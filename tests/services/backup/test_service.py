@@ -1135,3 +1135,403 @@ class TestRenderBackupUI:
         sig = inspect.signature(render_backup_ui)
         # Doit être une fonction sans paramètres obligatoires
         assert len([p for p in sig.parameters.values() if p.default is inspect.Parameter.empty]) == 0
+
+    @patch('src.services.backup.service.st')
+    @patch('src.services.backup.service.obtenir_service_backup')
+    def test_render_backup_ui_no_backups(self, mock_get_service, mock_st):
+        """Test render_backup_ui sans backups."""
+        from src.services.backup.service import render_backup_ui
+        
+        mock_service = MagicMock()
+        mock_service.list_backups.return_value = []
+        mock_get_service.return_value = mock_service
+        
+        mock_st.columns.return_value = (MagicMock(), MagicMock())
+        mock_st.button.return_value = False
+        mock_st.checkbox.return_value = True
+        mock_st.file_uploader.return_value = None
+        
+        render_backup_ui()
+        
+        mock_st.subheader.assert_called_once()
+        mock_st.info.assert_called()
+    
+    @patch('src.services.backup.service.st')
+    @patch('src.services.backup.service.obtenir_service_backup')
+    def test_render_backup_ui_with_backups(self, mock_get_service, mock_st):
+        """Test render_backup_ui avec des backups."""
+        from src.services.backup.service import render_backup_ui
+        
+        mock_backup = MagicMock()
+        mock_backup.id = "20240115_143000"
+        mock_backup.created_at = datetime(2024, 1, 15, 14, 30)
+        mock_backup.file_size_bytes = 1024
+        mock_backup.compressed = True
+        
+        mock_service = MagicMock()
+        mock_service.list_backups.return_value = [mock_backup]
+        mock_get_service.return_value = mock_service
+        
+        mock_st.columns.return_value = (MagicMock(), MagicMock())
+        mock_st.button.return_value = False
+        mock_st.checkbox.return_value = True
+        mock_st.file_uploader.return_value = None
+        mock_st.expander.return_value.__enter__ = MagicMock(return_value=MagicMock())
+        mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
+        
+        render_backup_ui()
+        
+        mock_st.subheader.assert_called()
+        mock_st.expander.assert_called()
+    
+    @patch('src.services.backup.service.st')
+    @patch('src.services.backup.service.obtenir_service_backup')
+    def test_render_backup_ui_create_button_clicked(self, mock_get_service, mock_st):
+        """Test clic sur bouton créer backup."""
+        from src.services.backup.service import render_backup_ui
+        
+        mock_result = MagicMock()
+        mock_result.success = True
+        mock_result.message = "Backup créé"
+        mock_result.metadata = MagicMock()
+        mock_result.metadata.total_records = 100
+        mock_result.metadata.file_size_bytes = 2048
+        
+        mock_service = MagicMock()
+        mock_service.list_backups.return_value = []
+        mock_service.create_backup.return_value = mock_result
+        mock_get_service.return_value = mock_service
+        
+        mock_st.columns.return_value = (MagicMock(), MagicMock())
+        # Premier appel au bouton crée = True, les autres = False
+        mock_st.button.side_effect = [True, False, False, False, False]
+        mock_st.checkbox.return_value = True
+        mock_st.file_uploader.return_value = None
+        mock_st.spinner.return_value.__enter__ = MagicMock()
+        mock_st.spinner.return_value.__exit__ = MagicMock(return_value=False)
+        
+        render_backup_ui()
+        
+        mock_service.create_backup.assert_called_once_with(compress=True)
+        mock_st.success.assert_called()
+    
+    @patch('src.services.backup.service.st')
+    @patch('src.services.backup.service.obtenir_service_backup')
+    def test_render_backup_ui_create_backup_fails(self, mock_get_service, mock_st):
+        """Test échec création backup."""
+        from src.services.backup.service import render_backup_ui
+        
+        mock_result = MagicMock()
+        mock_result.success = False
+        
+        mock_service = MagicMock()
+        mock_service.list_backups.return_value = []
+        mock_service.create_backup.return_value = mock_result
+        mock_get_service.return_value = mock_service
+        
+        mock_st.columns.return_value = (MagicMock(), MagicMock())
+        mock_st.button.side_effect = [True, False, False]
+        mock_st.checkbox.return_value = False
+        mock_st.file_uploader.return_value = None
+        mock_st.spinner.return_value.__enter__ = MagicMock()
+        mock_st.spinner.return_value.__exit__ = MagicMock(return_value=False)
+        
+        render_backup_ui()
+        
+        mock_st.error.assert_called()
+    
+    @patch('src.services.backup.service.st')
+    @patch('src.services.backup.service.obtenir_service_backup')
+    def test_render_backup_ui_restore_button(self, mock_get_service, mock_st):
+        """Test clic sur bouton restaurer dans expander."""
+        from src.services.backup.service import render_backup_ui
+        
+        mock_backup = MagicMock()
+        mock_backup.id = "20240115_143000"
+        mock_backup.created_at = datetime(2024, 1, 15)
+        mock_backup.file_size_bytes = 1024
+        mock_backup.compressed = False
+        
+        mock_service = MagicMock()
+        mock_service.list_backups.return_value = [mock_backup]
+        mock_get_service.return_value = mock_service
+        
+        mock_st.columns.return_value = (MagicMock(), MagicMock())
+        mock_st.checkbox.return_value = False
+        mock_st.file_uploader.return_value = None
+        
+        # Setup expander et nested columns
+        mock_expander_ctx = MagicMock()
+        mock_expander_ctx.__enter__ = MagicMock(return_value=mock_expander_ctx)
+        mock_expander_ctx.__exit__ = MagicMock(return_value=False)
+        mock_st.expander.return_value = mock_expander_ctx
+        
+        # Bouton restaurer cliqué
+        mock_st.button.side_effect = [False, True, False]
+        
+        render_backup_ui()
+        
+        mock_st.warning.assert_called()  # Affiche l'avertissement
+    
+    @patch('src.services.backup.service.st')
+    @patch('src.services.backup.service.obtenir_service_backup')
+    def test_render_backup_ui_delete_button(self, mock_get_service, mock_st):
+        """Test clic sur bouton supprimer."""
+        from src.services.backup.service import render_backup_ui
+        
+        mock_backup = MagicMock()
+        mock_backup.id = "20240115_143000"
+        mock_backup.created_at = datetime(2024, 1, 15)
+        mock_backup.file_size_bytes = 1024
+        mock_backup.compressed = False
+        
+        mock_service = MagicMock()
+        mock_service.list_backups.return_value = [mock_backup]
+        mock_service.delete_backup.return_value = True
+        mock_get_service.return_value = mock_service
+        
+        mock_st.columns.return_value = (MagicMock(), MagicMock())
+        mock_st.checkbox.return_value = False
+        mock_st.file_uploader.return_value = None
+        
+        mock_expander_ctx = MagicMock()
+        mock_expander_ctx.__enter__ = MagicMock(return_value=mock_expander_ctx)
+        mock_expander_ctx.__exit__ = MagicMock(return_value=False)
+        mock_st.expander.return_value = mock_expander_ctx
+        
+        # Bouton supprimer cliqué (2ème bouton dans inner cols)
+        mock_st.button.side_effect = [False, False, True]
+        
+        render_backup_ui()
+        
+        mock_service.delete_backup.assert_called_once_with("20240115_143000")
+        mock_st.success.assert_called()
+    
+    @patch('src.services.backup.service.st')
+    @patch('src.services.backup.service.obtenir_service_backup')
+    def test_render_backup_ui_file_upload(self, mock_get_service, mock_st, temp_backup_dir):
+        """Test upload et restauration de fichier."""
+        from src.services.backup.service import render_backup_ui
+        
+        mock_result = MagicMock()
+        mock_result.success = True
+        mock_result.message = "Restauration OK"
+        mock_result.records_restored = 50
+        mock_result.errors = []
+        
+        mock_service = MagicMock()
+        mock_service.list_backups.return_value = []
+        mock_service.config.backup_dir = str(temp_backup_dir)
+        mock_service.restore_backup.return_value = mock_result
+        mock_get_service.return_value = mock_service
+        
+        # Mock uploaded file
+        mock_uploaded_file = MagicMock()
+        mock_uploaded_file.name = "test_backup.json"
+        mock_uploaded_file.read.return_value = b'{"data": {}}'
+        
+        mock_st.columns.return_value = (MagicMock(), MagicMock())
+        mock_st.button.side_effect = [False, True]  # 2ème bouton = restaurer upload
+        mock_st.checkbox.side_effect = [False, False]  # compress, clear_existing
+        mock_st.file_uploader.return_value = mock_uploaded_file
+        mock_st.spinner.return_value.__enter__ = MagicMock()
+        mock_st.spinner.return_value.__exit__ = MagicMock(return_value=False)
+        
+        render_backup_ui()
+        
+        mock_service.restore_backup.assert_called_once()
+        mock_st.success.assert_called()
+    
+    @patch('src.services.backup.service.st')
+    @patch('src.services.backup.service.obtenir_service_backup')
+    def test_render_backup_ui_file_upload_fails(self, mock_get_service, mock_st, temp_backup_dir):
+        """Test échec restauration fichier uploadé."""
+        from src.services.backup.service import render_backup_ui
+        
+        mock_result = MagicMock()
+        mock_result.success = False
+        mock_result.message = "Erreur restauration"
+        mock_result.errors = ["Table invalide", "FK constraint"]
+        
+        mock_service = MagicMock()
+        mock_service.list_backups.return_value = []
+        mock_service.config.backup_dir = str(temp_backup_dir)
+        mock_service.restore_backup.return_value = mock_result
+        mock_get_service.return_value = mock_service
+        
+        mock_uploaded_file = MagicMock()
+        mock_uploaded_file.name = "bad_backup.json"
+        mock_uploaded_file.read.return_value = b'{}'
+        
+        mock_st.columns.return_value = (MagicMock(), MagicMock())
+        mock_st.button.side_effect = [False, True]
+        mock_st.checkbox.side_effect = [False, True]
+        mock_st.file_uploader.return_value = mock_uploaded_file
+        mock_st.spinner.return_value.__enter__ = MagicMock()
+        mock_st.spinner.return_value.__exit__ = MagicMock(return_value=False)
+        
+        render_backup_ui()
+        
+        mock_st.error.assert_called()
+        # Vérifie les warnings pour chaque erreur
+        assert mock_st.warning.call_count >= 1
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS EDGE CASES - LIGNES NON COUVERTES
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestEdgeCasesCoverage:
+    """Tests pour les lignes non couvertes."""
+    
+    def test_restore_with_invalid_date_string(self, backup_service, temp_backup_dir):
+        """Test restauration avec date invalide (ligne 325 - except: pass)."""
+        backup_data = {
+            "metadata": {"id": "test"},
+            "data": {
+                "ingredients": [
+                    {"id": 1, "name": "Test", "created_at": "not-a-date-but-has-T-in-it"}
+                ]
+            }
+        }
+        
+        backup_file = temp_backup_dir / "invalid_date.json"
+        with open(backup_file, 'w') as f:
+            json.dump(backup_data, f)
+        
+        mock_db = MagicMock()
+        mock_db.commit.return_value = None
+        mock_db.flush.return_value = None
+        
+        # Cette ligne teste le except: pass quand la date est invalide
+        result = backup_service.restore_backup.__wrapped__.__wrapped__(
+            backup_service,
+            file_path=str(backup_file),
+            tables=["ingredients"],
+            db=mock_db,
+        )
+        
+        assert result is not None
+    
+    def test_list_backups_file_stat_error(self, backup_service, temp_backup_dir):
+        """Test list_backups avec erreur stat (lignes 395-396)."""
+        import sys
+        
+        # Créer un fichier backup qui causera une erreur lors de la lecture  
+        backup_file = temp_backup_dir / "backup_20240115_100000.json"
+        backup_file.write_text('{}')
+        
+        # Patcher au niveau du module pour capturer l'exception
+        original_stat = Path.stat
+        call_count = [0]
+        
+        def mock_stat(self):
+            call_count[0] += 1
+            # Laisser glob fonctionner, mais lever erreur sur stat
+            if 'backup_' in str(self):
+                raise OSError("Permission denied")
+            return original_stat(self)
+        
+        # Test avec logger pour vérifier que l'erreur est catchée
+        with patch.object(Path, 'stat', mock_stat):
+            result = backup_service.list_backups()
+        
+        # Doit retourner une liste (peut être vide car stat a échoué)
+        assert isinstance(result, list)
+    
+    def test_get_backup_info_compressed_malformed(self, backup_service, temp_backup_dir):
+        """Test get_backup_info avec fichier compressé malformé (lignes 429-430)."""
+        # Créer un fichier gz avec contenu JSON invalide
+        bad_file = temp_backup_dir / "backup_bad.json.gz"
+        with gzip.open(bad_file, 'wt') as f:
+            f.write("{incomplete json")
+        
+        result = backup_service.get_backup_info(str(bad_file))
+        
+        # Doit retourner None sur erreur JSON
+        assert result is None
+    
+    def test_get_backup_info_json_malformed(self, backup_service, temp_backup_dir):
+        """Test get_backup_info avec fichier JSON malformé."""
+        bad_file = temp_backup_dir / "backup_bad.json"
+        bad_file.write_text("{incomplete json without closing")
+        
+        result = backup_service.get_backup_info(str(bad_file))
+        
+        assert result is None
+    
+    def test_upload_to_supabase_exception(self, backup_service, temp_backup_dir):
+        """Test upload_to_supabase avec exception (lignes 465-466)."""
+        test_file = temp_backup_dir / "test.json"
+        test_file.write_text('{"test": 1}')
+        
+        # Créer un module mock pour supabase
+        mock_supabase_module = MagicMock()
+        mock_client = MagicMock()
+        mock_client.storage.from_.return_value.upload.side_effect = Exception("Storage error")
+        mock_supabase_module.create_client.return_value = mock_client
+        
+        with patch.dict('sys.modules', {'supabase': mock_supabase_module}):
+            with patch('src.core.config.obtenir_parametres') as mock_params:
+                mock_params.return_value = MagicMock(
+                    SUPABASE_URL="https://test.supabase.co",
+                    SUPABASE_SERVICE_KEY="test-key"
+                )
+                
+                result = backup_service.upload_to_supabase(str(test_file))
+        
+        assert result is False
+    
+    def test_download_from_supabase_exception(self, backup_service, temp_backup_dir):
+        """Test download_from_supabase avec exception."""
+        # Créer un module mock pour supabase
+        mock_supabase_module = MagicMock()
+        mock_client = MagicMock()
+        mock_client.storage.from_.return_value.download.side_effect = Exception("Download error")
+        mock_supabase_module.create_client.return_value = mock_client
+        
+        with patch.dict('sys.modules', {'supabase': mock_supabase_module}):
+            with patch('src.core.config.obtenir_parametres') as mock_params:
+                mock_params.return_value = MagicMock(
+                    SUPABASE_URL="https://test.supabase.co",
+                    SUPABASE_ANON_KEY="test-key"
+                )
+                
+                result = backup_service.download_from_supabase(
+                    "test.json",
+                    str(temp_backup_dir / "downloaded.json")
+                )
+        
+        assert result is None
+    
+    def test_restore_with_table_exception(self, backup_service, temp_backup_dir):
+        """Test restauration avec erreur sur une table."""
+        backup_data = {
+            "metadata": {"id": "test"},
+            "data": {
+                "ingredients": [{"id": 1, "name": "Test"}]
+            }
+        }
+        
+        backup_file = temp_backup_dir / "with_error.json"
+        with open(backup_file, 'w') as f:
+            json.dump(backup_data, f)
+        
+        mock_db = MagicMock()
+        mock_db.query.side_effect = Exception("DB Error")
+        mock_db.rollback.return_value = None
+        mock_db.commit.return_value = None
+        
+        result = backup_service.restore_backup.__wrapped__.__wrapped__(
+            backup_service,
+            file_path=str(backup_file),
+            tables=["ingredients"],
+            clear_existing=True,
+            db=mock_db,
+        )
+        
+        # Doit retourner un RestoreResult avec erreurs
+        assert result is not None
+        assert len(result.errors) > 0

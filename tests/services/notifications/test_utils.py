@@ -223,7 +223,7 @@ class TestPeutEnvoyerPendantSilence:
 
     def test_type_string(self):
         """Type passé en string."""
-        result = peut_envoyer_pendant_silence("peremption_critique")
+        result = peut_envoyer_pendant_silence("expiration_critical")
         assert result is True
 
     def test_type_inconnu(self):
