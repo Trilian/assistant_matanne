@@ -530,7 +530,7 @@ class TestCacheRedisSerialisation:
     @pytest.mark.unit
     def test_serialize_pickle_complex_object(self):
         """Test sérialisation pickle pour objets non-JSON."""
-        data = {"date": datetime.datetime.now()}
+        data = {"date": datetime.now()}
 
         serialized = self.cache._serialize(data)
 
@@ -563,7 +563,7 @@ class TestCacheRedisSerialisation:
     @pytest.mark.unit
     def test_deserialize_pickle(self):
         """Test désérialisation pickle."""
-        now = datetime.datetime(2024, 1, 1, 12, 0, 0)
+        now = datetime(2024, 1, 1, 12, 0, 0)
         data = {"date": now}
 
         serialized = self.cache._serialize(data)

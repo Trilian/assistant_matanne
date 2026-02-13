@@ -486,7 +486,7 @@ class TestTableauBordPerformance:
             score, status = TableauBordPerformance.obtenir_score_sante()
 
         assert score == 100
-        assert status == "ðŸŸ¢"
+        assert status == "🟢"
 
     @patch("src.core.performance.st")
     def test_obtenir_score_sante_penalites_memoire(self, mock_st):
@@ -544,7 +544,7 @@ class TestTableauBordPerformance:
             score, status = TableauBordPerformance.obtenir_score_sante()
 
         assert 60 <= score < 80
-        assert status == "ðŸŸ¡"
+        assert status == "🟡"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -755,7 +755,7 @@ class TestComposantsUI:
             "memory": {"current_mb": 100, "total_objects": 5000},
             "sql": {"total_queries": 50, "slow_count": 2, "avg_time_ms": 20},
         }
-        mock_dashboard.obtenir_score_sante.return_value = (85, "ðŸŸ¢")
+        mock_dashboard.obtenir_score_sante.return_value = (85, "🟢")
 
         # Mock context managers
         mock_st.expander.return_value.__enter__ = MagicMock()
@@ -772,7 +772,7 @@ class TestComposantsUI:
     @patch("src.core.performance.MoniteurMemoire")
     def test_afficher_badge_mini_performance(self, mock_memory, mock_dashboard, mock_st):
         """Vérifie afficher_badge_mini_performance."""
-        mock_dashboard.obtenir_score_sante.return_value = (90, "ðŸŸ¢")
+        mock_dashboard.obtenir_score_sante.return_value = (90, "🟢")
         mock_memory.obtenir_utilisation_courante.return_value = {"current_mb": 75}
 
         afficher_badge_mini_performance()
