@@ -31,7 +31,7 @@ from src.core.models import (
     RecetteIngredient,
     VersionRecette,
 )
-from src.core.validation import RecetteInput
+from src.core.validation import EtapeInput, IngredientInput, RecetteInput
 from src.services.base import BaseAIService, BaseService, RecipeAIMixin
 
 from .types import (
@@ -139,8 +139,6 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
             Recette créée avec relations
         """
         from datetime import datetime
-
-        from src.core.validation import IngredientInput
 
         # Conversion des ingrédients en IngredientInput objects si ce sont des dicts
         ingredients_data = data.get("ingredients") or []
@@ -654,9 +652,7 @@ Difficulty: {recette.difficulte}"""
         )
 
         if not version_data:
-            logger.warning(
-                f"⚠️ Failed to generate batch cooking version for recipe {recette_id}"
-            )
+            logger.warning(f"⚠️ Failed to generate batch cooking version for recipe {recette_id}")
             raise ErreurValidation("Invalid IA response format for batch cooking version")
 
         # Créer version en DB

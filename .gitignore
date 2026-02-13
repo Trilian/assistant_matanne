@@ -23,6 +23,9 @@ env/
 .pytest_cache/
 .coverage
 htmlcov/
+coverage*.json
+cov_*.json
+cov_*.txt
 
 # Mypy
 .mypy_cache/
