@@ -241,21 +241,21 @@ def get_statistiques_recettes(db: Optional[Session] = None) -> Dict[str, Any]:
 
 
 def valider_recette(data: Dict[str, Any]) -> tuple[bool, Optional[str]]:
-    """Valide les donnees d'une recette."""
+    """Valide les données d'une recette."""
     if not data.get("nom"):
         return False, "Le nom est requis"
     
     if not data.get("ingredients") or len(data["ingredients"]) == 0:
-        return False, "Au moins un ingredient est requis"
+        return False, "Au moins un ingrédient est requis"
     
     if not data.get("instructions") or len(data["instructions"]) == 0:
         return False, "Au moins une instruction est requise"
     
     if data.get("temps_preparation", 0) < 0:
-        return False, "Le temps de preparation doit être positif"
+        return False, "Le temps de préparation doit être positif"
     
     if data.get("portions", 0) <= 0:
-        return False, "Le nombre de portions doit être superieur à 0"
+        return False, "Le nombre de portions doit être supérieur à 0"
     
     return True, None
 

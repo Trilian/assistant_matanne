@@ -65,7 +65,7 @@ def generer_notifications(
     if peremption_proche:
         notifications.append({
             "type": "warning",
-            "message": f"{len(peremption_proche)} article(s) pÃeriment bientôt",
+            "message": f"{len(peremption_proche)} article(s) périment bientôt",
             "priorite": "haute"
         })
     

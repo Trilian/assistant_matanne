@@ -438,7 +438,7 @@ class TestFormatage:
             "priorite": "haute"
         }
         label = formater_article_label(article)
-        assert "ðŸ”´" in label
+        assert "🔴" in label
         assert "Tomates" in label
         assert "4" in label
         assert "kg" in label
@@ -465,7 +465,7 @@ class TestFormatage:
             "suggere_par_ia": True
         }
         label = formater_article_label(article)
-        assert "ðŸŸ¢" in label
+        assert "🟢" in label
         assert "SPARKLE" in label
 
     def test_formater_liste_impression(self, articles_sample):
@@ -475,7 +475,7 @@ class TestFormatage:
         assert "Total:" in texte
         assert "Date:" in texte
         # Vérifie que les rayons sont présents
-        assert "FRUITS & LÃ‰GUMES" in texte
+        assert "FRUITS & LÉGUMES" in texte
 
 
 class TestSuggestions:

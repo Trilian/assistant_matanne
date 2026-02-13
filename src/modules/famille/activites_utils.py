@@ -118,13 +118,13 @@ def calculer_frequence_hebdomadaire(activites: List[Dict[str, Any]], semaines: i
 # ═══════════════════════════════════════════════════════════
 
 def suggerer_activites_age(age_mois: int) -> List[Dict[str, str]]:
-    """Suggère des activites adaptees à l'âge."""
+    """Suggère des activités adaptées à l'âge."""
     suggestions = []
     
     if age_mois < 12:
         suggestions = [
-            {"type": "Jeu", "titre": "Jeux d'eveil", "description": "Hochets, tapis d'eveil"},
-            {"type": "Sport", "titre": "Motricite libre", "description": "Temps au sol pour ramper"},
+            {"type": "Jeu", "titre": "Jeux d'éveil", "description": "Hochets, tapis d'éveil"},
+            {"type": "Sport", "titre": "Motricité libre", "description": "Temps au sol pour ramper"},
             {"type": "Culture", "titre": "Comptines", "description": "Chansons et comptines"}
         ]
     elif age_mois < 24:
@@ -135,15 +135,15 @@ def suggerer_activites_age(age_mois: int) -> List[Dict[str, str]]:
         ]
     elif age_mois < 36:
         suggestions = [
-            {"type": "Jeu", "titre": "Jeux symboliques", "description": "Poupees, voitures"},
-            {"type": "Sport", "titre": "Parcours moteur", "description": "Escalade, velo"},
+            {"type": "Jeu", "titre": "Jeux symboliques", "description": "Poupées, voitures"},
+            {"type": "Sport", "titre": "Parcours moteur", "description": "Escalade, vélo"},
             {"type": "Culture", "titre": "Musique", "description": "Instruments simples"}
         ]
     else:
         suggestions = [
-            {"type": "Atelier", "titre": "Activites creatives", "description": "Peinture, pâte à modeler"},
+            {"type": "Atelier", "titre": "Activités créatives", "description": "Peinture, pâte à modeler"},
             {"type": "Sport", "titre": "Sport collectif", "description": "Football, natation"},
-            {"type": "Culture", "titre": "Sorties culturelles", "description": "Musees, spectacles"}
+            {"type": "Culture", "titre": "Sorties culturelles", "description": "Musées, spectacles"}
         ]
     
     return suggestions
@@ -194,7 +194,7 @@ def valider_activite(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     if "duree" in data:
         duree = data["duree"]
         if not isinstance(duree, (int, float)) or duree <= 0:
-            erreurs.append("La duree doit être > 0")
+            erreurs.append("La durée doit être > 0")
     
     if "cout" in data:
         cout = data["cout"]
@@ -209,8 +209,8 @@ def valider_activite(data: Dict[str, Any]) -> tuple[bool, List[str]]:
 # ═══════════════════════════════════════════════════════════
 
 def formater_activite_resume(activite: Dict[str, Any]) -> str:
-    """Formate le resume d'une activite."""
-    titre = activite.get("titre", "Activite")
+    """Formate le résumé d'une activité."""
+    titre = activite.get("titre", "Activité")
     type_act = activite.get("type", "")
     lieu = activite.get("lieu", "")
     

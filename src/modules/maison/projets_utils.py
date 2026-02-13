@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 # CONSTANTES
 # ═══════════════════════════════════════════════════════════
 
-STATUTS_PROJET = ["À faire", "En cours", "Termine", "En pause"]
+STATUTS_PROJET = ["À faire", "En cours", "Terminé", "En pause"]
 PRIORITES = ["Basse", "Moyenne", "Haute", "Urgente"]
-CATEGORIES_PROJET = ["Renovation", "Decoration", "Reparation", "Amelioration", "Autre"]
+CATEGORIES_PROJET = ["Rénovation", "Décoration", "Réparation", "Amélioration", "Autre"]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -163,7 +163,7 @@ def calculer_statistiques_projets(projets: List[Dict[str, Any]]) -> Dict[str, An
     urgents = len(get_projets_urgents(projets))
     
     # Taux de completion
-    termines = par_statut.get("Termine", 0)
+    termines = par_statut.get("Terminé", 0)
     taux_completion = (termines / total * 100) if total > 0 else 0.0
     
     return {

@@ -23,12 +23,12 @@ PRIORITY_EMOJIS = {
 PRIORITY_ORDER = {"haute": 0, "moyenne": 1, "basse": 2}
 
 RAYONS_DEFAULT = [
-    "Fruits & Legumes",
+    "Fruits & Légumes",
     "Laitier",
     "Boulangerie",
     "Viandes",
     "Poissons",
-    "Surgeles",
+    "Surgelés",
     "Épices",
     "Boissons",
     "Autre"
@@ -298,15 +298,15 @@ def valider_article(article: dict) -> tuple[bool, list[str]]:
     elif len(article["ingredient_nom"]) < 2:
         erreurs.append("Le nom doit contenir au moins 2 caractères")
     
-    # Quantite positive
+    # Quantité positive
     quantite = article.get("quantite_necessaire", 0)
     if quantite is not None and quantite <= 0:
-        erreurs.append("La quantite doit être positive")
+        erreurs.append("La quantité doit être positive")
     
-    # Priorite valide
+    # Priorité valide
     priorite = article.get("priorite")
     if priorite and priorite not in PRIORITY_ORDER:
-        erreurs.append(f"Priorite invalide: {priorite}")
+        erreurs.append(f"Priorité invalide: {priorite}")
     
     # Rayon valide (si fourni)
     rayon = article.get("rayon_magasin")

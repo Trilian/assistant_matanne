@@ -141,7 +141,7 @@ class TestAnalyseChargeGlobale:
         assert result["charge_par_categorie"]["Travail"] == 2
 
     def test_niveau_charge_libre(self):
-        """Niveau 'Libre' si rien Ã  faire."""
+        """Niveau 'Libre' si rien à faire."""
         result = analyser_charge_globale([], [])
         assert result["niveau_charge"] == "Libre"
 
@@ -157,7 +157,7 @@ class TestAnalyseChargeGlobale:
         evenements = [{"titre": f"E{i}"} for i in range(20)]
         taches = [{"titre": f"T{i}", "complete": False} for i in range(10)]
         result = analyser_charge_globale(evenements, taches)
-        assert result["niveau_charge"] in ["Ã‰levé", "Très élevé"]
+        assert result["niveau_charge"] in ["Élevé", "Très élevé"]
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

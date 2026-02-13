@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 # Types de repas
-TYPES_REPAS = ["dejeuner", "dîner", "goûter"]
+TYPES_REPAS = ["déjeuner", "dîner", "goûter"]
 
 # Categories de proteines
 PROTEINES = {

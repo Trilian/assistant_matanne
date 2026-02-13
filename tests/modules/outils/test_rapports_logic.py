@@ -171,7 +171,7 @@ class TestGenererSectionRecettes:
         
         section = generer_section_recettes(recettes, "mois")
         
-        assert section["titre"] == "ðŸ“… Recettes"
+        assert section["titre"] == "📅 Recettes"
         assert section["total"] == 2
 
     def test_comptage_par_type(self):
@@ -234,7 +234,7 @@ class TestGenererSectionCourses:
         
         section = generer_section_courses(courses)
         
-        assert section["titre"] == "ðŸ’¡ Courses"
+        assert section["titre"] == "💡 Courses"
         assert section["total"] == 2
         assert section["achetes"] == 1
         assert section["non_achetes"] == 1
@@ -300,7 +300,7 @@ class TestGenererSectionActivites:
         
         section = generer_section_activites(activites)
         
-        assert section["titre"] == "ðŸŽ¯ Activités"
+        assert section["titre"] == "🎯 Activités"
         assert section["total"] == 2
 
     def test_comptage_par_type(self):

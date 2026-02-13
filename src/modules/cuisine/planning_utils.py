@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 JOURS_EMOJI = ["📅", "👶", "💡", "🎯", "💰", "⚫", "❌"]
-TYPES_REPAS = ["dejeuner", "dîner"]  # Specifique cuisine (simplifie)
+TYPES_REPAS = ["déjeuner", "dîner"]  # Specifique cuisine (simplifié)
 REGIMES = ["Omnivore", "Vegetarien", "Vegan", "Sans gluten"]
 TEMPS_CUISINE = ["Rapide (< 30 min)", "Moyen (30-60 min)", "Long (> 60 min)"]
 BUDGETS = ["Bas (< 20€)", "Moyen (20-40€)", "Haut (> 40€)"]

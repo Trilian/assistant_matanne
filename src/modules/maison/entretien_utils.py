@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 FREQUENCES = ["Quotidienne", "Hebdomadaire", "Mensuelle", "Trimestrielle", "Annuelle"]
-CATEGORIES_TACHE = ["Menage", "Maintenance", "Contrôle", "Autre"]
-PIECES = ["Cuisine", "Salon", "Chambre", "Salle de bain", "Bureau", "Exterieur", "Garage", "Autre"]
+CATEGORIES_TACHE = ["Ménage", "Maintenance", "Contrôle", "Autre"]
+PIECES = ["Cuisine", "Salon", "Chambre", "Salle de bain", "Bureau", "Extérieur", "Garage", "Autre"]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -278,10 +278,10 @@ def valider_tache(data: Dict[str, Any]) -> tuple[bool, List[str]]:
         erreurs.append("Le titre est requis")
     
     if "frequence" in data and data["frequence"] not in FREQUENCES:
-        erreurs.append(f"Frequence invalide. Valeurs autorisees: {', '.join(FREQUENCES)}")
+        erreurs.append(f"Fréquence invalide. Valeurs autorisées: {', '.join(FREQUENCES)}")
     
     if "categorie" in data and data["categorie"] not in CATEGORIES_TACHE:
-        erreurs.append(f"Categorie invalide. Valeurs autorisees: {', '.join(CATEGORIES_TACHE)}")
+        erreurs.append(f"Catégorie invalide. Valeurs autorisées: {', '.join(CATEGORIES_TACHE)}")
     
     return len(erreurs) == 0, erreurs
 

@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 MOMENTS_JOURNEE = ["Matin", "Midi", "Après-midi", "Soir", "Nuit"]
-TYPES_ROUTINE = ["Reveil", "Repas", "Sieste", "Bain", "Coucher", "Soins", "Autre"]
+TYPES_ROUTINE = ["Réveil", "Repas", "Sieste", "Bain", "Coucher", "Soins", "Autre"]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -204,13 +204,13 @@ def analyser_regularite(historique: List[Dict[str, Any]], routine_id: int, jours
 # ═══════════════════════════════════════════════════════════
 
 def suggerer_routines_age(age_mois: int) -> List[Dict[str, Any]]:
-    """Suggère des routines adaptees à l'âge."""
+    """Suggère des routines adaptées à l'âge."""
     suggestions = []
     
     # Routines communes
     suggestions.append({
-        "titre": "Reveil",
-        "type": "Reveil",
+        "titre": "Réveil",
+        "type": "Réveil",
         "moment": "Matin",
         "heure": "07:00",
         "duree": 15
@@ -296,7 +296,7 @@ def valider_routine(data: Dict[str, Any]) -> tuple[bool, List[str]]:
     if "duree" in data:
         duree = data["duree"]
         if not isinstance(duree, int) or duree <= 0:
-            erreurs.append("La duree doit être > 0")
+            erreurs.append("La durée doit être > 0")
     
     return len(erreurs) == 0, erreurs
 

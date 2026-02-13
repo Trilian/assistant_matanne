@@ -35,7 +35,7 @@ class TestConstantes:
     def test_statuts_projet(self):
         """Statuts de projet définis."""
         assert len(STATUTS_PROJET) >= 4
-        assert "Ã€ faire" in STATUTS_PROJET
+        assert "À faire" in STATUTS_PROJET
         assert "En cours" in STATUTS_PROJET
         assert "Terminé" in STATUTS_PROJET
 
@@ -147,7 +147,7 @@ class TestFiltrageProjets:
     def projets(self):
         return [
             {"titre": "Cuisine", "statut": "En cours", "priorite": "Haute", "categorie": "Rénovation"},
-            {"titre": "Peinture", "statut": "Ã€ faire", "priorite": "Moyenne", "categorie": "Décoration"},
+            {"titre": "Peinture", "statut": "À faire", "priorite": "Moyenne", "categorie": "Décoration"},
             {"titre": "Jardin", "statut": "Terminé", "priorite": "Basse", "categorie": "Amélioration"},
         ]
 
@@ -175,9 +175,9 @@ class TestGetProjetsSpecifiques:
     def projets(self):
         return [
             {"titre": "Urgent1", "priorite": "Urgente", "statut": "En cours"},
-            {"titre": "Urgent2", "priorite": "Moyenne", "statut": "Ã€ faire",
+            {"titre": "Urgent2", "priorite": "Moyenne", "statut": "À faire",
              "date_limite": date.today() + timedelta(days=3)},
-            {"titre": "Normal", "priorite": "Basse", "statut": "Ã€ faire",
+            {"titre": "Normal", "priorite": "Basse", "statut": "À faire",
              "date_limite": date.today() + timedelta(days=30)},
             {"titre": "EnCours", "priorite": "Moyenne", "statut": "En cours"},
         ]
@@ -220,7 +220,7 @@ class TestStatistiquesProjets:
         return [
             {"titre": "P1", "statut": "Terminé", "priorite": "Haute"},
             {"titre": "P2", "statut": "En cours", "priorite": "Moyenne"},
-            {"titre": "P3", "statut": "Ã€ faire", "priorite": "Urgente",
+            {"titre": "P3", "statut": "À faire", "priorite": "Urgente",
              "date_limite": date.today() + timedelta(days=3)},
             {"titre": "P4", "statut": "Terminé", "priorite": "Basse"},
         ]

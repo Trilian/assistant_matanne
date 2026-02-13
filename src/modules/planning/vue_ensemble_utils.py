@@ -41,13 +41,13 @@ def analyser_charge_globale(evenements: List[Dict[str, Any]], taches: List[Dict[
     if charge_totale == 0:
         niveau = "Libre"
     elif charge_totale <= 5:
-        niveau = "Leger"
+        niveau = "Léger"
     elif charge_totale <= 15:
         niveau = "Moyen"
     elif charge_totale <= 25:
-        niveau = "Éleve"
+        niveau = "Élevé"
     else:
-        niveau = "Très eleve"
+        niveau = "Très élevé"
     
     return {
         "total_evenements": total_evenements,
@@ -181,13 +181,13 @@ def prevoir_charge_prochaine_semaine(evenements: List[Dict[str, Any]], taches: L
     charge_totale = len(evt_semaine) + len(taches_semaine)
     
     if charge_totale <= 5:
-        prevision = "Semaine legère"
+        prevision = "Semaine légère"
     elif charge_totale <= 15:
         prevision = "Semaine normale"
     elif charge_totale <= 25:
-        prevision = "Semaine chargee"
+        prevision = "Semaine chargée"
     else:
-        prevision = "Semaine très chargee"
+        prevision = "Semaine très chargée"
     
     return {
         "evenements": len(evt_semaine),
@@ -304,10 +304,10 @@ def formater_niveau_charge(niveau: str) -> str:
     """Formate le niveau de charge avec emoji."""
     emojis = {
         "Libre": "😌",
-        "Leger": "🙂",
+        "Léger": "🙂",
         "Moyen": "😐",
-        "Éleve": "😐°",
-        "Très eleve": "📥"
+        "Élevé": "😰",
+        "Très élevé": "🔥"
     }
     emoji = emojis.get(niveau, "")
     return f"{emoji} {niveau}"

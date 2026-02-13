@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 # CONSTANTES
 # ═══════════════════════════════════════════════════════════
 
-CATEGORIES_PLANTES = ["Legumes", "Fruits", "Herbes", "Fleurs", "Arbres"]
-SAISONS = ["Printemps", "Éte", "Automne", "Hiver"]
-STATUS_PLANTES = ["Semis", "Pousse", "Mature", "Recolte", "Dormant"]
+CATEGORIES_PLANTES = ["Légumes", "Fruits", "Herbes", "Fleurs", "Arbres"]
+SAISONS = ["Printemps", "Été", "Automne", "Hiver"]
+STATUS_PLANTES = ["Semis", "Pousse", "Mature", "Récolte", "Dormant"]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -36,7 +36,7 @@ def get_saison_actuelle() -> str:
     if mois in [3, 4, 5]:
         return "Printemps"
     elif mois in [6, 7, 8]:
-        return "Éte"
+        return "Été"
     elif mois in [9, 10, 11]:
         return "Automne"
     else:

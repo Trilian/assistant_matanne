@@ -145,7 +145,7 @@ def generer_section_activites(activites: List[Dict[str, Any]]) -> Dict[str, Any]
     cout_total = sum(act.get("cout", 0) for act in activites)
     
     return {
-        "titre": "🎯 Activites",
+        "titre": "🎯 Activités",
         "total": total,
         "par_type": par_type,
         "cout_total": cout_total,
