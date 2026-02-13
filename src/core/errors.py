@@ -20,6 +20,7 @@ import streamlit as st
 # Ré-exporter les exceptions pures
 from .errors_base import (
     ErreurBaseDeDonnees,
+    ErreurConfiguration,
     ErreurLimiteDebit,
     ErreurNonTrouve,
     ErreurServiceExterne,

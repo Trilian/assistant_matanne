@@ -34,12 +34,12 @@ def render_activities(data: dict):
                 st.caption(act.date_debut.strftime("%d/%m à %H:%M"))
 
             with col2:
-                st.write(f"â±ï¸ {act.duree_formatted}")
+                st.write(f"⏱️ {act.duree_formatted}")
                 if act.distance_metres:
-                    st.write(f"📝 {act.distance_km:.1f} km")
+                    st.write(f"📝 {act.distance_km:.1f} km")
 
             with col3:
                 if act.calories:
                     st.write(f"🔥 {act.calories} kcal")
                 if act.fc_moyenne:
-                    st.write(f"â¤ï¸ {act.fc_moyenne} bpm")
+                    st.write(f"❤️ {act.fc_moyenne} bpm")

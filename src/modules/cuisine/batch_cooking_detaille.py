@@ -35,10 +35,10 @@ logger = logging.getLogger(__name__)
 TYPES_DECOUPE = {
     "rondelles": {"label": "Rondelles", "emoji": "â­•", "description": "Tranches circulaires"},
     "cubes": {"label": "Cubes", "emoji": "🔲", "description": "Morceaux cubiques"},
-    "julienne": {"label": "Julienne", "emoji": "📝", "description": "Bâtonnets fins 3-4mm"},
+    "julienne": {"label": "Julienne", "emoji": "📝", "description": "Bâtonnets fins 3-4mm"},
     "brunoise": {"label": "Brunoise", "emoji": "🔹", "description": "Petits dés 3mm"},
     "lamelles": {"label": "Lamelles", "emoji": "âž–", "description": "Tranches fines plates"},
-    "cisele": {"label": "Ciselé", "emoji": "âœ‚ï¸", "description": "Haché finement"},
+    "cisele": {"label": "Ciselé", "emoji": "✂️", "description": "Haché finement"},
     "emince": {"label": "Émincé", "emoji": "🔪", "description": "Tranches fines allongées"},
     "rape": {"label": "Râpé", "emoji": "🧀", "description": "Râpé grossier ou fin"},
 }
@@ -254,7 +254,7 @@ def render_instruction_robot(robot_config: dict):
 def render_timeline_session(etapes: list, heure_debut: time):
     """Affiche une timeline visuelle de la session."""
 
-    st.markdown("##### â±ï¸ Timeline")
+    st.markdown("##### ⏱️ Timeline")
 
     temps_courant = 0
 
@@ -309,7 +309,7 @@ def render_liste_courses_batch(ingredients: dict):
         "poissons": "🐟 Poissonnerie",
         "cremerie": "🧀 Crèmerie",
         "epicerie": "🍝 Épicerie",
-        "surgeles": "â„ï¸ Surgelés",
+        "surgeles": "❄️ Surgelés",
         "bio": "🌿 Bio",
         "autres": "📦 Autres",
     }
@@ -338,7 +338,7 @@ def render_finition_jour_j(recette: dict):
 
     # Temps de finition
     temps = recette.get("temps_finition_minutes", 10)
-    st.caption(f"â±ï¸ Temps de finition: {temps} min")
+    st.caption(f"⏱️ Temps de finition: {temps} min")
 
     # Étapes
     etapes = recette.get("instructions_finition", [])
@@ -526,7 +526,7 @@ def app():
             st.caption(type_info.get("description", ""))
 
         with col2:
-            st.markdown(f"**â±ï¸ Durée**: {type_info.get('duree_type', '2h')}")
+            st.markdown(f"**⏱️ Durée**: {type_info.get('duree_type', '2h')}")
 
         with col3:
             avec_jules = type_info.get("avec_jules", False)
@@ -611,7 +611,7 @@ def app():
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            st.metric("â±ï¸ Durée estimée", formater_duree(duree))
+            st.metric("⏱️ Durée estimée", formater_duree(duree))
 
         with col2:
             st.metric("🕐 Début", heure_debut.strftime("%H:%M"))
