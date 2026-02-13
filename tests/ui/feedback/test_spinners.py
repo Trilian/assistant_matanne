@@ -170,3 +170,134 @@ class TestSpinnersImports:
                 chargeur_squelette,
             ]
         )
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS ADDITIONNELS POUR COUVERTURE
+# ═══════════════════════════════════════════════════════════
+
+
+class TestSpinnerIntelligentCoverage:
+    """Tests additionnels pour spinner_intelligent."""
+
+    @patch("streamlit.spinner")
+    @patch("streamlit.caption")
+    def test_spinner_temps_tres_rapide(self, mock_caption, mock_spinner):
+        """Test spinner avec temps < 1s affiche en ms."""
+        from src.ui.feedback.spinners import spinner_intelligent
+
+        mock_spinner.return_value.__enter__ = MagicMock()
+        mock_spinner.return_value.__exit__ = MagicMock(return_value=False)
+
+        with spinner_intelligent("Test rapide"):
+            pass  # Instant
+
+        mock_caption.assert_called_once()
+        call_args = mock_caption.call_args[0][0]
+        # Devrait afficher en ms pour les opérations très rapides
+        assert "ms" in call_args or "s" in call_args
+
+    @patch("streamlit.spinner")
+    @patch("streamlit.caption")
+    def test_spinner_sans_estimation_message(self, mock_caption, mock_spinner):
+        """Test message sans estimation."""
+        from src.ui.feedback.spinners import spinner_intelligent
+
+        mock_spinner.return_value.__enter__ = MagicMock()
+        mock_spinner.return_value.__exit__ = MagicMock(return_value=False)
+
+        with spinner_intelligent("Opération simple"):
+            pass
+
+        call_args = mock_spinner.call_args[0][0]
+        assert "⏳ Opération simple..." in call_args
+        assert "estimation" not in call_args
+
+    @patch("streamlit.spinner")
+    @patch("streamlit.caption")
+    def test_spinner_exception_dans_contexte(self, mock_caption, mock_spinner):
+        """Test spinner gère les exceptions."""
+        from src.ui.feedback.spinners import spinner_intelligent
+
+        mock_spinner.return_value.__enter__ = MagicMock()
+        mock_spinner.return_value.__exit__ = MagicMock(return_value=False)
+
+        try:
+            with spinner_intelligent("Test avec erreur"):
+                raise ValueError("Test error")
+        except ValueError:
+            pass
+
+        # Le caption devrait quand même être appelé (dans le finally)
+        mock_caption.assert_called_once()
+
+    @patch("streamlit.spinner")
+    @patch("streamlit.caption")
+    def test_spinner_estimation_zero(self, mock_caption, mock_spinner):
+        """Test avec estimation de 0 secondes."""
+        from src.ui.feedback.spinners import spinner_intelligent
+
+        mock_spinner.return_value.__enter__ = MagicMock()
+        mock_spinner.return_value.__exit__ = MagicMock(return_value=False)
+
+        with spinner_intelligent("Test zero", secondes_estimees=0):
+            pass
+
+        # Si secondes_estimees est 0 (falsy), pas d'estimation dans le message
+        call_args = mock_spinner.call_args[0][0]
+        assert "estimation" not in call_args
+
+
+class TestIndicateurChargementCoverage:
+    """Tests additionnels pour indicateur_chargement."""
+
+    @patch("streamlit.markdown")
+    def test_indicateur_html_structure(self, mock_markdown):
+        """Test structure HTML complète."""
+        from src.ui.feedback.spinners import indicateur_chargement
+
+        indicateur_chargement("Test message")
+
+        call_args = mock_markdown.call_args
+        html = call_args[0][0]
+
+        # Vérifie la structure HTML
+        assert "<div" in html
+        assert "text-align: center" in html
+        assert "⏳" in html
+        assert "Test message" in html
+        assert call_args[1]["unsafe_allow_html"] is True
+
+
+class TestChargeurSqueletteCoverage:
+    """Tests additionnels pour chargeur_squelette."""
+
+    @patch("streamlit.markdown")
+    def test_chargeur_zero_lignes(self, mock_markdown):
+        """Test avec 0 lignes."""
+        from src.ui.feedback.spinners import chargeur_squelette
+
+        chargeur_squelette(lignes=0)
+
+        # Pas d'appel à markdown
+        mock_markdown.assert_not_called()
+
+    @patch("streamlit.markdown")
+    def test_chargeur_une_ligne(self, mock_markdown):
+        """Test avec 1 ligne."""
+        from src.ui.feedback.spinners import chargeur_squelette
+
+        chargeur_squelette(lignes=1)
+
+        assert mock_markdown.call_count == 1
+
+    @patch("streamlit.markdown")
+    def test_chargeur_style_gradient(self, mock_markdown):
+        """Test que le gradient est présent."""
+        from src.ui.feedback.spinners import chargeur_squelette
+
+        chargeur_squelette(lignes=1)
+
+        html = mock_markdown.call_args[0][0]
+        assert "linear-gradient" in html
+        assert "90deg" in html

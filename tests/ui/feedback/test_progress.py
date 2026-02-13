@@ -337,3 +337,127 @@ class TestProgressImports:
 
         assert SuiviProgression is not None
         assert EtatChargement is not None
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS ADDITIONNELS POUR COUVERTURE
+# ═══════════════════════════════════════════════════════════
+
+
+class TestSuiviProgressionCoverage:
+    """Tests additionnels pour SuiviProgression."""
+
+    @patch("streamlit.empty")
+    @patch("streamlit.progress")
+    def test_suivi_total_zero(self, mock_progress, mock_empty):
+        """Test avec total=0 (évite division par zéro)."""
+        from src.ui.feedback.progress import SuiviProgression
+
+        mock_empty.return_value = MagicMock()
+        mock_bar = MagicMock()
+        mock_progress.return_value = mock_bar
+
+        suivi = SuiviProgression("Test", total=0)
+
+        # Ne devrait pas lever d'exception
+        suivi.mettre_a_jour(0)
+        mock_bar.progress.assert_called_with(0)
+
+    @patch("streamlit.empty")
+    @patch("streamlit.progress")
+    def test_suivi_mettre_a_jour_avec_statut_seul(self, mock_progress, mock_empty):
+        """Test mettre_a_jour à 100% affiche juste le statut."""
+        from src.ui.feedback.progress import SuiviProgression
+
+        mock_placeholder = MagicMock()
+        mock_empty.return_value = mock_placeholder
+        mock_progress.return_value = MagicMock()
+
+        suivi = SuiviProgression("Test", total=10)
+        suivi.mettre_a_jour(10, "Terminé")  # 100%
+
+        # Le caption ne devrait pas afficher l'estimation à 100%
+        # mais devrait quand même afficher le statut
+        mock_placeholder.caption.assert_called()
+
+    @patch("streamlit.empty")
+    @patch("streamlit.progress")
+    def test_suivi_affichage_fraction_format(self, mock_progress, mock_empty):
+        """Test format fraction (X/Y)."""
+        from src.ui.feedback.progress import SuiviProgression
+
+        mock_placeholder = MagicMock()
+        mock_empty.return_value = mock_placeholder
+        mock_progress.return_value = MagicMock()
+
+        suivi = SuiviProgression("Test", total=50, afficher_pourcentage=False)
+        suivi.mettre_a_jour(25)
+
+        call_args = str(mock_placeholder.markdown.call_args)
+        assert "25/50" in call_args
+
+
+class TestEtatChargementCoverage:
+    """Tests additionnels pour EtatChargement."""
+
+    @patch("streamlit.empty")
+    def test_etat_affichage_html_structure(self, mock_empty):
+        """Test structure HTML de l'affichage."""
+        from src.ui.feedback.progress import EtatChargement
+
+        mock_placeholder = MagicMock()
+        mock_empty.return_value = mock_placeholder
+
+        etat = EtatChargement("Test")
+        etat.ajouter_etape("Étape 1")
+
+        # Vérifie que markdown a été appelé avec du HTML
+        calls = mock_placeholder.markdown.call_args_list
+        html_call = [c for c in calls if len(c[0]) > 0 and "unsafe_allow_html" in str(c)]
+        assert len(html_call) > 0
+
+    @patch("streamlit.empty")
+    def test_terminer_etape_inexistante(self, mock_empty):
+        """Test terminer une étape qui n'existe pas."""
+        from src.ui.feedback.progress import EtatChargement
+
+        mock_empty.return_value = MagicMock()
+
+        etat = EtatChargement("Test")
+        etat.ajouter_etape("Étape 1")
+
+        # Ne devrait pas lever d'exception
+        etat.terminer_etape("Étape inexistante")
+
+        # L'étape 1 ne devrait pas être terminée
+        assert etat.etapes[0]["completed"] is False
+
+    @patch("streamlit.empty")
+    def test_erreur_etape_inexistante(self, mock_empty):
+        """Test erreur sur étape qui n'existe pas."""
+        from src.ui.feedback.progress import EtatChargement
+
+        mock_empty.return_value = MagicMock()
+
+        etat = EtatChargement("Test")
+        etat.ajouter_etape("Étape 1")
+
+        # Ne devrait pas lever d'exception
+        etat.erreur_etape("Étape inexistante", "Error")
+
+        # L'étape 1 ne devrait pas être en erreur
+        assert "Erreur" not in etat.etapes[0]["status"]
+
+    @patch("streamlit.empty")
+    def test_etat_courante_none(self, mock_empty):
+        """Test avec etape_courante = None."""
+        from src.ui.feedback.progress import EtatChargement
+
+        mock_empty.return_value = MagicMock()
+
+        etat = EtatChargement("Test")
+        # Pas d'étape ajoutée, etape_courante est None
+
+        # Ne devrait pas lever d'exception
+        etat.terminer_etape()
+        etat.erreur_etape()

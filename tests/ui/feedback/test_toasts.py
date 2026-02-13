@@ -353,3 +353,285 @@ class TestNotificationsImports:
                 callable(afficher_info),
             ]
         )
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS ADDITIONNELS POUR COUVERTURE
+# ═══════════════════════════════════════════════════════════
+
+
+class TestGestionnaireNotificationsRendre:
+    """Tests complets pour la méthode rendre()."""
+
+    @patch("streamlit.container")
+    @patch("streamlit.success")
+    @patch("streamlit.session_state", {})
+    def test_rendre_success_notification(self, mock_success, mock_container):
+        """Test rendu notification success."""
+        from datetime import datetime, timedelta
+
+        from src.ui.feedback.toasts import GestionnaireNotifications
+
+        GestionnaireNotifications._init()
+
+        import streamlit as st
+
+        st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS] = [
+            {
+                "message": "Test success",
+                "type": "success",
+                "created_at": datetime.now(),
+                "expires_at": datetime.now() + timedelta(seconds=60),
+            }
+        ]
+
+        mock_container.return_value.__enter__ = MagicMock()
+        mock_container.return_value.__exit__ = MagicMock()
+
+        GestionnaireNotifications.rendre()
+
+        mock_success.assert_called_with("Test success")
+
+    @patch("streamlit.container")
+    @patch("streamlit.error")
+    @patch("streamlit.session_state", {})
+    def test_rendre_error_notification(self, mock_error, mock_container):
+        """Test rendu notification error."""
+        from datetime import datetime, timedelta
+
+        from src.ui.feedback.toasts import GestionnaireNotifications
+
+        GestionnaireNotifications._init()
+
+        import streamlit as st
+
+        st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS] = [
+            {
+                "message": "Test error",
+                "type": "error",
+                "created_at": datetime.now(),
+                "expires_at": datetime.now() + timedelta(seconds=60),
+            }
+        ]
+
+        mock_container.return_value.__enter__ = MagicMock()
+        mock_container.return_value.__exit__ = MagicMock()
+
+        GestionnaireNotifications.rendre()
+
+        mock_error.assert_called_with("Test error")
+
+    @patch("streamlit.container")
+    @patch("streamlit.warning")
+    @patch("streamlit.session_state", {})
+    def test_rendre_warning_notification(self, mock_warning, mock_container):
+        """Test rendu notification warning."""
+        from datetime import datetime, timedelta
+
+        from src.ui.feedback.toasts import GestionnaireNotifications
+
+        GestionnaireNotifications._init()
+
+        import streamlit as st
+
+        st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS] = [
+            {
+                "message": "Test warning",
+                "type": "warning",
+                "created_at": datetime.now(),
+                "expires_at": datetime.now() + timedelta(seconds=60),
+            }
+        ]
+
+        mock_container.return_value.__enter__ = MagicMock()
+        mock_container.return_value.__exit__ = MagicMock()
+
+        GestionnaireNotifications.rendre()
+
+        mock_warning.assert_called_with("Test warning")
+
+    @patch("streamlit.container")
+    @patch("streamlit.info")
+    @patch("streamlit.session_state", {})
+    def test_rendre_info_notification(self, mock_info, mock_container):
+        """Test rendu notification info."""
+        from datetime import datetime, timedelta
+
+        from src.ui.feedback.toasts import GestionnaireNotifications
+
+        GestionnaireNotifications._init()
+
+        import streamlit as st
+
+        st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS] = [
+            {
+                "message": "Test info",
+                "type": "info",
+                "created_at": datetime.now(),
+                "expires_at": datetime.now() + timedelta(seconds=60),
+            }
+        ]
+
+        mock_container.return_value.__enter__ = MagicMock()
+        mock_container.return_value.__exit__ = MagicMock()
+
+        GestionnaireNotifications.rendre()
+
+        mock_info.assert_called_with("Test info")
+
+    @patch("streamlit.container")
+    @patch("streamlit.info")
+    @patch("streamlit.session_state", {})
+    def test_rendre_unknown_type_falls_back_to_info(self, mock_info, mock_container):
+        """Test type inconnu utilise st.info par défaut."""
+        from datetime import datetime, timedelta
+
+        from src.ui.feedback.toasts import GestionnaireNotifications
+
+        GestionnaireNotifications._init()
+
+        import streamlit as st
+
+        st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS] = [
+            {
+                "message": "Test unknown type",
+                "type": "unknown_type",
+                "created_at": datetime.now(),
+                "expires_at": datetime.now() + timedelta(seconds=60),
+            }
+        ]
+
+        mock_container.return_value.__enter__ = MagicMock()
+        mock_container.return_value.__exit__ = MagicMock()
+
+        GestionnaireNotifications.rendre()
+
+        mock_info.assert_called_with("Test unknown type")
+
+    @patch("streamlit.session_state", {})
+    def test_rendre_expired_notifications_filtered(self):
+        """Test que les notifications expirées sont filtrées."""
+        from datetime import datetime, timedelta
+
+        from src.ui.feedback.toasts import GestionnaireNotifications
+
+        GestionnaireNotifications._init()
+
+        import streamlit as st
+
+        # Notification expirée
+        st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS] = [
+            {
+                "message": "Expired",
+                "type": "info",
+                "created_at": datetime.now() - timedelta(seconds=120),
+                "expires_at": datetime.now() - timedelta(seconds=60),
+            }
+        ]
+
+        GestionnaireNotifications.rendre()
+
+        # La notification expirée devrait être supprimée
+        assert len(st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]) == 0
+
+    @patch("streamlit.container")
+    @patch("streamlit.success")
+    @patch("streamlit.session_state", {})
+    def test_rendre_max_3_notifications(self, mock_success, mock_container):
+        """Test que max 3 notifications sont affichées."""
+        from datetime import datetime, timedelta
+
+        from src.ui.feedback.toasts import GestionnaireNotifications
+
+        GestionnaireNotifications._init()
+
+        import streamlit as st
+
+        # 5 notifications actives
+        st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS] = [
+            {
+                "message": f"Test {i}",
+                "type": "success",
+                "created_at": datetime.now(),
+                "expires_at": datetime.now() + timedelta(seconds=60),
+            }
+            for i in range(5)
+        ]
+
+        mock_container.return_value.__enter__ = MagicMock()
+        mock_container.return_value.__exit__ = MagicMock()
+
+        GestionnaireNotifications.rendre()
+
+        # Seulement les 3 derniers affichés
+        assert mock_success.call_count == 3
+
+    @patch("streamlit.session_state", {})
+    def test_rendre_empty_notifications(self):
+        """Test rendu sans notifications."""
+        from src.ui.feedback.toasts import GestionnaireNotifications
+
+        GestionnaireNotifications._init()
+
+        # Ne devrait pas lever d'exception
+        GestionnaireNotifications.rendre()
+
+        import streamlit as st
+
+        assert st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS] == []
+
+
+class TestHelpersAvecDureeCustom:
+    """Tests helpers avec durées personnalisées."""
+
+    @patch("streamlit.session_state", {})
+    def test_afficher_succes_duree_custom(self):
+        """Test afficher_succes avec durée custom."""
+        from src.ui.feedback.toasts import GestionnaireNotifications, afficher_succes
+
+        afficher_succes("Message custom", duree=10)
+
+        import streamlit as st
+
+        notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
+        diff = (notifications[0]["expires_at"] - notifications[0]["created_at"]).total_seconds()
+        assert 9.5 < diff < 10.5
+
+    @patch("streamlit.session_state", {})
+    def test_afficher_erreur_duree_custom(self):
+        """Test afficher_erreur avec durée custom."""
+        from src.ui.feedback.toasts import GestionnaireNotifications, afficher_erreur
+
+        afficher_erreur("Erreur custom", duree=15)
+
+        import streamlit as st
+
+        notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
+        diff = (notifications[0]["expires_at"] - notifications[0]["created_at"]).total_seconds()
+        assert 14.5 < diff < 15.5
+
+    @patch("streamlit.session_state", {})
+    def test_afficher_avertissement_duree_custom(self):
+        """Test afficher_avertissement avec durée custom."""
+        from src.ui.feedback.toasts import GestionnaireNotifications, afficher_avertissement
+
+        afficher_avertissement("Warning custom", duree=8)
+
+        import streamlit as st
+
+        notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
+        diff = (notifications[0]["expires_at"] - notifications[0]["created_at"]).total_seconds()
+        assert 7.5 < diff < 8.5
+
+    @patch("streamlit.session_state", {})
+    def test_afficher_info_duree_custom(self):
+        """Test afficher_info avec durée custom."""
+        from src.ui.feedback.toasts import GestionnaireNotifications, afficher_info
+
+        afficher_info("Info custom", duree=2)
+
+        import streamlit as st
+
+        notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
+        diff = (notifications[0]["expires_at"] - notifications[0]["created_at"]).total_seconds()
+        assert 1.5 < diff < 2.5

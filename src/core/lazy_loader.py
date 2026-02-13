@@ -314,6 +314,9 @@ class RouteurOptimise:
         ]
         ChargeurModuleDiffere.precharger(common, background=True)
 
+    # Alias anglais pour compatibilité avec app.py
+    load_module = charger_module
+
 
 # ═══════════════════════════════════════════════════════════
 # MÉTRIQUES LAZY LOADING
