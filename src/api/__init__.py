@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module API REST FastAPI.
 
 Ce package fournit une API REST pour l'accès programmatique

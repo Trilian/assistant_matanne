@@ -1,4 +1,4 @@
-﻿"""
+"""
 Decorateurs - Décorateurs utilitaires réutilisables.
 
 Contient :
@@ -8,12 +8,11 @@ Contient :
 - @avec_validation : Validation Pydantic automatique
 """
 
-import logging
-from functools import wraps
-from typing import Any, Callable, TypeVar
 import inspect
-
-from sqlalchemy.orm import Session
+import logging
+from collections.abc import Callable
+from functools import wraps
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +55,9 @@ def avec_session_db(func: F) -> F:
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
         # Si 'db' ou 'session' est déjà fourni(e), utiliser directement
-        if ("db" in kwargs and kwargs["db"] is not None) or \
-           ("session" in kwargs and kwargs["session"] is not None):
+        if ("db" in kwargs and kwargs["db"] is not None) or (
+            "session" in kwargs and kwargs["session"] is not None
+        ):
             return func(*args, **kwargs)
 
         # Sinon, créer une nouvelle session
@@ -89,7 +89,7 @@ def avec_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = N
         def charger_recettes(page: int = 1) -> list[Recette]:
             # Logique coûteuse
             return recettes
-        
+
         @avec_cache(ttl=3600, key_func=lambda self, id: f"recette_{id}")
         def charger_recette(self, id: int) -> Recette:
             # Custom key generation
@@ -110,7 +110,7 @@ def avec_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = N
         # Pré-calculer la signature pour optimisation
         sig = inspect.signature(func)
         param_names = list(sig.parameters.keys())
-        
+
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             from src.core.cache import Cache
@@ -118,8 +118,8 @@ def avec_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = N
             # Générer clé de cache
             if key_func is not None:
                 # Filtrer db des kwargs d'abord
-                filtered_kwargs = {k: v for k, v in kwargs.items() if k != 'db'}
-                
+                filtered_kwargs = {k: v for k, v in kwargs.items() if k != "db"}
+
                 # Essayer d'abord de passer les arguments par position
                 try:
                     cache_key = key_func(*args, **filtered_kwargs)
@@ -129,20 +129,23 @@ def avec_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = N
                     for i, arg in enumerate(args):
                         if i < len(param_names):
                             param_name = param_names[i]
-                            if param_name not in ('self', 'db'):
+                            if param_name not in ("self", "db"):
                                 full_kwargs[param_name] = arg
-                    
+
                     # Ajouter les kwargs nommés (sauf db)
                     for k, v in filtered_kwargs.items():
                         full_kwargs[k] = v
-                    
+
                     # Remplir les valeurs par défaut manquantes
                     for param_name, param in sig.parameters.items():
-                        if param_name in ('self', 'db'):
+                        if param_name in ("self", "db"):
                             continue
-                        if param_name not in full_kwargs and param.default != inspect.Parameter.empty:
+                        if (
+                            param_name not in full_kwargs
+                            and param.default != inspect.Parameter.empty
+                        ):
                             full_kwargs[param_name] = param.default
-                    
+
                     # Appeler key_func avec self + tous les kwargs nécessaires
                     if args:
                         cache_key = key_func(args[0], **full_kwargs)
@@ -151,7 +154,7 @@ def avec_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = N
             else:
                 prefix = key_prefix or func.__name__
                 # Exclure 'db' des kwargs dans le cache key
-                filtered_kwargs = {k: v for k, v in kwargs.items() if k != 'db'}
+                filtered_kwargs = {k: v for k, v in kwargs.items() if k != "db"}
                 cache_key = f"{prefix}_{str(args)}_{str(filtered_kwargs)}"
 
             # Chercher en cache avec sentinelle
@@ -209,6 +212,7 @@ def avec_gestion_erreurs(
             except Exception as e:
                 # Relever les exceptions métier (héritant de ExceptionApp)
                 from src.core.errors_base import ExceptionApp
+
                 if isinstance(e, ExceptionApp):
                     raise  # Relever les exceptions métier
 
@@ -273,9 +277,7 @@ def avec_validation(
             try:
                 # Chercher le paramètre à valider
                 param_key = list(field_mapping.keys())[0] if field_mapping else "data"
-                param_name = (
-                    field_mapping[param_key] if field_mapping else param_key
-                )
+                param_name = field_mapping[param_key] if field_mapping else param_key
 
                 if param_key in kwargs:
                     data = kwargs[param_key]

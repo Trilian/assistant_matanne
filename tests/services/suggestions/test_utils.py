@@ -1,55 +1,46 @@
-﻿"""
+"""
 Tests for src/services/suggestions/utils.py
 
 Pure utility functions - no mocking needed.
 """
 
-import pytest
 from datetime import date, datetime
-from collections import Counter
 
 from src.services.suggestions.utils import (
-    # Saisons
-    SAISONS,
-    INGREDIENTS_SAISON,
-    get_current_season,
-    get_seasonal_ingredients,
-    is_ingredient_in_season,
+    SCORE_CATEGORIE_PREFEREE,
+    SCORE_DIFFICULTE_ADAPTEE,
+    SCORE_INGREDIENT_DISPONIBLE,
+    SCORE_INGREDIENT_PRIORITAIRE,
+    SCORE_INGREDIENT_SAISON,
+    SCORE_JAMAIS_PREPAREE,
+    SCORE_TEMPS_ADAPTE,
+    SCORE_VARIETE,
     # Profil
     analyze_categories,
     analyze_frequent_ingredients,
     calculate_average_difficulty,
-    calculate_average_time,
     calculate_average_portions,
-    identify_favorites,
-    days_since_last_preparation,
+    calculate_average_time,
     # Scoring
     calculate_recipe_score,
-    rank_recipes,
-    generate_suggestion_reason,
-    SCORE_INGREDIENT_DISPONIBLE,
-    SCORE_INGREDIENT_PRIORITAIRE,
-    SCORE_INGREDIENT_SAISON,
-    SCORE_CATEGORIE_PREFEREE,
-    SCORE_TEMPS_ADAPTE,
-    SCORE_DIFFICULTE_ADAPTEE,
-    SCORE_JAMAIS_PREPAREE,
-    SCORE_VARIETE,
+    calculate_variety_score,
+    calculate_week_protein_balance,
+    days_since_last_preparation,
     # Protéines
     detect_protein_type,
-    calculate_week_protein_balance,
-    is_week_balanced,
-    PROTEINES_POISSON,
-    PROTEINES_VIANDE_ROUGE,
-    PROTEINES_VOLAILLE,
-    PROTEINES_VEGETARIEN,
-    # Variété
-    calculate_variety_score,
-    get_least_prepared_recipes,
+    filter_by_constraints,
+    format_profile_summary,
     # Formatage
     format_suggestion,
-    format_profile_summary,
-    filter_by_constraints,
+    generate_suggestion_reason,
+    # Saisons
+    get_current_season,
+    get_least_prepared_recipes,
+    get_seasonal_ingredients,
+    identify_favorites,
+    is_ingredient_in_season,
+    is_week_balanced,
+    rank_recipes,
 )
 
 
@@ -345,7 +336,7 @@ class TestScoring:
         recette = {"id": 1, "temps_preparation": 90, "temps_cuisson": 60, "ingredients": []}
         contexte = {"temps_disponible_minutes": 30}
         score = calculate_recipe_score(recette, contexte)
-        assert score <= 0  # Pénalité (score est cappé Ã  0 minimum)
+        assert score <= 0  # Pénalité (score est cappé à 0 minimum)
 
     def test_calculate_recipe_score_difficulte_adaptee(self):
         """Test score difficulté adaptée."""
@@ -508,8 +499,10 @@ class TestProteinDetection:
     def test_is_week_balanced_true(self):
         """Test semaine équilibrée."""
         repas = [
-            {"nom": "Saumon"}, {"nom": "Thon"},  # 2 poissons
-            {"nom": "Poulet"}, {"nom": "Dinde"},  # 2 volailles
+            {"nom": "Saumon"},
+            {"nom": "Thon"},  # 2 poissons
+            {"nom": "Poulet"},
+            {"nom": "Dinde"},  # 2 volailles
             {"nom": "Boeuf"},  # 1 viande rouge
             {"est_vegetarien": True},  # 1 végétarien
             {"nom": "Salade"},  # autre
@@ -531,8 +524,11 @@ class TestProteinDetection:
     def test_is_week_balanced_false_too_much_red_meat(self):
         """Test semaine non équilibrée - trop de viande rouge."""
         repas = [
-            {"nom": "Saumon"}, {"nom": "Thon"},
-            {"nom": "Boeuf"}, {"nom": "Agneau"}, {"nom": "Veau"},
+            {"nom": "Saumon"},
+            {"nom": "Thon"},
+            {"nom": "Boeuf"},
+            {"nom": "Agneau"},
+            {"nom": "Veau"},
             {"est_vegetarien": True},
         ]
         balanced, problemes = is_week_balanced(repas)
@@ -542,8 +538,10 @@ class TestProteinDetection:
     def test_is_week_balanced_false_no_vegetarian(self):
         """Test semaine non équilibrée - pas de végétarien."""
         repas = [
-            {"nom": "Saumon"}, {"nom": "Thon"},
-            {"nom": "Poulet"}, {"nom": "Dinde"},
+            {"nom": "Saumon"},
+            {"nom": "Thon"},
+            {"nom": "Poulet"},
+            {"nom": "Dinde"},
         ]
         balanced, problemes = is_week_balanced(repas)
         assert balanced is False
@@ -708,7 +706,12 @@ class TestFormatage:
         recettes = [
             {"id": 1, "est_vegetarien": True, "contient_gluten": False},
             {"id": 2, "est_vegetarien": True, "contient_gluten": True},
-            {"id": 3, "nom": "Boeuf grillé", "est_vegetarien": False, "contient_gluten": False},  # Contient viande
+            {
+                "id": 3,
+                "nom": "Boeuf grillé",
+                "est_vegetarien": False,
+                "contient_gluten": False,
+            },  # Contient viande
         ]
         result = filter_by_constraints(recettes, ["végétarien", "sans gluten"])
         assert len(result) == 1

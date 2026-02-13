@@ -1,1 +1,1 @@
-﻿# Formatters tests
+# Formatters tests

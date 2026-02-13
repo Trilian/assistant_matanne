@@ -1,71 +1,61 @@
-﻿"""
+"""
 Pytest Configuration & Central Fixtures
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+════════════════════════════════════════════════════════════════════
 
 Fixtures partagées pour tous les tests du répertoire tests/core/.
-Ã‰limine la duplication de setup Ã  travers les fichiers de test.
+Élimine la duplication de setup à travers les fichiers de test.
 
 Auto-découverte: pytest charge automatiquement ce fichier.
 """
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, MagicMock, patch
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session, sessionmaker
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
 # SECTION 1: PYTEST CONFIGURATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
+
 
 def pytest_configure(config):
     """Configure pytest avec markers personnalisés."""
-    config.addinivalue_line(
-        "markers", "unit: Unit tests (fast)"
-    )
-    config.addinivalue_line(
-        "markers", "integration: Integration tests (slower)"
-    )
-    config.addinivalue_line(
-        "markers", "slow: Slow tests (require optimization)"
-    )
-    config.addinivalue_line(
-        "markers", "requires_db: Require database"
-    )
-    config.addinivalue_line(
-        "markers", "requires_redis: Require Redis"
-    )
+    config.addinivalue_line("markers", "unit: Unit tests (fast)")
+    config.addinivalue_line("markers", "integration: Integration tests (slower)")
+    config.addinivalue_line("markers", "slow: Slow tests (require optimization)")
+    config.addinivalue_line("markers", "requires_db: Require database")
+    config.addinivalue_line("markers", "requires_redis: Require Redis")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
 # SECTION 2: DATABASE FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
+
 
 @pytest.fixture(scope="function")
 def test_db() -> Session:
     """Fixture BD SQLite en mémoire pour tests isolés.
-    
+
     Chaque test obtient sa propre BD fraîche.
     Auto-cleanup après le test.
     """
-    engine = create_engine(
-        'sqlite:///:memory:',
-        connect_args={'check_same_thread': False}
-    )
-    
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+
     # Créer tables si modèles disponibles
     try:
         from src.core.models import Base
+
         Base.metadata.create_all(engine)
     except (ImportError, Exception):
         # Models pas disponibles en test mode
         pass
-    
+
     SessionLocal = sessionmaker(bind=engine)
     session = SessionLocal()
-    
+
     yield session
-    
+
     # Cleanup
     session.close()
     engine.dispose()
@@ -78,9 +68,10 @@ def test_db_with_sample_data(test_db: Session) -> Session:
     yield test_db
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
 # SECTION 3: MOCK FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
+
 
 @pytest.fixture
 def mock_session() -> Mock:
@@ -147,14 +138,15 @@ def mock_logger() -> MagicMock:
     return MagicMock()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
 # SECTION 4: STREAMLIT FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
+
 
 @pytest.fixture
 def streamlit_session() -> MagicMock:
     """Mock Streamlit session_state.
-    
+
     Usage:
         def test_something(streamlit_session):
             streamlit_session['key'] = 'value'
@@ -168,25 +160,26 @@ def streamlit_session() -> MagicMock:
 def streamlit_session_with_data() -> MagicMock:
     """Mock Streamlit session_state avec données initiales."""
     session_data = {
-        'user_id': 'test_user',
-        'user_name': 'Test User',
-        'session_state': 'initialized',
+        "user_id": "test_user",
+        "user_name": "Test User",
+        "session_state": "initialized",
     }
     with patch("streamlit.session_state", session_data) as mock:
         yield mock
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
 # SECTION 5: TEST DATA FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
+
 
 @pytest.fixture
 def test_user_data() -> dict:
     """Données utilisateur test."""
     return {
-        'id': '123',
-        'name': 'Test User',
-        'email': 'test@example.com',
+        "id": "123",
+        "name": "Test User",
+        "email": "test@example.com",
     }
 
 
@@ -194,10 +187,10 @@ def test_user_data() -> dict:
 def test_recipe_data() -> dict:
     """Données recette test."""
     return {
-        'id': 1,
-        'nom': 'Test Recipe',
-        'ingredients': ['ingredient1', 'ingredient2'],
-        'instructions': 'Step 1...',
+        "id": 1,
+        "nom": "Test Recipe",
+        "ingredients": ["ingredient1", "ingredient2"],
+        "instructions": "Step 1...",
     }
 
 
@@ -205,10 +198,10 @@ def test_recipe_data() -> dict:
 def test_cache_entry() -> dict:
     """Données cache entry test."""
     return {
-        'key': 'test:key',
-        'value': 'test_value',
-        'ttl': 3600,
-        'tags': ['tag1', 'tag2'],
+        "key": "test:key",
+        "value": "test_value",
+        "ttl": 3600,
+        "tags": ["tag1", "tag2"],
     }
 
 
@@ -216,16 +209,17 @@ def test_cache_entry() -> dict:
 def test_query_info() -> dict:
     """Données query info test."""
     return {
-        'sql': 'SELECT * FROM users',
-        'operation': 'SELECT',
-        'table': 'users',
-        'duration_ms': 10,
+        "sql": "SELECT * FROM users",
+        "operation": "SELECT",
+        "table": "users",
+        "duration_ms": 10,
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
 # SECTION 6: CLEANUP FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
+
 
 @pytest.fixture(autouse=True)
 def cleanup():
@@ -237,30 +231,33 @@ def cleanup():
 @pytest.fixture
 def temp_env_vars():
     """Context manager pour variables d'environnement temporaires.
-    
+
     Usage:
         def test_something(temp_env_vars):
             temp_env_vars['MY_VAR'] = 'value'
             # test code
     """
     import os
+
     env_backup = os.environ.copy()
-    
+
     yield os.environ
-    
+
     # Restore
     os.environ.clear()
     os.environ.update(env_backup)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
 # SECTION 7: CONTEXT MANAGER FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
+
 
 @pytest.fixture
 def mock_database():
     """Context manager pour mock database."""
     from tests.core.helpers import mock_database_session
+
     with mock_database_session() as (session, query):
         yield session, query
 
@@ -269,18 +266,21 @@ def mock_database():
 def mock_redis_connection():
     """Context manager pour mock redis."""
     from tests.core.helpers import mock_redis_connection
+
     with mock_redis_connection(available=True) as redis:
         yield redis
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
 # SECTION 8: HELPER FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
+
 
 @pytest.fixture
 def mock_builder():
-    """Fixture pour accéder Ã  MockBuilder."""
+    """Fixture pour accéder à MockBuilder."""
     from tests.core.helpers import MockBuilder
+
     return MockBuilder
 
 
@@ -288,6 +288,7 @@ def mock_builder():
 def assertion_helpers():
     """Fixture pour accéder aux assertion helpers."""
     from tests.core.helpers import AssertionHelpers
+
     return AssertionHelpers
 
 
@@ -295,6 +296,7 @@ def assertion_helpers():
 def parametrize_helpers():
     """Fixture pour accéder aux parametrize helpers."""
     from tests.core.helpers import ParametrizeHelpers
+
     return ParametrizeHelpers
 
 
@@ -302,6 +304,7 @@ def parametrize_helpers():
 def test_patterns():
     """Fixture pour accéder aux test patterns."""
     from tests.core.helpers import TestPatterns
+
     return TestPatterns
 
 
@@ -309,19 +312,22 @@ def test_patterns():
 def test_utils():
     """Fixture pour accéder aux test utils."""
     from tests.core.helpers import TestUtils
+
     return TestUtils
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
 # SECTION 9: PYTEST PLUGINS & HOOKS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
+
 
 def pytest_collection_modifyitems(config, items):
     """Modifie items collectés pour ajouter defaults."""
     for item in items:
         # Marquer tous les tests sans marker comme "unit"
-        if not any(marker.name in ["unit", "integration", "slow"] 
-                  for marker in item.iter_markers()):
+        if not any(
+            marker.name in ["unit", "integration", "slow"] for marker in item.iter_markers()
+        ):
             item.add_marker(pytest.mark.unit)
 
 
@@ -336,44 +342,46 @@ def pytest_runtest_logreport(report):
             pass
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
 # SECTION 10: FIXTURES SCOPE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
+
 
 @pytest.fixture(scope="session")
 def session_data():
     """Données au niveau session (partagées entre tests).
-    
-    Utilisé pour données lourdes Ã  setup une seule fois.
+
+    Utilisé pour données lourdes à setup une seule fois.
     """
     return {
-        'initialized': True,
-        'timestamp': __import__('datetime').datetime.now(),
+        "initialized": True,
+        "timestamp": __import__("datetime").datetime.now(),
     }
 
 
 @pytest.fixture(scope="module")
 def module_db():
     """BD partagée au niveau module (attention: isoler les données!)."""
-    engine = create_engine('sqlite:///:memory:')
+    engine = create_engine("sqlite:///:memory:")
     try:
         from src.core.models import Base
+
         Base.metadata.create_all(engine)
     except (ImportError, Exception):
         pass
-    
+
     SessionLocal = sessionmaker(bind=engine)
     session = SessionLocal()
-    
+
     yield session
-    
+
     session.close()
     engine.dispose()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
 # SECTION 11: PYTEST INI CONFIGURATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═════════════════════════════════════════════════════════════════════
 
 """
 pytest.ini content (should be in root):

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package web - Services web unifiés (synchronisation temps réel + PWA).
 
 Ce package fournit:
@@ -16,59 +16,57 @@ Ce package fournit:
 Utilisation:
     # Synchronisation
     from src.services.web import get_realtime_sync_service, RealtimeSyncService
-    
+
     service = get_realtime_sync_service()
     service.broadcast_change(event)
-    
+
     # PWA
     from src.services.web import generate_pwa_files, inject_pwa_meta
-    
+
     generate_pwa_files("static/")
     inject_pwa_meta()
 """
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SYNCHRONISATION TEMPS RÉEL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
-from .synchronisation import (
-    # Types et énumérations
-    SyncEventType,
-    SyncEvent,
-    PresenceInfo,
-    SyncState,
-    # Service principal
-    RealtimeSyncService,
-    get_realtime_sync_service,
-    # Composants UI
-    render_presence_indicator,
-    render_typing_indicator,
-    render_sync_status,
-)
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # PWA - PROGRESSIVE WEB APP
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
+# ═══════════════════════════════════════════════════════════
 from .pwa import (
     # Configuration
     PWA_CONFIG,
+    generate_icon_svg,
     # Génération de fichiers
     generate_manifest,
-    generate_service_worker,
     generate_offline_page,
     generate_pwa_files,
-    generate_icon_svg,
+    generate_service_worker,
     # Injection et rendu
     inject_pwa_meta,
-    render_install_prompt,
     # Utilitaires
     is_pwa_installed,
+    render_install_prompt,
+)
+from .synchronisation import (
+    PresenceInfo,
+    # Service principal
+    RealtimeSyncService,
+    SyncEvent,
+    # Types et énumérations
+    SyncEventType,
+    SyncState,
+    get_realtime_sync_service,
+    # Composants UI
+    render_presence_indicator,
+    render_sync_status,
+    render_typing_indicator,
 )
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # EXPORTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 __all__ = [
     # === Synchronisation ===

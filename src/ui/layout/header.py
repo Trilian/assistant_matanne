@@ -1,4 +1,4 @@
-﻿"""
+"""
 Header de l'application.
 """
 

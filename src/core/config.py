@@ -1,4 +1,4 @@
-﻿"""
+"""
 Configuration - Configuration centralisée de l'application.
 Tout harmonisé en français
 """
@@ -6,7 +6,7 @@ Tout harmonisé en français
 import logging
 import os
 from pathlib import Path
-from typing import Optional
+
 
 def _reload_env_files():
     """Recharge les fichiers .env (appelé à chaque accès config pour Streamlit)"""
@@ -14,7 +14,7 @@ def _reload_env_files():
         # Trouver le répertoire racine du projet (parent du dossier src)
         _config_dir = Path(__file__).parent.parent.parent
         _env_files = [_config_dir / ".env.local", _config_dir / ".env"]
-        
+
         for env_path in _env_files:
             if env_path.exists():
                 # Charger manuellement le fichier .env
@@ -33,9 +33,10 @@ def _reload_env_files():
                                     value = value[1:-1]
                                 # Pour Streamlit : forcer le rechargement
                                 os.environ[key] = value
-    except Exception as e:
+    except Exception:
         # Ignorer les erreurs si le chargement échoue
         pass
+
 
 # Charger une première fois au démarrage du module
 _reload_env_files()
@@ -58,7 +59,6 @@ from .logging import configure_logging  # type: ignore
 logger = logging.getLogger(__name__)
 
 
-
 def _read_st_secret(section: str):
     """Lit de façon sûre une section de `st.secrets` si disponible.
 
@@ -76,11 +76,12 @@ def _read_st_secret(section: str):
 
 def _is_streamlit_cloud() -> bool:
     """Détecte si l'app s'exécute sur Streamlit Cloud.
-    
+
     Returns:
         True si sur Streamlit Cloud, False sinon
     """
     import os
+
     # Indicateurs de Streamlit Cloud
     if os.getenv("STREAMLIT_SERVER_HEADLESS") == "true":
         return True
@@ -98,51 +99,62 @@ def _is_streamlit_cloud() -> bool:
 
 def _get_mistral_api_key_from_secrets() -> str | None:
     """Récupère la clé API Mistral des secrets Streamlit.
-    
+
     Plusieurs stratégies pour accéder aux secrets:
     - Streamlit Cloud: `st.secrets`
     - Déploiement local avec secrets.toml: `st.secrets`
     """
     import sys
-    
+
     # Essayer d'accéder à st.secrets de plusieurs façons
     api_key = None
-    
+
     # Stratégie 1: Import streamlit et accès direct
     try:
         import streamlit as st
-        
+
         if hasattr(st, "secrets") and st.secrets:
             print(f"[DEBUG] st.secrets disponible, type={type(st.secrets)}")
-            
+
             # Essayer d'accéder via .get()
             try:
                 mistral = st.secrets.get("mistral", {})
                 if mistral:
-                    api_key = mistral.get("api_key") if hasattr(mistral, 'get') else mistral.get("api_key", None) if isinstance(mistral, dict) else None
+                    api_key = (
+                        mistral.get("api_key")
+                        if hasattr(mistral, "get")
+                        else mistral.get("api_key", None)
+                        if isinstance(mistral, dict)
+                        else None
+                    )
                     if api_key:
-                        print(f"[SUCCESS] Found via st.secrets['mistral']['api_key']: {api_key[:20]}...")
+                        print(
+                            f"[SUCCESS] Found via st.secrets['mistral']['api_key']: {api_key[:20]}..."
+                        )
                         return api_key
             except Exception as e:
                 print(f"[DEBUG] st.secrets.get('mistral') failed: {e}")
-            
+
             # Essayer accès direct dict
             try:
                 if "mistral" in st.secrets:
                     api_key = st.secrets["mistral"]["api_key"]
                     if api_key:
-                        print(f"[SUCCESS] Found via st.secrets['mistral']['api_key']: {api_key[:20]}...")
+                        print(
+                            f"[SUCCESS] Found via st.secrets['mistral']['api_key']: {api_key[:20]}..."
+                        )
                         return api_key
             except Exception as e:
                 print(f"[DEBUG] st.secrets dict access failed: {e}")
-                
+
     except Exception as e:
         print(f"[DEBUG] streamlit import/access failed: {e}")
-    
+
     # Stratégie 2: Vérifier si on est en Streamlit et accéder à la config
     try:
         if "streamlit" in sys.modules:
             import streamlit.runtime.secrets as secrets_module
+
             try:
                 # Accès direct au gestionnaire de secrets Streamlit
                 if hasattr(secrets_module, "get_secret_file_path"):
@@ -151,11 +163,10 @@ def _get_mistral_api_key_from_secrets() -> str | None:
                 pass
     except:
         pass
-    
+
     # Afficher toutes les tentatives échouées
     print("[DEBUG] No Mistral API key found in st.secrets")
     return None
-
 
 
 class Parametres(BaseSettings):
@@ -278,25 +289,27 @@ class Parametres(BaseSettings):
         # 1. Variable d'environnement directe (PREMIÈRE PRIORITÉ - dev local)
         cle = os.getenv("MISTRAL_API_KEY")
         if cle and cle.strip() and cle != "sk-test-dummy-key-replace-with-real-key":
-            print(f"[CONFIG] [OK] Clé API Mistral chargée depuis env var MISTRAL_API_KEY")
+            print("[CONFIG] [OK] Clé API Mistral chargée depuis env var MISTRAL_API_KEY")
             return cle
 
         # 2. Vérifier si c'est un edge case en Streamlit Cloud (STREAMLIT_SECRETS_MISTRAL_API_KEY)
         cle = os.getenv("STREAMLIT_SECRETS_MISTRAL_API_KEY")
         if cle and cle.strip():
-            print(f"[CONFIG] [OK] Clé API Mistral chargée depuis env var STREAMLIT_SECRETS_MISTRAL_API_KEY")
+            print(
+                "[CONFIG] [OK] Clé API Mistral chargée depuis env var STREAMLIT_SECRETS_MISTRAL_API_KEY"
+            )
             return cle
 
         # 3. Secrets Streamlit - Essayer plusieurs chemins (Streamlit Cloud)
         api_key = _get_mistral_api_key_from_secrets()
         if api_key and api_key.strip() and api_key != "sk-test-dummy-key-replace-with-real-key":
-            print(f"[CONFIG] [OK] Clé API Mistral chargée depuis st.secrets")
+            print("[CONFIG] [OK] Clé API Mistral chargée depuis st.secrets")
             return api_key
 
         # Erreur: aucune clé trouvée
         is_cloud = _is_streamlit_cloud()
         env_info = "Streamlit Cloud" if is_cloud else "Dev Local"
-        
+
         # En Streamlit Cloud, on lance une erreur MAIS on la laisse remonter
         # Le ClientIA.appeler() attendra le prochain appel quand st.secrets sera disponible
         raise ValueError(
@@ -333,7 +346,7 @@ class Parametres(BaseSettings):
     # ═══════════════════════════════════════════════════════════
 
     @property
-    def FOOTBALL_DATA_API_KEY(self) -> Optional[str]:
+    def FOOTBALL_DATA_API_KEY(self) -> str | None:
         """
         Clé API Football-Data.org avec fallbacks.
 
@@ -486,7 +499,7 @@ _parametres: Parametres | None = None
 def obtenir_parametres() -> Parametres:
     """
     Récupère l'instance Parametres.
-    
+
     Important: Avec Streamlit qui redémarre, on recrée l'instance
     à chaque appel pour recharger les variables d'environnement.
 
@@ -494,14 +507,14 @@ def obtenir_parametres() -> Parametres:
         Instance Parametres configurée
     """
     global _parametres
-    
+
     # Recharger .env files à chaque appel (important pour Streamlit qui redémarre)
     _reload_env_files()
-    
+
     # Toujours recréer l'instance pour Streamlit (pas de cache singleton)
     # Cela garantit que os.environ est relu
     _parametres = Parametres()
-    
+
     # Configure logging according to loaded settings
     try:
         configure_logging(_parametres.LOG_LEVEL)

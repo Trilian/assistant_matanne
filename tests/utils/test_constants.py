@@ -1,29 +1,31 @@
-﻿"""
+"""
 Tests pour src/utils/constants.py
 """
-import pytest
+
 import re
+
+import pytest
+
 from src.utils.constants import (
-    DIFFICULTES,
-    TYPES_REPAS,
-    SAISONS,
     CATEGORIES_INGREDIENTS,
-    EMPLACEMENTS,
-    UNITES_MESURE,
-    PRIORITES_COURSES,
-    MAGASINS,
-    JOURS_SEMAINE,
-    STATUTS_REPAS,
     COLORS,
-    STATUT_COLORS,
-    DATE_FORMAT_SHORT,
-    DATE_FORMAT_MEDIUM,
     DATE_FORMAT_LONG,
+    DATE_FORMAT_MEDIUM,
+    DATE_FORMAT_SHORT,
+    DIFFICULTES,
+    EMAIL_PATTERN,
+    EMPLACEMENTS,
+    JOURS_SEMAINE,
+    MAGASINS,
     MAX_STRING_LENGTH,
     MAX_TEXT_LENGTH,
     MAX_UPLOAD_SIZE_MB,
-    EMAIL_PATTERN,
     PHONE_PATTERN,
+    SAISONS,
+    STATUT_COLORS,
+    STATUTS_REPAS,
+    TYPES_REPAS,
+    UNITES_MESURE,
 )
 
 
@@ -247,4 +249,3 @@ class TestRegexPatterns:
         """Pattern téléphone rejette invalides."""
         assert not re.match(PHONE_PATTERN, "123")
         assert not re.match(PHONE_PATTERN, "abcdefghij")
-

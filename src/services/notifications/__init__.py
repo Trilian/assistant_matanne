@@ -1,141 +1,134 @@
-﻿"""
+"""
 Package de notifications unifié.
 
 Fusionne les 3 anciens services:
 - notifications.py â†’ inventaire.py (notifications locales inventaire)
-- notifications_push.py â†’ ntfy.py (notifications via ntfy.sh)  
+- notifications_push.py â†’ ntfy.py (notifications via ntfy.sh)
 - push_notifications.py â†’ webpush.py (notifications Web Push API)
 
 Tous renommés en français avec alias rétrocompatibilité.
 """
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TYPES ET ENUMS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
+# ═══════════════════════════════════════════════════════════
+# SERVICES
+# ═══════════════════════════════════════════════════════════
+from src.services.notifications.inventaire import (
+    Notification,
+    # Alias rétrocompatibilité
+    NotificationService,
+    ServiceNotificationsInventaire,
+    obtenir_service_notifications,
+    obtenir_service_notifications_inventaire,
+)
+from src.services.notifications.notif_ntfy import (
+    NotificationPushConfig,
+    NotificationPushScheduler,
+    # Alias rétrocompatibilité
+    NotificationPushService,
+    PlanificateurNtfy,
+    ResultatEnvoiPush,
+    ServiceNtfy,
+    get_notification_push_scheduler,
+    get_notification_push_service,
+    obtenir_planificateur_ntfy,
+    obtenir_service_ntfy,
+)
+from src.services.notifications.notif_web import (
+    NotificationPreferences,
+    PushNotification,
+    # Alias rétrocompatibilité
+    PushNotificationService,
+    PushSubscription,
+    ServiceWebPush,
+    get_push_notification_service,
+    obtenir_service_webpush,
+)
 from src.services.notifications.types import (
+    DEFAULT_TOPIC,
+    # Constantes
+    NTFY_BASE_URL,
+    PRIORITY_MAPPING,
+    VAPID_EMAIL,
+    VAPID_PRIVATE_KEY,
+    VAPID_PUBLIC_KEY,
+    # Modèles Web Push
+    AbonnementPush,
+    # Modèles ntfy
+    ConfigurationNtfy,
+    # Modèles inventaire
+    NotificationInventaire,
+    NotificationNtfy,
+    NotificationPush,
+    PreferencesNotification,
+    ResultatEnvoiNtfy,
     # Enums
     TypeAlerte,
     TypeNotification,
-    # Modèles inventaire
-    NotificationInventaire,
-    # Modèles ntfy
-    ConfigurationNtfy,
-    NotificationNtfy,
-    ResultatEnvoiNtfy,
-    # Modèles Web Push
-    AbonnementPush,
-    NotificationPush,
-    PreferencesNotification,
-    # Constantes
-    NTFY_BASE_URL,
-    DEFAULT_TOPIC,
-    PRIORITY_MAPPING,
-    VAPID_PUBLIC_KEY,
-    VAPID_PRIVATE_KEY,
-    VAPID_EMAIL,
 )
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# SERVICES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-from src.services.notifications.inventaire import (
-    ServiceNotificationsInventaire,
-    obtenir_service_notifications_inventaire,
-    # Alias rétrocompatibilité
-    NotificationService,
-    obtenir_service_notifications,
-    Notification,
-)
-
-from src.services.notifications.notif_ntfy import (
-    ServiceNtfy,
-    PlanificateurNtfy,
-    obtenir_service_ntfy,
-    obtenir_planificateur_ntfy,
-    # Alias rétrocompatibilité
-    NotificationPushService,
-    NotificationPushScheduler,
-    NotificationPushConfig,
-    ResultatEnvoiPush,
-    get_notification_push_service,
-    get_notification_push_scheduler,
-)
-
-from src.services.notifications.notif_web import (
-    ServiceWebPush,
-    obtenir_service_webpush,
-    # Alias rétrocompatibilité
-    PushNotificationService,
-    get_push_notification_service,
-    PushSubscription,
-    PushNotification,
-    NotificationPreferences,
-)
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# UTILITAIRES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-from src.services.notifications.utils import (
-    # Français
-    obtenir_mapping_types_notification,
-    verifier_type_notification_active,
-    est_heures_silencieuses,
-    peut_envoyer_pendant_silence,
-    doit_envoyer_notification,
-    construire_payload_push,
-    construire_info_abonnement,
-    creer_notification_stock,
-    creer_notification_peremption,
-    creer_notification_rappel_repas,
-    creer_notification_liste_partagee,
-    creer_notification_rappel_activite,
-    creer_notification_rappel_jalon,
-    generer_cle_compteur,
-    parser_cle_compteur,
-    doit_reinitialiser_compteur,
-    valider_abonnement,
-    valider_preferences,
-    # Alias rétrocompatibilité anglais
-    NotificationType,
-    get_notification_type_mapping,
-    check_notification_type_enabled,
-    is_quiet_hours,
-    can_send_during_quiet_hours,
-    should_send_notification,
-    build_push_payload,
-    build_subscription_info,
-    create_stock_notification,
-    create_expiration_notification,
-    create_meal_reminder_notification,
-    create_shopping_shared_notification,
-    create_activity_reminder_notification,
-    create_milestone_reminder_notification,
-    generate_count_key,
-    parse_count_key,
-    should_reset_counter,
-    validate_subscription,
-    validate_preferences,
-)
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # COMPOSANTS UI
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
+# ═══════════════════════════════════════════════════════════
 from src.services.notifications.ui import (
     afficher_demande_permission_push,
     afficher_preferences_notification,
+    render_notification_preferences,
     # Alias rétrocompatibilité
     render_push_permission_request,
-    render_notification_preferences,
 )
 
+# ═══════════════════════════════════════════════════════════
+# UTILITAIRES
+# ═══════════════════════════════════════════════════════════
+from src.services.notifications.utils import (
+    # Alias rétrocompatibilité anglais
+    NotificationType,
+    build_push_payload,
+    build_subscription_info,
+    can_send_during_quiet_hours,
+    check_notification_type_enabled,
+    construire_info_abonnement,
+    construire_payload_push,
+    create_activity_reminder_notification,
+    create_expiration_notification,
+    create_meal_reminder_notification,
+    create_milestone_reminder_notification,
+    create_shopping_shared_notification,
+    create_stock_notification,
+    creer_notification_liste_partagee,
+    creer_notification_peremption,
+    creer_notification_rappel_activite,
+    creer_notification_rappel_jalon,
+    creer_notification_rappel_repas,
+    creer_notification_stock,
+    doit_envoyer_notification,
+    doit_reinitialiser_compteur,
+    est_heures_silencieuses,
+    generate_count_key,
+    generer_cle_compteur,
+    get_notification_type_mapping,
+    is_quiet_hours,
+    # Français
+    obtenir_mapping_types_notification,
+    parse_count_key,
+    parser_cle_compteur,
+    peut_envoyer_pendant_silence,
+    should_reset_counter,
+    should_send_notification,
+    validate_preferences,
+    validate_subscription,
+    valider_abonnement,
+    valider_preferences,
+    verifier_type_notification_active,
+)
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # EXPORTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 __all__ = [
     # === TYPES (français) ===
@@ -148,7 +141,6 @@ __all__ = [
     "AbonnementPush",
     "NotificationPush",
     "PreferencesNotification",
-    
     # === SERVICES (français) ===
     "ServiceNotificationsInventaire",
     "obtenir_service_notifications_inventaire",
@@ -158,7 +150,6 @@ __all__ = [
     "obtenir_planificateur_ntfy",
     "ServiceWebPush",
     "obtenir_service_webpush",
-    
     # === UTILITAIRES (français) ===
     "obtenir_mapping_types_notification",
     "verifier_type_notification_active",
@@ -178,11 +169,9 @@ __all__ = [
     "doit_reinitialiser_compteur",
     "valider_abonnement",
     "valider_preferences",
-    
     # === UI (français) ===
     "afficher_demande_permission_push",
     "afficher_preferences_notification",
-    
     # === CONSTANTES ===
     "NTFY_BASE_URL",
     "DEFAULT_TOPIC",
@@ -190,7 +179,6 @@ __all__ = [
     "VAPID_PUBLIC_KEY",
     "VAPID_PRIVATE_KEY",
     "VAPID_EMAIL",
-    
     # === ALIAS RÉTROCOMPATIBILITÉ (anglais) ===
     # Types
     "NotificationType",

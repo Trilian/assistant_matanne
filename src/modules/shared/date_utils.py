@@ -6,7 +6,6 @@ qui etaient dupliquees dans plusieurs fichiers.
 """
 
 from datetime import date, timedelta
-from typing import List, Optional
 
 from src.modules.shared.constantes import (
     JOURS_SEMAINE,
@@ -14,19 +13,18 @@ from src.modules.shared.constantes import (
     MOIS_FRANCAIS,
 )
 
-
 # ═══════════════════════════════════════════════════════════
 # FONCTIONS DE SEMAINE
 # ═══════════════════════════════════════════════════════════
 
 
-def obtenir_debut_semaine(date_ref: Optional[date] = None) -> date:
+def obtenir_debut_semaine(date_ref: date | None = None) -> date:
     """
     Retourne le lundi de la semaine contenant la date.
-    
+
     Args:
         date_ref: Date de reference (defaut: aujourd'hui)
-        
+
     Returns:
         Date du lundi de la semaine
     """
@@ -35,26 +33,26 @@ def obtenir_debut_semaine(date_ref: Optional[date] = None) -> date:
     return date_ref - timedelta(days=date_ref.weekday())
 
 
-def obtenir_fin_semaine(date_ref: Optional[date] = None) -> date:
+def obtenir_fin_semaine(date_ref: date | None = None) -> date:
     """
     Retourne le dimanche de la semaine contenant la date.
-    
+
     Args:
         date_ref: Date de reference (defaut: aujourd'hui)
-        
+
     Returns:
         Date du dimanche de la semaine
     """
     return obtenir_debut_semaine(date_ref) + timedelta(days=6)
 
 
-def obtenir_jours_semaine(date_ref: Optional[date] = None) -> List[date]:
+def obtenir_jours_semaine(date_ref: date | None = None) -> list[date]:
     """
     Retourne les 7 jours de la semaine (lundi à dimanche).
-    
+
     Args:
         date_ref: Date de reference (defaut: aujourd'hui)
-        
+
     Returns:
         Liste des 7 dates de la semaine
     """
@@ -62,26 +60,26 @@ def obtenir_jours_semaine(date_ref: Optional[date] = None) -> List[date]:
     return [lundi + timedelta(days=i) for i in range(7)]
 
 
-def obtenir_semaine_precedente(date_ref: Optional[date] = None) -> date:
+def obtenir_semaine_precedente(date_ref: date | None = None) -> date:
     """
     Retourne le lundi de la semaine precedente.
-    
+
     Args:
         date_ref: Date de reference (defaut: aujourd'hui)
-        
+
     Returns:
         Date du lundi de la semaine precedente
     """
     return obtenir_debut_semaine(date_ref) - timedelta(days=7)
 
 
-def obtenir_semaine_suivante(date_ref: Optional[date] = None) -> date:
+def obtenir_semaine_suivante(date_ref: date | None = None) -> date:
     """
     Retourne le lundi de la semaine suivante.
-    
+
     Args:
         date_ref: Date de reference (defaut: aujourd'hui)
-        
+
     Returns:
         Date du lundi de la semaine suivante
     """
@@ -96,17 +94,17 @@ def obtenir_semaine_suivante(date_ref: Optional[date] = None) -> date:
 def formater_date_fr(d: date, avec_annee: bool = True) -> str:
     """
     Formate une date en français (ex: "Lundi 15 Janvier 2024").
-    
+
     Args:
         d: Date à formater
         avec_annee: Inclure l'annee dans le format
-        
+
     Returns:
         Date formatee en français
     """
     jour = JOURS_SEMAINE[d.weekday()]
     mois = MOIS_FRANCAIS[d.month - 1]
-    
+
     if avec_annee:
         return f"{jour} {d.day} {mois} {d.year}"
     return f"{jour} {d.day} {mois}"
@@ -115,11 +113,11 @@ def formater_date_fr(d: date, avec_annee: bool = True) -> str:
 def formater_jour_fr(d: date, court: bool = False) -> str:
     """
     Retourne le nom du jour de la semaine en français.
-    
+
     Args:
         d: Date
         court: Utiliser le format court (Lun, Mar, etc.)
-        
+
     Returns:
         Nom du jour en français
     """
@@ -131,16 +129,16 @@ def formater_jour_fr(d: date, court: bool = False) -> str:
 def formater_mois_fr(d: date, court: bool = False) -> str:
     """
     Retourne le nom du mois en français.
-    
+
     Args:
         d: Date
         court: Utiliser le format court
-        
+
     Returns:
         Nom du mois en français
     """
     from src.modules.shared.constantes import MOIS_FRANCAIS_COURT
-    
+
     if court:
         return MOIS_FRANCAIS_COURT[d.month - 1]
     return MOIS_FRANCAIS[d.month - 1]

@@ -1,14 +1,13 @@
-﻿"""
+"""
 Tests approfondis pour src/core/decorators.py
 
 Cible: Atteindre 80%+ de couverture
 Lignes manquantes: 63-72, 126-152, 227-228, 268-298
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-import inspect
+from unittest.mock import Mock, patch
 
+import pytest
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: with_db_session - lignes 63-72
@@ -110,8 +109,8 @@ class TestWithCacheKeyFunc:
 
     def test_with_cache_key_func_simple(self):
         """Test key_func simple"""
-        from src.core.decorators import with_cache
         from src.core.cache import Cache
+        from src.core.decorators import with_cache
 
         Cache.clear()
 
@@ -124,8 +123,8 @@ class TestWithCacheKeyFunc:
 
     def test_with_cache_key_func_with_kwargs(self):
         """Test key_func avec kwargs"""
-        from src.core.decorators import with_cache
         from src.core.cache import Cache
+        from src.core.decorators import with_cache
 
         Cache.clear()
 
@@ -138,8 +137,8 @@ class TestWithCacheKeyFunc:
 
     def test_with_cache_key_func_type_error_fallback(self):
         """Test fallback quand key_func Ã©choue avec TypeError"""
-        from src.core.decorators import with_cache
         from src.core.cache import Cache
+        from src.core.decorators import with_cache
 
         Cache.clear()
 
@@ -159,8 +158,8 @@ class TestWithCacheKeyFunc:
 
     def test_with_cache_without_key_func_uses_prefix(self):
         """Test sans key_func utilise le prÃ©fixe"""
-        from src.core.decorators import with_cache
         from src.core.cache import Cache
+        from src.core.decorators import with_cache
 
         Cache.clear()
 
@@ -173,8 +172,8 @@ class TestWithCacheKeyFunc:
 
     def test_with_cache_excludes_db_from_key(self):
         """Test que db est exclu de la clÃ© de cache"""
-        from src.core.decorators import with_cache
         from src.core.cache import Cache
+        from src.core.decorators import with_cache
 
         Cache.clear()
 
@@ -188,8 +187,8 @@ class TestWithCacheKeyFunc:
 
     def test_with_cache_hit_returns_cached(self):
         """Test retourne valeur en cache si disponible"""
-        from src.core.decorators import with_cache
         from src.core.cache import Cache
+        from src.core.decorators import with_cache
 
         Cache.clear()
         call_count = [0]
@@ -221,8 +220,9 @@ class TestWithValidation:
 
     def test_with_validation_success(self):
         """Test validation rÃ©ussie"""
-        from src.core.decorators import with_validation
         from pydantic import BaseModel
+
+        from src.core.decorators import with_validation
 
         class MonModele(BaseModel):
             nom: str
@@ -239,9 +239,10 @@ class TestWithValidation:
 
     def test_with_validation_echec(self):
         """Test validation Ã©chouÃ©e lÃ¨ve ErreurValidation"""
+        from pydantic import BaseModel
+
         from src.core.decorators import with_validation
         from src.core.errors_base import ErreurValidation
-        from pydantic import BaseModel
 
         class MonModele(BaseModel):
             nom: str
@@ -256,8 +257,9 @@ class TestWithValidation:
 
     def test_with_validation_sans_field_mapping(self):
         """Test validation sans field_mapping explicite"""
-        from src.core.decorators import with_validation
         from pydantic import BaseModel
+
+        from src.core.decorators import with_validation
 
         class MonModele(BaseModel):
             valeur: int
@@ -272,8 +274,9 @@ class TestWithValidation:
 
     def test_with_validation_preserves_function_name(self):
         """Test prÃ©servation du nom de fonction"""
-        from src.core.decorators import with_validation
         from pydantic import BaseModel
+
+        from src.core.decorators import with_validation
 
         class MonModele(BaseModel):
             x: int
@@ -349,8 +352,8 @@ class TestDecoratorsIntegration:
 
     def test_combining_decorators(self):
         """Test combinaison de dÃ©corateurs"""
-        from src.core.decorators import with_cache, with_error_handling
         from src.core.cache import Cache
+        from src.core.decorators import with_cache, with_error_handling
 
         Cache.clear()
 
@@ -364,8 +367,8 @@ class TestDecoratorsIntegration:
 
     def test_decorator_with_class_method(self):
         """Test dÃ©corateur avec mÃ©thode de classe"""
-        from src.core.decorators import with_cache
         from src.core.cache import Cache
+        from src.core.decorators import with_cache
 
         Cache.clear()
 

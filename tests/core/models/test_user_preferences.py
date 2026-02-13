@@ -1,11 +1,9 @@
-﻿"""
+"""
 Tests unitaires pour user_preferences.py
 
 Module: src.core.models.user_preferences
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
 # from src.core.models.user_preferences import ...
@@ -13,7 +11,6 @@ from unittest.mock import MagicMock, patch
 
 class TestUserPreferences:
     """Tests pour le module user_preferences."""
-
 
     class TestFeedbackType:
         """Tests pour la classe FeedbackType."""
@@ -28,7 +25,6 @@ class TestUserPreferences:
             # TODO: Implémenter
             pass
 
-
     class TestCalendarProvider:
         """Tests pour la classe CalendarProvider."""
 
@@ -41,7 +37,6 @@ class TestUserPreferences:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-
 
     class TestUserPreference:
         """Tests pour la classe UserPreference."""
@@ -56,7 +51,6 @@ class TestUserPreferences:
             # TODO: Implémenter
             pass
 
-
     class TestRecipeFeedback:
         """Tests pour la classe RecipeFeedback."""
 
@@ -69,7 +63,6 @@ class TestUserPreferences:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-
 
     class TestOpenFoodFactsCache:
         """Tests pour la classe OpenFoodFactsCache."""
@@ -84,9 +77,7 @@ class TestUserPreferences:
             # TODO: Implémenter
             pass
 
-
     def test_utc_now(self):
         """Test de la fonction utc_now."""
         # TODO: Implémenter
         pass
-

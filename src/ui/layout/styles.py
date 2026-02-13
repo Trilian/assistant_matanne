@@ -1,4 +1,4 @@
-﻿"""
+"""
 Styles CSS pour l'application.
 """
 
@@ -83,7 +83,7 @@ footer {visibility: hidden;}
     .main-header h1 {
         font-size: 1.5rem;
     }
-    
+
     .metric-card {
         padding: 1rem;
     }

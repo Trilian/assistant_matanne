@@ -1,4 +1,4 @@
-﻿"""
+"""
 Pytest Configuration & Fixtures for API Tests
 ════════════════════════════════════════════════════════════════════
 
@@ -6,38 +6,25 @@ Fixtures partagées pour tous les tests API (tests/api/).
 Auto-découverte par pytest.
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch
-from fastapi.testclient import TestClient
+from unittest.mock import MagicMock, Mock
 
+import pytest
+from fastapi.testclient import TestClient
 
 # ═════════════════════════════════════════════════════════════════════
 # SECTION 1: PYTEST CONFIGURATION
 # ═════════════════════════════════════════════════════════════════════
 
+
 def pytest_configure(config):
     """Configure pytest avec markers API."""
-    config.addinivalue_line(
-        "markers", "unit: Unit tests (fast, no external deps)"
-    )
-    config.addinivalue_line(
-        "markers", "integration: Integration tests (may use deps)"
-    )
-    config.addinivalue_line(
-        "markers", "slow: Slow tests (require optimization)"
-    )
-    config.addinivalue_line(
-        "markers", "endpoint: Tests for API endpoints"
-    )
-    config.addinivalue_line(
-        "markers", "auth: Tests for authentication"
-    )
-    config.addinivalue_line(
-        "markers", "rate_limit: Tests for rate limiting"
-    )
-    config.addinivalue_line(
-        "markers", "cache: Tests for caching"
-    )
+    config.addinivalue_line("markers", "unit: Unit tests (fast, no external deps)")
+    config.addinivalue_line("markers", "integration: Integration tests (may use deps)")
+    config.addinivalue_line("markers", "slow: Slow tests (require optimization)")
+    config.addinivalue_line("markers", "endpoint: Tests for API endpoints")
+    config.addinivalue_line("markers", "auth: Tests for authentication")
+    config.addinivalue_line("markers", "rate_limit: Tests for rate limiting")
+    config.addinivalue_line("markers", "cache: Tests for caching")
 
 
 # ═════════════════════════════════════════════════════════════════════
@@ -49,6 +36,7 @@ def pytest_configure(config):
 def disable_rate_limiting():
     """Désactive le rate limiting pour tous les tests API."""
     import os
+
     os.environ["RATE_LIMITING_DISABLED"] = "true"
     yield
     os.environ.pop("RATE_LIMITING_DISABLED", None)
@@ -58,22 +46,22 @@ def disable_rate_limiting():
 def app(monkeypatch, db):
     """Fixture app FastAPI pour tests avec DB SQLite réelle."""
     from contextlib import contextmanager
-    
+
     # Patch JSONB AVANT d'importer l'app
     from sqlalchemy.dialects.sqlite.base import SQLiteTypeCompiler
-    
+
     original_process = SQLiteTypeCompiler.process
-    
+
     def patched_process(self, type_, **kw):
         """Patch JSONB to JSON for SQLite."""
         from sqlalchemy.dialects.postgresql import JSONB
-        
+
         if isinstance(type_, JSONB):
             return "JSON"
         return original_process(self, type_, **kw)
-    
+
     monkeypatch.setattr(SQLiteTypeCompiler, "process", patched_process)
-    
+
     # Créer un VRAI context manager qui yield la DB de test
     @contextmanager
     def mock_obtenir_contexte_db():
@@ -85,14 +73,15 @@ def app(monkeypatch, db):
             db.rollback()
             raise
         # PAS de close - géré par fixture
-    
+
     # Patch global AVANT d'importer l'app
     monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_obtenir_contexte_db)
     monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_obtenir_contexte_db)
-    
+
     # Maintenant import l'app
-    from src.api.main import app as fastapi_app, get_current_user
-    
+    from src.api.main import app as fastapi_app
+    from src.api.main import get_current_user
+
     # Override FastAPI dependency pour get_current_user
     def mock_get_current_user():
         return {
@@ -102,11 +91,11 @@ def app(monkeypatch, db):
             "nom": "Test",
             "prenom": "User",
         }
-    
+
     fastapi_app.dependency_overrides[get_current_user] = mock_get_current_user
-    
+
     yield fastapi_app
-    
+
     # Cleanup
     fastapi_app.dependency_overrides.clear()
 
@@ -130,16 +119,19 @@ def authenticated_client(app) -> TestClient:
 def client_with_headers(app) -> TestClient:
     """Fixture TestClient avec headers personnalisés."""
     client = TestClient(app)
-    client.headers.update({
-        "Content-Type": "application/json",
-        "X-Request-ID": "test-request-123",
-    })
+    client.headers.update(
+        {
+            "Content-Type": "application/json",
+            "X-Request-ID": "test-request-123",
+        }
+    )
     return client
 
 
 # ═════════════════════════════════════════════════════════════════════
 # SECTION 3: MOCK FIXTURES
 # ═════════════════════════════════════════════════════════════════════
+
 
 @pytest.fixture
 def mock_auth() -> Mock:
@@ -187,6 +179,7 @@ def mock_db() -> Mock:
 # ═════════════════════════════════════════════════════════════════════
 # SECTION 4: TEST DATA FIXTURES
 # ═════════════════════════════════════════════════════════════════════
+
 
 @pytest.fixture
 def test_user() -> dict:
@@ -278,10 +271,12 @@ def test_token() -> str:
 # SECTION 5: CONTEXT MANAGER FIXTURES
 # ═════════════════════════════════════════════════════════════════════
 
+
 @pytest.fixture
 def auth_context():
     """Context manager mock authentification."""
     from tests.api.helpers import mock_auth_context
+
     return mock_auth_context
 
 
@@ -289,6 +284,7 @@ def auth_context():
 def rate_limit_context():
     """Context manager mock rate limiter."""
     from tests.api.helpers import mock_rate_limiter_context
+
     return mock_rate_limiter_context
 
 
@@ -296,6 +292,7 @@ def rate_limit_context():
 def cache_context():
     """Context manager mock cache."""
     from tests.api.helpers import mock_cache_context
+
     return mock_cache_context
 
 
@@ -303,6 +300,7 @@ def cache_context():
 def db_context():
     """Context manager mock BD."""
     from tests.api.helpers import mock_db_context
+
     return mock_db_context
 
 
@@ -310,10 +308,12 @@ def db_context():
 # SECTION 6: HELPER FIXTURES
 # ═════════════════════════════════════════════════════════════════════
 
+
 @pytest.fixture
 def api_client_builder():
     """Fixture pour APITestClientBuilder."""
     from tests.api.helpers import APITestClientBuilder
+
     return APITestClientBuilder
 
 
@@ -321,6 +321,7 @@ def api_client_builder():
 def api_request_builder():
     """Fixture pour APIRequestBuilder."""
     from tests.api.helpers import APIRequestBuilder
+
     return APIRequestBuilder
 
 
@@ -328,6 +329,7 @@ def api_request_builder():
 def api_mock_builder():
     """Fixture pour APIMockBuilder."""
     from tests.api.helpers import APIMockBuilder
+
     return APIMockBuilder
 
 
@@ -335,6 +337,7 @@ def api_mock_builder():
 def api_response_validator():
     """Fixture pour APIResponseValidator."""
     from tests.api.helpers import APIResponseValidator
+
     return APIResponseValidator
 
 
@@ -342,6 +345,7 @@ def api_response_validator():
 def api_test_patterns():
     """Fixture pour APITestPatterns."""
     from tests.api.helpers import APITestPatterns
+
     return APITestPatterns
 
 
@@ -349,6 +353,7 @@ def api_test_patterns():
 def api_test_utils():
     """Fixture pour APITestUtils."""
     from tests.api.helpers import APITestUtils
+
     return APITestUtils
 
 
@@ -356,12 +361,14 @@ def api_test_utils():
 def create_api_test_data():
     """Fixture factory pour créer données test."""
     from tests.api.helpers import create_api_test_data as factory
+
     return factory
 
 
 # ═════════════════════════════════════════════════════════════════════
 # SECTION 7: CLEANUP FIXTURES
 # ═════════════════════════════════════════════════════════════════════
+
 
 @pytest.fixture(autouse=True)
 def cleanup():
@@ -381,44 +388,35 @@ def set_development_environment(monkeypatch):
 @pytest.fixture(autouse=True)
 def disable_rate_limiting(monkeypatch):
     """Désactive le rate limiting pour tous les tests API."""
-    from unittest.mock import MagicMock, AsyncMock
-    
+
     # Mock le RateLimiter pour qu'il ne bloque jamais
     async def mock_check_rate_limit(*args, **kwargs):
         """Mock check qui ne lève jamais d'exception."""
         return {"remaining": 100, "limit": 1000, "reset": 0}
-    
+
     async def mock_dispatch(self, request, call_next):
         """Mock dispatch qui passe directement au handler."""
         return await call_next(request)
-    
+
     # Patch les méthodes du rate limiter
     try:
         from src.api import rate_limiting
+
         # Patch check_rate_limit pour ne jamais lever HTTPException
-        monkeypatch.setattr(
-            rate_limiting.RateLimiter, 
-            "check_rate_limit", 
-            mock_check_rate_limit
-        )
+        monkeypatch.setattr(rate_limiting.RateLimiter, "check_rate_limit", mock_check_rate_limit)
         # Patch le middleware dispatch
-        monkeypatch.setattr(
-            rate_limiting.RateLimitMiddleware, 
-            "dispatch", 
-            mock_dispatch
-        )
+        monkeypatch.setattr(rate_limiting.RateLimitMiddleware, "dispatch", mock_dispatch)
     except (ImportError, AttributeError):
         pass
-    
+
     yield
 
 
 @pytest.fixture(autouse=True)
 def mock_database_for_api(monkeypatch):
     """Mock la base de données pour les tests API."""
-    from unittest.mock import MagicMock
     from sqlalchemy.orm import Session
-    
+
     # Créer des mocks pour les recettes
     mock_recette = MagicMock()
     mock_recette.id = 1
@@ -431,7 +429,7 @@ def mock_database_for_api(monkeypatch):
     mock_recette.categorie = "plats"
     mock_recette.created_at = None
     mock_recette.updated_at = None
-    
+
     # Mock query chain
     mock_query = MagicMock()
     mock_query.filter.return_value = mock_query
@@ -441,7 +439,7 @@ def mock_database_for_api(monkeypatch):
     mock_query.count.return_value = 1
     mock_query.all.return_value = [mock_recette]
     mock_query.first.return_value = mock_recette
-    
+
     # Mock session
     mock_session = MagicMock(spec=Session)
     mock_session.query.return_value = mock_query
@@ -450,24 +448,25 @@ def mock_database_for_api(monkeypatch):
     mock_session.rollback = MagicMock()
     mock_session.close = MagicMock()
     mock_session.refresh = MagicMock()
-    
+
     # Mock context manager
     from contextlib import contextmanager
-    
+
     @contextmanager
     def mock_db_context():
         yield mock_session
-    
+
     # Patch obtenir_contexte_db
     monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_db_context)
     monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_db_context)
-    
+
     yield mock_session
 
 
 # ═════════════════════════════════════════════════════════════════════
 # SECTION 8: PYTEST HOOKS
 # ═════════════════════════════════════════════════════════════════════
+
 
 def pytest_collection_modifyitems(config, items):
     """Ajoute markers par défaut aux tests API."""
@@ -477,4 +476,3 @@ def pytest_collection_modifyitems(config, items):
             if not any(m.name == "endpoint" for m in item.iter_markers()):
                 if not any(m.name in ["unit", "integration"] for m in item.iter_markers()):
                     item.add_marker(pytest.mark.unit)
-

@@ -1,28 +1,29 @@
-﻿"""
+"""
 Tests pour src/services/garmin/service.py
 
 Couvre:
-- Connexion OAuth Ã  Garmin Connect
+- Connexion OAuth à Garmin Connect
 - Récupération des activités
 - Récupération des métriques de santé
 - Gestion des erreurs d'authentification
 """
 
-import pytest
-from datetime import date, datetime, timedelta
-from unittest.mock import Mock, MagicMock, patch, PropertyMock
 from contextlib import contextmanager
+from datetime import date, timedelta
+from unittest.mock import Mock, patch
+
+import pytest
 
 from src.services.garmin.service import (
-    get_garmin_config,
-    ServiceGarmin,
     GarminService,
-    obtenir_service_garmin,
+    ServiceGarmin,
+    get_garmin_config,
     get_garmin_service,
     get_garmin_sync_service,
     get_or_create_user,
     get_user_by_username,
     list_all_users,
+    obtenir_service_garmin,
 )
 from src.services.garmin.types import GarminConfig
 
@@ -34,9 +35,9 @@ def mock_db_context_manager(mock_session):
     yield mock_session
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -90,9 +91,9 @@ def service(mock_config):
     return ServiceGarmin(config=mock_config)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONFIGURATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGetGarminConfig:
@@ -105,9 +106,9 @@ class TestGetGarminConfig:
             GARMIN_CONSUMER_KEY="key123",
             GARMIN_CONSUMER_SECRET="secret456",
         )
-        
+
         config = get_garmin_config()
-        
+
         assert config.consumer_key == "key123"
         assert config.consumer_secret == "secret456"
 
@@ -115,16 +116,16 @@ class TestGetGarminConfig:
     def test_config_valeurs_defaut(self, mock_settings):
         """Valeurs par défaut si paramètres absents."""
         mock_settings.return_value = Mock(spec=[])
-        
+
         config = get_garmin_config()
-        
+
         assert config.consumer_key == ""
         assert config.consumer_secret == ""
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS SERVICE GARMIN - INIT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestServiceGarminInit:
@@ -133,7 +134,7 @@ class TestServiceGarminInit:
     def test_init_avec_config(self, mock_config):
         """Initialisation avec config fournie."""
         service = ServiceGarmin(config=mock_config)
-        
+
         assert service.config == mock_config
         assert service._oauth_session is None
         assert service._temp_request_token is None
@@ -142,16 +143,16 @@ class TestServiceGarminInit:
     def test_init_sans_config(self, mock_get_config, mock_config):
         """Initialisation sans config charge depuis factory."""
         mock_get_config.return_value = mock_config
-        
+
         service = ServiceGarmin()
-        
+
         mock_get_config.assert_called_once()
         assert service.config == mock_config
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS OAUTH FLOW
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGetAuthorizationUrl:
@@ -161,7 +162,7 @@ class TestGetAuthorizationUrl:
         """Erreur si clés non configurées."""
         config = GarminConfig(consumer_key="", consumer_secret="")
         service = ServiceGarmin(config=config)
-        
+
         with pytest.raises(ValueError, match="Clés Garmin non configurées"):
             service.get_authorization_url()
 
@@ -176,10 +177,10 @@ class TestGetAuthorizationUrl:
         }
         mock_oauth.authorization_url.return_value = "https://garmin.com/authorize?token=xyz"
         mock_oauth_class.return_value = mock_oauth
-        
+
         service = ServiceGarmin(config=mock_config)
         url, token = service.get_authorization_url()
-        
+
         assert url == "https://garmin.com/authorize?token=xyz"
         assert token["oauth_token"] == "request_token_123"
         assert token["oauth_token_secret"] == "request_secret_456"
@@ -195,10 +196,10 @@ class TestGetAuthorizationUrl:
         }
         mock_oauth.authorization_url.return_value = "https://garmin.com/auth"
         mock_oauth_class.return_value = mock_oauth
-        
+
         service = ServiceGarmin(config=mock_config)
         service.get_authorization_url(callback_url="https://myapp.com/callback")
-        
+
         mock_oauth_class.assert_called_once()
         call_kwargs = mock_oauth_class.call_args[1]
         assert call_kwargs["callback_uri"] == "https://myapp.com/callback"
@@ -209,9 +210,9 @@ class TestGetAuthorizationUrl:
         mock_oauth = Mock()
         mock_oauth.fetch_request_token.side_effect = Exception("Network error")
         mock_oauth_class.return_value = mock_oauth
-        
+
         service = ServiceGarmin(config=mock_config)
-        
+
         with pytest.raises(Exception, match="Network error"):
             service.get_authorization_url()
 
@@ -226,15 +227,17 @@ class TestCompleteAuthorization:
         # Setup mock DB context
         mock_db = Mock()
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         service = ServiceGarmin(config=mock_config)
-        
+
         with pytest.raises(ValueError, match="Request token manquant"):
             service.complete_authorization(user_id=1, oauth_verifier="verifier")
 
     @patch("src.services.garmin.service.OAuth1Session")
     @patch("src.core.database.obtenir_contexte_db")
-    def test_autorisation_complete(self, mock_db_ctx, mock_oauth_class, mock_config, mock_user, mock_garmin_token):
+    def test_autorisation_complete(
+        self, mock_db_ctx, mock_oauth_class, mock_config, mock_user, mock_garmin_token
+    ):
         """Autorisation complète avec succès."""
         # Mock OAuth
         mock_oauth = Mock()
@@ -243,23 +246,23 @@ class TestCompleteAuthorization:
             "oauth_token_secret": "access_secret_final",
         }
         mock_oauth_class.return_value = mock_oauth
-        
+
         # Mock DB
         mock_db = Mock()
         mock_db.get.return_value = mock_user
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
-        # Nouveau token Ã  créer
+
+        # Nouveau token à créer
         mock_user.garmin_token = None
-        
+
         service = ServiceGarmin(config=mock_config)
         service._temp_request_token = {
             "oauth_token": "request_token",
             "oauth_token_secret": "request_secret",
         }
-        
+
         result = service.complete_authorization(user_id=1, oauth_verifier="verifier123")
-        
+
         assert result is True
         assert service._temp_request_token is None
 
@@ -273,14 +276,14 @@ class TestCompleteAuthorization:
             "oauth_token_secret": "secret",
         }
         mock_oauth_class.return_value = mock_oauth
-        
+
         mock_db = Mock()
         mock_db.get.return_value = None  # Utilisateur non trouvé
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         service = ServiceGarmin(config=mock_config)
         service._temp_request_token = {"oauth_token": "t", "oauth_token_secret": "s"}
-        
+
         with pytest.raises(ValueError, match="non trouvé"):
             service.complete_authorization(user_id=999, oauth_verifier="verifier")
 
@@ -294,27 +297,25 @@ class TestCompleteAuthorization:
             "oauth_token_secret": "secret",
         }
         mock_oauth_class.return_value = mock_oauth
-        
+
         mock_db = Mock()
         mock_db.get.return_value = mock_user
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         service = ServiceGarmin(config=mock_config)
         # Pas de _temp_request_token défini
-        
+
         external_token = {"oauth_token": "ext_token", "oauth_token_secret": "ext_secret"}
         result = service.complete_authorization(
-            user_id=1, 
-            oauth_verifier="verifier",
-            request_token=external_token
+            user_id=1, oauth_verifier="verifier", request_token=external_token
         )
-        
+
         assert result is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS SYNCHRONISATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestSyncUserData:
@@ -326,9 +327,9 @@ class TestSyncUserData:
         mock_db = Mock()
         mock_db.get.return_value = None
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         service = ServiceGarmin(config=mock_config)
-        
+
         with pytest.raises(ValueError, match="non trouvé"):
             service.sync_user_data(user_id=999)
 
@@ -337,14 +338,14 @@ class TestSyncUserData:
         """Retourne zéros si sync désactivée."""
         mock_garmin_token.sync_active = False
         mock_user.garmin_token = mock_garmin_token
-        
+
         mock_db = Mock()
         mock_db.get.return_value = mock_user
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         service = ServiceGarmin(config=mock_config)
         result = service.sync_user_data(user_id=1)
-        
+
         assert result["activities_synced"] == 0
         assert result["summaries_synced"] == 0
 
@@ -362,16 +363,16 @@ class TestSyncUserData:
         mock_response.raise_for_status = Mock()
         mock_oauth.get.return_value = mock_response
         mock_oauth_class.return_value = mock_oauth
-        
+
         # Mock DB
         mock_db = Mock()
         mock_db.get.return_value = mock_user
         mock_db.query.return_value.filter_by.return_value.first.return_value = None
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         service = ServiceGarmin(config=mock_config)
         result = service.sync_user_data(user_id=1, days_back=7)
-        
+
         assert result["activities_synced"] == 2
         assert result["summaries_synced"] == 2  # Même réponse mockée pour les 2 appels
 
@@ -388,13 +389,9 @@ class TestFetchActivities:
         ]
         mock_response.raise_for_status = Mock()
         mock_session.get.return_value = mock_response
-        
-        result = service._fetch_activities(
-            mock_session, 
-            date(2024, 1, 1), 
-            date(2024, 1, 7)
-        )
-        
+
+        result = service._fetch_activities(mock_session, date(2024, 1, 1), date(2024, 1, 7))
+
         assert len(result) == 1
         assert result[0]["activityId"] == "123"
 
@@ -402,13 +399,9 @@ class TestFetchActivities:
         """Retourne liste vide en cas d'erreur."""
         mock_session = Mock()
         mock_session.get.side_effect = Exception("API Error")
-        
-        result = service._fetch_activities(
-            mock_session,
-            date(2024, 1, 1),
-            date(2024, 1, 7)
-        )
-        
+
+        result = service._fetch_activities(mock_session, date(2024, 1, 1), date(2024, 1, 7))
+
         assert result == []
 
 
@@ -424,13 +417,9 @@ class TestFetchDailySummaries:
         ]
         mock_response.raise_for_status = Mock()
         mock_session.get.return_value = mock_response
-        
-        result = service._fetch_daily_summaries(
-            mock_session,
-            date(2024, 1, 15),
-            date(2024, 1, 15)
-        )
-        
+
+        result = service._fetch_daily_summaries(mock_session, date(2024, 1, 15), date(2024, 1, 15))
+
         assert len(result) == 1
         assert result[0]["steps"] == 12000
 
@@ -438,13 +427,9 @@ class TestFetchDailySummaries:
         """Retourne liste vide en cas d'erreur."""
         mock_session = Mock()
         mock_session.get.side_effect = Exception("API Error")
-        
-        result = service._fetch_daily_summaries(
-            mock_session,
-            date(2024, 1, 1),
-            date(2024, 1, 7)
-        )
-        
+
+        result = service._fetch_daily_summaries(mock_session, date(2024, 1, 1), date(2024, 1, 7))
+
         assert result == []
 
 
@@ -454,7 +439,7 @@ class TestSaveActivity:
     def test_nouvelle_activite(self, service, mock_db_session):
         """Sauvegarde d'une nouvelle activité."""
         mock_db_session.query.return_value.filter_by.return_value.first.return_value = None
-        
+
         data = {
             "activityId": "123",
             "activityType": "running",
@@ -464,9 +449,9 @@ class TestSaveActivity:
             "distanceInMeters": 10000,
             "activeKilocalories": 500,
         }
-        
+
         result = service._save_activity(mock_db_session, 1, data)
-        
+
         assert result is not None
         mock_db_session.add.assert_called_once()
 
@@ -474,11 +459,11 @@ class TestSaveActivity:
         """Activité existante retourne l'existante."""
         existing = Mock()
         mock_db_session.query.return_value.filter_by.return_value.first.return_value = existing
-        
+
         data = {"activityId": "123"}
-        
+
         result = service._save_activity(mock_db_session, 1, data)
-        
+
         assert result == existing
         mock_db_session.add.assert_not_called()
 
@@ -489,40 +474,40 @@ class TestSaveDailySummary:
     def test_nouveau_summary(self, service, mock_db_session):
         """Sauvegarde d'un nouveau résumé."""
         mock_db_session.query.return_value.filter_by.return_value.first.return_value = None
-        
+
         data = {
             "calendarDate": "2024-01-15",
             "steps": 12000,
             "distanceInMeters": 9500,
             "totalKilocalories": 2200,
         }
-        
+
         result = service._save_daily_summary(mock_db_session, 1, data)
-        
+
         assert result is not None
         mock_db_session.add.assert_called_once()
 
     def test_summary_existant_mise_a_jour(self, service, mock_db_session):
-        """Résumé existant est mis Ã  jour."""
+        """Résumé existant est mis à jour."""
         existing = Mock()
         existing.pas = 0
         mock_db_session.query.return_value.filter_by.return_value.first.return_value = existing
-        
+
         data = {
             "calendarDate": "2024-01-15",
             "steps": 15000,
         }
-        
+
         result = service._save_daily_summary(mock_db_session, 1, data)
-        
+
         assert result == existing
         assert existing.pas == 15000
         mock_db_session.add.assert_not_called()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS HELPERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestDisconnectUser:
@@ -534,10 +519,10 @@ class TestDisconnectUser:
         mock_db = Mock()
         mock_db.get.return_value = mock_user
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         service = ServiceGarmin(config=mock_config)
         result = service.disconnect_user(user_id=1)
-        
+
         assert result is True
         assert mock_user.garmin_connected is False
         mock_db.delete.assert_called_once()
@@ -548,10 +533,10 @@ class TestDisconnectUser:
         mock_db = Mock()
         mock_db.get.return_value = None
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         service = ServiceGarmin(config=mock_config)
         result = service.disconnect_user(user_id=999)
-        
+
         assert result is False
 
 
@@ -564,10 +549,10 @@ class TestGetUserStats:
         mock_db = Mock()
         mock_db.get.return_value = None
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         service = ServiceGarmin(config=mock_config)
         result = service.get_user_stats(user_id=999)
-        
+
         assert result == {}
 
     @patch("src.core.database.obtenir_contexte_db")
@@ -579,25 +564,30 @@ class TestGetUserStats:
         mock_summary1.calories_actives = 400
         mock_summary1.distance_metres = 8000
         mock_summary1.date = date.today()
-        
+
         mock_summary2 = Mock()
         mock_summary2.pas = 12000
         mock_summary2.calories_actives = 500
         mock_summary2.distance_metres = 9500
         mock_summary2.date = date.today() - timedelta(days=1)
-        
+
         # Mock des activités
         mock_activity = Mock()
-        
+
         mock_db = Mock()
         mock_db.get.return_value = mock_user
-        mock_db.query.return_value.filter.return_value.all.return_value = [mock_summary1, mock_summary2]
-        mock_db.query.return_value.filter.return_value.order_by.return_value.all.return_value = [mock_summary1]
+        mock_db.query.return_value.filter.return_value.all.return_value = [
+            mock_summary1,
+            mock_summary2,
+        ]
+        mock_db.query.return_value.filter.return_value.order_by.return_value.all.return_value = [
+            mock_summary1
+        ]
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         service = ServiceGarmin(config=mock_config)
         result = service.get_user_stats(user_id=1, days=7)
-        
+
         assert "total_pas" in result
         assert "total_calories" in result
         assert "garmin_connected" in result
@@ -611,30 +601,32 @@ class TestCalculateStreak:
         mock_summary = Mock()
         mock_summary.pas = 12000
         mock_summary.date = date.today()
-        
+
         mock_db = Mock()
         mock_db.get.return_value = mock_user
-        mock_db.query.return_value.filter.return_value.order_by.return_value.all.return_value = [mock_summary]
-        
+        mock_db.query.return_value.filter.return_value.order_by.return_value.all.return_value = [
+            mock_summary
+        ]
+
         service = ServiceGarmin(config=mock_config)
         result = service._calculate_streak(1, mock_db)
-        
+
         assert result >= 0
 
     def test_streak_user_not_found(self, mock_config):
         """Retourne 0 si utilisateur non trouvé."""
         mock_db = Mock()
         mock_db.get.return_value = None
-        
+
         service = ServiceGarmin(config=mock_config)
         result = service._calculate_streak(999, mock_db)
-        
+
         assert result == 0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FACTORIES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFactories:
@@ -644,27 +636,27 @@ class TestFactories:
     def test_obtenir_service_garmin(self, mock_config_fn, mock_config):
         """Factory française retourne un service."""
         mock_config_fn.return_value = mock_config
-        
+
         service = obtenir_service_garmin()
-        
+
         assert isinstance(service, ServiceGarmin)
 
     @patch("src.services.garmin.service.get_garmin_config")
     def test_get_garmin_service(self, mock_config_fn, mock_config):
         """Factory anglaise retourne un service."""
         mock_config_fn.return_value = mock_config
-        
+
         service = get_garmin_service()
-        
+
         assert isinstance(service, ServiceGarmin)
 
     @patch("src.services.garmin.service.get_garmin_config")
     def test_get_garmin_sync_service_alias(self, mock_config_fn, mock_config):
         """Alias de rétrocompatibilité fonctionne."""
         mock_config_fn.return_value = mock_config
-        
+
         service = get_garmin_sync_service()
-        
+
         assert isinstance(service, ServiceGarmin)
 
 
@@ -676,9 +668,9 @@ class TestGarminServiceAlias:
         assert GarminService is ServiceGarmin
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS HELPERS UTILISATEURS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGetOrCreateUser:
@@ -689,13 +681,13 @@ class TestGetOrCreateUser:
         """Retourne utilisateur existant."""
         existing_user = Mock()
         existing_user.username = "anne"
-        
+
         mock_db = Mock()
         mock_db.query.return_value.filter_by.return_value.first.return_value = existing_user
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         result = get_or_create_user("anne", "Anne")
-        
+
         assert result == existing_user
         mock_db.add.assert_not_called()
 
@@ -705,9 +697,9 @@ class TestGetOrCreateUser:
         mock_db = Mock()
         mock_db.query.return_value.filter_by.return_value.first.return_value = None
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         result = get_or_create_user("newuser", "New User")
-        
+
         mock_db.add.assert_called_once()
         mock_db.commit.assert_called_once()
 
@@ -720,13 +712,13 @@ class TestGetUserByUsername:
         """Utilisateur trouvé."""
         user = Mock()
         user.username = "testuser"
-        
+
         mock_db = Mock()
         mock_db.query.return_value.filter_by.return_value.first.return_value = user
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         result = get_user_by_username("testuser")
-        
+
         assert result == user
 
     @patch("src.core.database.obtenir_contexte_db")
@@ -735,9 +727,9 @@ class TestGetUserByUsername:
         mock_db = Mock()
         mock_db.query.return_value.filter_by.return_value.first.return_value = None
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         result = get_user_by_username("unknown")
-        
+
         assert result is None
 
 
@@ -748,19 +740,19 @@ class TestListAllUsers:
     def test_liste_users(self, mock_db_ctx):
         """Liste tous les utilisateurs."""
         users = [Mock(), Mock()]
-        
+
         mock_db = Mock()
         mock_db.query.return_value.all.return_value = users
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         result = list_all_users()
-        
+
         assert len(result) == 2
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS AUTHENTIFICATION ERREURS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestAuthenticationErrors:
@@ -772,9 +764,9 @@ class TestAuthenticationErrors:
         mock_oauth = Mock()
         mock_oauth.fetch_request_token.side_effect = Exception("Invalid consumer key")
         mock_oauth_class.return_value = mock_oauth
-        
+
         service = ServiceGarmin(config=mock_config)
-        
+
         with pytest.raises(Exception, match="Invalid consumer key"):
             service.get_authorization_url()
 
@@ -785,13 +777,13 @@ class TestAuthenticationErrors:
         mock_oauth = Mock()
         mock_oauth.fetch_access_token.side_effect = Exception("Token rejected")
         mock_oauth_class.return_value = mock_oauth
-        
+
         mock_db = Mock()
         mock_db_ctx.return_value = mock_db_context_manager(mock_db)
-        
+
         service = ServiceGarmin(config=mock_config)
         service._temp_request_token = {"oauth_token": "t", "oauth_token_secret": "s"}
-        
+
         with pytest.raises(Exception, match="Token rejected"):
             service.complete_authorization(user_id=1, oauth_verifier="verifier")
 
@@ -804,10 +796,10 @@ class TestGetAuthenticatedSession:
         """Crée une session OAuth authentifiée."""
         mock_oauth = Mock()
         mock_oauth_class.return_value = mock_oauth
-        
+
         service = ServiceGarmin(config=mock_config)
         result = service._get_authenticated_session(mock_garmin_token)
-        
+
         assert result == mock_oauth
         mock_oauth_class.assert_called_once_with(
             mock_config.consumer_key,

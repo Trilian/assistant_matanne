@@ -1,12 +1,12 @@
-﻿"""
+"""
 Tests pour src/core/config.py
 Cible: obtenir_parametres, Parametres, validation config
 """
 
-import pytest
 import os
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import patch
 
+import pytest
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PARAMETRES
@@ -20,36 +20,34 @@ class TestParametresClass:
     def test_parametres_has_required_fields(self):
         """VÃ©rifie que Parametres a les champs requis."""
         from src.core.config import Parametres
-        
+
         # CrÃ©er une instance avec valeurs minimales
         params = Parametres(
-            DATABASE_URL="postgresql://test:test@localhost/test",
-            MISTRAL_API_KEY="test-key"
+            DATABASE_URL="postgresql://test:test@localhost/test", MISTRAL_API_KEY="test-key"
         )
-        
-        assert hasattr(params, 'DATABASE_URL')
-        assert hasattr(params, 'MISTRAL_API_KEY')
-        assert hasattr(params, 'DEBUG')
+
+        assert hasattr(params, "DATABASE_URL")
+        assert hasattr(params, "MISTRAL_API_KEY")
+        assert hasattr(params, "DEBUG")
 
     def test_parametres_default_values(self):
         """VÃ©rifie les valeurs par dÃ©faut des Parametres."""
         from src.core.config import obtenir_parametres
-        
+
         params = obtenir_parametres()
-        
+
         # VÃ©rifier que les attributs de base existent
-        assert hasattr(params, 'APP_NAME')
-        assert hasattr(params, 'DEBUG')
+        assert hasattr(params, "APP_NAME")
+        assert hasattr(params, "DEBUG")
 
     def test_parametres_custom_values(self):
         """VÃ©rifie les valeurs personnalisÃ©es via env."""
-        import os
         from src.core.config import obtenir_parametres
-        
+
         # Les paramÃ¨tres sont chargÃ©s depuis l'environnement
         # On vÃ©rifie juste que l'objet est crÃ©Ã© correctement
         params = obtenir_parametres()
-        
+
         # DATABASE_URL est une property, elle doit retourner une string
         db_url = params.DATABASE_URL
         assert isinstance(db_url, str)
@@ -67,24 +65,31 @@ class TestObtenirParametres:
 
     def test_obtenir_parametres_returns_parametres_instance(self):
         """VÃ©rifie que obtenir_parametres retourne une instance Parametres."""
-        from src.core.config import obtenir_parametres, Parametres
-        
-        with patch.dict(os.environ, {
-            'DATABASE_URL': 'postgresql://test:test@localhost/test',
-            'MISTRAL_API_KEY': 'test-key'
-        }):
+        from src.core.config import Parametres, obtenir_parametres
+
+        with patch.dict(
+            os.environ,
+            {
+                "DATABASE_URL": "postgresql://test:test@localhost/test",
+                "MISTRAL_API_KEY": "test-key",
+            },
+        ):
             params = obtenir_parametres()
             assert isinstance(params, Parametres)
 
     def test_obtenir_parametres_reads_env_vars(self):
         """VÃ©rifie que les variables d'environnement sont lues."""
         from src.core.config import obtenir_parametres
-        
-        with patch.dict(os.environ, {
-            'DATABASE_URL': 'postgresql://env:env@localhost/envdb',
-            'MISTRAL_API_KEY': 'env-api-key',
-            'DEBUG': 'true'
-        }, clear=False):
+
+        with patch.dict(
+            os.environ,
+            {
+                "DATABASE_URL": "postgresql://env:env@localhost/envdb",
+                "MISTRAL_API_KEY": "env-api-key",
+                "DEBUG": "true",
+            },
+            clear=False,
+        ):
             with patch("src.core.config.st.cache_resource", lambda: lambda f: f):
                 try:
                     params = obtenir_parametres()
@@ -107,22 +112,22 @@ class TestConfigHelpers:
     def test_read_env_with_default(self):
         """Teste la lecture d'env avec valeur par dÃ©faut."""
         # Test direct via os.environ
-        with patch.dict(os.environ, {'TEST_VAR': 'test_value'}):
-            assert os.environ.get('TEST_VAR', 'default') == 'test_value'
-        
+        with patch.dict(os.environ, {"TEST_VAR": "test_value"}):
+            assert os.environ.get("TEST_VAR", "default") == "test_value"
+
         # Sans la variable
-        assert os.environ.get('NONEXISTENT_VAR_XYZ', 'default') == 'default'
+        assert os.environ.get("NONEXISTENT_VAR_XYZ", "default") == "default"
 
     def test_bool_env_parsing(self):
         """Teste le parsing des variables boolÃ©ennes."""
-        truthy_values = ['true', 'True', 'TRUE', '1', 'yes', 'Yes']
-        falsy_values = ['false', 'False', 'FALSE', '0', 'no', 'No', '']
-        
+        truthy_values = ["true", "True", "TRUE", "1", "yes", "Yes"]
+        falsy_values = ["false", "False", "FALSE", "0", "no", "No", ""]
+
         for val in truthy_values:
-            assert val.lower() in ['true', '1', 'yes']
-        
+            assert val.lower() in ["true", "1", "yes"]
+
         for val in falsy_values:
-            assert val.lower() not in ['true', '1', 'yes'] or val == ''
+            assert val.lower() not in ["true", "1", "yes"] or val == ""
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -137,26 +142,22 @@ class TestConfigValidation:
     def test_database_url_format(self):
         """VÃ©rifie le format de DATABASE_URL."""
         from src.core.config import Parametres
-        
+
         # Format PostgreSQL valide
         valid_url = "postgresql://user:pass@host:5432/dbname"
-        
-        params = Parametres(
-            DATABASE_URL=valid_url,
-            MISTRAL_API_KEY="key"
-        )
-        
+
+        params = Parametres(DATABASE_URL=valid_url, MISTRAL_API_KEY="key")
+
         assert "postgresql://" in params.DATABASE_URL
 
     def test_api_key_not_empty(self):
         """VÃ©rifie que la clÃ© API n'est pas vide."""
         from src.core.config import Parametres
-        
+
         params = Parametres(
-            DATABASE_URL="postgresql://test:test@localhost/test",
-            MISTRAL_API_KEY="non-empty-key"
+            DATABASE_URL="postgresql://test:test@localhost/test", MISTRAL_API_KEY="non-empty-key"
         )
-        
+
         assert len(params.MISTRAL_API_KEY) > 0
 
 
@@ -173,16 +174,16 @@ class TestConfigFileLoading:
         """Teste l'ordre de prÃ©cÃ©dence des fichiers .env."""
         # .env.local > .env > secrets Streamlit > constantes
         # Ce test vÃ©rifie la logique documentÃ©e
-        
+
         # Les variables d'environnement ont la plus haute prioritÃ©
-        with patch.dict(os.environ, {'TEST_PRIORITY': 'env_value'}):
-            assert os.environ['TEST_PRIORITY'] == 'env_value'
+        with patch.dict(os.environ, {"TEST_PRIORITY": "env_value"}):
+            assert os.environ["TEST_PRIORITY"] == "env_value"
 
     def test_missing_env_file_handled(self):
         """VÃ©rifie que l'absence de .env est gÃ©rÃ©e."""
         # Ne devrait pas lever d'erreur si .env manque
         try:
-            from src.core.config import obtenir_parametres
+            pass
             # La fonction devrait fonctionner mÃªme sans .env
             # (avec des valeurs par dÃ©faut ou erreur gracieuse)
         except FileNotFoundError:
@@ -203,23 +204,23 @@ class TestStreamlitSecrets:
 
     def test_read_st_secrets_when_available(self):
         """Teste la lecture des secrets Streamlit."""
-        mock_secrets = {'api_key': 'secret_value', 'db_url': 'postgresql://...'}
-        
+        mock_secrets = {"api_key": "secret_value", "db_url": "postgresql://..."}
+
         with patch("src.core.config.st") as mock_st:
             mock_st.secrets = mock_secrets
-            
+
             # Simuler la lecture depuis secrets
-            value = mock_st.secrets.get('api_key')
-            assert value == 'secret_value'
+            value = mock_st.secrets.get("api_key")
+            assert value == "secret_value"
 
     def test_fallback_when_secrets_missing(self):
         """Teste le fallback quand secrets Streamlit manquent."""
         with patch("src.core.config.st") as mock_st:
             # Simuler absence de secrets
             mock_st.secrets = {}
-            
-            value = mock_st.secrets.get('missing_key', 'default')
-            assert value == 'default'
+
+            value = mock_st.secrets.get("missing_key", "default")
+            assert value == "default"
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -233,15 +234,15 @@ class TestApplicationConfig:
 
     def test_cache_constants_defined(self):
         """VÃ©rifie que les constantes de cache sont dÃ©finies."""
-        from src.core.constants import CACHE_TTL_RECETTES, CACHE_TTL_IA
-        
+        from src.core.constants import CACHE_TTL_IA, CACHE_TTL_RECETTES
+
         assert CACHE_TTL_RECETTES > 0
         assert CACHE_TTL_IA > 0
 
     def test_log_level_constants_exist(self):
         """VÃ©rifie que les niveaux de log sont dÃ©finis."""
-        from src.core.constants import LOG_LEVEL_PRODUCTION, LOG_LEVEL_DEVELOPMENT
-        
-        valid_levels = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+        from src.core.constants import LOG_LEVEL_DEVELOPMENT, LOG_LEVEL_PRODUCTION
+
+        valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
         assert LOG_LEVEL_PRODUCTION in valid_levels
         assert LOG_LEVEL_DEVELOPMENT in valid_levels

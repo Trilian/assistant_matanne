@@ -1,4 +1,4 @@
-﻿"""
+"""
 Formatters - Point d'entrée unifié
 """
 
@@ -6,39 +6,39 @@ Formatters - Point d'entrée unifié
 from .dates import (
     formater_date,
     formater_datetime,
-    temps_ecoule,
-    formater_temps,
     formater_duree,
+    formater_temps,
+    temps_ecoule,
 )
 
 # Numbers
 from .numbers import (
+    arrondir_intelligent,
+    formater_monnaie,
+    formater_nombre,
+    formater_plage,
+    formater_pourcentage,
+    formater_prix,
     formater_quantite,
     formater_quantite_unite,
-    formater_prix,
-    formater_monnaie,
-    formater_pourcentage,
-    formater_nombre,
     formater_taille_fichier,
-    formater_plage,
-    arrondir_intelligent,
 )
 
 # Text
 from .text import (
+    capitaliser_mots,
     capitaliser_premiere,
-    nettoyer_texte,
     extraire_nombre,
     generer_slug,
+    nettoyer_texte,
     tronquer,
-    capitaliser_mots,
 )
 
 # Units
 from .units import (
     formater_poids,
-    formater_volume,
     formater_temperature,
+    formater_volume,
 )
 
 __all__ = [

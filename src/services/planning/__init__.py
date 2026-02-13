@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package Planning - Services de gestion du planning familial.
 
 Ce package fournit:
@@ -10,7 +10,7 @@ Ce package fournit:
 Utilisation:
     ```python
     from src.services.planning import obtenir_service_planning, ServicePlanning
-    
+
     service = obtenir_service_planning()
     planning = service.get_planning()
     ```
@@ -23,95 +23,89 @@ Compatibilité:
     - get_planning_unified_service = obtenir_service_planning_unifie
 """
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TYPES & SCHÉMAS PYDANTIC
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
-from .types import (
-    # Schémas planning de base
-    JourPlanning,
-    SuggestionRecettesDay,
-    ParametresEquilibre,
-    # Schémas planning unifié
-    JourCompletSchema,
-    SemaineCompleSchema,
-    SemaineGenereeIASchema,
-)
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
+# ═══════════════════════════════════════════════════════════
 from .constantes import (
     JOURS_SEMAINE,
     JOURS_SEMAINE_LOWER,
-    TYPES_REPAS,
     TYPES_PROTEINES,
+    TYPES_REPAS,
+)
+from .global_planning import (
+    # Alias de compatibilité
+    PlanningAIService,
+    # Classe principale
+    ServicePlanningUnifie,
+    get_planning_unified_service,
+    get_unified_planning_service,
+    # Factories
+    obtenir_service_planning_unifie,
 )
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# UTILITAIRES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# SERVICES
+# ═══════════════════════════════════════════════════════════
+from .service import (
+    # Alias de compatibilité
+    PlanningService,
+    # Classe principale
+    ServicePlanning,
+    get_planning_service,
+    # Factory
+    obtenir_service_planning,
+)
+from .types import (
+    # Schémas planning unifié
+    JourCompletSchema,
+    # Schémas planning de base
+    JourPlanning,
+    ParametresEquilibre,
+    SemaineCompleSchema,
+    SemaineGenereeIASchema,
+    SuggestionRecettesDay,
+)
 
+# ═══════════════════════════════════════════════════════════
+# UTILITAIRES
+# ═══════════════════════════════════════════════════════════
 from .utils import (
-    # Dates
-    get_weekday_names,
-    get_weekday_name,
-    get_weekday_index,
+    # Courses
+    aggregate_ingredients,
+    # IA
+    build_planning_prompt_context,
+    calculate_week_balance,
     calculate_week_dates,
-    get_week_range,
-    get_monday_of_week,
-    format_week_label,
     # Équilibre nutritionnel
     determine_protein_type,
-    get_default_protein_schedule,
-    calculate_week_balance,
-    is_balanced_week,
     # Formatage
     format_meal_for_display,
     format_planning_summary,
-    group_meals_by_type,
-    # Courses
-    aggregate_ingredients,
-    sort_ingredients_by_rayon,
+    format_week_label,
+    get_default_protein_schedule,
+    get_monday_of_week,
     get_rayon_order,
+    get_week_range,
+    get_weekday_index,
+    get_weekday_name,
+    # Dates
+    get_weekday_names,
+    group_meals_by_type,
+    is_balanced_week,
+    parse_ai_planning_response,
+    sort_ingredients_by_rayon,
+    validate_meal_selection,
     # Validation
     validate_planning_dates,
-    validate_meal_selection,
-    # IA
-    build_planning_prompt_context,
-    parse_ai_planning_response,
 )
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# SERVICES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-from .service import (
-    # Classe principale
-    ServicePlanning,
-    # Alias de compatibilité
-    PlanningService,
-    # Factory
-    obtenir_service_planning,
-    get_planning_service,
-)
-
-from .global_planning import (
-    # Classe principale
-    ServicePlanningUnifie,
-    # Alias de compatibilité
-    PlanningAIService,
-    # Factories
-    obtenir_service_planning_unifie,
-    get_planning_unified_service,
-    get_unified_planning_service,
-)
-
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # EXPORTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 __all__ = [
     # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

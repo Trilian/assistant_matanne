@@ -1,18 +1,17 @@
-﻿"""
+"""
 Tests unitaires pour stats.py
 
 Module: src.utils.helpers.stats
 """
 
-import pytest
 from src.utils.helpers.stats import (
-    calculer_moyenne,
-    calculer_mediane,
-    calculer_variance,
     calculer_ecart_type,
-    calculer_percentile,
-    calculer_mode,
     calculer_etendue,
+    calculer_mediane,
+    calculer_mode,
+    calculer_moyenne,
+    calculer_percentile,
+    calculer_variance,
     moyenne_mobile,
 )
 

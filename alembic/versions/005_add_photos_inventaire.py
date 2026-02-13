@@ -1,13 +1,14 @@
-﻿"""Add photos support to inventory articles
+"""Add photos support to inventory articles
 
 Revision ID: 005
 Revises: 004
 Create Date: 2024-01-01 00:00:00.000000
 
 """
-from alembic import op
+
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "005"

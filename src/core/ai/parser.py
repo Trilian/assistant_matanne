@@ -1,4 +1,4 @@
-﻿"""
+"""
 Analyseur JSON IA Ultra-Robuste
 Gère tous les cas edge des réponses Mistral/GPT
 """
@@ -90,12 +90,16 @@ class AnalyseurIA:
 
         # Stratégie 5: Fallback
         if not strict and valeur_secours:
-            logger.warning(f"[!]  Toutes stratégies échouées, utilisation fallback pour {modele.__name__}")
+            logger.warning(
+                f"[!]  Toutes stratégies échouées, utilisation fallback pour {modele.__name__}"
+            )
             logger.debug(f"   Response était: {reponse[:300]}")
             return modele(**valeur_secours)
 
         # Échec total
-        logger.error(f"[ERROR] Impossible d'analyser réponse pour {modele.__name__}: {reponse[:200]}")
+        logger.error(
+            f"[ERROR] Impossible d'analyser réponse pour {modele.__name__}: {reponse[:200]}"
+        )
         raise ValueError(f"Impossible d'analyser la réponse IA pour {modele.__name__}")
 
     @staticmethod
@@ -222,7 +226,7 @@ def analyser_liste_reponse(
     Returns:
         Liste d'items validés
     """
-    
+
     # LOG DEBUG: Première partie de la réponse pour diagnostiquer
     reponse_debut = reponse[:500] if len(reponse) > 500 else reponse
     logger.debug(f"RAW AI RESPONSE (first 500 chars): {repr(reponse_debut)}")
@@ -232,12 +236,12 @@ def analyser_liste_reponse(
         json_str = AnalyseurIA._extraire_objet_json(reponse)
         items_data = json.loads(json_str)
         logger.debug(f"[S1] JSON parsed successfully: {type(items_data)}")
-        
+
         # Si c'est une liste directe
         if isinstance(items_data, list):
             logger.info(f"✅ Parser directe liste pour {modele_item.__name__}")
             return [modele_item(**item) for item in items_data]
-        
+
         # Si c'est un dict avec la clé attendue
         if isinstance(items_data, dict) and cle_liste in items_data:
             items_list = items_data[cle_liste]
@@ -253,8 +257,9 @@ def analyser_liste_reponse(
     # Stratégie 2: Chercher [{ json objects }] pattern directement
     try:
         import re
+
         # Chercher pattern: [ { ... }, { ... } ]
-        pattern = r'\[\s*\{.*?\}\s*\]'
+        pattern = r"\[\s*\{.*?\}\s*\]"
         match = re.search(pattern, reponse, re.DOTALL)
         if match:
             json_str = match.group(0)
@@ -270,9 +275,10 @@ def analyser_liste_reponse(
 
     # Stratégie 3: Utiliser 'items' hardcoded comme fallback
     try:
+
         class EnvelopeListe(BaseModel):
             items: list[modele_item]
-        
+
         donnees_enveloppe = AnalyseurIA.analyser(
             reponse, EnvelopeListe, valeur_secours={"items": items_secours or []}, strict=False
         )
@@ -289,6 +295,6 @@ def analyser_liste_reponse(
             return [modele_item(**item) for item in items_secours]
         except Exception:
             pass
-    
+
     logger.error(f"[ERROR] Impossible de parser liste pour {modele_item.__name__}")
     return []

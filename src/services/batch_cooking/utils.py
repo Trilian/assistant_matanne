@@ -1,27 +1,25 @@
-﻿"""
+"""
 Fonctions utilitaires pures pour le batch cooking.
 
 Ces fonctions ne dépendent pas de la base de données et peuvent être
 testées unitairement sans mocking.
 """
 
-from datetime import datetime, time, date, timedelta
-from typing import Any
+from datetime import date, datetime, time, timedelta
 
 from .constantes import JOURS_SEMAINE, ROBOTS_DISPONIBLES
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # CALCULS DE DURÉE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def calculer_duree_totale_etapes(etapes: list[dict]) -> int:
     """Calcule la durée totale estimée de toutes les étapes.
-    
+
     Args:
         etapes: Liste de dictionnaires avec clé 'duree_minutes'
-    
+
     Returns:
         Durée totale en minutes
     """
@@ -30,18 +28,18 @@ def calculer_duree_totale_etapes(etapes: list[dict]) -> int:
 
 def calculer_duree_parallele(etapes: list[dict]) -> int:
     """Calcule la durée en tenant compte des étapes parallèles.
-    
+
     Les étapes avec le même groupe_parallele s'exécutent simultanément.
-    
+
     Args:
         etapes: Liste de dictionnaires avec 'duree_minutes' et 'groupe_parallele'
-    
+
     Returns:
         Durée effective en minutes
     """
     if not etapes:
         return 0
-    
+
     # Grouper les étapes par groupe parallèle
     groupes: dict[int, list[int]] = {}
     for etape in etapes:
@@ -50,7 +48,7 @@ def calculer_duree_parallele(etapes: list[dict]) -> int:
         if groupe not in groupes:
             groupes[groupe] = []
         groupes[groupe].append(duree)
-    
+
     # Pour chaque groupe, prendre le max (exécution parallèle)
     duree_totale = 0
     for groupe_id, durees in groupes.items():
@@ -60,34 +58,34 @@ def calculer_duree_parallele(etapes: list[dict]) -> int:
         else:
             # Groupes parallèles: prendre le max
             duree_totale += max(durees) if durees else 0
-    
+
     return duree_totale
 
 
 def calculer_duree_reelle(heure_debut: datetime, heure_fin: datetime) -> int:
     """Calcule la durée réelle en minutes entre deux datetime.
-    
+
     Args:
         heure_debut: Début de l'étape
         heure_fin: Fin de l'étape
-    
+
     Returns:
         Durée en minutes (arrondi)
     """
     if not heure_debut or not heure_fin:
         return 0
-    
+
     delta = heure_fin - heure_debut
     return int(delta.total_seconds() / 60)
 
 
 def estimer_heure_fin(heure_debut: time, duree_minutes: int) -> time:
-    """Estime l'heure de fin Ã  partir de l'heure de début et la durée.
-    
+    """Estime l'heure de fin à partir de l'heure de début et la durée.
+
     Args:
         heure_debut: Heure de début
         duree_minutes: Durée estimée en minutes
-    
+
     Returns:
         Heure de fin estimée
     """
@@ -96,17 +94,17 @@ def estimer_heure_fin(heure_debut: time, duree_minutes: int) -> time:
     return fin_dt.time()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # ROBOTS ET ÉQUIPEMENTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def obtenir_info_robot(robot_id: str) -> dict:
     """Récupère les informations d'un robot.
-    
+
     Args:
         robot_id: Identifiant du robot
-    
+
     Returns:
         Dictionnaire avec nom, emoji, parallele
     """
@@ -115,10 +113,10 @@ def obtenir_info_robot(robot_id: str) -> dict:
 
 def obtenir_nom_robot(robot_id: str) -> str:
     """Récupère le nom d'affichage d'un robot.
-    
+
     Args:
         robot_id: Identifiant du robot
-    
+
     Returns:
         Nom d'affichage
     """
@@ -128,10 +126,10 @@ def obtenir_nom_robot(robot_id: str) -> str:
 
 def obtenir_emoji_robot(robot_id: str) -> str:
     """Récupère l'emoji d'un robot.
-    
+
     Args:
         robot_id: Identifiant du robot
-    
+
     Returns:
         Emoji du robot
     """
@@ -141,10 +139,10 @@ def obtenir_emoji_robot(robot_id: str) -> str:
 
 def est_robot_parallele(robot_id: str) -> bool:
     """Vérifie si un robot peut fonctionner en parallèle.
-    
+
     Args:
         robot_id: Identifiant du robot
-    
+
     Returns:
         True si parallélisable
     """
@@ -154,43 +152,43 @@ def est_robot_parallele(robot_id: str) -> bool:
 
 def formater_liste_robots(robot_ids: list[str]) -> str:
     """Formate une liste de robots pour affichage.
-    
+
     Args:
         robot_ids: Liste des identifiants de robots
-    
+
     Returns:
         Chaîne formatée avec noms
     """
     if not robot_ids:
         return "Aucun"
-    
+
     noms = [obtenir_nom_robot(r) for r in robot_ids]
     return ", ".join(noms)
 
 
 def filtrer_robots_paralleles(robot_ids: list[str]) -> list[str]:
     """Filtre les robots qui peuvent fonctionner en parallèle.
-    
+
     Args:
         robot_ids: Liste des identifiants de robots
-    
+
     Returns:
         Liste des robots parallélisables
     """
     return [r for r in robot_ids if est_robot_parallele(r)]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # JOURS ET DATES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def obtenir_nom_jour(index: int) -> str:
     """Récupère le nom du jour de la semaine.
-    
+
     Args:
-        index: 0 (Lundi) Ã  6 (Dimanche)
-    
+        index: 0 (Lundi) à 6 (Dimanche)
+
     Returns:
         Nom du jour
     """
@@ -200,11 +198,11 @@ def obtenir_nom_jour(index: int) -> str:
 
 
 def obtenir_index_jour(nom: str) -> int:
-    """Récupère l'index d'un jour Ã  partir de son nom.
-    
+    """Récupère l'index d'un jour à partir de son nom.
+
     Args:
-        nom: Nom du jour (insensible Ã  la casse)
-    
+        nom: Nom du jour (insensible à la casse)
+
     Returns:
         Index 0-6, ou -1 si non trouvé
     """
@@ -217,10 +215,10 @@ def obtenir_index_jour(nom: str) -> int:
 
 def formater_jours_batch(indices: list[int]) -> str:
     """Formate une liste d'indices de jours en chaîne.
-    
+
     Args:
         indices: Liste d'indices (0-6)
-    
+
     Returns:
         Chaîne formatée ex: "Samedi, Dimanche"
     """
@@ -230,42 +228,42 @@ def formater_jours_batch(indices: list[int]) -> str:
 
 def est_jour_batch(jour: date, jours_batch: list[int]) -> bool:
     """Vérifie si une date est un jour de batch cooking.
-    
+
     Args:
-        jour: Date Ã  vérifier
+        jour: Date à vérifier
         jours_batch: Liste des indices de jours de batch (0-6)
-    
+
     Returns:
         True si c'est un jour de batch
     """
-    # weekday() retourne 0 (lundi) Ã  6 (dimanche)
+    # weekday() retourne 0 (lundi) à 6 (dimanche)
     return jour.weekday() in jours_batch
 
 
 def prochain_jour_batch(depuis: date, jours_batch: list[int]) -> date | None:
     """Trouve le prochain jour de batch cooking.
-    
+
     Args:
         depuis: Date de départ
         jours_batch: Liste des indices de jours de batch
-    
+
     Returns:
         Prochaine date de batch, ou None si pas de jours définis
     """
     if not jours_batch:
         return None
-    
+
     for i in range(1, 8):  # On cherche dans les 7 prochains jours
         candidat = depuis + timedelta(days=i)
         if candidat.weekday() in jours_batch:
             return candidat
-    
+
     return None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # CONTEXTE RECETTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def construire_contexte_recette(
@@ -279,7 +277,7 @@ def construire_contexte_recette(
     etapes: list[dict] | None = None,
 ) -> str:
     """Construit le contexte texte d'une recette pour l'IA.
-    
+
     Args:
         nom: Nom de la recette
         temps_preparation: Temps de préparation en minutes
@@ -289,19 +287,21 @@ def construire_contexte_recette(
         congelable: Peut être congelé
         robots_compatibles: Liste des robots compatibles
         etapes: Liste des étapes {ordre, description, duree}
-    
+
     Returns:
         Texte de contexte formaté
     """
     etapes_text = ""
     if etapes:
-        etapes_text = "\n".join([
-            f"  {e.get('ordre', i+1)}. {e.get('description', '')} ({e.get('duree', '?')} min)"
-            for i, e in enumerate(etapes)
-        ])
-    
+        etapes_text = "\n".join(
+            [
+                f"  {e.get('ordre', i+1)}. {e.get('description', '')} ({e.get('duree', '?')} min)"
+                for i, e in enumerate(etapes)
+            ]
+        )
+
     robots_text = ", ".join(robots_compatibles) if robots_compatibles else "Aucun"
-    
+
     return f"""
 Recette: {nom}
 - Temps préparation: {temps_preparation or '?'} min
@@ -317,16 +317,16 @@ Recette: {nom}
 
 def construire_contexte_jules(present: bool = True) -> str:
     """Construit le contexte pour la présence de Jules.
-    
+
     Args:
         present: Jules sera-t-il présent
-    
+
     Returns:
         Texte de contexte
     """
     if not present:
         return ""
-    
+
     return """
 âš ï¸ IMPORTANT - JULES (bébé 19 mois) sera présent !
 - Éviter les étapes bruyantes pendant la sieste (13h-15h)
@@ -336,9 +336,9 @@ def construire_contexte_jules(present: bool = True) -> str:
 """
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # CALCULS DE SESSION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def calculer_progression_session(
@@ -346,11 +346,11 @@ def calculer_progression_session(
     etapes_total: int,
 ) -> float:
     """Calcule le pourcentage de progression d'une session.
-    
+
     Args:
         etapes_terminees: Nombre d'étapes terminées
         etapes_total: Nombre total d'étapes
-    
+
     Returns:
         Pourcentage de progression (0-100)
     """
@@ -364,35 +364,35 @@ def calculer_temps_restant(
     utiliser_parallele: bool = True,
 ) -> int:
     """Calcule le temps restant estimé pour les étapes non terminées.
-    
+
     Args:
         etapes_restantes: Liste des étapes restantes
         utiliser_parallele: Tenir compte du parallélisme
-    
+
     Returns:
         Temps restant en minutes
     """
     if not etapes_restantes:
         return 0
-    
+
     if utiliser_parallele:
         return calculer_duree_parallele(etapes_restantes)
     else:
         return calculer_duree_totale_etapes(etapes_restantes)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # PRÉPARATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def calculer_portions_restantes(portions_initiales: int, consommees: int) -> int:
     """Calcule le nombre de portions restantes.
-    
+
     Args:
         portions_initiales: Nombre de portions au départ
         consommees: Nombre de portions consommées
-    
+
     Returns:
         Portions restantes (minimum 0)
     """
@@ -405,18 +405,18 @@ def est_preparation_expiree(
     date_reference: date | None = None,
 ) -> bool:
     """Vérifie si une préparation a dépassé sa date de conservation.
-    
+
     Args:
         date_preparation: Date de création
         conservation_jours: Durée de conservation en jours
         date_reference: Date de référence (défaut: aujourd'hui)
-    
+
     Returns:
         True si expiré
     """
     if date_reference is None:
         date_reference = date.today()
-    
+
     date_expiration = date_preparation + timedelta(days=conservation_jours)
     return date_reference > date_expiration
 
@@ -427,18 +427,18 @@ def jours_avant_expiration(
     date_reference: date | None = None,
 ) -> int:
     """Calcule le nombre de jours avant expiration.
-    
+
     Args:
         date_preparation: Date de création
         conservation_jours: Durée de conservation en jours
         date_reference: Date de référence (défaut: aujourd'hui)
-    
+
     Returns:
         Jours restants (négatif si expiré)
     """
     if date_reference is None:
         date_reference = date.today()
-    
+
     date_expiration = date_preparation + timedelta(days=conservation_jours)
     delta = date_expiration - date_reference
     return delta.days
@@ -451,13 +451,13 @@ def est_preparation_a_risque(
     date_reference: date | None = None,
 ) -> bool:
     """Vérifie si une préparation va bientôt expirer.
-    
+
     Args:
         date_preparation: Date de création
         conservation_jours: Durée de conservation en jours
         seuil_alerte_jours: Nombre de jours avant alerte
         date_reference: Date de référence (défaut: aujourd'hui)
-    
+
     Returns:
         True si expire dans les prochains jours
     """
@@ -465,17 +465,17 @@ def est_preparation_a_risque(
     return 0 < jours <= seuil_alerte_jours
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def valider_jours_batch(jours: list[int]) -> list[int]:
     """Valide et nettoie une liste de jours de batch.
-    
+
     Args:
         jours: Liste d'indices de jours (0-6)
-    
+
     Returns:
         Liste validée (indices 0-6 uniquement, sans doublons)
     """
@@ -484,11 +484,11 @@ def valider_jours_batch(jours: list[int]) -> list[int]:
 
 def valider_duree(duree: int | None, defaut: int = 10) -> int:
     """Valide une durée en minutes.
-    
+
     Args:
-        duree: Durée Ã  valider
+        duree: Durée à valider
         defaut: Valeur par défaut si invalide
-    
+
     Returns:
         Durée validée (1-480 minutes)
     """
@@ -499,11 +499,11 @@ def valider_duree(duree: int | None, defaut: int = 10) -> int:
 
 def valider_portions(portions: int | None, defaut: int = 4) -> int:
     """Valide un nombre de portions.
-    
+
     Args:
         portions: Nombre de portions
         defaut: Valeur par défaut si invalide
-    
+
     Returns:
         Portions validées (1-20)
     """
@@ -514,11 +514,11 @@ def valider_portions(portions: int | None, defaut: int = 4) -> int:
 
 def valider_conservation(jours: int | None, defaut: int = 3) -> int:
     """Valide une durée de conservation.
-    
+
     Args:
         jours: Jours de conservation
         defaut: Valeur par défaut si invalide
-    
+
     Returns:
         Jours validés (1-90)
     """

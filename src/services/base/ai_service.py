@@ -1,4 +1,4 @@
-﻿"""
+"""
 Base AI Service - Service IA Générique avec Rate Limiting Auto
 Version améliorée avec gestion automatique des quotas et retry
 """
@@ -212,7 +212,7 @@ class BaseAIService:
     ) -> BaseModel | None:
         """
         Version synchrone de call_with_parsing
-        
+
         Wraps the async call_with_parsing in asyncio.run() for use from sync contexts
         like Streamlit.
         """
@@ -227,8 +227,10 @@ class BaseAIService:
             # Note: Cela peut échouer si on est déjà dans une coroutine
             logger.warning("Event loop is running, trying to execute coroutine...")
             import concurrent.futures
+
             with concurrent.futures.ThreadPoolExecutor() as pool:
-                future = pool.submit(asyncio.run, 
+                future = pool.submit(
+                    asyncio.run,
                     self.call_with_parsing(
                         prompt=prompt,
                         response_model=response_model,
@@ -237,10 +239,10 @@ class BaseAIService:
                         max_tokens=max_tokens,
                         use_cache=use_cache,
                         fallback=fallback,
-                    )
+                    ),
                 )
                 return future.result()
-        
+
         # Pas de boucle d'événements, créer une nouvelle et exécuter
         return asyncio.run(
             self.call_with_parsing(
@@ -316,7 +318,7 @@ class BaseAIService:
     ) -> list[BaseModel]:
         """
         Version synchrone de call_with_list_parsing
-        
+
         Wraps the async call_with_list_parsing in asyncio.run() for use from sync contexts
         like Streamlit.
         """
@@ -330,7 +332,8 @@ class BaseAIService:
             # Si une boucle d'événements est en cours, utiliser un thread
             logger.warning("Event loop is running, trying to execute coroutine in thread...")
             with concurrent.futures.ThreadPoolExecutor() as pool:
-                future = pool.submit(asyncio.run, 
+                future = pool.submit(
+                    asyncio.run,
                     self.call_with_list_parsing(
                         prompt=prompt,
                         item_model=item_model,
@@ -340,10 +343,10 @@ class BaseAIService:
                         max_tokens=max_tokens,
                         use_cache=use_cache,
                         max_items=max_items,
-                    )
+                    ),
                 )
                 return future.result()
-        
+
         # Pas de boucle d'événements, créer une nouvelle et exécuter
         return asyncio.run(
             self.call_with_list_parsing(
@@ -370,7 +373,7 @@ class BaseAIService:
     ) -> BaseModel | None:
         """
         Appel IA avec parsing direct vers un modèle Pydantic unique.
-        
+
         Args:
             prompt: Prompt utilisateur
             response_model: Modèle Pydantic attendu en réponse
@@ -378,13 +381,14 @@ class BaseAIService:
             temperature: Température (None = default)
             max_tokens: Tokens max
             use_cache: Utiliser le cache
-            
+
         Returns:
             Instance du modèle Pydantic ou None si erreur
         """
         response = await self.call_with_cache(
             prompt=prompt,
-            system_prompt=system_prompt or "Retourne uniquement du JSON valide, pas de markdown ni de texte.",
+            system_prompt=system_prompt
+            or "Retourne uniquement du JSON valide, pas de markdown ni de texte.",
             temperature=temperature,
             max_tokens=max_tokens,
             use_cache=use_cache,
@@ -396,8 +400,7 @@ class BaseAIService:
         # Parser JSON vers modèle Pydantic
         try:
             import json
-            import re
-            
+
             # Nettoyer la réponse des markdown code blocks
             cleaned = response.strip()
             if cleaned.startswith("```json"):
@@ -407,10 +410,10 @@ class BaseAIService:
             if cleaned.endswith("```"):
                 cleaned = cleaned[:-3]
             cleaned = cleaned.strip()
-            
+
             # Parser JSON
             data = json.loads(cleaned)
-            
+
             # Valider avec Pydantic
             result = response_model(**data)
             logger.info(f"✅ JSON parsé vers {response_model.__name__}")
@@ -438,7 +441,7 @@ class BaseAIService:
     ) -> BaseModel | None:
         """
         Version synchrone de call_with_json_parsing.
-        
+
         Wraps the async call_with_json_parsing in asyncio.run() for use from sync contexts
         like Streamlit.
         """
@@ -452,7 +455,8 @@ class BaseAIService:
             # Si une boucle d'événements est en cours, utiliser un thread
             logger.warning("Event loop is running, trying to execute coroutine in thread...")
             with concurrent.futures.ThreadPoolExecutor() as pool:
-                future = pool.submit(asyncio.run, 
+                future = pool.submit(
+                    asyncio.run,
                     self.call_with_json_parsing(
                         prompt=prompt,
                         response_model=response_model,
@@ -460,10 +464,10 @@ class BaseAIService:
                         temperature=temperature,
                         max_tokens=max_tokens,
                         use_cache=use_cache,
-                    )
+                    ),
                 )
                 return future.result()
-        
+
         # Pas de boucle d'événements, créer une nouvelle et exécuter
         return asyncio.run(
             self.call_with_json_parsing(

@@ -1,24 +1,21 @@
-﻿"""
+"""
 Sidebar avec navigation par modules.
 """
 
 import streamlit as st
 
 from src.core.cache import Cache
-from src.core.state import GestionnaireEtat, obtenir_etat
 from src.core.lazy_loader import ChargeurModuleDiffere, afficher_stats_chargement_differe
+from src.core.state import GestionnaireEtat, obtenir_etat
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # MENU DES MODULES - Configuration centralisée
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 MODULES_MENU = {
     "ðŸ  Accueil": "accueil",
-    
     # Calendrier unifié - VUE CENTRALE
     "ðŸ“… Calendrier Familial": "planning.calendrier_unifie",
-    
     # Cuisine - Workflow: Plan â†’ Batch â†’ Courses
     "ðŸ³ Cuisine": {
         "ðŸ½ï¸ Planifier Repas": "cuisine.planificateur_repas",
@@ -28,7 +25,6 @@ MODULES_MENU = {
         "ðŸ“š Recettes": "cuisine.recettes",
         "ðŸ¥« Inventaire": "cuisine.inventaire",
     },
-    
     # Famille - HUB
     "ðŸ‘¨â€ðŸ‘©â€ðŸ‘§â€ðŸ‘¦ Famille": {
         "ðŸ  Hub Famille": "famille.hub",
@@ -38,7 +34,6 @@ MODULES_MENU = {
         "ðŸŽ‰ Weekend": "famille.weekend",
         "ðŸ›ï¸ Achats": "famille.achats_famille",
     },
-    
     # Maison
     "ðŸ  Maison": {
         "ðŸ  Hub Maison": "maison",
@@ -50,13 +45,11 @@ MODULES_MENU = {
         "ðŸ’° Dépenses": "maison.depenses",
         "ðŸŒ± Éco-Tips": "maison.eco",
     },
-    
     # Jeux
     "ðŸŽ² Jeux": {
         "âš½ Paris Sportifs": "jeux.paris",
         "ðŸŽ° Loto": "jeux.loto",
     },
-    
     # Outils & Config
     "ðŸ”§ Outils": {
         "ðŸ“± Code-barres": "barcode",
@@ -113,11 +106,7 @@ def _rendre_menu(menu: dict, etat) -> None:
     for label, value in menu.items():
         if isinstance(value, dict):
             # Module avec sous-menus
-            est_actif = any(
-                etat.module_actuel.startswith(sub) 
-                for sub in value.values() 
-                if sub
-            )
+            est_actif = any(etat.module_actuel.startswith(sub) for sub in value.values() if sub)
 
             with st.expander(label, expanded=est_actif):
                 for sub_label, sub_value in value.items():

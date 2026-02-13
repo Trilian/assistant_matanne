@@ -1,13 +1,12 @@
-﻿"""
+"""
 Tests unitaires pour toasts.py (notifications)
 
 Module: src.ui.feedback.toasts
 Couverture cible: >80%
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
 from datetime import datetime, timedelta
+from unittest.mock import MagicMock, patch
 
 
 class TestGestionnaireNotifications:
@@ -21,6 +20,7 @@ class TestGestionnaireNotifications:
         GestionnaireNotifications._init()
 
         import streamlit as st
+
         assert GestionnaireNotifications.CLE_NOTIFICATIONS in st.session_state
 
     @patch("streamlit.session_state", {})
@@ -31,8 +31,9 @@ class TestGestionnaireNotifications:
         GestionnaireNotifications.afficher("Test réussi", "success", duree=3)
 
         import streamlit as st
+
         notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
-        
+
         assert len(notifications) == 1
         assert notifications[0]["message"] == "Test réussi"
         assert notifications[0]["type"] == "success"
@@ -45,8 +46,9 @@ class TestGestionnaireNotifications:
         GestionnaireNotifications.afficher("Erreur!", "error")
 
         import streamlit as st
+
         notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
-        
+
         assert notifications[0]["type"] == "error"
 
     @patch("streamlit.session_state", {})
@@ -57,8 +59,9 @@ class TestGestionnaireNotifications:
         GestionnaireNotifications.afficher("Attention", "warning")
 
         import streamlit as st
+
         notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
-        
+
         assert notifications[0]["type"] == "warning"
 
     @patch("streamlit.session_state", {})
@@ -69,8 +72,9 @@ class TestGestionnaireNotifications:
         GestionnaireNotifications.afficher("Info", "info")
 
         import streamlit as st
+
         notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
-        
+
         assert notifications[0]["type"] == "info"
 
     @patch("streamlit.session_state", {})
@@ -81,8 +85,9 @@ class TestGestionnaireNotifications:
         GestionnaireNotifications.afficher("Test", duree=5)
 
         import streamlit as st
+
         notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
-        
+
         assert "expires_at" in notifications[0]
         assert notifications[0]["expires_at"] > datetime.now()
 
@@ -98,7 +103,7 @@ class TestGestionnaireNotifications:
 
         # Ajouter une notification
         GestionnaireNotifications.afficher("Test", "success")
-        
+
         # Rendre
         GestionnaireNotifications.rendre()
 
@@ -152,9 +157,9 @@ class TestGestionnaireNotifications:
     @patch("streamlit.session_state", {})
     def test_rendre_filtre_expirees(self):
         """Test que rendre filtre les notifications expirées."""
-        from src.ui.feedback.toasts import GestionnaireNotifications
-
         import streamlit as st
+
+        from src.ui.feedback.toasts import GestionnaireNotifications
 
         # Ajouter une notification expirée manuellement
         GestionnaireNotifications._init()
@@ -198,13 +203,14 @@ class TestHelpersFonctions:
     @patch("streamlit.session_state", {})
     def test_afficher_succes(self):
         """Test de afficher_succes."""
-        from src.ui.feedback.toasts import afficher_succes, GestionnaireNotifications
+        from src.ui.feedback.toasts import GestionnaireNotifications, afficher_succes
 
         afficher_succes("Opération réussie")
 
         import streamlit as st
+
         notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
-        
+
         assert len(notifications) == 1
         assert notifications[0]["type"] == "success"
         assert notifications[0]["message"] == "Opération réussie"
@@ -212,13 +218,14 @@ class TestHelpersFonctions:
     @patch("streamlit.session_state", {})
     def test_afficher_succes_duree(self):
         """Test de afficher_succes avec durée personnalisée."""
-        from src.ui.feedback.toasts import afficher_succes, GestionnaireNotifications
+        from src.ui.feedback.toasts import GestionnaireNotifications, afficher_succes
 
         afficher_succes("Test", duree=10)
 
         import streamlit as st
+
         notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
-        
+
         # Vérifie que la durée est respectée (environ 10s)
         diff = (notifications[0]["expires_at"] - notifications[0]["created_at"]).total_seconds()
         assert 9.5 < diff < 10.5
@@ -226,65 +233,70 @@ class TestHelpersFonctions:
     @patch("streamlit.session_state", {})
     def test_afficher_erreur(self):
         """Test de afficher_erreur."""
-        from src.ui.feedback.toasts import afficher_erreur, GestionnaireNotifications
+        from src.ui.feedback.toasts import GestionnaireNotifications, afficher_erreur
 
         afficher_erreur("Erreur critique")
 
         import streamlit as st
+
         notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
-        
+
         assert notifications[0]["type"] == "error"
         assert notifications[0]["message"] == "Erreur critique"
 
     @patch("streamlit.session_state", {})
     def test_afficher_erreur_duree_defaut(self):
         """Test que afficher_erreur a une durée par défaut de 5s."""
-        from src.ui.feedback.toasts import afficher_erreur, GestionnaireNotifications
+        from src.ui.feedback.toasts import GestionnaireNotifications, afficher_erreur
 
         afficher_erreur("Erreur")
 
         import streamlit as st
+
         notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
-        
+
         diff = (notifications[0]["expires_at"] - notifications[0]["created_at"]).total_seconds()
         assert 4.5 < diff < 5.5
 
     @patch("streamlit.session_state", {})
     def test_afficher_avertissement(self):
         """Test de afficher_avertissement."""
-        from src.ui.feedback.toasts import afficher_avertissement, GestionnaireNotifications
+        from src.ui.feedback.toasts import GestionnaireNotifications, afficher_avertissement
 
         afficher_avertissement("Attention!")
 
         import streamlit as st
+
         notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
-        
+
         assert notifications[0]["type"] == "warning"
         assert notifications[0]["message"] == "Attention!"
 
     @patch("streamlit.session_state", {})
     def test_afficher_avertissement_duree_defaut(self):
         """Test que afficher_avertissement a une durée par défaut de 4s."""
-        from src.ui.feedback.toasts import afficher_avertissement, GestionnaireNotifications
+        from src.ui.feedback.toasts import GestionnaireNotifications, afficher_avertissement
 
         afficher_avertissement("Warning")
 
         import streamlit as st
+
         notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
-        
+
         diff = (notifications[0]["expires_at"] - notifications[0]["created_at"]).total_seconds()
         assert 3.5 < diff < 4.5
 
     @patch("streamlit.session_state", {})
     def test_afficher_info(self):
         """Test de afficher_info."""
-        from src.ui.feedback.toasts import afficher_info, GestionnaireNotifications
+        from src.ui.feedback.toasts import GestionnaireNotifications, afficher_info
 
         afficher_info("Information")
 
         import streamlit as st
+
         notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
-        
+
         assert notifications[0]["type"] == "info"
         assert notifications[0]["message"] == "Information"
 
@@ -295,41 +307,49 @@ class TestNotificationsImports:
     def test_import_gestionnaire_notifications(self):
         """Vérifie que GestionnaireNotifications est importable."""
         from src.ui.feedback.toasts import GestionnaireNotifications
+
         assert GestionnaireNotifications is not None
 
     def test_import_afficher_succes(self):
         """Vérifie que afficher_succes est importable."""
         from src.ui.feedback.toasts import afficher_succes
+
         assert callable(afficher_succes)
 
     def test_import_afficher_erreur(self):
         """Vérifie que afficher_erreur est importable."""
         from src.ui.feedback.toasts import afficher_erreur
+
         assert callable(afficher_erreur)
 
     def test_import_afficher_avertissement(self):
         """Vérifie que afficher_avertissement est importable."""
         from src.ui.feedback.toasts import afficher_avertissement
+
         assert callable(afficher_avertissement)
 
     def test_import_afficher_info(self):
         """Vérifie que afficher_info est importable."""
         from src.ui.feedback.toasts import afficher_info
+
         assert callable(afficher_info)
 
     def test_import_via_feedback(self):
         """Vérifie l'import via le module feedback."""
         from src.ui.feedback import (
             GestionnaireNotifications,
-            afficher_succes,
-            afficher_erreur,
             afficher_avertissement,
+            afficher_erreur,
             afficher_info,
+            afficher_succes,
         )
-        assert all([
-            GestionnaireNotifications is not None,
-            callable(afficher_succes),
-            callable(afficher_erreur),
-            callable(afficher_avertissement),
-            callable(afficher_info),
-        ])
+
+        assert all(
+            [
+                GestionnaireNotifications is not None,
+                callable(afficher_succes),
+                callable(afficher_erreur),
+                callable(afficher_avertissement),
+                callable(afficher_info),
+            ]
+        )

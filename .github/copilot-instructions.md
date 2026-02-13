@@ -258,11 +258,11 @@ from src.core.ai import ClientIA
 
 class RecipeService(BaseAIService):
     """Service avec intégration IA automatique"""
-    
+
     def generate_shopping_list(self, recipes: list[Recette]) -> list[dict]:
         """Générer la liste à partir des recettes avec IA et limitation de débit automatique"""
         prompt = f"Créer liste courses pour: {recipes}"
-        
+
         # Gère automatiquement: limitation de débit, cache, parsing, récupération d'erreurs
         return self.call_with_list_parsing_sync(
             prompt=prompt,
@@ -281,10 +281,10 @@ from sqlalchemy.orm import Session
 def test_create_recipe(test_db: Session):
     """Tester l'opération de base de données avec fixture"""
     from src.services.recettes import RecetteService
-    
+
     service = RecetteService(test_db)
     result = service.creer_recette({"nom": "Tarte"})
-    
+
     assert result.nom == "Tarte"
     # Session nettoyée automatiquement après le test
 ```

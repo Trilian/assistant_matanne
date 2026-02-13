@@ -1,1 +1,1 @@
-﻿"""Tests pour les modules domains."""
+"""Tests pour les modules domains."""

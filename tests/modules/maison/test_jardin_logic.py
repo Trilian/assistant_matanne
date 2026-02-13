@@ -1,30 +1,31 @@
-﻿"""
+"""
 Tests pour jardin_logic.py
 Couverture cible: 80%+
 """
+
+from datetime import date, timedelta
+
 import pytest
-from datetime import date, datetime, timedelta
 
 from src.modules.maison.jardin_utils import (
     # Constantes
     CATEGORIES_PLANTES,
     SAISONS,
     STATUS_PLANTES,
-    # Fonctions
-    get_saison_actuelle,
     calculer_jours_avant_arrosage,
     calculer_jours_avant_recolte,
-    get_plantes_a_arroser,
-    get_recoltes_proches,
     calculer_statistiques_jardin,
     filtrer_par_categorie,
     filtrer_par_status,
+    get_plantes_a_arroser,
+    get_recoltes_proches,
+    # Fonctions
+    get_saison_actuelle,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantes:
@@ -49,9 +50,9 @@ class TestConstantes:
         assert "Récolte" in STATUS_PLANTES
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS SAISONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestSaisons:
@@ -70,9 +71,9 @@ class TestSaisons:
         assert saison == "Hiver"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CALCUL ARROSAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculArrosage:
@@ -85,19 +86,13 @@ class TestCalculArrosage:
 
     def test_arrosage_dans_futur(self):
         """Calcule jours restants si arrosage dans le futur."""
-        plante = {
-            "dernier_arrosage": date.today() - timedelta(days=3),
-            "frequence_arrosage": 7
-        }
+        plante = {"dernier_arrosage": date.today() - timedelta(days=3), "frequence_arrosage": 7}
         result = calculer_jours_avant_arrosage(plante)
         assert result == 4  # 7 - 3 = 4 jours
 
     def test_arrosage_en_retard(self):
         """Retourne négatif si en retard."""
-        plante = {
-            "dernier_arrosage": date.today() - timedelta(days=10),
-            "frequence_arrosage": 7
-        }
+        plante = {"dernier_arrosage": date.today() - timedelta(days=10), "frequence_arrosage": 7}
         result = calculer_jours_avant_arrosage(plante)
         assert result == -3  # 10 - 7 = 3 jours de retard
 
@@ -105,23 +100,21 @@ class TestCalculArrosage:
         """Gère les dates en string ISO."""
         plante = {
             "dernier_arrosage": (date.today() - timedelta(days=3)).isoformat(),
-            "frequence_arrosage": 7
+            "frequence_arrosage": 7,
         }
         result = calculer_jours_avant_arrosage(plante)
         assert result == 4
 
     def test_frequence_defaut(self):
         """Utilise fréquence par défaut de 7 jours."""
-        plante = {
-            "dernier_arrosage": date.today() - timedelta(days=3)
-        }
+        plante = {"dernier_arrosage": date.today() - timedelta(days=3)}
         result = calculer_jours_avant_arrosage(plante)
         assert result == 4
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS CALCUL RÃ‰COLTE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS CALCUL RÉCOLTE
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculRecolte:
@@ -134,32 +127,26 @@ class TestCalculRecolte:
 
     def test_recolte_dans_futur(self):
         """Calcule jours avant récolte."""
-        plante = {
-            "date_recolte_estimee": date.today() + timedelta(days=15)
-        }
+        plante = {"date_recolte_estimee": date.today() + timedelta(days=15)}
         result = calculer_jours_avant_recolte(plante)
         assert result == 15
 
     def test_recolte_passee(self):
         """Retourne négatif si date passée."""
-        plante = {
-            "date_recolte_estimee": date.today() - timedelta(days=5)
-        }
+        plante = {"date_recolte_estimee": date.today() - timedelta(days=5)}
         result = calculer_jours_avant_recolte(plante)
         assert result == -5
 
     def test_recolte_date_string(self):
         """Gère les dates en string ISO."""
-        plante = {
-            "date_recolte_estimee": (date.today() + timedelta(days=10)).isoformat()
-        }
+        plante = {"date_recolte_estimee": (date.today() + timedelta(days=10)).isoformat()}
         result = calculer_jours_avant_recolte(plante)
         assert result == 10
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ALERTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestAlertesArrosage:
@@ -168,13 +155,21 @@ class TestAlertesArrosage:
     @pytest.fixture
     def plantes(self):
         return [
-            {"nom": "Tomate", "dernier_arrosage": date.today() - timedelta(days=6), "frequence_arrosage": 7},
-            {"nom": "Basilic", "dernier_arrosage": date.today() - timedelta(days=10), "frequence_arrosage": 3},
+            {
+                "nom": "Tomate",
+                "dernier_arrosage": date.today() - timedelta(days=6),
+                "frequence_arrosage": 7,
+            },
+            {
+                "nom": "Basilic",
+                "dernier_arrosage": date.today() - timedelta(days=10),
+                "frequence_arrosage": 3,
+            },
             {"nom": "Salade", "dernier_arrosage": date.today(), "frequence_arrosage": 2},
         ]
 
     def test_plantes_a_arroser_demain(self, plantes):
-        """Trouve plantes Ã  arroser demain (1 jour)."""
+        """Trouve plantes à arroser demain (1 jour)."""
         result = get_plantes_a_arroser(plantes, jours_avance=1)
         # Tomate: 7-6=1 jour, Basilic: 3-10=-7 (retard)
         assert len(result) >= 2
@@ -226,9 +221,9 @@ class TestAlertesRecolte:
             assert result[0]["jours_restants"] <= result[1]["jours_restants"]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestStatistiquesJardin:
@@ -237,11 +232,20 @@ class TestStatistiquesJardin:
     @pytest.fixture
     def plantes(self):
         return [
-            {"nom": "Tomate", "categorie": "Légumes", "status": "Mature",
-             "dernier_arrosage": date.today() - timedelta(days=10), "frequence_arrosage": 3},
+            {
+                "nom": "Tomate",
+                "categorie": "Légumes",
+                "status": "Mature",
+                "dernier_arrosage": date.today() - timedelta(days=10),
+                "frequence_arrosage": 3,
+            },
             {"nom": "Basilic", "categorie": "Herbes", "status": "Pousse"},
-            {"nom": "Carotte", "categorie": "Légumes", "status": "Semis",
-             "date_recolte_estimee": date.today() + timedelta(days=3)},
+            {
+                "nom": "Carotte",
+                "categorie": "Légumes",
+                "status": "Semis",
+                "date_recolte_estimee": date.today() + timedelta(days=3),
+            },
         ]
 
     def test_total_plantes(self, plantes):
@@ -277,9 +281,9 @@ class TestStatistiquesJardin:
         assert result["total_plantes"] == 0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FILTRAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFiltrageJardin:

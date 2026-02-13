@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modèles pour les listes de courses.
 
 Contient :
@@ -36,15 +36,15 @@ if TYPE_CHECKING:
 
 class ListeCourses(Base):
     """Liste de courses.
-    
+
     Attributes:
         nom: Nom de la liste
         archivee: Si la liste est archivée
         created_at: Date de création
     """
-    
+
     __tablename__ = "listes_courses"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     nom: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
     archivee: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
@@ -52,19 +52,19 @@ class ListeCourses(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    
+
     # Relations
     articles: Mapped[list["ArticleCourses"]] = relationship(
         back_populates="liste", cascade="all, delete-orphan"
     )
-    
+
     def __repr__(self) -> str:
         return f"<ListeCourses(id={self.id}, nom='{self.nom}')>"
 
 
 class ArticleCourses(Base):
     """Article dans la liste de courses.
-    
+
     Attributes:
         ingredient_id: ID de l'ingrédient
         quantite_necessaire: Quantité à acheter
@@ -118,7 +118,7 @@ class ArticleCourses(Base):
 
 class ModeleCourses(Base):
     """Template persistant pour listes de courses réutilisables.
-    
+
     Attributes:
         nom: Nom du modèle
         description: Description
@@ -132,21 +132,23 @@ class ModeleCourses(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     nom: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text)
-    
+
     # Support multi-user
     utilisateur_id: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
-    
+
     # Métadonnées
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     modifie_le: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
-    
+
     # Données articles (JSON)
     articles_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    
+
     # Relations
     articles: Mapped[list["ArticleModele"]] = relationship(
         "ArticleModele", back_populates="modele", cascade="all, delete-orphan"
@@ -158,7 +160,7 @@ class ModeleCourses(Base):
 
 class ArticleModele(Base):
     """Article d'un modèle de courses.
-    
+
     Attributes:
         modele_id: ID du modèle parent
         ingredient_id: ID de l'ingrédient (optionnel)
@@ -179,7 +181,7 @@ class ArticleModele(Base):
     ingredient_id: Mapped[int | None] = mapped_column(
         ForeignKey("ingredients.id", ondelete="SET NULL"), nullable=True, index=True
     )
-    
+
     # Propriétés
     nom_article: Mapped[str] = mapped_column(String(100), nullable=False)
     quantite: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
@@ -187,18 +189,17 @@ class ArticleModele(Base):
     rayon_magasin: Mapped[str] = mapped_column(String(100), nullable=False, default="Autre")
     priorite: Mapped[str] = mapped_column(String(20), nullable=False, default="moyenne")
     notes: Mapped[str | None] = mapped_column(Text)
-    
+
     # Tri
     ordre: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    
+
     # Métadonnées
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    
+
     __table_args__ = (
         CheckConstraint("quantite > 0", name="ck_article_modele_quantite_positive"),
         CheckConstraint(
-            "priorite IN ('haute', 'moyenne', 'basse')", 
-            name="ck_article_modele_priorite_valide"
+            "priorite IN ('haute', 'moyenne', 'basse')", name="ck_article_modele_priorite_valide"
         ),
     )
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Footer de l'application.
 """
 
@@ -10,7 +10,7 @@ from src.core.config import obtenir_parametres
 def afficher_footer():
     """Affiche le footer simplifié."""
     parametres = obtenir_parametres()
-    
+
     st.markdown("---")
 
     col1, col2, col3 = st.columns([2, 1, 1])
@@ -23,13 +23,13 @@ def afficher_footer():
             st.info("GitHub Issues")
 
     with col3:
-        if st.button("â„¹ï¸ Ã€ propos"):
-            with st.expander("Ã€ propos", expanded=True):
+        if st.button("â„¹ï¸ À propos"):
+            with st.expander("À propos", expanded=True):
                 st.markdown(
                     f"""
                 ### {parametres.APP_NAME}
                 **Version:** {parametres.APP_VERSION}
-                
+
                 **Stack:**
                 - Frontend: Streamlit
                 - Database: Supabase PostgreSQL

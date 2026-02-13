@@ -1,13 +1,15 @@
-﻿"""Fixtures pour services Phase 18."""
-import pytest
+"""Fixtures pour services Phase 18."""
+
 from unittest.mock import MagicMock, patch
+
+import pytest
 from sqlalchemy.orm import Session
 
 # Import des services réels
 try:
-    from src.services.recettes import RecetteService
-    from src.services.planning import PlanningService
     from src.services.courses import CoursesService
+    from src.services.planning import PlanningService
+    from src.services.recettes import RecetteService
 except ImportError:
     pass
 
@@ -16,9 +18,10 @@ except ImportError:
 # ServiceMockFactory - Factories pour créer des mocks de services standardisés
 # =============================================================================
 
+
 class ServiceMockFactory:
     """Factory pour créer des mocks de services standardisés."""
-    
+
     @staticmethod
     def mock_recette_service():
         """Mock RecetteService avec méthodes standard."""
@@ -29,7 +32,7 @@ class ServiceMockFactory:
         mock.modifier_recette = MagicMock(return_value=MagicMock(id=1))
         mock.supprimer_recette = MagicMock(return_value=True)
         return mock
-    
+
     @staticmethod
     def mock_planning_service():
         """Mock PlanningService avec méthodes standard."""
@@ -38,7 +41,7 @@ class ServiceMockFactory:
         mock.obtenir_planning = MagicMock(return_value=None)
         mock.creer_planning = MagicMock(return_value=MagicMock(id=1))
         return mock
-    
+
     @staticmethod
     def mock_courses_service():
         """Mock CoursesService avec méthodes standard."""
@@ -47,14 +50,12 @@ class ServiceMockFactory:
         mock.obtenir_course = MagicMock(return_value=None)
         mock.creer_course = MagicMock(return_value=MagicMock(id=1))
         return mock
-    
+
     @staticmethod
     def mock_ai_client():
         """Mock ClientIA avec réponses standard."""
         mock = MagicMock()
-        mock.appel_complet = MagicMock(
-            return_value={"suggestions": [], "status": "success"}
-        )
+        mock.appel_complet = MagicMock(return_value={"suggestions": [], "status": "success"})
         mock.appel_streaming = MagicMock()
         return mock
 
@@ -63,6 +64,7 @@ class ServiceMockFactory:
 # Fixtures principales
 # =============================================================================
 
+
 @pytest.fixture
 def mock_services():
     """Fixture fournissant tous les service mocks via ServiceMockFactory."""
@@ -70,7 +72,7 @@ def mock_services():
         "recette": ServiceMockFactory.mock_recette_service(),
         "planning": ServiceMockFactory.mock_planning_service(),
         "courses": ServiceMockFactory.mock_courses_service(),
-        "ai": ServiceMockFactory.mock_ai_client()
+        "ai": ServiceMockFactory.mock_ai_client(),
     }
 
 
@@ -107,10 +109,8 @@ def courses_service(test_db: Session) -> CoursesService:
 @pytest.fixture
 def mock_ia_service():
     """Mock pour service IA avec cache."""
-    with patch('src.core.ai.ClientIA') as mock:
-        mock.appel_complet = MagicMock(
-            return_value={"suggestions": [], "status": "success"}
-        )
+    with patch("src.core.ai.ClientIA") as mock:
+        mock.appel_complet = MagicMock(return_value={"suggestions": [], "status": "success"})
         mock.appel_streaming = MagicMock()
         yield mock
 
@@ -118,7 +118,7 @@ def mock_ia_service():
 @pytest.fixture
 def mock_streamlit_state():
     """Mock pour st.session_state."""
-    with patch('streamlit.session_state') as mock:
+    with patch("streamlit.session_state") as mock:
         mock.__setitem__ = MagicMock()
         mock.__getitem__ = MagicMock(return_value=None)
         mock.get = MagicMock(return_value=None)

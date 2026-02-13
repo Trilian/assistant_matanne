@@ -1,31 +1,29 @@
-﻿"""
+"""
 Tests pour planificateur_repas_logic.py - Fonctions pures du planificateur
 """
 
-import pytest
-from datetime import date, timedelta
 from dataclasses import dataclass
-from typing import Optional, List
+from datetime import date, timedelta
+
+import pytest
 
 from src.modules.cuisine.planificateur_repas.utils import (
+    EQUILIBRE_DEFAUT,
+    JOURS_SEMAINE,
+    PROTEINES,
+    TEMPS_CATEGORIES,
+    TYPES_REPAS,
+    PlanningSemaine,
     RecetteSuggestion,
     RepasPlannifie,
-    PlanningSemaine,
     calculer_score_recette,
     filtrer_recettes_eligibles,
-    JOURS_SEMAINE,
-    TYPES_REPAS,
-    PROTEINES,
-    EQUILIBRE_DEFAUT,
-    TEMPS_CATEGORIES,
-    ROBOTS_CUISINE,
 )
-from src.modules.cuisine.schemas import PreferencesUtilisateur, FeedbackRecette
+from src.modules.cuisine.schemas import FeedbackRecette, PreferencesUtilisateur
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Constantes
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantes:
@@ -69,9 +67,9 @@ class TestConstantes:
             assert "label" in info
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests RecetteSuggestion Dataclass
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestRecetteSuggestion:
@@ -86,7 +84,7 @@ class TestRecetteSuggestion:
             temps_preparation=15,
             temps_cuisson=60,
             portions=4,
-            difficulte="facile"
+            difficulte="facile",
         )
         assert suggestion.nom == "Poulet rôti"
         assert suggestion.temps_preparation == 15
@@ -100,39 +98,55 @@ class TestRecetteSuggestion:
             temps_preparation=20,
             temps_cuisson=30,
             portions=4,
-            difficulte="facile"
+            difficulte="facile",
         )
         assert suggestion.temps_total == 50
 
     def test_emoji_difficulte(self):
         """Vérifie les emojis de difficulté."""
         facile = RecetteSuggestion(
-            id=1, nom="T", description="T",
-            temps_preparation=10, temps_cuisson=10,
-            portions=2, difficulte="facile"
+            id=1,
+            nom="T",
+            description="T",
+            temps_preparation=10,
+            temps_cuisson=10,
+            portions=2,
+            difficulte="facile",
         )
         assert facile.emoji_difficulte == "ðŸŸ¢"
 
         moyen = RecetteSuggestion(
-            id=2, nom="T", description="T",
-            temps_preparation=10, temps_cuisson=10,
-            portions=2, difficulte="moyen"
+            id=2,
+            nom="T",
+            description="T",
+            temps_preparation=10,
+            temps_cuisson=10,
+            portions=2,
+            difficulte="moyen",
         )
         assert moyen.emoji_difficulte == "ðŸŸ¡"
 
         difficile = RecetteSuggestion(
-            id=3, nom="T", description="T",
-            temps_preparation=10, temps_cuisson=10,
-            portions=2, difficulte="difficile"
+            id=3,
+            nom="T",
+            description="T",
+            temps_preparation=10,
+            temps_cuisson=10,
+            portions=2,
+            difficulte="difficile",
         )
         assert difficile.emoji_difficulte == "ðŸ”´"
 
     def test_valeurs_defaut(self):
         """Vérifie les valeurs par défaut."""
         suggestion = RecetteSuggestion(
-            id=1, nom="Test", description="Test",
-            temps_preparation=10, temps_cuisson=10,
-            portions=2, difficulte="facile"
+            id=1,
+            nom="Test",
+            description="Test",
+            temps_preparation=10,
+            temps_cuisson=10,
+            portions=2,
+            difficulte="facile",
         )
         assert suggestion.compatible_batch is False
         assert suggestion.compatible_jules is True
@@ -142,9 +156,9 @@ class TestRecetteSuggestion:
         assert suggestion.ingredients_manquants == []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests RepasPlannifie Dataclass
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestRepasPlannifie:
@@ -152,25 +166,22 @@ class TestRepasPlannifie:
 
     def test_creation_vide(self):
         """Crée un repas vide."""
-        repas = RepasPlannifie(
-            jour=date.today(),
-            type_repas="déjeuner"
-        )
+        repas = RepasPlannifie(jour=date.today(), type_repas="déjeuner")
         assert repas.est_vide is True
         assert repas.recette is None
 
     def test_creation_avec_recette(self):
         """Crée un repas avec recette."""
         suggestion = RecetteSuggestion(
-            id=1, nom="Test", description="Test",
-            temps_preparation=10, temps_cuisson=10,
-            portions=2, difficulte="facile"
+            id=1,
+            nom="Test",
+            description="Test",
+            temps_preparation=10,
+            temps_cuisson=10,
+            portions=2,
+            difficulte="facile",
         )
-        repas = RepasPlannifie(
-            jour=date.today(),
-            type_repas="dîner",
-            recette=suggestion
-        )
+        repas = RepasPlannifie(jour=date.today(), type_repas="dîner", recette=suggestion)
         assert repas.est_vide is False
         assert repas.recette.nom == "Test"
 
@@ -182,9 +193,9 @@ class TestRepasPlannifie:
         assert repas.jour_nom == "Lundi"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests PlanningSemaine Dataclass
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestPlanningSemaine:
@@ -193,8 +204,7 @@ class TestPlanningSemaine:
     def test_creation_vide(self):
         """Crée un planning vide."""
         planning = PlanningSemaine(
-            date_debut=date.today(),
-            date_fin=date.today() + timedelta(days=6)
+            date_debut=date.today(), date_fin=date.today() + timedelta(days=6)
         )
         assert planning.nb_repas_planifies == 0
         assert planning.nb_repas_total == 0
@@ -202,9 +212,13 @@ class TestPlanningSemaine:
     def test_nb_repas_planifies(self):
         """Compte les repas planifiés."""
         suggestion = RecetteSuggestion(
-            id=1, nom="Test", description="Test",
-            temps_preparation=10, temps_cuisson=10,
-            portions=2, difficulte="facile"
+            id=1,
+            nom="Test",
+            description="Test",
+            temps_preparation=10,
+            temps_cuisson=10,
+            portions=2,
+            difficulte="facile",
         )
         planning = PlanningSemaine(
             date_debut=date.today(),
@@ -212,7 +226,7 @@ class TestPlanningSemaine:
             repas=[
                 RepasPlannifie(jour=date.today(), type_repas="déjeuner", recette=suggestion),
                 RepasPlannifie(jour=date.today(), type_repas="dîner"),  # Vide
-            ]
+            ],
         )
         assert planning.nb_repas_total == 2
         assert planning.nb_repas_planifies == 1
@@ -228,7 +242,7 @@ class TestPlanningSemaine:
                 RepasPlannifie(jour=aujourd_hui, type_repas="déjeuner"),
                 RepasPlannifie(jour=aujourd_hui, type_repas="dîner"),
                 RepasPlannifie(jour=demain, type_repas="déjeuner"),
-            ]
+            ],
         )
         repas_aujourdhui = planning.get_repas_jour(aujourd_hui)
         assert len(repas_aujourdhui) == 2
@@ -243,21 +257,25 @@ class TestPlanningSemaine:
                     jour=date.today(),
                     type_repas="déjeuner",
                     recette=RecetteSuggestion(
-                        id=1, nom="Poisson", description="Test",
-                        temps_preparation=10, temps_cuisson=10,
-                        portions=2, difficulte="facile",
-                        categorie_proteine="poisson"
-                    )
+                        id=1,
+                        nom="Poisson",
+                        description="Test",
+                        temps_preparation=10,
+                        temps_cuisson=10,
+                        portions=2,
+                        difficulte="facile",
+                        categorie_proteine="poisson",
+                    ),
                 ),
-            ]
+            ],
         )
         equilibre = planning.get_equilibre()
         assert equilibre["poisson"] == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Calcul Score Recette
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculerScoreRecette:
@@ -271,6 +289,7 @@ class TestCalculerScoreRecette:
     @pytest.fixture
     def recette_simple(self):
         """Recette simple pour les tests."""
+
         @dataclass
         class RecetteSimple:
             id: int = 1
@@ -281,6 +300,7 @@ class TestCalculerScoreRecette:
             compatible_bebe: bool = True
             compatible_batch: bool = False
             ingredients: list = None
+
         return RecetteSimple()
 
     def test_score_base(self, preferences_defaut, recette_simple):
@@ -290,7 +310,7 @@ class TestCalculerScoreRecette:
             preferences=preferences_defaut,
             feedbacks=[],
             equilibre_actuel={},
-            stock_disponible=[]
+            stock_disponible=[],
         )
         assert 40 <= score <= 60  # Autour du score de base
 
@@ -302,7 +322,7 @@ class TestCalculerScoreRecette:
             preferences=prefs,
             feedbacks=[],
             equilibre_actuel={},
-            stock_disponible=[]
+            stock_disponible=[],
         )
         assert score == 0.0
         assert "exclu" in raison.lower()
@@ -311,60 +331,62 @@ class TestCalculerScoreRecette:
         """Un favori augmente le score."""
         prefs_sans = PreferencesUtilisateur()
         prefs_avec = PreferencesUtilisateur(aliments_favoris=["poulet"])
-        
+
         score_sans, _ = calculer_score_recette(
             recette=recette_simple,
             preferences=prefs_sans,
             feedbacks=[],
             equilibre_actuel={},
-            stock_disponible=[]
+            stock_disponible=[],
         )
         score_avec, _ = calculer_score_recette(
             recette=recette_simple,
             preferences=prefs_avec,
             feedbacks=[],
             equilibre_actuel={},
-            stock_disponible=[]
+            stock_disponible=[],
         )
         assert score_avec > score_sans
 
     def test_feedback_positif(self, preferences_defaut, recette_simple):
         """Un feedback positif augmente le score."""
         feedback_like = FeedbackRecette(recette_id=1, recette_nom="Poulet grillé", feedback="like")
-        
+
         score_sans, _ = calculer_score_recette(
             recette=recette_simple,
             preferences=preferences_defaut,
             feedbacks=[],
             equilibre_actuel={},
-            stock_disponible=[]
+            stock_disponible=[],
         )
         score_avec, raison = calculer_score_recette(
             recette=recette_simple,
             preferences=preferences_defaut,
             feedbacks=[feedback_like],
             equilibre_actuel={},
-            stock_disponible=[]
+            stock_disponible=[],
         )
         assert score_avec > score_sans
 
     def test_feedback_negatif(self, preferences_defaut, recette_simple):
         """Un feedback négatif diminue le score."""
-        feedback_dislike = FeedbackRecette(recette_id=1, recette_nom="Poulet grillé", feedback="dislike")
-        
+        feedback_dislike = FeedbackRecette(
+            recette_id=1, recette_nom="Poulet grillé", feedback="dislike"
+        )
+
         score_sans, _ = calculer_score_recette(
             recette=recette_simple,
             preferences=preferences_defaut,
             feedbacks=[],
             equilibre_actuel={},
-            stock_disponible=[]
+            stock_disponible=[],
         )
         score_avec, raison = calculer_score_recette(
             recette=recette_simple,
             preferences=preferences_defaut,
             feedbacks=[feedback_dislike],
             equilibre_actuel={},
-            stock_disponible=[]
+            stock_disponible=[],
         )
         assert score_avec < score_sans
 
@@ -379,14 +401,14 @@ class TestCalculerScoreRecette:
             preferences=preferences_defaut,
             feedbacks=[],
             equilibre_actuel={},
-            stock_disponible=[]
+            stock_disponible=[],
         )
         assert 0 <= score <= 100
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# Tests Filtrer Recettes Ã‰ligibles
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# Tests Filtrer Recettes Éligibles
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFiltrerRecettesEligibles:
@@ -394,33 +416,35 @@ class TestFiltrerRecettesEligibles:
 
     def test_filtre_exclusions(self):
         """Exclut les recettes avec aliments exclus."""
+
         @dataclass
         class Recette:
             nom: str
-        
+
         recettes = [
             Recette(nom="Poulet rôti"),
             Recette(nom="Salade verte"),
             Recette(nom="Poulet grillé"),
         ]
         prefs = PreferencesUtilisateur(aliments_exclus=["poulet"])
-        
+
         eligibles = filtrer_recettes_eligibles(recettes, prefs)
         assert len(eligibles) == 1
         assert eligibles[0].nom == "Salade verte"
 
     def test_pas_exclusion(self):
         """Retourne toutes si pas d'exclusion."""
+
         @dataclass
         class Recette:
             nom: str
-        
+
         recettes = [
             Recette(nom="Poulet rôti"),
             Recette(nom="Salade verte"),
         ]
         prefs = PreferencesUtilisateur()
-        
+
         eligibles = filtrer_recettes_eligibles(recettes, prefs)
         assert len(eligibles) == 2
 
@@ -432,33 +456,35 @@ class TestFiltrerRecettesEligibles:
 
     def test_toutes_exclues(self):
         """Retourne vide si toutes exclues."""
+
         @dataclass
         class Recette:
             nom: str
-        
+
         recettes = [
             Recette(nom="Poulet rôti"),
             Recette(nom="Poulet grillé"),
         ]
         prefs = PreferencesUtilisateur(aliments_exclus=["poulet"])
-        
+
         eligibles = filtrer_recettes_eligibles(recettes, prefs)
         assert len(eligibles) == 0
 
     def test_filtre_type_repas(self):
         """Filtre par type de repas si spécifié."""
+
         @dataclass
         class Recette:
             nom: str
-            type_repas: Optional[str] = None
-        
+            type_repas: str | None = None
+
         recettes = [
             Recette(nom="Croissant", type_repas="petit_déjeuner"),
             Recette(nom="Steak", type_repas="déjeuner,dîner"),
             Recette(nom="Salade", type_repas=None),  # Pas de type spécifié
         ]
         prefs = PreferencesUtilisateur()
-        
+
         eligibles = filtrer_recettes_eligibles(recettes, prefs, type_repas="déjeuner")
         # Le croissant ne devrait pas être dans la liste pour le déjeuner
         noms = [r.nom for r in eligibles]

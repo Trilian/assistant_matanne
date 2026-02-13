@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/core/cache.py - Système de cache avec mocks Streamlit.
 """
 
@@ -41,6 +41,7 @@ def cache_module(mock_session_state):
     with patch("streamlit.session_state", mock_session_state):
         # Import après le patch pour que le module utilise le mock
         import importlib
+
         import src.core.cache as cache_module
 
         importlib.reload(cache_module)
@@ -109,7 +110,9 @@ class TestCacheObtenir:
             Cache.definir("ma_cle", "ma_valeur", ttl=300)
 
             # Simuler expiration
-            mock_session_state._mock_state["cache_timestamps"]["ma_cle"] = datetime.now() - timedelta(seconds=400)
+            mock_session_state._mock_state["cache_timestamps"]["ma_cle"] = (
+                datetime.now() - timedelta(seconds=400)
+            )
 
             result = Cache.obtenir("ma_cle", ttl=300, sentinelle="expiré")
             assert result == "expiré"
@@ -124,7 +127,9 @@ class TestCacheObtenir:
 
             Cache.obtenir("inexistant")
 
-            assert mock_session_state._mock_state["cache_statistiques"]["misses"] == initial_misses + 1
+            assert (
+                mock_session_state._mock_state["cache_statistiques"]["misses"] == initial_misses + 1
+            )
 
     def test_obtenir_increments_hit_counter(self, mock_session_state):
         """Test obtenir incrémente compteur hit."""
@@ -170,7 +175,11 @@ class TestCacheDefinir:
 
             Cache.definir("recette_1", "data", dependencies=["recettes", "recette_1"])
 
-            assert "test_cle" not in mock_session_state._mock_state["cache_dependances"].get("recettes", []) or "recette_1" in mock_session_state._mock_state["cache_dependances"]["recettes"]
+            assert (
+                "test_cle"
+                not in mock_session_state._mock_state["cache_dependances"].get("recettes", [])
+                or "recette_1" in mock_session_state._mock_state["cache_dependances"]["recettes"]
+            )
 
 
 class TestCacheInvalider:
@@ -212,11 +221,16 @@ class TestCacheInvalider:
             from src.core.cache import Cache
 
             Cache.definir("test", "valeur")
-            initial_invalidations = mock_session_state._mock_state["cache_statistiques"]["invalidations"]
+            initial_invalidations = mock_session_state._mock_state["cache_statistiques"][
+                "invalidations"
+            ]
 
             Cache.invalider(pattern="test")
 
-            assert mock_session_state._mock_state["cache_statistiques"]["invalidations"] > initial_invalidations
+            assert (
+                mock_session_state._mock_state["cache_statistiques"]["invalidations"]
+                > initial_invalidations
+            )
 
 
 class TestCacheVider:
@@ -296,7 +310,9 @@ class TestCacheNettoyerExpires:
             Cache.definir("ancienne", "val2")
 
             # Simuler entrée ancienne
-            mock_session_state._mock_state["cache_timestamps"]["ancienne"] = datetime.now() - timedelta(hours=2)
+            mock_session_state._mock_state["cache_timestamps"]["ancienne"] = (
+                datetime.now() - timedelta(hours=2)
+            )
 
             Cache.nettoyer_expires(age_max_secondes=3600)
 
@@ -381,7 +397,9 @@ class TestLimiteDebitEnregistrer:
             LimiteDebit.enregistrer_appel()
 
             assert mock_session_state._mock_state["limite_debit"]["appels_jour"] == initial_jour + 1
-            assert mock_session_state._mock_state["limite_debit"]["appels_heure"] == initial_heure + 1
+            assert (
+                mock_session_state._mock_state["limite_debit"]["appels_heure"] == initial_heure + 1
+            )
 
 
 class TestLimiteDebitStatistiques:
@@ -409,8 +427,9 @@ class TestLimiteDebitReset:
     def test_reset_daily_on_new_day(self, mock_session_state):
         """Test reset journalier au changement de jour."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import LimiteDebit
             from datetime import date
+
+            from src.core.cache import LimiteDebit
 
             LimiteDebit._initialiser()
             mock_session_state._mock_state["limite_debit"]["appels_jour"] = 50
@@ -456,7 +475,7 @@ class TestCachedDecorator:
     def test_cached_with_dependencies(self, mock_session_state):
         """Test cached avec dépendances."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import cached, Cache
+            from src.core.cache import cached
 
             @cached(ttl=300, cle="dep_func", dependencies=["tag1"])
             def ma_fonction():
@@ -465,7 +484,9 @@ class TestCachedDecorator:
             ma_fonction()
 
             # Vérifier que la dépendance est enregistrée
-            assert "dep_func" in mock_session_state._mock_state.get("cache_dependances", {}).get("tag1", [])
+            assert "dep_func" in mock_session_state._mock_state.get("cache_dependances", {}).get(
+                "tag1", []
+            )
 
     def test_cached_auto_generates_key(self, mock_session_state):
         """Test cached génère clé auto si non spécifiée."""

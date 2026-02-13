@@ -1,22 +1,22 @@
-﻿"""
+"""
 Tests unitaires pour recettes.py
 
 Module: src.core.models.recettes
 """
 
+from datetime import date, timedelta
+
 import pytest
-from unittest.mock import MagicMock, patch
-from datetime import date, datetime, timedelta
 
 from src.core.models.recettes import (
+    BatchMeal,
+    EtapeRecette,
+    HistoriqueRecette,
     Ingredient,
     Recette,
     RecetteIngredient,
-    EtapeRecette,
-    VersionRecette,
-    HistoriqueRecette,
-    BatchMeal,
     Recipe,
+    VersionRecette,
 )
 
 
@@ -36,7 +36,7 @@ class TestIngredient:
             categorie="légumes",
             unite="kg",
         )
-        
+
         assert ingredient.id == 1
         assert ingredient.nom == "Tomate"
         assert ingredient.categorie == "légumes"
@@ -45,7 +45,7 @@ class TestIngredient:
     def test_ingredient_repr(self):
         """Test de la représentation string."""
         ingredient = Ingredient(id=1, nom="Carotte")
-        
+
         repr_str = repr(ingredient)
         assert "Ingredient" in repr_str
         assert "Carotte" in repr_str
@@ -76,7 +76,7 @@ class TestRecette:
             portions=8,
             difficulte="facile",
         )
-        
+
         assert recette.id == 1
         assert recette.nom == "Tarte aux pommes"
         assert recette.temps_preparation == 30
@@ -87,7 +87,7 @@ class TestRecette:
     def test_recette_repr(self):
         """Test de la représentation string."""
         recette = Recette(id=1, nom="Quiche lorraine", temps_preparation=20)
-        
+
         repr_str = repr(recette)
         assert "Recette" in repr_str
         assert "Quiche lorraine" in repr_str
@@ -99,7 +99,7 @@ class TestRecette:
             temps_preparation=15,
             temps_cuisson=30,
         )
-        
+
         assert recette.temps_total == 45
 
     def test_recette_temps_total_no_cuisson(self):
@@ -109,7 +109,7 @@ class TestRecette:
             temps_preparation=10,
             temps_cuisson=0,
         )
-        
+
         assert recette.temps_total == 10
 
     def test_recette_robots_compatibles_empty(self):
@@ -122,7 +122,7 @@ class TestRecette:
             compatible_airfryer=False,
             compatible_multicooker=False,
         )
-        
+
         assert recette.robots_compatibles == []
 
     def test_recette_robots_compatibles_all(self):
@@ -135,7 +135,7 @@ class TestRecette:
             compatible_airfryer=True,
             compatible_multicooker=True,
         )
-        
+
         robots = recette.robots_compatibles
         assert "Cookeo" in robots
         assert "Monsieur Cuisine" in robots
@@ -153,7 +153,7 @@ class TestRecette:
             compatible_monsieur_cuisine=False,
             compatible_multicooker=False,
         )
-        
+
         robots = recette.robots_compatibles
         assert "Cookeo" in robots
         assert "Airfryer" in robots
@@ -173,7 +173,7 @@ class TestRecette:
             est_bio=False,
             est_local=False,
         )
-        
+
         assert recette.tags == []
 
     def test_recette_tags_all(self):
@@ -189,7 +189,7 @@ class TestRecette:
             est_bio=True,
             est_local=True,
         )
-        
+
         tags = recette.tags
         assert "rapide" in tags
         assert "équilibré" in tags
@@ -213,7 +213,7 @@ class TestRecette:
             congelable=False,
             est_local=False,
         )
-        
+
         tags = recette.tags
         assert "rapide" in tags
         assert "bio" in tags
@@ -243,7 +243,7 @@ class TestRecetteIngredient:
             unite="g",
             optionnel=False,
         )
-        
+
         assert ri.recette_id == 1
         assert ri.ingredient_id == 2
         assert ri.quantite == 200.0
@@ -253,7 +253,7 @@ class TestRecetteIngredient:
     def test_recetteingredient_repr(self):
         """Test de la représentation string."""
         ri = RecetteIngredient(id=1, recette_id=1, ingredient_id=2, quantite=100.0, unite="g")
-        
+
         repr_str = repr(ri)
         assert "RecetteIngredient" in repr_str
 
@@ -272,18 +272,18 @@ class TestEtapeRecette:
             id=1,
             recette_id=1,
             ordre=1,
-            description="Préchauffer le four Ã  180Â°C",
+            description="Préchauffer le four à 180°C",
             duree=5,
         )
-        
+
         assert etape.ordre == 1
-        assert etape.description == "Préchauffer le four Ã  180Â°C"
+        assert etape.description == "Préchauffer le four à 180°C"
         assert etape.duree == 5
 
     def test_etaperecette_repr(self):
         """Test de la représentation string."""
         etape = EtapeRecette(id=1, recette_id=1, ordre=2, description="Mélanger")
-        
+
         repr_str = repr(etape)
         assert "EtapeRecette" in repr_str
         assert "2" in repr_str  # ordre
@@ -306,14 +306,14 @@ class TestVersionRecette:
             instructions_modifiees="Mixer finement",
             notes_bebe="Adapté pour 12 mois+",
         )
-        
+
         assert version.type_version == "bébé"
         assert version.notes_bebe == "Adapté pour 12 mois+"
 
     def test_versionrecette_repr(self):
         """Test de la représentation string."""
         version = VersionRecette(id=1, recette_base_id=1, type_version="batch_cooking")
-        
+
         repr_str = repr(version)
         assert "VersionRecette" in repr_str
         assert "batch_cooking" in repr_str
@@ -337,7 +337,7 @@ class TestHistoriqueRecette:
             note=5,
             avis="Excellent!",
         )
-        
+
         assert hist.date_cuisson == date(2024, 1, 15)
         assert hist.note == 5
         assert hist.avis == "Excellent!"
@@ -350,7 +350,7 @@ class TestHistoriqueRecette:
             date_cuisson=date(2024, 1, 15),
             note=4,
         )
-        
+
         repr_str = repr(hist)
         assert "HistoriqueRecette" in repr_str
         assert "2024-01-15" in repr_str
@@ -363,7 +363,7 @@ class TestHistoriqueRecette:
             recette_id=1,
             date_cuisson=yesterday,
         )
-        
+
         assert hist.nb_jours_depuis == 1
 
     def test_historiquerecette_nb_jours_depuis_today(self):
@@ -374,7 +374,7 @@ class TestHistoriqueRecette:
             recette_id=1,
             date_cuisson=today,
         )
-        
+
         assert hist.nb_jours_depuis == 0
 
     def test_historiquerecette_nb_jours_depuis_week_ago(self):
@@ -385,7 +385,7 @@ class TestHistoriqueRecette:
             recette_id=1,
             date_cuisson=week_ago,
         )
-        
+
         assert hist.nb_jours_depuis == 7
 
 
@@ -408,7 +408,7 @@ class TestBatchMeal:
             date_peremption=date(2024, 1, 20),
             localisation="Congélateur",
         )
-        
+
         assert batch.nom == "Bolognaise"
         assert batch.portions_creees == 8
         assert batch.portions_restantes == 6
@@ -424,9 +424,8 @@ class TestBatchMeal:
             date_preparation=date.today(),
             date_peremption=date.today() + timedelta(days=5),
         )
-        
+
         repr_str = repr(batch)
         assert "BatchMeal" in repr_str
         assert "Ratatouille" in repr_str
         assert "2" in repr_str  # portions_restantes
-

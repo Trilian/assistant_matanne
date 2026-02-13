@@ -2,4 +2,4 @@
 
 from . import loto, paris
 
-__all__ = ['loto', 'paris']
+__all__ = ["loto", "paris"]

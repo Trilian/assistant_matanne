@@ -1,4 +1,4 @@
-﻿"""
+"""
 Central logging configuration for the application.
 
 Provides a small helper to configure Python logging consistently
@@ -67,36 +67,39 @@ import sys
 class FiltreSecrets(logging.Filter):
     """
     Filtre qui masque les informations sensibles dans les logs.
-    
+
     Patterns masqués :
     - URLs de base de données (postgresql://, mysql://, etc.)
     - Clés API (API_KEY, SECRET_KEY, etc.)
     - Tokens d'authentification
     """
-    
+
     PATTERNS_SECRETS = [
         # URLs de base de données avec credentials
-        (r'(postgresql|mysql|mongodb|redis):\/\/[^:]+:[^@]+@', r'\1://***:***@'),
+        (r"(postgresql|mysql|mongodb|redis):\/\/[^:]+:[^@]+@", r"\1://***:***@"),
         # DATABASE_URL complète
-        (r'DATABASE_URL[=:]\s*["\']?[^"\'\s]+["\']?', 'DATABASE_URL=***MASKED***'),
+        (r'DATABASE_URL[=:]\s*["\']?[^"\'\s]+["\']?', "DATABASE_URL=***MASKED***"),
         # Clés API génériques
-        (r'(api[_-]?key|secret[_-]?key|access[_-]?token|auth[_-]?token)[=:]\s*["\']?[\w\-]+["\']?', r'\1=***MASKED***'),
+        (
+            r'(api[_-]?key|secret[_-]?key|access[_-]?token|auth[_-]?token)[=:]\s*["\']?[\w\-]+["\']?',
+            r"\1=***MASKED***",
+        ),
         # Tokens Bearer
-        (r'Bearer\s+[\w\-\.]+', 'Bearer ***MASKED***'),
+        (r"Bearer\s+[\w\-\.]+", "Bearer ***MASKED***"),
         # Mots de passe dans les chaînes
-        (r'(password|pwd|pass)[=:]\s*["\']?[^"\'\s]+["\']?', r'\1=***MASKED***'),
+        (r'(password|pwd|pass)[=:]\s*["\']?[^"\'\s]+["\']?', r"\1=***MASKED***"),
         # Clés Mistral
-        (r'(mistral[_-]?api[_-]?key)[=:]\s*["\']?[\w\-]+["\']?', r'\1=***MASKED***'),
+        (r'(mistral[_-]?api[_-]?key)[=:]\s*["\']?[\w\-]+["\']?', r"\1=***MASKED***"),
     ]
     """Patterns de détection des secrets avec leur remplacement."""
-    
+
     def filter(self, record: logging.LogRecord) -> bool:
         """
         Filtre un enregistrement de log pour masquer les secrets.
-        
+
         Args:
             record: Enregistrement de log
-            
+
         Returns:
             True (on garde toujours l'enregistrement, on le modifie juste)
         """
@@ -105,7 +108,7 @@ class FiltreSecrets(logging.Filter):
             for pattern, replacement in self.PATTERNS_SECRETS:
                 message = re.sub(pattern, replacement, message, flags=re.IGNORECASE)
             record.msg = message
-            
+
         # Aussi filtrer les arguments
         if record.args:
             args_list = list(record.args) if isinstance(record.args, tuple) else [record.args]
@@ -116,7 +119,7 @@ class FiltreSecrets(logging.Filter):
                         arg = re.sub(pattern, replacement, arg, flags=re.IGNORECASE)
                 filtered_args.append(arg)
             record.args = tuple(filtered_args)
-            
+
         return True
 
 
@@ -195,10 +198,10 @@ class GestionnaireLog:
             "%(levelname)-8s | %(name)-25s | %(message)s", datefmt="%H:%M:%S"
         )
         console_handler.setFormatter(format_console)
-        
+
         # Ajouter le filtre de secrets
         console_handler.addFilter(FiltreSecrets())
-        
+
         root_logger.addHandler(console_handler)
 
         GestionnaireLog._initialise = True

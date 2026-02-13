@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modèles SQLAlchemy pour les calendriers externes.
 
 Contient :
@@ -21,19 +21,20 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # ENUMS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class CalendarProvider(str, Enum):
     """Fournisseurs de calendrier."""
+
     GOOGLE = "google"
     APPLE = "apple"
     OUTLOOK = "outlook"
@@ -42,22 +43,23 @@ class CalendarProvider(str, Enum):
 
 class SyncDirection(str, Enum):
     """Direction de synchronisation calendrier."""
+
     IMPORT = "import"
     EXPORT = "export"
     BIDIRECTIONAL = "bidirectional"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TABLE CALENDRIERS EXTERNES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class CalendrierExterne(Base):
     """Calendrier externe synchronisé.
-    
+
     Table SQL: calendriers_externes
     Utilisé par: src/services/calendar_sync.py
-    
+
     Attributes:
         provider: Fournisseur (google, apple, outlook, ical)
         nom: Nom du calendrier
@@ -80,10 +82,10 @@ class CalendrierExterne(Base):
     sync_interval_minutes: Mapped[int] = mapped_column(Integer, default=60)
     last_sync: Mapped[datetime | None] = mapped_column(DateTime)
     sync_direction: Mapped[str] = mapped_column(String(20), default="bidirectional")
-    
+
     # Supabase user
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), index=True)
-    
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
@@ -99,16 +101,16 @@ class CalendrierExterne(Base):
         return f"<CalendrierExterne(id={self.id}, provider='{self.provider}', nom='{self.nom}')>"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TABLE ÉVÉNEMENTS CALENDRIER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class EvenementCalendrier(Base):
     """Événement de calendrier synchronisé.
-    
+
     Table SQL: evenements_calendrier
-    
+
     Attributes:
         uid: UID iCal unique
         titre: Titre de l'événement
@@ -134,24 +136,22 @@ class EvenementCalendrier(Base):
     all_day: Mapped[bool] = mapped_column(Boolean, default=False)
     recurrence_rule: Mapped[str | None] = mapped_column(Text)  # RRULE iCal
     rappel_minutes: Mapped[int | None] = mapped_column(Integer)
-    
+
     # Relation calendrier source
     source_calendrier_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey("calendriers_externes.id", ondelete="SET NULL")
     )
-    
+
     # Supabase user
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), index=True)
-    
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
-    __table_args__ = (
-        UniqueConstraint("uid", "user_id", name="uq_event_uid_user"),
-    )
+    __table_args__ = (UniqueConstraint("uid", "user_id", name="uq_event_uid_user"),)
 
     # Relations
     calendrier_source: Mapped[Optional["CalendrierExterne"]] = relationship(

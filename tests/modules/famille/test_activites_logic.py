@@ -1,38 +1,39 @@
-﻿"""
+"""
 Tests pour activites_logic.py et routines_logic.py - Module Famille
 Couverture cible: 80%+
 """
+
+from datetime import date, timedelta
+
 import pytest
-from datetime import date, time, timedelta
 
 from src.modules.famille.activites_utils import (
+    CATEGORIES_AGE,
+    LIEUX,
     # Constantes
     TYPES_ACTIVITE,
-    LIEUX,
-    CATEGORIES_AGE,
-    # Filtrage
-    filtrer_par_type,
-    filtrer_par_lieu,
-    filtrer_par_date,
-    get_activites_a_venir,
-    get_activites_passees,
+    calculer_frequence_hebdomadaire,
     # Statistiques
     calculer_statistiques_activites,
-    calculer_frequence_hebdomadaire,
     detecter_desequilibre_types,
+    filtrer_par_date,
+    filtrer_par_lieu,
+    # Filtrage
+    filtrer_par_type,
+    # Formatage
+    formater_activite_resume,
+    get_activites_a_venir,
+    get_activites_passees,
+    grouper_par_mois,
     # Recommandations
     suggerer_activites_age,
     # Validation
     valider_activite,
-    # Formatage
-    formater_activite_resume,
-    grouper_par_mois,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -85,9 +86,9 @@ def activites_vides():
     return []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantesActivites:
@@ -111,9 +112,9 @@ class TestConstantesActivites:
         assert "1-2 ans" in CATEGORIES_AGE
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FILTRAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFiltrageActivites:
@@ -139,11 +140,7 @@ class TestFiltrageActivites:
     def test_filtrer_par_date(self, activites_sample):
         """Filtre par période."""
         today = date.today()
-        result = filtrer_par_date(
-            activites_sample,
-            today,
-            today + timedelta(days=5)
-        )
+        result = filtrer_par_date(activites_sample, today, today + timedelta(days=5))
         # Devrait inclure les activités des 5 prochains jours
         assert len(result) >= 2
 
@@ -165,6 +162,7 @@ class TestFiltrageActivites:
             act_date = act["date"]
             if isinstance(act_date, str):
                 from datetime import datetime
+
                 act_date = datetime.fromisoformat(act_date).date()
             assert act_date >= today
 
@@ -175,9 +173,9 @@ class TestFiltrageActivites:
         assert len(result) >= 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestStatistiquesActivites:
@@ -186,7 +184,7 @@ class TestStatistiquesActivites:
     def test_calculer_statistiques_activites(self, activites_sample):
         """Statistiques complètes."""
         result = calculer_statistiques_activites(activites_sample)
-        
+
         assert result["total"] == 4
         assert "par_type" in result
         assert "par_lieu" in result
@@ -227,9 +225,9 @@ class TestStatistiquesActivites:
         assert result == 0.0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS RECOMMANDATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestRecommandationsActivites:
@@ -271,6 +269,7 @@ class TestRecommandationsActivites:
             assert "type" in s
             assert "titre" in s
             assert "description" in s
+
 
 class TestDesequilibres:
     """Tests pour la détection des déséquilibres."""
@@ -316,13 +315,7 @@ class TestValidation:
 
     def test_activite_valide(self):
         """Activité complète et valide."""
-        data = {
-            "titre": "Football",
-            "type": "Sport",
-            "date": date.today(),
-            "duree": 60,
-            "cout": 0
-        }
+        data = {"titre": "Football", "type": "Sport", "date": date.today(), "duree": 60, "cout": 0}
         valide, erreurs = valider_activite(data)
         assert valide is True
         assert len(erreurs) == 0
@@ -343,33 +336,21 @@ class TestValidation:
 
     def test_activite_type_invalide(self):
         """Type invalide détecté."""
-        data = {
-            "titre": "Test",
-            "type": "TypeInexistant",
-            "date": date.today()
-        }
+        data = {"titre": "Test", "type": "TypeInexistant", "date": date.today()}
         valide, erreurs = valider_activite(data)
         assert valide is False
         assert any("type" in e.lower() for e in erreurs)
 
     def test_activite_duree_negative(self):
         """Durée négative invalide."""
-        data = {
-            "titre": "Test",
-            "date": date.today(),
-            "duree": -30
-        }
+        data = {"titre": "Test", "date": date.today(), "duree": -30}
         valide, erreurs = valider_activite(data)
         assert valide is False
         assert any("durée" in e.lower() for e in erreurs)
 
     def test_activite_cout_negatif(self):
         """Coût négatif invalide."""
-        data = {
-            "titre": "Test",
-            "date": date.today(),
-            "cout": -10
-        }
+        data = {"titre": "Test", "date": date.today(), "cout": -10}
         valide, erreurs = valider_activite(data)
         assert valide is False
         assert any("coût" in e.lower() for e in erreurs)
@@ -380,11 +361,7 @@ class TestFormatage:
 
     def test_formater_resume_complet(self):
         """Résumé avec tous les champs."""
-        activite = {
-            "titre": "Football",
-            "type": "Sport",
-            "lieu": "Parc"
-        }
+        activite = {"titre": "Football", "type": "Sport", "lieu": "Parc"}
         resume = formater_activite_resume(activite)
         assert "Football" in resume
         assert "Sport" in resume

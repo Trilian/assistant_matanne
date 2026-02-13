@@ -1,12 +1,11 @@
-﻿"""
+"""
 Tests unitaires pour atoms.py
 
 Module: src.ui.components.atoms
 Couverture cible: >80%
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 
 class TestBadge:
@@ -59,17 +58,17 @@ class TestEtatVide:
         mock_markdown.assert_called_once()
         call_args = mock_markdown.call_args[0][0]
         assert "Aucune recette" in call_args
-        assert "ðŸ“­" in call_args  # Icône par défaut
+        assert "📭" in call_args  # Icône par défaut
 
     @patch("streamlit.markdown")
     def test_etat_vide_avec_icone(self, mock_markdown):
         """Test etat_vide avec icône personnalisée."""
         from src.ui.components.atoms import etat_vide
 
-        etat_vide("Aucune recette", icone="ðŸ½ï¸")
+        etat_vide("Aucune recette", icone="🍽️")
 
         call_args = mock_markdown.call_args[0][0]
-        assert "ðŸ½ï¸" in call_args
+        assert "🍽️" in call_args
 
     @patch("streamlit.markdown")
     def test_etat_vide_avec_sous_texte(self, mock_markdown):
@@ -226,17 +225,17 @@ class TestBoiteInfo:
         call_args = mock_markdown.call_args[0][0]
         assert "Astuce" in call_args
         assert "Conseil utile" in call_args
-        assert "â„¹ï¸" in call_args  # Icône par défaut
+        assert "ℹ️" in call_args  # Icône par défaut
 
     @patch("streamlit.markdown")
     def test_boite_info_icone_personnalisee(self, mock_markdown):
         """Test boite_info avec icône personnalisée."""
         from src.ui.components.atoms import boite_info
 
-        boite_info("Astuce", "Conseil", icone="ðŸ’¡")
+        boite_info("Astuce", "Conseil", icone="💡")
 
         call_args = mock_markdown.call_args[0][0]
-        assert "ðŸ’¡" in call_args
+        assert "💡" in call_args
 
     @patch("streamlit.markdown")
     def test_boite_info_html_valide(self, mock_markdown):
@@ -255,67 +254,81 @@ class TestAtomsImports:
     def test_import_badge(self):
         """Vérifie que badge est importable."""
         from src.ui.components.atoms import badge
+
         assert callable(badge)
 
     def test_import_etat_vide(self):
         """Vérifie que etat_vide est importable."""
         from src.ui.components.atoms import etat_vide
+
         assert callable(etat_vide)
 
     def test_import_carte_metrique(self):
         """Vérifie que carte_metrique est importable."""
         from src.ui.components.atoms import carte_metrique
+
         assert callable(carte_metrique)
 
     def test_import_notification(self):
         """Vérifie que notification est importable."""
         from src.ui.components.atoms import notification
+
         assert callable(notification)
 
     def test_import_separateur(self):
         """Vérifie que separateur est importable."""
         from src.ui.components.atoms import separateur
+
         assert callable(separateur)
 
     def test_import_boite_info(self):
         """Vérifie que boite_info est importable."""
         from src.ui.components.atoms import boite_info
+
         assert callable(boite_info)
 
     def test_import_via_components(self):
         """Vérifie l'import via le module components."""
         from src.ui.components import (
             badge,
-            etat_vide,
+            boite_info,
             carte_metrique,
+            etat_vide,
             notification,
             separateur,
-            boite_info,
         )
-        assert all(callable(f) for f in [
-            badge,
-            etat_vide,
-            carte_metrique,
-            notification,
-            separateur,
-            boite_info,
-        ])
+
+        assert all(
+            callable(f)
+            for f in [
+                badge,
+                etat_vide,
+                carte_metrique,
+                notification,
+                separateur,
+                boite_info,
+            ]
+        )
 
     def test_import_via_ui(self):
         """Vérifie l'import via le module ui."""
         from src.ui import (
             badge,
-            etat_vide,
+            boite_info,
             carte_metrique,
+            etat_vide,
             notification,
             separateur,
-            boite_info,
         )
-        assert all(callable(f) for f in [
-            badge,
-            etat_vide,
-            carte_metrique,
-            notification,
-            separateur,
-            boite_info,
-        ])
+
+        assert all(
+            callable(f)
+            for f in [
+                badge,
+                etat_vide,
+                carte_metrique,
+                notification,
+                separateur,
+                boite_info,
+            ]
+        )

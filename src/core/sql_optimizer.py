@@ -1,4 +1,4 @@
-﻿"""
+"""
 SQL Optimizer - Optimisation des requêtes SQLAlchemy.
 
 Fonctionnalités :
@@ -13,30 +13,30 @@ import logging
 import re
 import time
 from collections import defaultdict
-from contextlib import contextmanager
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 import streamlit as st
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Query, Session, joinedload, selectinload
+from sqlalchemy.orm import Query, Session, selectinload
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TYPES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @dataclass
 class InfoRequete:
     """Information sur une requête SQL."""
-    
+
     sql: str
     duration_ms: float
     timestamp: datetime = field(default_factory=datetime.now)
@@ -48,7 +48,7 @@ class InfoRequete:
 @dataclass
 class DetectionN1:
     """Détection de problème N+1."""
-    
+
     table: str
     parent_table: str
     count: int
@@ -56,55 +56,55 @@ class DetectionN1:
     sample_query: str = ""
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # LISTENER SQLALCHEMY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class EcouteurSQLAlchemy:
     """
     Écoute les événements SQLAlchemy pour tracking.
-    
-    S'attache automatiquement Ã  l'engine pour capturer
+
+    S'attache automatiquement à l'engine pour capturer
     toutes les requêtes exécutées.
     """
-    
+
     SESSION_KEY = "_sqlalchemy_query_log"
     _installed = False
     _current_query_start: dict = {}
-    
+
     @classmethod
     def install(cls, engine: Engine) -> None:
         """
         Installe les listeners sur l'engine.
-        
+
         Args:
             engine: SQLAlchemy Engine
         """
         if cls._installed:
             return
-        
+
         @event.listens_for(engine, "before_cursor_execute")
         def before_execute(conn, cursor, statement, parameters, context, executemany):
             conn.info["query_start_time"] = time.perf_counter()
-        
+
         @event.listens_for(engine, "after_cursor_execute")
         def after_execute(conn, cursor, statement, parameters, context, executemany):
             start_time = conn.info.pop("query_start_time", None)
             if start_time:
                 duration_ms = (time.perf_counter() - start_time) * 1000
                 cls._log_query(statement, duration_ms, parameters)
-        
+
         cls._installed = True
         logger.info("[OK] SQLAlchemy listener installé")
-    
+
     @classmethod
     def _log_query(cls, sql: str, duration_ms: float, parameters: Any) -> None:
         """Enregistre une requête dans le log."""
         # Extraire table et opération
         operation = cls._extract_operation(sql)
         table = cls._extract_table(sql)
-        
+
         query_info = InfoRequete(
             sql=sql[:500],  # Tronquer
             duration_ms=duration_ms,
@@ -112,21 +112,21 @@ class EcouteurSQLAlchemy:
             operation=operation,
             parameters=dict(parameters) if isinstance(parameters, dict) else {},
         )
-        
+
         # Sauvegarder dans session
         if cls.SESSION_KEY not in st.session_state:
             st.session_state[cls.SESSION_KEY] = []
-        
+
         st.session_state[cls.SESSION_KEY].append(query_info)
-        
+
         # Garder seulement les 200 dernières
         if len(st.session_state[cls.SESSION_KEY]) > 200:
             st.session_state[cls.SESSION_KEY] = st.session_state[cls.SESSION_KEY][-200:]
-        
+
         # Log si lente
         if duration_ms > 100:
             logger.warning(f"[!] Requête lente ({duration_ms:.0f}ms) sur {table}: {operation}")
-    
+
     @classmethod
     def _extract_operation(cls, sql: str) -> str:
         """Extrait le type d'opération SQL."""
@@ -135,7 +135,7 @@ class EcouteurSQLAlchemy:
             if sql_upper.startswith(op):
                 return op
         return "OTHER"
-    
+
     @classmethod
     def _extract_table(cls, sql: str) -> str:
         """Extrait le nom de la table principale."""
@@ -145,24 +145,24 @@ class EcouteurSQLAlchemy:
             r"UPDATE\s+[\"']?(\w+)[\"']?",
             r"TABLE\s+[\"']?(\w+)[\"']?",
         ]
-        
+
         for pattern in patterns:
             match = re.search(pattern, sql, re.IGNORECASE)
             if match:
                 return match.group(1)
-        
+
         return "unknown"
-    
+
     @classmethod
     def obtenir_requetes(cls) -> list[InfoRequete]:
         """Retourne toutes les requêtes loggées."""
         return st.session_state.get(cls.SESSION_KEY, [])
-    
+
     @classmethod
     def obtenir_statistiques(cls) -> dict:
         """Calcule les statistiques des requêtes."""
         queries = cls.obtenir_requetes()
-        
+
         if not queries:
             return {
                 "total": 0,
@@ -171,20 +171,20 @@ class EcouteurSQLAlchemy:
                 "slow_queries": [],
                 "avg_time_ms": 0,
             }
-        
+
         by_operation = defaultdict(int)
         by_table = defaultdict(int)
         total_time = 0
         slow = []
-        
+
         for q in queries:
             by_operation[q.operation] += 1
             by_table[q.table] += 1
             total_time += q.duration_ms
-            
+
             if q.duration_ms > 100:
                 slow.append(q)
-        
+
         return {
             "total": len(queries),
             "by_operation": dict(by_operation),
@@ -192,64 +192,64 @@ class EcouteurSQLAlchemy:
             "slow_queries": slow[-10:],
             "avg_time_ms": round(total_time / len(queries), 2),
         }
-    
+
     @classmethod
     def clear(cls) -> None:
         """Vide le log."""
         st.session_state[cls.SESSION_KEY] = []
-    
+
     # Alias anglais
     get_queries = obtenir_requetes
     get_stats = obtenir_statistiques
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # DÉTECTEUR N+1
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class DetecteurN1:
     """
     Détecte les problèmes N+1 queries.
-    
+
     Un problème N+1 se produit quand on fait N requêtes
     supplémentaires pour charger des relations, au lieu
     d'une seule requête avec JOIN.
     """
-    
+
     SESSION_KEY = "_n1_detections"
     THRESHOLD = 5  # Min requêtes similaires pour alerter
-    
+
     @classmethod
     def analyze(cls) -> list[DetectionN1]:
         """
         Analyse les requêtes récentes pour détecter N+1.
-        
+
         Returns:
             Liste des détections N+1
         """
         queries = EcouteurSQLAlchemy.obtenir_requetes()
-        
+
         if len(queries) < cls.THRESHOLD:
             return []
-        
+
         # Grouper par pattern de requête
         patterns = defaultdict(list)
-        
+
         for q in queries:
             if q.operation == "SELECT":
                 # Normaliser la requête (retirer les valeurs)
                 pattern = cls._normalize_query(q.sql)
                 patterns[pattern].append(q)
-        
+
         # Détecter les patterns répétés
         detections = []
-        
+
         for pattern, pattern_queries in patterns.items():
             if len(pattern_queries) >= cls.THRESHOLD:
                 # Probable N+1
                 table = pattern_queries[0].table
-                
+
                 detection = DetectionN1(
                     table=table,
                     parent_table=cls._guess_parent_table(pattern_queries),
@@ -257,24 +257,24 @@ class DetecteurN1:
                     sample_query=pattern_queries[0].sql[:200],
                 )
                 detections.append(detection)
-        
+
         # Sauvegarder
         st.session_state[cls.SESSION_KEY] = detections
-        
+
         if detections:
             logger.warning(f"[!] {len(detections)} problème(s) N+1 détecté(s)")
-        
+
         return detections
-    
+
     @classmethod
     def _normalize_query(cls, sql: str) -> str:
         """Normalise une requête pour comparaison."""
         # Retirer les valeurs numériques
-        normalized = re.sub(r'\b\d+\b', '?', sql)
+        normalized = re.sub(r"\b\d+\b", "?", sql)
         # Retirer les strings
         normalized = re.sub(r"'[^']*'", "'?'", normalized)
         return normalized
-    
+
     @classmethod
     def _guess_parent_table(cls, queries: list[InfoRequete]) -> str:
         """Devine la table parente d'un N+1."""
@@ -285,23 +285,23 @@ class DetecteurN1:
                 fk = match.group(1)
                 return fk.replace("_id", "")
         return "unknown"
-    
+
     @classmethod
     def obtenir_detections(cls) -> list[DetectionN1]:
         """Retourne les détections N+1."""
         return st.session_state.get(cls.SESSION_KEY, [])
-    
+
     @classmethod
     def obtenir_suggestions(cls) -> list[str]:
         """
         Génère des suggestions pour corriger les N+1.
-        
+
         Returns:
             Liste de suggestions
         """
         detections = cls.obtenir_detections()
         suggestions = []
-        
+
         for d in detections:
             if d.parent_table != "unknown":
                 suggestions.append(
@@ -313,24 +313,24 @@ class DetecteurN1:
                     f"ðŸ’¡ Table '{d.table}': {d.count} requêtes similaires détectées. "
                     f"Considérer un eager loading des relations."
                 )
-        
+
         return suggestions
-    
+
     # Alias anglais
     get_detections = obtenir_detections
     get_suggestions = obtenir_suggestions
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # BATCH LOADER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class ChargeurParLots:
     """
     Utilitaires pour le chargement par lots.
     """
-    
+
     @staticmethod
     def charger_par_lots(
         query: Query,
@@ -339,67 +339,67 @@ class ChargeurParLots:
     ) -> list:
         """
         Charge les résultats d'une requête par lots.
-        
+
         Args:
             query: Requête SQLAlchemy
             batch_size: Taille des lots
             callback: Fonction appelée pour chaque lot
-            
+
         Returns:
             Tous les résultats
         """
         results = []
         offset = 0
-        
+
         while True:
             batch = query.offset(offset).limit(batch_size).all()
-            
+
             if not batch:
                 break
-            
+
             results.extend(batch)
-            
+
             if callback:
                 callback(batch)
-            
+
             offset += batch_size
-            
+
             # Éviter boucle infinie
             if len(batch) < batch_size:
                 break
-        
+
         return results
-    
+
     @staticmethod
     def chunked(items: list, chunk_size: int = 100):
         """
         Générateur qui découpe une liste en chunks.
-        
+
         Args:
-            items: Liste Ã  découper
+            items: Liste à découper
             chunk_size: Taille des chunks
-            
+
         Yields:
             Chunks de la liste
         """
         for i in range(0, len(items), chunk_size):
-            yield items[i:i + chunk_size]
+            yield items[i : i + chunk_size]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # QUERY BUILDER OPTIMISÉ
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class ConstructeurRequeteOptimisee:
     """
     Builder de requêtes avec optimisations automatiques.
     """
-    
+
     def __init__(self, session: Session, model: type):
         """
         Initialise le builder.
-        
+
         Args:
             session: Session SQLAlchemy
             model: Modèle de base
@@ -412,126 +412,125 @@ class ConstructeurRequeteOptimisee:
         self._order_by = None
         self._limit = None
         self._offset = None
-    
+
     def eager_load(self, *relationships: str) -> "ConstructeurRequeteOptimisee":
         """
         Ajoute des relations en eager loading.
-        
+
         Args:
             relationships: Noms des relations
-            
+
         Returns:
             Self pour chaînage
         """
         for rel in relationships:
             self._eager_loads.append(rel)
         return self
-    
+
     def filter_by(self, **kwargs) -> "ConstructeurRequeteOptimisee":
         """
         Ajoute des filtres.
-        
+
         Args:
             kwargs: Filtres clé=valeur
-            
+
         Returns:
             Self pour chaînage
         """
         self._filters.append(kwargs)
         return self
-    
+
     def order(self, column: str, desc: bool = False) -> "ConstructeurRequeteOptimisee":
         """
         Définit l'ordre.
-        
+
         Args:
             column: Colonne de tri
             desc: Ordre descendant
-            
+
         Returns:
             Self pour chaînage
         """
         self._order_by = (column, desc)
         return self
-    
+
     def paginate(self, page: int = 1, per_page: int = 20) -> "ConstructeurRequeteOptimisee":
         """
         Applique pagination.
-        
+
         Args:
             page: Numéro de page (1-based)
             per_page: Éléments par page
-            
+
         Returns:
             Self pour chaînage
         """
         self._offset = (page - 1) * per_page
         self._limit = per_page
         return self
-    
+
     def build(self) -> Query:
         """
         Construit la requête optimisée.
-        
+
         Returns:
             Query SQLAlchemy
         """
         query = self._query
-        
+
         # Appliquer eager loading
         for rel in self._eager_loads:
             if hasattr(self._model, rel):
                 # Utiliser selectinload pour les collections
                 query = query.options(selectinload(getattr(self._model, rel)))
-        
+
         # Appliquer filtres
         for filter_kwargs in self._filters:
             query = query.filter_by(**filter_kwargs)
-        
+
         # Appliquer ordre
         if self._order_by:
             column, desc = self._order_by
             col_attr = getattr(self._model, column, None)
             if col_attr is not None:
                 query = query.order_by(col_attr.desc() if desc else col_attr)
-        
+
         # Appliquer pagination
         if self._offset is not None:
             query = query.offset(self._offset)
         if self._limit is not None:
             query = query.limit(self._limit)
-        
+
         return query
-    
+
     def all(self) -> list:
         """Exécute et retourne tous les résultats."""
         return self.build().all()
-    
+
     def first(self) -> Any | None:
         """Exécute et retourne le premier résultat."""
         return self.build().first()
-    
+
     def count(self) -> int:
         """Compte les résultats."""
         return self.build().count()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # COMPOSANTS UI
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def afficher_analyse_sql():
     """Affiche l'analyse SQL dans l'interface."""
-    
+
     stats = EcouteurSQLAlchemy.obtenir_statistiques()
-    
+
     with st.expander("ðŸ—ƒï¸ Analyse SQL", expanded=False):
-        
         if stats["total"] == 0:
             st.info("Aucune requête enregistrée")
             return
-        
+
         # Métriques générales
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -546,20 +545,20 @@ def afficher_analyse_sql():
                 delta=f"-{slow_count}" if slow_count > 0 else None,
                 delta_color="inverse",
             )
-        
+
         # Par opération
         st.caption("[CHART] Par opération:")
         for op, count in stats["by_operation"].items():
             st.progress(count / stats["total"], text=f"{op}: {count}")
-        
+
         # Détection N+1
         detections = DetecteurN1.analyze()
         if detections:
             st.warning(f"[!] {len(detections)} problème(s) N+1 détecté(s)")
-            
+
             for suggestion in DetecteurN1.obtenir_suggestions():
                 st.caption(suggestion)
-        
+
         # Boutons
         col1, col2 = st.columns(2)
         with col1:
@@ -572,9 +571,9 @@ def afficher_analyse_sql():
                 st.rerun()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # EXPORTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 __all__ = [

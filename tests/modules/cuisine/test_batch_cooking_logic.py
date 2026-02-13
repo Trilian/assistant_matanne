@@ -1,29 +1,27 @@
-﻿"""
+"""
 Tests pour batch_cooking_logic.py - Fonctions pures de batch cooking
 """
 
-import pytest
 from datetime import date, time, timedelta
 
 from src.modules.cuisine.batch_cooking_utils import (
-    calculer_duree_totale_optimisee,
-    estimer_heure_fin,
-    formater_duree,
-    valider_session_batch,
-    valider_preparation,
-    optimiser_ordre_etapes,
-    detecter_conflits_robots,
-    filtrer_etapes_bruyantes,
-    ROBOTS_INFO,
-    LOCALISATIONS,
-    JOURS_SEMAINE,
     JOURS_EMOJI,
+    JOURS_SEMAINE,
+    LOCALISATIONS,
+    ROBOTS_INFO,
+    calculer_duree_totale_optimisee,
+    detecter_conflits_robots,
+    estimer_heure_fin,
+    filtrer_etapes_bruyantes,
+    formater_duree,
+    optimiser_ordre_etapes,
+    valider_preparation,
+    valider_session_batch,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Constantes
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantes:
@@ -59,9 +57,9 @@ class TestConstantes:
             assert "conservation_max_jours" in loc_info
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Calculs de Temps
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculerDureeTotaleOptimisee:
@@ -163,9 +161,9 @@ class TestFormaterDuree:
         assert formater_duree(125) == "2h05"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Validation Session Batch
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestValiderSessionBatch:
@@ -176,7 +174,7 @@ class TestValiderSessionBatch:
         resultat = valider_session_batch(
             date_session=date.today() + timedelta(days=1),
             recettes_ids=[1, 2, 3],
-            robots=["cookeo", "four"]
+            robots=["cookeo", "four"],
         )
         assert resultat["valide"] is True
         assert len(resultat["erreurs"]) == 0
@@ -184,9 +182,7 @@ class TestValiderSessionBatch:
     def test_date_passee(self):
         """Rejette une date passée."""
         resultat = valider_session_batch(
-            date_session=date.today() - timedelta(days=1),
-            recettes_ids=[1],
-            robots=["cookeo"]
+            date_session=date.today() - timedelta(days=1), recettes_ids=[1], robots=["cookeo"]
         )
         assert resultat["valide"] is False
         assert any("passé" in e for e in resultat["erreurs"])
@@ -194,9 +190,7 @@ class TestValiderSessionBatch:
     def test_date_aujourdhui(self):
         """Accepte la date d'aujourd'hui."""
         resultat = valider_session_batch(
-            date_session=date.today(),
-            recettes_ids=[1],
-            robots=["cookeo"]
+            date_session=date.today(), recettes_ids=[1], robots=["cookeo"]
         )
         # Date d'aujourd'hui devrait être acceptée
         assert resultat["valide"] is True
@@ -204,9 +198,7 @@ class TestValiderSessionBatch:
     def test_sans_recettes(self):
         """Rejette une session sans recettes."""
         resultat = valider_session_batch(
-            date_session=date.today(),
-            recettes_ids=[],
-            robots=["cookeo"]
+            date_session=date.today(), recettes_ids=[], robots=["cookeo"]
         )
         assert resultat["valide"] is False
         assert any("recette" in e.lower() for e in resultat["erreurs"])
@@ -214,9 +206,7 @@ class TestValiderSessionBatch:
     def test_trop_de_recettes(self):
         """Rejette si plus de 10 recettes."""
         resultat = valider_session_batch(
-            date_session=date.today(),
-            recettes_ids=list(range(15)),
-            robots=["cookeo"]
+            date_session=date.today(), recettes_ids=list(range(15)), robots=["cookeo"]
         )
         assert resultat["valide"] is False
         assert any("10" in e or "max" in e.lower() for e in resultat["erreurs"])
@@ -224,17 +214,15 @@ class TestValiderSessionBatch:
     def test_robot_inconnu(self):
         """Signale les robots inconnus."""
         resultat = valider_session_batch(
-            date_session=date.today(),
-            recettes_ids=[1],
-            robots=["robot_inexistant"]
+            date_session=date.today(), recettes_ids=[1], robots=["robot_inexistant"]
         )
         assert resultat["valide"] is False
         assert any("inconnu" in e.lower() for e in resultat["erreurs"])
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Validation Préparation
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestValiderPreparation:
@@ -243,10 +231,7 @@ class TestValiderPreparation:
     def test_preparation_valide(self):
         """Valide une préparation correcte."""
         resultat = valider_preparation(
-            nom="Poulet rôti",
-            portions=4,
-            conservation_jours=3,
-            localisation="frigo"
+            nom="Poulet rôti", portions=4, conservation_jours=3, localisation="frigo"
         )
         assert resultat["valide"] is True
         assert len(resultat["erreurs"]) == 0
@@ -254,10 +239,7 @@ class TestValiderPreparation:
     def test_nom_trop_court(self):
         """Rejette un nom trop court."""
         resultat = valider_preparation(
-            nom="AB",
-            portions=4,
-            conservation_jours=3,
-            localisation="frigo"
+            nom="AB", portions=4, conservation_jours=3, localisation="frigo"
         )
         assert resultat["valide"] is False
         assert any("3 caractères" in e for e in resultat["erreurs"])
@@ -265,10 +247,7 @@ class TestValiderPreparation:
     def test_nom_vide(self):
         """Rejette un nom vide."""
         resultat = valider_preparation(
-            nom="",
-            portions=4,
-            conservation_jours=3,
-            localisation="frigo"
+            nom="", portions=4, conservation_jours=3, localisation="frigo"
         )
         assert resultat["valide"] is False
 
@@ -276,23 +255,20 @@ class TestValiderPreparation:
         """Rejette des portions hors limites."""
         # Trop peu
         resultat = valider_preparation(
-            nom="Test", portions=0,
-            conservation_jours=3, localisation="frigo"
+            nom="Test", portions=0, conservation_jours=3, localisation="frigo"
         )
         assert resultat["valide"] is False
 
         # Trop
         resultat = valider_preparation(
-            nom="Test", portions=25,
-            conservation_jours=3, localisation="frigo"
+            nom="Test", portions=25, conservation_jours=3, localisation="frigo"
         )
         assert resultat["valide"] is False
 
     def test_localisation_invalide(self):
         """Rejette une localisation inconnue."""
         resultat = valider_preparation(
-            nom="Test", portions=4,
-            conservation_jours=3, localisation="placard_magique"
+            nom="Test", portions=4, conservation_jours=3, localisation="placard_magique"
         )
         assert resultat["valide"] is False
         assert any("localisation" in e.lower() for e in resultat["erreurs"])
@@ -300,9 +276,10 @@ class TestValiderPreparation:
     def test_conservation_trop_longue_frigo(self):
         """Rejette conservation trop longue pour frigo."""
         resultat = valider_preparation(
-            nom="Test", portions=4,
+            nom="Test",
+            portions=4,
             conservation_jours=10,  # Max 5 pour frigo
-            localisation="frigo"
+            localisation="frigo",
         )
         assert resultat["valide"] is False
         assert any("conservation" in e.lower() for e in resultat["erreurs"])
@@ -310,16 +287,17 @@ class TestValiderPreparation:
     def test_conservation_congelateur(self):
         """Accepte conservation longue pour congélateur."""
         resultat = valider_preparation(
-            nom="Test plat", portions=4,
+            nom="Test plat",
+            portions=4,
             conservation_jours=60,  # Acceptable pour congélateur
-            localisation="congelateur"
+            localisation="congelateur",
         )
         assert resultat["valide"] is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Optimisation
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestOptimiserOrdreEtapes:
@@ -343,7 +321,7 @@ class TestOptimiserOrdreEtapes:
     def test_assignation_groupes_paralleles(self):
         """Les groupes parallèles sont assignés."""
         etapes = [
-            {"titre": "Ã‰tape 1", "duree_minutes": 20, "est_supervision": False},
+            {"titre": "Étape 1", "duree_minutes": 20, "est_supervision": False},
         ]
         resultat = optimiser_ordre_etapes(etapes)
         assert "groupe_parallele" in resultat[0]
@@ -352,13 +330,18 @@ class TestOptimiserOrdreEtapes:
     def test_parallelisation_sans_conflit(self):
         """Parallélise les étapes sans conflit de robot."""
         etapes = [
-            {"titre": "Cuisson poulet", "duree_minutes": 45, "est_supervision": True, "robots": ["cookeo"]},
-            {"titre": "Ã‰plucher", "duree_minutes": 15, "est_supervision": False, "robots": []},
+            {
+                "titre": "Cuisson poulet",
+                "duree_minutes": 45,
+                "est_supervision": True,
+                "robots": ["cookeo"],
+            },
+            {"titre": "Éplucher", "duree_minutes": 15, "est_supervision": False, "robots": []},
         ]
         resultat = optimiser_ordre_etapes(etapes)
         # Les deux devraient être dans le même groupe (parallèles)
         groupes = set(e["groupe_parallele"] for e in resultat)
-        # Ã‰plucher peut être fait pendant la cuisson
+        # Éplucher peut être fait pendant la cuisson
         assert len(resultat) == 2
 
 
@@ -368,8 +351,8 @@ class TestDetecterConflitsRobots:
     def test_pas_de_conflit(self):
         """Aucun conflit si robots différents."""
         etapes = [
-            {"titre": "Ã‰tape 1", "groupe_parallele": 0, "robots": ["cookeo"]},
-            {"titre": "Ã‰tape 2", "groupe_parallele": 0, "robots": ["four"]},
+            {"titre": "Étape 1", "groupe_parallele": 0, "robots": ["cookeo"]},
+            {"titre": "Étape 2", "groupe_parallele": 0, "robots": ["four"]},
         ]
         conflits = detecter_conflits_robots(etapes)
         assert len(conflits) == 0
@@ -388,8 +371,8 @@ class TestDetecterConflitsRobots:
     def test_groupes_differents_ok(self):
         """Pas de conflit si groupes différents."""
         etapes = [
-            {"titre": "Ã‰tape 1", "groupe_parallele": 0, "robots": ["mixeur"]},
-            {"titre": "Ã‰tape 2", "groupe_parallele": 1, "robots": ["mixeur"]},
+            {"titre": "Étape 1", "groupe_parallele": 0, "robots": ["mixeur"]},
+            {"titre": "Étape 2", "groupe_parallele": 1, "robots": ["mixeur"]},
         ]
         conflits = detecter_conflits_robots(etapes)
         assert len(conflits) == 0
@@ -397,17 +380,17 @@ class TestDetecterConflitsRobots:
     def test_robot_parallele_ok(self):
         """Pas de conflit si robot peut être parallélisé."""
         etapes = [
-            {"titre": "Ã‰tape 1", "groupe_parallele": 0, "robots": ["four"]},
-            {"titre": "Ã‰tape 2", "groupe_parallele": 0, "robots": ["four"]},
+            {"titre": "Étape 1", "groupe_parallele": 0, "robots": ["four"]},
+            {"titre": "Étape 2", "groupe_parallele": 0, "robots": ["four"]},
         ]
         conflits = detecter_conflits_robots(etapes)
         # Le four peut être parallélisé
         assert len(conflits) == 0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Mode Jules
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFiltrerEtapesBruyantes:
@@ -419,7 +402,7 @@ class TestFiltrerEtapesBruyantes:
             {"titre": "Mixer", "alerte_bruit": True},
             {"titre": "Cuisson", "alerte_bruit": False},
             {"titre": "Hacher électrique", "alerte_bruit": True},
-            {"titre": "Ã‰plucher", "alerte_bruit": False},
+            {"titre": "Éplucher", "alerte_bruit": False},
         ]
         resultat = filtrer_etapes_bruyantes(etapes)
         assert len(resultat["bruyantes"]) == 2
@@ -452,9 +435,9 @@ class TestFiltrerEtapesBruyantes:
         assert len(resultat["calmes"]) == 0
 
     def test_sans_attribut_bruit(self):
-        """Ã‰tapes sans attribut sont considérées calmes."""
+        """Étapes sans attribut sont considérées calmes."""
         etapes = [
-            {"titre": "Ã‰tape sans info"},
+            {"titre": "Étape sans info"},
             {"titre": "Autre étape"},
         ]
         resultat = filtrer_etapes_bruyantes(etapes)

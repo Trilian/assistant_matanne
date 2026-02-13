@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Courses Unifie.
 
 Service complet pour la gestion de la liste de courses avec support IA.
@@ -10,11 +10,10 @@ from typing import Any
 from sqlalchemy.orm import Session, joinedload
 
 from src.core.ai import obtenir_client_ia
-from src.core.database import obtenir_contexte_db
-from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import ArticleCourses
-from src.services.base import BaseAIService
-from src.services.base import BaseService
+from src.services.base import BaseAIService, BaseService
+
 from .types import SuggestionCourses
 
 logger = logging.getLogger(__name__)
@@ -46,9 +45,9 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
             service_name="courses",
         )
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 1: CRUD & LISTE COURSES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_cache(
         ttl=1800,
@@ -72,9 +71,7 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
         Returns:
             Liste de dicts avec donnees articles organisees par rayon
         """
-        query = db.query(ArticleCourses).options(
-            joinedload(ArticleCourses.ingredient)
-        )
+        query = db.query(ArticleCourses).options(joinedload(ArticleCourses.ingredient))
 
         if not achetes:
             query = query.filter(ArticleCourses.achete.is_(False))
@@ -111,9 +108,9 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
     # Alias pour compatibilite
     get_liste_courses = obtenir_liste_courses
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 2: SUGGESTIONS IA
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_cache(ttl=3600, key_func=lambda self: "suggestions_courses_ia")
     @avec_gestion_erreurs(default_return=[])
@@ -133,7 +130,7 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
             if not inventaire_service:
                 logger.warning("Service inventaire indisponible")
                 return []
-            
+
             inventaire = inventaire_service.get_inventaire_complet()
             if not inventaire:
                 logger.info("Inventaire vide, pas de suggestions")
@@ -180,7 +177,7 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
 
             logger.info(f"Genere {len(suggestions)} suggestions courses")
             return suggestions or []
-        
+
         except KeyError as e:
             logger.error(f"Erreur parsing (champ manquant): {e}")
             return []
@@ -188,22 +185,24 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
             logger.error(f"Erreur generation suggestions: {str(e)}")
             return []
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 3: MODELES PERSISTANTS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_session_db
-    def obtenir_modeles(self, utilisateur_id: str | None = None, db: Session | None = None) -> list[dict]:
+    def obtenir_modeles(
+        self, utilisateur_id: str | None = None, db: Session | None = None
+    ) -> list[dict]:
         """Recuperer tous les modeles sauvegardes."""
         from src.core.models import ModeleCourses
-        
+
         query = db.query(ModeleCourses).filter(ModeleCourses.actif == True)
-        
+
         if utilisateur_id:
             query = query.filter(ModeleCourses.utilisateur_id == utilisateur_id)
-        
+
         modeles = query.order_by(ModeleCourses.nom).all()
-        
+
         return [
             {
                 "id": m.id,
@@ -229,12 +228,17 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
     get_modeles = obtenir_modeles
 
     @avec_session_db
-    def creer_modele(self, nom: str, articles: list[dict], description: str | None = None, 
-                     utilisateur_id: str | None = None, db: Session | None = None) -> int:
+    def creer_modele(
+        self,
+        nom: str,
+        articles: list[dict],
+        description: str | None = None,
+        utilisateur_id: str | None = None,
+        db: Session | None = None,
+    ) -> int:
         """Creer un nouveau modele de courses."""
-        from src.core.models import ModeleCourses, ArticleModele
-        from src.core.models import Ingredient
-        
+        from src.core.models import ArticleModele, Ingredient, ModeleCourses
+
         modele = ModeleCourses(
             nom=nom,
             description=description,
@@ -242,12 +246,14 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
         )
         db.add(modele)
         db.flush()
-        
+
         for ordre, article_data in enumerate(articles):
             ingredient = None
             if "ingredient_id" in article_data:
-                ingredient = db.query(Ingredient).filter_by(id=article_data["ingredient_id"]).first()
-            
+                ingredient = (
+                    db.query(Ingredient).filter_by(id=article_data["ingredient_id"]).first()
+                )
+
             article_modele = ArticleModele(
                 modele_id=modele.id,
                 ingredient_id=ingredient.id if ingredient else None,
@@ -260,7 +266,7 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
                 ordre=ordre,
             )
             db.add(article_modele)
-        
+
         db.commit()
         logger.info(f"Modele '{nom}' cree avec {len(articles)} articles")
         return modele.id
@@ -272,11 +278,11 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
     def supprimer_modele(self, modele_id: int, db: Session | None = None) -> bool:
         """Supprimer un modele."""
         from src.core.models import ModeleCourses
-        
+
         modele = db.query(ModeleCourses).filter_by(id=modele_id).first()
         if not modele:
             return False
-        
+
         db.delete(modele)
         db.commit()
         logger.info(f"Modele {modele_id} supprime")
@@ -286,29 +292,32 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
     delete_modele = supprimer_modele
 
     @avec_session_db
-    def appliquer_modele(self, modele_id: int, utilisateur_id: str | None = None, 
-                        db: Session | None = None) -> list[int]:
+    def appliquer_modele(
+        self, modele_id: int, utilisateur_id: str | None = None, db: Session | None = None
+    ) -> list[int]:
         """Appliquer un modele a la liste active (cree articles cours)."""
-        from src.core.models import ModeleCourses, Ingredient, ArticleModele
         from sqlalchemy.orm import joinedload
-        
-        modele = db.query(ModeleCourses).options(
-            joinedload(ModeleCourses.articles).joinedload(ArticleModele.ingredient)
-        ).filter_by(id=modele_id).first()
-        
+
+        from src.core.models import ArticleModele, Ingredient, ModeleCourses
+
+        modele = (
+            db.query(ModeleCourses)
+            .options(joinedload(ModeleCourses.articles).joinedload(ArticleModele.ingredient))
+            .filter_by(id=modele_id)
+            .first()
+        )
+
         if not modele:
             logger.error(f"Modele {modele_id} non trouve")
             return []
-        
+
         article_ids = []
         for article_modele in modele.articles:
             logger.debug(f"Traitement article: {article_modele.nom_article}")
             ingredient = article_modele.ingredient
             if not ingredient:
                 logger.debug(f"  Recherche ingredient par nom: {article_modele.nom_article}")
-                ingredient = db.query(Ingredient).filter_by(
-                    nom=article_modele.nom_article
-                ).first()
+                ingredient = db.query(Ingredient).filter_by(nom=article_modele.nom_article).first()
                 if not ingredient:
                     logger.debug(f"  Creation nouvel ingredient: {article_modele.nom_article}")
                     ingredient = Ingredient(
@@ -317,7 +326,7 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
                     )
                     db.add(ingredient)
                     db.flush()
-            
+
             data = {
                 "ingredient_id": ingredient.id,
                 "quantite_necessaire": article_modele.quantite,
@@ -326,18 +335,18 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
                 "notes": article_modele.notes,
                 "achete": False,
             }
-            
+
             article_id = self.create(data, db=db)
             article_ids.append(article_id)
             logger.debug(f"  Article cree: ID={article_id}")
-        
+
         logger.info(f"Modele {modele_id} applique ({len(article_ids)} articles)")
         return article_ids
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SINGLETON SERVICE INSTANCE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 _service_courses: ServiceCourses | None = None
 

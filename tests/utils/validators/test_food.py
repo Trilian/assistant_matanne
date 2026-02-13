@@ -1,16 +1,17 @@
-﻿"""
+"""
 Tests pour src/utils/validators/food.py
 """
-import pytest
+
 from datetime import date, timedelta
+
 from src.utils.validators.food import (
-    valider_recette,
-    valider_ingredient,
-    valider_article_inventaire,
-    valider_article_courses,
-    valider_repas,
-    valider_quantite,
     valider_allergie,
+    valider_article_courses,
+    valider_article_inventaire,
+    valider_ingredient,
+    valider_quantite,
+    valider_recette,
+    valider_repas,
 )
 
 
@@ -415,8 +416,8 @@ class TestValiderAllergie:
         assert is_valid is True
 
     def test_allergie_valide_fruits_coque(self):
-        """Fruits Ã  coque valide."""
-        is_valid, msg = valider_allergie("fruits Ã  coque")
+        """Fruits à coque valide."""
+        is_valid, msg = valider_allergie("fruits à coque")
         assert is_valid is True
 
     def test_allergie_vide(self):

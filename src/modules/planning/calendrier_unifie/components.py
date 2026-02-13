@@ -1,13 +1,23 @@
-﻿"""
-Module Calendrier Familial UnifiÃe - Composants UI
+"""
+Module Calendrier Familial Unifié - Composants UI
 """
 
 from ._common import (
-    st, date, datetime, time, timedelta,
-    obtenir_contexte_db, FamilyActivity, CalendarEvent,
-    TypeEvenement, JourCalendrier, SemaineCalendrier,
-    get_debut_semaine, get_semaine_precedente, get_semaine_suivante,
-    generer_texte_semaine_pour_impression
+    CalendarEvent,
+    FamilyActivity,
+    JourCalendrier,
+    SemaineCalendrier,
+    TypeEvenement,
+    date,
+    datetime,
+    generer_texte_semaine_pour_impression,
+    get_debut_semaine,
+    get_semaine_precedente,
+    get_semaine_suivante,
+    obtenir_contexte_db,
+    st,
+    time,
+    timedelta,
 )
 
 
@@ -15,33 +25,33 @@ def render_navigation_semaine():
     """Affiche la navigation entre semaines."""
     if "cal_semaine_debut" not in st.session_state:
         st.session_state.cal_semaine_debut = get_debut_semaine(date.today())
-    
+
     col1, col2, col3, col4 = st.columns([1, 2, 1, 1])
-    
+
     with col1:
-        if st.button("â—€ PrÃecÃedente", use_container_width=True):
+        if st.button("â—€ Précédente", use_container_width=True):
             st.session_state.cal_semaine_debut = get_semaine_precedente(
                 st.session_state.cal_semaine_debut
             )
             st.rerun()
-    
+
     with col2:
         semaine_debut = st.session_state.cal_semaine_debut
         semaine_fin = semaine_debut + timedelta(days=6)
         st.markdown(
             f"<h3 style='text-align: center; margin: 0;'>"
-            f"ðŸ“… {semaine_debut.strftime('%d/%m')} â€” {semaine_fin.strftime('%d/%m/%Y')}"
+            f"ðŸ“… {semaine_debut.strftime('%d/%m')} — {semaine_fin.strftime('%d/%m/%Y')}"
             f"</h3>",
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
-    
+
     with col3:
         if st.button("Suivante â–¶", use_container_width=True):
             st.session_state.cal_semaine_debut = get_semaine_suivante(
                 st.session_state.cal_semaine_debut
             )
             st.rerun()
-    
+
     with col4:
         if st.button("ðŸ“… Aujourd'hui", use_container_width=True):
             st.session_state.cal_semaine_debut = get_debut_semaine(date.today())
@@ -50,81 +60,79 @@ def render_navigation_semaine():
 
 def render_jour_calendrier(jour: JourCalendrier):
     """Affiche un jour du calendrier dans une carte."""
-    
+
     # Style du conteneur
     bg_color = "#e3f2fd" if jour.est_aujourdhui else "#ffffff"
     border = "3px solid #1976d2" if jour.est_aujourdhui else "1px solid #e0e0e0"
-    
+
     with st.container():
         # Header du jour
         col_titre, col_actions = st.columns([4, 1])
-        
+
         with col_titre:
             marqueur = "â­ " if jour.est_aujourdhui else ""
-            st.markdown(
-                f"**{marqueur}{jour.jour_semaine}** {jour.date_jour.strftime('%d/%m')}"
-            )
-        
+            st.markdown(f"**{marqueur}{jour.jour_semaine}** {jour.date_jour.strftime('%d/%m')}")
+
         with col_actions:
             if st.button("âž•", key=f"add_{jour.date_jour}", help="Ajouter"):
                 st.session_state.ajouter_event_date = jour.date_jour
-        
+
         # Grille des repas
         col_midi, col_soir = st.columns(2)
-        
+
         with col_midi:
             if jour.repas_midi:
                 st.markdown(f"ðŸŒž **{jour.repas_midi.titre}**")
                 if jour.repas_midi.version_jules:
                     st.caption(f"ðŸ‘¶ {jour.repas_midi.version_jules[:40]}...")
             else:
-                st.markdown("ðŸŒž *Midi: â€”*")
-        
+                st.markdown("ðŸŒž *Midi: —*")
+
         with col_soir:
             if jour.repas_soir:
                 st.markdown(f"ðŸŒ™ **{jour.repas_soir.titre}**")
                 if jour.repas_soir.version_jules:
                     st.caption(f"ðŸ‘¶ {jour.repas_soir.version_jules[:40]}...")
             else:
-                st.markdown("ðŸŒ™ *Soir: â€”*")
-        
-        # Goûter si prÃesent
+                st.markdown("ðŸŒ™ *Soir: —*")
+
+        # Goûter si présent
         if jour.gouter:
             st.markdown(f"ðŸ° {jour.gouter.titre}")
-        
+
         # Batch cooking
         if jour.batch_cooking:
             st.success(f"ðŸ³ **BATCH COOKING** {jour.batch_cooking.heure_str}")
-        
+
         # Courses
         for courses in jour.courses:
             st.info(f"ðŸ›’ {courses.magasin} {courses.heure_str}")
-        
-        # ActivitÃes
+
+        # Activités
         for act in jour.activites:
             emoji = "ðŸ‘¶" if act.pour_jules else "ðŸŽ¨"
             st.markdown(f"{emoji} {act.titre} {act.heure_str}")
-        
+
         # RDV
         for rdv in jour.rdv:
             emoji = "ðŸ¥" if rdv.type == TypeEvenement.RDV_MEDICAL else "ðŸ“…"
             lieu_str = f" @ {rdv.lieu}" if rdv.lieu else ""
             st.warning(f"{emoji} {rdv.titre} {rdv.heure_str}{lieu_str}")
-        
-        # Tâches mÃenage
+
+        # Tâches ménage
         for tache in jour.taches_menage:
             en_retard = "âš ï¸ " if tache.notes and "RETARD" in tache.notes else ""
-            duree_str = f" ({tache.description.split('â€¢')[0].strip()})" if tache.description else ""
+            duree_str = f" ({tache.description.split('•')[0].strip()})" if tache.description else ""
             st.markdown(f"{tache.emoji} {en_retard}{tache.titre}{duree_str}")
-        
-        # Autres ÃevÃenements
+
+        # Autres événements
         for evt in jour.autres_evenements:
             st.caption(f"{evt.emoji} {evt.titre}")
 
 
 def render_vue_semaine_grille(semaine: SemaineCalendrier):
     """Affiche la semaine en grille 7 colonnes."""
-    
+
     # En-têtes des jours
     cols = st.columns(7)
     for i, col in enumerate(cols):
@@ -132,9 +140,9 @@ def render_vue_semaine_grille(semaine: SemaineCalendrier):
         with col:
             bg = "ðŸ”µ" if jour.est_aujourdhui else ""
             col.markdown(f"**{bg} {jour.jour_semaine_court}**")
-    
+
     st.divider()
-    
+
     # Contenu des jours
     cols = st.columns(7)
     for i, col in enumerate(cols):
@@ -145,38 +153,38 @@ def render_vue_semaine_grille(semaine: SemaineCalendrier):
 
 def render_cellule_jour(jour: JourCalendrier):
     """Affiche une cellule de jour dans la grille."""
-    
+
     # Date
     st.markdown(f"**{jour.date_jour.strftime('%d')}**")
-    
+
     # Repas
     if jour.repas_midi:
         st.caption(f"ðŸŒž {jour.repas_midi.titre[:15]}...")
     if jour.repas_soir:
         st.caption(f"ðŸŒ™ {jour.repas_soir.titre[:15]}...")
-    
-    # ÉvÃenements importants
+
+    # Événements importants
     if jour.batch_cooking:
         st.success("ðŸ³ Batch", icon="ðŸ³")
-    
+
     for c in jour.courses[:1]:  # Max 1 pour la place
-        st.info(f"ðŸ›’", icon="ðŸ›’")
-    
+        st.info("ðŸ›’", icon="ðŸ›’")
+
     for rdv in jour.rdv[:1]:
-        st.warning(f"ðŸ¥", icon="ðŸ¥")
-    
-    # Indicateur si plus d'ÃevÃenements
+        st.warning("ðŸ¥", icon="ðŸ¥")
+
+    # Indicateur si plus d'événements
     nb_autres = len(jour.activites) + len(jour.autres_evenements)
     if nb_autres > 0:
         st.caption(f"+{nb_autres} autres")
 
 
 def render_vue_semaine_liste(semaine: SemaineCalendrier):
-    """Affiche la semaine en liste (plus dÃetaillÃee)."""
-    
+    """Affiche la semaine en liste (plus détaillée)."""
+
     for jour in semaine.jours:
         expanded = jour.est_aujourdhui
-        
+
         # Construire le titre avec indicateurs
         indicateurs = []
         if jour.repas_midi or jour.repas_soir:
@@ -189,59 +197,62 @@ def render_vue_semaine_liste(semaine: SemaineCalendrier):
             indicateurs.append("ðŸ¥")
         if jour.activites:
             indicateurs.append("ðŸŽ¨")
-        
+
         marqueur = "â­ " if jour.est_aujourdhui else ""
-        indicateurs_str = " ".join(indicateurs) if indicateurs else "â€”"
-        
+        indicateurs_str = " ".join(indicateurs) if indicateurs else "—"
+
         with st.expander(
             f"{marqueur}**{jour.jour_semaine}** {jour.date_jour.strftime('%d/%m')} â”‚ {indicateurs_str}",
-            expanded=expanded
+            expanded=expanded,
         ):
             render_jour_calendrier(jour)
 
 
 def render_stats_semaine(semaine: SemaineCalendrier):
     """Affiche les statistiques de la semaine."""
-    
+
     col1, col2, col3, col4 = st.columns(4)
-    
+
     with col1:
-        st.metric("ðŸ½ï¸ Repas planifiÃes", f"{semaine.nb_repas_planifies}/14")
-    
+        st.metric("ðŸ½ï¸ Repas planifiés", f"{semaine.nb_repas_planifies}/14")
+
     with col2:
         st.metric("ðŸ³ Batch cooking", semaine.nb_sessions_batch)
-    
+
     with col3:
         st.metric("ðŸ›’ Courses", semaine.nb_courses)
-    
+
     with col4:
-        st.metric("ðŸŽ¨ ActivitÃes", semaine.nb_activites)
+        st.metric("ðŸŽ¨ Activités", semaine.nb_activites)
 
 
 def render_actions_rapides(semaine: SemaineCalendrier):
     """Affiche les boutons d'actions rapides."""
-    
+
     col1, col2, col3, col4 = st.columns(4)
-    
+
     with col1:
         if st.button("ðŸ½ï¸ Planifier repas", use_container_width=True, type="primary"):
             # Naviguer vers le planificateur
             from src.core.state import GestionnaireEtat
+
             GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
             st.rerun()
-    
+
     with col2:
         if st.button("ðŸ³ Nouveau batch", use_container_width=True):
             from src.core.state import GestionnaireEtat
+
             GestionnaireEtat.naviguer_vers("cuisine.batch_cooking")
             st.rerun()
-    
+
     with col3:
         if st.button("ðŸ›’ Mes courses", use_container_width=True):
             from src.core.state import GestionnaireEtat
+
             GestionnaireEtat.naviguer_vers("cuisine.courses")
             st.rerun()
-    
+
     with col4:
         if st.button("ðŸ–¨ï¸ Imprimer", use_container_width=True):
             st.session_state.show_print_modal = True
@@ -249,28 +260,28 @@ def render_actions_rapides(semaine: SemaineCalendrier):
 
 def render_modal_impression(semaine: SemaineCalendrier):
     """Affiche le modal d'impression."""
-    
+
     if st.session_state.get("show_print_modal"):
         with st.container():
             st.subheader("ðŸ–¨ï¸ Imprimer le planning")
-            
+
             texte = generer_texte_semaine_pour_impression(semaine)
-            
+
             st.text_area(
                 "Aperçu (copier-coller pour imprimer)",
                 value=texte,
                 height=400,
             )
-            
+
             col1, col2 = st.columns(2)
             with col1:
                 st.download_button(
-                    "ðŸ“¥ TÃelÃecharger .txt",
+                    "ðŸ“¥ Télécharger .txt",
                     data=texte,
                     file_name=f"planning_{semaine.date_debut.strftime('%Y%m%d')}.txt",
                     mime="text/plain",
                 )
-            
+
             with col2:
                 if st.button("Fermer"):
                     st.session_state.show_print_modal = False
@@ -278,49 +289,49 @@ def render_modal_impression(semaine: SemaineCalendrier):
 
 
 def render_formulaire_ajout_event():
-    """Affiche le formulaire d'ajout d'ÃevÃenement."""
-    
+    """Affiche le formulaire d'ajout d'événement."""
+
     if "ajouter_event_date" in st.session_state:
         date_selectionnee = st.session_state.ajouter_event_date
-        
+
         with st.container():
-            st.subheader(f"âž• Ajouter un ÃevÃenement - {date_selectionnee.strftime('%d/%m/%Y')}")
-            
+            st.subheader(f"âž• Ajouter un événement - {date_selectionnee.strftime('%d/%m/%Y')}")
+
             with st.form("form_ajout_event"):
                 type_event = st.selectbox(
                     "Type",
                     options=[
-                        ("ðŸ¥ RDV MÃedical", "rdv_medical"),
+                        ("ðŸ¥ RDV Médical", "rdv_medical"),
                         ("ðŸ“… RDV Autre", "rdv_autre"),
-                        ("ðŸŽ¨ ActivitÃe", "activite"),
+                        ("ðŸŽ¨ Activité", "activite"),
                         ("ðŸ›’ Courses", "courses"),
                         ("ðŸ“Œ Autre", "autre"),
                     ],
                     format_func=lambda x: x[0],
                 )
-                
-                titre = st.text_input("Titre *", placeholder="Ex: PÃediatre Jules")
-                
+
+                titre = st.text_input("Titre *", placeholder="Ex: Pédiatre Jules")
+
                 col1, col2 = st.columns(2)
                 with col1:
                     heure = st.time_input("Heure", value=time(10, 0))
                 with col2:
                     lieu = st.text_input("Lieu", placeholder="Ex: Cabinet Dr Martin")
-                
-                notes = st.text_area("Notes", placeholder="Informations supplÃementaires...")
-                
+
+                notes = st.text_area("Notes", placeholder="Informations supplémentaires...")
+
                 col_submit, col_cancel = st.columns(2)
-                
+
                 with col_submit:
-                    submitted = st.form_submit_button("âœ… CrÃeer", type="primary")
-                
+                    submitted = st.form_submit_button("âœ… Créer", type="primary")
+
                 with col_cancel:
                     if st.form_submit_button("âŒ Annuler"):
                         del st.session_state.ajouter_event_date
                         st.rerun()
-                
+
                 if submitted and titre:
-                    # CrÃeer l'ÃevÃenement
+                    # Créer l'événement
                     try:
                         with obtenir_contexte_db() as db:
                             if type_event[1] == "activite":
@@ -331,7 +342,7 @@ def render_formulaire_ajout_event():
                                     lieu=lieu,
                                     notes=notes,
                                     type_activite="famille",
-                                    statut="planifiÃe",
+                                    statut="planifié",
                                 )
                             else:
                                 evt = CalendarEvent(
@@ -343,25 +354,25 @@ def render_formulaire_ajout_event():
                                 )
                             db.add(evt)
                             db.commit()
-                        
-                        st.success(f"âœ… {titre} ajoutÃe!")
+
+                        st.success(f"âœ… {titre} ajouté!")
                         del st.session_state.ajouter_event_date
                         st.rerun()
-                        
+
                     except Exception as e:
                         st.error(f"âŒ Erreur: {str(e)}")
 
 
 def render_legende():
-    """Affiche la lÃegende du calendrier."""
-    with st.expander("ðŸ“– LÃegende"):
+    """Affiche la légende du calendrier."""
+    with st.expander("ðŸ“– Légende"):
         cols = st.columns(6)
         legendes = [
             ("ðŸŒž Midi", "ðŸŒ™ Soir", "ðŸ° Goûter"),
             ("ðŸ³ Batch", "ðŸ›’ Courses"),
-            ("ðŸŽ¨ ActivitÃe", "ðŸ¥ RDV mÃedical"),
+            ("ðŸŽ¨ Activité", "ðŸ¥ RDV médical"),
             ("ðŸ“… RDV", "ðŸ‘¶ Pour Jules"),
-            ("ðŸ§¹ MÃenage", "ðŸŒ± Jardin"),
+            ("ðŸ§¹ Ménage", "ðŸŒ± Jardin"),
             ("â­ Aujourd'hui",),
         ]
         for i, col in enumerate(cols):

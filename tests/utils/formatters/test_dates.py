@@ -1,15 +1,18 @@
-﻿"""
+"""
 Tests pour src/utils/formatters/dates.py
 Données réelles de cuisine familiale
 """
-import pytest
+
 from datetime import date, datetime, timedelta
+
+import pytest
+
 from src.utils.formatters.dates import (
     formater_date,
     formater_datetime,
-    temps_ecoule,
-    formater_temps,
     formater_duree,
+    formater_temps,
+    temps_ecoule,
 )
 
 
@@ -19,7 +22,7 @@ class TestFormaterDate:
 
     # Format short
     def test_format_short_noel(self):
-        """NoÃ«l format court."""
+        """Noël format court."""
         assert formater_date(date(2026, 12, 25), "short") == "25/12"
 
     def test_format_short_nouvel_an(self):
@@ -96,7 +99,7 @@ class TestFormaterDate:
         assert result == "11 novembre 2026"
 
     def test_format_long_fr_decembre(self):
-        """Long format décembre (NoÃ«l)."""
+        """Long format décembre (Noël)."""
         result = formater_date(date(2026, 12, 25), "long", "fr")
         assert result == "25 décembre 2026"
 
@@ -115,7 +118,7 @@ class TestFormaterDate:
     # None et datetime
     def test_format_none(self):
         """None retourne tiret."""
-        assert formater_date(None) == "â€”"
+        assert formater_date(None) == "—"
 
     def test_format_datetime_input(self):
         """Datetime converti en date."""
@@ -153,11 +156,11 @@ class TestFormaterDatetime:
         result = formater_datetime(dt, "long", "fr")
         assert "décembre" in result
         assert "13:00" in result
-        assert "Ã " in result
+        assert "à" in result
 
     def test_datetime_none(self):
         """None retourne tiret."""
-        assert formater_datetime(None) == "â€”"
+        assert formater_datetime(None) == "—"
 
     def test_datetime_invalid_format(self):
         """Format invalide fallback."""
@@ -223,7 +226,7 @@ class TestFormaterTemps:
 
     # Minutes seules
     def test_temps_5min_oeuf_coque(self):
-        """Oeuf Ã  la coque 5min."""
+        """Oeuf à la coque 5min."""
         assert formater_temps(5) == "5min"
 
     def test_temps_15min_salade(self):

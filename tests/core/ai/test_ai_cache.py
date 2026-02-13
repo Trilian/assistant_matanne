@@ -1,10 +1,7 @@
-﻿"""
+"""
 Tests pour src/core/ai/cache.py - Cache IA avec mocks Streamlit.
 """
 
-import hashlib
-import json
-from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -317,8 +314,9 @@ class TestAfficherStatistiquesCacheIA:
     def test_afficher_statistiques_calls_streamlit(self, mock_session_state):
         """Test que le widget appelle les composants Streamlit."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai.cache import afficher_statistiques_cache_ia
             import streamlit as st
+
+            from src.core.ai.cache import afficher_statistiques_cache_ia
 
             # Mock tous les composants Streamlit
             with patch.object(st, "expander") as mock_expander:
@@ -344,8 +342,9 @@ class TestAfficherStatistiquesCacheIA:
     def test_afficher_statistiques_button_nettoyer(self, mock_session_state):
         """Test bouton nettoyer dans le widget."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai.cache import afficher_statistiques_cache_ia, CacheIA
             import streamlit as st
+
+            from src.core.ai.cache import CacheIA, afficher_statistiques_cache_ia
 
             # Mock tous les composants avec bouton nettoyer cliqué
             with patch.object(st, "expander") as mock_expander:
@@ -372,8 +371,9 @@ class TestAfficherStatistiquesCacheIA:
     def test_afficher_statistiques_button_vider(self, mock_session_state):
         """Test bouton vider dans le widget."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai.cache import afficher_statistiques_cache_ia, CacheIA
             import streamlit as st
+
+            from src.core.ai.cache import CacheIA, afficher_statistiques_cache_ia
 
             # Mock tous les composants avec bouton vider cliqué
             with patch.object(st, "expander") as mock_expander:

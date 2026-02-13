@@ -1,4 +1,4 @@
-﻿"""
+"""
 Formatters - Unités (poids, volume)
 """
 

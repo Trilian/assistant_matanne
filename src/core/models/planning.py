@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modèles pour le planning et le calendrier.
 
 Contient :
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 
 class Planning(Base):
     """Planning hebdomadaire de repas.
-    
+
     Attributes:
         nom: Nom du planning
         semaine_debut: Date de début de semaine
@@ -67,7 +67,7 @@ class Planning(Base):
 
 class Repas(Base):
     """Repas planifié dans un planning.
-    
+
     Attributes:
         planning_id: ID du planning parent
         recette_id: ID de la recette (optionnel)
@@ -108,7 +108,7 @@ class Repas(Base):
 
 class CalendarEvent(Base):
     """Événement du calendrier familial.
-    
+
     Attributes:
         titre: Titre de l'événement
         description: Description

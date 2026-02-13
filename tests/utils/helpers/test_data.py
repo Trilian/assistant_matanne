@@ -1,13 +1,13 @@
-﻿"""
+"""
 Tests pour src/utils/helpers/data.py
 """
-import pytest
+
 from src.utils.helpers.data import (
-    obtenir_securise,
-    grouper_par,
+    aplatir,
     compter_par,
     dedupliquer,
-    aplatir,
+    grouper_par,
+    obtenir_securise,
     partitionner,
 )
 

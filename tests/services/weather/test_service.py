@@ -1,31 +1,29 @@
-﻿"""
+"""
 Tests pour src/services/weather/service.py
 
 Couvre le service météo principal avec mocks des appels HTTP et base de données.
 """
 
-import pytest
 from datetime import date, timedelta
 from decimal import Decimal
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 from uuid import uuid4
 
 import httpx
+import pytest
 
 from src.services.weather.service import (
+    AlerteMeteo,
+    MeteoJour,
+    NiveauAlerte,
+    PlanArrosage,
     ServiceMeteo,
     TypeAlertMeteo,
-    NiveauAlerte,
-    MeteoJour,
-    AlerteMeteo,
-    ConseilJardin,
-    PlanArrosage,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -39,10 +37,7 @@ def mock_response_previsions():
     """Réponse simulée de l'API Open-Meteo."""
     return {
         "daily": {
-            "time": [
-                (date.today() + timedelta(days=i)).isoformat()
-                for i in range(7)
-            ],
+            "time": [(date.today() + timedelta(days=i)).isoformat() for i in range(7)],
             "temperature_2m_min": [5, 7, 8, 10, 12, 14, 10],
             "temperature_2m_max": [15, 17, 18, 22, 25, 28, 20],
             "precipitation_sum": [0, 5, 0, 0, 0, 0, 10],
@@ -52,13 +47,9 @@ def mock_response_previsions():
             "uv_index_max": [3, 4, 5, 6, 7, 8, 4],
             "weathercode": [0, 63, 1, 2, 0, 3, 95],
             "sunrise": [
-                f"{(date.today() + timedelta(days=i)).isoformat()}T07:30"
-                for i in range(7)
+                f"{(date.today() + timedelta(days=i)).isoformat()}T07:30" for i in range(7)
             ],
-            "sunset": [
-                f"{(date.today() + timedelta(days=i)).isoformat()}T18:30"
-                for i in range(7)
-            ],
+            "sunset": [f"{(date.today() + timedelta(days=i)).isoformat()}T18:30" for i in range(7)],
         }
     }
 
@@ -95,16 +86,24 @@ def previsions_list():
             uv_index=[3, 4, 5, 11, 7, 8, 4][i],
             lever_soleil="07:30",
             coucher_soleil="18:30",
-            condition=["Ensoleillé", "Couvert", "Peu nuageux", "Ensoleillé", "Ensoleillé", "Orage", "Pluie forte"][i],
+            condition=[
+                "Ensoleillé",
+                "Couvert",
+                "Peu nuageux",
+                "Ensoleillé",
+                "Ensoleillé",
+                "Orage",
+                "Pluie forte",
+            ][i],
             icone=["â˜€ï¸", "â˜ï¸", "ðŸŒ¤ï¸", "â˜€ï¸", "â˜€ï¸", "â›ˆï¸", "ðŸŒ§ï¸"][i],
         )
         for i in range(7)
     ]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS INITIALISATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestServiceMeteoInit:
@@ -129,10 +128,10 @@ class TestServiceMeteoInit:
 
 
 class TestSetLocation:
-    """Tests de mise Ã  jour de localisation."""
+    """Tests de mise à jour de localisation."""
 
     def test_set_location(self, service):
-        """Met Ã  jour les coordonnées."""
+        """Met à jour les coordonnées."""
         service.set_location(45.0, 5.0)
         assert service.latitude == 45.0
         assert service.longitude == 5.0
@@ -177,9 +176,9 @@ class TestSetLocationFromCity:
         assert result is False
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS PRÃ‰VISIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS PRÉVISIONS
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGetPrevisions:
@@ -246,39 +245,39 @@ class TestGetPrevisions:
         with patch.object(service.http_client, "get", return_value=mock_response) as mock_get:
             service.get_previsions(20)  # Demande 20 jours
 
-        # Vérifie que le paramètre est limité Ã  16
+        # Vérifie que le paramètre est limité à 16
         call_args = mock_get.call_args
         assert call_args[1]["params"]["forecast_days"] == 16
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS MÃ‰THODES DÃ‰LÃ‰GUÃ‰ES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS MÉTHODES DÉLÉGUÉES
+# ═══════════════════════════════════════════════════════════
 
 
 class TestMethodesDelegatees:
     """Tests des méthodes qui délèguent aux utils."""
 
     def test_direction_from_degrees(self, service):
-        """Délégation Ã  utils.direction_from_degrees."""
+        """Délégation à utils.direction_from_degrees."""
         assert service._direction_from_degrees(0) == "N"
         assert service._direction_from_degrees(90) == "E"
         assert service._direction_from_degrees(None) == ""
 
     def test_weathercode_to_condition(self, service):
-        """Délégation Ã  utils.weathercode_to_condition."""
+        """Délégation à utils.weathercode_to_condition."""
         assert service._weathercode_to_condition(0) == "Ensoleillé"
         assert service._weathercode_to_condition(95) == "Orage"
 
     def test_weathercode_to_icon(self, service):
-        """Délégation Ã  utils.weathercode_to_icon."""
+        """Délégation à utils.weathercode_to_icon."""
         assert service._weathercode_to_icon(0) == "â˜€ï¸"
         assert service._weathercode_to_icon(None) == "â“"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ALERTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGenererAlertes:
@@ -290,7 +289,7 @@ class TestGenererAlertes:
 
         alertes_gel = [a for a in alertes if a.type_alerte == TypeAlertMeteo.GEL]
         assert len(alertes_gel) >= 1
-        assert alertes_gel[0].niveau == NiveauAlerte.DANGER  # -2Â°C < 0
+        assert alertes_gel[0].niveau == NiveauAlerte.DANGER  # -2°C < 0
 
     def test_alerte_canicule(self, service, previsions_list):
         """Génère alerte canicule."""
@@ -298,7 +297,7 @@ class TestGenererAlertes:
 
         alertes_canicule = [a for a in alertes if a.type_alerte == TypeAlertMeteo.CANICULE]
         assert len(alertes_canicule) >= 1
-        assert alertes_canicule[0].niveau == NiveauAlerte.DANGER  # 42Â°C >= 40
+        assert alertes_canicule[0].niveau == NiveauAlerte.DANGER  # 42°C >= 40
 
     def test_alerte_pluie_forte(self, service, previsions_list):
         """Génère alerte pluie forte."""
@@ -386,17 +385,15 @@ class TestGenererAlertes:
 
     def test_generer_alertes_previsions_none(self, service):
         """Retourne liste vide si prévisions None (erreur API)."""
-        with patch.object(
-            service.http_client, "get", side_effect=httpx.RequestError("Error")
-        ):
+        with patch.object(service.http_client, "get", side_effect=httpx.RequestError("Error")):
             alertes = service.generer_alertes()
 
         assert alertes == []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONSEILS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGenererConseils:
@@ -597,9 +594,9 @@ class TestGenererConseils:
         assert conseils == []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS PLAN ARROSAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGenererPlanArrosage:
@@ -646,9 +643,7 @@ class TestGenererPlanArrosage:
 
     def test_plan_vide_si_erreur(self, service):
         """Retourne liste vide si erreur API."""
-        with patch.object(
-            service.http_client, "get", side_effect=httpx.RequestError("Error")
-        ):
+        with patch.object(service.http_client, "get", side_effect=httpx.RequestError("Error")):
             plan = service.generer_plan_arrosage(7)
 
         assert plan == []
@@ -666,9 +661,9 @@ class TestGenererPlanArrosage:
             assert jour.raison != ""
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS BASE DE DONNÃ‰ES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS BASE DE DONNÉES
+# ═══════════════════════════════════════════════════════════
 
 
 class TestSauvegarderAlerte:
@@ -689,9 +684,7 @@ class TestSauvegarderAlerte:
         mock_db = MagicMock()
 
         # Patcher le décorateur avec_session_db pour injecter notre mock
-        with patch(
-            "src.services.weather.service.obtenir_contexte_db"
-        ) as mock_ctx:
+        with patch("src.services.weather.service.obtenir_contexte_db") as mock_ctx:
             mock_ctx.return_value.__enter__ = Mock(return_value=mock_db)
             mock_ctx.return_value.__exit__ = Mock(return_value=False)
 
@@ -754,9 +747,9 @@ class TestMarquerAlerteLue:
         assert result is False
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS CONFIG MÃ‰TÃ‰O
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS CONFIG MÉTÉO
+# ═══════════════════════════════════════════════════════════
 
 
 class TestObtienirConfigMeteo:
@@ -805,7 +798,7 @@ class TestSauvegarderConfigMeteo:
         mock_db.commit.assert_called_once()
 
     def test_mettre_a_jour_config_existante(self, service):
-        """Met Ã  jour une config existante."""
+        """Met à jour une config existante."""
         mock_db = MagicMock()
         mock_config = MagicMock()
 
@@ -822,15 +815,15 @@ class TestSauvegarderConfigMeteo:
             db=mock_db,
         )
 
-        # Pas d'appel Ã  add car config existe déjÃ 
+        # Pas d'appel à add car config existe déjà
         mock_db.add.assert_not_called()
         mock_db.commit.assert_called_once()
         assert mock_config.latitude == Decimal("45.0")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FACTORY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFactory:
@@ -858,9 +851,9 @@ class TestFactory:
         assert isinstance(service, ServiceMeteo)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ALIAS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestAlias:

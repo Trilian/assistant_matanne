@@ -1,30 +1,28 @@
-﻿"""Tests pour src/services/recettes/service.py"""
+"""Tests pour src/services/recettes/service.py"""
+
+from unittest.mock import patch
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from datetime import date
-
 from sqlalchemy.orm import Session
 
-from src.services.recettes.service import (
-    ServiceRecettes,
-    RecetteService,
-    obtenir_service_recettes,
-    get_recette_service,
-)
 from src.core.models import (
-    Recette,
-    Ingredient,
-    RecetteIngredient,
     EtapeRecette,
-    VersionRecette,
     HistoriqueRecette,
+    Ingredient,
+    Recette,
+    RecetteIngredient,
+    VersionRecette,
+)
+from src.services.recettes.service import (
+    RecetteService,
+    ServiceRecettes,
+    get_recette_service,
+    obtenir_service_recettes,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -50,7 +48,7 @@ def sample_recette_data():
             {"nom": "thym", "quantite": 10, "unite": "g"},
         ],
         "etapes": [
-            {"description": "Préchauffer le four Ã  200Â°C"},
+            {"description": "Préchauffer le four à 200°C"},
             {"description": "Assaisonner le poulet"},
         ],
     }
@@ -91,12 +89,12 @@ def recette_with_ingredients(db: Session):
     )
     db.add(recette)
     db.flush()
-    
+
     # Créer ingrédient
     ingredient = Ingredient(nom="carotte", unite="g", categorie="Légumes")
     db.add(ingredient)
     db.flush()
-    
+
     # Lier
     ri = RecetteIngredient(
         recette_id=recette.id,
@@ -105,24 +103,24 @@ def recette_with_ingredients(db: Session):
         unite="g",
     )
     db.add(ri)
-    
-    # Ã‰tape
+
+    # Étape
     etape = EtapeRecette(
         recette_id=recette.id,
         ordre=1,
-        description="Ã‰plucher les carottes",
+        description="Éplucher les carottes",
         duree=5,
     )
     db.add(etape)
-    
+
     db.commit()
     db.refresh(recette)
     return recette
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS INITIALISATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestServiceRecettesInit:
@@ -141,11 +139,12 @@ class TestServiceRecettesInit:
     def test_obtenir_service_recettes_singleton(self):
         """Test singleton."""
         import src.services.recettes.service as module
+
         module._service_recettes = None
-        
+
         s1 = obtenir_service_recettes()
         s2 = obtenir_service_recettes()
-        
+
         assert s1 is s2
         assert isinstance(s1, ServiceRecettes)
 
@@ -154,9 +153,9 @@ class TestServiceRecettesInit:
         assert get_recette_service is obtenir_service_recettes
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CRUD
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestServiceRecettesCRUD:
@@ -201,18 +200,19 @@ class TestExportMethods:
     def test_export_to_json_with_recettes(self, service, recette_with_ingredients):
         """Test export JSON avec données."""
         import json
+
         result = service.export_to_json([recette_with_ingredients])
         data = json.loads(result)
-        
+
         assert len(data) == 1
         assert data[0]["nom"] == "Recette Complète"
         assert "ingredients" in data[0]
         assert "etapes" in data[0]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS HISTORIQUE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestHistoriqueRecette:
@@ -227,11 +227,13 @@ class TestHistoriqueRecette:
             avis="Très bon",
         )
         assert result is True
-        
+
         # Vérifier en base
-        historique = db.query(HistoriqueRecette).filter(
-            HistoriqueRecette.recette_id == recette_in_db.id
-        ).first()
+        historique = (
+            db.query(HistoriqueRecette)
+            .filter(HistoriqueRecette.recette_id == recette_in_db.id)
+            .first()
+        )
         assert historique is not None
         assert historique.portions_cuisinees == 2
         assert historique.note == 4
@@ -246,7 +248,7 @@ class TestHistoriqueRecette:
         # Créer historique
         service.enregistrer_cuisson(recette_id=recette_in_db.id, portions=2)
         service.enregistrer_cuisson(recette_id=recette_in_db.id, portions=4)
-        
+
         result = service.get_historique(recette_in_db.id)
         assert len(result) >= 2
 
@@ -265,16 +267,16 @@ class TestHistoriqueRecette:
         """Test stats avec historique."""
         service.enregistrer_cuisson(recette_id=recette_in_db.id, portions=2, note=4)
         service.enregistrer_cuisson(recette_id=recette_in_db.id, portions=4, note=5)
-        
+
         result = service.get_stats_recette(recette_in_db.id)
         assert result["nb_cuissons"] == 2
         assert result["total_portions"] == 6
         assert result["note_moyenne"] == 4.5
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS VERSIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestVersionsRecette:
@@ -296,15 +298,15 @@ class TestVersionsRecette:
         )
         db.add(version)
         db.commit()
-        
+
         result = service.get_versions(recette_in_db.id)
         assert len(result) == 1
         assert result[0].type_version == "bébé"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS HELPERS PRIVÃ‰S
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS HELPERS PRIVÉS
+# ═══════════════════════════════════════════════════════════
 
 
 class TestHelpersPrives:
@@ -316,7 +318,7 @@ class TestHelpersPrives:
         ing = Ingredient(nom="tomate", unite="pcs")
         db.add(ing)
         db.commit()
-        
+
         result = service._find_or_create_ingredient(db, "tomate")
         assert result.id == ing.id
 
@@ -327,9 +329,9 @@ class TestHelpersPrives:
         assert result.id is not None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS GÃ‰NÃ‰RATION IA (MOCKED)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS GÉNÉRATION IA (MOCKED)
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGenerationIA:
@@ -339,13 +341,13 @@ class TestGenerationIA:
         """Test génération avec mock IA."""
         with patch.object(service, "call_with_list_parsing_sync") as mock_call:
             mock_call.return_value = []
-            
+
             result = service.generer_recettes_ia(
                 type_repas="diner",
                 saison="hiver",
                 difficulte="facile",
             )
-            
+
             # La méthode doit être appelée
             assert mock_call.called or result == []
 
@@ -353,18 +355,18 @@ class TestGenerationIA:
         """Test variantes avec mock IA."""
         with patch.object(service, "call_with_list_parsing_sync") as mock_call:
             mock_call.return_value = []
-            
+
             result = service.generer_variantes_recette_ia(
                 nom_recette="Poulet rôti",
                 nb_variantes=2,
             )
-            
+
             assert result == []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS RECHERCHE AVANCÃ‰E
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS RECHERCHE AVANCÉE
+# ═══════════════════════════════════════════════════════════
 
 
 class TestRechercheAvancee:
@@ -391,9 +393,9 @@ class TestRechercheAvancee:
         assert isinstance(result, list)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS EDGE CASES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestEdgeCases:
@@ -416,9 +418,9 @@ class TestEdgeCases:
         assert "nb_cuissons" in result or result == {}
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CACHE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCacheService:
@@ -433,9 +435,9 @@ class TestCacheService:
         assert service.cache_ttl == 3600
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS CRÃ‰ATION COMPLÃˆTE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS CRÉATION COMPLÈTE
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCreateComplete:
@@ -445,7 +447,7 @@ class TestCreateComplete:
         """Test création complète basique."""
         # Note: requires patch_db_context
         result = service.create_complete(sample_recette_data)
-        
+
         if result:  # Peut échouer si problème de contexte
             assert result.nom == sample_recette_data["nom"]
             assert result.id is not None
@@ -473,9 +475,9 @@ class TestCreateComplete:
         assert result is None or result.nom == "Test stringified"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS GET BY ID FULL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGetByIdFull:
@@ -494,9 +496,9 @@ class TestGetByIdFull:
             assert result.id == recette_in_db.id
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS VERSIONS IA (MOCKED)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestVersionsIA:
@@ -519,9 +521,9 @@ class TestVersionsIA:
             service.generer_version_robot(recette_in_db.id, "robot_inexistant")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS EXPORT AVANCÃ‰S
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS EXPORT AVANCÉS
+# ═══════════════════════════════════════════════════════════
 
 
 class TestExportAvances:
@@ -545,7 +547,7 @@ class TestExportAvances:
         for r in recettes:
             db.add(r)
         db.commit()
-        
+
         result = service.export_to_csv(recettes)
         assert "Recette 1" in result
         assert "Recette 2" in result
@@ -554,14 +556,15 @@ class TestExportAvances:
     def test_export_json_indent_4(self, service, db, recette_in_db):
         """Test export JSON avec indentation 4."""
         import json
+
         result = service.export_to_json([recette_in_db], indent=4)
         data = json.loads(result)
         assert len(data) == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS SERVICE MIXIN
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestServiceMixin:
@@ -570,11 +573,13 @@ class TestServiceMixin:
     def test_service_is_base_ai_service(self, service):
         """Test que le service hérite de BaseAIService."""
         from src.services.base import BaseAIService
+
         assert isinstance(service, BaseAIService)
 
     def test_service_has_recipe_mixin(self, service):
         """Test que le service a RecipeAIMixin."""
         from src.services.base import RecipeAIMixin
+
         assert isinstance(service, RecipeAIMixin)
 
     def test_build_recipe_context_basic(self, service):
@@ -587,4 +592,3 @@ class TestServiceMixin:
                 nb_recettes=3,
             )
             assert isinstance(context, str)
-

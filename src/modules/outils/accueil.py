@@ -10,6 +10,8 @@ import streamlit as st
 # Cache
 # State
 from src.core.state import GestionnaireEtat, obtenir_etat
+
+# Logique metier pure
 from src.services.courses import get_courses_service
 from src.services.inventaire import get_inventaire_service
 from src.services.planning import get_planning_service
@@ -17,26 +19,16 @@ from src.services.planning import get_planning_service
 # Services
 from src.services.recettes import get_recette_service
 
-# Logique metier pure
-from src.modules.outils.accueil_utils import (
-    calculer_metriques_dashboard,
-    compter_alertes_critiques,
-    generer_notifications,
-    trier_notifications_par_priorite,
-    est_cette_semaine,
-    est_aujourdhui,
-    est_en_retard
-)
-
 # Dashboard widgets enrichis
 try:
     from src.ui.components.dashboard_widgets import (
+        afficher_sante_systeme,
         carte_metrique_avancee,
         graphique_inventaire_categories,
         graphique_repartition_repas,
-        afficher_sante_systeme,
         widget_jules_apercu,
     )
+
     WIDGETS_DISPONIBLES = True
 except ImportError:
     WIDGETS_DISPONIBLES = False
@@ -98,7 +90,7 @@ def app():
         render_inventaire_summary()
         st.markdown("")
         render_courses_summary()
-    
+
     # Footer avec sante système
     st.markdown("---")
     if WIDGETS_DISPONIBLES:
@@ -111,33 +103,30 @@ def app():
 
 def render_graphiques_enrichis():
     """Affiche les graphiques Plotly enrichis."""
-    
+
     st.markdown("### 📈 Visualisations")
-    
+
     col1, col2 = st.columns(2)
-    
+
     with col1:
         # Graphique inventaire par categorie
         inventaire = get_inventaire_service().get_inventaire_complet()
         fig = graphique_inventaire_categories(inventaire)
         if fig:
             st.markdown("**📦 Stock par Categorie**")
-            st.plotly_chart(fig, width='stretch', key="chart_inventaire")
+            st.plotly_chart(fig, width="stretch", key="chart_inventaire")
         else:
             st.info("Pas de donnees d'inventaire")
-    
+
     with col2:
         # Graphique repartition repas
         planning = get_planning_service().get_planning()
         if planning and planning.repas:
-            repas_data = [
-                {"type_repas": getattr(r, 'type_repas', 'autre')} 
-                for r in planning.repas
-            ]
+            repas_data = [{"type_repas": getattr(r, "type_repas", "autre")} for r in planning.repas]
             fig = graphique_repartition_repas(repas_data)
             if fig:
                 st.markdown("**💡 Repartition des Repas**")
-                st.plotly_chart(fig, width='stretch', key="chart_repas")
+                st.plotly_chart(fig, width="stretch", key="chart_repas")
             else:
                 st.info("Pas de planning cette semaine")
         else:
@@ -201,32 +190,40 @@ def render_critical_alerts():
     try:
         from src.core.database import obtenir_contexte_db
         from src.core.models import MaintenanceTask
-        
+
         with obtenir_contexte_db() as db:
-            taches_retard = db.query(MaintenanceTask).filter(
-                MaintenanceTask.prochaine_fois < date.today(),
-                MaintenanceTask.fait == False
-            ).limit(10).all()
-            
+            taches_retard = (
+                db.query(MaintenanceTask)
+                .filter(
+                    MaintenanceTask.prochaine_fois < date.today(), MaintenanceTask.fait == False
+                )
+                .limit(10)
+                .all()
+            )
+
             if taches_retard:
-                alerts.append({
-                    "type": "warning",
-                    "icon": "🧹",
-                    "title": f"{len(taches_retard)} tâche(s) menage en retard!",
-                    "action": "Voir Maison",
-                    "module": "maison.entretien",
-                })
-                
+                alerts.append(
+                    {
+                        "type": "warning",
+                        "icon": "🧹",
+                        "title": f"{len(taches_retard)} tâche(s) menage en retard!",
+                        "action": "Voir Maison",
+                        "module": "maison.entretien",
+                    }
+                )
+
                 # Detail des tâches critiques
                 for t in taches_retard[:3]:
                     jours_retard = (date.today() - t.prochaine_fois).days
-                    alerts.append({
-                        "type": "error" if jours_retard > 7 else "warning",
-                        "icon": "⚠️",
-                        "title": f"{t.nom} ({jours_retard}j de retard)",
-                        "action": "Marquer fait",
-                        "module": "maison.entretien",
-                    })
+                    alerts.append(
+                        {
+                            "type": "error" if jours_retard > 7 else "warning",
+                            "icon": "⚠️",
+                            "title": f"{t.nom} ({jours_retard}j de retard)",
+                            "action": "Marquer fait",
+                            "module": "maison.entretien",
+                        }
+                    )
     except Exception:
         pass  # Table pas encore creee
 
@@ -250,9 +247,7 @@ def render_critical_alerts():
                     st.error(f"{alert['icon']} **{alert['title']}**")
 
             with col2:
-                if st.button(
-                    alert["action"], key=f"alert_{alert['module']}", width='stretch'
-                ):
+                if st.button(alert["action"], key=f"alert_{alert['module']}", width="stretch"):
                     GestionnaireEtat.naviguer_vers(alert["module"])
                     st.rerun()
 
@@ -318,24 +313,24 @@ def render_quick_actions():
 
     with col1:
         if st.button(
-            "➕ Ajouter Recette", key="quick_add_recette", width='stretch', type="primary"
+            "➕ Ajouter Recette", key="quick_add_recette", width="stretch", type="primary"
         ):
             GestionnaireEtat.naviguer_vers("cuisine.recettes")
             st.session_state.show_add_form = True
             st.rerun()
 
     with col2:
-        if st.button("📅 Voir Courses", key="quick_view_courses", width='stretch'):
+        if st.button("📅 Voir Courses", key="quick_view_courses", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.courses")
             st.rerun()
 
     with col3:
-        if st.button("📦 Gerer Inventaire", key="quick_view_inventaire", width='stretch'):
+        if st.button("📦 Gerer Inventaire", key="quick_view_inventaire", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.inventaire")
             st.rerun()
 
     with col4:
-        if st.button("🧹 Planning Semaine", key="quick_view_planning", width='stretch'):
+        if st.button("🧹 Planning Semaine", key="quick_view_planning", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
             st.rerun()
 
@@ -375,7 +370,7 @@ def render_cuisine_summary():
         with col3:
             st.metric("🎯 Bebe", stats.get("bebe", 0))
 
-        if st.button("👶 Voir les recettes", key="nav_recettes", width='stretch'):
+        if st.button("👶 Voir les recettes", key="nav_recettes", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.recettes")
             st.rerun()
 
@@ -419,7 +414,7 @@ def render_inventaire_summary():
 
             stock_alert(articles_alert[:3], key="home_inventory_alert")  # Max 3
 
-        if st.button("📦 Gerer l'inventaire", key="nav_inventaire", width='stretch'):
+        if st.button("📦 Gerer l'inventaire", key="nav_inventaire", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.inventaire")
             st.rerun()
 
@@ -459,12 +454,14 @@ def render_courses_summary():
             prioritaires = [a for a in liste if a.get("priorite") == "haute"]
 
             for art in prioritaires[:3]:
-                st.caption(f"• {art.get('ingredient_nom', 'Article')} ({art.get('quantite_necessaire', 0)} {art.get('unite', '')})")
+                st.caption(
+                    f"• {art.get('ingredient_nom', 'Article')} ({art.get('quantite_necessaire', 0)} {art.get('unite', '')})"
+                )
 
             if len(prioritaires) > 3:
                 st.caption(f"... et {len(prioritaires) - 3} autre(s)")
 
-        if st.button("📅 Voir la liste", key="nav_courses", width='stretch'):
+        if st.button("📅 Voir la liste", key="nav_courses", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.courses")
             st.rerun()
 
@@ -487,9 +484,9 @@ def render_planning_summary():
 
         if planning and planning.repas:
             total_repas = len(planning.repas)
-            
+
             # Repas adaptes bebe
-            repas_bebe = len([r for r in planning.repas if getattr(r, 'compatible_bebe', False)])
+            repas_bebe = len([r for r in planning.repas if getattr(r, "compatible_bebe", False)])
 
             col1, col2 = st.columns(2)
 
@@ -502,21 +499,20 @@ def render_planning_summary():
             # Repas d'aujourd'hui
             aujourd_hui = date.today()
             repas_aujourdhui = [
-                r for r in planning.repas 
-                if hasattr(r, 'date') and r.date == aujourd_hui
+                r for r in planning.repas if hasattr(r, "date") and r.date == aujourd_hui
             ]
 
             if repas_aujourdhui:
                 st.markdown("**Aujourd'hui:**")
                 for repas in repas_aujourdhui[:2]:
-                    type_repas = getattr(repas, 'type_repas', 'Repas')
-                    nom_recette = getattr(repas, 'recette_nom', None) or "Non defini"
+                    type_repas = getattr(repas, "type_repas", "Repas")
+                    nom_recette = getattr(repas, "recette_nom", None) or "Non defini"
                     st.caption(f"• {type_repas}: {nom_recette}")
 
         else:
             st.info("Aucun planning cette semaine")
 
-        if st.button("🧹 Voir le planning", key="nav_planning", width='stretch'):
+        if st.button("🧹 Voir le planning", key="nav_planning", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
             st.rerun()
 

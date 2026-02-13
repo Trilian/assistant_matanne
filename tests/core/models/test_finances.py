@@ -1,27 +1,25 @@
-﻿"""
+"""
 Tests unitaires pour finances.py
 
 Module: src.core.models.finances
 Contient: Depense, BudgetMensuelDB, HouseExpense
 """
 
-import pytest
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
 
 from src.core.models.finances import (
-    Depense,
     BudgetMensuelDB,
-    HouseExpense,
     CategorieDepenseDB,
-    RecurrenceType,
+    Depense,
     ExpenseCategory,
+    HouseExpense,
+    RecurrenceType,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ENUMS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCategorieDepenseDB:
@@ -38,9 +36,21 @@ class TestCategorieDepenseDB:
     def test_toutes_valeurs_existent(self):
         """Vérifie que toutes les catégories attendues existent."""
         valeurs = [v.value for v in CategorieDepenseDB]
-        expected = ["alimentation", "transport", "logement", "sante", "loisirs",
-                    "vetements", "education", "cadeaux", "abonnements", 
-                    "restaurant", "vacances", "bebe", "autre"]
+        expected = [
+            "alimentation",
+            "transport",
+            "logement",
+            "sante",
+            "loisirs",
+            "vetements",
+            "education",
+            "cadeaux",
+            "abonnements",
+            "restaurant",
+            "vacances",
+            "bebe",
+            "autre",
+        ]
         for cat in expected:
             assert cat in valeurs
 
@@ -69,9 +79,9 @@ class TestExpenseCategory:
         assert ExpenseCategory.LOYER.value == "loyer"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS MODÃˆLES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS MODÈLES
+# ═══════════════════════════════════════════════════════════
 
 
 class TestDepense:
@@ -97,18 +107,18 @@ class TestDepense:
         """Vérifie que les colonnes ont des valeurs par défaut définies."""
         # Vérifier la présence des colonnes avec default
         colonnes = Depense.__table__.columns
-        assert colonnes['categorie'].default is not None
-        assert colonnes['created_at'].default is not None
+        assert colonnes["categorie"].default is not None
+        assert colonnes["created_at"].default is not None
 
     def test_est_recurrente_property(self):
         """Test de la propriété est_recurrente."""
         # Dépense ponctuelle
         depense1 = Depense(montant=Decimal("10.00"), recurrence=None)
         assert depense1.est_recurrente is False
-        
+
         depense2 = Depense(montant=Decimal("10.00"), recurrence="ponctuel")
         assert depense2.est_recurrente is False
-        
+
         # Dépense récurrente
         depense3 = Depense(montant=Decimal("10.00"), recurrence="mensuel")
         assert depense3.est_recurrente is True
@@ -143,7 +153,7 @@ class TestBudgetMensuelDB:
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
         colonnes = BudgetMensuelDB.__table__.columns
-        assert colonnes['budget_total'].default is not None
+        assert colonnes["budget_total"].default is not None
 
     def test_budgets_par_categorie(self):
         """Test du champ JSONB budgets_par_categorie."""
@@ -154,7 +164,7 @@ class TestBudgetMensuelDB:
                 "alimentation": 600,
                 "transport": 200,
                 "loisirs": 150,
-            }
+            },
         )
         assert budget.budgets_par_categorie["alimentation"] == 600
         assert len(budget.budgets_par_categorie) == 3
@@ -211,4 +221,3 @@ class TestHouseExpense:
         assert "HouseExpense" in result
         assert "eau" in result
         assert "45" in result
-

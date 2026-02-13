@@ -1,31 +1,30 @@
-﻿"""
+"""
 Tests unitaires pour CalendarSyncService.
 
 Module: src.services.calendrier.service
 Coverage target: >80%
 """
 
-import pytest
 from datetime import date, datetime, timedelta
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
+import pytest
+
+from src.services.calendrier.schemas import (
+    CalendarEventExternal,
+    CalendarProvider,
+    ExternalCalendarConfig,
+    SyncDirection,
+)
 from src.services.calendrier.service import (
     CalendarSyncService,
     get_calendar_sync_service,
 )
-from src.services.calendrier.schemas import (
-    CalendarProvider,
-    SyncDirection,
-    ExternalCalendarConfig,
-    CalendarEventExternal,
-    SyncResult,
-)
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -91,9 +90,9 @@ END:VEVENT
 END:VCALENDAR"""
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS CRÃ‰ATION ET FACTORY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS CRÉATION ET FACTORY
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalendarSyncServiceCreation:
@@ -117,9 +116,9 @@ class TestCalendarSyncServiceCreation:
         assert isinstance(service, CalendarSyncService)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONFIGURATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConfigurationCalendriers:
@@ -129,7 +128,7 @@ class TestConfigurationCalendriers:
         """Test ajout d'un calendrier."""
         with patch.object(service, "_save_config_to_db"):
             calendar_id = service.add_calendar(google_config)
-            
+
             assert calendar_id == google_config.id
             assert google_config.id in service._configs
 
@@ -139,7 +138,7 @@ class TestConfigurationCalendriers:
             with patch.object(service, "_remove_config_from_db"):
                 service.add_calendar(google_config)
                 service.remove_calendar(google_config.id)
-                
+
                 assert google_config.id not in service._configs
 
     def test_remove_calendar_inexistant(self, service):
@@ -153,7 +152,7 @@ class TestConfigurationCalendriers:
         with patch.object(service, "_save_config_to_db"):
             service.add_calendar(google_config)
             service.add_calendar(ical_config)
-            
+
             # Autre utilisateur
             other_config = ExternalCalendarConfig(
                 id="other789",
@@ -162,16 +161,16 @@ class TestConfigurationCalendriers:
                 name="Autre utilisateur",
             )
             service.add_calendar(other_config)
-            
+
             calendars = service.get_user_calendars("user-001")
-            
+
             assert len(calendars) == 2
             assert all(c.user_id == "user-001" for c in calendars)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS IMPORT iCAL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestImportIcal:
@@ -182,22 +181,22 @@ class TestImportIcal:
         mock_response = MagicMock()
         mock_response.text = sample_ical_content
         mock_response.raise_for_status = MagicMock()
-        
+
         service.http_client.get = MagicMock(return_value=mock_response)
-        
+
         with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
             with patch("src.services.calendrier.service.CalendarEvent") as mock_cal_event:
                 mock_session = MagicMock()
                 mock_session.query.return_value.filter.return_value.first.return_value = None
                 mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
                 mock_db.return_value.__exit__ = MagicMock(return_value=False)
-                
+
                 result = service.import_from_ical_url(
                     user_id="user-001",
                     ical_url="https://example.com/calendar.ics",
-                    calendar_name="Test Import"
+                    calendar_name="Test Import",
                 )
-                
+
                 assert result is not None
                 assert result.success is True
                 assert result.events_imported >= 1
@@ -207,12 +206,11 @@ class TestImportIcal:
         mock_response = MagicMock()
         mock_response.raise_for_status.side_effect = Exception("HTTP Error")
         service.http_client.get = MagicMock(return_value=mock_response)
-        
+
         result = service.import_from_ical_url(
-            user_id="user-001",
-            ical_url="https://example.com/invalid.ics"
+            user_id="user-001", ical_url="https://example.com/invalid.ics"
         )
-        
+
         assert result is not None
         assert result.success is False
         assert "télécharger" in result.message.lower() or "erreur" in result.message.lower()
@@ -223,43 +221,43 @@ class TestImportIcal:
         mock_response.text = "BEGIN:VCALENDAR\nVERSION:2.0\nEND:VCALENDAR"
         mock_response.raise_for_status = MagicMock()
         service.http_client.get = MagicMock(return_value=mock_response)
-        
+
         result = service.import_from_ical_url(
-            user_id="user-001",
-            ical_url="https://example.com/empty.ics"
+            user_id="user-001", ical_url="https://example.com/empty.ics"
         )
-        
+
         assert result is not None
         assert result.success is False
         assert "aucun" in result.message.lower()
 
     def test_import_from_ical_url_update_existing(self, service, sample_ical_content):
-        """Test import avec mise Ã  jour d'événement existant."""
+        """Test import avec mise à jour d'événement existant."""
         mock_response = MagicMock()
         mock_response.text = sample_ical_content
         mock_response.raise_for_status = MagicMock()
         service.http_client.get = MagicMock(return_value=mock_response)
-        
+
         with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
             with patch("src.services.calendrier.service.CalendarEvent") as mock_cal_event:
                 existing_event = MagicMock()
                 mock_session = MagicMock()
-                mock_session.query.return_value.filter.return_value.first.return_value = existing_event
+                mock_session.query.return_value.filter.return_value.first.return_value = (
+                    existing_event
+                )
                 mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
                 mock_db.return_value.__exit__ = MagicMock(return_value=False)
-                
+
                 result = service.import_from_ical_url(
-                    user_id="user-001",
-                    ical_url="https://example.com/calendar.ics"
+                    user_id="user-001", ical_url="https://example.com/calendar.ics"
                 )
-                
+
                 assert result is not None
                 assert result.success is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS EXPORT iCAL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestExportIcal:
@@ -273,9 +271,9 @@ class TestExportIcal:
             mock_session.query.return_value.filter.return_value.all.return_value = []
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_db.return_value.__exit__ = MagicMock(return_value=False)
-            
+
             result = service.export_to_ical(user_id="user-001")
-            
+
             assert result is not None
             assert "BEGIN:VCALENDAR" in result
             assert "END:VCALENDAR" in result
@@ -289,16 +287,18 @@ class TestExportIcal:
         mock_repas.notes = "Test notes"
         mock_repas.recette = MagicMock()
         mock_repas.recette.nom = "Poulet rôti"
-        
+
         with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
             mock_session = MagicMock()
-            mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = [mock_repas]
+            mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = [
+                mock_repas
+            ]
             mock_session.query.return_value.filter.return_value.all.return_value = []
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_db.return_value.__exit__ = MagicMock(return_value=False)
-            
+
             result = service.export_to_ical(user_id="user-001")
-            
+
             assert result is not None
             assert "BEGIN:VEVENT" in result
             assert "Poulet" in result
@@ -313,30 +313,30 @@ class TestExportIcal:
         mock_activity.duree_heures = 3
         mock_activity.lieu = "Parc municipal"
         mock_activity.statut = "planifié"
-        
+
         with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
             mock_session = MagicMock()
+
             # When include_meals=False, only activities and calendar events are queried
             # Activities query returns our mock, calendar events returns empty
             def query_side_effect(model):
                 q = MagicMock()
-                from src.core.models import FamilyActivity, CalendarEvent
+                from src.core.models import FamilyActivity
+
                 if model == FamilyActivity:
                     q.filter.return_value.all.return_value = [mock_activity]
                 else:
                     q.filter.return_value.all.return_value = []
                 return q
-            
+
             mock_session.query.side_effect = query_side_effect
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_db.return_value.__exit__ = MagicMock(return_value=False)
-            
+
             result = service.export_to_ical(
-                user_id="user-001",
-                include_meals=False,
-                include_activities=True
+                user_id="user-001", include_meals=False, include_activities=True
             )
-            
+
             assert result is not None
             assert "Sortie au parc" in result
 
@@ -348,13 +348,13 @@ class TestExportIcal:
             mock_session.query.return_value.filter.return_value.all.return_value = []
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_db.return_value.__exit__ = MagicMock(return_value=False)
-            
+
             result = service.export_to_ical(
                 user_id="user-001",
                 start_date=date.today(),
-                end_date=date.today() + timedelta(days=7)
+                end_date=date.today() + timedelta(days=7),
             )
-            
+
             assert result is not None
 
     def test_export_to_ical_with_calendar_events(self, service):
@@ -367,7 +367,7 @@ class TestExportIcal:
         mock_event.date_fin = date.today()
         # Simulate no attribute journee_entiere
         del mock_event.journee_entiere
-        
+
         with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
             mock_session = MagicMock()
             mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = []
@@ -375,9 +375,9 @@ class TestExportIcal:
             mock_session.query.return_value.filter.return_value.all.side_effect = [[], [mock_event]]
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_db.return_value.__exit__ = MagicMock(return_value=False)
-            
+
             result = service.export_to_ical(user_id="user-001")
-            
+
             assert result is not None
 
     def test_export_meal_types_hours(self, service):
@@ -388,7 +388,7 @@ class TestExportIcal:
             ("goûter", 16),
             ("dîner", 19),
         ]
-        
+
         for meal_type, expected_hour in meal_types:
             mock_repas = MagicMock()
             mock_repas.id = 1
@@ -396,24 +396,28 @@ class TestExportIcal:
             mock_repas.type_repas = meal_type
             mock_repas.notes = None
             mock_repas.recette = None
-            
+
             with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
                 mock_session = MagicMock()
-                mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = [mock_repas]
+                mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = [
+                    mock_repas
+                ]
                 mock_session.query.return_value.filter.return_value.all.return_value = []
                 mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
                 mock_db.return_value.__exit__ = MagicMock(return_value=False)
-                
+
                 result = service.export_to_ical(user_id="user-001")
-                
+
                 assert result is not None
                 expected_time = f"T{expected_hour:02d}0000"
-                assert expected_time in result, f"Type {meal_type} devrait avoir heure {expected_hour}"
+                assert (
+                    expected_time in result
+                ), f"Type {meal_type} devrait avoir heure {expected_hour}"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS GOOGLE CALENDAR
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGoogleCalendar:
@@ -423,12 +427,11 @@ class TestGoogleCalendar:
         """Test génération URL auth Google."""
         with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID="test_client_id")
-            
+
             url = service.get_google_auth_url(
-                user_id="user-001",
-                redirect_uri="https://example.com/callback"
+                user_id="user-001", redirect_uri="https://example.com/callback"
             )
-            
+
             assert "accounts.google.com" in url
             assert "client_id=test_client_id" in url
             assert "redirect_uri=" in url
@@ -438,11 +441,10 @@ class TestGoogleCalendar:
         """Test erreur si GOOGLE_CLIENT_ID non configuré."""
         with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID="")
-            
+
             with pytest.raises(ValueError, match="GOOGLE_CLIENT_ID"):
                 service.get_google_auth_url(
-                    user_id="user-001",
-                    redirect_uri="https://example.com/callback"
+                    user_id="user-001", redirect_uri="https://example.com/callback"
                 )
 
     def test_handle_google_callback_success(self, service):
@@ -455,20 +457,19 @@ class TestGoogleCalendar:
         }
         mock_response.raise_for_status = MagicMock()
         service.http_client.post = MagicMock(return_value=mock_response)
-        
+
         with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(
-                GOOGLE_CLIENT_ID="test_id",
-                GOOGLE_CLIENT_SECRET="test_secret"
+                GOOGLE_CLIENT_ID="test_id", GOOGLE_CLIENT_SECRET="test_secret"
             )
-            
+
             with patch.object(service, "add_calendar"):
                 result = service.handle_google_callback(
                     user_id="user-001",
                     code="auth_code",
-                    redirect_uri="https://example.com/callback"
+                    redirect_uri="https://example.com/callback",
                 )
-                
+
                 assert result is not None
                 assert result.access_token == "new_access_token"
                 assert result.provider == CalendarProvider.GOOGLE
@@ -477,44 +478,39 @@ class TestGoogleCalendar:
         """Test callback sans credentials configurés."""
         with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID="", GOOGLE_CLIENT_SECRET="")
-            
+
             result = service.handle_google_callback(
-                user_id="user-001",
-                code="auth_code",
-                redirect_uri="https://example.com/callback"
+                user_id="user-001", code="auth_code", redirect_uri="https://example.com/callback"
             )
-            
+
             assert result is None
 
     def test_handle_google_callback_http_error(self, service):
         """Test callback avec erreur HTTP."""
         service.http_client.post = MagicMock(side_effect=Exception("HTTP Error"))
-        
+
         with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(
-                GOOGLE_CLIENT_ID="test_id",
-                GOOGLE_CLIENT_SECRET="test_secret"
+                GOOGLE_CLIENT_ID="test_id", GOOGLE_CLIENT_SECRET="test_secret"
             )
-            
+
             result = service.handle_google_callback(
-                user_id="user-001",
-                code="auth_code",
-                redirect_uri="https://example.com/callback"
+                user_id="user-001", code="auth_code", redirect_uri="https://example.com/callback"
             )
-            
+
             assert result is None
 
     def test_sync_google_calendar_wrong_provider(self, service, ical_config):
         """Test sync avec mauvais provider."""
         result = service.sync_google_calendar(ical_config)
-        
+
         assert result.success is False
         assert "google" in result.message.lower()
 
     def test_sync_google_calendar_import(self, service, google_config):
         """Test sync Google - import."""
         google_config.sync_direction = SyncDirection.IMPORT_ONLY
-        
+
         mock_response = MagicMock()
         mock_response.json.return_value = {
             "items": [
@@ -528,39 +524,39 @@ class TestGoogleCalendar:
         }
         mock_response.raise_for_status = MagicMock()
         service.http_client.get = MagicMock(return_value=mock_response)
-        
+
         with patch.object(service, "_import_events_to_db", return_value=1):
             with patch.object(service, "_save_config_to_db"):
                 result = service.sync_google_calendar(google_config)
-                
+
                 assert result.success is True
                 assert result.events_imported == 1
 
     def test_sync_google_calendar_export(self, service, google_config):
         """Test sync Google - export."""
         google_config.sync_direction = SyncDirection.EXPORT_ONLY
-        
+
         with patch.object(service, "_export_to_google", return_value=5):
             with patch.object(service, "_save_config_to_db"):
                 result = service.sync_google_calendar(google_config)
-                
+
                 assert result.success is True
                 assert result.events_exported == 5
 
     def test_sync_google_calendar_bidirectional(self, service, google_config):
         """Test sync Google bidirectionnelle."""
         google_config.sync_direction = SyncDirection.BIDIRECTIONAL
-        
+
         mock_response = MagicMock()
         mock_response.json.return_value = {"items": []}
         mock_response.raise_for_status = MagicMock()
         service.http_client.get = MagicMock(return_value=mock_response)
-        
+
         with patch.object(service, "_import_events_to_db", return_value=2):
             with patch.object(service, "_export_to_google", return_value=3):
                 with patch.object(service, "_save_config_to_db"):
                     result = service.sync_google_calendar(google_config)
-                    
+
                     assert result.success is True
                     assert result.events_imported == 2
                     assert result.events_exported == 3
@@ -569,27 +565,27 @@ class TestGoogleCalendar:
         """Test sync avec token expiré - rafraîchissement."""
         google_config.token_expiry = datetime.now() - timedelta(hours=1)
         google_config.sync_direction = SyncDirection.IMPORT_ONLY
-        
+
         mock_response = MagicMock()
         mock_response.json.return_value = {"items": []}
         mock_response.raise_for_status = MagicMock()
         service.http_client.get = MagicMock(return_value=mock_response)
-        
+
         with patch.object(service, "_refresh_google_token") as mock_refresh:
             with patch.object(service, "_import_events_to_db", return_value=0):
                 with patch.object(service, "_save_config_to_db"):
                     result = service.sync_google_calendar(google_config)
-                    
+
                     mock_refresh.assert_called_once()
 
     def test_sync_google_calendar_error(self, service, google_config):
         """Test sync avec erreur."""
         google_config.sync_direction = SyncDirection.IMPORT_ONLY
-        
+
         service.http_client.get = MagicMock(side_effect=Exception("Network error"))
-        
+
         result = service.sync_google_calendar(google_config)
-        
+
         assert result.success is False
         assert len(result.errors) > 0
 
@@ -612,12 +608,12 @@ class TestGoogleImportExport:
         }
         mock_response.raise_for_status = MagicMock()
         service.http_client.get = MagicMock(return_value=mock_response)
-        
+
         headers = {"Authorization": "Bearer token"}
-        
+
         with patch.object(service, "_import_events_to_db", return_value=1) as mock_import:
             result = service._import_from_google(google_config, headers)
-            
+
             assert result == 1
             call_args = mock_import.call_args[0][0]
             assert len(call_args) == 1
@@ -640,12 +636,12 @@ class TestGoogleImportExport:
         }
         mock_response.raise_for_status = MagicMock()
         service.http_client.get = MagicMock(return_value=mock_response)
-        
+
         headers = {"Authorization": "Bearer token"}
-        
+
         with patch.object(service, "_import_events_to_db", return_value=1) as mock_import:
             service._import_from_google(google_config, headers)
-            
+
             call_args = mock_import.call_args[0][0]
             assert call_args[0].location == "Salle A, 2ème étage"
 
@@ -659,7 +655,7 @@ class TestGoogleImportExport:
         mock_repas.recette = MagicMock()
         mock_repas.recette.nom = "Salade"
         mock_repas.recette.description = "Description recette"
-        
+
         mock_activity = MagicMock()
         mock_activity.id = 1
         mock_activity.date_prevue = date.today()
@@ -668,27 +664,30 @@ class TestGoogleImportExport:
         mock_activity.lieu = "Piscine municipale"
         mock_activity.duree_heures = 2
         mock_activity.statut = "planifié"
-        
+
         mock_response = MagicMock()
         mock_response.json.return_value = {"id": "created123"}
         mock_response.raise_for_status = MagicMock()
         service.http_client.post = MagicMock(return_value=mock_response)
-        service.http_client.get = MagicMock(return_value=MagicMock(
-            json=MagicMock(return_value={"items": []}),
-            raise_for_status=MagicMock()
-        ))
-        
+        service.http_client.get = MagicMock(
+            return_value=MagicMock(
+                json=MagicMock(return_value={"items": []}), raise_for_status=MagicMock()
+            )
+        )
+
         headers = {"Authorization": "Bearer token"}
-        
+
         with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
             mock_session = MagicMock()
-            mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = [mock_repas]
+            mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = [
+                mock_repas
+            ]
             mock_session.query.return_value.filter.return_value.all.return_value = [mock_activity]
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_db.return_value.__exit__ = MagicMock(return_value=False)
-            
+
             result = service._export_to_google(google_config, headers)
-            
+
             assert result == 2  # 1 repas + 1 activité
 
     def test_export_meal_to_google_create_new(self, service, google_config):
@@ -701,41 +700,43 @@ class TestGoogleImportExport:
         mock_repas.recette = MagicMock()
         mock_repas.recette.nom = "Pizza"
         mock_repas.recette.description = "Pizza maison"
-        
+
         mock_response = MagicMock()
         mock_response.json.return_value = {"id": "created123"}
         mock_response.raise_for_status = MagicMock()
         service.http_client.post = MagicMock(return_value=mock_response)
-        
+
         with patch.object(service, "_find_google_event_by_matanne_id", return_value=None):
             headers = {"Authorization": "Bearer token"}
             mock_db = MagicMock()
-            
+
             result = service._export_meal_to_google(mock_repas, google_config, headers, mock_db)
-            
+
             assert result == "created123"
             service.http_client.post.assert_called_once()
 
     def test_export_meal_to_google_update_existing(self, service, google_config):
-        """Test mise Ã  jour d'un repas existant."""
+        """Test mise à jour d'un repas existant."""
         mock_repas = MagicMock()
         mock_repas.id = 1
         mock_repas.date_repas = date.today()
         mock_repas.type_repas = "déjeuner"
         mock_repas.notes = None
         mock_repas.recette = None
-        
+
         mock_response = MagicMock()
         mock_response.json.return_value = {"id": "existing123"}
         mock_response.raise_for_status = MagicMock()
         service.http_client.patch = MagicMock(return_value=mock_response)
-        
-        with patch.object(service, "_find_google_event_by_matanne_id", return_value={"id": "existing123"}):
+
+        with patch.object(
+            service, "_find_google_event_by_matanne_id", return_value={"id": "existing123"}
+        ):
             headers = {"Authorization": "Bearer token"}
             mock_db = MagicMock()
-            
+
             result = service._export_meal_to_google(mock_repas, google_config, headers, mock_db)
-            
+
             assert result == "existing123"
             service.http_client.patch.assert_called_once()
 
@@ -748,18 +749,20 @@ class TestGoogleImportExport:
         mock_activity.description = "Film en famille"
         mock_activity.lieu = "UGC"
         mock_activity.duree_heures = 3
-        
+
         mock_response = MagicMock()
         mock_response.json.return_value = {"id": "act123"}
         mock_response.raise_for_status = MagicMock()
         service.http_client.post = MagicMock(return_value=mock_response)
-        
+
         with patch.object(service, "_find_google_event_by_matanne_id", return_value=None):
             headers = {"Authorization": "Bearer token"}
             mock_db = MagicMock()
-            
-            result = service._export_activity_to_google(mock_activity, google_config, headers, mock_db)
-            
+
+            result = service._export_activity_to_google(
+                mock_activity, google_config, headers, mock_db
+            )
+
             assert result == "act123"
 
     def test_find_google_event_found(self, service):
@@ -768,10 +771,10 @@ class TestGoogleImportExport:
         mock_response.json.return_value = {"items": [{"id": "found123"}]}
         mock_response.raise_for_status = MagicMock()
         service.http_client.get = MagicMock(return_value=mock_response)
-        
+
         headers = {"Authorization": "Bearer token"}
         result = service._find_google_event_by_matanne_id("matanne-meal-1", headers)
-        
+
         assert result is not None
         assert result["id"] == "found123"
 
@@ -781,19 +784,19 @@ class TestGoogleImportExport:
         mock_response.json.return_value = {"items": []}
         mock_response.raise_for_status = MagicMock()
         service.http_client.get = MagicMock(return_value=mock_response)
-        
+
         headers = {"Authorization": "Bearer token"}
         result = service._find_google_event_by_matanne_id("matanne-meal-999", headers)
-        
+
         assert result is None
 
     def test_find_google_event_error(self, service):
         """Test recherche événement Google - erreur."""
         service.http_client.get = MagicMock(side_effect=Exception("Error"))
-        
+
         headers = {"Authorization": "Bearer token"}
         result = service._find_google_event_by_matanne_id("matanne-meal-1", headers)
-        
+
         assert result is None
 
 
@@ -809,28 +812,26 @@ class TestGoogleTokenRefresh:
         }
         mock_response.raise_for_status = MagicMock()
         service.http_client.post = MagicMock(return_value=mock_response)
-        
+
         with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(
-                GOOGLE_CLIENT_ID="id",
-                GOOGLE_CLIENT_SECRET="secret"
+                GOOGLE_CLIENT_ID="id", GOOGLE_CLIENT_SECRET="secret"
             )
-            
+
             with patch.object(service, "_save_config_to_db"):
                 service._refresh_google_token(google_config)
-                
+
                 assert google_config.access_token == "new_token"
 
     def test_refresh_google_token_error(self, service, google_config):
         """Test erreur rafraîchissement token."""
         service.http_client.post = MagicMock(side_effect=Exception("Error"))
-        
+
         with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(
-                GOOGLE_CLIENT_ID="id",
-                GOOGLE_CLIENT_SECRET="secret"
+                GOOGLE_CLIENT_ID="id", GOOGLE_CLIENT_SECRET="secret"
             )
-            
+
             # Ne doit pas lever d'exception
             service._refresh_google_token(google_config)
 
@@ -840,31 +841,25 @@ class TestExportPlanningToGoogle:
 
     def test_export_planning_wrong_provider(self, service, ical_config):
         """Test export avec mauvais provider."""
-        result = service.export_planning_to_google(
-            user_id="user-001",
-            config=ical_config
-        )
-        
+        result = service.export_planning_to_google(user_id="user-001", config=ical_config)
+
         assert result.success is False
 
     def test_export_planning_with_refresh(self, service, google_config):
         """Test export avec rafraîchissement token."""
         google_config.token_expiry = datetime.now() - timedelta(hours=1)
-        
+
         with patch.object(service, "_refresh_google_token") as mock_refresh:
             with patch.object(service, "_export_to_google", return_value=5):
-                result = service.export_planning_to_google(
-                    user_id="user-001",
-                    config=google_config
-                )
-                
+                result = service.export_planning_to_google(user_id="user-001", config=google_config)
+
                 mock_refresh.assert_called_once()
                 assert result.success is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS DB PERSISTENCE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestDatabasePersistence:
@@ -880,22 +875,22 @@ class TestDatabasePersistence:
                 end_time=datetime.now() + timedelta(hours=1),
             ),
         ]
-        
+
         with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
             with patch("src.services.calendrier.service.CalendarEvent") as mock_cal_event:
                 mock_session = MagicMock()
                 mock_session.query.return_value.filter.return_value.first.return_value = None
                 mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
                 mock_db.return_value.__exit__ = MagicMock(return_value=False)
-                
+
                 count = service._import_events_to_db(events)
-                
+
                 assert count == 1
                 mock_session.add.assert_called_once()
                 mock_session.commit.assert_called_once()
 
     def test_import_events_to_db_update(self, service):
-        """Test import événements - mise Ã  jour."""
+        """Test import événements - mise à jour."""
         events = [
             CalendarEventExternal(
                 external_id="ext1",
@@ -904,18 +899,18 @@ class TestDatabasePersistence:
                 end_time=datetime.now() + timedelta(hours=1),
             ),
         ]
-        
+
         existing = MagicMock()
-        
+
         with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
             with patch("src.services.calendrier.service.CalendarEvent") as mock_cal_event:
                 mock_session = MagicMock()
                 mock_session.query.return_value.filter.return_value.first.return_value = existing
                 mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
                 mock_db.return_value.__exit__ = MagicMock(return_value=False)
-                
+
                 count = service._import_events_to_db(events)
-                
+
                 assert count == 1
                 assert existing.titre == "Event Updated"
 
@@ -929,17 +924,19 @@ class TestDatabasePersistence:
                 end_time=datetime.now() + timedelta(hours=1),
             ),
         ]
-        
+
         with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
             with patch("src.services.calendrier.service.CalendarEvent") as mock_cal_event:
                 mock_session = MagicMock()
-                mock_session.query.return_value.filter.return_value.first.side_effect = Exception("DB Error")
+                mock_session.query.return_value.filter.return_value.first.side_effect = Exception(
+                    "DB Error"
+                )
                 mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
                 mock_db.return_value.__exit__ = MagicMock(return_value=False)
-                
+
                 # Ne doit pas lever d'exception
                 count = service._import_events_to_db(events)
-                
+
                 assert count == 0
 
 
@@ -950,47 +947,47 @@ class TestSaveConfigToDb:
         """Test création configuration."""
         google_config.id = "not_digit"  # Non numérique
         google_config.user_id = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"  # UUID valide
-        
+
         with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
             with patch("src.services.calendrier.service.CalendrierExterne") as mock_cal_ext:
                 mock_session = MagicMock()
                 mock_session.query.return_value.filter.return_value.first.return_value = None
                 mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
                 mock_db.return_value.__exit__ = MagicMock(return_value=False)
-                
+
                 service._save_config_to_db(google_config)
-                
+
                 mock_session.add.assert_called_once()
                 mock_session.commit.assert_called_once()
 
     def test_save_config_update(self, service, google_config):
-        """Test mise Ã  jour configuration."""
+        """Test mise à jour configuration."""
         google_config.id = "123"  # ID numérique
-        
+
         existing = MagicMock()
-        
+
         with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.return_value = existing
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_db.return_value.__exit__ = MagicMock(return_value=False)
-            
+
             service._save_config_to_db(google_config)
-            
+
             assert existing.provider == google_config.provider.value
 
     def test_remove_config_from_db(self, service):
         """Test suppression configuration."""
         existing = MagicMock()
-        
+
         with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.return_value = existing
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_db.return_value.__exit__ = MagicMock(return_value=False)
-            
+
             service._remove_config_from_db("123")
-            
+
             mock_session.delete.assert_called_once_with(existing)
             mock_session.commit.assert_called_once()
 
@@ -1001,10 +998,10 @@ class TestSaveConfigToDb:
             mock_session.query.return_value.filter.return_value.first.return_value = None
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_db.return_value.__exit__ = MagicMock(return_value=False)
-            
+
             # Ne doit pas lever d'exception
             service._remove_config_from_db("999")
-            
+
             mock_session.delete.assert_not_called()
 
     def test_remove_config_non_numeric_id(self, service):
@@ -1013,34 +1010,36 @@ class TestSaveConfigToDb:
             mock_session = MagicMock()
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_db.return_value.__exit__ = MagicMock(return_value=False)
-            
+
             # Ne doit pas lever d'exception
             service._remove_config_from_db("not_a_number")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS MÃ‰THODES AVEC @avec_session_db
+# ═══════════════════════════════════════════════════════════
+# TESTS MÉTHODES AVEC @avec_session_db
 # Ces tests nécessitent une DB avec utilisateurs valides (FK constraints)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
-@pytest.mark.skip(reason="Nécessite fixtures DB avec FK constraints user_id - testé via mocks ci-dessus")
+@pytest.mark.skip(
+    reason="Nécessite fixtures DB avec FK constraints user_id - testé via mocks ci-dessus"
+)
 class TestSessionDecoratedMethods:
     """Tests des méthodes utilisant @avec_session_db."""
 
     def test_ajouter_calendrier_externe(self, service, db):
         """Test ajout calendrier externe en base."""
         user_id = str(uuid4())
-        
+
         calendrier = service.ajouter_calendrier_externe(
             user_id=user_id,
             provider="google",
             nom="Mon Google",
             url=None,
             credentials={"token": "abc"},
-            db=db
+            db=db,
         )
-        
+
         assert calendrier is not None
         assert calendrier.nom == "Mon Google"
         assert calendrier.provider == "google"
@@ -1048,41 +1047,30 @@ class TestSessionDecoratedMethods:
     def test_lister_calendriers_utilisateur(self, service, db):
         """Test liste calendriers utilisateur."""
         user_id = str(uuid4())
-        
+
         # Créer quelques calendriers
         for i in range(3):
             service.ajouter_calendrier_externe(
-                user_id=user_id,
-                provider="google",
-                nom=f"Calendrier {i}",
-                db=db
+                user_id=user_id, provider="google", nom=f"Calendrier {i}", db=db
             )
-        
+
         # Autre utilisateur
         other_id = str(uuid4())
-        service.ajouter_calendrier_externe(
-            user_id=other_id,
-            provider="apple",
-            nom="Autre",
-            db=db
-        )
-        
+        service.ajouter_calendrier_externe(user_id=other_id, provider="apple", nom="Autre", db=db)
+
         calendriers = service.lister_calendriers_utilisateur(user_id=user_id, db=db)
-        
+
         assert len(calendriers) == 3
 
     def test_sauvegarder_evenement_calendrier_create(self, service, db):
         """Test sauvegarde événement - création."""
         user_id = str(uuid4())
-        
+
         # Créer un calendrier d'abord
         calendrier = service.ajouter_calendrier_externe(
-            user_id=user_id,
-            provider="google",
-            nom="Test",
-            db=db
+            user_id=user_id, provider="google", nom="Test", db=db
         )
-        
+
         event = CalendarEventExternal(
             external_id="evt123",
             title="Test Event",
@@ -1091,29 +1079,23 @@ class TestSessionDecoratedMethods:
             end_time=datetime.now() + timedelta(hours=1),
             location="Bureau",
         )
-        
+
         db_event = service.sauvegarder_evenement_calendrier(
-            calendrier_id=calendrier.id,
-            event=event,
-            user_id=user_id,
-            db=db
+            calendrier_id=calendrier.id, event=event, user_id=user_id, db=db
         )
-        
+
         assert db_event is not None
         assert db_event.titre == "Test Event"
         assert db_event.uid == "evt123"
 
     def test_sauvegarder_evenement_calendrier_update(self, service, db):
-        """Test sauvegarde événement - mise Ã  jour."""
+        """Test sauvegarde événement - mise à jour."""
         user_id = str(uuid4())
-        
+
         calendrier = service.ajouter_calendrier_externe(
-            user_id=user_id,
-            provider="google",
-            nom="Test",
-            db=db
+            user_id=user_id, provider="google", nom="Test", db=db
         )
-        
+
         # Créer l'événement
         event1 = CalendarEventExternal(
             external_id="evt123",
@@ -1122,13 +1104,10 @@ class TestSessionDecoratedMethods:
             end_time=datetime.now() + timedelta(hours=1),
         )
         db_event1 = service.sauvegarder_evenement_calendrier(
-            calendrier_id=calendrier.id,
-            event=event1,
-            user_id=user_id,
-            db=db
+            calendrier_id=calendrier.id, event=event1, user_id=user_id, db=db
         )
-        
-        # Mettre Ã  jour
+
+        # Mettre à jour
         event2 = CalendarEventExternal(
             external_id="evt123",
             title="Updated",
@@ -1136,26 +1115,20 @@ class TestSessionDecoratedMethods:
             end_time=datetime.now() + timedelta(hours=2),
         )
         db_event2 = service.sauvegarder_evenement_calendrier(
-            calendrier_id=calendrier.id,
-            event=event2,
-            user_id=user_id,
-            db=db
+            calendrier_id=calendrier.id, event=event2, user_id=user_id, db=db
         )
-        
+
         assert db_event2.titre == "Updated"
         assert db_event1.id == db_event2.id  # Même événement
 
     def test_lister_evenements_calendrier(self, service, db):
         """Test liste événements avec filtres."""
         user_id = str(uuid4())
-        
+
         calendrier = service.ajouter_calendrier_externe(
-            user_id=user_id,
-            provider="google",
-            nom="Test",
-            db=db
+            user_id=user_id, provider="google", nom="Test", db=db
         )
-        
+
         # Créer plusieurs événements
         for i in range(5):
             event = CalendarEventExternal(
@@ -1165,43 +1138,34 @@ class TestSessionDecoratedMethods:
                 end_time=datetime.now() + timedelta(days=i, hours=1),
             )
             service.sauvegarder_evenement_calendrier(
-                calendrier_id=calendrier.id,
-                event=event,
-                user_id=user_id,
-                db=db
+                calendrier_id=calendrier.id, event=event, user_id=user_id, db=db
             )
-        
+
         # Lister tous
         all_events = service.lister_evenements_calendrier(user_id=user_id, db=db)
         assert len(all_events) == 5
-        
+
         # Filtrer par date
         filtered = service.lister_evenements_calendrier(
             user_id=user_id,
             date_debut=date.today(),
             date_fin=date.today() + timedelta(days=2),
-            db=db
+            db=db,
         )
         assert len(filtered) >= 1  # Au moins l'événement du jour
 
     def test_lister_evenements_par_calendrier(self, service, db):
         """Test liste événements filtré par calendrier."""
         user_id = str(uuid4())
-        
+
         cal1 = service.ajouter_calendrier_externe(
-            user_id=user_id,
-            provider="google",
-            nom="Cal1",
-            db=db
+            user_id=user_id, provider="google", nom="Cal1", db=db
         )
         cal2 = service.ajouter_calendrier_externe(
-            user_id=user_id,
-            provider="apple",
-            nom="Cal2",
-            db=db
+            user_id=user_id, provider="apple", nom="Cal2", db=db
         )
-        
-        # Ã‰vénements dans cal1
+
+        # Événements dans cal1
         for i in range(3):
             event = CalendarEventExternal(
                 external_id=f"c1evt{i}",
@@ -1210,13 +1174,10 @@ class TestSessionDecoratedMethods:
                 end_time=datetime.now() + timedelta(hours=1),
             )
             service.sauvegarder_evenement_calendrier(
-                calendrier_id=cal1.id,
-                event=event,
-                user_id=user_id,
-                db=db
+                calendrier_id=cal1.id, event=event, user_id=user_id, db=db
             )
-        
-        # Ã‰vénement dans cal2
+
+        # Événement dans cal2
         event = CalendarEventExternal(
             external_id="c2evt1",
             title="Cal2 Event",
@@ -1224,17 +1185,9 @@ class TestSessionDecoratedMethods:
             end_time=datetime.now() + timedelta(hours=1),
         )
         service.sauvegarder_evenement_calendrier(
-            calendrier_id=cal2.id,
-            event=event,
-            user_id=user_id,
-            db=db
+            calendrier_id=cal2.id, event=event, user_id=user_id, db=db
         )
-        
-        # Filtrer par cal1
-        events = service.lister_evenements_calendrier(
-            user_id=user_id,
-            calendrier_id=cal1.id,
-            db=db
-        )
-        assert len(events) == 3
 
+        # Filtrer par cal1
+        events = service.lister_evenements_calendrier(user_id=user_id, calendrier_id=cal1.id, db=db)
+        assert len(events) == 3

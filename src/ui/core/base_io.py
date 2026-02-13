@@ -1,4 +1,4 @@
-﻿"""
+"""
 Base IO - Import/Export universel
 Gestion automatique CSV/JSON depuis config
 """

@@ -210,24 +210,24 @@ tests/services/backup/test_utils.py::TestEdgeCases::test_format_file_size_zero P
 tests/services/backup/test_utils.py::TestEdgeCases::test_format_file_size_exact_boundaries PASSED [ 99%]
 tests/services/backup/test_utils.py::TestEdgeCases::test_filter_and_order_duplicates PASSED [ 99%]
 pytest : C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-package
-s\coverage\inorout.py:495: CoverageWarning: Module src/services/backup/service 
+s\coverage\inorout.py:495: CoverageWarning: Module src/services/backup/service
 was never imported. (module-not-imported); see https://coverage.readthedocs.io/
 en/7.13.2/messages.html#warning-module-not-imported
 Au caractère Ligne:1 : 1
 + pytest tests/services/backup/ --cov=src/services/backup/service --cov ...
 + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (C:\Users\Nemo\A...le-not-imported 
+    + CategoryInfo          : NotSpecified: (C:\Users\Nemo\A...le-not-imported
    :String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
- 
+
   self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")
 C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\coverag
-e\control.py:958: CoverageWarning: No data was collected. (no-data-collected); 
+e\control.py:958: CoverageWarning: No data was collected. (no-data-collected);
 see https://coverage.readthedocs.io/en/7.13.2/messages.html#warning-no-data-col
 lected
   self._warn("No data was collected.", slug="no-data-collected")
 C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\pytest_
-cov\plugin.py:363: CovReportWarning: Failed to generate report: No data to 
+cov\plugin.py:363: CovReportWarning: Failed to generate report: No data to
 report.
 
   warnings.warn(CovReportWarning(message), stacklevel=1)

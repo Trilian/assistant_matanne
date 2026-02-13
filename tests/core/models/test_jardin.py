@@ -1,27 +1,25 @@
-﻿"""
+"""
 Tests unitaires pour jardin.py
 
 Module: src.core.models.jardin
 Contient: GardenZone, AlerteMeteo, ConfigMeteo
 """
 
-import pytest
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
 
 from src.core.models.jardin import (
-    GardenZone,
     AlerteMeteo,
     ConfigMeteo,
+    GardenZone,
     GardenZoneType,
     NiveauAlerte,
     TypeAlerteMeteo,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ENUMS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGardenZoneType:
@@ -61,9 +59,9 @@ class TestTypeAlerteMeteo:
         assert TypeAlerteMeteo.PLUIE_FORTE.value == "pluie_forte"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS MODÃˆLES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS MODÈLES
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGardenZone:
@@ -89,7 +87,7 @@ class TestGardenZone:
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
         colonnes = GardenZone.__table__.columns
-        assert colonnes['etat_note'].default is not None
+        assert colonnes["etat_note"].default is not None
 
     def test_repr(self):
         """Test de la représentation string."""
@@ -121,8 +119,8 @@ class TestAlerteMeteo:
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
         colonnes = AlerteMeteo.__table__.columns
-        assert colonnes['niveau'].default is not None
-        assert colonnes['lu'].default is not None
+        assert colonnes["niveau"].default is not None
+        assert colonnes["lu"].default is not None
 
     def test_repr(self):
         """Test de la représentation string."""
@@ -151,9 +149,9 @@ class TestConfigMeteo:
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut (Paris)."""
         colonnes = ConfigMeteo.__table__.columns
-        assert colonnes['ville'].default is not None
-        assert colonnes['notifications_gel'].default is not None
-        assert colonnes['notifications_canicule'].default is not None
+        assert colonnes["ville"].default is not None
+        assert colonnes["notifications_gel"].default is not None
+        assert colonnes["notifications_canicule"].default is not None
 
     def test_repr(self):
         """Test de la représentation string."""

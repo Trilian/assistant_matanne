@@ -2103,7 +2103,7 @@ _______________ TestGenererSectionRecettes.test_section_basique _______________
 tests\modules\outils\test_rapports_logic.py:174: in test_section_basique
     assert section["titre"] == "­ƒôà Recettes"
 E   AssertionError: assert '\U0001f4c5 Recettes' == '\xf0\u0178\u201c\u2026 Recettes'
-E     
+E
 E     - ­ƒôà Recettes
 E     ? ^^^^
 E     + \U0001f4c5 Recettes
@@ -2146,7 +2146,7 @@ _______________ TestGenererSectionCourses.test_section_basique ________________
 tests\modules\outils\test_rapports_logic.py:237: in test_section_basique
     assert section["titre"] == "­ƒÆí Courses"
 E   AssertionError: assert '\U0001f4a1 Courses' == '\xf0\u0178\u2019\xa1 Courses'
-E     
+E
 E     - ­ƒÆí Courses
 E     ? ^^^^
 E     + \U0001f4a1 Courses
@@ -2189,7 +2189,7 @@ ______________ TestGenererSectionActivites.test_section_basique _______________
 tests\modules\outils\test_rapports_logic.py:303: in test_section_basique
     assert section["titre"] == "­ƒÄ» ActivitÚs"
 E   AssertionError: assert '\U0001f3af Activites' == '\xf0\u0178\u017d\xaf Activit\xe9s'
-E     
+E
 E     - ­ƒÄ» ActivitÚs
 E     + \U0001f3af Activites
 ---------------------------- Captured stdout setup ----------------------------
@@ -2230,7 +2230,7 @@ ______________ TestAnalyseChargeGlobale.test_niveau_charge_leger ______________
 tests\modules\planning\test_vue_ensemble_logic.py:153: in test_niveau_charge_leger
     assert result["niveau_charge"] == "LÚger"
 E   AssertionError: assert 'Leger' == 'LÚger'
-E     
+E
 E     - LÚger
 E     ?  ^
 E     + Leger
@@ -2311,7 +2311,7 @@ ___________________ TestPrevisionSemaine.test_semaine_vide ____________________
 tests\modules\planning\test_vue_ensemble_logic.py:227: in test_semaine_vide
     assert result["prevision"] == "Semaine lÚgÞre"
 E   AssertionError: assert 'Semaine legÞre' == 'Semaine lÚgÞre'
-E     
+E
 E     - Semaine lÚgÞre
 E     ?          ^
 E     + Semaine legÞre

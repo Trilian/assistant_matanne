@@ -1,17 +1,16 @@
-﻿"""
+"""
 Tests unitaires pour text.py
 
 Module: src.utils.formatters.text
 """
 
-import pytest
 from src.utils.formatters.text import (
-    tronquer,
-    nettoyer_texte,
-    generer_slug,
-    extraire_nombre,
-    capitaliser_premiere,
     capitaliser_mots,
+    capitaliser_premiere,
+    extraire_nombre,
+    generer_slug,
+    nettoyer_texte,
+    tronquer,
 )
 
 
@@ -36,7 +35,7 @@ class TestText:
     def test_extraire_nombre(self):
         """Test de la fonction extraire_nombre."""
         assert extraire_nombre("2.5 kg") == 2.5
-        assert extraire_nombre("Prix: 10,50â‚¬") == 10.5
+        assert extraire_nombre("Prix: 10,50€") == 10.5
         assert extraire_nombre("") is None
 
     def test_capitaliser_premiere(self):

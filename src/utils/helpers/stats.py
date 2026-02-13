@@ -1,4 +1,4 @@
-﻿"""
+"""
 Helpers - Calculs statistiques
 """
 
@@ -140,4 +140,3 @@ def moyenne_mobile(values: list[float], window: int) -> list[float]:
         result.append(sum(window_values) / window)
 
     return result
-

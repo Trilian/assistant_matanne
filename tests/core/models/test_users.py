@@ -1,11 +1,9 @@
-﻿"""
+"""
 Tests unitaires pour users.py
 
 Module: src.core.models.users
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
 # from src.core.models.users import ...
@@ -13,7 +11,6 @@ from unittest.mock import MagicMock, patch
 
 class TestUsers:
     """Tests pour le module users."""
-
 
     class TestGarminActivityType:
         """Tests pour la classe GarminActivityType."""
@@ -28,7 +25,6 @@ class TestUsers:
             # TODO: Implémenter
             pass
 
-
     class TestPurchaseCategory:
         """Tests pour la classe PurchaseCategory."""
 
@@ -41,7 +37,6 @@ class TestUsers:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-
 
     class TestPurchasePriority:
         """Tests pour la classe PurchasePriority."""
@@ -56,7 +51,6 @@ class TestUsers:
             # TODO: Implémenter
             pass
 
-
     class TestUserProfile:
         """Tests pour la classe UserProfile."""
 
@@ -70,7 +64,6 @@ class TestUsers:
             # TODO: Implémenter
             pass
 
-
     class TestGarminToken:
         """Tests pour la classe GarminToken."""
 
@@ -83,4 +76,3 @@ class TestUsers:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-

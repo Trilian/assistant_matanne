@@ -1,34 +1,35 @@
-﻿"""
+"""
 Module Inventaire - Gestion du stock
 
-FonctionnalitÃes complètes:
+Fonctionnalités complètes:
 - Gestion complète du stock avec alertes
-- CatÃegorisation et filtres avancÃes
+- Catégorisation et filtres avancés
 - Suggestions IA pour les courses
-- Export/Import des donnÃees
-- PrÃedictions ML et recommandations
+- Export/Import des données
+- Prédictions ML et recommandations
 - Notifications d'alertes
 - Gestion des photos
 """
 
 import streamlit as st
 
-# Imports des sous-modules
-from .stock import render_stock, render_add_article_form
 from .alertes import render_alertes
 from .categories import render_categories
-from .suggestions import render_suggestions_ia
-from .photos import render_photos
-from .notifications import render_notifications, render_notifications_widget
-from .predictions import render_predictions
-from .tools import render_tools
 from .historique import render_historique
+from .notifications import render_notifications, render_notifications_widget
+from .photos import render_photos
+from .predictions import render_predictions
+
+# Imports des sous-modules
+from .stock import render_add_article_form, render_stock
+from .suggestions import render_suggestions_ia
+from .tools import render_tools
 
 
 def app():
-    """Point d'entrÃee module inventaire"""
+    """Point d'entrée module inventaire"""
     st.title("ðŸ“¦ Inventaire")
-    st.caption("Gestion complète de votre stock d'ingrÃedients")
+    st.caption("Gestion complète de votre stock d'ingrédients")
 
     # Initialiser session state
     if "show_form" not in st.session_state:
@@ -37,17 +38,29 @@ def app():
         st.session_state.refresh_counter = 0
 
     # Tabs principales
-    tab_stock, tab_alertes, tab_categories, tab_suggestions, tab_historique, tab_photos, tab_notifications, tab_predictions, tab_tools = st.tabs([
-        "ðŸ“Š Stock", 
-        "âš ï¸ Alertes", 
-        "ðŸ·ï¸ CatÃegories", 
-        "ðŸ›’ Suggestions IA",
-        "ðŸ“‹ Historique",
-        "ðŸ“· Photos",
-        "ðŸ”” Notifications",
-        "ðŸ”® PrÃevisions",
-        "ðŸ”§ Outils"
-    ])
+    (
+        tab_stock,
+        tab_alertes,
+        tab_categories,
+        tab_suggestions,
+        tab_historique,
+        tab_photos,
+        tab_notifications,
+        tab_predictions,
+        tab_tools,
+    ) = st.tabs(
+        [
+            "ðŸ“Š Stock",
+            "âš ï¸ Alertes",
+            "ðŸ·ï¸ Catégories",
+            "ðŸ›’ Suggestions IA",
+            "ðŸ“‹ Historique",
+            "ðŸ“· Photos",
+            "ðŸ”” Notifications",
+            "ðŸ”® Prévisions",
+            "ðŸ”§ Outils",
+        ]
+    )
 
     with tab_stock:
         render_stock()
@@ -76,7 +89,7 @@ def app():
     with tab_tools:
         render_tools()
 
-    # Afficher formulaire d'ajout si demandÃe
+    # Afficher formulaire d'ajout si demandé
     if st.session_state.show_form:
         st.divider()
         render_add_article_form()

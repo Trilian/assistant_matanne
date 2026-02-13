@@ -1,11 +1,9 @@
-﻿"""
+"""
 Tests unitaires pour batch_cooking.py
 
 Module: src.core.models.batch_cooking
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
 # from src.core.models.batch_cooking import ...
@@ -13,7 +11,6 @@ from unittest.mock import MagicMock, patch
 
 class TestBatchCooking:
     """Tests pour le module batch_cooking."""
-
 
     class TestStatutSessionEnum:
         """Tests pour la classe StatutSessionEnum."""
@@ -28,7 +25,6 @@ class TestBatchCooking:
             # TODO: Implémenter
             pass
 
-
     class TestStatutEtapeEnum:
         """Tests pour la classe StatutEtapeEnum."""
 
@@ -41,7 +37,6 @@ class TestBatchCooking:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-
 
     class TestTypeRobotEnum:
         """Tests pour la classe TypeRobotEnum."""
@@ -56,7 +51,6 @@ class TestBatchCooking:
             # TODO: Implémenter
             pass
 
-
     class TestLocalisationStockageEnum:
         """Tests pour la classe LocalisationStockageEnum."""
 
@@ -70,7 +64,6 @@ class TestBatchCooking:
             # TODO: Implémenter
             pass
 
-
     class TestConfigBatchCooking:
         """Tests pour la classe ConfigBatchCooking."""
 
@@ -83,4 +76,3 @@ class TestBatchCooking:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-

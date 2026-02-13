@@ -1,13 +1,9 @@
-﻿"""
+"""
 Tests approfondis pour src/core/cache.py
 
 Cible: Atteindre 80%+ de couverture
 Lignes manquantes: 165-167, 295-296, 326-353, 377-378, 398-419, 426-428, 438-439, 471-499, 510-529
 """
-
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime, timedelta
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -116,7 +112,7 @@ class TestCacheDeep:
         Cache.definir("size_test2", "value2")
 
         stats = Cache.obtenir_statistiques()
-        
+
         # Les stats devraient inclure des infos de taille
         assert "taille_octets" in stats or "taille_mo" in stats
 
@@ -354,8 +350,9 @@ class TestCacheExpiration:
 
     def test_expiration_auto(self):
         """Test expiration automatique"""
-        from src.core.cache import Cache
         import time
+
+        from src.core.cache import Cache
 
         Cache.definir("auto_expire", "value", ttl=0.05)
 
@@ -378,8 +375,9 @@ class TestCacheExpiration:
 
     def test_expiration_renouvellement(self):
         """Test renouvellement de l'expiration"""
-        from src.core.cache import Cache
         import time
+
+        from src.core.cache import Cache
 
         Cache.definir("renew_test", "value", ttl=0.1)
 

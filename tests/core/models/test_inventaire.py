@@ -1,11 +1,9 @@
-﻿"""
+"""
 Tests unitaires pour inventaire.py
 
 Module: src.core.models.inventaire
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
 # from src.core.models.inventaire import ...
@@ -13,7 +11,6 @@ from unittest.mock import MagicMock, patch
 
 class TestInventaire:
     """Tests pour le module inventaire."""
-
 
     class TestArticleInventaire:
         """Tests pour la classe ArticleInventaire."""
@@ -28,7 +25,6 @@ class TestInventaire:
             # TODO: Implémenter
             pass
 
-
     class TestHistoriqueInventaire:
         """Tests pour la classe HistoriqueInventaire."""
 
@@ -41,4 +37,3 @@ class TestInventaire:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-

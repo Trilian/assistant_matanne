@@ -1,4 +1,4 @@
-﻿"""
+"""
 Schémas Pydantic pour le service de suggestions IA.
 
 Définit les modèles de données:
@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 class ProfilCulinaire(BaseModel):
     """Profil culinaire déduit de l'historique."""
-    
+
     categories_preferees: list[str] = Field(default_factory=list)
     ingredients_frequents: list[str] = Field(default_factory=list)
     ingredients_evites: list[str] = Field(default_factory=list)
@@ -25,12 +25,12 @@ class ProfilCulinaire(BaseModel):
 
 class ContexteSuggestion(BaseModel):
     """Contexte pour générer des suggestions."""
-    
+
     type_repas: str = "dîner"
     nb_personnes: int = 4
     temps_disponible_minutes: int = 60
     ingredients_disponibles: list[str] = Field(default_factory=list)
-    ingredients_a_utiliser: list[str] = Field(default_factory=list)  # Ã€ consommer en priorité
+    ingredients_a_utiliser: list[str] = Field(default_factory=list)  # À consommer en priorité
     contraintes: list[str] = Field(default_factory=list)  # végétarien, sans gluten, etc.
     saison: str = ""
     budget: str = "normal"  # économique, normal, gastronomique
@@ -38,7 +38,7 @@ class ContexteSuggestion(BaseModel):
 
 class SuggestionRecette(BaseModel):
     """Suggestion de recette avec scoring."""
-    
+
     recette_id: int | None = None
     nom: str = ""
     raison: str = ""  # Pourquoi cette suggestion

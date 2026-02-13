@@ -1,4 +1,4 @@
-﻿"""
+"""
 Script de seed - DonnÃ©es de dÃ©monstration
 Remplit la base avec des donnÃ©es rÃ©alistes pour tester l'application
 """
@@ -9,28 +9,29 @@ from pathlib import Path
 # Ajouter src au path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
+
 from src.core.database import get_db_context
 from src.core.models import (
-    User,
-    UserProfile,
-    Notification,
-    Ingredient,
-    Recipe,
-    RecipeIngredient,
-    InventoryItem,
     BatchMeal,
-    ShoppingList,
+    CalendarEvent,
     ChildProfile,
-    WellbeingEntry,
-    Routine,
-    RoutineTask,
-    Project,
-    ProjectTask,
     GardenItem,
     GardenLog,
-    CalendarEvent,
+    Ingredient,
+    InventoryItem,
+    Notification,
+    Project,
+    ProjectTask,
+    Recipe,
+    RecipeIngredient,
+    Routine,
+    RoutineTask,
+    ShoppingList,
+    User,
+    UserProfile,
     WeatherLog,
+    WellbeingEntry,
 )
 
 

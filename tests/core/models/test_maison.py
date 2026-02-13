@@ -1,11 +1,9 @@
-﻿"""
+"""
 Tests unitaires pour maison.py
 
 Module: src.core.models.maison
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
 # from src.core.models.maison import ...
@@ -13,7 +11,6 @@ from unittest.mock import MagicMock, patch
 
 class TestMaison:
     """Tests pour le module maison."""
-
 
     class TestProject:
         """Tests pour la classe Project."""
@@ -28,7 +25,6 @@ class TestMaison:
             # TODO: Implémenter
             pass
 
-
     class TestProjectTask:
         """Tests pour la classe ProjectTask."""
 
@@ -41,7 +37,6 @@ class TestMaison:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-
 
     class TestRoutine:
         """Tests pour la classe Routine."""
@@ -56,7 +51,6 @@ class TestMaison:
             # TODO: Implémenter
             pass
 
-
     class TestRoutineTask:
         """Tests pour la classe RoutineTask."""
 
@@ -70,7 +64,6 @@ class TestMaison:
             # TODO: Implémenter
             pass
 
-
     class TestGardenItem:
         """Tests pour la classe GardenItem."""
 
@@ -83,4 +76,3 @@ class TestMaison:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-

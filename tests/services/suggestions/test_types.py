@@ -1,14 +1,12 @@
-﻿"""
+"""
 Tests for src/services/suggestions/types.py
 
 Pydantic models for suggestions.
 """
 
-import pytest
-
 from src.services.suggestions.types import (
-    ProfilCulinaire,
     ContexteSuggestion,
+    ProfilCulinaire,
     SuggestionRecette,
 )
 
@@ -168,7 +166,7 @@ class TestAllExport:
     def test_all_exports(self):
         """Test tous les exports."""
         from src.services.suggestions import types
-        
+
         assert "ProfilCulinaire" in types.__all__
         assert "ContexteSuggestion" in types.__all__
         assert "SuggestionRecette" in types.__all__

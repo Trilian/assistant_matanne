@@ -1,10 +1,11 @@
-﻿"""
+"""
 Script d'initialisation de la base de donnÃ©es
 CrÃ©e toutes les tables depuis les modÃ¨les SQLAlchemy
 
 Usage:
     python scripts/init_db.py
 """
+
 import sys
 from pathlib import Path
 
@@ -13,9 +14,10 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from sqlalchemy import text
-from src.core.models import Base
+
 from src.core.database import obtenir_moteur
 from src.core.logging import get_logger
+from src.core.models import Base
 
 logger = get_logger(__name__)
 
@@ -31,11 +33,13 @@ def drop_all_tables():
         conn.execute(text("SET session_replication_role = 'replica';"))
 
         # RÃ©cupÃ©rer toutes les tables
-        result = conn.execute(text("""
-            SELECT tablename 
-            FROM pg_tables 
+        result = conn.execute(
+            text("""
+            SELECT tablename
+            FROM pg_tables
             WHERE schemaname = 'public'
-        """))
+        """)
+        )
 
         tables = [row[0] for row in result]
 
@@ -78,12 +82,14 @@ def create_all_tables():
 
     # Afficher les tables crÃ©Ã©es
     with engine.connect() as conn:
-        result = conn.execute(text("""
-            SELECT tablename 
-            FROM pg_tables 
+        result = conn.execute(
+            text("""
+            SELECT tablename
+            FROM pg_tables
             WHERE schemaname = 'public'
             ORDER BY tablename
-        """))
+        """)
+        )
 
         tables = [row[0] for row in result]
 
@@ -99,23 +105,25 @@ def verify_schema():
     logger.info("\nðŸ” VÃ©rification du schÃ©ma...")
 
     expected_tables = [
-        'ingredients',
-        'recettes',
-        'recette_ingredients',
-        'etapes_recette',
-        'versions_recette',
-        'inventaire',
-        'liste_courses',
-        'plannings',
-        'repas',
+        "ingredients",
+        "recettes",
+        "recette_ingredients",
+        "etapes_recette",
+        "versions_recette",
+        "inventaire",
+        "liste_courses",
+        "plannings",
+        "repas",
     ]
 
     with engine.connect() as conn:
-        result = conn.execute(text("""
-            SELECT tablename 
-            FROM pg_tables 
+        result = conn.execute(
+            text("""
+            SELECT tablename
+            FROM pg_tables
             WHERE schemaname = 'public'
-        """))
+        """)
+        )
 
         existing_tables = [row[0] for row in result]
 
@@ -138,16 +146,12 @@ def main():
     """Fonction principale"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Initialiser la base de donnÃ©es')
+    parser = argparse.ArgumentParser(description="Initialiser la base de donnÃ©es")
     parser.add_argument(
-        '--drop',
-        action='store_true',
-        help='Supprimer toutes les tables avant de crÃ©er'
+        "--drop", action="store_true", help="Supprimer toutes les tables avant de crÃ©er"
     )
     parser.add_argument(
-        '--no-verify',
-        action='store_true',
-        help='Ne pas vÃ©rifier le schÃ©ma aprÃ¨s crÃ©ation'
+        "--no-verify", action="store_true", help="Ne pas vÃ©rifier le schÃ©ma aprÃ¨s crÃ©ation"
     )
 
     args = parser.parse_args()
@@ -159,8 +163,10 @@ def main():
     try:
         # Supprimer si demandÃ©
         if args.drop:
-            confirmation = input("\nâš ï¸ ATTENTION : Toutes les donnÃ©es seront perdues. Continuer ? (oui/non): ")
-            if confirmation.lower() != 'oui':
+            confirmation = input(
+                "\nâš ï¸ ATTENTION : Toutes les donnÃ©es seront perdues. Continuer ? (oui/non): "
+            )
+            if confirmation.lower() != "oui":
                 logger.info("âŒ OpÃ©ration annulÃ©e")
                 return
 
@@ -183,6 +189,7 @@ def main():
     except Exception as e:
         logger.error(f"\nâŒ ERREUR: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

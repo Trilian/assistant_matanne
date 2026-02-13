@@ -1,21 +1,21 @@
-﻿"""
+"""
 Service Prévisions ML pour Inventaire
 Analyse historique + prédictions de consommation
 """
 
 import logging
-from datetime import date, datetime, timedelta
-from typing import Any
+from datetime import datetime
 from statistics import mean, stdev
+from typing import Any
 
 from pydantic import BaseModel, Field
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
 
 class PredictionArticle(BaseModel):
     """Prédiction pour un article"""
+
     article_id: int
     ingredient_id: int
     nom: str
@@ -31,6 +31,7 @@ class PredictionArticle(BaseModel):
 
 class AnalysePrediction(BaseModel):
     """Analyse complète des prédictions"""
+
     date_analyse: datetime = Field(default_factory=datetime.utcnow)
     nombre_articles: int
     articles_en_rupture_risque: list[str]
@@ -57,11 +58,11 @@ class PredictionService:
         historique: list[dict[str, Any]],
     ) -> dict[str, Any] | None:
         """Analyse l'historique d'un article pour détecter patterns.
-        
+
         Args:
             article_id: ID de l'article
             historique: Liste des modifications historiques
-            
+
         Returns:
             Dict avec taux consommation, tendance, etc
         """
@@ -70,8 +71,9 @@ class PredictionService:
 
         # Filtre les modifications pour cet article
         modifications = [
-            h for h in historique
-            if h.get("article_id") == article_id 
+            h
+            for h in historique
+            if h.get("article_id") == article_id
             and h.get("type_modification") == "modification_quantite"
         ]
 
@@ -86,10 +88,12 @@ class PredictionService:
             change = qty_avant - qty_apres  # Positif = consommation
 
             if change > 0:  # Seulement consommations
-                changes.append({
-                    "change": change,
-                    "date": mod.get("date_modification"),
-                })
+                changes.append(
+                    {
+                        "change": change,
+                        "date": mod.get("date_modification"),
+                    }
+                )
 
         if not changes:
             return None
@@ -101,8 +105,8 @@ class PredictionService:
 
         # Détecte tendance (croissance/décroissance)
         if len(changements) >= 2:
-            premiers = changements[:len(changements) // 2]
-            derniers = changements[len(changements) // 2:]
+            premiers = changements[: len(changements) // 2]
+            derniers = changements[len(changements) // 2 :]
             tendance_value = mean(derniers) - mean(premiers)
 
             if tendance_value > variance * 0.1:
@@ -129,12 +133,12 @@ class PredictionService:
         jours: int = 30,
     ) -> float:
         """Prédit la quantité future.
-        
+
         Args:
             quantite_actuelle: Stock actuel
             taux_consommation: Consommation/jour moyenne
             jours: Nombre de jours à prédire
-            
+
         Returns:
             Quantité estimée dans N jours
         """
@@ -150,12 +154,12 @@ class PredictionService:
         taux_consommation: float,
     ) -> tuple[bool, int | None]:
         """Détecte si rupture de stock risquée.
-        
+
         Args:
             quantite_actuelle: Stock actuel
             quantite_min: Seuil minimum
             taux_consommation: Consommation/jour
-            
+
         Returns:
             (risque, jours_avant_rupture)
         """
@@ -175,11 +179,11 @@ class PredictionService:
         historique_complet: list[dict[str, Any]],
     ) -> list[PredictionArticle]:
         """Génère prédictions pour tous les articles.
-        
+
         Args:
             articles: Liste des articles actuels
             historique_complet: Historique complet
-            
+
         Returns:
             Liste de prédictions
         """
@@ -212,9 +216,7 @@ class PredictionService:
             qty_mois = self.predire_quantite(quantite_actuelle, taux, 30)
 
             # Risque rupture
-            risque, jours = self.detecter_rupture_risque(
-                quantite_actuelle, quantite_min, taux
-            )
+            risque, jours = self.detecter_rupture_risque(quantite_actuelle, quantite_min, taux)
 
             prediction = PredictionArticle(
                 article_id=article_id,
@@ -239,27 +241,19 @@ class PredictionService:
         predictions: list[PredictionArticle],
     ) -> AnalysePrediction:
         """Obtient analyse globale des prédictions.
-        
+
         Args:
             predictions: Liste de prédictions
-            
+
         Returns:
             Analyse globale
         """
-        articles_rupture = [
-            p.nom for p in predictions if p.risque_rupture_mois
-        ]
-        articles_croissance = [
-            p.nom for p in predictions if p.tendance == "croissante"
-        ]
-        articles_decroissance = [
-            p.nom for p in predictions if p.tendance == "decroissante"
-        ]
+        articles_rupture = [p.nom for p in predictions if p.risque_rupture_mois]
+        articles_croissance = [p.nom for p in predictions if p.tendance == "croissante"]
+        articles_decroissance = [p.nom for p in predictions if p.tendance == "decroissante"]
 
         consommation_globale = (
-            mean([p.taux_consommation_moyen for p in predictions])
-            if predictions
-            else 0
+            mean([p.taux_consommation_moyen for p in predictions]) if predictions else 0
         )
 
         # Tendance globale
@@ -276,7 +270,9 @@ class PredictionService:
             tendance_globale = "stable"
 
         # Consommations min/max
-        taux_consommation = [p.taux_consommation_moyen for p in predictions if p.taux_consommation_moyen > 0]
+        taux_consommation = [
+            p.taux_consommation_moyen for p in predictions if p.taux_consommation_moyen > 0
+        ]
         consommation_min = min(taux_consommation) if taux_consommation else 0.0
         consommation_max = max(taux_consommation) if taux_consommation else 0.0
 
@@ -299,10 +295,10 @@ class PredictionService:
         predictions: list[PredictionArticle],
     ) -> list[dict[str, Any]]:
         """Génère recommandations d'achat.
-        
+
         Args:
             predictions: Liste de prédictions
-            
+
         Returns:
             Liste de recommandations
         """
@@ -310,32 +306,38 @@ class PredictionService:
 
         for pred in predictions:
             # Critique: risque rupture dans 2 semaines
-            if pred.risque_rupture_mois and pred.jours_avant_rupture and pred.jours_avant_rupture < 14:
+            if (
+                pred.risque_rupture_mois
+                and pred.jours_avant_rupture
+                and pred.jours_avant_rupture < 14
+            ):
                 quantite_recommandee = pred.taux_consommation_moyen * 30  # 1 mois
-                recommandations.append({
-                    "article": pred.nom,
-                    "priorite": "CRITIQUE",
-                    "raison": f"Rupture risquée dans {pred.jours_avant_rupture} jours",
-                    "quantite_acheter": quantite_recommandee,
-                    "icone": "🚨",
-                })
+                recommandations.append(
+                    {
+                        "article": pred.nom,
+                        "priorite": "CRITIQUE",
+                        "raison": f"Rupture risquée dans {pred.jours_avant_rupture} jours",
+                        "quantite_acheter": quantite_recommandee,
+                        "icone": "🚨",
+                    }
+                )
 
             # Croissance: consommation augmente
             elif pred.tendance == "croissante" and pred.confiance > 0.5:
                 quantite_recommandee = pred.taux_consommation_moyen * 45  # 1.5 mois
-                recommandations.append({
-                    "article": pred.nom,
-                    "priorite": "HAUTE",
-                    "raison": "Consommation en hausse, anticiper",
-                    "quantite_acheter": quantite_recommandee,
-                    "icone": "📈",
-                })
+                recommandations.append(
+                    {
+                        "article": pred.nom,
+                        "priorite": "HAUTE",
+                        "raison": "Consommation en hausse, anticiper",
+                        "quantite_acheter": quantite_recommandee,
+                        "icone": "📈",
+                    }
+                )
 
         # Trier par priorité
         priorite_ordre = {"CRITIQUE": 0, "HAUTE": 1}
-        recommandations.sort(
-            key=lambda x: priorite_ordre.get(x["priorite"], 2)
-        )
+        recommandations.sort(key=lambda x: priorite_ordre.get(x["priorite"], 2))
 
         return recommandations[:10]  # Top 10
 

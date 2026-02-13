@@ -1,13 +1,11 @@
-﻿"""
+"""
 Tests unitaires pour spinners.py
 
 Module: src.ui.feedback.spinners
 Couverture cible: >80%
 """
 
-import pytest
 from unittest.mock import MagicMock, patch
-from datetime import datetime
 
 
 class TestSpinners:
@@ -65,8 +63,8 @@ class TestSpinners:
     @patch("streamlit.caption")
     def test_spinner_intelligent_temps_long(self, mock_caption, mock_spinner):
         """Test spinner_intelligent avec temps > 1 seconde."""
+
         from src.ui.feedback.spinners import spinner_intelligent
-        import time
 
         mock_spinner.return_value.__enter__ = MagicMock()
         mock_spinner.return_value.__exit__ = MagicMock(return_value=False)
@@ -127,7 +125,7 @@ class TestSpinners:
 
         call_args = mock_markdown.call_args
         html_content = call_args[0][0]
-        
+
         # Vérifie que c'est du HTML avec animation
         assert "background" in html_content
         assert "animation" in html_content
@@ -141,28 +139,34 @@ class TestSpinnersImports:
     def test_import_spinner_intelligent(self):
         """Vérifie que spinner_intelligent est importable."""
         from src.ui.feedback.spinners import spinner_intelligent
+
         assert callable(spinner_intelligent)
 
     def test_import_indicateur_chargement(self):
         """Vérifie que indicateur_chargement est importable."""
         from src.ui.feedback.spinners import indicateur_chargement
+
         assert callable(indicateur_chargement)
 
     def test_import_chargeur_squelette(self):
         """Vérifie que chargeur_squelette est importable."""
         from src.ui.feedback.spinners import chargeur_squelette
+
         assert callable(chargeur_squelette)
 
     def test_import_via_feedback(self):
         """Vérifie l'import via le module feedback."""
         from src.ui.feedback import (
-            spinner_intelligent,
-            indicateur_chargement,
             chargeur_squelette,
+            indicateur_chargement,
+            spinner_intelligent,
         )
-        assert all(callable(f) for f in [
-            spinner_intelligent,
-            indicateur_chargement,
-            chargeur_squelette,
-        ])
 
+        assert all(
+            callable(f)
+            for f in [
+                spinner_intelligent,
+                indicateur_chargement,
+                chargeur_squelette,
+            ]
+        )

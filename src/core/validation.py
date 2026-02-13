@@ -1,4 +1,4 @@
-﻿"""
+"""
 Validation - Validation Pydantic + Sanitization des entrées.
 
 Ce module fournit :
@@ -323,7 +323,9 @@ class EtapeInput(BaseModel):
     """
 
     numero: int | None = Field(None, ge=1, le=MAX_ETAPES, description="Numéro de l'étape")
-    ordre: int | None = Field(None, ge=1, le=MAX_ETAPES, description="Ordre de l'étape (alias de numero)")
+    ordre: int | None = Field(
+        None, ge=1, le=MAX_ETAPES, description="Ordre de l'étape (alias de numero)"
+    )
     description: str = Field(..., min_length=1, max_length=MAX_LENGTH_LONG)
     duree: int | None = Field(None, ge=0, le=MAX_TEMPS_CUISSON)
 
@@ -404,9 +406,7 @@ class RecetteInput(BaseModel):
         """Valide le type de repas"""
         types_valides = {"petit_déjeuner", "déjeuner", "dîner", "goûter", "apéritif", "dessert"}
         if v.lower() not in types_valides:
-            raise ValueError(
-                f"Type de repas invalide. Doit être parmi: {', '.join(types_valides)}"
-            )
+            raise ValueError(f"Type de repas invalide. Doit être parmi: {', '.join(types_valides)}")
         return v.lower()
 
     @field_validator("saison")
@@ -416,9 +416,7 @@ class RecetteInput(BaseModel):
         if v:
             saisons_valides = {"printemps", "été", "automne", "hiver", "toute_année"}
             if v.lower() not in saisons_valides:
-                raise ValueError(
-                    f"Saison invalide. Doit être parmi: {', '.join(saisons_valides)}"
-                )
+                raise ValueError(f"Saison invalide. Doit être parmi: {', '.join(saisons_valides)}")
             return v.lower()
         return None
 
@@ -547,9 +545,7 @@ class RepasInput(BaseModel):
             "goûter",
         }
         if v.lower() not in types_valides:
-            raise ValueError(
-                f"Type invalide. Doit être parmi: {', '.join(types_valides)}"
-            )
+            raise ValueError(f"Type invalide. Doit être parmi: {', '.join(types_valides)}")
         return v.lower()
 
 
@@ -564,9 +560,7 @@ class RoutineInput(BaseModel):
     nom: str = Field(..., min_length=1, max_length=200)
     description: str | None = Field(None, max_length=500)
     pour_qui: str = Field(..., description="Enfant associé")
-    frequence: str = Field(
-        ..., description="Fréquence (quotidien, hebdo, mensuel)"
-    )
+    frequence: str = Field(..., description="Fréquence (quotidien, hebdo, mensuel)")
     is_active: bool = Field(default=True)
 
     @field_validator("nom")
@@ -623,9 +617,7 @@ class EntreeJournalInput(BaseModel):
         """Valide le domaine"""
         domaines_valides = {"santé", "humeur", "développement", "comportement"}
         if v.lower() not in domaines_valides:
-            raise ValueError(
-                f"Domaine invalide. Doit être parmi: {', '.join(domaines_valides)}"
-            )
+            raise ValueError(f"Domaine invalide. Doit être parmi: {', '.join(domaines_valides)}")
         return v.lower()
 
     @field_validator("titre")
@@ -662,19 +654,13 @@ class ProjetInput(BaseModel):
         """Valide la priorité"""
         priorites_valides = {"basse", "moyenne", "haute"}
         if v.lower() not in priorites_valides:
-            raise ValueError(
-                f"Priorité invalide. Doit être parmi: {', '.join(priorites_valides)}"
-            )
+            raise ValueError(f"Priorité invalide. Doit être parmi: {', '.join(priorites_valides)}")
         return v.lower()
 
     @model_validator(mode="after")
     def valider_dates(self) -> "ProjetInput":
         """Valide que la date de fin est après la date de début"""
-        if (
-            self.date_debut
-            and self.date_fin_estimee
-            and self.date_fin_estimee < self.date_debut
-        ):
+        if self.date_debut and self.date_fin_estimee and self.date_fin_estimee < self.date_debut:
             raise ValueError("La date de fin doit être après la date de début")
         return self
 
@@ -821,7 +807,8 @@ def valider_formulaire_streamlit(
             longueur_max = regles.get("max_length", 1000)
             if len(valeur) > longueur_max:
                 erreurs.append(
-                    f"[!] {regles.get('label', champ)} trop long " f"(max {longueur_max} caractères)"
+                    f"[!] {regles.get('label', champ)} trop long "
+                    f"(max {longueur_max} caractères)"
                 )
 
     est_valide = len(erreurs) == 0

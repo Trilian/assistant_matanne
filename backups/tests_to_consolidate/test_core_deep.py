@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests profonds pour les modules core.
 
 Ces tests exÃ©cutent rÃ©ellement le code (pas juste des imports)
@@ -6,11 +6,10 @@ pour amÃ©liorer significativement la couverture.
 """
 
 import logging
-import re
-import pytest
 from datetime import date, datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
+import pytest
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: NettoyeurEntrees (validation.py)
@@ -442,7 +441,7 @@ class TestHelpersValidation:
 
     def test_exiger_champs_manquants(self):
         """Test exiger_champs avec champs manquants"""
-        from src.core.errors import exiger_champs, ErreurValidation
+        from src.core.errors import ErreurValidation, exiger_champs
 
         data = {"nom": "Tarte"}
 
@@ -460,14 +459,14 @@ class TestHelpersValidation:
 
     def test_exiger_positif_zero(self):
         """Test exiger_positif avec zÃ©ro"""
-        from src.core.errors import exiger_positif, ErreurValidation
+        from src.core.errors import ErreurValidation, exiger_positif
 
         with pytest.raises(ErreurValidation):
             exiger_positif(0, "quantitÃ©")
 
     def test_exiger_positif_negatif(self):
         """Test exiger_positif avec valeur nÃ©gative"""
-        from src.core.errors import exiger_positif, ErreurValidation
+        from src.core.errors import ErreurValidation, exiger_positif
 
         with pytest.raises(ErreurValidation):
             exiger_positif(-5, "quantitÃ©")
@@ -482,7 +481,7 @@ class TestHelpersValidation:
 
     def test_exiger_existence_none(self):
         """Test exiger_existence avec None"""
-        from src.core.errors import exiger_existence, ErreurNonTrouve
+        from src.core.errors import ErreurNonTrouve, exiger_existence
 
         with pytest.raises(ErreurNonTrouve):
             exiger_existence(None, "Recette", 42)
@@ -496,14 +495,14 @@ class TestHelpersValidation:
 
     def test_exiger_plage_trop_petit(self):
         """Test exiger_plage valeur trop petite"""
-        from src.core.errors import exiger_plage, ErreurValidation
+        from src.core.errors import ErreurValidation, exiger_plage
 
         with pytest.raises(ErreurValidation):
             exiger_plage(-10, minimum=0, nom_champ="prix")
 
     def test_exiger_plage_trop_grand(self):
         """Test exiger_plage valeur trop grande"""
-        from src.core.errors import exiger_plage, ErreurValidation
+        from src.core.errors import ErreurValidation, exiger_plage
 
         with pytest.raises(ErreurValidation):
             exiger_plage(200, maximum=100, nom_champ="prix")
@@ -517,14 +516,14 @@ class TestHelpersValidation:
 
     def test_exiger_longueur_trop_court(self):
         """Test exiger_longueur texte trop court"""
-        from src.core.errors import exiger_longueur, ErreurValidation
+        from src.core.errors import ErreurValidation, exiger_longueur
 
         with pytest.raises(ErreurValidation):
             exiger_longueur("Hi", minimum=5, nom_champ="nom")
 
     def test_exiger_longueur_trop_long(self):
         """Test exiger_longueur texte trop long"""
-        from src.core.errors import exiger_longueur, ErreurValidation
+        from src.core.errors import ErreurValidation, exiger_longueur
 
         with pytest.raises(ErreurValidation):
             exiger_longueur("A" * 100, maximum=50, nom_champ="nom")
@@ -788,6 +787,6 @@ class TestHandleErrorsAlias:
 
     def test_alias_exists(self):
         """Test alias handle_errors existe"""
-        from src.core.errors import handle_errors, gerer_erreurs
+        from src.core.errors import gerer_erreurs, handle_errors
 
         assert handle_errors is gerer_erreurs

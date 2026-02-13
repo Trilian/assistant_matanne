@@ -1,10 +1,9 @@
-﻿"""
+"""
 UI Feedback - Progress tracking
 """
 
 import time
 from datetime import datetime
-from typing import Optional
 
 import streamlit as st
 
@@ -146,7 +145,7 @@ class EtatChargement:
         self.etape_courante = len(self.etapes) - 1
         self._mettre_a_jour_affichage()
 
-    def terminer_etape(self, nom_etape: Optional[str] = None, succes: bool = True):
+    def terminer_etape(self, nom_etape: str | None = None, succes: bool = True):
         """Marque une étape comme terminée"""
         # Trouver l'étape
         if nom_etape:
@@ -167,7 +166,7 @@ class EtatChargement:
             etape["completed"] = True
             self._mettre_a_jour_affichage()
 
-    def erreur_etape(self, nom_etape: Optional[str] = None, msg_erreur: str = ""):
+    def erreur_etape(self, nom_etape: str | None = None, msg_erreur: str = ""):
         """Marque une étape en erreur"""
         if nom_etape:
             idx_etape = next((i for i, s in enumerate(self.etapes) if s["name"] == nom_etape), None)

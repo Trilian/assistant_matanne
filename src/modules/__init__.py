@@ -1,4 +1,4 @@
-﻿"""Modules organises par contexte metier.
+"""Modules organises par contexte metier.
 
 Architecture:
 - cuisine: Recettes, planning repas, inventaire, courses
@@ -9,6 +9,6 @@ Architecture:
 - jeux: Paris sportifs, loto
 """
 
-from . import cuisine, famille, planning, maison, outils, jeux, shared
+from . import cuisine, famille, jeux, maison, outils, planning, shared
 
 __all__ = ["cuisine", "famille", "planning", "maison", "outils", "jeux", "shared"]

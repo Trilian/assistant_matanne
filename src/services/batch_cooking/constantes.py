@@ -1,4 +1,4 @@
-﻿"""
+"""
 Constantes pour le batch cooking.
 
 Définit les robots de cuisine, les jours de la semaine et autres valeurs de référence.

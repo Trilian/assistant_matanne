@@ -1,15 +1,16 @@
-﻿"""
+"""
 Tests pour src/utils/helpers/dates.py
 """
-import pytest
-from datetime import date, timedelta
+
+from datetime import date
+
 from src.utils.helpers.dates import (
+    ajouter_jours_ouvres,
+    est_weekend,
+    obtenir_bornes_mois,
     obtenir_bornes_semaine,
     plage_dates,
-    obtenir_bornes_mois,
-    ajouter_jours_ouvres,
     semaines_entre,
-    est_weekend,
 )
 
 
@@ -82,7 +83,7 @@ class TestObtenirBornesMois:
         assert last == date(2025, 1, 31)
 
     def test_month_bounds_december(self):
-        """Décembre passe Ã  l'année suivante."""
+        """Décembre passe à l'année suivante."""
         first, last = obtenir_bornes_mois(date(2025, 12, 15))
         assert first == date(2025, 12, 1)
         assert last == date(2025, 12, 31)

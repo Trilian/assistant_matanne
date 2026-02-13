@@ -10,18 +10,12 @@ Vue intelligente jour par jour avec :
 
 from datetime import date, datetime, timedelta
 
-import streamlit as st
 import plotly.graph_objects as go
-
-from src.services.planning import get_planning_unified_service
-from src.modules.shared.constantes import JOURS_SEMAINE_LOWER
+import streamlit as st
 
 # Logique metier pure
-from src.modules.planning.vue_semaine_utils import (
-    get_debut_semaine,
-    get_jours_semaine,
-    calculer_charge_semaine
-)
+from src.modules.shared.constantes import JOURS_SEMAINE_LOWER
+from src.services.planning import get_planning_unified_service
 
 logger = __import__("logging").getLogger(__name__)
 
@@ -132,7 +126,9 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
                     # Affichage flexible selon le type
                     if groupe_nom == "📷 Repas":
                         st.write(f"**{event['type'].capitalize()}**: {event['recette']}")
-                        st.caption(f"{event['portions']} portions | {event.get('temps_total', 0)} min")
+                        st.caption(
+                            f"{event['portions']} portions | {event.get('temps_total', 0)} min"
+                        )
 
                     elif groupe_nom == "🎨 Activites":
                         label = "👶" if event.get("pour_jules") else "📅"
@@ -201,7 +197,7 @@ def app():
         week_start = st.session_state.semaine_view_start
         week_end = week_start + timedelta(days=6)
         st.markdown(
-            f"<h3 style='text-align: center;'>{week_start.strftime('%d/%m')} â€” {week_end.strftime('%d/%m/%Y')}</h3>",
+            f"<h3 style='text-align: center;'>{week_start.strftime('%d/%m')} — {week_end.strftime('%d/%m/%Y')}</h3>",
             unsafe_allow_html=True,
         )
 
@@ -246,18 +242,28 @@ def app():
         # Jour le plus charge
         jour_max = max(jours_list, key=lambda j: j.charge_score)
         jour_max_nom = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"][
-            (st.session_state.semaine_view_start + timedelta(days=list(semaine.jours.values()).index(jour_max))).weekday()
+            (
+                st.session_state.semaine_view_start
+                + timedelta(days=list(semaine.jours.values()).index(jour_max))
+            ).weekday()
         ]
 
-        st.info(f"❌ Jour le plus charge: **{jour_max_nom.capitalize()}** ({jour_max.charge_score}/100)")
+        st.info(
+            f"❌ Jour le plus charge: **{jour_max_nom.capitalize()}** ({jour_max.charge_score}/100)"
+        )
 
         # Jour le moins charge
         jour_min = min(jours_list, key=lambda j: j.charge_score)
         jour_min_nom = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"][
-            (st.session_state.semaine_view_start + timedelta(days=list(semaine.jours.values()).index(jour_min))).weekday()
+            (
+                st.session_state.semaine_view_start
+                + timedelta(days=list(semaine.jours.values()).index(jour_min))
+            ).weekday()
         ]
 
-        st.success(f"🎨 Jour le plus calme: **{jour_min_nom.capitalize()}** ({jour_min.charge_score}/100)")
+        st.success(
+            f"🎨 Jour le plus calme: **{jour_min_nom.capitalize()}** ({jour_min.charge_score}/100)"
+        )
 
         # Couverture Jules
         st.write(

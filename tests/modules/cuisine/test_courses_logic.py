@@ -1,49 +1,50 @@
-﻿"""
+"""
 Tests pour courses_logic.py - Module Cuisine
 Couverture cible: 80%+
 """
-import pytest
+
 from datetime import datetime, timedelta
+
+import pytest
 
 from src.modules.cuisine.courses.utils import (
     # Constantes
     PRIORITY_EMOJIS,
     PRIORITY_ORDER,
     RAYONS_DEFAULT,
+    # Historique
+    analyser_historique,
+    # Statistiques
+    calculer_statistiques,
+    calculer_statistiques_par_rayon,
+    deduper_suggestions,
+    filtrer_articles,
     # Filtrage
     filtrer_par_priorite,
     filtrer_par_rayon,
     filtrer_par_recherche,
-    filtrer_articles,
-    # Tri
-    trier_par_priorite,
-    trier_par_rayon,
-    trier_par_nom,
-    # Groupement
-    grouper_par_rayon,
-    grouper_par_priorite,
-    # Statistiques
-    calculer_statistiques,
-    calculer_statistiques_par_rayon,
-    # Validation
-    valider_article,
-    valider_nouvel_article,
     # Formatage
     formater_article_label,
     formater_liste_impression,
+    generer_modele_depuis_historique,
+    generer_suggestions_depuis_recettes,
     # Suggestions
     generer_suggestions_depuis_stock_bas,
-    generer_suggestions_depuis_recettes,
-    deduper_suggestions,
-    # Historique
-    analyser_historique,
-    generer_modele_depuis_historique,
+    grouper_par_priorite,
+    # Groupement
+    grouper_par_rayon,
+    trier_par_nom,
+    # Tri
+    trier_par_priorite,
+    trier_par_rayon,
+    # Validation
+    valider_article,
+    valider_nouvel_article,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -99,9 +100,9 @@ def articles_vides():
     return []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantes:
@@ -125,9 +126,9 @@ class TestConstantes:
         assert "Laitier" in RAYONS_DEFAULT
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FILTRAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFiltrage:
@@ -189,7 +190,7 @@ class TestFiltrage:
         assert result[0]["ingredient_nom"] == "Yaourt"
 
     def test_filtrer_par_recherche_case_insensitive(self, articles_sample):
-        """Recherche insensible Ã  la casse."""
+        """Recherche insensible à la casse."""
         result = filtrer_par_recherche(articles_sample, "PAIN")
         assert len(result) == 1
         assert result[0]["ingredient_nom"] == "Pain"
@@ -201,27 +202,20 @@ class TestFiltrage:
 
     def test_filtrer_articles_combinaison(self, articles_sample):
         """Combinaison de plusieurs filtres."""
-        result = filtrer_articles(
-            articles_sample,
-            priorite="haute",
-            rayon="Fruits & Légumes"
-        )
+        result = filtrer_articles(articles_sample, priorite="haute", rayon="Fruits & Légumes")
         assert len(result) == 2
         assert all(a["priorite"] == "haute" for a in result)
         assert all(a["rayon_magasin"] == "Fruits & Légumes" for a in result)
 
     def test_filtrer_articles_avec_recherche(self, articles_sample):
         """Filtres avec recherche."""
-        result = filtrer_articles(
-            articles_sample,
-            recherche="carotte"
-        )
+        result = filtrer_articles(articles_sample, recherche="carotte")
         assert len(result) == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS TRI
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestTri:
@@ -259,9 +253,9 @@ class TestTri:
         assert trier_par_nom(articles_vides) == []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS GROUPEMENT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGroupement:
@@ -298,9 +292,9 @@ class TestGroupement:
         assert len(result["moyenne"]) == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestStatistiques:
@@ -309,7 +303,7 @@ class TestStatistiques:
     def test_calculer_statistiques(self, articles_sample):
         """Statistiques complètes."""
         result = calculer_statistiques(articles_sample)
-        
+
         assert result["total_a_acheter"] == 5
         assert result["total_achetes"] == 0
         assert result["haute_priorite"] == 2
@@ -322,7 +316,7 @@ class TestStatistiques:
         """Statistiques avec articles achetés."""
         achetes = [{"id": 1}]
         result = calculer_statistiques(articles_sample, achetes)
-        
+
         assert result["total_achetes"] == 1
         assert result["taux_completion"] > 0
 
@@ -335,15 +329,15 @@ class TestStatistiques:
     def test_calculer_statistiques_par_rayon(self, articles_sample):
         """Statistiques par rayon."""
         result = calculer_statistiques_par_rayon(articles_sample)
-        
+
         assert "Fruits & Légumes" in result
         assert result["Fruits & Légumes"]["count"] == 2
         assert result["Laitier"]["count"] == 2
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestValidation:
@@ -351,11 +345,7 @@ class TestValidation:
 
     def test_valider_article_valide(self):
         """Article valide."""
-        article = {
-            "ingredient_nom": "Tomates",
-            "quantite_necessaire": 4,
-            "priorite": "haute"
-        }
+        article = {"ingredient_nom": "Tomates", "quantite_necessaire": 4, "priorite": "haute"}
         valide, erreurs = valider_article(article)
         assert valide is True
         assert len(erreurs) == 0
@@ -374,23 +364,17 @@ class TestValidation:
         valide, erreurs = valider_article(article)
         assert valide is False
         assert any("2 caractères" in e for e in erreurs)
+
     def test_valider_article_priorite_invalide(self):
         """Priorité invalide."""
-        article = {
-            "ingredient_nom": "Tomates",
-            "quantite_necessaire": 4,
-            "priorite": "invalide"
-        }
+        article = {"ingredient_nom": "Tomates", "quantite_necessaire": 4, "priorite": "invalide"}
         valide, erreurs = valider_article(article)
         assert valide is False
         assert any("Priorité invalide" in e for e in erreurs)
 
     def test_valider_article_quantite_zero(self):
         """Quantité zéro invalide."""
-        article = {
-            "ingredient_nom": "Tomates",
-            "quantite_necessaire": 0
-        }
+        article = {"ingredient_nom": "Tomates", "quantite_necessaire": 0}
         valide, erreurs = valider_article(article)
         assert valide is False
         assert any("quantité" in e.lower() for e in erreurs)
@@ -402,11 +386,7 @@ class TestValiderNouvelArticle:
     def test_nouvel_article_valide(self):
         """Création d'un nouvel article valide."""
         valide, result = valider_nouvel_article(
-            nom="Tomates",
-            quantite=4,
-            unite="kg",
-            priorite="haute",
-            rayon="Fruits & Légumes"
+            nom="Tomates", quantite=4, unite="kg", priorite="haute", rayon="Fruits & Légumes"
         )
         assert valide is True
         assert isinstance(result, dict)
@@ -416,11 +396,7 @@ class TestValiderNouvelArticle:
 
     def test_nouvel_article_invalide(self):
         """Article avec nom invalide."""
-        valide, erreurs = valider_nouvel_article(
-            nom="",
-            quantite=4,
-            unite="kg"
-        )
+        valide, erreurs = valider_nouvel_article(nom="", quantite=4, unite="kg")
         assert valide is False
         assert isinstance(erreurs, list)
         assert len(erreurs) > 0
@@ -435,7 +411,7 @@ class TestFormatage:
             "ingredient_nom": "Tomates",
             "quantite_necessaire": 4,
             "unite": "kg",
-            "priorite": "haute"
+            "priorite": "haute",
         }
         label = formater_article_label(article)
         assert "🔴" in label
@@ -450,7 +426,7 @@ class TestFormatage:
             "quantite_necessaire": 4,
             "unite": "kg",
             "priorite": "moyenne",
-            "notes": "Bio préféré"
+            "notes": "Bio préféré",
         }
         label = formater_article_label(article)
         assert "Bio préféré" in label
@@ -462,7 +438,7 @@ class TestFormatage:
             "quantite_necessaire": 4,
             "unite": "kg",
             "priorite": "basse",
-            "suggere_par_ia": True
+            "suggere_par_ia": True,
         }
         label = formater_article_label(article)
         assert "🟢" in label
@@ -490,10 +466,10 @@ class TestSuggestions:
                     "quantite": 0,
                     "seuil_alerte": 2,
                     "unite": "L",
-                    "rayon": "Laitier"
+                    "rayon": "Laitier",
                 }
             ],
-            "stock_bas": []
+            "stock_bas": [],
         }
         suggestions = generer_suggestions_depuis_stock_bas(alertes)
         assert len(suggestions) == 1
@@ -510,9 +486,9 @@ class TestSuggestions:
                     "quantite": 1,
                     "seuil_alerte": 3,
                     "unite": "pièces",
-                    "rayon": "Laitier"
+                    "rayon": "Laitier",
                 }
-            ]
+            ],
         }
         suggestions = generer_suggestions_depuis_stock_bas(alertes)
         assert len(suggestions) == 1
@@ -525,14 +501,17 @@ class TestSuggestions:
             {
                 "nom": "Tarte aux pommes",
                 "ingredients": [
-                    {"nom": "Pommes", "quantite": 5, "unite": "pièces", "categorie": "Fruits & Légumes"},
-                    {"nom": "Farine", "quantite": 200, "unite": "g", "categorie": "Ã‰picerie"}
-                ]
+                    {
+                        "nom": "Pommes",
+                        "quantite": 5,
+                        "unite": "pièces",
+                        "categorie": "Fruits & Légumes",
+                    },
+                    {"nom": "Farine", "quantite": 200, "unite": "g", "categorie": "Épicerie"},
+                ],
             }
         ]
-        inventaire = [
-            {"ingredient_nom": "pommes", "quantite": 2}
-        ]
+        inventaire = [{"ingredient_nom": "pommes", "quantite": 2}]
         suggestions = generer_suggestions_depuis_recettes(recettes, inventaire)
         assert len(suggestions) == 2
         # Pommes: 5 requis - 2 en stock = 3 manquant
@@ -569,10 +548,26 @@ class TestHistorique:
         """Analyse basique d'historique."""
         now = datetime.now()
         historique = [
-            {"ingredient_nom": "Tomates", "achete_le": now - timedelta(days=5), "quantite_necessaire": 4},
-            {"ingredient_nom": "Tomates", "achete_le": now - timedelta(days=10), "quantite_necessaire": 3},
-            {"ingredient_nom": "Tomates", "achete_le": now - timedelta(days=15), "quantite_necessaire": 5},
-            {"ingredient_nom": "Lait", "achete_le": now - timedelta(days=7), "quantite_necessaire": 2},
+            {
+                "ingredient_nom": "Tomates",
+                "achete_le": now - timedelta(days=5),
+                "quantite_necessaire": 4,
+            },
+            {
+                "ingredient_nom": "Tomates",
+                "achete_le": now - timedelta(days=10),
+                "quantite_necessaire": 3,
+            },
+            {
+                "ingredient_nom": "Tomates",
+                "achete_le": now - timedelta(days=15),
+                "quantite_necessaire": 5,
+            },
+            {
+                "ingredient_nom": "Lait",
+                "achete_le": now - timedelta(days=7),
+                "quantite_necessaire": 2,
+            },
         ]
         analyse = analyser_historique(historique, jours=30)
         assert analyse["total_achats"] == 4
@@ -585,8 +580,16 @@ class TestHistorique:
         """Filtre par date limite."""
         now = datetime.now()
         historique = [
-            {"ingredient_nom": "Tomates", "achete_le": now - timedelta(days=5), "quantite_necessaire": 4},
-            {"ingredient_nom": "Vieux", "achete_le": now - timedelta(days=60), "quantite_necessaire": 1},
+            {
+                "ingredient_nom": "Tomates",
+                "achete_le": now - timedelta(days=5),
+                "quantite_necessaire": 4,
+            },
+            {
+                "ingredient_nom": "Vieux",
+                "achete_le": now - timedelta(days=60),
+                "quantite_necessaire": 1,
+            },
         ]
         analyse = analyser_historique(historique, jours=30)
         assert analyse["total_achats"] == 1
@@ -596,8 +599,18 @@ class TestHistorique:
         """Génère modèle depuis analyse."""
         analyse = {
             "recurrents": [
-                {"ingredient_nom": "Tomates", "frequence": 5, "quantite_moyenne": 4.5, "rayon": "Fruits & Légumes"},
-                {"ingredient_nom": "Lait", "frequence": 2, "quantite_moyenne": 2.0, "rayon": "Laitier"},
+                {
+                    "ingredient_nom": "Tomates",
+                    "frequence": 5,
+                    "quantite_moyenne": 4.5,
+                    "rayon": "Fruits & Légumes",
+                },
+                {
+                    "ingredient_nom": "Lait",
+                    "frequence": 2,
+                    "quantite_moyenne": 2.0,
+                    "rayon": "Laitier",
+                },
             ]
         }
         modele = generer_modele_depuis_historique(analyse, seuil_frequence=3)

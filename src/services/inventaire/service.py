@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Inventaire Unifié.
 
 âœ… Utilise @avec_session_db et @avec_cache
@@ -14,21 +14,18 @@ from typing import Any
 from sqlalchemy.orm import Session, joinedload
 
 from src.core.ai import obtenir_client_ia
-from src.core.cache import Cache
-from src.core.database import obtenir_contexte_db
-from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.errors_base import ErreurValidation
 from src.core.models import ArticleInventaire
-from src.services.base import BaseAIService, InventoryAIMixin
-from src.services.base import BaseService
+from src.services.base import BaseAIService, BaseService, InventoryAIMixin
 
-from .types import SuggestionCourses, ArticleImport
+from .types import ArticleImport, SuggestionCourses
 
 logger = logging.getLogger(__name__)
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 CATEGORIES = [
     "Légumes",
@@ -45,9 +42,9 @@ CATEGORIES = [
 EMPLACEMENTS = ["Frigo", "Congélateur", "Placard", "Cave", "Garde-manger"]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SERVICE INVENTAIRE UNIFIÉ
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class ServiceInventaire(BaseService[ArticleInventaire], BaseAIService, InventoryAIMixin):
@@ -76,9 +73,9 @@ class ServiceInventaire(BaseService[ArticleInventaire], BaseAIService, Inventory
             service_name="inventaire",
         )
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 1: CRUD & INVENTAIRE
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_cache(
         ttl=1800,
@@ -109,9 +106,7 @@ class ServiceInventaire(BaseService[ArticleInventaire], BaseAIService, Inventory
         Returns:
             List of dict with article data and calculated status
         """
-        query = db.query(ArticleInventaire).options(
-            joinedload(ArticleInventaire.ingredient)
-        )
+        query = db.query(ArticleInventaire).options(joinedload(ArticleInventaire.ingredient))
 
         if emplacement:
             query = query.filter(ArticleInventaire.emplacement == emplacement)
@@ -174,14 +169,14 @@ class ServiceInventaire(BaseService[ArticleInventaire], BaseAIService, Inventory
         logger.info(f"âš ï¸ Inventory alerts: {sum(len(v) for v in alertes.values())} items")
         return alertes
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 2: SUGGESTIONS IA
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_cache(ttl=3600, key_func=lambda self: "suggestions_courses_ia")
     @avec_gestion_erreurs(default_return=[])
     def suggerer_courses_ia(self) -> list[SuggestionCourses]:  # pragma: no cover
-        """Suggère des articles Ã  ajouter aux courses via IA.
+        """Suggère des articles à ajouter aux courses via IA.
 
         Uses Mistral AI to suggest shopping items based on inventory status.
         Results cached for 1 hour.
@@ -197,7 +192,7 @@ class ServiceInventaire(BaseService[ArticleInventaire], BaseAIService, Inventory
         context = self.build_inventory_summary(inventaire)
 
         # Construire prompt - FORCE JSON STRICT ET CLAIR
-        prompt = f'''GENERATE 15 SHOPPING ITEMS IN JSON FORMAT ONLY.
+        prompt = f"""GENERATE 15 SHOPPING ITEMS IN JSON FORMAT ONLY.
 
 {context}
 
@@ -212,7 +207,7 @@ RULES:
 4. priorite must be: haute, moyenne, or basse (haute for critical items)
 5. rayon: Fruits & Légumes, Laitier, Viande, Épicerie, Surgelé, Boulangerie, Hygiène
 6. quantite: realistic amounts for family use
-7. No explanations, no text, ONLY JSON'''
+7. No explanations, no text, ONLY JSON"""
 
         logger.info("ðŸ¤– Generating shopping suggestions with AI")
 
@@ -229,17 +224,17 @@ RULES:
         logger.info(f"âœ… Generated {len(suggestions)} shopping suggestions")
         return suggestions
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 3: HELPERS PRIVÉS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     def _calculer_statut(self, article: ArticleInventaire, today: date) -> str:
         """Calcule le statut d'un article.
-        
+
         Args:
             article: ArticleInventaire object
             today: Current date for calculations
-            
+
         Returns:
             Status string: 'critique', 'stock_bas', 'peremption_proche', or 'ok'
         """
@@ -256,15 +251,13 @@ RULES:
 
         return "ok"
 
-    def _jours_avant_peremption(
-        self, article: ArticleInventaire, today: date
-    ) -> int | None:
+    def _jours_avant_peremption(self, article: ArticleInventaire, today: date) -> int | None:
         """Calcule jours avant péremption.
-        
+
         Args:
             article: ArticleInventaire object
             today: Current date
-            
+
         Returns:
             Days until expiration or None if no expiration date
         """
@@ -272,9 +265,9 @@ RULES:
             return None
         return (article.date_peremption - today).days
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 4: HISTORIQUE (Tracking modifications)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_gestion_erreurs(default_return=True)
     @avec_session_db
@@ -294,7 +287,7 @@ RULES:
         db: Session | None = None,
     ) -> bool:
         """Enregistre une modification dans l'historique.
-        
+
         Args:
             article: Article modifié
             type_modification: "ajout", "modification", "suppression"
@@ -302,7 +295,7 @@ RULES:
             ... (autres champs avant/après)
             notes: Notes additionnelles
             db: Database session
-            
+
         Returns:
             True if recorded successfully
         """
@@ -332,25 +325,26 @@ RULES:
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
     def get_historique(
-        self, 
+        self,
         article_id: int | None = None,
         ingredient_id: int | None = None,
         days: int = 30,
         db: Session | None = None,
     ) -> list[dict[str, Any]]:
         """Récupère l'historique des modifications.
-        
+
         Args:
             article_id: Filtrer par article (optionnel)
             ingredient_id: Filtrer par ingrédient (optionnel)
             days: Historique des N derniers jours
             db: Database session
-            
+
         Returns:
             List of modifications with details
         """
-        from src.core.models import HistoriqueInventaire
         from datetime import timedelta
+
+        from src.core.models import HistoriqueInventaire
 
         query = db.query(HistoriqueInventaire).filter(
             HistoriqueInventaire.date_modification >= (date.today() - timedelta(days=days))
@@ -366,27 +360,29 @@ RULES:
 
         result = []
         for h in historique:
-            result.append({
-                "id": h.id,
-                "article_id": h.article_id,
-                "ingredient_nom": h.ingredient.nom,
-                "type": h.type_modification,
-                "quantite_avant": h.quantite_avant,
-                "quantite_apres": h.quantite_apres,
-                "emplacement_avant": h.emplacement_avant,
-                "emplacement_apres": h.emplacement_apres,
-                "date_peremption_avant": h.date_peremption_avant,
-                "date_peremption_apres": h.date_peremption_apres,
-                "date_modification": h.date_modification,
-                "notes": h.notes,
-            })
+            result.append(
+                {
+                    "id": h.id,
+                    "article_id": h.article_id,
+                    "ingredient_nom": h.ingredient.nom,
+                    "type": h.type_modification,
+                    "quantite_avant": h.quantite_avant,
+                    "quantite_apres": h.quantite_apres,
+                    "emplacement_avant": h.emplacement_avant,
+                    "emplacement_apres": h.emplacement_apres,
+                    "date_peremption_avant": h.date_peremption_avant,
+                    "date_peremption_apres": h.date_peremption_apres,
+                    "date_modification": h.date_modification,
+                    "notes": h.notes,
+                }
+            )
 
         logger.info(f"ðŸ“œ Retrieved {len(result)} historique entries")
         return result
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 5: GESTION ARTICLES (CREATE/UPDATE/DELETE)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
@@ -399,7 +395,7 @@ RULES:
         date_peremption: date | None = None,
         db: Session | None = None,
     ) -> dict[str, Any] | None:
-        """Ajoute un article Ã  l'inventaire.
+        """Ajoute un article à l'inventaire.
 
         Args:
             ingredient_nom: Nom de l'ingrédient
@@ -415,21 +411,21 @@ RULES:
         from src.core.models import Ingredient
 
         # Trouver ou créer l'ingrédient
-        ingredient = db.query(Ingredient).filter(
-            Ingredient.nom.ilike(ingredient_nom)
-        ).first()
+        ingredient = db.query(Ingredient).filter(Ingredient.nom.ilike(ingredient_nom)).first()
 
         if not ingredient:
             logger.warning(f"âš ï¸ Ingrédient '{ingredient_nom}' non trouvé")
             return None
 
-        # Vérifier si existe déjÃ 
-        existing = db.query(ArticleInventaire).filter(
-            ArticleInventaire.ingredient_id == ingredient.id
-        ).first()
+        # Vérifier si existe déjà
+        existing = (
+            db.query(ArticleInventaire)
+            .filter(ArticleInventaire.ingredient_id == ingredient.id)
+            .first()
+        )
 
         if existing:
-            logger.warning(f"âš ï¸ Article '{ingredient_nom}' existe déjÃ ")
+            logger.warning(f"âš ï¸ Article '{ingredient_nom}' existe déjà")
             return None
 
         # Créer l'article
@@ -444,7 +440,7 @@ RULES:
         db.add(article)
         db.commit()
 
-        logger.info(f"âœ… Article '{ingredient_nom}' ajouté Ã  l'inventaire")
+        logger.info(f"âœ… Article '{ingredient_nom}' ajouté à l'inventaire")
         self.invalidate_cache()
 
         return {
@@ -467,7 +463,7 @@ RULES:
         date_peremption: date | None = None,
         db: Session | None = None,
     ) -> bool:
-        """Met Ã  jour un article de l'inventaire.
+        """Met à jour un article de l'inventaire.
 
         Args:
             article_id: ID de l'article
@@ -480,9 +476,7 @@ RULES:
         Returns:
             True if updated, False otherwise
         """
-        article = db.query(ArticleInventaire).filter(
-            ArticleInventaire.id == article_id
-        ).first()
+        article = db.query(ArticleInventaire).filter(ArticleInventaire.id == article_id).first()
 
         if not article:
             logger.warning(f"âš ï¸ Article #{article_id} non trouvé")
@@ -510,7 +504,7 @@ RULES:
             article.date_peremption = date_peremption
 
         db.commit()
-        
+
         # Enregistrer dans historique
         self._enregistrer_modification(
             article=article,
@@ -524,8 +518,8 @@ RULES:
             date_peremption_avant=date_peremption_avant,
             date_peremption_apres=date_peremption if date_peremption is not None else None,
         )
-        
-        logger.info(f"âœ… Article #{article_id} mis Ã  jour")
+
+        logger.info(f"âœ… Article #{article_id} mis à jour")
         self.invalidate_cache()
 
         return True
@@ -542,9 +536,7 @@ RULES:
         Returns:
             True if deleted, False otherwise
         """
-        article = db.query(ArticleInventaire).filter(
-            ArticleInventaire.id == article_id
-        ).first()
+        article = db.query(ArticleInventaire).filter(ArticleInventaire.id == article_id).first()
 
         if not article:
             logger.warning(f"âš ï¸ Article #{article_id} non trouvé")
@@ -558,9 +550,9 @@ RULES:
 
         return True
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 6: GESTION DES PHOTOS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_session_db
     @avec_gestion_erreurs(default_return={})
@@ -571,14 +563,14 @@ RULES:
         photo_filename: str,
         db: Session | None = None,
     ) -> dict[str, Any]:
-        """Ajoute une photo Ã  un article.
-        
+        """Ajoute une photo à un article.
+
         Args:
             article_id: ID de l'article
             photo_url: URL de la photo stockée
             photo_filename: Nom du fichier original
             db: Database session
-            
+
         Returns:
             Updated article data
         """
@@ -587,12 +579,16 @@ RULES:
             raise ErreurValidation(f"Article #{article_id} introuvable")
 
         # Garde trace de l'ancienne photo (si elle existe)
-        old_photo = {
-            "url": article.photo_url,
-            "filename": article.photo_filename,
-        } if article.photo_url else None
+        old_photo = (
+            {
+                "url": article.photo_url,
+                "filename": article.photo_filename,
+            }
+            if article.photo_url
+            else None
+        )
 
-        # Met Ã  jour la photo
+        # Met à jour la photo
         article.photo_url = photo_url
         article.photo_filename = photo_filename
         article.photo_uploaded_at = date.today()
@@ -610,7 +606,7 @@ RULES:
             db=db,
         )
 
-        logger.info(f"ðŸ“¸ Photo ajoutée Ã  l'article #{article_id}")
+        logger.info(f"ðŸ“¸ Photo ajoutée à l'article #{article_id}")
         self.invalidate_cache()
 
         return {
@@ -624,11 +620,11 @@ RULES:
     @avec_gestion_erreurs(default_return=False)
     def supprimer_photo(self, article_id: int, db: Session | None = None) -> bool:
         """Supprime la photo d'un article.
-        
+
         Args:
             article_id: ID de l'article
             db: Database session
-            
+
         Returns:
             True if successful
         """
@@ -668,11 +664,11 @@ RULES:
     @avec_gestion_erreurs(default_return=None)
     def obtenir_photo(self, article_id: int, db: Session | None = None) -> dict[str, Any] | None:
         """Récupère les info photo d'un article.
-        
+
         Args:
             article_id: ID de l'article
             db: Database session
-            
+
         Returns:
             Photo info or None if no photo
         """
@@ -686,14 +682,14 @@ RULES:
             "uploaded_at": article.photo_uploaded_at,
         }
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 8: NOTIFICATIONS & ALERTES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_gestion_erreurs(default_return={})
     def generer_notifications_alertes(self) -> dict[str, Any]:
         """Génère les notifications d'alertes selon l'état de l'inventaire.
-        
+
         Returns:
             Dict avec notifications créées par type
         """
@@ -753,7 +749,7 @@ RULES:
     @avec_gestion_erreurs(default_return=[])
     def obtenir_alertes_actives(self) -> list[dict[str, Any]]:
         """Récupère les alertes actives pour l'utilisateur.
-        
+
         Returns:
             Liste des notifications non lues
         """
@@ -776,9 +772,9 @@ RULES:
             for notif in notifs
         ]
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 9: STATISTIQUES & RAPPORTS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_gestion_erreurs(default_return={})
     def get_statistiques(self) -> dict[str, Any]:
@@ -841,7 +837,7 @@ RULES:
 
     @avec_gestion_erreurs(default_return=[])
     def get_articles_a_prelever(self, date_limite: date | None = None) -> list[dict[str, Any]]:
-        """Récupère articles Ã  utiliser en priorité.
+        """Récupère articles à utiliser en priorité.
 
         Args:
             date_limite: Date limite de péremption (par défaut aujourd'hui + 3 jours)
@@ -849,7 +845,6 @@ RULES:
         Returns:
             List of articles to use first (FIFO)
         """
-        from datetime import timedelta
 
         if date_limite is None:
             date_limite = date.today() + timedelta(days=3)
@@ -857,8 +852,7 @@ RULES:
         inventaire = self.get_inventaire_complet()
 
         a_prelever = [
-            a for a in inventaire
-            if a["date_peremption"] and a["date_peremption"] <= date_limite
+            a for a in inventaire if a["date_peremption"] and a["date_peremption"] <= date_limite
         ]
 
         # Trier par date de péremption (plus ancien d'abord)
@@ -866,9 +860,9 @@ RULES:
 
         return a_prelever
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 10: IMPORT/EXPORT AVANCÉ
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_gestion_erreurs(default_return=[])
     def importer_articles(  # pragma: no cover
@@ -876,10 +870,10 @@ RULES:
         articles_data: list[dict[str, Any]],
     ) -> list[dict[str, Any]]:
         """Importe plusieurs articles en batch.
-        
+
         Args:
-            articles_data: Liste des articles Ã  importer (dictionnaires)
-            
+            articles_data: Liste des articles à importer (dictionnaires)
+
         Returns:
             Liste des articles importés avec leurs IDs
         """
@@ -892,14 +886,12 @@ RULES:
                 article_import = ArticleImport(**article_data)
 
                 # Cherche ou crée l'ingrédient
-                from src.core.models import Ingredient
                 from src.core.database import obtenir_contexte_db
+                from src.core.models import Ingredient
 
                 db = obtenir_contexte_db().session
 
-                ingredient = db.query(Ingredient).filter_by(
-                    nom=article_import.nom
-                ).first()
+                ingredient = db.query(Ingredient).filter_by(nom=article_import.nom).first()
 
                 if not ingredient:
                     ingredient = Ingredient(
@@ -911,7 +903,7 @@ RULES:
                     db.commit()
                     db.refresh(ingredient)
 
-                # Ajoute l'article Ã  l'inventaire
+                # Ajoute l'article à l'inventaire
                 resultat = self.ajouter_article(
                     ingredient_id=ingredient.id,
                     quantite=article_import.quantite,
@@ -924,19 +916,23 @@ RULES:
                     ),
                 )
 
-                resultats.append({
-                    "nom": article_import.nom,
-                    "status": "âœ…",
-                    "message": "Importé avec succès",
-                })
+                resultats.append(
+                    {
+                        "nom": article_import.nom,
+                        "status": "âœ…",
+                        "message": "Importé avec succès",
+                    }
+                )
 
             except Exception as e:
                 errors.append(f"Ligne {idx + 2}: {str(e)}")
-                resultats.append({
-                    "nom": article_data.get("nom", "?"),
-                    "status": "âŒ",
-                    "message": str(e),
-                })
+                resultats.append(
+                    {
+                        "nom": article_data.get("nom", "?"),
+                        "status": "âŒ",
+                        "message": str(e),
+                    }
+                )
 
         logger.info(f"âœ… {len(resultats) - len(errors)}/{len(resultats)} articles importés")
 
@@ -948,10 +944,10 @@ RULES:
         format_export: str = "csv",
     ) -> str | None:
         """Exporte l'inventaire dans le format demandé.
-        
+
         Args:
             format_export: "csv" ou "json"
-            
+
         Returns:
             Contenu du fichier en string
         """
@@ -1019,10 +1015,10 @@ RULES:
         donnees: list[dict[str, Any]],
     ) -> dict[str, Any]:
         """Valide les données d'import et retourne un rapport.
-        
+
         Args:
             donnees: Données parsées du fichier
-            
+
         Returns:
             Rapport de validation
         """
@@ -1038,32 +1034,36 @@ RULES:
             try:
                 article_import = ArticleImport(**article)
                 rapport["valides"] += 1
-                rapport["articles_valides"].append({
-                    "nom": article_import.nom,
-                    "quantite": article_import.quantite,
-                })
+                rapport["articles_valides"].append(
+                    {
+                        "nom": article_import.nom,
+                        "quantite": article_import.quantite,
+                    }
+                )
             except Exception as e:
                 rapport["invalides"] += 1
-                rapport["erreurs"].append({
-                    "ligne": idx + 2,
-                    "erreur": str(e),
-                })
+                rapport["erreurs"].append(
+                    {
+                        "ligne": idx + 2,
+                        "erreur": str(e),
+                    }
+                )
                 rapport["articles_invalides"].append(article.get("nom", "?"))
 
         return rapport
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # ALIASES DE COMPATIBILITÉ
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 # Alias pour rétrocompatibilité
 InventaireService = ServiceInventaire
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # INSTANCE SINGLETON - LAZY LOADING
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 _service_inventaire: ServiceInventaire | None = None
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Formatters - Texte
 """
 
@@ -117,4 +117,3 @@ def capitaliser_mots(text: str) -> str:
     if not text:
         return text
     return " ".join(word.capitalize() for word in text.split())
-

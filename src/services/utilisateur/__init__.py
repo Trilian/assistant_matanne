@@ -1,5 +1,5 @@
-﻿"""
-Package Utilisateur - Services liés Ã  l'utilisateur.
+"""
+Package Utilisateur - Services liés à l'utilisateur.
 
 Regroupe:
 - auth: Authentification Supabase
@@ -21,46 +21,45 @@ Usage:
     )
 """
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # AUTH - Authentification Supabase
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 from .authentification import (
-    AuthService,
-    get_auth_service,
-    UserProfile,
     AuthResult,
-    Role,
+    AuthService,
     Permission,
+    Role,
+    UserProfile,
+    get_auth_service,
     render_login_form,
-    render_user_menu,
     render_profile_settings,
+    render_user_menu,
     require_authenticated,
     require_role,
 )
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # HISTORIQUE - Historique des actions utilisateur
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 from .historique import (
-    ActionHistoryService,
-    get_action_history_service,
-    ActionType,
     ActionEntry,
     ActionFilter,
+    ActionHistoryService,
     ActionStats,
+    ActionType,
+    get_action_history_service,
+    render_activity_stats,
     render_activity_timeline,
     render_user_activity,
-    render_activity_stats,
 )
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # PRÉFÉRENCES - Préférences utilisateur persistantes
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 from .preferences import (
     UserPreferenceService,
     get_user_preference_service,
 )
-
 
 __all__ = [
     # Auth

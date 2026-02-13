@@ -1,0 +1,50 @@
+# Configuration pre-commit pour le projet Assistant Matanne
+# Installation: pip install pre-commit && pre-commit install
+# Documentation: https://pre-commit.com/
+
+repos:
+  # Hooks locaux pour l'encodage
+  - repo: local
+    hooks:
+      - id: check-utf8-bom
+        name: Verifier absence de BOM UTF-8
+        entry: python scripts/convert_to_utf8.py --check
+        language: system
+        pass_filenames: false
+        always_run: true
+        types: [python]
+        description: "Bloque les commits si des fichiers Python contiennent un BOM UTF-8"
+
+      - id: check-mojibake
+        name: Verifier absence de mojibake
+        entry: python fix_encoding.py --check
+        language: system
+        pass_filenames: false
+        always_run: true
+        types: [python]
+        description: "Bloque les commits si des fichiers contiennent des caracteres mojibake"
+
+  # Hooks standards pre-commit
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: check-merge-conflict
+      - id: debug-statements
+
+  # Ruff pour le linting et formatage
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.0
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+# Configuration par défaut
+default_language_version:
+  python: python3.11

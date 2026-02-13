@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/utilisateur/historique.py
 Cible: Couverture >80%
 
@@ -9,28 +9,26 @@ Tests pour:
 - Cache et sauvegarde
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch
 from datetime import datetime, timedelta
+from unittest.mock import MagicMock, Mock, patch
 
+import pytest
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # IMPORTS DU MODULE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
+# ═══════════════════════════════════════════════════════════
 from src.services.utilisateur.historique import (
-    ActionType,
     ActionEntry,
     ActionFilter,
-    ActionStats,
     ActionHistoryService,
+    ActionStats,
+    ActionType,
     get_action_history_service,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ENUMS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -78,9 +76,9 @@ class TestActionType:
         assert ActionType.SYSTEM_IMPORT.value == "system.import"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ACTIONENTRY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -94,9 +92,9 @@ class TestActionEntry:
             user_name="Test User",
             action_type=ActionType.RECETTE_CREATED,
             entity_type="recette",
-            description="Test description"
+            description="Test description",
         )
-        
+
         assert entry.user_id == "user123"
         assert entry.user_name == "Test User"
         assert entry.action_type == ActionType.RECETTE_CREATED
@@ -110,9 +108,9 @@ class TestActionEntry:
             user_name="Test",
             action_type=ActionType.SYSTEM_LOGIN,
             entity_type="system",
-            description="Login"
+            description="Login",
         )
-        
+
         assert entry.id is None
         assert entry.entity_id is None
         assert entry.entity_name is None
@@ -134,15 +132,15 @@ class TestActionEntry:
             entity_type="recette",
             entity_id=42,
             entity_name="Tarte aux pommes",
-            description="Mise Ã  jour de recette",
+            description="Mise à jour de recette",
             details={"field": "temps"},
             old_value={"temps": 30},
             new_value={"temps": 45},
             ip_address="192.168.1.1",
             user_agent="Mozilla/5.0",
-            created_at=now
+            created_at=now,
         )
-        
+
         assert entry.id == 1
         assert entry.entity_id == 42
         assert entry.entity_name == "Tarte aux pommes"
@@ -154,9 +152,9 @@ class TestActionEntry:
         assert entry.created_at == now
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ACTIONFILTER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -166,7 +164,7 @@ class TestActionFilter:
     def test_default_values(self):
         """Vérifie les valeurs par défaut."""
         f = ActionFilter()
-        
+
         assert f.user_id is None
         assert f.action_types is None
         assert f.entity_type is None
@@ -189,9 +187,9 @@ class TestActionFilter:
             date_to=now,
             search_text="tarte",
             limit=20,
-            offset=10
+            offset=10,
         )
-        
+
         assert f.user_id == "user123"
         assert len(f.action_types) == 2
         assert f.entity_type == "recette"
@@ -201,9 +199,9 @@ class TestActionFilter:
         assert f.offset == 10
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ACTIONSTATS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -213,7 +211,7 @@ class TestActionStats:
     def test_default_values(self):
         """Vérifie les valeurs par défaut."""
         stats = ActionStats()
-        
+
         assert stats.total_actions == 0
         assert stats.actions_today == 0
         assert stats.actions_this_week == 0
@@ -229,9 +227,9 @@ class TestActionStats:
             actions_this_week=50,
             most_active_users=[{"name": "Anne", "count": 30}],
             most_common_actions=[{"type": "recette.created", "count": 20}],
-            peak_hours=[9, 12, 19]
+            peak_hours=[9, 12, 19],
         )
-        
+
         assert stats.total_actions == 100
         assert stats.actions_today == 10
         assert stats.actions_this_week == 50
@@ -241,9 +239,9 @@ class TestActionStats:
         assert len(stats.peak_hours) == 3
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ACTIONHISTORYSERVICE - INIT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -265,34 +263,34 @@ class TestActionHistoryServiceInit:
         """Vérifie les attributs de cache de classe."""
         # Reset cache
         ActionHistoryService._recent_cache = []
-        
+
         assert ActionHistoryService._cache_max_size == 100
         assert isinstance(ActionHistoryService._recent_cache, list)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS LOG_ACTION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
 class TestActionHistoryServiceLogAction:
     """Tests pour log_action."""
 
-    @patch.object(ActionHistoryService, '_save_to_database')
-    @patch.object(ActionHistoryService, '_add_to_cache')
-    @patch.object(ActionHistoryService, '_get_current_user')
+    @patch.object(ActionHistoryService, "_save_to_database")
+    @patch.object(ActionHistoryService, "_add_to_cache")
+    @patch.object(ActionHistoryService, "_get_current_user")
     def test_log_action_basic(self, mock_get_user, mock_cache, mock_save):
         """Log action basique."""
         mock_get_user.return_value = ("user123", "Test User")
-        
+
         service = ActionHistoryService()
         entry = service.log_action(
             action_type=ActionType.RECETTE_CREATED,
             entity_type="recette",
-            description="Recette créée"
+            description="Recette créée",
         )
-        
+
         assert entry.user_id == "user123"
         assert entry.user_name == "Test User"
         assert entry.action_type == ActionType.RECETTE_CREATED
@@ -300,13 +298,13 @@ class TestActionHistoryServiceLogAction:
         mock_save.assert_called_once()
         mock_cache.assert_called_once()
 
-    @patch.object(ActionHistoryService, '_save_to_database')
-    @patch.object(ActionHistoryService, '_add_to_cache')
-    @patch.object(ActionHistoryService, '_get_current_user')
+    @patch.object(ActionHistoryService, "_save_to_database")
+    @patch.object(ActionHistoryService, "_add_to_cache")
+    @patch.object(ActionHistoryService, "_get_current_user")
     def test_log_action_with_details(self, mock_get_user, mock_cache, mock_save):
         """Log action avec détails."""
         mock_get_user.return_value = ("user123", "Test User")
-        
+
         service = ActionHistoryService()
         entry = service.log_action(
             action_type=ActionType.RECETTE_UPDATED,
@@ -316,9 +314,9 @@ class TestActionHistoryServiceLogAction:
             entity_name="Tarte aux pommes",
             details={"changes": ["temps"]},
             old_value={"temps": 30},
-            new_value={"temps": 45}
+            new_value={"temps": 45},
         )
-        
+
         assert entry.entity_id == 42
         assert entry.entity_name == "Tarte aux pommes"
         assert entry.details == {"changes": ["temps"]}
@@ -326,126 +324,126 @@ class TestActionHistoryServiceLogAction:
         assert entry.new_value == {"temps": 45}
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS LOGGING SPÃ‰CIFIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS LOGGING SPÉCIFIQUES
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
 class TestSpecificLogMethods:
     """Tests pour les méthodes de logging spécifiques."""
 
-    @patch.object(ActionHistoryService, 'log_action')
+    @patch.object(ActionHistoryService, "log_action")
     def test_log_recette_created(self, mock_log):
         """Log création de recette."""
         service = ActionHistoryService()
         service.log_recette_created(42, "Tarte aux pommes", {"temps": 30})
-        
+
         mock_log.assert_called_once()
         args = mock_log.call_args
-        assert args.kwargs['action_type'] == ActionType.RECETTE_CREATED
-        assert args.kwargs['entity_type'] == "recette"
-        assert args.kwargs['entity_id'] == 42
-        assert args.kwargs['entity_name'] == "Tarte aux pommes"
+        assert args.kwargs["action_type"] == ActionType.RECETTE_CREATED
+        assert args.kwargs["entity_type"] == "recette"
+        assert args.kwargs["entity_id"] == 42
+        assert args.kwargs["entity_name"] == "Tarte aux pommes"
 
-    @patch.object(ActionHistoryService, 'log_action')
+    @patch.object(ActionHistoryService, "log_action")
     def test_log_recette_updated(self, mock_log):
-        """Log mise Ã  jour de recette."""
+        """Log mise à jour de recette."""
         service = ActionHistoryService()
         old_data = {"temps": 30}
         new_data = {"temps": 45}
         service.log_recette_updated(42, "Tarte aux pommes", old_data, new_data)
-        
+
         mock_log.assert_called_once()
         args = mock_log.call_args
-        assert args.kwargs['action_type'] == ActionType.RECETTE_UPDATED
-        assert args.kwargs['old_value'] == old_data
-        assert args.kwargs['new_value'] == new_data
+        assert args.kwargs["action_type"] == ActionType.RECETTE_UPDATED
+        assert args.kwargs["old_value"] == old_data
+        assert args.kwargs["new_value"] == new_data
 
-    @patch.object(ActionHistoryService, 'log_action')
+    @patch.object(ActionHistoryService, "log_action")
     def test_log_recette_deleted(self, mock_log):
         """Log suppression de recette."""
         service = ActionHistoryService()
         backup = {"nom": "Tarte", "temps": 30}
         service.log_recette_deleted(42, "Tarte aux pommes", backup)
-        
+
         mock_log.assert_called_once()
         args = mock_log.call_args
-        assert args.kwargs['action_type'] == ActionType.RECETTE_DELETED
-        assert args.kwargs['old_value'] == backup
+        assert args.kwargs["action_type"] == ActionType.RECETTE_DELETED
+        assert args.kwargs["old_value"] == backup
 
-    @patch.object(ActionHistoryService, 'log_action')
+    @patch.object(ActionHistoryService, "log_action")
     def test_log_inventaire_added(self, mock_log):
-        """Log ajout Ã  l'inventaire."""
+        """Log ajout à l'inventaire."""
         service = ActionHistoryService()
         service.log_inventaire_added(1, "Pommes", 500, "g")
-        
+
         mock_log.assert_called_once()
         args = mock_log.call_args
-        assert args.kwargs['action_type'] == ActionType.INVENTAIRE_ADDED
-        assert args.kwargs['entity_type'] == "inventaire"
-        assert args.kwargs['details'] == {"quantite": 500, "unite": "g"}
+        assert args.kwargs["action_type"] == ActionType.INVENTAIRE_ADDED
+        assert args.kwargs["entity_type"] == "inventaire"
+        assert args.kwargs["details"] == {"quantite": 500, "unite": "g"}
 
-    @patch.object(ActionHistoryService, 'log_action')
+    @patch.object(ActionHistoryService, "log_action")
     def test_log_courses_item_checked_true(self, mock_log):
         """Log cochage d'article de courses (coché)."""
         service = ActionHistoryService()
         service.log_courses_item_checked(1, "Lait", True)
-        
+
         mock_log.assert_called_once()
         args = mock_log.call_args
-        assert args.kwargs['action_type'] == ActionType.COURSES_ITEM_CHECKED
+        assert args.kwargs["action_type"] == ActionType.COURSES_ITEM_CHECKED
         # Vérifie que "coch" est dans la description (évite problème encodage)
-        assert "coch" in args.kwargs['description'].lower()
+        assert "coch" in args.kwargs["description"].lower()
 
-    @patch.object(ActionHistoryService, 'log_action')
+    @patch.object(ActionHistoryService, "log_action")
     def test_log_courses_item_checked_false(self, mock_log):
         """Log cochage d'article de courses (décoché)."""
         service = ActionHistoryService()
         service.log_courses_item_checked(1, "Lait", False)
-        
+
         mock_log.assert_called_once()
         args = mock_log.call_args
         # Vérifie que "coch" est dans la description (évite problème encodage)
-        assert "coch" in args.kwargs['description'].lower()
+        assert "coch" in args.kwargs["description"].lower()
 
-    @patch.object(ActionHistoryService, 'log_action')
+    @patch.object(ActionHistoryService, "log_action")
     def test_log_planning_repas_added(self, mock_log):
         """Log ajout de repas au planning."""
         service = ActionHistoryService()
         test_date = datetime(2024, 1, 15, 12, 0)
         service.log_planning_repas_added(1, "Tarte", test_date, "déjeuner")
-        
+
         mock_log.assert_called_once()
         args = mock_log.call_args
-        assert args.kwargs['action_type'] == ActionType.PLANNING_REPAS_ADDED
-        assert args.kwargs['entity_type'] == "planning"
+        assert args.kwargs["action_type"] == ActionType.PLANNING_REPAS_ADDED
+        assert args.kwargs["entity_type"] == "planning"
 
-    @patch.object(ActionHistoryService, 'log_action')
+    @patch.object(ActionHistoryService, "log_action")
     def test_log_system_login(self, mock_log):
         """Log connexion système."""
         service = ActionHistoryService()
         service.log_system_login()
-        
+
         mock_log.assert_called_once()
         args = mock_log.call_args
-        assert args.kwargs['action_type'] == ActionType.SYSTEM_LOGIN
-        assert args.kwargs['entity_type'] == "system"
+        assert args.kwargs["action_type"] == ActionType.SYSTEM_LOGIN
+        assert args.kwargs["entity_type"] == "system"
 
-    @patch.object(ActionHistoryService, 'log_action')
+    @patch.object(ActionHistoryService, "log_action")
     def test_log_system_logout(self, mock_log):
         """Log déconnexion système."""
         service = ActionHistoryService()
         service.log_system_logout()
-        
+
         mock_log.assert_called_once()
         args = mock_log.call_args
-        assert args.kwargs['action_type'] == ActionType.SYSTEM_LOGOUT
+        assert args.kwargs["action_type"] == ActionType.SYSTEM_LOGOUT
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS GET_HISTORY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -457,12 +455,12 @@ class TestGetHistory:
         # Ce test vérifie que get_history retourne une liste
         # Même en cas d'erreur, il utilise le cache comme fallback
         ActionHistoryService._recent_cache = []
-        
+
         service = ActionHistoryService()
         filters = ActionFilter(limit=10)
-        
+
         # On utilise le fallback sur le cache (liste vide)
-        with patch('src.core.database.obtenir_contexte_db') as mock_context:
+        with patch("src.core.database.obtenir_contexte_db") as mock_context:
             mock_context.return_value.__enter__.side_effect = Exception("Connection error")
             result = service.get_history(filters)
             assert isinstance(result, list)
@@ -475,34 +473,34 @@ class TestGetHistory:
             user_name="Test",
             action_type=ActionType.SYSTEM_LOGIN,
             entity_type="system",
-            description="Test"
+            description="Test",
         )
         ActionHistoryService._recent_cache = [test_entry]
-        
+
         service = ActionHistoryService()
-        
-        with patch('src.core.database.obtenir_contexte_db') as mock_context:
+
+        with patch("src.core.database.obtenir_contexte_db") as mock_context:
             mock_context.return_value.__enter__.side_effect = Exception("DB Error")
             result = service.get_history(ActionFilter(limit=10))
-        
+
         assert len(result) <= 10
 
     def test_get_history_default_filter(self):
         """get_history sans filtre crée ActionFilter par défaut."""
         service = ActionHistoryService()
-        
+
         # Reset cache pour fallback
         ActionHistoryService._recent_cache = []
-        
-        with patch('src.core.database.obtenir_contexte_db') as mock_db:
+
+        with patch("src.core.database.obtenir_contexte_db") as mock_db:
             mock_db.return_value.__enter__.side_effect = Exception("Error")
             result = service.get_history()
             assert isinstance(result, list)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS HELPER METHODS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -512,11 +510,11 @@ class TestHistoryHelperMethods:
     def test_get_user_history(self):
         """Récupère l'historique d'un utilisateur."""
         service = ActionHistoryService()
-        
-        with patch.object(service, 'get_history') as mock:
+
+        with patch.object(service, "get_history") as mock:
             mock.return_value = []
             service.get_user_history("user123", limit=20)
-            
+
             mock.assert_called_once()
             filter_arg = mock.call_args[0][0]
             assert filter_arg.user_id == "user123"
@@ -525,11 +523,11 @@ class TestHistoryHelperMethods:
     def test_get_entity_history(self):
         """Récupère l'historique d'une entité."""
         service = ActionHistoryService()
-        
-        with patch.object(service, 'get_history') as mock:
+
+        with patch.object(service, "get_history") as mock:
             mock.return_value = []
             service.get_entity_history("recette", 42, limit=20)
-            
+
             mock.assert_called_once()
             filter_arg = mock.call_args[0][0]
             assert filter_arg.entity_type == "recette"
@@ -539,19 +537,19 @@ class TestHistoryHelperMethods:
     def test_get_recent_actions(self):
         """Récupère les actions récentes."""
         service = ActionHistoryService()
-        
-        with patch.object(service, 'get_history') as mock:
+
+        with patch.object(service, "get_history") as mock:
             mock.return_value = []
             service.get_recent_actions(limit=10)
-            
+
             mock.assert_called_once()
             filter_arg = mock.call_args[0][0]
             assert filter_arg.limit == 10
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS STATS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -563,32 +561,32 @@ class TestGetStats:
         # get_stats utilise obtenir_contexte_db importé localement dans la méthode
         # On mock au niveau de src.core.database
         service = ActionHistoryService()
-        
-        with patch('src.core.database.obtenir_contexte_db') as mock_context:
+
+        with patch("src.core.database.obtenir_contexte_db") as mock_context:
             mock_session = MagicMock()
             mock_session.query.return_value.scalar.return_value = 100
             mock_session.query.return_value.filter.return_value.scalar.return_value = 10
             mock_session.query.return_value.filter.return_value.group_by.return_value.order_by.return_value.limit.return_value.all.return_value = []
             mock_context.return_value.__enter__.return_value = mock_session
-            
+
             stats = service.get_stats(days=7)
             assert isinstance(stats, ActionStats)
 
     def test_get_stats_error(self):
         """Erreur dans get_stats retourne stats vides."""
         service = ActionHistoryService()
-        
-        with patch('src.core.database.obtenir_contexte_db') as mock_context:
+
+        with patch("src.core.database.obtenir_contexte_db") as mock_context:
             mock_context.return_value.__enter__.side_effect = Exception("DB Error")
             stats = service.get_stats()
-        
+
         assert isinstance(stats, ActionStats)
         assert stats.total_actions == 0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS UNDO
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -604,15 +602,15 @@ class TestUndo:
             action_type=ActionType.RECETTE_DELETED,
             entity_type="recette",
             description="Deleted",
-            old_value={"nom": "Tarte"}
+            old_value={"nom": "Tarte"},
         )
-        
+
         service = ActionHistoryService()
-        
-        with patch.object(service, 'get_history') as mock:
+
+        with patch.object(service, "get_history") as mock:
             mock.return_value = [entry]
             result = service.can_undo(1)
-            
+
             assert result is True
 
     def test_can_undo_not_reversible(self):
@@ -624,15 +622,15 @@ class TestUndo:
             action_type=ActionType.SYSTEM_LOGIN,
             entity_type="system",
             description="Login",
-            old_value=None
+            old_value=None,
         )
-        
+
         service = ActionHistoryService()
-        
-        with patch.object(service, 'get_history') as mock:
+
+        with patch.object(service, "get_history") as mock:
             mock.return_value = [entry]
             result = service.can_undo(1)
-            
+
             assert result is False
 
     def test_can_undo_no_old_value(self):
@@ -644,38 +642,38 @@ class TestUndo:
             action_type=ActionType.RECETTE_DELETED,
             entity_type="recette",
             description="Deleted",
-            old_value=None
+            old_value=None,
         )
-        
+
         service = ActionHistoryService()
-        
-        with patch.object(service, 'get_history') as mock:
+
+        with patch.object(service, "get_history") as mock:
             mock.return_value = [entry]
             result = service.can_undo(1)
-            
+
             assert result is False
 
     def test_can_undo_action_not_found(self):
         """can_undo quand action non trouvée."""
         service = ActionHistoryService()
-        
-        with patch.object(service, 'get_history') as mock:
+
+        with patch.object(service, "get_history") as mock:
             mock.return_value = []
             result = service.can_undo(999)
-            
+
             assert result is False
 
     def test_undo_action_not_implemented(self):
         """undo_action retourne False (non implémenté)."""
         service = ActionHistoryService()
         result = service.undo_action(1)
-        
+
         assert result is False
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS MÃ‰THODES PRIVÃ‰ES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS MÉTHODES PRIVÉES
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -687,16 +685,16 @@ class TestPrivateMethods:
         mock_user = Mock()
         mock_user.id = "user123"
         mock_user.display_name = "Test User"
-        
+
         mock_auth = Mock()
         mock_auth.get_current_user.return_value = mock_user
-        
+
         service = ActionHistoryService()
-        
-        with patch('src.services.utilisateur.authentification.get_auth_service') as mock_get_auth:
+
+        with patch("src.services.utilisateur.authentification.get_auth_service") as mock_get_auth:
             mock_get_auth.return_value = mock_auth
             user_id, user_name = service._get_current_user()
-        
+
         assert user_id == "user123"
         assert user_name == "Test User"
 
@@ -704,24 +702,24 @@ class TestPrivateMethods:
         """Récupération utilisateur anonyme."""
         mock_auth = Mock()
         mock_auth.get_current_user.return_value = None
-        
+
         service = ActionHistoryService()
-        
-        with patch('src.services.utilisateur.authentification.get_auth_service') as mock_get_auth:
+
+        with patch("src.services.utilisateur.authentification.get_auth_service") as mock_get_auth:
             mock_get_auth.return_value = mock_auth
             user_id, user_name = service._get_current_user()
-        
+
         assert user_id == "anonymous"
         assert user_name == "Anonyme"
 
     def test_get_current_user_exception(self):
         """Récupération utilisateur avec exception."""
         service = ActionHistoryService()
-        
-        with patch('src.services.utilisateur.authentification.get_auth_service') as mock_get_auth:
+
+        with patch("src.services.utilisateur.authentification.get_auth_service") as mock_get_auth:
             mock_get_auth.side_effect = Exception("Error")
             user_id, user_name = service._get_current_user()
-        
+
         assert user_id == "anonymous"
         assert user_name == "Anonyme"
 
@@ -733,9 +731,9 @@ class TestPrivateMethods:
             user_name="Test",
             action_type=ActionType.SYSTEM_LOGIN,
             entity_type="system",
-            description="Test"
+            description="Test",
         )
-        
+
         # La méthode _save_to_database importe ActionHistory localement
         # Si le modèle n'existe pas, elle logue l'erreur sans lever d'exception
         # On vérifie simplement que la méthode s'exécute sans crash
@@ -749,10 +747,10 @@ class TestPrivateMethods:
             user_name="Test",
             action_type=ActionType.SYSTEM_LOGIN,
             entity_type="system",
-            description="Test"
+            description="Test",
         )
-        
-        with patch('src.core.database.obtenir_contexte_db') as mock_context:
+
+        with patch("src.core.database.obtenir_contexte_db") as mock_context:
             mock_context.return_value.__enter__.side_effect = Exception("DB Error")
             # Ne doit pas lever d'exception
             service._save_to_database(entry)
@@ -760,18 +758,18 @@ class TestPrivateMethods:
     def test_add_to_cache(self):
         """Ajout au cache."""
         ActionHistoryService._recent_cache = []
-        
+
         service = ActionHistoryService()
         entry = ActionEntry(
             user_id="user123",
             user_name="Test",
             action_type=ActionType.SYSTEM_LOGIN,
             entity_type="system",
-            description="Test"
+            description="Test",
         )
-        
+
         service._add_to_cache(entry)
-        
+
         assert len(ActionHistoryService._recent_cache) == 1
         assert ActionHistoryService._recent_cache[0] == entry
 
@@ -779,45 +777,45 @@ class TestPrivateMethods:
         """Cache respecte la taille maximale."""
         ActionHistoryService._recent_cache = []
         ActionHistoryService._cache_max_size = 3
-        
+
         service = ActionHistoryService()
-        
+
         for i in range(5):
             entry = ActionEntry(
                 user_id=f"user{i}",
                 user_name=f"Test {i}",
                 action_type=ActionType.SYSTEM_LOGIN,
                 entity_type="system",
-                description=f"Test {i}"
+                description=f"Test {i}",
             )
             service._add_to_cache(entry)
-        
+
         assert len(ActionHistoryService._recent_cache) <= 3
-        
+
         # Reset
         ActionHistoryService._cache_max_size = 100
 
     def test_compute_changes(self):
         """Calcul des changements entre deux états."""
         service = ActionHistoryService()
-        
+
         old = {"nom": "Tarte", "temps": 30, "removed": "value"}
         new = {"nom": "Tarte aux pommes", "temps": 30, "added": "new"}
-        
+
         changes = service._compute_changes(old, new)
-        
+
         assert isinstance(changes, list)
         assert len(changes) == 3  # nom changed, removed removed, added added
-        
+
         names_changed = [c for c in changes if c["field"] == "nom"]
         assert len(names_changed) == 1
         assert names_changed[0]["old"] == "Tarte"
         assert names_changed[0]["new"] == "Tarte aux pommes"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FACTORY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -827,137 +825,136 @@ class TestFactory:
     def test_factory_returns_service(self):
         """Factory retourne ActionHistoryService."""
         import src.services.utilisateur.historique as hist_module
+
         hist_module._history_service = None
-        
+
         service = get_action_history_service()
-        
+
         assert isinstance(service, ActionHistoryService)
 
     def test_factory_singleton(self):
         """Factory retourne la même instance."""
         import src.services.utilisateur.historique as hist_module
+
         hist_module._history_service = None
-        
+
         service1 = get_action_history_service()
         service2 = get_action_history_service()
-        
+
         assert service1 is service2
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS UI COMPONENTS (WITH MOCKED STREAMLIT)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
 class TestUIComponents:
     """Tests pour les composants UI avec Streamlit mocké."""
 
-    @patch('src.services.utilisateur.historique.st')
-    @patch('src.services.utilisateur.historique.get_action_history_service')
+    @patch("src.services.utilisateur.historique.st")
+    @patch("src.services.utilisateur.historique.get_action_history_service")
     def test_render_activity_timeline_empty(self, mock_service, mock_st):
         """Timeline vide affiche message info."""
         from src.services.utilisateur.historique import render_activity_timeline
-        
+
         mock_service.return_value.get_recent_actions.return_value = []
-        
+
         render_activity_timeline(limit=10)
-        
+
         mock_st.info.assert_called_once()
 
-    @patch('src.services.utilisateur.historique.st')
-    @patch('src.services.utilisateur.historique.get_action_history_service')
+    @patch("src.services.utilisateur.historique.st")
+    @patch("src.services.utilisateur.historique.get_action_history_service")
     def test_render_activity_timeline_with_actions(self, mock_service, mock_st):
         """Timeline avec actions."""
         from src.services.utilisateur.historique import render_activity_timeline
-        
+
         mock_action = Mock()
         mock_action.entity_type = "recette"
         mock_action.description = "Test action"
         mock_action.user_name = "Test User"
         mock_action.created_at = datetime.now()
-        
+
         mock_service.return_value.get_recent_actions.return_value = [mock_action]
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
-        
+
         render_activity_timeline(limit=10)
-        
+
         mock_st.markdown.assert_called()
 
-    @patch('src.services.utilisateur.historique.st')
-    @patch('src.services.utilisateur.historique.get_action_history_service')
+    @patch("src.services.utilisateur.historique.st")
+    @patch("src.services.utilisateur.historique.get_action_history_service")
     def test_render_user_activity_empty(self, mock_service, mock_st):
         """Activité utilisateur vide."""
         from src.services.utilisateur.historique import render_user_activity
-        
+
         mock_service.return_value.get_user_history.return_value = []
-        
+
         render_user_activity("user123")
-        
+
         mock_st.info.assert_called()
 
-    @patch('src.services.utilisateur.historique.st')
-    @patch('src.services.utilisateur.historique.get_action_history_service')
+    @patch("src.services.utilisateur.historique.st")
+    @patch("src.services.utilisateur.historique.get_action_history_service")
     def test_render_user_activity_with_actions(self, mock_service, mock_st):
         """Activité utilisateur avec actions."""
         from src.services.utilisateur.historique import render_user_activity
-        
+
         mock_action = Mock()
         mock_action.description = "Test action"
         mock_action.created_at = datetime.now()
         mock_action.details = {"key": "value"}
-        
+
         mock_service.return_value.get_user_history.return_value = [mock_action]
         mock_st.expander.return_value.__enter__ = Mock(return_value=Mock())
         mock_st.expander.return_value.__exit__ = Mock(return_value=False)
-        
+
         render_user_activity("user123")
-        
+
         mock_st.markdown.assert_called()
 
-    @patch('src.services.utilisateur.historique.st')
-    @patch('src.services.utilisateur.historique.get_action_history_service')
+    @patch("src.services.utilisateur.historique.st")
+    @patch("src.services.utilisateur.historique.get_action_history_service")
     def test_render_activity_stats(self, mock_service, mock_st):
         """Statistiques d'activité."""
         from src.services.utilisateur.historique import render_activity_stats
-        
+
         mock_stats = ActionStats(
             total_actions=100,
             actions_today=10,
             actions_this_week=50,
-            most_active_users=[{"name": "Anne", "count": 30}]
+            most_active_users=[{"name": "Anne", "count": 30}],
         )
         mock_service.return_value.get_stats.return_value = mock_stats
         mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
-        
+
         render_activity_stats()
-        
+
         mock_st.markdown.assert_called()
         mock_st.metric.assert_called()
 
-    @patch('src.services.utilisateur.historique.st')
-    @patch('src.services.utilisateur.historique.get_action_history_service')
+    @patch("src.services.utilisateur.historique.st")
+    @patch("src.services.utilisateur.historique.get_action_history_service")
     def test_render_activity_stats_no_users(self, mock_service, mock_st):
         """Statistiques sans utilisateurs actifs."""
         from src.services.utilisateur.historique import render_activity_stats
-        
+
         mock_stats = ActionStats(
-            total_actions=0,
-            actions_today=0,
-            actions_this_week=0,
-            most_active_users=[]
+            total_actions=0, actions_today=0, actions_this_week=0, most_active_users=[]
         )
         mock_service.return_value.get_stats.return_value = mock_stats
         mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
-        
+
         render_activity_stats()
-        
+
         mock_st.metric.assert_called()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ADDITIONAL EDGE CASES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -968,21 +965,21 @@ class TestEdgeCases:
         """Vérifie la configuration du modèle Pydantic."""
         assert ActionEntry.model_config.get("from_attributes") is True
 
-    @patch.object(ActionHistoryService, '_save_to_database')
-    @patch.object(ActionHistoryService, '_add_to_cache')
-    @patch.object(ActionHistoryService, '_get_current_user')
+    @patch.object(ActionHistoryService, "_save_to_database")
+    @patch.object(ActionHistoryService, "_add_to_cache")
+    @patch.object(ActionHistoryService, "_get_current_user")
     def test_log_action_with_none_details(self, mock_get_user, mock_cache, mock_save):
         """Log action avec details=None."""
         mock_get_user.return_value = ("user123", "Test User")
-        
+
         service = ActionHistoryService()
         entry = service.log_action(
             action_type=ActionType.RECETTE_CREATED,
             entity_type="recette",
             description="Test",
-            details=None
+            details=None,
         )
-        
+
         assert entry.details == {}
 
     def test_action_filter_with_all_params(self):
@@ -997,9 +994,9 @@ class TestEdgeCases:
             date_to=now,
             search_text="test",
             limit=100,
-            offset=50
+            offset=50,
         )
-        
+
         assert f.user_id == "user123"
         assert f.limit == 100
         assert f.offset == 50

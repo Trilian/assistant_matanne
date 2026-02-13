@@ -1,13 +1,12 @@
-﻿"""
+"""
 Tests profonds supplÃ©mentaires pour errors.py et errors_base.py
 
 Cible les fonctions non couvertes pour atteindre 80% de couverture.
 """
 
-import pytest
-import logging
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
+import pytest
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: ExceptionApp et sous-classes
@@ -21,9 +20,7 @@ class TestExceptionAppDetails:
         """Test message utilisateur personnalisÃ©"""
         from src.core.errors_base import ExceptionApp
 
-        err = ExceptionApp(
-            "Message technique", message_utilisateur="Message pour l'utilisateur"
-        )
+        err = ExceptionApp("Message technique", message_utilisateur="Message pour l'utilisateur")
 
         assert err.message_utilisateur == "Message pour l'utilisateur"
 
@@ -164,7 +161,7 @@ class TestExigerChamps:
 
     def test_exiger_champs_un_manquant(self):
         """Test un champ manquant"""
-        from src.core.errors_base import exiger_champs, ErreurValidation
+        from src.core.errors_base import ErreurValidation, exiger_champs
 
         data = {"nom": "Tarte", "temps": 30}
 
@@ -175,7 +172,7 @@ class TestExigerChamps:
 
     def test_exiger_champs_plusieurs_manquants(self):
         """Test plusieurs champs manquants"""
-        from src.core.errors_base import exiger_champs, ErreurValidation
+        from src.core.errors_base import ErreurValidation, exiger_champs
 
         data = {"nom": "Tarte"}
 
@@ -184,7 +181,7 @@ class TestExigerChamps:
 
     def test_exiger_champs_valeur_vide(self):
         """Test valeur vide considÃ©rÃ©e comme manquante"""
-        from src.core.errors_base import exiger_champs, ErreurValidation
+        from src.core.errors_base import ErreurValidation, exiger_champs
 
         data = {"nom": "", "temps": 30}
 
@@ -216,14 +213,14 @@ class TestValiderPlage:
 
     def test_valider_plage_sous_min(self):
         """Test valeur sous le minimum"""
-        from src.core.errors_base import valider_plage, ErreurValidation
+        from src.core.errors_base import ErreurValidation, valider_plage
 
         with pytest.raises(ErreurValidation):
             valider_plage(-10, min_val=0, nom_param="prix")
 
     def test_valider_plage_sur_max(self):
         """Test valeur au-dessus du maximum"""
-        from src.core.errors_base import valider_plage, ErreurValidation
+        from src.core.errors_base import ErreurValidation, valider_plage
 
         with pytest.raises(ErreurValidation):
             valider_plage(150, max_val=100, nom_param="prix")
@@ -260,14 +257,14 @@ class TestValiderType:
 
     def test_valider_type_invalide(self):
         """Test type invalide"""
-        from src.core.errors_base import valider_type, ErreurValidation
+        from src.core.errors_base import ErreurValidation, valider_type
 
         with pytest.raises(ErreurValidation):
             valider_type("not an int", int, "age")
 
     def test_valider_type_none(self):
         """Test None quand type attendu"""
-        from src.core.errors_base import valider_type, ErreurValidation
+        from src.core.errors_base import ErreurValidation, valider_type
 
         with pytest.raises(ErreurValidation):
             valider_type(None, str, "valeur")
@@ -283,7 +280,7 @@ class TestGererErreursAdvanced:
 
     def test_gerer_erreurs_niveau_warning(self):
         """Test niveau log WARNING"""
-        from src.core.errors import gerer_erreurs, ErreurValidation
+        from src.core.errors import ErreurValidation, gerer_erreurs
 
         @gerer_erreurs(niveau_log="WARNING", afficher_dans_ui=False, valeur_fallback=None)
         def func_warning():
@@ -294,7 +291,7 @@ class TestGererErreursAdvanced:
 
     def test_gerer_erreurs_erreur_non_trouve(self):
         """Test gestion ErreurNonTrouve"""
-        from src.core.errors import gerer_erreurs, ErreurNonTrouve
+        from src.core.errors import ErreurNonTrouve, gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback={"found": False})
         def func_not_found():
@@ -305,7 +302,7 @@ class TestGererErreursAdvanced:
 
     def test_gerer_erreurs_erreur_bdd(self):
         """Test gestion ErreurBaseDeDonnees"""
-        from src.core.errors import gerer_erreurs, ErreurBaseDeDonnees
+        from src.core.errors import ErreurBaseDeDonnees, gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=[])
         def func_bdd():
@@ -316,7 +313,7 @@ class TestGererErreursAdvanced:
 
     def test_gerer_erreurs_erreur_ia(self):
         """Test gestion ErreurServiceIA"""
-        from src.core.errors import gerer_erreurs, ErreurServiceIA
+        from src.core.errors import ErreurServiceIA, gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback="IA indisponible")
         def func_ia():
@@ -327,7 +324,7 @@ class TestGererErreursAdvanced:
 
     def test_gerer_erreurs_erreur_limite_debit(self):
         """Test gestion ErreurLimiteDebit"""
-        from src.core.errors import gerer_erreurs, ErreurLimiteDebit
+        from src.core.errors import ErreurLimiteDebit, gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback="Quota dÃ©passÃ©")
         def func_rate_limit():
@@ -338,7 +335,7 @@ class TestGererErreursAdvanced:
 
     def test_gerer_erreurs_erreur_service_externe(self):
         """Test gestion ErreurServiceExterne"""
-        from src.core.errors import gerer_erreurs, ErreurServiceExterne
+        from src.core.errors import ErreurServiceExterne, gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=None)
         def func_externe():
@@ -395,13 +392,13 @@ class TestReExports:
     def test_exceptions_reexportees(self):
         """Test exceptions rÃ©-exportÃ©es depuis errors.py"""
         from src.core.errors import (
-            ErreurValidation,
-            ErreurNonTrouve,
             ErreurBaseDeDonnees,
-            ErreurServiceIA,
-            ErreurLimiteDebit,
-            ErreurServiceExterne,
             ErreurConfiguration,
+            ErreurLimiteDebit,
+            ErreurNonTrouve,
+            ErreurServiceExterne,
+            ErreurServiceIA,
+            ErreurValidation,
             ExceptionApp,
         )
 
@@ -434,7 +431,7 @@ class TestHandleErrorsAlias:
 
     def test_handle_errors_alias(self):
         """Test alias existe"""
-        from src.core.errors import handle_errors, gerer_erreurs
+        from src.core.errors import gerer_erreurs, handle_errors
 
         assert handle_errors is gerer_erreurs
 
@@ -485,9 +482,9 @@ class TestExceptionHierarchy:
     def test_toutes_exceptions_catchable(self):
         """Test toutes les exceptions peuvent Ãªtre catchÃ©es par ExceptionApp"""
         from src.core.errors import (
-            ErreurValidation,
-            ErreurNonTrouve,
             ErreurBaseDeDonnees,
+            ErreurNonTrouve,
+            ErreurValidation,
             ExceptionApp,
         )
 

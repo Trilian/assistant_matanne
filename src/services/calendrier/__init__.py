@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package de synchronisation des calendriers externes.
 
 Exports:
@@ -8,16 +8,14 @@ Exports:
 - ICalGenerator: Génération/parsing iCal
 """
 
+from .generateur import ICalGenerator
 from .schemas import (
-    CalendarProvider,
-    SyncDirection,
-    ExternalCalendarConfig,
     CalendarEventExternal,
+    CalendarProvider,
+    ExternalCalendarConfig,
+    SyncDirection,
     SyncResult,
 )
-
-from .generateur import ICalGenerator
-
 from .service import (
     CalendarSyncService,
     get_calendar_sync_service,
@@ -27,11 +25,12 @@ from .service import (
 def render_calendar_sync_ui():
     """
     Interface Streamlit pour la synchronisation des calendriers.
-    
+
     Déplacé vers src/modules/planning/ui/calendar_sync_ui.py
     Cette fonction assure la rétrocompatibilité.
     """
     from src.modules.planning.calendar_sync_ui import render_calendar_sync_ui as _render
+
     return _render()
 
 

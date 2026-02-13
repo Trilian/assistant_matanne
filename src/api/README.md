@@ -159,7 +159,7 @@ const BASE_URL = "http://localhost:8000/api/v1";
 async function getExpiringItems() {
     const response = await fetch(`${BASE_URL}/inventaire?expiring_soon=true`);
     const data = await response.json();
-    
+
     console.log(`${data.total} articles expirent bientôt:`);
     data.items.forEach(item => {
         console.log(`- ${item.nom}: ${item.date_peremption}`);
@@ -170,7 +170,7 @@ async function getExpiringItems() {
 async function searchBarcode(code) {
     const response = await fetch(`${BASE_URL}/inventaire/barcode/${code}`);
     const data = await response.json();
-    
+
     if (data.found !== false) {
         console.log(`Trouvé: ${data.nom}`);
     } else {

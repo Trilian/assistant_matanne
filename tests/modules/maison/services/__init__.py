@@ -1,1 +1,1 @@
-﻿"""Package de tests pour src.modules.maison.services."""
+"""Package de tests pour src.modules.maison.services."""

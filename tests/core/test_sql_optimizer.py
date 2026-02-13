@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/core/sql_optimizer.py
 Couvre :
 - EcouteurSQLAlchemy (log, extract, clear, install)
@@ -7,33 +7,33 @@ Couvre :
 - ConstructeurRequeteOptimisee (builder pattern)
 """
 
-import pytest
-from unittest.mock import MagicMock, patch, Mock
 from datetime import datetime
-from collections import defaultdict
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from src.core.sql_optimizer import (
-    EcouteurSQLAlchemy,
-    DetecteurN1,
     ChargeurParLots,
     ConstructeurRequeteOptimisee,
-    InfoRequete,
+    DetecteurN1,
     DetectionN1,
+    EcouteurSQLAlchemy,
+    InfoRequete,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# MODÃˆLES DE TEST
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# MODÈLES DE TEST
+# ═══════════════════════════════════════════════════════════
 
 
 class MockModel:
     """Modèle de test avec attributs."""
+
     id = MagicMock()
     name = MagicMock()
     user_id = MagicMock()
     items = MagicMock()  # Relation
-    
+
     @classmethod
     def __init__(cls):
         pass
@@ -50,9 +50,9 @@ class DummySession:
         return MagicMock()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -72,9 +72,9 @@ def clean_session_state():
         yield state
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 1: INFO REQUETE DATACLASS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestInfoRequete:
@@ -89,7 +89,7 @@ class TestInfoRequete:
             table="test",
             operation="SELECT",
         )
-        
+
         assert info.sql == "SELECT * FROM test"
         assert info.duration_ms == 50.5
         assert info.table == "test"
@@ -99,7 +99,7 @@ class TestInfoRequete:
     def test_info_requete_default_timestamp(self):
         """Test timestamp par défaut."""
         info = InfoRequete(sql="SELECT 1", duration_ms=1.0)
-        
+
         assert info.timestamp is not None
         assert isinstance(info.timestamp, datetime)
 
@@ -107,7 +107,7 @@ class TestInfoRequete:
     def test_info_requete_default_parameters(self):
         """Test parameters par défaut."""
         info = InfoRequete(sql="SELECT 1", duration_ms=1.0)
-        
+
         assert info.parameters == {}
 
 
@@ -123,7 +123,7 @@ class TestDetectionN1Dataclass:
             count=10,
             sample_query="SELECT * FROM users WHERE order_id = 1",
         )
-        
+
         assert detection.table == "users"
         assert detection.parent_table == "orders"
         assert detection.count == 10
@@ -132,13 +132,13 @@ class TestDetectionN1Dataclass:
     def test_detection_n1_default_first_seen(self):
         """Test first_seen par défaut."""
         detection = DetectionN1(table="test", parent_table="parent", count=5)
-        
+
         assert detection.first_seen is not None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 2: ECOUTEUR SQLALCHEMY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestEcouteurSQLAlchemy:
@@ -148,7 +148,7 @@ class TestEcouteurSQLAlchemy:
     def test_log_query_adds_query(self, mock_session_state):
         """Test ajout requête au log."""
         EcouteurSQLAlchemy._log_query("SELECT * FROM test", 120, {})
-        
+
         assert EcouteurSQLAlchemy.SESSION_KEY in mock_session_state
         assert len(mock_session_state[EcouteurSQLAlchemy.SESSION_KEY]) == 1
         q = mock_session_state[EcouteurSQLAlchemy.SESSION_KEY][0]
@@ -245,7 +245,7 @@ class TestEcouteurSQLAlchemy:
         """Test statistiques retourne dict."""
         EcouteurSQLAlchemy._log_query("SELECT * FROM foo", 50, {})
         stats = EcouteurSQLAlchemy.get_stats()
-        
+
         assert isinstance(stats, dict)
         assert "total" in stats
         assert "by_operation" in stats
@@ -256,7 +256,7 @@ class TestEcouteurSQLAlchemy:
     def test_get_stats_empty(self, clean_session_state):
         """Test statistiques avec log vide."""
         stats = EcouteurSQLAlchemy.get_stats()
-        
+
         assert stats["total"] == 0
         assert stats["by_operation"] == {}
         assert stats["avg_time_ms"] == 0
@@ -266,9 +266,9 @@ class TestEcouteurSQLAlchemy:
         """Test statistiques avec requêtes lentes."""
         EcouteurSQLAlchemy._log_query("SELECT slow FROM foo", 150, {})  # >100ms = lent
         EcouteurSQLAlchemy._log_query("SELECT fast FROM bar", 20, {})
-        
+
         stats = EcouteurSQLAlchemy.get_stats()
-        
+
         assert len(stats["slow_queries"]) == 1
         assert stats["slow_queries"][0].duration_ms == 150
 
@@ -277,7 +277,7 @@ class TestEcouteurSQLAlchemy:
         """Test vidage du log."""
         EcouteurSQLAlchemy._log_query("SELECT * FROM foo", 50, {})
         EcouteurSQLAlchemy.clear()
-        
+
         assert mock_session_state[EcouteurSQLAlchemy.SESSION_KEY] == []
 
     @pytest.mark.unit
@@ -285,7 +285,7 @@ class TestEcouteurSQLAlchemy:
         """Test troncature SQL long."""
         long_sql = "SELECT " + "x" * 1000
         EcouteurSQLAlchemy._log_query(long_sql, 10, {})
-        
+
         logged = mock_session_state[EcouteurSQLAlchemy.SESSION_KEY][0]
         assert len(logged.sql) <= 500
 
@@ -294,7 +294,7 @@ class TestEcouteurSQLAlchemy:
         """Test limite de 200 entrées."""
         for i in range(250):
             EcouteurSQLAlchemy._log_query(f"SELECT * FROM table_{i}", 10, {})
-        
+
         assert len(mock_session_state[EcouteurSQLAlchemy.SESSION_KEY]) == 200
 
     @pytest.mark.unit
@@ -302,7 +302,7 @@ class TestEcouteurSQLAlchemy:
         """Test log avec paramètres dict."""
         params = {"id": 1, "name": "test"}
         EcouteurSQLAlchemy._log_query("SELECT * FROM foo WHERE id = :id", 10, params)
-        
+
         logged = mock_session_state[EcouteurSQLAlchemy.SESSION_KEY][0]
         assert logged.parameters == params
 
@@ -311,7 +311,7 @@ class TestEcouteurSQLAlchemy:
         """Test log avec paramètres non-dict."""
         params = [1, 2, 3]
         EcouteurSQLAlchemy._log_query("SELECT * FROM foo", 10, params)
-        
+
         logged = mock_session_state[EcouteurSQLAlchemy.SESSION_KEY][0]
         assert logged.parameters == {}
 
@@ -319,13 +319,13 @@ class TestEcouteurSQLAlchemy:
     def test_install_with_engine(self):
         """Test installation listener sur engine."""
         mock_engine = MagicMock()
-        
+
         # Reset installed flag
         EcouteurSQLAlchemy._installed = False
-        
+
         with patch("src.core.sql_optimizer.event.listens_for") as mock_listens_for:
             EcouteurSQLAlchemy.install(mock_engine)
-            
+
             # Devrait enregistrer des listeners
             assert mock_listens_for.call_count >= 2
 
@@ -333,23 +333,23 @@ class TestEcouteurSQLAlchemy:
     def test_install_idempotent(self):
         """Test installation est idempotent."""
         mock_engine = MagicMock()
-        
+
         # Marquer comme installé
         EcouteurSQLAlchemy._installed = True
-        
+
         with patch("src.core.sql_optimizer.event.listens_for") as mock_listens_for:
             EcouteurSQLAlchemy.install(mock_engine)
-            
+
             # Ne devrait pas réinstaller
             mock_listens_for.assert_not_called()
-        
+
         # Reset pour autres tests
         EcouteurSQLAlchemy._installed = False
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 3: DETECTEUR N+1
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestDetecteurN1:
@@ -360,9 +360,9 @@ class TestDetecteurN1:
         """Test détection N+1."""
         for _ in range(6):
             EcouteurSQLAlchemy._log_query("SELECT * FROM foo WHERE bar_id = 1", 10, {})
-        
+
         detections = DetecteurN1.analyze()
-        
+
         assert isinstance(detections, list)
         assert len(detections) >= 1
         assert hasattr(detections[0], "table")
@@ -373,9 +373,9 @@ class TestDetecteurN1:
         """Test pas de détection sous le seuil."""
         for i in range(3):  # En dessous du seuil de 5
             EcouteurSQLAlchemy._log_query(f"SELECT * FROM foo WHERE id = {i}", 10, {})
-        
+
         detections = DetecteurN1.analyze()
-        
+
         assert len(detections) == 0
 
     @pytest.mark.unit
@@ -383,10 +383,10 @@ class TestDetecteurN1:
         """Test génération suggestions."""
         for _ in range(6):
             EcouteurSQLAlchemy._log_query("SELECT * FROM foo WHERE bar_id = 1", 10, {})
-        
+
         DetecteurN1.analyze()
         suggestions = DetecteurN1.get_suggestions()
-        
+
         assert isinstance(suggestions, list)
         assert any("joinedload" in s or "eager loading" in s for s in suggestions)
 
@@ -395,7 +395,7 @@ class TestDetecteurN1:
         """Test normalisation retire les nombres."""
         sql = "SELECT * FROM users WHERE id = 12345"
         normalized = DetecteurN1._normalize_query(sql)
-        
+
         assert "12345" not in normalized
         assert "?" in normalized
 
@@ -404,7 +404,7 @@ class TestDetecteurN1:
         """Test normalisation retire les strings."""
         sql = "SELECT * FROM users WHERE name = 'John'"
         normalized = DetecteurN1._normalize_query(sql)
-        
+
         assert "John" not in normalized
         assert "'?'" in normalized
 
@@ -414,9 +414,9 @@ class TestDetecteurN1:
         queries = [
             InfoRequete(sql="SELECT * FROM items WHERE user_id = 1", duration_ms=10, table="items"),
         ]
-        
+
         parent = DetecteurN1._guess_parent_table(queries)
-        
+
         assert parent == "user"
 
     @pytest.mark.unit
@@ -425,9 +425,9 @@ class TestDetecteurN1:
         queries = [
             InfoRequete(sql="SELECT * FROM items", duration_ms=10, table="items"),
         ]
-        
+
         parent = DetecteurN1._guess_parent_table(queries)
-        
+
         assert parent == "unknown"
 
     @pytest.mark.unit
@@ -436,9 +436,9 @@ class TestDetecteurN1:
         mock_session_state[DetecteurN1.SESSION_KEY] = [
             DetectionN1(table="test", parent_table="parent", count=5)
         ]
-        
+
         detections = DetecteurN1.obtenir_detections()
-        
+
         assert len(detections) == 1
 
     @pytest.mark.unit
@@ -447,16 +447,16 @@ class TestDetecteurN1:
         mock_session_state[DetecteurN1.SESSION_KEY] = [
             DetectionN1(table="test", parent_table="unknown", count=10)
         ]
-        
+
         suggestions = DetecteurN1.obtenir_suggestions()
-        
+
         assert len(suggestions) == 1
         assert "eager loading" in suggestions[0]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 4: CHARGEUR PAR LOTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestChargeurParLots:
@@ -467,7 +467,7 @@ class TestChargeurParLots:
         """Test chunked basique."""
         items = list(range(250))
         chunks = list(ChargeurParLots.chunked(items, chunk_size=100))
-        
+
         assert len(chunks) == 3
         assert chunks[0] == list(range(100))
         assert chunks[2] == list(range(200, 250))
@@ -477,7 +477,7 @@ class TestChargeurParLots:
         """Test chunked avec division exacte."""
         items = list(range(100))
         chunks = list(ChargeurParLots.chunked(items, chunk_size=50))
-        
+
         assert len(chunks) == 2
         assert len(chunks[0]) == 50
         assert len(chunks[1]) == 50
@@ -487,7 +487,7 @@ class TestChargeurParLots:
         """Test chunked avec liste plus petite que chunk."""
         items = list(range(10))
         chunks = list(ChargeurParLots.chunked(items, chunk_size=100))
-        
+
         assert len(chunks) == 1
         assert chunks[0] == items
 
@@ -496,7 +496,7 @@ class TestChargeurParLots:
         """Test chunked avec liste vide."""
         items = []
         chunks = list(ChargeurParLots.chunked(items, chunk_size=100))
-        
+
         assert len(chunks) == 0
 
     @pytest.mark.unit
@@ -507,12 +507,12 @@ class TestChargeurParLots:
         mock_query.limit.return_value = mock_query
         mock_query.all.side_effect = [
             [1, 2, 3],  # Premier lot
-            [4, 5],     # Deuxième lot
-            []          # Fin
+            [4, 5],  # Deuxième lot
+            [],  # Fin
         ]
-        
+
         results = ChargeurParLots.charger_par_lots(mock_query, batch_size=3)
-        
+
         assert results == [1, 2, 3, 4, 5]
 
     @pytest.mark.unit
@@ -522,14 +522,14 @@ class TestChargeurParLots:
         mock_query.offset.return_value = mock_query
         mock_query.limit.return_value = mock_query
         mock_query.all.side_effect = [[1, 2], [3], []]
-        
+
         callback_calls = []
-        
+
         def callback(batch):
             callback_calls.append(batch)
-        
+
         ChargeurParLots.charger_par_lots(mock_query, batch_size=2, callback=callback)
-        
+
         assert len(callback_calls) == 2
 
     @pytest.mark.unit
@@ -540,17 +540,17 @@ class TestChargeurParLots:
         mock_query.limit.return_value = mock_query
         # Lot incomplet (moins que batch_size)
         mock_query.all.return_value = [1, 2]
-        
+
         results = ChargeurParLots.charger_par_lots(mock_query, batch_size=10)
-        
+
         assert results == [1, 2]
         # Devrait faire un seul appel
         assert mock_query.all.call_count == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 5: CONSTRUCTEUR REQUETE OPTIMISEE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstructeurRequeteOptimisee:
@@ -561,7 +561,7 @@ class TestConstructeurRequeteOptimisee:
         self.mock_session = MagicMock()
         self.mock_query = MagicMock()
         self.mock_session.query.return_value = self.mock_query
-        
+
         # Mock model avec attributs
         self.mock_model = MagicMock()
         self.mock_model.id = MagicMock()
@@ -572,7 +572,7 @@ class TestConstructeurRequeteOptimisee:
     def test_builder_creation(self):
         """Test création builder."""
         builder = ConstructeurRequeteOptimisee(self.mock_session, self.mock_model)
-        
+
         assert builder is not None
         assert builder._session == self.mock_session
         assert builder._model == self.mock_model
@@ -581,10 +581,10 @@ class TestConstructeurRequeteOptimisee:
     def test_filter_by(self):
         """Test filtre."""
         self.mock_query.filter_by.return_value = self.mock_query
-        
+
         builder = ConstructeurRequeteOptimisee(self.mock_session, self.mock_model)
         result = builder.filter_by(name="test")
-        
+
         assert result is builder  # Chaînage
 
     @pytest.mark.unit
@@ -592,7 +592,7 @@ class TestConstructeurRequeteOptimisee:
         """Test ordre."""
         builder = ConstructeurRequeteOptimisee(self.mock_session, self.mock_model)
         result = builder.order("name")
-        
+
         assert result is builder
         assert builder._order_by == ("name", False)
 
@@ -601,7 +601,7 @@ class TestConstructeurRequeteOptimisee:
         """Test ordre décroissant."""
         builder = ConstructeurRequeteOptimisee(self.mock_session, self.mock_model)
         result = builder.order("id", desc=True)
-        
+
         assert result is builder
         assert builder._order_by == ("id", True)
 
@@ -610,7 +610,7 @@ class TestConstructeurRequeteOptimisee:
         """Test pagination."""
         builder = ConstructeurRequeteOptimisee(self.mock_session, self.mock_model)
         result = builder.paginate(page=2, per_page=20)
-        
+
         assert result is builder
         assert builder._offset == 20  # (2-1) * 20
         assert builder._limit == 20
@@ -620,7 +620,7 @@ class TestConstructeurRequeteOptimisee:
         """Test eager loading."""
         builder = ConstructeurRequeteOptimisee(self.mock_session, self.mock_model)
         result = builder.eager_load("items", "other")
-        
+
         assert result is builder
         assert "items" in builder._eager_loads
         assert "other" in builder._eager_loads
@@ -633,14 +633,14 @@ class TestConstructeurRequeteOptimisee:
         self.mock_query.order_by.return_value = self.mock_query
         self.mock_query.offset.return_value = self.mock_query
         self.mock_query.limit.return_value = self.mock_query
-        
+
         builder = ConstructeurRequeteOptimisee(self.mock_session, self.mock_model)
         builder.filter_by(active=True)
         builder.order("name")
         builder.paginate(page=1, per_page=10)
-        
+
         query = builder.build()
-        
+
         assert query is not None
 
     @pytest.mark.unit
@@ -651,10 +651,10 @@ class TestConstructeurRequeteOptimisee:
         self.mock_query.order_by.return_value = self.mock_query
         self.mock_query.offset.return_value = self.mock_query
         self.mock_query.limit.return_value = self.mock_query
-        
+
         builder = ConstructeurRequeteOptimisee(self.mock_session, self.mock_model)
         results = builder.all()
-        
+
         assert results == ["item1", "item2"]
 
     @pytest.mark.unit
@@ -662,41 +662,41 @@ class TestConstructeurRequeteOptimisee:
         """Test first()."""
         self.mock_query.first.return_value = "item1"
         self.mock_query.filter_by.return_value = self.mock_query
-        
+
         builder = ConstructeurRequeteOptimisee(self.mock_session, self.mock_model)
         result = builder.first()
-        
+
         assert result == "item1"
 
     @pytest.mark.unit
     def test_count(self):
         """Test count()."""
         self.mock_query.count.return_value = 42
-        
+
         builder = ConstructeurRequeteOptimisee(self.mock_session, self.mock_model)
         count = builder.count()
-        
+
         assert count == 42
 
     @pytest.mark.unit
     def test_build_with_eager_load(self):
         """Test build avec eager loading."""
         self.mock_query.options.return_value = self.mock_query
-        
+
         # Mock model avec relation
         self.mock_model.items = MagicMock()
-        
+
         builder = ConstructeurRequeteOptimisee(self.mock_session, self.mock_model)
         builder.eager_load("items")
-        
+
         with patch("src.core.sql_optimizer.selectinload") as mock_selectinload:
             mock_selectinload.return_value = MagicMock()
             builder.build()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# SECTION 6: TESTS D'INTÃ‰GRATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# SECTION 6: TESTS D'INTÉGRATION
+# ═══════════════════════════════════════════════════════════
 
 
 class TestSQLOptimizerIntegration:
@@ -708,16 +708,16 @@ class TestSQLOptimizerIntegration:
         # Log plusieurs requêtes
         EcouteurSQLAlchemy._log_query("SELECT * FROM users", 50, {})
         EcouteurSQLAlchemy._log_query("SELECT * FROM orders WHERE user_id = 1", 30, {})
-        
+
         # Obtenir statistiques
         stats = EcouteurSQLAlchemy.get_stats()
-        
+
         assert stats["total"] == 2
         assert "SELECT" in stats["by_operation"]
-        
+
         # Clear
         EcouteurSQLAlchemy.clear()
-        
+
         stats2 = EcouteurSQLAlchemy.get_stats()
         assert stats2["total"] == 0
 
@@ -726,22 +726,18 @@ class TestSQLOptimizerIntegration:
         """Test workflow détection N+1."""
         # Simuler N+1 pattern
         for i in range(10):
-            EcouteurSQLAlchemy._log_query(
-                f"SELECT * FROM order_items WHERE order_id = {i}",
-                5,
-                {}
-            )
-        
+            EcouteurSQLAlchemy._log_query(f"SELECT * FROM order_items WHERE order_id = {i}", 5, {})
+
         detections = DetecteurN1.analyze()
         suggestions = DetecteurN1.get_suggestions()
-        
+
         assert len(detections) >= 1  # Au moins un pattern détecté
         assert len(suggestions) >= 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 7: TESTS UI (mocked)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestAfficherAnalyseSQL:
@@ -754,11 +750,11 @@ class TestAfficherAnalyseSQL:
             mock_st.expander.return_value.__enter__ = MagicMock()
             mock_st.expander.return_value.__exit__ = MagicMock()
             mock_st.session_state = clean_session_state
-            
+
             from src.core.sql_optimizer import afficher_analyse_sql
-            
+
             # Ne devrait pas crash
             try:
                 afficher_analyse_sql()
             except Exception:
-                pass  # OK si erreur Ã  cause des mocks incomplets
+                pass  # OK si erreur à cause des mocks incomplets

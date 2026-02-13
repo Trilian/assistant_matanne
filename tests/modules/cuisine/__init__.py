@@ -1,1 +1,1 @@
-﻿"""Tests pour le domaine Cuisine."""
+"""Tests pour le domaine Cuisine."""

@@ -1,1 +1,1 @@
-﻿"""Tests pour le domaine Famille."""
+"""Tests pour le domaine Famille."""

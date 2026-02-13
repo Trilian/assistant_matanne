@@ -3,13 +3,20 @@ Fonctions CRUD pour les paris, equipes et matchs.
 """
 
 from .utils import (
-    st, date, Decimal, logger,
-    obtenir_contexte_db, Equipe, Match, PariSportif,
+    Decimal,
+    Equipe,
+    Match,
+    PariSportif,
+    date,
+    logger,
+    obtenir_contexte_db,
+    st,
 )
 
 
-def enregistrer_pari(match_id: int, prediction: str, cote: float, 
-                     mise: float = 0, est_virtuel: bool = True):
+def enregistrer_pari(
+    match_id: int, prediction: str, cote: float, mise: float = 0, est_virtuel: bool = True
+):
     """Enregistre un nouveau pari"""
     try:
         with obtenir_contexte_db() as session:
@@ -20,7 +27,7 @@ def enregistrer_pari(match_id: int, prediction: str, cote: float,
                 cote=cote,
                 mise=Decimal(str(mise)),
                 est_virtuel=est_virtuel,
-                statut="en_attente"
+                statut="en_attente",
             )
             session.add(pari)
             session.commit()
@@ -34,10 +41,7 @@ def ajouter_equipe(nom: str, championnat: str):
     """Ajoute une nouvelle equipe"""
     try:
         with obtenir_contexte_db() as session:
-            equipe = Equipe(
-                nom=nom,
-                championnat=championnat
-            )
+            equipe = Equipe(nom=nom, championnat=championnat)
             session.add(equipe)
             session.commit()
             st.success(f"✅ Équipe '{nom}' ajoutee!")
@@ -47,8 +51,9 @@ def ajouter_equipe(nom: str, championnat: str):
         return False
 
 
-def ajouter_match(equipe_dom_id: int, equipe_ext_id: int, 
-                  championnat: str, date_match: date, heure: str = None):
+def ajouter_match(
+    equipe_dom_id: int, equipe_ext_id: int, championnat: str, date_match: date, heure: str = None
+):
     """Ajoute un nouveau match"""
     try:
         with obtenir_contexte_db() as session:
@@ -58,7 +63,7 @@ def ajouter_match(equipe_dom_id: int, equipe_ext_id: int,
                 championnat=championnat,
                 date_match=date_match,
                 heure=heure,
-                joue=False
+                joue=False,
             )
             session.add(match)
             session.commit()
@@ -78,7 +83,7 @@ def enregistrer_resultat_match(match_id: int, score_dom: int, score_ext: int):
                 match.score_domicile = score_dom
                 match.score_exterieur = score_ext
                 match.joue = True
-                
+
                 # Determiner le resultat
                 if score_dom > score_ext:
                     match.resultat = "1"
@@ -86,7 +91,7 @@ def enregistrer_resultat_match(match_id: int, score_dom: int, score_ext: int):
                     match.resultat = "2"
                 else:
                     match.resultat = "N"
-                
+
                 # Mettre à jour les paris lies
                 for pari in match.paris:
                     if pari.statut == "en_attente":
@@ -96,7 +101,7 @@ def enregistrer_resultat_match(match_id: int, score_dom: int, score_ext: int):
                         else:
                             pari.statut = "perdu"
                             pari.gain = Decimal("0")
-                
+
                 session.commit()
                 st.success(f"✅ Resultat enregistre: {score_dom}-{score_ext}")
                 return True
@@ -108,10 +113,10 @@ def enregistrer_resultat_match(match_id: int, score_dom: int, score_ext: int):
 def supprimer_match(match_id: int) -> bool:
     """
     Supprime un match et ses paris associes.
-    
+
     Args:
         match_id: ID du match à supprimer
-        
+
     Returns:
         True si suppression reussie
     """
@@ -122,7 +127,7 @@ def supprimer_match(match_id: int) -> bool:
                 # Supprimer d'abord les paris lies
                 for pari in match.paris:
                     session.delete(pari)
-                
+
                 # Puis le match
                 session.delete(match)
                 session.commit()
@@ -143,4 +148,3 @@ __all__ = [
     "enregistrer_resultat_match",
     "supprimer_match",
 ]
-

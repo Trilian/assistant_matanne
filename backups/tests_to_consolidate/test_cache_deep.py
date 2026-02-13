@@ -1,14 +1,14 @@
-﻿"""
+"""
 Tests profonds pour le systÃ¨me de cache et autres modules core.
 
 Ces tests utilisent des mocks pour simuler Streamlit session_state
 et exÃ©cutent rÃ©ellement la logique du cache.
 """
 
-import pytest
 from datetime import datetime, timedelta
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import patch
 
+import pytest
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MOCK STREAMLIT SESSION STATE
@@ -242,7 +242,7 @@ class TestGererErreursDecorateur:
 
     def test_gerer_erreurs_validation(self):
         """Test gestion ErreurValidation"""
-        from src.core.errors import gerer_erreurs, ErreurValidation
+        from src.core.errors import ErreurValidation, gerer_erreurs
 
         @gerer_erreurs(valeur_fallback=None, relancer=False, afficher_dans_ui=False)
         def func_validation():
@@ -253,7 +253,7 @@ class TestGererErreursDecorateur:
 
     def test_gerer_erreurs_non_trouve(self):
         """Test gestion ErreurNonTrouve"""
-        from src.core.errors import gerer_erreurs, ErreurNonTrouve
+        from src.core.errors import ErreurNonTrouve, gerer_erreurs
 
         @gerer_erreurs(valeur_fallback=[], relancer=False, afficher_dans_ui=False)
         def func_not_found():

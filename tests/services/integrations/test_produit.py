@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour le service OpenFoodFacts.
 
 Couverture cible: >80%
@@ -9,25 +9,25 @@ Couverture cible: >80%
 - Fonctions utilitaires (nutriscore, nova)
 """
 
-import pytest
 from datetime import datetime
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
+
 import httpx
+import pytest
 
 from src.services.integrations.produit import (
-    NutritionInfo,
-    ProduitOpenFoodFacts,
-    OpenFoodFactsService,
-    get_openfoodfacts_service,
+    CACHE_TTL,
     OPENFOODFACTS_API,
     OPENFOODFACTS_SEARCH,
-    CACHE_TTL,
+    NutritionInfo,
+    OpenFoodFactsService,
+    ProduitOpenFoodFacts,
+    get_openfoodfacts_service,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -67,7 +67,7 @@ def api_response_nutella():
                 "fat_100g": 30.9,
                 "saturated-fat_100g": 10.6,
                 "fiber_100g": 0,
-                "salt_100g": 0.107
+                "salt_100g": 0.107,
             },
             "nutriscore_grade": "e",
             "nova_group": 4,
@@ -77,19 +77,16 @@ def api_response_nutella():
             "traces_tags": ["en:gluten", "en:soy"],
             "labels_tags_fr": ["en:no-artificial-colors"],
             "origins": "Italie",
-            "conservation_conditions": "Ã€ conserver au frais",
-            "completeness": 90
-        }
+            "conservation_conditions": "À conserver au frais",
+            "completeness": 90,
+        },
     }
 
 
 @pytest.fixture
 def api_response_not_found():
     """Réponse API pour produit non trouvé."""
-    return {
-        "status": 0,
-        "status_verbose": "product not found"
-    }
+    return {"status": 0, "status_verbose": "product not found"}
 
 
 @pytest.fixture
@@ -103,22 +100,22 @@ def api_search_response():
                 "product_name_fr": "Nutella 400g",
                 "brands": "Ferrero",
                 "nutriments": {},
-                "completeness": 80
+                "completeness": 80,
             },
             {
                 "code": "3017620429002",
                 "product_name_fr": "Nutella 750g",
                 "brands": "Ferrero",
                 "nutriments": {},
-                "completeness": 75
-            }
-        ]
+                "completeness": 75,
+            },
+        ],
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS MODÃˆLES DE DONNÃ‰ES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS MODÈLES DE DONNÉES
+# ═══════════════════════════════════════════════════════════
 
 
 class TestNutritionInfo:
@@ -127,7 +124,7 @@ class TestNutritionInfo:
     def test_creation_vide(self):
         """Test création sans données."""
         nutrition = NutritionInfo()
-        
+
         assert nutrition.energie_kcal is None
         assert nutrition.proteines_g is None
         assert nutrition.nutriscore is None
@@ -145,9 +142,9 @@ class TestNutritionInfo:
             sel_g=0.107,
             nutriscore="E",
             nova_group=4,
-            ecoscore="C"
+            ecoscore="C",
         )
-        
+
         assert nutrition.energie_kcal == 539
         assert nutrition.proteines_g == 6.3
         assert nutrition.nutriscore == "E"
@@ -159,11 +156,8 @@ class TestProduitOpenFoodFacts:
 
     def test_creation_minimale(self):
         """Test création avec champs requis."""
-        produit = ProduitOpenFoodFacts(
-            code_barres="3017620422003",
-            nom="Nutella"
-        )
-        
+        produit = ProduitOpenFoodFacts(code_barres="3017620422003", nom="Nutella")
+
         assert produit.code_barres == "3017620422003"
         assert produit.nom == "Nutella"
         assert produit.source == "openfoodfacts"
@@ -177,18 +171,18 @@ class TestProduitOpenFoodFacts:
             nom="Nutella",
             marque="Ferrero",
             quantite="400g",
-            categories=["Pâtes Ã  tartiner", "Petit-déjeuner"],
+            categories=["Pâtes à tartiner", "Petit-déjeuner"],
             image_url="https://example.com/image.jpg",
             nutrition=nutrition,
             ingredients_texte="Sucre, huile de palme...",
-            allergenes=["Lait", "Fruits Ã  coque"],
+            allergenes=["Lait", "Fruits à coque"],
             traces=["Gluten"],
             labels=["Sans colorants artificiels"],
             origine="Italie",
             conservation="Conserver au frais",
-            confiance=0.9
+            confiance=0.9,
         )
-        
+
         assert produit.marque == "Ferrero"
         assert produit.quantite == "400g"
         assert len(produit.categories) == 2
@@ -198,11 +192,8 @@ class TestProduitOpenFoodFacts:
 
     def test_valeurs_par_defaut(self):
         """Test des valeurs par défaut."""
-        produit = ProduitOpenFoodFacts(
-            code_barres="12345678",
-            nom="Test"
-        )
-        
+        produit = ProduitOpenFoodFacts(code_barres="12345678", nom="Test")
+
         assert produit.marque is None
         assert produit.categories == []
         assert produit.allergenes == []
@@ -210,9 +201,9 @@ class TestProduitOpenFoodFacts:
         assert isinstance(produit.date_recuperation, datetime)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS SERVICE INIT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestServiceInit:
@@ -228,9 +219,9 @@ class TestServiceInit:
         assert service.cache is not None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS RECHERCHE PAR CODE-BARRES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestRechercherProduit:
@@ -238,15 +229,12 @@ class TestRechercherProduit:
 
     def test_recherche_cache_hit(self, service, mock_cache):
         """Test recherche avec cache hit."""
-        cached_produit = ProduitOpenFoodFacts(
-            code_barres="3017620422003",
-            nom="Nutella (cached)"
-        )
+        cached_produit = ProduitOpenFoodFacts(code_barres="3017620422003", nom="Nutella (cached)")
         mock_cache.obtenir.return_value = cached_produit
-        
-        with patch.object(service, 'cache', mock_cache):
+
+        with patch.object(service, "cache", mock_cache):
             result = service.rechercher_produit("3017620422003")
-            
+
             assert result is not None
             assert result.nom == "Nutella (cached)"
             mock_cache.obtenir.assert_called_once()
@@ -256,17 +244,17 @@ class TestRechercherProduit:
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = api_response_nutella
-        
-        with patch.object(service.cache, 'obtenir', return_value=None):
-            with patch.object(service.cache, 'definir') as mock_definir:
-                with patch('httpx.Client') as mock_client:
-                    mock_client.return_value.__enter__ = Mock(return_value=Mock(
-                        get=Mock(return_value=mock_response)
-                    ))
+
+        with patch.object(service.cache, "obtenir", return_value=None):
+            with patch.object(service.cache, "definir") as mock_definir:
+                with patch("httpx.Client") as mock_client:
+                    mock_client.return_value.__enter__ = Mock(
+                        return_value=Mock(get=Mock(return_value=mock_response))
+                    )
                     mock_client.return_value.__exit__ = Mock(return_value=False)
-                    
+
                     result = service.rechercher_produit("3017620422003")
-                    
+
                     assert result is not None
                     assert result.code_barres == "3017620422003"
                     assert result.nom == "Nutella"
@@ -277,64 +265,64 @@ class TestRechercherProduit:
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = api_response_not_found
-        
-        with patch.object(service.cache, 'obtenir', return_value=None):
-            with patch('httpx.Client') as mock_client:
-                mock_client.return_value.__enter__ = Mock(return_value=Mock(
-                    get=Mock(return_value=mock_response)
-                ))
+
+        with patch.object(service.cache, "obtenir", return_value=None):
+            with patch("httpx.Client") as mock_client:
+                mock_client.return_value.__enter__ = Mock(
+                    return_value=Mock(get=Mock(return_value=mock_response))
+                )
                 mock_client.return_value.__exit__ = Mock(return_value=False)
-                
+
                 result = service.rechercher_produit("0000000000000")
-                
+
                 assert result is None
 
     def test_recherche_erreur_http(self, service):
         """Test recherche avec erreur HTTP."""
         mock_response = Mock()
         mock_response.status_code = 500
-        
-        with patch.object(service.cache, 'obtenir', return_value=None):
-            with patch('httpx.Client') as mock_client:
-                mock_client.return_value.__enter__ = Mock(return_value=Mock(
-                    get=Mock(return_value=mock_response)
-                ))
+
+        with patch.object(service.cache, "obtenir", return_value=None):
+            with patch("httpx.Client") as mock_client:
+                mock_client.return_value.__enter__ = Mock(
+                    return_value=Mock(get=Mock(return_value=mock_response))
+                )
                 mock_client.return_value.__exit__ = Mock(return_value=False)
-                
+
                 result = service.rechercher_produit("3017620422003")
-                
+
                 assert result is None
 
     def test_recherche_timeout(self, service):
         """Test recherche avec timeout."""
-        with patch.object(service.cache, 'obtenir', return_value=None):
-            with patch('httpx.Client') as mock_client:
-                mock_client.return_value.__enter__ = Mock(return_value=Mock(
-                    get=Mock(side_effect=httpx.TimeoutException("Timeout"))
-                ))
+        with patch.object(service.cache, "obtenir", return_value=None):
+            with patch("httpx.Client") as mock_client:
+                mock_client.return_value.__enter__ = Mock(
+                    return_value=Mock(get=Mock(side_effect=httpx.TimeoutException("Timeout")))
+                )
                 mock_client.return_value.__exit__ = Mock(return_value=False)
-                
+
                 result = service.rechercher_produit("3017620422003")
-                
+
                 assert result is None
 
     def test_recherche_exception(self, service):
         """Test recherche avec exception générale."""
-        with patch.object(service.cache, 'obtenir', return_value=None):
-            with patch('httpx.Client') as mock_client:
-                mock_client.return_value.__enter__ = Mock(return_value=Mock(
-                    get=Mock(side_effect=Exception("Network error"))
-                ))
+        with patch.object(service.cache, "obtenir", return_value=None):
+            with patch("httpx.Client") as mock_client:
+                mock_client.return_value.__enter__ = Mock(
+                    return_value=Mock(get=Mock(side_effect=Exception("Network error")))
+                )
                 mock_client.return_value.__exit__ = Mock(return_value=False)
-                
+
                 result = service.rechercher_produit("3017620422003")
-                
+
                 assert result is None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS PARSER PRODUIT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestParserProduit:
@@ -344,35 +332,35 @@ class TestParserProduit:
         """Test parsing avec nom français."""
         data = {"product_name_fr": "Pâtes", "product_name": "Pasta"}
         result = service._parser_produit("123", data)
-        
+
         assert result.nom == "Pâtes"
 
     def test_parser_nom_fallback(self, service):
         """Test parsing avec fallback nom."""
         data = {"product_name": "Pasta"}
         result = service._parser_produit("123", data)
-        
+
         assert result.nom == "Pasta"
 
     def test_parser_nom_generic(self, service):
         """Test parsing avec nom générique."""
         data = {"generic_name_fr": "Pâtes alimentaires"}
         result = service._parser_produit("123", data)
-        
+
         assert result.nom == "Pâtes alimentaires"
 
     def test_parser_nom_inconnu(self, service):
         """Test parsing sans nom."""
         data = {}
         result = service._parser_produit("123", data)
-        
+
         assert result.nom == "Produit inconnu"
 
     def test_parser_nutrition(self, service, api_response_nutella):
         """Test parsing nutrition."""
         data = api_response_nutella["product"]
         result = service._parser_produit("3017620422003", data)
-        
+
         assert result.nutrition is not None
         assert result.nutrition.energie_kcal == 539
         assert result.nutrition.proteines_g == 6.3
@@ -383,7 +371,7 @@ class TestParserProduit:
         """Test parsing catégories."""
         data = api_response_nutella["product"]
         result = service._parser_produit("3017620422003", data)
-        
+
         assert len(result.categories) > 0
         # Les catégories sont nettoyées et formatées
         assert all(isinstance(c, str) for c in result.categories)
@@ -392,7 +380,7 @@ class TestParserProduit:
         """Test parsing allergènes."""
         data = api_response_nutella["product"]
         result = service._parser_produit("3017620422003", data)
-        
+
         assert len(result.allergenes) == 2
         assert "Milk" in result.allergenes or "Nuts" in result.allergenes
 
@@ -400,21 +388,21 @@ class TestParserProduit:
         """Test parsing traces."""
         data = api_response_nutella["product"]
         result = service._parser_produit("3017620422003", data)
-        
+
         assert len(result.traces) == 2
 
     def test_parser_labels(self, service, api_response_nutella):
         """Test parsing labels."""
         data = api_response_nutella["product"]
         result = service._parser_produit("3017620422003", data)
-        
+
         assert len(result.labels) > 0
 
     def test_parser_confiance(self, service, api_response_nutella):
         """Test calcul confiance."""
         data = api_response_nutella["product"]
         result = service._parser_produit("3017620422003", data)
-        
+
         # Avec completeness=90, confiance devrait être 0.9
         assert result.confiance == 0.9
 
@@ -422,7 +410,7 @@ class TestParserProduit:
         """Test confiance sans completeness."""
         data = {"product_name": "Test"}
         result = service._parser_produit("123", data)
-        
+
         # Sans completeness, confiance par défaut = 0.5
         assert result.confiance == 0.5
 
@@ -430,14 +418,14 @@ class TestParserProduit:
         """Test parsing images."""
         data = api_response_nutella["product"]
         result = service._parser_produit("3017620422003", data)
-        
+
         assert result.image_url is not None
         assert result.image_thumb_url is not None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS RECHERCHE PAR NOM
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestRechercherParNom:
@@ -448,15 +436,15 @@ class TestRechercherParNom:
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = api_search_response
-        
-        with patch('httpx.Client') as mock_client:
-            mock_client.return_value.__enter__ = Mock(return_value=Mock(
-                get=Mock(return_value=mock_response)
-            ))
+
+        with patch("httpx.Client") as mock_client:
+            mock_client.return_value.__enter__ = Mock(
+                return_value=Mock(get=Mock(return_value=mock_response))
+            )
             mock_client.return_value.__exit__ = Mock(return_value=False)
-            
+
             results = service.rechercher_par_nom("nutella")
-            
+
             assert len(results) == 2
             assert results[0].nom == "Nutella 400g"
             assert results[1].nom == "Nutella 750g"
@@ -466,42 +454,42 @@ class TestRechercherParNom:
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"count": 0, "products": []}
-        
-        with patch('httpx.Client') as mock_client:
-            mock_client.return_value.__enter__ = Mock(return_value=Mock(
-                get=Mock(return_value=mock_response)
-            ))
+
+        with patch("httpx.Client") as mock_client:
+            mock_client.return_value.__enter__ = Mock(
+                return_value=Mock(get=Mock(return_value=mock_response))
+            )
             mock_client.return_value.__exit__ = Mock(return_value=False)
-            
+
             results = service.rechercher_par_nom("xyznonexistent")
-            
+
             assert results == []
 
     def test_recherche_erreur_http(self, service):
         """Test recherche avec erreur HTTP."""
         mock_response = Mock()
         mock_response.status_code = 500
-        
-        with patch('httpx.Client') as mock_client:
-            mock_client.return_value.__enter__ = Mock(return_value=Mock(
-                get=Mock(return_value=mock_response)
-            ))
+
+        with patch("httpx.Client") as mock_client:
+            mock_client.return_value.__enter__ = Mock(
+                return_value=Mock(get=Mock(return_value=mock_response))
+            )
             mock_client.return_value.__exit__ = Mock(return_value=False)
-            
+
             results = service.rechercher_par_nom("nutella")
-            
+
             assert results == []
 
     def test_recherche_exception(self, service):
         """Test recherche avec exception."""
-        with patch('httpx.Client') as mock_client:
-            mock_client.return_value.__enter__ = Mock(return_value=Mock(
-                get=Mock(side_effect=Exception("Network error"))
-            ))
+        with patch("httpx.Client") as mock_client:
+            mock_client.return_value.__enter__ = Mock(
+                return_value=Mock(get=Mock(side_effect=Exception("Network error")))
+            )
             mock_client.return_value.__exit__ = Mock(return_value=False)
-            
+
             results = service.rechercher_par_nom("nutella")
-            
+
             assert results == []
 
     def test_recherche_limite(self, service, api_search_response):
@@ -509,23 +497,23 @@ class TestRechercherParNom:
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = api_search_response
-        
-        with patch('httpx.Client') as mock_client:
+
+        with patch("httpx.Client") as mock_client:
             mock_instance = Mock()
             mock_instance.get = Mock(return_value=mock_response)
             mock_client.return_value.__enter__ = Mock(return_value=mock_instance)
             mock_client.return_value.__exit__ = Mock(return_value=False)
-            
+
             service.rechercher_par_nom("nutella", limite=5)
-            
+
             # Vérifier que page_size=5 est passé
             call_args = mock_instance.get.call_args
             assert call_args[1]["params"]["page_size"] == 5
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FONCTIONS UTILITAIRES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestUtilitaires:
@@ -581,14 +569,14 @@ class TestUtilitaires:
         """Test description NOVA inconnu."""
         result = service.obtenir_nova_description(None)
         assert "Inconnu" in result
-        
+
         result = service.obtenir_nova_description(5)
         assert "Inconnu" in result
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantes:
@@ -604,9 +592,9 @@ class TestConstantes:
         assert CACHE_TTL == 86400
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FACTORY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFactory:
@@ -624,50 +612,50 @@ class TestFactory:
         assert s1 is s2
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS INTÃ‰GRATION CACHE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS INTÉGRATION CACHE
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCacheIntegration:
     """Tests d'intégration avec le cache."""
 
     def test_cache_set_on_success(self, service, api_response_nutella):
-        """Test que le cache est mis Ã  jour après succès."""
+        """Test que le cache est mis à jour après succès."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = api_response_nutella
-        
-        with patch.object(service.cache, 'obtenir', return_value=None):
-            with patch.object(service.cache, 'definir') as mock_definir:
-                with patch('httpx.Client') as mock_client:
-                    mock_client.return_value.__enter__ = Mock(return_value=Mock(
-                        get=Mock(return_value=mock_response)
-                    ))
+
+        with patch.object(service.cache, "obtenir", return_value=None):
+            with patch.object(service.cache, "definir") as mock_definir:
+                with patch("httpx.Client") as mock_client:
+                    mock_client.return_value.__enter__ = Mock(
+                        return_value=Mock(get=Mock(return_value=mock_response))
+                    )
                     mock_client.return_value.__exit__ = Mock(return_value=False)
-                    
+
                     result = service.rechercher_produit("3017620422003")
-                    
-                    # Vérifier que le cache a été mis Ã  jour
+
+                    # Vérifier que le cache a été mis à jour
                     mock_definir.assert_called_once()
                     cache_key = mock_definir.call_args[0][0]
                     assert "3017620422003" in cache_key
 
     def test_cache_not_set_on_not_found(self, service, api_response_not_found):
-        """Test que le cache n'est pas mis Ã  jour si non trouvé."""
+        """Test que le cache n'est pas mis à jour si non trouvé."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = api_response_not_found
-        
-        with patch.object(service.cache, 'obtenir', return_value=None):
-            with patch.object(service.cache, 'definir') as mock_definir:
-                with patch('httpx.Client') as mock_client:
-                    mock_client.return_value.__enter__ = Mock(return_value=Mock(
-                        get=Mock(return_value=mock_response)
-                    ))
+
+        with patch.object(service.cache, "obtenir", return_value=None):
+            with patch.object(service.cache, "definir") as mock_definir:
+                with patch("httpx.Client") as mock_client:
+                    mock_client.return_value.__enter__ = Mock(
+                        return_value=Mock(get=Mock(return_value=mock_response))
+                    )
                     mock_client.return_value.__exit__ = Mock(return_value=False)
-                    
+
                     result = service.rechercher_produit("0000000000000")
-                    
-                    # Le cache ne doit pas être mis Ã  jour pour un produit non trouvé
+
+                    # Le cache ne doit pas être mis à jour pour un produit non trouvé
                     mock_definir.assert_not_called()

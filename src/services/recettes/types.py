@@ -1,16 +1,16 @@
-﻿"""
+"""
 Types et schémas Pydantic pour le package recettes.
 
 Module unifié avec tous les modèles de données pour les services de recettes.
 Inclut les schémas de validation pour la génération IA.
 """
 
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class RecetteSuggestion(BaseModel):
     """Recette suggérée par l'IA."""
-    
+
     # Convertir automatiquement les floats en entiers (Mistral peut retourner 20.0)
     model_config = ConfigDict(coerce_numbers_to_str=False)
 
@@ -24,7 +24,7 @@ class RecetteSuggestion(BaseModel):
     saison: str = "toute_année"
     ingredients: list[dict]
     etapes: list[dict]
-    
+
     @field_validator("temps_preparation", "temps_cuisson", "portions", mode="before")
     @classmethod
     def convert_float_to_int(cls, v):
@@ -36,11 +36,11 @@ class RecetteSuggestion(BaseModel):
 
 class VersionBebeGeneree(BaseModel):
     """Version bébé générée par l'IA."""
-    
+
     instructions_modifiees: str
     notes_bebe: str
     age_minimum_mois: int = Field(6, ge=6, le=36)
-    
+
     @field_validator("age_minimum_mois", mode="before")
     @classmethod
     def convert_float_to_int_age(cls, v):
@@ -52,14 +52,14 @@ class VersionBebeGeneree(BaseModel):
 
 class VersionBatchCookingGeneree(BaseModel):
     """Version batch cooking générée par l'IA."""
-    
+
     instructions_modifiees: str
     nombre_portions_recommande: int = Field(12, ge=4, le=100)
     temps_preparation_total_heures: float = Field(2.0, ge=0.5, le=12)
     conseils_conservation: str
     conseils_congelation: str
     calendrier_preparation: str
-    
+
     @field_validator("nombre_portions_recommande", mode="before")
     @classmethod
     def convert_float_to_int_portions(cls, v):
@@ -71,13 +71,13 @@ class VersionBatchCookingGeneree(BaseModel):
 
 class VersionRobotGeneree(BaseModel):
     """Version adaptée pour robot de cuisine générée par l'IA."""
-    
+
     instructions_modifiees: str
     reglages_robot: str
     temps_cuisson_adapte_minutes: int = Field(30, ge=5, le=300)
     conseils_preparation: str
     etapes_specifiques: list[str] = Field(default_factory=list)
-    
+
     @field_validator("temps_cuisson_adapte_minutes", mode="before")
     @classmethod
     def convert_float_to_int_temps(cls, v):
@@ -87,9 +87,9 @@ class VersionRobotGeneree(BaseModel):
         return v
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # ALIASES ANGLAIS (pour compatibilité)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 RecipeSuggestion = RecetteSuggestion
 BabyVersionGenerated = VersionBebeGeneree

@@ -8,15 +8,14 @@ Pour un enfant de ~19 mois:
 - Suggestions IA personnalisees
 """
 
-import streamlit as st
-from datetime import date, timedelta
-from typing import Optional
 import random
+from datetime import date
+
+import streamlit as st
 
 from src.core.database import obtenir_contexte_db
 from src.core.models import ChildProfile
 from src.modules.shared.constantes import JOURS_SEMAINE
-
 
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES - ACTIVITÉS PAR CATÉGORIE
@@ -30,22 +29,30 @@ CATEGORIES_ACTIVITES = {
             {"nom": "Parcours coussins", "duree": 15, "desc": "Grimper, sauter sur les coussins"},
             {"nom": "Danse sur musique", "duree": 10, "desc": "Bouger librement sur comptines"},
             {"nom": "Jeu de ballon", "duree": 15, "desc": "Rouler, lancer, attraper"},
-            {"nom": "Monter/descendre escalier", "duree": 10, "desc": "Avec aide, alterner les pieds"},
+            {
+                "nom": "Monter/descendre escalier",
+                "duree": 10,
+                "desc": "Avec aide, alterner les pieds",
+            },
             {"nom": "Porteur/trotteur", "duree": 20, "desc": "Se deplacer dans la maison"},
             {"nom": "Yoga bebe", "duree": 10, "desc": "Imiter des postures animaux"},
-        ]
+        ],
     },
     "langage": {
         "emoji": "💬",
         "couleur": "#2196F3",
         "activites": [
             {"nom": "Lecture interactive", "duree": 15, "desc": "Pointer et nommer les images"},
-            {"nom": "Comptines gestuelles", "duree": 10, "desc": "Ainsi font font, Petit escargot..."},
+            {
+                "nom": "Comptines gestuelles",
+                "duree": 10,
+                "desc": "Ainsi font font, Petit escargot...",
+            },
             {"nom": "Nommer les objets", "duree": 10, "desc": "Lors du bain, repas, habillage"},
             {"nom": "Imagier sonore", "duree": 10, "desc": "Sons animaux, vehicules"},
             {"nom": "Telephone jouet", "duree": 10, "desc": "Faire semblant de parler"},
             {"nom": "Chansons repetitives", "duree": 10, "desc": "La même chanson plusieurs fois"},
-        ]
+        ],
     },
     "creativite": {
         "emoji": "🎨",
@@ -57,7 +64,7 @@ CATEGORIES_ACTIVITES = {
             {"nom": "Dessin aux crayons", "duree": 15, "desc": "Gros crayons adaptes"},
             {"nom": "Pâte à sel", "duree": 20, "desc": "Faire des formes simples"},
             {"nom": "Collage", "duree": 15, "desc": "Coller des morceaux de papier"},
-        ]
+        ],
     },
     "sensoriel": {
         "emoji": "✋",
@@ -69,7 +76,7 @@ CATEGORIES_ACTIVITES = {
             {"nom": "Boîte à tresors", "duree": 15, "desc": "Explorer objets du quotidien"},
             {"nom": "Bulles de savon", "duree": 10, "desc": "Attraper, observer"},
             {"nom": "Cuisine sensorielle", "duree": 15, "desc": "Toucher fruits, legumes"},
-        ]
+        ],
     },
     "exterieur": {
         "emoji": "🌳",
@@ -81,7 +88,7 @@ CATEGORIES_ACTIVITES = {
             {"nom": "Jeux au parc", "duree": 45, "desc": "Toboggan, balançoire"},
             {"nom": "Velo/draisienne", "duree": 20, "desc": "Dans le jardin ou parc"},
             {"nom": "Chasse aux tresors", "duree": 20, "desc": "Trouver des objets dehors"},
-        ]
+        ],
     },
     "imitation": {
         "emoji": "🎭",
@@ -93,7 +100,7 @@ CATEGORIES_ACTIVITES = {
             {"nom": "Telephone", "duree": 10, "desc": "Faire semblant d'appeler"},
             {"nom": "Voitures/garage", "duree": 20, "desc": "Faire rouler, garer"},
             {"nom": "Docteur", "duree": 15, "desc": "Soigner les doudous"},
-        ]
+        ],
     },
 }
 
@@ -113,6 +120,7 @@ PLANNING_SEMAINE_TYPE = {
 # HELPERS
 # ═══════════════════════════════════════════════════════════
 
+
 def get_age_jules_mois() -> int:
     """Retourne l'âge de Jules en mois"""
     try:
@@ -127,25 +135,27 @@ def get_age_jules_mois() -> int:
     return (date.today() - date(2024, 6, 22)).days // 30
 
 
-def generer_activites_jour(jour_semaine: int, seed: Optional[int] = None) -> list[dict]:
+def generer_activites_jour(jour_semaine: int, seed: int | None = None) -> list[dict]:
     """Genère les activites pour un jour de la semaine."""
     if seed:
         random.seed(seed)
-    
+
     categories_jour = PLANNING_SEMAINE_TYPE.get(jour_semaine, ["motricite", "langage"])
     activites = []
-    
+
     for cat in categories_jour:
         cat_info = CATEGORIES_ACTIVITES.get(cat, {})
         if cat_info.get("activites"):
             activite = random.choice(cat_info["activites"])
-            activites.append({
-                "categorie": cat,
-                "emoji": cat_info["emoji"],
-                "couleur": cat_info["couleur"],
-                **activite
-            })
-    
+            activites.append(
+                {
+                    "categorie": cat,
+                    "emoji": cat_info["emoji"],
+                    "couleur": cat_info["couleur"],
+                    **activite,
+                }
+            )
+
     return activites
 
 
@@ -154,17 +164,18 @@ def get_planning_semaine() -> dict[int, list[dict]]:
     today = date.today()
     # Seed base sur la semaine pour consistance
     week_seed = today.isocalendar()[1] * 100 + today.year
-    
+
     planning = {}
     for jour in range(7):
         planning[jour] = generer_activites_jour(jour, seed=week_seed + jour)
-    
+
     return planning
 
 
 # ═══════════════════════════════════════════════════════════
 # SESSION STATE - TRACKING
 # ═══════════════════════════════════════════════════════════
+
 
 def init_tracking():
     """Initialise le tracking des activites faites."""
@@ -188,23 +199,22 @@ def est_fait(jour: int, activite_nom: str) -> bool:
 # UI COMPONENTS
 # ═══════════════════════════════════════════════════════════
 
+
 def render_activite_card(jour: int, activite: dict, index: int):
     """Affiche une carte d'activite."""
     fait = est_fait(jour, activite["nom"])
-    
+
     with st.container(border=True):
         col1, col2 = st.columns([4, 1])
-        
+
         with col1:
             style = "text-decoration: line-through; opacity: 0.6;" if fait else ""
             st.markdown(
-                f"<span style='{style}'>"
-                f"**{activite['emoji']} {activite['nom']}**"
-                f"</span>",
-                unsafe_allow_html=True
+                f"<span style='{style}'>" f"**{activite['emoji']} {activite['nom']}**" f"</span>",
+                unsafe_allow_html=True,
             )
             st.caption(f"⏱️ {activite['duree']} min • {activite['desc']}")
-        
+
         with col2:
             if fait:
                 st.success("✅")
@@ -217,19 +227,19 @@ def render_activite_card(jour: int, activite: dict, index: int):
 def render_jour(jour_idx: int, nom_jour: str, activites: list[dict], est_aujourd_hui: bool):
     """Affiche un jour du planning."""
     header = f"{'📍 ' if est_aujourd_hui else ''}{nom_jour}"
-    
+
     with st.expander(header, expanded=est_aujourd_hui):
         if not activites:
             st.caption("Pas d'activites planifiees")
             return
-        
+
         # Stats du jour
         nb_faites = sum(1 for a in activites if est_fait(jour_idx, a["nom"]))
         if nb_faites == len(activites):
             st.success(f"🎉 Toutes les activites sont faites ! ({nb_faites}/{len(activites)})")
         else:
             st.progress(nb_faites / len(activites), text=f"{nb_faites}/{len(activites)} faites")
-        
+
         # Activites
         for i, act in enumerate(activites):
             render_activite_card(jour_idx, act, i)
@@ -238,42 +248,42 @@ def render_jour(jour_idx: int, nom_jour: str, activites: list[dict], est_aujourd
 def render_vue_semaine():
     """Affiche la vue semaine complète."""
     st.subheader("📅 Planning de la semaine")
-    
+
     age = get_age_jules_mois()
     st.caption(f"Activites adaptees pour {age} mois")
-    
+
     planning = get_planning_semaine()
     today = date.today()
     jour_actuel = today.weekday()
-    
+
     # Tabs par jour
     tabs = st.tabs(JOURS_SEMAINE)
-    
+
     for jour_idx, tab in enumerate(tabs):
         with tab:
             render_jour(
-                jour_idx, 
-                JOURS_SEMAINE[jour_idx], 
+                jour_idx,
+                JOURS_SEMAINE[jour_idx],
                 planning.get(jour_idx, []),
-                jour_idx == jour_actuel
+                jour_idx == jour_actuel,
             )
 
 
 def render_vue_aujourd_hui():
     """Affiche les activites du jour."""
     st.subheader("🌟 Aujourd'hui")
-    
+
     today = date.today()
     jour_actuel = today.weekday()
     planning = get_planning_semaine()
     activites = planning.get(jour_actuel, [])
-    
+
     st.markdown(f"**{JOURS_SEMAINE[jour_actuel]} {today.strftime('%d/%m')}**")
-    
+
     if not activites:
         st.info("Pas d'activites planifiees pour aujourd'hui")
         return
-    
+
     # Stats
     nb_faites = sum(1 for a in activites if est_fait(jour_actuel, a["nom"]))
     col1, col2, col3 = st.columns(3)
@@ -284,9 +294,9 @@ def render_vue_aujourd_hui():
     with col3:
         duree_totale = sum(a["duree"] for a in activites)
         st.metric("Duree totale", f"{duree_totale} min")
-    
+
     st.divider()
-    
+
     # Activites
     for i, act in enumerate(activites):
         render_activite_card(jour_actuel, act, i)
@@ -295,16 +305,15 @@ def render_vue_aujourd_hui():
 def render_categories():
     """Affiche toutes les categories d'activites."""
     st.subheader("📚 Toutes les activites par categorie")
-    
-    tabs = st.tabs([
-        f"{info['emoji']} {cat.capitalize()}" 
-        for cat, info in CATEGORIES_ACTIVITES.items()
-    ])
-    
-    for tab, (cat, info) in zip(tabs, CATEGORIES_ACTIVITES.items()):
+
+    tabs = st.tabs(
+        [f"{info['emoji']} {cat.capitalize()}" for cat, info in CATEGORIES_ACTIVITES.items()]
+    )
+
+    for tab, (cat, info) in zip(tabs, CATEGORIES_ACTIVITES.items(), strict=False):
         with tab:
             st.markdown(f"**{info['emoji']} {cat.capitalize()}**")
-            
+
             for act in info["activites"]:
                 with st.container(border=True):
                     st.markdown(f"**{act['nom']}**")
@@ -316,15 +325,14 @@ def render_stats_semaine():
     planning = get_planning_semaine()
     today = date.today()
     jour_actuel = today.weekday()
-    
+
     total_activites = sum(len(acts) for acts in planning.values())
     total_faites = sum(
-        1 for jour, acts in planning.items() 
-        for act in acts if est_fait(jour, act["nom"])
+        1 for jour, acts in planning.items() for act in acts if est_fait(jour, act["nom"])
     )
-    
+
     st.subheader("📊 Bilan de la semaine")
-    
+
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("Total activites", total_activites)
@@ -333,9 +341,9 @@ def render_stats_semaine():
     with col3:
         pct = (total_faites / total_activites * 100) if total_activites > 0 else 0
         st.metric("Progression", f"{pct:.0f}%")
-    
+
     st.progress(total_faites / total_activites if total_activites > 0 else 0)
-    
+
     # Par categorie
     st.markdown("**Par categorie:**")
     cat_stats = {}
@@ -345,22 +353,22 @@ def render_stats_semaine():
             if cat not in cat_stats:
                 cat_stats[cat] = {"total": 0, "fait": 0}
             cat_stats[cat]["total"] += 1
-    
+
     # Count faites
     for jour, acts in planning.items():
         for act in acts:
             if est_fait(jour, act["nom"]):
                 cat_stats[act["categorie"]]["fait"] += 1
-    
+
     cols = st.columns(3)
     for i, (cat, stats) in enumerate(cat_stats.items()):
         info = CATEGORIES_ACTIVITES.get(cat, {})
         with cols[i % 3]:
             pct = (stats["fait"] / stats["total"] * 100) if stats["total"] > 0 else 0
             st.metric(
-                f"{info.get('emoji', '')} {cat.capitalize()}", 
+                f"{info.get('emoji', '')} {cat.capitalize()}",
                 f"{stats['fait']}/{stats['total']}",
-                f"{pct:.0f}%"
+                f"{pct:.0f}%",
             )
 
 
@@ -368,31 +376,31 @@ def render_stats_semaine():
 # PAGE PRINCIPALE
 # ═══════════════════════════════════════════════════════════
 
+
 def app():
     """Point d'entree du module Planning Jules."""
     init_tracking()
-    
+
     st.title("📅 Planning Activites Jules")
-    
+
     age = get_age_jules_mois()
     st.caption(f"🎂 {age} mois • Planning d'eveil hebdomadaire")
-    
+
     # Tabs principaux
     tabs = st.tabs(["🌟 Aujourd'hui", "📅 Semaine", "📊 Bilan", "📚 Catalogue"])
-    
+
     with tabs[0]:
         render_vue_aujourd_hui()
-    
+
     with tabs[1]:
         render_vue_semaine()
-    
+
     with tabs[2]:
         render_stats_semaine()
-    
+
     with tabs[3]:
         render_categories()
 
 
 if __name__ == "__main__":
     app()
-

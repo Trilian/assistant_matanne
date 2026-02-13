@@ -1,12 +1,14 @@
-﻿"""
+"""
 Alembic Environment - Compatible Streamlit Cloud + Supabase
 """
+
 import os
 import sys
-from pathlib import Path
 from logging.config import fileConfig
+from pathlib import Path
 
 from sqlalchemy import engine_from_config, pool
+
 from alembic import context
 
 # Ajouter le rÃ©pertoire parent au path

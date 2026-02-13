@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modèles pour les recettes et la cuisine.
 
 Contient :
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
 
 class Ingredient(Base):
     """Ingrédient de base utilisé partout (recettes, inventaire, courses).
-    
+
     Attributes:
         id: Identifiant unique
         nom: Nom de l'ingrédient (unique)
@@ -78,7 +78,7 @@ class Ingredient(Base):
 
 class Recette(Base):
     """Recette de cuisine avec ingrédients et étapes.
-    
+
     Attributes:
         nom: Nom de la recette
         description: Description détaillée
@@ -88,26 +88,26 @@ class Recette(Base):
         difficulte: Niveau de difficulté (facile, moyen, difficile)
         type_repas: Type de repas (petit_déjeuner, déjeuner, dîner, goûter)
         saison: Saison recommandée
-        
+
         # Tags système
         est_rapide: Recette rapide (<30 min)
         est_equilibre: Recette équilibrée
         compatible_bebe: Adaptable pour bébé
         compatible_batch: Adaptable pour batch cooking
         congelable: Peut être congelée
-        
+
         # Bio & Local
         est_bio: Ingrédients bio
         est_local: Ingrédients locaux
         score_bio: Score bio (0-100)
         score_local: Score local (0-100)
-        
+
         # Robots compatibles
         compatible_cookeo: Compatible Cookeo
         compatible_monsieur_cuisine: Compatible Monsieur Cuisine
         compatible_airfryer: Compatible Airfryer
         compatible_multicooker: Compatible Multicooker
-        
+
         # Nutrition
         calories: Calories par portion
         proteines: Protéines en grammes
@@ -129,7 +129,9 @@ class Recette(Base):
 
     # Catégorisation
     type_repas: Mapped[str] = mapped_column(String(50), nullable=False, default="dîner", index=True)
-    saison: Mapped[str] = mapped_column(String(50), nullable=False, default="toute_année", index=True)
+    saison: Mapped[str] = mapped_column(
+        String(50), nullable=False, default="toute_année", index=True
+    )
     categorie: Mapped[str | None] = mapped_column(String(100))
 
     # Flags - Tags système
@@ -139,9 +141,11 @@ class Recette(Base):
     compatible_bebe: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     compatible_batch: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     congelable: Mapped[bool] = mapped_column(Boolean, default=False)
-    
+
     # Types de protéines (pour équilibre semaine)
-    type_proteines: Mapped[str | None] = mapped_column(String(100))  # poisson, viande, volaille, vegetarien
+    type_proteines: Mapped[str | None] = mapped_column(
+        String(100)
+    )  # poisson, viande, volaille, vegetarien
 
     # Bio & Local
     est_bio: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
@@ -173,7 +177,9 @@ class Recette(Base):
     modifie_le: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)  # TODO: Make NOT NULL after migration applied
+    updated_at: Mapped[datetime | None] = mapped_column(
+        DateTime, nullable=True
+    )  # TODO: Make NOT NULL after migration applied
 
     # Relations
     ingredients: Mapped[list["RecetteIngredient"]] = relationship(
@@ -251,7 +257,7 @@ Recipe = Recette
 
 class RecetteIngredient(Base):
     """Association Recette ↔ Ingrédient avec quantité.
-    
+
     Attributes:
         recette_id: ID de la recette
         ingredient_id: ID de l'ingrédient
@@ -285,7 +291,7 @@ class RecetteIngredient(Base):
 
 class EtapeRecette(Base):
     """Étape de préparation d'une recette.
-    
+
     Attributes:
         recette_id: ID de la recette
         ordre: Numéro d'ordre de l'étape
@@ -314,7 +320,7 @@ class EtapeRecette(Base):
 
 class VersionRecette(Base):
     """Version adaptée d'une recette (bébé, batch cooking).
-    
+
     Attributes:
         recette_base_id: ID de la recette de base
         type_version: Type de version (bébé, batch_cooking)
@@ -355,7 +361,7 @@ class VersionRecette(Base):
 
 class HistoriqueRecette(Base):
     """Historique d'utilisation d'une recette.
-    
+
     Attributes:
         recette_id: ID de la recette
         date_cuisson: Date de préparation
@@ -388,6 +394,7 @@ class HistoriqueRecette(Base):
     def nb_jours_depuis(self) -> int:
         """Nombre de jours depuis la dernière cuisson."""
         from datetime import date as dt_date
+
         return (dt_date.today() - self.date_cuisson).days
 
     def __repr__(self) -> str:
@@ -396,7 +403,7 @@ class HistoriqueRecette(Base):
 
 class BatchMeal(Base):
     """Recette préparée en batch cooking.
-    
+
     Attributes:
         recette_id: ID de la recette (optionnel)
         nom: Nom du plat préparé

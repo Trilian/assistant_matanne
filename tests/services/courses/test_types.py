@@ -1,9 +1,9 @@
-﻿"""
+"""
 Tests pour src/services/courses/types.py
 
 Tests des modèles Pydantic:
 - SuggestionCourses
-- ArticleCourse  
+- ArticleCourse
 - ListeCoursesIntelligente
 - SuggestionSubstitution
 """
@@ -12,15 +12,15 @@ import pytest
 from pydantic import ValidationError
 
 from src.services.courses.types import (
-    SuggestionCourses,
     ArticleCourse,
     ListeCoursesIntelligente,
-    SuggestionSubstitution,
+    ShoppingItem,
     # Aliases
     ShoppingSuggestion,
-    ShoppingItem,
     SmartShoppingList,
     SubstitutionSuggestion,
+    SuggestionCourses,
+    SuggestionSubstitution,
 )
 
 
@@ -30,11 +30,7 @@ class TestSuggestionCourses:
     def test_creation_valide(self):
         """Test création avec données valides."""
         suggestion = SuggestionCourses(
-            nom="Tomates",
-            quantite=2.0,
-            unite="kg",
-            priorite="haute",
-            rayon="Fruits & Légumes"
+            nom="Tomates", quantite=2.0, unite="kg", priorite="haute", rayon="Fruits & Légumes"
         )
         assert suggestion.nom == "Tomates"
         assert suggestion.quantite == 2.0
@@ -59,7 +55,7 @@ class TestSuggestionCourses:
     def test_priorite_basse_valide(self):
         """Test priorité basse."""
         suggestion = SuggestionCourses(
-            nom="Sucre", quantite=1.0, unite="kg", priorite="basse", rayon="Ã‰picerie"
+            nom="Sucre", quantite=1.0, unite="kg", priorite="basse", rayon="Épicerie"
         )
         assert suggestion.priorite == "basse"
 
@@ -74,64 +70,78 @@ class TestSuggestionCourses:
     def test_nom_trop_court_rejete(self):
         """Test nom < 2 caractères."""
         with pytest.raises(ValidationError) as exc_info:
-            SuggestionCourses(
-                nom="A", quantite=1.0, unite="kg", priorite="haute", rayon="Test"
-            )
+            SuggestionCourses(nom="A", quantite=1.0, unite="kg", priorite="haute", rayon="Test")
         assert "nom" in str(exc_info.value)
 
     def test_quantite_negative_rejetee(self):
         """Test quantité <= 0."""
         with pytest.raises(ValidationError) as exc_info:
-            SuggestionCourses(
-                nom="Test", quantite=-1.0, unite="kg", priorite="haute", rayon="Test"
-            )
+            SuggestionCourses(nom="Test", quantite=-1.0, unite="kg", priorite="haute", rayon="Test")
         assert "quantite" in str(exc_info.value)
 
     def test_quantite_zero_rejetee(self):
         """Test quantité = 0."""
         with pytest.raises(ValidationError) as exc_info:
-            SuggestionCourses(
-                nom="Test", quantite=0, unite="kg", priorite="haute", rayon="Test"
-            )
+            SuggestionCourses(nom="Test", quantite=0, unite="kg", priorite="haute", rayon="Test")
         assert "quantite" in str(exc_info.value)
 
     def test_unite_vide_rejetee(self):
         """Test unité vide."""
         with pytest.raises(ValidationError) as exc_info:
-            SuggestionCourses(
-                nom="Test", quantite=1.0, unite="", priorite="haute", rayon="Test"
-            )
+            SuggestionCourses(nom="Test", quantite=1.0, unite="", priorite="haute", rayon="Test")
         assert "unite" in str(exc_info.value)
 
     def test_rayon_trop_court_rejete(self):
         """Test rayon < 3 caractères."""
         with pytest.raises(ValidationError) as exc_info:
-            SuggestionCourses(
-                nom="Test", quantite=1.0, unite="kg", priorite="haute", rayon="AB"
-            )
+            SuggestionCourses(nom="Test", quantite=1.0, unite="kg", priorite="haute", rayon="AB")
         assert "rayon" in str(exc_info.value)
 
     def test_model_validate_alias_article(self):
         """Test normalisation champ 'article' -> 'nom'."""
-        data = {"article": "Pommes", "quantite": 3.0, "unite": "kg", "priorite": "moyenne", "rayon": "Fruits"}
+        data = {
+            "article": "Pommes",
+            "quantite": 3.0,
+            "unite": "kg",
+            "priorite": "moyenne",
+            "rayon": "Fruits",
+        }
         suggestion = SuggestionCourses.model_validate(data)
         assert suggestion.nom == "Pommes"
 
     def test_model_validate_alias_name(self):
         """Test normalisation champ 'name' -> 'nom'."""
-        data = {"name": "Oranges", "quantite": 2.0, "unite": "kg", "priorite": "basse", "rayon": "Fruits"}
+        data = {
+            "name": "Oranges",
+            "quantite": 2.0,
+            "unite": "kg",
+            "priorite": "basse",
+            "rayon": "Fruits",
+        }
         suggestion = SuggestionCourses.model_validate(data)
         assert suggestion.nom == "Oranges"
 
     def test_model_validate_alias_item(self):
         """Test normalisation champ 'item' -> 'nom'."""
-        data = {"item": "Bananes", "quantite": 1.0, "unite": "kg", "priorite": "haute", "rayon": "Fruits"}
+        data = {
+            "item": "Bananes",
+            "quantite": 1.0,
+            "unite": "kg",
+            "priorite": "haute",
+            "rayon": "Fruits",
+        }
         suggestion = SuggestionCourses.model_validate(data)
         assert suggestion.nom == "Bananes"
 
     def test_model_validate_alias_product(self):
         """Test normalisation champ 'product' -> 'nom'."""
-        data = {"product": "Raisins", "quantite": 0.5, "unite": "kg", "priorite": "moyenne", "rayon": "Fruits"}
+        data = {
+            "product": "Raisins",
+            "quantite": 0.5,
+            "unite": "kg",
+            "priorite": "moyenne",
+            "rayon": "Fruits",
+        }
         suggestion = SuggestionCourses.model_validate(data)
         assert suggestion.nom == "Raisins"
 
@@ -149,7 +159,13 @@ class TestSuggestionCourses:
 
     def test_model_validate_alias_unit(self):
         """Test normalisation champ 'unit' -> 'unite'."""
-        data = {"nom": "Test", "quantite": 1.0, "unit": "piece", "priorite": "haute", "rayon": "Test"}
+        data = {
+            "nom": "Test",
+            "quantite": 1.0,
+            "unit": "piece",
+            "priorite": "haute",
+            "rayon": "Test",
+        }
         suggestion = SuggestionCourses.model_validate(data)
         assert suggestion.unite == "piece"
 
@@ -161,13 +177,25 @@ class TestSuggestionCourses:
 
     def test_model_validate_alias_section(self):
         """Test normalisation champ 'section' -> 'rayon'."""
-        data = {"nom": "Test", "quantite": 1.0, "unite": "kg", "priorite": "haute", "section": "Ã‰picerie"}
+        data = {
+            "nom": "Test",
+            "quantite": 1.0,
+            "unite": "kg",
+            "priorite": "haute",
+            "section": "Épicerie",
+        }
         suggestion = SuggestionCourses.model_validate(data)
-        assert suggestion.rayon == "Ã‰picerie"
+        assert suggestion.rayon == "Épicerie"
 
     def test_model_validate_alias_department(self):
         """Test normalisation champ 'department' -> 'rayon'."""
-        data = {"nom": "Test", "quantite": 1.0, "unite": "kg", "priorite": "haute", "department": "Boucherie"}
+        data = {
+            "nom": "Test",
+            "quantite": 1.0,
+            "unite": "kg",
+            "priorite": "haute",
+            "department": "Boucherie",
+        }
         suggestion = SuggestionCourses.model_validate(data)
         assert suggestion.rayon == "Boucherie"
 
@@ -179,7 +207,13 @@ class TestSuggestionCourses:
 
     def test_model_validate_priorite_medium_to_moyenne(self):
         """Test normalisation priorité 'medium' -> 'moyenne'."""
-        data = {"nom": "Test", "quantite": 1.0, "unite": "kg", "priorite": "medium", "rayon": "Test"}
+        data = {
+            "nom": "Test",
+            "quantite": 1.0,
+            "unite": "kg",
+            "priorite": "medium",
+            "rayon": "Test",
+        }
         suggestion = SuggestionCourses.model_validate(data)
         assert suggestion.priorite == "moyenne"
 
@@ -225,7 +259,7 @@ class TestArticleCourse:
             priorite=1,
             en_stock=0.5,
             a_acheter=2.0,
-            notes="Bio de préférence"
+            notes="Bio de préférence",
         )
         assert article.nom == "Tomates"
         assert article.quantite == 2.5
@@ -284,7 +318,7 @@ class TestListeCoursesIntelligente:
             total_articles=2,
             recettes_couvertes=["Petit déj"],
             estimation_budget=15.50,
-            alertes=["Stock bas en lait"]
+            alertes=["Stock bas en lait"],
         )
         assert len(liste.articles) == 2
         assert liste.total_articles == 2
@@ -294,9 +328,7 @@ class TestListeCoursesIntelligente:
 
     def test_creation_avec_alertes(self):
         """Test création avec alertes."""
-        liste = ListeCoursesIntelligente(
-            alertes=["Alerte 1", "Alerte 2"]
-        )
+        liste = ListeCoursesIntelligente(alertes=["Alerte 1", "Alerte 2"])
         assert len(liste.alertes) == 2
         assert "Alerte 1" in liste.alertes
 
@@ -317,9 +349,7 @@ class TestSuggestionSubstitution:
     def test_creation_minimale(self):
         """Test création avec champs requis."""
         suggestion = SuggestionSubstitution(
-            ingredient_original="Beurre",
-            suggestion="Huile d'olive",
-            raison="Plus sain"
+            ingredient_original="Beurre", suggestion="Huile d'olive", raison="Plus sain"
         )
         assert suggestion.ingredient_original == "Beurre"
         assert suggestion.suggestion == "Huile d'olive"
@@ -332,17 +362,13 @@ class TestSuggestionSubstitution:
             ingredient_original="Saumon",
             suggestion="Maquereau",
             raison="Moins cher et local",
-            economie_estimee=5.50
+            economie_estimee=5.50,
         )
         assert suggestion.economie_estimee == 5.50
 
     def test_economie_optionnelle(self):
         """Test économie None par défaut."""
-        suggestion = SuggestionSubstitution(
-            ingredient_original="A",
-            suggestion="B",
-            raison="Test"
-        )
+        suggestion = SuggestionSubstitution(ingredient_original="A", suggestion="B", raison="Test")
         assert suggestion.economie_estimee is None
 
 
@@ -372,7 +398,5 @@ class TestAliases:
     def test_substitution_suggestion_alias(self):
         """Test alias SubstitutionSuggestion."""
         assert SubstitutionSuggestion is SuggestionSubstitution
-        sub = SubstitutionSuggestion(
-            ingredient_original="A", suggestion="B", raison="C"
-        )
+        sub = SubstitutionSuggestion(ingredient_original="A", suggestion="B", raison="C")
         assert isinstance(sub, SuggestionSubstitution)

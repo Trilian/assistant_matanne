@@ -1,4 +1,4 @@
-﻿"""
+"""
 Services - Point d'Entrée Unifié COMPLET
 
 Exporte tous les services métier de l'application.
@@ -20,10 +20,9 @@ from .base import (
     BaseAIService,
     BaseService,
     InventoryAIMixin,
+    IOService,
     PlanningAIMixin,
     RecipeAIMixin,
-    IOService,
-    create_base_ai_service,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -33,6 +32,29 @@ from .courses import (
     # Service CRUD
     CoursesService,
     courses_service,
+)
+
+# ═══════════════════════════════════════════════════════════
+# 🔌 INTÉGRATIONS EXTERNES
+# ═══════════════════════════════════════════════════════════
+from .integrations import (
+    BarcodeArticle,
+    BarcodeData,
+    BarcodeRecette,
+    # Codes-barres
+    BarcodeService,
+    DonneesFacture,
+    # Facture OCR
+    FactureOCRService,
+    NutritionInfo,
+    # OpenFoodFacts
+    OpenFoodFactsService,
+    ProduitOpenFoodFacts,
+    ResultatOCR,
+    ScanResultat,
+    get_barcode_service,
+    get_facture_ocr_service,
+    get_openfoodfacts_service,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -48,98 +70,73 @@ from .inventaire import (
 )
 
 # Service IO importé depuis base/
-
 # ═══════════════════════════════════════════════════════════
 # 📅 PLANNING (Package unifié)
 # ═══════════════════════════════════════════════════════════
 # PlanningService: Gestion repas hebdomadaires + génération IA menus
 # PlanningAIService: Vue unifiée (repas + activités + projets + routines)
 from .planning import (
-    # Services CRUD
-    PlanningService,
-    get_planning_service,
-    # Service Unifié (repas + activités + projets + routines)
-    PlanningAIService,
-    get_planning_unified_service,
+    JourCompletSchema,
     # Schémas
     JourPlanning,
     ParametresEquilibre,
-    JourCompletSchema,
+    # Service Unifié (repas + activités + projets + routines)
+    PlanningAIService,
+    # Services CRUD
+    PlanningService,
     SemaineCompleSchema,
+    get_planning_service,
+    get_planning_unified_service,
 )
 
 # ═══════════════════════════════════════════════════════════
 # 📚 RECETTES (6 fichiers)
 # ═══════════════════════════════════════════════════════════
 from .recettes import (
-    # Service CRUD
-    RecetteService,
-    # Schémas
-    RecetteSuggestion,
-    VersionBebeGeneree,
-    VersionBebeGeneree,
-    recette_service,
     # Import URL (scraping)
     ImportedIngredient,
     ImportedRecipe,
     ImportResult,
+    # Service CRUD
+    RecetteService,
+    # Schémas
+    RecetteSuggestion,
     RecipeImportService,
+    VersionBebeGeneree,
     get_recipe_import_service,
+    recette_service,
 )
-# BaseService importé depuis base/
 
+# BaseService importé depuis base/
 # ═══════════════════════════════════════════════════════════
 # 🧑 UTILISATEUR (auth, historique, préférences)
 # ═══════════════════════════════════════════════════════════
 from .utilisateur import (
-    # Auth
-    AuthService,
-    get_auth_service,
-    UserProfile,
-    AuthResult,
-    Role,
-    Permission,
-    render_login_form,
-    render_user_menu,
-    render_profile_settings,
-    require_authenticated,
-    require_role,
-    # Historique
-    ActionHistoryService,
-    get_action_history_service,
-    ActionType,
     ActionEntry,
     ActionFilter,
+    # Historique
+    ActionHistoryService,
     ActionStats,
-    render_activity_timeline,
-    render_user_activity,
-    render_activity_stats,
+    ActionType,
+    AuthResult,
+    # Auth
+    AuthService,
+    Permission,
+    Role,
     # Préférences
     UserPreferenceService,
+    UserProfile,
+    get_action_history_service,
+    get_auth_service,
     get_user_preference_service,
-)
-
-# ═══════════════════════════════════════════════════════════
-# 🔌 INTÉGRATIONS EXTERNES
-# ═══════════════════════════════════════════════════════════
-from .integrations import (
-    # Codes-barres
-    BarcodeService,
-    get_barcode_service,
-    BarcodeData,
-    BarcodeArticle,
-    BarcodeRecette,
-    ScanResultat,
-    # OpenFoodFacts
-    OpenFoodFactsService,
-    get_openfoodfacts_service,
-    NutritionInfo,
-    ProduitOpenFoodFacts,
-    # Facture OCR
-    FactureOCRService,
-    get_facture_ocr_service,
-    DonneesFacture,
-    ResultatOCR,
+    render_activity_stats,
+    render_activity_timeline,
+    render_login_form,
+    render_profile_settings,
+    render_user_activity,
+    render_user_menu,
+    require_authenticated,
+    require_role,
 )
 
 # ═══════════════════════════════════════════════════════════

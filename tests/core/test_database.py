@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests unitaires pour database.py (src/core/database.py).
 
 Tests couvrant:
@@ -9,29 +9,25 @@ Tests couvrant:
 - Initialisation de la base de données
 """
 
-import pytest
-from datetime import datetime
-from unittest.mock import MagicMock, patch, PropertyMock
-from contextlib import contextmanager
+from unittest.mock import MagicMock, patch
 
-from sqlalchemy import create_engine, text
-from sqlalchemy.exc import OperationalError, DatabaseError
+import pytest
+from sqlalchemy.exc import DatabaseError, OperationalError
 from sqlalchemy.orm import Session
 
 from src.core.database import (
-    obtenir_moteur,
-    obtenir_moteur_securise,
-    obtenir_fabrique_session,
+    GestionnaireMigrations,
+    initialiser_database,
     obtenir_contexte_db,
     obtenir_db_securise,
-    GestionnaireMigrations,
-    verifier_connexion,
+    obtenir_fabrique_session,
     obtenir_infos_db,
-    initialiser_database,
+    obtenir_moteur,
+    obtenir_moteur_securise,
+    verifier_connexion,
     verifier_sante,
 )
 from src.core.errors import ErreurBaseDeDonnees
-
 
 # ═══════════════════════════════════════════════════════════
 # SECTION 1: TESTS ENGINE
@@ -59,9 +55,9 @@ class TestDatabaseEngine:
         """Test que obtenir_moteur_securise retourne None en cas d'erreur."""
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.side_effect = ErreurBaseDeDonnees("Test error")
-            
+
             result = obtenir_moteur_securise()
-            
+
             assert result is None
 
     def test_obtenir_moteur_securise_returns_engine_on_success(self):
@@ -69,9 +65,9 @@ class TestDatabaseEngine:
         mock_engine = MagicMock()
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
-            
+
             result = obtenir_moteur_securise()
-            
+
             assert result == mock_engine
 
 
@@ -89,9 +85,9 @@ class TestSessionFactory:
         mock_engine = MagicMock()
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
-            
+
             factory = obtenir_fabrique_session()
-            
+
             assert factory is not None
             assert callable(factory)
 
@@ -109,10 +105,10 @@ class TestContextManagers:
         """Test que le context manager yield une session."""
         mock_session = MagicMock(spec=Session)
         mock_factory = MagicMock(return_value=mock_session)
-        
+
         with patch("src.core.database.obtenir_fabrique_session") as mock_fab:
             mock_fab.return_value = mock_factory
-            
+
             with obtenir_contexte_db() as db:
                 assert db is not None
 
@@ -120,47 +116,47 @@ class TestContextManagers:
         """Test que le context manager commit en cas de succès."""
         mock_session = MagicMock(spec=Session)
         mock_factory = MagicMock(return_value=mock_session)
-        
+
         with patch("src.core.database.obtenir_fabrique_session") as mock_fab:
             mock_fab.return_value = mock_factory
-            
+
             with obtenir_contexte_db() as db:
                 pass  # Succès
-            
+
             mock_session.commit.assert_called()
 
     def test_obtenir_contexte_db_rollback_on_error(self):
         """Test que le context manager rollback en cas d'erreur."""
         mock_session = MagicMock(spec=Session)
         mock_factory = MagicMock(return_value=mock_session)
-        
+
         with patch("src.core.database.obtenir_fabrique_session") as mock_fab:
             mock_fab.return_value = mock_factory
-            
+
             with pytest.raises(ValueError):
                 with obtenir_contexte_db() as db:
                     raise ValueError("Test error")
-            
+
             mock_session.rollback.assert_called()
 
     def test_obtenir_contexte_db_closes_session(self):
         """Test que le context manager ferme la session."""
         mock_session = MagicMock(spec=Session)
         mock_factory = MagicMock(return_value=mock_session)
-        
+
         with patch("src.core.database.obtenir_fabrique_session") as mock_fab:
             mock_fab.return_value = mock_factory
-            
+
             with obtenir_contexte_db() as db:
                 pass
-            
+
             mock_session.close.assert_called()
 
     def test_obtenir_db_securise_yields_none_on_error(self):
         """Test que obtenir_db_securise yield None en cas d'erreur."""
         with patch("src.core.database.obtenir_contexte_db") as mock_ctx:
             mock_ctx.side_effect = ErreurBaseDeDonnees("Test")
-            
+
             with obtenir_db_securise() as db:
                 assert db is None
 
@@ -185,12 +181,12 @@ class TestGestionnaireMigrations:
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
         mock_conn.execute.return_value.scalar.return_value = None
-        
+
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
-            
+
             version = GestionnaireMigrations.obtenir_version_courante()
-            
+
             assert version == 0
 
     def test_obtenir_version_courante_returns_max_version(self):
@@ -200,33 +196,33 @@ class TestGestionnaireMigrations:
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
         mock_conn.execute.return_value.scalar.return_value = 5
-        
+
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
-            
+
             version = GestionnaireMigrations.obtenir_version_courante()
-            
+
             assert version == 5
 
     def test_obtenir_version_courante_returns_zero_on_exception(self):
         """Test que version courante retourne 0 en cas d'exception."""
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.side_effect = Exception("Test error")
-            
+
             version = GestionnaireMigrations.obtenir_version_courante()
-            
+
             assert version == 0
 
     def test_obtenir_migrations_disponibles_returns_list(self):
         """Test que obtenir_migrations_disponibles retourne une liste."""
         migrations = GestionnaireMigrations.obtenir_migrations_disponibles()
-        
+
         assert isinstance(migrations, list)
 
     def test_obtenir_migrations_disponibles_has_required_keys(self):
         """Test que chaque migration a les clés requises."""
         migrations = GestionnaireMigrations.obtenir_migrations_disponibles()
-        
+
         for migration in migrations:
             assert "version" in migration
             assert "name" in migration
@@ -249,12 +245,12 @@ class TestDatabaseVerifications:
         mock_conn = MagicMock()
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
-        
+
         with patch("src.core.database.obtenir_moteur_securise") as mock_moteur:
             mock_moteur.return_value = mock_engine
             with patch("src.core.database.st.cache_data", lambda **kw: lambda f: f):
                 result = verifier_connexion()
-                
+
                 assert isinstance(result, tuple)
                 assert len(result) == 2
                 assert isinstance(result[0], bool)
@@ -287,12 +283,12 @@ class TestHealthCheck:
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
         mock_conn.execute.return_value.scalar.return_value = 1
-        
+
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
-            
+
             result = verifier_sante()
-            
+
             assert isinstance(result, dict)
 
     def test_verifier_sante_has_sain_key(self):
@@ -302,21 +298,21 @@ class TestHealthCheck:
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
         mock_conn.execute.return_value.scalar.return_value = 1
-        
+
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
-            
+
             result = verifier_sante()
-            
+
             assert "sain" in result
 
     def test_verifier_sante_returns_false_on_error(self):
         """Test que verifier_sante retourne sain=False en cas d'erreur."""
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.side_effect = Exception("Test error")
-            
+
             result = verifier_sante()
-            
+
             assert result["sain"] is False
             assert "erreur" in result
 
@@ -327,12 +323,12 @@ class TestHealthCheck:
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
         mock_conn.execute.return_value.scalar.return_value = 1
-        
+
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
-            
+
             result = verifier_sante()
-            
+
             assert "timestamp" in result
 
 
@@ -351,14 +347,14 @@ class TestDatabaseInitialisation:
         mock_conn = MagicMock()
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
-        
+
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
             with patch("src.core.database.obtenir_parametres") as mock_params:
                 mock_params.return_value = MagicMock(est_production=lambda: False)
                 with patch.object(GestionnaireMigrations, "executer_migrations"):
                     result = initialiser_database()
-                    
+
                     assert isinstance(result, bool)
 
     def test_initialiser_database_returns_false_on_error(self):
@@ -367,9 +363,9 @@ class TestDatabaseInitialisation:
             mock_moteur.side_effect = Exception("Test error")
             with patch("src.core.database.obtenir_parametres") as mock_params:
                 mock_params.return_value = MagicMock(est_production=lambda: False)
-                
+
                 result = initialiser_database()
-                
+
                 assert result is False
 
     def test_initialiser_database_skips_migrations_if_disabled(self):
@@ -378,14 +374,14 @@ class TestDatabaseInitialisation:
         mock_conn = MagicMock()
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
-        
+
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
             with patch("src.core.database.obtenir_parametres") as mock_params:
                 mock_params.return_value = MagicMock(est_production=lambda: False)
                 with patch.object(GestionnaireMigrations, "executer_migrations") as mock_exec:
                     initialiser_database(executer_migrations=False)
-                    
+
                     mock_exec.assert_not_called()
 
 
@@ -412,6 +408,7 @@ class TestDatabaseInfos:
             with patch("src.core.database.st.cache_data", lambda **kw: lambda f: f):
                 # Ré-importer la fonction pour bypass le cache
                 from src.core.database import obtenir_infos_db as get_infos
+
                 # Le test vérifie que la fonction est callable
                 assert callable(get_infos)
 
@@ -421,13 +418,13 @@ class TestDatabaseInfos:
             mock_moteur.side_effect = Exception("Test error")
             with patch("src.core.database.st.cache_data", lambda **kw: lambda f: f):
                 result = obtenir_infos_db()
-                
+
                 assert result["statut"] == "error"
                 assert "erreur" in result
 
 
 # ═══════════════════════════════════════════════════════════
-# SECTION 9: TESTS D'INTÃ‰GRATION
+# SECTION 9: TESTS D'INTÉGRATION
 # ═══════════════════════════════════════════════════════════
 
 
@@ -444,7 +441,7 @@ class TestDatabaseIntegration:
     def test_session_transaction_isolation(self, db):
         """Test isolation des transactions."""
         from src.core.models import Recette
-        
+
         # Créer une recette
         recette = Recette(
             nom="Test Transaction",
@@ -454,19 +451,19 @@ class TestDatabaseIntegration:
         )
         db.add(recette)
         db.flush()
-        
+
         # Vérifier qu'elle existe dans la session
         assert recette.id is not None
-        
+
         # Rollback dans la fixture nettoiera
 
     def test_query_execution(self, db):
         """Test exécution de requêtes."""
         from src.core.models import Recette
-        
+
         # Exécuter une requête simple
         count = db.query(Recette).count()
-        
+
         assert isinstance(count, int)
         assert count >= 0
 
@@ -486,12 +483,12 @@ class TestGestionnaireMigrationsAvance:
         mock_conn = MagicMock()
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
-        
+
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
-            
+
             GestionnaireMigrations.initialiser_table_migrations()
-            
+
             mock_conn.execute.assert_called()
             mock_conn.commit.assert_called()
 
@@ -501,16 +498,14 @@ class TestGestionnaireMigrationsAvance:
         mock_conn = MagicMock()
         mock_engine.begin.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.begin.return_value.__exit__ = MagicMock(return_value=False)
-        
+
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
-            
+
             result = GestionnaireMigrations.appliquer_migration(
-                version=1,
-                nom="test_migration",
-                sql="CREATE TABLE test (id INT)"
+                version=1, nom="test_migration", sql="CREATE TABLE test (id INT)"
             )
-            
+
             assert result is True
             assert mock_conn.execute.call_count >= 2  # SQL + INSERT
 
@@ -519,15 +514,13 @@ class TestGestionnaireMigrationsAvance:
         mock_engine = MagicMock()
         mock_engine.begin.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
         mock_engine.begin.return_value.__exit__ = MagicMock(return_value=False)
-        
+
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
-            
+
             with pytest.raises(ErreurBaseDeDonnees):
                 GestionnaireMigrations.appliquer_migration(
-                    version=1,
-                    nom="test_migration",
-                    sql="INVALID SQL"
+                    version=1, nom="test_migration", sql="INVALID SQL"
                 )
 
     def test_executer_migrations_aucune_en_attente(self):
@@ -537,16 +530,20 @@ class TestGestionnaireMigrationsAvance:
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
         mock_conn.execute.return_value.scalar.return_value = 999  # Version très haute
-        
+
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
             with patch.object(GestionnaireMigrations, "initialiser_table_migrations"):
-                with patch.object(GestionnaireMigrations, "obtenir_version_courante", return_value=999):
-                    with patch.object(GestionnaireMigrations, "obtenir_migrations_disponibles") as mock_get_migrations:
+                with patch.object(
+                    GestionnaireMigrations, "obtenir_version_courante", return_value=999
+                ):
+                    with patch.object(
+                        GestionnaireMigrations, "obtenir_migrations_disponibles"
+                    ) as mock_get_migrations:
                         mock_get_migrations.return_value = [
                             {"version": 1, "name": "test", "sql": "SELECT 1"}
                         ]
-                        
+
                         # Ne devrait pas lever d'exception
                         GestionnaireMigrations.executer_migrations()
 
@@ -558,18 +555,24 @@ class TestGestionnaireMigrationsAvance:
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
         mock_engine.begin.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.begin.return_value.__exit__ = MagicMock(return_value=False)
-        
+
         with patch("src.core.database.obtenir_moteur") as mock_moteur:
             mock_moteur.return_value = mock_engine
             with patch.object(GestionnaireMigrations, "initialiser_table_migrations"):
-                with patch.object(GestionnaireMigrations, "obtenir_version_courante", return_value=0):
-                    with patch.object(GestionnaireMigrations, "obtenir_migrations_disponibles") as mock_get_migrations:
+                with patch.object(
+                    GestionnaireMigrations, "obtenir_version_courante", return_value=0
+                ):
+                    with patch.object(
+                        GestionnaireMigrations, "obtenir_migrations_disponibles"
+                    ) as mock_get_migrations:
                         mock_get_migrations.return_value = [
                             {"version": 1, "name": "test", "sql": "SELECT 1"}
                         ]
-                        with patch.object(GestionnaireMigrations, "appliquer_migration") as mock_apply:
+                        with patch.object(
+                            GestionnaireMigrations, "appliquer_migration"
+                        ) as mock_apply:
                             GestionnaireMigrations.executer_migrations()
-                            
+
                             mock_apply.assert_called_once()
 
 
@@ -588,12 +591,11 @@ class TestObteniMoteurRetry:
         mock_conn = MagicMock()
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
-        
+
         with patch("src.core.database.create_engine", return_value=mock_engine):
             with patch("src.core.database.obtenir_parametres") as mock_params:
                 mock_params.return_value = MagicMock(
-                    DATABASE_URL="postgresql://user:pass@host/db",
-                    DEBUG=False
+                    DATABASE_URL="postgresql://user:pass@host/db", DEBUG=False
                 )
                 with patch("src.core.database.st.cache_resource", lambda **kw: lambda f: f):
                     # Appeler directement la fonction déwrappée
@@ -603,7 +605,7 @@ class TestObteniMoteurRetry:
     def test_obtenir_moteur_retry_on_operational_error(self):
         """Test retry sur OperationalError."""
         call_count = 0
-        
+
         def create_engine_side_effect(*args, **kwargs):
             nonlocal call_count
             call_count += 1
@@ -614,12 +616,11 @@ class TestObteniMoteurRetry:
             mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
             mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
             return mock_engine
-        
+
         with patch("src.core.database.create_engine", side_effect=create_engine_side_effect):
             with patch("src.core.database.obtenir_parametres") as mock_params:
                 mock_params.return_value = MagicMock(
-                    DATABASE_URL="postgresql://user:pass@host/db",
-                    DEBUG=False
+                    DATABASE_URL="postgresql://user:pass@host/db", DEBUG=False
                 )
                 with patch("src.core.database.st.cache_resource", lambda **kw: lambda f: f):
                     with patch("time.sleep"):
@@ -639,25 +640,25 @@ class TestCreerToutesTableses:
     def test_creer_toutes_tables_skips_production(self):
         """Test que creer_toutes_tables est ignoré en production."""
         from src.core.database import creer_toutes_tables
-        
+
         with patch("src.core.database.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock()
             mock_params.return_value.est_production.return_value = True
-            
+
             # Ne devrait pas lever d'exception et ne rien faire
             creer_toutes_tables()
 
     def test_creer_toutes_tables_creates_in_dev(self):
         """Test création tables en dev."""
         from src.core.database import creer_toutes_tables
-        
+
         mock_engine = MagicMock()
         mock_base = MagicMock()
-        
+
         with patch("src.core.database.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock()
             mock_params.return_value.est_production.return_value = False
-            
+
             with patch("src.core.database.obtenir_moteur", return_value=mock_engine):
                 with patch("src.core.models.Base", mock_base):
                     try:
@@ -680,10 +681,10 @@ class TestContextManagersAvanced:
         mock_session = MagicMock(spec=Session)
         mock_session.commit.side_effect = OperationalError("Connection lost", None, None)
         mock_factory = MagicMock(return_value=mock_session)
-        
+
         with patch("src.core.database.obtenir_fabrique_session") as mock_fab:
             mock_fab.return_value = mock_factory
-            
+
             with pytest.raises(ErreurBaseDeDonnees):
                 with obtenir_contexte_db() as db:
                     pass  # Le commit va échouer
@@ -693,10 +694,10 @@ class TestContextManagersAvanced:
         mock_session = MagicMock(spec=Session)
         mock_session.commit.side_effect = DatabaseError("Integrity error", None, None)
         mock_factory = MagicMock(return_value=mock_session)
-        
+
         with patch("src.core.database.obtenir_fabrique_session") as mock_fab:
             mock_fab.return_value = mock_factory
-            
+
             with pytest.raises(ErreurBaseDeDonnees):
                 with obtenir_contexte_db() as db:
                     pass
@@ -705,10 +706,10 @@ class TestContextManagersAvanced:
         """Test obtenir_db_securise yield session en cas de succès."""
         mock_session = MagicMock(spec=Session)
         mock_factory = MagicMock(return_value=mock_session)
-        
+
         with patch("src.core.database.obtenir_fabrique_session") as mock_fab:
             mock_fab.return_value = mock_factory
-            
+
             with obtenir_db_securise() as db:
                 assert db is not None
 
@@ -717,7 +718,7 @@ class TestContextManagersAvanced:
         with patch("src.core.database.obtenir_contexte_db") as mock_ctx:
             # Simuler une exception générique
             mock_ctx.side_effect = Exception("Unknown error")
-            
+
             with obtenir_db_securise() as db:
                 assert db is None
 
@@ -738,19 +739,25 @@ class TestObtenirInfosDBAvance:
         mock_conn = MagicMock()
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
-        
+
         # Mock le résultat de la requête
         mock_result = MagicMock()
-        mock_result.__getitem__ = MagicMock(side_effect=lambda x: ["PostgreSQL 14.0, compiled", "testdb", "testuser", "100 MB"][x])
+        mock_result.__getitem__ = MagicMock(
+            side_effect=lambda x: ["PostgreSQL 14.0, compiled", "testdb", "testuser", "100 MB"][x]
+        )
         mock_conn.execute.return_value.fetchone.return_value = mock_result
-        
+
         with patch("src.core.database.obtenir_moteur", return_value=mock_engine):
             with patch("src.core.database.obtenir_parametres") as mock_params:
-                mock_params.return_value = MagicMock(DATABASE_URL="postgresql://user:pass@host.example.com:5432/db")
+                mock_params.return_value = MagicMock(
+                    DATABASE_URL="postgresql://user:pass@host.example.com:5432/db"
+                )
                 with patch("src.core.database.st.cache_data", lambda **kw: lambda f: f):
-                    with patch.object(GestionnaireMigrations, "obtenir_version_courante", return_value=5):
+                    with patch.object(
+                        GestionnaireMigrations, "obtenir_version_courante", return_value=5
+                    ):
                         result = obtenir_infos_db()
-                        
+
                         assert result["statut"] == "connected"
 
 
@@ -769,14 +776,14 @@ class TestVerifierSanteAvance:
         mock_conn = MagicMock()
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
-        
+
         # Configurer les réponses
         mock_conn.execute.return_value.scalar.side_effect = [5, 1000000]  # connexions, taille
-        
+
         with patch("src.core.database.obtenir_moteur", return_value=mock_engine):
             with patch.object(GestionnaireMigrations, "obtenir_version_courante", return_value=1):
                 result = verifier_sante()
-                
+
                 assert result["sain"] is True
                 assert "connexions_actives" in result
                 assert "taille_base_octets" in result
@@ -799,11 +806,11 @@ class TestVerifierConnexionAvance:
         mock_conn = MagicMock()
         mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
-        
+
         with patch("src.core.database.obtenir_moteur_securise", return_value=mock_engine):
             with patch("src.core.database.st.cache_data", lambda **kw: lambda f: f):
                 result = verifier_connexion()
-                
+
                 assert result[0] is True
                 assert "OK" in result[1]
 
@@ -813,5 +820,5 @@ class TestVerifierConnexionAvance:
             mock.side_effect = ErreurBaseDeDonnees("Test", message_utilisateur="Test error")
             with patch("src.core.database.st.cache_data", lambda **kw: lambda f: f):
                 result = verifier_connexion()
-                
+
                 assert result[0] is False

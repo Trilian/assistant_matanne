@@ -1,4 +1,4 @@
-﻿"""
+"""
 UI Components - Layouts
 Grilles, cartes, containers
 """
@@ -200,4 +200,3 @@ def conteneur_carte(fonction_contenu: Callable, couleur: str = "#ffffff"):
     )
     fonction_contenu()
     st.markdown("</div>", unsafe_allow_html=True)
-

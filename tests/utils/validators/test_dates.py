@@ -1,15 +1,16 @@
-﻿"""
+"""
 Tests pour src/utils/validators/dates.py
 """
-import pytest
+
 from datetime import date, timedelta
+
 from src.utils.validators.dates import (
-    valider_plage_dates,
+    est_dans_x_jours,
     est_date_future,
     est_date_passee,
-    valider_date_peremption,
     jours_jusqua,
-    est_dans_x_jours,
+    valider_date_peremption,
+    valider_plage_dates,
 )
 
 
@@ -100,21 +101,21 @@ class TestJoursJusqua:
     """Tests pour jours_jusqua."""
 
     def test_jours_jusqua_tomorrow(self):
-        """Jours jusqu'Ã  demain = 1."""
+        """Jours jusqu'à demain = 1."""
         tomorrow = date.today() + timedelta(days=1)
         assert jours_jusqua(tomorrow) == 1
 
     def test_jours_jusqua_next_week(self):
-        """Jours jusqu'Ã  semaine prochaine = 7."""
+        """Jours jusqu'à semaine prochaine = 7."""
         next_week = date.today() + timedelta(days=7)
         assert jours_jusqua(next_week) == 7
 
     def test_jours_jusqua_today(self):
-        """Jours jusqu'Ã  aujourd'hui = 0."""
+        """Jours jusqu'à aujourd'hui = 0."""
         assert jours_jusqua(date.today()) == 0
 
     def test_jours_jusqua_past(self):
-        """Jours jusqu'Ã  date passée = négatif."""
+        """Jours jusqu'à date passée = négatif."""
         yesterday = date.today() - timedelta(days=1)
         assert jours_jusqua(yesterday) == -1
 
@@ -133,7 +134,7 @@ class TestEstDansXJours:
         assert est_dans_x_jours(target, 5) is False
 
     def test_est_dans_x_jours_exact(self):
-        """Date exactement Ã  N jours."""
+        """Date exactement à N jours."""
         target = date.today() + timedelta(days=5)
         assert est_dans_x_jours(target, 5) is True
 
@@ -145,4 +146,3 @@ class TestEstDansXJours:
         """Date passée = pas dans les N jours futurs."""
         yesterday = date.today() - timedelta(days=1)
         assert est_dans_x_jours(yesterday, 5) is False
-

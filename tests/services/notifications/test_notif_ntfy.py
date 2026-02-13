@@ -1,4 +1,4 @@
-﻿"""Tests pour src/services/notifications/notif_ntfy.py - ServiceNtfy.
+"""Tests pour src/services/notifications/notif_ntfy.py - ServiceNtfy.
 
 Couverture des fonctionnalités:
 - Envoi de notifications via ntfy.sh
@@ -7,21 +7,21 @@ Couverture des fonctionnalités:
 - Planificateur de notifications
 """
 
-import pytest
-import asyncio
 from datetime import date, timedelta
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from src.services.notifications.notif_ntfy import (
-    ServiceNtfy,
-    PlanificateurNtfy,
-    obtenir_service_ntfy,
-    obtenir_planificateur_ntfy,
+    NotificationPushConfig,
+    NotificationPushScheduler,
     # Alias rétrocompatibilité
     NotificationPushService,
-    NotificationPushScheduler,
-    NotificationPushConfig,
+    PlanificateurNtfy,
+    ServiceNtfy,
     get_notification_push_service,
+    obtenir_planificateur_ntfy,
+    obtenir_service_ntfy,
 )
 from src.services.notifications.types import (
     ConfigurationNtfy,
@@ -29,10 +29,9 @@ from src.services.notifications.types import (
     ResultatEnvoiNtfy,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -85,9 +84,9 @@ def mock_httpx_client():
         yield client
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS INITIALISATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -97,33 +96,33 @@ class TestServiceNtfyInit:
     def test_init_avec_config(self, config):
         """Initialisation avec configuration."""
         service = ServiceNtfy(config)
-        
+
         assert service.config.topic == "test-matanne"
         assert service.config.actif is True
 
     def test_init_sans_config(self):
         """Initialisation sans configuration (défaut)."""
         service = ServiceNtfy()
-        
+
         assert service.config is not None
         assert isinstance(service.config, ConfigurationNtfy)
 
     def test_factory_obtenir_service_ntfy(self):
         """Test factory obtenir_service_ntfy."""
         service = obtenir_service_ntfy()
-        
+
         assert isinstance(service, ServiceNtfy)
 
     def test_factory_avec_config(self, config):
         """Test factory avec configuration."""
         service = obtenir_service_ntfy(config)
-        
+
         assert service.config.topic == "test-matanne"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ENVOI NOTIFICATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -134,7 +133,7 @@ class TestEnvoyerNotification:
     async def test_envoyer_desactive(self, service_disabled, notification):
         """Envoi avec service désactivé."""
         result = await service_disabled.envoyer(notification)
-        
+
         assert result.succes is False
         assert "désactivées" in result.message
 
@@ -145,12 +144,12 @@ class TestEnvoyerNotification:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"id": "abc123"}
-        
+
         service.client = AsyncMock()
         service.client.post.return_value = mock_response
-        
+
         result = await service.envoyer(notification)
-        
+
         assert result.succes is True
         assert "envoyée" in result.message
         assert result.notification_id == "abc123"
@@ -161,12 +160,12 @@ class TestEnvoyerNotification:
         mock_response = MagicMock()
         mock_response.status_code = 500
         mock_response.text = "Internal Server Error"
-        
+
         service.client = AsyncMock()
         service.client.post.return_value = mock_response
-        
+
         result = await service.envoyer(notification)
-        
+
         assert result.succes is False
         assert "500" in result.message
 
@@ -175,9 +174,9 @@ class TestEnvoyerNotification:
         """Envoi avec exception."""
         service.client = AsyncMock()
         service.client.post.side_effect = Exception("Network error")
-        
+
         result = await service.envoyer(notification)
-        
+
         assert result.succes is False
         assert "Network error" in result.message
 
@@ -187,12 +186,12 @@ class TestEnvoyerNotification:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"id": "sync123"}
-        
+
         service.client = AsyncMock()
         service.client.post.return_value = mock_response
-        
+
         result = service.envoyer_sync(notification)
-        
+
         assert result.succes is True
 
 
@@ -208,16 +207,16 @@ class TestNotificationAvecOptions:
             message="Message",
             click_url="https://example.com",
         )
-        
+
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"id": "url123"}
-        
+
         service.client = AsyncMock()
         service.client.post.return_value = mock_response
-        
+
         await service.envoyer(notif)
-        
+
         # Vérifier que l'URL est dans les headers
         call_args = service.client.post.call_args
         headers = call_args.kwargs.get("headers", {})
@@ -231,24 +230,24 @@ class TestNotificationAvecOptions:
             message="Message",
             tags=["warning", "house"],
         )
-        
+
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"id": "tags123"}
-        
+
         service.client = AsyncMock()
         service.client.post.return_value = mock_response
-        
+
         await service.envoyer(notif)
-        
+
         call_args = service.client.post.call_args
         headers = call_args.kwargs.get("headers", {})
         assert "warning,house" in headers.get("Tags", "")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS RÃ‰CUPÃ‰RATION TÃ‚CHES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS RÉCUPÉRATION TÃ‚CHES
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -258,35 +257,34 @@ class TestObtenirTachesEnRetard:
     def test_taches_en_retard_vide(self, service, db):
         """Pas de tâches en retard."""
         result = service.obtenir_taches_en_retard(db=db)
-        
+
         assert result == []
 
     def test_taches_en_retard_avec_taches(self, service):
         """Récupération des tâches en retard."""
-        from src.core.models import MaintenanceTask
         from unittest.mock import MagicMock, patch
-        
+
         # Mock de la requête DB
         tache = MagicMock()
         tache.nom = "Tâche en retard"
         tache.prochaine_fois = date.today() - timedelta(days=5)
         tache.fait = False
         tache.categorie = "rangement"
-        
-        with patch.object(service, 'obtenir_taches_en_retard', return_value=[tache]):
+
+        with patch.object(service, "obtenir_taches_en_retard", return_value=[tache]):
             result = service.obtenir_taches_en_retard()
-        
+
         assert len(result) >= 1
         assert result[0].nom == "Tâche en retard"
 
     def test_taches_terminees_exclues(self, service):
         """Tâches terminées non incluses."""
         from unittest.mock import patch
-        
+
         # Les tâches terminées ne devraient pas être retournées
-        with patch.object(service, 'obtenir_taches_en_retard', return_value=[]):
+        with patch.object(service, "obtenir_taches_en_retard", return_value=[]):
             result = service.obtenir_taches_en_retard()
-        
+
         # Ne devrait pas inclure la tâche terminée
         assert all(t.fait is False for t in result)
 
@@ -298,22 +296,22 @@ class TestObtenirTachesDuJour:
     def test_taches_du_jour_vide(self, service, db):
         """Pas de tâches aujourd'hui."""
         result = service.obtenir_taches_du_jour(db=db)
-        
+
         assert result == []
 
     def test_taches_du_jour_avec_taches(self, service):
         """Récupération des tâches du jour."""
         from unittest.mock import MagicMock, patch
-        
+
         tache = MagicMock()
         tache.nom = "Tâche aujourd'hui"
         tache.prochaine_fois = date.today()
         tache.fait = False
         tache.categorie = "rangement"
-        
-        with patch.object(service, 'obtenir_taches_du_jour', return_value=[tache]):
+
+        with patch.object(service, "obtenir_taches_du_jour", return_value=[tache]):
             result = service.obtenir_taches_du_jour()
-        
+
         assert len(result) >= 1
 
 
@@ -324,26 +322,26 @@ class TestObtenirCoursesUrgentes:
     def test_courses_urgentes_vide(self, service, db):
         """Pas de courses urgentes."""
         result = service.obtenir_courses_urgentes(db=db)
-        
+
         assert result == []
 
     def test_courses_urgentes_avec_articles(self, service):
         """Récupération des courses urgentes."""
         from unittest.mock import MagicMock, patch
-        
+
         article = MagicMock()
         article.achete = False
         article.priorite = "haute"
-        
-        with patch.object(service, 'obtenir_courses_urgentes', return_value=[article]):
+
+        with patch.object(service, "obtenir_courses_urgentes", return_value=[article]):
             result = service.obtenir_courses_urgentes()
-        
+
         assert len(result) >= 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ALERTES TÃ‚CHES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -359,17 +357,17 @@ class TestEnvoyerAlerteTacheRetard:
         tache.fait = False
         tache.description = "Faire le ménage"
         tache.categorie = "rangement"
-        
+
         # Mock du client HTTP
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"id": "task123"}
-        
+
         service.client = AsyncMock()
         service.client.post.return_value = mock_response
-        
+
         result = await service.envoyer_alerte_tache_retard(tache)
-        
+
         assert result.succes is True
 
     @pytest.mark.asyncio
@@ -378,27 +376,27 @@ class TestEnvoyerAlerteTacheRetard:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"id": "123"}
-        
+
         service.client = AsyncMock()
         service.client.post.return_value = mock_response
-        
+
         # Tâche très en retard (> 7 jours)
         tache_tres_retard = MagicMock()
         tache_tres_retard.nom = "Très en retard"
         tache_tres_retard.prochaine_fois = date.today() - timedelta(days=10)
         tache_tres_retard.fait = False
         tache_tres_retard.categorie = "rangement"
-        
+
         await service.envoyer_alerte_tache_retard(tache_tres_retard)
-        
+
         call_args = service.client.post.call_args
         headers = call_args.kwargs.get("headers", {})
         assert headers.get("Priority") == "5"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS DIGEST QUOTIDIEN
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -411,9 +409,9 @@ class TestEnvoyerDigestQuotidien:
         # Mock des méthodes de récupération
         service.obtenir_taches_en_retard = MagicMock(return_value=[])
         service.obtenir_taches_du_jour = MagicMock(return_value=[])
-        
+
         result = await service.envoyer_digest_quotidien()
-        
+
         assert result.succes is True
         assert "Pas de tâches" in result.message
 
@@ -426,32 +424,32 @@ class TestEnvoyerDigestQuotidien:
         tache1.prochaine_fois = date.today() - timedelta(days=1)
         tache1.fait = False
         tache1.categorie = "rangement"
-        
+
         tache2 = MagicMock()
         tache2.nom = "Tâche jour"
         tache2.prochaine_fois = date.today()
         tache2.fait = False
         tache2.categorie = "rangement"
-        
+
         service.obtenir_taches_en_retard = MagicMock(return_value=[tache1])
         service.obtenir_taches_du_jour = MagicMock(return_value=[tache2])
-        
+
         # Mock HTTP
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"id": "digest123"}
-        
+
         service.client = AsyncMock()
         service.client.post.return_value = mock_response
-        
+
         result = await service.envoyer_digest_quotidien()
-        
+
         assert result.succes is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS TEST CONNEXION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -464,12 +462,12 @@ class TestTestConnexion:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"id": "test123"}
-        
+
         service.client = AsyncMock()
         service.client.post.return_value = mock_response
-        
+
         result = await service.test_connexion()
-        
+
         assert result.succes is True
 
     def test_connexion_sync(self, service):
@@ -477,18 +475,18 @@ class TestTestConnexion:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"id": "sync123"}
-        
+
         service.client = AsyncMock()
         service.client.post.return_value = mock_response
-        
+
         result = service.test_connexion_sync()
-        
+
         assert result.succes is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS URLs
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -498,27 +496,27 @@ class TestUrls:
     def test_get_subscribe_url(self, service):
         """URL d'abonnement."""
         url = service.get_subscribe_url()
-        
+
         assert url == "ntfy://test-matanne"
 
     def test_get_web_url(self, service):
         """URL web."""
         url = service.get_web_url()
-        
+
         assert "test-matanne" in url
         assert "ntfy.sh" in url
 
     def test_get_subscribe_qr_url(self, service):
         """URL QR code."""
         url = service.get_subscribe_qr_url()
-        
+
         assert "qrserver" in url
         assert "test-matanne" in url
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS PLANIFICATEUR
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -528,7 +526,7 @@ class TestPlanificateurNtfy:
     def test_init_planificateur(self, service):
         """Initialisation du planificateur."""
         planificateur = PlanificateurNtfy(service)
-        
+
         assert planificateur.service is service
         assert planificateur._running is False
 
@@ -540,39 +538,39 @@ class TestPlanificateurNtfy:
         tache.prochaine_fois = date.today() - timedelta(days=1)
         tache.fait = False
         tache.categorie = "rangement"
-        
+
         service.obtenir_taches_en_retard = MagicMock(return_value=[tache])
-        
+
         # Mock envoi
         service.envoyer_alerte_tache_retard = AsyncMock(
             return_value=ResultatEnvoiNtfy(succes=True, message="OK")
         )
-        
+
         planificateur = PlanificateurNtfy(service)
         resultats = await planificateur.verifier_et_envoyer_alertes()
-        
+
         assert len(resultats) >= 1
         assert resultats[0].succes is True
 
     def test_lancer_verification_sync(self, service, db):
         """Lancement synchrone de la vérification."""
         service.obtenir_taches_en_retard = MagicMock(return_value=[])
-        
+
         planificateur = PlanificateurNtfy(service)
         resultats = planificateur.lancer_verification_sync()
-        
+
         assert resultats == []
 
     def test_factory_obtenir_planificateur(self):
         """Test factory obtenir_planificateur_ntfy."""
         planificateur = obtenir_planificateur_ntfy()
-        
+
         assert isinstance(planificateur, PlanificateurNtfy)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS ALIAS RÃ‰TROCOMPATIBILITÃ‰
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS ALIAS RÉTROCOMPATIBILITÉ
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service de notifications Web Push.
 
 Utilise Web Push API avec VAPID pour envoyer des notifications
@@ -10,29 +10,28 @@ import logging
 from datetime import datetime, time
 from uuid import UUID
 
-from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
 from src.core.models import (
-    PushSubscription as PushSubscriptionModel,
     NotificationPreference as NotificationPreferenceModel,
 )
-
+from src.core.models import (
+    PushSubscription as PushSubscriptionModel,
+)
 from src.services.notifications.types import (
-    TypeNotification,
+    VAPID_EMAIL,
+    VAPID_PRIVATE_KEY,
     AbonnementPush,
     NotificationPush,
     PreferencesNotification,
-    VAPID_PUBLIC_KEY,
-    VAPID_PRIVATE_KEY,
-    VAPID_EMAIL,
+    TypeNotification,
 )
 from src.services.notifications.utils import (
-    verifier_type_notification_active,
     est_heures_silencieuses,
-    peut_envoyer_pendant_silence,
     generer_cle_compteur,
+    peut_envoyer_pendant_silence,
+    verifier_type_notification_active,
 )
 
 logger = logging.getLogger(__name__)
@@ -41,33 +40,29 @@ logger = logging.getLogger(__name__)
 class ServiceWebPush:
     """
     Service d'envoi de notifications push via Web Push API.
-    
+
     Utilise Web Push API avec VAPID pour envoyer des notifications
     aux navigateurs des utilisateurs.
     """
-    
+
     def __init__(self):
         """Initialise le service."""
         self._subscriptions: dict[str, list[AbonnementPush]] = {}
         self._preferences: dict[str, PreferencesNotification] = {}
         self._sent_count: dict[str, int] = {}
-    
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    # ═══════════════════════════════════════════════════════════
     # GESTION DES ABONNEMENTS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    
-    def sauvegarder_abonnement(
-        self,
-        user_id: str,
-        subscription_info: dict
-    ) -> AbonnementPush:
+    # ═══════════════════════════════════════════════════════════
+
+    def sauvegarder_abonnement(self, user_id: str, subscription_info: dict) -> AbonnementPush:
         """
         Sauvegarde un nouvel abonnement push.
-        
+
         Args:
             user_id: ID de l'utilisateur
             subscription_info: Info d'abonnement du navigateur
-            
+
         Returns:
             Abonnement créé
         """
@@ -77,66 +72,56 @@ class ServiceWebPush:
             p256dh_key=subscription_info["keys"]["p256dh"],
             auth_key=subscription_info["keys"]["auth"],
         )
-        
+
         if user_id not in self._subscriptions:
             self._subscriptions[user_id] = []
-        
+
         # Éviter les doublons
-        existing = [s for s in self._subscriptions[user_id] 
-                   if s.endpoint == subscription.endpoint]
+        existing = [s for s in self._subscriptions[user_id] if s.endpoint == subscription.endpoint]
         if not existing:
             self._subscriptions[user_id].append(subscription)
             self._sauvegarder_abonnement_supabase(subscription)
-        
+
         logger.info(f"âœ… Abonnement push enregistré pour {user_id}")
         return subscription
-    
+
     def supprimer_abonnement(self, user_id: str, endpoint: str):
         """Supprime un abonnement."""
         if user_id in self._subscriptions:
             self._subscriptions[user_id] = [
-                s for s in self._subscriptions[user_id]
-                if s.endpoint != endpoint
+                s for s in self._subscriptions[user_id] if s.endpoint != endpoint
             ]
         self._supprimer_abonnement_supabase(user_id, endpoint)
         logger.info(f"Abonnement supprimé pour {user_id}")
-    
+
     def obtenir_abonnements_utilisateur(self, user_id: str) -> list[AbonnementPush]:
         """Récupère les abonnements d'un utilisateur."""
         if user_id in self._subscriptions:
             return self._subscriptions[user_id]
-        
+
         subs = self._charger_abonnements_supabase(user_id)
         self._subscriptions[user_id] = subs
         return subs
-    
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    # ═══════════════════════════════════════════════════════════
     # PRÉFÉRENCES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    
+    # ═══════════════════════════════════════════════════════════
+
     def obtenir_preferences(self, user_id: str) -> PreferencesNotification:
         """Récupère les préférences de notification."""
         if user_id not in self._preferences:
             self._preferences[user_id] = PreferencesNotification(user_id=user_id)
         return self._preferences[user_id]
-    
-    def mettre_a_jour_preferences(
-        self,
-        user_id: str,
-        preferences: PreferencesNotification
-    ):
-        """Met Ã  jour les préférences."""
+
+    def mettre_a_jour_preferences(self, user_id: str, preferences: PreferencesNotification):
+        """Met à jour les préférences."""
         self._preferences[user_id] = preferences
         self._sauvegarder_preferences_supabase(preferences)
-    
-    def doit_envoyer(
-        self,
-        user_id: str,
-        type_notification: TypeNotification
-    ) -> bool:
+
+    def doit_envoyer(self, user_id: str, type_notification: TypeNotification) -> bool:
         """
         Vérifie si on doit envoyer une notification.
-        
+
         Prend en compte:
         - Préférences utilisateur
         - Heures de silence
@@ -144,7 +129,7 @@ class ServiceWebPush:
         """
         prefs = self.obtenir_preferences(user_id)
         now = datetime.now()
-        
+
         # Convertir prefs en dict pour les utilitaires
         prefs_dict = {
             "alertes_stock": prefs.alertes_stock,
@@ -158,57 +143,51 @@ class ServiceWebPush:
             "heures_silencieuses_fin": prefs.heures_silencieuses_fin,
             "max_par_heure": prefs.max_par_heure,
         }
-        
+
         # Vérifier type activé
         if not verifier_type_notification_active(type_notification, prefs_dict):
             return False
-        
+
         # Vérifier heures silencieuses
         if est_heures_silencieuses(
-            now.hour,
-            prefs.heures_silencieuses_debut,
-            prefs.heures_silencieuses_fin
+            now.hour, prefs.heures_silencieuses_debut, prefs.heures_silencieuses_fin
         ):
             if not peut_envoyer_pendant_silence(type_notification):
                 return False
-        
+
         # Vérifier limite par heure
         count_key = generer_cle_compteur(user_id, now)
         current_count = self._sent_count.get(count_key, 0)
         if current_count >= prefs.max_par_heure:
             return False
-        
+
         return True
-    
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    # ═══════════════════════════════════════════════════════════
     # ENVOI DE NOTIFICATIONS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    
-    def envoyer_notification(
-        self,
-        user_id: str,
-        notification: NotificationPush
-    ) -> bool:
+    # ═══════════════════════════════════════════════════════════
+
+    def envoyer_notification(self, user_id: str, notification: NotificationPush) -> bool:
         """
-        Envoie une notification push Ã  un utilisateur.
-        
+        Envoie une notification push à un utilisateur.
+
         Args:
             user_id: ID de l'utilisateur
-            notification: Notification Ã  envoyer
-            
+            notification: Notification à envoyer
+
         Returns:
             True si envoyé avec succès
         """
         if not self.doit_envoyer(user_id, notification.notification_type):
             logger.debug(f"Notification ignorée pour {user_id} (préférences)")
             return False
-        
+
         subscriptions = self.obtenir_abonnements_utilisateur(user_id)
-        
+
         if not subscriptions:
             logger.warning(f"Pas d'abonnement push pour {user_id}")
             return False
-        
+
         success = False
         for sub in subscriptions:
             try:
@@ -219,19 +198,19 @@ class ServiceWebPush:
                 logger.error(f"Erreur envoi push: {e}")
                 if "410" in str(e) or "404" in str(e):
                     sub.is_active = False
-        
+
         # Incrémenter le compteur
         if success:
             now = datetime.now()
             count_key = generer_cle_compteur(user_id, now)
             self._sent_count[count_key] = self._sent_count.get(count_key, 0) + 1
-        
+
         return success
-    
+
     def envoyer_a_tous(self, notification: NotificationPush) -> int:
         """
-        Envoie une notification Ã  tous les utilisateurs.
-        
+        Envoie une notification à tous les utilisateurs.
+
         Returns:
             Nombre d'utilisateurs notifiés
         """
@@ -240,55 +219,57 @@ class ServiceWebPush:
             if self.envoyer_notification(user_id, notification):
                 count += 1
         return count
-    
+
     def _envoyer_web_push(self, subscription: AbonnementPush, notification: NotificationPush):
         """Envoie via Web Push API."""
         try:
             from pywebpush import webpush
-            
-            payload = json.dumps({
-                "title": notification.title,
-                "body": notification.body,
-                "icon": notification.icon,
-                "badge": notification.badge,
-                "tag": notification.tag,
-                "data": {
-                    "url": notification.url,
-                    "type": notification.notification_type.value,
-                    **notification.data
-                },
-                "actions": notification.actions,
-                "vibrate": notification.vibrate,
-                "requireInteraction": notification.require_interaction,
-                "silent": notification.silent,
-                "timestamp": notification.timestamp.isoformat(),
-            })
-            
+
+            payload = json.dumps(
+                {
+                    "title": notification.title,
+                    "body": notification.body,
+                    "icon": notification.icon,
+                    "badge": notification.badge,
+                    "tag": notification.tag,
+                    "data": {
+                        "url": notification.url,
+                        "type": notification.notification_type.value,
+                        **notification.data,
+                    },
+                    "actions": notification.actions,
+                    "vibrate": notification.vibrate,
+                    "requireInteraction": notification.require_interaction,
+                    "silent": notification.silent,
+                    "timestamp": notification.timestamp.isoformat(),
+                }
+            )
+
             webpush(
                 subscription_info={
                     "endpoint": subscription.endpoint,
                     "keys": {
                         "p256dh": subscription.p256dh_key,
                         "auth": subscription.auth_key,
-                    }
+                    },
                 },
                 data=payload,
                 vapid_private_key=VAPID_PRIVATE_KEY,
-                vapid_claims={"sub": VAPID_EMAIL}
+                vapid_claims={"sub": VAPID_EMAIL},
             )
-            
+
             logger.debug(f"Push envoyé: {notification.title}")
-            
+
         except ImportError:
             logger.warning("pywebpush non installé: pip install pywebpush")
         except Exception as e:
             logger.error(f"Erreur Web Push: {e}")
             raise
-    
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    # ═══════════════════════════════════════════════════════════
     # NOTIFICATIONS PRÉDÉFINIES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    
+    # ═══════════════════════════════════════════════════════════
+
     def notifier_stock_bas(self, user_id: str, nom_article: str, quantite: float):
         """Notifie un stock bas."""
         notification = NotificationPush(
@@ -299,17 +280,13 @@ class ServiceWebPush:
             tag=f"stock_{nom_article}",
             actions=[
                 {"action": "add_to_cart", "title": "Ajouter aux courses"},
-                {"action": "dismiss", "title": "Ignorer"}
-            ]
+                {"action": "dismiss", "title": "Ignorer"},
+            ],
         )
         return self.envoyer_notification(user_id, notification)
-    
+
     def notifier_peremption(
-        self,
-        user_id: str,
-        nom_article: str,
-        jours_restants: int,
-        critique: bool = False
+        self, user_id: str, nom_article: str, jours_restants: int, critique: bool = False
     ):
         """Notifie une péremption proche."""
         if jours_restants <= 0:
@@ -319,12 +296,16 @@ class ServiceWebPush:
         elif jours_restants == 1:
             title = "ðŸ”´ Péremption demain"
             body = f"{nom_article} expire demain"
-            notif_type = TypeNotification.PEREMPTION_CRITIQUE if critique else TypeNotification.PEREMPTION_ALERTE
+            notif_type = (
+                TypeNotification.PEREMPTION_CRITIQUE
+                if critique
+                else TypeNotification.PEREMPTION_ALERTE
+            )
         else:
             title = "ðŸŸ¡ Péremption proche"
             body = f"{nom_article} expire dans {jours_restants} jours"
             notif_type = TypeNotification.PEREMPTION_ALERTE
-        
+
         notification = NotificationPush(
             title=title,
             body=body,
@@ -334,13 +315,9 @@ class ServiceWebPush:
             require_interaction=critique,
         )
         return self.envoyer_notification(user_id, notification)
-    
+
     def notifier_rappel_repas(
-        self,
-        user_id: str,
-        type_repas: str,
-        nom_recette: str,
-        temps_restant: str
+        self, user_id: str, type_repas: str, nom_recette: str, temps_restant: str
     ):
         """Notifie un rappel de repas."""
         notification = NotificationPush(
@@ -351,17 +328,12 @@ class ServiceWebPush:
             tag=f"meal_{type_repas}",
             actions=[
                 {"action": "view_recipe", "title": "Voir la recette"},
-                {"action": "dismiss", "title": "OK"}
-            ]
+                {"action": "dismiss", "title": "OK"},
+            ],
         )
         return self.envoyer_notification(user_id, notification)
-    
-    def notifier_liste_partagee(
-        self,
-        user_id: str,
-        partage_par: str,
-        nom_liste: str
-    ):
+
+    def notifier_liste_partagee(self, user_id: str, partage_par: str, nom_liste: str):
         """Notifie le partage d'une liste."""
         notification = NotificationPush(
             title="ðŸ›’ Liste partagée",
@@ -370,38 +342,41 @@ class ServiceWebPush:
             url="/?module=cuisine.courses",
             actions=[
                 {"action": "view", "title": "Voir"},
-                {"action": "dismiss", "title": "Plus tard"}
-            ]
+                {"action": "dismiss", "title": "Plus tard"},
+            ],
         )
         return self.envoyer_notification(user_id, notification)
-    
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    # ═══════════════════════════════════════════════════════════
     # PERSISTANCE SUPABASE
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    
+    # ═══════════════════════════════════════════════════════════
+
     def _get_supabase_client(self):
         """Récupère le client Supabase."""
         try:
             from supabase import create_client
+
             from src.core.config import obtenir_parametres
-            
+
             params = obtenir_parametres()
-            supabase_url = getattr(params, 'SUPABASE_URL', None)
-            supabase_key = getattr(params, 'SUPABASE_SERVICE_KEY', None) or getattr(params, 'SUPABASE_ANON_KEY', None)
-            
+            supabase_url = getattr(params, "SUPABASE_URL", None)
+            supabase_key = getattr(params, "SUPABASE_SERVICE_KEY", None) or getattr(
+                params, "SUPABASE_ANON_KEY", None
+            )
+
             if supabase_url and supabase_key:
                 return create_client(supabase_url, supabase_key)
         except Exception as e:
             logger.warning(f"Supabase non disponible: {e}")
         return None
-    
+
     def _sauvegarder_abonnement_supabase(self, subscription: AbonnementPush):
         """Sauvegarde un abonnement en base Supabase."""
         client = self._get_supabase_client()
         if not client:
             logger.debug("Supabase non configuré, abonnement en mémoire uniquement")
             return
-        
+
         try:
             data = {
                 "user_id": subscription.user_id,
@@ -412,67 +387,71 @@ class ServiceWebPush:
                 "created_at": subscription.created_at.isoformat(),
                 "is_active": subscription.is_active,
             }
-            
-            client.table("push_subscriptions").upsert(
-                data,
-                on_conflict="endpoint"
-            ).execute()
-            
+
+            client.table("push_subscriptions").upsert(data, on_conflict="endpoint").execute()
+
             logger.debug(f"Abonnement sauvegardé pour {subscription.user_id}")
         except Exception as e:
             logger.error(f"Erreur sauvegarde abonnement: {e}")
-    
+
     def _supprimer_abonnement_supabase(self, user_id: str, endpoint: str):
         """Supprime un abonnement de la base Supabase."""
         client = self._get_supabase_client()
         if not client:
             return
-        
+
         try:
-            client.table("push_subscriptions").delete().match({
-                "user_id": user_id,
-                "endpoint": endpoint
-            }).execute()
-            
+            client.table("push_subscriptions").delete().match(
+                {"user_id": user_id, "endpoint": endpoint}
+            ).execute()
+
             logger.debug(f"Abonnement supprimé pour {user_id}")
         except Exception as e:
             logger.error(f"Erreur suppression abonnement: {e}")
-    
+
     def _charger_abonnements_supabase(self, user_id: str) -> list[AbonnementPush]:
         """Charge les abonnements depuis Supabase."""
         client = self._get_supabase_client()
         if not client:
             return []
-        
+
         try:
-            response = client.table("push_subscriptions").select("*").eq(
-                "user_id", user_id
-            ).eq("is_active", True).execute()
-            
+            response = (
+                client.table("push_subscriptions")
+                .select("*")
+                .eq("user_id", user_id)
+                .eq("is_active", True)
+                .execute()
+            )
+
             subscriptions = []
             for row in response.data:
-                subscriptions.append(AbonnementPush(
-                    id=row.get("id"),
-                    user_id=row["user_id"],
-                    endpoint=row["endpoint"],
-                    p256dh_key=row["p256dh_key"],
-                    auth_key=row["auth_key"],
-                    user_agent=row.get("user_agent"),
-                    created_at=datetime.fromisoformat(row["created_at"]) if row.get("created_at") else datetime.now(),
-                    is_active=row.get("is_active", True),
-                ))
-            
+                subscriptions.append(
+                    AbonnementPush(
+                        id=row.get("id"),
+                        user_id=row["user_id"],
+                        endpoint=row["endpoint"],
+                        p256dh_key=row["p256dh_key"],
+                        auth_key=row["auth_key"],
+                        user_agent=row.get("user_agent"),
+                        created_at=datetime.fromisoformat(row["created_at"])
+                        if row.get("created_at")
+                        else datetime.now(),
+                        is_active=row.get("is_active", True),
+                    )
+                )
+
             return subscriptions
         except Exception as e:
             logger.error(f"Erreur chargement abonnements: {e}")
             return []
-    
+
     def _sauvegarder_preferences_supabase(self, preferences: PreferencesNotification):
         """Sauvegarde les préférences en base Supabase."""
         client = self._get_supabase_client()
         if not client:
             return
-        
+
         try:
             data = {
                 "user_id": preferences.user_id,
@@ -488,19 +467,16 @@ class ServiceWebPush:
                 "max_per_hour": preferences.max_par_heure,
                 "digest_mode": preferences.mode_digest,
             }
-            
-            client.table("notification_preferences").upsert(
-                data,
-                on_conflict="user_id"
-            ).execute()
-            
+
+            client.table("notification_preferences").upsert(data, on_conflict="user_id").execute()
+
             logger.debug(f"Préférences sauvegardées pour {preferences.user_id}")
         except Exception as e:
             logger.error(f"Erreur sauvegarde préférences: {e}")
-    
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+    # ═══════════════════════════════════════════════════════════
     # PERSISTANCE SQLALCHEMY (ALTERNATIVE)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_session_db
     def sauvegarder_abonnement_db(
@@ -515,10 +491,12 @@ class ServiceWebPush:
         """
         Sauvegarde un abonnement push via SQLAlchemy.
         """
-        existing = db.query(PushSubscriptionModel).filter(
-            PushSubscriptionModel.endpoint == endpoint
-        ).first()
-        
+        existing = (
+            db.query(PushSubscriptionModel)
+            .filter(PushSubscriptionModel.endpoint == endpoint)
+            .first()
+        )
+
         if existing:
             existing.p256dh_key = p256dh_key
             existing.auth_key = auth_key
@@ -527,7 +505,7 @@ class ServiceWebPush:
             db.commit()
             db.refresh(existing)
             return existing
-        
+
         subscription = PushSubscriptionModel(
             endpoint=endpoint,
             p256dh_key=p256dh_key,
@@ -547,9 +525,11 @@ class ServiceWebPush:
         db: Session = None,
     ) -> list[PushSubscriptionModel]:
         """Liste les abonnements push d'un utilisateur via SQLAlchemy."""
-        return db.query(PushSubscriptionModel).filter(
-            PushSubscriptionModel.user_id == UUID(str(user_id))
-        ).all()
+        return (
+            db.query(PushSubscriptionModel)
+            .filter(PushSubscriptionModel.user_id == UUID(str(user_id)))
+            .all()
+        )
 
     @avec_session_db
     def supprimer_abonnement_db(
@@ -558,9 +538,11 @@ class ServiceWebPush:
         db: Session = None,
     ) -> bool:
         """Supprime un abonnement par endpoint via SQLAlchemy."""
-        subscription = db.query(PushSubscriptionModel).filter(
-            PushSubscriptionModel.endpoint == endpoint
-        ).first()
+        subscription = (
+            db.query(PushSubscriptionModel)
+            .filter(PushSubscriptionModel.endpoint == endpoint)
+            .first()
+        )
         if subscription:
             db.delete(subscription)
             db.commit()
@@ -574,9 +556,11 @@ class ServiceWebPush:
         db: Session = None,
     ) -> NotificationPreferenceModel | None:
         """Récupère les préférences de notification depuis DB."""
-        return db.query(NotificationPreferenceModel).filter(
-            NotificationPreferenceModel.user_id == UUID(str(user_id))
-        ).first()
+        return (
+            db.query(NotificationPreferenceModel)
+            .filter(NotificationPreferenceModel.user_id == UUID(str(user_id)))
+            .first()
+        )
 
     @avec_session_db
     def sauvegarder_preferences_db(
@@ -591,15 +575,17 @@ class ServiceWebPush:
         quiet_hours_end: time | None = None,
         db: Session = None,
     ) -> NotificationPreferenceModel:
-        """Crée ou met Ã  jour les préférences de notification via SQLAlchemy."""
-        prefs = db.query(NotificationPreferenceModel).filter(
-            NotificationPreferenceModel.user_id == UUID(str(user_id))
-        ).first()
-        
+        """Crée ou met à jour les préférences de notification via SQLAlchemy."""
+        prefs = (
+            db.query(NotificationPreferenceModel)
+            .filter(NotificationPreferenceModel.user_id == UUID(str(user_id)))
+            .first()
+        )
+
         if not prefs:
             prefs = NotificationPreferenceModel(user_id=UUID(str(user_id)))
             db.add(prefs)
-        
+
         prefs.courses_rappel = courses_rappel
         prefs.repas_suggestion = repas_suggestion
         prefs.stock_alerte = stock_alerte
@@ -609,15 +595,15 @@ class ServiceWebPush:
             prefs.quiet_hours_start = quiet_hours_start
         if quiet_hours_end:
             prefs.quiet_hours_end = quiet_hours_end
-        
+
         db.commit()
         db.refresh(prefs)
         return prefs
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # ALIAS MÉTHODES RÉTROCOMPATIBILITÉ
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    
+    # ═══════════════════════════════════════════════════════════
+
     # Public methods aliases
     save_subscription = sauvegarder_abonnement
     remove_subscription = supprimer_abonnement
@@ -631,7 +617,7 @@ class ServiceWebPush:
     notify_expiration = notifier_peremption
     notify_meal_reminder = notifier_rappel_repas
     notify_shopping_list_shared = notifier_liste_partagee
-    
+
     # Private methods aliases (for tests)
     _send_web_push = _envoyer_web_push
     _save_subscription_to_db = _sauvegarder_abonnement_supabase
@@ -640,9 +626,9 @@ class ServiceWebPush:
     _save_preferences_to_db = _sauvegarder_preferences_supabase
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SINGLETON
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 _service_webpush: ServiceWebPush | None = None
 
@@ -658,7 +644,7 @@ def obtenir_service_webpush() -> ServiceWebPush:
 # Alias rétrocompatibilité
 PushNotificationService = ServiceWebPush
 get_push_notification_service = obtenir_service_webpush
-# Alias pour types originaux (déjÃ  dans types.py mais référencés ici pour l'ancien import)
+# Alias pour types originaux (déjà dans types.py mais référencés ici pour l'ancien import)
 PushSubscription = AbonnementPush
 PushNotification = NotificationPush
 NotificationPreferences = PreferencesNotification

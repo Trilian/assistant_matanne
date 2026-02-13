@@ -1,21 +1,23 @@
-﻿"""
+"""
 Tests pour calendrier_unifie_logic.py - Module Planning
 Couverture cible: 80%+
 """
-import pytest
+
 from datetime import date, time, timedelta
 
+import pytest
+
 from src.modules.planning.calendrier_unifie.utils import (
+    COULEUR_TYPE,
+    EMOJI_TYPE,
     # Constantes
     JOURS_SEMAINE,
     JOURS_SEMAINE_COURT,
-    TypeEvenement,
-    EMOJI_TYPE,
-    COULEUR_TYPE,
     # Dataclasses
     EvenementCalendrier,
     JourCalendrier,
     SemaineCalendrier,
+    TypeEvenement,
     # Fonctions de calcul
     get_debut_semaine,
     get_fin_semaine,
@@ -24,10 +26,9 @@ from src.modules.planning.calendrier_unifie.utils import (
     get_semaine_suivante,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantesCalendrier:
@@ -65,9 +66,9 @@ class TestConstantesCalendrier:
             assert COULEUR_TYPE[evt_type].startswith("#")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS EVENEMENT CALENDRIER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestEvenementCalendrier:
@@ -79,9 +80,9 @@ class TestEvenementCalendrier:
             id="repas_midi_1",
             type=TypeEvenement.REPAS_MIDI,
             titre="Poulet rôti",
-            date_jour=date.today()
+            date_jour=date.today(),
         )
-        
+
         assert evt.id == "repas_midi_1"
         assert evt.type == TypeEvenement.REPAS_MIDI
         assert evt.titre == "Poulet rôti"
@@ -101,9 +102,9 @@ class TestEvenementCalendrier:
             participants=["Jules", "Papa", "Maman"],
             pour_jules=True,
             budget=5.0,
-            notes="Prévoir goûter"
+            notes="Prévoir goûter",
         )
-        
+
         assert evt.lieu == "Parc municipal"
         assert len(evt.participants) == 3
         assert evt.pour_jules is True
@@ -112,10 +113,7 @@ class TestEvenementCalendrier:
     def test_emoji_property(self):
         """Property emoji."""
         evt = EvenementCalendrier(
-            id="test",
-            type=TypeEvenement.BATCH_COOKING,
-            titre="Test",
-            date_jour=date.today()
+            id="test", type=TypeEvenement.BATCH_COOKING, titre="Test", date_jour=date.today()
         )
         assert evt.emoji == EMOJI_TYPE[TypeEvenement.BATCH_COOKING]
         assert evt.emoji == "ðŸ³"
@@ -123,10 +121,7 @@ class TestEvenementCalendrier:
     def test_couleur_property(self):
         """Property couleur."""
         evt = EvenementCalendrier(
-            id="test",
-            type=TypeEvenement.COURSES,
-            titre="Test",
-            date_jour=date.today()
+            id="test", type=TypeEvenement.COURSES, titre="Test", date_jour=date.today()
         )
         assert evt.couleur == COULEUR_TYPE[TypeEvenement.COURSES]
 
@@ -137,24 +132,21 @@ class TestEvenementCalendrier:
             type=TypeEvenement.RDV_MEDICAL,
             titre="Test",
             date_jour=date.today(),
-            heure_debut=time(14, 30)
+            heure_debut=time(14, 30),
         )
         assert evt.heure_str == "14:30"
 
     def test_heure_str_none(self):
         """heure_str quand pas d'heure."""
         evt = EvenementCalendrier(
-            id="test",
-            type=TypeEvenement.ACTIVITE,
-            titre="Test",
-            date_jour=date.today()
+            id="test", type=TypeEvenement.ACTIVITE, titre="Test", date_jour=date.today()
         )
         assert evt.heure_str == ""
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS JOUR CALENDRIER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestJourCalendrier:
@@ -170,33 +162,33 @@ class TestJourCalendrier:
                     id="repas_midi_1",
                     type=TypeEvenement.REPAS_MIDI,
                     titre="Pâtes carbonara",
-                    date_jour=date.today()
+                    date_jour=date.today(),
                 ),
                 EvenementCalendrier(
                     id="repas_soir_1",
                     type=TypeEvenement.REPAS_SOIR,
                     titre="Salade composée",
-                    date_jour=date.today()
+                    date_jour=date.today(),
                 ),
                 EvenementCalendrier(
                     id="activite_1",
                     type=TypeEvenement.ACTIVITE,
                     titre="Parc",
-                    date_jour=date.today()
+                    date_jour=date.today(),
                 ),
                 EvenementCalendrier(
                     id="courses_1",
                     type=TypeEvenement.COURSES,
                     titre="Courses Carrefour",
-                    date_jour=date.today()
+                    date_jour=date.today(),
                 ),
                 EvenementCalendrier(
                     id="menage_1",
                     type=TypeEvenement.MENAGE,
                     titre="Ménage cuisine",
-                    date_jour=date.today()
+                    date_jour=date.today(),
                 ),
-            ]
+            ],
         )
 
     def test_creation_jour_vide(self):
@@ -209,7 +201,7 @@ class TestJourCalendrier:
         """Property est_aujourdhui."""
         jour_aujourd = JourCalendrier(date_jour=date.today())
         jour_demain = JourCalendrier(date_jour=date.today() + timedelta(days=1))
-        
+
         assert jour_aujourd.est_aujourdhui is True
         assert jour_demain.est_aujourdhui is False
 
@@ -262,28 +254,25 @@ class TestJourCalendrier:
             date_jour=date.today(),
             evenements=[
                 EvenementCalendrier(
-                    id="test",
-                    type=TypeEvenement.ACTIVITE,
-                    titre="Test",
-                    date_jour=date.today()
+                    id="test", type=TypeEvenement.ACTIVITE, titre="Test", date_jour=date.today()
                 )
-            ]
+            ],
         )
-        
+
         assert jour_vide.est_vide is True
         assert jour_avec.est_vide is False
 
     def test_a_repas_planifies(self, jour_avec_evenements):
         """Property a_repas_planifies."""
         assert jour_avec_evenements.a_repas_planifies is True
-        
+
         jour_sans_repas = JourCalendrier(date_jour=date.today())
         assert jour_sans_repas.a_repas_planifies is False
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS SEMAINE CALENDRIER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestSemaineCalendrier:
@@ -294,39 +283,45 @@ class TestSemaineCalendrier:
         """Semaine avec quelques jours remplis."""
         lundi = date(2024, 1, 1)  # Lundi 1er janvier 2024
         jours = []
-        
+
         for i in range(7):
             jour_date = lundi + timedelta(days=i)
             evenements = []
-            
+
             # Repas midi tous les jours
-            evenements.append(EvenementCalendrier(
-                id=f"repas_midi_{i}",
-                type=TypeEvenement.REPAS_MIDI,
-                titre=f"Déjeuner {i+1}",
-                date_jour=jour_date
-            ))
-            
+            evenements.append(
+                EvenementCalendrier(
+                    id=f"repas_midi_{i}",
+                    type=TypeEvenement.REPAS_MIDI,
+                    titre=f"Déjeuner {i+1}",
+                    date_jour=jour_date,
+                )
+            )
+
             # Dîner seulement certains jours
             if i in [0, 2, 4, 6]:
-                evenements.append(EvenementCalendrier(
-                    id=f"repas_soir_{i}",
-                    type=TypeEvenement.REPAS_SOIR,
-                    titre=f"Dîner {i+1}",
-                    date_jour=jour_date
-                ))
-            
+                evenements.append(
+                    EvenementCalendrier(
+                        id=f"repas_soir_{i}",
+                        type=TypeEvenement.REPAS_SOIR,
+                        titre=f"Dîner {i+1}",
+                        date_jour=jour_date,
+                    )
+                )
+
             # Batch cooking le dimanche
             if i == 6:
-                evenements.append(EvenementCalendrier(
-                    id="batch_1",
-                    type=TypeEvenement.BATCH_COOKING,
-                    titre="Batch cooking",
-                    date_jour=jour_date
-                ))
-            
+                evenements.append(
+                    EvenementCalendrier(
+                        id="batch_1",
+                        type=TypeEvenement.BATCH_COOKING,
+                        titre="Batch cooking",
+                        date_jour=jour_date,
+                    )
+                )
+
             jours.append(JourCalendrier(date_jour=jour_date, evenements=evenements))
-        
+
         return SemaineCalendrier(date_debut=lundi, jours=jours)
 
     def test_creation_semaine(self, semaine_sample):
@@ -354,9 +349,9 @@ class TestSemaineCalendrier:
         assert semaine_sample.nb_sessions_batch == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FONCTIONS DE CALCUL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFonctionsCalcul:
@@ -386,7 +381,7 @@ class TestFonctionsCalcul:
         """Liste des 7 jours."""
         lundi = date(2024, 1, 1)
         jours = get_jours_semaine(lundi)
-        
+
         assert len(jours) == 7
         assert jours[0] == lundi  # Lundi
         assert jours[6] == date(2024, 1, 7)  # Dimanche
@@ -395,29 +390,29 @@ class TestFonctionsCalcul:
         """Liste des jours depuis un mercredi = commence au lundi."""
         mercredi = date(2024, 1, 3)
         jours = get_jours_semaine(mercredi)
-        
+
         assert jours[0] == date(2024, 1, 1)  # Lundi
 
     def test_get_semaine_precedente(self):
         """Semaine précédente."""
         lundi = date(2024, 1, 8)
         precedente = get_semaine_precedente(lundi)
-        
+
         assert precedente == date(2024, 1, 1)
 
     def test_get_semaine_suivante(self):
         """Semaine suivante."""
         lundi = date(2024, 1, 1)
         suivante = get_semaine_suivante(lundi)
-        
+
         assert suivante == date(2024, 1, 8)
 
     def test_navigation_semaines_coherente(self):
         """Navigation avant/arrière cohérente."""
         lundi = date(2024, 1, 15)
-        
-        # Aller Ã  la semaine précédente puis suivante = retour Ã  l'origine
+
+        # Aller à la semaine précédente puis suivante = retour à l'origine
         precedente = get_semaine_precedente(lundi)
         retour = get_semaine_suivante(precedente)
-        
+
         assert retour == lundi

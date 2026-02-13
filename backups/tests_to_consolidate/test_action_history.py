@@ -1,8 +1,6 @@
-﻿"""Tests unitaires pour le service action_history."""
+"""Tests unitaires pour le service action_history."""
 
-import pytest
 from datetime import datetime, timedelta
-
 
 # Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
 # TESTS ENUMS
@@ -15,27 +13,27 @@ class TestActionTypeEnum:
     def test_types_actions_disponibles(self):
         """VÃ©rifie les types d'actions."""
         from src.services.action_history import ActionType
-        
+
         # Recettes
         assert ActionType.RECETTE_CREATED is not None
         assert ActionType.RECETTE_UPDATED is not None
         assert ActionType.RECETTE_DELETED is not None
-        
+
         # Inventaire
         assert ActionType.INVENTAIRE_ADDED is not None
         assert ActionType.INVENTAIRE_UPDATED is not None
-        
+
         # Courses
         assert ActionType.COURSES_ITEM_ADDED is not None
         assert ActionType.COURSES_ITEM_CHECKED is not None
-        
+
         # Planning
         assert ActionType.PLANNING_REPAS_ADDED is not None
 
     def test_action_type_valeur_string(self):
         """Types ont des valeurs string."""
         from src.services.action_history import ActionType
-        
+
         for action in ActionType:
             assert isinstance(action.value, str)
             assert "." in action.value  # Format "entity.action"
@@ -52,7 +50,7 @@ class TestActionEntryModel:
     def test_action_entry_creation(self):
         """CrÃ©ation d'une entrÃ©e d'action."""
         from src.services.action_history import ActionEntry, ActionType
-        
+
         entry = ActionEntry(
             user_id="user_1",
             user_name="Test User",
@@ -60,24 +58,24 @@ class TestActionEntryModel:
             entity_type="recette",
             entity_id=1,
             entity_name="Tarte aux pommes",
-            description="CrÃ©ation d'une nouvelle recette"
+            description="CrÃ©ation d'une nouvelle recette",
         )
-        
+
         assert entry.user_id == "user_1"
         assert entry.action_type == ActionType.RECETTE_CREATED
 
     def test_action_entry_timestamp_auto(self):
         """Timestamp crÃ©Ã© automatiquement."""
         from src.services.action_history import ActionEntry, ActionType
-        
+
         entry = ActionEntry(
             user_id="user_1",
             user_name="Test",
             action_type=ActionType.RECETTE_CREATED,
             entity_type="recette",
-            description="Test"
+            description="Test",
         )
-        
+
         assert entry.created_at is not None
         # Devrait Ãªtre proche de maintenant
         delta = datetime.now() - entry.created_at
@@ -86,7 +84,7 @@ class TestActionEntryModel:
     def test_action_entry_avec_details(self):
         """EntrÃ©e avec dÃ©tails."""
         from src.services.action_history import ActionEntry, ActionType
-        
+
         entry = ActionEntry(
             user_id="user_1",
             user_name="Test",
@@ -94,9 +92,9 @@ class TestActionEntryModel:
             entity_type="inventaire",
             entity_id=5,
             description="Modification quantitÃ©",
-            details={"champ": "quantite", "avant": 10, "apres": 8}
+            details={"champ": "quantite", "avant": 10, "apres": 8},
         )
-        
+
         assert entry.details["avant"] == 10
         assert entry.details["apres"] == 8
 
@@ -107,34 +105,29 @@ class TestActionFilterModel:
     def test_filter_defaults(self):
         """Valeurs par dÃ©faut du filtre."""
         from src.services.action_history import ActionFilter
-        
+
         filtre = ActionFilter()
-        
+
         assert filtre.limit == 50
         assert filtre.offset == 0
 
     def test_filter_par_type(self):
         """Filtre par type d'action."""
         from src.services.action_history import ActionFilter, ActionType
-        
-        filtre = ActionFilter(
-            action_types=[ActionType.RECETTE_CREATED, ActionType.RECETTE_UPDATED]
-        )
-        
+
+        filtre = ActionFilter(action_types=[ActionType.RECETTE_CREATED, ActionType.RECETTE_UPDATED])
+
         assert len(filtre.action_types) == 2
 
     def test_filter_par_periode(self):
         """Filtre par pÃ©riode."""
         from src.services.action_history import ActionFilter
-        
+
         maintenant = datetime.now()
         semaine_derniere = maintenant - timedelta(days=7)
-        
-        filtre = ActionFilter(
-            date_from=semaine_derniere,
-            date_to=maintenant
-        )
-        
+
+        filtre = ActionFilter(date_from=semaine_derniere, date_to=maintenant)
+
         assert filtre.date_from is not None
         assert filtre.date_to is not None
 
@@ -145,9 +138,9 @@ class TestActionStatsModel:
     def test_stats_defaults(self):
         """Valeurs par dÃ©faut des stats."""
         from src.services.action_history import ActionStats
-        
+
         stats = ActionStats()
-        
+
         assert stats.total_actions == 0
         assert stats.actions_today == 0
 
@@ -163,18 +156,18 @@ class TestActionHistoryServiceInit:
     def test_service_creation(self):
         """CrÃ©ation du service."""
         from src.services.action_history import ActionHistoryService
-        
+
         service = ActionHistoryService()
-        
+
         assert service is not None
 
     def test_service_methodes_requises(self):
         """Le service a les mÃ©thodes requises."""
         from src.services.action_history import ActionHistoryService
-        
+
         service = ActionHistoryService()
-        
-        assert hasattr(service, 'log_action')
+
+        assert hasattr(service, "log_action")
 
 
 # Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢Ã¢â€¢
@@ -189,12 +182,12 @@ class TestComputeChanges:
         """Calcul des changements pour modification."""
         old = {"quantite": 10, "nom": "Lait"}
         new = {"quantite": 8, "nom": "Lait"}
-        
+
         changes = {}
         for key in old.keys():
             if old[key] != new.get(key):
                 changes[key] = {"avant": old[key], "apres": new.get(key)}
-        
+
         assert "quantite" in changes
         assert changes["quantite"]["avant"] == 10
         assert changes["quantite"]["apres"] == 8
@@ -203,24 +196,24 @@ class TestComputeChanges:
         """Calcul pour suppression (avant seulement)."""
         old = {"id": 1, "nom": "Article supprimÃ©"}
         new = None
-        
+
         if new is None:
             changes = {"deleted": old}
         else:
             changes = {}
-        
+
         assert "deleted" in changes
 
     def test_compute_changes_aucun(self):
         """Aucun changement si identique."""
         old = {"quantite": 10, "nom": "Lait"}
         new = {"quantite": 10, "nom": "Lait"}
-        
+
         changes = {}
         for key in old.keys():
             if old[key] != new.get(key):
                 changes[key] = {"avant": old[key], "apres": new.get(key)}
-        
+
         assert len(changes) == 0
 
 
@@ -231,13 +224,13 @@ class TestCacheActions:
         """Cache limitÃ© en taille."""
         cache = []
         max_size = 100
-        
+
         # Ajouter plus que la limite
         for i in range(150):
             cache.append({"id": i})
             if len(cache) > max_size:
                 cache.pop(0)  # Retirer le plus ancien
-        
+
         assert len(cache) == max_size
 
     def test_cache_ordre_chronologique(self):
@@ -247,10 +240,10 @@ class TestCacheActions:
             {"id": 2, "date": datetime(2026, 1, 15)},
             {"id": 3, "date": datetime(2026, 1, 20)},
         ]
-        
+
         # Plus rÃ©cent en premier
         triees = sorted(actions, key=lambda x: x["date"], reverse=True)
-        
+
         assert triees[0]["id"] == 3
 
 
@@ -260,31 +253,31 @@ class TestFiltrerActions:
     def test_filtrer_par_type(self):
         """Filtrage par type."""
         from src.services.action_history import ActionType
-        
+
         actions = [
             {"type": ActionType.RECETTE_CREATED, "id": 1},
             {"type": ActionType.INVENTAIRE_ADDED, "id": 2},
             {"type": ActionType.RECETTE_UPDATED, "id": 3},
         ]
-        
+
         types_recette = [ActionType.RECETTE_CREATED, ActionType.RECETTE_UPDATED]
         filtrees = [a for a in actions if a["type"] in types_recette]
-        
+
         assert len(filtrees) == 2
 
     def test_filtrer_par_date(self):
         """Filtrage par pÃ©riode."""
         maintenant = datetime.now()
-        
+
         actions = [
             {"date": maintenant - timedelta(days=1), "id": 1},
             {"date": maintenant - timedelta(days=10), "id": 2},
             {"date": maintenant - timedelta(days=5), "id": 3},
         ]
-        
+
         semaine_derniere = maintenant - timedelta(days=7)
         filtrees = [a for a in actions if a["date"] >= semaine_derniere]
-        
+
         assert len(filtrees) == 2  # id 1 et 3
 
     def test_filtrer_par_entite(self):
@@ -294,9 +287,9 @@ class TestFiltrerActions:
             {"entity_type": "inventaire", "entity_id": 2},
             {"entity_type": "recette", "entity_id": 3},
         ]
-        
+
         filtrees = [a for a in actions if a["entity_type"] == "recette"]
-        
+
         assert len(filtrees) == 2
 
 
@@ -305,51 +298,52 @@ class TestStatistiquesActions:
 
     def test_compter_par_type(self):
         """Comptage par type."""
-        from src.services.action_history import ActionType
         from collections import Counter
-        
+
+        from src.services.action_history import ActionType
+
         actions = [
             ActionType.RECETTE_CREATED,
             ActionType.RECETTE_CREATED,
             ActionType.INVENTAIRE_ADDED,
             ActionType.RECETTE_UPDATED,
         ]
-        
+
         compteur = Counter(actions)
-        
+
         assert compteur[ActionType.RECETTE_CREATED] == 2
         assert compteur[ActionType.INVENTAIRE_ADDED] == 1
 
     def test_compter_par_utilisateur(self):
         """Comptage par utilisateur."""
         from collections import Counter
-        
+
         actions = [
             {"user_id": "user_1"},
             {"user_id": "user_1"},
             {"user_id": "user_2"},
             {"user_id": "user_1"},
         ]
-        
+
         compteur = Counter(a["user_id"] for a in actions)
-        
+
         assert compteur["user_1"] == 3
         assert compteur["user_2"] == 1
 
     def test_actions_par_heure(self):
         """Actions par heure de la journÃ©e."""
         from collections import Counter
-        
+
         actions = [
             {"date": datetime(2026, 1, 28, 9, 0)},
             {"date": datetime(2026, 1, 28, 9, 30)},
             {"date": datetime(2026, 1, 28, 14, 0)},
             {"date": datetime(2026, 1, 28, 9, 15)},
         ]
-        
+
         heures = [a["date"].hour for a in actions]
         compteur = Counter(heures)
-        
+
         assert compteur[9] == 3  # 9h est le pic
 
 
@@ -360,15 +354,15 @@ class TestDescriptionAction:
         """Description pour crÃ©ation recette."""
         action_type = "recette.created"
         entity_name = "Tarte aux pommes"
-        
+
         templates = {
             "recette.created": "CrÃ©ation de la recette '{name}'",
             "recette.updated": "Modification de la recette '{name}'",
             "recette.deleted": "Suppression de la recette '{name}'",
         }
-        
+
         description = templates[action_type].format(name=entity_name)
-        
+
         assert description == "CrÃ©ation de la recette 'Tarte aux pommes'"
 
     def test_description_inventaire_updated(self):
@@ -376,7 +370,7 @@ class TestDescriptionAction:
         entity_name = "Lait"
         avant = 10
         apres = 8
-        
+
         description = f"Modification de {entity_name}: {avant} Ã¢â€ â€™ {apres}"
-        
+
         assert "10 Ã¢â€ â€™ 8" in description

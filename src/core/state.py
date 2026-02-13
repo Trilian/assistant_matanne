@@ -1,4 +1,4 @@
-﻿"""
+"""
 State Unifié - Gestionnaire État Complet
 Tout harmonisé en français avec alias anglais
 """
@@ -358,4 +358,3 @@ def est_mode_debug() -> bool:
 def nettoyer_etats_ui():
     """Raccourci pour nettoyer états UI"""
     GestionnaireEtat.nettoyer_etats_ui()
-

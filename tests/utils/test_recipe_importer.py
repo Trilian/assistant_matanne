@@ -1,8 +1,11 @@
-﻿"""
+"""
 Tests pour src/utils/recipe_importer.py
 """
+
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
+
 from src.utils.recipe_importer import RecipeImporter
 
 
@@ -69,7 +72,7 @@ Ingrédients:
 - 200g de farine
 - 100g de sucre
 
-Ã‰tapes:
+Étapes:
 Préchauffer le four
 Mélanger les ingrédients
 Cuire 30 minutes
@@ -120,9 +123,9 @@ class TestFromUrl:
     def test_from_url_adds_https(self, mock_get):
         """Ajoute https:// si manquant."""
         mock_get.side_effect = Exception("Network error")
-        
+
         result = RecipeImporter.from_url("example.com/recipe")
-        
+
         # Vérifie que la requête a été appelée avec https://
         if mock_get.called:
             call_url = mock_get.call_args[0][0]
@@ -132,9 +135,9 @@ class TestFromUrl:
     def test_from_url_handles_error(self, mock_get):
         """Gère les erreurs réseau."""
         mock_get.side_effect = Exception("Network error")
-        
+
         result = RecipeImporter.from_url("https://example.com/recipe")
-        
+
         assert result is None
 
     def test_from_url_requires_bs4(self):
@@ -169,9 +172,9 @@ class TestExtractFromText:
         """Parse ingrédients avec puces."""
         text = """Gâteau
 Ingrédients:
-â€¢ Farine
-â€¢ Sucre
-â€¢ Oeufs
+• Farine
+• Sucre
+• Oeufs
 """
         result = RecipeImporter._extract_from_text(text)
 
@@ -195,8 +198,8 @@ Ingrédients:
     def test_extract_etapes(self):
         """Parse les étapes."""
         text = """Pizza
-Ã‰tapes:
-Ã‰taler la pâte
+Étapes:
+Étaler la pâte
 Ajouter la sauce
 Cuire au four
 """
@@ -234,15 +237,9 @@ class TestRecipeImporterIntegration:
 
     def test_all_methods_are_static(self):
         """Toutes les méthodes sont statiques."""
-        assert isinstance(
-            RecipeImporter.__dict__["from_url"], staticmethod
-        )
-        assert isinstance(
-            RecipeImporter.__dict__["from_text"], staticmethod
-        )
-        assert isinstance(
-            RecipeImporter.__dict__["_parse_duration"], staticmethod
-        )
+        assert isinstance(RecipeImporter.__dict__["from_url"], staticmethod)
+        assert isinstance(RecipeImporter.__dict__["from_text"], staticmethod)
+        assert isinstance(RecipeImporter.__dict__["_parse_duration"], staticmethod)
 
 
 @pytest.mark.unit
@@ -266,7 +263,7 @@ class TestExtractFromHtml:
                 "description": "Une délicieuse tarte",
                 "recipeIngredient": ["250g fraises", "200g pâte sablée"],
                 "recipeInstructions": [
-                    {"@type": "HowToStep", "text": "Ã‰taler la pâte"},
+                    {"@type": "HowToStep", "text": "Étaler la pâte"},
                     {"@type": "HowToStep", "text": "Ajouter les fraises"}
                 ],
                 "prepTime": "PT20M",
@@ -518,9 +515,9 @@ class TestFromUrlMocking:
     def test_from_url_timeout(self, mock_get):
         """Gère timeout réseau."""
         from requests.exceptions import Timeout
+
         mock_get.side_effect = Timeout("Connection timed out")
 
         result = RecipeImporter.from_url("https://example.com/slow")
 
         assert result is None
-

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Types et schémas Pydantic pour le service de backup.
 
 Définit les modèles de configuration, métadonnées et résultats.
@@ -11,9 +11,9 @@ from pydantic import BaseModel, Field
 
 class BackupConfig(BaseModel):
     """Configuration du service de backup."""
-    
+
     backup_dir: str = "backups"
-    max_backups: int = 10  # Nombre max de backups Ã  conserver
+    max_backups: int = 10  # Nombre max de backups à conserver
     compress: bool = True
     include_timestamps: bool = True
     auto_backup_enabled: bool = True
@@ -22,7 +22,7 @@ class BackupConfig(BaseModel):
 
 class BackupMetadata(BaseModel):
     """Métadonnées d'un backup."""
-    
+
     id: str = ""
     created_at: datetime = Field(default_factory=datetime.now)
     version: str = "1.0"
@@ -35,7 +35,7 @@ class BackupMetadata(BaseModel):
 
 class BackupResult(BaseModel):
     """Résultat d'une opération de backup."""
-    
+
     success: bool = False
     message: str = ""
     file_path: str | None = None
@@ -45,7 +45,7 @@ class BackupResult(BaseModel):
 
 class RestoreResult(BaseModel):
     """Résultat d'une restauration."""
-    
+
     success: bool = False
     message: str = ""
     tables_restored: list[str] = Field(default_factory=list)

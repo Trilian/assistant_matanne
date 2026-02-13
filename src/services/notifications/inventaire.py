@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service de notifications pour l'inventaire.
 
 Gère les notifications locales (en mémoire) pour les alertes de stock
@@ -9,8 +9,8 @@ import logging
 from typing import Any
 
 from src.services.notifications.types import (
-    TypeAlerte,
     NotificationInventaire,
+    TypeAlerte,
 )
 
 logger = logging.getLogger(__name__)
@@ -37,8 +37,8 @@ class ServiceNotificationsInventaire:
         return NotificationInventaire(
             id=self._next_id,
             type_alerte=TypeAlerte.STOCK_CRITIQUE,
-            article_id=article['id'],
-            ingredient_id=article['ingredient_id'],
+            article_id=article["id"],
+            ingredient_id=article["ingredient_id"],
             titre=f"âš ï¸ Stock critique: {article['nom']}",
             message=message,
             icone="âŒ",
@@ -59,8 +59,8 @@ class ServiceNotificationsInventaire:
         return NotificationInventaire(
             id=self._next_id,
             type_alerte=TypeAlerte.STOCK_BAS,
-            article_id=article['id'],
-            ingredient_id=article['ingredient_id'],
+            article_id=article["id"],
+            ingredient_id=article["ingredient_id"],
             titre=f"âš ï¸ Stock bas: {article['nom']}",
             message=message,
             icone="âš ï¸",
@@ -92,14 +92,14 @@ class ServiceNotificationsInventaire:
         message = (
             f"{icone} Date de péremption: {article.get('date_peremption')}\n"
             f"Jours restants: {jours_avant}\n"
-            f"Ã€ consommer dès que possible!"
+            f"À consommer dès que possible!"
         )
 
         return NotificationInventaire(
             id=self._next_id,
             type_alerte=type_alerte,
-            article_id=article['id'],
-            ingredient_id=article['ingredient_id'],
+            article_id=article["id"],
+            ingredient_id=article["ingredient_id"],
             titre=titre,
             message=message,
             icone=icone,
@@ -177,8 +177,7 @@ class ServiceNotificationsInventaire:
         if utilisateur_id in self.notifications:
             original_len = len(self.notifications[utilisateur_id])
             self.notifications[utilisateur_id] = [
-                n for n in self.notifications[utilisateur_id]
-                if n.id != notification_id
+                n for n in self.notifications[utilisateur_id] if n.id != notification_id
             ]
             return len(self.notifications[utilisateur_id]) < original_len
         return False
@@ -190,8 +189,7 @@ class ServiceNotificationsInventaire:
 
         avant = len(self.notifications[utilisateur_id])
         self.notifications[utilisateur_id] = [
-            n for n in self.notifications[utilisateur_id]
-            if not n.lue
+            n for n in self.notifications[utilisateur_id] if not n.lue
         ]
         apres = len(self.notifications[utilisateur_id])
 
@@ -212,9 +210,7 @@ class ServiceNotificationsInventaire:
         for notif in notifs:
             type_key = notif.type_alerte.value
             stats["par_type"][type_key] = stats["par_type"].get(type_key, 0) + 1
-            stats["par_priorite"][notif.priorite] = (
-                stats["par_priorite"].get(notif.priorite, 0) + 1
-            )
+            stats["par_priorite"][notif.priorite] = stats["par_priorite"].get(notif.priorite, 0) + 1
 
         return stats
 
@@ -249,9 +245,7 @@ class ServiceNotificationsInventaire:
         email_destinataire: str,
     ) -> bool:
         """Envoie une notification par email (stub)."""
-        logger.info(
-            f"ðŸ“§ Email alerte Ã  {email_destinataire}: {notification.titre}"
-        )
+        logger.info(f"ðŸ“§ Email alerte à {email_destinataire}: {notification.titre}")
 
         notification.email = email_destinataire
         notification.push_envoyee = True
@@ -259,9 +253,9 @@ class ServiceNotificationsInventaire:
         return True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SINGLETON
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 _service_notifications_inventaire: ServiceNotificationsInventaire | None = None
 

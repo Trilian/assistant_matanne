@@ -1,20 +1,21 @@
-﻿"""
+"""
 Tests pour src/utils/media.py
 Tests des classes ImageConfig, ImageCache, ImageOptimizer
 """
-import pytest
+
 from datetime import datetime, timedelta
 from io import BytesIO
-from unittest.mock import patch, MagicMock
+
+import pytest
 from PIL import Image
 
 from src.utils.media import (
-    ImageConfig,
     ImageCache,
+    ImageConfig,
     ImageOptimizer,
+    get_cache_stats,
     get_optimizer,
     optimize_uploaded_image,
-    get_cache_stats,
 )
 
 
@@ -34,11 +35,7 @@ class TestImageConfig:
     def test_config_personnalisee_recette(self):
         """Config pour images recettes (thumbnail)."""
         config = ImageConfig(
-            max_width=400,
-            max_height=300,
-            quality=75,
-            format="JPEG",
-            cache_ttl_seconds=7200
+            max_width=400, max_height=300, quality=75, format="JPEG", cache_ttl_seconds=7200
         )
         assert config.max_width == 400
         assert config.max_height == 300
@@ -68,10 +65,10 @@ class TestImageCache:
         """Set et get une image."""
         cache = ImageCache()
         image = Image.new("RGB", (100, 100), color="red")
-        
+
         cache.set("tarte-pommes", image)
         result = cache.get("tarte-pommes")
-        
+
         assert result is not None
         assert result.size == (100, 100)
 
@@ -84,11 +81,11 @@ class TestImageCache:
         """Clear vide le cache."""
         cache = ImageCache()
         image = Image.new("RGB", (100, 100))
-        
+
         cache.set("recette1", image)
         cache.set("recette2", image)
         assert cache.stats()["size"] == 2
-        
+
         cache.clear()
         assert cache.stats()["size"] == 0
 
@@ -96,14 +93,14 @@ class TestImageCache:
         """Cache expire après TTL."""
         cache = ImageCache(ttl_seconds=1)
         image = Image.new("RGB", (100, 100))
-        
+
         cache.set("test", image)
-        
+
         # Simuler expiration en modifiant le timestamp
         key = "test"
         img, _ = cache.cache[key]
         cache.cache[key] = (img, datetime.utcnow() - timedelta(seconds=5))
-        
+
         # Devrait retourner None car expiré
         result = cache.get("test")
         assert result is None
@@ -114,7 +111,7 @@ class TestImageCache:
         for i in range(5):
             image = Image.new("RGB", (50, 50))
             cache.set(f"recette_{i}", image)
-        
+
         stats = cache.stats()
         assert stats["size"] == 5
         assert len(stats["keys"]) == 5
@@ -149,9 +146,9 @@ class TestImageOptimizer:
         """Optimise image plus petite que max."""
         optimizer = ImageOptimizer(ImageConfig(max_width=1000, max_height=1000))
         image = Image.new("RGB", (100, 100), color="green")
-        
+
         result = optimizer.optimize(image)
-        
+
         # Pas de redimensionnement
         assert result.size == (100, 100)
 
@@ -159,9 +156,9 @@ class TestImageOptimizer:
         """Optimise image plus grande que max."""
         optimizer = ImageOptimizer(ImageConfig(max_width=100, max_height=100))
         image = Image.new("RGB", (500, 500), color="green")
-        
+
         result = optimizer.optimize(image)
-        
+
         # Redimensionnée
         assert result.width <= 100
         assert result.height <= 100
@@ -170,13 +167,13 @@ class TestImageOptimizer:
         """Optimize utilise le cache."""
         optimizer = ImageOptimizer()
         image = Image.new("RGB", (100, 100))
-        
+
         # Premier appel
         result1 = optimizer.optimize(image, key="mon-gateau")
-        
+
         # Deuxième appel avec la même clé
         result2 = optimizer.optimize(image, key="mon-gateau")
-        
+
         # Devrait retourner depuis le cache
         assert result1 is not None
         assert result2 is not None
@@ -185,9 +182,9 @@ class TestImageOptimizer:
         """Optimize bytes d'image."""
         optimizer = ImageOptimizer(ImageConfig(format="JPEG", quality=80))
         image_bytes = _create_test_image(100, 100)
-        
+
         result = optimizer.optimize_bytes(image_bytes)
-        
+
         assert isinstance(result, bytes)
         assert len(result) > 0
 
@@ -195,10 +192,10 @@ class TestImageOptimizer:
         """Get cache stats."""
         optimizer = ImageOptimizer()
         image = Image.new("RGB", (100, 100))
-        
+
         optimizer.optimize(image, key="test1")
         optimizer.optimize(image, key="test2")
-        
+
         stats = optimizer.get_cache_stats()
         assert stats["size"] == 2
 
@@ -226,9 +223,9 @@ class TestOptimizeUploadedImage:
     def test_optimize_simple(self):
         """Optimize image uploadée simple."""
         image_bytes = _create_test_image(100, 100)
-        
+
         result = optimize_uploaded_image(image_bytes)
-        
+
         assert isinstance(result, bytes)
         assert len(result) > 0
 
@@ -236,9 +233,9 @@ class TestOptimizeUploadedImage:
         """Optimize avec config personnalisée."""
         image_bytes = _create_test_image(500, 500)
         config = ImageConfig(max_width=100, max_height=100, quality=50)
-        
+
         result = optimize_uploaded_image(image_bytes, config=config)
-        
+
         # Vérifier que l'image est redimensionnée
         result_image = Image.open(BytesIO(result))
         assert result_image.width <= 100
@@ -247,9 +244,9 @@ class TestOptimizeUploadedImage:
     def test_optimize_avec_cle_cache(self):
         """Optimize avec clé de cache."""
         image_bytes = _create_test_image()
-        
+
         result = optimize_uploaded_image(image_bytes, key="pizza-quatre-fromages")
-        
+
         assert isinstance(result, bytes)
 
 
@@ -260,9 +257,8 @@ class TestGetCacheStats:
     def test_stats_format(self):
         """Stats retourne le bon format."""
         stats = get_cache_stats()
-        
+
         assert "size" in stats
         assert "keys" in stats
         assert isinstance(stats["size"], int)
         assert isinstance(stats["keys"], list)
-

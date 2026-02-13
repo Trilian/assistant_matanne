@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package PDF unifié.
 
 Fusionne les 2 anciens services:
@@ -8,50 +8,46 @@ Fusionne les 2 anciens services:
 Tous renommés en français avec alias rétrocompatibilité.
 """
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TYPES ET SCHÉMAS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
-from src.services.rapports.types import (
-    # Schémas export (français)
-    DonneesRecettePDF,
-    DonneesPlanningPDF,
-    DonneesCoursesPDF,
-    # Schémas rapports (français)
-    RapportStocks,
-    RapportBudget,
-    AnalyseGaspillage,
-    RapportPlanning,
-    # Alias rétrocompatibilité
-    RecettePDFData,
-    PlanningPDFData,
-    CoursesPDFData,
-)
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SERVICES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
+# ═══════════════════════════════════════════════════════════
 from src.services.rapports.export import (
-    ServiceExportPDF,
-    obtenir_service_export_pdf,
     # Alias rétrocompatibilité
     PDFExportService,
+    ServiceExportPDF,
     get_pdf_export_service,
+    obtenir_service_export_pdf,
 )
-
 from src.services.rapports.generation import (
-    ServiceRapportsPDF,
-    obtenir_service_rapports_pdf,
     # Alias rétrocompatibilité
     RapportsPDFService,
+    ServiceRapportsPDF,
     get_rapports_pdf_service,
+    obtenir_service_rapports_pdf,
+)
+from src.services.rapports.types import (
+    AnalyseGaspillage,
+    CoursesPDFData,
+    DonneesCoursesPDF,
+    DonneesPlanningPDF,
+    # Schémas export (français)
+    DonneesRecettePDF,
+    PlanningPDFData,
+    RapportBudget,
+    RapportPlanning,
+    # Schémas rapports (français)
+    RapportStocks,
+    # Alias rétrocompatibilité
+    RecettePDFData,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # EXPORTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 __all__ = [
     # === TYPES (français) ===
@@ -62,13 +58,11 @@ __all__ = [
     "RapportBudget",
     "AnalyseGaspillage",
     "RapportPlanning",
-    
     # === SERVICES (français) ===
     "ServiceExportPDF",
     "obtenir_service_export_pdf",
     "ServiceRapportsPDF",
     "obtenir_service_rapports_pdf",
-    
     # === ALIAS RÉTROCOMPATIBILITÉ ===
     # Types
     "RecettePDFData",

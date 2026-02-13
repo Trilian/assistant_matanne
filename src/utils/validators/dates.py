@@ -1,4 +1,4 @@
-﻿"""
+"""
 Validators - Validation dates
 """
 
@@ -97,4 +97,3 @@ def est_dans_x_jours(target: date, days: int) -> bool:
     """
     delta = jours_jusqua(target)
     return 0 <= delta <= days
-

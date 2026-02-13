@@ -1,14 +1,14 @@
-﻿"""Add cree_le column to historique_recettes table
+"""Add cree_le column to historique_recettes table
 
 Revision ID: 003
 Revises: 002_add_historique_recettes
 Create Date: 2026-01-16 13:00:00.000000
 
 """
-from alembic import op
-import sqlalchemy as sa
-from datetime import datetime
 
+import sqlalchemy as sa
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "003"

@@ -1,10 +1,10 @@
-﻿"""
+"""
 Client IA Unifié - Mistral AI
 """
 
 import asyncio
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import httpx
 
@@ -38,18 +38,19 @@ class ClientIA:
 
     def _ensure_config_loaded(self):
         """Charge la config au moment du premier accès (lazy loading)
-        
+
         En Streamlit Cloud, on retente à chaque appel car st.secrets n'est
         disponible que lors des interactions utilisateur.
         """
         # Déterminer si on est en Streamlit Cloud
         import os
+
         is_cloud = os.getenv("SF_PARTNER") == "streamlit"
-        
+
         # En Cloud, toujours retenter. Localement, charger une fois
         if self._config_loaded and not is_cloud:
             return
-        
+
         # Si on a déjà une config valide et pas en cloud, la conserver
         if self._config_loaded and self.cle_api:
             return
@@ -65,8 +66,8 @@ class ClientIA:
 
             logger.info(f"[OK] ClientIA initialisé (modèle: {self.modele})")
 
-        except ValueError as e:
-            logger.error(f"[ERROR] Configuration IA manquante: Clé API Mistral non configurée")
+        except ValueError:
+            logger.error("[ERROR] Configuration IA manquante: Clé API Mistral non configurée")
             # NE PAS marquer comme loaded en cas d'erreur
             # Cela permet une tentative lors du prochain appel (quand st.secrets sera prêt)
             self.cle_api = None
@@ -221,8 +222,8 @@ class ClientIA:
             # Vérifier que la réponse contient au moins un choix
             if not resultat.get("choices") or len(resultat["choices"]) == 0:
                 raise ErreurServiceIA(
-                    "Réponse IA invalide: pas de contenu", 
-                    message_utilisateur="Service IA retourné une réponse vide"
+                    "Réponse IA invalide: pas de contenu",
+                    message_utilisateur="Service IA retourné une réponse vide",
                 )
 
             contenu = resultat["choices"][0]["message"]["content"]
@@ -243,46 +244,41 @@ class ClientIA:
     ) -> str:
         """
         Appel API avec image (Vision) pour OCR.
-        
+
         Args:
             prompt: Instructions pour l'analyse
             image_base64: Image encodée en base64
             max_tokens: Tokens max pour la réponse
             temperature: Température (recommandé: 0.3 pour OCR)
-            
+
         Returns:
             Texte extrait de l'image
         """
         # Charger la config
         self._ensure_config_loaded()
-        
+
         if not self.cle_api:
             raise ErreurServiceIA(
                 "Clé API Mistral non configurée",
                 message_utilisateur="La clé API Mistral n'est pas configurée.",
             )
-        
+
         # Modèle vision (pixtral)
         vision_model = "pixtral-12b-2409"
-        
+
         messages = [
             {
                 "role": "user",
                 "content": [
-                    {
-                        "type": "text",
-                        "text": prompt
-                    },
+                    {"type": "text", "text": prompt},
                     {
                         "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{image_base64}"
-                        }
-                    }
-                ]
+                        "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"},
+                    },
+                ],
             }
         ]
-        
+
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
                 f"{self.url_base}/chat/completions",
@@ -297,19 +293,18 @@ class ClientIA:
                     "max_tokens": max_tokens,
                 },
             )
-            
+
             response.raise_for_status()
             result = response.json()
-            
+
             if not result.get("choices"):
                 raise ErreurServiceIA(
-                    "Réponse vision vide",
-                    message_utilisateur="L'analyse de l'image a échoué"
+                    "Réponse vision vide", message_utilisateur="L'analyse de l'image a échoué"
                 )
-            
+
             content = result["choices"][0]["message"]["content"]
             logger.info(f"[OK] Vision: {len(content)} caractères extraits")
-            
+
             return content
 
     # ═══════════════════════════════════════════════════════════
@@ -317,7 +312,7 @@ class ClientIA:
     # ═══════════════════════════════════════════════════════════
 
     async def discuter(
-        self, message: str, historique: Optional[list[dict]] = None, contexte: dict | None = None
+        self, message: str, historique: list[dict] | None = None, contexte: dict | None = None
     ) -> str:
         """
         Interface conversationnelle (legacy)
@@ -359,27 +354,27 @@ class ClientIA:
     ) -> dict | str | None:
         """
         Génère une réponse JSON de manière synchrone.
-        
+
         Wrapper sync autour de appeler() pour les contextes UI.
-        
+
         Args:
             prompt: Prompt utilisateur
             system_prompt: Instructions système (défaut: JSON uniquement)
             temperature: Température (défaut: 0.3 pour plus de précision)
             max_tokens: Tokens max
-            
+
         Returns:
             Dictionnaire parsé, string JSON brut, ou None si erreur
         """
         import concurrent.futures
         import json
-        
+
         # Exécuter async dans un thread pour éviter les conflits de boucle
         try:
             loop = asyncio.get_running_loop()
         except RuntimeError:
             loop = None
-        
+
         async def _call():
             return await self.appeler(
                 prompt=prompt,
@@ -388,7 +383,7 @@ class ClientIA:
                 max_tokens=max_tokens,
                 utiliser_cache=True,
             )
-        
+
         try:
             if loop is not None:
                 # Boucle d'événements active - utiliser un thread
@@ -398,10 +393,10 @@ class ClientIA:
             else:
                 # Pas de boucle - exécuter directement
                 response = asyncio.run(_call())
-            
+
             if not response:
                 return None
-            
+
             # Nettoyer et parser JSON
             cleaned = response.strip()
             if cleaned.startswith("```json"):
@@ -411,14 +406,14 @@ class ClientIA:
             if cleaned.endswith("```"):
                 cleaned = cleaned[:-3]
             cleaned = cleaned.strip()
-            
+
             return json.loads(cleaned)
-            
+
         except json.JSONDecodeError:
             # Retourner la réponse brute si pas du JSON valide
             logger.warning("Réponse non-JSON, retour brut")
-            return response if 'response' in dir() else None
-            
+            return response if "response" in dir() else None
+
         except Exception as e:
             logger.error(f"Erreur generer_json: {e}")
             return None

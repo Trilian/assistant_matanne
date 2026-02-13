@@ -1,4 +1,4 @@
-﻿"""
+"""
 tests/utils/__init__.py - Package pour les tests Utilités
 """
 
@@ -8,7 +8,4 @@ tests/utils/__init__.py - Package pour les tests Utilités
 # @pytest.mark.utils - Tests spécifiques aux utils
 # @pytest.mark.performance - Tests de performance
 
-__all__ = [
-    "test_week1_2",
-    "test_week3_4"
-]
+__all__ = ["test_week1_2", "test_week3_4"]

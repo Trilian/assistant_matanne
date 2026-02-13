@@ -1,35 +1,37 @@
-﻿"""
-Module Planificateur de Repas - Gestion des prÃefÃerences et feedbacks
+"""
+Module Planificateur de Repas - Gestion des préférences et feedbacks
 """
 
 from ._common import (
-    st, logger,
+    FeedbackRecette,
+    PreferencesUtilisateur,
     get_user_preference_service,
-    PreferencesUtilisateur, FeedbackRecette
+    logger,
+    st,
 )
 
 
 def charger_preferences() -> PreferencesUtilisateur:
     """
-    Charge les prÃefÃerences depuis la DB.
-    
-    Utilise un cache session_state pour Ãeviter les requêtes rÃepÃetÃees
+    Charge les préférences depuis la DB.
+
+    Utilise un cache session_state pour éviter les requêtes répétées
     pendant la même session Streamlit.
     """
-    # Cache en session pour Ãeviter requêtes DB rÃepÃetÃees
+    # Cache en session pour éviter requêtes DB répétées
     if "user_preferences" in st.session_state:
         return st.session_state.user_preferences
-    
+
     # Charger depuis DB
     try:
         service = get_user_preference_service()
         prefs = service.charger_preferences()
         st.session_state.user_preferences = prefs
-        logger.info("âœ… PrÃefÃerences chargÃees depuis DB")
+        logger.info("âœ… Préférences chargées depuis DB")
         return prefs
     except Exception as e:
-        logger.error(f"âŒ Erreur chargement prÃefÃerences: {e}")
-        # Fallback sur valeurs par dÃefaut
+        logger.error(f"âŒ Erreur chargement préférences: {e}")
+        # Fallback sur valeurs par défaut
         prefs = PreferencesUtilisateur(
             nb_adultes=2,
             jules_present=True,
@@ -50,26 +52,26 @@ def charger_preferences() -> PreferencesUtilisateur:
 
 def sauvegarder_preferences(prefs: PreferencesUtilisateur) -> bool:
     """
-    Sauvegarde les prÃefÃerences en DB.
-    
+    Sauvegarde les préférences en DB.
+
     Args:
-        prefs: PrÃefÃerences Ã  sauvegarder
-        
+        prefs: Préférences à sauvegarder
+
     Returns:
         True si succès
     """
     try:
         service = get_user_preference_service()
         success = service.sauvegarder_preferences(prefs)
-        
+
         if success:
-            # Mettre Ã  jour le cache session
+            # Mettre à jour le cache session
             st.session_state.user_preferences = prefs
-            logger.info("âœ… PrÃefÃerences sauvegardÃees en DB")
-        
+            logger.info("âœ… Préférences sauvegardées en DB")
+
         return success
     except Exception as e:
-        logger.error(f"âŒ Erreur sauvegarde prÃefÃerences: {e}")
+        logger.error(f"âŒ Erreur sauvegarde préférences: {e}")
         # Fallback: sauvegarder en session seulement
         st.session_state.user_preferences = prefs
         return False
@@ -78,18 +80,18 @@ def sauvegarder_preferences(prefs: PreferencesUtilisateur) -> bool:
 def charger_feedbacks() -> list[FeedbackRecette]:
     """
     Charge l'historique des feedbacks depuis la DB.
-    
+
     Utilise un cache session pour les performances.
     """
     # Cache en session
     if "recipe_feedbacks" in st.session_state:
         return st.session_state.recipe_feedbacks
-    
+
     try:
         service = get_user_preference_service()
         feedbacks = service.charger_feedbacks()
         st.session_state.recipe_feedbacks = feedbacks
-        logger.debug(f"ChargÃe {len(feedbacks)} feedbacks depuis DB")
+        logger.debug(f"Chargé {len(feedbacks)} feedbacks depuis DB")
         return feedbacks
     except Exception as e:
         logger.error(f"âŒ Erreur chargement feedbacks: {e}")
@@ -100,7 +102,7 @@ def charger_feedbacks() -> list[FeedbackRecette]:
 def ajouter_feedback(recette_id: int, recette_nom: str, feedback: str, contexte: str = None):
     """
     Ajoute un feedback sur une recette en DB.
-    
+
     Args:
         recette_id: ID de la recette
         recette_nom: Nom de la recette
@@ -110,32 +112,29 @@ def ajouter_feedback(recette_id: int, recette_nom: str, feedback: str, contexte:
     try:
         service = get_user_preference_service()
         success = service.ajouter_feedback(
-            recette_id=recette_id,
-            recette_nom=recette_nom,
-            feedback=feedback,
-            contexte=contexte
+            recette_id=recette_id, recette_nom=recette_nom, feedback=feedback, contexte=contexte
         )
-        
+
         if success:
-            # Mettre Ã  jour le cache session
+            # Mettre à jour le cache session
             fb = FeedbackRecette(
                 recette_id=recette_id,
                 recette_nom=recette_nom,
                 feedback=feedback,
                 contexte=contexte,
             )
-            
+
             if "recipe_feedbacks" not in st.session_state:
                 st.session_state.recipe_feedbacks = []
-            
+
             # Remplacer si feedback existant
             st.session_state.recipe_feedbacks = [
                 f for f in st.session_state.recipe_feedbacks if f.recette_id != recette_id
             ]
             st.session_state.recipe_feedbacks.append(fb)
-            
-            logger.info(f"âœ… Feedback ajoutÃe: {recette_nom} â†’ {feedback}")
-            
+
+            logger.info(f"âœ… Feedback ajouté: {recette_nom} â†’ {feedback}")
+
     except Exception as e:
         logger.error(f"âŒ Erreur ajout feedback: {e}")
         # Fallback: sauvegarder en session seulement

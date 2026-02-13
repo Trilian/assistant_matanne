@@ -1,17 +1,15 @@
-﻿"""
+"""
 Tests for src/services/suggestions/predictions.py
 
 PredictionService - ML predictions for inventory.
 """
 
 import pytest
-from datetime import datetime, timedelta
-from statistics import mean
 
 from src.services.suggestions.predictions import (
-    PredictionService,
-    PredictionArticle,
     AnalysePrediction,
+    PredictionArticle,
+    PredictionService,
     obtenir_service_predictions,
 )
 
@@ -100,9 +98,9 @@ class TestPredictionService:
         """Test initialisation."""
         assert service.min_data_points == 3
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # analyser_historique_article
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     def test_analyser_historique_article_basic(self, service):
         """Test analyse historique basique."""
@@ -247,9 +245,9 @@ class TestPredictionService:
         assert result is not None
         assert result["confiance"] == 1.0
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # predire_quantite
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     def test_predire_quantite_basic(self, service):
         """Test prédiction basique."""
@@ -262,7 +260,7 @@ class TestPredictionService:
         assert result == 10.0
 
     def test_predire_quantite_negative_capped(self, service):
-        """Test quantité négative plafonnée Ã  0."""
+        """Test quantité négative plafonnée à 0."""
         result = service.predire_quantite(5.0, 1.0, 30)
         assert result == 0.0  # Pas négatif
 
@@ -271,9 +269,9 @@ class TestPredictionService:
         result = service.predire_quantite(20.0, 0.5, 30)
         assert result == 5.0
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # detecter_rupture_risque
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     def test_detecter_rupture_risque_true(self, service):
         """Test détection risque de rupture."""
@@ -303,15 +301,15 @@ class TestPredictionService:
         assert jours == 10
 
     def test_detecter_rupture_risque_already_below_min(self, service):
-        """Test déjÃ  sous le minimum."""
+        """Test déjà sous le minimum."""
         risque, jours = service.detecter_rupture_risque(3.0, 5.0, 0.5)
         # (3 - 5) / 0.5 = -4 -> jours = 0
         assert risque is True
         assert jours == 0
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # generer_predictions
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     def test_generer_predictions_basic(self, service):
         """Test génération prédictions basique."""
@@ -401,9 +399,9 @@ class TestPredictionService:
         predictions = service.generer_predictions(articles, [])
         assert len(predictions) == 1
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # obtenir_analyse_globale
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     def test_obtenir_analyse_globale_basic(self, service):
         """Test analyse globale basique."""
@@ -510,9 +508,9 @@ class TestPredictionService:
         assert analyse.consommation_max == 0.8
         assert analyse.consommation_moyenne_globale == 0.5
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # generer_recommandations
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     def test_generer_recommandations_critique(self, service):
         """Test recommandations critiques."""

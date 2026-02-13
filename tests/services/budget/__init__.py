@@ -1,1 +1,1 @@
-﻿"""Tests pour le package budget."""
+"""Tests pour le package budget."""

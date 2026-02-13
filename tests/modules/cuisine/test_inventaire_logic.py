@@ -1,30 +1,30 @@
-﻿"""
+"""
 Tests pour inventaire_logic.py
 Couverture cible: 80%+
 """
-import pytest
+
 from datetime import date, datetime, timedelta
 
+import pytest
+
 from src.modules.cuisine.inventaire.utils import (
+    CATEGORIES,
     # Constantes
     EMPLACEMENTS,
-    CATEGORIES,
     STATUS_CONFIG,
+    calculer_status_global,
+    calculer_status_peremption,
     # Calcul de statut
     calculer_status_stock,
-    calculer_status_peremption,
-    calculer_status_global,
+    filtrer_par_categorie,
     # Filtrage
     filtrer_par_emplacement,
-    filtrer_par_categorie,
-    filtrer_par_status,
     filtrer_par_recherche,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantes:
@@ -57,9 +57,9 @@ class TestConstantes:
             assert "label" in config
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CALCUL STATUT STOCK
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculStatusStock:
@@ -96,9 +96,9 @@ class TestCalculStatusStock:
         assert calculer_status_stock(article) == "critique"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS CALCUL STATUT PÃ‰REMPTION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS CALCUL STATUT PÉREMPTION
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculStatusPeremption:
@@ -149,9 +149,9 @@ class TestCalculStatusPeremption:
         assert calculer_status_peremption(article) == "ok"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CALCUL STATUT GLOBAL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculStatusGlobal:
@@ -161,7 +161,7 @@ class TestCalculStatusGlobal:
         """Périmé est prioritaire sur tout."""
         article = {
             "quantite": 10,  # stock OK
-            "date_peremption": date.today() - timedelta(days=1)  # périmé
+            "date_peremption": date.today() - timedelta(days=1),  # périmé
         }
         result = calculer_status_global(article)
         assert result["status_prioritaire"] == "perime"
@@ -171,7 +171,7 @@ class TestCalculStatusGlobal:
         article = {
             "quantite": 1,  # critique
             "seuil_critique": 2,
-            "date_peremption": date.today() + timedelta(days=5)  # bientôt périmé
+            "date_peremption": date.today() + timedelta(days=5),  # bientôt périmé
         }
         result = calculer_status_global(article)
         assert result["status_prioritaire"] == "critique"
@@ -182,7 +182,7 @@ class TestCalculStatusGlobal:
             "quantite": 4,  # stock bas
             "seuil_alerte": 5,
             "seuil_critique": 2,
-            "date_peremption": date.today() + timedelta(days=5)  # bientôt périmé
+            "date_peremption": date.today() + timedelta(days=5),  # bientôt périmé
         }
         result = calculer_status_global(article)
         assert result["status_prioritaire"] == "bientot_perime"
@@ -193,7 +193,7 @@ class TestCalculStatusGlobal:
             "quantite": 4,
             "seuil_alerte": 5,
             "seuil_critique": 2,
-            "date_peremption": date.today() + timedelta(days=30)
+            "date_peremption": date.today() + timedelta(days=30),
         }
         result = calculer_status_global(article)
         assert result["status_prioritaire"] == "stock_bas"
@@ -204,7 +204,7 @@ class TestCalculStatusGlobal:
             "quantite": 10,
             "seuil_alerte": 5,
             "seuil_critique": 2,
-            "date_peremption": date.today() + timedelta(days=30)
+            "date_peremption": date.today() + timedelta(days=30),
         }
         result = calculer_status_global(article)
         assert result["status_prioritaire"] == "ok"
@@ -218,9 +218,9 @@ class TestCalculStatusGlobal:
         assert "emoji" in result["config"]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FILTRAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFiltrageEmplacement:
@@ -281,7 +281,7 @@ class TestFiltrageRecherche:
         return [
             {"ingredient_nom": "Lait entier", "notes": "Bio"},
             {"ingredient_nom": "Yaourt nature", "notes": ""},
-            {"ingredient_nom": "Crème fraîche", "notes": "Ã‰paisse"},
+            {"ingredient_nom": "Crème fraîche", "notes": "Épaisse"},
         ]
 
     def test_recherche_nom(self, articles):
@@ -290,7 +290,7 @@ class TestFiltrageRecherche:
         assert len(result) == 1
 
     def test_recherche_case_insensitive(self, articles):
-        """Recherche insensible Ã  la casse."""
+        """Recherche insensible à la casse."""
         result = filtrer_par_recherche(articles, "YAOURT")
         assert len(result) == 1
 
@@ -310,9 +310,9 @@ class TestFiltrageRecherche:
         assert len(result) == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS FILTRAGE COMBINÃ‰
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS FILTRAGE COMBINÉ
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFiltrageInventaire:
@@ -321,48 +321,68 @@ class TestFiltrageInventaire:
     @pytest.fixture
     def articles(self):
         return [
-            {"ingredient_nom": "Lait", "categorie": "Produits laitiers", "emplacement": "Frigo", "quantite": 1, "seuil_critique": 2},
-            {"ingredient_nom": "Pommes", "categorie": "Fruits & Légumes", "emplacement": "Frigo", "quantite": 10, "seuil_critique": 2},
-            {"ingredient_nom": "Yaourt", "categorie": "Produits laitiers", "emplacement": "Frigo", "quantite": 5, "seuil_critique": 2},
-            {"ingredient_nom": "Pain", "categorie": "Ã‰picerie", "emplacement": "Placard", "quantite": 2, "seuil_critique": 2},
+            {
+                "ingredient_nom": "Lait",
+                "categorie": "Produits laitiers",
+                "emplacement": "Frigo",
+                "quantite": 1,
+                "seuil_critique": 2,
+            },
+            {
+                "ingredient_nom": "Pommes",
+                "categorie": "Fruits & Légumes",
+                "emplacement": "Frigo",
+                "quantite": 10,
+                "seuil_critique": 2,
+            },
+            {
+                "ingredient_nom": "Yaourt",
+                "categorie": "Produits laitiers",
+                "emplacement": "Frigo",
+                "quantite": 5,
+                "seuil_critique": 2,
+            },
+            {
+                "ingredient_nom": "Pain",
+                "categorie": "Épicerie",
+                "emplacement": "Placard",
+                "quantite": 2,
+                "seuil_critique": 2,
+            },
         ]
 
     def test_filtre_unique(self, articles):
         """Un seul filtre appliqué."""
         from src.modules.cuisine.inventaire.utils import filtrer_inventaire
-        
+
         result = filtrer_inventaire(articles, categorie="Produits laitiers")
         assert len(result) == 2
 
     def test_filtres_combines(self, articles):
         """Plusieurs filtres combinés."""
         from src.modules.cuisine.inventaire.utils import filtrer_inventaire
-        
-        result = filtrer_inventaire(
-            articles, 
-            emplacement="Frigo", 
-            categorie="Produits laitiers"
-        )
+
+        result = filtrer_inventaire(articles, emplacement="Frigo", categorie="Produits laitiers")
         assert len(result) == 2
 
     def test_sans_filtre(self, articles):
         """Aucun filtre retourne tout."""
         from src.modules.cuisine.inventaire.utils import filtrer_inventaire
-        
+
         result = filtrer_inventaire(articles)
         assert len(result) == 4
 
     def test_filtre_avec_recherche(self, articles):
         """Filtre avec recherche textuelle."""
         from src.modules.cuisine.inventaire.utils import filtrer_inventaire
-        
+
         result = filtrer_inventaire(articles, recherche="lait")
         assert len(result) == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ALERTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculerAlertes:
@@ -377,17 +397,27 @@ class TestCalculerAlertes:
             # Stock OK
             {"ingredient_nom": "Eau", "quantite": 20, "seuil_critique": 2, "seuil_alerte": 5},
             # Bientôt périmé
-            {"ingredient_nom": "Yaourt", "quantite": 10, "seuil_critique": 2, "date_peremption": today + timedelta(days=3)},
+            {
+                "ingredient_nom": "Yaourt",
+                "quantite": 10,
+                "seuil_critique": 2,
+                "date_peremption": today + timedelta(days=3),
+            },
             # Périmé
-            {"ingredient_nom": "Crème", "quantite": 5, "seuil_critique": 2, "date_peremption": today - timedelta(days=1)},
+            {
+                "ingredient_nom": "Crème",
+                "quantite": 5,
+                "seuil_critique": 2,
+                "date_peremption": today - timedelta(days=1),
+            },
         ]
 
     def test_alertes_structure(self, articles_varies):
         """Les alertes ont la bonne structure."""
         from src.modules.cuisine.inventaire.utils import calculer_alertes
-        
+
         alertes = calculer_alertes(articles_varies)
-        
+
         assert "critique" in alertes
         assert "stock_bas" in alertes
         assert "perime" in alertes
@@ -396,27 +426,27 @@ class TestCalculerAlertes:
     def test_alerte_critique(self, articles_varies):
         """Détecte les articles en stock critique."""
         from src.modules.cuisine.inventaire.utils import calculer_alertes
-        
+
         alertes = calculer_alertes(articles_varies)
-        
+
         assert len(alertes["critique"]) == 1
         assert alertes["critique"][0]["ingredient_nom"] == "Lait"
 
     def test_alerte_perime(self, articles_varies):
         """Détecte les articles périmés."""
         from src.modules.cuisine.inventaire.utils import calculer_alertes
-        
+
         alertes = calculer_alertes(articles_varies)
-        
+
         assert len(alertes["perime"]) == 1
         assert alertes["perime"][0]["ingredient_nom"] == "Crème"
 
     def test_alerte_bientot_perime(self, articles_varies):
         """Détecte les articles bientôt périmés."""
         from src.modules.cuisine.inventaire.utils import calculer_alertes
-        
+
         alertes = calculer_alertes(articles_varies)
-        
+
         assert len(alertes["bientot_perime"]) == 1
         assert alertes["bientot_perime"][0]["ingredient_nom"] == "Yaourt"
 
@@ -427,16 +457,16 @@ class TestCompterAlertes:
     def test_compte_correct(self):
         """Compte les alertes correctement."""
         from src.modules.cuisine.inventaire.utils import compter_alertes
-        
+
         alertes = {
             "critique": [1, 2, 3],
             "stock_bas": [1],
             "perime": [],
             "bientot_perime": [1, 2],
         }
-        
+
         result = compter_alertes(alertes)
-        
+
         assert result["critique"] == 3
         assert result["stock_bas"] == 1
         assert result["perime"] == 0
@@ -445,22 +475,22 @@ class TestCompterAlertes:
     def test_compte_vide(self):
         """Compte des alertes vides."""
         from src.modules.cuisine.inventaire.utils import compter_alertes
-        
+
         alertes = {
             "critique": [],
             "stock_bas": [],
             "perime": [],
             "bientot_perime": [],
         }
-        
+
         result = compter_alertes(alertes)
-        
+
         assert all(v == 0 for v in result.values())
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestStatistiquesInventaire:
@@ -472,32 +502,37 @@ class TestStatistiquesInventaire:
         return [
             {"ingredient_nom": "Lait", "quantite": 1, "seuil_critique": 2, "seuil_alerte": 5},
             {"ingredient_nom": "Eau", "quantite": 20, "seuil_critique": 2, "seuil_alerte": 5},
-            {"ingredient_nom": "Yaourt", "quantite": 5, "seuil_critique": 2, "date_peremption": today + timedelta(days=3)},
+            {
+                "ingredient_nom": "Yaourt",
+                "quantite": 5,
+                "seuil_critique": 2,
+                "date_peremption": today + timedelta(days=3),
+            },
         ]
 
     def test_statistiques_structure(self, articles):
         """Les statistiques ont la bonne structure."""
         from src.modules.cuisine.inventaire.utils import calculer_statistiques_inventaire
-        
+
         stats = calculer_statistiques_inventaire(articles)
-        
+
         assert "total_articles" in stats
         assert "articles_ok" in stats or "articles_alerte" in stats
 
     def test_compte_total(self, articles):
         """Compte le total d'articles."""
         from src.modules.cuisine.inventaire.utils import calculer_statistiques_inventaire
-        
+
         stats = calculer_statistiques_inventaire(articles)
-        
+
         assert stats["total_articles"] == 3
 
     def test_liste_vide(self):
         """Statistiques d'une liste vide."""
         from src.modules.cuisine.inventaire.utils import calculer_statistiques_inventaire
-        
+
         stats = calculer_statistiques_inventaire([])
-        
+
         assert stats["total_articles"] == 0
 
 
@@ -508,16 +543,16 @@ class TestGroupement:
     def articles(self):
         return [
             {"ingredient_nom": "Lait", "emplacement": "Frigo", "categorie": "Produits laitiers"},
-            {"ingredient_nom": "Pain", "emplacement": "Placard", "categorie": "Ã‰picerie"},
+            {"ingredient_nom": "Pain", "emplacement": "Placard", "categorie": "Épicerie"},
             {"ingredient_nom": "Yaourt", "emplacement": "Frigo", "categorie": "Produits laitiers"},
         ]
 
     def test_grouper_par_emplacement(self, articles):
         """Groupe par emplacement."""
         from src.modules.cuisine.inventaire.utils import grouper_par_emplacement
-        
+
         result = grouper_par_emplacement(articles)
-        
+
         assert "Frigo" in result
         assert "Placard" in result
         assert len(result["Frigo"]) == 2
@@ -526,11 +561,11 @@ class TestGroupement:
     def test_grouper_par_categorie(self, articles):
         """Groupe par catégorie."""
         from src.modules.cuisine.inventaire.utils import grouper_par_categorie
-        
+
         result = grouper_par_categorie(articles)
-        
+
         assert "Produits laitiers" in result
-        assert "Ã‰picerie" in result
+        assert "Épicerie" in result
         assert len(result["Produits laitiers"]) == 2
 
 
@@ -540,44 +575,33 @@ class TestValidationArticle:
     def test_article_valide(self):
         """Article avec tous les champs valides."""
         from src.modules.cuisine.inventaire.utils import valider_article_inventaire
-        
-        article = {
-            "ingredient_nom": "Lait",
-            "quantite": 5,
-            "unite": "L",
-            "emplacement": "Frigo"
-        }
-        
+
+        article = {"ingredient_nom": "Lait", "quantite": 5, "unite": "L", "emplacement": "Frigo"}
+
         valide, erreurs = valider_article_inventaire(article)
-        
+
         assert valide is True
         assert len(erreurs) == 0
 
     def test_article_nom_manquant(self):
         """Article sans nom."""
         from src.modules.cuisine.inventaire.utils import valider_article_inventaire
-        
-        article = {
-            "quantite": 5,
-            "unite": "L"
-        }
-        
+
+        article = {"quantite": 5, "unite": "L"}
+
         valide, erreurs = valider_article_inventaire(article)
-        
+
         assert valide is False
         assert len(erreurs) > 0
 
     def test_article_quantite_negative(self):
         """Article avec quantité négative."""
         from src.modules.cuisine.inventaire.utils import valider_article_inventaire
-        
-        article = {
-            "ingredient_nom": "Lait",
-            "quantite": -1
-        }
-        
+
+        article = {"ingredient_nom": "Lait", "quantite": -1}
+
         valide, erreurs = valider_article_inventaire(article)
-        
+
         assert valide is False
 
 
@@ -587,29 +611,25 @@ class TestFormatage:
     def test_formater_article_label(self):
         """Formate l'étiquette d'un article."""
         from src.modules.cuisine.inventaire.utils import formater_article_label
-        
-        article = {
-            "ingredient_nom": "Lait",
-            "quantite": 2,
-            "unite": "L"
-        }
-        
+
+        article = {"ingredient_nom": "Lait", "quantite": 2, "unite": "L"}
+
         label = formater_article_label(article)
-        
+
         assert "Lait" in label
         assert "2" in label
 
     def test_formater_inventaire_rapport(self):
         """Formate un rapport d'inventaire."""
         from src.modules.cuisine.inventaire.utils import formater_inventaire_rapport
-        
+
         articles = [
             {"ingredient_nom": "Lait", "quantite": 2, "unite": "L", "emplacement": "Frigo"},
             {"ingredient_nom": "Pain", "quantite": 1, "unite": "unité", "emplacement": "Placard"},
         ]
-        
+
         rapport = formater_inventaire_rapport(articles)
-        
+
         assert "Lait" in rapport
         assert "Pain" in rapport
 
@@ -620,31 +640,31 @@ class TestCalculJoursPeremption:
     def test_jours_positifs(self):
         """Calcule les jours restants."""
         from src.modules.cuisine.inventaire.utils import calculer_jours_avant_peremption
-        
+
         today = date.today()
         article = {"date_peremption": today + timedelta(days=5)}
-        
+
         jours = calculer_jours_avant_peremption(article)
-        
+
         assert jours == 5
 
     def test_jours_negatifs(self):
         """Article périmé (jours négatifs)."""
         from src.modules.cuisine.inventaire.utils import calculer_jours_avant_peremption
-        
+
         today = date.today()
         article = {"date_peremption": today - timedelta(days=3)}
-        
+
         jours = calculer_jours_avant_peremption(article)
-        
+
         assert jours == -3
 
     def test_sans_date_peremption(self):
         """Article sans date de péremption."""
         from src.modules.cuisine.inventaire.utils import calculer_jours_avant_peremption
-        
+
         article = {"ingredient_nom": "Sel"}
-        
+
         jours = calculer_jours_avant_peremption(article)
-        
+
         assert jours is None

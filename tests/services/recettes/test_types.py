@@ -1,18 +1,18 @@
-﻿"""Tests pour src/services/recettes/types.py"""
+"""Tests pour src/services/recettes/types.py"""
 
 import pytest
 from pydantic import ValidationError
 
 from src.services.recettes.types import (
-    RecetteSuggestion,
-    VersionBebeGeneree,
-    VersionBatchCookingGeneree,
-    VersionRobotGeneree,
-    # Aliases anglais
-    RecipeSuggestion,
     BabyVersionGenerated,
     BatchCookingVersionGenerated,
+    RecetteSuggestion,
+    # Aliases anglais
+    RecipeSuggestion,
     RobotVersionGenerated,
+    VersionBatchCookingGeneree,
+    VersionBebeGeneree,
+    VersionRobotGeneree,
 )
 
 
@@ -162,11 +162,11 @@ class TestVersionBebeGeneree:
     def test_valid_version_bebe(self):
         """Test création valide."""
         version = VersionBebeGeneree(
-            instructions_modifiees="Cuire jusqu'Ã  très tendre",
-            notes_bebe="Ã‰viter le sel, mixer si nécessaire",
+            instructions_modifiees="Cuire jusqu'à très tendre",
+            notes_bebe="Éviter le sel, mixer si nécessaire",
             age_minimum_mois=12,
         )
-        assert version.instructions_modifiees == "Cuire jusqu'Ã  très tendre"
+        assert version.instructions_modifiees == "Cuire jusqu'à très tendre"
         assert version.age_minimum_mois == 12
 
     def test_default_age(self):
@@ -216,7 +216,7 @@ class TestVersionBatchCookingGeneree:
             nombre_portions_recommande=12,
             temps_preparation_total_heures=2.5,
             conseils_conservation="Réfrigérateur 5 jours",
-            conseils_congelation="Jusqu'Ã  3 mois",
+            conseils_congelation="Jusqu'à 3 mois",
             calendrier_preparation="Dimanche: préparation",
         )
         assert version.nombre_portions_recommande == 12

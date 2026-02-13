@@ -1,13 +1,14 @@
-﻿import sys
 import os
-sys.path.insert(0, os.path.abspath('.'))
+import sys
+
+sys.path.insert(0, os.path.abspath("."))
 #!/usr/bin/env python3
 """
 Script de gestion - Remplace le Makefile pour Streamlit Cloud
 Usage: python manage.py <command>
 """
-import sys
 import subprocess
+import sys
 from pathlib import Path
 
 

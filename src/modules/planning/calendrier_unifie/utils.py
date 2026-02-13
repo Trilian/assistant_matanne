@@ -1,4 +1,4 @@
-﻿"""
+"""
 Logique metier du Calendrier Familial Unifie
 
 Agrège TOUS les evenements familiaux dans une vue unique:
@@ -12,14 +12,14 @@ Agrège TOUS les evenements familiaux dans une vue unique:
 Separee de l'UI pour être testable sans Streamlit.
 """
 
-from datetime import date, datetime, timedelta, time
-from typing import Optional, Dict, Any, List, Tuple
-from dataclasses import dataclass, field
-from enum import Enum
 import logging
+from dataclasses import dataclass, field
+from datetime import date, datetime, time, timedelta
+from enum import Enum
+from typing import Any
 
 from src.modules.shared.constantes import JOURS_SEMAINE, JOURS_SEMAINE_COURT
-from src.modules.shared.date_utils import obtenir_debut_semaine as get_debut_semaine, obtenir_fin_semaine as get_fin_semaine
+from src.modules.shared.date_utils import obtenir_debut_semaine as get_debut_semaine
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 class TypeEvenement(str, Enum):
     """Types d'evenements dans le calendrier unifie."""
+
     REPAS_MIDI = "repas_midi"
     REPAS_SOIR = "repas_soir"
     GOUTER = "gouter"
@@ -40,9 +41,9 @@ class TypeEvenement(str, Enum):
     RDV_MEDICAL = "rdv_medical"
     RDV_AUTRE = "rdv_autre"
     ROUTINE = "routine"
-    MENAGE = "menage"           # ðŸ§¹ Tâches menage
-    JARDIN = "jardin"           # ðŸŒ± Tâches jardin
-    ENTRETIEN = "entretien"     # ðŸ”§ Entretien maison
+    MENAGE = "menage"  # ðŸ§¹ Tâches menage
+    JARDIN = "jardin"  # ðŸŒ± Tâches jardin
+    ENTRETIEN = "entretien"  # ðŸ”§ Entretien maison
     EVENEMENT = "evenement"
 
 
@@ -67,54 +68,55 @@ EMOJI_TYPE = {
 COULEUR_TYPE = {
     TypeEvenement.REPAS_MIDI: "#FFB74D",  # Orange clair
     TypeEvenement.REPAS_SOIR: "#7986CB",  # Bleu/violet
-    TypeEvenement.GOUTER: "#F48FB1",      # Rose
+    TypeEvenement.GOUTER: "#F48FB1",  # Rose
     TypeEvenement.BATCH_COOKING: "#81C784",  # Vert
-    TypeEvenement.COURSES: "#4DD0E1",     # Cyan
-    TypeEvenement.ACTIVITE: "#BA68C8",    # Violet
-    TypeEvenement.RDV_MEDICAL: "#E57373", # Rouge clair
-    TypeEvenement.RDV_AUTRE: "#90A4AE",   # Gris
-    TypeEvenement.ROUTINE: "#A1887F",     # Marron
-    TypeEvenement.MENAGE: "#FFCC80",      # Orange pâle
-    TypeEvenement.JARDIN: "#A5D6A7",      # Vert pâle
-    TypeEvenement.ENTRETIEN: "#BCAAA4",   # Marron clair
-    TypeEvenement.EVENEMENT: "#64B5F6",   # Bleu
+    TypeEvenement.COURSES: "#4DD0E1",  # Cyan
+    TypeEvenement.ACTIVITE: "#BA68C8",  # Violet
+    TypeEvenement.RDV_MEDICAL: "#E57373",  # Rouge clair
+    TypeEvenement.RDV_AUTRE: "#90A4AE",  # Gris
+    TypeEvenement.ROUTINE: "#A1887F",  # Marron
+    TypeEvenement.MENAGE: "#FFCC80",  # Orange pâle
+    TypeEvenement.JARDIN: "#A5D6A7",  # Vert pâle
+    TypeEvenement.ENTRETIEN: "#BCAAA4",  # Marron clair
+    TypeEvenement.EVENEMENT: "#64B5F6",  # Bleu
 }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # DATACLASSES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @dataclass
 class EvenementCalendrier:
     """Évenement unifie dans le calendrier."""
+
     id: str  # Format: "{type}_{id_source}"
     type: TypeEvenement
     titre: str
     date_jour: date
-    heure_debut: Optional[time] = None
-    heure_fin: Optional[time] = None
-    description: Optional[str] = None
-    lieu: Optional[str] = None
-    participants: List[str] = field(default_factory=list)
+    heure_debut: time | None = None
+    heure_fin: time | None = None
+    description: str | None = None
+    lieu: str | None = None
+    participants: list[str] = field(default_factory=list)
     pour_jules: bool = False
-    version_jules: Optional[str] = None  # Instructions adaptees Jules
-    budget: Optional[float] = None
-    magasin: Optional[str] = None  # Pour courses
-    recette_id: Optional[int] = None  # Pour repas
-    session_id: Optional[int] = None  # Pour batch
+    version_jules: str | None = None  # Instructions adaptees Jules
+    budget: float | None = None
+    magasin: str | None = None  # Pour courses
+    recette_id: int | None = None  # Pour repas
+    session_id: int | None = None  # Pour batch
     termine: bool = False
-    notes: Optional[str] = None
-    
+    notes: str | None = None
+
     @property
     def emoji(self) -> str:
         return EMOJI_TYPE.get(self.type, "ðŸ“Œ")
-    
+
     @property
     def couleur(self) -> str:
         return COULEUR_TYPE.get(self.type, "#90A4AE")
-    
+
     @property
     def heure_str(self) -> str:
         if self.heure_debut:
@@ -125,92 +127,105 @@ class EvenementCalendrier:
 @dataclass
 class JourCalendrier:
     """Representation d'un jour dans le calendrier."""
+
     date_jour: date
-    evenements: List[EvenementCalendrier] = field(default_factory=list)
-    
+    evenements: list[EvenementCalendrier] = field(default_factory=list)
+
     @property
     def est_aujourdhui(self) -> bool:
         return self.date_jour == date.today()
-    
+
     @property
     def jour_semaine(self) -> str:
         return JOURS_SEMAINE[self.date_jour.weekday()]
-    
+
     @property
     def jour_semaine_court(self) -> str:
         return JOURS_SEMAINE_COURT[self.date_jour.weekday()]
-    
+
     @property
-    def repas_midi(self) -> Optional[EvenementCalendrier]:
+    def repas_midi(self) -> EvenementCalendrier | None:
         for evt in self.evenements:
             if evt.type == TypeEvenement.REPAS_MIDI:
                 return evt
         return None
-    
+
     @property
-    def repas_soir(self) -> Optional[EvenementCalendrier]:
+    def repas_soir(self) -> EvenementCalendrier | None:
         for evt in self.evenements:
             if evt.type == TypeEvenement.REPAS_SOIR:
                 return evt
         return None
-    
+
     @property
-    def gouter(self) -> Optional[EvenementCalendrier]:
+    def gouter(self) -> EvenementCalendrier | None:
         for evt in self.evenements:
             if evt.type == TypeEvenement.GOUTER:
                 return evt
         return None
-    
+
     @property
-    def batch_cooking(self) -> Optional[EvenementCalendrier]:
+    def batch_cooking(self) -> EvenementCalendrier | None:
         for evt in self.evenements:
             if evt.type == TypeEvenement.BATCH_COOKING:
                 return evt
         return None
-    
+
     @property
-    def courses(self) -> List[EvenementCalendrier]:
+    def courses(self) -> list[EvenementCalendrier]:
         return [evt for evt in self.evenements if evt.type == TypeEvenement.COURSES]
-    
+
     @property
-    def activites(self) -> List[EvenementCalendrier]:
+    def activites(self) -> list[EvenementCalendrier]:
         return [evt for evt in self.evenements if evt.type == TypeEvenement.ACTIVITE]
-    
+
     @property
-    def rdv(self) -> List[EvenementCalendrier]:
-        return [evt for evt in self.evenements 
-                if evt.type in (TypeEvenement.RDV_MEDICAL, TypeEvenement.RDV_AUTRE)]
-    
+    def rdv(self) -> list[EvenementCalendrier]:
+        return [
+            evt
+            for evt in self.evenements
+            if evt.type in (TypeEvenement.RDV_MEDICAL, TypeEvenement.RDV_AUTRE)
+        ]
+
     @property
-    def taches_menage(self) -> List[EvenementCalendrier]:
+    def taches_menage(self) -> list[EvenementCalendrier]:
         """Tâches menage du jour."""
-        return [evt for evt in self.evenements 
-                if evt.type in (TypeEvenement.MENAGE, TypeEvenement.ENTRETIEN)]
-    
+        return [
+            evt
+            for evt in self.evenements
+            if evt.type in (TypeEvenement.MENAGE, TypeEvenement.ENTRETIEN)
+        ]
+
     @property
-    def taches_jardin(self) -> List[EvenementCalendrier]:
+    def taches_jardin(self) -> list[EvenementCalendrier]:
         """Tâches jardin du jour."""
         return [evt for evt in self.evenements if evt.type == TypeEvenement.JARDIN]
-    
+
     @property
-    def autres_evenements(self) -> List[EvenementCalendrier]:
+    def autres_evenements(self) -> list[EvenementCalendrier]:
         types_principaux = {
-            TypeEvenement.REPAS_MIDI, TypeEvenement.REPAS_SOIR, 
-            TypeEvenement.GOUTER, TypeEvenement.BATCH_COOKING,
-            TypeEvenement.COURSES, TypeEvenement.ACTIVITE,
-            TypeEvenement.RDV_MEDICAL, TypeEvenement.RDV_AUTRE,
-            TypeEvenement.MENAGE, TypeEvenement.JARDIN, TypeEvenement.ENTRETIEN,
+            TypeEvenement.REPAS_MIDI,
+            TypeEvenement.REPAS_SOIR,
+            TypeEvenement.GOUTER,
+            TypeEvenement.BATCH_COOKING,
+            TypeEvenement.COURSES,
+            TypeEvenement.ACTIVITE,
+            TypeEvenement.RDV_MEDICAL,
+            TypeEvenement.RDV_AUTRE,
+            TypeEvenement.MENAGE,
+            TypeEvenement.JARDIN,
+            TypeEvenement.ENTRETIEN,
         }
         return [evt for evt in self.evenements if evt.type not in types_principaux]
-    
+
     @property
     def nb_evenements(self) -> int:
         return len(self.evenements)
-    
+
     @property
     def est_vide(self) -> bool:
         return len(self.evenements) == 0
-    
+
     @property
     def a_repas_planifies(self) -> bool:
         return self.repas_midi is not None or self.repas_soir is not None
@@ -219,17 +234,18 @@ class JourCalendrier:
 @dataclass
 class SemaineCalendrier:
     """Representation d'une semaine dans le calendrier."""
+
     date_debut: date  # Toujours un lundi
-    jours: List[JourCalendrier] = field(default_factory=list)
-    
+    jours: list[JourCalendrier] = field(default_factory=list)
+
     @property
     def date_fin(self) -> date:
         return self.date_debut + timedelta(days=6)
-    
+
     @property
     def titre(self) -> str:
-        return f"{self.date_debut.strftime('%d/%m')} â€” {self.date_fin.strftime('%d/%m/%Y')}"
-    
+        return f"{self.date_debut.strftime('%d/%m')} — {self.date_fin.strftime('%d/%m/%Y')}"
+
     @property
     def nb_repas_planifies(self) -> int:
         count = 0
@@ -239,26 +255,26 @@ class SemaineCalendrier:
             if jour.repas_soir:
                 count += 1
         return count
-    
+
     @property
     def nb_sessions_batch(self) -> int:
         return sum(1 for jour in self.jours if jour.batch_cooking)
-    
+
     @property
     def nb_courses(self) -> int:
         return sum(len(jour.courses) for jour in self.jours)
-    
+
     @property
     def nb_activites(self) -> int:
         return sum(len(jour.activites) for jour in self.jours)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FONCTIONS DE CALCUL (importees de shared/date_utils.py)
 # get_debut_semaine, get_fin_semaine importes en haut du fichier
 
 
-def get_jours_semaine(date_debut: date) -> List[date]:
+def get_jours_semaine(date_debut: date) -> list[date]:
     """Retourne les 7 jours de la semaine a partir du lundi."""
     lundi = get_debut_semaine(date_debut)
     return [lundi + timedelta(days=i) for i in range(7)]
@@ -274,31 +290,33 @@ def get_semaine_suivante(date_debut: date) -> date:
     return get_debut_semaine(date_debut) + timedelta(days=7)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # AGRÉGATION DES ÉVÉNEMENTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
-def convertir_repas_en_evenement(repas: Any) -> Optional[EvenementCalendrier]:
+def convertir_repas_en_evenement(repas: Any) -> EvenementCalendrier | None:
     """Convertit un objet Repas SQLAlchemy en EvenementCalendrier."""
     if not repas:
         return None
-    
+
     try:
-        type_evt = TypeEvenement.REPAS_SOIR if repas.type_repas == "dîner" else TypeEvenement.REPAS_MIDI
-        
+        type_evt = (
+            TypeEvenement.REPAS_SOIR if repas.type_repas == "dîner" else TypeEvenement.REPAS_MIDI
+        )
+
         # Recuperer le nom de la recette si disponible
         titre = "Repas non defini"
         version_jules = None
         recette_id = None
-        
-        if hasattr(repas, 'recette') and repas.recette:
+
+        if hasattr(repas, "recette") and repas.recette:
             titre = repas.recette.nom
             recette_id = repas.recette.id
             # Version Jules si disponible
-            if hasattr(repas.recette, 'instructions_bebe') and repas.recette.instructions_bebe:
+            if hasattr(repas.recette, "instructions_bebe") and repas.recette.instructions_bebe:
                 version_jules = repas.recette.instructions_bebe
-        
+
         return EvenementCalendrier(
             id=f"repas_{repas.id}",
             type=type_evt,
@@ -307,165 +325,169 @@ def convertir_repas_en_evenement(repas: Any) -> Optional[EvenementCalendrier]:
             pour_jules=True,  # Toujours inclure Jules
             version_jules=version_jules,
             recette_id=recette_id,
-            termine=repas.prepare if hasattr(repas, 'prepare') else False,
-            notes=repas.notes if hasattr(repas, 'notes') else None,
+            termine=repas.prepare if hasattr(repas, "prepare") else False,
+            notes=repas.notes if hasattr(repas, "notes") else None,
         )
     except Exception as e:
         logger.error(f"Erreur conversion repas: {e}")
         return None
 
 
-def convertir_session_batch_en_evenement(session: Any) -> Optional[EvenementCalendrier]:
+def convertir_session_batch_en_evenement(session: Any) -> EvenementCalendrier | None:
     """Convertit une SessionBatchCooking en EvenementCalendrier."""
     if not session:
         return None
-    
+
     try:
-        heure = session.heure_debut if hasattr(session, 'heure_debut') else time(14, 0)
-        
+        heure = session.heure_debut if hasattr(session, "heure_debut") else time(14, 0)
+
         # Construire titre avec les recettes
         titre = "Session Batch Cooking"
-        if hasattr(session, 'recettes_planifiees') and session.recettes_planifiees:
-            nb_recettes = len(session.recettes_planifiees) if isinstance(session.recettes_planifiees, list) else 0
+        if hasattr(session, "recettes_planifiees") and session.recettes_planifiees:
+            nb_recettes = (
+                len(session.recettes_planifiees)
+                if isinstance(session.recettes_planifiees, list)
+                else 0
+            )
             titre = f"Batch Cooking ({nb_recettes} plats)"
-        
+
         return EvenementCalendrier(
             id=f"batch_{session.id}",
             type=TypeEvenement.BATCH_COOKING,
             titre=titre,
             date_jour=session.date_session,
             heure_debut=heure,
-            pour_jules=session.avec_jules if hasattr(session, 'avec_jules') else False,
+            pour_jules=session.avec_jules if hasattr(session, "avec_jules") else False,
             session_id=session.id,
-            termine=session.statut == "terminee" if hasattr(session, 'statut') else False,
-            notes=session.notes if hasattr(session, 'notes') else None,
+            termine=session.statut == "terminee" if hasattr(session, "statut") else False,
+            notes=session.notes if hasattr(session, "notes") else None,
         )
     except Exception as e:
         logger.error(f"Erreur conversion session batch: {e}")
         return None
 
 
-def convertir_activite_en_evenement(activite: Any) -> Optional[EvenementCalendrier]:
+def convertir_activite_en_evenement(activite: Any) -> EvenementCalendrier | None:
     """Convertit une FamilyActivity en EvenementCalendrier."""
     if not activite:
         return None
-    
+
     try:
         # Determiner si c'est un RDV medical
         type_evt = TypeEvenement.ACTIVITE
-        if hasattr(activite, 'type_activite'):
-            if activite.type_activite in ('medical', 'medical', 'sante', 'rdv_medical'):
+        if hasattr(activite, "type_activite"):
+            if activite.type_activite in ("medical", "medical", "sante", "rdv_medical"):
                 type_evt = TypeEvenement.RDV_MEDICAL
-        
+
         return EvenementCalendrier(
             id=f"activite_{activite.id}",
             type=type_evt,
-            titre=activite.titre if hasattr(activite, 'titre') else "Activite",
-            date_jour=activite.date_prevue if hasattr(activite, 'date_prevue') else date.today(),
-            heure_debut=activite.heure_debut if hasattr(activite, 'heure_debut') else None,
-            lieu=activite.lieu if hasattr(activite, 'lieu') else None,
-            pour_jules=activite.pour_jules if hasattr(activite, 'pour_jules') else False,
-            budget=activite.cout_estime if hasattr(activite, 'cout_estime') else None,
-            termine=activite.statut == "termine" if hasattr(activite, 'statut') else False,
-            notes=activite.notes if hasattr(activite, 'notes') else None,
+            titre=activite.titre if hasattr(activite, "titre") else "Activite",
+            date_jour=activite.date_prevue if hasattr(activite, "date_prevue") else date.today(),
+            heure_debut=activite.heure_debut if hasattr(activite, "heure_debut") else None,
+            lieu=activite.lieu if hasattr(activite, "lieu") else None,
+            pour_jules=activite.pour_jules if hasattr(activite, "pour_jules") else False,
+            budget=activite.cout_estime if hasattr(activite, "cout_estime") else None,
+            termine=activite.statut == "termine" if hasattr(activite, "statut") else False,
+            notes=activite.notes if hasattr(activite, "notes") else None,
         )
     except Exception as e:
         logger.error(f"Erreur conversion activite: {e}")
         return None
 
 
-def convertir_event_calendrier_en_evenement(event: Any) -> Optional[EvenementCalendrier]:
+def convertir_event_calendrier_en_evenement(event: Any) -> EvenementCalendrier | None:
     """Convertit un CalendarEvent en EvenementCalendrier."""
     if not event:
         return None
-    
+
     try:
         # Determiner le type
         type_evt = TypeEvenement.EVENEMENT
-        if hasattr(event, 'type_event'):
-            if event.type_event in ('medical', 'medical', 'sante'):
+        if hasattr(event, "type_event"):
+            if event.type_event in ("medical", "medical", "sante"):
                 type_evt = TypeEvenement.RDV_MEDICAL
-            elif event.type_event in ('courses', 'shopping'):
+            elif event.type_event in ("courses", "shopping"):
                 type_evt = TypeEvenement.COURSES
-        
+
         heure = None
-        if hasattr(event, 'date_debut') and isinstance(event.date_debut, datetime):
+        if hasattr(event, "date_debut") and isinstance(event.date_debut, datetime):
             heure = event.date_debut.time()
-        
+
         date_jour = date.today()
-        if hasattr(event, 'date_debut'):
+        if hasattr(event, "date_debut"):
             if isinstance(event.date_debut, datetime):
                 date_jour = event.date_debut.date()
             elif isinstance(event.date_debut, date):
                 date_jour = event.date_debut
-        
+
         return EvenementCalendrier(
             id=f"event_{event.id}",
             type=type_evt,
-            titre=event.titre if hasattr(event, 'titre') else "Évenement",
+            titre=event.titre if hasattr(event, "titre") else "Évenement",
             date_jour=date_jour,
             heure_debut=heure,
-            lieu=event.lieu if hasattr(event, 'lieu') else None,
-            description=event.description if hasattr(event, 'description') else None,
-            termine=event.termine if hasattr(event, 'termine') else False,
+            lieu=event.lieu if hasattr(event, "lieu") else None,
+            description=event.description if hasattr(event, "description") else None,
+            termine=event.termine if hasattr(event, "termine") else False,
         )
     except Exception as e:
         logger.error(f"Erreur conversion event: {e}")
         return None
 
 
-def convertir_tache_menage_en_evenement(tache: Any) -> Optional[EvenementCalendrier]:
+def convertir_tache_menage_en_evenement(tache: Any) -> EvenementCalendrier | None:
     """
     Convertit une MaintenanceTask (tâche menage/entretien) en EvenementCalendrier.
-    
+
     Args:
         tache: Objet MaintenanceTask SQLAlchemy
-        
+
     Returns:
         EvenementCalendrier ou None si erreur
     """
     if not tache:
         return None
-    
+
     try:
         # Determiner le type selon la categorie
-        categorie = getattr(tache, 'categorie', 'menage')
-        if categorie in ('menage', 'nettoyage', 'rangement'):
+        categorie = getattr(tache, "categorie", "menage")
+        if categorie in ("menage", "nettoyage", "rangement"):
             type_evt = TypeEvenement.MENAGE
-        elif categorie in ('jardin', 'exterieur', 'pelouse'):
+        elif categorie in ("jardin", "exterieur", "pelouse"):
             type_evt = TypeEvenement.JARDIN
         else:
             type_evt = TypeEvenement.ENTRETIEN
-        
+
         # Recuperer la date de prochaine execution
-        date_jour = getattr(tache, 'prochaine_fois', None) or date.today()
-        
+        date_jour = getattr(tache, "prochaine_fois", None) or date.today()
+
         # Construire le titre avec responsable si present
-        titre = getattr(tache, 'nom', 'Tâche')
-        responsable = getattr(tache, 'responsable', None)
+        titre = getattr(tache, "nom", "Tâche")
+        responsable = getattr(tache, "responsable", None)
         if responsable:
             titre = f"{titre} ({responsable})"
-        
+
         # Duree en description
-        duree = getattr(tache, 'duree_minutes', None)
-        description = getattr(tache, 'description', '')
+        duree = getattr(tache, "duree_minutes", None)
+        description = getattr(tache, "description", "")
         if duree:
-            description = f"~{duree}min â€¢ {description}"
-        
+            description = f"~{duree}min • {description}"
+
         # Calculer si en retard
         est_en_retard = False
-        prochaine = getattr(tache, 'prochaine_fois', None)
+        prochaine = getattr(tache, "prochaine_fois", None)
         if prochaine and prochaine < date.today():
             est_en_retard = True
-        
+
         return EvenementCalendrier(
             id=f"menage_{tache.id}",
             type=type_evt,
             titre=titre,
             date_jour=date_jour,
             description=description,
-            termine=getattr(tache, 'fait', False),
-            notes=f"âš ï¸ EN RETARD!" if est_en_retard else getattr(tache, 'notes', None),
+            termine=getattr(tache, "fait", False),
+            notes="âš ï¸ EN RETARD!" if est_en_retard else getattr(tache, "notes", None),
         )
     except Exception as e:
         logger.error(f"Erreur conversion tâche menage: {e}")
@@ -473,30 +495,28 @@ def convertir_tache_menage_en_evenement(tache: Any) -> Optional[EvenementCalendr
 
 
 def generer_taches_menage_semaine(
-    taches: List[Any],
-    date_debut: date,
-    date_fin: date
-) -> Dict[date, List[EvenementCalendrier]]:
+    taches: list[Any], date_debut: date, date_fin: date
+) -> dict[date, list[EvenementCalendrier]]:
     """
     Genère les evenements menage pour une semaine en se basant sur frequence_jours.
-    
+
     Logique:
     - Si prochaine_fois dans la semaine â†’ afficher ce jour
     - Si frequence_jours defini â†’ calculer les occurrences dans la semaine
     - Sinon â†’ afficher uniquement si prochaine_fois dans la semaine
-    
+
     Returns:
         Dict[date, List[EvenementCalendrier]] pour chaque jour de la semaine
     """
-    taches_par_jour: Dict[date, List[EvenementCalendrier]] = {}
-    
+    taches_par_jour: dict[date, list[EvenementCalendrier]] = {}
+
     for tache in taches:
-        if not getattr(tache, 'integrer_planning', False):
+        if not getattr(tache, "integrer_planning", False):
             continue  # Ne pas afficher les tâches non integrees au planning
-        
-        prochaine = getattr(tache, 'prochaine_fois', None)
-        frequence = getattr(tache, 'frequence_jours', None)
-        
+
+        prochaine = getattr(tache, "prochaine_fois", None)
+        frequence = getattr(tache, "frequence_jours", None)
+
         # Cas 1: Tâche avec prochaine_fois dans la semaine
         if prochaine and date_debut <= prochaine <= date_fin:
             evt = convertir_tache_menage_en_evenement(tache)
@@ -504,27 +524,26 @@ def generer_taches_menage_semaine(
                 if prochaine not in taches_par_jour:
                     taches_par_jour[prochaine] = []
                 taches_par_jour[prochaine].append(evt)
-        
+
         # Cas 2: Tâche recurrente sans prochaine_fois â†’ generer par jour de semaine
         elif frequence and frequence <= 7:
             # Tâches hebdomadaires: on les met sur des jours fixes bases sur leur ID
             # Pour eviter tout le menage le même jour!
             jour_offset = (tache.id or 0) % 7  # Distribuer sur la semaine
             jour_cible = date_debut + timedelta(days=jour_offset)
-            
+
             evt = convertir_tache_menage_en_evenement(tache)
             if evt:
                 evt.date_jour = jour_cible
                 if jour_cible not in taches_par_jour:
                     taches_par_jour[jour_cible] = []
                 taches_par_jour[jour_cible].append(evt)
-    
+
     return taches_par_jour
+
+
 def creer_evenement_courses(
-    date_jour: date,
-    magasin: str,
-    heure: Optional[time] = None,
-    id_source: Optional[int] = None
+    date_jour: date, magasin: str, heure: time | None = None, id_source: int | None = None
 ) -> EvenementCalendrier:
     """Cree un evenement courses."""
     return EvenementCalendrier(
@@ -539,16 +558,16 @@ def creer_evenement_courses(
 
 def agreger_evenements_jour(
     date_jour: date,
-    repas: List[Any] = None,
-    sessions_batch: List[Any] = None,
-    activites: List[Any] = None,
-    events: List[Any] = None,
-    courses_planifiees: List[Dict] = None,
-    taches_menage: List[EvenementCalendrier] = None,
+    repas: list[Any] = None,
+    sessions_batch: list[Any] = None,
+    activites: list[Any] = None,
+    events: list[Any] = None,
+    courses_planifiees: list[dict] = None,
+    taches_menage: list[EvenementCalendrier] = None,
 ) -> JourCalendrier:
     """
     Agrège tous les evenements d'un jour dans une structure unifiee.
-    
+
     Args:
         date_jour: Date du jour
         repas: Liste des objets Repas SQLAlchemy
@@ -556,94 +575,94 @@ def agreger_evenements_jour(
         activites: Liste des FamilyActivity
         events: Liste des CalendarEvent
         courses_planifiees: Liste de dicts {magasin, heure}
-        taches_menage: Liste d'EvenementCalendrier dejÃ  convertis pour ce jour
-    
+        taches_menage: Liste d'EvenementCalendrier dejà convertis pour ce jour
+
     Returns:
         JourCalendrier avec tous les evenements
     """
     evenements = []
-    
+
     # Convertir les repas
     if repas:
         for r in repas:
-            if hasattr(r, 'date_repas') and r.date_repas == date_jour:
+            if hasattr(r, "date_repas") and r.date_repas == date_jour:
                 evt = convertir_repas_en_evenement(r)
                 if evt:
                     evenements.append(evt)
-    
+
     # Convertir les sessions batch
     if sessions_batch:
         for s in sessions_batch:
-            if hasattr(s, 'date_session') and s.date_session == date_jour:
+            if hasattr(s, "date_session") and s.date_session == date_jour:
                 evt = convertir_session_batch_en_evenement(s)
                 if evt:
                     evenements.append(evt)
-    
+
     # Convertir les activites
     if activites:
         for a in activites:
             evt = convertir_activite_en_evenement(a)
             if evt and evt.date_jour == date_jour:
                 evenements.append(evt)
-    
+
     # Convertir les evenements calendrier
     if events:
         for e in events:
             evt = convertir_event_calendrier_en_evenement(e)
             if evt and evt.date_jour == date_jour:
                 evenements.append(evt)
-    
+
     # Ajouter les courses planifiees
     if courses_planifiees:
         for c in courses_planifiees:
-            if c.get('date') == date_jour:
+            if c.get("date") == date_jour:
                 evt = creer_evenement_courses(
                     date_jour=date_jour,
-                    magasin=c.get('magasin', 'Courses'),
-                    heure=c.get('heure'),
+                    magasin=c.get("magasin", "Courses"),
+                    heure=c.get("heure"),
                 )
                 evenements.append(evt)
-    
-    # Ajouter les tâches menage (dejÃ  converties)
+
+    # Ajouter les tâches menage (dejà converties)
     if taches_menage:
         evenements.extend(taches_menage)
-    
+
     # Trier par heure puis par type
     evenements.sort(key=lambda e: (e.heure_debut or time(23, 59), e.type.value))
-    
+
     return JourCalendrier(date_jour=date_jour, evenements=evenements)
 
 
 def construire_semaine_calendrier(
     date_debut: date,
-    repas: List[Any] = None,
-    sessions_batch: List[Any] = None,
-    activites: List[Any] = None,
-    events: List[Any] = None,
-    courses_planifiees: List[Dict] = None,
-    taches_menage: List[Any] = None,
+    repas: list[Any] = None,
+    sessions_batch: list[Any] = None,
+    activites: list[Any] = None,
+    events: list[Any] = None,
+    courses_planifiees: list[dict] = None,
+    taches_menage: list[Any] = None,
 ) -> SemaineCalendrier:
     """
     Construit une semaine complète de calendrier.
-    
+
     Args:
         date_debut: Date de debut (sera alignee sur le lundi)
         repas, sessions_batch, activites, events: Donnees brutes
         courses_planifiees: Liste de {date, magasin, heure}
-        taches_menage: Liste des MaintenanceTask Ã  integrer
-    
+        taches_menage: Liste des MaintenanceTask à integrer
+
     Returns:
         SemaineCalendrier avec les 7 jours
     """
     lundi = get_debut_semaine(date_debut)
     dimanche = lundi + timedelta(days=6)
     jours = []
-    
+
     # Pre-traiter les tâches menage pour toute la semaine
-    taches_par_jour: Dict[date, List[EvenementCalendrier]] = {}
+    taches_par_jour: dict[date, list[EvenementCalendrier]] = {}
     if taches_menage:
         taches_par_jour = generer_taches_menage_semaine(taches_menage, lundi, dimanche)
-    
+
     for i in range(7):
         jour_date = lundi + timedelta(days=i)
         jour = agreger_evenements_jour(
@@ -656,73 +675,75 @@ def construire_semaine_calendrier(
             taches_menage=taches_par_jour.get(jour_date, []),
         )
         jours.append(jour)
-    
+
     return SemaineCalendrier(date_debut=lundi, jours=jours)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # IMPRESSION / EXPORT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def generer_texte_semaine_pour_impression(semaine: SemaineCalendrier) -> str:
     """
     Genère un texte formate de la semaine pour impression.
-    
+
     Returns:
         Texte formate pour être colle sur le frigo
     """
     lignes = []
-    lignes.append(f"â•â•â• SEMAINE DU {semaine.titre} â•â•â•")
+    lignes.append(f"═══ SEMAINE DU {semaine.titre} ═══")
     lignes.append("")
-    
+
     for jour in semaine.jours:
         lignes.append(f"â–¶ {jour.jour_semaine.upper()} {jour.date_jour.strftime('%d/%m')}")
         lignes.append("-" * 30)
-        
+
         if jour.repas_midi:
             lignes.append(f"  ðŸŒž Midi: {jour.repas_midi.titre}")
             if jour.repas_midi.version_jules:
                 lignes.append(f"     ðŸ‘¶ Jules: {jour.repas_midi.version_jules[:50]}...")
-        
+
         if jour.repas_soir:
             lignes.append(f"  ðŸŒ™ Soir: {jour.repas_soir.titre}")
             if jour.repas_soir.version_jules:
                 lignes.append(f"     ðŸ‘¶ Jules: {jour.repas_soir.version_jules[:50]}...")
-        
+
         if jour.gouter:
             lignes.append(f"  ðŸ° Goûter: {jour.gouter.titre}")
-        
+
         if jour.batch_cooking:
             lignes.append(f"  ðŸ³ BATCH COOKING {jour.batch_cooking.heure_str}")
-        
+
         for courses in jour.courses:
             lignes.append(f"  ðŸ›’ Courses: {courses.magasin} {courses.heure_str}")
-        
+
         for activite in jour.activites:
             lignes.append(f"  ðŸŽ¨ {activite.titre} {activite.heure_str}")
-        
+
         for rdv in jour.rdv:
             emoji = "ðŸ¥" if rdv.type == TypeEvenement.RDV_MEDICAL else "ðŸ“…"
             lignes.append(f"  {emoji} {rdv.titre} {rdv.heure_str}")
-        
+
         if jour.est_vide:
             lignes.append("  (rien de planifie)")
-        
+
         lignes.append("")
-    
-    lignes.append("â•" * 35)
-    lignes.append(f"ðŸ“Š {semaine.nb_repas_planifies} repas | {semaine.nb_sessions_batch} batch | {semaine.nb_courses} courses")
-    
+
+    lignes.append("═" * 35)
+    lignes.append(
+        f"ðŸ“Š {semaine.nb_repas_planifies} repas | {semaine.nb_sessions_batch} batch | {semaine.nb_courses} courses"
+    )
+
     return "\n".join(lignes)
 
 
 def generer_html_semaine_pour_impression(semaine: SemaineCalendrier) -> str:
     """
     Genère un HTML formate de la semaine pour impression.
-    
+
     Returns:
-        HTML prêt Ã  imprimer
+        HTML prêt à imprimer
     """
     html = f"""
     <html>
@@ -740,37 +761,37 @@ def generer_html_semaine_pour_impression(semaine: SemaineCalendrier) -> str:
     <body>
         <h1>ðŸ“… SEMAINE DU {semaine.titre}</h1>
     """
-    
+
     for jour in semaine.jours:
         html += f"""
         <div class="jour">
             <div class="jour-titre">{jour.jour_semaine} {jour.date_jour.strftime('%d/%m')}</div>
         """
-        
+
         if jour.repas_midi:
             html += f'<div class="repas">ðŸŒž Midi: <b>{jour.repas_midi.titre}</b></div>'
             if jour.repas_midi.version_jules:
                 html += f'<div class="jules">ðŸ‘¶ {jour.repas_midi.version_jules[:60]}...</div>'
-        
+
         if jour.repas_soir:
             html += f'<div class="repas">ðŸŒ™ Soir: <b>{jour.repas_soir.titre}</b></div>'
             if jour.repas_soir.version_jules:
                 html += f'<div class="jules">ðŸ‘¶ {jour.repas_soir.version_jules[:60]}...</div>'
-        
+
         if jour.batch_cooking:
             html += f'<div class="event">ðŸ³ Batch Cooking {jour.batch_cooking.heure_str}</div>'
-        
+
         for courses in jour.courses:
             html += f'<div class="event">ðŸ›’ {courses.magasin} {courses.heure_str}</div>'
-        
+
         for rdv in jour.rdv:
             html += f'<div class="event">ðŸ¥ {rdv.titre} {rdv.heure_str}</div>'
-        
+
         html += "</div>"
-    
+
     html += """
     </body>
     </html>
     """
-    
+
     return html

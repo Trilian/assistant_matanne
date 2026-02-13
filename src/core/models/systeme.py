@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modèles SQLAlchemy pour le système et les sauvegardes.
 
 Contient :
@@ -14,23 +14,23 @@ from sqlalchemy import (
     DateTime,
     String,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TABLE BACKUPS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class Backup(Base):
     """Historique des sauvegardes.
-    
+
     Table SQL: backups
     Utilisé par: src/services/backup.py
-    
+
     Attributes:
         filename: Nom du fichier de backup
         tables_included: Liste des tables sauvegardées
@@ -51,10 +51,10 @@ class Backup(Base):
     compressed: Mapped[bool] = mapped_column(Boolean, default=True)
     storage_path: Mapped[str | None] = mapped_column(String(500))
     version: Mapped[str] = mapped_column(String(20), default="1.0.0")
-    
+
     # Supabase user
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), index=True)
-    
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
 

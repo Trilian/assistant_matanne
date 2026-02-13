@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Script pour gÃ©rer les tests et la couverture du projet Assistant Matanne.
 
@@ -13,9 +13,9 @@ Utilisation:
     python test_manager.py quick        # Tests rapides (skip lents)
 """
 
+import argparse
 import subprocess
 import sys
-import argparse
 from pathlib import Path
 
 
@@ -25,7 +25,7 @@ def run_command(cmd, description=""):
         print(f"\n{'='*70}")
         print(f"ðŸ“Œ {description}")
         print(f"{'='*70}\n")
-    
+
     try:
         result = subprocess.run(cmd, shell=True)
         return result.returncode == 0
@@ -54,12 +54,12 @@ def run_coverage():
         "-v"
     )
     success = run_command(cmd, "Tests avec RAPPORT DE COUVERTURE")
-    
+
     if success:
         print("\nâœ… Rapport de couverture gÃ©nÃ©rÃ©")
         print("ðŸ“Š Rapport HTML: htmlcov/index.html")
         print("ðŸ“Š Rapport XML: coverage.xml")
-    
+
     return success
 
 
@@ -107,10 +107,10 @@ def run_specific_test(pattern):
 
 def generate_report():
     """GÃ©nÃ©rer un rapport complet de couverture."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("ðŸ“Š GÃ‰NÃ‰RATION DU RAPPORT COMPLET DE COUVERTURE")
-    print("="*70 + "\n")
-    
+    print("=" * 70 + "\n")
+
     cmd = (
         "python -m pytest tests/ "
         "--cov=src "
@@ -119,21 +119,21 @@ def generate_report():
         "--cov-report=json "
         "-v --tb=line"
     )
-    
+
     success = run_command(cmd)
-    
+
     if success:
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("âœ… RAPPORTS GÃ‰NÃ‰RÃ‰S")
-        print("="*70)
+        print("=" * 70)
         print("ðŸ“Š Rapport HTML: htmlcov/index.html")
         print("ðŸ“Š Rapport JSON: coverage.json")
         print("ðŸ“Š Rapport Terminal: Voir au-dessus")
-        
+
         # Afficher un rÃ©sumÃ©
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("ðŸ” RÃ‰SUMÃ‰")
-        print("="*70)
+        print("=" * 70)
         print("""
 Pour visualiser le rapport de couverture:
   Windows: start htmlcov/index.html
@@ -146,19 +146,19 @@ Principaux fichiers Ã  amÃ©liorer:
   3. PrioritÃ©: src/services/weather.py
   4. PrioritÃ©: src/services/budget.py
         """)
-    
+
     return success
 
 
 def show_stats():
     """Afficher les statistiques des tests."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("ðŸ“Š STATISTIQUES DES TESTS")
-    print("="*70 + "\n")
-    
+    print("=" * 70 + "\n")
+
     # Compter les fichiers de test
     test_dir = Path("tests")
-    
+
     stats = {
         "core": len(list(test_dir.glob("core/test_*.py"))),
         "services": len(list(test_dir.glob("services/test_*.py"))),
@@ -168,42 +168,47 @@ def show_stats():
         "logic": len(list(test_dir.glob("logic/test_*.py"))),
         "e2e": len(list(test_dir.glob("e2e/test_*.py"))),
     }
-    
+
     total = sum(stats.values())
-    
-    print(f"ðŸ“ Fichiers de test par catÃ©gorie:")
+
+    print("ðŸ“ Fichiers de test par catÃ©gorie:")
     for category, count in stats.items():
         percentage = (count / total * 100) if total > 0 else 0
         print(f"   {category:15} {count:3} fichiers ({percentage:5.1f}%)")
-    
+
     print(f"\nðŸ“Š Total: {total} fichiers de test")
-    print(f"\nâœ… Tous les tests sont organisÃ©s et prÃªts Ã  s'exÃ©cuter!")
+    print("\nâœ… Tous les tests sont organisÃ©s et prÃªts Ã  s'exÃ©cuter!")
 
 
 def main():
     """Point d'entrÃ©e principal."""
-    parser = argparse.ArgumentParser(
-        description="Gestionnaire de tests pour Assistant Matanne"
-    )
-    
+    parser = argparse.ArgumentParser(description="Gestionnaire de tests pour Assistant Matanne")
+
     parser.add_argument(
         "command",
         nargs="?",
         default="all",
         choices=[
-            "all", "coverage", "core", "services", "ui", 
-            "integration", "utils", "quick", "report", "stats"
+            "all",
+            "coverage",
+            "core",
+            "services",
+            "ui",
+            "integration",
+            "utils",
+            "quick",
+            "report",
+            "stats",
         ],
-        help="Commande Ã  exÃ©cuter"
+        help="Commande Ã  exÃ©cuter",
     )
-    
+
     parser.add_argument(
-        "-k", "--pattern",
-        help="Pattern pour filtrer les tests (ex: 'test_recettes')"
+        "-k", "--pattern", help="Pattern pour filtrer les tests (ex: 'test_recettes')"
     )
-    
+
     args = parser.parse_args()
-    
+
     commands = {
         "all": run_all_tests,
         "coverage": run_coverage,
@@ -216,7 +221,7 @@ def main():
         "report": generate_report,
         "stats": show_stats,
     }
-    
+
     # ExÃ©cuter la commande
     if args.pattern and args.command in ["all", "coverage"]:
         success = run_specific_test(args.pattern)
@@ -228,7 +233,7 @@ def main():
             print(f"âŒ Commande inconnue: {args.command}")
             parser.print_help()
             return 1
-    
+
     # Retourner le code de sortie
     return 0 if success else 1
 

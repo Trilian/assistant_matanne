@@ -1,11 +1,9 @@
-﻿"""
+"""
 Tests unitaires pour planning.py
 
 Module: src.core.models.planning
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
 # from src.core.models.planning import ...
@@ -13,7 +11,6 @@ from unittest.mock import MagicMock, patch
 
 class TestPlanning:
     """Tests pour le module planning."""
-
 
     class TestPlanning:
         """Tests pour la classe Planning."""
@@ -28,7 +25,6 @@ class TestPlanning:
             # TODO: Implémenter
             pass
 
-
     class TestRepas:
         """Tests pour la classe Repas."""
 
@@ -42,7 +38,6 @@ class TestPlanning:
             # TODO: Implémenter
             pass
 
-
     class TestCalendarEvent:
         """Tests pour la classe CalendarEvent."""
 
@@ -55,4 +50,3 @@ class TestPlanning:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-

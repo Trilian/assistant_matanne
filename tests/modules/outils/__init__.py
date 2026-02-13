@@ -1,1 +1,1 @@
-﻿"""Tests pour domains/utils/logic/."""
+"""Tests pour domains/utils/logic/."""

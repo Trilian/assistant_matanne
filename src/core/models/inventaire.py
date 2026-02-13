@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modèles pour l'inventaire et le stock.
 
 Contient :
@@ -10,13 +10,11 @@ from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
-    Boolean,
     CheckConstraint,
     Date,
     DateTime,
     Float,
     ForeignKey,
-    Integer,
     String,
     Text,
 )
@@ -35,7 +33,7 @@ if TYPE_CHECKING:
 
 class ArticleInventaire(Base):
     """Article en stock dans l'inventaire.
-    
+
     Attributes:
         ingredient_id: ID de l'ingrédient
         quantite: Quantité en stock
@@ -61,14 +59,16 @@ class ArticleInventaire(Base):
     derniere_maj: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, index=True
     )
-    
+
     # Photos
     photo_url: Mapped[str | None] = mapped_column(String(500))
     photo_filename: Mapped[str | None] = mapped_column(String(200))
     photo_uploaded_at: Mapped[datetime | None] = mapped_column(DateTime)
-    
+
     # Code-barres
-    code_barres: Mapped[str | None] = mapped_column(String(50), unique=True, index=True, nullable=True)
+    code_barres: Mapped[str | None] = mapped_column(
+        String(50), unique=True, index=True, nullable=True
+    )
     prix_unitaire: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     # Relations
@@ -98,7 +98,7 @@ class ArticleInventaire(Base):
 
 class HistoriqueInventaire(Base):
     """Trace chaque modification de l'inventaire.
-    
+
     Attributes:
         article_id: ID de l'article modifié
         ingredient_id: ID de l'ingrédient
@@ -117,12 +117,12 @@ class HistoriqueInventaire(Base):
     ingredient_id: Mapped[int] = mapped_column(
         ForeignKey("ingredients.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    
+
     # Type de modification
     type_modification: Mapped[str] = mapped_column(
         String(50), nullable=False, index=True
     )  # "ajout", "modification", "suppression"
-    
+
     # Avant/Après
     quantite_avant: Mapped[float | None] = mapped_column(Float)
     quantite_apres: Mapped[float | None] = mapped_column(Float)
@@ -132,14 +132,14 @@ class HistoriqueInventaire(Base):
     date_peremption_apres: Mapped[date | None] = mapped_column(Date)
     emplacement_avant: Mapped[str | None] = mapped_column(String(100))
     emplacement_apres: Mapped[str | None] = mapped_column(String(100))
-    
+
     # Métadonnées
     date_modification: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, index=True
     )
     utilisateur: Mapped[str | None] = mapped_column(String(100))
     notes: Mapped[str | None] = mapped_column(Text)
-    
+
     # Relations
     article: Mapped["ArticleInventaire"] = relationship(back_populates="historique")
     ingredient: Mapped["Ingredient"] = relationship()

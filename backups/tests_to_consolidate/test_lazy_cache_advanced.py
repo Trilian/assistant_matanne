@@ -1,15 +1,14 @@
-﻿"""
+"""
 Tests profonds supplÃ©mentaires pour lazy_loader.py, cache.py et decorators.py
 
 Cible les fonctions non couvertes pour atteindre 80% de couverture.
 """
 
-import pytest
 import time
 from datetime import datetime, timedelta
-from unittest.mock import MagicMock, patch, PropertyMock
-from functools import wraps
+from unittest.mock import MagicMock, patch
 
+import pytest
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MOCK STREAMLIT SESSION STATE (amÃ©liorÃ©)
@@ -225,7 +224,7 @@ class TestCacheAlias:
 
     def test_clear_all_alias(self):
         """Test alias clear_all"""
-        from src.core.cache import clear_all, Cache
+        from src.core.cache import Cache, clear_all
 
         assert clear_all == Cache.vider
 

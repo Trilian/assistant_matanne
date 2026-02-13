@@ -1,42 +1,43 @@
-﻿"""
+"""
 Tests pour routines_logic.py - Module Famille
 Couverture cible: 80%+
 """
-import pytest
+
 from datetime import date, time, timedelta
 
+import pytest
+
 from src.modules.famille.routines_utils import (
+    JOURS_SEMAINE,
     # Constantes
     MOMENTS_JOURNEE,
     TYPES_ROUTINE,
-    JOURS_SEMAINE,
-    # Gestion du temps
-    get_moment_journee,
+    analyser_regularite,
     calculer_duree_routine,
     calculer_heure_fin,
-    # Filtrage et organisation
-    filtrer_par_moment,
-    filtrer_par_jour,
-    get_routines_aujourdhui,
-    grouper_par_moment,
-    trier_par_heure,
     # Statistiques
     calculer_statistiques_routines,
-    analyser_regularite,
-    # Suggestions
-    suggerer_routines_age,
     detecter_conflits_horaires,
-    # Validation
-    valider_routine,
+    filtrer_par_jour,
+    # Filtrage et organisation
+    filtrer_par_moment,
+    formater_duree,
     # Formatage
     formater_heure,
-    formater_duree,
+    # Gestion du temps
+    get_moment_journee,
+    get_routines_aujourdhui,
+    grouper_par_moment,
+    # Suggestions
+    suggerer_routines_age,
+    trier_par_heure,
+    # Validation
+    valider_routine,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -92,9 +93,9 @@ def routines_vides():
     return []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantesRoutines:
@@ -120,9 +121,9 @@ class TestConstantesRoutines:
         assert JOURS_SEMAINE[6] == "Dimanche"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS GESTION DU TEMPS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGestionTemps:
@@ -157,7 +158,6 @@ class TestGestionTemps:
 
     def test_get_moment_journee_string(self):
         """Heure en format string."""
-        from datetime import datetime
         heure_str = "2024-01-01T08:00:00"
         assert get_moment_journee(heure_str) == "Matin"
 
@@ -179,7 +179,7 @@ class TestGestionTemps:
         assert fin == time(8, 45)
 
     def test_calculer_heure_fin_passage_heure(self):
-        """Passage d'une heure Ã  l'autre."""
+        """Passage d'une heure à l'autre."""
         debut = time(8, 45)
         fin = calculer_heure_fin(debut, 30)
         assert fin == time(9, 15)
@@ -191,9 +191,9 @@ class TestGestionTemps:
         assert fin == time(9, 0)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FILTRAGE ET ORGANISATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFiltrageRoutines:
@@ -231,7 +231,7 @@ class TestFiltrageRoutines:
     def test_grouper_par_moment(self, routines_sample):
         """Groupement par moment."""
         result = grouper_par_moment(routines_sample)
-        
+
         assert "Matin" in result
         assert "Midi" in result
         assert "Soir" in result
@@ -263,7 +263,7 @@ class TestFiltrageRoutines:
         assert len(result) == 3
 
     def test_trier_par_heure_none(self):
-        """Routines sans heure vont Ã  la fin."""
+        """Routines sans heure vont à la fin."""
         routines = [
             {"heure": time(8, 0)},
             {"heure": None},
@@ -273,9 +273,9 @@ class TestFiltrageRoutines:
         assert result[-1]["heure"] is None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestStatistiquesRoutines:
@@ -284,7 +284,7 @@ class TestStatistiquesRoutines:
     def test_calculer_statistiques_routines(self, routines_sample):
         """Statistiques complètes."""
         result = calculer_statistiques_routines(routines_sample)
-        
+
         assert result["total"] == 5
         assert "par_type" in result
         assert "par_moment" in result
@@ -293,7 +293,7 @@ class TestStatistiquesRoutines:
         """Statistiques par type."""
         result = calculer_statistiques_routines(routines_sample)
         par_type = result["par_type"]
-        
+
         assert par_type.get("Réveil", 0) == 1
         assert par_type.get("Repas", 0) == 1
         assert par_type.get("Coucher", 0) == 1
@@ -304,6 +304,7 @@ class TestStatistiquesRoutines:
         assert result["total"] == 0
         assert result["par_type"] == {}
         assert result["par_moment"] == {}
+
 
 class TestAnalyseRegularite:
     """Tests pour l'analyse de régularité."""
@@ -342,9 +343,7 @@ class TestAnalyseRegularite:
     def test_analyser_regularite_faible(self):
         """Taux < 50% = Faible."""
         today = date.today()
-        historique = [
-            {"routine_id": 1, "date": today}
-        ]
+        historique = [{"routine_id": 1, "date": today}]
         result = analyser_regularite(historique, routine_id=1, jours=7)
         assert result["regularite"] == "Faible"
 
@@ -408,12 +407,7 @@ class TestValidationRoutine:
 
     def test_valider_routine_valide(self):
         """Routine valide."""
-        data = {
-            "titre": "Réveil",
-            "type": "Réveil",
-            "moment": "Matin",
-            "duree": 30
-        }
+        data = {"titre": "Réveil", "type": "Réveil", "moment": "Matin", "duree": 30}
         valide, erreurs = valider_routine(data)
         assert valide is True
         assert len(erreurs) == 0

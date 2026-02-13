@@ -1,15 +1,15 @@
-﻿"""
+"""
 Tests E2E pour les workflows complets des domains.
 Teste les flux utilisateur de bout en bout sans mock de la logique métier.
 """
-import pytest
+
 from datetime import date, time, timedelta
-from unittest.mock import patch, MagicMock
 
+import pytest
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # E2E: WORKFLOW CUISINE COMPLET
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.e2e
@@ -26,10 +26,10 @@ class TestWorkflowCuisineE2E:
         5. Trier par priorité
         """
         from src.modules.cuisine.courses.utils import (
+            calculer_statistiques,
             filtrer_articles,
             grouper_par_rayon,
             trier_par_priorite,
-            calculer_statistiques,
         )
 
         # 1. Articles initiaux
@@ -68,6 +68,7 @@ class TestWorkflowCuisineE2E:
         4. Modifier les préférences
         """
         import json
+
         from src.modules.cuisine.schemas import PreferencesUtilisateur
 
         # 1. Créer préférences
@@ -76,7 +77,7 @@ class TestWorkflowCuisineE2E:
             jules_present=True,
             aliments_exclus=["fruits de mer"],
             poisson_par_semaine=2,
-            budget_semaine=150.0
+            budget_semaine=150.0,
         )
 
         # 2. Sérialiser
@@ -93,9 +94,9 @@ class TestWorkflowCuisineE2E:
         assert restored.budget_semaine == prefs.budget_semaine
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # E2E: WORKFLOW FAMILLE COMPLET
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.e2e
@@ -111,10 +112,10 @@ class TestWorkflowFamilleE2E:
         4. Calculer le budget
         """
         from src.modules.famille.activites_utils import (
-            suggerer_activites_age,
-            filtrer_par_type,
             calculer_statistiques_activites,
+            filtrer_par_type,
             get_activites_a_venir,
+            suggerer_activites_age,
         )
 
         # 1. Suggestions pour Jules (19 mois)
@@ -141,7 +142,7 @@ class TestWorkflowFamilleE2E:
         assert stats["cout_total"] == 35.0
         assert stats["par_type"]["Sport"] == 2
 
-        # 5. Activités Ã  venir
+        # 5. Activités à venir
         a_venir = get_activites_a_venir(activites, jours=7)
         assert len(a_venir) == 4
 
@@ -154,23 +155,38 @@ class TestWorkflowFamilleE2E:
         4. Filtrer par jour
         """
         from src.modules.famille.routines_utils import (
-            grouper_par_moment,
+            JOURS_SEMAINE,
             calculer_duree_routine,
             filtrer_par_jour,
             get_moment_journee,
-            JOURS_SEMAINE,
+            grouper_par_moment,
         )
 
         # 1. Routines de Jules
         routines = [
-            {"type": "Réveil", "moment": "Matin", "heure": time(7, 0), "duree": 20,
-             "jours_actifs": ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"]},
+            {
+                "type": "Réveil",
+                "moment": "Matin",
+                "heure": time(7, 0),
+                "duree": 20,
+                "jours_actifs": ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"],
+            },
             {"type": "Repas", "moment": "Midi", "duree": 30, "jours_actifs": JOURS_SEMAINE},
             {"type": "Sieste", "moment": "Après-midi", "duree": 90, "jours_actifs": JOURS_SEMAINE},
-            {"type": "Bain", "moment": "Soir", "heure": time(18, 30), "duree": 20,
-             "jours_actifs": JOURS_SEMAINE},
-            {"type": "Coucher", "moment": "Soir", "heure": time(19, 30), "duree": 30,
-             "jours_actifs": JOURS_SEMAINE},
+            {
+                "type": "Bain",
+                "moment": "Soir",
+                "heure": time(18, 30),
+                "duree": 20,
+                "jours_actifs": JOURS_SEMAINE,
+            },
+            {
+                "type": "Coucher",
+                "moment": "Soir",
+                "heure": time(19, 30),
+                "duree": 30,
+                "jours_actifs": JOURS_SEMAINE,
+            },
         ]
 
         # 2. Grouper par moment
@@ -191,9 +207,9 @@ class TestWorkflowFamilleE2E:
         assert get_moment_journee(time(19, 0)) == "Soir"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # E2E: WORKFLOW PLANNING COMPLET
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.e2e
@@ -250,10 +266,10 @@ class TestWorkflowPlanningE2E:
         3. Vérifier les properties
         """
         from src.modules.planning.calendrier_unifie.utils import (
-            TypeEvenement,
             EvenementCalendrier,
             JourCalendrier,
             SemaineCalendrier,
+            TypeEvenement,
             get_debut_semaine,
         )
 
@@ -267,44 +283,52 @@ class TestWorkflowPlanningE2E:
             evenements = []
 
             # Repas midi tous les jours
-            evenements.append(EvenementCalendrier(
-                id=f"repas_midi_{i}",
-                type=TypeEvenement.REPAS_MIDI,
-                titre=f"Déjeuner jour {i+1}",
-                date_jour=jour_date,
-                heure_debut=time(12, 0)
-            ))
+            evenements.append(
+                EvenementCalendrier(
+                    id=f"repas_midi_{i}",
+                    type=TypeEvenement.REPAS_MIDI,
+                    titre=f"Déjeuner jour {i+1}",
+                    date_jour=jour_date,
+                    heure_debut=time(12, 0),
+                )
+            )
 
             # Activité mercredi après-midi
             if i == 2:  # Mercredi
-                evenements.append(EvenementCalendrier(
-                    id="activite_mercredi",
-                    type=TypeEvenement.ACTIVITE,
-                    titre="Activité Jules",
-                    date_jour=jour_date,
-                    heure_debut=time(14, 0),
-                    pour_jules=True
-                ))
+                evenements.append(
+                    EvenementCalendrier(
+                        id="activite_mercredi",
+                        type=TypeEvenement.ACTIVITE,
+                        titre="Activité Jules",
+                        date_jour=jour_date,
+                        heure_debut=time(14, 0),
+                        pour_jules=True,
+                    )
+                )
 
             # Courses samedi
             if i == 5:  # Samedi
-                evenements.append(EvenementCalendrier(
-                    id="courses_samedi",
-                    type=TypeEvenement.COURSES,
-                    titre="Courses Carrefour",
-                    date_jour=jour_date,
-                    magasin="Carrefour"
-                ))
+                evenements.append(
+                    EvenementCalendrier(
+                        id="courses_samedi",
+                        type=TypeEvenement.COURSES,
+                        titre="Courses Carrefour",
+                        date_jour=jour_date,
+                        magasin="Carrefour",
+                    )
+                )
 
             # Batch cooking dimanche
             if i == 6:  # Dimanche
-                evenements.append(EvenementCalendrier(
-                    id="batch_dimanche",
-                    type=TypeEvenement.BATCH_COOKING,
-                    titre="Batch cooking",
-                    date_jour=jour_date,
-                    heure_debut=time(10, 0)
-                ))
+                evenements.append(
+                    EvenementCalendrier(
+                        id="batch_dimanche",
+                        type=TypeEvenement.BATCH_COOKING,
+                        titre="Batch cooking",
+                        date_jour=jour_date,
+                        heure_debut=time(10, 0),
+                    )
+                )
 
             jours.append(JourCalendrier(date_jour=jour_date, evenements=evenements))
 
@@ -323,9 +347,9 @@ class TestWorkflowPlanningE2E:
         assert mercredi.activites[0].pour_jules is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # E2E: WORKFLOW MAISON COMPLET
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.e2e
@@ -341,12 +365,10 @@ class TestWorkflowMaisonE2E:
         4. Calculer les statistiques
         """
         from src.modules.maison.entretien_utils import (
-            calculer_jours_avant_tache,
-            get_taches_aujourd_hui,
-            get_taches_semaine,
-            get_taches_en_retard,
-            grouper_par_piece,
             calculer_statistiques_entretien,
+            get_taches_en_retard,
+            get_taches_semaine,
+            grouper_par_piece,
         )
 
         today = date.today()
@@ -354,21 +376,37 @@ class TestWorkflowMaisonE2E:
         # 1. Tâches d'entretien
         taches = [
             # Tâche en retard
-            {"titre": "Nettoyer filtres VMC", "piece": "Garage", 
-             "frequence": "Mensuelle", "categorie": "Maintenance",
-             "derniere_execution": today - timedelta(days=45)},
-            # Tâche Ã  faire cette semaine
-            {"titre": "Aspirateur", "piece": "Salon",
-             "frequence": "Hebdomadaire", "categorie": "Ménage",
-             "derniere_execution": today - timedelta(days=5)},
-            # Tâche Ã  jour
-            {"titre": "Nettoyage cuisine", "piece": "Cuisine",
-             "frequence": "Quotidienne", "categorie": "Ménage",
-             "derniere_execution": today - timedelta(days=1)},
+            {
+                "titre": "Nettoyer filtres VMC",
+                "piece": "Garage",
+                "frequence": "Mensuelle",
+                "categorie": "Maintenance",
+                "derniere_execution": today - timedelta(days=45),
+            },
+            # Tâche à faire cette semaine
+            {
+                "titre": "Aspirateur",
+                "piece": "Salon",
+                "frequence": "Hebdomadaire",
+                "categorie": "Ménage",
+                "derniere_execution": today - timedelta(days=5),
+            },
+            # Tâche à jour
+            {
+                "titre": "Nettoyage cuisine",
+                "piece": "Cuisine",
+                "frequence": "Quotidienne",
+                "categorie": "Ménage",
+                "derniere_execution": today - timedelta(days=1),
+            },
             # Tâche annuelle OK
-            {"titre": "Contrôle chaudière", "piece": "Garage",
-             "frequence": "Annuelle", "categorie": "Contrôle",
-             "derniere_execution": today - timedelta(days=100)},
+            {
+                "titre": "Contrôle chaudière",
+                "piece": "Garage",
+                "frequence": "Annuelle",
+                "categorie": "Contrôle",
+                "derniere_execution": today - timedelta(days=100),
+            },
         ]
 
         # 2. Identifier les urgentes
@@ -401,21 +439,30 @@ class TestWorkflowMaisonE2E:
         4. Prioriser
         """
         from src.modules.maison.entretien_utils import (
-            PIECES,
+            calculer_statistiques_entretien,
             filtrer_par_piece,
             valider_tache,
-            calculer_statistiques_entretien,
         )
 
         # 1. Créer tâches pour chaque pièce
         taches_printemps = []
         for piece in ["Cuisine", "Salon", "Chambre", "Salle de bain"]:
-            taches_printemps.extend([
-                {"titre": f"Nettoyer vitres - {piece}", "piece": piece,
-                 "frequence": "Trimestrielle", "categorie": "Ménage"},
-                {"titre": f"Nettoyer rideaux - {piece}", "piece": piece,
-                 "frequence": "Annuelle", "categorie": "Ménage"},
-            ])
+            taches_printemps.extend(
+                [
+                    {
+                        "titre": f"Nettoyer vitres - {piece}",
+                        "piece": piece,
+                        "frequence": "Trimestrielle",
+                        "categorie": "Ménage",
+                    },
+                    {
+                        "titre": f"Nettoyer rideaux - {piece}",
+                        "piece": piece,
+                        "frequence": "Annuelle",
+                        "categorie": "Ménage",
+                    },
+                ]
+            )
 
         # 2. Valider les tâches
         for tache in taches_printemps:
@@ -431,9 +478,9 @@ class TestWorkflowMaisonE2E:
         assert stats["total_taches"] == 8  # 4 pièces x 2 tâches
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # E2E: WORKFLOW CROSS-DOMAIN
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.e2e
@@ -449,20 +496,19 @@ class TestWorkflowCrossDomainE2E:
         4. Tâches ménage (maison)
         5. Planifier le tout (planning)
         """
-        from src.modules.famille.routines_utils import (
-            get_moment_journee,
-            calculer_duree_routine,
-        )
         from src.modules.cuisine.courses.utils import (
             filtrer_par_priorite,
+        )
+        from src.modules.famille.routines_utils import (
+            calculer_duree_routine,
         )
         from src.modules.maison.entretien_utils import (
             get_taches_aujourd_hui,
         )
         from src.modules.planning.calendrier_unifie.utils import (
-            TypeEvenement,
             EvenementCalendrier,
             JourCalendrier,
+            TypeEvenement,
         )
 
         today = date.today()
@@ -478,7 +524,7 @@ class TestWorkflowCrossDomainE2E:
 
         # 2. Courses urgentes pour le repas
         courses = [
-            {"ingredient_nom": "Pâtes", "priorite": "haute", "rayon_magasin": "Ã‰picerie"},
+            {"ingredient_nom": "Pâtes", "priorite": "haute", "rayon_magasin": "Épicerie"},
             {"ingredient_nom": "Fromage", "priorite": "moyenne", "rayon_magasin": "Laitier"},
         ]
         urgentes = filtrer_par_priorite(courses, "haute")
@@ -486,8 +532,11 @@ class TestWorkflowCrossDomainE2E:
 
         # 3. Tâches ménage du jour
         taches_menage = [
-            {"titre": "Aspirateur", "frequence": "Hebdomadaire",
-             "derniere_execution": today - timedelta(days=8)},
+            {
+                "titre": "Aspirateur",
+                "frequence": "Hebdomadaire",
+                "derniere_execution": today - timedelta(days=8),
+            },
         ]
         taches_jour = get_taches_aujourd_hui(taches_menage)
         assert len(taches_jour) >= 1
@@ -500,7 +549,7 @@ class TestWorkflowCrossDomainE2E:
                 type=TypeEvenement.ROUTINE,
                 titre="Routines matin",
                 date_jour=today,
-                heure_debut=time(7, 0)
+                heure_debut=time(7, 0),
             ),
             # Repas midi
             EvenementCalendrier(
@@ -508,7 +557,7 @@ class TestWorkflowCrossDomainE2E:
                 type=TypeEvenement.REPAS_MIDI,
                 titre="Pâtes au fromage",
                 date_jour=today,
-                heure_debut=time(12, 0)
+                heure_debut=time(12, 0),
             ),
             # Ménage
             EvenementCalendrier(
@@ -516,7 +565,7 @@ class TestWorkflowCrossDomainE2E:
                 type=TypeEvenement.MENAGE,
                 titre="Aspirateur",
                 date_jour=today,
-                heure_debut=time(14, 0)
+                heure_debut=time(14, 0),
             ),
         ]
 
@@ -535,33 +584,34 @@ class TestWorkflowCrossDomainE2E:
         3. Planifier le batch cooking
         4. Ajouter au calendrier
         """
-        from src.modules.cuisine.schemas import PreferencesUtilisateur
         from src.modules.cuisine.courses.utils import (
-            grouper_par_rayon,
             calculer_statistiques,
+            grouper_par_rayon,
         )
+        from src.modules.cuisine.schemas import PreferencesUtilisateur
         from src.modules.planning.calendrier_unifie.utils import (
-            TypeEvenement,
             EvenementCalendrier,
             JourCalendrier,
             SemaineCalendrier,
+            TypeEvenement,
             get_debut_semaine,
         )
 
         # 1. Préférences pour la semaine
         prefs = PreferencesUtilisateur(
-            nb_adultes=2,
-            jules_present=True,
-            poisson_par_semaine=2,
-            vegetarien_par_semaine=1
+            nb_adultes=2, jules_present=True, poisson_par_semaine=2, vegetarien_par_semaine=1
         )
 
         # 2. Liste de courses générée
         courses = [
             {"ingredient_nom": "Saumon", "priorite": "haute", "rayon_magasin": "Poissons"},
-            {"ingredient_nom": "Courgettes", "priorite": "haute", "rayon_magasin": "Fruits & Légumes"},
-            {"ingredient_nom": "Riz", "priorite": "moyenne", "rayon_magasin": "Ã‰picerie"},
-            {"ingredient_nom": "Lentilles", "priorite": "moyenne", "rayon_magasin": "Ã‰picerie"},
+            {
+                "ingredient_nom": "Courgettes",
+                "priorite": "haute",
+                "rayon_magasin": "Fruits & Légumes",
+            },
+            {"ingredient_nom": "Riz", "priorite": "moyenne", "rayon_magasin": "Épicerie"},
+            {"ingredient_nom": "Lentilles", "priorite": "moyenne", "rayon_magasin": "Épicerie"},
             {"ingredient_nom": "Yaourts", "priorite": "basse", "rayon_magasin": "Laitier"},
         ]
 
@@ -584,23 +634,27 @@ class TestWorkflowCrossDomainE2E:
 
             # Samedi = courses
             if i == 5:
-                evenements.append(EvenementCalendrier(
-                    id="courses",
-                    type=TypeEvenement.COURSES,
-                    titre="Courses hebdo",
-                    date_jour=jour_date,
-                    description=f"{len(courses)} articles"
-                ))
+                evenements.append(
+                    EvenementCalendrier(
+                        id="courses",
+                        type=TypeEvenement.COURSES,
+                        titre="Courses hebdo",
+                        date_jour=jour_date,
+                        description=f"{len(courses)} articles",
+                    )
+                )
 
             # Dimanche = batch cooking
             if i == 6:
-                evenements.append(EvenementCalendrier(
-                    id="batch",
-                    type=TypeEvenement.BATCH_COOKING,
-                    titre="Batch cooking",
-                    date_jour=jour_date,
-                    heure_debut=time(10, 0)
-                ))
+                evenements.append(
+                    EvenementCalendrier(
+                        id="batch",
+                        type=TypeEvenement.BATCH_COOKING,
+                        titre="Batch cooking",
+                        date_jour=jour_date,
+                        heure_debut=time(10, 0),
+                    )
+                )
 
             jours.append(JourCalendrier(date_jour=jour_date, evenements=evenements))
 

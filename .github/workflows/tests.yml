@@ -15,12 +15,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Cache pip dependencies
       uses: actions/cache@v3
       with:
@@ -28,28 +28,28 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest pytest-cov pytest-asyncio
-    
+
     - name: Run unit tests
       run: |
         pytest tests/ -v --tb=short -m "unit" --cov=src --cov-report=xml --cov-report=html
-    
+
     - name: Run integration tests
       run: |
         pytest tests/integration/ -v --tb=short -m "integration"
-    
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
         files: ./coverage.xml
         fail_ci_if_error: false
         verbose: true
-    
+
     - name: Archive coverage reports
       if: always()
       uses: actions/upload-artifact@v3
@@ -59,21 +59,21 @@ jobs:
 
   type-check:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pylance
-    
+
     - name: Type check with Pylance
       run: |
         # Note: Pylance is VSCode extension. For CI/CD, use Pyright
@@ -81,23 +81,42 @@ jobs:
         pyright src/ --outputjson || true
       continue-on-error: true
 
-  lint:
+  encoding-check:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-    
+
+    - name: Verifier encodage UTF-8 sans BOM
+      run: |
+        python scripts/convert_to_utf8.py --check
+
+    - name: Verifier absence de mojibake
+      run: |
+        python fix_encoding.py --check
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pylint
-    
+
     - name: Lint with pylint
       run: |
         pylint src/ --disable=all --enable=syntax-error,undefined-variable || true

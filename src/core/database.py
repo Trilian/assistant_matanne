@@ -1,4 +1,4 @@
-﻿"""
+"""
 Database - Gestion de la base de données avec migrations.
 Tout harmonisé en français
 """
@@ -46,17 +46,17 @@ def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative
     for tentative in range(nombre_tentatives):
         try:
             url_base = parametres.DATABASE_URL
-            
+
             # Utiliser QueuePool pour de meilleures performances
             # NullPool désactivé car inefficace pour les requêtes fréquentes
             moteur = create_engine(
                 url_base,
                 poolclass=pool.QueuePool,
-                pool_size=5,            # Connexions de base
-                max_overflow=10,        # Connexions supplémentaires si nécessaire
-                pool_timeout=30,        # Timeout attente connexion
-                pool_recycle=1800,      # Recycler connexions après 30min
-                pool_pre_ping=True,     # Vérifier connexion avant utilisation
+                pool_size=5,  # Connexions de base
+                max_overflow=10,  # Connexions supplémentaires si nécessaire
+                pool_timeout=30,  # Timeout attente connexion
+                pool_recycle=1800,  # Recycler connexions après 30min
+                pool_pre_ping=True,  # Vérifier connexion avant utilisation
                 echo=parametres.DEBUG,
                 connect_args={
                     "connect_timeout": DB_CONNECTION_TIMEOUT,
@@ -290,7 +290,7 @@ class GestionnaireMigrations:
                 conn.execute(
                     text(
                         f"""
-                    INSERT INTO {GestionnaireMigrations.TABLE_MIGRATIONS} 
+                    INSERT INTO {GestionnaireMigrations.TABLE_MIGRATIONS}
                     (version, name)
                     VALUES (:version, :name)
                 """
@@ -408,7 +408,7 @@ def obtenir_infos_db() -> dict:
             resultat = conn.execute(
                 text(
                     """
-                SELECT 
+                SELECT
                     version() as version,
                     current_database() as database,
                     current_user as user,
@@ -531,8 +531,8 @@ def verifier_sante() -> dict:
             connexions_actives = conn.execute(
                 text(
                     """
-                SELECT count(*) 
-                FROM pg_stat_activity 
+                SELECT count(*)
+                FROM pg_stat_activity
                 WHERE state = 'active'
             """
                 )
@@ -568,4 +568,3 @@ __all__ = [
     "initialiser_database",
     "GestionnaireMigrations",
 ]
-

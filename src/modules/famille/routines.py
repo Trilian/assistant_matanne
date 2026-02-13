@@ -14,16 +14,6 @@ from src.core.database import obtenir_contexte_db
 from src.core.models import ChildProfile, Routine, RoutineTask
 
 # Logique metier pure
-from src.modules.famille.routines_utils import (
-    get_routines_aujourdhui,
-    grouper_par_moment,
-    calculer_duree_routine,
-    calculer_statistiques_routines,
-    analyser_regularite,
-    suggerer_routines_age,
-    detecter_conflits_horaires,
-    valider_routine
-)
 
 # ===================================
 # HELPERS
@@ -74,7 +64,7 @@ def charger_taches_routine(routine_id: int) -> pd.DataFrame:
                 {
                     "id": t.id,
                     "nom": t.task_name,
-                    "heure": t.scheduled_time or "â€”",
+                    "heure": t.scheduled_time or "—",
                     "statut": t.status,
                     "completed_at": t.completed_at,
                 }
@@ -154,11 +144,11 @@ def get_taches_en_retard() -> list[dict]:
         tasks = (
             db.query(RoutineTask, Routine)
             .join(Routine, RoutineTask.routine_id == Routine.id)
-                .filter(
-                    RoutineTask.status == "à faire",
-                    RoutineTask.scheduled_time.isnot(None),
-                    Routine.is_active,
-                )
+            .filter(
+                RoutineTask.status == "à faire",
+                RoutineTask.scheduled_time.isnot(None),
+                Routine.is_active,
+            )
             .all()
         )
 
@@ -200,7 +190,7 @@ def app():
     # ===================================
 
     now = datetime.now()
-    st.info(f"👶 **{now.strftime('%H:%M')}** â€” {now.strftime('%A %d %B %Y')}")
+    st.info(f"👶 **{now.strftime('%H:%M')}** — {now.strftime('%A %d %B %Y')}")
 
     # Tâches en retard
     taches_retard = get_taches_en_retard()
@@ -261,7 +251,7 @@ def app():
             # Liste des routines
             for _, routine in df_routines.iterrows():
                 with st.expander(
-                    f"{routine['ia']} **{routine['nom']}** â€” {routine['pour']} ({routine['nb_taches']} tâches)",
+                    f"{routine['ia']} **{routine['nom']}** — {routine['pour']} ({routine['nb_taches']} tâches)",
                     expanded=True,
                 ):
                     st.caption(routine["description"])
@@ -278,7 +268,7 @@ def app():
 
                             with col_t1:
                                 statut_emoji = "✅" if tache["statut"] == "termine" else "⏳"
-                                st.write(f"{statut_emoji} **{tache['heure']}** â€” {tache['nom']}")
+                                st.write(f"{statut_emoji} **{tache['heure']}** — {tache['nom']}")
 
                             with col_t2:
                                 if tache["statut"] == "à faire":
@@ -385,7 +375,7 @@ def app():
                             routines_data = [
                                 {
                                     "nom": routine.name,
-                                    "heure": task.scheduled_time or "â€”",
+                                    "heure": task.scheduled_time or "—",
                                     "tache": task.task_name,
                                 }
                                 for task, routine in tasks
@@ -606,4 +596,3 @@ def app():
             st.markdown("### 📋 Historique de la semaine")
 
             st.info("Fonctionnalite en developpement : graphique d'historique sur 7 jours")
-

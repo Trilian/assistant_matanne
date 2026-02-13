@@ -1,29 +1,26 @@
-﻿"""
+"""
 Tests unitaires pour habitat.py
 
 Module: src.core.models.habitat
 Contient: Furniture, HouseStock, MaintenanceTask, EcoAction
 """
 
-import pytest
-from datetime import date, datetime
 from decimal import Decimal
 
 from src.core.models.habitat import (
+    EcoAction,
+    EcoActionType,
     Furniture,
+    FurniturePriority,
+    FurnitureStatus,
     HouseStock,
     MaintenanceTask,
-    EcoAction,
-    FurnitureStatus,
-    FurniturePriority,
-    EcoActionType,
     RoomType,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ENUMS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFurnitureStatus:
@@ -75,9 +72,9 @@ class TestRoomType:
         assert RoomType.GARAGE.value == "garage"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS MODÃˆLES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS MODÈLES
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFurniture:
@@ -105,8 +102,8 @@ class TestFurniture:
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
         colonnes = Furniture.__table__.columns
-        assert colonnes['statut'].default is not None
-        assert colonnes['priorite'].default is not None
+        assert colonnes["statut"].default is not None
+        assert colonnes["priorite"].default is not None
 
     def test_dimensions(self):
         """Test des dimensions optionnelles."""
@@ -168,9 +165,9 @@ class TestHouseStock:
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
         colonnes = HouseStock.__table__.columns
-        assert colonnes['quantite'].default is not None
-        assert colonnes['unite'].default is not None
-        assert colonnes['seuil_alerte'].default is not None
+        assert colonnes["quantite"].default is not None
+        assert colonnes["unite"].default is not None
+        assert colonnes["seuil_alerte"].default is not None
 
     def test_repr(self):
         """Test de la représentation string."""
@@ -207,9 +204,9 @@ class TestMaintenanceTask:
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
         colonnes = MaintenanceTask.__table__.columns
-        assert colonnes['duree_minutes'].default is not None
-        assert colonnes['priorite'].default is not None
-        assert colonnes['fait'].default is not None
+        assert colonnes["duree_minutes"].default is not None
+        assert colonnes["priorite"].default is not None
+        assert colonnes["fait"].default is not None
 
     def test_tache_ponctuelle(self):
         """Test d'une tâche ponctuelle (sans fréquence)."""
@@ -254,7 +251,7 @@ class TestEcoAction:
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
         colonnes = EcoAction.__table__.columns
-        assert colonnes['actif'].default is not None
+        assert colonnes["actif"].default is not None
 
     def test_cout_initial_alias(self):
         """Test de l'alias cout_initial."""
@@ -265,7 +262,7 @@ class TestEcoAction:
         )
         # Property alias
         assert action.cout_initial == Decimal("50.00")
-        
+
         # Setter alias
         action.cout_initial = Decimal("75.00")
         assert action.cout_nouveau_initial == Decimal("75.00")
@@ -277,4 +274,3 @@ class TestEcoAction:
         assert "EcoAction" in result
         assert "LED" in result
         assert "energie" in result
-

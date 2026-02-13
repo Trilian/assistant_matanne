@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modèles pour la santé et le bien-être.
 
 Contient :
@@ -26,7 +26,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
 
-
 # ═══════════════════════════════════════════════════════════
 # ROUTINES SANTÉ
 # ═══════════════════════════════════════════════════════════
@@ -34,7 +33,7 @@ from .base import Base
 
 class HealthRoutine(Base):
     """Routine de santé ou sport.
-    
+
     Attributes:
         nom: Nom de la routine
         description: Description
@@ -67,9 +66,7 @@ class HealthRoutine(Base):
         back_populates="routine", cascade="all, delete-orphan"
     )
 
-    __table_args__ = (
-        CheckConstraint("duree_minutes > 0", name="ck_routine_duree_positive"),
-    )
+    __table_args__ = (CheckConstraint("duree_minutes > 0", name="ck_routine_duree_positive"),)
 
     def __repr__(self) -> str:
         return f"<HealthRoutine(id={self.id}, nom='{self.nom}', type='{self.type_routine}')>"
@@ -77,7 +74,7 @@ class HealthRoutine(Base):
 
 class HealthObjective(Base):
     """Objectifs de santé et bien-être.
-    
+
     Attributes:
         titre: Titre de l'objectif
         description: Description
@@ -118,7 +115,7 @@ class HealthObjective(Base):
 
 class HealthEntry(Base):
     """Entrée quotidienne de suivi santé.
-    
+
     Attributes:
         routine_id: ID de la routine (optionnel)
         date: Date de l'entrée

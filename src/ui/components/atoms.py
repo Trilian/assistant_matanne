@@ -1,4 +1,4 @@
-﻿"""
+"""
 UI Components - Atoms (composants de base)
 badge, etat_vide, carte_metrique
 """
@@ -38,7 +38,9 @@ def etat_vide(message: str, icone: str = "📭", sous_texte: str | None = None):
         etat_vide("Aucune recette", "🍽️", "Ajoutez-en une")
     """
     html_sous_texte = (
-        f'<div style="font-size: 1rem; margin-top: 0.5rem;">{sous_texte}</div>' if sous_texte else ""
+        f'<div style="font-size: 1rem; margin-top: 0.5rem;">{sous_texte}</div>'
+        if sous_texte
+        else ""
     )
 
     st.markdown(

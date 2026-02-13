@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Planning de Base (REFACTORING PHASE 2)
 
 âœ… Utilise @avec_session_db et @avec_cache (Phase 1)
@@ -15,24 +15,22 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.core.ai import obtenir_client_ia
 from src.core.cache import Cache
-from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
-from src.core.errors_base import ErreurNonTrouve
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import Planning, Repas
-from src.services.base import BaseAIService, PlanningAIMixin
-from src.services.base import BaseService
+from src.services.base import BaseAIService, BaseService, PlanningAIMixin
 
 from .types import JourPlanning, ParametresEquilibre
 from .utils import (
-    get_weekday_names,
     determine_protein_type,
+    get_weekday_names,
 )
 
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SERVICE PLANNING
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
@@ -61,14 +59,16 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
             service_name="planning",
         )
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 1: CRUD & PLANNING (REFACTORED)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
-    @avec_cache(ttl=1800, key_func=lambda self, planning_id=None, **kw: f"planning_active")
+    @avec_cache(ttl=1800, key_func=lambda self, planning_id=None, **kw: "planning_active")
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
-    def get_planning(self, planning_id: int | None = None, db: Session | None = None) -> Planning | None:
+    def get_planning(
+        self, planning_id: int | None = None, db: Session | None = None
+    ) -> Planning | None:
         """Get the active or specified planning with eager loading of meals and recettes.
 
         Args:
@@ -79,13 +79,16 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
             Planning object with repas and recettes eagerly loaded, or None if not found
         """
         from sqlalchemy.orm import selectinload
-        from src.core.models import Recette, VersionRecette
-        
+
+        from src.core.models import Recette
+
         if planning_id:
             planning = (
                 db.query(Planning)
                 .options(
-                    selectinload(Planning.repas).selectinload(Repas.recette).selectinload(Recette.versions)
+                    selectinload(Planning.repas)
+                    .selectinload(Repas.recette)
+                    .selectinload(Recette.versions)
                 )
                 .filter(Planning.id == planning_id)
                 .first()
@@ -94,22 +97,26 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
             planning = (
                 db.query(Planning)
                 .options(
-                    selectinload(Planning.repas).selectinload(Repas.recette).selectinload(Recette.versions)
+                    selectinload(Planning.repas)
+                    .selectinload(Repas.recette)
+                    .selectinload(Recette.versions)
                 )
                 .filter(Planning.actif == True)
                 .first()
             )
-        
+
         if not planning:
-            logger.debug(f"â„¹ï¸ Planning not found")
+            logger.debug("â„¹ï¸ Planning not found")
             return None
-        
+
         return planning
 
     @avec_cache(ttl=1800, key_func=lambda self, planning_id, **kw: f"planning_full_{planning_id}")
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
-    def get_planning_complet(self, planning_id: int, db: Session | None = None) -> dict[str, Any] | None:
+    def get_planning_complet(
+        self, planning_id: int, db: Session | None = None
+    ) -> dict[str, Any] | None:
         """Récupère un planning avec tous ses repas.
 
         Retrieves complete planning with all meals organized by day.
@@ -124,9 +131,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
         """
         planning = (
             db.query(Planning)
-            .options(
-                joinedload(Planning.repas).joinedload(Repas.recette)
-            )
+            .options(joinedload(Planning.repas).joinedload(Repas.recette))
             .filter(Planning.id == planning_id)
             .first()
         )
@@ -165,9 +170,9 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
         logger.info(f"âœ… Retrieved planning {planning_id} with {len(repas_par_jour)} days")
         return result
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 2: SUGGESTIONS ÉQUILIBRÉES (NOUVEAU)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
@@ -178,39 +183,39 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
         db: Session | None = None,
     ) -> list[dict]:
         """Suggère des recettes équilibrées pour chaque jour.
-        
+
         Retourne 3 options par jour avec score d'équilibre.
         Utilise les fonctions pures de planning.utils.
-        
+
         Args:
             semaine_debut: Date de début de semaine
             parametres: Contraintes d'équilibre
             db: Database session
-            
+
         Returns:
             List de dicts {jour, type_repas, suggestions: [{nom, description, raison}]}
         """
         from src.core.models import Recette
-        
+
         # Utiliser planning.utils pour les jours de la semaine
         jours_semaine = get_weekday_names()
         suggestions_globales = []
-        
+
         for idx, jour_name in enumerate(jours_semaine):
             jour_lower = jour_name.lower()
             date_jour = semaine_debut + timedelta(days=idx)
-            
+
             # Utiliser planning.utils pour déterminer le type de protéine
             type_proteine, raison_jour = determine_protein_type(
                 jour_lower,
                 poisson_jours=parametres.poisson_jours,
                 viande_rouge_jours=parametres.viande_rouge_jours,
-                vegetarien_jours=parametres.vegetarien_jours
+                vegetarien_jours=parametres.vegetarien_jours,
             )
-            
+
             # Requête base pour récupérer 3 recettes de ce type
             query = db.query(Recette).filter(Recette.est_equilibre == True)
-            
+
             # Filtrer par type de protéine
             if type_proteine == "poisson":
                 query = query.filter(Recette.type_proteines.ilike("%poisson%"))
@@ -218,58 +223,69 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
                 query = query.filter(Recette.type_proteines.ilike("%viande%"))
             elif type_proteine == "vegetarien":
                 query = query.filter(Recette.est_vegetarien == True)
-            
+
             # Exclure les ingrédients interdits
             for ingredient_exc in parametres.ingredients_exclus:
                 # Filtre basique (devrait utiliser une vraie relation en prod)
                 query = query.filter(~Recette.description.ilike(f"%{ingredient_exc}%"))
-            
+
             # Récupérer 3 suggestions
             recettes = query.limit(3).all()
-            
+
             suggestions_jour = []
             for recette in recettes:
-                suggestions_jour.append({
-                    "id": recette.id,
-                    "nom": recette.nom,
-                    "description": recette.description,
-                    "temps_total": (recette.temps_preparation or 0) + (recette.temps_cuisson or 0),
-                    "type_repas": "déjeuner" if idx % 2 == 0 else "dîner",
-                    "raison": raison_jour,
-                    "type_proteines": recette.type_proteines,
-                })
-            
-            # Si pas assez, ajouter des recettes équilibrées quelconques
-            if len(suggestions_jour) < 3:
-                autres = db.query(Recette).filter(
-                    Recette.id.notin_([s["id"] for s in suggestions_jour])
-                ).limit(3 - len(suggestions_jour)).all()
-                
-                for recette in autres:
-                    suggestions_jour.append({
+                suggestions_jour.append(
+                    {
                         "id": recette.id,
                         "nom": recette.nom,
                         "description": recette.description,
-                        "temps_total": (recette.temps_preparation or 0) + (recette.temps_cuisson or 0),
+                        "temps_total": (recette.temps_preparation or 0)
+                        + (recette.temps_cuisson or 0),
                         "type_repas": "déjeuner" if idx % 2 == 0 else "dîner",
-                        "raison": "ðŸ“ Alternative équilibrée",
-                        "type_proteines": getattr(recette, 'type_proteines', 'mixte'),
-                    })
-            
-            suggestions_globales.append({
-                "jour": jour_name,
-                "jour_index": idx,
-                "date": date_jour.isoformat(),
-                "raison_jour": raison_jour,
-                "suggestions": suggestions_jour[:3],
-            })
-        
+                        "raison": raison_jour,
+                        "type_proteines": recette.type_proteines,
+                    }
+                )
+
+            # Si pas assez, ajouter des recettes équilibrées quelconques
+            if len(suggestions_jour) < 3:
+                autres = (
+                    db.query(Recette)
+                    .filter(Recette.id.notin_([s["id"] for s in suggestions_jour]))
+                    .limit(3 - len(suggestions_jour))
+                    .all()
+                )
+
+                for recette in autres:
+                    suggestions_jour.append(
+                        {
+                            "id": recette.id,
+                            "nom": recette.nom,
+                            "description": recette.description,
+                            "temps_total": (recette.temps_preparation or 0)
+                            + (recette.temps_cuisson or 0),
+                            "type_repas": "déjeuner" if idx % 2 == 0 else "dîner",
+                            "raison": "ðŸ“ Alternative équilibrée",
+                            "type_proteines": getattr(recette, "type_proteines", "mixte"),
+                        }
+                    )
+
+            suggestions_globales.append(
+                {
+                    "jour": jour_name,
+                    "jour_index": idx,
+                    "date": date_jour.isoformat(),
+                    "raison_jour": raison_jour,
+                    "suggestions": suggestions_jour[:3],
+                }
+            )
+
         logger.info(f"âœ… Generated {len(suggestions_globales)} days of balanced suggestions")
         return suggestions_globales
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 3: GÉNÉRATION AVEC CHOIX (NOUVEAU)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
@@ -280,21 +296,21 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
         enfants_adaptes: list[int] | None = None,
         db: Session | None = None,
     ) -> Planning | None:
-        """Crée un planning Ã  partir des choix de l'utilisateur.
-        
+        """Crée un planning à partir des choix de l'utilisateur.
+
         Args:
             semaine_debut: Date de début
             recettes_selection: Mapping jour â†’ recette_id choisi
             enfants_adaptes: IDs des enfants pour adapter (Jules, etc.)
             db: Database session
-            
+
         Returns:
             Planning créé avec tous les repas
         """
         from src.core.models import Recette
-        
+
         semaine_fin = semaine_debut + timedelta(days=6)
-        
+
         planning = Planning(
             nom=f"Planning {semaine_debut.strftime('%d/%m')}",
             semaine_debut=semaine_debut,
@@ -304,24 +320,24 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
         )
         db.add(planning)
         db.flush()
-        
+
         jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
-        
+
         for idx, jour_name in enumerate(jours_semaine):
             date_jour = semaine_debut + timedelta(days=idx)
             jour_key = f"jour_{idx}"
-            
+
             # Récupérer la recette sélectionnée
             recette_id = recettes_selection.get(jour_key)
             if not recette_id:
                 logger.warning(f"âš ï¸ No recipe selected for {jour_name}")
                 continue
-            
+
             recette = db.query(Recette).filter(Recette.id == recette_id).first()
             if not recette:
                 logger.warning(f"âš ï¸ Recipe {recette_id} not found for {jour_name}")
                 continue
-            
+
             # Créer repas (on crée juste le dîner pour simplifier en départ)
             repas = Repas(
                 planning_id=planning.id,
@@ -331,16 +347,16 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
                 notes=f"Repas du {jour_name}",
             )
             db.add(repas)
-        
+
         db.commit()
         db.refresh(planning)
-        
+
         logger.info(f"âœ… Created custom planning for {semaine_debut}")
         return planning
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 4: AGRÉGATION COURSES (NOUVEAU)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
@@ -350,59 +366,49 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
         db: Session | None = None,
     ) -> list[dict]:
         """Agrège les ingrédients de toutes les recettes du planning.
-        
+
         Retourne une liste d'ingrédients uniques avec quantités totales.
-        
+
         Args:
             planning_id: ID du planning
             db: Database session
-            
+
         Returns:
             List de dicts {ingredient, quantite, unite, rayon, priorite}
         """
-        from src.core.models import (
-            Planning, Repas, Recette, RecetteIngredient, Ingredient
-        )
-        
+        from src.core.models import Planning, Recette
+
         # Récupérer le planning avec tous ses repas et recettes
-        planning = (
-            db.query(Planning)
-            .filter(Planning.id == planning_id)
-            .first()
-        )
-        
+        planning = db.query(Planning).filter(Planning.id == planning_id).first()
+
         if not planning or not planning.repas:
             logger.warning(f"âš ï¸ Planning {planning_id} pas trouvé ou pas de repas")
             return []
-        
+
         # Agréger les ingrédients
         ingredients_aggregated = {}  # {nom: {quantite: 0, unite, rayon, priorite}}
-        
+
         for repas in planning.repas:
             if not repas.recette_id:
                 continue
-            
+
             # Charger la recette avec ses ingrédients
-            recette = (
-                db.query(Recette)
-                .filter(Recette.id == repas.recette_id)
-                .first()
-            )
-            
+            recette = db.query(Recette).filter(Recette.id == repas.recette_id).first()
+
             if not recette or not recette.ingredients:
                 continue
-            
+
             # Parcourir les ingrédients de cette recette
             for recette_ingredient in recette.ingredients:
                 ingredient = recette_ingredient.ingredient
                 if not ingredient:
                     continue
-                
+
                 nom = ingredient.nom
                 quantite = recette_ingredient.quantite or 1
                 unite = recette_ingredient.unite or ingredient.unite or "pcs"
                 rayon = ingredient.categorie or "autre"
-                
+
                 # Agréger
                 if nom not in ingredients_aggregated:
                     ingredients_aggregated[nom] = {
@@ -418,23 +424,24 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
                     if ingredients_aggregated[nom]["unite"] == unite:
                         ingredients_aggregated[nom]["quantite"] += quantite
                     ingredients_aggregated[nom]["repas_count"] += 1
-        
+
         # Trier par priorité (rayon) et quantité
         courses_list = sorted(
-            ingredients_aggregated.values(),
-            key=lambda x: (x["rayon"], -x["quantite"])
+            ingredients_aggregated.values(), key=lambda x: (x["rayon"], -x["quantite"])
         )
-        
+
         logger.info(f"âœ… Agrégé {len(courses_list)} ingrédients pour planning {planning_id}")
         return courses_list
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 5: GÉNÉRATION IA (REFACTORED)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_cache(
         ttl=3600,
-        key_func=lambda self, semaine_debut, preferences=None: f"planning_ia_{semaine_debut.isoformat()}",
+        key_func=lambda self,
+        semaine_debut,
+        preferences=None: f"planning_ia_{semaine_debut.isoformat()}",
     )
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
@@ -499,9 +506,11 @@ RULES:
 
         # Log de debug pour voir la réponse
         if not planning_data:
-            logger.warning(f"âš ï¸ Failed to generate planning for {semaine_debut} - no data returned")
-            logger.debug(f"Checking if we can create default planning instead...")
-            
+            logger.warning(
+                f"âš ï¸ Failed to generate planning for {semaine_debut} - no data returned"
+            )
+            logger.debug("Checking if we can create default planning instead...")
+
             # Créer un planning par défaut avec des repas simples
             planning = Planning(
                 nom=f"Planning {semaine_debut.strftime('%d/%m/%Y')}",
@@ -513,23 +522,31 @@ RULES:
             db.add(planning)
             db.flush()
 
-            # Créer repas par défaut (simplement lundi Ã  dimanche)
-            jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+            # Créer repas par défaut (simplement lundi à dimanche)
+            jours_semaine = [
+                "Lundi",
+                "Mardi",
+                "Mercredi",
+                "Jeudi",
+                "Vendredi",
+                "Samedi",
+                "Dimanche",
+            ]
             for idx, jour_name in enumerate(jours_semaine):
                 date_jour = semaine_debut + timedelta(days=idx)
-                
+
                 repas = Repas(
                     planning_id=planning.id,
                     date_repas=date_jour,
                     type_repas="dejeuner",
-                    notes=f"Repas du {jour_name} - Ã€ remplir manuellement",
+                    notes=f"Repas du {jour_name} - À remplir manuellement",
                 )
                 db.add(repas)
-            
+
             db.commit()
             logger.info(f"âœ… Created default planning for {semaine_debut} with 7 days")
             return planning
-        
+
         # Planning IA réussi
         logger.info(f"âœ… Generated planning with {len(planning_data)} days using AI")
 
@@ -576,18 +593,18 @@ RULES:
         return planning
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # ALIAS DE COMPATIBILITÉ
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 # Alias pour rétro-compatibilité
 PlanningService = ServicePlanning
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FACTORIES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 # INSTANCE SINGLETON - LAZY LOADING
@@ -606,9 +623,9 @@ def obtenir_service_planning() -> ServicePlanning:
 get_planning_service = obtenir_service_planning
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # EXPORTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 __all__ = [

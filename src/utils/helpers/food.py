@@ -1,4 +1,4 @@
-﻿"""
+"""
 Food Helpers - Utilitaires pour la gestion des recettes et de l'inventaire
 """
 
@@ -29,7 +29,10 @@ def convertir_unite(valeur: float, unite_source: str, unite_cible: str) -> float
         ("mg", "g"): 0.001,
         ("g", "mg"): 1000,
     }
-    key = (unite_source.lower(), unite_cible.upper() if unite_cible.upper() in ["L"] else unite_cible.lower())
+    key = (
+        unite_source.lower(),
+        unite_cible.upper() if unite_cible.upper() in ["L"] else unite_cible.lower(),
+    )
     if key in conversions:
         return valeur * conversions[key]
     return None
@@ -62,6 +65,6 @@ def extraire_ingredient(texte: str) -> dict | None:
         return {
             "quantite": float(match.group(1)),
             "unite": match.group(2) or "",
-            "nom": match.group(3).strip()
+            "nom": match.group(3).strip(),
         }
     return None

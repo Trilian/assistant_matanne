@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modèles pour le Batch Cooking.
 
 Contient :
@@ -9,8 +9,9 @@ Contient :
 - RobotCuisine : Robots/appareils disponibles
 """
 
+import enum
 from datetime import date, datetime, time
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 from sqlalchemy import (
     Boolean,
@@ -22,24 +23,20 @@ from sqlalchemy import (
     String,
     Text,
     Time,
-    Float,
-    Enum as SQLEnum,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
 
-import enum
-
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # ÉNUMÉRATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class StatutSessionEnum(str, enum.Enum):
     """Statut d'une session batch cooking."""
+
     PLANIFIEE = "planifiee"
     EN_COURS = "en_cours"
     TERMINEE = "terminee"
@@ -48,6 +45,7 @@ class StatutSessionEnum(str, enum.Enum):
 
 class StatutEtapeEnum(str, enum.Enum):
     """Statut d'une étape batch cooking."""
+
     A_FAIRE = "a_faire"
     EN_COURS = "en_cours"
     TERMINEE = "terminee"
@@ -56,6 +54,7 @@ class StatutEtapeEnum(str, enum.Enum):
 
 class TypeRobotEnum(str, enum.Enum):
     """Types de robots/appareils de cuisine."""
+
     COOKEO = "cookeo"
     MONSIEUR_CUISINE = "monsieur_cuisine"
     AIRFRYER = "airfryer"
@@ -69,19 +68,20 @@ class TypeRobotEnum(str, enum.Enum):
 
 class LocalisationStockageEnum(str, enum.Enum):
     """Localisation du stockage des préparations."""
+
     FRIGO = "frigo"
     CONGELATEUR = "congelateur"
     TEMPERATURE_AMBIANTE = "temperature_ambiante"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # CONFIGURATION BATCH COOKING
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class ConfigBatchCooking(Base):
     """Configuration utilisateur pour le batch cooking.
-    
+
     Attributes:
         jours_batch: Jours de la semaine pour le batch (0=lundi...6=dimanche)
         heure_debut_preferee: Heure de début habituelle
@@ -95,27 +95,29 @@ class ConfigBatchCooking(Base):
     __tablename__ = "config_batch_cooking"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    
+
     # Jours préférés (stockés en JSON: [0, 6] pour lundi et dimanche)
-    jours_batch: Mapped[list[int]] = mapped_column(JSONB, default=lambda: [6])  # Dimanche par défaut
+    jours_batch: Mapped[list[int]] = mapped_column(
+        JSONB, default=lambda: [6]
+    )  # Dimanche par défaut
     heure_debut_preferee: Mapped[time | None] = mapped_column(Time, default=time(10, 0))
     duree_max_session: Mapped[int] = mapped_column(Integer, default=180)  # 3h par défaut
-    
+
     # Mode famille
     avec_jules_par_defaut: Mapped[bool] = mapped_column(Boolean, default=True)
-    
+
     # Équipement (JSON: ["cookeo", "airfryer", ...])
     robots_disponibles: Mapped[list[str]] = mapped_column(
         JSONB, default=lambda: ["four", "plaques"]
     )
-    
+
     # Préférences stockage
     preferences_stockage: Mapped[dict | None] = mapped_column(JSONB)
-    
+
     # Personnalisation
     objectif_portions_semaine: Mapped[int] = mapped_column(Integer, default=20)
     notes: Mapped[str | None] = mapped_column(Text)
-    
+
     # Timestamps
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     modifie_le: Mapped[datetime] = mapped_column(
@@ -126,14 +128,14 @@ class ConfigBatchCooking(Base):
         return f"<ConfigBatchCooking(id={self.id}, jours={self.jours_batch})>"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SESSION BATCH COOKING
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class SessionBatchCooking(Base):
     """Session de batch cooking planifiée ou en cours.
-    
+
     Attributes:
         nom: Nom de la session (ex: "Batch Dimanche 12/01")
         date_session: Date de la session
@@ -142,9 +144,9 @@ class SessionBatchCooking(Base):
         duree_estimee: Durée estimée en minutes
         duree_reelle: Durée réelle en minutes
         statut: Statut de la session
-        avec_jules: Si Jules participe Ã  cette session
+        avec_jules: Si Jules participe à cette session
         planning_id: Lien vers le planning de la semaine (optionnel)
-        recettes_selectionnees: IDs des recettes Ã  préparer (JSON)
+        recettes_selectionnees: IDs des recettes à préparer (JSON)
         robots_utilises: Robots utilisés pour cette session (JSON)
         notes_avant: Notes de préparation
         notes_apres: Retour d'expérience
@@ -155,42 +157,42 @@ class SessionBatchCooking(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     nom: Mapped[str] = mapped_column(String(200), nullable=False)
-    
+
     # Planning temporel
     date_session: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     heure_debut: Mapped[time | None] = mapped_column(Time)
     heure_fin: Mapped[time | None] = mapped_column(Time)
     duree_estimee: Mapped[int] = mapped_column(Integer, default=120)  # minutes
     duree_reelle: Mapped[int | None] = mapped_column(Integer)
-    
+
     # Statut
     statut: Mapped[str] = mapped_column(
         String(20), default=StatutSessionEnum.PLANIFIEE.value, index=True
     )
-    
+
     # Mode famille
     avec_jules: Mapped[bool] = mapped_column(Boolean, default=False)
-    
+
     # Liens
     planning_id: Mapped[int | None] = mapped_column(
         ForeignKey("plannings.id", ondelete="SET NULL"), index=True
     )
-    
+
     # Données session (JSON)
     recettes_selectionnees: Mapped[list[int] | None] = mapped_column(JSONB)
     robots_utilises: Mapped[list[str] | None] = mapped_column(JSONB)
-    
+
     # Notes
     notes_avant: Mapped[str | None] = mapped_column(Text)
     notes_apres: Mapped[str | None] = mapped_column(Text)
-    
+
     # IA
     genere_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
-    
+
     # Métriques
     nb_portions_preparees: Mapped[int] = mapped_column(Integer, default=0)
     nb_recettes_completees: Mapped[int] = mapped_column(Integer, default=0)
-    
+
     # Timestamps
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     modifie_le: Mapped[datetime] = mapped_column(
@@ -205,9 +207,7 @@ class SessionBatchCooking(Base):
         back_populates="session", cascade="all, delete-orphan"
     )
 
-    __table_args__ = (
-        Index("idx_session_date_statut", "date_session", "statut"),
-    )
+    __table_args__ = (Index("idx_session_date_statut", "date_session", "statut"),)
 
     @property
     def est_en_cours(self) -> bool:
@@ -226,17 +226,17 @@ class SessionBatchCooking(Base):
         return f"<SessionBatchCooking(id={self.id}, nom='{self.nom}', statut={self.statut})>"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # ÉTAPES BATCH COOKING
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class EtapeBatchCooking(Base):
     """Étape d'une session de batch cooking.
-    
+
     Chaque étape peut utiliser un ou plusieurs robots.
     Les étapes peuvent être parallélisées si elles utilisent des robots différents.
-    
+
     Attributes:
         session_id: ID de la session parent
         recette_id: ID de la recette concernée (optionnel)
@@ -249,7 +249,7 @@ class EtapeBatchCooking(Base):
         robots_requis: Liste des robots nécessaires (JSON)
         est_supervision: Étape de surveillance passive (ex: cuisson four)
         alerte_bruit: Si l'étape fait du bruit (important si Jules dort)
-        temperature: Température requise (Â°C, optionnel)
+        temperature: Température requise (°C, optionnel)
         statut: Statut de l'étape
         heure_debut: Heure de début réelle
         heure_fin: Heure de fin réelle
@@ -260,52 +260,47 @@ class EtapeBatchCooking(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     session_id: Mapped[int] = mapped_column(
-        ForeignKey("sessions_batch_cooking.id", ondelete="CASCADE"), 
-        nullable=False, index=True
+        ForeignKey("sessions_batch_cooking.id", ondelete="CASCADE"), nullable=False, index=True
     )
     recette_id: Mapped[int | None] = mapped_column(
         ForeignKey("recettes.id", ondelete="SET NULL"), index=True
     )
-    
+
     # Ordre et parallélisation
     ordre: Mapped[int] = mapped_column(Integer, nullable=False)
     groupe_parallele: Mapped[int] = mapped_column(Integer, default=0)
-    
+
     # Contenu
     titre: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
-    
+
     # Timing
     duree_minutes: Mapped[int] = mapped_column(Integer, default=10)
     duree_reelle: Mapped[int | None] = mapped_column(Integer)
-    
+
     # Équipement (JSON: ["cookeo", "four"])
     robots_requis: Mapped[list[str] | None] = mapped_column(JSONB)
-    
+
     # Caractéristiques
     est_supervision: Mapped[bool] = mapped_column(Boolean, default=False)
     alerte_bruit: Mapped[bool] = mapped_column(Boolean, default=False)
-    temperature: Mapped[int | None] = mapped_column(Integer)  # Â°C
-    
+    temperature: Mapped[int | None] = mapped_column(Integer)  # °C
+
     # Statut et timing réel
-    statut: Mapped[str] = mapped_column(
-        String(20), default=StatutEtapeEnum.A_FAIRE.value
-    )
+    statut: Mapped[str] = mapped_column(String(20), default=StatutEtapeEnum.A_FAIRE.value)
     heure_debut: Mapped[datetime | None] = mapped_column(DateTime)
     heure_fin: Mapped[datetime | None] = mapped_column(DateTime)
-    
+
     # Notes
     notes: Mapped[str | None] = mapped_column(Text)
-    
+
     # Timer actif
     timer_actif: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # Relations
     session: Mapped["SessionBatchCooking"] = relationship(back_populates="etapes")
 
-    __table_args__ = (
-        Index("idx_etape_session_ordre", "session_id", "ordre"),
-    )
+    __table_args__ = (Index("idx_etape_session_ordre", "session_id", "ordre"),)
 
     @property
     def est_terminee(self) -> bool:
@@ -321,16 +316,16 @@ class EtapeBatchCooking(Base):
         return f"<EtapeBatchCooking(id={self.id}, ordre={self.ordre}, titre='{self.titre}')>"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # PRÉPARATIONS STOCKÉES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class PreparationBatch(Base):
     """Préparation issue d'une session batch cooking.
-    
+
     Suit les plats préparés avec leur localisation et péremption.
-    
+
     Attributes:
         session_id: ID de la session d'origine
         recette_id: ID de la recette (optionnel)
@@ -358,36 +353,36 @@ class PreparationBatch(Base):
     recette_id: Mapped[int | None] = mapped_column(
         ForeignKey("recettes.id", ondelete="SET NULL"), index=True
     )
-    
+
     # Identification
     nom: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
-    
+
     # Portions
     portions_initiales: Mapped[int] = mapped_column(Integer, nullable=False, default=4)
     portions_restantes: Mapped[int] = mapped_column(Integer, nullable=False, default=4)
-    
+
     # Dates
     date_preparation: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     date_peremption: Mapped[date] = mapped_column(Date, nullable=False, index=True)
-    
+
     # Stockage
     localisation: Mapped[str] = mapped_column(
         String(50), default=LocalisationStockageEnum.FRIGO.value, index=True
     )
     container: Mapped[str | None] = mapped_column(String(100))
     etagere: Mapped[str | None] = mapped_column(String(50))
-    
+
     # Utilisation planifiée (JSON: [repas_id, repas_id, ...])
     repas_attribues: Mapped[list[int] | None] = mapped_column(JSONB)
-    
+
     # Métadonnées
     notes: Mapped[str | None] = mapped_column(Text)
     photo_url: Mapped[str | None] = mapped_column(String(500))
-    
+
     # Statut
     consomme: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
-    
+
     # Timestamps
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     modifie_le: Mapped[datetime] = mapped_column(

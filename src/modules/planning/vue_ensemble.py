@@ -5,19 +5,13 @@ Affiche les actions critiques et suggère automatiquement ce qui doit être fait
 Utilise PlanningAIService pour detection intelligente des alertes
 """
 
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 import streamlit as st
 
-from src.services.planning import get_planning_unified_service
-from src.modules.shared.constantes import JOURS_SEMAINE_LOWER
-
 # Logique metier pure
-from src.modules.planning.vue_ensemble_utils import (
-    analyser_charge_globale,
-    identifier_taches_urgentes
-)
-from src.core.state import obtenir_etat
+from src.modules.shared.constantes import JOURS_SEMAINE_LOWER
+from src.services.planning import get_planning_unified_service
 
 logger = __import__("logging").getLogger(__name__)
 
@@ -150,13 +144,14 @@ def afficher_opportunities(semaine_data: dict) -> None:
     activites_jules = semaine_data.get("activites_jules", 0)
     if activites_jules == 0:
         suggestions.append(
-            ("💡 Aucune activite pour Jules", 
-             "Planifier au moins 2-3 activites adaptees à 19m par semaine")
+            (
+                "💡 Aucune activite pour Jules",
+                "Planifier au moins 2-3 activites adaptees à 19m par semaine",
+            )
         )
     elif activites_jules < 2:
         suggestions.append(
-            ("💡 Peu d'activites pour Jules",
-             f"Actuellement {activites_jules} - Recommande: 3+")
+            ("💡 Peu d'activites pour Jules", f"Actuellement {activites_jules} - Recommande: 3+")
         )
 
     # Budget
@@ -164,15 +159,13 @@ def afficher_opportunities(semaine_data: dict) -> None:
     budget_limite = 500  # À adapter à votre budget
     if budget_total > budget_limite:
         suggestions.append(
-            ("🍽️ Budget eleve",
-             f"{budget_total:.0f}€ > {budget_limite}€ - Revoir les depenses")
+            ("🍽️ Budget eleve", f"{budget_total:.0f}€ > {budget_limite}€ - Revoir les depenses")
         )
 
     # Pas de repas
     if semaine_data.get("total_repas", 0) == 0:
         suggestions.append(
-            ("🧹 Aucun repas planifie",
-             "Prevoir le planning culinaire de la semaine")
+            ("🧹 Aucun repas planifie", "Prevoir le planning culinaire de la semaine")
         )
 
     if suggestions:
@@ -217,7 +210,7 @@ def app():
         week_start = st.session_state.ensemble_week_start
         week_end = week_start + timedelta(days=6)
         st.markdown(
-            f"<h3 style='text-align: center;'>{week_start.strftime('%d/%m')} â€” {week_end.strftime('%d/%m/%Y')}</h3>",
+            f"<h3 style='text-align: center;'>{week_start.strftime('%d/%m')} — {week_end.strftime('%d/%m/%Y')}</h3>",
             unsafe_allow_html=True,
         )
 
@@ -255,7 +248,7 @@ def app():
     afficher_metriques_cles(semaine.stats_semaine, semaine.charge_globale)
 
     # ═══════════════════════════════════════════════════════════
-    # SYNTHÃˆSE JOURS
+    # SYNTHÈSE JOURS
     # ═══════════════════════════════════════════════════════════
 
     afficher_synthese_jours(semaine.jours)
@@ -285,19 +278,27 @@ def app():
 
         # Identifier jours charges
         jours_list = list(semaine.jours.values())
-        jours_charges = [
-            (i, j) for i, j in enumerate(jours_list) if j.charge_score >= 75
-        ]
+        jours_charges = [(i, j) for i, j in enumerate(jours_list) if j.charge_score >= 75]
 
         if jours_charges:
             for idx, jour_charge in jours_charges[:2]:
-                jour_names = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+                jour_names = [
+                    "Lundi",
+                    "Mardi",
+                    "Mercredi",
+                    "Jeudi",
+                    "Vendredi",
+                    "Samedi",
+                    "Dimanche",
+                ]
                 jour_nom = jour_names[idx]
 
                 with st.expander(f"❌ {jour_nom} - Surcharge ({jour_charge.charge_score}/100)"):
-                    st.write(f"Activites: {len(jour_charge.activites)} | Repas: {len(jour_charge.repas)}")
+                    st.write(
+                        f"Activites: {len(jour_charge.activites)} | Repas: {len(jour_charge.repas)}"
+                    )
 
-                    if st.button(f"Proposer repartition", key=f"reequilibrer_{idx}"):
+                    if st.button("Proposer repartition", key=f"reequilibrer_{idx}"):
                         st.info("🗑️ Suggestion: Deplacer 1-2 activites vers jour plus calme")
 
         else:
@@ -358,7 +359,9 @@ def app():
     with tab3:
         st.subheader("📅 Details Semaine")
 
-        selected_jour = st.selectbox("Selectionner un jour", JOURS_SEMAINE_LOWER, key="ensemble_jour_select")
+        selected_jour = st.selectbox(
+            "Selectionner un jour", JOURS_SEMAINE_LOWER, key="ensemble_jour_select"
+        )
 
         jour_idx = JOURS_SEMAINE_LOWER.index(selected_jour)
         jour_date = st.session_state.ensemble_week_start + timedelta(days=jour_idx)
@@ -382,7 +385,9 @@ def app():
                 st.metric("Charge", f"{charge_emoji} {jour_data_dict['charge_score']}/100")
 
             with col_d2:
-                st.metric("Évenements", len(jour_data_dict["repas"]) + len(jour_data_dict["activites"]))
+                st.metric(
+                    "Évenements", len(jour_data_dict["repas"]) + len(jour_data_dict["activites"])
+                )
 
             with col_d3:
                 st.metric("Budget", f"{jour_data_dict['budget_jour']:.0f}€")

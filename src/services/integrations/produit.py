@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service OpenFoodFacts - Enrichissement des produits par code-barres
 
 Récupère les informations nutritionnelles et descriptives depuis
@@ -6,7 +6,6 @@ l'API gratuite OpenFoodFacts.
 """
 
 import logging
-from typing import Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -18,9 +17,9 @@ from src.core.decorators import avec_gestion_erreurs
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 OPENFOODFACTS_API = "https://world.openfoodfacts.org/api/v2/product"
 OPENFOODFACTS_SEARCH = "https://world.openfoodfacts.org/cgi/search.pl"
@@ -29,76 +28,77 @@ OPENFOODFACTS_SEARCH = "https://world.openfoodfacts.org/cgi/search.pl"
 CACHE_TTL = 86400
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # DATACLASSES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @dataclass
 class NutritionInfo:
     """Informations nutritionnelles pour 100g."""
-    energie_kcal: Optional[float] = None
-    proteines_g: Optional[float] = None
-    glucides_g: Optional[float] = None
-    sucres_g: Optional[float] = None
-    lipides_g: Optional[float] = None
-    satures_g: Optional[float] = None
-    fibres_g: Optional[float] = None
-    sel_g: Optional[float] = None
-    
-    nutriscore: Optional[str] = None  # A, B, C, D, E
-    nova_group: Optional[int] = None  # 1-4 (transformation)
-    ecoscore: Optional[str] = None  # A, B, C, D, E
+
+    energie_kcal: float | None = None
+    proteines_g: float | None = None
+    glucides_g: float | None = None
+    sucres_g: float | None = None
+    lipides_g: float | None = None
+    satures_g: float | None = None
+    fibres_g: float | None = None
+    sel_g: float | None = None
+
+    nutriscore: str | None = None  # A, B, C, D, E
+    nova_group: int | None = None  # 1-4 (transformation)
+    ecoscore: str | None = None  # A, B, C, D, E
 
 
 @dataclass
 class ProduitOpenFoodFacts:
     """Produit enrichi depuis OpenFoodFacts."""
-    
+
     # Identifiants
     code_barres: str
     nom: str
-    
+
     # Infos de base
-    marque: Optional[str] = None
-    quantite: Optional[str] = None  # Ex: "500g", "1L"
+    marque: str | None = None
+    quantite: str | None = None  # Ex: "500g", "1L"
     categories: list[str] = field(default_factory=list)
-    
+
     # Images
-    image_url: Optional[str] = None
-    image_thumb_url: Optional[str] = None
-    
+    image_url: str | None = None
+    image_thumb_url: str | None = None
+
     # Nutrition
-    nutrition: Optional[NutritionInfo] = None
-    
+    nutrition: NutritionInfo | None = None
+
     # Ingrédients
-    ingredients_texte: Optional[str] = None
+    ingredients_texte: str | None = None
     allergenes: list[str] = field(default_factory=list)
     traces: list[str] = field(default_factory=list)
-    
+
     # Labels
     labels: list[str] = field(default_factory=list)  # Bio, Sans gluten, etc.
-    origine: Optional[str] = None
-    
+    origine: str | None = None
+
     # Conservation
-    conservation: Optional[str] = None
-    duree_conservation_jours: Optional[int] = None
-    
+    conservation: str | None = None
+    duree_conservation_jours: int | None = None
+
     # Métadonnées
     source: str = "openfoodfacts"
     date_recuperation: datetime = field(default_factory=datetime.now)
     confiance: float = 0.0  # 0-1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SERVICE OPENFOODFACTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class OpenFoodFactsService:
     """
     Service d'enrichissement produits via OpenFoodFacts.
-    
+
     API gratuite et collaborative pour récupérer:
     - Nom, marque, quantité
     - Informations nutritionnelles
@@ -106,19 +106,19 @@ class OpenFoodFactsService:
     - Ingrédients, allergènes
     - Images produit
     """
-    
+
     def __init__(self):
         self.cache = Cache
         self.timeout = 10.0
         self.user_agent = "AssistantMatanne/1.0 (contact@example.com)"
-    
-    def rechercher_produit(self, code_barres: str) -> Optional[ProduitOpenFoodFacts]:
+
+    def rechercher_produit(self, code_barres: str) -> ProduitOpenFoodFacts | None:
         """
         Recherche un produit par son code-barres.
-        
+
         Args:
             code_barres: Code EAN-13, EAN-8 ou UPC
-            
+
         Returns:
             ProduitOpenFoodFacts ou None si non trouvé
         """
@@ -128,54 +128,51 @@ class OpenFoodFactsService:
         if cached:
             logger.debug(f"Cache hit pour {code_barres}")
             return cached
-        
+
         try:
             url = f"{OPENFOODFACTS_API}/{code_barres}.json"
-            
+
             with httpx.Client(timeout=self.timeout) as client:
-                response = client.get(
-                    url,
-                    headers={"User-Agent": self.user_agent}
-                )
-                
+                response = client.get(url, headers={"User-Agent": self.user_agent})
+
                 if response.status_code != 200:
                     logger.warning(f"OpenFoodFacts HTTP {response.status_code} pour {code_barres}")
                     return None
-                
+
                 data = response.json()
-                
+
                 if data.get("status") != 1:
                     logger.info(f"Produit {code_barres} non trouvé sur OpenFoodFacts")
                     return None
-                
+
                 product = data.get("product", {})
                 result = self._parser_produit(code_barres, product)
-                
+
                 # Mettre en cache
                 if result:
                     self.cache.definir(cache_key, result, ttl=CACHE_TTL)
-                
+
                 return result
-                
+
         except httpx.TimeoutException:
             logger.warning(f"Timeout OpenFoodFacts pour {code_barres}")
             return None
         except Exception as e:
             logger.error(f"Erreur OpenFoodFacts: {e}")
             return None
-    
+
     def _parser_produit(self, code_barres: str, data: dict) -> ProduitOpenFoodFacts:
         """Parse les données brutes OpenFoodFacts."""
-        
+
         # Nom du produit
         nom = (
-            data.get("product_name_fr") or 
-            data.get("product_name") or 
-            data.get("generic_name_fr") or
-            data.get("generic_name") or
-            "Produit inconnu"
+            data.get("product_name_fr")
+            or data.get("product_name")
+            or data.get("generic_name_fr")
+            or data.get("generic_name")
+            or "Produit inconnu"
         )
-        
+
         # Nutrition
         nutriments = data.get("nutriments", {})
         nutrition = NutritionInfo(
@@ -191,31 +188,32 @@ class OpenFoodFactsService:
             nova_group=data.get("nova_group"),
             ecoscore=data.get("ecoscore_grade", "").upper() or None,
         )
-        
+
         # Catégories
         categories_raw = data.get("categories_tags_fr") or data.get("categories_tags") or []
-        categories = [c.replace("en:", "").replace("fr:", "").replace("-", " ").title() 
-                      for c in categories_raw[:5]]
-        
+        categories = [
+            c.replace("en:", "").replace("fr:", "").replace("-", " ").title()
+            for c in categories_raw[:5]
+        ]
+
         # Labels
         labels_raw = data.get("labels_tags_fr") or data.get("labels_tags") or []
-        labels = [l.replace("en:", "").replace("fr:", "").replace("-", " ").title() 
-                  for l in labels_raw]
-        
+        labels = [
+            l.replace("en:", "").replace("fr:", "").replace("-", " ").title() for l in labels_raw
+        ]
+
         # Allergènes
         allergenes_raw = data.get("allergens_tags") or []
-        allergenes = [a.replace("en:", "").replace("fr:", "").title() 
-                      for a in allergenes_raw]
-        
+        allergenes = [a.replace("en:", "").replace("fr:", "").title() for a in allergenes_raw]
+
         # Traces
         traces_raw = data.get("traces_tags") or []
-        traces = [t.replace("en:", "").replace("fr:", "").title() 
-                  for t in traces_raw]
-        
+        traces = [t.replace("en:", "").replace("fr:", "").title() for t in traces_raw]
+
         # Score de confiance basé sur la complétude
         completeness = data.get("completeness", 0)
         confiance = min(completeness / 100, 1.0) if completeness else 0.5
-        
+
         return ProduitOpenFoodFacts(
             code_barres=code_barres,
             nom=nom,
@@ -233,16 +231,16 @@ class OpenFoodFactsService:
             conservation=data.get("conservation_conditions"),
             confiance=confiance,
         )
-    
+
     @avec_gestion_erreurs(default_return=[])
     def rechercher_par_nom(self, terme: str, limite: int = 10) -> list[ProduitOpenFoodFacts]:
         """
         Recherche des produits par nom/terme.
-        
+
         Args:
             terme: Terme de recherche
             limite: Nombre max de résultats
-            
+
         Returns:
             Liste de produits correspondants
         """
@@ -256,45 +254,43 @@ class OpenFoodFactsService:
                 "lc": "fr",
                 "cc": "fr",
             }
-            
+
             with httpx.Client(timeout=self.timeout) as client:
                 response = client.get(
-                    OPENFOODFACTS_SEARCH,
-                    params=params,
-                    headers={"User-Agent": self.user_agent}
+                    OPENFOODFACTS_SEARCH, params=params, headers={"User-Agent": self.user_agent}
                 )
-                
+
                 if response.status_code != 200:
                     return []
-                
+
                 data = response.json()
                 products = data.get("products", [])
-                
+
                 results = []
                 for p in products:
                     code = p.get("code", "")
                     if code:
                         parsed = self._parser_produit(code, p)
                         results.append(parsed)
-                
+
                 return results
-                
+
         except Exception as e:
             logger.error(f"Erreur recherche OpenFoodFacts: {e}")
             return []
-    
-    def obtenir_nutriscore_emoji(self, grade: Optional[str]) -> str:
+
+    def obtenir_nutriscore_emoji(self, grade: str | None) -> str:
         """Retourne un emoji pour le nutriscore."""
         mapping = {
             "A": "ðŸŸ¢",
-            "B": "ðŸŸ¡", 
+            "B": "ðŸŸ¡",
             "C": "ðŸŸ ",
             "D": "ðŸŸ§",
             "E": "ðŸ”´",
         }
         return mapping.get(grade.upper() if grade else "", "âšª")
-    
-    def obtenir_nova_description(self, group: Optional[int]) -> str:
+
+    def obtenir_nova_description(self, group: int | None) -> str:
         """Retourne la description du groupe NOVA."""
         descriptions = {
             1: "ðŸ¥¬ Aliment non transformé",
@@ -305,11 +301,11 @@ class OpenFoodFactsService:
         return descriptions.get(group, "â“ Inconnu")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SINGLETON
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
-_service_instance: Optional[OpenFoodFactsService] = None
+_service_instance: OpenFoodFactsService | None = None
 
 
 def get_openfoodfacts_service() -> OpenFoodFactsService:

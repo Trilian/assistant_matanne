@@ -3,8 +3,8 @@ Composants reutilisables pour le module planning
 """
 
 from datetime import date, datetime
-import streamlit as st
 
+import streamlit as st
 
 # ═══════════════════════════════════════════════════════════
 # BADGES & INDICATEURS
@@ -61,7 +61,9 @@ def selecteur_semaine(key_prefix: str = "semaine") -> tuple[date, date]:
     """Selecteur de semaine (retourne date_debut, date_fin)"""
     if f"{key_prefix}_start" not in st.session_state:
         today = date.today()
-        st.session_state[f"{key_prefix}_start"] = today - __import__("datetime").timedelta(days=today.weekday())
+        st.session_state[f"{key_prefix}_start"] = today - __import__("datetime").timedelta(
+            days=today.weekday()
+        )
 
     col_nav1, col_nav2, col_nav3 = st.columns([1, 2, 1])
 
@@ -146,11 +148,7 @@ def carte_projet(projet: dict) -> None:
 def carte_event(event: dict) -> None:
     """Carte pour afficher un evenement calendrier"""
     with st.container():
-        debut = (
-            event["debut"].strftime("%H:%M")
-            if isinstance(event["debut"], datetime)
-            else "–"
-        )
+        debut = event["debut"].strftime("%H:%M") if isinstance(event["debut"], datetime) else "–"
 
         col1, col2 = st.columns([3, 1])
 

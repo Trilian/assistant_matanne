@@ -1,51 +1,50 @@
-﻿"""Tests pour src/services/recettes/utils.py"""
+"""Tests pour src/services/recettes/utils.py"""
 
 import pytest
 
 from src.services.recettes.utils import (
     # Constantes
     DIFFICULTES,
-    TYPES_REPAS,
-    SAISONS,
     ROBOTS_COMPATIBLES,
-    # Export CSV
-    export_recettes_to_csv,
-    parse_csv_to_recettes,
-    # Export JSON
-    export_recettes_to_json,
-    parse_json_to_recettes,
-    # Conversion
-    recette_to_dict,
-    ingredient_to_dict,
-    etape_to_dict,
+    SAISONS,
+    TYPES_REPAS,
+    ajuster_ingredients,
+    # Portions
+    ajuster_quantite_ingredient,
+    calculer_score_recette,
+    # Stats
+    calculer_stats_recettes,
     # Temps
     calculer_temps_total,
     estimer_temps_robot,
-    formater_temps,
-    # Portions
-    ajuster_quantite_ingredient,
-    ajuster_ingredients,
+    etape_to_dict,
+    # Export CSV
+    export_recettes_to_csv,
+    # Export JSON
+    export_recettes_to_json,
+    filtrer_recettes_par_difficulte,
+    filtrer_recettes_par_saison,
     # Filtres
     filtrer_recettes_par_temps,
-    filtrer_recettes_par_difficulte,
     filtrer_recettes_par_type,
-    filtrer_recettes_par_saison,
-    rechercher_par_nom,
+    formater_temps,
+    ingredient_to_dict,
+    parse_csv_to_recettes,
+    parse_json_to_recettes,
+    # Conversion
+    recette_to_dict,
     rechercher_par_ingredient,
-    # Stats
-    calculer_stats_recettes,
-    calculer_score_recette,
+    rechercher_par_nom,
     # Validation
     valider_difficulte,
-    valider_type_repas,
-    valider_temps,
     valider_portions,
+    valider_temps,
+    valider_type_repas,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -97,9 +96,9 @@ def sample_recettes():
     ]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantes:
@@ -136,9 +135,9 @@ class TestConstantes:
         assert ROBOTS_COMPATIBLES["cookeo"]["temps_reduction"] < 1.0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS EXPORT CSV
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestExportCSV:
@@ -202,9 +201,9 @@ Test,invalid,30"""
         assert parsed[0]["nom"] == sample_recettes[0]["nom"]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS EXPORT JSON
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestExportJSON:
@@ -215,6 +214,7 @@ class TestExportJSON:
         result = export_recettes_to_json(sample_recettes)
         assert "Poulet rôti" in result
         import json
+
         parsed = json.loads(result)
         assert len(parsed) == 3
 
@@ -249,9 +249,9 @@ class TestExportJSON:
         assert len(parsed) == len(sample_recettes)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONVERSION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConversion:
@@ -312,9 +312,9 @@ class TestConversion:
         assert result["duree"] == 30
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS TEMPS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestTemps:
@@ -358,9 +358,9 @@ class TestTemps:
         assert formater_temps(150) == "2h 30min"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS PORTIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestPortions:
@@ -382,7 +382,7 @@ class TestPortions:
         assert result == 100
 
     def test_ajuster_quantite_ingredient_zero_base(self):
-        """Test avec portions base Ã  0."""
+        """Test avec portions base à 0."""
         result = ajuster_quantite_ingredient(100, 0, 4)
         assert result == 100
 
@@ -409,9 +409,9 @@ class TestPortions:
         assert "quantite" not in result[0]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FILTRES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFiltres:
@@ -465,7 +465,7 @@ class TestFiltres:
         assert result[0]["nom"] == "Poulet rôti"
 
     def test_rechercher_par_nom_case_insensitive(self, sample_recettes):
-        """Test recherche insensible Ã  la casse."""
+        """Test recherche insensible à la casse."""
         result = rechercher_par_nom(sample_recettes, "SALADE")
         assert len(result) == 1
 
@@ -487,9 +487,9 @@ class TestFiltres:
         assert result[0]["nom"] == "Boeuf bourguignon"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestStatistiques:
@@ -547,7 +547,7 @@ class TestStatistiques:
         assert result == 55.0  # 50 + 5
 
     def test_calculer_score_recette_max_100(self):
-        """Test score plafonné Ã  100."""
+        """Test score plafonné à 100."""
         recette = {
             "nom": "Test",
             "temps_preparation": 10,
@@ -566,9 +566,9 @@ class TestStatistiques:
         assert result == 100.0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestValidation:
@@ -612,7 +612,7 @@ class TestValidation:
         assert valider_temps(-10) == 0
 
     def test_valider_temps_too_large(self):
-        """Test temps trop grand (plafonné Ã  480)."""
+        """Test temps trop grand (plafonné à 480)."""
         assert valider_temps(1000) == 480
 
     def test_valider_portions_valid(self):
@@ -631,5 +631,5 @@ class TestValidation:
         assert valider_portions(0) == 4
 
     def test_valider_portions_too_large(self):
-        """Test portions trop grandes (plafonné Ã  100)."""
+        """Test portions trop grandes (plafonné à 100)."""
         assert valider_portions(200) == 100

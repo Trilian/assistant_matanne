@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Planning Unifié - Centre de Coordination Familiale
 
 âœ… Agrégation complète de TOUS les événements familiaux
@@ -17,36 +17,31 @@ Service complet pour le planning familial fusionnant :
 
 import logging
 from datetime import date, datetime, timedelta
-from typing import Any
 
-from sqlalchemy.orm import Session, selectinload, joinedload
+from sqlalchemy.orm import Session
 
 from src.core.ai import obtenir_client_ia
 from src.core.cache import Cache
-from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
-from src.core.errors_base import ErreurNonTrouve
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import (
     CalendarEvent,
-    Planning,
-    Repas,
     FamilyActivity,
     Project,
-    ProjectTask,
+    Recette,
+    Repas,
     Routine,
     RoutineTask,
-    Recette,
 )
-from src.services.base import BaseAIService, PlanningAIMixin
-from src.services.base import BaseService
+from src.services.base import BaseAIService, BaseService, PlanningAIMixin
 
 from .types import JourCompletSchema, SemaineCompleSchema, SemaineGenereeIASchema
 
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SERVICE PLANNING UNIFIÉ
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningAIMixin):
@@ -81,14 +76,19 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             service_name="planning",
         )
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-    # SECTION 1: AGRÉGATION COMPLÃˆTE SEMAINE
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
+    # SECTION 1: AGRÉGATION COMPLÈTE SEMAINE
+    # ═══════════════════════════════════════════════════════════
 
-    @avec_cache(ttl=1800, key_func=lambda self, date_debut, **kw: f"semaine_complete_{date_debut.isoformat()}")
+    @avec_cache(
+        ttl=1800,
+        key_func=lambda self, date_debut, **kw: f"semaine_complete_{date_debut.isoformat()}",
+    )
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
-    def get_semaine_complete(self, date_debut: date, db: Session | None = None) -> SemaineCompleSchema | None:
+    def get_semaine_complete(
+        self, date_debut: date, db: Session | None = None
+    ) -> SemaineCompleSchema | None:
         """
         Retourne TOUS les événements familiaux agrégés par jour.
 
@@ -163,11 +163,13 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             alertes_semaine=alertes_semaine,
         )
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 2: CHARGEMENT DONNÉES OPTIMISÉ
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
-    def _charger_repas(self, date_debut: date, date_fin: date, db: Session) -> dict[str, list[dict]]:
+    def _charger_repas(
+        self, date_debut: date, date_fin: date, db: Session
+    ) -> dict[str, list[dict]]:
         """Charge repas planifiés avec recettes"""
         repas_dict = {}
 
@@ -183,27 +185,35 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             if jour_str not in repas_dict:
                 repas_dict[jour_str] = []
 
-            repas_dict[jour_str].append({
-                "id": meal.id,
-                "type": meal.type_repas,
-                "recette": recipe.nom if recipe else "Non défini",
-                "recette_id": recipe.id if recipe else None,
-                "portions": meal.portion_ajustee or (recipe.portions if recipe else 4),
-                "temps_total": (recipe.temps_preparation + recipe.temps_cuisson) if recipe else 0,
-                "notes": meal.notes,
-            })
+            repas_dict[jour_str].append(
+                {
+                    "id": meal.id,
+                    "type": meal.type_repas,
+                    "recette": recipe.nom if recipe else "Non défini",
+                    "recette_id": recipe.id if recipe else None,
+                    "portions": meal.portion_ajustee or (recipe.portions if recipe else 4),
+                    "temps_total": (recipe.temps_preparation + recipe.temps_cuisson)
+                    if recipe
+                    else 0,
+                    "notes": meal.notes,
+                }
+            )
 
         return repas_dict
 
-    def _charger_activites(self, date_debut: date, date_fin: date, db: Session) -> dict[str, list[dict]]:
+    def _charger_activites(
+        self, date_debut: date, date_fin: date, db: Session
+    ) -> dict[str, list[dict]]:
         """Charge activités familiales"""
         activites_dict = {}
 
         activites = (
             db.query(FamilyActivity)
             .filter(
-                FamilyActivity.date_prevue >= datetime.combine(date_debut, datetime.min.time()).date(),
-                FamilyActivity.date_prevue <= datetime.combine(date_fin, datetime.max.time()).date(),
+                FamilyActivity.date_prevue
+                >= datetime.combine(date_debut, datetime.min.time()).date(),
+                FamilyActivity.date_prevue
+                <= datetime.combine(date_fin, datetime.max.time()).date(),
             )
             .all()
         )
@@ -213,28 +223,33 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             if jour_str not in activites_dict:
                 activites_dict[jour_str] = []
 
-            activites_dict[jour_str].append({
-                "id": act.id,
-                "titre": act.titre,
-                "type": act.type_activite,
-                "debut": act.date_prevue,
-                "fin": act.date_prevue,  # FamilyActivity n'a pas de date_fin séparée
-                "lieu": act.lieu,
-                "budget": act.cout_estime or 0,
-                "duree": act.duree_heures or 0,
-            })
+            activites_dict[jour_str].append(
+                {
+                    "id": act.id,
+                    "titre": act.titre,
+                    "type": act.type_activite,
+                    "debut": act.date_prevue,
+                    "fin": act.date_prevue,  # FamilyActivity n'a pas de date_fin séparée
+                    "lieu": act.lieu,
+                    "budget": act.cout_estime or 0,
+                    "duree": act.duree_heures or 0,
+                }
+            )
 
         return activites_dict
 
-    def _charger_projets(self, date_debut: date, date_fin: date, db: Session) -> dict[str, list[dict]]:
+    def _charger_projets(
+        self, date_debut: date, date_fin: date, db: Session
+    ) -> dict[str, list[dict]]:
         """Charge projets avec tâches"""
         projets_dict = {}
 
         projets = (
             db.query(Project)
             .filter(
-                Project.statut.in_(["Ã _faire", "en_cours"]),
-                (Project.date_fin_prevue == None) | (Project.date_fin_prevue.between(date_debut, date_fin)),
+                Project.statut.in_(["à_faire", "en_cours"]),
+                (Project.date_fin_prevue == None)
+                | (Project.date_fin_prevue.between(date_debut, date_fin)),
             )
             .all()
         )
@@ -244,13 +259,15 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             if jour_str not in projets_dict:
                 projets_dict[jour_str] = []
 
-            projets_dict[jour_str].append({
-                "id": projet.id,
-                "nom": projet.nom,
-                "priorite": projet.priorite,
-                "statut": projet.statut,
-                "echéance": projet.date_fin_prevue,
-            })
+            projets_dict[jour_str].append(
+                {
+                    "id": projet.id,
+                    "nom": projet.nom,
+                    "priorite": projet.priorite,
+                    "statut": projet.statut,
+                    "echéance": projet.date_fin_prevue,
+                }
+            )
 
         return projets_dict
 
@@ -270,17 +287,21 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             if jour_str not in routines_dict:
                 routines_dict[jour_str] = []
 
-            routines_dict[jour_str].append({
-                "id": task.id,
-                "nom": task.nom,
-                "routine": routine.nom,
-                "heure": task.heure_prevue,
-                "fait": task.fait_le is not None,
-            })
+            routines_dict[jour_str].append(
+                {
+                    "id": task.id,
+                    "nom": task.nom,
+                    "routine": routine.nom,
+                    "heure": task.heure_prevue,
+                    "fait": task.fait_le is not None,
+                }
+            )
 
         return routines_dict
 
-    def _charger_events(self, date_debut: date, date_fin: date, db: Session) -> dict[str, list[dict]]:
+    def _charger_events(
+        self, date_debut: date, date_fin: date, db: Session
+    ) -> dict[str, list[dict]]:
         """Charge événements calendrier"""
         events_dict = {}
 
@@ -298,21 +319,23 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             if jour_str not in events_dict:
                 events_dict[jour_str] = []
 
-            events_dict[jour_str].append({
-                "id": event.id,
-                "titre": event.titre,
-                "type": event.type_event,
-                "debut": event.date_debut,
-                "fin": event.date_fin,
-                "lieu": event.lieu,
-                "couleur": event.couleur,
-            })
+            events_dict[jour_str].append(
+                {
+                    "id": event.id,
+                    "titre": event.titre,
+                    "type": event.type_event,
+                    "debut": event.date_debut,
+                    "fin": event.date_fin,
+                    "lieu": event.lieu,
+                    "couleur": event.couleur,
+                }
+            )
 
         return events_dict
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 3: CALCUL CHARGE & DÉTECTION ALERTES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     def _calculer_charge(
         self,
@@ -362,7 +385,7 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
 
         # Surcharge
         if charge_score >= 80:
-            alertes.append("âš ï¸ Jour très chargé - Penser Ã  prendre du temps")
+            alertes.append("âš ï¸ Jour très chargé - Penser à prendre du temps")
 
         # Pas d'activité pour Jules
         if not any(a.get("pour_jules") for a in activites):
@@ -401,8 +424,8 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
 
         # Budget
         budget_total = sum(j.budget_jour for j in jours_list)
-        if budget_total > 500:  # Adapter Ã  votre budget famille
-            alertes.append(f"ðŸ’° Budget semaine: {budget_total:.2f}â‚¬ - Veiller au budget")
+        if budget_total > 500:  # Adapter à votre budget famille
+            alertes.append(f"ðŸ’° Budget semaine: {budget_total:.2f}€ - Veiller au budget")
 
         return alertes
 
@@ -423,14 +446,18 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             "total_projets": sum(len(j.projets) for j in jours_list),
             "total_events": sum(len(j.events) for j in jours_list),
             "budget_total": sum(j.budget_jour for j in jours_list),
-            "charge_moyenne": int(sum(j.charge_score for j in jours_list) / len(jours_list)) if jours_list else 0,
+            "charge_moyenne": int(sum(j.charge_score for j in jours_list) / len(jours_list))
+            if jours_list
+            else 0,
         }
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 4: GÉNÉRATION IA
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
-    @avec_cache(ttl=1800, key_func=lambda self, date_debut, **kw: f"semaine_ia_{date_debut.isoformat()}")
+    @avec_cache(
+        ttl=1800, key_func=lambda self, date_debut, **kw: f"semaine_ia_{date_debut.isoformat()}"
+    )
     @avec_gestion_erreurs(default_return=None)
     def generer_semaine_ia(
         self,
@@ -486,13 +513,13 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
 
         return f"""
         Génère un planning familial pour la semaine du {date_debut.isoformat()}.
-        
+
         Contexte:
         - Jules a {jules_mois} mois
-        - Budget semaine: {budget}â‚¬
+        - Budget semaine: {budget}€
         - Énergie famille: {energie}
         - Objectifs santé: {', '.join(objectifs_sante) if objectifs_sante else 'Maintenir équilibre'}
-        
+
         Retourne JSON avec:
         - repas_proposes: Liste repas (4 éléments)
         - activites_proposees: Liste activités adaptées Jules
@@ -501,9 +528,9 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         - raisons: Justifications (liste)
         """
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 5: CRUD ÉVÉNEMENTS CALENDRIER
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_session_db
     def creer_event(
@@ -530,10 +557,10 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             )
             db.add(event)
             db.commit()
-            
+
             # Invalider cache
             self._invalider_cache_semaine(date_debut.date())
-            
+
             logger.info(f"âœ… Événement créé: {titre}")
             return event
         except Exception as e:
@@ -550,18 +577,18 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         logger.debug(f"ðŸ”„ Cache semaine invalidé: {debut_semaine}")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # ALIAS DE COMPATIBILITÉ
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 # Alias pour rétro-compatibilité
 PlanningAIService = ServicePlanningUnifie
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FACTORIES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def obtenir_service_planning_unifie() -> ServicePlanningUnifie:
@@ -574,9 +601,9 @@ get_planning_unified_service = obtenir_service_planning_unifie
 get_unified_planning_service = obtenir_service_planning_unifie
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # EXPORTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 __all__ = [

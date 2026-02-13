@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests unitaires pour config.py (src/core/config.py).
 
 Tests couvrant:
@@ -8,22 +8,21 @@ Tests couvrant:
 - Re-load des fichiers .env
 """
 
-import pytest
-from unittest.mock import patch, MagicMock
 import os
-from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from src.core.config import (
     Parametres,
-    obtenir_parametres,
     _read_st_secret,
     _reload_env_files,
+    obtenir_parametres,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 1: TESTS HELPERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -57,9 +56,9 @@ class TestConfigHelpers:
             assert result is None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 2: TESTS PARAMETRES CLASS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -114,17 +113,15 @@ class TestParametres:
 
     def test_parametres_from_env(self):
         """Test chargement depuis variables d'environnement."""
-        with patch.dict(
-            os.environ, {"APP_NAME": "TestApp", "DEBUG": "True"}, clear=False
-        ):
+        with patch.dict(os.environ, {"APP_NAME": "TestApp", "DEBUG": "True"}, clear=False):
             params = Parametres()
             # Les valeurs env override les défauts
             assert params.APP_NAME  # Exists
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 3: TESTS obtenir_parametres
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -155,9 +152,9 @@ class TestObtenirParametres:
         assert isinstance(params.DATABASE_URL, str)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 4: TESTS CONFIGURATION CASCADE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -166,9 +163,7 @@ class TestConfigurationCascade:
 
     def test_env_var_overrides_default(self):
         """Test que les variables env override les defaults."""
-        with patch.dict(
-            os.environ, {"ENV": "test"}, clear=False
-        ):
+        with patch.dict(os.environ, {"ENV": "test"}, clear=False):
             params = Parametres()
             # ENV devrait être au moins basé sur env
             assert params.ENV in ["production", "development", "test"]
@@ -176,16 +171,14 @@ class TestConfigurationCascade:
     def test_database_url_from_env(self):
         """Test que DATABASE_URL vient d'env si défini."""
         test_db_url = "postgresql://test:test@testhost/testdb"
-        with patch.dict(
-            os.environ, {"DATABASE_URL": test_db_url}, clear=False
-        ):
+        with patch.dict(os.environ, {"DATABASE_URL": test_db_url}, clear=False):
             params = Parametres()
             assert params.DATABASE_URL == test_db_url
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 5: TESTS VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -222,9 +215,9 @@ class TestConfigValidation:
         assert "://" in params.DATABASE_URL or "memory" in params.DATABASE_URL
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 6: TESTS INTEGRATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.integration
@@ -234,7 +227,7 @@ class TestConfigIntegration:
     def test_full_config_load_cycle(self):
         """Test le cycle complet de chargement de configuration."""
         params = obtenir_parametres()
-        
+
         # Vérifier les propriétés principales
         assert params.APP_NAME
         assert params.DEBUG is not None
@@ -248,7 +241,7 @@ class TestConfigIntegration:
             "DEBUG": "false",
             "ENV": "test",
         }
-        
+
         with patch.dict(os.environ, custom_env, clear=False):
             params = Parametres()
             # Au moins APP_NAME devrait correspondre ou être défini
@@ -266,15 +259,15 @@ class TestConfigIntegration:
         """Test que plusieurs instances Parametres sont cohérentes."""
         params1 = Parametres()
         params2 = Parametres()
-        
+
         # Les propriétés principales doivent être cohérentes
         assert params1.APP_NAME == params2.APP_NAME
         assert params1.ENV == params2.ENV
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 7: TESTS EDGE CASES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -319,35 +312,35 @@ class TestConfigEdgeCases:
                 getattr(params, field)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# SECTION 8: TESTS COUVERTURE SUPPLÃ‰MENTAIRES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# SECTION 8: TESTS COUVERTURE SUPPLÉMENTAIRES
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
 class TestConfigCouvertureSupplementaire:
     """Tests supplémentaires pour améliorer la couverture."""
-    
+
     def test_parametres_app_version(self):
         """Test que APP_VERSION existe."""
         params = Parametres()
         assert hasattr(params, "APP_VERSION")
         assert params.APP_VERSION
-    
+
     def test_parametres_default_values(self):
         """Test des valeurs par défaut."""
         params = Parametres()
         # Vérifier les defaults
         assert params.CACHE_ENABLED is True or params.CACHE_ENABLED is False
         assert params.LOG_LEVEL is not None
-    
+
     def test_parametres_cache_settings(self):
         """Test des paramètres de cache."""
         params = Parametres()
         assert isinstance(params.CACHE_ENABLED, bool)
         assert isinstance(params.CACHE_DEFAULT_TTL, int)
         assert isinstance(params.CACHE_MAX_SIZE, int)
-    
+
     def test_parametres_rate_limit_settings(self):
         """Test des paramètres de limitation de débit."""
         params = Parametres()
@@ -355,7 +348,7 @@ class TestConfigCouvertureSupplementaire:
         assert isinstance(params.RATE_LIMIT_HOURLY, int)
         assert params.RATE_LIMIT_DAILY > 0
         assert params.RATE_LIMIT_HOURLY > 0
-    
+
     def test_parametres_mistral_settings(self):
         """Test des paramètres Mistral."""
         params = Parametres()
@@ -363,19 +356,19 @@ class TestConfigCouvertureSupplementaire:
         assert params.MISTRAL_TIMEOUT > 0
         assert hasattr(params, "MISTRAL_BASE_URL")
         assert "mistral" in params.MISTRAL_BASE_URL.lower()
-    
+
     def test_est_production_method(self):
         """Test méthode est_production()."""
         with patch.dict(os.environ, {"ENV": "production"}, clear=False):
             params = Parametres()
             # Méthode devrait exister et être callable
             assert callable(params.est_production)
-    
+
     def test_est_developpement_method(self):
         """Test méthode est_developpement()."""
         params = Parametres()
         assert callable(params.est_developpement)
-    
+
     def test_football_data_api_key_optional(self):
         """Test que FOOTBALL_DATA_API_KEY est optionnel."""
         # Retirer la clé de l'environnement
@@ -385,25 +378,26 @@ class TestConfigCouvertureSupplementaire:
             # Devrait être None ou une valeur (pas lever d'exception)
             result = params.FOOTBALL_DATA_API_KEY
             assert result is None or isinstance(result, str)
-    
+
     def test_mistral_model_property(self):
         """Test propriété MISTRAL_MODEL."""
         params = Parametres()
         model = params.MISTRAL_MODEL
         assert model is not None
         assert isinstance(model, str)
-    
+
     def test_reload_env_files_handles_missing_files(self):
         """Test _reload_env_files gère les fichiers manquants."""
         with patch("builtins.open", side_effect=FileNotFoundError):
             # Ne devrait pas lever d'exception
             _reload_env_files()
             assert True
-    
+
     def test_reload_env_files_handles_malformed_lines(self):
         """Test _reload_env_files gère les lignes mal formées."""
         # Le fichier .env peut avoir des lignes sans =
         from io import StringIO
+
         fake_env_content = """
 # Commentaire
 VALID_KEY=valid_value
@@ -416,15 +410,15 @@ AUTRE_CLE="valeur entre guillemets"
                 # Pas d'exception = succès
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# SECTION 9: TESTS PROPRIÃ‰TÃ‰S DATABASE_URL ET MISTRAL_API_KEY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# SECTION 9: TESTS PROPRIÉTÉS DATABASE_URL ET MISTRAL_API_KEY
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
 class TestProprietesConfig:
     """Tests des propriétés avec logique complexe."""
-    
+
     def test_database_url_from_db_vars(self):
         """Test DATABASE_URL construit depuis variables DB_*."""
         env_vars = {
@@ -440,7 +434,7 @@ class TestProprietesConfig:
                 db_url = params.DATABASE_URL
                 assert "localhost" in db_url
                 assert "test_user" in db_url
-    
+
     def test_database_url_adds_sslmode_for_supabase(self):
         """Test que sslmode est ajouté pour Supabase."""
         supabase_url = "postgresql://user:pass@xyz.supabase.co/postgres"
@@ -450,7 +444,7 @@ class TestProprietesConfig:
                 db_url = params.DATABASE_URL
                 # Devrait contenir sslmode
                 assert "sslmode" in db_url or "supabase" in db_url
-    
+
     def test_mistral_api_key_from_env(self):
         """Test MISTRAL_API_KEY depuis variable env."""
         test_key = "sk-real-api-key-12345"
@@ -458,19 +452,20 @@ class TestProprietesConfig:
             params = Parametres()
             key = params.MISTRAL_API_KEY
             assert key == test_key
-    
+
     def test_get_mistral_api_key_from_secrets_returns_none_if_no_secrets(self):
         """Test _get_mistral_api_key_from_secrets retourne None sans secrets."""
         from src.core.config import _get_mistral_api_key_from_secrets
-        
+
         with patch("streamlit.secrets", None):
             result = _get_mistral_api_key_from_secrets()
             # Devrait retourner None sans lever d'exception
             assert result is None or isinstance(result, str)
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# SECTION 10: COUVERTURE SUPPLÃ‰MENTAIRE - PROPRIÃ‰TÃ‰S
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+# ═══════════════════════════════════════════════════════════
+# SECTION 10: COUVERTURE SUPPLÉMENTAIRE - PROPRIÉTÉS
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -484,14 +479,14 @@ class TestProprietesAvancees:
             "password": "testpass",
             "host": "testhost",
             "port": "5432",
-            "name": "testdb"
+            "name": "testdb",
         }
-        
+
         with patch("src.core.config._read_st_secret", return_value=mock_db):
             with patch.dict(os.environ, {}, clear=False):
                 params = Parametres()
                 db_url = params.DATABASE_URL
-                
+
                 assert "testuser" in db_url
                 assert "testhost" in db_url
 
@@ -500,71 +495,75 @@ class TestProprietesAvancees:
         with patch("src.core.config._read_st_secret", return_value=None):
             with patch.dict(os.environ, {"DATABASE_URL": "", "DB_HOST": ""}, clear=True):
                 params = Parametres()
-                
+
                 with pytest.raises(ValueError) as exc_info:
                     _ = params.DATABASE_URL
-                
-                assert "Configuration DB manquante" in str(exc_info.value) or "Configure" in str(exc_info.value)
+
+                assert "Configuration DB manquante" in str(exc_info.value) or "Configure" in str(
+                    exc_info.value
+                )
 
     def test_mistral_api_key_from_streamlit_secrets_env(self):
         """Test MISTRAL_API_KEY depuis STREAMLIT_SECRETS_MISTRAL_API_KEY."""
         test_key = "sk-from-streamlit-secrets"
-        
-        with patch.dict(os.environ, {
-            "MISTRAL_API_KEY": "",
-            "STREAMLIT_SECRETS_MISTRAL_API_KEY": test_key
-        }, clear=False):
+
+        with patch.dict(
+            os.environ,
+            {"MISTRAL_API_KEY": "", "STREAMLIT_SECRETS_MISTRAL_API_KEY": test_key},
+            clear=False,
+        ):
             params = Parametres()
             key = params.MISTRAL_API_KEY
-            
+
             assert key == test_key
 
     def test_mistral_api_key_error_message(self):
         """Test message d'erreur MISTRAL_API_KEY."""
-        with patch.dict(os.environ, {
-            "MISTRAL_API_KEY": "",
-            "STREAMLIT_SECRETS_MISTRAL_API_KEY": ""
-        }, clear=False):
+        with patch.dict(
+            os.environ,
+            {"MISTRAL_API_KEY": "", "STREAMLIT_SECRETS_MISTRAL_API_KEY": ""},
+            clear=False,
+        ):
             with patch("src.core.config._get_mistral_api_key_from_secrets", return_value=None):
                 params = Parametres()
-                
+
                 with pytest.raises(ValueError) as exc_info:
                     _ = params.MISTRAL_API_KEY
-                
+
                 assert "Clé API Mistral manquante" in str(exc_info.value)
 
     def test_mistral_api_key_ignores_dummy_key(self):
         """Test que la clé dummy est ignorée."""
-        with patch.dict(os.environ, {
-            "MISTRAL_API_KEY": "sk-test-dummy-key-replace-with-real-key"
-        }, clear=False):
+        with patch.dict(
+            os.environ, {"MISTRAL_API_KEY": "sk-test-dummy-key-replace-with-real-key"}, clear=False
+        ):
             with patch("src.core.config._get_mistral_api_key_from_secrets", return_value=None):
                 params = Parametres()
-                
+
                 with pytest.raises(ValueError):
                     _ = params.MISTRAL_API_KEY
 
     def test_football_data_api_key_from_env(self):
         """Test FOOTBALL_DATA_API_KEY depuis env."""
         test_key = "football-api-key-123"
-        
+
         with patch.dict(os.environ, {"FOOTBALL_DATA_API_KEY": test_key}, clear=False):
             params = Parametres()
             key = params.FOOTBALL_DATA_API_KEY
-            
+
             assert key == test_key
 
     def test_football_data_api_key_from_st_secrets_flat(self):
         """Test FOOTBALL_DATA_API_KEY depuis st.secrets format plat."""
         test_key = "football-from-secrets"
-        
+
         with patch.dict(os.environ, {"FOOTBALL_DATA_API_KEY": ""}, clear=False):
             with patch("streamlit.secrets") as mock_secrets:
                 mock_secrets.get.return_value = test_key
-                
+
                 params = Parametres()
                 key = params.FOOTBALL_DATA_API_KEY
-                
+
                 # Peut être test_key ou None selon l'implémentation exacte
                 assert key is None or key == test_key
 
@@ -573,10 +572,10 @@ class TestProprietesAvancees:
         with patch.dict(os.environ, {"MISTRAL_MODEL": "mistral-large"}, clear=False):
             with patch("streamlit.secrets") as mock_secrets:
                 mock_secrets.get.side_effect = Exception("No secrets")
-                
+
                 params = Parametres()
                 model = params.MISTRAL_MODEL
-                
+
                 assert model == "mistral-large"
 
     def test_mistral_model_default(self):
@@ -584,16 +583,16 @@ class TestProprietesAvancees:
         with patch.dict(os.environ, {"MISTRAL_MODEL": ""}, clear=False):
             with patch("streamlit.secrets") as mock_secrets:
                 mock_secrets.get.return_value = {}
-                
+
                 params = Parametres()
                 model = params.MISTRAL_MODEL
-                
+
                 assert "mistral" in model.lower()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# SECTION 11: TESTS MÃ‰THODES HELPERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# SECTION 11: TESTS MÉTHODES HELPERS
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -604,46 +603,47 @@ class TestMethodesHelpers:
         """Test est_production retourne True."""
         with patch.dict(os.environ, {"ENV": "production"}, clear=False):
             params = Parametres()
-            
+
             assert params.est_production() is True
 
     def test_est_production_false(self):
         """Test est_production retourne False."""
         with patch.dict(os.environ, {"ENV": "development"}, clear=False):
             params = Parametres()
-            
+
             assert params.est_production() is False
 
     def test_est_developpement_true(self):
         """Test est_developpement retourne True."""
         with patch.dict(os.environ, {"ENV": "development"}, clear=False):
             params = Parametres()
-            
+
             assert params.est_developpement() is True
 
     def test_est_developpement_dev_short(self):
         """Test est_developpement avec 'dev'."""
         with patch.dict(os.environ, {"ENV": "dev"}, clear=False):
             params = Parametres()
-            
+
             assert params.est_developpement() is True
 
     def test_est_developpement_false(self):
         """Test est_developpement retourne False."""
         with patch.dict(os.environ, {"ENV": "production"}, clear=False):
             params = Parametres()
-            
+
             assert params.est_developpement() is False
 
     def test_obtenir_config_publique(self):
         """Test obtenir_config_publique."""
-        with patch.dict(os.environ, {
-            "DATABASE_URL": "postgresql://user:pass@host/db",
-            "MISTRAL_API_KEY": "sk-test-key"
-        }, clear=False):
+        with patch.dict(
+            os.environ,
+            {"DATABASE_URL": "postgresql://user:pass@host/db", "MISTRAL_API_KEY": "sk-test-key"},
+            clear=False,
+        ):
             params = Parametres()
             config = params.obtenir_config_publique()
-            
+
             assert "nom_app" in config
             assert "version" in config
             assert "environnement" in config
@@ -653,13 +653,14 @@ class TestMethodesHelpers:
 
     def test_obtenir_config_publique_no_secrets(self):
         """Test obtenir_config_publique ne contient pas de secrets."""
-        with patch.dict(os.environ, {
-            "DATABASE_URL": "postgresql://user:pass@host/db",
-            "MISTRAL_API_KEY": "sk-secret-key"
-        }, clear=False):
+        with patch.dict(
+            os.environ,
+            {"DATABASE_URL": "postgresql://user:pass@host/db", "MISTRAL_API_KEY": "sk-secret-key"},
+            clear=False,
+        ):
             params = Parametres()
             config = params.obtenir_config_publique()
-            
+
             # Ne devrait pas contenir les clés API ou mots de passe
             config_str = str(config)
             assert "sk-secret" not in config_str
@@ -667,9 +668,11 @@ class TestMethodesHelpers:
 
     def test_verifier_db_configuree_true(self):
         """Test _verifier_db_configuree retourne True."""
-        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://user:pass@host/db"}, clear=False):
+        with patch.dict(
+            os.environ, {"DATABASE_URL": "postgresql://user:pass@host/db"}, clear=False
+        ):
             params = Parametres()
-            
+
             assert params._verifier_db_configuree() is True
 
     def test_verifier_db_configuree_false(self):
@@ -677,14 +680,14 @@ class TestMethodesHelpers:
         with patch.dict(os.environ, {"DATABASE_URL": ""}, clear=True):
             with patch("src.core.config._read_st_secret", return_value=None):
                 params = Parametres()
-                
+
                 assert params._verifier_db_configuree() is False
 
     def test_verifier_mistral_configure_true(self):
         """Test _verifier_mistral_configure retourne True."""
         with patch.dict(os.environ, {"MISTRAL_API_KEY": "sk-valid-key"}, clear=False):
             params = Parametres()
-            
+
             assert params._verifier_mistral_configure() is True
 
     def test_verifier_mistral_configure_false(self):
@@ -692,13 +695,13 @@ class TestMethodesHelpers:
         with patch.dict(os.environ, {"MISTRAL_API_KEY": ""}, clear=False):
             with patch("src.core.config._get_mistral_api_key_from_secrets", return_value=None):
                 params = Parametres()
-                
+
                 assert params._verifier_mistral_configure() is False
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 12: TESTS RELOAD ENV FILES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -708,22 +711,22 @@ class TestReloadEnvFiles:
     def test_reload_env_files_parses_simple_line(self):
         """Test parsing ligne simple."""
         from io import StringIO
-        
+
         fake_content = "KEY=value\n"
-        
+
         with patch("builtins.open", return_value=StringIO(fake_content)):
             with patch("pathlib.Path.exists", return_value=True):
                 _reload_env_files()
-                
+
                 # Vérifier que la variable est dans os.environ
                 # Note: peut ne pas fonctionner parfaitement selon l'implémentation
 
     def test_reload_env_files_strips_double_quotes(self):
         """Test suppression guillemets doubles."""
         from io import StringIO
-        
+
         fake_content = 'KEY="quoted value"\n'
-        
+
         with patch("builtins.open", return_value=StringIO(fake_content)):
             with patch("pathlib.Path.exists", return_value=True):
                 _reload_env_files()
@@ -731,9 +734,9 @@ class TestReloadEnvFiles:
     def test_reload_env_files_strips_single_quotes(self):
         """Test suppression guillemets simples."""
         from io import StringIO
-        
+
         fake_content = "KEY='single quoted'\n"
-        
+
         with patch("builtins.open", return_value=StringIO(fake_content)):
             with patch("pathlib.Path.exists", return_value=True):
                 _reload_env_files()
@@ -741,9 +744,9 @@ class TestReloadEnvFiles:
     def test_reload_env_files_ignores_comments(self):
         """Test ignore les commentaires."""
         from io import StringIO
-        
+
         fake_content = "# This is a comment\nKEY=value\n"
-        
+
         with patch("builtins.open", return_value=StringIO(fake_content)):
             with patch("pathlib.Path.exists", return_value=True):
                 _reload_env_files()
@@ -751,9 +754,9 @@ class TestReloadEnvFiles:
     def test_reload_env_files_ignores_empty_lines(self):
         """Test ignore les lignes vides."""
         from io import StringIO
-        
+
         fake_content = "\n\nKEY=value\n\n"
-        
+
         with patch("builtins.open", return_value=StringIO(fake_content)):
             with patch("pathlib.Path.exists", return_value=True):
                 _reload_env_files()
@@ -765,9 +768,9 @@ class TestReloadEnvFiles:
             _reload_env_files()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 13: TESTS GET MISTRAL API KEY FROM SECRETS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -777,34 +780,34 @@ class TestGetMistralApiKeyFromSecrets:
     def test_get_from_secrets_dict_access(self):
         """Test accès dict st.secrets."""
         from src.core.config import _get_mistral_api_key_from_secrets
-        
+
         mock_secrets = MagicMock()
         mock_secrets.get.return_value = {"api_key": "sk-from-secrets"}
         mock_secrets.__contains__ = MagicMock(return_value=True)
         mock_secrets.__getitem__ = MagicMock(return_value={"api_key": "sk-from-secrets"})
-        
+
         with patch("streamlit.secrets", mock_secrets):
             result = _get_mistral_api_key_from_secrets()
-            
+
             # Devrait essayer d'accéder aux secrets
             assert result is None or isinstance(result, str)
 
     def test_get_from_secrets_exception_handling(self):
         """Test gestion exception."""
         from src.core.config import _get_mistral_api_key_from_secrets
-        
+
         with patch("streamlit.secrets") as mock_secrets:
             mock_secrets.get.side_effect = Exception("No secrets")
-            
+
             result = _get_mistral_api_key_from_secrets()
-            
+
             # Devrait retourner None sans crash
             assert result is None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 14: TESTS OBTENIR PARAMETRES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -816,7 +819,7 @@ class TestObtenirParametresAvance:
         with patch("src.core.config._reload_env_files") as mock_reload:
             with patch("src.core.config.configure_logging"):
                 obtenir_parametres()
-                
+
                 mock_reload.assert_called()
 
     def test_obtenir_parametres_configures_logging(self):
@@ -824,7 +827,7 @@ class TestObtenirParametresAvance:
         with patch("src.core.config._reload_env_files"):
             with patch("src.core.config.configure_logging") as mock_logging:
                 obtenir_parametres()
-                
+
                 mock_logging.assert_called()
 
     def test_obtenir_parametres_logging_exception_handled(self):
@@ -833,13 +836,13 @@ class TestObtenirParametresAvance:
             with patch("src.core.config.configure_logging", side_effect=Exception("Logging error")):
                 # Ne devrait pas lever d'exception
                 params = obtenir_parametres()
-                
+
                 assert params is not None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 15: TESTS READ ST SECRET
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -850,25 +853,25 @@ class TestReadStSecret:
         """Test sans module streamlit."""
         with patch("src.core.config.st") as mock_st:
             delattr(mock_st, "secrets")
-            
+
             result = _read_st_secret("section")
-            
+
             assert result is None
 
     def test_read_st_secret_exception(self):
         """Test avec exception."""
         with patch("src.core.config.st") as mock_st:
             mock_st.secrets.get.side_effect = Exception("Error")
-            
+
             result = _read_st_secret("section")
-            
+
             assert result is None
 
     def test_read_st_secret_success(self):
         """Test lecture réussie."""
         with patch("src.core.config.st") as mock_st:
             mock_st.secrets.get.return_value = {"key": "value"}
-            
+
             result = _read_st_secret("section")
-            
+
             assert result == {"key": "value"}

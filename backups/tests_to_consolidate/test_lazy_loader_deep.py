@@ -1,13 +1,13 @@
-﻿"""
+"""
 Tests approfondis pour src/core/lazy_loader.py
 
 Cible: Atteindre 80%+ de couverture
 Lignes manquantes: 77-79, 98-100, 158, 272-309, 314-318, 328-360
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
+import pytest
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: ChargeurModuleDiffere - lignes 77-79, 98-100
@@ -67,8 +67,9 @@ class TestLazyModuleLoaderDeep:
 
     def test_preload_background_thread(self):
         """Test prÃ©chargement en arriÃ¨re-plan"""
-        from src.core.lazy_loader import ChargeurModuleDiffere
         import time
+
+        from src.core.lazy_loader import ChargeurModuleDiffere
 
         modules = ["json"]
         ChargeurModuleDiffere.preload(modules, background=True)
@@ -199,7 +200,8 @@ class TestOptimizedRouterDeep:
 
         with patch.object(RouteurOptimise, "MODULE_REGISTRY", {"test": {"path": "test.path"}}):
             with patch(
-                "src.core.lazy_loader.ChargeurModuleDiffere.load", side_effect=Exception("Test error")
+                "src.core.lazy_loader.ChargeurModuleDiffere.load",
+                side_effect=Exception("Test error"),
             ):
                 with patch("streamlit.spinner"):
                     with patch("streamlit.error") as mock_error:
@@ -214,7 +216,8 @@ class TestOptimizedRouterDeep:
 
         with patch.object(RouteurOptimise, "MODULE_REGISTRY", {"test": {"path": "test.path"}}):
             with patch(
-                "src.core.lazy_loader.ChargeurModuleDiffere.load", side_effect=Exception("Test error")
+                "src.core.lazy_loader.ChargeurModuleDiffere.load",
+                side_effect=Exception("Test error"),
             ):
                 with patch("streamlit.spinner"):
                     with patch("streamlit.error"):
@@ -267,7 +270,7 @@ class TestRenderLazyLoadingStats:
 
     def test_render_stats_with_load_times(self):
         """Test affichage stats avec temps de chargement"""
-        from src.core.lazy_loader import afficher_stats_chargement_differe, ChargeurModuleDiffere
+        from src.core.lazy_loader import ChargeurModuleDiffere, afficher_stats_chargement_differe
 
         # Charger quelques modules pour avoir des stats
         ChargeurModuleDiffere.clear_cache()
@@ -329,6 +332,7 @@ class TestLazyImportDecorator:
         @lazy_import("json")
         def use_json():
             import json
+
             return json is not None
 
         result = use_json()
@@ -342,6 +346,7 @@ class TestLazyImportDecorator:
         @lazy_import("os", attr_name="sep")
         def use_sep():
             import os
+
             return os.sep is not None
 
         result = use_sep()
@@ -373,10 +378,10 @@ class TestModuleRegistry:
 
         # Les modules minimaux requis (peuvent Ãªtre prÃ©fixÃ©s)
         registry_keys = list(RouteurOptimise.MODULE_REGISTRY.keys())
-        
+
         # VÃ©rifier qu'il y a au moins quelques modules
         assert len(registry_keys) > 0, "Le registry est vide"
-        
+
         # VÃ©rifier que "accueil" existe
         assert "accueil" in registry_keys, "Module accueil manquant"
 

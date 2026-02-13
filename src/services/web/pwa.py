@@ -1,4 +1,4 @@
-﻿"""
+"""
 Configuration PWA (Progressive Web App) pour l'Assistant Matanne.
 
 Ce module génère les fichiers nécessaires pour transformer
@@ -10,10 +10,10 @@ l'application Streamlit en PWA installable:
 
 Usage:
     from src.services.web import generate_pwa_files, inject_pwa_meta
-    
+
     # Générer les fichiers PWA (static/ par défaut)
     generate_pwa_files()
-    
+
     # Injecter les meta tags
     inject_pwa_meta()
 """
@@ -21,9 +21,7 @@ Usage:
 import json
 import logging
 from pathlib import Path
-from typing import Any
 
-import streamlit as st
 import streamlit.components.v1 as components
 
 logger = logging.getLogger(__name__)
@@ -51,50 +49,50 @@ PWA_CONFIG = {
             "src": "/static/icons/icon-72x72.png",
             "sizes": "72x72",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "maskable any",
         },
         {
             "src": "/static/icons/icon-96x96.png",
             "sizes": "96x96",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "maskable any",
         },
         {
             "src": "/static/icons/icon-128x128.png",
             "sizes": "128x128",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "maskable any",
         },
         {
             "src": "/static/icons/icon-144x144.png",
             "sizes": "144x144",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "maskable any",
         },
         {
             "src": "/static/icons/icon-152x152.png",
             "sizes": "152x152",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "maskable any",
         },
         {
             "src": "/static/icons/icon-192x192.png",
             "sizes": "192x192",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "maskable any",
         },
         {
             "src": "/static/icons/icon-384x384.png",
             "sizes": "384x384",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "maskable any",
         },
         {
             "src": "/static/icons/icon-512x512.png",
             "sizes": "512x512",
             "type": "image/png",
-            "purpose": "maskable any"
-        }
+            "purpose": "maskable any",
+        },
     ],
     "shortcuts": [
         {
@@ -102,22 +100,22 @@ PWA_CONFIG = {
             "short_name": "Recettes",
             "description": "Accéder aux recettes",
             "url": "/?module=cuisine.recettes",
-            "icons": [{"src": "/static/icons/recipe-96x96.png", "sizes": "96x96"}]
+            "icons": [{"src": "/static/icons/recipe-96x96.png", "sizes": "96x96"}],
         },
         {
             "name": "Liste de courses",
             "short_name": "Courses",
             "description": "Voir la liste de courses",
             "url": "/?module=cuisine.courses",
-            "icons": [{"src": "/static/icons/cart-96x96.png", "sizes": "96x96"}]
+            "icons": [{"src": "/static/icons/cart-96x96.png", "sizes": "96x96"}],
         },
         {
             "name": "Planning",
             "short_name": "Planning",
             "description": "Voir le planning des repas",
             "url": "/?module=planning",
-            "icons": [{"src": "/static/icons/calendar-96x96.png", "sizes": "96x96"}]
-        }
+            "icons": [{"src": "/static/icons/calendar-96x96.png", "sizes": "96x96"}],
+        },
     ],
     "screenshots": [
         {
@@ -125,18 +123,18 @@ PWA_CONFIG = {
             "sizes": "1280x720",
             "type": "image/png",
             "form_factor": "wide",
-            "label": "Tableau de bord"
+            "label": "Tableau de bord",
         },
         {
             "src": "/static/screenshots/mobile.png",
             "sizes": "750x1334",
             "type": "image/png",
             "form_factor": "narrow",
-            "label": "Vue mobile"
-        }
+            "label": "Vue mobile",
+        },
     ],
     "related_applications": [],
-    "prefer_related_applications": False
+    "prefer_related_applications": False,
 }
 
 
@@ -192,23 +190,23 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     // Ignorer les requêtes non-GET
     if (event.request.method !== 'GET') return;
-    
+
     // Ignorer les WebSockets (Streamlit)
     if (event.request.url.includes('_stcore')) return;
-    
+
     event.respondWith(
         fetch(event.request)
             .then((response) => {
                 // Cloner la réponse pour la mettre en cache
                 const responseClone = response.clone();
-                
+
                 // Ne mettre en cache que les ressources statiques
                 if (response.ok && isStaticAsset(event.request.url)) {
                     caches.open(CACHE_NAME).then((cache) => {
                         cache.put(event.request, responseClone);
                     });
                 }
-                
+
                 return response;
             })
             .catch(() => {
@@ -218,12 +216,12 @@ self.addEventListener('fetch', (event) => {
                         if (cachedResponse) {
                             return cachedResponse;
                         }
-                        
+
                         // Page offline pour les documents HTML
                         if (event.request.destination === 'document') {
                             return caches.match(OFFLINE_URL);
                         }
-                        
+
                         return new Response('Offline', {
                             status: 503,
                             statusText: 'Service Unavailable'
@@ -242,7 +240,7 @@ function isStaticAsset(url) {
 // Gestion des notifications push
 self.addEventListener('push', (event) => {
     console.log('[SW] Push received');
-    
+
     const data = event.data ? event.data.json() : {};
     const title = data.title || 'Assistant Matanne';
     const options = {
@@ -255,7 +253,7 @@ self.addEventListener('push', (event) => {
         tag: data.tag || 'default',
         renotify: data.renotify || false,
     };
-    
+
     event.waitUntil(
         self.registration.showNotification(title, options)
     );
@@ -265,9 +263,9 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
     console.log('[SW] Notification clicked');
     event.notification.close();
-    
+
     const urlToOpen = event.notification.data?.url || '/';
-    
+
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true })
             .then((clientList) => {
@@ -288,7 +286,7 @@ self.addEventListener('notificationclick', (event) => {
 // Synchronisation en arrière-plan
 self.addEventListener('sync', (event) => {
     console.log('[SW] Background sync:', event.tag);
-    
+
     if (event.tag === 'sync-shopping-list') {
         event.waitUntil(syncShoppingList());
     } else if (event.tag === 'sync-offline-changes') {
@@ -303,27 +301,27 @@ self.addEventListener('sync', (event) => {
 function openDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
-        
+
         request.onerror = () => reject(request.error);
         request.onsuccess = () => resolve(request.result);
-        
+
         request.onupgradeneeded = (event) => {
             const db = event.target.result;
-            
+
             // Store pour la liste de courses
             if (!db.objectStoreNames.contains('shopping_list')) {
                 const store = db.createObjectStore('shopping_list', { keyPath: 'id', autoIncrement: true });
                 store.createIndex('synced', 'synced', { unique: false });
                 store.createIndex('achete', 'achete', { unique: false });
             }
-            
+
             // Store pour les modifications en attente
             if (!db.objectStoreNames.contains('pending_changes')) {
                 const store = db.createObjectStore('pending_changes', { keyPath: 'id', autoIncrement: true });
                 store.createIndex('timestamp', 'timestamp', { unique: false });
                 store.createIndex('type', 'type', { unique: false });
             }
-            
+
             // Store pour les recettes favorites (lecture offline)
             if (!db.objectStoreNames.contains('favorite_recipes')) {
                 const store = db.createObjectStore('favorite_recipes', { keyPath: 'id' });
@@ -371,16 +369,16 @@ async function clearOfflineStore(storeName) {
 
 async function syncShoppingList() {
     console.log('[SW] Syncing shopping list...');
-    
+
     try {
         // Récupérer les modifications en attente
         const pendingChanges = await getFromOfflineStore('pending_changes');
-        
+
         if (pendingChanges.length === 0) {
             console.log('[SW] No pending changes');
             return;
         }
-        
+
         // Envoyer les modifications au serveur
         for (const change of pendingChanges) {
             try {
@@ -389,7 +387,7 @@ async function syncShoppingList() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(change)
                 });
-                
+
                 if (response.ok) {
                     // Supprimer la modification de la file d'attente
                     await deleteFromOfflineStore('pending_changes', change.id);
@@ -399,14 +397,14 @@ async function syncShoppingList() {
                 console.error('[SW] Failed to sync change:', change.id, error);
             }
         }
-        
+
         // Notifier l'utilisateur
         await self.registration.showNotification('Synchronisation terminée', {
             body: `${pendingChanges.length} modification(s) synchronisée(s)`,
             icon: '/static/icons/icon-192x192.png',
             tag: 'sync-complete'
         });
-        
+
     } catch (error) {
         console.error('[SW] Sync error:', error);
     }
@@ -434,7 +432,7 @@ async function syncOfflineChanges() {
 
 self.addEventListener('message', (event) => {
     console.log('[SW] Message received:', event.data);
-    
+
     if (event.data.type === 'SAVE_OFFLINE') {
         // Sauvegarder des données pour utilisation offline
         saveToOfflineStore(event.data.store, event.data.data)
@@ -445,7 +443,7 @@ self.addEventListener('message', (event) => {
                 event.ports[0].postMessage({ success: false, error: error.message });
             });
     }
-    
+
     if (event.data.type === 'GET_OFFLINE') {
         // Récupérer des données offline
         getFromOfflineStore(event.data.store)
@@ -456,11 +454,11 @@ self.addEventListener('message', (event) => {
                 event.ports[0].postMessage({ success: false, error: error.message });
             });
     }
-    
+
     if (event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
     }
-    
+
     if (event.data.type === 'REQUEST_SYNC') {
         // Demander une synchronisation
         self.registration.sync.register('sync-shopping-list')
@@ -558,22 +556,19 @@ OFFLINE_HTML = """
 def generate_manifest(output_path: str | Path) -> Path:
     """
     Génère le fichier manifest.json.
-    
+
     Args:
         output_path: Chemin du dossier de sortie
-        
+
     Returns:
         Chemin du fichier créé
     """
     output_path = Path(output_path)
     output_path.mkdir(parents=True, exist_ok=True)
-    
+
     manifest_path = output_path / "manifest.json"
-    manifest_path.write_text(
-        json.dumps(PWA_CONFIG, indent=2, ensure_ascii=False),
-        encoding="utf-8"
-    )
-    
+    manifest_path.write_text(json.dumps(PWA_CONFIG, indent=2, ensure_ascii=False), encoding="utf-8")
+
     logger.info(f"✅ Manifest généré: {manifest_path}")
     return manifest_path
 
@@ -581,19 +576,19 @@ def generate_manifest(output_path: str | Path) -> Path:
 def generate_service_worker(output_path: str | Path) -> Path:
     """
     Génère le Service Worker.
-    
+
     Args:
         output_path: Chemin du dossier de sortie
-        
+
     Returns:
         Chemin du fichier créé
     """
     output_path = Path(output_path)
     output_path.mkdir(parents=True, exist_ok=True)
-    
+
     sw_path = output_path / "sw.js"
     sw_path.write_text(SERVICE_WORKER_JS, encoding="utf-8")
-    
+
     logger.info(f"✅ Service Worker généré: {sw_path}")
     return sw_path
 
@@ -601,19 +596,19 @@ def generate_service_worker(output_path: str | Path) -> Path:
 def generate_offline_page(output_path: str | Path) -> Path:
     """
     Génère la page offline.
-    
+
     Args:
         output_path: Chemin du dossier de sortie
-        
+
     Returns:
         Chemin du fichier créé
     """
     output_path = Path(output_path)
     output_path.mkdir(parents=True, exist_ok=True)
-    
+
     offline_path = output_path / "offline.html"
     offline_path.write_text(OFFLINE_HTML, encoding="utf-8")
-    
+
     logger.info(f"✅ Page offline générée: {offline_path}")
     return offline_path
 
@@ -621,25 +616,25 @@ def generate_offline_page(output_path: str | Path) -> Path:
 def generate_pwa_files(output_path: str | Path = "static") -> dict[str, Path]:
     """
     Génère tous les fichiers PWA.
-    
+
     Args:
         output_path: Chemin du dossier de sortie
-        
+
     Returns:
         Dictionnaire des fichiers créés
     """
     output_path = Path(output_path)
-    
+
     files = {
         "manifest": generate_manifest(output_path),
         "service_worker": generate_service_worker(output_path),
         "offline": generate_offline_page(output_path),
     }
-    
+
     # Créer le dossier des icônes
     icons_path = output_path / "icons"
     icons_path.mkdir(parents=True, exist_ok=True)
-    
+
     logger.info(f"✅ Tous les fichiers PWA générés dans: {output_path}")
     return files
 
@@ -652,7 +647,7 @@ def generate_pwa_files(output_path: str | Path = "static") -> dict[str, Path]:
 def inject_pwa_meta():
     """
     Injecte les meta tags PWA dans la page Streamlit.
-    
+
     Doit être appelé au début de l'application.
     """
     pwa_meta = """
@@ -663,15 +658,15 @@ def inject_pwa_meta():
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="Matanne">
-        
+
         <!-- iOS Icons -->
         <link rel="apple-touch-icon" href="/static/icons/icon-152x152.png">
         <link rel="apple-touch-icon" sizes="180x180" href="/static/icons/icon-192x192.png">
-        
+
         <!-- Splash Screens iOS -->
         <link rel="apple-touch-startup-image" href="/static/splash/splash.png">
     </head>
-    
+
     <script>
         // Enregistrer le Service Worker
         if ('serviceWorker' in navigator) {
@@ -685,7 +680,7 @@ def inject_pwa_meta():
                     });
             });
         }
-        
+
         // Demander la permission pour les notifications
         async function requestNotificationPermission() {
             if ('Notification' in window && Notification.permission === 'default') {
@@ -693,12 +688,12 @@ def inject_pwa_meta():
                 console.log('Notification permission:', permission);
             }
         }
-        
+
         // Détecter si installé en PWA
         window.addEventListener('appinstalled', () => {
             console.log('PWA installed');
         });
-        
+
         // Proposer l'installation
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -708,7 +703,7 @@ def inject_pwa_meta():
         });
     </script>
     """
-    
+
     components.html(pwa_meta, height=0)
 
 
@@ -734,16 +729,16 @@ def render_install_prompt():
             📲 Installer l'application
         </button>
     </div>
-    
+
     <script>
         let deferredPrompt;
-        
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             document.getElementById('pwa-install-container').style.display = 'block';
         });
-        
+
         async function installPWA() {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
@@ -755,14 +750,14 @@ def render_install_prompt():
         }
     </script>
     """
-    
+
     components.html(install_script, height=60)
 
 
 def is_pwa_installed() -> bool:
     """
     Vérifie si l'app est installée en PWA.
-    
+
     Note: Ne fonctionne que côté client via JavaScript.
     """
     # Cette vérification doit être faite côté client
@@ -777,10 +772,10 @@ def is_pwa_installed() -> bool:
 def generate_icon_svg(size: int = 512) -> str:
     """
     Génère un SVG d'icône par défaut.
-    
+
     Args:
         size: Taille de l'icône
-        
+
     Returns:
         Code SVG
     """
@@ -793,7 +788,7 @@ def generate_icon_svg(size: int = 512) -> str:
             </linearGradient>
         </defs>
         <rect width="{size}" height="{size}" rx="{size//8}" fill="url(#grad)"/>
-        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" 
+        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
               font-size="{size//2}" font-family="Arial" fill="white">🏠</text>
     </svg>
     """

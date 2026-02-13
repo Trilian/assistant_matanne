@@ -1,4 +1,4 @@
-﻿"""
+"""
 Mode Tablette / Cuisine pour l'application.
 
 Fournit:
@@ -9,10 +9,11 @@ Fournit:
 - Mode cuisine (recettes step-by-step)
 """
 
-import streamlit as st
-from typing import Callable, Any
+from collections.abc import Callable
 from enum import Enum
+from typing import Any
 
+import streamlit as st
 
 # ═══════════════════════════════════════════════════════════
 # CONFIGURATION MODE TABLETTE
@@ -21,6 +22,7 @@ from enum import Enum
 
 class TabletMode(str, Enum):
     """Modes d'affichage tablette."""
+
     NORMAL = "normal"
     TABLET = "tablet"
     KITCHEN = "kitchen"  # Mode cuisine (très gros, tactile)
@@ -277,7 +279,7 @@ TABLET_CSS = """
     .stApp {
         font-size: 1.1rem;
     }
-    
+
     .stButton > button {
         min-height: 54px;
         font-size: 1.1rem;
@@ -299,12 +301,12 @@ TABLET_CSS = """
         min-height: 48px;
         padding: 12px 20px;
     }
-    
+
     /* Supprimer les effets hover sur tactile */
     .stButton > button:hover {
         transform: none;
     }
-    
+
     /* Active state pour tactile */
     .stButton > button:active {
         transform: scale(0.98);
@@ -454,14 +456,14 @@ KITCHEN_MODE_CSS = """
 def apply_tablet_mode():
     """
     Applique le mode tablette à la page courante.
-    
+
     À appeler au début de chaque page/module.
     """
     mode = get_tablet_mode()
-    
+
     # Toujours inclure le CSS de base
     st.markdown(TABLET_CSS, unsafe_allow_html=True)
-    
+
     if mode == TabletMode.TABLET:
         st.markdown('<div class="tablet-mode">', unsafe_allow_html=True)
     elif mode == TabletMode.KITCHEN:
@@ -472,9 +474,9 @@ def apply_tablet_mode():
 def close_tablet_mode():
     """Ferme les balises du mode tablette."""
     mode = get_tablet_mode()
-    
+
     if mode in [TabletMode.TABLET, TabletMode.KITCHEN]:
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -488,29 +490,29 @@ def tablet_button(
     icon: str = "",
     type: str = "secondary",
     on_click: Callable | None = None,
-    **kwargs
+    **kwargs,
 ) -> bool:
     """
     Bouton optimisé pour tablette.
-    
+
     Args:
         label: Texte du bouton
         key: Clé unique
         icon: Emoji/icône à afficher
         type: "primary", "secondary", "danger"
         on_click: Callback au clic
-        
+
     Returns:
         True si cliqué
     """
     full_label = f"{icon} {label}" if icon else label
-    
+
     # Styles selon le type
     if type == "primary":
         kwargs["type"] = "primary"
     elif type == "danger":
         kwargs["help"] = "⚠️ Action irréversible"
-    
+
     return st.button(full_label, key=key, on_click=on_click, **kwargs)
 
 
@@ -521,34 +523,34 @@ def tablet_select_grid(
 ) -> str | None:
     """
     Grille de sélection tactile.
-    
+
     Args:
         options: Liste de {"value": str, "label": str, "icon": str}
         key: Clé unique
         columns: Nombre de colonnes
-        
+
     Returns:
         Valeur sélectionnée ou None
     """
     selected = st.session_state.get(f"{key}_selected")
-    
+
     cols = st.columns(columns)
-    
+
     for i, opt in enumerate(options):
         with cols[i % columns]:
             is_selected = selected == opt.get("value")
-            
+
             btn_label = f"{opt.get('icon', '')} {opt.get('label', opt.get('value', ''))}"
-            
+
             if st.button(
                 btn_label,
                 key=f"{key}_{i}",
                 use_container_width=True,
-                type="primary" if is_selected else "secondary"
+                type="primary" if is_selected else "secondary",
             ):
                 st.session_state[f"{key}_selected"] = opt.get("value")
                 st.rerun()
-    
+
     return selected
 
 
@@ -562,7 +564,7 @@ def tablet_number_input(
 ) -> int:
     """
     Input numérique avec boutons +/- tactiles.
-    
+
     Args:
         label: Label du champ
         key: Clé unique
@@ -570,37 +572,37 @@ def tablet_number_input(
         max_value: Valeur maximale
         default: Valeur par défaut
         step: Incrément
-        
+
     Returns:
         Valeur actuelle
     """
     if f"{key}_value" not in st.session_state:
         st.session_state[f"{key}_value"] = default
-    
+
     current = st.session_state[f"{key}_value"]
-    
+
     st.write(f"**{label}**")
-    
+
     col1, col2, col3 = st.columns([1, 2, 1])
-    
+
     with col1:
         if st.button("➖", key=f"{key}_minus", use_container_width=True):
             new_val = max(min_value, current - step)
             st.session_state[f"{key}_value"] = new_val
             st.rerun()
-    
+
     with col2:
         st.markdown(
             f"<div style='text-align: center; font-size: 2rem; font-weight: bold;'>{current}</div>",
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
-    
+
     with col3:
         if st.button("➕", key=f"{key}_plus", use_container_width=True):
             new_val = min(max_value, current + step)
             st.session_state[f"{key}_value"] = new_val
             st.rerun()
-    
+
     return current
 
 
@@ -611,24 +613,24 @@ def tablet_checklist(
 ) -> dict[str, bool]:
     """
     Liste de cases à cocher tactile.
-    
+
     Args:
         items: Liste des éléments
         key: Clé unique
         on_check: Callback (item, checked)
-        
+
     Returns:
         Dict {item: checked}
     """
     if f"{key}_checked" not in st.session_state:
         st.session_state[f"{key}_checked"] = {item: False for item in items}
-    
+
     checked = st.session_state[f"{key}_checked"]
-    
+
     for item in items:
         is_checked = checked.get(item, False)
         icon = "✅" if is_checked else "⬜"
-        
+
         if st.button(
             f"{icon} {item}",
             key=f"{key}_{item}",
@@ -636,12 +638,12 @@ def tablet_checklist(
         ):
             new_state = not is_checked
             st.session_state[f"{key}_checked"][item] = new_state
-            
+
             if on_check:
                 on_check(item, new_state)
-            
+
             st.rerun()
-    
+
     return checked
 
 
@@ -656,7 +658,7 @@ def render_kitchen_recipe_view(
 ):
     """
     Affiche une recette en mode cuisine (step-by-step).
-    
+
     Args:
         recette: Dict avec nom, ingredients, instructions
         key: Clé unique
@@ -664,11 +666,11 @@ def render_kitchen_recipe_view(
     # État
     if f"{key}_step" not in st.session_state:
         st.session_state[f"{key}_step"] = 0
-    
+
     current_step = st.session_state[f"{key}_step"]
     instructions = recette.get("instructions", [])
     total_steps = len(instructions)
-    
+
     # Timer (si défini)
     if f"{key}_timer" in st.session_state and st.session_state[f"{key}_timer"] > 0:
         st.markdown(
@@ -677,21 +679,21 @@ def render_kitchen_recipe_view(
                 ⏱️ {st.session_state[f"{key}_timer"]} min
             </div>
             """,
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
-    
+
     # Titre de la recette
     st.markdown(f"## 👨‍🍳 {recette.get('nom', 'Recette')}")
-    
+
     # Navigation par onglets
     tab1, tab2 = st.tabs(["📝 Étapes", "🥕 Ingrédients"])
-    
+
     with tab1:
         if current_step == 0:
             # Écran d'accueil
             st.markdown("### 🚀 Prêt à cuisiner ?")
             st.markdown(f"**{total_steps} étapes** à suivre")
-            
+
             # Temps
             temps_prep = recette.get("temps_preparation", 0)
             temps_cuisson = recette.get("temps_cuisson", 0)
@@ -701,25 +703,27 @@ def render_kitchen_recipe_view(
                     st.metric("⏱️ Préparation", f"{temps_prep} min")
                 with col2:
                     st.metric("🔥 Cuisson", f"{temps_cuisson} min")
-            
-            if st.button("▶️ Commencer", key=f"{key}_start", type="primary", use_container_width=True):
+
+            if st.button(
+                "▶️ Commencer", key=f"{key}_start", type="primary", use_container_width=True
+            ):
                 st.session_state[f"{key}_step"] = 1
                 st.rerun()
-        
+
         elif current_step > total_steps:
             # Fin de la recette
             st.markdown("### 🎉 Bravo !")
             st.markdown("Votre plat est prêt. Bon appétit !")
             st.balloons()
-            
+
             if st.button("🔄 Recommencer", key=f"{key}_restart", use_container_width=True):
                 st.session_state[f"{key}_step"] = 0
                 st.rerun()
-        
+
         else:
             # Étape courante
             instruction = instructions[current_step - 1]
-            
+
             st.markdown(
                 f"""
                 <div class="kitchen-step-card kitchen-step-transition">
@@ -727,13 +731,13 @@ def render_kitchen_recipe_view(
                     <span style="font-size: 1.4rem;">{instruction}</span>
                 </div>
                 """,
-                unsafe_allow_html=True
+                unsafe_allow_html=True,
             )
-            
+
             # Barre de progression
             progress = current_step / total_steps
             st.progress(progress, text=f"Étape {current_step}/{total_steps}")
-            
+
             # Timer rapide
             col1, col2, col3 = st.columns(3)
             with col1:
@@ -745,13 +749,13 @@ def render_kitchen_recipe_view(
             with col3:
                 if st.button("⏱️ 10 min", key=f"{key}_timer_10"):
                     st.session_state[f"{key}_timer"] = 10
-    
+
     with tab2:
         # Liste des ingrédients
         ingredients = recette.get("ingredients", [])
-        
+
         st.markdown("### 🥕 Ingrédients")
-        
+
         for i, ing in enumerate(ingredients):
             if isinstance(ing, dict):
                 quantite = ing.get("quantite", "")
@@ -760,24 +764,24 @@ def render_kitchen_recipe_view(
                 label = f"{quantite} {unite} {nom}".strip()
             else:
                 label = str(ing)
-            
+
             st.checkbox(label, key=f"{key}_ing_{i}")
-    
+
     # Navigation fixe en bas
     st.markdown("---")
-    
+
     col1, col2, col3 = st.columns([1, 2, 1])
-    
+
     with col1:
         if current_step > 1:
             if st.button("◀️ Précédent", key=f"{key}_prev", use_container_width=True):
                 st.session_state[f"{key}_step"] = current_step - 1
                 st.rerun()
-    
+
     with col2:
         if st.button("❌ Quitter", key=f"{key}_quit", use_container_width=True):
             st.session_state[f"{key}_step"] = 0
-    
+
     with col3:
         if current_step >= 1 and current_step <= total_steps:
             btn_label = "✅ Terminé" if current_step == total_steps else "Suivant ▶️"
@@ -796,15 +800,15 @@ def render_mode_selector():
     with st.sidebar:
         st.markdown("---")
         st.markdown("### 📱 Mode d'affichage")
-        
+
         mode = get_tablet_mode()
-        
+
         options = {
             TabletMode.NORMAL: "🖥️ Normal",
             TabletMode.TABLET: "📱 Tablette",
             TabletMode.KITCHEN: "👨‍🍳 Cuisine",
         }
-        
+
         selected = st.selectbox(
             "Choisir le mode",
             options=list(options.keys()),
@@ -813,10 +817,12 @@ def render_mode_selector():
             key="mode_selector",
             label_visibility="collapsed",
         )
-        
+
         if selected != mode:
             set_tablet_mode(selected)
             st.rerun()
-        
+
         if mode == TabletMode.KITCHEN:
-            st.info("🍳 Mode cuisine activé:\n- Interface simplifiée\n- Gros boutons tactiles\n- Navigation par étapes")
+            st.info(
+                "🍳 Mode cuisine activé:\n- Interface simplifiée\n- Gros boutons tactiles\n- Navigation par étapes"
+            )

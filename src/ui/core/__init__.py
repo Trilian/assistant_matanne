@@ -1,11 +1,25 @@
-﻿"""
+"""
 UI Core - Point d'entrée
 Composants de base réutilisables
 """
 
 from .base_form import ConstructeurFormulaire, FormBuilder
-from .base_io import ConfigurationIO, IOConfig, ServiceIOBase, BaseIOService, creer_service_io, create_io_service
-from .base_module import ConfigurationModule, ModuleConfig, ModuleUIBase, BaseModuleUI, creer_module_ui, create_module_ui
+from .base_io import (
+    BaseIOService,
+    ConfigurationIO,
+    IOConfig,
+    ServiceIOBase,
+    create_io_service,
+    creer_service_io,
+)
+from .base_module import (
+    BaseModuleUI,
+    ConfigurationModule,
+    ModuleConfig,
+    ModuleUIBase,
+    create_module_ui,
+    creer_module_ui,
+)
 
 __all__ = [
     # Module (nouveaux noms français)

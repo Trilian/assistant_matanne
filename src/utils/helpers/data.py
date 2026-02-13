@@ -1,4 +1,4 @@
-﻿"""
+"""
 Helpers - Manipulation de données
 """
 
@@ -158,4 +158,3 @@ def trier_donnees(items: list[dict], key: str, reverse: bool = False) -> list[di
         [{"val": 1}, {"val": 3}]
     """
     return sorted(items, key=lambda x: x.get(key), reverse=reverse)
-

@@ -1,13 +1,11 @@
-﻿"""
+"""
 Tests unitaires pour progress.py
 
 Module: src.ui.feedback.progress
 Couverture cible: >80%
 """
 
-import pytest
 from unittest.mock import MagicMock, patch
-from datetime import datetime, timedelta
 
 
 class TestSuiviProgression:
@@ -40,7 +38,7 @@ class TestSuiviProgression:
         mock_progress.return_value = MagicMock()
 
         suivi = SuiviProgression("Test", total=10)
-        suivi.mettre_a_jour(5, "Ã‰tape 5")
+        suivi.mettre_a_jour(5, "Étape 5")
 
         assert suivi.courant == 5
 
@@ -165,7 +163,7 @@ class TestSuiviProgression:
         mock_progress.return_value = MagicMock()
 
         suivi = SuiviProgression("Test", total=10)
-        # Simule une progression Ã  mi-chemin
+        # Simule une progression à mi-chemin
         suivi.mettre_a_jour(5, "Traitement...")
 
         # Le caption devrait être appelé avec l'estimation
@@ -210,8 +208,8 @@ class TestEtatChargement:
         mock_empty.return_value = MagicMock()
 
         etat = EtatChargement("Test")
-        etat.ajouter_etape("Ã‰tape 1")
-        etat.terminer_etape("Ã‰tape 1")
+        etat.ajouter_etape("Étape 1")
+        etat.terminer_etape("Étape 1")
 
         assert etat.etapes[0]["completed"] is True
         assert "OK" in etat.etapes[0]["status"]
@@ -224,7 +222,7 @@ class TestEtatChargement:
         mock_empty.return_value = MagicMock()
 
         etat = EtatChargement("Test")
-        etat.ajouter_etape("Ã‰tape 1")
+        etat.ajouter_etape("Étape 1")
         etat.terminer_etape()
 
         assert etat.etapes[0]["completed"] is True
@@ -237,8 +235,8 @@ class TestEtatChargement:
         mock_empty.return_value = MagicMock()
 
         etat = EtatChargement("Test")
-        etat.ajouter_etape("Ã‰tape 1")
-        etat.terminer_etape("Ã‰tape 1", succes=False)
+        etat.ajouter_etape("Étape 1")
+        etat.terminer_etape("Étape 1", succes=False)
 
         assert etat.etapes[0]["completed"] is True
         assert "Erreur" in etat.etapes[0]["status"]
@@ -251,8 +249,8 @@ class TestEtatChargement:
         mock_empty.return_value = MagicMock()
 
         etat = EtatChargement("Test")
-        etat.ajouter_etape("Ã‰tape 1")
-        etat.erreur_etape("Ã‰tape 1", "Timeout")
+        etat.ajouter_etape("Étape 1")
+        etat.erreur_etape("Étape 1", "Timeout")
 
         assert etat.etapes[0]["completed"] is True
         assert "Timeout" in etat.etapes[0]["status"]
@@ -265,7 +263,7 @@ class TestEtatChargement:
         mock_empty.return_value = MagicMock()
 
         etat = EtatChargement("Test")
-        etat.ajouter_etape("Ã‰tape 1")
+        etat.ajouter_etape("Étape 1")
         etat.erreur_etape()
 
         assert etat.etapes[0]["completed"] is True
@@ -281,8 +279,8 @@ class TestEtatChargement:
         mock_empty.return_value = mock_placeholder
 
         etat = EtatChargement("Test")
-        etat.ajouter_etape("Ã‰tape 1")
-        etat.terminer_etape("Ã‰tape 1")
+        etat.ajouter_etape("Étape 1")
+        etat.terminer_etape("Étape 1")
         etat.finaliser("Tout est prêt")
 
         mock_placeholder.success.assert_called()
@@ -324,16 +322,18 @@ class TestProgressImports:
     def test_import_suivi_progression(self):
         """Vérifie que SuiviProgression est importable."""
         from src.ui.feedback.progress import SuiviProgression
+
         assert SuiviProgression is not None
 
     def test_import_etat_chargement(self):
         """Vérifie que EtatChargement est importable."""
         from src.ui.feedback.progress import EtatChargement
+
         assert EtatChargement is not None
 
     def test_import_via_feedback(self):
         """Vérifie l'import via le module feedback."""
-        from src.ui.feedback import SuiviProgression, EtatChargement
+        from src.ui.feedback import EtatChargement, SuiviProgression
+
         assert SuiviProgression is not None
         assert EtatChargement is not None
-

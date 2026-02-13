@@ -1,35 +1,36 @@
-﻿# -*- coding: utf-8 -*-
 """
 Tests pour performance_optimizations.py - amÃ©lioration de la couverture
 
 Cible:
 - RedisCache class (singleton, get, set, delete, clear_pattern, stats)
 """
-import pytest
+
 import time
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 class TestRedisCacheSingleton:
     """Tests pour le pattern singleton de RedisCache."""
-    
+
     def test_singleton_returns_same_instance(self):
         """Retourne toujours la mÃªme instance."""
         from src.core.performance_optimizations import RedisCache
-        
+
         # Reset singleton pour test isolÃ©
         RedisCache._instance = None
-        
-        with patch.object(RedisCache, '_init_redis'):
+
+        with patch.object(RedisCache, "_init_redis"):
             cache1 = RedisCache()
             cache2 = RedisCache()
-            
+
             assert cache1 is cache2
 
 
 class TestRedisCacheInitialization:
     """Tests pour l'initialisation de RedisCache."""
-    
+
     # NOTE: Tests supprimÃ©s:
     # - test_init_without_redis_package
     # - test_init_without_redis_url
@@ -39,159 +40,159 @@ class TestRedisCacheInitialization:
 
 class TestRedisCacheOperations:
     """Tests pour les opÃ©rations RedisCache."""
-    
+
     @pytest.fixture
     def cache(self):
         """Cache avec fallback mÃ©moire."""
         from src.core.performance_optimizations import RedisCache
-        
+
         RedisCache._instance = None
         RedisCache._client = None
         RedisCache._fallback_cache = {}
-        
-        with patch.object(RedisCache, '_init_redis'):
+
+        with patch.object(RedisCache, "_init_redis"):
             cache = RedisCache()
             cache._client = None  # Force fallback
             return cache
-    
+
     def test_is_available_false_without_client(self, cache):
         """is_available retourne False sans client Redis."""
         assert cache.is_available is False
-    
+
     def test_is_available_true_with_client(self, cache):
         """is_available retourne True avec client."""
         cache._client = MagicMock()
         assert cache.is_available is True
-    
+
     def test_get_missing_key_returns_none(self, cache):
         """get retourne None pour clÃ© manquante."""
         result = cache.get("nonexistent")
         assert result is None
-    
+
     def test_set_and_get_fallback(self, cache):
         """set/get fonctionne avec fallback mÃ©moire."""
         cache.set("key1", {"data": "test"}, ttl=60)
         result = cache.get("key1")
-        
+
         assert result == {"data": "test"}
-    
+
     def test_get_expired_returns_none(self, cache):
         """get retourne None pour valeur expirÃ©e."""
         # Ajouter directement avec expiration passÃ©e
         cache._fallback_cache["expired"] = ("value", time.time() - 10)
-        
+
         result = cache.get("expired")
         assert result is None
-    
+
     def test_delete(self, cache):
         """delete supprime une clÃ©."""
         cache.set("to_delete", "value")
         cache.delete("to_delete")
-        
+
         result = cache.get("to_delete")
         assert result is None
-    
+
     def test_delete_nonexistent(self, cache):
         """delete sur clÃ© inexistante ne lÃ¨ve pas d'erreur."""
         result = cache.delete("nonexistent")
         assert result is True
-    
+
     def test_clear_pattern(self, cache):
         """clear_pattern supprime les clÃ©s matching."""
         cache.set("prefix:1", "v1")
         cache.set("prefix:2", "v2")
         cache.set("other:1", "v3")
-        
+
         count = cache.clear_pattern("prefix:*")
-        
+
         assert count == 2
         assert cache.get("other:1") == "v3"
-    
+
     def test_stats_memory_backend(self, cache):
         """stats retourne les infos pour backend mÃ©moire."""
         cache.set("key1", "v1")
         cache.set("key2", "v2")
-        
+
         stats = cache.stats()
-        
+
         assert stats["backend"] == "memory"
         assert stats["memory_keys"] == 2
 
 
 class TestRedisCacheWithRedisClient:
     """Tests avec client Redis mockÃ©."""
-    
+
     @pytest.fixture
     def cache_with_redis(self):
         """Cache avec client Redis mockÃ©."""
         from src.core.performance_optimizations import RedisCache
-        
+
         RedisCache._instance = None
         RedisCache._fallback_cache = {}
-        
+
         mock_client = MagicMock()
-        
-        with patch.object(RedisCache, '_init_redis'):
+
+        with patch.object(RedisCache, "_init_redis"):
             cache = RedisCache()
             cache._client = mock_client
             return cache
-    
+
     def test_get_from_redis(self, cache_with_redis):
         """get rÃ©cupÃ¨re depuis Redis."""
         cache_with_redis._client.get.return_value = '{"data": "from_redis"}'
-        
+
         result = cache_with_redis.get("key")
-        
+
         assert result == {"data": "from_redis"}
         cache_with_redis._client.get.assert_called_with("key")
-    
+
     def test_get_redis_error_falls_back(self, cache_with_redis):
         """get utilise fallback si Redis Ã©choue."""
         cache_with_redis._client.get.side_effect = Exception("Redis error")
         cache_with_redis._fallback_cache["key"] = ("fallback_value", time.time() + 60)
-        
+
         result = cache_with_redis.get("key")
-        
+
         assert result == "fallback_value"
-    
+
     def test_set_to_redis(self, cache_with_redis):
         """set stocke dans Redis."""
         result = cache_with_redis.set("key", {"data": "test"}, ttl=300)
-        
+
         assert result is True
         cache_with_redis._client.setex.assert_called()
-    
+
     def test_set_redis_error_uses_fallback(self, cache_with_redis):
         """set utilise fallback si Redis Ã©choue."""
         cache_with_redis._client.setex.side_effect = Exception("Redis error")
-        
+
         result = cache_with_redis.set("key", "value", ttl=60)
-        
+
         assert result is True
         assert "key" in cache_with_redis._fallback_cache
-    
+
     def test_delete_from_redis(self, cache_with_redis):
         """delete supprime de Redis."""
         cache_with_redis.delete("key")
-        
+
         cache_with_redis._client.delete.assert_called_with("key")
-    
+
     def test_clear_pattern_redis(self, cache_with_redis):
         """clear_pattern utilise scan_iter de Redis."""
         cache_with_redis._client.scan_iter.return_value = iter(["key1", "key2"])
-        
+
         count = cache_with_redis.clear_pattern("prefix:*")
-        
+
         cache_with_redis._client.scan_iter.assert_called_with(match="prefix:*")
         assert cache_with_redis._client.delete.call_count >= 2
-    
+
     def test_stats_redis_backend(self, cache_with_redis):
         """stats retourne les infos Redis."""
         cache_with_redis._client.info.return_value = {"used_memory_human": "1.5M"}
         cache_with_redis._client.dbsize.return_value = 100
-        
+
         stats = cache_with_redis.stats()
-        
+
         assert stats["backend"] == "redis"
         assert stats["redis_memory"] == "1.5M"
         assert stats["redis_keys"] == 100

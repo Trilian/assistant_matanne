@@ -1,15 +1,15 @@
-﻿"""
+"""
 Tests pour src/utils/helpers/strings.py
 """
-import pytest
+
 from src.utils.helpers.strings import (
-    generer_id,
-    normaliser_espaces,
-    retirer_accents,
     camel_vers_snake,
-    snake_vers_camel,
-    pluraliser,
+    generer_id,
     masquer_sensible,
+    normaliser_espaces,
+    pluraliser,
+    retirer_accents,
+    snake_vers_camel,
 )
 
 
@@ -71,7 +71,7 @@ class TestRetirerAccents:
 
     def test_retirer_accents_all_vowels(self):
         """Retire les accents sur toutes les voyelles."""
-        assert retirer_accents("Ã éîÃ¶ù") == "aeiou"
+        assert retirer_accents("àéîöù") == "aeiou"
 
     def test_retirer_cedilla(self):
         """Retire la cédille."""
@@ -79,11 +79,11 @@ class TestRetirerAccents:
 
     def test_retirer_tilde(self):
         """Retire le tilde."""
-        assert retirer_accents("seÃ±or") == "senor"
+        assert retirer_accents("señor") == "senor"
 
     def test_retirer_accents_uppercase(self):
         """Gère les majuscules."""
-        assert retirer_accents("CAFÃ‰") == "CAFE"
+        assert retirer_accents("CAFÉ") == "CAFE"
 
     def test_no_accents_unchanged(self):
         """Texte sans accent inchangé."""

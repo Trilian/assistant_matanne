@@ -1,17 +1,18 @@
-﻿"""Add magasin column to family_budgets table.
+"""Add magasin column to family_budgets table.
 
 Revision ID: 011
 Revises: 010
 Create Date: 2026-01-31 22:00:00.000000
 
 """
-from alembic import op
+
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = '011'
-down_revision = '010'
+revision = "011"
+down_revision = "010"
 branch_labels = None
 depends_on = None
 
@@ -19,9 +20,7 @@ depends_on = None
 def upgrade():
     # Ajouter la colonne magasin si elle n'existe pas
     try:
-        op.add_column('family_budgets', 
-            sa.Column('magasin', sa.String(200), nullable=True)
-        )
+        op.add_column("family_budgets", sa.Column("magasin", sa.String(200), nullable=True))
     except Exception:
         # La colonne existe dÃ©jÃ , on ignore
         pass
@@ -29,6 +28,6 @@ def upgrade():
 
 def downgrade():
     try:
-        op.drop_column('family_budgets', 'magasin')
+        op.drop_column("family_budgets", "magasin")
     except Exception:
         pass

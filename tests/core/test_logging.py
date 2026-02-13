@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests unitaires pour logging.py (src/core/logging.py).
 
 Tests couvrant:
@@ -9,27 +9,25 @@ Tests couvrant:
 - Fonctions d'alias (init, get_logger, obtenir_logger)
 """
 
-import pytest
 import logging
-from unittest.mock import patch, MagicMock
-import sys
-import io
+from unittest.mock import patch
+
+import pytest
 
 from src.core.logging import (
-    configure_logging,
     FiltreSecrets,
     FormatteurColore,
     GestionnaireLog,
     LogManager,
-    init,
+    configure_logging,
     get_logger,
+    init,
     obtenir_logger,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 1: TESTS configure_logging
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -64,11 +62,11 @@ class TestConfigureLogging:
         assert len(logger.handlers) > 0
 
     def test_configure_logging_updates_existing_handler(self):
-        """Test que configure_logging met Ã  jour les handlers existants."""
+        """Test que configure_logging met à jour les handlers existants."""
         logger = logging.getLogger()
         initial_handler_count = len(logger.handlers)
         configure_logging("WARNING")
-        # Devrait mettre Ã  jour, pas ajouter
+        # Devrait mettre à jour, pas ajouter
         assert len(logger.handlers) >= initial_handler_count
 
     @patch.dict("os.environ", {"LOG_LEVEL": "DEBUG"})
@@ -80,9 +78,9 @@ class TestConfigureLogging:
         assert logger.level <= logging.DEBUG
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 2: TESTS FiltreSecrets
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -167,9 +165,9 @@ class TestFiltreSecrets:
         assert isinstance(record.args, tuple)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 3: TESTS FormatteurColore
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -231,9 +229,9 @@ class TestFormatteurColore:
         assert "Debug" in result
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 4: TESTS GestionnaireLog
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -248,7 +246,7 @@ class TestGestionnaireLog:
         logger = logging.getLogger()
         handler_count_1 = len(logger.handlers)
         GestionnaireLog.initialiser("INFO")
-        # Ne devrait pas créer de nouveaux handlers si déjÃ  initialisé
+        # Ne devrait pas créer de nouveaux handlers si déjà initialisé
         # (mais peut les réutiliser)
         assert len(logger.handlers) >= handler_count_1
 
@@ -296,9 +294,9 @@ class TestGestionnaireLog:
             assert logger is not None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 5: TESTS ALIAS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -332,9 +330,9 @@ class TestAlias:
         assert logger1 == logger2
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SECTION 6: TESTS INTEGRATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.integration
@@ -345,13 +343,13 @@ class TestIntegrationLogging:
         """Test le stack complet: configuration -> utilisation -> secrets."""
         # Configure
         configure_logging("DEBUG")
-        
+
         # Obtient logger
         logger = obtenir_logger("test.integration")
-        
+
         # Log un message (devrait être masqué s'il y a des secrets)
         logger.info("Message test avec DATABASE_URL=postgresql://user:pwd@host/db")
-        
+
         # Devrait fonctionner sans erreurs
         assert logger is not None
 
@@ -359,7 +357,7 @@ class TestIntegrationLogging:
         """Test que le gestionnaire applique le filtre de secrets."""
         GestionnaireLog._initialise = False
         GestionnaireLog.initialiser("INFO")
-        
+
         logger = logging.getLogger("test.secrets")
         # Initier le logging si nécessaire
         root_logger = logging.getLogger()
@@ -370,7 +368,7 @@ class TestIntegrationLogging:
         """Test plusieurs loggers avec niveaux différents."""
         logger1 = obtenir_logger("app.core")
         logger2 = obtenir_logger("app.ui")
-        
+
         # Les deux devraient exister
         assert logger1 is not None
         assert logger2 is not None

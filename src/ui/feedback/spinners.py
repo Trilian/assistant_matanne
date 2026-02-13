@@ -1,4 +1,4 @@
-﻿"""
+"""
 UI Feedback - Spinners intelligents
 """
 
@@ -9,7 +9,9 @@ import streamlit as st
 
 
 @contextmanager
-def spinner_intelligent(operation: str, secondes_estimees: int | None = None, afficher_temps_ecoule: bool = True):
+def spinner_intelligent(
+    operation: str, secondes_estimees: int | None = None, afficher_temps_ecoule: bool = True
+):
     """
     Spinner avec estimation temps et temps écoulé
 

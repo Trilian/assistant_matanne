@@ -2,27 +2,29 @@
 Logique metier du module Recettes (sans UI Streamlit).
 Fonctions pures testables independamment de Streamlit.
 """
-from typing import List, Dict, Any, Optional
-from datetime import date, datetime
+
+from datetime import date
+from typing import Any
+
 from sqlalchemy.orm import Session
 
 from src.core.database import obtenir_contexte_db
-from src.services.recettes import get_recette_service
 from src.core.models import Recette, Repas
-
+from src.services.recettes import get_recette_service
 
 # ═══════════════════════════════════════════════════════════
 # LOGIQUE RECETTES - LECTURE
 # ═══════════════════════════════════════════════════════════
 
-def get_toutes_recettes(db: Optional[Session] = None) -> List[Recette]:
+
+def get_toutes_recettes(db: Session | None = None) -> list[Recette]:
     """Recupère toutes les recettes."""
     with obtenir_contexte_db() as session:
         service = get_recette_service(session)
         return session.query(Recette).all()
 
 
-def get_recette_by_id(recette_id: int, db: Optional[Session] = None) -> Optional[Recette]:
+def get_recette_by_id(recette_id: int, db: Session | None = None) -> Recette | None:
     """Recupère une recette par son ID."""
     with obtenir_contexte_db() as session:
         return session.query(Recette).filter(Recette.id == recette_id).first()
@@ -30,15 +32,15 @@ def get_recette_by_id(recette_id: int, db: Optional[Session] = None) -> Optional
 
 def rechercher_recettes(
     query: str,
-    categorie: Optional[str] = None,
-    difficulte: Optional[str] = None,
-    temps_max: Optional[int] = None,
-    db: Optional[Session] = None
-) -> List[Recette]:
+    categorie: str | None = None,
+    difficulte: str | None = None,
+    temps_max: int | None = None,
+    db: Session | None = None,
+) -> list[Recette]:
     """Recherche recettes avec filtres."""
     with obtenir_contexte_db() as session:
         q = session.query(Recette)
-        
+
         if query:
             q = q.filter(Recette.nom.ilike(f"%{query}%"))
         if categorie:
@@ -47,17 +49,17 @@ def rechercher_recettes(
             q = q.filter(Recette.difficulte == difficulte)
         if temps_max:
             q = q.filter(Recette.temps_preparation <= temps_max)
-        
+
         return q.all()
 
 
-def get_recettes_par_categorie(categorie: str, db: Optional[Session] = None) -> List[Recette]:
+def get_recettes_par_categorie(categorie: str, db: Session | None = None) -> list[Recette]:
     """Recupère recettes d'une categorie."""
     with obtenir_contexte_db() as session:
         return session.query(Recette).filter(Recette.categorie == categorie).all()
 
 
-def get_recettes_favorites(db: Optional[Session] = None) -> List[Recette]:
+def get_recettes_favorites(db: Session | None = None) -> list[Recette]:
     """Recupère les recettes favorites."""
     with obtenir_contexte_db() as session:
         return session.query(Recette).filter(Recette.favorite == True).all()
@@ -67,21 +69,22 @@ def get_recettes_favorites(db: Optional[Session] = None) -> List[Recette]:
 # LOGIQUE RECETTES - CRÉATION/MODIFICATION
 # ═══════════════════════════════════════════════════════════
 
+
 def creer_recette(
     nom: str,
-    ingredients: List[str],
-    instructions: List[str],
+    ingredients: list[str],
+    instructions: list[str],
     categorie: str = "autre",
     difficulte: str = "moyenne",
     temps_preparation: int = 30,
     portions: int = 4,
-    calories: Optional[int] = None,
-    db: Optional[Session] = None
+    calories: int | None = None,
+    db: Session | None = None,
 ) -> Recette:
     """Cree une nouvelle recette."""
     with obtenir_contexte_db() as session:
         service = get_recette_service(session)
-        
+
         recette = Recette(
             nom=nom,
             ingredients=ingredients,
@@ -90,9 +93,9 @@ def creer_recette(
             difficulte=difficulte,
             temps_preparation=temps_preparation,
             portions=portions,
-            calories=calories
+            calories=calories,
         )
-        
+
         session.add(recette)
         session.commit()
         session.refresh(recette)
@@ -100,47 +103,45 @@ def creer_recette(
 
 
 def mettre_a_jour_recette(
-    recette_id: int,
-    updates: Dict[str, Any],
-    db: Optional[Session] = None
-) -> Optional[Recette]:
+    recette_id: int, updates: dict[str, Any], db: Session | None = None
+) -> Recette | None:
     """Met à jour une recette existante."""
     with obtenir_contexte_db() as session:
         recette = session.query(Recette).filter(Recette.id == recette_id).first()
-        
+
         if not recette:
             return None
-        
+
         for key, value in updates.items():
             if hasattr(recette, key):
                 setattr(recette, key, value)
-        
+
         session.commit()
         session.refresh(recette)
         return recette
 
 
-def supprimer_recette(recette_id: int, db: Optional[Session] = None) -> bool:
+def supprimer_recette(recette_id: int, db: Session | None = None) -> bool:
     """Supprime une recette."""
     with obtenir_contexte_db() as session:
         recette = session.query(Recette).filter(Recette.id == recette_id).first()
-        
+
         if not recette:
             return False
-        
+
         session.delete(recette)
         session.commit()
         return True
 
 
-def toggle_favorite(recette_id: int, db: Optional[Session] = None) -> bool:
+def toggle_favorite(recette_id: int, db: Session | None = None) -> bool:
     """Toggle le statut favori d'une recette."""
     with obtenir_contexte_db() as session:
         recette = session.query(Recette).filter(Recette.id == recette_id).first()
-        
+
         if not recette:
             return False
-        
+
         recette.favorite = not recette.favorite
         session.commit()
         return recette.favorite
@@ -150,29 +151,26 @@ def toggle_favorite(recette_id: int, db: Optional[Session] = None) -> bool:
 # LOGIQUE PLANNING REPAS
 # ═══════════════════════════════════════════════════════════
 
-def get_planning_semaine(date_debut: date, date_fin: date, db: Optional[Session] = None) -> List[Repas]:
+
+def get_planning_semaine(
+    date_debut: date, date_fin: date, db: Session | None = None
+) -> list[Repas]:
     """Recupère le planning de repas pour une periode."""
     with obtenir_contexte_db() as session:
-        return session.query(Repas).filter(
-            Repas.date_repas >= date_debut,
-            Repas.date_repas <= date_fin
-        ).all()
+        return (
+            session.query(Repas)
+            .filter(Repas.date_repas >= date_debut, Repas.date_repas <= date_fin)
+            .all()
+        )
 
 
 def ajouter_repas_planning(
-    recette_id: int,
-    date_repas: date,
-    type_repas: str = "diner",
-    db: Optional[Session] = None
+    recette_id: int, date_repas: date, type_repas: str = "diner", db: Session | None = None
 ) -> Repas:
     """Ajoute un repas au planning."""
     with obtenir_contexte_db() as session:
-        repas = Repas(
-            recette_id=recette_id,
-            date_repas=date_repas,
-            type_repas=type_repas
-        )
-        
+        repas = Repas(recette_id=recette_id, date_repas=date_repas, type_repas=type_repas)
+
         session.add(repas)
         session.commit()
         session.refresh(repas)
@@ -183,79 +181,104 @@ def ajouter_repas_planning(
 # LOGIQUE CALCULS & STATISTIQUES
 # ═══════════════════════════════════════════════════════════
 
-def calculer_cout_recette(recette: Recette, prix_ingredients: Dict[str, float]) -> float:
+
+def calculer_cout_recette(recette: Recette, prix_ingredients: dict[str, float]) -> float:
     """Calcule le coût estime d'une recette."""
     cout_total = 0.0
-    
+
     for ingredient in recette.ingredients:
         # Recherche de l'ingredient dans le dictionnaire des prix
         for nom_ingredient, prix in prix_ingredients.items():
             if nom_ingredient.lower() in ingredient.lower():
                 cout_total += prix
                 break
-    
+
     return round(cout_total, 2)
 
 
-def calculer_calories_portion(recette: Recette) -> Optional[float]:
+def calculer_calories_portion(recette: Recette) -> float | None:
     """Calcule les calories par portion."""
     if not recette.calories or not recette.portions:
         return None
-    
+
     return round(recette.calories / recette.portions, 2)
 
 
-def get_statistiques_recettes(db: Optional[Session] = None) -> Dict[str, Any]:
+def get_statistiques_recettes(db: Session | None = None) -> dict[str, Any]:
     """Calcule les statistiques sur les recettes."""
     with obtenir_contexte_db() as session:
         recettes = session.query(Recette).all()
-        
+
         if not recettes:
             return {
                 "total": 0,
                 "par_categorie": {},
                 "par_difficulte": {},
                 "temps_moyen": 0,
-                "favorites": 0
+                "favorites": 0,
             }
-        
+
         stats = {
             "total": len(recettes),
             "par_categorie": {},
             "par_difficulte": {},
             "temps_moyen": sum(r.temps_preparation or 0 for r in recettes) / len(recettes),
-            "favorites": sum(1 for r in recettes if r.favorite)
+            "favorites": sum(1 for r in recettes if r.favorite),
         }
-        
+
         # Par categorie
         for recette in recettes:
             cat = recette.categorie or "autre"
             stats["par_categorie"][cat] = stats["par_categorie"].get(cat, 0) + 1
-        
+
         # Par difficulte
         for recette in recettes:
             diff = recette.difficulte or "moyenne"
             stats["par_difficulte"][diff] = stats["par_difficulte"].get(diff, 0) + 1
-        
+
         return stats
 
 
-def valider_recette(data: Dict[str, Any]) -> tuple[bool, Optional[str]]:
+def valider_recette(data: dict[str, Any]) -> tuple[bool, str | None]:
     """Valide les données d'une recette."""
     if not data.get("nom"):
         return False, "Le nom est requis"
-    
+
     if not data.get("ingredients") or len(data["ingredients"]) == 0:
         return False, "Au moins un ingrédient est requis"
-    
+
     if not data.get("instructions") or len(data["instructions"]) == 0:
         return False, "Au moins une instruction est requise"
-    
+
     if data.get("temps_preparation", 0) < 0:
         return False, "Le temps de préparation doit être positif"
-    
+
     if data.get("portions", 0) <= 0:
         return False, "Le nombre de portions doit être supérieur à 0"
-    
+
     return True, None
 
+
+# ============================================================
+# Fonctions importées depuis utilitaires.py
+# ============================================================
+
+
+def formater_quantite(quantite: float | int | str) -> str:
+    """Formate une quantité: affiche 2 au lieu de 2.0"""
+    # Convertir en nombre si c'est une chaîne
+    if isinstance(quantite, str):
+        try:
+            quantite = float(quantite)
+        except (ValueError, TypeError):
+            return str(quantite)
+
+    if isinstance(quantite, (int, float)):
+        if quantite == int(quantite):
+            return str(int(quantite))
+        else:
+            return str(quantite)
+    return str(quantite)
+
+
+__all__ = ["formater_quantite"]

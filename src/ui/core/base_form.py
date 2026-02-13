@@ -1,9 +1,10 @@
-﻿"""
+"""
 Base Form - Générateur de formulaires universel
 """
 
+from collections.abc import Callable
 from datetime import date
-from typing import Callable, Any, Optional
+from typing import Any
 
 import streamlit as st
 
@@ -25,7 +26,7 @@ class ConstructeurFormulaire:
             data = form.get_data()
     """
 
-    def __init__(self, form_id: str, title: Optional[str] = None):
+    def __init__(self, form_id: str, title: str | None = None):
         self.form_id = form_id
         self.title = title
         self.fields = []
@@ -41,8 +42,8 @@ class ConstructeurFormulaire:
         label: str,
         required: bool = False,
         default: str = "",
-        max_length: Optional[int] = None,
-        help_text: Optional[str] = None,
+        max_length: int | None = None,
+        help_text: str | None = None,
     ):
         """Ajoute champ texte"""
         self.fields.append(
@@ -65,7 +66,7 @@ class ConstructeurFormulaire:
         required: bool = False,
         default: str = "",
         height: int = 100,
-        help_text: Optional[str] = None,
+        help_text: str | None = None,
     ):
         """Ajoute textarea"""
         self.fields.append(
@@ -87,10 +88,10 @@ class ConstructeurFormulaire:
         label: str,
         required: bool = False,
         default: float = 0.0,
-        min_value: Optional[float] = None,
-        max_value: Optional[float] = None,
+        min_value: float | None = None,
+        max_value: float | None = None,
         step: float = 1.0,
-        help_text: Optional[str] = None,
+        help_text: str | None = None,
     ):
         """Ajoute champ nombre"""
         self.fields.append(
@@ -114,8 +115,8 @@ class ConstructeurFormulaire:
         label: str,
         options: list[str],
         required: bool = False,
-        default: Optional[str] = None,
-        help_text: Optional[str] = None,
+        default: str | None = None,
+        help_text: str | None = None,
     ):
         """Ajoute select"""
         self.fields.append(
@@ -137,8 +138,8 @@ class ConstructeurFormulaire:
         label: str,
         options: list[str],
         required: bool = False,
-        default: Optional[list[str]] = None,
-        help_text: Optional[str] = None,
+        default: list[str] | None = None,
+        help_text: str | None = None,
     ):
         """Ajoute multiselect"""
         self.fields.append(
@@ -154,7 +155,9 @@ class ConstructeurFormulaire:
         )
         return self
 
-    def add_checkbox(self, name: str, label: str, default: bool = False, help_text: Optional[str] = None):
+    def add_checkbox(
+        self, name: str, label: str, default: bool = False, help_text: str | None = None
+    ):
         """Ajoute checkbox"""
         self.fields.append(
             {
@@ -172,10 +175,10 @@ class ConstructeurFormulaire:
         name: str,
         label: str,
         required: bool = False,
-        default: Optional[date] = None,
-        min_value: Optional[date] = None,
-        max_value: Optional[date] = None,
-        help_text: Optional[str] = None,
+        default: date | None = None,
+        min_value: date | None = None,
+        max_value: date | None = None,
+        help_text: str | None = None,
     ):
         """Ajoute date"""
         self.fields.append(
@@ -199,7 +202,7 @@ class ConstructeurFormulaire:
         min_value: int = 0,
         max_value: int = 100,
         default: int = 50,
-        help_text: Optional[str] = None,
+        help_text: str | None = None,
     ):
         """Ajoute slider"""
         self.fields.append(
@@ -229,7 +232,11 @@ class ConstructeurFormulaire:
     # RENDER
     # ═══════════════════════════════════════════════════════
 
-    def render(self, on_submit: Optional[Callable[[dict], Any]] = None, on_cancel: Optional[Callable[[], Any]] = None) -> bool:
+    def render(
+        self,
+        on_submit: Callable[[dict], Any] | None = None,
+        on_cancel: Callable[[], Any] | None = None,
+    ) -> bool:
         """
         Render formulaire
 

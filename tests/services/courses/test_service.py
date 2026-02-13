@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/courses/service.py
 
 Tests du ServiceCourses:
@@ -9,20 +9,23 @@ Tests du ServiceCourses:
 - Application des modèles
 """
 
-import pytest
-from unittest.mock import MagicMock, patch, PropertyMock
-from datetime import datetime
+from unittest.mock import MagicMock, patch
 
+import pytest
 from sqlalchemy.orm import Session
 
-from src.core.models import ArticleCourses, Ingredient, ModeleCourses, ArticleModele
-from src.services.courses.service import ServiceCourses, obtenir_service_courses, get_courses_service
+from src.core.models import ArticleCourses, ArticleModele, Ingredient, ModeleCourses
+from src.services.courses.service import (
+    ServiceCourses,
+    get_courses_service,
+    obtenir_service_courses,
+)
 from src.services.courses.types import SuggestionCourses
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+
 
 @pytest.fixture
 def mock_client_ia():
@@ -43,11 +46,7 @@ def service_courses(mock_client_ia):
 @pytest.fixture
 def sample_ingredient(db: Session) -> Ingredient:
     """Crée un ingrédient de test."""
-    ingredient = Ingredient(
-        nom="Tomates",
-        unite="kg",
-        categorie="Fruits & Légumes"
-    )
+    ingredient = Ingredient(nom="Tomates", unite="kg", categorie="Fruits & Légumes")
     db.add(ingredient)
     db.commit()
     db.refresh(ingredient)
@@ -57,11 +56,7 @@ def sample_ingredient(db: Session) -> Ingredient:
 @pytest.fixture
 def sample_ingredient_2(db: Session) -> Ingredient:
     """Crée un second ingrédient de test."""
-    ingredient = Ingredient(
-        nom="Oeufs",
-        unite="pièce",
-        categorie="Crèmerie"
-    )
+    ingredient = Ingredient(nom="Oeufs", unite="pièce", categorie="Crèmerie")
     db.add(ingredient)
     db.commit()
     db.refresh(ingredient)
@@ -72,6 +67,7 @@ def sample_ingredient_2(db: Session) -> Ingredient:
 def sample_liste_courses(db: Session) -> "ListeCourses":
     """Crée une liste de courses de test."""
     from src.core.models import ListeCourses
+
     liste = ListeCourses(nom="Liste Test", archivee=False)
     db.add(liste)
     db.commit()
@@ -80,7 +76,9 @@ def sample_liste_courses(db: Session) -> "ListeCourses":
 
 
 @pytest.fixture
-def sample_article_courses(db: Session, sample_ingredient: Ingredient, sample_liste_courses) -> ArticleCourses:
+def sample_article_courses(
+    db: Session, sample_ingredient: Ingredient, sample_liste_courses
+) -> ArticleCourses:
     """Crée un article de courses de test."""
     article = ArticleCourses(
         liste_id=sample_liste_courses.id,
@@ -90,7 +88,7 @@ def sample_article_courses(db: Session, sample_ingredient: Ingredient, sample_li
         achete=False,
         rayon_magasin="Fruits & Légumes",
         notes="Bio si possible",
-        suggere_par_ia=False
+        suggere_par_ia=False,
     )
     db.add(article)
     db.commit()
@@ -98,13 +96,11 @@ def sample_article_courses(db: Session, sample_ingredient: Ingredient, sample_li
     return article
 
 
-@pytest.fixture 
+@pytest.fixture
 def sample_modele_courses(db: Session) -> ModeleCourses:
     """Crée un modèle de courses de test."""
     modele = ModeleCourses(
-        nom="Modèle Petit-déjeuner",
-        description="Articles pour le petit-déjeuner",
-        actif=True
+        nom="Modèle Petit-déjeuner", description="Articles pour le petit-déjeuner", actif=True
     )
     db.add(modele)
     db.commit()
@@ -113,7 +109,9 @@ def sample_modele_courses(db: Session) -> ModeleCourses:
 
 
 @pytest.fixture
-def sample_article_modele(db: Session, sample_modele_courses: ModeleCourses, sample_ingredient: Ingredient) -> ArticleModele:
+def sample_article_modele(
+    db: Session, sample_modele_courses: ModeleCourses, sample_ingredient: Ingredient
+) -> ArticleModele:
     """Crée un article de modèle de test."""
     article = ArticleModele(
         modele_id=sample_modele_courses.id,
@@ -123,7 +121,7 @@ def sample_article_modele(db: Session, sample_modele_courses: ModeleCourses, sam
         unite="kg",
         rayon_magasin="Fruits & Légumes",
         priorite="haute",
-        ordre=0
+        ordre=0,
     )
     db.add(article)
     db.commit()
@@ -131,9 +129,10 @@ def sample_article_modele(db: Session, sample_modele_courses: ModeleCourses, sam
     return article
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS CRÃ‰ATION SERVICE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS CRÉATION SERVICE
+# ═══════════════════════════════════════════════════════════
+
 
 class TestServiceCoursesCreation:
     """Tests de création du service."""
@@ -170,9 +169,10 @@ class TestServiceCoursesCreation:
                 assert isinstance(service, ServiceCourses)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS OBTENIR LISTE COURSES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+
 
 class TestObtenirlListeCourses:
     """Tests pour obtenir_liste_courses."""
@@ -183,11 +183,7 @@ class TestObtenirlListeCourses:
         assert result == []
 
     def test_liste_avec_articles(
-        self, 
-        service_courses, 
-        patch_db_context, 
-        sample_article_courses,
-        sample_ingredient
+        self, service_courses, patch_db_context, sample_article_courses, sample_ingredient
     ):
         """Test récupération liste avec articles."""
         result = service_courses.obtenir_liste_courses()
@@ -198,12 +194,12 @@ class TestObtenirlListeCourses:
         assert result[0]["achete"] is False
 
     def test_liste_exclut_achetes_par_defaut(
-        self, 
+        self,
         db: Session,
-        service_courses, 
+        service_courses,
         patch_db_context,
         sample_ingredient,
-        sample_liste_courses
+        sample_liste_courses,
     ):
         """Test que les articles achetés sont exclus par défaut."""
         # Créer un article acheté
@@ -213,7 +209,7 @@ class TestObtenirlListeCourses:
             quantite_necessaire=1.0,
             priorite="moyenne",
             achete=True,
-            rayon_magasin="Test"
+            rayon_magasin="Test",
         )
         db.add(article_achete)
         db.commit()
@@ -222,12 +218,12 @@ class TestObtenirlListeCourses:
         assert len(result) == 0
 
     def test_liste_inclut_achetes(
-        self, 
+        self,
         db: Session,
-        service_courses, 
+        service_courses,
         patch_db_context,
         sample_ingredient,
-        sample_liste_courses
+        sample_liste_courses,
     ):
         """Test inclusion des articles achetés."""
         # Créer un article acheté
@@ -237,7 +233,7 @@ class TestObtenirlListeCourses:
             quantite_necessaire=1.0,
             priorite="moyenne",
             achete=True,
-            rayon_magasin="Test"
+            rayon_magasin="Test",
         )
         db.add(article)
         db.commit()
@@ -247,13 +243,13 @@ class TestObtenirlListeCourses:
         assert result[0]["achete"] is True
 
     def test_filtre_priorite_haute(
-        self, 
+        self,
         db: Session,
-        service_courses, 
+        service_courses,
         patch_db_context,
         sample_ingredient,
         sample_ingredient_2,
-        sample_liste_courses
+        sample_liste_courses,
     ):
         """Test filtre par priorité haute."""
         # Créer articles avec différentes priorités
@@ -263,7 +259,7 @@ class TestObtenirlListeCourses:
             quantite_necessaire=1.0,
             priorite="haute",
             achete=False,
-            rayon_magasin="Test"
+            rayon_magasin="Test",
         )
         article_moyenne = ArticleCourses(
             liste_id=sample_liste_courses.id,
@@ -271,7 +267,7 @@ class TestObtenirlListeCourses:
             quantite_necessaire=1.0,
             priorite="moyenne",
             achete=False,
-            rayon_magasin="Test"
+            rayon_magasin="Test",
         )
         db.add_all([article_haute, article_moyenne])
         db.commit()
@@ -281,13 +277,13 @@ class TestObtenirlListeCourses:
         assert result[0]["priorite"] == "haute"
 
     def test_filtre_priorite_moyenne(
-        self, 
+        self,
         db: Session,
-        service_courses, 
+        service_courses,
         patch_db_context,
         sample_ingredient,
         sample_ingredient_2,
-        sample_liste_courses
+        sample_liste_courses,
     ):
         """Test filtre par priorité moyenne."""
         article_haute = ArticleCourses(
@@ -296,7 +292,7 @@ class TestObtenirlListeCourses:
             quantite_necessaire=1.0,
             priorite="haute",
             achete=False,
-            rayon_magasin="Test"
+            rayon_magasin="Test",
         )
         article_moyenne = ArticleCourses(
             liste_id=sample_liste_courses.id,
@@ -304,7 +300,7 @@ class TestObtenirlListeCourses:
             quantite_necessaire=1.0,
             priorite="moyenne",
             achete=False,
-            rayon_magasin="Test"
+            rayon_magasin="Test",
         )
         db.add_all([article_haute, article_moyenne])
         db.commit()
@@ -319,29 +315,34 @@ class TestObtenirlListeCourses:
         assert result == []
 
     def test_structure_dict_retour(
-        self, 
-        service_courses, 
-        patch_db_context,
-        sample_article_courses,
-        sample_ingredient
+        self, service_courses, patch_db_context, sample_article_courses, sample_ingredient
     ):
         """Test structure du dictionnaire retourné."""
         result = service_courses.obtenir_liste_courses()
         assert len(result) == 1
-        
+
         article = result[0]
         expected_keys = [
-            "id", "ingredient_id", "ingredient_nom", "quantite_necessaire",
-            "unite", "priorite", "achete", "rayon_magasin", "magasin_cible",
-            "notes", "suggere_par_ia"
+            "id",
+            "ingredient_id",
+            "ingredient_nom",
+            "quantite_necessaire",
+            "unite",
+            "priorite",
+            "achete",
+            "rayon_magasin",
+            "magasin_cible",
+            "notes",
+            "suggere_par_ia",
         ]
         for key in expected_keys:
             assert key in article, f"Clé manquante: {key}"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS SUGGESTIONS IA
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+
 
 class TestSuggestionsIA:
     """Tests pour generer_suggestions_ia_depuis_inventaire."""
@@ -352,7 +353,7 @@ class TestSuggestionsIA:
             mock_inv = MagicMock()
             mock_inv.get_inventaire_complet.return_value = []
             mock_get_inv.return_value = mock_inv
-            
+
             result = service_courses.generer_suggestions_ia_depuis_inventaire()
             assert result == []
 
@@ -360,7 +361,7 @@ class TestSuggestionsIA:
         """Test suggestions quand service inventaire indisponible."""
         with patch("src.services.inventaire.get_inventaire_service") as mock_get_inv:
             mock_get_inv.return_value = None
-            
+
             result = service_courses.generer_suggestions_ia_depuis_inventaire()
             assert result == []
 
@@ -370,18 +371,22 @@ class TestSuggestionsIA:
             {"nom": "Tomates", "quantite": 1, "unite": "kg"},
             {"nom": "Lait", "quantite": 0.5, "unite": "L"},
         ]
-        
+
         mock_suggestions = [
-            SuggestionCourses(nom="Lait", quantite=1.0, unite="L", priorite="haute", rayon="Crèmerie"),
+            SuggestionCourses(
+                nom="Lait", quantite=1.0, unite="L", priorite="haute", rayon="Crèmerie"
+            ),
         ]
-        
+
         with patch("src.services.inventaire.get_inventaire_service") as mock_get_inv:
             mock_inv = MagicMock()
             mock_inv.get_inventaire_complet.return_value = mock_inventaire
             mock_inv.build_inventory_summary.return_value = "Inventaire: Tomates, Lait"
             mock_get_inv.return_value = mock_inv
-            
-            with patch.object(service_courses, "call_with_list_parsing_sync", return_value=mock_suggestions):
+
+            with patch.object(
+                service_courses, "call_with_list_parsing_sync", return_value=mock_suggestions
+            ):
                 result = service_courses.generer_suggestions_ia_depuis_inventaire()
                 assert len(result) == 1
                 assert result[0].nom == "Lait"
@@ -389,35 +394,42 @@ class TestSuggestionsIA:
     def test_suggestions_erreur_parsing(self, service_courses, patch_db_context):
         """Test gestion erreur de parsing."""
         mock_inventaire = [{"nom": "Test", "quantite": 1}]
-        
+
         with patch("src.services.inventaire.get_inventaire_service") as mock_get_inv:
             mock_inv = MagicMock()
             mock_inv.get_inventaire_complet.return_value = mock_inventaire
             mock_inv.build_inventory_summary.return_value = "Test"
             mock_get_inv.return_value = mock_inv
-            
-            with patch.object(service_courses, "call_with_list_parsing_sync", side_effect=KeyError("champ manquant")):
+
+            with patch.object(
+                service_courses,
+                "call_with_list_parsing_sync",
+                side_effect=KeyError("champ manquant"),
+            ):
                 result = service_courses.generer_suggestions_ia_depuis_inventaire()
                 assert result == []
 
     def test_suggestions_erreur_generique(self, service_courses, patch_db_context):
         """Test gestion erreur générique."""
         mock_inventaire = [{"nom": "Test", "quantite": 1}]
-        
+
         with patch("src.services.inventaire.get_inventaire_service") as mock_get_inv:
             mock_inv = MagicMock()
             mock_inv.get_inventaire_complet.return_value = mock_inventaire
             mock_inv.build_inventory_summary.return_value = "Test"
             mock_get_inv.return_value = mock_inv
-            
-            with patch.object(service_courses, "call_with_list_parsing_sync", side_effect=Exception("Erreur test")):
+
+            with patch.object(
+                service_courses, "call_with_list_parsing_sync", side_effect=Exception("Erreur test")
+            ):
                 result = service_courses.generer_suggestions_ia_depuis_inventaire()
                 assert result == []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS MODÃˆLES COURSES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS MODÈLES COURSES
+# ═══════════════════════════════════════════════════════════
+
 
 class TestModelesGestion:
     """Tests pour la gestion des modèles."""
@@ -428,11 +440,7 @@ class TestModelesGestion:
         assert result == []
 
     def test_obtenir_modeles_avec_contenu(
-        self, 
-        service_courses, 
-        patch_db_context,
-        sample_modele_courses,
-        sample_article_modele
+        self, service_courses, patch_db_context, sample_modele_courses, sample_article_modele
     ):
         """Test récupération modèles avec articles."""
         result = service_courses.obtenir_modeles()
@@ -442,10 +450,7 @@ class TestModelesGestion:
         assert len(result[0]["articles"]) == 1
 
     def test_obtenir_modeles_filtre_utilisateur(
-        self, 
-        db: Session,
-        service_courses, 
-        patch_db_context
+        self, db: Session, service_courses, patch_db_context
     ):
         """Test filtre par utilisateur_id."""
         modele1 = ModeleCourses(nom="Modèle User1", utilisateur_id="user1", actif=True)
@@ -457,12 +462,7 @@ class TestModelesGestion:
         assert len(result) == 1
         assert result[0]["nom"] == "Modèle User1"
 
-    def test_obtenir_modeles_exclut_inactifs(
-        self, 
-        db: Session,
-        service_courses, 
-        patch_db_context
-    ):
+    def test_obtenir_modeles_exclut_inactifs(self, db: Session, service_courses, patch_db_context):
         """Test exclusion modèles inactifs."""
         modele_actif = ModeleCourses(nom="Actif", actif=True)
         modele_inactif = ModeleCourses(nom="Inactif", actif=False)
@@ -478,27 +478,20 @@ class TestModelesGestion:
         result = service_courses.get_modeles()
         assert result == []
 
-    def test_creer_modele_simple(
-        self, 
-        db: Session,
-        service_courses, 
-        patch_db_context
-    ):
+    def test_creer_modele_simple(self, db: Session, service_courses, patch_db_context):
         """Test création modèle simple."""
         articles = [
             {"nom": "Article1", "quantite": 1.0, "unite": "pièce"},
             {"nom": "Article2", "quantite": 2.0, "unite": "kg"},
         ]
-        
+
         modele_id = service_courses.creer_modele(
-            nom="Nouveau modèle",
-            articles=articles,
-            description="Description test"
+            nom="Nouveau modèle", articles=articles, description="Description test"
         )
-        
+
         assert modele_id is not None
         assert modele_id > 0
-        
+
         # Vérifier en DB
         modele = db.query(ModeleCourses).filter_by(id=modele_id).first()
         assert modele is not None
@@ -506,103 +499,74 @@ class TestModelesGestion:
         assert len(modele.articles) == 2
 
     def test_creer_modele_avec_ingredient_id(
-        self, 
-        db: Session,
-        service_courses, 
-        patch_db_context,
-        sample_ingredient
+        self, db: Session, service_courses, patch_db_context, sample_ingredient
     ):
         """Test création modèle avec ingredient_id."""
         articles = [
             {"ingredient_id": sample_ingredient.id, "nom": "Tomates", "quantite": 1.5},
         ]
-        
+
         modele_id = service_courses.creer_modele(nom="Avec Ingredient", articles=articles)
-        
+
         modele = db.query(ModeleCourses).filter_by(id=modele_id).first()
         assert modele.articles[0].ingredient_id == sample_ingredient.id
 
-    def test_creer_modele_avec_utilisateur(
-        self, 
-        db: Session,
-        service_courses, 
-        patch_db_context
-    ):
+    def test_creer_modele_avec_utilisateur(self, db: Session, service_courses, patch_db_context):
         """Test création modèle avec utilisateur_id."""
         modele_id = service_courses.creer_modele(
             nom="Modèle personnel",
             articles=[{"nom": "Test", "quantite": 1}],
-            utilisateur_id="user123"
+            utilisateur_id="user123",
         )
-        
+
         modele = db.query(ModeleCourses).filter_by(id=modele_id).first()
         assert modele.utilisateur_id == "user123"
 
-    def test_alias_create_modele(
-        self, 
-        service_courses, 
-        patch_db_context
-    ):
+    def test_alias_create_modele(self, service_courses, patch_db_context):
         """Test alias create_modele."""
         modele_id = service_courses.create_modele(
-            nom="Alias test",
-            articles=[{"nom": "X", "quantite": 1}]
+            nom="Alias test", articles=[{"nom": "X", "quantite": 1}]
         )
         assert modele_id > 0
 
     def test_supprimer_modele_existant(
-        self, 
-        service_courses, 
-        patch_db_context,
-        sample_modele_courses
+        self, service_courses, patch_db_context, sample_modele_courses
     ):
         """Test suppression modèle existant."""
         result = service_courses.supprimer_modele(sample_modele_courses.id)
         assert result is True
 
-    def test_supprimer_modele_inexistant(
-        self, 
-        service_courses, 
-        patch_db_context
-    ):
+    def test_supprimer_modele_inexistant(self, service_courses, patch_db_context):
         """Test suppression modèle inexistant."""
         result = service_courses.supprimer_modele(99999)
         assert result is False
 
-    def test_alias_delete_modele(
-        self, 
-        service_courses, 
-        patch_db_context,
-        sample_modele_courses
-    ):
+    def test_alias_delete_modele(self, service_courses, patch_db_context, sample_modele_courses):
         """Test alias delete_modele."""
         result = service_courses.delete_modele(sample_modele_courses.id)
         assert result is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS APPLIQUER MODÃˆLES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS APPLIQUER MODÈLES
+# ═══════════════════════════════════════════════════════════
+
 
 class TestAppliquerModele:
     """Tests pour appliquer_modele."""
 
-    def test_appliquer_modele_inexistant(
-        self, 
-        service_courses, 
-        patch_db_context
-    ):
+    def test_appliquer_modele_inexistant(self, service_courses, patch_db_context):
         """Test application modèle inexistant."""
         result = service_courses.appliquer_modele(99999)
         assert result == []
 
     def test_appliquer_modele_avec_ingredient(
-        self, 
+        self,
         db: Session,
-        service_courses, 
+        service_courses,
         patch_db_context,
         sample_modele_courses,
-        sample_article_modele
+        sample_article_modele,
     ):
         """Test application modèle avec ingrédient existant."""
         # Le mock de BaseService.create doit être configuré
@@ -612,17 +576,14 @@ class TestAppliquerModele:
             mock_create.assert_called_once()
 
     def test_appliquer_modele_cree_ingredient_si_absent(
-        self, 
-        db: Session,
-        service_courses, 
-        patch_db_context
+        self, db: Session, service_courses, patch_db_context
     ):
         """Test création ingrédient si non trouvé."""
         # Créer modèle avec article sans ingredient_id
         modele = ModeleCourses(nom="Test", actif=True)
         db.add(modele)
         db.flush()
-        
+
         article = ArticleModele(
             modele_id=modele.id,
             nom_article="Nouvel ingredient",
@@ -630,7 +591,7 @@ class TestAppliquerModele:
             unite="kg",
             rayon_magasin="Test",
             priorite="moyenne",
-            ordre=0
+            ordre=0,
         )
         db.add(article)
         db.commit()

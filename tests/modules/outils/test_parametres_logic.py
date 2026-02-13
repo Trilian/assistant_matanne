@@ -1,25 +1,21 @@
-﻿"""
+"""
 Tests pour parametres_logic.py - Fonctions pures de gestion des paramètres
 """
 
-import pytest
-from typing import Dict, Any
-
 from src.modules.outils.parametres_utils import (
-    valider_parametres,
-    valider_email,
-    generer_config_defaut,
-    fusionner_config,
     comparer_versions,
-    version_est_superieure,
     formater_version,
+    fusionner_config,
+    generer_config_defaut,
     get_preferences_par_categorie,
+    valider_email,
+    valider_parametres,
+    version_est_superieure,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Validation Paramètres
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestValiderParametres:
@@ -107,18 +103,16 @@ class TestValiderParametres:
 
     def test_multiples_erreurs(self):
         """Détecte plusieurs erreurs."""
-        valide, erreurs = valider_parametres({
-            "nom_famille": "A",
-            "email": "invalid",
-            "devise": "XYZ"
-        })
+        valide, erreurs = valider_parametres(
+            {"nom_famille": "A", "email": "invalid", "devise": "XYZ"}
+        )
         assert valide is False
         assert len(erreurs) >= 3
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Validation Email
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestValiderEmail:
@@ -172,9 +166,9 @@ class TestValiderEmail:
         assert "254" in msg or "long" in msg.lower()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Configuration Par Défaut
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGenererConfigDefaut:
@@ -207,20 +201,20 @@ class TestFusionnerConfig:
         """Fusionne deux configurations."""
         config_base = {"a": 1, "b": 2}
         nouveaux = {"b": 3, "c": 4}
-        
+
         resultat = fusionner_config(config_base, nouveaux)
-        
+
         assert resultat["a"] == 1  # Conservé
-        assert resultat["b"] == 3  # Ã‰crasé
+        assert resultat["b"] == 3  # Écrasé
         assert resultat["c"] == 4  # Ajouté
 
     def test_ne_modifie_pas_original(self):
         """Ne modifie pas la config originale."""
         config_base = {"a": 1}
         nouveaux = {"b": 2}
-        
+
         fusionner_config(config_base, nouveaux)
-        
+
         assert "b" not in config_base
 
     def test_fusion_vide(self):
@@ -230,9 +224,9 @@ class TestFusionnerConfig:
         assert resultat == {"a": 1}
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Comparaison Versions
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestComparerVersions:
@@ -291,13 +285,13 @@ class TestFormaterVersion:
         assert formater_version("1.0.0") == "v1.0.0"
 
     def test_preserve_v_existant(self):
-        """Préserve le v déjÃ  présent."""
+        """Préserve le v déjà présent."""
         assert formater_version("v1.0.0") == "v1.0.0"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Préférences Par Catégorie
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGetPreferencesParCategorie:
@@ -305,44 +299,33 @@ class TestGetPreferencesParCategorie:
 
     def test_groupement_general(self):
         """Groupe les préférences générales."""
-        prefs = {
-            "nom_famille": "Dupont",
-            "langue": "fr",
-            "fuseau_horaire": "Europe/Paris"
-        }
+        prefs = {"nom_famille": "Dupont", "langue": "fr", "fuseau_horaire": "Europe/Paris"}
         groupees = get_preferences_par_categorie(prefs)
-        
+
         assert "general" in groupees
         assert groupees["general"]["nom_famille"] == "Dupont"
         assert groupees["general"]["langue"] == "fr"
 
     def test_groupement_affichage(self):
         """Groupe les préférences d'affichage."""
-        prefs = {
-            "theme": "dark",
-            "format_date": "DD/MM/YYYY",
-            "mode_compact": True
-        }
+        prefs = {"theme": "dark", "format_date": "DD/MM/YYYY", "mode_compact": True}
         groupees = get_preferences_par_categorie(prefs)
-        
+
         assert "affichage" in groupees
         assert groupees["affichage"]["theme"] == "dark"
 
     def test_categories_vides(self):
         """Gère les catégories vides."""
         groupees = get_preferences_par_categorie({})
-        
+
         assert "general" in groupees
         assert len(groupees["general"]) == 0
 
     def test_cle_inconnue_ignoree(self):
         """Ignore les clés inconnues."""
-        prefs = {
-            "cle_inconnue": "valeur",
-            "theme": "light"
-        }
+        prefs = {"cle_inconnue": "valeur", "theme": "light"}
         groupees = get_preferences_par_categorie(prefs)
-        
+
         # La clé inconnue n'apparaît dans aucune catégorie
         all_values = []
         for cat_values in groupees.values():

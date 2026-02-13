@@ -18,14 +18,9 @@ from src.core.database import verifier_sante as health_check
 
 # State
 from src.core.state import GestionnaireEtat, obtenir_etat
-from src.ui.components import Modale as Modal
 
 # Logique metier pure
-from src.modules.outils.parametres_utils import (
-    valider_parametres,
-    generer_config_defaut,
-    verifier_sante_config
-)
+from src.ui.components import Modale as Modal
 
 # UI
 from src.ui.feedback import afficher_erreur, afficher_succes, spinner_intelligent
@@ -42,7 +37,15 @@ def app():
 
     # Tabs - Ajout des nouvelles fonctionnalites
     tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
-        ["??????? Foyer", "– IA", "?? Base de Donnees", "?? Cache", "?? Affichage", "?? Budget", "?? À Propos"]
+        [
+            "??????? Foyer",
+            "– IA",
+            "?? Base de Donnees",
+            "?? Cache",
+            "?? Affichage",
+            "?? Budget",
+            "?? À Propos",
+        ]
     )
 
     with tab1:
@@ -300,13 +303,13 @@ def render_database_config():
         col1, col2 = st.columns(2)
 
         with col1:
-            st.info(f"**Host:** {db_info.get('hote', 'â€”')}")
-            st.info(f"**Database:** {db_info.get('base_donnees', 'â€”')}")
-            st.info(f"**User:** {db_info.get('utilisateur', 'â€”')}")
+            st.info(f"**Host:** {db_info.get('hote', '—')}")
+            st.info(f"**Database:** {db_info.get('base_donnees', '—')}")
+            st.info(f"**User:** {db_info.get('utilisateur', '—')}")
 
         with col2:
-            st.info(f"**Version:** {db_info.get('version', 'â€”')}")
-            st.info(f"**Taille:** {db_info.get('taille', 'â€”')}")
+            st.info(f"**Version:** {db_info.get('version', '—')}")
+            st.info(f"**Taille:** {db_info.get('taille', '—')}")
             st.info(f"**Schema:** v{db_info.get('version_schema', 0)}")
 
     else:
@@ -356,7 +359,9 @@ def render_database_config():
                     afficher_erreur(f"? Erreur: {str(e)}")
 
     with col6:
-        if st.button("?? Voir Historique", key="btn_show_migration_history", use_container_width=True):
+        if st.button(
+            "?? Voir Historique", key="btn_show_migration_history", use_container_width=True
+        ):
             st.session_state.show_migrations_history = True
 
     st.markdown("---")
@@ -423,7 +428,9 @@ def render_cache_config():
 
                 st.metric("Taux de Hit", f"{hit_rate:.1f}%")
 
-            if st.button("??? Vider Cache Applicatif", key="btn_clear_cache_app", use_container_width=True):
+            if st.button(
+                "??? Vider Cache Applicatif", key="btn_clear_cache_app", use_container_width=True
+            ):
                 Cache.clear_all()
                 afficher_succes("Cache applicatif vide !")
                 st.rerun()
@@ -459,7 +466,12 @@ def render_cache_config():
     # Actions groupees
     st.markdown("#### ?? Actions Groupees")
 
-    if st.button("??¸ TOUT Vider (Cache App + IA)", key="btn_clear_all", type="primary", use_container_width=True):
+    if st.button(
+        "??¸ TOUT Vider (Cache App + IA)",
+        key="btn_clear_all",
+        type="primary",
+        use_container_width=True,
+    ):
         Cache.clear_all()
         SemanticCache.invalider_tout()
         afficher_succes("? Tous les caches vides !")
@@ -482,16 +494,16 @@ def render_about():
     st.markdown(
         f"""
     ## – {settings.APP_NAME}
-    
+
     **Version:** {settings.APP_VERSION}
-    
-    **Description:**  
+
+    **Description:**
     Assistant familial intelligent pour gerer :
     - ?? Recettes et planning repas
     - [PKG] Inventaire alimentaire
     - ??? Liste de courses
     - ?? Planning hebdomadaire
-    
+
     **Technologies:**
     - Frontend: Streamlit
     - Backend: Python
@@ -512,9 +524,7 @@ def render_about():
         st.info(f"**Debug:** {'Active' if settings.DEBUG else 'Desactive'}")
 
     with col2:
-        db_configured = (
-            "? Configuree" if settings._verifier_db_configuree() else "? Non configuree"
-        )
+        db_configured = "? Configuree" if settings._verifier_db_configuree() else "? Non configuree"
         ai_configured = (
             "? Configuree" if settings._verifier_mistral_configure() else "? Non configuree"
         )
@@ -555,6 +565,7 @@ def render_about():
     with st.expander("État de l'application"):
         st.json(state_summary)
 
+
 # -----------------------------------------------------------
 # TAB 5: CONFIGURATION AFFICHAGE (Mode Tablette)
 # -----------------------------------------------------------
@@ -562,51 +573,54 @@ def render_about():
 
 def render_display_config():
     """Configuration de l'affichage et mode tablette."""
-    
+
     st.markdown("### ?? Configuration Affichage")
     st.caption("Personnalise l'interface selon ton appareil")
-    
+
     try:
         from src.ui.tablet_mode import (
-            TabletMode, get_tablet_mode, set_tablet_mode, render_mode_selector
+            TabletMode,
+            get_tablet_mode,
+            render_mode_selector,
+            set_tablet_mode,
         )
-        
+
         current_mode = get_tablet_mode()
-        
+
         st.markdown("#### Mode d'affichage")
-        
+
         mode_options = {
             TabletMode.NORMAL: ("??¸ Normal", "Interface standard pour ordinateur"),
             TabletMode.TABLET: ("?? Tablette", "Boutons plus grands, interface tactile"),
             TabletMode.KITCHEN: ("??€?? Cuisine", "Mode cuisine avec navigation par etapes"),
         }
-        
+
         for mode, (label, description) in mode_options.items():
             col1, col2 = st.columns([1, 3])
             with col1:
                 if st.button(
-                    label, 
+                    label,
                     key=f"mode_{mode.value}",
                     type="primary" if current_mode == mode else "secondary",
-                    use_container_width=True
+                    use_container_width=True,
                 ):
                     set_tablet_mode(mode)
                     afficher_succes(f"Mode {label} active !")
                     st.rerun()
             with col2:
                 st.caption(description)
-        
+
         st.markdown("---")
-        
+
         st.markdown("#### Previsualisation")
-        
+
         if current_mode == TabletMode.NORMAL:
             st.info("??¸ Mode normal actif - Interface optimisee pour ordinateur")
         elif current_mode == TabletMode.TABLET:
             st.warning("?? Mode tablette actif - Boutons et textes agrandis")
         else:
             st.success("??€?? Mode cuisine actif - Interface simplifiee pour cuisiner")
-        
+
     except ImportError:
         st.error("Module tablet_mode non disponible")
 
@@ -618,20 +632,20 @@ def render_display_config():
 
 def render_budget_config():
     """Configuration du budget et backup."""
-    
+
     st.markdown("### ?? Budget & Sauvegarde")
-    
+
     # Section Budget
     st.markdown("#### ?? Configuration Budget")
-    
+
     try:
         from src.services.budget import CategorieDepense
-        
+
         st.markdown("**Categories de depenses disponibles:**")
-        
+
         cols = st.columns(3)
         categories = list(CategorieDepense)
-        
+
         for i, cat in enumerate(categories):
             with cols[i % 3]:
                 emoji_map = {
@@ -651,24 +665,24 @@ def render_budget_config():
                 }
                 emoji = emoji_map.get(cat.value, "[PKG]")
                 st.checkbox(f"{emoji} {cat.value.capitalize()}", value=True, disabled=True)
-        
+
         st.info("??? Accède au module Budget dans le menu Famille pour gerer tes depenses")
-        
+
     except ImportError:
         st.warning("Module budget non disponible")
-    
+
     st.markdown("---")
-    
+
     # Section Backup
     st.markdown("#### ?? Sauvegarde des donnees")
-    
+
     try:
         from src.services.backup import get_backup_service, render_backup_ui
-        
+
         backup_service = get_backup_service()
-        
+
         col1, col2 = st.columns(2)
-        
+
         with col1:
             if st.button("?? Creer une sauvegarde", type="primary", use_container_width=True):
                 with spinner_intelligent("Sauvegarde en cours..."):
@@ -677,7 +691,7 @@ def render_budget_config():
                         afficher_succes(f"? {result.message}")
                     else:
                         afficher_erreur(f"? {result.message}")
-        
+
         with col2:
             if st.button("?? Voir les sauvegardes", use_container_width=True):
                 backups = backup_service.list_backups()
@@ -686,24 +700,24 @@ def render_budget_config():
                         st.text(f"?? {b.filename} ({b.size_bytes // 1024} KB)")
                 else:
                     st.info("Aucune sauvegarde trouvee")
-        
+
     except ImportError:
         st.warning("Module backup non disponible")
-    
+
     st.markdown("---")
-    
+
     # Section Meteo
     st.markdown("#### ???¸ Configuration Meteo Jardin")
-    
+
     try:
         from src.services.weather import get_weather_garden_service
-        
+
         weather = get_weather_garden_service()
-        
+
         with st.form("meteo_config"):
             ville = st.text_input("Ville", value="Paris")
             surface = st.number_input("Surface jardin (m²)", min_value=1, max_value=1000, value=50)
-            
+
             col1, col2, col3 = st.columns(3)
             with col1:
                 notif_gel = st.checkbox("Alertes gel", value=True)
@@ -711,7 +725,7 @@ def render_budget_config():
                 notif_canicule = st.checkbox("Alertes canicule", value=True)
             with col3:
                 notif_pluie = st.checkbox("Alertes pluie", value=True)
-            
+
             if st.form_submit_button("?? Sauvegarder", use_container_width=True):
                 if weather.set_location_from_city(ville):
                     st.session_state.meteo_config = {
@@ -724,7 +738,6 @@ def render_budget_config():
                     afficher_succes("? Configuration meteo sauvegardee")
                 else:
                     afficher_erreur("Ville non trouvee")
-                    
+
     except ImportError:
         st.warning("Module meteo non disponible")
-

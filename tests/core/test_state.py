@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/core/state.py - Gestionnaire d'état avec mocks Streamlit.
 """
 
@@ -93,7 +93,7 @@ class TestGestionnaireEtatInit:
     def test_initialiser_only_once(self, mock_session_state):
         """Test initialiser ne réécrit pas si existant."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.state import GestionnaireEtat, EtatApp
+            from src.core.state import GestionnaireEtat
 
             # Première init
             GestionnaireEtat.initialiser()
@@ -113,7 +113,7 @@ class TestGestionnaireEtatObtenir:
     def test_obtenir_returns_etat(self, mock_session_state):
         """Test obtenir retourne l'état."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.state import GestionnaireEtat, EtatApp
+            from src.core.state import EtatApp, GestionnaireEtat
 
             etat = GestionnaireEtat.obtenir()
 

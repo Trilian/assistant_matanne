@@ -1,38 +1,39 @@
-﻿"""
+"""
 Tests pour entretien_logic.py - Module Maison
 Couverture cible: 80%+
 """
-import pytest
+
 from datetime import date, timedelta
 
+import pytest
+
 from src.modules.maison.entretien_utils import (
+    CATEGORIES_TACHE,
     # Constantes
     FREQUENCES,
-    CATEGORIES_TACHE,
     PIECES,
+    calculer_jours_avant_tache,
     # Calcul des dates
     calculer_prochaine_occurrence,
-    calculer_jours_avant_tache,
-    # Alertes et priorités
-    get_taches_aujourd_hui,
-    get_taches_semaine,
-    get_taches_en_retard,
-    # Filtrage
-    filtrer_par_categorie,
-    filtrer_par_piece,
-    filtrer_par_frequence,
     # Statistiques
     calculer_statistiques_entretien,
     calculer_taux_completion,
+    # Filtrage
+    filtrer_par_categorie,
+    filtrer_par_frequence,
+    filtrer_par_piece,
+    # Alertes et priorités
+    get_taches_aujourd_hui,
+    get_taches_en_retard,
+    get_taches_semaine,
+    grouper_par_piece,
     # Validation
     valider_tache,
-    grouper_par_piece,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -89,9 +90,9 @@ def taches_vides():
     return []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantesEntretien:
@@ -118,9 +119,9 @@ class TestConstantesEntretien:
         assert "Salle de bain" in PIECES
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CALCUL DES DATES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculDates:
@@ -166,10 +167,7 @@ class TestCalculDates:
     def test_jours_avant_tache_future(self):
         """Tâche future = jours positifs."""
         today = date.today()
-        tache = {
-            "frequence": "Hebdomadaire",
-            "derniere_execution": today - timedelta(days=3)
-        }
+        tache = {"frequence": "Hebdomadaire", "derniere_execution": today - timedelta(days=3)}
         jours = calculer_jours_avant_tache(tache)
         # Prochaine dans 4 jours (7 - 3)
         assert jours == 4
@@ -177,16 +175,13 @@ class TestCalculDates:
     def test_jours_avant_tache_retard(self):
         """Tâche en retard = jours négatifs."""
         today = date.today()
-        tache = {
-            "frequence": "Hebdomadaire",
-            "derniere_execution": today - timedelta(days=10)
-        }
+        tache = {"frequence": "Hebdomadaire", "derniere_execution": today - timedelta(days=10)}
         jours = calculer_jours_avant_tache(tache)
         # En retard de 3 jours
         assert jours == -3
 
     def test_jours_avant_tache_sans_execution(self):
-        """Tâche jamais exécutée = 0 (Ã  faire immédiatement)."""
+        """Tâche jamais exécutée = 0 (à faire immédiatement)."""
         tache = {"frequence": "Hebdomadaire"}
         jours = calculer_jours_avant_tache(tache)
         assert jours == 0
@@ -196,25 +191,25 @@ class TestCalculDates:
         today = date.today()
         tache = {
             "frequence": "Quotidienne",
-            "derniere_execution": (today - timedelta(days=2)).isoformat()
+            "derniere_execution": (today - timedelta(days=2)).isoformat(),
         }
         jours = calculer_jours_avant_tache(tache)
         # En retard de 1 jour
         assert jours == -1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS ALERTES ET PRIORITÃ‰S
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS ALERTES ET PRIORITÉS
+# ═══════════════════════════════════════════════════════════
 
 
 class TestAlertesPriorites:
     """Tests des fonctions d'alertes."""
 
     def test_get_taches_aujourd_hui(self, taches_sample):
-        """Tâches Ã  faire aujourd'hui (jours <= 0)."""
+        """Tâches à faire aujourd'hui (jours <= 0)."""
         result = get_taches_aujourd_hui(taches_sample)
-        # Au moins une tâche devrait être Ã  faire
+        # Au moins une tâche devrait être à faire
         assert isinstance(result, list)
         # Toutes ont un retard
         for t in result:
@@ -241,9 +236,9 @@ class TestAlertesPriorites:
         assert result == []
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FILTRAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFiltrageEntretien:
@@ -273,9 +268,9 @@ class TestFiltrageEntretien:
         assert result[0]["titre"] == "Aspirateur salon"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestStatistiquesEntretien:
@@ -284,7 +279,7 @@ class TestStatistiquesEntretien:
     def test_calculer_statistiques_entretien(self, taches_sample):
         """Statistiques complètes."""
         result = calculer_statistiques_entretien(taches_sample)
-        
+
         assert result["total_taches"] == 5
         assert "par_categorie" in result
         assert "par_frequence" in result
@@ -293,7 +288,7 @@ class TestStatistiquesEntretien:
     def test_calculer_statistiques_alertes(self, taches_sample):
         """Statistiques d'alertes."""
         result = calculer_statistiques_entretien(taches_sample)
-        
+
         assert "aujourd_hui" in result
         assert "en_retard" in result
         assert "cette_semaine" in result
@@ -310,9 +305,9 @@ class TestStatistiquesEntretien:
         assert result == 0.0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestValidationEntretien:
@@ -320,11 +315,7 @@ class TestValidationEntretien:
 
     def test_valider_tache_valide(self):
         """Tâche valide."""
-        data = {
-            "titre": "Nettoyage",
-            "frequence": "Hebdomadaire",
-            "categorie": "Ménage"
-        }
+        data = {"titre": "Nettoyage", "frequence": "Hebdomadaire", "categorie": "Ménage"}
         valide, erreurs = valider_tache(data)
         assert valide is True
         assert len(erreurs) == 0
@@ -338,28 +329,22 @@ class TestValidationEntretien:
 
     def test_valider_tache_frequence_invalide(self):
         """Fréquence invalide."""
-        data = {
-            "titre": "Test",
-            "frequence": "Invalide"
-        }
+        data = {"titre": "Test", "frequence": "Invalide"}
         valide, erreurs = valider_tache(data)
         assert valide is False
         assert any("fréquence" in e.lower() for e in erreurs)
 
     def test_valider_tache_categorie_invalide(self):
         """Catégorie invalide."""
-        data = {
-            "titre": "Test",
-            "categorie": "Invalide"
-        }
+        data = {"titre": "Test", "categorie": "Invalide"}
         valide, erreurs = valider_tache(data)
         assert valide is False
         assert any("catégorie" in e.lower() for e in erreurs)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS GROUPEMENT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGroupementEntretien:
@@ -368,7 +353,7 @@ class TestGroupementEntretien:
     def test_grouper_par_piece(self, taches_sample):
         """Groupement par pièce."""
         result = grouper_par_piece(taches_sample)
-        
+
         assert "Cuisine" in result
         assert "Salon" in result
         assert "Garage" in result

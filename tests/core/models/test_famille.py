@@ -1,11 +1,9 @@
-﻿"""
+"""
 Tests unitaires pour famille.py
 
 Module: src.core.models.famille
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
 # from src.core.models.famille import ...
@@ -13,7 +11,6 @@ from unittest.mock import MagicMock, patch
 
 class TestFamille:
     """Tests pour le module famille."""
-
 
     class TestChildProfile:
         """Tests pour la classe ChildProfile."""
@@ -28,7 +25,6 @@ class TestFamille:
             # TODO: Implémenter
             pass
 
-
     class TestWellbeingEntry:
         """Tests pour la classe WellbeingEntry."""
 
@@ -41,7 +37,6 @@ class TestFamille:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-
 
     class TestMilestone:
         """Tests pour la classe Milestone."""
@@ -56,7 +51,6 @@ class TestFamille:
             # TODO: Implémenter
             pass
 
-
     class TestFamilyActivity:
         """Tests pour la classe FamilyActivity."""
 
@@ -70,7 +64,6 @@ class TestFamille:
             # TODO: Implémenter
             pass
 
-
     class TestFamilyBudget:
         """Tests pour la classe FamilyBudget."""
 
@@ -83,4 +76,3 @@ class TestFamille:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-

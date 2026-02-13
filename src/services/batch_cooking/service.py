@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Batch Cooking - Gestion des sessions de préparation de repas en lot.
 
 Ce service gère :
@@ -20,27 +20,22 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.core.ai import obtenir_client_ia
 from src.core.cache import Cache
-from src.core.database import obtenir_contexte_db
-from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
-from src.core.errors_base import ErreurValidation, ErreurNonTrouve
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
+from src.core.errors_base import ErreurNonTrouve, ErreurValidation
 from src.core.models import (
     ConfigBatchCooking,
-    SessionBatchCooking,
     EtapeBatchCooking,
+    Planning,
     PreparationBatch,
     Recette,
-    Planning,
-    Repas,
-    StatutSessionEnum,
+    SessionBatchCooking,
     StatutEtapeEnum,
-    TypeRobotEnum,
-    LocalisationStockageEnum,
+    StatutSessionEnum,
 )
-from src.services.base import BaseAIService
-from src.services.base import BaseService
+from src.services.base import BaseAIService, BaseService
 
-from .types import EtapeBatchIA, SessionBatchIA, PreparationIA
-from .constantes import ROBOTS_DISPONIBLES, JOURS_SEMAINE
+from .constantes import ROBOTS_DISPONIBLES
+from .types import SessionBatchIA
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +43,7 @@ logger = logging.getLogger(__name__)
 class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
     """
     Service complet pour le batch cooking.
-    
+
     Fonctionnalités:
     - Configuration utilisateur (jours, robots, préférences)
     - Sessions batch cooking (création, exécution, suivi)
@@ -68,9 +63,9 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
             service_name="batch_cooking",
         )
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 1: CONFIGURATION
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_cache(ttl=3600, key_func=lambda self: "batch_config")
     @avec_gestion_erreurs(default_return=None)
@@ -105,7 +100,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         objectif_portions: int | None = None,
         db: Session | None = None,
     ) -> ConfigBatchCooking | None:
-        """Met Ã  jour la configuration batch cooking."""
+        """Met à jour la configuration batch cooking."""
         config = db.query(ConfigBatchCooking).first()
         if not config:
             config = ConfigBatchCooking()
@@ -126,21 +121,23 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
 
         db.commit()
         db.refresh(config)
-        
+
         # Invalider cache
         Cache.invalider(pattern="batch_config")
-        
-        logger.info("âœ… Configuration batch cooking mise Ã  jour")
+
+        logger.info("âœ… Configuration batch cooking mise à jour")
         return config
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 2: SESSIONS BATCH COOKING
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_cache(ttl=600, key_func=lambda self, session_id: f"batch_session_{session_id}")
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
-    def obtenir_session(self, session_id: int, db: Session | None = None) -> SessionBatchCooking | None:
+    def obtenir_session(
+        self, session_id: int, db: Session | None = None
+    ) -> SessionBatchCooking | None:
         """Récupère une session avec ses étapes et préparations."""
         return (
             db.query(SessionBatchCooking)
@@ -170,7 +167,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
     def obtenir_sessions_planifiees(
-        self, 
+        self,
         date_debut: date | None = None,
         date_fin: date | None = None,
         db: Session | None = None,
@@ -179,12 +176,12 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         query = db.query(SessionBatchCooking).filter(
             SessionBatchCooking.statut == StatutSessionEnum.PLANIFIEE.value
         )
-        
+
         if date_debut:
             query = query.filter(SessionBatchCooking.date_session >= date_debut)
         if date_fin:
             query = query.filter(SessionBatchCooking.date_session <= date_fin)
-            
+
         return query.order_by(SessionBatchCooking.date_session).all()
 
     @avec_gestion_erreurs(default_return=None)
@@ -207,32 +204,35 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
 
         # Récupérer config pour valeurs par défaut
         config = self.get_config()
-        
+
         session = SessionBatchCooking(
             nom=f"Batch {date_session.strftime('%d/%m/%Y')}",
             date_session=date_session,
             heure_debut=heure_debut or (config.heure_debut_preferee if config else time(10, 0)),
             avec_jules=avec_jules,
             recettes_selectionnees=recettes_ids,
-            robots_utilises=robots or (config.robots_disponibles if config else ["four", "plaques"]),
+            robots_utilises=robots
+            or (config.robots_disponibles if config else ["four", "plaques"]),
             planning_id=planning_id,
             notes_avant=notes,
             statut=StatutSessionEnum.PLANIFIEE.value,
         )
-        
+
         db.add(session)
         db.commit()
         db.refresh(session)
-        
+
         # Invalider cache
         Cache.invalider(pattern="batch_session")
-        
+
         logger.info(f"âœ… Session batch cooking créée: {session.id}")
         return session
 
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
-    def demarrer_session(self, session_id: int, db: Session | None = None) -> SessionBatchCooking | None:
+    def demarrer_session(
+        self, session_id: int, db: Session | None = None
+    ) -> SessionBatchCooking | None:
         """Démarre une session batch cooking."""
         session = db.query(SessionBatchCooking).filter_by(id=session_id).first()
         if not session:
@@ -243,21 +243,21 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
 
         session.statut = StatutSessionEnum.EN_COURS.value
         session.heure_debut = datetime.now().time()
-        
+
         db.commit()
         db.refresh(session)
-        
+
         # Invalider cache
         Cache.invalider(pattern="batch_session")
-        
+
         logger.info(f"âœ… Session batch cooking démarrée: {session_id}")
         return session
 
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def terminer_session(
-        self, 
-        session_id: int, 
+        self,
+        session_id: int,
         notes_apres: str | None = None,
         db: Session | None = None,
     ) -> SessionBatchCooking | None:
@@ -277,32 +277,35 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         session.statut = StatutSessionEnum.TERMINEE.value
         session.heure_fin = datetime.now().time()
         session.notes_apres = notes_apres
-        
+
         # Calculer durée réelle
         if session.heure_debut:
             debut = datetime.combine(session.date_session, session.heure_debut)
             fin = datetime.combine(session.date_session, session.heure_fin)
             session.duree_reelle = int((fin - debut).total_seconds() / 60)
-        
+
         # Compter recettes complétées
         if session.etapes:
-            session.nb_recettes_completees = len(set(
-                e.recette_id for e in session.etapes 
-                if e.recette_id and e.statut == StatutEtapeEnum.TERMINEE.value
-            ))
-        
+            session.nb_recettes_completees = len(
+                set(
+                    e.recette_id
+                    for e in session.etapes
+                    if e.recette_id and e.statut == StatutEtapeEnum.TERMINEE.value
+                )
+            )
+
         db.commit()
         db.refresh(session)
-        
+
         # Invalider cache
         Cache.invalider(pattern="batch_session")
-        
+
         logger.info(f"âœ… Session batch cooking terminée: {session_id}")
         return session
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 3: GESTION DES ÉTAPES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
@@ -312,7 +315,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         etapes: list[dict[str, Any]],
         db: Session | None = None,
     ) -> SessionBatchCooking | None:
-        """Ajoute des étapes Ã  une session."""
+        """Ajoute des étapes à une session."""
         session = db.query(SessionBatchCooking).filter_by(id=session_id).first()
         if not session:
             raise ErreurNonTrouve(f"Session {session_id} non trouvée")
@@ -335,11 +338,11 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
 
         # Estimer durée totale
         session.duree_estimee = sum(e.get("duree_minutes", 10) for e in etapes)
-        
+
         db.commit()
         db.refresh(session)
-        
-        logger.info(f"âœ… {len(etapes)} étapes ajoutées Ã  la session {session_id}")
+
+        logger.info(f"âœ… {len(etapes)} étapes ajoutées à la session {session_id}")
         return session
 
     @avec_gestion_erreurs(default_return=None)
@@ -353,10 +356,10 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         etape.statut = StatutEtapeEnum.EN_COURS.value
         etape.heure_debut = datetime.now()
         etape.timer_actif = True
-        
+
         db.commit()
         db.refresh(etape)
-        
+
         logger.info(f"âœ… Étape démarrée: {etape_id}")
         return etape
 
@@ -371,14 +374,14 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         etape.statut = StatutEtapeEnum.TERMINEE.value
         etape.heure_fin = datetime.now()
         etape.timer_actif = False
-        
+
         # Calculer durée réelle
         if etape.heure_debut:
             etape.duree_reelle = int((etape.heure_fin - etape.heure_debut).total_seconds() / 60)
-        
+
         db.commit()
         db.refresh(etape)
-        
+
         logger.info(f"âœ… Étape terminée: {etape_id}")
         return etape
 
@@ -392,18 +395,23 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
 
         etape.statut = StatutEtapeEnum.PASSEE.value
         etape.timer_actif = False
-        
+
         db.commit()
         db.refresh(etape)
-        
+
         logger.info(f"âœ… Étape passée: {etape_id}")
         return etape
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 4: PRÉPARATIONS STOCKÉES
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
-    @avec_cache(ttl=600, key_func=lambda self, consommees=False, localisation=None: f"preparations_{consommees}_{localisation}")
+    @avec_cache(
+        ttl=600,
+        key_func=lambda self,
+        consommees=False,
+        localisation=None: f"preparations_{consommees}_{localisation}",
+    )
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
     def get_preparations(
@@ -414,10 +422,10 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
     ) -> list[PreparationBatch]:
         """Récupère les préparations stockées."""
         query = db.query(PreparationBatch).filter(PreparationBatch.consomme == consommees)
-        
+
         if localisation:
             query = query.filter(PreparationBatch.localisation == localisation)
-            
+
         return query.order_by(PreparationBatch.date_peremption).all()
 
     @avec_gestion_erreurs(default_return=[])
@@ -463,14 +471,14 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
             container=container,
             notes=notes,
         )
-        
+
         db.add(preparation)
         db.commit()
         db.refresh(preparation)
-        
+
         # Invalider cache
         Cache.invalider(pattern="preparations")
-        
+
         logger.info(f"âœ… Préparation créée: {preparation.id}")
         return preparation
 
@@ -488,22 +496,27 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
             raise ErreurNonTrouve(f"Préparation {preparation_id} non trouvée")
 
         preparation.consommer_portion(portions)
-        
+
         db.commit()
         db.refresh(preparation)
-        
+
         # Invalider cache
         Cache.invalider(pattern="preparations")
-        
+
         logger.info(f"âœ… {portions} portion(s) consommée(s): {preparation_id}")
         return preparation
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 5: GÉNÉRATION IA
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
-    @avec_cache(ttl=3600, key_func=lambda self, recettes_ids, robots_disponibles, avec_jules=False: 
-                f"batch_plan_{'-'.join(map(str, recettes_ids))}_{avec_jules}")
+    @avec_cache(
+        ttl=3600,
+        key_func=lambda self,
+        recettes_ids,
+        robots_disponibles,
+        avec_jules=False: f"batch_plan_{'-'.join(map(str, recettes_ids))}_{avec_jules}",
+    )
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def generer_plan_ia(
@@ -514,7 +527,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         db: Session | None = None,
     ) -> SessionBatchIA | None:
         """Génère un plan de batch cooking optimisé avec l'IA.
-        
+
         L'IA optimise :
         - L'ordre des étapes pour paralléliser au maximum
         - L'utilisation des robots pour gagner du temps
@@ -530,8 +543,10 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         for r in recettes:
             etapes_text = ""
             if r.etapes:
-                etapes_text = "\n".join([f"  {e.ordre}. {e.description} ({e.duree or '?'} min)" for e in r.etapes])
-            
+                etapes_text = "\n".join(
+                    [f"  {e.ordre}. {e.description} ({e.duree or '?'} min)" for e in r.etapes]
+                )
+
             recettes_context.append(f"""
 Recette: {r.nom}
 - Temps préparation: {r.temps_preparation} min
@@ -544,18 +559,24 @@ Recette: {r.nom}
 {etapes_text}
 """)
 
-        robots_text = ", ".join([ROBOTS_DISPONIBLES.get(r, {}).get("nom", r) for r in robots_disponibles])
-        jules_context = """
+        robots_text = ", ".join(
+            [ROBOTS_DISPONIBLES.get(r, {}).get("nom", r) for r in robots_disponibles]
+        )
+        jules_context = (
+            """
 âš ï¸ IMPORTANT - JULES (bébé 19 mois) sera présent !
 - Éviter les étapes bruyantes pendant la sieste (13h-15h)
 - Prévoir des moments calmes où il peut observer/aider
 - Signaler les étapes dangereuses (four chaud, friture, couteaux)
 - Optimiser pour terminer avant 12h si possible
-""" if avec_jules else ""
+"""
+            if avec_jules
+            else ""
+        )
 
-        prompt = f"""GÉNÃˆRE UN PLAN DE BATCH COOKING OPTIMISÉ EN JSON UNIQUEMENT.
+        prompt = f"""GÉNÈRE UN PLAN DE BATCH COOKING OPTIMISÉ EN JSON UNIQUEMENT.
 
-RECETTES Ã€ PRÉPARER:
+RECETTES À PRÉPARER:
 {''.join(recettes_context)}
 
 ÉQUIPEMENTS DISPONIBLES:
@@ -591,7 +612,7 @@ RETOURNE UNIQUEMENT CE JSON (pas de markdown, pas d'explication):
     "ordre_optimal": "Commencer par les cuissons longues au four, puis préparer les plats rapides en parallèle"
 }}
 
-RÃˆGLES:
+RÈGLES:
 - Les étapes avec le même groupe_parallele peuvent être faites simultanément
 - est_supervision=true pour les étapes passives (surveiller la cuisson)
 - alerte_bruit=true pour mixeur, hachoir, robot bruyant
@@ -609,8 +630,10 @@ RÃˆGLES:
         )
 
         if result:
-            logger.info(f"âœ… Plan batch cooking généré: {result.duree_totale_estimee} min estimées")
-        
+            logger.info(
+                f"âœ… Plan batch cooking généré: {result.duree_totale_estimee} min estimées"
+            )
+
         return result
 
     @avec_gestion_erreurs(default_return=[])
@@ -625,7 +648,7 @@ RÃˆGLES:
     ) -> list[Recette]:
         """Suggère des recettes adaptées au batch cooking."""
         query = db.query(Recette).filter(Recette.compatible_batch == True)
-        
+
         # Filtrer par robots si spécifié
         if robots_disponibles:
             # Filtre complexe sur les robots
@@ -636,20 +659,20 @@ RÃˆGLES:
                     query = query.filter(Recette.compatible_monsieur_cuisine == True)
                 elif robot == "airfryer":
                     query = query.filter(Recette.compatible_airfryer == True)
-        
+
         # Filtrer pour bébé si Jules présent
         if avec_jules:
             query = query.filter(Recette.compatible_bebe == True)
-        
+
         # Prioriser les recettes congelables
         recettes = query.order_by(Recette.congelable.desc()).limit(nb_recettes * 2).all()
-        
+
         # Retourner un échantillon varié
         return recettes[:nb_recettes]
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 6: INTÉGRATION PLANNING
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
@@ -682,27 +705,29 @@ RÃˆGLES:
         for preparation in session.preparations:
             if preparation.consomme:
                 continue
-                
+
             # Trouver les repas sans recette
             repas_libres = [r for r in planning.repas if not r.recette_id and not r.notes]
-            
-            # Attribuer Ã  des repas
+
+            # Attribuer à des repas
             nb_attribue = min(preparation.portions_restantes, len(repas_libres))
             for i, repas in enumerate(repas_libres[:nb_attribue]):
                 repas.notes = f"ðŸ± {preparation.nom}"
-                
+
                 if preparation.repas_attribues is None:
                     preparation.repas_attribues = []
                 preparation.repas_attribues.append(repas.id)
-                
-                attributions.append({
-                    "preparation": preparation.nom,
-                    "repas_id": repas.id,
-                    "date": repas.date_repas.isoformat(),
-                })
+
+                attributions.append(
+                    {
+                        "preparation": preparation.nom,
+                        "repas_id": repas.id,
+                        "date": repas.date_repas.isoformat(),
+                    }
+                )
 
         db.commit()
-        
+
         logger.info(f"âœ… {len(attributions)} attributions créées")
         return {
             "session_id": session_id,
@@ -711,17 +736,17 @@ RÃˆGLES:
         }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # ALIAS POUR RÉTROCOMPATIBILITÉ
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 # Alias de classe (ancien nom)
 BatchCookingService = ServiceBatchCooking
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # INSTANCE SINGLETON - LAZY LOADING
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 _service_batch_cooking: ServiceBatchCooking | None = None
 

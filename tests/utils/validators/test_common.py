@@ -1,15 +1,15 @@
-﻿"""
+"""
 Tests pour src/utils/validators/common.py
 """
-import pytest
+
 from src.utils.validators.common import (
-    valider_email,
-    valider_telephone,
     borner,
-    valider_plage,
-    valider_longueur_texte,
     valider_champs_requis,
     valider_choix,
+    valider_email,
+    valider_longueur_texte,
+    valider_plage,
+    valider_telephone,
     valider_url,
 )
 

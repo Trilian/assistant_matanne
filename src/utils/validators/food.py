@@ -1,4 +1,4 @@
-﻿"""
+"""
 Validators - Validation données cuisine
 """
 
@@ -195,7 +195,9 @@ def valider_repas(data: dict) -> tuple[bool, list[str]]:
     return len(errors) == 0, errors
 
 
-def valider_quantite(quantite: float | int | str, min_val: float = 0, max_val: float = 10000) -> tuple[bool, str]:
+def valider_quantite(
+    quantite: float | int | str, min_val: float = 0, max_val: float = 10000
+) -> tuple[bool, str]:
     """
     Valide une quantité
 

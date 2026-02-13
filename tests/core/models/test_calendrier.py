@@ -1,24 +1,22 @@
-﻿"""
+"""
 Tests unitaires pour calendrier.py
 
 Module: src.core.models.calendrier
 Contient: CalendrierExterne, EvenementCalendrier
 """
 
-import pytest
 from datetime import datetime
 
 from src.core.models.calendrier import (
+    CalendarProvider,
     CalendrierExterne,
     EvenementCalendrier,
-    CalendarProvider,
     SyncDirection,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ENUMS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalendarProvider:
@@ -42,9 +40,9 @@ class TestSyncDirection:
         assert SyncDirection.BIDIRECTIONAL.value == "bidirectional"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS MODÃˆLES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS MODÈLES
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalendrierExterne:
@@ -66,9 +64,9 @@ class TestCalendrierExterne:
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
         colonnes = CalendrierExterne.__table__.columns
-        assert colonnes['enabled'].default is not None
-        assert colonnes['sync_interval_minutes'].default is not None
-        assert colonnes['sync_direction'].default is not None
+        assert colonnes["enabled"].default is not None
+        assert colonnes["sync_interval_minutes"].default is not None
+        assert colonnes["sync_direction"].default is not None
 
     def test_repr(self):
         """Test de la représentation string."""
@@ -100,15 +98,12 @@ class TestEvenementCalendrier:
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
         colonnes = EvenementCalendrier.__table__.columns
-        assert colonnes['all_day'].default is not None
+        assert colonnes["all_day"].default is not None
 
     def test_repr(self):
         """Test de la représentation string."""
         event = EvenementCalendrier(
-            id=1,
-            uid="abc",
-            titre="Anniversaire",
-            date_debut=datetime(2026, 3, 1)
+            id=1, uid="abc", titre="Anniversaire", date_debut=datetime(2026, 3, 1)
         )
         result = repr(event)
         assert "EvenementCalendrier" in result

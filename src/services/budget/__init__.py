@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package de gestion du budget familial.
 
 Exports:
@@ -10,57 +10,56 @@ Exports:
 
 from .schemas import (
     DEFAULT_USER_ID,
+    BudgetMensuel,
     CategorieDepense,
-    FrequenceRecurrence,
     Depense,
     FactureMaison,
-    BudgetMensuel,
-    ResumeFinancier,
+    FrequenceRecurrence,
     PrevisionDepense,
+    ResumeFinancier,
 )
-
 from .service import (
     BudgetService,
     get_budget_service,
 )
-
 from .utils import (
-    # Conversion DB â†’ Pydantic
-    db_entry_to_depense,
-    db_entries_to_depenses,
+    # Agrégation
+    agreger_depenses_par_categorie,
+    calculer_confiance_prevision,
     # Calculs statistiques
     calculer_moyenne_ponderee,
-    calculer_tendance,
-    calculer_variance,
-    calculer_confiance_prevision,
-    generer_prevision_categorie,
     # Calculs de budget
     calculer_pourcentage_budget,
     calculer_reste_disponible,
-    est_budget_depasse,
-    est_budget_a_risque,
-    # Agrégation
-    agreger_depenses_par_categorie,
+    calculer_tendance,
     calculer_total_depenses,
-    filtrer_depenses_par_categorie,
-    filtrer_depenses_par_periode,
+    calculer_variance,
     # Résumés
     construire_resume_financier,
+    db_entries_to_depenses,
+    # Conversion DB â†’ Pydantic
+    db_entry_to_depense,
+    est_budget_a_risque,
+    est_budget_depasse,
+    filtrer_depenses_par_categorie,
+    filtrer_depenses_par_periode,
+    generer_prevision_categorie,
+    valider_annee,
+    valider_mois,
     # Validation
     valider_montant,
-    valider_mois,
-    valider_annee,
 )
 
 
 def render_budget_dashboard():
     """
     Affiche le tableau de bord budget dans Streamlit.
-    
+
     Déplacé vers src/modules/famille/ui/budget_dashboard.py
     Cette fonction assure la rétrocompatibilité.
     """
     from src.modules.famille.budget_dashboard import render_budget_dashboard as _render
+
     return _render()
 
 

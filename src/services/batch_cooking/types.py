@@ -1,4 +1,4 @@
-﻿"""
+"""
 Types et schémas Pydantic pour le package batch_cooking.
 
 Module unifié avec tous les modèles de données pour les services de batch cooking.
@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 class EtapeBatchIA(BaseModel):
     """Étape générée par l'IA pour une session batch cooking."""
+
     ordre: int = Field(..., ge=1)
     titre: str = Field(..., min_length=3, max_length=200)
     description: str = Field(..., min_length=5)
@@ -23,6 +24,7 @@ class EtapeBatchIA(BaseModel):
 
 class SessionBatchIA(BaseModel):
     """Session batch cooking générée par l'IA."""
+
     recettes: list[str] = Field(..., min_length=1)
     duree_totale_estimee: int = Field(..., ge=5, le=480)
     etapes: list[EtapeBatchIA] = Field(..., min_length=1)
@@ -32,6 +34,7 @@ class SessionBatchIA(BaseModel):
 
 class PreparationIA(BaseModel):
     """Préparation générée par l'IA."""
+
     nom: str = Field(..., min_length=3, max_length=200)
     portions: int = Field(..., ge=1, le=20)
     conservation_jours: int = Field(..., ge=1, le=90)

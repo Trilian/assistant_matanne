@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour le module errors_base.py.
 
 Tests couverts:
@@ -10,19 +10,18 @@ Tests couverts:
 import pytest
 
 from src.core.errors_base import (
-    ExceptionApp,
-    ErreurValidation,
-    ErreurNonTrouve,
     ErreurBaseDeDonnees,
-    ErreurServiceIA,
-    ErreurLimiteDebit,
-    ErreurServiceExterne,
     ErreurConfiguration,
+    ErreurLimiteDebit,
+    ErreurNonTrouve,
+    ErreurServiceExterne,
+    ErreurServiceIA,
+    ErreurValidation,
+    ExceptionApp,
     exiger_champs,
-    valider_type,
     valider_plage,
+    valider_type,
 )
-
 
 # ═══════════════════════════════════════════════════════════
 # TESTS EXCEPTION DE BASE
@@ -35,7 +34,7 @@ class TestExceptionApp:
     def test_creation_simple(self):
         """Test création avec message seul."""
         exc = ExceptionApp("Test error")
-        
+
         assert exc.message == "Test error"
         assert exc.details == {}
         assert exc.message_utilisateur == "Test error"
@@ -49,7 +48,7 @@ class TestExceptionApp:
             message_utilisateur="Erreur technique",
             code_erreur="CUSTOM_ERROR",
         )
-        
+
         assert exc.message == "Technical error"
         assert exc.details == {"key": "value"}
         assert exc.message_utilisateur == "Erreur technique"
@@ -73,9 +72,9 @@ class TestExceptionApp:
             message_utilisateur="Message utilisateur",
             code_erreur="CODE123",
         )
-        
+
         data = exc.to_dict()
-        
+
         assert data["type"] == "ExceptionApp"
         assert data["message"] == "Error message"
         assert data["code_erreur"] == "CODE123"
@@ -86,7 +85,7 @@ class TestExceptionApp:
         """Test qu'on peut lever l'exception."""
         with pytest.raises(ExceptionApp) as exc_info:
             raise ExceptionApp("Test raise")
-        
+
         assert exc_info.value.message == "Test raise"
 
     def test_inherits_from_exception(self):
@@ -96,7 +95,7 @@ class TestExceptionApp:
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS EXCEPTIONS SPÃ‰CIALISÃ‰ES
+# TESTS EXCEPTIONS SPÉCIALISÉES
 # ═══════════════════════════════════════════════════════════
 
 
@@ -134,7 +133,7 @@ class TestErreurNonTrouve:
             "Recette non trouvée",
             details={"id": 123, "table": "recettes"},
         )
-        
+
         assert exc.details["id"] == 123
         assert exc.details["table"] == "recettes"
 
@@ -167,7 +166,7 @@ class TestErreurServiceIA:
             "Timeout",
             details={"endpoint": "/chat", "timeout": 30},
         )
-        
+
         assert exc.details["endpoint"] == "/chat"
         assert exc.details["timeout"] == 30
 
@@ -190,7 +189,7 @@ class TestErreurLimiteDebit:
                 "period": "hourly",
             },
         )
-        
+
         assert exc.details["calls_remaining"] == 0
         assert exc.details["period"] == "hourly"
 
@@ -219,7 +218,7 @@ class TestErreurConfiguration:
             details={"variable": "DATABASE_URL", "required": True},
             message_utilisateur="Configuration manquante",
         )
-        
+
         assert exc.details["variable"] == "DATABASE_URL"
         assert exc.message_utilisateur == "Configuration manquante"
 
@@ -235,45 +234,45 @@ class TestExigerChamps:
     def test_all_fields_present(self):
         """Test avec tous les champs présents."""
         data = {"nom": "Tarte", "temps": 30, "portions": 4}
-        
+
         # Ne doit pas lever d'exception
         exiger_champs(data, ["nom", "temps", "portions"], "recette")
 
     def test_missing_field_raises(self):
         """Test avec champ manquant."""
         data = {"nom": "Tarte", "temps": 30}
-        
+
         with pytest.raises(ErreurValidation) as exc_info:
             exiger_champs(data, ["nom", "temps", "portions"], "recette")
-        
+
         assert "portions" in str(exc_info.value)
         assert exc_info.value.details["champs_manquants"] == ["portions"]
 
     def test_empty_field_treated_as_missing(self):
         """Test champ vide traité comme manquant."""
         data = {"nom": "Tarte", "temps": 30, "portions": ""}
-        
+
         with pytest.raises(ErreurValidation) as exc_info:
             exiger_champs(data, ["nom", "temps", "portions"], "recette")
-        
+
         assert "portions" in exc_info.value.details["champs_manquants"]
 
     def test_none_field_treated_as_missing(self):
         """Test champ None traité comme manquant."""
         data = {"nom": "Tarte", "temps": None}
-        
+
         with pytest.raises(ErreurValidation) as exc_info:
             exiger_champs(data, ["nom", "temps"], "recette")
-        
+
         assert "temps" in exc_info.value.details["champs_manquants"]
 
     def test_multiple_missing_fields(self):
         """Test plusieurs champs manquants."""
         data = {"nom": "Tarte"}
-        
+
         with pytest.raises(ErreurValidation) as exc_info:
             exiger_champs(data, ["nom", "temps", "portions", "difficulte"], "recette")
-        
+
         manquants = exc_info.value.details["champs_manquants"]
         assert "temps" in manquants
         assert "portions" in manquants
@@ -282,32 +281,32 @@ class TestExigerChamps:
     def test_message_utilisateur_formatted(self):
         """Test message utilisateur formaté."""
         data = {"nom": "Tarte"}
-        
+
         with pytest.raises(ErreurValidation) as exc_info:
             exiger_champs(data, ["nom", "temps", "portions"], "recette")
-        
+
         assert "Champs obligatoires manquants" in exc_info.value.message_utilisateur
 
     def test_default_nom_objet(self):
         """Test nom objet par défaut."""
         data = {}
-        
+
         with pytest.raises(ErreurValidation) as exc_info:
             exiger_champs(data, ["champ"])
-        
+
         assert "objet" in str(exc_info.value)
 
     def test_empty_champs_list(self):
         """Test liste de champs vide."""
         data = {"any": "value"}
-        
+
         # Ne doit pas lever d'exception
         exiger_champs(data, [], "test")
 
     def test_zero_value_accepted(self):
         """Test valeur 0 acceptée (truthy test)."""
         data = {"count": 0}
-        
+
         # 0 est falsy, donc sera traité comme manquant
         with pytest.raises(ErreurValidation):
             exiger_champs(data, ["count"], "test")
@@ -334,7 +333,7 @@ class TestValiderType:
         """Test avec type incorrect."""
         with pytest.raises(ErreurValidation) as exc_info:
             valider_type(42, str, "age")
-        
+
         assert "age" in str(exc_info.value)
         assert "str" in str(exc_info.value)
         assert "int" in str(exc_info.value)
@@ -349,14 +348,14 @@ class TestValiderType:
         """Test avec plusieurs types, aucun ne correspond."""
         with pytest.raises(ErreurValidation) as exc_info:
             valider_type(3.14, (int, str), "value")
-        
+
         assert "int ou str" in str(exc_info.value)
 
     def test_details_populated(self):
         """Test détails remplis."""
         with pytest.raises(ErreurValidation) as exc_info:
             valider_type([1, 2], str, "data")
-        
+
         details = exc_info.value.details
         assert details["parametre"] == "data"
         assert details["type_attendu"] == "str"
@@ -366,7 +365,7 @@ class TestValiderType:
         """Test nom paramètre par défaut."""
         with pytest.raises(ErreurValidation) as exc_info:
             valider_type(42, str)
-        
+
         assert "paramètre" in str(exc_info.value)
 
 
@@ -389,7 +388,7 @@ class TestValiderPlage:
         """Test valeur sous le minimum."""
         with pytest.raises(ErreurValidation) as exc_info:
             valider_plage(0, min_val=1, max_val=10, nom_param="age")
-        
+
         assert ">= 1" in str(exc_info.value)
         assert exc_info.value.details["min"] == 1
         assert exc_info.value.details["recu"] == 0
@@ -398,7 +397,7 @@ class TestValiderPlage:
         """Test valeur au-dessus du maximum."""
         with pytest.raises(ErreurValidation) as exc_info:
             valider_plage(15, min_val=1, max_val=10, nom_param="age")
-        
+
         assert "<= 10" in str(exc_info.value)
         assert exc_info.value.details["max"] == 10
         assert exc_info.value.details["recu"] == 15
@@ -406,28 +405,28 @@ class TestValiderPlage:
     def test_min_only(self):
         """Test avec min seulement."""
         valider_plage(100, min_val=1)  # Pas de max, OK
-        
+
         with pytest.raises(ErreurValidation):
             valider_plage(0, min_val=1)
 
     def test_max_only(self):
         """Test avec max seulement."""
         valider_plage(-100, max_val=10)  # Pas de min, OK
-        
+
         with pytest.raises(ErreurValidation):
             valider_plage(20, max_val=10)
 
     def test_float_values(self):
         """Test avec valeurs float."""
         valider_plage(5.5, min_val=1.0, max_val=10.0)
-        
+
         with pytest.raises(ErreurValidation):
             valider_plage(0.5, min_val=1.0)
 
     def test_negative_range(self):
         """Test avec plage négative."""
         valider_plage(-5, min_val=-10, max_val=-1)
-        
+
         with pytest.raises(ErreurValidation):
             valider_plage(0, min_val=-10, max_val=-1)
 
@@ -435,12 +434,12 @@ class TestValiderPlage:
         """Test nom paramètre par défaut."""
         with pytest.raises(ErreurValidation) as exc_info:
             valider_plage(100, max_val=10)
-        
+
         assert "valeur" in str(exc_info.value)
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS D'INTÃ‰GRATION
+# TESTS D'INTÉGRATION
 # ═══════════════════════════════════════════════════════════
 
 
@@ -450,7 +449,7 @@ class TestExceptionsIntegration:
     def test_exception_hierarchy(self):
         """Test hiérarchie des exceptions."""
         exc = ErreurValidation("Test")
-        
+
         assert isinstance(exc, ErreurValidation)
         assert isinstance(exc, ExceptionApp)
         assert isinstance(exc, Exception)
@@ -466,7 +465,7 @@ class TestExceptionsIntegration:
             ErreurServiceExterne("test"),
             ErreurConfiguration("test"),
         ]
-        
+
         for exc in exceptions:
             try:
                 raise exc
@@ -485,7 +484,7 @@ class TestExceptionsIntegration:
             ErreurServiceExterne("test"),
             ErreurConfiguration("test"),
         ]
-        
+
         for exc in exceptions:
             data = exc.to_dict()
             assert "type" in data

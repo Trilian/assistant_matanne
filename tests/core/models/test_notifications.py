@@ -1,22 +1,20 @@
-﻿"""
+"""
 Tests unitaires pour notifications.py
 
 Module: src.core.models.notifications
 Contient: PushSubscription, NotificationPreference
 """
 
-import pytest
-from datetime import datetime, time
+from datetime import time
 
 from src.core.models.notifications import (
-    PushSubscription,
     NotificationPreference,
+    PushSubscription,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS MODÃˆLES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS MODÈLES
+# ═══════════════════════════════════════════════════════════
 
 
 class TestPushSubscription:
@@ -66,14 +64,14 @@ class TestNotificationPreference:
         """Vérifie que les colonnes ont des valeurs par défaut."""
         colonnes = NotificationPreference.__table__.columns
         # Toutes les notifications activées par défaut
-        assert colonnes['courses_rappel'].default is not None
-        assert colonnes['repas_suggestion'].default is not None
-        assert colonnes['stock_alerte'].default is not None
-        assert colonnes['meteo_alerte'].default is not None
-        assert colonnes['budget_alerte'].default is not None
+        assert colonnes["courses_rappel"].default is not None
+        assert colonnes["repas_suggestion"].default is not None
+        assert colonnes["stock_alerte"].default is not None
+        assert colonnes["meteo_alerte"].default is not None
+        assert colonnes["budget_alerte"].default is not None
         # Heures silencieuses par défaut
-        assert colonnes['quiet_hours_start'].default is not None
-        assert colonnes['quiet_hours_end'].default is not None
+        assert colonnes["quiet_hours_start"].default is not None
+        assert colonnes["quiet_hours_end"].default is not None
 
     def test_heures_silencieuses_personnalisees(self):
         """Test des heures silencieuses personnalisées."""

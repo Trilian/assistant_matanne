@@ -1,19 +1,15 @@
-﻿"""
+"""
 Tests unitaires pour systeme.py
 
 Module: src.core.models.systeme
 Contient: Backup
 """
 
-import pytest
-from datetime import datetime
-
 from src.core.models.systeme import Backup
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS MODÃˆLES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS MODÈLES
+# ═══════════════════════════════════════════════════════════
 
 
 class TestBackup:
@@ -37,9 +33,9 @@ class TestBackup:
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
         colonnes = Backup.__table__.columns
-        assert colonnes['size_bytes'].default is not None
-        assert colonnes['compressed'].default is not None
-        assert colonnes['version'].default is not None
+        assert colonnes["size_bytes"].default is not None
+        assert colonnes["compressed"].default is not None
+        assert colonnes["version"].default is not None
 
     def test_tables_included(self):
         """Test du champ tables_included."""

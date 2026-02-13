@@ -1,4 +1,4 @@
-﻿"""
+"""
 Validators - Validation commune
 """
 
@@ -119,9 +119,7 @@ def valider_champs_requis(data: dict, required_fields: list) -> tuple[bool, list
     return len(missing) == 0, missing
 
 
-def valider_choix(
-    value: Any, allowed_values: list, field_name: str = "valeur"
-) -> tuple[bool, str]:
+def valider_choix(value: Any, allowed_values: list, field_name: str = "valeur") -> tuple[bool, str]:
     """
     Valide qu'une valeur est dans une liste
 

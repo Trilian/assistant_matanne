@@ -1,4 +1,4 @@
-﻿"""
+"""
 Fonctions utilitaires pures pour les notifications push.
 
 Ces fonctions peuvent être testées sans base de données ni dépendances externes.
@@ -7,20 +7,18 @@ Elles représentent la logique métier pure.
 
 import json
 from datetime import datetime
-from typing import Any
 
 from src.services.notifications.types import TypeNotification
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # VÉRIFICATION DES PRÉFÉRENCES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def obtenir_mapping_types_notification() -> dict[TypeNotification, str]:
     """
     Retourne le mapping entre types de notification et préférences utilisateur.
-    
+
     Returns:
         Dict {TypeNotification: nom_preference}
     """
@@ -40,16 +38,15 @@ def obtenir_mapping_types_notification() -> dict[TypeNotification, str]:
 
 
 def verifier_type_notification_active(
-    type_notification: TypeNotification | str,
-    preferences: dict
+    type_notification: TypeNotification | str, preferences: dict
 ) -> bool:
     """
     Vérifie si un type de notification est activé pour l'utilisateur.
-    
+
     Args:
         type_notification: Type de notification
         preferences: Dict des préférences utilisateur
-        
+
     Returns:
         True si le type est activé
     """
@@ -58,47 +55,45 @@ def verifier_type_notification_active(
             type_notification = TypeNotification(type_notification)
         except ValueError:
             return True  # Type inconnu, activer par défaut
-    
+
     mapping = obtenir_mapping_types_notification()
     pref_key = mapping.get(type_notification, None)
-    
+
     if pref_key is None:
         return True  # Type sans préférence, activer par défaut
-    
+
     return preferences.get(pref_key, True)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # GESTION DES HEURES SILENCIEUSES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def est_heures_silencieuses(
-    heure_courante: int,
-    heure_debut: int | None,
-    heure_fin: int | None
+    heure_courante: int, heure_debut: int | None, heure_fin: int | None
 ) -> bool:
     """
     Vérifie si l'heure courante est dans la période silencieuse.
-    
+
     Gère le cas où la période silencieuse passe par minuit
     (ex: 22h -> 7h).
-    
+
     Args:
         heure_courante: Heure actuelle (0-23)
         heure_debut: Heure de début de silence (None = pas de silence)
         heure_fin: Heure de fin de silence
-        
+
     Returns:
         True si dans les heures silencieuses
     """
     if heure_debut is None or heure_fin is None:
         return False
-    
+
     # Valider l'heure
     if not 0 <= heure_courante <= 23:
         return False
-    
+
     if heure_debut > heure_fin:
         # Passe par minuit (ex: 22h -> 7h)
         return heure_courante >= heure_debut or heure_courante < heure_fin
@@ -110,12 +105,12 @@ def est_heures_silencieuses(
 def peut_envoyer_pendant_silence(type_notification: TypeNotification | str) -> bool:
     """
     Vérifie si un type de notification peut être envoyé pendant les heures silencieuses.
-    
+
     Certaines notifications critiques sont toujours envoyées.
-    
+
     Args:
         type_notification: Type de notification
-        
+
     Returns:
         True si peut être envoyé pendant silence
     """
@@ -124,12 +119,12 @@ def peut_envoyer_pendant_silence(type_notification: TypeNotification | str) -> b
             type_notification = TypeNotification(type_notification)
         except ValueError:
             return False
-    
+
     # Seules les alertes critiques passent
     types_critiques = {
         TypeNotification.PEREMPTION_CRITIQUE,
     }
-    
+
     return type_notification in types_critiques
 
 
@@ -137,60 +132,60 @@ def doit_envoyer_notification(
     type_notification: TypeNotification | str,
     preferences: dict,
     heure_courante: int | None = None,
-    nombre_envoyes_cette_heure: int = 0
+    nombre_envoyes_cette_heure: int = 0,
 ) -> tuple[bool, str]:
     """
     Vérifie si une notification doit être envoyée.
-    
+
     Prend en compte:
     - Les préférences utilisateur
     - Les heures silencieuses
     - La limite par heure
-    
+
     Args:
         type_notification: Type de notification
         preferences: Préférences utilisateur
         heure_courante: Heure actuelle (None = auto)
-        nombre_envoyes_cette_heure: Nombre de notifications déjÃ  envoyées cette heure
-        
+        nombre_envoyes_cette_heure: Nombre de notifications déjà envoyées cette heure
+
     Returns:
         Tuple (doit_envoyer, raison)
     """
     if heure_courante is None:
         heure_courante = datetime.now().hour
-    
+
     # 1. Vérifier si le type est activé
     if not verifier_type_notification_active(type_notification, preferences):
         return False, "Type de notification désactivé"
-    
+
     # 2. Vérifier les heures silencieuses
     heure_debut = preferences.get("heures_silencieuses_debut")
     heure_fin = preferences.get("heures_silencieuses_fin")
-    
+
     if est_heures_silencieuses(heure_courante, heure_debut, heure_fin):
         if not peut_envoyer_pendant_silence(type_notification):
             return False, "Heures silencieuses actives"
-    
+
     # 3. Vérifier la limite par heure
     max_par_heure = preferences.get("max_par_heure", 5)
     if nombre_envoyes_cette_heure >= max_par_heure:
         return False, f"Limite par heure atteinte ({max_par_heure})"
-    
+
     return True, ""
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # CONSTRUCTION DE PAYLOADS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def construire_payload_push(notification: dict) -> str:
     """
     Construit le payload JSON pour Web Push.
-    
+
     Args:
         notification: Dict avec title, body, icon, etc.
-        
+
     Returns:
         Chaîne JSON du payload
     """
@@ -203,14 +198,14 @@ def construire_payload_push(notification: dict) -> str:
         "data": {
             "url": notification.get("url", "/"),
             "type": notification.get("notification_type", "system_update"),
-            **(notification.get("data", {}))
+            **(notification.get("data", {})),
         },
         "actions": notification.get("actions", []),
         "vibrate": notification.get("vibrate", [100, 50, 100]),
         "requireInteraction": notification.get("require_interaction", False),
         "silent": notification.get("silent", False),
     }
-    
+
     # Ajouter timestamp si fourni
     timestamp = notification.get("timestamp")
     if timestamp:
@@ -218,17 +213,17 @@ def construire_payload_push(notification: dict) -> str:
             payload["timestamp"] = timestamp.isoformat()
         else:
             payload["timestamp"] = str(timestamp)
-    
+
     return json.dumps(payload, ensure_ascii=False)
 
 
 def construire_info_abonnement(subscription: dict) -> dict:
     """
     Construit l'info d'abonnement pour pywebpush.
-    
+
     Args:
         subscription: Dict avec endpoint, p256dh_key, auth_key
-        
+
     Returns:
         Dict formaté pour pywebpush
     """
@@ -237,33 +232,29 @@ def construire_info_abonnement(subscription: dict) -> dict:
         "keys": {
             "p256dh": subscription.get("p256dh_key", ""),
             "auth": subscription.get("auth_key", ""),
-        }
+        },
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # CRÉATION DE NOTIFICATIONS PRÉDÉFINIES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
-def creer_notification_stock(
-    nom_article: str,
-    quantite: float,
-    unite: str = ""
-) -> dict:
+def creer_notification_stock(nom_article: str, quantite: float, unite: str = "") -> dict:
     """
     Crée une notification de stock bas.
-    
+
     Args:
         nom_article: Nom de l'article
         quantite: Quantité restante
         unite: Unité (optionnel)
-        
+
     Returns:
-        Dict notification prêt Ã  envoyer
+        Dict notification prêt à envoyer
     """
     quantite_str = f"{quantite} {unite}".strip() if unite else str(quantite)
-    
+
     return {
         "title": "ðŸ“¦ Stock bas",
         "body": f"{nom_article} est presque épuisé ({quantite_str} restant)",
@@ -272,27 +263,25 @@ def creer_notification_stock(
         "tag": f"stock_{nom_article.lower().replace(' ', '_')}",
         "actions": [
             {"action": "add_to_cart", "title": "Ajouter aux courses"},
-            {"action": "dismiss", "title": "Ignorer"}
+            {"action": "dismiss", "title": "Ignorer"},
         ],
         "require_interaction": False,
     }
 
 
 def creer_notification_peremption(
-    nom_article: str,
-    jours_restants: int,
-    critique: bool = False
+    nom_article: str, jours_restants: int, critique: bool = False
 ) -> dict:
     """
     Crée une notification de péremption proche.
-    
+
     Args:
         nom_article: Nom de l'article
         jours_restants: Jours avant péremption (0 = aujourd'hui, <0 = périmé)
         critique: Forcer le mode critique
-        
+
     Returns:
-        Dict notification prêt Ã  envoyer
+        Dict notification prêt à envoyer
     """
     if jours_restants <= 0:
         title = "âš ï¸ Produit périmé!"
@@ -302,14 +291,18 @@ def creer_notification_peremption(
     elif jours_restants == 1:
         title = "ðŸ”´ Péremption demain"
         body = f"{nom_article} expire demain"
-        notif_type = TypeNotification.PEREMPTION_CRITIQUE.value if critique else TypeNotification.PEREMPTION_ALERTE.value
+        notif_type = (
+            TypeNotification.PEREMPTION_CRITIQUE.value
+            if critique
+            else TypeNotification.PEREMPTION_ALERTE.value
+        )
         require_interaction = critique
     else:
         title = "ðŸŸ¡ Péremption proche"
         body = f"{nom_article} expire dans {jours_restants} jours"
         notif_type = TypeNotification.PEREMPTION_ALERTE.value
         require_interaction = False
-    
+
     return {
         "title": title,
         "body": body,
@@ -320,21 +313,17 @@ def creer_notification_peremption(
     }
 
 
-def creer_notification_rappel_repas(
-    type_repas: str,
-    nom_recette: str,
-    temps_restant: str
-) -> dict:
+def creer_notification_rappel_repas(type_repas: str, nom_recette: str, temps_restant: str) -> dict:
     """
     Crée une notification de rappel de repas.
-    
+
     Args:
         type_repas: Type de repas (déjeuner, dîner)
         nom_recette: Nom de la recette
         temps_restant: Temps restant (ex: "30 min")
-        
+
     Returns:
-        Dict notification prêt Ã  envoyer
+        Dict notification prêt à envoyer
     """
     return {
         "title": f"ðŸ½ï¸ {type_repas.title()} dans {temps_restant}",
@@ -344,25 +333,22 @@ def creer_notification_rappel_repas(
         "tag": f"meal_{type_repas.lower()}",
         "actions": [
             {"action": "view_recipe", "title": "Voir la recette"},
-            {"action": "dismiss", "title": "OK"}
+            {"action": "dismiss", "title": "OK"},
         ],
         "require_interaction": False,
     }
 
 
-def creer_notification_liste_partagee(
-    partage_par: str,
-    nom_liste: str
-) -> dict:
+def creer_notification_liste_partagee(partage_par: str, nom_liste: str) -> dict:
     """
     Crée une notification de partage de liste de courses.
-    
+
     Args:
         partage_par: Nom de la personne qui partage
         nom_liste: Nom de la liste
-        
+
     Returns:
-        Dict notification prêt Ã  envoyer
+        Dict notification prêt à envoyer
     """
     return {
         "title": "ðŸ›’ Liste partagée",
@@ -371,32 +357,30 @@ def creer_notification_liste_partagee(
         "url": "/?module=cuisine.courses",
         "actions": [
             {"action": "view", "title": "Voir"},
-            {"action": "dismiss", "title": "Plus tard"}
+            {"action": "dismiss", "title": "Plus tard"},
         ],
         "require_interaction": False,
     }
 
 
 def creer_notification_rappel_activite(
-    nom_activite: str,
-    temps_restant: str,
-    lieu: str | None = None
+    nom_activite: str, temps_restant: str, lieu: str | None = None
 ) -> dict:
     """
     Crée une notification de rappel d'activité.
-    
+
     Args:
         nom_activite: Nom de l'activité
         temps_restant: Temps restant
         lieu: Lieu (optionnel)
-        
+
     Returns:
-        Dict notification prêt Ã  envoyer
+        Dict notification prêt à envoyer
     """
     body = f"{nom_activite} dans {temps_restant}"
     if lieu:
         body += f" - {lieu}"
-    
+
     return {
         "title": "ðŸ“… Rappel d'activité",
         "body": body,
@@ -407,21 +391,17 @@ def creer_notification_rappel_activite(
     }
 
 
-def creer_notification_rappel_jalon(
-    prenom_enfant: str,
-    type_jalon: str,
-    nom_jalon: str
-) -> dict:
+def creer_notification_rappel_jalon(prenom_enfant: str, type_jalon: str, nom_jalon: str) -> dict:
     """
     Crée une notification de rappel de jalon enfant.
-    
+
     Args:
         prenom_enfant: Prénom de l'enfant
         type_jalon: Type du jalon
         nom_jalon: Nom du jalon
-        
+
     Returns:
-        Dict notification prêt Ã  envoyer
+        Dict notification prêt à envoyer
     """
     return {
         "title": f"ðŸ‘¶ Jalon pour {prenom_enfant}",
@@ -432,19 +412,19 @@ def creer_notification_rappel_jalon(
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # COMPTEUR DE NOTIFICATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def generer_cle_compteur(user_id: str, dt: datetime | None = None) -> str:
     """
     Génère une clé pour le compteur de notifications par heure.
-    
+
     Args:
         user_id: ID de l'utilisateur
         dt: Date/heure (défaut: maintenant)
-        
+
     Returns:
         Clé au format user_id_YYYYMMDDHH
     """
@@ -456,19 +436,19 @@ def generer_cle_compteur(user_id: str, dt: datetime | None = None) -> str:
 def parser_cle_compteur(key: str) -> tuple[str, datetime | None]:
     """
     Parse une clé de compteur pour extraire user_id et heure.
-    
+
     Args:
         key: Clé au format user_id_YYYYMMDDHH
-        
+
     Returns:
         Tuple (user_id, datetime)
     """
     if "_" not in key:
         return key, None
-    
+
     parts = key.rsplit("_", 1)
     user_id = parts[0]
-    
+
     try:
         dt = datetime.strptime(parts[1], "%Y%m%d%H")
         return user_id, dt
@@ -478,84 +458,84 @@ def parser_cle_compteur(key: str) -> tuple[str, datetime | None]:
 
 def doit_reinitialiser_compteur(derniere_cle: str, cle_courante: str) -> bool:
     """
-    Vérifie si le compteur doit être remis Ã  zéro (nouvelle heure).
-    
+    Vérifie si le compteur doit être remis à zéro (nouvelle heure).
+
     Args:
         derniere_cle: Dernière clé utilisée
         cle_courante: Clé actuelle
-        
+
     Returns:
         True si les clés sont différentes (nouvelle heure)
     """
     return derniere_cle != cle_courante
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 def valider_abonnement(subscription: dict) -> tuple[bool, str]:
     """
     Valide un abonnement push.
-    
+
     Args:
         subscription: Dict avec endpoint, keys
-        
+
     Returns:
         Tuple (is_valid, error_message)
     """
     if not subscription.get("endpoint"):
         return False, "Endpoint manquant"
-    
+
     if not subscription["endpoint"].startswith("https://"):
         return False, "Endpoint doit être HTTPS"
-    
+
     keys = subscription.get("keys", {})
     if not keys.get("p256dh"):
         return False, "Clé p256dh manquante"
-    
+
     if not keys.get("auth"):
         return False, "Clé auth manquante"
-    
+
     return True, ""
 
 
 def valider_preferences(preferences: dict) -> tuple[bool, list[str]]:
     """
     Valide les préférences de notification.
-    
+
     Args:
         preferences: Dict des préférences
-        
+
     Returns:
         Tuple (is_valid, list_of_warnings)
     """
     warnings = []
-    
+
     # Vérifier les heures silencieuses
     heure_debut = preferences.get("heures_silencieuses_debut")
     heure_fin = preferences.get("heures_silencieuses_fin")
-    
+
     if heure_debut is not None and not 0 <= heure_debut <= 23:
         warnings.append("heures_silencieuses_debut doit être entre 0 et 23")
-    
+
     if heure_fin is not None and not 0 <= heure_fin <= 23:
         warnings.append("heures_silencieuses_fin doit être entre 0 et 23")
-    
+
     # Vérifier max_par_heure
     max_par_heure = preferences.get("max_par_heure", 5)
     if max_par_heure < 1:
         warnings.append("max_par_heure doit être >= 1")
     elif max_par_heure > 100:
         warnings.append("max_par_heure semble élevé (>100)")
-    
+
     return len(warnings) == 0, warnings
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # ALIAS RÉTROCOMPATIBILITÉ
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 # Enum alias (pour anciens imports)
 NotificationType = TypeNotification
@@ -581,9 +561,9 @@ validate_subscription = valider_abonnement
 validate_preferences = valider_preferences
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # EXPORTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 __all__ = [
     # Types (français)

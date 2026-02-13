@@ -1,11 +1,9 @@
-﻿"""
+"""
 Tests unitaires pour sante.py
 
 Module: src.core.models.sante
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
 # from src.core.models.sante import ...
@@ -13,7 +11,6 @@ from unittest.mock import MagicMock, patch
 
 class TestSante:
     """Tests pour le module sante."""
-
 
     class TestHealthRoutine:
         """Tests pour la classe HealthRoutine."""
@@ -28,7 +25,6 @@ class TestSante:
             # TODO: Implémenter
             pass
 
-
     class TestHealthObjective:
         """Tests pour la classe HealthObjective."""
 
@@ -42,7 +38,6 @@ class TestSante:
             # TODO: Implémenter
             pass
 
-
     class TestHealthEntry:
         """Tests pour la classe HealthEntry."""
 
@@ -55,4 +50,3 @@ class TestSante:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-

@@ -1,18 +1,21 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Script de reset complet de la base Supabase
 Usage: python scripts/reset_supabase.py
 """
+
 import sys
 from pathlib import Path
 
 # Ajouter src au path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import streamlit as st
-from sqlalchemy import create_engine, text, MetaData
-from src.core.models import Base
 import logging
+
+import streamlit as st
+from sqlalchemy import create_engine, text
+
+from src.core.models import Base
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

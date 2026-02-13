@@ -1,4 +1,4 @@
-﻿"""
+"""
 UI - Point d'entrée unifié optimisé
 Architecture claire : core/ components/ feedback/
 """
@@ -17,6 +17,7 @@ from .components import (
     alerte_stock,
     badge,
     barre_progression,
+    barre_recherche,
     boite_info,
     boutons_export,
     carte_item,
@@ -32,28 +33,27 @@ from .components import (
     notification,
     pagination,
     panneau_filtres,
-    barre_recherche,
     section_pliable,
     separateur,
     tableau_donnees,
 )
 from .core import (
+    # Alias compatibilité
+    BaseIOService,
+    BaseModuleUI,
     # Nouveaux noms français
     ConfigurationIO,
     ConfigurationModule,
     ConstructeurFormulaire,
-    ModuleUIBase,
-    ServiceIOBase,
-    creer_module_ui,
-    creer_service_io,
-    # Alias compatibilité
-    BaseIOService,
-    BaseModuleUI,
     FormBuilder,
     IOConfig,
     ModuleConfig,
+    ModuleUIBase,
+    ServiceIOBase,
     create_io_service,
     create_module_ui,
+    creer_module_ui,
+    creer_service_io,
 )
 
 # Feedback

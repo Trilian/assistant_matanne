@@ -1,11 +1,9 @@
-﻿"""
+"""
 Tests unitaires pour base.py
 
 Module: src.core.models.base
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
 # from src.core.models.base import ...
@@ -13,7 +11,6 @@ from unittest.mock import MagicMock, patch
 
 class TestBase:
     """Tests pour le module base."""
-
 
     class TestBase:
         """Tests pour la classe Base."""
@@ -28,7 +25,6 @@ class TestBase:
             # TODO: Implémenter
             pass
 
-
     class TestPrioriteEnum:
         """Tests pour la classe PrioriteEnum."""
 
@@ -41,7 +37,6 @@ class TestBase:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-
 
     class TestSaisonEnum:
         """Tests pour la classe SaisonEnum."""
@@ -56,7 +51,6 @@ class TestBase:
             # TODO: Implémenter
             pass
 
-
     class TestTypeRepasEnum:
         """Tests pour la classe TypeRepasEnum."""
 
@@ -69,7 +63,6 @@ class TestBase:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-
 
     class TestTypeVersionRecetteEnum:
         """Tests pour la classe TypeVersionRecetteEnum."""
@@ -84,9 +77,7 @@ class TestBase:
             # TODO: Implémenter
             pass
 
-
     def test_obtenir_valeurs_enum(self):
         """Test de la fonction obtenir_valeurs_enum."""
         # TODO: Implémenter
         pass
-

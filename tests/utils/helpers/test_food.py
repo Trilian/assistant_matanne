@@ -1,14 +1,13 @@
-﻿"""
+"""
 Tests unitaires pour food.py
 
 Module: src.utils.helpers.food
 """
 
-import pytest
 from src.utils.helpers.food import (
     convertir_unite,
-    multiplier_portion,
     extraire_ingredient,
+    multiplier_portion,
 )
 
 
@@ -48,7 +47,7 @@ class TestFood:
         assert result == {"sucre": 100.0}
 
     def test_multiplier_portion_zero_original(self):
-        """Test avec portion originale Ã  0."""
+        """Test avec portion originale à 0."""
         ingredients = {"sucre": 200}
         result = multiplier_portion(0, 4, ingredients)
         assert result == ingredients

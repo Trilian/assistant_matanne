@@ -1,1 +1,1 @@
-﻿# Validators tests
+# Validators tests

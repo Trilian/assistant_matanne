@@ -1,35 +1,36 @@
-﻿"""
+"""
 Tests pour vue_semaine_logic.py - Module Planning
 Couverture cible: 80%+
 """
+
+from datetime import date, time
+
 import pytest
-from datetime import date, time, datetime, timedelta
 
 from src.modules.planning.vue_semaine_utils import (
+    HEURES_JOURNEE,
     # Constantes
     JOURS_SEMAINE,
-    HEURES_JOURNEE,
+    # Analyse
+    calculer_charge_semaine,
+    detecter_conflits_horaires,
+    filtrer_evenements_jour,
+    # Filtrage
+    filtrer_evenements_semaine,
     # Navigation
     get_debut_semaine,
     get_fin_semaine,
     get_jours_semaine,
+    get_numero_semaine,
     get_semaine_precedente,
     get_semaine_suivante,
-    get_numero_semaine,
-    # Filtrage
-    filtrer_evenements_semaine,
-    filtrer_evenements_jour,
     grouper_evenements_par_jour,
     trier_evenements_par_heure,
-    # Analyse
-    calculer_charge_semaine,
-    detecter_conflits_horaires,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -46,29 +47,47 @@ def date_mercredi():
 
 @pytest.fixture
 def evenements_semaine():
-    """Ã‰vénements de test sur une semaine."""
+    """Événements de test sur une semaine."""
     return [
         {"id": 1, "titre": "Réunion", "date": date(2025, 1, 6), "heure": time(9, 0), "duree": 60},
         {"id": 2, "titre": "Déjeuner", "date": date(2025, 1, 6), "heure": time(12, 0), "duree": 60},
         {"id": 3, "titre": "Sport", "date": date(2025, 1, 7), "heure": time(18, 0), "duree": 90},
         {"id": 4, "titre": "Médecin", "date": date(2025, 1, 8), "heure": time(14, 30), "duree": 30},
-        {"id": 5, "titre": "Shopping", "date": date(2025, 1, 11), "heure": time(10, 0), "duree": 120},
+        {
+            "id": 5,
+            "titre": "Shopping",
+            "date": date(2025, 1, 11),
+            "heure": time(10, 0),
+            "duree": 120,
+        },
     ]
 
 
 @pytest.fixture
 def evenements_conflits():
-    """Ã‰vénements avec conflits horaires."""
+    """Événements avec conflits horaires."""
     return [
         {"id": 1, "titre": "Réunion A", "date": date(2025, 1, 6), "heure": time(9, 0), "duree": 60},
-        {"id": 2, "titre": "Réunion B", "date": date(2025, 1, 6), "heure": time(9, 30), "duree": 30},  # Conflit avec A
-        {"id": 3, "titre": "Déjeuner", "date": date(2025, 1, 6), "heure": time(12, 0), "duree": 60},  # Pas de conflit
+        {
+            "id": 2,
+            "titre": "Réunion B",
+            "date": date(2025, 1, 6),
+            "heure": time(9, 30),
+            "duree": 30,
+        },  # Conflit avec A
+        {
+            "id": 3,
+            "titre": "Déjeuner",
+            "date": date(2025, 1, 6),
+            "heure": time(12, 0),
+            "duree": 60,
+        },  # Pas de conflit
     ]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantes:
@@ -87,9 +106,9 @@ class TestConstantes:
         assert HEURES_JOURNEE[-1] == 23
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS NAVIGATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestNavigation:
@@ -141,9 +160,9 @@ class TestNavigation:
         assert num == 2  # 6 janvier 2025 est en semaine 2
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FILTRAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFiltrage:
@@ -196,7 +215,7 @@ class TestFiltrage:
         assert tries[2]["titre"] == "Tard"
 
     def test_trier_evenements_sans_heure(self):
-        """Ã‰vénements sans heure au début."""
+        """Événements sans heure au début."""
         evenements = [
             {"titre": "Avec heure", "heure": time(10, 0)},
             {"titre": "Sans heure", "heure": None},
@@ -205,9 +224,9 @@ class TestFiltrage:
         assert tries[0]["titre"] == "Sans heure"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ANALYSE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestAnalyse:

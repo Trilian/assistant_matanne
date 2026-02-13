@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modèles pour la maison (projets, routines, jardin).
 
 Contient :
@@ -26,7 +26,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
 
-
 # ═══════════════════════════════════════════════════════════
 # PROJETS DOMESTIQUES
 # ═══════════════════════════════════════════════════════════
@@ -34,7 +33,7 @@ from .base import Base
 
 class Project(Base):
     """Projet domestique.
-    
+
     Attributes:
         nom: Nom du projet
         description: Description
@@ -68,7 +67,7 @@ class Project(Base):
 
 class ProjectTask(Base):
     """Tâche d'un projet.
-    
+
     Attributes:
         project_id: ID du projet parent
         nom: Nom de la tâche
@@ -107,7 +106,7 @@ class ProjectTask(Base):
 
 class Routine(Base):
     """Routine ou habitude quotidienne.
-    
+
     Attributes:
         nom: Nom de la routine
         description: Description
@@ -137,7 +136,7 @@ class Routine(Base):
 
 class RoutineTask(Base):
     """Tâche d'une routine.
-    
+
     Attributes:
         routine_id: ID de la routine parent
         nom: Nom de la tâche
@@ -176,7 +175,7 @@ class RoutineTask(Base):
 
 class GardenItem(Base):
     """Élément du jardin (plante, légume, fleur, etc.).
-    
+
     Attributes:
         nom: Nom de la plante
         type: Type (plante, légume, fleur, arbre, etc.)
@@ -210,7 +209,7 @@ class GardenItem(Base):
 
 class GardenLog(Base):
     """Journal d'entretien du jardin.
-    
+
     Attributes:
         garden_item_id: ID de l'élément (optionnel)
         date: Date de l'action

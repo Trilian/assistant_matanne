@@ -1,4 +1,4 @@
-﻿"""
+"""
 Intégrations externes - Services d'intégration avec APIs tierces
 
 Ce package regroupe tous les services d'intégration externe:
@@ -17,59 +17,57 @@ Utilisation:
     )
 """
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # CODES-BARRES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 from .codes_barres import (
-    # Service
-    BarcodeService,
-    get_barcode_service,
+    BarcodeArticle,
     # Schémas Pydantic
     BarcodeData,
-    BarcodeArticle,
     BarcodeRecette,
+    # Service
+    BarcodeService,
     ScanResultat,
+    get_barcode_service,
 )
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# OPENFOODFACTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-from .produit import (
-    # Service
-    OpenFoodFactsService,
-    get_openfoodfacts_service,
-    # Dataclasses
-    NutritionInfo,
-    ProduitOpenFoodFacts,
-    # Constantes
-    OPENFOODFACTS_API,
-    OPENFOODFACTS_SEARCH,
-    CACHE_TTL,
-)
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FACTURE OCR
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
+# ═══════════════════════════════════════════════════════════
 from .facture import (
-    # Service
-    FactureOCRService,
-    get_facture_ocr_service,
-    # Schémas Pydantic
-    DonneesFacture,
-    ResultatOCR,
     # Helpers
     PATTERNS_FOURNISSEURS,
     PATTERNS_MONTANTS,
+    # Schémas Pydantic
+    DonneesFacture,
+    # Service
+    FactureOCRService,
+    ResultatOCR,
     detecter_fournisseur,
     extraire_montant,
+    get_facture_ocr_service,
 )
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# OPENFOODFACTS
+# ═══════════════════════════════════════════════════════════
+from .produit import (
+    CACHE_TTL,
+    # Constantes
+    OPENFOODFACTS_API,
+    OPENFOODFACTS_SEARCH,
+    # Dataclasses
+    NutritionInfo,
+    # Service
+    OpenFoodFactsService,
+    ProduitOpenFoodFacts,
+    get_openfoodfacts_service,
+)
+
+# ═══════════════════════════════════════════════════════════
 # EXPORTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 __all__ = [
     # Codes-barres

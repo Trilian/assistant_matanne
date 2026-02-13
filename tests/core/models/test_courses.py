@@ -1,11 +1,9 @@
-﻿"""
+"""
 Tests unitaires pour courses.py
 
 Module: src.core.models.courses
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
 # from src.core.models.courses import ...
@@ -13,7 +11,6 @@ from unittest.mock import MagicMock, patch
 
 class TestCourses:
     """Tests pour le module courses."""
-
 
     class TestListeCourses:
         """Tests pour la classe ListeCourses."""
@@ -28,7 +25,6 @@ class TestCourses:
             # TODO: Implémenter
             pass
 
-
     class TestArticleCourses:
         """Tests pour la classe ArticleCourses."""
 
@@ -41,7 +37,6 @@ class TestCourses:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-
 
     class TestModeleCourses:
         """Tests pour la classe ModeleCourses."""
@@ -56,7 +51,6 @@ class TestCourses:
             # TODO: Implémenter
             pass
 
-
     class TestArticleModele:
         """Tests pour la classe ArticleModele."""
 
@@ -69,4 +63,3 @@ class TestCourses:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-

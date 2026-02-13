@@ -12,13 +12,11 @@ Structure:
 └─────────────┘ └─────────────┘ └─────────────┘
 """
 
+from datetime import date
+
 import streamlit as st
-from datetime import date, timedelta
-from decimal import Decimal
-from typing import Optional
 
 from src.core.database import obtenir_contexte_db
-
 
 # ═══════════════════════════════════════════════════════════
 # STYLES CSS
@@ -84,10 +82,12 @@ CARD_STYLES = """
 # HELPERS - STATS
 # ═══════════════════════════════════════════════════════════
 
+
 def get_stats_projets() -> dict:
     """Recupère stats projets"""
     try:
         from src.core.models import Project
+
         with obtenir_contexte_db() as db:
             total = db.query(Project).count()
             en_cours = db.query(Project).filter(Project.statut == "en_cours").count()
@@ -100,13 +100,18 @@ def get_stats_jardin() -> dict:
     """Recupère stats zones jardin"""
     try:
         from src.core.models import GardenZone
+
         with obtenir_contexte_db() as db:
             zones = db.query(GardenZone).all()
             if not zones:
                 return {"zones": 0, "etat_moyen": 0, "surface": 2600}
             etat_moyen = sum(z.etat_note for z in zones) / len(zones)
             surface = sum(z.surface_m2 or 0 for z in zones)
-            return {"zones": len(zones), "etat_moyen": round(etat_moyen, 1), "surface": surface or 2600}
+            return {
+                "zones": len(zones),
+                "etat_moyen": round(etat_moyen, 1),
+                "surface": surface or 2600,
+            }
     except:
         return {"zones": 0, "etat_moyen": 0, "surface": 2600}
 
@@ -115,13 +120,15 @@ def get_stats_menage() -> dict:
     """Recupère stats tâches menage"""
     try:
         from src.core.models import MaintenanceTask
+
         today = date.today()
         with obtenir_contexte_db() as db:
             total = db.query(MaintenanceTask).filter(MaintenanceTask.fait == False).count()
-            urgentes = db.query(MaintenanceTask).filter(
-                MaintenanceTask.fait == False,
-                MaintenanceTask.prochaine_fois <= today
-            ).count()
+            urgentes = (
+                db.query(MaintenanceTask)
+                .filter(MaintenanceTask.fait == False, MaintenanceTask.prochaine_fois <= today)
+                .count()
+            )
             return {"a_faire": total, "urgentes": urgentes}
     except:
         return {"a_faire": 0, "urgentes": 0}
@@ -131,12 +138,14 @@ def get_stats_meubles() -> dict:
     """Recupère stats wishlist meubles"""
     try:
         from src.core.models import Furniture
+
         with obtenir_contexte_db() as db:
             total = db.query(Furniture).filter(Furniture.statut != "achete").count()
-            budget = db.query(Furniture).filter(
-                Furniture.statut != "achete",
-                Furniture.prix_estime != None
-            ).all()
+            budget = (
+                db.query(Furniture)
+                .filter(Furniture.statut != "achete", Furniture.prix_estime != None)
+                .all()
+            )
             budget_total = sum(float(m.prix_estime or 0) for m in budget)
             return {"en_attente": total, "budget_estime": budget_total}
     except:
@@ -147,6 +156,7 @@ def get_stats_eco() -> dict:
     """Recupère stats actions eco"""
     try:
         from src.core.models import EcoAction
+
         with obtenir_contexte_db() as db:
             actions = db.query(EcoAction).filter(EcoAction.actif == True).all()
             economie_mensuelle = sum(float(a.economie_mensuelle or 0) for a in actions)
@@ -159,12 +169,14 @@ def get_stats_depenses() -> dict:
     """Recupère stats depenses du mois"""
     try:
         from src.core.models import HouseExpense
+
         today = date.today()
         with obtenir_contexte_db() as db:
-            depenses = db.query(HouseExpense).filter(
-                HouseExpense.mois == today.month,
-                HouseExpense.annee == today.year
-            ).all()
+            depenses = (
+                db.query(HouseExpense)
+                .filter(HouseExpense.mois == today.month, HouseExpense.annee == today.year)
+                .all()
+            )
             total = sum(float(d.montant) for d in depenses)
             return {"total_mois": total, "nb_categories": len(set(d.categorie for d in depenses))}
     except:
@@ -175,14 +187,15 @@ def get_stats_depenses() -> dict:
 # CARDS
 # ═══════════════════════════════════════════════════════════
 
+
 def render_card_projets():
     """Card Projets travaux"""
     stats = get_stats_projets()
-    
+
     if st.button("📋 **Projets**", key="card_projets", use_container_width=True, type="primary"):
         st.session_state["maison_page"] = "projets"
         st.rerun()
-    
+
     col1, col2 = st.columns(2)
     with col1:
         st.metric("En cours", stats["en_cours"])
@@ -193,11 +206,11 @@ def render_card_projets():
 def render_card_jardin():
     """Card Jardin 2600m²"""
     stats = get_stats_jardin()
-    
+
     if st.button("🌱 **Jardin**", key="card_jardin", use_container_width=True, type="primary"):
         st.session_state["maison_page"] = "jardin"
         st.rerun()
-    
+
     # Afficher etat moyen avec emoji
     etat = stats["etat_moyen"]
     if etat <= 1:
@@ -210,18 +223,18 @@ def render_card_jardin():
         emoji = "🙂"
     else:
         emoji = "😊"
-    
+
     st.caption(f"📏 {stats['surface']}m² | État: {etat}/5 {emoji}")
 
 
 def render_card_menage():
     """Card Menage/Entretien"""
     stats = get_stats_menage()
-    
+
     if st.button("🧹 **Menage**", key="card_menage", use_container_width=True, type="primary"):
         st.session_state["maison_page"] = "menage"
         st.rerun()
-    
+
     col1, col2 = st.columns(2)
     with col1:
         st.metric("À faire", stats["a_faire"])
@@ -235,11 +248,11 @@ def render_card_menage():
 def render_card_meubles():
     """Card Wishlist meubles"""
     stats = get_stats_meubles()
-    
+
     if st.button("🛋️ **Meubles**", key="card_meubles", use_container_width=True, type="primary"):
         st.session_state["maison_page"] = "meubles"
         st.rerun()
-    
+
     st.caption(f"📋 {stats['en_attente']} en wishlist")
     if stats["budget_estime"] > 0:
         st.caption(f"💰 Budget: ~{stats['budget_estime']:.0f}€")
@@ -248,11 +261,11 @@ def render_card_meubles():
 def render_card_eco():
     """Card Éco-Tips"""
     stats = get_stats_eco()
-    
+
     if st.button("💡 **Éco-Tips**", key="card_eco", use_container_width=True, type="primary"):
         st.session_state["maison_page"] = "eco"
         st.rerun()
-    
+
     st.caption(f"🌿 {stats['actions']} actions actives")
     if stats["economie_mensuelle"] > 0:
         st.caption(f"💰 -{stats['economie_mensuelle']:.0f}€/mois")
@@ -261,11 +274,11 @@ def render_card_eco():
 def render_card_depenses():
     """Card Depenses maison"""
     stats = get_stats_depenses()
-    
+
     if st.button("💰 **Depenses**", key="card_depenses", use_container_width=True, type="primary"):
         st.session_state["maison_page"] = "depenses"
         st.rerun()
-    
+
     st.caption(f"📊 Ce mois: {stats['total_mois']:.0f}€")
 
 
@@ -273,41 +286,48 @@ def render_card_depenses():
 # ROUTEUR INTERNE
 # ═══════════════════════════════════════════════════════════
 
+
 def render_page_content():
     """Route vers la bonne page selon session_state"""
     page = st.session_state.get("maison_page", "hub")
-    
+
     # Bouton retour si pas sur hub
     if page != "hub":
         if st.button("← Retour au Hub", key="btn_retour_hub"):
             st.session_state["maison_page"] = "hub"
             st.rerun()
         st.divider()
-    
+
     if page == "projets":
         from src.modules.maison.projets import app as projets_app
+
         projets_app()
-    
+
     elif page == "jardin":
         from src.modules.maison.jardin import app as jardin_app
+
         jardin_app()
-    
+
     elif page == "menage":
         from src.modules.maison.entretien import app as entretien_app
+
         entretien_app()
-    
+
     elif page == "meubles":
         from src.modules.maison.meubles import app as meubles_app
+
         meubles_app()
-    
+
     elif page == "eco":
         from src.modules.maison.eco_tips import app as eco_app
+
         eco_app()
-    
+
     elif page == "depenses":
         from src.modules.maison.depenses import app as depenses_app
+
         depenses_app()
-    
+
     else:
         # Hub principal
         render_hub()
@@ -316,45 +336,45 @@ def render_page_content():
 def render_hub():
     """Affiche le hub avec les cards"""
     st.markdown(CARD_STYLES, unsafe_allow_html=True)
-    
+
     # Titre
     st.title("🏠 Hub Maison")
     st.caption("Gestion travaux, jardin, menage et budget")
-    
+
     st.divider()
-    
+
     # Ligne 1: Projets, Jardin, Menage
     col1, col2, col3 = st.columns(3)
-    
+
     with col1:
         with st.container(border=True):
             render_card_projets()
-    
+
     with col2:
         with st.container(border=True):
             render_card_jardin()
-    
+
     with col3:
         with st.container(border=True):
             render_card_menage()
-    
+
     # Ligne 2: Meubles, Éco, Depenses
     col4, col5, col6 = st.columns(3)
-    
+
     with col4:
         with st.container(border=True):
             render_card_meubles()
-    
+
     with col5:
         with st.container(border=True):
             render_card_eco()
-    
+
     with col6:
         with st.container(border=True):
             render_card_depenses()
-    
+
     st.divider()
-    
+
     # Alertes / Actions urgentes
     render_alertes()
 
@@ -362,19 +382,19 @@ def render_hub():
 def render_alertes():
     """Affiche les alertes et actions urgentes"""
     st.subheader("⚠️ Actions prioritaires")
-    
+
     alertes = []
-    
+
     # Verifier tâches en retard
     stats_menage = get_stats_menage()
     if stats_menage["urgentes"] > 0:
         alertes.append(f"🧹 {stats_menage['urgentes']} tâche(s) menage en retard")
-    
+
     # Verifier etat jardin
     stats_jardin = get_stats_jardin()
     if stats_jardin["etat_moyen"] < 2:
         alertes.append(f"🌱 Jardin en mauvais etat ({stats_jardin['etat_moyen']}/5)")
-    
+
     if alertes:
         for alerte in alertes:
             st.warning(alerte)
@@ -386,7 +406,7 @@ def render_alertes():
 # POINT D'ENTRÉE
 # ═══════════════════════════════════════════════════════════
 
+
 def app():
     """Point d'entree module Hub Maison"""
     render_page_content()
-

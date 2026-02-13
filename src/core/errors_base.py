@@ -1,4 +1,4 @@
-﻿"""
+"""
 Errors Base - Exceptions pures sans dépendances UI/Streamlit.
 
 Ce module centralise UNIQUEMENT :
@@ -10,7 +10,6 @@ Ce module centralise UNIQUEMENT :
 """
 
 from typing import Any
-
 
 # ═══════════════════════════════════════════════════════════
 # EXCEPTIONS PERSONNALISÉES (PURES)

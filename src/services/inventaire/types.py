@@ -1,4 +1,4 @@
-﻿"""
+"""
 Types et schémas Pydantic pour le service inventaire.
 
 Ce module contient les modèles de validation utilisés pour:
@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 class SuggestionCourses(BaseModel):
     """Suggestion d'achat générée par l'IA.
-    
+
     Attributes:
         nom: Nom de l'article suggéré
         quantite: Quantité recommandée
@@ -19,6 +19,7 @@ class SuggestionCourses(BaseModel):
         priorite: Niveau de priorité (haute, moyenne, basse)
         rayon: Rayon du magasin
     """
+
     nom: str = Field(..., min_length=2)
     quantite: float = Field(..., gt=0)
     unite: str = Field(..., min_length=1)
@@ -28,7 +29,7 @@ class SuggestionCourses(BaseModel):
 
 class ArticleImport(BaseModel):
     """Modèle pour importer un article en batch.
-    
+
     Attributes:
         nom: Nom de l'article
         quantite: Quantité en stock
@@ -38,6 +39,7 @@ class ArticleImport(BaseModel):
         emplacement: Lieu de stockage (optionnel)
         date_peremption: Date de péremption au format YYYY-MM-DD (optionnel)
     """
+
     nom: str = Field(..., min_length=2)
     quantite: float = Field(..., ge=0)
     quantite_min: float = Field(..., ge=0)

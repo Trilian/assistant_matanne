@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests complets pour les composants UI Ã  faible couverture.
 
 Couvre:
@@ -9,11 +9,10 @@ Couvre:
 - domain.py (stock_alert)
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch
-from dataclasses import dataclass
-import numpy as np
+from unittest.mock import MagicMock, Mock, patch
 
+import numpy as np
+import pytest
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CAMERA_SCANNER.PY
@@ -27,14 +26,14 @@ class TestDetectBarcodePyzbar:
     def test_detect_with_pyzbar_installed(self):
         """Test dÃ©tection avec pyzbar installÃ©."""
         from src.ui.components.camera_scanner import _detect_barcode_pyzbar
-        
+
         # Mock frame (image BGR)
         mock_frame = np.zeros((100, 100, 3), dtype=np.uint8)
-        
-        with patch.dict('sys.modules', {'pyzbar': MagicMock(), 'cv2': MagicMock()}):
-            with patch('src.ui.components.camera_scanner.pyzbar', create=True) as mock_pyzbar:
+
+        with patch.dict("sys.modules", {"pyzbar": MagicMock(), "cv2": MagicMock()}):
+            with patch("src.ui.components.camera_scanner.pyzbar", create=True) as mock_pyzbar:
                 mock_pyzbar.pyzbar.decode.return_value = []
-                
+
                 # Should not raise
                 result = _detect_barcode_pyzbar(mock_frame)
                 # May return empty list or raise ImportError - both valid
@@ -42,9 +41,9 @@ class TestDetectBarcodePyzbar:
     def test_detect_without_pyzbar(self):
         """Test dÃ©tection sans pyzbar (ImportError)."""
         from src.ui.components.camera_scanner import _detect_barcode_pyzbar
-        
+
         mock_frame = np.zeros((100, 100, 3), dtype=np.uint8)
-        
+
         # pyzbar not available should return empty list
         result = _detect_barcode_pyzbar(mock_frame)
         assert result == [] or isinstance(result, list)
@@ -57,9 +56,9 @@ class TestDetectBarcodeZxing:
     def test_detect_without_zxing(self):
         """Test dÃ©tection sans zxing (ImportError)."""
         from src.ui.components.camera_scanner import _detect_barcode_zxing
-        
+
         mock_frame = np.zeros((100, 100, 3), dtype=np.uint8)
-        
+
         # zxing not available should return empty list
         result = _detect_barcode_zxing(mock_frame)
         assert result == [] or isinstance(result, list)
@@ -72,23 +71,23 @@ class TestDetectBarcodes:
     def test_detect_barcodes_returns_list(self):
         """Test que detect_barcodes retourne une liste."""
         from src.ui.components.camera_scanner import detect_barcodes
-        
+
         mock_frame = np.zeros((100, 100, 3), dtype=np.uint8)
-        
+
         result = detect_barcodes(mock_frame)
         assert isinstance(result, list)
 
     def test_detect_barcodes_with_mocked_pyzbar(self):
         """Test detect_barcodes avec pyzbar mockÃ©."""
         from src.ui.components.camera_scanner import detect_barcodes
-        
+
         mock_frame = np.zeros((100, 100, 3), dtype=np.uint8)
-        
-        with patch('src.ui.components.camera_scanner._detect_barcode_pyzbar') as mock_pyzbar:
+
+        with patch("src.ui.components.camera_scanner._detect_barcode_pyzbar") as mock_pyzbar:
             mock_pyzbar.return_value = [
                 {"type": "EAN13", "data": "1234567890123", "rect": (0, 0, 100, 100)}
             ]
-            
+
             result = detect_barcodes(mock_frame)
             assert len(result) == 1
             assert result[0]["type"] == "EAN13"
@@ -96,16 +95,14 @@ class TestDetectBarcodes:
     def test_detect_barcodes_fallback_to_zxing(self):
         """Test fallback sur zxing si pyzbar ne trouve rien."""
         from src.ui.components.camera_scanner import detect_barcodes
-        
+
         mock_frame = np.zeros((100, 100, 3), dtype=np.uint8)
-        
-        with patch('src.ui.components.camera_scanner._detect_barcode_pyzbar') as mock_pyzbar:
-            with patch('src.ui.components.camera_scanner._detect_barcode_zxing') as mock_zxing:
+
+        with patch("src.ui.components.camera_scanner._detect_barcode_pyzbar") as mock_pyzbar:
+            with patch("src.ui.components.camera_scanner._detect_barcode_zxing") as mock_zxing:
                 mock_pyzbar.return_value = []
-                mock_zxing.return_value = [
-                    {"type": "QR_CODE", "data": "test_data", "rect": None}
-                ]
-                
+                mock_zxing.return_value = [{"type": "QR_CODE", "data": "test_data", "rect": None}]
+
                 result = detect_barcodes(mock_frame)
                 mock_zxing.assert_called_once()
 
@@ -117,7 +114,7 @@ class TestBarcodeScanner:
     def test_init(self):
         """Test initialisation du scanner."""
         from src.ui.components.camera_scanner import BarcodeScanner
-        
+
         scanner = BarcodeScanner()
         assert scanner.on_scan is None
         assert scanner.last_scanned is None
@@ -126,7 +123,7 @@ class TestBarcodeScanner:
     def test_init_with_callback(self):
         """Test initialisation avec callback."""
         from src.ui.components.camera_scanner import BarcodeScanner
-        
+
         callback = Mock()
         scanner = BarcodeScanner(on_scan=callback)
         assert scanner.on_scan == callback
@@ -134,49 +131,52 @@ class TestBarcodeScanner:
     def test_should_report_scan_first_scan(self):
         """Test _should_report_scan pour premier scan."""
         from src.ui.components.camera_scanner import BarcodeScanner
-        
+
         scanner = BarcodeScanner()
-        
+
         result = scanner._should_report_scan("123456789")
         assert result is True
         assert scanner.last_scanned == "123456789"
 
     def test_should_report_scan_cooldown(self):
         """Test _should_report_scan avec cooldown."""
+        from datetime import datetime
+
         from src.ui.components.camera_scanner import BarcodeScanner
-        from datetime import datetime, timedelta
-        
+
         scanner = BarcodeScanner()
         scanner.last_scanned = "123456789"
         scanner.last_scan_time = datetime.now()
-        
+
         # Same code within cooldown should not report
         result = scanner._should_report_scan("123456789")
         assert result is False
 
     def test_should_report_scan_different_code(self):
         """Test _should_report_scan avec code diffÃ©rent."""
-        from src.ui.components.camera_scanner import BarcodeScanner
         from datetime import datetime
-        
+
+        from src.ui.components.camera_scanner import BarcodeScanner
+
         scanner = BarcodeScanner()
         scanner.last_scanned = "123456789"
         scanner.last_scan_time = datetime.now()
-        
+
         # Different code should report
         result = scanner._should_report_scan("987654321")
         assert result is True
 
     def test_should_report_scan_after_cooldown(self):
         """Test _should_report_scan aprÃ¨s cooldown."""
-        from src.ui.components.camera_scanner import BarcodeScanner
         from datetime import datetime, timedelta
-        
+
+        from src.ui.components.camera_scanner import BarcodeScanner
+
         scanner = BarcodeScanner()
         scanner.last_scanned = "123456789"
         scanner.scan_cooldown = 0.1  # Reduce for test
         scanner.last_scan_time = datetime.now() - timedelta(seconds=1)
-        
+
         # Same code after cooldown should report
         result = scanner._should_report_scan("123456789")
         assert result is True
@@ -194,12 +194,14 @@ class TestVerifierConfigGoogle:
     def test_config_ok(self):
         """Test avec config complÃ¨te."""
         from src.ui.components.google_calendar_sync import verifier_config_google
-        
+
         mock_params = Mock()
         mock_params.GOOGLE_CLIENT_ID = "test_client_id"
         mock_params.GOOGLE_CLIENT_SECRET = "test_client_secret"
-        
-        with patch('src.ui.components.google_calendar_sync.obtenir_parametres', return_value=mock_params):
+
+        with patch(
+            "src.ui.components.google_calendar_sync.obtenir_parametres", return_value=mock_params
+        ):
             ok, message = verifier_config_google()
             assert ok is True
             assert "OK" in message
@@ -207,12 +209,14 @@ class TestVerifierConfigGoogle:
     def test_config_missing_client_id(self):
         """Test sans GOOGLE_CLIENT_ID."""
         from src.ui.components.google_calendar_sync import verifier_config_google
-        
+
         mock_params = Mock()
         mock_params.GOOGLE_CLIENT_ID = ""
         mock_params.GOOGLE_CLIENT_SECRET = "secret"
-        
-        with patch('src.ui.components.google_calendar_sync.obtenir_parametres', return_value=mock_params):
+
+        with patch(
+            "src.ui.components.google_calendar_sync.obtenir_parametres", return_value=mock_params
+        ):
             ok, message = verifier_config_google()
             assert ok is False
             assert "CLIENT_ID" in message
@@ -220,12 +224,14 @@ class TestVerifierConfigGoogle:
     def test_config_missing_client_secret(self):
         """Test sans GOOGLE_CLIENT_SECRET."""
         from src.ui.components.google_calendar_sync import verifier_config_google
-        
+
         mock_params = Mock()
         mock_params.GOOGLE_CLIENT_ID = "client_id"
         mock_params.GOOGLE_CLIENT_SECRET = ""
-        
-        with patch('src.ui.components.google_calendar_sync.obtenir_parametres', return_value=mock_params):
+
+        with patch(
+            "src.ui.components.google_calendar_sync.obtenir_parametres", return_value=mock_params
+        ):
             ok, message = verifier_config_google()
             assert ok is False
             assert "CLIENT_SECRET" in message
@@ -233,10 +239,12 @@ class TestVerifierConfigGoogle:
     def test_config_missing_attr(self):
         """Test avec attributs manquants."""
         from src.ui.components.google_calendar_sync import verifier_config_google
-        
+
         mock_params = Mock(spec=[])  # No attributes
-        
-        with patch('src.ui.components.google_calendar_sync.obtenir_parametres', return_value=mock_params):
+
+        with patch(
+            "src.ui.components.google_calendar_sync.obtenir_parametres", return_value=mock_params
+        ):
             ok, message = verifier_config_google()
             assert ok is False
 
@@ -248,7 +256,7 @@ class TestGoogleCalendarConstants:
     def test_google_scopes_defined(self):
         """Test que GOOGLE_SCOPES est dÃ©fini."""
         from src.ui.components.google_calendar_sync import GOOGLE_SCOPES
-        
+
         assert isinstance(GOOGLE_SCOPES, list)
         assert len(GOOGLE_SCOPES) > 0
         assert any("calendar" in scope for scope in GOOGLE_SCOPES)
@@ -256,7 +264,7 @@ class TestGoogleCalendarConstants:
     def test_redirect_uri_defined(self):
         """Test que REDIRECT_URI_LOCAL est dÃ©fini."""
         from src.ui.components.google_calendar_sync import REDIRECT_URI_LOCAL
-        
+
         assert isinstance(REDIRECT_URI_LOCAL, str)
         assert "localhost" in REDIRECT_URI_LOCAL
 
@@ -273,15 +281,10 @@ class TestModuleConfig:
     def test_minimal_config(self):
         """Test crÃ©ation config minimale."""
         from src.ui.core.base_module import ModuleConfig
-        
+
         mock_service = Mock()
-        config = ModuleConfig(
-            name="test",
-            title="Test Module",
-            icon="ðŸ§ª",
-            service=mock_service
-        )
-        
+        config = ModuleConfig(name="test", title="Test Module", icon="ðŸ§ª", service=mock_service)
+
         assert config.name == "test"
         assert config.title == "Test Module"
         assert config.icon == "ðŸ§ª"
@@ -290,15 +293,10 @@ class TestModuleConfig:
     def test_default_values(self):
         """Test valeurs par dÃ©faut."""
         from src.ui.core.base_module import ModuleConfig
-        
+
         mock_service = Mock()
-        config = ModuleConfig(
-            name="test",
-            title="Test",
-            icon="ðŸ“¦",
-            service=mock_service
-        )
-        
+        config = ModuleConfig(name="test", title="Test", icon="ðŸ“¦", service=mock_service)
+
         assert config.display_fields == []
         assert config.search_fields == []
         assert config.items_per_page == 20
@@ -307,7 +305,7 @@ class TestModuleConfig:
     def test_full_config(self):
         """Test config complÃ¨te."""
         from src.ui.core.base_module import ModuleConfig
-        
+
         mock_service = Mock()
         config = ModuleConfig(
             name="recettes",
@@ -318,9 +316,9 @@ class TestModuleConfig:
             search_fields=["nom", "ingredients"],
             items_per_page=50,
             status_field="statut",
-            status_colors={"actif": "green", "archive": "gray"}
+            status_colors={"actif": "green", "archive": "gray"},
         )
-        
+
         assert len(config.display_fields) == 1
         assert config.items_per_page == 50
         assert config.status_colors["actif"] == "green"
@@ -333,34 +331,24 @@ class TestBaseModuleUI:
     def test_init(self):
         """Test initialisation."""
         from src.ui.core.base_module import BaseModuleUI, ModuleConfig
-        
+
         mock_service = Mock()
-        config = ModuleConfig(
-            name="test",
-            title="Test",
-            icon="ðŸ§ª",
-            service=mock_service
-        )
-        
+        config = ModuleConfig(name="test", title="Test", icon="ðŸ§ª", service=mock_service)
+
         module = BaseModuleUI(config)
         assert module.config == config
 
     def test_module_has_render_methods(self):
         """Test que le module a des mÃ©thodes de rendu."""
         from src.ui.core.base_module import BaseModuleUI, ModuleConfig
-        
+
         mock_service = Mock()
-        config = ModuleConfig(
-            name="test",
-            title="Test",
-            icon="ðŸ§ª",
-            service=mock_service
-        )
-        
+        config = ModuleConfig(name="test", title="Test", icon="ðŸ§ª", service=mock_service)
+
         module = BaseModuleUI(config)
-        
+
         # Check for expected methods
-        assert hasattr(module, 'config')
+        assert hasattr(module, "config")
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -375,12 +363,9 @@ class TestIOConfig:
     def test_minimal_config(self):
         """Test config minimale."""
         from src.ui.core.base_io import IOConfig
-        
-        config = IOConfig(
-            field_mapping={"nom": "Nom"},
-            required_fields=["nom"]
-        )
-        
+
+        config = IOConfig(field_mapping={"nom": "Nom"}, required_fields=["nom"])
+
         assert config.field_mapping["nom"] == "Nom"
         assert "nom" in config.required_fields
         assert config.transformers is None
@@ -388,15 +373,13 @@ class TestIOConfig:
     def test_with_transformers(self):
         """Test config avec transformers."""
         from src.ui.core.base_io import IOConfig
-        
+
         transformer = lambda x: x.upper()
-        
+
         config = IOConfig(
-            field_mapping={"nom": "Nom"},
-            required_fields=["nom"],
-            transformers={"nom": transformer}
+            field_mapping={"nom": "Nom"}, required_fields=["nom"], transformers={"nom": transformer}
         )
-        
+
         assert config.transformers is not None
         assert "nom" in config.transformers
 
@@ -408,12 +391,9 @@ class TestBaseIOService:
     def test_init(self):
         """Test initialisation."""
         from src.ui.core.base_io import BaseIOService, IOConfig
-        
-        config = IOConfig(
-            field_mapping={"nom": "Nom"},
-            required_fields=["nom"]
-        )
-        
+
+        config = IOConfig(field_mapping={"nom": "Nom"}, required_fields=["nom"])
+
         service = BaseIOService(config)
         assert service.config == config
         assert service.io_service is not None
@@ -421,37 +401,30 @@ class TestBaseIOService:
     def test_to_csv(self):
         """Test export CSV."""
         from src.ui.core.base_io import BaseIOService, IOConfig
-        
+
         config = IOConfig(
-            field_mapping={"nom": "Nom", "quantite": "QuantitÃ©"},
-            required_fields=["nom"]
+            field_mapping={"nom": "Nom", "quantite": "QuantitÃ©"}, required_fields=["nom"]
         )
-        
+
         service = BaseIOService(config)
-        
-        items = [
-            {"nom": "Test1", "quantite": 10},
-            {"nom": "Test2", "quantite": 20}
-        ]
-        
-        with patch.object(service.io_service, 'to_csv', return_value="csv content"):
+
+        items = [{"nom": "Test1", "quantite": 10}, {"nom": "Test2", "quantite": 20}]
+
+        with patch.object(service.io_service, "to_csv", return_value="csv content"):
             result = service.to_csv(items)
             assert result == "csv content"
 
     def test_to_json(self):
         """Test export JSON."""
         from src.ui.core.base_io import BaseIOService, IOConfig
-        
-        config = IOConfig(
-            field_mapping={"nom": "Nom"},
-            required_fields=["nom"]
-        )
-        
+
+        config = IOConfig(field_mapping={"nom": "Nom"}, required_fields=["nom"])
+
         service = BaseIOService(config)
-        
+
         items = [{"nom": "Test"}]
-        
-        with patch.object(service.io_service, 'to_json', return_value='{"test": "json"}'):
+
+        with patch.object(service.io_service, "to_json", return_value='{"test": "json"}'):
             result = service.to_json(items)
             assert result is not None
 
@@ -468,8 +441,8 @@ class TestStockAlert:
     def test_empty_articles(self):
         """Test avec liste vide."""
         from src.ui.domain import stock_alert
-        
-        with patch('streamlit.container') as mock_container:
+
+        with patch("streamlit.container") as mock_container:
             result = stock_alert([])
             # Should return immediately, no container
             mock_container.assert_not_called()
@@ -477,58 +450,58 @@ class TestStockAlert:
     def test_critique_article(self):
         """Test avec article critique."""
         from src.ui.domain import stock_alert
-        
+
         articles = [{"nom": "Lait", "statut": "critique"}]
-        
-        with patch('streamlit.container') as mock_container:
+
+        with patch("streamlit.container") as mock_container:
             mock_container.return_value.__enter__ = Mock()
             mock_container.return_value.__exit__ = Mock()
-            
-            with patch('streamlit.warning') as mock_warning:
+
+            with patch("streamlit.warning") as mock_warning:
                 stock_alert(articles)
 
     def test_peremption_article(self):
         """Test avec article pÃ©remption proche."""
         from src.ui.domain import stock_alert
-        
+
         articles = [{"nom": "Yaourt", "statut": "peremption_proche"}]
-        
-        with patch('streamlit.container') as mock_container:
+
+        with patch("streamlit.container") as mock_container:
             mock_container.return_value.__enter__ = Mock()
             mock_container.return_value.__exit__ = Mock()
-            
-            with patch('streamlit.info') as mock_info:
+
+            with patch("streamlit.info") as mock_info:
                 stock_alert(articles)
 
     def test_multiple_articles(self):
         """Test avec plusieurs articles."""
         from src.ui.domain import stock_alert
-        
+
         articles = [
             {"nom": "Lait", "statut": "critique"},
             {"nom": "Yaourt", "statut": "peremption_proche"},
-            {"nom": "Beurre", "statut": "unknown"}
+            {"nom": "Beurre", "statut": "unknown"},
         ]
-        
-        with patch('streamlit.container') as mock_container:
+
+        with patch("streamlit.container") as mock_container:
             mock_container.return_value.__enter__ = Mock()
             mock_container.return_value.__exit__ = Mock()
-            
-            with patch('streamlit.warning'):
-                with patch('streamlit.info'):
+
+            with patch("streamlit.warning"):
+                with patch("streamlit.info"):
                     stock_alert(articles)
 
     def test_article_without_nom(self):
         """Test article sans nom."""
         from src.ui.domain import stock_alert
-        
+
         articles = [{"statut": "critique"}]
-        
-        with patch('streamlit.container') as mock_container:
+
+        with patch("streamlit.container") as mock_container:
             mock_container.return_value.__enter__ = Mock()
             mock_container.return_value.__exit__ = Mock()
-            
-            with patch('streamlit.warning') as mock_warning:
+
+            with patch("streamlit.warning") as mock_warning:
                 stock_alert(articles)
                 # Should use default "Article sans nom"
 
@@ -545,14 +518,15 @@ class TestTabletModeExtended:
     def test_tablet_mode_import(self):
         """Test import du module."""
         from src.ui import tablet_mode
+
         assert tablet_mode is not None
 
     def test_tablet_mode_has_functions(self):
         """Test que le module a des fonctions."""
         from src.ui import tablet_mode
-        
+
         # Check for expected functions/classes
-        assert hasattr(tablet_mode, '__name__')
+        assert hasattr(tablet_mode, "__name__")
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -567,6 +541,7 @@ class TestLayoutFooter:
     def test_footer_import(self):
         """Test import footer."""
         from src.ui.layout import footer
+
         assert footer is not None
 
 
@@ -577,6 +552,7 @@ class TestLayoutHeader:
     def test_header_import(self):
         """Test import header."""
         from src.ui.layout import header
+
         assert header is not None
 
 
@@ -592,29 +568,26 @@ class TestEdgeCases:
     def test_barcode_scanner_with_none_callback(self):
         """Test scanner sans callback."""
         from src.ui.components.camera_scanner import BarcodeScanner
-        
+
         scanner = BarcodeScanner(on_scan=None)
         assert scanner.on_scan is None
 
     def test_io_config_empty_mapping(self):
         """Test IOConfig avec mapping vide."""
         from src.ui.core.base_io import IOConfig
-        
-        config = IOConfig(
-            field_mapping={},
-            required_fields=[]
-        )
-        
+
+        config = IOConfig(field_mapping={}, required_fields=[])
+
         assert config.field_mapping == {}
         assert config.required_fields == []
 
     def test_module_config_with_callbacks(self):
         """Test ModuleConfig avec callbacks."""
         from src.ui.core.base_module import ModuleConfig
-        
+
         on_view = Mock()
         on_edit = Mock()
-        
+
         mock_service = Mock()
         config = ModuleConfig(
             name="test",
@@ -622,8 +595,8 @@ class TestEdgeCases:
             icon="ðŸ§ª",
             service=mock_service,
             on_view=on_view,
-            on_edit=on_edit
+            on_edit=on_edit,
         )
-        
+
         assert config.on_view == on_view
         assert config.on_edit == on_edit

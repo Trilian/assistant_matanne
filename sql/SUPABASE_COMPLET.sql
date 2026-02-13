@@ -1552,7 +1552,7 @@ DO $$
 DECLARE t TEXT;
 tables_updated_at TEXT [] := ARRAY [
         'listes_courses', 'modeles_courses', 'furniture', 'garden_zones',
-        'maintenance_tasks', 'house_stocks', 'user_preferences', 
+        'maintenance_tasks', 'house_stocks', 'user_preferences',
         'depenses', 'budgets_mensuels', 'config_meteo', 'calendriers_externes',
         'notification_preferences', 'external_calendar_configs', 'evenements_calendrier'
     ];

@@ -1,12 +1,13 @@
-﻿"""
+"""
 Initialisation de l'application.
 """
 
 import logging
+
 import streamlit as st
 
-from src.core.state import GestionnaireEtat, obtenir_etat
 from src.core.database import verifier_connexion
+from src.core.state import GestionnaireEtat, obtenir_etat
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 def initialiser_app() -> bool:
     """
     Initialise l'application.
-    
+
     Returns:
         True si l'initialisation a réussi, False sinon.
     """
@@ -37,6 +38,7 @@ def initialiser_app() -> bool:
     if not etat.agent_ia:
         try:
             from src.core.ai import obtenir_client_ia
+
             etat.agent_ia = obtenir_client_ia()
             logger.info("âœ… Client IA OK")
         except Exception as e:

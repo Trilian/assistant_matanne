@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/garmin/utils.py
 
 Couvre:
@@ -9,40 +9,37 @@ Couvre:
 - Validation des configurations
 """
 
-import pytest
 from datetime import date, datetime, timedelta
-from unittest.mock import patch
 
 from src.services.garmin.utils import (
-    parse_garmin_timestamp,
-    parse_garmin_date,
-    parse_activity_data,
-    parse_daily_summary,
-    translate_activity_type,
-    get_activity_icon,
-    format_duration,
+    build_api_params,
+    calculate_activity_stats,
+    calculate_daily_stats,
+    calculate_goal_progress,
+    calculate_streak,
+    calculate_weekly_summary,
+    date_to_garmin_timestamp,
+    estimate_calories_burned,
     format_distance,
+    format_duration,
     format_pace,
     format_speed,
-    calculate_daily_stats,
-    calculate_activity_stats,
-    calculate_streak,
+    get_activity_icon,
     get_streak_badge,
-    calculate_goal_progress,
-    estimate_calories_burned,
-    calculate_weekly_summary,
-    validate_oauth_config,
-    validate_garmin_token,
-    is_sync_needed,
     get_sync_date_range,
-    date_to_garmin_timestamp,
-    build_api_params,
+    is_sync_needed,
+    parse_activity_data,
+    parse_daily_summary,
+    parse_garmin_date,
+    parse_garmin_timestamp,
+    translate_activity_type,
+    validate_garmin_token,
+    validate_oauth_config,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS PARSING DONNÃ‰ES API
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS PARSING DONNÉES API
+# ═══════════════════════════════════════════════════════════
 
 
 class TestParseGarminTimestamp:
@@ -53,7 +50,7 @@ class TestParseGarminTimestamp:
         result = parse_garmin_timestamp(1700000000)
         assert result is not None
         assert isinstance(result, datetime)
-        # 14 novembre 2023 Ã  22:13:20 UTC
+        # 14 novembre 2023 à 22:13:20 UTC
         assert result.year == 2023
         assert result.month == 11
         assert result.day == 14
@@ -135,9 +132,9 @@ class TestParseActivityData:
             "averageSpeedInMetersPerSecond": 2.78,
             "totalElevationGainInMeters": 100,
         }
-        
+
         result = parse_activity_data(raw)
-        
+
         assert result["garmin_id"] == "12345"
         assert result["type_activite"] == "running"
         assert result["type_activite_fr"] == "course"
@@ -155,9 +152,9 @@ class TestParseActivityData:
     def test_activite_minimale(self):
         """Parsing d'une activité avec données minimales."""
         raw = {"activityId": "999"}
-        
+
         result = parse_activity_data(raw)
-        
+
         assert result["garmin_id"] == "999"
         assert result["type_activite"] == "other"
         assert result["duree_secondes"] == 1  # fallback minimum
@@ -165,25 +162,25 @@ class TestParseActivityData:
     def test_activite_sans_id(self):
         """Parsing sans ID utilise fallback 'unknown'."""
         raw = {"activityName": "Test"}
-        
+
         result = parse_activity_data(raw)
-        
+
         assert result["garmin_id"] == "unknown"
 
     def test_activite_type_string(self):
         """Le type d'activité string est géré."""
         raw = {"activityId": "1", "activityType": "swimming"}
-        
+
         result = parse_activity_data(raw)
-        
+
         assert result["type_activite"] == "swimming"
 
     def test_activite_summary_id(self):
         """summaryId est utilisé si activityId absent."""
         raw = {"summaryId": "SUM123"}
-        
+
         result = parse_activity_data(raw)
-        
+
         assert result["garmin_id"] == "SUM123"
 
 
@@ -207,9 +204,9 @@ class TestParseDailySummary:
             "bodyBatteryChargedValue": 95,
             "bodyBatteryDrainedValue": 25,
         }
-        
+
         result = parse_daily_summary(raw)
-        
+
         assert result["date"] == date(2024, 1, 15)
         assert result["pas"] == 12500
         assert result["distance_metres"] == 9500
@@ -227,9 +224,9 @@ class TestParseDailySummary:
     def test_summary_minimal(self):
         """Parsing avec données minimales."""
         raw = {}
-        
+
         result = parse_daily_summary(raw)
-        
+
         assert result["pas"] == 0
         assert result["distance_metres"] == 0
         assert isinstance(result["date"], date)
@@ -237,15 +234,15 @@ class TestParseDailySummary:
     def test_summary_avec_timestamp(self):
         """Date via startTimeInSeconds si calendarDate absent."""
         raw = {"startTimeInSeconds": 1700000000}
-        
+
         result = parse_daily_summary(raw)
-        
+
         assert result["date"] == date(2023, 11, 14)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS TRADUCTION ET AFFICHAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestTranslateActivityType:
@@ -285,9 +282,9 @@ class TestGetActivityIcon:
         assert get_activity_icon("RUNNING") == "ðŸƒ"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FORMATAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFormatDuration:
@@ -383,9 +380,9 @@ class TestFormatSpeed:
         assert format_speed(None) == "0 km/h"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CALCULS STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculateDailyStats:
@@ -398,9 +395,9 @@ class TestCalculateDailyStats:
             {"pas": 12000, "calories_actives": 500, "distance_metres": 9500},
             {"pas": 8000, "calories_actives": 350, "distance_metres": 6000},
         ]
-        
+
         result = calculate_daily_stats(summaries)
-        
+
         assert result["total_pas"] == 30000
         assert result["total_calories"] == 1250
         assert result["total_distance_km"] == 23.5
@@ -410,7 +407,7 @@ class TestCalculateDailyStats:
     def test_stats_liste_vide(self):
         """Stats sur liste vide retourne des zéros."""
         result = calculate_daily_stats([])
-        
+
         assert result["total_pas"] == 0
         assert result["total_calories"] == 0
         assert result["jours_avec_donnees"] == 0
@@ -426,9 +423,9 @@ class TestCalculateActivityStats:
             {"type_activite": "running", "duree_secondes": 1800, "calories": 200},
             {"type_activite": "cycling", "duree_secondes": 3600, "calories": 300},
         ]
-        
+
         result = calculate_activity_stats(activities)
-        
+
         assert result["total_activites"] == 3
         assert result["par_type"]["running"]["count"] == 2
         assert result["par_type"]["cycling"]["count"] == 1
@@ -438,16 +435,16 @@ class TestCalculateActivityStats:
     def test_activity_stats_vide(self):
         """Stats sur liste vide."""
         result = calculate_activity_stats([])
-        
+
         assert result["total_activites"] == 0
         assert result["par_type"] == {}
 
     def test_activity_calories_none(self):
         """Calories None sont gérées."""
         activities = [{"type_activite": "running", "duree_secondes": 3600, "calories": None}]
-        
+
         result = calculate_activity_stats(activities)
-        
+
         assert result["total_calories"] == 0
 
 
@@ -462,9 +459,9 @@ class TestCalculateStreak:
             date(2024, 1, 14): {"pas": 11000},
             date(2024, 1, 13): {"pas": 10500},
         }
-        
+
         result = calculate_streak(summaries, goal_steps=10000, reference_date=today)
-        
+
         assert result == 3
 
     def test_streak_interrupted(self):
@@ -475,9 +472,9 @@ class TestCalculateStreak:
             date(2024, 1, 14): {"pas": 8000},  # Sous objectif
             date(2024, 1, 13): {"pas": 11000},
         }
-        
+
         result = calculate_streak(summaries, goal_steps=10000, reference_date=today)
-        
+
         assert result == 1
 
     def test_streak_aucun(self):
@@ -486,15 +483,15 @@ class TestCalculateStreak:
         summaries = {
             date(2024, 1, 15): {"pas": 5000},
         }
-        
+
         result = calculate_streak(summaries, goal_steps=10000, reference_date=today)
-        
+
         assert result == 0
 
     def test_streak_vide(self):
         """Aucune donnée = streak 0."""
         result = calculate_streak({}, goal_steps=10000, reference_date=date(2024, 1, 15))
-        
+
         assert result == 0
 
 
@@ -524,13 +521,13 @@ class TestGetStreakBadge:
     def test_badge_semaine(self):
         """Streak >= 7 = 1 semaine."""
         result = get_streak_badge(7)
-        assert result == ("âœ¨", "1 semaine")
+        assert result == ("⏰", "1 semaine")
 
     def test_badge_aucun(self):
         """Streak < 7 = pas de badge."""
         result = get_streak_badge(6)
         assert result is None
-        
+
         result = get_streak_badge(0)
         assert result is None
 
@@ -545,7 +542,7 @@ class TestCalculateGoalProgress:
         assert color == "green"
 
     def test_objectif_depasse(self):
-        """Objectif dépassé = plafonné Ã  100%."""
+        """Objectif dépassé = plafonné à 100%."""
         percentage, color = calculate_goal_progress(15000, 10000)
         assert percentage == 100.0
         assert color == "green"
@@ -579,13 +576,13 @@ class TestEstimateCaloriesBurned:
     """Tests pour estimate_calories_burned."""
 
     def test_running_1h(self):
-        """Estimation pour 1h de course Ã  70kg."""
+        """Estimation pour 1h de course à 70kg."""
         result = estimate_calories_burned("running", 3600, 70.0)
         # MET 10 * 70kg * 1h = 700 calories
         assert result == 700
 
     def test_walking_30min(self):
-        """Estimation pour 30min de marche Ã  70kg."""
+        """Estimation pour 30min de marche à 70kg."""
         result = estimate_calories_burned("walking", 1800, 70.0)
         # MET 3.5 * 70kg * 0.5h = 122.5 => 122
         assert result == 122
@@ -610,13 +607,28 @@ class TestCalculateWeeklySummary:
         """Résumé d'une semaine complète."""
         # Semaine du 8 au 14 janvier 2024 (lundi au dimanche)
         summaries = [
-            {"date": date(2024, 1, 8), "pas": 10000, "calories_actives": 400, "distance_metres": 8000},
-            {"date": date(2024, 1, 9), "pas": 12000, "calories_actives": 500, "distance_metres": 9500},
-            {"date": date(2024, 1, 10), "pas": 8000, "calories_actives": 350, "distance_metres": 6000},
+            {
+                "date": date(2024, 1, 8),
+                "pas": 10000,
+                "calories_actives": 400,
+                "distance_metres": 8000,
+            },
+            {
+                "date": date(2024, 1, 9),
+                "pas": 12000,
+                "calories_actives": 500,
+                "distance_metres": 9500,
+            },
+            {
+                "date": date(2024, 1, 10),
+                "pas": 8000,
+                "calories_actives": 350,
+                "distance_metres": 6000,
+            },
         ]
-        
+
         result = calculate_weekly_summary(summaries, week_start=date(2024, 1, 8))
-        
+
         assert result["total_pas"] == 30000
         assert result["semaine_debut"] == date(2024, 1, 8)
         assert result["semaine_fin"] == date(2024, 1, 14)
@@ -624,9 +636,9 @@ class TestCalculateWeeklySummary:
         assert result["jours_manquants"] == 4  # 7 - 3
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS VALIDATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestValidateOauthConfig:
@@ -642,9 +654,9 @@ class TestValidateOauthConfig:
             "authorize_url": "https://api.garmin.com/authorize",
             "api_base_url": "https://api.garmin.com",
         }
-        
+
         is_valid, errors = validate_oauth_config(config)
-        
+
         assert is_valid is True
         assert errors == []
 
@@ -657,9 +669,9 @@ class TestValidateOauthConfig:
             "access_token_url": "https://api.garmin.com/access",
             "authorize_url": "https://api.garmin.com/authorize",
         }
-        
+
         is_valid, errors = validate_oauth_config(config)
-        
+
         assert is_valid is False
         assert any("consumer_secret" in e for e in errors)
 
@@ -672,9 +684,9 @@ class TestValidateOauthConfig:
             "access_token_url": "https://api.garmin.com/access",
             "authorize_url": "https://api.garmin.com/authorize",
         }
-        
+
         is_valid, errors = validate_oauth_config(config)
-        
+
         assert is_valid is False
         assert any("non sécurisée" in e for e in errors)
 
@@ -688,34 +700,34 @@ class TestValidateGarminToken:
             "oauth_token": "token123",
             "oauth_token_secret": "secret456",
         }
-        
+
         is_valid, error = validate_garmin_token(token)
-        
+
         assert is_valid is True
         assert error == ""
 
     def test_token_none(self):
         """Token None invalide."""
         is_valid, error = validate_garmin_token(None)
-        
+
         assert is_valid is False
         assert "Aucun token" in error
 
     def test_token_sans_oauth_token(self):
         """Token sans oauth_token."""
         token = {"oauth_token_secret": "secret"}
-        
+
         is_valid, error = validate_garmin_token(token)
-        
+
         assert is_valid is False
         assert "oauth_token manquant" in error
 
     def test_token_sans_secret(self):
         """Token sans oauth_token_secret."""
         token = {"oauth_token": "token"}
-        
+
         is_valid, error = validate_garmin_token(token)
-        
+
         assert is_valid is False
         assert "oauth_token_secret manquant" in error
 
@@ -726,9 +738,9 @@ class TestValidateGarminToken:
             "oauth_token_secret": "secret",
             "expires_at": datetime.utcnow() - timedelta(hours=1),
         }
-        
+
         is_valid, error = validate_garmin_token(token)
-        
+
         assert is_valid is False
         assert "expiré" in error
 
@@ -739,9 +751,9 @@ class TestValidateGarminToken:
             "oauth_token_secret": "secret",
             "expires_at": (datetime.utcnow() - timedelta(hours=1)).timestamp(),
         }
-        
+
         is_valid, error = validate_garmin_token(token)
-        
+
         assert is_valid is False
         assert "expiré" in error
 
@@ -764,9 +776,9 @@ class TestIsSyncNeeded:
         assert is_sync_needed(last_sync, min_interval_minutes=30) is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS GÃ‰NÃ‰RATION DATES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS GÉNÉRATION DATES
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGetSyncDateRange:
@@ -775,14 +787,14 @@ class TestGetSyncDateRange:
     def test_range_7_jours(self):
         """Plage de 7 jours."""
         start, end = get_sync_date_range(7)
-        
+
         assert end == date.today()
         assert start == date.today() - timedelta(days=7)
 
     def test_range_30_jours(self):
         """Plage de 30 jours."""
         start, end = get_sync_date_range(30)
-        
+
         assert end == date.today()
         assert start == date.today() - timedelta(days=30)
 
@@ -794,7 +806,7 @@ class TestDateToGarminTimestamp:
         """Conversion d'une date en timestamp."""
         d = date(2024, 1, 15)
         result = date_to_garmin_timestamp(d)
-        
+
         # Doit être le début de la journée
         expected = datetime(2024, 1, 15, 0, 0, 0).timestamp()
         assert result == int(expected)
@@ -807,9 +819,9 @@ class TestBuildApiParams:
         """Construction des paramètres API."""
         start = date(2024, 1, 10)
         end = date(2024, 1, 15)
-        
+
         result = build_api_params(start, end)
-        
+
         assert "uploadStartTimeInSeconds" in result
         assert "uploadEndTimeInSeconds" in result
         assert result["uploadStartTimeInSeconds"] < result["uploadEndTimeInSeconds"]

@@ -1,10 +1,10 @@
-﻿"""
+"""
 Agent IA - Wrapper hautement intégré pour interactions IA
 Fournit une interface simplifiée pour les modules
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from .client import ClientIA
 
@@ -31,17 +31,17 @@ class AgentIA:
     async def analyser(
         self,
         prompt: str,
-        contexte: Optional[dict] = None,
+        contexte: dict | None = None,
         temperature: float = 0.7,
     ) -> str:
         """
         Analyse un prompt avec l'IA
-        
+
         Args:
             prompt: Le prompt/question à analyser
             contexte: Contexte supplémentaire (données utilisateur, etc.)
             temperature: Température de réponse (0-1)
-            
+
         Returns:
             Réponse texte de l'IA
         """
@@ -75,11 +75,11 @@ class AgentIA:
     ) -> str:
         """
         Génère une analyse spécifique d'un type de données
-        
+
         Args:
             donnees: Données à analyser
             type_analyse: Type d'analyse ('bien_etre', 'cuisine', 'budget', etc.)
-            
+
         Returns:
             Analyse texte générée
         """

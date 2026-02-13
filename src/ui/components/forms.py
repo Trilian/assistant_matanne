@@ -1,4 +1,4 @@
-﻿"""
+"""
 UI Components - Forms
 Champs formulaire, recherche, filtres
 """
@@ -92,7 +92,9 @@ def barre_recherche(texte_indicatif: str = "Rechercher...", cle: str = "search")
     Example:
         term = barre_recherche("Rechercher recettes...", "recipe_search")
     """
-    return st.text_input("", placeholder=f"🔍 {texte_indicatif}", key=cle, label_visibility="collapsed")
+    return st.text_input(
+        "", placeholder=f"🔍 {texte_indicatif}", key=cle, label_visibility="collapsed"
+    )
 
 
 def panneau_filtres(config_filtres: dict[str, dict], prefixe_cle: str) -> dict:
@@ -152,4 +154,3 @@ def filtres_rapides(filtres: dict[str, list], prefixe_cle: str = "filter") -> di
                     results[label] = option
 
     return results
-

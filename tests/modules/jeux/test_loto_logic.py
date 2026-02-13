@@ -1,31 +1,28 @@
-﻿"""
+"""
 Tests pour loto_logic.py - Fonctions pures d'analyse du Loto
 """
 
-import pytest
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
-from typing import Dict, Any, List
 
 from src.modules.jeux.loto.utils import (
-    calculer_frequences_numeros,
-    calculer_ecart,
-    identifier_numeros_chauds_froids,
-    NUMERO_MIN,
-    NUMERO_MAX,
-    CHANCE_MIN,
     CHANCE_MAX,
-    NB_NUMEROS,
-    GAINS_PAR_RANG,
+    CHANCE_MIN,
     COUT_GRILLE,
+    GAINS_PAR_RANG,
+    NB_NUMEROS,
+    NUMERO_MAX,
+    NUMERO_MIN,
     NUMEROS_POPULAIRES,
     PROBA_JACKPOT,
+    calculer_ecart,
+    calculer_frequences_numeros,
+    identifier_numeros_chauds_froids,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Constantes
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantesLoto:
@@ -67,9 +64,9 @@ class TestConstantesLoto:
             assert gain_rang2 > gain_rang3  # 5 bons > 4+chance
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Calcul Fréquences
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculerFrequencesNumeros:
@@ -84,18 +81,20 @@ class TestCalculerFrequencesNumeros:
 
     def test_tirage_unique(self):
         """Compte un tirage unique."""
-        tirages = [{
-            "date_tirage": date.today(),
-            "numero_1": 1,
-            "numero_2": 10,
-            "numero_3": 20,
-            "numero_4": 30,
-            "numero_5": 40,
-            "numero_chance": 5
-        }]
-        
+        tirages = [
+            {
+                "date_tirage": date.today(),
+                "numero_1": 1,
+                "numero_2": 10,
+                "numero_3": 20,
+                "numero_4": 30,
+                "numero_5": 40,
+                "numero_chance": 5,
+            }
+        ]
+
         result = calculer_frequences_numeros(tirages)
-        
+
         assert result["nb_tirages"] == 1
         assert result["frequences"][1]["frequence"] == 1
         assert result["frequences"][10]["frequence"] == 1
@@ -105,12 +104,26 @@ class TestCalculerFrequencesNumeros:
     def test_plusieurs_tirages(self):
         """Compte plusieurs tirages."""
         tirages = [
-            {"numero_1": 1, "numero_2": 2, "numero_3": 3, "numero_4": 4, "numero_5": 5, "numero_chance": 1},
-            {"numero_1": 1, "numero_2": 2, "numero_3": 6, "numero_4": 7, "numero_5": 8, "numero_chance": 2},
+            {
+                "numero_1": 1,
+                "numero_2": 2,
+                "numero_3": 3,
+                "numero_4": 4,
+                "numero_5": 5,
+                "numero_chance": 1,
+            },
+            {
+                "numero_1": 1,
+                "numero_2": 2,
+                "numero_3": 6,
+                "numero_4": 7,
+                "numero_5": 8,
+                "numero_chance": 2,
+            },
         ]
-        
+
         result = calculer_frequences_numeros(tirages)
-        
+
         assert result["nb_tirages"] == 2
         assert result["frequences"][1]["frequence"] == 2  # Sorti 2x
         assert result["frequences"][2]["frequence"] == 2  # Sorti 2x
@@ -123,58 +136,58 @@ class TestCalculerFrequencesNumeros:
             {"numero_1": 1, "numero_2": 2, "numero_3": 3, "numero_4": 4, "numero_5": 5},
             {"numero_1": 1, "numero_2": 6, "numero_3": 7, "numero_4": 8, "numero_5": 9},
         ]
-        
+
         result = calculer_frequences_numeros(tirages)
-        
+
         # 1 est sorti 2x sur 2 tirages = 100%
         assert result["frequences"][1]["pourcentage"] == 100.0
         # 2 est sorti 1x sur 2 tirages = 50%
         assert result["frequences"][2]["pourcentage"] == 50.0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# Tests Calcul Ã‰cart
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# Tests Calcul Écart
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculerEcart:
     """Tests pour calculer_ecart."""
 
     def test_numero_recent(self):
-        """Ã‰cart 0 si sorti au dernier tirage."""
+        """Écart 0 si sorti au dernier tirage."""
         tirages = [
             {"numero_1": 5, "numero_2": 10, "numero_3": 15, "numero_4": 20, "numero_5": 25},
         ]
-        
+
         ecart = calculer_ecart(tirages, 5)
         assert ecart == 0
 
     def test_numero_ancien(self):
-        """Ã‰cart correct pour numéro pas sorti récemment."""
+        """Écart correct pour numéro pas sorti récemment."""
         tirages = [
             {"numero_1": 5, "numero_2": 10, "numero_3": 15, "numero_4": 20, "numero_5": 25},
             {"numero_1": 6, "numero_2": 11, "numero_3": 16, "numero_4": 21, "numero_5": 26},
             {"numero_1": 7, "numero_2": 12, "numero_3": 17, "numero_4": 22, "numero_5": 27},
         ]
-        
+
         # Le numéro 5 n'est sorti qu'au premier tirage (index 0, donc écart = 2)
         ecart = calculer_ecart(tirages, 5)
         assert ecart == 2
 
     def test_numero_jamais_sorti(self):
-        """Ã‰cart = nb tirages si jamais sorti."""
+        """Écart = nb tirages si jamais sorti."""
         tirages = [
             {"numero_1": 1, "numero_2": 2, "numero_3": 3, "numero_4": 4, "numero_5": 5},
             {"numero_1": 6, "numero_2": 7, "numero_3": 8, "numero_4": 9, "numero_5": 10},
         ]
-        
+
         ecart = calculer_ecart(tirages, 49)  # Jamais sorti
         assert ecart == 2
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # Tests Numéros Chauds/Froids
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestIdentifierNumerosChaudsFroids:
@@ -196,13 +209,13 @@ class TestIdentifierNumerosChaudsFroids:
             4: {"frequence": 1, "ecart": 10},
             5: {"frequence": 8, "ecart": 1},
         }
-        
+
         result = identifier_numeros_chauds_froids(frequences, nb_top=3)
-        
+
         # Chauds: plus fréquents (3, 1, 5)
         assert result["chauds"][0] == 3
         assert result["chauds"][1] == 1
-        
+
         # Froids: moins fréquents (4, 2, ...)
         assert 4 in result["froids"]
 
@@ -213,19 +226,19 @@ class TestIdentifierNumerosChaudsFroids:
             2: {"frequence": 5, "ecart": 15},
             3: {"frequence": 15, "ecart": 1},
         }
-        
+
         result = identifier_numeros_chauds_froids(frequences, nb_top=2)
-        
+
         # Retard: plus grand écart en premier
-        assert result["retard"][0] == 2  # Ã‰cart 15
-        assert result["retard"][1] == 1  # Ã‰cart 5
+        assert result["retard"][0] == 2  # Écart 15
+        assert result["retard"][1] == 1  # Écart 5
 
     def test_nb_top_limite(self):
         """Limite le nombre de résultats."""
         frequences = {i: {"frequence": i, "ecart": i} for i in range(1, 20)}
-        
+
         result = identifier_numeros_chauds_froids(frequences, nb_top=5)
-        
+
         assert len(result["chauds"]) == 5
         assert len(result["froids"]) == 5
         assert len(result["retard"]) == 5

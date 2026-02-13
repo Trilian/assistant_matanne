@@ -1,25 +1,26 @@
-﻿"""
+"""
 Tests pour vue_ensemble_logic.py
 Couverture cible: 80%+
 """
+
+from datetime import date, timedelta
+
 import pytest
-from datetime import date, datetime, timedelta
 
 from src.modules.planning.vue_ensemble_utils import (
+    CATEGORIES_TACHES,
     # Constantes
     PERIODES,
-    CATEGORIES_TACHES,
     # Fonctions
     analyser_charge_globale,
-    est_en_retard,
     analyser_tendances,
+    est_en_retard,
     prevoir_charge_prochaine_semaine,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantes:
@@ -39,9 +40,9 @@ class TestConstantes:
         assert "Famille" in CATEGORIES_TACHES
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS EST EN RETARD
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestEstEnRetard:
@@ -49,10 +50,7 @@ class TestEstEnRetard:
 
     def test_tache_complete_pas_en_retard(self):
         """Une tâche complète n'est jamais en retard."""
-        tache = {
-            "complete": True,
-            "date_limite": date.today() - timedelta(days=5)
-        }
+        tache = {"complete": True, "date_limite": date.today() - timedelta(days=5)}
         assert est_en_retard(tache) is False
 
     def test_tache_sans_date_limite(self):
@@ -62,32 +60,23 @@ class TestEstEnRetard:
 
     def test_tache_en_retard(self):
         """Tâche en retard si date passée."""
-        tache = {
-            "complete": False,
-            "date_limite": date.today() - timedelta(days=1)
-        }
+        tache = {"complete": False, "date_limite": date.today() - timedelta(days=1)}
         assert est_en_retard(tache) is True
 
     def test_tache_dans_temps(self):
         """Tâche pas en retard si date future."""
-        tache = {
-            "complete": False,
-            "date_limite": date.today() + timedelta(days=5)
-        }
+        tache = {"complete": False, "date_limite": date.today() + timedelta(days=5)}
         assert est_en_retard(tache) is False
 
     def test_date_string(self):
         """Gère les dates en string ISO."""
-        tache = {
-            "complete": False,
-            "date_limite": (date.today() - timedelta(days=3)).isoformat()
-        }
+        tache = {"complete": False, "date_limite": (date.today() - timedelta(days=3)).isoformat()}
         assert est_en_retard(tache) is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ANALYSE CHARGE GLOBALE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestAnalyseChargeGlobale:
@@ -105,8 +94,12 @@ class TestAnalyseChargeGlobale:
         return [
             {"titre": "T1", "complete": False, "categorie": "Travail"},
             {"titre": "T2", "complete": True, "categorie": "Maison"},
-            {"titre": "T3", "complete": False, "categorie": "Travail",
-             "date_limite": date.today() - timedelta(days=1)},
+            {
+                "titre": "T3",
+                "complete": False,
+                "categorie": "Travail",
+                "date_limite": date.today() - timedelta(days=1),
+            },
         ]
 
     def test_total_evenements(self, evenements, taches):
@@ -160,9 +153,9 @@ class TestAnalyseChargeGlobale:
         assert result["niveau_charge"] in ["Élevé", "Très élevé"]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS ANALYSE TENDANCES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestAnalyseTendances:
@@ -177,10 +170,7 @@ class TestAnalyseTendances:
 
     def test_historique_avec_donnees(self):
         """Analyse l'historique avec données."""
-        historique = [
-            {"date": (date.today() - timedelta(days=i)).isoformat()}
-            for i in range(15)
-        ]
+        historique = [{"date": (date.today() - timedelta(days=i)).isoformat()} for i in range(15)]
         result = analyser_tendances(historique, jours=30)
         assert result["moyenne_jour"] > 0
 
@@ -188,18 +178,15 @@ class TestAnalyseTendances:
         """Trouve le pic d'activité."""
         # Créer 5 éléments le même jour
         jour_pic = date.today() - timedelta(days=5)
-        historique = [
-            {"date": jour_pic.isoformat()} for _ in range(5)
-        ] + [
-            {"date": (date.today() - timedelta(days=i)).isoformat()}
-            for i in range(10) if i != 5
+        historique = [{"date": jour_pic.isoformat()} for _ in range(5)] + [
+            {"date": (date.today() - timedelta(days=i)).isoformat()} for i in range(10) if i != 5
         ]
         result = analyser_tendances(historique, jours=30)
         assert result["pic_activite"] is not None
         assert result["pic_activite"]["nombre"] >= 5
 
     def test_tendance_hausse(self):
-        """Détecte une tendance Ã  la hausse."""
+        """Détecte une tendance à la hausse."""
         # Plus d'activité dans la 2ème moitié
         historique = [
             {"date": (date.today() - timedelta(days=i)).isoformat()}
@@ -210,9 +197,9 @@ class TestAnalyseTendances:
         assert result["evolution"] in ["stable", "hausse"]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS PRÃ‰VISION SEMAINE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS PRÉVISION SEMAINE
+# ═══════════════════════════════════════════════════════════
 
 
 class TestPrevisionSemaine:
@@ -239,11 +226,15 @@ class TestPrevisionSemaine:
         assert result["evenements"] == 2
 
     def test_avec_taches_echeance(self):
-        """Compte les tâches Ã  échéance."""
+        """Compte les tâches à échéance."""
         debut_semaine_prochaine = date.today() + timedelta(days=7 - date.today().weekday())
         taches = [
             {"titre": "T1", "complete": False, "date_limite": debut_semaine_prochaine.isoformat()},
-            {"titre": "T2", "complete": True, "date_limite": debut_semaine_prochaine.isoformat()},  # Complète = ignorée
+            {
+                "titre": "T2",
+                "complete": True,
+                "date_limite": debut_semaine_prochaine.isoformat(),
+            },  # Complète = ignorée
         ]
         result = prevoir_charge_prochaine_semaine([], taches)
         assert result["taches"] == 1
@@ -255,5 +246,5 @@ class TestPrevisionSemaine:
             "Semaine légère",
             "Semaine normale",
             "Semaine chargée",
-            "Semaine très chargée"
+            "Semaine très chargée",
         ]

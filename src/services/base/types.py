@@ -1,11 +1,12 @@
-﻿"""
+"""
 Service Types - Types et classes de base partagés
 Point d'entrée sans dépendances circulaires
 """
 
 import logging
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Generic, TypeVar, Callable, Optional
+from typing import Any, Generic, TypeVar
 
 from sqlalchemy import desc, func, or_
 from sqlalchemy.orm import Session
@@ -207,19 +208,19 @@ class BaseService(Generic[T]):
         db: Session | None = None,
     ) -> tuple[int, int]:
         """Création en masse avec fusion intelligente.
-        
+
         Crée ou met à jour des entités en fonction d'une clé de fusion.
         Utile pour l'import de données avec déduplication.
-        
+
         Args:
             items_data: Liste de dictionnaires de données
             merge_key: Champ utilisé pour identifier les doublons
             merge_strategy: Fonction (existant, nouveau) -> données fusionnées
             db: Session DB (optionnelle)
-            
+
         Returns:
             Tuple (nombre créés, nombre fusionnés)
-            
+
         Example:
             >>> def merge(old, new):
             ...     return {**old, **new}
@@ -273,16 +274,16 @@ class BaseService(Generic[T]):
         db: Session | None = None,
     ) -> dict:
         """Calcule des statistiques génériques sur les entités.
-        
+
         Args:
             group_by_fields: Champs pour grouper les comptages
             count_filters: Filtres conditionnels {'nom': {'champ': valeur}}
             additional_filters: Filtres globaux
             db: Session DB (optionnelle)
-            
+
         Returns:
             Dict avec 'total' et statistiques groupées
-            
+
         Example:
             >>> service.get_stats(
             ...     group_by_fields=['statut'],
@@ -347,16 +348,18 @@ class BaseService(Generic[T]):
     # MIXINS INTÉGRÉS
     # ════════════════════════════════════════════════════════════
 
-    def count_by_status(self, status_field: str = "statut", db: Session | None = None) -> dict[str, int]:
+    def count_by_status(
+        self, status_field: str = "statut", db: Session | None = None
+    ) -> dict[str, int]:
         """Compte les entités groupées par statut.
-        
+
         Args:
             status_field: Nom du champ de statut (défaut: 'statut')
             db: Session DB (optionnelle)
-            
+
         Returns:
             Dict {statut: nombre}
-            
+
         Example:
             >>> service.count_by_status()
             {'en_cours': 10, 'termine': 5, 'annule': 2}
@@ -368,16 +371,16 @@ class BaseService(Generic[T]):
         self, item_id: int, status_field: str, status_value: str, db: Session | None = None
     ) -> bool:
         """Marque une entité avec un statut spécifique.
-        
+
         Args:
             item_id: ID de l'entité
             status_field: Nom du champ de statut
             status_value: Nouvelle valeur du statut
             db: Session DB (optionnelle)
-            
+
         Returns:
             True si mis à jour, False sinon
-            
+
         Example:
             >>> service.mark_as(42, 'statut', 'termine')
             True
@@ -390,14 +393,14 @@ class BaseService(Generic[T]):
 
     def _with_session(self, func: Callable, db: Session | None = None) -> Any:
         """Exécute une fonction avec une session DB.
-        
+
         Si une session est fournie, l'utilise directement.
         Sinon, crée une nouvelle session via le context manager.
-        
+
         Args:
             func: Fonction à exécuter (prend Session en paramètre)
             db: Session DB existante (optionnelle)
-            
+
         Returns:
             Résultat de la fonction
         """
@@ -410,16 +413,16 @@ class BaseService(Generic[T]):
 
     def _apply_filters(self, query, filters: dict):
         """Applique des filtres génériques à une requête SQLAlchemy.
-        
+
         Supporte les opérateurs: gte, lte, in, like.
-        
+
         Args:
             query: Requête SQLAlchemy
             filters: Dict {champ: valeur} ou {champ: {'op': valeur}}
-            
+
         Returns:
             Requête filtrée
-            
+
         Example:
             >>> _apply_filters(query, {'prix': {'lte': 100}, 'actif': True})
         """
@@ -443,12 +446,12 @@ class BaseService(Generic[T]):
 
     def _model_to_dict(self, obj: Any) -> dict:
         """Convertit un objet modèle SQLAlchemy en dictionnaire.
-        
+
         Gère la sérialisation des dates en ISO format.
-        
+
         Args:
             obj: Instance de modèle SQLAlchemy
-            
+
         Returns:
             Dict avec les valeurs des colonnes
         """
@@ -462,7 +465,7 @@ class BaseService(Generic[T]):
 
     def _invalider_cache(self):
         """Invalide le cache associé à ce modèle.
-        
+
         Utilise le nom du modèle en minuscules comme pattern de recherche.
         Appelé automatiquement après create, update, delete.
         """

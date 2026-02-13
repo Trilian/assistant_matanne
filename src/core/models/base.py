@@ -1,4 +1,4 @@
-﻿"""
+"""
 Base SQLAlchemy et énumérations communes.
 
 Ce module contient :
@@ -8,6 +8,7 @@ Ce module contient :
 """
 
 import enum
+
 from sqlalchemy import MetaData
 from sqlalchemy.orm import DeclarativeBase
 
@@ -28,6 +29,7 @@ metadata = MetaData(naming_convention=convention)
 
 class Base(DeclarativeBase):
     """Classe de base pour tous les modèles SQLAlchemy."""
+
     metadata = metadata
 
 
@@ -38,6 +40,7 @@ class Base(DeclarativeBase):
 
 class PrioriteEnum(str, enum.Enum):
     """Niveaux de priorité utilisés dans plusieurs modèles."""
+
     BASSE = "basse"
     MOYENNE = "moyenne"
     HAUTE = "haute"
@@ -45,6 +48,7 @@ class PrioriteEnum(str, enum.Enum):
 
 class SaisonEnum(str, enum.Enum):
     """Saisons pour les recettes et le jardinage."""
+
     PRINTEMPS = "printemps"
     ETE = "été"
     AUTOMNE = "automne"
@@ -54,6 +58,7 @@ class SaisonEnum(str, enum.Enum):
 
 class TypeRepasEnum(str, enum.Enum):
     """Types de repas pour le planning."""
+
     PETIT_DEJEUNER = "petit_déjeuner"
     DEJEUNER = "déjeuner"
     DINER = "dîner"
@@ -62,6 +67,7 @@ class TypeRepasEnum(str, enum.Enum):
 
 class TypeVersionRecetteEnum(str, enum.Enum):
     """Types de versions de recettes."""
+
     STANDARD = "standard"
     BEBE = "bébé"
     BATCH_COOKING = "batch_cooking"
@@ -74,13 +80,13 @@ class TypeVersionRecetteEnum(str, enum.Enum):
 
 def obtenir_valeurs_enum(enum_class: type[enum.Enum]) -> list[str]:
     """Récupère toutes les valeurs d'un enum.
-    
+
     Args:
         enum_class: Classe d'énumération
-        
+
     Returns:
         Liste des valeurs de l'enum
-        
+
     Example:
         >>> obtenir_valeurs_enum(PrioriteEnum)
         ['basse', 'moyenne', 'haute']

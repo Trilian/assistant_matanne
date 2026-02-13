@@ -4,13 +4,12 @@ Constantes partagees entre tous les modules.
 Centralise les constantes dupliquees pour garantir la coherence.
 """
 
-from typing import List
 
 # ═══════════════════════════════════════════════════════════
 # JOURS DE LA SEMAINE
 # ═══════════════════════════════════════════════════════════
 
-JOURS_SEMAINE: List[str] = [
+JOURS_SEMAINE: list[str] = [
     "Lundi",
     "Mardi",
     "Mercredi",
@@ -20,7 +19,7 @@ JOURS_SEMAINE: List[str] = [
     "Dimanche",
 ]
 
-JOURS_SEMAINE_COURT: List[str] = [
+JOURS_SEMAINE_COURT: list[str] = [
     "Lun",
     "Mar",
     "Mer",
@@ -31,7 +30,7 @@ JOURS_SEMAINE_COURT: List[str] = [
 ]
 
 # Version minuscule pour les selecteurs UI
-JOURS_SEMAINE_LOWER: List[str] = [
+JOURS_SEMAINE_LOWER: list[str] = [
     "lundi",
     "mardi",
     "mercredi",
@@ -45,7 +44,7 @@ JOURS_SEMAINE_LOWER: List[str] = [
 # MOIS DE L'ANNÉE
 # ═══════════════════════════════════════════════════════════
 
-MOIS_FRANCAIS: List[str] = [
+MOIS_FRANCAIS: list[str] = [
     "Janvier",
     "Fevrier",
     "Mars",
@@ -60,7 +59,7 @@ MOIS_FRANCAIS: List[str] = [
     "Decembre",
 ]
 
-MOIS_FRANCAIS_COURT: List[str] = [
+MOIS_FRANCAIS_COURT: list[str] = [
     "Jan",
     "Fev",
     "Mar",
@@ -79,7 +78,7 @@ MOIS_FRANCAIS_COURT: List[str] = [
 # TYPES DE REPAS
 # ═══════════════════════════════════════════════════════════
 
-TYPES_REPAS: List[str] = [
+TYPES_REPAS: list[str] = [
     "petit_dejeuner",
     "dejeuner",
     "gouter",

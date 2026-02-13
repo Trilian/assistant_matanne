@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour le service de codes-barres.
 
 Couverture cible: >80%
@@ -8,24 +8,23 @@ Couverture cible: >80%
 - Import/Export CSV
 """
 
-import pytest
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
+import pytest
+
+from src.core.errors_base import ErreurNonTrouve, ErreurValidation
 from src.services.integrations.codes_barres import (
-    BarcodeService,
-    BarcodeData,
     BarcodeArticle,
-    BarcodeRecette,
+    BarcodeData,
+    BarcodeService,
     ScanResultat,
     get_barcode_service,
 )
-from src.core.errors_base import ErreurValidation, ErreurNonTrouve
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -49,9 +48,9 @@ def mock_session():
     return session
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS SCHÃ‰MAS PYDANTIC
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS SCHÉMAS PYDANTIC
+# ═══════════════════════════════════════════════════════════
 
 
 class TestBarcodeData:
@@ -59,11 +58,7 @@ class TestBarcodeData:
 
     def test_creation_valide(self):
         """Test création avec données valides."""
-        data = BarcodeData(
-            code="3017620422003",
-            type_code="EAN-13",
-            source="scanner"
-        )
+        data = BarcodeData(code="3017620422003", type_code="EAN-13", source="scanner")
         assert data.code == "3017620422003"
         assert data.type_code == "EAN-13"
         assert data.source == "scanner"
@@ -96,10 +91,10 @@ class TestBarcodeArticle:
             nom_article="Nutella 400g",
             quantite_defaut=1.5,
             unite_defaut="pot",
-            categorie="Ã‰picerie",
+            categorie="Épicerie",
             prix_unitaire=4.50,
             date_peremption_jours=365,
-            lieu_stockage="Placard"
+            lieu_stockage="Placard",
         )
         assert article.barcode == "3017620422003"
         assert article.article_id == 1
@@ -109,10 +104,7 @@ class TestBarcodeArticle:
     def test_valeurs_defaut(self):
         """Test valeurs par défaut."""
         article = BarcodeArticle(
-            barcode="12345678",
-            article_id=1,
-            nom_article="Test",
-            categorie="Autre"
+            barcode="12345678", article_id=1, nom_article="Test", categorie="Autre"
         )
         assert article.quantite_defaut == 1.0
         assert article.unite_defaut == "unité"
@@ -126,9 +118,7 @@ class TestScanResultat:
     def test_creation(self):
         """Test création résultat."""
         result = ScanResultat(
-            barcode="12345678",
-            type_scan="article",
-            details={"id": 1, "nom": "Test"}
+            barcode="12345678", type_scan="article", details={"id": 1, "nom": "Test"}
         )
         assert result.barcode == "12345678"
         assert result.type_scan == "article"
@@ -140,9 +130,9 @@ class TestScanResultat:
             ScanResultat(barcode="12345678", type_scan="invalid", details={})
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS VALIDATION BARCODE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestValidationBarcode:
@@ -219,9 +209,9 @@ class TestValidationBarcode:
         assert type_code == "QR"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CHECKSUM INDIVIDUELS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestChecksumFunctions:
@@ -276,9 +266,9 @@ class TestChecksumFunctions:
         assert BarcodeService._valider_checksum_upc("01234567890A") is False
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS SCANNER CODE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestScannerCode:
@@ -291,7 +281,7 @@ class TestScannerCode:
         assert valide is False
         assert "non reconnu" in raison
 
-    @patch('src.services.integrations.codes_barres.obtenir_contexte_db')
+    @patch("src.services.integrations.codes_barres.obtenir_contexte_db")
     def test_scan_article_connu(self, mock_db, service):
         """Test scan d'un article connu."""
         # Setup mock
@@ -311,12 +301,12 @@ class TestScannerCode:
 
         # Test avec appel direct (contourne les décorateurs)
         result = service.scanner_code.__wrapped__(service, "3017620422003", session=mock_session)
-        
+
         assert result.barcode == "3017620422003"
         assert result.type_scan == "article"
         assert result.details["nom"] == "Nutella"
 
-    @patch('src.services.integrations.codes_barres.obtenir_contexte_db')
+    @patch("src.services.integrations.codes_barres.obtenir_contexte_db")
     def test_scan_article_inconnu(self, mock_db, service):
         """Test scan d'un article inconnu."""
         mock_session = Mock()
@@ -325,15 +315,15 @@ class TestScannerCode:
         mock_db.return_value.__exit__ = Mock(return_value=False)
 
         result = service.scanner_code.__wrapped__(service, "3017620422003", session=mock_session)
-        
+
         assert result.barcode == "3017620422003"
         assert result.type_scan == "inconnu"
         assert "non reconnu" in result.details["message"]
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS AJOUT ARTICLE PAR BARCODE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestAjouterArticle:
@@ -341,28 +331,21 @@ class TestAjouterArticle:
 
     def test_ajout_barcode_invalide(self, service):
         """Test ajout avec code invalide."""
-        with patch.object(service, 'valider_barcode', return_value=(False, "Invalide")):
+        with patch.object(service, "valider_barcode", return_value=(False, "Invalide")):
             with pytest.raises(ErreurValidation):
-                service.ajouter_article_par_barcode.__wrapped__(
-                    service,
-                    code="123",
-                    nom="Test"
-                )
+                service.ajouter_article_par_barcode.__wrapped__(service, code="123", nom="Test")
 
     def test_ajout_barcode_existant(self, service, mock_session):
-        """Test ajout avec code déjÃ  existant."""
+        """Test ajout avec code déjà existant."""
         existing_article = Mock()
         existing_article.nom = "Article existant"
         mock_session.query.return_value.filter.return_value.first.return_value = existing_article
 
         with pytest.raises(ErreurValidation) as exc_info:
             service.ajouter_article_par_barcode.__wrapped__(
-                service,
-                code="3017620422003",
-                nom="Nouveau",
-                session=mock_session
+                service, code="3017620422003", nom="Nouveau", session=mock_session
             )
-        assert "déjÃ  assigné" in str(exc_info.value)
+        assert "déjà assigné" in str(exc_info.value)
 
     def test_ajout_succes(self, service, mock_session):
         """Test ajout réussi - vérifie que add et commit sont appelés."""
@@ -377,15 +360,15 @@ class TestAjouterArticle:
                 nom="Nutella",
                 quantite=2.0,
                 unite="pot",
-                categorie="Ã‰picerie",
+                categorie="Épicerie",
                 prix_unitaire=4.50,
                 emplacement="Placard",
-                session=mock_session
+                session=mock_session,
             )
         except TypeError:
             # Model may have different field names - that's OK, we tested the business logic
             pass
-        
+
         # La validation du barcode et la vérification d'unicité ont réussi
         mock_session.query.assert_called()
 
@@ -400,19 +383,19 @@ class TestAjouterArticle:
                 code="3017620422003",
                 nom="Yaourt",
                 date_peremption_jours=30,
-                session=mock_session
+                session=mock_session,
             )
         except TypeError:
             # Model may have different field names - that's OK
             pass
-        
+
         # La validation du barcode a réussi
         mock_session.query.assert_called()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS INCREMENT/VÃ‰RIFICATION STOCK
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS INCREMENT/VÉRIFICATION STOCK
+# ═══════════════════════════════════════════════════════════
 
 
 class TestGestionStock:
@@ -424,10 +407,7 @@ class TestGestionStock:
 
         with pytest.raises(ErreurNonTrouve):
             service.incrementer_stock_barcode.__wrapped__(
-                service,
-                code="3017620422003",
-                quantite=1.0,
-                session=mock_session
+                service, code="3017620422003", quantite=1.0, session=mock_session
             )
 
     def test_incrementer_succes(self, service, mock_session):
@@ -439,10 +419,7 @@ class TestGestionStock:
         mock_session.query.return_value.filter.return_value.first.return_value = mock_article
 
         result = service.incrementer_stock_barcode.__wrapped__(
-            service,
-            code="3017620422003",
-            quantite=3.0,
-            session=mock_session
+            service, code="3017620422003", quantite=3.0, session=mock_session
         )
 
         assert mock_article.quantite == 5.0
@@ -454,9 +431,7 @@ class TestGestionStock:
 
         with pytest.raises(ErreurNonTrouve):
             service.verifier_stock_barcode.__wrapped__(
-                service,
-                code="3017620422003",
-                session=mock_session
+                service, code="3017620422003", session=mock_session
             )
 
     def test_verifier_stock_critique(self, service, mock_session):
@@ -473,9 +448,7 @@ class TestGestionStock:
         mock_session.query.return_value.filter.return_value.first.return_value = mock_article
 
         result = service.verifier_stock_barcode.__wrapped__(
-            service,
-            code="3017620422003",
-            session=mock_session
+            service, code="3017620422003", session=mock_session
         )
 
         assert result["etat_stock"] == "CRITIQUE"
@@ -494,9 +467,7 @@ class TestGestionStock:
         mock_session.query.return_value.filter.return_value.first.return_value = mock_article
 
         result = service.verifier_stock_barcode.__wrapped__(
-            service,
-            code="3017620422003",
-            session=mock_session
+            service, code="3017620422003", session=mock_session
         )
 
         assert result["etat_stock"] == "FAIBLE"
@@ -515,9 +486,7 @@ class TestGestionStock:
         mock_session.query.return_value.filter.return_value.first.return_value = mock_article
 
         result = service.verifier_stock_barcode.__wrapped__(
-            service,
-            code="3017620422003",
-            session=mock_session
+            service, code="3017620422003", session=mock_session
         )
 
         assert result["etat_stock"] == "OK"
@@ -536,12 +505,10 @@ class TestGestionStock:
         mock_session.query.return_value.filter.return_value.first.return_value = mock_article
 
         result = service.verifier_stock_barcode.__wrapped__(
-            service,
-            code="3017620422003",
-            session=mock_session
+            service, code="3017620422003", session=mock_session
         )
 
-        assert result["peremption_etat"] == "PÃ‰RIMÃ‰"
+        assert result["peremption_etat"] == "PÉRIMÉ"
 
     def test_verifier_stock_peremption_urgente(self, service, mock_session):
         """Test péremption urgente (< 7 jours)."""
@@ -557,9 +524,7 @@ class TestGestionStock:
         mock_session.query.return_value.filter.return_value.first.return_value = mock_article
 
         result = service.verifier_stock_barcode.__wrapped__(
-            service,
-            code="3017620422003",
-            session=mock_session
+            service, code="3017620422003", session=mock_session
         )
 
         assert result["peremption_etat"] == "URGENT"
@@ -578,65 +543,54 @@ class TestGestionStock:
         mock_session.query.return_value.filter.return_value.first.return_value = mock_article
 
         result = service.verifier_stock_barcode.__wrapped__(
-            service,
-            code="3017620422003",
-            session=mock_session
+            service, code="3017620422003", session=mock_session
         )
 
         assert result["peremption_etat"] == "BIENTÃ”T"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS MISE Ã€ JOUR BARCODE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS MISE À JOUR BARCODE
+# ═══════════════════════════════════════════════════════════
 
 
 class TestMiseAJourBarcode:
-    """Tests de mise Ã  jour des codes-barres."""
+    """Tests de mise à jour des codes-barres."""
 
     def test_update_code_invalide(self, service, mock_session):
-        """Test mise Ã  jour avec code invalide."""
-        with patch.object(service, 'valider_barcode', return_value=(False, "Invalide")):
+        """Test mise à jour avec code invalide."""
+        with patch.object(service, "valider_barcode", return_value=(False, "Invalide")):
             with pytest.raises(ErreurValidation):
                 service.mettre_a_jour_barcode.__wrapped__(
-                    service,
-                    article_id=1,
-                    nouveau_code="abc",
-                    session=mock_session
+                    service, article_id=1, nouveau_code="abc", session=mock_session
                 )
 
     def test_update_article_non_trouve(self, service, mock_session):
-        """Test mise Ã  jour article inexistant."""
+        """Test mise à jour article inexistant."""
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
         with pytest.raises(ErreurNonTrouve):
             service.mettre_a_jour_barcode.__wrapped__(
-                service,
-                article_id=999,
-                nouveau_code="3017620422003",
-                session=mock_session
+                service, article_id=999, nouveau_code="3017620422003", session=mock_session
             )
 
     def test_update_succes(self, service, mock_session):
-        """Test mise Ã  jour réussie."""
+        """Test mise à jour réussie."""
         mock_article = Mock()
         mock_article.code_barres = "old_code"
         mock_session.query.return_value.filter.return_value.first.return_value = mock_article
 
         result = service.mettre_a_jour_barcode.__wrapped__(
-            service,
-            article_id=1,
-            nouveau_code="3017620422003",
-            session=mock_session
+            service, article_id=1, nouveau_code="3017620422003", session=mock_session
         )
 
         assert mock_article.code_barres == "3017620422003"
         mock_session.commit.assert_called_once()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS LISTER/EXPORTER/IMPORTER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestListeExportImport:
@@ -661,10 +615,10 @@ class TestListeExportImport:
         # Mock lister_articles_avec_barcode - without 'id' field to match CSV fieldnames
         with patch.object(
             service,
-            'lister_articles_avec_barcode',
+            "lister_articles_avec_barcode",
             return_value=[
                 {"nom": "A", "barcode": "111", "quantite": 1, "unite": "u", "categorie": "C1"}
-            ]
+            ],
         ):
             csv_content = service.exporter_barcodes.__wrapped__(service, session=mock_session)
 
@@ -674,14 +628,12 @@ class TestListeExportImport:
 
     def test_importer_barcodes_csv_succes(self, service, mock_session):
         """Test import CSV réussi."""
-        csv_content = "barcode,nom,quantite,unite,categorie\n3017620422003,Nutella,2,pot,Ã‰picerie"
-        
+        csv_content = "barcode,nom,quantite,unite,categorie\n3017620422003,Nutella,2,pot,Épicerie"
+
         # Mock ajouter_article_par_barcode pour ne pas lever d'exception
-        with patch.object(service, 'ajouter_article_par_barcode'):
+        with patch.object(service, "ajouter_article_par_barcode"):
             result = service.importer_barcodes.__wrapped__(
-                service,
-                csv_content=csv_content,
-                session=mock_session
+                service, csv_content=csv_content, session=mock_session
             )
 
             assert result["success"] == 1
@@ -690,17 +642,13 @@ class TestListeExportImport:
     def test_importer_barcodes_csv_erreur(self, service, mock_session):
         """Test import CSV avec erreur."""
         csv_content = "barcode,nom,quantite,unite,categorie\n123,InvalidCode,1,u,Other"
-        
+
         # Mock ajouter_article_par_barcode pour lever une exception
         with patch.object(
-            service,
-            'ajouter_article_par_barcode',
-            side_effect=ErreurValidation("Code invalide")
+            service, "ajouter_article_par_barcode", side_effect=ErreurValidation("Code invalide")
         ):
             result = service.importer_barcodes.__wrapped__(
-                service,
-                csv_content=csv_content,
-                session=mock_session
+                service, csv_content=csv_content, session=mock_session
             )
 
             assert result["success"] == 0
@@ -708,9 +656,9 @@ class TestListeExportImport:
             assert result["errors"][0]["barcode"] == "123"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FACTORY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFactory:

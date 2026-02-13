@@ -1,4 +1,4 @@
-﻿"""
+"""
 UI Components - Point d'entrée
 Composants UI réutilisables organisés par thème
 """
@@ -26,7 +26,13 @@ from .dynamic import AssistantEtapes, ListeDynamique, Modale
 from .forms import barre_recherche, champ_formulaire, filtres_rapides, panneau_filtres
 
 # Layouts
-from .layouts import carte_item, conteneur_carte, disposition_grille, disposition_onglets, section_pliable
+from .layouts import (
+    carte_item,
+    conteneur_carte,
+    disposition_grille,
+    disposition_onglets,
+    section_pliable,
+)
 
 __all__ = [
     # Alertes

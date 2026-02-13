@@ -1,28 +1,29 @@
-﻿"""
+"""
 Tests unitaires complets pour src/services/base/types.py
 Module: BaseService - CRUD, recherche avancée, statistiques, bulk operations.
 
 Couverture cible: >80%
 """
 
-import pytest
-from unittest.mock import MagicMock, Mock, patch, call
 from datetime import datetime
-from sqlalchemy.orm import Session
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, Float
-from sqlalchemy.orm import sessionmaker, declarative_base
+from unittest.mock import MagicMock, Mock, patch
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# BASE DE TEST POUR INTÃ‰GRATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+import pytest
+from sqlalchemy import Boolean, Column, Float, Integer, String, create_engine
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
+
+# ═══════════════════════════════════════════════════════════
+# BASE DE TEST POUR INTÉGRATION
+# ═══════════════════════════════════════════════════════════
 
 TestBase = declarative_base()
 
 
 class ItemModel(TestBase):
     """Modèle de test pour intégration SQLite."""
+
     __tablename__ = "test_items"
-    
+
     id = Column(Integer, primary_key=True)
     nom = Column(String(100), nullable=False)
     statut = Column(String(50), default="actif")
@@ -30,34 +31,35 @@ class ItemModel(TestBase):
     prix = Column(Float, default=0.0)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# MODÃˆLE DE TEST (MOCK)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# MODÈLE DE TEST (MOCK)
+# ═══════════════════════════════════════════════════════════
 
 
 class MockModel:
     """Modèle fictif pour les tests unitaires."""
+
     __name__ = "MockModel"
     __tablename__ = "mock_models"
-    
+
     class __table__:
         columns = []
-    
+
     def __init__(self, **kwargs):
         self.id = kwargs.get("id", 1)
         self.nom = kwargs.get("nom", "Test")
         self.statut = kwargs.get("statut", "actif")
         self.actif = kwargs.get("actif", True)
         self.prix = kwargs.get("prix", 100)
-        
+
     @classmethod
     def query(cls):
         return MagicMock()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.fixture
@@ -88,6 +90,7 @@ def integration_db():
 def integration_service(integration_db):
     """BaseService avec modèle réel pour intégration."""
     from src.services.base.types import BaseService
+
     return BaseService(model=ItemModel, cache_ttl=60)
 
 
@@ -95,7 +98,7 @@ def integration_service(integration_db):
 def base_service():
     """Instance de BaseService avec modèle mocké."""
     from src.services.base.types import BaseService
-    
+
     service = BaseService(model=MockModel, cache_ttl=60)
     return service
 
@@ -109,9 +112,9 @@ def patch_db_context(mock_db):
         yield mock_db
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS INITIALISATION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -121,39 +124,39 @@ class TestBaseServiceInit:
     def test_init_sets_model(self):
         """Vérifie que le modèle est correctement défini."""
         from src.services.base.types import BaseService
-        
+
         service = BaseService(model=MockModel)
-        
+
         assert service.model == MockModel
 
     def test_init_sets_model_name(self):
         """Vérifie que le nom du modèle est extrait."""
         from src.services.base.types import BaseService
-        
+
         service = BaseService(model=MockModel)
-        
+
         assert service.model_name == "MockModel"
 
     def test_init_sets_default_cache_ttl(self):
         """Vérifie le TTL cache par défaut."""
         from src.services.base.types import BaseService
-        
+
         service = BaseService(model=MockModel)
-        
+
         assert service.cache_ttl == 60
 
     def test_init_custom_cache_ttl(self):
         """Vérifie le TTL cache personnalisé."""
         from src.services.base.types import BaseService
-        
+
         service = BaseService(model=MockModel, cache_ttl=300)
-        
+
         assert service.cache_ttl == 300
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CRUD - CREATE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -166,10 +169,10 @@ class TestBaseServiceCreate:
             with patch("src.core.errors.gerer_erreurs", lambda **kwargs: lambda f: f):
                 # On doit patcher _with_session pour exécuter directement
                 data = {"nom": "Nouvelle entité", "statut": "actif"}
-                
+
                 # Le modèle est appelé avec les données
                 result = base_service.create(data=data, db=mock_db)
-                
+
                 # Vérifier que add et commit ont été appelés
                 mock_db.add.assert_called()
                 mock_db.commit.assert_called()
@@ -179,15 +182,15 @@ class TestBaseServiceCreate:
         with patch.object(base_service, "_with_session") as mock_with:
             # Simuler le retour de l'exécution
             mock_with.return_value = MockModel(id=1, nom="Test")
-            
+
             result = base_service.create({"nom": "Test"}, db=mock_db)
-            
+
             assert result is not None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CRUD - GET BY ID
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -199,9 +202,9 @@ class TestBaseServiceGetById:
         with patch.object(base_service, "_with_session") as mock_with:
             mock_entity = MockModel(id=1, nom="Test")
             mock_with.return_value = mock_entity
-            
+
             result = base_service.get_by_id(entity_id=1, db=mock_db)
-            
+
             assert result is not None
             assert result.id == 1
 
@@ -209,15 +212,15 @@ class TestBaseServiceGetById:
         """Test ID non trouvé."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = None
-            
+
             result = base_service.get_by_id(entity_id=999, db=mock_db)
-            
+
             assert result is None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CRUD - GET ALL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -231,9 +234,9 @@ class TestBaseServiceGetAll:
                 MockModel(id=1, nom="Test1"),
                 MockModel(id=2, nom="Test2"),
             ]
-            
+
             result = base_service.get_all(db=mock_db)
-            
+
             assert isinstance(result, list)
             assert len(result) == 2
 
@@ -241,33 +244,33 @@ class TestBaseServiceGetAll:
         """Test pagination."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = [MockModel(id=2)]
-            
+
             result = base_service.get_all(skip=1, limit=1, db=mock_db)
-            
+
             assert len(result) == 1
 
     def test_get_all_with_filters(self, base_service, mock_db):
         """Test avec filtres."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = [MockModel(id=1, statut="actif")]
-            
+
             result = base_service.get_all(filters={"statut": "actif"}, db=mock_db)
-            
+
             assert len(result) == 1
 
     def test_get_all_with_order(self, base_service, mock_db):
         """Test avec tri."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = [MockModel(id=2), MockModel(id=1)]
-            
+
             result = base_service.get_all(order_by="id", desc_order=True, db=mock_db)
-            
+
             assert len(result) == 2
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CRUD - UPDATE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -275,28 +278,28 @@ class TestBaseServiceUpdate:
     """Tests pour la méthode update."""
 
     def test_update_returns_entity(self, base_service, mock_db):
-        """Test mise Ã  jour."""
+        """Test mise à jour."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_entity = MockModel(id=1, nom="Updated")
             mock_with.return_value = mock_entity
-            
+
             result = base_service.update(entity_id=1, data={"nom": "Updated"}, db=mock_db)
-            
+
             assert result is not None
 
     def test_update_not_found(self, base_service, mock_db):
-        """Test mise Ã  jour entité non trouvée."""
+        """Test mise à jour entité non trouvée."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = None
-            
+
             result = base_service.update(entity_id=999, data={"nom": "Updated"}, db=mock_db)
-            
+
             assert result is None
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CRUD - DELETE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -307,24 +310,24 @@ class TestBaseServiceDelete:
         """Test suppression réussie."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = True
-            
+
             result = base_service.delete(entity_id=1, db=mock_db)
-            
+
             assert result is True
 
     def test_delete_not_found(self, base_service, mock_db):
         """Test suppression entité non trouvée."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = False
-            
+
             result = base_service.delete(entity_id=999, db=mock_db)
-            
+
             assert result is False
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS COUNT
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -335,24 +338,24 @@ class TestBaseServiceCount:
         """Test comptage."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = 5
-            
+
             result = base_service.count(db=mock_db)
-            
+
             assert result == 5
 
     def test_count_with_filters(self, base_service, mock_db):
         """Test comptage avec filtres."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = 3
-            
+
             result = base_service.count(filters={"statut": "actif"}, db=mock_db)
-            
+
             assert result == 3
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS RECHERCHE AVANCÃ‰E
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS RECHERCHE AVANCÉE
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -363,57 +366,44 @@ class TestBaseServiceAdvancedSearch:
         """Test recherche textuelle."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = [MockModel(id=1, nom="Recherche")]
-            
+
             result = base_service.advanced_search(
-                search_term="Recherche", 
-                search_fields=["nom"],
-                db=mock_db
+                search_term="Recherche", search_fields=["nom"], db=mock_db
             )
-            
+
             assert len(result) == 1
 
     def test_search_with_filters(self, base_service, mock_db):
         """Test recherche avec filtres."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = [MockModel(id=1, statut="actif")]
-            
-            result = base_service.advanced_search(
-                filters={"statut": "actif"},
-                db=mock_db
-            )
-            
+
+            result = base_service.advanced_search(filters={"statut": "actif"}, db=mock_db)
+
             assert len(result) == 1
 
     def test_search_with_sort(self, base_service, mock_db):
         """Test recherche avec tri."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = [MockModel(id=2), MockModel(id=1)]
-            
-            result = base_service.advanced_search(
-                sort_by="id",
-                sort_desc=True,
-                db=mock_db
-            )
-            
+
+            result = base_service.advanced_search(sort_by="id", sort_desc=True, db=mock_db)
+
             assert len(result) == 2
 
     def test_search_with_pagination(self, base_service, mock_db):
         """Test recherche avec pagination."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = [MockModel(id=2)]
-            
-            result = base_service.advanced_search(
-                offset=1,
-                limit=1,
-                db=mock_db
-            )
-            
+
+            result = base_service.advanced_search(offset=1, limit=1, db=mock_db)
+
             assert len(result) == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS BULK OPERATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -424,20 +414,20 @@ class TestBaseServiceBulkOperations:
         """Test création en masse."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = (3, 0)  # 3 créés, 0 fusionnés
-            
+
             items_data = [
                 {"nom": "Item1", "statut": "actif"},
                 {"nom": "Item2", "statut": "actif"},
                 {"nom": "Item3", "statut": "actif"},
             ]
-            
+
             created, merged = base_service.bulk_create_with_merge(
                 items_data=items_data,
                 merge_key="nom",
                 merge_strategy=lambda old, new: {**old, **new},
-                db=mock_db
+                db=mock_db,
             )
-            
+
             assert created == 3
             assert merged == 0
 
@@ -445,39 +435,39 @@ class TestBaseServiceBulkOperations:
         """Test fusion en masse."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = (0, 2)  # 0 créés, 2 fusionnés
-            
+
             result = base_service.bulk_create_with_merge(
                 items_data=[{"nom": "Existing1"}, {"nom": "Existing2"}],
                 merge_key="nom",
                 merge_strategy=lambda old, new: {**old, **new},
-                db=mock_db
+                db=mock_db,
             )
-            
+
             assert result[1] == 2
 
     def test_bulk_create_skip_no_merge_key(self, base_service, mock_db):
         """Test skip items sans clé de fusion."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = (1, 0)  # 1 créé (sans clé ignoré)
-            
+
             items_data = [
                 {"nom": "Item1"},
                 {"statut": "actif"},  # Pas de clé 'nom'
             ]
-            
+
             created, merged = base_service.bulk_create_with_merge(
                 items_data=items_data,
                 merge_key="nom",
                 merge_strategy=lambda old, new: new,
-                db=mock_db
+                db=mock_db,
             )
-            
+
             assert created == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -488,48 +478,36 @@ class TestBaseServiceStats:
         """Test statistiques - total."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = {"total": 10}
-            
+
             result = base_service.get_stats(db=mock_db)
-            
+
             assert "total" in result
             assert result["total"] == 10
 
     def test_get_stats_grouped(self, base_service, mock_db):
         """Test statistiques groupées."""
         with patch.object(base_service, "_with_session") as mock_with:
-            mock_with.return_value = {
-                "total": 10,
-                "by_statut": {"actif": 7, "inactif": 3}
-            }
-            
-            result = base_service.get_stats(
-                group_by_fields=["statut"],
-                db=mock_db
-            )
-            
+            mock_with.return_value = {"total": 10, "by_statut": {"actif": 7, "inactif": 3}}
+
+            result = base_service.get_stats(group_by_fields=["statut"], db=mock_db)
+
             assert "by_statut" in result
             assert result["by_statut"]["actif"] == 7
 
     def test_get_stats_count_filters(self, base_service, mock_db):
         """Test compteurs conditionnels."""
         with patch.object(base_service, "_with_session") as mock_with:
-            mock_with.return_value = {
-                "total": 10,
-                "actifs": 7
-            }
-            
-            result = base_service.get_stats(
-                count_filters={"actifs": {"actif": True}},
-                db=mock_db
-            )
-            
+            mock_with.return_value = {"total": 10, "actifs": 7}
+
+            result = base_service.get_stats(count_filters={"actifs": {"actif": True}}, db=mock_db)
+
             assert "actifs" in result
             assert result["actifs"] == 7
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS MIXINS STATUS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -539,27 +517,21 @@ class TestBaseServiceStatusMixin:
     def test_count_by_status(self, base_service, mock_db):
         """Test comptage par statut."""
         with patch.object(base_service, "get_stats") as mock_stats:
-            mock_stats.return_value = {
-                "total": 10,
-                "by_statut": {"actif": 7, "inactif": 3}
-            }
-            
+            mock_stats.return_value = {"total": 10, "by_statut": {"actif": 7, "inactif": 3}}
+
             result = base_service.count_by_status(status_field="statut", db=mock_db)
-            
+
             assert result == {"actif": 7, "inactif": 3}
 
     def test_mark_as(self, base_service, mock_db):
         """Test marquage de statut."""
         with patch.object(base_service, "update") as mock_update:
             mock_update.return_value = MockModel(id=1, statut="termine")
-            
+
             result = base_service.mark_as(
-                item_id=1,
-                status_field="statut",
-                status_value="termine",
-                db=mock_db
+                item_id=1, status_field="statut", status_value="termine", db=mock_db
             )
-            
+
             assert result is True
             mock_update.assert_called_once_with(1, {"statut": "termine"}, db=mock_db)
 
@@ -567,20 +539,17 @@ class TestBaseServiceStatusMixin:
         """Test marquage entité non trouvée."""
         with patch.object(base_service, "update") as mock_update:
             mock_update.return_value = None
-            
+
             result = base_service.mark_as(
-                item_id=999,
-                status_field="statut",
-                status_value="termine",
-                db=mock_db
+                item_id=999, status_field="statut", status_value="termine", db=mock_db
             )
-            
+
             assert result is False
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS HELPERS PRIVÃ‰S
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS HELPERS PRIVÉS
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -590,9 +559,9 @@ class TestBaseServiceHelpers:
     def test_with_session_uses_provided_db(self, base_service, mock_db):
         """Test _with_session avec session fournie."""
         mock_func = MagicMock(return_value="result")
-        
+
         result = base_service._with_session(mock_func, db=mock_db)
-        
+
         mock_func.assert_called_once_with(mock_db)
         assert result == "result"
 
@@ -600,13 +569,13 @@ class TestBaseServiceHelpers:
         """Test _with_session crée un contexte si pas de session."""
         mock_func = MagicMock(return_value="result")
         mock_session = MagicMock()
-        
+
         with patch("src.core.database.obtenir_contexte_db") as mock_ctx:
             mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_ctx.return_value.__exit__ = MagicMock(return_value=None)
-            
+
             result = base_service._with_session(mock_func, db=None)
-            
+
             # Vérifier que le context manager est utilisé
             mock_ctx.assert_called_once()
 
@@ -614,30 +583,30 @@ class TestBaseServiceHelpers:
         """Test _apply_filters avec comparaison simple."""
         mock_query = MagicMock()
         mock_query.filter = MagicMock(return_value=mock_query)
-        
+
         # On doit mocker le modèle pour avoir les colonnes
         with patch.object(base_service, "model") as mock_model:
             mock_model.nom = MagicMock()
-            
+
             result = base_service._apply_filters(mock_query, {"nom": "Test"})
-            
+
             mock_query.filter.assert_called()
 
     def test_apply_filters_operators(self, base_service):
         """Test _apply_filters avec opérateurs."""
         mock_query = MagicMock()
         mock_query.filter = MagicMock(return_value=mock_query)
-        
+
         with patch.object(base_service, "model") as mock_model:
             mock_model.prix = MagicMock()
             mock_model.prix.__ge__ = MagicMock()
             mock_model.prix.__le__ = MagicMock()
-            
+
             # Filtres avec opérateurs
             filters = {"prix": {"gte": 50, "lte": 100}}
-            
+
             result = base_service._apply_filters(mock_query, filters)
-            
+
             # Deux appels filter (gte et lte)
             assert mock_query.filter.call_count >= 1
 
@@ -645,37 +614,37 @@ class TestBaseServiceHelpers:
         """Test _apply_filters avec opérateur in."""
         mock_query = MagicMock()
         mock_query.filter = MagicMock(return_value=mock_query)
-        
+
         with patch.object(base_service, "model") as mock_model:
             mock_model.statut = MagicMock()
             mock_model.statut.in_ = MagicMock()
-            
+
             filters = {"statut": {"in": ["actif", "inactif"]}}
-            
+
             result = base_service._apply_filters(mock_query, filters)
-            
+
             mock_query.filter.assert_called()
 
     def test_apply_filters_like_operator(self, base_service):
         """Test _apply_filters avec opérateur like."""
         mock_query = MagicMock()
         mock_query.filter = MagicMock(return_value=mock_query)
-        
+
         with patch.object(base_service, "model") as mock_model:
             mock_model.nom = MagicMock()
             mock_model.nom.ilike = MagicMock()
-            
+
             filters = {"nom": {"like": "Test"}}
-            
+
             result = base_service._apply_filters(mock_query, filters)
-            
+
             mock_query.filter.assert_called()
 
     def test_model_to_dict(self, base_service):
         """Test _model_to_dict conversion."""
         mock_obj = MagicMock()
         mock_obj.__table__ = MagicMock()
-        
+
         # Simuler des colonnes
         col1 = MagicMock()
         col1.name = "id"
@@ -683,14 +652,14 @@ class TestBaseServiceHelpers:
         col2.name = "nom"
         col3 = MagicMock()
         col3.name = "created_at"
-        
+
         mock_obj.__table__.columns = [col1, col2, col3]
         mock_obj.id = 1
         mock_obj.nom = "Test"
         mock_obj.created_at = datetime(2024, 1, 1, 12, 0, 0)
-        
+
         result = base_service._model_to_dict(mock_obj)
-        
+
         assert result["id"] == 1
         assert result["nom"] == "Test"
         assert result["created_at"] == "2024-01-01T12:00:00"
@@ -699,13 +668,13 @@ class TestBaseServiceHelpers:
         """Test _invalider_cache."""
         with patch("src.core.cache.Cache.invalider") as mock_invalider:
             base_service._invalider_cache()
-            
+
             mock_invalider.assert_called_once_with(pattern="mockmodel")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS EDGE CASES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -716,51 +685,49 @@ class TestBaseServiceEdgeCases:
         """Test liste vide."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = []
-            
+
             result = base_service.get_all(db=mock_db)
-            
+
             assert result == []
 
     def test_count_zero(self, base_service, mock_db):
         """Test comptage zéro."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = 0
-            
+
             result = base_service.count(db=mock_db)
-            
+
             assert result == 0
 
     def test_advanced_search_no_results(self, base_service, mock_db):
         """Test recherche sans résultats."""
         with patch.object(base_service, "_with_session") as mock_with:
             mock_with.return_value = []
-            
+
             result = base_service.advanced_search(
-                search_term="inexistant",
-                search_fields=["nom"],
-                db=mock_db
+                search_term="inexistant", search_fields=["nom"], db=mock_db
             )
-            
+
             assert result == []
 
     def test_apply_filters_unknown_field(self, base_service):
         """Test filtres avec champ inconnu."""
         mock_query = MagicMock()
-        
+
         with patch.object(base_service, "model") as mock_model:
             # Le modèle n'a pas l'attribut 'inconnu'
             delattr(mock_model, "inconnu") if hasattr(mock_model, "inconnu") else None
-            
+
             # Ne doit pas lever d'erreur
             result = base_service._apply_filters(mock_query, {"inconnu": "valeur"})
-            
+
             # La requête doit être retournée sans modification
             assert result is mock_query
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS GENERIC TYPE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
@@ -769,31 +736,32 @@ class TestBaseServiceGeneric:
 
     def test_is_generic(self):
         """Vérifie que BaseService est Generic[T]."""
+
         from src.services.base.types import BaseService
-        import typing
-        
+
         # Vérifier que c'est une classe générique
         assert hasattr(BaseService, "__class_getitem__")
 
     def test_typevar_export(self):
         """Vérifie que T est exporté."""
-        from src.services.base.types import T
         from typing import TypeVar
-        
+
+        from src.services.base.types import T
+
         assert isinstance(T, TypeVar)
 
     def test_all_exports(self):
         """Vérifie les exports __all__."""
         from src.services.base import types
-        
+
         assert hasattr(types, "__all__")
         assert "BaseService" in types.__all__
         assert "T" in types.__all__
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS D'INTÃ‰GRATION AVEC SQLITE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# TESTS D'INTÉGRATION AVEC SQLITE
+# ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.integration
@@ -804,10 +772,9 @@ class TestBaseServiceIntegration:
         """Test création réelle."""
         with patch("src.core.cache.Cache.invalider"):
             result = integration_service.create(
-                data={"nom": "Test Item", "statut": "actif", "prix": 10.5},
-                db=integration_db
+                data={"nom": "Test Item", "statut": "actif", "prix": 10.5}, db=integration_db
             )
-        
+
         assert result is not None
         assert result.nom == "Test Item"
         assert result.id is not None
@@ -817,15 +784,14 @@ class TestBaseServiceIntegration:
         # Créer d'abord
         with patch("src.core.cache.Cache.invalider"):
             entity = integration_service.create(
-                data={"nom": "GetTest", "statut": "actif"},
-                db=integration_db
+                data={"nom": "GetTest", "statut": "actif"}, db=integration_db
             )
-        
+
         # Récupérer
         with patch("src.core.cache.Cache.obtenir", return_value=None):
             with patch("src.core.cache.Cache.definir"):
                 result = integration_service.get_by_id(entity.id, db=integration_db)
-        
+
         assert result is not None
         assert result.nom == "GetTest"
 
@@ -833,22 +799,22 @@ class TestBaseServiceIntegration:
         """Test get_by_id avec ID inexistant."""
         with patch("src.core.cache.Cache.obtenir", return_value=None):
             result = integration_service.get_by_id(999, db=integration_db)
-        
+
         assert result is None
 
     def test_get_by_id_cache_hit(self, integration_service, integration_db):
         """Test get_by_id avec cache hit."""
         cached_entity = ItemModel(id=1, nom="Cached")
-        
+
         with patch("src.core.cache.Cache.obtenir", return_value=cached_entity):
             result = integration_service.get_by_id(1, db=integration_db)
-        
+
         assert result == cached_entity
 
     def test_get_all_empty(self, integration_service, integration_db):
         """Test get_all sans données."""
         result = integration_service.get_all(db=integration_db)
-        
+
         assert result == []
 
     def test_get_all_with_data(self, integration_service, integration_db):
@@ -857,9 +823,9 @@ class TestBaseServiceIntegration:
         with patch("src.core.cache.Cache.invalider"):
             integration_service.create({"nom": "Item1"}, db=integration_db)
             integration_service.create({"nom": "Item2"}, db=integration_db)
-        
+
         result = integration_service.get_all(db=integration_db)
-        
+
         assert len(result) == 2
 
     def test_get_all_with_skip_limit(self, integration_service, integration_db):
@@ -867,9 +833,9 @@ class TestBaseServiceIntegration:
         with patch("src.core.cache.Cache.invalider"):
             for i in range(5):
                 integration_service.create({"nom": f"Item{i}"}, db=integration_db)
-        
+
         result = integration_service.get_all(skip=2, limit=2, db=integration_db)
-        
+
         assert len(result) == 2
 
     def test_get_all_with_filters(self, integration_service, integration_db):
@@ -877,9 +843,9 @@ class TestBaseServiceIntegration:
         with patch("src.core.cache.Cache.invalider"):
             integration_service.create({"nom": "Active", "actif": True}, db=integration_db)
             integration_service.create({"nom": "Inactive", "actif": False}, db=integration_db)
-        
+
         result = integration_service.get_all(filters={"actif": True}, db=integration_db)
-        
+
         assert len(result) == 1
         assert result[0].nom == "Active"
 
@@ -889,9 +855,9 @@ class TestBaseServiceIntegration:
             integration_service.create({"nom": "B"}, db=integration_db)
             integration_service.create({"nom": "A"}, db=integration_db)
             integration_service.create({"nom": "C"}, db=integration_db)
-        
+
         result = integration_service.get_all(order_by="nom", db=integration_db)
-        
+
         assert result[0].nom == "A"
         assert result[2].nom == "C"
 
@@ -900,46 +866,42 @@ class TestBaseServiceIntegration:
         with patch("src.core.cache.Cache.invalider"):
             integration_service.create({"nom": "B"}, db=integration_db)
             integration_service.create({"nom": "A"}, db=integration_db)
-        
+
         result = integration_service.get_all(order_by="nom", desc_order=True, db=integration_db)
-        
+
         assert result[0].nom == "B"
 
     def test_update_success(self, integration_service, integration_db):
-        """Test mise Ã  jour réussie."""
+        """Test mise à jour réussie."""
         with patch("src.core.cache.Cache.invalider"):
             entity = integration_service.create({"nom": "Original"}, db=integration_db)
-            
-            result = integration_service.update(
-                entity.id, 
-                {"nom": "Updated"}, 
-                db=integration_db
-            )
-        
+
+            result = integration_service.update(entity.id, {"nom": "Updated"}, db=integration_db)
+
         assert result is not None
         assert result.nom == "Updated"
 
     def test_update_not_found(self, integration_service, integration_db):
-        """Test mise Ã  jour entité non trouvée."""
+        """Test mise à jour entité non trouvée."""
         with patch("src.core.cache.Cache.invalider"):
             result = integration_service.update(999, {"nom": "Test"}, db=integration_db)
-        
+
         assert result is None
 
     def test_delete_success(self, integration_service, integration_db):
         """Test suppression réussie."""
         with patch("src.core.cache.Cache.invalider"):
             entity = integration_service.create({"nom": "ToDelete"}, db=integration_db)
-            
+
             result = integration_service.delete(entity.id, db=integration_db)
-        
+
         assert result is True
 
     def test_delete_not_found(self, integration_service, integration_db):
         """Test suppression entité non trouvée."""
         with patch("src.core.cache.Cache.invalider"):
             result = integration_service.delete(999, db=integration_db)
-        
+
         assert result is False
 
     def test_count(self, integration_service, integration_db):
@@ -947,9 +909,9 @@ class TestBaseServiceIntegration:
         with patch("src.core.cache.Cache.invalider"):
             integration_service.create({"nom": "A"}, db=integration_db)
             integration_service.create({"nom": "B"}, db=integration_db)
-        
+
         result = integration_service.count(db=integration_db)
-        
+
         assert result == 2
 
     def test_count_with_filters(self, integration_service, integration_db):
@@ -957,9 +919,9 @@ class TestBaseServiceIntegration:
         with patch("src.core.cache.Cache.invalider"):
             integration_service.create({"nom": "A", "actif": True}, db=integration_db)
             integration_service.create({"nom": "B", "actif": False}, db=integration_db)
-        
+
         result = integration_service.count(filters={"actif": True}, db=integration_db)
-        
+
         assert result == 1
 
 
@@ -973,13 +935,11 @@ class TestBaseServiceAdvancedSearchIntegration:
             integration_service.create({"nom": "Pommes"}, db=integration_db)
             integration_service.create({"nom": "Oranges"}, db=integration_db)
             integration_service.create({"nom": "Pommes vertes"}, db=integration_db)
-        
+
         result = integration_service.advanced_search(
-            search_term="Pommes",
-            search_fields=["nom"],
-            db=integration_db
+            search_term="Pommes", search_fields=["nom"], db=integration_db
         )
-        
+
         assert len(result) == 2
 
     def test_search_with_filters_and_sort(self, integration_service, integration_db):
@@ -988,14 +948,11 @@ class TestBaseServiceAdvancedSearchIntegration:
             integration_service.create({"nom": "Z", "actif": True}, db=integration_db)
             integration_service.create({"nom": "A", "actif": True}, db=integration_db)
             integration_service.create({"nom": "B", "actif": False}, db=integration_db)
-        
+
         result = integration_service.advanced_search(
-            filters={"actif": True},
-            sort_by="nom",
-            sort_desc=False,
-            db=integration_db
+            filters={"actif": True}, sort_by="nom", sort_desc=False, db=integration_db
         )
-        
+
         assert len(result) == 2
         assert result[0].nom == "A"
 
@@ -1003,14 +960,12 @@ class TestBaseServiceAdvancedSearchIntegration:
         """Test recherche avec champ invalide."""
         with patch("src.core.cache.Cache.invalider"):
             integration_service.create({"nom": "Test"}, db=integration_db)
-        
+
         # Ne doit pas lever d'erreur
         result = integration_service.advanced_search(
-            search_term="Test",
-            search_fields=["champ_inexistant"],
-            db=integration_db
+            search_term="Test", search_fields=["champ_inexistant"], db=integration_db
         )
-        
+
         assert isinstance(result, list)
 
 
@@ -1025,33 +980,33 @@ class TestBaseServiceBulkIntegration:
                 {"nom": "Item1", "prix": 10},
                 {"nom": "Item2", "prix": 20},
             ]
-            
+
             created, merged = integration_service.bulk_create_with_merge(
                 items_data=items,
                 merge_key="nom",
                 merge_strategy=lambda old, new: {**old, **new},
-                db=integration_db
+                db=integration_db,
             )
-        
+
         assert created == 2
         assert merged == 0
 
     def test_bulk_create_with_merge_existing(self, integration_service, integration_db):
-        """Test mise Ã  jour en masse d'items existants."""
+        """Test mise à jour en masse d'items existants."""
         with patch("src.core.cache.Cache.invalider"):
             # Créer d'abord
             integration_service.create({"nom": "Existing", "prix": 10}, db=integration_db)
-            
+
             # Puis bulk merge
             items = [{"nom": "Existing", "prix": 20}]
-            
+
             created, merged = integration_service.bulk_create_with_merge(
                 items_data=items,
                 merge_key="nom",
                 merge_strategy=lambda old, new: {**new},
-                db=integration_db
+                db=integration_db,
             )
-        
+
         assert created == 0
         assert merged == 1
 
@@ -1062,14 +1017,14 @@ class TestBaseServiceBulkIntegration:
                 {"nom": "Valid", "prix": 10},
                 {"prix": 20},  # Pas de nom
             ]
-            
+
             created, merged = integration_service.bulk_create_with_merge(
                 items_data=items,
                 merge_key="nom",
                 merge_strategy=lambda old, new: new,
-                db=integration_db
+                db=integration_db,
             )
-        
+
         assert created == 1
 
 
@@ -1082,9 +1037,9 @@ class TestBaseServiceStatsIntegration:
         with patch("src.core.cache.Cache.invalider"):
             for i in range(5):
                 integration_service.create({"nom": f"Item{i}"}, db=integration_db)
-        
+
         result = integration_service.get_stats(db=integration_db)
-        
+
         assert result["total"] == 5
 
     def test_get_stats_grouped(self, integration_service, integration_db):
@@ -1093,12 +1048,9 @@ class TestBaseServiceStatsIntegration:
             integration_service.create({"nom": "A", "statut": "actif"}, db=integration_db)
             integration_service.create({"nom": "B", "statut": "actif"}, db=integration_db)
             integration_service.create({"nom": "C", "statut": "inactif"}, db=integration_db)
-        
-        result = integration_service.get_stats(
-            group_by_fields=["statut"],
-            db=integration_db
-        )
-        
+
+        result = integration_service.get_stats(group_by_fields=["statut"], db=integration_db)
+
         assert "by_statut" in result
         assert result["by_statut"]["actif"] == 2
         assert result["by_statut"]["inactif"] == 1
@@ -1109,12 +1061,11 @@ class TestBaseServiceStatsIntegration:
             integration_service.create({"nom": "A", "actif": True}, db=integration_db)
             integration_service.create({"nom": "B", "actif": True}, db=integration_db)
             integration_service.create({"nom": "C", "actif": False}, db=integration_db)
-        
+
         result = integration_service.get_stats(
-            count_filters={"actifs": {"actif": True}},
-            db=integration_db
+            count_filters={"actifs": {"actif": True}}, db=integration_db
         )
-        
+
         assert result["actifs"] == 2
 
     def test_get_stats_count_filters_operators(self, integration_service, integration_db):
@@ -1123,15 +1074,15 @@ class TestBaseServiceStatsIntegration:
             integration_service.create({"nom": "A", "prix": 50}, db=integration_db)
             integration_service.create({"nom": "B", "prix": 100}, db=integration_db)
             integration_service.create({"nom": "C", "prix": 150}, db=integration_db)
-        
+
         result = integration_service.get_stats(
             count_filters={
                 "prix_haut": {"prix": {"gte": 100}},
                 "prix_bas": {"prix": {"lt": 100}},
             },
-            db=integration_db
+            db=integration_db,
         )
-        
+
         assert result["prix_haut"] == 2
         assert result["prix_bas"] == 1
 
@@ -1145,12 +1096,9 @@ class TestBaseServiceFiltersIntegration:
         with patch("src.core.cache.Cache.invalider"):
             integration_service.create({"nom": "A", "prix": 50}, db=integration_db)
             integration_service.create({"nom": "B", "prix": 100}, db=integration_db)
-        
-        result = integration_service.get_all(
-            filters={"prix": {"gte": 100}},
-            db=integration_db
-        )
-        
+
+        result = integration_service.get_all(filters={"prix": {"gte": 100}}, db=integration_db)
+
         assert len(result) == 1
         assert result[0].nom == "B"
 
@@ -1159,12 +1107,9 @@ class TestBaseServiceFiltersIntegration:
         with patch("src.core.cache.Cache.invalider"):
             integration_service.create({"nom": "A", "prix": 50}, db=integration_db)
             integration_service.create({"nom": "B", "prix": 100}, db=integration_db)
-        
-        result = integration_service.get_all(
-            filters={"prix": {"lte": 50}},
-            db=integration_db
-        )
-        
+
+        result = integration_service.get_all(filters={"prix": {"lte": 50}}, db=integration_db)
+
         assert len(result) == 1
         assert result[0].nom == "A"
 
@@ -1174,12 +1119,11 @@ class TestBaseServiceFiltersIntegration:
             integration_service.create({"nom": "A", "statut": "actif"}, db=integration_db)
             integration_service.create({"nom": "B", "statut": "inactif"}, db=integration_db)
             integration_service.create({"nom": "C", "statut": "archive"}, db=integration_db)
-        
+
         result = integration_service.get_all(
-            filters={"statut": {"in": ["actif", "inactif"]}},
-            db=integration_db
+            filters={"statut": {"in": ["actif", "inactif"]}}, db=integration_db
         )
-        
+
         assert len(result) == 2
 
     def test_filter_like(self, integration_service, integration_db):
@@ -1188,10 +1132,7 @@ class TestBaseServiceFiltersIntegration:
             integration_service.create({"nom": "Pommes rouges"}, db=integration_db)
             integration_service.create({"nom": "Pommes vertes"}, db=integration_db)
             integration_service.create({"nom": "Oranges"}, db=integration_db)
-        
-        result = integration_service.get_all(
-            filters={"nom": {"like": "Pommes"}},
-            db=integration_db
-        )
-        
+
+        result = integration_service.get_all(filters={"nom": {"like": "Pommes"}}, db=integration_db)
+
         assert len(result) == 2

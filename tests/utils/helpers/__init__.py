@@ -1,1 +1,1 @@
-﻿# Helpers tests
+# Helpers tests

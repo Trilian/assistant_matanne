@@ -1,32 +1,33 @@
-﻿"""
+"""
 Tests pour projets_logic.py
 Couverture cible: 80%+
 """
+
+from datetime import date, timedelta
+
 import pytest
-from datetime import date, datetime, timedelta
 
 from src.modules.maison.projets_utils import (
+    CATEGORIES_PROJET,
+    PRIORITES,
     # Constantes
     STATUTS_PROJET,
-    PRIORITES,
-    CATEGORIES_PROJET,
+    calculer_budget_total,
+    calculer_jours_restants,
+    calculer_statistiques_projets,
     # Fonctions
     calculer_urgence_projet,
-    calculer_jours_restants,
-    filtrer_par_statut,
-    filtrer_par_priorite,
     filtrer_par_categorie,
-    get_projets_urgents,
-    get_projets_en_cours,
+    filtrer_par_priorite,
+    filtrer_par_statut,
     get_projets_a_faire,
-    calculer_statistiques_projets,
-    calculer_budget_total,
+    get_projets_en_cours,
+    get_projets_urgents,
 )
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CONSTANTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConstantes:
@@ -52,9 +53,9 @@ class TestConstantes:
         assert "Réparation" in CATEGORIES_PROJET
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CALCUL URGENCE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculUrgence:
@@ -67,48 +68,36 @@ class TestCalculUrgence:
 
     def test_urgence_moins_7_jours(self):
         """Urgent si moins de 7 jours."""
-        projet = {
-            "priorite": "Basse",
-            "date_limite": date.today() + timedelta(days=5)
-        }
+        projet = {"priorite": "Basse", "date_limite": date.today() + timedelta(days=5)}
         assert calculer_urgence_projet(projet) == "Urgente"
 
     def test_urgence_priorite_urgente(self):
-        """Urgent si priorité déjÃ  urgente."""
-        projet = {
-            "priorite": "Urgente",
-            "date_limite": date.today() + timedelta(days=30)
-        }
+        """Urgent si priorité déjà urgente."""
+        projet = {"priorite": "Urgente", "date_limite": date.today() + timedelta(days=30)}
         assert calculer_urgence_projet(projet) == "Urgente"
 
     def test_haute_si_moins_14_jours(self):
         """Haute si 7-14 jours et priorité moyenne+."""
-        projet = {
-            "priorite": "Moyenne",
-            "date_limite": date.today() + timedelta(days=10)
-        }
+        projet = {"priorite": "Moyenne", "date_limite": date.today() + timedelta(days=10)}
         assert calculer_urgence_projet(projet) == "Haute"
 
     def test_garde_priorite_si_loin(self):
         """Garde la priorité si date loin."""
-        projet = {
-            "priorite": "Basse",
-            "date_limite": date.today() + timedelta(days=30)
-        }
+        projet = {"priorite": "Basse", "date_limite": date.today() + timedelta(days=30)}
         assert calculer_urgence_projet(projet) == "Basse"
 
     def test_date_string(self):
         """Gère les dates en string ISO."""
         projet = {
             "priorite": "Moyenne",
-            "date_limite": (date.today() + timedelta(days=3)).isoformat()
+            "date_limite": (date.today() + timedelta(days=3)).isoformat(),
         }
         assert calculer_urgence_projet(projet) == "Urgente"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS CALCUL JOURS RESTANTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculJoursRestants:
@@ -135,9 +124,9 @@ class TestCalculJoursRestants:
         assert calculer_jours_restants(projet) == 7
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS FILTRAGE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestFiltrageProjets:
@@ -146,9 +135,24 @@ class TestFiltrageProjets:
     @pytest.fixture
     def projets(self):
         return [
-            {"titre": "Cuisine", "statut": "En cours", "priorite": "Haute", "categorie": "Rénovation"},
-            {"titre": "Peinture", "statut": "À faire", "priorite": "Moyenne", "categorie": "Décoration"},
-            {"titre": "Jardin", "statut": "Terminé", "priorite": "Basse", "categorie": "Amélioration"},
+            {
+                "titre": "Cuisine",
+                "statut": "En cours",
+                "priorite": "Haute",
+                "categorie": "Rénovation",
+            },
+            {
+                "titre": "Peinture",
+                "statut": "À faire",
+                "priorite": "Moyenne",
+                "categorie": "Décoration",
+            },
+            {
+                "titre": "Jardin",
+                "statut": "Terminé",
+                "priorite": "Basse",
+                "categorie": "Amélioration",
+            },
         ]
 
     def test_filtrer_par_statut(self, projets):
@@ -175,10 +179,18 @@ class TestGetProjetsSpecifiques:
     def projets(self):
         return [
             {"titre": "Urgent1", "priorite": "Urgente", "statut": "En cours"},
-            {"titre": "Urgent2", "priorite": "Moyenne", "statut": "À faire",
-             "date_limite": date.today() + timedelta(days=3)},
-            {"titre": "Normal", "priorite": "Basse", "statut": "À faire",
-             "date_limite": date.today() + timedelta(days=30)},
+            {
+                "titre": "Urgent2",
+                "priorite": "Moyenne",
+                "statut": "À faire",
+                "date_limite": date.today() + timedelta(days=3),
+            },
+            {
+                "titre": "Normal",
+                "priorite": "Basse",
+                "statut": "À faire",
+                "date_limite": date.today() + timedelta(days=30),
+            },
             {"titre": "EnCours", "priorite": "Moyenne", "statut": "En cours"},
         ]
 
@@ -202,14 +214,14 @@ class TestGetProjetsSpecifiques:
         assert len(result) == 2
 
     def test_get_projets_a_faire(self, projets):
-        """Retourne les projets Ã  faire."""
+        """Retourne les projets à faire."""
         result = get_projets_a_faire(projets)
         assert len(result) == 2
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS STATISTIQUES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestStatistiquesProjets:
@@ -220,8 +232,12 @@ class TestStatistiquesProjets:
         return [
             {"titre": "P1", "statut": "Terminé", "priorite": "Haute"},
             {"titre": "P2", "statut": "En cours", "priorite": "Moyenne"},
-            {"titre": "P3", "statut": "À faire", "priorite": "Urgente",
-             "date_limite": date.today() + timedelta(days=3)},
+            {
+                "titre": "P3",
+                "statut": "À faire",
+                "priorite": "Urgente",
+                "date_limite": date.today() + timedelta(days=3),
+            },
             {"titre": "P4", "statut": "Terminé", "priorite": "Basse"},
         ]
 
@@ -258,9 +274,9 @@ class TestStatistiquesProjets:
         assert result["taux_completion"] == 0.0
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TESTS BUDGET
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class TestCalculBudget:

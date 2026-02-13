@@ -1,14 +1,13 @@
-﻿"""
+"""
 Tests approfondis pour src/core/errors.py
 
 Cible: Atteindre 80%+ de couverture
 Lignes manquantes: 50-55, 101-154, 330-361, 417
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-import traceback
+from unittest.mock import MagicMock, Mock, patch
 
+import pytest
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS: gerer_erreurs decorator - lignes 101-154
@@ -498,11 +497,12 @@ class TestIsDebugMode:
 
     def test_debug_mode_true(self):
         """Test mode debug True quand configurÃ©"""
-        from src.core.errors import _is_debug_mode
         import streamlit as st
 
+        from src.core.errors import _is_debug_mode
+
         # Simuler session_state avec debug_mode=True
-        original_state = dict(st.session_state) if hasattr(st, 'session_state') else {}
+        original_state = dict(st.session_state) if hasattr(st, "session_state") else {}
         try:
             st.session_state["debug_mode"] = True
             result = _is_debug_mode()

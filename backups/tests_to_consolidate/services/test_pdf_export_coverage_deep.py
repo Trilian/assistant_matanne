@@ -1,14 +1,11 @@
-﻿"""
+"""
 Tests complets pour src/services/pdf_export.py
 
 Couverture cible: >80%
 """
 
-import pytest
 from datetime import datetime, timedelta
 from io import BytesIO
-from unittest.mock import Mock, patch, MagicMock
-
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SCHÃ‰MAS PYDANTIC
@@ -20,13 +17,14 @@ class TestRecettePDFData:
 
     def test_import_schema(self):
         from src.services.pdf_export import RecettePDFData
+
         assert RecettePDFData is not None
 
     def test_creation_minimal(self):
         from src.services.pdf_export import RecettePDFData
-        
+
         data = RecettePDFData(id=1, nom="Tarte aux pommes")
-        
+
         assert data.id == 1
         assert data.nom == "Tarte aux pommes"
         assert data.description == ""
@@ -40,7 +38,7 @@ class TestRecettePDFData:
 
     def test_creation_complete(self):
         from src.services.pdf_export import RecettePDFData
-        
+
         data = RecettePDFData(
             id=1,
             nom="Tarte aux pommes",
@@ -51,12 +49,12 @@ class TestRecettePDFData:
             difficulte="moyen",
             ingredients=[
                 {"nom": "Pommes", "quantite": 4, "unite": "unitÃ©s"},
-                {"nom": "Sucre", "quantite": 100, "unite": "g"}
+                {"nom": "Sucre", "quantite": 100, "unite": "g"},
             ],
             etapes=["Ã‰plucher les pommes", "PrÃ©parer la pÃ¢te"],
-            tags=["dessert", "familial"]
+            tags=["dessert", "familial"],
         )
-        
+
         assert data.temps_preparation == 30
         assert data.temps_cuisson == 45
         assert len(data.ingredients) == 2
@@ -69,13 +67,10 @@ class TestPlanningPDFData:
 
     def test_creation_minimal(self):
         from src.services.pdf_export import PlanningPDFData
-        
+
         now = datetime.now()
-        data = PlanningPDFData(
-            semaine_debut=now,
-            semaine_fin=now + timedelta(days=7)
-        )
-        
+        data = PlanningPDFData(semaine_debut=now, semaine_fin=now + timedelta(days=7))
+
         assert data.semaine_debut is not None
         assert data.semaine_fin is not None
         assert data.repas_par_jour == {}
@@ -83,18 +78,18 @@ class TestPlanningPDFData:
 
     def test_creation_complete(self):
         from src.services.pdf_export import PlanningPDFData
-        
+
         now = datetime.now()
         data = PlanningPDFData(
             semaine_debut=now,
             semaine_fin=now + timedelta(days=7),
             repas_par_jour={
                 "Lundi": ["Petit-dÃ©j", "DÃ©jeuner", "DÃ®ner"],
-                "Mardi": ["Petit-dÃ©j", "DÃ©jeuner", "DÃ®ner"]
+                "Mardi": ["Petit-dÃ©j", "DÃ©jeuner", "DÃ®ner"],
             },
-            total_repas=6
+            total_repas=6,
         )
-        
+
         assert len(data.repas_par_jour) == 2
         assert data.total_repas == 6
 
@@ -104,9 +99,9 @@ class TestCoursesPDFData:
 
     def test_creation_minimal(self):
         from src.services.pdf_export import CoursesPDFData
-        
+
         data = CoursesPDFData()
-        
+
         assert data.date_export is not None
         assert data.articles == []
         assert data.total_articles == 0
@@ -114,19 +109,13 @@ class TestCoursesPDFData:
 
     def test_creation_complete(self):
         from src.services.pdf_export import CoursesPDFData
-        
+
         data = CoursesPDFData(
-            articles=[
-                {"nom": "Lait", "quantite": 2},
-                {"nom": "Pain", "quantite": 1}
-            ],
+            articles=[{"nom": "Lait", "quantite": 2}, {"nom": "Pain", "quantite": 1}],
             total_articles=2,
-            par_categorie={
-                "Frais": 1,
-                "Boulangerie": 1
-            }
+            par_categorie={"Frais": 1, "Boulangerie": 1},
         )
-        
+
         assert len(data.articles) == 2
         assert data.total_articles == 2
         assert len(data.par_categorie) == 2
@@ -142,25 +131,26 @@ class TestPDFExportServiceInit:
 
     def test_import_service(self):
         from src.services.pdf_export import PDFExportService
+
         assert PDFExportService is not None
 
     def test_init_service(self):
         from src.services.pdf_export import PDFExportService
-        
+
         service = PDFExportService()
-        
+
         assert service.styles is not None
-        assert hasattr(service, 'styles')
+        assert hasattr(service, "styles")
 
     def test_custom_styles_created(self):
         from src.services.pdf_export import PDFExportService
-        
+
         service = PDFExportService()
-        
+
         # VÃ©rifier que les styles personnalisÃ©s sont crÃ©Ã©s
-        assert 'TitreRecette' in service.styles.byName
-        assert 'SousTitre' in service.styles.byName
-        assert 'Etape' in service.styles.byName
+        assert "TitreRecette" in service.styles.byName
+        assert "SousTitre" in service.styles.byName
+        assert "Etape" in service.styles.byName
 
 
 class TestPDFExportServiceStyles:
@@ -168,26 +158,26 @@ class TestPDFExportServiceStyles:
 
     def test_style_titre_recette(self):
         from src.services.pdf_export import PDFExportService
-        
+
         service = PDFExportService()
-        style = service.styles['TitreRecette']
-        
+        style = service.styles["TitreRecette"]
+
         assert style.fontSize == 24
 
     def test_style_sous_titre(self):
         from src.services.pdf_export import PDFExportService
-        
+
         service = PDFExportService()
-        style = service.styles['SousTitre']
-        
+        style = service.styles["SousTitre"]
+
         assert style.fontSize == 14
 
     def test_style_etape(self):
         from src.services.pdf_export import PDFExportService
-        
+
         service = PDFExportService()
-        style = service.styles['Etape']
-        
+        style = service.styles["Etape"]
+
         assert style.fontSize == 11
 
 
@@ -201,9 +191,9 @@ class TestPDFGeneration:
 
     def test_generer_pdf_recette(self):
         from src.services.pdf_export import PDFExportService, RecettePDFData
-        
+
         service = PDFExportService()
-        
+
         data = RecettePDFData(
             id=1,
             nom="Test Recette",
@@ -213,59 +203,54 @@ class TestPDFGeneration:
             portions=4,
             difficulte="facile",
             ingredients=[{"nom": "Test", "quantite": 1, "unite": "unitÃ©"}],
-            etapes=["Ã‰tape 1", "Ã‰tape 2"]
+            etapes=["Ã‰tape 1", "Ã‰tape 2"],
         )
-        
+
         # Appeler la mÃ©thode privÃ©e de gÃ©nÃ©ration
         result = service._generer_pdf_recette(data)
-        
+
         assert isinstance(result, BytesIO)
         # VÃ©rifier que le buffer a du contenu avec getvalue()
         assert len(result.getvalue()) > 0
 
     def test_generer_pdf_recette_sans_description(self):
         from src.services.pdf_export import PDFExportService, RecettePDFData
-        
+
         service = PDFExportService()
-        
+
         data = RecettePDFData(
             id=1,
             nom="Recette Simple",
             ingredients=[{"nom": "Item", "quantite": 0, "unite": ""}],
-            etapes=["Faire la recette"]
+            etapes=["Faire la recette"],
         )
-        
+
         result = service._generer_pdf_recette(data)
-        
+
         assert isinstance(result, BytesIO)
 
     def test_generer_pdf_recette_sans_ingredients(self):
         from src.services.pdf_export import PDFExportService, RecettePDFData
-        
+
         service = PDFExportService()
-        
-        data = RecettePDFData(
-            id=1,
-            nom="Recette Vide"
-        )
-        
+
+        data = RecettePDFData(id=1, nom="Recette Vide")
+
         result = service._generer_pdf_recette(data)
-        
+
         assert isinstance(result, BytesIO)
 
     def test_generer_pdf_recette_avec_tags(self):
         from src.services.pdf_export import PDFExportService, RecettePDFData
-        
+
         service = PDFExportService()
-        
+
         data = RecettePDFData(
-            id=1,
-            nom="Recette Tags",
-            tags=["vÃ©gÃ©tarien", "rapide", "Ã©conomique"]
+            id=1, nom="Recette Tags", tags=["vÃ©gÃ©tarien", "rapide", "Ã©conomique"]
         )
-        
+
         result = service._generer_pdf_recette(data)
-        
+
         assert isinstance(result, BytesIO)
 
 
@@ -279,68 +264,53 @@ class TestPDFExportEdgeCases:
 
     def test_recette_nom_long(self):
         from src.services.pdf_export import RecettePDFData
-        
+
         data = RecettePDFData(
             id=1,
-            nom="Recette avec un nom vraiment trÃ¨s trÃ¨s long qui pourrait poser des problÃ¨mes de mise en page"
+            nom="Recette avec un nom vraiment trÃ¨s trÃ¨s long qui pourrait poser des problÃ¨mes de mise en page",
         )
-        
+
         assert len(data.nom) > 50
 
     def test_recette_description_longue(self):
         from src.services.pdf_export import RecettePDFData
-        
-        data = RecettePDFData(
-            id=1,
-            nom="Test",
-            description="Lorem ipsum " * 100
-        )
-        
+
+        data = RecettePDFData(id=1, nom="Test", description="Lorem ipsum " * 100)
+
         assert len(data.description) > 500
 
     def test_recette_beaucoup_ingredients(self):
         from src.services.pdf_export import RecettePDFData
-        
-        ingredients = [
-            {"nom": f"IngrÃ©dient {i}", "quantite": i, "unite": "g"}
-            for i in range(50)
-        ]
-        
-        data = RecettePDFData(
-            id=1,
-            nom="Test",
-            ingredients=ingredients
-        )
-        
+
+        ingredients = [{"nom": f"IngrÃ©dient {i}", "quantite": i, "unite": "g"} for i in range(50)]
+
+        data = RecettePDFData(id=1, nom="Test", ingredients=ingredients)
+
         assert len(data.ingredients) == 50
 
     def test_recette_beaucoup_etapes(self):
         from src.services.pdf_export import RecettePDFData
-        
+
         etapes = [f"Ã‰tape numÃ©ro {i} avec des instructions dÃ©taillÃ©es." for i in range(30)]
-        
-        data = RecettePDFData(
-            id=1,
-            nom="Test",
-            etapes=etapes
-        )
-        
+
+        data = RecettePDFData(id=1, nom="Test", etapes=etapes)
+
         assert len(data.etapes) == 30
 
     def test_planning_semaine_complete(self):
         from src.services.pdf_export import PlanningPDFData
-        
+
         now = datetime.now()
         jours = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
         repas = {jour: ["Petit-dÃ©j", "DÃ©jeuner", "GoÃ»ter", "DÃ®ner"] for jour in jours}
-        
+
         data = PlanningPDFData(
             semaine_debut=now,
             semaine_fin=now + timedelta(days=7),
             repas_par_jour=repas,
-            total_repas=28
+            total_repas=28,
         )
-        
+
         assert len(data.repas_par_jour) == 7
         assert data.total_repas == 28
 
@@ -350,9 +320,9 @@ class TestPDFExportIntegration:
 
     def test_workflow_export_recette(self):
         from src.services.pdf_export import PDFExportService, RecettePDFData
-        
+
         service = PDFExportService()
-        
+
         # CrÃ©er les donnÃ©es
         data = RecettePDFData(
             id=42,
@@ -366,49 +336,47 @@ class TestPDFExportIntegration:
                 {"nom": "Poulet entier", "quantite": 1.5, "unite": "kg"},
                 {"nom": "Thym", "quantite": 2, "unite": "branches"},
                 {"nom": "Romarin", "quantite": 1, "unite": "branche"},
-                {"nom": "Beurre", "quantite": 50, "unite": "g"}
+                {"nom": "Beurre", "quantite": 50, "unite": "g"},
             ],
             etapes=[
                 "PrÃ©chauffer le four Ã  200Â°C",
                 "Placer les herbes dans la cavitÃ© du poulet",
                 "Badigeonner de beurre fondu",
                 "Enfourner et cuire 1h30",
-                "Arroser rÃ©guliÃ¨rement"
+                "Arroser rÃ©guliÃ¨rement",
             ],
-            tags=["viande", "familial", "four"]
+            tags=["viande", "familial", "four"],
         )
-        
+
         # GÃ©nÃ©rer le PDF
         pdf_buffer = service._generer_pdf_recette(data)
-        
+
         # VÃ©rifier le rÃ©sultat
         assert isinstance(pdf_buffer, BytesIO)
         pdf_content = pdf_buffer.getvalue()
         assert len(pdf_content) > 0
         # VÃ©rifier signature PDF
-        assert pdf_content[:4] == b'%PDF'
+        assert pdf_content[:4] == b"%PDF"
 
     def test_workflow_courses_liste(self):
         from src.services.pdf_export import CoursesPDFData
-        
+
         articles = [
             {"nom": "Lait", "quantite": 2, "categorie": "Frais"},
             {"nom": "Beurre", "quantite": 1, "categorie": "Frais"},
             {"nom": "Pain", "quantite": 1, "categorie": "Boulangerie"},
             {"nom": "Pommes", "quantite": 6, "categorie": "Fruits"},
         ]
-        
+
         par_categorie = {}
         for article in articles:
             cat = article["categorie"]
             par_categorie[cat] = par_categorie.get(cat, 0) + 1
-        
+
         data = CoursesPDFData(
-            articles=articles,
-            total_articles=len(articles),
-            par_categorie=par_categorie
+            articles=articles, total_articles=len(articles), par_categorie=par_categorie
         )
-        
+
         assert data.total_articles == 4
         assert data.par_categorie["Frais"] == 2
 
@@ -419,28 +387,27 @@ class TestPDFExportImports:
     def test_import_reportlab(self):
         from reportlab.lib.pagesizes import A4
         from reportlab.lib.styles import getSampleStyleSheet
-        from reportlab.platypus import SimpleDocTemplate, Table, Paragraph
-        
+
         assert A4 is not None
         assert getSampleStyleSheet is not None
 
     def test_import_models(self):
-        from src.core.models import Recette, RecetteIngredient, Planning
-        
+        from src.core.models import Recette, RecetteIngredient
+
         assert Recette is not None
         assert RecetteIngredient is not None
 
     def test_import_decorators(self):
         from src.core.decorators import with_db_session, with_error_handling
-        
+
         assert with_db_session is not None
         assert with_error_handling is not None
 
     def test_bytesio_usage(self):
         from io import BytesIO
-        
+
         buffer = BytesIO()
         buffer.write(b"test content")
         buffer.seek(0)
-        
+
         assert buffer.read() == b"test content"

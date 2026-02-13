@@ -3,8 +3,8 @@ Logique metier du module Barcode (scan codes-barres) - Separee de l'UI
 Ce module contient toute la logique pure, testable sans Streamlit
 """
 
-from typing import Optional, Dict, Any, List, Tuple
 import logging
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -13,63 +13,67 @@ logger = logging.getLogger(__name__)
 # VALIDATION CODE-BARRES
 # ═══════════════════════════════════════════════════════════
 
-def valider_code_barres(code: str) -> Tuple[bool, Optional[str]]:
+
+def valider_code_barres(code: str) -> tuple[bool, str | None]:
     """
     Valide un code-barres.
-    
+
     Args:
         code: Code-barres à valider
-        
+
     Returns:
         Tuple (valide, message_erreur)
     """
     if not code:
         return False, "Code-barres vide"
-    
+
     # Nettoyer le code
     code = code.strip()
-    
+
     if len(code) < 8:
         return False, "Code-barres trop court (minimum 8 caractères)"
-    
+
     if not code.isdigit():
         return False, "Code-barres doit contenir uniquement des chiffres"
-    
+
     # Verifier longueurs standards
     longueurs_valides = [8, 12, 13, 14]
     if len(code) not in longueurs_valides:
-        return False, f"Longueur invalide: {len(code)} (attendu: {', '.join(map(str, longueurs_valides))})"
-    
+        return (
+            False,
+            f"Longueur invalide: {len(code)} (attendu: {', '.join(map(str, longueurs_valides))})",
+        )
+
     return True, None
 
 
 def valider_checksum_ean13(code: str) -> bool:
     """
     Valide le checksum d'un code EAN-13.
-    
+
     Args:
         code: Code EAN-13 à valider
-        
+
     Returns:
         True si le checksum est valide
     """
     if len(code) != 13:
         return False
-    
+
     try:
         # Somme des chiffres en positions impaires (1, 3, 5, ...) Ã— 1
         somme_impaires = sum(int(code[i]) for i in range(0, 12, 2))
-        
+
         # Somme des chiffres en positions paires (2, 4, 6, ...) Ã— 3
         somme_paires = sum(int(code[i]) * 3 for i in range(1, 12, 2))
-        
+
         # Total
         total = somme_impaires + somme_paires
-        
+
         # Checksum = 10 - (total % 10), ou 0 si total % 10 == 0
         checksum_calcule = (10 - (total % 10)) % 10
         checksum_code = int(code[12])
-        
+
         return checksum_calcule == checksum_code
     except (ValueError, IndexError):
         return False
@@ -79,18 +83,19 @@ def valider_checksum_ean13(code: str) -> bool:
 # DÉTECTION TYPE CODE-BARRES
 # ═══════════════════════════════════════════════════════════
 
+
 def detecter_type_code_barres(code: str) -> str:
     """
     Detecte le type de code-barres.
-    
+
     Args:
         code: Code-barres à analyser
-        
+
     Returns:
         Type de code (EAN-8, EAN-13, UPC-A, ITF-14, Inconnu)
     """
     longueur = len(code)
-    
+
     if longueur == 8:
         return "EAN-8"
     elif longueur == 12:
@@ -103,22 +108,22 @@ def detecter_type_code_barres(code: str) -> str:
         return "Inconnu"
 
 
-def detecter_pays_origine(code: str) -> Optional[str]:
+def detecter_pays_origine(code: str) -> str | None:
     """
     Detecte le pays d'origine à partir d'un code EAN-13.
-    
+
     Args:
         code: Code EAN-13
-        
+
     Returns:
         Nom du pays ou None
     """
     if len(code) != 13:
         return None
-    
+
     # Prefixe GS1 (3 premiers chiffres)
     prefixe = code[:3]
-    
+
     pays_map = {
         ("300", "379"): "France",
         ("400", "440"): "Allemagne",
@@ -214,19 +219,21 @@ def detecter_pays_origine(code: str) -> Optional[str]:
         ("930", "939"): "Australie",
         ("940", "949"): "Nouvelle-Zelande",
     }
-    
+
     try:
         prefixe_int = int(prefixe)
-        
+
         for ranges, pays in pays_map.items():
             for r in ranges:
                 if len(r) == 3 and prefixe == r:
                     return pays
-                elif prefixe_int >= int(r[:3]) and (len(ranges) > 1 and prefixe_int <= int(ranges[1][:3])):
+                elif prefixe_int >= int(r[:3]) and (
+                    len(ranges) > 1 and prefixe_int <= int(ranges[1][:3])
+                ):
                     return pays
     except ValueError:
         pass
-    
+
     return None
 
 
@@ -234,34 +241,35 @@ def detecter_pays_origine(code: str) -> Optional[str]:
 # FORMATAGE
 # ═══════════════════════════════════════════════════════════
 
+
 def formater_code_barres(code: str) -> str:
     """
     Formate un code-barres pour l'affichage.
-    
+
     Args:
         code: Code-barres à formater
-        
+
     Returns:
         Code formate avec espaces
     """
     code = code.strip()
-    
+
     # EAN-13: XXX XXXX XXXXX X
     if len(code) == 13:
         return f"{code[:3]} {code[3:7]} {code[7:12]} {code[12]}"
-    
+
     # UPC-A: X XXXXX XXXXX X
     elif len(code) == 12:
         return f"{code[0]} {code[1:6]} {code[6:11]} {code[11]}"
-    
+
     # EAN-8: XXXX XXXX
     elif len(code) == 8:
         return f"{code[:4]} {code[4:]}"
-    
+
     # ITF-14: XX XXXXXX XXXXX X
     elif len(code) == 14:
         return f"{code[:2]} {code[2:8]} {code[8:13]} {code[13]}"
-    
+
     else:
         return code
 
@@ -269,10 +277,10 @@ def formater_code_barres(code: str) -> str:
 def nettoyer_code_barres(code: str) -> str:
     """
     Nettoie un code-barres (supprime espaces, tirets).
-    
+
     Args:
         code: Code brut
-        
+
     Returns:
         Code nettoye
     """
@@ -283,32 +291,30 @@ def nettoyer_code_barres(code: str) -> str:
 # ANALYSE PRODUIT
 # ═══════════════════════════════════════════════════════════
 
-def extraire_infos_produit(code: str) -> Dict[str, Any]:
+
+def extraire_infos_produit(code: str) -> dict[str, Any]:
     """
     Extrait les informations d'un code-barres.
-    
+
     Args:
         code: Code-barres
-        
+
     Returns:
         Dictionnaire avec infos extraites
     """
     valide, erreur = valider_code_barres(code)
-    
+
     if not valide:
-        return {
-            "valide": False,
-            "erreur": erreur
-        }
-    
+        return {"valide": False, "erreur": erreur}
+
     type_code = detecter_type_code_barres(code)
     pays = None
     checksum_valide = None
-    
+
     if type_code == "EAN-13":
         pays = detecter_pays_origine(code)
         checksum_valide = valider_checksum_ean13(code)
-    
+
     return {
         "valide": True,
         "code": code,
@@ -316,7 +322,7 @@ def extraire_infos_produit(code: str) -> Dict[str, Any]:
         "type": type_code,
         "pays_origine": pays,
         "checksum_valide": checksum_valide,
-        "longueur": len(code)
+        "longueur": len(code),
     }
 
 
@@ -324,25 +330,26 @@ def extraire_infos_produit(code: str) -> Dict[str, Any]:
 # SUGGESTIONS
 # ═══════════════════════════════════════════════════════════
 
-def suggerer_categorie_produit(code: str) -> Optional[str]:
+
+def suggerer_categorie_produit(code: str) -> str | None:
     """
     Suggère une categorie de produit basee sur le prefixe.
     (Simplifie - en production, utiliser une API comme Open Food Facts)
-    
+
     Args:
         code: Code EAN-13
-        
+
     Returns:
         Categorie suggeree
     """
     if len(code) != 13:
         return None
-    
+
     # Prefixes courants (approximatif)
     prefixe = code[:3]
-    
+
     # France (300-379)
     if 300 <= int(prefixe) <= 379:
         return "Produit français"
-    
+
     return "Produit importe"

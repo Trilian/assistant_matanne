@@ -1,4 +1,4 @@
-﻿"""
+"""
 Models - Point d'entrée unifié pour tous les modèles SQLAlchemy.
 
 Architecture modulaire :
@@ -20,24 +20,75 @@ Usage:
 # Base et énumérations
 from .base import (
     Base,
-    metadata,
     PrioriteEnum,
     SaisonEnum,
     TypeRepasEnum,
     TypeVersionRecetteEnum,
+    metadata,
     obtenir_valeurs_enum,
 )
 
-# Recettes et cuisine
-from .recettes import (
-    Ingredient,
-    Recette,
-    Recipe,  # Alias
-    RecetteIngredient,
-    EtapeRecette,
-    VersionRecette,
-    HistoriqueRecette,
-    BatchMeal,
+# Batch Cooking
+from .batch_cooking import (
+    ConfigBatchCooking,
+    EtapeBatchCooking,
+    LocalisationStockageEnum,
+    PreparationBatch,
+    SessionBatchCooking,
+    StatutEtapeEnum,
+    # Enums
+    StatutSessionEnum,
+    TypeRobotEnum,
+)
+
+# Calendrier externe
+from .calendrier import (
+    # Enums
+    CalendarProvider,
+    CalendrierExterne,
+    EvenementCalendrier,
+    SyncDirection,
+)
+
+# Courses
+from .courses import (
+    ArticleCourses,
+    ArticleModele,
+    ModeleCourses,
+)
+
+# Famille et bien-être
+from .famille import (
+    ChildProfile,
+    FamilyActivity,
+    FamilyBudget,
+    Milestone,
+    ShoppingItem,
+    WellbeingEntry,
+)
+
+# Finances et budget
+from .finances import (
+    BudgetMensuelDB,
+    # Enums
+    CategorieDepenseDB,
+    Depense,
+    ExpenseCategory,
+    HouseExpense,
+    RecurrenceType,
+)
+
+# Habitat (meubles, stocks, entretien, éco)
+from .habitat import (
+    EcoAction,
+    EcoActionType,
+    Furniture,
+    FurniturePriority,
+    # Enums
+    FurnitureStatus,
+    HouseStock,
+    MaintenanceTask,
+    RoomType,
 )
 
 # Inventaire
@@ -46,83 +97,73 @@ from .inventaire import (
     HistoriqueInventaire,
 )
 
-# Courses
-from .courses import (
-    ListeCourses,
-    ArticleCourses,
-    ModeleCourses,
-    ArticleModele,
-)
-
-# Planning et calendrier
-from .planning import (
-    Planning,
-    Repas,
-    CalendarEvent,
-)
-
-# Famille et bien-être
-from .famille import (
-    ChildProfile,
-    WellbeingEntry,
-    Milestone,
-    FamilyActivity,
-    FamilyBudget,
-    ShoppingItem,
-)
-
-# Santé
-from .sante import (
-    HealthRoutine,
-    HealthObjective,
-    HealthEntry,
-)
-
-# Maison (projets, routines, jardin)
-from .maison import (
-    Project,
-    ProjectTask,
-    Routine,
-    RoutineTask,
-    GardenItem,
-    GardenLog,
-)
-
-# Finances et budget
-from .finances import (
-    Depense,
-    BudgetMensuelDB,
-    HouseExpense,
-    # Enums
-    CategorieDepenseDB,
-    RecurrenceType,
-    ExpenseCategory,
-)
-
 # Jardin et météo
 from .jardin import (
-    GardenZone,
     AlerteMeteo,
     ConfigMeteo,
+    GardenZone,
     # Enums
     GardenZoneType,
     NiveauAlerte,
     TypeAlerteMeteo,
 )
 
-# Calendrier externe
-from .calendrier import (
-    CalendrierExterne,
-    EvenementCalendrier,
+# Jeux (Paris sportifs & Loto)
+from .jeux import (
+    ChampionnatEnum,
+    Equipe,
+    GrilleLoto,
+    HistoriqueJeux,
+    Match,
+    PariSportif,
     # Enums
-    CalendarProvider,
-    SyncDirection,
+    ResultatMatchEnum,
+    StatistiquesLoto,
+    StatutPariEnum,
+    TirageLoto,
+    TypePariEnum,
+)
+
+# Maison (projets, routines, jardin)
+from .maison import (
+    GardenItem,
+    GardenLog,
+    Project,
+    ProjectTask,
+    Routine,
+    RoutineTask,
 )
 
 # Notifications
 from .notifications import (
-    PushSubscription,
     NotificationPreference,
+    PushSubscription,
+)
+
+# Planning et calendrier
+from .planning import (
+    CalendarEvent,
+    Planning,
+    Repas,
+)
+
+# Recettes et cuisine
+from .recettes import (
+    BatchMeal,
+    EtapeRecette,
+    HistoriqueRecette,
+    Ingredient,
+    Recette,
+    RecetteIngredient,
+    Recipe,  # Alias
+    VersionRecette,
+)
+
+# Santé
+from .sante import (
+    HealthEntry,
+    HealthObjective,
+    HealthRoutine,
 )
 
 # Système
@@ -130,73 +171,29 @@ from .systeme import (
     Backup,
 )
 
-# Jeux (Paris sportifs & Loto)
-from .jeux import (
-    Equipe,
-    Match,
-    PariSportif,
-    TirageLoto,
-    GrilleLoto,
-    StatistiquesLoto,
-    HistoriqueJeux,
-    # Enums
-    ResultatMatchEnum,
-    StatutPariEnum,
-    TypePariEnum,
-    ChampionnatEnum,
-)
-
-# Batch Cooking
-from .batch_cooking import (
-    ConfigBatchCooking,
-    SessionBatchCooking,
-    EtapeBatchCooking,
-    PreparationBatch,
-    # Enums
-    StatutSessionEnum,
-    StatutEtapeEnum,
-    TypeRobotEnum,
-    LocalisationStockageEnum,
-)
-
 # Préférences utilisateur et apprentissage IA (NOUVEAU)
 from .user_preferences import (
-    UserPreference,
-    RecipeFeedback,
-    OpenFoodFactsCache,
     ExternalCalendarConfig,
     FeedbackType,
-    CalendarProvider as CalendarProviderNew,
+    OpenFoodFactsCache,
+    RecipeFeedback,
+    UserPreference,
 )
 
 # Utilisateurs et Garmin (NOUVEAU)
 from .users import (
-    UserProfile,
-    GarminToken,
-    GarminActivity,
-    GarminDailySummary,
-    FoodLog,
-    WeekendActivity,
     FamilyPurchase,
+    FoodLog,
+    GarminActivity,
     # Enums
     GarminActivityType,
+    GarminDailySummary,
+    GarminToken,
     PurchaseCategory,
     PurchasePriority,
+    UserProfile,
+    WeekendActivity,
 )
-
-# Habitat (meubles, stocks, entretien, éco)
-from .habitat import (
-    Furniture,
-    HouseStock,
-    MaintenanceTask,
-    EcoAction,
-    # Enums
-    FurnitureStatus,
-    FurniturePriority,
-    EcoActionType,
-    RoomType,
-)
-
 
 # Export explicite de tous les symboles
 __all__ = [

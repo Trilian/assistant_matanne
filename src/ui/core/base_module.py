@@ -1,4 +1,4 @@
-﻿"""
+"""
 Base Module UI - Module CRUD universel générique
 100% réutilisable, agnostique du domaine métier
 
@@ -218,7 +218,8 @@ class ModuleUIBase:
 
         with col1:
             search = barre_recherche(
-                texte_indicatif=f"Rechercher {self.config.name}...", cle=f"{self.session_key}_search"
+                texte_indicatif=f"Rechercher {self.config.name}...",
+                cle=f"{self.session_key}_search",
             )
             st.session_state[self.session_key]["search_term"] = search
 
@@ -227,7 +228,9 @@ class ModuleUIBase:
                 with st.popover("🔍 Filtres"):
                     from src.ui.components import panneau_filtres
 
-                    filters = panneau_filtres(self.config.filters_config, prefixe_cle=self.session_key)
+                    filters = panneau_filtres(
+                        self.config.filters_config, prefixe_cle=self.session_key
+                    )
                     st.session_state[self.session_key]["filters"] = filters
 
     # ═══════════════════════════════════════════════════════
@@ -318,7 +321,9 @@ class ModuleUIBase:
 
         # Titre
         title = item_dict.get(
-            self.config.display_fields[0]["key"] if (self.config.display_fields and len(self.config.display_fields) > 0) else "nom",
+            self.config.display_fields[0]["key"]
+            if (self.config.display_fields and len(self.config.display_fields) > 0)
+            else "nom",
             "Sans titre",
         )
 
@@ -377,7 +382,9 @@ class ModuleUIBase:
 
             with col1:
                 title = item_dict.get(
-                    self.config.display_fields[0]["key"] if (self.config.display_fields and len(self.config.display_fields) > 0) else "nom",
+                    self.config.display_fields[0]["key"]
+                    if (self.config.display_fields and len(self.config.display_fields) > 0)
+                    else "nom",
                     "Sans titre",
                 )
                 st.markdown(f"### {title}")

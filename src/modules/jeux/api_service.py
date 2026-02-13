@@ -2,92 +2,93 @@
 Module Service pour Paris Sportifs avec integration API Football-Data
 """
 
-from typing import List, Dict, Any, Optional
-from datetime import date, timedelta
 import logging
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-def charger_matchs_depuis_api(championnat: str, jours: int = 7) -> List[Dict[str, Any]]:
+def charger_matchs_depuis_api(championnat: str, jours: int = 7) -> list[dict[str, Any]]:
     """
     Charge les matchs depuis Football-Data API et convertit au format local
-    
+
     Args:
         championnat: Nom du championnat
         jours: Nombre de jours à chercher
-        
+
     Returns:
         Liste des matchs au format application
     """
     try:
         from src.modules.jeux.api_football import charger_matchs_a_venir
-        
+
         matchs_api = charger_matchs_a_venir(championnat, jours)
-        
+
         # Convertir au format attendu par paris.py
         matchs_convertis = []
         for m in matchs_api:
-            matchs_convertis.append({
-                "api_id": m.get("id"),
-                "date": m.get("date"),
-                "heure": m.get("heure"),
-                "championnat": m.get("championnat"),
-                "dom_nom": m.get("equipe_domicile"),
-                "ext_nom": m.get("equipe_exterieur"),
-                "cote_dom": 1.8,  # À recuperer depuis odds si disponibles
-                "cote_nul": 3.5,
-                "cote_ext": 4.2,
-                "source": "Football-Data API"
-            })
-        
+            matchs_convertis.append(
+                {
+                    "api_id": m.get("id"),
+                    "date": m.get("date"),
+                    "heure": m.get("heure"),
+                    "championnat": m.get("championnat"),
+                    "dom_nom": m.get("equipe_domicile"),
+                    "ext_nom": m.get("equipe_exterieur"),
+                    "cote_dom": 1.8,  # À recuperer depuis odds si disponibles
+                    "cote_nul": 3.5,
+                    "cote_ext": 4.2,
+                    "source": "Football-Data API",
+                }
+            )
+
         logger.info(f"✅ {len(matchs_convertis)} matchs charges depuis API")
         return matchs_convertis
-    
+
     except Exception as e:
         logger.error(f"❌ Erreur chargement API: {e}")
         return []
 
 
-def charger_classement_depuis_api(championnat: str) -> List[Dict[str, Any]]:
+def charger_classement_depuis_api(championnat: str) -> list[dict[str, Any]]:
     """
     Charge le classement d'un championnat depuis l'API
-    
+
     Args:
         championnat: Nom du championnat
-        
+
     Returns:
         Liste des equipes avec leurs stats
     """
     try:
         from src.modules.jeux.api_football import charger_classement
-        
+
         equipes = charger_classement(championnat)
         logger.info(f"✅ Classement {championnat} charge: {len(equipes)} equipes")
         return equipes
-    
+
     except Exception as e:
         logger.error(f"❌ Erreur chargement classement: {e}")
         return []
 
 
-def charger_historique_equipe_depuis_api(nom_equipe: str) -> List[Dict[str, Any]]:
+def charger_historique_equipe_depuis_api(nom_equipe: str) -> list[dict[str, Any]]:
     """
     Charge l'historique des matchs d'une equipe
-    
+
     Args:
         nom_equipe: Nom de l'equipe
-        
+
     Returns:
         Liste des matchs recents
     """
     try:
         from src.modules.jeux.api_football import charger_historique_equipe
-        
+
         matchs = charger_historique_equipe(nom_equipe, limite=10)
         logger.info(f"✅ Historique {nom_equipe}: {len(matchs)} matchs")
         return matchs
-    
+
     except Exception as e:
         logger.error(f"❌ Erreur chargement historique: {e}")
         return []
@@ -96,23 +97,23 @@ def charger_historique_equipe_depuis_api(nom_equipe: str) -> List[Dict[str, Any]
 def synchroniser_matchs_api_vers_bd(championnat: str, jours: int = 7):
     """
     Synchronise les matchs de l'API vers la base de donnees
-    
+
     À appeler regulièrement pour maintenir les donnees à jour
     """
     try:
         from src.core.database import obtenir_contexte_db
         from src.core.models import Equipe, Match
         from src.modules.jeux.api_football import charger_matchs_a_venir
-        
+
         matchs_api = charger_matchs_a_venir(championnat, jours)
-        
+
         with obtenir_contexte_db() as session:
             for m_data in matchs_api:
                 # Chercher/creer les equipes
-                equipe_dom = session.query(Equipe).filter_by(
-                    nom=m_data.get("equipe_domicile")
-                ).first()
-                
+                equipe_dom = (
+                    session.query(Equipe).filter_by(nom=m_data.get("equipe_domicile")).first()
+                )
+
                 if not equipe_dom:
                     equipe_dom = Equipe(
                         nom=m_data.get("equipe_domicile"),
@@ -123,15 +124,15 @@ def synchroniser_matchs_api_vers_bd(championnat: str, jours: int = 7):
                         defaites=0,
                         buts_marques=0,
                         buts_encaisses=0,
-                        points=0
+                        points=0,
                     )
                     session.add(equipe_dom)
                     session.flush()
-                
-                equipe_ext = session.query(Equipe).filter_by(
-                    nom=m_data.get("equipe_exterieur")
-                ).first()
-                
+
+                equipe_ext = (
+                    session.query(Equipe).filter_by(nom=m_data.get("equipe_exterieur")).first()
+                )
+
                 if not equipe_ext:
                     equipe_ext = Equipe(
                         nom=m_data.get("equipe_exterieur"),
@@ -142,17 +143,18 @@ def synchroniser_matchs_api_vers_bd(championnat: str, jours: int = 7):
                         defaites=0,
                         buts_marques=0,
                         buts_encaisses=0,
-                        points=0
+                        points=0,
                     )
                     session.add(equipe_ext)
                     session.flush()
-                
+
                 # Verifier si le match existe
-                match_existing = session.query(Match).filter_by(
-                    api_id=m_data.get("id"),
-                    championnat=championnat
-                ).first()
-                
+                match_existing = (
+                    session.query(Match)
+                    .filter_by(api_id=m_data.get("id"), championnat=championnat)
+                    .first()
+                )
+
                 if not match_existing:
                     match = Match(
                         api_id=m_data.get("id"),
@@ -166,14 +168,14 @@ def synchroniser_matchs_api_vers_bd(championnat: str, jours: int = 7):
                         cote_exterieur=4.2,
                         statut_match="SCHEDULED",
                         joue=False,
-                        source="Football-Data API"
+                        source="Football-Data API",
                     )
                     session.add(match)
-            
+
             session.commit()
             logger.info(f"✅ BD synchronisee avec API pour {championnat}")
             return True
-    
+
     except Exception as e:
         logger.error(f"❌ Erreur synchronisation BD: {e}")
         return False
@@ -187,32 +189,29 @@ def synchroniser_resultats_matches_api(championnat: str):
         from src.core.database import obtenir_contexte_db
         from src.core.models import Match
         from src.modules.jeux.api_football import charger_matchs_a_venir
-        
+
         # Charger les matchs "FINISHED" depuis l'API
         matchs_api = charger_matchs_a_venir(
             championnat,
             jours=30,  # Chercher les 30 derniers jours
-            statut="FINISHED"
+            statut="FINISHED",
         )
-        
+
         with obtenir_contexte_db() as session:
             for m_data in matchs_api:
-                match = session.query(Match).filter_by(
-                    api_id=m_data.get("id")
-                ).first()
-                
+                match = session.query(Match).filter_by(api_id=m_data.get("id")).first()
+
                 if match and not match.joue:
                     match.score_domicile = m_data.get("score_domicile")
                     match.score_exterieur = m_data.get("score_exterieur")
                     match.joue = True
                     match.statut_match = "FINISHED"
                     session.add(match)
-            
+
             session.commit()
             logger.info(f"✅ Resultats mis à jour pour {championnat}")
             return True
-    
+
     except Exception as e:
         logger.error(f"❌ Erreur mise à jour resultats: {e}")
         return False
-

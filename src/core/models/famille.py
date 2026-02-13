@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modèles pour la famille et le bien-être.
 
 Contient :
@@ -29,7 +29,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
 
-
 # ═══════════════════════════════════════════════════════════
 # PROFIL ENFANT
 # ═══════════════════════════════════════════════════════════
@@ -37,7 +36,7 @@ from .base import Base
 
 class ChildProfile(Base):
     """Profil d'un enfant suivi.
-    
+
     Attributes:
         name: Prénom de l'enfant
         date_of_birth: Date de naissance
@@ -70,7 +69,7 @@ class ChildProfile(Base):
 
 class WellbeingEntry(Base):
     """Entrée de bien-être familial.
-    
+
     Attributes:
         child_id: ID de l'enfant (optionnel)
         username: Nom de l'utilisateur adulte
@@ -109,7 +108,7 @@ class WellbeingEntry(Base):
 
 class Milestone(Base):
     """Jalons et apprentissages de l'enfant.
-    
+
     Attributes:
         child_id: ID de l'enfant
         titre: Titre du jalon
@@ -148,7 +147,7 @@ class Milestone(Base):
 
 class FamilyActivity(Base):
     """Activités et sorties familiales.
-    
+
     Attributes:
         titre: Titre de l'activité
         description: Description
@@ -196,7 +195,7 @@ class FamilyActivity(Base):
 
 class FamilyBudget(Base):
     """Dépenses familiales par catégorie.
-    
+
     Attributes:
         date: Date de la dépense
         categorie: Catégorie (Jules_jouets, Jules_vetements, Nous_sport, etc.)
@@ -217,13 +216,13 @@ class FamilyBudget(Base):
     montant: Mapped[float] = mapped_column(Float, nullable=False)
     magasin: Mapped[str | None] = mapped_column(String(200))
     est_recurrent: Mapped[bool] = mapped_column(Boolean, default=False)
-    frequence_recurrence: Mapped[str | None] = mapped_column(String(50))  # mensuel, hebdomadaire, etc.
+    frequence_recurrence: Mapped[str | None] = mapped_column(
+        String(50)
+    )  # mensuel, hebdomadaire, etc.
     notes: Mapped[str | None] = mapped_column(Text)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    __table_args__ = (
-        CheckConstraint("montant > 0", name="ck_budget_montant_positive"),
-    )
+    __table_args__ = (CheckConstraint("montant > 0", name="ck_budget_montant_positive"),)
 
     def __repr__(self) -> str:
         return f"<FamilyBudget(id={self.id}, categorie='{self.categorie}', montant={self.montant})>"
@@ -236,7 +235,7 @@ class FamilyBudget(Base):
 
 class ShoppingItem(Base):
     """Article dans une liste de shopping familial.
-    
+
     Attributes:
         titre: Titre de l'article
         categorie: Catégorie
@@ -257,10 +256,10 @@ class ShoppingItem(Base):
     prix_estime: Mapped[float] = mapped_column(Float, default=0.0)
     liste: Mapped[str] = mapped_column(String(50), default="Nous", index=True)
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
-    
+
     # Timestamps
     date_ajout: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
     date_achat: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    
+
     def __repr__(self) -> str:
         return f"<ShoppingItem(titre={self.titre}, categorie={self.categorie}, actif={self.actif})>"

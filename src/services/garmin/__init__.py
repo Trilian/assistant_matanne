@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package de synchronisation Garmin Connect.
 
 Exports:
@@ -10,68 +10,65 @@ Exports:
 - Utils: Fonctions utilitaires pures
 """
 
-from .types import (
-    GarminConfig,
-    # Constantes
-    ACTIVITY_TYPE_MAPPING,
-    ACTIVITY_ICONS,
-    STEPS_GOAL_DEFAULT,
-    CALORIES_GOAL_DEFAULT,
-    ACTIVE_MINUTES_GOAL,
-    STREAK_BADGE_THRESHOLDS,
-    METERS_TO_KM,
-    SECONDS_TO_MINUTES,
-    SECONDS_TO_HOURS,
-)
-
-from .utils import (
-    # Parsing
-    parse_garmin_timestamp,
-    parse_garmin_date,
-    parse_activity_data,
-    parse_daily_summary,
-    # Traduction et affichage
-    translate_activity_type,
-    get_activity_icon,
-    format_duration,
-    format_distance,
-    format_pace,
-    format_speed,
-    # Calculs et statistiques
-    calculate_daily_stats,
-    calculate_activity_stats,
-    calculate_streak,
-    get_streak_badge,
-    calculate_goal_progress,
-    estimate_calories_burned,
-    calculate_weekly_summary,
-    # Validation
-    validate_oauth_config,
-    validate_garmin_token,
-    is_sync_needed,
-    # Dates et périodes
-    get_sync_date_range,
-    date_to_garmin_timestamp,
-    build_api_params,
-)
-
 from .service import (
+    GarminService,  # Alias
     # Service principal
     ServiceGarmin,
-    GarminService,  # Alias
-    # Factories
-    obtenir_service_garmin,
+    # Configuration
+    get_garmin_config,
     get_garmin_service,
     get_garmin_sync_service,  # Alias rétrocompatibilité
     # Helpers utilisateurs
     get_or_create_user,
-    init_family_users,
     get_user_by_username,
+    init_family_users,
     list_all_users,
-    # Configuration
-    get_garmin_config,
+    # Factories
+    obtenir_service_garmin,
 )
-
+from .types import (
+    ACTIVE_MINUTES_GOAL,
+    ACTIVITY_ICONS,
+    # Constantes
+    ACTIVITY_TYPE_MAPPING,
+    CALORIES_GOAL_DEFAULT,
+    METERS_TO_KM,
+    SECONDS_TO_HOURS,
+    SECONDS_TO_MINUTES,
+    STEPS_GOAL_DEFAULT,
+    STREAK_BADGE_THRESHOLDS,
+    GarminConfig,
+)
+from .utils import (
+    build_api_params,
+    calculate_activity_stats,
+    # Calculs et statistiques
+    calculate_daily_stats,
+    calculate_goal_progress,
+    calculate_streak,
+    calculate_weekly_summary,
+    date_to_garmin_timestamp,
+    estimate_calories_burned,
+    format_distance,
+    format_duration,
+    format_pace,
+    format_speed,
+    get_activity_icon,
+    get_streak_badge,
+    # Dates et périodes
+    get_sync_date_range,
+    is_sync_needed,
+    parse_activity_data,
+    parse_daily_summary,
+    parse_garmin_date,
+    # Parsing
+    parse_garmin_timestamp,
+    # Traduction et affichage
+    translate_activity_type,
+    validate_garmin_token,
+    # Validation
+    validate_oauth_config,
+)
 
 __all__ = [
     # Types

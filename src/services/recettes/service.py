@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Recettes Unifié (REFACTORING PHASE 2)
 
 âœ… Utilise @avec_session_db et @avec_cache (Phase 1)
@@ -22,8 +22,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.core.ai import obtenir_client_ia
 from src.core.cache import Cache
-from src.core.database import obtenir_contexte_db
-from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.errors_base import ErreurNonTrouve, ErreurValidation
 from src.core.models import (
     EtapeRecette,
@@ -32,23 +31,22 @@ from src.core.models import (
     RecetteIngredient,
     VersionRecette,
 )
-from src.core.validation import RecetteInput, IngredientInput, EtapeInput
-from src.services.base import BaseAIService, RecipeAIMixin
-from src.services.base import BaseService
+from src.core.validation import RecetteInput
+from src.services.base import BaseAIService, BaseService, RecipeAIMixin
 
 from .types import (
     RecetteSuggestion,
-    VersionBebeGeneree,
     VersionBatchCookingGeneree,
+    VersionBebeGeneree,
     VersionRobotGeneree,
 )
 
 logger = logging.getLogger(__name__)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SERVICE RECETTES UNIFIÉ (AVEC HÉRITAGE MULTIPLE)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
@@ -82,9 +80,9 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
             service_name="recettes",
         )
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 1 : CRUD OPTIMISÉ
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_cache(ttl=3600, key_func=lambda self, recette_id: f"recette_full_{recette_id}")
     @avec_session_db
@@ -92,7 +90,7 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
         """Récupère une recette avec toutes ses relations (avec cache)."""
         try:
             from sqlalchemy.orm import selectinload
-            
+
             recette = (
                 db.query(Recette)
                 .options(
@@ -103,15 +101,15 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
                 .filter(Recette.id == recette_id)
                 .first()
             )
-            
+
             if not recette:
                 return None
-            
+
             # Force l'initialisation des collections lazy-loaded avant la fermeture de la session
             _ = recette.ingredients
             _ = recette.etapes
             _ = recette.versions
-            
+
             return recette
         except Exception as e:
             logger.error(f"Erreur récupération recette {recette_id}: {e}")
@@ -121,11 +119,7 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
     def get_by_type(self, type_repas: str, db: Session) -> list[Recette]:
         """Récupère les recettes d'un type donné."""
         try:
-            return (
-                db.query(Recette)
-                .filter(Recette.type_repas == type_repas)
-                .all()
-            )
+            return db.query(Recette).filter(Recette.type_repas == type_repas).all()
         except Exception as e:
             logger.error(f"Erreur récupération recettes par type {type_repas}: {e}")
             return []
@@ -135,18 +129,19 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
     def create_complete(self, data: dict, db: Session) -> Recette:
         """
         Crée une recette complète (recette + ingrédients + étapes).
-        
+
         Args:
-            data: Dict avec clés: nom, description, temps_prep, temps_cuisson, 
+            data: Dict avec clés: nom, description, temps_prep, temps_cuisson,
                   portions, ingredients[], etapes[]
             db: Session DB injectée
-            
+
         Returns:
             Recette créée avec relations
         """
         from datetime import datetime
-        from src.core.validation import IngredientInput, EtapeInput
-        
+
+        from src.core.validation import IngredientInput
+
         # Conversion des ingrédients en IngredientInput objects si ce sont des dicts
         ingredients_data = data.get("ingredients") or []
         if ingredients_data and isinstance(ingredients_data[0], dict):
@@ -158,7 +153,7 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
                 )
                 for ing in ingredients_data
             ]
-        
+
         # Conversion des étapes en EtapeInput objects si ce sont des dicts
         etapes_data = data.get("etapes") or []
         if etapes_data and isinstance(etapes_data[0], dict):
@@ -166,18 +161,18 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
                 EtapeInput(
                     ordre=idx + 1,
                     description=etape.get("description", ""),
-                    duree=etape.get("duree")
+                    duree=etape.get("duree"),
                 )
                 for idx, etape in enumerate(etapes_data)
             ]
-        
+
         # Validation avec Pydantic
         try:
             validated = RecetteInput(**data)
         except Exception as e:
             logger.error(f"Validation error: {e} - Data: {data}")
             raise ErreurValidation(f"Données invalides: {str(e)}")
-        
+
         # Créer recette avec updated_at
         recette_dict = validated.model_dump(exclude={"ingredients", "etapes"})
         recette_dict["updated_at"] = datetime.utcnow()  # â† Requis par le trigger PostgreSQL
@@ -229,7 +224,7 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
     ) -> list[Recette]:
         """
         Recherche avancée multi-critères.
-        
+
         Args:
             term: Terme de recherche (nom/description)
             type_repas: Type de repas (petit_déjeuner, déjeuner, dîner, goûter)
@@ -239,7 +234,7 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
             compatible_bebe: Compatible pour bébé
             limit: Nombre de résultats max
             db: Session DB injectée
-            
+
         Returns:
             Liste des recettes trouvées
         """
@@ -266,9 +261,9 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
             db=db,
         )
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 2 : GÉNÉRATION IA (AVEC CACHE ET VALIDATION)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_cache(
         ttl=21600,
@@ -314,7 +309,7 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
         )
 
         # Prompt avec instructions JSON ULTRA-STRICTES
-        prompt = f'''GENERATE {nb_recettes} RECIPES IN JSON FORMAT ONLY.
+        prompt = f"""GENERATE {nb_recettes} RECIPES IN JSON FORMAT ONLY.
 
 {context}
 
@@ -329,7 +324,7 @@ RULES:
 4. ingredients: array of {{nom, quantite, unite}}
 5. etapes: array of {{description}}
 6. difficulte values: facile, moyen, difficile
-7. No explanations, no text, ONLY JSON'''
+7. No explanations, no text, ONLY JSON"""
 
         logger.info(f"ðŸ¤– Generating {nb_recettes} recipe suggestions")
 
@@ -371,7 +366,7 @@ RULES:
         prompt = self.build_json_prompt(
             context=context,
             task=f"Generate {nb_variantes} different variations of {nom_recette} recipe",
-            json_schema='''{
+            json_schema="""{
     "items": [
         {
             "nom": "string (recipe name with variation)",
@@ -386,7 +381,7 @@ RULES:
             "etapes": [{"description": "string"}]
         }
     ]
-}''',
+}""",
             constraints=[
                 "Each variation must be significantly different from the others",
                 "Include variations from different cuisines or cooking methods",
@@ -442,7 +437,7 @@ RULES:
             VersionRecette object or None if generation fails
         """
         print(f"[generer_version_bebe] START: recette_id={recette_id}, db={type(db)}")
-        
+
         # Récupérer la recette
         recette = (
             db.query(Recette)
@@ -458,7 +453,7 @@ RULES:
             print(f"[generer_version_bebe] Recipe {recette_id} not found")
             raise ErreurNonTrouve(f"Recipe {recette_id} not found")
 
-        # Vérifier si version existe déjÃ 
+        # Vérifier si version existe déjà
         existing = (
             db.query(VersionRecette)
             .filter(
@@ -473,7 +468,7 @@ RULES:
             return existing
 
         logger.info(f"ðŸ¤– Generating baby-safe version for recipe {recette_id}")
-        print(f"[generer_version_bebe] Generating new baby version")
+        print("[generer_version_bebe] Generating new baby version")
 
         # Construire contexte avec recette complète
         ingredients_str = "\n".join(
@@ -503,7 +498,7 @@ Steps:
                 "Food safety instructions",
             ],
         )
-        print(f"[generer_version_bebe] Prompt built, calling IA...")
+        print("[generer_version_bebe] Prompt built, calling IA...")
 
         # Appel IA avec parsing auto
         version_data = self.call_with_parsing_sync(
@@ -526,7 +521,7 @@ Steps:
         )
 
         if not version_data:
-            print(f"[generer_version_bebe] version_data is None after IA call")
+            print("[generer_version_bebe] version_data is None after IA call")
             logger.warning(f"âš ï¸ Failed to generate baby version for recipe {recette_id}")
             raise ErreurValidation("Invalid IA response format for baby version")
 
@@ -539,11 +534,11 @@ Steps:
             instructions_modifiees=version_data.instructions_modifiees,
             notes_bebe=version_data.notes_bebe,
         )
-        print(f"[generer_version_bebe] VersionRecette object created")
+        print("[generer_version_bebe] VersionRecette object created")
         db.add(version)
-        print(f"[generer_version_bebe] Version added to db session")
+        print("[generer_version_bebe] Version added to db session")
         db.commit()
-        print(f"[generer_version_bebe] Version committed to db")
+        print("[generer_version_bebe] Version committed to db")
         db.refresh(version)
         print(f"[generer_version_bebe] Version refreshed, id={version.id}")
 
@@ -578,7 +573,7 @@ Steps:
         if not recette:
             raise ErreurNonTrouve(f"Recipe {recette_id} not found")
 
-        # Vérifier si version existe déjÃ 
+        # Vérifier si version existe déjà
         existing = (
             db.query(VersionRecette)
             .filter(
@@ -617,14 +612,14 @@ Difficulty: {recette.difficulte}"""
         prompt = self.build_json_prompt(
             context=context,
             task="Adapt this recipe for batch cooking preparation",
-            json_schema='''{
+            json_schema="""{
                 "instructions_modifiees": str,
                 "nombre_portions_recommande": int,
                 "temps_preparation_total_heures": float,
                 "conseils_conservation": str,
                 "conseils_congelation": str,
                 "calendrier_preparation": str
-            }''',
+            }""",
             constraints=[
                 "Increase quantities for 12+ portions",
                 "Simplify steps for batch preparation",
@@ -659,7 +654,9 @@ Difficulty: {recette.difficulte}"""
         )
 
         if not version_data:
-            logger.warning(f"âš ï¸ Failed to generate batch cooking version for recipe {recette_id}")
+            logger.warning(
+                f"âš ï¸ Failed to generate batch cooking version for recipe {recette_id}"
+            )
             raise ErreurValidation("Invalid IA response format for batch cooking version")
 
         # Créer version en DB
@@ -712,7 +709,7 @@ Difficulty: {recette.difficulte}"""
         if not recette:
             raise ErreurNonTrouve(f"Recipe {recette_id} not found")
 
-        # Vérifier si version existe déjÃ 
+        # Vérifier si version existe déjà
         existing = (
             db.query(VersionRecette)
             .filter(
@@ -722,9 +719,7 @@ Difficulty: {recette.difficulte}"""
             .first()
         )
         if existing:
-            logger.info(
-                f"ðŸ¤– Robot version ({robot_type}) already exists for recipe {recette_id}"
-            )
+            logger.info(f"ðŸ¤– Robot version ({robot_type}) already exists for recipe {recette_id}")
             return existing
 
         logger.info(f"ðŸ¤– Generating {robot_type} version for recipe {recette_id}")
@@ -790,7 +785,7 @@ Difficulty: {recette.difficulte}"""
                 "task": "Adapt this recipe specifically for an air fryer (deep fryer alternative)",
                 "constraints": [
                     "Reduce cooking times by 20-30% compared to oven",
-                    "Lower temperature by 20Â°C typically",
+                    "Lower temperature by 20°C typically",
                     "Specify basket arrangement and stirring frequency",
                     "Account for reduced oil requirements",
                     "Include portion/batch information",
@@ -830,13 +825,13 @@ Difficulty: {recette.difficulte}"""
         prompt = self.build_json_prompt(
             context=context,
             task=robot_config["task"],
-            json_schema='''{
+            json_schema="""{
                 "instructions_modifiees": str,
                 "reglages_robot": str,
                 "temps_cuisson_adapte_minutes": int,
                 "conseils_preparation": str,
                 "etapes_specifiques": list[str]
-            }''',
+            }""",
             constraints=robot_config["constraints"],
         )
 
@@ -873,7 +868,7 @@ Difficulty: {recette.difficulte}"""
 ðŸ“‹ Préparation: {version_data.conseils_preparation}
 
 ðŸ”§ Étapes spécifiques:
-{chr(10).join(f"â€¢ {etape}" for etape in version_data.etapes_specifiques)}""",
+{chr(10).join(f"• {etape}" for etape in version_data.etapes_specifiques)}""",
         )
         db.add(version)
         db.commit()
@@ -882,9 +877,9 @@ Difficulty: {recette.difficulte}"""
         logger.info(f"âœ… {robot_type} version created for recipe {recette_id}")
         return version
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 3 : HISTORIQUE & VERSIONS
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     @avec_session_db
     def enregistrer_cuisson(
@@ -896,21 +891,22 @@ Difficulty: {recette.difficulte}"""
         db: Session | None = None,
     ) -> bool:
         """Enregistre qu'une recette a été cuisinée.
-        
+
         Args:
             recette_id: ID de la recette
             portions: Nombre de portions cuisinées
             note: Note de 0-5 (optionnel)
             avis: Avis personnel (optionnel)
             db: Session DB injectée
-            
+
         Returns:
             True si succès, False sinon
         """
         try:
             from datetime import date
+
             from src.core.models import HistoriqueRecette
-            
+
             historique = HistoriqueRecette(
                 recette_id=recette_id,
                 date_cuisson=date.today(),
@@ -934,18 +930,18 @@ Difficulty: {recette.difficulte}"""
         db: Session | None = None,
     ) -> list:
         """Récupère l'historique d'utilisation d'une recette.
-        
+
         Args:
             recette_id: ID de la recette
-            nb_dernieres: Nombre d'entrées Ã  retourner
+            nb_dernieres: Nombre d'entrées à retourner
             db: Session DB injectée
-            
+
         Returns:
             Liste des entrées d'historique
         """
         try:
             from src.core.models import HistoriqueRecette
-            
+
             return (
                 db.query(HistoriqueRecette)
                 .filter(HistoriqueRecette.recette_id == recette_id)
@@ -960,24 +956,23 @@ Difficulty: {recette.difficulte}"""
     @avec_session_db
     def get_stats_recette(self, recette_id: int, db: Session | None = None) -> dict:
         """Récupère les statistiques d'utilisation d'une recette.
-        
+
         Args:
             recette_id: ID de la recette
             db: Session DB injectée
-            
+
         Returns:
             Dict avec nb_cuissons, derniere_cuisson, note_moyenne, etc.
         """
         try:
             from datetime import date
+
             from src.core.models import HistoriqueRecette
-            
+
             historique = (
-                db.query(HistoriqueRecette)
-                .filter(HistoriqueRecette.recette_id == recette_id)
-                .all()
+                db.query(HistoriqueRecette).filter(HistoriqueRecette.recette_id == recette_id).all()
             )
-            
+
             if not historique:
                 return {
                     "nb_cuissons": 0,
@@ -986,10 +981,10 @@ Difficulty: {recette.difficulte}"""
                     "total_portions": 0,
                     "jours_depuis_derniere": None,
                 }
-            
+
             notes = [h.note for h in historique if h.note is not None]
             derniere = historique[0]
-            
+
             return {
                 "nb_cuissons": len(historique),
                 "derniere_cuisson": derniere.date_cuisson,
@@ -1004,35 +999,33 @@ Difficulty: {recette.difficulte}"""
     @avec_session_db
     def get_versions(self, recette_id: int, db: Session | None = None) -> list:
         """Récupère toutes les versions d'une recette.
-        
+
         Args:
             recette_id: ID de la recette
             db: Session DB injectée
-            
+
         Returns:
             Liste des VersionRecette
         """
         try:
             return (
-                db.query(VersionRecette)
-                .filter(VersionRecette.recette_base_id == recette_id)
-                .all()
+                db.query(VersionRecette).filter(VersionRecette.recette_base_id == recette_id).all()
             )
         except Exception as e:
             logger.error(f"Erreur récupération versions: {e}")
             return []
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 4 : IMPORT/EXPORT (REFACTORED)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     def export_to_csv(self, recettes: list[Recette], separator: str = ",") -> str:
         """Exporte des recettes en CSV.
-        
+
         Args:
             recettes: List of Recette objects to export
             separator: CSV separator character
-            
+
         Returns:
             CSV string with recipe data
         """
@@ -1072,11 +1065,11 @@ Difficulty: {recette.difficulte}"""
 
     def export_to_json(self, recettes: list[Recette], indent: int = 2) -> str:
         """Exporte des recettes en JSON.
-        
+
         Args:
             recettes: List of Recette objects to export
             indent: JSON indentation level
-            
+
         Returns:
             JSON string with recipe data
         """
@@ -1103,17 +1096,17 @@ Difficulty: {recette.difficulte}"""
         logger.info(f"âœ… Exported {len(recettes)} recipes to JSON")
         return json.dumps(data, indent=indent, ensure_ascii=False)
 
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
     # SECTION 5 : HELPERS PRIVÉS (REFACTORED)
-    # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    # ═══════════════════════════════════════════════════════════
 
     def _find_or_create_ingredient(self, db: Session, nom: str) -> Ingredient:
         """Finds or creates an ingredient.
-        
+
         Args:
             db: Database session
             nom: Ingredient name
-            
+
         Returns:
             Ingredient object (existing or newly created)
         """
@@ -1126,16 +1119,16 @@ Difficulty: {recette.difficulte}"""
         return ingredient
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # ALIASES (compatibilité avec l'ancien code)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 RecetteService = ServiceRecettes
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # INSTANCE SINGLETON - LAZY LOADING
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 _service_recettes = None
 

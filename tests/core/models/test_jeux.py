@@ -1,11 +1,9 @@
-﻿"""
+"""
 Tests unitaires pour jeux.py
 
 Module: src.core.models.jeux
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
 
 # TODO: Ajuster l'import selon la structure
 # from src.core.models.jeux import ...
@@ -13,7 +11,6 @@ from unittest.mock import MagicMock, patch
 
 class TestJeux:
     """Tests pour le module jeux."""
-
 
     class TestResultatMatchEnum:
         """Tests pour la classe ResultatMatchEnum."""
@@ -28,7 +25,6 @@ class TestJeux:
             # TODO: Implémenter
             pass
 
-
     class TestStatutPariEnum:
         """Tests pour la classe StatutPariEnum."""
 
@@ -41,7 +37,6 @@ class TestJeux:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-
 
     class TestTypePariEnum:
         """Tests pour la classe TypePariEnum."""
@@ -56,7 +51,6 @@ class TestJeux:
             # TODO: Implémenter
             pass
 
-
     class TestChampionnatEnum:
         """Tests pour la classe ChampionnatEnum."""
 
@@ -70,7 +64,6 @@ class TestJeux:
             # TODO: Implémenter
             pass
 
-
     class TestEquipe:
         """Tests pour la classe Equipe."""
 
@@ -83,4 +76,3 @@ class TestJeux:
             """Test de la méthode principale."""
             # TODO: Implémenter
             pass
-

@@ -1,10 +1,11 @@
-﻿"""
+"""
 Routes API pour l'inventaire.
 """
 
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field, field_validator
+
+from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel, field_validator
 
 router = APIRouter(prefix="/api/v1/inventaire", tags=["Inventaire"])
 
@@ -16,19 +17,20 @@ router = APIRouter(prefix="/api/v1/inventaire", tags=["Inventaire"])
 
 class InventaireItemBase(BaseModel):
     """Schéma de base pour un article d'inventaire."""
+
     nom: str
     quantite: float = 1.0
     unite: str | None = None
     categorie: str | None = None
     date_peremption: datetime | None = None
-    
+
     @field_validator("nom")
     @classmethod
     def validate_nom(cls, v: str) -> str:
         if not v or not v.strip():
             raise ValueError("Le nom ne peut pas être vide")
         return v.strip()
-    
+
     @field_validator("quantite")
     @classmethod
     def validate_quantite(cls, v: float) -> float:
@@ -41,16 +43,18 @@ class InventaireItemBase(BaseModel):
 
 class InventaireItemCreate(InventaireItemBase):
     """Schéma pour créer un article."""
+
     code_barres: str | None = None
     emplacement: str | None = None
 
 
 class InventaireItemResponse(InventaireItemBase):
     """Schéma de réponse pour un article."""
+
     id: int
     code_barres: str | None = None
     created_at: datetime | None = None
-    
+
     model_config = {"from_attributes": True}
 
 
@@ -70,38 +74,39 @@ async def list_inventaire(
 ):
     """Liste les articles d'inventaire avec filtres."""
     try:
+        from datetime import timedelta
+
         from src.core.database import obtenir_contexte_db
         from src.core.models import ArticleInventaire
-        from datetime import timedelta
-        
+
         with obtenir_contexte_db() as session:
             query = session.query(ArticleInventaire)
-            
+
             if categorie:
                 # categorie via relation ingredient
                 from src.core.models import Ingredient
+
                 query = query.join(Ingredient).filter(Ingredient.categorie == categorie)
-            
+
             if emplacement:
                 query = query.filter(ArticleInventaire.emplacement == emplacement)
-            
+
             if stock_bas:
                 query = query.filter(ArticleInventaire.quantite <= ArticleInventaire.quantite_min)
-            
+
             if peremption_proche:
                 seuil = datetime.now() + timedelta(days=7)
                 query = query.filter(ArticleInventaire.date_peremption <= seuil)
-            
+
             total = query.count()
-            
+
             items = (
-                query
-                .order_by(ArticleInventaire.id)
+                query.order_by(ArticleInventaire.id)
                 .offset((page - 1) * page_size)
                 .limit(page_size)
                 .all()
             )
-            
+
             return {
                 "items": [
                     {
@@ -119,9 +124,9 @@ async def list_inventaire(
                 "total": total,
                 "page": page,
                 "page_size": page_size,
-                "pages": (total + page_size - 1) // page_size
+                "pages": (total + page_size - 1) // page_size,
             }
-            
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -132,7 +137,7 @@ async def create_inventaire_item(item: InventaireItemCreate):
     try:
         from src.core.database import obtenir_contexte_db
         from src.core.models import ArticleInventaire
-        
+
         with obtenir_contexte_db() as session:
             db_item = ArticleInventaire(
                 nom=item.nom,
@@ -146,9 +151,9 @@ async def create_inventaire_item(item: InventaireItemCreate):
             session.add(db_item)
             session.commit()
             session.refresh(db_item)
-            
+
             return InventaireItemResponse.model_validate(db_item)
-            
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -159,19 +164,20 @@ async def get_by_barcode(code: str):
     try:
         from src.core.database import obtenir_contexte_db
         from src.core.models import ArticleInventaire
-        
+
         with obtenir_contexte_db() as session:
-            item = session.query(ArticleInventaire).filter(
-                ArticleInventaire.code_barres == code
-            ).first()
-            
+            item = (
+                session.query(ArticleInventaire)
+                .filter(ArticleInventaire.code_barres == code)
+                .first()
+            )
+
             if not item:
                 raise HTTPException(status_code=404, detail="Article non trouvé")
-            
+
             return InventaireItemResponse.model_validate(item)
-            
+
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-

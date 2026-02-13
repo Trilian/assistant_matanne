@@ -1,4 +1,4 @@
-﻿"""
+"""
 Migration 009 - IntÃ©gration services avec base de donnÃ©es
 
 RÃ©vision ID: 009
@@ -27,8 +27,8 @@ Aucune modification de schÃ©ma nÃ©cessaire - tables dÃ©jÃ  crÃ©Ã©es.
 """
 
 # Revision identifiers, used by Alembic
-revision = '009'
-down_revision = '008'
+revision = "009"
+down_revision = "008"
 branch_labels = None
 depends_on = None
 
