@@ -93,7 +93,7 @@ async def list_recettes(
             }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/{recette_id}", response_model=RecetteResponse)
@@ -114,7 +114,7 @@ async def get_recette(recette_id: int):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("", response_model=RecetteResponse)
@@ -141,7 +141,7 @@ async def create_recette(recette: RecetteCreate):
             return RecetteResponse.model_validate(db_recette)
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.put("/{recette_id}", response_model=RecetteResponse)
@@ -169,7 +169,7 @@ async def update_recette(recette_id: int, recette: RecetteCreate):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.delete("/{recette_id}")
@@ -193,4 +193,4 @@ async def delete_recette(recette_id: int):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e

@@ -15,7 +15,7 @@ def render_categories():
     service = get_inventaire_service()
 
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("❌ Service inventaire indisponible")
         return
 
     try:
@@ -35,7 +35,7 @@ def render_categories():
 
         # Afficher par onglet
         tabs = st.tabs(
-            [f"ðŸ·ï¸ {cat} ({len(articles)})" for cat, articles in sorted(categories.items())]
+            [f"🏷️ {cat} ({len(articles)})" for cat, articles in sorted(categories.items())]
         )
 
         for (cat, articles), tab in zip(sorted(categories.items()), tabs, strict=False):
@@ -52,7 +52,7 @@ def render_categories():
                     cat_alertes = len(
                         [a for a in articles if a["statut"] in ["critique", "stock_bas"]]
                     )
-                    st.metric("âš ï¸ Alertes", cat_alertes)
+                    st.metric("⚠️ Alertes", cat_alertes)
 
                 st.divider()
 
@@ -61,7 +61,7 @@ def render_categories():
                 st.dataframe(df, width="stretch", hide_index=True)
 
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
 
 
 __all__ = ["render_categories"]

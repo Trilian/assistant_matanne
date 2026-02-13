@@ -26,7 +26,6 @@ from .errors_base import (
     ErreurServiceIA,
     ErreurValidation,
     ExceptionApp,
-    exiger_champs,
 )
 
 logger = logging.getLogger(__name__)
@@ -166,35 +165,6 @@ handle_errors = gerer_erreurs
 # ═══════════════════════════════════════════════════════════
 # HELPERS DE VALIDATION
 # ═══════════════════════════════════════════════════════════
-
-
-def exiger_champs(data: dict, champs: list[str], nom_objet: str = "objet"):
-    """
-    Vérifie que les champs requis sont présents et non vides.
-
-    Args:
-        data: Dictionnaire de données
-        champs: Liste des champs obligatoires
-        nom_objet: Nom de l'objet pour le message d'erreur
-
-    Raises:
-        ErreurValidation: Si des champs sont manquants
-
-    Example:
-        >>> exiger_champs(
-        >>>     {"nom": "Tarte", "temps": 30},
-        >>>     ["nom", "temps", "portions"],
-        >>>     "recette"
-        >>> )
-    """
-    manquants = [champ for champ in champs if not data.get(champ)]
-
-    if manquants:
-        raise ErreurValidation(
-            f"Champs manquants dans {nom_objet}: {manquants}",
-            details={"champs_manquants": manquants},
-            message_utilisateur=f"Champs obligatoires manquants : {', '.join(manquants)}",
-        )
 
 
 def exiger_positif(valeur: float, nom_champ: str):

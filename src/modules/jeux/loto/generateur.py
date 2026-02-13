@@ -22,7 +22,7 @@ from .utils import charger_grilles_utilisateur
 def afficher_generateur_grilles(tirages: list):
     """Interface de génération de grilles"""
 
-    st.markdown("### ðŸŽ² Générer une grille")
+    st.markdown("### 🎲 Générer une grille")
 
     # Préparer les données si disponibles
     freq_data = calculer_frequences_numeros(tirages) if tirages else {}
@@ -34,12 +34,12 @@ def afficher_generateur_grilles(tirages: list):
         strategie = st.selectbox(
             "Stratégie de génération",
             [
-                ("ðŸŽ² Aléatoire", "aleatoire"),
-                ("ðŸ§  Éviter populaires (32-49)", "eviter_populaires"),
+                ("🎲 Aléatoire", "aleatoire"),
+                ("🧠 Éviter populaires (32-49)", "eviter_populaires"),
                 ("âš–ï¸ Équilibrée (somme moyenne)", "equilibree"),
-                ("ðŸ”¥ Numéros chauds", "chauds"),
+                ("🔥 Numéros chauds", "chauds"),
                 ("â„ï¸ Numéros froids", "froids"),
-                ("ðŸ”„ Mixte (chauds + froids)", "mixte"),
+                ("🔄 Mixte (chauds + froids)", "mixte"),
                 ("âœï¸ Manuelle", "manuel"),
             ],
             format_func=lambda x: x[0],
@@ -66,7 +66,7 @@ def afficher_generateur_grilles(tirages: list):
             }
     else:
         with col2:
-            if st.button("ðŸŽ² Générer!", type="primary", width="stretch"):
+            if st.button("🎲 Générer!", type="primary", width="stretch"):
                 if strategie[1] == "aleatoire":
                     grille_generee = generer_grille_aleatoire()
                 elif strategie[1] == "eviter_populaires":
@@ -110,7 +110,7 @@ def afficher_generateur_grilles(tirages: list):
             # Bouton enregistrer
             col_save, col_empty = st.columns([1, 2])
             with col_save:
-                if st.button("ðŸ’¾ Enregistrer (virtuel)", width="stretch"):
+                if st.button("💾 Enregistrer (virtuel)", width="stretch"):
                     enregistrer_grille(
                         grille_generee["numeros"],
                         grille_generee["numero_chance"],
@@ -125,7 +125,7 @@ def afficher_mes_grilles():
     grilles = charger_grilles_utilisateur()
 
     if not grilles:
-        st.info("ðŸ“ Aucune grille enregistrée. Générez-en une!")
+        st.info("📝 Aucune grille enregistrée. Générez-en une!")
         return
 
     # Stats globales
@@ -135,15 +135,15 @@ def afficher_mes_grilles():
 
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("ðŸŽ« Grilles jouées", len(grilles))
+        st.metric("🎫 Grilles jouées", len(grilles))
     with col2:
-        st.metric("ðŸ’¸ Total misé", f"{total_mise:.2f}€")
+        st.metric("💸 Total misé", f"{total_mise:.2f}€")
     with col3:
-        st.metric("ðŸ’° Total gagné", f"{total_gain:.2f}€")
+        st.metric("💰 Total gagné", f"{total_gain:.2f}€")
     with col4:
         profit = total_gain - total_mise
         st.metric(
-            "ðŸ“ˆ Bilan", f"{profit:+.2f}€", delta_color="normal" if profit >= 0 else "inverse"
+            "📝ˆ Bilan", f"{profit:+.2f}€", delta_color="normal" if profit >= 0 else "inverse"
         )
 
     st.divider()
@@ -154,20 +154,20 @@ def afficher_mes_grilles():
             col1, col2, col3 = st.columns([3, 1, 1])
 
             with col1:
-                st.write(f"ðŸŽ« {grille['numeros_str']}")
+                st.write(f"🎫 {grille['numeros_str']}")
                 st.caption(f"Source: {grille['source']} | {grille['date'].strftime('%d/%m/%Y')}")
 
             with col2:
                 if grille.get("rang"):
-                    st.success(f"ðŸ† Rang {grille['rang']}")
+                    st.success(f"🏆 Rang {grille['rang']}")
                     st.write(f"+{grille['gain']:.2f}€")
                 elif grille.get("tirage_id"):
-                    st.error("âŒ Perdu")
+                    st.error("❌ Perdu")
                 else:
-                    st.warning("â³ En attente")
+                    st.warning("⏳ En attente")
 
             with col3:
                 if grille.get("numeros_trouves") is not None:
-                    st.write(f"âœ… {grille['numeros_trouves']}/5")
+                    st.write(f"✅ {grille['numeros_trouves']}/5")
                     if grille.get("chance_trouvee"):
                         st.write("+ Chance âœ“")

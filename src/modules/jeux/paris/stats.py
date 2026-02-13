@@ -174,20 +174,20 @@ def analyser_tendances_championnat(
     tendances = []
 
     if stats["pct_victoires_dom"] > 50:
-        tendances.append(f"ðŸ  Forte domination domicile ({stats['pct_victoires_dom']}%)")
+        tendances.append(f"🏠 Forte domination domicile ({stats['pct_victoires_dom']}%)")
     elif stats["pct_victoires_dom"] < 35:
         tendances.append(f"âœˆï¸ Bons résultats extérieurs ({stats['pct_victoires_ext']}%)")
 
     if stats["pct_nuls"] > 30:
-        tendances.append(f"ðŸ¤ Beaucoup de nuls ({stats['pct_nuls']}%)")
+        tendances.append(f"🤝 Beaucoup de nuls ({stats['pct_nuls']}%)")
 
     if stats["pct_over_2_5"] > 55:
-        tendances.append(f"âš½ Championnat offensif ({stats['buts_par_match']:.1f} buts/match)")
+        tendances.append(f"⚽ Championnat offensif ({stats['buts_par_match']:.1f} buts/match)")
     elif stats["pct_over_2_5"] < 40:
-        tendances.append(f"ðŸ›¡ï¸ Championnat défensif ({stats['buts_par_match']:.1f} buts/match)")
+        tendances.append(f"🛡️ Championnat défensif ({stats['buts_par_match']:.1f} buts/match)")
 
     if stats["pct_btts"] > 55:
-        tendances.append(f"âœ… BTTS fréquent ({stats['pct_btts']}%)")
+        tendances.append(f"✅ BTTS fréquent ({stats['pct_btts']}%)")
 
     return {
         "championnat": championnat,

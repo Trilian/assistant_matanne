@@ -18,12 +18,12 @@ from ._common import (
 def afficher_dernier_tirage(tirages: list):
     """Affiche le dernier tirage avec style"""
     if not tirages:
-        st.info("ðŸ“Š Aucun tirage enregistré")
+        st.info("📊 Aucun tirage enregistré")
         return
 
     dernier = tirages[0]
 
-    st.markdown("### ðŸŽ° Dernier tirage")
+    st.markdown("### 🎰 Dernier tirage")
 
     with st.container(border=True):
         col1, col2 = st.columns([3, 1])
@@ -54,7 +54,7 @@ def afficher_dernier_tirage(tirages: list):
 
         with col2:
             if dernier.get("jackpot_euros"):
-                st.metric("ðŸ’° Jackpot", f"{dernier['jackpot_euros']:,}€")
+                st.metric("💰 Jackpot", f"{dernier['jackpot_euros']:,}€")
 
 
 def afficher_statistiques_frequences(tirages: list):
@@ -74,7 +74,7 @@ def afficher_statistiques_frequences(tirages: list):
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown("### ðŸ”¥ Numéros Chauds")
+        st.markdown("### 🔥 Numéros Chauds")
         st.caption("Les plus fréquents")
         for num in chauds_froids.get("chauds", [])[:5]:
             freq = frequences[num]["frequence"]
@@ -90,7 +90,7 @@ def afficher_statistiques_frequences(tirages: list):
             st.write(f"**{num}** - {freq} fois ({pct}%)")
 
     with col3:
-        st.markdown("### â° En Retard")
+        st.markdown("### ⏰ En Retard")
         st.caption("Pas sortis depuis longtemps")
         for num in chauds_froids.get("retard", [])[:5]:
             ecart = frequences[num]["ecart"]
@@ -99,7 +99,7 @@ def afficher_statistiques_frequences(tirages: list):
     st.divider()
 
     # Graphique de fréquence
-    st.markdown("### ðŸ“Š Distribution des fréquences")
+    st.markdown("### 📊 Distribution des fréquences")
 
     nums = list(range(NUMERO_MIN, NUMERO_MAX + 1))
     freqs = [frequences.get(n, {}).get("frequence", 0) for n in nums]
@@ -133,7 +133,7 @@ def afficher_statistiques_frequences(tirages: list):
 
     # Avertissement
     st.warning(
-        "âš ï¸ **Rappel**: Ces statistiques sont purement informatives. "
+        "⚠️ **Rappel**: Ces statistiques sont purement informatives. "
         "Chaque tirage est indépendant et aléatoire. "
         "Un numéro 'en retard' n'a pas plus de chances de sortir!"
     )
@@ -144,24 +144,24 @@ def afficher_esperance():
 
     esp = calculer_esperance_mathematique()
 
-    st.markdown("### ðŸ“ Mathématiques du Loto")
+    st.markdown("### 📝 Mathématiques du Loto")
 
     with st.container(border=True):
         col1, col2 = st.columns(2)
 
         with col1:
-            st.metric("ðŸ’¸ Coût grille", f"{esp['cout_grille']:.2f}€")
-            st.metric("ðŸ“‰ Espérance", f"{esp['esperance']:+.4f}€")
+            st.metric("💸 Coût grille", f"{esp['cout_grille']:.2f}€")
+            st.metric("📝‰ Espérance", f"{esp['esperance']:+.4f}€")
 
         with col2:
-            st.metric("ðŸŽ¯ Gains espérés", f"{esp['gains_esperes']:.4f}€")
-            st.metric("ðŸ“Š Perte moyenne", f"{esp['perte_moyenne_pct']:.1f}%")
+            st.metric("🎯 Gains espérés", f"{esp['gains_esperes']:.4f}€")
+            st.metric("📊 Perte moyenne", f"{esp['perte_moyenne_pct']:.1f}%")
 
         st.info(esp["conclusion"])
 
     st.divider()
 
-    st.markdown("### ðŸŽ² Probabilités de gain")
+    st.markdown("### 🎲 Probabilités de gain")
 
     df_probas = pd.DataFrame(
         [
@@ -179,6 +179,6 @@ def afficher_esperance():
     st.dataframe(df_probas, hide_index=True, width="stretch")
 
     st.warning(
-        "âš ï¸ **Rappel**: Vous avez plus de chances de mourir d'une chute de météorite (1/700 000) "
+        "⚠️ **Rappel**: Vous avez plus de chances de mourir d'une chute de météorite (1/700 000) "
         "que de gagner le jackpot du Loto (1/19 068 840)!"
     )

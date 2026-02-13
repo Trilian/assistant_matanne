@@ -421,7 +421,7 @@ class SessionStateMock(dict):
         try:
             return self[key]
         except KeyError:
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{key}'")
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{key}'") from None
 
     def __setattr__(self, key, value):
         self[key] = value
@@ -430,7 +430,7 @@ class SessionStateMock(dict):
         try:
             del self[key]
         except KeyError:
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{key}'")
+            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{key}'") from None
 
 
 def create_streamlit_mock(session_state_data: dict = None):

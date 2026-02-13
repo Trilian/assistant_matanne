@@ -42,7 +42,7 @@ def afficher_prediction_match(match: dict):
             "exterieur": match["cote_ext"],
         }
 
-    # ðŸ§  ANALYSE INTELLIGENTE COMPLÈTE
+    # 🧠 ANALYSE INTELLIGENTE COMPLÈTE
     analyse = generer_analyse_complete(forme_dom, forme_ext, h2h, cotes, match.get("championnat"))
     prediction = predire_resultat_match(forme_dom, forme_ext, h2h, cotes)
     over_under = predire_over_under(forme_dom, forme_ext)
@@ -53,49 +53,49 @@ def afficher_prediction_match(match: dict):
         col1, col2, col3 = st.columns([2, 1, 2])
 
         with col1:
-            st.markdown(f"### ðŸ  {match['dom_nom']}")
+            st.markdown(f"### 🏠 {match['dom_nom']}")
             forme_str = forme_dom.get("forme_str", "?????")
             forme_coloree = (
-                forme_str.replace("V", "ðŸŸ¢")
-                .replace("N", "ðŸŸ¡")
-                .replace("D", "ðŸ”´")
-                .replace("?", "âšª")
+                forme_str.replace("V", "🟢")
+                .replace("N", "🟡")
+                .replace("D", "🔴")
+                .replace("?", "⚪")
             )
             st.markdown(f"Forme: {forme_coloree}")
 
             score_dom = forme_dom.get("score", 50)
             if score_dom >= 70:
-                st.success(f"ðŸ’ª Excellente forme ({score_dom:.0f}/100)")
+                st.success(f"💪 Excellente forme ({score_dom:.0f}/100)")
             elif score_dom >= 50:
-                st.info(f"ðŸ‘ Bonne forme ({score_dom:.0f}/100)")
+                st.info(f"👍 Bonne forme ({score_dom:.0f}/100)")
             else:
-                st.warning(f"ðŸ˜Ÿ Forme moyenne ({score_dom:.0f}/100)")
+                st.warning(f"😟 Forme moyenne ({score_dom:.0f}/100)")
 
         with col2:
-            st.markdown("### âš½")
+            st.markdown("### ⚽")
             st.markdown(f"**{match['date']}**")
             if match.get("heure"):
-                st.markdown(f"â° {match['heure']}")
-            st.markdown(f"ðŸ† {match['championnat']}")
+                st.markdown(f"⏰ {match['heure']}")
+            st.markdown(f"🏆 {match['championnat']}")
 
         with col3:
             st.markdown(f"### âœˆï¸ {match['ext_nom']}")
             forme_str = forme_ext.get("forme_str", "?????")
             forme_coloree = (
-                forme_str.replace("V", "ðŸŸ¢")
-                .replace("N", "ðŸŸ¡")
-                .replace("D", "ðŸ”´")
-                .replace("?", "âšª")
+                forme_str.replace("V", "🟢")
+                .replace("N", "🟡")
+                .replace("D", "🔴")
+                .replace("?", "⚪")
             )
             st.markdown(f"Forme: {forme_coloree}")
 
             score_ext = forme_ext.get("score", 50)
             if score_ext >= 70:
-                st.success(f"ðŸ’ª Excellente forme ({score_ext:.0f}/100)")
+                st.success(f"💪 Excellente forme ({score_ext:.0f}/100)")
             elif score_ext >= 50:
-                st.info(f"ðŸ‘ Bonne forme ({score_ext:.0f}/100)")
+                st.info(f"👍 Bonne forme ({score_ext:.0f}/100)")
             else:
-                st.warning(f"ðŸ˜Ÿ Forme moyenne ({score_ext:.0f}/100)")
+                st.warning(f"😟 Forme moyenne ({score_ext:.0f}/100)")
 
         st.divider()
 
@@ -109,23 +109,23 @@ def afficher_prediction_match(match: dict):
 
         if confiance >= 65:
             st.success(f"""
-            ### âœ… PARI RECOMMANDÉ: **{pari_reco}**
+            ### ✅ PARI RECOMMANDÉ: **{pari_reco}**
 
             **Confiance:** {confiance:.0f}% | **Mise suggérée:** {reco.get('mise', '?')}
 
-            ðŸ“Š *{reco.get('raison', '')}*
+            📊 *{reco.get('raison', '')}*
             """)
         elif confiance >= 50:
             st.warning(f"""
-            ### âš ï¸ PARI POSSIBLE: **{pari_reco}**
+            ### ⚠️ PARI POSSIBLE: **{pari_reco}**
 
             **Confiance:** {confiance:.0f}% | **Mise suggérée:** {reco.get('mise', '?')}
 
-            ðŸ“Š *{reco.get('raison', '')}*
+            📊 *{reco.get('raison', '')}*
             """)
         else:
             st.error("""
-            ### âŒ MATCH À ÉVITER
+            ### ❌ MATCH À ÉVITER
 
             Pas assez de signaux clairs pour ce match.
             **Conseil:** Garde tes sous pour un meilleur match!
@@ -140,7 +140,7 @@ def afficher_prediction_match(match: dict):
             fig = go.Figure(
                 data=[
                     go.Bar(
-                        x=["ðŸ  Dom", "âš–ï¸ Nul", "âœˆï¸ Ext"],
+                        x=["🏠 Dom", "âš–ï¸ Nul", "âœˆï¸ Ext"],
                         y=[
                             probas.get("domicile", 33),
                             probas.get("nul", 33),
@@ -160,7 +160,7 @@ def afficher_prediction_match(match: dict):
                 ]
             )
             fig.update_layout(
-                title="ðŸ“Š Probabilités estimées",
+                title="📊 Probabilités estimées",
                 height=220,
                 margin=dict(l=20, r=20, t=40, b=20),
                 showlegend=False,
@@ -172,7 +172,7 @@ def afficher_prediction_match(match: dict):
             stats = analyse.get("stats", {})
             moy_buts = stats.get("moy_buts_match", 2.5)
 
-            st.markdown("### âš½ Paris Buts")
+            st.markdown("### ⚽ Paris Buts")
 
             if moy_buts > 2.8:
                 st.success(f"**Over 2.5** recommandé ({over_under['probabilite_over']:.0f}%)")
@@ -191,10 +191,10 @@ def afficher_prediction_match(match: dict):
 
         # CONSEILS INTELLIGENTS
         if conseils:
-            st.markdown("### ðŸ’¡ Conseils IA")
+            st.markdown("### 💡 Conseils IA")
 
             for conseil in conseils[:4]:
-                emoji = conseil.get("emoji", "ðŸ’¡")
+                emoji = conseil.get("emoji", "💡")
                 titre = conseil.get("titre", "")
                 message = conseil.get("message", "")
                 conf = conseil.get("confiance", 50)
@@ -205,18 +205,18 @@ def afficher_prediction_match(match: dict):
                     f"{emoji} {titre} - **{pari}** ({conf:.0f}%)", expanded=(conf >= 60)
                 ):
                     st.markdown(message)
-                    st.caption(f"ðŸ’° Mise suggérée: {mise}")
+                    st.caption(f"💰 Mise suggérée: {mise}")
 
         # ALERTES
         if alertes:
-            st.markdown("### âš ï¸ Points d'attention")
+            st.markdown("### ⚠️ Points d'attention")
             for alerte in alertes:
                 st.warning(f"{alerte['emoji']} **{alerte['titre']}**: {alerte['message']}")
 
         # VALUE BETS
         value_bets = analyse.get("value_bets", [])
         if value_bets:
-            st.markdown("### ðŸ’Ž Value Bets détectées")
+            st.markdown("### 💎 Value Bets détectées")
             for vb in value_bets:
                 if vb["qualite"] in ["excellente", "bonne"]:
                     st.success(
@@ -227,24 +227,24 @@ def afficher_prediction_match(match: dict):
 
         # BOUTONS DE PARIS
         st.divider()
-        st.markdown("### ðŸŽ¯ Enregistrer un pari")
+        st.markdown("### 🎯 Enregistrer un pari")
 
         col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
 
         with col_btn1:
             cote_d = match.get("cote_dom") or 2.0
             if st.button(
-                f"ðŸ  {match['dom_nom'][:10]}... ({cote_d:.2f})", key=f"bet_dom_{match['id']}"
+                f"🏠 {match['dom_nom'][:10]}... ({cote_d:.2f})", key=f"bet_dom_{match['id']}"
             ):
                 enregistrer_pari(match["id"], "1", cote_d, est_virtuel=True)
-                st.success("âœ… Pari enregistré!")
+                st.success("✅ Pari enregistré!")
                 st.rerun()
 
         with col_btn2:
             cote_n = match.get("cote_nul") or 3.5
             if st.button(f"âš–ï¸ Match Nul ({cote_n:.2f})", key=f"bet_nul_{match['id']}"):
                 enregistrer_pari(match["id"], "N", cote_n, est_virtuel=True)
-                st.success("âœ… Pari enregistré!")
+                st.success("✅ Pari enregistré!")
                 st.rerun()
 
         with col_btn3:
@@ -253,16 +253,16 @@ def afficher_prediction_match(match: dict):
                 f"âœˆï¸ {match['ext_nom'][:10]}... ({cote_e:.2f})", key=f"bet_ext_{match['id']}"
             ):
                 enregistrer_pari(match["id"], "2", cote_e, est_virtuel=True)
-                st.success("âœ… Pari enregistré!")
+                st.success("✅ Pari enregistré!")
                 st.rerun()
 
         with col_btn4:
-            if st.button("ðŸ“Š Analyse complète", key=f"analyse_{match['id']}"):
+            if st.button("📊 Analyse complète", key=f"analyse_{match['id']}"):
                 st.session_state[f"show_details_{match['id']}"] = True
 
         # Détails complets si demandé
         if st.session_state.get(f"show_details_{match['id']}", False):
-            with st.expander("ðŸ“Š Analyse détaillée complète", expanded=True):
+            with st.expander("📊 Analyse détaillée complète", expanded=True):
                 col_d1, col_d2 = st.columns(2)
 
                 with col_d1:

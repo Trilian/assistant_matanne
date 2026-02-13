@@ -29,7 +29,7 @@ class ServiceNotificationsInventaire:
     ) -> NotificationInventaire | None:
         """Crée une notification pour stock critique."""
         message = (
-            f"âŒ CRITIQUE: {article['nom']} est en stock critique!\n"
+            f"❌ CRITIQUE: {article['nom']} est en stock critique!\n"
             f"Quantité actuelle: {article['quantite']} {article.get('unite', '')}\n"
             f"Seuil minimum: {article['quantite_min']} {article.get('unite', '')}"
         )
@@ -39,9 +39,9 @@ class ServiceNotificationsInventaire:
             type_alerte=TypeAlerte.STOCK_CRITIQUE,
             article_id=article["id"],
             ingredient_id=article["ingredient_id"],
-            titre=f"âš ï¸ Stock critique: {article['nom']}",
+            titre=f"⚠️ Stock critique: {article['nom']}",
             message=message,
-            icone="âŒ",
+            icone="❌",
             priorite="haute",
         )
 
@@ -51,7 +51,7 @@ class ServiceNotificationsInventaire:
     ) -> NotificationInventaire | None:
         """Crée une notification pour stock bas."""
         message = (
-            f"âš ï¸ ALERTE: {article['nom']} a un stock bas.\n"
+            f"⚠️ ALERTE: {article['nom']} a un stock bas.\n"
             f"Quantité actuelle: {article['quantite']} {article.get('unite', '')}\n"
             f"Seuil minimum: {article['quantite_min']} {article.get('unite', '')}"
         )
@@ -61,9 +61,9 @@ class ServiceNotificationsInventaire:
             type_alerte=TypeAlerte.STOCK_BAS,
             article_id=article["id"],
             ingredient_id=article["ingredient_id"],
-            titre=f"âš ï¸ Stock bas: {article['nom']}",
+            titre=f"⚠️ Stock bas: {article['nom']}",
             message=message,
-            icone="âš ï¸",
+            icone="⚠️",
             priorite="moyenne",
         )
 
@@ -74,20 +74,20 @@ class ServiceNotificationsInventaire:
     ) -> NotificationInventaire | None:
         """Crée une notification pour péremption proche."""
         if jours_avant <= 0:
-            titre = f"ðŸš¨ EXPIRÉ: {article['nom']}"
+            titre = f"🚨 EXPIRÉ: {article['nom']}"
             type_alerte = TypeAlerte.PEREMPTION_DEPASSEE
             priorite = "haute"
-            icone = "ðŸš¨"
+            icone = "🚨"
         elif jours_avant <= 3:
-            titre = f"ðŸ”´ Péremption très proche: {article['nom']}"
+            titre = f"🔴 Péremption très proche: {article['nom']}"
             type_alerte = TypeAlerte.PEREMPTION_PROCHE
             priorite = "haute"
-            icone = "ðŸ”´"
+            icone = "🔴"
         else:
-            titre = f"ðŸŸ  Péremption proche: {article['nom']}"
+            titre = f"🟠 Péremption proche: {article['nom']}"
             type_alerte = TypeAlerte.PEREMPTION_PROCHE
             priorite = "moyenne"
-            icone = "ðŸŸ "
+            icone = "🟠"
 
         message = (
             f"{icone} Date de péremption: {article.get('date_peremption')}\n"
@@ -127,7 +127,7 @@ class ServiceNotificationsInventaire:
         self._next_id += 1
 
         self.notifications[utilisateur_id].append(notification)
-        logger.info(f"ðŸ“¬ Notification créée: {notification.titre}")
+        logger.info(f"📝¬ Notification créée: {notification.titre}")
 
         return notification
 
@@ -245,7 +245,7 @@ class ServiceNotificationsInventaire:
         email_destinataire: str,
     ) -> bool:
         """Envoie une notification par email (stub)."""
-        logger.info(f"ðŸ“§ Email alerte à {email_destinataire}: {notification.titre}")
+        logger.info(f"📝§ Email alerte à {email_destinataire}: {notification.titre}")
 
         notification.email = email_destinataire
         notification.push_envoyee = True
@@ -266,7 +266,7 @@ def obtenir_service_notifications_inventaire() -> ServiceNotificationsInventaire
 
     if _service_notifications_inventaire is None:
         _service_notifications_inventaire = ServiceNotificationsInventaire()
-        logger.info("âœ… Service de notifications inventaire initialisé")
+        logger.info("✅ Service de notifications inventaire initialisé")
 
     return _service_notifications_inventaire
 

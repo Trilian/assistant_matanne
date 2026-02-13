@@ -305,12 +305,12 @@ class DetecteurN1:
         for d in detections:
             if d.parent_table != "unknown":
                 suggestions.append(
-                    f"ðŸ’¡ Table '{d.table}': Utiliser `joinedload({d.parent_table})` "
+                    f"💡 Table '{d.table}': Utiliser `joinedload({d.parent_table})` "
                     f"ou `selectinload({d.parent_table})` pour éviter {d.count} requêtes"
                 )
             else:
                 suggestions.append(
-                    f"ðŸ’¡ Table '{d.table}': {d.count} requêtes similaires détectées. "
+                    f"💡 Table '{d.table}': {d.count} requêtes similaires détectées. "
                     f"Considérer un eager loading des relations."
                 )
 
@@ -526,7 +526,7 @@ def afficher_analyse_sql():
 
     stats = EcouteurSQLAlchemy.obtenir_statistiques()
 
-    with st.expander("ðŸ—ƒï¸ Analyse SQL", expanded=False):
+    with st.expander("🗃️ Analyse SQL", expanded=False):
         if stats["total"] == 0:
             st.info("Aucune requête enregistrée")
             return
@@ -547,7 +547,7 @@ def afficher_analyse_sql():
             )
 
         # Par opération
-        st.caption("[CHART] Par opération:")
+        st.caption("📊 Par opération:")
         for op, count in stats["by_operation"].items():
             st.progress(count / stats["total"], text=f"{op}: {count}")
 
@@ -562,11 +562,11 @@ def afficher_analyse_sql():
         # Boutons
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("ðŸ”„ Analyser N+1", key="analyze_n1"):
+            if st.button("🔄 Analyser N+1", key="analyze_n1"):
                 DetecteurN1.analyze()
                 st.rerun()
         with col2:
-            if st.button("ðŸ—‘ï¸ Vider log", key="clear_sql_log"):
+            if st.button("🗑️ Vider log", key="clear_sql_log"):
                 EcouteurSQLAlchemy.clear()
                 st.rerun()
 

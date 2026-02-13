@@ -18,9 +18,9 @@ class JulesAIService(BaseAIService):
         prompt = f"""Pour un enfant de {age_mois} mois, suggère {nb} activités {meteo}.
 
 Format pour chaque activité:
-ðŸŽ¯ [Nom de l'activité]
+🎯 [Nom de l'activité]
 â±ï¸ Durée: X min
-ðŸ“ Description: Une phrase
+📝 Description: Une phrase
 ⏰ Bénéfice: Ce que ça développe
 
 Activités adaptées à cet âge, stimulantes et réalisables à la maison."""
@@ -65,10 +65,10 @@ Ton bienveillant, rassurant et pratique."""
         prompt = f"""Pour un enfant de {age_mois} mois, suggère 5 jouets éducatifs avec un budget de {budget}€ max par jouet.
 
 Format:
-ðŸŽ [Nom du jouet]
-ðŸ’° Prix estimé: X€
-ðŸŽ¯ Développe: [compétence]
-ðŸ“ Pourquoi: Une phrase
+🎁 [Nom du jouet]
+💰 Prix estimé: X€
+🎯 Développe: [compétence]
+📝 Pourquoi: Une phrase
 
 Jouets sûrs, éducatifs et adaptés à cet âge."""
 

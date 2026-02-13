@@ -26,7 +26,7 @@ from .utils import formater_quantite
 
 def app():
     """Point d'entrée module recettes"""
-    st.title("ðŸ½ï¸ Mes Recettes")
+    st.title("🍽️ Mes Recettes")
     st.caption("Gestion complète de votre base de recettes")
 
     # Gérer l'état de la vue détails
@@ -42,7 +42,7 @@ def app():
                 # Bouton retour en haut avec icône visible
                 col_retour, col_titre = st.columns([1, 10])
                 with col_retour:
-                    if st.button("â¬…ï¸", help="Retour à la liste", use_container_width=True):
+                    if st.button("⬅️", help="Retour à la liste", use_container_width=True):
                         st.session_state.detail_recette_id = None
                         st.rerun()
                 with col_titre:
@@ -50,7 +50,7 @@ def app():
                 st.divider()
                 render_detail_recette(recette)
                 return
-        st.error("âŒ Recette non trouvée")
+        st.error("❌ Recette non trouvée")
         st.session_state.detail_recette_id = None
 
     # Sous-tabs avec persistence d'état
@@ -58,7 +58,7 @@ def app():
         st.session_state.recettes_selected_tab = 0
 
     tab_liste, tab_ajout, tab_import, tab_ia = st.tabs(
-        ["ðŸ“‹ Liste", "âž• Ajouter Manuel", "ðŸ“¥ Importer", "⏰ Générer IA"]
+        ["📋 Liste", "➕ Ajouter Manuel", "📝¥ Importer", "⏰ Générer IA"]
     )
 
     with tab_liste:

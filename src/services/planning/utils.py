@@ -179,18 +179,18 @@ def determine_protein_type(
 
     Examples:
         >>> determine_protein_type('lundi', ['lundi'], [], [])
-        ('poisson', 'ðŸŸ Jour poisson')
+        ('poisson', '🐟 Jour poisson')
         >>> determine_protein_type('mercredi', [], [], ['mercredi'])
-        ('vegetarien', 'ðŸ¥¬ Jour végétarien')
+        ('vegetarien', '🥬 Jour végétarien')
     """
     if jour_lower in [j.lower() for j in poisson_jours]:
-        return "poisson", "ðŸŸ Jour poisson"
+        return "poisson", "🐟 Jour poisson"
     elif jour_lower in [j.lower() for j in viande_rouge_jours]:
-        return "viande_rouge", "ðŸ¥© Jour viande rouge"
+        return "viande_rouge", "🥩 Jour viande rouge"
     elif jour_lower in [j.lower() for j in vegetarien_jours]:
-        return "vegetarien", "ðŸ¥¬ Jour végétarien"
+        return "vegetarien", "🥬 Jour végétarien"
     else:
-        return "volaille", "ðŸ— Jour volaille"
+        return "volaille", "🍗 Jour volaille"
 
 
 def get_default_protein_schedule() -> dict[str, str]:
@@ -323,12 +323,12 @@ def format_meal_for_display(repas: dict) -> dict:
 
     # Emoji par type
     emoji_map = {
-        "petit-dejeuner": "ðŸŒ…",
+        "petit-dejeuner": "🌅",
         "dejeuner": "â˜€ï¸",
-        "gouter": "ðŸª",
-        "diner": "ðŸŒ™",
+        "gouter": "🍪",
+        "diner": "🌙",
     }
-    emoji = emoji_map.get(type_repas.lower().replace(" ", "-"), "ðŸ½ï¸")
+    emoji = emoji_map.get(type_repas.lower().replace(" ", "-"), "🍽️")
 
     return {
         "id": repas.get("id"),

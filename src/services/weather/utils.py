@@ -31,22 +31,22 @@ DIRECTIONS_CARDINALES = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"]
 # Codes météo WMO (World Meteorological Organization)
 WEATHERCODES = {
     0: {"condition": "Ensoleillé", "icon": "â˜€ï¸", "arrosage_factor": 1.2},
-    1: {"condition": "Peu nuageux", "icon": "ðŸŒ¤ï¸", "arrosage_factor": 1.1},
+    1: {"condition": "Peu nuageux", "icon": "🌤️", "arrosage_factor": 1.1},
     2: {"condition": "Partiellement nuageux", "icon": "â›…", "arrosage_factor": 1.0},
     3: {"condition": "Couvert", "icon": "â˜ï¸", "arrosage_factor": 0.8},
-    45: {"condition": "Brouillard", "icon": "ðŸŒ«ï¸", "arrosage_factor": 0.5},
-    48: {"condition": "Brouillard givrant", "icon": "ðŸŒ«ï¸", "arrosage_factor": 0.3},
-    51: {"condition": "Bruine légère", "icon": "ðŸŒ¦ï¸", "arrosage_factor": 0.7},
-    53: {"condition": "Bruine", "icon": "ðŸŒ§ï¸", "arrosage_factor": 0.5},
-    55: {"condition": "Bruine forte", "icon": "ðŸŒ§ï¸", "arrosage_factor": 0.3},
-    61: {"condition": "Pluie légère", "icon": "ðŸŒ§ï¸", "arrosage_factor": 0.4},
-    63: {"condition": "Pluie modérée", "icon": "ðŸŒ§ï¸", "arrosage_factor": 0.2},
-    65: {"condition": "Pluie forte", "icon": "ðŸŒ§ï¸", "arrosage_factor": 0.0},
-    71: {"condition": "Neige légère", "icon": "ðŸŒ¨ï¸", "arrosage_factor": 0.0},
+    45: {"condition": "Brouillard", "icon": "🌫️", "arrosage_factor": 0.5},
+    48: {"condition": "Brouillard givrant", "icon": "🌫️", "arrosage_factor": 0.3},
+    51: {"condition": "Bruine légère", "icon": "🌦️", "arrosage_factor": 0.7},
+    53: {"condition": "Bruine", "icon": "🌧️", "arrosage_factor": 0.5},
+    55: {"condition": "Bruine forte", "icon": "🌧️", "arrosage_factor": 0.3},
+    61: {"condition": "Pluie légère", "icon": "🌧️", "arrosage_factor": 0.4},
+    63: {"condition": "Pluie modérée", "icon": "🌧️", "arrosage_factor": 0.2},
+    65: {"condition": "Pluie forte", "icon": "🌧️", "arrosage_factor": 0.0},
+    71: {"condition": "Neige légère", "icon": "🌨️", "arrosage_factor": 0.0},
     73: {"condition": "Neige modérée", "icon": "â„ï¸", "arrosage_factor": 0.0},
     75: {"condition": "Neige forte", "icon": "â„ï¸", "arrosage_factor": 0.0},
-    80: {"condition": "Averses légères", "icon": "ðŸŒ¦ï¸", "arrosage_factor": 0.5},
-    81: {"condition": "Averses", "icon": "ðŸŒ§ï¸", "arrosage_factor": 0.3},
+    80: {"condition": "Averses légères", "icon": "🌦️", "arrosage_factor": 0.5},
+    81: {"condition": "Averses", "icon": "🌧️", "arrosage_factor": 0.3},
     82: {"condition": "Averses violentes", "icon": "â›ˆï¸", "arrosage_factor": 0.0},
     95: {"condition": "Orage", "icon": "â›ˆï¸", "arrosage_factor": 0.0},
     96: {"condition": "Orage avec grêle légère", "icon": "â›ˆï¸", "arrosage_factor": 0.0},
@@ -152,10 +152,10 @@ def weathercode_to_icon(code: int | None) -> str:
         'â›ˆï¸'
     """
     if code is None:
-        return "â“"
+        return "❓"
 
     info = WEATHERCODES.get(code)
-    return info["icon"] if info else "ðŸŒ¡ï¸"
+    return info["icon"] if info else "🌡️"
 
 
 def get_arrosage_factor(code: int | None) -> float:
@@ -648,7 +648,7 @@ def get_gardening_advice_for_weather(
         conseils.append(
             {
                 "priorite": 1,
-                "icone": "ðŸ’§",
+                "icone": "💧",
                 "titre": "Arrosage renforcé",
                 "description": "Arrosez le soir ou tôt le matin pour limiter l'évaporation",
                 "action": "Évitez l'arrosage en plein soleil (risque de brûlure)",
@@ -657,7 +657,7 @@ def get_gardening_advice_for_weather(
         conseils.append(
             {
                 "priorite": 2,
-                "icone": "ðŸŒ¿",
+                "icone": "🌿",
                 "titre": "Paillage recommandé",
                 "description": "Paillez le sol pour conserver l'humidité",
                 "action": "Utilisez de la paille, des feuilles mortes ou du BRF",
@@ -668,7 +668,7 @@ def get_gardening_advice_for_weather(
         conseils.append(
             {
                 "priorite": 1,
-                "icone": "ðŸ§¥",
+                "icone": "🧥",
                 "titre": "Protection hivernale",
                 "description": "Protégez les plantes sensibles au froid",
                 "action": "Utilisez un voile d'hivernage ou rentrez les pots",
@@ -680,7 +680,7 @@ def get_gardening_advice_for_weather(
         conseils.append(
             {
                 "priorite": 1,
-                "icone": "ðŸŒŠ",
+                "icone": "🌊",
                 "titre": "Drainage à vérifier",
                 "description": "De fortes pluies sont prévues",
                 "action": "Vérifiez que l'eau s'écoule bien dans vos pots et jardinières",
@@ -690,7 +690,7 @@ def get_gardening_advice_for_weather(
         conseils.append(
             {
                 "priorite": 2,
-                "icone": "ðŸ’§",
+                "icone": "💧",
                 "titre": "Vigilance arrosage",
                 "description": "Pas de pluie prévue",
                 "action": "Planifiez votre arrosage pour les prochains jours",
@@ -713,7 +713,7 @@ def get_gardening_advice_for_weather(
         conseils.append(
             {
                 "priorite": 1,
-                "icone": "âš¡",
+                "icone": "⚡",
                 "titre": "Orages prévus",
                 "description": "Risque de grêle et vents forts",
                 "action": "Mettez à l'abri les plantes en pot et les objets légers",

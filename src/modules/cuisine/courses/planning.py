@@ -7,7 +7,7 @@ from ._common import get_courses_intelligentes_service, st
 
 def render_courses_depuis_planning():
     """Génère la liste de courses depuis le planning repas actif."""
-    st.subheader("ðŸ½ï¸ Courses depuis le Planning")
+    st.subheader("🍽️ Courses depuis le Planning")
 
     st.info("""
     **Génération automatique** de la liste de courses basée sur votre planning de repas.
@@ -22,10 +22,10 @@ def render_courses_depuis_planning():
     planning = service.obtenir_planning_actif()
 
     if not planning:
-        st.warning("âš ï¸ Aucun planning actif trouvé.")
-        st.caption("Créez d'abord un planning de repas dans 'Cuisine â†’ Planning Semaine'")
+        st.warning("⚠️ Aucun planning actif trouvé.")
+        st.caption("Créez d'abord un planning de repas dans 'Cuisine → Planning Semaine'")
 
-        if st.button("ðŸ“… Aller au planning", use_container_width=True):
+        if st.button("📝… Aller au planning", use_container_width=True):
             # Naviguer vers planning
             st.session_state.current_page = "cuisine.planning_semaine"
             st.rerun()
@@ -34,15 +34,15 @@ def render_courses_depuis_planning():
     # Afficher info planning
     col1, col2 = st.columns([2, 1])
     with col1:
-        st.success(f"âœ… Planning actif: **{planning.nom}**")
+        st.success(f"✅ Planning actif: **{planning.nom}**")
         nb_repas = len(planning.repas) if planning.repas else 0
         st.caption(
-            f"ðŸ“† Du {planning.semaine_debut} au {planning.semaine_fin} • {nb_repas} repas planifiés"
+            f"📝† Du {planning.semaine_debut} au {planning.semaine_fin} • {nb_repas} repas planifiés"
         )
 
     with col2:
         # Bouton générer
-        if st.button("ðŸ”„ Générer la liste", type="primary", use_container_width=True):
+        if st.button("🔄 Générer la liste", type="primary", use_container_width=True):
             with st.spinner("Analyse du planning en cours..."):
                 resultat = service.generer_liste_courses()
                 st.session_state["courses_planning_resultat"] = resultat
@@ -56,9 +56,9 @@ def render_courses_depuis_planning():
     if resultat:
         # Alertes
         for alerte in resultat.alertes:
-            if "âœ…" in alerte:
+            if "✅" in alerte:
                 st.success(alerte)
-            elif "âš ï¸" in alerte:
+            elif "⚠️" in alerte:
                 st.warning(alerte)
             else:
                 st.info(alerte)
@@ -67,13 +67,13 @@ def render_courses_depuis_planning():
             # Métriques
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.metric("ðŸ›’ Articles à acheter", resultat.total_articles)
+                st.metric("🛒 Articles à acheter", resultat.total_articles)
             with col2:
-                st.metric("ðŸ³ Recettes couvertes", len(resultat.recettes_couvertes))
+                st.metric("🍳 Recettes couvertes", len(resultat.recettes_couvertes))
             with col3:
                 # Répartition par rayon
                 rayons = set(a.rayon for a in resultat.articles)
-                st.metric("ðŸ“¦ Rayons", len(rayons))
+                st.metric("📦 Rayons", len(rayons))
 
             # Recettes couvertes
             if resultat.recettes_couvertes:
@@ -83,7 +83,7 @@ def render_courses_depuis_planning():
             st.divider()
 
             # Afficher articles par rayon
-            st.subheader("ðŸ“‹ Articles à acheter")
+            st.subheader("📋 Articles à acheter")
 
             # Grouper par rayon
             articles_par_rayon = {}
@@ -97,7 +97,7 @@ def render_courses_depuis_planning():
 
             for rayon in sorted(articles_par_rayon.keys()):
                 articles = articles_par_rayon[rayon]
-                priorite_emoji = {1: "ðŸ”´", 2: "ðŸŸ¡", 3: "ðŸŸ¢"}.get(articles[0].priorite, "âšª")
+                priorite_emoji = {1: "🔴", 2: "🟡", 3: "🟢"}.get(articles[0].priorite, "⚪")
 
                 with st.expander(
                     f"{priorite_emoji} {rayon} ({len(articles)} articles)", expanded=True
@@ -115,7 +115,7 @@ def render_courses_depuis_planning():
 
                             # Sources
                             sources = ", ".join(article.recettes_source[:2])
-                            st.caption(f"ðŸ“– {sources}")
+                            st.caption(f"📝– {sources}")
 
                         with col2:
                             st.markdown(f"**{article.a_acheter:.0f}** {article.unite}")
@@ -130,7 +130,7 @@ def render_courses_depuis_planning():
             col1, col2 = st.columns(2)
             with col1:
                 if st.button(
-                    f"âœ… Ajouter {len(articles_selectionnes)} articles à la liste",
+                    f"✅ Ajouter {len(articles_selectionnes)} articles à la liste",
                     type="primary",
                     use_container_width=True,
                     disabled=len(articles_selectionnes) == 0,
@@ -138,14 +138,14 @@ def render_courses_depuis_planning():
                     with st.spinner("Ajout en cours..."):
                         ids = service.ajouter_a_liste_courses(articles_selectionnes)
                         if ids:
-                            st.success(f"âœ… {len(ids)} articles ajoutés à votre liste de courses!")
+                            st.success(f"✅ {len(ids)} articles ajoutés à votre liste de courses!")
                             # Reset
                             del st.session_state["courses_planning_resultat"]
                             st.session_state.courses_refresh += 1
                             st.rerun()
 
             with col2:
-                if st.button("ðŸ”„ Régénérer", use_container_width=True):
+                if st.button("🔄 Régénérer", use_container_width=True):
                     del st.session_state["courses_planning_resultat"]
                     st.rerun()
     else:

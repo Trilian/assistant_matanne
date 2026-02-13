@@ -17,28 +17,28 @@ def render_suggestions_ia():
     service = get_inventaire_service()
 
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("❌ Service inventaire indisponible")
         return
 
-    st.info("ðŸ¤– Suggestions IA basées sur l'état de votre inventaire")
+    st.info("🤖 Suggestions IA basées sur l'état de votre inventaire")
 
     # Initialiser l'état
     if "suggestions_data" not in st.session_state:
         st.session_state.suggestions_data = None
 
-    if st.button("ðŸ›’ Générer les suggestions", width="stretch"):
+    if st.button("🛒 Générer les suggestions", width="stretch"):
         try:
             with st.spinner("Génération des suggestions..."):
                 suggestions = service.suggerer_courses_ia()
 
             if not suggestions:
-                st.warning("âš ï¸ Aucune suggestion générée. Vérifiez votre inventaire.")
+                st.warning("⚠️ Aucune suggestion générée. Vérifiez votre inventaire.")
             else:
                 st.session_state.suggestions_data = suggestions
                 st.rerun()
 
         except Exception as e:
-            st.error(f"âŒ Erreur: {str(e)}")
+            st.error(f"❌ Erreur: {str(e)}")
             logger.error(f"Erreur suggestions IA: {e}", exc_info=True)
 
     # Afficher les suggestions stockées
@@ -60,7 +60,7 @@ def render_suggestions_ia():
             for priority in ["haute", "moyenne", "basse"]:
                 if priority in by_priority:
                     icon = (
-                        "âŒ" if priority == "haute" else "âš ï¸" if priority == "moyenne" else "âœ…"
+                        "❌" if priority == "haute" else "⚠️" if priority == "moyenne" else "✅"
                     )
                     with st.expander(
                         f"{icon} Priorité {priority.upper()} ({len(by_priority[priority])})"
@@ -72,7 +72,7 @@ def render_suggestions_ia():
                             with col2:
                                 st.write(f"{sugg.quantite} {sugg.unite}")
                             with col3:
-                                st.write(f"ðŸ“ {sugg.rayon}")
+                                st.write(f"📝 {sugg.rayon}")
                             with col4:
                                 if st.button("⏰ Ajouter", key=f"add_{sugg.nom}"):
                                     st.success(f"⏰ {sugg.nom} ajouté aux courses")

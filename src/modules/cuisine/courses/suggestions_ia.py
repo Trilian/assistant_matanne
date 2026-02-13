@@ -23,18 +23,18 @@ def render_suggestions_ia():
 
     st.subheader("⏰ Suggestions intelligentes")
 
-    tab_inventaire, tab_recettes = st.tabs(["ðŸ“¦ Depuis inventaire", "ðŸ½ï¸ Par recettes"])
+    tab_inventaire, tab_recettes = st.tabs(["📦 Depuis inventaire", "🍽️ Par recettes"])
 
     with tab_inventaire:
         st.write("**Générer suggestions depuis stock bas**")
 
-        if st.button("ðŸ¤– Analyser inventaire & générer suggestions"):
-            with st.spinner("â³ Analyse en cours..."):
+        if st.button("🤖 Analyser inventaire & générer suggestions"):
+            with st.spinner("⏳ Analyse en cours..."):
                 try:
                     suggestions = service.generer_suggestions_ia_depuis_inventaire()
 
                     if suggestions:
-                        st.success(f"âœ… {len(suggestions)} suggestions générées!")
+                        st.success(f"✅ {len(suggestions)} suggestions générées!")
 
                         # Afficher suggestions
                         df = pd.DataFrame(
@@ -51,7 +51,7 @@ def render_suggestions_ia():
 
                         st.dataframe(df, use_container_width=True)
 
-                        if st.button("âœ… Ajouter toutes les suggestions"):
+                        if st.button("✅ Ajouter toutes les suggestions"):
                             try:
                                 from src.core.models import Ingredient
 
@@ -84,22 +84,22 @@ def render_suggestions_ia():
                                     service.create(data)
                                     count += 1
 
-                                st.success(f"âœ… {count} articles ajoutés!")
+                                st.success(f"✅ {count} articles ajoutés!")
                                 st.session_state.courses_refresh += 1
                                 # Pas de rerun pour rester sur cet onglet
                                 time.sleep(0.5)
                             except Exception as e:
-                                st.error(f"âŒ Erreur sauvegarde: {str(e)}")
+                                st.error(f"❌ Erreur sauvegarde: {str(e)}")
                     else:
                         st.info("Aucune suggestion (inventaire OK)")
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"❌ Erreur: {str(e)}")
 
     with tab_recettes:
         st.write("**Ajouter ingrédients manquants pour recettes**")
 
         if recettes_service is None:
-            st.warning("âš ï¸ Service recettes indisponible")
+            st.warning("⚠️ Service recettes indisponible")
         else:
             # Lister recettes
             try:
@@ -122,10 +122,10 @@ def render_suggestions_ia():
                         if recette:
                             # Afficher ingrédients de la recette
                             nb_ingredients = len(recette.ingredients) if recette.ingredients else 0
-                            st.caption(f"ðŸ“ {nb_ingredients} ingrédients")
+                            st.caption(f"📝 {nb_ingredients} ingrédients")
 
                             if st.button(
-                                "ðŸ” Ajouter ingrédients manquants",
+                                "🔍 Ajouter ingrédients manquants",
                                 key="btn_add_missing_ingredients",
                             ):
                                 try:
@@ -191,16 +191,16 @@ def render_suggestions_ia():
                                                 count_added += 1
 
                                         st.success(
-                                            f"âœ… {count_added} ingrédient(s) ajouté(s) à la liste!"
+                                            f"✅ {count_added} ingrédient(s) ajouté(s) à la liste!"
                                         )
                                         st.session_state.courses_refresh += 1
                                         # Pas de rerun pour rester sur cet onglet
                                         time.sleep(0.5)
                                 except Exception as e:
-                                    st.error(f"âŒ Erreur: {str(e)}")
+                                    st.error(f"❌ Erreur: {str(e)}")
                                     logger.error(f"Erreur ajout ingrédients recette: {e}")
             except Exception as e:
-                st.error(f"âŒ Erreur: {str(e)}")
+                st.error(f"❌ Erreur: {str(e)}")
                 logger.error(f"Erreur render tab recettes: {e}")
 
 

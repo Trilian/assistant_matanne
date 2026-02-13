@@ -34,25 +34,25 @@ logger = logging.getLogger(__name__)
 
 TYPES_DECOUPE = {
     "rondelles": {"label": "Rondelles", "emoji": "â­•", "description": "Tranches circulaires"},
-    "cubes": {"label": "Cubes", "emoji": "ðŸ”²", "description": "Morceaux cubiques"},
-    "julienne": {"label": "Julienne", "emoji": "ðŸ“", "description": "Bâtonnets fins 3-4mm"},
-    "brunoise": {"label": "Brunoise", "emoji": "ðŸ”¹", "description": "Petits dés 3mm"},
+    "cubes": {"label": "Cubes", "emoji": "🔲", "description": "Morceaux cubiques"},
+    "julienne": {"label": "Julienne", "emoji": "📝", "description": "Bâtonnets fins 3-4mm"},
+    "brunoise": {"label": "Brunoise", "emoji": "🔹", "description": "Petits dés 3mm"},
     "lamelles": {"label": "Lamelles", "emoji": "âž–", "description": "Tranches fines plates"},
     "cisele": {"label": "Ciselé", "emoji": "âœ‚ï¸", "description": "Haché finement"},
-    "emince": {"label": "Émincé", "emoji": "ðŸ”ª", "description": "Tranches fines allongées"},
-    "rape": {"label": "Râpé", "emoji": "ðŸ§€", "description": "Râpé grossier ou fin"},
+    "emince": {"label": "Émincé", "emoji": "🔪", "description": "Tranches fines allongées"},
+    "rape": {"label": "Râpé", "emoji": "🧀", "description": "Râpé grossier ou fin"},
 }
 
 TYPES_SESSION = {
     "dimanche": {
-        "label": "ðŸŒž Session Dimanche",
+        "label": "🌞 Session Dimanche",
         "duree_type": "2-3h",
         "avec_jules": True,
         "heure_defaut": time(10, 0),
         "description": "Grande session familiale avec Jules",
     },
     "mercredi": {
-        "label": "ðŸŒ™ Session Mercredi",
+        "label": "🌙 Session Mercredi",
         "duree_type": "1-1.5h",
         "avec_jules": False,
         "heure_defaut": time(20, 0),
@@ -69,13 +69,13 @@ TYPES_SESSION = {
 def render_selecteur_session():
     """Sélecteur de type de session."""
 
-    st.subheader("ðŸ“… Type de session")
+    st.subheader("📝… Type de session")
 
     col1, col2 = st.columns(2)
 
     with col1:
         if st.button(
-            "ðŸŒž **Dimanche**\n2-3h avec Jules",
+            "🌞 **Dimanche**\n2-3h avec Jules",
             key="btn_session_dimanche",
             use_container_width=True,
             type="primary" if st.session_state.get("batch_type") == "dimanche" else "secondary",
@@ -85,7 +85,7 @@ def render_selecteur_session():
 
     with col2:
         if st.button(
-            "ðŸŒ™ **Mercredi**\n1-1.5h solo",
+            "🌙 **Mercredi**\n1-1.5h solo",
             key="btn_session_mercredi",
             use_container_width=True,
             type="primary" if st.session_state.get("batch_type") == "mercredi" else "secondary",
@@ -97,7 +97,7 @@ def render_selecteur_session():
 def render_planning_semaine_preview(planning_data: dict):
     """Affiche les repas de la semaine pour lesquels on fait le batch."""
 
-    st.markdown("##### ðŸ“‹ Repas à préparer")
+    st.markdown("##### 📋 Repas à préparer")
 
     if not planning_data:
         st.info("Aucun planning trouvé. Allez d'abord dans 'Planifier mes repas'.")
@@ -112,16 +112,16 @@ def render_planning_semaine_preview(planning_data: dict):
             with cols[0]:
                 midi = repas.get("midi", {})
                 if midi:
-                    st.caption(f"ðŸŒž {midi.get('nom', 'Non défini')}")
+                    st.caption(f"🌞 {midi.get('nom', 'Non défini')}")
                 else:
-                    st.caption("ðŸŒž -")
+                    st.caption("🌞 -")
 
             with cols[1]:
                 soir = repas.get("soir", {})
                 if soir:
-                    st.caption(f"ðŸŒ™ {soir.get('nom', 'Non défini')}")
+                    st.caption(f"🌙 {soir.get('nom', 'Non défini')}")
                 else:
-                    st.caption("ðŸŒ™ -")
+                    st.caption("🌙 -")
 
 
 def render_ingredient_detaille(ingredient: dict, key_prefix: str):
@@ -153,17 +153,17 @@ def render_ingredient_detaille(ingredient: dict, key_prefix: str):
                 taille = ingredient.get("taille_decoupe", "")
 
                 st.markdown(
-                    f"{decoupe_info.get('emoji', 'ðŸ”ª')} **{decoupe_info.get('label', 'Découpe')}**"
+                    f"{decoupe_info.get('emoji', '🔪')} **{decoupe_info.get('label', 'Découpe')}**"
                 )
                 if taille:
                     st.caption(f"Taille: {taille}")
 
             if ingredient.get("instruction_prep"):
-                st.caption(f"ðŸ“ {ingredient['instruction_prep']}")
+                st.caption(f"📝 {ingredient['instruction_prep']}")
 
         # Badge Jules
         if ingredient.get("jules_peut_aider"):
-            st.success(f"ðŸ‘¶ Jules: {ingredient.get('tache_jules', 'Peut aider')}", icon="ðŸ‘¶")
+            st.success(f"👶 Jules: {ingredient.get('tache_jules', 'Peut aider')}", icon="👶")
 
 
 def render_etape_batch(etape: dict, numero: int, key_prefix: str):
@@ -181,7 +181,7 @@ def render_etape_batch(etape: dict, numero: int, key_prefix: str):
 
         with col_titre:
             titre = etape.get("titre", "Étape")
-            emoji = "â³" if est_passif else "ðŸ‘eâ€ðŸ³"
+            emoji = "⏳" if est_passif else "👩â€🍳"
             st.markdown(f"**{emoji} {titre}**")
 
         with col_duree:
@@ -199,7 +199,7 @@ def render_etape_batch(etape: dict, numero: int, key_prefix: str):
 
         # Jules
         if etape.get("jules_participation"):
-            st.success(f"ðŸ‘¶ **Jules peut aider:** {etape.get('tache_jules', '')}", icon="ðŸ‘¶")
+            st.success(f"👶 **Jules peut aider:** {etape.get('tache_jules', '')}", icon="👶")
 
         st.divider()
 
@@ -210,7 +210,7 @@ def render_instruction_robot(robot_config: dict):
     robot_type = robot_config.get("type", "")
     robot_info = ROBOTS_INFO.get(robot_type, {})
 
-    emoji = robot_info.get("emoji", "ðŸ¤–")
+    emoji = robot_info.get("emoji", "🤖")
     nom = robot_info.get("nom", robot_type.title())
 
     # Construire l'instruction
@@ -264,7 +264,7 @@ def render_timeline_session(etapes: list, heure_debut: time):
         debut_m = (heure_debut.hour * 60 + heure_debut.minute + temps_courant) % 60
 
         est_passif = etape.get("est_passif", False)
-        emoji = "â³" if est_passif else "ðŸ‘eâ€ðŸ³"
+        emoji = "⏳" if est_passif else "👩â€🍳"
 
         # Afficher la barre
         with st.container():
@@ -292,26 +292,26 @@ def render_moments_jules(moments: list):
     if not moments:
         return
 
-    st.markdown("##### ðŸ‘¶ Moments avec Jules")
+    st.markdown("##### 👶 Moments avec Jules")
 
     for moment in moments:
-        st.success(moment, icon="ðŸ‘¶")
+        st.success(moment, icon="👶")
 
 
 def render_liste_courses_batch(ingredients: dict):
     """Affiche la liste de courses groupée par rayon."""
 
-    st.markdown("##### ðŸ›’ Liste de courses")
+    st.markdown("##### 🛒 Liste de courses")
 
     rayons_labels = {
-        "fruits_legumes": "ðŸ¥¬ Fruits & Légumes",
-        "viandes": "ðŸ¥e Boucherie",
-        "poissons": "ðŸŸ Poissonnerie",
-        "cremerie": "ðŸ§€ Crèmerie",
-        "epicerie": "ðŸ Épicerie",
+        "fruits_legumes": "🥬 Fruits & Légumes",
+        "viandes": "🥩 Boucherie",
+        "poissons": "🐟 Poissonnerie",
+        "cremerie": "🧀 Crèmerie",
+        "epicerie": "🍝 Épicerie",
         "surgeles": "â„ï¸ Surgelés",
-        "bio": "ðŸŒ¿ Bio",
-        "autres": "ðŸ“¦ Autres",
+        "bio": "🌿 Bio",
+        "autres": "📦 Autres",
     }
 
     for rayon_key, label in rayons_labels.items():
@@ -334,7 +334,7 @@ def render_liste_courses_batch(ingredients: dict):
 def render_finition_jour_j(recette: dict):
     """Affiche les instructions de finition pour le jour J."""
 
-    st.markdown(f"##### ðŸ½ï¸ {recette.get('nom', 'Recette')}")
+    st.markdown(f"##### 🍽️ {recette.get('nom', 'Recette')}")
 
     # Temps de finition
     temps = recette.get("temps_finition_minutes", 10)
@@ -347,7 +347,7 @@ def render_finition_jour_j(recette: dict):
 
     # Notes Jules
     if recette.get("version_jules"):
-        st.info(f"ðŸ‘¶ Jules: {recette['version_jules']}", icon="ðŸ‘¶")
+        st.info(f"👶 Jules: {recette['version_jules']}", icon="👶")
 
 
 # ═══════════════════════════════════════════════════════════
@@ -459,7 +459,7 @@ IMPORTANT:
     try:
         client = obtenir_client_ia()
         if not client:
-            st.error("âŒ Client IA non disponible")
+            st.error("❌ Client IA non disponible")
             return {}
 
         response = client.generer_json(
@@ -475,7 +475,7 @@ IMPORTANT:
 
     except Exception as e:
         logger.error(f"Erreur génération batch IA: {e}")
-        st.error(f"âŒ Erreur IA: {str(e)}")
+        st.error(f"❌ Erreur IA: {str(e)}")
 
     return {}
 
@@ -488,7 +488,7 @@ IMPORTANT:
 def app():
     """Point d'entrée du module Batch Cooking Détaillé."""
 
-    st.title("ðŸ³ Batch Cooking")
+    st.title("🍳 Batch Cooking")
     st.caption("Préparez vos repas de la semaine en une session efficace")
 
     # Initialiser la session
@@ -503,7 +503,7 @@ def app():
 
     # Tabs
     tab_preparer, tab_session, tab_finitions = st.tabs(
-        ["ðŸ“‹ Préparer", "ðŸ‘eâ€ðŸ³ Session Batch", "ðŸ½ï¸ Finitions Jour J"]
+        ["📋 Préparer", "👩â€🍳 Session Batch", "🍽️ Finitions Jour J"]
     )
 
     # ═══════════════════════════════════════════════════════
@@ -531,9 +531,9 @@ def app():
         with col3:
             avec_jules = type_info.get("avec_jules", False)
             if avec_jules:
-                st.success("ðŸ‘¶ Avec Jules", icon="ðŸ‘¶")
+                st.success("👶 Avec Jules", icon="👶")
             else:
-                st.info("ðŸ‘¤ Solo", icon="ðŸ‘¤")
+                st.info("👤 Solo", icon="👤")
 
         st.divider()
 
@@ -542,14 +542,14 @@ def app():
 
         with col_date:
             date_batch = st.date_input(
-                "ðŸ“… Date de la session",
+                "📝… Date de la session",
                 value=date.today() + timedelta(days=1),
                 format="DD/MM/YYYY",
             )
 
         with col_heure:
             heure_batch = st.time_input(
-                "â° Heure de début",
+                "⏰ Heure de début",
                 value=type_info.get("heure_defaut", time(10, 0)),
             )
 
@@ -559,35 +559,35 @@ def app():
         st.divider()
 
         # Preview du planning
-        st.markdown("##### ðŸ“‹ Recettes du planning")
+        st.markdown("##### 📋 Recettes du planning")
 
         if planning_data:
             render_planning_semaine_preview(planning_data)
         else:
-            st.warning("âš ï¸ Aucun planning de repas trouvé.")
-            if st.button("ðŸ“… Aller au planificateur de repas"):
-                st.info("ðŸš§ Navigation vers le planificateur...")
+            st.warning("⚠️ Aucun planning de repas trouvé.")
+            if st.button("📝… Aller au planificateur de repas"):
+                st.info("🚧 Navigation vers le planificateur...")
 
         st.divider()
 
         # Générer le batch
         if planning_data:
             if st.button(
-                "ðŸš€ Générer les instructions de batch", type="primary", use_container_width=True
+                "🚀 Générer les instructions de batch", type="primary", use_container_width=True
             ):
                 avec_jules = type_info.get("avec_jules", False)
 
-                with st.spinner("ðŸ¤– L'IA génère vos instructions détaillées..."):
+                with st.spinner("🤖 L'IA génère vos instructions détaillées..."):
                     result = generer_batch_ia(
                         planning_data, st.session_state.batch_type, avec_jules
                     )
 
                     if result:
                         st.session_state.batch_data = result
-                        st.success("âœ… Instructions générées!")
+                        st.success("✅ Instructions générées!")
                         st.rerun()
                     else:
-                        st.error("âŒ Impossible de générer les instructions")
+                        st.error("❌ Impossible de générer les instructions")
 
     # ═══════════════════════════════════════════════════════
     # TAB: SESSION BATCH
@@ -597,7 +597,7 @@ def app():
         batch_data = st.session_state.get("batch_data", {})
 
         if not batch_data:
-            st.info("ðŸ‘† Allez dans 'Préparer' et générez les instructions d'abord")
+            st.info("👆 Allez dans 'Préparer' et générez les instructions d'abord")
             return
 
         session_info = batch_data.get("session", {})
@@ -614,15 +614,15 @@ def app():
             st.metric("â±ï¸ Durée estimée", formater_duree(duree))
 
         with col2:
-            st.metric("ðŸ• Début", heure_debut.strftime("%H:%M"))
+            st.metric("🕐 Début", heure_debut.strftime("%H:%M"))
 
         with col3:
-            st.metric("ðŸ• Fin estimée", heure_fin.strftime("%H:%M"))
+            st.metric("🕐 Fin estimée", heure_fin.strftime("%H:%M"))
 
         # Conseils
         conseils = session_info.get("conseils_organisation", [])
         if conseils:
-            with st.expander("ðŸ’¡ Conseils d'organisation", expanded=False):
+            with st.expander("💡 Conseils d'organisation", expanded=False):
                 for c in conseils:
                     st.markdown(f"• {c}")
 
@@ -648,7 +648,7 @@ def app():
 
         # Recettes détaillées
         for recette in recettes:
-            with st.expander(f"ðŸ“– {recette.get('nom', 'Recette')}", expanded=False):
+            with st.expander(f"📝– {recette.get('nom', 'Recette')}", expanded=False):
                 # Ingrédients
                 st.markdown("**Ingrédients:**")
                 for ing in recette.get("ingredients", []):
@@ -663,7 +663,7 @@ def app():
 
                 # Stockage
                 st.info(
-                    f"ðŸ“¦ Stockage: {recette.get('stockage', 'frigo').upper()} - {recette.get('duree_conservation_jours', 3)} jours max"
+                    f"📦 Stockage: {recette.get('stockage', 'frigo').upper()} - {recette.get('duree_conservation_jours', 3)} jours max"
                 )
 
         st.divider()
@@ -679,16 +679,16 @@ def app():
         col_act1, col_act2, col_act3 = st.columns(3)
 
         with col_act1:
-            if st.button("ðŸ–¨ï¸ Imprimer les instructions", use_container_width=True):
-                st.info("ðŸš§ Export PDF en développement")
+            if st.button("🖨️ Imprimer les instructions", use_container_width=True):
+                st.info("🚧 Export PDF en développement")
 
         with col_act2:
-            if st.button("ðŸ›’ Envoyer aux courses", use_container_width=True):
-                st.info("ðŸš§ Intégration liste de courses...")
+            if st.button("🛒 Envoyer aux courses", use_container_width=True):
+                st.info("🚧 Intégration liste de courses...")
 
         with col_act3:
-            if st.button("ðŸ’¾ Sauvegarder session", use_container_width=True):
-                st.success("âœ… Session sauvegardée!")
+            if st.button("💾 Sauvegarder session", use_container_width=True):
+                st.success("✅ Session sauvegardée!")
 
     # ═══════════════════════════════════════════════════════
     # TAB: FINITIONS JOUR J
@@ -699,10 +699,10 @@ def app():
         recettes = batch_data.get("recettes", [])
 
         if not recettes:
-            st.info("ðŸ‘† Générez d'abord les instructions de batch")
+            st.info("👆 Générez d'abord les instructions de batch")
             return
 
-        st.markdown("##### ðŸ—“ï¸ Instructions de finition par jour")
+        st.markdown("##### 🗓️ Instructions de finition par jour")
         st.caption("Ce qu'il reste à faire le jour J")
 
         # Grouper par jour
@@ -715,11 +715,11 @@ def app():
 
         if finitions_par_jour:
             for jour in sorted(finitions_par_jour.keys()):
-                with st.expander(f"ðŸ“… {jour}", expanded=False):
+                with st.expander(f"📝… {jour}", expanded=False):
                     for recette in finitions_par_jour[jour]:
                         render_finition_jour_j(recette)
         else:
             # Afficher toutes les recettes
             for recette in recettes:
-                with st.expander(f"ðŸ½ï¸ {recette.get('nom', 'Recette')}", expanded=False):
+                with st.expander(f"🍽️ {recette.get('nom', 'Recette')}", expanded=False):
                     render_finition_jour_j(recette)

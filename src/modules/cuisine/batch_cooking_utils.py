@@ -15,31 +15,31 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 JOURS_EMOJI = {
-    0: "ðŸŸ¡",  # Lundi
-    1: "ðŸŸ ",  # Mardi
-    2: "ðŸŸ£",  # Mercredi
-    3: "ðŸŸ¢",  # Jeudi
+    0: "🟡",  # Lundi
+    1: "🟠",  # Mardi
+    2: "🐟£",  # Mercredi
+    3: "🟢",  # Jeudi
     4: "âš«",  # Vendredi
-    5: "ðŸ”´",  # Samedi
-    6: "ðŸŸ¢",  # Dimanche
+    5: "🔴",  # Samedi
+    6: "🟢",  # Dimanche
 }
 
 ROBOTS_INFO = {
     "cookeo": {
         "nom": "Cookeo",
-        "emoji": "ðŸ²",
+        "emoji": "🍲",
         "peut_parallele": True,
         "description": "Cuiseur multi-fonction",
     },
     "monsieur_cuisine": {
         "nom": "Monsieur Cuisine",
-        "emoji": "ðŸ¤–",
+        "emoji": "🤖",
         "peut_parallele": True,
         "description": "Robot cuiseur",
     },
     "airfryer": {
         "nom": "Airfryer",
-        "emoji": "ðŸŸ",
+        "emoji": "🍟",
         "peut_parallele": True,
         "description": "Friteuse sans huile",
     },
@@ -51,42 +51,42 @@ ROBOTS_INFO = {
     },
     "four": {
         "nom": "Four",
-        "emoji": "ðŸ”¥",
+        "emoji": "🔥",
         "peut_parallele": True,
         "description": "Four traditionnel",
     },
     "plaques": {
         "nom": "Plaques",
-        "emoji": "ðŸ³",
+        "emoji": "🍳",
         "peut_parallele": False,
         "description": "Plaques de cuisson",
     },
     "robot_patissier": {
         "nom": "Robot Pâtissier",
-        "emoji": "ðŸŽ‚",
+        "emoji": "🎂",
         "peut_parallele": True,
         "description": "Pour pâtisserie",
     },
     "mixeur": {
         "nom": "Mixeur",
-        "emoji": "ðŸ¥¤",
+        "emoji": "🥤",
         "peut_parallele": False,
         "description": "Mixeur/blender",
     },
     "hachoir": {
         "nom": "Hachoir",
-        "emoji": "ðŸ”ª",
+        "emoji": "🔪",
         "peut_parallele": False,
         "description": "Hachoir electrique",
     },
 }
 
 LOCALISATIONS = {
-    "frigo": {"nom": "Refrigerateur", "emoji": "ðŸ§Š", "conservation_max_jours": 5},
+    "frigo": {"nom": "Refrigerateur", "emoji": "🧊", "conservation_max_jours": 5},
     "congelateur": {"nom": "Congelateur", "emoji": "â„ï¸", "conservation_max_jours": 90},
     "temperature_ambiante": {
         "nom": "Temperature ambiante",
-        "emoji": "ðŸ ",
+        "emoji": "🏠",
         "conservation_max_jours": 2,
     },
 }
@@ -448,14 +448,14 @@ def identifier_moments_jules(etapes: list[dict[str, Any]]) -> list[dict[str, Any
             moments_jules.append(
                 {
                     **etape,
-                    "conseil_jules": "âœ… Jules peut participer en melangeant/observant",
+                    "conseil_jules": "✅ Jules peut participer en melangeant/observant",
                 }
             )
         elif etape.get("est_supervision", False) and est_calme:
             moments_jules.append(
                 {
                     **etape,
-                    "conseil_jules": "ðŸ‘€ Jules peut observer depuis sa chaise haute",
+                    "conseil_jules": "👀 Jules peut observer depuis sa chaise haute",
                 }
             )
 
@@ -514,7 +514,7 @@ def generer_planning_jules(
         )
         if nb_bruyantes_sieste > 0:
             planning["conseils"].append(
-                f"âš ï¸ {nb_bruyantes_sieste} etape(s) bruyante(s) pendant la sieste - "
+                f"⚠️ {nb_bruyantes_sieste} etape(s) bruyante(s) pendant la sieste - "
                 "Reorganiser si possible"
             )
 

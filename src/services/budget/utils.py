@@ -17,7 +17,7 @@ from src.services.budget import (
 )
 
 # ═══════════════════════════════════════════════════════════
-# CONVERSION DB â†’ PYDANTIC
+# CONVERSION DB → PYDANTIC
 # ═══════════════════════════════════════════════════════════
 
 
@@ -279,7 +279,7 @@ def agreger_depenses_par_categorie(depenses: list[Depense]) -> dict[CategorieDep
         depenses: Liste de dépenses
 
     Returns:
-        Dictionnaire catégorie â†’ total
+        Dictionnaire catégorie → total
     """
     totaux: dict[CategorieDepense, float] = {}
 
@@ -435,7 +435,7 @@ def valider_montant(montant: float | str) -> float:
         result = float(montant)
         return result
     except (TypeError, ValueError):
-        raise ValueError(f"Montant invalide: {montant}")
+        raise ValueError(f"Montant invalide: {montant}") from None
 
 
 def valider_mois(mois: int) -> int:

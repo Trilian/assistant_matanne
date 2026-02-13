@@ -10,7 +10,7 @@ def afficher_dashboard_performance():
     paris = charger_paris_utilisateur()
 
     if not paris:
-        st.info("ðŸ“Š Aucun pari enregistré. Commencez par faire des prédictions!")
+        st.info("📊 Aucun pari enregistré. Commencez par faire des prédictions!")
         return
 
     # Calculs
@@ -20,23 +20,23 @@ def afficher_dashboard_performance():
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.metric("ðŸŽ¯ Total Paris", perf["nb_paris"])
+        st.metric("🎯 Total Paris", perf["nb_paris"])
 
     with col2:
         taux = perf.get("taux_reussite", 0)
-        st.metric("âœ… Taux Réussite", f"{taux:.1f}%")
+        st.metric("✅ Taux Réussite", f"{taux:.1f}%")
 
     with col3:
         profit = perf.get("profit", 0)
         st.metric(
-            "ðŸ’° Profit/Perte",
+            "💰 Profit/Perte",
             f"{profit:+.2f}€",
             delta_color="normal" if profit >= 0 else "inverse",
         )
 
     with col4:
         roi = perf.get("roi", 0)
-        st.metric("ðŸ“ˆ ROI", f"{roi:+.1f}%", delta_color="normal" if roi >= 0 else "inverse")
+        st.metric("📝ˆ ROI", f"{roi:+.1f}%", delta_color="normal" if roi >= 0 else "inverse")
 
     st.divider()
 
@@ -54,15 +54,15 @@ def afficher_dashboard_performance():
             ).cumsum()
 
             st.line_chart(df["profit_cumul"])
-            st.caption("ðŸ“ˆ Évolution du profit cumulé")
+            st.caption("📝ˆ Évolution du profit cumulé")
 
     st.divider()
 
     # Historique des paris
-    st.subheader("ðŸ“‹ Historique récent")
+    st.subheader("📋 Historique récent")
 
     for pari in paris[:10]:
-        statut_emoji = {"en_attente": "â³", "gagne": "âœ…", "perdu": "âŒ"}.get(pari["statut"], "?")
+        statut_emoji = {"en_attente": "⏳", "gagne": "✅", "perdu": "❌"}.get(pari["statut"], "?")
 
         pred_label = {"1": "Dom", "N": "Nul", "2": "Ext"}.get(pari["prediction"], "?")
 
@@ -75,9 +75,9 @@ def afficher_dashboard_performance():
             st.write(f"Cote: {pari['cote']:.2f}")
         with col4:
             if pari["statut"] == "gagne":
-                st.write(f"ðŸ’° +{pari['gain']:.2f}€")
+                st.write(f"💰 +{pari['gain']:.2f}€")
             elif pari["statut"] == "perdu":
-                st.write(f"ðŸ“‰ -{pari['mise']:.2f}€")
+                st.write(f"📝‰ -{pari['mise']:.2f}€")
 
 
 __all__ = ["afficher_dashboard_performance"]

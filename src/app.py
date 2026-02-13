@@ -1,9 +1,9 @@
 """
 Application principale - VERSION OPTIMISÉE LAZY LOADING
-âœ… Architecture modulaire (header/sidebar/footer extraits)
-âœ… -60% temps chargement initial
-âœ… Navigation instantanée
-âœ… Modules chargés à la demande
+✅ Architecture modulaire (header/sidebar/footer extraits)
+✅ -60% temps chargement initial
+✅ Navigation instantanée
+✅ Modules chargés à la demande
 """
 
 import os as _os
@@ -73,7 +73,7 @@ parametres = obtenir_parametres()
 
 st.set_page_config(
     page_title=parametres.APP_NAME,
-    page_icon="ðŸ¤–",
+    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
@@ -113,13 +113,13 @@ def main():
         afficher_footer()
 
     except Exception as e:
-        logger.exception("âŒ Erreur critique dans main()")
-        st.error(f"âŒ Erreur critique: {str(e)}")
+        logger.exception("❌ Erreur critique dans main()")
+        st.error(f"❌ Erreur critique: {str(e)}")
 
         if obtenir_etat().mode_debug:
             st.exception(e)
 
-        if st.button("ðŸ”„ Redémarrer"):
+        if st.button("🔄 Redémarrer"):
             GestionnaireEtat.reinitialiser()
             Cache.vider()
             st.rerun()
@@ -130,5 +130,5 @@ def main():
 # ═══════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
-    logger.info(f"ðŸš€ Démarrage {parametres.APP_NAME} v{parametres.APP_VERSION} (LAZY MODE)")
+    logger.info(f"🚀 Démarrage {parametres.APP_NAME} v{parametres.APP_VERSION} (LAZY MODE)")
     main()

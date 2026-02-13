@@ -206,9 +206,9 @@ def _generer_raisons(
 
     if bonus_nul > 0.05:
         if sans_nul_dom >= SEUIL_SERIE_SANS_NUL:
-            raisons.append(f"âš ï¸ {sans_nul_dom} matchs sans nul (dom) â†’ nul probable")
+            raisons.append(f"⚠️ {sans_nul_dom} matchs sans nul (dom) → nul probable")
         if sans_nul_ext >= SEUIL_SERIE_SANS_NUL:
-            raisons.append(f"âš ï¸ {sans_nul_ext} matchs sans nul (ext) â†’ nul probable")
+            raisons.append(f"⚠️ {sans_nul_ext} matchs sans nul (ext) → nul probable")
 
     return raisons
 
@@ -226,14 +226,14 @@ def generer_conseil_pari(
     conseils = []
 
     if confiance >= SEUIL_CONFIANCE_HAUTE:
-        conseils.append(f"âœ… **PARIER**: {labels[prediction]} (confiance {confiance:.0f}%)")
-        conseils.append("ðŸ’° Mise suggérée: 3-5% de ta bankroll")
+        conseils.append(f"✅ **PARIER**: {labels[prediction]} (confiance {confiance:.0f}%)")
+        conseils.append("💰 Mise suggérée: 3-5% de ta bankroll")
     elif confiance >= SEUIL_CONFIANCE_MOYENNE:
-        conseils.append(f"âš ï¸ **PRUDENT**: {labels[prediction]} risqué")
-        conseils.append("ðŸ’° Mise suggérée: 1-2% max")
+        conseils.append(f"⚠️ **PRUDENT**: {labels[prediction]} risqué")
+        conseils.append("💰 Mise suggérée: 1-2% max")
     else:
-        conseils.append("âŒ **ÉVITER** ce match - trop incertain")
-        conseils.append("ðŸ’¡ Attends un match plus clair")
+        conseils.append("❌ **ÉVITER** ce match - trop incertain")
+        conseils.append("💡 Attends un match plus clair")
         return " | ".join(conseils)
 
     if cotes:
@@ -243,14 +243,14 @@ def generer_conseil_pari(
         ev = (proba_modele * cote_pred) - 1
 
         if ev > 0.15:
-            conseils.append(f"ðŸ”¥ **VALUE BET**: Cote {cote_pred:.2f} trop haute! (EV: +{ev:.0%})")
+            conseils.append(f"🔥 **VALUE BET**: Cote {cote_pred:.2f} trop haute! (EV: +{ev:.0%})")
         elif ev > 0.05:
-            conseils.append(f"ðŸ’Ž Value détectée (EV: +{ev:.0%})")
+            conseils.append(f"💎 Value détectée (EV: +{ev:.0%})")
         elif ev < -0.1:
             conseils.append(f"â›” Cote trop basse, pas rentable (EV: {ev:.0%})")
 
     if proba_nul > 0.30:
-        conseils.append("ðŸŽ¯ **ASTUCE**: Proba nul élevée, regarde la cote nul!")
+        conseils.append("🎯 **ASTUCE**: Proba nul élevée, regarde la cote nul!")
 
     return " | ".join(conseils)
 
@@ -317,7 +317,7 @@ def generer_conseils_avances(
         total_sans_nul = matchs_sans_nul_dom + matchs_sans_nul_ext
         conseils.append(
             {
-                "type": "ðŸŽ¯ MATCH NUL",
+                "type": "🎯 MATCH NUL",
                 "message": f"Les équipes n'ont pas fait de nul depuis {matchs_sans_nul_dom}+{matchs_sans_nul_ext} matchs. "
                 f"Statistiquement, un nul devient très probable!",
                 "niveau": "haute" if total_sans_nul >= 10 else "moyenne",
@@ -325,7 +325,7 @@ def generer_conseils_avances(
             }
         )
 
-    # 2. Conseil série défaites â†’ rebond
+    # 2. Conseil série défaites → rebond
     serie_dom = forme_dom.get("serie_en_cours", "")
     serie_ext = forme_ext.get("serie_en_cours", "")
 
@@ -333,7 +333,7 @@ def generer_conseils_avances(
         nb = int(serie_dom.replace("D", ""))
         conseils.append(
             {
-                "type": "ðŸ“ˆ REBOND ATTENDU",
+                "type": "📝ˆ REBOND ATTENDU",
                 "message": f"L'équipe domicile a perdu {nb} matchs d'affilée. "
                 f"À domicile, un rebond est statistiquement probable.",
                 "niveau": "moyenne",
@@ -353,7 +353,7 @@ def generer_conseils_avances(
     if buts_attendus > 3.0:
         conseils.append(
             {
-                "type": "âš½ OVER 2.5",
+                "type": "⚽ OVER 2.5",
                 "message": f"Moyenne de {buts_attendus:.1f} buts/match entre ces équipes. "
                 f"Un Over 2.5 est probable!",
                 "niveau": "moyenne",
@@ -363,7 +363,7 @@ def generer_conseils_avances(
     elif buts_attendus < 2.0:
         conseils.append(
             {
-                "type": "ðŸ›¡ï¸ UNDER 2.5",
+                "type": "🛡️ UNDER 2.5",
                 "message": f"Équipes défensives ({buts_attendus:.1f} buts/match). "
                 f"Un Under 2.5 est intéressant.",
                 "niveau": "moyenne",
@@ -377,7 +377,7 @@ def generer_conseils_avances(
         if cote_nul >= 3.8 and (matchs_sans_nul_dom >= 4 or matchs_sans_nul_ext >= 4):
             conseils.append(
                 {
-                    "type": "ðŸ’Ž VALUE BET NUL",
+                    "type": "💎 VALUE BET NUL",
                     "message": f"Cote nul à {cote_nul:.2f} + série sans nul = opportunité!",
                     "niveau": "haute",
                     "mise_suggere": "2-3%",

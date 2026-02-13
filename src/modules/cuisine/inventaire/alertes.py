@@ -15,7 +15,7 @@ def render_alertes():
     service = get_inventaire_service()
 
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("❌ Service inventaire indisponible")
         return
 
     try:
@@ -27,7 +27,7 @@ def render_alertes():
 
         # ARTICLES CRITIQUES
         if alertes["critique"]:
-            st.error(f"âŒ {len(alertes['critique'])} articles en stock critique")
+            st.error(f"❌ {len(alertes['critique'])} articles en stock critique")
             df = _prepare_alert_dataframe(alertes["critique"])
             st.dataframe(df, width="stretch", hide_index=True)
 
@@ -43,12 +43,12 @@ def render_alertes():
 
         # PÉREMPTION PROCHE
         if alertes["peremption_proche"]:
-            st.warning(f"â° {len(alertes['peremption_proche'])} articles proche péremption")
+            st.warning(f"⏰ {len(alertes['peremption_proche'])} articles proche péremption")
             df = _prepare_alert_dataframe(alertes["peremption_proche"])
             st.dataframe(df, width="stretch", hide_index=True)
 
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
 
 
 __all__ = ["render_alertes"]

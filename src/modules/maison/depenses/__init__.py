@@ -32,7 +32,7 @@ from .utils import CATEGORY_LABELS, st
 
 def app():
     """Point d'entrée module Dépenses"""
-    st.title("ðŸ’° Dépenses Maison")
+    st.title("💰 Dépenses Maison")
     st.caption("Suivez vos dépenses: gaz, eau, électricité, loyer...")
 
     # Mode édition
@@ -42,7 +42,7 @@ def app():
             st.subheader(
                 f"âœï¸ Modifier: {CATEGORY_LABELS.get(depense.categorie, depense.categorie)}"
             )
-            if st.button("âŒ Annuler"):
+            if st.button("❌ Annuler"):
                 del st.session_state["edit_depense_id"]
                 st.rerun()
             render_formulaire(depense)
@@ -55,7 +55,7 @@ def app():
     st.divider()
 
     # Onglets
-    tab1, tab2, tab3 = st.tabs(["ðŸ“… Ce mois", "âž• Ajouter", "ðŸ“ˆ Analyse"])
+    tab1, tab2, tab3 = st.tabs(["📝… Ce mois", "➕ Ajouter", "📝ˆ Analyse"])
 
     with tab1:
         render_onglet_mois()

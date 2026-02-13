@@ -18,7 +18,7 @@ class WeekendAIService(BaseAIService):
         meteo: str = "variable",
         age_enfant_mois: int = 19,
         budget: int = 50,
-        region: str = "ÃŽle-de-France",
+        region: str = "Île-de-France",
         nb_suggestions: int = 3,
     ) -> str:
         """Suggère des activités weekend"""
@@ -30,13 +30,13 @@ class WeekendAIService(BaseAIService):
 - Région: {region}
 
 Pour chaque activité:
-ðŸŽ¯ [Nom de l'activité]
-ðŸ“ Type de lieu: [parc/musée/piscine/etc.]
+🎯 [Nom de l'activité]
+📝 Type de lieu: [parc/musée/piscine/etc.]
 â±ï¸ Durée recommandée: X heures
-ðŸ’° Budget estimé: X€
-ðŸ‘¶ Adapté à l'âge: Oui/Non + explications
-ðŸŒ¤ï¸ Météo requise: intérieur/extérieur
-ðŸ“ Description: 2-3 phrases sur pourquoi c'est bien
+💰 Budget estimé: X€
+👶 Adapté à l'âge: Oui/Non + explications
+🌤️ Météo requise: intérieur/extérieur
+📝 Description: 2-3 phrases sur pourquoi c'est bien
 
 Privilégie les activités:
 - Adaptées à un enfant de {age_enfant_mois} mois

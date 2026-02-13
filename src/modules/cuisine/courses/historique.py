@@ -18,7 +18,7 @@ def render_historique():
     """Historique des listes de courses"""
     service = get_courses_service()
 
-    st.subheader("ðŸ“š Historique des courses")
+    st.subheader("📝š Historique des courses")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -54,17 +54,17 @@ def render_historique():
 
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("ðŸ“Š Articles achetés", total_articles)
+            st.metric("📊 Articles achetés", total_articles)
         with col2:
-            st.metric("ðŸª‘ Rayons différents", len(rayons_utilises))
+            st.metric("🍪‘ Rayons différents", len(rayons_utilises))
         with col3:
             priorite_haute = len([a for a in articles_achetes if a.priorite == "haute"])
-            st.metric("ðŸ”´ Haute priorité", priorite_haute)
+            st.metric("🔴 Haute priorité", priorite_haute)
 
         st.divider()
 
         # Tableau détaillé
-        st.subheader("ðŸ“‹ Détail des achats")
+        st.subheader("📋 Détail des achats")
 
         df = pd.DataFrame(
             [
@@ -86,14 +86,14 @@ def render_historique():
         if df is not None and not df.empty:
             csv = df.to_csv(index=False)
             st.download_button(
-                label="ðŸ“¥ Télécharger en CSV",
+                label="📝¥ Télécharger en CSV",
                 data=csv,
                 file_name=f"historique_courses_{date_debut}_{date_fin}.csv",
                 mime="text/csv",
             )
 
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
         logger.error(f"Erreur historique: {e}")
 
 

@@ -37,7 +37,7 @@ from .utils import (
     # Résumés
     construire_resume_financier,
     db_entries_to_depenses,
-    # Conversion DB â†’ Pydantic
+    # Conversion DB → Pydantic
     db_entry_to_depense,
     est_budget_a_risque,
     est_budget_depasse,

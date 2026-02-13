@@ -55,7 +55,7 @@ class ChargeurModuleDiffere:
         start_time = time.time()
 
         try:
-            logger.info(f"ðŸ“¦ Chargement lazy: {module_path}")
+            logger.info(f"📦 Chargement lazy: {module_path}")
 
             # Import dynamique
             module = importlib.import_module(module_path)
@@ -129,7 +129,7 @@ class ChargeurModuleDiffere:
         """Vide le cache (dev mode)"""
         ChargeurModuleDiffere._cache.clear()
         ChargeurModuleDiffere._load_times.clear()
-        logger.info("ðŸ—‘ï¸ Cache lazy loader vidé")
+        logger.info("🗑️ Cache lazy loader vidé")
 
     # Alias anglais pour compatibilité
     load = charger
@@ -184,98 +184,75 @@ class RouteurOptimise:
     """
 
     # ═══════════════════════════════════════════════════════
-    # REGISTRY AVEC MAPPING MODULE UNIFIÉ â†’ SOUS-SECTIONS
+    # REGISTRY - CHEMINS RÉELS DES MODULES
     # ═══════════════════════════════════════════════════════
 
     MODULE_REGISTRY = {
-        "accueil": {"path": "src.modules.outils.ui.accueil", "type": "simple"},
-        # [NEW] CALENDRIER UNIFIÉ - VUE CENTRALE
+        # ACCUEIL
+        "accueil": {"path": "src.modules.outils.accueil", "type": "simple"},
+        # CALENDRIER UNIFIÉ - VUE CENTRALE
         "planning.calendrier_unifie": {
-            "path": "src.modules.planning.ui.calendrier_unifie",
+            "path": "src.modules.planning.calendrier_unifie",
             "type": "simple",
         },
-        # [OK] DOMAINE CUISINE
-        "cuisine.recettes": {
-            "path": "src.modules.cuisine.ui.recettes",
-            "type": "simple",
-        },
-        "cuisine.inventaire": {
-            "path": "src.modules.cuisine.ui.inventaire",
-            "type": "simple",
-        },
-        # [UNIFIÉ] Planificateur repas intelligent (Jow-like)
+        # DOMAINE CUISINE
+        "cuisine.recettes": {"path": "src.modules.cuisine.recettes", "type": "simple"},
+        "cuisine.inventaire": {"path": "src.modules.cuisine.inventaire", "type": "simple"},
         "cuisine.planificateur_repas": {
-            "path": "src.modules.cuisine.ui.planificateur_repas",
+            "path": "src.modules.cuisine.planificateur_repas",
             "type": "simple",
         },
-        # [LEGACY] Ancien planning semaine â†’ redirige vers planificateur
         "cuisine.planning_semaine": {
-            "path": "src.modules.cuisine.ui.planificateur_repas",
+            "path": "src.modules.cuisine.planificateur_repas",
             "type": "simple",
-        },
-        # [UNIFIÉ] Batch Cooking â†’ utilise le nouveau module détaillé
+        },  # Alias legacy
         "cuisine.batch_cooking": {
-            "path": "src.modules.cuisine.ui.batch_cooking_detaille",
+            "path": "src.modules.cuisine.batch_cooking_detaille",
             "type": "simple",
         },
-        # [NEW] Batch Cooking détaillé (alias direct)
         "cuisine.batch_cooking_detaille": {
-            "path": "src.modules.cuisine.ui.batch_cooking_detaille",
+            "path": "src.modules.cuisine.batch_cooking_detaille",
             "type": "simple",
         },
-        "cuisine.courses": {
-            "path": "src.modules.cuisine.ui.courses",
-            "type": "simple",
-        },
-        # [SUPPRIMÉ] Anciens modules planning.py et batch_cooking.py (legacy)
-        # Outils transversaux
-        "barcode": {"path": "src.modules.outils.ui.barcode", "type": "simple"},
-        "rapports": {"path": "src.modules.outils.ui.rapports", "type": "simple"},
-        # [OK] DOMAINE FAMILLE - NOUVEAU HUB
-        "famille.hub": {"path": "src.modules.famille.ui.hub_famille", "type": "simple"},
-        "famille.jules": {"path": "src.modules.famille.ui.jules", "type": "simple"},
+        "cuisine.courses": {"path": "src.modules.cuisine.courses", "type": "simple"},
+        # OUTILS TRANSVERSAUX
+        "barcode": {"path": "src.modules.outils.barcode", "type": "simple"},
+        "rapports": {"path": "src.modules.outils.rapports", "type": "simple"},
+        # DOMAINE FAMILLE
+        "famille.hub": {"path": "src.modules.famille.hub_famille", "type": "simple"},
+        "famille.jules": {"path": "src.modules.famille.jules", "type": "simple"},
         "famille.jules_planning": {
-            "path": "src.modules.famille.ui.jules_planning",
-            "type": "simple",
-        },  # Planning activités éveil
-        "famille.suivi_perso": {"path": "src.modules.famille.ui.suivi_perso", "type": "simple"},
-        "famille.weekend": {"path": "src.modules.famille.ui.weekend", "type": "simple"},
-        "famille.achats_famille": {
-            "path": "src.modules.famille.ui.achats_famille",
+            "path": "src.modules.famille.jules_planning",
             "type": "simple",
         },
-        # Modules famille conservés
-        "famille.activites": {"path": "src.modules.famille.ui.activites", "type": "simple"},
-        "famille.routines": {"path": "src.modules.famille.ui.routines", "type": "simple"},
-        # [OK] DOMAINE MAISON
-        "maison": {"path": "src.modules.maison.ui", "type": "hub"},  # Hub Maison avec cards
-        "maison.projets": {"path": "src.modules.maison.ui.projets", "type": "simple"},
-        "maison.jardin": {"path": "src.modules.maison.ui.jardin", "type": "simple"},
-        "maison.jardin_zones": {
-            "path": "src.modules.maison.ui.jardin_zones",
+        "famille.suivi_perso": {"path": "src.modules.famille.suivi_perso", "type": "simple"},
+        "famille.weekend": {"path": "src.modules.famille.weekend", "type": "simple"},
+        "famille.achats_famille": {
+            "path": "src.modules.famille.achats_famille",
             "type": "simple",
-        },  # Dashboard zones 2600m²
-        "maison.entretien": {"path": "src.modules.maison.ui.entretien", "type": "simple"},
-        "maison.meubles": {"path": "src.modules.maison.ui.meubles", "type": "simple"},
-        "maison.eco": {"path": "src.modules.maison.ui.eco_tips", "type": "simple"},
-        "maison.depenses": {"path": "src.modules.maison.ui.depenses", "type": "simple"},
-        "maison.energie": {
-            "path": "src.modules.maison.ui.energie",
-            "type": "simple",
-        },  # Dashboard énergie
-        "maison.scan_factures": {
-            "path": "src.modules.maison.ui.scan_factures",
-            "type": "simple",
-        },  # OCR factures
-        # [OK] DOMAINE JEUX (Paris sportifs & Loto)
-        "jeux.paris": {"path": "src.modules.jeux.ui.paris", "type": "simple"},
-        "jeux.loto": {"path": "src.modules.jeux.ui.loto", "type": "simple"},
-        # Paramètres
-        "parametres": {"path": "src.modules.outils.ui.parametres", "type": "simple"},
+        },
+        "famille.activites": {"path": "src.modules.famille.activites", "type": "simple"},
+        "famille.routines": {"path": "src.modules.famille.routines", "type": "simple"},
+        # DOMAINE MAISON
+        "maison": {"path": "src.modules.maison.hub_maison", "type": "simple"},
+        "maison.projets": {"path": "src.modules.maison.projets", "type": "simple"},
+        "maison.jardin": {"path": "src.modules.maison.jardin", "type": "simple"},
+        "maison.jardin_zones": {"path": "src.modules.maison.jardin_zones", "type": "simple"},
+        "maison.entretien": {"path": "src.modules.maison.entretien", "type": "simple"},
+        "maison.meubles": {"path": "src.modules.maison.meubles", "type": "simple"},
+        "maison.eco": {"path": "src.modules.maison.eco_tips", "type": "simple"},
+        "maison.depenses": {"path": "src.modules.maison.depenses", "type": "simple"},
+        "maison.energie": {"path": "src.modules.maison.energie", "type": "simple"},
+        "maison.scan_factures": {"path": "src.modules.maison.scan_factures", "type": "simple"},
+        # DOMAINE JEUX
+        "jeux.paris": {"path": "src.modules.jeux.paris", "type": "simple"},
+        "jeux.loto": {"path": "src.modules.jeux.loto", "type": "simple"},
+        # PARAMÈTRES & NOTIFICATIONS
+        "parametres": {"path": "src.modules.outils.parametres", "type": "simple"},
         "notifications_push": {
-            "path": "src.modules.outils.ui.notifications_push",
+            "path": "src.modules.outils.notifications_push",
             "type": "simple",
-        },  # Alertes push
+        },
     }
 
     @staticmethod
@@ -297,10 +274,10 @@ class RouteurOptimise:
         config = RouteurOptimise.MODULE_REGISTRY[module_name]
         module_path = config["path"]
 
-        logger.info(f"ðŸŽ¯ Route: {module_name} â†’ {module_path}")
+        logger.info(f"🎯 Route: {module_name} → {module_path}")
 
         # Afficher spinner pendant chargement
-        with st.spinner(f"â³ Chargement {module_name}..."):
+        with st.spinner(f"⏳ Chargement {module_name}..."):
             try:
                 # Lazy load du module
                 module = ChargeurModuleDiffere.charger(module_path)
@@ -349,7 +326,7 @@ def afficher_stats_chargement_differe():
 
     stats = ChargeurModuleDiffere.obtenir_statistiques()
 
-    with st.expander("âš¡ Lazy Loading Stats"):
+    with st.expander("⚡ Lazy Loading Stats"):
         col1, col2 = st.columns(2)
 
         with col1:
@@ -372,7 +349,7 @@ def afficher_stats_chargement_differe():
                 module_name = module.split(".")[-1]
                 st.caption(f"• {module_name}: {load_time*1000:.0f}ms")
 
-        if st.button("ðŸ—‘ï¸ Vider Cache Lazy"):
+        if st.button("🗑️ Vider Cache Lazy"):
             ChargeurModuleDiffere.vider_cache()
             st.success("Cache vidé !")
             st.rerun()

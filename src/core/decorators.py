@@ -291,7 +291,7 @@ def avec_validation(
                     f"Validation échouée: {e}",
                     details={"validation_errors": e.errors()},
                     message_utilisateur="Les données fournies sont invalides",
-                )
+                ) from e
 
         return wrapper  # type: ignore
 

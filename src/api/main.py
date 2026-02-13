@@ -112,7 +112,7 @@ async def get_current_user(
         raise
     except Exception as e:
         logger.error(f"Erreur validation token: {e}")
-        raise HTTPException(status_code=401, detail="Token invalide ou expiré")
+        raise HTTPException(status_code=401, detail="Token invalide ou expiré") from e
 
 
 def require_auth(user: dict = Depends(get_current_user)):
@@ -204,4 +204,4 @@ async def suggest_recettes(
         raise
     except Exception as e:
         logger.error(f"Erreur suggestions IA: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e

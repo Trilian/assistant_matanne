@@ -41,27 +41,27 @@ class TypeEvenement(str, Enum):
     RDV_MEDICAL = "rdv_medical"
     RDV_AUTRE = "rdv_autre"
     ROUTINE = "routine"
-    MENAGE = "menage"  # ðŸ§¹ Tâches menage
-    JARDIN = "jardin"  # ðŸŒ± Tâches jardin
-    ENTRETIEN = "entretien"  # ðŸ”§ Entretien maison
+    MENAGE = "menage"  # 🧹 Tâches menage
+    JARDIN = "jardin"  # 🌱 Tâches jardin
+    ENTRETIEN = "entretien"  # 🔧 Entretien maison
     EVENEMENT = "evenement"
 
 
 # Emojis par type d'evenement
 EMOJI_TYPE = {
-    TypeEvenement.REPAS_MIDI: "ðŸŒž",
-    TypeEvenement.REPAS_SOIR: "ðŸŒ™",
-    TypeEvenement.GOUTER: "ðŸ°",
-    TypeEvenement.BATCH_COOKING: "ðŸ³",
-    TypeEvenement.COURSES: "ðŸ›’",
-    TypeEvenement.ACTIVITE: "ðŸŽ¨",
-    TypeEvenement.RDV_MEDICAL: "ðŸ¥",
-    TypeEvenement.RDV_AUTRE: "ðŸ“…",
-    TypeEvenement.ROUTINE: "â°",
-    TypeEvenement.MENAGE: "ðŸ§¹",
-    TypeEvenement.JARDIN: "ðŸŒ±",
-    TypeEvenement.ENTRETIEN: "ðŸ”§",
-    TypeEvenement.EVENEMENT: "ðŸ“Œ",
+    TypeEvenement.REPAS_MIDI: "🌞",
+    TypeEvenement.REPAS_SOIR: "🌙",
+    TypeEvenement.GOUTER: "🍰",
+    TypeEvenement.BATCH_COOKING: "🍳",
+    TypeEvenement.COURSES: "🛒",
+    TypeEvenement.ACTIVITE: "🎨",
+    TypeEvenement.RDV_MEDICAL: "🏥",
+    TypeEvenement.RDV_AUTRE: "📝…",
+    TypeEvenement.ROUTINE: "⏰",
+    TypeEvenement.MENAGE: "🧹",
+    TypeEvenement.JARDIN: "🌱",
+    TypeEvenement.ENTRETIEN: "🔧",
+    TypeEvenement.EVENEMENT: "📝Œ",
 }
 
 # Couleurs par type (pour l'affichage)
@@ -111,7 +111,7 @@ class EvenementCalendrier:
 
     @property
     def emoji(self) -> str:
-        return EMOJI_TYPE.get(self.type, "ðŸ“Œ")
+        return EMOJI_TYPE.get(self.type, "📝Œ")
 
     @property
     def couleur(self) -> str:
@@ -487,7 +487,7 @@ def convertir_tache_menage_en_evenement(tache: Any) -> EvenementCalendrier | Non
             date_jour=date_jour,
             description=description,
             termine=getattr(tache, "fait", False),
-            notes="âš ï¸ EN RETARD!" if est_en_retard else getattr(tache, "notes", None),
+            notes="⚠️ EN RETARD!" if est_en_retard else getattr(tache, "notes", None),
         )
     except Exception as e:
         logger.error(f"Erreur conversion tâche menage: {e}")
@@ -501,9 +501,9 @@ def generer_taches_menage_semaine(
     Genère les evenements menage pour une semaine en se basant sur frequence_jours.
 
     Logique:
-    - Si prochaine_fois dans la semaine â†’ afficher ce jour
-    - Si frequence_jours defini â†’ calculer les occurrences dans la semaine
-    - Sinon â†’ afficher uniquement si prochaine_fois dans la semaine
+    - Si prochaine_fois dans la semaine → afficher ce jour
+    - Si frequence_jours defini → calculer les occurrences dans la semaine
+    - Sinon → afficher uniquement si prochaine_fois dans la semaine
 
     Returns:
         Dict[date, List[EvenementCalendrier]] pour chaque jour de la semaine
@@ -525,7 +525,7 @@ def generer_taches_menage_semaine(
                     taches_par_jour[prochaine] = []
                 taches_par_jour[prochaine].append(evt)
 
-        # Cas 2: Tâche recurrente sans prochaine_fois â†’ generer par jour de semaine
+        # Cas 2: Tâche recurrente sans prochaine_fois → generer par jour de semaine
         elif frequence and frequence <= 7:
             # Tâches hebdomadaires: on les met sur des jours fixes bases sur leur ID
             # Pour eviter tout le menage le même jour!
@@ -700,29 +700,29 @@ def generer_texte_semaine_pour_impression(semaine: SemaineCalendrier) -> str:
         lignes.append("-" * 30)
 
         if jour.repas_midi:
-            lignes.append(f"  ðŸŒž Midi: {jour.repas_midi.titre}")
+            lignes.append(f"  🌞 Midi: {jour.repas_midi.titre}")
             if jour.repas_midi.version_jules:
-                lignes.append(f"     ðŸ‘¶ Jules: {jour.repas_midi.version_jules[:50]}...")
+                lignes.append(f"     👶 Jules: {jour.repas_midi.version_jules[:50]}...")
 
         if jour.repas_soir:
-            lignes.append(f"  ðŸŒ™ Soir: {jour.repas_soir.titre}")
+            lignes.append(f"  🌙 Soir: {jour.repas_soir.titre}")
             if jour.repas_soir.version_jules:
-                lignes.append(f"     ðŸ‘¶ Jules: {jour.repas_soir.version_jules[:50]}...")
+                lignes.append(f"     👶 Jules: {jour.repas_soir.version_jules[:50]}...")
 
         if jour.gouter:
-            lignes.append(f"  ðŸ° Goûter: {jour.gouter.titre}")
+            lignes.append(f"  🍰 Goûter: {jour.gouter.titre}")
 
         if jour.batch_cooking:
-            lignes.append(f"  ðŸ³ BATCH COOKING {jour.batch_cooking.heure_str}")
+            lignes.append(f"  🍳 BATCH COOKING {jour.batch_cooking.heure_str}")
 
         for courses in jour.courses:
-            lignes.append(f"  ðŸ›’ Courses: {courses.magasin} {courses.heure_str}")
+            lignes.append(f"  🛒 Courses: {courses.magasin} {courses.heure_str}")
 
         for activite in jour.activites:
-            lignes.append(f"  ðŸŽ¨ {activite.titre} {activite.heure_str}")
+            lignes.append(f"  🎨 {activite.titre} {activite.heure_str}")
 
         for rdv in jour.rdv:
-            emoji = "ðŸ¥" if rdv.type == TypeEvenement.RDV_MEDICAL else "ðŸ“…"
+            emoji = "🏥" if rdv.type == TypeEvenement.RDV_MEDICAL else "📝…"
             lignes.append(f"  {emoji} {rdv.titre} {rdv.heure_str}")
 
         if jour.est_vide:
@@ -732,7 +732,7 @@ def generer_texte_semaine_pour_impression(semaine: SemaineCalendrier) -> str:
 
     lignes.append("═" * 35)
     lignes.append(
-        f"ðŸ“Š {semaine.nb_repas_planifies} repas | {semaine.nb_sessions_batch} batch | {semaine.nb_courses} courses"
+        f"📊 {semaine.nb_repas_planifies} repas | {semaine.nb_sessions_batch} batch | {semaine.nb_courses} courses"
     )
 
     return "\n".join(lignes)
@@ -759,7 +759,7 @@ def generer_html_semaine_pour_impression(semaine: SemaineCalendrier) -> str:
         </style>
     </head>
     <body>
-        <h1>ðŸ“… SEMAINE DU {semaine.titre}</h1>
+        <h1>📝… SEMAINE DU {semaine.titre}</h1>
     """
 
     for jour in semaine.jours:
@@ -769,23 +769,23 @@ def generer_html_semaine_pour_impression(semaine: SemaineCalendrier) -> str:
         """
 
         if jour.repas_midi:
-            html += f'<div class="repas">ðŸŒž Midi: <b>{jour.repas_midi.titre}</b></div>'
+            html += f'<div class="repas">🌞 Midi: <b>{jour.repas_midi.titre}</b></div>'
             if jour.repas_midi.version_jules:
-                html += f'<div class="jules">ðŸ‘¶ {jour.repas_midi.version_jules[:60]}...</div>'
+                html += f'<div class="jules">👶 {jour.repas_midi.version_jules[:60]}...</div>'
 
         if jour.repas_soir:
-            html += f'<div class="repas">ðŸŒ™ Soir: <b>{jour.repas_soir.titre}</b></div>'
+            html += f'<div class="repas">🌙 Soir: <b>{jour.repas_soir.titre}</b></div>'
             if jour.repas_soir.version_jules:
-                html += f'<div class="jules">ðŸ‘¶ {jour.repas_soir.version_jules[:60]}...</div>'
+                html += f'<div class="jules">👶 {jour.repas_soir.version_jules[:60]}...</div>'
 
         if jour.batch_cooking:
-            html += f'<div class="event">ðŸ³ Batch Cooking {jour.batch_cooking.heure_str}</div>'
+            html += f'<div class="event">🍳 Batch Cooking {jour.batch_cooking.heure_str}</div>'
 
         for courses in jour.courses:
-            html += f'<div class="event">ðŸ›’ {courses.magasin} {courses.heure_str}</div>'
+            html += f'<div class="event">🛒 {courses.magasin} {courses.heure_str}</div>'
 
         for rdv in jour.rdv:
-            html += f'<div class="event">ðŸ¥ {rdv.titre} {rdv.heure_str}</div>'
+            html += f'<div class="event">🏥 {rdv.titre} {rdv.heure_str}</div>'
 
         html += "</div>"
 

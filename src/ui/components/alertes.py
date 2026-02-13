@@ -1,4 +1,4 @@
-"""
+﻿"""
 Alertes - Composants d'affichage des alertes métier
 Stock critique, péremption, notifications domaine
 """
@@ -25,6 +25,6 @@ def alerte_stock(articles: list[dict[str, Any]], cle: str = "alerte_stock") -> N
             nom = article.get("nom", "Article sans nom")
 
             if statut == "critique":
-                st.warning(f"ðŸ”´ Stock critique: {nom}", icon="âš ï¸")
+                st.warning(f"🔴 Stock critique: {nom}", icon="⚠️")
             elif statut == "peremption_proche":
-                st.info(f"â° Péremption proche: {nom}", icon="â„¹ï¸")
+                st.info(f"⏰ Péremption proche: {nom}", icon="ℹ️")

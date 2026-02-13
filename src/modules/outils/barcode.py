@@ -113,7 +113,7 @@ def render_scanner():
                 st.metric("Type", resultat.type_scan.upper())
 
             with col2:
-                st.info(f"â° Scannee: {resultat.timestamp.strftime('%H:%M:%S')}")
+                st.info(f"⏰ Scannee: {resultat.timestamp.strftime('%H:%M:%S')}")
 
             # Details
             if resultat.type_scan == "article":

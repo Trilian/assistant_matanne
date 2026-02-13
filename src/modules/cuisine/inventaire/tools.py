@@ -11,9 +11,9 @@ from src.services.inventaire import get_inventaire_service
 
 def render_tools():
     """Outils utilitaires pour l'inventaire"""
-    st.subheader("ðŸ”§ Outils d'administration")
+    st.subheader("🔧 Outils d'administration")
 
-    tab_import_export, tab_stats = st.tabs(["ðŸ“¤ Import/Export", "ðŸ“Š Statistiques"])
+    tab_import_export, tab_stats = st.tabs(["📝¤ Import/Export", "📊 Statistiques"])
 
     with tab_import_export:
         render_import_export()
@@ -25,7 +25,7 @@ def render_tools():
                 inventaire = service.get_inventaire_complet()
                 alertes = service.get_alertes()
 
-                st.subheader("ðŸ“Š Statistiques globales")
+                st.subheader("📊 Statistiques globales")
 
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
@@ -45,7 +45,7 @@ def render_tools():
                 st.divider()
 
                 # Graphiques
-                st.subheader("ðŸ“Š Répartition")
+                st.subheader("📊 Répartition")
 
                 col_graph1, col_graph2 = st.columns(2)
 
@@ -66,16 +66,16 @@ def render_tools():
                     st.bar_chart(cats)
 
             except Exception as e:
-                st.error(f"âŒ Erreur: {str(e)}")
+                st.error(f"❌ Erreur: {str(e)}")
 
 
 def render_import_export():
     """Gestion import/export avancée"""
     service = get_inventaire_service()
 
-    st.subheader("ðŸ“¤ Import/Export Avancé")
+    st.subheader("📝¤ Import/Export Avancé")
 
-    tab_import, tab_export = st.tabs(["ðŸ“¥ Importer", "ðŸ“¤ Exporter"])
+    tab_import, tab_export = st.tabs(["📝¥ Importer", "📝¤ Exporter"])
 
     with tab_import:
         st.write("**Importer articles depuis fichier**")
@@ -130,7 +130,7 @@ def render_import_export():
                         with col1:
                             st.metric("⏰ Valides", rapport["valides"])
                         with col2:
-                            st.metric("âŒ Invalides", rapport["invalides"])
+                            st.metric("❌ Invalides", rapport["invalides"])
                         with col3:
                             if rapport["valides"] > 0:
                                 pct = (
@@ -154,26 +154,26 @@ def render_import_export():
 
                         # Confirme et importe
                         if rapport["valides"] > 0:
-                            if st.button("ðŸš€ Importer les articles valides", width="stretch"):
+                            if st.button("🚀 Importer les articles valides", width="stretch"):
                                 resultats = service.importer_articles(articles_list)
 
                                 # Affiche résultats
                                 success = [r for r in resultats if r["status"] == "⏰"]
-                                errors = [r for r in resultats if r["status"] == "âŒ"]
+                                errors = [r for r in resultats if r["status"] == "❌"]
 
                                 st.success(f"⏰ {len(success)}/{len(resultats)} articles importés!")
                                 st.toast(f"Import complété: {len(success)} réussis", icon="⏰")
 
                                 if errors:
-                                    st.warning(f"âš ï¸ {len(errors)} articles avec erreurs")
+                                    st.warning(f"⚠️ {len(errors)} articles avec erreurs")
                                     for err in errors[:3]:
                                         st.caption(f"• {err['nom']}: {err['message']}")
 
                     except Exception as e:
-                        st.error(f"âŒ Erreur import: {str(e)}")
+                        st.error(f"❌ Erreur import: {str(e)}")
 
             except Exception as e:
-                st.error(f"âŒ Erreur parsing fichier: {str(e)}")
+                st.error(f"❌ Erreur parsing fichier: {str(e)}")
 
     with tab_export:
         st.write("**Exporter l'inventaire**")
@@ -181,39 +181,39 @@ def render_import_export():
         col1, col2 = st.columns(2)
 
         with col1:
-            if st.button("ðŸ“¥ Télécharger CSV", width="stretch"):
+            if st.button("📝¥ Télécharger CSV", width="stretch"):
                 try:
                     csv_content = service.exporter_inventaire("csv")
                     st.download_button(
-                        label="ðŸŽ¯ Télécharger CSV",
+                        label="🎯 Télécharger CSV",
                         data=csv_content,
                         file_name="inventaire.csv",
                         mime="text/csv",
                     )
                     st.success("⏰ CSV prêt à télécharger")
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"❌ Erreur: {str(e)}")
 
         with col2:
-            if st.button("ðŸ“¥ Télécharger JSON", width="stretch"):
+            if st.button("📝¥ Télécharger JSON", width="stretch"):
                 try:
                     json_content = service.exporter_inventaire("json")
                     st.download_button(
-                        label="ðŸŽ¯ Télécharger JSON",
+                        label="🎯 Télécharger JSON",
                         data=json_content,
                         file_name="inventaire.json",
                         mime="application/json",
                     )
                     st.success("⏰ JSON prêt à télécharger")
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"❌ Erreur: {str(e)}")
 
         st.divider()
 
         # Info export
         articles = service.get_inventaire_complet()
         st.info(
-            f"ðŸ“Š **Statistiques export:**\n"
+            f"📊 **Statistiques export:**\n"
             f"• **Articles:** {len(articles)}\n"
             f"• **Stock total:** {sum(a['quantite'] for a in articles)}\n"
             f"• **Date export:** Automatique"

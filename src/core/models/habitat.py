@@ -186,7 +186,7 @@ class HouseStock(Base):
 
 
 # ═══════════════════════════════════════════════════════════
-# TÃ‚CHES ENTRETIEN PLANIFIÉES
+# TÂCHES ENTRETIEN PLANIFIÉES
 # ═══════════════════════════════════════════════════════════
 
 

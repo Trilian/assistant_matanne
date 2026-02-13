@@ -2,10 +2,10 @@
 Module Jules - Activités adaptées, achats suggérés, conseils développement.
 
 Fonctionnalités:
-- ðŸ“Š Dashboard: âge, prochains achats suggérés
-- ðŸŽ¨ Activités du jour (adaptées 19 mois)
-- ðŸ›’ Shopping Jules (vêtements taille actuelle, jouets recommandés)
-- ðŸ’¡ Conseils (propreté, sommeil, alimentation) - IA
+- 📊 Dashboard: âge, prochains achats suggérés
+- 🎨 Activités du jour (adaptées 19 mois)
+- 🛒 Shopping Jules (vêtements taille actuelle, jouets recommandés)
+- 💡 Conseils (propreté, sommeil, alimentation) - IA
 """
 
 # Import des fonctions pour exposer l'API publique
@@ -29,13 +29,13 @@ from .utils import (
 
 def app():
     """Point d'entrée du module Jules"""
-    st.title("ðŸ‘¶ Jules")
+    st.title("👶 Jules")
 
     age = get_age_jules()
-    st.caption(f"ðŸŽ‚ {age['mois']} mois • Né le {age['date_naissance'].strftime('%d/%m/%Y')}")
+    st.caption(f"🎂 {age['mois']} mois • Né le {age['date_naissance'].strftime('%d/%m/%Y')}")
 
     # Tabs principaux
-    tabs = st.tabs(["ðŸ“Š Dashboard", "ðŸŽ¨ Activités", "ðŸ›’ Shopping", "ðŸ’¡ Conseils"])
+    tabs = st.tabs(["📊 Dashboard", "🎨 Activités", "🛒 Shopping", "💡 Conseils"])
 
     with tabs[0]:
         render_dashboard()

@@ -16,12 +16,12 @@ from src.services.calendrier import get_calendar_sync_service
 
 def render_calendar_sync_ui():
     """Interface Streamlit pour la synchronisation des calendriers."""
-    st.subheader("ðŸ“… Synchronisation Calendriers")
+    st.subheader("📝… Synchronisation Calendriers")
 
     service = get_calendar_sync_service()
 
     # Tabs pour les différentes options
-    tab1, tab2, tab3 = st.tabs(["ðŸ“¤ Exporter", "ðŸ“¥ Importer", "ðŸ”— Connecter"])
+    tab1, tab2, tab3 = st.tabs(["📝¤ Exporter", "📝¥ Importer", "🔗 Connecter"])
 
     with tab1:
         _render_export_tab(service)
@@ -50,7 +50,7 @@ def _render_export_tab(service):
 
     days_ahead = st.slider("Période (jours)", 7, 90, 30, key="export_days")
 
-    if st.button("ðŸ“¥ Générer le fichier iCal", type="primary"):
+    if st.button("📝¥ Générer le fichier iCal", type="primary"):
         from src.services.utilisateur import get_auth_service
 
         auth = get_auth_service()
@@ -66,12 +66,12 @@ def _render_export_tab(service):
 
         if ical_content:
             st.download_button(
-                label="ðŸ’¾ Télécharger le fichier .ics",
+                label="💾 Télécharger le fichier .ics",
                 data=ical_content,
                 file_name="assistant_matanne_calendar.ics",
                 mime="text/calendar",
             )
-            st.success("âœ… Fichier généré avec succès!")
+            st.success("✅ Fichier généré avec succès!")
 
 
 def _render_import_tab(service):
@@ -89,7 +89,7 @@ def _render_import_tab(service):
         "Nom du calendrier", value="Calendrier importé", key="import_calendar_name"
     )
 
-    if st.button("ðŸ“¤ Importer", type="primary") and ical_url:
+    if st.button("📝¤ Importer", type="primary") and ical_url:
         from src.services.utilisateur import get_auth_service
 
         auth = get_auth_service()
@@ -104,9 +104,9 @@ def _render_import_tab(service):
             )
 
         if result and result.success:
-            st.success(f"âœ… {result.message}")
+            st.success(f"✅ {result.message}")
         else:
-            st.error(f"âŒ {result.message if result else 'Erreur inconnue'}")
+            st.error(f"❌ {result.message if result else 'Erreur inconnue'}")
 
 
 def _render_connect_tab(service):
@@ -121,7 +121,7 @@ def _render_connect_tab(service):
     params = obtenir_parametres()
 
     if getattr(params, "GOOGLE_CLIENT_ID", None):
-        if st.button("ðŸ”— Connecter Google Calendar", key="connect_google"):
+        if st.button("🔗 Connecter Google Calendar", key="connect_google"):
             # Générer l'URL d'auth
             auth_url = service.get_google_auth_url(
                 user_id="current_user", redirect_uri="http://localhost:8501/callback"
@@ -133,4 +133,4 @@ def _render_connect_tab(service):
     st.markdown("---")
     st.markdown("#### Apple iCloud Calendar")
     st.caption("Utilisez l'URL de partage iCal de votre calendrier iCloud")
-    st.info("Dans iCloud Calendar: Partager â†’ Calendrier public â†’ Copier le lien")
+    st.info("Dans iCloud Calendar: Partager → Calendrier public → Copier le lien")

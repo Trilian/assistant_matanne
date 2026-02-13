@@ -55,22 +55,22 @@ def verifier_config_google() -> tuple[bool, str]:
 def render_google_calendar_config():
     """Affiche le panneau de configuration Google Calendar."""
 
-    st.markdown("### ðŸ“… Google Calendar")
+    st.markdown("### 📝… Google Calendar")
 
     # Vérifier la configuration
     config_ok, message = verifier_config_google()
 
     if not config_ok:
-        st.warning(f"âš ï¸ {message}")
+        st.warning(f"⚠️ {message}")
 
-        with st.expander("ðŸ“– Comment configurer Google Calendar"):
+        with st.expander("📝– Comment configurer Google Calendar"):
             st.markdown("""
             **Étapes pour activer Google Calendar:**
 
             1. Allez sur [Google Cloud Console](https://console.cloud.google.com/)
             2. Créez un nouveau projet ou sélectionnez-en un existant
             3. Activez l'API Google Calendar
-            4. Allez dans "Identifiants" â†’ "Créer des identifiants" â†’ "ID client OAuth 2.0"
+            4. Allez dans "Identifiants" → "Créer des identifiants" → "ID client OAuth 2.0"
             5. Type d'application: "Application Web"
             6. Ajoutez `http://localhost:8501/callback/google` aux URIs de redirection autorisées
             7. Copiez le Client ID et Client Secret
@@ -86,7 +86,7 @@ def render_google_calendar_config():
         return
 
     # Configuration présente
-    st.success("âœ… Google Calendar configuré")
+    st.success("✅ Google Calendar configuré")
 
     # État de la connexion
     if "google_calendar_config" not in st.session_state:
@@ -104,30 +104,30 @@ def render_google_calendar_config():
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            if st.button("ðŸ”„ Synchroniser", use_container_width=True):
+            if st.button("🔄 Synchroniser", use_container_width=True):
                 with st.spinner("Synchronisation en cours..."):
                     service = get_calendar_sync_service()
                     result = service.sync_google_calendar(config)
 
                     if result.success:
-                        st.success(f"âœ… {result.events_imported} événements importés")
+                        st.success(f"✅ {result.events_imported} événements importés")
                     else:
-                        st.error(f"âŒ {result.message}")
+                        st.error(f"❌ {result.message}")
 
         with col2:
-            if st.button("ðŸ“¤ Exporter vers Google", use_container_width=True):
-                st.info("ðŸš§ Export vers Google Calendar - En développement")
+            if st.button("📝¤ Exporter vers Google", use_container_width=True):
+                st.info("🚧 Export vers Google Calendar - En développement")
 
         with col3:
-            if st.button("ðŸ”Œ Déconnecter", use_container_width=True):
+            if st.button("🔌 Déconnecter", use_container_width=True):
                 st.session_state.google_calendar_config = None
                 st.rerun()
 
     else:
         # Non connecté
-        st.info("ðŸ“… Connectez votre Google Calendar pour synchroniser vos événements")
+        st.info("📝… Connectez votre Google Calendar pour synchroniser vos événements")
 
-        if st.button("ðŸ”— Connecter Google Calendar", type="primary"):
+        if st.button("🔗 Connecter Google Calendar", type="primary"):
             # Générer l'URL d'auth
             service = get_calendar_sync_service()
             try:
@@ -139,7 +139,7 @@ def render_google_calendar_config():
                 st.markdown(f"""
                 **Cliquez sur le lien ci-dessous pour autoriser l'accès:**
 
-                [ðŸ”— Autoriser Google Calendar]({auth_url})
+                [🔗 Autoriser Google Calendar]({auth_url})
 
                 Après autorisation, copiez le code fourni ci-dessous:
                 """)
@@ -151,7 +151,7 @@ def render_google_calendar_config():
                     help="Collez le code reçu après avoir autorisé l'accès",
                 )
 
-                if auth_code and st.button("âœ… Valider le code"):
+                if auth_code and st.button("✅ Valider le code"):
                     with st.spinner("Connexion en cours..."):
                         config = service.handle_google_callback(
                             user_id="default_user",
@@ -161,13 +161,13 @@ def render_google_calendar_config():
 
                         if config:
                             st.session_state.google_calendar_config = config
-                            st.success("âœ… Google Calendar connecté!")
+                            st.success("✅ Google Calendar connecté!")
                             st.rerun()
                         else:
-                            st.error("âŒ Échec de la connexion")
+                            st.error("❌ Échec de la connexion")
 
             except ValueError as e:
-                st.error(f"âŒ {str(e)}")
+                st.error(f"❌ {str(e)}")
 
 
 def render_sync_status():
@@ -182,13 +182,13 @@ def render_sync_status():
     if config.last_sync:
         delta = datetime.now() - config.last_sync
         if delta < timedelta(minutes=5):
-            st.success("ðŸŸ¢ Synchronisé à l'instant")
+            st.success("🟢 Synchronisé à l'instant")
         elif delta < timedelta(hours=1):
-            st.info(f"ðŸŸ¡ Synchronisé il y a {delta.seconds // 60} min")
+            st.info(f"🟡 Synchronisé il y a {delta.seconds // 60} min")
         elif delta < timedelta(days=1):
-            st.warning(f"ðŸŸ  Synchronisé il y a {delta.seconds // 3600}h")
+            st.warning(f"🟠 Synchronisé il y a {delta.seconds // 3600}h")
         else:
-            st.error(f"ðŸ”´ Dernière sync: {config.last_sync.strftime('%d/%m')}")
+            st.error(f"🔴 Dernière sync: {config.last_sync.strftime('%d/%m')}")
 
 
 def render_quick_sync_button():
@@ -197,11 +197,11 @@ def render_quick_sync_button():
     config = st.session_state.get("google_calendar_config")
 
     if config:
-        if st.button("ðŸ”„ Sync Google", use_container_width=True):
+        if st.button("🔄 Sync Google", use_container_width=True):
             service = get_calendar_sync_service()
             result = service.sync_google_calendar(config)
 
             if result.success:
-                st.toast(f"âœ… {result.events_imported} événements synchronisés")
+                st.toast(f"✅ {result.events_imported} événements synchronisés")
             else:
-                st.toast(f"âŒ Erreur sync: {result.message}")
+                st.toast(f"❌ Erreur sync: {result.message}")

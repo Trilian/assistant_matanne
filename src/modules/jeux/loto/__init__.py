@@ -1,7 +1,7 @@
 """
 Module Loto - Analyse statistique et simulation de stratégies
 
-âš ï¸ DISCLAIMER: Le Loto est un jeu de hasard pur.
+⚠️ DISCLAIMER: Le Loto est un jeu de hasard pur.
 Aucune stratégie ne peut prédire les résultats.
 Ce module est à but éducatif et de divertissement.
 
@@ -31,11 +31,11 @@ from .utils import charger_grilles_utilisateur, charger_tirages
 def app():
     """Point d'entrée du module Loto"""
 
-    st.title("ðŸŽ° Loto - Analyse & Simulation")
+    st.title("🎰 Loto - Analyse & Simulation")
     st.caption("Analysez les statistiques et testez vos stratégies (virtuellement)")
 
     # Avertissement
-    with st.expander("âš ï¸ Avertissement important", expanded=False):
+    with st.expander("⚠️ Avertissement important", expanded=False):
         st.markdown("""
         **Le Loto est un jeu de hasard pur.**
 
@@ -54,12 +54,12 @@ def app():
     # Tabs principaux
     tabs = st.tabs(
         [
-            "ðŸ“Š Statistiques",
-            "ðŸŽ² Générer Grille",
-            "ðŸŽ« Mes Grilles",
-            "ðŸ”¬ Simulation",
-            "ðŸ“ Maths",
-            "âš™ï¸ Tirages",
+            "📊 Statistiques",
+            "🎲 Générer Grille",
+            "🎫 Mes Grilles",
+            "🔬 Simulation",
+            "📝 Maths",
+            "⚙️ Tirages",
         ]
     )
 

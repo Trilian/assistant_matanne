@@ -3,7 +3,7 @@ Module Courses - Gestion complète de la liste de courses
 
 Fonctionnalités complètes:
 - Gestion CRUD complète de la liste
-- Intégration inventaire (stock bas â†’ courses)
+- Intégration inventaire (stock bas → courses)
 - Suggestions IA par recettes
 - Historique & modèles récurrents
 - Partage & synchronisation multi-appareils
@@ -35,7 +35,7 @@ from .suggestions_ia import render_suggestions_ia
 
 def app():
     """Point d'entrée module courses"""
-    st.title("ðŸ› Courses")
+    st.title("🛒 Courses")
     st.caption("Gestion de votre liste de courses")
 
     # Initialiser session state
@@ -52,12 +52,12 @@ def app():
     # Tabs principales
     tab_liste, tab_planning, tab_suggestions, tab_historique, tab_modeles, tab_outils = st.tabs(
         [
-            "ðŸ“‹ Liste Active",
-            "ðŸ½ï¸ Depuis Planning",
+            "📋 Liste Active",
+            "🍽️ Depuis Planning",
             "⏰ Suggestions IA",
-            "ðŸ“š Historique",
-            "ðŸ“„ Modèles",
-            "ðŸ“§ Outils",
+            "📝š Historique",
+            "📝„ Modèles",
+            "📝§ Outils",
         ]
     )
 

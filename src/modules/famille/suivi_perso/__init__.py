@@ -21,14 +21,14 @@ from .utils import get_current_user, get_food_logs_today, get_user_data, set_cur
 
 def app():
     """Point d'entrée du module Suivi Perso"""
-    st.title("ðŸ’ª Mon Suivi")
+    st.title("💪 Mon Suivi")
 
     # Switch utilisateur
     render_user_switch()
 
     username = get_current_user()
     display_name = "Anne" if username == "anne" else "Mathieu"
-    emoji = "ðŸ‘e" if username == "anne" else "ðŸ‘¨"
+    emoji = "👩" if username == "anne" else "💨"
 
     st.caption(f"{emoji} {display_name}")
 
@@ -37,7 +37,7 @@ def app():
 
     # Tabs
     tabs = st.tabs(
-        ["ðŸ“Š Dashboard", "ðŸƒ Activités", "ðŸ¥— Alimentation", "ðŸŽ¯ Objectifs", "âŒš Garmin"]
+        ["📊 Dashboard", "🏃 Activités", "🥗 Alimentation", "🎯 Objectifs", "âŒš Garmin"]
     )
 
     with tabs[0]:

@@ -304,7 +304,7 @@ def generer_resume_parieur(analyse: dict[str, Any]) -> str:
     dom = match_info.get("equipe_domicile", "Dom")
     ext = match_info.get("equipe_exterieur", "Ext")
 
-    lines.append(f"## ðŸŽ¯ {dom} vs {ext}")
+    lines.append(f"## 🎯 {dom} vs {ext}")
     lines.append("")
 
     # Prédiction principale
@@ -332,22 +332,22 @@ def generer_resume_parieur(analyse: dict[str, Any]) -> str:
     alertes = []
 
     if forme_dom.get("matchs_sans_nul", 0) >= 5:
-        alertes.append(f"âš ï¸ {dom}: {forme_dom['matchs_sans_nul']} matchs sans nul")
+        alertes.append(f"⚠️ {dom}: {forme_dom['matchs_sans_nul']} matchs sans nul")
     if forme_ext.get("matchs_sans_nul", 0) >= 5:
-        alertes.append(f"âš ï¸ {ext}: {forme_ext['matchs_sans_nul']} matchs sans nul")
+        alertes.append(f"⚠️ {ext}: {forme_ext['matchs_sans_nul']} matchs sans nul")
 
     if forme_dom.get("serie_en_cours"):
         if (
             "D" in forme_dom["serie_en_cours"]
             and int(forme_dom["serie_en_cours"].replace("D", "")) >= 3
         ):
-            alertes.append(f"ðŸ”» {dom} en série noire")
+            alertes.append(f"📉 {dom} en série noire")
     if forme_ext.get("serie_en_cours"):
         if (
             "V" in forme_ext["serie_en_cours"]
             and int(forme_ext["serie_en_cours"].replace("V", "")) >= 3
         ):
-            alertes.append(f"ðŸ”¥ {ext} en forme!")
+            alertes.append(f"🔥 {ext} en forme!")
 
     if alertes:
         lines.append("")
@@ -357,7 +357,7 @@ def generer_resume_parieur(analyse: dict[str, Any]) -> str:
     value_bets = analyse.get("value_bets", [])
     if value_bets:
         lines.append("")
-        lines.append("**ðŸ’Ž Value Bets détectés:**")
+        lines.append("**💎 Value Bets détectés:**")
         for vb in value_bets[:2]:
             lines.append(f"  - {vb['type']} @ {vb['cote_actuelle']:.2f} (EV: +{vb['ev']:.0f}%)")
 
@@ -373,6 +373,6 @@ def generer_resume_parieur(analyse: dict[str, Any]) -> str:
     conseil = prediction.get("conseil", "")
     if conseil:
         lines.append("")
-        lines.append(f"**ðŸ’¡ {conseil}**")
+        lines.append(f"**💡 {conseil}**")
 
     return "\n".join(lines)

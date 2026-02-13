@@ -83,7 +83,7 @@ def generer_notifications(
 
 def trier_notifications_par_priorite(notifications: list[dict]) -> list[dict]:
     """
-    Trie les notifications par priorité (haute â†’ basse)
+    Trie les notifications par priorité (haute → basse)
 
     Args:
         notifications: Liste des notifications

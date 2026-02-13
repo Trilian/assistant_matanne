@@ -19,7 +19,7 @@ def render_liste_active():
     inventaire_service = get_inventaire_service()
 
     if service is None:
-        st.error("âŒ Service courses indisponible")
+        st.error("❌ Service courses indisponible")
         return
 
     try:
@@ -29,22 +29,22 @@ def render_liste_active():
         # Statistiques
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric("ðŸ“¥ À acheter", len(liste))
+            st.metric("📝¥ À acheter", len(liste))
         with col2:
             haute = len([a for a in liste if a.get("priorite") == "haute"])
-            st.metric("ðŸ”´ Haute priorité", haute)
+            st.metric("🔴 Haute priorité", haute)
         with col3:
             if inventaire_service:
                 alertes = inventaire_service.get_alertes()
                 stock_bas = len(alertes.get("stock_bas", []))
-                st.metric("âš ï¸ Stock bas", stock_bas)
+                st.metric("⚠️ Stock bas", stock_bas)
         with col4:
-            st.metric("ðŸ’° Total articles", len(service.get_liste_courses(achetes=True)))
+            st.metric("💰 Total articles", len(service.get_liste_courses(achetes=True)))
 
         st.divider()
 
         if not liste:
-            st.info("âœ… Liste vide! Ajoutez des articles ou générez des suggestions IA.")
+            st.info("✅ Liste vide! Ajoutez des articles ou générez des suggestions IA.")
             if st.button("⏰ Générer suggestions IA"):
                 st.session_state.new_article_mode = False
                 st.rerun()
@@ -55,7 +55,7 @@ def render_liste_active():
         with col1:
             filter_priorite = st.selectbox(
                 "Filtrer par priorité",
-                ["Toutes", "ðŸ”´ Haute", "ðŸŸ¡ Moyenne", "ðŸŸ¢ Basse"],
+                ["Toutes", "🔴 Haute", "🟡 Moyenne", "🟢 Basse"],
                 key="filter_priorite",
             )
         with col2:
@@ -65,13 +65,13 @@ def render_liste_active():
                 key="filter_rayon",
             )
         with col3:
-            search_term = st.text_input("ðŸ” Chercher...", key="search_courses")
+            search_term = st.text_input("🔍 Chercher...", key="search_courses")
 
         # Appliquer filtres
         liste_filtree = liste.copy()
 
         if filter_priorite != "Toutes":
-            priority_map = {"ðŸ”´ Haute": "haute", "ðŸŸ¡ Moyenne": "moyenne", "ðŸŸ¢ Basse": "basse"}
+            priority_map = {"🔴 Haute": "haute", "🟡 Moyenne": "moyenne", "🟢 Basse": "basse"}
             liste_filtree = [
                 a for a in liste_filtree if a.get("priorite") == priority_map[filter_priorite]
             ]
@@ -86,10 +86,10 @@ def render_liste_active():
                 if search_term.lower() in a.get("ingredient_nom", "").lower()
             ]
 
-        st.success(f"ðŸ“Š {len(liste_filtree)}/{len(liste)} article(s)")
+        st.success(f"📊 {len(liste_filtree)}/{len(liste)} article(s)")
 
         # Afficher par rayon
-        st.subheader("ðŸ“¦ Articles par rayon")
+        st.subheader("📦 Articles par rayon")
 
         rayons = {}
         for article in liste_filtree:
@@ -99,7 +99,7 @@ def render_liste_active():
             rayons[rayon].append(article)
 
         for rayon in sorted(rayons.keys()):
-            with st.expander(f"ðŸª‘ {rayon} ({len(rayons[rayon])} articles)", expanded=True):
+            with st.expander(f"🍪‘ {rayon} ({len(rayons[rayon])} articles)", expanded=True):
                 render_rayon_articles(service, rayon, rayons[rayon])
 
         st.divider()
@@ -107,16 +107,16 @@ def render_liste_active():
         # Actions rapides
         col1, col2, col3 = st.columns(3)
         with col1:
-            if st.button("âž• Ajouter article", use_container_width=True):
+            if st.button("➕ Ajouter article", use_container_width=True):
                 st.session_state.new_article_mode = True
                 st.rerun()
         with col2:
-            if st.button("ðŸ“„ Imprimer liste", use_container_width=True):
+            if st.button("📝„ Imprimer liste", use_container_width=True):
                 render_print_view(liste_filtree)
         with col3:
-            if st.button("ðŸ—‘ï¸ Vider (achetés)", use_container_width=True):
+            if st.button("🗑️ Vider (achetés)", use_container_width=True):
                 if service.get_liste_courses(achetes=True):
-                    st.warning("âš ï¸ Suppression des articles achetés...")
+                    st.warning("⚠️ Suppression des articles achetés...")
                     st.session_state.courses_refresh += 1
                     st.rerun()
 
@@ -126,7 +126,7 @@ def render_liste_active():
             render_ajouter_article()
 
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
         logger.error(f"Erreur render_liste_active: {e}")
 
 
@@ -140,7 +140,7 @@ def render_rayon_articles(service, rayon: str, articles: list):
             label = f"{priorite_emoji} {article.get('ingredient_nom')} ({article.get('quantite_necessaire')} {article.get('unite')})"
 
             if article.get("notes"):
-                label += f" | ðŸ“ {article.get('notes')}"
+                label += f" | 📝 {article.get('notes')}"
 
             if article.get("suggere_par_ia"):
                 label += " ⏰"
@@ -149,18 +149,18 @@ def render_rayon_articles(service, rayon: str, articles: list):
 
         with col2:
             if st.button(
-                "âœ…",
+                "✅",
                 key=f"article_mark_{article['id']}",
                 help="Marquer acheté",
                 use_container_width=True,
             ):
                 try:
                     service.update(article["id"], {"achete": True, "achete_le": datetime.now()})
-                    st.success(f"âœ… {article.get('ingredient_nom')} marqué acheté!")
+                    st.success(f"✅ {article.get('ingredient_nom')} marqué acheté!")
                     st.session_state.courses_refresh += 1
                     st.rerun()
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"❌ Erreur: {str(e)}")
 
         with col3:
             if st.button(
@@ -174,18 +174,18 @@ def render_rayon_articles(service, rayon: str, articles: list):
 
         with col4:
             if st.button(
-                "ðŸ—‘ï¸",
+                "🗑️",
                 key=f"article_del_{article['id']}",
                 help="Supprimer",
                 use_container_width=True,
             ):
                 try:
                     service.delete(article["id"])
-                    st.success(f"âœ… {article.get('ingredient_nom')} supprimé!")
+                    st.success(f"✅ {article.get('ingredient_nom')} supprimé!")
                     st.session_state.courses_refresh += 1
                     st.rerun()
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"❌ Erreur: {str(e)}")
 
         # Formulaire édition inline si sélectionné
         if st.session_state.get("edit_article_id") == article["id"]:
@@ -229,7 +229,7 @@ def render_rayon_articles(service, rayon: str, articles: list):
                 col1, col2 = st.columns(2)
                 with col1:
                     if st.form_submit_button(
-                        "ðŸ’¾ Sauvegarder", key=f"article_save_{article['id']}"
+                        "💾 Sauvegarder", key=f"article_save_{article['id']}"
                     ):
                         try:
                             service.update(
@@ -241,26 +241,26 @@ def render_rayon_articles(service, rayon: str, articles: list):
                                     "notes": new_notes or None,
                                 },
                             )
-                            st.success("âœ… Article mis à jour!")
+                            st.success("✅ Article mis à jour!")
                             st.session_state.edit_article_id = None
                             st.session_state.courses_refresh += 1
                             st.rerun()
                         except Exception as e:
-                            st.error(f"âŒ Erreur: {str(e)}")
+                            st.error(f"❌ Erreur: {str(e)}")
 
                 with col2:
-                    if st.form_submit_button("âŒ Annuler", key=f"article_cancel_{article['id']}"):
+                    if st.form_submit_button("❌ Annuler", key=f"article_cancel_{article['id']}"):
                         st.session_state.edit_article_id = None
                         st.rerun()
 
 
 def render_ajouter_article():
     """Formulaire ajout article"""
-    st.subheader("âž• Ajouter un article")
+    st.subheader("➕ Ajouter un article")
 
     service = get_courses_service()
     if service is None:
-        st.error("âŒ Service indisponible")
+        st.error("❌ Service indisponible")
         return
 
     with st.form("form_new_article"):
@@ -280,10 +280,10 @@ def render_ajouter_article():
 
         notes = st.text_area("Notes (optionnel)", max_chars=200)
 
-        submitted = st.form_submit_button("âœ… Ajouter", use_container_width=True)
+        submitted = st.form_submit_button("✅ Ajouter", use_container_width=True)
         if submitted:
             if not nom:
-                st.error("âš ï¸ Entrez un nom d'article")
+                st.error("⚠️ Entrez un nom d'article")
                 return
 
             try:
@@ -313,18 +313,18 @@ def render_ajouter_article():
 
                 service.create(data)
 
-                st.success(f"âœ… {nom} ajouté à la liste!")
+                st.success(f"✅ {nom} ajouté à la liste!")
                 st.session_state.new_article_mode = False
                 st.session_state.courses_refresh += 1
                 st.rerun()
             except Exception as e:
-                st.error(f"âŒ Erreur: {str(e)}")
+                st.error(f"❌ Erreur: {str(e)}")
                 logger.error(f"Erreur ajout article: {e}")
 
 
 def render_print_view(liste):
     """Vue d'impression optimisée"""
-    st.subheader("ðŸ–¨ï¸ Liste à imprimer")
+    st.subheader("🖨️ Liste à imprimer")
 
     # Grouper par rayon
     rayons = {}
@@ -334,12 +334,12 @@ def render_print_view(liste):
             rayons[rayon] = []
         rayons[rayon].append(article)
 
-    print_text = "ðŸ“‹ LISTE DE COURSES\n"
-    print_text += f"ðŸ“… {datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
+    print_text = "📋 LISTE DE COURSES\n"
+    print_text += f"📝… {datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
     print_text += "=" * 40 + "\n\n"
 
     for rayon in sorted(rayons.keys()):
-        print_text += f"ðŸª‘ {rayon}\n"
+        print_text += f"🍪‘ {rayon}\n"
         for article in rayons[rayon]:
             checkbox = "â˜‘"
             qty = f"{article.get('quantite_necessaire')} {article.get('unite')}"

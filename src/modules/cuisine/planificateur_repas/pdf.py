@@ -69,7 +69,7 @@ def generer_pdf_planning_session(
 
         # En-tête
         date_fin = date_debut + timedelta(days=len(planning_data) - 1)
-        elements.append(Paragraph("ðŸ½ï¸ Planning Repas Famille Matanne", title_style))
+        elements.append(Paragraph("🍽️ Planning Repas Famille Matanne", title_style))
         elements.append(
             Paragraph(
                 f"Du {date_debut.strftime('%d/%m/%Y')} au {date_fin.strftime('%d/%m/%Y')}",
@@ -81,22 +81,22 @@ def generer_pdf_planning_session(
         # Table repas par jour
         type_repas_emoji = {
             "midi": "â˜€ï¸",
-            "soir": "ðŸŒ™",
-            "gouter": "ðŸª",
+            "soir": "🌙",
+            "gouter": "🍪",
         }
 
         for i, (jour, repas) in enumerate(planning_data.items()):
             jour_date = date_debut + timedelta(days=i)
 
             # Tableau pour ce jour
-            day_data = [[f"ðŸ“† {jour} {jour_date.strftime('%d/%m')}", "Repas"]]
+            day_data = [[f"📝† {jour} {jour_date.strftime('%d/%m')}", "Repas"]]
 
             for type_repas in ["midi", "soir", "gouter"]:
                 if type_repas in repas and repas[type_repas]:
                     recette_nom = repas[type_repas]
                     if isinstance(recette_nom, dict):
                         recette_nom = recette_nom.get("nom", str(recette_nom))
-                    emoji = type_repas_emoji.get(type_repas, "ðŸ´")
+                    emoji = type_repas_emoji.get(type_repas, "🍴")
                     label = {"midi": "Déjeuner", "soir": "Dîner", "gouter": "Goûter"}.get(
                         type_repas, type_repas
                     )
@@ -128,13 +128,13 @@ def generer_pdf_planning_session(
         # Conseils batch cooking
         if conseils:
             elements.append(Spacer(1, 0.2 * inch))
-            elements.append(Paragraph("ðŸ³ Conseils Batch Cooking", day_style))
+            elements.append(Paragraph("🍳 Conseils Batch Cooking", day_style))
             elements.append(Paragraph(conseils, styles["Normal"]))
 
         # Suggestions bio
         if suggestions_bio:
             elements.append(Spacer(1, 0.2 * inch))
-            elements.append(Paragraph("ðŸŒ¿ Suggestions Bio/Local", day_style))
+            elements.append(Paragraph("🌿 Suggestions Bio/Local", day_style))
             for sug in suggestions_bio:
                 elements.append(Paragraph(f"• {sug}", styles["Normal"]))
 
@@ -142,7 +142,7 @@ def generer_pdf_planning_session(
         elements.append(Spacer(1, 0.5 * inch))
         elements.append(
             Paragraph(
-                f"Généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')} • Assistant Matanne ðŸ ",
+                f"Généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')} • Assistant Matanne 🏠",
                 ParagraphStyle(
                     "Footer",
                     parent=styles["Normal"],
@@ -159,5 +159,5 @@ def generer_pdf_planning_session(
         return buffer
 
     except Exception as e:
-        logger.error(f"âŒ Erreur génération PDF planning: {e}")
+        logger.error(f"❌ Erreur génération PDF planning: {e}")
         return None

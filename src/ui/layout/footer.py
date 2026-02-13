@@ -16,14 +16,14 @@ def afficher_footer():
     col1, col2, col3 = st.columns([2, 1, 1])
 
     with col1:
-        st.caption(f"ðŸ’š {parametres.APP_NAME} v{parametres.APP_VERSION} | Lazy Loading Active")
+        st.caption(f"💚 {parametres.APP_NAME} v{parametres.APP_VERSION} | Lazy Loading Active")
 
     with col2:
-        if st.button("ðŸ› Bug"):
+        if st.button("🐛 Bug"):
             st.info("GitHub Issues")
 
     with col3:
-        if st.button("â„¹ï¸ À propos"):
+        if st.button("ℹ️ À propos"):
             with st.expander("À propos", expanded=True):
                 st.markdown(
                     f"""
@@ -34,6 +34,6 @@ def afficher_footer():
                 - Frontend: Streamlit
                 - Database: Supabase PostgreSQL
                 - IA: Mistral AI
-                - âš¡ Lazy Loading: Active
+                - ⚡ Lazy Loading: Active
                 """
                 )

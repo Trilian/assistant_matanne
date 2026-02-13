@@ -26,7 +26,7 @@ def afficher_demande_permission_push():
         display: none;
     ">
         <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 24px;">ðŸ””</span>
+            <span style="font-size: 24px;">🔔</span>
             <div style="flex: 1;">
                 <div style="font-weight: 600;">Activer les notifications</div>
                 <div style="font-size: 13px; opacity: 0.9;">
@@ -132,7 +132,7 @@ def afficher_preferences_notification():
 
     prefs = push_service.obtenir_preferences(user_id)
 
-    st.markdown("### ðŸ”” Préférences de notifications")
+    st.markdown("### 🔔 Préférences de notifications")
 
     with st.form("notification_prefs"):
         st.markdown("**Catégories de notifications:**")
@@ -192,7 +192,7 @@ def afficher_preferences_notification():
                 max_par_heure=max_par_heure,
             )
             push_service.mettre_a_jour_preferences(user_id, new_prefs)
-            st.success("âœ… Préférences enregistrées!")
+            st.success("✅ Préférences enregistrées!")
 
 
 # Alias rétrocompatibilité

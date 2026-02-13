@@ -10,7 +10,7 @@ from src.services.inventaire import get_inventaire_service
 
 def render_photos():
     """Gestion des photos pour les articles de l'inventaire"""
-    st.subheader("ðŸ“· Gestion des photos")
+    st.subheader("📝· Gestion des photos")
 
     # Récupère l'inventaire
     service = get_inventaire_service()
@@ -38,12 +38,12 @@ def render_photos():
     # Affiche la photo actuelle
     with col2:
         photo_status = (
-            "âœ… Avec photo" if selected_article.get("photo_url") else "â„¹ï¸ Pas de photo"
+            "✅ Avec photo" if selected_article.get("photo_url") else "ℹ️ Pas de photo"
         )
         st.info(f"État: {photo_status}")
 
     # Onglets upload/gestion
-    tab_upload, tab_view = st.tabs(["ðŸ“¤ Ajouter/Remplacer", "ðŸ‘ï¸ Afficher"])
+    tab_upload, tab_view = st.tabs(["📝¤ Ajouter/Remplacer", "👁️ Afficher"])
 
     with tab_upload:
         st.write("**Ajouter ou remplacer la photo**")
@@ -78,7 +78,7 @@ def render_photos():
                         )
 
                         st.success("⏰ Photo ajoutée avec succès!")
-                        st.toast("Photo mise à jour", icon="ðŸ“·")
+                        st.toast("Photo mise à jour", icon="📝·")
                         st.rerun()
                     except Exception as e:
                         st.error(f"Erreur: {str(e)}")
@@ -86,7 +86,7 @@ def render_photos():
         # Bouton supprimer
         if selected_article.get("photo_url"):
             st.divider()
-            if st.button("ðŸ—‘ï¸ Supprimer la photo", key="delete_photo"):
+            if st.button("🗑️ Supprimer la photo", key="delete_photo"):
                 try:
                     service.supprimer_photo(article_id)
                     st.success("⏰ Photo supprimée")

@@ -326,7 +326,7 @@ class MockSessionState(dict):
         try:
             return self[key]
         except KeyError:
-            raise AttributeError(key)
+            raise AttributeError(key) from None
 
     def __setattr__(self, key, value):
         self[key] = value
@@ -335,7 +335,7 @@ class MockSessionState(dict):
         try:
             del self[key]
         except KeyError:
-            raise AttributeError(key)
+            raise AttributeError(key) from None
 
 
 class TestRenderFull:

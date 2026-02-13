@@ -159,14 +159,14 @@ def obtenir_contexte_db() -> Generator[Session, None, None]:
         raise ErreurBaseDeDonnees(
             f"Erreur réseau/connexion: {e}",
             message_utilisateur="Problème de connexion à la base de données",
-        )
+        ) from e
 
     except DatabaseError as e:
         db.rollback()
         logger.error(f"[ERROR] Erreur base de données: {e}")
         raise ErreurBaseDeDonnees(
             str(e), message_utilisateur="Erreur lors de l'opération en base de données"
-        )
+        ) from e
 
     except Exception as e:
         db.rollback()
@@ -306,7 +306,7 @@ class GestionnaireMigrations:
             raise ErreurBaseDeDonnees(
                 f"Échec migration v{version}: {e}",
                 message_utilisateur="Erreur lors de la mise à jour du schéma",
-            )
+            ) from e
 
     @staticmethod
     def executer_migrations():

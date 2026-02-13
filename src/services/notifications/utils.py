@@ -256,7 +256,7 @@ def creer_notification_stock(nom_article: str, quantite: float, unite: str = "")
     quantite_str = f"{quantite} {unite}".strip() if unite else str(quantite)
 
     return {
-        "title": "ðŸ“¦ Stock bas",
+        "title": "📦 Stock bas",
         "body": f"{nom_article} est presque épuisé ({quantite_str} restant)",
         "notification_type": TypeNotification.STOCK_BAS.value,
         "url": "/?module=cuisine.inventaire",
@@ -284,12 +284,12 @@ def creer_notification_peremption(
         Dict notification prêt à envoyer
     """
     if jours_restants <= 0:
-        title = "âš ï¸ Produit périmé!"
+        title = "⚠️ Produit périmé!"
         body = f"{nom_article} a expiré!"
         notif_type = TypeNotification.PEREMPTION_CRITIQUE.value
         require_interaction = True
     elif jours_restants == 1:
-        title = "ðŸ”´ Péremption demain"
+        title = "🔴 Péremption demain"
         body = f"{nom_article} expire demain"
         notif_type = (
             TypeNotification.PEREMPTION_CRITIQUE.value
@@ -298,7 +298,7 @@ def creer_notification_peremption(
         )
         require_interaction = critique
     else:
-        title = "ðŸŸ¡ Péremption proche"
+        title = "🟡 Péremption proche"
         body = f"{nom_article} expire dans {jours_restants} jours"
         notif_type = TypeNotification.PEREMPTION_ALERTE.value
         require_interaction = False
@@ -326,7 +326,7 @@ def creer_notification_rappel_repas(type_repas: str, nom_recette: str, temps_res
         Dict notification prêt à envoyer
     """
     return {
-        "title": f"ðŸ½ï¸ {type_repas.title()} dans {temps_restant}",
+        "title": f"🍽️ {type_repas.title()} dans {temps_restant}",
         "body": f"Au menu: {nom_recette}",
         "notification_type": TypeNotification.RAPPEL_REPAS.value,
         "url": "/?module=planning",
@@ -351,7 +351,7 @@ def creer_notification_liste_partagee(partage_par: str, nom_liste: str) -> dict:
         Dict notification prêt à envoyer
     """
     return {
-        "title": "ðŸ›’ Liste partagée",
+        "title": "🛒 Liste partagée",
         "body": f"{partage_par} a partagé la liste '{nom_liste}'",
         "notification_type": TypeNotification.LISTE_PARTAGEE.value,
         "url": "/?module=cuisine.courses",
@@ -382,7 +382,7 @@ def creer_notification_rappel_activite(
         body += f" - {lieu}"
 
     return {
-        "title": "ðŸ“… Rappel d'activité",
+        "title": "📝… Rappel d'activité",
         "body": body,
         "notification_type": TypeNotification.RAPPEL_ACTIVITE.value,
         "url": "/?module=planning",
@@ -404,7 +404,7 @@ def creer_notification_rappel_jalon(prenom_enfant: str, type_jalon: str, nom_jal
         Dict notification prêt à envoyer
     """
     return {
-        "title": f"ðŸ‘¶ Jalon pour {prenom_enfant}",
+        "title": f"👶 Jalon pour {prenom_enfant}",
         "body": f"{type_jalon}: {nom_jalon}",
         "notification_type": TypeNotification.RAPPEL_JALON.value,
         "url": "/?module=famille.jules",

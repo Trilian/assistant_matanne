@@ -25,13 +25,13 @@ from .utils import charger_tirages
 def afficher_simulation():
     """Interface de simulation de stratégies"""
 
-    st.markdown("### ðŸ”¬ Simulation de stratégies")
+    st.markdown("### 🔬 Simulation de stratégies")
     st.caption("Testez différentes stratégies sur l'historique des tirages")
 
     tirages = charger_tirages(limite=500)
 
     if len(tirages) < 10:
-        st.warning("âš ï¸ Pas assez de tirages pour une simulation fiable (minimum 10)")
+        st.warning("⚠️ Pas assez de tirages pour une simulation fiable (minimum 10)")
         return
 
     col1, col2 = st.columns(2)
@@ -44,7 +44,7 @@ def afficher_simulation():
     with col2:
         grilles_par_tirage = st.slider("Grilles par tirage", 1, 10, 1)
 
-    if st.button("ðŸš€ Lancer la simulation", type="primary"):
+    if st.button("🚀 Lancer la simulation", type="primary"):
         with st.spinner("Simulation en cours..."):
             freq_data = calculer_frequences_numeros(tirages[:nb_tirages])
             patterns = analyser_patterns_tirages(tirages[:nb_tirages])
@@ -69,7 +69,7 @@ def afficher_simulation():
 
         # Afficher résultats
         st.divider()
-        st.markdown("### ðŸ“Š Résultats de la simulation")
+        st.markdown("### 📊 Résultats de la simulation")
 
         df_res = pd.DataFrame(
             [
@@ -119,30 +119,30 @@ def afficher_gestion_tirages():
     """Interface pour gérer les tirages"""
 
     # Boutons de synchronisation
-    st.markdown("### ðŸ”„ Synchronisation")
+    st.markdown("### 🔄 Synchronisation")
 
     col_sync1, col_sync2 = st.columns([1, 1])
 
     with col_sync1:
-        if st.button("ðŸ“¥ Sync Tirages FDJ", help="Charge les derniers tirages du Loto FDJ"):
-            st.info("â³ Synchronisation en cours...")
+        if st.button("📝¥ Sync Tirages FDJ", help="Charge les derniers tirages du Loto FDJ"):
+            st.info("⏳ Synchronisation en cours...")
             try:
                 with st.spinner("Récupération des tirages..."):
-                    logger.info("ðŸ”˜ Bouton SYNC LOTO cliqué!")
+                    logger.info("🔘 Bouton SYNC LOTO cliqué!")
                     count = sync_tirages_loto(limite=50)
-                    logger.info(f"ðŸ“Š Résultat sync loto: {count} tirages")
+                    logger.info(f"📊 Résultat sync loto: {count} tirages")
                     if count > 0:
-                        st.success(f"âœ… {count} nouveau(x) tirage(s) ajouté(s)!")
+                        st.success(f"✅ {count} nouveau(x) tirage(s) ajouté(s)!")
                     else:
-                        st.info("âœ… Tous les tirages sont à jour")
+                        st.info("✅ Tous les tirages sont à jour")
                     st.rerun()
             except Exception as e:
-                logger.error(f"âŒ Erreur sync loto: {e}", exc_info=True)
-                st.error(f"âŒ Erreur: {e}")
+                logger.error(f"❌ Erreur sync loto: {e}", exc_info=True)
+                st.error(f"❌ Erreur: {e}")
 
     st.divider()
 
-    st.markdown("### âž• Ajouter un tirage")
+    st.markdown("### ➕ Ajouter un tirage")
 
     col1, col2 = st.columns([2, 1])
 
@@ -169,16 +169,16 @@ def afficher_gestion_tirages():
 
     # Validation
     if len(set(numeros)) != 5:
-        st.warning("âš ï¸ Les 5 numéros doivent être différents")
+        st.warning("⚠️ Les 5 numéros doivent être différents")
     else:
-        if st.button("ðŸ’¾ Enregistrer le tirage", type="primary"):
+        if st.button("💾 Enregistrer le tirage", type="primary"):
             ajouter_tirage(date_tirage, numeros, chance, jackpot)
             st.rerun()
 
     st.divider()
 
     # Historique
-    st.markdown("### ðŸ“œ Historique des tirages")
+    st.markdown("### 📝œ Historique des tirages")
     tirages = charger_tirages(limite=20)
 
     if tirages:

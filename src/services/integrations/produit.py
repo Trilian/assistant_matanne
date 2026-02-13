@@ -282,23 +282,23 @@ class OpenFoodFactsService:
     def obtenir_nutriscore_emoji(self, grade: str | None) -> str:
         """Retourne un emoji pour le nutriscore."""
         mapping = {
-            "A": "ðŸŸ¢",
-            "B": "ðŸŸ¡",
-            "C": "ðŸŸ ",
-            "D": "ðŸŸ§",
-            "E": "ðŸ”´",
+            "A": "🟢",
+            "B": "🟡",
+            "C": "🟠",
+            "D": "🐟§",
+            "E": "🔴",
         }
-        return mapping.get(grade.upper() if grade else "", "âšª")
+        return mapping.get(grade.upper() if grade else "", "⚪")
 
     def obtenir_nova_description(self, group: int | None) -> str:
         """Retourne la description du groupe NOVA."""
         descriptions = {
-            1: "ðŸ¥¬ Aliment non transformé",
-            2: "ðŸ§‚ Ingrédient culinaire",
-            3: "ðŸ¥« Aliment transformé",
-            4: "ðŸŸ Ultra-transformé",
+            1: "🥬 Aliment non transformé",
+            2: "🧂 Ingrédient culinaire",
+            3: "🥫 Aliment transformé",
+            4: "🍟 Ultra-transformé",
         }
-        return descriptions.get(group, "â“ Inconnu")
+        return descriptions.get(group, "❓ Inconnu")
 
 
 # ═══════════════════════════════════════════════════════════

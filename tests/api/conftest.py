@@ -386,8 +386,8 @@ def set_development_environment(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
-def disable_rate_limiting(monkeypatch):
-    """Désactive le rate limiting pour tous les tests API."""
+def mock_rate_limit_dispatch(monkeypatch):
+    """Mock le RateLimiter pour désactiver le rate limiting dans les tests."""
 
     # Mock le RateLimiter pour qu'il ne bloque jamais
     async def mock_check_rate_limit(*args, **kwargs):

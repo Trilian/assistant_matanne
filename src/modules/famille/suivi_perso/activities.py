@@ -7,7 +7,7 @@ from .utils import st
 
 def render_activities(data: dict):
     """Affiche les activités sportives"""
-    st.subheader("ðŸƒ Activités récentes")
+    st.subheader("🏃 Activités récentes")
 
     activities = data.get("activities", [])
 
@@ -21,14 +21,14 @@ def render_activities(data: dict):
 
             with col1:
                 emoji = {
-                    "running": "ðŸƒ",
-                    "cycling": "ðŸš´",
-                    "swimming": "ðŸŠ",
-                    "walking": "ðŸš¶",
-                    "hiking": "ðŸ¥¾",
-                    "strength": "ðŸ’ª",
-                    "yoga": "ðŸ§˜",
-                }.get(act.type_activite.lower(), "ðŸ‹ï¸")
+                    "running": "🏃",
+                    "cycling": "🚴",
+                    "swimming": "🏊",
+                    "walking": "🚶",
+                    "hiking": "🥾",
+                    "strength": "💪",
+                    "yoga": "🧘",
+                }.get(act.type_activite.lower(), "🏋️")
 
                 st.markdown(f"**{emoji} {act.nom}**")
                 st.caption(act.date_debut.strftime("%d/%m à %H:%M"))
@@ -36,10 +36,10 @@ def render_activities(data: dict):
             with col2:
                 st.write(f"â±ï¸ {act.duree_formatted}")
                 if act.distance_metres:
-                    st.write(f"ðŸ“ {act.distance_km:.1f} km")
+                    st.write(f"📝 {act.distance_km:.1f} km")
 
             with col3:
                 if act.calories:
-                    st.write(f"ðŸ”¥ {act.calories} kcal")
+                    st.write(f"🔥 {act.calories} kcal")
                 if act.fc_moyenne:
                     st.write(f"â¤ï¸ {act.fc_moyenne} bpm")

@@ -2,7 +2,7 @@
 Logique métier Loto - Analyses statistiques et simulations
 Ce module contient toute la logique pure, testable sans Streamlit.
 
-âš ï¸ DISCLAIMER IMPORTANT:
+⚠️ DISCLAIMER IMPORTANT:
 Le Loto est un jeu de hasard pur. Les tirages sont parfaitement aléatoires
 et indépendants. Aucune analyse statistique ne peut prédire les résultats.
 
@@ -145,7 +145,7 @@ def identifier_numeros_chauds_froids(
     """
     Identifie les numéros les plus et moins fréquents.
 
-    âš ï¸ Rappel: Ceci est purement informatif. Les tirages sont indépendants.
+    ⚠️ Rappel: Ceci est purement informatif. Les tirages sont indépendants.
 
     Args:
         frequences: Dict des fréquences par numéro
@@ -296,7 +296,7 @@ def generer_grille_equilibree(patterns: dict[str, Any]) -> dict[str, Any]:
     """
     Génère une grille "équilibrée" basée sur les patterns historiques.
 
-    âš ï¸ Ceci n'augmente PAS les chances de gagner, mais produit
+    ⚠️ Ceci n'augmente PAS les chances de gagner, mais produit
     une grille statistiquement "typique".
 
     Args:
@@ -343,7 +343,7 @@ def generer_grille_chauds_froids(
     """
     Génère une grille basée sur les numéros chauds ou froids.
 
-    âš ï¸ Rappel: Statistiquement inutile, mais psychologiquement satisfaisant.
+    ⚠️ Rappel: Statistiquement inutile, mais psychologiquement satisfaisant.
 
     Args:
         frequences: Fréquences des numéros
@@ -626,7 +626,7 @@ def comparer_strategies(tirages: list[dict[str, Any]], nb_simulations: int = 100
         "resultats": resultats,
         "classement": [s[0] for s in classement],
         "meilleure_strategie": classement[0][0] if classement else None,
-        "note": "âš ï¸ Ces résultats varient aléatoirement. Aucune stratégie n'est meilleure à long terme.",
+        "note": "⚠️ Ces résultats varient aléatoirement. Aucune stratégie n'est meilleure à long terme.",
     }
 
 

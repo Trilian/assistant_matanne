@@ -20,10 +20,10 @@ def render_add_article_form():
     service = get_inventaire_service()
 
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("❌ Service inventaire indisponible")
         return
 
-    st.subheader("âž• Ajouter un nouvel article")
+    st.subheader("➕ Ajouter un nouvel article")
 
     try:
         col1, col2 = st.columns(2)
@@ -47,7 +47,7 @@ def render_add_article_form():
         with col1:
             if st.button("⏰ Ajouter", width="stretch", type="primary"):
                 if not ingredient_nom:
-                    st.error("âŒ Le nom est obligatoire")
+                    st.error("❌ Le nom est obligatoire")
                 else:
                     try:
                         article = service.ajouter_article(
@@ -58,26 +58,26 @@ def render_add_article_form():
                         )
 
                         if article:
-                            st.success(f"âœ… Article '{ingredient_nom}' ajouté avec succès!")
+                            st.success(f"✅ Article '{ingredient_nom}' ajouté avec succès!")
                             st.session_state.show_form = False
                             st.session_state.refresh_counter += 1
                             st.rerun()
                         else:
-                            st.error("âŒ Impossible d'ajouter l'article")
+                            st.error("❌ Impossible d'ajouter l'article")
 
                     except ErreurValidation as e:
-                        st.error(f"âŒ Erreur: {e}")
+                        st.error(f"❌ Erreur: {e}")
                     except Exception as e:
-                        st.error(f"âŒ Erreur lors de l'ajout: {str(e)}")
+                        st.error(f"❌ Erreur lors de l'ajout: {str(e)}")
                         logger.error(f"Erreur ajouter_article: {e}")
 
         with col2:
-            if st.button("âŒ Annuler", width="stretch"):
+            if st.button("❌ Annuler", width="stretch"):
                 st.session_state.show_form = False
                 st.rerun()
 
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
         logger.error(f"Erreur render_add_article_form: {e}")
 
 
@@ -86,15 +86,15 @@ def render_stock():
     service = get_inventaire_service()
 
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("❌ Service inventaire indisponible")
         return
 
     try:
         inventaire = service.get_inventaire_complet()
 
         if not inventaire:
-            st.info("ðŸ“† Inventaire vide. Commencez par ajouter des articles!")
-            if st.button("âž• Ajouter un article"):
+            st.info("📝† Inventaire vide. Commencez par ajouter des articles!")
+            if st.button("➕ Ajouter un article"):
                 st.session_state.show_form = True
             return
 
@@ -107,15 +107,15 @@ def render_stock():
         peremption = len(alertes.get("peremption_proche", []))
 
         with col1:
-            st.metric("ðŸ“¦ Articles", len(inventaire), delta=None)
+            st.metric("📦 Articles", len(inventaire), delta=None)
         with col2:
-            color = "âŒ" if stock_critique > 0 else "âœ…"
+            color = "❌" if stock_critique > 0 else "✅"
             st.metric(f"{color} Critique", stock_critique)
         with col3:
-            color = "âš " if stock_bas > 0 else "âœ…"
+            color = "âš " if stock_bas > 0 else "✅"
             st.metric(f"{color} Faible", stock_bas)
         with col4:
-            color = "â°" if peremption > 0 else "âœ…"
+            color = "⏰" if peremption > 0 else "✅"
             st.metric(f"{color} Péremption", peremption)
 
         st.divider()
@@ -126,16 +126,16 @@ def render_stock():
         with col_filter1:
             emplacements = sorted(set(a["emplacement"] for a in inventaire if a["emplacement"]))
             selected_emplacements = st.multiselect(
-                "ðŸ“ Emplacement", options=emplacements, default=[]
+                "📝 Emplacement", options=emplacements, default=[]
             )
 
         with col_filter2:
             categories = sorted(set(a["ingredient_categorie"] for a in inventaire))
-            selected_categories = st.multiselect("ðŸ·ï¸ Catégorie", options=categories, default=[])
+            selected_categories = st.multiselect("🏷️ Catégorie", options=categories, default=[])
 
         with col_filter3:
             status_filter = st.multiselect(
-                "âš ï¸ Statut",
+                "⚠️ Statut",
                 options=["critique", "stock_bas", "peremption_proche", "ok"],
                 default=[],
             )
@@ -177,23 +177,23 @@ def render_stock():
         col_btn1, col_btn2, col_btn3 = st.columns(3)
 
         with col_btn1:
-            if st.button("âž• Ajouter un article", width="stretch"):
+            if st.button("➕ Ajouter un article", width="stretch"):
                 st.session_state.show_form = True
                 st.rerun()
 
         with col_btn2:
-            if st.button("ðŸ”„ Rafraîchir", width="stretch"):
+            if st.button("🔄 Rafraîchir", width="stretch"):
                 st.session_state.refresh_counter += 1
                 st.rerun()
 
         with col_btn3:
-            if st.button("ðŸ“¥ Importer CSV", width="stretch"):
+            if st.button("📝¥ Importer CSV", width="stretch"):
                 st.session_state.show_import = True
 
     except ErreurValidation as e:
-        st.error(f"âŒ Erreur de validation: {e}")
+        st.error(f"❌ Erreur de validation: {e}")
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
 
 
 __all__ = ["render_stock", "render_add_article_form"]

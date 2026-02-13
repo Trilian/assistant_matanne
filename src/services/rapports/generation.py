@@ -1,10 +1,10 @@
 """
 Service Génération Rapports PDF
 
-âœ… Rapports hebdo stocks
-âœ… Rapports budget/dépenses
-âœ… Analyse gaspillage
-âœ… Export professionnel
+✅ Rapports hebdo stocks
+✅ Rapports budget/dépenses
+✅ Analyse gaspillage
+✅ Export professionnel
 """
 
 import logging
@@ -193,7 +193,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         elements = []
 
         # Titre
-        elements.append(Paragraph("ðŸ“Š RAPPORT STOCKS HEBDOMADAIRE", title_style))
+        elements.append(Paragraph("📊 RAPPORT STOCKS HEBDOMADAIRE", title_style))
         elements.append(
             Paragraph(
                 f"Généré le {donnees.date_rapport.strftime('%d/%m/%Y à %H:%M')}", styles["Normal"]
@@ -202,7 +202,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         elements.append(Spacer(1, 0.3 * inch))
 
         # Résumé général
-        elements.append(Paragraph("ðŸ” RÉSUMÉ GÉNÉRAL", heading_style))
+        elements.append(Paragraph("🔍 RÉSUMÉ GÉNÉRAL", heading_style))
         summary_data = [
             ["Métrique", "Valeur"],
             ["Total articles en stock", str(donnees.articles_total)],
@@ -232,7 +232,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
 
         # Articles faible stock
         if donnees.articles_faible_stock:
-            elements.append(Paragraph("âš ï¸ ARTICLES EN FAIBLE STOCK", heading_style))
+            elements.append(Paragraph("⚠️ ARTICLES EN FAIBLE STOCK", heading_style))
             stock_data = [["Article", "Quantité", "Minimum", "Unité", "Emplacement"]]
             for article in donnees.articles_faible_stock[:10]:
                 stock_data.append(
@@ -272,7 +272,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
 
         # Articles périmés
         if donnees.articles_perimes:
-            elements.append(Paragraph("âŒ ARTICLES PÉRIMÉS", heading_style))
+            elements.append(Paragraph("❌ ARTICLES PÉRIMÉS", heading_style))
             perimes_data = [["Article", "Date péremption", "Jours écart", "Quantité"]]
             for article in donnees.articles_perimes[:10]:
                 perimes_data.append(
@@ -312,7 +312,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         # Catégories
         if donnees.categories_resumee:
             elements.append(PageBreak())
-            elements.append(Paragraph("ðŸ“¦ RÉSUMÉ PAR CATÉGORIE", heading_style))
+            elements.append(Paragraph("📦 RÉSUMÉ PAR CATÉGORIE", heading_style))
             cat_data = [["Catégorie", "Articles", "Quantité", "Valeur €"]]
             for cat, data in donnees.categories_resumee.items():
                 cat_data.append(
@@ -447,7 +447,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         elements = []
 
         # Titre
-        elements.append(Paragraph("ðŸ’° RAPPORT BUDGET/DÉPENSES", title_style))
+        elements.append(Paragraph("💰 RAPPORT BUDGET/DÉPENSES", title_style))
         elements.append(
             Paragraph(
                 f"Généré le {donnees.date_rapport.strftime('%d/%m/%Y à %H:%M')}", styles["Normal"]
@@ -456,7 +456,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         elements.append(Spacer(1, 0.3 * inch))
 
         # Résumé
-        elements.append(Paragraph("ðŸ’µ RÉSUMÉ FINANCIER", heading_style))
+        elements.append(Paragraph("💵 RÉSUMÉ FINANCIER", heading_style))
         summary_data = [
             ["Métrique", "Valeur"],
             ["Dépenses totales", f"€{donnees.depenses_total:.2f}"],
@@ -485,7 +485,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
 
         # Dépenses par catégorie
         if donnees.depenses_par_categorie:
-            elements.append(Paragraph("ðŸ“Š DÉPENSES PAR CATÉGORIE", heading_style))
+            elements.append(Paragraph("📊 DÉPENSES PAR CATÉGORIE", heading_style))
             cat_data = [["Catégorie", "Montant €", "% du total"]]
             for cat, montant in sorted(
                 donnees.depenses_par_categorie.items(), key=lambda x: x[1], reverse=True
@@ -513,7 +513,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
 
         # Articles coûteux
         if donnees.articles_couteux:
-            elements.append(Paragraph("â­ ARTICLES LES PLUS COÃ›TEUX", heading_style))
+            elements.append(Paragraph("⭐ ARTICLES LES PLUS COÛTEUX", heading_style))
             costly_data = [["Article", "Catégorie", "Quantité", "Coût total €"]]
             for article in donnees.articles_couteux[:10]:
                 costly_data.append(
@@ -615,15 +615,15 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         analyse.recommandations = []
         if analyse.articles_perimes_total > 5:
             analyse.recommandations.append(
-                "âš ï¸ Gaspillage important détecté: améliorer la planification des achats"
+                "⚠️ Gaspillage important détecté: améliorer la planification des achats"
             )
         if analyse.valeur_perdue > 50:
             analyse.recommandations.append(
-                f"ðŸ’° Valeur perdue: €{analyse.valeur_perdue:.2f} - Optimiser l'inventaire"
+                f"💰 Valeur perdue: €{analyse.valeur_perdue:.2f} - Optimiser l'inventaire"
             )
         if analyse.articles_perimes_detail:
             analyse.recommandations.append(
-                "ðŸ“… Mettre en place un FIFO (First In First Out) strict"
+                "📝… Mettre en place un FIFO (First In First Out) strict"
             )
 
         return analyse
@@ -678,7 +678,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         elements = []
 
         # Titre
-        elements.append(Paragraph("ðŸ—‘ï¸ ANALYSE GASPILLAGE", title_style))
+        elements.append(Paragraph("🗑️ ANALYSE GASPILLAGE", title_style))
         elements.append(
             Paragraph(
                 f"Généré le {analyse.date_rapport.strftime('%d/%m/%Y à %H:%M')}", styles["Normal"]
@@ -687,7 +687,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         elements.append(Spacer(1, 0.3 * inch))
 
         # Résumé
-        elements.append(Paragraph("ðŸ“Š RÉSUMÉ GASPILLAGE", heading_style))
+        elements.append(Paragraph("📊 RÉSUMÉ GASPILLAGE", heading_style))
         summary_data = [
             ["Métrique", "Valeur"],
             ["Articles périmés", str(analyse.articles_perimes_total)],
@@ -719,14 +719,14 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
 
         # Recommandations
         if analyse.recommandations:
-            elements.append(Paragraph("ðŸ’¡ RECOMMANDATIONS", heading_style))
+            elements.append(Paragraph("💡 RECOMMANDATIONS", heading_style))
             for rec in analyse.recommandations:
                 elements.append(Paragraph(f"• {rec}", styles["Normal"]))
             elements.append(Spacer(1, 0.2 * inch))
 
         # Articles périmés détail
         if analyse.articles_perimes_detail:
-            elements.append(Paragraph("âŒ ARTICLES PÉRIMÉS DÉTAIL", heading_style))
+            elements.append(Paragraph("❌ ARTICLES PÉRIMÉS DÉTAIL", heading_style))
 
             detail_data = [["Article", "Périmé depuis", "Quantité", "Valeur perdue"]]
             for article in analyse.articles_perimes_detail[:15]:
@@ -767,7 +767,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         # Gaspillage par catégorie
         if analyse.categories_gaspillage:
             elements.append(PageBreak())
-            elements.append(Paragraph("ðŸ“¦ GASPILLAGE PAR CATÉGORIE", heading_style))
+            elements.append(Paragraph("📦 GASPILLAGE PAR CATÉGORIE", heading_style))
 
             cat_data = [["Catégorie", "Articles", "Valeur perdue"]]
             for cat, data in sorted(
@@ -979,7 +979,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         elements = []
 
         # En-tête
-        elements.append(Paragraph(f"ðŸ½ï¸ {donnees.nom_planning}", title_style))
+        elements.append(Paragraph(f"🍽️ {donnees.nom_planning}", title_style))
 
         date_range = ""
         if donnees.semaine_debut and donnees.semaine_fin:
@@ -989,7 +989,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
 
         # Statistiques rapides
         stats_data = [
-            ["ðŸ“Š Statistiques", ""],
+            ["📊 Statistiques", ""],
             ["Total repas planifiés", str(donnees.total_repas)],
             ["Ingrédients nécessaires", str(len(donnees.liste_courses_estimee))],
         ]
@@ -1017,7 +1017,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         elements.append(Spacer(1, 0.3 * inch))
 
         # Planning jour par jour
-        elements.append(Paragraph("ðŸ“… PLANNING DE LA SEMAINE", day_style))
+        elements.append(Paragraph("📝… PLANNING DE LA SEMAINE", day_style))
         elements.append(Spacer(1, 0.1 * inch))
 
         jours_fr = {
@@ -1031,10 +1031,10 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         }
 
         type_repas_emoji = {
-            "petit_déjeuner": "ðŸŒ…",
+            "petit_déjeuner": "🌅",
             "déjeuner": "â˜€ï¸",
-            "goûter": "ðŸª",
-            "dîner": "ðŸŒ™",
+            "goûter": "🍪",
+            "dîner": "🌙",
         }
 
         for date_str in sorted(donnees.repas_par_jour.keys()):
@@ -1044,7 +1044,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
 
             # Tableau pour ce jour
             day_data = [
-                [f"ðŸ“† {jour_nom} {date_obj.strftime('%d/%m')}", "Recette", "Portions", "Status"]
+                [f"📝† {jour_nom} {date_obj.strftime('%d/%m')}", "Recette", "Portions", "Status"]
             ]
 
             for repas in sorted(
@@ -1053,8 +1053,8 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
                 if x["type"] in ["petit_déjeuner", "déjeuner", "goûter", "dîner"]
                 else 99,
             ):
-                emoji = type_repas_emoji.get(repas["type"], "ðŸ´")
-                status = "âœ…" if repas["prepare"] else "â³"
+                emoji = type_repas_emoji.get(repas["type"], "🍴")
+                status = "✅" if repas["prepare"] else "⏳"
                 day_data.append(
                     [
                         f"{emoji} {repas['type'].replace('_', ' ').title()}",
@@ -1091,7 +1091,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         # Liste des courses
         if donnees.liste_courses_estimee:
             elements.append(PageBreak())
-            elements.append(Paragraph("ðŸ›’ LISTE DE COURSES ESTIMÉE", day_style))
+            elements.append(Paragraph("🛒 LISTE DE COURSES ESTIMÉE", day_style))
             elements.append(Spacer(1, 0.1 * inch))
 
             courses_data = [["Ingrédient", "Quantité", "Unité"]]
@@ -1131,7 +1131,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         elements.append(Spacer(1, 0.5 * inch))
         elements.append(
             Paragraph(
-                f"Généré le {donnees.date_rapport.strftime('%d/%m/%Y à %H:%M')} • Assistant Matanne ðŸ ",
+                f"Généré le {donnees.date_rapport.strftime('%d/%m/%Y à %H:%M')} • Assistant Matanne 🏠",
                 ParagraphStyle(
                     "Footer",
                     parent=styles["Normal"],

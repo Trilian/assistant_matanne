@@ -31,20 +31,20 @@ from .utils import (
 
 def app():
     """Point d'entrée du module Achats Famille"""
-    st.title("ðŸ›ï¸ Achats Famille")
+    st.title("🛍️ Achats Famille")
 
     stats = get_stats()
-    st.caption(f"ðŸ“‹ {stats['en_attente']} en attente • ðŸ’° ~{stats['total_estime']:.0f}€")
+    st.caption(f"📋 {stats['en_attente']} en attente • 💰 ~{stats['total_estime']:.0f}€")
 
     # Tabs
     tabs = st.tabs(
         [
-            "ðŸ“Š Dashboard",
-            "ðŸ‘¶ Jules",
-            "ðŸ‘¨â€ðŸ‘eâ€ðŸ‘§ Nous",
-            "ðŸª Par magasin",
-            "âž• Ajouter",
-            "ðŸ“œ Historique",
+            "📊 Dashboard",
+            "👶 Jules",
+            "💨â€👩â€💧 Nous",
+            "🏪 Par magasin",
+            "➕ Ajouter",
+            "📝œ Historique",
         ]
     )
 
@@ -52,10 +52,10 @@ def app():
         render_dashboard()
 
     with tabs[1]:
-        render_liste_groupe("jules", "ðŸ‘¶ Achats pour Jules")
+        render_liste_groupe("jules", "👶 Achats pour Jules")
 
     with tabs[2]:
-        render_liste_groupe("nous", "ðŸ‘¨â€ðŸ‘eâ€ðŸ‘§ Achats pour nous")
+        render_liste_groupe("nous", "💨â€👩â€💧 Achats pour nous")
 
     with tabs[3]:
         render_par_magasin()

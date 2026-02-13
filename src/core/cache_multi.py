@@ -6,7 +6,7 @@ Architecture à 3 niveaux :
 - L2 : Session Streamlit - Persistant pendant la session
 - L3 : Fichier local (pickle) - Persistant entre sessions
 
-Stratégie de lecture : L1 â†’ L2 â†’ L3 â†’ Source
+Stratégie de lecture : L1 → L2 → L3 → Source
 Stratégie d'écriture : Propagation vers tous les niveaux
 """
 
@@ -50,7 +50,7 @@ class EntreeCache:
 
     @property
     def age_seconds(self) -> float:
-        """Ã‚ge de l'entrée en secondes."""
+        """Âge de l'entrée en secondes."""
         return time.time() - self.created_at
 
 
@@ -445,7 +445,7 @@ class CacheMultiNiveau:
     Combine L1 (mémoire), L2 (session) et L3 (fichier)
     pour une performance optimale avec persistance.
 
-    Stratégie de lecture : L1 â†’ L2 â†’ L3 â†’ miss
+    Stratégie de lecture : L1 → L2 → L3 → miss
     Stratégie d'écriture : L1 + L2 (L3 optionnel si persistent=True)
     """
 

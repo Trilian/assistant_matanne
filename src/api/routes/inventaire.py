@@ -128,7 +128,7 @@ async def list_inventaire(
             }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("", response_model=InventaireItemResponse)
@@ -155,7 +155,7 @@ async def create_inventaire_item(item: InventaireItemCreate):
             return InventaireItemResponse.model_validate(db_item)
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/barcode/{code}")
@@ -180,4 +180,4 @@ async def get_by_barcode(code: str):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e

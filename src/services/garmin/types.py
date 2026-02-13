@@ -43,16 +43,16 @@ ACTIVITY_TYPE_MAPPING = {
 
 # Icônes par type d'activité
 ACTIVITY_ICONS = {
-    "running": "ðŸƒ",
-    "cycling": "ðŸš´",
-    "swimming": "ðŸŠ",
-    "walking": "ðŸš¶",
-    "hiking": "ðŸ¥¾",
-    "strength_training": "ðŸ‹ï¸",
-    "cardio_training": "ðŸ’ª",
-    "yoga": "ðŸ§˜",
-    "other": "ðŸ…",
-    "multi_sport": "ðŸ†",
+    "running": "🏃",
+    "cycling": "🚴",
+    "swimming": "🏊",
+    "walking": "🚶",
+    "hiking": "🥾",
+    "strength_training": "🏋️",
+    "cardio_training": "💪",
+    "yoga": "🧘",
+    "other": "🏅",
+    "multi_sport": "🏆",
 }
 
 # Seuils pour les indicateurs

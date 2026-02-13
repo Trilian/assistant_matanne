@@ -176,7 +176,7 @@ def get_activity_icon(activity_type: str) -> str:
     Returns:
         Emoji représentant l'activité
     """
-    return ACTIVITY_ICONS.get(activity_type.lower(), "ðŸ…")
+    return ACTIVITY_ICONS.get(activity_type.lower(), "🏅")
 
 
 def format_duration(seconds: int | float) -> str:
@@ -405,13 +405,13 @@ def get_streak_badge(streak: int) -> tuple[str, str] | None:
         Tuple (emoji, label) ou None si pas de badge
     """
     if streak >= 100:
-        return "ðŸ†", "Champion du mois"
+        return "🏆", "Champion du mois"
     elif streak >= 60:
-        return "ðŸ’Ž", "Diamant"
+        return "💎", "Diamant"
     elif streak >= 30:
-        return "ðŸ”¥", "On fire!"
+        return "🔥", "On fire!"
     elif streak >= 14:
-        return "â­", "Star"
+        return "⭐", "Star"
     elif streak >= 7:
         return "⏰", "1 semaine"
 

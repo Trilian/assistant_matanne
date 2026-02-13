@@ -80,7 +80,7 @@ class NotificationInventaire(BaseModel):
     ingredient_id: int
     titre: str = Field(..., min_length=5)
     message: str = Field(..., min_length=10)
-    icone: str = "â„¹ï¸"
+    icone: str = "ℹ️"
     date_creation: datetime = Field(default_factory=lambda: datetime.now(UTC))
     lue: bool = False
     priorite: Literal["haute", "moyenne", "basse"] = "moyenne"

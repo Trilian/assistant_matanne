@@ -7,7 +7,7 @@ from ._common import get_courses_service, logger, st
 
 def render_modeles():
     """Gestion des modèles de listes récurrentes (Phase 2: Persistance BD)"""
-    st.subheader("ðŸ“„ Modèles de listes - Phase 2")
+    st.subheader("📝„ Modèles de listes - Phase 2")
 
     service = get_courses_service()
 
@@ -15,11 +15,11 @@ def render_modeles():
         # Récupérer modèles depuis BD (Phase 2)
         modeles = service.get_modeles(utilisateur_id=None)  # TODO: user_id depuis auth
 
-        tab_mes_modeles, tab_nouveau = st.tabs(["ðŸ“‹ Mes modèles", "âž• Nouveau"])
+        tab_mes_modeles, tab_nouveau = st.tabs(["📋 Mes modèles", "➕ Nouveau"])
 
-        # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        # ─────────────────────────────────────────────────────────────────────────────
         # ONGLET: MES MODÈLES (affichage et actions)
-        # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        # ─────────────────────────────────────────────────────────────────────────────
 
         with tab_mes_modeles:
             st.write("**Modèles sauvegardés en BD**")
@@ -32,16 +32,16 @@ def render_modeles():
                         col1, col2, col3 = st.columns([3, 1, 1])
 
                         with col1:
-                            st.write(f"**ðŸ“‹ {modele['nom']}**")
+                            st.write(f"**📋 {modele['nom']}**")
                             if modele.get("description"):
-                                st.caption(f"ðŸ“ {modele['description']}")
+                                st.caption(f"📝 {modele['description']}")
                             st.caption(
-                                f"ðŸ“¦ {len(modele.get('articles', []))} articles | ðŸ“… {modele.get('cree_le', '')[:10]}"
+                                f"📦 {len(modele.get('articles', []))} articles | 📝… {modele.get('cree_le', '')[:10]}"
                             )
 
                         with col2:
                             if st.button(
-                                "ðŸ“¥ Charger",
+                                "📝¥ Charger",
                                 key=f"modele_load_{modele['id']}",
                                 use_container_width=True,
                                 help="Charger ce modèle dans la liste",
@@ -50,51 +50,51 @@ def render_modeles():
                                     # Appliquer le modèle (crée articles courses)
                                     article_ids = service.appliquer_modele(modele["id"])
                                     if not article_ids:
-                                        st.warning("âš ï¸ Modèle chargé mais aucun article trouvé")
+                                        st.warning("⚠️ Modèle chargé mais aucun article trouvé")
                                     else:
                                         st.success(
-                                            f"âœ… Modèle chargé ({len(article_ids)} articles)!"
+                                            f"✅ Modèle chargé ({len(article_ids)} articles)!"
                                         )
                                         st.session_state.courses_refresh += 1
                                         st.rerun()
                                 except Exception as e:
                                     import traceback
 
-                                    st.error(f"âŒ Erreur: {str(e)}")
-                                    with st.expander("ðŸ“‹ Détails d'erreur"):
+                                    st.error(f"❌ Erreur: {str(e)}")
+                                    with st.expander("📋 Détails d'erreur"):
                                         st.code(traceback.format_exc())
 
                         with col3:
                             if st.button(
-                                "ðŸ—‘ï¸ Supprimer",
+                                "🗑️ Supprimer",
                                 key=f"modele_del_{modele['id']}",
                                 use_container_width=True,
                                 help="Supprimer ce modèle",
                             ):
                                 try:
                                     service.delete_modele(modele["id"])
-                                    st.success("âœ… Modèle supprimé!")
+                                    st.success("✅ Modèle supprimé!")
                                     st.rerun()
                                 except Exception as e:
-                                    st.error(f"âŒ Erreur: {str(e)}")
+                                    st.error(f"❌ Erreur: {str(e)}")
 
                         # Afficher les articles du modèle
-                        with st.expander(f"ðŸ‘ï¸ Voir {len(modele.get('articles', []))} articles"):
+                        with st.expander(f"👁️ Voir {len(modele.get('articles', []))} articles"):
                             for article in modele.get("articles", []):
                                 priorite_emoji = (
-                                    "ðŸ”´"
+                                    "🔴"
                                     if article["priorite"] == "haute"
-                                    else ("ðŸŸ¡" if article["priorite"] == "moyenne" else "ðŸŸ¢")
+                                    else ("🟡" if article["priorite"] == "moyenne" else "🟢")
                                 )
                                 st.write(
                                     f"{priorite_emoji} **{article['nom']}** - {article['quantite']} {article['unite']} ({article['rayon']})"
                                 )
                                 if article.get("notes"):
-                                    st.caption(f"ðŸ“Œ {article['notes']}")
+                                    st.caption(f"📝Œ {article['notes']}")
 
-        # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        # ─────────────────────────────────────────────────────────────────────────────
         # ONGLET: CRÉER NOUVEAU MODÈLE
-        # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        # ─────────────────────────────────────────────────────────────────────────────
 
         with tab_nouveau:
             st.write("**Sauvegarder la liste actuelle comme modèle réutilisable**")
@@ -103,7 +103,7 @@ def render_modeles():
             liste_actuelle = service.get_liste_courses(achetes=False)
 
             if not liste_actuelle:
-                st.warning("âš ï¸ La liste est vide. Ajoutez des articles d'abord!")
+                st.warning("⚠️ La liste est vide. Ajoutez des articles d'abord!")
             else:
                 col1, col2 = st.columns(2)
                 with col1:
@@ -126,12 +126,12 @@ def render_modeles():
                 st.divider()
 
                 # Aperçu des articles à sauvegarder
-                st.subheader(f"ðŸ“¦ Articles ({len(liste_actuelle)})")
+                st.subheader(f"📦 Articles ({len(liste_actuelle)})")
                 for i, article in enumerate(liste_actuelle):
                     priorite_emoji = (
-                        "ðŸ”´"
+                        "🔴"
                         if article["priorite"] == "haute"
-                        else ("ðŸŸ¡" if article["priorite"] == "moyenne" else "ðŸŸ¢")
+                        else ("🟡" if article["priorite"] == "moyenne" else "🟢")
                     )
                     st.write(
                         f"{i+1}. {priorite_emoji} **{article['ingredient_nom']}** - {article['quantite_necessaire']} {article['unite']} ({article['rayon_magasin']})"
@@ -140,10 +140,10 @@ def render_modeles():
                 st.divider()
 
                 if st.button(
-                    "ðŸ’¾ Sauvegarder comme modèle", use_container_width=True, type="primary"
+                    "💾 Sauvegarder comme modèle", use_container_width=True, type="primary"
                 ):
                     if not nom_modele or nom_modele.strip() == "":
-                        st.error("âš ï¸ Entrez un nom pour le modèle")
+                        st.error("⚠️ Entrez un nom pour le modèle")
                     else:
                         try:
                             # Préparer les données articles
@@ -168,15 +168,15 @@ def render_modeles():
                                 utilisateur_id=None,  # TODO: user_id depuis auth
                             )
 
-                            st.success(f"âœ… Modèle '{nom_modele}' créé et sauvegardé en BD!")
+                            st.success(f"✅ Modèle '{nom_modele}' créé et sauvegardé en BD!")
                             st.balloons()
                             st.rerun()
                         except Exception as e:
-                            st.error(f"âŒ Erreur lors de la sauvegarde: {str(e)}")
+                            st.error(f"❌ Erreur lors de la sauvegarde: {str(e)}")
                             logger.error(f"Erreur create_modele: {e}")
 
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
         logger.error(f"Erreur render_modeles: {e}")
 
 

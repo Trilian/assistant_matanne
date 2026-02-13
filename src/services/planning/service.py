@@ -1,10 +1,10 @@
 """
 Service Planning de Base (REFACTORING PHASE 2)
 
-âœ… Utilise @avec_session_db et @avec_cache (Phase 1)
-âœ… Validation Pydantic centralisée
-âœ… Type hints complets pour meilleur IDE support
-âœ… Services testables sans Streamlit
+✅ Utilise @avec_session_db et @avec_cache (Phase 1)
+✅ Validation Pydantic centralisée
+✅ Type hints complets pour meilleur IDE support
+✅ Services testables sans Streamlit
 """
 
 import logging
@@ -37,10 +37,10 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
     """
     Service complet pour le planning hebdomadaire.
 
-    âœ… Héritage multiple :
-    - BaseService â†’ CRUD optimisé
-    - BaseAIService â†’ IA avec rate limiting auto
-    - PlanningAIMixin â†’ Contextes métier planning
+    ✅ Héritage multiple :
+    - BaseService → CRUD optimisé
+    - BaseAIService → IA avec rate limiting auto
+    - PlanningAIMixin → Contextes métier planning
 
     Fonctionnalités:
     - CRUD optimisé avec cache
@@ -106,7 +106,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
             )
 
         if not planning:
-            logger.debug("â„¹ï¸ Planning not found")
+            logger.debug("ℹ️ Planning not found")
             return None
 
         return planning
@@ -137,7 +137,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
         )
 
         if not planning:
-            logger.warning(f"âš ï¸ Planning {planning_id} not found")
+            logger.warning(f"⚠️ Planning {planning_id} not found")
             return None
 
         repas_par_jour = {}
@@ -167,7 +167,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
             "repas_par_jour": repas_par_jour,
         }
 
-        logger.info(f"âœ… Retrieved planning {planning_id} with {len(repas_par_jour)} days")
+        logger.info(f"✅ Retrieved planning {planning_id} with {len(repas_par_jour)} days")
         return result
 
     # ═══════════════════════════════════════════════════════════
@@ -265,7 +265,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
                             "temps_total": (recette.temps_preparation or 0)
                             + (recette.temps_cuisson or 0),
                             "type_repas": "déjeuner" if idx % 2 == 0 else "dîner",
-                            "raison": "ðŸ“ Alternative équilibrée",
+                            "raison": "📝 Alternative équilibrée",
                             "type_proteines": getattr(recette, "type_proteines", "mixte"),
                         }
                     )
@@ -280,7 +280,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
                 }
             )
 
-        logger.info(f"âœ… Generated {len(suggestions_globales)} days of balanced suggestions")
+        logger.info(f"✅ Generated {len(suggestions_globales)} days of balanced suggestions")
         return suggestions_globales
 
     # ═══════════════════════════════════════════════════════════
@@ -300,7 +300,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
 
         Args:
             semaine_debut: Date de début
-            recettes_selection: Mapping jour â†’ recette_id choisi
+            recettes_selection: Mapping jour → recette_id choisi
             enfants_adaptes: IDs des enfants pour adapter (Jules, etc.)
             db: Database session
 
@@ -330,12 +330,12 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
             # Récupérer la recette sélectionnée
             recette_id = recettes_selection.get(jour_key)
             if not recette_id:
-                logger.warning(f"âš ï¸ No recipe selected for {jour_name}")
+                logger.warning(f"⚠️ No recipe selected for {jour_name}")
                 continue
 
             recette = db.query(Recette).filter(Recette.id == recette_id).first()
             if not recette:
-                logger.warning(f"âš ï¸ Recipe {recette_id} not found for {jour_name}")
+                logger.warning(f"⚠️ Recipe {recette_id} not found for {jour_name}")
                 continue
 
             # Créer repas (on crée juste le dîner pour simplifier en départ)
@@ -351,7 +351,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
         db.commit()
         db.refresh(planning)
 
-        logger.info(f"âœ… Created custom planning for {semaine_debut}")
+        logger.info(f"✅ Created custom planning for {semaine_debut}")
         return planning
 
     # ═══════════════════════════════════════════════════════════
@@ -382,7 +382,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
         planning = db.query(Planning).filter(Planning.id == planning_id).first()
 
         if not planning or not planning.repas:
-            logger.warning(f"âš ï¸ Planning {planning_id} pas trouvé ou pas de repas")
+            logger.warning(f"⚠️ Planning {planning_id} pas trouvé ou pas de repas")
             return []
 
         # Agréger les ingrédients
@@ -430,7 +430,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
             ingredients_aggregated.values(), key=lambda x: (x["rayon"], -x["quantite"])
         )
 
-        logger.info(f"âœ… Agrégé {len(courses_list)} ingrédients pour planning {planning_id}")
+        logger.info(f"✅ Agrégé {len(courses_list)} ingrédients pour planning {planning_id}")
         return courses_list
 
     # ═══════════════════════════════════════════════════════════
@@ -492,7 +492,7 @@ RULES:
 5. Adapt to family preferences and dietary restrictions
 6. No explanations, no text, ONLY JSON"""
 
-        logger.info(f"ðŸ¤– Generating AI weekly plan starting {semaine_debut}")
+        logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
 
         # Appel IA avec auto rate limiting & parsing
         planning_data = self.call_with_list_parsing_sync(
@@ -507,7 +507,7 @@ RULES:
         # Log de debug pour voir la réponse
         if not planning_data:
             logger.warning(
-                f"âš ï¸ Failed to generate planning for {semaine_debut} - no data returned"
+                f"⚠️ Failed to generate planning for {semaine_debut} - no data returned"
             )
             logger.debug("Checking if we can create default planning instead...")
 
@@ -544,11 +544,11 @@ RULES:
                 db.add(repas)
 
             db.commit()
-            logger.info(f"âœ… Created default planning for {semaine_debut} with 7 days")
+            logger.info(f"✅ Created default planning for {semaine_debut} with 7 days")
             return planning
 
         # Planning IA réussi
-        logger.info(f"âœ… Generated planning with {len(planning_data)} days using AI")
+        logger.info(f"✅ Generated planning with {len(planning_data)} days using AI")
 
         # Créer planning en DB
         planning = Planning(
@@ -589,7 +589,7 @@ RULES:
         # Invalider cache
         Cache.invalider(pattern="planning")
 
-        logger.info(f"âœ… Generated AI planning for week starting {semaine_debut}")
+        logger.info(f"✅ Generated AI planning for week starting {semaine_debut}")
         return planning
 
 

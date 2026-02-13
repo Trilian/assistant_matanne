@@ -9,15 +9,15 @@ JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "D
 
 # Robots de cuisine disponibles avec leurs caractéristiques
 ROBOTS_DISPONIBLES = {
-    "cookeo": {"nom": "Cookeo", "emoji": "ðŸ²", "parallele": True},
-    "monsieur_cuisine": {"nom": "Monsieur Cuisine", "emoji": "ðŸ¤–", "parallele": True},
-    "airfryer": {"nom": "Airfryer", "emoji": "ðŸŸ", "parallele": True},
+    "cookeo": {"nom": "Cookeo", "emoji": "🍲", "parallele": True},
+    "monsieur_cuisine": {"nom": "Monsieur Cuisine", "emoji": "🤖", "parallele": True},
+    "airfryer": {"nom": "Airfryer", "emoji": "🍟", "parallele": True},
     "multicooker": {"nom": "Multicooker", "emoji": "â™¨ï¸", "parallele": True},
-    "four": {"nom": "Four", "emoji": "ðŸ”¥", "parallele": True},
-    "plaques": {"nom": "Plaques", "emoji": "ðŸ³", "parallele": False},
-    "robot_patissier": {"nom": "Robot Pâtissier", "emoji": "ðŸŽ‚", "parallele": True},
-    "mixeur": {"nom": "Mixeur", "emoji": "ðŸ¥¤", "parallele": False},
-    "hachoir": {"nom": "Hachoir", "emoji": "ðŸ”ª", "parallele": False},
+    "four": {"nom": "Four", "emoji": "🔥", "parallele": True},
+    "plaques": {"nom": "Plaques", "emoji": "🍳", "parallele": False},
+    "robot_patissier": {"nom": "Robot Pâtissier", "emoji": "🎂", "parallele": True},
+    "mixeur": {"nom": "Mixeur", "emoji": "🥤", "parallele": False},
+    "hachoir": {"nom": "Hachoir", "emoji": "🔪", "parallele": False},
 }
 
 # Alias pour rétrocompatibilité

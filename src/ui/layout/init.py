@@ -19,19 +19,19 @@ def initialiser_app() -> bool:
     Returns:
         True si l'initialisation a réussi, False sinon.
     """
-    logger.info("ðŸš€ Initialisation app (lazy)...")
+    logger.info("🚀 Initialisation app (lazy)...")
 
     # State Manager
     GestionnaireEtat.initialiser()
-    logger.info("âœ… StateManager OK")
+    logger.info("✅ StateManager OK")
 
     # Database
     if not verifier_connexion():
-        st.error("âŒ Connexion DB impossible")
+        st.error("❌ Connexion DB impossible")
         st.stop()
         return False
 
-    logger.info("âœ… Database OK")
+    logger.info("✅ Database OK")
 
     # Client IA (lazy - chargé si besoin)
     etat = obtenir_etat()
@@ -40,9 +40,9 @@ def initialiser_app() -> bool:
             from src.core.ai import obtenir_client_ia
 
             etat.agent_ia = obtenir_client_ia()
-            logger.info("âœ… Client IA OK")
+            logger.info("✅ Client IA OK")
         except Exception as e:
-            logger.warning(f"âš ï¸ Client IA indispo: {e}")
+            logger.warning(f"⚠️ Client IA indispo: {e}")
 
-    logger.info("âœ… App initialisée (lazy mode)")
+    logger.info("✅ App initialisée (lazy mode)")
     return True

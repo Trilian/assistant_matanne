@@ -98,7 +98,7 @@ class ConseilJardin(BaseModel):
     """Conseil de jardinage basé sur la météo."""
 
     priorite: int = 1  # 1 = haute, 3 = basse
-    icone: str = "ðŸŒ±"
+    icone: str = "🌱"
     titre: str
     description: str
     plantes_concernees: list[str] = Field(default_factory=list)
@@ -303,7 +303,7 @@ class ServiceMeteo:
                     AlerteMeteo(
                         type_alerte=TypeAlertMeteo.GEL,
                         niveau=niveau,
-                        titre="ðŸ¥¶ Risque de gel",
+                        titre="🥶 Risque de gel",
                         message=f"Température minimale prévue: {prev.temperature_min}°C",
                         conseil_jardin="Protégez vos plantes sensibles avec un voile d'hivernage. Rentrez les pots fragiles.",
                         date_debut=prev.date,
@@ -320,7 +320,7 @@ class ServiceMeteo:
                     AlerteMeteo(
                         type_alerte=TypeAlertMeteo.CANICULE,
                         niveau=niveau,
-                        titre="ðŸ”¥ Canicule",
+                        titre="🔥 Canicule",
                         message=f"Température maximale prévue: {prev.temperature_max}°C",
                         conseil_jardin="Arrosez tôt le matin ou tard le soir. Installez des ombrages. Paillez abondamment.",
                         date_debut=prev.date,
@@ -334,7 +334,7 @@ class ServiceMeteo:
                     AlerteMeteo(
                         type_alerte=TypeAlertMeteo.PLUIE_FORTE,
                         niveau=NiveauAlerte.ATTENTION,
-                        titre="ðŸŒ§ï¸ Fortes pluies",
+                        titre="🌧️ Fortes pluies",
                         message=f"Précipitations prévues: {prev.precipitation_mm}mm",
                         conseil_jardin="Vérifiez le drainage. Protégez les semis. Évitez de marcher sur sol détrempé.",
                         date_debut=prev.date,
@@ -347,7 +347,7 @@ class ServiceMeteo:
                     AlerteMeteo(
                         type_alerte=TypeAlertMeteo.VENT_FORT,
                         niveau=NiveauAlerte.ATTENTION,
-                        titre="ðŸ’¨ Vent fort",
+                        titre="💨 Vent fort",
                         message=f"Vent prévu: {prev.vent_km_h} km/h",
                         conseil_jardin="Tuteurez les plantes hautes. Rentrez ou fixez les pots légers. Reportez les traitements.",
                         date_debut=prev.date,
@@ -421,7 +421,7 @@ class ServiceMeteo:
             conseils.append(
                 ConseilJardin(
                     priorite=1,
-                    icone="ðŸ’§",
+                    icone="💧",
                     titre="Arrosage recommandé",
                     description="Températures élevées, pensez à arroser le soir ou tôt le matin.",
                     action_recommandee="Arroser ce soir après 19h",
@@ -432,7 +432,7 @@ class ServiceMeteo:
             conseils.append(
                 ConseilJardin(
                     priorite=2,
-                    icone="ðŸŒ¡ï¸",
+                    icone="🌡️",
                     titre="Nuits fraîches",
                     description="Les nuits sont fraîches, attention aux plantes sensibles.",
                     plantes_concernees=["Tomates", "Basilic", "Courges"],
@@ -445,7 +445,7 @@ class ServiceMeteo:
             conseils.append(
                 ConseilJardin(
                     priorite=2,
-                    icone="ðŸŒ±",
+                    icone="🌱",
                     titre="Journée sèche",
                     description="Pas de pluie prévue, idéal pour les travaux au jardin.",
                     action_recommandee="Désherber, tailler, ou planter",
@@ -455,7 +455,7 @@ class ServiceMeteo:
             conseils.append(
                 ConseilJardin(
                     priorite=2,
-                    icone="ðŸŒ§ï¸",
+                    icone="🌧️",
                     titre="Pluie prévue",
                     description="Inutile d'arroser, la pluie s'en chargera.",
                     action_recommandee="Reporter l'arrosage",
@@ -467,7 +467,7 @@ class ServiceMeteo:
             conseils.append(
                 ConseilJardin(
                     priorite=3,
-                    icone="ðŸ",
+                    icone="🌱",
                     titre="Conditions idéales pour traiter",
                     description="Peu de vent, conditions parfaites pour les traitements foliaires.",
                     action_recommandee="Traiter si nécessaire (purin, savon noir...)",
@@ -492,7 +492,7 @@ class ServiceMeteo:
             conseils.append(
                 ConseilJardin(
                     priorite=3,
-                    icone="ðŸŒ™",
+                    icone="🌙",
                     titre="Période favorable aux semis",
                     description="Lune montante, favorable aux semis et greffes.",
                     action_recommandee="Semer les graines",
@@ -826,19 +826,19 @@ def render_weather_garden_ui():  # pragma: no cover
     """Interface Streamlit pour les alertes météo jardin."""
     import streamlit as st
 
-    st.subheader("ðŸŒ¤ï¸ Météo & Jardin")
+    st.subheader("🌤️ Météo & Jardin")
 
     service = get_weather_garden_service()
 
     # Configuration localisation
-    with st.expander("ðŸ“ Configurer la localisation"):
+    with st.expander("📝 Configurer la localisation"):
         city = st.text_input(
             "Ville", value="Paris", key="weather_city", help="Entrez le nom de votre ville"
         )
 
-        if st.button("ðŸ” Localiser", key="locate_btn"):
+        if st.button("🔍 Localiser", key="locate_btn"):
             if service.set_location_from_city(city):
-                st.success(f"âœ… Localisation mise à jour: {city}")
+                st.success(f"✅ Localisation mise à jour: {city}")
             else:
                 st.error("Ville non trouvée")
 
@@ -846,14 +846,14 @@ def render_weather_garden_ui():  # pragma: no cover
     previsions = service.get_previsions(7)
 
     if not previsions:
-        st.error("âŒ Impossible de récupérer les données météo")
+        st.error("❌ Impossible de récupérer les données météo")
         return
 
     # Alertes en premier
     alertes = service.generer_alertes(previsions)
 
     if alertes:
-        st.markdown("### âš ï¸ Alertes")
+        st.markdown("### ⚠️ Alertes")
         for alerte in alertes:
             if alerte.niveau == NiveauAlerte.DANGER:
                 st.error(f"**{alerte.titre}** - {alerte.message}")
@@ -862,12 +862,12 @@ def render_weather_garden_ui():  # pragma: no cover
             else:
                 st.info(f"**{alerte.titre}** - {alerte.message}")
 
-            st.caption(f"ðŸ’¡ {alerte.conseil_jardin}")
+            st.caption(f"💡 {alerte.conseil_jardin}")
 
     st.markdown("---")
 
     # Prévisions 7 jours
-    st.markdown("### ðŸ“… Prévisions 7 jours")
+    st.markdown("### 📝… Prévisions 7 jours")
 
     cols = st.columns(min(7, len(previsions)))
 
@@ -884,14 +884,14 @@ def render_weather_garden_ui():  # pragma: no cover
             )
 
             if prev.precipitation_mm > 0:
-                st.caption(f"ðŸŒ§ï¸ {prev.precipitation_mm}mm")
+                st.caption(f"🌧️ {prev.precipitation_mm}mm")
             if prev.vent_km_h > 30:
-                st.caption(f"ðŸ’¨ {prev.vent_km_h:.0f}km/h")
+                st.caption(f"💨 {prev.vent_km_h:.0f}km/h")
 
     st.markdown("---")
 
     # Tabs pour détails
-    tab1, tab2, tab3 = st.tabs(["ðŸ’¡ Conseils", "ðŸ’§ Arrosage", "ðŸ“Š Détails"])
+    tab1, tab2, tab3 = st.tabs(["💡 Conseils", "💧 Arrosage", "📊 Détails"])
 
     with tab1:
         conseils = service.generer_conseils(previsions[:3])
@@ -899,24 +899,24 @@ def render_weather_garden_ui():  # pragma: no cover
         if conseils:
             for conseil in conseils:
                 priorite_badge = (
-                    "ðŸ”´" if conseil.priorite == 1 else "ðŸŸ¡" if conseil.priorite == 2 else "ðŸŸ¢"
+                    "🔴" if conseil.priorite == 1 else "🟡" if conseil.priorite == 2 else "🟢"
                 )
 
                 st.markdown(f"#### {conseil.icone} {conseil.titre} {priorite_badge}")
                 st.write(conseil.description)
 
                 if conseil.action_recommandee:
-                    st.info(f"ðŸ‘‰ {conseil.action_recommandee}")
+                    st.info(f"👉 {conseil.action_recommandee}")
 
                 if conseil.plantes_concernees:
-                    st.caption(f"ðŸŒ± Plantes concernées: {', '.join(conseil.plantes_concernees)}")
+                    st.caption(f"🌱 Plantes concernées: {', '.join(conseil.plantes_concernees)}")
 
                 st.markdown("---")
         else:
             st.info("Pas de conseil particulier pour aujourd'hui")
 
     with tab2:
-        st.markdown("### ðŸ’§ Plan d'arrosage intelligent")
+        st.markdown("### 💧 Plan d'arrosage intelligent")
 
         surface = st.slider(
             "Surface du jardin (m²)",
@@ -948,9 +948,9 @@ def render_weather_garden_ui():  # pragma: no cover
 
                 with col2:
                     if jour.besoin_arrosage:
-                        st.markdown("ðŸ’§ **Oui**")
+                        st.markdown("💧 **Oui**")
                     else:
-                        st.markdown("âœ… Non")
+                        st.markdown("✅ Non")
 
                 with col3:
                     st.caption(jour.raison)
@@ -960,7 +960,7 @@ def render_weather_garden_ui():  # pragma: no cover
                         st.caption(f"Priorité: {', '.join(jour.plantes_prioritaires)}")
 
     with tab3:
-        st.markdown("### ðŸ“Š Détails météo")
+        st.markdown("### 📊 Détails météo")
 
         import pandas as pd
 

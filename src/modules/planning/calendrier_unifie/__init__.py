@@ -2,12 +2,12 @@
 Module Calendrier Familial Unifié - Vue centrale de TOUT
 
 Affiche dans une seule vue:
-- ðŸ½ï¸ Repas (midi, soir, goûters)
-- ðŸ³ Sessions batch cooking
-- ðŸ›’ Courses planifiées
-- ðŸŽ¨ Activités famille
-- ðŸ¥ RDV médicaux
-- ðŸ“… Événements divers
+- 🍽️ Repas (midi, soir, goûters)
+- 🍳 Sessions batch cooking
+- 🛒 Courses planifiées
+- 🎨 Activités famille
+- 🏥 RDV médicaux
+- 📝… Événements divers
 
 Fonctionnalités:
 - Vue semaine avec impression
@@ -37,7 +37,7 @@ from .data import charger_donnees_semaine
 def app():
     """Point d'entrée du module Calendrier Familial Unifié."""
 
-    st.title("ðŸ“… Calendrier Familial")
+    st.title("📝… Calendrier Familial")
     st.caption("Vue unifiée de toute votre semaine: repas, batch, courses, activités, ménage, RDV")
 
     # Navigation
@@ -76,13 +76,13 @@ def app():
     # Mode d'affichage
     mode = st.radio(
         "Vue",
-        ["ðŸ“‹ Liste détaillée", "ðŸ“Š Grille"],
+        ["📋 Liste détaillée", "📊 Grille"],
         horizontal=True,
         label_visibility="collapsed",
     )
 
     # Affichage principal
-    if mode == "ðŸ“‹ Liste détaillée":
+    if mode == "📋 Liste détaillée":
         render_vue_semaine_liste(semaine)
     else:
         render_vue_semaine_grille(semaine)

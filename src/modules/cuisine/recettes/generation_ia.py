@@ -22,7 +22,7 @@ def render_generer_ia():
 
     service = get_recette_service()
     if service is None:
-        st.error("âŒ Service IA indisponible")
+        st.error("❌ Service IA indisponible")
         return
 
     # Sélection du mode de génération
@@ -38,7 +38,7 @@ def render_generer_ia():
 
 def _render_recherche_specifique(service):
     """Mode recherche de variantes d'une recette spécifique"""
-    st.info("ðŸ” Générez plusieurs variantes d'une recette spécifique")
+    st.info("🔍 Générez plusieurs variantes d'une recette spécifique")
     with st.form("form_recette_specifique", border=True):
         recette_recherche = st.text_input(
             "Nom de la recette recherchée *",
@@ -46,11 +46,11 @@ def _render_recherche_specifique(service):
         )
         nb_variantes = st.slider("Nombre de variantes", 1, 5, 3)
         submitted_spec = st.form_submit_button(
-            "ðŸ” Chercher des variantes", use_container_width=True
+            "🔍 Chercher des variantes", use_container_width=True
         )
 
     if submitted_spec and recette_recherche:
-        with st.spinner(f"ðŸ¤– Génération de variantes de '{recette_recherche}'..."):
+        with st.spinner(f"🤖 Génération de variantes de '{recette_recherche}'..."):
             try:
                 recettes_variantes = service.generer_variantes_recette_ia(
                     nom_recette=recette_recherche,
@@ -58,11 +58,11 @@ def _render_recherche_specifique(service):
                 )
 
                 if not recettes_variantes:
-                    st.warning("âš ï¸ Aucune variante générée. Réessayez.")
+                    st.warning("⚠️ Aucune variante générée. Réessayez.")
                     return
 
                 st.success(
-                    f"âœ… {len(recettes_variantes)} variante(s) de '{recette_recherche}' générée(s)!"
+                    f"✅ {len(recettes_variantes)} variante(s) de '{recette_recherche}' générée(s)!"
                 )
                 st.divider()
 
@@ -71,12 +71,12 @@ def _render_recherche_specifique(service):
                     _render_suggestion_card(suggestion, idx, service, is_variant=True)
 
             except Exception as e:
-                st.error(f"âŒ Erreur: {str(e)}")
+                st.error(f"❌ Erreur: {str(e)}")
 
 
 def _render_mode_personnalise(service):
     """Mode génération personnalisée"""
-    st.info("ðŸ’¡ Laissez l'IA générer des recettes personnalisées basées sur vos préférences")
+    st.info("💡 Laissez l'IA générer des recettes personnalisées basées sur vos préférences")
     with st.form("form_recette_ia", border=True):
         col1, col2 = st.columns(2)
         with col1:
@@ -103,17 +103,17 @@ def _render_mode_personnalise(service):
             height=80,
         )
 
-        submitted = st.form_submit_button("ðŸ¤– Générer avec l'IA", use_container_width=True)
+        submitted = st.form_submit_button("🤖 Générer avec l'IA", use_container_width=True)
 
     if submitted:
         if not type_repas or not saison:
-            st.error("âŒ Type de repas et saison sont obligatoires")
+            st.error("❌ Type de repas et saison sont obligatoires")
         else:
             ingredients_dispo = None
             if ingredients_str:
                 ingredients_dispo = [i.strip() for i in ingredients_str.split(",") if i.strip()]
 
-            with st.spinner("ðŸ¤– L'IA génère vos recettes..."):
+            with st.spinner("🤖 L'IA génère vos recettes..."):
                 try:
                     recettes_suggestions = service.generer_recettes_ia(
                         type_repas=type_repas,
@@ -124,10 +124,10 @@ def _render_mode_personnalise(service):
                     )
 
                     if not recettes_suggestions:
-                        st.warning("âš ï¸ Aucune recette générée. Réessayez.")
+                        st.warning("⚠️ Aucune recette générée. Réessayez.")
                         return
 
-                    st.success(f"âœ… {len(recettes_suggestions)} recette(s) générée(s)!")
+                    st.success(f"✅ {len(recettes_suggestions)} recette(s) générée(s)!")
                     st.divider()
 
                     # Afficher les suggestions en cartes
@@ -137,7 +137,7 @@ def _render_mode_personnalise(service):
                         )
 
                 except Exception as e:
-                    st.error(f"âŒ Erreur génération: {str(e)}")
+                    st.error(f"❌ Erreur génération: {str(e)}")
                     logger.error(f"Erreur IA recettes: {e}")
 
 
@@ -149,10 +149,10 @@ def _render_suggestion_card(
         # Titre + Métrique difficulté en ligne
         col_titre, col_diff = st.columns([4, 1])
         with col_titre:
-            title_prefix = f"ðŸ³ Variante {idx}:" if is_variant else "ðŸ³"
+            title_prefix = f"🍳 Variante {idx}:" if is_variant else "🍳"
             st.subheader(f"{title_prefix} {suggestion.nom}", anchor=False)
         with col_diff:
-            difficulte_emoji = {"facile": "ðŸŸ¢", "moyen": "ðŸŸ¡", "difficile": "ðŸ”´"}.get(
+            difficulte_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(
                 suggestion.difficulte, ""
             )
             st.caption(f"{difficulte_emoji} {suggestion.difficulte}")
@@ -171,13 +171,13 @@ def _render_suggestion_card(
             )
         with col2:
             st.metric(
-                "ðŸ”¥ Cuisson", f"{suggestion.temps_cuisson} min", label_visibility="collapsed"
+                "🔥 Cuisson", f"{suggestion.temps_cuisson} min", label_visibility="collapsed"
             )
         with col3:
-            st.metric("ðŸ½ï¸ Portions", suggestion.portions, label_visibility="collapsed")
+            st.metric("🍽️ Portions", suggestion.portions, label_visibility="collapsed")
         with col4:
             st.metric(
-                "â° Total",
+                "⏰ Total",
                 f"{suggestion.temps_preparation + suggestion.temps_cuisson} min",
                 label_visibility="collapsed",
             )
@@ -207,7 +207,7 @@ def _render_suggestion_card(
 
         # Étapes dans un expander
         if suggestion.etapes:
-            with st.expander("ðŸ“‹ Étapes de préparation"):
+            with st.expander("📋 Étapes de préparation"):
                 for i, etape in enumerate(suggestion.etapes, 1):
                     if isinstance(etape, dict):
                         st.write(f"**{i}.** {etape.get('description', etape)}")
@@ -220,7 +220,7 @@ def _render_suggestion_card(
         with col_btn_add:
             button_key = f"add_variant_{idx}" if is_variant else f"add_suggestion_{idx}"
             if st.button(
-                "âœ… Ajouter à mes recettes",
+                "✅ Ajouter à mes recettes",
                 key=button_key,
                 use_container_width=True,
                 type="primary",
@@ -245,11 +245,11 @@ def _render_suggestion_card(
 
                     with obtenir_contexte_db() as db:
                         recette = service.create_complete(data, db=db)
-                    st.success(f"âœ… '{recette.nom}' ajoutée à vos recettes!")
-                    st.toast(f"ðŸŽ‰ {recette.nom} sauvegardée!", icon="âœ…")
+                    st.success(f"✅ '{recette.nom}' ajoutée à vos recettes!")
+                    st.toast(f"🎉 {recette.nom} sauvegardée!", icon="✅")
 
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"❌ Erreur: {str(e)}")
                     logger.error(f"Erreur ajout suggestion: {e}")
 
         st.write("")  # Espacement

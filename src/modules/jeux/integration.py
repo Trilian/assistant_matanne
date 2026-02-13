@@ -22,9 +22,9 @@ def configurer_jeux():
 
         if api_key:
             configurer_api_key(api_key)
-            logger.debug("âœ… Football-Data API configurée")
+            logger.debug("✅ Football-Data API configurée")
         else:
-            logger.debug("âš ï¸  Football-Data API non configurée (fallback BD utilisé)")
+            logger.debug("⚠️  Football-Data API non configurée (fallback BD utilisé)")
 
     except Exception as e:
         logger.debug(f"Note: {e}")

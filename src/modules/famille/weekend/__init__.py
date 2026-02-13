@@ -2,10 +2,10 @@
 Module Sorties Weekend - Planning et suggestions IA.
 
 Fonctionnalités:
-- ðŸ“… Planning weekend (samedi/dimanche)
-- ðŸ’¡ Idées IA (selon météo + âge Jules + budget)
-- ðŸ—ºï¸ Lieux testés & notés
-- ðŸ’° Budget sorties
+- 📝… Planning weekend (samedi/dimanche)
+- 💡 Idées IA (selon météo + âge Jules + budget)
+- 🗺️ Lieux testés & notés
+- 💰 Budget sorties
 """
 
 # Import des fonctions pour exposer l'API publique
@@ -31,14 +31,14 @@ from .utils import (
 
 def app():
     """Point d'entrée du module Weekend"""
-    st.title("ðŸŽ‰ Sorties Weekend")
+    st.title("🎉 Sorties Weekend")
 
     saturday, sunday = get_next_weekend()
-    st.caption(f"ðŸ“… {saturday.strftime('%d/%m')} - {sunday.strftime('%d/%m')}")
+    st.caption(f"📝… {saturday.strftime('%d/%m')} - {sunday.strftime('%d/%m')}")
 
     # Tabs
     tabs = st.tabs(
-        ["ðŸ“… Planning", "ðŸ’¡ Suggestions IA", "ðŸ—ºï¸ Lieux testés", "âž• Ajouter", "â­ Noter"]
+        ["📝… Planning", "💡 Suggestions IA", "🗺️ Lieux testés", "➕ Ajouter", "⭐ Noter"]
     )
 
     with tabs[0]:

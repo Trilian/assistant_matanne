@@ -2,12 +2,12 @@
 Module Calendrier Familial Unifié - Imports et constantes partagés
 
 Affiche dans une seule vue:
-- ðŸ½ï¸ Repas (midi, soir, goûters)
-- ðŸ³ Sessions batch cooking
-- ðŸ›’ Courses planifiées
-- ðŸŽ¨ Activités famille
-- ðŸ¥ RDV médicaux
-- ðŸ“… Événements divers
+- 🍽️ Repas (midi, soir, goûters)
+- 🍳 Sessions batch cooking
+- 🛒 Courses planifiées
+- 🎨 Activités famille
+- 🏥 RDV médicaux
+- 📝… Événements divers
 """
 
 import logging

@@ -1,10 +1,10 @@
 """
 Service Barcode/QR Code Scanner
 
-âœ… Scanner codes-barres et QR codes
-âœ… Intégration avec inventaire
-âœ… Intégration avec recettes
-âœ… Validation et caching
+✅ Scanner codes-barres et QR codes
+✅ Intégration avec inventaire
+✅ Intégration avec recettes
+✅ Validation et caching
 """
 
 import logging
@@ -37,7 +37,7 @@ class BarcodeData(BaseModel):
 
 
 class BarcodeArticle(BaseModel):
-    """Association barcode â†’ article inventaire"""
+    """Association barcode → article inventaire"""
 
     barcode: str = Field(..., min_length=8)
     article_id: int
@@ -51,7 +51,7 @@ class BarcodeArticle(BaseModel):
 
 
 class BarcodeRecette(BaseModel):
-    """Association barcode â†’ recette"""
+    """Association barcode → recette"""
 
     barcode: str = Field(..., min_length=8)
     recette_id: int
@@ -88,7 +88,7 @@ class BarcodeService(BaseService[ArticleInventaire]):
         super().__init__(ArticleInventaire, cache_ttl=3600)
         # Cache est statique, pas besoin d'instancier
         self.cache_ttl = 3600
-        self.barcode_mappings = {}  # Cache local {barcode â†’ article_id}
+        self.barcode_mappings = {}  # Cache local {barcode → article_id}
 
     # ═══════════════════════════════════════════════════════════
     # VALIDATION ET PARSING
@@ -286,7 +286,7 @@ class BarcodeService(BaseService[ArticleInventaire]):
         session.add(article)
         session.commit()
 
-        logger.info(f"âœ… Article ajouté: {nom} (barcode: {code})")
+        logger.info(f"✅ Article ajouté: {nom} (barcode: {code})")
         self.cache.invalidate()
 
         return article
@@ -316,7 +316,7 @@ class BarcodeService(BaseService[ArticleInventaire]):
         article.quantite += quantite
         session.commit()
 
-        logger.info(f"ðŸ“¦ Stock augmenté: {article.nom} â†’ {article.quantite}{article.unite}")
+        logger.info(f"📦 Stock augmenté: {article.nom} → {article.quantite}{article.unite}")
         self.cache.invalidate()
 
         return article
@@ -357,7 +357,7 @@ class BarcodeService(BaseService[ArticleInventaire]):
             elif jours_restants <= 7:
                 peremption_etat = "URGENT"
             elif jours_restants <= 30:
-                peremption_etat = "BIENTÃ”T"
+                peremption_etat = "BIENTÔT"
 
         return {
             "article_id": article.id,
@@ -399,7 +399,7 @@ class BarcodeService(BaseService[ArticleInventaire]):
         article.code_barres = nouveau_code
         session.commit()
 
-        logger.info(f"ðŸ”„ Code-barres mis à jour: {ancien_code} â†’ {nouveau_code}")
+        logger.info(f"🔄 Code-barres mis à jour: {ancien_code} → {nouveau_code}")
         self.cache.invalidate()
 
         return article

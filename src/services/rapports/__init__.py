@@ -2,8 +2,8 @@
 Package PDF unifié.
 
 Fusionne les 2 anciens services:
-- pdf_export.py â†’ export.py (exports recettes, planning, courses)
-- rapports_pdf.py â†’ rapports.py (rapports stocks, budget, gaspillage)
+- pdf_export.py → export.py (exports recettes, planning, courses)
+- rapports_pdf.py → rapports.py (rapports stocks, budget, gaspillage)
 
 Tous renommés en français avec alias rétrocompatibilité.
 """

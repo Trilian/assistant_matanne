@@ -3,7 +3,7 @@ Module Planificateur de Repas - Imports et constantes partagés
 
 Interface style Jow:
 - Générateur IA de menus équilibrés
-- Apprentissage des goûts (ðŸ‘/ðŸ‘Ž) persistant en DB
+- Apprentissage des goûts (👍/👎) persistant en DB
 - Versions Jules intégrées
 - Suggestions alternatives
 """

@@ -17,7 +17,7 @@ def generer_semaine_ia(date_debut: date) -> dict:
     try:
         client = obtenir_client_ia()
         if not client:
-            st.error("âŒ Client IA non disponible")
+            st.error("❌ Client IA non disponible")
             return {}
 
         response = client.generer_json(
@@ -34,6 +34,6 @@ def generer_semaine_ia(date_debut: date) -> dict:
 
     except Exception as e:
         logger.error(f"Erreur génération IA: {e}")
-        st.error(f"âŒ Erreur IA: {str(e)}")
+        st.error(f"❌ Erreur IA: {str(e)}")
 
     return {}

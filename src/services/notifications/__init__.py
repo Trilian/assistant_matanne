@@ -2,9 +2,9 @@
 Package de notifications unifié.
 
 Fusionne les 3 anciens services:
-- notifications.py â†’ inventaire.py (notifications locales inventaire)
-- notifications_push.py â†’ ntfy.py (notifications via ntfy.sh)
-- push_notifications.py â†’ webpush.py (notifications Web Push API)
+- notifications.py → inventaire.py (notifications locales inventaire)
+- notifications_push.py → ntfy.py (notifications via ntfy.sh)
+- push_notifications.py → webpush.py (notifications Web Push API)
 
 Tous renommés en français avec alias rétrocompatibilité.
 """

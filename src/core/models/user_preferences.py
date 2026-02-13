@@ -3,7 +3,7 @@ Modèles pour les préférences utilisateur et l'apprentissage IA.
 
 Contient :
 - UserPreference : Préférences alimentaires persistantes
-- RecipeFeedback : Feedbacks ðŸ‘/ðŸ‘Ž pour apprentissage
+- RecipeFeedback : Feedbacks 👍/👎 pour apprentissage
 - OpenFoodFactsCache : Cache des produits scannés
 - ExternalCalendarConfig : Configuration calendriers externes
 """
@@ -72,7 +72,7 @@ class UserPreference(Base):
         user_id: Identifiant utilisateur (UUID Supabase ou string)
         nb_adultes: Nombre d'adultes dans le foyer
         jules_present: Si Jules mange avec la famille
-        jules_age_mois: Ã‚ge de Jules en mois
+        jules_age_mois: Âge de Jules en mois
         temps_semaine: Temps de cuisine en semaine (rapide/normal/long)
         temps_weekend: Temps de cuisine le weekend
         aliments_exclus: Liste JSON des aliments à éviter
@@ -125,7 +125,7 @@ class UserPreference(Base):
 
 
 class RecipeFeedback(Base):
-    """Feedback utilisateur sur une recette (ðŸ‘/ðŸ‘Ž).
+    """Feedback utilisateur sur une recette (👍/👎).
 
     Permet l'apprentissage IA des goûts pour améliorer les suggestions.
 

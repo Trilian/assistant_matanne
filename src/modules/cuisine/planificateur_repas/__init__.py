@@ -3,7 +3,7 @@ Module Planificateur de Repas Intelligent - UI Streamlit
 
 Interface style Jow:
 - Générateur IA de menus équilibrés
-- Apprentissage des goûts (ðŸ‘/ðŸ‘Ž) persistant en DB
+- Apprentissage des goûts (👍/👎) persistant en DB
 - Versions Jules intégrées
 - Suggestions alternatives
 - Validation équilibre nutritionnel
@@ -32,7 +32,7 @@ from .preferences import (
 def app():
     """Point d'entrée du module Planificateur de Repas."""
 
-    st.title("ðŸ½ï¸ Planifier mes repas")
+    st.title("🍽️ Planifier mes repas")
     st.caption("Générateur intelligent de menus équilibrés avec adaptation pour Jules")
 
     # Initialiser la session
@@ -49,7 +49,7 @@ def app():
 
     # Tabs
     tab_planifier, tab_preferences, tab_historique = st.tabs(
-        ["ðŸ“… Planifier", "âš™ï¸ Préférences", "ðŸ“š Historique"]
+        ["📝… Planifier", "⚙️ Préférences", "📝š Historique"]
     )
 
     # ═══════════════════════════════════════════════════════
@@ -62,15 +62,15 @@ def app():
 
         with col1:
             date_debut = st.date_input(
-                "ðŸ“… Début de la semaine",
+                "📝… Début de la semaine",
                 value=st.session_state.planning_date_debut,
                 format="DD/MM/YYYY",
             )
             st.session_state.planning_date_debut = date_debut
 
         with col2:
-            date_fin = date_debut + timedelta(days=9)  # Mer â†’ Ven suivant = 10 jours
-            st.markdown(f"**â†’** Vendredi {date_fin.strftime('%d/%m/%Y')}")
+            date_fin = date_debut + timedelta(days=9)  # Mer → Ven suivant = 10 jours
+            st.markdown(f"**→** Vendredi {date_fin.strftime('%d/%m/%Y')}")
 
         with col3:
             st.write("")  # Spacer
@@ -78,7 +78,7 @@ def app():
         st.divider()
 
         # Apprentissage IA
-        with st.expander("ðŸ§  Ce que l'IA a appris", expanded=False):
+        with st.expander("🧠 Ce que l'IA a appris", expanded=False):
             render_apprentissage_ia()
 
         st.divider()
@@ -87,8 +87,8 @@ def app():
         col_gen1, col_gen2, col_gen3 = st.columns([2, 2, 1])
 
         with col_gen1:
-            if st.button("ðŸŽ² Générer une semaine", type="primary", use_container_width=True):
-                with st.spinner("ðŸ¤– L'IA réfléchit à vos menus..."):
+            if st.button("🎲 Générer une semaine", type="primary", use_container_width=True):
+                with st.spinner("🤖 L'IA réfléchit à vos menus..."):
                     result = generer_semaine_ia(date_debut)
 
                     if result and result.get("semaine"):
@@ -108,17 +108,17 @@ def app():
                             "suggestions_bio", []
                         )
 
-                        st.success("âœ… Semaine générée!")
+                        st.success("✅ Semaine générée!")
                         st.rerun()
                     else:
-                        st.error("âŒ Impossible de générer la semaine")
+                        st.error("❌ Impossible de générer la semaine")
 
         with col_gen2:
-            if st.button("ðŸ“¦ Utiliser mon stock", use_container_width=True):
-                st.info("ðŸš§ Fonctionnalité en développement")
+            if st.button("📦 Utiliser mon stock", use_container_width=True):
+                st.info("🚧 Fonctionnalité en développement")
 
         with col_gen3:
-            if st.button("ðŸ”„ Reset", use_container_width=True):
+            if st.button("🔄 Reset", use_container_width=True):
                 st.session_state.planning_data = {}
                 st.rerun()
 
@@ -140,12 +140,12 @@ def app():
 
             # Conseils batch
             if st.session_state.get("planning_conseils"):
-                st.markdown("##### ðŸ³ Conseils Batch Cooking")
+                st.markdown("##### 🍳 Conseils Batch Cooking")
                 st.info(st.session_state.planning_conseils)
 
             # Suggestions bio
             if st.session_state.get("planning_suggestions_bio"):
-                st.markdown("##### ðŸŒ¿ Suggestions bio/local")
+                st.markdown("##### 🌿 Suggestions bio/local")
                 for sug in st.session_state.planning_suggestions_bio:
                     st.caption(f"• {sug}")
 
@@ -155,13 +155,13 @@ def app():
             col_val1, col_val2, col_val3 = st.columns(3)
 
             with col_val1:
-                if st.button("ðŸ’š Valider ce planning", type="primary", use_container_width=True):
-                    st.success("âœ… Planning validé! Redirection vers les courses...")
+                if st.button("💚 Valider ce planning", type="primary", use_container_width=True):
+                    st.success("✅ Planning validé! Redirection vers les courses...")
                     # TODO: Créer le planning en DB et générer la liste de courses
 
             with col_val2:
-                if st.button("ðŸ›’ Générer courses", use_container_width=True):
-                    st.info("ðŸš§ Génération de la liste de courses...")
+                if st.button("🛒 Générer courses", use_container_width=True):
+                    st.info("🚧 Génération de la liste de courses...")
 
             with col_val3:
                 # Export PDF du planning
@@ -174,17 +174,17 @@ def app():
                     )
                     if pdf_buffer:
                         st.download_button(
-                            label="ðŸ–¨ï¸ Télécharger PDF",
+                            label="🖨️ Télécharger PDF",
                             data=pdf_buffer,
                             file_name=f"planning_{date_debut.strftime('%Y%m%d')}.pdf",
                             mime="application/pdf",
                             use_container_width=True,
                         )
                     else:
-                        st.button("ðŸ–¨ï¸ Imprimer", disabled=True, use_container_width=True)
+                        st.button("🖨️ Imprimer", disabled=True, use_container_width=True)
 
         else:
-            st.info("ðŸ‘† Cliquez sur 'Générer une semaine' pour commencer")
+            st.info("👆 Cliquez sur 'Générer une semaine' pour commencer")
 
     # ═══════════════════════════════════════════════════════
     # TAB: PRÉFÉRENCES
@@ -198,22 +198,22 @@ def app():
     # ═══════════════════════════════════════════════════════
 
     with tab_historique:
-        st.subheader("ðŸ“š Historique des plannings")
+        st.subheader("📝š Historique des plannings")
 
         # TODO: Charger l'historique depuis la DB
-        st.info("ðŸš§ Historique des plannings passés à venir")
+        st.info("🚧 Historique des plannings passés à venir")
 
-        st.markdown("##### ðŸ§  Vos feedbacks")
+        st.markdown("##### 🧠 Vos feedbacks")
         feedbacks = charger_feedbacks()
 
         if feedbacks:
             for fb in feedbacks[-10:]:
                 emoji = (
-                    "ðŸ‘"
+                    "👍"
                     if fb.feedback == "like"
-                    else "ðŸ‘Ž"
+                    else "👎"
                     if fb.feedback == "dislike"
-                    else "ðŸ˜"
+                    else "😐"
                 )
                 st.caption(f"{emoji} {fb.recette_nom} ({fb.date_feedback.strftime('%d/%m')})")
         else:

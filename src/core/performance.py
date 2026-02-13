@@ -186,7 +186,7 @@ def mesurer_temps(name: str):
     finally:
         duration_ms = (time.perf_counter() - start) * 1000
         ProfileurFonction.enregistrer(name, duration_ms, error)
-        logger.debug(f"â±ï¸ {name}: {duration_ms:.1f}ms")
+        logger.debug(f"⏱️ {name}: {duration_ms:.1f}ms")
 
 
 # ═══════════════════════════════════════════════════════════
@@ -208,7 +208,7 @@ class MoniteurMemoire:
         if not cls._tracking_active:
             tracemalloc.start()
             cls._tracking_active = True
-            logger.info("[CHART] Tracking mémoire démarré")
+            logger.info("📊 Tracking mémoire démarré")
 
     @classmethod
     def arreter_suivi(cls) -> None:
@@ -216,7 +216,7 @@ class MoniteurMemoire:
         if cls._tracking_active:
             tracemalloc.stop()
             cls._tracking_active = False
-            logger.info("[CHART] Tracking mémoire arrêté")
+            logger.info("📊 Tracking mémoire arrêté")
 
     @classmethod
     def obtenir_utilisation_courante(cls) -> dict:
@@ -264,7 +264,7 @@ class MoniteurMemoire:
         # Garder seulement les 20 derniers
         st.session_state[cls.SESSION_KEY] = st.session_state[cls.SESSION_KEY][-20:]
 
-        logger.debug(f"ðŸ“¸ Snapshot mémoire '{label}': {usage['current_mb']}MB")
+        logger.debug(f"📸 Snapshot mémoire '{label}': {usage['current_mb']}MB")
         return usage
 
     @classmethod
@@ -297,7 +297,7 @@ class MoniteurMemoire:
 
         freed_mb = before["current_mb"] - after["current_mb"]
 
-        logger.info(f"ðŸ§¹ Cleanup: {collected} objets collectés, {freed_mb:.2f}MB libérés")
+        logger.info(f"🧹 Cleanup: {collected} objets collectés, {freed_mb:.2f}MB libérés")
 
         return {
             "objects_collected": collected,
@@ -494,11 +494,11 @@ class TableauBordPerformance:
 
         # Status emoji
         if score >= 80:
-            status = "ðŸŸ¢"
+            status = "🟢"
         elif score >= 60:
-            status = "ðŸŸ¡"
+            status = "🟡"
         else:
-            status = "ðŸ”´"
+            status = "🔴"
 
         return max(0, score), status
 
@@ -514,9 +514,9 @@ def afficher_panneau_performance():
     summary = TableauBordPerformance.obtenir_resume()
     score, status = TableauBordPerformance.obtenir_score_sante()
 
-    with st.expander(f"ðŸ“Š Performance {status} {score}/100"):
+    with st.expander(f"📊 Performance {status} {score}/100"):
         # Tabs pour différentes métriques
-        tab1, tab2, tab3 = st.tabs(["âš¡ Général", "ðŸ§  Mémoire", "ðŸ—ƒï¸ SQL"])
+        tab1, tab2, tab3 = st.tabs(["⚡ Général", "🧠 Mémoire", "🗃️ SQL"])
 
         with tab1:
             col1, col2 = st.columns(2)
@@ -533,7 +533,7 @@ def afficher_panneau_performance():
 
             # Top fonctions lentes
             if summary["functions"]["slowest"]:
-                st.caption("ðŸŒ Fonctions les plus lentes:")
+                st.caption("🐌 Fonctions les plus lentes:")
                 for f in summary["functions"]["slowest"][:3]:
                     st.caption(f"• {f['name']}: {f['avg_ms']}ms")
 
@@ -550,7 +550,7 @@ def afficher_panneau_performance():
                     f"{summary['memory']['total_objects']:,}",
                 )
 
-            if st.button("ðŸ§¹ Nettoyer mémoire", key="cleanup_mem"):
+            if st.button("🧹 Nettoyer mémoire", key="cleanup_mem"):
                 result = MoniteurMemoire.forcer_nettoyage()
                 st.success(f"Libéré: {result['memory_freed_mb']}MB")
 
@@ -568,7 +568,7 @@ def afficher_panneau_performance():
                     delta_color="inverse" if summary["sql"]["slow_count"] > 0 else "off",
                 )
 
-            if st.button("ðŸ—‘ï¸ Reset stats", key="reset_sql"):
+            if st.button("🗑️ Reset stats", key="reset_sql"):
                 OptimiseurSQL.effacer()
                 st.success("Stats SQL réinitialisées")
 
@@ -584,7 +584,7 @@ def afficher_badge_mini_performance():
         f'padding: 0.25rem 0.5rem; background: #f0f2f6; border-radius: 4px; '
         f'font-size: 0.8rem;">'
         f'<span>{status} Perf: {score}%</span>'
-        f'<span>ðŸ’¾ {memory["current_mb"]}MB</span>'
+        f'<span>💾 {memory["current_mb"]}MB</span>'
         f'</div>',
         unsafe_allow_html=True,
     )

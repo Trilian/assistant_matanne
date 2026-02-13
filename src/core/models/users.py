@@ -100,7 +100,7 @@ class UserProfile(Base):
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False, index=True)
     display_name: Mapped[str] = mapped_column(String(100), nullable=False)
     email: Mapped[str | None] = mapped_column(String(200))
-    avatar_emoji: Mapped[str] = mapped_column(String(10), default="ðŸ‘¤")
+    avatar_emoji: Mapped[str] = mapped_column(String(10), default="👤")
 
     # Infos santé
     date_naissance: Mapped[date | None] = mapped_column(Date)
@@ -402,7 +402,7 @@ class WeekendActivity(Base):
         lieu: Lieu
         adresse: Adresse complète
         adapte_jules: Si adapté à Jules
-        age_min_mois: Ã‚ge minimum en mois
+        age_min_mois: Âge minimum en mois
         cout_estime: Coût estimé
         meteo_requise: Météo requise (ensoleillé, couvert, intérieur)
         note_lieu: Note du lieu (1-5)
@@ -479,7 +479,7 @@ class FamilyPurchase(Base):
         prix_estime: Prix estimé
         url: Lien vers l'article
         taille: Taille (pour vêtements)
-        age_recommande: Ã‚ge recommandé (pour jouets)
+        age_recommande: Âge recommandé (pour jouets)
         achete: Si acheté
         date_achat: Date d'achat
         prix_reel: Prix réel

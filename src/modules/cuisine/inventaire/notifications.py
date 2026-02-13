@@ -24,10 +24,10 @@ def render_notifications_widget():
     col1, col2, col3 = st.columns([2, 1, 1])
 
     with col1:
-        st.metric("ðŸ”” Notifications", len(notifs), delta="À traiter")
+        st.metric("🔔 Notifications", len(notifs), delta="À traiter")
 
     with col2:
-        if st.button("ðŸ”„ Actualiser", key="refresh_notifs", width="stretch"):
+        if st.button("🔄 Actualiser", key="refresh_notifs", width="stretch"):
             st.rerun()
 
     with col3:
@@ -42,7 +42,7 @@ def render_notifications_widget():
     # Critiques
     critiques = [n for n in notifs if n.priorite == "haute"]
     if critiques:
-        st.markdown("### ðŸš¨ CRITIQUES")
+        st.markdown("### 🚨 CRITIQUES")
         for notif in critiques:
             with st.container(border=True):
                 col1, col2 = st.columns([0.9, 0.1])
@@ -57,7 +57,7 @@ def render_notifications_widget():
     # Moyennes
     moyennes = [n for n in notifs if n.priorite == "moyenne"]
     if moyennes:
-        st.markdown("### âš ï¸ MOYENNES")
+        st.markdown("### ⚠️ MOYENNES")
         for notif in moyennes[:3]:  # Affiche seulement les 3 premières
             with st.container(border=True):
                 col1, col2 = st.columns([0.9, 0.1])
@@ -75,30 +75,30 @@ def render_notifications_widget():
 
 def render_notifications():
     """Gestion et affichage des notifications d'alerte"""
-    st.subheader("ðŸ”” Notifications et Alertes")
+    st.subheader("🔔 Notifications et Alertes")
 
     service = get_inventaire_service()
     service_notifs = obtenir_service_notifications()
 
     # Onglets
-    tab_center, tab_config = st.tabs(["ðŸ“¬ Centre de notifications", "âš™ï¸ Configuration"])
+    tab_center, tab_config = st.tabs(["📝¬ Centre de notifications", "⚙️ Configuration"])
 
     with tab_center:
         # Actualiser les notifications
         col1, col2, col3 = st.columns([2, 1, 1])
 
         with col1:
-            if st.button("ðŸ”„ Actualiser les alertes", width="stretch", key="refresh_all_alerts"):
+            if st.button("🔄 Actualiser les alertes", width="stretch", key="refresh_all_alerts"):
                 try:
                     stats = service.generer_notifications_alertes()
                     total = sum(len(v) for v in stats.values())
-                    st.toast(f"⏰ {total} alertes détectées", icon="ðŸ””")
+                    st.toast(f"⏰ {total} alertes détectées", icon="🔔")
                 except Exception as e:
                     st.error(f"Erreur: {str(e)}")
 
         with col2:
             stats_notifs = service_notifs.obtenir_stats()
-            st.metric("ðŸ“¬ Non lues", stats_notifs["non_lues"])
+            st.metric("📝¬ Non lues", stats_notifs["non_lues"])
 
         with col3:
             if st.button("⏰ Tout marquer comme lu", width="stretch"):
@@ -121,7 +121,7 @@ def render_notifications():
 
             # Affiche les critiques
             if critiques:
-                st.markdown("### ðŸš¨ Alertes Critiques")
+                st.markdown("### 🚨 Alertes Critiques")
                 for notif in critiques:
                     with st.container(border=True):
                         col1, col2 = st.columns([0.85, 0.15])
@@ -129,7 +129,7 @@ def render_notifications():
                             st.write(f"**{notif.icone} {notif.titre}**")
                             st.write(notif.message)
                             st.caption(
-                                f"{'⏰ Lue' if notif.lue else 'ðŸ“Œ Non lue'} • {notif.date_creation.strftime('%d/%m %H:%M')}"
+                                f"{'⏰ Lue' if notif.lue else '📝Œ Non lue'} • {notif.date_creation.strftime('%d/%m %H:%M')}"
                             )
                         with col2:
                             col_a, col_b = st.columns(2)
@@ -144,7 +144,7 @@ def render_notifications():
                                     st.rerun()
                             with col_b:
                                 if st.button(
-                                    "ðŸ—‘ï¸",
+                                    "🗑️",
                                     key=f"delete_{notif.id}",
                                     help="Supprimer",
                                     width="stretch",
@@ -154,7 +154,7 @@ def render_notifications():
 
             # Affiche les moyennes
             if moyennes:
-                st.markdown("### âš ï¸ Alertes Moyennes")
+                st.markdown("### ⚠️ Alertes Moyennes")
                 for notif in moyennes:
                     with st.container(border=True):
                         col1, col2 = st.columns([0.85, 0.15])
@@ -162,7 +162,7 @@ def render_notifications():
                             st.write(f"**{notif.icone} {notif.titre}**")
                             st.write(notif.message)
                             st.caption(
-                                f"{'⏰ Lue' if notif.lue else 'ðŸ“Œ Non lue'} • {notif.date_creation.strftime('%d/%m %H:%M')}"
+                                f"{'⏰ Lue' if notif.lue else '📝Œ Non lue'} • {notif.date_creation.strftime('%d/%m %H:%M')}"
                             )
                         with col2:
                             col_a, col_b = st.columns(2)
@@ -177,7 +177,7 @@ def render_notifications():
                                     st.rerun()
                             with col_b:
                                 if st.button(
-                                    "ðŸ—‘ï¸",
+                                    "🗑️",
                                     key=f"delete_{notif.id}",
                                     help="Supprimer",
                                     width="stretch",
@@ -187,7 +187,7 @@ def render_notifications():
 
             # Affiche les basses
             if basses:
-                st.markdown("### â„¹ï¸ Informations")
+                st.markdown("### ℹ️ Informations")
                 for notif in basses[:5]:  # Limit to 5
                     with st.container(border=True):
                         col1, col2 = st.columns([0.85, 0.15])
@@ -195,7 +195,7 @@ def render_notifications():
                             st.write(f"**{notif.icone} {notif.titre}**")
                             st.write(notif.message)
                             st.caption(
-                                f"{'⏰ Lue' if notif.lue else 'ðŸ“Œ Non lue'} • {notif.date_creation.strftime('%d/%m %H:%M')}"
+                                f"{'⏰ Lue' if notif.lue else '📝Œ Non lue'} • {notif.date_creation.strftime('%d/%m %H:%M')}"
                             )
                         with col2:
                             col_a, col_b = st.columns(2)
@@ -210,7 +210,7 @@ def render_notifications():
                                     st.rerun()
                             with col_b:
                                 if st.button(
-                                    "ðŸ—‘ï¸",
+                                    "🗑️",
                                     key=f"delete_{notif.id}",
                                     help="Supprimer",
                                     width="stretch",
@@ -227,13 +227,13 @@ def render_notifications():
         col1, col2 = st.columns(2)
 
         with col1:
-            st.markdown("### ðŸ”” Alertes actives")
+            st.markdown("### 🔔 Alertes actives")
             enable_stock = st.checkbox("Stock critique", value=True, key="alert_stock_crit")
             enable_stock_bas = st.checkbox("Stock bas", value=True, key="alert_stock_bas")
             enable_peremption = st.checkbox("Péremption", value=True, key="alert_peremption")
 
         with col2:
-            st.markdown("### ðŸ“¤ Canaux")
+            st.markdown("### 📝¤ Canaux")
             browser_notif = st.checkbox(
                 "Notifications navigateur", value=True, help="Popup dans le navigateur"
             )
@@ -243,21 +243,21 @@ def render_notifications():
         st.divider()
 
         # Bouton pour générer les alertes
-        if st.button("ðŸ”„ Générer les alertes maintenant", width="stretch", type="primary"):
+        if st.button("🔄 Générer les alertes maintenant", width="stretch", type="primary"):
             try:
                 stats = service.generer_notifications_alertes()
 
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
-                    st.metric("âŒ Critique", len(stats["stock_critique"]))
+                    st.metric("❌ Critique", len(stats["stock_critique"]))
                 with col2:
                     st.metric("âš  Bas", len(stats["stock_bas"]))
                 with col3:
-                    st.metric("â° Péremption", len(stats["peremption_proche"]))
+                    st.metric("⏰ Péremption", len(stats["peremption_proche"]))
                 with col4:
-                    st.metric("ðŸš¨ Expirés", len(stats["peremption_depassee"]))
+                    st.metric("🚨 Expirés", len(stats["peremption_depassee"]))
 
-                st.toast(f"⏰ {sum(len(v) for v in stats.values())} alertes créées", icon="ðŸ””")
+                st.toast(f"⏰ {sum(len(v) for v in stats.values())} alertes créées", icon="🔔")
             except Exception as e:
                 st.error(f"Erreur: {str(e)}")
 

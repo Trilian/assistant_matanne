@@ -10,7 +10,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-
 # ============================================================
 # Fixtures
 # ============================================================
@@ -123,7 +122,7 @@ class TestChargerMatchsAvecFallback:
         with patch.dict(sys.modules, {"src.modules.jeux.api_service": mock_api_service}):
             from src.modules.jeux.utils import charger_matchs_avec_fallback
 
-            result, source = charger_matchs_avec_fallback.__wrapped__("Ligue 1", jours=7, prefer_api=True) 
+            result, source = charger_matchs_avec_fallback.__wrapped__("Ligue 1", jours=7, prefer_api=True)
 
             assert source == "API"
             assert len(result) == 1
@@ -158,7 +157,7 @@ class TestChargerMatchsAvecFallback:
         """Test que la fonction retourne liste vide si tout échoue"""
         mock_api_service = MagicMock()
         mock_api_service.charger_matchs_depuis_api.side_effect = Exception("API error")
-        
+
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.side_effect = Exception("DB error")
         mock_models = MagicMock()
@@ -180,7 +179,7 @@ class TestChargerMatchsAvecFallback:
         # avec une liste vide (comportement attendu du code)
         mock_api_service = MagicMock()
         mock_api_service.charger_matchs_depuis_api.return_value = []
-        
+
         with patch.dict(sys.modules, {"src.modules.jeux.api_service": mock_api_service}):
             from src.modules.jeux.utils import charger_matchs_avec_fallback
 
@@ -205,7 +204,7 @@ class TestChargerClassementAvecFallback:
             {"position": 1, "nom": "PSG", "points": 58},
             {"position": 2, "nom": "Monaco", "points": 52},
         ]
-        
+
         mock_api_service = MagicMock()
         mock_api_service.charger_classement_depuis_api.return_value = classement_api
 
@@ -221,14 +220,14 @@ class TestChargerClassementAvecFallback:
     def test_fallback_bd_classement(self, mock_equipe_bd, mock_db_context_manager):
         """Test fallback BD pour le classement"""
         cm, session = mock_db_context_manager
-        
+
         mock_query = MagicMock()
         mock_query.filter_by.return_value.order_by.return_value.all.return_value = [mock_equipe_bd]
         session.query.return_value = mock_query
 
         mock_api_service = MagicMock()
         mock_api_service.charger_classement_depuis_api.side_effect = Exception("API error")
-        
+
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.return_value = cm
         mock_models = MagicMock()
@@ -250,14 +249,14 @@ class TestChargerClassementAvecFallback:
     def test_api_retourne_vide_fallback_bd(self, mock_equipe_bd, mock_db_context_manager):
         """Test fallback BD quand API retourne vide"""
         cm, session = mock_db_context_manager
-        
+
         mock_query = MagicMock()
         mock_query.filter_by.return_value.order_by.return_value.all.return_value = [mock_equipe_bd]
         session.query.return_value = mock_query
 
         mock_api_service = MagicMock()
         mock_api_service.charger_classement_depuis_api.return_value = []
-        
+
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.return_value = cm
         mock_models = MagicMock()
@@ -277,7 +276,7 @@ class TestChargerClassementAvecFallback:
         """Test que la fonction gère tout échoue"""
         mock_api_service = MagicMock()
         mock_api_service.charger_classement_depuis_api.side_effect = Exception("API error")
-        
+
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.side_effect = Exception("DB error")
         mock_models = MagicMock()
@@ -308,7 +307,7 @@ class TestChargerHistoriqueEquipeAvecFallback:
             {"date": "2026-02-10", "equipe_domicile": "PSG", "equipe_exterieur": "Lille",
              "score_domicile": 3, "score_exterieur": 0}
         ]
-        
+
         mock_api_service = MagicMock()
         mock_api_service.charger_historique_equipe_depuis_api.return_value = historique_api
 
@@ -324,7 +323,7 @@ class TestChargerHistoriqueEquipeAvecFallback:
     def test_fallback_bd_historique(self, mock_historique_match, mock_db_context_manager):
         """Test fallback BD pour l'historique"""
         cm, session = mock_db_context_manager
-        
+
         mock_query = MagicMock()
         (mock_query.filter.return_value
          .filter.return_value
@@ -335,7 +334,7 @@ class TestChargerHistoriqueEquipeAvecFallback:
 
         mock_api_service = MagicMock()
         mock_api_service.charger_historique_equipe_depuis_api.side_effect = Exception("API error")
-        
+
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.return_value = cm
         mock_models = MagicMock()
@@ -355,7 +354,7 @@ class TestChargerHistoriqueEquipeAvecFallback:
     def test_api_retourne_vide_fallback_bd(self, mock_historique_match, mock_db_context_manager):
         """Test fallback BD quand API retourne vide"""
         cm, session = mock_db_context_manager
-        
+
         mock_query = MagicMock()
         (mock_query.filter.return_value
          .filter.return_value
@@ -366,7 +365,7 @@ class TestChargerHistoriqueEquipeAvecFallback:
 
         mock_api_service = MagicMock()
         mock_api_service.charger_historique_equipe_depuis_api.return_value = []
-        
+
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.return_value = cm
         mock_models = MagicMock()
@@ -386,7 +385,7 @@ class TestChargerHistoriqueEquipeAvecFallback:
         """Test historique tout échoue"""
         mock_api_service = MagicMock()
         mock_api_service.charger_historique_equipe_depuis_api.side_effect = Exception("API error")
-        
+
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.side_effect = Exception("DB error")
         mock_models = MagicMock()
@@ -416,7 +415,7 @@ class TestChargerTiragesLotoAvecFallback:
         tirages_scraper = [
             {"date": "2026-02-12", "numeros": [7, 14, 21, 35, 42], "numero_chance": 3}
         ]
-        
+
         mock_scraper = MagicMock()
         mock_scraper.charger_tirages_loto.return_value = tirages_scraper
 
@@ -432,14 +431,14 @@ class TestChargerTiragesLotoAvecFallback:
     def test_fallback_bd_tirages(self, mock_tirage_bd, mock_db_context_manager):
         """Test fallback BD pour les tirages"""
         cm, session = mock_db_context_manager
-        
+
         mock_query = MagicMock()
         mock_query.order_by.return_value.limit.return_value.all.return_value = [mock_tirage_bd]
         session.query.return_value = mock_query
 
         mock_scraper = MagicMock()
         mock_scraper.charger_tirages_loto.side_effect = Exception("Scraper error")
-        
+
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.return_value = cm
         mock_models = MagicMock()
@@ -460,14 +459,14 @@ class TestChargerTiragesLotoAvecFallback:
     def test_scraper_vide_fallback_bd(self, mock_tirage_bd, mock_db_context_manager):
         """Test fallback BD quand scraper retourne vide"""
         cm, session = mock_db_context_manager
-        
+
         mock_query = MagicMock()
         mock_query.order_by.return_value.limit.return_value.all.return_value = [mock_tirage_bd]
         session.query.return_value = mock_query
 
         mock_scraper = MagicMock()
         mock_scraper.charger_tirages_loto.return_value = []
-        
+
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.return_value = cm
         mock_models = MagicMock()
@@ -487,7 +486,7 @@ class TestChargerTiragesLotoAvecFallback:
         """Test quand tout échoue pour les tirages"""
         mock_scraper = MagicMock()
         mock_scraper.charger_tirages_loto.side_effect = Exception("Scraper error")
-        
+
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.side_effect = Exception("DB error")
         mock_models = MagicMock()
@@ -515,7 +514,7 @@ class TestChargerStatsLotoAvecFallback:
     def test_charge_stats_scraper_success(self):
         """Test chargement des stats depuis le scraper"""
         stats_scraper = {"frequences": {"5": 45, "12": 38}, "derniere_maj": "2026-02-12"}
-        
+
         mock_scraper = MagicMock()
         mock_scraper.obtenir_statistiques_loto.return_value = stats_scraper
 
@@ -530,14 +529,14 @@ class TestChargerStatsLotoAvecFallback:
     def test_fallback_bd_stats(self, mock_stat_bd, mock_db_context_manager):
         """Test fallback BD pour les statistiques"""
         cm, session = mock_db_context_manager
-        
+
         mock_query = MagicMock()
         mock_query.filter_by.return_value.order_by.return_value.first.return_value = mock_stat_bd
         session.query.return_value = mock_query
 
         mock_scraper = MagicMock()
         mock_scraper.obtenir_statistiques_loto.side_effect = Exception("Scraper error")
-        
+
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.return_value = cm
         mock_models = MagicMock()
@@ -557,14 +556,14 @@ class TestChargerStatsLotoAvecFallback:
     def test_scraper_vide_fallback_bd(self, mock_stat_bd, mock_db_context_manager):
         """Test fallback BD quand scraper retourne vide"""
         cm, session = mock_db_context_manager
-        
+
         mock_query = MagicMock()
         mock_query.filter_by.return_value.order_by.return_value.first.return_value = mock_stat_bd
         session.query.return_value = mock_query
 
         mock_scraper = MagicMock()
         mock_scraper.obtenir_statistiques_loto.return_value = {}
-        
+
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.return_value = cm
         mock_models = MagicMock()
@@ -584,7 +583,7 @@ class TestChargerStatsLotoAvecFallback:
         """Test quand aucune statistique n'est disponible"""
         mock_scraper = MagicMock()
         mock_scraper.obtenir_statistiques_loto.side_effect = Exception("Scraper error")
-        
+
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.side_effect = Exception("DB error")
         mock_models = MagicMock()

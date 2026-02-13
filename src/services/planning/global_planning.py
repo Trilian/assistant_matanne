@@ -1,11 +1,11 @@
 """
 Service Planning Unifié - Centre de Coordination Familiale
 
-âœ… Agrégation complète de TOUS les événements familiaux
-âœ… Utilise @avec_session_db, @avec_cache, décorateurs unifiés
-âœ… Cache agressif (TTL 30min) pour perfs
-âœ… IA intégrée pour générer semaines équilibrées
-âœ… Détection intelligente d'alertes (charge, couverture activités, budget)
+✅ Agrégation complète de TOUS les événements familiaux
+✅ Utilise @avec_session_db, @avec_cache, décorateurs unifiés
+✅ Cache agressif (TTL 30min) pour perfs
+✅ IA intégrée pour générer semaines équilibrées
+✅ Détection intelligente d'alertes (charge, couverture activités, budget)
 
 Service complet pour le planning familial fusionnant :
 - Planning repas (Planning + Repas)
@@ -48,18 +48,18 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
     """
     Service unifié pour le planning familial.
 
-    âœ… Héritage multiple :
-    - BaseService â†’ CRUD optimisé pour CalendarEvent
-    - BaseAIService â†’ IA avec rate limiting auto
-    - PlanningAIMixin â†’ Contextes métier planning
+    ✅ Héritage multiple :
+    - BaseService → CRUD optimisé pour CalendarEvent
+    - BaseAIService → IA avec rate limiting auto
+    - PlanningAIMixin → Contextes métier planning
 
     Fonctionnalités :
-    - âœ… Agrégation complète (repas, activités, projets, routines, events)
-    - âœ… Cache agressif (TTL 30min) invalidé intelligemment
-    - âœ… Calcul charge familiale par jour
-    - âœ… Détection alertes intelligentes
-    - âœ… Génération IA avec contraintes familiales
-    - âœ… Suggestions intelligentes basées sur contexte
+    - ✅ Agrégation complète (repas, activités, projets, routines, events)
+    - ✅ Cache agressif (TTL 30min) invalidé intelligemment
+    - ✅ Calcul charge familiale par jour
+    - ✅ Détection alertes intelligentes
+    - ✅ Génération IA avec contraintes familiales
+    - ✅ Suggestions intelligentes basées sur contexte
     """
 
     def __init__(self):
@@ -385,20 +385,20 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
 
         # Surcharge
         if charge_score >= 80:
-            alertes.append("âš ï¸ Jour très chargé - Penser à prendre du temps")
+            alertes.append("⚠️ Jour très chargé - Penser à prendre du temps")
 
         # Pas d'activité pour Jules
         if not any(a.get("pour_jules") for a in activites):
-            alertes.append("ðŸ‘¶ Pas d'activité prévue pour Jules")
+            alertes.append("👶 Pas d'activité prévue pour Jules")
 
         # Projets urgents sans tâches
         projets_urgents = [p for p in projets if p.get("priorite") == "haute"]
         if projets_urgents:
-            alertes.append(f"ðŸ”´ {len(projets_urgents)} projet(s) urgent(s)")
+            alertes.append(f"🔴 {len(projets_urgents)} projet(s) urgent(s)")
 
         # Repas trop nombreux/complexes
         if len(repas) > 3:
-            alertes.append(f"ðŸ½ï¸ {len(repas)} repas ce jour - Vérifier préparation")
+            alertes.append(f"🍽️ {len(repas)} repas ce jour - Vérifier préparation")
 
         return alertes
 
@@ -413,19 +413,19 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             sum(1 for a in j.activites if a.get("pour_jules")) for j in jours_list
         )
         if activites_jules == 0:
-            alertes.append("ðŸ‘¶ Aucune activité Jules cette semaine")
+            alertes.append("👶 Aucune activité Jules cette semaine")
         elif activites_jules < 3:
-            alertes.append("ðŸ‘¶ Peu d'activités pour Jules (recommandé: 3+)")
+            alertes.append("👶 Peu d'activités pour Jules (recommandé: 3+)")
 
         # Charge globale
         charges_intenses = sum(1 for j in jours_list if j.charge_score >= 80)
         if charges_intenses >= 3:
-            alertes.append("âš ï¸ Plus de 3 jours très chargés - Risque burnout familial")
+            alertes.append("⚠️ Plus de 3 jours très chargés - Risque burnout familial")
 
         # Budget
         budget_total = sum(j.budget_jour for j in jours_list)
         if budget_total > 500:  # Adapter à votre budget famille
-            alertes.append(f"ðŸ’° Budget semaine: {budget_total:.2f}€ - Veiller au budget")
+            alertes.append(f"💰 Budget semaine: {budget_total:.2f}€ - Veiller au budget")
 
         return alertes
 
@@ -493,7 +493,7 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         )
 
         if not response:
-            logger.warning("âŒ Génération IA échouée")
+            logger.warning("❌ Génération IA échouée")
             return None
 
         return SemaineGenereeIASchema(**response[0]) if response else None
@@ -561,10 +561,10 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
             # Invalider cache
             self._invalider_cache_semaine(date_debut.date())
 
-            logger.info(f"âœ… Événement créé: {titre}")
+            logger.info(f"✅ Événement créé: {titre}")
             return event
         except Exception as e:
-            logger.error(f"âŒ Erreur création événement: {e}")
+            logger.error(f"❌ Erreur création événement: {e}")
             db.rollback()
             return None
 
@@ -574,7 +574,7 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         debut_semaine = date_jour - timedelta(days=date_jour.weekday())
         Cache.invalider(pattern=f"semaine_complete_{debut_semaine.isoformat()}")
         Cache.invalider(pattern=f"semaine_ia_{debut_semaine.isoformat()}")
-        logger.debug(f"ðŸ”„ Cache semaine invalidé: {debut_semaine}")
+        logger.debug(f"🔄 Cache semaine invalidé: {debut_semaine}")
 
 
 # ═══════════════════════════════════════════════════════════

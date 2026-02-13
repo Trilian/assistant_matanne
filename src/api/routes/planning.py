@@ -106,7 +106,7 @@ async def get_planning_semaine(
             }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/repas")
@@ -174,4 +174,4 @@ async def create_repas(repas: RepasCreate):
             return {"message": "Repas planifié", "id": db_repas.id}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e

@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def render_ajouter_manuel():
     """Formulaire pour ajouter une recette manuellement"""
-    st.subheader("âž• Ajouter une recette manuellement")
+    st.subheader("➕ Ajouter une recette manuellement")
 
     # Initialiser session_state si nécessaire
     if "form_num_ingredients" not in st.session_state:
@@ -38,7 +38,7 @@ def render_ajouter_manuel():
     col_img, col_space = st.columns([2, 1])
     with col_img:
         image_file = st.file_uploader(
-            "ðŸ“· Photo de la recette (optionnel)",
+            "📝· Photo de la recette (optionnel)",
             type=["jpg", "jpeg", "png"],
             key="form_image_upload",
         )
@@ -115,18 +115,18 @@ def render_ajouter_manuel():
             etapes.append({"description": etape_desc, "duree": None})
 
     # Bouton créer
-    if st.button("âœ… Créer la recette", use_container_width=True, type="primary"):
+    if st.button("✅ Créer la recette", use_container_width=True, type="primary"):
         if not nom or not type_repas:
-            st.error("âŒ Nom et type de repas sont obligatoires")
+            st.error("❌ Nom et type de repas sont obligatoires")
         elif not ingredients:
-            st.error("âŒ Ajoutez au moins un ingrédient")
+            st.error("❌ Ajoutez au moins un ingrédient")
         elif not etapes:
-            st.error("âŒ Ajoutez au moins une étape")
+            st.error("❌ Ajoutez au moins une étape")
         else:
             # Créer la recette
             service = get_recette_service()
             if service is None:
-                st.error("âŒ Service indisponible")
+                st.error("❌ Service indisponible")
             else:
                 try:
                     # Sauvegarder l'image si fournie
@@ -176,16 +176,16 @@ def render_ajouter_manuel():
                         if key.startswith("form_"):
                             del st.session_state[key]
 
-                    st.success(f"âœ… Recette '{recette.nom}' créée avec succès!")
+                    st.success(f"✅ Recette '{recette.nom}' créée avec succès!")
                     if image_file:
-                        st.caption(f"ðŸ“· Image sauvegardée: {image_file.name}")
+                        st.caption(f"📝· Image sauvegardée: {image_file.name}")
                     st.balloons()
                     time.sleep(1)
 
                 except ErreurValidation as e:
-                    st.error(f"âŒ Erreur validation: {e}")
+                    st.error(f"❌ Erreur validation: {e}")
                 except Exception as e:
-                    st.error(f"âŒ Erreur: {str(e)}")
+                    st.error(f"❌ Erreur: {str(e)}")
                     logger.error(f"Erreur création recette: {e}")
 
 

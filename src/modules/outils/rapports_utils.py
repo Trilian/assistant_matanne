@@ -222,14 +222,14 @@ def formater_rapport_texte(rapport: dict[str, Any]) -> str:
     """
     lignes = [
         "═══════════════════════════════════════════════════════════" * 60,
-        f"[CHART] {rapport.get('titre', 'RAPPORT').upper()}",
+        f"📊 {rapport.get('titre', 'RAPPORT').upper()}",
         "═══════════════════════════════════════════════════════════" * 60,
         f"Periode: {rapport.get('periode', 'N/A')}",
         f"Du {rapport.get('date_debut')} au {rapport.get('date_fin')}",
         f"Genere le: {rapport.get('date_generation')}",
         "",
         "STATISTIQUES GLOBALES:",
-        "â”€" * 60,
+        "─" * 60,
     ]
 
     stats = rapport.get("statistiques", {})
@@ -240,7 +240,7 @@ def formater_rapport_texte(rapport: dict[str, Any]) -> str:
     if rapport.get("sections"):
         lignes.append("")
         lignes.append("DÉTAILS PAR SECTION:")
-        lignes.append("â”€" * 60)
+        lignes.append("─" * 60)
 
         for section in rapport["sections"]:
             lignes.append(f"\n{section.get('titre', 'Section')}")
@@ -263,7 +263,7 @@ def formater_rapport_markdown(rapport: dict[str, Any]) -> str:
         Markdown formate
     """
     lignes = [
-        f"# [CHART] {rapport.get('titre', 'Rapport')}",
+        f"# 📊 {rapport.get('titre', 'Rapport')}",
         "",
         f"**Periode:** {rapport.get('periode', 'N/A')}  ",
         f"**Dates:** Du {rapport.get('date_debut')} au {rapport.get('date_fin')}  ",
@@ -318,7 +318,7 @@ def formater_rapport_html(rapport: dict[str, Any]) -> str:
     </style>
 </head>
 <body>
-    <h1>[CHART] {rapport.get('titre', 'Rapport')}</h1>
+    <h1>📊 {rapport.get('titre', 'Rapport')}</h1>
 
     <div class="stats">
         <p><strong>Periode:</strong> {rapport.get('periode', 'N/A')}</p>

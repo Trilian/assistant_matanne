@@ -179,7 +179,7 @@ def get_taches_en_retard() -> list[dict]:
 def app():
     """Module Routines avec IA integree"""
 
-    st.title("â° Routines Quotidiennes")
+    st.title("⏰ Routines Quotidiennes")
     st.caption("Gestion intelligente des routines familiales")
 
     # Recuperer l'agent IA

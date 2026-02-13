@@ -62,11 +62,11 @@ def get_url():
 
         if not password:
             raise ValueError(
-                "âŒ Configuration DB manquante.\n"
+                "❌ Configuration DB manquante.\n"
                 "Configure soit :\n"
                 "1. Les secrets Streamlit (.streamlit/secrets.toml)\n"
                 "2. Les variables d'environnement (.env)"
-            )
+            ) from None
 
         return f"postgresql://{user}:{password}" f"@{host}:{port}/{database}" f"?sslmode=require"
 

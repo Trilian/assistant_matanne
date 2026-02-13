@@ -46,11 +46,11 @@ def afficher_actions_prioritaires(alertes_semaine: list) -> None:
                     st.session_state.planning_view = "activites"
 
             elif "🍽️" in emoji:
-                if st.button("â†’ Budget", key=f"alerte_{alerte[:20]}", use_container_width=True):
+                if st.button("→ Budget", key=f"alerte_{alerte[:20]}", use_container_width=True):
                     st.session_state.planning_view = "budget"
 
             elif "âš ï¸" in emoji:
-                if st.button("â†’ Voir", key=f"alerte_{alerte[:20]}", use_container_width=True):
+                if st.button("→ Voir", key=f"alerte_{alerte[:20]}", use_container_width=True):
                     pass
 
 

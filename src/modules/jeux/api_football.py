@@ -44,7 +44,7 @@ COMP_IDS = {
     # "ELC": 2016,   # Championship (England 2nd)
     # "DED": 2003,   # Eredivisie (Netherlands)
     # "PPL": 2017,   # Primeira Liga (Portugal)
-    # "BSA": 2013,   # BrasileirÃ£o Série A
+    # "BSA": 2013,   # Brasileirão Série A
 }
 
 
@@ -52,7 +52,7 @@ def configurer_api_key(api_key: str):
     """Configure la clé API Football-Data"""
     global API_KEY
     API_KEY = api_key
-    logger.info("âœ… Clé API Football-Data configurée")
+    logger.info("✅ Clé API Football-Data configurée")
 
 
 def obtenir_cle_api() -> str | None:
@@ -85,22 +85,22 @@ def faire_requete(endpoint: str, params: dict[str, Any] = None) -> dict | None:
     api_key = obtenir_cle_api()
 
     # DEBUG: Log ce qu'on trouve
-    logger.info(f"ðŸ”‘ faire_requete: api_key présente = {bool(api_key)}")
+    logger.info(f"🔑 faire_requete: api_key présente = {bool(api_key)}")
 
     if not api_key:
-        logger.warning("âš ï¸ Clé API Football-Data non configurée")
+        logger.warning("⚠️ Clé API Football-Data non configurée")
         return None
 
     url = f"{API_BASE_URL}{endpoint}"
     headers = {"X-Auth-Token": api_key}
 
     try:
-        logger.info(f"ðŸ“¡ Appel API: {endpoint}")
+        logger.info(f"📝¡ Appel API: {endpoint}")
         response = requests.get(url, headers=headers, params=params, timeout=10)
 
         # Log la réponse même en cas d'erreur
         if response.status_code != 200:
-            logger.warning(f"âš ï¸ Statut HTTP {response.status_code} pour {endpoint}")
+            logger.warning(f"⚠️ Statut HTTP {response.status_code} pour {endpoint}")
             try:
                 error_detail = response.json()
                 logger.debug(f"   Détail erreur API: {error_detail}")
@@ -108,18 +108,18 @@ def faire_requete(endpoint: str, params: dict[str, Any] = None) -> dict | None:
                 logger.debug(f"   Réponse brute: {response.text[:200]}")
 
         response.raise_for_status()
-        logger.info("âœ… Réponse API OK")
+        logger.info("✅ Réponse API OK")
         return response.json()
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 429:
-            logger.warning("âš ï¸ Limite de requêtes API dépassée (10/min)")
+            logger.warning("⚠️ Limite de requêtes API dépassée (10/min)")
         elif e.response.status_code == 404:
-            logger.error(f"âŒ Endpoint non trouvé (404): {endpoint}")
+            logger.error(f"❌ Endpoint non trouvé (404): {endpoint}")
         else:
-            logger.error(f"âŒ Erreur API Football-Data: {e.response.status_code}")
+            logger.error(f"❌ Erreur API Football-Data: {e.response.status_code}")
         return None
     except Exception as e:
-        logger.error(f"âŒ Erreur requête API: {e}")
+        logger.error(f"❌ Erreur requête API: {e}")
         return None
 
 
@@ -263,7 +263,7 @@ def charger_classement(championnat: str) -> list[dict[str, Any]]:
         return []
 
     # Essayer d'abord les standings
-    logger.info(f"ðŸ“¡ Tentative standings pour {championnat} (ID: {comp_id})")
+    logger.info(f"📝¡ Tentative standings pour {championnat} (ID: {comp_id})")
     data = faire_requete(f"/competitions/{comp_id}/standings")
 
     if data and data.get("standings"):
@@ -290,7 +290,7 @@ def charger_classement(championnat: str) -> list[dict[str, Any]]:
         return equipes
 
     # Fallback: charger juste les équipes sans standings
-    logger.info(f"ðŸ“¡ Fallback /teams pour {championnat}")
+    logger.info(f"📝¡ Fallback /teams pour {championnat}")
     data = faire_requete(f"/competitions/{comp_id}/teams")
 
     if data and data.get("teams"):
@@ -310,10 +310,10 @@ def charger_classement(championnat: str) -> list[dict[str, Any]]:
                 }
             )
 
-        logger.info(f"âœ… {len(equipes)} équipes chargées pour {championnat}")
+        logger.info(f"✅ {len(equipes)} équipes chargées pour {championnat}")
         return equipes
 
-    logger.warning(f"âŒ Pas de données pour {championnat}")
+    logger.warning(f"❌ Pas de données pour {championnat}")
     return []
 
 
@@ -402,7 +402,7 @@ def charger_matchs_termines(championnat: str, jours: int = 7) -> list[dict[str, 
             logger.debug(f"Erreur parsing match terminé: {e}")
             continue
 
-    logger.info(f"âœ… {len(matchs)} matchs terminés chargés pour {championnat}")
+    logger.info(f"✅ {len(matchs)} matchs terminés chargés pour {championnat}")
     return matchs
 
 

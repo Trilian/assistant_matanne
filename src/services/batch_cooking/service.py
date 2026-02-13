@@ -7,9 +7,9 @@ Ce service gère :
 - Génération IA des plans optimisés
 - Gestion des préparations stockées
 
-âœ… Utilise @avec_session_db et @avec_cache
-âœ… Validation Pydantic centralisée
-âœ… Intégration IA pour optimisation
+✅ Utilise @avec_session_db et @avec_cache
+✅ Validation Pydantic centralisée
+✅ Intégration IA pour optimisation
 """
 
 import logging
@@ -125,7 +125,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         # Invalider cache
         Cache.invalider(pattern="batch_config")
 
-        logger.info("âœ… Configuration batch cooking mise à jour")
+        logger.info("✅ Configuration batch cooking mise à jour")
         return config
 
     # ═══════════════════════════════════════════════════════════
@@ -225,7 +225,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         # Invalider cache
         Cache.invalider(pattern="batch_session")
 
-        logger.info(f"âœ… Session batch cooking créée: {session.id}")
+        logger.info(f"✅ Session batch cooking créée: {session.id}")
         return session
 
     @avec_gestion_erreurs(default_return=None)
@@ -250,7 +250,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         # Invalider cache
         Cache.invalider(pattern="batch_session")
 
-        logger.info(f"âœ… Session batch cooking démarrée: {session_id}")
+        logger.info(f"✅ Session batch cooking démarrée: {session_id}")
         return session
 
     @avec_gestion_erreurs(default_return=None)
@@ -300,7 +300,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         # Invalider cache
         Cache.invalider(pattern="batch_session")
 
-        logger.info(f"âœ… Session batch cooking terminée: {session_id}")
+        logger.info(f"✅ Session batch cooking terminée: {session_id}")
         return session
 
     # ═══════════════════════════════════════════════════════════
@@ -342,7 +342,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         db.commit()
         db.refresh(session)
 
-        logger.info(f"âœ… {len(etapes)} étapes ajoutées à la session {session_id}")
+        logger.info(f"✅ {len(etapes)} étapes ajoutées à la session {session_id}")
         return session
 
     @avec_gestion_erreurs(default_return=None)
@@ -360,7 +360,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         db.commit()
         db.refresh(etape)
 
-        logger.info(f"âœ… Étape démarrée: {etape_id}")
+        logger.info(f"✅ Étape démarrée: {etape_id}")
         return etape
 
     @avec_gestion_erreurs(default_return=None)
@@ -382,7 +382,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         db.commit()
         db.refresh(etape)
 
-        logger.info(f"âœ… Étape terminée: {etape_id}")
+        logger.info(f"✅ Étape terminée: {etape_id}")
         return etape
 
     @avec_gestion_erreurs(default_return=None)
@@ -399,7 +399,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         db.commit()
         db.refresh(etape)
 
-        logger.info(f"âœ… Étape passée: {etape_id}")
+        logger.info(f"✅ Étape passée: {etape_id}")
         return etape
 
     # ═══════════════════════════════════════════════════════════
@@ -479,7 +479,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         # Invalider cache
         Cache.invalider(pattern="preparations")
 
-        logger.info(f"âœ… Préparation créée: {preparation.id}")
+        logger.info(f"✅ Préparation créée: {preparation.id}")
         return preparation
 
     @avec_gestion_erreurs(default_return=None)
@@ -503,7 +503,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         # Invalider cache
         Cache.invalider(pattern="preparations")
 
-        logger.info(f"âœ… {portions} portion(s) consommée(s): {preparation_id}")
+        logger.info(f"✅ {portions} portion(s) consommée(s): {preparation_id}")
         return preparation
 
     # ═══════════════════════════════════════════════════════════
@@ -564,7 +564,7 @@ Recette: {r.nom}
         )
         jules_context = (
             """
-âš ï¸ IMPORTANT - JULES (bébé 19 mois) sera présent !
+⚠️ IMPORTANT - JULES (bébé 19 mois) sera présent !
 - Éviter les étapes bruyantes pendant la sieste (13h-15h)
 - Prévoir des moments calmes où il peut observer/aider
 - Signaler les étapes dangereuses (four chaud, friture, couteaux)
@@ -619,7 +619,7 @@ RÈGLES:
 - Grouper intelligemment pour minimiser le temps total
 """
 
-        logger.info(f"ðŸ¤– Génération plan batch cooking IA ({len(recettes)} recettes)")
+        logger.info(f"🤖 Génération plan batch cooking IA ({len(recettes)} recettes)")
 
         result = self.call_with_json_parsing_sync(
             prompt=prompt,
@@ -631,7 +631,7 @@ RÈGLES:
 
         if result:
             logger.info(
-                f"âœ… Plan batch cooking généré: {result.duree_totale_estimee} min estimées"
+                f"✅ Plan batch cooking généré: {result.duree_totale_estimee} min estimées"
             )
 
         return result
@@ -712,7 +712,7 @@ RÈGLES:
             # Attribuer à des repas
             nb_attribue = min(preparation.portions_restantes, len(repas_libres))
             for i, repas in enumerate(repas_libres[:nb_attribue]):
-                repas.notes = f"ðŸ± {preparation.nom}"
+                repas.notes = f"🍱 {preparation.nom}"
 
                 if preparation.repas_attribues is None:
                     preparation.repas_attribues = []
@@ -728,7 +728,7 @@ RÈGLES:
 
         db.commit()
 
-        logger.info(f"âœ… {len(attributions)} attributions créées")
+        logger.info(f"✅ {len(attributions)} attributions créées")
         return {
             "session_id": session_id,
             "planning_id": planning.id,

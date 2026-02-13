@@ -82,7 +82,7 @@ class ServiceWebPush:
             self._subscriptions[user_id].append(subscription)
             self._sauvegarder_abonnement_supabase(subscription)
 
-        logger.info(f"âœ… Abonnement push enregistré pour {user_id}")
+        logger.info(f"✅ Abonnement push enregistré pour {user_id}")
         return subscription
 
     def supprimer_abonnement(self, user_id: str, endpoint: str):
@@ -273,7 +273,7 @@ class ServiceWebPush:
     def notifier_stock_bas(self, user_id: str, nom_article: str, quantite: float):
         """Notifie un stock bas."""
         notification = NotificationPush(
-            title="ðŸ“¦ Stock bas",
+            title="📦 Stock bas",
             body=f"{nom_article} est presque épuisé ({quantite} restant)",
             notification_type=TypeNotification.STOCK_BAS,
             url="/?module=cuisine.inventaire",
@@ -290,11 +290,11 @@ class ServiceWebPush:
     ):
         """Notifie une péremption proche."""
         if jours_restants <= 0:
-            title = "âš ï¸ Produit périmé!"
+            title = "⚠️ Produit périmé!"
             body = f"{nom_article} a expiré!"
             notif_type = TypeNotification.PEREMPTION_CRITIQUE
         elif jours_restants == 1:
-            title = "ðŸ”´ Péremption demain"
+            title = "🔴 Péremption demain"
             body = f"{nom_article} expire demain"
             notif_type = (
                 TypeNotification.PEREMPTION_CRITIQUE
@@ -302,7 +302,7 @@ class ServiceWebPush:
                 else TypeNotification.PEREMPTION_ALERTE
             )
         else:
-            title = "ðŸŸ¡ Péremption proche"
+            title = "🟡 Péremption proche"
             body = f"{nom_article} expire dans {jours_restants} jours"
             notif_type = TypeNotification.PEREMPTION_ALERTE
 
@@ -321,7 +321,7 @@ class ServiceWebPush:
     ):
         """Notifie un rappel de repas."""
         notification = NotificationPush(
-            title=f"ðŸ½ï¸ {type_repas.title()} dans {temps_restant}",
+            title=f"🍽️ {type_repas.title()} dans {temps_restant}",
             body=f"Au menu: {nom_recette}",
             notification_type=TypeNotification.RAPPEL_REPAS,
             url="/?module=planning",
@@ -336,7 +336,7 @@ class ServiceWebPush:
     def notifier_liste_partagee(self, user_id: str, partage_par: str, nom_liste: str):
         """Notifie le partage d'une liste."""
         notification = NotificationPush(
-            title="ðŸ›’ Liste partagée",
+            title="🛒 Liste partagée",
             body=f"{partage_par} a partagé la liste '{nom_liste}'",
             notification_type=TypeNotification.LISTE_PARTAGEE,
             url="/?module=cuisine.courses",

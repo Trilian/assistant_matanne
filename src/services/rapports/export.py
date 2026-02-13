@@ -136,7 +136,7 @@ class ServiceExportPDF:
         story = []
 
         # Titre
-        story.append(Paragraph(f"ðŸ½ï¸ {data.nom}", self.styles["TitreRecette"]))
+        story.append(Paragraph(f"🍽️ {data.nom}", self.styles["TitreRecette"]))
         story.append(Spacer(1, 12))
 
         # Description
@@ -147,9 +147,9 @@ class ServiceExportPDF:
         # Infos pratiques
         infos_data = [
             ["â±ï¸ Préparation", f"{data.temps_preparation} min"],
-            ["ðŸ”¥ Cuisson", f"{data.temps_cuisson} min"],
-            ["ðŸ‘¥ Portions", str(data.portions)],
-            ["ðŸ“Š Difficulté", data.difficulte.capitalize()],
+            ["🔥 Cuisson", f"{data.temps_cuisson} min"],
+            ["👥 Portions", str(data.portions)],
+            ["📊 Difficulté", data.difficulte.capitalize()],
         ]
         infos_table = Table(infos_data, colWidths=[4 * cm, 3 * cm])
         infos_table.setStyle(
@@ -169,14 +169,14 @@ class ServiceExportPDF:
         story.append(Spacer(1, 20))
 
         # Ingrédients
-        story.append(Paragraph("ðŸ¥• Ingrédients", self.styles["SousTitre"]))
+        story.append(Paragraph("🥕 Ingrédients", self.styles["SousTitre"]))
         for ing in data.ingredients:
             quantite = f"{ing['quantite']} {ing['unite']}" if ing["quantite"] else ""
             story.append(Paragraph(f"• {ing['nom']} {quantite}".strip(), self.styles["Normal"]))
         story.append(Spacer(1, 12))
 
         # Étapes
-        story.append(Paragraph("ðŸ“ Préparation", self.styles["SousTitre"]))
+        story.append(Paragraph("📝 Préparation", self.styles["SousTitre"]))
         for i, etape in enumerate(data.etapes, 1):
             story.append(Paragraph(f"{i}. {etape}", self.styles["Etape"]))
 
@@ -281,7 +281,7 @@ class ServiceExportPDF:
         story = []
 
         # Titre
-        story.append(Paragraph(f"ðŸ“… {nom_planning}", self.styles["TitreRecette"]))
+        story.append(Paragraph(f"📝… {nom_planning}", self.styles["TitreRecette"]))
         story.append(
             Paragraph(
                 f"Semaine du {data.semaine_debut.strftime('%d/%m')} au {data.semaine_fin.strftime('%d/%m/%Y')}",
@@ -408,7 +408,7 @@ class ServiceExportPDF:
         story = []
 
         # Titre
-        story.append(Paragraph("ðŸ›’ Liste de Courses", self.styles["TitreRecette"]))
+        story.append(Paragraph("🛒 Liste de Courses", self.styles["TitreRecette"]))
         story.append(
             Paragraph(
                 f"Générée le {data.date_export.strftime('%d/%m/%Y à %H:%M')}",
@@ -425,19 +425,19 @@ class ServiceExportPDF:
 
         # Emojis par catégorie
         emojis_categories = {
-            "fruits_legumes": "ðŸ¥¬",
-            "viande": "ðŸ¥©",
-            "poisson": "ðŸŸ",
-            "produits_laitiers": "ðŸ§€",
-            "epicerie": "ðŸ¥«",
-            "surgeles": "ðŸ§Š",
-            "boissons": "ðŸ¥¤",
-            "hygiene": "ðŸ§´",
-            "autre": "ðŸ“¦",
+            "fruits_legumes": "🥬",
+            "viande": "🥩",
+            "poisson": "🐟",
+            "produits_laitiers": "🧀",
+            "epicerie": "🥫",
+            "surgeles": "🧊",
+            "boissons": "🥤",
+            "hygiene": "🧴",
+            "autre": "📦",
         }
 
         for categorie, articles in data.par_categorie.items():
-            emoji = emojis_categories.get(categorie.lower(), "ðŸ“¦")
+            emoji = emojis_categories.get(categorie.lower(), "📦")
             story.append(
                 Paragraph(
                     f"{emoji} {categorie.replace('_', ' ').title()}", self.styles["SousTitre"]
@@ -445,7 +445,7 @@ class ServiceExportPDF:
             )
 
             for article in articles:
-                prefix = "ðŸ”´ " if article.get("urgent") else "â˜ "
+                prefix = "🔴 " if article.get("urgent") else "â˜ "
                 quantite = (
                     f" ({article['quantite']} {article['unite']})" if article["quantite"] else ""
                 )
@@ -458,7 +458,7 @@ class ServiceExportPDF:
         # Total
         story.append(Spacer(1, 10))
         story.append(
-            Paragraph(f"ðŸ“Š Total: {data.total_articles} articles", self.styles["Normal"])
+            Paragraph(f"📊 Total: {data.total_articles} articles", self.styles["Normal"])
         )
 
         # Pied de page

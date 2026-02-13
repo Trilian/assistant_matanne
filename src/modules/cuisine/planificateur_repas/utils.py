@@ -3,7 +3,7 @@ Logique metier du Planificateur de Repas Intelligent
 
 Inspire de Jow:
 - Generation IA de menus equilibres
-- Apprentissage des goûts (ðŸ‘/ðŸ‘Ž)
+- Apprentissage des goûts (👍/👎)
 - Versions Jules integrees aux recettes
 - Prise en compte du stock existant
 - Suggestions alternatives
@@ -32,15 +32,15 @@ TYPES_REPAS = ["déjeuner", "dîner", "goûter"]
 
 # Categories de proteines
 PROTEINES = {
-    "poulet": {"label": "Poulet", "emoji": "ðŸ”", "categorie": "volaille"},
-    "boeuf": {"label": "BÅ“uf", "emoji": "ðŸ„", "categorie": "viande_rouge"},
-    "porc": {"label": "Porc", "emoji": "ðŸ·", "categorie": "viande"},
-    "agneau": {"label": "Agneau", "emoji": "ðŸ‘", "categorie": "viande_rouge"},
-    "poisson": {"label": "Poisson", "emoji": "ðŸŸ", "categorie": "poisson"},
-    "crevettes": {"label": "Crevettes", "emoji": "ðŸ¦", "categorie": "fruits_mer"},
-    "oeufs": {"label": "Å’ufs", "emoji": "ðŸ¥š", "categorie": "vegetarien"},
-    "tofu": {"label": "Tofu", "emoji": "ðŸ§Š", "categorie": "vegan"},
-    "legumineuses": {"label": "Legumineuses", "emoji": "ðŸ«˜", "categorie": "vegetarien"},
+    "poulet": {"label": "Poulet", "emoji": "🐔", "categorie": "volaille"},
+    "boeuf": {"label": "BÅ“uf", "emoji": "🐄", "categorie": "viande_rouge"},
+    "porc": {"label": "Porc", "emoji": "🐷", "categorie": "viande"},
+    "agneau": {"label": "Agneau", "emoji": "🐑", "categorie": "viande_rouge"},
+    "poisson": {"label": "Poisson", "emoji": "🐟", "categorie": "poisson"},
+    "crevettes": {"label": "Crevettes", "emoji": "🦐", "categorie": "fruits_mer"},
+    "oeufs": {"label": "Å’ufs", "emoji": "🥚", "categorie": "vegetarien"},
+    "tofu": {"label": "Tofu", "emoji": "🧊", "categorie": "vegan"},
+    "legumineuses": {"label": "Legumineuses", "emoji": "🫘", "categorie": "vegetarien"},
 }
 
 # Équilibre recommande par semaine (nombre de repas)
@@ -61,11 +61,11 @@ TEMPS_CATEGORIES = {
 
 # Robots cuisine
 ROBOTS_CUISINE = {
-    "monsieur_cuisine": {"label": "Monsieur Cuisine", "emoji": "ðŸ¤–"},
-    "cookeo": {"label": "Cookeo", "emoji": "ðŸ²"},
-    "four": {"label": "Four", "emoji": "ðŸ”¥"},
-    "airfryer": {"label": "Airfryer", "emoji": "ðŸŸ"},
-    "poele": {"label": "Poêle/Casserole", "emoji": "ðŸ³"},
+    "monsieur_cuisine": {"label": "Monsieur Cuisine", "emoji": "🤖"},
+    "cookeo": {"label": "Cookeo", "emoji": "🍲"},
+    "four": {"label": "Four", "emoji": "🔥"},
+    "airfryer": {"label": "Airfryer", "emoji": "🍟"},
+    "poele": {"label": "Poêle/Casserole", "emoji": "🍳"},
 }
 
 
@@ -115,7 +115,7 @@ class RecetteSuggestion:
 
     @property
     def emoji_difficulte(self) -> str:
-        return {"facile": "ðŸŸ¢", "moyen": "ðŸŸ¡", "difficile": "ðŸ”´"}.get(self.difficulte, "âšª")
+        return {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(self.difficulte, "⚪")
 
 
 @dataclass
@@ -178,7 +178,7 @@ class PlanningSemaine:
 
 
 # ═══════════════════════════════════════════════════════════
-# APPRENTISSAGE DES GOÃ›TS
+# APPRENTISSAGE DES GOÛTS
 # ═══════════════════════════════════════════════════════════
 
 
@@ -550,24 +550,24 @@ def valider_equilibre_semaine(
     # Verifier poisson
     if equilibre["poisson"] < preferences.poisson_par_semaine:
         alertes.append(
-            f"âš ï¸ Seulement {equilibre['poisson']} repas poisson (objectif: {preferences.poisson_par_semaine})"
+            f"⚠️ Seulement {equilibre['poisson']} repas poisson (objectif: {preferences.poisson_par_semaine})"
         )
 
     # Verifier vegetarien
     if equilibre["vegetarien"] < preferences.vegetarien_par_semaine:
         alertes.append(
-            f"âš ï¸ Seulement {equilibre['vegetarien']} repas vegetarien (objectif: {preferences.vegetarien_par_semaine})"
+            f"⚠️ Seulement {equilibre['vegetarien']} repas vegetarien (objectif: {preferences.vegetarien_par_semaine})"
         )
 
     # Verifier viande rouge
     if equilibre["viande_rouge"] > preferences.viande_rouge_max:
         alertes.append(
-            f"âš ï¸ Trop de viande rouge: {equilibre['viande_rouge']} (max: {preferences.viande_rouge_max})"
+            f"⚠️ Trop de viande rouge: {equilibre['viande_rouge']} (max: {preferences.viande_rouge_max})"
         )
 
     # Verifier repas planifies
     if planning.nb_repas_planifies < 10:  # Au moins 10 repas sur 14 possibles
-        alertes.append(f"âš ï¸ Seulement {planning.nb_repas_planifies} repas planifies sur 14")
+        alertes.append(f"⚠️ Seulement {planning.nb_repas_planifies} repas planifies sur 14")
 
     est_valide = len(alertes) == 0
 

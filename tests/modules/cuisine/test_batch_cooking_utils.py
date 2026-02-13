@@ -5,26 +5,24 @@ Tests complets pour atteindre ≥80% de couverture.
 """
 
 from datetime import date, time, timedelta
-import pytest
 
 from src.modules.cuisine.batch_cooking_utils import (
     JOURS_EMOJI,
-    ROBOTS_INFO,
     LOCALISATIONS,
+    ROBOTS_INFO,
     calculer_duree_totale_optimisee,
-    estimer_heure_fin,
-    formater_duree,
-    valider_session_batch,
-    valider_preparation,
-    optimiser_ordre_etapes,
-    detecter_conflits_robots,
-    filtrer_etapes_bruyantes,
-    identifier_moments_jules,
-    generer_planning_jules,
-    calculer_statistiques_session,
     calculer_historique_batch,
+    calculer_statistiques_session,
+    detecter_conflits_robots,
+    estimer_heure_fin,
+    filtrer_etapes_bruyantes,
+    formater_duree,
+    generer_planning_jules,
+    identifier_moments_jules,
+    optimiser_ordre_etapes,
+    valider_preparation,
+    valider_session_batch,
 )
-
 
 # ═══════════════════════════════════════════════════════════
 # TESTS DES CONSTANTES
@@ -298,7 +296,7 @@ class TestValiderPreparation:
             localisation="frigo",
         )
         assert result["valide"] is False
-        
+
         # Trop
         result = valider_preparation(
             nom="Test",

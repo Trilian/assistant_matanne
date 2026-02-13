@@ -108,7 +108,7 @@ def obtenir_info_robot(robot_id: str) -> dict:
     Returns:
         Dictionnaire avec nom, emoji, parallele
     """
-    return ROBOTS_DISPONIBLES.get(robot_id, {"nom": robot_id, "emoji": "ðŸ”§", "parallele": True})
+    return ROBOTS_DISPONIBLES.get(robot_id, {"nom": robot_id, "emoji": "🔧", "parallele": True})
 
 
 def obtenir_nom_robot(robot_id: str) -> str:
@@ -134,7 +134,7 @@ def obtenir_emoji_robot(robot_id: str) -> str:
         Emoji du robot
     """
     info = obtenir_info_robot(robot_id)
-    return info.get("emoji", "ðŸ”§")
+    return info.get("emoji", "🔧")
 
 
 def est_robot_parallele(robot_id: str) -> bool:
@@ -328,7 +328,7 @@ def construire_contexte_jules(present: bool = True) -> str:
         return ""
 
     return """
-âš ï¸ IMPORTANT - JULES (bébé 19 mois) sera présent !
+⚠️ IMPORTANT - JULES (bébé 19 mois) sera présent !
 - Éviter les étapes bruyantes pendant la sieste (13h-15h)
 - Prévoir des moments calmes où il peut observer/aider
 - Signaler les étapes dangereuses (four chaud, friture, couteaux)

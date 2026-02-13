@@ -147,8 +147,8 @@ class ServiceNtfy:
             tags = ["calendar"]
 
         notification = NotificationNtfy(
-            titre=f"â° Tâche en retard: {tache.nom}",
-            message=f"{tache.nom}\n\nðŸ“… Prévue le {tache.prochaine_fois.strftime('%d/%m')}\nâš ï¸ {jours_retard} jour(s) de retard\n\n{tache.description or ''}",
+            titre=f"⏰ Tâche en retard: {tache.nom}",
+            message=f"{tache.nom}\n\n📝… Prévue le {tache.prochaine_fois.strftime('%d/%m')}\n⚠️ {jours_retard} jour(s) de retard\n\n{tache.description or ''}",
             priorite=priorite,
             tags=tags,
         )
@@ -164,20 +164,20 @@ class ServiceNtfy:
             return ResultatEnvoiNtfy(succes=True, message="Pas de tâches à notifier")
 
         # Construire message
-        lines = ["ðŸ“‹ Résumé du jour\n"]
+        lines = ["📋 Résumé du jour\n"]
 
         if taches_retard:
-            lines.append(f"âš ï¸ {len(taches_retard)} tâche(s) en retard:")
+            lines.append(f"⚠️ {len(taches_retard)} tâche(s) en retard:")
             for t in taches_retard[:3]:
                 lines.append(f"  • {t.nom}")
 
         if taches_jour:
-            lines.append(f"\nðŸ“… {len(taches_jour)} tâche(s) aujourd'hui:")
+            lines.append(f"\n📝… {len(taches_jour)} tâche(s) aujourd'hui:")
             for t in taches_jour[:5]:
                 lines.append(f"  • {t.nom}")
 
         notification = NotificationNtfy(
-            titre="ðŸ“‹ Digest Matanne",
+            titre="📋 Digest Matanne",
             message="\n".join(lines),
             priorite=3 if not taches_retard else 4,
             tags=["house", "clipboard"],
@@ -195,7 +195,7 @@ class ServiceNtfy:
         articles_noms = [c.nom for c in courses_urgentes[:5]]
 
         notification = NotificationNtfy(
-            titre=f"ðŸ›’ {nb_articles} articles en attente",
+            titre=f"🛒 {nb_articles} articles en attente",
             message="Articles prioritaires:\n• " + "\n• ".join(articles_noms),
             priorite=2,
             tags=["shopping_cart"],
@@ -206,7 +206,7 @@ class ServiceNtfy:
     async def test_connexion(self) -> ResultatEnvoiNtfy:
         """Teste la connexion au serveur ntfy."""
         notification = NotificationNtfy(
-            titre="ðŸ”” Test Matanne",
+            titre="🔔 Test Matanne",
             message="Les notifications sont correctement configurées!",
             priorite=3,
             tags=["white_check_mark"],

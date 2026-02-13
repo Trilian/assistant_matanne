@@ -398,12 +398,12 @@ def afficher_sante_systeme():
     status = indicateur_sante_systeme()
 
     # Icône global
-    icon_map = {"ok": "ðŸŸ¢", "warning": "ðŸŸ¡", "error": "ðŸ”´"}
-    global_icon = icon_map.get(status["global"], "âšª")
+    icon_map = {"ok": "🟢", "warning": "🟡", "error": "🔴"}
+    global_icon = icon_map.get(status["global"], "⚪")
 
     with st.expander(f"{global_icon} Santé Système", expanded=False):
         for detail in status["details"]:
-            icon = icon_map.get(detail["status"], "âšª")
+            icon = icon_map.get(detail["status"], "⚪")
             st.write(f"{icon} **{detail['nom']}**: {detail['message']}")
 
 
@@ -426,18 +426,18 @@ def afficher_timeline_activites(activites: list[dict], max_items: int = 5):
 
     # Icônes par type
     icones = {
-        "recette": "ðŸ½ï¸",
-        "inventaire": "ðŸ“¦",
-        "courses": "ðŸ›’",
-        "planning": "ðŸ“…",
-        "famille": "ðŸ‘¨â€ðŸ‘©â€ðŸ‘¦",
-        "maison": "ðŸ ",
+        "recette": "🍽️",
+        "inventaire": "📦",
+        "courses": "🛒",
+        "planning": "📝…",
+        "famille": "👨‍👩‍👦",
+        "maison": "🏠",
     }
 
-    st.markdown("### ðŸ“‹ Activité Récente")
+    st.markdown("### 📋 Activité Récente")
 
     for activite in activites[:max_items]:
-        icone = icones.get(activite.get("type", ""), "ðŸ“Œ")
+        icone = icones.get(activite.get("type", ""), "📝Œ")
         date_str = activite.get("date", "")
         if isinstance(date_str, datetime):
             date_str = date_str.strftime("%d/%m %H:%M")
@@ -481,7 +481,7 @@ def widget_jules_apercu():
             padding: 1.5rem;
             text-align: center;
         ">
-            <span style="font-size: 3rem;">ðŸ‘¶</span>
+            <span style="font-size: 3rem;">👶</span>
             <h3 style="margin: 0.5rem 0;">Jules</h3>
             <p style="margin: 0; color: #1565C0; font-weight: 500;">{age_mois} mois</p>
         </div>

@@ -13,13 +13,13 @@ def render_user_switch():
 
     with col1:
         btn_type = "primary" if current == "anne" else "secondary"
-        if st.button("ðŸ‘e Anne", key="switch_anne", use_container_width=True, type=btn_type):
+        if st.button("👩 Anne", key="switch_anne", use_container_width=True, type=btn_type):
             set_current_user("anne")
             st.rerun()
 
     with col2:
         btn_type = "primary" if current == "mathieu" else "secondary"
-        if st.button("ðŸ‘¨ Mathieu", key="switch_mathieu", use_container_width=True, type=btn_type):
+        if st.button("💨 Mathieu", key="switch_mathieu", use_container_width=True, type=btn_type):
             set_current_user("mathieu")
             st.rerun()
 
@@ -31,14 +31,14 @@ def render_dashboard(data: dict):
         st.warning("Utilisateur non trouvé")
         return
 
-    st.subheader("ðŸ“Š Dashboard")
+    st.subheader("📊 Dashboard")
 
     # Métriques principales
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         streak = data.get("streak", 0)
-        st.metric("ðŸ”¥ Streak", f"{streak} jours")
+        st.metric("🔥 Streak", f"{streak} jours")
 
     with col2:
         today_summary = None
@@ -50,14 +50,14 @@ def render_dashboard(data: dict):
         today_pas = today_summary.pas if today_summary else 0
         objectif = data.get("objectif_pas", 10000)
         pct = min(100, (today_pas / objectif) * 100)
-        st.metric("ðŸ‘£ Pas aujourd'hui", f"{today_pas:,}", f"{pct:.0f}%")
+        st.metric("👣 Pas aujourd'hui", f"{today_pas:,}", f"{pct:.0f}%")
 
     with col3:
         today_cal = today_summary.calories_actives if today_summary else 0
-        st.metric("ðŸ”¥ Calories", f"{today_cal}")
+        st.metric("🔥 Calories", f"{today_cal}")
 
     with col4:
-        garmin = "âœ… Connecté" if data.get("garmin_connected") else "âŒ Non connecté"
+        garmin = "✅ Connecté" if data.get("garmin_connected") else "❌ Non connecté"
         st.metric("âŒš Garmin", garmin)
 
     # Graphique des 7 derniers jours
@@ -97,7 +97,7 @@ def render_weekly_chart(summaries: list, objectif: int):
     )
 
     fig.update_layout(
-        title="ðŸ“ˆ Pas quotidiens (7 derniers jours)",
+        title="📝ˆ Pas quotidiens (7 derniers jours)",
         xaxis_title="",
         yaxis_title="Pas",
         showlegend=False,

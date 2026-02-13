@@ -1,10 +1,10 @@
 """
 Service Recettes Unifié (REFACTORING PHASE 2)
 
-âœ… Utilise @avec_session_db et @avec_cache (Phase 1)
-âœ… Validation Pydantic centralisée (RecetteInput, etc.)
-âœ… Type hints complets pour meilleur IDE support
-âœ… Services testables sans Streamlit
+✅ Utilise @avec_session_db et @avec_cache (Phase 1)
+✅ Validation Pydantic centralisée (RecetteInput, etc.)
+✅ Type hints complets pour meilleur IDE support
+✅ Services testables sans Streamlit
 
 Service complet pour les recettes fusionnant :
 - recette_service.py (CRUD + recherche)
@@ -53,10 +53,10 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
     """
     Service complet pour les recettes.
 
-    âœ… Héritage multiple :
-    - BaseService â†’ CRUD optimisé
-    - BaseAIService â†’ IA avec rate limiting auto
-    - RecipeAIMixin â†’ Contextes métier recettes
+    ✅ Héritage multiple :
+    - BaseService → CRUD optimisé
+    - BaseAIService → IA avec rate limiting auto
+    - RecipeAIMixin → Contextes métier recettes
 
     Fonctionnalités :
     - CRUD optimisé avec cache
@@ -171,7 +171,7 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
             validated = RecetteInput(**data)
         except Exception as e:
             logger.error(f"Validation error: {e} - Data: {data}")
-            raise ErreurValidation(f"Données invalides: {str(e)}")
+            raise ErreurValidation(f"Données invalides: {str(e)}") from e
 
         # Créer recette avec updated_at
         recette_dict = validated.model_dump(exclude={"ingredients", "etapes"})
@@ -207,7 +207,7 @@ class ServiceRecettes(BaseService[Recette], BaseAIService, RecipeAIMixin):
         # Invalider cache
         Cache.invalider(pattern="recettes")
 
-        logger.info(f"âœ… Recette créée : {recette.nom} (ID: {recette.id})")
+        logger.info(f"✅ Recette créée : {recette.nom} (ID: {recette.id})")
         return recette
 
     @avec_session_db
@@ -326,7 +326,7 @@ RULES:
 6. difficulte values: facile, moyen, difficile
 7. No explanations, no text, ONLY JSON"""
 
-        logger.info(f"ðŸ¤– Generating {nb_recettes} recipe suggestions")
+        logger.info(f"🤖 Generating {nb_recettes} recipe suggestions")
 
         # IA call with auto rate limiting & parsing
         recettes = self.call_with_list_parsing_sync(
@@ -338,7 +338,7 @@ RULES:
             max_tokens=4000,
         )
 
-        logger.info(f"âœ… Generated {len(recettes)} recipe suggestions")
+        logger.info(f"✅ Generated {len(recettes)} recipe suggestions")
         return recettes
 
     def generer_variantes_recette_ia(
@@ -392,7 +392,7 @@ RULES:
             ],
         )
 
-        logger.info(f"ðŸ¤– Generating {nb_variantes} variations of '{nom_recette}'")
+        logger.info(f"🤖 Generating {nb_variantes} variations of '{nom_recette}'")
 
         # Call IA with auto rate limiting & parsing
         variations = self.call_with_list_parsing_sync(
@@ -417,7 +417,7 @@ RULES:
             max_items=nb_variantes,
         )
 
-        logger.info(f"âœ… Generated {len(variations)} variations of '{nom_recette}'")
+        logger.info(f"✅ Generated {len(variations)} variations of '{nom_recette}'")
         return variations
 
     @avec_cache(ttl=3600, key_func=lambda self, rid: f"version_bebe_{rid}")
@@ -464,10 +464,10 @@ RULES:
         )
         if existing:
             print(f"[generer_version_bebe] Baby version already exists for recipe {recette_id}")
-            logger.info(f"ðŸ“¦ Baby version already exists for recipe {recette_id}")
+            logger.info(f"📦 Baby version already exists for recipe {recette_id}")
             return existing
 
-        logger.info(f"ðŸ¤– Generating baby-safe version for recipe {recette_id}")
+        logger.info(f"🤖 Generating baby-safe version for recipe {recette_id}")
         print("[generer_version_bebe] Generating new baby version")
 
         # Construire contexte avec recette complète
@@ -522,7 +522,7 @@ Steps:
 
         if not version_data:
             print("[generer_version_bebe] version_data is None after IA call")
-            logger.warning(f"âš ï¸ Failed to generate baby version for recipe {recette_id}")
+            logger.warning(f"⚠️ Failed to generate baby version for recipe {recette_id}")
             raise ErreurValidation("Invalid IA response format for baby version")
 
         print(f"[generer_version_bebe] version_data parsed successfully: {version_data}")
@@ -542,7 +542,7 @@ Steps:
         db.refresh(version)
         print(f"[generer_version_bebe] Version refreshed, id={version.id}")
 
-        logger.info(f"âœ… Baby version created for recipe {recette_id}")
+        logger.info(f"✅ Baby version created for recipe {recette_id}")
         print(f"[generer_version_bebe] END: Returning version {version.id}")
         return version
 
@@ -583,10 +583,10 @@ Steps:
             .first()
         )
         if existing:
-            logger.info(f"ðŸ“¦ Batch cooking version already exists for recipe {recette_id}")
+            logger.info(f"📦 Batch cooking version already exists for recipe {recette_id}")
             return existing
 
-        logger.info(f"ðŸ¤– Generating batch cooking version for recipe {recette_id}")
+        logger.info(f"🤖 Generating batch cooking version for recipe {recette_id}")
 
         # Construire contexte avec recette complète
         ingredients_str = "\n".join(
@@ -655,7 +655,7 @@ Difficulty: {recette.difficulte}"""
 
         if not version_data:
             logger.warning(
-                f"âš ï¸ Failed to generate batch cooking version for recipe {recette_id}"
+                f"⚠️ Failed to generate batch cooking version for recipe {recette_id}"
             )
             raise ErreurValidation("Invalid IA response format for batch cooking version")
 
@@ -667,17 +667,17 @@ Difficulty: {recette.difficulte}"""
             notes_bebe=f"""**Portions: {version_data.nombre_portions_recommande}**
 â±ï¸ Temps total: {version_data.temps_preparation_total_heures}h
 
-ðŸ§Š Conservation: {version_data.conseils_conservation}
+🧊 Conservation: {version_data.conseils_conservation}
 
 â„ï¸ Congélation: {version_data.conseils_congelation}
 
-ðŸ“… Calendrier: {version_data.calendrier_preparation}""",
+📝… Calendrier: {version_data.calendrier_preparation}""",
         )
         db.add(version)
         db.commit()
         db.refresh(version)
 
-        logger.info(f"âœ… Batch cooking version created for recipe {recette_id}")
+        logger.info(f"✅ Batch cooking version created for recipe {recette_id}")
         return version
 
     @avec_session_db
@@ -719,10 +719,10 @@ Difficulty: {recette.difficulte}"""
             .first()
         )
         if existing:
-            logger.info(f"ðŸ¤– Robot version ({robot_type}) already exists for recipe {recette_id}")
+            logger.info(f"🤖 Robot version ({robot_type}) already exists for recipe {recette_id}")
             return existing
 
-        logger.info(f"ðŸ¤– Generating {robot_type} version for recipe {recette_id}")
+        logger.info(f"🤖 Generating {robot_type} version for recipe {recette_id}")
 
         # Construire contexte avec recette complète
         ingredients_str = "\n".join(
@@ -852,7 +852,7 @@ Difficulty: {recette.difficulte}"""
         )
 
         if not version_data:
-            logger.warning(f"âš ï¸ Failed to generate {robot_type} version for recipe {recette_id}")
+            logger.warning(f"⚠️ Failed to generate {robot_type} version for recipe {recette_id}")
             raise ErreurValidation(f"Invalid IA response format for {robot_type} version")
 
         # Créer version en DB
@@ -865,16 +865,16 @@ Difficulty: {recette.difficulte}"""
 
 â±ï¸ Temps de cuisson: {version_data.temps_cuisson_adapte_minutes} minutes
 
-ðŸ“‹ Préparation: {version_data.conseils_preparation}
+📋 Préparation: {version_data.conseils_preparation}
 
-ðŸ”§ Étapes spécifiques:
+🔧 Étapes spécifiques:
 {chr(10).join(f"• {etape}" for etape in version_data.etapes_specifiques)}""",
         )
         db.add(version)
         db.commit()
         db.refresh(version)
 
-        logger.info(f"âœ… {robot_type} version created for recipe {recette_id}")
+        logger.info(f"✅ {robot_type} version created for recipe {recette_id}")
         return version
 
     # ═══════════════════════════════════════════════════════════
@@ -916,7 +916,7 @@ Difficulty: {recette.difficulte}"""
             )
             db.add(historique)
             db.commit()
-            logger.info(f"âœ… Cuisson enregistrée pour recette {recette_id}")
+            logger.info(f"✅ Cuisson enregistrée pour recette {recette_id}")
             return True
         except Exception as e:
             logger.error(f"Erreur enregistrement cuisson: {e}")
@@ -1060,7 +1060,7 @@ Difficulty: {recette.difficulte}"""
                 }
             )
 
-        logger.info(f"âœ… Exported {len(recettes)} recipes to CSV")
+        logger.info(f"✅ Exported {len(recettes)} recipes to CSV")
         return output.getvalue()
 
     def export_to_json(self, recettes: list[Recette], indent: int = 2) -> str:
@@ -1093,7 +1093,7 @@ Difficulty: {recette.difficulte}"""
                 }
             )
 
-        logger.info(f"âœ… Exported {len(recettes)} recipes to JSON")
+        logger.info(f"✅ Exported {len(recettes)} recipes to JSON")
         return json.dumps(data, indent=indent, ensure_ascii=False)
 
     # ═══════════════════════════════════════════════════════════

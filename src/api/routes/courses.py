@@ -108,7 +108,7 @@ async def list_courses(
             }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("")
@@ -127,7 +127,7 @@ async def create_liste(data: CourseListCreate):
             return {"id": liste.id, "nom": liste.nom, "message": "Liste créée"}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/{liste_id}/items")
@@ -165,4 +165,4 @@ async def add_item(liste_id: int, item: CourseItemBase):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e

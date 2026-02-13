@@ -28,7 +28,7 @@ from .tools import render_tools
 
 def app():
     """Point d'entrée module inventaire"""
-    st.title("ðŸ“¦ Inventaire")
+    st.title("📦 Inventaire")
     st.caption("Gestion complète de votre stock d'ingrédients")
 
     # Initialiser session state
@@ -50,15 +50,15 @@ def app():
         tab_tools,
     ) = st.tabs(
         [
-            "ðŸ“Š Stock",
-            "âš ï¸ Alertes",
-            "ðŸ·ï¸ Catégories",
-            "ðŸ›’ Suggestions IA",
-            "ðŸ“‹ Historique",
-            "ðŸ“· Photos",
-            "ðŸ”” Notifications",
-            "ðŸ”® Prévisions",
-            "ðŸ”§ Outils",
+            "📊 Stock",
+            "⚠️ Alertes",
+            "🏷️ Catégories",
+            "🛒 Suggestions IA",
+            "📋 Historique",
+            "📝· Photos",
+            "🔔 Notifications",
+            "🔮 Prévisions",
+            "🔧 Outils",
         ]
     )
 

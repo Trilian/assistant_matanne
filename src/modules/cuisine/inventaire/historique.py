@@ -14,10 +14,10 @@ def render_historique():
     service = get_inventaire_service()
 
     if service is None:
-        st.error("âŒ Service inventaire indisponible")
+        st.error("❌ Service inventaire indisponible")
         return
 
-    st.subheader("ðŸ“‹ Historique des Modifications")
+    st.subheader("📋 Historique des Modifications")
 
     # Filtres
     col1, col2, col3 = st.columns(3)
@@ -44,7 +44,7 @@ def render_historique():
         historique = service.get_historique(days=days)
 
         if not historique:
-            st.info("ðŸ“‹ Aucune modification enregistrée dans cette période")
+            st.info("📋 Aucune modification enregistrée dans cette période")
             return
 
         # Filtrer par type
@@ -57,19 +57,19 @@ def render_historique():
         # Afficher tableau
         data = []
         for h in historique_filtres:
-            action_icon = {"ajout": "âž•", "modification": "âœï¸", "suppression": "ðŸ—‘ï¸"}.get(
-                h["type"], "â“"
+            action_icon = {"ajout": "➕", "modification": "âœï¸", "suppression": "🗑️"}.get(
+                h["type"], "❓"
             )
 
             # Résumer les changements
             changements = []
             if h["quantite_avant"] is not None:
-                changements.append(f"Qty: {h['quantite_avant']:.1f} â†’ {h['quantite_apres']:.1f}")
+                changements.append(f"Qty: {h['quantite_avant']:.1f} → {h['quantite_apres']:.1f}")
             if h["emplacement_avant"] is not None:
-                changements.append(f"Empl: {h['emplacement_avant']} â†’ {h['emplacement_apres']}")
+                changements.append(f"Empl: {h['emplacement_avant']} → {h['emplacement_apres']}")
             if h["date_peremption_avant"] is not None:
                 changements.append(
-                    f"Péremption: {h['date_peremption_avant']} â†’ {h['date_peremption_apres']}"
+                    f"Péremption: {h['date_peremption_avant']} → {h['date_peremption_apres']}"
                 )
 
             changement_text = " | ".join(changements) if changements else "Détails disponibles"
@@ -100,7 +100,7 @@ def render_historique():
             st.metric("Modifications", modifs)
 
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
 
 
 __all__ = ["render_historique"]

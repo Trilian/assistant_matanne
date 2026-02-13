@@ -61,10 +61,10 @@ def valider_checksum_ean13(code: str) -> bool:
         return False
 
     try:
-        # Somme des chiffres en positions impaires (1, 3, 5, ...) Ã— 1
+        # Somme des chiffres en positions impaires (1, 3, 5, ...) × 1
         somme_impaires = sum(int(code[i]) for i in range(0, 12, 2))
 
-        # Somme des chiffres en positions paires (2, 4, 6, ...) Ã— 3
+        # Somme des chiffres en positions paires (2, 4, 6, ...) × 3
         somme_paires = sum(int(code[i]) * 3 for i in range(1, 12, 2))
 
         # Total

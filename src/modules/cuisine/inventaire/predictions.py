@@ -12,14 +12,14 @@ from src.services.suggestions import obtenir_service_predictions
 
 def render_predictions():
     """Affiche les prédictions et recommandations ML"""
-    st.subheader("ðŸ”® Prévisions et Recommandations")
+    st.subheader("🔮 Prévisions et Recommandations")
 
     try:
         service = get_inventaire_service()
         service_pred = obtenir_service_predictions()
 
         if service is None:
-            st.error("âŒ Service inventaire indisponible")
+            st.error("❌ Service inventaire indisponible")
             return
 
         # Récupère les données
@@ -35,7 +35,7 @@ def render_predictions():
 
         with col1:
             if st.button(
-                "ðŸ”„ Générer les prédictions", width="stretch", key="btn_generate_predictions"
+                "🔄 Générer les prédictions", width="stretch", key="btn_generate_predictions"
             ):
                 st.session_state.predictions_generated = True
                 st.session_state.predictions_data = None
@@ -48,13 +48,13 @@ def render_predictions():
             )
 
         with col3:
-            st.metric("ðŸ“¦ Articles", len(articles))
+            st.metric("📦 Articles", len(articles))
 
         st.divider()
 
         # Affiche les prédictions si générées
         if st.session_state.get("predictions_generated", False):
-            with st.spinner("ðŸ“Š Génération des prédictions ML..."):
+            with st.spinner("📊 Génération des prédictions ML..."):
                 try:
                     predictions = service_pred.generer_predictions(articles, historique_complet)
                     analyse_globale = service_pred.obtenir_analyse_globale(predictions)
@@ -66,7 +66,7 @@ def render_predictions():
                         "recommandations": recommandations,
                     }
                 except Exception as e:
-                    st.error(f"âŒ Erreur lors de la génération: {str(e)}")
+                    st.error(f"❌ Erreur lors de la génération: {str(e)}")
                     st.session_state.predictions_generated = False
                     return
 
@@ -80,10 +80,10 @@ def render_predictions():
             # Tabs pour les différentes vues
             tab_pred, tab_tendances, tab_recom, tab_analyse = st.tabs(
                 [
-                    "ðŸ“ˆ Prédictions",
-                    "ðŸ“Š Tendances",
-                    "ðŸ”” Recommandations",
-                    "ðŸ“ Analyse globale",
+                    "📝ˆ Prédictions",
+                    "📊 Tendances",
+                    "🔔 Recommandations",
+                    "📝 Analyse globale",
                 ]
             )
 
@@ -100,7 +100,7 @@ def render_predictions():
                             "Prédite (1 mois)": f"{pred.quantite_predite:.1f}",
                             "Tendance": pred.tendance,
                             "Confiance": f"{pred.confiance:.0%}",
-                            "Risque rupture": "âŒ OUI" if pred.risque_rupture else "âœ… Non",
+                            "Risque rupture": "❌ OUI" if pred.risque_rupture else "✅ Non",
                             "Jours avant rupture": pred.jours_avant_rupture
                             if pred.jours_avant_rupture
                             else "-",
@@ -145,7 +145,7 @@ def render_predictions():
                 if filtered_pred:
                     st.write(f"**{len(filtered_pred)} article(s) correspondent aux filtres**")
                     for pred in filtered_pred[:5]:  # Affiche les 5 premiers
-                        with st.expander(f"ðŸ’¡ {pred.nom} - {pred.tendance.upper()}"):
+                        with st.expander(f"💡 {pred.nom} - {pred.tendance.upper()}"):
                             col1, col2, col3 = st.columns(3)
 
                             with col1:
@@ -161,7 +161,7 @@ def render_predictions():
 
                             with col3:
                                 if pred.risque_rupture:
-                                    st.metric("âš ï¸ Rupture dans", f"{pred.jours_avant_rupture} j")
+                                    st.metric("⚠️ Rupture dans", f"{pred.jours_avant_rupture} j")
                                     st.warning(
                                         f"Stock insuffisant dans {pred.jours_avant_rupture} jours!"
                                     )
@@ -180,14 +180,14 @@ def render_predictions():
                 col1, col2, col3 = st.columns(3)
 
                 with col1:
-                    st.metric("ðŸ“ˆ Croissante", len(tendances["croissante"]))
+                    st.metric("📝ˆ Croissante", len(tendances["croissante"]))
                     if tendances["croissante"]:
                         with st.expander("Voir les articles"):
                             for p in tendances["croissante"]:
                                 st.write(f"• {p.nom} (+{p.consommation_moyenne:.2f}/jour)")
 
                 with col2:
-                    st.metric("ðŸ“‰ Décroissante", len(tendances["décroissante"]))
+                    st.metric("📝‰ Décroissante", len(tendances["décroissante"]))
                     if tendances["décroissante"]:
                         with st.expander("Voir les articles"):
                             for p in tendances["décroissante"]:
@@ -227,7 +227,7 @@ def render_predictions():
                     for priority in ["CRITIQUE", "HAUTE", "MOYENNE"]:
                         if priority in by_priority:
                             icon = (
-                                "âŒ"
+                                "❌"
                                 if priority == "CRITIQUE"
                                 else "âš "
                                 if priority == "HAUTE"
@@ -258,7 +258,7 @@ def render_predictions():
                                         if st.button(
                                             "⏰ Ajouter", key=f"add_rec_{rec.nom}", width="stretch"
                                         ):
-                                            st.toast(f"⏰ {rec.nom} ajouté", icon="ðŸ›’")
+                                            st.toast(f"⏰ {rec.nom} ajouté", icon="🛒")
                 else:
                     st.info("Aucune recommandation d'achat pour le moment")
 
@@ -268,17 +268,17 @@ def render_predictions():
                 col1, col2, col3, col4 = st.columns(4)
 
                 with col1:
-                    st.metric("ðŸ“¦ Total articles", len(predictions))
+                    st.metric("📦 Total articles", len(predictions))
 
                 with col2:
                     articles_risque = len([p for p in predictions if p.risque_rupture])
-                    st.metric("âŒ En risque", articles_risque)
+                    st.metric("❌ En risque", articles_risque)
 
                 with col3:
                     articles_croissance = len(
                         [p for p in predictions if p.tendance == "croissante"]
                     )
-                    st.metric("ðŸ“ˆ Croissance", articles_croissance)
+                    st.metric("📝ˆ Croissance", articles_croissance)
 
                 with col4:
                     confiance_moy = (
@@ -286,7 +286,7 @@ def render_predictions():
                         if predictions
                         else 0
                     )
-                    st.metric("ðŸŽ¯ Confiance moy", f"{confiance_moy:.0%}")
+                    st.metric("🎯 Confiance moy", f"{confiance_moy:.0%}")
 
                 st.divider()
 
@@ -294,12 +294,12 @@ def render_predictions():
                 if analyse:
                     st.write("**Tendance générale**: ")
                     if analyse.tendance_globale == "croissante":
-                        st.write("ðŸ“ˆ **Consommation en augmentation**")
+                        st.write("📝ˆ **Consommation en augmentation**")
                         st.info(
                             "La consommation générale augmente. Préparez-vous à augmenter vos achats."
                         )
                     elif analyse.tendance_globale == "décroissante":
-                        st.write("ðŸ“‰ **Consommation en diminution**")
+                        st.write("📝‰ **Consommation en diminution**")
                         st.info(
                             "La consommation générale diminue. Vous pouvez réduire légèrement vos achats."
                         )
@@ -329,7 +329,7 @@ def render_predictions():
                         st.metric("Stables", f"{analyse.nb_articles_stables}")
 
     except Exception as e:
-        st.error(f"âŒ Erreur: {str(e)}")
+        st.error(f"❌ Erreur: {str(e)}")
         import traceback
 
         st.text(traceback.format_exc())

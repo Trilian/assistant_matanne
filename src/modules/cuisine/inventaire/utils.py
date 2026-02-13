@@ -576,7 +576,7 @@ def formater_inventaire_rapport(articles: list[dict]) -> str:
         "=" * 40,
         f"Date: {datetime.now().strftime('%d/%m/%Y %H:%M')}",
         "",
-        "[CHART] RÉSUMÉ",
+        "📊 RÉSUMÉ",
         "-" * 20,
         f"Total articles: {stats['total_articles']}",
         f"Articles OK: {stats['articles_ok']} ({stats['pct_ok']:.1f}%)",
@@ -757,11 +757,11 @@ def _prepare_inventory_dataframe(inventaire: list[dict[str, Any]]) -> pd.DataFra
     data = []
     for article in inventaire:
         statut_icon = {
-            "critique": "âŒ",
+            "critique": "❌",
             "stock_bas": "âš ",
-            "peremption_proche": "â°",
-            "ok": "âœ…",
-        }.get(article["statut"], "â“")
+            "peremption_proche": "⏰",
+            "ok": "✅",
+        }.get(article["statut"], "❓")
 
         data.append(
             {
@@ -786,10 +786,10 @@ def _prepare_alert_dataframe(articles: list[dict[str, Any]]) -> pd.DataFrame:
     data = []
     for article in articles:
         statut_icon = {
-            "critique": "âŒ",
+            "critique": "❌",
             "stock_bas": "âš ",
-            "peremption_proche": "â°",
-        }.get(article["statut"], "â“")
+            "peremption_proche": "⏰",
+        }.get(article["statut"], "❓")
 
         jours = ""
         if article["jours_avant_peremption"] is not None:
