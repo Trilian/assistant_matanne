@@ -1,4 +1,4 @@
-﻿"""
+"""
 Alertes - Composants d'affichage des alertes métier
 Stock critique, péremption, notifications domaine
 """
@@ -20,7 +20,7 @@ def alerte_stock(articles: list[dict[str, Any]], cle: str = "alerte_stock") -> N
         return
 
     with st.container():
-        for i, article in enumerate(articles):
+        for _i, article in enumerate(articles):
             statut = article.get("statut", "unknown")
             nom = article.get("nom", "Article sans nom")
 
