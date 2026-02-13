@@ -617,12 +617,12 @@ class TestPromptHelpers:
         result = base_ai_service.build_system_prompt(
             role="un assistant",
             expertise=["Aide"],
-            rules=["ÃŠtre poli", "ÃŠtre concis"]
+            rules=["Être poli", "Être concis"]
         )
         
-        assert "RÃˆGLES" in result
-        assert "ÃŠtre poli" in result
-        assert "ÃŠtre concis" in result
+        assert "RÈGLES" in result
+        assert "Être poli" in result
+        assert "Être concis" in result
 
     def test_build_system_prompt_french(self, base_ai_service):
         """Test que le prompt demande de répondre en français."""
