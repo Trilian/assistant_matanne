@@ -54,6 +54,7 @@ from .calendrier import (
 from .courses import (
     ArticleCourses,
     ArticleModele,
+    ListeCourses,
     ModeleCourses,
 )
 
@@ -219,6 +220,7 @@ __all__ = [
     "HistoriqueInventaire",
     # Courses
     "ArticleCourses",
+    "ListeCourses",
     "ModeleCourses",
     "ArticleModele",
     # Planning

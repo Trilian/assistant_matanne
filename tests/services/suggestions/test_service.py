@@ -141,7 +141,7 @@ class TestServiceSuggestions:
         """Test profil vide sans historique."""
         mock_session.query.return_value.filter.return_value.all.return_value = []
 
-        with patch("src.services.suggestions.service.obtenir_contexte_db") as mock_ctx:
+        with patch("src.core.database.obtenir_contexte_db") as mock_ctx:
             mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
 

@@ -281,7 +281,7 @@ class TestScannerCode:
         assert valide is False
         assert "non reconnu" in raison
 
-    @patch("src.services.integrations.codes_barres.obtenir_contexte_db")
+    @patch("src.core.database.obtenir_contexte_db")
     def test_scan_article_connu(self, mock_db, service):
         """Test scan d'un article connu."""
         # Setup mock
@@ -306,7 +306,7 @@ class TestScannerCode:
         assert result.type_scan == "article"
         assert result.details["nom"] == "Nutella"
 
-    @patch("src.services.integrations.codes_barres.obtenir_contexte_db")
+    @patch("src.core.database.obtenir_contexte_db")
     def test_scan_article_inconnu(self, mock_db, service):
         """Test scan d'un article inconnu."""
         mock_session = Mock()
