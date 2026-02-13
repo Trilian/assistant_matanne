@@ -120,7 +120,7 @@ class TestContextManagers:
         with patch("src.core.database.obtenir_fabrique_session") as mock_fab:
             mock_fab.return_value = mock_factory
 
-            with obtenir_contexte_db() as db:
+            with obtenir_contexte_db() as _db:
                 pass  # Succès
 
             mock_session.commit.assert_called()
@@ -134,7 +134,7 @@ class TestContextManagers:
             mock_fab.return_value = mock_factory
 
             with pytest.raises(ValueError):
-                with obtenir_contexte_db() as db:
+                with obtenir_contexte_db() as _db:
                     raise ValueError("Test error")
 
             mock_session.rollback.assert_called()
@@ -147,7 +147,7 @@ class TestContextManagers:
         with patch("src.core.database.obtenir_fabrique_session") as mock_fab:
             mock_fab.return_value = mock_factory
 
-            with obtenir_contexte_db() as db:
+            with obtenir_contexte_db() as _db:
                 pass
 
             mock_session.close.assert_called()
@@ -686,7 +686,7 @@ class TestContextManagersAvanced:
             mock_fab.return_value = mock_factory
 
             with pytest.raises(ErreurBaseDeDonnees):
-                with obtenir_contexte_db() as db:
+                with obtenir_contexte_db() as _db:
                     pass  # Le commit va échouer
 
     def test_obtenir_contexte_db_database_error(self):
@@ -699,7 +699,7 @@ class TestContextManagersAvanced:
             mock_fab.return_value = mock_factory
 
             with pytest.raises(ErreurBaseDeDonnees):
-                with obtenir_contexte_db() as db:
+                with obtenir_contexte_db() as _db:
                     pass
 
     def test_obtenir_db_securise_yields_session_on_success(self):
@@ -816,6 +816,8 @@ class TestVerifierConnexionAvance:
 
     def test_verifier_connexion_erreur_base_donnees(self):
         """Test vérification avec ErreurBaseDeDonnees."""
+        # Clear cache to avoid cached results from previous tests
+        verifier_connexion.clear()
         with patch("src.core.database.obtenir_moteur_securise") as mock:
             mock.side_effect = ErreurBaseDeDonnees("Test", message_utilisateur="Test error")
             with patch("src.core.database.st.cache_data", lambda **kw: lambda f: f):

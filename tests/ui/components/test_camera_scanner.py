@@ -129,7 +129,7 @@ class TestDetectBarcodes:
         mock_zxing.return_value = []
 
         frame = np.zeros((100, 100, 3), dtype=np.uint8)
-        result = detect_barcodes(frame)
+        _result = detect_barcodes(frame)
 
         mock_pyzbar.assert_called_once()
         mock_zxing.assert_not_called()  # Pas appelé si pyzbar a trouvé
@@ -408,7 +408,7 @@ class TestRenderBarcodeScannerWidget:
 
         assert render_barcode_scanner_widget is not None
 
-    @patch("streamlit.radio", return_value="âŒ¨ï¸ Manuel")
+    @patch("streamlit.radio", return_value="⌨️ Manuel")
     @patch("streamlit.markdown")
     @patch("streamlit.text_input", return_value="")
     def test_manual_mode(self, mock_input, mock_md, mock_radio):
@@ -420,7 +420,7 @@ class TestRenderBarcodeScannerWidget:
         mock_md.assert_called()
         mock_input.assert_called()
 
-    @patch("streamlit.radio", return_value="âŒ¨ï¸ Manuel")
+    @patch("streamlit.radio", return_value="⌨️ Manuel")
     @patch("streamlit.markdown")
     @patch("streamlit.text_input", return_value="CODE123")
     @patch("streamlit.button", return_value=True)
@@ -434,7 +434,7 @@ class TestRenderBarcodeScannerWidget:
 
         callback.assert_called_once_with("CODE123")
 
-    @patch("streamlit.radio", return_value="âŒ¨ï¸ Manuel")
+    @patch("streamlit.radio", return_value="⌨️ Manuel")
     @patch("streamlit.markdown")
     @patch("streamlit.text_input", return_value="")
     def test_auto_mode_fallback(self, mock_input, mock_md, mock_radio):
@@ -444,7 +444,7 @@ class TestRenderBarcodeScannerWidget:
         # Sans packages, tombe sur manuel
         render_barcode_scanner_widget(mode="auto", key="test")
 
-    @patch("streamlit.radio", return_value="ðŸ“· Photo")
+    @patch("streamlit.radio", return_value="📷 Photo")
     @patch("streamlit.markdown")
     @patch("streamlit.info")
     @patch("streamlit.camera_input", return_value=None)
@@ -461,7 +461,7 @@ class TestRenderBarcodeScannerWidget:
 
             mock_camera.assert_called()
 
-    @patch("streamlit.radio", return_value="âŒ¨ï¸ Manuel")
+    @patch("streamlit.radio", return_value="⌨️ Manuel")
     @patch("streamlit.markdown")
     @patch("streamlit.text_input", return_value="")
     @patch("streamlit.button", return_value=False)
@@ -475,7 +475,7 @@ class TestRenderBarcodeScannerWidget:
         # Pas de callback car pas de soumission
         callback.assert_not_called()
 
-    @patch("streamlit.radio", return_value="âŒ¨ï¸ Manuel")
+    @patch("streamlit.radio", return_value="⌨️ Manuel")
     @patch("streamlit.markdown")
     @patch("streamlit.text_input", return_value="TEST")
     @patch("streamlit.button", return_value=True)
@@ -551,7 +551,7 @@ class TestEdgeCases:
         assert scanner._should_report_scan("333") is True
 
     @patch("streamlit.session_state", {})
-    @patch("streamlit.radio", return_value="âŒ¨ï¸ Manuel")
+    @patch("streamlit.radio", return_value="⌨️ Manuel")
     @patch("streamlit.markdown")
     @patch("streamlit.text_input", return_value="")
     @patch("streamlit.button", return_value=False)

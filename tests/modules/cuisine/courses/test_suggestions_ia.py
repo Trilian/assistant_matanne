@@ -345,7 +345,7 @@ class TestRenderSuggestionsIA:
 
         mock_st.selectbox.assert_called()
 
-    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_contexte_db")
+    @patch("src.core.database.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
