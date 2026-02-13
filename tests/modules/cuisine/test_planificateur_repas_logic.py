@@ -113,7 +113,7 @@ class TestRecetteSuggestion:
             portions=2,
             difficulte="facile",
         )
-        assert facile.emoji_difficulte == "ðŸŸ¢"
+        assert facile.emoji_difficulte == "🟢"
 
         moyen = RecetteSuggestion(
             id=2,
@@ -124,7 +124,7 @@ class TestRecetteSuggestion:
             portions=2,
             difficulte="moyen",
         )
-        assert moyen.emoji_difficulte == "ðŸŸ¡"
+        assert moyen.emoji_difficulte == "🟡"
 
         difficile = RecetteSuggestion(
             id=3,
@@ -135,7 +135,7 @@ class TestRecetteSuggestion:
             portions=2,
             difficulte="difficile",
         )
-        assert difficile.emoji_difficulte == "ðŸ”´"
+        assert difficile.emoji_difficulte == "🔴"
 
     def test_valeurs_defaut(self):
         """Vérifie les valeurs par défaut."""

@@ -27,6 +27,9 @@ from .errors_base import (
     ErreurServiceIA,
     ErreurValidation,
     ExceptionApp,
+    exiger_champs,
+    valider_plage,
+    valider_type,
 )
 
 logger = logging.getLogger(__name__)

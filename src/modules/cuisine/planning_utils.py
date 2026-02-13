@@ -10,6 +10,7 @@ from typing import Any
 from src.modules.shared.constantes import JOURS_SEMAINE
 from src.modules.shared.date_utils import (
     obtenir_debut_semaine as get_debut_semaine,
+    obtenir_fin_semaine as get_fin_semaine,
 )
 
 logger = logging.getLogger(__name__)
@@ -24,9 +25,6 @@ TYPES_REPAS = ["déjeuner", "dîner"]  # Specifique cuisine (simplifié)
 REGIMES = ["Omnivore", "Vegetarien", "Vegan", "Sans gluten"]
 TEMPS_CUISINE = ["Rapide (< 30 min)", "Moyen (30-60 min)", "Long (> 60 min)"]
 BUDGETS = ["Bas (< 20€)", "Moyen (20-40€)", "Haut (> 40€)"]
-
-
-# Note: get_debut_semaine et get_fin_semaine sont importes depuis shared.date_utils
 
 
 def get_dates_semaine(date_ref: date = None) -> list[date]:

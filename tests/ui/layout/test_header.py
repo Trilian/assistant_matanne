@@ -45,7 +45,7 @@ class TestAfficherHeader:
 
         afficher_header()
 
-        mock_badge.assert_called_with("ðŸ¤– IA Active", "#4CAF50")
+        mock_badge.assert_called_with("🤖 IA Active", "#4CAF50")
 
     @patch("src.ui.layout.header.st")
     @patch("src.ui.layout.header.badge")
@@ -61,7 +61,7 @@ class TestAfficherHeader:
 
         afficher_header()
 
-        mock_badge.assert_called_with("ðŸ¤– IA Indispo", "#FFC107")
+        mock_badge.assert_called_with("🤖 IA Indispo", "#FFC107")
 
     @patch("src.ui.layout.header.st")
     @patch("src.ui.layout.header.badge")
