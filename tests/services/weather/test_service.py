@@ -95,7 +95,7 @@ def previsions_list():
                 "Orage",
                 "Pluie forte",
             ][i],
-            icone=["â˜€ï¸", "â˜ï¸", "ðŸŒ¤ï¸", "â˜€ï¸", "â˜€ï¸", "â›ˆï¸", "ðŸŒ§ï¸"][i],
+            icone=["☀️", "☁️", "🌤️", "☀️", "☀️", "⛈️", "🌧️"][i],
         )
         for i in range(7)
     ]
@@ -222,7 +222,7 @@ class TestGetPrevisions:
 
         # Code 0 = Ensoleillé
         assert previsions[0].condition == "Ensoleillé"
-        assert previsions[0].icone == "â˜€ï¸"
+        assert previsions[0].icone == "☀️"
 
         # Code 63 = Pluie modérée
         assert previsions[1].condition == "Pluie modérée"
@@ -271,8 +271,8 @@ class TestMethodesDelegatees:
 
     def test_weathercode_to_icon(self, service):
         """Délégation à utils.weathercode_to_icon."""
-        assert service._weathercode_to_icon(0) == "â˜€ï¸"
-        assert service._weathercode_to_icon(None) == "â“"
+        assert service._weathercode_to_icon(0) == "☀️"
+        assert service._weathercode_to_icon(None) == "❓"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -338,7 +338,7 @@ class TestGenererAlertes:
                 lever_soleil="07:00",
                 coucher_soleil="19:00",
                 condition="Ensoleillé",
-                icone="â˜€ï¸",
+                icone="☀️",
             )
             for i in range(8)
         ]
@@ -365,7 +365,7 @@ class TestGenererAlertes:
                 lever_soleil="07:00",
                 coucher_soleil="19:00",
                 condition="Nuageux",
-                icone="â˜ï¸",
+                icone="☁️",
             )
         ]
         alertes = service.generer_alertes(previsions)
@@ -416,7 +416,7 @@ class TestGenererConseils:
                 lever_soleil="07:00",
                 coucher_soleil="19:00",
                 condition="Ensoleillé",
-                icone="â˜€ï¸",
+                icone="☀️",
             )
         ]
         conseils = service.generer_conseils(previsions)
@@ -443,7 +443,7 @@ class TestGenererConseils:
                 lever_soleil="07:00",
                 coucher_soleil="19:00",
                 condition="Nuageux",
-                icone="â˜ï¸",
+                icone="☁️",
             )
         ]
         conseils = service.generer_conseils(previsions)
@@ -468,7 +468,7 @@ class TestGenererConseils:
                 lever_soleil="07:00",
                 coucher_soleil="19:00",
                 condition="Ensoleillé",
-                icone="â˜€ï¸",
+                icone="☀️",
             )
         ]
         conseils = service.generer_conseils(previsions)
@@ -493,7 +493,7 @@ class TestGenererConseils:
                 lever_soleil="07:00",
                 coucher_soleil="19:00",
                 condition="Pluie",
-                icone="ðŸŒ§ï¸",
+                icone="🌧️",
             )
         ]
         conseils = service.generer_conseils(previsions)
@@ -518,7 +518,7 @@ class TestGenererConseils:
                 lever_soleil="07:00",
                 coucher_soleil="19:00",
                 condition="Nuageux",
-                icone="â˜ï¸",
+                icone="☁️",
             )
         ]
         conseils = service.generer_conseils(previsions)
@@ -543,7 +543,7 @@ class TestGenererConseils:
                 lever_soleil="06:00",
                 coucher_soleil="21:00",
                 condition="Ensoleillé",
-                icone="â˜€ï¸",
+                icone="☀️",
             )
         ]
         conseils = service.generer_conseils(previsions)
@@ -568,7 +568,7 @@ class TestGenererConseils:
                 lever_soleil="07:00",
                 coucher_soleil="19:00",
                 condition="Ensoleillé",
-                icone="â˜€ï¸",
+                icone="☀️",
             )
         ]
         conseils = service.generer_conseils(previsions)

@@ -132,9 +132,9 @@ class TestDirectionFromDegrees:
     def test_valeurs_limites(self):
         """Test valeurs aux frontières."""
         # Autour de Est (90°) - 8 directions = 45° chacune
-        # 67° / 45 = 1.49 â†’ arrondi 1 = NE
+        # 67° / 45 = 1.49 → arrondi 1 = NE
         assert direction_from_degrees(67) == "NE"
-        # 112° / 45 = 2.49 â†’ arrondi 2 = E
+        # 112° / 45 = 2.49 → arrondi 2 = E
         assert direction_from_degrees(112) == "E"
 
     def test_negatif_normalise(self):
@@ -213,24 +213,24 @@ class TestWeathercodeToIcon:
     """Tests de weathercode_to_icon."""
 
     def test_ensoleille(self):
-        """Code 0 = â˜€ï¸."""
-        assert weathercode_to_icon(0) == "â˜€ï¸"
+        """Code 0 = ☀️."""
+        assert weathercode_to_icon(0) == "☀️"
 
     def test_orage(self):
-        """Code 95 = â›ˆï¸."""
-        assert weathercode_to_icon(95) == "â›ˆï¸"
+        """Code 95 = ⛈️."""
+        assert weathercode_to_icon(95) == "⛈️"
 
     def test_neige(self):
-        """Code 73 = â„ï¸."""
-        assert weathercode_to_icon(73) == "â„ï¸"
+        """Code 73 = ❄️."""
+        assert weathercode_to_icon(73) == "❄️"
 
     def test_code_inconnu(self):
         """Code inconnu retourne emoji par défaut."""
-        assert weathercode_to_icon(999) == "ðŸŒ¡ï¸"
+        assert weathercode_to_icon(999) == "🌡️"
 
     def test_none_retourne_question(self):
-        """None retourne â“."""
-        assert weathercode_to_icon(None) == "â“"
+        """None retourne ❓."""
+        assert weathercode_to_icon(None) == "❓"
 
 
 class TestGetArrosageFactor:

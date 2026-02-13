@@ -285,7 +285,7 @@ class OpenFoodFactsService:
             "A": "🟢",
             "B": "🟡",
             "C": "🟠",
-            "D": "🐟§",
+            "D": "🟧",
             "E": "🔴",
         }
         return mapping.get(grade.upper() if grade else "", "⚪")

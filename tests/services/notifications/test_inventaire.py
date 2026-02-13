@@ -115,7 +115,7 @@ class TestCreerNotificationStockCritique:
         assert notif.ingredient_id == 20
         assert "Beurre" in notif.titre
         assert notif.priorite == "haute"
-        assert notif.icone == "âŒ"
+        assert notif.icone == "❌"
 
     def test_notification_contient_details(self, service, sample_article_critico):
         """Test que la notification contient les détails de quantité."""
@@ -139,7 +139,7 @@ class TestCreerNotificationStockBas:
         assert notif.article_id == 1
         assert "Lait" in notif.titre
         assert notif.priorite == "moyenne"
-        assert notif.icone == "âš ï¸"
+        assert notif.icone == "⚠️"
 
 
 @pytest.mark.unit
@@ -154,7 +154,7 @@ class TestCreerNotificationPeremption:
         assert notif.type_alerte == TypeAlerte.PEREMPTION_DEPASSEE
         assert "EXPIRÉ" in notif.titre
         assert notif.priorite == "haute"
-        assert notif.icone == "ðŸš¨"
+        assert notif.icone == "🚨"
 
     def test_peremption_tres_proche(self, service, sample_article):
         """Test notification péremption très proche (<= 3 jours)."""
@@ -164,7 +164,7 @@ class TestCreerNotificationPeremption:
         assert notif.type_alerte == TypeAlerte.PEREMPTION_PROCHE
         assert "très proche" in notif.titre
         assert notif.priorite == "haute"
-        assert notif.icone == "ðŸ”´"
+        assert notif.icone == "🔴"
 
     def test_peremption_proche(self, service, sample_article):
         """Test notification péremption proche (> 3 jours)."""
@@ -174,7 +174,7 @@ class TestCreerNotificationPeremption:
         assert notif.type_alerte == TypeAlerte.PEREMPTION_PROCHE
         assert "proche" in notif.titre.lower()
         assert notif.priorite == "moyenne"
-        assert notif.icone == "ðŸŸ "
+        assert notif.icone == "🟠"
 
     def test_peremption_zero_jours(self, service, sample_article):
         """Test notification pour jour même de péremption."""

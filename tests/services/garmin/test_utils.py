@@ -147,7 +147,7 @@ class TestParseActivityData:
         assert result["fc_max"] == 175
         assert result["vitesse_moyenne"] == 2.78
         assert result["elevation_gain"] == 100
-        assert result["icon"] == "ðŸƒ"
+        assert result["icon"] == "🏃"
 
     def test_activite_minimale(self):
         """Parsing d'une activité avec données minimales."""
@@ -269,17 +269,17 @@ class TestGetActivityIcon:
 
     def test_icon_connu(self):
         """Un type connu retourne son icône."""
-        assert get_activity_icon("running") == "ðŸƒ"
-        assert get_activity_icon("cycling") == "ðŸš´"
-        assert get_activity_icon("swimming") == "ðŸŠ"
+        assert get_activity_icon("running") == "🏃"
+        assert get_activity_icon("cycling") == "🚴"
+        assert get_activity_icon("swimming") == "🏊"
 
     def test_icon_inconnu(self):
         """Un type inconnu retourne l'icône par défaut."""
-        assert get_activity_icon("unknown") == "ðŸ…"
+        assert get_activity_icon("unknown") == "🏅"
 
     def test_icon_majuscules(self):
         """Le type est normalisé."""
-        assert get_activity_icon("RUNNING") == "ðŸƒ"
+        assert get_activity_icon("RUNNING") == "🏃"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -501,22 +501,22 @@ class TestGetStreakBadge:
     def test_badge_champion(self):
         """Streak >= 100 = Champion."""
         result = get_streak_badge(100)
-        assert result == ("ðŸ†", "Champion du mois")
+        assert result == ("🏆", "Champion du mois")
 
     def test_badge_diamant(self):
         """Streak >= 60 = Diamant."""
         result = get_streak_badge(60)
-        assert result == ("ðŸ’Ž", "Diamant")
+        assert result == ("💎", "Diamant")
 
     def test_badge_on_fire(self):
         """Streak >= 30 = On fire."""
         result = get_streak_badge(30)
-        assert result == ("ðŸ”¥", "On fire!")
+        assert result == ("🔥", "On fire!")
 
     def test_badge_star(self):
         """Streak >= 14 = Star."""
         result = get_streak_badge(14)
-        assert result == ("â­", "Star")
+        assert result == ("⭐", "Star")
 
     def test_badge_semaine(self):
         """Streak >= 7 = 1 semaine."""

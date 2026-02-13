@@ -381,7 +381,7 @@ class TestRobotsEquipements:
         result = obtenir_info_robot("robot_inconnu")
 
         assert result["nom"] == "robot_inconnu"
-        assert result["emoji"] == "ðŸ”§"
+        assert result["emoji"] == "🔧"
         assert result["parallele"] is True
 
     def test_obtenir_nom_robot(self):

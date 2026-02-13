@@ -368,7 +368,7 @@ class TestCreerNotificationStock:
         """Création notification stock bas."""
         notif = creer_notification_stock("Lait", 0.5, "L")
 
-        assert notif["title"] == "ðŸ“¦ Stock bas"
+        assert notif["title"] == "📦 Stock bas"
         assert "Lait" in notif["body"]
         assert "0.5 L" in notif["body"]
         assert notif["notification_type"] == TypeNotification.STOCK_BAS.value

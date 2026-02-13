@@ -218,25 +218,25 @@ class TestDetermineProteinType:
         """Vérifie la détection poisson."""
         result = determine_protein_type("lundi", ["lundi"], [], [])
         assert result[0] == "poisson"
-        assert "ðŸŸ" in result[1]
+        assert "🐟" in result[1]
 
     def test_determine_protein_type_viande_rouge(self):
         """Vérifie la détection viande rouge."""
         result = determine_protein_type("mardi", [], ["mardi"], [])
         assert result[0] == "viande_rouge"
-        assert "ðŸ¥©" in result[1]
+        assert "🥩" in result[1]
 
     def test_determine_protein_type_vegetarien(self):
         """Vérifie la détection végétarien."""
         result = determine_protein_type("mercredi", [], [], ["mercredi"])
         assert result[0] == "vegetarien"
-        assert "ðŸ¥¬" in result[1]
+        assert "🥬" in result[1]
 
     def test_determine_protein_type_default_volaille(self):
         """Vérifie le fallback volaille."""
         result = determine_protein_type("jeudi", [], [], [])
         assert result[0] == "volaille"
-        assert "ðŸ—" in result[1]
+        assert "🍗" in result[1]
 
     def test_determine_protein_type_case_insensitive(self):
         """Vérifie l'insensibilité à la casse."""
@@ -412,31 +412,31 @@ class TestFormatMealForDisplay:
         """Emoji pour déjeuner."""
         repas = {"type_repas": "dejeuner"}
         result = format_meal_for_display(repas)
-        assert result["emoji"] == "â˜€ï¸"
+        assert result["emoji"] == "☀️"
 
     def test_emoji_for_diner(self):
         """Emoji pour dîner."""
         repas = {"type_repas": "diner"}
         result = format_meal_for_display(repas)
-        assert result["emoji"] == "ðŸŒ™"
+        assert result["emoji"] == "🌙"
 
     def test_emoji_for_petit_dejeuner(self):
         """Emoji pour petit-déjeuner."""
         repas = {"type_repas": "petit-dejeuner"}
         result = format_meal_for_display(repas)
-        assert result["emoji"] == "ðŸŒ…"
+        assert result["emoji"] == "🌅"
 
     def test_emoji_for_gouter(self):
         """Emoji pour goûter."""
         repas = {"type_repas": "gouter"}
         result = format_meal_for_display(repas)
-        assert result["emoji"] == "ðŸª"
+        assert result["emoji"] == "🍪"
 
     def test_emoji_default(self):
         """Emoji par défaut."""
         repas = {"type_repas": "autre"}
         result = format_meal_for_display(repas)
-        assert result["emoji"] == "ðŸ½ï¸"
+        assert result["emoji"] == "🍽️"
 
     def test_fallback_to_notes(self):
         """Fallback sur notes si pas de recette_nom."""

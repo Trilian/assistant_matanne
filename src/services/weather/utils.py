@@ -30,9 +30,9 @@ DIRECTIONS_CARDINALES = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"]
 
 # Codes météo WMO (World Meteorological Organization)
 WEATHERCODES = {
-    0: {"condition": "Ensoleillé", "icon": "â˜€ï¸", "arrosage_factor": 1.2},
+    0: {"condition": "Ensoleillé", "icon": "☀️", "arrosage_factor": 1.2},
     1: {"condition": "Peu nuageux", "icon": "🌤️", "arrosage_factor": 1.1},
-    2: {"condition": "Partiellement nuageux", "icon": "â›…", "arrosage_factor": 1.0},
+    2: {"condition": "Partiellement nuageux", "icon": "⛅", "arrosage_factor": 1.0},
     3: {"condition": "Couvert", "icon": "â˜ï¸", "arrosage_factor": 0.8},
     45: {"condition": "Brouillard", "icon": "🌫️", "arrosage_factor": 0.5},
     48: {"condition": "Brouillard givrant", "icon": "🌫️", "arrosage_factor": 0.3},
@@ -43,14 +43,14 @@ WEATHERCODES = {
     63: {"condition": "Pluie modérée", "icon": "🌧️", "arrosage_factor": 0.2},
     65: {"condition": "Pluie forte", "icon": "🌧️", "arrosage_factor": 0.0},
     71: {"condition": "Neige légère", "icon": "🌨️", "arrosage_factor": 0.0},
-    73: {"condition": "Neige modérée", "icon": "â„ï¸", "arrosage_factor": 0.0},
-    75: {"condition": "Neige forte", "icon": "â„ï¸", "arrosage_factor": 0.0},
+    73: {"condition": "Neige modérée", "icon": "❄️", "arrosage_factor": 0.0},
+    75: {"condition": "Neige forte", "icon": "❄️", "arrosage_factor": 0.0},
     80: {"condition": "Averses légères", "icon": "🌦️", "arrosage_factor": 0.5},
     81: {"condition": "Averses", "icon": "🌧️", "arrosage_factor": 0.3},
-    82: {"condition": "Averses violentes", "icon": "â›ˆï¸", "arrosage_factor": 0.0},
-    95: {"condition": "Orage", "icon": "â›ˆï¸", "arrosage_factor": 0.0},
-    96: {"condition": "Orage avec grêle légère", "icon": "â›ˆï¸", "arrosage_factor": 0.0},
-    99: {"condition": "Orage avec grêle", "icon": "â›ˆï¸", "arrosage_factor": 0.0},
+    82: {"condition": "Averses violentes", "icon": "⛈️", "arrosage_factor": 0.0},
+    95: {"condition": "Orage", "icon": "⛈️", "arrosage_factor": 0.0},
+    96: {"condition": "Orage avec grêle légère", "icon": "⛈️", "arrosage_factor": 0.0},
+    99: {"condition": "Orage avec grêle", "icon": "⛈️", "arrosage_factor": 0.0},
 }
 
 
@@ -147,9 +147,9 @@ def weathercode_to_icon(code: int | None) -> str:
 
     Examples:
         >>> weathercode_to_icon(0)
-        'â˜€ï¸'
+        '☀️'
         >>> weathercode_to_icon(95)
-        'â›ˆï¸'
+        '⛈️'
     """
     if code is None:
         return "❓"
@@ -702,7 +702,7 @@ def get_gardening_advice_for_weather(
         conseils.append(
             {
                 "priorite": 3,
-                "icone": "â˜€ï¸",
+                "icone": "☀️",
                 "titre": "Journée idéale au jardin",
                 "description": "Conditions parfaites pour le jardinage",
                 "action": "Profitez-en pour désherber, planter ou tailler",

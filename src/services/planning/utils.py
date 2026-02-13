@@ -324,7 +324,7 @@ def format_meal_for_display(repas: dict) -> dict:
     # Emoji par type
     emoji_map = {
         "petit-dejeuner": "🌅",
-        "dejeuner": "â˜€ï¸",
+        "dejeuner": "☀️",
         "gouter": "🍪",
         "diner": "🌙",
     }

@@ -546,7 +546,7 @@ class TestGestionStock:
             service, code="3017620422003", session=mock_session
         )
 
-        assert result["peremption_etat"] == "BIENTÃ”T"
+        assert result["peremption_etat"] == "BIENTÔT"
 
 
 # ═══════════════════════════════════════════════════════════

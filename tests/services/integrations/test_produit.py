@@ -521,29 +521,29 @@ class TestUtilitaires:
 
     def test_nutriscore_emoji_a(self, service):
         """Test emoji nutriscore A."""
-        assert service.obtenir_nutriscore_emoji("A") == "ðŸŸ¢"
-        assert service.obtenir_nutriscore_emoji("a") == "ðŸŸ¢"
+        assert service.obtenir_nutriscore_emoji("A") == "🟢"
+        assert service.obtenir_nutriscore_emoji("a") == "🟢"
 
     def test_nutriscore_emoji_b(self, service):
         """Test emoji nutriscore B."""
-        assert service.obtenir_nutriscore_emoji("B") == "ðŸŸ¡"
+        assert service.obtenir_nutriscore_emoji("B") == "🟡"
 
     def test_nutriscore_emoji_c(self, service):
         """Test emoji nutriscore C."""
-        assert service.obtenir_nutriscore_emoji("C") == "ðŸŸ "
+        assert service.obtenir_nutriscore_emoji("C") == "🟠"
 
     def test_nutriscore_emoji_d(self, service):
         """Test emoji nutriscore D."""
-        assert service.obtenir_nutriscore_emoji("D") == "ðŸŸ§"
+        assert service.obtenir_nutriscore_emoji("D") == "🟧"
 
     def test_nutriscore_emoji_e(self, service):
         """Test emoji nutriscore E."""
-        assert service.obtenir_nutriscore_emoji("E") == "ðŸ”´"
+        assert service.obtenir_nutriscore_emoji("E") == "🔴"
 
     def test_nutriscore_emoji_inconnu(self, service):
         """Test emoji nutriscore inconnu."""
-        assert service.obtenir_nutriscore_emoji(None) == "âšª"
-        assert service.obtenir_nutriscore_emoji("") == "âšª"
+        assert service.obtenir_nutriscore_emoji(None) == "⚪"
+        assert service.obtenir_nutriscore_emoji("") == "⚪"
 
     def test_nova_description_1(self, service):
         """Test description NOVA 1."""

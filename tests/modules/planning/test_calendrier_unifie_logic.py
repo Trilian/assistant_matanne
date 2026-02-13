@@ -114,7 +114,7 @@ class TestEvenementCalendrier:
             id="test", type=TypeEvenement.BATCH_COOKING, titre="Test", date_jour=date.today()
         )
         assert evt.emoji == EMOJI_TYPE[TypeEvenement.BATCH_COOKING]
-        assert evt.emoji == "ðŸ³"
+        assert evt.emoji == "🍳"
 
     def test_couleur_property(self):
         """Property couleur."""
