@@ -9,8 +9,6 @@ import pytest
 
 from src.modules.planning.vue_semaine_utils import (
     HEURES_JOURNEE,
-    # Constantes
-    JOURS_SEMAINE,
     # Analyse
     calculer_charge_semaine,
     detecter_conflits_horaires,
@@ -27,6 +25,7 @@ from src.modules.planning.vue_semaine_utils import (
     grouper_evenements_par_jour,
     trier_evenements_par_heure,
 )
+from src.modules.shared.constantes import JOURS_SEMAINE
 
 # ═══════════════════════════════════════════════════════════
 # FIXTURES

@@ -6,7 +6,6 @@ from datetime import date, time, timedelta
 
 from src.modules.cuisine.batch_cooking_utils import (
     JOURS_EMOJI,
-    JOURS_SEMAINE,
     LOCALISATIONS,
     ROBOTS_INFO,
     calculer_duree_totale_optimisee,
@@ -18,6 +17,7 @@ from src.modules.cuisine.batch_cooking_utils import (
     valider_preparation,
     valider_session_batch,
 )
+from src.modules.shared.constantes import JOURS_SEMAINE
 
 # ═══════════════════════════════════════════════════════════
 # Tests Constantes

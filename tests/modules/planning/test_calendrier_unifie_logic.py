@@ -10,7 +10,6 @@ import pytest
 from src.modules.planning.calendrier_unifie.utils import (
     COULEUR_TYPE,
     EMOJI_TYPE,
-    # Constantes
     JOURS_SEMAINE,
     JOURS_SEMAINE_COURT,
     # Dataclasses
@@ -20,7 +19,6 @@ from src.modules.planning.calendrier_unifie.utils import (
     TypeEvenement,
     # Fonctions de calcul
     get_debut_semaine,
-    get_fin_semaine,
     get_jours_semaine,
     get_semaine_precedente,
     get_semaine_suivante,
@@ -371,11 +369,6 @@ class TestFonctionsCalcul:
         """Début de semaine pour un dimanche = le lundi précédent."""
         dimanche = date(2024, 1, 7)  # Dimanche
         assert get_debut_semaine(dimanche) == date(2024, 1, 1)
-
-    def test_get_fin_semaine(self):
-        """Fin de semaine = dimanche."""
-        lundi = date(2024, 1, 1)
-        assert get_fin_semaine(lundi) == date(2024, 1, 7)
 
     def test_get_jours_semaine(self):
         """Liste des 7 jours."""
