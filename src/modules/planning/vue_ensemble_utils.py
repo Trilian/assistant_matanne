@@ -312,7 +312,7 @@ def calculer_statistiques_periode(
 
 def formater_niveau_charge(niveau: str) -> str:
     """Formate le niveau de charge avec emoji."""
-    emojis = {"Libre": "😊", "Léger": "🙂", "Moyen": "😐", "Élevé": "😰", "Très élevé": "🔥"}
+    emojis = {"Libre": "�", "Léger": "🙂", "Moyen": "😐", "Élevé": "😰", "Très élevé": "🔥"}
     emoji = emojis.get(niveau, "")
     return f"{emoji} {niveau}"
 
