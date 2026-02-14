@@ -6,7 +6,7 @@ Documentation des services backend et de leurs APIs internes.
 
 L'architecture des services suit un modèle en couches:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                    UI (Streamlit)                        │
 └─────────────────────────┬───────────────────────────────┘
@@ -56,15 +56,15 @@ suggestions = service.suggerer_recettes(
 recette = service.importer_depuis_url("https://...")
 ```
 
-| Méthode | Description |
-|---------|-------------|
-| `creer_recette(data)` | Créer une nouvelle recette |
-| `lister_recettes()` | Liste paginée avec filtres |
-| `obtenir_recette(id)` | Détails d'une recette |
-| `mettre_a_jour_recette(id, data)` | Modifier une recette |
-| `supprimer_recette(id)` | Supprimer une recette |
-| `suggerer_recettes()` | Suggestions IA |
-| `importer_depuis_url(url)` | Import depuis URL |
+| Méthode                           | Description                |
+| --------------------------------- | -------------------------- |
+| `creer_recette(data)`             | Créer une nouvelle recette |
+| `lister_recettes()`               | Liste paginée avec filtres |
+| `obtenir_recette(id)`             | Détails d'une recette      |
+| `mettre_a_jour_recette(id, data)` | Modifier une recette       |
+| `supprimer_recette(id)`           | Supprimer une recette      |
+| `suggerer_recettes()`             | Suggestions IA             |
+| `importer_depuis_url(url)`        | Import depuis URL          |
 
 ---
 
@@ -88,14 +88,14 @@ service.marquer_fait(article_id)
 service.generer_depuis_planning(semaine="2025-W03")
 ```
 
-| Méthode | Description |
-|---------|-------------|
-| `creer_liste(nom)` | Nouvelle liste |
-| `lister_listes()` | Toutes les listes |
-| `ajouter_article()` | Ajouter un article |
-| `marquer_fait(id, fait)` | Toggle article fait |
+| Méthode                     | Description                    |
+| --------------------------- | ------------------------------ |
+| `creer_liste(nom)`          | Nouvelle liste                 |
+| `lister_listes()`           | Toutes les listes              |
+| `ajouter_article()`         | Ajouter un article             |
+| `marquer_fait(id, fait)`    | Toggle article fait            |
 | `generer_depuis_planning()` | Générer depuis repas planifiés |
-| `suggerer_articles()` | Suggestions IA |
+| `suggerer_articles()`       | Suggestions IA                 |
 
 ---
 
@@ -121,14 +121,14 @@ info = service.obtenir_info_produit("3017760000123")
 expirant = service.articles_expirant_bientot(jours=7)
 ```
 
-| Méthode | Description |
-|---------|-------------|
-| `lister_articles()` | Inventaire complet |
-| `ajouter_article()` | Ajouter au stock |
-| `consommer(id, qte)` | Décrémenter quantité |
-| `rechercher_barcode()` | Recherche par code-barres |
-| `obtenir_info_produit()` | Info OpenFoodFacts |
-| `articles_expirant_bientot()` | Alertes péremption |
+| Méthode                       | Description               |
+| ----------------------------- | ------------------------- |
+| `lister_articles()`           | Inventaire complet        |
+| `ajouter_article()`           | Ajouter au stock          |
+| `consommer(id, qte)`          | Décrémenter quantité      |
+| `rechercher_barcode()`        | Recherche par code-barres |
+| `obtenir_info_produit()`      | Info OpenFoodFacts        |
+| `articles_expirant_bientot()` | Alertes péremption        |
 
 ---
 
@@ -158,14 +158,14 @@ reste = service.budget_restant("courses", "2025-01")
 analyse = service.analyser_depenses_ia(mois="2025-01")
 ```
 
-| Méthode | Description |
-|---------|-------------|
-| `ajouter_depense()` | Nouvelle dépense |
-| `lister_depenses()` | Liste avec filtres |
-| `total_mois()` | Total mensuel |
-| `definir_budget_mensuel()` | Définir un budget |
-| `budget_restant()` | Calcul reste |
-| `analyser_depenses_ia()` | Analyse IA |
+| Méthode                    | Description        |
+| -------------------------- | ------------------ |
+| `ajouter_depense()`        | Nouvelle dépense   |
+| `lister_depenses()`        | Liste avec filtres |
+| `total_mois()`             | Total mensuel      |
+| `definir_budget_mensuel()` | Définir un budget  |
+| `budget_restant()`         | Calcul reste       |
+| `analyser_depenses_ia()`   | Analyse IA         |
 
 ---
 
@@ -191,13 +191,13 @@ service.supprimer_repas(id)
 suggestions = service.suggerer_repas_semaine()
 ```
 
-| Méthode | Description |
-|---------|-------------|
-| `ajouter_repas()` | Planifier un repas |
-| `planning_semaine()` | Récupérer la semaine |
-| `supprimer_repas()` | Retirer un repas |
-| `suggerer_repas_semaine()` | Suggestions IA |
-| `generer_liste_courses()` | Liste depuis planning |
+| Méthode                    | Description           |
+| -------------------------- | --------------------- |
+| `ajouter_repas()`          | Planifier un repas    |
+| `planning_semaine()`       | Récupérer la semaine  |
+| `supprimer_repas()`        | Retirer un repas      |
+| `suggerer_repas_semaine()` | Suggestions IA        |
+| `generer_liste_courses()`  | Liste depuis planning |
 
 ---
 
@@ -219,12 +219,12 @@ service.sync_google_calendar(token)
 service.sync_apple_calendar(subscription_url)
 ```
 
-| Méthode | Description |
-|---------|-------------|
-| `generer_ical_url()` | URL flux iCal |
-| `exporter_ical()` | Export iCal |
-| `sync_google_calendar()` | Sync Google |
-| `sync_apple_calendar()` | Sync Apple |
+| Méthode                  | Description   |
+| ------------------------ | ------------- |
+| `generer_ical_url()`     | URL flux iCal |
+| `exporter_ical()`        | Export iCal   |
+| `sync_google_calendar()` | Sync Google   |
+| `sync_apple_calendar()`  | Sync Apple    |
 
 ---
 
@@ -246,11 +246,11 @@ alertes = service.alertes_jardin()
 # Ex: ["⚠️ Gel prévu cette nuit", "🌧️ Pluie demain"]
 ```
 
-| Méthode | Description |
-|---------|-------------|
-| `obtenir_meteo_actuelle()` | Conditions actuelles |
-| `previsions_7j()` | Prévisions semaine |
-| `alertes_jardin()` | Alertes pour jardinier |
+| Méthode                    | Description            |
+| -------------------------- | ---------------------- |
+| `obtenir_meteo_actuelle()` | Conditions actuelles   |
+| `previsions_7j()`          | Prévisions semaine     |
+| `alertes_jardin()`         | Alertes pour jardinier |
 
 ---
 
@@ -274,12 +274,12 @@ service.restaurer(backup_id)
 backups = service.lister_sauvegardes()
 ```
 
-| Méthode | Description |
-|---------|-------------|
-| `creer_sauvegarde()` | Nouvelle sauvegarde |
-| `restaurer(id)` | Restaurer une sauvegarde |
-| `lister_sauvegardes()` | Historique |
-| `supprimer_anciens()` | Nettoyage |
+| Méthode                | Description              |
+| ---------------------- | ------------------------ |
+| `creer_sauvegarde()`   | Nouvelle sauvegarde      |
+| `restaurer(id)`        | Restaurer une sauvegarde |
+| `lister_sauvegardes()` | Historique               |
+| `supprimer_anciens()`  | Nettoyage                |
 
 ---
 
@@ -308,12 +308,12 @@ notifs = service.lister_notifications(non_lues=True)
 service.marquer_lue(id)
 ```
 
-| Méthode | Description |
-|---------|-------------|
-| `enregistrer_souscription()` | Web Push subscribe |
-| `envoyer_notification()` | Envoyer push |
-| `lister_notifications()` | In-app notifications |
-| `marquer_lue()` | Marquer comme lue |
+| Méthode                      | Description          |
+| ---------------------------- | -------------------- |
+| `enregistrer_souscription()` | Web Push subscribe   |
+| `envoyer_notification()`     | Envoyer push         |
+| `lister_notifications()`     | In-app notifications |
+| `marquer_lue()`              | Marquer comme lue    |
 
 ---
 
@@ -338,11 +338,11 @@ predictions = service.predire_courses_semaine()
 # Basé sur historique et habitudes
 ```
 
-| Méthode | Description |
-|---------|-------------|
-| `suggerer_recettes()` | Suggestions recettes |
-| `predire_courses_semaine()` | Prédiction courses |
-| `analyser_habitudes()` | Analyse patterns |
+| Méthode                     | Description          |
+| --------------------------- | -------------------- |
+| `suggerer_recettes()`       | Suggestions recettes |
+| `predire_courses_semaine()` | Prédiction courses   |
+| `analyser_habitudes()`      | Analyse patterns     |
 
 ---
 
@@ -409,6 +409,7 @@ class MonService(BaseAIService):
 ```
 
 **Méthodes disponibles:**
+
 - `call_ai_sync(prompt)` - Appel simple
 - `call_with_json_parsing_sync(prompt, model)` - Parsing JSON
 - `call_with_list_parsing_sync(prompt, item_model)` - Parsing liste

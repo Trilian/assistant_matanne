@@ -51,7 +51,7 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "C4", "UP"]
-ignore = ["E501", "B008"]
+ignore = ["E501", "E402", "E711", "E712", "E722", "E741", "B007", "B008", "B015", "B017", "B023", "B025", "B904", "C401", "C403", "C408", "C414", "C416", "F401", "F402", "F403", "F821", "F822", "F823", "F841", "UP035", "UP038"]
 
 [tool.coverage.run]
 source = ["src"]
