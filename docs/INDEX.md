@@ -1,15 +1,16 @@
 # 📚 Documentation Index - MaTanne v2
 
-## 🎯 Documents Essentiels (Racine)
+## 🎯 Documents Essentiels
 
 | Fichier | Description |
 |---------|-------------|
 | **README.md** | Documentation principale du projet |
 | **ROADMAP.md** | Plan de développement & roadmap |
-| **CHECKLIST_FINAL.md** | Checklist finale Phase 3 |
-| **RESULTAT_FINAL_PHASE3.md** | Résultats complets Phase 3 ✅ |
-| **RESTRUCTURATION_TESTS.md** | Guide de restructuration des tests |
-| **PHASE3_COMPLETE_REORGANIZED.md** | Phase 3 + réorganisation détails |
+| **[API_REFERENCE.md](./API_REFERENCE.md)** | **Référence complète de l'API REST** |
+| **[SERVICES_REFERENCE.md](./SERVICES_REFERENCE.md)** | **Documentation des services backend** |
+| **[ARCHITECTURE.md](./ARCHITECTURE.md)** | Architecture technique |
+| **[FONCTIONNALITES.md](./FONCTIONNALITES.md)** | Fonctionnalités détaillées |
+| **[SQLALCHEMY_SESSION_GUIDE.md](./SQLALCHEMY_SESSION_GUIDE.md)** | Guide sessions DB |
 
 ## 📁 Structure des Dossiers
 
@@ -18,20 +19,16 @@
 docs/
 ├── INDEX.md                          ← Vous êtes ici
 ├── ARCHITECTURE.md                   ← Architecture technique
+├── API_REFERENCE.md                  ← Documentation API REST (NEW!)
+├── SERVICES_REFERENCE.md             ← Documentation Services (NEW!)
+├── FONCTIONNALITES.md                ← Fonctionnalités
+├── SQLALCHEMY_SESSION_GUIDE.md       ← Guide sessions DB
+├── ERD_SCHEMA.md                     ← Schéma ERD
 ├── reports/                          ← Rapports d'analyse
 │   ├── ANALYSIS_SUMMARY.json
 │   ├── COVERAGE_REPORT.md
-│   ├── FINAL_COVERAGE_ANALYSIS.md
-│   ├── TEST_ANALYSIS_DETAILED.md
-│   ├── TEST_ANALYSIS_REPORT.json
 │   └── coverage.json
 └── archive/                          ← Anciens documents (archivés)
-    ├── PHASE1_RESULTS.md
-    ├── PHASE2_SUITE_COMPLETE.md
-    ├── DASHBOARD_FINAL_PHASE12.md
-    ├── TESTING_GUIDE.md
-    ├── QUICK_COMMANDS.md
-    └── ... (13+ fichiers)
 ```
 
 ### `/tools/` - Scripts & Outils
@@ -43,60 +40,30 @@ tools/
 ├── deploy_supabase.py                ← Déployer Supabase
 ├── migrate_supabase.py               ← Migrer Supabase
 ├── seed_recettes.py                  ← Remplir BD recettes
-├── reorganize_tests.py               ← Réorganiser tests
-├── run_tests_planning.py             ← Runner planning tests
-├── test_manager.py                   ← Manager tests
-├── fix_encoding*.py                  ← Fixes encoding
 └── *.ps1                             ← Scripts PowerShell
 ```
 
-### `/data/` - Données & Templates
-```
-data/
-├── recettes_standard.json            ← Recettes standard
-├── TEMPLATE_IMPORT.csv               ← Template import
-└── tests_new.txt                     ← Test liste
-```
+## 🚀 Démarrage rapide
 
-## 🚀 Commandes Principales
-
-### Mesurer Couverture (Actif)
+### Lancer l'application
 ```bash
-# Depuis la racine
-python tools/measure_coverage.py 40
-
-# Via manage.py
-python manage.py test_coverage
+streamlit run src/app.py
 ```
 
-### Exécuter Tests
+### Lancer l'API REST
+```bash
+uvicorn src.api.main:app --reload --port 8000
+# Documentation: http://localhost:8000/docs
+```
+
+### Tests
 ```bash
 # Tous les tests
 pytest tests/ -v
 
-# Phases seulement
-pytest tests/phases/ -v
-
 # Avec couverture
 pytest tests/ --cov=src --cov-report=html
 ```
-
-### Outils Disponibles
-```bash
-# Analyser couverture
-python tools/analyze_coverage.py
-
-# Analyser tests
-python tools/analyze_tests.py
-
-# Déployer migrations
-python tools/migrate_supabase.py
-
-# Seed recettes
-python tools/seed_recettes.py
-```
-
-## 📊 Derniers Résultats
 
 ### Phase 3 (Complète ✅)
 - **Tests créés:** 170 (P1: 51, P2: 36, P3: 83)
