@@ -18,14 +18,18 @@ from typing import Any
 import streamlit as st
 
 # Ré-exporter les exceptions pures
-from .errors_base import (
+from .errors_base import (  # noqa: F401
     ErreurBaseDeDonnees,
+    ErreurConfiguration,
     ErreurLimiteDebit,
     ErreurNonTrouve,
     ErreurServiceExterne,
     ErreurServiceIA,
     ErreurValidation,
     ExceptionApp,
+    exiger_champs,
+    valider_plage,
+    valider_type,
 )
 
 logger = logging.getLogger(__name__)
