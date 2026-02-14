@@ -18,12 +18,12 @@ env_file = project_root / ".env.local"
 if env_file.exists():
     load_dotenv(env_file, override=True)
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text  # noqa: E402
 
-from alembic.config import Config
-from alembic.operations import Operations
-from alembic.runtime.migration import MigrationContext
-from src.core.config import obtenir_parametres
+from alembic.config import Config  # noqa: E402
+from alembic.operations import Operations  # noqa: E402
+from alembic.runtime.migration import MigrationContext  # noqa: E402
+from src.core.config import obtenir_parametres  # noqa: E402
 
 parametres = obtenir_parametres()
 
@@ -111,7 +111,7 @@ def lancer_migration(engine):
         # ExÃ©cuter upgrade
         with engine.begin() as conn:
             ctx = MigrationContext.configure(conn)
-            op = Operations(ctx)
+            Operations(ctx)
 
             # Lire la migration
             migrations_dir = project_root / "alembic" / "versions"

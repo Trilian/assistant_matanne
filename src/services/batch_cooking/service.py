@@ -287,11 +287,11 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         # Compter recettes complétées
         if session.etapes:
             session.nb_recettes_completees = len(
-                set(
+                {
                     e.recette_id
                     for e in session.etapes
                     if e.recette_id and e.statut == StatutEtapeEnum.TERMINEE.value
-                )
+                }
             )
 
         db.commit()
@@ -436,7 +436,7 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
         return (
             db.query(PreparationBatch)
             .filter(
-                PreparationBatch.consomme == False,
+                not PreparationBatch.consomme,
                 PreparationBatch.date_peremption <= limite,
             )
             .order_by(PreparationBatch.date_peremption)
@@ -630,9 +630,7 @@ RÈGLES:
         )
 
         if result:
-            logger.info(
-                f"✅ Plan batch cooking généré: {result.duree_totale_estimee} min estimées"
-            )
+            logger.info(f"✅ Plan batch cooking généré: {result.duree_totale_estimee} min estimées")
 
         return result
 
@@ -647,22 +645,22 @@ RÈGLES:
         db: Session | None = None,
     ) -> list[Recette]:
         """Suggère des recettes adaptées au batch cooking."""
-        query = db.query(Recette).filter(Recette.compatible_batch == True)
+        query = db.query(Recette).filter(Recette.compatible_batch)
 
         # Filtrer par robots si spécifié
         if robots_disponibles:
             # Filtre complexe sur les robots
             for robot in robots_disponibles:
                 if robot == "cookeo":
-                    query = query.filter(Recette.compatible_cookeo == True)
+                    query = query.filter(Recette.compatible_cookeo)
                 elif robot == "monsieur_cuisine":
-                    query = query.filter(Recette.compatible_monsieur_cuisine == True)
+                    query = query.filter(Recette.compatible_monsieur_cuisine)
                 elif robot == "airfryer":
-                    query = query.filter(Recette.compatible_airfryer == True)
+                    query = query.filter(Recette.compatible_airfryer)
 
         # Filtrer pour bébé si Jules présent
         if avec_jules:
-            query = query.filter(Recette.compatible_bebe == True)
+            query = query.filter(Recette.compatible_bebe)
 
         # Prioriser les recettes congelables
         recettes = query.order_by(Recette.congelable.desc()).limit(nb_recettes * 2).all()
@@ -711,7 +709,7 @@ RÈGLES:
 
             # Attribuer à des repas
             nb_attribue = min(preparation.portions_restantes, len(repas_libres))
-            for i, repas in enumerate(repas_libres[:nb_attribue]):
+            for _i, repas in enumerate(repas_libres[:nb_attribue]):
                 repas.notes = f"🍱 {preparation.nom}"
 
                 if preparation.repas_attribues is None:

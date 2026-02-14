@@ -370,7 +370,7 @@ class ServiceExportPDF:
         with obtenir_contexte_db() as db:
             articles = (
                 db.query(ArticleCourses)
-                .filter(ArticleCourses.achete == False)
+                .filter(not ArticleCourses.achete)
                 .order_by(ArticleCourses.categorie, ArticleCourses.nom)
                 .all()
             )
@@ -457,9 +457,7 @@ class ServiceExportPDF:
 
         # Total
         story.append(Spacer(1, 10))
-        story.append(
-            Paragraph(f"📊 Total: {data.total_articles} articles", self.styles["Normal"])
-        )
+        story.append(Paragraph(f"📊 Total: {data.total_articles} articles", self.styles["Normal"]))
 
         # Pied de page
         story.append(Spacer(1, 30))

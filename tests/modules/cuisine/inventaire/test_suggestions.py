@@ -9,6 +9,25 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
+class SessionStateMock(dict):
+    """Mock de session_state Streamlit supportant dict et attributs"""
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(key) from None
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+    def __delattr__(self, key):
+        try:
+            del self[key]
+        except KeyError:
+            raise AttributeError(key) from None
+
+
 class SuggestionMock:
     """Mock d'une suggestion IA"""
 
@@ -34,7 +53,7 @@ class TestRenderSuggestionsIA:
     def mock_st(self):
         """Mock streamlit"""
         with patch("src.modules.cuisine.inventaire.suggestions.st") as mock:
-            mock.session_state = {}
+            mock.session_state = SessionStateMock()
             mock.columns.return_value = [MagicMock(), MagicMock(), MagicMock(), MagicMock()]
             yield mock
 
@@ -128,12 +147,14 @@ class TestRenderSuggestionsIA:
     def test_affiche_suggestions_existantes(self, mock_st, mock_service):
         """Vérifie l'affichage des suggestions en session"""
         mock_st.button.return_value = False
-        mock_st.session_state = {
-            "suggestions_data": [
-                SuggestionMock("Pommes", "haute"),
-                SuggestionMock("Pain", "basse"),
-            ]
-        }
+        mock_st.session_state = SessionStateMock(
+            {
+                "suggestions_data": [
+                    SuggestionMock("Pommes", "haute"),
+                    SuggestionMock("Pain", "basse"),
+                ]
+            }
+        )
 
         mock_expander = MagicMock()
         mock_expander.__enter__ = MagicMock(return_value=mock_expander)
@@ -150,13 +171,15 @@ class TestRenderSuggestionsIA:
     def test_groupe_par_priorite(self, mock_st, mock_service):
         """Vérifie le groupement par priorité"""
         mock_st.button.return_value = False
-        mock_st.session_state = {
-            "suggestions_data": [
-                SuggestionMock("Pommes", "haute"),
-                SuggestionMock("Carottes", "haute"),
-                SuggestionMock("Pain", "basse"),
-            ]
-        }
+        mock_st.session_state = SessionStateMock(
+            {
+                "suggestions_data": [
+                    SuggestionMock("Pommes", "haute"),
+                    SuggestionMock("Carottes", "haute"),
+                    SuggestionMock("Pain", "basse"),
+                ]
+            }
+        )
 
         mock_expander = MagicMock()
         mock_expander.__enter__ = MagicMock(return_value=mock_expander)

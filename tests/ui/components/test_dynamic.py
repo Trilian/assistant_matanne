@@ -136,7 +136,7 @@ class TestListeDynamique:
         fields = [{"name": "nom", "label": "Nom", "type": "text"}]
         initial = [{"nom": "Item1"}, {"nom": "Item2"}]
 
-        dl = ListeDynamique("init_test", fields, initial_items=initial)
+        _dl = ListeDynamique("init_test", fields, initial_items=initial)
 
         assert st.session_state.get("init_test_items") == initial
 

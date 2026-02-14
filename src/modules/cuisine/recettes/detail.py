@@ -370,13 +370,11 @@ def render_detail_recette(recette):
                 }
 
                 # Créer colonnes pour les boutons disponibles
-                available_robots = [r for r in robots_compatibles]
+                available_robots = list(robots_compatibles)
                 if available_robots:
                     cols = st.columns(len(available_robots))
                     for idx, robot_name in enumerate(available_robots):
-                        icon, robot_key = robot_buttons.get(
-                            robot_name, ("🤖", robot_name.lower())
-                        )
+                        icon, robot_key = robot_buttons.get(robot_name, ("🤖", robot_name.lower()))
                         with cols[idx]:
                             if st.button(
                                 f"{icon} {robot_name}",
@@ -430,7 +428,7 @@ def render_detail_recette(recette):
                             "glucides": recette.glucides,
                             "updated_at": datetime.utcnow(),
                         }
-                        nouvelle_recette = service.create(recette_dict)
+                        service.create(recette_dict)
                         st.success("✅ Recette dupliquée!")
                         st.rerun()
                 except Exception as e:

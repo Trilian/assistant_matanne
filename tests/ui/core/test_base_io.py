@@ -89,7 +89,7 @@ class TestServiceIOBaseExport:
         service = ServiceIOBase(config)
         items = [{"nom": "Test"}]
 
-        result = service.to_csv(items)
+        _result = service.to_csv(items)
 
         mock_io.to_csv.assert_called_once_with(items=items, field_mapping={"nom": "Nom"})
 
@@ -107,7 +107,7 @@ class TestServiceIOBaseExport:
         service = ServiceIOBase(config)
         items = [{"nom": "Test"}]
 
-        result = service.to_json(items, indent=4)
+        _result = service.to_json(items, indent=4)
 
         mock_io.to_json.assert_called_once_with(items, indent=4)
 

@@ -623,7 +623,7 @@ def tablet_checklist(
         Dict {item: checked}
     """
     if f"{key}_checked" not in st.session_state:
-        st.session_state[f"{key}_checked"] = {item: False for item in items}
+        st.session_state[f"{key}_checked"] = dict.fromkeys(items, False)
 
     checked = st.session_state[f"{key}_checked"]
 

@@ -59,9 +59,7 @@ def render_suggestions_ia():
             # Afficher par priorité
             for priority in ["haute", "moyenne", "basse"]:
                 if priority in by_priority:
-                    icon = (
-                        "❌" if priority == "haute" else "⚠️" if priority == "moyenne" else "✅"
-                    )
+                    icon = "❌" if priority == "haute" else "⚠️" if priority == "moyenne" else "✅"
                     with st.expander(
                         f"{icon} Priorité {priority.upper()} ({len(by_priority[priority])})"
                     ):

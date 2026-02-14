@@ -189,7 +189,7 @@ class TestBarreRecherche:
 
         mock_input.return_value = ""
 
-        result = barre_recherche()
+        _result = barre_recherche()
 
         mock_input.assert_called_once()
         # Vérifie placeholder contient emoji recherche
@@ -203,7 +203,7 @@ class TestBarreRecherche:
 
         mock_input.return_value = "test"
 
-        result = barre_recherche(texte_indicatif="Rechercher recettes...", cle="recipe_search")
+        _result = barre_recherche(texte_indicatif="Rechercher recettes...", cle="recipe_search")
 
         call_kwargs = mock_input.call_args[1]
         assert "recettes" in call_kwargs.get("placeholder", "")
@@ -334,7 +334,7 @@ class TestFiltresRapides:
 
         filters = {"Type": ["A", "B"], "Status": ["X", "Y"]}
 
-        result = filtres_rapides(filters)
+        _result = filtres_rapides(filters)
 
         # Vérifie que columns est appelé pour chaque groupe
         assert mock_cols.call_count == 2

@@ -37,9 +37,7 @@ def render_photos():
 
     # Affiche la photo actuelle
     with col2:
-        photo_status = (
-            "✅ Avec photo" if selected_article.get("photo_url") else "ℹ️ Pas de photo"
-        )
+        photo_status = "✅ Avec photo" if selected_article.get("photo_url") else "ℹ️ Pas de photo"
         st.info(f"État: {photo_status}")
 
     # Onglets upload/gestion
@@ -71,7 +69,7 @@ def render_photos():
                         # Pour le prototype, on utilise une URL Streamlit
                         photo_url = f"streamlit_uploaded://{uploaded_file.name}"
 
-                        result = service.ajouter_photo(
+                        service.ajouter_photo(
                             article_id=article_id,
                             photo_url=photo_url,
                             photo_filename=uploaded_file.name,
@@ -109,7 +107,7 @@ def render_photos():
                         caption=selected_article.get("photo_filename", "Photo"),
                         use_column_width=True,
                     )
-                except:
+                except Exception:
                     st.warning("Impossible d'afficher la photo")
 
             with col2:

@@ -2,6 +2,9 @@
 # Installation: pip install pre-commit && pre-commit install
 # Documentation: https://pre-commit.com/
 
+# Exclure les dossiers de backup des vérifications
+exclude: ^backups/
+
 repos:
   # Hooks locaux pour l'encodage
   - repo: local

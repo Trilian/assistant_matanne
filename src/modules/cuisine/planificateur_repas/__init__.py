@@ -209,11 +209,7 @@ def app():
         if feedbacks:
             for fb in feedbacks[-10:]:
                 emoji = (
-                    "👍"
-                    if fb.feedback == "like"
-                    else "👎"
-                    if fb.feedback == "dislike"
-                    else "😐"
+                    "👍" if fb.feedback == "like" else "👎" if fb.feedback == "dislike" else "😐"
                 )
                 st.caption(f"{emoji} {fb.recette_nom} ({fb.date_feedback.strftime('%d/%m')})")
         else:

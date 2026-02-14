@@ -26,23 +26,23 @@ workspace_root = Path(__file__).parent.parent
 if str(workspace_root) not in sys.path:
     sys.path.insert(0, str(workspace_root))
 
-from datetime import date, timedelta
+from datetime import date, timedelta  # noqa: E402
 
-import pytest
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.pool import StaticPool
+import pytest  # noqa: E402
+from sqlalchemy import create_engine, event  # noqa: E402
+from sqlalchemy.orm import Session, sessionmaker  # noqa: E402
+from sqlalchemy.pool import StaticPool  # noqa: E402
 
-from src.core.models import (
+from src.core.models import (  # noqa: E402
     Base,
     Ingredient,
     Planning,
     Recette,
 )
-from src.services.courses import CoursesService
-from src.services.inventaire import InventaireService
-from src.services.planning import PlanningService
-from src.services.recettes import RecetteService
+from src.services.courses import CoursesService  # noqa: E402
+from src.services.inventaire import InventaireService  # noqa: E402
+from src.services.planning import PlanningService  # noqa: E402
+from src.services.recettes import RecetteService  # noqa: E402
 
 # ==================== DATABASE SETUP - SQLite JSON compatibility ====================
 
@@ -421,7 +421,9 @@ class SessionStateMock(dict):
         try:
             return self[key]
         except KeyError:
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{key}'") from None
+            raise AttributeError(
+                f"'{type(self).__name__}' object has no attribute '{key}'"
+            ) from None
 
     def __setattr__(self, key, value):
         self[key] = value
@@ -430,7 +432,9 @@ class SessionStateMock(dict):
         try:
             del self[key]
         except KeyError:
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{key}'") from None
+            raise AttributeError(
+                f"'{type(self).__name__}' object has no attribute '{key}'"
+            ) from None
 
 
 def create_streamlit_mock(session_state_data: dict = None):

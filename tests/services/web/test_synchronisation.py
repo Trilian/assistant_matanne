@@ -1043,7 +1043,7 @@ class TestInitClient:
         mock_params.SUPABASE_URL = "https://test.supabase.co"
         mock_params.SUPABASE_ANON_KEY = "test_key"
 
-        with patch("src.services.web.synchronisation.create_client", create=True) as mock_create:
+        with patch("src.services.web.synchronisation.create_client", create=True) as _mock_create:
             from src.services.web.synchronisation import RealtimeSyncService
 
             with patch(
@@ -1106,7 +1106,7 @@ class TestGetCurrentUser:
         ):
             from src.services.web.synchronisation import RealtimeSyncService
 
-            service = RealtimeSyncService()
+            _service = RealtimeSyncService()
             # Test passera car les méthodes sont mockées ailleurs
 
 

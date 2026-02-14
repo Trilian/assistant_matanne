@@ -21,6 +21,10 @@ class TestRenderCalendarSyncUI:
             tab_mock.__exit__ = MagicMock(return_value=False)
             mock.tabs.return_value = [tab_mock, tab_mock, tab_mock]
             mock.columns.return_value = [MagicMock(), MagicMock()]
+            mock.checkbox.return_value = True
+            mock.slider.return_value = 30
+            mock.button.return_value = False
+            mock.text_input.return_value = ""
             yield mock
 
     @pytest.fixture
@@ -33,22 +37,28 @@ class TestRenderCalendarSyncUI:
 
     def test_affiche_subheader(self, mock_st, mock_service):
         """Vérifie l'affichage du titre"""
-        from src.modules.planning.calendar_sync_ui import render_calendar_sync_ui
+        with patch("src.core.config.obtenir_parametres") as mock_params:
+            mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID=None)
 
-        render_calendar_sync_ui()
+            from src.modules.planning.calendar_sync_ui import render_calendar_sync_ui
 
-        mock_st.subheader.assert_called_once()
-        assert "Synchronisation" in mock_st.subheader.call_args[0][0]
+            render_calendar_sync_ui()
+
+            mock_st.subheader.assert_called_once()
+            assert "Synchronisation" in mock_st.subheader.call_args[0][0]
 
     def test_affiche_3_tabs(self, mock_st, mock_service):
         """Vérifie les 3 onglets"""
-        from src.modules.planning.calendar_sync_ui import render_calendar_sync_ui
+        with patch("src.core.config.obtenir_parametres") as mock_params:
+            mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID=None)
 
-        render_calendar_sync_ui()
+            from src.modules.planning.calendar_sync_ui import render_calendar_sync_ui
 
-        mock_st.tabs.assert_called_once()
-        args = mock_st.tabs.call_args[0][0]
-        assert len(args) == 3
+            render_calendar_sync_ui()
+
+            mock_st.tabs.assert_called_once()
+            args = mock_st.tabs.call_args[0][0]
+            assert len(args) == 3
 
 
 class TestRenderExportTab:
@@ -118,7 +128,7 @@ class TestRenderExportTab:
         mock_st.button.return_value = True
         mock_service.export_to_ical.return_value = "BEGIN:VCALENDAR..."
 
-        with patch("src.modules.planning.calendar_sync_ui.get_auth_service") as mock_auth:
+        with patch("src.services.utilisateur.get_auth_service") as mock_auth:
             mock_user = MagicMock()
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user
@@ -134,7 +144,7 @@ class TestRenderExportTab:
         mock_st.button.return_value = True
         mock_service.export_to_ical.return_value = "BEGIN:VCALENDAR..."
 
-        with patch("src.modules.planning.calendar_sync_ui.get_auth_service") as mock_auth:
+        with patch("src.services.utilisateur.get_auth_service") as mock_auth:
             mock_user = MagicMock()
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user
@@ -201,7 +211,7 @@ class TestRenderImportTab:
         result_mock.message = "Import réussi"
         mock_service.import_from_ical_url.return_value = result_mock
 
-        with patch("src.modules.planning.calendar_sync_ui.get_auth_service") as mock_auth:
+        with patch("src.services.utilisateur.get_auth_service") as mock_auth:
             mock_user = MagicMock()
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user
@@ -225,7 +235,7 @@ class TestRenderImportTab:
         result_mock.message = "Import réussi"
         mock_service.import_from_ical_url.return_value = result_mock
 
-        with patch("src.modules.planning.calendar_sync_ui.get_auth_service") as mock_auth:
+        with patch("src.services.utilisateur.get_auth_service") as mock_auth:
             mock_user = MagicMock()
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user
@@ -249,7 +259,7 @@ class TestRenderImportTab:
         result_mock.message = "Erreur d'import"
         mock_service.import_from_ical_url.return_value = result_mock
 
-        with patch("src.modules.planning.calendar_sync_ui.get_auth_service") as mock_auth:
+        with patch("src.services.utilisateur.get_auth_service") as mock_auth:
             mock_user = MagicMock()
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user
@@ -278,7 +288,7 @@ class TestRenderConnectTab:
 
     def test_affiche_titre_connecter(self, mock_st, mock_service):
         """Vérifie le titre de l'onglet connexion"""
-        with patch("src.modules.planning.calendar_sync_ui.obtenir_parametres") as mock_params:
+        with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID=None)
 
             from src.modules.planning.calendar_sync_ui import _render_connect_tab
@@ -289,7 +299,7 @@ class TestRenderConnectTab:
 
     def test_affiche_warning_google_non_configure(self, mock_st, mock_service):
         """Vérifie le warning si Google non configuré"""
-        with patch("src.modules.planning.calendar_sync_ui.obtenir_parametres") as mock_params:
+        with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID=None)
 
             from src.modules.planning.calendar_sync_ui import _render_connect_tab
@@ -300,7 +310,7 @@ class TestRenderConnectTab:
 
     def test_affiche_bouton_google_si_configure(self, mock_st, mock_service):
         """Vérifie le bouton Google si configuré"""
-        with patch("src.modules.planning.calendar_sync_ui.obtenir_parametres") as mock_params:
+        with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID="client_id_123")
 
             from src.modules.planning.calendar_sync_ui import _render_connect_tab
@@ -315,7 +325,7 @@ class TestRenderConnectTab:
         mock_st.button.return_value = True
         mock_service.get_google_auth_url.return_value = "https://accounts.google.com/auth"
 
-        with patch("src.modules.planning.calendar_sync_ui.obtenir_parametres") as mock_params:
+        with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID="client_id_123")
 
             from src.modules.planning.calendar_sync_ui import _render_connect_tab

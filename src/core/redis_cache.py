@@ -155,7 +155,7 @@ class CacheRedis:
 
         self._initialized = True
         self._fallback = CacheMemoire()
-        self._redis: "redis.Redis | None" = None
+        self._redis: redis.Redis | None = None
         self._config = ConfigurationRedis()
         self._stats = {"hits": 0, "misses": 0, "errors": 0, "fallback_used": 0}
 

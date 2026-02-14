@@ -67,7 +67,7 @@ class TestAppConfiguration:
         try:
             # La vérification peut échouer en test, c'est OK
             result = verifier_connexion()
-            assert isinstance(result, (bool, dict)) or result is None
+            assert isinstance(result, bool | dict) or result is None
         except Exception:
             # Attendu en environnement de test
             pass
@@ -156,7 +156,7 @@ class TestErrorHandling:
             try:
                 from src.core.config import obtenir_parametres
 
-                params = obtenir_parametres()
+                _params = obtenir_parametres()
                 # L'application doit avoir des valeurs par défaut
             except Exception:
                 # Acceptable en test

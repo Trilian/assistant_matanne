@@ -9,6 +9,25 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
+class SessionStateMock(dict):
+    """Mock de session_state Streamlit supportant dict et attributs"""
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(key) from None
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+    def __delattr__(self, key):
+        try:
+            del self[key]
+        except KeyError:
+            raise AttributeError(key) from None
+
+
 class TestDepensesApp:
     """Tests pour app()"""
 
@@ -16,7 +35,7 @@ class TestDepensesApp:
     def mock_st(self):
         """Mock streamlit"""
         with patch("src.modules.maison.depenses.st") as mock:
-            mock.session_state = {}
+            mock.session_state = SessionStateMock()
             mock.tabs.return_value = [MagicMock(), MagicMock(), MagicMock()]
             yield mock
 
@@ -35,12 +54,14 @@ class TestDepensesApp:
             patch("src.modules.maison.depenses.render_onglet_mois") as mock_mois,
             patch("src.modules.maison.depenses.render_onglet_ajouter") as mock_ajouter,
             patch("src.modules.maison.depenses.render_onglet_analyse") as mock_analyse,
+            patch("src.modules.maison.depenses.render_formulaire") as mock_formulaire,
         ):
             yield {
                 "stats": mock_stats,
                 "mois": mock_mois,
                 "ajouter": mock_ajouter,
                 "analyse": mock_analyse,
+                "formulaire": mock_formulaire,
             }
 
     def test_app_affiche_titre(self, mock_st, mock_components):
@@ -92,9 +113,10 @@ class TestDepensesApp:
 
     def test_app_mode_edition_annuler(self, mock_st, mock_components):
         """Vérifie l'annulation du mode édition"""
-        session_state = {"edit_depense_id": 1}
-        mock_st.session_state = session_state
+        mock_st.session_state = SessionStateMock({"edit_depense_id": 1})
         mock_st.button.return_value = True
+        # st.rerun() should stop execution, simulate with exception
+        mock_st.rerun.side_effect = SystemExit()
 
         with (
             patch("src.modules.maison.depenses.get_depense_by_id") as mock_get,
@@ -104,14 +126,15 @@ class TestDepensesApp:
 
             from src.modules.maison.depenses import app
 
-            app()
+            with pytest.raises(SystemExit):
+                app()
 
             mock_st.button.assert_called()
             mock_st.rerun.assert_called()
 
     def test_app_mode_edition_depense_introuvable(self, mock_st, mock_components):
         """Vérifie le comportement si dépense non trouvée"""
-        mock_st.session_state = {"edit_depense_id": 999}
+        mock_st.session_state = SessionStateMock({"edit_depense_id": 999})
 
         with patch("src.modules.maison.depenses.get_depense_by_id") as mock_get:
             mock_get.return_value = None

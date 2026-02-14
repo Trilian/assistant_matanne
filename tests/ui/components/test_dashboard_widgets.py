@@ -297,7 +297,7 @@ class TestCarteMetriqueAvancee:
         """Test avec lien vers module."""
         from src.ui.components.dashboard_widgets import carte_metrique_avancee
 
-        with patch("src.core.state.GestionnaireEtat") as mock_etat:
+        with patch("src.core.state.GestionnaireEtat") as _mock_etat:
             try:
                 carte_metrique_avancee(
                     titre="Recettes", valeur=10, icone="ðŸ½ï¸", lien_module="cuisine"

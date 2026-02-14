@@ -771,7 +771,7 @@ class TestEnvoyerWebPushAvances:
     ):
         """Erreur 410 désactive l'abonnement."""
         service._sauvegarder_abonnement_supabase = MagicMock()
-        sub = service.sauvegarder_abonnement("user123", subscription_info)
+        _sub = service.sauvegarder_abonnement("user123", subscription_info)
         service.doit_envoyer = MagicMock(return_value=True)
 
         # Simuler une erreur 410 lors de l'envoi
@@ -791,7 +791,7 @@ class TestEnvoyerWebPushAvances:
     ):
         """Erreur 404 désactive l'abonnement."""
         service._sauvegarder_abonnement_supabase = MagicMock()
-        sub = service.sauvegarder_abonnement("user123", subscription_info)
+        _sub = service.sauvegarder_abonnement("user123", subscription_info)
         service.doit_envoyer = MagicMock(return_value=True)
 
         # Simuler une erreur 404 lors de l'envoi
@@ -805,6 +805,218 @@ class TestEnvoyerWebPushAvances:
         # L'envoi a échoué et l'abonnement devrait être marqué inactif
         assert result is False
         assert service._subscriptions["user123"][0].is_active is False
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS MÉTHODES DB (SQLAlchemy)
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestSauvegarderAbonnementDB:
+    """Tests pour sauvegarder_abonnement_db - lignes 494-519."""
+
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        return ServiceWebPush()
+
+    @pytest.fixture
+    def mock_db(self):
+        """Fixture pour une session DB mockée."""
+        mock = MagicMock()
+        mock.query.return_value.filter.return_value.first.return_value = None
+        mock.add = MagicMock()
+        mock.commit = MagicMock()
+        mock.refresh = MagicMock()
+        return mock
+
+    @pytest.fixture
+    def valid_uuid(self):
+        """UUID valide pour les tests."""
+        from uuid import uuid4
+
+        return str(uuid4())
+
+    def test_sauvegarder_nouvel_abonnement_db(self, service, mock_db, valid_uuid):
+        """Test création d'un nouvel abonnement DB."""
+        _result = service.sauvegarder_abonnement_db(
+            endpoint="https://push.example.com/abc",
+            p256dh_key="abc123",
+            auth_key="xyz789",
+            user_id=valid_uuid,
+            device_info={"browser": "Chrome"},
+            db=mock_db,
+        )
+
+        mock_db.add.assert_called_once()
+        mock_db.commit.assert_called_once()
+
+    def test_maj_abonnement_existant_db(self, service, mock_db, valid_uuid):
+        """Test mise à jour d'un abonnement existant."""
+        existing = MagicMock()
+        existing.endpoint = "https://push.example.com/abc"
+        mock_db.query.return_value.filter.return_value.first.return_value = existing
+
+        service.sauvegarder_abonnement_db(
+            endpoint="https://push.example.com/abc",
+            p256dh_key="new_key",
+            auth_key="new_auth",
+            user_id=valid_uuid,
+            db=mock_db,
+        )
+
+        assert existing.p256dh_key == "new_key"
+        assert existing.auth_key == "new_auth"
+        mock_db.commit.assert_called_once()
+
+
+@pytest.mark.unit
+class TestListerAbonnementsDB:
+    """Tests pour lister_abonnements_utilisateur_db."""
+
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        return ServiceWebPush()
+
+    @pytest.fixture
+    def valid_uuid(self):
+        """UUID valide pour les tests."""
+        from uuid import uuid4
+
+        return str(uuid4())
+
+    def test_lister_abonnements_utilisateur_db(self, service, valid_uuid):
+        """Test liste abonnements via DB."""
+        mock_db = MagicMock()
+        mock_subs = [MagicMock(), MagicMock()]
+        mock_db.query.return_value.filter.return_value.all.return_value = mock_subs
+
+        result = service.lister_abonnements_utilisateur_db(user_id=valid_uuid, db=mock_db)
+
+        assert len(result) == 2
+
+
+@pytest.mark.unit
+class TestSupprimerAbonnementDB:
+    """Tests pour supprimer_abonnement_db."""
+
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        return ServiceWebPush()
+
+    def test_supprimer_abonnement_db_existant(self, service):
+        """Test suppression d'un abonnement DB existant."""
+        mock_db = MagicMock()
+        mock_sub = MagicMock()
+        mock_db.query.return_value.filter.return_value.first.return_value = mock_sub
+
+        result = service.supprimer_abonnement_db(
+            endpoint="https://push.example.com/abc", db=mock_db
+        )
+
+        assert result is True
+        mock_db.delete.assert_called_once_with(mock_sub)
+        mock_db.commit.assert_called_once()
+
+    def test_supprimer_abonnement_db_inexistant(self, service):
+        """Test suppression abonnement non trouvé."""
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.first.return_value = None
+
+        result = service.supprimer_abonnement_db(endpoint="https://push.notfound.com", db=mock_db)
+
+        assert result is False
+
+
+@pytest.mark.unit
+class TestObtenirPreferencesDB:
+    """Tests pour obtenir_preferences_db."""
+
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        return ServiceWebPush()
+
+    @pytest.fixture
+    def valid_uuid(self):
+        """UUID valide pour les tests."""
+        from uuid import uuid4
+
+        return str(uuid4())
+
+    def test_obtenir_preferences_db_existantes(self, service, valid_uuid):
+        """Test récupération préférences existantes depuis DB."""
+        mock_db = MagicMock()
+        mock_prefs = MagicMock()
+        mock_db.query.return_value.filter.return_value.first.return_value = mock_prefs
+
+        result = service.obtenir_preferences_db(user_id=valid_uuid, db=mock_db)
+
+        assert result == mock_prefs
+
+    def test_obtenir_preferences_db_inexistantes(self, service, valid_uuid):
+        """Test récupération quand préférences n'existent pas."""
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.first.return_value = None
+
+        result = service.obtenir_preferences_db(user_id=valid_uuid, db=mock_db)
+
+        assert result is None
+
+
+@pytest.mark.unit
+class TestSauvegarderPreferencesDB:
+    """Tests pour sauvegarder_preferences_db - lignes 579-601."""
+
+    @pytest.fixture
+    def service(self):
+        """Fixture pour créer un service mocké."""
+        return ServiceWebPush()
+
+    @pytest.fixture
+    def valid_uuid(self):
+        """UUID valide pour les tests."""
+        from uuid import uuid4
+
+        return str(uuid4())
+
+    def test_creer_nouvelles_preferences_db(self, service, valid_uuid):
+        """Test création nouvelles préférences."""
+        mock_db = MagicMock()
+        mock_db.query.return_value.filter.return_value.first.return_value = None
+
+        _result = service.sauvegarder_preferences_db(
+            user_id=valid_uuid,
+            courses_rappel=True,
+            repas_suggestion=False,
+            stock_alerte=True,
+            meteo_alerte=False,
+            budget_alerte=True,
+            db=mock_db,
+        )
+
+        mock_db.add.assert_called_once()
+        mock_db.commit.assert_called_once()
+
+    def test_maj_preferences_existantes_db(self, service, valid_uuid):
+        """Test mise à jour préférences existantes."""
+        mock_db = MagicMock()
+        existing_prefs = MagicMock()
+        mock_db.query.return_value.filter.return_value.first.return_value = existing_prefs
+
+        service.sauvegarder_preferences_db(
+            user_id=valid_uuid,
+            courses_rappel=False,
+            budget_alerte=False,
+            db=mock_db,
+        )
+
+        assert existing_prefs.courses_rappel is False
+        assert existing_prefs.budget_alerte is False
+        mock_db.commit.assert_called_once()
 
 
 # ═══════════════════════════════════════════════════════════

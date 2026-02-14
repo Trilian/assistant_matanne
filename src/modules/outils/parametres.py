@@ -14,6 +14,7 @@ from src.core.cache import Cache
 from src.core.config import obtenir_parametres as get_settings
 from src.core.database import GestionnaireMigrations as GestionnaireMigrations
 from src.core.database import obtenir_infos_db as get_db_info
+from src.core.database import vacuum_database
 from src.core.database import verifier_sante as health_check
 
 # State
@@ -391,11 +392,22 @@ def render_database_config():
                         except Exception as e:
                             afficher_erreur(f"? Erreur: {str(e)}")
 
-                modal.cancel("? Annuler")
+                modal.cancel("❌ Annuler")
 
     with col8:
-        if st.button("?? Backup (TODO)", key="btn_backup_db", use_container_width=True):
-            st.info("Fonctionnalite à implementer")
+        if st.button("💾 Backup", key="btn_backup_db", use_container_width=True):
+            try:
+                from src.services.backup import get_backup_service
+
+                backup_service = get_backup_service()
+                with spinner_intelligent("Sauvegarde en cours..."):
+                    result = backup_service.create_backup()
+                    if result.success:
+                        afficher_succes(f"✅ {result.message}")
+                    else:
+                        afficher_erreur(f"❌ {result.message}")
+            except ImportError:
+                st.warning("Module backup non disponible")
 
 
 # -----------------------------------------------------------
@@ -581,7 +593,6 @@ def render_display_config():
         from src.ui.tablet_mode import (
             TabletMode,
             get_tablet_mode,
-            render_mode_selector,
             set_tablet_mode,
         )
 
@@ -677,7 +688,7 @@ def render_budget_config():
     st.markdown("#### ?? Sauvegarde des donnees")
 
     try:
-        from src.services.backup import get_backup_service, render_backup_ui
+        from src.services.backup import get_backup_service
 
         backup_service = get_backup_service()
 

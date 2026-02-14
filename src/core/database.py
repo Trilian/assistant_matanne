@@ -553,6 +553,27 @@ def verifier_sante() -> dict:
         return {"sain": False, "erreur": str(e), "timestamp": time.time()}
 
 
+def vacuum_database() -> bool:
+    """
+    Exécute VACUUM sur la base de données PostgreSQL pour optimiser l'espace.
+
+    Returns:
+        True si succès, False sinon
+    """
+    try:
+        moteur = obtenir_moteur()
+
+        # VACUUM nécessite autocommit
+        with moteur.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+            conn.execute(text("VACUUM ANALYZE"))
+            logger.info("✅ VACUUM ANALYZE exécuté avec succès")
+            return True
+
+    except Exception as e:
+        logger.error(f"❌ Erreur VACUUM: {e}")
+        raise
+
+
 # ═══════════════════════════════════════════════════════════
 # EXPORTS PRINCIPAUX
 # ═══════════════════════════════════════════════════════════
@@ -566,5 +587,6 @@ __all__ = [
     "verifier_connexion",
     "obtenir_infos_db",
     "initialiser_database",
+    "vacuum_database",
     "GestionnaireMigrations",
 ]

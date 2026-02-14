@@ -695,6 +695,160 @@ class TestChargerEvents:
 
 
 # ═══════════════════════════════════════════════════════════
+# TESTS GENERER_SEMAINE_IA ET CREER_EVENT
+# ═══════════════════════════════════════════════════════════
+
+
+class TestGenererSemaineIA:
+    """Tests pour generer_semaine_ia - lignes 479-514."""
+
+    @pytest.fixture
+    def service(self):
+        """Fixture pour le service."""
+        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+            return ServicePlanningUnifie()
+
+    def test_generer_semaine_ia_appel_base(self, service):
+        """Test appel basique de generer_semaine_ia."""
+        # Mock la méthode call_with_list_parsing_sync pour retourner des données
+        mock_response = [
+            {
+                "repas_proposes": ["Pâtes", "Poulet", "Poisson", "Riz"],
+                "activites_proposees": ["Parc", "Piscine"],
+                "projets_suggeres": ["Ranger garage"],
+                "harmonie_description": "Une semaine équilibrée",
+                "raisons": ["Economique", "Familial"],
+            }
+        ]
+
+        with patch.object(service, "call_with_list_parsing_sync", return_value=mock_response):
+            _result = service.generer_semaine_ia(
+                date_debut=date(2024, 1, 15),
+                contraintes={"budget": 300},
+                contexte={"jules_age_mois": 19},
+            )
+            # Peut retourner None si parsing échoue, mais la méthode est appelée
+            service.call_with_list_parsing_sync.assert_called_once()
+
+    def test_generer_semaine_ia_sans_contraintes(self, service):
+        """Test avec contraintes None."""
+        with patch.object(service, "call_with_list_parsing_sync", return_value=None):
+            result = service.generer_semaine_ia(
+                date_debut=date(2024, 1, 15), contraintes=None, contexte=None
+            )
+            assert result is None
+
+    def test_generer_semaine_ia_echec_ia(self, service):
+        """Test quand IA échoue et retourne None."""
+        with patch.object(service, "call_with_list_parsing_sync", return_value=None):
+            result = service.generer_semaine_ia(
+                date_debut=date(2024, 1, 15),
+                contraintes={"budget": 200},
+                contexte={"objectifs_sante": ["sport", "sommeil"]},
+            )
+            assert result is None
+
+    def test_construire_prompt_generation(self, service):
+        """Test de _construire_prompt_generation."""
+        prompt = service._construire_prompt_generation(
+            date_debut=date(2024, 1, 15),
+            contraintes={"budget": 350, "energie": "faible"},
+            contexte={"jules_age_mois": 20, "objectifs_sante": ["sport", "repos"]},
+        )
+
+        assert "2024-01-15" in prompt
+        assert "350" in prompt
+        assert "faible" in prompt
+        assert "20 mois" in prompt
+        assert "sport" in prompt
+
+
+class TestCreerEvent:
+    """Tests pour creer_event - lignes 548-577."""
+
+    @pytest.fixture
+    def service(self):
+        """Fixture pour le service."""
+        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+            return ServicePlanningUnifie()
+
+    @pytest.fixture
+    def mock_db(self):
+        """Fixture DB mockée."""
+        mock = MagicMock()
+        mock.add = MagicMock()
+        mock.commit = MagicMock()
+        mock.rollback = MagicMock()
+        return mock
+
+    def test_creer_event_success(self, service, mock_db):
+        """Test création événement réussie."""
+        with patch.object(service, "_invalider_cache_semaine"):
+            _result = service.creer_event(
+                titre="Réunion parents",
+                date_debut=datetime(2024, 1, 15, 14, 0),
+                type_event="rdv",
+                description="Réunion école",
+                lieu="École Jules",
+                couleur="#3366cc",
+                db=mock_db,
+            )
+
+            mock_db.add.assert_called_once()
+            mock_db.commit.assert_called_once()
+
+    def test_creer_event_with_date_fin(self, service, mock_db):
+        """Test création événement avec date de fin."""
+        with patch.object(service, "_invalider_cache_semaine"):
+            service.creer_event(
+                titre="Conférence",
+                date_debut=datetime(2024, 1, 15, 9, 0),
+                date_fin=datetime(2024, 1, 15, 12, 0),
+                type_event="autre",
+                db=mock_db,
+            )
+            mock_db.add.assert_called_once()
+
+    def test_creer_event_error_rollback(self, service, mock_db):
+        """Test rollback en cas d'erreur."""
+        mock_db.commit.side_effect = Exception("DB Error")
+
+        with patch.object(service, "_invalider_cache_semaine"):
+            result = service.creer_event(
+                titre="Event error", date_debut=datetime(2024, 1, 15, 10, 0), db=mock_db
+            )
+
+            # Vérifie rollback appelé
+            mock_db.rollback.assert_called_once()
+            assert result is None
+
+
+class TestInvaliderCacheSemaine:
+    """Tests pour _invalider_cache_semaine."""
+
+    @pytest.fixture
+    def service(self):
+        """Fixture pour le service."""
+        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+            return ServicePlanningUnifie()
+
+    def test_invalider_cache_semaine(self, service):
+        """Test invalidation du cache."""
+        with patch("src.services.planning.global_planning.Cache") as mock_cache:
+            service._invalider_cache_semaine(date(2024, 1, 17))  # Mercredi
+
+            # Vérifie que le cache est invalidé pour le lundi de la semaine (15 janvier)
+            assert mock_cache.invalider.call_count == 2
+
+    def test_invalider_cache_lundi(self, service):
+        """Test invalidation quand date est lundi."""
+        with patch("src.services.planning.global_planning.Cache") as mock_cache:
+            service._invalider_cache_semaine(date(2024, 1, 15))  # Lundi
+
+            assert mock_cache.invalider.call_count == 2
+
+
+# ═══════════════════════════════════════════════════════════
 # TESTS DES FACTORIES
 # ═══════════════════════════════════════════════════════════
 

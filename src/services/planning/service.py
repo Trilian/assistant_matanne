@@ -101,7 +101,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
                     .selectinload(Repas.recette)
                     .selectinload(Recette.versions)
                 )
-                .filter(Planning.actif == True)
+                .filter(Planning.actif)
                 .first()
             )
 
@@ -214,7 +214,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
             )
 
             # Requête base pour récupérer 3 recettes de ce type
-            query = db.query(Recette).filter(Recette.est_equilibre == True)
+            query = db.query(Recette).filter(Recette.est_equilibre)
 
             # Filtrer par type de protéine
             if type_proteine == "poisson":
@@ -222,7 +222,7 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
             elif type_proteine == "viande_rouge":
                 query = query.filter(Recette.type_proteines.ilike("%viande%"))
             elif type_proteine == "vegetarien":
-                query = query.filter(Recette.est_vegetarien == True)
+                query = query.filter(Recette.est_vegetarien)
 
             # Exclure les ingrédients interdits
             for ingredient_exc in parametres.ingredients_exclus:
@@ -506,9 +506,7 @@ RULES:
 
         # Log de debug pour voir la réponse
         if not planning_data:
-            logger.warning(
-                f"⚠️ Failed to generate planning for {semaine_debut} - no data returned"
-            )
+            logger.warning(f"⚠️ Failed to generate planning for {semaine_debut} - no data returned")
             logger.debug("Checking if we can create default planning instead...")
 
             # Créer un planning par défaut avec des repas simples

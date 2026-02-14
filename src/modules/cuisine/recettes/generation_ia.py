@@ -170,9 +170,7 @@ def _render_suggestion_card(
                 label_visibility="collapsed",
             )
         with col2:
-            st.metric(
-                "🔥 Cuisson", f"{suggestion.temps_cuisson} min", label_visibility="collapsed"
-            )
+            st.metric("🔥 Cuisson", f"{suggestion.temps_cuisson} min", label_visibility="collapsed")
         with col3:
             st.metric("🍽️ Portions", suggestion.portions, label_visibility="collapsed")
         with col4:

@@ -99,7 +99,7 @@ class TestModuleUIBase:
             name="init_test", title="Test", icon="ðŸ§ª", service=MagicMock()
         )
 
-        module = ModuleUIBase(config)
+        _module = ModuleUIBase(config)
 
         assert "module_init_test" in st.session_state
         assert st.session_state["module_init_test"]["current_page"] == 1
@@ -621,7 +621,7 @@ class TestLoadItems:
         module = ModuleUIBase(config)
         st.session_state[module.session_key]["search_term"] = "test"
 
-        items = module._load_items()
+        _items = module._load_items()
 
         mock_service.advanced_search.assert_called_once()
         call_args = mock_service.advanced_search.call_args
@@ -644,7 +644,7 @@ class TestLoadItems:
         module = ModuleUIBase(config)
         st.session_state[module.session_key]["filters"] = {"categorie": "A"}
 
-        items = module._load_items()
+        _items = module._load_items()
 
         mock_service.get_all.assert_called()
         call_args = mock_service.get_all.call_args
@@ -667,7 +667,7 @@ class TestLoadItems:
         module = ModuleUIBase(config)
         st.session_state[module.session_key]["filters"] = {"tags": ["a", "b"]}
 
-        items = module._load_items()
+        _items = module._load_items()
 
         call_args = mock_service.get_all.call_args
         assert call_args.kwargs["filters"]["tags"] == {"in": ["a", "b"]}
@@ -689,7 +689,7 @@ class TestLoadItems:
         module = ModuleUIBase(config)
         st.session_state[module.session_key]["filters"] = {"type": "Tous", "cat": "Toutes"}
 
-        items = module._load_items()
+        _items = module._load_items()
 
         call_args = mock_service.get_all.call_args
         assert call_args.kwargs["filters"] == {}
