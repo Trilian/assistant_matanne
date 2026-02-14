@@ -48,7 +48,7 @@ def analyser_charge_globale(
     elif charge_totale <= 15:
         niveau = "Moyen"
     elif charge_totale <= 25:
-        niveau = "Ãlevé"
+        niveau = "Élevé"
     else:
         niveau = "Très élevé"
 
@@ -312,7 +312,13 @@ def calculer_statistiques_periode(
 
 def formater_niveau_charge(niveau: str) -> str:
     """Formate le niveau de charge avec emoji."""
-    emojis = {"Libre": "�", "Léger": "🙂", "Moyen": "😐", "Élevé": "😰", "Très élevé": "🔥"}
+    emojis = {
+        "Libre": "\U0001f60c",  # 😌 relieved face
+        "Léger": "\U0001f642",  # 🙂 slightly smiling face
+        "Moyen": "\U0001f610",  # 😐 neutral face
+        "Élevé": "\U0001f630",  # 😰 anxious face
+        "Très élevé": "\U0001f525",  # 🔥 fire
+    }
     emoji = emojis.get(niveau, "")
     return f"{emoji} {niveau}"
 
