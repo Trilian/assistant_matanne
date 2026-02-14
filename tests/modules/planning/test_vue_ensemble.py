@@ -3,6 +3,8 @@
 from datetime import date, timedelta
 from unittest.mock import MagicMock, patch
 
+from tests.conftest import SessionStateMock
+
 # ═══════════════════════════════════════════════════════════
 # TESTS D'IMPORT
 # ═══════════════════════════════════════════════════════════
@@ -92,7 +94,7 @@ class TestAfficherActionsPrioritaires:
         mock_col_action = MagicMock()
         mock_st.columns.return_value = [mock_col_msg, mock_col_action]
         mock_st.button.return_value = True
-        mock_st.session_state = {}
+        mock_st.session_state = SessionStateMock()
 
         alertes = ["🎯 - Test activite"]
         afficher_actions_prioritaires(alertes)
@@ -108,7 +110,7 @@ class TestAfficherActionsPrioritaires:
         mock_col_action = MagicMock()
         mock_st.columns.return_value = [mock_col_msg, mock_col_action]
         mock_st.button.return_value = True
-        mock_st.session_state = {}
+        mock_st.session_state = SessionStateMock()
 
         alertes = ["🍽️ - Budget eleve"]
         afficher_actions_prioritaires(alertes)
@@ -386,7 +388,7 @@ class TestAppFunction:
         from src.modules.planning.vue_ensemble import app
 
         # Setup mocks
-        mock_st.session_state = {}
+        mock_st.session_state = SessionStateMock()
         mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
         mock_st.button.return_value = False
         mock_st.tabs.return_value = [MagicMock(), MagicMock(), MagicMock()]
@@ -405,7 +407,7 @@ class TestAppFunction:
         """Test affichage erreur quand pas de semaine."""
         from src.modules.planning.vue_ensemble import app
 
-        mock_st.session_state = {}
+        mock_st.session_state = SessionStateMock()
         mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
         mock_st.button.return_value = False
 
@@ -457,8 +459,10 @@ class TestAppFunction:
         mock_semaine.charge_globale = "normal"
         mock_semaine.jours = {f"2025-01-{i:02d}": MockJour() for i in range(1, 8)}
 
-        mock_st.session_state = {}
-        mock_st.columns.return_value = [MagicMock() for _ in range(7)]
+        mock_st.session_state = SessionStateMock()
+        mock_st.columns.side_effect = lambda n: [
+            MagicMock() for _ in range(n if isinstance(n, int) else len(n))
+        ]
         mock_st.button.return_value = False
         mock_st.tabs.return_value = [MagicMock(), MagicMock(), MagicMock()]
         mock_st.selectbox.return_value = "lundi"
@@ -486,7 +490,7 @@ class TestAppFunction:
         today = date.today()
         week_start = today - timedelta(days=today.weekday())
 
-        mock_st.session_state = {"ensemble_week_start": week_start}
+        mock_st.session_state = SessionStateMock({"ensemble_week_start": week_start})
         mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
         mock_st.button.side_effect = [True, False]  # First button clicked
 
@@ -509,7 +513,7 @@ class TestAppFunction:
         today = date.today()
         week_start = today - timedelta(days=today.weekday())
 
-        mock_st.session_state = {"ensemble_week_start": week_start}
+        mock_st.session_state = SessionStateMock({"ensemble_week_start": week_start})
         mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
         mock_st.button.side_effect = [False, True]  # Second button clicked
 
@@ -553,8 +557,10 @@ class TestAppFunction:
         mock_semaine.charge_globale = "normal"
         mock_semaine.jours = {f"2025-01-{i:02d}": MockJour() for i in range(1, 8)}
 
-        mock_st.session_state = {}
-        mock_st.columns.return_value = [MagicMock() for _ in range(7)]
+        mock_st.session_state = SessionStateMock()
+        mock_st.columns.side_effect = lambda n: [
+            MagicMock() for _ in range(n if isinstance(n, int) else len(n))
+        ]
         mock_st.button.return_value = False
         mock_st.tabs.return_value = [MagicMock(), MagicMock(), MagicMock()]
         mock_st.selectbox.return_value = "lundi"
@@ -614,8 +620,10 @@ class TestOnglets:
         mock_semaine.charge_globale = "intense"
         mock_semaine.jours = {f"2025-01-{i:02d}": MockJourCharge() for i in range(1, 8)}
 
-        mock_st.session_state = {}
-        mock_st.columns.return_value = [MagicMock() for _ in range(7)]
+        mock_st.session_state = SessionStateMock()
+        mock_st.columns.side_effect = lambda n: [
+            MagicMock() for _ in range(n if isinstance(n, int) else len(n))
+        ]
         mock_st.button.return_value = False
         mock_st.tabs.return_value = [MagicMock(), MagicMock(), MagicMock()]
         mock_st.selectbox.return_value = "lundi"
@@ -665,8 +673,10 @@ class TestOnglets:
         mock_semaine.charge_globale = "normal"
         mock_semaine.jours = {f"2025-01-{i:02d}": MockJour() for i in range(1, 8)}
 
-        mock_st.session_state = {}
-        mock_st.columns.return_value = [MagicMock() for _ in range(7)]
+        mock_st.session_state = SessionStateMock()
+        mock_st.columns.side_effect = lambda n: [
+            MagicMock() for _ in range(n if isinstance(n, int) else len(n))
+        ]
         mock_st.button.return_value = False
         mock_st.tabs.return_value = [MagicMock(), MagicMock(), MagicMock()]
         mock_st.selectbox.return_value = "lundi"

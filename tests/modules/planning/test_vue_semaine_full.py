@@ -81,7 +81,7 @@ class TestTimelineJour:
         col = MagicMock()
         col.__enter__ = MagicMock(return_value=col)
         col.__exit__ = MagicMock(return_value=None)
-        mock_cols.return_value = [col, col, col]
+        mock_cols.side_effect = lambda n: [col for _ in range(n if isinstance(n, int) else len(n))]
         jour_data = {
             "charge_score": 50,
             "charge": "normal",
@@ -108,7 +108,7 @@ class TestTimelineJour:
         col = MagicMock()
         col.__enter__ = MagicMock(return_value=col)
         col.__exit__ = MagicMock(return_value=None)
-        mock_cols.return_value = [col, col, col]
+        mock_cols.side_effect = lambda n: [col for _ in range(n if isinstance(n, int) else len(n))]
         exp = MagicMock()
         exp.__enter__ = MagicMock(return_value=exp)
         exp.__exit__ = MagicMock(return_value=None)
@@ -141,7 +141,7 @@ class TestTimelineJour:
         col = MagicMock()
         col.__enter__ = MagicMock(return_value=col)
         col.__exit__ = MagicMock(return_value=None)
-        mock_cols.return_value = [col, col, col]
+        mock_cols.side_effect = lambda n: [col for _ in range(n if isinstance(n, int) else len(n))]
         exp = MagicMock()
         exp.__enter__ = MagicMock(return_value=exp)
         exp.__exit__ = MagicMock(return_value=None)
@@ -171,7 +171,7 @@ class TestTimelineJour:
         col = MagicMock()
         col.__enter__ = MagicMock(return_value=col)
         col.__exit__ = MagicMock(return_value=None)
-        mock_cols.return_value = [col, col, col]
+        mock_cols.side_effect = lambda n: [col for _ in range(n if isinstance(n, int) else len(n))]
         exp = MagicMock()
         exp.__enter__ = MagicMock(return_value=exp)
         exp.__exit__ = MagicMock(return_value=None)
@@ -202,7 +202,7 @@ class TestTimelineJour:
         col = MagicMock()
         col.__enter__ = MagicMock(return_value=col)
         col.__exit__ = MagicMock(return_value=None)
-        mock_cols.return_value = [col, col, col]
+        mock_cols.side_effect = lambda n: [col for _ in range(n if isinstance(n, int) else len(n))]
         exp = MagicMock()
         exp.__enter__ = MagicMock(return_value=exp)
         exp.__exit__ = MagicMock(return_value=None)
@@ -232,7 +232,7 @@ class TestTimelineJour:
         col = MagicMock()
         col.__enter__ = MagicMock(return_value=col)
         col.__exit__ = MagicMock(return_value=None)
-        mock_cols.return_value = [col, col, col]
+        mock_cols.side_effect = lambda n: [col for _ in range(n if isinstance(n, int) else len(n))]
         exp = MagicMock()
         exp.__enter__ = MagicMock(return_value=exp)
         exp.__exit__ = MagicMock(return_value=None)
@@ -261,7 +261,7 @@ class TestTimelineJour:
         col = MagicMock()
         col.__enter__ = MagicMock(return_value=col)
         col.__exit__ = MagicMock(return_value=None)
-        mock_cols.return_value = [col, col, col]
+        mock_cols.side_effect = lambda n: [col for _ in range(n if isinstance(n, int) else len(n))]
         jour_data = {
             "charge_score": 90,
             "charge": "intense",
@@ -307,7 +307,7 @@ class TestVueSemaineApp:
         col = MagicMock()
         col.__enter__ = MagicMock(return_value=col)
         col.__exit__ = MagicMock(return_value=None)
-        mock_cols.return_value = [col, col, col]
+        mock_cols.side_effect = lambda n: [col for _ in range(n if isinstance(n, int) else len(n))]
         svc = MagicMock()
         svc.get_semaine_complete.return_value = None
         mock_svc.return_value = svc
@@ -358,7 +358,7 @@ class TestVueSemaineApp:
         col = MagicMock()
         col.__enter__ = MagicMock(return_value=col)
         col.__exit__ = MagicMock(return_value=None)
-        mock_cols.return_value = [col, col, col]
+        mock_cols.side_effect = lambda n: [col for _ in range(n if isinstance(n, int) else len(n))]
         tab = MagicMock()
         tab.__enter__ = MagicMock(return_value=tab)
         tab.__exit__ = MagicMock(return_value=None)
@@ -418,7 +418,7 @@ class TestVueSemaineApp:
         col = MagicMock()
         col.__enter__ = MagicMock(return_value=col)
         col.__exit__ = MagicMock(return_value=None)
-        mock_cols.return_value = [col, col, col]
+        mock_cols.side_effect = lambda n: [col for _ in range(n if isinstance(n, int) else len(n))]
         mock_btn.side_effect = [True, False]
         svc = MagicMock()
         svc.get_semaine_complete.return_value = None

@@ -49,7 +49,7 @@ def afficher_actions_prioritaires(alertes_semaine: list) -> None:
                 if st.button("→ Budget", key=f"alerte_{alerte[:20]}", use_container_width=True):
                     st.session_state.planning_view = "budget"
 
-            elif "âš ï¸" in emoji:
+            elif "⚠️" in emoji:
                 if st.button("→ Voir", key=f"alerte_{alerte[:20]}", use_container_width=True):
                     pass
 
