@@ -41,7 +41,7 @@ class TestConstantes:
     def test_robots_info_structure(self):
         """Vérifie la structure des infos robots"""
         assert len(ROBOTS_INFO) >= 5
-        for robot_id, info in ROBOTS_INFO.items():
+        for _robot_id, info in ROBOTS_INFO.items():
             assert "nom" in info
             assert "emoji" in info
             assert "peut_parallele" in info
@@ -51,7 +51,7 @@ class TestConstantes:
         assert "frigo" in LOCALISATIONS
         assert "congelateur" in LOCALISATIONS
         assert "temperature_ambiante" in LOCALISATIONS
-        for loc_id, info in LOCALISATIONS.items():
+        for _loc_id, info in LOCALISATIONS.items():
             assert "conservation_max_jours" in info
 
 
@@ -373,7 +373,12 @@ class TestOptimiserOrdreEtapes:
     def test_parallelisation(self):
         """Test de la parallélisation supervision + actif"""
         etapes = [
-            {"titre": "Supervision", "duree_minutes": 60, "est_supervision": True, "robots": ["four"]},
+            {
+                "titre": "Supervision",
+                "duree_minutes": 60,
+                "est_supervision": True,
+                "robots": ["four"],
+            },
             {"titre": "Actif", "duree_minutes": 15, "est_supervision": False, "robots": ["mixeur"]},
         ]
         result = optimiser_ordre_etapes(etapes)
@@ -384,12 +389,17 @@ class TestOptimiserOrdreEtapes:
     def test_conflit_robot_pas_parallelise(self):
         """Test que les conflits de robot empêchent la parallélisation"""
         etapes = [
-            {"titre": "Supervision", "duree_minutes": 60, "est_supervision": True, "robots": ["four"]},
+            {
+                "titre": "Supervision",
+                "duree_minutes": 60,
+                "est_supervision": True,
+                "robots": ["four"],
+            },
             {"titre": "Actif", "duree_minutes": 15, "est_supervision": False, "robots": ["four"]},
         ]
         result = optimiser_ordre_etapes(etapes)
         # Les deux ne devraient pas être dans le même groupe
-        groupes = set(e["groupe_parallele"] for e in result)
+        groupes = {e["groupe_parallele"] for e in result}
         assert len(groupes) == 2
 
     def test_assignation_ordre(self):
@@ -404,7 +414,12 @@ class TestOptimiserOrdreEtapes:
     def test_etapes_actives_sans_supervision(self):
         """Test avec uniquement des étapes actives"""
         etapes = [
-            {"titre": "Actif1", "duree_minutes": 10, "est_supervision": False, "robots": ["mixeur"]},
+            {
+                "titre": "Actif1",
+                "duree_minutes": 10,
+                "est_supervision": False,
+                "robots": ["mixeur"],
+            },
             {"titre": "Actif2", "duree_minutes": 20, "est_supervision": False, "robots": ["four"]},
         ]
         result = optimiser_ordre_etapes(etapes)
@@ -626,7 +641,11 @@ class TestGenererPlanningJules:
     def test_conseil_etapes_bruyantes_sieste(self):
         """Test conseil pour étapes bruyantes pendant sieste"""
         etapes = [
-            {"titre": "E1", "duree_minutes": 240, "alerte_bruit": True},  # 9h-13h -> chevauche sieste
+            {
+                "titre": "E1",
+                "duree_minutes": 240,
+                "alerte_bruit": True,
+            },  # 9h-13h -> chevauche sieste
         ]
         result = generer_planning_jules(
             etapes=etapes,
@@ -670,9 +689,24 @@ class TestCalculerStatistiquesSession:
         """Test avec session complète"""
         session = {
             "etapes": [
-                {"duree_minutes": 30, "statut": "terminee", "robots": ["four"], "groupe_parallele": 0},
-                {"duree_minutes": 20, "statut": "terminee", "robots": ["mixeur"], "groupe_parallele": 0},
-                {"duree_minutes": 15, "statut": "en_cours", "robots": ["cookeo"], "groupe_parallele": 1},
+                {
+                    "duree_minutes": 30,
+                    "statut": "terminee",
+                    "robots": ["four"],
+                    "groupe_parallele": 0,
+                },
+                {
+                    "duree_minutes": 20,
+                    "statut": "terminee",
+                    "robots": ["mixeur"],
+                    "groupe_parallele": 0,
+                },
+                {
+                    "duree_minutes": 15,
+                    "statut": "en_cours",
+                    "robots": ["cookeo"],
+                    "groupe_parallele": 1,
+                },
             ],
             "preparations": [
                 {"portions_initiales": 4},
@@ -734,7 +768,11 @@ class TestCalculerHistoriqueBatch:
     def test_historique_simple(self):
         """Test avec historique simple"""
         sessions = [
-            {"duree_reelle": 120, "nb_portions_preparees": 8, "robots_utilises": ["cookeo", "four"]},
+            {
+                "duree_reelle": 120,
+                "nb_portions_preparees": 8,
+                "robots_utilises": ["cookeo", "four"],
+            },
             {"duree_reelle": 90, "nb_portions_preparees": 6, "robots_utilises": ["cookeo"]},
         ]
         result = calculer_historique_batch(sessions)

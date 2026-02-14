@@ -1,66 +1,125 @@
-from unittest.mock import patch
+"""
+Tests pour src/modules/jeux/integration.py
+
+Tests complets pour configurer_jeux().
+"""
+
+from unittest.mock import MagicMock, patch
 
 
-class TestGameAPIs:
-    """Tests d'intégration des APIs"""
+class TestConfigurerJeux:
+    """Tests pour configurer_jeux()"""
 
-    @patch("streamlit.write")
-    @patch("streamlit.button")
-    def test_integracion_api_recette(self, mock_button, mock_write):
-        """Teste l'intégration API"""
-        mock_button.return_value = True
-        clicked = mock_button("Charger")
-        mock_write("Recette chargée")
-        assert mock_button.called
-        assert mock_write.called
+    def test_configure_api_football_avec_cle(self):
+        """Teste la configuration avec une clé API valide"""
+        with (
+            patch("src.core.config.obtenir_parametres") as mock_params,
+            patch("src.modules.jeux.api_football.configurer_api_key") as mock_config_api,
+        ):
+            mock_config = MagicMock()
+            mock_config.get.return_value = "test_api_key_123"
+            mock_params.return_value = mock_config
 
-    @patch("streamlit.info")
-    def test_charger_donnees_jeu(self, mock_info):
-        """Teste le chargement"""
-        mock_info.return_value = None
-        mock_info("Jeu chargé")
-        assert mock_info.called
+            from src.modules.jeux.integration import configurer_jeux
 
-    @patch("streamlit.success")
-    def test_api_completion(self, mock_success):
-        """Teste le succès"""
-        mock_success.return_value = None
-        mock_success("Partie terminée!")
-        assert mock_success.called
+            configurer_jeux()
+
+            # Note: La fonction peut être appelée 2 fois (import module + appel explicite)
+            mock_config_api.assert_called_with("test_api_key_123")
+            assert mock_config_api.call_count >= 1
+
+    def test_pas_configuration_sans_cle_api(self):
+        """Teste le comportement sans clé API"""
+        with (
+            patch("src.core.config.obtenir_parametres") as mock_params,
+            patch("src.modules.jeux.api_football.configurer_api_key") as mock_config_api,
+        ):
+            mock_config = MagicMock()
+            mock_config.get.return_value = None  # Pas de clé
+            mock_params.return_value = mock_config
+
+            from src.modules.jeux.integration import configurer_jeux
+
+            configurer_jeux()
+
+            mock_config_api.assert_not_called()
+
+    def test_gere_exception_import(self):
+        """Teste la gestion d'exception lors de l'import"""
+        with patch(
+            "src.core.config.obtenir_parametres",
+            side_effect=ImportError("Module non trouvé"),
+        ):
+            from src.modules.jeux.integration import configurer_jeux
+
+            # Ne doit pas lever d'exception
+            configurer_jeux()
+
+    def test_gere_exception_configuration(self):
+        """Teste la gestion d'exception lors de la configuration"""
+        with (
+            patch("src.core.config.obtenir_parametres") as mock_params,
+            patch(
+                "src.modules.jeux.api_football.configurer_api_key",
+                side_effect=Exception("Erreur configuration"),
+            ),
+        ):
+            mock_config = MagicMock()
+            mock_config.get.return_value = "test_key"
+            mock_params.return_value = mock_config
+
+            from src.modules.jeux.integration import configurer_jeux
+
+            # Ne doit pas lever d'exception
+            configurer_jeux()
+
+    def test_log_fallback_sans_cle(self):
+        """Teste le logging du fallback sans clé"""
+        with (
+            patch("src.core.config.obtenir_parametres") as mock_params,
+            patch("src.modules.jeux.api_football.configurer_api_key") as mock_config_api,
+        ):
+            mock_config = MagicMock()
+            mock_config.get.return_value = ""  # Chaîne vide = pas de clé
+            mock_params.return_value = mock_config
+
+            from src.modules.jeux.integration import configurer_jeux
+
+            configurer_jeux()
+
+            mock_config_api.assert_not_called()
 
 
-class TestGameIntegration:
-    """Tests E2E d'intégration"""
+class TestConfigurerJeuxIntegration:
+    """Tests d'intégration pour configurer_jeux"""
 
-    @patch("streamlit.selectbox")
-    @patch("streamlit.button")
-    @patch("streamlit.success")
-    def test_flux_complet(self, mock_success, mock_button, mock_selectbox):
-        """Teste le flux complet"""
-        mock_selectbox.return_value = "Memory"
-        mock_button.return_value = True
-        mock_success.return_value = None
+    def test_import_module(self):
+        """Vérifie que le module s'importe correctement"""
+        from src.modules.jeux.integration import configurer_jeux
 
-        game = mock_selectbox("Jeu", ["Memory", "Dés"])
-        start = mock_button("Démarrer")
-        mock_success("Gagné!")
+        assert callable(configurer_jeux)
 
-        assert game == "Memory"
-        assert start is True
-        assert mock_selectbox.called
-        assert mock_button.called
-        assert mock_success.called
+    def test_module_niveau_appel(self):
+        """Vérifie que configurer_jeux est appelé au démarrage du module"""
+        # Le module appelle configurer_jeux() à l'import
+        # On vérifie juste que l'import ne lève pas d'exception
+        import importlib
 
-    @patch("streamlit.write")
-    @patch("streamlit.dataframe")
-    def test_afficher_resultats(self, mock_df, mock_write):
-        """Teste l'affichage résultats"""
-        results = [{"joueur": "Alice", "score": 100}]
-        mock_write.return_value = None
-        mock_df.return_value = None
+        import src.modules.jeux.integration
 
-        mock_write("Résultats:")
-        mock_df(results)
+        importlib.reload(src.modules.jeux.integration)
 
-        assert mock_write.called
-        assert mock_df.called
+    def test_fonction_sans_parametres(self):
+        """Vérifie que la fonction n'a pas de paramètres requis"""
+        import inspect
+
+        from src.modules.jeux.integration import configurer_jeux
+
+        sig = inspect.signature(configurer_jeux)
+        # Tous les paramètres ont des valeurs par défaut
+        for param in sig.parameters.values():
+            assert (
+                param.default != inspect.Parameter.empty
+                or param.kind == inspect.Parameter.VAR_POSITIONAL
+                or param.kind == inspect.Parameter.VAR_KEYWORD
+            ) or len(sig.parameters) == 0

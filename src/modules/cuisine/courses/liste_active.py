@@ -11,6 +11,11 @@ from ._common import (
     logger,
     st,
 )
+from .liste_utils import (
+    filtrer_liste,
+    formater_article_label,
+    grouper_par_rayon,
+)
 
 
 def render_liste_active():
@@ -61,42 +66,29 @@ def render_liste_active():
         with col2:
             filter_rayon = st.selectbox(
                 "Filtrer par rayon",
-                ["Tous les rayons"] + sorted(set(a.get("rayon_magasin", "Autre") for a in liste)),
+                ["Tous les rayons"] + sorted({a.get("rayon_magasin", "Autre") for a in liste}),
                 key="filter_rayon",
             )
         with col3:
             search_term = st.text_input("🔍 Chercher...", key="search_courses")
 
-        # Appliquer filtres
-        liste_filtree = liste.copy()
+        # Appliquer filtres via fonction utilitaire
+        priority_map = {"🔴 Haute": "haute", "🟡 Moyenne": "moyenne", "🟢 Basse": "basse"}
+        priorite_filter = priority_map.get(filter_priorite) if filter_priorite != "Toutes" else None
+        rayon_filter = filter_rayon if filter_rayon != "Tous les rayons" else None
 
-        if filter_priorite != "Toutes":
-            priority_map = {"🔴 Haute": "haute", "🟡 Moyenne": "moyenne", "🟢 Basse": "basse"}
-            liste_filtree = [
-                a for a in liste_filtree if a.get("priorite") == priority_map[filter_priorite]
-            ]
-
-        if filter_rayon != "Tous les rayons":
-            liste_filtree = [a for a in liste_filtree if a.get("rayon_magasin") == filter_rayon]
-
-        if search_term:
-            liste_filtree = [
-                a
-                for a in liste_filtree
-                if search_term.lower() in a.get("ingredient_nom", "").lower()
-            ]
+        liste_filtree = filtrer_liste(
+            liste,
+            priorite=priorite_filter,
+            rayon=rayon_filter,
+            search_term=search_term or None,
+        )
 
         st.success(f"📊 {len(liste_filtree)}/{len(liste)} article(s)")
 
-        # Afficher par rayon
+        # Afficher par rayon (via fonction utilitaire)
         st.subheader("📦 Articles par rayon")
-
-        rayons = {}
-        for article in liste_filtree:
-            rayon = article.get("rayon_magasin", "Autre")
-            if rayon not in rayons:
-                rayons[rayon] = []
-            rayons[rayon].append(article)
+        rayons = grouper_par_rayon(liste_filtree)
 
         for rayon in sorted(rayons.keys()):
             with st.expander(f"🍪‘ {rayon} ({len(rayons[rayon])} articles)", expanded=True):
@@ -136,15 +128,7 @@ def render_rayon_articles(service, rayon: str, articles: list):
         col1, col2, col3, col4 = st.columns([4, 1, 1, 1], gap="small")
 
         with col1:
-            priorite_emoji = PRIORITY_EMOJIS.get(article.get("priorite", "moyenne"), "âš«")
-            label = f"{priorite_emoji} {article.get('ingredient_nom')} ({article.get('quantite_necessaire')} {article.get('unite')})"
-
-            if article.get("notes"):
-                label += f" | 📝 {article.get('notes')}"
-
-            if article.get("suggere_par_ia"):
-                label += " ⏰"
-
+            label = formater_article_label(article, PRIORITY_EMOJIS)
             st.write(label)
 
         with col2:
@@ -228,9 +212,7 @@ def render_rayon_articles(service, rayon: str, articles: list):
 
                 col1, col2 = st.columns(2)
                 with col1:
-                    if st.form_submit_button(
-                        "💾 Sauvegarder", key=f"article_save_{article['id']}"
-                    ):
+                    if st.form_submit_button("💾 Sauvegarder", key=f"article_save_{article['id']}"):
                         try:
                             service.update(
                                 article["id"],

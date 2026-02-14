@@ -291,7 +291,7 @@ class TestSemaineCalendrier:
                 EvenementCalendrier(
                     id=f"repas_midi_{i}",
                     type=TypeEvenement.REPAS_MIDI,
-                    titre=f"Déjeuner {i+1}",
+                    titre=f"Déjeuner {i + 1}",
                     date_jour=jour_date,
                 )
             )
@@ -302,7 +302,7 @@ class TestSemaineCalendrier:
                     EvenementCalendrier(
                         id=f"repas_soir_{i}",
                         type=TypeEvenement.REPAS_SOIR,
-                        titre=f"Dîner {i+1}",
+                        titre=f"Dîner {i + 1}",
                         date_jour=jour_date,
                     )
                 )

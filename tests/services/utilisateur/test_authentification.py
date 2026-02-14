@@ -1568,3 +1568,230 @@ class TestRenderFunctions:
         render_profile_settings()
 
         mock_st.warning.assert_called_once()
+
+
+@pytest.mark.unit
+class TestRenderFunctionsAdditional:
+    """Tests supplémentaires pour les fonctions render (couverture branches)."""
+
+    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.utilisateur.authentification.get_auth_service")
+    def test_render_login_form_login_success(self, mock_get_auth, mock_st):
+        """Test login réussi avec rerun."""
+        from src.services.utilisateur.authentification import render_login_form
+
+        mock_service = Mock()
+        mock_service.login.return_value = AuthResult(success=True, message="Bienvenue!")
+        mock_get_auth.return_value = mock_service
+
+        # Setup mocks pour le formulaire - utiliser MagicMock pour context managers
+        from unittest.mock import MagicMock
+
+        form_mock = MagicMock()
+        mock_st.form.return_value = form_mock
+        # Tab1: email, password (2) + Tab2: email, prenom, nom, password, password2 (5) = 7 text_inputs
+        mock_st.text_input.side_effect = ["test@test.com", "password123", "", "", "", "", ""]
+        # Tab1: submit, forgot (2) + Tab2: submit (1) = 3 form_submit_buttons
+        mock_st.form_submit_button.side_effect = [True, False, False]
+        mock_st.columns.return_value = [MagicMock(), MagicMock()]
+
+        # Utiliser MagicMock pour les tabs (context managers)
+        tab1_mock = MagicMock()
+        tab2_mock = MagicMock()
+        mock_st.tabs.return_value = [tab1_mock, tab2_mock]
+
+        render_login_form(redirect_on_success=True)
+
+        mock_st.success.assert_called()
+        mock_st.rerun.assert_called()
+
+    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.utilisateur.authentification.get_auth_service")
+    def test_render_login_form_login_failure(self, mock_get_auth, mock_st):
+        """Test login échoué."""
+        from unittest.mock import MagicMock
+
+        from src.services.utilisateur.authentification import render_login_form
+
+        mock_service = Mock()
+        mock_service.login.return_value = AuthResult(
+            success=False, message="Identifiants incorrects"
+        )
+        mock_get_auth.return_value = mock_service
+
+        form_mock = MagicMock()
+        mock_st.form.return_value = form_mock
+        # Tab1: email, password (2) + Tab2: email, prenom, nom, password, password2 (5) = 7 text_inputs
+        mock_st.text_input.side_effect = ["test@test.com", "wrongpass", "", "", "", "", ""]
+        mock_st.form_submit_button.side_effect = [True, False, False]
+        mock_st.columns.return_value = [MagicMock(), MagicMock()]
+        tab1_mock = MagicMock()
+        tab2_mock = MagicMock()
+        mock_st.tabs.return_value = [tab1_mock, tab2_mock]
+
+        render_login_form()
+
+        mock_st.error.assert_called()
+
+    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.utilisateur.authentification.get_auth_service")
+    def test_render_login_form_forgot_password(self, mock_get_auth, mock_st):
+        """Test mot de passe oublié."""
+        from unittest.mock import MagicMock
+
+        from src.services.utilisateur.authentification import render_login_form
+
+        mock_service = Mock()
+        mock_service.reset_password.return_value = AuthResult(success=True, message="Email envoyé")
+        mock_get_auth.return_value = mock_service
+
+        form_mock = MagicMock()
+        mock_st.form.return_value = form_mock
+        # Tab1: email, password (2) + Tab2: email, prenom, nom, password, password2 (5) = 7 text_inputs
+        mock_st.text_input.side_effect = ["reset@test.com", "", "", "", "", "", ""]
+        mock_st.form_submit_button.side_effect = [False, True, False]  # Submit=False, forgot=True
+        mock_st.columns.return_value = [MagicMock(), MagicMock()]
+        tab1_mock = MagicMock()
+        tab2_mock = MagicMock()
+        mock_st.tabs.return_value = [tab1_mock, tab2_mock]
+
+        render_login_form()
+
+        mock_st.info.assert_called()
+
+    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.utilisateur.authentification.get_auth_service")
+    def test_render_user_menu_logged_in(self, mock_get_auth, mock_st):
+        """Test menu utilisateur connecté."""
+        from unittest.mock import MagicMock
+
+        from src.services.utilisateur.authentification import render_user_menu
+
+        mock_user = Mock()
+        mock_user.display_name = "Test User"
+        mock_user.role = Role.MEMBRE
+
+        mock_service = Mock()
+        mock_service.get_current_user.return_value = mock_user
+        mock_get_auth.return_value = mock_service
+
+        # Sidebar est un context manager
+        sidebar_mock = MagicMock()
+        mock_st.sidebar = sidebar_mock
+        mock_st.columns.return_value = [MagicMock(), MagicMock()]
+        mock_st.button.return_value = False
+
+        render_user_menu()
+
+        mock_st.markdown.assert_called()
+
+    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.utilisateur.authentification.get_auth_service")
+    def test_render_user_menu_logout_clicked(self, mock_get_auth, mock_st):
+        """Test bouton déconnexion cliqué."""
+        from unittest.mock import MagicMock
+
+        from src.services.utilisateur.authentification import render_user_menu
+
+        mock_user = Mock()
+        mock_user.display_name = "Test User"
+        mock_user.role = Role.ADMIN
+
+        mock_service = Mock()
+        mock_service.get_current_user.return_value = mock_user
+        mock_get_auth.return_value = mock_service
+
+        sidebar_mock = MagicMock()
+        mock_st.sidebar = sidebar_mock
+        mock_st.columns.return_value = [MagicMock(), MagicMock()]
+        mock_st.button.return_value = True  # Logout clicked
+
+        render_user_menu()
+
+        mock_service.logout.assert_called_once()
+        mock_st.rerun.assert_called()
+
+    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.utilisateur.authentification.get_auth_service")
+    def test_render_user_menu_login_clicked(self, mock_get_auth, mock_st):
+        """Test bouton connexion cliqué (non connecté)."""
+        from unittest.mock import MagicMock
+
+        from src.services.utilisateur.authentification import render_user_menu
+
+        mock_service = Mock()
+        mock_service.get_current_user.return_value = None
+        mock_get_auth.return_value = mock_service
+
+        sidebar_mock = MagicMock()
+        mock_st.sidebar = sidebar_mock
+        mock_st.button.return_value = True  # Login button clicked
+        mock_st.session_state = {}
+
+        render_user_menu()
+
+        assert mock_st.session_state["show_login"] is True
+
+    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.utilisateur.authentification.get_auth_service")
+    def test_render_profile_settings_with_user(self, mock_get_auth, mock_st):
+        """Test paramètres profil avec utilisateur connecté."""
+        from datetime import datetime
+        from unittest.mock import MagicMock
+
+        from src.services.utilisateur.authentification import render_profile_settings
+
+        mock_user = Mock()
+        mock_user.prenom = "Jean"
+        mock_user.nom = "Dupont"
+        mock_user.avatar_url = None
+        mock_user.email = "jean@test.com"
+        mock_user.role = Role.MEMBRE
+        mock_user.created_at = datetime(2024, 1, 1)
+
+        mock_service = Mock()
+        mock_service.get_current_user.return_value = mock_user
+        mock_service.update_profile.return_value = AuthResult(success=True, message="OK")
+        mock_get_auth.return_value = mock_service
+
+        form_mock = MagicMock()
+        mock_st.form.return_value = form_mock
+        mock_st.text_input.side_effect = ["Jean", "Dupont", "", "newpass", "newpass"]
+        mock_st.form_submit_button.side_effect = [True, False]  # Save=True, Change pwd=False
+
+        render_profile_settings()
+
+        mock_st.success.assert_called()
+
+    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.utilisateur.authentification.get_auth_service")
+    def test_render_profile_password_change(self, mock_get_auth, mock_st):
+        """Test changement de mot de passe."""
+        from datetime import datetime
+        from unittest.mock import MagicMock
+
+        from src.services.utilisateur.authentification import render_profile_settings
+
+        mock_user = Mock()
+        mock_user.prenom = "Test"
+        mock_user.nom = "User"
+        mock_user.avatar_url = None
+        mock_user.email = "test@test.com"
+        mock_user.role = Role.MEMBRE
+        mock_user.created_at = datetime(2024, 1, 1)
+
+        mock_service = Mock()
+        mock_service.get_current_user.return_value = mock_user
+        mock_service.change_password.return_value = AuthResult(success=True, message="Changé")
+        mock_get_auth.return_value = mock_service
+
+        form_mock = MagicMock()
+        mock_st.form.return_value = form_mock
+        # First form (profile), second form (password)
+        mock_st.text_input.side_effect = ["Test", "User", "", "newpass123", "newpass123"]
+        mock_st.form_submit_button.side_effect = [False, True]  # Save=False, Change pwd=True
+
+        render_profile_settings()
+
+        mock_service.change_password.assert_called_with("newpass123")
+        mock_st.success.assert_called()

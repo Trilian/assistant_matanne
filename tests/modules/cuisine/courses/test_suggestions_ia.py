@@ -513,6 +513,179 @@ class TestRenderSuggestionsIA:
         mock_st.error.assert_called()
         mock_logger.error.assert_called()
 
+    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.st")
+    @patch("src.modules.cuisine.courses.suggestions_ia.time")
+    def test_render_ingredient_direct_nom_attribute(
+        self, mock_time, mock_st, mock_courses, mock_inv, mock_recettes, mock_db
+    ):
+        """Test ingrédient avec nom direct (sans .ingredient)."""
+        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+
+        courses_svc = MagicMock()
+        mock_courses.return_value = courses_svc
+        mock_inv.return_value = MagicMock()
+
+        # Ingrédient sans attribut .ingredient (a directement .nom)
+        ingredient = MagicMock(spec=["nom"])
+        ingredient.nom = "Sel"
+        # Pas de .ingredient, .quantite
+
+        recette = MagicMock()
+        recette.id = 1
+        recette.nom = "Test"
+        recette.ingredients = [ingredient]
+
+        recettes_svc = MagicMock()
+        recettes_svc.get_all.return_value = [recette]
+        recettes_svc.get_by_id_full.return_value = recette
+        mock_recettes.return_value = recettes_svc
+
+        tab1, tab2 = MagicMock(), MagicMock()
+        mock_st.tabs.return_value = [tab1, tab2]
+        tab1.__enter__ = MagicMock(return_value=tab1)
+        tab1.__exit__ = MagicMock(return_value=False)
+        tab2.__enter__ = MagicMock(return_value=tab2)
+        tab2.__exit__ = MagicMock(return_value=False)
+
+        mock_st.button.side_effect = [False, True]
+        mock_st.selectbox.return_value = 1
+        mock_st.session_state = MockSessionState({"courses_refresh": 0})
+
+        mock_session = MagicMock()
+        mock_db_ing = MagicMock()
+        mock_db_ing.id = 10
+        mock_session.query.return_value.filter.return_value.first.return_value = mock_db_ing
+        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
+        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+
+        render_suggestions_ia()
+
+        courses_svc.create.assert_called()
+        mock_st.success.assert_called()
+
+    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.st")
+    @patch("src.modules.cuisine.courses.suggestions_ia.time")
+    def test_render_ingredient_nom_empty_skip(
+        self, mock_time, mock_st, mock_courses, mock_inv, mock_recettes, mock_db
+    ):
+        """Test ingrédient avec nom vide est ignoré."""
+        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+
+        courses_svc = MagicMock()
+        mock_courses.return_value = courses_svc
+        mock_inv.return_value = MagicMock()
+
+        # Ingrédient avec nom vide (doit être ignoré)
+        ingredient_empty = MagicMock()
+        ingredient_empty.ingredient = MagicMock()
+        ingredient_empty.ingredient.nom = ""  # Nom vide
+        ingredient_empty.quantite = 1
+
+        # Ingrédient valide
+        ingredient_valid = MagicMock()
+        ingredient_valid.ingredient = MagicMock()
+        ingredient_valid.ingredient.nom = "Poivre"
+        ingredient_valid.ingredient.unite = "g"
+        ingredient_valid.quantite = 10
+
+        recette = MagicMock()
+        recette.id = 1
+        recette.nom = "Test"
+        recette.ingredients = [ingredient_empty, ingredient_valid]
+
+        recettes_svc = MagicMock()
+        recettes_svc.get_all.return_value = [recette]
+        recettes_svc.get_by_id_full.return_value = recette
+        mock_recettes.return_value = recettes_svc
+
+        tab1, tab2 = MagicMock(), MagicMock()
+        mock_st.tabs.return_value = [tab1, tab2]
+        tab1.__enter__ = MagicMock(return_value=tab1)
+        tab1.__exit__ = MagicMock(return_value=False)
+        tab2.__enter__ = MagicMock(return_value=tab2)
+        tab2.__exit__ = MagicMock(return_value=False)
+
+        mock_st.button.side_effect = [False, True]
+        mock_st.selectbox.return_value = 1
+        mock_st.session_state = MockSessionState({"courses_refresh": 0})
+
+        mock_session = MagicMock()
+        mock_db_ing = MagicMock()
+        mock_db_ing.id = 10
+        mock_session.query.return_value.filter.return_value.first.return_value = mock_db_ing
+        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
+        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+
+        render_suggestions_ia()
+
+        # Seulement un appel pour l'ingrédient valide
+        assert courses_svc.create.call_count == 1
+        mock_st.success.assert_called()
+
+    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.st")
+    @patch("src.modules.cuisine.courses.suggestions_ia.time")
+    def test_render_create_new_ingredient_from_recette(
+        self, mock_time, mock_st, mock_courses, mock_inv, mock_recettes, mock_db
+    ):
+        """Test création nouvel ingrédient depuis recette."""
+        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+
+        courses_svc = MagicMock()
+        mock_courses.return_value = courses_svc
+        mock_inv.return_value = MagicMock()
+
+        ingredient = MagicMock()
+        ingredient.ingredient = MagicMock()
+        ingredient.ingredient.nom = "NouvelIngredient"
+        ingredient.ingredient.unite = "ml"
+        ingredient.quantite = 200
+
+        recette = MagicMock()
+        recette.id = 1
+        recette.nom = "Test"
+        recette.ingredients = [ingredient]
+
+        recettes_svc = MagicMock()
+        recettes_svc.get_all.return_value = [recette]
+        recettes_svc.get_by_id_full.return_value = recette
+        mock_recettes.return_value = recettes_svc
+
+        tab1, tab2 = MagicMock(), MagicMock()
+        mock_st.tabs.return_value = [tab1, tab2]
+        tab1.__enter__ = MagicMock(return_value=tab1)
+        tab1.__exit__ = MagicMock(return_value=False)
+        tab2.__enter__ = MagicMock(return_value=tab2)
+        tab2.__exit__ = MagicMock(return_value=False)
+
+        mock_st.button.side_effect = [False, True]
+        mock_st.selectbox.return_value = 1
+        mock_st.session_state = MockSessionState({"courses_refresh": 0})
+
+        mock_session = MagicMock()
+        # Ingrédient non existant en DB
+        mock_session.query.return_value.filter.return_value.first.return_value = None
+        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
+        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+
+        render_suggestions_ia()
+
+        # Vérifier que add et flush ont été appelés pour créer l'ingrédient
+        mock_session.add.assert_called()
+        mock_session.flush.assert_called()
+        mock_st.success.assert_called()
+
 
 class TestSuggestionsIAModule:
     """Tests module-level."""

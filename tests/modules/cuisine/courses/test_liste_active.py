@@ -675,3 +675,436 @@ class TestListeActiveModule:
         assert "render_rayon_articles" in liste_active.__all__
         assert "render_ajouter_article" in liste_active.__all__
         assert "render_print_view" in liste_active.__all__
+
+
+class TestRenderListeActiveAdditional:
+    """Tests supplémentaires pour couverture branches manquantes."""
+
+    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
+    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.st")
+    def test_render_liste_inventaire_service_none(
+        self, mock_st, mock_courses_service, mock_inv_service
+    ):
+        """Test quand inventaire_service est None (ligne 37)."""
+        from src.modules.cuisine.courses.liste_active import render_liste_active
+
+        mock_service = MagicMock()
+        mock_service.get_liste_courses.side_effect = [
+            [
+                {
+                    "id": 1,
+                    "ingredient_nom": "Test",
+                    "quantite_necessaire": 1.0,
+                    "unite": "kg",
+                    "priorite": "haute",
+                    "rayon_magasin": "Autre",
+                    "notes": None,
+                    "suggere_par_ia": False,
+                }
+            ],
+            [],
+        ]
+        mock_courses_service.return_value = mock_service
+        mock_inv_service.return_value = None  # Inventaire service None
+
+        mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock(), MagicMock()]
+        mock_st.session_state = MockSessionState(
+            {"new_article_mode": False, "edit_article_id": None, "courses_refresh": 0}
+        )
+        mock_st.button.return_value = False
+        mock_st.selectbox.side_effect = ["Toutes", "Tous les rayons"]
+        mock_st.text_input.return_value = ""
+        expander_mock = MagicMock()
+        mock_st.expander.return_value.__enter__ = MagicMock(return_value=expander_mock)
+        mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
+
+        render_liste_active()
+
+        # Vérifier que metric a été appelé (sans stock_bas)
+        mock_st.metric.assert_called()
+
+    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
+    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.st")
+    def test_render_liste_empty_generate_ia_clicked(
+        self, mock_st, mock_courses_service, mock_inv_service
+    ):
+        """Test bouton générer suggestions IA cliqué (lignes 49-50)."""
+        from src.modules.cuisine.courses.liste_active import render_liste_active
+
+        mock_service = MagicMock()
+        mock_service.get_liste_courses.return_value = []  # Liste vide
+        mock_courses_service.return_value = mock_service
+
+        mock_inv = MagicMock()
+        mock_inv.get_alertes.return_value = {"stock_bas": []}
+        mock_inv_service.return_value = mock_inv
+
+        mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock(), MagicMock()]
+        mock_st.session_state = MockSessionState({"new_article_mode": True, "courses_refresh": 0})
+        mock_st.button.return_value = True  # Button clicked
+
+        render_liste_active()
+
+        mock_st.rerun.assert_called()
+
+    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
+    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.st")
+    def test_render_liste_filter_by_priority(self, mock_st, mock_courses_service, mock_inv_service):
+        """Test filtre par priorité (lignes 74-75)."""
+        from src.modules.cuisine.courses.liste_active import render_liste_active
+
+        mock_service = MagicMock()
+        mock_service.get_liste_courses.side_effect = [
+            [
+                {
+                    "id": 1,
+                    "ingredient_nom": "Item1",
+                    "quantite_necessaire": 1.0,
+                    "unite": "kg",
+                    "priorite": "haute",
+                    "rayon_magasin": "Autre",
+                    "notes": None,
+                    "suggere_par_ia": False,
+                },
+                {
+                    "id": 2,
+                    "ingredient_nom": "Item2",
+                    "quantite_necessaire": 2.0,
+                    "unite": "kg",
+                    "priorite": "basse",
+                    "rayon_magasin": "Autre",
+                    "notes": None,
+                    "suggere_par_ia": False,
+                },
+            ],
+            [],
+        ]
+        mock_courses_service.return_value = mock_service
+
+        mock_inv = MagicMock()
+        mock_inv.get_alertes.return_value = {"stock_bas": []}
+        mock_inv_service.return_value = mock_inv
+
+        # Multiple columns calls: 4 for metrics, 3 for filters, 3 for actions, 4 for article row
+        mock_st.columns.side_effect = [
+            [MagicMock(), MagicMock(), MagicMock(), MagicMock()],  # metrics
+            [MagicMock(), MagicMock(), MagicMock()],  # filters
+            [MagicMock(), MagicMock(), MagicMock()],  # actions
+            [MagicMock(), MagicMock(), MagicMock(), MagicMock()],  # article row
+        ]
+        mock_st.session_state = MockSessionState(
+            {"new_article_mode": False, "edit_article_id": None, "courses_refresh": 0}
+        )
+        mock_st.button.return_value = False
+        mock_st.selectbox.side_effect = ["🔴 Haute", "Tous les rayons"]  # Filter by priority
+        mock_st.text_input.return_value = ""
+        expander_mock = MagicMock()
+        mock_st.expander.return_value.__enter__ = MagicMock(return_value=expander_mock)
+        mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
+
+        render_liste_active()
+
+        # Vérifie que le filtre par priorité fonctionne (1 sur 2 articles)
+        mock_st.success.assert_called()
+
+    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
+    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.st")
+    def test_render_liste_filter_by_rayon(self, mock_st, mock_courses_service, mock_inv_service):
+        """Test filtre par rayon (ligne 80)."""
+        from src.modules.cuisine.courses.liste_active import render_liste_active
+
+        mock_service = MagicMock()
+        mock_service.get_liste_courses.side_effect = [
+            [
+                {
+                    "id": 1,
+                    "ingredient_nom": "Lait",
+                    "quantite_necessaire": 1.0,
+                    "unite": "l",
+                    "priorite": "moyenne",
+                    "rayon_magasin": "Crèmerie",
+                    "notes": None,
+                    "suggere_par_ia": False,
+                },
+                {
+                    "id": 2,
+                    "ingredient_nom": "Pain",
+                    "quantite_necessaire": 1.0,
+                    "unite": "pièce",
+                    "priorite": "moyenne",
+                    "rayon_magasin": "Boulangerie",
+                    "notes": None,
+                    "suggere_par_ia": False,
+                },
+            ],
+            [],
+        ]
+        mock_courses_service.return_value = mock_service
+
+        mock_inv = MagicMock()
+        mock_inv.get_alertes.return_value = {"stock_bas": []}
+        mock_inv_service.return_value = mock_inv
+
+        # Multiple columns calls
+        mock_st.columns.side_effect = [
+            [MagicMock(), MagicMock(), MagicMock(), MagicMock()],  # metrics
+            [MagicMock(), MagicMock(), MagicMock()],  # filters
+            [MagicMock(), MagicMock(), MagicMock()],  # actions
+            [MagicMock(), MagicMock(), MagicMock(), MagicMock()],  # article row
+        ]
+        mock_st.session_state = MockSessionState(
+            {"new_article_mode": False, "edit_article_id": None, "courses_refresh": 0}
+        )
+        mock_st.button.return_value = False
+        mock_st.selectbox.side_effect = ["Toutes", "Crèmerie"]  # Filter by rayon
+        mock_st.text_input.return_value = ""
+        expander_mock = MagicMock()
+        mock_st.expander.return_value.__enter__ = MagicMock(return_value=expander_mock)
+        mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
+
+        render_liste_active()
+
+        mock_st.success.assert_called()
+
+    @patch("src.modules.cuisine.courses.liste_active.render_print_view")
+    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
+    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.st")
+    def test_render_liste_print_button_clicked(
+        self, mock_st, mock_courses_service, mock_inv_service, mock_print_view
+    ):
+        """Test bouton imprimer cliqué (ligne 284)."""
+        from src.modules.cuisine.courses.liste_active import render_liste_active
+
+        mock_service = MagicMock()
+        mock_service.get_liste_courses.side_effect = [
+            [
+                {
+                    "id": 1,
+                    "ingredient_nom": "Test",
+                    "quantite_necessaire": 1.0,
+                    "unite": "kg",
+                    "priorite": "haute",
+                    "rayon_magasin": "Autre",
+                    "notes": None,
+                    "suggere_par_ia": False,
+                }
+            ],
+            [],
+        ]
+        mock_courses_service.return_value = mock_service
+
+        mock_inv = MagicMock()
+        mock_inv.get_alertes.return_value = {"stock_bas": []}
+        mock_inv_service.return_value = mock_inv
+
+        # Multiple columns calls: 4 stats, 3 filters, 4 article row, 3 actions
+        mock_st.columns.side_effect = [
+            [MagicMock(), MagicMock(), MagicMock(), MagicMock()],  # stats
+            [MagicMock(), MagicMock(), MagicMock()],  # filters
+            [MagicMock(), MagicMock(), MagicMock(), MagicMock()],  # article row
+            [MagicMock(), MagicMock(), MagicMock()],  # actions
+        ]
+        mock_st.session_state = MockSessionState(
+            {"new_article_mode": False, "edit_article_id": None, "courses_refresh": 0}
+        )
+        # Buttons: mark(F), edit(F), delete(F), add(F), print(T), clear(F)
+        mock_st.button.side_effect = [False, False, False, False, True, False]
+        mock_st.selectbox.side_effect = ["Toutes", "Tous les rayons"]
+        mock_st.text_input.return_value = ""
+        expander_mock = MagicMock()
+        mock_st.expander.return_value.__enter__ = MagicMock(return_value=expander_mock)
+        mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
+
+        render_liste_active()
+
+        mock_print_view.assert_called()
+
+
+class TestRenderRayonArticlesAdditional:
+    """Tests supplémentaires pour render_rayon_articles."""
+
+    @patch(
+        "src.modules.cuisine.courses.liste_active.PRIORITY_EMOJIS",
+        {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"},
+    )
+    @patch("src.modules.cuisine.courses.liste_active.RAYONS_DEFAULT", ["Crèmerie", "Autre"])
+    @patch("src.modules.cuisine.courses.liste_active.st")
+    def test_render_rayon_edit_form_save_success(self, mock_st):
+        """Test sauvegarde formulaire édition réussie (lignes 97-106)."""
+        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+
+        mock_service = MagicMock()
+        articles = [
+            {
+                "id": 10,
+                "ingredient_nom": "EditTest",
+                "quantite_necessaire": 2.0,
+                "unite": "kg",
+                "priorite": "moyenne",
+                "rayon_magasin": "Crèmerie",
+                "notes": "Note",
+                "suggere_par_ia": False,
+            }
+        ]
+
+        mock_st.columns.side_effect = [
+            [MagicMock(), MagicMock(), MagicMock(), MagicMock()],
+            [MagicMock(), MagicMock()],
+            [MagicMock(), MagicMock()],
+        ]
+        mock_st.button.return_value = False
+        mock_st.session_state = MockSessionState({"edit_article_id": 10, "courses_refresh": 0})
+
+        form_mock = MagicMock()
+        mock_st.form.return_value.__enter__ = MagicMock(return_value=form_mock)
+        mock_st.form.return_value.__exit__ = MagicMock(return_value=False)
+        mock_st.number_input.return_value = 3.0
+        mock_st.selectbox.side_effect = ["haute", "Autre"]
+        mock_st.text_area.return_value = "New note"
+        mock_st.form_submit_button.side_effect = [True, False]  # Save clicked, Cancel not
+
+        render_rayon_articles(mock_service, "Crèmerie", articles)
+
+        mock_service.update.assert_called()
+        mock_st.success.assert_called()
+
+    @patch(
+        "src.modules.cuisine.courses.liste_active.PRIORITY_EMOJIS",
+        {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"},
+    )
+    @patch("src.modules.cuisine.courses.liste_active.RAYONS_DEFAULT", ["Crèmerie", "Autre"])
+    @patch("src.modules.cuisine.courses.liste_active.st")
+    def test_render_rayon_edit_form_cancel(self, mock_st):
+        """Test annulation formulaire édition (lignes 172-173)."""
+        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+
+        mock_service = MagicMock()
+        articles = [
+            {
+                "id": 11,
+                "ingredient_nom": "CancelTest",
+                "quantite_necessaire": 1.0,
+                "unite": "pièce",
+                "priorite": "basse",
+                "rayon_magasin": "Crèmerie",
+                "notes": "",
+                "suggere_par_ia": False,
+            }
+        ]
+
+        mock_st.columns.side_effect = [
+            [MagicMock(), MagicMock(), MagicMock(), MagicMock()],
+            [MagicMock(), MagicMock()],
+            [MagicMock(), MagicMock()],
+        ]
+        mock_st.button.return_value = False
+        mock_st.session_state = MockSessionState({"edit_article_id": 11, "courses_refresh": 0})
+
+        form_mock = MagicMock()
+        mock_st.form.return_value.__enter__ = MagicMock(return_value=form_mock)
+        mock_st.form.return_value.__exit__ = MagicMock(return_value=False)
+        mock_st.number_input.return_value = 1.0
+        mock_st.selectbox.side_effect = ["basse", "Crèmerie"]
+        mock_st.text_area.return_value = ""
+        mock_st.form_submit_button.side_effect = [False, True]  # Save not, Cancel clicked
+
+        render_rayon_articles(mock_service, "Crèmerie", articles)
+
+        mock_st.rerun.assert_called()
+
+    @patch(
+        "src.modules.cuisine.courses.liste_active.PRIORITY_EMOJIS",
+        {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"},
+    )
+    @patch("src.modules.cuisine.courses.liste_active.RAYONS_DEFAULT", ["Crèmerie", "Autre"])
+    @patch("src.modules.cuisine.courses.liste_active.st")
+    def test_render_rayon_edit_form_save_error(self, mock_st):
+        """Test erreur sauvegarde formulaire édition."""
+        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+
+        mock_service = MagicMock()
+        mock_service.update.side_effect = Exception("Update failed")
+        articles = [
+            {
+                "id": 12,
+                "ingredient_nom": "ErrorTest",
+                "quantite_necessaire": 1.0,
+                "unite": "kg",
+                "priorite": "moyenne",
+                "rayon_magasin": "Crèmerie",
+                "notes": "",
+                "suggere_par_ia": False,
+            }
+        ]
+
+        mock_st.columns.side_effect = [
+            [MagicMock(), MagicMock(), MagicMock(), MagicMock()],
+            [MagicMock(), MagicMock()],
+            [MagicMock(), MagicMock()],
+        ]
+        mock_st.button.return_value = False
+        mock_st.session_state = MockSessionState({"edit_article_id": 12, "courses_refresh": 0})
+
+        form_mock = MagicMock()
+        mock_st.form.return_value.__enter__ = MagicMock(return_value=form_mock)
+        mock_st.form.return_value.__exit__ = MagicMock(return_value=False)
+        mock_st.number_input.return_value = 1.0
+        mock_st.selectbox.side_effect = ["moyenne", "Crèmerie"]
+        mock_st.text_area.return_value = ""
+        mock_st.form_submit_button.side_effect = [True, False]  # Save clicked
+
+        render_rayon_articles(mock_service, "Crèmerie", articles)
+
+        mock_st.error.assert_called()
+
+    @patch(
+        "src.modules.cuisine.courses.liste_active.PRIORITY_EMOJIS",
+        {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"},
+    )
+    @patch("src.modules.cuisine.courses.liste_active.RAYONS_DEFAULT", ["Rayon", "Autre"])
+    @patch("src.modules.cuisine.courses.liste_active.st")
+    def test_render_rayon_articles_edit_button_clicked(self, mock_st):
+        """Test bouton édition cliqué."""
+        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+
+        mock_service = MagicMock()
+        articles = [
+            {
+                "id": 13,
+                "ingredient_nom": "EditBtn",
+                "quantite_necessaire": 1.0,
+                "unite": "kg",
+                "priorite": "moyenne",
+                "rayon_magasin": "Rayon",
+                "notes": None,
+                "suggere_par_ia": False,
+            }
+        ]
+
+        # 3 columns calls: article row (4), form inputs (2), form buttons (2)
+        mock_st.columns.side_effect = [
+            [MagicMock(), MagicMock(), MagicMock(), MagicMock()],  # article row
+            [MagicMock(), MagicMock()],  # form input columns
+            [MagicMock(), MagicMock()],  # form button columns
+        ]
+        # Boutons: mark bought=False, edit=True, delete=False
+        mock_st.button.side_effect = [False, True, False]
+        mock_st.session_state = MockSessionState({"edit_article_id": None, "courses_refresh": 0})
+
+        # Setup form mock since edit form will be shown after button click
+        form_mock = MagicMock()
+        mock_st.form.return_value.__enter__ = MagicMock(return_value=form_mock)
+        mock_st.form.return_value.__exit__ = MagicMock(return_value=False)
+        mock_st.number_input.return_value = 1.0
+        mock_st.selectbox.side_effect = ["moyenne", "Rayon"]
+        mock_st.text_area.return_value = ""
+        mock_st.form_submit_button.side_effect = [False, False]  # Save=F, Cancel=F
+
+        render_rayon_articles(mock_service, "Rayon", articles)
+
+        mock_st.rerun.assert_called()
