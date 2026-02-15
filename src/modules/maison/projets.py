@@ -113,7 +113,7 @@ def creer_projet(
         clear_maison_cache()
         return projet.id
     except Exception as e:
-        st.error(f"❌ Erreur creation projet: {e}")
+        st.error(f"âŒ Erreur creation projet: {e}")
         return None
 
 
@@ -141,7 +141,7 @@ def ajouter_tache(
         clear_maison_cache()
         return True
     except Exception as e:
-        st.error(f"❌ Erreur ajout tâche: {e}")
+        st.error(f"âŒ Erreur ajout tâche: {e}")
         return False
 
 
@@ -156,7 +156,7 @@ def marquer_tache_done(task_id: int, db=None) -> bool:
             clear_maison_cache()
             return True
     except Exception as e:
-        st.error(f"❌ Erreur mise à jour: {e}")
+        st.error(f"âŒ Erreur mise à jour: {e}")
     return False
 
 
@@ -172,8 +172,66 @@ def marquer_projet_done(project_id: int, db=None) -> bool:
             clear_maison_cache()
             return True
     except Exception as e:
-        st.error(f"❌ Erreur: {e}")
+        st.error(f"âŒ Erreur: {e}")
     return False
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# HELPERS TESTABLES POUR IA
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+
+def run_ia_suggerer_taches(service, nom_projet: str, description: str) -> tuple:
+    """Appelle l'IA pour suggerer des taches. Retourne (success, result_or_error)."""
+    import asyncio
+
+    try:
+        result = asyncio.run(service.suggerer_taches(nom_projet, description))
+        if result:
+            return (True, result)
+        return (False, "Aucune suggestion generee")
+    except Exception as e:
+        return (False, f"IA indisponible: {e}")
+
+
+def run_ia_estimer_duree(service, nom_projet: str, complexite: str) -> tuple:
+    """Appelle l'IA pour estimer la duree. Retourne (success, result_or_error)."""
+    import asyncio
+
+    try:
+        result = asyncio.run(service.estimer_duree(nom_projet, complexite))
+        if result:
+            return (True, result)
+        return (False, "Aucune estimation generee")
+    except Exception as e:
+        return (False, f"IA indisponible: {e}")
+
+
+def run_ia_analyser_risques(service, nom_projet: str) -> tuple:
+    """Appelle l'IA pour analyser les risques. Retourne (success, result_or_error)."""
+    import asyncio
+
+    try:
+        result = asyncio.run(service.conseil_blocages(nom_projet, ""))
+        if result:
+            return (True, result)
+        return (False, "Aucun risque identifie")
+    except Exception as e:
+        return (False, f"IA indisponible: {e}")
+
+
+def creer_graphique_progression(df) -> object:
+    """Cree un graphique Plotly de progression des projets."""
+    import plotly.express as px
+
+    return px.bar(
+        df,
+        x="projet",
+        y="progression",
+        color="progression",
+        color_continuous_scale="Greens",
+        title="Progression des projets",
+    )
 
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -183,7 +241,7 @@ def marquer_projet_done(project_id: int, db=None) -> bool:
 
 def app():
     """Point d'entree module Projets"""
-    st.title("👶 Projets Maison")
+    st.title("ðŸ‘¶ Projets Maison")
     st.caption("Gestion et priorisation intelligente des projets")
 
     service = get_projets_service()
@@ -195,12 +253,12 @@ def app():
     urgents = get_projets_urgents()
 
     if urgents:
-        st.warning(f"âš ï¸ **{len(urgents)} projet(s) necessitent attention**")
+        st.warning(f"âÅ¡Â ïÂ¸ **{len(urgents)} projet(s) necessitent attention**")
         for urgent in urgents[:3]:
             if urgent["type"] == "RETARD":
-                st.error(f"❌ **{urgent['projet']}** : {urgent['message']}")
+                st.error(f"âŒ **{urgent['projet']}** : {urgent['message']}")
             else:
-                st.warning(f"🗑️ **{urgent['projet']}** : {urgent['message']}")
+                st.warning(f"ðŸ—‘ï¸ **{urgent['projet']}** : {urgent['message']}")
         st.markdown("---")
 
     # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -229,7 +287,9 @@ def app():
     # TABS
     # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-    tab1, tab2, tab3, tab4 = st.tabs(["🎯 En cours", "🤖 Assistant IA", "➕ Nouveau", "📄 Tableau"])
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["ðŸŽ¯ En cours", "ðŸ¤– Assistant IA", "âž• Nouveau", "ðŸ“„ Tableau"]
+    )
 
     # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
     # TAB 1: PROJETS EN COURS
@@ -251,7 +311,7 @@ def app():
 
                     # Barre de progression
                     st.progress(projet["progress"] / 100)
-                    st.caption(f"✅ {projet['progress']:.0f}% • {projet['taches_count']} tâches")
+                    st.caption(f"âœ… {projet['progress']:.0f}% • {projet['taches_count']} tâches")
 
                     if projet["description"]:
                         st.caption(projet["description"][:100] + "...")
@@ -261,11 +321,11 @@ def app():
 
                     with col_a:
                         badge = (
-                            "❌"
+                            "âŒ"
                             if projet["priorite"] == "urgente"
-                            else "🧹"
+                            else "ðŸ§¹"
                             if projet["priorite"] == "haute"
-                            else "💡"
+                            else "ðŸ’¡"
                         )
                         st.caption(f"{badge} {projet['priorite'].upper()}")
 
@@ -273,15 +333,15 @@ def app():
                         if projet["jours_restants"] is not None:
                             jours = projet["jours_restants"]
                             if jours < 0:
-                                st.caption(f"📋 **En retard de {-jours}j**")
+                                st.caption(f"ðŸ“‹ **En retard de {-jours}j**")
                             elif jours == 0:
-                                st.caption("📋 **À livrer aujourd'hui!**")
+                                st.caption("ðŸ“‹ **À livrer aujourd'hui!**")
                             else:
-                                st.caption(f"📋 {jours}j restants")
+                                st.caption(f"ðŸ“‹ {jours}j restants")
 
                 with col2:
                     if st.button(
-                        "✅ Terminer", key=f"done_{projet['id']}", use_container_width=True
+                        "âœ… Terminer", key=f"done_{projet['id']}", use_container_width=True
                     ):
                         if marquer_projet_done(projet["id"]):
                             st.success("Projet marque comme termine!")
@@ -299,7 +359,7 @@ def app():
                                 col_t1, col_t2, col_t3 = st.columns([3, 1, 1])
 
                                 with col_t1:
-                                    emoji = "✅" if t.statut == "termine" else "⏳"
+                                    emoji = "âœ…" if t.statut == "termine" else "â³"
                                     st.caption(f"{emoji} {t.nom}")
 
                                 with col_t2:
@@ -309,7 +369,7 @@ def app():
                                 with col_t3:
                                     if t.statut != "termine":
                                         if st.button(
-                                            "✅", key=f"task_{t.id}", use_container_width=True
+                                            "âœ…", key=f"task_{t.id}", use_container_width=True
                                         ):
                                             if marquer_tache_done(t.id):
                                                 st.rerun()
@@ -321,20 +381,20 @@ def app():
     # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
     with tab2:
-        st.subheader("🤖 Assistant Projets IA")
+        st.subheader("ðŸ¤– Assistant Projets IA")
 
         col_ia1, col_ia2 = st.columns(2)
 
         # Suggerer tâches
         with col_ia1:
-            st.markdown("#### 🎯 Suggerer des tâches")
+            st.markdown("#### ðŸŽ¯ Suggerer des tâches")
 
             projet_nom_ia = st.text_input("Nom du projet", placeholder="Ex: Renover cuisine")
             projet_desc_ia = st.text_area(
                 "Description", placeholder="Details du projet...", height=100
             )
 
-            if st.button("🍽️ Generer tâches", key="ia_taches", use_container_width=True):
+            if st.button("ðŸ½ï¸ Generer tâches", key="ia_taches", use_container_width=True):
                 if projet_nom_ia:
                     with st.spinner("IA analyse le projet..."):
                         try:
@@ -346,18 +406,18 @@ def app():
                             if taches:
                                 st.success(taches)
                         except Exception as e:
-                            st.warning(f"âš ï¸ IA indisponible: {e}")
+                            st.warning(f"âÅ¡Â ïÂ¸ IA indisponible: {e}")
 
         # Estimer duree
         with col_ia2:
-            st.markdown("#### ⏱️ Estimer la duree")
+            st.markdown("#### â±ï¸ Estimer la duree")
 
             projet_nom_dur = st.text_input(
                 "Nom du projet", placeholder="Ex: Repeindre salon", key="dur"
             )
             complexite = st.selectbox("Complexite", ["simple", "moyen", "complexe"], key="complex")
 
-            if st.button("💰 Estimer duree", key="ia_duree", use_container_width=True):
+            if st.button("ðŸ’° Estimer duree", key="ia_duree", use_container_width=True):
                 if projet_nom_dur:
                     with st.spinner("Estimation en cours..."):
                         try:
@@ -367,12 +427,12 @@ def app():
                             if duree:
                                 st.info(duree)
                         except Exception as e:
-                            st.warning(f"âš ï¸ IA indisponible: {e}")
+                            st.warning(f"âÅ¡Â ïÂ¸ IA indisponible: {e}")
 
         st.markdown("---")
 
         # Analyser blocages
-        st.markdown("#### ⚠️ Analyser les risques")
+        st.markdown("#### âš ï¸ Analyser les risques")
 
         col_r1, col_r2 = st.columns(2)
 
@@ -380,7 +440,7 @@ def app():
             projet_risque = st.text_input("Nom du projet", placeholder="Ex: Installer piscine")
 
         with col_r2:
-            if st.button("📍Identifier risques", use_container_width=True):
+            if st.button("ðŸ“Identifier risques", use_container_width=True):
                 if projet_risque:
                     with st.spinner("Analyse des risques..."):
                         try:
@@ -390,7 +450,7 @@ def app():
                             if risques:
                                 st.warning(risques)
                         except Exception as e:
-                            st.warning(f"âš ï¸ IA indisponible: {e}")
+                            st.warning(f"âÅ¡Â ïÂ¸ IA indisponible: {e}")
 
     # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
     # TAB 3: CRÉER NOUVEAU PROJET
@@ -414,7 +474,7 @@ def app():
             with col_p2:
                 date_fin = st.date_input("Date d'echeance (optionnel)", value=None)
 
-            submitted = st.form_submit_button("📅 Creer le projet", type="primary")
+            submitted = st.form_submit_button("ðŸ“… Creer le projet", type="primary")
 
             if submitted:
                 if not nom:
@@ -422,14 +482,14 @@ def app():
                 else:
                     project_id = creer_projet(nom, description, "General", priorite, date_fin)
                     if project_id:
-                        st.success(f"✅ Projet '{nom}' cree!")
+                        st.success(f"âœ… Projet '{nom}' cree!")
                         st.balloons()
                         st.rerun()
 
         st.markdown("---")
 
         # Templates
-        st.markdown("### 🎯 Templates rapides")
+        st.markdown("### ðŸŽ¯ Templates rapides")
 
         templates = [
             {
@@ -465,12 +525,12 @@ def app():
         ]
 
         for templ in templates:
-            if st.button(f"🎯 {templ['nom']}", use_container_width=True):
+            if st.button(f"ðŸŽ¯ {templ['nom']}", use_container_width=True):
                 p_id = creer_projet(templ["nom"], "", "General", "moyenne")
                 if p_id:
                     for tache in templ["taches"]:
                         ajouter_tache(p_id, tache)
-                    st.success("✅ Projet template cree avec tâches!")
+                    st.success("âœ… Projet template cree avec tâches!")
                     st.rerun()
 
     # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -478,7 +538,7 @@ def app():
     # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
     with tab4:
-        st.subheader("📊 Vue d'ensemble")
+        st.subheader("ðŸ“Š Vue d'ensemble")
 
         df_all = charger_projets()
 
