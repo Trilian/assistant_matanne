@@ -590,7 +590,7 @@ def render_activity_timeline(limit: int = 10):
 
         with col2:
             st.markdown(f"**{action.description}**")
-            st.caption(f"{action.user_name} ïÂ¿Â½ " f"{action.created_at.strftime('%d/%m %H:%M')}")
+            st.caption(f"{action.user_name} ïÂ¿Â½ {action.created_at.strftime('%d/%m %H:%M')}")
 
         st.markdown("---")
 

@@ -41,7 +41,7 @@ def spinner_intelligent(
 
             if afficher_temps_ecoule:
                 if temps_ecoule < 1:
-                    st.caption(f"✅ Terminé en {temps_ecoule*1000:.0f}ms")
+                    st.caption(f"✅ Terminé en {temps_ecoule * 1000:.0f}ms")
                 else:
                     st.caption(f"✅ Terminé en {temps_ecoule:.1f}s")
 

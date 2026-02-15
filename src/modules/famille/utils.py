@@ -394,4 +394,4 @@ def format_date_fr(d: date) -> str:
     jours = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
     mois = ["jan", "fev", "mar", "avr", "mai", "jun", "jul", "aoû", "sep", "oct", "nov", "dec"]
 
-    return f"{jours[d.weekday()]} {d.day} {mois[d.month-1]} {d.year}"
+    return f"{jours[d.weekday()]} {d.day} {mois[d.month - 1]} {d.year}"

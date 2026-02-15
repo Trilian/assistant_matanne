@@ -439,9 +439,9 @@ class ServicePlanning(BaseService[Planning], BaseAIService, PlanningAIMixin):
 
     @avec_cache(
         ttl=3600,
-        key_func=lambda self,
-        semaine_debut,
-        preferences=None: f"planning_ia_{semaine_debut.isoformat()}",
+        key_func=lambda self, semaine_debut, preferences=None: (
+            f"planning_ia_{semaine_debut.isoformat()}"
+        ),
     )
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db

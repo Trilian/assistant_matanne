@@ -82,7 +82,7 @@ def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative
 
     # Toutes les tentatives ont échoué
     message_erreur = (
-        f"Impossible de se connecter après {nombre_tentatives} tentatives: " f"{derniere_erreur}"
+        f"Impossible de se connecter après {nombre_tentatives} tentatives: {derniere_erreur}"
     )
     logger.error(message_erreur)
     raise ErreurBaseDeDonnees(
@@ -331,7 +331,7 @@ class GestionnaireMigrations:
         logger.info(f"🔄 {len(en_attente)} migration(s) en attente")
 
         for migration in sorted(en_attente, key=lambda x: x["version"]):
-            logger.info(f"Application migration v{migration['version']}: " f"{migration['name']}")
+            logger.info(f"Application migration v{migration['version']}: {migration['name']}")
             GestionnaireMigrations.appliquer_migration(
                 migration["version"], migration["name"], migration["sql"]
             )

@@ -453,7 +453,9 @@ def app():
             zone_selectionnee = st.selectbox(
                 "Selectionner une zone",
                 options=[z["nom"] for z in zones],
-                format_func=lambda x: f"{EMOJI_ZONE.get(next((z['type_zone'] for z in zones if z['nom']==x), 'autre'), '📍')} {x}",
+                format_func=lambda x: (
+                    f"{EMOJI_ZONE.get(next((z['type_zone'] for z in zones if z['nom'] == x), 'autre'), '📍')} {x}"
+                ),
             )
 
             zone = next((z for z in zones if z["nom"] == zone_selectionnee), None)

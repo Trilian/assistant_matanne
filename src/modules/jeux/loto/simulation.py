@@ -155,7 +155,7 @@ def afficher_gestion_tirages():
         for i in range(5):
             with cols_num[i]:
                 num = st.number_input(
-                    f"N°{i+1}",
+                    f"N°{i + 1}",
                     NUMERO_MIN,
                     NUMERO_MAX,
                     value=random.randint(NUMERO_MIN, NUMERO_MAX),

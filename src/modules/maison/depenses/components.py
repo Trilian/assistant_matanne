@@ -174,9 +174,9 @@ def render_graphique_evolution():
     categorie = st.selectbox(
         "Categorie à afficher",
         options=["total"] + list(CATEGORY_LABELS.keys()),
-        format_func=lambda x: "📊 Total toutes categories"
-        if x == "total"
-        else CATEGORY_LABELS.get(x, x),
+        format_func=lambda x: (
+            "📊 Total toutes categories" if x == "total" else CATEGORY_LABELS.get(x, x)
+        ),
     )
 
     today = date.today()

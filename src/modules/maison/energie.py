@@ -253,7 +253,7 @@ def graphique_comparaison_annees(energie: str):
     )
 
     fig.update_layout(
-        title=f"{info['emoji']} Comparaison {annee_courante-1} vs {annee_courante}",
+        title=f"{info['emoji']} Comparaison {annee_courante - 1} vs {annee_courante}",
         yaxis_title="Montant (€)",
         barmode="group",
         height=350,

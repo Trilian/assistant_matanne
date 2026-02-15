@@ -287,7 +287,7 @@ class TestWorkflowPlanningE2E:
                 EvenementCalendrier(
                     id=f"repas_midi_{i}",
                     type=TypeEvenement.REPAS_MIDI,
-                    titre=f"Déjeuner jour {i+1}",
+                    titre=f"Déjeuner jour {i + 1}",
                     date_jour=jour_date,
                     heure_debut=time(12, 0),
                 )

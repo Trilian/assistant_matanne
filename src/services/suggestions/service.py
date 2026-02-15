@@ -471,13 +471,13 @@ CONTEXTE:
 - Saison: {contexte.saison}
 
 INGRÉDIENTS DISPONIBLES:
-{', '.join(contexte.ingredients_disponibles[:20]) if contexte.ingredients_disponibles else 'Non spécifié'}
+{", ".join(contexte.ingredients_disponibles[:20]) if contexte.ingredients_disponibles else "Non spécifié"}
 
 INGRÉDIENTS À UTILISER EN PRIORITÉ (péremption proche):
-{', '.join(contexte.ingredients_a_utiliser) if contexte.ingredients_a_utiliser else 'Aucun'}
+{", ".join(contexte.ingredients_a_utiliser) if contexte.ingredients_a_utiliser else "Aucun"}
 
 PRÉFÉRENCES DÉTECTÉES:
-- Catégories préférées: {', '.join(profil.categories_preferees[:3]) if profil.categories_preferees else 'Non déterminé'}
+- Catégories préférées: {", ".join(profil.categories_preferees[:3]) if profil.categories_preferees else "Non déterminé"}
 - Difficulté habituelle: {profil.difficulte_moyenne}
 - Temps moyen: {profil.temps_moyen_minutes} minutes
 

@@ -431,12 +431,12 @@ def generer_prompt_semaine(
 CONTEXTE FAMILLE:
 - {preferences.nb_adultes} adultes
 - 1 bebe de {preferences.jules_age_mois} mois (Jules) qui mange avec nous
-- Robots cuisine disponibles: {', '.join(preferences.robots)}
+- Robots cuisine disponibles: {", ".join(preferences.robots)}
 
 CONTRAINTES:
-- Temps de cuisine en semaine: {preferences.temps_semaine} ({TEMPS_CATEGORIES[preferences.temps_semaine]['label']})
-- Aliments à ÉVITER: {', '.join(preferences.aliments_exclus) if preferences.aliments_exclus else 'aucun'}
-- Aliments favoris: {', '.join(preferences.aliments_favoris) if preferences.aliments_favoris else 'varies'}
+- Temps de cuisine en semaine: {preferences.temps_semaine} ({TEMPS_CATEGORIES[preferences.temps_semaine]["label"]})
+- Aliments à ÉVITER: {", ".join(preferences.aliments_exclus) if preferences.aliments_exclus else "aucun"}
+- Aliments favoris: {", ".join(preferences.aliments_favoris) if preferences.aliments_favoris else "varies"}
 
 ÉQUILIBRE SOUHAITÉ PAR SEMAINE:
 - Poisson: {preferences.poisson_par_semaine} fois
@@ -444,10 +444,10 @@ CONTRAINTES:
 - Viande rouge: maximum {preferences.viande_rouge_max} fois
 
 APPRENTISSAGE (base sur l'historique):
-- La famille a aime: {', '.join(recettes_aimees) if recettes_aimees else 'pas encore assez de donnees'}
-- La famille n'a pas aime: {', '.join(recettes_pas_aimees) if recettes_pas_aimees else 'pas encore assez de donnees'}
+- La famille a aime: {", ".join(recettes_aimees) if recettes_aimees else "pas encore assez de donnees"}
+- La famille n'a pas aime: {", ".join(recettes_pas_aimees) if recettes_pas_aimees else "pas encore assez de donnees"}
 
-JOURS À PLANIFIER: {', '.join(jours_a_planifier)}
+JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
 
 Pour chaque repas, fournis:
 1. Nom du plat (simple et familial)
@@ -504,13 +504,13 @@ def generer_prompt_alternative(
 CONTRAINTES:
 - Famille avec bebe de {preferences.jules_age_mois} mois
 - Temps disponible: {preferences.temps_semaine}
-- Équipement: {', '.join(preferences.robots)}
-- À eviter: {', '.join(preferences.aliments_exclus) if preferences.aliments_exclus else 'rien'}
+- Équipement: {", ".join(preferences.robots)}
+- À eviter: {", ".join(preferences.aliments_exclus) if preferences.aliments_exclus else "rien"}
 
 ÉQUILIBRE ACTUEL DE LA SEMAINE:
-- Poisson dejà prevu: {contraintes_equilibre.get('poisson', 0)}/{preferences.poisson_par_semaine}
-- Vegetarien: {contraintes_equilibre.get('vegetarien', 0)}/{preferences.vegetarien_par_semaine}
-- Viande rouge: {contraintes_equilibre.get('viande_rouge', 0)}/{preferences.viande_rouge_max}
+- Poisson dejà prevu: {contraintes_equilibre.get("poisson", 0)}/{preferences.poisson_par_semaine}
+- Vegetarien: {contraintes_equilibre.get("vegetarien", 0)}/{preferences.vegetarien_par_semaine}
+- Viande rouge: {contraintes_equilibre.get("viande_rouge", 0)}/{preferences.viande_rouge_max}
 
 FORMAT JSON:
 {{

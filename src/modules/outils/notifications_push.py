@@ -111,7 +111,7 @@ def render_configuration():
 
 def render_abonnement():
     """Interface pour s'abonner aux notifications."""
-    st.subheader("📝± S'abonner aux notifications")
+    st.subheader("📷 S'abonner aux notifications")
 
     config = charger_config()
     service = get_notification_push_service(config)
@@ -236,7 +236,7 @@ def render_taches_retard():
     with col1:
         st.metric("⚠️ En retard", len(taches_retard))
     with col2:
-        st.metric("📝… Aujourd'hui", len(taches_jour))
+        st.metric("📅 Aujourd'hui", len(taches_jour))
     with col3:
         total = len(taches_retard) + len(taches_jour)
         st.metric("📊 Total à traiter", total)
@@ -256,7 +256,7 @@ def render_taches_retard():
 
                 with col1:
                     st.markdown(f"**{urgence} {tache.titre}**")
-                    st.caption(f"📝… Prévue: {tache.date_echeance.strftime('%d/%m/%Y')}")
+                    st.caption(f"📅 Prévue: {tache.date_echeance.strftime('%d/%m/%Y')}")
 
                 with col2:
                     st.markdown(f"**{jours_retard}j** retard")
@@ -292,7 +292,7 @@ def render_taches_retard():
     # Tâches du jour
     if taches_jour:
         st.divider()
-        st.markdown("### 📝… Tâches du jour")
+        st.markdown("### 📅 Tâches du jour")
 
         for tache in taches_jour[:5]:
             st.markdown(f"• {tache.titre}")
@@ -315,7 +315,7 @@ def app():
     st.caption("Recevez des alertes sur votre téléphone")
 
     # Tabs
-    tabs = st.tabs(["📝± S'abonner", "⚙️ Configuration", "⏰ Tâches", "🧪 Test", "❓ Aide"])
+    tabs = st.tabs(["📷 S'abonner", "⚙️ Configuration", "⏰ Tâches", "🧪 Test", "❓ Aide"])
 
     with tabs[0]:
         render_abonnement()

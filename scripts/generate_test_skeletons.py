@@ -97,7 +97,7 @@ def generate_test_content(module_path: str, module_name: str, extracted: dict[st
 
     if imports:
         if len(imports) <= 3:
-            lines.append(f'from {import_path} import {", ".join(imports)}')
+            lines.append(f"from {import_path} import {', '.join(imports)}")
         else:
             lines.append(f"from {import_path} import (")
             for imp in imports:
@@ -106,7 +106,7 @@ def generate_test_content(module_path: str, module_name: str, extracted: dict[st
     else:
         lines.append(f"# from {import_path} import ...")
 
-    class_name = f'Test{module_name.title().replace("_", "")}'
+    class_name = f"Test{module_name.title().replace('_', '')}"
     lines.extend(
         ["", "", f"class {class_name}:", f'    """Tests pour le module {module_name}"""', ""]
     )
@@ -248,9 +248,9 @@ def main():
 
         created += 1
 
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print("RÉSUMÉ")
-    print(f"{'='*50}")
+    print(f"{'=' * 50}")
     print(f"  Fichiers source: {len(source_files)}")
     print(f"  Tests existants (ignorés): {skipped}")
     print(f"  Tests créés: {created}")

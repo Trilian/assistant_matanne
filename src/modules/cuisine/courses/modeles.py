@@ -134,7 +134,7 @@ def render_modeles():
                         else ("🟡" if article["priorite"] == "moyenne" else "🟢")
                     )
                     st.write(
-                        f"{i+1}. {priorite_emoji} **{article['ingredient_nom']}** - {article['quantite_necessaire']} {article['unite']} ({article['rayon_magasin']})"
+                        f"{i + 1}. {priorite_emoji} **{article['ingredient_nom']}** - {article['quantite_necessaire']} {article['unite']} ({article['rayon_magasin']})"
                     )
 
                 st.divider()

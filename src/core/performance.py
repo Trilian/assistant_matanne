@@ -581,11 +581,11 @@ def afficher_badge_mini_performance():
 
     st.markdown(
         f'<div style="display: flex; justify-content: space-between; '
-        f'padding: 0.25rem 0.5rem; background: #f0f2f6; border-radius: 4px; '
+        f"padding: 0.25rem 0.5rem; background: #f0f2f6; border-radius: 4px; "
         f'font-size: 0.8rem;">'
-        f'<span>{status} Perf: {score}%</span>'
-        f'<span>💾 {memory["current_mb"]}MB</span>'
-        f'</div>',
+        f"<span>{status} Perf: {score}%</span>"
+        f"<span>💾 {memory['current_mb']}MB</span>"
+        f"</div>",
         unsafe_allow_html=True,
     )
 

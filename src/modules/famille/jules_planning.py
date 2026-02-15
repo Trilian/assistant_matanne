@@ -210,7 +210,7 @@ def render_activite_card(jour: int, activite: dict, index: int):
         with col1:
             style = "text-decoration: line-through; opacity: 0.6;" if fait else ""
             st.markdown(
-                f"<span style='{style}'>" f"**{activite['emoji']} {activite['nom']}**" f"</span>",
+                f"<span style='{style}'>**{activite['emoji']} {activite['nom']}**</span>",
                 unsafe_allow_html=True,
             )
             st.caption(f"⏱️ {activite['duree']} min • {activite['desc']}")

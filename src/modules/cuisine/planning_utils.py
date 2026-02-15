@@ -252,7 +252,7 @@ def valider_planning(data: dict[str, Any]) -> tuple[bool, list[str]]:
         for i, repas in enumerate(data["repas"]):
             valide, erreur = valider_repas(repas)
             if not valide:
-                erreurs.append(f"Repas {i+1}: {erreur}")
+                erreurs.append(f"Repas {i + 1}: {erreur}")
 
     return len(erreurs) == 0, erreurs
 

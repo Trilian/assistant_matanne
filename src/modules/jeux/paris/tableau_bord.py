@@ -47,9 +47,11 @@ def afficher_dashboard_performance():
 
         if not df.empty:
             df["profit_cumul"] = df.apply(
-                lambda x: float(x["gain"]) - float(x["mise"])
-                if x["statut"] == "gagne"
-                else -float(x["mise"]),
+                lambda x: (
+                    float(x["gain"]) - float(x["mise"])
+                    if x["statut"] == "gagne"
+                    else -float(x["mise"])
+                ),
                 axis=1,
             ).cumsum()
 

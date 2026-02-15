@@ -309,7 +309,7 @@ def formater_rapport_html(rapport: dict[str, Any]) -> str:
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>{rapport.get('titre', 'Rapport')}</title>
+    <title>{rapport.get("titre", "Rapport")}</title>
     <style>
         body {{ font-family: Arial, sans-serif; margin: 20px; }}
         h1 {{ color: #333; }}
@@ -318,12 +318,12 @@ def formater_rapport_html(rapport: dict[str, Any]) -> str:
     </style>
 </head>
 <body>
-    <h1>📊 {rapport.get('titre', 'Rapport')}</h1>
+    <h1>📊 {rapport.get("titre", "Rapport")}</h1>
 
     <div class="stats">
-        <p><strong>Periode:</strong> {rapport.get('periode', 'N/A')}</p>
-        <p><strong>Dates:</strong> Du {rapport.get('date_debut')} au {rapport.get('date_fin')}</p>
-        <p><strong>Genere le:</strong> {rapport.get('date_generation')}</p>
+        <p><strong>Periode:</strong> {rapport.get("periode", "N/A")}</p>
+        <p><strong>Dates:</strong> Du {rapport.get("date_debut")} au {rapport.get("date_fin")}</p>
+        <p><strong>Genere le:</strong> {rapport.get("date_generation")}</p>
     </div>
 
     <h2>Statistiques Globales</h2>
@@ -343,8 +343,8 @@ def formater_rapport_html(rapport: dict[str, Any]) -> str:
         for section in rapport["sections"]:
             html += f"""
     <div class="section">
-        <h3>{section.get('titre', 'Section')}</h3>
-        <p><strong>Total:</strong> {section.get('total', 0)}</p>
+        <h3>{section.get("titre", "Section")}</h3>
+        <p><strong>Total:</strong> {section.get("total", 0)}</p>
     </div>
 """
 

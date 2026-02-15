@@ -40,7 +40,7 @@ def render_navigation_semaine():
         semaine_fin = semaine_debut + timedelta(days=6)
         st.markdown(
             f"<h3 style='text-align: center; margin: 0;'>"
-            f"📝… {semaine_debut.strftime('%d/%m')} — {semaine_fin.strftime('%d/%m/%Y')}"
+            f"📅 {semaine_debut.strftime('%d/%m')} — {semaine_fin.strftime('%d/%m/%Y')}"
             f"</h3>",
             unsafe_allow_html=True,
         )
@@ -53,7 +53,7 @@ def render_navigation_semaine():
             st.rerun()
 
     with col4:
-        if st.button("📝… Aujourd'hui", use_container_width=True):
+        if st.button("📅 Aujourd'hui", use_container_width=True):
             st.session_state.cal_semaine_debut = get_debut_semaine(date.today())
             st.rerun()
 
@@ -115,7 +115,7 @@ def render_jour_calendrier(jour: JourCalendrier):
 
         # RDV
         for rdv in jour.rdv:
-            emoji = "🏥" if rdv.type == TypeEvenement.RDV_MEDICAL else "📝…"
+            emoji = "🏥" if rdv.type == TypeEvenement.RDV_MEDICAL else "📅"
             lieu_str = f" @ {rdv.lieu}" if rdv.lieu else ""
             st.warning(f"{emoji} {rdv.titre} {rdv.heure_str}{lieu_str}")
 
@@ -302,7 +302,7 @@ def render_formulaire_ajout_event():
                     "Type",
                     options=[
                         ("🏥 RDV Médical", "rdv_medical"),
-                        ("📝… RDV Autre", "rdv_autre"),
+                        ("📅 RDV Autre", "rdv_autre"),
                         ("🎨 Activité", "activite"),
                         ("🛒 Courses", "courses"),
                         ("📝Œ Autre", "autre"),
@@ -371,7 +371,7 @@ def render_legende():
             ("🌞 Midi", "🌙 Soir", "🍰 Goûter"),
             ("🍳 Batch", "🛒 Courses"),
             ("🎨 Activité", "🏥 RDV médical"),
-            ("📝… RDV", "👶 Pour Jules"),
+            ("📅 RDV", "👶 Pour Jules"),
             ("🧹 Ménage", "🌱 Jardin"),
             ("⭐ Aujourd'hui",),
         ]

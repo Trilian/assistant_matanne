@@ -807,8 +807,7 @@ def valider_formulaire_streamlit(
             longueur_max = regles.get("max_length", 1000)
             if len(valeur) > longueur_max:
                 erreurs.append(
-                    f"[!] {regles.get('label', champ)} trop long "
-                    f"(max {longueur_max} caractères)"
+                    f"[!] {regles.get('label', champ)} trop long (max {longueur_max} caractères)"
                 )
 
     est_valide = len(erreurs) == 0

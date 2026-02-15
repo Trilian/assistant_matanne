@@ -61,7 +61,7 @@ def app():
 
             **📝¥ Sync Équipes**: Charge les équipes des 5 championnats depuis l'API
 
-            **📝… Sync Matchs**: Charge les matchs à venir avec prédictions IA automatiques
+            **📅 Sync Matchs**: Charge les matchs à venir avec prédictions IA automatiques
 
             💡 **Conseil**: Faites d'abord "Sync Équipes" puis "Sync Matchs" pour tout automatiser!
             """)
@@ -117,11 +117,11 @@ def app():
 
         with col_btn3:
             if st.button(
-                "📝… Sync Matchs",
+                "📅 Sync Matchs",
                 help="Charge les matchs à venir depuis l'API",
                 use_container_width=True,
             ):
-                st.info("📝… Chargement des matchs...")
+                st.info("📅 Chargement des matchs...")
                 try:
                     with st.spinner("Récupération des matchs des 5 championnats..."):
                         logger.info("🔘 Bouton SYNC MATCHS cliqué!")
@@ -156,8 +156,7 @@ def app():
                 afficher_prediction_match(match)
         else:
             st.info(
-                "📝… Aucun match prévu dans cette période. "
-                "Ajoutez des matchs dans l'onglet Gestion."
+                "📅 Aucun match prévu dans cette période. Ajoutez des matchs dans l'onglet Gestion."
             )
 
             with st.expander("🎮 Voir une démo"):

@@ -694,7 +694,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
             ["Valeur perdue", f"€{analyse.valeur_perdue:.2f}"],
             [
                 "Moyenne par article",
-                f"€{analyse.valeur_perdue/max(analyse.articles_perimes_total, 1):.2f}",
+                f"€{analyse.valeur_perdue / max(analyse.articles_perimes_total, 1):.2f}",
             ],
         ]
 
@@ -1049,9 +1049,11 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
 
             for repas in sorted(
                 repas_jour,
-                key=lambda x: ["petit_déjeuner", "déjeuner", "goûter", "dîner"].index(x["type"])
-                if x["type"] in ["petit_déjeuner", "déjeuner", "goûter", "dîner"]
-                else 99,
+                key=lambda x: (
+                    ["petit_déjeuner", "déjeuner", "goûter", "dîner"].index(x["type"])
+                    if x["type"] in ["petit_déjeuner", "déjeuner", "goûter", "dîner"]
+                    else 99
+                ),
             ):
                 emoji = type_repas_emoji.get(repas["type"], "🍴")
                 status = "✅" if repas["prepare"] else "⏳"

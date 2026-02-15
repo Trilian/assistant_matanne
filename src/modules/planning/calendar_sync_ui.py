@@ -16,7 +16,7 @@ from src.services.calendrier import get_calendar_sync_service
 
 def render_calendar_sync_ui():
     """Interface Streamlit pour la synchronisation des calendriers."""
-    st.subheader("📝… Synchronisation Calendriers")
+    st.subheader("📅 Synchronisation Calendriers")
 
     service = get_calendar_sync_service()
 

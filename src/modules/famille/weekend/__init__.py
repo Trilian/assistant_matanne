@@ -2,7 +2,7 @@
 Module Sorties Weekend - Planning et suggestions IA.
 
 Fonctionnalités:
-- 📝… Planning weekend (samedi/dimanche)
+- 📅 Planning weekend (samedi/dimanche)
 - 💡 Idées IA (selon météo + âge Jules + budget)
 - 🗺️ Lieux testés & notés
 - 💰 Budget sorties
@@ -34,12 +34,10 @@ def app():
     st.title("🎉 Sorties Weekend")
 
     saturday, sunday = get_next_weekend()
-    st.caption(f"📝… {saturday.strftime('%d/%m')} - {sunday.strftime('%d/%m')}")
+    st.caption(f"📅 {saturday.strftime('%d/%m')} - {sunday.strftime('%d/%m')}")
 
     # Tabs
-    tabs = st.tabs(
-        ["📝… Planning", "💡 Suggestions IA", "🗺️ Lieux testés", "➕ Ajouter", "⭐ Noter"]
-    )
+    tabs = st.tabs(["📅 Planning", "💡 Suggestions IA", "🗺️ Lieux testés", "➕ Ajouter", "⭐ Noter"])
 
     with tabs[0]:
         render_planning()

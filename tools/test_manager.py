@@ -22,9 +22,9 @@ from pathlib import Path
 def run_command(cmd, description=""):
     """ExÃ©cuter une commande et afficher le rÃ©sultat."""
     if description:
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print(f"ðŸ“Œ {description}")
-        print(f"{'='*70}\n")
+        print(f"{'=' * 70}\n")
 
     try:
         result = subprocess.run(cmd, shell=True)

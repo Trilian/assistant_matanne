@@ -69,7 +69,7 @@ TYPES_SESSION = {
 def render_selecteur_session():
     """Sélecteur de type de session."""
 
-    st.subheader("📝… Type de session")
+    st.subheader("📅 Type de session")
 
     col1, col2 = st.columns(2)
 
@@ -542,7 +542,7 @@ def app():
 
         with col_date:
             date_batch = st.date_input(
-                "📝… Date de la session",
+                "📅 Date de la session",
                 value=date.today() + timedelta(days=1),
                 format="DD/MM/YYYY",
             )
@@ -565,7 +565,7 @@ def app():
             render_planning_semaine_preview(planning_data)
         else:
             st.warning("⚠️ Aucun planning de repas trouvé.")
-            if st.button("📝… Aller au planificateur de repas"):
+            if st.button("📅 Aller au planificateur de repas"):
                 st.info("🚧 Navigation vers le planificateur...")
 
         st.divider()
@@ -715,7 +715,7 @@ def app():
 
         if finitions_par_jour:
             for jour in sorted(finitions_par_jour.keys()):
-                with st.expander(f"📝… {jour}", expanded=False):
+                with st.expander(f"📅 {jour}", expanded=False):
                     for recette in finitions_par_jour[jour]:
                         render_finition_jour_j(recette)
         else:

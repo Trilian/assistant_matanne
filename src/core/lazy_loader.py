@@ -67,7 +67,7 @@ class ChargeurModuleDiffere:
             load_time = time.time() - start_time
             ChargeurModuleDiffere._load_times[module_path] = load_time
 
-            logger.info(f"[OK] Module chargé en {load_time*1000:.0f}ms: {module_path}")
+            logger.info(f"[OK] Module chargé en {load_time * 1000:.0f}ms: {module_path}")
 
             return module
 
@@ -338,7 +338,7 @@ def afficher_stats_chargement_differe():
         with col2:
             st.metric(
                 "Temps Moyen",
-                f"{stats['average_load_time']*1000:.0f}ms",
+                f"{stats['average_load_time'] * 1000:.0f}ms",
                 help="Temps moyen de chargement",
             )
 
@@ -350,7 +350,7 @@ def afficher_stats_chargement_differe():
                 stats["load_times"].items(), key=lambda x: x[1], reverse=True
             )[:5]:  # Top 5 plus lents
                 module_name = module.split(".")[-1]
-                st.caption(f"• {module_name}: {load_time*1000:.0f}ms")
+                st.caption(f"• {module_name}: {load_time * 1000:.0f}ms")
 
         if st.button("🗑️ Vider Cache Lazy"):
             ChargeurModuleDiffere.vider_cache()

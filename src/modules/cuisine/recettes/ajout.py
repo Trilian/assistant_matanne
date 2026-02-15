@@ -86,7 +86,7 @@ def render_ajouter_manuel():
     for i in range(int(num_ingredients)):
         col1, col2, col3 = st.columns([2, 1, 1])
         with col1:
-            ing_nom = st.text_input(f"Ingrédient {i+1}", key=f"form_ing_nom_{i}")
+            ing_nom = st.text_input(f"Ingrédient {i + 1}", key=f"form_ing_nom_{i}")
         with col2:
             ing_qty = st.number_input("Qté", value=1.0, key=f"form_ing_qty_{i}", step=0.25)
         with col3:
@@ -110,7 +110,7 @@ def render_ajouter_manuel():
 
     etapes = []
     for i in range(int(num_etapes)):
-        etape_desc = st.text_area(f"Étape {i+1}", height=80, key=f"form_etape_{i}")
+        etape_desc = st.text_area(f"Étape {i + 1}", height=80, key=f"form_etape_{i}")
         if etape_desc:
             etapes.append({"description": etape_desc, "duree": None})
 

@@ -294,7 +294,7 @@ Format JSON:
 
 Criteres:
 - Moins cher en ce moment
-- De saison (nous sommes en {date.today().strftime('%B')})
+- De saison (nous sommes en {date.today().strftime("%B")})
 - Equivalent nutritionnel
 
 Reponds UNIQUEMENT avec le JSON."""

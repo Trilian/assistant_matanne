@@ -295,7 +295,7 @@ def construire_contexte_recette(
     if etapes:
         etapes_text = "\n".join(
             [
-                f"  {e.get('ordre', i+1)}. {e.get('description', '')} ({e.get('duree', '?')} min)"
+                f"  {e.get('ordre', i + 1)}. {e.get('description', '')} ({e.get('duree', '?')} min)"
                 for i, e in enumerate(etapes)
             ]
         )
@@ -304,11 +304,11 @@ def construire_contexte_recette(
 
     return f"""
 Recette: {nom}
-- Temps préparation: {temps_preparation or '?'} min
-- Temps cuisson: {temps_cuisson or '?'} min
-- Portions: {portions or '?'}
-- Compatible batch: {'Oui' if compatible_batch else 'Non'}
-- Congelable: {'Oui' if congelable else 'Non'}
+- Temps préparation: {temps_preparation or "?"} min
+- Temps cuisson: {temps_cuisson or "?"} min
+- Portions: {portions or "?"}
+- Compatible batch: {"Oui" if compatible_batch else "Non"}
+- Congelable: {"Oui" if congelable else "Non"}
 - Robots: {robots_text}
 - Étapes:
 {etapes_text}

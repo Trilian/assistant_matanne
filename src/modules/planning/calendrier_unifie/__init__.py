@@ -7,7 +7,7 @@ Affiche dans une seule vue:
 - 🛒 Courses planifiées
 - 🎨 Activités famille
 - 🏥 RDV médicaux
-- 📝… Événements divers
+- 📅 Événements divers
 
 Fonctionnalités:
 - Vue semaine avec impression
@@ -37,7 +37,7 @@ from .data import charger_donnees_semaine
 def app():
     """Point d'entrée du module Calendrier Familial Unifié."""
 
-    st.title("📝… Calendrier Familial")
+    st.title("📅 Calendrier Familial")
     st.caption("Vue unifiée de toute votre semaine: repas, batch, courses, activités, ménage, RDV")
 
     # Navigation

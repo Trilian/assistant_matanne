@@ -233,7 +233,7 @@ class ServiceBackup:
 
         logger.info(
             f"✅ Backup créé: {filename} "
-            f"({total_records} enregistrements, {file_size/1024:.1f} KB, {duration:.2f}s)"
+            f"({total_records} enregistrements, {file_size / 1024:.1f} KB, {duration:.2f}s)"
         )
 
         return BackupResult(
@@ -662,7 +662,7 @@ def render_backup_ui():
                     st.success(f"✅ {result.message}")
                     st.info(
                         f"📊 {result.metadata.total_records} enregistrements, "
-                        f"{result.metadata.file_size_bytes/1024:.1f} KB"
+                        f"{result.metadata.file_size_bytes / 1024:.1f} KB"
                     )
                 else:
                     st.error("❌ Erreur lors de la création du backup")
@@ -678,7 +678,7 @@ def render_backup_ui():
             for backup in backups[:5]:  # Afficher les 5 derniers
                 with st.expander(f"📝 {backup.id}"):
                     st.write(f"**Date:** {backup.created_at.strftime('%d/%m/%Y %H:%M')}")
-                    st.write(f"**Taille:** {backup.file_size_bytes/1024:.1f} KB")
+                    st.write(f"**Taille:** {backup.file_size_bytes / 1024:.1f} KB")
                     st.write(f"**Compressé:** {'Oui' if backup.compressed else 'Non'}")
 
                     col_a, col_b = st.columns(2)

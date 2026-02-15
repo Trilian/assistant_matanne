@@ -33,7 +33,7 @@ class TestGraphiqueChargeSemaine:
 
         jour_mock = MagicMock()
         jour_mock.charge_score = 50
-        jours = {f"2025-01-{6+i:02d}": jour_mock for i in range(7)}
+        jours = {f"2025-01-{6 + i:02d}": jour_mock for i in range(7)}
         afficher_graphique_charge_semaine(jours)
         mock_plotly.assert_called_once()
 
@@ -45,7 +45,7 @@ class TestGraphiqueChargeSemaine:
         for i, score in enumerate([20, 40, 60, 80, 50, 30, 10]):
             j = MagicMock()
             j.charge_score = score
-            jours[f"2025-01-{6+i:02d}"] = j
+            jours[f"2025-01-{6 + i:02d}"] = j
         afficher_graphique_charge_semaine(jours)
         mock_plotly.assert_called_once()
 
@@ -381,7 +381,7 @@ class TestVueSemaineApp:
             "alertes": [],
         }
         sem = MagicMock()
-        sem.jours = {f"2025-01-{6+i:02d}": j for i in range(7)}
+        sem.jours = {f"2025-01-{6 + i:02d}": j for i in range(7)}
         sem.stats_semaine = {
             "total_repas": 14,
             "total_activites": 5,

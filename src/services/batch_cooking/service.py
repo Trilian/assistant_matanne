@@ -408,9 +408,9 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
 
     @avec_cache(
         ttl=600,
-        key_func=lambda self,
-        consommees=False,
-        localisation=None: f"preparations_{consommees}_{localisation}",
+        key_func=lambda self, consommees=False, localisation=None: (
+            f"preparations_{consommees}_{localisation}"
+        ),
     )
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
@@ -512,10 +512,9 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
 
     @avec_cache(
         ttl=3600,
-        key_func=lambda self,
-        recettes_ids,
-        robots_disponibles,
-        avec_jules=False: f"batch_plan_{'-'.join(map(str, recettes_ids))}_{avec_jules}",
+        key_func=lambda self, recettes_ids, robots_disponibles, avec_jules=False: (
+            f"batch_plan_{'-'.join(map(str, recettes_ids))}_{avec_jules}"
+        ),
     )
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
@@ -554,7 +553,7 @@ Recette: {r.nom}
 - Portions: {r.portions}
 - Compatible batch: {r.compatible_batch}
 - Congelable: {r.congelable}
-- Robots: {', '.join(r.robots_compatibles) if r.robots_compatibles else 'Aucun'}
+- Robots: {", ".join(r.robots_compatibles) if r.robots_compatibles else "Aucun"}
 - Étapes:
 {etapes_text}
 """)
@@ -577,7 +576,7 @@ Recette: {r.nom}
         prompt = f"""GÉNÈRE UN PLAN DE BATCH COOKING OPTIMISÉ EN JSON UNIQUEMENT.
 
 RECETTES À PRÉPARER:
-{''.join(recettes_context)}
+{"".join(recettes_context)}
 
 ÉQUIPEMENTS DISPONIBLES:
 {robots_text}

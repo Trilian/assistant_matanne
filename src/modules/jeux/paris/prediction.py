@@ -111,17 +111,17 @@ def afficher_prediction_match(match: dict):
             st.success(f"""
             ### ✅ PARI RECOMMANDÉ: **{pari_reco}**
 
-            **Confiance:** {confiance:.0f}% | **Mise suggérée:** {reco.get('mise', '?')}
+            **Confiance:** {confiance:.0f}% | **Mise suggérée:** {reco.get("mise", "?")}
 
-            📊 *{reco.get('raison', '')}*
+            📊 *{reco.get("raison", "")}*
             """)
         elif confiance >= 50:
             st.warning(f"""
             ### ⚠️ PARI POSSIBLE: **{pari_reco}**
 
-            **Confiance:** {confiance:.0f}% | **Mise suggérée:** {reco.get('mise', '?')}
+            **Confiance:** {confiance:.0f}% | **Mise suggérée:** {reco.get("mise", "?")}
 
-            📊 *{reco.get('raison', '')}*
+            📊 *{reco.get("raison", "")}*
             """)
         else:
             st.error("""

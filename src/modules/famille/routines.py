@@ -495,11 +495,11 @@ def app():
 
                 with col_t1:
                     tache_nom = st.text_input(
-                        f"Tâche {i+1}", placeholder="Ex: Brossage de dents", key=f"task_name_{i}"
+                        f"Tâche {i + 1}", placeholder="Ex: Brossage de dents", key=f"task_name_{i}"
                     )
 
                 with col_t2:
-                    tache_heure = st.time_input(f"Heure {i+1}", value=None, key=f"task_time_{i}")
+                    tache_heure = st.time_input(f"Heure {i + 1}", value=None, key=f"task_time_{i}")
 
                 if tache_nom:
                     taches.append(

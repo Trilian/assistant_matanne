@@ -518,7 +518,7 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         - Jules a {jules_mois} mois
         - Budget semaine: {budget}€
         - Énergie famille: {energie}
-        - Objectifs santé: {', '.join(objectifs_sante) if objectifs_sante else 'Maintenir équilibre'}
+        - Objectifs santé: {", ".join(objectifs_sante) if objectifs_sante else "Maintenir équilibre"}
 
         Retourne JSON avec:
         - repas_proposes: Liste repas (4 éléments)

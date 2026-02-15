@@ -55,7 +55,7 @@ def app():
     st.divider()
 
     # Onglets
-    tab1, tab2, tab3 = st.tabs(["📝… Ce mois", "➕ Ajouter", "📝ˆ Analyse"])
+    tab1, tab2, tab3 = st.tabs(["📅 Ce mois", "➕ Ajouter", "📊 Analyse"])
 
     with tab1:
         render_onglet_mois()

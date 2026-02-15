@@ -180,7 +180,9 @@ def render_add_activity():
             type_activite = st.selectbox(
                 "Type *",
                 list(TYPES_ACTIVITES.keys()),
-                format_func=lambda x: f"{TYPES_ACTIVITES[x]['emoji']} {TYPES_ACTIVITES[x]['label']}",
+                format_func=lambda x: (
+                    f"{TYPES_ACTIVITES[x]['emoji']} {TYPES_ACTIVITES[x]['label']}"
+                ),
             )
 
         with col2:

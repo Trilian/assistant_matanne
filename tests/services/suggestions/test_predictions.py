@@ -237,7 +237,7 @@ class TestPredictionService:
                 "type_modification": "modification_quantite",
                 "quantite_avant": 100 - i,
                 "quantite_apres": 100 - i - 2,
-                "date_modification": f"2024-07-{i+1:02d}",
+                "date_modification": f"2024-07-{i + 1:02d}",
             }
             for i in range(15)
         ]

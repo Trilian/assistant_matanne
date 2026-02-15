@@ -56,9 +56,9 @@ def migrate_module(module_name: str):
         print(f" Module {module_name} not found")
         return
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f" MIGRATING {module_name.upper()}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     # Step 1: Move UI subfolders up (they become the main features)
     if ui_path.exists():
@@ -216,9 +216,9 @@ def update_imports_in_file(filepath: Path):
 
 def update_all_imports():
     """Update imports across the entire codebase."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(" UPDATING IMPORTS")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
     updated = 0
     for root, dirs, files in os.walk(PROJECT_ROOT / "src"):
@@ -297,9 +297,9 @@ def __getattr__(name: str):
 
 def rename_common_to_utils():
     """Rename _common.py files to utils.py where appropriate."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(" RENAMING _common.py  utils.py")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
     for common_file in MODULES_PATH.glob("**/_common.py"):
         utils_file = common_file.parent / "utils.py"
@@ -327,9 +327,9 @@ def main():
     update_all_imports()
 
     # Update module __init__.py files
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(" UPDATING MODULE __init__.py")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
     for module in modules:
         update_module_init(module)
 

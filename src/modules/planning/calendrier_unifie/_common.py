@@ -7,7 +7,7 @@ Affiche dans une seule vue:
 - 🛒 Courses planifiées
 - 🎨 Activités famille
 - 🏥 RDV médicaux
-- 📝… Événements divers
+- 📅 Événements divers
 """
 
 import logging

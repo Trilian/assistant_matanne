@@ -575,10 +575,10 @@ def calculer_esperance_mathematique() -> dict[str, Any]:
         "gains_esperes": round(gains_esperes, 4),
         "esperance": round(esperance, 4),
         "perte_moyenne_pct": round((1 - gains_esperes / float(COUT_GRILLE)) * 100, 1),
-        "probabilites": {rang: f"1/{int(1/p):,}" for rang, p in probas.items()},
+        "probabilites": {rang: f"1/{int(1 / p):,}" for rang, p in probas.items()},
         "conclusion": (
             f"En moyenne, vous perdez {abs(esperance):.2f}€ par grille jouée. "
-            f"Le Loto reverse environ {gains_esperes/float(COUT_GRILLE)*100:.0f}% des mises."
+            f"Le Loto reverse environ {gains_esperes / float(COUT_GRILLE) * 100:.0f}% des mises."
         ),
     }
 

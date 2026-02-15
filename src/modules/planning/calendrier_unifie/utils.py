@@ -58,7 +58,7 @@ EMOJI_TYPE = {
     TypeEvenement.COURSES: "🛒",
     TypeEvenement.ACTIVITE: "🎨",
     TypeEvenement.RDV_MEDICAL: "🏥",
-    TypeEvenement.RDV_AUTRE: "📝…",
+    TypeEvenement.RDV_AUTRE: "📅",
     TypeEvenement.ROUTINE: "⏰",
     TypeEvenement.MENAGE: "🧹",
     TypeEvenement.JARDIN: "🌱",
@@ -724,7 +724,7 @@ def generer_texte_semaine_pour_impression(semaine: SemaineCalendrier) -> str:
             lignes.append(f"  🎨 {activite.titre} {activite.heure_str}")
 
         for rdv in jour.rdv:
-            emoji = "🏥" if rdv.type == TypeEvenement.RDV_MEDICAL else "📝…"
+            emoji = "🏥" if rdv.type == TypeEvenement.RDV_MEDICAL else "📅"
             lignes.append(f"  {emoji} {rdv.titre} {rdv.heure_str}")
 
         if jour.est_vide:
@@ -761,13 +761,13 @@ def generer_html_semaine_pour_impression(semaine: SemaineCalendrier) -> str:
         </style>
     </head>
     <body>
-        <h1>📝… SEMAINE DU {semaine.titre}</h1>
+        <h1>📅 SEMAINE DU {semaine.titre}</h1>
     """
 
     for jour in semaine.jours:
         html += f"""
         <div class="jour">
-            <div class="jour-titre">{jour.jour_semaine} {jour.date_jour.strftime('%d/%m')}</div>
+            <div class="jour-titre">{jour.jour_semaine} {jour.date_jour.strftime("%d/%m")}</div>
         """
 
         if jour.repas_midi:

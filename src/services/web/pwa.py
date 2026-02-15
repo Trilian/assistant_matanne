@@ -787,9 +787,9 @@ def generate_icon_svg(size: int = 512) -> str:
                 <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
             </linearGradient>
         </defs>
-        <rect width="{size}" height="{size}" rx="{size//8}" fill="url(#grad)"/>
+        <rect width="{size}" height="{size}" rx="{size // 8}" fill="url(#grad)"/>
         <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
-              font-size="{size//2}" font-family="Arial" fill="white">🏠</text>
+              font-size="{size // 2}" font-family="Arial" fill="white">🏠</text>
     </svg>
     """
 

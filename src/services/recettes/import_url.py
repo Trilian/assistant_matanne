@@ -770,8 +770,7 @@ def render_import_recipe_ui():  # pragma: no cover
     st.subheader("🌐 Importer une recette depuis le web")
 
     st.info(
-        "📝 Collez l'URL d'une recette depuis Marmiton, CuisineAZ, "
-        "ou tout autre site de cuisine."
+        "📝 Collez l'URL d'une recette depuis Marmiton, CuisineAZ, ou tout autre site de cuisine."
     )
 
     # Import simple
@@ -899,7 +898,7 @@ def render_import_recipe_ui():  # pragma: no cover
 
                 results = []
                 for i, url in enumerate(urls):
-                    status.text(f"Import {i+1}/{len(urls)}: {url[:50]}...")
+                    status.text(f"Import {i + 1}/{len(urls)}: {url[:50]}...")
                     result = service.import_from_url(url)
                     results.append(result)
                     progress_bar.progress((i + 1) / len(urls))

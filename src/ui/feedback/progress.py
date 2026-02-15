@@ -77,7 +77,7 @@ class SuiviProgression:
 
         # Titre avec pourcentage
         if self.afficher_pourcentage:
-            titre = f"{self.operation} - {pct_progression*100:.0f}%"
+            titre = f"{self.operation} - {pct_progression * 100:.0f}%"
         else:
             titre = f"{self.operation} - {self.courant}/{self.total}"
 

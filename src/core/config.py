@@ -236,11 +236,7 @@ class Parametres(BaseSettings):
         port = os.getenv("DB_PORT", "5432")
 
         if all([hote, utilisateur, mot_de_passe, nom]):
-            return (
-                f"postgresql://{utilisateur}:{mot_de_passe}"
-                f"@{hote}:{port}/{nom}"
-                f"?sslmode=require"
-            )
+            return f"postgresql://{utilisateur}:{mot_de_passe}@{hote}:{port}/{nom}?sslmode=require"
 
         # 3. DATABASE_URL complète
         db_url = os.getenv("DATABASE_URL")

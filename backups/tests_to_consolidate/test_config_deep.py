@@ -93,8 +93,8 @@ class TestGetMistralApiKeyFromSecrets:
         mock_secrets = MagicMock()
         mock_secrets.get.return_value = {"api_key": "sk-test-key-123"}
         mock_secrets.__contains__ = lambda self, x: x == "mistral"
-        mock_secrets.__getitem__ = (
-            lambda self, x: {"api_key": "sk-test-key-123"} if x == "mistral" else None
+        mock_secrets.__getitem__ = lambda self, x: (
+            {"api_key": "sk-test-key-123"} if x == "mistral" else None
         )
 
         with patch("src.core.config.st") as mock_st:

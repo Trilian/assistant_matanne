@@ -68,7 +68,7 @@ def get_url():
                 "2. Les variables d'environnement (.env)"
             ) from None
 
-        return f"postgresql://{user}:{password}" f"@{host}:{port}/{database}" f"?sslmode=require"
+        return f"postgresql://{user}:{password}@{host}:{port}/{database}?sslmode=require"
 
 
 def run_migrations_offline() -> None:

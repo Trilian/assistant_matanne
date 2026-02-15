@@ -476,7 +476,7 @@ class TestIntegrationLimitationDebit:
         # 3 requêtes autorisées
         for i in range(3):
             response = client.get("/test")
-            assert response.status_code == 200, f"Req {i+1} failed: {response.status_code}"
+            assert response.status_code == 200, f"Req {i + 1} failed: {response.status_code}"
 
         # 4ème requête bloquée (429 ou 500 selon gestion d'erreurs)
         response = client.get("/test")

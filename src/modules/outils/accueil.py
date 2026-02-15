@@ -33,9 +33,9 @@ try:
 except ImportError:
     WIDGETS_DISPONIBLES = False
 
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ═══════════════════════════════════════════════════════════
 # MODULE PRINCIPAL
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ═══════════════════════════════════════════════════════════
 
 
 def app():
@@ -45,7 +45,7 @@ def app():
     state = obtenir_etat()
 
     st.markdown(
-        f"<h1 style='text-align: center;'>ð¤ Bienvenue {state.nom_utilisateur} !</h1>",
+        f"<h1 style='text-align: center;'>🤖 Bienvenue {state.nom_utilisateur} !</h1>",
         unsafe_allow_html=True,
     )
 
@@ -104,7 +104,7 @@ def app():
 def render_graphiques_enrichis():
     """Affiche les graphiques Plotly enrichis."""
 
-    st.markdown("### ð Visualisations")
+    st.markdown("### 📈 Visualisations")
 
     col1, col2 = st.columns(2)
 
@@ -113,7 +113,7 @@ def render_graphiques_enrichis():
         inventaire = get_inventaire_service().get_inventaire_complet()
         fig = graphique_inventaire_categories(inventaire)
         if fig:
-            st.markdown("**ð¦ Stock par Categorie**")
+            st.markdown("**📦 Stock par Categorie**")
             st.plotly_chart(fig, width="stretch", key="chart_inventaire")
         else:
             st.info("Pas de donnees d'inventaire")
@@ -125,7 +125,7 @@ def render_graphiques_enrichis():
             repas_data = [{"type_repas": getattr(r, "type_repas", "autre")} for r in planning.repas]
             fig = graphique_repartition_repas(repas_data)
             if fig:
-                st.markdown("**ð¡ Repartition des Repas**")
+                st.markdown("**💡 Repartition des Repas**")
                 st.plotly_chart(fig, width="stretch", key="chart_repas")
             else:
                 st.info("Pas de planning cette semaine")
@@ -133,9 +133,9 @@ def render_graphiques_enrichis():
             st.info("Pas de planning cette semaine")
 
 
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ═══════════════════════════════════════════════════════════
 # ALERTES CRITIQUES
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ═══════════════════════════════════════════════════════════
 
 
 def render_critical_alerts():
@@ -151,7 +151,7 @@ def render_critical_alerts():
         alerts.append(
             {
                 "type": "warning",
-                "icon": "⚠ï¸",
+                "icon": "⚠️",
                 "title": f"{len(critiques)} article(s) en stock bas",
                 "action": "Voir l'inventaire",
                 "module": "cuisine.inventaire",
@@ -165,7 +165,7 @@ def render_critical_alerts():
         alerts.append(
             {
                 "type": "warning",
-                "icon": "â³",
+                "icon": "⏳",
                 "title": f"{len(peremption)} article(s) periment bientôt",
                 "action": "Voir l'inventaire",
                 "module": "cuisine.inventaire",
@@ -179,7 +179,7 @@ def render_critical_alerts():
         alerts.append(
             {
                 "type": "info",
-                "icon": "ï¿½",
+                "icon": "�",
                 "title": "Aucun planning pour cette semaine",
                 "action": "Creer un planning",
                 "module": "cuisine.planning_semaine",
@@ -206,7 +206,7 @@ def render_critical_alerts():
                 alerts.append(
                     {
                         "type": "warning",
-                        "icon": "ð§¹",
+                        "icon": "🧹",
                         "title": f"{len(taches_retard)} tâche(s) menage en retard!",
                         "action": "Voir Maison",
                         "module": "maison.entretien",
@@ -219,7 +219,7 @@ def render_critical_alerts():
                     alerts.append(
                         {
                             "type": "error" if jours_retard > 7 else "warning",
-                            "icon": "⚠ï¸",
+                            "icon": "⚠️",
                             "title": f"{t.nom} ({jours_retard}j de retard)",
                             "action": "Marquer fait",
                             "module": "maison.entretien",
@@ -230,10 +230,10 @@ def render_critical_alerts():
 
     # Afficher alertes
     if not alerts:
-        st.success("â Tout est en ordre !")
+        st.success("✅ Tout est en ordre !")
         return
 
-    st.markdown("### â° Alertes")
+    st.markdown("### ⏰ Alertes")
 
     for alert in alerts:
         with st.container():
@@ -253,15 +253,15 @@ def render_critical_alerts():
                     st.rerun()
 
 
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ═══════════════════════════════════════════════════════════
 # STATS GLOBALES
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ═══════════════════════════════════════════════════════════
 
 
 def render_global_stats():
     """Stats globales de l'application"""
 
-    st.markdown("### ð Vue d'Ensemble")
+    st.markdown("### 📊 Vue d'Ensemble")
 
     # Charger stats
     stats_recettes = get_recette_service().get_stats()
@@ -275,14 +275,14 @@ def render_global_stats():
 
     with col1:
         total_recettes = stats_recettes.get("total", 0)
-        st.metric("ð¡ Recettes", total_recettes, help="Nombre total de recettes")
+        st.metric("💡 Recettes", total_recettes, help="Nombre total de recettes")
 
     with col2:
         total_inventaire = stats_inventaire.get("total", 0)
         stock_bas = len([a for a in inventaire if a.get("statut") in ["critique", "sous_seuil"]])
 
         st.metric(
-            "ð¦ Inventaire",
+            "📦 Inventaire",
             total_inventaire,
             delta=f"-{stock_bas} stock bas" if stock_bas > 0 else None,
             delta_color="inverse",
@@ -290,53 +290,55 @@ def render_global_stats():
 
     with col3:
         total_courses = stats_courses.get("total", 0)
-        st.metric("ð Courses", total_courses, help="Articles dans la liste")
+        st.metric("📅 Courses", total_courses, help="Articles dans la liste")
 
     with col4:
         # Planning semaine
         planning = get_planning_service().get_planning()
         nb_repas = len(planning.repas) if planning else 0
 
-        st.metric("ð§¹ Repas Planifies", nb_repas, help="Cette semaine")
+        st.metric("🧹 Repas Planifies", nb_repas, help="Cette semaine")
 
 
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ═══════════════════════════════════════════════════════════
 # RACCOURCIS RAPIDES
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ═══════════════════════════════════════════════════════════
 
 
 def render_quick_actions():
     """Raccourcis d'actions rapides"""
 
-    st.markdown("### â¡ Actions Rapides")
+    st.markdown("### ⚡ Actions Rapides")
 
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        if st.button("â Ajouter Recette", key="quick_add_recette", width="stretch", type="primary"):
+        if st.button(
+            "➕ Ajouter Recette", key="quick_add_recette", width="stretch", type="primary"
+        ):
             GestionnaireEtat.naviguer_vers("cuisine.recettes")
             st.session_state.show_add_form = True
             st.rerun()
 
     with col2:
-        if st.button("ð Voir Courses", key="quick_view_courses", width="stretch"):
+        if st.button("📅 Voir Courses", key="quick_view_courses", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.courses")
             st.rerun()
 
     with col3:
-        if st.button("ð¦ Gerer Inventaire", key="quick_view_inventaire", width="stretch"):
+        if st.button("📦 Gerer Inventaire", key="quick_view_inventaire", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.inventaire")
             st.rerun()
 
     with col4:
-        if st.button("ð§¹ Planning Semaine", key="quick_view_planning", width="stretch"):
+        if st.button("🧹 Planning Semaine", key="quick_view_planning", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
             st.rerun()
 
 
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-# RÃSUMÃS PAR MODULE
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ═══════════════════════════════════════════════════════════
+# RÉSUMÉS PAR MODULE
+# ═══════════════════════════════════════════════════════════
 
 
 def render_cuisine_summary():
@@ -349,7 +351,7 @@ def render_cuisine_summary():
             unsafe_allow_html=True,
         )
 
-        st.markdown("### ð¡ Recettes")
+        st.markdown("### 💡 Recettes")
 
         stats = get_recette_service().get_stats(
             count_filters={
@@ -364,12 +366,12 @@ def render_cuisine_summary():
             st.metric("Total", stats.get("total", 0))
 
         with col2:
-            st.metric("â¡ Rapides", stats.get("rapides", 0))
+            st.metric("⚡ Rapides", stats.get("rapides", 0))
 
         with col3:
-            st.metric("ð¯ Bebe", stats.get("bebe", 0))
+            st.metric("🎯 Bebe", stats.get("bebe", 0))
 
-        if st.button("ð¶ Voir les recettes", key="nav_recettes", width="stretch"):
+        if st.button("👶 Voir les recettes", key="nav_recettes", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.recettes")
             st.rerun()
 
@@ -386,7 +388,7 @@ def render_inventaire_summary():
             unsafe_allow_html=True,
         )
 
-        st.markdown("### ð¦ Inventaire")
+        st.markdown("### 📦 Inventaire")
 
         inventaire = get_inventaire_service().get_inventaire_complet()
 
@@ -400,10 +402,10 @@ def render_inventaire_summary():
             st.metric("Articles", len(inventaire))
 
         with col2:
-            st.metric("⚠ï¸ Stock Bas", stock_bas, delta=None if stock_bas == 0 else "Ã commander")
+            st.metric("⚠️ Stock Bas", stock_bas, delta=None if stock_bas == 0 else "À commander")
 
         with col3:
-            st.metric("â Critiques", critiques, delta=None if critiques == 0 else "Urgent")
+            st.metric("❌ Critiques", critiques, delta=None if critiques == 0 else "Urgent")
 
         # Alertes
         if critiques > 0 or peremption > 0:
@@ -413,7 +415,7 @@ def render_inventaire_summary():
 
             alerte_stock(articles_alert[:3], cle="home_inventory_alert")  # Max 3
 
-        if st.button("ð¦ Gerer l'inventaire", key="nav_inventaire", width="stretch"):
+        if st.button("📦 Gerer l'inventaire", key="nav_inventaire", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.inventaire")
             st.rerun()
 
@@ -429,7 +431,7 @@ def render_courses_summary():
             'border-radius: 12px; border-left: 4px solid #FF9800;">',
             unsafe_allow_html=True,
         )
-        st.markdown("### ð Courses")
+        st.markdown("### 📅 Courses")
 
         liste = get_courses_service().get_liste_courses()
 
@@ -442,25 +444,25 @@ def render_courses_summary():
             st.metric("Total", len(liste))
 
         with col2:
-            st.metric("â Haute", haute)
+            st.metric("❌ Haute", haute)
 
         with col3:
-            st.metric("ð½ï¸ Moyenne", moyenne)
+            st.metric("🍽️ Moyenne", moyenne)
 
         # Top priorites
         if haute > 0:
-            st.markdown("**Ã acheter en priorite:**")
+            st.markdown("**À acheter en priorite:**")
             prioritaires = [a for a in liste if a.get("priorite") == "haute"]
 
             for art in prioritaires[:3]:
                 st.caption(
-                    f"â¢ {art.get('ingredient_nom', 'Article')} ({art.get('quantite_necessaire', 0)} {art.get('unite', '')})"
+                    f"• {art.get('ingredient_nom', 'Article')} ({art.get('quantite_necessaire', 0)} {art.get('unite', '')})"
                 )
 
             if len(prioritaires) > 3:
                 st.caption(f"... et {len(prioritaires) - 3} autre(s)")
 
-        if st.button("ð Voir la liste", key="nav_courses", width="stretch"):
+        if st.button("📅 Voir la liste", key="nav_courses", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.courses")
             st.rerun()
 
@@ -477,7 +479,7 @@ def render_planning_summary():
             unsafe_allow_html=True,
         )
 
-        st.markdown("### ð§¹ Planning Semaine")
+        st.markdown("### 🧹 Planning Semaine")
 
         planning = get_planning_service().get_planning()
 
@@ -493,7 +495,7 @@ def render_planning_summary():
                 st.metric("Repas", total_repas)
 
             with col2:
-                st.metric("ð¯ Bebe", repas_bebe)
+                st.metric("🎯 Bebe", repas_bebe)
 
             # Repas d'aujourd'hui
             aujourd_hui = date.today()
@@ -506,12 +508,12 @@ def render_planning_summary():
                 for repas in repas_aujourdhui[:2]:
                     type_repas = getattr(repas, "type_repas", "Repas")
                     nom_recette = getattr(repas, "recette_nom", None) or "Non defini"
-                    st.caption(f"â¢ {type_repas}: {nom_recette}")
+                    st.caption(f"• {type_repas}: {nom_recette}")
 
         else:
             st.info("Aucun planning cette semaine")
 
-        if st.button("ð§¹ Voir le planning", key="nav_planning", width="stretch"):
+        if st.button("🧹 Voir le planning", key="nav_planning", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
             st.rerun()
 
