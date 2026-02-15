@@ -14,22 +14,49 @@ import pytest
 # =============================================================================
 
 
+class SessionStateMock(dict):
+    """Mock dict qui supporte aussi l'accès par attribut comme st.session_state."""
+
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError(name)
+
+    def __setattr__(self, name, value):
+        self[name] = value
+
+    def __delattr__(self, name):
+        try:
+            del self[name]
+        except KeyError:
+            raise AttributeError(name)
+
+
 @pytest.fixture
 def mock_st():
     """Mock complet de Streamlit."""
     with patch("src.modules.cuisine.batch_cooking_detaille.st") as st_mock:
-        # Session state
-        st_mock.session_state = {
-            "batch_type": "dimanche",
-            "batch_data": {},
-            "planning_data": {},
-        }
+        # Session state - utilise le mock dict custom
+        st_mock.session_state = SessionStateMock(
+            {
+                "batch_type": "dimanche",
+                "batch_data": {},
+                "planning_data": {},
+            }
+        )
 
-        # Columns context manager
-        col_mock = MagicMock()
-        col_mock.__enter__ = MagicMock(return_value=col_mock)
-        col_mock.__exit__ = MagicMock(return_value=False)
-        st_mock.columns.return_value = [col_mock, col_mock, col_mock]
+        # Columns context manager - return the right number based on argument
+        def create_columns(n):
+            cols = []
+            for _ in range(n if isinstance(n, int) else len(n)):
+                col = MagicMock()
+                col.__enter__ = MagicMock(return_value=col)
+                col.__exit__ = MagicMock(return_value=False)
+                cols.append(col)
+            return cols
+
+        st_mock.columns.side_effect = create_columns
 
         # Container context manager
         container_mock = MagicMock()
@@ -48,6 +75,9 @@ def mock_st():
         tab_mock.__enter__ = MagicMock(return_value=tab_mock)
         tab_mock.__exit__ = MagicMock(return_value=False)
         st_mock.tabs.return_value = [tab_mock, tab_mock, tab_mock]
+
+        # time_input returns a proper time object
+        st_mock.time_input.return_value = time(9, 0)
 
         yield st_mock
 
@@ -701,8 +731,8 @@ class TestApp:
         """Teste l'initialisation de la session state."""
         from src.modules.cuisine.batch_cooking_detaille import app
 
-        # Vider la session state
-        mock_st.session_state = {}
+        # Vider la session state avec SessionStateMock
+        mock_st.session_state = SessionStateMock({})
 
         app()
 

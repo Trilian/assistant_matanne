@@ -725,7 +725,7 @@ class TestRenderHistorique:
 
         render_historique()
 
-        mock_st.info.assert_called_once_with("Aucun achat enregistre")
+        mock_st.info.assert_called_once_with("Aucun achat enregistré")
 
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.get_all_purchases")

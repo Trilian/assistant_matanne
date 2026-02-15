@@ -128,7 +128,7 @@ class TestJulesApp:
         app()
 
         # Assert
-        mock_st.title.assert_called_once_with("ðŸ‘¶ Jules")
+        mock_st.title.assert_called_once_with("👶 Jules")
 
     @patch("src.modules.famille.jules.st")
     @patch("src.modules.famille.jules.render_dashboard")
@@ -212,10 +212,10 @@ class TestJulesApp:
         mock_st.tabs.assert_called_once()
         tabs_arg = mock_st.tabs.call_args[0][0]
         assert len(tabs_arg) == 4
-        assert "ðŸ“Š Dashboard" in tabs_arg
-        assert "ðŸŽ¨ Activités" in tabs_arg
-        assert "ðŸ›’ Shopping" in tabs_arg
-        assert "ðŸ’¡ Conseils" in tabs_arg
+        assert "📊 Dashboard" in tabs_arg
+        assert "🎨 Activités" in tabs_arg
+        assert "🛒 Shopping" in tabs_arg
+        assert "💡 Conseils" in tabs_arg
 
     @patch("src.modules.famille.jules.st")
     @patch("src.modules.famille.jules.render_dashboard")

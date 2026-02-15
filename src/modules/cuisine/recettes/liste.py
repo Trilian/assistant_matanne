@@ -108,7 +108,7 @@ def render_liste():
         with col_tags[1]:
             est_equilibre = st.checkbox("💪 Équilibré", key="tag_equilibre")
         with col_tags[2]:
-            congelable = st.checkbox("â„ï¸ Congélable", key="tag_congelable")
+            congelable = st.checkbox("❄️ Congélable", key="tag_congelable")
 
     # Chercher les recettes
     type_repas_filter = None if type_repas == "Tous" else type_repas
@@ -238,7 +238,7 @@ def render_liste():
                     "🚜": "Local",
                     "⚡": "Rapide",
                     "💪": "Équilibré",
-                    "â„ï¸": "Congélable",
+                    "❄️": "Congélable",
                 }
 
                 all_badges = []

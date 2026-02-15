@@ -22,6 +22,9 @@ from src.modules.shared.constantes import JOURS_SEMAINE, JOURS_SEMAINE_COURT
 from src.modules.shared.date_utils import (
     obtenir_debut_semaine as get_debut_semaine,
 )
+from src.modules.shared.date_utils import (
+    obtenir_fin_semaine as get_fin_semaine,
+)
 
 logger = logging.getLogger(__name__)
 
