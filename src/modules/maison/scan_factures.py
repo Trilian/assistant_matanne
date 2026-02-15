@@ -298,7 +298,7 @@ def render_formulaire_correction(donnees: DonneesFacture) -> DonneesFacture:
             )
 
             if sauvegarder_facture(donnees_corrigees):
-                st.success("✅ Facture enregistree avec succès!")
+                st.success("✅ Facture enregistrée avec succès!")
                 # Reset session
                 if "ocr_resultat" in st.session_state:
                     del st.session_state["ocr_resultat"]

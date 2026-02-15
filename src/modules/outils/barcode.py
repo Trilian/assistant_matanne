@@ -158,7 +158,7 @@ def render_scanner():
 
     # Info
     st.info("""
-    💰š **Formats supportes:**
+    � **Formats supportés:**
     - EAN-13 (13 chiffres)
     - EAN-8 (8 chiffres)
     - UPC (12 chiffres)

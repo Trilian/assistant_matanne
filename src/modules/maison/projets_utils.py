@@ -221,10 +221,10 @@ def valider_projet(data: dict[str, Any]) -> tuple[bool, list[str]]:
         erreurs.append("Le titre est requis")
 
     if "statut" in data and data["statut"] not in STATUTS_PROJET:
-        erreurs.append(f"Statut invalide. Valeurs autorisees: {', '.join(STATUTS_PROJET)}")
+        erreurs.append(f"Statut invalide. Valeurs autorisées: {', '.join(STATUTS_PROJET)}")
 
     if "priorite" in data and data["priorite"] not in PRIORITES:
-        erreurs.append(f"Priorite invalide. Valeurs autorisees: {', '.join(PRIORITES)}")
+        erreurs.append(f"Priorité invalide. Valeurs autorisées: {', '.join(PRIORITES)}")
 
     if "budget" in data:
         budget = data["budget"]

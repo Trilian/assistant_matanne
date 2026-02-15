@@ -235,7 +235,7 @@ def valider_plante(data: dict[str, Any]) -> tuple[bool, list[str]]:
         erreurs.append("Le nom est requis")
 
     if "categorie" in data and data["categorie"] not in CATEGORIES_PLANTES:
-        erreurs.append(f"Categorie invalide. Valeurs autorisees: {', '.join(CATEGORIES_PLANTES)}")
+        erreurs.append(f"Catégorie invalide. Valeurs autorisées: {', '.join(CATEGORIES_PLANTES)}")
 
     if "frequence_arrosage" in data:
         freq = data["frequence_arrosage"]

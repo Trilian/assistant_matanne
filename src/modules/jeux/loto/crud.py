@@ -94,7 +94,7 @@ def enregistrer_grille(
             )
             session.add(grille)
             session.commit()
-            st.success(f"✅ Grille enregistree: {'-'.join(map(str, numeros))} + N°{chance}")
+            st.success(f"✅ Grille enregistrée: {'-'.join(map(str, numeros))} + N°{chance}")
             return True
 
     except Exception as e:

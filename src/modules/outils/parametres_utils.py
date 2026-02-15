@@ -48,7 +48,7 @@ def valider_parametres(data: dict[str, Any]) -> tuple[bool, list[str]]:
         devises_supportees = ["EUR", "USD", "GBP", "CHF", "CAD"]
         if devise not in devises_supportees:
             erreurs.append(
-                f"Devise non supportee. Valeurs acceptees: {', '.join(devises_supportees)}"
+                f"Devise non supportée. Valeurs acceptées: {', '.join(devises_supportees)}"
             )
 
     # Langue
@@ -57,7 +57,7 @@ def valider_parametres(data: dict[str, Any]) -> tuple[bool, list[str]]:
         langues_supportees = ["fr", "en", "es", "de"]
         if langue not in langues_supportees:
             erreurs.append(
-                f"Langue non supportee. Valeurs acceptees: {', '.join(langues_supportees)}"
+                f"Langue non supportée. Valeurs acceptées: {', '.join(langues_supportees)}"
             )
 
     # Thème
@@ -65,7 +65,7 @@ def valider_parametres(data: dict[str, Any]) -> tuple[bool, list[str]]:
         theme = data["theme"]
         themes_supportes = ["light", "dark", "auto"]
         if theme not in themes_supportes:
-            erreurs.append(f"Thème non supporte. Valeurs acceptees: {', '.join(themes_supportes)}")
+            erreurs.append(f"Thème non supporté. Valeurs acceptées: {', '.join(themes_supportes)}")
 
     return len(erreurs) == 0, erreurs
 
@@ -314,10 +314,10 @@ def verifier_sante_config(config: dict[str, Any]) -> dict[str, Any]:
 
     # Verifier coherence
     if config.get("notifications_email") and not config.get("email"):
-        avertissements.append("Notifications email activees mais pas d'email configure")
+        avertissements.append("Notifications email activées mais pas d'email configuré")
 
     if config.get("sync_calendrier") and not config.get("api_externe"):
-        avertissements.append("Sync calendrier activee mais pas d'API configuree")
+        avertissements.append("Sync calendrier activée mais pas d'API configurée")
 
     # Statut global
     if problemes:

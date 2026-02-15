@@ -220,9 +220,9 @@ def valider_repas(data: dict[str, Any]) -> tuple[bool, str | None]:
     if "type_repas" not in data or not data["type_repas"]:
         return False, "Le type de repas est requis"
 
-    # Verifier type repas valide
+    # Vérifier type repas valide
     if data["type_repas"] not in TYPES_REPAS:
-        return False, f"Type de repas invalide. Valeurs autorisees: {', '.join(TYPES_REPAS)}"
+        return False, f"Type de repas invalide. Valeurs autorisées: {', '.join(TYPES_REPAS)}"
 
     # Recette requise
     if "recette_id" not in data or not data["recette_id"]:

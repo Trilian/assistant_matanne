@@ -1,9 +1,9 @@
 """
-Service Prï¿½fï¿½rences Utilisateur - Persistance DB
+Service Préférences Utilisateur - Persistance DB
 
-Gï¿½re:
-- UserPreference: Prï¿½fï¿½rences familiales persistantes
-- RecipeFeedback: Feedbacks ??/?? pour apprentissage IA
+Gère:
+- UserPreference: Préférences familiales persistantes
+- RecipeFeedback: Feedbacks 👍/👎 pour apprentissage IA
 
 Remplace st.session_state par persistance PostgreSQL.
 """
@@ -23,12 +23,12 @@ from src.modules.cuisine.schemas import (
 
 logger = logging.getLogger(__name__)
 
-# ID utilisateur par dï¿½faut (famille Matanne)
+# ID utilisateur par défaut (famille Matanne)
 DEFAULT_USER_ID = "matanne"
 
 
 class UserPreferenceService:
-    """Service pour gï¿½rer les prï¿½fï¿½rences utilisateur en DB."""
+    """Service pour gérer les préférences utilisateur en DB."""
 
     def __init__(self, user_id: str = DEFAULT_USER_ID):
         self.user_id = user_id
@@ -36,20 +36,20 @@ class UserPreferenceService:
     @avec_session_db
     def charger_preferences(self, db: Session | None = None) -> PreferencesUtilisateur:
         """
-        Charge les prï¿½fï¿½rences depuis la DB.
+        Charge les préférences depuis la DB.
 
         Returns:
-            PreferencesUtilisateur avec valeurs DB ou dï¿½fauts
+            PreferencesUtilisateur avec valeurs DB ou défauts
         """
         stmt = select(UserPreference).where(UserPreference.user_id == self.user_id)
         db_pref = db.execute(stmt).scalar_one_or_none()
 
         if db_pref:
-            logger.debug(f"Prï¿½fï¿½rences chargï¿½es pour {self.user_id}")
+            logger.debug(f"Préférences chargées pour {self.user_id}")
             return self._db_to_dataclass(db_pref)
 
-        # Crï¿½er les prï¿½fï¿½rences par dï¿½faut
-        logger.info(f"Crï¿½ation prï¿½fï¿½rences par dï¿½faut pour {self.user_id}")
+        # Créer les préférences par défaut
+        logger.info(f"Création préférences par défaut pour {self.user_id}")
         default_prefs = self._get_default_preferences()
         self.sauvegarder_preferences(default_prefs, db=db)
         return default_prefs
@@ -59,13 +59,13 @@ class UserPreferenceService:
         self, prefs: PreferencesUtilisateur, db: Session | None = None
     ) -> bool:
         """
-        Sauvegarde les prï¿½fï¿½rences en DB (insert ou update).
+        Sauvegarde les préférences en DB (insert ou update).
 
         Args:
-            prefs: PreferencesUtilisateur ï¿½ sauvegarder
+            prefs: PreferencesUtilisateur à sauvegarder
 
         Returns:
-            True si succï¿½s
+            True si succès
         """
         try:
             stmt = select(UserPreference).where(UserPreference.user_id == self.user_id)
@@ -81,11 +81,11 @@ class UserPreferenceService:
                 db.add(db_pref)
 
             db.commit()
-            logger.info(f"? Prï¿½fï¿½rences sauvegardï¿½es pour {self.user_id}")
+            logger.info(f"✅ Préférences sauvegardées pour {self.user_id}")
             return True
 
         except Exception as e:
-            logger.error(f"? Erreur sauvegarde prï¿½fï¿½rences: {e}")
+            logger.error(f"❌ Erreur sauvegarde préférences: {e}")
             db.rollback()
             return False
 
@@ -111,14 +111,14 @@ class UserPreferenceService:
             feedbacks.append(
                 FeedbackRecette(
                     recette_id=fb.recette_id,
-                    recette_nom=fb.notes or f"Recette #{fb.recette_id}",  # nom stockï¿½ dans notes
+                    recette_nom=fb.notes or f"Recette #{fb.recette_id}",  # nom stocké dans notes
                     feedback=fb.feedback,
                     date_feedback=date_fb,
                     contexte=fb.contexte,
                 )
             )
 
-        logger.debug(f"Chargï¿½ {len(feedbacks)} feedbacks pour {self.user_id}")
+        logger.debug(f"Chargé {len(feedbacks)} feedbacks pour {self.user_id}")
         return feedbacks
 
     @avec_session_db
@@ -131,19 +131,19 @@ class UserPreferenceService:
         db: Session | None = None,
     ) -> bool:
         """
-        Ajoute ou met ï¿½ jour un feedback sur une recette.
+        Ajoute ou met à jour un feedback sur une recette.
 
         Args:
             recette_id: ID de la recette
-            recette_nom: Nom de la recette (stockï¿½ dans notes)
+            recette_nom: Nom de la recette (stocké dans notes)
             feedback: "like", "dislike", ou "neutral"
             contexte: Contexte optionnel
 
         Returns:
-            True si succï¿½s
+            True si succès
         """
         try:
-            # Vï¿½rifier si feedback existe dï¿½jï¿½
+            # Vérifier si feedback existe déjà
             stmt = select(RecipeFeedback).where(
                 RecipeFeedback.user_id == self.user_id, RecipeFeedback.recette_id == recette_id
             )
@@ -154,7 +154,7 @@ class UserPreferenceService:
                 existing.feedback = feedback
                 existing.contexte = contexte
                 existing.notes = recette_nom
-                logger.debug(f"Feedback mis ï¿½ jour: {recette_nom} ? {feedback}")
+                logger.debug(f"Feedback mis à jour: {recette_nom} → {feedback}")
             else:
                 # Insert
                 new_fb = RecipeFeedback(
@@ -165,13 +165,13 @@ class UserPreferenceService:
                     notes=recette_nom,  # Stocker le nom dans notes
                 )
                 db.add(new_fb)
-                logger.debug(f"Nouveau feedback: {recette_nom} ? {feedback}")
+                logger.debug(f"Nouveau feedback: {recette_nom} → {feedback}")
 
             db.commit()
             return True
 
         except Exception as e:
-            logger.error(f"? Erreur ajout feedback: {e}")
+            logger.error(f"❌ Erreur ajout feedback: {e}")
             db.rollback()
             return False
 
@@ -187,12 +187,12 @@ class UserPreferenceService:
             if fb:
                 db.delete(fb)
                 db.commit()
-                logger.info(f"Feedback supprimï¿½ pour recette {recette_id}")
+                logger.info(f"Feedback supprimé pour recette {recette_id}")
                 return True
             return False
 
         except Exception as e:
-            logger.error(f"? Erreur suppression feedback: {e}")
+            logger.error(f"❌ Erreur suppression feedback: {e}")
             db.rollback()
             return False
 
@@ -219,7 +219,7 @@ class UserPreferenceService:
     # -----------------------------------------------------------
 
     def _get_default_preferences(self) -> PreferencesUtilisateur:
-        """Retourne les prï¿½fï¿½rences par dï¿½faut pour la famille Matanne."""
+        """Retourne les préférences par défaut pour la famille Matanne."""
         return PreferencesUtilisateur(
             nb_adultes=2,
             jules_present=True,
@@ -227,7 +227,7 @@ class UserPreferenceService:
             temps_semaine="normal",
             temps_weekend="long",
             aliments_exclus=[],
-            aliments_favoris=["poulet", "pï¿½tes", "gratins", "soupes"],
+            aliments_favoris=["poulet", "pâtes", "gratins", "soupes"],
             poisson_par_semaine=2,
             vegetarien_par_semaine=1,
             viande_rouge_max=2,
@@ -236,7 +236,7 @@ class UserPreferenceService:
         )
 
     def _db_to_dataclass(self, db_pref: UserPreference) -> PreferencesUtilisateur:
-        """Convertit UserPreference (DB) ? PreferencesUtilisateur (dataclass)."""
+        """Convertit UserPreference (DB) → PreferencesUtilisateur (dataclass)."""
         return PreferencesUtilisateur(
             nb_adultes=db_pref.nb_adultes,
             jules_present=db_pref.jules_present,
@@ -253,7 +253,7 @@ class UserPreferenceService:
         )
 
     def _dataclass_to_db(self, prefs: PreferencesUtilisateur) -> UserPreference:
-        """Convertit PreferencesUtilisateur (dataclass) ? UserPreference (DB)."""
+        """Convertit PreferencesUtilisateur (dataclass) → UserPreference (DB)."""
         return UserPreference(
             user_id=self.user_id,
             nb_adultes=prefs.nb_adultes,
@@ -271,7 +271,7 @@ class UserPreferenceService:
         )
 
     def _update_db_from_dataclass(self, db_pref: UserPreference, prefs: PreferencesUtilisateur):
-        """Met ï¿½ jour les champs DB depuis le dataclass."""
+        """Met à jour les champs DB depuis le dataclass."""
         db_pref.nb_adultes = prefs.nb_adultes
         db_pref.jules_present = prefs.jules_present
         db_pref.jules_age_mois = prefs.jules_age_mois
@@ -294,7 +294,7 @@ _preference_service: UserPreferenceService | None = None
 
 
 def get_user_preference_service(user_id: str = DEFAULT_USER_ID) -> UserPreferenceService:
-    """Factory pour obtenir le service de prï¿½fï¿½rences."""
+    """Factory pour obtenir le service de préférences."""
     global _preference_service
     if _preference_service is None or _preference_service.user_id != user_id:
         _preference_service = UserPreferenceService(user_id)

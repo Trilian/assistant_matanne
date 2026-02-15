@@ -187,7 +187,7 @@ def render_vue_ensemble():
     zones = charger_zones()
 
     if not zones:
-        st.warning("🌱 Aucune zone configuree. Executez la migration SQL 016.")
+        st.warning("🌱 Aucune zone configurée. Exécutez la migration SQL 016.")
         return
 
     # Metriques globales
@@ -448,7 +448,7 @@ def app():
 
     with tab2:
         if not zones:
-            st.warning("Aucune zone configuree")
+            st.warning("Aucune zone configurée")
         else:
             zone_selectionnee = st.selectbox(
                 "Selectionner une zone",

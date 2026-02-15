@@ -1,12 +1,12 @@
 """
 Service d'authentification Supabase.
 
-Fonctionnalitï¿½s:
+Fonctionnalités:
 - Inscription/Connexion utilisateurs
 - Gestion des sessions
-- Rï¿½cupï¿½ration mot de passe
+- Récupération mot de passe
 - Profils utilisateurs
-- Rï¿½les et permissions
+- Rôles et permissions
 """
 
 import logging
@@ -21,12 +21,12 @@ logger = logging.getLogger(__name__)
 
 
 # -----------------------------------------------------------
-# TYPES ET SCHï¿½MAS
+# TYPES ET SCHÉMAS
 # -----------------------------------------------------------
 
 
 class Role(StrEnum):
-    """Rï¿½les utilisateur."""
+    """Rôles utilisateur."""
 
     ADMIN = "admin"
     MEMBRE = "membre"
@@ -79,7 +79,7 @@ class UserProfile(BaseModel):
     last_login: datetime | None = None
 
     def has_permission(self, permission: Permission) -> bool:
-        """Vï¿½rifie si l'utilisateur a une permission."""
+        """Vérifie si l'utilisateur a une permission."""
         return permission in ROLE_PERMISSIONS.get(self.role, [])
 
     @property
@@ -91,7 +91,7 @@ class UserProfile(BaseModel):
 
 
 class AuthResult(BaseModel):
-    """Rï¿½sultat d'une opï¿½ration d'authentification."""
+    """Résultat d'une opération d'authentification."""
 
     success: bool = False
     user: UserProfile | None = None
@@ -108,7 +108,7 @@ class AuthService:
     """
     Service d'authentification utilisant Supabase Auth.
 
-    Gï¿½re:
+    Gère:
     - Inscription/Connexion
     - Sessions persistantes
     - Profils utilisateurs
@@ -132,27 +132,27 @@ class AuthService:
 
             params = obtenir_parametres()
 
-            # Vï¿½rifier les variables d'environnement requises
+            # Vérifier les variables d'environnement requises
             supabase_url = getattr(params, "SUPABASE_URL", None)
             supabase_key = getattr(params, "SUPABASE_ANON_KEY", None)
 
             if not supabase_url or not supabase_key:
                 logger.warning(
-                    "Variables Supabase non configurï¿½es (SUPABASE_URL, SUPABASE_ANON_KEY)"
+                    "Variables Supabase non configurées (SUPABASE_URL, SUPABASE_ANON_KEY)"
                 )
                 return
 
             self._client = create_client(supabase_url, supabase_key)
-            logger.info("? Client Supabase Auth initialisï¿½")
+            logger.info("✅ Client Supabase Auth initialisé")
 
         except ImportError:
-            logger.warning("Package supabase non installï¿½: pip install supabase")
+            logger.warning("Package supabase non installé: pip install supabase")
         except Exception as e:
             logger.error(f"Erreur initialisation Supabase: {e}")
 
     @property
     def is_configured(self) -> bool:
-        """Vï¿½rifie si Supabase est configurï¿½."""
+        """Vérifie si Supabase est configuré."""
         return self._client is not None
 
     # -----------------------------------------------------------
@@ -171,17 +171,17 @@ class AuthService:
 
         Args:
             email: Adresse email
-            password: Mot de passe (min 6 caractï¿½res)
+            password: Mot de passe (min 6 caractères)
             nom: Nom de famille
-            prenom: Prï¿½nom
+            prenom: Prénom
 
         Returns:
-            Rï¿½sultat de l'inscription
+            Résultat de l'inscription
         """
         if not self.is_configured:
             return AuthResult(
                 success=False,
-                message="Service d'authentification non configurï¿½",
+                message="Service d'authentification non configuré",
                 error_code="NOT_CONFIGURED",
             )
 
@@ -202,7 +202,7 @@ class AuthService:
             )
 
             if response.user:
-                # Crï¿½er le profil
+                # Créer le profil
                 user = UserProfile(
                     id=response.user.id,
                     email=email,
@@ -220,7 +220,7 @@ class AuthService:
                 return AuthResult(
                     success=True,
                     user=user,
-                    message="Inscription rï¿½ussie! Vï¿½rifiez votre email.",
+                    message="Inscription réussie! Vérifiez votre email.",
                 )
 
             return AuthResult(success=False, message="Erreur lors de l'inscription")
@@ -233,7 +233,7 @@ class AuthService:
             if "already registered" in error_msg.lower():
                 return AuthResult(
                     success=False,
-                    message="Cet email est dï¿½jï¿½ utilisï¿½",
+                    message="Cet email est déjà utilisé",
                     error_code="EMAIL_EXISTS",
                 )
 
@@ -254,22 +254,22 @@ class AuthService:
             password: Mot de passe
 
         Returns:
-            Rï¿½sultat de la connexion
+            Résultat de la connexion
         """
-        # Mode Dï¿½MO - Permet la connexion sans Supabase en dï¿½veloppement
+        # Mode DÉMO - Permet la connexion sans Supabase en développement
         if not self.is_configured:
-            logger.warning("?? Mode dï¿½mo: Authentification Supabase non configurï¿½e")
+            logger.warning("⚠️ Mode démo: Authentification Supabase non configurée")
 
-            # Comptes de dï¿½monstration disponibles
+            # Comptes de démonstration disponibles
             DEMO_ACCOUNTS = {
                 "anne@matanne.fr": "password123",  # Admin
                 "demo@test.fr": "password123",  # Membre
-                "test@test.fr": "password123",  # Invitï¿½
+                "test@test.fr": "password123",  # Invité
             }
 
-            # Vï¿½rifier si c'est un compte dï¿½mo valide
+            # Vérifier si c'est un compte démo valide
             if email in DEMO_ACCOUNTS and DEMO_ACCOUNTS[email] == password:
-                # Crï¿½er un profil de test
+                # Créer un profil de test
                 roles_map = {
                     "anne@matanne.fr": Role.ADMIN,
                     "demo@test.fr": Role.MEMBRE,
@@ -292,15 +292,15 @@ class AuthService:
 
                 # Sauvegarder en session
                 st.session_state[self.USER_KEY] = user
-                logger.info(f"? Connexion dï¿½mo rï¿½ussie: {email} ({user.role.value})")
+                logger.info(f"✅ Connexion démo réussie: {email} ({user.role.value})")
 
                 return AuthResult(
-                    success=True, user=user, message=f"Bienvenue {prenom}! (Mode dï¿½mo)"
+                    success=True, user=user, message=f"Bienvenue {prenom}! (Mode démo)"
                 )
 
             return AuthResult(
                 success=False,
-                message="? Mode dï¿½mo: Utilisez anne@matanne.fr / password123 (ou demo@test.fr / password123)",
+                message="⚠️ Mode démo: Utilisez anne@matanne.fr / password123 (ou demo@test.fr / password123)",
                 error_code="DEMO_MODE",
             )
 
@@ -330,9 +330,9 @@ class AuthService:
                 # Sauvegarder en session
                 self._save_session(response.session, user)
 
-                logger.info(f"Utilisateur connectï¿½: {email}")
+                logger.info(f"Utilisateur connecté: {email}")
 
-                return AuthResult(success=True, user=user, message="Connexion rï¿½ussie!")
+                return AuthResult(success=True, user=user, message="Connexion réussie!")
 
             return AuthResult(success=False, message="Identifiants incorrects")
 
@@ -352,61 +352,61 @@ class AuthService:
             )
 
     # -----------------------------------------------------------
-    # Dï¿½CONNEXION
+    # DÉCONNEXION
     # -----------------------------------------------------------
 
     def logout(self) -> AuthResult:
-        """Dï¿½connecte l'utilisateur actuel."""
+        """Déconnecte l'utilisateur actuel."""
         if not self.is_configured:
-            return AuthResult(success=True, message="Dï¿½connectï¿½")
+            return AuthResult(success=True, message="Déconnecté")
 
         try:
             self._client.auth.sign_out()
             self._clear_session()
 
-            logger.info("Utilisateur dï¿½connectï¿½")
+            logger.info("Utilisateur déconnecté")
 
-            return AuthResult(success=True, message="Dï¿½connexion rï¿½ussie")
+            return AuthResult(success=True, message="Déconnexion réussie")
 
         except Exception as e:
-            logger.error(f"Erreur dï¿½connexion: {e}")
-            self._clear_session()  # Nettoyer quand mï¿½me
-            return AuthResult(success=True, message="Dï¿½connectï¿½")
+            logger.error(f"Erreur déconnexion: {e}")
+            self._clear_session()  # Nettoyer quand même
+            return AuthResult(success=True, message="Déconnecté")
 
     # -----------------------------------------------------------
-    # MOT DE PASSE OUBLIï¿½
+    # MOT DE PASSE OUBLIÉ
     # -----------------------------------------------------------
 
     def reset_password(self, email: str) -> AuthResult:
         """
-        Envoie un email de rï¿½initialisation de mot de passe.
+        Envoie un email de réinitialisation de mot de passe.
 
         Args:
             email: Adresse email
 
         Returns:
-            Rï¿½sultat de l'opï¿½ration
+            Résultat de l'opération
         """
         if not self.is_configured:
             return AuthResult(
-                success=False, message="Service non configurï¿½", error_code="NOT_CONFIGURED"
+                success=False, message="Service non configuré", error_code="NOT_CONFIGURED"
             )
 
         try:
             self._client.auth.reset_password_for_email(email)
 
-            logger.info(f"Email de reset envoyï¿½ ï¿½: {email}")
+            logger.info(f"Email de reset envoyé à: {email}")
 
             return AuthResult(
                 success=True,
-                message="Si cet email existe, vous recevrez un lien de rï¿½initialisation.",
+                message="Si cet email existe, vous recevrez un lien de réinitialisation.",
             )
 
         except Exception as e:
             logger.error(f"Erreur reset password: {e}")
             return AuthResult(
-                success=True,  # Ne pas rï¿½vï¿½ler si l'email existe
-                message="Si cet email existe, vous recevrez un lien de rï¿½initialisation.",
+                success=True,  # Ne pas révéler si l'email existe
+                message="Si cet email existe, vous recevrez un lien de réinitialisation.",
             )
 
     # -----------------------------------------------------------
@@ -414,21 +414,21 @@ class AuthService:
     # -----------------------------------------------------------
 
     def get_current_user(self) -> UserProfile | None:
-        """Retourne l'utilisateur actuellement connectï¿½."""
+        """Retourne l'utilisateur actuellement connecté."""
         return st.session_state.get(self.USER_KEY)
 
     def is_authenticated(self) -> bool:
-        """Vï¿½rifie si un utilisateur est connectï¿½."""
+        """Vérifie si un utilisateur est connecté."""
         return self.get_current_user() is not None
 
     def require_auth(self) -> UserProfile | None:
         """
         Exige une authentification.
 
-        Affiche le formulaire de connexion si non authentifiï¿½.
+        Affiche le formulaire de connexion si non authentifié.
 
         Returns:
-            Utilisateur si authentifiï¿½, None sinon
+            Utilisateur si authentifié, None sinon
         """
         user = self.get_current_user()
 
@@ -441,13 +441,13 @@ class AuthService:
 
     def require_permission(self, permission: Permission) -> bool:
         """
-        Vï¿½rifie si l'utilisateur a une permission.
+        Vérifie si l'utilisateur a une permission.
 
         Args:
             permission: Permission requise
 
         Returns:
-            True si autorisï¿½
+            True si autorisé
         """
         user = self.get_current_user()
 
@@ -470,7 +470,7 @@ class AuthService:
 
     def refresh_session(self) -> bool:
         """
-        Rafraï¿½chit la session si nï¿½cessaire.
+        Rafraîchit la session si nécessaire.
 
         Returns:
             True si session valide
@@ -482,7 +482,7 @@ class AuthService:
             session = st.session_state.get(self.SESSION_KEY)
 
             if session:
-                # Vï¿½rifier et rafraï¿½chir le token
+                # Vérifier et rafraîchir le token
                 response = self._client.auth.obtenir_contexte_db()
 
                 if response:
@@ -509,7 +509,7 @@ class AuthService:
             UserProfile si valide, None sinon
         """
         if not self.is_configured:
-            logger.warning("Auth non configurï¿½ pour validation JWT")
+            logger.warning("Auth non configuré pour validation JWT")
             return None
 
         try:
@@ -537,14 +537,14 @@ class AuthService:
 
     def decode_jwt_payload(self, token: str) -> dict | None:
         """
-        Dï¿½code le payload d'un JWT sans validation signature.
+        Décode le payload d'un JWT sans validation signature.
         Utile pour debug ou extraction d'infos basiques.
 
         Args:
             token: Token JWT
 
         Returns:
-            Payload dï¿½codï¿½ ou None
+            Payload décodé ou None
         """
         try:
             import base64
@@ -555,20 +555,20 @@ class AuthService:
             if len(parts) != 3:
                 return None
 
-            # Dï¿½coder le payload (partie 2)
+            # Décoder le payload (partie 2)
             payload = parts[1]
-            # Ajouter padding si nï¿½cessaire
+            # Ajouter padding si nécessaire
             payload += "=" * (4 - len(payload) % 4)
             decoded = base64.urlsafe_b64decode(payload)
 
             return json.loads(decoded)
 
         except Exception as e:
-            logger.debug(f"Erreur dï¿½codage JWT: {e}")
+            logger.debug(f"Erreur décodage JWT: {e}")
             return None
 
     # -----------------------------------------------------------
-    # MISE ï¿½ JOUR PROFIL
+    # MISE À JOUR PROFIL
     # -----------------------------------------------------------
 
     def update_profile(
@@ -579,30 +579,28 @@ class AuthService:
         preferences: dict | None = None,
     ) -> AuthResult:
         """
-        Met ï¿½ jour le profil de l'utilisateur connectï¿½.
+        Met à jour le profil de l'utilisateur connecté.
 
         Args:
             nom: Nouveau nom (optionnel)
-            prenom: Nouveau prï¿½nom (optionnel)
+            prenom: Nouveau prénom (optionnel)
             avatar_url: URL de l'avatar (optionnel)
-            preferences: Prï¿½fï¿½rences utilisateur (optionnel)
+            preferences: Préférences utilisateur (optionnel)
 
         Returns:
-            Rï¿½sultat de la mise ï¿½ jour
+            Résultat de la mise à jour
         """
         if not self.is_configured:
             return AuthResult(
-                success=False, message="Service non configurï¿½", error_code="NOT_CONFIGURED"
+                success=False, message="Service non configuré", error_code="NOT_CONFIGURED"
             )
 
         user = self.get_current_user()
         if not user:
-            return AuthResult(
-                success=False, message="Non connectï¿½", error_code="NOT_AUTHENTICATED"
-            )
+            return AuthResult(success=False, message="Non connecté", error_code="NOT_AUTHENTICATED")
 
         try:
-            # Construire les donnï¿½es ï¿½ mettre ï¿½ jour
+            # Construire les données à mettre à jour
             update_data = {}
 
             if nom is not None:
@@ -617,11 +615,11 @@ class AuthService:
             if not update_data:
                 return AuthResult(success=True, message="Aucune modification", user=user)
 
-            # Mettre ï¿½ jour via Supabase Auth
+            # Mettre à jour via Supabase Auth
             response = self._client.auth.update_user({"data": update_data})
 
             if response and response.user:
-                # Mettre ï¿½ jour le profil local
+                # Mettre à jour le profil local
                 metadata = response.user.user_metadata or {}
 
                 updated_user = UserProfile(
@@ -636,16 +634,16 @@ class AuthService:
                     created_at=user.created_at,
                 )
 
-                # Mettre ï¿½ jour la session
+                # Mettre à jour la session
                 st.session_state[self.USER_KEY] = updated_user
 
-                logger.info(f"Profil mis ï¿½ jour: {user.email}")
+                logger.info(f"Profil mis à jour: {user.email}")
 
                 return AuthResult(
-                    success=True, message="Profil mis ï¿½ jour avec succï¿½s", user=updated_user
+                    success=True, message="Profil mis à jour avec succès", user=updated_user
                 )
 
-            return AuthResult(success=False, message="Erreur lors de la mise ï¿½ jour")
+            return AuthResult(success=False, message="Erreur lors de la mise à jour")
 
         except Exception as e:
             logger.error(f"Erreur update profile: {e}")
@@ -653,26 +651,26 @@ class AuthService:
 
     def change_password(self, new_password: str) -> AuthResult:
         """
-        Change le mot de passe de l'utilisateur connectï¿½.
+        Change le mot de passe de l'utilisateur connecté.
 
         Args:
-            new_password: Nouveau mot de passe (min 6 caractï¿½res)
+            new_password: Nouveau mot de passe (min 6 caractères)
 
         Returns:
-            Rï¿½sultat du changement
+            Résultat du changement
         """
         if not self.is_configured:
-            return AuthResult(success=False, message="Service non configurï¿½")
+            return AuthResult(success=False, message="Service non configuré")
 
         if len(new_password) < 6:
-            return AuthResult(success=False, message="Mot de passe trop court (min 6 caractï¿½res)")
+            return AuthResult(success=False, message="Mot de passe trop court (min 6 caractères)")
 
         try:
             response = self._client.auth.update_user({"password": new_password})
 
             if response:
-                logger.info("Mot de passe changï¿½")
-                return AuthResult(success=True, message="Mot de passe changï¿½ avec succï¿½s")
+                logger.info("Mot de passe changé")
+                return AuthResult(success=True, message="Mot de passe changé avec succès")
 
             return AuthResult(success=False, message="Erreur lors du changement")
 
@@ -691,11 +689,11 @@ def render_login_form(redirect_on_success: bool = True):
     Affiche le formulaire de connexion.
 
     Args:
-        redirect_on_success: Rerun aprï¿½s connexion rï¿½ussie
+        redirect_on_success: Rerun après connexion réussie
     """
     auth = get_auth_service()
 
-    st.markdown("### ?? Connexion")
+    st.markdown("### 🔐 Connexion")
 
     tab1, tab2 = st.tabs(["Se connecter", "S'inscrire"])
 
@@ -708,7 +706,7 @@ def render_login_form(redirect_on_success: bool = True):
             with col1:
                 submit = st.form_submit_button("Se connecter", use_container_width=True)
             with col2:
-                forgot = st.form_submit_button("Mot de passe oubliï¿½?")
+                forgot = st.form_submit_button("Mot de passe oublié?")
 
             if submit and email and password:
                 result = auth.login(email, password)
@@ -729,7 +727,7 @@ def render_login_form(redirect_on_success: bool = True):
             email = st.text_input("Email", key="signup_email")
             col1, col2 = st.columns(2)
             with col1:
-                prenom = st.text_input("Prï¿½nom")
+                prenom = st.text_input("Prénom")
             with col2:
                 nom = st.text_input("Nom")
             password = st.text_input("Mot de passe", type="password", key="signup_pass")
@@ -743,7 +741,7 @@ def render_login_form(redirect_on_success: bool = True):
                 elif password != password2:
                     st.error("Les mots de passe ne correspondent pas")
                 elif len(password) < 6:
-                    st.error("Mot de passe trop court (min 6 caractï¿½res)")
+                    st.error("Mot de passe trop court (min 6 caractères)")
                 else:
                     result = auth.signup(email, password, nom, prenom)
 
@@ -764,49 +762,49 @@ def render_user_menu():
 
             col1, col2 = st.columns([1, 3])
             with col1:
-                st.markdown("??")
+                st.markdown("👤")
             with col2:
                 st.markdown(f"**{user.display_name}**")
                 st.caption(user.role.value.title())
 
-            if st.button("?? Dï¿½connexion", use_container_width=True, key="logout_btn"):
+            if st.button("🚪 Déconnexion", use_container_width=True, key="logout_btn"):
                 auth.logout()
                 st.rerun()
     else:
         with st.sidebar:
             st.markdown("---")
-            if st.button("?? Se connecter", use_container_width=True, key="login_btn"):
+            if st.button("🔐 Se connecter", use_container_width=True, key="login_btn"):
                 st.session_state["show_login"] = True
 
 
 def render_profile_settings():
-    """Affiche les paramï¿½tres du profil utilisateur."""
+    """Affiche les paramètres du profil utilisateur."""
     auth = get_auth_service()
     user = auth.get_current_user()
 
     if not user:
-        st.warning("Vous devez ï¿½tre connectï¿½")
+        st.warning("Vous devez être connecté")
         return
 
-    st.markdown("### ?? Mon profil")
+    st.markdown("### 👤 Mon profil")
 
-    # Formulaire de mise ï¿½ jour du profil
+    # Formulaire de mise à jour du profil
     with st.form("profile_form"):
-        prenom = st.text_input("Prï¿½nom", value=user.prenom)
+        prenom = st.text_input("Prénom", value=user.prenom)
         nom = st.text_input("Nom", value=user.nom)
         avatar_url = st.text_input(
             "URL Avatar", value=user.avatar_url or "", help="URL d'une image pour votre avatar"
         )
 
         st.markdown("---")
-        st.caption(f"?? Email: {user.email}")
-        st.caption(f"??? Rï¿½le: {user.role.value.title()}")
+        st.caption(f"📧 Email: {user.email}")
+        st.caption(f"🏆 Rôle: {user.role.value.title()}")
         st.caption(
-            f"?? Membre depuis: {user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A'}"
+            f"📅 Membre depuis: {user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A'}"
         )
 
         if st.form_submit_button(
-            "?? Enregistrer les modifications", use_container_width=True, type="primary"
+            "💾 Enregistrer les modifications", use_container_width=True, type="primary"
         ):
             result = auth.update_profile(
                 nom=nom if nom != user.nom else None,
@@ -818,11 +816,11 @@ def render_profile_settings():
                 st.success(f"? {result.message}")
                 st.rerun()
             else:
-                st.error(f"? {result.message}")
+                st.error(f"❌ {result.message}")
 
     # Section changement de mot de passe
     st.markdown("---")
-    st.markdown("### ?? Changer le mot de passe")
+    st.markdown("### 🔐 Changer le mot de passe")
 
     with st.form("password_form"):
         new_password = st.text_input("Nouveau mot de passe", type="password", key="new_pwd")
@@ -830,28 +828,28 @@ def render_profile_settings():
             "Confirmer le mot de passe", type="password", key="confirm_pwd"
         )
 
-        if st.form_submit_button("?? Changer le mot de passe", use_container_width=True):
+        if st.form_submit_button("🔐 Changer le mot de passe", use_container_width=True):
             if not new_password:
                 st.error("Veuillez entrer un nouveau mot de passe")
             elif new_password != confirm_password:
                 st.error("Les mots de passe ne correspondent pas")
             elif len(new_password) < 6:
-                st.error("Mot de passe trop court (min 6 caractï¿½res)")
+                st.error("Mot de passe trop court (min 6 caractères)")
             else:
                 result = auth.change_password(new_password)
                 if result.success:
-                    st.success(f"? {result.message}")
+                    st.success(f"✅ {result.message}")
                 else:
-                    st.error(f"? {result.message}")
+                    st.error(f"❌ {result.message}")
 
 
 # -----------------------------------------------------------
-# Dï¿½CORATEURS DE PERMISSION
+# DÉCORATEURS DE PERMISSION
 # -----------------------------------------------------------
 
 
 def require_authenticated(func):
-    """Dï¿½corateur qui exige une authentification."""
+    """Décorateur qui exige une authentification."""
     from functools import wraps
 
     @wraps(func)
@@ -859,7 +857,7 @@ def require_authenticated(func):
         auth = get_auth_service()
 
         if not auth.is_authenticated():
-            st.warning("?? Authentification requise")
+            st.warning("🔐 Authentification requise")
             render_login_form()
             return None
 
@@ -869,7 +867,7 @@ def require_authenticated(func):
 
 
 def require_role(role: Role):
-    """Dï¿½corateur qui exige un rï¿½le minimum."""
+    """Décorateur qui exige un rôle minimum."""
 
     def decorator(func):
         from functools import wraps
@@ -880,15 +878,15 @@ def require_role(role: Role):
             user = auth.get_current_user()
 
             if not user:
-                st.warning("?? Authentification requise")
+                st.warning("🔐 Authentification requise")
                 render_login_form()
                 return None
 
-            # Hiï¿½rarchie des rï¿½les
+            # Hiérarchie des rôles
             role_hierarchy = [Role.INVITE, Role.MEMBRE, Role.ADMIN]
 
             if role_hierarchy.index(user.role) < role_hierarchy.index(role):
-                st.error(f"? Accï¿½s refusï¿½. Rï¿½le requis: {role.value}")
+                st.error(f"❌ Accès refusé. Rôle requis: {role.value}")
                 return None
 
             return func(*args, **kwargs)

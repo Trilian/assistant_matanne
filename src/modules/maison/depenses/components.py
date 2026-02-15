@@ -285,7 +285,7 @@ def render_onglet_mois():
     depenses = get_depenses_mois(mois, int(annee))
 
     if not depenses:
-        st.info(f"Aucune depense enregistree pour {MOIS_FR[mois]} {annee}")
+        st.info(f"Aucune dépense enregistrée pour {MOIS_FR[mois]} {annee}")
         return
 
     # Total

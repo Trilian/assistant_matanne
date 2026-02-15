@@ -34,18 +34,18 @@ from src.ui.feedback import afficher_erreur, afficher_succes, spinner_intelligen
 def app():
     """Point d'entree module paramètres"""
 
-    st.title("?? Paramètres")
+    st.title("⚙️ Paramètres")
 
     # Tabs - Ajout des nouvelles fonctionnalites
     tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
         [
-            "??????? Foyer",
-            "– IA",
-            "?? Base de Donnees",
-            "?? Cache",
-            "?? Affichage",
-            "?? Budget",
-            "?? À Propos",
+            "👨‍👩‍👧‍👦 Foyer",
+            "🤖 IA",
+            "🗄️ Base de Données",
+            "💾 Cache",
+            "🖥️ Affichage",
+            "💰 Budget",
+            "ℹ️ À Propos",
         ]
     )
 
@@ -79,7 +79,7 @@ def app():
 def render_foyer_config():
     """Configuration du foyer"""
 
-    st.markdown("### ?? ?? ?? ?? Configuration Foyer")
+    st.markdown("### 👨‍👩‍👧‍👦 Configuration Foyer")
     st.caption("Configure les informations de ton foyer")
 
     # État actuel
@@ -119,7 +119,7 @@ def render_foyer_config():
             )
 
             a_bebe = st.checkbox(
-                "?? Presence d'un jeune enfant (< 24 mois)", value=config.get("a_bebe", False)
+                "👶 Présence d'un jeune enfant (< 24 mois)", value=config.get("a_bebe", False)
             )
 
         st.markdown("#### Preferences Alimentaires")
@@ -149,7 +149,7 @@ def render_foyer_config():
         st.markdown("---")
 
         submitted = st.form_submit_button(
-            "?? Sauvegarder", type="primary", use_container_width=True
+            "💾 Sauvegarder", type="primary", use_container_width=True
         )
 
         if submitted:
@@ -169,11 +169,11 @@ def render_foyer_config():
             # Mettre à jour state
             state.nom_utilisateur = nom_utilisateur
 
-            afficher_succes("? Configuration sauvegardee !")
+            afficher_succes("✅ Configuration sauvegardée !")
             st.rerun()
 
     # Afficher config actuelle
-    with st.expander("?? Configuration Actuelle"):
+    with st.expander("📋 Configuration actuelle"):
         st.json(config)
 
 
@@ -185,7 +185,7 @@ def render_foyer_config():
 def render_ia_config():
     """Configuration IA"""
 
-    st.markdown("### – Configuration IA")
+    st.markdown("### 🤖 Configuration IA")
     st.caption("Paramètres du service d'intelligence artificielle")
 
     settings = get_settings()
@@ -206,7 +206,7 @@ def render_ia_config():
     st.markdown("---")
 
     # Rate Limiting
-    st.markdown("#### ? Rate Limiting")
+    st.markdown("#### ⚡ Rate Limiting")
 
     col3, col4 = st.columns(2)
 
@@ -243,7 +243,7 @@ def render_ia_config():
     st.markdown("---")
 
     # Cache Semantique
-    st.markdown("#### ?? Cache Semantique")
+    st.markdown("#### 🧠 Cache Sémantique")
 
     cache_stats = SemanticCache.obtenir_statistiques()
 
@@ -262,25 +262,25 @@ def render_ia_config():
     with col9:
         st.metric("Appels Économises", cache_stats.get("saved_api_calls", 0))
 
-    mode = "?? Semantique" if cache_stats.get("embeddings_available", False) else "?? MD5"
+    mode = "🧠 Sémantique" if cache_stats.get("embeddings_available", False) else "🔑 MD5"
     st.info(f"**Mode:** {mode}")
     if cache_stats.get("embeddings_available", False):
-        st.success("? Embeddings actifs (similarite semantique)")
+        st.success("✅ Embeddings actifs (similarité sémantique)")
     else:
-        st.warning("âš ï¸ Embeddings indisponibles (fallback MD5)")
+        st.warning("⚠️ Embeddings indisponibles (fallback MD5)")
 
     # Actions cache IA
     col10, col11 = st.columns(2)
 
     with col10:
-        if st.button("?? Vider Cache IA", key="btn_clear_semantic_cache", use_container_width=True):
+        if st.button("🗑️ Vider Cache IA", key="btn_clear_semantic_cache", use_container_width=True):
             SemanticCache.invalider_tout()
-            afficher_succes("Cache IA vide !")
+            afficher_succes("Cache IA vidé !")
             st.rerun()
 
     with col11:
-        if st.button("?? Details Cache", key="btn_cache_details", use_container_width=True):
-            with st.expander("?? Statistiques Detaillees", expanded=True):
+        if st.button("📊 Détails Cache", key="btn_cache_details", use_container_width=True):
+            with st.expander("📈 Statistiques Détaillées", expanded=True):
                 st.json(cache_stats)
 
 
@@ -292,14 +292,14 @@ def render_ia_config():
 def render_database_config():
     """Configuration base de donnees"""
 
-    st.markdown("### ?? Base de Donnees")
-    st.caption("Informations et maintenance de la base de donnees")
+    st.markdown("### 🗄️ Base de Données")
+    st.caption("Informations et maintenance de la base de données")
 
     # Infos DB
     db_info = get_db_info()
 
     if db_info.get("statut") == "connected":
-        st.success("? Connexion active")
+        st.success("✅ Connexion active")
 
         col1, col2 = st.columns(2)
 
@@ -314,19 +314,19 @@ def render_database_config():
             st.info(f"**Schema:** v{db_info.get('version_schema', 0)}")
 
     else:
-        st.error(f"? Erreur: {db_info.get('erreur', 'Inconnue')}")
+        st.error(f"❌ Erreur: {db_info.get('erreur', 'Inconnue')}")
 
     st.markdown("---")
 
     # Health Check
-    st.markdown("#### ?? Health Check")
+    st.markdown("#### 🟢 Health Check")
 
-    if st.button("??Verifier l'etat", key="btn_check_db_status", use_container_width=True):
+    if st.button("🔍 Vérifier l'état", key="btn_check_db_status", use_container_width=True):
         with spinner_intelligent("Verification en cours...", secondes_estimees=2):
             health = health_check()
 
         if health.get("sain"):
-            st.success("? Base de donnees en bonne sante")
+            st.success("✅ Base de données en bonne santé")
 
             col3, col4 = st.columns(2)
 
@@ -337,12 +337,12 @@ def render_database_config():
                 db_size_mb = health.get("taille_base_octets", 0) / 1024 / 1024
                 st.metric("Taille DB", f"{db_size_mb:.2f} MB")
         else:
-            st.error(f"? Problème detecte: {health.get('erreur')}")
+            st.error(f"❌ Problème détecté: {health.get('erreur')}")
 
     st.markdown("---")
 
     # Migrations
-    st.markdown("#### ?? Migrations")
+    st.markdown("#### 🔄 Migrations")
 
     current_version = GestionnaireMigrations.obtenir_version_courante()
     st.info(f"**Version du schema:** v{current_version}")
@@ -350,32 +350,32 @@ def render_database_config():
     col5, col6 = st.columns(2)
 
     with col5:
-        if st.button("?? Executer Migrations", key="btn_run_migrations", use_container_width=True):
+        if st.button("▶️ Exécuter Migrations", key="btn_run_migrations", use_container_width=True):
             with spinner_intelligent("Execution des migrations...", secondes_estimees=5):
                 try:
                     GestionnaireMigrations.executer_migrations()
-                    afficher_succes("? Migrations executees !")
+                    afficher_succes("✅ Migrations exécutées !")
                     st.rerun()
                 except Exception as e:
-                    afficher_erreur(f"? Erreur: {str(e)}")
+                    afficher_erreur(f"❌ Erreur: {str(e)}")
 
     with col6:
         if st.button(
-            "?? Voir Historique", key="btn_show_migration_history", use_container_width=True
+            "📜 Voir Historique", key="btn_show_migration_history", use_container_width=True
         ):
             st.session_state.show_migrations_history = True
 
     st.markdown("---")
 
     # Maintenance
-    st.markdown("#### ?? Maintenance")
+    st.markdown("#### 🛠️ Maintenance")
 
-    st.warning("âš ï¸ Ces operations peuvent être longues")
+    st.warning("⚠️ Ces opérations peuvent être longues")
 
     col7, col8 = st.columns(2)
 
     with col7:
-        if st.button("?? Optimiser (VACUUM)", key="btn_optimize_db", use_container_width=True):
+        if st.button("🧹 Optimiser (VACUUM)", key="btn_optimize_db", use_container_width=True):
             modal = Modal("vacuum_db")
 
             if not modal.is_showing():
@@ -383,14 +383,14 @@ def render_database_config():
             else:
                 st.warning("Cela peut prendre plusieurs minutes. Continuer ?")
 
-                if modal.confirm("? Optimiser"):
+                if modal.confirm("✅ Optimiser"):
                     with spinner_intelligent("Optimisation en cours...", secondes_estimees=10):
                         try:
                             vacuum_database()
-                            afficher_succes("? Optimisation terminee !")
+                            afficher_succes("✅ Optimisation terminée !")
                             modal.close()
                         except Exception as e:
-                            afficher_erreur(f"? Erreur: {str(e)}")
+                            afficher_erreur(f"❌ Erreur: {str(e)}")
 
                 modal.cancel("❌ Annuler")
 
@@ -418,11 +418,11 @@ def render_database_config():
 def render_cache_config():
     """Configuration cache"""
 
-    st.markdown("### ??¸ Gestion du Cache")
+    st.markdown("### 💾 Gestion du Cache")
     st.caption("Cache applicatif et cache IA")
 
     # Cache applicatif
-    st.markdown("#### [PKG] Cache Applicatif")
+    st.markdown("#### 📦 Cache Applicatif")
 
     if "cache_data" in st.session_state:
         cache_size = len(st.session_state.cache_data)
@@ -441,7 +441,7 @@ def render_cache_config():
                 st.metric("Taux de Hit", f"{hit_rate:.1f}%")
 
             if st.button(
-                "??? Vider Cache Applicatif", key="btn_clear_cache_app", use_container_width=True
+                "🗑️ Vider Cache Applicatif", key="btn_clear_cache_app", use_container_width=True
             ):
                 Cache.clear_all()
                 afficher_succes("Cache applicatif vide !")
@@ -453,7 +453,7 @@ def render_cache_config():
     st.markdown("---")
 
     # Cache IA
-    st.markdown("#### ?? Cache IA")
+    st.markdown("#### 🤖 Cache IA")
 
     cache_stats = SemanticCache.obtenir_statistiques()
 
@@ -468,25 +468,25 @@ def render_cache_config():
     with col5:
         st.metric("Misses", 0)
 
-    if st.button("?? Vider Cache IA", key="btn_clear_cache_ia", use_container_width=True):
+    if st.button("🗑️ Vider Cache IA", key="btn_clear_cache_ia", use_container_width=True):
         SemanticCache.invalider_tout()
-        afficher_succes("Cache IA vide !")
+        afficher_succes("Cache IA vidé !")
         st.rerun()
 
     st.markdown("---")
 
     # Actions groupees
-    st.markdown("#### ?? Actions Groupees")
+    st.markdown("#### ⚡ Actions Groupées")
 
     if st.button(
-        "??¸ TOUT Vider (Cache App + IA)",
+        "🗑️ TOUT Vider (Cache App + IA)",
         key="btn_clear_all",
         type="primary",
         use_container_width=True,
     ):
         Cache.clear_all()
         SemanticCache.invalider_tout()
-        afficher_succes("? Tous les caches vides !")
+        afficher_succes("✅ Tous les caches vidés !")
         st.rerun()
 
 
@@ -500,21 +500,21 @@ def render_about():
 
     settings = get_settings()
 
-    st.markdown("### ?? À Propos")
+    st.markdown("### ℹ️ À Propos")
 
     # Infos app
     st.markdown(
         f"""
-    ## – {settings.APP_NAME}
+    ## 🏠 {settings.APP_NAME}
 
     **Version:** {settings.APP_VERSION}
 
     **Description:**
-    Assistant familial intelligent pour gerer :
-    - ?? Recettes et planning repas
-    - [PKG] Inventaire alimentaire
-    - ??? Liste de courses
-    - ?? Planning hebdomadaire
+    Assistant familial intelligent pour gérer :
+    - 🍳 Recettes et planning repas
+    - 📦 Inventaire alimentaire
+    - 🛒 Liste de courses
+    - 📅 Planning hebdomadaire
 
     **Technologies:**
     - Frontend: Streamlit
@@ -527,27 +527,29 @@ def render_about():
     st.markdown("---")
 
     # Environnement
-    st.markdown("#### ?? Environnement")
+    st.markdown("#### 💻 Environnement")
 
     col1, col2 = st.columns(2)
 
     with col1:
         st.info(f"**Mode:** {settings.ENV}")
-        st.info(f"**Debug:** {'Active' if settings.DEBUG else 'Desactive'}")
+        st.info(f"**Debug:** {'Activé' if settings.DEBUG else 'Désactivé'}")
 
     with col2:
-        db_configured = "? Configuree" if settings._verifier_db_configuree() else "? Non configuree"
+        db_configured = (
+            "✅ Configurée" if settings._verifier_db_configuree() else "❌ Non configurée"
+        )
         ai_configured = (
-            "? Configuree" if settings._verifier_mistral_configure() else "? Non configuree"
+            "✅ Configurée" if settings._verifier_mistral_configure() else "❌ Non configurée"
         )
 
-        st.info(f"**Base de donnees:** {db_configured}")
+        st.info(f"**Base de données:** {db_configured}")
         st.info(f"**IA:** {ai_configured}")
 
     st.markdown("---")
 
     # Configuration securisee (sans secrets)
-    st.markdown("#### ?? Configuration")
+    st.markdown("#### 🔐 Configuration")
 
     with st.expander("Voir la configuration (sans secrets)"):
         safe_config = settings.obtenir_config_publique()
@@ -556,21 +558,21 @@ def render_about():
     st.markdown("---")
 
     # Support
-    st.markdown("#### ?? Support")
+    st.markdown("#### 📞 Support")
 
     st.info(
         """
     **Besoin d'aide ?**
-    - [WATER] Contact: support@example.com
-    - ??? Bugs: GitHub Issues
-    - ?? Documentation: /docs
+    - ✉️ Contact: support@example.com
+    - 🐛 Bugs: GitHub Issues
+    - 📚 Documentation: /docs
     """
     )
 
     st.markdown("---")
 
     # État système
-    st.markdown("#### ??¸ État Système")
+    st.markdown("#### ⚙️ État Système")
 
     state_summary = GestionnaireEtat.obtenir_resume_etat()
 
@@ -586,7 +588,7 @@ def render_about():
 def render_display_config():
     """Configuration de l'affichage et mode tablette."""
 
-    st.markdown("### ?? Configuration Affichage")
+    st.markdown("### 🖥️ Configuration Affichage")
     st.caption("Personnalise l'interface selon ton appareil")
 
     try:
@@ -601,9 +603,9 @@ def render_display_config():
         st.markdown("#### Mode d'affichage")
 
         mode_options = {
-            TabletMode.NORMAL: ("??¸ Normal", "Interface standard pour ordinateur"),
-            TabletMode.TABLET: ("?? Tablette", "Boutons plus grands, interface tactile"),
-            TabletMode.KITCHEN: ("??€?? Cuisine", "Mode cuisine avec navigation par etapes"),
+            TabletMode.NORMAL: ("💻 Normal", "Interface standard pour ordinateur"),
+            TabletMode.TABLET: ("📱 Tablette", "Boutons plus grands, interface tactile"),
+            TabletMode.KITCHEN: ("🍳 Cuisine", "Mode cuisine avec navigation par étapes"),
         }
 
         for mode, (label, description) in mode_options.items():
@@ -623,14 +625,14 @@ def render_display_config():
 
         st.markdown("---")
 
-        st.markdown("#### Previsualisation")
+        st.markdown("#### Prévisualisation")
 
         if current_mode == TabletMode.NORMAL:
-            st.info("??¸ Mode normal actif - Interface optimisee pour ordinateur")
+            st.info("💻 Mode normal actif - Interface optimisée pour ordinateur")
         elif current_mode == TabletMode.TABLET:
-            st.warning("?? Mode tablette actif - Boutons et textes agrandis")
+            st.warning("📱 Mode tablette actif - Boutons et textes agrandis")
         else:
-            st.success("??€?? Mode cuisine actif - Interface simplifiee pour cuisiner")
+            st.success("🍳 Mode cuisine actif - Interface simplifiée pour cuisiner")
 
     except ImportError:
         st.error("Module tablet_mode non disponible")
@@ -644,10 +646,10 @@ def render_display_config():
 def render_budget_config():
     """Configuration du budget et backup."""
 
-    st.markdown("### ?? Budget & Sauvegarde")
+    st.markdown("### 💰 Budget & Sauvegarde")
 
     # Section Budget
-    st.markdown("#### ?? Configuration Budget")
+    st.markdown("#### 📈 Configuration Budget")
 
     try:
         from src.services.budget import CategorieDepense
@@ -660,24 +662,24 @@ def render_budget_config():
         for i, cat in enumerate(categories):
             with cols[i % 3]:
                 emoji_map = {
-                    "alimentation": "??",
-                    "transport": "??",
-                    "logement": "??",
-                    "sante": "??",
-                    "loisirs": "??",
-                    "vetements": "??",
-                    "education": "??",
-                    "cadeaux": "??",
-                    "abonnements": "??",
-                    "restaurant": "??",
-                    "vacances": "??",
-                    "bebe": "??",
-                    "autre": "??",
+                    "alimentation": "🍞",
+                    "transport": "🚗",
+                    "logement": "🏠",
+                    "sante": "🏥",
+                    "loisirs": "🎮",
+                    "vetements": "👕",
+                    "education": "📚",
+                    "cadeaux": "🎁",
+                    "abonnements": "📱",
+                    "restaurant": "🍽️",
+                    "vacances": "✈️",
+                    "bebe": "👶",
+                    "autre": "📦",
                 }
-                emoji = emoji_map.get(cat.value, "[PKG]")
+                emoji = emoji_map.get(cat.value, "📦")
                 st.checkbox(f"{emoji} {cat.value.capitalize()}", value=True, disabled=True)
 
-        st.info("??? Accède au module Budget dans le menu Famille pour gerer tes depenses")
+        st.info("👉 Accède au module Budget dans le menu Famille pour gérer tes dépenses")
 
     except ImportError:
         st.warning("Module budget non disponible")
@@ -685,7 +687,7 @@ def render_budget_config():
     st.markdown("---")
 
     # Section Backup
-    st.markdown("#### ?? Sauvegarde des donnees")
+    st.markdown("#### 💾 Sauvegarde des données")
 
     try:
         from src.services.backup import get_backup_service
@@ -695,22 +697,22 @@ def render_budget_config():
         col1, col2 = st.columns(2)
 
         with col1:
-            if st.button("?? Creer une sauvegarde", type="primary", use_container_width=True):
+            if st.button("💾 Créer une sauvegarde", type="primary", use_container_width=True):
                 with spinner_intelligent("Sauvegarde en cours..."):
                     result = backup_service.create_backup()
                     if result.success:
-                        afficher_succes(f"? {result.message}")
+                        afficher_succes(f"✅ {result.message}")
                     else:
-                        afficher_erreur(f"? {result.message}")
+                        afficher_erreur(f"❌ {result.message}")
 
         with col2:
-            if st.button("?? Voir les sauvegardes", use_container_width=True):
+            if st.button("📂 Voir les sauvegardes", use_container_width=True):
                 backups = backup_service.list_backups()
                 if backups:
                     for b in backups[:5]:
-                        st.text(f"?? {b.filename} ({b.size_bytes // 1024} KB)")
+                        st.text(f"📄 {b.filename} ({b.size_bytes // 1024} KB)")
                 else:
-                    st.info("Aucune sauvegarde trouvee")
+                    st.info("Aucune sauvegarde trouvée")
 
     except ImportError:
         st.warning("Module backup non disponible")
@@ -718,7 +720,7 @@ def render_budget_config():
     st.markdown("---")
 
     # Section Meteo
-    st.markdown("#### ???¸ Configuration Meteo Jardin")
+    st.markdown("#### ⛅ Configuration Météo Jardin")
 
     try:
         from src.services.weather import get_weather_garden_service
@@ -737,7 +739,7 @@ def render_budget_config():
             with col3:
                 notif_pluie = st.checkbox("Alertes pluie", value=True)
 
-            if st.form_submit_button("?? Sauvegarder", use_container_width=True):
+            if st.form_submit_button("💾 Sauvegarder", use_container_width=True):
                 if weather.set_location_from_city(ville):
                     st.session_state.meteo_config = {
                         "ville": ville,
@@ -746,9 +748,9 @@ def render_budget_config():
                         "notif_canicule": notif_canicule,
                         "notif_pluie": notif_pluie,
                     }
-                    afficher_succes("? Configuration meteo sauvegardee")
+                    afficher_succes("✅ Configuration météo sauvegardée")
                 else:
-                    afficher_erreur("Ville non trouvee")
+                    afficher_erreur("Ville non trouvée")
 
     except ImportError:
         st.warning("Module meteo non disponible")
