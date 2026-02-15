@@ -138,8 +138,8 @@ def render_vue_semaine_grille(semaine: SemaineCalendrier):
     for i, col in enumerate(cols):
         jour = semaine.jours[i]
         with col:
-            bg = "🔵" if jour.est_aujourdhui else ""
-            col.markdown(f"**{bg} {jour.jour_semaine_court}**")
+            prefix = "🔵 " if jour.est_aujourdhui else ""
+            col.markdown(f"**{prefix}{jour.jour_semaine_court}**")
 
     st.divider()
 
