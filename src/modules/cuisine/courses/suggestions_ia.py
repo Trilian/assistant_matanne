@@ -49,7 +49,7 @@ def render_suggestions_ia():
                             ]
                         )
 
-                        st.dataframe(df, use_container_width=True)
+                        st.dataframe(df, width="stretch")
 
                         if st.button("✅ Ajouter toutes les suggestions"):
                             try:

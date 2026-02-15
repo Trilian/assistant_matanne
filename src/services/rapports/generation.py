@@ -1042,7 +1042,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
 
             # Tableau pour ce jour
             day_data = [
-                [f"� {jour_nom} {date_obj.strftime('%d/%m')}", "Recette", "Portions", "Status"]
+                [f"📅 {jour_nom} {date_obj.strftime('%d/%m')}", "Recette", "Portions", "Status"]
             ]
 
             for repas in sorted(

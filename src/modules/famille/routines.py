@@ -337,7 +337,7 @@ def app():
 
                     with col_act2:
                         if st.button(
-                            "�️ Supprimer",
+                            "🗑️ Supprimer",
                             key=f"del_{routine['id']}",
                             type="secondary",
                             use_container_width=True,

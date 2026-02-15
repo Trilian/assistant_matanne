@@ -62,17 +62,17 @@ def migrate():
 
 
 def create_migration():
-    """CrÃ©e une nouvelle migration"""
+    """Crée une nouvelle migration"""
     message = input("Message de migration: ")
-    print(f"[EDIT] CrÃ©ation migration: {message}")
+    print(f"[EDIT] Création migration: {message}")
     run_cmd(f"alembic revision --autogenerate -m '{message}'", shell=True)
 
 
 def generate_requirements():
-    """GÃ©nÃ¨re requirements.txt depuis pyproject.toml"""
-    print("[PKG] GÃ©nÃ©ration requirements.txt...")
+    """Génère requirements.txt depuis pyproject.toml"""
+    print("📦 Génération requirements.txt...")
     if run_cmd("poetry export -f requirements.txt --output requirements.txt --without-hashes"):
-        print("[OK] requirements.txt gÃ©nÃ©rÃ©")
+        print("✅ requirements.txt généré")
 
 
 def clean():
@@ -111,23 +111,23 @@ def help_cmd():
     """Affiche l'aide"""
     print(
         """
-ðŸ¤– Assistant MaTanne v2 - Commandes disponibles
+🤖 Assistant MaTanne v2 - Commandes disponibles
 
-DÃ©veloppement:
+Développement:
   run                  Lance l'application Streamlit
   test                 Lance les tests
   coverage             Tests avec couverture
   format               Formate le code (black)
-  lint                 VÃ©rifie le code (ruff)
+  lint                 Vérifie le code (ruff)
   clean                Nettoie les fichiers temporaires
 
-Base de donnÃ©es:
+Base de données:
   migrate              Applique les migrations
-  create-migration     CrÃ©e une nouvelle migration
+  create-migration     Crée une nouvelle migration
   reset-supabase       [FIRE] Reset COMPLET Supabase (DANGER)
 
-DÃ©ploiement:
-  requirements         GÃ©nÃ¨re requirements.txt
+Déploiement:
+  requirements         Génère requirements.txt
 
 Usage:
   python manage.py <command>

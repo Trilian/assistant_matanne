@@ -25,7 +25,7 @@ TYPE_LABELS = {
     "alimentation": "🥗 Alimentation",
 }
 
-# Idees d'actions eco avec economies estimees
+# Idées d'actions éco avec économies estimées
 IDEES_ACTIONS = [
     {
         "nom": "Essuie-tout lavables",
@@ -121,7 +121,7 @@ def get_action_by_id(action_id: int) -> EcoAction | None:
 
 
 def create_action(data: dict) -> EcoAction:
-    """Cree une nouvelle action eco"""
+    """Crée une nouvelle action éco"""
     with obtenir_contexte_db() as db:
         action = EcoAction(**data)
         db.add(action)
@@ -131,7 +131,7 @@ def create_action(data: dict) -> EcoAction:
 
 
 def update_action(action_id: int, data: dict) -> EcoAction | None:
-    """Met à jour une action eco"""
+    """Met à jour une action éco"""
     with obtenir_contexte_db() as db:
         action = db.query(EcoAction).filter(EcoAction.id == action_id).first()
         if action:
@@ -143,7 +143,7 @@ def update_action(action_id: int, data: dict) -> EcoAction | None:
 
 
 def delete_action(action_id: int) -> bool:
-    """Supprime une action eco"""
+    """Supprime une action éco"""
     with obtenir_contexte_db() as db:
         action = db.query(EcoAction).filter(EcoAction.id == action_id).first()
         if action:
@@ -340,8 +340,8 @@ def render_formulaire(action: EcoAction | None = None):
 
 
 def render_idees():
-    """Affiche les idees d'actions avec bouton d'ajout rapide"""
-    st.subheader("💡 Idees d'actions")
+    """Affiche les idées d'actions avec bouton d'ajout rapide"""
+    st.subheader("💡 Idées d'actions")
     st.caption("Cliquez pour ajouter rapidement une action")
 
     # Recuperer les noms des actions existantes
@@ -394,7 +394,7 @@ def render_onglet_mes_actions():
     actions = get_all_actions()
 
     if not actions:
-        st.info("🌿 Aucune action eco pour le moment. Ajoutez-en une!")
+        st.info("🌿 Aucune action éco pour le moment. Ajoutez-en une!")
         return
 
     # Filtrer par type
@@ -413,7 +413,7 @@ def render_onglet_mes_actions():
 
 def render_onglet_ajouter():
     """Onglet ajout"""
-    st.subheader("➕ Nouvelle action eco")
+    st.subheader("➕ Nouvelle action éco")
     render_formulaire(None)
 
 

@@ -127,7 +127,7 @@ class ServiceNotificationsInventaire:
         self._next_id += 1
 
         self.notifications[utilisateur_id].append(notification)
-        logger.info(f"� Notification créée: {notification.titre}")
+        logger.info(f"🔔 Notification créée: {notification.titre}")
 
         return notification
 

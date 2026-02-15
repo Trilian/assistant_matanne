@@ -313,7 +313,7 @@ html = service.generer_html_imprimable(listes)
 
 ---
 
-## �️ Nouveaux Modèles (Migration 016)
+## ⚙️ Nouveaux Modèles (Migration 016)
 
 Tables ajoutées pour l'apprentissage IA et les intégrations:
 

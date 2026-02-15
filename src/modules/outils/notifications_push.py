@@ -85,11 +85,12 @@ def render_configuration():
             rappels_courses = st.toggle("Rappels courses", value=config.rappels_courses)
 
         heure_digest = st.slider(
-            "Heure du digest quotidien",
+            "Heure d'envoi du résumé quotidien",
             min_value=6,
             max_value=22,
             value=config.heure_digest,
             format="%dh",
+            help="Heure à laquelle vous recevrez le récapitulatif de vos tâches et rappels",
         )
 
         submitted = st.form_submit_button(

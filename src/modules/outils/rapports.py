@@ -40,13 +40,11 @@ def app():
         unsafe_allow_html=True,
     )
 
-    st.markdown("Generez des rapports professionnels pour votre gestion")
+    st.markdown("Générez des rapports professionnels pour votre gestion")
     st.markdown("---")
 
     # Onglets
-    tab1, tab2, tab3, tab4 = st.tabs(
-        ["[PKG] Stocks", "💡 Budget", "🎯¸ Gaspillage", "🗑️ Historique"]
-    )
+    tab1, tab2, tab3, tab4 = st.tabs(["📦 Stocks", "💡 Budget", "🎯 Gaspillage", "🗑️ Historique"])
 
     with tab1:
         render_rapport_stocks()
@@ -71,7 +69,7 @@ def render_rapport_stocks():
 
     service = get_rapports_service()
 
-    st.subheader("[PKG] Rapport Stocks Hebdomadaire")
+    st.subheader("📦 Rapport Stocks Hebdomadaire")
 
     st.markdown("""
     Generez un rapport detaille de votre stock chaque semaine:
@@ -98,7 +96,7 @@ def render_rapport_stocks():
             st.session_state.preview_stocks = True
 
     with col3:
-        if st.button("👶 Telecharger PDF", key="btn_download_stocks", use_container_width=True):
+        if st.button("📥 Télécharger PDF", key="btn_download_stocks", use_container_width=True):
             st.session_state.download_stocks = True
 
     # Aperçu
@@ -175,7 +173,7 @@ def render_rapport_stocks():
                         }
                     )
                 df_cat = pd.DataFrame(cat_data)
-                st.dataframe(df_cat, use_container_width=True, hide_index=True)
+                st.dataframe(df_cat, width="stretch", hide_index=True)
 
         except Exception as e:
             st.error(f"❌ Erreur: {str(e)}")
@@ -187,13 +185,13 @@ def render_rapport_stocks():
             filename = f"rapport_stocks_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
 
             st.download_button(
-                label="👶 Telecharger le PDF",
+                label="📥 Télécharger le PDF",
                 data=pdf.getvalue(),
                 file_name=filename,
                 mime="application/pdf",
                 key="download_button_stocks",
             )
-            st.success("✅ PDF genere - Cliquez sur le bouton pour telecharger")
+            st.success("✅ PDF généré - Cliquez sur le bouton pour télécharger")
             st.session_state.download_stocks = False
 
         except Exception as e:
@@ -238,7 +236,7 @@ def render_rapport_budget():
             st.session_state.preview_budget = True
 
     with col3:
-        if st.button("👶 Telecharger PDF", key="btn_download_budget", use_container_width=True):
+        if st.button("📥 Télécharger PDF", key="btn_download_budget", use_container_width=True):
             st.session_state.download_budget = True
 
     # Aperçu
@@ -281,7 +279,7 @@ def render_rapport_budget():
                     )
 
                 df_cat = pd.DataFrame(cat_data)
-                st.dataframe(df_cat, use_container_width=True, hide_index=True)
+                st.dataframe(df_cat, width="stretch", hide_index=True)
 
                 # Graphique
                 cat_values = sorted(
@@ -323,13 +321,13 @@ def render_rapport_budget():
             filename = f"rapport_budget_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
 
             st.download_button(
-                label="👶 Telecharger le PDF",
+                label="📥 Télécharger le PDF",
                 data=pdf.getvalue(),
                 file_name=filename,
                 mime="application/pdf",
                 key="download_button_budget",
             )
-            st.success("✅ PDF genere - Cliquez sur le bouton pour telecharger")
+            st.success("✅ PDF généré - Cliquez sur le bouton pour télécharger")
             st.session_state.download_budget = False
 
         except Exception as e:
@@ -374,7 +372,7 @@ def render_analyse_gaspillage():
             st.session_state.preview_gaspillage = True
 
     with col3:
-        if st.button("👶 Telecharger PDF", key="btn_download_gaspillage", use_container_width=True):
+        if st.button("📥 Télécharger PDF", key="btn_download_gaspillage", use_container_width=True):
             st.session_state.download_gaspillage = True
 
     # Aperçu
@@ -422,7 +420,7 @@ def render_analyse_gaspillage():
                     )
 
                 df_cat = pd.DataFrame(cat_data)
-                st.dataframe(df_cat, use_container_width=True, hide_index=True)
+                st.dataframe(df_cat, width="stretch", hide_index=True)
 
             # Articles detail
             if analyse.articles_perimes_detail:
@@ -456,13 +454,13 @@ def render_analyse_gaspillage():
             filename = f"analyse_gaspillage_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
 
             st.download_button(
-                label="👶 Telecharger le PDF",
+                label="📥 Télécharger le PDF",
                 data=pdf.getvalue(),
                 file_name=filename,
                 mime="application/pdf",
                 key="download_button_gaspillage",
             )
-            st.success("✅ PDF genere - Cliquez sur le bouton pour telecharger")
+            st.success("✅ PDF généré - Cliquez sur le bouton pour télécharger")
             st.session_state.download_gaspillage = False
 
         except Exception as e:
@@ -490,9 +488,9 @@ def render_historique():
         st.subheader("📋 Rapports Hebdomadaires")
 
         st.markdown("""
-        ✅ Rapport stocks - chaque lundi
-        ✅ Rapport budget - chaque dimanche
-        ✅ Analyse gaspillage - chaque vendredi
+        - ✅ **Rapport stocks** - chaque lundi
+        - ✅ **Rapport budget** - chaque dimanche
+        - ✅ **Analyse gaspillage** - chaque vendredi
         """)
 
         if st.button("⚙️ Configurer planification", key="btn_schedule"):

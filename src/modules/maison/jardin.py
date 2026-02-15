@@ -212,7 +212,7 @@ def app():
                 col1, col2, col3 = st.columns([2, 1, 1])
 
                 with col1:
-                    emoji = "�" if row["a_arroser"] else "✅"
+                    emoji = "💧" if row["a_arroser"] else "✅"
                     st.markdown(f"### {emoji} {row['nom']}")
                     st.caption(f"📍 {row['location']} • {row['type']}")
                     if row["notes"]:

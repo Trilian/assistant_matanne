@@ -80,7 +80,7 @@ def render_historique():
             ]
         )
 
-        st.dataframe(df, use_container_width=True)
+        st.dataframe(df, width="stretch")
 
         # Export CSV - directement, sans button wrapper
         if df is not None and not df.empty:

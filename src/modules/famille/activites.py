@@ -150,7 +150,7 @@ def app():
     # TAB 2: IDÉES ACTIVITÉS
     # ═══════════════════════════════════════════════════════════
     with tabs[1]:
-        st.header("👶 Idees d'Activites")
+        st.header("💡 Idées d'Activités")
 
         st.subheader("Suggestions par type")
 

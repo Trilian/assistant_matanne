@@ -654,32 +654,32 @@ def render_budget_config():
     try:
         from src.services.budget import CategorieDepense
 
-        st.markdown("**Categories de depenses disponibles:**")
+        st.markdown("**Catégories de dépenses disponibles:**")
 
-        cols = st.columns(3)
+        emoji_map = {
+            "alimentation": "🍞",
+            "transport": "🚗",
+            "logement": "🏠",
+            "sante": "🏥",
+            "loisirs": "🎮",
+            "vetements": "👕",
+            "education": "📚",
+            "cadeaux": "🎁",
+            "abonnements": "📱",
+            "restaurant": "🍽️",
+            "vacances": "✈️",
+            "bebe": "👶",
+            "autre": "📦",
+        }
+
+        # Affichage en badges au lieu de checkboxes désactivées
         categories = list(CategorieDepense)
+        badges = [
+            f"{emoji_map.get(cat.value, '📦')} {cat.value.capitalize()}" for cat in categories
+        ]
+        st.markdown(" • ".join(badges))
 
-        for i, cat in enumerate(categories):
-            with cols[i % 3]:
-                emoji_map = {
-                    "alimentation": "🍞",
-                    "transport": "🚗",
-                    "logement": "🏠",
-                    "sante": "🏥",
-                    "loisirs": "🎮",
-                    "vetements": "👕",
-                    "education": "📚",
-                    "cadeaux": "🎁",
-                    "abonnements": "📱",
-                    "restaurant": "🍽️",
-                    "vacances": "✈️",
-                    "bebe": "👶",
-                    "autre": "📦",
-                }
-                emoji = emoji_map.get(cat.value, "📦")
-                st.checkbox(f"{emoji} {cat.value.capitalize()}", value=True, disabled=True)
-
-        st.info("👉 Accède au module Budget dans le menu Famille pour gérer tes dépenses")
+        st.info("👉 Accède au module **Budget** dans le menu Famille pour gérer tes dépenses")
 
     except ImportError:
         st.warning("Module budget non disponible")

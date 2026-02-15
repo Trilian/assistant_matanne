@@ -58,7 +58,7 @@ def app():
             "🎲 Générer Grille",
             "🎫 Mes Grilles",
             "🔬 Simulation",
-            "📝 Maths",
+            "📊 Maths",
             "⚙️ Tirages",
         ]
     )

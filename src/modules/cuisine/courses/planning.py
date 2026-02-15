@@ -37,7 +37,7 @@ def render_courses_depuis_planning():
         st.success(f"✅ Planning actif: **{planning.nom}**")
         nb_repas = len(planning.repas) if planning.repas else 0
         st.caption(
-            f"� Du {planning.semaine_debut} au {planning.semaine_fin} • {nb_repas} repas planifiés"
+            f"📅 Du {planning.semaine_debut} au {planning.semaine_fin} • {nb_repas} repas planifiés"
         )
 
     with col2:
@@ -115,7 +115,7 @@ def render_courses_depuis_planning():
 
                             # Sources
                             sources = ", ".join(article.recettes_source[:2])
-                            st.caption(f"� {sources}")
+                            st.caption(f"📝 {sources}")
 
                         with col2:
                             st.markdown(f"**{article.a_acheter:.0f}** {article.unite}")

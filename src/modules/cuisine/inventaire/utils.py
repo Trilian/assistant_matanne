@@ -599,7 +599,7 @@ def formater_inventaire_rapport(articles: list[dict]) -> str:
         lignes.append("")
 
     # Par emplacement
-    lignes.append("[PKG] PAR EMPLACEMENT")
+    lignes.append("📦 PAR EMPLACEMENT")
     lignes.append("-" * 20)
 
     stats_emp = calculer_statistiques_par_emplacement(articles)

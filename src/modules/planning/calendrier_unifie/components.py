@@ -365,7 +365,7 @@ def render_formulaire_ajout_event():
 
 def render_legende():
     """Affiche la légende du calendrier."""
-    with st.expander("� Légende"):
+    with st.expander("ℹ️ Légende"):
         cols = st.columns(6)
         legendes = [
             ("🌞 Midi", "🌙 Soir", "🍰 Goûter"),

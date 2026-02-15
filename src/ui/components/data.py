@@ -157,7 +157,7 @@ def tableau_donnees(data: list[dict] | pd.DataFrame, cle: str = "table"):
     else:
         df = data
 
-    st.dataframe(df, use_container_width=True, key=cle)
+    st.dataframe(df, width="stretch", key=cle)
 
 
 def barre_progression(valeur: float, label: str = "", cle: str = "progress"):

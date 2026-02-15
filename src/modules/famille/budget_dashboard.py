@@ -116,7 +116,7 @@ def _render_overview_tab(service, resume, mois, annee):
                 hole=0.4,
             )
             fig_pie.update_traces(textposition="inside", textinfo="percent+label")
-            st.plotly_chart(fig_pie, use_container_width=True, key="budget_expenses_pie")
+            st.plotly_chart(fig_pie, width="stretch", key="budget_expenses_pie")
 
         with col_chart2:
             # Barres budget vs dépenses
@@ -136,7 +136,7 @@ def _render_overview_tab(service, resume, mois, annee):
                 ]
             )
             fig_bar.update_layout(title="Budget vs Dépenses", barmode="group", xaxis_tickangle=-45)
-            st.plotly_chart(fig_bar, use_container_width=True, key="budget_vs_expenses_bar")
+            st.plotly_chart(fig_bar, width="stretch", key="budget_vs_expenses_bar")
 
     # Liste des dépenses récentes
     st.markdown("### 📋 Dernières dépenses")
@@ -243,7 +243,7 @@ def _render_trends_tab(service, mois, annee):
             hovermode="x unified",
         )
 
-        st.plotly_chart(fig_trend, use_container_width=True, key="budget_expenses_trend")
+        st.plotly_chart(fig_trend, width="stretch", key="budget_expenses_trend")
 
     # Prévisions
     st.markdown("### 🔮 Prévisions mois prochain")

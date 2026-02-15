@@ -166,7 +166,7 @@ def afficher_prediction_match(match: dict):
                 showlegend=False,
                 yaxis=dict(range=[0, 100]),
             )
-            st.plotly_chart(fig, use_container_width=True, key=f"{match_key_prefix}_proba")
+            st.plotly_chart(fig, width="stretch", key=f"{match_key_prefix}_proba")
 
         with col_over:
             stats = analyse.get("stats", {})

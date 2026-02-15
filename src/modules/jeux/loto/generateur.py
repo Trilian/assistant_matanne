@@ -125,7 +125,7 @@ def afficher_mes_grilles():
     grilles = charger_grilles_utilisateur()
 
     if not grilles:
-        st.info("📝 Aucune grille enregistrée. Générez-en une!")
+        st.info("🎫 Aucune grille enregistrée. Générez-en une!")
         return
 
     # Stats globales

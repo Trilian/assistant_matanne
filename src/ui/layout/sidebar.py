@@ -39,7 +39,7 @@ MODULES_MENU = {
         "🏠 Hub Maison": "maison",
         "🌳 Zones Jardin": "maison.jardin_zones",
         "🔋 Énergie": "maison.energie",
-        "� Scan Factures": "maison.scan_factures",
+        "📱 Scan Factures": "maison.scan_factures",
         "🧹 Entretien": "maison.entretien",
         "🛋️ Meubles": "maison.meubles",
         "💰 Dépenses": "maison.depenses",

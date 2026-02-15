@@ -94,7 +94,7 @@ def carte_item(
         if url_image:
             col_img, col_content = st.columns([1, 4])
             with col_img:
-                st.image(url_image, use_container_width=True)
+                st.image(url_image, width="stretch")
             content_col = col_content
         else:
             content_col = st.container()

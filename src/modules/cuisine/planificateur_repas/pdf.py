@@ -89,7 +89,7 @@ def generer_pdf_planning_session(
             jour_date = date_debut + timedelta(days=i)
 
             # Tableau pour ce jour
-            day_data = [[f"� {jour} {jour_date.strftime('%d/%m')}", "Repas"]]
+            day_data = [[f"📅 {jour} {jour_date.strftime('%d/%m')}", "Repas"]]
 
             for type_repas in ["midi", "soir", "gouter"]:
                 if type_repas in repas and repas[type_repas]:

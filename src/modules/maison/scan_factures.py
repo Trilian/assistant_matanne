@@ -142,7 +142,7 @@ def render_upload():
         col1, col2 = st.columns([1, 1])
 
         with col1:
-            st.image(uploaded_file, caption="Facture uploadee", use_container_width=True)
+            st.image(uploaded_file, caption="Facture uploadee", width="stretch")
 
         with col2:
             st.markdown("**Informations fichier:**")

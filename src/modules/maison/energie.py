@@ -376,11 +376,11 @@ def render_detail_energie(energie: str):
     with tab1:
         afficher_conso = st.checkbox("Afficher consommation", value=True, key=f"conso_{energie}")
         fig = graphique_evolution(energie, afficher_conso)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     with tab2:
         fig = graphique_comparaison_annees(energie)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
 
 def render_alertes():
@@ -449,7 +449,7 @@ def app():
         col1, col2 = st.columns(2)
         with col1:
             fig = graphique_repartition()
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
         with col2:
             render_alertes()
 

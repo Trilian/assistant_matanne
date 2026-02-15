@@ -10,7 +10,7 @@ from src.services.inventaire import get_inventaire_service
 
 def render_photos():
     """Gestion des photos pour les articles de l'inventaire"""
-    st.subheader("� Gestion des photos")
+    st.subheader("📷 Gestion des photos")
 
     # Récupère l'inventaire
     service = get_inventaire_service()
@@ -76,7 +76,7 @@ def render_photos():
                         )
 
                         st.success("⏰ Photo ajoutée avec succès!")
-                        st.toast("Photo mise à jour", icon="�")
+                        st.toast("Photo mise à jour", icon="📷")
                         st.rerun()
                     except Exception as e:
                         st.error(f"Erreur: {str(e)}")

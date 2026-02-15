@@ -47,7 +47,7 @@ def app():
 
     # Onglets
     tab1, tab2, tab3, tab4, tab5 = st.tabs(
-        ["👶 Scanner", "➕ Ajout rapide", "✅ Verifier stock", "📊 Gestion", "💰¥ Import/Export"]
+        ["📷 Scanner", "➕ Ajout rapide", "✅ Vérifier stock", "📊 Gestion", "📥 Import/Export"]
     )
 
     with tab1:
@@ -76,7 +76,7 @@ def render_scanner():
 
     service = get_barcode_service()
 
-    st.subheader("👶 Scanner Code")
+    st.subheader("📷 Scanner Code")
 
     col1, col2 = st.columns([3, 1])
 
@@ -117,7 +117,7 @@ def render_scanner():
 
             # Details
             if resultat.type_scan == "article":
-                st.subheader("[PKG] Article trouve")
+                st.subheader("📦 Article trouvé")
                 details = resultat.details
 
                 col1, col2, col3 = st.columns(3)
@@ -144,7 +144,7 @@ def render_scanner():
                         st.switch_page("pages/0_accueil.py")
 
                 with col3:
-                    if st.button("🎯¸ Supprimer", key="btn_delete_article"):
+                    if st.button("🗑️ Supprimer", key="btn_delete_article"):
                         st.warning("Action non disponible ici")
 
             else:
@@ -158,7 +158,7 @@ def render_scanner():
 
     # Info
     st.info("""
-    � **Formats supportés:**
+    📝 **Formats supportés:**
     - EAN-13 (13 chiffres)
     - EAN-8 (8 chiffres)
     - UPC (12 chiffres)
@@ -273,13 +273,13 @@ def render_ajout_rapide():
 
 
 def render_verifier_stock():
-    """Verifier stock par code-barres"""
+    """Vérifier stock par code-barres"""
 
     service = get_barcode_service()
 
-    st.subheader("✅ Verifier Stock par Code")
+    st.subheader("✅ Vérifier Stock par Code")
 
-    st.markdown("Scannez un code pour verifier instantanement le stock")
+    st.markdown("Scannez un code pour vérifier instantanément le stock")
 
     col1, col2 = st.columns([3, 1])
 
@@ -339,7 +339,7 @@ def render_verifier_stock():
 
             # Actions
             if info_stock["etat_stock"] != "OK":
-                st.warning("[PKG] Stock faible - Considerer l'ajout de stock")
+                st.warning("📦 Stock faible - Considérer l'ajout de stock")
 
             if info_stock["peremption_etat"] in ["URGENT", "PÉRIMÉ"]:
                 st.error("❌ Problème peremption - Action requise")
@@ -443,23 +443,23 @@ def render_import_export():
     with col1:
         st.subheader("💡 Exporter")
 
-        if st.button("⬇️ Telecharger CSV", key="btn_export_barcode"):
+        if st.button("⬇️ Télécharger CSV", key="btn_export_barcode"):
             try:
                 csv_data = service.exporter_barcodes()
                 st.download_button(
-                    label="💰¥ Telecharger codes-barres.csv",
+                    label="📥 Télécharger codes-barres.csv",
                     data=csv_data,
                     file_name=f"codes_barres_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv",
                     key="download_barcode_csv",
                 )
-                st.success("✅ CSV genere")
+                st.success("✅ CSV généré")
             except Exception as e:
                 st.error(f"❌ Erreur: {str(e)}")
 
     # IMPORT
     with col2:
-        st.subheader("💰¥ Importer")
+        st.subheader("📥 Importer")
 
         uploaded_file = st.file_uploader(
             "Choisir fichier CSV", type="csv", key="upload_barcode_csv"

@@ -179,7 +179,7 @@ def render_critical_alerts():
         alerts.append(
             {
                 "type": "info",
-                "icon": "�",
+                "icon": "📅",
                 "title": "Aucun planning pour cette semaine",
                 "action": "Creer un planning",
                 "module": "cuisine.planning_semaine",

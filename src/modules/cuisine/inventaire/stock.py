@@ -93,7 +93,7 @@ def render_stock():
         inventaire = service.get_inventaire_complet()
 
         if not inventaire:
-            st.info("� Inventaire vide. Commencez par ajouter des articles!")
+            st.info("📦 Inventaire vide. Commencez par ajouter des articles!")
             if st.button("➕ Ajouter un article"):
                 st.session_state.show_form = True
             return

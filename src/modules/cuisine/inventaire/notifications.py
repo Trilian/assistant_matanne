@@ -81,7 +81,7 @@ def render_notifications():
     service_notifs = obtenir_service_notifications()
 
     # Onglets
-    tab_center, tab_config = st.tabs(["� Centre de notifications", "⚙️ Configuration"])
+    tab_center, tab_config = st.tabs(["🔔 Centre de notifications", "⚙️ Configuration"])
 
     with tab_center:
         # Actualiser les notifications
@@ -98,7 +98,7 @@ def render_notifications():
 
         with col2:
             stats_notifs = service_notifs.obtenir_stats()
-            st.metric("� Non lues", stats_notifs["non_lues"])
+            st.metric("📬 Non lues", stats_notifs["non_lues"])
 
         with col3:
             if st.button("⏰ Tout marquer comme lu", width="stretch"):

@@ -25,9 +25,12 @@ def render_generer_ia():
         st.error("❌ Service IA indisponible")
         return
 
-    # Sélection du mode de génération
+    # Sélection du mode de génération (avec key pour persister l'état)
     mode_gen = st.radio(
-        "Mode de génération", ["Personnalisé", "Recherche spécifique"], horizontal=True
+        "Mode de génération",
+        ["Personnalisé", "Recherche spécifique"],
+        horizontal=True,
+        key="recettes_mode_generation",
     )
 
     if mode_gen == "Recherche spécifique":

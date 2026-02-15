@@ -223,7 +223,7 @@ def app():
     # ONGLETS VUE
     # ═══════════════════════════════════════════════════════════
 
-    tab1, tab2, tab3 = st.tabs(["� Analyse Charge", "🎯 Repartition", "📋 Detail Jours"])
+    tab1, tab2, tab3 = st.tabs(["📊 Analyse Charge", "🎯 Répartition", "📋 Détail Jours"])
 
     with tab1:
         st.subheader("📊 Analyse de la charge familiale")

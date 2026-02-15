@@ -231,7 +231,7 @@ def render_vue_ensemble():
         height=350,
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     # Alertes
     alertes = [z for z in zones if z["etat_note"] <= 2]
@@ -279,7 +279,7 @@ def render_detail_zone(zone: dict[str, Any]):
         with tab_avant:
             if avant:
                 for url in avant[-3:]:  # Max 3 photos
-                    st.image(url, use_container_width=True)
+                    st.image(url, width="stretch")
             else:
                 st.caption("Pas de photo 'avant'")
 
@@ -292,7 +292,7 @@ def render_detail_zone(zone: dict[str, Any]):
         with tab_apres:
             if apres:
                 for url in apres[-3:]:
-                    st.image(url, use_container_width=True)
+                    st.image(url, width="stretch")
             else:
                 st.caption("Pas de photo 'après'")
 

@@ -21,7 +21,7 @@ def render_calendar_sync_ui():
     service = get_calendar_sync_service()
 
     # Tabs pour les différentes options
-    tab1, tab2, tab3 = st.tabs(["� Exporter", "📥 Importer", "🔗 Connecter"])
+    tab1, tab2, tab3 = st.tabs(["📤 Exporter", "📥 Importer", "🔗 Connecter"])
 
     with tab1:
         _render_export_tab(service)
