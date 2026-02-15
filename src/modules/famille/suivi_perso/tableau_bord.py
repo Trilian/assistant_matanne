@@ -31,7 +31,28 @@ def render_dashboard(data: dict):
         st.warning("Utilisateur non trouvé")
         return
 
-    st.subheader("📊 Dashboard")
+    st.markdown("##### 📊 Dashboard")
+
+    # CSS pour réduire la taille des métriques
+    st.markdown(
+        """
+        <style>
+        [data-testid="stMetric"] {
+            padding: 8px 12px;
+        }
+        [data-testid="stMetric"] label {
+            font-size: 0.85rem !important;
+        }
+        [data-testid="stMetric"] [data-testid="stMetricValue"] {
+            font-size: 1.2rem !important;
+        }
+        [data-testid="stMetric"] [data-testid="stMetricDelta"] {
+            font-size: 0.75rem !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
     # Métriques principales
     col1, col2, col3, col4 = st.columns(4)

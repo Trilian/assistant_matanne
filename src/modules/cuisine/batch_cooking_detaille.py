@@ -531,9 +531,9 @@ def app():
         with col3:
             avec_jules = type_info.get("avec_jules", False)
             if avec_jules:
-                st.success("👶 Avec Jules", icon="👶")
+                st.success("👶 Avec Jules")
             else:
-                st.info("👤 Solo", icon="👤")
+                st.info("👤 Solo")
 
         st.divider()
 

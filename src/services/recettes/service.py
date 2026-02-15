@@ -661,11 +661,11 @@ Difficulty: {recette.difficulte}"""
             type_version="batch cooking",
             instructions_modifiees=version_data.instructions_modifiees,
             notes_bebe=f"""**Portions: {version_data.nombre_portions_recommande}**
-â±ï¸ Temps total: {version_data.temps_preparation_total_heures}h
+⏱️ Temps total: {version_data.temps_preparation_total_heures}h
 
 🧊 Conservation: {version_data.conseils_conservation}
 
-â„ï¸ Congélation: {version_data.conseils_congelation}
+❄️ Congélation: {version_data.conseils_congelation}
 
 📅 Calendrier: {version_data.calendrier_preparation}""",
         )
@@ -859,7 +859,7 @@ Difficulty: {recette.difficulte}"""
             notes_bebe=f"""**Réglages {robot_type.capitalize()}:**
 {version_data.reglages_robot}
 
-â±ï¸ Temps de cuisson: {version_data.temps_cuisson_adapte_minutes} minutes
+⏱️ Temps de cuisson: {version_data.temps_cuisson_adapte_minutes} minutes
 
 📋 Préparation: {version_data.conseils_preparation}
 

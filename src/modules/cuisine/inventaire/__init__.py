@@ -28,7 +28,16 @@ from .tools import render_tools
 
 def app():
     """Point d'entrée module inventaire"""
-    st.title("📦 Inventaire")
+    col_title, col_help = st.columns([10, 1])
+    with col_title:
+        st.title("📦 Inventaire")
+    with col_help:
+        st.markdown(
+            "<span title=\"Gérez votre stock d'ingrédients, suivez les dates de péremption, "
+            "recevez des alertes et optimisez vos courses grâce à l'IA.\" "
+            'style="cursor: help; font-size: 1.5rem;">❓</span>',
+            unsafe_allow_html=True,
+        )
     st.caption("Gestion complète de votre stock d'ingrédients")
 
     # Initialiser session state

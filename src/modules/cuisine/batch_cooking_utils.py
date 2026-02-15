@@ -83,7 +83,7 @@ ROBOTS_INFO = {
 
 LOCALISATIONS = {
     "frigo": {"nom": "Refrigerateur", "emoji": "🧊", "conservation_max_jours": 5},
-    "congelateur": {"nom": "Congelateur", "emoji": "â„ï¸", "conservation_max_jours": 90},
+    "congelateur": {"nom": "Congelateur", "emoji": "❄️", "conservation_max_jours": 90},
     "temperature_ambiante": {
         "nom": "Temperature ambiante",
         "emoji": "🏠",

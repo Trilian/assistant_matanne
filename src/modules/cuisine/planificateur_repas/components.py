@@ -55,7 +55,7 @@ def render_configuration_preferences():
             placeholder="Ex: fruits de mer, abats, coriandre",
         )
 
-        st.markdown("##### â¤ï¸ Vos basiques adorés")
+        st.markdown("##### ❤️ Vos basiques adorés")
         favoris = st.text_input(
             "Séparés par des virgules",
             value=", ".join(prefs.aliments_favoris),
