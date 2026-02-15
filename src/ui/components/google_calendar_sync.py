@@ -63,7 +63,7 @@ def render_google_calendar_config():
     if not config_ok:
         st.warning(f"⚠️ {message}")
 
-        with st.expander("📝– Comment configurer Google Calendar"):
+        with st.expander("� Comment configurer Google Calendar"):
             st.markdown("""
             **Étapes pour activer Google Calendar:**
 

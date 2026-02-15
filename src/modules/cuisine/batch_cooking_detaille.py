@@ -648,7 +648,7 @@ def app():
 
         # Recettes détaillées
         for recette in recettes:
-            with st.expander(f"📝– {recette.get('nom', 'Recette')}", expanded=False):
+            with st.expander(f"� {recette.get('nom', 'Recette')}", expanded=False):
                 # Ingrédients
                 st.markdown("**Ingrédients:**")
                 for ing in recette.get("ingredients", []):

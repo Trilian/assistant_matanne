@@ -217,7 +217,7 @@ def app():
     # ===================================
 
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["🎯 Mes Routines", "– Rappels IA", "➕ Creer Routine", "📊 Suivi"]
+        ["🎯 Mes Routines", "🤖 Rappels IA", "➕ Créer Routine", "📊 Suivi"]
     )
 
     # ===================================
@@ -337,7 +337,7 @@ def app():
 
                     with col_act2:
                         if st.button(
-                            "💡¸ Supprimer",
+                            "�️ Supprimer",
                             key=f"del_{routine['id']}",
                             type="secondary",
                             use_container_width=True,
@@ -351,17 +351,17 @@ def app():
     # ===================================
 
     with tab2:
-        st.subheader("– Rappels intelligents")
+        st.subheader("🤖 Rappels intelligents")
 
         if not agent:
             st.error("Agent IA non disponible")
         else:
-            st.info("💰 L'IA analyse tes routines et te rappelle les tâches importantes")
+            st.info("💡 L'IA analyse tes routines et te rappelle les tâches importantes")
 
             heure_actuelle = datetime.now().strftime("%H:%M")
 
-            if st.button("– Demander rappels IA", type="primary", use_container_width=True):
-                with st.spinner("– Analyse des routines..."):
+            if st.button("🤖 Demander rappels IA", type="primary", use_container_width=True):
+                with st.spinner("🤖 Analyse des routines..."):
                     try:
                         # Recuperer toutes les tâches
                         with obtenir_contexte_db() as db:

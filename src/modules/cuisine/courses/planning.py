@@ -115,7 +115,7 @@ def render_courses_depuis_planning():
 
                             # Sources
                             sources = ", ".join(article.recettes_source[:2])
-                            st.caption(f"📝– {sources}")
+                            st.caption(f"� {sources}")
 
                         with col2:
                             st.markdown(f"**{article.a_acheter:.0f}** {article.unite}")
