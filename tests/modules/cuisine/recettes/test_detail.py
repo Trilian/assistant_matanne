@@ -241,3 +241,72 @@ class TestImports:
         from src.modules.cuisine.recettes.detail import render_detail_recette
 
         assert callable(render_detail_recette)
+
+
+@pytest.mark.unit
+class TestRenderDetailRecetteExtended:
+    """Tests etendus pour render_detail_recette."""
+
+    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.st")
+    def test_render_detail_image_exception(self, mock_st, mock_svc_factory, mock_render_img):
+        """Test quand l image ne peut pas etre chargee."""
+        from src.modules.cuisine.recettes.detail import render_detail_recette
+
+        setup_mock_st(mock_st)
+        mock_st.image.side_effect = Exception("Image error")
+        mock_service = MagicMock()
+        mock_service.get_stats_recette.return_value = {}
+        mock_service.get_historique.return_value = []
+        mock_service.get_versions_recette.return_value = []
+        mock_svc_factory.return_value = mock_service
+        recette = create_mock_recette(with_image=True)
+        render_detail_recette(recette)
+        mock_st.caption.assert_called()
+
+    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.st")
+    def test_render_detail_no_badges(self, mock_st, mock_svc_factory, mock_render_img):
+        """Test sans badges."""
+        from src.modules.cuisine.recettes.detail import render_detail_recette
+
+        setup_mock_st(mock_st)
+        mock_service = MagicMock()
+        mock_service.get_stats_recette.return_value = {}
+        mock_service.get_historique.return_value = []
+        mock_service.get_versions_recette.return_value = []
+        mock_svc_factory.return_value = mock_service
+        recette = create_mock_recette()
+        recette.est_bio = False
+        recette.est_local = False
+        recette.est_rapide = False
+        recette.est_equilibre = False
+        recette.congelable = False
+        recette.score_bio = 0
+        recette.score_local = 0
+        render_detail_recette(recette)
+        mock_st.header.assert_called()
+
+    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.st")
+    def test_render_detail_all_badges(self, mock_st, mock_svc_factory, mock_render_img):
+        """Test avec tous les badges."""
+        from src.modules.cuisine.recettes.detail import render_detail_recette
+
+        setup_mock_st(mock_st)
+        mock_service = MagicMock()
+        mock_service.get_stats_recette.return_value = {}
+        mock_service.get_historique.return_value = []
+        mock_service.get_versions_recette.return_value = []
+        mock_svc_factory.return_value = mock_service
+        recette = create_mock_recette()
+        recette.est_bio = True
+        recette.est_local = True
+        recette.est_rapide = True
+        recette.est_equilibre = True
+        recette.congelable = True
+        render_detail_recette(recette)
+        mock_st.markdown.assert_called()
