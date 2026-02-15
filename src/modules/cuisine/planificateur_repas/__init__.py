@@ -49,7 +49,7 @@ def app():
 
     # Tabs
     tab_planifier, tab_preferences, tab_historique = st.tabs(
-        ["📝… Planifier", "⚙️ Préférences", "📝š Historique"]
+        ["📅 Planifier", "⚙️ Préférences", "📋 Historique"]
     )
 
     # ═══════════════════════════════════════════════════════
@@ -62,7 +62,7 @@ def app():
 
         with col1:
             date_debut = st.date_input(
-                "📝… Début de la semaine",
+                "📅 Début de la semaine",
                 value=st.session_state.planning_date_debut,
                 format="DD/MM/YYYY",
             )
@@ -198,7 +198,7 @@ def app():
     # ═══════════════════════════════════════════════════════
 
     with tab_historique:
-        st.subheader("📝š Historique des plannings")
+        st.subheader("📋 Historique des plannings")
 
         # TODO: Charger l'historique depuis la DB
         st.info("🚧 Historique des plannings passés à venir")

@@ -39,9 +39,7 @@ def app():
     if "edit_depense_id" in st.session_state:
         depense = get_depense_by_id(st.session_state["edit_depense_id"])
         if depense:
-            st.subheader(
-                f"âœï¸ Modifier: {CATEGORY_LABELS.get(depense.categorie, depense.categorie)}"
-            )
+            st.subheader(f"✏️ Modifier: {CATEGORY_LABELS.get(depense.categorie, depense.categorie)}")
             if st.button("❌ Annuler"):
                 del st.session_state["edit_depense_id"]
                 st.rerun()

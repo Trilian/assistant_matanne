@@ -261,13 +261,13 @@ def render_liste():
                     )
                 if recette.congelable:
                     all_badges.append(
-                        f'<span title="{badge_definitions["â„ï¸"]}" style="cursor: help;">â„ï¸</span>'
+                        f'<span title="{badge_definitions["❄️"]}" style="cursor: help;">❄️</span>'
                     )
 
                 if recette.robots_compatibles:
                     robots_icons = {
                         "Cookeo": ("🤖", "Cookeo"),
-                        "Monsieur Cuisine": ("💨â€🍳", "MC"),
+                        "Monsieur Cuisine": ("👨‍🍳", "MC"),
                         "Airfryer": ("🌪️", "Airfryer"),
                         "Multicooker": ("🍳", "MC"),
                     }
@@ -353,7 +353,7 @@ def render_liste():
 
     with col5:
         if st.session_state.recettes_page < total_pages - 1:
-            if st.button("Suivant âž¡ï¸"):
+            if st.button("Suivant ➡️"):
                 st.session_state.recettes_page += 1
                 st.rerun()
 

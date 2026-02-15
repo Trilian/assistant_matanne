@@ -13,7 +13,7 @@ def render_tools():
     """Outils utilitaires pour l'inventaire"""
     st.subheader("🔧 Outils d'administration")
 
-    tab_import_export, tab_stats = st.tabs(["📝¤ Import/Export", "📊 Statistiques"])
+    tab_import_export, tab_stats = st.tabs(["📤 Import/Export", "📊 Statistiques"])
 
     with tab_import_export:
         render_import_export()
@@ -73,9 +73,9 @@ def render_import_export():
     """Gestion import/export avancée"""
     service = get_inventaire_service()
 
-    st.subheader("📝¤ Import/Export Avancé")
+    st.subheader("📤 Import/Export Avancé")
 
-    tab_import, tab_export = st.tabs(["📝¥ Importer", "📝¤ Exporter"])
+    tab_import, tab_export = st.tabs(["📥 Importer", "📤 Exporter"])
 
     with tab_import:
         st.write("**Importer articles depuis fichier**")
@@ -181,7 +181,7 @@ def render_import_export():
         col1, col2 = st.columns(2)
 
         with col1:
-            if st.button("📝¥ Télécharger CSV", width="stretch"):
+            if st.button("📥 Télécharger CSV", width="stretch"):
                 try:
                     csv_content = service.exporter_inventaire("csv")
                     st.download_button(
@@ -195,7 +195,7 @@ def render_import_export():
                     st.error(f"❌ Erreur: {str(e)}")
 
         with col2:
-            if st.button("📝¥ Télécharger JSON", width="stretch"):
+            if st.button("📥 Télécharger JSON", width="stretch"):
                 try:
                     json_content = service.exporter_inventaire("json")
                     st.download_button(

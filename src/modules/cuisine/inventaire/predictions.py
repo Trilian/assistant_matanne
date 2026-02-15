@@ -194,7 +194,7 @@ def render_predictions():
                                 st.write(f"• {p.nom} ({p.consommation_moyenne:.2f}/jour)")
 
                 with col3:
-                    st.metric("âž¡ï¸ Stable", len(tendances["stable"]))
+                    st.metric("➡️ Stable", len(tendances["stable"]))
                     if tendances["stable"]:
                         with st.expander("Voir les articles"):
                             for p in tendances["stable"]:
@@ -229,9 +229,9 @@ def render_predictions():
                             icon = (
                                 "❌"
                                 if priority == "CRITIQUE"
-                                else "âš "
+                                else "⚠️"
                                 if priority == "HAUTE"
-                                else "â„¹"
+                                else "ℹ️"
                             )
                             count = len(by_priority[priority])
 
@@ -304,7 +304,7 @@ def render_predictions():
                             "La consommation générale diminue. Vous pouvez réduire légèrement vos achats."
                         )
                     else:
-                        st.write("âž¡ï¸ **Consommation stable**")
+                        st.write("➡️ **Consommation stable**")
                         st.info(
                             "La consommation est stable. Maintenez votre rythme d'achat actuel."
                         )

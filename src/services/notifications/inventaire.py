@@ -127,7 +127,7 @@ class ServiceNotificationsInventaire:
         self._next_id += 1
 
         self.notifications[utilisateur_id].append(notification)
-        logger.info(f"📝¬ Notification créée: {notification.titre}")
+        logger.info(f"� Notification créée: {notification.titre}")
 
         return notification
 
@@ -245,7 +245,7 @@ class ServiceNotificationsInventaire:
         email_destinataire: str,
     ) -> bool:
         """Envoie une notification par email (stub)."""
-        logger.info(f"📝§ Email alerte à {email_destinataire}: {notification.titre}")
+        logger.info(f"🔧 Email alerte à {email_destinataire}: {notification.titre}")
 
         notification.email = email_destinataire
         notification.push_envoyee = True

@@ -25,7 +25,7 @@ def render_courses_depuis_planning():
         st.warning("⚠️ Aucun planning actif trouvé.")
         st.caption("Créez d'abord un planning de repas dans 'Cuisine → Planning Semaine'")
 
-        if st.button("📝… Aller au planning", use_container_width=True):
+        if st.button("📅 Aller au planning", use_container_width=True):
             # Naviguer vers planning
             st.session_state.current_page = "cuisine.planning_semaine"
             st.rerun()
@@ -37,7 +37,7 @@ def render_courses_depuis_planning():
         st.success(f"✅ Planning actif: **{planning.nom}**")
         nb_repas = len(planning.repas) if planning.repas else 0
         st.caption(
-            f"📝† Du {planning.semaine_debut} au {planning.semaine_fin} • {nb_repas} repas planifiés"
+            f"� Du {planning.semaine_debut} au {planning.semaine_fin} • {nb_repas} repas planifiés"
         )
 
     with col2:

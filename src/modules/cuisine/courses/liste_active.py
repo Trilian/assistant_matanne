@@ -34,7 +34,7 @@ def render_liste_active():
         # Statistiques
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric("📝¥ À acheter", len(liste))
+            st.metric("📥 À acheter", len(liste))
         with col2:
             haute = len([a for a in liste if a.get("priorite") == "haute"])
             st.metric("🔴 Haute priorité", haute)
@@ -103,7 +103,7 @@ def render_liste_active():
                 st.session_state.new_article_mode = True
                 st.rerun()
         with col2:
-            if st.button("📝„ Imprimer liste", use_container_width=True):
+            if st.button("📄 Imprimer liste", use_container_width=True):
                 render_print_view(liste_filtree)
         with col3:
             if st.button("🗑️ Vider (achetés)", use_container_width=True):
@@ -148,7 +148,7 @@ def render_rayon_articles(service, rayon: str, articles: list):
 
         with col3:
             if st.button(
-                "âœï¸",
+                "✏️",
                 key=f"article_edit_{article['id']}",
                 help="Modifier",
                 use_container_width=True,
@@ -317,13 +317,13 @@ def render_print_view(liste):
         rayons[rayon].append(article)
 
     print_text = "📋 LISTE DE COURSES\n"
-    print_text += f"📝… {datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
+    print_text += f"📅 {datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
     print_text += "=" * 40 + "\n\n"
 
     for rayon in sorted(rayons.keys()):
-        print_text += f"🍪‘ {rayon}\n"
+        print_text += f"🏷️ {rayon}\n"
         for article in rayons[rayon]:
-            checkbox = "â˜‘"
+            checkbox = "☑"
             qty = f"{article.get('quantite_necessaire')} {article.get('unite')}"
             print_text += f"  {checkbox} {article.get('ingredient_nom')} ({qty})\n"
         print_text += "\n"

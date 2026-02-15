@@ -247,7 +247,7 @@ def generer_conseil_pari(
         elif ev > 0.05:
             conseils.append(f"💎 Value détectée (EV: +{ev:.0%})")
         elif ev < -0.1:
-            conseils.append(f"â›” Cote trop basse, pas rentable (EV: {ev:.0%})")
+            conseils.append(f"⛔ Cote trop basse, pas rentable (EV: {ev:.0%})")
 
     if proba_nul > 0.30:
         conseils.append("🎯 **ASTUCE**: Proba nul élevée, regarde la cote nul!")

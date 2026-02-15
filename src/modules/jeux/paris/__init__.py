@@ -59,7 +59,7 @@ def app():
             st.markdown("""
             **🔄 Refresh Scores**: Met à jour les scores des matchs terminés depuis l'API
 
-            **📝¥ Sync Équipes**: Charge les équipes des 5 championnats depuis l'API
+            **📥 Sync Équipes**: Charge les équipes des 5 championnats depuis l'API
 
             **📅 Sync Matchs**: Charge les matchs à venir avec prédictions IA automatiques
 
@@ -92,7 +92,7 @@ def app():
 
         with col_btn2:
             if st.button(
-                "📝¥ Sync Équipes",
+                "📥 Sync Équipes",
                 help="Charge toutes les équipes depuis Football-Data API",
                 use_container_width=True,
             ):

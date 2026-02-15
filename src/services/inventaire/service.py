@@ -377,7 +377,7 @@ RULES:
                 }
             )
 
-        logger.info(f"📝œ Retrieved {len(result)} historique entries")
+        logger.info(f"📜 Retrieved {len(result)} historique entries")
         return result
 
     # ═══════════════════════════════════════════════════════════
@@ -738,7 +738,7 @@ RULES:
                             stats["peremption_proche"].append(article_data["nom"])
 
         logger.info(
-            f"📝¬ Notifications générées: "
+            f"� Notifications générées: "
             f"Critique={len(stats['stock_critique'])}, "
             f"Bas={len(stats['stock_bas'])}, "
             f"Péremption={len(stats['peremption_proche']) + len(stats['peremption_depassee'])}"

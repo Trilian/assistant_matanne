@@ -429,7 +429,7 @@ def afficher_timeline_activites(activites: list[dict], max_items: int = 5):
         "recette": "🍽️",
         "inventaire": "📦",
         "courses": "🛒",
-        "planning": "📝…",
+        "planning": "📅",
         "famille": "👨‍👩‍👦",
         "maison": "🏠",
     }
@@ -437,7 +437,7 @@ def afficher_timeline_activites(activites: list[dict], max_items: int = 5):
     st.markdown("### 📋 Activité Récente")
 
     for activite in activites[:max_items]:
-        icone = icones.get(activite.get("type", ""), "📝Œ")
+        icone = icones.get(activite.get("type", ""), "📜")
         date_str = activite.get("date", "")
         if isinstance(date_str, datetime):
             date_str = date_str.strftime("%d/%m %H:%M")
@@ -496,7 +496,7 @@ def widget_meteo_jour():
     # Données simulées - à remplacer par API météo
     meteo = {
         "temp": 12,
-        "condition": "â˜ï¸ Nuageux",
+        "condition": "☁️ Nuageux",
         "conseil": "Prévoir une veste légère",
     }
 

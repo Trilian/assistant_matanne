@@ -20,7 +20,7 @@ def render_configuration_preferences():
 
     with st.form("form_preferences"):
         # Famille
-        st.markdown("##### 💨â€👩â€💧 Ma famille")
+        st.markdown("##### 👨‍👩‍👦 Ma famille")
         col1, col2, col3 = st.columns(3)
 
         with col1:
@@ -30,7 +30,7 @@ def render_configuration_preferences():
         with col3:
             jules_age = st.number_input("Âge Jules (mois)", 6, 36, prefs.jules_age_mois)
 
-        st.markdown("##### â±ï¸ Temps de cuisine")
+        st.markdown("##### ⏱️ Temps de cuisine")
         col1, col2 = st.columns(2)
 
         with col1:
@@ -62,7 +62,7 @@ def render_configuration_preferences():
             placeholder="Ex: pâtes, poulet, gratins",
         )
 
-        st.markdown("##### âš–ï¸ Équilibre souhaité par semaine")
+        st.markdown("##### ⚖️ Équilibre souhaité par semaine")
         col1, col2, col3 = st.columns(3)
 
         with col1:
@@ -208,7 +208,7 @@ def render_jour_planning(
 
     est_weekend = jour_date.weekday() >= 5
 
-    with st.expander(f"📝… **{jour}** {jour_date.strftime('%d/%m')}", expanded=True):
+    with st.expander(f"📅 **{jour}** {jour_date.strftime('%d/%m')}", expanded=True):
         # Midi
         st.markdown("##### 🌞 Midi")
         midi = repas_jour.get("midi")

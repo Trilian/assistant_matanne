@@ -36,11 +36,11 @@ def afficher_generateur_grilles(tirages: list):
             [
                 ("🎲 Aléatoire", "aleatoire"),
                 ("🧠 Éviter populaires (32-49)", "eviter_populaires"),
-                ("âš–ï¸ Équilibrée (somme moyenne)", "equilibree"),
+                ("⚖️ Équilibrée (somme moyenne)", "equilibree"),
                 ("🔥 Numéros chauds", "chauds"),
-                ("â„ï¸ Numéros froids", "froids"),
+                ("❄️ Numéros froids", "froids"),
                 ("🔄 Mixte (chauds + froids)", "mixte"),
-                ("âœï¸ Manuelle", "manuel"),
+                ("✏️ Manuelle", "manuel"),
             ],
             format_func=lambda x: x[0],
         )
@@ -170,4 +170,4 @@ def afficher_mes_grilles():
                 if grille.get("numeros_trouves") is not None:
                     st.write(f"✅ {grille['numeros_trouves']}/5")
                     if grille.get("chance_trouvee"):
-                        st.write("+ Chance âœ“")
+                        st.write("+ Chance ✓")

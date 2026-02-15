@@ -292,7 +292,7 @@ def render_rapport_budget():
 
             # Articles coûteux
             if donnees.articles_couteux:
-                st.subheader("â­ Articles les plus coûteux")
+                st.subheader("⭐ Articles les plus coûteux")
                 df_couteux = pd.DataFrame(donnees.articles_couteux)
                 st.dataframe(
                     df_couteux.rename(

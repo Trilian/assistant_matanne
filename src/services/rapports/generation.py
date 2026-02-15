@@ -622,9 +622,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
                 f"💰 Valeur perdue: €{analyse.valeur_perdue:.2f} - Optimiser l'inventaire"
             )
         if analyse.articles_perimes_detail:
-            analyse.recommandations.append(
-                "📝… Mettre en place un FIFO (First In First Out) strict"
-            )
+            analyse.recommandations.append("📅 Mettre en place un FIFO (First In First Out) strict")
 
         return analyse
 
@@ -1017,7 +1015,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         elements.append(Spacer(1, 0.3 * inch))
 
         # Planning jour par jour
-        elements.append(Paragraph("📝… PLANNING DE LA SEMAINE", day_style))
+        elements.append(Paragraph("📅 PLANNING DE LA SEMAINE", day_style))
         elements.append(Spacer(1, 0.1 * inch))
 
         jours_fr = {
@@ -1032,7 +1030,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
 
         type_repas_emoji = {
             "petit_déjeuner": "🌅",
-            "déjeuner": "â˜€ï¸",
+            "déjeuner": "☀️",
             "goûter": "🍪",
             "dîner": "🌙",
         }
@@ -1044,7 +1042,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
 
             # Tableau pour ce jour
             day_data = [
-                [f"📝† {jour_nom} {date_obj.strftime('%d/%m')}", "Recette", "Portions", "Status"]
+                [f"� {jour_nom} {date_obj.strftime('%d/%m')}", "Recette", "Portions", "Status"]
             ]
 
             for repas in sorted(

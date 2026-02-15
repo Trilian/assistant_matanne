@@ -58,7 +58,7 @@ def app():
         st.session_state.recettes_selected_tab = 0
 
     tab_liste, tab_ajout, tab_import, tab_ia = st.tabs(
-        ["📋 Liste", "➕ Ajouter Manuel", "📝¥ Importer", "⏰ Générer IA"]
+        ["📋 Liste", "➕ Ajouter Manuel", "📥 Importer", "⏰ Générer IA"]
     )
 
     with tab_liste:

@@ -214,10 +214,10 @@ def render_historique():
     achats = get_all_purchases(achete=True)
 
     if not achats:
-        st.info("Aucun achat enregistre")
+        st.info("Aucun achat enregistré")
         return
 
-    # Trier par date d'achat (plus recent d'abord)
+    # Trier par date d'achat (plus récent d'abord)
     achats_tries = sorted(achats, key=lambda x: x.date_achat or date.min, reverse=True)
 
     # Stats

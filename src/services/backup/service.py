@@ -192,9 +192,9 @@ class ServiceBackup:
                     self._model_to_dict(record) for record in records
                 ]
                 total_records += len(records)
-                logger.debug(f"  âœ“ {table_name}: {len(records)} enregistrements")
+                logger.debug(f"  ✓ {table_name}: {len(records)} enregistrements")
             except Exception as e:
-                logger.error(f"  âœ— Erreur export {table_name}: {e}")
+                logger.error(f"  ✗ Erreur export {table_name}: {e}")
                 backup_data["data"][table_name] = []
 
         # Sérialiser
@@ -339,11 +339,11 @@ class ServiceBackup:
                 db.flush()
                 tables_restored.append(table_name)
                 total_records += len(records)
-                logger.debug(f"  âœ“ {table_name}: {len(records)} enregistrements restaurés")
+                logger.debug(f"  ✓ {table_name}: {len(records)} enregistrements restaurés")
 
             except Exception as e:
                 error_msg = f"Erreur restauration {table_name}: {e}"
-                logger.error(f"  âœ— {error_msg}")
+                logger.error(f"  ✗ {error_msg}")
                 errors.append(error_msg)
                 db.rollback()
 
@@ -654,7 +654,7 @@ def render_backup_ui():
 
         compress = st.checkbox("Compresser (gzip)", value=True, key="backup_compress")
 
-        if st.button("📝¥ Créer un backup maintenant", use_container_width=True, type="primary"):
+        if st.button("📥 Créer un backup maintenant", use_container_width=True, type="primary"):
             with st.spinner("Création du backup..."):
                 result = service.create_backup(compress=compress)
 

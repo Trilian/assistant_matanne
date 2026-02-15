@@ -41,10 +41,10 @@ def app():
         [
             "📊 Dashboard",
             "👶 Jules",
-            "💨â€👩â€💧 Nous",
+            "👨‍👩‍👦 Nous",
             "🏪 Par magasin",
             "➕ Ajouter",
-            "📝œ Historique",
+            "📜 Historique",
         ]
     )
 
@@ -55,7 +55,7 @@ def app():
         render_liste_groupe("jules", "👶 Achats pour Jules")
 
     with tabs[2]:
-        render_liste_groupe("nous", "💨â€👩â€💧 Achats pour nous")
+        render_liste_groupe("nous", "👨‍👩‍👦 Achats pour nous")
 
     with tabs[3]:
         render_par_magasin()

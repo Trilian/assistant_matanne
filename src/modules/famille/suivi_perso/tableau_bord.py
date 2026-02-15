@@ -58,7 +58,7 @@ def render_dashboard(data: dict):
 
     with col4:
         garmin = "✅ Connecté" if data.get("garmin_connected") else "❌ Non connecté"
-        st.metric("âŒš Garmin", garmin)
+        st.metric("⌚ Garmin", garmin)
 
     # Graphique des 7 derniers jours
     st.markdown("---")

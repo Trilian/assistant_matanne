@@ -200,7 +200,7 @@ def est_fait(jour: int, activite_nom: str) -> bool:
 # ═══════════════════════════════════════════════════════════
 
 
-def render_activite_card(jour: int, activite: dict, index: int):
+def render_activite_card(jour: int, activite: dict, index: int, key_prefix: str = "week"):
     """Affiche une carte d'activite."""
     fait = est_fait(jour, activite["nom"])
 
@@ -219,7 +219,7 @@ def render_activite_card(jour: int, activite: dict, index: int):
             if fait:
                 st.success("✅")
             else:
-                if st.button("Fait ✓", key=f"act_{jour}_{index}", type="secondary"):
+                if st.button("Fait ✓", key=f"act_{key_prefix}_{jour}_{index}", type="secondary"):
                     marquer_fait(jour, activite["nom"])
                     st.rerun()
 
@@ -299,7 +299,7 @@ def render_vue_aujourd_hui():
 
     # Activites
     for i, act in enumerate(activites):
-        render_activite_card(jour_actuel, act, i)
+        render_activite_card(jour_actuel, act, i, key_prefix="today")
 
 
 def render_categories():

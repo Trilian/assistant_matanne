@@ -207,7 +207,7 @@ def render_test():
                 default=["bell"],
             )
 
-        if st.form_submit_button("📝¤ Envoyer", use_container_width=True):
+        if st.form_submit_button("📤 Envoyer", use_container_width=True):
             notification = NotificationPush(
                 titre=titre, message=message, priorite=priorite, tags=tags
             )
@@ -262,7 +262,7 @@ def render_taches_retard():
                     st.markdown(f"**{jours_retard}j** retard")
 
                 with col3:
-                    if st.button("📝¤", key=f"notif_{tache.id}", help="Envoyer alerte"):
+                    if st.button("📤", key=f"notif_{tache.id}", help="Envoyer alerte"):
                         import asyncio
 
                         resultat = asyncio.run(service.envoyer_alerte_tache_retard(tache))
@@ -274,7 +274,7 @@ def render_taches_retard():
         # Action groupée
         st.divider()
         if st.button(
-            f"📝¤ Envoyer alertes pour {min(5, len(taches_retard))} tâches",
+            f"📤 Envoyer alertes pour {min(5, len(taches_retard))} tâches",
             type="primary",
             use_container_width=True,
         ):

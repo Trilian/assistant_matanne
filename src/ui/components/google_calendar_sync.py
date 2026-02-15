@@ -55,7 +55,7 @@ def verifier_config_google() -> tuple[bool, str]:
 def render_google_calendar_config():
     """Affiche le panneau de configuration Google Calendar."""
 
-    st.markdown("### 📝… Google Calendar")
+    st.markdown("### 📅 Google Calendar")
 
     # Vérifier la configuration
     config_ok, message = verifier_config_google()
@@ -115,7 +115,7 @@ def render_google_calendar_config():
                         st.error(f"❌ {result.message}")
 
         with col2:
-            if st.button("📝¤ Exporter vers Google", use_container_width=True):
+            if st.button("📤 Exporter vers Google", use_container_width=True):
                 st.info("🚧 Export vers Google Calendar - En développement")
 
         with col3:
@@ -125,7 +125,7 @@ def render_google_calendar_config():
 
     else:
         # Non connecté
-        st.info("📝… Connectez votre Google Calendar pour synchroniser vos événements")
+        st.info("📅 Connectez votre Google Calendar pour synchroniser vos événements")
 
         if st.button("🔗 Connecter Google Calendar", type="primary"):
             # Générer l'URL d'auth

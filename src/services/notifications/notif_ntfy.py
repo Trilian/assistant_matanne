@@ -148,7 +148,7 @@ class ServiceNtfy:
 
         notification = NotificationNtfy(
             titre=f"⏰ Tâche en retard: {tache.nom}",
-            message=f"{tache.nom}\n\n📝… Prévue le {tache.prochaine_fois.strftime('%d/%m')}\n⚠️ {jours_retard} jour(s) de retard\n\n{tache.description or ''}",
+            message=f"{tache.nom}\n\n📅 Prévue le {tache.prochaine_fois.strftime('%d/%m')}\n⚠️ {jours_retard} jour(s) de retard\n\n{tache.description or ''}",
             priorite=priorite,
             tags=tags,
         )
@@ -172,7 +172,7 @@ class ServiceNtfy:
                 lines.append(f"  • {t.nom}")
 
         if taches_jour:
-            lines.append(f"\n📝… {len(taches_jour)} tâche(s) aujourd'hui:")
+            lines.append(f"\n📅 {len(taches_jour)} tâche(s) aujourd'hui:")
             for t in taches_jour[:5]:
                 lines.append(f"  • {t.nom}")
 

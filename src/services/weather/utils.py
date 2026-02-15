@@ -33,7 +33,7 @@ WEATHERCODES = {
     0: {"condition": "Ensoleillé", "icon": "☀️", "arrosage_factor": 1.2},
     1: {"condition": "Peu nuageux", "icon": "🌤️", "arrosage_factor": 1.1},
     2: {"condition": "Partiellement nuageux", "icon": "⛅", "arrosage_factor": 1.0},
-    3: {"condition": "Couvert", "icon": "â˜ï¸", "arrosage_factor": 0.8},
+    3: {"condition": "Couvert", "icon": "☁️", "arrosage_factor": 0.8},
     45: {"condition": "Brouillard", "icon": "🌫️", "arrosage_factor": 0.5},
     48: {"condition": "Brouillard givrant", "icon": "🌫️", "arrosage_factor": 0.3},
     51: {"condition": "Bruine légère", "icon": "🌦️", "arrosage_factor": 0.7},

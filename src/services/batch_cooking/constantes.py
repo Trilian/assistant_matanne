@@ -12,7 +12,7 @@ ROBOTS_DISPONIBLES = {
     "cookeo": {"nom": "Cookeo", "emoji": "🍲", "parallele": True},
     "monsieur_cuisine": {"nom": "Monsieur Cuisine", "emoji": "🤖", "parallele": True},
     "airfryer": {"nom": "Airfryer", "emoji": "🍟", "parallele": True},
-    "multicooker": {"nom": "Multicooker", "emoji": "â™¨ï¸", "parallele": True},
+    "multicooker": {"nom": "Multicooker", "emoji": "♨️", "parallele": True},
     "four": {"nom": "Four", "emoji": "🔥", "parallele": True},
     "plaques": {"nom": "Plaques", "emoji": "🍳", "parallele": False},
     "robot_patissier": {"nom": "Robot Pâtissier", "emoji": "🎂", "parallele": True},

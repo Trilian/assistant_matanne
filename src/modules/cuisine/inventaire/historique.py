@@ -57,7 +57,7 @@ def render_historique():
         # Afficher tableau
         data = []
         for h in historique_filtres:
-            action_icon = {"ajout": "➕", "modification": "âœï¸", "suppression": "🗑️"}.get(
+            action_icon = {"ajout": "➕", "modification": "✏️", "suppression": "🗑️"}.get(
                 h["type"], "❓"
             )
 

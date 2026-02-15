@@ -176,7 +176,7 @@ def analyser_tendances_championnat(
     if stats["pct_victoires_dom"] > 50:
         tendances.append(f"🏠 Forte domination domicile ({stats['pct_victoires_dom']}%)")
     elif stats["pct_victoires_dom"] < 35:
-        tendances.append(f"âœˆï¸ Bons résultats extérieurs ({stats['pct_victoires_ext']}%)")
+        tendances.append(f"✈️ Bons résultats extérieurs ({stats['pct_victoires_ext']}%)")
 
     if stats["pct_nuls"] > 30:
         tendances.append(f"🤝 Beaucoup de nuls ({stats['pct_nuls']}%)")

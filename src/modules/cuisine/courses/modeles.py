@@ -7,7 +7,7 @@ from ._common import get_courses_service, logger, st
 
 def render_modeles():
     """Gestion des modèles de listes récurrentes (Phase 2: Persistance BD)"""
-    st.subheader("📝„ Modèles de listes - Phase 2")
+    st.subheader("📄 Modèles de listes - Phase 2")
 
     service = get_courses_service()
 
@@ -36,12 +36,12 @@ def render_modeles():
                             if modele.get("description"):
                                 st.caption(f"📝 {modele['description']}")
                             st.caption(
-                                f"📦 {len(modele.get('articles', []))} articles | 📝… {modele.get('cree_le', '')[:10]}"
+                                f"📦 {len(modele.get('articles', []))} articles | 📅 {modele.get('cree_le', '')[:10]}"
                             )
 
                         with col2:
                             if st.button(
-                                "📝¥ Charger",
+                                "📥 Charger",
                                 key=f"modele_load_{modele['id']}",
                                 use_container_width=True,
                                 help="Charger ce modèle dans la liste",
@@ -90,7 +90,7 @@ def render_modeles():
                                     f"{priorite_emoji} **{article['nom']}** - {article['quantite']} {article['unite']} ({article['rayon']})"
                                 )
                                 if article.get("notes"):
-                                    st.caption(f"📝Œ {article['notes']}")
+                                    st.caption(f"📜 {article['notes']}")
 
         # ─────────────────────────────────────────────────────────────────────────────
         # ONGLET: CRÉER NOUVEAU MODÈLE

@@ -68,7 +68,7 @@ def selecteur_semaine(key_prefix: str = "semaine") -> tuple[date, date]:
     col_nav1, col_nav2, col_nav3 = st.columns([1, 2, 1])
 
     with col_nav1:
-        if st.button("â¬…ï¸ Precedente", key=f"{key_prefix}_prev"):
+        if st.button("⬅️ Precedente", key=f"{key_prefix}_prev"):
             st.session_state[f"{key_prefix}_start"] -= __import__("datetime").timedelta(days=7)
             st.rerun()
 
@@ -81,7 +81,7 @@ def selecteur_semaine(key_prefix: str = "semaine") -> tuple[date, date]:
         )
 
     with col_nav3:
-        if st.button("Suivante âž¡ï¸", key=f"{key_prefix}_next"):
+        if st.button("Suivante ➡️", key=f"{key_prefix}_next"):
             st.session_state[f"{key_prefix}_start"] += __import__("datetime").timedelta(days=7)
             st.rerun()
 

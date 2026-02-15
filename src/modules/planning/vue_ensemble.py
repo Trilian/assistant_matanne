@@ -202,7 +202,7 @@ def app():
     col_nav1, col_nav2, col_nav3 = st.columns([1, 2, 1])
 
     with col_nav1:
-        if st.button("â¬…ï¸ Semaine precedente", key="prev_ensemble"):
+        if st.button("⬅️ Semaine precedente", key="prev_ensemble"):
             st.session_state.ensemble_week_start -= timedelta(days=7)
             st.rerun()
 
@@ -215,7 +215,7 @@ def app():
         )
 
     with col_nav3:
-        if st.button("Semaine suivante âž¡ï¸", key="next_ensemble"):
+        if st.button("Semaine suivante ➡️", key="next_ensemble"):
             st.session_state.ensemble_week_start += timedelta(days=7)
             st.rerun()
 

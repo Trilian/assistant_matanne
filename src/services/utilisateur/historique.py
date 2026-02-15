@@ -1,14 +1,14 @@
 """
 Service d'historique des actions utilisateur.
 
-Trace toutes les actions importantes effectuïÂ¿Â½es par les utilisateurs
-pour audit, debugging et fonctionnalitïÂ¿Â½s de type "annuler".
+Trace toutes les actions importantes effectuées par les utilisateurs
+pour audit, debugging et fonctionnalités de type "annuler".
 
-FonctionnalitïÂ¿Â½s:
+Fonctionnalités:
 - Logging des actions CRUD
 - Historique consultable par utilisateur
-- Timeline d'activitïÂ¿Â½
-- Restauration d'ïÂ¿Â½tats prïÂ¿Â½cïÂ¿Â½dents
+- Timeline d'activité
+- Restauration d'états précédents
 """
 
 import logging
@@ -23,12 +23,12 @@ logger = logging.getLogger(__name__)
 
 
 # -----------------------------------------------------------
-# TYPES ET SCHïÂ¿Â½MAS
+# TYPES ET SCHÉMAS
 # -----------------------------------------------------------
 
 
 class ActionType(StrEnum):
-    """Types d'actions traïÂ¿Â½ables."""
+    """Types d'actions traçables."""
 
     # Recettes
     RECETTE_CREATED = "recette.created"
@@ -57,7 +57,7 @@ class ActionType(StrEnum):
     FAMILLE_ACTIVITY_LOGGED = "famille.activity_logged"
     FAMILLE_MILESTONE_ADDED = "famille.milestone_added"
 
-    # SystïÂ¿Â½me
+    # Système
     SYSTEM_LOGIN = "system.login"
     SYSTEM_LOGOUT = "system.logout"
     SYSTEM_SETTINGS_CHANGED = "system.settings_changed"
@@ -66,7 +66,7 @@ class ActionType(StrEnum):
 
 
 class ActionEntry(BaseModel):
-    """EntrïÂ¿Â½e d'historique d'action."""
+    """Entrée d'historique d'action."""
 
     id: int | None = None
     user_id: str
@@ -101,7 +101,7 @@ class ActionFilter(BaseModel):
 
 
 class ActionStats(BaseModel):
-    """Statistiques d'activitïÂ¿Â½."""
+    """Statistiques d'activité."""
 
     total_actions: int = 0
     actions_today: int = 0
@@ -118,16 +118,16 @@ class ActionStats(BaseModel):
 
 class ActionHistoryService:
     """
-    Service de traïÂ¿Â½abilitïÂ¿Â½ des actions utilisateur.
+    Service de traçabilité des actions utilisateur.
 
     Enregistre toutes les actions importantes pour:
-    - Audit et conformitïÂ¿Â½
+    - Audit et conformité
     - Debugging
-    - FonctionnalitïÂ¿Â½ "annuler"
-    - Timeline d'activitïÂ¿Â½
+    - Fonctionnalité "annuler"
+    - Timeline d'activité
     """
 
-    # Cache en mïÂ¿Â½moire pour les actions rïÂ¿Â½centes (performance)
+    # Cache en mémoire pour les actions récentes (performance)
     _recent_cache: list[ActionEntry] = []
     _cache_max_size: int = 100
 
@@ -160,16 +160,16 @@ class ActionHistoryService:
 
         Args:
             action_type: Type d'action
-            entity_type: Type d'entitïÂ¿Â½ (recette, inventaire, etc.)
+            entity_type: Type d'entité (recette, inventaire, etc.)
             description: Description lisible de l'action
-            entity_id: ID de l'entitïÂ¿Â½ concernïÂ¿Â½e
-            entity_name: Nom de l'entitïÂ¿Â½ (pour affichage)
-            details: DïÂ¿Â½tails additionnels
+            entity_id: ID de l'entité concernée
+            entity_name: Nom de l'entité (pour affichage)
+            details: Détails additionnels
             old_value: Valeur avant modification (pour undo)
-            new_value: Valeur aprïÂ¿Â½s modification
+            new_value: Valeur après modification
 
         Returns:
-            EntrïÂ¿Â½e d'historique crïÂ¿Â½ïÂ¿Â½e
+            Entrée d'historique créée
         """
         user_id, user_name = self._get_current_user()
 
@@ -197,13 +197,13 @@ class ActionHistoryService:
         return entry
 
     def log_recette_created(self, recette_id: int, nom: str, details: dict = None):
-        """Log crïÂ¿Â½ation de recette."""
+        """Log création de recette."""
         return self.log_action(
             action_type=ActionType.RECETTE_CREATED,
             entity_type="recette",
             entity_id=recette_id,
             entity_name=nom,
-            description=f"Recette '{nom}' crïÂ¿Â½ïÂ¿Â½e",
+            description=f"Recette '{nom}' créée",
             new_value=details,
         )
 
@@ -215,7 +215,7 @@ class ActionHistoryService:
             entity_type="recette",
             entity_id=recette_id,
             entity_name=nom,
-            description=f"Recette '{nom}' modifiïÂ¿Â½e",
+            description=f"Recette '{nom}' modifiée",
             details={"changes": changes},
             old_value=old_data,
             new_value=new_data,
@@ -228,24 +228,24 @@ class ActionHistoryService:
             entity_type="recette",
             entity_id=recette_id,
             entity_name=nom,
-            description=f"Recette '{nom}' supprimïÂ¿Â½e",
+            description=f"Recette '{nom}' supprimée",
             old_value=backup_data,
         )
 
     def log_inventaire_added(self, item_id: int, nom: str, quantite: float, unite: str):
-        """Log ajout ïÂ¿Â½ l'inventaire."""
+        """Log ajout à l'inventaire."""
         return self.log_action(
             action_type=ActionType.INVENTAIRE_ADDED,
             entity_type="inventaire",
             entity_id=item_id,
             entity_name=nom,
-            description=f"'{nom}' ajoutïÂ¿Â½ ïÂ¿Â½ l'inventaire ({quantite} {unite})",
+            description=f"'{nom}' ajouté à l'inventaire ({quantite} {unite})",
             details={"quantite": quantite, "unite": unite},
         )
 
     def log_courses_item_checked(self, liste_id: int, item_name: str, checked: bool):
         """Log cochage d'article de courses."""
-        status = "cochïÂ¿Â½" if checked else "dïÂ¿Â½cochïÂ¿Â½"
+        status = "coché" if checked else "décoché"
         return self.log_action(
             action_type=ActionType.COURSES_ITEM_CHECKED,
             entity_type="courses",
@@ -264,7 +264,7 @@ class ActionHistoryService:
             entity_type="planning",
             entity_id=planning_id,
             entity_name=recette_nom,
-            description=f"'{recette_nom}' planifiïÂ¿Â½ pour le {type_repas} du {date.strftime('%d/%m')}",
+            description=f"'{recette_nom}' planifié pour le {type_repas} du {date.strftime('%d/%m')}",
             details={"date": date.isoformat(), "type_repas": type_repas},
         )
 
@@ -273,15 +273,15 @@ class ActionHistoryService:
         return self.log_action(
             action_type=ActionType.SYSTEM_LOGIN,
             entity_type="system",
-            description="Connexion ïÂ¿Â½ l'application",
+            description="Connexion à l'application",
         )
 
     def log_system_logout(self):
-        """Log dïÂ¿Â½connexion utilisateur."""
+        """Log déconnexion utilisateur."""
         return self.log_action(
             action_type=ActionType.SYSTEM_LOGOUT,
             entity_type="system",
-            description="DïÂ¿Â½connexion de l'application",
+            description="Déconnexion de l'application",
         )
 
     # -----------------------------------------------------------
@@ -290,13 +290,13 @@ class ActionHistoryService:
 
     def get_history(self, filters: ActionFilter | None = None) -> list[ActionEntry]:
         """
-        RïÂ¿Â½cupïÂ¿Â½re l'historique filtrïÂ¿Â½.
+        Récupère l'historique filtré.
 
         Args:
-            filters: CritïÂ¿Â½res de filtrage
+            filters: Critères de filtrage
 
         Returns:
-            Liste d'entrïÂ¿Â½es d'historique
+            Liste d'entrées d'historique
         """
         filters = filters or ActionFilter()
 
@@ -347,19 +347,19 @@ class ActionHistoryService:
             return self._recent_cache[: filters.limit]
 
     def get_user_history(self, user_id: str, limit: int = 20) -> list[ActionEntry]:
-        """RïÂ¿Â½cupïÂ¿Â½re l'historique d'un utilisateur."""
+        """Récupère l'historique d'un utilisateur."""
         return self.get_history(ActionFilter(user_id=user_id, limit=limit))
 
     def get_entity_history(
         self, entity_type: str, entity_id: int, limit: int = 20
     ) -> list[ActionEntry]:
-        """RïÂ¿Â½cupïÂ¿Â½re l'historique d'une entitïÂ¿Â½ spïÂ¿Â½cifique."""
+        """Récupère l'historique d'une entité spécifique."""
         return self.get_history(
             ActionFilter(entity_type=entity_type, entity_id=entity_id, limit=limit)
         )
 
     def get_recent_actions(self, limit: int = 10) -> list[ActionEntry]:
-        """RïÂ¿Â½cupïÂ¿Â½re les actions rïÂ¿Â½centes (toutes utilisateurs)."""
+        """Récupère les actions récentes (toutes utilisateurs)."""
         return self.get_history(ActionFilter(limit=limit))
 
     # -----------------------------------------------------------
@@ -368,13 +368,13 @@ class ActionHistoryService:
 
     def get_stats(self, days: int = 7) -> ActionStats:
         """
-        Calcule les statistiques d'activitïÂ¿Â½.
+        Calcule les statistiques d'activité.
 
         Args:
-            days: Nombre de jours ïÂ¿Â½ analyser
+            days: Nombre de jours à analyser
 
         Returns:
-            Statistiques d'activitïÂ¿Â½
+            Statistiques d'activité
         """
         try:
             from sqlalchemy import func
@@ -418,7 +418,7 @@ class ActionHistoryService:
                     .all()
                 )
 
-                # Actions les plus frïÂ¿Â½quentes
+                # Actions les plus fréquentes
                 top_actions = (
                     session.query(
                         ActionHistory.action_type, func.count(ActionHistory.id).label("count")
@@ -443,20 +443,20 @@ class ActionHistoryService:
             return ActionStats()
 
     # -----------------------------------------------------------
-    # FONCTIONNALITïÂ¿Â½ UNDO
+    # FONCTIONNALITÉ UNDO
     # -----------------------------------------------------------
 
     def can_undo(self, action_id: int) -> bool:
         """
-        VïÂ¿Â½rifie si une action peut ïÂ¿Â½tre annulïÂ¿Â½e.
+        Vérifie si une action peut être annulée.
 
         Args:
             action_id: ID de l'action
 
         Returns:
-            True si l'action peut ïÂ¿Â½tre annulïÂ¿Â½e
+            True si l'action peut être annulée
         """
-        # Types d'actions rïÂ¿Â½versibles
+        # Types d'actions réversibles
         reversible_types = {
             ActionType.RECETTE_DELETED,
             ActionType.INVENTAIRE_CONSUMED,
@@ -476,17 +476,17 @@ class ActionHistoryService:
         Annule une action.
 
         Args:
-            action_id: ID de l'action ïÂ¿Â½ annuler
+            action_id: ID de l'action à annuler
 
         Returns:
-            True si l'annulation a rïÂ¿Â½ussi
+            True si l'annulation a réussi
         """
-        # TODO: ImplïÂ¿Â½menter la restauration basïÂ¿Â½e sur old_value
+        # TODO: Implémenter la restauration basée sur old_value
         logger.warning(f"Undo action {action_id} not fully implemented")
         return False
 
     # -----------------------------------------------------------
-    # MïÂ¿Â½THODES PRIVïÂ¿Â½ES
+    # MÉTHODES PRIVÉES
     # -----------------------------------------------------------
 
     def _get_current_user(self) -> tuple[str, str]:
@@ -503,7 +503,7 @@ class ActionHistoryService:
         return "anonymous", "Anonyme"
 
     def _save_to_database(self, entry: ActionEntry):
-        """Sauvegarde l'entrïÂ¿Â½e en base de donnïÂ¿Â½es."""
+        """Sauvegarde l'entrée en base de données."""
         try:
             from src.core.database import obtenir_contexte_db
             from src.core.models import ActionHistory
@@ -530,13 +530,13 @@ class ActionHistoryService:
             logger.error(f"Erreur sauvegarde historique: {e}")
 
     def _add_to_cache(self, entry: ActionEntry):
-        """Ajoute une entrïÂ¿Â½e au cache mïÂ¿Â½moire."""
+        """Ajoute une entrée au cache mémoire."""
         self._recent_cache.insert(0, entry)
         if len(self._recent_cache) > self._cache_max_size:
             self._recent_cache.pop()
 
     def _compute_changes(self, old: dict, new: dict) -> list[dict]:
-        """Calcule les changements entre deux ïÂ¿Â½tats."""
+        """Calcule les changements entre deux états."""
         changes = []
         all_keys = set(old.keys()) | set(new.keys())
 
@@ -562,48 +562,48 @@ class ActionHistoryService:
 
 
 def render_activity_timeline(limit: int = 10):
-    """Affiche la timeline d'activitïÂ¿Â½ rïÂ¿Â½cente."""
+    """Affiche la timeline d'activité récente."""
     service = get_action_history_service()
     actions = service.get_recent_actions(limit=limit)
 
     if not actions:
-        st.info("Aucune activitïÂ¿Â½ rïÂ¿Â½cente")
+        st.info("Aucune activité récente")
         return
 
-    st.markdown("### ?? ActivitïÂ¿Â½ rïÂ¿Â½cente")
+    st.markdown("### 📋 Activité récente")
 
     for action in actions:
         col1, col2 = st.columns([1, 4])
 
         with col1:
-            # IcïÂ¿Â½ne selon le type
+            # Icône selon le type
             icons = {
-                "recette": "??",
-                "inventaire": "??",
-                "courses": "??",
-                "planning": "??",
-                "famille": "????????",
-                "system": "??",
+                "recette": "🍳",
+                "inventaire": "📦",
+                "courses": "🛒",
+                "planning": "📅",
+                "famille": "👨‍👩‍👧",
+                "system": "⚙️",
             }
-            icon = icons.get(action.entity_type, "??")
+            icon = icons.get(action.entity_type, "📝")
             st.markdown(f"### {icon}")
 
         with col2:
             st.markdown(f"**{action.description}**")
-            st.caption(f"{action.user_name} ïÂ¿Â½ {action.created_at.strftime('%d/%m %H:%M')}")
+            st.caption(f"{action.user_name} à {action.created_at.strftime('%d/%m %H:%M')}")
 
         st.markdown("---")
 
 
 def render_user_activity(user_id: str):
-    """Affiche l'activitïÂ¿Â½ d'un utilisateur spïÂ¿Â½cifique."""
+    """Affiche l'activité d'un utilisateur spécifique."""
     service = get_action_history_service()
     actions = service.get_user_history(user_id, limit=20)
 
-    st.markdown("### ?? ActivitïÂ¿Â½ de l'utilisateur")
+    st.markdown("### 👤 Activité de l'utilisateur")
 
     if not actions:
-        st.info("Aucune activitïÂ¿Â½ enregistrïÂ¿Â½e")
+        st.info("Aucune activité enregistrée")
         return
 
     for action in actions:
@@ -614,11 +614,11 @@ def render_user_activity(user_id: str):
 
 
 def render_activity_stats():
-    """Affiche les statistiques d'activitïÂ¿Â½."""
+    """Affiche les statistiques d'activité."""
     service = get_action_history_service()
     stats = service.get_stats()
 
-    st.markdown("### ?? Statistiques")
+    st.markdown("### 📊 Statistiques")
 
     col1, col2, col3 = st.columns(3)
 
@@ -630,9 +630,9 @@ def render_activity_stats():
         st.metric("Cette semaine", stats.actions_this_week)
 
     if stats.most_active_users:
-        st.markdown("**?? Utilisateurs les plus actifs:**")
+        st.markdown("**🏆 Utilisateurs les plus actifs:**")
         for user in stats.most_active_users[:3]:
-            st.write(f"ïÂ¿Â½ {user['name']}: {user['count']} actions")
+            st.write(f"• {user['name']}: {user['count']} actions")
 
 
 # -----------------------------------------------------------

@@ -29,7 +29,7 @@ def render_navigation_semaine():
     col1, col2, col3, col4 = st.columns([1, 2, 1, 1])
 
     with col1:
-        if st.button("â—€ Précédente", use_container_width=True):
+        if st.button("◀ Précédente", use_container_width=True):
             st.session_state.cal_semaine_debut = get_semaine_precedente(
                 st.session_state.cal_semaine_debut
             )
@@ -46,7 +46,7 @@ def render_navigation_semaine():
         )
 
     with col3:
-        if st.button("Suivante â–¶", use_container_width=True):
+        if st.button("Suivante ▶", use_container_width=True):
             st.session_state.cal_semaine_debut = get_semaine_suivante(
                 st.session_state.cal_semaine_debut
             )
@@ -202,7 +202,7 @@ def render_vue_semaine_liste(semaine: SemaineCalendrier):
         indicateurs_str = " ".join(indicateurs) if indicateurs else "—"
 
         with st.expander(
-            f"{marqueur}**{jour.jour_semaine}** {jour.date_jour.strftime('%d/%m')} â”‚ {indicateurs_str}",
+            f"{marqueur}**{jour.jour_semaine}** {jour.date_jour.strftime('%d/%m')} │ {indicateurs_str}",
             expanded=expanded,
         ):
             render_jour_calendrier(jour)
@@ -276,7 +276,7 @@ def render_modal_impression(semaine: SemaineCalendrier):
             col1, col2 = st.columns(2)
             with col1:
                 st.download_button(
-                    "📝¥ Télécharger .txt",
+                    "📥 Télécharger .txt",
                     data=texte,
                     file_name=f"planning_{semaine.date_debut.strftime('%Y%m%d')}.txt",
                     mime="text/plain",
@@ -305,7 +305,7 @@ def render_formulaire_ajout_event():
                         ("📅 RDV Autre", "rdv_autre"),
                         ("🎨 Activité", "activite"),
                         ("🛒 Courses", "courses"),
-                        ("📝Œ Autre", "autre"),
+                        ("📜 Autre", "autre"),
                     ],
                     format_func=lambda x: x[0],
                 )

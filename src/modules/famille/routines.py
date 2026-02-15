@@ -324,7 +324,7 @@ def app():
 
                     with col_act1:
                         if st.button(
-                            "â¸ï¸ Desactiver",
+                            "⏸️ Desactiver",
                             key=f"disable_{routine['id']}",
                             use_container_width=True,
                         ):

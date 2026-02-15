@@ -116,7 +116,7 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
         "🎨 Activites": jour_complet.get("activites", []),
         "🧹 Projets": jour_complet.get("projets", []),
         "⏰ Routines": jour_complet.get("routines", []),
-        "📱… Évenements": jour_complet.get("events", []),
+        "📅 Évenements": jour_complet.get("events", []),
     }
 
     for groupe_nom, events in events_grouped.items():
@@ -144,7 +144,7 @@ def afficher_timeline_jour(jour_complet: dict, jour: date) -> None:
                         }.get(event.get("priorite", "moyenne"), "⚫")
                         st.write(f"{priorite_emoji} **{event['nom']}** ({event['statut']})")
 
-                    elif groupe_nom == "📱… Évenements":
+                    elif groupe_nom == "📅 Évenements":
                         debut = (
                             event["debut"].strftime("%H:%M")
                             if isinstance(event["debut"], datetime)
@@ -189,7 +189,7 @@ def app():
     col_nav1, col_nav2, col_nav3 = st.columns([1, 2, 1])
 
     with col_nav1:
-        if st.button("â¬…ï¸ Semaine precedente", key="prev_semaine_view"):
+        if st.button("⬅️ Semaine precedente", key="prev_semaine_view"):
             st.session_state.semaine_view_start -= timedelta(days=7)
             st.rerun()
 
@@ -202,7 +202,7 @@ def app():
         )
 
     with col_nav3:
-        if st.button("Semaine suivante âž¡ï¸", key="next_semaine_view"):
+        if st.button("Semaine suivante ➡️", key="next_semaine_view"):
             st.session_state.semaine_view_start += timedelta(days=7)
             st.rerun()
 
@@ -223,10 +223,10 @@ def app():
     # ONGLETS VUE
     # ═══════════════════════════════════════════════════════════
 
-    tab1, tab2, tab3 = st.tabs(["📱ˆ Analyse Charge", "🎯 Repartition", "📱… Detail Jours"])
+    tab1, tab2, tab3 = st.tabs(["� Analyse Charge", "🎯 Repartition", "📋 Detail Jours"])
 
     with tab1:
-        st.subheader("📱ˆ Analyse de la charge familiale")
+        st.subheader("📊 Analyse de la charge familiale")
 
         # Graphique charge semaine
         afficher_graphique_charge_semaine(semaine.jours)
@@ -288,10 +288,10 @@ def app():
             st.metric("📷 Repas planifies", stats.get("total_repas", 0))
             st.metric("🎨 Activites", stats.get("total_activites", 0))
             st.metric("🧹 Projets", stats.get("total_projets", 0))
-            st.metric("📱… Évenements", stats.get("total_events", 0))
+            st.metric("📅 Évenements", stats.get("total_events", 0))
 
     with tab3:
-        st.subheader("📱… Detail par jour")
+        st.subheader("📅 Detail par jour")
 
         # Selection du jour
         jour_select = st.selectbox(

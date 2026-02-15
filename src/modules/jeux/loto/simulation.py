@@ -124,7 +124,7 @@ def afficher_gestion_tirages():
     col_sync1, col_sync2 = st.columns([1, 1])
 
     with col_sync1:
-        if st.button("📝¥ Sync Tirages FDJ", help="Charge les derniers tirages du Loto FDJ"):
+        if st.button("📥 Sync Tirages FDJ", help="Charge les derniers tirages du Loto FDJ"):
             st.info("⏳ Synchronisation en cours...")
             try:
                 with st.spinner("Récupération des tirages..."):
@@ -178,7 +178,7 @@ def afficher_gestion_tirages():
     st.divider()
 
     # Historique
-    st.markdown("### 📝œ Historique des tirages")
+    st.markdown("### 📜 Historique des tirages")
     tirages = charger_tirages(limite=20)
 
     if tirages:

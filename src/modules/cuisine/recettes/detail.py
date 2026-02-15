@@ -91,7 +91,7 @@ def render_detail_recette(recette):
     if recette.robots_compatibles:
         robots_icons = {
             "Cookeo": ("🤖", "Cookeo"),
-            "Monsieur Cuisine": ("💨â€🍳", "Monsieur Cuisine"),
+            "Monsieur Cuisine": ("👨‍🍳", "Monsieur Cuisine"),
             "Airfryer": ("🌪️", "Airfryer"),
             "Multicooker": ("🍳", "Multicooker"),
         }
@@ -104,7 +104,7 @@ def render_detail_recette(recette):
     # Infos principales
     metric_cols = st.columns(4)
     with metric_cols[0]:
-        st.metric("â±ï¸ Préparation", f"{recette.temps_preparation} min")
+        st.metric("⏱️ Préparation", f"{recette.temps_preparation} min")
     with metric_cols[1]:
         st.metric("🍳 Cuisson", f"{recette.temps_cuisson} min")
     with metric_cols[2]:
@@ -150,7 +150,7 @@ def render_detail_recette(recette):
 
     # Étapes de préparation
     if recette.etapes:
-        st.markdown("### 💨â€🍳 Étapes de préparation")
+        st.markdown("### 👨‍🍳 Étapes de préparation")
         for etape in sorted(recette.etapes, key=lambda e: e.ordre or 0):
             st.markdown(f"**Étape {etape.ordre}:** {etape.description}")
 
@@ -164,7 +164,7 @@ def render_detail_recette(recette):
         stat_cols = st.columns(5)
         stat_cols[0].metric("🍽️ Cuissons", stats.get("nb_cuissons", 0))
         if stats.get("derniere_cuisson"):
-            stat_cols[1].metric("📝… Dernière", stats.get("jours_depuis_derniere", "?"), "jours")
+            stat_cols[1].metric("📅 Dernière", stats.get("jours_depuis_derniere", "?"), "jours")
         if stats.get("note_moyenne"):
             stat_cols[2].metric("⭐ Note moyenne", f"{stats.get('note_moyenne', 0):.1f}/5")
         stat_cols[3].metric("👥 Total portions", stats.get("total_portions", 0))
@@ -192,11 +192,11 @@ def render_detail_recette(recette):
         # Historique des 5 dernières cuissons
         historique = service.get_historique(recette.id, nb_dernieres=5)
         if historique:
-            with st.expander("📝œ 5 dernières utilisations", expanded=True):
+            with st.expander("📜 5 dernières utilisations", expanded=True):
                 for h in historique:
                     col_date, col_portions, col_note = st.columns([1, 1, 1])
                     with col_date:
-                        st.caption(f"📝… {h.date_cuisson.strftime('%d/%m/%Y')}")
+                        st.caption(f"📅 {h.date_cuisson.strftime('%d/%m/%Y')}")
                     with col_portions:
                         st.caption(f"👥 {h.portions_cuisinees} portions")
                     with col_note:
@@ -282,7 +282,7 @@ def render_detail_recette(recette):
                         ],
                     },
                     "Monsieur Cuisine": {
-                        "icon": "💨â€🍳",
+                        "icon": "👨‍🍳",
                         "desc": "Robot cuiseur multifonction",
                         "temps": "Généralement similaire ou réduit",
                         "conseils": [
@@ -364,7 +364,7 @@ def render_detail_recette(recette):
 
                 robot_buttons = {
                     "Cookeo": ("🍲", "cookeo"),
-                    "Monsieur Cuisine": ("💨â€🍳", "monsieur_cuisine"),
+                    "Monsieur Cuisine": ("👨‍🍳", "monsieur_cuisine"),
                     "Airfryer": ("🌪️", "airfryer"),
                     "Multicooker": ("🍳", "multicooker"),
                 }
@@ -401,7 +401,7 @@ def render_detail_recette(recette):
     action_cols = st.columns(3)
 
     with action_cols[0]:
-        if st.button("âœï¸ Modifier", use_container_width=True, key="btn_modifier_recette"):
+        if st.button("✏️ Modifier", use_container_width=True, key="btn_modifier_recette"):
             st.session_state.edit_mode_recette = recette.id
             st.rerun()
 

@@ -79,7 +79,7 @@ def afficher_prediction_match(match: dict):
             st.markdown(f"🏆 {match['championnat']}")
 
         with col3:
-            st.markdown(f"### âœˆï¸ {match['ext_nom']}")
+            st.markdown(f"### ✈️ {match['ext_nom']}")
             forme_str = forme_ext.get("forme_str", "?????")
             forme_coloree = (
                 forme_str.replace("V", "🟢")
@@ -140,7 +140,7 @@ def afficher_prediction_match(match: dict):
             fig = go.Figure(
                 data=[
                     go.Bar(
-                        x=["🏠 Dom", "âš–ï¸ Nul", "âœˆï¸ Ext"],
+                        x=["🏠 Dom", "⚖️ Nul", "✈️ Ext"],
                         y=[
                             probas.get("domicile", 33),
                             probas.get("nul", 33),
@@ -242,7 +242,7 @@ def afficher_prediction_match(match: dict):
 
         with col_btn2:
             cote_n = match.get("cote_nul") or 3.5
-            if st.button(f"âš–ï¸ Match Nul ({cote_n:.2f})", key=f"bet_nul_{match['id']}"):
+            if st.button(f"⚖️ Match Nul ({cote_n:.2f})", key=f"bet_nul_{match['id']}"):
                 enregistrer_pari(match["id"], "N", cote_n, est_virtuel=True)
                 st.success("✅ Pari enregistré!")
                 st.rerun()
@@ -250,7 +250,7 @@ def afficher_prediction_match(match: dict):
         with col_btn3:
             cote_e = match.get("cote_ext") or 3.0
             if st.button(
-                f"âœˆï¸ {match['ext_nom'][:10]}... ({cote_e:.2f})", key=f"bet_ext_{match['id']}"
+                f"✈️ {match['ext_nom'][:10]}... ({cote_e:.2f})", key=f"bet_ext_{match['id']}"
             ):
                 enregistrer_pari(match["id"], "2", cote_e, est_virtuel=True)
                 st.success("✅ Pari enregistré!")

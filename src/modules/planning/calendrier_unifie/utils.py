@@ -63,7 +63,7 @@ EMOJI_TYPE = {
     TypeEvenement.MENAGE: "🧹",
     TypeEvenement.JARDIN: "🌱",
     TypeEvenement.ENTRETIEN: "🔧",
-    TypeEvenement.EVENEMENT: "📝Œ",
+    TypeEvenement.EVENEMENT: "📜",
 }
 
 # Couleurs par type (pour l'affichage)
@@ -113,7 +113,7 @@ class EvenementCalendrier:
 
     @property
     def emoji(self) -> str:
-        return EMOJI_TYPE.get(self.type, "📝Œ")
+        return EMOJI_TYPE.get(self.type, "📜")
 
     @property
     def couleur(self) -> str:
@@ -698,7 +698,7 @@ def generer_texte_semaine_pour_impression(semaine: SemaineCalendrier) -> str:
     lignes.append("")
 
     for jour in semaine.jours:
-        lignes.append(f"â–¶ {jour.jour_semaine.upper()} {jour.date_jour.strftime('%d/%m')}")
+        lignes.append(f"▶ {jour.jour_semaine.upper()} {jour.date_jour.strftime('%d/%m')}")
         lignes.append("-" * 30)
 
         if jour.repas_midi:

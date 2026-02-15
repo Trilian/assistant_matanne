@@ -281,7 +281,7 @@ class ServiceExportPDF:
         story = []
 
         # Titre
-        story.append(Paragraph(f"📝… {nom_planning}", self.styles["TitreRecette"]))
+        story.append(Paragraph(f"📅 {nom_planning}", self.styles["TitreRecette"]))
         story.append(
             Paragraph(
                 f"Semaine du {data.semaine_debut.strftime('%d/%m')} au {data.semaine_fin.strftime('%d/%m/%Y')}",
@@ -445,7 +445,7 @@ class ServiceExportPDF:
             )
 
             for article in articles:
-                prefix = "🔴 " if article.get("urgent") else "â˜ "
+                prefix = "🔴 " if article.get("urgent") else "☐ "
                 quantite = (
                     f" ({article['quantite']} {article['unite']})" if article["quantite"] else ""
                 )

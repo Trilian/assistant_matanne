@@ -18,7 +18,7 @@ def render_historique():
     """Historique des listes de courses"""
     service = get_courses_service()
 
-    st.subheader("📝š Historique des courses")
+    st.subheader("📋 Historique des courses")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -86,7 +86,7 @@ def render_historique():
         if df is not None and not df.empty:
             csv = df.to_csv(index=False)
             st.download_button(
-                label="📝¥ Télécharger en CSV",
+                label="📥 Télécharger en CSV",
                 data=csv,
                 file_name=f"historique_courses_{date_debut}_{date_fin}.csv",
                 mime="text/csv",

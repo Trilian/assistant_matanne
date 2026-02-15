@@ -46,7 +46,7 @@ def render_realtime_status():
         # Statut dans la sidebar
         with st.sidebar:
             st.divider()
-            st.markdown("### 📝„ Synchronisation")
+            st.markdown("### 📄 Synchronisation")
 
             render_sync_status()
             render_presence_indicator()

@@ -667,7 +667,7 @@ Difficulty: {recette.difficulte}"""
 
 â„ï¸ Congélation: {version_data.conseils_congelation}
 
-📝… Calendrier: {version_data.calendrier_preparation}""",
+📅 Calendrier: {version_data.calendrier_preparation}""",
         )
         db.add(version)
         db.commit()

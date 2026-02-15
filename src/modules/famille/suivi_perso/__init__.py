@@ -36,9 +36,7 @@ def app():
     data = get_user_data(username)
 
     # Tabs
-    tabs = st.tabs(
-        ["📊 Dashboard", "🏃 Activités", "🥗 Alimentation", "🎯 Objectifs", "âŒš Garmin"]
-    )
+    tabs = st.tabs(["📊 Dashboard", "🏃 Activités", "🥗 Alimentation", "🎯 Objectifs", "⌚ Garmin"])
 
     with tabs[0]:
         render_dashboard(data)

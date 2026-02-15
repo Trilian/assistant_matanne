@@ -443,7 +443,7 @@ def render_import_export():
     with col1:
         st.subheader("💡 Exporter")
 
-        if st.button("â¬‡ï¸ Telecharger CSV", key="btn_export_barcode"):
+        if st.button("⬇️ Telecharger CSV", key="btn_export_barcode"):
             try:
                 csv_data = service.exporter_barcodes()
                 st.download_button(

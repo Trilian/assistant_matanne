@@ -38,7 +38,7 @@ def render_ajouter_manuel():
     col_img, col_space = st.columns([2, 1])
     with col_img:
         image_file = st.file_uploader(
-            "📝· Photo de la recette (optionnel)",
+            "� Photo de la recette (optionnel)",
             type=["jpg", "jpeg", "png"],
             key="form_image_upload",
         )
@@ -178,7 +178,7 @@ def render_ajouter_manuel():
 
                     st.success(f"✅ Recette '{recette.nom}' créée avec succès!")
                     if image_file:
-                        st.caption(f"📝· Image sauvegardée: {image_file.name}")
+                        st.caption(f"� Image sauvegardée: {image_file.name}")
                     st.balloons()
                     time.sleep(1)
 

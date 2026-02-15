@@ -15,21 +15,21 @@ from src.core.state import GestionnaireEtat, obtenir_etat
 MODULES_MENU = {
     "🏠 Accueil": "accueil",
     # Calendrier unifié - VUE CENTRALE
-    "📝… Calendrier Familial": "planning.calendrier_unifie",
+    "📅 Calendrier Familial": "planning.calendrier_unifie",
     # Cuisine - Workflow: Plan → Batch → Courses
     "🍳 Cuisine": {
         "🍽️ Planifier Repas": "cuisine.planificateur_repas",
         "🍳 Batch Cooking": "cuisine.batch_cooking_detaille",
         "🛒 Courses": "cuisine.courses",
         "───────────": None,  # Séparateur
-        "📝š Recettes": "cuisine.recettes",
+        "📋 Recettes": "cuisine.recettes",
         "🥫 Inventaire": "cuisine.inventaire",
     },
     # Famille - HUB
     "👨‍👩‍👧‍👦 Famille": {
         "🏠 Hub Famille": "famille.hub",
         "👶 Jules": "famille.jules",
-        "📝… Planning Jules": "famille.jules_planning",
+        "📅 Planning Jules": "famille.jules_planning",
         "💪 Mon Suivi": "famille.suivi_perso",
         "🎉 Weekend": "famille.weekend",
         "🛍️ Achats": "famille.achats_famille",
@@ -52,7 +52,7 @@ MODULES_MENU = {
     },
     # Outils & Config
     "🔧 Outils": {
-        "📝± Code-barres": "barcode",
+        "📱 Code-barres": "barcode",
         "📊 Rapports": "rapports",
         "🔔 Notifications": "notifications_push",
     },

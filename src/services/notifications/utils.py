@@ -382,7 +382,7 @@ def creer_notification_rappel_activite(
         body += f" - {lieu}"
 
     return {
-        "title": "📝… Rappel d'activité",
+        "title": "📅 Rappel d'activité",
         "body": body,
         "notification_type": TypeNotification.RAPPEL_ACTIVITE.value,
         "url": "/?module=planning",

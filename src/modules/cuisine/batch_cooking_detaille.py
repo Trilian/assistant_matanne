@@ -33,11 +33,11 @@ logger = logging.getLogger(__name__)
 
 
 TYPES_DECOUPE = {
-    "rondelles": {"label": "Rondelles", "emoji": "â­•", "description": "Tranches circulaires"},
+    "rondelles": {"label": "Rondelles", "emoji": "⭕", "description": "Tranches circulaires"},
     "cubes": {"label": "Cubes", "emoji": "🔲", "description": "Morceaux cubiques"},
     "julienne": {"label": "Julienne", "emoji": "📝", "description": "Bâtonnets fins 3-4mm"},
     "brunoise": {"label": "Brunoise", "emoji": "🔹", "description": "Petits dés 3mm"},
-    "lamelles": {"label": "Lamelles", "emoji": "âž–", "description": "Tranches fines plates"},
+    "lamelles": {"label": "Lamelles", "emoji": "➖", "description": "Tranches fines plates"},
     "cisele": {"label": "Ciselé", "emoji": "✂️", "description": "Haché finement"},
     "emince": {"label": "Émincé", "emoji": "🔪", "description": "Tranches fines allongées"},
     "rape": {"label": "Râpé", "emoji": "🧀", "description": "Râpé grossier ou fin"},
@@ -181,7 +181,7 @@ def render_etape_batch(etape: dict, numero: int, key_prefix: str):
 
         with col_titre:
             titre = etape.get("titre", "Étape")
-            emoji = "⏳" if est_passif else "👩â€🍳"
+            emoji = "⏳" if est_passif else "👩‍🍳"
             st.markdown(f"**{emoji} {titre}**")
 
         with col_duree:
@@ -248,7 +248,7 @@ def render_instruction_robot(robot_config: dict):
             mins = robot_config["duree_secondes"] // 60
             parts.append(f"**{mins}min**")
 
-    st.info(" â”‚ ".join(parts))
+    st.info(" │ ".join(parts))
 
 
 def render_timeline_session(etapes: list, heure_debut: time):
@@ -264,7 +264,7 @@ def render_timeline_session(etapes: list, heure_debut: time):
         debut_m = (heure_debut.hour * 60 + heure_debut.minute + temps_courant) % 60
 
         est_passif = etape.get("est_passif", False)
-        emoji = "⏳" if est_passif else "👩â€🍳"
+        emoji = "⏳" if est_passif else "👩‍🍳"
 
         # Afficher la barre
         with st.container():
@@ -324,7 +324,7 @@ def render_liste_courses_batch(ingredients: dict):
                     nom = item.get("nom", "")
                     poids = item.get("poids_g", "")
 
-                    ligne = f"â˜ {qty} {unite} {nom}"
+                    ligne = f"☐ {qty} {unite} {nom}"
                     if poids:
                         ligne += f" (~{poids}g)"
 
@@ -503,7 +503,7 @@ def app():
 
     # Tabs
     tab_preparer, tab_session, tab_finitions = st.tabs(
-        ["📋 Préparer", "👩â€🍳 Session Batch", "🍽️ Finitions Jour J"]
+        ["📋 Préparer", "👩‍🍳 Session Batch", "🍽️ Finitions Jour J"]
     )
 
     # ═══════════════════════════════════════════════════════

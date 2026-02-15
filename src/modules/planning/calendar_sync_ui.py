@@ -21,7 +21,7 @@ def render_calendar_sync_ui():
     service = get_calendar_sync_service()
 
     # Tabs pour les différentes options
-    tab1, tab2, tab3 = st.tabs(["📝¤ Exporter", "📝¥ Importer", "🔗 Connecter"])
+    tab1, tab2, tab3 = st.tabs(["� Exporter", "📥 Importer", "🔗 Connecter"])
 
     with tab1:
         _render_export_tab(service)
@@ -50,7 +50,7 @@ def _render_export_tab(service):
 
     days_ahead = st.slider("Période (jours)", 7, 90, 30, key="export_days")
 
-    if st.button("📝¥ Générer le fichier iCal", type="primary"):
+    if st.button("📥 Générer le fichier iCal", type="primary"):
         from src.services.utilisateur import get_auth_service
 
         auth = get_auth_service()
@@ -89,7 +89,7 @@ def _render_import_tab(service):
         "Nom du calendrier", value="Calendrier importé", key="import_calendar_name"
     )
 
-    if st.button("📝¤ Importer", type="primary") and ical_url:
+    if st.button("📤 Importer", type="primary") and ical_url:
         from src.services.utilisateur import get_auth_service
 
         auth = get_auth_service()

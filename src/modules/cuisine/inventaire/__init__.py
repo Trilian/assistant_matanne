@@ -55,7 +55,7 @@ def app():
             "🏷️ Catégories",
             "🛒 Suggestions IA",
             "📋 Historique",
-            "📝· Photos",
+            "� Photos",
             "🔔 Notifications",
             "🔮 Prévisions",
             "🔧 Outils",

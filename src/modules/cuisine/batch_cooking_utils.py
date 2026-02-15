@@ -45,7 +45,7 @@ ROBOTS_INFO = {
     },
     "multicooker": {
         "nom": "Multicooker",
-        "emoji": "â™¨ï¸",
+        "emoji": "♨️",
         "peut_parallele": True,
         "description": "Cuiseur polyvalent",
     },

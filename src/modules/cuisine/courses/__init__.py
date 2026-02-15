@@ -55,9 +55,9 @@ def app():
             "📋 Liste Active",
             "🍽️ Depuis Planning",
             "⏰ Suggestions IA",
-            "📝š Historique",
-            "📝„ Modèles",
-            "📝§ Outils",
+            "📋 Historique",
+            "📄 Modèles",
+            "🔧 Outils",
         ]
     )
 

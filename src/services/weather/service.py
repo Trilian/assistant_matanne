@@ -360,7 +360,7 @@ class ServiceMeteo:
                     AlerteMeteo(
                         type_alerte=TypeAlertMeteo.ORAGE,
                         niveau=NiveauAlerte.ATTENTION,
-                        titre="â›ˆï¸ Orages",
+                        titre="⛈️ Orages",
                         message="Orages prévus",
                         conseil_jardin="Débranchez les systèmes d'arrosage automatique. Protégez les jeunes plants.",
                         date_debut=prev.date,
@@ -380,7 +380,7 @@ class ServiceMeteo:
                 AlerteMeteo(
                     type_alerte=TypeAlertMeteo.SECHERESSE,
                     niveau=NiveauAlerte.ATTENTION,
-                    titre="â˜€ï¸ Période sèche",
+                    titre="☀️ Période sèche",
                     message=f"{jours_sans_pluie} jours sans pluie significative prévus",
                     conseil_jardin="Renforcez l'arrosage. Privilégiez le paillage. Arrosez en profondeur moins souvent.",
                     date_debut=previsions[0].date,
@@ -479,7 +479,7 @@ class ServiceMeteo:
             conseils.append(
                 ConseilJardin(
                     priorite=1,
-                    icone="â˜€ï¸",
+                    icone="☀️",
                     titre="UV très forts",
                     description="Évitez de jardiner entre 12h et 16h. Pensez à vous protéger.",
                     action_recommandee="Jardiner le matin ou en fin de journée",
@@ -867,7 +867,7 @@ def render_weather_garden_ui():  # pragma: no cover
     st.markdown("---")
 
     # Prévisions 7 jours
-    st.markdown("### 📝… Prévisions 7 jours")
+    st.markdown("### 📅 Prévisions 7 jours")
 
     cols = st.columns(min(7, len(previsions)))
 

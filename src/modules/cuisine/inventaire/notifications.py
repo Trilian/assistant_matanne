@@ -50,7 +50,7 @@ def render_notifications_widget():
                     st.write(f"**{notif.icone} {notif.titre}**")
                     st.caption(notif.message)
                 with col2:
-                    if st.button("âœ“", key=f"mark_read_{notif.id}", help="Marquer comme lu"):
+                    if st.button("✓", key=f"mark_read_{notif.id}", help="Marquer comme lu"):
                         service_notifs.marquer_lue(notif.id)
                         st.rerun()
 
@@ -65,7 +65,7 @@ def render_notifications_widget():
                     st.write(f"**{notif.icone} {notif.titre}**")
                     st.caption(notif.message)
                 with col2:
-                    if st.button("âœ“", key=f"mark_read_{notif.id}", help="Marquer comme lu"):
+                    if st.button("✓", key=f"mark_read_{notif.id}", help="Marquer comme lu"):
                         service_notifs.marquer_lue(notif.id)
                         st.rerun()
 
@@ -81,7 +81,7 @@ def render_notifications():
     service_notifs = obtenir_service_notifications()
 
     # Onglets
-    tab_center, tab_config = st.tabs(["📝¬ Centre de notifications", "⚙️ Configuration"])
+    tab_center, tab_config = st.tabs(["� Centre de notifications", "⚙️ Configuration"])
 
     with tab_center:
         # Actualiser les notifications
@@ -98,7 +98,7 @@ def render_notifications():
 
         with col2:
             stats_notifs = service_notifs.obtenir_stats()
-            st.metric("📝¬ Non lues", stats_notifs["non_lues"])
+            st.metric("� Non lues", stats_notifs["non_lues"])
 
         with col3:
             if st.button("⏰ Tout marquer comme lu", width="stretch"):
@@ -129,13 +129,13 @@ def render_notifications():
                             st.write(f"**{notif.icone} {notif.titre}**")
                             st.write(notif.message)
                             st.caption(
-                                f"{'⏰ Lue' if notif.lue else '📝Œ Non lue'} • {notif.date_creation.strftime('%d/%m %H:%M')}"
+                                f"{'⏰ Lue' if notif.lue else '📜 Non lue'} • {notif.date_creation.strftime('%d/%m %H:%M')}"
                             )
                         with col2:
                             col_a, col_b = st.columns(2)
                             with col_a:
                                 if st.button(
-                                    "âœ“",
+                                    "✓",
                                     key=f"mark_{notif.id}",
                                     help="Marquer comme lu",
                                     width="stretch",
@@ -162,13 +162,13 @@ def render_notifications():
                             st.write(f"**{notif.icone} {notif.titre}**")
                             st.write(notif.message)
                             st.caption(
-                                f"{'⏰ Lue' if notif.lue else '📝Œ Non lue'} • {notif.date_creation.strftime('%d/%m %H:%M')}"
+                                f"{'⏰ Lue' if notif.lue else '📜 Non lue'} • {notif.date_creation.strftime('%d/%m %H:%M')}"
                             )
                         with col2:
                             col_a, col_b = st.columns(2)
                             with col_a:
                                 if st.button(
-                                    "âœ“",
+                                    "✓",
                                     key=f"mark_{notif.id}",
                                     help="Marquer comme lu",
                                     width="stretch",
@@ -195,13 +195,13 @@ def render_notifications():
                             st.write(f"**{notif.icone} {notif.titre}**")
                             st.write(notif.message)
                             st.caption(
-                                f"{'⏰ Lue' if notif.lue else '📝Œ Non lue'} • {notif.date_creation.strftime('%d/%m %H:%M')}"
+                                f"{'⏰ Lue' if notif.lue else '📜 Non lue'} • {notif.date_creation.strftime('%d/%m %H:%M')}"
                             )
                         with col2:
                             col_a, col_b = st.columns(2)
                             with col_a:
                                 if st.button(
-                                    "âœ“",
+                                    "✓",
                                     key=f"mark_{notif.id}",
                                     help="Marquer comme lu",
                                     width="stretch",
@@ -233,7 +233,7 @@ def render_notifications():
             enable_peremption = st.checkbox("Péremption", value=True, key="alert_peremption")
 
         with col2:
-            st.markdown("### 📝¤ Canaux")
+            st.markdown("### 📤 Canaux")
             browser_notif = st.checkbox(
                 "Notifications navigateur", value=True, help="Popup dans le navigateur"
             )

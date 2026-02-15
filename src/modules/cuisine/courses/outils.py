@@ -13,11 +13,11 @@ from ._common import (
 
 def render_outils():
     """Outils utilitaires - Phase 2: Code-barres, partage, UX améliorée"""
-    st.subheader("📝§ Outils")
+    st.subheader("🔧 Outils")
 
     # PHASE 2 FEATURES
     tab_barcode, tab_share, tab_export, tab_stats = st.tabs(
-        ["📝± Code-barres (PHASE 2)", "👥 Partage (PHASE 2)", "💾 Export/Import", "📊 Stats"]
+        ["📱 Code-barres (PHASE 2)", "👥 Partage (PHASE 2)", "💾 Export/Import", "📊 Stats"]
     )
 
     # ─────────────────────────────────────────────────────────────────────────────
@@ -25,7 +25,7 @@ def render_outils():
     # ─────────────────────────────────────────────────────────────────────────────
 
     with tab_barcode:
-        st.write("**📝± Scanner code-barres pour saisie rapide**")
+        st.write("**📱 Scanner code-barres pour saisie rapide**")
         st.info("⏳ Phase 2 - En développement")
 
         # Simuler la structure Phase 2
@@ -33,7 +33,7 @@ def render_outils():
         with col1:
             st.write("""
             **Fonctionnalités planifiées:**
-            - 📝± Scan code-barres avec webcam
+            - 📱 Scan code-barres avec webcam
             - 🔍 Reconnaissance automatique article
             - ⚡ Saisie 10x plus rapide
             - 📊 Base de codes-barres articles
@@ -63,9 +63,9 @@ def render_outils():
             st.write("""
             **Fonctionnalités planifiées:**
             - 👥 Partage par email/lien
-            - 📝„ Sync temps réel
+            - 📄 Sync temps réel
             - ✅ Permissions (lecture/écriture)
-            - 📝± Notifications mises à jour
+            - 📱 Notifications mises à jour
             """)
         with col2:
             st.write("""
@@ -118,14 +118,14 @@ def render_outils():
 
                 csv = df.to_csv(index=False)
                 st.download_button(
-                    label="📝¥ Télécharger liste (CSV)",
+                    label="📥 Télécharger liste (CSV)",
                     data=csv,
                     file_name=f"liste_courses_{datetime.now().strftime('%Y%m%d')}.csv",
                     mime="text/csv",
                 )
 
         with col2:
-            uploaded = st.file_uploader("📝¤ Importer liste (CSV)", type=["csv"], key="import_csv")
+            uploaded = st.file_uploader("📤 Importer liste (CSV)", type=["csv"], key="import_csv")
             if uploaded:
                 try:
                     import io

@@ -36,7 +36,7 @@ def get_or_create_jules() -> int:
                     name="Jules",
                     date_of_birth=date(2024, 6, 22),
                     gender="M",
-                    notes="Notre petit Jules â¤ï¸",
+                    notes="Notre petit Jules ❤️",
                     actif=True,
                 )
                 session.add(child)
