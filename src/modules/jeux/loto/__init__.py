@@ -16,6 +16,7 @@ Fonctionnalités:
 from ._common import st
 from .crud import ajouter_tirage, enregistrer_grille
 from .generateur import afficher_generateur_grilles, afficher_mes_grilles
+from .series import afficher_series_loto
 from .simulation import afficher_gestion_tirages, afficher_simulation
 from .statistiques import (
     afficher_dernier_tirage,
@@ -55,6 +56,7 @@ def app():
     tabs = st.tabs(
         [
             "📊 Statistiques",
+            "📈 Tendances",
             "🎲 Générer Grille",
             "🎫 Mes Grilles",
             "🔬 Simulation",
@@ -69,24 +71,28 @@ def app():
         st.divider()
         afficher_statistiques_frequences(tirages)
 
-    # TAB 2: GÉNÉRATION
+    # TAB 2: TENDANCES (Loi des séries)
     with tabs[1]:
+        afficher_series_loto()
+
+    # TAB 3: GÉNÉRATION
+    with tabs[2]:
         afficher_generateur_grilles(tirages)
 
-    # TAB 3: MES GRILLES
-    with tabs[2]:
+    # TAB 4: MES GRILLES
+    with tabs[3]:
         afficher_mes_grilles()
 
-    # TAB 4: SIMULATION
-    with tabs[3]:
+    # TAB 5: SIMULATION
+    with tabs[4]:
         afficher_simulation()
 
-    # TAB 5: MATHÉMATIQUES
-    with tabs[4]:
+    # TAB 6: MATHÉMATIQUES
+    with tabs[5]:
         afficher_esperance()
 
-    # TAB 6: GESTION TIRAGES
-    with tabs[5]:
+    # TAB 7: GESTION TIRAGES
+    with tabs[6]:
         afficher_gestion_tirages()
 
 

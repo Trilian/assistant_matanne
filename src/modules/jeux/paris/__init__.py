@@ -20,6 +20,7 @@ from .crud import (
 )
 from .gestion import afficher_gestion_donnees
 from .prediction import afficher_prediction_match
+from .series import afficher_series_paris
 
 # Imports des sous-modules
 from .sync import (
@@ -49,7 +50,7 @@ def app():
     st.caption("Suivi des championnats européens avec prédictions intelligentes")
 
     # Tabs principaux
-    tabs = st.tabs(["🎯 Prédictions", "📊 Performance", "🏆 Classements", "⚙️ Gestion"])
+    tabs = st.tabs(["🎯 Prédictions", "� Séries", "�📊 Performance", "🏆 Classements", "⚙️ Gestion"])
 
     # TAB 1: PRÉDICTIONS
     with tabs[0]:
@@ -175,13 +176,17 @@ def app():
                 5. **Suivez votre performance** dans l'onglet dédié
                 """)
 
-    # TAB 2: PERFORMANCE
+    # TAB 2: SÉRIES (LOI DES SÉRIES)
     with tabs[1]:
+        afficher_series_paris()
+
+    # TAB 3: PERFORMANCE
+    with tabs[2]:
         st.header("📊 Performance de mes paris")
         afficher_dashboard_performance()
 
-    # TAB 3: CLASSEMENTS
-    with tabs[2]:
+    # TAB 4: CLASSEMENTS
+    with tabs[3]:
         st.header("🏆 Classements")
 
         champ_classe = st.selectbox("Sélectionner un championnat", CHAMPIONNATS, key="class_champ")
@@ -220,8 +225,8 @@ def app():
         else:
             st.info(f"Aucune équipe enregistrée pour {champ_classe}")
 
-    # TAB 4: GESTION
-    with tabs[3]:
+    # TAB 5: GESTION
+    with tabs[4]:
         st.header("⚙️ Gestion des données")
         afficher_gestion_donnees()
 

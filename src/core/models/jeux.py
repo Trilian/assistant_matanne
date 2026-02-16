@@ -376,3 +376,166 @@ class HistoriqueJeux(Base):
         if total == 0:
             return 0.0
         return self.paris_gagnes / total * 100
+
+
+# ═══════════════════════════════════════════════════════════════════
+# ENUMS SÉRIES
+# ═══════════════════════════════════════════════════════════════════
+
+
+class TypeJeuEnum(str, enum.Enum):
+    """Type de jeu pour le tracking des séries"""
+
+    PARIS = "paris"
+    LOTO = "loto"
+
+
+class TypeMarcheParisEnum(str, enum.Enum):
+    """Types de marchés paris sportifs (inspiré du template Excel)"""
+
+    # Mi-temps
+    DOMICILE_MT = "domicile_mi_temps"
+    NUL_MT = "nul_mi_temps"
+    EXTERIEUR_MT = "exterieur_mi_temps"
+    ZERO_ZERO_MT = "0-0_mi_temps"
+    OVER_05_MT = "over_0.5_mi_temps"
+    OVER_15_MT = "over_1.5_mi_temps"
+    BTTS_MT = "btts_mi_temps"
+    CLEAN_SHEET_MT = "clean_sheet_mi_temps"
+
+    # Fin de match
+    DOMICILE_FT = "domicile_fin_match"
+    NUL_FT = "nul_fin_match"
+    EXTERIEUR_FT = "exterieur_fin_match"
+    ZERO_ZERO_FT = "0-0_fin_match"
+    UNDER_15_FT = "under_1.5_fin_match"
+    OVER_25_FT = "over_2.5_fin_match"
+    OVER_35_FT = "over_3.5_fin_match"
+    OVER_45_FT = "over_4.5_fin_match"
+    BTTS_FT = "btts_fin_match"
+    CLEAN_SHEET_FT = "clean_sheet_fin_match"
+
+    # Écarts
+    DOMICILE_1_BUT = "domicile_1_but_ecart"
+    DOMICILE_2PLUS_BUTS = "domicile_2plus_buts_ecart"
+    EXTERIEUR_1_BUT = "exterieur_1_but_ecart"
+    EXTERIEUR_2PLUS_BUTS = "exterieur_2plus_buts_ecart"
+
+
+# ═══════════════════════════════════════════════════════════════════
+# MODÈLES SÉRIES (Loi des séries - Paris & Loto)
+# ═══════════════════════════════════════════════════════════════════
+
+
+class SerieJeux(Base):
+    """
+    Tracking des séries pour la loi des séries.
+
+    Pour Paris: série = nb matchs depuis dernière occurrence du marché
+    Pour Loto: série = nb tirages depuis dernière sortie du numéro
+    """
+
+    __tablename__ = "jeux_series"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    # Identification
+    type_jeu: Mapped[str] = mapped_column(String(20), nullable=False)  # "paris" ou "loto"
+    championnat: Mapped[str | None] = mapped_column(
+        String(50), nullable=True
+    )  # Pour paris: "Ligue 1", pour loto: null
+    marche: Mapped[str] = mapped_column(
+        String(50), nullable=False
+    )  # Pour paris: type marché, pour loto: numéro (1-49)
+
+    # Statistiques
+    serie_actuelle: Mapped[int] = mapped_column(Integer, default=0)  # Nb événements depuis dernier
+    frequence: Mapped[float] = mapped_column(Float, default=0.0)  # Fréquence historique (0-1)
+    nb_occurrences: Mapped[int] = mapped_column(Integer, default=0)  # Nb fois ce marché est arrivé
+    nb_total: Mapped[int] = mapped_column(Integer, default=0)  # Nb total d'événements analysés
+
+    # Tracking
+    derniere_occurrence: Mapped[date | None] = mapped_column(Date, nullable=True)
+    derniere_mise_a_jour: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    # Méta
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self) -> str:
+        return f"<Serie {self.type_jeu}/{self.championnat or 'global'}/{self.marche}: {self.serie_actuelle}>"
+
+    @property
+    def value(self) -> float:
+        """Calcule la value = fréquence × série (indicateur d'opportunité)"""
+        return self.frequence * self.serie_actuelle
+
+    @property
+    def frequence_pourcent(self) -> float:
+        """Fréquence en pourcentage"""
+        return self.frequence * 100
+
+
+class AlerteJeux(Base):
+    """
+    Alertes d'opportunités basées sur la loi des séries.
+
+    Créée automatiquement quand value > seuil configurable.
+    """
+
+    __tablename__ = "jeux_alertes"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    # Référence à la série
+    serie_id: Mapped[int] = mapped_column(Integer, ForeignKey("jeux_series.id"), nullable=False)
+
+    # Contexte
+    type_jeu: Mapped[str] = mapped_column(String(20), nullable=False)
+    championnat: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    marche: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    # Métriques au moment de l'alerte
+    value_alerte: Mapped[float] = mapped_column(Float, nullable=False)
+    serie_alerte: Mapped[int] = mapped_column(Integer, nullable=False)
+    frequence_alerte: Mapped[float] = mapped_column(Float, nullable=False)
+    seuil_utilise: Mapped[float] = mapped_column(Float, default=2.0)
+
+    # Statut
+    notifie: Mapped[bool] = mapped_column(Boolean, default=False)
+    date_notification: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    # Résultat (après l'événement)
+    resultat_verifie: Mapped[bool] = mapped_column(Boolean, default=False)
+    resultat_correct: Mapped[bool | None] = mapped_column(
+        Boolean, nullable=True
+    )  # True si la série s'est brisée
+
+    # Méta
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    # Relations
+    serie: Mapped["SerieJeux"] = relationship("SerieJeux")
+
+    def __repr__(self) -> str:
+        return f"<Alerte {self.type_jeu}/{self.marche} value={self.value_alerte:.2f}>"
+
+
+class ConfigurationJeux(Base):
+    """
+    Configuration globale pour les modules jeux.
+
+    Stocke les seuils d'alerte, fréquences de sync, etc.
+    """
+
+    __tablename__ = "jeux_configuration"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    cle: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
+    valeur: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    modifie_le: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    def __repr__(self) -> str:
+        return f"<Config {self.cle}={self.valeur}>"

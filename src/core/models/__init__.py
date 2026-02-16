@@ -111,7 +111,9 @@ from .jardin import (
 
 # Jeux (Paris sportifs & Loto)
 from .jeux import (
+    AlerteJeux,
     ChampionnatEnum,
+    ConfigurationJeux,
     Equipe,
     GrilleLoto,
     HistoriqueJeux,
@@ -119,9 +121,12 @@ from .jeux import (
     PariSportif,
     # Enums
     ResultatMatchEnum,
+    SerieJeux,
     StatistiquesLoto,
     StatutPariEnum,
     TirageLoto,
+    TypeJeuEnum,
+    TypeMarcheParisEnum,
     TypePariEnum,
 )
 
@@ -277,10 +282,15 @@ __all__ = [
     "GrilleLoto",
     "StatistiquesLoto",
     "HistoriqueJeux",
+    "SerieJeux",
+    "AlerteJeux",
+    "ConfigurationJeux",
     "ResultatMatchEnum",
     "StatutPariEnum",
     "TypePariEnum",
     "ChampionnatEnum",
+    "TypeJeuEnum",
+    "TypeMarcheParisEnum",
     # Batch Cooking
     "ConfigBatchCooking",
     "SessionBatchCooking",
