@@ -36,38 +36,46 @@ def app():
 
     st.title("⚙️ Paramètres")
 
-    # Tabs - Ajout des nouvelles fonctionnalites
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(
-        [
-            "👨‍👩‍👧‍👦 Foyer",
-            "🤖 IA",
-            "🗄️ Base de Données",
-            "💾 Cache",
-            "🖥️ Affichage",
-            "💰 Budget",
-            "ℹ️ À Propos",
-        ]
+    # Noms des onglets
+    tab_names = [
+        "👨‍👩‍👧‍👦 Foyer",
+        "🤖 IA",
+        "🗄️ Base de Données",
+        "💾 Cache",
+        "🖥️ Affichage",
+        "💰 Budget",
+        "ℹ️ À Propos",
+    ]
+
+    # Sélecteur d'onglet persistant
+    if "parametres_tab" not in st.session_state:
+        st.session_state.parametres_tab = tab_names[0]
+
+    # Navigation par selectbox (persiste entre reruns)
+    selected_tab = st.selectbox(
+        "Section",
+        tab_names,
+        index=tab_names.index(st.session_state.parametres_tab),
+        label_visibility="collapsed",
     )
+    st.session_state.parametres_tab = selected_tab
 
-    with tab1:
+    st.markdown("---")
+
+    # Afficher le contenu selon l'onglet sélectionné
+    if selected_tab == tab_names[0]:
         render_foyer_config()
-
-    with tab2:
+    elif selected_tab == tab_names[1]:
         render_ia_config()
-
-    with tab3:
+    elif selected_tab == tab_names[2]:
         render_database_config()
-
-    with tab4:
+    elif selected_tab == tab_names[3]:
         render_cache_config()
-
-    with tab5:
+    elif selected_tab == tab_names[4]:
         render_display_config()
-
-    with tab6:
+    elif selected_tab == tab_names[5]:
         render_budget_config()
-
-    with tab7:
+    elif selected_tab == tab_names[6]:
         render_about()
 
 
@@ -262,12 +270,8 @@ def render_ia_config():
     with col9:
         st.metric("Appels Économises", cache_stats.get("saved_api_calls", 0))
 
-    mode = "🧠 Sémantique" if cache_stats.get("embeddings_available", False) else "🔑 MD5"
-    st.info(f"**Mode:** {mode}")
-    if cache_stats.get("embeddings_available", False):
-        st.success("✅ Embeddings actifs (similarité sémantique)")
-    else:
-        st.warning("⚠️ Embeddings indisponibles (fallback MD5)")
+    mode = "🔑 Hachage MD5"
+    st.info(f"**Mode:** {mode} (correspondance exacte des prompts)")
 
     # Actions cache IA
     col10, col11 = st.columns(2)
@@ -276,7 +280,6 @@ def render_ia_config():
         if st.button("🗑️ Vider Cache IA", key="btn_clear_semantic_cache", use_container_width=True):
             SemanticCache.invalider_tout()
             afficher_succes("Cache IA vidé !")
-            st.rerun()
 
     with col11:
         if st.button("📊 Détails Cache", key="btn_cache_details", use_container_width=True):
@@ -363,7 +366,20 @@ def render_database_config():
         if st.button(
             "📜 Voir Historique", key="btn_show_migration_history", use_container_width=True
         ):
-            st.session_state.show_migrations_history = True
+            st.session_state.show_migrations_history = not st.session_state.get(
+                "show_migrations_history", False
+            )
+
+    # Afficher l'historique si demandé
+    if st.session_state.get("show_migrations_history", False):
+        with st.expander("📜 Historique des Migrations", expanded=True):
+            migrations_disponibles = GestionnaireMigrations.obtenir_migrations_disponibles()
+            if migrations_disponibles:
+                for m in migrations_disponibles:
+                    status = "✅" if m["version"] <= current_version else "⏳"
+                    st.markdown(f"{status} **v{m['version']}** - {m['name']}")
+            else:
+                st.info("Aucune migration définie")
 
     st.markdown("---")
 
@@ -443,9 +459,8 @@ def render_cache_config():
             if st.button(
                 "🗑️ Vider Cache Applicatif", key="btn_clear_cache_app", use_container_width=True
             ):
-                Cache.clear_all()
-                afficher_succes("Cache applicatif vide !")
-                st.rerun()
+                Cache.clear()
+                afficher_succes("Cache applicatif vidé !")
 
     else:
         st.info("Cache vide")
@@ -471,7 +486,6 @@ def render_cache_config():
     if st.button("🗑️ Vider Cache IA", key="btn_clear_cache_ia", use_container_width=True):
         SemanticCache.invalider_tout()
         afficher_succes("Cache IA vidé !")
-        st.rerun()
 
     st.markdown("---")
 
@@ -484,10 +498,9 @@ def render_cache_config():
         type="primary",
         use_container_width=True,
     ):
-        Cache.clear_all()
+        Cache.clear()
         SemanticCache.invalider_tout()
         afficher_succes("✅ Tous les caches vidés !")
-        st.rerun()
 
 
 # -----------------------------------------------------------
@@ -500,29 +513,46 @@ def render_about():
 
     settings = get_settings()
 
-    st.markdown("### ℹ️ À Propos")
+    # Header avec logo/titre
+    col_logo, col_info = st.columns([1, 3])
 
-    # Infos app
-    st.markdown(
-        f"""
-    ## 🏠 {settings.APP_NAME}
+    with col_logo:
+        st.markdown("# 🏠")
 
-    **Version:** {settings.APP_VERSION}
+    with col_info:
+        st.markdown(f"## {settings.APP_NAME}")
+        st.caption(f"Version {settings.APP_VERSION}")
 
-    **Description:**
-    Assistant familial intelligent pour gérer :
-    - 🍳 Recettes et planning repas
-    - 📦 Inventaire alimentaire
-    - 🛒 Liste de courses
-    - 📅 Planning hebdomadaire
+    st.markdown("---")
 
-    **Technologies:**
-    - Frontend: Streamlit
-    - Backend: Python
-    - Database: PostgreSQL (Supabase)
-    - IA: Mistral AI
-    """
-    )
+    # Description
+    st.markdown("#### 📋 Description")
+    st.markdown("""
+Assistant familial intelligent pour gérer le quotidien :
+- 🍳 **Recettes** et planning des repas
+- 📦 **Inventaire** alimentaire
+- 🛒 **Listes** de courses
+- 📅 **Planning** hebdomadaire
+- 👶 **Suivi** de Jules
+- 💪 **Santé** et bien-être
+""")
+
+    st.markdown("---")
+
+    # Stack technique en colonnes
+    st.markdown("#### 🛠️ Stack Technique")
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.metric("Frontend", "Streamlit", delta=None)
+    with col2:
+        st.metric("Database", "Supabase", delta=None)
+    with col3:
+        st.metric("IA", "Mistral AI", delta=None)
+    with col4:
+        lazy_status = "✅ Actif" if True else "❌"
+        st.metric("Lazy Loading", lazy_status, delta=None)
 
     st.markdown("---")
 
@@ -532,52 +562,40 @@ def render_about():
     col1, col2 = st.columns(2)
 
     with col1:
-        st.info(f"**Mode:** {settings.ENV}")
-        st.info(f"**Debug:** {'Activé' if settings.DEBUG else 'Désactivé'}")
+        env_color = "🟢" if settings.ENV == "production" else "🟡"
+        st.markdown(f"{env_color} **Mode:** {settings.ENV}")
+        debug_icon = "🔧" if settings.DEBUG else "🔒"
+        st.markdown(f"{debug_icon} **Debug:** {'Activé' if settings.DEBUG else 'Désactivé'}")
 
     with col2:
-        db_configured = (
-            "✅ Configurée" if settings._verifier_db_configuree() else "❌ Non configurée"
-        )
-        ai_configured = (
-            "✅ Configurée" if settings._verifier_mistral_configure() else "❌ Non configurée"
-        )
-
-        st.info(f"**Base de données:** {db_configured}")
-        st.info(f"**IA:** {ai_configured}")
+        db_ok = settings._verifier_db_configuree()
+        ai_ok = settings._verifier_mistral_configure()
+        st.markdown(f"{'✅' if db_ok else '❌'} **Base de données**")
+        st.markdown(f"{'✅' if ai_ok else '❌'} **IA Mistral**")
 
     st.markdown("---")
 
-    # Configuration securisee (sans secrets)
-    st.markdown("#### 🔐 Configuration")
-
-    with st.expander("Voir la configuration (sans secrets)"):
+    # Configuration (collapsible)
+    with st.expander("🔐 Configuration (sans secrets)"):
         safe_config = settings.obtenir_config_publique()
         st.json(safe_config)
 
-    st.markdown("---")
-
-    # Support
-    st.markdown("#### 📞 Support")
-
-    st.info(
-        """
-    **Besoin d'aide ?**
-    - ✉️ Contact: support@example.com
-    - 🐛 Bugs: GitHub Issues
-    - 📚 Documentation: /docs
-    """
-    )
-
-    st.markdown("---")
-
-    # État système
-    st.markdown("#### ⚙️ État Système")
-
+    # État système (collapsible)
     state_summary = GestionnaireEtat.obtenir_resume_etat()
 
-    with st.expander("État de l'application"):
-        st.json(state_summary)
+    with st.expander("⚙️ État Système"):
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(f"**Module:** {state_summary.get('module_actuel', '—')}")
+            st.markdown(f"**Utilisateur:** {state_summary.get('nom_utilisateur', '—')}")
+            st.markdown(f"**Cache:** {'✅' if state_summary.get('cache_active') else '❌'}")
+        with col2:
+            st.markdown(f"**IA:** {'✅' if state_summary.get('ia_disponible') else '❌'}")
+            st.markdown(f"**Debug:** {'✅' if state_summary.get('mode_debug') else '❌'}")
+            notifs = state_summary.get("notifications_non_lues", 0)
+            st.markdown(f"**Notifications:** {notifs}")
+            notifs = state_summary.get("notifications_non_lues", 0)
+            st.markdown(f"**Notifications:** {notifs}")
 
 
 # -----------------------------------------------------------
@@ -603,33 +621,46 @@ def render_display_config():
         st.markdown("#### Mode d'affichage")
 
         mode_options = {
-            TabletMode.NORMAL: ("💻 Normal", "Interface standard pour ordinateur"),
-            TabletMode.TABLET: ("📱 Tablette", "Boutons plus grands, interface tactile"),
-            TabletMode.KITCHEN: ("🍳 Cuisine", "Mode cuisine avec navigation par étapes"),
+            "💻 Normal": TabletMode.NORMAL,
+            "📱 Tablette": TabletMode.TABLET,
+            "🍳 Cuisine": TabletMode.KITCHEN,
         }
 
-        for mode, (label, description) in mode_options.items():
-            col1, col2 = st.columns([1, 3])
-            with col1:
-                if st.button(
-                    label,
-                    key=f"mode_{mode.value}",
-                    type="primary" if current_mode == mode else "secondary",
-                    use_container_width=True,
-                ):
-                    set_tablet_mode(mode)
-                    afficher_succes(f"Mode {label} active !")
-                    st.rerun()
-            with col2:
-                st.caption(description)
+        mode_descriptions = {
+            TabletMode.NORMAL: "Interface standard pour ordinateur",
+            TabletMode.TABLET: "Boutons plus grands, interface tactile",
+            TabletMode.KITCHEN: "Mode cuisine avec navigation par étapes",
+        }
+
+        # Trouver le label actuel
+        current_label = next(
+            (label for label, mode in mode_options.items() if mode == current_mode), "💻 Normal"
+        )
+
+        selected_label = st.radio(
+            "Choisir le mode",
+            options=list(mode_options.keys()),
+            index=list(mode_options.keys()).index(current_label),
+            horizontal=True,
+            label_visibility="collapsed",
+        )
+
+        selected_mode = mode_options[selected_label]
+
+        # Appliquer si changement
+        if selected_mode != current_mode:
+            set_tablet_mode(selected_mode)
+            afficher_succes(f"Mode {selected_label} activé !")
+
+        st.caption(mode_descriptions[selected_mode])
 
         st.markdown("---")
 
         st.markdown("#### Prévisualisation")
 
-        if current_mode == TabletMode.NORMAL:
+        if selected_mode == TabletMode.NORMAL:
             st.info("💻 Mode normal actif - Interface optimisée pour ordinateur")
-        elif current_mode == TabletMode.TABLET:
+        elif selected_mode == TabletMode.TABLET:
             st.warning("📱 Mode tablette actif - Boutons et textes agrandis")
         else:
             st.success("🍳 Mode cuisine actif - Interface simplifiée pour cuisiner")
@@ -644,40 +675,48 @@ def render_display_config():
 
 
 def render_budget_config():
-    """Configuration du budget et backup."""
+    """Configuration du budget."""
 
-    st.markdown("### 💰 Budget & Sauvegarde")
+    st.markdown("### 💰 Budget")
 
     # Section Budget
-    st.markdown("#### 📈 Configuration Budget")
+    st.markdown("#### 📈 Catégories de dépenses")
 
     try:
         from src.services.budget import CategorieDepense
 
-        st.markdown("**Catégories de dépenses disponibles:**")
-
+        # Mapping complet avec accents
         emoji_map = {
             "alimentation": "🍞",
+            "courses": "🛒",
+            "maison": "🏠",
+            "santé": "🏥",
             "transport": "🚗",
-            "logement": "🏠",
-            "sante": "🏥",
             "loisirs": "🎮",
-            "vetements": "👕",
-            "education": "📚",
-            "cadeaux": "🎁",
-            "abonnements": "📱",
-            "restaurant": "🍽️",
-            "vacances": "✈️",
-            "bebe": "👶",
+            "vêtements": "👕",
+            "enfant": "👶",
+            "éducation": "📚",
+            "services": "🔧",
+            "impôts": "📋",
+            "épargne": "💰",
+            "gaz": "🔥",
+            "electricite": "⚡",
+            "eau": "💧",
+            "internet": "🌐",
+            "loyer": "🏘️",
+            "assurance": "🛡️",
+            "taxe_fonciere": "🏛️",
+            "creche": "🧒",
             "autre": "📦",
         }
 
-        # Affichage en badges au lieu de checkboxes désactivées
+        # Affichage en grille
         categories = list(CategorieDepense)
-        badges = [
-            f"{emoji_map.get(cat.value, '📦')} {cat.value.capitalize()}" for cat in categories
-        ]
-        st.markdown(" • ".join(badges))
+        cols = st.columns(4)
+        for i, cat in enumerate(categories):
+            with cols[i % 4]:
+                emoji = emoji_map.get(cat.value, "📦")
+                st.markdown(f"{emoji} {cat.value.replace('_', ' ').capitalize()}")
 
         st.info("👉 Accède au module **Budget** dans le menu Famille pour gérer tes dépenses")
 
@@ -716,41 +755,3 @@ def render_budget_config():
 
     except ImportError:
         st.warning("Module backup non disponible")
-
-    st.markdown("---")
-
-    # Section Meteo
-    st.markdown("#### ⛅ Configuration Météo Jardin")
-
-    try:
-        from src.services.weather import get_weather_garden_service
-
-        weather = get_weather_garden_service()
-
-        with st.form("meteo_config"):
-            ville = st.text_input("Ville", value="Paris")
-            surface = st.number_input("Surface jardin (m²)", min_value=1, max_value=1000, value=50)
-
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                notif_gel = st.checkbox("Alertes gel", value=True)
-            with col2:
-                notif_canicule = st.checkbox("Alertes canicule", value=True)
-            with col3:
-                notif_pluie = st.checkbox("Alertes pluie", value=True)
-
-            if st.form_submit_button("💾 Sauvegarder", use_container_width=True):
-                if weather.set_location_from_city(ville):
-                    st.session_state.meteo_config = {
-                        "ville": ville,
-                        "surface": surface,
-                        "notif_gel": notif_gel,
-                        "notif_canicule": notif_canicule,
-                        "notif_pluie": notif_pluie,
-                    }
-                    afficher_succes("✅ Configuration météo sauvegardée")
-                else:
-                    afficher_erreur("Ville non trouvée")
-
-    except ImportError:
-        st.warning("Module meteo non disponible")

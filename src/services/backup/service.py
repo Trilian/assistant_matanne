@@ -195,6 +195,8 @@ class ServiceBackup:
                 logger.debug(f"  ✓ {table_name}: {len(records)} enregistrements")
             except Exception as e:
                 logger.error(f"  ✗ Erreur export {table_name}: {e}")
+                # Rollback pour libérer la transaction en erreur
+                db.rollback()
                 backup_data["data"][table_name] = []
 
         # Sérialiser

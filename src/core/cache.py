@@ -243,6 +243,9 @@ class Cache:
         st.session_state[Cache.CLE_STATS]["invalidations"] += 1
         logger.info("Cache complètement vidé")
 
+    # Alias pour compatibilité
+    clear_all = vider
+
     @staticmethod
     def obtenir_statistiques() -> dict:
         """

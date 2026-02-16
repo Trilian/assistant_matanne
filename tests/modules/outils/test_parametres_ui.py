@@ -28,7 +28,7 @@ def setup_mock_st(mock_st: MagicMock, session_data: dict | None = None) -> None:
         MagicMock() for _ in range(n if isinstance(n, int) else len(n))
     ]
     mock_st.tabs.return_value = [MagicMock() for _ in range(7)]
-    mock_st.session_state = SessionStateMock(session_data or {})
+    mock_st.session_state = SessionStateMock(session_data or {"parametres_tab": "👨‍👩‍👧‍👦 Foyer"})
     for cm in ["container", "expander", "spinner", "form"]:
         getattr(mock_st, cm).return_value.__enter__ = MagicMock(return_value=MagicMock())
         getattr(mock_st, cm).return_value.__exit__ = MagicMock(return_value=False)
@@ -51,9 +51,10 @@ class TestParametresUI:
         from src.modules.outils.parametres import app
 
         setup_mock_st(mock_st)
+        mock_st.selectbox.return_value = "👨‍👩‍👧‍👦 Foyer"
         app()
         mock_st.title.assert_called()
-        mock_st.tabs.assert_called_once()
+        mock_st.selectbox.assert_called()  # Navigation par selectbox
 
     @patch("src.modules.outils.parametres.obtenir_etat")
     @patch("src.modules.outils.parametres.st")
@@ -117,9 +118,7 @@ class TestParametresUI:
         from src.modules.outils.parametres import render_display_config
 
         setup_mock_st(mock_st)
-        mock_st.selectbox.return_value = "Clair"
-        mock_st.slider.return_value = 14
-        mock_st.checkbox.return_value = True
+        mock_st.radio.return_value = "💻 Normal"  # Mode par défaut
         render_display_config()
         mock_st.markdown.assert_called()
 
