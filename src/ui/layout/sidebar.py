@@ -36,17 +36,11 @@ MODULES_MENU = {
     },
     # Maison
     "🏠 Maison": {
-        "🏠 Hub Maison": "maison",
-        "�️ Hub Intégré": "maison.hub_integre",
-        "📋 Projets": "maison.projets",
-        "🌳 Jardin": "maison.jardin",
-        "�🌳 Zones Jardin": "maison.jardin_zones",
-        "🔋 Énergie": "maison.energie",
-        "📱 Scan Factures": "maison.scan_factures",
-        "🧹 Entretien": "maison.entretien",
-        "🛋️ Meubles": "maison.meubles",
+        "🏠 Hub": "maison.hub",
+        "� Jardin": "maison.jardin",
+        "🏡 Entretien": "maison.entretien",
+        "💡 Charges": "maison.energie",
         "💰 Dépenses": "maison.depenses",
-        "🌱 Éco-Tips": "maison.eco",
     },
     # Jeux
     "🎲 Jeux": {

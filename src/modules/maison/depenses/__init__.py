@@ -2,17 +2,25 @@
 Module Dépenses Maison - Suivi des factures (gaz, eau, électricité, etc.)
 
 Focus sur les dépenses récurrentes de la maison avec consommation.
+Fonctionnalités avancées:
+- Graphiques Plotly interactifs
+- Export PDF/CSV
+- Prévisions IA
+
 Utilise le service Budget unifié (src/services/budget.py).
 """
 
 from .components import (
     render_comparaison_mois,
     render_depense_card,
+    render_export_section,
     render_formulaire,
     render_graphique_evolution,
+    render_graphique_repartition,
     render_onglet_ajouter,
     render_onglet_analyse,
     render_onglet_mois,
+    render_previsions_ia,
     render_stats_dashboard,
 )
 
@@ -33,7 +41,9 @@ from .utils import CATEGORY_LABELS, st
 def app():
     """Point d'entrée module Dépenses"""
     st.title("💰 Dépenses Maison")
-    st.caption("Suivez vos dépenses: gaz, eau, électricité, loyer...")
+    st.caption(
+        "Suivez vos dépenses: gaz, eau, électricité, loyer... avec graphiques et prévisions IA!"
+    )
 
     # Mode édition
     if "edit_depense_id" in st.session_state:
@@ -52,7 +62,7 @@ def app():
 
     st.divider()
 
-    # Onglets
+    # Onglets enrichis
     tab1, tab2, tab3 = st.tabs(["📅 Ce mois", "➕ Ajouter", "📊 Analyse"])
 
     with tab1:
@@ -82,7 +92,10 @@ __all__ = [
     "render_depense_card",
     "render_formulaire",
     "render_graphique_evolution",
+    "render_graphique_repartition",
     "render_comparaison_mois",
+    "render_export_section",
+    "render_previsions_ia",
     "render_onglet_mois",
     "render_onglet_ajouter",
     "render_onglet_analyse",

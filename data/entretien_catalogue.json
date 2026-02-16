@@ -1,0 +1,304 @@
+{
+  "version": "1.0",
+  "description": "Catalogue des tâches d'entretien par type d'objet/équipement",
+  "categories": {
+    "electromenager": {
+      "icon": "🔌",
+      "couleur": "#3498db",
+      "objets": {
+        "lave_linge": {
+          "nom": "Lave-linge",
+          "duree_vie_ans": 10,
+          "taches": [
+            {"nom": "Nettoyage tambour", "frequence_jours": 30, "duree_min": 10, "description": "Lancer un cycle à vide à 90°C avec vinaigre blanc"},
+            {"nom": "Nettoyage filtre", "frequence_jours": 60, "duree_min": 15, "description": "Retirer et nettoyer le filtre de vidange"},
+            {"nom": "Nettoyage joint", "frequence_jours": 14, "duree_min": 5, "description": "Essuyer le joint de porte avec un chiffon humide"},
+            {"nom": "Détartrage", "frequence_jours": 90, "duree_min": 5, "description": "Ajouter du détartrant et lancer un cycle"}
+          ]
+        },
+        "lave_vaisselle": {
+          "nom": "Lave-vaisselle",
+          "duree_vie_ans": 10,
+          "taches": [
+            {"nom": "Nettoyage filtre", "frequence_jours": 14, "duree_min": 10, "description": "Retirer et rincer le filtre"},
+            {"nom": "Cycle nettoyage", "frequence_jours": 30, "duree_min": 5, "description": "Lancer un cycle à vide avec produit nettoyant"},
+            {"nom": "Nettoyage bras", "frequence_jours": 90, "duree_min": 15, "description": "Vérifier et déboucher les trous des bras de lavage"},
+            {"nom": "Vérifier sel/liquide rinçage", "frequence_jours": 30, "duree_min": 2, "description": "Remplir si nécessaire"}
+          ]
+        },
+        "refrigerateur": {
+          "nom": "Réfrigérateur",
+          "duree_vie_ans": 12,
+          "taches": [
+            {"nom": "Nettoyage intérieur", "frequence_jours": 30, "duree_min": 20, "description": "Vider, nettoyer avec eau + bicarbonate, remettre"},
+            {"nom": "Nettoyage grille arrière", "frequence_jours": 180, "duree_min": 15, "description": "Aspirer la poussière sur le condenseur"},
+            {"nom": "Vérifier joints", "frequence_jours": 90, "duree_min": 5, "description": "Nettoyer les joints et vérifier l'étanchéité"},
+            {"nom": "Dégivrage congélateur", "frequence_jours": 180, "duree_min": 60, "description": "Si givre > 5mm, dégivrer"}
+          ]
+        },
+        "four": {
+          "nom": "Four",
+          "duree_vie_ans": 15,
+          "taches": [
+            {"nom": "Nettoyage intérieur", "frequence_jours": 14, "duree_min": 30, "description": "Nettoyer les parois avec produit four ou pyrolyse"},
+            {"nom": "Nettoyage grilles", "frequence_jours": 30, "duree_min": 20, "description": "Tremper et frotter les grilles"},
+            {"nom": "Nettoyage vitre", "frequence_jours": 14, "duree_min": 10, "description": "Nettoyer la vitre intérieure et extérieure"}
+          ]
+        },
+        "micro_ondes": {
+          "nom": "Micro-ondes",
+          "duree_vie_ans": 8,
+          "taches": [
+            {"nom": "Nettoyage intérieur", "frequence_jours": 7, "duree_min": 10, "description": "Chauffer un bol d'eau citronnée 3min, essuyer"},
+            {"nom": "Nettoyage plateau", "frequence_jours": 7, "duree_min": 5, "description": "Laver le plateau tournant"}
+          ]
+        },
+        "aspirateur": {
+          "nom": "Aspirateur",
+          "duree_vie_ans": 8,
+          "taches": [
+            {"nom": "Vider sac/bac", "frequence_jours": 7, "duree_min": 5, "description": "Vider quand rempli aux 2/3"},
+            {"nom": "Nettoyer filtres", "frequence_jours": 30, "duree_min": 15, "description": "Laver ou remplacer les filtres"},
+            {"nom": "Vérifier brosse", "frequence_jours": 30, "duree_min": 10, "description": "Retirer cheveux et fils enroulés"}
+          ]
+        },
+        "climatisation": {
+          "nom": "Climatisation",
+          "duree_vie_ans": 15,
+          "taches": [
+            {"nom": "Nettoyer filtres", "frequence_jours": 30, "duree_min": 15, "description": "Retirer, aspirer ou laver les filtres"},
+            {"nom": "Révision pro", "frequence_jours": 365, "duree_min": 60, "description": "Faire vérifier par un professionnel", "pro": true}
+          ]
+        },
+        "chaudiere": {
+          "nom": "Chaudière",
+          "duree_vie_ans": 20,
+          "taches": [
+            {"nom": "Révision annuelle", "frequence_jours": 365, "duree_min": 60, "description": "Entretien obligatoire par professionnel", "pro": true, "obligatoire": true},
+            {"nom": "Vérifier pression", "frequence_jours": 30, "duree_min": 2, "description": "Pression entre 1 et 1.5 bar"},
+            {"nom": "Purger radiateurs", "frequence_jours": 365, "duree_min": 30, "description": "Purger avant l'hiver"}
+          ]
+        },
+        "chauffe_eau": {
+          "nom": "Chauffe-eau",
+          "duree_vie_ans": 12,
+          "taches": [
+            {"nom": "Détartrage", "frequence_jours": 730, "duree_min": 60, "description": "Faire détartrer par professionnel tous les 2 ans", "pro": true},
+            {"nom": "Vérifier groupe sécurité", "frequence_jours": 30, "duree_min": 2, "description": "Actionner la soupape pour vérifier le fonctionnement"}
+          ]
+        }
+      }
+    },
+    "mobilier": {
+      "icon": "🪑",
+      "couleur": "#8e44ad",
+      "objets": {
+        "canape_tissu": {
+          "nom": "Canapé tissu",
+          "duree_vie_ans": 10,
+          "taches": [
+            {"nom": "Aspirer", "frequence_jours": 7, "duree_min": 10, "description": "Aspirer toute la surface et les recoins"},
+            {"nom": "Retourner coussins", "frequence_jours": 7, "duree_min": 2, "description": "Retourner et tapoter les coussins"},
+            {"nom": "Nettoyage profond", "frequence_jours": 180, "duree_min": 60, "description": "Shampouiner ou faire nettoyer"}
+          ]
+        },
+        "canape_cuir": {
+          "nom": "Canapé cuir",
+          "duree_vie_ans": 15,
+          "taches": [
+            {"nom": "Dépoussiérer", "frequence_jours": 7, "duree_min": 5, "description": "Passer un chiffon sec"},
+            {"nom": "Nourrir le cuir", "frequence_jours": 90, "duree_min": 20, "description": "Appliquer un lait nourrissant pour cuir"}
+          ]
+        },
+        "matelas": {
+          "nom": "Matelas",
+          "duree_vie_ans": 10,
+          "taches": [
+            {"nom": "Retourner", "frequence_jours": 90, "duree_min": 10, "description": "Retourner tête-pied et/ou face"},
+            {"nom": "Aspirer", "frequence_jours": 30, "duree_min": 10, "description": "Aspirer la surface"},
+            {"nom": "Aérer", "frequence_jours": 7, "duree_min": 1, "description": "Ouvrir les fenêtres, laisser aérer"}
+          ]
+        },
+        "meuble_bois": {
+          "nom": "Meuble bois",
+          "duree_vie_ans": 30,
+          "taches": [
+            {"nom": "Dépoussiérer", "frequence_jours": 7, "duree_min": 5, "description": "Chiffon microfibre sec ou légèrement humide"},
+            {"nom": "Cirer/huiler", "frequence_jours": 180, "duree_min": 30, "description": "Appliquer cire ou huile selon le bois"}
+          ]
+        }
+      }
+    },
+    "sanitaires": {
+      "icon": "🚿",
+      "couleur": "#1abc9c",
+      "objets": {
+        "wc": {
+          "nom": "WC",
+          "duree_vie_ans": 25,
+          "taches": [
+            {"nom": "Nettoyage cuvette", "frequence_jours": 3, "duree_min": 5, "description": "Brosse + produit WC"},
+            {"nom": "Nettoyage complet", "frequence_jours": 7, "duree_min": 15, "description": "Cuvette, abattant, extérieur, sol autour"},
+            {"nom": "Détartrage", "frequence_jours": 30, "duree_min": 10, "description": "Produit détartrant sous les rebords"}
+          ]
+        },
+        "douche": {
+          "nom": "Douche",
+          "duree_vie_ans": 20,
+          "taches": [
+            {"nom": "Rincer parois", "frequence_jours": 1, "duree_min": 2, "description": "Rincer après chaque utilisation"},
+            {"nom": "Nettoyage complet", "frequence_jours": 7, "duree_min": 20, "description": "Parois, bac, joints, pommeau"},
+            {"nom": "Détartrer pommeau", "frequence_jours": 30, "duree_min": 5, "description": "Tremper dans vinaigre blanc"},
+            {"nom": "Nettoyer siphon", "frequence_jours": 30, "duree_min": 10, "description": "Retirer les cheveux, utiliser furet si besoin"}
+          ]
+        },
+        "baignoire": {
+          "nom": "Baignoire",
+          "duree_vie_ans": 25,
+          "taches": [
+            {"nom": "Rincer", "frequence_jours": 1, "duree_min": 2, "description": "Rincer après chaque bain"},
+            {"nom": "Nettoyage complet", "frequence_jours": 7, "duree_min": 20, "description": "Parois, fond, robinetterie"},
+            {"nom": "Nettoyer siphon", "frequence_jours": 30, "duree_min": 10, "description": "Retirer les cheveux"}
+          ]
+        },
+        "lavabo": {
+          "nom": "Lavabo",
+          "duree_vie_ans": 25,
+          "taches": [
+            {"nom": "Nettoyage", "frequence_jours": 3, "duree_min": 5, "description": "Vasque, robinetterie, miroir au-dessus"},
+            {"nom": "Nettoyer siphon", "frequence_jours": 60, "duree_min": 10, "description": "Démonter et nettoyer le siphon"}
+          ]
+        }
+      }
+    },
+    "surfaces": {
+      "icon": "🧹",
+      "couleur": "#e74c3c",
+      "objets": {
+        "sol_carrelage": {
+          "nom": "Sol carrelage",
+          "duree_vie_ans": 50,
+          "taches": [
+            {"nom": "Balayer/aspirer", "frequence_jours": 2, "duree_min": 10, "description": "Retirer poussière et débris"},
+            {"nom": "Laver", "frequence_jours": 7, "duree_min": 20, "description": "Serpillière avec produit adapté"},
+            {"nom": "Nettoyer joints", "frequence_jours": 90, "duree_min": 30, "description": "Brosse + bicarbonate sur les joints"}
+          ]
+        },
+        "sol_parquet": {
+          "nom": "Sol parquet",
+          "duree_vie_ans": 50,
+          "taches": [
+            {"nom": "Balayer/aspirer", "frequence_jours": 2, "duree_min": 10, "description": "Retirer poussière et débris"},
+            {"nom": "Nettoyer", "frequence_jours": 7, "duree_min": 15, "description": "Serpillière légèrement humide, savon noir"},
+            {"nom": "Huiler/vitrifier", "frequence_jours": 365, "duree_min": 120, "description": "Rénover la protection du bois"}
+          ]
+        },
+        "moquette": {
+          "nom": "Moquette/Tapis",
+          "duree_vie_ans": 10,
+          "taches": [
+            {"nom": "Aspirer", "frequence_jours": 3, "duree_min": 15, "description": "Aspirer en croisant les passages"},
+            {"nom": "Shampouiner", "frequence_jours": 180, "duree_min": 60, "description": "Nettoyage profond shampouineuse"}
+          ]
+        },
+        "vitres": {
+          "nom": "Vitres/Fenêtres",
+          "duree_vie_ans": 30,
+          "taches": [
+            {"nom": "Nettoyer vitres", "frequence_jours": 30, "duree_min": 30, "description": "Produit vitre + raclette"},
+            {"nom": "Nettoyer encadrements", "frequence_jours": 90, "duree_min": 15, "description": "Cadres, rails, poignées"},
+            {"nom": "Graisser ferrures", "frequence_jours": 365, "duree_min": 20, "description": "Huiler les charnières et mécanismes"}
+          ]
+        }
+      }
+    },
+    "exterieur": {
+      "icon": "🏡",
+      "couleur": "#27ae60",
+      "objets": {
+        "gouttiere": {
+          "nom": "Gouttières",
+          "duree_vie_ans": 30,
+          "taches": [
+            {"nom": "Nettoyage", "frequence_jours": 180, "duree_min": 60, "description": "Retirer feuilles et débris, vérifier écoulement"},
+            {"nom": "Vérifier fixations", "frequence_jours": 365, "duree_min": 30, "description": "Contrôler les crochets et joints"}
+          ]
+        },
+        "terrasse": {
+          "nom": "Terrasse",
+          "duree_vie_ans": 30,
+          "taches": [
+            {"nom": "Balayer", "frequence_jours": 7, "duree_min": 10, "description": "Retirer feuilles et débris"},
+            {"nom": "Nettoyage haute pression", "frequence_jours": 180, "duree_min": 60, "description": "Karcher ou brosse dure"},
+            {"nom": "Traitement", "frequence_jours": 365, "duree_min": 120, "description": "Anti-mousse, imperméabilisant selon matériau"}
+          ]
+        },
+        "barbecue": {
+          "nom": "Barbecue",
+          "duree_vie_ans": 10,
+          "taches": [
+            {"nom": "Nettoyage grille", "frequence_jours": 1, "duree_min": 15, "description": "Brosser à chaud après utilisation", "conditionnel": "apres_utilisation"},
+            {"nom": "Nettoyage complet", "frequence_jours": 30, "duree_min": 30, "description": "Cuve, grilles, couvercle", "saisonnier": [5, 6, 7, 8, 9]},
+            {"nom": "Hivernage", "frequence_jours": 365, "duree_min": 45, "description": "Nettoyage complet + housse", "mois": [10]}
+          ]
+        },
+        "piscine": {
+          "nom": "Piscine",
+          "duree_vie_ans": 25,
+          "taches": [
+            {"nom": "Vérifier pH/chlore", "frequence_jours": 2, "duree_min": 5, "description": "Tester et ajuster si nécessaire", "saisonnier": [5, 6, 7, 8, 9]},
+            {"nom": "Nettoyer skimmers", "frequence_jours": 2, "duree_min": 5, "description": "Vider les paniers", "saisonnier": [5, 6, 7, 8, 9]},
+            {"nom": "Robot/Balai", "frequence_jours": 7, "duree_min": 30, "description": "Nettoyer fond et parois", "saisonnier": [5, 6, 7, 8, 9]},
+            {"nom": "Nettoyage filtre", "frequence_jours": 14, "duree_min": 20, "description": "Backwash ou nettoyage cartouche", "saisonnier": [5, 6, 7, 8, 9]},
+            {"nom": "Hivernage", "frequence_jours": 365, "duree_min": 120, "description": "Produit hivernage + bâche", "mois": [10, 11]},
+            {"nom": "Mise en route", "frequence_jours": 365, "duree_min": 180, "description": "Nettoyage + traitement choc", "mois": [4, 5]}
+          ]
+        }
+      }
+    },
+    "divers": {
+      "icon": "📦",
+      "couleur": "#95a5a6",
+      "objets": {
+        "detecteur_fumee": {
+          "nom": "Détecteur de fumée",
+          "duree_vie_ans": 10,
+          "taches": [
+            {"nom": "Test", "frequence_jours": 30, "duree_min": 1, "description": "Appuyer sur le bouton test"},
+            {"nom": "Changer piles", "frequence_jours": 365, "duree_min": 5, "description": "Remplacer les piles"}
+          ]
+        },
+        "extincteur": {
+          "nom": "Extincteur",
+          "duree_vie_ans": 20,
+          "taches": [
+            {"nom": "Vérification visuelle", "frequence_jours": 180, "duree_min": 2, "description": "Pression OK, pas de corrosion"},
+            {"nom": "Révision pro", "frequence_jours": 365, "duree_min": 30, "description": "Contrôle par professionnel", "pro": true}
+          ]
+        },
+        "vmc": {
+          "nom": "VMC",
+          "duree_vie_ans": 15,
+          "taches": [
+            {"nom": "Nettoyer bouches", "frequence_jours": 90, "duree_min": 15, "description": "Dépoussiérer les bouches d'extraction"},
+            {"nom": "Nettoyer filtres", "frequence_jours": 180, "duree_min": 20, "description": "Si VMC double flux"}
+          ]
+        }
+      }
+    }
+  },
+  "pieces_type": {
+    "salon": {"nom": "Salon", "icon": "🛋️", "surfaces_defaut": ["sol_parquet", "vitres"], "objets_courants": ["canape_tissu", "meuble_bois"]},
+    "cuisine": {"nom": "Cuisine", "icon": "🍳", "surfaces_defaut": ["sol_carrelage", "vitres"], "objets_courants": ["refrigerateur", "four", "micro_ondes", "lave_vaisselle"]},
+    "chambre": {"nom": "Chambre", "icon": "🛏️", "surfaces_defaut": ["sol_parquet"], "objets_courants": ["matelas", "meuble_bois"]},
+    "salle_de_bain": {"nom": "Salle de bain", "icon": "🚿", "surfaces_defaut": ["sol_carrelage"], "objets_courants": ["douche", "lavabo", "wc"]},
+    "wc": {"nom": "WC", "icon": "🚽", "surfaces_defaut": ["sol_carrelage"], "objets_courants": ["wc", "lavabo"]},
+    "bureau": {"nom": "Bureau", "icon": "💼", "surfaces_defaut": ["sol_parquet"], "objets_courants": ["meuble_bois"]},
+    "buanderie": {"nom": "Buanderie", "icon": "🧺", "surfaces_defaut": ["sol_carrelage"], "objets_courants": ["lave_linge"]},
+    "garage": {"nom": "Garage", "icon": "🚗", "surfaces_defaut": [], "objets_courants": []},
+    "cave": {"nom": "Cave", "icon": "🍷", "surfaces_defaut": [], "objets_courants": []},
+    "grenier": {"nom": "Grenier", "icon": "📦", "surfaces_defaut": [], "objets_courants": []},
+    "jardin": {"nom": "Jardin", "icon": "🌳", "surfaces_defaut": [], "objets_courants": ["barbecue"]},
+    "terrasse": {"nom": "Terrasse", "icon": "☀️", "surfaces_defaut": ["terrasse"], "objets_courants": ["barbecue"]}
+  }
+}

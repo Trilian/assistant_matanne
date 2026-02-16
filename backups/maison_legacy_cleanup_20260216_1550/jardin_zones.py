@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from src.core.database import obtenir_contexte_db
 from src.core.decorators import avec_session_db
-from src.core.models import GardenZone
+from src.core.models import ZoneJardin
 
 logger = logging.getLogger(__name__)
 
@@ -67,13 +67,13 @@ def charger_zones() -> list[dict[str, Any]]:
     """Charge toutes les zones du jardin."""
     try:
         with obtenir_contexte_db() as db:
-            zones = db.query(GardenZone).all()
+            zones = db.query(ZoneJardin).all()
             return [
                 {
                     "id": z.id,
                     "nom": z.nom,
                     "type_zone": z.type_zone,
-                    "surface_m2": z.surface_m2 or 0,
+                    "superficie_m2": float(z.superficie_m2) if z.superficie_m2 else 0,
                     "etat_note": z.etat_note or 3,
                     "etat_description": z.etat_description or "",
                     "objectif": z.objectif or "",
@@ -93,7 +93,7 @@ def charger_zones() -> list[dict[str, Any]]:
 def mettre_a_jour_zone(zone_id: int, champs: dict[str, Any], db: Session | None = None) -> bool:
     """Met à jour une zone du jardin."""
     try:
-        zone = db.query(GardenZone).filter_by(id=zone_id).first()
+        zone = db.query(ZoneJardin).filter_by(id=zone_id).first()
         if not zone:
             return False
 
@@ -115,7 +115,7 @@ def ajouter_photo_zone(
 ) -> bool:
     """Ajoute une photo à une zone."""
     try:
-        zone = db.query(GardenZone).filter_by(id=zone_id).first()
+        zone = db.query(ZoneJardin).filter_by(id=zone_id).first()
         if not zone:
             return False
 
@@ -154,7 +154,7 @@ def render_carte_zone(zone: dict[str, Any]):
             st.markdown(f"**{label_etat}**")
 
         # Surface
-        st.caption(f"📐 {zone['surface_m2']}m²")
+        st.caption(f"📐 {zone['superficie_m2']}m²")
 
         # Description de l'etat
         if zone["etat_description"]:
@@ -191,7 +191,7 @@ def render_vue_ensemble():
         return
 
     # Metriques globales
-    total_surface = sum(z["surface_m2"] for z in zones)
+    total_surface = sum(z["superficie_m2"] for z in zones)
     etat_moyen = sum(z["etat_note"] for z in zones) / len(zones)
     zones_critiques = len([z for z in zones if z["etat_note"] <= 2])
 
@@ -254,7 +254,7 @@ def render_detail_zone(zone: dict[str, Any]):
     with col1:
         # Infos
         st.markdown(f"**Type:** {zone['type_zone']}")
-        st.markdown(f"**Surface:** {zone['surface_m2']}m²")
+        st.markdown(f"**Surface:** {zone['superficie_m2']}m²")
         st.markdown(f"**État:** {LABEL_ETAT.get(zone['etat_note'], '?')}")
         st.progress(zone["etat_note"] / 5)
 

@@ -13,6 +13,7 @@ from decimal import Decimal
 from enum import Enum
 
 from sqlalchemy import (
+    JSON,
     CheckConstraint,
     Date,
     DateTime,
@@ -430,6 +431,13 @@ class ZoneJardin(Base):
         exposition: Exposition (N, S, E, O)
         type_sol: Type de sol
         arrosage_auto: Si arrosage automatique installé
+        etat_note: État actuel (1=catastrophe, 5=parfait)
+        etat_description: Description de l'état actuel
+        objectif: Objectif de remise en état
+        budget_estime: Budget estimé pour travaux
+        prochaine_action: Prochaine action à effectuer
+        date_prochaine_action: Date prévue
+        photos_url: URLs des photos avant/après
     """
 
     __tablename__ = "zones_jardin"
@@ -445,6 +453,17 @@ class ZoneJardin(Base):
 
     description: Mapped[str | None] = mapped_column(Text)
 
+    # État et suivi (champs migrés de GardenZone)
+    etat_note: Mapped[int] = mapped_column(Integer, default=3)  # 1=catastrophe, 5=parfait
+    etat_description: Mapped[str | None] = mapped_column(Text)  # "Herbe jaune, pas entretenu"
+    objectif: Mapped[str | None] = mapped_column(Text)  # "Pelouse verte et tondue"
+    budget_estime: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
+    prochaine_action: Mapped[str | None] = mapped_column(String(200))
+    date_prochaine_action: Mapped[date | None] = mapped_column(Date)
+    photos_url: Mapped[list[str] | None] = mapped_column(
+        JSON, default=list
+    )  # ["avant:url", "apres:url"]
+
     # Métadonnées
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
@@ -457,7 +476,7 @@ class ZoneJardin(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<ZoneJardin(id={self.id}, nom='{self.nom}', type='{self.type_zone}')>"
+        return f"<ZoneJardin(id={self.id}, nom='{self.nom}', type='{self.type_zone}', etat={self.etat_note}/5)>"
 
 
 class PlanteJardin(Base):

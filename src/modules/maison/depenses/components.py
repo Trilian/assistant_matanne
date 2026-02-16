@@ -1,10 +1,30 @@
 """
 Module Depenses Maison - Composants UI
+
+Fonctionnalités:
+- Dashboard stats
+- Graphiques Plotly interactifs
+- Export PDF/CSV
+- Prévisions IA
 """
+
+import io
+from datetime import datetime
+
+import pandas as pd
+
+try:
+    import plotly.express as px
+    import plotly.graph_objects as go
+
+    PLOTLY_AVAILABLE = True
+except ImportError:
+    PLOTLY_AVAILABLE = False
 
 from .crud import (
     create_depense,
     delete_depense,
+    get_depenses_annee,
     get_depenses_mois,
     get_historique_categorie,
     get_stats_globales,
@@ -167,7 +187,7 @@ def render_formulaire(depense: Optional[HouseExpense] = None):
 
 
 def render_graphique_evolution():
-    """Affiche le graphique d'evolution"""
+    """Affiche le graphique d'evolution avec Plotly"""
     st.subheader("📈 Évolution")
 
     # Selection categorie
@@ -193,17 +213,352 @@ def render_graphique_evolution():
 
             depenses = get_depenses_mois(mois, annee)
             total = sum(float(d.montant) for d in depenses)
-            data.append({"Mois": f"{MOIS_FR[mois][:3]} {annee}", "Montant": total})
+            data.append(
+                {
+                    "Mois": f"{MOIS_FR[mois][:3]} {annee}",
+                    "Montant": total,
+                    "mois_num": mois,
+                    "annee": annee,
+                }
+            )
         data = list(reversed(data))
     else:
         historique = get_historique_categorie(categorie, 12)
         data = [{"Mois": h["label"], "Montant": h["montant"]} for h in historique]
 
     if data:
-        import pandas as pd
+        df = pd.DataFrame(data)
+
+        if PLOTLY_AVAILABLE:
+            # Graphique Plotly interactif
+            fig = px.bar(
+                df,
+                x="Mois",
+                y="Montant",
+                title=f"Évolution {'totale' if categorie == 'total' else CATEGORY_LABELS.get(categorie, categorie)}",
+                text="Montant",
+                color_discrete_sequence=["#8e44ad"],
+            )
+
+            fig.update_traces(texttemplate="%{text:.0f}€", textposition="outside")
+
+            fig.update_layout(
+                xaxis_title="",
+                yaxis_title="Montant (€)",
+                showlegend=False,
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(family="system-ui", size=12),
+                margin=dict(t=50, b=50, l=50, r=20),
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Graphique tendance (ligne)
+            if len(df) >= 3:
+                fig_line = px.line(df, x="Mois", y="Montant", title="Tendance", markers=True)
+                fig_line.update_traces(line_color="#27ae60")
+                fig_line.update_layout(
+                    showlegend=False, plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)"
+                )
+                st.plotly_chart(fig_line, use_container_width=True)
+        else:
+            # Fallback: graphique Streamlit natif
+            st.bar_chart(df.set_index("Mois")["Montant"])
+
+
+def render_graphique_repartition():
+    """Affiche un graphique camembert de répartition par catégorie."""
+    st.subheader("🥧 Répartition par catégorie")
+
+    today = date.today()
+
+    col1, col2 = st.columns(2)
+    with col1:
+        mois = st.selectbox(
+            "Mois",
+            options=range(1, 13),
+            format_func=lambda x: MOIS_FR[x],
+            index=today.month - 1,
+            key="repartition_mois",
+        )
+    with col2:
+        annee = st.number_input(
+            "Année", min_value=2020, max_value=2030, value=today.year, key="repartition_annee"
+        )
+
+    depenses = get_depenses_mois(mois, int(annee))
+
+    if not depenses:
+        st.info(f"Aucune dépense pour {MOIS_FR[mois]} {annee}")
+        return
+
+    # Grouper par catégorie
+    par_cat = {}
+    for d in depenses:
+        cat = CATEGORY_LABELS.get(d.categorie, d.categorie)
+        par_cat[cat] = par_cat.get(cat, 0) + float(d.montant)
+
+    df = pd.DataFrame([{"Catégorie": k, "Montant": v} for k, v in par_cat.items()])
+
+    if PLOTLY_AVAILABLE and not df.empty:
+        fig = px.pie(
+            df,
+            values="Montant",
+            names="Catégorie",
+            title=f"Répartition {MOIS_FR[mois]} {annee}",
+            color_discrete_sequence=px.colors.qualitative.Set3,
+        )
+
+        fig.update_traces(
+            textposition="inside",
+            textinfo="percent+label",
+            hovertemplate="<b>%{label}</b><br>%{value:.0f}€<br>%{percent}",
+        )
+
+        fig.update_layout(showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.3))
+
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        # Fallback simple
+        for cat, montant in par_cat.items():
+            st.write(f"{cat}: {montant:.0f}€")
+
+
+def render_export_section():
+    """Section d'export PDF/CSV des dépenses."""
+    st.subheader("📥 Export des données")
+
+    today = date.today()
+
+    col1, col2 = st.columns(2)
+    with col1:
+        annee_export = st.selectbox(
+            "Année à exporter", options=range(today.year, 2019, -1), key="export_annee"
+        )
+    with col2:
+        format_export = st.selectbox("Format", options=["CSV", "Excel"], key="export_format")
+
+    if st.button("📥 Générer l'export", type="primary", use_container_width=True):
+        # Récupérer toutes les dépenses de l'année
+        toutes_depenses = get_depenses_annee(int(annee_export))
+
+        if not toutes_depenses:
+            st.warning(f"Aucune dépense trouvée pour {annee_export}")
+            return
+
+        # Convertir en DataFrame
+        data = []
+        for d in toutes_depenses:
+            data.append(
+                {
+                    "Mois": MOIS_FR[d.mois],
+                    "Année": d.annee,
+                    "Catégorie": CATEGORY_LABELS.get(d.categorie, d.categorie),
+                    "Montant (€)": float(d.montant),
+                    "Consommation": float(d.consommation) if d.consommation else "",
+                    "Note": d.note or "",
+                }
+            )
 
         df = pd.DataFrame(data)
-        st.bar_chart(df.set_index("Mois"))
+
+        # Total par mois
+        st.markdown(f"**{len(data)} dépenses** pour un total de **{df['Montant (€)'].sum():.2f}€**")
+
+        # Exporter
+        if format_export == "CSV":
+            csv = df.to_csv(index=False, encoding="utf-8-sig")
+            st.download_button(
+                label="⬇️ Télécharger CSV",
+                data=csv,
+                file_name=f"depenses_maison_{annee_export}.csv",
+                mime="text/csv",
+            )
+        else:
+            # Excel
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine="openpyxl") as writer:
+                df.to_excel(writer, sheet_name="Dépenses", index=False)
+
+                # Résumé par catégorie
+                resume = df.groupby("Catégorie")["Montant (€)"].sum().reset_index()
+                resume.columns = ["Catégorie", "Total (€)"]
+                resume.to_excel(writer, sheet_name="Résumé", index=False)
+
+            output.seek(0)
+
+            st.download_button(
+                label="⬇️ Télécharger Excel",
+                data=output.getvalue(),
+                file_name=f"depenses_maison_{annee_export}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+
+        st.success("✅ Export généré avec succès !")
+
+
+def render_previsions_ia():
+    """Affiche les prévisions IA pour les prochains mois."""
+    st.subheader("🤖 Prévisions IA")
+
+    st.markdown("""
+    Basé sur votre historique, l'IA estime vos dépenses pour les prochains mois.
+    """)
+
+    today = date.today()
+
+    # Récupérer données des 6 derniers mois
+    historique = []
+    for i in range(6):
+        mois = today.month - i
+        annee = today.year
+        while mois <= 0:
+            mois += 12
+            annee -= 1
+
+        depenses = get_depenses_mois(mois, annee)
+        total = sum(float(d.montant) for d in depenses)
+        historique.append({"mois": mois, "annee": annee, "total": total})
+
+    historique = list(reversed(historique))
+
+    if not historique or all(h["total"] == 0 for h in historique):
+        st.info("📊 Ajoutez des dépenses pour obtenir des prévisions personnalisées.")
+        return
+
+    # Calculs de prévision (moyenne mobile + saisonnalité simplifiée)
+    moyenne = sum(h["total"] for h in historique) / len(historique)
+    tendance = (
+        (historique[-1]["total"] - historique[0]["total"]) / len(historique)
+        if len(historique) > 1
+        else 0
+    )
+
+    # Prévisions pour les 3 prochains mois
+    previsions = []
+    for i in range(1, 4):
+        mois_prev = today.month + i
+        annee_prev = today.year
+        while mois_prev > 12:
+            mois_prev -= 12
+            annee_prev += 1
+
+        # Estimation: moyenne + tendance + facteur saisonnier
+        facteur_saison = 1.0
+        if mois_prev in [1, 2, 12]:  # Mois froids = plus de chauffage
+            facteur_saison = 1.15
+        elif mois_prev in [7, 8]:  # Été = moins
+            facteur_saison = 0.9
+
+        estimation = (moyenne + tendance * i) * facteur_saison
+        estimation = max(0, estimation)  # Pas de négatif
+
+        previsions.append(
+            {
+                "Mois": f"{MOIS_FR[mois_prev]} {annee_prev}",
+                "Estimation": estimation,
+                "mois_num": mois_prev,
+            }
+        )
+
+    # Affichage
+    col1, col2, col3 = st.columns(3)
+
+    for i, (col, prev) in enumerate(zip([col1, col2, col3], previsions, strict=False)):
+        with col:
+            variation = ""
+            if historique:
+                last_total = historique[-1]["total"]
+                if last_total > 0:
+                    pct = ((prev["Estimation"] - last_total) / last_total) * 100
+                    variation = f"{pct:+.0f}%"
+
+            st.metric(
+                prev["Mois"], f"{prev['Estimation']:.0f}€", delta=variation, delta_color="inverse"
+            )
+
+    # Graphique prévisionnel
+    if PLOTLY_AVAILABLE:
+        # Combiner historique et prévisions
+        df_hist = pd.DataFrame(
+            [
+                {"Mois": f"{MOIS_FR[h['mois']][:3]}", "Montant": h["total"], "Type": "Réel"}
+                for h in historique
+            ]
+        )
+
+        df_prev = pd.DataFrame(
+            [
+                {"Mois": p["Mois"][:3], "Montant": p["Estimation"], "Type": "Prévision"}
+                for p in previsions
+            ]
+        )
+
+        df_combined = pd.concat([df_hist, df_prev])
+
+        fig = go.Figure()
+
+        # Historique
+        fig.add_trace(
+            go.Bar(x=df_hist["Mois"], y=df_hist["Montant"], name="Réel", marker_color="#8e44ad")
+        )
+
+        # Prévisions (hachuré)
+        fig.add_trace(
+            go.Bar(
+                x=df_prev["Mois"],
+                y=df_prev["Montant"],
+                name="Prévision",
+                marker_color="#9b59b6",
+                marker_pattern_shape="/",
+            )
+        )
+
+        fig.update_layout(
+            title="Historique et prévisions",
+            xaxis_title="",
+            yaxis_title="Montant (€)",
+            barmode="group",
+            showlegend=True,
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    # Insights IA
+    st.divider()
+    st.markdown("### 💡 Insights")
+
+    insights = []
+
+    if tendance > 20:
+        insights.append(
+            "📈 **Tendance haussière** : Vos dépenses augmentent. Surveillez les postes en hausse."
+        )
+    elif tendance < -20:
+        insights.append(
+            "📉 **Tendance baissière** : Bravo ! Vos efforts de réduction portent leurs fruits."
+        )
+    else:
+        insights.append("➡️ **Tendance stable** : Vos dépenses sont relativement constantes.")
+
+    # Mois le plus cher
+    if historique:
+        mois_max = max(historique, key=lambda h: h["total"])
+        if mois_max["total"] > 0:
+            insights.append(
+                f"💰 Mois le plus cher : **{MOIS_FR[mois_max['mois']]} {mois_max['annee']}** ({mois_max['total']:.0f}€)"
+            )
+
+    # Estimation annuelle
+    estimation_annuelle = moyenne * 12
+    insights.append(
+        f"📅 Budget annuel estimé : **{estimation_annuelle:.0f}€** ({estimation_annuelle/12:.0f}€/mois)"
+    )
+
+    for insight in insights:
+        st.markdown(insight)
 
 
 def render_comparaison_mois():
@@ -305,7 +660,23 @@ def render_onglet_ajouter():
 
 
 def render_onglet_analyse():
-    """Onglet analyse et graphiques"""
-    render_graphique_evolution()
-    st.divider()
-    render_comparaison_mois()
+    """Onglet analyse et graphiques enrichie avec Plotly, export et prévisions IA."""
+
+    # Sous-onglets pour organisation
+    sub_tab1, sub_tab2, sub_tab3, sub_tab4 = st.tabs(
+        ["📈 Évolution", "🥧 Répartition", "🤖 Prévisions IA", "📥 Export"]
+    )
+
+    with sub_tab1:
+        render_graphique_evolution()
+        st.divider()
+        render_comparaison_mois()
+
+    with sub_tab2:
+        render_graphique_repartition()
+
+    with sub_tab3:
+        render_previsions_ia()
+
+    with sub_tab4:
+        render_export_section()

@@ -74,6 +74,11 @@ class GardenZone(Base):
     """Zone du jardin avec état et plan d'action.
 
     Pour gérer un grand jardin (2600m²) par zones.
+
+    .. deprecated::
+        Ce modèle est obsolète. Utiliser ZoneJardin de temps_entretien.py
+        qui unifie les fonctionnalités jardin avec le suivi du temps.
+        GardenZone sera supprimé dans une prochaine version.
     """
 
     __tablename__ = "garden_zones"

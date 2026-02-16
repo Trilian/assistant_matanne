@@ -37,7 +37,6 @@ _SERVICES = {
     "InventaireMaisonService": "inventaire_service",
     "PlanJardinService": "plan_jardin_service",
     "MaisonAssistantIA": "assistant_ia",
-    "MaisonIntegrationService": "integration_service",
     "TempsEntretienService": "temps_entretien_service",
     # Factories
     "get_jardin_service": "jardin_service",
@@ -47,7 +46,6 @@ _SERVICES = {
     "get_inventaire_service": "inventaire_service",
     "get_plan_jardin_service": "plan_jardin_service",
     "get_maison_assistant": "assistant_ia",
-    "get_maison_integration_service": "integration_service",
     "get_temps_entretien_service": "temps_entretien_service",
 }
 
@@ -94,7 +92,6 @@ if TYPE_CHECKING:
     from .assistant_ia import MaisonAssistantIA, get_maison_assistant
     from .energie_service import EnergieService, get_energie_service
     from .entretien_service import EntretienService, get_entretien_service
-    from .integration_service import MaisonIntegrationService, get_maison_integration_service
     from .inventaire_service import InventaireMaisonService, get_inventaire_service
     from .jardin_service import JardinService, get_jardin_service
     from .plan_jardin_service import PlanJardinService, get_plan_jardin_service
@@ -114,6 +111,7 @@ if TYPE_CHECKING:
         RoutineCreate,
         ZoneJardinCreate,
     )
+    from .temps_entretien_service import TempsEntretienService, get_temps_entretien_service
 
 __all__ = [
     # Services
@@ -124,7 +122,7 @@ __all__ = [
     "InventaireMaisonService",
     "PlanJardinService",
     "MaisonAssistantIA",
-    "MaisonIntegrationService",
+    "TempsEntretienService",
     # Factories
     "get_jardin_service",
     "get_entretien_service",
@@ -133,7 +131,7 @@ __all__ = [
     "get_inventaire_service",
     "get_plan_jardin_service",
     "get_maison_assistant",
-    "get_maison_integration_service",
+    "get_temps_entretien_service",
     # Schemas
     "BriefingMaison",
     "AlerteMaison",
