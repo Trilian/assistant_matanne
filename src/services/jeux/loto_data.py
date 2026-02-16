@@ -103,7 +103,7 @@ class LotoDataService:
 
     def __init__(self):
         """Initialise le service."""
-        self.http_client = httpx.Client(timeout=60.0)
+        self.http_client = httpx.Client(timeout=60.0, follow_redirects=True)
         self._tirages_cache: list[TirageLoto] = []
 
     # ─────────────────────────────────────────────────────────────────

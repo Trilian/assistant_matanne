@@ -44,6 +44,22 @@ NOMS_MARCHES = {
     "nul_final": "Nul Final",
 }
 
+# CSS pour réduire la taille des éléments
+STYLES_SERIES = """
+<style>
+/* Réduire taille metrics dans les séries */
+div[data-testid="stMetric"] > div {
+    font-size: 0.85rem !important;
+}
+div[data-testid="stMetric"] label {
+    font-size: 0.7rem !important;
+}
+div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+    font-size: 1.1rem !important;
+}
+</style>
+"""
+
 
 # ═══════════════════════════════════════════════════════════
 # FONCTIONS UI
@@ -52,6 +68,9 @@ NOMS_MARCHES = {
 
 def afficher_series_paris():
     """Affiche le tableau des séries pour les paris sportifs."""
+    # Injecter CSS pour tailles réduites
+    st.markdown(STYLES_SERIES, unsafe_allow_html=True)
+
     st.header("📈 Loi des Séries - Opportunités")
 
     st.markdown("""
@@ -122,7 +141,20 @@ def afficher_series_paris():
 
     st.subheader(f"Séries - {COMPETITIONS[competition]}")
 
-    # Afficher avec style
+    # En-tête
+    col_ind, col_marche, col_serie, col_freq, col_val = st.columns([0.5, 2.5, 1.5, 1.5, 1])
+    with col_ind:
+        st.caption("")
+    with col_marche:
+        st.caption("Marché")
+    with col_serie:
+        st.caption("Série")
+    with col_freq:
+        st.caption("Fréq.")
+    with col_val:
+        st.caption("Value")
+
+    # Afficher avec style compact
     for _, row in df.iterrows():
         niveau = row["niveau"]
         marche = row["marche_nom"]
@@ -130,20 +162,20 @@ def afficher_series_paris():
         frequence = row["frequence"]
         value = row["value"]
 
-        col_ind, col_marche, col_serie, col_freq, col_val = st.columns([1, 3, 2, 2, 2])
+        col_ind, col_marche, col_serie, col_freq, col_val = st.columns([0.5, 2.5, 1.5, 1.5, 1])
 
         with col_ind:
-            st.markdown(f"### {niveau}")
+            st.write(niveau)
         with col_marche:
-            st.markdown(f"**{marche}**")
+            st.write(f"**{marche}**")
         with col_serie:
-            st.metric("Série", f"{serie} matchs")
+            st.write(f"**{serie}** matchs")
         with col_freq:
-            st.metric("Fréquence", f"{frequence:.1%}")
+            st.write(f"{frequence:.1%}")
         with col_val:
-            st.metric("Value", f"{value:.2f}")
+            st.write(f"**{value:.2f}**")
 
-        st.divider()
+    st.markdown("---")
 
     # ─────────────────────────────────────────────────────────────────
     # DÉTAILS AVANCÉS

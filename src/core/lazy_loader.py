@@ -235,6 +235,7 @@ class RouteurOptimise:
         "famille.routines": {"path": "src.modules.famille.routines", "type": "simple"},
         # DOMAINE MAISON
         "maison": {"path": "src.modules.maison.hub_maison", "type": "simple"},
+        "maison.hub_integre": {"path": "src.modules.maison.hub_integre", "type": "simple"},
         "maison.projets": {"path": "src.modules.maison.projets", "type": "simple"},
         "maison.jardin": {"path": "src.modules.maison.jardin", "type": "simple"},
         "maison.jardin_zones": {"path": "src.modules.maison.jardin_zones", "type": "simple"},
