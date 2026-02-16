@@ -51,10 +51,9 @@ class TestParametresUI:
         from src.modules.outils.parametres import app
 
         setup_mock_st(mock_st)
-        mock_st.selectbox.return_value = "👨‍👩‍👧‍👦 Foyer"
         app()
         mock_st.title.assert_called()
-        mock_st.selectbox.assert_called()  # Navigation par selectbox
+        mock_st.tabs.assert_called()  # Navigation par onglets
 
     @patch("src.modules.outils.parametres.obtenir_etat")
     @patch("src.modules.outils.parametres.st")
@@ -117,7 +116,9 @@ class TestParametresUI:
         """Test config affichage."""
         from src.modules.outils.parametres import render_display_config
 
-        setup_mock_st(mock_st)
+        setup_mock_st(
+            mock_st, {"display_mode_selection": "💻 Normal", "display_mode_key": "💻 Normal"}
+        )
         mock_st.radio.return_value = "💻 Normal"  # Mode par défaut
         render_display_config()
         mock_st.markdown.assert_called()

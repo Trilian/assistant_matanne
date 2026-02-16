@@ -71,6 +71,101 @@ def app():
 # ═══════════════════════════════════════════════════════════
 
 
+def _render_scanner_camera(service: BarcodeService):
+    """Scanner via caméra du téléphone (st.camera_input)."""
+    import cv2
+    import numpy as np
+    from PIL import Image
+    from pyzbar import pyzbar
+
+    st.info("📱 **Prenez une photo du code-barres** - Fonctionne sur téléphone!")
+
+    # Capture photo via caméra native
+    camera_photo = st.camera_input(
+        "Prendre une photo",
+        key="barcode_camera",
+        label_visibility="collapsed",
+    )
+
+    if camera_photo:
+        with st.spinner("Analyse de l'image..."):
+            try:
+                # Convertir en numpy array
+                image = Image.open(camera_photo)
+                frame = np.array(image)
+
+                # Convertir RGB -> BGR pour OpenCV
+                if len(frame.shape) == 3 and frame.shape[2] == 3:
+                    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
+                # Détecter les codes-barres
+                codes = pyzbar.decode(frame)
+
+                if codes:
+                    st.success(f"✅ {len(codes)} code(s) détecté(s)!")
+
+                    for code in codes:
+                        code_data = code.data.decode("utf-8")
+                        code_type = code.type
+
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Type", code_type)
+                        with col2:
+                            st.metric("Code", code_data)
+
+                        # Traiter le code détecté
+                        st.divider()
+                        _process_scanned_code(service, code_data)
+                else:
+                    st.warning(
+                        "⚠️ Aucun code détecté.\n\n"
+                        "**Conseils:**\n"
+                        "- Rapprochez-vous du code-barres\n"
+                        "- Assurez-vous d'avoir assez de lumière\n"
+                        "- Évitez les reflets"
+                    )
+
+            except Exception as e:
+                st.error(f"❌ Erreur: {e}")
+
+
+def _process_scanned_code(service: BarcodeService, code_input: str):
+    """Traite un code scanné (partagé entre caméra et manuel)."""
+    try:
+        # Valider code
+        valide, type_code = service.valider_barcode(code_input)
+
+        if not valide:
+            st.error(f"❌ Code invalide: {type_code}")
+            return
+
+        # Scanner
+        resultat = service.scanner_code(code_input)
+
+        st.success("✅ Scan réussi!")
+
+        # Afficher résultats
+        if resultat.type_scan == "article":
+            st.subheader("📦 Article trouvé")
+            details = resultat.details
+
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Article", details["nom"])
+            with col2:
+                st.metric("Stock", f"{details['quantite']} {details['unite']}")
+            with col3:
+                st.metric("Emplacement", details["emplacement"])
+
+        elif resultat.type_scan == "nouveau":
+            st.info("🆕 Code inconnu - Ajoutez-le comme nouvel article!")
+            st.session_state.nouveau_barcode = code_input
+
+    except Exception as e:
+        st.error(f"❌ Erreur: {e}")
+
+
 def render_scanner():
     """Scanner codes-barres"""
 
@@ -78,18 +173,57 @@ def render_scanner():
 
     st.subheader("📷 Scanner Code")
 
-    col1, col2 = st.columns([3, 1])
+    # Vérifier si les packages caméra sont disponibles
+    camera_disponible = False
+    try:
+        import cv2
+        from pyzbar import pyzbar
 
-    with col1:
-        code_input = st.text_input(
-            "Scannez ou entrez le code:",
-            key="scanner_input",
-            placeholder="Posez le lecteur sur le code...",
-            label_visibility="collapsed",
+        camera_disponible = True
+    except ImportError:
+        pass
+
+    # Mode de saisie
+    modes_disponibles = ["⌨️ Manuel", "🎮 Démo (codes test)"]
+    if camera_disponible:
+        modes_disponibles.insert(0, "📷 Caméra")
+
+    mode = st.radio(
+        "Mode de saisie",
+        modes_disponibles,
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+
+    if mode == "📷 Caméra":
+        _render_scanner_camera(service)
+    elif mode == "🎮 Démo (codes test)":
+        st.info("💡 **Mode Démo** - Sélectionnez un code-barres de test")
+        demo_codes = {
+            "Lait demi-écrémé 1L": "3017620422003",
+            "Pâtes Panzani 500g": "3038350012005",
+            "Eau Evian 1.5L": "3068320114484",
+            "Nutella 400g": "3017620425035",
+            "Café Carte Noire 250g": "3104060013510",
+            "Code invalide (test)": "1234567890",
+        }
+        selected_demo = st.selectbox("Produit test", list(demo_codes.keys()))
+        code_input = demo_codes[selected_demo]
+        st.code(f"Code: {code_input}")
+        scanner_button = st.button(
+            "📍 Scanner ce code", use_container_width=True, key="btn_demo_scan"
         )
-
-    with col2:
-        scanner_button = st.button("📍Scanner", use_container_width=True, key="btn_scanner")
+    else:
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            code_input = st.text_input(
+                "Scannez ou entrez le code:",
+                key="scanner_input",
+                placeholder="Entrez le code-barres (ex: 3017620422003)...",
+                label_visibility="collapsed",
+            )
+        with col2:
+            scanner_button = st.button("📍 Scanner", use_container_width=True, key="btn_scanner")
 
     if code_input and scanner_button:
         try:
@@ -435,31 +569,30 @@ def render_import_export():
 
     service = get_barcode_service()
 
-    st.subheader("📅Ÿ“¤ Import/Export")
+    st.subheader("📥 Import/Export")
 
     col1, col2 = st.columns(2)
 
     # EXPORT
     with col1:
-        st.subheader("💡 Exporter")
+        st.markdown("#### 📤 Exporter")
 
-        if st.button("⬇️ Télécharger CSV", key="btn_export_barcode"):
-            try:
-                csv_data = service.exporter_barcodes()
-                st.download_button(
-                    label="📥 Télécharger codes-barres.csv",
-                    data=csv_data,
-                    file_name=f"codes_barres_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                    mime="text/csv",
-                    key="download_barcode_csv",
-                )
-                st.success("✅ CSV généré")
-            except Exception as e:
-                st.error(f"❌ Erreur: {str(e)}")
+        try:
+            csv_data = service.exporter_barcodes()
+            st.download_button(
+                label="⬇️ Télécharger CSV",
+                data=csv_data,
+                file_name=f"codes_barres_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                mime="text/csv",
+                key="download_barcode_csv",
+                use_container_width=True,
+            )
+        except Exception as e:
+            st.error(f"❌ Erreur export: {str(e)}")
 
     # IMPORT
     with col2:
-        st.subheader("📥 Importer")
+        st.markdown("#### 📥 Importer")
 
         uploaded_file = st.file_uploader(
             "Choisir fichier CSV", type="csv", key="upload_barcode_csv"
@@ -468,14 +601,14 @@ def render_import_export():
         if uploaded_file:
             csv_content = uploaded_file.read().decode("utf-8")
 
-            if st.button("✅ Importer", key="btn_import_barcode"):
+            if st.button("✅ Importer", key="btn_import_barcode", use_container_width=True):
                 try:
                     resultats = service.importer_barcodes(csv_content)
 
-                    st.success(f"✅ {resultats['success']} articles importes")
+                    st.success(f"✅ {resultats['success']} articles importés")
 
                     if resultats["errors"]:
-                        st.warning(f"âš ï¸ {len(resultats['errors'])} erreurs")
+                        st.warning(f"⚠️ {len(resultats['errors'])} erreurs")
                         for err in resultats["errors"][:5]:
                             st.text(f"- {err['barcode']}: {err['erreur']}")
                 except Exception as e:

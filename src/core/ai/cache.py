@@ -148,7 +148,7 @@ class CacheIA:
             >>> # Toutes les réponses IA seront recalculées
         """
         Cache.invalider(pattern=CacheIA.PREFIXE)
-        logger.info("Cache IA complètement invalidé")
+        logger.info("Cache IA vidé")
 
     @staticmethod
     def obtenir_statistiques() -> dict[str, Any]:

@@ -21,56 +21,36 @@ class TestAfficherFooter:
         from src.ui.layout.footer import afficher_footer
 
         mock_params.return_value = MagicMock(APP_NAME="Matanne", APP_VERSION="1.0.0")
-        mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
-        mock_st.button.return_value = False
 
         afficher_footer()
 
-        mock_st.markdown.assert_called()
-        mock_st.columns.assert_called()
+        mock_st.markdown.assert_called_with("---")
+        mock_st.caption.assert_called()
 
     @patch("src.ui.layout.footer.st")
     @patch("src.ui.layout.footer.obtenir_parametres")
-    def test_footer_caption(self, mock_params, mock_st):
+    def test_footer_caption_contains_app_info(self, mock_params, mock_st):
         """Test caption dans footer."""
         from src.ui.layout.footer import afficher_footer
 
         mock_params.return_value = MagicMock(APP_NAME="TestApp", APP_VERSION="2.0")
-        mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
-        mock_st.button.return_value = False
 
         afficher_footer()
 
         mock_st.caption.assert_called()
         call_args = str(mock_st.caption.call_args)
-        assert "TestApp" in call_args or "Lazy Loading" in call_args
+        assert "TestApp" in call_args
+        assert "2.0" in call_args
 
     @patch("src.ui.layout.footer.st")
     @patch("src.ui.layout.footer.obtenir_parametres")
-    def test_footer_bug_button(self, mock_params, mock_st):
-        """Test bouton bug."""
+    def test_footer_contains_stack_info(self, mock_params, mock_st):
+        """Test que le footer affiche la stack technique."""
         from src.ui.layout.footer import afficher_footer
 
         mock_params.return_value = MagicMock(APP_NAME="T", APP_VERSION="1")
-        mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
-        mock_st.button.side_effect = [True, False]  # Bug clicked
 
         afficher_footer()
 
-        mock_st.info.assert_called()
-
-    @patch("src.ui.layout.footer.st")
-    @patch("src.ui.layout.footer.obtenir_parametres")
-    def test_footer_about_expander(self, mock_params, mock_st):
-        """Test expander À propos."""
-        from src.ui.layout.footer import afficher_footer
-
-        mock_params.return_value = MagicMock(APP_NAME="T", APP_VERSION="1")
-        mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
-        mock_st.button.side_effect = [False, True]  # About clicked
-        mock_st.expander.return_value.__enter__ = MagicMock()
-        mock_st.expander.return_value.__exit__ = MagicMock()
-
-        afficher_footer()
-
-        mock_st.expander.assert_called()
+        call_args = str(mock_st.caption.call_args)
+        assert "Streamlit" in call_args or "Supabase" in call_args or "Mistral" in call_args

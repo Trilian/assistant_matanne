@@ -185,6 +185,10 @@ class ServiceNtfy:
 
         return await self.envoyer(notification)
 
+    def envoyer_digest_quotidien_sync(self) -> ResultatEnvoiNtfy:
+        """Version synchrone de l'envoi du digest quotidien."""
+        return asyncio.run(self.envoyer_digest_quotidien())
+
     async def envoyer_rappel_courses(self, nb_articles: int) -> ResultatEnvoiNtfy:
         """Envoie un rappel pour les courses."""
         courses_urgentes = self.obtenir_courses_urgentes()

@@ -74,8 +74,8 @@ class ProjectTask(Base):
         description: Description
         statut: Statut (à_faire, en_cours, terminé)
         priorite: Priorité
-        date_echéance: Date limite
-        assigné_à: Personne assignée
+        date_echeance: Date limite
+        assigne_a: Personne assignée
     """
 
     __tablename__ = "project_tasks"
@@ -88,8 +88,8 @@ class ProjectTask(Base):
     description: Mapped[str | None] = mapped_column(Text)
     statut: Mapped[str] = mapped_column(String(50), nullable=False, default="à_faire", index=True)
     priorite: Mapped[str] = mapped_column(String(50), nullable=False, default="moyenne")
-    date_echéance: Mapped[date | None] = mapped_column(Date)
-    assigné_à: Mapped[str | None] = mapped_column(String(200))
+    date_echeance: Mapped[date | None] = mapped_column(Date)
+    assigne_a: Mapped[str | None] = mapped_column(String(200))
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relations

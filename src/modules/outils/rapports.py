@@ -122,7 +122,7 @@ def render_rapport_stocks():
 
             # Articles faible stock
             if donnees.articles_faible_stock:
-                st.subheader("âš ï¸ Articles en faible stock")
+                st.subheader("⚠️ Articles en faible stock")
                 df_faible = pd.DataFrame(donnees.articles_faible_stock)
                 st.dataframe(
                     df_faible.rename(
@@ -381,7 +381,7 @@ def render_analyse_gaspillage():
             analyse = service.generer_analyse_gaspillage(periode)
 
             # Resume
-            st.warning("âš ï¸ **RÉSUMÉ GASPILLAGE**")
+            st.warning("⚠️ **RÉSUMÉ GASPILLAGE**")
             col1, col2, col3 = st.columns(3)
 
             with col1:
@@ -494,12 +494,13 @@ def render_historique():
         """)
 
         if st.button("⚙️ Configurer planification", key="btn_schedule"):
-            st.info("""
-            Pour configurer les rapports automatiques:
-            1. Utilisez le menu Paramètres
-            2. Activez "Rapports automatiques"
-            3. Choisissez les jours et heures
-            """)
+            with st.expander("📅 Configuration des rapports automatiques", expanded=True):
+                st.markdown("""
+                Pour configurer les rapports automatiques:
+                1. Allez dans le menu **Paramètres**
+                2. Activez "Rapports automatiques"
+                3. Choisissez les jours et heures de génération
+                """)
 
     with col2:
         st.subheader("📊 Statistiques")

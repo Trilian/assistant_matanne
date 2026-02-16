@@ -157,7 +157,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         Returns:
             Fichier PDF en BytesIO
         """
-        donnees = self.generer_donnees_rapport_stocks(periode_jours, session)
+        donnees = self.generer_donnees_rapport_stocks(periode_jours, session=session)
 
         # Créer le PDF
         buffer = BytesIO()
@@ -411,7 +411,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         Returns:
             Fichier PDF en BytesIO
         """
-        donnees = self.generer_donnees_rapport_budget(periode_jours, session)
+        donnees = self.generer_donnees_rapport_budget(periode_jours, session=session)
 
         # Créer le PDF
         buffer = BytesIO()
@@ -640,7 +640,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         Returns:
             Fichier PDF en BytesIO
         """
-        analyse = self.generer_analyse_gaspillage(periode_jours, session)
+        analyse = self.generer_analyse_gaspillage(periode_jours, session=session)
 
         # Créer le PDF
         buffer = BytesIO()
@@ -931,7 +931,7 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
         Returns:
             Fichier PDF en BytesIO
         """
-        donnees = self.generer_donnees_rapport_planning(planning_id, session)
+        donnees = self.generer_donnees_rapport_planning(planning_id, session=session)
 
         # Créer le PDF
         buffer = BytesIO()

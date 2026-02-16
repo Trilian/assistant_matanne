@@ -36,46 +36,32 @@ def app():
 
     st.title("⚙️ Paramètres")
 
-    # Noms des onglets
-    tab_names = [
-        "👨‍👩‍👧‍👦 Foyer",
-        "🤖 IA",
-        "🗄️ Base de Données",
-        "💾 Cache",
-        "🖥️ Affichage",
-        "💰 Budget",
-        "ℹ️ À Propos",
-    ]
-
-    # Sélecteur d'onglet persistant
-    if "parametres_tab" not in st.session_state:
-        st.session_state.parametres_tab = tab_names[0]
-
-    # Navigation par selectbox (persiste entre reruns)
-    selected_tab = st.selectbox(
-        "Section",
-        tab_names,
-        index=tab_names.index(st.session_state.parametres_tab),
-        label_visibility="collapsed",
+    # Navigation par onglets
+    tabs = st.tabs(
+        [
+            "👨‍👩‍👧‍👦 Foyer",
+            "🤖 IA",
+            "🗄️ BD",
+            "💾 Cache",
+            "🖥️ Affichage",
+            "💰 Budget",
+            "ℹ️ À Propos",
+        ]
     )
-    st.session_state.parametres_tab = selected_tab
 
-    st.markdown("---")
-
-    # Afficher le contenu selon l'onglet sélectionné
-    if selected_tab == tab_names[0]:
+    with tabs[0]:
         render_foyer_config()
-    elif selected_tab == tab_names[1]:
+    with tabs[1]:
         render_ia_config()
-    elif selected_tab == tab_names[2]:
+    with tabs[2]:
         render_database_config()
-    elif selected_tab == tab_names[3]:
+    with tabs[3]:
         render_cache_config()
-    elif selected_tab == tab_names[4]:
+    with tabs[4]:
         render_display_config()
-    elif selected_tab == tab_names[5]:
+    with tabs[5]:
         render_budget_config()
-    elif selected_tab == tab_names[6]:
+    with tabs[6]:
         render_about()
 
 
@@ -594,8 +580,6 @@ Assistant familial intelligent pour gérer le quotidien :
             st.markdown(f"**Debug:** {'✅' if state_summary.get('mode_debug') else '❌'}")
             notifs = state_summary.get("notifications_non_lues", 0)
             st.markdown(f"**Notifications:** {notifs}")
-            notifs = state_summary.get("notifications_non_lues", 0)
-            st.markdown(f"**Notifications:** {notifs}")
 
 
 # -----------------------------------------------------------
@@ -616,10 +600,6 @@ def render_display_config():
             set_tablet_mode,
         )
 
-        current_mode = get_tablet_mode()
-
-        st.markdown("#### Mode d'affichage")
-
         mode_options = {
             "💻 Normal": TabletMode.NORMAL,
             "📱 Tablette": TabletMode.TABLET,
@@ -632,26 +612,34 @@ def render_display_config():
             TabletMode.KITCHEN: "Mode cuisine avec navigation par étapes",
         }
 
-        # Trouver le label actuel
-        current_label = next(
-            (label for label, mode in mode_options.items() if mode == current_mode), "💻 Normal"
-        )
+        # Initialiser si nécessaire
+        if "display_mode_selection" not in st.session_state:
+            current = get_tablet_mode()
+            st.session_state.display_mode_selection = next(
+                (label for label, mode in mode_options.items() if mode == current),
+                "💻 Normal",
+            )
+
+        def on_mode_change():
+            """Callback quand le mode change."""
+            label = st.session_state.display_mode_key
+            mode = mode_options[label]
+            set_tablet_mode(mode)
+            st.session_state.display_mode_selection = label
+
+        st.markdown("#### Mode d'affichage")
 
         selected_label = st.radio(
             "Choisir le mode",
             options=list(mode_options.keys()),
-            index=list(mode_options.keys()).index(current_label),
+            index=list(mode_options.keys()).index(st.session_state.display_mode_selection),
             horizontal=True,
             label_visibility="collapsed",
+            key="display_mode_key",
+            on_change=on_mode_change,
         )
 
         selected_mode = mode_options[selected_label]
-
-        # Appliquer si changement
-        if selected_mode != current_mode:
-            set_tablet_mode(selected_mode)
-            afficher_succes(f"Mode {selected_label} activé !")
-
         st.caption(mode_descriptions[selected_mode])
 
         st.markdown("---")

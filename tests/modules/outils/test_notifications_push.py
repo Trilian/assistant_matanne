@@ -254,6 +254,7 @@ class TestRenderTest:
 
         mock_charger_config.return_value = mock_config
         mock_get_service.return_value = mock_service
+        mock_st.toggle.return_value = False  # Mode réel (pas démo)
         mock_st.button.return_value = False
         mock_st.form_submit_button.return_value = False
 
@@ -272,6 +273,7 @@ class TestRenderTest:
 
         mock_charger_config.return_value = mock_config
         mock_get_service.return_value = mock_service
+        mock_st.toggle.return_value = False  # Mode réel (pas démo)
         mock_st.button.side_effect = [True, False]  # Premier bouton cliqué
         mock_st.form_submit_button.return_value = False
 
@@ -293,12 +295,34 @@ class TestRenderTest:
             succes=False, message="Erreur connexion"
         )
         mock_get_service.return_value = mock_service
+        mock_st.toggle.return_value = False  # Mode réel (pas démo)
         mock_st.button.side_effect = [True, False]
         mock_st.form_submit_button.return_value = False
 
         render_test()
 
         mock_st.error.assert_called()
+
+    @patch("src.modules.outils.notifications_push.get_notification_push_service")
+    @patch("src.modules.outils.notifications_push.charger_config")
+    def test_render_test_mode_demo(
+        self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
+    ):
+        """Test le mode démo est disponible via toggle."""
+        from src.modules.outils.notifications_push import render_test
+
+        mock_charger_config.return_value = mock_config
+        mock_get_service.return_value = mock_service
+        mock_st.toggle.return_value = False  # Mode réel par défaut
+        mock_st.button.return_value = False
+        mock_st.form_submit_button.return_value = False
+
+        render_test()
+
+        # Vérifier que le toggle mode démo est affiché
+        mock_st.toggle.assert_called_once()
+        call_args = mock_st.toggle.call_args
+        assert "démo" in call_args[0][0].lower() or "demo" in str(call_args).lower()
 
 
 class TestRenderTachesRetard:

@@ -60,6 +60,7 @@ class TestBarcodeUI:
         from src.modules.outils.barcode import render_scanner
 
         setup_mock_st(mock_st)
+        mock_st.radio.return_value = "⌨️ Manuel"  # Mode manuel
         mock_st.text_input.return_value = ""
         mock_st.button.return_value = False
         render_scanner()
@@ -72,6 +73,7 @@ class TestBarcodeUI:
         from src.modules.outils.barcode import render_scanner
 
         setup_mock_st(mock_st)
+        mock_st.radio.return_value = "⌨️ Manuel"  # Mode manuel
         mock_st.text_input.return_value = "3017620422003"
         mock_st.button.return_value = True
         mock_srv.return_value.valider_barcode.return_value = (True, "EAN13")
@@ -86,11 +88,26 @@ class TestBarcodeUI:
         from src.modules.outils.barcode import render_scanner
 
         setup_mock_st(mock_st)
+        mock_st.radio.return_value = "⌨️ Manuel"  # Mode manuel
         mock_st.text_input.return_value = "invalid"
         mock_st.button.return_value = True
         mock_srv.return_value.valider_barcode.return_value = (False, "Invalid format")
         render_scanner()
         mock_st.error.assert_called()
+
+    @patch("src.modules.outils.barcode.get_barcode_service")
+    @patch("src.modules.outils.barcode.st")
+    def test_render_scanner_demo_mode(self, mock_st, mock_srv) -> None:
+        """Test scanner en mode démo."""
+        from src.modules.outils.barcode import render_scanner
+
+        setup_mock_st(mock_st)
+        mock_st.radio.return_value = "🎮 Démo (codes test)"  # Mode démo
+        mock_st.selectbox.return_value = "Lait demi-écrémé 1L"
+        mock_st.button.return_value = True
+        mock_srv.return_value.valider_barcode.return_value = (True, "EAN13")
+        render_scanner()
+        mock_st.info.assert_called()  # Mode démo affiche un info
 
     @patch("src.modules.outils.barcode.st")
     def test_render_ajout_rapide(self, mock_st) -> None:
@@ -150,8 +167,9 @@ class TestBarcodeUI:
 
         setup_mock_st(mock_st)
         mock_st.file_uploader.return_value = None
+        mock_srv.return_value.exporter_barcodes.return_value = "code,nom\n123,Test"
         render_import_export()
-        assert True
+        mock_st.download_button.assert_called()  # Download button affiché directement
 
 
 @pytest.mark.unit

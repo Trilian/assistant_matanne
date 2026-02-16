@@ -107,7 +107,6 @@ def render_configuration():
             )
             sauvegarder_config(new_config)
             st.success("✅ Configuration sauvegardée!")
-            st.rerun()
 
 
 def render_abonnement():
@@ -147,6 +146,41 @@ def render_abonnement():
     st.info(f"📝 **Topic actuel:** `{config.topic}`")
 
 
+def _simuler_notification(titre: str, message: str, priorite: int = 3, tags: list = None):
+    """Simule l'affichage d'une notification en mode démo."""
+    import uuid
+    from datetime import datetime
+
+    # Stocker dans session_state
+    if "notif_demo_history" not in st.session_state:
+        st.session_state["notif_demo_history"] = []
+
+    notif_id = str(uuid.uuid4())[:8]
+    st.session_state["notif_demo_history"].append(
+        {
+            "id": notif_id,
+            "titre": titre,
+            "message": message,
+            "priorite": priorite,
+            "tags": tags or [],
+            "timestamp": datetime.now().isoformat(),
+        }
+    )
+
+    # Aperçu visuel de la notification
+    priorite_emoji = {1: "⬜", 2: "🟦", 3: "🟩", 4: "🟧", 5: "🟥"}[priorite]
+    tag_emoji = tags[0] if tags else "🔔"
+
+    st.toast(f"{priorite_emoji} {titre}")
+
+    with st.container(border=True):
+        st.markdown(f"**{priorite_emoji} {titre}**")
+        st.caption(message[:100] + ("..." if len(message) > 100 else ""))
+        st.caption(f"ID: {notif_id} | Tags: {', '.join(tags or ['aucun'])}")
+
+    return notif_id
+
+
 def render_test():
     """Interface de test des notifications."""
     st.subheader("🧪 Tester les notifications")
@@ -154,37 +188,71 @@ def render_test():
     config = charger_config()
     service = get_notification_push_service(config)
 
+    # Mode démo toggle
+    mode_demo = st.toggle(
+        "🎭 Mode démo (simulation locale)",
+        value=st.session_state.get("notif_mode_demo", False),
+        help="Affiche les notifications localement sans les envoyer à ntfy.sh",
+        key="notif_mode_demo",
+    )
+
+    if mode_demo:
+        st.info("💡 **Mode démo actif** - Les notifications s'affichent ici sans être envoyées.")
+
     col1, col2 = st.columns(2)
 
     with col1:
         if st.button("🔔 Envoyer test", type="primary", use_container_width=True):
-            with st.spinner("Envoi en cours..."):
-                resultat = service.test_connexion_sync()
-
-                if resultat.succes:
-                    st.success(f"✅ {resultat.message}")
-                    st.caption(f"ID: {resultat.notification_id}")
-                else:
-                    st.error(f"❌ {resultat.message}")
+            if mode_demo:
+                _simuler_notification(
+                    "🔔 Test Matanne",
+                    "Les notifications sont correctement configurées!",
+                    priorite=3,
+                    tags=["white_check_mark"],
+                )
+                st.success("✅ Notification simulée!")
+            else:
+                with st.spinner("Envoi en cours..."):
+                    resultat = service.test_connexion_sync()
+                    if resultat.succes:
+                        st.success(f"✅ {resultat.message}")
+                        st.caption(f"ID: {resultat.notification_id}")
+                    else:
+                        st.error(f"❌ {resultat.message}")
 
     with col2:
         if st.button("📋 Envoyer digest", use_container_width=True):
-            with st.spinner("Génération du digest..."):
-                import asyncio
-
-                resultat = asyncio.run(service.envoyer_digest_quotidien())
-
-                if resultat.succes:
-                    st.success(f"✅ {resultat.message}")
-                else:
-                    st.error(f"❌ {resultat.message}")
+            if mode_demo:
+                taches_retard = service.obtenir_taches_en_retard()
+                taches_jour = service.obtenir_taches_du_jour()
+                lines = ["📋 Résumé du jour"]
+                if taches_retard:
+                    lines.append(f"⚠️ {len(taches_retard)} tâche(s) en retard")
+                if taches_jour:
+                    lines.append(f"📅 {len(taches_jour)} tâche(s) aujourd'hui")
+                if not taches_retard and not taches_jour:
+                    lines.append("✨ Rien à signaler!")
+                _simuler_notification(
+                    "📋 Digest Matanne",
+                    "\n".join(lines),
+                    priorite=4 if taches_retard else 3,
+                    tags=["house", "clipboard"],
+                )
+                st.success("✅ Digest simulé!")
+            else:
+                with st.spinner("Génération du digest..."):
+                    resultat = service.envoyer_digest_quotidien_sync()
+                    if resultat.succes:
+                        st.success(f"✅ {resultat.message}")
+                    else:
+                        st.error(f"❌ {resultat.message}")
 
     # Notification personnalisée
     st.divider()
     st.markdown("### Notification personnalisée")
 
     with st.form("notif_custom"):
-        titre = st.text_input("Titre", value="📝¢ Message Matanne")
+        titre = st.text_input("Titre", value="📝 Message Matanne")
         message = st.text_area("Message", value="Ceci est un test.", height=100)
 
         col1, col2 = st.columns(2)
@@ -210,16 +278,37 @@ def render_test():
 
         if st.form_submit_button("📤 Envoyer", use_container_width=True):
             notification = NotificationPush(
-                titre=titre, message=message, priorite=priorite, tags=tags
+                title=titre, body=message, tag=tags[0] if tags else None
             )
 
-            with st.spinner("Envoi..."):
-                resultat = service.envoyer_sync(notification)
+            if mode_demo:
+                _simuler_notification(titre, message, priorite, tags)
+                st.success("✅ Notification simulée!")
+            else:
+                with st.spinner("Envoi..."):
+                    resultat = service.envoyer_sync(notification)
+                    if resultat.succes:
+                        st.success("✅ Notification envoyée!")
+                    else:
+                        st.error(f"❌ {resultat.message}")
 
-                if resultat.succes:
-                    st.success("✅ Notification envoyée!")
-                else:
-                    st.error(f"❌ {resultat.message}")
+    # Historique des notifications démo
+    if mode_demo and st.session_state.get("notif_demo_history"):
+        st.divider()
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.markdown("### 📜 Historique démo")
+        with col2:
+            if st.button("🗑️ Effacer", key="clear_demo_history"):
+                st.session_state["notif_demo_history"] = []
+                st.rerun()
+
+        for notif in reversed(st.session_state["notif_demo_history"][-5:]):
+            priorite_emoji = {1: "⬜", 2: "🟦", 3: "🟩", 4: "🟧", 5: "🟥"}[notif["priorite"]]
+            with st.container(border=True):
+                st.markdown(f"**{priorite_emoji} {notif['titre']}**")
+                st.caption(notif["message"][:80])
+                st.caption(f"🕐 {notif['timestamp'][:19]} | ID: {notif['id']}")
 
 
 def render_taches_retard():
