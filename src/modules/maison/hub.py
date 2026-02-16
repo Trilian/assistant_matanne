@@ -18,8 +18,7 @@ Architecture:
 └──────────────────────────────────────────────────────────────┘
 """
 
-from datetime import date, datetime, timedelta
-from decimal import Decimal
+from datetime import date, datetime
 
 import streamlit as st
 
@@ -425,7 +424,6 @@ def _render_header():
 def _render_taches(taches: list[dict], charge: dict):
     """Affiche la section des tâches du jour."""
     niveau_class = f"charge-{charge['niveau']}"
-    niveau_labels = {"leger": "Léger", "normal": "Normal", "eleve": "Élevé"}
     jauge_class = f"jauge-{charge['niveau']}"
 
     st.markdown(

@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from src.core.ai import ClientIA
 from src.core.database import obtenir_contexte_db
-from src.core.models import AlerteMeteo, GardenItem, GardenLog
+from src.core.models import GardenItem
 from src.services.base import BaseAIService
 
 from .schemas import (

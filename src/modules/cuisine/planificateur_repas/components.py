@@ -206,8 +206,6 @@ def render_jour_planning(
 ):
     """Affiche un jour du planning avec ses repas."""
 
-    est_weekend = jour_date.weekday() >= 5
-
     with st.expander(f"📅 **{jour}** {jour_date.strftime('%d/%m')}", expanded=True):
         # Midi
         st.markdown("##### 🌞 Midi")

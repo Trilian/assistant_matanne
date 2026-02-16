@@ -118,6 +118,11 @@ class CalendarEvent(Base):
         type_event: Type (rdv, activité, fête, autre)
         couleur: Couleur d'affichage
         rappel_avant_minutes: Minutes avant pour le rappel
+        recurrence_type: Type de récurrence (none, daily, weekly, monthly, yearly)
+        recurrence_interval: Intervalle de récurrence (tous les N jours/semaines/mois/années)
+        recurrence_jours: Jours de la semaine pour weekly (ex: "0,1,4" = lun,mar,ven)
+        recurrence_fin: Date de fin de la récurrence
+        parent_event_id: ID de l'événement parent (pour les occurrences)
     """
 
     __tablename__ = "calendar_events"
@@ -131,6 +136,14 @@ class CalendarEvent(Base):
     type_event: Mapped[str] = mapped_column(String(50), nullable=False, default="autre", index=True)
     couleur: Mapped[str | None] = mapped_column(String(20))
     rappel_avant_minutes: Mapped[int | None] = mapped_column(Integer)
+
+    # Récurrence
+    recurrence_type: Mapped[str | None] = mapped_column(String(20))  # none, daily, weekly, monthly, yearly
+    recurrence_interval: Mapped[int | None] = mapped_column(Integer, default=1)  # Tous les N jours/semaines/mois/années
+    recurrence_jours: Mapped[str | None] = mapped_column(String(20))  # Pour weekly: "0,1,4" = lun,mar,ven
+    recurrence_fin: Mapped[date | None] = mapped_column(Date)  # Date de fin de la récurrence
+    parent_event_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("calendar_events.id"))
+
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     __table_args__ = (
@@ -140,3 +153,81 @@ class CalendarEvent(Base):
 
     def __repr__(self) -> str:
         return f"<CalendarEvent(id={self.id}, titre='{self.titre}', date={self.date_debut})>"
+
+
+# ═══════════════════════════════════════════════════════════
+# TEMPLATES DE SEMAINE
+# ═══════════════════════════════════════════════════════════
+
+
+class TemplateSemaine(Base):
+    """Modèle de semaine type réutilisable.
+
+    Permet de sauvegarder une organisation de semaine
+    et de l'appliquer à n'importe quelle semaine.
+
+    Attributes:
+        nom: Nom du template
+        description: Description du template
+        actif: Si le template est actif
+    """
+
+    __tablename__ = "templates_semaine"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nom: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
+    description: Mapped[str | None] = mapped_column(Text)
+    actif: Mapped[bool] = mapped_column(Boolean, default=True)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relations
+    items: Mapped[list["TemplateItem"]] = relationship(
+        "TemplateItem",
+        back_populates="template",
+        cascade="all, delete-orphan",
+        order_by="TemplateItem.jour_semaine, TemplateItem.heure_debut",
+    )
+
+    def __repr__(self) -> str:
+        return f"<TemplateSemaine(id={self.id}, nom='{self.nom}')>"
+
+
+class TemplateItem(Base):
+    """Élément d'un template de semaine.
+
+    Représente un événement type dans le template,
+    positionné sur un jour et une heure.
+
+    Attributes:
+        template_id: ID du template parent
+        jour_semaine: Jour (0=Lundi à 6=Dimanche)
+        heure_debut: Heure de début (ex: "09:00")
+        heure_fin: Heure de fin (ex: "10:30")
+        titre: Titre de l'événement
+        type_event: Type d'événement
+        lieu: Lieu optionnel
+        couleur: Couleur d'affichage
+    """
+
+    __tablename__ = "template_items"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    template_id: Mapped[int] = mapped_column(ForeignKey("templates_semaine.id"), nullable=False)
+    jour_semaine: Mapped[int] = mapped_column(Integer, nullable=False)  # 0-6
+    heure_debut: Mapped[str] = mapped_column(String(5), nullable=False)  # "HH:MM"
+    heure_fin: Mapped[str | None] = mapped_column(String(5))
+    titre: Mapped[str] = mapped_column(String(200), nullable=False)
+    type_event: Mapped[str] = mapped_column(String(50), default="autre")
+    lieu: Mapped[str | None] = mapped_column(String(200))
+    couleur: Mapped[str | None] = mapped_column(String(20))
+
+    # Relations
+    template: Mapped["TemplateSemaine"] = relationship("TemplateSemaine", back_populates="items")
+
+    __table_args__ = (
+        Index("idx_template_jour", "template_id", "jour_semaine"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<TemplateItem(jour={self.jour_semaine}, heure={self.heure_debut}, titre='{self.titre}')>"

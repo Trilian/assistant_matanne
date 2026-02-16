@@ -15,7 +15,7 @@ import logging
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import func, or_
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from src.core.ai import ClientIA
@@ -25,7 +25,6 @@ from src.services.base import BaseAIService
 from .schemas import (
     ActionObjetResult,
     CategorieObjet,
-    ConteneurCreate,
     CoutTravauxPiece,
     DemandeChangementObjet,
     LienObjetBudget,
@@ -33,7 +32,6 @@ from .schemas import (
     ModificationPieceCreate,
     ObjetAvecStatut,
     ObjetCreate,
-    ObjetUpdate,
     PieceCreate,
     PieceVersion,
     PlanReorganisationPiece,
@@ -41,7 +39,6 @@ from .schemas import (
     ResultatRecherche,
     ResumeTravauxMaison,
     StatutObjet,
-    TypeModificationPiece,
 )
 
 logger = logging.getLogger(__name__)

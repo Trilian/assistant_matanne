@@ -48,7 +48,6 @@ def render_categories():
                     total_qty = sum(a["quantite"] for a in articles)
                     st.metric("Quantité totale", f"{total_qty:.1f}")
                 with col3:
-                    alertes = service.get_alertes()
                     cat_alertes = len(
                         [a for a in articles if a["statut"] in ["critique", "stock_bas"]]
                     )

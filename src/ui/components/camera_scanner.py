@@ -238,7 +238,7 @@ class BarcodeScanner:
         st.info("👆 Autorisez l'accès à la caméra, puis présentez le code-barres")
 
         # Streamer vidéo
-        ctx = webrtc_streamer(
+        webrtc_streamer(
             key=key,
             video_processor_factory=BarcodeVideoProcessor,
             rtc_configuration=rtc_config,

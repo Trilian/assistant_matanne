@@ -17,8 +17,6 @@ from typing import Any
 
 from src.services.jeux.series_service import (
     SEUIL_VALUE_ALERTE,
-    SEUIL_VALUE_HAUTE,
-    SeriesService,
 )
 
 logger = logging.getLogger(__name__)

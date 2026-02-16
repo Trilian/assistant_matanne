@@ -78,7 +78,7 @@ Ce document détaille le plan de division des fichiers > 500 lignes.
 | `src/ui/tablet_mode.py` | 822 | Diviser par composant UI |
 | `src/services/pwa.py` | 812 | Diviser service/manifest/sw |
 | `src/services/batch_cooking.py` | 794 | Laisser ou diviser légèrement |
-| `src/modules/planning/logic/calendrier_unifie_logic.py` | 786 | Diviser par fonctionnalité |
+| `src/modules/planning/logic/calendrier_logic.py` | 786 | Diviser par fonctionnalité |
 | `src/services/backup.py` | 779 | Diviser backup/restore |
 | `src/services/budget/service.py` | 713 | Acceptable, légère division |
 | `src/core/performance.py` | 697 | Diviser profiler/metrics |

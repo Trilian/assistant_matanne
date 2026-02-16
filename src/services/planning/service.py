@@ -592,15 +592,6 @@ RULES:
 
 
 # ═══════════════════════════════════════════════════════════
-# ALIAS DE COMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
-
-
-# Alias pour rétro-compatibilité
-PlanningService = ServicePlanning
-
-
-# ═══════════════════════════════════════════════════════════
 # FACTORIES
 # ═══════════════════════════════════════════════════════════
 
@@ -629,8 +620,6 @@ get_planning_service = obtenir_service_planning
 __all__ = [
     # Classe principale
     "ServicePlanning",
-    # Alias de compatibilité
-    "PlanningService",
     # Factory
     "obtenir_service_planning",
     "get_planning_service",

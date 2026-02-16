@@ -970,9 +970,6 @@ class ServiceRapportsPDF(BaseService[ArticleInventaire]):
             spaceAfter=8,
             spaceBefore=15,
         )
-        meal_style = ParagraphStyle(
-            "MealStyle", parent=styles["Normal"], fontSize=10, leftIndent=20
-        )
 
         elements = []
 

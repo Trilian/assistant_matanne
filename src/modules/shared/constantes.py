@@ -94,6 +94,17 @@ TYPES_REPAS_AFFICHAGE = {
 }
 
 # ═══════════════════════════════════════════════════════════
+# TYPES DE PROTÉINES
+# ═══════════════════════════════════════════════════════════
+
+TYPES_PROTEINES: dict[str, list[str]] = {
+    "poisson": ["poisson", "saumon", "thon", "cabillaud", "sardine", "crevette"],
+    "viande_rouge": ["boeuf", "veau", "agneau", "viande rouge"],
+    "volaille": ["poulet", "dinde", "canard", "volaille"],
+    "vegetarien": ["légumes", "tofu", "seitan", "légumineuses"],
+}
+
+# ═══════════════════════════════════════════════════════════
 # EXPORTS
 # ═══════════════════════════════════════════════════════════
 
@@ -105,4 +116,5 @@ __all__ = [
     "MOIS_FRANCAIS_COURT",
     "TYPES_REPAS",
     "TYPES_REPAS_AFFICHAGE",
+    "TYPES_PROTEINES",
 ]

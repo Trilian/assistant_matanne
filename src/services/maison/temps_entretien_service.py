@@ -14,13 +14,9 @@ import logging
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 from decimal import Decimal
-from typing import Any
 
-from sqlalchemy import and_, desc, func
-from sqlalchemy.orm import Session
 
 from src.core.ai import ClientIA
-from src.core.database import obtenir_contexte_db
 from src.services.base import BaseAIService
 
 from .schemas import (
@@ -31,8 +27,6 @@ from .schemas import (
     RecommandationMateriel,
     ResumeTempsHebdo,
     SessionTravail,
-    SessionTravailCreate,
-    SessionTravailUpdate,
     StatistiqueTempsActivite,
     StatistiqueTempsZone,
     SuggestionOptimisation,

@@ -189,10 +189,18 @@ class RouteurOptimise:
 
     MODULE_REGISTRY = {
         # ACCUEIL
-        "accueil": {"path": "src.modules.outils.accueil", "type": "simple"},
+        "accueil": {"path": "src.modules.accueil", "type": "simple"},
         # CALENDRIER UNIFIÉ - VUE CENTRALE
-        "planning.calendrier_unifie": {
-            "path": "src.modules.planning.calendrier_unifie",
+        "planning.calendrier": {
+            "path": "src.modules.planning.calendrier",
+            "type": "simple",
+        },
+        "planning.templates_ui": {
+            "path": "src.modules.planning.templates_ui",
+            "type": "simple",
+        },
+        "planning.timeline_ui": {
+            "path": "src.modules.planning.timeline_ui",
             "type": "simple",
         },
         # DOMAINE CUISINE
@@ -216,8 +224,8 @@ class RouteurOptimise:
         },
         "cuisine.courses": {"path": "src.modules.cuisine.courses", "type": "simple"},
         # OUTILS TRANSVERSAUX
-        "barcode": {"path": "src.modules.outils.barcode", "type": "simple"},
-        "rapports": {"path": "src.modules.outils.rapports", "type": "simple"},
+        "barcode": {"path": "src.modules.utilitaires.barcode", "type": "simple"},
+        "rapports": {"path": "src.modules.utilitaires.rapports", "type": "simple"},
         # DOMAINE FAMILLE
         "famille.hub": {"path": "src.modules.famille.hub_famille", "type": "simple"},
         "famille.jules": {"path": "src.modules.famille.jules", "type": "simple"},
@@ -249,9 +257,9 @@ class RouteurOptimise:
         "jeux.paris": {"path": "src.modules.jeux.paris", "type": "simple"},
         "jeux.loto": {"path": "src.modules.jeux.loto", "type": "simple"},
         # PARAMÈTRES & NOTIFICATIONS
-        "parametres": {"path": "src.modules.outils.parametres", "type": "simple"},
+        "parametres": {"path": "src.modules.parametres", "type": "simple"},
         "notifications_push": {
-            "path": "src.modules.outils.notifications_push",
+            "path": "src.modules.utilitaires.notifications_push",
             "type": "simple",
         },
     }

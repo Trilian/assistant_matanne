@@ -785,11 +785,6 @@ def _prepare_alert_dataframe(articles: list[dict[str, Any]]) -> pd.DataFrame:
     """Prépare un DataFrame pour affichage alertes"""
     data = []
     for article in articles:
-        statut_icon = {
-            "critique": "❌",
-            "stock_bas": "âš ",
-            "peremption_proche": "⏰",
-        }.get(article["statut"], "❓")
 
         jours = ""
         if article["jours_avant_peremption"] is not None:

@@ -468,7 +468,7 @@ class ServiceBackup:
 
             path = Path(file_path)
             with open(path, "rb") as f:
-                response = client.storage.from_(bucket).upload(
+                client.storage.from_(bucket).upload(
                     path.name,
                     f.read(),
                     {

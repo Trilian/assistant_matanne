@@ -24,7 +24,6 @@ from src.services.base import BaseAIService
 from .schemas import (
     AnalyseEnergie,
     BadgeEco,
-    ConsommationMois,
     EcoScoreResult,
 )
 

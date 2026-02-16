@@ -16,15 +16,12 @@ def afficher_badge_charge(charge_score: int, taille: str = "normal") -> None:
     if charge_score < 35:
         emoji = "🔔"
         label = "Faible"
-        couleur = "#00AA00"
     elif charge_score < 70:
         emoji = "💰"
         label = "Normal"
-        couleur = "#FFAA00"
     else:
         emoji = "❌"
         label = "Intense"
-        couleur = "#FF0000"
 
     if taille == "petit":
         st.write(f"{emoji} {label}")

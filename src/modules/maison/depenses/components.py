@@ -9,7 +9,6 @@ Fonctionnalités:
 """
 
 import io
-from datetime import datetime
 
 import pandas as pd
 
@@ -494,8 +493,6 @@ def render_previsions_ia():
                 for p in previsions
             ]
         )
-
-        df_combined = pd.concat([df_hist, df_prev])
 
         fig = go.Figure()
 

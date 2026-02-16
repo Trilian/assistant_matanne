@@ -131,7 +131,6 @@ def afficher_mes_grilles():
     # Stats globales
     total_mise = sum(float(g.get("mise", 0)) for g in grilles)
     total_gain = sum(float(g.get("gain", 0) or 0) for g in grilles if g.get("gain"))
-    nb_gagnantes = sum(1 for g in grilles if g.get("rang"))
 
     col1, col2, col3, col4 = st.columns(4)
     with col1:

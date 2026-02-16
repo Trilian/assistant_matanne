@@ -10,13 +10,11 @@ Features:
 """
 
 import logging
-from datetime import date, datetime, timedelta
 from typing import Any
 
 from sqlalchemy.orm import Session
 
 from src.core.ai import ClientIA
-from src.core.database import obtenir_contexte_db
 from src.services.base import BaseAIService
 
 from .schemas import (

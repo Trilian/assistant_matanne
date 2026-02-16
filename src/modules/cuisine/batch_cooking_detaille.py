@@ -170,7 +170,6 @@ def render_etape_batch(etape: dict, numero: int, key_prefix: str):
     """Affiche une étape de batch cooking."""
 
     est_passif = etape.get("est_passif", False)
-    couleur_bg = "background-color: #f0f8ff;" if est_passif else ""
 
     with st.container():
         # Header

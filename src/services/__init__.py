@@ -73,17 +73,17 @@ from .inventaire import (
 # ═══════════════════════════════════════════════════════════
 # 📅 PLANNING (Package unifié)
 # ═══════════════════════════════════════════════════════════
-# PlanningService: Gestion repas hebdomadaires + génération IA menus
-# PlanningAIService: Vue unifiée (repas + activités + projets + routines)
+# ServicePlanning: Gestion repas hebdomadaires + génération IA menus
+# ServicePlanningUnifie: Vue unifiée (repas + activités + projets + routines)
 from .planning import (
     JourCompletSchema,
     # Schémas
     JourPlanning,
     ParametresEquilibre,
     # Service Unifié (repas + activités + projets + routines)
-    PlanningAIService,
+    ServicePlanningUnifie,
     # Services CRUD
-    PlanningService,
+    ServicePlanning,
     SemaineCompleSchema,
     get_planning_service,
     get_planning_unified_service,
@@ -190,8 +190,8 @@ __all__ = [
     # PLANNING
     # ═══════════════════════════════════════════════════════════
     # Classes
-    "PlanningService",
-    "PlanningAIService",
+    "ServicePlanning",
+    "ServicePlanningUnifie",
     # Factories
     "get_planning_service",
     "get_planning_unified_service",

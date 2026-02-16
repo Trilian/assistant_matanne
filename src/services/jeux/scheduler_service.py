@@ -16,8 +16,8 @@ Compatible avec Streamlit (pas de blocage de l'UI).
 
 import logging
 import threading
-from datetime import datetime, timedelta
-from typing import Callable, Literal
+from datetime import datetime
+from typing import Literal
 
 try:
     from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED

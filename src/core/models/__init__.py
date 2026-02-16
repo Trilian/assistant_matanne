@@ -151,6 +151,8 @@ from .planning import (
     CalendarEvent,
     Planning,
     Repas,
+    TemplateItem,
+    TemplateSemaine,
 )
 
 # Recettes et cuisine
@@ -250,6 +252,8 @@ __all__ = [
     "Planning",
     "Repas",
     "CalendarEvent",
+    "TemplateSemaine",
+    "TemplateItem",
     # Famille
     "ChildProfile",
     "WellbeingEntry",

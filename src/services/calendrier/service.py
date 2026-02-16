@@ -431,7 +431,6 @@ class CalendarSyncService:
         start_time = datetime.now()
         events_imported = 0
         events_exported = 0
-        errors = []
 
         try:
             headers = {"Authorization": f"Bearer {config.access_token}"}

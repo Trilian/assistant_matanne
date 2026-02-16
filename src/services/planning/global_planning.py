@@ -505,7 +505,6 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         contexte: dict,
     ) -> str:
         """Construit prompt pour génération IA"""
-        semaine = date_debut.strftime("%W")
         budget = contraintes.get("budget", 400)
         energie = contraintes.get("energie", "normal")
         jules_mois = contexte.get("jules_age_mois", 19)
@@ -578,15 +577,6 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
 
 
 # ═══════════════════════════════════════════════════════════
-# ALIAS DE COMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
-
-
-# Alias pour rétro-compatibilité
-PlanningAIService = ServicePlanningUnifie
-
-
-# ═══════════════════════════════════════════════════════════
 # FACTORIES
 # ═══════════════════════════════════════════════════════════
 
@@ -609,8 +599,6 @@ get_unified_planning_service = obtenir_service_planning_unifie
 __all__ = [
     # Classe principale
     "ServicePlanningUnifie",
-    # Alias de compatibilité
-    "PlanningAIService",
     # Factories
     "obtenir_service_planning_unifie",
     "get_planning_unified_service",

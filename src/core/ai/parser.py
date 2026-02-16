@@ -122,18 +122,15 @@ class AnalyseurIA:
 
         pile = []
         debut = None
-        is_array = False
 
         for i, char in enumerate(texte):
             if char == "{":
                 if not pile:
                     debut = i
-                    is_array = False
                 pile.append(char)
             elif char == "[":
                 if not pile:
                     debut = i
-                    is_array = True
                 pile.append(char)
             elif char == "}":
                 if pile and (pile[-1] == "{"):

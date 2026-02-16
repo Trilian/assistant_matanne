@@ -184,8 +184,7 @@ class ServiceInventaire(BaseService[ArticleInventaire], BaseAIService, Inventory
         Returns:
             List of SuggestionCourses objects, empty list on error
         """
-        # Récupérer alertes et contexte
-        alertes = self.get_alertes()
+        # Récupérer contexte inventaire
         inventaire = self.get_inventaire_complet()
 
         # Utilisation du Mixin pour résumé inventaire
@@ -706,9 +705,6 @@ RULES:
 
         # Vérifie chaque article
         for article_data in inventaire["articles"]:
-            article_id = article_data["id"]
-            quantite = article_data["quantite"]
-            quantite_min = article_data["quantite_min"]
             date_peremption = article_data.get("date_peremption")
 
             # Check stock critique
@@ -904,7 +900,7 @@ RULES:
                     db.refresh(ingredient)
 
                 # Ajoute l'article à l'inventaire
-                resultat = self.ajouter_article(
+                self.ajouter_article(
                     ingredient_id=ingredient.id,
                     quantite=article_import.quantite,
                     quantite_min=article_import.quantite_min,

@@ -104,7 +104,49 @@ def clean():
 def reset_supabase():
     """Reset complet de la base Supabase"""
     print("[FIRE] Lancement du reset Supabase...")
-    run_cmd("python scripts/reset_supabase.py")
+    run_cmd("python scripts/db/reset_supabase.py")
+
+
+def deploy_schema():
+    """Déploie le schéma SQL vers Supabase"""
+    print("[DB] Déploiement du schéma...")
+    run_cmd("python scripts/db/deploy_supabase.py --deploy")
+
+
+def check_db():
+    """Vérifie la connexion Supabase"""
+    print("[DB] Vérification connexion...")
+    run_cmd("python scripts/db/deploy_supabase.py --check")
+
+
+def seed_recipes():
+    """Importe les recettes depuis le fichier JSON"""
+    print("[SEED] Import des recettes...")
+    run_cmd("python scripts/db/import_recettes.py")
+
+
+def seed_demo():
+    """Charge les données de démo"""
+    print("[SEED] Chargement données démo...")
+    run_cmd("python scripts/db/seed_data.py")
+
+
+def test_quick():
+    """Tests rapides sans couverture"""
+    print("[TEST] Tests rapides...")
+    run_cmd("python scripts/test/test_manager.py quick")
+
+
+def test_core():
+    """Tests du core uniquement"""
+    print("[TEST] Tests core...")
+    run_cmd("python scripts/test/test_manager.py core")
+
+
+def audit_tests():
+    """Audit de couverture des tests"""
+    print("[AUDIT] Audit couverture...")
+    run_cmd("python scripts/test/audit_tests.py")
 
 
 def help_cmd():
@@ -125,6 +167,15 @@ Base de données:
   migrate              Applique les migrations
   create-migration     Crée une nouvelle migration
   reset-supabase       [FIRE] Reset COMPLET Supabase (DANGER)
+  deploy-schema        Déploie le schéma SQL vers Supabase
+  check-db             Vérifie la connexion Supabase
+  seed-recipes         Importe les recettes standard
+  seed-demo            Charge les données de démo
+
+Tests avancés:
+  test-quick           Tests rapides sans couverture
+  test-core            Tests du core uniquement
+  audit-tests          Audit de couverture des tests
 
 Déploiement:
   requirements         Génère requirements.txt
@@ -144,6 +195,13 @@ COMMANDS = {
     "migrate": migrate,
     "create-migration": create_migration,
     "reset-supabase": reset_supabase,
+    "deploy-schema": deploy_schema,
+    "check-db": check_db,
+    "seed-recipes": seed_recipes,
+    "seed-demo": seed_demo,
+    "test-quick": test_quick,
+    "test-core": test_core,
+    "audit-tests": audit_tests,
     "requirements": generate_requirements,
     "clean": clean,
     "help": help_cmd,

@@ -227,8 +227,6 @@ PATTERNS_MONTANTS = {
 
 def detecter_fournisseur(texte: str) -> tuple[str, str]:
     """Détecte le fournisseur depuis le texte OCR."""
-    texte_lower = texte.lower()
-
     for nom, info in PATTERNS_FOURNISSEURS.items():
         if re.search(info["regex"], texte, re.IGNORECASE):
             return nom.upper(), info["type"]

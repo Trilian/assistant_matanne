@@ -15,7 +15,9 @@ from src.core.state import GestionnaireEtat, obtenir_etat
 MODULES_MENU = {
     "🏠 Accueil": "accueil",
     # Calendrier unifié - VUE CENTRALE
-    "📅 Calendrier Familial": "planning.calendrier_unifie",
+    "📅 Calendrier Familial": "planning.calendrier",
+    "📋 Templates": "planning.templates_ui",
+    "📊 Timeline": "planning.timeline_ui",
     # Cuisine - Workflow: Plan → Batch → Courses
     "🍳 Cuisine": {
         "🍽️ Planifier Repas": "cuisine.planificateur_repas",

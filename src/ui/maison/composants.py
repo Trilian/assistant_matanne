@@ -9,8 +9,7 @@ Widgets et composants spécialisés:
 - timeline_versions: Timeline des versions/modifications
 """
 
-from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
 from typing import Any, Callable
 
@@ -317,9 +316,6 @@ def carte_objet_statut(
     """
     st.markdown(COMPOSANTS_CSS, unsafe_allow_html=True)
 
-    statut_info = STATUT_CONFIG.get(statut, STATUTS_CONFIG["fonctionnel"])
-    classe_statut = statut.replace("_", "-")
-
     with st.container(border=True):
         # Header
         col_nom, col_badge = st.columns([3, 1])
@@ -570,10 +566,8 @@ def timeline_versions(
         date_v = version.get("date", "")
         titre = version.get("titre", "Version")
         description = version.get("description", "")
-        active = version.get("active", idx == 0)
 
         date_str = date_v.strftime("%d/%m/%Y") if isinstance(date_v, date) else str(date_v)
-        dot_class = "active" if active else ""
 
         with st.container(border=True):
             col1, col2 = st.columns([1, 3])

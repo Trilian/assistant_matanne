@@ -26,7 +26,7 @@ def render_historique():
         days = st.slider("Période (jours)", 1, 90, 30)
 
     with col2:
-        article_id = st.selectbox(
+        _article_id = st.selectbox(
             "Article (optionnel)",
             options=["Tous"] + [f"Article #{i}" for i in range(1, 20)],
             index=0,

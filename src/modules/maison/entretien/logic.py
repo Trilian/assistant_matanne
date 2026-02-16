@@ -111,7 +111,6 @@ def generer_taches_entretien(mes_objets: list[dict], historique: list[dict]) -> 
         objet_id = mon_objet.get("objet_id")
         categorie_id = mon_objet.get("categorie_id")
         piece = mon_objet.get("piece", "")
-        date_achat = mon_objet.get("date_achat")
 
         # Trouver la définition dans le catalogue
         categorie_data = catalogue.get("categories", {}).get(categorie_id, {})
@@ -122,7 +121,6 @@ def generer_taches_entretien(mes_objets: list[dict], historique: list[dict]) -> 
 
         nom_objet = objet_data.get("nom", objet_id)
         icon_cat = categorie_data.get("icon", "📦")
-        couleur_cat = categorie_data.get("couleur", "#95a5a6")
 
         # Parcourir les tâches de cet objet
         for tache_def in objet_data.get("taches", []):
@@ -213,7 +211,6 @@ def calculer_score_proprete(mes_objets: list[dict], historique: list[dict]) -> d
     taches = generer_taches_entretien(mes_objets, historique)
 
     # Score basé sur le ratio de tâches en retard
-    total_objets = len(mes_objets)
     taches_urgentes = len([t for t in taches if t.get("priorite") == "urgente"])
     taches_hautes = len([t for t in taches if t.get("priorite") == "haute"])
 

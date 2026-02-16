@@ -164,8 +164,7 @@ class GestionnaireEtat:
             "maison.eco": "Éco-Tips",
             "maison.depenses": "Dépenses",
             "maison.energie": "Énergie",
-            "planning.calendrier_unifie": "Calendrier",
-            "planning.vue_ensemble": "Vue d'ensemble",
+            "planning.calendrier": "Calendrier",
             "parametres": "Paramètres",
         }
 

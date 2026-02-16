@@ -10,7 +10,7 @@ Features:
 """
 
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 from sqlalchemy.orm import Session
 
@@ -20,9 +20,7 @@ from src.core.models import Routine, RoutineTask
 from src.services.base import BaseAIService
 
 from .schemas import (
-    RoutineCreate,
     RoutineSuggestionIA,
-    TacheRoutineCreate,
 )
 
 logger = logging.getLogger(__name__)

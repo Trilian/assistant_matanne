@@ -6,7 +6,6 @@ Génération des tâches, calcul d'autonomie alimentaire, badges et prédictions
 
 import logging
 from datetime import date, datetime, timedelta
-from typing import Optional
 
 from .data import charger_catalogue_plantes
 

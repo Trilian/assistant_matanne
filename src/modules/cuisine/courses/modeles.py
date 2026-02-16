@@ -161,7 +161,7 @@ def render_modeles():
                             ]
 
                             # Sauvegarder en BD (Phase 2)
-                            modele_id = service.create_modele(
+                            service.create_modele(
                                 nom=nom_modele.strip(),
                                 articles=articles_data,
                                 description=description.strip() if description else None,

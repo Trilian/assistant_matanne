@@ -5,12 +5,9 @@ Fonctions d'affichage pour header, tâches, calendrier, badges gamifiés, etc.
 """
 
 import logging
-from datetime import date, datetime
-from typing import Optional
 
 import streamlit as st
 
-from .data import charger_catalogue_plantes
 
 logger = logging.getLogger(__name__)
 

@@ -20,7 +20,6 @@ from src.services.recettes import get_recette_service
 def get_toutes_recettes(db: Session | None = None) -> list[Recette]:
     """Recupère toutes les recettes."""
     with obtenir_contexte_db() as session:
-        service = get_recette_service(session)
         return session.query(Recette).all()
 
 
@@ -83,7 +82,6 @@ def creer_recette(
 ) -> Recette:
     """Cree une nouvelle recette."""
     with obtenir_contexte_db() as session:
-        service = get_recette_service(session)
 
         recette = Recette(
             nom=nom,

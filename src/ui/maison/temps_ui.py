@@ -8,10 +8,8 @@ Composants:
 - Graphiques temps par activité
 """
 
-from dataclasses import dataclass
-from datetime import datetime, timedelta
-from decimal import Decimal
-from typing import Any, Callable
+from datetime import datetime
+from typing import Callable
 
 import streamlit as st
 

@@ -10,19 +10,17 @@ Features:
 """
 
 import logging
-from datetime import date, timedelta
 from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
 from src.core.ai import ClientIA
 from src.core.database import obtenir_contexte_db
-from src.core.models import Project, ProjectTask
+from src.core.models import Project
 from src.services.base import BaseAIService
 
 from .schemas import (
     MaterielProjet,
-    ProjetCreate,
     ProjetEstimation,
     TacheProjetCreate,
 )

@@ -277,7 +277,6 @@ def avec_validation(
             try:
                 # Chercher le paramètre à valider
                 param_key = list(field_mapping.keys())[0] if field_mapping else "data"
-                param_name = field_mapping[param_key] if field_mapping else param_key
 
                 if param_key in kwargs:
                     data = kwargs[param_key]

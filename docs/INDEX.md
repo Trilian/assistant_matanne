@@ -32,17 +32,30 @@ docs/
 └── archive/                          ← Anciens documents (archivés)
 ```
 
-### `/tools/` - Scripts & Outils
+### `/scripts/` - Scripts & Outils
 
 ```text
-tools/
-├── analyze_coverage.py               ← Analyser couverture
-├── analyze_tests.py                  ← Analyser tests
-├── measure_coverage.py               ← Mesurer couverture (ACTIF!)
-├── deploy_supabase.py                ← Déployer Supabase
-├── migrate_supabase.py               ← Migrer Supabase
-├── seed_recettes.py                  ← Remplir BD recettes
-└── *.ps1                             ← Scripts PowerShell
+scripts/
+├── __init__.py                       ← Package Python
+├── db/                               ← Opérations base de données
+│   ├── deploy_supabase.py           ← Déployer schéma SQL
+│   ├── import_recettes.py           ← Import recettes JSON
+│   ├── init_db.py                   ← Initialisation BD
+│   ├── reset_supabase.py            ← Reset complet Supabase
+│   └── seed_data.py                 ← Données démo
+├── test/                            ← Outils de test
+│   ├── audit_tests.py               ← Audit couverture
+│   ├── audit_tests_fast.py          ← Audit rapide
+│   ├── generate_skeletons.py        ← Générer tests
+│   ├── summary_tests.py             ← Résumé couverture
+│   └── test_manager.py              ← Gestionnaire tests
+├── analysis/                        ← Analyse de code
+│   └── analyze_api.py               ← Analyser API
+└── setup/                           ← Configuration
+    ├── convert_utf8.py              ← Fix encodage
+    ├── generate_vapid.py            ← Clés VAPID
+    ├── setup_api_key.py             ← Config API Football
+    └── setup_jeux.py                ← Setup module Jeux
 ```
 
 ## 🚀 Démarrage rapide
@@ -113,11 +126,12 @@ pytest tests/ --cov=src --cov-report=html
 - `reports/` - Rapports d'analyse
 - `archive/` - Docs archivées
 
-### 🔨 Outils (tools/)
+### 🔨 Scripts (scripts/)
 
-- Scripts Python (11 fichiers)
-- Scripts PowerShell (2 fichiers)
-- Logs (\*.log)
+- db/ - 5 scripts opérations BD
+- test/ - 5 scripts tests
+- analysis/ - 1 script analyse
+- setup/ - 4 scripts configuration
 
 ### 📊 Données (data/)
 

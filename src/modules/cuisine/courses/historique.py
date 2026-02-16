@@ -16,7 +16,7 @@ from ._common import (
 
 def render_historique():
     """Historique des listes de courses"""
-    service = get_courses_service()
+    _service = get_courses_service()
 
     st.subheader("📋 Historique des courses")
 

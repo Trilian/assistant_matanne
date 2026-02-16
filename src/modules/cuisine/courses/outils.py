@@ -80,7 +80,7 @@ def render_outils():
 
         # Structure Phase 2
         st.subheader("Configuration partage (à venir)")
-        shared_with = st.multiselect(
+        _shared_with = st.multiselect(
             "Partager avec:",
             ["Alice", "Bob", "Charlie"],
             disabled=True,

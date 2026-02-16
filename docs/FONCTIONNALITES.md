@@ -288,8 +288,8 @@ html = service.generer_html_imprimable(listes)
 
 ### Calendrier Unifié
 
-- Logic: `src/modules/planning/logic/calendrier_unifie_logic.py`
-- UI: `src/modules/planning/ui/calendrier_unifie.py`
+- Logic: `src/modules/planning/logic/calendrier_logic.py`
+- UI: `src/modules/planning/ui/calendrier.py`
 
 ### Planificateur Repas (style Jow)
 

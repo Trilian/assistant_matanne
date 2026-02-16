@@ -228,17 +228,17 @@ def render_notifications():
 
         with col1:
             st.markdown("### 🔔 Alertes actives")
-            enable_stock = st.checkbox("Stock critique", value=True, key="alert_stock_crit")
-            enable_stock_bas = st.checkbox("Stock bas", value=True, key="alert_stock_bas")
-            enable_peremption = st.checkbox("Péremption", value=True, key="alert_peremption")
+            _enable_stock = st.checkbox("Stock critique", value=True, key="alert_stock_crit")
+            _enable_stock_bas = st.checkbox("Stock bas", value=True, key="alert_stock_bas")
+            _enable_peremption = st.checkbox("Péremption", value=True, key="alert_peremption")
 
         with col2:
             st.markdown("### 📤 Canaux")
-            browser_notif = st.checkbox(
+            _browser_notif = st.checkbox(
                 "Notifications navigateur", value=True, help="Popup dans le navigateur"
             )
-            email_notif = st.checkbox("Email (bientôt)", value=False, disabled=True)
-            slack_notif = st.checkbox("Slack (bientôt)", value=False, disabled=True)
+            _email_notif = st.checkbox("Email (bientôt)", value=False, disabled=True)
+            _slack_notif = st.checkbox("Slack (bientôt)", value=False, disabled=True)
 
         st.divider()
 

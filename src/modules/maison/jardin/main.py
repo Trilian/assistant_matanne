@@ -23,12 +23,9 @@ from .logic import (
 )
 from .styles import CSS as JARDIN_CSS
 from .ui import (
-    afficher_autonomie_card,
-    afficher_autonomie_gamifiee,
     afficher_badges_jardin,
     afficher_calendrier_plante,
     afficher_compagnons,
-    afficher_header,
     afficher_planning_jardin_ui,
     afficher_previsions_recoltes_ui,
     afficher_score_jardin_gamifie,

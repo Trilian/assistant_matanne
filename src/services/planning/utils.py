@@ -7,7 +7,11 @@ Elles représentent la logique métier pure extraite du planning.
 
 from datetime import date, datetime, timedelta
 
-from .constantes import JOURS_SEMAINE, JOURS_SEMAINE_LOWER, TYPES_PROTEINES
+from src.modules.shared.constantes import (
+    JOURS_SEMAINE,
+    JOURS_SEMAINE_LOWER,
+    TYPES_PROTEINES,
+)
 
 # ═══════════════════════════════════════════════════════════
 # DATES ET CALENDRIER
@@ -614,8 +618,6 @@ def parse_ai_planning_response(response: list[dict]) -> list[dict]:
         >>> parsed[0]['jour']
         'Lundi'
     """
-    from .constantes import JOURS_SEMAINE
-
     parsed = []
 
     for item in response:

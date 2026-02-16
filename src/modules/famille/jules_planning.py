@@ -323,8 +323,6 @@ def render_categories():
 def render_stats_semaine():
     """Affiche les stats de la semaine."""
     planning = get_planning_semaine()
-    today = date.today()
-    jour_actuel = today.weekday()
 
     total_activites = sum(len(acts) for acts in planning.values())
     total_faites = sum(

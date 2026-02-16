@@ -5,7 +5,6 @@ Onglets et fonction app() du module.
 Gamification complète avec badges, graphiques Plotly et export CSV.
 """
 
-import io
 import logging
 from datetime import date, datetime, timedelta
 
@@ -26,15 +25,12 @@ from .styles import ENTRETIEN_CSS
 from .ui import afficher_alertes_predictives as ui_alertes_predictives
 from .ui import (
     afficher_badges_entretien,
-    afficher_header,
     afficher_piece_card,
     afficher_score_gamifie,
-    afficher_score_widget,
     afficher_stats_rapides,
     afficher_tache_entretien,
     afficher_timeline_item,
 )
-from .ui import afficher_planning_previsionnel as ui_planning_previsionnel
 
 # Import optionnel Plotly
 try:

@@ -9,11 +9,9 @@ Features:
 - Météo et alertes jardin
 """
 
-import calendar
 from dataclasses import dataclass, field
 from datetime import date, datetime
-from decimal import Decimal
-from typing import Any, Callable
+from typing import Callable
 
 import streamlit as st
 
@@ -507,10 +505,6 @@ class PlanJardinInteractif:
         if not self.meteo:
             return
 
-        alerte_class = ""
-        if self.meteo.gel_prevu:
-            alerte_class = "gel"
-
         st.markdown(
             f"""
             <div class="meteo-jardin">
@@ -562,7 +556,6 @@ class PlanJardinInteractif:
     def _render_zone_card(self, zone: ZoneJardinData, key: str):
         """Affiche une carte de zone."""
         icone = ICONES_ZONES.get(zone.type_zone, ICONES_ZONES["default"])
-        couleur = COULEURS_ZONES.get(zone.type_zone, "#22c55e")
         plantes = self.plantes_par_zone.get(zone.id, [])
 
         # Card de zone

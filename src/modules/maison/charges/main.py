@@ -9,9 +9,8 @@ Fonctionnalités avancées:
 - Comparaisons périodiques
 """
 
-import asyncio
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date
 from decimal import Decimal
 
 import streamlit as st
@@ -708,7 +707,6 @@ def simuler_economies_energie(energie: str, action: str) -> dict:
         },
     }
 
-    config = ENERGIES.get(energie, {})
     action_key = action.lower().replace(" ", "_")
 
     actions = economies_actions.get(energie, {})

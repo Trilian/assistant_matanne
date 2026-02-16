@@ -22,12 +22,10 @@ import logging
 from datetime import date, datetime
 from typing import Literal
 
-from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
-from src.core.database import obtenir_contexte_db
 from src.core.decorators import avec_session_db
-from src.core.models import AlerteJeux, ConfigurationJeux, SerieJeux
+from src.core.models import AlerteJeux, SerieJeux
 
 logger = logging.getLogger(__name__)
 

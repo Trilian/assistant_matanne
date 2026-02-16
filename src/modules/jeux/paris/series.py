@@ -10,7 +10,6 @@ Utilise les données de SeriesService pour afficher:
 """
 
 import logging
-from datetime import datetime
 
 import pandas as pd
 import streamlit as st
@@ -18,11 +17,8 @@ import streamlit as st
 from src.services.jeux import (
     APSCHEDULER_AVAILABLE,
     FootballDataService,
-    SchedulerService,
     SeriesService,
-    SyncService,
     get_scheduler_service,
-    get_series_service,
     get_sync_service,
 )
 from src.services.jeux.football_data import COMPETITIONS

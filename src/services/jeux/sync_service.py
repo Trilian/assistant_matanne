@@ -11,12 +11,11 @@ Utilisation:
 """
 
 import logging
-from datetime import date, datetime
+from datetime import datetime
 from typing import Literal
 
 from sqlalchemy.orm import Session
 
-from src.core.database import obtenir_contexte_db
 from src.core.decorators import avec_session_db
 
 from .football_data import FootballDataService, StatistiquesMarcheData

@@ -5,7 +5,6 @@ Affichage de tâches, pièces, score gamifié, badges, etc.
 """
 
 import logging
-from datetime import date
 
 import streamlit as st
 
@@ -37,7 +36,6 @@ def afficher_score_gamifie(score: dict, streak: int = 0):
     """Affiche le score propreté avec anneau SVG animé et gamification."""
     score_val = score.get("score", 50)
     niveau = score.get("niveau", "Moyen")
-    couleur = score.get("couleur", "#3498db")
 
     # Couleur selon score
     if score_val >= 90:

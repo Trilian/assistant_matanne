@@ -30,15 +30,14 @@ Compatibilité:
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES
 # ═══════════════════════════════════════════════════════════
-from .constantes import (
+from src.modules.shared.constantes import (
     JOURS_SEMAINE,
     JOURS_SEMAINE_LOWER,
     TYPES_PROTEINES,
     TYPES_REPAS,
 )
+
 from .global_planning import (
-    # Alias de compatibilité
-    PlanningAIService,
     # Classe principale
     ServicePlanningUnifie,
     get_planning_unified_service,
@@ -51,8 +50,6 @@ from .global_planning import (
 # SERVICES
 # ═══════════════════════════════════════════════════════════
 from .service import (
-    # Alias de compatibilité
-    PlanningService,
     # Classe principale
     ServicePlanning,
     get_planning_service,
@@ -73,6 +70,28 @@ from .types import (
 # ═══════════════════════════════════════════════════════════
 # UTILITAIRES
 # ═══════════════════════════════════════════════════════════
+from .rappels import (
+    OPTIONS_RAPPEL,
+    ServiceRappels,
+    format_rappel,
+    get_rappels_service,
+    obtenir_service_rappels,
+)
+from .recurrence import (
+    JOURS_SEMAINE as JOURS_SEMAINE_RECURRENCE,
+    OPTIONS_RECURRENCE,
+    ServiceRecurrence,
+    TypeRecurrence,
+    format_recurrence,
+    get_recurrence_service,
+    obtenir_service_recurrence,
+)
+from .templates import (
+    JOURS_SEMAINE as JOURS_SEMAINE_TEMPLATES,
+    ServiceTemplates,
+    get_templates_service,
+    obtenir_service_templates,
+)
 from .utils import (
     # Courses
     aggregate_ingredients,
@@ -167,15 +186,38 @@ __all__ = [
     # Services - Planning de base
     # ─────────────────────────────────────────────────────────
     "ServicePlanning",
-    "PlanningService",  # Alias compatibilité
     "obtenir_service_planning",
     "get_planning_service",  # Alias compatibilité
     # ─────────────────────────────────────────────────────────
     # Services - Planning unifié
     # ─────────────────────────────────────────────────────────
     "ServicePlanningUnifie",
-    "PlanningAIService",  # Alias compatibilité
     "obtenir_service_planning_unifie",
     "get_planning_unified_service",  # Alias compatibilité
     "get_unified_planning_service",  # Alias compatibilité
+    # ─────────────────────────────────────────────────────────
+    # Services - Rappels
+    # ─────────────────────────────────────────────────────────
+    "OPTIONS_RAPPEL",
+    "ServiceRappels",
+    "format_rappel",
+    "get_rappels_service",
+    "obtenir_service_rappels",
+    # ─────────────────────────────────────────────────────────
+    # Services - Récurrence
+    # ─────────────────────────────────────────────────────────
+    "JOURS_SEMAINE_RECURRENCE",
+    "OPTIONS_RECURRENCE",
+    "ServiceRecurrence",
+    "TypeRecurrence",
+    "format_recurrence",
+    "get_recurrence_service",
+    "obtenir_service_recurrence",
+    # ─────────────────────────────────────────────────────────
+    # Services - Templates de semaine
+    # ─────────────────────────────────────────────────────────
+    "JOURS_SEMAINE_TEMPLATES",
+    "ServiceTemplates",
+    "get_templates_service",
+    "obtenir_service_templates",
 ]

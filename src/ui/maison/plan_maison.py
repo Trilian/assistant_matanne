@@ -623,7 +623,6 @@ def grille_objets(
     for idx, objet in enumerate(objets):
         with cols[idx % nb_cols]:
             icone = ICONES_CATEGORIES.get(objet.categorie, "📦")
-            couleur = COULEURS_STATUT.get(objet.statut, "#6b7280")
 
             with st.container(border=True):
                 st.markdown(f"### {icone} {objet.nom}")

@@ -43,7 +43,7 @@ def render_predictions():
 
         with col2:
             # Période de prédiction
-            periode = st.selectbox(
+            _periode = st.selectbox(
                 "Prédiction pour", ["1 semaine", "1 mois", "3 mois"], key="prediction_period"
             )
 

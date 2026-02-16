@@ -18,7 +18,7 @@ from ._common import (
 def render_suggestions_ia():
     """Suggestions IA depuis inventaire & recettes"""
     service = get_courses_service()
-    inventaire_service = get_inventaire_service()
+    _inventaire_service = get_inventaire_service()
     recettes_service = get_recette_service()
 
     st.subheader("⏰ Suggestions intelligentes")
