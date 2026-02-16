@@ -177,6 +177,24 @@ from .systeme import (
     Backup,
 )
 
+# Temps d'entretien et jardin
+from .temps_entretien import (
+    CoutTravaux,
+    LogStatutObjet,
+    ObjetMaison,
+    PieceMaison,
+    PlanteJardin,
+    PrioriteRemplacement,
+    # Modèles
+    SessionTravail,
+    StatutObjet,
+    # Enums
+    TypeActiviteEntretien,
+    TypeModificationPiece,
+    VersionPiece,
+    ZoneJardin,
+)
+
 # Préférences utilisateur et apprentissage IA (NOUVEAU)
 from .user_preferences import (
     ExternalCalendarConfig,
@@ -326,4 +344,17 @@ __all__ = [
     "FurniturePriority",
     "EcoActionType",
     "RoomType",
+    # Temps d'entretien et jardin
+    "TypeActiviteEntretien",
+    "TypeModificationPiece",
+    "StatutObjet",
+    "PrioriteRemplacement",
+    "SessionTravail",
+    "VersionPiece",
+    "CoutTravaux",
+    "LogStatutObjet",
+    "PieceMaison",
+    "ObjetMaison",
+    "ZoneJardin",
+    "PlanteJardin",
 ]
