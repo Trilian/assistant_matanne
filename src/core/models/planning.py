@@ -138,9 +138,15 @@ class CalendarEvent(Base):
     rappel_avant_minutes: Mapped[int | None] = mapped_column(Integer)
 
     # Récurrence
-    recurrence_type: Mapped[str | None] = mapped_column(String(20))  # none, daily, weekly, monthly, yearly
-    recurrence_interval: Mapped[int | None] = mapped_column(Integer, default=1)  # Tous les N jours/semaines/mois/années
-    recurrence_jours: Mapped[str | None] = mapped_column(String(20))  # Pour weekly: "0,1,4" = lun,mar,ven
+    recurrence_type: Mapped[str | None] = mapped_column(
+        String(20)
+    )  # none, daily, weekly, monthly, yearly
+    recurrence_interval: Mapped[int | None] = mapped_column(
+        Integer, default=1
+    )  # Tous les N jours/semaines/mois/années
+    recurrence_jours: Mapped[str | None] = mapped_column(
+        String(20)
+    )  # Pour weekly: "0,1,4" = lun,mar,ven
     recurrence_fin: Mapped[date | None] = mapped_column(Date)  # Date de fin de la récurrence
     parent_event_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("calendar_events.id"))
 
@@ -179,7 +185,9 @@ class TemplateSemaine(Base):
     description: Mapped[str | None] = mapped_column(Text)
     actif: Mapped[bool] = mapped_column(Boolean, default=True)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    modifie_le: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     # Relations
     items: Mapped[list["TemplateItem"]] = relationship(
@@ -225,9 +233,7 @@ class TemplateItem(Base):
     # Relations
     template: Mapped["TemplateSemaine"] = relationship("TemplateSemaine", back_populates="items")
 
-    __table_args__ = (
-        Index("idx_template_jour", "template_id", "jour_semaine"),
-    )
+    __table_args__ = (Index("idx_template_jour", "template_id", "jour_semaine"),)
 
     def __repr__(self) -> str:
         return f"<TemplateItem(jour={self.jour_semaine}, heure={self.heure_debut}, titre='{self.titre}')>"

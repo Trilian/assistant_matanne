@@ -81,22 +81,23 @@ def app():
 
     try:
         from datetime import timedelta
+
         from src.modules.planning.timeline_ui import charger_events_periode
-        
+
         # Charger les événements des 7 prochains jours
         aujourd_hui = date.today()
         events = charger_events_periode(aujourd_hui, aujourd_hui + timedelta(days=7))
-        
+
         if events:
             # Afficher les 5 prochains
             events_tries = sorted(events, key=lambda e: e["date_debut"])[:5]
-            
+
             for event in events_tries:
                 jour = event["date_debut"].strftime("%a %d/%m")
                 heure = event["date_debut"].strftime("%H:%M")
                 couleur = event.get("couleur", "#757575")
                 lieu = f" • 📍 {event['lieu']}" if event.get("lieu") else ""
-                
+
                 st.markdown(
                     f'<div style="padding:8px;margin:4px 0;background:#f8f9fa;'
                     f'border-left:4px solid {couleur};border-radius:4px;">'
@@ -104,13 +105,13 @@ def app():
                     f'<span style="color:#666;">{lieu}</span></div>',
                     unsafe_allow_html=True,
                 )
-            
+
             # Lien vers le calendrier complet
             if len(events) > 5:
                 st.caption(f"... et {len(events) - 5} autres événements cette semaine")
         else:
             st.info("Aucun événement prévu cette semaine")
-            
+
     except ImportError:
         st.caption("Module timeline non disponible")
     except Exception as e:
@@ -119,13 +120,17 @@ def app():
     # Section rappels (si disponible)
     try:
         from src.services.planning.rappels import verifier_et_envoyer_rappels
-        
+
         rappels_info = verifier_et_envoyer_rappels()
-        
+
         if rappels_info["prochains"]:
-            with st.expander(f"🔔 {len(rappels_info['prochains'])} rappel(s) à venir", expanded=False):
+            with st.expander(
+                f"🔔 {len(rappels_info['prochains'])} rappel(s) à venir", expanded=False
+            ):
                 for rappel in rappels_info["prochains"]:
-                    st.markdown(f"- **{rappel['titre']}** - {rappel['date_debut'].strftime('%H:%M')}")
+                    st.markdown(
+                        f"- **{rappel['titre']}** - {rappel['date_debut'].strftime('%H:%M')}"
+                    )
     except ImportError:
         pass
     except Exception:

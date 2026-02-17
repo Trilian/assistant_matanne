@@ -211,6 +211,38 @@ class ZoneJardinCreate(BaseModel):
     notes: str | None = None
 
 
+class PlanJardinCreate(BaseModel):
+    """Création d'un plan de jardin."""
+
+    nom: str
+    largeur: float  # mètres
+    hauteur: float  # mètres
+    description: str | None = None
+
+
+class PlanteJardinCreate(BaseModel):
+    """Ajout d'une plante sur le plan jardin (avec position)."""
+
+    nom: str
+    variete: str | None = None
+    zone_id: int
+    position_x: float
+    position_y: float
+    date_plantation: date_type | None = None
+    etat: EtatPlante = EtatPlante.BON
+    notes: str | None = None
+
+
+class ActionPlanteCreate(BaseModel):
+    """Action effectuée sur une plante."""
+
+    plante_id: int
+    type_action: str  # arrosage, taille, recolte, traitement, etc.
+    date_action: date_type | None = None
+    notes: str | None = None
+    quantite: float | None = None  # Pour récoltes
+
+
 class PlanteCreate(BaseModel):
     """Création d'une plante dans le jardin."""
 

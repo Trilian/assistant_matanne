@@ -15,8 +15,6 @@ from datetime import date
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.services.planning import get_planning_unified_service
-
 logger = logging.getLogger(__name__)
 
 
@@ -223,6 +221,9 @@ def render_formulaire_optimisation_ia(week_start: date) -> None:
 
         if submitted:
             with st.spinner("🤖 L'IA analyse..."):
+                # Import différé pour éviter les dépendances circulaires
+                from src.services.planning import get_planning_unified_service
+
                 service = get_planning_unified_service()
                 result = service.generer_semaine_ia(
                     date_debut=week_start,

@@ -403,9 +403,7 @@ class TestRenderModalImpression:
         render_modal_impression(semaine)
         assert True
 
-    @patch(
-        "src.modules.planning.calendrier.components.generer_texte_semaine_pour_impression"
-    )
+    @patch("src.modules.planning.calendrier.components.generer_texte_semaine_pour_impression")
     @patch("src.modules.planning.calendrier.components.st")
     def test_render_modal_open(self, mock_st: MagicMock, mock_gen: MagicMock) -> None:
         """Test du modal ouvert."""

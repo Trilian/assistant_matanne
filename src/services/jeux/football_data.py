@@ -470,19 +470,21 @@ def charger_matchs_a_venir(
     for m in data.get("matches", []):
         try:
             utc_date = m.get("utcDate", "")
-            matchs.append({
-                "id": m.get("id"),
-                "date": utc_date.split("T")[0] if "T" in utc_date else utc_date,
-                "heure": utc_date.split("T")[1][:5] if "T" in utc_date else None,
-                "championnat": championnat,
-                "equipe_domicile": m.get("homeTeam", {}).get("name"),
-                "equipe_domicile_id": m.get("homeTeam", {}).get("id"),
-                "equipe_exterieur": m.get("awayTeam", {}).get("name"),
-                "equipe_exterieur_id": m.get("awayTeam", {}).get("id"),
-                "statut": m.get("status"),
-                "score_domicile": m.get("score", {}).get("fullTime", {}).get("home"),
-                "score_exterieur": m.get("score", {}).get("fullTime", {}).get("away"),
-            })
+            matchs.append(
+                {
+                    "id": m.get("id"),
+                    "date": utc_date.split("T")[0] if "T" in utc_date else utc_date,
+                    "heure": utc_date.split("T")[1][:5] if "T" in utc_date else None,
+                    "championnat": championnat,
+                    "equipe_domicile": m.get("homeTeam", {}).get("name"),
+                    "equipe_domicile_id": m.get("homeTeam", {}).get("id"),
+                    "equipe_exterieur": m.get("awayTeam", {}).get("name"),
+                    "equipe_exterieur_id": m.get("awayTeam", {}).get("id"),
+                    "statut": m.get("status"),
+                    "score_domicile": m.get("score", {}).get("fullTime", {}).get("home"),
+                    "score_exterieur": m.get("score", {}).get("fullTime", {}).get("away"),
+                }
+            )
         except Exception as e:
             logger.debug(f"Erreur parsing match: {e}")
     return matchs
@@ -521,13 +523,15 @@ def charger_matchs_termines(championnat: str, jours: int = 7) -> list[dict]:
     for m in data.get("matches", []):
         try:
             score = m.get("score", {}).get("fullTime", {})
-            matchs.append({
-                "date": m.get("utcDate", "").split("T")[0],
-                "equipe_domicile": m.get("homeTeam", {}).get("name"),
-                "equipe_exterieur": m.get("awayTeam", {}).get("name"),
-                "score_domicile": score.get("home"),
-                "score_exterieur": score.get("away"),
-            })
+            matchs.append(
+                {
+                    "date": m.get("utcDate", "").split("T")[0],
+                    "equipe_domicile": m.get("homeTeam", {}).get("name"),
+                    "equipe_exterieur": m.get("awayTeam", {}).get("name"),
+                    "score_domicile": score.get("home"),
+                    "score_exterieur": score.get("away"),
+                }
+            )
         except Exception as e:
             logger.debug(f"Erreur parsing match terminé: {e}")
     return matchs
@@ -554,17 +558,19 @@ def charger_classement(championnat: str) -> list[dict]:
         equipes = []
         for table in data.get("standings", []):
             for i, eq in enumerate(table.get("table", []), 1):
-                equipes.append({
-                    "position": i,
-                    "nom": eq.get("team", {}).get("name"),
-                    "matchs_joues": eq.get("playedGames"),
-                    "victoires": eq.get("won"),
-                    "nuls": eq.get("draw"),
-                    "defaites": eq.get("lost"),
-                    "buts_marques": eq.get("goalsFor"),
-                    "buts_encaisses": eq.get("goalsAgainst"),
-                    "points": eq.get("points"),
-                })
+                equipes.append(
+                    {
+                        "position": i,
+                        "nom": eq.get("team", {}).get("name"),
+                        "matchs_joues": eq.get("playedGames"),
+                        "victoires": eq.get("won"),
+                        "nuls": eq.get("draw"),
+                        "defaites": eq.get("lost"),
+                        "buts_marques": eq.get("goalsFor"),
+                        "buts_encaisses": eq.get("goalsAgainst"),
+                        "points": eq.get("points"),
+                    }
+                )
         return equipes
 
     # Fallback: charger les équipes sans classement
@@ -599,8 +605,7 @@ def charger_historique_equipe(nom_equipe: str, limite: int = 10) -> list[dict]:
         return []
 
     data = service._faire_requete(
-        f"/teams/{equipe_id}/matches",
-        {"limit": limite, "status": "FINISHED"}
+        f"/teams/{equipe_id}/matches", {"limit": limite, "status": "FINISHED"}
     )
     if not data:
         return []
@@ -608,15 +613,17 @@ def charger_historique_equipe(nom_equipe: str, limite: int = 10) -> list[dict]:
     matchs = []
     for m in data.get("matches", []):
         try:
-            matchs.append({
-                "date": m.get("utcDate", "").split("T")[0],
-                "equipe_domicile": m.get("homeTeam", {}).get("name"),
-                "equipe_domicile_id": m.get("homeTeam", {}).get("id"),
-                "equipe_exterieur": m.get("awayTeam", {}).get("name"),
-                "equipe_exterieur_id": m.get("awayTeam", {}).get("id"),
-                "score_domicile": m.get("score", {}).get("fullTime", {}).get("home"),
-                "score_exterieur": m.get("score", {}).get("fullTime", {}).get("away"),
-            })
+            matchs.append(
+                {
+                    "date": m.get("utcDate", "").split("T")[0],
+                    "equipe_domicile": m.get("homeTeam", {}).get("name"),
+                    "equipe_domicile_id": m.get("homeTeam", {}).get("id"),
+                    "equipe_exterieur": m.get("awayTeam", {}).get("name"),
+                    "equipe_exterieur_id": m.get("awayTeam", {}).get("id"),
+                    "score_domicile": m.get("score", {}).get("fullTime", {}).get("home"),
+                    "score_exterieur": m.get("score", {}).get("fullTime", {}).get("away"),
+                }
+            )
         except Exception as e:
             logger.debug(f"Erreur parsing match: {e}")
     return matchs

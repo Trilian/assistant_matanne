@@ -15,7 +15,6 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
-
 from src.core.ai import ClientIA
 from src.services.base import BaseAIService
 

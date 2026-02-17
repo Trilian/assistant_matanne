@@ -5,13 +5,13 @@ Point d'entrée avec navigation par onglets
 
 import streamlit as st
 
-from src.modules.parametres.foyer import render_foyer_config
-from src.modules.parametres.ia import render_ia_config
-from src.modules.parametres.database import render_database_config
-from src.modules.parametres.cache import render_cache_config
+from src.modules.parametres.about import render_about
 from src.modules.parametres.affichage import render_display_config
 from src.modules.parametres.budget import render_budget_config
-from src.modules.parametres.about import render_about
+from src.modules.parametres.cache import render_cache_config
+from src.modules.parametres.database import render_database_config
+from src.modules.parametres.foyer import render_foyer_config
+from src.modules.parametres.ia import render_ia_config
 
 
 def app():

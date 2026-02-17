@@ -5,9 +5,8 @@ Gestion et maintenance de la base PostgreSQL/Supabase
 
 import streamlit as st
 
-from src.core.database import GestionnaireMigrations
+from src.core.database import GestionnaireMigrations, vacuum_database
 from src.core.database import obtenir_infos_db as get_db_info
-from src.core.database import vacuum_database
 from src.core.database import verifier_sante as health_check
 from src.ui.components import Modale as Modal
 from src.ui.feedback import afficher_erreur, afficher_succes, spinner_intelligent

@@ -10,6 +10,8 @@ Ce module réexporte les éléments de:
 
 # Types et dataclasses
 # Compatibilité: importer get_debut_semaine depuis shared
+# Réexport de JOURS_SEMAINE pour compatibilité
+from src.modules.shared.constantes import JOURS_SEMAINE, JOURS_SEMAINE_COURT
 from src.modules.shared.date_utils import obtenir_debut_semaine as get_debut_semaine
 from src.modules.shared.date_utils import obtenir_fin_semaine as get_fin_semaine
 
@@ -55,6 +57,9 @@ __all__ = [
     "EvenementCalendrier",
     "JourCalendrier",
     "SemaineCalendrier",
+    # Constantes
+    "JOURS_SEMAINE",
+    "JOURS_SEMAINE_COURT",
     # Converters
     "convertir_repas_en_evenement",
     "convertir_session_batch_en_evenement",

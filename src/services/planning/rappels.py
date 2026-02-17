@@ -62,10 +62,7 @@ class ServiceRappels:
 
     @avec_session_db
     def get_rappels_imminents(
-        self,
-        window_minutes: int = 60,
-        *,
-        db: Session
+        self, window_minutes: int = 60, *, db: Session
     ) -> list[dict[str, Any]]:
         """
         Récupère les événements dont le rappel doit être envoyé.
@@ -81,10 +78,14 @@ class ServiceRappels:
         rappels: list[dict[str, Any]] = []
 
         # Événements CalendarEvent avec rappel
-        events = db.query(CalendarEvent).filter(
-            CalendarEvent.rappel_avant_minutes.isnot(None),
-            CalendarEvent.date_debut > now,
-        ).all()
+        events = (
+            db.query(CalendarEvent)
+            .filter(
+                CalendarEvent.rappel_avant_minutes.isnot(None),
+                CalendarEvent.date_debut > now,
+            )
+            .all()
+        )
 
         for event in events:
             # Calculer quand le rappel doit être envoyé
@@ -94,15 +95,17 @@ class ServiceRappels:
 
             # Si le moment du rappel est dans la fenêtre
             if now <= rappel_at <= now + timedelta(minutes=window_minutes):
-                rappels.append({
-                    "type": "calendar_event",
-                    "id": event.id,
-                    "titre": event.titre,
-                    "date_debut": event.date_debut,
-                    "lieu": event.lieu,
-                    "rappel_minutes": event.rappel_avant_minutes,
-                    "rappel_at": rappel_at,
-                })
+                rappels.append(
+                    {
+                        "type": "calendar_event",
+                        "id": event.id,
+                        "titre": event.titre,
+                        "date_debut": event.date_debut,
+                        "lieu": event.lieu,
+                        "rappel_minutes": event.rappel_avant_minutes,
+                        "rappel_at": rappel_at,
+                    }
+                )
 
         # Activités famille avec rappel (si elles avaient ce champ)
         # Note: FamilyActivity n'a pas encore rappel_avant_minutes
@@ -131,14 +134,19 @@ class ServiceRappels:
                 # Formater le délai
                 minutes = rappel["rappel_minutes"]
                 if minutes >= 60:
-                    delai_str = f"{minutes // 60}h" if minutes % 60 == 0 else f"{minutes // 60}h{minutes % 60}"
+                    delai_str = (
+                        f"{minutes // 60}h"
+                        if minutes % 60 == 0
+                        else f"{minutes // 60}h{minutes % 60}"
+                    )
                 else:
                     delai_str = f"{minutes} min"
 
                 # Créer la notification
                 notification = NotificationPush(
                     title=f"🔔 Rappel: {rappel['titre']}",
-                    body=f"Dans {delai_str}" + (f" • {rappel['lieu']}" if rappel.get("lieu") else ""),
+                    body=f"Dans {delai_str}"
+                    + (f" • {rappel['lieu']}" if rappel.get("lieu") else ""),
                     notification_type=TypeNotification.RAPPEL_ACTIVITE,
                     data={"event_id": rappel["id"], "type": rappel["type"]},
                 )
@@ -181,22 +189,22 @@ get_rappels_service = obtenir_service_rappels
 def verifier_et_envoyer_rappels() -> dict:
     """
     Vérifie et envoie les rappels en attente.
-    
+
     Fonction utilitaire pour être appelée depuis l'UI
     ou un job périodique.
-    
+
     Returns:
         Dict avec {envoyés: int, erreurs: int, prochains: list}
     """
     service = obtenir_service_rappels()
-    
+
     try:
         # Envoyer les rappels imminents (15 min)
         envois = service.envoyer_rappels_en_attente()
-        
+
         # Récupérer les prochains rappels (1h)
         prochains = service.get_rappels_imminents(window_minutes=60)
-        
+
         return {
             "envoyes": envois,
             "erreurs": 0,

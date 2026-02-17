@@ -15,12 +15,6 @@ DB_CONNECTION_RETRY = 3
 DB_CONNECTION_TIMEOUT = 10
 """Timeout de connexion DB en secondes."""
 
-DB_POOL_SIZE = 5
-"""Taille du pool de connexions."""
-
-DB_MAX_OVERFLOW = 10
-"""Nombre maximum de connexions en overflow."""
-
 # ═══════════════════════════════════════════════════════════
 # CACHE
 # ═══════════════════════════════════════════════════════════
@@ -55,9 +49,6 @@ AI_RATE_LIMIT_DAILY = 100
 
 AI_RATE_LIMIT_HOURLY = 30
 """Limite d'appels IA par heure."""
-
-AI_RATE_LIMIT_PER_MINUTE = 10
-"""Limite d'appels IA par minute."""
 
 AI_API_TIMEOUT = 60
 """Timeout API IA en secondes."""
@@ -161,34 +152,6 @@ MAX_ITEMS_EXPORT = 1000
 """Nombre maximum d'items à exporter."""
 
 # ═══════════════════════════════════════════════════════════
-# UI / FEEDBACK
-# ═══════════════════════════════════════════════════════════
-
-TOAST_DURATION_SHORT = 2
-"""Durée d'affichage toast courte (secondes)."""
-
-TOAST_DURATION_MEDIUM = 3
-"""Durée d'affichage toast moyenne (secondes)."""
-
-TOAST_DURATION_LONG = 5
-"""Durée d'affichage toast longue (secondes)."""
-
-SPINNER_ESTIMATED_SECONDS_SHORT = 2
-"""Estimation spinner courte (secondes)."""
-
-SPINNER_ESTIMATED_SECONDS_MEDIUM = 5
-"""Estimation spinner moyenne (secondes)."""
-
-SPINNER_ESTIMATED_SECONDS_LONG = 10
-"""Estimation spinner longue (secondes)."""
-
-MAX_NAVIGATION_HISTORY = 50
-"""Taille maximale de l'historique de navigation."""
-
-MAX_BREADCRUMB_ITEMS = 5
-"""Nombre maximum d'items dans le fil d'Ariane."""
-
-# ═══════════════════════════════════════════════════════════
 # RÈGLES MÉTIER - CUISINE
 # ═══════════════════════════════════════════════════════════
 
@@ -214,25 +177,6 @@ RECETTE_PORTIONS_DEFAULT = 4
 """Nombre de portions par défaut."""
 
 # ═══════════════════════════════════════════════════════════
-# IMAGES
-# ═══════════════════════════════════════════════════════════
-
-IMAGE_MAX_WIDTH = 800
-"""Largeur maximale d'image (pixels)."""
-
-IMAGE_MAX_HEIGHT = 600
-"""Hauteur maximale d'image (pixels)."""
-
-IMAGE_THUMBNAIL_SIZE = 200
-"""Taille des miniatures (pixels)."""
-
-IMAGE_JPEG_QUALITY = 85
-"""Qualité JPEG (0-100)."""
-
-IMAGE_WEBP_QUALITY = 80
-"""Qualité WebP (0-100)."""
-
-# ═══════════════════════════════════════════════════════════
 # EXPORT
 # ═══════════════════════════════════════════════════════════
 
@@ -248,41 +192,6 @@ EXPORT_JSON_INDENT = 2
 
 LOG_LEVEL_PRODUCTION = "INFO"
 """Niveau de log en production."""
-
-LOG_LEVEL_DEVELOPMENT = "DEBUG"
-"""Niveau de log en développement."""
-
-LOG_MAX_SIZE_MB = 10
-"""Taille maximale des fichiers de log (MB)."""
-
-LOG_BACKUP_COUNT = 5
-"""Nombre de fichiers de log à conserver."""
-
-# ═══════════════════════════════════════════════════════════
-# SÉCURITÉ
-# ═══════════════════════════════════════════════════════════
-
-PASSWORD_MIN_LENGTH = 8
-"""Longueur minimale de mot de passe."""
-
-PASSWORD_MAX_LENGTH = 128
-"""Longueur maximale de mot de passe."""
-
-SESSION_TIMEOUT_MINUTES = 60
-"""Durée de session en minutes."""
-
-SANITIZE_MAX_LENGTH_DEFAULT = 1000
-"""Longueur maximale par défaut pour sanitization."""
-
-# ═══════════════════════════════════════════════════════════
-# MONITORING
-# ═══════════════════════════════════════════════════════════
-
-HEALTH_CHECK_INTERVAL_SECONDS = 60
-"""Intervalle de health check (secondes)."""
-
-METRICS_FLUSH_INTERVAL_SECONDS = 30
-"""Intervalle de flush des métriques (secondes)."""
 
 # ═══════════════════════════════════════════════════════════
 # CATÉGORIES & ENUMS (Constantes métier)
@@ -333,116 +242,3 @@ PRIORITES_PROJET = ["basse", "moyenne", "haute", "urgente"]
 
 CATEGORIES_JARDIN = ["Légumes", "Fruits", "Herbes aromatiques", "Fleurs", "Arbres", "Autre"]
 """Catégories d'éléments de jardin."""
-
-# ═══════════════════════════════════════════════════════════
-# MESSAGES UTILISATEUR
-# ═══════════════════════════════════════════════════════════
-
-MSG_SUCCESS_CREATE = "[OK] {item} créé avec succès"
-"""Message de succès création."""
-
-MSG_SUCCESS_UPDATE = "[OK] {item} mis à jour"
-"""Message de succès mise à jour."""
-
-MSG_SUCCESS_DELETE = "🗑️ {item} supprimé"
-"""Message de succès suppression."""
-
-MSG_ERROR_NOT_FOUND = "[ERROR] {item} introuvable"
-"""Message d'erreur élément non trouvé."""
-
-MSG_ERROR_INVALID_DATA = "[ERROR] Données invalides"
-"""Message d'erreur données invalides."""
-
-MSG_ERROR_REQUIRED_FIELD = "[!] {field} est requis"
-"""Message d'erreur champ requis."""
-
-MSG_ERROR_DB_CONNECTION = "[ERROR] Erreur de connexion à la base de données"
-"""Message d'erreur connexion DB."""
-
-MSG_ERROR_AI_SERVICE = "🤖 Service IA temporairement indisponible"
-"""Message d'erreur service IA."""
-
-MSG_ERROR_RATE_LIMIT = "⏳ Limite d'appels atteinte, réessayez plus tard"
-"""Message d'erreur rate limit."""
-
-MSG_WARNING_STOCK_BAS = "[!] Stock bas : {item}"
-"""Message d'alerte stock bas."""
-
-MSG_WARNING_PEREMPTION = "⏳ {item} périme bientôt"
-"""Message d'alerte péremption proche."""
-
-MSG_INFO_EMPTY_LIST = "Aucun élément à afficher"
-"""Message d'information liste vide."""
-
-MSG_INFO_LOADING = "⏳ Chargement en cours..."
-"""Message d'information chargement."""
-
-# ═══════════════════════════════════════════════════════════
-# FONCTIONS HELPERS
-# ═══════════════════════════════════════════════════════════
-
-
-def obtenir_cache_ttl(module: str) -> int:
-    """
-    Retourne le TTL de cache selon le module.
-
-    Args:
-        module: Nom du module (ex: "recettes", "inventaire")
-
-    Returns:
-        TTL en secondes
-    """
-    ttl_map = {
-        "recettes": CACHE_TTL_RECETTES,
-        "inventaire": CACHE_TTL_INVENTAIRE,
-        "courses": CACHE_TTL_COURSES,
-        "planning": CACHE_TTL_PLANNING,
-        "ia": CACHE_TTL_IA,
-    }
-    return ttl_map.get(module, CACHE_TTL_RECETTES)
-
-
-def obtenir_items_par_page(module: str) -> int:
-    """
-    Retourne le nombre d'items par page selon le module.
-
-    Args:
-        module: Nom du module
-
-    Returns:
-        Nombre d'items par page
-    """
-    pagination_map = {
-        "recettes": ITEMS_PER_PAGE_RECETTES,
-        "inventaire": ITEMS_PER_PAGE_INVENTAIRE,
-        "courses": ITEMS_PER_PAGE_COURSES,
-        "planning": ITEMS_PER_PAGE_PLANNING,
-    }
-    return pagination_map.get(module, ITEMS_PER_PAGE_DEFAULT)
-
-
-def est_temps_rapide(temps_minutes: int) -> bool:
-    """
-    Vérifie si le temps de recette est considéré comme rapide.
-
-    Args:
-        temps_minutes: Temps en minutes
-
-    Returns:
-        True si rapide
-    """
-    return temps_minutes <= RECETTE_TEMPS_RAPIDE_MAX
-
-
-def est_stock_critique(quantite: float, seuil: float) -> bool:
-    """
-    Vérifie si le stock est critique.
-
-    Args:
-        quantite: Quantité actuelle
-        seuil: Seuil minimum
-
-    Returns:
-        True si critique
-    """
-    return quantite < (seuil * INVENTAIRE_SEUIL_CRITIQUE_RATIO)

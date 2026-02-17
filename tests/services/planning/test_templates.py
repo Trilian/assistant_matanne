@@ -32,12 +32,13 @@ class TestServiceTemplates:
     def test_get_items_par_jour_vide(self):
         """get_items_par_jour avec template vide."""
         from unittest.mock import MagicMock
+
         service = ServiceTemplates()
         template = MagicMock()
         template.items = []
-        
+
         result = service.get_items_par_jour(template)
-        
+
         assert len(result) == 7
         for jour in range(7):
             assert result[jour] == []

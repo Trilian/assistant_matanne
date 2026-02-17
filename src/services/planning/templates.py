@@ -25,7 +25,9 @@ class ServiceTemplates:
         self._db = db
 
     @avec_session_db
-    def lister_templates(self, actifs_seulement: bool = True, *, db: Session) -> list[TemplateSemaine]:
+    def lister_templates(
+        self, actifs_seulement: bool = True, *, db: Session
+    ) -> list[TemplateSemaine]:
         """Liste tous les templates disponibles."""
         query = db.query(TemplateSemaine)
         if actifs_seulement:
@@ -171,7 +173,9 @@ class ServiceTemplates:
             date_fin = None
             if item.heure_fin:
                 h, m = map(int, item.heure_fin.split(":"))
-                date_fin = datetime.combine(event_date, datetime.min.time().replace(hour=h, minute=m))
+                date_fin = datetime.combine(
+                    event_date, datetime.min.time().replace(hour=h, minute=m)
+                )
 
             # Créer l'événement
             event = CalendarEvent(
@@ -214,10 +218,14 @@ class ServiceTemplates:
         date_fin_dt = datetime.combine(date_fin, datetime.max.time())
 
         # Récupérer les événements de la semaine
-        events = db.query(CalendarEvent).filter(
-            CalendarEvent.date_debut >= date_debut_dt,
-            CalendarEvent.date_debut <= date_fin_dt,
-        ).all()
+        events = (
+            db.query(CalendarEvent)
+            .filter(
+                CalendarEvent.date_debut >= date_debut_dt,
+                CalendarEvent.date_debut <= date_fin_dt,
+            )
+            .all()
+        )
 
         if not events:
             return None

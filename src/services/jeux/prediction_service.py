@@ -149,9 +149,7 @@ class PredictionService:
         matchs_sans_nul_dom = forme_domicile.get("matchs_sans_nul", 0)
         matchs_sans_nul_ext = forme_exterieur.get("matchs_sans_nul", 0)
 
-        bonus_nul = self._calculer_bonus_nul_regression(
-            matchs_sans_nul_dom, matchs_sans_nul_ext
-        )
+        bonus_nul = self._calculer_bonus_nul_regression(matchs_sans_nul_dom, matchs_sans_nul_ext)
         if bonus_nul > 0:
             proba_nul += bonus_nul
             proba_dom -= bonus_nul * 0.5
@@ -174,15 +172,18 @@ class PredictionService:
         ecart = probas_triees[0] - probas_triees[1]
         confiance = min(95, 40 + ecart * 150)
 
-        if (
-            forme_domicile.get("nb_matchs", 0) < 3
-            or forme_exterieur.get("nb_matchs", 0) < 3
-        ):
+        if forme_domicile.get("nb_matchs", 0) < 3 or forme_exterieur.get("nb_matchs", 0) < 3:
             confiance *= 0.8
 
         raisons = self._generer_raisons(
-            forme_domicile, forme_exterieur, h2h, serie_dom, serie_ext,
-            bonus_nul, matchs_sans_nul_dom, matchs_sans_nul_ext,
+            forme_domicile,
+            forme_exterieur,
+            h2h,
+            serie_dom,
+            serie_ext,
+            bonus_nul,
+            matchs_sans_nul_dom,
+            matchs_sans_nul_ext,
         )
 
         if confiance >= self.seuil_confiance_haute:
@@ -206,8 +207,11 @@ class PredictionService:
         )
 
     def _appliquer_regression_defaites(
-        self, proba_dom: float, proba_ext: float,
-        serie_dom: str | None, serie_ext: str | None,
+        self,
+        proba_dom: float,
+        proba_ext: float,
+        serie_dom: str | None,
+        serie_ext: str | None,
     ) -> tuple[float, float]:
         if serie_dom and "D" in serie_dom:
             try:
@@ -228,8 +232,11 @@ class PredictionService:
         return proba_dom, proba_ext
 
     def _appliquer_regression_victoires(
-        self, proba_dom: float, proba_ext: float,
-        serie_dom: str | None, serie_ext: str | None,
+        self,
+        proba_dom: float,
+        proba_ext: float,
+        serie_dom: str | None,
+        serie_ext: str | None,
     ) -> tuple[float, float]:
         if serie_dom and "V" in serie_dom:
             try:
@@ -263,7 +270,10 @@ class PredictionService:
         return min(bonus, 0.15)
 
     def _ajuster_selon_cotes(
-        self, proba_dom: float, proba_nul: float, proba_ext: float,
+        self,
+        proba_dom: float,
+        proba_nul: float,
+        proba_ext: float,
         cotes: dict[str, float],
     ) -> tuple[float, float, float]:
         cote_dom = cotes.get("domicile", 2.0)
@@ -286,9 +296,15 @@ class PredictionService:
         return proba_dom, proba_nul, proba_ext
 
     def _generer_raisons(
-        self, forme_dom: dict, forme_ext: dict, h2h: dict,
-        serie_dom: str | None, serie_ext: str | None,
-        bonus_nul: float, sans_nul_dom: int, sans_nul_ext: int,
+        self,
+        forme_dom: dict,
+        forme_ext: dict,
+        h2h: dict,
+        serie_dom: str | None,
+        serie_ext: str | None,
+        bonus_nul: float,
+        sans_nul_dom: int,
+        sans_nul_ext: int,
     ) -> list[str]:
         raisons = []
         score_dom = forme_dom.get("score", 50)
@@ -323,7 +339,10 @@ class PredictionService:
         return raisons
 
     def _generer_conseil_pari(
-        self, prediction: str, confiance: float, cotes: dict[str, float] | None = None,
+        self,
+        prediction: str,
+        confiance: float,
+        cotes: dict[str, float] | None = None,
     ) -> str:
         labels = {"1": "Victoire domicile", "N": "Match nul", "2": "Victoire extérieur"}
         conseils = []
@@ -346,7 +365,9 @@ class PredictionService:
             ev = (proba_modele * cote_pred) - 1
 
             if ev > 0.15:
-                conseils.append(f"🔥 **VALUE BET**: Cote {cote_pred:.2f} trop haute! (EV: +{ev:.0%})")
+                conseils.append(
+                    f"🔥 **VALUE BET**: Cote {cote_pred:.2f} trop haute! (EV: +{ev:.0%})"
+                )
             elif ev > 0.05:
                 conseils.append(f"💎 Value détectée (EV: +{ev:.0%})")
             elif ev < -0.1:
@@ -355,7 +376,10 @@ class PredictionService:
         return " | ".join(conseils)
 
     def predire_over_under(
-        self, forme_domicile: dict[str, Any], forme_exterieur: dict[str, Any], seuil: float = 2.5,
+        self,
+        forme_domicile: dict[str, Any],
+        forme_exterieur: dict[str, Any],
+        seuil: float = 2.5,
     ) -> PredictionOverUnder:
         nb_matchs_dom = forme_domicile.get("nb_matchs", 1) or 1
         nb_matchs_ext = forme_exterieur.get("nb_matchs", 1) or 1
@@ -394,7 +418,9 @@ class PredictionService:
         )
 
     def generer_conseils_avances(
-        self, forme_dom: dict[str, Any], forme_ext: dict[str, Any],
+        self,
+        forme_dom: dict[str, Any],
+        forme_ext: dict[str, Any],
         cotes: dict[str, float] | None = None,
     ) -> list[ConseilPari]:
         conseils = []
@@ -404,58 +430,72 @@ class PredictionService:
 
         if matchs_sans_nul_dom >= 6 or matchs_sans_nul_ext >= 6:
             total_sans_nul = matchs_sans_nul_dom + matchs_sans_nul_ext
-            conseils.append(ConseilPari(
-                type="🎯 MATCH NUL",
-                message=f"Les équipes n'ont pas fait de nul depuis {matchs_sans_nul_dom}+{matchs_sans_nul_ext} matchs.",
-                niveau="haute" if total_sans_nul >= 10 else "moyenne",
-                mise_suggere="2-3%" if total_sans_nul >= 10 else "1-2%",
-            ))
+            conseils.append(
+                ConseilPari(
+                    type="🎯 MATCH NUL",
+                    message=f"Les équipes n'ont pas fait de nul depuis {matchs_sans_nul_dom}+{matchs_sans_nul_ext} matchs.",
+                    niveau="haute" if total_sans_nul >= 10 else "moyenne",
+                    mise_suggere="2-3%" if total_sans_nul >= 10 else "1-2%",
+                )
+            )
 
         serie_dom = forme_dom.get("serie_en_cours", "")
         if serie_dom and "D" in serie_dom:
             try:
                 nb = int(serie_dom.replace("D", ""))
                 if nb >= 4:
-                    conseils.append(ConseilPari(
-                        type="📈 REBOND ATTENDU",
-                        message=f"L'équipe domicile a perdu {nb} matchs d'affilée.",
-                        niveau="moyenne",
-                        mise_suggere="1-2%",
-                    ))
+                    conseils.append(
+                        ConseilPari(
+                            type="📈 REBOND ATTENDU",
+                            message=f"L'équipe domicile a perdu {nb} matchs d'affilée.",
+                            niveau="moyenne",
+                            mise_suggere="1-2%",
+                        )
+                    )
             except ValueError:
                 pass
 
         nb_matchs_dom = max(1, forme_dom.get("nb_matchs", 1))
         nb_matchs_ext = max(1, forme_ext.get("nb_matchs", 1))
 
-        buts_moy_dom = (forme_dom.get("buts_marques", 0) + forme_dom.get("buts_encaisses", 0)) / nb_matchs_dom
-        buts_moy_ext = (forme_ext.get("buts_marques", 0) + forme_ext.get("buts_encaisses", 0)) / nb_matchs_ext
+        buts_moy_dom = (
+            forme_dom.get("buts_marques", 0) + forme_dom.get("buts_encaisses", 0)
+        ) / nb_matchs_dom
+        buts_moy_ext = (
+            forme_ext.get("buts_marques", 0) + forme_ext.get("buts_encaisses", 0)
+        ) / nb_matchs_ext
         buts_attendus = (buts_moy_dom + buts_moy_ext) / 2
 
         if buts_attendus > 3.0:
-            conseils.append(ConseilPari(
-                type="⚽ OVER 2.5",
-                message=f"Moyenne de {buts_attendus:.1f} buts/match entre ces équipes.",
-                niveau="moyenne",
-                mise_suggere="1-2%",
-            ))
+            conseils.append(
+                ConseilPari(
+                    type="⚽ OVER 2.5",
+                    message=f"Moyenne de {buts_attendus:.1f} buts/match entre ces équipes.",
+                    niveau="moyenne",
+                    mise_suggere="1-2%",
+                )
+            )
         elif buts_attendus < 2.0:
-            conseils.append(ConseilPari(
-                type="🛡️ UNDER 2.5",
-                message=f"Équipes défensives ({buts_attendus:.1f} buts/match).",
-                niveau="moyenne",
-                mise_suggere="1-2%",
-            ))
+            conseils.append(
+                ConseilPari(
+                    type="🛡️ UNDER 2.5",
+                    message=f"Équipes défensives ({buts_attendus:.1f} buts/match).",
+                    niveau="moyenne",
+                    mise_suggere="1-2%",
+                )
+            )
 
         if cotes:
             cote_nul = cotes.get("nul", 3.5)
             if cote_nul >= 3.8 and (matchs_sans_nul_dom >= 4 or matchs_sans_nul_ext >= 4):
-                conseils.append(ConseilPari(
-                    type="💎 VALUE BET NUL",
-                    message=f"Cote nul à {cote_nul:.2f} + série sans nul = opportunité!",
-                    niveau="haute",
-                    mise_suggere="2-3%",
-                ))
+                conseils.append(
+                    ConseilPari(
+                        type="💎 VALUE BET NUL",
+                        message=f"Cote nul à {cote_nul:.2f} + série sans nul = opportunité!",
+                        niveau="haute",
+                        mise_suggere="2-3%",
+                    )
+                )
 
         return conseils
 
@@ -485,8 +525,10 @@ def _get_service() -> PredictionService:
 
 
 def predire_resultat_match(
-    forme_domicile: dict[str, Any], forme_exterieur: dict[str, Any],
-    h2h: dict[str, Any], cotes: dict[str, float] | None = None,
+    forme_domicile: dict[str, Any],
+    forme_exterieur: dict[str, Any],
+    h2h: dict[str, Any],
+    cotes: dict[str, float] | None = None,
     facteurs_supplementaires: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Fonction de compatibilité avec l'ancienne API."""
@@ -498,7 +540,9 @@ def predire_resultat_match(
 
 
 def predire_over_under(
-    forme_domicile: dict[str, Any], forme_exterieur: dict[str, Any], seuil: float = 2.5,
+    forme_domicile: dict[str, Any],
+    forme_exterieur: dict[str, Any],
+    seuil: float = 2.5,
 ) -> dict[str, Any]:
     """Fonction de compatibilité avec l'ancienne API."""
     service = _get_service()
@@ -507,7 +551,8 @@ def predire_over_under(
 
 
 def generer_conseils_avances(
-    forme_dom: dict[str, Any], forme_ext: dict[str, Any],
+    forme_dom: dict[str, Any],
+    forme_ext: dict[str, Any],
     cotes: dict[str, float] | None = None,
 ) -> list[dict[str, str]]:
     """Fonction de compatibilité avec l'ancienne API."""
@@ -517,7 +562,10 @@ def generer_conseils_avances(
 
 
 def generer_conseil_pari(
-    prediction: str, confiance: float, cotes: dict[str, float] | None = None, proba_nul: float = 0.25,
+    prediction: str,
+    confiance: float,
+    cotes: dict[str, float] | None = None,
+    proba_nul: float = 0.25,
 ) -> str:
     """Fonction de compatibilité avec l'ancienne API."""
     service = _get_service()

@@ -82,7 +82,6 @@ def creer_recette(
 ) -> Recette:
     """Cree une nouvelle recette."""
     with obtenir_contexte_db() as session:
-
         recette = Recette(
             nom=nom,
             ingredients=ingredients,

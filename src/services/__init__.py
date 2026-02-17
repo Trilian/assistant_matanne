@@ -80,11 +80,11 @@ from .planning import (
     # Schémas
     JourPlanning,
     ParametresEquilibre,
-    # Service Unifié (repas + activités + projets + routines)
-    ServicePlanningUnifie,
+    SemaineCompleSchema,
     # Services CRUD
     ServicePlanning,
-    SemaineCompleSchema,
+    # Service Unifié (repas + activités + projets + routines)
+    ServicePlanningUnifie,
     get_planning_service,
     get_planning_unified_service,
 )

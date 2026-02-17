@@ -8,10 +8,10 @@ import pytest
 
 from src.services.jeux.prediction_service import (
     PredictionService,
-    get_prediction_service,
-    predire_resultat_match,
-    predire_over_under,
     generer_conseils_avances,
+    get_prediction_service,
+    predire_over_under,
+    predire_resultat_match,
 )
 
 
@@ -58,9 +58,7 @@ class TestPredictionService:
         self, service, forme_equipe_forte, forme_equipe_faible, h2h_neutre
     ):
         """Test: équipe forte à domicile doit être favorite."""
-        result = service.predire_resultat_match(
-            forme_equipe_forte, forme_equipe_faible, h2h_neutre
-        )
+        result = service.predire_resultat_match(forme_equipe_forte, forme_equipe_faible, h2h_neutre)
 
         assert result.prediction == "1"  # Victoire domicile
         assert result.probabilites["domicile"] > result.probabilites["exterieur"]

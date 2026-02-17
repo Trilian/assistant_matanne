@@ -85,9 +85,7 @@ def simuler_strategie(
         "gains_totaux": gains_totaux,
         "profit": gains_totaux - mises_totales,
         "roi": (
-            float((gains_totaux - mises_totales) / mises_totales * 100)
-            if mises_totales > 0
-            else 0
+            float((gains_totaux - mises_totales) / mises_totales * 100) if mises_totales > 0 else 0
         ),
         "nb_gagnants": nb_gagnants,
         "taux_gain": round(nb_gagnants / len(resultats) * 100, 2) if resultats else 0,
@@ -96,9 +94,7 @@ def simuler_strategie(
     }
 
 
-def comparer_strategies(
-    tirages: list[dict[str, Any]], nb_simulations: int = 100
-) -> dict[str, Any]:
+def comparer_strategies(tirages: list[dict[str, Any]], nb_simulations: int = 100) -> dict[str, Any]:
     """
     Compare plusieurs stratégies sur les mêmes tirages.
 

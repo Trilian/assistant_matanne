@@ -32,7 +32,9 @@ def charger_matchs_avec_fallback(
 
     if prefer_api:
         try:
-            from src.services.jeux.football_data import charger_matchs_a_venir as charger_matchs_depuis_api
+            from src.services.jeux.football_data import (
+                charger_matchs_a_venir as charger_matchs_depuis_api,
+            )
 
             matchs = charger_matchs_depuis_api(championnat, jours)
             source = "API"
@@ -97,7 +99,9 @@ def charger_classement_avec_fallback(championnat: str) -> tuple[list[dict], str]
 
     # Essayer API d'abord
     try:
-        from src.services.jeux.football_data import charger_classement as charger_classement_depuis_api
+        from src.services.jeux.football_data import (
+            charger_classement as charger_classement_depuis_api,
+        )
 
         classement = charger_classement_depuis_api(championnat)
         if classement:
@@ -152,7 +156,9 @@ def charger_historique_equipe_avec_fallback(nom_equipe: str) -> tuple[list[dict]
 
     # Essayer API
     try:
-        from src.services.jeux.football_data import charger_historique_equipe as charger_historique_equipe_depuis_api
+        from src.services.jeux.football_data import (
+            charger_historique_equipe as charger_historique_equipe_depuis_api,
+        )
 
         historique = charger_historique_equipe_depuis_api(nom_equipe)
         if historique:

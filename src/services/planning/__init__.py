@@ -47,27 +47,6 @@ from .global_planning import (
 )
 
 # ═══════════════════════════════════════════════════════════
-# SERVICES
-# ═══════════════════════════════════════════════════════════
-from .service import (
-    # Classe principale
-    ServicePlanning,
-    get_planning_service,
-    # Factory
-    obtenir_service_planning,
-)
-from .types import (
-    # Schémas planning unifié
-    JourCompletSchema,
-    # Schémas planning de base
-    JourPlanning,
-    ParametresEquilibre,
-    SemaineCompleSchema,
-    SemaineGenereeIASchema,
-    SuggestionRecettesDay,
-)
-
-# ═══════════════════════════════════════════════════════════
 # UTILITAIRES
 # ═══════════════════════════════════════════════════════════
 from .rappels import (
@@ -79,6 +58,8 @@ from .rappels import (
 )
 from .recurrence import (
     JOURS_SEMAINE as JOURS_SEMAINE_RECURRENCE,
+)
+from .recurrence import (
     OPTIONS_RECURRENCE,
     ServiceRecurrence,
     TypeRecurrence,
@@ -86,11 +67,34 @@ from .recurrence import (
     get_recurrence_service,
     obtenir_service_recurrence,
 )
+
+# ═══════════════════════════════════════════════════════════
+# SERVICES
+# ═══════════════════════════════════════════════════════════
+from .service import (
+    # Classe principale
+    ServicePlanning,
+    get_planning_service,
+    # Factory
+    obtenir_service_planning,
+)
 from .templates import (
     JOURS_SEMAINE as JOURS_SEMAINE_TEMPLATES,
+)
+from .templates import (
     ServiceTemplates,
     get_templates_service,
     obtenir_service_templates,
+)
+from .types import (
+    # Schémas planning unifié
+    JourCompletSchema,
+    # Schémas planning de base
+    JourPlanning,
+    ParametresEquilibre,
+    SemaineCompleSchema,
+    SemaineGenereeIASchema,
+    SuggestionRecettesDay,
 )
 from .utils import (
     # Courses
@@ -125,6 +129,10 @@ from .utils import (
 # ═══════════════════════════════════════════════════════════
 # EXPORTS
 # ═══════════════════════════════════════════════════════════
+
+# Alias de compatibilité (anciens noms)
+PlanningService = ServicePlanning
+PlanningAIService = ServicePlanningUnifie
 
 __all__ = [
     # ─────────────────────────────────────────────────────────
@@ -186,12 +194,14 @@ __all__ = [
     # Services - Planning de base
     # ─────────────────────────────────────────────────────────
     "ServicePlanning",
+    "PlanningService",  # Alias compatibilité
     "obtenir_service_planning",
     "get_planning_service",  # Alias compatibilité
     # ─────────────────────────────────────────────────────────
     # Services - Planning unifié
     # ─────────────────────────────────────────────────────────
     "ServicePlanningUnifie",
+    "PlanningAIService",  # Alias compatibilité
     "obtenir_service_planning_unifie",
     "get_planning_unified_service",  # Alias compatibilité
     "get_unified_planning_service",  # Alias compatibilité

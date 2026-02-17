@@ -32,11 +32,13 @@ def app():
     service = obtenir_service_templates()
 
     # Onglets principaux
-    tab_liste, tab_creer, tab_appliquer = st.tabs([
-        "📑 Mes templates",
-        "➕ Créer",
-        "📅 Appliquer",
-    ])
+    tab_liste, tab_creer, tab_appliquer = st.tabs(
+        [
+            "📑 Mes templates",
+            "➕ Créer",
+            "📅 Appliquer",
+        ]
+    )
 
     # ═══════════════════════════════════════════════════════════
     # TAB: LISTE DES TEMPLATES
@@ -114,12 +116,14 @@ def app():
                         titre = st.text_input("Titre", key=f"titre_{i}")
 
                     if titre:  # Seulement si un titre est donné
-                        items_data.append({
-                            "jour_semaine": jour,
-                            "heure_debut": heure_debut,
-                            "heure_fin": heure_fin if heure_fin else None,
-                            "titre": titre,
-                        })
+                        items_data.append(
+                            {
+                                "jour_semaine": jour,
+                                "heure_debut": heure_debut,
+                                "heure_fin": heure_fin if heure_fin else None,
+                                "titre": titre,
+                            }
+                        )
 
                 submitted = st.form_submit_button("✅ Créer le template", use_container_width=True)
 
@@ -130,8 +134,12 @@ def app():
                         afficher_erreur("Ajoutez au moins un événement")
                     else:
                         try:
-                            service.creer_template(nom=nom, description=description, items=items_data)
-                            afficher_succes(f"Template '{nom}' créé avec {len(items_data)} événements")
+                            service.creer_template(
+                                nom=nom, description=description, items=items_data
+                            )
+                            afficher_succes(
+                                f"Template '{nom}' créé avec {len(items_data)} événements"
+                            )
                             st.rerun()
                         except Exception as e:
                             afficher_erreur(f"Erreur: {e}")
@@ -143,12 +151,18 @@ def app():
             with col1:
                 date_ref = st.date_input("Date dans la semaine", value=date.today())
             with col2:
-                nom_template = st.text_input("Nom du template *", placeholder="Ex: Ma semaine du 10/02")
+                nom_template = st.text_input(
+                    "Nom du template *", placeholder="Ex: Ma semaine du 10/02"
+                )
 
-            description_template = st.text_area("Description", placeholder="Description optionnelle...")
+            description_template = st.text_area(
+                "Description", placeholder="Description optionnelle..."
+            )
 
             lundi = get_lundi_semaine(date_ref)
-            st.info(f"📅 Semaine du {lundi.strftime('%d/%m/%Y')} au {(lundi + timedelta(days=6)).strftime('%d/%m/%Y')}")
+            st.info(
+                f"📅 Semaine du {lundi.strftime('%d/%m/%Y')} au {(lundi + timedelta(days=6)).strftime('%d/%m/%Y')}"
+            )
 
             if st.button("📥 Créer depuis cette semaine", use_container_width=True):
                 if not nom_template:
@@ -160,7 +174,9 @@ def app():
                         description=description_template,
                     )
                     if template:
-                        afficher_succes(f"Template '{nom_template}' créé avec {len(template.items)} événements")
+                        afficher_succes(
+                            f"Template '{nom_template}' créé avec {len(template.items)} événements"
+                        )
                         st.rerun()
                     else:
                         afficher_erreur("Aucun événement trouvé dans cette semaine")
@@ -188,7 +204,9 @@ def app():
                 date_cible = st.date_input("Date dans la semaine cible", value=date.today())
 
             lundi_cible = get_lundi_semaine(date_cible)
-            st.info(f"📅 Les événements seront créés du {lundi_cible.strftime('%d/%m/%Y')} au {(lundi_cible + timedelta(days=6)).strftime('%d/%m/%Y')}")
+            st.info(
+                f"📅 Les événements seront créés du {lundi_cible.strftime('%d/%m/%Y')} au {(lundi_cible + timedelta(days=6)).strftime('%d/%m/%Y')}"
+            )
 
             # Prévisualiser le template sélectionné
             selected_template = service.get_template(template_id)
@@ -206,7 +224,9 @@ def app():
             if st.button("✅ Appliquer le template", type="primary", use_container_width=True):
                 events = service.appliquer_template(template_id, lundi_cible)
                 if events:
-                    afficher_succes(f"{len(events)} événements créés pour la semaine du {lundi_cible.strftime('%d/%m')}")
+                    afficher_succes(
+                        f"{len(events)} événements créés pour la semaine du {lundi_cible.strftime('%d/%m')}"
+                    )
                 else:
                     afficher_erreur("Aucun événement créé")
 

@@ -5,10 +5,25 @@ Architecture:
 - famille: Jules, sante, activites, shopping
 - planning: Calendrier, routines, planification
 - maison: Entretien, projets, jardin, zones
-- outils: Accueil, parametres, rapports, barcode
+- utilitaires: Accueil, parametres, rapports, barcode
 - jeux: Paris sportifs, loto
+
+Note: Les modules sont chargés paresseusement - pas d'import automatique
+pour éviter les dépendances circulaires.
 """
 
-from . import cuisine, famille, jeux, maison, outils, planning, shared
+# Chargement différé explicite: seul 'shared' est importé automatiquement
+# car il contient les constantes partagées sans dépendances
+from . import shared
 
-__all__ = ["cuisine", "famille", "planning", "maison", "outils", "jeux", "shared"]
+__all__ = [
+    "accueil",
+    "cuisine",
+    "famille",
+    "planning",
+    "maison",
+    "parametres",
+    "utilitaires",
+    "jeux",
+    "shared",
+]

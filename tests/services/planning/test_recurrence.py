@@ -46,6 +46,7 @@ class TestFormatRecurrence:
     def test_format_sans_recurrence(self):
         """Event sans récurrence retourne chaîne vide."""
         from unittest.mock import MagicMock
+
         event = MagicMock()
         event.recurrence_type = None
         assert format_recurrence(event) == ""
@@ -53,6 +54,7 @@ class TestFormatRecurrence:
     def test_format_recurrence_none_value(self):
         """Event avec type 'none' retourne chaîne vide."""
         from unittest.mock import MagicMock
+
         event = MagicMock()
         event.recurrence_type = "none"
         assert format_recurrence(event) == ""
@@ -69,10 +71,11 @@ class TestServiceRecurrence:
     def test_generer_occurrences_sans_recurrence(self):
         """generer_occurrences sans récurrence retourne liste vide."""
         from unittest.mock import MagicMock
+
         service = ServiceRecurrence()
         event = MagicMock()
         event.recurrence_type = None
-        
+
         result = service.generer_occurrences(
             event,
             date.today(),

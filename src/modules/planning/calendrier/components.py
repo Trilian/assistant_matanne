@@ -374,9 +374,13 @@ def render_formulaire_ajout_event():
                             "Jours de la semaine",
                             options=[0, 1, 2, 3, 4, 5, 6],
                             default=[date_selectionnee.weekday()],
-                            format_func=lambda x: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"][x],
+                            format_func=lambda x: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"][
+                                x
+                            ],
                         )
-                        recurrence_jours = ",".join(map(str, jours_selection)) if jours_selection else None
+                        recurrence_jours = (
+                            ",".join(map(str, jours_selection)) if jours_selection else None
+                        )
 
                 col_submit, col_cancel = st.columns(2)
 
@@ -410,7 +414,9 @@ def render_formulaire_ajout_event():
                                     lieu=lieu,
                                     description=notes,
                                     rappel_avant_minutes=rappel,
-                                    recurrence_type=recurrence_type if recurrence_type != "none" else None,
+                                    recurrence_type=recurrence_type
+                                    if recurrence_type != "none"
+                                    else None,
                                     recurrence_interval=recurrence_interval,
                                     recurrence_jours=recurrence_jours,
                                     recurrence_fin=recurrence_fin,

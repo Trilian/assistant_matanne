@@ -113,14 +113,10 @@ def identifier_numeros_chauds_froids(
         return {"chauds": [], "froids": [], "retard": []}
 
     # Trier par fréquence
-    tries_freq = sorted(
-        frequences.items(), key=lambda x: x[1].get("frequence", 0), reverse=True
-    )
+    tries_freq = sorted(frequences.items(), key=lambda x: x[1].get("frequence", 0), reverse=True)
 
     # Trier par écart (retard)
-    tries_ecart = sorted(
-        frequences.items(), key=lambda x: x[1].get("ecart", 0), reverse=True
-    )
+    tries_ecart = sorted(frequences.items(), key=lambda x: x[1].get("ecart", 0), reverse=True)
 
     return {
         "chauds": [num for num, _ in tries_freq[:nb_top]],
@@ -186,7 +182,5 @@ def analyser_patterns_tirages(tirages: list[dict[str, Any]]) -> dict[str, Any]:
         "paires_frequentes": [
             {"paire": list(paire), "frequence": freq} for paire, freq in top_paires
         ],
-        "distribution_parite": {
-            f"{i}_pair_{5-i}_impair": nb_pairs.count(i) for i in range(6)
-        },
+        "distribution_parite": {f"{i}_pair_{5-i}_impair": nb_pairs.count(i) for i in range(6)},
     }

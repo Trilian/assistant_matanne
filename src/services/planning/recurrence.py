@@ -18,6 +18,7 @@ from src.core.models import CalendarEvent
 
 class TypeRecurrence(str, Enum):
     """Types de récurrence disponibles."""
+
     AUCUNE = "none"
     QUOTIDIEN = "daily"
     HEBDOMADAIRE = "weekly"
@@ -136,17 +137,19 @@ class ServiceRecurrence:
                         current += timedelta(days=1)
                         continue
 
-                occurrences.append({
-                    "parent_id": event.id,
-                    "titre": event.titre,
-                    "description": event.description,
-                    "date_debut": current,
-                    "date_fin": current + duree if duree else None,
-                    "lieu": event.lieu,
-                    "type_event": event.type_event,
-                    "couleur": event.couleur,
-                    "est_occurrence": True,
-                })
+                occurrences.append(
+                    {
+                        "parent_id": event.id,
+                        "titre": event.titre,
+                        "description": event.description,
+                        "date_debut": current,
+                        "date_fin": current + duree if duree else None,
+                        "lieu": event.lieu,
+                        "type_event": event.type_event,
+                        "couleur": event.couleur,
+                        "est_occurrence": True,
+                    }
+                )
 
             # Avancer selon le type de récurrence
             if event.recurrence_type == "daily":
@@ -170,8 +173,11 @@ class ServiceRecurrence:
                 except ValueError:
                     # Jour invalide (ex: 31 février), aller au dernier jour du mois
                     import calendar
+
                     last_day = calendar.monthrange(year, month)[1]
-                    current = current.replace(year=year, month=month, day=min(current.day, last_day))
+                    current = current.replace(
+                        year=year, month=month, day=min(current.day, last_day)
+                    )
             elif event.recurrence_type == "yearly":
                 try:
                     current = current.replace(year=current.year + interval)
@@ -206,35 +212,46 @@ class ServiceRecurrence:
         fin_dt = dt.combine(date_fin, dt.max.time())
 
         # Événements simples dans la période
-        events_simples = db.query(CalendarEvent).filter(
-            CalendarEvent.date_debut >= debut_dt,
-            CalendarEvent.date_debut <= fin_dt,
-            (CalendarEvent.recurrence_type.is_(None)) | (CalendarEvent.recurrence_type == "none"),
-        ).all()
+        events_simples = (
+            db.query(CalendarEvent)
+            .filter(
+                CalendarEvent.date_debut >= debut_dt,
+                CalendarEvent.date_debut <= fin_dt,
+                (CalendarEvent.recurrence_type.is_(None))
+                | (CalendarEvent.recurrence_type == "none"),
+            )
+            .all()
+        )
 
         # Événements récurrents (dont la date de début est avant la fin de période)
-        events_recurrents = db.query(CalendarEvent).filter(
-            CalendarEvent.date_debut <= fin_dt,
-            CalendarEvent.recurrence_type.isnot(None),
-            CalendarEvent.recurrence_type != "none",
-        ).all()
+        events_recurrents = (
+            db.query(CalendarEvent)
+            .filter(
+                CalendarEvent.date_debut <= fin_dt,
+                CalendarEvent.recurrence_type.isnot(None),
+                CalendarEvent.recurrence_type != "none",
+            )
+            .all()
+        )
 
         resultats = []
 
         # Ajouter les événements simples
         for event in events_simples:
-            resultats.append({
-                "id": event.id,
-                "titre": event.titre,
-                "description": event.description,
-                "date_debut": event.date_debut,
-                "date_fin": event.date_fin,
-                "lieu": event.lieu,
-                "type_event": event.type_event,
-                "couleur": event.couleur,
-                "est_occurrence": False,
-                "recurrence": None,
-            })
+            resultats.append(
+                {
+                    "id": event.id,
+                    "titre": event.titre,
+                    "description": event.description,
+                    "date_debut": event.date_debut,
+                    "date_fin": event.date_fin,
+                    "lieu": event.lieu,
+                    "type_event": event.type_event,
+                    "couleur": event.couleur,
+                    "est_occurrence": False,
+                    "recurrence": None,
+                }
+            )
 
         # Générer les occurrences
         for event in events_recurrents:

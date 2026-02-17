@@ -28,15 +28,6 @@ class TestDatabaseConstants:
         """Test que DB_CONNECTION_TIMEOUT est positif."""
         assert constants.DB_CONNECTION_TIMEOUT > 0
 
-    def test_db_pool_size_positif(self):
-        """Test que DB_POOL_SIZE est positif."""
-        assert constants.DB_POOL_SIZE > 0
-
-    def test_db_max_overflow_raisonnable(self):
-        """Test que DB_MAX_OVERFLOW est raisonnable."""
-        assert constants.DB_MAX_OVERFLOW > 0
-        assert constants.DB_MAX_OVERFLOW >= constants.DB_POOL_SIZE
-
     def test_db_timeout_moins_que_retry(self):
         """Test que timeout est moins que retry total."""
         # Timeout unique < timeout total possible
@@ -110,12 +101,10 @@ class TestAIConstants:
         """Test que les rate limits sont positifs."""
         assert constants.AI_RATE_LIMIT_DAILY > 0
         assert constants.AI_RATE_LIMIT_HOURLY > 0
-        assert constants.AI_RATE_LIMIT_PER_MINUTE > 0
 
     def test_ai_rate_limits_hierarchie(self):
-        """Test que daily > hourly > per_minute."""
+        """Test que daily > hourly."""
         assert constants.AI_RATE_LIMIT_DAILY > constants.AI_RATE_LIMIT_HOURLY
-        assert constants.AI_RATE_LIMIT_HOURLY > constants.AI_RATE_LIMIT_PER_MINUTE
 
     def test_ai_api_timeout_positif(self):
         """Test que AI_API_TIMEOUT est positif."""
@@ -244,52 +233,7 @@ class TestPaginationConstants:
 
 
 # ═══════════════════════════════════════════════════════════
-# SECTION 6: TESTS UI / FEEDBACK
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestUIConstants:
-    """Tests des constantes UI."""
-
-    def test_toast_durations_positives(self):
-        """Test que les durées toast sont positives."""
-        assert constants.TOAST_DURATION_SHORT > 0
-        assert constants.TOAST_DURATION_MEDIUM > 0
-        assert constants.TOAST_DURATION_LONG > 0
-
-    def test_toast_durations_hierarchie(self):
-        """Test que short < medium < long."""
-        assert constants.TOAST_DURATION_SHORT <= constants.TOAST_DURATION_MEDIUM
-        assert constants.TOAST_DURATION_MEDIUM <= constants.TOAST_DURATION_LONG
-
-    def test_spinner_durations_positives(self):
-        """Test que les durées spinner sont positives."""
-        assert constants.SPINNER_ESTIMATED_SECONDS_SHORT > 0
-        assert constants.SPINNER_ESTIMATED_SECONDS_MEDIUM > 0
-        assert constants.SPINNER_ESTIMATED_SECONDS_LONG > 0
-
-    def test_spinner_durations_hierarchie(self):
-        """Test que short < medium < long."""
-        assert (
-            constants.SPINNER_ESTIMATED_SECONDS_SHORT <= constants.SPINNER_ESTIMATED_SECONDS_MEDIUM
-        )
-        assert (
-            constants.SPINNER_ESTIMATED_SECONDS_MEDIUM <= constants.SPINNER_ESTIMATED_SECONDS_LONG
-        )
-
-    def test_max_navigation_history_raisonnable(self):
-        """Test que MAX_NAVIGATION_HISTORY est raisonnable."""
-        assert constants.MAX_NAVIGATION_HISTORY > 0
-        assert constants.MAX_NAVIGATION_HISTORY <= 1000
-
-    def test_max_breadcrumb_items_raisonnable(self):
-        """Test que MAX_BREADCRUMB_ITEMS est raisonnable."""
-        assert 1 <= constants.MAX_BREADCRUMB_ITEMS <= 20
-
-
-# ═══════════════════════════════════════════════════════════
-# SECTION 7: TESTS MÉTIER
+# SECTION 6: TESTS MÉTIER
 # ═══════════════════════════════════════════════════════════
 
 
@@ -307,7 +251,7 @@ class TestBusinessConstants:
 
 
 # ═══════════════════════════════════════════════════════════
-# SECTION 8: TESTS COHÉRENCE GLOBALE
+# SECTION 7: TESTS COHÉRENCE GLOBALE
 # ═══════════════════════════════════════════════════════════
 
 
@@ -323,7 +267,6 @@ class TestConstantsConsistency:
             "AI_RATE_LIMIT_DAILY",
             "MAX_LENGTH_SHORT",
             "ITEMS_PER_PAGE_DEFAULT",
-            "TOAST_DURATION_SHORT",
             "JOURS_SEMAINE",
         ]
         for const_name in required_constants:

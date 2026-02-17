@@ -785,7 +785,6 @@ def _prepare_alert_dataframe(articles: list[dict[str, Any]]) -> pd.DataFrame:
     """Prépare un DataFrame pour affichage alertes"""
     data = []
     for article in articles:
-
         jours = ""
         if article["jours_avant_peremption"] is not None:
             jours = f"{article['jours_avant_peremption']} jours"

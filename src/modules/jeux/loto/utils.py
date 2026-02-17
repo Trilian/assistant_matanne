@@ -49,30 +49,26 @@ NUMEROS_POPULAIRES = set(range(1, 32))
 # RÉEXPORTS DEPUIS LES MODULES SPÉCIALISÉS
 # ═══════════════════════════════════════════════════════════════════
 
+from .calculs import (
+    calculer_esperance_mathematique,
+    verifier_grille,
+)
 from .frequences import (
     analyser_patterns_tirages,
     calculer_ecart,
     calculer_frequences_numeros,
     identifier_numeros_chauds_froids,
 )
-
 from .generation import (
     generer_grille_aleatoire,
     generer_grille_chauds_froids,
     generer_grille_equilibree,
     generer_grille_eviter_populaires,
 )
-
-from .calculs import (
-    calculer_esperance_mathematique,
-    verifier_grille,
-)
-
 from .strategies import (
     comparer_strategies,
     simuler_strategie,
 )
-
 
 # ═══════════════════════════════════════════════════════════════════
 # FONCTIONS UTILITAIRES DB
