@@ -857,8 +857,8 @@ class TestUtilities:
 class TestUIComponents:
     """Tests pour les composants UI."""
 
-    @patch("src.services.web.synchronisation.st")
-    @patch("src.services.web.synchronisation.get_realtime_sync_service")
+    @patch("src.ui.views.synchronisation.st")
+    @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_presence_indicator_empty(self, mock_get_service, mock_st):
         """Test render_presence sans utilisateurs."""
         mock_st.session_state = {}
@@ -873,8 +873,8 @@ class TestUIComponents:
         # Should not call markdown if no users
         mock_st.markdown.assert_not_called()
 
-    @patch("src.services.web.synchronisation.st")
-    @patch("src.services.web.synchronisation.get_realtime_sync_service")
+    @patch("src.ui.views.synchronisation.st")
+    @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_presence_indicator_with_users(self, mock_get_service, mock_st):
         """Test render_presence avec utilisateurs."""
         mock_st.session_state = {}
@@ -894,8 +894,8 @@ class TestUIComponents:
 
         mock_st.markdown.assert_called()
 
-    @patch("src.services.web.synchronisation.st")
-    @patch("src.services.web.synchronisation.get_realtime_sync_service")
+    @patch("src.ui.views.synchronisation.st")
+    @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_presence_indicator_many_users(self, mock_get_service, mock_st):
         """Test render_presence avec plus de 5 utilisateurs."""
         mock_st.session_state = {}
@@ -916,8 +916,8 @@ class TestUIComponents:
 
         mock_st.caption.assert_called()  # Should show "... et 2 autre(s)"
 
-    @patch("src.services.web.synchronisation.st")
-    @patch("src.services.web.synchronisation.get_realtime_sync_service")
+    @patch("src.ui.views.synchronisation.st")
+    @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_typing_indicator_no_typing(self, mock_get_service, mock_st):
         """Test render_typing sans frappe en cours."""
         mock_st.session_state = {}
@@ -932,8 +932,8 @@ class TestUIComponents:
 
         mock_st.caption.assert_not_called()
 
-    @patch("src.services.web.synchronisation.st")
-    @patch("src.services.web.synchronisation.get_realtime_sync_service")
+    @patch("src.ui.views.synchronisation.st")
+    @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_typing_indicator_with_typing(self, mock_get_service, mock_st):
         """Test render_typing avec frappe en cours."""
         mock_st.session_state = {}
@@ -953,8 +953,8 @@ class TestUIComponents:
 
         mock_st.caption.assert_called()
 
-    @patch("src.services.web.synchronisation.st")
-    @patch("src.services.web.synchronisation.get_realtime_sync_service")
+    @patch("src.ui.views.synchronisation.st")
+    @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_sync_status_connected(self, mock_get_service, mock_st):
         """Test render_sync_status connecté."""
         mock_st.session_state = {}
@@ -972,8 +972,8 @@ class TestUIComponents:
 
         mock_st.success.assert_called()
 
-    @patch("src.services.web.synchronisation.st")
-    @patch("src.services.web.synchronisation.get_realtime_sync_service")
+    @patch("src.ui.views.synchronisation.st")
+    @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_sync_status_pending(self, mock_get_service, mock_st):
         """Test render_sync_status avec pending."""
         mock_st.session_state = {}
@@ -993,8 +993,8 @@ class TestUIComponents:
 
         mock_st.warning.assert_called()
 
-    @patch("src.services.web.synchronisation.st")
-    @patch("src.services.web.synchronisation.get_realtime_sync_service")
+    @patch("src.ui.views.synchronisation.st")
+    @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_sync_status_offline(self, mock_get_service, mock_st):
         """Test render_sync_status hors ligne."""
         mock_st.session_state = {}

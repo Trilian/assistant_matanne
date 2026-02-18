@@ -29,7 +29,7 @@ def service():
 @pytest.fixture
 def mock_client_ia():
     """Mock du ClientIA."""
-    with patch("src.services.jeux.ai_service.ClientIA") as mock:
+    with patch("src.services.jeux._internal.ai_service.ClientIA") as mock:
         client_instance = MagicMock()
         mock.return_value = client_instance
         yield client_instance

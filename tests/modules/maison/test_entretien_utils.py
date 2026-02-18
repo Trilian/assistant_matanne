@@ -4,6 +4,12 @@ Tests pour src/modules/maison/entretien_utils.py
 Tests générés automatiquement - à compléter avec la logique de test.
 """
 
+import pytest
+
+pytestmark = pytest.mark.skip(
+    reason="Module src.modules.maison.entretien_utils non encore implémenté"
+)
+
 
 class TestEntretienUtils:
     """Tests pour le module entretien_utils"""

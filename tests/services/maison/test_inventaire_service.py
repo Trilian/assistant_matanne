@@ -212,15 +212,19 @@ class TestInventaireServiceCodeBarre:
 
     def test_rechercher_par_code_barre_trouve(self, objet_inventaire_data):
         """Trouve un objet par son code-barres."""
-        # Ce test nécessiterait une vraie DB
-        # Pour l'instant, test de la structure
         with patch("src.services.maison.inventaire_service.ClientIA"):
             service = get_inventaire_service()
 
-            # Simulation - retournera None sans données réelles
-            result = service.rechercher_par_code_barre(
-                code_barre=objet_inventaire_data["code_barre"]
-            )
+            # Mock obtenir_contexte_db pour éviter connexion réelle
+            mock_session = MagicMock()
+            mock_session.query.return_value.filter.return_value.first.return_value = None
+
+            with patch("src.services.maison.inventaire_service.obtenir_contexte_db") as mock_db:
+                mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
+                mock_db.return_value.__exit__ = MagicMock(return_value=False)
+                result = service.rechercher_par_code_barre(
+                    code_barre=objet_inventaire_data["code_barre"]
+                )
             # Pas d'assertion stricte, juste vérifier que ça ne crash pas
 
 

@@ -3,7 +3,7 @@ Tests pour NotificationJeuxService - Gestion des notifications jeux.
 """
 
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -25,17 +25,15 @@ from src.services.jeux.series_service import SEUIL_VALUE_ALERTE, SEUIL_VALUE_HAU
 
 
 @pytest.fixture
-def mock_session_state():
-    """Mock Streamlit session_state."""
-    with patch("src.services.jeux.notification_service.st") as mock_st:
-        mock_st.session_state = {}
-        yield mock_st
+def storage():
+    """Dict servant de stockage en lieu de st.session_state."""
+    return {}
 
 
 @pytest.fixture
-def service(mock_session_state):
+def service(storage):
     """Instance du service de notifications."""
-    return NotificationJeuxService()
+    return NotificationJeuxService(storage=storage)
 
 
 @pytest.fixture
@@ -109,7 +107,7 @@ class TestNotificationJeux:
 class TestCreerNotification:
     """Tests de création de notifications."""
 
-    def test_creer_notification_simple(self, service, mock_session_state):
+    def test_creer_notification_simple(self, service):
         """Créer une notification simple."""
         notif = service.creer_notification(
             type=TypeNotification.INFO,
@@ -122,7 +120,7 @@ class TestCreerNotification:
         assert notif.type == TypeNotification.INFO
         assert notif.urgence == NiveauUrgence.BASSE
 
-    def test_creer_notification_ajoute_session(self, service, mock_session_state):
+    def test_creer_notification_ajoute_session(self, service):
         """La notification est ajoutée à la session."""
         service.creer_notification(
             type=TypeNotification.INFO,
@@ -133,7 +131,7 @@ class TestCreerNotification:
 
         assert len(service.notifications) == 1
 
-    def test_limite_notifications(self, service, mock_session_state):
+    def test_limite_notifications(self, service):
         """Les notifications sont limitées."""
         # Créer plus que la limite
         for i in range(service.MAX_NOTIFICATIONS + 10):
@@ -150,7 +148,7 @@ class TestCreerNotification:
 class TestCreerAlerteOpportunite:
     """Tests de création d'alertes opportunité."""
 
-    def test_opportunite_haute(self, service, mock_session_state):
+    def test_opportunite_haute(self, service):
         """Opportunité avec value haute = urgence haute."""
         notif = service.creer_alerte_opportunite(
             identifiant="More_2_5",
@@ -162,7 +160,7 @@ class TestCreerAlerteOpportunite:
         assert notif.urgence == NiveauUrgence.HAUTE
         assert "🟢" in notif.message
 
-    def test_opportunite_moyenne(self, service, mock_session_state):
+    def test_opportunite_moyenne(self, service):
         """Opportunité avec value moyenne = urgence moyenne."""
         notif = service.creer_alerte_opportunite(
             identifiant="BTTS_Yes",
@@ -174,7 +172,7 @@ class TestCreerAlerteOpportunite:
         assert notif.urgence == NiveauUrgence.MOYENNE
         assert "🟡" in notif.message
 
-    def test_opportunite_metadata(self, service, mock_session_state):
+    def test_opportunite_metadata(self, service):
         """Les metadata sont correctement stockées."""
         notif = service.creer_alerte_opportunite(
             identifiant="Numéro7",
@@ -190,7 +188,7 @@ class TestCreerAlerteOpportunite:
 class TestCreerAlerteSync:
     """Tests de création d'alertes de synchronisation."""
 
-    def test_sync_succes(self, service, mock_session_state):
+    def test_sync_succes(self, service):
         """Sync réussie = notification basse."""
         notif = service.creer_alerte_sync(
             type_jeu="paris",
@@ -202,7 +200,7 @@ class TestCreerAlerteSync:
         assert "✅" in notif.titre
         assert notif.urgence == NiveauUrgence.BASSE
 
-    def test_sync_echec(self, service, mock_session_state):
+    def test_sync_echec(self, service):
         """Sync échouée = notification haute."""
         notif = service.creer_alerte_sync(
             type_jeu="loto",
@@ -222,7 +220,7 @@ class TestCreerAlerteSync:
 class TestLectureNotifications:
     """Tests de lecture des notifications."""
 
-    def test_obtenir_non_lues(self, service, mock_session_state):
+    def test_obtenir_non_lues(self, service):
         """Obtenir seulement les non lues."""
         # Créer 3 notifications
         for i in range(3):
@@ -239,7 +237,7 @@ class TestLectureNotifications:
         non_lues = service.obtenir_non_lues()
         assert len(non_lues) == 2
 
-    def test_obtenir_par_type(self, service, mock_session_state):
+    def test_obtenir_par_type(self, service):
         """Filtrer par type."""
         service.creer_notification(
             type=TypeNotification.OPPORTUNITE,
@@ -258,7 +256,7 @@ class TestLectureNotifications:
         assert len(opps) == 1
         assert opps[0].titre == "Opp"
 
-    def test_obtenir_par_jeu(self, service, mock_session_state):
+    def test_obtenir_par_jeu(self, service):
         """Filtrer par type de jeu."""
         service.creer_notification(
             type=TypeNotification.INFO,
@@ -277,7 +275,7 @@ class TestLectureNotifications:
         assert len(paris) == 1
         assert paris[0].titre == "Paris"
 
-    def test_compter_non_lues(self, service, mock_session_state):
+    def test_compter_non_lues(self, service):
         """Compter les non lues."""
         for i in range(5):
             service.creer_notification(
@@ -298,7 +296,7 @@ class TestLectureNotifications:
 class TestActionsNotifications:
     """Tests des actions sur les notifications."""
 
-    def test_marquer_lue(self, service, mock_session_state):
+    def test_marquer_lue(self, service):
         """Marquer une notification comme lue."""
         notif = service.creer_notification(
             type=TypeNotification.INFO,
@@ -312,12 +310,12 @@ class TestActionsNotifications:
         assert result is True
         assert notif.lue is True
 
-    def test_marquer_lue_introuvable(self, service, mock_session_state):
+    def test_marquer_lue_introuvable(self, service):
         """Marquer lue une notification inexistante."""
         result = service.marquer_lue("inexistant_123")
         assert result is False
 
-    def test_marquer_toutes_lues(self, service, mock_session_state):
+    def test_marquer_toutes_lues(self, service):
         """Marquer toutes comme lues."""
         for i in range(5):
             service.creer_notification(
@@ -332,7 +330,7 @@ class TestActionsNotifications:
         assert count == 5
         assert service.compter_non_lues() == 0
 
-    def test_supprimer(self, service, mock_session_state):
+    def test_supprimer(self, service):
         """Supprimer une notification."""
         notif = service.creer_notification(
             type=TypeNotification.INFO,
@@ -346,7 +344,7 @@ class TestActionsNotifications:
         assert result is True
         assert len(service.notifications) == 0
 
-    def test_vider(self, service, mock_session_state):
+    def test_vider(self, service):
         """Vider toutes les notifications."""
         for i in range(5):
             service.creer_notification(
@@ -393,13 +391,15 @@ class TestEnumerations:
 class TestNotificationFactory:
     """Tests de la factory."""
 
-    def test_get_notification_jeux_service(self, mock_session_state):
+    def test_get_notification_jeux_service(self):
         """Factory retourne une instance."""
-        # Reset singleton
-        import src.services.jeux.notification_service as module
+        import src.services.jeux._internal.notification_service as module
 
-        module._notification_service_instance = None
+        # Inject a pre-built instance so the factory never calls _get_default_storage()
+        module._notification_service_instance = NotificationJeuxService(storage={})
 
-        service = get_notification_jeux_service()
-
-        assert isinstance(service, NotificationJeuxService)
+        try:
+            service = get_notification_jeux_service()
+            assert isinstance(service, NotificationJeuxService)
+        finally:
+            module._notification_service_instance = None

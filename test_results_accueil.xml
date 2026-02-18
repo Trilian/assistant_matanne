@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="10.690" timestamp="2026-02-18T14:11:52.654721+01:00" hostname="LAPTOP-FIS3VT0M"><testcase classname="tests.modules.accueil.test_accueil_ui.TestAccueilUI" name="test_app_basic" time="5.181"><failure message="src.core.errors_base.ErreurBaseDeDonnees: Impossible de se connecter après 3 tentatives: (psycopg2.OperationalError) connection to server at &quot;aws-0-eu-central-1.pooler.supabase.com&quot; (18.198.30.239), port 6543 failed: FATAL:  Tenant or user not found&#10;&#10;(Background on this error at: https://sqlalche.me/e/20/e3q8)">C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\streamlit\elements\spinner.py:116: in spinner
+    create_transient, clear_transient = self.dg._transient(
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\streamlit\delta_generator.py:636: in _transient
+    transient_cursor = self._get_transient_cursor()
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\streamlit\delta_generator.py:441: in _get_transient_cursor
+    raise NoSessionContext("Cursor is not set")
+E   streamlit.errors.NoSessionContext: Cursor is not set
+
+During handling of the above exception, another exception occurred:
+tests\modules\accueil\test_accueil_ui.py:59: in test_app_basic
+    app()
+src\modules\accueil\dashboard.py:57: in app
+    render_critical_alerts()
+src\modules\accueil\dashboard.py:207: in render_critical_alerts
+    inventaire = get_inventaire_service().get_inventaire_complet()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\core\decorators.py:168: in wrapper
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+src\core\decorators.py:210: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+src\core\decorators.py:66: in wrapper
+    with obtenir_contexte_db() as session:
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+src\core\db\session.py:53: in obtenir_contexte_db
+    fabrique = obtenir_fabrique_session()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\core\db\session.py:29: in obtenir_fabrique_session
+    moteur = obtenir_moteur()
+             ^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\streamlit\runtime\caching\cache_utils.py:281: in __call__
+    return self._get_or_create_cached_value(args, kwargs, spinner_message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\streamlit\runtime\caching\cache_utils.py:326: in _get_or_create_cached_value
+    return self._handle_cache_miss(cache, value_key, func_args, func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Nemo\AppData\Local\Programs\Python\Python311\Lib\site-packages\streamlit\runtime\caching\cache_utils.py:385: in _handle_cache_miss
+    computed_value = self._info.func(*func_args, **func_kwargs)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\core\db\engine.py:82: in obtenir_moteur
+    raise ErreurBaseDeDonnees(
+E   src.core.errors_base.ErreurBaseDeDonnees: Impossible de se connecter après 3 tentatives: (psycopg2.OperationalError) connection to server at "aws-0-eu-central-1.pooler.supabase.com" (18.198.30.239), port 6543 failed: FATAL:  Tenant or user not found
+E
+E   (Background on this error at: https://sqlalche.me/e/20/e3q8)</failure></testcase><testcase time="0.003" /></testsuite></testsuites>

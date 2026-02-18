@@ -17,6 +17,10 @@ Utilisation:
 """
 
 # Types et schémas Pydantic
+# Mixins
+from src.services.backup.backup_export import BackupExportMixin
+from src.services.backup.backup_restore import BackupRestoreMixin
+
 # Service principal
 from src.services.backup.service import (
     # Aliases pour rétrocompatibilité
@@ -75,6 +79,9 @@ __all__ = [
     "ServiceBackup",
     "obtenir_service_backup",
     "render_backup_ui",
+    # Mixins
+    "BackupRestoreMixin",
+    "BackupExportMixin",
     # Aliases rétrocompatibilité
     "BackupService",
     "get_backup_service",

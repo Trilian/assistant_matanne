@@ -120,6 +120,7 @@ class TestMaisonAssistantBriefing:
                 type=TypeAlerteMaison.METEO,
                 niveau=NiveauUrgence.CRITIQUE,
                 titre="Urgent",
+                message="Alerte météo critique",
                 action_suggeree="Action urgente",
             ),
         ]

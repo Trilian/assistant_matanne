@@ -7,96 +7,21 @@ Fonctionnalités:
 - Récupération mot de passe
 - Profils utilisateurs
 - Rôles et permissions
+
+Note: Les enums/schémas sont dans auth_schemas.py,
+la logique de permissions dans auth_permissions.py.
 """
 
 import logging
 from collections.abc import MutableMapping
 from datetime import datetime
-from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, Field
+# Ré-exports pour rétrocompatibilité
+from .auth_permissions import ROLE_PERMISSIONS, PermissionsMixin
+from .auth_schemas import AuthResult, Permission, Role, UserProfile
 
 logger = logging.getLogger(__name__)
-
-
-# -----------------------------------------------------------
-# TYPES ET SCHÉMAS
-# -----------------------------------------------------------
-
-
-class Role(StrEnum):
-    """Rôles utilisateur."""
-
-    ADMIN = "admin"
-    MEMBRE = "membre"
-    INVITE = "invite"
-
-
-class Permission(StrEnum):
-    """Permissions granulaires."""
-
-    READ_RECIPES = "read_recipes"
-    WRITE_RECIPES = "write_recipes"
-    DELETE_RECIPES = "delete_recipes"
-    READ_INVENTORY = "read_inventory"
-    WRITE_INVENTORY = "write_inventory"
-    READ_PLANNING = "read_planning"
-    WRITE_PLANNING = "write_planning"
-    MANAGE_USERS = "manage_users"
-    ADMIN_ALL = "admin_all"
-
-
-ROLE_PERMISSIONS = {
-    Role.ADMIN: list(Permission),  # Toutes les permissions
-    Role.MEMBRE: [
-        Permission.READ_RECIPES,
-        Permission.WRITE_RECIPES,
-        Permission.READ_INVENTORY,
-        Permission.WRITE_INVENTORY,
-        Permission.READ_PLANNING,
-        Permission.WRITE_PLANNING,
-    ],
-    Role.INVITE: [
-        Permission.READ_RECIPES,
-        Permission.READ_INVENTORY,
-        Permission.READ_PLANNING,
-    ],
-}
-
-
-class UserProfile(BaseModel):
-    """Profil utilisateur."""
-
-    id: str = ""
-    email: str = ""
-    nom: str = ""
-    prenom: str = ""
-    role: Role = Role.MEMBRE
-    avatar_url: str | None = None
-    preferences: dict = Field(default_factory=dict)
-    created_at: datetime | None = None
-    last_login: datetime | None = None
-
-    def has_permission(self, permission: Permission) -> bool:
-        """Vérifie si l'utilisateur a une permission."""
-        return permission in ROLE_PERMISSIONS.get(self.role, [])
-
-    @property
-    def display_name(self) -> str:
-        """Nom d'affichage."""
-        if self.prenom and self.nom:
-            return f"{self.prenom} {self.nom}"
-        return self.email.split("@")[0] if self.email else "Utilisateur"
-
-
-class AuthResult(BaseModel):
-    """Résultat d'une opération d'authentification."""
-
-    success: bool = False
-    user: UserProfile | None = None
-    message: str = ""
-    error_code: str | None = None
 
 
 # -----------------------------------------------------------
@@ -104,7 +29,7 @@ class AuthResult(BaseModel):
 # -----------------------------------------------------------
 
 
-class AuthService:
+class AuthService(PermissionsMixin):
     """
     Service d'authentification utilisant Supabase Auth.
 
@@ -112,7 +37,7 @@ class AuthService:
     - Inscription/Connexion
     - Sessions persistantes
     - Profils utilisateurs
-    - Permissions
+    - Permissions (via PermissionsMixin)
     """
 
     SESSION_KEY = "_auth_session"
@@ -451,23 +376,6 @@ class AuthService:
         render_login_form()
         return None
 
-    def require_permission(self, permission: Permission) -> bool:
-        """
-        Vérifie si l'utilisateur a une permission.
-
-        Args:
-            permission: Permission requise
-
-        Returns:
-            True si autorisé
-        """
-        user = self.get_current_user()
-
-        if not user:
-            return False
-
-        return user.has_permission(permission)
-
     def _save_session(self, session: Any, user: UserProfile):
         """Sauvegarde la session."""
         self._storage[self.SESSION_KEY] = session
@@ -762,6 +670,8 @@ __all__ = [
     "AuthResult",
     "Role",
     "Permission",
+    "ROLE_PERMISSIONS",
+    "PermissionsMixin",
     "render_login_form",
     "render_user_menu",
     "render_profile_settings",

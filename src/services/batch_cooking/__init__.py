@@ -14,8 +14,10 @@ Exemple d'utilisation:
     session = service.creer_session(date_session=date.today(), recettes_ids=[1, 2, 3])
 """
 
-# Service principal
+# Service principal et mixins
 # Constantes
+from .batch_cooking_ia import BatchCookingIAMixin
+from .batch_cooking_stats import BatchCookingStatsMixin
 from .constantes import (
     JOURS_SEMAINE,
     ROBOTS_CUISINE,  # Alias
@@ -79,6 +81,9 @@ __all__ = [
     "BatchCookingService",
     "obtenir_service_batch_cooking",
     "get_batch_cooking_service",
+    # Mixins
+    "BatchCookingIAMixin",
+    "BatchCookingStatsMixin",
     # Types
     "EtapeBatchIA",
     "SessionBatchIA",

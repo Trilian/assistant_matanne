@@ -8,20 +8,20 @@ Service Inventaire Unifié.
 """
 
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date
 from typing import Any
 
 from sqlalchemy.orm import Session, joinedload
 
 from src.core.ai import obtenir_client_ia
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.errors_base import ErreurValidation
 from src.core.models import ArticleInventaire
 from src.services.base import BaseAIService, BaseService, InventoryAIMixin
 
 from .inventaire_io import InventaireIOMixin
+from .inventaire_operations import InventaireOperationsMixin
 from .inventaire_stats import InventaireStatsMixin
-from .types import ArticleImport, SuggestionCourses
+from .inventaire_stock import InventaireStockMixin
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +55,8 @@ class ServiceInventaire(
     InventoryAIMixin,
     InventaireIOMixin,
     InventaireStatsMixin,
+    InventaireStockMixin,
+    InventaireOperationsMixin,
 ):
     """
     Service complet pour l'inventaire.
@@ -65,6 +67,8 @@ class ServiceInventaire(
     - InventoryAIMixin → Contextes métier inventaire
     - InventaireIOMixin → Import/export d'articles
     - InventaireStatsMixin → Statistiques et alertes
+    - InventaireStockMixin → Gestion de stock et historique
+    - InventaireOperationsMixin → CRUD articles, photos, suggestions IA
 
     Fonctionnalités:
     - CRUD optimisé avec cache
@@ -84,7 +88,7 @@ class ServiceInventaire(
         )
 
     # ═══════════════════════════════════════════════════════════
-    # SECTION 1: CRUD & INVENTAIRE
+    # REQUÊTE INVENTAIRE COMPLET
     # ═══════════════════════════════════════════════════════════
 
     @avec_cache(
@@ -154,541 +158,20 @@ class ServiceInventaire(
         logger.info(f"✅ Retrieved complete inventory: {len(result)} items")
         return result
 
-    @avec_gestion_erreurs(default_return={})
-    def get_alertes(self) -> dict[str, list[dict[str, Any]]]:
-        """Récupère toutes les alertes d'inventaire.
-
-        Gets all inventory alerts grouped by type.
-
-        Returns:
-            Dict with keys: stock_bas, critique, peremption_proche
-        """
-        inventaire = self.get_inventaire_complet(include_ok=False)
-
-        alertes = {
-            "stock_bas": [],
-            "critique": [],
-            "peremption_proche": [],
-        }
-
-        for article in inventaire:
-            statut = article["statut"]
-            if statut in alertes:
-                alertes[statut].append(article)
-
-        logger.info(f"⚠️ Inventory alerts: {sum(len(v) for v in alertes.values())} items")
-        return alertes
-
     # ═══════════════════════════════════════════════════════════
-    # SECTION 2: SUGGESTIONS IA
+    # NOTE: Gestion stock & historique → InventaireStockMixin
+    #   → get_alertes, _calculer_statut, _jours_avant_peremption
+    #   → _enregistrer_modification, get_historique
+    #   Voir: inventaire_stock.py
     # ═══════════════════════════════════════════════════════════
 
-    @avec_cache(ttl=3600, key_func=lambda self: "suggestions_courses_ia")
-    @avec_gestion_erreurs(default_return=[])
-    def suggerer_courses_ia(self) -> list[SuggestionCourses]:  # pragma: no cover
-        """Suggère des articles à ajouter aux courses via IA.
-
-        Uses Mistral AI to suggest shopping items based on inventory status.
-        Results cached for 1 hour.
-
-        Returns:
-            List of SuggestionCourses objects, empty list on error
-        """
-        # Récupérer contexte inventaire
-        inventaire = self.get_inventaire_complet()
-
-        # Utilisation du Mixin pour résumé inventaire
-        context = self.build_inventory_summary(inventaire)
-
-        # Construire prompt - FORCE JSON STRICT ET CLAIR
-        prompt = f"""GENERATE 15 SHOPPING ITEMS IN JSON FORMAT ONLY.
-
-{context}
-
-OUTPUT ONLY THIS JSON (no other text, no markdown, no code blocks):
-
-{{"items": [{{"nom": "Milk", "quantite": 2, "unite": "L", "priorite": "haute", "rayon": "Laitier"}}, {{"nom": "Eggs", "quantite": 1, "unite": "box", "priorite": "haute", "rayon": "Laitier"}}]}}
-
-RULES:
-1. Return ONLY valid JSON - nothing before or after
-2. Generate 15 shopping items based on inventory alerts
-3. All fields required: nom, quantite, unite, priorite, rayon
-4. priorite must be: haute, moyenne, or basse (haute for critical items)
-5. rayon: Fruits & Légumes, Laitier, Viande, Épicerie, Surgelé, Boulangerie, Hygiène
-6. quantite: realistic amounts for family use
-7. No explanations, no text, ONLY JSON"""
-
-        logger.info("🤖 Generating shopping suggestions with AI")
-
-        # Appel IA avec auto rate limiting & parsing
-        suggestions = self.call_with_list_parsing_sync(
-            prompt=prompt,
-            item_model=SuggestionCourses,
-            system_prompt="Return ONLY valid JSON. No text before or after JSON.",
-            max_items=15,
-            temperature=0.5,
-            max_tokens=2500,
-        )
-
-        logger.info(f"✅ Generated {len(suggestions)} shopping suggestions")
-        return suggestions
-
     # ═══════════════════════════════════════════════════════════
-    # SECTION 3: HELPERS PRIVÉS
+    # NOTE: CRUD articles, photos & suggestions IA → InventaireOperationsMixin
+    #   → ajouter_article, mettre_a_jour_article, supprimer_article
+    #   → ajouter_photo, supprimer_photo, obtenir_photo
+    #   → suggerer_courses_ia
+    #   Voir: inventaire_operations.py
     # ═══════════════════════════════════════════════════════════
-
-    def _calculer_statut(self, article: ArticleInventaire, today: date) -> str:
-        """Calcule le statut d'un article.
-
-        Args:
-            article: ArticleInventaire object
-            today: Current date for calculations
-
-        Returns:
-            Status string: 'critique', 'stock_bas', 'peremption_proche', or 'ok'
-        """
-        if article.date_peremption:
-            days_left = (article.date_peremption - today).days
-            if days_left <= 7:
-                return "peremption_proche"
-
-        if article.quantite < (article.quantite_min * 0.5):
-            return "critique"
-
-        if article.quantite < article.quantite_min:
-            return "stock_bas"
-
-        return "ok"
-
-    def _jours_avant_peremption(self, article: ArticleInventaire, today: date) -> int | None:
-        """Calcule jours avant péremption.
-
-        Args:
-            article: ArticleInventaire object
-            today: Current date
-
-        Returns:
-            Days until expiration or None if no expiration date
-        """
-        if not article.date_peremption:
-            return None
-        return (article.date_peremption - today).days
-
-    # ═══════════════════════════════════════════════════════════
-    # SECTION 4: HISTORIQUE (Tracking modifications)
-    # ═══════════════════════════════════════════════════════════
-
-    @avec_gestion_erreurs(default_return=True)
-    @avec_session_db
-    def _enregistrer_modification(
-        self,
-        article: ArticleInventaire,
-        type_modification: str,
-        quantite_avant: float | None = None,
-        quantite_apres: float | None = None,
-        quantite_min_avant: float | None = None,
-        quantite_min_apres: float | None = None,
-        date_peremption_avant: date | None = None,
-        date_peremption_apres: date | None = None,
-        emplacement_avant: str | None = None,
-        emplacement_apres: str | None = None,
-        notes: str | None = None,
-        db: Session | None = None,
-    ) -> bool:
-        """Enregistre une modification dans l'historique.
-
-        Args:
-            article: Article modifié
-            type_modification: "ajout", "modification", "suppression"
-            quantite_avant/apres: Quantités avant/après
-            ... (autres champs avant/après)
-            notes: Notes additionnelles
-            db: Database session
-
-        Returns:
-            True if recorded successfully
-        """
-        from src.core.models import HistoriqueInventaire
-
-        historique = HistoriqueInventaire(
-            article_id=article.id,
-            ingredient_id=article.ingredient_id,
-            type_modification=type_modification,
-            quantite_avant=quantite_avant,
-            quantite_apres=quantite_apres,
-            quantite_min_avant=quantite_min_avant,
-            quantite_min_apres=quantite_min_apres,
-            date_peremption_avant=date_peremption_avant,
-            date_peremption_apres=date_peremption_apres,
-            emplacement_avant=emplacement_avant,
-            emplacement_apres=emplacement_apres,
-            notes=notes,
-        )
-
-        db.add(historique)
-        db.commit()
-
-        logger.info(f"📝 Historique enregistré: {type_modification} article #{article.id}")
-        return True
-
-    @avec_gestion_erreurs(default_return=[])
-    @avec_session_db
-    def get_historique(
-        self,
-        article_id: int | None = None,
-        ingredient_id: int | None = None,
-        days: int = 30,
-        db: Session | None = None,
-    ) -> list[dict[str, Any]]:
-        """Récupère l'historique des modifications.
-
-        Args:
-            article_id: Filtrer par article (optionnel)
-            ingredient_id: Filtrer par ingrédient (optionnel)
-            days: Historique des N derniers jours
-            db: Database session
-
-        Returns:
-            List of modifications with details
-        """
-
-        from src.core.models import HistoriqueInventaire
-
-        query = db.query(HistoriqueInventaire).filter(
-            HistoriqueInventaire.date_modification >= (date.today() - timedelta(days=days))
-        )
-
-        if article_id:
-            query = query.filter(HistoriqueInventaire.article_id == article_id)
-
-        if ingredient_id:
-            query = query.filter(HistoriqueInventaire.ingredient_id == ingredient_id)
-
-        historique = query.order_by(HistoriqueInventaire.date_modification.desc()).all()
-
-        result = []
-        for h in historique:
-            result.append(
-                {
-                    "id": h.id,
-                    "article_id": h.article_id,
-                    "ingredient_nom": h.ingredient.nom,
-                    "type": h.type_modification,
-                    "quantite_avant": h.quantite_avant,
-                    "quantite_apres": h.quantite_apres,
-                    "emplacement_avant": h.emplacement_avant,
-                    "emplacement_apres": h.emplacement_apres,
-                    "date_peremption_avant": h.date_peremption_avant,
-                    "date_peremption_apres": h.date_peremption_apres,
-                    "date_modification": h.date_modification,
-                    "notes": h.notes,
-                }
-            )
-
-        logger.info(f"📜 Retrieved {len(result)} historique entries")
-        return result
-
-    # ═══════════════════════════════════════════════════════════
-    # SECTION 5: GESTION ARTICLES (CREATE/UPDATE/DELETE)
-    # ═══════════════════════════════════════════════════════════
-
-    @avec_gestion_erreurs(default_return=None)
-    @avec_session_db
-    def ajouter_article(
-        self,
-        ingredient_nom: str,
-        quantite: float,
-        quantite_min: float = 1.0,
-        emplacement: str | None = None,
-        date_peremption: date | None = None,
-        db: Session | None = None,
-    ) -> dict[str, Any] | None:
-        """Ajoute un article à l'inventaire.
-
-        Args:
-            ingredient_nom: Nom de l'ingrédient
-            quantite: Quantité en stock
-            quantite_min: Quantité minimum
-            emplacement: Lieu de stockage
-            date_peremption: Date de péremption
-            db: Database session (injected)
-
-        Returns:
-            Dict with new article data or None on error
-        """
-        from src.core.models import Ingredient
-
-        # Trouver ou créer l'ingrédient
-        ingredient = db.query(Ingredient).filter(Ingredient.nom.ilike(ingredient_nom)).first()
-
-        if not ingredient:
-            logger.warning(f"⚠️ Ingrédient '{ingredient_nom}' non trouvé")
-            return None
-
-        # Vérifier si existe déjà
-        existing = (
-            db.query(ArticleInventaire)
-            .filter(ArticleInventaire.ingredient_id == ingredient.id)
-            .first()
-        )
-
-        if existing:
-            logger.warning(f"⚠️ Article '{ingredient_nom}' existe déjà")
-            return None
-
-        # Créer l'article
-        article = ArticleInventaire(
-            ingredient_id=ingredient.id,
-            quantite=quantite,
-            quantite_min=quantite_min,
-            emplacement=emplacement,
-            date_peremption=date_peremption,
-        )
-
-        db.add(article)
-        db.commit()
-
-        logger.info(f"✅ Article '{ingredient_nom}' ajouté à l'inventaire")
-        self.invalidate_cache()
-
-        return {
-            "id": article.id,
-            "ingredient_nom": ingredient.nom,
-            "quantite": quantite,
-            "quantite_min": quantite_min,
-            "emplacement": emplacement,
-            "date_peremption": date_peremption,
-        }
-
-    @avec_gestion_erreurs(default_return=False)
-    @avec_session_db
-    def mettre_a_jour_article(
-        self,
-        article_id: int,
-        quantite: float | None = None,
-        quantite_min: float | None = None,
-        emplacement: str | None = None,
-        date_peremption: date | None = None,
-        db: Session | None = None,
-    ) -> bool:
-        """Met à jour un article de l'inventaire.
-
-        Args:
-            article_id: ID de l'article
-            quantite: Nouvelle quantité (optionnel)
-            quantite_min: Nouveau seuil minimum (optionnel)
-            emplacement: Nouvel emplacement (optionnel)
-            date_peremption: Nouvelle date de péremption (optionnel)
-            db: Database session (injected)
-
-        Returns:
-            True if updated, False otherwise
-        """
-        article = db.query(ArticleInventaire).filter(ArticleInventaire.id == article_id).first()
-
-        if not article:
-            logger.warning(f"⚠️ Article #{article_id} non trouvé")
-            return False
-
-        if quantite is not None:
-            quantite_avant = article.quantite
-            article.quantite = quantite
-        else:
-            quantite_avant = None
-
-        quantite_min_avant = None
-        if quantite_min is not None:
-            quantite_min_avant = article.quantite_min
-            article.quantite_min = quantite_min
-
-        emplacement_avant = None
-        if emplacement is not None:
-            emplacement_avant = article.emplacement
-            article.emplacement = emplacement
-
-        date_peremption_avant = None
-        if date_peremption is not None:
-            date_peremption_avant = article.date_peremption
-            article.date_peremption = date_peremption
-
-        db.commit()
-
-        # Enregistrer dans historique
-        self._enregistrer_modification(
-            article=article,
-            type_modification="modification",
-            quantite_avant=quantite_avant,
-            quantite_apres=quantite if quantite is not None else None,
-            quantite_min_avant=quantite_min_avant,
-            quantite_min_apres=quantite_min if quantite_min is not None else None,
-            emplacement_avant=emplacement_avant,
-            emplacement_apres=emplacement if emplacement is not None else None,
-            date_peremption_avant=date_peremption_avant,
-            date_peremption_apres=date_peremption if date_peremption is not None else None,
-        )
-
-        logger.info(f"✅ Article #{article_id} mis à jour")
-        self.invalidate_cache()
-
-        return True
-
-    @avec_gestion_erreurs(default_return=False)
-    @avec_session_db
-    def supprimer_article(self, article_id: int, db: Session | None = None) -> bool:
-        """Supprime un article de l'inventaire.
-
-        Args:
-            article_id: ID de l'article
-            db: Database session (injected)
-
-        Returns:
-            True if deleted, False otherwise
-        """
-        article = db.query(ArticleInventaire).filter(ArticleInventaire.id == article_id).first()
-
-        if not article:
-            logger.warning(f"⚠️ Article #{article_id} non trouvé")
-            return False
-
-        db.delete(article)
-        db.commit()
-
-        logger.info(f"✅ Article #{article_id} supprimé")
-        self.invalidate_cache()
-
-        return True
-
-    # ═══════════════════════════════════════════════════════════
-    # SECTION 6: GESTION DES PHOTOS
-    # ═══════════════════════════════════════════════════════════
-
-    @avec_session_db
-    @avec_gestion_erreurs(default_return={})
-    def ajouter_photo(
-        self,
-        article_id: int,
-        photo_url: str,
-        photo_filename: str,
-        db: Session | None = None,
-    ) -> dict[str, Any]:
-        """Ajoute une photo à un article.
-
-        Args:
-            article_id: ID de l'article
-            photo_url: URL de la photo stockée
-            photo_filename: Nom du fichier original
-            db: Database session
-
-        Returns:
-            Updated article data
-        """
-        article = db.query(ArticleInventaire).filter_by(id=article_id).first()
-        if not article:
-            raise ErreurValidation(f"Article #{article_id} introuvable")
-
-        # Garde trace de l'ancienne photo (si elle existe)
-        old_photo = (
-            {
-                "url": article.photo_url,
-                "filename": article.photo_filename,
-            }
-            if article.photo_url
-            else None
-        )
-
-        # Met à jour la photo
-        article.photo_url = photo_url
-        article.photo_filename = photo_filename
-        article.photo_uploaded_at = date.today()
-
-        db.add(article)
-        db.commit()
-        db.refresh(article)
-
-        # Enregistre dans l'historique
-        self._enregistrer_modification(
-            article_id=article_id,
-            ingredient_id=article.ingredient_id,
-            type_modification="photo_ajoutee",
-            notes=f"Photo ajoutée: {photo_filename}",
-            db=db,
-        )
-
-        logger.info(f"📝¸ Photo ajoutée à l'article #{article_id}")
-        self.invalidate_cache()
-
-        return {
-            "article_id": article.id,
-            "photo_url": article.photo_url,
-            "photo_filename": article.photo_filename,
-            "ancien": old_photo,
-        }
-
-    @avec_session_db
-    @avec_gestion_erreurs(default_return=False)
-    def supprimer_photo(self, article_id: int, db: Session | None = None) -> bool:
-        """Supprime la photo d'un article.
-
-        Args:
-            article_id: ID de l'article
-            db: Database session
-
-        Returns:
-            True if successful
-        """
-        article = db.query(ArticleInventaire).filter_by(id=article_id).first()
-        if not article:
-            raise ErreurValidation(f"Article #{article_id} introuvable")
-
-        if not article.photo_url:
-            raise ErreurValidation("Cet article n'a pas de photo")
-
-        # Garde trace de la photo supprimée
-        old_filename = article.photo_filename
-
-        # Supprime la photo
-        article.photo_url = None
-        article.photo_filename = None
-        article.photo_uploaded_at = None
-
-        db.add(article)
-        db.commit()
-
-        # Enregistre dans l'historique
-        self._enregistrer_modification(
-            article_id=article_id,
-            ingredient_id=article.ingredient_id,
-            type_modification="photo_supprimee",
-            notes=f"Photo supprimée: {old_filename}",
-            db=db,
-        )
-
-        logger.info(f"🗑️  Photo supprimée de l'article #{article_id}")
-        self.invalidate_cache()
-
-        return True
-
-    @avec_session_db
-    @avec_gestion_erreurs(default_return=None)
-    def obtenir_photo(self, article_id: int, db: Session | None = None) -> dict[str, Any] | None:
-        """Récupère les info photo d'un article.
-
-        Args:
-            article_id: ID de l'article
-            db: Database session
-
-        Returns:
-            Photo info or None if no photo
-        """
-        article = db.query(ArticleInventaire).filter_by(id=article_id).first()
-        if not article or not article.photo_url:
-            return None
-
-        return {
-            "url": article.photo_url,
-            "filename": article.photo_filename,
-            "uploaded_at": article.photo_uploaded_at,
-        }
 
     # ═══════════════════════════════════════════════════════════
     # NOTE: Notifications & alertes déléguées à InventaireStatsMixin

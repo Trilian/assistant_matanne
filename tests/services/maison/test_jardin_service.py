@@ -58,7 +58,7 @@ class TestJardinServiceConseils:
             )
         )
 
-        conseils = await service.generer_conseils_saison("printemps", ["tomates", "rosiers"])
+        conseils = await service.generer_conseils_saison("printemps")
 
         # Vérifier que l'appel IA est fait
         assert service.call_with_cache.called
@@ -112,7 +112,9 @@ class TestJardinServiceArrosage:
         plantes = ["Tomates", "Salades"]
         plan = await service.generer_plan_arrosage(plantes)
 
-        assert service.call_with_cache.called
+        # generer_plan_arrosage calcule directement sans appel IA
+        assert isinstance(plan, list)
+        assert len(plan) == 2
 
 
 class TestJardinServiceDiagnostic:
@@ -123,38 +125,41 @@ class TestJardinServiceDiagnostic:
         """Diagnostic avec image de la plante."""
         mock_response = json.dumps(
             {
-                "probleme": "Carence en azote",
-                "symptomes": ["Feuilles jaunies", "Croissance lente"],
-                "traitement": "Apport d'engrais azoté",
-                "urgence": "moyenne",
+                "plante": "Tomate",
+                "etat": "attention",
+                "problemes": ["Carence en azote"],
+                "traitements": ["Apport d'engrais azoté"],
             }
         )
 
+        mock_client_ia.appeler_avec_image = AsyncMock(return_value=mock_response)
+
         service = JardinService(client=mock_client_ia)
-        service.call_with_cache = AsyncMock(return_value=mock_response)
 
         diagnostic = await service.diagnostiquer_plante(
-            "Tomate",
-            symptomes=["feuilles jaunes"],
-            image_base64=None,
+            image_base64="base64_image_data",
+            description="Tomate - feuilles jaunes",
         )
 
-        assert service.call_with_cache.called
+        assert diagnostic is not None
+        assert mock_client_ia.appeler_avec_image.called
 
     @pytest.mark.asyncio
     async def test_diagnostiquer_plante_sans_image(self, mock_client_ia):
         """Diagnostic basé uniquement sur les symptômes."""
-        mock_response = "Possible carence ou excès d'eau"
+        # Without valid image, the method falls back to error handling
+        mock_client_ia.appeler_avec_image = AsyncMock(side_effect=Exception("No image"))
 
         service = JardinService(client=mock_client_ia)
-        service.call_with_cache = AsyncMock(return_value=mock_response)
 
         diagnostic = await service.diagnostiquer_plante(
-            "Basilic",
-            symptomes=["feuilles noires", "tiges molles"],
+            image_base64="",
+            description="Basilic - feuilles noires, tiges molles",
         )
 
-        assert service.call_with_cache.called
+        # Falls back to default diagnostic
+        assert diagnostic is not None
+        assert diagnostic.confiance == 0.0
 
 
 class TestJardinServiceMeteo:
@@ -173,27 +178,28 @@ class TestJardinServiceMeteo:
         service = JardinService(client=mock_client_ia)
         service.call_with_cache = AsyncMock(return_value=mock_response)
 
-        impact = await service.analyser_meteo_impact(meteo_data)
+        impact = await service.analyser_meteo_impact(
+            temperature_min=meteo_data["temperature_min"],
+            temperature_max=meteo_data["temperature_max"],
+            pluie_mm=meteo_data["precipitation_mm"],
+        )
 
-        assert service.call_with_cache.called
+        assert isinstance(impact, list)
 
     @pytest.mark.asyncio
     async def test_analyser_meteo_gel(self, mock_client_ia, meteo_gel_data):
         """Détecte et alerte sur le risque de gel."""
-        mock_response = json.dumps(
-            {
-                "impact": "critique",
-                "risque": "gel",
-                "actions": ["Protéger les plantes sensibles", "Rentrer les pots"],
-            }
+        service = JardinService(client=mock_client_ia)
+
+        impact = await service.analyser_meteo_impact(
+            temperature_min=meteo_gel_data["temperature_min"],
+            temperature_max=meteo_gel_data["temperature_max"],
+            pluie_mm=meteo_gel_data["precipitation_mm"],
         )
 
-        service = JardinService(client=mock_client_ia)
-        service.call_with_cache = AsyncMock(return_value=mock_response)
-
-        impact = await service.analyser_meteo_impact(meteo_gel_data)
-
-        assert service.call_with_cache.called
+        assert isinstance(impact, list)
+        # Gel prévu à -3°C, devrait avoir au moins une alerte
+        assert len(impact) >= 1
 
     @pytest.mark.asyncio
     async def test_generer_conseils_meteo(self, mock_client_ia):
@@ -204,11 +210,12 @@ class TestJardinServiceMeteo:
         service.call_with_cache = AsyncMock(return_value=mock_response)
 
         conseils = await service.generer_conseils_meteo(
-            temperature=20,
-            conditions="ensoleillé",
+            meteo={"temp_min": 15, "temp_max": 20},
+            plantes=["tomates", "salades"],
         )
 
-        assert service.call_with_cache.called
+        # generer_conseils_meteo calcule directement sans appel IA
+        assert isinstance(conseils, list)
 
 
 class TestJardinServiceSuggestions:
@@ -249,7 +256,7 @@ class TestJardinServiceSuggestions:
 
         suggestions = await service.suggerer_plantes_saison(
             "été",
-            contraintes=["ombre", "peu d'entretien"],
+            climat="ombre",
         )
 
         assert service.call_with_cache.called

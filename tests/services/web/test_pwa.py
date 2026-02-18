@@ -125,7 +125,7 @@ class TestGeneratePwaFiles:
 class TestInjectPwaMeta:
     """Tests pour inject_pwa_meta."""
 
-    @patch("src.services.web.pwa.components")
+    @patch("src.ui.views.pwa.components")
     def test_inject_meta_calls_components(self, mock_components):
         """Test appel de components.html."""
         from src.services.web.pwa import inject_pwa_meta
@@ -144,7 +144,7 @@ class TestInjectPwaMeta:
 class TestRenderInstallPrompt:
     """Tests pour render_install_prompt."""
 
-    @patch("src.services.web.pwa.components")
+    @patch("src.ui.views.synchronisation.components", create=True)
     def test_render_install_calls_components(self, mock_components):
         """Test appel de components.html."""
         from src.services.web.pwa import render_install_prompt

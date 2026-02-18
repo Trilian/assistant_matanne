@@ -936,9 +936,9 @@ class TestAuthServiceFactory:
 class TestDecorators:
     """Tests pour les décorateurs d'authentification."""
 
-    @patch("src.services.utilisateur.authentification.render_login_form")
-    @patch("src.services.utilisateur.authentification.get_auth_service")
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.ui.views.authentification.afficher_formulaire_connexion")
+    @patch("src.ui.views.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
     def test_require_authenticated_not_authenticated(self, mock_st, mock_get_auth, mock_render):
         """Décorateur avec utilisateur non authentifié."""
         mock_auth = Mock()
@@ -954,8 +954,8 @@ class TestDecorators:
         assert result is None
         mock_render.assert_called_once()
 
-    @patch("src.services.utilisateur.authentification.get_auth_service")
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.ui.views.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
     def test_require_authenticated_authenticated(self, mock_st, mock_get_auth):
         """Décorateur avec utilisateur authentifié."""
         mock_auth = Mock()
@@ -970,9 +970,9 @@ class TestDecorators:
 
         assert result == "success"
 
-    @patch("src.services.utilisateur.authentification.render_login_form")
-    @patch("src.services.utilisateur.authentification.get_auth_service")
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.ui.views.authentification.afficher_formulaire_connexion")
+    @patch("src.ui.views.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
     def test_require_role_not_authenticated(self, mock_st, mock_get_auth, mock_render):
         """Décorateur role sans utilisateur."""
         mock_auth = Mock()
@@ -988,8 +988,8 @@ class TestDecorators:
         assert result is None
         mock_render.assert_called_once()
 
-    @patch("src.services.utilisateur.authentification.get_auth_service")
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.ui.views.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
     def test_require_role_insufficient_role(self, mock_st, mock_get_auth):
         """Décorateur role avec rôle insuffisant."""
         mock_auth = Mock()
@@ -1005,8 +1005,8 @@ class TestDecorators:
 
         assert result is None
 
-    @patch("src.services.utilisateur.authentification.get_auth_service")
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.ui.views.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
     def test_require_role_sufficient_role(self, mock_st, mock_get_auth):
         """Décorateur role avec rôle suffisant."""
         mock_auth = Mock()
@@ -1518,8 +1518,8 @@ class TestUpdateProfileNoChange:
 class TestRenderFunctions:
     """Tests basiques pour les fonctions render (UI)."""
 
-    @patch("src.services.utilisateur.authentification.st")
-    @patch("src.services.utilisateur.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
+    @patch("src.ui.views.authentification.get_auth_service")
     def test_render_login_form_basic(self, mock_get_auth, mock_st):
         """Test render_login_form est appelable."""
         from src.services.utilisateur.authentification import render_login_form
@@ -1537,8 +1537,8 @@ class TestRenderFunctions:
         except Exception:
             pass  # OK si exception due aux mocks incomplets
 
-    @patch("src.services.utilisateur.authentification.st")
-    @patch("src.services.utilisateur.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
+    @patch("src.ui.views.authentification.get_auth_service")
     def test_render_user_menu_not_logged(self, mock_get_auth, mock_st):
         """Test render_user_menu sans utilisateur connecté."""
         from src.services.utilisateur.authentification import render_user_menu
@@ -1555,8 +1555,8 @@ class TestRenderFunctions:
         except Exception:
             pass  # OK pour ce test basique
 
-    @patch("src.services.utilisateur.authentification.st")
-    @patch("src.services.utilisateur.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
+    @patch("src.ui.views.authentification.get_auth_service")
     def test_render_profile_settings_not_logged(self, mock_get_auth, mock_st):
         """Test render_profile_settings sans utilisateur connecté."""
         from src.services.utilisateur.authentification import render_profile_settings
@@ -1574,8 +1574,8 @@ class TestRenderFunctions:
 class TestRenderFunctionsAdditional:
     """Tests supplémentaires pour les fonctions render (couverture branches)."""
 
-    @patch("src.services.utilisateur.authentification.st")
-    @patch("src.services.utilisateur.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
+    @patch("src.ui.views.authentification.get_auth_service")
     def test_render_login_form_login_success(self, mock_get_auth, mock_st):
         """Test login réussi avec rerun."""
         from src.services.utilisateur.authentification import render_login_form
@@ -1605,8 +1605,8 @@ class TestRenderFunctionsAdditional:
         mock_st.success.assert_called()
         mock_st.rerun.assert_called()
 
-    @patch("src.services.utilisateur.authentification.st")
-    @patch("src.services.utilisateur.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
+    @patch("src.ui.views.authentification.get_auth_service")
     def test_render_login_form_login_failure(self, mock_get_auth, mock_st):
         """Test login échoué."""
         from unittest.mock import MagicMock
@@ -1633,8 +1633,8 @@ class TestRenderFunctionsAdditional:
 
         mock_st.error.assert_called()
 
-    @patch("src.services.utilisateur.authentification.st")
-    @patch("src.services.utilisateur.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
+    @patch("src.ui.views.authentification.get_auth_service")
     def test_render_login_form_forgot_password(self, mock_get_auth, mock_st):
         """Test mot de passe oublié."""
         from unittest.mock import MagicMock
@@ -1659,8 +1659,8 @@ class TestRenderFunctionsAdditional:
 
         mock_st.info.assert_called()
 
-    @patch("src.services.utilisateur.authentification.st")
-    @patch("src.services.utilisateur.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
+    @patch("src.ui.views.authentification.get_auth_service")
     def test_render_user_menu_logged_in(self, mock_get_auth, mock_st):
         """Test menu utilisateur connecté."""
         from unittest.mock import MagicMock
@@ -1685,8 +1685,8 @@ class TestRenderFunctionsAdditional:
 
         mock_st.markdown.assert_called()
 
-    @patch("src.services.utilisateur.authentification.st")
-    @patch("src.services.utilisateur.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
+    @patch("src.ui.views.authentification.get_auth_service")
     def test_render_user_menu_logout_clicked(self, mock_get_auth, mock_st):
         """Test bouton déconnexion cliqué."""
         from unittest.mock import MagicMock
@@ -1711,8 +1711,8 @@ class TestRenderFunctionsAdditional:
         mock_service.logout.assert_called_once()
         mock_st.rerun.assert_called()
 
-    @patch("src.services.utilisateur.authentification.st")
-    @patch("src.services.utilisateur.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
+    @patch("src.ui.views.authentification.get_auth_service")
     def test_render_user_menu_login_clicked(self, mock_get_auth, mock_st):
         """Test bouton connexion cliqué (non connecté)."""
         from unittest.mock import MagicMock
@@ -1732,8 +1732,8 @@ class TestRenderFunctionsAdditional:
 
         assert mock_st.session_state["show_login"] is True
 
-    @patch("src.services.utilisateur.authentification.st")
-    @patch("src.services.utilisateur.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
+    @patch("src.ui.views.authentification.get_auth_service")
     def test_render_profile_settings_with_user(self, mock_get_auth, mock_st):
         """Test paramètres profil avec utilisateur connecté."""
         from datetime import datetime
@@ -1763,8 +1763,8 @@ class TestRenderFunctionsAdditional:
 
         mock_st.success.assert_called()
 
-    @patch("src.services.utilisateur.authentification.st")
-    @patch("src.services.utilisateur.authentification.get_auth_service")
+    @patch("src.ui.views.authentification.st")
+    @patch("src.ui.views.authentification.get_auth_service")
     def test_render_profile_password_change(self, mock_get_auth, mock_st):
         """Test changement de mot de passe."""
         from datetime import datetime

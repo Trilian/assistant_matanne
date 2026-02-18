@@ -4,8 +4,8 @@ Service Batch Cooking - Gestion des sessions de préparation de repas en lot.
 Ce service gère :
 - Configuration du batch cooking (jours, robots, préférences)
 - Sessions de batch cooking (planification, exécution, suivi)
-- Génération IA des plans optimisés
-- Gestion des préparations stockées
+- Génération IA des plans optimisés (via BatchCookingIAMixin)
+- Gestion des préparations stockées (via BatchCookingStatsMixin)
 
 ✅ Utilise @avec_session_db et @avec_cache
 ✅ Validation Pydantic centralisée
@@ -13,7 +13,7 @@ Ce service gère :
 """
 
 import logging
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time
 from typing import Any
 
 from sqlalchemy.orm import Session, joinedload
@@ -25,31 +25,33 @@ from src.core.errors_base import ErreurNonTrouve, ErreurValidation
 from src.core.models import (
     ConfigBatchCooking,
     EtapeBatchCooking,
-    Planning,
-    PreparationBatch,
-    Recette,
     SessionBatchCooking,
     StatutEtapeEnum,
     StatutSessionEnum,
 )
 from src.services.base import BaseAIService, BaseService
 
-from .constantes import ROBOTS_DISPONIBLES
-from .types import SessionBatchIA
+from .batch_cooking_ia import BatchCookingIAMixin
+from .batch_cooking_stats import BatchCookingStatsMixin
 
 logger = logging.getLogger(__name__)
 
 
-class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
+class ServiceBatchCooking(
+    BatchCookingIAMixin,
+    BatchCookingStatsMixin,
+    BaseService[SessionBatchCooking],
+    BaseAIService,
+):
     """
     Service complet pour le batch cooking.
 
     Fonctionnalités:
     - Configuration utilisateur (jours, robots, préférences)
     - Sessions batch cooking (création, exécution, suivi)
-    - Génération IA de plans optimisés
-    - Gestion des préparations stockées
-    - Intégration avec le planning hebdomadaire
+    - Génération IA de plans optimisés (BatchCookingIAMixin)
+    - Gestion des préparations stockées (BatchCookingStatsMixin)
+    - Intégration avec le planning hebdomadaire (BatchCookingStatsMixin)
     """
 
     def __init__(self):
@@ -401,336 +403,6 @@ class ServiceBatchCooking(BaseService[SessionBatchCooking], BaseAIService):
 
         logger.info(f"✅ Étape passée: {etape_id}")
         return etape
-
-    # ═══════════════════════════════════════════════════════════
-    # SECTION 4: PRÉPARATIONS STOCKÉES
-    # ═══════════════════════════════════════════════════════════
-
-    @avec_cache(
-        ttl=600,
-        key_func=lambda self, consommees=False, localisation=None: (
-            f"preparations_{consommees}_{localisation}"
-        ),
-    )
-    @avec_gestion_erreurs(default_return=[])
-    @avec_session_db
-    def get_preparations(
-        self,
-        consommees: bool = False,
-        localisation: str | None = None,
-        db: Session | None = None,
-    ) -> list[PreparationBatch]:
-        """Récupère les préparations stockées."""
-        query = db.query(PreparationBatch).filter(PreparationBatch.consomme == consommees)
-
-        if localisation:
-            query = query.filter(PreparationBatch.localisation == localisation)
-
-        return query.order_by(PreparationBatch.date_peremption).all()
-
-    @avec_gestion_erreurs(default_return=[])
-    @avec_session_db
-    def get_preparations_alertes(self, db: Session | None = None) -> list[PreparationBatch]:
-        """Récupère les préparations proches de la péremption."""
-        limite = date.today() + timedelta(days=3)
-        return (
-            db.query(PreparationBatch)
-            .filter(
-                not PreparationBatch.consomme,
-                PreparationBatch.date_peremption <= limite,
-            )
-            .order_by(PreparationBatch.date_peremption)
-            .all()
-        )
-
-    @avec_gestion_erreurs(default_return=None)
-    @avec_session_db
-    def creer_preparation(
-        self,
-        nom: str,
-        portions: int,
-        date_preparation: date,
-        conservation_jours: int,
-        localisation: str = "frigo",
-        session_id: int | None = None,
-        recette_id: int | None = None,
-        container: str | None = None,
-        notes: str | None = None,
-        db: Session | None = None,
-    ) -> PreparationBatch | None:
-        """Crée une nouvelle préparation stockée."""
-        preparation = PreparationBatch(
-            session_id=session_id,
-            recette_id=recette_id,
-            nom=nom,
-            portions_initiales=portions,
-            portions_restantes=portions,
-            date_preparation=date_preparation,
-            date_peremption=date_preparation + timedelta(days=conservation_jours),
-            localisation=localisation,
-            container=container,
-            notes=notes,
-        )
-
-        db.add(preparation)
-        db.commit()
-        db.refresh(preparation)
-
-        # Invalider cache
-        Cache.invalider(pattern="preparations")
-
-        logger.info(f"✅ Préparation créée: {preparation.id}")
-        return preparation
-
-    @avec_gestion_erreurs(default_return=None)
-    @avec_session_db
-    def consommer_preparation(
-        self,
-        preparation_id: int,
-        portions: int = 1,
-        db: Session | None = None,
-    ) -> PreparationBatch | None:
-        """Consomme des portions d'une préparation."""
-        preparation = db.query(PreparationBatch).filter_by(id=preparation_id).first()
-        if not preparation:
-            raise ErreurNonTrouve(f"Préparation {preparation_id} non trouvée")
-
-        preparation.consommer_portion(portions)
-
-        db.commit()
-        db.refresh(preparation)
-
-        # Invalider cache
-        Cache.invalider(pattern="preparations")
-
-        logger.info(f"✅ {portions} portion(s) consommée(s): {preparation_id}")
-        return preparation
-
-    # ═══════════════════════════════════════════════════════════
-    # SECTION 5: GÉNÉRATION IA
-    # ═══════════════════════════════════════════════════════════
-
-    @avec_cache(
-        ttl=3600,
-        key_func=lambda self, recettes_ids, robots_disponibles, avec_jules=False: (
-            f"batch_plan_{'-'.join(map(str, recettes_ids))}_{avec_jules}"
-        ),
-    )
-    @avec_gestion_erreurs(default_return=None)
-    @avec_session_db
-    def generer_plan_ia(
-        self,
-        recettes_ids: list[int],
-        robots_disponibles: list[str],
-        avec_jules: bool = False,
-        db: Session | None = None,
-    ) -> SessionBatchIA | None:
-        """Génère un plan de batch cooking optimisé avec l'IA.
-
-        L'IA optimise :
-        - L'ordre des étapes pour paralléliser au maximum
-        - L'utilisation des robots pour gagner du temps
-        - Les conseils pour cuisiner avec un enfant présent
-        """
-        # Récupérer les recettes
-        recettes = db.query(Recette).filter(Recette.id.in_(recettes_ids)).all()
-        if not recettes:
-            raise ErreurValidation("Aucune recette trouvée")
-
-        # Construire le contexte
-        recettes_context = []
-        for r in recettes:
-            etapes_text = ""
-            if r.etapes:
-                etapes_text = "\n".join(
-                    [f"  {e.ordre}. {e.description} ({e.duree or '?'} min)" for e in r.etapes]
-                )
-
-            recettes_context.append(f"""
-Recette: {r.nom}
-- Temps préparation: {r.temps_preparation} min
-- Temps cuisson: {r.temps_cuisson} min
-- Portions: {r.portions}
-- Compatible batch: {r.compatible_batch}
-- Congelable: {r.congelable}
-- Robots: {", ".join(r.robots_compatibles) if r.robots_compatibles else "Aucun"}
-- Étapes:
-{etapes_text}
-""")
-
-        robots_text = ", ".join(
-            [ROBOTS_DISPONIBLES.get(r, {}).get("nom", r) for r in robots_disponibles]
-        )
-        jules_context = (
-            """
-⚠️ IMPORTANT - JULES (bébé 19 mois) sera présent !
-- Éviter les étapes bruyantes pendant la sieste (13h-15h)
-- Prévoir des moments calmes où il peut observer/aider
-- Signaler les étapes dangereuses (four chaud, friture, couteaux)
-- Optimiser pour terminer avant 12h si possible
-"""
-            if avec_jules
-            else ""
-        )
-
-        prompt = f"""GÉNÈRE UN PLAN DE BATCH COOKING OPTIMISÉ EN JSON UNIQUEMENT.
-
-RECETTES À PRÉPARER:
-{"".join(recettes_context)}
-
-ÉQUIPEMENTS DISPONIBLES:
-{robots_text}
-
-{jules_context}
-
-OBJECTIF:
-1. Optimiser le temps total en parallélisant les tâches
-2. Regrouper les étapes par robot/équipement
-3. Prévoir les temps de supervision (cuisson four, etc.)
-4. Indiquer clairement les étapes bruyantes
-
-RETOURNE UNIQUEMENT CE JSON (pas de markdown, pas d'explication):
-{{
-    "recettes": ["Nom recette 1", "Nom recette 2"],
-    "duree_totale_estimee": 120,
-    "etapes": [
-        {{
-            "ordre": 1,
-            "titre": "Préparer les légumes",
-            "description": "Éplucher et couper les carottes, pommes de terre et oignons",
-            "duree_minutes": 15,
-            "robots": ["hachoir"],
-            "groupe_parallele": 0,
-            "est_supervision": false,
-            "alerte_bruit": true,
-            "temperature": null,
-            "recette_nom": "Boeuf bourguignon"
-        }}
-    ],
-    "conseils_jules": ["Moment idéal pour Jules: étape 3 (mélanger les ingrédients)"],
-    "ordre_optimal": "Commencer par les cuissons longues au four, puis préparer les plats rapides en parallèle"
-}}
-
-RÈGLES:
-- Les étapes avec le même groupe_parallele peuvent être faites simultanément
-- est_supervision=true pour les étapes passives (surveiller la cuisson)
-- alerte_bruit=true pour mixeur, hachoir, robot bruyant
-- Grouper intelligemment pour minimiser le temps total
-"""
-
-        logger.info(f"🤖 Génération plan batch cooking IA ({len(recettes)} recettes)")
-
-        result = self.call_with_json_parsing_sync(
-            prompt=prompt,
-            response_model=SessionBatchIA,
-            system_prompt="Tu es un chef expert en batch cooking et organisation de cuisine. Retourne UNIQUEMENT du JSON valide, sans aucun texte avant ou après.",
-            temperature=0.5,
-            max_tokens=4000,
-        )
-
-        if result:
-            logger.info(f"✅ Plan batch cooking généré: {result.duree_totale_estimee} min estimées")
-
-        return result
-
-    @avec_gestion_erreurs(default_return=[])
-    @avec_session_db
-    def suggerer_recettes_batch(
-        self,
-        nb_recettes: int = 4,
-        robots_disponibles: list[str] | None = None,
-        avec_jules: bool = False,
-        planning_id: int | None = None,
-        db: Session | None = None,
-    ) -> list[Recette]:
-        """Suggère des recettes adaptées au batch cooking."""
-        query = db.query(Recette).filter(Recette.compatible_batch)
-
-        # Filtrer par robots si spécifié
-        if robots_disponibles:
-            # Filtre complexe sur les robots
-            for robot in robots_disponibles:
-                if robot == "cookeo":
-                    query = query.filter(Recette.compatible_cookeo)
-                elif robot == "monsieur_cuisine":
-                    query = query.filter(Recette.compatible_monsieur_cuisine)
-                elif robot == "airfryer":
-                    query = query.filter(Recette.compatible_airfryer)
-
-        # Filtrer pour bébé si Jules présent
-        if avec_jules:
-            query = query.filter(Recette.compatible_bebe)
-
-        # Prioriser les recettes congelables
-        recettes = query.order_by(Recette.congelable.desc()).limit(nb_recettes * 2).all()
-
-        # Retourner un échantillon varié
-        return recettes[:nb_recettes]
-
-    # ═══════════════════════════════════════════════════════════
-    # SECTION 6: INTÉGRATION PLANNING
-    # ═══════════════════════════════════════════════════════════
-
-    @avec_gestion_erreurs(default_return=None)
-    @avec_session_db
-    def attribuer_preparations_planning(
-        self,
-        session_id: int,
-        db: Session | None = None,
-    ) -> dict[str, Any] | None:
-        """Attribue automatiquement les préparations aux repas du planning."""
-        session = (
-            db.query(SessionBatchCooking)
-            .options(joinedload(SessionBatchCooking.preparations))
-            .filter_by(id=session_id)
-            .first()
-        )
-        if not session or not session.planning_id:
-            return None
-
-        planning = (
-            db.query(Planning)
-            .options(joinedload(Planning.repas))
-            .filter_by(id=session.planning_id)
-            .first()
-        )
-        if not planning:
-            return None
-
-        # Attribuer les préparations aux repas
-        attributions = []
-        for preparation in session.preparations:
-            if preparation.consomme:
-                continue
-
-            # Trouver les repas sans recette
-            repas_libres = [r for r in planning.repas if not r.recette_id and not r.notes]
-
-            # Attribuer à des repas
-            nb_attribue = min(preparation.portions_restantes, len(repas_libres))
-            for _i, repas in enumerate(repas_libres[:nb_attribue]):
-                repas.notes = f"🍱 {preparation.nom}"
-
-                if preparation.repas_attribues is None:
-                    preparation.repas_attribues = []
-                preparation.repas_attribues.append(repas.id)
-
-                attributions.append(
-                    {
-                        "preparation": preparation.nom,
-                        "repas_id": repas.id,
-                        "date": repas.date_repas.isoformat(),
-                    }
-                )
-
-        db.commit()
-
-        logger.info(f"✅ {len(attributions)} attributions créées")
-        return {
-            "session_id": session_id,
-            "planning_id": planning.id,
-            "attributions": attributions,
-        }
 
 
 # ═══════════════════════════════════════════════════════════

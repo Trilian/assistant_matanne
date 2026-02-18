@@ -853,8 +853,8 @@ class TestFactory:
 class TestUIComponents:
     """Tests pour les composants UI avec Streamlit mocké."""
 
-    @patch("src.services.utilisateur.historique.st")
-    @patch("src.services.utilisateur.historique.get_action_history_service")
+    @patch("src.ui.views.historique.st")
+    @patch("src.ui.views.historique.get_action_history_service")
     def test_render_activity_timeline_empty(self, mock_service, mock_st):
         """Timeline vide affiche message info."""
         from src.services.utilisateur.historique import render_activity_timeline
@@ -865,8 +865,8 @@ class TestUIComponents:
 
         mock_st.info.assert_called_once()
 
-    @patch("src.services.utilisateur.historique.st")
-    @patch("src.services.utilisateur.historique.get_action_history_service")
+    @patch("src.ui.views.historique.st")
+    @patch("src.ui.views.historique.get_action_history_service")
     def test_render_activity_timeline_with_actions(self, mock_service, mock_st):
         """Timeline avec actions."""
         from src.services.utilisateur.historique import render_activity_timeline
@@ -884,8 +884,8 @@ class TestUIComponents:
 
         mock_st.markdown.assert_called()
 
-    @patch("src.services.utilisateur.historique.st")
-    @patch("src.services.utilisateur.historique.get_action_history_service")
+    @patch("src.ui.views.historique.st")
+    @patch("src.ui.views.historique.get_action_history_service")
     def test_render_user_activity_empty(self, mock_service, mock_st):
         """Activité utilisateur vide."""
         from src.services.utilisateur.historique import render_user_activity
@@ -896,8 +896,8 @@ class TestUIComponents:
 
         mock_st.info.assert_called()
 
-    @patch("src.services.utilisateur.historique.st")
-    @patch("src.services.utilisateur.historique.get_action_history_service")
+    @patch("src.ui.views.historique.st")
+    @patch("src.ui.views.historique.get_action_history_service")
     def test_render_user_activity_with_actions(self, mock_service, mock_st):
         """Activité utilisateur avec actions."""
         from src.services.utilisateur.historique import render_user_activity
@@ -915,8 +915,8 @@ class TestUIComponents:
 
         mock_st.markdown.assert_called()
 
-    @patch("src.services.utilisateur.historique.st")
-    @patch("src.services.utilisateur.historique.get_action_history_service")
+    @patch("src.ui.views.historique.st")
+    @patch("src.ui.views.historique.get_action_history_service")
     def test_render_activity_stats(self, mock_service, mock_st):
         """Statistiques d'activité."""
         from src.services.utilisateur.historique import render_activity_stats
@@ -935,8 +935,8 @@ class TestUIComponents:
         mock_st.markdown.assert_called()
         mock_st.metric.assert_called()
 
-    @patch("src.services.utilisateur.historique.st")
-    @patch("src.services.utilisateur.historique.get_action_history_service")
+    @patch("src.ui.views.historique.st")
+    @patch("src.ui.views.historique.get_action_history_service")
     def test_render_activity_stats_no_users(self, mock_service, mock_st):
         """Statistiques sans utilisateurs actifs."""
         from src.services.utilisateur.historique import render_activity_stats
