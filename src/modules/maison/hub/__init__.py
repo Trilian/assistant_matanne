@@ -1,0 +1,68 @@
+"""
+🏠 Hub Maison - Dashboard Intelligent
+
+Hub central avec :
+- Briefing IA quotidien
+- Tâches prioritaires (respect charge mentale)
+- Stats visuelles
+- Navigation modules
+
+Architecture:
+┌──────────────────────────────────────────────────────────────┐
+│ 📋 AUJOURD'HUI                                               │
+│ "3 tâches • 45 min • Charge: ████░░░░░░ 40%"                │
+├──────────────────────────────────────────────────────────────┤
+│ 🚨 ALERTES          │ 📊 STATS DU MOIS                      │
+└──────────────────────────────────────────────────────────────┘
+│ 🌳 Jardin  │ 🏡 Entretien  │ 💡 Charges  │ 💰 Dépenses     │
+└──────────────────────────────────────────────────────────────┘
+"""
+
+import streamlit as st
+
+from .data import calculer_charge, obtenir_alertes, obtenir_stats_globales, obtenir_taches_jour
+from .styles import CSS
+from .ui import render_alertes, render_header, render_modules, render_stats_mois, render_taches
+
+
+def app():
+    """Point d'entrée du hub maison."""
+    st.markdown(CSS, unsafe_allow_html=True)
+
+    # Données
+    stats = obtenir_stats_globales()
+    taches = obtenir_taches_jour()
+    alertes = obtenir_alertes()
+    charge = calculer_charge(taches)
+
+    # Rendu
+    render_header()
+
+    # Layout principal
+    col_main, col_side = st.columns([2, 1])
+
+    with col_main:
+        render_taches(taches, charge)
+        render_modules(stats)
+
+    with col_side:
+        render_alertes(alertes)
+        render_stats_mois(stats)
+
+    # Actions rapides
+    st.markdown("---")
+
+    with st.expander("⚡ Actions rapides", expanded=False):
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("➕ Nouvelle tâche", use_container_width=True):
+                st.info("Formulaire nouvelle tâche")
+        with col2:
+            if st.button("⏱️ Démarrer chrono", use_container_width=True):
+                st.info("Lancer chronomètre")
+        with col3:
+            if st.button("📊 Stats détaillées", use_container_width=True):
+                st.info("Voir statistiques")
+
+
+__all__ = ["app"]

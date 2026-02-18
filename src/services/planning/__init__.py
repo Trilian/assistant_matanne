@@ -59,7 +59,7 @@ from .rappels import (
     obtenir_service_rappels,
 )
 from .recurrence import (
-    JOURS_SEMAINE as JOURS_SEMAINE_RECURRENCE,
+    JOURS_SEMAINE_INDEX as JOURS_SEMAINE_RECURRENCE,
 )
 from .recurrence import (
     OPTIONS_RECURRENCE,
@@ -79,9 +79,6 @@ from .service import (
     get_planning_service,
     # Factory
     obtenir_service_planning,
-)
-from .templates import (
-    JOURS_SEMAINE as JOURS_SEMAINE_TEMPLATES,
 )
 from .templates import (
     ServiceTemplates,
@@ -228,7 +225,6 @@ __all__ = [
     # ─────────────────────────────────────────────────────────
     # Services - Templates de semaine
     # ─────────────────────────────────────────────────────────
-    "JOURS_SEMAINE_TEMPLATES",
     "ServiceTemplates",
     "get_templates_service",
     "obtenir_service_templates",

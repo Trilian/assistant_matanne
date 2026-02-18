@@ -1,0 +1,212 @@
+"""
+Hub Maison - Styles CSS.
+"""
+
+CSS = """
+<style>
+/* Header principal */
+.hub-main-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.hub-main-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+.hub-date {
+    opacity: 0.8;
+    font-size: 0.95rem;
+}
+
+/* Section tâches */
+.taches-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.taches-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #eee;
+}
+.taches-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a1a2e;
+}
+.charge-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.charge-leger { background: #d4edda; color: #155724; }
+.charge-normal { background: #fff3cd; color: #856404; }
+.charge-eleve { background: #f8d7da; color: #721c24; }
+
+/* Tâche individuelle */
+.tache-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    border-radius: 8px;
+    background: #f8f9fa;
+    transition: all 0.2s ease;
+}
+.tache-item:hover {
+    background: #e9ecef;
+    transform: translateX(4px);
+}
+.tache-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+}
+.tache-jardin { background: #d4edda; }
+.tache-entretien { background: #cce5ff; }
+.tache-charges { background: #fff3cd; }
+.tache-depenses { background: #f5c6cb; }
+.tache-content {
+    flex: 1;
+}
+.tache-titre {
+    font-weight: 500;
+    color: #212529;
+}
+.tache-meta {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+.tache-duree {
+    font-size: 0.85rem;
+    color: #495057;
+    background: white;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+}
+
+/* Alertes */
+.alerte-card {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+.alerte-info { background: #cce5ff; border-left: 3px solid #004085; }
+.alerte-warning { background: #fff3cd; border-left: 3px solid #856404; }
+.alerte-danger { background: #f8d7da; border-left: 3px solid #721c24; }
+.alerte-success { background: #d4edda; border-left: 3px solid #155724; }
+.alerte-icon { font-size: 1.2rem; }
+.alerte-content { flex: 1; }
+.alerte-titre { font-weight: 500; font-size: 0.9rem; }
+.alerte-desc { font-size: 0.8rem; opacity: 0.85; }
+
+/* Modules navigation */
+.modules-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+.module-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+.module-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+.module-card.jardin:hover { border-color: #28a745; }
+.module-card.entretien:hover { border-color: #007bff; }
+.module-card.charges:hover { border-color: #ffc107; }
+.module-card.depenses:hover { border-color: #dc3545; }
+.module-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+.module-titre {
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 0.25rem;
+}
+.module-stat {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+.module-highlight {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    display: inline-block;
+}
+.highlight-success { background: #d4edda; color: #155724; }
+.highlight-warning { background: #fff3cd; color: #856404; }
+.highlight-info { background: #cce5ff; color: #004085; }
+
+/* Stats section */
+.stats-mini {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+.stat-item {
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1a1a2e;
+}
+.stat-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+}
+
+/* Jauge charge */
+.jauge-container {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0.5rem 0;
+}
+.jauge-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+.jauge-leger { background: linear-gradient(90deg, #28a745, #34ce57); }
+.jauge-normal { background: linear-gradient(90deg, #ffc107, #ffda6a); }
+.jauge-eleve { background: linear-gradient(90deg, #dc3545, #e4606d); }
+</style>
+"""

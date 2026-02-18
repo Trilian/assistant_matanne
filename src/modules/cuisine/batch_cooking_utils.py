@@ -7,6 +7,8 @@ import logging
 from datetime import date, datetime, time, timedelta
 from typing import Any
 
+from src.utils.formatters.dates import formater_temps
+
 logger = logging.getLogger(__name__)
 
 
@@ -145,22 +147,8 @@ def estimer_heure_fin(heure_debut: time, duree_minutes: int) -> time:
 
 
 def formater_duree(minutes: int) -> str:
-    """
-    Formate une duree en minutes en texte lisible.
-
-    Args:
-        minutes: Duree en minutes
-
-    Returns:
-        Texte formate (ex: "2h30" ou "45 min")
-    """
-    if minutes < 60:
-        return f"{minutes} min"
-    heures = minutes // 60
-    mins_restantes = minutes % 60
-    if mins_restantes == 0:
-        return f"{heures}h"
-    return f"{heures}h{mins_restantes:02d}"
+    """Formate une duree en minutes (alias pour formater_temps avec espace)."""
+    return formater_temps(minutes, avec_espace=True)
 
 
 # ═══════════════════════════════════════════════════════════

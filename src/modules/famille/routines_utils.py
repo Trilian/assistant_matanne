@@ -8,6 +8,7 @@ from datetime import date, time, timedelta
 from typing import Any
 
 from src.core.constants import JOURS_SEMAINE
+from src.utils.formatters.dates import formater_temps
 
 logger = logging.getLogger(__name__)
 
@@ -369,13 +370,5 @@ def formater_heure(heure: time) -> str:
 
 
 def formater_duree(minutes: int) -> str:
-    """Formate une duree."""
-    if minutes < 60:
-        return f"{minutes}min"
-    else:
-        heures = minutes // 60
-        mins = minutes % 60
-        if mins > 0:
-            return f"{heures}h{mins:02d}"
-        else:
-            return f"{heures}h"
+    """Formate une duree en minutes (alias pour formater_temps)."""
+    return formater_temps(minutes)

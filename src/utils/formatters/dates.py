@@ -111,26 +111,32 @@ def temps_ecoule(d: date | datetime) -> str:
         return formater_date(d, "medium")
 
 
-def formater_temps(minutes: int | float | None) -> str:
+def formater_temps(minutes: int | float | None, avec_espace: bool = False) -> str:
     """
-    Formate une durée en minutes vers format lisible
+    Formate une durée en minutes vers format lisible.
+
+    Args:
+        minutes: Durée en minutes
+        avec_espace: Ajoute un espace entre le nombre et l'unité (ex: "45 min")
 
     Examples:
         >>> formater_temps(90)
         "1h30"
         >>> formater_temps(45)
         "45min"
+        >>> formater_temps(45, avec_espace=True)
+        "45 min"
     """
     if minutes is None or minutes == 0:
-        return "0min"
+        return "0 min" if avec_espace else "0min"
 
     try:
         total_minutes = int(minutes)
     except (ValueError, TypeError):
-        return "0min"
+        return "0 min" if avec_espace else "0min"
 
     if total_minutes < 60:
-        return f"{total_minutes}min"
+        return f"{total_minutes} min" if avec_espace else f"{total_minutes}min"
 
     hours = total_minutes // 60
     remaining_minutes = total_minutes % 60
