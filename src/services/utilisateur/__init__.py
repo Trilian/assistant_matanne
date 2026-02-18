@@ -31,6 +31,7 @@ from .authentification import (
     Role,
     UserProfile,
     get_auth_service,
+    obtenir_service_authentification,
     render_login_form,
     render_profile_settings,
     render_user_menu,
@@ -48,6 +49,7 @@ from .historique import (
     ActionStats,
     ActionType,
     get_action_history_service,
+    obtenir_service_historique_actions,
     render_activity_stats,
     render_activity_timeline,
     render_user_activity,
@@ -59,12 +61,14 @@ from .historique import (
 from .preferences import (
     UserPreferenceService,
     get_user_preference_service,
+    obtenir_service_preferences_utilisateur,
 )
 
 __all__ = [
     # Auth
     "AuthService",
     "get_auth_service",
+    "obtenir_service_authentification",
     "UserProfile",
     "AuthResult",
     "Role",
@@ -77,6 +81,7 @@ __all__ = [
     # Historique
     "ActionHistoryService",
     "get_action_history_service",
+    "obtenir_service_historique_actions",
     "ActionType",
     "ActionEntry",
     "ActionFilter",
@@ -87,4 +92,5 @@ __all__ = [
     # Préférences
     "UserPreferenceService",
     "get_user_preference_service",
+    "obtenir_service_preferences_utilisateur",
 ]

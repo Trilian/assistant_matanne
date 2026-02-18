@@ -121,8 +121,8 @@ class BaseUITest:
         def mock_context():
             yield mock_db
 
-        p1 = patch("src.core.database.obtenir_contexte_db", mock_context)
-        p2 = patch("src.core.database.obtenir_contexte_db", mock_context)
+        p1 = patch("src.core.db.obtenir_contexte_db", mock_context)
+        p2 = patch("src.core.db.obtenir_contexte_db", mock_context)
 
         p1.start()
         p2.start()
@@ -238,6 +238,6 @@ class BaseUITestWithDB(BaseUITest):
         def mock_context():
             yield self.db
 
-        with patch("src.core.database.obtenir_contexte_db", mock_context):
-            with patch("src.core.database.obtenir_contexte_db", mock_context):
+        with patch("src.core.db.obtenir_contexte_db", mock_context):
+            with patch("src.core.db.obtenir_contexte_db", mock_context):
                 yield self.db

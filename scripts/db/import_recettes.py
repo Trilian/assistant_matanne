@@ -7,7 +7,7 @@ import json
 import logging
 from pathlib import Path
 
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.models import EtapeRecette, Ingredient, Recette, RecetteIngredient
 
 logger = logging.getLogger(__name__)

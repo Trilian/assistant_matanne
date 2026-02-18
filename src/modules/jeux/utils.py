@@ -45,7 +45,7 @@ def charger_matchs_avec_fallback(
     # Fallback à la BD
     if not matchs:
         try:
-            from src.core.database import obtenir_contexte_db
+            from src.core.db import obtenir_contexte_db
             from src.core.models import Match
 
             debut = date.today()
@@ -112,7 +112,7 @@ def charger_classement_avec_fallback(championnat: str) -> tuple[list[dict], str]
 
     # Fallback BD
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import Equipe
 
         with obtenir_contexte_db() as session:
@@ -169,7 +169,7 @@ def charger_historique_equipe_avec_fallback(nom_equipe: str) -> tuple[list[dict]
 
     # Fallback BD
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import Match
 
         with obtenir_contexte_db() as session:
@@ -225,7 +225,7 @@ def charger_tirages_loto_avec_fallback(limite: int = 50) -> tuple[list[dict], st
 
     # Fallback BD
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import TirageLoto
 
         with obtenir_contexte_db() as session:
@@ -272,7 +272,7 @@ def charger_stats_loto_avec_fallback(limite: int = 50) -> tuple[dict, str]:
 
     # Fallback BD
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import StatistiquesLoto
 
         with obtenir_contexte_db() as session:

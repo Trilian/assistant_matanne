@@ -6,7 +6,7 @@ Gestion du cache applicatif et cache IA
 import streamlit as st
 
 from src.core.ai.cache import CacheIA as SemanticCache
-from src.core.cache import Cache
+from src.core.caching import Cache
 from src.ui.feedback import afficher_succes
 
 

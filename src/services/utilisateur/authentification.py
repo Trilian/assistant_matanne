@@ -3,13 +3,16 @@ Service d'authentification Supabase.
 
 Fonctionnalités:
 - Inscription/Connexion utilisateurs
-- Gestion des sessions
+- Gestion des sessions (via SessionMixin)
+- Validation JWT (via TokenValidationMixin)
+- Profils utilisateurs (via ProfileMixin)
 - Récupération mot de passe
-- Profils utilisateurs
-- Rôles et permissions
+- Rôles et permissions (via PermissionsMixin)
 
 Note: Les enums/schémas sont dans auth_schemas.py,
-la logique de permissions dans auth_permissions.py.
+la logique de permissions dans auth_permissions.py,
+la session dans auth_session.py, les tokens dans auth_token.py,
+le profil dans auth_profile.py.
 """
 
 import logging
@@ -17,9 +20,14 @@ from collections.abc import MutableMapping
 from datetime import datetime
 from typing import Any
 
+import streamlit as st
+
 # Ré-exports pour rétrocompatibilité
 from .auth_permissions import ROLE_PERMISSIONS, PermissionsMixin
+from .auth_profile import ProfileMixin
 from .auth_schemas import AuthResult, Permission, Role, UserProfile
+from .auth_session import SessionMixin
+from .auth_token import TokenValidationMixin
 
 logger = logging.getLogger(__name__)
 
@@ -29,15 +37,16 @@ logger = logging.getLogger(__name__)
 # -----------------------------------------------------------
 
 
-class AuthService(PermissionsMixin):
+class AuthService(PermissionsMixin, SessionMixin, TokenValidationMixin, ProfileMixin):
     """
     Service d'authentification utilisant Supabase Auth.
 
     Gère:
     - Inscription/Connexion
-    - Sessions persistantes
-    - Profils utilisateurs
-    - Permissions (via PermissionsMixin)
+    - Sessions persistantes (SessionMixin)
+    - Validation JWT (TokenValidationMixin)
+    - Profils utilisateurs (ProfileMixin)
+    - Permissions (PermissionsMixin)
     """
 
     SESSION_KEY = "_auth_session"
@@ -56,8 +65,6 @@ class AuthService(PermissionsMixin):
     @staticmethod
     def _get_default_storage() -> MutableMapping[str, Any]:
         """Retourne le stockage par défaut (st.session_state)."""
-        import streamlit as st
-
         return st.session_state
 
     def _init_client(self):
@@ -346,258 +353,6 @@ class AuthService(PermissionsMixin):
                 message="Si cet email existe, vous recevrez un lien de réinitialisation.",
             )
 
-    # -----------------------------------------------------------
-    # SESSION
-    # -----------------------------------------------------------
-
-    def get_current_user(self) -> UserProfile | None:
-        """Retourne l'utilisateur actuellement connecté."""
-        return self._storage.get(self.USER_KEY)
-
-    def is_authenticated(self) -> bool:
-        """Vérifie si un utilisateur est connecté."""
-        return self.get_current_user() is not None
-
-    def require_auth(self) -> UserProfile | None:
-        """
-        Exige une authentification.
-
-        Affiche le formulaire de connexion si non authentifié.
-
-        Returns:
-            Utilisateur si authentifié, None sinon
-        """
-        user = self.get_current_user()
-
-        if user:
-            return user
-
-        # Afficher le formulaire de connexion
-        render_login_form()
-        return None
-
-    def _save_session(self, session: Any, user: UserProfile):
-        """Sauvegarde la session."""
-        self._storage[self.SESSION_KEY] = session
-        self._storage[self.USER_KEY] = user
-
-    def _clear_session(self):
-        """Efface la session."""
-        if self.SESSION_KEY in self._storage:
-            del self._storage[self.SESSION_KEY]
-        if self.USER_KEY in self._storage:
-            del self._storage[self.USER_KEY]
-
-    def refresh_session(self) -> bool:
-        """
-        Rafraîchit la session si nécessaire.
-
-        Returns:
-            True si session valide
-        """
-        if not self.is_configured:
-            return False
-
-        try:
-            session = self._storage.get(self.SESSION_KEY)
-
-            if session:
-                # Vérifier et rafraîchir le token
-                response = self._client.auth.obtenir_contexte_db()
-
-                if response:
-                    return True
-
-            return False
-
-        except Exception as e:
-            logger.debug(f"Session refresh: {e}")
-            return False
-
-    # -----------------------------------------------------------
-    # VALIDATION JWT (pour API REST)
-    # -----------------------------------------------------------
-
-    def validate_token(self, token: str) -> UserProfile | None:
-        """
-        Valide un token JWT Supabase et retourne l'utilisateur.
-
-        Args:
-            token: Token JWT Bearer
-
-        Returns:
-            UserProfile si valide, None sinon
-        """
-        if not self.is_configured:
-            logger.warning("Auth non configuré pour validation JWT")
-            return None
-
-        try:
-            # Utiliser l'API Supabase pour valider le token
-            self._client.auth._storage_key = token  # Temporaire
-            response = self._client.auth.get_user(token)
-
-            if response and response.user:
-                metadata = response.user.user_metadata or {}
-
-                return UserProfile(
-                    id=response.user.id,
-                    email=response.user.email or "",
-                    nom=metadata.get("nom", ""),
-                    prenom=metadata.get("prenom", ""),
-                    role=Role(metadata.get("role", "membre")),
-                    avatar_url=metadata.get("avatar_url"),
-                )
-
-            return None
-
-        except Exception as e:
-            logger.error(f"Erreur validation token JWT: {e}")
-            return None
-
-    def decode_jwt_payload(self, token: str) -> dict | None:
-        """
-        Décode le payload d'un JWT sans validation signature.
-        Utile pour debug ou extraction d'infos basiques.
-
-        Args:
-            token: Token JWT
-
-        Returns:
-            Payload décodé ou None
-        """
-        try:
-            import base64
-            import json
-
-            # JWT = header.payload.signature
-            parts = token.split(".")
-            if len(parts) != 3:
-                return None
-
-            # Décoder le payload (partie 2)
-            payload = parts[1]
-            # Ajouter padding si nécessaire
-            payload += "=" * (4 - len(payload) % 4)
-            decoded = base64.urlsafe_b64decode(payload)
-
-            return json.loads(decoded)
-
-        except Exception as e:
-            logger.debug(f"Erreur décodage JWT: {e}")
-            return None
-
-    # -----------------------------------------------------------
-    # MISE À JOUR PROFIL
-    # -----------------------------------------------------------
-
-    def update_profile(
-        self,
-        nom: str | None = None,
-        prenom: str | None = None,
-        avatar_url: str | None = None,
-        preferences: dict | None = None,
-    ) -> AuthResult:
-        """
-        Met à jour le profil de l'utilisateur connecté.
-
-        Args:
-            nom: Nouveau nom (optionnel)
-            prenom: Nouveau prénom (optionnel)
-            avatar_url: URL de l'avatar (optionnel)
-            preferences: Préférences utilisateur (optionnel)
-
-        Returns:
-            Résultat de la mise à jour
-        """
-        if not self.is_configured:
-            return AuthResult(
-                success=False, message="Service non configuré", error_code="NOT_CONFIGURED"
-            )
-
-        user = self.get_current_user()
-        if not user:
-            return AuthResult(success=False, message="Non connecté", error_code="NOT_AUTHENTICATED")
-
-        try:
-            # Construire les données à mettre à jour
-            update_data = {}
-
-            if nom is not None:
-                update_data["nom"] = nom
-            if prenom is not None:
-                update_data["prenom"] = prenom
-            if avatar_url is not None:
-                update_data["avatar_url"] = avatar_url
-            if preferences is not None:
-                update_data["preferences"] = preferences
-
-            if not update_data:
-                return AuthResult(success=True, message="Aucune modification", user=user)
-
-            # Mettre à jour via Supabase Auth
-            response = self._client.auth.update_user({"data": update_data})
-
-            if response and response.user:
-                # Mettre à jour le profil local
-                metadata = response.user.user_metadata or {}
-
-                updated_user = UserProfile(
-                    id=response.user.id,
-                    email=response.user.email or user.email,
-                    nom=metadata.get("nom", user.nom),
-                    prenom=metadata.get("prenom", user.prenom),
-                    role=Role(metadata.get("role", user.role.value)),
-                    avatar_url=metadata.get("avatar_url", user.avatar_url),
-                    preferences=metadata.get("preferences", {}),
-                    last_login=user.last_login,
-                    created_at=user.created_at,
-                )
-
-                # Mettre à jour la session
-                self._storage[self.USER_KEY] = updated_user
-
-                logger.info(f"Profil mis à jour: {user.email}")
-
-                return AuthResult(
-                    success=True, message="Profil mis à jour avec succès", user=updated_user
-                )
-
-            return AuthResult(success=False, message="Erreur lors de la mise à jour")
-
-        except Exception as e:
-            logger.error(f"Erreur update profile: {e}")
-            return AuthResult(success=False, message=f"Erreur: {str(e)}", error_code="UPDATE_ERROR")
-
-    def change_password(self, new_password: str) -> AuthResult:
-        """
-        Change le mot de passe de l'utilisateur connecté.
-
-        Args:
-            new_password: Nouveau mot de passe (min 6 caractères)
-
-        Returns:
-            Résultat du changement
-        """
-        if not self.is_configured:
-            return AuthResult(success=False, message="Service non configuré")
-
-        if len(new_password) < 6:
-            return AuthResult(success=False, message="Mot de passe trop court (min 6 caractères)")
-
-        try:
-            response = self._client.auth.update_user({"password": new_password})
-
-            if response:
-                logger.info("Mot de passe changé")
-                return AuthResult(success=True, message="Mot de passe changé avec succès")
-
-            return AuthResult(success=False, message="Erreur lors du changement")
-
-        except Exception as e:
-            logger.error(f"Erreur changement mot de passe: {e}")
-            return AuthResult(success=False, message=f"Erreur: {str(e)}")
-
 
 # -----------------------------------------------------------
 # COMPOSANTS UI — Rétrocompatibilité
@@ -672,6 +427,9 @@ __all__ = [
     "Permission",
     "ROLE_PERMISSIONS",
     "PermissionsMixin",
+    "SessionMixin",
+    "TokenValidationMixin",
+    "ProfileMixin",
     "render_login_form",
     "render_user_menu",
     "render_profile_settings",

@@ -2,50 +2,58 @@
 
 ## Vue d'ensemble
 
-Le dossier `src/services/` a été réorganisé en modules de façade pour améliorer l'organisation logique du code tout en maintenant la compatibilité avec les imports existants.
+Le dossier `src/services/` est organisé en modules par domaine métier avec des imports directs.
 
-## Nouvelle Structure
+## Structure Actuelle
 
-### 1. `cuisine/` - Services de cuisine et alimentation
-Regroupe tous les services liés à la gestion alimentaire:
+### Organisation par domaine
 
-```python
-from src.services.cuisine import (
-    # Recettes
-    RecetteService, get_recette_service,
-    RecipeImportService, get_recipe_import_service,
-    # Inventaire
-    InventaireService, get_inventaire_service,
-    # Courses
-    CoursesService, get_courses_service,
-    # Batch cooking
-    BatchCookingService, get_batch_cooking_service,
-    # Suggestions IA
-    ServiceSuggestions, obtenir_service_suggestions,
-)
+```
+src/services/
+├── base/               # Classes de base (BaseAIService, BaseService, async_utils)
+├── recettes/           # Gestion des recettes
+├── planning/           # Planning repas et activités
+├── inventaire/         # Gestion des stocks
+├── courses/            # Listes de courses
+├── budget/             # Gestion budgétaire
+├── batch_cooking/      # Préparation batch
+├── suggestions/        # Suggestions IA
+├── maison/             # Entretien, jardin, énergie
+├── calendrier/         # Calendrier familial + Google Calendar
+├── weather/            # Service météo
+├── utilisateur/        # Auth, historique, préférences
+├── notifications/      # Notifications push
+├── integrations/       # APIs externes (codes-barres, météo)
+├── jeux/               # Paris sportifs (isolé avec _internal/)
+├── garmin/             # Intégration Garmin
+├── rapports/           # Export PDF
+├── backup/             # Backup/Restore
+└── web/                # Services web/PWA
 ```
 
-### 2. `infrastructure/` - Services techniques transversaux
-Services d'infrastructure et support:
+### Imports directs (recommandé)
 
 ```python
-from src.services.infrastructure import (
-    # Notifications
-    NotificationService, obtenir_service_notifications,
-    PushNotificationService, get_push_notification_service,
-    # Rapports PDF
-    PDFExportService, get_pdf_export_service,
-    RapportsPDFService, get_rapports_pdf_service,
-    # Backup
-    BackupService, get_backup_service,
-    # Utilisateur
-    AuthService, get_auth_service,
-    ActionHistoryService, get_action_history_service,
-    UserPreferenceService, get_user_preference_service,
-)
+# Recettes
+from src.services.recettes import RecetteService, get_recette_service
+
+# Inventaire
+from src.services.inventaire import InventaireService, get_inventaire_service
+
+# Courses
+from src.services.courses import CoursesService, get_courses_service
+
+# Notifications
+from src.services.notifications import NotificationService, obtenir_service_notifications
+
+# Authentification
+from src.services.utilisateur import AuthService, get_auth_service
+
+# Météo
+from src.services.weather import ServiceMeteo, get_weather_service
 ```
 
-### 3. `integrations/meteo/` - Service météo transversal
+### Service météo transversal (`integrations/meteo/`)
 Utilisé par `maison/jardin` ET `famille/activités`:
 
 ```python
@@ -163,23 +171,65 @@ from src.ui.views import (
 ## Recommandations pour le futur
 
 ### Pour les nouveaux développements:
-1. Utiliser les nouveaux chemins de façade (`services.cuisine`, `services.infrastructure`)
+1. Utiliser les imports directs depuis les packages métier
 2. Placer tout code UI dans `src/ui/views/`
 3. Les services ne doivent JAMAIS importer `streamlit`
+4. Utiliser `sync_wrapper` pour créer des versions sync des méthodes async
 
-### Migration progressive:
-Les fichiers physiques n'ont pas été déplacés pour éviter de casser les imports existants. Une migration complète pourra être effectuée ultérieurement avec:
-1. Mise à jour de tous les imports dans le projet
-2. Déplacement physique des fichiers
-3. Suppression des anciens chemins
+### Utilitaire async/sync
+```python
+from src.services.base import sync_wrapper
+
+class MonService:
+    async def call_api(self, prompt: str) -> str:
+        ...
+
+    # Crée automatiquement la version sync
+    call_api_sync = sync_wrapper(call_api)
+```
+
+## Surveillance des gros packages
+
+### `jeux/` — 22 fichiers (~4140 lignes)
+
+| Fichier | Lignes | Domaine | Split possible? |
+|---------|--------|---------|-----------------|
+| `football_data.py` | 541 | Football | Extraire vers `jeux/football/` |
+| `prediction_service.py` | 468 | Prédictions | OK |
+| `backtest_service.py` | 451 | Backtesting | OK |
+| `series_service.py` | 433 | Séries | OK |
+| `loto_data.py` | 320 | Loto | Extraire vers `jeux/loto/` |
+
+**Recommandation**: Surveiller. Si le module football grandit, considérer un split `jeux/football/` et `jeux/loto/`.
+
+### `maison/` — 18 fichiers (~4855 lignes)
+
+| Fichier | Lignes | Domaine | Split possible? |
+|---------|--------|---------|-----------------|
+| `plan_jardin_service.py` | 453 | Jardin | Extraire vers `maison/jardin/` |
+| `assistant_ia.py` | 434 | IA | OK |
+| `temps_entretien_service.py` | 430 | Entretien | OK |
+| `energie_service.py` | 423 | Énergie | Extraire vers `maison/energie/` |
+| `jardin_service.py` | 357 | Jardin | Extraire vers `maison/jardin/` |
+| `entretien_service.py` | 336 | Entretien | OK |
+
+**Recommandation**: Surveiller. Si le jardin grandit, considérer un split `maison/jardin/` et `maison/entretien/`.
+
+### Seuils d'alerte
+
+| Métrique | Seuil actuel | Seuil d'alerte | Action |
+|----------|--------------|----------------|--------|
+| Fichiers par package | 22 max | >30 | Split en sous-packages |
+| Lignes par fichier | 541 max | >600 | Extraire en mixins |
+| Lignes totales package | ~4855 | >6000 | Restructurer |
 
 ## Tests de validation
 
 ```bash
-# Tester les nouveaux modules:
-python -c "from src.services.cuisine import *; print('OK')"
-python -c "from src.services.infrastructure import *; print('OK')"
-python -c "from src.services.integrations.meteo import *; print('OK')"
+# Tester les imports de base:
+python -c "from src.services.base import BaseAIService, sync_wrapper; print('OK')"
+python -c "from src.services.recettes import get_recette_service; print('OK')"
+python -c "from src.services.integrations.meteo import ServiceMeteo; print('OK')"
 
 # Tester l'UI extraite:
 python -c "from src.ui.views import *; print('OK')"

@@ -19,7 +19,7 @@ from typing import Any
 from sqlalchemy.orm import Session, joinedload
 
 from src.core.ai import obtenir_client_ia
-from src.core.cache import Cache
+from src.core.caching import Cache
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.errors_base import ErreurNonTrouve, ErreurValidation
 from src.core.models import (

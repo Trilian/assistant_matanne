@@ -44,7 +44,7 @@ def patched_db_context(test_db):
     def mock_context():
         yield test_db
 
-    with patch("src.core.database.obtenir_contexte_db", mock_context):
+    with patch("src.core.db.obtenir_contexte_db", mock_context):
         yield test_db
 
 

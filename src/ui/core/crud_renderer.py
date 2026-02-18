@@ -7,7 +7,7 @@ from typing import Any
 
 import streamlit as st
 
-from src.core.cache import Cache
+from src.core.caching import Cache
 from src.ui.components import barre_recherche, boutons_export, etat_vide, pagination
 from src.ui.feedback import afficher_succes
 
@@ -393,6 +393,12 @@ class ModuleUIBase:
                 result[field_key] = getattr(item, field_key)
 
         return result
+
+    # ═══════════════════════════════════════════════════════
+    # ALIAS FRANÇAIS
+    # ═══════════════════════════════════════════════════════
+
+    afficher = render
 
 
 # ═══════════════════════════════════════════════════════════

@@ -17,7 +17,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.core.ai import ClientIA
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.models import HouseExpense
 from src.services.base import BaseAIService
 

@@ -10,6 +10,32 @@ Exports:
 - Utils: Fonctions utilitaires pures
 """
 
+from .alertes_meteo import (
+    calculate_average_temperature,
+    calculate_feels_like,
+    calculate_temperature_amplitude,
+    celsius_to_fahrenheit,
+    detect_all_alerts,
+    detect_canicule_alert,
+    detect_gel_alert,
+    detect_pluie_forte_alert,
+    detect_uv_alert,
+    detect_vent_fort_alert,
+    fahrenheit_to_celsius,
+)
+from .arrosage import (
+    calculate_watering_need,
+    detect_drought_risk,
+)
+from .parsing import (
+    parse_open_meteo_daily,
+    validate_coordinates,
+)
+from .saisons import (
+    format_weather_summary,
+    get_gardening_advice_for_weather,
+    get_season,
+)
 from .service import (
     AlerteMeteo,
     ConseilJardin,
@@ -29,11 +55,10 @@ from .service import (
     # UI (thin wrapper → src.ui.views.meteo)
     render_weather_garden_ui,
 )
-from .utils import (
+from .weather_codes import (
     DIRECTIONS_CARDINALES,
     SEUIL_CANICULE,
     SEUIL_CANICULE_SEVERE,
-    # Constantes
     SEUIL_GEL,
     SEUIL_GEL_SEVERE,
     SEUIL_PLUIE_FORTE,
@@ -44,33 +69,9 @@ from .utils import (
     SEUIL_VENT_FORT,
     SEUIL_VENT_TEMPETE,
     WEATHERCODES,
-    # Températures
-    calculate_average_temperature,
-    calculate_feels_like,
-    calculate_temperature_amplitude,
-    # Arrosage
-    calculate_watering_need,
-    celsius_to_fahrenheit,
     degrees_from_direction,
-    detect_all_alerts,
-    detect_canicule_alert,
-    detect_drought_risk,
-    # Alertes
-    detect_gel_alert,
-    detect_pluie_forte_alert,
-    detect_uv_alert,
-    detect_vent_fort_alert,
-    # Conversion
     direction_from_degrees,
-    fahrenheit_to_celsius,
-    format_weather_summary,
     get_arrosage_factor,
-    get_gardening_advice_for_weather,
-    # Conseils
-    get_season,
-    # Parsing API
-    parse_open_meteo_daily,
-    validate_coordinates,
     weathercode_to_condition,
     weathercode_to_icon,
 )

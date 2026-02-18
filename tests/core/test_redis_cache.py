@@ -17,16 +17,16 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.core import redis_cache
+from src.core.caching import redis
 
 
 @pytest.mark.unit
 def test_import_redis_cache():
     """Vérifie que le module redis_cache s'importe sans erreur."""
-    assert hasattr(redis_cache, "CacheRedis") or hasattr(redis_cache, "__file__")
+    assert hasattr(redis, "CacheRedis") or hasattr(redis_cache, "__file__")
 
 
-from src.core.redis_cache import (
+from src.core.caching.redis import (
     CacheMemoire,
     CacheRedis,
     ConfigurationRedis,
@@ -233,7 +233,7 @@ class TestRedisCache:
         assert stats["errors"] == 0
 
     @pytest.mark.unit
-    @patch("src.core.redis_cache.REDIS_DISPONIBLE", False)
+    @patch("src.core.caching.redis.REDIS_DISPONIBLE", False)
     def test_fallback_to_memory(self):
         """Test fallback quand Redis indisponible."""
         cache = CacheRedis()
@@ -706,10 +706,10 @@ class TestCacheRedisWithMockedRedis:
 
     @pytest.mark.skip(reason="Nécessite refactoring du mock redis - redis importé dans try/except")
     @pytest.mark.unit
-    @patch("src.core.redis_cache.REDIS_DISPONIBLE", True)
+    @patch("src.core.caching.redis.REDIS_DISPONIBLE", True)
     def test_connect_with_redis_available(self):
         """Test connexion avec Redis disponible mais connection échoue."""
-        with patch("src.core.redis_cache.redis") as mock_redis:
+        with patch("src.core.caching.redis.redis") as mock_redis:
             mock_redis.Redis.return_value.ping.side_effect = Exception("Connection refused")
 
             cache = CacheRedis()
@@ -719,10 +719,10 @@ class TestCacheRedisWithMockedRedis:
 
     @pytest.mark.skip(reason="Nécessite refactoring du mock redis - redis importé dans try/except")
     @pytest.mark.unit
-    @patch("src.core.redis_cache.REDIS_DISPONIBLE", True)
+    @patch("src.core.caching.redis.REDIS_DISPONIBLE", True)
     def test_get_with_redis_error(self):
         """Test get avec erreur Redis."""
-        with patch("src.core.redis_cache.redis") as mock_redis:
+        with patch("src.core.caching.redis.redis") as mock_redis:
             mock_instance = MagicMock()
             mock_instance.ping.return_value = True
             mock_instance.get.side_effect = Exception("Redis error")
@@ -738,10 +738,10 @@ class TestCacheRedisWithMockedRedis:
 
     @pytest.mark.skip(reason="Nécessite refactoring du mock redis - redis importé dans try/except")
     @pytest.mark.unit
-    @patch("src.core.redis_cache.REDIS_DISPONIBLE", True)
+    @patch("src.core.caching.redis.REDIS_DISPONIBLE", True)
     def test_set_with_redis_error(self):
         """Test set avec erreur Redis."""
-        with patch("src.core.redis_cache.redis") as mock_redis:
+        with patch("src.core.caching.redis.redis") as mock_redis:
             mock_instance = MagicMock()
             mock_instance.ping.return_value = True
             mock_instance.setex.side_effect = Exception("Redis error")
@@ -756,7 +756,7 @@ class TestCacheRedisWithMockedRedis:
             assert cache._stats["errors"] > 0 or cache._stats["fallback_used"] > 0
 
     @pytest.mark.unit
-    @patch("src.core.redis_cache.REDIS_DISPONIBLE", True)
+    @patch("src.core.caching.redis.REDIS_DISPONIBLE", True)
     def test_set_with_tags_redis(self):
         """Test set avec tags sur Redis."""
         mock_redis_instance = MagicMock()
@@ -774,7 +774,7 @@ class TestCacheRedisWithMockedRedis:
         mock_redis_instance.sadd.assert_called()
 
     @pytest.mark.unit
-    @patch("src.core.redis_cache.REDIS_DISPONIBLE", True)
+    @patch("src.core.caching.redis.REDIS_DISPONIBLE", True)
     def test_invalidate_tag_redis(self):
         """Test invalidation tag avec Redis."""
         mock_redis_instance = MagicMock()
@@ -790,7 +790,7 @@ class TestCacheRedisWithMockedRedis:
         assert count == 2
 
     @pytest.mark.unit
-    @patch("src.core.redis_cache.REDIS_DISPONIBLE", True)
+    @patch("src.core.caching.redis.REDIS_DISPONIBLE", True)
     def test_invalidate_tag_empty_redis(self):
         """Test invalidation tag sans clés."""
         mock_redis_instance = MagicMock()
@@ -804,7 +804,7 @@ class TestCacheRedisWithMockedRedis:
         assert count == 0
 
     @pytest.mark.unit
-    @patch("src.core.redis_cache.REDIS_DISPONIBLE", True)
+    @patch("src.core.caching.redis.REDIS_DISPONIBLE", True)
     def test_invalidate_pattern_redis(self):
         """Test invalidation pattern avec Redis."""
         mock_redis_instance = MagicMock()
@@ -819,7 +819,7 @@ class TestCacheRedisWithMockedRedis:
         assert count == 2
 
     @pytest.mark.unit
-    @patch("src.core.redis_cache.REDIS_DISPONIBLE", True)
+    @patch("src.core.caching.redis.REDIS_DISPONIBLE", True)
     def test_clear_redis(self):
         """Test clear avec Redis."""
         mock_redis_instance = MagicMock()
@@ -834,7 +834,7 @@ class TestCacheRedisWithMockedRedis:
         assert count == 2
 
     @pytest.mark.unit
-    @patch("src.core.redis_cache.REDIS_DISPONIBLE", True)
+    @patch("src.core.caching.redis.REDIS_DISPONIBLE", True)
     def test_stats_with_redis(self):
         """Test stats avec Redis connecté."""
         mock_redis_instance = MagicMock()
@@ -851,7 +851,7 @@ class TestCacheRedisWithMockedRedis:
         assert stats["keys_count"] == 100
 
     @pytest.mark.unit
-    @patch("src.core.redis_cache.REDIS_DISPONIBLE", True)
+    @patch("src.core.caching.redis.REDIS_DISPONIBLE", True)
     def test_health_check_with_redis(self):
         """Test health_check avec Redis."""
         mock_redis_instance = MagicMock()
@@ -867,7 +867,7 @@ class TestCacheRedisWithMockedRedis:
         assert result["connected"] is True
 
     @pytest.mark.unit
-    @patch("src.core.redis_cache.REDIS_DISPONIBLE", True)
+    @patch("src.core.caching.redis.REDIS_DISPONIBLE", True)
     def test_health_check_redis_error(self):
         """Test health_check avec erreur Redis."""
         mock_redis_instance = MagicMock()
@@ -903,7 +903,7 @@ class TestAvecCacheRedisDecorateur:
     @pytest.mark.unit
     def test_decorator_basic_caching(self):
         """Test décorateur cache basique."""
-        from src.core.redis_cache import avec_cache_redis
+        from src.core.caching.redis import avec_cache_redis
 
         call_count = 0
 
@@ -924,7 +924,7 @@ class TestAvecCacheRedisDecorateur:
     @pytest.mark.unit
     def test_decorator_with_prefix(self):
         """Test décorateur avec préfixe."""
-        from src.core.redis_cache import avec_cache_redis
+        from src.core.caching.redis import avec_cache_redis
 
         @avec_cache_redis(ttl=60, key_prefix="myprefix")
         def my_function(x):
@@ -937,7 +937,7 @@ class TestAvecCacheRedisDecorateur:
     @pytest.mark.unit
     def test_decorator_with_tags(self):
         """Test décorateur avec tags."""
-        from src.core.redis_cache import avec_cache_redis
+        from src.core.caching.redis import avec_cache_redis
 
         @avec_cache_redis(ttl=60, tags=["tag1", "tag2"])
         def tagged_function(x):
@@ -950,7 +950,7 @@ class TestAvecCacheRedisDecorateur:
     @pytest.mark.unit
     def test_decorator_with_custom_key_builder(self):
         """Test décorateur avec key_builder custom."""
-        from src.core.redis_cache import avec_cache_redis
+        from src.core.caching.redis import avec_cache_redis
 
         def custom_key_builder(x):
             return f"custom:{x}"
@@ -966,7 +966,7 @@ class TestAvecCacheRedisDecorateur:
     @pytest.mark.unit
     def test_decorator_invalidate_method(self):
         """Test méthode invalidate du décorateur."""
-        from src.core.redis_cache import avec_cache_redis
+        from src.core.caching.redis import avec_cache_redis
 
         @avec_cache_redis(ttl=60, key_prefix="invalidate_test")
         def func_to_invalidate():
@@ -982,7 +982,7 @@ class TestAvecCacheRedisDecorateur:
     @pytest.mark.unit
     def test_decorator_with_kwargs(self):
         """Test décorateur avec arguments nommés."""
-        from src.core.redis_cache import avec_cache_redis
+        from src.core.caching.redis import avec_cache_redis
 
         @avec_cache_redis(ttl=60)
         def func_with_kwargs(a, b=10):
@@ -1003,7 +1003,7 @@ class TestObteniCacheRedisFactory:
 
     def setup_method(self):
         """Reset global et singleton."""
-        import src.core.redis_cache as module
+        import src.core.caching.redis as module
 
         module._cache_instance = None
         CacheRedis._instance = None
@@ -1011,7 +1011,7 @@ class TestObteniCacheRedisFactory:
 
     def teardown_method(self):
         """Cleanup."""
-        import src.core.redis_cache as module
+        import src.core.caching.redis as module
 
         module._cache_instance = None
         CacheRedis._instance = None
@@ -1020,7 +1020,7 @@ class TestObteniCacheRedisFactory:
     @pytest.mark.unit
     def test_obtenir_cache_redis_returns_instance(self):
         """Test factory retourne une instance."""
-        from src.core.redis_cache import obtenir_cache_redis
+        from src.core.caching.redis import obtenir_cache_redis
 
         cache = obtenir_cache_redis()
 
@@ -1030,7 +1030,7 @@ class TestObteniCacheRedisFactory:
     @pytest.mark.unit
     def test_obtenir_cache_redis_singleton(self):
         """Test factory retourne singleton."""
-        from src.core.redis_cache import obtenir_cache_redis
+        from src.core.caching.redis import obtenir_cache_redis
 
         cache1 = obtenir_cache_redis()
         cache2 = obtenir_cache_redis()

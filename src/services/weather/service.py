@@ -28,7 +28,7 @@ from src.core.models import (
 )
 
 from .meteo_jardin import MeteoJardinMixin
-from .utils import (
+from .weather_codes import (
     direction_from_degrees,
     weathercode_to_condition,
     weathercode_to_icon,
@@ -626,6 +626,7 @@ def get_weather_service() -> ServiceMeteo:
 def get_weather_garden_service() -> ServiceMeteo:
     """Factory pour le service météo jardin (alias rétrocompatibilité)."""
     return obtenir_service_meteo()
+
 
 # ═══════════════════════════════════════════════════════════
 # ALIAS UI RÉTROCOMPATIBILITÉ

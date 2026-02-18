@@ -4,7 +4,6 @@ Version améliorée avec gestion automatique des quotas et retry
 """
 
 import asyncio
-import concurrent.futures
 import logging
 from datetime import datetime
 
@@ -13,6 +12,7 @@ from pydantic import BaseModel, ValidationError
 from src.core.ai import AnalyseurIA, ClientIA, RateLimitIA
 from src.core.ai.cache import CacheIA
 from src.core.errors import ErreurLimiteDebit, gerer_erreurs
+from src.services.base.async_utils import sync_wrapper
 
 logger = logging.getLogger(__name__)
 
@@ -200,61 +200,8 @@ class BaseAIService:
 
             return None
 
-    def call_with_parsing_sync(
-        self,
-        prompt: str,
-        response_model: type[BaseModel],
-        system_prompt: str = "",
-        temperature: float | None = None,
-        max_tokens: int = 1000,
-        use_cache: bool = True,
-        fallback: dict | None = None,
-    ) -> BaseModel | None:
-        """
-        Version synchrone de call_with_parsing
-
-        Wraps the async call_with_parsing in asyncio.run() for use from sync contexts
-        like Streamlit.
-        """
-        # Essayer d'obtenir la boucle courante
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = None
-
-        if loop is not None:
-            # Si une boucle d'événements est en cours, utiliser run_until_complete
-            # Note: Cela peut échouer si on est déjà dans une coroutine
-            logger.warning("Event loop is running, trying to execute coroutine...")
-            import concurrent.futures
-
-            with concurrent.futures.ThreadPoolExecutor() as pool:
-                future = pool.submit(
-                    asyncio.run,
-                    self.call_with_parsing(
-                        prompt=prompt,
-                        response_model=response_model,
-                        system_prompt=system_prompt,
-                        temperature=temperature,
-                        max_tokens=max_tokens,
-                        use_cache=use_cache,
-                        fallback=fallback,
-                    ),
-                )
-                return future.result()
-
-        # Pas de boucle d'événements, créer une nouvelle et exécuter
-        return asyncio.run(
-            self.call_with_parsing(
-                prompt=prompt,
-                response_model=response_model,
-                system_prompt=system_prompt,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                use_cache=use_cache,
-                fallback=fallback,
-            )
-        )
+    # Version synchrone auto-générée via sync_wrapper
+    call_with_parsing_sync = sync_wrapper(call_with_parsing)
 
     @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=[])
     async def call_with_list_parsing(
@@ -305,61 +252,8 @@ class BaseAIService:
             logger.error(f"❌ Erreur parsing liste: {e}")
             return []
 
-    def call_with_list_parsing_sync(
-        self,
-        prompt: str,
-        item_model: type[BaseModel],
-        list_key: str = "items",
-        system_prompt: str = "",
-        temperature: float | None = None,
-        max_tokens: int = 2000,
-        use_cache: bool = True,
-        max_items: int | None = None,
-    ) -> list[BaseModel]:
-        """
-        Version synchrone de call_with_list_parsing
-
-        Wraps the async call_with_list_parsing in asyncio.run() for use from sync contexts
-        like Streamlit.
-        """
-        # Essayer d'obtenir la boucle courante
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = None
-
-        if loop is not None:
-            # Si une boucle d'événements est en cours, utiliser un thread
-            logger.warning("Event loop is running, trying to execute coroutine in thread...")
-            with concurrent.futures.ThreadPoolExecutor() as pool:
-                future = pool.submit(
-                    asyncio.run,
-                    self.call_with_list_parsing(
-                        prompt=prompt,
-                        item_model=item_model,
-                        list_key=list_key,
-                        system_prompt=system_prompt,
-                        temperature=temperature,
-                        max_tokens=max_tokens,
-                        use_cache=use_cache,
-                        max_items=max_items,
-                    ),
-                )
-                return future.result()
-
-        # Pas de boucle d'événements, créer une nouvelle et exécuter
-        return asyncio.run(
-            self.call_with_list_parsing(
-                prompt=prompt,
-                item_model=item_model,
-                list_key=list_key,
-                system_prompt=system_prompt,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                use_cache=use_cache,
-                max_items=max_items,
-            )
-        )
+    # Version synchrone auto-générée via sync_wrapper
+    call_with_list_parsing_sync = sync_wrapper(call_with_list_parsing)
 
     @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
     async def call_with_json_parsing(
@@ -430,55 +324,8 @@ class BaseAIService:
             logger.error(f"❌ Erreur parsing inattendue: {e}")
             return None
 
-    def call_with_json_parsing_sync(
-        self,
-        prompt: str,
-        response_model: type[BaseModel],
-        system_prompt: str = "",
-        temperature: float | None = None,
-        max_tokens: int = 2000,
-        use_cache: bool = True,
-    ) -> BaseModel | None:
-        """
-        Version synchrone de call_with_json_parsing.
-
-        Wraps the async call_with_json_parsing in asyncio.run() for use from sync contexts
-        like Streamlit.
-        """
-        # Essayer d'obtenir la boucle courante
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = None
-
-        if loop is not None:
-            # Si une boucle d'événements est en cours, utiliser un thread
-            logger.warning("Event loop is running, trying to execute coroutine in thread...")
-            with concurrent.futures.ThreadPoolExecutor() as pool:
-                future = pool.submit(
-                    asyncio.run,
-                    self.call_with_json_parsing(
-                        prompt=prompt,
-                        response_model=response_model,
-                        system_prompt=system_prompt,
-                        temperature=temperature,
-                        max_tokens=max_tokens,
-                        use_cache=use_cache,
-                    ),
-                )
-                return future.result()
-
-        # Pas de boucle d'événements, créer une nouvelle et exécuter
-        return asyncio.run(
-            self.call_with_json_parsing(
-                prompt=prompt,
-                response_model=response_model,
-                system_prompt=system_prompt,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                use_cache=use_cache,
-            )
-        )
+    # Version synchrone auto-générée via sync_wrapper
+    call_with_json_parsing_sync = sync_wrapper(call_with_json_parsing)
 
     # ═══════════════════════════════════════════════════════════
     # HELPERS PROMPTS STRUCTURÉS

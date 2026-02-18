@@ -6,7 +6,7 @@ import logging
 
 import streamlit as st
 
-from src.core.database import verifier_connexion
+from src.core.db import verifier_connexion
 from src.core.state import GestionnaireEtat, obtenir_etat
 
 logger = logging.getLogger(__name__)

@@ -38,35 +38,31 @@ from src.services.backup.types import (
 )
 
 # Fonctions utilitaires
-from src.services.backup.utils import (
-    # Statistiques
-    calculate_backup_stats,
-    # Checksums
+from src.services.backup.utils_identity import (
     calculate_checksum,
-    compare_backup_stats,
-    deserialize_value,
-    filter_and_order_tables,
     format_file_size,
-    # Identifiants
     generate_backup_id,
     get_backup_filename,
-    # Rotation
-    get_backups_to_rotate,
-    # Ordre de restauration
-    get_restore_order,
-    # Fichiers
-    is_compressed_file,
     is_valid_backup_id,
-    # Sérialisation
-    model_to_dict,
     parse_backup_filename,
     parse_backup_id,
-    serialize_value,
-    should_run_backup,
-    validate_backup_metadata,
-    # Validation
-    validate_backup_structure,
     verify_checksum,
+)
+from src.services.backup.utils_operations import (
+    calculate_backup_stats,
+    compare_backup_stats,
+    filter_and_order_tables,
+    get_backups_to_rotate,
+    get_restore_order,
+    should_run_backup,
+)
+from src.services.backup.utils_serialization import (
+    deserialize_value,
+    is_compressed_file,
+    model_to_dict,
+    serialize_value,
+    validate_backup_metadata,
+    validate_backup_structure,
 )
 
 __all__ = [

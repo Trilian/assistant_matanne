@@ -1,0 +1,33 @@
+============================= test session starts =============================
+collected 802 items
+
+tests\services\backup\test_service.py .................................. [  4%]
+.................................................                        [ 10%]
+tests\services\backup\test_types.py .................................... [ 14%]
+                                                                         [ 14%]
+tests\services\backup\test_utils.py .................................... [ 19%]
+...............................................................          [ 27%]
+tests\services\garmin\test_service.py .................................. [ 31%]
+.......                                                                  [ 32%]
+tests\services\garmin\test_utils.py .................................... [ 36%]
+................................................                         [ 42%]
+tests\services\notifications\test_inventaire.py ........................ [ 45%]
+.....                                                                    [ 46%]
+tests\services\notifications\test_notif_ntfy.py ........................ [ 49%]
+...........                                                              [ 50%]
+tests\services\notifications\test_notif_web.py ......................... [ 53%]
+.....................................                                    [ 58%]
+tests\services\notifications\test_ui.py ............                     [ 59%]
+tests\services\notifications\test_utils.py ............................. [ 63%]
+...............................                                          [ 67%]
+tests\services\recettes\test_import_url.py ............................. [ 71%]
+.................................................                        [ 77%]
+tests\services\recettes\test_service.py ................................ [ 81%]
+....................................................                     [ 87%]
+tests\services\recettes\test_types.py ............................       [ 91%]
+tests\services\recettes\test_utils.py .................................. [ 95%]
+.....................................                                    [100%]
+
+============================ 802 passed in 23.46s =============================
+
+---

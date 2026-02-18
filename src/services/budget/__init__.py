@@ -21,6 +21,7 @@ from .schemas import (
 from .service import (
     BudgetService,
     get_budget_service,
+    obtenir_service_budget,
 )
 from .utils import (
     # Agrégation
@@ -68,6 +69,7 @@ __all__ = [
     # Service
     "BudgetService",
     "get_budget_service",
+    "obtenir_service_budget",
     # Utils - Conversion
     "db_entry_to_depense",
     "db_entries_to_depenses",

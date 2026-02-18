@@ -54,11 +54,8 @@ from src.services.backup.types import (
     BackupMetadata,
     BackupResult,
 )
-from src.services.backup.utils import (
-    calculate_checksum,
-    generate_backup_id,
-    model_to_dict,
-)
+from src.services.backup.utils_identity import calculate_checksum, generate_backup_id
+from src.services.backup.utils_serialization import model_to_dict
 
 logger = logging.getLogger(__name__)
 

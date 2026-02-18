@@ -10,7 +10,7 @@ from datetime import date as date_type
 
 from sqlalchemy.orm import Session
 
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.decorators import avec_cache, avec_session_db
 
 from .schemas import (

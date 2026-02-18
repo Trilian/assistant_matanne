@@ -8,7 +8,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.models import Recette, Repas
 from src.services.recettes import get_recette_service
 
@@ -270,7 +270,7 @@ def formater_quantite(quantite: float | int | str) -> str:
         except (ValueError, TypeError):
             return str(quantite)
 
-    if isinstance(quantite, (int, float)):
+    if isinstance(quantite, int | float):
         if quantite == int(quantite):
             return str(int(quantite))
         else:

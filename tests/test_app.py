@@ -62,7 +62,7 @@ class TestAppConfiguration:
 
     def test_database_connection_verification(self):
         """Teste la vérification de la connexion à la base de données"""
-        from src.core.database import verifier_connexion
+        from src.core.db import verifier_connexion
 
         try:
             # La vérification peut échouer en test, c'est OK
@@ -99,7 +99,7 @@ class TestStateManagement:
     @patch("streamlit.session_state", {})
     def test_cache_functionality(self):
         """Teste la fonctionnalité de cache"""
-        from src.core.cache import Cache
+        from src.core.caching.cache import Cache
 
         # Test que la classe Cache existe et peut être instanciée
         assert Cache is not None
@@ -162,13 +162,13 @@ class TestErrorHandling:
                 # Acceptable en test
                 pass
 
-    @patch("src.core.database.verifier_connexion")
+    @patch("src.core.db.verifier_connexion")
     def test_database_connection_error_handling(self, mock_verify):
         """Teste la gestion des erreurs de connexion BD"""
         mock_verify.side_effect = Exception("Connexion échouée")
 
         try:
-            from src.core.database import verifier_connexion
+            from src.core.db import verifier_connexion
 
             verifier_connexion()
         except Exception as e:

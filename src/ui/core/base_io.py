@@ -169,6 +169,15 @@ class ServiceIOBase:
 
         return transformed
 
+    # ═══════════════════════════════════════════════════════
+    # ALIAS FRANÇAIS
+    # ═══════════════════════════════════════════════════════
+
+    vers_csv = to_csv
+    vers_json = to_json
+    depuis_csv = from_csv
+    depuis_json = from_json
+
 
 # ═══════════════════════════════════════════════════════════
 # FACTORY

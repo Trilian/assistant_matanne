@@ -387,6 +387,26 @@ class ConstructeurFormulaire:
         """Récupère données formulaire"""
         return self.data
 
+    # ═══════════════════════════════════════════════════════
+    # ALIAS FRANÇAIS
+    # ═══════════════════════════════════════════════════════
+
+    # Alias méthodes d'ajout
+    ajouter_texte = add_text
+    ajouter_zone_texte = add_textarea
+    ajouter_nombre = add_number
+    ajouter_selection = add_select
+    ajouter_multiselection = add_multiselect
+    ajouter_case = add_checkbox
+    ajouter_date = add_date
+    ajouter_curseur = add_slider
+    ajouter_separateur = add_divider
+    ajouter_entete = add_header
+
+    # Alias render/data
+    afficher = render
+    obtenir_donnees = get_data
+
 
 # Alias pour compatibilité
 FormBuilder = ConstructeurFormulaire

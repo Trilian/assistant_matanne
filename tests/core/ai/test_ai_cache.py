@@ -271,7 +271,7 @@ class TestCacheIANettoyerExpires:
         """Test nettoyer_expires appelle Cache.nettoyer_expires."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.ai.cache import CacheIA
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             with patch.object(Cache, "nettoyer_expires") as mock_nettoyer:
                 CacheIA.nettoyer_expires()
@@ -281,7 +281,7 @@ class TestCacheIANettoyerExpires:
         """Test nettoyer_expires avec âge personnalisé."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.ai.cache import CacheIA
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             age_custom = 3600
             with patch.object(Cache, "nettoyer_expires") as mock_nettoyer:
@@ -294,7 +294,7 @@ class TestCacheIANettoyerExpires:
 
         with patch("streamlit.session_state", mock_session_state):
             from src.core.ai.cache import CacheIA
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             with patch.object(Cache, "nettoyer_expires"):
                 with caplog.at_level(logging.INFO):

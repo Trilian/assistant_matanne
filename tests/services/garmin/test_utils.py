@@ -11,7 +11,7 @@ Couvre:
 
 from datetime import date, datetime, timedelta
 
-from src.services.garmin.utils import (
+from src.services.garmin import (
     build_api_params,
     calculate_activity_stats,
     calculate_daily_stats,

@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from src.core.cache import Cache
+from src.core.caching.cache import Cache
 from src.core.decorators import (
     avec_cache,
     avec_gestion_erreurs,
@@ -649,7 +649,7 @@ class TestAvecValidationAdvanced:
 class TestAvecSessionDbAdvanced:
     """Tests avancés pour @avec_session_db."""
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_session_injected_as_kwarg(self, mock_context):
         """Test que la session est injectée comme kwarg 'db'."""
         mock_session = Mock()
@@ -663,7 +663,7 @@ class TestAvecSessionDbAdvanced:
         result = query_with_session("SELECT 1")
         assert result is True
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_session_not_injected_if_already_provided(self, mock_context):
         """Test que la session n'est pas réinjectée si déjà fournie."""
         mock_session = Mock()

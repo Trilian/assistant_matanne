@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.services.backup.types import BackupMetadata, RestoreResult
-from src.services.backup.utils import filter_and_order_tables
+from src.services.backup.utils_operations import filter_and_order_tables
 
 if TYPE_CHECKING:
     from src.services.backup.types import BackupConfig

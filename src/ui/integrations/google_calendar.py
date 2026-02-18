@@ -205,3 +205,12 @@ def render_quick_sync_button():
                 st.toast(f"✅ {result.events_imported} événements synchronisés")
             else:
                 st.toast(f"❌ Erreur sync: {result.message}")
+
+
+# ═══════════════════════════════════════════════════════
+# ALIAS FRANÇAIS
+# ═══════════════════════════════════════════════════════
+
+afficher_config_google_calendar = render_google_calendar_config
+afficher_statut_synchronisation = render_sync_status
+afficher_bouton_sync_rapide = render_quick_sync_button

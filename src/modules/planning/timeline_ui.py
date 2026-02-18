@@ -12,7 +12,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.core.constants import JOURS_SEMAINE
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.models import CalendarEvent, FamilyActivity, Repas
 
 # Couleurs par type d'événement

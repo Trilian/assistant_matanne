@@ -15,7 +15,7 @@ from decimal import Decimal
 from sqlalchemy.orm import Session
 
 from src.core.ai import ClientIA
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.models import Project
 from src.services.base import BaseAIService
 

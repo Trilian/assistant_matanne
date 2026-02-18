@@ -477,7 +477,7 @@ def create_streamlit_mock(session_state_data: dict = None):
 def clear_cache():
     """Clear cache before/after each test."""
     try:
-        from src.core.cache import Cache
+        from src.core.caching.cache import Cache
 
         # Clear before test - catch errors when st.session_state is unavailable
         try:
@@ -517,8 +517,8 @@ def patch_db_context(db):
         yield db
 
     # Patch both French and English function names
-    with patch("src.core.database.obtenir_contexte_db", mock_db_context):
-        with patch("src.core.database.obtenir_contexte_db", mock_db_context):
+    with patch("src.core.db.obtenir_contexte_db", mock_db_context):
+        with patch("src.core.db.obtenir_contexte_db", mock_db_context):
             yield db
 
 

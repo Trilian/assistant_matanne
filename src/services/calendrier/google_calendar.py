@@ -15,7 +15,7 @@ from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.models import (
     CalendarEvent,
     CalendrierExterne,

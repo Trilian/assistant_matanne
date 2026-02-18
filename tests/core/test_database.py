@@ -15,7 +15,7 @@ import pytest
 from sqlalchemy.exc import DatabaseError, OperationalError
 from sqlalchemy.orm import Session
 
-from src.core.database import (
+from src.core.db import (
     GestionnaireMigrations,
     initialiser_database,
     obtenir_contexte_db,
@@ -407,7 +407,7 @@ class TestDatabaseInfos:
             mock_moteur.side_effect = Exception("Test error")
             with patch("src.core.db.utils.st.cache_data", lambda **kw: lambda f: f):
                 # Ré-importer la fonction pour bypass le cache
-                from src.core.database import obtenir_infos_db as get_infos
+                from src.core.db import obtenir_infos_db as get_infos
 
                 # Le test vérifie que la fonction est callable
                 assert callable(get_infos)
@@ -639,7 +639,7 @@ class TestCreerToutesTableses:
 
     def test_creer_toutes_tables_skips_production(self):
         """Test que creer_toutes_tables est ignoré en production."""
-        from src.core.database import creer_toutes_tables
+        from src.core.db import creer_toutes_tables
 
         with patch("src.core.db.utils.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock()
@@ -650,7 +650,7 @@ class TestCreerToutesTableses:
 
     def test_creer_toutes_tables_creates_in_dev(self):
         """Test création tables en dev."""
-        from src.core.database import creer_toutes_tables
+        from src.core.db import creer_toutes_tables
 
         mock_engine = MagicMock()
         mock_base = MagicMock()

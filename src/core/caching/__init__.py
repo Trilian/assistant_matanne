@@ -13,6 +13,7 @@ Ce module fournit:
 """
 
 from .base import EntreeCache, StatistiquesCache
+from .cache import Cache, cached, clear_all
 from .file import CacheFichierN3
 from .memory import CacheMemoireN1
 from .orchestrator import (
@@ -24,13 +25,16 @@ from .session import CacheSessionN2
 
 # Alias anglais pour compatibilité
 cache = obtenir_cache()
-cached = avec_cache_multi
 get_cache = obtenir_cache
 
 __all__ = [
     # Types
     "EntreeCache",
     "StatistiquesCache",
+    # Cache session simple
+    "Cache",
+    "cached",
+    "clear_all",
     # Caches par niveau
     "CacheMemoireN1",
     "CacheSessionN2",
@@ -41,6 +45,5 @@ __all__ = [
     "avec_cache_multi",
     # Alias
     "cache",
-    "cached",
     "get_cache",
 ]

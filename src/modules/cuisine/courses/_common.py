@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import streamlit as st
 
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.errors_base import ErreurValidation
 
 # Import du module logique métier séparé

@@ -322,8 +322,8 @@ class TestIndicateurSanteSysteme:
 
         assert indicateur_sante_systeme is not None
 
-    @patch("src.core.database.verifier_connexion", return_value=True)
-    @patch("src.core.cache_multi.obtenir_cache")
+    @patch("src.core.db.verifier_connexion", return_value=True)
+    @patch("src.core.caching.obtenir_cache")
     def test_all_ok(self, mock_cache, mock_db):
         """Test avec tout OK."""
         from src.ui.components import indicateur_sante_systeme
@@ -335,8 +335,8 @@ class TestIndicateurSanteSysteme:
         assert result["global"] == "ok"
         assert len(result["details"]) >= 1
 
-    @patch("src.core.database.verifier_connexion", return_value=False)
-    @patch("src.core.cache_multi.obtenir_cache")
+    @patch("src.core.db.verifier_connexion", return_value=False)
+    @patch("src.core.caching.obtenir_cache")
     def test_db_disconnected(self, mock_cache, mock_db):
         """Test avec DB déconnectée."""
         from src.ui.components import indicateur_sante_systeme
@@ -347,8 +347,8 @@ class TestIndicateurSanteSysteme:
 
         assert result["global"] == "error"
 
-    @patch("src.core.database.verifier_connexion", side_effect=Exception("DB Error"))
-    @patch("src.core.cache_multi.obtenir_cache")
+    @patch("src.core.db.verifier_connexion", side_effect=Exception("DB Error"))
+    @patch("src.core.caching.obtenir_cache")
     def test_db_exception(self, mock_cache, mock_db):
         """Test avec exception DB."""
         from src.ui.components import indicateur_sante_systeme
@@ -359,8 +359,8 @@ class TestIndicateurSanteSysteme:
 
         assert result["global"] == "error"
 
-    @patch("src.core.database.verifier_connexion", return_value=True)
-    @patch("src.core.cache_multi.obtenir_cache")
+    @patch("src.core.db.verifier_connexion", return_value=True)
+    @patch("src.core.caching.obtenir_cache")
     def test_cache_warning(self, mock_cache, mock_db):
         """Test avec cache en warning."""
         from src.ui.components import indicateur_sante_systeme
@@ -372,8 +372,8 @@ class TestIndicateurSanteSysteme:
         # Le global peut être ok ou warning selon cache
         assert result["global"] in ["ok", "warning"]
 
-    @patch("src.core.database.verifier_connexion", return_value=True)
-    @patch("src.core.cache_multi.obtenir_cache", side_effect=Exception("Cache Error"))
+    @patch("src.core.db.verifier_connexion", return_value=True)
+    @patch("src.core.caching.obtenir_cache", side_effect=Exception("Cache Error"))
     def test_cache_exception(self, mock_cache, mock_db):
         """Test avec exception cache."""
         from src.ui.components import indicateur_sante_systeme

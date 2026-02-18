@@ -5,33 +5,25 @@ from pathlib import Path
 
 import pytest
 
-from src.services.backup.utils import (
-    # Statistiques
+from src.services.backup import (
     calculate_backup_stats,
-    # Checksums
     calculate_checksum,
     compare_backup_stats,
     deserialize_value,
     filter_and_order_tables,
     format_file_size,
-    # Identifiants
     generate_backup_id,
     get_backup_filename,
-    # Rotation
     get_backups_to_rotate,
-    # Ordre de restauration
     get_restore_order,
-    # Fichiers
     is_compressed_file,
     is_valid_backup_id,
-    # Sérialisation
     model_to_dict,
     parse_backup_filename,
     parse_backup_id,
     serialize_value,
     should_run_backup,
     validate_backup_metadata,
-    # Validation
     validate_backup_structure,
     verify_checksum,
 )

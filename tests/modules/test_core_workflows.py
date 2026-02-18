@@ -121,7 +121,7 @@ class TestParametresModule:
         # Placeholder: implementation en Phase 17+
         assert True
 
-    @patch("src.core.database.GestionnaireMigrations")
+    @patch("src.core.db.GestionnaireMigrations")
     def test_parametres_database_check(self, mock_migrations):
         """Le module Parametres peut verifier la BD."""
         mock_migrations.verifier_sante_bd.return_value = True
@@ -129,7 +129,7 @@ class TestParametresModule:
         # Placeholder: implementation en Phase 17+
         assert True
 
-    @patch("src.core.database.GestionnaireMigrations")
+    @patch("src.core.db.GestionnaireMigrations")
     def test_parametres_apply_migrations(self, mock_migrations):
         """Le module Parametres peut appliquer les migrations."""
         mock_migrations.appliquer_migrations.return_value = None

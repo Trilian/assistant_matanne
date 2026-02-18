@@ -471,7 +471,7 @@ class TestRenderAjouterArticle:
         mock_st.error.assert_called()
 
     @patch("src.core.models.Ingredient")
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_ajouter_article_success_existing_ingredient(
@@ -506,7 +506,7 @@ class TestRenderAjouterArticle:
         mock_st.success.assert_called()
 
     @patch("src.core.models.Ingredient")
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_ajouter_article_success_new_ingredient(
@@ -546,7 +546,7 @@ class TestRenderAjouterArticle:
         svc.create.assert_called()
 
     @patch("src.core.models.Ingredient")
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
     @patch("src.modules.cuisine.courses.liste_active.st")
     @patch("src.modules.cuisine.courses.liste_active.logger")

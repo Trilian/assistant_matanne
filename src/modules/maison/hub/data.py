@@ -4,7 +4,7 @@ Hub Maison - Fonctions de données.
 
 from datetime import date, datetime
 
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.models import ObjetMaison, PieceMaison
 from src.core.models.temps_entretien import SessionTravail, ZoneJardin
 

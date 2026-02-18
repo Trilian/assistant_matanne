@@ -322,16 +322,16 @@ class TestTableauDonnees:
 
     @patch("streamlit.dataframe")
     def test_tableau_donnees_uses_container_width(self, mock_dataframe):
-        """Test que use_container_width=True est passé."""
+        """Test que width='stretch' est passé (nouvelle API Streamlit)."""
         from src.ui.components.data import tableau_donnees
 
         data = [{"id": 1}]
 
         tableau_donnees(data, "width_test")
 
-        # Vérifie que use_container_width=True est passé
+        # Vérifie que width='stretch' est passé (remplace use_container_width)
         call_kwargs = mock_dataframe.call_args[1]
-        assert call_kwargs.get("use_container_width") is True
+        assert call_kwargs.get("width") == "stretch"
 
 
 # ═══════════════════════════════════════════════════════════

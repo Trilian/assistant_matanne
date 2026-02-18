@@ -7,7 +7,7 @@ from datetime import date, timedelta
 import streamlit as st
 from sqlalchemy import and_, func
 
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.models import (
     ChildProfile,
     FamilyActivity,

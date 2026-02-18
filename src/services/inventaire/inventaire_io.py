@@ -60,7 +60,7 @@ class InventaireIOMixin:
                 article_import = ArticleImport(**article_data)
 
                 # Cherche ou crée l'ingrédient
-                from src.core.database import obtenir_contexte_db
+                from src.core.db import obtenir_contexte_db
                 from src.core.models import Ingredient
 
                 db = obtenir_contexte_db().session

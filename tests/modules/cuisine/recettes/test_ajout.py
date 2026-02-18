@@ -164,7 +164,7 @@ class TestRenderAjouterManuel:
         render_ajouter_manuel()
         mock_st.error.assert_called()
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.recettes.ajout.get_recette_service")
     @patch("src.modules.cuisine.recettes.ajout.st")
     def test_render_ajouter_manuel_success(self, mock_st, mock_get_service, mock_db_ctx):
@@ -210,7 +210,7 @@ class TestRenderAjouterManuel:
         mock_st.success.assert_called()
         mock_st.balloons.assert_called()
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.recettes.ajout.get_recette_service")
     @patch("src.modules.cuisine.recettes.ajout.st")
     def test_render_ajouter_manuel_validation_error(self, mock_st, mock_get_service, mock_db_ctx):
@@ -252,7 +252,7 @@ class TestRenderAjouterManuel:
         render_ajouter_manuel()
         mock_st.error.assert_called()
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.recettes.ajout.get_recette_service")
     @patch("src.modules.cuisine.recettes.ajout.st")
     def test_render_ajouter_manuel_generic_error(self, mock_st, mock_get_service, mock_db_ctx):

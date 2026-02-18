@@ -14,7 +14,7 @@ from typing import Any
 from sqlalchemy.orm import Session, joinedload
 
 from src.core.ai import obtenir_client_ia
-from src.core.cache import Cache
+from src.core.caching import Cache
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import Planning, Repas
 from src.services.base import BaseAIService, BaseService, PlanningAIMixin
@@ -610,6 +610,7 @@ def obtenir_service_planning() -> ServicePlanning:
 
 # Alias pour rétro-compatibilité
 get_planning_service = obtenir_service_planning
+PlanningService = ServicePlanning
 
 
 # ═══════════════════════════════════════════════════════════
@@ -620,6 +621,7 @@ get_planning_service = obtenir_service_planning
 __all__ = [
     # Classe principale
     "ServicePlanning",
+    "PlanningService",
     # Factory
     "obtenir_service_planning",
     "get_planning_service",

@@ -757,7 +757,7 @@ class TestRenderActions:
     @patch("src.ui.core.crud_renderer.afficher_succes")
     def test_actions_cache(self, mock_succes, mock_btn, mock_cols):
         """Test bouton cache."""
-        from src.core.cache import Cache
+        from src.core.caching.cache import Cache
         from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_btn.side_effect = [False, False, True]  # Cache cliqué

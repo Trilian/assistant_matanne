@@ -684,7 +684,7 @@ class TestSauvegarderAlerte:
         mock_db = MagicMock()
 
         # Patcher le décorateur avec_session_db pour injecter notre mock
-        with patch("src.core.database.obtenir_contexte_db") as mock_ctx:
+        with patch("src.core.db.obtenir_contexte_db") as mock_ctx:
             mock_ctx.return_value.__enter__ = Mock(return_value=mock_db)
             mock_ctx.return_value.__exit__ = Mock(return_value=False)
 

@@ -932,7 +932,7 @@ class TestCreateCompletePhase2:
             "ingredients": [{"nom": "pâtes", "quantite": 200, "unite": "g"}],
             "etapes": [{"description": "Cuire les pâtes al dente"}],
         }
-        from src.core.cache import Cache
+        from src.core.caching.cache import Cache
 
         with patch.object(Cache, "invalider"):
             result = service.create_complete(data)
@@ -958,7 +958,7 @@ class TestCreateCompletePhase2:
             ],
             "etapes": [{"description": "Battre les oeufs et cuire à feu doux"}],
         }
-        from src.core.cache import Cache
+        from src.core.caching.cache import Cache
 
         with patch.object(Cache, "invalider"):
             result = service.create_complete(data)
@@ -985,7 +985,7 @@ class TestCreateCompletePhase2:
                 {"description": "Assaisonner et servir frais"},
             ],
         }
-        from src.core.cache import Cache
+        from src.core.caching.cache import Cache
 
         with patch.object(Cache, "invalider"):
             result = service.create_complete(data)
@@ -1018,7 +1018,7 @@ class TestCreateCompletePhase2:
                 {"description": "Ajouter les légumes et mijoter"},
             ],
         }
-        from src.core.cache import Cache
+        from src.core.caching.cache import Cache
 
         with patch.object(Cache, "invalider"):
             result = service.create_complete(data)

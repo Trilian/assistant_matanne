@@ -39,34 +39,35 @@ from .types import (
     STREAK_BADGE_THRESHOLDS,
     GarminConfig,
 )
-from .utils import (
-    build_api_params,
-    calculate_activity_stats,
-    # Calculs et statistiques
-    calculate_daily_stats,
-    calculate_goal_progress,
-    calculate_streak,
-    calculate_weekly_summary,
-    date_to_garmin_timestamp,
-    estimate_calories_burned,
+from .utils_format import (
     format_distance,
     format_duration,
     format_pace,
     format_speed,
+)
+from .utils_parsing import (
     get_activity_icon,
-    get_streak_badge,
-    # Dates et périodes
-    get_sync_date_range,
-    is_sync_needed,
     parse_activity_data,
     parse_daily_summary,
     parse_garmin_date,
-    # Parsing
     parse_garmin_timestamp,
-    # Traduction et affichage
     translate_activity_type,
+)
+from .utils_stats import (
+    calculate_activity_stats,
+    calculate_daily_stats,
+    calculate_goal_progress,
+    calculate_streak,
+    calculate_weekly_summary,
+    estimate_calories_burned,
+    get_streak_badge,
+)
+from .utils_sync import (
+    build_api_params,
+    date_to_garmin_timestamp,
+    get_sync_date_range,
+    is_sync_needed,
     validate_garmin_token,
-    # Validation
     validate_oauth_config,
 )
 

@@ -248,7 +248,7 @@ def render_critical_alerts():
 
     # Tâches menage en retard
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import MaintenanceTask
 
         with obtenir_contexte_db() as db:

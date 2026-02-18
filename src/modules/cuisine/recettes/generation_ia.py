@@ -242,7 +242,7 @@ def _render_suggestion_card(
                     }
 
                     # Créer la recette avec session BD
-                    from src.core.database import obtenir_contexte_db
+                    from src.core.db import obtenir_contexte_db
 
                     with obtenir_contexte_db() as db:
                         recette = service.create_complete(data, db=db)

@@ -13,7 +13,7 @@ import json
 import logging
 from typing import Any
 
-from ..cache import Cache
+from ..caching import Cache
 from ..constants import CACHE_TTL_IA
 
 logger = logging.getLogger(__name__)

@@ -19,7 +19,7 @@ from datetime import datetime
 from enum import Enum, StrEnum
 from typing import Any
 
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.models import AlerteJeux
 from src.services.jeux._internal.series_service import SEUIL_VALUE_ALERTE, SEUIL_VALUE_HAUTE
 

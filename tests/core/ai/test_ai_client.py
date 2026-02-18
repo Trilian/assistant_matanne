@@ -114,8 +114,8 @@ class TestClientIAAppels:
         # Créer le client et appeler
         client = ClientIA()
 
-        with patch("src.core.cache.LimiteDebit.peut_appeler", return_value=(True, "")):
-            with patch("src.core.cache.LimiteDebit.enregistrer_appel"):
+        with patch("src.core.ai.rate_limit.RateLimitIA.peut_appeler", return_value=(True, "")):
+            with patch("src.core.ai.rate_limit.RateLimitIA.enregistrer_appel"):
                 with patch("src.core.ai.client.CacheIA.obtenir", return_value=None):
                     with patch("src.core.ai.client.CacheIA.definir"):
                         reponse = await client.appeler(
@@ -139,7 +139,8 @@ class TestClientIAAppels:
         client = ClientIA()
 
         with patch(
-            "src.core.cache.LimiteDebit.peut_appeler", return_value=(False, "Rate limit dépassé")
+            "src.core.ai.rate_limit.RateLimitIA.peut_appeler",
+            return_value=(False, "Rate limit dépassé"),
         ):
             with pytest.raises(ErreurLimiteDebit):
                 await client.appeler(prompt="Test")
@@ -177,8 +178,8 @@ class TestClientIAAppels:
         client = ClientIA()
 
         with patch("src.core.ai.client.asyncio.sleep", new_callable=AsyncMock):
-            with patch("src.core.cache.LimiteDebit.peut_appeler", return_value=(True, "")):
-                with patch("src.core.cache.LimiteDebit.enregistrer_appel"):
+            with patch("src.core.ai.rate_limit.RateLimitIA.peut_appeler", return_value=(True, "")):
+                with patch("src.core.ai.rate_limit.RateLimitIA.enregistrer_appel"):
                     with patch("src.core.ai.client.CacheIA.obtenir", return_value=None):
                         with patch("src.core.ai.client.CacheIA.definir"):
                             reponse = await client.appeler(
@@ -211,7 +212,7 @@ class TestClientIACache:
 
         client = ClientIA()
 
-        with patch("src.core.cache.LimiteDebit.peut_appeler", return_value=(True, "")):
+        with patch("src.core.ai.rate_limit.RateLimitIA.peut_appeler", return_value=(True, "")):
             with patch("src.core.ai.client.CacheIA.obtenir", return_value="Réponse en cache"):
                 reponse = await client.appeler(
                     prompt="Test",
@@ -233,7 +234,7 @@ class TestClientIACache:
 
         client = ClientIA()
 
-        with patch("src.core.cache.LimiteDebit.peut_appeler", return_value=(True, "")):
+        with patch("src.core.ai.rate_limit.RateLimitIA.peut_appeler", return_value=(True, "")):
             with patch("src.core.ai.client.CacheIA.obtenir", return_value=None) as mock_cache:
                 with patch.object(
                     client,
@@ -241,7 +242,7 @@ class TestClientIACache:
                     new_callable=AsyncMock,
                     return_value="Réponse fraîche",
                 ):
-                    with patch("src.core.cache.LimiteDebit.enregistrer_appel"):
+                    with patch("src.core.ai.rate_limit.RateLimitIA.enregistrer_appel"):
                         reponse = await client.appeler(
                             prompt="Test",
                             utiliser_cache=False,
@@ -357,7 +358,7 @@ class TestClientIAIntegration:
         client = ClientIA()
 
         # Workflow: cache miss â†’ appel API â†’ cache store
-        with patch("src.core.cache.LimiteDebit.peut_appeler", return_value=(True, "")):
+        with patch("src.core.ai.rate_limit.RateLimitIA.peut_appeler", return_value=(True, "")):
             with patch("src.core.ai.client.CacheIA.obtenir", return_value=None):
                 with patch("src.core.ai.client.CacheIA.definir") as mock_cache_store:
                     with patch.object(
@@ -366,7 +367,7 @@ class TestClientIAIntegration:
                         new_callable=AsyncMock,
                         return_value="Réponse API",
                     ):
-                        with patch("src.core.cache.LimiteDebit.enregistrer_appel"):
+                        with patch("src.core.ai.rate_limit.RateLimitIA.enregistrer_appel"):
                             reponse = await client.appeler(
                                 prompt="Question?",
                                 utiliser_cache=True,
@@ -591,7 +592,7 @@ class TestClientIARetryLogic:
         client = ClientIA()
 
         with patch("src.core.ai.client.asyncio.sleep", new_callable=AsyncMock):
-            with patch("src.core.cache.LimiteDebit.peut_appeler", return_value=(True, "")):
+            with patch("src.core.ai.rate_limit.RateLimitIA.peut_appeler", return_value=(True, "")):
                 with patch("src.core.ai.client.CacheIA.obtenir", return_value=None):
                     with pytest.raises(ErreurServiceIA) as exc_info:
                         await client.appeler(
@@ -614,7 +615,7 @@ class TestClientIARetryLogic:
 
         client = ClientIA()
 
-        with patch("src.core.cache.LimiteDebit.peut_appeler", return_value=(True, "")):
+        with patch("src.core.ai.rate_limit.RateLimitIA.peut_appeler", return_value=(True, "")):
             with patch("src.core.ai.client.CacheIA.obtenir", return_value=None):
                 with patch.object(
                     client,

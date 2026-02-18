@@ -6,8 +6,12 @@ Ce package regroupe les classes fondamentales des services:
 - BaseService: Service CRUD générique avec ORM
 - IOService: Import/Export universel (CSV, JSON)
 - Mixins IA: RecipeAIMixin, PlanningAIMixin, InventoryAIMixin
+- Async utils: sync_wrapper pour conversion async→sync
 """
 
+# ═══════════════════════════════════════════════════════════
+# UTILITAIRES ASYNC
+# ═══════════════════════════════════════════════════════════
 # ═══════════════════════════════════════════════════════════
 # BASE AI SERVICE (avec mixins spécialisés)
 # ═══════════════════════════════════════════════════════════
@@ -18,6 +22,7 @@ from .ai_service import (
     RecipeAIMixin,
     create_base_ai_service,
 )
+from .async_utils import make_sync_alias, sync_wrapper
 
 # ═══════════════════════════════════════════════════════════
 # IO SERVICE (Import/Export)
@@ -35,6 +40,9 @@ from .io_service import (
 from .types import BaseService, T
 
 __all__ = [
+    # Async utils
+    "sync_wrapper",
+    "make_sync_alias",
     # AI Service
     "BaseAIService",
     "RecipeAIMixin",

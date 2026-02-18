@@ -6,7 +6,16 @@ Pure utility functions - no mocking needed.
 
 from datetime import date, datetime
 
-from src.services.suggestions.utils import (
+from src.services.suggestions.analyse_historique import (
+    analyze_categories,
+    analyze_frequent_ingredients,
+    calculate_average_difficulty,
+    calculate_average_portions,
+    calculate_average_time,
+    days_since_last_preparation,
+    identify_favorites,
+)
+from src.services.suggestions.constantes_suggestions import (
     SCORE_CATEGORIE_PREFEREE,
     SCORE_DIFFICULTE_ADAPTEE,
     SCORE_INGREDIENT_DISPONIBLE,
@@ -15,31 +24,27 @@ from src.services.suggestions.utils import (
     SCORE_JAMAIS_PREPAREE,
     SCORE_TEMPS_ADAPTE,
     SCORE_VARIETE,
-    # Profil
-    analyze_categories,
-    analyze_frequent_ingredients,
-    calculate_average_difficulty,
-    calculate_average_portions,
-    calculate_average_time,
-    # Scoring
-    calculate_recipe_score,
+)
+from src.services.suggestions.equilibre import (
     calculate_variety_score,
     calculate_week_protein_balance,
-    days_since_last_preparation,
-    # Protéines
     detect_protein_type,
+    get_least_prepared_recipes,
+    is_week_balanced,
+)
+from src.services.suggestions.formatage import (
     filter_by_constraints,
     format_profile_summary,
-    # Formatage
     format_suggestion,
-    generate_suggestion_reason,
-    # Saisons
+)
+from src.services.suggestions.saisons import (
     get_current_season,
-    get_least_prepared_recipes,
     get_seasonal_ingredients,
-    identify_favorites,
     is_ingredient_in_season,
-    is_week_balanced,
+)
+from src.services.suggestions.scoring import (
+    calculate_recipe_score,
+    generate_suggestion_reason,
     rank_recipes,
 )
 

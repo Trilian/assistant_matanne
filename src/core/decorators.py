@@ -61,7 +61,7 @@ def avec_session_db(func: F) -> F:
             return func(*args, **kwargs)
 
         # Sinon, créer une nouvelle session
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
 
         with obtenir_contexte_db() as session:
             # Ajouter 'db' ou 'session' selon le paramètre attendu
@@ -113,7 +113,7 @@ def avec_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = N
 
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
-            from src.core.cache import Cache
+            from src.core.caching import Cache
 
             # Générer clé de cache
             if key_func is not None:

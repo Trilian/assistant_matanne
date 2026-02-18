@@ -15,7 +15,7 @@ sys.path.insert(0, str(project_root))
 
 from sqlalchemy import text
 
-from src.core.database import obtenir_moteur
+from src.core.db import obtenir_moteur
 from src.core.logging import get_logger
 from src.core.models import Base
 

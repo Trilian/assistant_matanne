@@ -270,7 +270,7 @@ def render_ajouter_article():
 
             try:
                 # Créer/trouver l'ingrédient
-                from src.core.database import obtenir_contexte_db
+                from src.core.db import obtenir_contexte_db
                 from src.core.models import Ingredient
 
                 with obtenir_contexte_db() as db:

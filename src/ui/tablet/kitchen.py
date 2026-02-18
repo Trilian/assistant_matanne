@@ -11,34 +11,34 @@ from typing import Any
 
 import streamlit as st
 
-from .config import TabletMode, get_tablet_mode, set_tablet_mode
+from .config import ModeTablette, definir_mode_tablette, obtenir_mode_tablette
 
 
-def render_kitchen_recipe_view(
+def afficher_vue_recette_cuisine(
     recette: dict[str, Any],
-    key: str = "kitchen_recipe",
+    cle: str = "kitchen_recipe",
 ):
     """
     Affiche une recette en mode cuisine (step-by-step).
 
     Args:
         recette: Dict avec nom, ingredients, instructions
-        key: Clé unique
+        cle: Clé unique
     """
     # État
-    if f"{key}_step" not in st.session_state:
-        st.session_state[f"{key}_step"] = 0
+    if f"{cle}_etape" not in st.session_state:
+        st.session_state[f"{cle}_etape"] = 0
 
-    current_step = st.session_state[f"{key}_step"]
+    etape_courante = st.session_state[f"{cle}_etape"]
     instructions = recette.get("instructions", [])
-    total_steps = len(instructions)
+    total_etapes = len(instructions)
 
     # Timer (si défini)
-    if f"{key}_timer" in st.session_state and st.session_state[f"{key}_timer"] > 0:
+    if f"{cle}_minuteur" in st.session_state and st.session_state[f"{cle}_minuteur"] > 0:
         st.markdown(
             f"""
             <div class="kitchen-timer active">
-                ⏱️ {st.session_state[f"{key}_timer"]} min
+                ⏱️ {st.session_state[f"{cle}_minuteur"]} min
             </div>
             """,
             unsafe_allow_html=True,
@@ -51,10 +51,10 @@ def render_kitchen_recipe_view(
     tab1, tab2 = st.tabs(["📝 Étapes", "🥕 Ingrédients"])
 
     with tab1:
-        if current_step == 0:
+        if etape_courante == 0:
             # Écran d'accueil
             st.markdown("### 🚀 Prêt à cuisiner ?")
-            st.markdown(f"**{total_steps} étapes** à suivre")
+            st.markdown(f"**{total_etapes} étapes** à suivre")
 
             # Temps
             temps_prep = recette.get("temps_preparation", 0)
@@ -67,29 +67,29 @@ def render_kitchen_recipe_view(
                     st.metric("🔥 Cuisson", f"{temps_cuisson} min")
 
             if st.button(
-                "▶️ Commencer", key=f"{key}_start", type="primary", use_container_width=True
+                "▶️ Commencer", key=f"{cle}_demarrer", type="primary", use_container_width=True
             ):
-                st.session_state[f"{key}_step"] = 1
+                st.session_state[f"{cle}_etape"] = 1
                 st.rerun()
 
-        elif current_step > total_steps:
+        elif etape_courante > total_etapes:
             # Fin de la recette
             st.markdown("### 🎉 Bravo !")
             st.markdown("Votre plat est prêt. Bon appétit !")
             st.balloons()
 
-            if st.button("🔄 Recommencer", key=f"{key}_restart", use_container_width=True):
-                st.session_state[f"{key}_step"] = 0
+            if st.button("🔄 Recommencer", key=f"{cle}_recommencer", use_container_width=True):
+                st.session_state[f"{cle}_etape"] = 0
                 st.rerun()
 
         else:
             # Étape courante
-            instruction = instructions[current_step - 1]
+            instruction = instructions[etape_courante - 1]
 
             st.markdown(
                 f"""
                 <div class="kitchen-step-card kitchen-step-transition">
-                    <span class="kitchen-step-number">{current_step}</span>
+                    <span class="kitchen-step-number">{etape_courante}</span>
                     <span style="font-size: 1.4rem;">{instruction}</span>
                 </div>
                 """,
@@ -97,20 +97,20 @@ def render_kitchen_recipe_view(
             )
 
             # Barre de progression
-            progress = current_step / total_steps
-            st.progress(progress, text=f"Étape {current_step}/{total_steps}")
+            progression = etape_courante / total_etapes
+            st.progress(progression, text=f"Étape {etape_courante}/{total_etapes}")
 
             # Timer rapide
             col1, col2, col3 = st.columns(3)
             with col1:
-                if st.button("⏱️ 1 min", key=f"{key}_timer_1"):
-                    st.session_state[f"{key}_timer"] = 1
+                if st.button("⏱️ 1 min", key=f"{cle}_minuteur_1"):
+                    st.session_state[f"{cle}_minuteur"] = 1
             with col2:
-                if st.button("⏱️ 5 min", key=f"{key}_timer_5"):
-                    st.session_state[f"{key}_timer"] = 5
+                if st.button("⏱️ 5 min", key=f"{cle}_minuteur_5"):
+                    st.session_state[f"{cle}_minuteur"] = 5
             with col3:
-                if st.button("⏱️ 10 min", key=f"{key}_timer_10"):
-                    st.session_state[f"{key}_timer"] = 10
+                if st.button("⏱️ 10 min", key=f"{cle}_minuteur_10"):
+                    st.session_state[f"{cle}_minuteur"] = 10
 
     with tab2:
         # Liste des ingrédients
@@ -123,11 +123,11 @@ def render_kitchen_recipe_view(
                 quantite = ing.get("quantite", "")
                 unite = ing.get("unite", "")
                 nom = ing.get("nom", ing.get("ingredient", ""))
-                label = f"{quantite} {unite} {nom}".strip()
+                etiquette = f"{quantite} {unite} {nom}".strip()
             else:
-                label = str(ing)
+                etiquette = str(ing)
 
-            st.checkbox(label, key=f"{key}_ing_{i}")
+            st.checkbox(etiquette, key=f"{cle}_ing_{i}")
 
     # Navigation fixe en bas
     st.markdown("---")
@@ -135,51 +135,51 @@ def render_kitchen_recipe_view(
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col1:
-        if current_step > 1:
-            if st.button("◀️ Précédent", key=f"{key}_prev", use_container_width=True):
-                st.session_state[f"{key}_step"] = current_step - 1
+        if etape_courante > 1:
+            if st.button("◀️ Précédent", key=f"{cle}_prec", use_container_width=True):
+                st.session_state[f"{cle}_etape"] = etape_courante - 1
                 st.rerun()
 
     with col2:
-        if st.button("❌ Quitter", key=f"{key}_quit", use_container_width=True):
-            st.session_state[f"{key}_step"] = 0
+        if st.button("❌ Quitter", key=f"{cle}_quitter", use_container_width=True):
+            st.session_state[f"{cle}_etape"] = 0
 
     with col3:
-        if current_step >= 1 and current_step <= total_steps:
-            btn_label = "✅ Terminé" if current_step == total_steps else "Suivant ▶️"
-            if st.button(btn_label, key=f"{key}_next", type="primary", use_container_width=True):
-                st.session_state[f"{key}_step"] = current_step + 1
+        if etape_courante >= 1 and etape_courante <= total_etapes:
+            btn_label = "✅ Terminé" if etape_courante == total_etapes else "Suivant ▶️"
+            if st.button(btn_label, key=f"{cle}_suiv", type="primary", use_container_width=True):
+                st.session_state[f"{cle}_etape"] = etape_courante + 1
                 st.rerun()
 
 
-def render_mode_selector():
+def afficher_selecteur_mode():
     """Affiche le sélecteur de mode dans la sidebar."""
     with st.sidebar:
         st.markdown("---")
         st.markdown("### 📱 Mode d'affichage")
 
-        mode = get_tablet_mode()
+        mode = obtenir_mode_tablette()
 
         options = {
-            TabletMode.NORMAL: "🖥️ Normal",
-            TabletMode.TABLET: "📱 Tablette",
-            TabletMode.KITCHEN: "👨‍🍳 Cuisine",
+            ModeTablette.NORMAL: "🖥️ Normal",
+            ModeTablette.TABLETTE: "📱 Tablette",
+            ModeTablette.CUISINE: "👨‍🍳 Cuisine",
         }
 
-        selected = st.selectbox(
+        selectionne = st.selectbox(
             "Choisir le mode",
             options=list(options.keys()),
             format_func=lambda x: options[x],
             index=list(options.keys()).index(mode),
-            key="mode_selector",
+            key="selecteur_mode",
             label_visibility="collapsed",
         )
 
-        if selected != mode:
-            set_tablet_mode(selected)
+        if selectionne != mode:
+            definir_mode_tablette(selectionne)
             st.rerun()
 
-        if mode == TabletMode.KITCHEN:
+        if mode == ModeTablette.CUISINE:
             st.info(
-                "🍳 Mode cuisine activé:\n- Interface simplifiée\n- Gros boutons tactiles\n- Navigation par étapes"
+                "🍳 Mode cuisine activé:\\n- Interface simplifiée\\n- Gros boutons tactiles\\n- Navigation par étapes"
             )

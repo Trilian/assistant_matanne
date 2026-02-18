@@ -11,6 +11,7 @@ NOTE: render_calendar_sync_ui déplacé vers src/modules/planning/calendar_sync_
 """
 
 from .generateur import ICalGenerator
+from .google_calendar import GoogleCalendarMixin
 from .schemas import (
     CalendarEventExternal,
     CalendarProvider,
@@ -21,6 +22,7 @@ from .schemas import (
 from .service import (
     CalendarSyncService,
     get_calendar_sync_service,
+    obtenir_service_synchronisation_calendrier,
 )
 
 __all__ = [
@@ -32,7 +34,10 @@ __all__ = [
     "SyncResult",
     # Générateur iCal
     "ICalGenerator",
+    # Mixin Google Calendar
+    "GoogleCalendarMixin",
     # Service
     "CalendarSyncService",
     "get_calendar_sync_service",
+    "obtenir_service_synchronisation_calendrier",
 ]

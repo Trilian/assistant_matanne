@@ -6,7 +6,7 @@ import streamlit as st
 
 from src.core.config import obtenir_parametres
 from src.core.state import obtenir_etat
-from src.ui import badge
+from src.ui.components.atoms import badge
 
 
 def afficher_header():

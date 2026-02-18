@@ -21,6 +21,20 @@ Utilisation:
 # CODES-BARRES
 # ═══════════════════════════════════════════════════════════
 
+# ═══════════════════════════════════════════════════════════
+# MÉTÉO (TRANSVERSAL) - réexportation depuis weather/
+# ═══════════════════════════════════════════════════════════
+from ..weather import (
+    AlerteMeteo,
+    ConseilJardin,
+    MeteoJour,
+    PlanArrosage,
+    ServiceMeteo,
+    WeatherService,
+    get_weather_garden_service,
+    get_weather_service,
+    obtenir_service_meteo,
+)
 from .codes_barres import (
     BarcodeArticle,
     # Schémas Pydantic
@@ -47,21 +61,6 @@ from .facture import (
     detecter_fournisseur,
     extraire_montant,
     get_facture_ocr_service,
-)
-
-# ═══════════════════════════════════════════════════════════
-# MÉTÉO (TRANSVERSAL)
-# ═══════════════════════════════════════════════════════════
-from .meteo import (
-    AlerteMeteo,
-    ConseilJardin,
-    MeteoJour,
-    PlanArrosage,
-    ServiceMeteo,
-    WeatherService,
-    get_weather_garden_service,
-    get_weather_service,
-    obtenir_service_meteo,
 )
 
 # ═══════════════════════════════════════════════════════════

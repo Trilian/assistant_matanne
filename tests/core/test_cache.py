@@ -42,7 +42,7 @@ def cache_module(mock_session_state):
         # Import après le patch pour que le module utilise le mock
         import importlib
 
-        import src.core.cache as cache_module
+        import src.core.caching.cache as cache_module
 
         importlib.reload(cache_module)
         yield cache_module
@@ -59,7 +59,7 @@ class TestCacheBase:
     def test_initialise_creates_structures(self, mock_session_state):
         """Test initialisation crée les structures."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache._initialiser()
 
@@ -71,7 +71,7 @@ class TestCacheBase:
     def test_initialise_only_once(self, mock_session_state):
         """Test initialisation ne réécrit pas si existant."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             # Première init
             Cache._initialiser()
@@ -88,7 +88,7 @@ class TestCacheObtenir:
     def test_obtenir_returns_sentinelle_if_missing(self, mock_session_state):
         """Test obtenir retourne sentinelle si clé absente."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             result = Cache.obtenir("inexistant", sentinelle="default")
             assert result == "default"
@@ -96,7 +96,7 @@ class TestCacheObtenir:
     def test_obtenir_returns_value_if_present_and_fresh(self, mock_session_state):
         """Test obtenir retourne valeur si présente et fraîche."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache.definir("ma_cle", "ma_valeur", ttl=300)
             result = Cache.obtenir("ma_cle", ttl=300)
@@ -105,7 +105,7 @@ class TestCacheObtenir:
     def test_obtenir_returns_sentinelle_if_expired(self, mock_session_state):
         """Test obtenir retourne sentinelle si expiré."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache.definir("ma_cle", "ma_valeur", ttl=300)
 
@@ -120,7 +120,7 @@ class TestCacheObtenir:
     def test_obtenir_increments_miss_counter(self, mock_session_state):
         """Test obtenir incrémente compteur miss."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache._initialiser()
             initial_misses = mock_session_state._mock_state["cache_statistiques"]["misses"]
@@ -134,7 +134,7 @@ class TestCacheObtenir:
     def test_obtenir_increments_hit_counter(self, mock_session_state):
         """Test obtenir incrémente compteur hit."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache.definir("ma_cle", "ma_valeur")
             initial_hits = mock_session_state._mock_state["cache_statistiques"]["hits"]
@@ -150,7 +150,7 @@ class TestCacheDefinir:
     def test_definir_stores_value(self, mock_session_state):
         """Test definir stocke la valeur."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache.definir("test_cle", {"data": "valeur"})
 
@@ -159,7 +159,7 @@ class TestCacheDefinir:
     def test_definir_stores_timestamp(self, mock_session_state):
         """Test definir stocke le timestamp."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             avant = datetime.now()
             Cache.definir("test_cle", "valeur")
@@ -171,7 +171,7 @@ class TestCacheDefinir:
     def test_definir_with_dependencies(self, mock_session_state):
         """Test definir avec dépendances."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache.definir("recette_1", "data", dependencies=["recettes", "recette_1"])
 
@@ -188,7 +188,7 @@ class TestCacheInvalider:
     def test_invalider_by_pattern(self, mock_session_state):
         """Test invalidation par pattern."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache.definir("recettes_liste", "data1")
             Cache.definir("recettes_detail_1", "data2")
@@ -203,7 +203,7 @@ class TestCacheInvalider:
     def test_invalider_by_dependencies(self, mock_session_state):
         """Test invalidation par dépendances."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache.definir("recette_1", "data1", dependencies=["tag_recette"])
             Cache.definir("recette_2", "data2", dependencies=["tag_recette"])
@@ -218,7 +218,7 @@ class TestCacheInvalider:
     def test_invalider_increments_counter(self, mock_session_state):
         """Test invalidation incrémente compteur."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache.definir("test", "valeur")
             initial_invalidations = mock_session_state._mock_state["cache_statistiques"][
@@ -239,7 +239,7 @@ class TestCacheVider:
     def test_vider_removes_all_data(self, mock_session_state):
         """Test vider supprime toutes les données."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache.definir("cle1", "val1")
             Cache.definir("cle2", "val2")
@@ -251,7 +251,7 @@ class TestCacheVider:
     def test_clear_alias_works(self, mock_session_state):
         """Test alias clear fonctionne."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache.definir("cle", "val")
 
@@ -266,7 +266,7 @@ class TestCacheStatistiques:
     def test_obtenir_statistiques_returns_dict(self, mock_session_state):
         """Test statistiques retourne dict."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache._initialiser()
             stats = Cache.obtenir_statistiques()
@@ -280,7 +280,7 @@ class TestCacheStatistiques:
     def test_taux_hit_calculation(self, mock_session_state):
         """Test calcul taux de hit."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache._initialiser()
             Cache.definir("cle", "val")
@@ -304,7 +304,7 @@ class TestCacheNettoyerExpires:
     def test_nettoyer_removes_old_entries(self, mock_session_state):
         """Test nettoyer supprime entrées anciennes."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import Cache
+            from src.core.caching.cache import Cache
 
             Cache.definir("recente", "val1")
             Cache.definir("ancienne", "val2")
@@ -331,7 +331,7 @@ class TestLimiteDebitBase:
     def test_initialise_creates_structures(self, mock_session_state):
         """Test initialisation crée les structures."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import LimiteDebit
+            from src.core.ai import LimiteDebit
 
             LimiteDebit._initialiser()
 
@@ -346,7 +346,7 @@ class TestLimiteDebitPeutAppeler:
     def test_peut_appeler_returns_true_initially(self, mock_session_state):
         """Test peut_appeler retourne True au départ."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import LimiteDebit
+            from src.core.ai import LimiteDebit
 
             autorise, erreur = LimiteDebit.peut_appeler()
 
@@ -356,7 +356,7 @@ class TestLimiteDebitPeutAppeler:
     def test_peut_appeler_false_when_daily_limit_reached(self, mock_session_state):
         """Test peut_appeler retourne False si limite jour atteinte."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import LimiteDebit
+            from src.core.ai import LimiteDebit
             from src.core.constants import AI_RATE_LIMIT_DAILY
 
             LimiteDebit._initialiser()
@@ -370,7 +370,7 @@ class TestLimiteDebitPeutAppeler:
     def test_peut_appeler_false_when_hourly_limit_reached(self, mock_session_state):
         """Test peut_appeler retourne False si limite heure atteinte."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import LimiteDebit
+            from src.core.ai import LimiteDebit
             from src.core.constants import AI_RATE_LIMIT_HOURLY
 
             LimiteDebit._initialiser()
@@ -388,7 +388,7 @@ class TestLimiteDebitEnregistrer:
     def test_enregistrer_appel_increments_counters(self, mock_session_state):
         """Test enregistrer_appel incrémente les compteurs."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import LimiteDebit
+            from src.core.ai import LimiteDebit
 
             LimiteDebit._initialiser()
             initial_jour = mock_session_state._mock_state["rate_limit_ia"]["appels_jour"]
@@ -410,7 +410,7 @@ class TestLimiteDebitStatistiques:
     def test_obtenir_statistiques_returns_dict(self, mock_session_state):
         """Test statistiques retourne dict complet."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import LimiteDebit
+            from src.core.ai import LimiteDebit
 
             stats = LimiteDebit.obtenir_statistiques()
 
@@ -431,7 +431,7 @@ class TestLimiteDebitReset:
         with patch("streamlit.session_state", mock_session_state):
             from datetime import date
 
-            from src.core.cache import LimiteDebit
+            from src.core.ai import LimiteDebit
 
             LimiteDebit._initialiser()
             mock_session_state._mock_state["rate_limit_ia"]["appels_jour"] = 50
@@ -454,7 +454,7 @@ class TestCachedDecorator:
     def test_cached_returns_cached_value(self, mock_session_state):
         """Test cached retourne valeur en cache."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import cached
+            from src.core.caching.cache import cached
 
             call_count = 0
 
@@ -477,7 +477,7 @@ class TestCachedDecorator:
     def test_cached_with_dependencies(self, mock_session_state):
         """Test cached avec dépendances."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import cached
+            from src.core.caching.cache import cached
 
             @cached(ttl=300, cle="dep_func", dependencies=["tag1"])
             def ma_fonction():
@@ -493,7 +493,7 @@ class TestCachedDecorator:
     def test_cached_auto_generates_key(self, mock_session_state):
         """Test cached génère clé auto si non spécifiée."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.cache import cached
+            from src.core.caching.cache import cached
 
             @cached(ttl=300)
             def fonction_avec_args(x, y):

@@ -414,6 +414,57 @@ class MonService(BaseAIService):
 - `call_with_json_parsing_sync(prompt, model)` - Parsing JSON
 - `call_with_list_parsing_sync(prompt, item_model)` - Parsing liste
 
+### sync_wrapper (Utilitaire Async/Sync)
+
+Décorateur pour convertir automatiquement des méthodes async en méthodes sync.
+Utile pour l'intégration avec Streamlit qui ne supporte pas nativement async.
+
+```python
+from src.services.base import sync_wrapper
+
+class MonService:
+    async def appel_api(self, prompt: str) -> str:
+        """Méthode async originale."""
+        response = await self.client.call(prompt)
+        return response
+
+    # Crée automatiquement la version synchrone
+    appel_api_sync = sync_wrapper(appel_api)
+
+# Usage
+service = MonService()
+result = service.appel_api_sync("Mon prompt")  # Appel synchrone!
+```
+
+**Caractéristiques:**
+
+| Fonctionnalité | Description |
+|----------------|-------------|
+| Event loop actif | Utilise `ThreadPoolExecutor` automatiquement |
+| Pas d'event loop | Utilise `asyncio.run()` directement |
+| Préservation nom | `__name__` et `__qualname__` conservés |
+| Propagation erreurs | Les exceptions async sont propagées |
+
+**Variante avec suffixe personnalisé:**
+
+```python
+from src.services.base import make_sync_alias
+
+# Ajoute le suffixe par défaut "_sync"
+ma_methode_sync = make_sync_alias(ma_methode_async)
+
+# Suffixe personnalisé
+ma_methode_synchrone = make_sync_alias(ma_methode_async, suffix="_synchrone")
+```
+
+**Quand utiliser sync_wrapper:**
+
+- ✅ Méthodes async appelées depuis Streamlit
+- ✅ Services IA avec appels réseau async
+- ✅ Éviter duplication de code async/sync
+- ❌ Code déjà synchrone
+- ❌ Contextes purement async (utiliser `await` directement)
+
 ### BaseIOService
 
 Classe de base pour les opérations I/O.

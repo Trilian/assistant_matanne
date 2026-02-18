@@ -221,7 +221,7 @@ class TestCompleteAuthorization:
     """Tests pour complete_authorization."""
 
     @patch("src.services.garmin.service.OAuth1Session")
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_token_manquant(self, mock_db_ctx, mock_oauth_class, mock_config):
         """Erreur si request token manquant."""
         # Setup mock DB context
@@ -234,7 +234,7 @@ class TestCompleteAuthorization:
             service.complete_authorization(user_id=1, oauth_verifier="verifier")
 
     @patch("src.services.garmin.service.OAuth1Session")
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_autorisation_complete(
         self, mock_db_ctx, mock_oauth_class, mock_config, mock_user, mock_garmin_token
     ):
@@ -267,7 +267,7 @@ class TestCompleteAuthorization:
         assert service._temp_request_token is None
 
     @patch("src.services.garmin.service.OAuth1Session")
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_utilisateur_non_trouve(self, mock_db_ctx, mock_oauth_class, mock_config):
         """Erreur si utilisateur non trouvé."""
         mock_oauth = Mock()
@@ -288,7 +288,7 @@ class TestCompleteAuthorization:
             service.complete_authorization(user_id=999, oauth_verifier="verifier")
 
     @patch("src.services.garmin.service.OAuth1Session")
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_request_token_fourni(self, mock_db_ctx, mock_oauth_class, mock_config, mock_user):
         """Request token fourni explicitement."""
         mock_oauth = Mock()
@@ -321,7 +321,7 @@ class TestCompleteAuthorization:
 class TestSyncUserData:
     """Tests pour sync_user_data."""
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_utilisateur_non_trouve(self, mock_db_ctx, mock_config):
         """Erreur si utilisateur non trouvé."""
         mock_db = Mock()
@@ -333,7 +333,7 @@ class TestSyncUserData:
         with pytest.raises(ValueError, match="non trouvé"):
             service.sync_user_data(user_id=999)
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_sync_desactivee(self, mock_db_ctx, mock_config, mock_user, mock_garmin_token):
         """Retourne zéros si sync désactivée."""
         mock_garmin_token.sync_active = False
@@ -350,7 +350,7 @@ class TestSyncUserData:
         assert result["summaries_synced"] == 0
 
     @patch("src.services.garmin.service.OAuth1Session")
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_sync_complete(self, mock_db_ctx, mock_oauth_class, mock_config, mock_user):
         """Sync complète avec activités et résumés."""
         # Mock OAuth session
@@ -513,7 +513,7 @@ class TestSaveDailySummary:
 class TestDisconnectUser:
     """Tests pour disconnect_user."""
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_disconnect_success(self, mock_db_ctx, mock_config, mock_user):
         """Déconnexion réussie."""
         mock_db = Mock()
@@ -527,7 +527,7 @@ class TestDisconnectUser:
         assert mock_user.garmin_connected is False
         mock_db.delete.assert_called_once()
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_disconnect_user_not_found(self, mock_db_ctx, mock_config):
         """Retourne False si utilisateur non trouvé."""
         mock_db = Mock()
@@ -543,7 +543,7 @@ class TestDisconnectUser:
 class TestGetUserStats:
     """Tests pour get_user_stats."""
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_user_not_found(self, mock_db_ctx, mock_config):
         """Retourne dict vide si utilisateur non trouvé."""
         mock_db = Mock()
@@ -555,7 +555,7 @@ class TestGetUserStats:
 
         assert result == {}
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_stats_calculees(self, mock_db_ctx, mock_config, mock_user):
         """Stats correctement calculées."""
         # Mock des résumés quotidiens
@@ -676,7 +676,7 @@ class TestGarminServiceAlias:
 class TestGetOrCreateUser:
     """Tests pour get_or_create_user."""
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_user_existant(self, mock_db_ctx):
         """Retourne utilisateur existant."""
         existing_user = Mock()
@@ -691,7 +691,7 @@ class TestGetOrCreateUser:
         assert result == existing_user
         mock_db.add.assert_not_called()
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_creation_user(self, mock_db_ctx):
         """Crée un nouvel utilisateur."""
         mock_db = Mock()
@@ -707,7 +707,7 @@ class TestGetOrCreateUser:
 class TestGetUserByUsername:
     """Tests pour get_user_by_username."""
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_user_trouve(self, mock_db_ctx):
         """Utilisateur trouvé."""
         user = Mock()
@@ -721,7 +721,7 @@ class TestGetUserByUsername:
 
         assert result == user
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_user_non_trouve(self, mock_db_ctx):
         """Utilisateur non trouvé retourne None."""
         mock_db = Mock()
@@ -736,7 +736,7 @@ class TestGetUserByUsername:
 class TestListAllUsers:
     """Tests pour list_all_users."""
 
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_liste_users(self, mock_db_ctx):
         """Liste tous les utilisateurs."""
         users = [Mock(), Mock()]
@@ -771,7 +771,7 @@ class TestAuthenticationErrors:
             service.get_authorization_url()
 
     @patch("src.services.garmin.service.OAuth1Session")
-    @patch("src.core.database.obtenir_contexte_db")
+    @patch("src.core.db.obtenir_contexte_db")
     def test_access_token_error(self, mock_db_ctx, mock_oauth_class, mock_config, mock_user):
         """Gère les erreurs de récupération d'access token."""
         mock_oauth = Mock()

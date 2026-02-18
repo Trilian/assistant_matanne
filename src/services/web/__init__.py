@@ -58,6 +58,7 @@ from .synchronisation import (
     SyncEventType,
     SyncState,
     get_realtime_sync_service,
+    obtenir_service_synchronisation_temps_reel,
     # Composants UI (rétrocompat depuis ui/views)
     render_presence_indicator,
     render_sync_status,
@@ -78,6 +79,7 @@ __all__ = [
     # Service
     "RealtimeSyncService",
     "get_realtime_sync_service",
+    "obtenir_service_synchronisation_temps_reel",
     # UI
     "render_presence_indicator",
     "render_typing_indicator",

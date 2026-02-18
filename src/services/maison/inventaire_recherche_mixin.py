@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import or_
 
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 
 from .schemas import ResultatRecherche
 

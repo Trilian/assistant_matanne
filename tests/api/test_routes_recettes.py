@@ -207,7 +207,7 @@ class TestRoutesRecettesAvecMock:
         mock_query.all.return_value = mock_recettes
         mock_session.query.return_value = mock_query
 
-        with patch("src.core.database.obtenir_contexte_db", return_value=mock_context):
+        with patch("src.core.db.obtenir_contexte_db", return_value=mock_context):
             from src.api.main import app
 
             client = TestClient(app)
@@ -236,7 +236,7 @@ class TestRoutesRecettesAvecMock:
         mock_query.first.return_value = mock_recette
         mock_session.query.return_value = mock_query
 
-        with patch("src.core.database.obtenir_contexte_db", return_value=mock_context):
+        with patch("src.core.db.obtenir_contexte_db", return_value=mock_context):
             from src.api.main import app
 
             client = TestClient(app)
@@ -261,7 +261,7 @@ class TestRoutesRecettesAvecMock:
         mock_query.first.return_value = None
         mock_session.query.return_value = mock_query
 
-        with patch("src.core.database.obtenir_contexte_db", return_value=mock_context):
+        with patch("src.core.db.obtenir_contexte_db", return_value=mock_context):
             from src.api.main import app
 
             client = TestClient(app)
@@ -295,7 +295,7 @@ class TestRoutesRecettesAvecMock:
         mock_session.commit.return_value = None
         mock_session.refresh.side_effect = fake_refresh
 
-        with patch("src.core.database.obtenir_contexte_db", return_value=mock_context):
+        with patch("src.core.db.obtenir_contexte_db", return_value=mock_context):
             from src.api.main import app
 
             client = TestClient(app)

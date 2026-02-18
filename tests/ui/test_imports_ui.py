@@ -6,27 +6,51 @@ import pytest
 @pytest.mark.parametrize(
     "module_path",
     [
+        # Components
         "src.ui.components.alertes",
         "src.ui.components.atoms",
         "src.ui.components.camera_scanner",
-        "src.ui.components.dashboard_widgets",
+        "src.ui.components.charts",
         "src.ui.components.data",
         "src.ui.components.dynamic",
         "src.ui.components.forms",
-        "src.ui.components.google_calendar_sync",
         "src.ui.components.layouts",
+        "src.ui.components.metrics",
+        "src.ui.components.system",
+        # Core
         "src.ui.core.base_form",
         "src.ui.core.base_io",
-        "src.ui.core.base_module",
+        "src.ui.core.crud_renderer",
+        "src.ui.core.module_config",
+        # Feedback
         "src.ui.feedback.progress",
         "src.ui.feedback.spinners",
         "src.ui.feedback.toasts",
+        # Layout
         "src.ui.layout.footer",
         "src.ui.layout.header",
         "src.ui.layout.sidebar",
         "src.ui.layout.init",
         "src.ui.layout.styles",
-        "src.ui.tablet_mode",
+        # Integrations
+        "src.ui.integrations.google_calendar",
+        # Tablet
+        "src.ui.tablet",
+        "src.ui.tablet.config",
+        "src.ui.tablet.kitchen",
+        "src.ui.tablet.styles",
+        "src.ui.tablet.widgets",
+        # Views
+        "src.ui.views",
+        "src.ui.views.authentification",
+        "src.ui.views.historique",
+        "src.ui.views.import_recettes",
+        "src.ui.views.jeux",
+        "src.ui.views.meteo",
+        "src.ui.views.notifications",
+        "src.ui.views.pwa",
+        "src.ui.views.sauvegarde",
+        "src.ui.views.synchronisation",
     ],
 )
 def test_import_ui_module(module_path):

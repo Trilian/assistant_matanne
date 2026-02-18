@@ -212,7 +212,7 @@ class ScraperLotoFDJ:
                         numeros.extend(nums)
                 # Si c'est une liste
                 elif isinstance(val, list):
-                    numeros.extend([int(n) for n in val if isinstance(n, (int, float))])
+                    numeros.extend([int(n) for n in val if isinstance(n, int | float)])
 
         return numeros
 
@@ -358,7 +358,7 @@ def inserer_tirages_en_bd(limite: int = 50):
     À appeler periodiquement (ex: cron job quotidien)
     """
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import StatistiquesLoto, TirageLoto
 
         scraper = ScraperLotoFDJ()

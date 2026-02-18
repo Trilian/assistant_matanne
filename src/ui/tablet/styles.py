@@ -9,14 +9,14 @@ Fournit les feuilles de style pour:
 
 import streamlit as st
 
-from .config import TabletMode, get_tablet_mode
+from .config import ModeTablette, obtenir_mode_tablette
 
 # ═══════════════════════════════════════════════════════════
 # CSS TABLETTE
 # ═══════════════════════════════════════════════════════════
 
 
-TABLET_CSS = """
+CSS_TABLETTE = """
 <style>
 /* ═══════════════════════════════════════════════════════════
    MODE TABLETTE - CSS RESPONSIVE
@@ -359,7 +359,7 @@ TABLET_CSS = """
 """
 
 
-KITCHEN_MODE_CSS = """
+CSS_MODE_CUISINE = """
 <style>
 /* CSS spécifique au mode cuisine (superpose tablet CSS) */
 
@@ -425,27 +425,27 @@ KITCHEN_MODE_CSS = """
 # ═══════════════════════════════════════════════════════════
 
 
-def apply_tablet_mode():
+def appliquer_mode_tablette():
     """
     Applique le mode tablette à la page courante.
 
     À appeler au début de chaque page/module.
     """
-    mode = get_tablet_mode()
+    mode = obtenir_mode_tablette()
 
     # Toujours inclure le CSS de base
-    st.markdown(TABLET_CSS, unsafe_allow_html=True)
+    st.markdown(CSS_TABLETTE, unsafe_allow_html=True)
 
-    if mode == TabletMode.TABLET:
+    if mode == ModeTablette.TABLETTE:
         st.markdown('<div class="tablet-mode">', unsafe_allow_html=True)
-    elif mode == TabletMode.KITCHEN:
-        st.markdown(KITCHEN_MODE_CSS, unsafe_allow_html=True)
+    elif mode == ModeTablette.CUISINE:
+        st.markdown(CSS_MODE_CUISINE, unsafe_allow_html=True)
         st.markdown('<div class="tablet-mode kitchen-mode">', unsafe_allow_html=True)
 
 
-def close_tablet_mode():
+def fermer_mode_tablette():
     """Ferme les balises du mode tablette."""
-    mode = get_tablet_mode()
+    mode = obtenir_mode_tablette()
 
-    if mode in [TabletMode.TABLET, TabletMode.KITCHEN]:
+    if mode in [ModeTablette.TABLETTE, ModeTablette.CUISINE]:
         st.markdown("</div>", unsafe_allow_html=True)

@@ -17,7 +17,7 @@ from reportlab.lib.units import cm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from sqlalchemy.orm import joinedload
 
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.decorators import avec_gestion_erreurs
 from src.core.models import ArticleCourses, Planning, Recette, RecetteIngredient, Repas
 from src.services.rapports.types import (

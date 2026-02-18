@@ -50,6 +50,13 @@ class Modale:
         if st.button(label, key=f"{self.key}_no", use_container_width=True):
             self.close()
 
+    # Alias français
+    afficher = show
+    fermer = close
+    est_affichee = is_showing
+    confirmer = confirm
+    annuler = cancel
+
 
 class ListeDynamique:
     """
@@ -129,6 +136,12 @@ class ListeDynamique:
         """Ajoute item programmatiquement"""
         st.session_state[f"{self.key}_items"].append(item)
 
+    # Alias français
+    afficher = render
+    obtenir_items = get_items
+    vider = clear
+    ajouter_item = add_item
+
 
 class AssistantEtapes:
     """
@@ -202,3 +215,10 @@ class AssistantEtapes:
     def is_last_step(self) -> bool:
         """Dernière étape ?"""
         return st.session_state[f"{self.key}_step"] == len(self.steps) - 1
+
+    # Alias français
+    afficher = render
+    suivant = next
+    precedent = previous
+    reinitialiser = reset
+    est_derniere_etape = is_last_step

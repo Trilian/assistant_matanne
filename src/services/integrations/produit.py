@@ -11,7 +11,7 @@ from datetime import datetime
 
 import httpx
 
-from src.core.cache import Cache
+from src.core.caching import Cache
 from src.core.decorators import avec_gestion_erreurs
 
 logger = logging.getLogger(__name__)

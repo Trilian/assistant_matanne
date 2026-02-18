@@ -4,7 +4,7 @@ Sidebar avec navigation par modules.
 
 import streamlit as st
 
-from src.core.cache import Cache
+from src.core.caching import Cache
 from src.core.lazy_loader import ChargeurModuleDiffere, afficher_stats_chargement_differe
 from src.core.state import GestionnaireEtat, obtenir_etat
 

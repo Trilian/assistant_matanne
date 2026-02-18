@@ -129,7 +129,7 @@ def render_suggestions_ia():
                                 key="btn_add_missing_ingredients",
                             ):
                                 try:
-                                    from src.core.database import obtenir_contexte_db
+                                    from src.core.db import obtenir_contexte_db
                                     from src.core.models import Ingredient
 
                                     # Récupérer ingrédients de la recette

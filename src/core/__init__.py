@@ -19,22 +19,30 @@ Refactorisé en sous-modules thématiques:
 from .ai import AnalyseurIA, CacheIA, ClientIA, LimiteDebit, RateLimitIA, obtenir_client_ia
 
 # ═══════════════════════════════════════════════════════════
-# CACHE (ancien module pour compatibilité)
+# CACHE (depuis caching/)
 # ═══════════════════════════════════════════════════════════
-from .cache import (
-    Cache,
-    cached,
-)
-
 # ═══════════════════════════════════════════════════════════
 # CACHE MULTI-NIVEAUX (nouveau sous-module caching/)
 # ═══════════════════════════════════════════════════════════
 from .caching import (
+    Cache,
     CacheMultiNiveau,
     EntreeCache,
     StatistiquesCache,
     avec_cache_multi,
+    cached,
     obtenir_cache,
+)
+
+# ═══════════════════════════════════════════════════════════
+# REDIS CACHE
+# ═══════════════════════════════════════════════════════════
+from .caching.redis import (
+    CacheMemoire,
+    CacheRedis,
+    ConfigurationRedis,
+    avec_cache_redis,
+    obtenir_cache_redis,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -42,11 +50,8 @@ from .caching import (
 # ═══════════════════════════════════════════════════════════
 from .config import Parametres, obtenir_parametres
 
-# ═══════════════════════════════════════════════════════════
-# CONSTANTS
-# ═══════════════════════════════════════════════════════════
-from .constants import *
-
+# Note: Les constantes sont accessibles via `from src.core.constants import ...`
+# Ne pas utiliser `from src.core import CONSTANT` - utiliser l'import direct depuis constants
 # ═══════════════════════════════════════════════════════════
 # DATABASE (nouveau sous-module db/)
 # ═══════════════════════════════════════════════════════════
@@ -138,6 +143,17 @@ from .monitoring import (
 )
 
 # ═══════════════════════════════════════════════════════════
+# SQL OPTIMIZER
+# ═══════════════════════════════════════════════════════════
+from .monitoring.sql_optimizer import (
+    ChargeurParLots,
+    ConstructeurRequeteOptimisee,
+    DetecteurN1,
+    EcouteurSQLAlchemy,
+    afficher_analyse_sql,
+)
+
+# ═══════════════════════════════════════════════════════════
 # MULTI-TENANT
 # ═══════════════════════════════════════════════════════════
 from .multi_tenant import (
@@ -160,28 +176,6 @@ from .offline import (
     afficher_panneau_sync,
     afficher_statut_connexion,
     avec_mode_hors_ligne,
-)
-
-# ═══════════════════════════════════════════════════════════
-# REDIS CACHE
-# ═══════════════════════════════════════════════════════════
-from .redis_cache import (
-    CacheMemoire,
-    CacheRedis,
-    ConfigurationRedis,
-    avec_cache_redis,
-    obtenir_cache_redis,
-)
-
-# ═══════════════════════════════════════════════════════════
-# SQL OPTIMIZER
-# ═══════════════════════════════════════════════════════════
-from .sql_optimizer import (
-    ChargeurParLots,
-    ConstructeurRequeteOptimisee,
-    DetecteurN1,
-    EcouteurSQLAlchemy,
-    afficher_analyse_sql,
 )
 
 # ═══════════════════════════════════════════════════════════

@@ -432,7 +432,7 @@ class TestCreateBackupMocked:
         mock_db = MagicMock()
         mock_db.query.return_value.all.return_value = []
 
-        with patch("src.core.database.obtenir_contexte_db") as mock_ctx:
+        with patch("src.core.db.obtenir_contexte_db") as mock_ctx:
             mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
             mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
 

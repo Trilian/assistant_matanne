@@ -9,38 +9,38 @@ Fournit:
 """
 
 # Configuration et état
-from .config import TabletMode, get_tablet_mode, set_tablet_mode
+from .config import ModeTablette, definir_mode_tablette, obtenir_mode_tablette
 
 # Mode cuisine
-from .kitchen import render_kitchen_recipe_view, render_mode_selector
+from .kitchen import afficher_selecteur_mode, afficher_vue_recette_cuisine
 
 # Styles CSS
-from .styles import KITCHEN_MODE_CSS, TABLET_CSS, apply_tablet_mode, close_tablet_mode
+from .styles import CSS_MODE_CUISINE, CSS_TABLETTE, appliquer_mode_tablette, fermer_mode_tablette
 
 # Widgets tactiles
 from .widgets import (
-    tablet_button,
-    tablet_checklist,
-    tablet_number_input,
-    tablet_select_grid,
+    bouton_tablette,
+    grille_selection_tablette,
+    liste_cases_tablette,
+    saisie_nombre_tablette,
 )
 
 __all__ = [
     # Config
-    "TabletMode",
-    "get_tablet_mode",
-    "set_tablet_mode",
+    "ModeTablette",
+    "obtenir_mode_tablette",
+    "definir_mode_tablette",
     # Styles
-    "TABLET_CSS",
-    "KITCHEN_MODE_CSS",
-    "apply_tablet_mode",
-    "close_tablet_mode",
+    "CSS_TABLETTE",
+    "CSS_MODE_CUISINE",
+    "appliquer_mode_tablette",
+    "fermer_mode_tablette",
     # Widgets
-    "tablet_button",
-    "tablet_select_grid",
-    "tablet_number_input",
-    "tablet_checklist",
+    "bouton_tablette",
+    "grille_selection_tablette",
+    "saisie_nombre_tablette",
+    "liste_cases_tablette",
     # Kitchen
-    "render_kitchen_recipe_view",
-    "render_mode_selector",
+    "afficher_vue_recette_cuisine",
+    "afficher_selecteur_mode",
 ]

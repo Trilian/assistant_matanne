@@ -12,6 +12,8 @@ from .dashboard import (
     TableauBordPerformance,
     afficher_badge_mini_performance,
     afficher_panneau_performance,
+    afficher_statistiques_cache,
+    afficher_statistiques_rate_limit,
 )
 from .memory import MoniteurMemoire
 from .profiler import (
@@ -25,6 +27,13 @@ from .profiler import (
     profiler,
 )
 from .sql import OptimiseurSQL, suivre_requete
+from .sql_optimizer import (
+    ChargeurParLots,
+    ConstructeurRequeteOptimisee,
+    DetecteurN1,
+    EcouteurSQLAlchemy,
+    afficher_analyse_sql,
+)
 
 __all__ = [
     # Types
@@ -36,6 +45,12 @@ __all__ = [
     "OptimiseurSQL",
     "TableauBordPerformance",
     "ChargeurComposant",
+    # SQL Optimizer
+    "EcouteurSQLAlchemy",
+    "DetecteurN1",
+    "ChargeurParLots",
+    "ConstructeurRequeteOptimisee",
+    "afficher_analyse_sql",
     # Décorateurs
     "profiler",
     "antirrebond",
@@ -46,4 +61,6 @@ __all__ = [
     # UI
     "afficher_panneau_performance",
     "afficher_badge_mini_performance",
+    "afficher_statistiques_cache",
+    "afficher_statistiques_rate_limit",
 ]

@@ -75,8 +75,8 @@ def app(monkeypatch, db):
         # PAS de close - géré par fixture
 
     # Patch global AVANT d'importer l'app
-    monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_obtenir_contexte_db)
-    monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_obtenir_contexte_db)
+    monkeypatch.setattr("src.core.db.obtenir_contexte_db", mock_obtenir_contexte_db)
+    monkeypatch.setattr("src.core.db.obtenir_contexte_db", mock_obtenir_contexte_db)
 
     # Maintenant import l'app
     from src.api.main import app as fastapi_app
@@ -457,8 +457,8 @@ def mock_database_for_api(monkeypatch):
         yield mock_session
 
     # Patch obtenir_contexte_db
-    monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_db_context)
-    monkeypatch.setattr("src.core.database.obtenir_contexte_db", mock_db_context)
+    monkeypatch.setattr("src.core.db.obtenir_contexte_db", mock_db_context)
+    monkeypatch.setattr("src.core.db.obtenir_contexte_db", mock_db_context)
 
     yield mock_session
 

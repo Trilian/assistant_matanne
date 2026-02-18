@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 
 from src.core.ai import AnalyseurIA, ClientIA
-from src.core.cache_multi import obtenir_cache
+from src.core.caching import obtenir_cache
 from src.core.decorators import avec_session_db
 from src.core.models import (
     ArticleInventaire,

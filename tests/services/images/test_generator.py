@@ -41,7 +41,7 @@ class TestConstruireQueryOptimisee:
 
     def test_query_basique_nom_seul(self):
         """Query avec juste un nom de recette."""
-        from src.core.image_generator import _construire_query_optimisee
+        from src.services.images.generator import _construire_query_optimisee
 
         result = _construire_query_optimisee("Tarte aux pommes")
         assert "Tarte aux pommes" in result
@@ -49,7 +49,7 @@ class TestConstruireQueryOptimisee:
 
     def test_query_avec_ingredients(self):
         """Query avec liste d'ingrédients."""
-        from src.core.image_generator import _construire_query_optimisee
+        from src.services.images.generator import _construire_query_optimisee
 
         ingredients = [{"nom": "pommes"}, {"nom": "farine"}, {"nom": "sucre"}]
         result = _construire_query_optimisee("Tarte", ingredients)
@@ -58,7 +58,7 @@ class TestConstruireQueryOptimisee:
 
     def test_query_ingredient_dedoublonne(self):
         """Ingrédient principal non dupliqué si dans le nom."""
-        from src.core.image_generator import _construire_query_optimisee
+        from src.services.images.generator import _construire_query_optimisee
 
         ingredients = [{"nom": "pommes"}]
         result = _construire_query_optimisee("Compote de pommes", ingredients)
@@ -67,7 +67,7 @@ class TestConstruireQueryOptimisee:
 
     def test_query_type_dessert(self):
         """Query dessert inclut mots-clés spécifiques."""
-        from src.core.image_generator import _construire_query_optimisee
+        from src.services.images.generator import _construire_query_optimisee
 
         result = _construire_query_optimisee("Crème brûlée", type_plat="dessert")
         assert "dessert" in result
@@ -75,7 +75,7 @@ class TestConstruireQueryOptimisee:
 
     def test_query_type_soupe(self):
         """Query soupe inclut mots-clés spécifiques."""
-        from src.core.image_generator import _construire_query_optimisee
+        from src.services.images.generator import _construire_query_optimisee
 
         result = _construire_query_optimisee("Soupe", type_plat="soupe")
         assert "soup" in result
@@ -83,7 +83,7 @@ class TestConstruireQueryOptimisee:
 
     def test_query_type_plat_general(self):
         """Query plat général avec mots-clés cuisine."""
-        from src.core.image_generator import _construire_query_optimisee
+        from src.services.images.generator import _construire_query_optimisee
 
         result = _construire_query_optimisee("Poulet rôti")
         assert "homemade" in result
@@ -91,14 +91,14 @@ class TestConstruireQueryOptimisee:
 
     def test_query_type_petit_dejeuner(self):
         """Query petit déjeuner."""
-        from src.core.image_generator import _construire_query_optimisee
+        from src.services.images.generator import _construire_query_optimisee
 
         result = _construire_query_optimisee("Pancakes", type_plat="petit_déjeuner")
         assert "breakfast" in result
 
     def test_query_sans_ingredients(self):
         """Query sans ingrédients ne crash pas."""
-        from src.core.image_generator import _construire_query_optimisee
+        from src.services.images.generator import _construire_query_optimisee
 
         result = _construire_query_optimisee("Pizza", None, "plat")
         assert "Pizza" in result
@@ -114,7 +114,7 @@ class TestConstruirePromptDetaille:
 
     def test_prompt_basique(self):
         """Prompt contient le nom de la recette."""
-        from src.core.image_generator import _construire_prompt_detaille
+        from src.services.images.generator import _construire_prompt_detaille
 
         result = _construire_prompt_detaille("Tarte Tatin", "")
         assert "Tarte Tatin" in result
@@ -122,7 +122,7 @@ class TestConstruirePromptDetaille:
 
     def test_prompt_avec_ingredients(self):
         """Prompt mentionne les ingrédients clés."""
-        from src.core.image_generator import _construire_prompt_detaille
+        from src.services.images.generator import _construire_prompt_detaille
 
         ingredients = [{"nom": "pommes"}, {"nom": "beurre"}, {"nom": "sucre"}]
         result = _construire_prompt_detaille("Tarte", "", ingredients)
@@ -131,28 +131,28 @@ class TestConstruirePromptDetaille:
 
     def test_prompt_avec_description(self):
         """Prompt inclut la description."""
-        from src.core.image_generator import _construire_prompt_detaille
+        from src.services.images.generator import _construire_prompt_detaille
 
         result = _construire_prompt_detaille("Gâteau", "Moelleux au chocolat")
         assert "Moelleux au chocolat" in result
 
     def test_prompt_type_dessert(self):
         """Prompt dessert avec style adapté."""
-        from src.core.image_generator import _construire_prompt_detaille
+        from src.services.images.generator import _construire_prompt_detaille
 
         result = _construire_prompt_detaille("Fondant", "", type_plat="dessert")
         assert "dessert" in result.lower()
 
     def test_prompt_type_soupe(self):
         """Prompt soupe avec style adapté."""
-        from src.core.image_generator import _construire_prompt_detaille
+        from src.services.images.generator import _construire_prompt_detaille
 
         result = _construire_prompt_detaille("Soupe de légumes", "", type_plat="soupe")
         assert "soup" in result or "Soupe" in result
 
     def test_prompt_ingredients_string(self):
         """Prompt avec ingrédients en string."""
-        from src.core.image_generator import _construire_prompt_detaille
+        from src.services.images.generator import _construire_prompt_detaille
 
         ingredients = ["pommes", "poires"]
         result = _construire_prompt_detaille("Compote", "", ingredients)
@@ -160,7 +160,7 @@ class TestConstruirePromptDetaille:
 
     def test_prompt_qualite(self):
         """Prompt contient mentions de qualité."""
-        from src.core.image_generator import _construire_prompt_detaille
+        from src.services.images.generator import _construire_prompt_detaille
 
         result = _construire_prompt_detaille("Salade", "")
         assert "4K" in result
@@ -177,16 +177,16 @@ class TestRechercherImagePexels:
 
     def test_sans_cle_api(self):
         """Retourne None sans clé API."""
-        from src.core.image_generator import _rechercher_image_pexels
+        from src.services.images.generator import _rechercher_image_pexels
 
-        with patch("src.core.image_generator.PEXELS_API_KEY", None):
+        with patch("src.services.images.generator.PEXELS_API_KEY", None):
             assert _rechercher_image_pexels("Tarte") is None
 
-    @patch("src.core.image_generator.PEXELS_API_KEY", "fake_key")
+    @patch("src.services.images.generator.PEXELS_API_KEY", "fake_key")
     @patch("requests.get")
     def test_avec_resultats(self, mock_get):
         """Retourne URL si résultats trouvés."""
-        from src.core.image_generator import _rechercher_image_pexels
+        from src.services.images.generator import _rechercher_image_pexels
 
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -203,11 +203,11 @@ class TestRechercherImagePexels:
         assert result is not None
         assert "pexels.com" in result
 
-    @patch("src.core.image_generator.PEXELS_API_KEY", "fake_key")
+    @patch("src.services.images.generator.PEXELS_API_KEY", "fake_key")
     @patch("requests.get")
     def test_sans_resultats(self, mock_get):
         """Retourne None si pas de résultats."""
-        from src.core.image_generator import _rechercher_image_pexels
+        from src.services.images.generator import _rechercher_image_pexels
 
         mock_response = MagicMock()
         mock_response.json.return_value = {"photos": []}
@@ -216,11 +216,11 @@ class TestRechercherImagePexels:
 
         assert _rechercher_image_pexels("Plat inexistant XYZ") is None
 
-    @patch("src.core.image_generator.PEXELS_API_KEY", "fake_key")
+    @patch("src.services.images.generator.PEXELS_API_KEY", "fake_key")
     @patch("requests.get", side_effect=Exception("Network error"))
     def test_erreur_reseau(self, mock_get):
         """Retourne None si erreur réseau."""
-        from src.core.image_generator import _rechercher_image_pexels
+        from src.services.images.generator import _rechercher_image_pexels
 
         assert _rechercher_image_pexels("Tarte") is None
 
@@ -235,16 +235,16 @@ class TestRechercherImagePixabay:
 
     def test_sans_cle_api(self):
         """Retourne None sans clé API."""
-        from src.core.image_generator import _rechercher_image_pixabay
+        from src.services.images.generator import _rechercher_image_pixabay
 
-        with patch("src.core.image_generator.PIXABAY_API_KEY", None):
+        with patch("src.services.images.generator.PIXABAY_API_KEY", None):
             assert _rechercher_image_pixabay("Salade") is None
 
-    @patch("src.core.image_generator.PIXABAY_API_KEY", "fake_key")
+    @patch("src.services.images.generator.PIXABAY_API_KEY", "fake_key")
     @patch("requests.get")
     def test_avec_resultats(self, mock_get):
         """Retourne URL si résultats trouvés."""
-        from src.core.image_generator import _rechercher_image_pixabay
+        from src.services.images.generator import _rechercher_image_pixabay
 
         mock_response = MagicMock()
         mock_response.json.return_value = {
@@ -257,11 +257,11 @@ class TestRechercherImagePixabay:
         assert result is not None
         assert "pixabay.com" in result
 
-    @patch("src.core.image_generator.PIXABAY_API_KEY", "fake_key")
+    @patch("src.services.images.generator.PIXABAY_API_KEY", "fake_key")
     @patch("requests.get")
     def test_sans_resultats(self, mock_get):
         """Retourne None si pas de résultats."""
-        from src.core.image_generator import _rechercher_image_pixabay
+        from src.services.images.generator import _rechercher_image_pixabay
 
         mock_response = MagicMock()
         mock_response.json.return_value = {"hits": []}
@@ -270,11 +270,11 @@ class TestRechercherImagePixabay:
 
         assert _rechercher_image_pixabay("XYZ") is None
 
-    @patch("src.core.image_generator.PIXABAY_API_KEY", "fake_key")
+    @patch("src.services.images.generator.PIXABAY_API_KEY", "fake_key")
     @patch("requests.get", side_effect=Exception("Timeout"))
     def test_erreur_reseau(self, mock_get):
         """Retourne None si erreur réseau."""
-        from src.core.image_generator import _rechercher_image_pixabay
+        from src.services.images.generator import _rechercher_image_pixabay
 
         assert _rechercher_image_pixabay("Pizza") is None
 
@@ -289,16 +289,16 @@ class TestRechercherImageUnsplash:
 
     def test_sans_cle_api(self):
         """Retourne None sans clé API."""
-        from src.core.image_generator import _rechercher_image_unsplash
+        from src.services.images.generator import _rechercher_image_unsplash
 
-        with patch("src.core.image_generator.UNSPLASH_API_KEY", None):
+        with patch("src.services.images.generator.UNSPLASH_API_KEY", None):
             assert _rechercher_image_unsplash("Crêpes") is None
 
-    @patch("src.core.image_generator.UNSPLASH_API_KEY", "fake_key")
+    @patch("src.services.images.generator.UNSPLASH_API_KEY", "fake_key")
     @patch("requests.get")
     def test_avec_resultats(self, mock_get):
         """Retourne URL si résultats trouvés."""
-        from src.core.image_generator import _rechercher_image_unsplash
+        from src.services.images.generator import _rechercher_image_unsplash
 
         mock_response = MagicMock()
         mock_response.json.return_value = {
@@ -317,11 +317,11 @@ class TestRechercherImageUnsplash:
         assert result is not None
         assert "unsplash.com" in result
 
-    @patch("src.core.image_generator.UNSPLASH_API_KEY", "fake_key")
+    @patch("src.services.images.generator.UNSPLASH_API_KEY", "fake_key")
     @patch("requests.get")
     def test_sans_resultats(self, mock_get):
         """Retourne None si pas de résultats."""
-        from src.core.image_generator import _rechercher_image_unsplash
+        from src.services.images.generator import _rechercher_image_unsplash
 
         mock_response = MagicMock()
         mock_response.json.return_value = {"results": []}
@@ -330,11 +330,11 @@ class TestRechercherImageUnsplash:
 
         assert _rechercher_image_unsplash("XYZ introuvable") is None
 
-    @patch("src.core.image_generator.UNSPLASH_API_KEY", "fake_key")
+    @patch("src.services.images.generator.UNSPLASH_API_KEY", "fake_key")
     @patch("requests.get", side_effect=Exception("Error"))
     def test_erreur_reseau(self, mock_get):
         """Retourne None si erreur réseau."""
-        from src.core.image_generator import _rechercher_image_unsplash
+        from src.services.images.generator import _rechercher_image_unsplash
 
         assert _rechercher_image_unsplash("Pizza") is None
 
@@ -350,7 +350,7 @@ class TestGenererViaPollinations:
     @patch("requests.head")
     def test_genere_url_valide(self, mock_head):
         """Retourne URL Pollinations si accessible."""
-        from src.core.image_generator import _generer_via_pollinations
+        from src.services.images.generator import _generer_via_pollinations
 
         mock_head.return_value = MagicMock(status_code=200)
 
@@ -361,14 +361,14 @@ class TestGenererViaPollinations:
     @patch("requests.head", side_effect=Exception("Timeout"))
     def test_erreur_retourne_none(self, mock_head):
         """Retourne None si Pollinations down."""
-        from src.core.image_generator import _generer_via_pollinations
+        from src.services.images.generator import _generer_via_pollinations
 
         assert _generer_via_pollinations("Tarte", "") is None
 
     @patch("requests.head")
     def test_url_encode_accents(self, mock_head):
         """URL encode correctement les accents."""
-        from src.core.image_generator import _generer_via_pollinations
+        from src.services.images.generator import _generer_via_pollinations
 
         mock_head.return_value = MagicMock(status_code=200)
 
@@ -387,7 +387,7 @@ class TestGenererViaHuggingface:
 
     def test_sans_cle_api(self):
         """Retourne None sans clé API."""
-        from src.core.image_generator import _generer_via_huggingface
+        from src.services.images.generator import _generer_via_huggingface
 
         with patch.dict("os.environ", {"HUGGINGFACE_API_KEY": ""}, clear=False):
             assert _generer_via_huggingface("Salade", "") is None
@@ -396,7 +396,7 @@ class TestGenererViaHuggingface:
     @patch.dict("os.environ", {"HUGGINGFACE_API_KEY": "hf_fake_key"})
     def test_avec_reponse_valide(self, mock_post):
         """Retourne base64 data URI si réponse valide."""
-        from src.core.image_generator import _generer_via_huggingface
+        from src.services.images.generator import _generer_via_huggingface
 
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -411,7 +411,7 @@ class TestGenererViaHuggingface:
     @patch.dict("os.environ", {"HUGGINGFACE_API_KEY": "hf_fake_key"})
     def test_erreur_api(self, mock_post):
         """Retourne None si erreur API."""
-        from src.core.image_generator import _generer_via_huggingface
+        from src.services.images.generator import _generer_via_huggingface
 
         mock_response = MagicMock()
         mock_response.status_code = 503
@@ -430,7 +430,7 @@ class TestGenererViaLeonardo:
 
     def test_sans_cle_api(self):
         """Retourne None sans clé API."""
-        from src.core.image_generator import _generer_via_leonardo
+        from src.services.images.generator import _generer_via_leonardo
 
         with patch.dict("os.environ", {"LEONARDO_API_KEY": "", "LEONARDO_TOKEN": ""}, clear=False):
             assert _generer_via_leonardo("Poulet", "") is None
@@ -439,7 +439,7 @@ class TestGenererViaLeonardo:
     @patch.dict("os.environ", {"LEONARDO_API_KEY": "leo_fake_key"})
     def test_avec_reponse_valide(self, mock_post):
         """Retourne URL si génération réussie."""
-        from src.core.image_generator import _generer_via_leonardo
+        from src.services.images.generator import _generer_via_leonardo
 
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -454,7 +454,7 @@ class TestGenererViaLeonardo:
     @patch.dict("os.environ", {"LEONARDO_API_KEY": "leo_fake_key"})
     def test_erreur_api(self, mock_post):
         """Retourne None si erreur API."""
-        from src.core.image_generator import _generer_via_leonardo
+        from src.services.images.generator import _generer_via_leonardo
 
         mock_response = MagicMock()
         mock_response.status_code = 429
@@ -474,7 +474,7 @@ class TestGenererViaReplicate:
 
     def test_sans_cle_api(self):
         """Retourne None sans clé API."""
-        from src.core.image_generator import _generer_via_replicate
+        from src.services.images.generator import _generer_via_replicate
 
         with patch.dict("os.environ", {"REPLICATE_API_TOKEN": ""}, clear=False):
             assert _generer_via_replicate("Pizza", "") is None
@@ -488,35 +488,35 @@ class TestGenererViaReplicate:
 class TestGenererImageRecette:
     """Tests pour generer_image_recette (fonction principale)."""
 
-    @patch("src.core.image_generator._generer_via_pollinations")
+    @patch("src.services.images.generator._generer_via_pollinations")
     def test_fallback_pollinations(self, mock_pollinations):
         """Utilise Pollinations en dernier recours quand aucune API configurée."""
-        from src.core.image_generator import generer_image_recette
+        from src.services.images.generator import generer_image_recette
 
         mock_pollinations.return_value = "https://pollinations.ai/test.jpg"
 
         with (
-            patch("src.core.image_generator.UNSPLASH_API_KEY", None),
-            patch("src.core.image_generator.PEXELS_API_KEY", None),
-            patch("src.core.image_generator.PIXABAY_API_KEY", None),
-            patch("src.core.image_generator.LEONARDO_API_KEY", None),
+            patch("src.services.images.generator.UNSPLASH_API_KEY", None),
+            patch("src.services.images.generator.PEXELS_API_KEY", None),
+            patch("src.services.images.generator.PIXABAY_API_KEY", None),
+            patch("src.services.images.generator.LEONARDO_API_KEY", None),
             patch.dict("os.environ", {"HUGGINGFACE_API_KEY": ""}, clear=False),
         ):
             result = generer_image_recette("Tarte aux pommes")
 
         assert result is not None
 
-    @patch("src.core.image_generator._generer_via_pollinations", return_value=None)
-    @patch("src.core.image_generator._generer_via_replicate", return_value=None)
+    @patch("src.services.images.generator._generer_via_pollinations", return_value=None)
+    @patch("src.services.images.generator._generer_via_replicate", return_value=None)
     def test_toutes_apis_echouent(self, mock_replicate, mock_pollinations):
         """Retourne None si toutes les APIs échouent."""
-        from src.core.image_generator import generer_image_recette
+        from src.services.images.generator import generer_image_recette
 
         with (
-            patch("src.core.image_generator.UNSPLASH_API_KEY", None),
-            patch("src.core.image_generator.PEXELS_API_KEY", None),
-            patch("src.core.image_generator.PIXABAY_API_KEY", None),
-            patch("src.core.image_generator.LEONARDO_API_KEY", None),
+            patch("src.services.images.generator.UNSPLASH_API_KEY", None),
+            patch("src.services.images.generator.PEXELS_API_KEY", None),
+            patch("src.services.images.generator.PIXABAY_API_KEY", None),
+            patch("src.services.images.generator.LEONARDO_API_KEY", None),
             patch.dict("os.environ", {"HUGGINGFACE_API_KEY": ""}, clear=False),
         ):
             result = generer_image_recette("Plat inconnu")
@@ -535,7 +535,7 @@ class TestTelechargerImageDepuisUrl:
     @patch("requests.get")
     def test_telechargement_reussi(self, mock_get):
         """Télécharge et sauvegarde une image."""
-        from src.core.image_generator import telecharger_image_depuis_url
+        from src.services.images.generator import telecharger_image_depuis_url
 
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -549,7 +549,7 @@ class TestTelechargerImageDepuisUrl:
     @patch("requests.get", side_effect=Exception("Network error"))
     def test_erreur_telechargement(self, mock_get):
         """Retourne None si erreur de téléchargement."""
-        from src.core.image_generator import telecharger_image_depuis_url
+        from src.services.images.generator import telecharger_image_depuis_url
 
         result = telecharger_image_depuis_url("https://example.com/image.png", "test_image")
         assert result is None
@@ -557,7 +557,7 @@ class TestTelechargerImageDepuisUrl:
     @patch("requests.get")
     def test_erreur_status_code(self, mock_get):
         """Retourne None si status code non-200."""
-        from src.core.image_generator import telecharger_image_depuis_url
+        from src.services.images.generator import telecharger_image_depuis_url
 
         mock_response = MagicMock()
         mock_response.status_code = 404
@@ -577,7 +577,7 @@ class TestGetApiKey:
 
     def test_get_api_key_from_env(self):
         """Récupère clé depuis os.environ."""
-        from src.core.image_generator import _get_api_key
+        from src.services.images.generator import _get_api_key
 
         with patch.dict("os.environ", {"TEST_KEY": "my_secret_key"}):
             result = _get_api_key("TEST_KEY")
@@ -585,7 +585,7 @@ class TestGetApiKey:
 
     def test_get_api_key_missing(self):
         """Retourne None si clé absente."""
-        from src.core.image_generator import _get_api_key
+        from src.services.images.generator import _get_api_key
 
         with patch.dict("os.environ", {}, clear=True):
             result = _get_api_key("NONEXISTENT_KEY_12345")

@@ -16,7 +16,7 @@ from uuid import UUID, uuid4
 import httpx
 from sqlalchemy.orm import Session
 
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.models import (
     CalendarEvent,

@@ -25,7 +25,7 @@ def indicateur_sante_systeme() -> dict:
 
     try:
         # Vérifier la connexion DB
-        from src.core.database import verifier_connexion
+        from src.core.db import verifier_connexion
 
         if verifier_connexion():
             status["details"].append(
@@ -42,7 +42,7 @@ def indicateur_sante_systeme() -> dict:
 
     try:
         # Vérifier le cache
-        from src.core.cache_multi import obtenir_cache
+        from src.core.caching import obtenir_cache
 
         cache = obtenir_cache()
         cache_stats = cache.get_stats()

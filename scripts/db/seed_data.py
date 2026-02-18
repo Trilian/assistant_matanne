@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from datetime import date, timedelta
 
-from src.core.database import get_db_context
+from src.core.db import obtenir_contexte_db as get_db_context
 from src.core.models import (
     BatchMeal,
     CalendarEvent,

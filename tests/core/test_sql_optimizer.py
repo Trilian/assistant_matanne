@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.core.sql_optimizer import (
+from src.core.monitoring.sql_optimizer import (
     ChargeurParLots,
     ConstructeurRequeteOptimisee,
     DetecteurN1,
@@ -323,7 +323,7 @@ class TestEcouteurSQLAlchemy:
         # Reset installed flag
         EcouteurSQLAlchemy._installed = False
 
-        with patch("src.core.sql_optimizer.event.listens_for") as mock_listens_for:
+        with patch("src.core.monitoring.sql_optimizer.event.listens_for") as mock_listens_for:
             EcouteurSQLAlchemy.install(mock_engine)
 
             # Devrait enregistrer des listeners
@@ -337,7 +337,7 @@ class TestEcouteurSQLAlchemy:
         # Marquer comme installé
         EcouteurSQLAlchemy._installed = True
 
-        with patch("src.core.sql_optimizer.event.listens_for") as mock_listens_for:
+        with patch("src.core.monitoring.sql_optimizer.event.listens_for") as mock_listens_for:
             EcouteurSQLAlchemy.install(mock_engine)
 
             # Ne devrait pas réinstaller
@@ -689,7 +689,7 @@ class TestConstructeurRequeteOptimisee:
         builder = ConstructeurRequeteOptimisee(self.mock_session, self.mock_model)
         builder.eager_load("items")
 
-        with patch("src.core.sql_optimizer.selectinload") as mock_selectinload:
+        with patch("src.core.monitoring.sql_optimizer.selectinload") as mock_selectinload:
             mock_selectinload.return_value = MagicMock()
             builder.build()
 
@@ -746,12 +746,12 @@ class TestAfficherAnalyseSQL:
     @pytest.mark.unit
     def test_afficher_analyse_sql_no_queries(self, clean_session_state):
         """Test affichage sans requêtes."""
-        with patch("src.core.sql_optimizer.st") as mock_st:
+        with patch("src.core.monitoring.sql_optimizer.st") as mock_st:
             mock_st.expander.return_value.__enter__ = MagicMock()
             mock_st.expander.return_value.__exit__ = MagicMock()
             mock_st.session_state = clean_session_state
 
-            from src.core.sql_optimizer import afficher_analyse_sql
+            from src.core.monitoring.sql_optimizer import afficher_analyse_sql
 
             # Ne devrait pas crash
             try:

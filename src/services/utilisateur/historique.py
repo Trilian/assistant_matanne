@@ -300,7 +300,7 @@ class ActionHistoryService:
         filters = filters or ActionFilter()
 
         try:
-            from src.core.database import obtenir_contexte_db
+            from src.core.db import obtenir_contexte_db
             from src.core.models import ActionHistory
 
             with obtenir_contexte_db() as session:
@@ -378,7 +378,7 @@ class ActionHistoryService:
         try:
             from sqlalchemy import func
 
-            from src.core.database import obtenir_contexte_db
+            from src.core.db import obtenir_contexte_db
             from src.core.models import ActionHistory
 
             with obtenir_contexte_db() as session:
@@ -504,7 +504,7 @@ class ActionHistoryService:
     def _save_to_database(self, entry: ActionEntry):
         """Sauvegarde l'entrée en base de données."""
         try:
-            from src.core.database import obtenir_contexte_db
+            from src.core.db import obtenir_contexte_db
             from src.core.models import ActionHistory
 
             with obtenir_contexte_db() as session:

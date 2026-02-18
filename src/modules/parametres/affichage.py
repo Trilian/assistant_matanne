@@ -14,26 +14,26 @@ def render_display_config():
 
     try:
         from src.ui.tablet import (
-            TabletMode,
-            get_tablet_mode,
-            set_tablet_mode,
+            ModeTablette,
+            definir_mode_tablette,
+            obtenir_mode_tablette,
         )
 
         mode_options = {
-            "💻 Normal": TabletMode.NORMAL,
-            "📱 Tablette": TabletMode.TABLET,
-            "🍳 Cuisine": TabletMode.KITCHEN,
+            "💻 Normal": ModeTablette.NORMAL,
+            "📱 Tablette": ModeTablette.TABLETTE,
+            "🍳 Cuisine": ModeTablette.CUISINE,
         }
 
         mode_descriptions = {
-            TabletMode.NORMAL: "Interface standard pour ordinateur",
-            TabletMode.TABLET: "Boutons plus grands, interface tactile",
-            TabletMode.KITCHEN: "Mode cuisine avec navigation par étapes",
+            ModeTablette.NORMAL: "Interface standard pour ordinateur",
+            ModeTablette.TABLETTE: "Boutons plus grands, interface tactile",
+            ModeTablette.CUISINE: "Mode cuisine avec navigation par étapes",
         }
 
         # Initialiser si nécessaire
         if "display_mode_selection" not in st.session_state:
-            current = get_tablet_mode()
+            current = obtenir_mode_tablette()
             st.session_state.display_mode_selection = next(
                 (label for label, mode in mode_options.items() if mode == current),
                 "💻 Normal",
@@ -43,7 +43,7 @@ def render_display_config():
             """Callback quand le mode change."""
             label = st.session_state.display_mode_key
             mode = mode_options[label]
-            set_tablet_mode(mode)
+            definir_mode_tablette(mode)
             st.session_state.display_mode_selection = label
 
         st.markdown("#### Mode d'affichage")
@@ -65,9 +65,9 @@ def render_display_config():
 
         st.markdown("#### Prévisualisation")
 
-        if selected_mode == TabletMode.NORMAL:
+        if selected_mode == ModeTablette.NORMAL:
             st.info("💻 Mode normal actif - Interface optimisée pour ordinateur")
-        elif selected_mode == TabletMode.TABLET:
+        elif selected_mode == ModeTablette.TABLETTE:
             st.warning("📱 Mode tablette actif - Boutons et textes agrandis")
         else:
             st.success("🍳 Mode cuisine actif - Interface simplifiée pour cuisiner")

@@ -187,3 +187,80 @@ def afficher_badge_mini_performance():
         f"</div>",
         unsafe_allow_html=True,
     )
+
+
+# ═══════════════════════════════════════════════════════════
+# WIDGETS CACHE & RATE LIMIT
+# ═══════════════════════════════════════════════════════════
+
+
+def afficher_statistiques_cache(prefixe_cle: str = "cache"):
+    """
+    Widget Streamlit pour afficher les stats cache dans la sidebar.
+
+    Args:
+        prefixe_cle: Préfixe pour les clés Streamlit (évite collisions)
+
+    Example:
+        >>> with st.sidebar:
+        >>>     afficher_statistiques_cache()
+    """
+    from src.core.caching.cache import Cache
+
+    stats = Cache.obtenir_statistiques()
+
+    with st.expander("💾 Cache Stats"):
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric("Entrées", stats["entrees"], help="Nombre d'entrées en cache")
+            st.metric("Taux Hit", f"{stats['taux_hit']:.1f}%", help="Taux de succès du cache")
+
+        with col2:
+            st.metric("Taille", f"{stats['taille_mo']:.2f} MB", help="Taille totale du cache")
+            st.metric("Invalidations", stats["invalidations"], help="Nombre d'invalidations")
+
+        # Actions
+        col3, col4 = st.columns(2)
+
+        with col3:
+            if st.button("🧹 Nettoyer", key=f"{prefixe_cle}_nettoyer", use_container_width=True):
+                Cache.nettoyer_expires()
+                st.success("Nettoyage effectué !")
+                st.rerun()
+
+        with col4:
+            if st.button("🗑️ Vider", key=f"{prefixe_cle}_vider", use_container_width=True):
+                Cache.vider()
+                st.success("Cache vidé !")
+                st.rerun()
+
+
+def afficher_statistiques_rate_limit():
+    """
+    Widget Streamlit pour afficher les stats de rate limiting.
+
+    Example:
+        >>> with st.sidebar:
+        >>>     afficher_statistiques_rate_limit()
+    """
+    from src.core.ai import RateLimitIA
+
+    stats = RateLimitIA.obtenir_statistiques()
+
+    with st.expander("⏳ Rate Limit IA"):
+        st.metric(
+            "Appels aujourd'hui",
+            f"{stats['appels_jour']} / {stats['limite_jour']}",
+            delta=f"{stats['restant_jour']} restants",
+        )
+
+        st.metric(
+            "Appels cette heure",
+            f"{stats['appels_heure']} / {stats['limite_heure']}",
+            delta=f"{stats['restant_heure']} restants",
+        )
+
+        # Progress bars
+        st.progress(stats["appels_jour"] / stats["limite_jour"])
+        st.caption("Quota journalier")

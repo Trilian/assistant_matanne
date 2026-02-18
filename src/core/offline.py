@@ -138,7 +138,7 @@ class GestionnaireConnexion:
         cls.set_status(StatutConnexion.CONNECTING)
 
         try:
-            from src.core.database import verifier_connexion
+            from src.core.db import verifier_connexion
 
             if verifier_connexion():
                 cls.set_status(StatutConnexion.ONLINE)
@@ -361,7 +361,7 @@ class SynchroniseurHorsLigne:
         Returns:
             True si succès
         """
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
 
         # Mapping des modèles vers les services
         service_map = {

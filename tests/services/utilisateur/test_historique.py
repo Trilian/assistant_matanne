@@ -460,7 +460,7 @@ class TestGetHistory:
         filters = ActionFilter(limit=10)
 
         # On utilise le fallback sur le cache (liste vide)
-        with patch("src.core.database.obtenir_contexte_db") as mock_context:
+        with patch("src.core.db.obtenir_contexte_db") as mock_context:
             mock_context.return_value.__enter__.side_effect = Exception("Connection error")
             result = service.get_history(filters)
             assert isinstance(result, list)
@@ -479,7 +479,7 @@ class TestGetHistory:
 
         service = ActionHistoryService()
 
-        with patch("src.core.database.obtenir_contexte_db") as mock_context:
+        with patch("src.core.db.obtenir_contexte_db") as mock_context:
             mock_context.return_value.__enter__.side_effect = Exception("DB Error")
             result = service.get_history(ActionFilter(limit=10))
 
@@ -492,7 +492,7 @@ class TestGetHistory:
         # Reset cache pour fallback
         ActionHistoryService._recent_cache = []
 
-        with patch("src.core.database.obtenir_contexte_db") as mock_db:
+        with patch("src.core.db.obtenir_contexte_db") as mock_db:
             mock_db.return_value.__enter__.side_effect = Exception("Error")
             result = service.get_history()
             assert isinstance(result, list)
@@ -562,7 +562,7 @@ class TestGetStats:
         # On mock au niveau de src.core.database
         service = ActionHistoryService()
 
-        with patch("src.core.database.obtenir_contexte_db") as mock_context:
+        with patch("src.core.db.obtenir_contexte_db") as mock_context:
             mock_session = MagicMock()
             mock_session.query.return_value.scalar.return_value = 100
             mock_session.query.return_value.filter.return_value.scalar.return_value = 10
@@ -576,7 +576,7 @@ class TestGetStats:
         """Erreur dans get_stats retourne stats vides."""
         service = ActionHistoryService()
 
-        with patch("src.core.database.obtenir_contexte_db") as mock_context:
+        with patch("src.core.db.obtenir_contexte_db") as mock_context:
             mock_context.return_value.__enter__.side_effect = Exception("DB Error")
             stats = service.get_stats()
 
@@ -750,7 +750,7 @@ class TestPrivateMethods:
             description="Test",
         )
 
-        with patch("src.core.database.obtenir_contexte_db") as mock_context:
+        with patch("src.core.db.obtenir_contexte_db") as mock_context:
             mock_context.return_value.__enter__.side_effect = Exception("DB Error")
             # Ne doit pas lever d'exception
             service._save_to_database(entry)

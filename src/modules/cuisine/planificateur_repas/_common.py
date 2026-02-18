@@ -18,7 +18,7 @@ import streamlit as st
 logger = logging.getLogger(__name__)
 
 from src.core.ai import obtenir_client_ia
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.models import (
     Planning,
     Recette,

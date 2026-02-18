@@ -13,7 +13,7 @@ from typing import Any
 import streamlit as st
 
 
-def tablet_button(
+def bouton_tablette(
     label: str,
     key: str | None = None,
     icon: str = "",
@@ -45,7 +45,7 @@ def tablet_button(
     return st.button(full_label, key=key, on_click=on_click, **kwargs)
 
 
-def tablet_select_grid(
+def grille_selection_tablette(
     options: list[dict[str, Any]],
     key: str,
     columns: int = 3,
@@ -83,7 +83,7 @@ def tablet_select_grid(
     return selected
 
 
-def tablet_number_input(
+def saisie_nombre_tablette(
     label: str,
     key: str,
     min_value: int = 0,
@@ -135,7 +135,7 @@ def tablet_number_input(
     return current
 
 
-def tablet_checklist(
+def liste_cases_tablette(
     items: list[str],
     key: str,
     on_check: Callable[[str, bool], None] | None = None,

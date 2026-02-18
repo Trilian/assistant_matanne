@@ -18,7 +18,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.core.performance import (
+from src.core.monitoring import (
     ChargeurComposant,
     MetriquePerformance,
     MoniteurMemoire,

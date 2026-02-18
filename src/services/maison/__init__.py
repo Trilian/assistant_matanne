@@ -38,7 +38,7 @@ _SERVICES = {
     "PlanJardinService": "plan_jardin_service",
     "MaisonAssistantIA": "assistant_ia",
     "TempsEntretienService": "temps_entretien_service",
-    # Factories
+    # Factories (anglais)
     "get_jardin_service": "jardin_service",
     "get_entretien_service": "entretien_service",
     "get_projets_service": "projets_service",
@@ -47,6 +47,14 @@ _SERVICES = {
     "get_plan_jardin_service": "plan_jardin_service",
     "get_maison_assistant": "assistant_ia",
     "get_temps_entretien_service": "temps_entretien_service",
+    # Factories (français)
+    "obtenir_service_jardin": "jardin_service",
+    "obtenir_service_entretien": "entretien_service",
+    "obtenir_service_projets": "projets_service",
+    "obtenir_service_energie": "energie_service",
+    "obtenir_service_inventaire_maison": "inventaire_service",
+    "obtenir_service_plan_jardin": "plan_jardin_service",
+    "obtenir_service_temps_entretien": "temps_entretien_service",
 }
 
 _SCHEMAS = {
@@ -90,12 +98,24 @@ def __dir__():
 # Type hints pour IDE sans charger les modules
 if TYPE_CHECKING:
     from .assistant_ia import MaisonAssistantIA, get_maison_assistant
-    from .energie_service import EnergieService, get_energie_service
-    from .entretien_service import EntretienService, get_entretien_service
-    from .inventaire_service import InventaireMaisonService, get_inventaire_service
-    from .jardin_service import JardinService, get_jardin_service
-    from .plan_jardin_service import PlanJardinService, get_plan_jardin_service
-    from .projets_service import ProjetsService, get_projets_service
+    from .energie_service import EnergieService, get_energie_service, obtenir_service_energie
+    from .entretien_service import (
+        EntretienService,
+        get_entretien_service,
+        obtenir_service_entretien,
+    )
+    from .inventaire_service import (
+        InventaireMaisonService,
+        get_inventaire_service,
+        obtenir_service_inventaire_maison,
+    )
+    from .jardin_service import JardinService, get_jardin_service, obtenir_service_jardin
+    from .plan_jardin_service import (
+        PlanJardinService,
+        get_plan_jardin_service,
+        obtenir_service_plan_jardin,
+    )
+    from .projets_service import ProjetsService, get_projets_service, obtenir_service_projets
     from .schemas import (
         AlerteMaison,
         BriefingMaison,
@@ -111,7 +131,11 @@ if TYPE_CHECKING:
         RoutineCreate,
         ZoneJardinCreate,
     )
-    from .temps_entretien_service import TempsEntretienService, get_temps_entretien_service
+    from .temps_entretien_service import (
+        TempsEntretienService,
+        get_temps_entretien_service,
+        obtenir_service_temps_entretien,
+    )
 
 __all__ = [
     # Services
@@ -123,7 +147,7 @@ __all__ = [
     "PlanJardinService",
     "MaisonAssistantIA",
     "TempsEntretienService",
-    # Factories
+    # Factories (anglais)
     "get_jardin_service",
     "get_entretien_service",
     "get_projets_service",
@@ -132,6 +156,14 @@ __all__ = [
     "get_plan_jardin_service",
     "get_maison_assistant",
     "get_temps_entretien_service",
+    # Factories (français)
+    "obtenir_service_jardin",
+    "obtenir_service_entretien",
+    "obtenir_service_projets",
+    "obtenir_service_energie",
+    "obtenir_service_inventaire_maison",
+    "obtenir_service_plan_jardin",
+    "obtenir_service_temps_entretien",
     # Schemas
     "BriefingMaison",
     "AlerteMaison",

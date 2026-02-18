@@ -17,7 +17,7 @@ try:
     from dotenv import load_dotenv
 
     # Chercher .env.local et .env depuis la racine du projet
-    project_root = Path(__file__).parent.parent.parent
+    project_root = Path(__file__).parent.parent.parent.parent
     load_dotenv(project_root / ".env.local")
     load_dotenv(project_root / ".env")
 except ImportError:
@@ -382,8 +382,7 @@ def _rechercher_image_unsplash(nom_recette: str, search_query: str = "") -> str 
                 return image_url
 
             # Fallback: prendre simplement la première si aucune ne correspond
-            if not best_result:
-                best_result = results[0]
+            best_result = results[0] if results else None
 
             if best_result and "urls" in best_result and "regular" in best_result["urls"]:
                 image_url = best_result["urls"]["regular"]

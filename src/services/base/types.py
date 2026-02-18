@@ -61,7 +61,7 @@ class BaseService(Generic[T]):
 
     def get_by_id(self, entity_id: int, db: Session | None = None) -> T | None:
         """Récupère par ID avec cache"""
-        from src.core.cache import Cache
+        from src.core.caching import Cache
         from src.core.errors import gerer_erreurs
 
         @gerer_erreurs(afficher_dans_ui=False, valeur_fallback=None)
@@ -404,7 +404,7 @@ class BaseService(Generic[T]):
         Returns:
             Résultat de la fonction
         """
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
 
         if db:
             return func(db)
@@ -469,7 +469,7 @@ class BaseService(Generic[T]):
         Utilise le nom du modèle en minuscules comme pattern de recherche.
         Appelé automatiquement après create, update, delete.
         """
-        from src.core.cache import Cache
+        from src.core.caching import Cache
 
         Cache.invalider(pattern=self.model_name.lower())
 

@@ -9,20 +9,20 @@ from enum import StrEnum
 import streamlit as st
 
 
-class TabletMode(StrEnum):
+class ModeTablette(StrEnum):
     """Modes d'affichage tablette."""
 
     NORMAL = "normal"
-    TABLET = "tablet"
-    KITCHEN = "kitchen"  # Mode cuisine (très gros, tactile)
+    TABLETTE = "tablette"
+    CUISINE = "cuisine"  # Mode cuisine (très gros, tactile)
 
 
-def get_tablet_mode() -> TabletMode:
+def obtenir_mode_tablette() -> ModeTablette:
     """Retourne le mode tablette actuel."""
-    mode = st.session_state.get("tablet_mode", TabletMode.NORMAL)
-    return TabletMode(mode) if isinstance(mode, str) else mode
+    mode = st.session_state.get("mode_tablette", ModeTablette.NORMAL)
+    return ModeTablette(mode) if isinstance(mode, str) else mode
 
 
-def set_tablet_mode(mode: TabletMode):
+def definir_mode_tablette(mode: ModeTablette):
     """Définit le mode tablette."""
-    st.session_state["tablet_mode"] = mode
+    st.session_state["mode_tablette"] = mode

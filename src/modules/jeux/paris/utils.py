@@ -12,7 +12,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.core.database import obtenir_contexte_db
+from src.core.db import obtenir_contexte_db
 from src.core.models import Equipe, HistoriqueJeux, Match, PariSportif
 
 logger = logging.getLogger(__name__)

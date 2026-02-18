@@ -45,7 +45,7 @@ def setup_module():
     # Step 2: Créer les tables BD
     print("\n2️⃣  Vérification base de données...")
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import (
             Equipe,
         )
@@ -66,7 +66,7 @@ def setup_module():
     # Step 3: Charger les données initiales
     print("\n3️⃣  Initialisation des données...")
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import Equipe
 
         with obtenir_contexte_db() as session:

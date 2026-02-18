@@ -179,7 +179,7 @@ class TestRoutesInventaireAvecMock:
         mock_query.first.return_value = mock_article
         mock_session.query.return_value = mock_query
 
-        with patch("src.core.database.obtenir_contexte_db", return_value=mock_context):
+        with patch("src.core.db.obtenir_contexte_db", return_value=mock_context):
             from src.api.main import app
 
             client = TestClient(app)
@@ -202,7 +202,7 @@ class TestRoutesInventaireAvecMock:
         mock_query.first.return_value = None
         mock_session.query.return_value = mock_query
 
-        with patch("src.core.database.obtenir_contexte_db", return_value=mock_context):
+        with patch("src.core.db.obtenir_contexte_db", return_value=mock_context):
             from src.api.main import app
 
             client = TestClient(app)
