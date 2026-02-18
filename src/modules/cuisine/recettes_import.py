@@ -11,7 +11,7 @@ from src.core.models import EtapeRecette, Ingredient, Recette, RecetteIngredient
 
 # Logique metier pure
 from src.services.recettes import get_recette_service
-from src.utils.recipe_importer import RecipeImporter
+from src.services.recettes.importer import RecipeImporter
 
 
 def render_importer():

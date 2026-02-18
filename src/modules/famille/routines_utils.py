@@ -8,7 +8,7 @@ from datetime import date, time, timedelta
 from typing import Any
 
 from src.core.constants import JOURS_SEMAINE
-from src.utils.formatters.dates import formater_temps
+from src.core.formatters import formater_temps
 
 logger = logging.getLogger(__name__)
 

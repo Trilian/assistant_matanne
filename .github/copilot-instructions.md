@@ -1,12 +1,14 @@
 # Instructions Copilot pour Codebase Assistant Matanne
 
 ## Vue d'ensemble du projet
+
 **Type**: Application Streamlit de gestion familiale  
 **Langage**: Python 3.11+ avec SQLAlchemy 2.0 ORM  
 **Base de données**: Supabase PostgreSQL avec migrations Alembic  
 **Stack clé**: Streamlit, SQLAlchemy, Pydantic v2, API Mistral AI, pandas, Plotly
 
 Hub de gestion familiale en production avec modules pour:
+
 - 🍽️ Recettes et planification des repas (suggestions IA)
 - 🛍️ Listes de courses et scans de codes-barres
 - 📅 Planification d'activités et routines familiales
@@ -14,35 +16,51 @@ Hub de gestion familiale en production avec modules pour:
 - 💪 Suivi de la santé et du fitness
 - 📊 Tableau de bord familial avec métriques
 
-**Architecture**: Chargement différé avec ~60% d'accélération au démarrage via `OptimizedRouter`, modèles SQLAlchemy unifiés (fichier unique de 1144 lignes), codebase en français.
+**Architecture**: Chargement différé avec ~60% d'accélération au démarrage via `OptimizedRouter`, modèles SQLAlchemy modulaires dans `core/models/` (18 fichiers), codebase en français.
 
 ---
 
 ## Architecture
 
 ### Modules principaux (src/core/)
+
 - **config.py**: Pydantic `BaseSettings` avec chargement en cascade: `.env.local` → `.env` → secrets Streamlit → constantes
-- **models.py**: Tous les modèles SQLAlchemy ORM (1144 lignes, fichier unique) avec DeclarativeBase et conventions de nommage des contraintes
+- **models/**: Modèles SQLAlchemy ORM modulaires (18 fichiers organisés par domaine: recettes, inventaire, planning, famille...)
 - **database.py**: `GestionnaireMigrations` pour la gestion des versions de schéma; sans dépendance runtime Alembic; utilise le gestionnaire de contexte `get_db_context()`
 - **decorators.py**: `@with_db_session` (injecte automatiquement la Session), `@with_cache` (cache Streamlit basé sur TTL), `@with_error_handling`
 - **lazy_loader.py**: `OptimizedRouter` pour le chargement dynamique des modules; classe `LazyModuleLoader`; améliore massivement le temps de démarrage
+- **date_utils.py**: Fonctions de manipulation de dates/semaines centralisées (nouvellement consolidé)
+- **formatters.py**: Fonctions de formatage (dates, nombres, texte, unités) centralisées
+- **helpers.py**: Fonctions utilitaires (data, stats, strings, food) centralisées
+- **image_generator.py**: Génération d'images via APIs (Unsplash, Pexels, Pollinations...)
 - **ai/**: Sous-module avec `ClientIA` (client Mistral), `AnalyseurIA` (parsing JSON/Pydantic), `CacheIA` (cache sémantique), `RateLimitIA`
 
 ### Couche Services (src/services/)
-- **base_ai_service.py**: `BaseAIService` avec limitation de débit intégrée, cache sémantique, parsing JSON, gestion d'erreurs unifiée
-- **base_service.py**: Modèle de service de base générique pour la base de données
-- **recettes.py**, **courses.py**, **planning.py**, **inventaire.py**: Services spécifiques au domaine utilisant `BaseAIService`
+
+- **base/**: `BaseAIService` avec limitation de débit intégrée, cache sémantique, parsing JSON, gestion d'erreurs unifiée
+- **recettes/**: Service recettes avec `importer.py` pour import URL/PDF
+- **planning/**: Service modulaire divisé en sous-modules:
+  - `nutrition.py`: Équilibre nutritionnel
+  - `agregation.py`: Agrégation des courses
+  - `formatters.py`: Formatage pour l'UI
+  - `validators.py`: Validation des plannings
+  - `prompts.py`: Génération de prompts IA
+- **courses.py**, **inventaire.py**: Services spécifiques au domaine
 - **barcode.py**, **rapports_pdf.py**, **predictions.py**: Services utilitaires
 - Tous exportent des fonctions factory `get_{service_name}_service()` pour l'injection de dépendances
 
 ### Composants UI (src/ui/)
+
 - **components/**: Widgets Streamlit réutilisables (boutons, cartes, tableaux, modales, badges)
 - **feedback/**: Utilitaires `smart_spinner()`, `show_success()`, `show_error()`, `show_warning()`
 - **core/**: Constructeurs de formulaires, gestionnaires de modales avec décorateurs `@st.cache_data`
+- **layout/**: Header, footer, sidebar, styles
 - Tous les composants retournent des objets Streamlit directement (pas de wrappers)
 
 ### Modules Métier (src/modules/)
+
 Chaque module exporte la fonction `app()` (point d'entrée pour le chargement différé):
+
 - **accueil.py**: Tableau de bord avec métriques familiales, alertes critiques, raccourcis rapides
 - **cuisine/**: Recettes, planification des repas, gestion des stocks
 - **famille/**: Hub de la vie familiale: suivi de Jules (enfant), santé/bien-être, activités, achats
@@ -55,6 +73,7 @@ Chaque module exporte la fonction `app()` (point d'entrée pour le chargement di
 ## Flux de travail critiques pour les développeurs
 
 ### Lancer l'application
+
 ```bash
 # Développement (point d'entrée principal)
 streamlit run src/app.py
@@ -67,6 +86,7 @@ python manage.py run
 ```
 
 ### Base de données et migrations
+
 ```bash
 # Génère automatiquement une migration à partir des changements de modèles
 python manage.py create_migration
@@ -85,6 +105,7 @@ alembic history
 ```
 
 ### Tests
+
 ```bash
 # Tous les tests avec rapport de couverture (HTML + terminal)
 python manage.py test_coverage
@@ -101,6 +122,7 @@ pytest -m integration
 ```
 
 ### Qualité du code
+
 ```bash
 # Formate le code (black, longueur de ligne 100)
 python manage.py format_code
@@ -117,12 +139,14 @@ python manage.py generate_requirements
 ## Conventions spécifiques au projet
 
 ### Nommage et langage
+
 - **Français partout**: Tous les noms de variables, commentaires, docstrings et noms de fonctions utilisent le français (ex: `obtenir_parametres()`, `GestionnaireMigrations`, `avec_session_db`)
-- **Structure des fichiers**: Tous les modèles dans `src/core/models.py` (NON dispersés), tous les décorateurs dans `src/core/decorators.py`
+- **Structure des fichiers**: Modèles SQLAlchemy dans `src/core/models/` (18 fichiers modulaires), tous les décorateurs dans `src/core/decorators.py`, utilitaires dans `src/core/` (date_utils, formatters, helpers)
 - **Nommage des modules**: Les modules sont `src/modules/{name}.py` ou `src/modules/{name}/__init__.py`
 - **Factories de services**: Toujours exporter une fonction `get_{service_name}_service()` pour l'injection de dépendances (ex: `get_recette_service()`)
 
 ### Points d'entrée
+
 - **Modules Streamlit**: Chaque module DOIT exporter une fonction `app()` comme point d'entrée:
   ```python
   def app():
@@ -133,6 +157,7 @@ python manage.py generate_requirements
 - Pas de renommage de fonctions (ne pas utiliser `afficher()` ou autres - s'en tenir à `app()`)
 
 ### Modèle de gestion des erreurs
+
 ```python
 from src.core.errors import ErreurBaseDeDonnees
 
@@ -142,9 +167,11 @@ except Exception as e:
     logger.error(f"L'opération a échoué: {e}")
     raise ErreurBaseDeDonnees("Message convivial pour l'utilisateur")
 ```
+
 Voir [src/core/errors.py](src/core/errors.py) et [src/core/decorators.py](src/core/decorators.py#L1) pour le décorateur `@gerer_erreurs`.
 
 ### Gestion des sessions de base de données
+
 ```python
 from src.core.database import get_db_context
 from src.core.decorators import with_db_session
@@ -162,9 +189,11 @@ with get_db_context() as session:
     result = session.query(Recette).first()
     session.commit()
 ```
+
 Clé: Toujours utiliser `get_db_context()` - ne jamais créer Engine/Session directement.
 
 ### Stratégie de cache
+
 - **Cache Streamlit**: `@st.cache_data(ttl=1800)` pour les données UI (par défaut 30 min)
 - **Cache des réponses IA**: `CacheIA` dans `src/core/ai/cache.py` pour le cache sémantique des appels IA
 - **Invalidation manuelle**: `StateManager` peut nettoyer le cache lors d'actions utilisateur
@@ -176,12 +205,15 @@ Clé: Toujours utiliser `get_db_context()` - ne jamais créer Engine/Session dir
   ```
 
 ### Modèle de chargement différé
+
 Les modules sont chargés à la demande seulement quand ils sont sélectionnés:
+
 ```python
 # Dans app.py: géré automatiquement via OptimizedRouter
 if hasattr(module, "app"):
     module.app()  # Point d'entrée du module chargé différemment
 ```
+
 Garder les imports de modules DANS la fonction `app()`, pas au niveau du module, pour préserver la performance du démarrage.
 
 ---
@@ -189,11 +221,13 @@ Garder les imports de modules DANS la fonction `app()`, pas au niveau du module,
 ## Points d'intégration et dépendances
 
 ### APIs externes
+
 - **Mistral AI**: Client à `src/core/ai/client.py`, configuré dans [config.py](src/core/config.py). Tous les appels IA passent par `BaseAIService` avec limitation de débit et cache intégrés.
 - **Supabase PostgreSQL**: Connexion via `DATABASE_URL` depuis `.env.local`. Format: `postgresql://user:password@host/db`
 - **Limites de débit**: `AI_RATE_LIMIT_DAILY`, `AI_RATE_LIMIT_HOURLY` définis dans [src/core/constants.py](src/core/constants.py)
 
 ### Intégration du service IA
+
 ```python
 from src.services.base_ai_service import BaseAIService
 from src.core.ai import ClientIA, AnalyseurIA
@@ -211,14 +245,17 @@ class MonService(BaseAIService):
 service = get_recette_service()  # Fonction factory
 suggestions = service.suggest_recipes("Dîner rapide")
 ```
+
 Clé: Tous les appels IA sont enveloppés avec limitation de débit automatique, cache sémantique et récupération d'erreurs.
 
 ### Communication inter-modules
+
 - **Helpers partagés**: `src/modules/famille/helpers.py` fournit des fonctions réutilisables avec décorateurs `@st.cache_data`
 - **Gestion d'état**: `StateManager` dans [src/core/state.py](src/core/state.py) fournit un magasin clé-valeur global (nom de famille, préférences utilisateur)
 - **Relations de base de données**: SQLAlchemy `relationship()` avec `back_populates` pour l'accès aux objets bidirectionnel entre modèles
 
 ### Sources de configuration (en cascade)
+
 1. Fichier `.env.local` (racine du projet, plus haute priorité)
 2. Fichier `.env` (fallback)
 3. Secrets du cloud Streamlit (`st.secrets`)
@@ -231,6 +268,7 @@ Importer via: `from src.core.config import obtenir_parametres()`
 ## Modèles courants à suivre
 
 ### Ajouter un nouveau module
+
 1. Créer `src/modules/mymodule.py` ou `src/modules/mymodule/__init__.py`
 2. Exporter la fonction `app()` comme point d'entrée:
    ```python
@@ -244,6 +282,7 @@ Importer via: `from src.core.config import obtenir_parametres()`
 5. Enregistrer dans `OptimizedRouter.MODULE_REGISTRY` dans [src/app.py](src/app.py) (auto-découverte si suit la convention de nommage)
 
 ### Ajouter un modèle de base de données
+
 1. Ajouter la classe à [src/core/models.py](src/core/models.py) en héritant de `Base`
 2. Suivre les modèles ORM SQLAlchemy 2.0 avec indices de type `mapped_column` et `Mapped`
 3. Utiliser la convention de nommage pour les contraintes (déjà configurée dans models.py)
@@ -252,6 +291,7 @@ Importer via: `from src.core.config import obtenir_parametres()`
 6. Les fichiers de migration apparaissent dans `alembic/versions/` numérotés avec préfixe de date
 
 ### Intégration IA
+
 ```python
 from src.services.base_ai_service import BaseAIService
 from src.core.ai import ClientIA
@@ -272,6 +312,7 @@ class RecipeService(BaseAIService):
 ```
 
 ### Modèles de test
+
 ```python
 # Dans tests/test_mymodule.py
 import pytest
@@ -288,39 +329,44 @@ def test_create_recipe(test_db: Session):
     assert result.nom == "Tarte"
     # Session nettoyée automatiquement après le test
 ```
+
 Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire pour des tests isolés.
 
 ---
 
 ## Référence des fichiers clés
 
-| Fichier | Objectif |
-|------|---------|
-| [src/core/config.py](src/core/config.py) | Chargement et validation de la configuration |
-| [src/core/models.py](src/core/models.py) | Tous les modèles ORM SQLAlchemy |
-| [src/core/database.py](src/core/database.py) | Connexions BD, gestionnaire de migrations |
-| [src/app.py](src/app.py) | App Streamlit principale, routage, chargement différé |
-| [src/core/decorators.py](src/core/decorators.py) | Utilitaires `@with_db_session`, `@with_cache` |
-| [pyproject.toml](pyproject.toml) | Dépendances (Poetry), config test, règles de linting |
-| [alembic/env.py](alembic/env.py) | Configuration d'environnement des migrations |
+| Fichier                                          | Objectif                                              |
+| ------------------------------------------------ | ----------------------------------------------------- |
+| [src/core/config.py](src/core/config.py)         | Chargement et validation de la configuration          |
+| [src/core/models.py](src/core/models.py)         | Tous les modèles ORM SQLAlchemy                       |
+| [src/core/database.py](src/core/database.py)     | Connexions BD, gestionnaire de migrations             |
+| [src/app.py](src/app.py)                         | App Streamlit principale, routage, chargement différé |
+| [src/core/decorators.py](src/core/decorators.py) | Utilitaires `@with_db_session`, `@with_cache`         |
+| [pyproject.toml](pyproject.toml)                 | Dépendances (Poetry), config test, règles de linting  |
+| [alembic/env.py](alembic/env.py)                 | Configuration d'environnement des migrations          |
 
 ---
 
 ## Débogage rapide
 
 **Module ne se charge pas?**
+
 - Vérifier que la fonction `app()` existe
 - Vérifier le chemin du chargeur paresseux dans `MODULE_REGISTRY`
 
 **Connexion à la base de données échouée?**
+
 - Vérifier `DATABASE_URL` dans `.env.local`: format `postgresql://user:pass@host/db`
 - Exécuter: `python -c "from src.core.database import obtenir_moteur; obtenir_moteur().connect()"`
 
 **Tests échouent?**
+
 - Conftest.py fournit des fixtures de BD SQLite en mémoire pour les tests isolés
 - Utiliser `pytest tests/test_name.py::TestClass::test_method -v` pour un test unique
 
 **Les migrations ne s'appliquent pas?**
+
 - Vérifier `alembic/versions/` pour les erreurs de syntaxe
 - Assurer que tous les imports dans les fichiers de migration sont valides
 - Exécuter `alembic current` pour voir la version appliquée

@@ -1,7 +1,7 @@
 """
 UI Components pour le module Maison.
 
-Composants visuels interactifs:
+Composants visuels interactifs déplacés de src/ui/maison/:
 - Plan interactif de la maison (pièces, objets)
 - Plan interactif du jardin (zones, plantes)
 - Cartes et widgets spécifiques maison

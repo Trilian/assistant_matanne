@@ -10,11 +10,8 @@ Architecture:
 
 Note: Les modules sont chargés paresseusement - pas d'import automatique
 pour éviter les dépendances circulaires.
+Les constantes partagées sont maintenant dans src/core/constants.py.
 """
-
-# Chargement différé explicite: seul 'shared' est importé automatiquement
-# car il contient les constantes partagées sans dépendances
-from . import shared
 
 __all__ = [
     "accueil",
@@ -25,5 +22,4 @@ __all__ = [
     "parametres",
     "utilitaires",
     "jeux",
-    "shared",
 ]

@@ -9,11 +9,10 @@ Ce module réexporte les éléments de:
 """
 
 # Types et dataclasses
-# Compatibilité: importer get_debut_semaine depuis shared
 # Réexport de JOURS_SEMAINE pour compatibilité
 from src.core.constants import JOURS_SEMAINE, JOURS_SEMAINE_COURT
-from src.modules.shared.date_utils import obtenir_debut_semaine as get_debut_semaine
-from src.modules.shared.date_utils import obtenir_fin_semaine as get_fin_semaine
+from src.core.date_utils import obtenir_debut_semaine as get_debut_semaine
+from src.core.date_utils import obtenir_fin_semaine as get_fin_semaine
 
 # Aggregation
 from .aggregation import (

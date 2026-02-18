@@ -12,7 +12,7 @@ Fonctions pour:
 from datetime import date, time, timedelta
 from typing import Any
 
-from src.modules.shared.date_utils import obtenir_debut_semaine as get_debut_semaine
+from src.core.date_utils import obtenir_debut_semaine as get_debut_semaine
 
 from .converters import (
     convertir_activite_en_evenement,
