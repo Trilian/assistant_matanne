@@ -43,7 +43,7 @@ from .pwa import (
     generate_offline_page,
     generate_pwa_files,
     generate_service_worker,
-    # Injection et rendu
+    # Injection et rendu (rétrocompat depuis ui/views)
     inject_pwa_meta,
     # Utilitaires
     is_pwa_installed,
@@ -58,7 +58,7 @@ from .synchronisation import (
     SyncEventType,
     SyncState,
     get_realtime_sync_service,
-    # Composants UI
+    # Composants UI (rétrocompat depuis ui/views)
     render_presence_indicator,
     render_sync_status,
     render_typing_indicator,

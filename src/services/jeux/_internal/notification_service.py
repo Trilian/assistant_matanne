@@ -13,12 +13,11 @@ Intégration avec:
 """
 
 import logging
+from collections.abc import MutableMapping
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, StrEnum
 from typing import Any
-
-import streamlit as st
 
 from src.core.database import obtenir_contexte_db
 from src.core.models import AlerteJeux
@@ -103,20 +102,32 @@ class NotificationJeuxService:
     SESSION_KEY = "jeux_notifications"
     MAX_NOTIFICATIONS = 50
 
-    def __init__(self):
-        """Initialise le service."""
+    def __init__(self, storage: MutableMapping[str, Any] | None = None):
+        """Initialise le service.
+
+        Args:
+            storage: Stockage clé-valeur mutable (défaut: st.session_state).
+        """
+        self._storage = storage if storage is not None else self._get_default_storage()
         self._init_session()
+
+    @staticmethod
+    def _get_default_storage() -> MutableMapping[str, Any]:
+        """Retourne le stockage par défaut (st.session_state)."""
+        import streamlit as st
+
+        return st.session_state
 
     def _init_session(self):
         """Initialise le stockage session."""
-        if self.SESSION_KEY not in st.session_state:
-            st.session_state[self.SESSION_KEY] = []
+        if self.SESSION_KEY not in self._storage:
+            self._storage[self.SESSION_KEY] = []
 
     @property
     def notifications(self) -> list[NotificationJeux]:
         """Liste des notifications en session."""
         self._init_session()
-        return st.session_state[self.SESSION_KEY]
+        return self._storage[self.SESSION_KEY]
 
     # ───────────────────────────────────────────────────────────────
     # CRÉATION
@@ -157,12 +168,12 @@ class NotificationJeuxService:
 
         # Ajouter en session
         self._init_session()
-        notifications = st.session_state[self.SESSION_KEY]
+        notifications = self._storage[self.SESSION_KEY]
         notifications.insert(0, notification)
 
         # Limiter le nombre
         if len(notifications) > self.MAX_NOTIFICATIONS:
-            st.session_state[self.SESSION_KEY] = notifications[: self.MAX_NOTIFICATIONS]
+            self._storage[self.SESSION_KEY] = notifications[: self.MAX_NOTIFICATIONS]
 
         logger.info(f"Notification créée: {titre}")
         return notification
@@ -313,7 +324,7 @@ class NotificationJeuxService:
     def supprimer(self, notification_id: str) -> bool:
         """Supprime une notification."""
         self._init_session()
-        notifications = st.session_state[self.SESSION_KEY]
+        notifications = self._storage[self.SESSION_KEY]
         for i, notif in enumerate(notifications):
             if notif.id == notification_id:
                 del notifications[i]
@@ -323,7 +334,7 @@ class NotificationJeuxService:
     def vider(self) -> int:
         """Vide toutes les notifications."""
         count = len(self.notifications)
-        st.session_state[self.SESSION_KEY] = []
+        self._storage[self.SESSION_KEY] = []
         return count
 
     # ───────────────────────────────────────────────────────────────
@@ -384,64 +395,33 @@ class NotificationJeuxService:
 
 
 # ═══════════════════════════════════════════════════════════
-# UI HELPERS
+# UI HELPERS — rétrocompatibilité, implémentation dans src.ui.views.jeux
 # ═══════════════════════════════════════════════════════════
 
 
-def afficher_badge_notifications(service: NotificationJeuxService) -> None:
-    """Affiche un badge avec le nombre de notifications non lues."""
-    non_lues = service.compter_non_lues()
-    if non_lues > 0:
-        st.markdown(
-            f"""
-            <span style="background-color: #FF4B4B; color: white;
-                         padding: 2px 8px; border-radius: 10px;
-                         font-size: 12px; font-weight: bold;">
-                {non_lues}
-            </span>
-            """,
-            unsafe_allow_html=True,
-        )
+def afficher_badge_notifications(service: "NotificationJeuxService | None" = None) -> None:
+    """Rétrocompat — délègue à src.ui.views.jeux."""
+    from src.ui.views.jeux import afficher_badge_notifications_jeux
+
+    afficher_badge_notifications_jeux(service)
 
 
-def afficher_notification(notification: NotificationJeux) -> None:
-    """Affiche une notification dans l'UI."""
-    with st.container():
-        col1, col2 = st.columns([1, 10])
+def afficher_notification(notification: "NotificationJeux") -> None:
+    """Rétrocompat — délègue à src.ui.views.jeux."""
+    from src.ui.views.jeux import afficher_notification_jeux
 
-        with col1:
-            st.markdown(f"### {notification.icone}")
-
-        with col2:
-            titre_style = "font-weight: normal;" if notification.lue else "font-weight: bold;"
-            st.markdown(
-                f"<span style='{titre_style}'>{notification.titre}</span>",
-                unsafe_allow_html=True,
-            )
-            st.caption(notification.message)
-            st.caption(f"🕐 {notification.cree_le.strftime('%H:%M %d/%m')}")
+    afficher_notification_jeux(notification)
 
 
 def afficher_liste_notifications(
-    service: NotificationJeuxService,
+    service: "NotificationJeuxService | None" = None,
     limite: int = 10,
     type_jeu: str | None = None,
 ) -> None:
-    """Affiche la liste des notifications."""
-    notifications = service.notifications
+    """Rétrocompat — délègue à src.ui.views.jeux."""
+    from src.ui.views.jeux import afficher_liste_notifications_jeux
 
-    if type_jeu:
-        notifications = [n for n in notifications if n.type_jeu == type_jeu]
-
-    notifications = notifications[:limite]
-
-    if not notifications:
-        st.info("Aucune notification")
-        return
-
-    for notif in notifications:
-        afficher_notification(notif)
-        st.divider()
+    afficher_liste_notifications_jeux(service, limite, type_jeu)
 
 
 # ═══════════════════════════════════════════════════════════

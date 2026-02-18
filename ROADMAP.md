@@ -1,6 +1,42 @@
 # 🗺️ ROADMAP - Assistant Matanne
 
-> Dernière mise à jour: 2 février 2026
+> Dernière mise à jour: 18 février 2026
+
+---
+
+## ✅ Terminé (Session 18 février)
+
+### 🎉 REFONTE MAJEURE ARCHITECTURE
+
+Restructuration complète du codebase avec amélioration massive de la couverture de tests.
+
+#### Refactoring UI (7 phases)
+
+- Suppression des wrappers dépréciés (`dashboard_widgets`, `google_calendar_sync`, `base_module`, `tablet_mode`)
+- Restructuration `ui/components` en `atoms`, `charts`, `metrics`, `system`
+- Nouveaux modules: `ui/tablet/`, `ui/views/`, `ui/integrations/`
+- Ajout `ui/core/crud_renderer`, `module_config`
+
+#### Refactoring Services
+
+- Services divisés en sous-modules (inventaire, jeux, maison)
+- Nouveaux packages: `cuisine/`, `infrastructure/`, `integrations/meteo/`
+- Restructuration `jeux` en `_internal/` sub-package
+- Extraction: `google_calendar`, `planning_pdf`, `recettes_ia_generation`
+
+#### Refactoring Core
+
+- `config.py` → `config/` package (settings, loader)
+- `validation.py` → `validation/` package (schemas, sanitizer, validators)
+- Nouveaux packages: `caching/`, `db/`, `monitoring/`
+- Annotations type modernisées (PEP 604: `X | Y`)
+
+#### Tests & Coverage
+
+- **12 fichiers tests corrigés** (imports `src.utils`/`src.modules.shared` → `src.core`)
+- **6 fichiers tests fantômes supprimés** (testaient du code inexistant)
+- **44 nouveaux tests** pour `image_generator.py` avec mocking API
+- Coverage améliorée: `helpers` 0→92%, `formatters` 12→94%, `date_utils` 49→81%
 
 ---
 
@@ -140,29 +176,29 @@ def sauvegarder_alerte(alerte: dict, db: Session):
 
 ## 🟡 À faire cette semaine - PRIORITÉ MOYENNE
 
-### 4. Tests - PARTIELLEMENT TERMINÉ ✅
+### 4. Tests - ✅ COUVERTURE ATTEINTE, CORRECTIONS EN COURS
 
 ```bash
-# Objectif: passer de ~40% à 70% couverture
-# Actuel: 28.32% (amélioration significative)
-python manage.py test_coverage
+# État actuel: 8661 tests, 8115 passent (93.7%)
+# 507 tests en échec à corriger
+python -m pytest --tb=no -q
 ```
 
-**Fichiers tests créés:**
+**Fichiers tests à corriger (507 failures):**
 
-- [x] `tests/test_budget.py` - 26 tests pour modèles Depense
-- [x] `tests/test_notifications.py` - 20 tests
-- [x] `tests/test_predictions.py` - 24 tests
-- [x] `tests/test_action_history.py` - 24 tests
-- [x] `tests/test_suggestions_ia.py` - 16 tests
-- [x] `tests/test_recipe_import.py` - 36 tests
-- [x] `tests/test_redis_multi_tenant.py` - 22 tests
+- [ ] `tests/services/utilisateur/` - 67 failures (authentification, historique)
+- [ ] `tests/services/web/` - 53 failures (synchronisation)
+- [ ] `tests/modules/maison/` - ~250 failures (projets, eco_tips, scan_factures, meubles, utils, énergie, jardin, entretien)
+- [ ] `tests/modules/accueil/` - 21 failures
+- [ ] `tests/services/jeux/` - 22 errors (imports cassés)
 
-**Fichiers tests à créer:**
+**Fichiers avec 0% coverage à tester:**
 
-- [ ] `tests/test_weather.py` - Service météo
-- [ ] `tests/test_backup.py` - Service backup
-- [ ] `tests/test_calendar_sync.py` - Sync calendrier
+- [ ] `src/core/image_generator.py` (311 stmts) — 44 tests créés, vérifier coverage
+- [ ] `src/modules/utilitaires/barcode.py` (288 stmts)
+- [ ] `src/services/rapports/generation.py` (248 stmts)
+- [ ] `src/modules/maison/ui/plan_jardin.py` (240 stmts)
+- [ ] `src/modules/utilitaires/rapports.py` (200 stmts)
 
 ### 5. Migration Alembic (1h)
 
@@ -210,26 +246,43 @@ streamlit run src/app.py
 
 ## 📊 Métriques projet
 
-| Métrique         | Actuel     | Objectif | Status        |
-| ---------------- | ---------- | -------- | ------------- |
-| Couverture tests | **28.32%** | 70%      | 🟡 En cours   |
-| Tests passés     | **1491**   | 2000+    | 🟢            |
-| Temps démarrage  | ~2s        | <1.5s    | 🟡            |
-| Tables SQL       | 35         | ✅       | ✅            |
-| Services         | 25         | ✅       | ✅            |
-| Fichiers .md     | 3          | ✅       | ✅ (était 52) |
+| Métrique              | Actuel        | Objectif | Status           |
+| --------------------- | ------------- | -------- | ---------------- |
+| Tests collectés       | **8 661**     | ✅       | ✅               |
+| Tests passés          | **8 115**     | 100%     | 🟡 93.7%         |
+| Tests en échec        | **507**       | 0        | 🔴 5.9%          |
+| Couverture tests      | **~70%**      | 80%      | 🟢 (était 28%)   |
+| Lint (ruff)           | **2 issues**  | 0        | 🟡 auto-fixable  |
+| Fichiers 0% coverage  | **22**        | 0        | 🟡 2758 stmts    |
+| Temps démarrage       | ~1.5s         | <1.5s    | ✅               |
+| Tables SQL            | 35            | ✅       | ✅               |
+| Services              | 30+           | ✅       | ✅               |
 
 ---
 
 ## 🔧 Prochaines actions recommandées
 
 ```
-✅ .env.example existe déjà (complet)
-□ Générer VAPID keys: npx web-push generate-vapid-keys
+🔴 PRIORITÉ HAUTE:
+□ Corriger 507 tests en échec (35 fichiers)
+  - services/utilisateur (67 failures)
+  - services/web (53 failures)
+  - modules/maison (~250 failures)
+  - modules/accueil (21 failures)
+  - services/jeux (22 errors - imports cassés)
+
+□ Committer les changements en cours (11 fichiers modifiés)
+□ Fix lint: ruff check src tests --fix
+
+🟡 PRIORITÉ MOYENNE:
+□ Nettoyer ~16 fichiers temp à la racine
+□ Augmenter coverage des 22 fichiers à 0%
 □ Déployer SUPABASE_COMPLET_V3.sql
-□ Migrer services vers nouveaux modèles DB
-□ Créer tests pour weather, backup, calendar_sync
-□ Viser 40% couverture (+12%)
+
+🟢 PRIORITÉ BASSE:
+□ Générer VAPID keys: npx web-push generate-vapid-keys
+□ Intégrer Sentry pour error tracking
+□ Activer Redis en production
 ```
 
 ---

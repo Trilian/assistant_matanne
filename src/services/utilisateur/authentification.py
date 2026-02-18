@@ -10,11 +10,11 @@ Fonctionnalités:
 """
 
 import logging
+from collections.abc import MutableMapping
 from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-import streamlit as st
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -118,10 +118,22 @@ class AuthService:
     SESSION_KEY = "_auth_session"
     USER_KEY = "_auth_user"
 
-    def __init__(self):
-        """Initialise le service avec le client Supabase."""
+    def __init__(self, storage: MutableMapping[str, Any] | None = None):
+        """Initialise le service avec le client Supabase.
+
+        Args:
+            storage: Stockage clé-valeur mutable (défaut: st.session_state).
+        """
+        self._storage = storage if storage is not None else self._get_default_storage()
         self._client = None
         self._init_client()
+
+    @staticmethod
+    def _get_default_storage() -> MutableMapping[str, Any]:
+        """Retourne le stockage par défaut (st.session_state)."""
+        import streamlit as st
+
+        return st.session_state
 
     def _init_client(self):
         """Initialise le client Supabase."""
@@ -291,7 +303,7 @@ class AuthService:
                 )
 
                 # Sauvegarder en session
-                st.session_state[self.USER_KEY] = user
+                self._storage[self.USER_KEY] = user
                 logger.info(f"✅ Connexion démo réussie: {email} ({user.role.value})")
 
                 return AuthResult(
@@ -415,7 +427,7 @@ class AuthService:
 
     def get_current_user(self) -> UserProfile | None:
         """Retourne l'utilisateur actuellement connecté."""
-        return st.session_state.get(self.USER_KEY)
+        return self._storage.get(self.USER_KEY)
 
     def is_authenticated(self) -> bool:
         """Vérifie si un utilisateur est connecté."""
@@ -458,15 +470,15 @@ class AuthService:
 
     def _save_session(self, session: Any, user: UserProfile):
         """Sauvegarde la session."""
-        st.session_state[self.SESSION_KEY] = session
-        st.session_state[self.USER_KEY] = user
+        self._storage[self.SESSION_KEY] = session
+        self._storage[self.USER_KEY] = user
 
     def _clear_session(self):
         """Efface la session."""
-        if self.SESSION_KEY in st.session_state:
-            del st.session_state[self.SESSION_KEY]
-        if self.USER_KEY in st.session_state:
-            del st.session_state[self.USER_KEY]
+        if self.SESSION_KEY in self._storage:
+            del self._storage[self.SESSION_KEY]
+        if self.USER_KEY in self._storage:
+            del self._storage[self.USER_KEY]
 
     def refresh_session(self) -> bool:
         """
@@ -479,7 +491,7 @@ class AuthService:
             return False
 
         try:
-            session = st.session_state.get(self.SESSION_KEY)
+            session = self._storage.get(self.SESSION_KEY)
 
             if session:
                 # Vérifier et rafraîchir le token
@@ -635,7 +647,7 @@ class AuthService:
                 )
 
                 # Mettre à jour la session
-                st.session_state[self.USER_KEY] = updated_user
+                self._storage[self.USER_KEY] = updated_user
 
                 logger.info(f"Profil mis à jour: {user.email}")
 
@@ -680,220 +692,45 @@ class AuthService:
 
 
 # -----------------------------------------------------------
-# COMPOSANTS UI
+# COMPOSANTS UI — Rétrocompatibilité
 # -----------------------------------------------------------
+# Les fonctions UI ont été déplacées vers src.ui.views.authentification.
+# Les wrappers ci-dessous préservent la rétrocompatibilité des imports.
 
 
-def render_login_form(redirect_on_success: bool = True):
-    """
-    Affiche le formulaire de connexion.
+def render_login_form(redirect_on_success: bool = True):  # pragma: no cover
+    """Wrapper rétrocompat — délègue à src.ui.views.authentification."""
+    from src.ui.views.authentification import afficher_formulaire_connexion
 
-    Args:
-        redirect_on_success: Rerun après connexion réussie
-    """
-    auth = get_auth_service()
-
-    st.markdown("### 🔐 Connexion")
-
-    tab1, tab2 = st.tabs(["Se connecter", "S'inscrire"])
-
-    with tab1:
-        with st.form("login_form"):
-            email = st.text_input("Email", placeholder="votre@email.com")
-            password = st.text_input("Mot de passe", type="password")
-
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                submit = st.form_submit_button("Se connecter", use_container_width=True)
-            with col2:
-                forgot = st.form_submit_button("Mot de passe oublié?")
-
-            if submit and email and password:
-                result = auth.login(email, password)
-
-                if result.success:
-                    st.success(result.message)
-                    if redirect_on_success:
-                        st.rerun()
-                else:
-                    st.error(result.message)
-
-            if forgot and email:
-                result = auth.reset_password(email)
-                st.info(result.message)
-
-    with tab2:
-        with st.form("signup_form"):
-            email = st.text_input("Email", key="signup_email")
-            col1, col2 = st.columns(2)
-            with col1:
-                prenom = st.text_input("Prénom")
-            with col2:
-                nom = st.text_input("Nom")
-            password = st.text_input("Mot de passe", type="password", key="signup_pass")
-            password2 = st.text_input("Confirmer mot de passe", type="password")
-
-            submit = st.form_submit_button("S'inscrire", use_container_width=True)
-
-            if submit:
-                if not email or not password:
-                    st.error("Email et mot de passe requis")
-                elif password != password2:
-                    st.error("Les mots de passe ne correspondent pas")
-                elif len(password) < 6:
-                    st.error("Mot de passe trop court (min 6 caractères)")
-                else:
-                    result = auth.signup(email, password, nom, prenom)
-
-                    if result.success:
-                        st.success(result.message)
-                    else:
-                        st.error(result.message)
+    return afficher_formulaire_connexion(rediriger_apres_succes=redirect_on_success)
 
 
-def render_user_menu():
-    """Affiche le menu utilisateur dans la sidebar."""
-    auth = get_auth_service()
-    user = auth.get_current_user()
+def render_user_menu():  # pragma: no cover
+    """Wrapper rétrocompat — délègue à src.ui.views.authentification."""
+    from src.ui.views.authentification import afficher_menu_utilisateur
 
-    if user:
-        with st.sidebar:
-            st.markdown("---")
-
-            col1, col2 = st.columns([1, 3])
-            with col1:
-                st.markdown("👤")
-            with col2:
-                st.markdown(f"**{user.display_name}**")
-                st.caption(user.role.value.title())
-
-            if st.button("🚪 Déconnexion", use_container_width=True, key="logout_btn"):
-                auth.logout()
-                st.rerun()
-    else:
-        with st.sidebar:
-            st.markdown("---")
-            if st.button("🔐 Se connecter", use_container_width=True, key="login_btn"):
-                st.session_state["show_login"] = True
+    return afficher_menu_utilisateur()
 
 
-def render_profile_settings():
-    """Affiche les paramètres du profil utilisateur."""
-    auth = get_auth_service()
-    user = auth.get_current_user()
+def render_profile_settings():  # pragma: no cover
+    """Wrapper rétrocompat — délègue à src.ui.views.authentification."""
+    from src.ui.views.authentification import afficher_parametres_profil
 
-    if not user:
-        st.warning("Vous devez être connecté")
-        return
-
-    st.markdown("### 👤 Mon profil")
-
-    # Formulaire de mise à jour du profil
-    with st.form("profile_form"):
-        prenom = st.text_input("Prénom", value=user.prenom)
-        nom = st.text_input("Nom", value=user.nom)
-        avatar_url = st.text_input(
-            "URL Avatar", value=user.avatar_url or "", help="URL d'une image pour votre avatar"
-        )
-
-        st.markdown("---")
-        st.caption(f"📧 Email: {user.email}")
-        st.caption(f"🏆 Rôle: {user.role.value.title()}")
-        st.caption(
-            f"📅 Membre depuis: {user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A'}"
-        )
-
-        if st.form_submit_button(
-            "💾 Enregistrer les modifications", use_container_width=True, type="primary"
-        ):
-            result = auth.update_profile(
-                nom=nom if nom != user.nom else None,
-                prenom=prenom if prenom != user.prenom else None,
-                avatar_url=avatar_url if avatar_url != user.avatar_url else None,
-            )
-
-            if result.success:
-                st.success(f"? {result.message}")
-                st.rerun()
-            else:
-                st.error(f"❌ {result.message}")
-
-    # Section changement de mot de passe
-    st.markdown("---")
-    st.markdown("### 🔐 Changer le mot de passe")
-
-    with st.form("password_form"):
-        new_password = st.text_input("Nouveau mot de passe", type="password", key="new_pwd")
-        confirm_password = st.text_input(
-            "Confirmer le mot de passe", type="password", key="confirm_pwd"
-        )
-
-        if st.form_submit_button("🔐 Changer le mot de passe", use_container_width=True):
-            if not new_password:
-                st.error("Veuillez entrer un nouveau mot de passe")
-            elif new_password != confirm_password:
-                st.error("Les mots de passe ne correspondent pas")
-            elif len(new_password) < 6:
-                st.error("Mot de passe trop court (min 6 caractères)")
-            else:
-                result = auth.change_password(new_password)
-                if result.success:
-                    st.success(f"✅ {result.message}")
-                else:
-                    st.error(f"❌ {result.message}")
+    return afficher_parametres_profil()
 
 
-# -----------------------------------------------------------
-# DÉCORATEURS DE PERMISSION
-# -----------------------------------------------------------
+def require_authenticated(func):  # pragma: no cover
+    """Wrapper rétrocompat — délègue à src.ui.views.authentification."""
+    from src.ui.views.authentification import require_authenticated as _require_authenticated
+
+    return _require_authenticated(func)
 
 
-def require_authenticated(func):
-    """Décorateur qui exige une authentification."""
-    from functools import wraps
+def require_role(role: Role):  # pragma: no cover
+    """Wrapper rétrocompat — délègue à src.ui.views.authentification."""
+    from src.ui.views.authentification import require_role as _require_role
 
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        auth = get_auth_service()
-
-        if not auth.is_authenticated():
-            st.warning("🔐 Authentification requise")
-            render_login_form()
-            return None
-
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-def require_role(role: Role):
-    """Décorateur qui exige un rôle minimum."""
-
-    def decorator(func):
-        from functools import wraps
-
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            auth = get_auth_service()
-            user = auth.get_current_user()
-
-            if not user:
-                st.warning("🔐 Authentification requise")
-                render_login_form()
-                return None
-
-            # Hiérarchie des rôles
-            role_hierarchy = [Role.INVITE, Role.MEMBRE, Role.ADMIN]
-
-            if role_hierarchy.index(user.role) < role_hierarchy.index(role):
-                st.error(f"❌ Accès refusé. Rôle requis: {role.value}")
-                return None
-
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
+    return _require_role(role)
 
 
 # -----------------------------------------------------------

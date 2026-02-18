@@ -12,12 +12,12 @@ Fonctionnalités:
 """
 
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, MutableMapping
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, StrEnum
+from typing import Any
 
-import streamlit as st
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -95,12 +95,37 @@ class RealtimeSyncService:
     CHANNEL_PREFIX = "shopping_list_"
     STATE_KEY = "_realtime_sync_state"
 
-    def __init__(self):
-        """Initialise le service de synchronisation."""
+    def __init__(
+        self,
+        storage: MutableMapping[str, Any] | None = None,
+        on_rerun: Callable[[], None] | None = None,
+    ):
+        """Initialise le service de synchronisation.
+
+        Args:
+            storage: Stockage clé-valeur mutable (défaut: st.session_state).
+            on_rerun: Callback pour déclencher un rerun (défaut: st.rerun).
+        """
+        self._storage = storage if storage is not None else self._get_default_storage()
+        self._on_rerun = on_rerun if on_rerun is not None else self._get_default_rerun()
         self._client = None
         self._channel = None
         self._callbacks: dict[SyncEventType, list[Callable]] = {}
         self._init_client()
+
+    @staticmethod
+    def _get_default_storage() -> MutableMapping[str, Any]:
+        """Retourne le stockage par défaut (st.session_state)."""
+        import streamlit as st
+
+        return st.session_state
+
+    @staticmethod
+    def _get_default_rerun() -> Callable[[], None]:
+        """Retourne le callback rerun par défaut (st.rerun)."""
+        import streamlit as st
+
+        return st.rerun
 
     def _init_client(self):
         """Initialise le client Supabase Realtime."""
@@ -132,9 +157,9 @@ class RealtimeSyncService:
     @property
     def state(self) -> SyncState:
         """Retourne l'état de synchronisation."""
-        if self.STATE_KEY not in st.session_state:
-            st.session_state[self.STATE_KEY] = SyncState()
-        return st.session_state[self.STATE_KEY]
+        if self.STATE_KEY not in self._storage:
+            self._storage[self.STATE_KEY] = SyncState()
+        return self._storage[self.STATE_KEY]
 
     # ═══════════════════════════════════════════════════════════
     # CONNEXION AU CHANNEL
@@ -338,7 +363,7 @@ class RealtimeSyncService:
                     logger.error(f"Erreur callback: {e}")
 
             # Déclencher un rerun Streamlit
-            st.rerun()
+            self._on_rerun()
 
         except Exception as e:
             logger.error(f"Erreur traitement broadcast: {e}")
@@ -495,78 +520,29 @@ class RealtimeSyncService:
 
 
 # ═══════════════════════════════════════════════════════════
-# COMPOSANTS UI
+# COMPOSANTS UI (rétrocompatibilité — implémentation dans src.ui.views.synchronisation)
 # ═══════════════════════════════════════════════════════════
 
 
 def render_presence_indicator():
-    """Affiche les utilisateurs connectés sur la liste."""
-    sync = get_realtime_sync_service()
-    users = sync.get_connected_users()
+    """Rétrocompatibilité — délègue à src.ui.views.synchronisation."""
+    from src.ui.views.synchronisation import afficher_indicateur_presence
 
-    if not users:
-        return
-
-    st.markdown("---")
-    st.markdown("**👥 Connectés:**")
-
-    cols = st.columns(min(len(users), 5))
-    for i, user in enumerate(users[:5]):
-        with cols[i]:
-            # Avatar avec initiales
-            initials = "".join([w[0].upper() for w in user.user_name.split()[:2]])
-            st.markdown(
-                f"""
-                <div style="text-align: center;">
-                    <div style="
-                        width: 40px;
-                        height: 40px;
-                        border-radius: 50%;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                        display: inline-flex;
-                        align-items: center;
-                        justify-content: center;
-                        color: white;
-                        font-weight: bold;
-                        font-size: 14px;
-                    ">{initials}</div>
-                    <div style="font-size: 11px; margin-top: 4px;">{user.user_name}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-    if len(users) > 5:
-        st.caption(f"... et {len(users) - 5} autre(s)")
+    return afficher_indicateur_presence()
 
 
 def render_typing_indicator():
-    """Affiche les indicateurs de frappe."""
-    sync = get_realtime_sync_service()
+    """Rétrocompatibilité — délègue à src.ui.views.synchronisation."""
+    from src.ui.views.synchronisation import afficher_indicateur_frappe
 
-    typing_users = [
-        u
-        for u in sync.get_connected_users()
-        if u.is_typing and u.user_id != sync._get_current_user_id()
-    ]
-
-    if typing_users:
-        names = ", ".join([u.user_name for u in typing_users[:3]])
-        verb = "écrit" if len(typing_users) == 1 else "écrivent"
-        st.caption(f"✏️ {names} {verb}...")
+    return afficher_indicateur_frappe()
 
 
 def render_sync_status():
-    """Affiche le statut de synchronisation."""
-    sync = get_realtime_sync_service()
+    """Rétrocompatibilité — délègue à src.ui.views.synchronisation."""
+    from src.ui.views.synchronisation import afficher_statut_synchronisation
 
-    if sync.state.connected:
-        users_count = len(sync.get_connected_users())
-        st.success(f"🔄 Synchronisé • {users_count} connecté(s)")
-    elif sync.state.pending_events:
-        st.warning(f"⏳ {len(sync.state.pending_events)} modification(s) en attente")
-    else:
-        st.info("📴 Mode hors ligne")
+    return afficher_statut_synchronisation()
 
 
 # ═══════════════════════════════════════════════════════════

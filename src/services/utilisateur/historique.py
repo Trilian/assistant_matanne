@@ -558,11 +558,27 @@ class ActionHistoryService:
 # -----------------------------------------------------------
 # RÉTROCOMPATIBILITÉ UI — Fonctions extraites vers src/ui/views/historique.py
 # -----------------------------------------------------------
-from src.ui.views.historique import (
-    afficher_timeline_activite as render_activity_timeline,
-    afficher_activite_utilisateur as render_user_activity,
-    afficher_statistiques_activite as render_activity_stats,
-)
+
+
+def render_activity_timeline(*args, **kwargs):
+    """Proxy rétrocompatible vers src.ui.views.historique."""
+    from src.ui.views.historique import afficher_timeline_activite
+
+    return afficher_timeline_activite(*args, **kwargs)
+
+
+def render_user_activity(*args, **kwargs):
+    """Proxy rétrocompatible vers src.ui.views.historique."""
+    from src.ui.views.historique import afficher_activite_utilisateur
+
+    return afficher_activite_utilisateur(*args, **kwargs)
+
+
+def render_activity_stats(*args, **kwargs):
+    """Proxy rétrocompatible vers src.ui.views.historique."""
+    from src.ui.views.historique import afficher_statistiques_activite
+
+    return afficher_statistiques_activite(*args, **kwargs)
 
 
 # -----------------------------------------------------------

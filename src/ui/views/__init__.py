@@ -42,6 +42,9 @@ from .notifications import (
     afficher_demande_permission_push,
     afficher_preferences_notification,
 )
+from .pwa import (
+    injecter_meta_pwa,
+)
 from .sauvegarde import (
     afficher_sauvegarde,
 )
@@ -77,6 +80,8 @@ __all__ = [
     "afficher_indicateur_frappe",
     "afficher_statut_synchronisation",
     "afficher_invite_installation_pwa",
+    # PWA
+    "injecter_meta_pwa",
     # Jeux
     "afficher_badge_notifications_jeux",
     "afficher_notification_jeux",

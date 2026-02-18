@@ -26,7 +26,7 @@ from .service import (
     get_weather_service,
     # Factories
     obtenir_service_meteo,
-    # UI
+    # UI (thin wrapper → src.ui.views.meteo)
     render_weather_garden_ui,
 )
 from .utils import (
