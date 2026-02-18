@@ -182,5 +182,5 @@ def analyser_patterns_tirages(tirages: list[dict[str, Any]]) -> dict[str, Any]:
         "paires_frequentes": [
             {"paire": list(paire), "frequence": freq} for paire, freq in top_paires
         ],
-        "distribution_parite": {f"{i}_pair_{5-i}_impair": nb_pairs.count(i) for i in range(6)},
+        "distribution_parite": {f"{i}_pair_{5 - i}_impair": nb_pairs.count(i) for i in range(6)},
     }

@@ -9,7 +9,7 @@ Contient :
 
 from datetime import date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import Enum, StrEnum
 from uuid import UUID
 
 from sqlalchemy import (
@@ -33,7 +33,7 @@ from .base import Base
 # ═══════════════════════════════════════════════════════════
 
 
-class GardenZoneType(str, Enum):
+class GardenZoneType(StrEnum):
     """Type de zone jardin."""
 
     PELOUSE = "pelouse"
@@ -46,7 +46,7 @@ class GardenZoneType(str, Enum):
     AUTRE = "autre"
 
 
-class NiveauAlerte(str, Enum):
+class NiveauAlerte(StrEnum):
     """Niveaux d'alerte météo."""
 
     INFO = "info"
@@ -54,7 +54,7 @@ class NiveauAlerte(str, Enum):
     DANGER = "danger"
 
 
-class TypeAlerteMeteo(str, Enum):
+class TypeAlerteMeteo(StrEnum):
     """Types d'alertes météo."""
 
     GEL = "gel"

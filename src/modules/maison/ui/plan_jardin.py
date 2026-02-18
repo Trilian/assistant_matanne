@@ -513,7 +513,7 @@ class PlanJardinInteractif:
                     <div class="meteo-temp">{self.meteo.temperature:.0f}°C</div>
                     <div class="meteo-detail">
                         {self.meteo.description}
-                        {' • 🌧️ ' + str(self.meteo.precipitation_mm) + 'mm' if self.meteo.precipitation_mm > 0 else ''}
+                        {" • 🌧️ " + str(self.meteo.precipitation_mm) + "mm" if self.meteo.precipitation_mm > 0 else ""}
                     </div>
                 </div>
             </div>

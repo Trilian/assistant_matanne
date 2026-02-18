@@ -63,7 +63,7 @@ def afficher_eco_score_gamifie(score: int, variation: int | None, streak: int):
         </div>
         <div class="eco-score-label">ÉCO-SCORE</div>
         {var_html}
-        <div class="eco-level {niveau['class']}">{niveau['emoji']} {niveau['nom']}</div>
+        <div class="eco-level {niveau["class"]}">{niveau["emoji"]} {niveau["nom"]}</div>
     </div>
     """,
         unsafe_allow_html=True,
@@ -98,8 +98,8 @@ def afficher_badges_collection(badges_obtenus: list[str], stats: dict):
             st.markdown(
                 f"""
             <div class="badge-eco {locked_class} {new_class}">
-                <span class="icon">{badge_def['emoji']}</span>
-                <span class="name">{badge_def['nom']}</span>
+                <span class="icon">{badge_def["emoji"]}</span>
+                <span class="name">{badge_def["nom"]}</span>
                 {'<span class="date">Obtenu ✓</span>' if est_obtenu else '<span class="date">🔒 Verrouillé</span>'}
             </div>
             """,
@@ -123,13 +123,13 @@ def afficher_energie_card(
         f"""
     <div class="energie-card {energie_id} animate-in">
         <div class="header">
-            <div><span class="icon">{data['emoji']}</span><span class="title">{data['label']}</span></div>
+            <div><span class="icon">{data["emoji"]}</span><span class="title">{data["label"]}</span></div>
             <span class="trend {trend_class}">{trend_icon} {tendance.capitalize()}</span>
         </div>
-        <div class="value">{conso:.0f} <span class="unit">{data['unite']}</span></div>
+        <div class="value">{conso:.0f} <span class="unit">{data["unite"]}</span></div>
         <div style="font-size: 1rem; color: #718096;">{cout:.2f} € ce mois</div>
         <div class="progress-bar-compare"><div class="fill {progress_class}" style="width: {progress_pct}%"></div></div>
-        <div style="font-size: 0.8rem; color: #a0aec0; margin-top: 0.5rem;">{ratio*100:.0f}% de la moyenne nationale</div>
+        <div style="font-size: 0.8rem; color: #a0aec0; margin-top: 0.5rem;">{ratio * 100:.0f}% de la moyenne nationale</div>
     </div>
     """,
         unsafe_allow_html=True,
@@ -147,9 +147,9 @@ def afficher_anomalies(anomalies: list[dict]):
         <div class="anomalie-alert animate-in">
             <span class="icon">⚠️</span>
             <div class="content">
-                <div class="title">{anomalie.get('titre', 'Anomalie détectée')}</div>
-                <div class="description">{anomalie.get('description', '')}</div>
-                <div class="action">💡 {anomalie.get('conseil', 'Vérifiez vos équipements')}</div>
+                <div class="title">{anomalie.get("titre", "Anomalie détectée")}</div>
+                <div class="description">{anomalie.get("description", "")}</div>
+                <div class="action">💡 {anomalie.get("conseil", "Vérifiez vos équipements")}</div>
             </div>
         </div>
         """,
@@ -162,7 +162,7 @@ def afficher_simulation_economies(energie: str, economie_estimee, periode: str =
     st.markdown(
         f"""
     <div class="simulation-card animate-in">
-        <div class="header"><span>{ENERGIES[energie]['emoji']} Simulation {ENERGIES[energie]['label']}</span></div>
+        <div class="header"><span>{ENERGIES[energie]["emoji"]} Simulation {ENERGIES[energie]["label"]}</span></div>
         <div class="result"><div class="savings">💰 {economie_estimee:.0f} €</div><div class="period">{periode}</div></div>
     </div>
     """,
@@ -175,9 +175,9 @@ def afficher_conseil_eco(conseil: dict):
     st.markdown(
         f"""
     <div class="conseil-eco">
-        <span class="icon">{conseil['emoji']}</span>
-        <div class="text"><div class="title">{conseil['titre']}</div><div class="desc">{conseil['desc']}</div></div>
-        <span class="economie">{conseil['economie']}</span>
+        <span class="icon">{conseil["emoji"]}</span>
+        <div class="text"><div class="title">{conseil["titre"]}</div><div class="desc">{conseil["desc"]}</div></div>
+        <span class="economie">{conseil["economie"]}</span>
     </div>
     """,
         unsafe_allow_html=True,
@@ -193,13 +193,13 @@ def afficher_facture_item(facture: dict, energie_data: dict, index: int):
     st.markdown(
         f"""
     <div class="facture-item animate-in">
-        <div class="icon">{energie_data.get('emoji', '📄')}</div>
+        <div class="icon">{energie_data.get("emoji", "📄")}</div>
         <div class="details">
-            <div class="type">{energie_data.get('label', facture.get('type'))}</div>
-            <div class="date">{facture.get('date')} • {facture.get('fournisseur', 'Non précisé')}</div>
+            <div class="type">{energie_data.get("label", facture.get("type"))}</div>
+            <div class="date">{facture.get("date")} • {facture.get("fournisseur", "Non précisé")}</div>
             <div class="conso">{conso_text}</div>
         </div>
-        <div class="montant">{facture.get('montant', 0):.2f} €</div>
+        <div class="montant">{facture.get("montant", 0):.2f} €</div>
     </div>
     """,
         unsafe_allow_html=True,

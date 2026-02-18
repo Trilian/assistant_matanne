@@ -4,7 +4,7 @@ Tests unitaires pour stats.py
 Module: src.utils.helpers.stats
 """
 
-from src.utils.helpers.stats import (
+from src.core.helpers import (
     calculer_ecart_type,
     calculer_etendue,
     calculer_mediane,

@@ -35,8 +35,8 @@ class TestConfigHelpers:
 
     def test_read_st_secret_with_no_secrets(self):
         """Test _read_st_secret quand st.secrets n'existe pas."""
-        with patch("src.core.config.st") as mock_st:
-            mock_st.secrets.get.side_effect = AttributeError
+        with patch("streamlit.secrets", None):
+            # Quand secrets n'est pas disponible, retourne None
             result = _read_st_secret("test_section")
             assert result is None
 
@@ -193,7 +193,7 @@ class TestConfigValidation:
     def test_debug_is_boolean(self):
         """Test que DEBUG est booléen."""
         params = Parametres()
-        assert isinstance(params.DEBUG, (bool, type(None))) or params.DEBUG in [True, False, None]
+        assert isinstance(params.DEBUG, bool | type(None)) or params.DEBUG in [True, False, None]
 
     def test_env_is_string(self):
         """Test que ENV est une string."""
@@ -429,7 +429,7 @@ class TestProprietesConfig:
             "DB_PORT": "5432",
         }
         with patch.dict(os.environ, env_vars, clear=False):
-            with patch("src.core.config._read_st_secret", return_value=None):
+            with patch("src.core.config.settings._read_st_secret", return_value=None):
                 params = Parametres()
                 db_url = params.DATABASE_URL
                 assert "localhost" in db_url
@@ -439,7 +439,7 @@ class TestProprietesConfig:
         """Test que sslmode est ajouté pour Supabase."""
         supabase_url = "postgresql://user:pass@xyz.supabase.co/postgres"
         with patch.dict(os.environ, {"DATABASE_URL": supabase_url}, clear=False):
-            with patch("src.core.config._read_st_secret", return_value=None):
+            with patch("src.core.config.settings._read_st_secret", return_value=None):
                 params = Parametres()
                 db_url = params.DATABASE_URL
                 # Devrait contenir sslmode
@@ -482,7 +482,7 @@ class TestProprietesAvancees:
             "name": "testdb",
         }
 
-        with patch("src.core.config._read_st_secret", return_value=mock_db):
+        with patch("src.core.config.settings._read_st_secret", return_value=mock_db):
             with patch.dict(os.environ, {}, clear=False):
                 params = Parametres()
                 db_url = params.DATABASE_URL
@@ -492,7 +492,7 @@ class TestProprietesAvancees:
 
     def test_database_url_error_message(self):
         """Test message d'erreur DATABASE_URL détaillé."""
-        with patch("src.core.config._read_st_secret", return_value=None):
+        with patch("src.core.config.settings._read_st_secret", return_value=None):
             with patch.dict(os.environ, {"DATABASE_URL": "", "DB_HOST": ""}, clear=True):
                 params = Parametres()
 
@@ -678,7 +678,7 @@ class TestMethodesHelpers:
     def test_verifier_db_configuree_false(self):
         """Test _verifier_db_configuree retourne False."""
         with patch.dict(os.environ, {"DATABASE_URL": ""}, clear=True):
-            with patch("src.core.config._read_st_secret", return_value=None):
+            with patch("src.core.config.settings._read_st_secret", return_value=None):
                 params = Parametres()
 
                 assert params._verifier_db_configuree() is False
@@ -816,24 +816,26 @@ class TestObtenirParametresAvance:
 
     def test_obtenir_parametres_reloads_env(self):
         """Test que obtenir_parametres recharge .env."""
-        with patch("src.core.config._reload_env_files") as mock_reload:
-            with patch("src.core.config.configure_logging"):
+        with patch("src.core.config.settings._reload_env_files") as mock_reload:
+            with patch("src.core.logging.configure_logging"):
                 obtenir_parametres()
 
                 mock_reload.assert_called()
 
     def test_obtenir_parametres_configures_logging(self):
         """Test que obtenir_parametres configure le logging."""
-        with patch("src.core.config._reload_env_files"):
-            with patch("src.core.config.configure_logging") as mock_logging:
+        with patch("src.core.config.settings._reload_env_files"):
+            with patch("src.core.logging.configure_logging") as mock_logging:
                 obtenir_parametres()
 
                 mock_logging.assert_called()
 
     def test_obtenir_parametres_logging_exception_handled(self):
         """Test gestion exception logging."""
-        with patch("src.core.config._reload_env_files"):
-            with patch("src.core.config.configure_logging", side_effect=Exception("Logging error")):
+        with patch("src.core.config.settings._reload_env_files"):
+            with patch(
+                "src.core.logging.configure_logging", side_effect=Exception("Logging error")
+            ):
                 # Ne devrait pas lever d'exception
                 params = obtenir_parametres()
 
@@ -851,27 +853,32 @@ class TestReadStSecret:
 
     def test_read_st_secret_no_streamlit(self):
         """Test sans module streamlit."""
-        with patch("src.core.config.st") as mock_st:
-            delattr(mock_st, "secrets")
+        import streamlit as st
 
+        original_secrets = getattr(st, "secrets", None)
+        try:
+            if hasattr(st, "secrets"):
+                delattr(st, "secrets")
             result = _read_st_secret("section")
-
             assert result is None
+        finally:
+            if original_secrets is not None:
+                st.secrets = original_secrets
 
     def test_read_st_secret_exception(self):
         """Test avec exception."""
-        with patch("src.core.config.st") as mock_st:
-            mock_st.secrets.get.side_effect = Exception("Error")
-
+        mock_secrets = MagicMock()
+        mock_secrets.get.side_effect = Exception("Error")
+        with patch("streamlit.secrets", mock_secrets):
             result = _read_st_secret("section")
 
             assert result is None
 
     def test_read_st_secret_success(self):
         """Test lecture réussie."""
-        with patch("src.core.config.st") as mock_st:
-            mock_st.secrets.get.return_value = {"key": "value"}
-
+        mock_secrets = MagicMock()
+        mock_secrets.get.return_value = {"key": "value"}
+        with patch("streamlit.secrets", mock_secrets):
             result = _read_st_secret("section")
 
             assert result == {"key": "value"}

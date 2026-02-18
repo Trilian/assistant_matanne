@@ -876,8 +876,8 @@ class TestDatabasePersistence:
             ),
         ]
 
-        with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
-            with patch("src.services.calendrier.service.CalendarEvent") as mock_cal_event:
+        with patch("src.services.calendrier.google_calendar.obtenir_contexte_db") as mock_db:
+            with patch("src.services.calendrier.google_calendar.CalendarEvent") as mock_cal_event:
                 mock_session = MagicMock()
                 mock_session.query.return_value.filter.return_value.first.return_value = None
                 mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
@@ -902,8 +902,8 @@ class TestDatabasePersistence:
 
         existing = MagicMock()
 
-        with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
-            with patch("src.services.calendrier.service.CalendarEvent") as mock_cal_event:
+        with patch("src.services.calendrier.google_calendar.obtenir_contexte_db") as mock_db:
+            with patch("src.services.calendrier.google_calendar.CalendarEvent") as mock_cal_event:
                 mock_session = MagicMock()
                 mock_session.query.return_value.filter.return_value.first.return_value = existing
                 mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
@@ -925,8 +925,8 @@ class TestDatabasePersistence:
             ),
         ]
 
-        with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
-            with patch("src.services.calendrier.service.CalendarEvent") as mock_cal_event:
+        with patch("src.services.calendrier.google_calendar.obtenir_contexte_db") as mock_db:
+            with patch("src.services.calendrier.google_calendar.CalendarEvent") as mock_cal_event:
                 mock_session = MagicMock()
                 mock_session.query.return_value.filter.return_value.first.side_effect = Exception(
                     "DB Error"
@@ -948,8 +948,8 @@ class TestSaveConfigToDb:
         google_config.id = "not_digit"  # Non numérique
         google_config.user_id = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"  # UUID valide
 
-        with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
-            with patch("src.services.calendrier.service.CalendrierExterne") as mock_cal_ext:
+        with patch("src.services.calendrier.google_calendar.obtenir_contexte_db") as mock_db:
+            with patch("src.services.calendrier.google_calendar.CalendrierExterne") as mock_cal_ext:
                 mock_session = MagicMock()
                 mock_session.query.return_value.filter.return_value.first.return_value = None
                 mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
@@ -966,7 +966,7 @@ class TestSaveConfigToDb:
 
         existing = MagicMock()
 
-        with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
+        with patch("src.services.calendrier.google_calendar.obtenir_contexte_db") as mock_db:
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.return_value = existing
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
@@ -980,7 +980,7 @@ class TestSaveConfigToDb:
         """Test suppression configuration."""
         existing = MagicMock()
 
-        with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
+        with patch("src.services.calendrier.google_calendar.obtenir_contexte_db") as mock_db:
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.return_value = existing
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
@@ -993,7 +993,7 @@ class TestSaveConfigToDb:
 
     def test_remove_config_not_found(self, service):
         """Test suppression configuration inexistante."""
-        with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
+        with patch("src.services.calendrier.google_calendar.obtenir_contexte_db") as mock_db:
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.return_value = None
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
@@ -1006,7 +1006,7 @@ class TestSaveConfigToDb:
 
     def test_remove_config_non_numeric_id(self, service):
         """Test suppression avec ID non numérique."""
-        with patch("src.services.calendrier.service.obtenir_contexte_db") as mock_db:
+        with patch("src.services.calendrier.google_calendar.obtenir_contexte_db") as mock_db:
             mock_session = MagicMock()
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_db.return_value.__exit__ = MagicMock(return_value=False)

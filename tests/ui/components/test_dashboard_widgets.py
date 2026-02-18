@@ -16,20 +16,20 @@ class TestGraphiqueRepartitionRepas:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.components.dashboard_widgets import graphique_repartition_repas
+        from src.ui.components import graphique_repartition_repas
 
         assert graphique_repartition_repas is not None
 
     def test_empty_data(self):
         """Test avec données vides."""
-        from src.ui.components.dashboard_widgets import graphique_repartition_repas
+        from src.ui.components import graphique_repartition_repas
 
         result = graphique_repartition_repas([])
         assert result is None
 
     def test_with_data(self):
         """Test avec données valides."""
-        from src.ui.components.dashboard_widgets import graphique_repartition_repas
+        from src.ui.components import graphique_repartition_repas
 
         data = [
             {"type_repas": "déjeuner"},
@@ -46,7 +46,7 @@ class TestGraphiqueRepartitionRepas:
 
     def test_unknown_type(self):
         """Test avec type de repas inconnu."""
-        from src.ui.components.dashboard_widgets import graphique_repartition_repas
+        from src.ui.components import graphique_repartition_repas
 
         data = [{"type_repas": "brunch"}]
 
@@ -55,7 +55,7 @@ class TestGraphiqueRepartitionRepas:
 
     def test_missing_type(self):
         """Test avec type_repas manquant."""
-        from src.ui.components.dashboard_widgets import graphique_repartition_repas
+        from src.ui.components import graphique_repartition_repas
 
         data = [{"autre": "valeur"}]  # Pas de type_repas
 
@@ -73,20 +73,20 @@ class TestGraphiqueInventaireCategories:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.components.dashboard_widgets import graphique_inventaire_categories
+        from src.ui.components import graphique_inventaire_categories
 
         assert graphique_inventaire_categories is not None
 
     def test_empty_data(self):
         """Test avec données vides."""
-        from src.ui.components.dashboard_widgets import graphique_inventaire_categories
+        from src.ui.components import graphique_inventaire_categories
 
         result = graphique_inventaire_categories([])
         assert result is None
 
     def test_with_data(self):
         """Test avec données valides."""
-        from src.ui.components.dashboard_widgets import graphique_inventaire_categories
+        from src.ui.components import graphique_inventaire_categories
 
         data = [
             {"categorie": "Fruits", "statut": "ok"},
@@ -102,7 +102,7 @@ class TestGraphiqueInventaireCategories:
 
     def test_missing_categorie(self):
         """Test avec catégorie manquante."""
-        from src.ui.components.dashboard_widgets import graphique_inventaire_categories
+        from src.ui.components import graphique_inventaire_categories
 
         data = [{"statut": "ok"}]  # Pas de catégorie â†’ "Autre"
 
@@ -111,7 +111,7 @@ class TestGraphiqueInventaireCategories:
 
     def test_many_categories(self):
         """Test avec beaucoup de catégories (max 8)."""
-        from src.ui.components.dashboard_widgets import graphique_inventaire_categories
+        from src.ui.components import graphique_inventaire_categories
 
         # Plus de 8 catégories
         data = [{"categorie": f"Cat{i}", "statut": "ok"} for i in range(15)]
@@ -130,13 +130,13 @@ class TestGraphiqueActiviteSemaine:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.components.dashboard_widgets import graphique_activite_semaine
+        from src.ui.components import graphique_activite_semaine
 
         assert graphique_activite_semaine is not None
 
     def test_empty_data(self):
         """Test avec données vides - génère données vides."""
-        from src.ui.components.dashboard_widgets import graphique_activite_semaine
+        from src.ui.components import graphique_activite_semaine
 
         result = graphique_activite_semaine([])
 
@@ -145,7 +145,7 @@ class TestGraphiqueActiviteSemaine:
 
     def test_with_data(self):
         """Test avec données valides."""
-        from src.ui.components.dashboard_widgets import graphique_activite_semaine
+        from src.ui.components import graphique_activite_semaine
 
         today = date.today()
         data = [
@@ -159,7 +159,7 @@ class TestGraphiqueActiviteSemaine:
 
     def test_with_string_dates(self):
         """Test avec dates en string ISO."""
-        from src.ui.components.dashboard_widgets import graphique_activite_semaine
+        from src.ui.components import graphique_activite_semaine
 
         today = date.today()
         data = [{"date": (today - timedelta(days=i)).isoformat(), "count": 5} for i in range(3)]
@@ -178,20 +178,20 @@ class TestGraphiqueProgressionObjectifs:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.components.dashboard_widgets import graphique_progression_objectifs
+        from src.ui.components import graphique_progression_objectifs
 
         assert graphique_progression_objectifs is not None
 
     def test_empty_data(self):
         """Test avec données vides."""
-        from src.ui.components.dashboard_widgets import graphique_progression_objectifs
+        from src.ui.components import graphique_progression_objectifs
 
         result = graphique_progression_objectifs([])
         assert result is None
 
     def test_with_data(self):
         """Test avec données valides."""
-        from src.ui.components.dashboard_widgets import graphique_progression_objectifs
+        from src.ui.components import graphique_progression_objectifs
 
         data = [
             {"nom": "Recettes créées", "actuel": 8, "cible": 10},
@@ -206,7 +206,7 @@ class TestGraphiqueProgressionObjectifs:
 
     def test_over_100_percent(self):
         """Test avec progression > 100%."""
-        from src.ui.components.dashboard_widgets import graphique_progression_objectifs
+        from src.ui.components import graphique_progression_objectifs
 
         data = [{"nom": "Dépassé", "actuel": 15, "cible": 10}]  # 150%
 
@@ -215,7 +215,7 @@ class TestGraphiqueProgressionObjectifs:
 
     def test_missing_values(self):
         """Test avec valeurs manquantes."""
-        from src.ui.components.dashboard_widgets import graphique_progression_objectifs
+        from src.ui.components import graphique_progression_objectifs
 
         data = [{"nom": "Test"}]  # Pas actuel ni cible
 
@@ -233,7 +233,7 @@ class TestCarteMetriqueAvancee:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.components.dashboard_widgets import carte_metrique_avancee
+        from src.ui.components import carte_metrique_avancee
 
         assert carte_metrique_avancee is not None
 
@@ -241,7 +241,7 @@ class TestCarteMetriqueAvancee:
     @patch("streamlit.button", return_value=False)
     def test_basic_call(self, mock_btn, mock_md):
         """Test appel basique."""
-        from src.ui.components.dashboard_widgets import carte_metrique_avancee
+        from src.ui.components import carte_metrique_avancee
 
         carte_metrique_avancee(titre="Recettes", valeur=42, icone="ðŸ½ï¸")
 
@@ -253,7 +253,7 @@ class TestCarteMetriqueAvancee:
     @patch("streamlit.button", return_value=False)
     def test_with_delta_positive(self, mock_btn, mock_md):
         """Test avec delta positif."""
-        from src.ui.components.dashboard_widgets import carte_metrique_avancee
+        from src.ui.components import carte_metrique_avancee
 
         carte_metrique_avancee(
             titre="Total", valeur=100, icone="ðŸ“Š", delta="+5", delta_positif=True
@@ -261,13 +261,13 @@ class TestCarteMetriqueAvancee:
 
         html = mock_md.call_args[0][0]
         assert "+5" in html
-        assert "â†‘" in html
+        assert "\u2191" in html
 
     @patch("streamlit.markdown")
     @patch("streamlit.button", return_value=False)
     def test_with_delta_negative(self, mock_btn, mock_md):
         """Test avec delta négatif."""
-        from src.ui.components.dashboard_widgets import carte_metrique_avancee
+        from src.ui.components import carte_metrique_avancee
 
         carte_metrique_avancee(
             titre="Stock", valeur=50, icone="ðŸ“¦", delta="-10", delta_positif=False
@@ -275,13 +275,13 @@ class TestCarteMetriqueAvancee:
 
         html = mock_md.call_args[0][0]
         assert "-10" in html
-        assert "â†“" in html
+        assert "\u2193" in html
 
     @patch("streamlit.markdown")
     @patch("streamlit.button", return_value=False)
     def test_with_sous_titre(self, mock_btn, mock_md):
         """Test avec sous-titre."""
-        from src.ui.components.dashboard_widgets import carte_metrique_avancee
+        from src.ui.components import carte_metrique_avancee
 
         carte_metrique_avancee(
             titre="Titre", valeur="Val", icone="ðŸ“Œ", sous_titre="Description ici"
@@ -295,7 +295,7 @@ class TestCarteMetriqueAvancee:
     @patch("streamlit.rerun")
     def test_with_lien_module(self, mock_rerun, mock_btn, mock_md):
         """Test avec lien vers module."""
-        from src.ui.components.dashboard_widgets import carte_metrique_avancee
+        from src.ui.components import carte_metrique_avancee
 
         with patch("src.core.state.GestionnaireEtat") as _mock_etat:
             try:
@@ -318,7 +318,7 @@ class TestIndicateurSanteSysteme:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.components.dashboard_widgets import indicateur_sante_systeme
+        from src.ui.components import indicateur_sante_systeme
 
         assert indicateur_sante_systeme is not None
 
@@ -326,7 +326,7 @@ class TestIndicateurSanteSysteme:
     @patch("src.core.cache_multi.obtenir_cache")
     def test_all_ok(self, mock_cache, mock_db):
         """Test avec tout OK."""
-        from src.ui.components.dashboard_widgets import indicateur_sante_systeme
+        from src.ui.components import indicateur_sante_systeme
 
         mock_cache.return_value.get_stats.return_value = {"hit_rate": "85%"}
 
@@ -339,7 +339,7 @@ class TestIndicateurSanteSysteme:
     @patch("src.core.cache_multi.obtenir_cache")
     def test_db_disconnected(self, mock_cache, mock_db):
         """Test avec DB déconnectée."""
-        from src.ui.components.dashboard_widgets import indicateur_sante_systeme
+        from src.ui.components import indicateur_sante_systeme
 
         mock_cache.return_value.get_stats.return_value = {"hit_rate": "50%"}
 
@@ -351,7 +351,7 @@ class TestIndicateurSanteSysteme:
     @patch("src.core.cache_multi.obtenir_cache")
     def test_db_exception(self, mock_cache, mock_db):
         """Test avec exception DB."""
-        from src.ui.components.dashboard_widgets import indicateur_sante_systeme
+        from src.ui.components import indicateur_sante_systeme
 
         mock_cache.return_value.get_stats.return_value = {"hit_rate": "50%"}
 
@@ -363,7 +363,7 @@ class TestIndicateurSanteSysteme:
     @patch("src.core.cache_multi.obtenir_cache")
     def test_cache_warning(self, mock_cache, mock_db):
         """Test avec cache en warning."""
-        from src.ui.components.dashboard_widgets import indicateur_sante_systeme
+        from src.ui.components import indicateur_sante_systeme
 
         mock_cache.return_value.get_stats.return_value = {"hit_rate": "50%"}
 
@@ -376,7 +376,7 @@ class TestIndicateurSanteSysteme:
     @patch("src.core.cache_multi.obtenir_cache", side_effect=Exception("Cache Error"))
     def test_cache_exception(self, mock_cache, mock_db):
         """Test avec exception cache."""
-        from src.ui.components.dashboard_widgets import indicateur_sante_systeme
+        from src.ui.components import indicateur_sante_systeme
 
         result = indicateur_sante_systeme()
 
@@ -394,7 +394,7 @@ class TestAfficherSanteSysteme:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.components.dashboard_widgets import afficher_sante_systeme
+        from src.ui.components import afficher_sante_systeme
 
         assert afficher_sante_systeme is not None
 
@@ -402,12 +402,12 @@ class TestAfficherSanteSysteme:
     @patch("streamlit.write")
     def test_display(self, mock_write, mock_expander):
         """Test affichage."""
-        from src.ui.components.dashboard_widgets import afficher_sante_systeme
+        from src.ui.components import afficher_sante_systeme
 
         mock_expander.return_value.__enter__ = MagicMock()
         mock_expander.return_value.__exit__ = MagicMock()
 
-        with patch("src.ui.components.dashboard_widgets.indicateur_sante_systeme") as mock_ind:
+        with patch("src.ui.components.system.indicateur_sante_systeme") as mock_ind:
             mock_ind.return_value = {
                 "global": "ok",
                 "details": [{"nom": "DB", "status": "ok", "message": "OK"}],
@@ -428,7 +428,7 @@ class TestAfficherTimelineActivites:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.components.dashboard_widgets import afficher_timeline_activites
+        from src.ui.components import afficher_timeline_activites
 
         assert afficher_timeline_activites is not None
 
@@ -436,7 +436,7 @@ class TestAfficherTimelineActivites:
     @patch("streamlit.markdown")
     def test_empty_data(self, mock_md, mock_info):
         """Test avec données vides."""
-        from src.ui.components.dashboard_widgets import afficher_timeline_activites
+        from src.ui.components import afficher_timeline_activites
 
         afficher_timeline_activites([])
 
@@ -445,7 +445,7 @@ class TestAfficherTimelineActivites:
     @patch("streamlit.markdown")
     def test_with_datetime(self, mock_md):
         """Test avec datetime."""
-        from src.ui.components.dashboard_widgets import afficher_timeline_activites
+        from src.ui.components import afficher_timeline_activites
 
         activites = [
             {"date": datetime.now(), "action": "Ajout recette", "type": "recette"},
@@ -460,7 +460,7 @@ class TestAfficherTimelineActivites:
     @patch("streamlit.markdown")
     def test_with_string_date(self, mock_md):
         """Test avec date en string."""
-        from src.ui.components.dashboard_widgets import afficher_timeline_activites
+        from src.ui.components import afficher_timeline_activites
 
         activites = [
             {"date": "2026-02-11 10:30", "action": "Action", "type": "courses"},
@@ -473,7 +473,7 @@ class TestAfficherTimelineActivites:
     @patch("streamlit.markdown")
     def test_max_items(self, mock_md):
         """Test limite d'items."""
-        from src.ui.components.dashboard_widgets import afficher_timeline_activites
+        from src.ui.components import afficher_timeline_activites
 
         activites = [
             {"date": datetime.now(), "action": f"Action {i}", "type": "planning"} for i in range(10)
@@ -487,7 +487,7 @@ class TestAfficherTimelineActivites:
     @patch("streamlit.markdown")
     def test_unknown_type(self, mock_md):
         """Test avec type inconnu."""
-        from src.ui.components.dashboard_widgets import afficher_timeline_activites
+        from src.ui.components import afficher_timeline_activites
 
         activites = [{"date": datetime.now(), "action": "Test", "type": "unknown"}]
 
@@ -506,14 +506,14 @@ class TestWidgetJulesApercu:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.components.dashboard_widgets import widget_jules_apercu
+        from src.ui.components import widget_jules_apercu
 
         assert widget_jules_apercu is not None
 
     @patch("streamlit.markdown")
     def test_display(self, mock_md):
         """Test affichage."""
-        from src.ui.components.dashboard_widgets import widget_jules_apercu
+        from src.ui.components import widget_jules_apercu
 
         widget_jules_apercu()
 
@@ -533,14 +533,14 @@ class TestWidgetMeteoJour:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.components.dashboard_widgets import widget_meteo_jour
+        from src.ui.components import widget_meteo_jour
 
         assert widget_meteo_jour is not None
 
     @patch("streamlit.markdown")
     def test_display(self, mock_md):
         """Test affichage."""
-        from src.ui.components.dashboard_widgets import widget_meteo_jour
+        from src.ui.components import widget_meteo_jour
 
         widget_meteo_jour()
 

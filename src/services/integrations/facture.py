@@ -251,6 +251,11 @@ def extraire_montant(texte: str, pattern: str) -> float | None:
 # ═══════════════════════════════════════════════════════════
 
 
-def get_facture_ocr_service() -> FactureOCRService:
-    """Factory pour le service OCR."""
+def obtenir_service_ocr_facture() -> FactureOCRService:
+    """Factory pour le service OCR (convention française)."""
     return FactureOCRService()
+
+
+def get_facture_ocr_service() -> FactureOCRService:
+    """Factory pour le service OCR (alias anglais)."""
+    return obtenir_service_ocr_facture()

@@ -8,7 +8,7 @@ Permet de:
 """
 
 from datetime import date, datetime, timedelta
-from enum import Enum
+from enum import Enum, StrEnum
 
 from sqlalchemy.orm import Session
 
@@ -16,7 +16,7 @@ from src.core.decorators import avec_session_db
 from src.core.models import CalendarEvent
 
 
-class TypeRecurrence(str, Enum):
+class TypeRecurrence(StrEnum):
     """Types de récurrence disponibles."""
 
     AUCUNE = "none"

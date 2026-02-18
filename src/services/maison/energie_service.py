@@ -236,7 +236,7 @@ class EnergieService(BaseAIService):
         # Consommation vs moyenne nationale
         if moyenne > moyenne_ref * 1.3:
             anomalies.append(
-                f"Consommation {(moyenne/moyenne_ref - 1)*100:.0f}% au-dessus de la moyenne"
+                f"Consommation {(moyenne / moyenne_ref - 1) * 100:.0f}% au-dessus de la moyenne"
             )
 
         return anomalies[:5]  # Max 5 anomalies
@@ -482,8 +482,8 @@ Format JSON: {{"economie_pct": 7, "economie_euros_an": 85, "investissement": 0, 
 # ═══════════════════════════════════════════════════════════
 
 
-def get_energie_service(client: ClientIA | None = None) -> EnergieService:
-    """Factory pour obtenir le service énergie.
+def obtenir_service_energie(client: ClientIA | None = None) -> EnergieService:
+    """Factory pour obtenir le service énergie (convention française).
 
     Args:
         client: Client IA optionnel
@@ -492,3 +492,8 @@ def get_energie_service(client: ClientIA | None = None) -> EnergieService:
         Instance de EnergieService
     """
     return EnergieService(client=client)
+
+
+def get_energie_service(client: ClientIA | None = None) -> EnergieService:
+    """Factory pour obtenir le service énergie (alias anglais)."""
+    return obtenir_service_energie(client)

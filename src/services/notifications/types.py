@@ -6,7 +6,7 @@ Centralise toutes les enums et modèles Pydantic pour les services de notificati
 
 import logging
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
-class TypeAlerte(str, Enum):
+class TypeAlerte(StrEnum):
     """Types d'alertes pour l'inventaire (notifications locales)."""
 
     STOCK_CRITIQUE = "stock_critique"
@@ -30,7 +30,7 @@ class TypeAlerte(str, Enum):
     ARTICLE_MODIFIE = "article_modifie"
 
 
-class TypeNotification(str, Enum):
+class TypeNotification(StrEnum):
     """Types de notifications push (Web Push et ntfy)."""
 
     # Alertes importantes

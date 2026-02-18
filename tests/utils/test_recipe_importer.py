@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.utils.recipe_importer import RecipeImporter
+from src.services.recettes.importer import RecipeImporter
 
 
 @pytest.mark.unit

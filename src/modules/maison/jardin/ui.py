@@ -90,9 +90,9 @@ def afficher_badges_jardin(badges_obtenus: list[str], stats: dict):
             st.markdown(
                 f"""
             <div class="badge-jardin {classe}">
-                <span class="icon">{badge_def['emoji']}</span>
-                <span class="name">{badge_def['nom']}</span>
-                <span class="status">{'✓ Obtenu' if est_obtenu else '🔒 Verrouillé'}</span>
+                <span class="icon">{badge_def["emoji"]}</span>
+                <span class="name">{badge_def["nom"]}</span>
+                <span class="status">{"✓ Obtenu" if est_obtenu else "🔒 Verrouillé"}</span>
             </div>
             """,
                 unsafe_allow_html=True,
@@ -111,12 +111,12 @@ def afficher_previsions_recoltes_ui(previsions: list[dict]):
         st.markdown(
             f"""
         <div class="prevision-recolte">
-            <span class="emoji">{prev.get('emoji', '🌱')}</span>
+            <span class="emoji">{prev.get("emoji", "🌱")}</span>
             <div class="details">
-                <div class="nom">{prev.get('nom', 'Légume')}</div>
-                <div class="quantite">~{prev.get('quantite_prevue_kg', 0)} kg</div>
+                <div class="nom">{prev.get("nom", "Légume")}</div>
+                <div class="quantite">~{prev.get("quantite_prevue_kg", 0)} kg</div>
             </div>
-            <span class="periode">{prev.get('periode', 'Bientôt')}</span>
+            <span class="periode">{prev.get("periode", "Bientôt")}</span>
         </div>
         """,
             unsafe_allow_html=True,
@@ -136,11 +136,11 @@ def afficher_planning_jardin_ui(planning: list[dict]):
         st.markdown(
             f"""
         <div class="planning-jardin-item {type_class}">
-            <span style="font-size: 1.5rem;">{item.get('emoji', '🌱')}</span>
+            <span style="font-size: 1.5rem;">{item.get("emoji", "🌱")}</span>
             <div style="flex: 1;">
-                <strong>{item.get('titre', 'Activité')}</strong>
+                <strong>{item.get("titre", "Activité")}</strong>
             </div>
-            <span class="mois-badge">{item.get('mois_label', '')}</span>
+            <span class="mois-badge">{item.get("mois_label", "")}</span>
         </div>
         """,
             unsafe_allow_html=True,
@@ -183,11 +183,11 @@ def afficher_header(meteo: dict):
         <h2>🌱 Mon Potager Intelligent</h2>
         <p>
             <span style="font-size: 1.8rem">☀️</span>
-            <strong>{meteo.get('temperature', 20)}°C</strong>
-            {'💧 Pluie prévue' if meteo.get('pluie_prevue') else ''}
-            {'🥶 Risque gel' if meteo.get('gel_risque') else ''}
+            <strong>{meteo.get("temperature", 20)}°C</strong>
+            {"💧 Pluie prévue" if meteo.get("pluie_prevue") else ""}
+            {"🥶 Risque gel" if meteo.get("gel_risque") else ""}
         </p>
-        <small>{meteo.get('conseil', '')}</small>
+        <small>{meteo.get("conseil", "")}</small>
     </div>
     """,
         unsafe_allow_html=True,
@@ -206,12 +206,12 @@ def afficher_tache(tache: dict, key: str) -> bool:
     st.markdown(
         f"""
     <div class="tache-card {priorite_class}">
-        <div class="tache-emoji">{tache.get('emoji', '📋')}</div>
+        <div class="tache-emoji">{tache.get("emoji", "📋")}</div>
         <div class="tache-content">
-            <div class="tache-titre">{tache.get('titre', 'Tâche')}</div>
-            <div class="tache-description">{tache.get('description', '')}</div>
+            <div class="tache-titre">{tache.get("titre", "Tâche")}</div>
+            <div class="tache-description">{tache.get("description", "")}</div>
             <div class="tache-meta">
-                <span>⏱️ {tache.get('duree_min', 15)} min</span>
+                <span>⏱️ {tache.get("duree_min", 15)} min</span>
                 <span class="priorite-badge {priorite_class}">{priorite_class.capitalize()}</span>
             </div>
         </div>
@@ -269,7 +269,7 @@ def afficher_plante_card(plante_data: dict, mes_infos: dict | None = None):
         <div class="plante-info">
             <strong>{nom}</strong>
             <small>{categorie}</small>
-            {f'<span class="surface">{surface}m²</span>' if surface else ''}
+            {f'<span class="surface">{surface}m²</span>' if surface else ""}
         </div>
     </div>
     """,
@@ -282,7 +282,7 @@ def afficher_autonomie_card(autonomie: dict):
     st.markdown(
         f"""
     <div class="autonomie-gauge">
-        <div class="value">{autonomie['pourcentage_prevu']}%</div>
+        <div class="value">{autonomie["pourcentage_prevu"]}%</div>
         <div class="label">Autonomie alimentaire prévue</div>
     </div>
     """,

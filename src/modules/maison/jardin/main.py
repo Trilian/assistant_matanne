@@ -56,8 +56,8 @@ def app():
             <h1>🌱 Mon Potager Intelligent</h1>
             <div class="meteo-badge">
                 <span style="font-size: 1.8rem">☀️</span>
-                <span><strong>{meteo.get('temperature', 20)}°C</strong></span>
-                {f'<span class="streak-badge">🔥 {streak}j</span>' if streak > 2 else ''}
+                <span><strong>{meteo.get("temperature", 20)}°C</strong></span>
+                {f'<span class="streak-badge">🔥 {streak}j</span>' if streak > 2 else ""}
             </div>
         </div>
         """,

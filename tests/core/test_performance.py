@@ -106,14 +106,14 @@ class TestStatistiquesFonction:
 class TestProfileurFonction:
     """Tests pour ProfileurFonction."""
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.profiler.st")
     def test_get_stats_empty(self, mock_st):
         """Vérifie _get_stats retourne dict vide par défaut."""
         mock_st.session_state = {}
         stats = ProfileurFonction._get_stats()
         assert stats == {}
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.profiler.st")
     def test_enregistrer_nouvelle_fonction(self, mock_st):
         """Vérifie enregistrer crée une nouvelle entrée."""
         mock_st.session_state = {}
@@ -124,7 +124,7 @@ class TestProfileurFonction:
         assert stats["test_func"].call_count == 1
         assert stats["test_func"].total_time_ms == 50.0
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.profiler.st")
     def test_enregistrer_plusieurs_appels(self, mock_st):
         """Vérifie enregistrer accumule les stats."""
         mock_st.session_state = {}
@@ -139,7 +139,7 @@ class TestProfileurFonction:
         assert stats.max_time_ms == 30.0
         assert stats.avg_time_ms == 20.0
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.profiler.st")
     def test_enregistrer_avec_erreur(self, mock_st):
         """Vérifie enregistrer compte les erreurs."""
         mock_st.session_state = {}
@@ -148,7 +148,7 @@ class TestProfileurFonction:
         stats = mock_st.session_state[ProfileurFonction.SESSION_KEY]["test_func"]
         assert stats.errors == 1
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.profiler.st")
     def test_obtenir_toutes_stats(self, mock_st):
         """Vérifie obtenir_toutes_stats."""
         mock_st.session_state = {
@@ -162,7 +162,7 @@ class TestProfileurFonction:
         assert "func1" in stats
         assert "func2" in stats
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.profiler.st")
     def test_obtenir_plus_lentes(self, mock_st):
         """Vérifie obtenir_plus_lentes retourne triées par avg_time."""
         mock_st.session_state = {
@@ -177,7 +177,7 @@ class TestProfileurFonction:
         assert slowest[0][0] == "slow"
         assert slowest[1][0] == "medium"
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.profiler.st")
     def test_obtenir_plus_appelees(self, mock_st):
         """Vérifie obtenir_plus_appelees retourne triées par call_count."""
         mock_st.session_state = {
@@ -192,7 +192,7 @@ class TestProfileurFonction:
         assert most_called[0][0] == "frequent"
         assert most_called[1][0] == "normal"
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.profiler.st")
     def test_effacer(self, mock_st):
         """Vérifie effacer reset les stats."""
         mock_st.session_state = {
@@ -255,7 +255,7 @@ class TestMoniteurMemoire:
 
         MoniteurMemoire.arreter_suivi()
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.memory.st")
     def test_prendre_instantane(self, mock_st):
         """Vérifie prendre_instantane sauvegarde dans session."""
         mock_st.session_state = {}
@@ -276,7 +276,7 @@ class TestMoniteurMemoire:
         assert "timestamp" in snapshot
         assert len(mock_st.session_state[MoniteurMemoire.SESSION_KEY]) == 1
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.memory.st")
     def test_prendre_instantane_limite_20(self, mock_st):
         """Vérifie que max 20 snapshots sont gardés."""
         mock_st.session_state = {
@@ -297,7 +297,7 @@ class TestMoniteurMemoire:
 
         assert len(mock_st.session_state[MoniteurMemoire.SESSION_KEY]) == 20
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.memory.st")
     def test_obtenir_instantanes(self, mock_st):
         """Vérifie obtenir_instantanes retourne les snapshots."""
         mock_st.session_state = {
@@ -306,8 +306,8 @@ class TestMoniteurMemoire:
         snapshots = MoniteurMemoire.obtenir_instantanes()
         assert len(snapshots) == 2
 
-    @patch("src.core.performance.st")
-    @patch("src.core.performance.gc")
+    @patch("src.core.monitoring.memory.st")
+    @patch("src.core.monitoring.memory.gc")
     def test_forcer_nettoyage(self, mock_gc, mock_st):
         """Vérifie forcer_nettoyage appelle gc.collect()."""
         mock_gc.collect.return_value = 50
@@ -331,7 +331,7 @@ class TestMoniteurMemoire:
 class TestOptimiseurSQL:
     """Tests pour OptimiseurSQL."""
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.sql.st")
     def test_get_stats_default(self, mock_st):
         """Vérifie _get_stats retourne structure par défaut."""
         mock_st.session_state = {}
@@ -342,7 +342,7 @@ class TestOptimiseurSQL:
         assert "total_count" in stats
         assert "total_time_ms" in stats
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.sql.st")
     def test_enregistrer_query(self, mock_st):
         """Vérifie enregistrer_query ajoute une requête."""
         mock_st.session_state = {}
@@ -353,7 +353,7 @@ class TestOptimiseurSQL:
         assert stats["total_time_ms"] == 25.0
         assert len(stats["queries"]) == 1
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.sql.st")
     def test_enregistrer_query_lente(self, mock_st):
         """Vérifie que les requêtes > 100ms sont marquées lentes."""
         mock_st.session_state = {}
@@ -362,7 +362,7 @@ class TestOptimiseurSQL:
         stats = mock_st.session_state[OptimiseurSQL.SESSION_KEY]
         assert len(stats["slow_queries"]) == 1
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.sql.st")
     def test_enregistrer_query_tronque(self, mock_st):
         """Vérifie que les requêtes longues sont tronquées."""
         mock_st.session_state = {}
@@ -372,7 +372,7 @@ class TestOptimiseurSQL:
         stats = mock_st.session_state[OptimiseurSQL.SESSION_KEY]
         assert len(stats["queries"][0]["query"]) <= 200
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.sql.st")
     def test_obtenir_statistiques(self, mock_st):
         """Vérifie obtenir_statistiques."""
         mock_st.session_state = {
@@ -389,7 +389,7 @@ class TestOptimiseurSQL:
         assert stats["avg_time_ms"] == 20.0
         assert stats["slow_query_count"] == 0
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.sql.st")
     def test_obtenir_statistiques_empty(self, mock_st):
         """Vérifie obtenir_statistiques avec aucune requête."""
         mock_st.session_state = {}
@@ -398,7 +398,7 @@ class TestOptimiseurSQL:
         assert stats["total_queries"] == 0
         assert stats["avg_time_ms"] == 0
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.sql.st")
     def test_effacer(self, mock_st):
         """Vérifie effacer reset les stats."""
         mock_st.session_state = {
@@ -424,14 +424,14 @@ class TestOptimiseurSQL:
 class TestTableauBordPerformance:
     """Tests pour TableauBordPerformance."""
 
-    @patch("src.core.performance.st")
-    @patch("src.core.performance.ChargeurModuleDiffere", create=True)
+    @patch("src.core.monitoring.dashboard.st")
+    @patch("src.core.monitoring.dashboard.ChargeurModuleDiffere", create=True)
     def test_obtenir_resume(self, mock_loader, mock_st):
         """Vérifie obtenir_resume retourne toutes les métriques."""
         mock_st.session_state = {}
 
         # Mock lazy loader
-        with patch("src.core.performance.ChargeurModuleDiffere") as mock_lazy:
+        with patch("src.core.monitoring.dashboard.ChargeurModuleDiffere") as mock_lazy:
             mock_lazy.obtenir_statistiques.return_value = {
                 "cached_modules": 5,
                 "total_load_time": 1.5,
@@ -468,7 +468,7 @@ class TestTableauBordPerformance:
         assert "memory" in summary
         assert "sql" in summary
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.dashboard.st")
     def test_obtenir_score_sante_parfait(self, mock_st):
         """Vérifie score parfait sans pénalités."""
         mock_st.session_state = {}
@@ -488,7 +488,7 @@ class TestTableauBordPerformance:
         assert score == 100
         assert status == "🟢"
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.dashboard.st")
     def test_obtenir_score_sante_penalites_memoire(self, mock_st):
         """Vérifie pénalités mémoire."""
         mock_st.session_state = {}
@@ -507,7 +507,7 @@ class TestTableauBordPerformance:
 
         assert score == 80
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.dashboard.st")
     def test_obtenir_score_sante_penalites_sql(self, mock_st):
         """Vérifie pénalités SQL lentes."""
         mock_st.session_state = {}
@@ -526,7 +526,7 @@ class TestTableauBordPerformance:
 
         assert score == 85
 
-    @patch("src.core.performance.st")
+    @patch("src.core.monitoring.dashboard.st")
     def test_obtenir_score_sante_status_jaune(self, mock_st):
         """Vérifie status jaune (60-79)."""
         mock_st.session_state = {}
@@ -555,7 +555,7 @@ class TestTableauBordPerformance:
 class TestDecorateurs:
     """Tests pour les décorateurs de performance."""
 
-    @patch("src.core.performance.ProfileurFonction")
+    @patch("src.core.monitoring.profiler.ProfileurFonction")
     def test_profiler_sans_args(self, mock_profiler):
         """Vérifie le décorateur @profiler sans arguments."""
 
@@ -567,7 +567,7 @@ class TestDecorateurs:
         assert result == 42
         mock_profiler.enregistrer.assert_called()
 
-    @patch("src.core.performance.ProfileurFonction")
+    @patch("src.core.monitoring.profiler.ProfileurFonction")
     def test_profiler_avec_nom(self, mock_profiler):
         """Vérifie le décorateur @profiler avec nom personnalisé."""
 
@@ -581,7 +581,7 @@ class TestDecorateurs:
         call_args = mock_profiler.enregistrer.call_args
         assert call_args[0][0] == "custom_name"
 
-    @patch("src.core.performance.ProfileurFonction")
+    @patch("src.core.monitoring.profiler.ProfileurFonction")
     def test_profiler_avec_exception(self, mock_profiler):
         """Vérifie profiler marque les erreurs."""
 
@@ -595,7 +595,7 @@ class TestDecorateurs:
         call_args = mock_profiler.enregistrer.call_args
         assert call_args[0][2] is True  # error=True
 
-    @patch("src.core.performance.ProfileurFonction")
+    @patch("src.core.monitoring.profiler.ProfileurFonction")
     def test_mesurer_temps_context_manager(self, mock_profiler):
         """Vérifie le context manager mesurer_temps."""
         with mesurer_temps("test_block"):
@@ -606,7 +606,7 @@ class TestDecorateurs:
         assert call_args[0][0] == "test_block"
         assert call_args[0][1] >= 10  # Au moins 10ms
 
-    @patch("src.core.performance.ProfileurFonction")
+    @patch("src.core.monitoring.profiler.ProfileurFonction")
     def test_mesurer_temps_avec_exception(self, mock_profiler):
         """Vérifie mesurer_temps enregistre même avec exception."""
         with pytest.raises(ValueError):
@@ -688,8 +688,8 @@ class TestChargeurComposant:
         """Reset avant chaque test."""
         ChargeurComposant._loaded = set()
 
-    @patch("src.core.performance.st")
-    @patch("src.core.performance.mesurer_temps")
+    @patch("src.core.monitoring.profiler.st")
+    @patch("src.core.monitoring.profiler.mesurer_temps")
     def test_composant_differe_premier_chargement(self, mock_mesurer, mock_st):
         """Vérifie le premier chargement d'un composant."""
         mock_st.spinner.return_value.__enter__ = MagicMock()
@@ -707,8 +707,8 @@ class TestChargeurComposant:
         assert len(loader_called) == 1
         assert "comp1" in ChargeurComposant._loaded
 
-    @patch("src.core.performance.st")
-    @patch("src.core.performance.mesurer_temps")
+    @patch("src.core.monitoring.profiler.st")
+    @patch("src.core.monitoring.profiler.mesurer_temps")
     def test_composant_differe_deja_charge(self, mock_mesurer, mock_st):
         """Vérifie qu'un composant déjà chargé n'affiche pas le spinner."""
         mock_mesurer.return_value.__enter__ = MagicMock()
@@ -741,8 +741,8 @@ class TestChargeurComposant:
 class TestComposantsUI:
     """Tests pour les composants UI."""
 
-    @patch("src.core.performance.st")
-    @patch("src.core.performance.TableauBordPerformance")
+    @patch("src.core.monitoring.dashboard.st")
+    @patch("src.core.monitoring.dashboard.TableauBordPerformance")
     def test_afficher_panneau_performance(self, mock_dashboard, mock_st):
         """Vérifie afficher_panneau_performance."""
         mock_dashboard.obtenir_resume.return_value = {
@@ -767,9 +767,9 @@ class TestComposantsUI:
 
         mock_st.expander.assert_called_once()
 
-    @patch("src.core.performance.st")
-    @patch("src.core.performance.TableauBordPerformance")
-    @patch("src.core.performance.MoniteurMemoire")
+    @patch("src.core.monitoring.dashboard.st")
+    @patch("src.core.monitoring.dashboard.TableauBordPerformance")
+    @patch("src.core.monitoring.dashboard.MoniteurMemoire")
     def test_afficher_badge_mini_performance(self, mock_memory, mock_dashboard, mock_st):
         """Vérifie afficher_badge_mini_performance."""
         mock_dashboard.obtenir_score_sante.return_value = (90, "🟢")
@@ -791,7 +791,7 @@ class TestComposantsUI:
 class TestSuivreRequete:
     """Tests pour le context manager suivre_requete."""
 
-    @patch("src.core.performance.OptimiseurSQL")
+    @patch("src.core.monitoring.sql.OptimiseurSQL")
     def test_suivre_requete_basic(self, mock_sql):
         """Vérifie suivre_requete enregistre la requête."""
         with suivre_requete("SELECT * FROM users"):

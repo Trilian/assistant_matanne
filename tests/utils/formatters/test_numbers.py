@@ -5,7 +5,7 @@ Données réelles de cuisine et courses
 
 import pytest
 
-from src.utils.formatters.numbers import (
+from src.core.formatters import (
     arrondir_intelligent,
     formater_monnaie,
     formater_nombre,

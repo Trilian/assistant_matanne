@@ -1,6 +1,12 @@
 """
 UI Core - Point d'entrée
 Composants de base réutilisables
+
+Structure:
+- module_config.py: ConfigurationModule dataclass
+- crud_renderer.py: ModuleUIBase classe de rendu CRUD
+- base_form.py: Constructeur de formulaires
+- base_io.py: Services import/export
 """
 
 from .base_form import ConstructeurFormulaire, FormBuilder
@@ -12,33 +18,32 @@ from .base_io import (
     create_io_service,
     creer_service_io,
 )
-from .base_module import (
+
+# ✅ Import depuis nouveaux modules éclatés
+from .crud_renderer import (
     BaseModuleUI,
-    ConfigurationModule,
-    ModuleConfig,
     ModuleUIBase,
     create_module_ui,
     creer_module_ui,
 )
+from .module_config import ConfigurationModule, ModuleConfig
 
 __all__ = [
-    # Module (nouveaux noms français)
+    # Module Config (dataclass)
     "ConfigurationModule",
-    "ModuleUIBase",
-    "creer_module_ui",
-    # Module (alias compatibilité)
     "ModuleConfig",
+    # CRUD Renderer (classe principale)
+    "ModuleUIBase",
     "BaseModuleUI",
+    "creer_module_ui",
     "create_module_ui",
-    # Form (nouveau nom français)
+    # Form
     "ConstructeurFormulaire",
-    # Form (alias compatibilité)
     "FormBuilder",
-    # IO (nouveaux noms français)
+    # IO
     "ConfigurationIO",
     "ServiceIOBase",
     "creer_service_io",
-    # IO (alias compatibilité)
     "IOConfig",
     "BaseIOService",
     "create_io_service",

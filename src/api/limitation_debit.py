@@ -15,7 +15,7 @@ import time
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from functools import wraps
 from typing import Any
 
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
-class StrategieLimitationDebit(str, Enum):
+class StrategieLimitationDebit(StrEnum):
     """Stratégies de limitation de débit."""
 
     FENETRE_FIXE = "fixed_window"  # Fenêtre fixe (ex: 100 req/min)

@@ -12,6 +12,7 @@ Contient :
 
 from datetime import date, datetime
 from enum import Enum as PyEnum
+from enum import StrEnum
 from typing import Optional
 
 from sqlalchemy import (
@@ -36,7 +37,7 @@ from .base import Base
 # ═══════════════════════════════════════════════════════════
 
 
-class GarminActivityType(str, PyEnum):
+class GarminActivityType(StrEnum):
     """Types d'activités Garmin"""
 
     RUNNING = "running"
@@ -50,7 +51,7 @@ class GarminActivityType(str, PyEnum):
     OTHER = "other"
 
 
-class PurchaseCategory(str, PyEnum):
+class PurchaseCategory(StrEnum):
     """Catégories d'achats famille"""
 
     JULES_VETEMENTS = "jules_vetements"
@@ -62,7 +63,7 @@ class PurchaseCategory(str, PyEnum):
     MAISON = "maison"
 
 
-class PurchasePriority(str, PyEnum):
+class PurchasePriority(StrEnum):
     """Priorité d'achat"""
 
     URGENT = "urgent"

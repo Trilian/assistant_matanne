@@ -15,13 +15,13 @@ class TestConfigurationModule:
 
     def test_configuration_module_import(self):
         """Test import réussi."""
-        from src.ui.core.base_module import ConfigurationModule
+        from src.ui.core import ConfigurationModule
 
         assert ConfigurationModule is not None
 
     def test_configuration_module_creation(self):
         """Test création basique."""
-        from src.ui.core.base_module import ConfigurationModule
+        from src.ui.core import ConfigurationModule
 
         config = ConfigurationModule(
             name="test", title="Test Module", icon="ðŸ§ª", service=MagicMock()
@@ -33,7 +33,7 @@ class TestConfigurationModule:
 
     def test_configuration_module_defaults(self):
         """Test valeurs par défaut."""
-        from src.ui.core.base_module import ConfigurationModule
+        from src.ui.core import ConfigurationModule
 
         config = ConfigurationModule(name="test", title="Test", icon="ðŸ§ª", service=MagicMock())
 
@@ -45,7 +45,7 @@ class TestConfigurationModule:
 
     def test_configuration_module_with_stats(self):
         """Test avec stats config."""
-        from src.ui.core.base_module import ConfigurationModule
+        from src.ui.core import ConfigurationModule
 
         stats = [{"label": "Total", "value_key": "total"}]
 
@@ -57,7 +57,7 @@ class TestConfigurationModule:
 
     def test_alias_module_config(self):
         """Test alias ModuleConfig."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleConfig
+        from src.ui.core import ConfigurationModule, ModuleConfig
 
         assert ModuleConfig is ConfigurationModule
 
@@ -72,14 +72,14 @@ class TestModuleUIBase:
 
     def test_module_ui_base_import(self):
         """Test import réussi."""
-        from src.ui.core.base_module import ModuleUIBase
+        from src.ui.core import ModuleUIBase
 
         assert ModuleUIBase is not None
 
     @patch("streamlit.session_state", {})
     def test_module_ui_base_creation(self):
         """Test création."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         config = ConfigurationModule(name="test", title="Test", icon="ðŸ§ª", service=MagicMock())
 
@@ -93,7 +93,7 @@ class TestModuleUIBase:
         """Test initialisation session state."""
         import streamlit as st
 
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         config = ConfigurationModule(
             name="init_test", title="Test", icon="ðŸ§ª", service=MagicMock()
@@ -107,7 +107,7 @@ class TestModuleUIBase:
 
     def test_alias_base_module_ui(self):
         """Test alias BaseModuleUI."""
-        from src.ui.core.base_module import BaseModuleUI, ModuleUIBase
+        from src.ui.core import BaseModuleUI, ModuleUIBase
 
         assert BaseModuleUI is ModuleUIBase
 
@@ -126,7 +126,7 @@ class TestModuleUIBaseRender:
     @patch("streamlit.button", return_value=False)
     def test_render_header(self, mock_btn, mock_cols, mock_title):
         """Test _render_header."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_cols.return_value = [MagicMock(), MagicMock()]
         for col in mock_cols.return_value:
@@ -162,7 +162,7 @@ class TestModuleUIBaseRender:
         """Test toggle view mode."""
         import streamlit as st
 
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_cols.return_value = [MagicMock(), MagicMock()]
         for col in mock_cols.return_value:
@@ -186,17 +186,17 @@ class TestModuleUIBaseRender:
     @patch("streamlit.session_state", {})
     def test_render_search_filters(self):
         """Test _render_search_filters."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         config = ConfigurationModule(
             name="search_test",
             title="Search Test",
-            icon="ðŸ§ª",
+            icon="🧪",
             service=MagicMock(),
             search_fields=["nom"],
         )
 
-        with patch("src.ui.core.base_module.barre_recherche", return_value=""):
+        with patch("src.ui.core.crud_renderer.barre_recherche", return_value=""):
             module = ModuleUIBase(config)
             module._render_search_filters()
 
@@ -206,7 +206,7 @@ class TestModuleUIBaseRender:
     @patch("streamlit.download_button", return_value=False)
     def test_render_actions(self, mock_dl, mock_btn, mock_cols):
         """Test _render_actions."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         # Le code utilise col1, col2, col3 = st.columns(3)
         mock_cols.return_value = [MagicMock(), MagicMock(), MagicMock()]
@@ -225,7 +225,7 @@ class TestModuleUIBaseRender:
     @patch("streamlit.columns")
     def test_render_grid(self, mock_cols):
         """Test _render_grid."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_cols.return_value = [MagicMock() for _ in range(3)]
         for col in mock_cols.return_value:
@@ -250,7 +250,7 @@ class TestModuleUIBaseRender:
     @patch("streamlit.expander")
     def test_render_list(self, mock_expander):
         """Test _render_list."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_expander.return_value.__enter__ = MagicMock()
         mock_expander.return_value.__exit__ = MagicMock()
@@ -271,7 +271,7 @@ class TestModuleUIBaseRender:
     @patch("streamlit.session_state", {})
     def test_item_to_dict_with_dict(self):
         """Test _item_to_dict avec dict."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         config = ConfigurationModule(
             name="dict_test", title="Dict Test", icon="ðŸ§ª", service=MagicMock()
@@ -296,7 +296,7 @@ class TestFactory:
     @patch("streamlit.session_state", {})
     def test_creer_module_ui(self):
         """Test creer_module_ui."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase, creer_module_ui
+        from src.ui.core import ConfigurationModule, ModuleUIBase, creer_module_ui
 
         config = ConfigurationModule(
             name="factory_test", title="Factory Test", icon="ðŸ§ª", service=MagicMock()
@@ -309,7 +309,7 @@ class TestFactory:
     @patch("streamlit.session_state", {})
     def test_create_module_ui_alias(self):
         """Test alias create_module_ui."""
-        from src.ui.core.base_module import create_module_ui, creer_module_ui
+        from src.ui.core import create_module_ui, creer_module_ui
 
         assert create_module_ui is creer_module_ui
 
@@ -346,14 +346,14 @@ class TestRenderFull:
     @patch("streamlit.columns")
     @patch("streamlit.button", return_value=False)
     @patch("streamlit.markdown")
-    @patch("src.ui.core.base_module.etat_vide")
-    @patch("src.ui.core.base_module.barre_recherche", return_value="")
+    @patch("src.ui.core.crud_renderer.etat_vide")
+    @patch("src.ui.core.crud_renderer.barre_recherche", return_value="")
     @patch("streamlit.popover")
     def test_render_empty_items(
         self, mock_popover, mock_search, mock_vide, mock_md, mock_btn, mock_cols, mock_title
     ):
         """Test render avec liste vide."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_service = MagicMock()
         mock_service.get_all.return_value = []
@@ -386,7 +386,7 @@ class TestRenderFull:
     @patch("streamlit.columns")
     @patch("streamlit.button", return_value=False)
     @patch("streamlit.markdown")
-    @patch("src.ui.core.base_module.barre_recherche", return_value="")
+    @patch("src.ui.core.crud_renderer.barre_recherche", return_value="")
     @patch("src.ui.components.layouts.carte_item")
     @patch("streamlit.popover")
     def test_render_with_items_grid(
@@ -395,7 +395,7 @@ class TestRenderFull:
         """Test render avec items en mode grid."""
         import streamlit as st
 
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         # Item avec .id pour carte_item
         mock_item = MagicMock()
@@ -441,7 +441,7 @@ class TestRenderFull:
     @patch("streamlit.markdown")
     @patch("streamlit.caption")
     @patch("streamlit.container")
-    @patch("src.ui.core.base_module.barre_recherche", return_value="")
+    @patch("src.ui.core.crud_renderer.barre_recherche", return_value="")
     @patch("src.ui.components.atoms.badge")
     @patch("streamlit.popover")
     def test_render_with_items_list(
@@ -459,7 +459,7 @@ class TestRenderFull:
         """Test render avec items en mode list."""
         import streamlit as st
 
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_item = MagicMock()
         mock_item.id = 1
@@ -508,7 +508,7 @@ class TestRenderStats:
     @patch("src.ui.components.data.ligne_metriques")
     def test_render_stats_no_config(self, mock_lignes):
         """Test _render_stats sans config."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_service = MagicMock()
 
@@ -530,7 +530,7 @@ class TestRenderStats:
     @patch("streamlit.session_state", MockSessionState())
     def test_render_stats_value_key_service_called(self):
         """Test _render_stats appelle le service."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_service = MagicMock()
         mock_service.count.return_value = 42
@@ -556,7 +556,7 @@ class TestRenderStats:
     @patch("streamlit.session_state", MockSessionState())
     def test_render_stats_with_filter(self):
         """Test _render_stats avec filtre."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_service = MagicMock()
         mock_service.count.return_value = 10
@@ -585,7 +585,7 @@ class TestLoadItems:
     @patch("streamlit.session_state", MockSessionState())
     def test_load_items_simple(self):
         """Test _load_items basique."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_service = MagicMock()
         mock_service.get_all.return_value = [{"id": 1}, {"id": 2}]
@@ -605,7 +605,7 @@ class TestLoadItems:
         """Test _load_items avec recherche."""
         import streamlit as st
 
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_service = MagicMock()
         mock_service.advanced_search.return_value = [{"id": 1}]
@@ -632,7 +632,7 @@ class TestLoadItems:
         """Test _load_items avec filtres."""
         import streamlit as st
 
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_service = MagicMock()
         mock_service.get_all.return_value = [{"id": 1}]
@@ -655,7 +655,7 @@ class TestLoadItems:
         """Test _load_items avec filtre liste."""
         import streamlit as st
 
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_service = MagicMock()
         mock_service.get_all.return_value = []
@@ -677,7 +677,7 @@ class TestLoadItems:
         """Test filtres 'Tous'/'Toutes' ignorés."""
         import streamlit as st
 
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_service = MagicMock()
         mock_service.get_all.return_value = []
@@ -703,7 +703,7 @@ class TestRenderActions:
     @patch("streamlit.button")
     def test_actions_add_callback(self, mock_btn, mock_cols):
         """Test bouton ajouter avec callback."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_callback = MagicMock()
         mock_btn.side_effect = [True, False, False]  # Ajouter cliqué
@@ -733,7 +733,7 @@ class TestRenderActions:
         """Test bouton ajouter affiche form."""
         import streamlit as st
 
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_btn.side_effect = [True, False, False]  # Ajouter cliqué
 
@@ -754,10 +754,11 @@ class TestRenderActions:
     @patch("streamlit.session_state", MockSessionState())
     @patch("streamlit.columns")
     @patch("streamlit.button")
-    @patch("src.ui.core.base_module.afficher_succes")
+    @patch("src.ui.core.crud_renderer.afficher_succes")
     def test_actions_cache(self, mock_succes, mock_btn, mock_cols):
         """Test bouton cache."""
-        from src.ui.core.base_module import Cache, ConfigurationModule, ModuleUIBase
+        from src.core.cache import Cache
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_btn.side_effect = [False, False, True]  # Cache cliqué
 
@@ -768,7 +769,7 @@ class TestRenderActions:
 
         with patch.object(Cache, "invalider") as mock_invalider:
             config = ConfigurationModule(
-                name="cache_test", title="Cache Test", icon="ðŸ§ª", service=MagicMock()
+                name="cache_test", title="Cache Test", icon="🧪", service=MagicMock()
             )
 
             module = ModuleUIBase(config)
@@ -784,7 +785,7 @@ class TestRenderCarteItem:
     @patch("streamlit.session_state", MockSessionState())
     def test_carte_item_no_exception(self):
         """Test _render_carte_item ne lève pas d'exception."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         config = ConfigurationModule(
             name="carte_test",
@@ -814,7 +815,7 @@ class TestRenderCarteItem:
     @patch("streamlit.session_state", MockSessionState())
     def test_carte_item_dict_item(self):
         """Test _render_carte_item avec dict utilise _item_to_dict."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         config = ConfigurationModule(
             name="carte_dict_test",
@@ -841,7 +842,7 @@ class TestExportData:
     def test_export_csv(self, mock_download):
         """Test export CSV."""
 
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         mock_service = MagicMock()
         mock_service.get_all.return_value = [{"id": 1, "nom": "Test"}]
@@ -866,7 +867,7 @@ class TestItemToDict:
     @patch("streamlit.session_state", MockSessionState())
     def test_item_to_dict_dict(self):
         """Test _item_to_dict avec dict."""
-        from src.ui.core.base_module import ConfigurationModule, ModuleUIBase
+        from src.ui.core import ConfigurationModule, ModuleUIBase
 
         config = ConfigurationModule(
             name="dict_test", title="Dict Test", icon="ðŸ§ª", service=MagicMock()

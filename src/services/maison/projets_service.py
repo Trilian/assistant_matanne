@@ -454,8 +454,8 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
 # ═══════════════════════════════════════════════════════════
 
 
-def get_projets_service(client: ClientIA | None = None) -> ProjetsService:
-    """Factory pour obtenir le service projets.
+def obtenir_service_projets(client: ClientIA | None = None) -> ProjetsService:
+    """Factory pour obtenir le service projets (convention française).
 
     Args:
         client: Client IA optionnel
@@ -464,3 +464,8 @@ def get_projets_service(client: ClientIA | None = None) -> ProjetsService:
         Instance de ProjetsService
     """
     return ProjetsService(client=client)
+
+
+def get_projets_service(client: ClientIA | None = None) -> ProjetsService:
+    """Factory pour obtenir le service projets (alias anglais)."""
+    return obtenir_service_projets(client)

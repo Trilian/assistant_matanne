@@ -489,9 +489,14 @@ class BarcodeService(BaseService[ArticleInventaire]):
 _service_instance: BarcodeService | None = None
 
 
-def get_barcode_service() -> BarcodeService:
-    """Factory pour obtenir le service Barcode."""
+def obtenir_service_codes_barres() -> BarcodeService:
+    """Factory pour obtenir le service Barcode (convention française)."""
     global _service_instance
     if _service_instance is None:
         _service_instance = BarcodeService()
     return _service_instance
+
+
+def get_barcode_service() -> BarcodeService:
+    """Factory pour obtenir le service Barcode (alias anglais)."""
+    return obtenir_service_codes_barres()

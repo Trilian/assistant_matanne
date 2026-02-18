@@ -100,8 +100,8 @@ def onglet_taches(mes_objets: list[dict], historique: list[dict]):
         st.markdown(
             f"""
         <div class="categorie-header">
-            <span class="icon">{cat_data.get('icon', '📦')}</span>
-            <span class="title">{cat_id.replace('_', ' ').capitalize()} ({len(cat_taches)})</span>
+            <span class="icon">{cat_data.get("icon", "📦")}</span>
+            <span class="title">{cat_id.replace("_", " ").capitalize()} ({len(cat_taches)})</span>
         </div>
         """,
             unsafe_allow_html=True,
@@ -475,10 +475,10 @@ def onglet_stats(mes_objets: list[dict], historique: list[dict]):
             st.markdown(
                 f"""
             <div class="entretien-card">
-                <div style="font-size: 2rem; margin-bottom: 0.5rem">{cat_data.get('icon', '📦')}</div>
-                <div style="font-weight: 600">{cat_id.replace('_', ' ').capitalize()}</div>
+                <div style="font-size: 2rem; margin-bottom: 0.5rem">{cat_data.get("icon", "📦")}</div>
+                <div style="font-weight: 600">{cat_id.replace("_", " ").capitalize()}</div>
                 <div style="font-size: 0.85rem; color: #718096">
-                    {data['objets']} équipements • {data['taches']} tâches en attente
+                    {data["objets"]} équipements • {data["taches"]} tâches en attente
                 </div>
             </div>
             """,

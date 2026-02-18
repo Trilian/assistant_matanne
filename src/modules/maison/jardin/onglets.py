@@ -228,7 +228,7 @@ def onglet_autonomie(mes_plantes: list[dict], recoltes: list[dict]):
         m1, m2, m3 = st.columns(3)
         m1.metric("Plantes", stats.get("nb_plantes", 0), help="Plantes cultivées")
         m2.metric("Variétés", stats.get("varietes_uniques", 0), help="Diversité du potager")
-        m3.metric("Récoltes", f'{stats.get("production_kg", 0)} kg', help="Production totale")
+        m3.metric("Récoltes", f"{stats.get('production_kg', 0)} kg", help="Production totale")
 
         # Prévisions
         previsions = generer_previsions_recoltes(mes_plantes)
@@ -314,10 +314,10 @@ def onglet_recoltes(mes_plantes: list[dict], recoltes: list[dict]):
             st.markdown(
                 f"""
             <div class="recolte-item">
-                <span style="font-size: 1.5rem">{plante_data.get('emoji', '🌱')}</span>
-                <span><strong>{plante_data.get('nom', recolte.get('plante_id'))}</strong></span>
-                <span class="quantite">{recolte.get('quantite_kg')} kg</span>
-                <span style="color: #718096">{recolte.get('date')}</span>
+                <span style="font-size: 1.5rem">{plante_data.get("emoji", "🌱")}</span>
+                <span><strong>{plante_data.get("nom", recolte.get("plante_id"))}</strong></span>
+                <span class="quantite">{recolte.get("quantite_kg")} kg</span>
+                <span style="color: #718096">{recolte.get("date")}</span>
             </div>
             """,
                 unsafe_allow_html=True,

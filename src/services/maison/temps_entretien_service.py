@@ -816,8 +816,8 @@ Sois encourageant mais objectif.
 _service_instance: TempsEntretienService | None = None
 
 
-def get_temps_entretien_service() -> TempsEntretienService:
-    """Factory pour obtenir le service de suivi du temps.
+def obtenir_service_temps_entretien() -> TempsEntretienService:
+    """Factory pour obtenir le service de suivi du temps (convention française).
 
     Returns:
         Instance singleton du service
@@ -826,3 +826,8 @@ def get_temps_entretien_service() -> TempsEntretienService:
     if _service_instance is None:
         _service_instance = TempsEntretienService()
     return _service_instance
+
+
+def get_temps_entretien_service() -> TempsEntretienService:
+    """Factory pour obtenir le service de suivi du temps (alias anglais)."""
+    return obtenir_service_temps_entretien()

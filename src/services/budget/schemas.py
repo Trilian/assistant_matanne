@@ -6,7 +6,7 @@ Types et modèles de données pour la gestion du budget familial.
 
 from datetime import date as date_type
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 
 from pydantic import BaseModel, Field
 
@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 DEFAULT_USER_ID = "matanne"
 
 
-class CategorieDepense(str, Enum):
+class CategorieDepense(StrEnum):
     """Catégories de dépenses."""
 
     ALIMENTATION = "alimentation"
@@ -41,7 +41,7 @@ class CategorieDepense(str, Enum):
     AUTRE = "autre"
 
 
-class FrequenceRecurrence(str, Enum):
+class FrequenceRecurrence(StrEnum):
     """Fréquence des dépenses récurrentes."""
 
     PONCTUEL = "ponctuel"

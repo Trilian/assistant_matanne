@@ -52,11 +52,11 @@ def render_taches(taches: list[dict], charge: dict):
             <div class="taches-header">
                 <span class="taches-title">📋 Aujourd'hui</span>
                 <span class="charge-badge {niveau_class}">
-                    {charge['nb_taches']} tâches • {charge['temps_str']}
+                    {charge["nb_taches"]} tâches • {charge["temps_str"]}
                 </span>
             </div>
             <div class="jauge-container">
-                <div class="jauge-fill {jauge_class}" style="width: {charge['pourcent']}%"></div>
+                <div class="jauge-fill {jauge_class}" style="width: {charge["pourcent"]}%"></div>
             </div>
     """,
         unsafe_allow_html=True,
@@ -86,10 +86,10 @@ def render_taches(taches: list[dict], charge: dict):
             <div class="tache-item">
                 <div class="tache-icon {icon_class}">{icon}</div>
                 <div class="tache-content">
-                    <div class="tache-titre">{tache['titre']}</div>
+                    <div class="tache-titre">{tache["titre"]}</div>
                     <div class="tache-meta">{meta}</div>
                 </div>
-                <div class="tache-duree">{tache['duree_min']} min</div>
+                <div class="tache-duree">{tache["duree_min"]} min</div>
             </div>
         """,
             unsafe_allow_html=True,
@@ -110,10 +110,10 @@ def render_alertes(alertes: list[dict]):
         st.markdown(
             f"""
             <div class="alerte-card {type_class}">
-                <span class="alerte-icon">{alerte['icon']}</span>
+                <span class="alerte-icon">{alerte["icon"]}</span>
                 <div class="alerte-content">
-                    <div class="alerte-titre">{alerte['titre']}</div>
-                    <div class="alerte-desc">{alerte['description']}</div>
+                    <div class="alerte-titre">{alerte["titre"]}</div>
+                    <div class="alerte-desc">{alerte["description"]}</div>
                 </div>
             </div>
         """,
@@ -204,15 +204,15 @@ def render_stats_mois(stats: dict):
                 <div class="stat-label">Ce mois</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">{stats.get('zones_jardin', 0)}</div>
+                <div class="stat-value">{stats.get("zones_jardin", 0)}</div>
                 <div class="stat-label">Zones jardin</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">{stats.get('pieces', 0)}</div>
+                <div class="stat-value">{stats.get("pieces", 0)}</div>
                 <div class="stat-label">Pièces</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">{stats.get('autonomie_pourcent', 0)}%</div>
+                <div class="stat-value">{stats.get("autonomie_pourcent", 0)}%</div>
                 <div class="stat-label">Autonomie</div>
             </div>
         </div>

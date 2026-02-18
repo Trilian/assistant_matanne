@@ -11,6 +11,7 @@ import httpx
 from ..config import obtenir_parametres
 from ..errors import ErreurLimiteDebit, ErreurServiceIA
 from .cache import CacheIA
+from .rate_limit import RateLimitIA
 
 logger = logging.getLogger(__name__)
 
@@ -111,9 +112,7 @@ class ClientIA:
         self._ensure_config_loaded()
 
         # Vérifier rate limit
-        from ..cache import LimiteDebit
-
-        peut_appeler, message_erreur = LimiteDebit.peut_appeler()
+        peut_appeler, message_erreur = RateLimitIA.peut_appeler()
         if not peut_appeler:
             raise ErreurLimiteDebit(message_erreur, message_utilisateur=message_erreur)
 
@@ -138,7 +137,7 @@ class ClientIA:
                 )
 
                 # Enregistrer appel
-                LimiteDebit.enregistrer_appel()
+                RateLimitIA.enregistrer_appel(service="mistral")
 
                 # Cacher résultat
                 if utiliser_cache:

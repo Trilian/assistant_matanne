@@ -308,9 +308,14 @@ class OpenFoodFactsService:
 _service_instance: OpenFoodFactsService | None = None
 
 
-def get_openfoodfacts_service() -> OpenFoodFactsService:
-    """Factory pour obtenir le service OpenFoodFacts."""
+def obtenir_service_openfoodfacts() -> OpenFoodFactsService:
+    """Factory pour obtenir le service OpenFoodFacts (convention française)."""
     global _service_instance
     if _service_instance is None:
         _service_instance = OpenFoodFactsService()
     return _service_instance
+
+
+def get_openfoodfacts_service() -> OpenFoodFactsService:
+    """Factory pour obtenir le service OpenFoodFacts (alias anglais)."""
+    return obtenir_service_openfoodfacts()

@@ -38,7 +38,7 @@ class Base(DeclarativeBase):
 # ═══════════════════════════════════════════════════════════
 
 
-class PrioriteEnum(str, enum.Enum):
+class PrioriteEnum(enum.StrEnum):
     """Niveaux de priorité utilisés dans plusieurs modèles."""
 
     BASSE = "basse"
@@ -46,7 +46,7 @@ class PrioriteEnum(str, enum.Enum):
     HAUTE = "haute"
 
 
-class SaisonEnum(str, enum.Enum):
+class SaisonEnum(enum.StrEnum):
     """Saisons pour les recettes et le jardinage."""
 
     PRINTEMPS = "printemps"
@@ -56,7 +56,7 @@ class SaisonEnum(str, enum.Enum):
     TOUTE_ANNEE = "toute_année"
 
 
-class TypeRepasEnum(str, enum.Enum):
+class TypeRepasEnum(enum.StrEnum):
     """Types de repas pour le planning."""
 
     PETIT_DEJEUNER = "petit_déjeuner"
@@ -65,7 +65,7 @@ class TypeRepasEnum(str, enum.Enum):
     GOUTER = "goûter"
 
 
-class TypeVersionRecetteEnum(str, enum.Enum):
+class TypeVersionRecetteEnum(enum.StrEnum):
     """Types de versions de recettes."""
 
     STANDARD = "standard"

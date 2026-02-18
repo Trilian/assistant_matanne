@@ -551,7 +551,7 @@ def render_previsions_ia():
     # Estimation annuelle
     estimation_annuelle = moyenne * 12
     insights.append(
-        f"📅 Budget annuel estimé : **{estimation_annuelle:.0f}€** ({estimation_annuelle/12:.0f}€/mois)"
+        f"📅 Budget annuel estimé : **{estimation_annuelle:.0f}€** ({estimation_annuelle / 12:.0f}€/mois)"
     )
 
     for insight in insights:

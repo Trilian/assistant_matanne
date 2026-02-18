@@ -145,17 +145,37 @@ with user_context(user_id) as ctx:
 
 ## Cache
 
-### Niveaux de cache
-1. **L1**: Streamlit session_state (immédiat)
-2. **L2**: Redis (si disponible)
-3. **L3**: Cache sémantique IA (embeddings)
+### Architecture multi-niveaux (src/core/caching/)
+1. **L1**: `CacheMemoireN1` — dict Python en mémoire (ultra rapide, volatile)
+2. **L2**: `CacheSessionN2` — st.session_state (persistant pendant la session)
+3. **L3**: `CacheFichierN3` — pickle sur disque (persistant entre sessions)
 
+```python
+from src.core.caching import avec_cache_multi, obtenir_cache
+
+# Décorateur
+@avec_cache_multi(ttl=300, niveaux=["L1", "L2"])
+def get_recettes():
+    ...
+
+# Cache orchestrateur
+cache = obtenir_cache()
+cache.set("clé", valeur, ttl=600)
+```
+
+### Cache Redis (optionnel)
 ```python
 from src.core.redis_cache import redis_cached
 
 @redis_cached(ttl=3600, tags=["recettes"])
 def get_recettes():
     ...
+```
+
+### Cache sémantique IA
+```python
+from src.core.ai import CacheIA
+# Cache les réponses IA par similarité sémantique
 ```
 
 ## Conventions

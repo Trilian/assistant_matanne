@@ -18,7 +18,6 @@ from pathlib import Path
 from typing import Any
 from uuid import UUID
 
-import streamlit as st
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db

@@ -10,7 +10,7 @@ Contient :
 
 from datetime import date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import Enum, StrEnum
 
 from sqlalchemy import (
     JSON,
@@ -32,7 +32,7 @@ from .base import Base
 # ═══════════════════════════════════════════════════════════
 
 
-class TypeActiviteEntretien(str, Enum):
+class TypeActiviteEntretien(StrEnum):
     """Types d'activités d'entretien/jardinage."""
 
     # Jardin
@@ -67,7 +67,7 @@ class TypeActiviteEntretien(str, Enum):
     AUTRE = "autre"
 
 
-class TypeModificationPiece(str, Enum):
+class TypeModificationPiece(StrEnum):
     """Types de modifications de pièce."""
 
     AJOUT_MEUBLE = "ajout_meuble"
@@ -79,7 +79,7 @@ class TypeModificationPiece(str, Enum):
     REPARATION = "reparation"
 
 
-class StatutObjet(str, Enum):
+class StatutObjet(StrEnum):
     """Statut d'un objet dans l'inventaire."""
 
     FONCTIONNE = "fonctionne"
@@ -92,7 +92,7 @@ class StatutObjet(str, Enum):
     ARCHIVE = "archive"
 
 
-class PrioriteRemplacement(str, Enum):
+class PrioriteRemplacement(StrEnum):
     """Priorité pour remplacement d'objet."""
 
     URGENTE = "urgente"

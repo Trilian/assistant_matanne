@@ -15,7 +15,6 @@ import logging
 from datetime import datetime, timedelta
 from enum import StrEnum
 
-import streamlit as st
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -557,82 +556,13 @@ class ActionHistoryService:
 
 
 # -----------------------------------------------------------
-# COMPOSANTS UI
+# RÉTROCOMPATIBILITÉ UI — Fonctions extraites vers src/ui/views/historique.py
 # -----------------------------------------------------------
-
-
-def render_activity_timeline(limit: int = 10):
-    """Affiche la timeline d'activité récente."""
-    service = get_action_history_service()
-    actions = service.get_recent_actions(limit=limit)
-
-    if not actions:
-        st.info("Aucune activité récente")
-        return
-
-    st.markdown("### 📋 Activité récente")
-
-    for action in actions:
-        col1, col2 = st.columns([1, 4])
-
-        with col1:
-            # Icône selon le type
-            icons = {
-                "recette": "🍳",
-                "inventaire": "📦",
-                "courses": "🛒",
-                "planning": "📅",
-                "famille": "👨‍👩‍👧",
-                "system": "⚙️",
-            }
-            icon = icons.get(action.entity_type, "📝")
-            st.markdown(f"### {icon}")
-
-        with col2:
-            st.markdown(f"**{action.description}**")
-            st.caption(f"{action.user_name} à {action.created_at.strftime('%d/%m %H:%M')}")
-
-        st.markdown("---")
-
-
-def render_user_activity(user_id: str):
-    """Affiche l'activité d'un utilisateur spécifique."""
-    service = get_action_history_service()
-    actions = service.get_user_history(user_id, limit=20)
-
-    st.markdown("### 👤 Activité de l'utilisateur")
-
-    if not actions:
-        st.info("Aucune activité enregistrée")
-        return
-
-    for action in actions:
-        with st.expander(
-            f"{action.description} - {action.created_at.strftime('%d/%m %H:%M')}", expanded=False
-        ):
-            st.json(action.details)
-
-
-def render_activity_stats():
-    """Affiche les statistiques d'activité."""
-    service = get_action_history_service()
-    stats = service.get_stats()
-
-    st.markdown("### 📊 Statistiques")
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.metric("Total actions", stats.total_actions)
-    with col2:
-        st.metric("Aujourd'hui", stats.actions_today)
-    with col3:
-        st.metric("Cette semaine", stats.actions_this_week)
-
-    if stats.most_active_users:
-        st.markdown("**🏆 Utilisateurs les plus actifs:**")
-        for user in stats.most_active_users[:3]:
-            st.write(f"• {user['name']}: {user['count']} actions")
+from src.ui.views.historique import (
+    afficher_timeline_activite as render_activity_timeline,
+    afficher_activite_utilisateur as render_user_activity,
+    afficher_statistiques_activite as render_activity_stats,
+)
 
 
 # -----------------------------------------------------------
@@ -643,21 +573,28 @@ def render_activity_stats():
 _history_service: ActionHistoryService | None = None
 
 
-def get_action_history_service() -> ActionHistoryService:
-    """Factory pour le service d'historique."""
+def obtenir_service_historique_actions() -> ActionHistoryService:
+    """Factory pour le service d'historique (convention française)."""
     global _history_service
     if _history_service is None:
         _history_service = ActionHistoryService()
     return _history_service
 
 
+def get_action_history_service() -> ActionHistoryService:
+    """Factory pour le service d'historique (alias anglais)."""
+    return obtenir_service_historique_actions()
+
+
 __all__ = [
     "ActionHistoryService",
+    "obtenir_service_historique_actions",
     "get_action_history_service",
     "ActionType",
     "ActionEntry",
     "ActionFilter",
     "ActionStats",
+    # UI rétrocompat — réexportées depuis src.ui.views.historique
     "render_activity_timeline",
     "render_user_activity",
     "render_activity_stats",

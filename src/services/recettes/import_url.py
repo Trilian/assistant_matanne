@@ -750,12 +750,17 @@ Réponds en JSON avec cette structure exacte:
 _import_service: RecipeImportService | None = None
 
 
-def get_recipe_import_service() -> RecipeImportService:
-    """Factory pour le service d'import de recettes."""
+def obtenir_service_import_recettes() -> RecipeImportService:
+    """Factory pour le service d'import de recettes (convention française)."""
     global _import_service
     if _import_service is None:
         _import_service = RecipeImportService()
     return _import_service
+
+
+def get_recipe_import_service() -> RecipeImportService:
+    """Factory pour le service d'import de recettes (alias anglais)."""
+    return obtenir_service_import_recettes()
 
 
 # ═══════════════════════════════════════════════════════════

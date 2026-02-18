@@ -10,7 +10,7 @@ Contient :
 
 from datetime import date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import Enum, StrEnum
 
 from sqlalchemy import (
     Boolean,
@@ -30,7 +30,7 @@ from .base import Base
 # ═══════════════════════════════════════════════════════════
 
 
-class FurnitureStatus(str, Enum):
+class FurnitureStatus(StrEnum):
     """Statut d'un meuble dans la wishlist."""
 
     SOUHAITE = "souhaite"  # On le veut
@@ -41,7 +41,7 @@ class FurnitureStatus(str, Enum):
     ANNULE = "annule"  # Annulé
 
 
-class FurniturePriority(str, Enum):
+class FurniturePriority(StrEnum):
     """Priorité d'achat."""
 
     URGENT = "urgent"  # Besoin immédiat
@@ -51,7 +51,7 @@ class FurniturePriority(str, Enum):
     PLUS_TARD = "plus_tard"  # Un jour...
 
 
-class EcoActionType(str, Enum):
+class EcoActionType(StrEnum):
     """Type d'action écologique."""
 
     LAVABLE = "lavable"  # Passage au lavable (essuie-tout, serviettes)
@@ -62,7 +62,7 @@ class EcoActionType(str, Enum):
     AUTRE = "autre"
 
 
-class RoomType(str, Enum):
+class RoomType(StrEnum):
     """Pièces de la maison."""
 
     SALON = "salon"

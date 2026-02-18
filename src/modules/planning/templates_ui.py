@@ -99,7 +99,7 @@ def app():
                 # Formulaire pour plusieurs items
                 items_data = []
                 for i in range(3):  # 3 slots d'événements
-                    st.markdown(f"*Événement {i+1}*")
+                    st.markdown(f"*Événement {i + 1}*")
                     cols = st.columns([2, 2, 2, 3])
                     with cols[0]:
                         jour = st.selectbox(

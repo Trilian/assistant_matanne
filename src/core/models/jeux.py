@@ -28,7 +28,7 @@ from src.core.models.base import Base
 # ═══════════════════════════════════════════════════════════════════
 
 
-class ResultatMatchEnum(str, enum.Enum):
+class ResultatMatchEnum(enum.StrEnum):
     """Résultat possible d'un match"""
 
     VICTOIRE_DOMICILE = "1"
@@ -37,7 +37,7 @@ class ResultatMatchEnum(str, enum.Enum):
     NON_JOUE = "non_joue"
 
 
-class StatutPariEnum(str, enum.Enum):
+class StatutPariEnum(enum.StrEnum):
     """Statut d'un pari"""
 
     EN_ATTENTE = "en_attente"
@@ -46,7 +46,7 @@ class StatutPariEnum(str, enum.Enum):
     ANNULE = "annule"
 
 
-class TypePariEnum(str, enum.Enum):
+class TypePariEnum(enum.StrEnum):
     """Type de pari"""
 
     RESULTAT_MATCH = "1N2"
@@ -55,7 +55,7 @@ class TypePariEnum(str, enum.Enum):
     BTTS = "les_deux_marquent"  # Both Teams To Score
 
 
-class ChampionnatEnum(str, enum.Enum):
+class ChampionnatEnum(enum.StrEnum):
     """Championnats européens suivis"""
 
     LIGUE_1 = "Ligue 1"
@@ -383,14 +383,14 @@ class HistoriqueJeux(Base):
 # ═══════════════════════════════════════════════════════════════════
 
 
-class TypeJeuEnum(str, enum.Enum):
+class TypeJeuEnum(enum.StrEnum):
     """Type de jeu pour le tracking des séries"""
 
     PARIS = "paris"
     LOTO = "loto"
 
 
-class TypeMarcheParisEnum(str, enum.Enum):
+class TypeMarcheParisEnum(enum.StrEnum):
     """Types de marchés paris sportifs (inspiré du template Excel)"""
 
     # Mi-temps

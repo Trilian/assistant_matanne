@@ -13,7 +13,7 @@ Modèles de validation pour:
 from datetime import date as date_type
 from datetime import datetime
 from decimal import Decimal
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -23,7 +23,7 @@ from pydantic import BaseModel, ConfigDict, Field
 # ═══════════════════════════════════════════════════════════
 
 
-class NiveauUrgence(str, Enum):
+class NiveauUrgence(StrEnum):
     """Niveau d'urgence pour alertes."""
 
     HAUTE = "haute"
@@ -32,7 +32,7 @@ class NiveauUrgence(str, Enum):
     INFO = "info"
 
 
-class TypeAlerteMaison(str, Enum):
+class TypeAlerteMaison(StrEnum):
     """Types d'alertes maison."""
 
     METEO = "meteo"
@@ -43,7 +43,7 @@ class TypeAlerteMaison(str, Enum):
     JARDIN = "jardin"
 
 
-class CategorieObjet(str, Enum):
+class CategorieObjet(StrEnum):
     """Catégories d'objets maison."""
 
     ELECTROMENAGER = "electromenager"
@@ -59,7 +59,7 @@ class CategorieObjet(str, Enum):
     AUTRE = "autre"
 
 
-class TypeZoneJardin(str, Enum):
+class TypeZoneJardin(StrEnum):
     """Types de zones jardin."""
 
     POTAGER = "potager"
@@ -75,7 +75,7 @@ class TypeZoneJardin(str, Enum):
     AUTRE = "autre"
 
 
-class EtatPlante(str, Enum):
+class EtatPlante(StrEnum):
     """État de santé d'une plante."""
 
     EXCELLENT = "excellent"
@@ -84,7 +84,7 @@ class EtatPlante(str, Enum):
     PROBLEME = "probleme"
 
 
-class StatutObjet(str, Enum):
+class StatutObjet(StrEnum):
     """Statut d'un objet dans l'inventaire."""
 
     FONCTIONNE = "fonctionne"  # En bon état
@@ -97,7 +97,7 @@ class StatutObjet(str, Enum):
     ARCHIVE = "archive"  # Historique seulement
 
 
-class TypeModificationPiece(str, Enum):
+class TypeModificationPiece(StrEnum):
     """Types de modifications de pièce."""
 
     AJOUT_MEUBLE = "ajout_meuble"
@@ -109,7 +109,7 @@ class TypeModificationPiece(str, Enum):
     REPARATION = "reparation"
 
 
-class PrioriteRemplacement(str, Enum):
+class PrioriteRemplacement(StrEnum):
     """Priorité pour remplacement d'objet."""
 
     URGENTE = "urgente"  # Dans la semaine
@@ -664,7 +664,7 @@ class ActionObjetResult(BaseModel):
 # ═══════════════════════════════════════════════════════════
 
 
-class FrequenceTache(str, Enum):
+class FrequenceTache(StrEnum):
     """Fréquence de récurrence d'une tâche."""
 
     QUOTIDIEN = "quotidien"
@@ -724,7 +724,7 @@ class SyncPlanningResult(BaseModel):
 # ═══════════════════════════════════════════════════════════
 
 
-class TypeActiviteEntretien(str, Enum):
+class TypeActiviteEntretien(StrEnum):
     """Types d'activités d'entretien/jardinage."""
 
     # Jardin

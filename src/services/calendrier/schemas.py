@@ -5,13 +5,13 @@ Types et modèles de données pour l'import/export de calendriers.
 """
 
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
 
-class CalendarProvider(str, Enum):
+class CalendarProvider(StrEnum):
     """Fournisseurs de calendrier supportés."""
 
     GOOGLE = "google"
@@ -20,7 +20,7 @@ class CalendarProvider(str, Enum):
     ICAL_URL = "ical_url"  # URL iCal générique
 
 
-class SyncDirection(str, Enum):
+class SyncDirection(StrEnum):
     """Direction de synchronisation."""
 
     IMPORT_ONLY = "import"  # Du calendrier externe vers l'app

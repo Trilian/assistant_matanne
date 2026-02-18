@@ -24,16 +24,18 @@ Hub de gestion familiale en production avec modules pour:
 
 ### Modules principaux (src/core/)
 
-- **config.py**: Pydantic `BaseSettings` avec chargement en cascade: `.env.local` → `.env` → secrets Streamlit → constantes
-- **models/**: Modèles SQLAlchemy ORM modulaires (18 fichiers organisés par domaine: recettes, inventaire, planning, famille...)
-- **database.py**: `GestionnaireMigrations` pour la gestion des versions de schéma; sans dépendance runtime Alembic; utilise le gestionnaire de contexte `get_db_context()`
-- **decorators.py**: `@with_db_session` (injecte automatiquement la Session), `@with_cache` (cache Streamlit basé sur TTL), `@with_error_handling`
-- **lazy_loader.py**: `OptimizedRouter` pour le chargement dynamique des modules; classe `LazyModuleLoader`; améliore massivement le temps de démarrage
-- **date_utils.py**: Fonctions de manipulation de dates/semaines centralisées (nouvellement consolidé)
-- **formatters.py**: Fonctions de formatage (dates, nombres, texte, unités) centralisées
-- **helpers.py**: Fonctions utilitaires (data, stats, strings, food) centralisées
-- **image_generator.py**: Génération d'images via APIs (Unsplash, Pexels, Pollinations...)
-- **ai/**: Sous-module avec `ClientIA` (client Mistral), `AnalyseurIA` (parsing JSON/Pydantic), `CacheIA` (cache sémantique), `RateLimitIA`
+Le core est organisé en **5 sous-packages** + fichiers utilitaires. Des shims de rétrocompatibilité conservent les anciens chemins d'import fonctionnels.
+
+- **config/**: Package Pydantic `BaseSettings` — `settings.py` (Parametres, obtenir_parametres), `loader.py` (chargement .env, secrets Streamlit)
+- **db/**: Package base de données — `engine.py` (Engine SQLAlchemy, QueuePool), `session.py` (context managers), `migrations.py` (GestionnaireMigrations), `utils.py` (health checks)
+- **caching/**: Package cache multi-niveaux — `memory.py` (L1 dict), `session.py` (L2 session_state), `file.py` (L3 pickle), `orchestrator.py` (CacheMultiNiveau, @avec_cache_multi)
+- **validation/**: Package validation — `schemas.py` (modèles Pydantic), `sanitizer.py` (anti-XSS/injection), `validators.py` (helpers)
+- **monitoring/**: Package métriques — `profiler.py` (ProfileurFonction), `memory.py` (MoniteurMemoire), `sql.py` (OptimiseurSQL), `dashboard.py` (UI)
+- **models/**: Modèles SQLAlchemy ORM modulaires (18 fichiers organisés par domaine)
+- **ai/**: Sous-module avec `ClientIA` (client Mistral), `AnalyseurIA` (parsing JSON/Pydantic), `CacheIA` (cache sémantique), `RateLimitIA` (source de vérité rate limiting)
+- **decorators.py**: `@with_db_session`, `@with_cache`, `@with_error_handling`
+- **Shims rétrocompat**: `database.py` → db/, `cache_multi.py` → caching/, `performance.py` → monitoring/
+- **Utilitaires**: `date_utils.py`, `formatters.py`, `helpers.py`, `constants.py`, `errors.py`
 
 ### Couche Services (src/services/)
 
@@ -173,7 +175,7 @@ Voir [src/core/errors.py](src/core/errors.py) et [src/core/decorators.py](src/co
 ### Gestion des sessions de base de données
 
 ```python
-from src.core.database import get_db_context
+from src.core.db import obtenir_contexte_db
 from src.core.decorators import with_db_session
 
 # Modèle 1: Utiliser le décorateur (préféré pour les fonctions pures)
@@ -185,23 +187,24 @@ def create_recipe(data: dict, db: Session) -> Recette:
     return recette
 
 # Modèle 2: Gestionnaire de contexte manuel (pour les flux complexes)
-with get_db_context() as session:
+with obtenir_contexte_db() as session:
     result = session.query(Recette).first()
     session.commit()
 ```
 
-Clé: Toujours utiliser `get_db_context()` - ne jamais créer Engine/Session directement.
+Clé: Toujours utiliser `obtenir_contexte_db()` (ou alias `get_db_context()`) — ne jamais créer Engine/Session directement.
 
 ### Stratégie de cache
 
+- **Cache multi-niveaux**: `src/core/caching/` — L1 mémoire, L2 session, L3 fichier avec `@avec_cache_multi`
 - **Cache Streamlit**: `@st.cache_data(ttl=1800)` pour les données UI (par défaut 30 min)
 - **Cache des réponses IA**: `CacheIA` dans `src/core/ai/cache.py` pour le cache sémantique des appels IA
 - **Invalidation manuelle**: `StateManager` peut nettoyer le cache lors d'actions utilisateur
 - Exemple:
   ```python
-  from src.core.cache import Cache
-  cache = Cache()
-  cache.nettoyer("prefix")  # Nettoyer par préfixe
+  from src.core.caching import obtenir_cache
+  cache = obtenir_cache()
+  # Utilisation via orchestrateur multi-niveaux
   ```
 
 ### Modèle de chargement différé
@@ -283,7 +286,7 @@ Importer via: `from src.core.config import obtenir_parametres()`
 
 ### Ajouter un modèle de base de données
 
-1. Ajouter la classe à [src/core/models.py](src/core/models.py) en héritant de `Base`
+1. Ajouter la classe dans le fichier approprié sous [src/core/models/](src/core/models/) en héritant de `Base`
 2. Suivre les modèles ORM SQLAlchemy 2.0 avec indices de type `mapped_column` et `Mapped`
 3. Utiliser la convention de nommage pour les contraintes (déjà configurée dans models.py)
 4. Créer la migration: `python manage.py create_migration "Add new model fields"`
@@ -338,13 +341,18 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 
 | Fichier                                          | Objectif                                              |
 | ------------------------------------------------ | ----------------------------------------------------- |
-| [src/core/config.py](src/core/config.py)         | Chargement et validation de la configuration          |
-| [src/core/models.py](src/core/models.py)         | Tous les modèles ORM SQLAlchemy                       |
-| [src/core/database.py](src/core/database.py)     | Connexions BD, gestionnaire de migrations             |
-| [src/app.py](src/app.py)                         | App Streamlit principale, routage, chargement différé |
+| [src/core/config/](src/core/config/)             | Package configuration (Pydantic BaseSettings)         |
+| [src/core/db/](src/core/db/)                     | Package base de données (engine, sessions, migrations)|
+| [src/core/caching/](src/core/caching/)           | Package cache multi-niveaux (L1/L2/L3)                |
+| [src/core/validation/](src/core/validation/)     | Package validation & sanitization                     |
+| [src/core/monitoring/](src/core/monitoring/)      | Package métriques & performance                       |
+| [src/core/ai/](src/core/ai/)                     | Package IA (Mistral, rate limiting, cache sémantique) |
+| [src/core/models/](src/core/models/)             | Tous les modèles ORM SQLAlchemy (18 fichiers)         |
 | [src/core/decorators.py](src/core/decorators.py) | Utilitaires `@with_db_session`, `@with_cache`         |
+| [src/app.py](src/app.py)                         | App Streamlit principale, routage, chargement différé |
 | [pyproject.toml](pyproject.toml)                 | Dépendances (Poetry), config test, règles de linting  |
 | [alembic/env.py](alembic/env.py)                 | Configuration d'environnement des migrations          |
+| [docs/MIGRATION_CORE_PACKAGES.md](docs/MIGRATION_CORE_PACKAGES.md) | Guide de migration des imports    |
 
 ---
 
@@ -358,7 +366,7 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 **Connexion à la base de données échouée?**
 
 - Vérifier `DATABASE_URL` dans `.env.local`: format `postgresql://user:pass@host/db`
-- Exécuter: `python -c "from src.core.database import obtenir_moteur; obtenir_moteur().connect()"`
+- Exécuter: `python -c "from src.core.db import obtenir_moteur; obtenir_moteur().connect()"`
 
 **Tests échouent?**
 

@@ -460,7 +460,7 @@ class PlanMaisonInteractif:
                 {piece.nom}
             </div>
             <div class="piece-stats">
-                {f'<span class="piece-stat">📐 {piece.superficie_m2} m²</span>' if piece.superficie_m2 else ''}
+                {f'<span class="piece-stat">📐 {piece.superficie_m2} m²</span>' if piece.superficie_m2 else ""}
                 <span class="piece-stat">💰 {piece.valeur_totale:,.0f}€</span>
             </div>
             <div style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
@@ -689,8 +689,8 @@ def timeline_travaux(
                     {statut_icon} {titre}
                 </div>
                 <div style="font-size: 0.85rem; color: #718096; margin-top: 4px;">
-                    📅 {date_travail.strftime('%d/%m/%Y')}
-                    {f' • 💰 {cout:,.0f}€' if cout else ''}
+                    📅 {date_travail.strftime("%d/%m/%Y")}
+                    {f" • 💰 {cout:,.0f}€" if cout else ""}
                 </div>
             </div>
             """,

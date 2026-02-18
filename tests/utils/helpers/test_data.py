@@ -2,7 +2,7 @@
 Tests pour src/utils/helpers/data.py
 """
 
-from src.utils.helpers.data import (
+from src.core.helpers import (
     aplatir,
     compter_par,
     dedupliquer,

@@ -24,7 +24,7 @@ def afficher_header(score: dict):
         <h1>🏠 Entretien Maison</h1>
         <div class="score-badge">
             <span style="font-size: 1.25rem">✨</span>
-            <span>Score: <strong>{score['score']}/100</strong> • {score['niveau']}</span>
+            <span>Score: <strong>{score["score"]}/100</strong> • {score["niveau"]}</span>
         </div>
     </div>
     """,
@@ -115,8 +115,8 @@ def afficher_badges_entretien(badges_obtenus: list[str], stats: dict):
             st.markdown(
                 f"""
             <div class="badge-entretien {locked_class}">
-                <span class="icon">{badge_def['emoji']}</span>
-                <span class="name">{badge_def['nom']}</span>
+                <span class="icon">{badge_def["emoji"]}</span>
+                <span class="name">{badge_def["nom"]}</span>
                 {'<span class="date">Obtenu ✓</span>' if est_obtenu else '<span class="date">🔒</span>'}
             </div>
             """,
@@ -137,9 +137,9 @@ def afficher_alertes_predictives(alertes: list[dict]):
         <div class="alerte-predictive animate-in">
             <span class="icon">📅</span>
             <div class="content">
-                <div class="title">{alerte.get('tache_nom', 'Tâche')}</div>
-                <div class="description">{alerte.get('objet_nom', '')} • {alerte.get('piece', '')}</div>
-                <div class="date-prevue">📆 Prévu le {alerte.get('date_prevue', 'bientôt')}</div>
+                <div class="title">{alerte.get("tache_nom", "Tâche")}</div>
+                <div class="description">{alerte.get("objet_nom", "")} • {alerte.get("piece", "")}</div>
+                <div class="date-prevue">📆 Prévu le {alerte.get("date_prevue", "bientôt")}</div>
             </div>
         </div>
         """,
@@ -179,12 +179,12 @@ def _afficher_planning_item(tache: dict, classe: str):
     st.markdown(
         f"""
     <div class="planning-item {classe}">
-        <div class="date-badge">J-{tache.get('jours_restants', '?')}</div>
+        <div class="date-badge">J-{tache.get("jours_restants", "?")}</div>
         <div class="details">
-            <div class="tache-nom">{tache.get('tache_nom', 'Tâche')}</div>
-            <div class="objet-nom">{tache.get('objet_nom', '')} • {tache.get('piece', '')}</div>
+            <div class="tache-nom">{tache.get("tache_nom", "Tâche")}</div>
+            <div class="objet-nom">{tache.get("objet_nom", "")} • {tache.get("piece", "")}</div>
         </div>
-        <span>⏱️ {tache.get('duree_min', 15)} min</span>
+        <span>⏱️ {tache.get("duree_min", 15)} min</span>
     </div>
     """,
         unsafe_allow_html=True,
@@ -210,15 +210,15 @@ def afficher_tache_entretien(tache: dict, key: str) -> bool:
         st.markdown(
             f"""
         <div class="tache-entretien">
-            <div class="icon-circle {cat_class}">{tache['categorie_icon']}</div>
+            <div class="icon-circle {cat_class}">{tache["categorie_icon"]}</div>
             <div class="content">
-                <div class="title">{tache['tache_nom']} {pro_html}</div>
+                <div class="title">{tache["tache_nom"]} {pro_html}</div>
                 <div style="font-size: 0.9rem; color: #4a5568; margin-bottom: 0.5rem;">
-                    {tache['objet_nom']} • {tache.get('piece', 'Non assigné')}
+                    {tache["objet_nom"]} • {tache.get("piece", "Non assigné")}
                 </div>
                 <div class="meta">
-                    <span class="meta-item">⏱️ {tache['duree_min']} min</span>
-                    <span class="meta-item">🔄 Tous les {tache['frequence_jours']}j</span>
+                    <span class="meta-item">⏱️ {tache["duree_min"]} min</span>
+                    <span class="meta-item">🔄 Tous les {tache["frequence_jours"]}j</span>
                     {retard_html}
                 </div>
             </div>
@@ -242,8 +242,8 @@ def afficher_piece_card(piece_id: str, piece_data: dict, nb_taches: int):
         f"""
     <div class="piece-card">
         {badge_html}
-        <div class="emoji">{piece_data.get('icon', '🏠')}</div>
-        <div class="nom">{piece_data.get('nom', piece_id)}</div>
+        <div class="emoji">{piece_data.get("icon", "🏠")}</div>
+        <div class="nom">{piece_data.get("nom", piece_id)}</div>
     </div>
     """,
         unsafe_allow_html=True,
@@ -255,8 +255,8 @@ def afficher_score_widget(score: dict):
     st.markdown(
         f"""
     <div class="score-proprete">
-        <div class="value">{score['score']}</div>
-        <div class="label">{score['niveau']}</div>
+        <div class="value">{score["score"]}</div>
+        <div class="label">{score["niveau"]}</div>
     </div>
     """,
         unsafe_allow_html=True,
@@ -349,8 +349,8 @@ def afficher_timeline_item(historique_entry: dict, catalogue: dict, label_date: 
         f"""
     <div class="timeline-item done">
         <span>{icon}</span>
-        <span><strong>{historique_entry.get('tache_nom', 'Tâche')}</strong></span>
-        <span style="color: #718096">• {historique_entry.get('objet_id', '').replace('_', ' ')}</span>
+        <span><strong>{historique_entry.get("tache_nom", "Tâche")}</strong></span>
+        <span style="color: #718096">• {historique_entry.get("objet_id", "").replace("_", " ")}</span>
     </div>
     """,
         unsafe_allow_html=True,

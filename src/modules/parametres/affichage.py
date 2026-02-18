@@ -13,7 +13,7 @@ def render_display_config():
     st.caption("Personnalise l'interface selon ton appareil")
 
     try:
-        from src.ui.tablet_mode import (
+        from src.ui.tablet import (
             TabletMode,
             get_tablet_mode,
             set_tablet_mode,

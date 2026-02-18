@@ -5,7 +5,7 @@ Données réelles de cuisine et ingrédients
 
 import pytest
 
-from src.utils.formatters.units import (
+from src.core.formatters import (
     formater_poids,
     formater_temperature,
     formater_volume,

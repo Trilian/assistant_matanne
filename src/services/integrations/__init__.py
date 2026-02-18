@@ -50,6 +50,21 @@ from .facture import (
 )
 
 # ═══════════════════════════════════════════════════════════
+# MÉTÉO (TRANSVERSAL)
+# ═══════════════════════════════════════════════════════════
+from .meteo import (
+    AlerteMeteo,
+    ConseilJardin,
+    MeteoJour,
+    PlanArrosage,
+    ServiceMeteo,
+    WeatherService,
+    get_weather_garden_service,
+    get_weather_service,
+    obtenir_service_meteo,
+)
+
+# ═══════════════════════════════════════════════════════════
 # OPENFOODFACTS
 # ═══════════════════════════════════════════════════════════
 from .produit import (
@@ -94,4 +109,14 @@ __all__ = [
     "PATTERNS_MONTANTS",
     "detecter_fournisseur",
     "extraire_montant",
+    # Météo
+    "ServiceMeteo",
+    "WeatherService",
+    "get_weather_service",
+    "obtenir_service_meteo",
+    "get_weather_garden_service",
+    "MeteoJour",
+    "AlerteMeteo",
+    "ConseilJardin",
+    "PlanArrosage",
 ]

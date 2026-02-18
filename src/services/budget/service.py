@@ -738,9 +738,14 @@ class BudgetService:
 _budget_service: BudgetService | None = None
 
 
-def get_budget_service() -> BudgetService:
-    """Factory pour le service budget."""
+def obtenir_service_budget() -> BudgetService:
+    """Factory pour le service budget (convention française)."""
     global _budget_service
     if _budget_service is None:
         _budget_service = BudgetService()
     return _budget_service
+
+
+def get_budget_service() -> BudgetService:
+    """Factory pour le service budget (alias anglais)."""
+    return obtenir_service_budget()

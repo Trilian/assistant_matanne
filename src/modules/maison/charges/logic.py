@@ -196,7 +196,7 @@ def detecter_anomalies(factures: list[dict]) -> list[dict]:
                 anomalies.append(
                     {
                         "titre": f"Pic de consommation {config['label']}",
-                        "description": f"{f.get('date', 'Récemment')}: {conso:.0f} {config['unite']} (+{((conso/moyenne)-1)*100:.0f}% vs votre moyenne)",
+                        "description": f"{f.get('date', 'Récemment')}: {conso:.0f} {config['unite']} (+{((conso / moyenne) - 1) * 100:.0f}% vs votre moyenne)",
                         "conseil": "Vérifiez s'il y a eu un événement particulier",
                         "energie": energie_id,
                         "severite": "warning",

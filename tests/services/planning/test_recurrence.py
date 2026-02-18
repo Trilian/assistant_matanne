@@ -5,7 +5,9 @@ from datetime import date, datetime, timedelta
 import pytest
 
 from src.services.planning.recurrence import (
-    JOURS_SEMAINE,
+    JOURS_SEMAINE_INDEX as JOURS_SEMAINE,
+)
+from src.services.planning.recurrence import (
     OPTIONS_RECURRENCE,
     ServiceRecurrence,
     TypeRecurrence,

@@ -335,9 +335,9 @@ class TestLimiteDebitBase:
 
             LimiteDebit._initialiser()
 
-            assert "limite_debit" in mock_session_state._mock_state
-            assert "appels_jour" in mock_session_state._mock_state["limite_debit"]
-            assert "appels_heure" in mock_session_state._mock_state["limite_debit"]
+            assert "rate_limit_ia" in mock_session_state._mock_state
+            assert "appels_jour" in mock_session_state._mock_state["rate_limit_ia"]
+            assert "appels_heure" in mock_session_state._mock_state["rate_limit_ia"]
 
 
 class TestLimiteDebitPeutAppeler:
@@ -360,7 +360,7 @@ class TestLimiteDebitPeutAppeler:
             from src.core.constants import AI_RATE_LIMIT_DAILY
 
             LimiteDebit._initialiser()
-            mock_session_state._mock_state["limite_debit"]["appels_jour"] = AI_RATE_LIMIT_DAILY
+            mock_session_state._mock_state["rate_limit_ia"]["appels_jour"] = AI_RATE_LIMIT_DAILY
 
             autorise, erreur = LimiteDebit.peut_appeler()
 
@@ -374,7 +374,7 @@ class TestLimiteDebitPeutAppeler:
             from src.core.constants import AI_RATE_LIMIT_HOURLY
 
             LimiteDebit._initialiser()
-            mock_session_state._mock_state["limite_debit"]["appels_heure"] = AI_RATE_LIMIT_HOURLY
+            mock_session_state._mock_state["rate_limit_ia"]["appels_heure"] = AI_RATE_LIMIT_HOURLY
 
             autorise, erreur = LimiteDebit.peut_appeler()
 
@@ -391,14 +391,16 @@ class TestLimiteDebitEnregistrer:
             from src.core.cache import LimiteDebit
 
             LimiteDebit._initialiser()
-            initial_jour = mock_session_state._mock_state["limite_debit"]["appels_jour"]
-            initial_heure = mock_session_state._mock_state["limite_debit"]["appels_heure"]
+            initial_jour = mock_session_state._mock_state["rate_limit_ia"]["appels_jour"]
+            initial_heure = mock_session_state._mock_state["rate_limit_ia"]["appels_heure"]
 
             LimiteDebit.enregistrer_appel()
 
-            assert mock_session_state._mock_state["limite_debit"]["appels_jour"] == initial_jour + 1
             assert (
-                mock_session_state._mock_state["limite_debit"]["appels_heure"] == initial_heure + 1
+                mock_session_state._mock_state["rate_limit_ia"]["appels_jour"] == initial_jour + 1
+            )
+            assert (
+                mock_session_state._mock_state["rate_limit_ia"]["appels_heure"] == initial_heure + 1
             )
 
 
@@ -432,13 +434,13 @@ class TestLimiteDebitReset:
             from src.core.cache import LimiteDebit
 
             LimiteDebit._initialiser()
-            mock_session_state._mock_state["limite_debit"]["appels_jour"] = 50
-            mock_session_state._mock_state["limite_debit"]["dernier_reset"] = date(2024, 1, 1)
+            mock_session_state._mock_state["rate_limit_ia"]["appels_jour"] = 50
+            mock_session_state._mock_state["rate_limit_ia"]["dernier_reset_jour"] = date(2024, 1, 1)
 
             # peut_appeler() devrait reset le compteur
             LimiteDebit.peut_appeler()
 
-            assert mock_session_state._mock_state["limite_debit"]["appels_jour"] == 0
+            assert mock_session_state._mock_state["rate_limit_ia"]["appels_jour"] == 0
 
 
 # ═══════════════════════════════════════════════════════════

@@ -6,7 +6,7 @@ Tests des fonctions utilitaires de manipulation de dates.
 
 from datetime import date
 
-from src.modules.shared.date_utils import (
+from src.core.date_utils import (
     formater_date_fr,
     formater_jour_fr,
     formater_mois_fr,

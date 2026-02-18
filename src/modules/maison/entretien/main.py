@@ -55,8 +55,8 @@ def app():
             <h1>🏠 Entretien Maison</h1>
             <div class="score-badge">
                 <span style="font-size: 1.25rem">✨</span>
-                <span>Score: <strong>{score['score']}/100</strong> • {score['niveau']}</span>
-                {f'<span class="streak-mini">🔥 {streak}j</span>' if streak > 2 else ''}
+                <span>Score: <strong>{score["score"]}/100</strong> • {score["niveau"]}</span>
+                {f'<span class="streak-mini">🔥 {streak}j</span>' if streak > 2 else ""}
             </div>
         </div>
         """,

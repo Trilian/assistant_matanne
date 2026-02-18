@@ -177,9 +177,11 @@ def onglet_factures(factures: list[dict]):
             filtre_energie = st.selectbox(
                 "Filtrer par énergie",
                 options=["Toutes"] + list(ENERGIES.keys()),
-                format_func=lambda x: "Toutes les énergies"
-                if x == "Toutes"
-                else f"{ENERGIES[x]['emoji']} {ENERGIES[x]['label']}",
+                format_func=lambda x: (
+                    "Toutes les énergies"
+                    if x == "Toutes"
+                    else f"{ENERGIES[x]['emoji']} {ENERGIES[x]['label']}"
+                ),
             )
         with col_filter[1]:
             ordre = st.selectbox("Trier par", ["Date (récent)", "Date (ancien)", "Montant"])
@@ -303,8 +305,8 @@ def onglet_analyse(factures: list[dict]):
     col1, col2 = st.columns([1, 1])
     with col1:
         st.markdown(f"""
-        - **Votre moyenne** : {moyenne_utilisateur:.0f} {config['unite']}/mois
-        - **Moyenne nationale** : {moyenne_ref:.0f} {config['unite']}/mois
+        - **Votre moyenne** : {moyenne_utilisateur:.0f} {config["unite"]}/mois
+        - **Moyenne nationale** : {moyenne_ref:.0f} {config["unite"]}/mois
         - **Écart** : {ecart:+.0f}%
         """)
 
@@ -414,7 +416,7 @@ def onglet_simulation(factures: list[dict]):
 
                 Basé sur votre profil de consommation, voici l'ordre de priorité recommandé:
 
-                1. **{actions_selectionnees[0]['titre'] if actions_selectionnees else 'Aucune action'}** - ROI le plus rapide
+                1. **{actions_selectionnees[0]["titre"] if actions_selectionnees else "Aucune action"}** - ROI le plus rapide
                 2. Combinez plusieurs actions pour un effet multiplicateur
                 3. Économie potentielle réaliste : **{int(total_economie * 0.7)}-{total_economie} €/an**
 

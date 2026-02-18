@@ -66,7 +66,7 @@ def create_streamlit_mock(session_state: dict[str, Any] = None) -> MagicMock:
     def make_columns(spec, **kwargs):
         if isinstance(spec, int):
             return [ContextManagerMock() for _ in range(spec)]
-        elif isinstance(spec, (list, tuple)):
+        elif isinstance(spec, list | tuple):
             return [ContextManagerMock() for _ in spec]
         return [ContextManagerMock(), ContextManagerMock()]
 

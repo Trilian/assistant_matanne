@@ -405,8 +405,8 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
 # ═══════════════════════════════════════════════════════════
 
 
-def get_entretien_service(client: ClientIA | None = None) -> EntretienService:
-    """Factory pour obtenir le service entretien.
+def obtenir_service_entretien(client: ClientIA | None = None) -> EntretienService:
+    """Factory pour obtenir le service entretien (convention française).
 
     Args:
         client: Client IA optionnel
@@ -415,3 +415,8 @@ def get_entretien_service(client: ClientIA | None = None) -> EntretienService:
         Instance de EntretienService
     """
     return EntretienService(client=client)
+
+
+def get_entretien_service(client: ClientIA | None = None) -> EntretienService:
+    """Factory pour obtenir le service entretien (alias anglais)."""
+    return obtenir_service_entretien(client)

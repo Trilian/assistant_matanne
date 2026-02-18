@@ -394,7 +394,7 @@ def badge_priorite(priorite: str, size: str = "normal"):
     st.markdown(
         f"""
         <span class="badge-priorite {priorite.lower()}" style="{style}">
-            {config['icone']} {config['label']}
+            {config["icone"]} {config["label"]}
         </span>
         """,
         unsafe_allow_html=True,
@@ -414,7 +414,7 @@ def badge_statut_widget(statut: str):
     st.markdown(
         f"""
         <span class="badge-statut {classe}">
-            {config['icone']} {config['label']}
+            {config["icone"]} {config["label"]}
         </span>
         """,
         unsafe_allow_html=True,

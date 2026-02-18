@@ -15,7 +15,7 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
 from uuid import uuid4
 
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
-class StatutConnexion(str, Enum):
+class StatutConnexion(StrEnum):
     """Statut de connexion."""
 
     ONLINE = "online"
@@ -38,7 +38,7 @@ class StatutConnexion(str, Enum):
     ERROR = "error"
 
 
-class TypeOperation(str, Enum):
+class TypeOperation(StrEnum):
     """Type d'opération en queue."""
 
     CREATE = "create"

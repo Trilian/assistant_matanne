@@ -15,13 +15,13 @@ class TestTabletModeEnum:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.tablet_mode import TabletMode
+        from src.ui.tablet import TabletMode
 
         assert TabletMode is not None
 
     def test_values(self):
         """Test les valeurs de l'enum."""
-        from src.ui.tablet_mode import TabletMode
+        from src.ui.tablet import TabletMode
 
         assert TabletMode.NORMAL.value == "normal"
         assert TabletMode.TABLET.value == "tablet"
@@ -29,7 +29,7 @@ class TestTabletModeEnum:
 
     def test_str_enum(self):
         """Test que c'est un str enum."""
-        from src.ui.tablet_mode import TabletMode
+        from src.ui.tablet import TabletMode
 
         assert isinstance(TabletMode.NORMAL, str)
         assert TabletMode.NORMAL == "normal"
@@ -46,7 +46,7 @@ class TestGetSetTabletMode:
     @patch("streamlit.session_state", {})
     def test_get_default(self):
         """Test get avec valeur par défaut."""
-        from src.ui.tablet_mode import TabletMode, get_tablet_mode
+        from src.ui.tablet import TabletMode, get_tablet_mode
 
         result = get_tablet_mode()
         assert result == TabletMode.NORMAL
@@ -54,7 +54,7 @@ class TestGetSetTabletMode:
     @patch("streamlit.session_state", {"tablet_mode": "tablet"})
     def test_get_from_string(self):
         """Test get avec string stockée."""
-        from src.ui.tablet_mode import TabletMode, get_tablet_mode
+        from src.ui.tablet import TabletMode, get_tablet_mode
 
         result = get_tablet_mode()
         assert result == TabletMode.TABLET
@@ -64,7 +64,7 @@ class TestGetSetTabletMode:
         """Test set mode."""
         import streamlit as st
 
-        from src.ui.tablet_mode import TabletMode, set_tablet_mode
+        from src.ui.tablet import TabletMode, set_tablet_mode
 
         set_tablet_mode(TabletMode.KITCHEN)
 
@@ -81,7 +81,7 @@ class TestApplyTabletMode:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.tablet_mode import apply_tablet_mode
+        from src.ui.tablet import apply_tablet_mode
 
         assert apply_tablet_mode is not None
 
@@ -89,7 +89,7 @@ class TestApplyTabletMode:
     @patch("streamlit.markdown")
     def test_apply_normal_mode(self, mock_md):
         """Test apply en mode normal."""
-        from src.ui.tablet_mode import apply_tablet_mode
+        from src.ui.tablet import apply_tablet_mode
 
         apply_tablet_mode()
 
@@ -100,7 +100,7 @@ class TestApplyTabletMode:
     @patch("streamlit.markdown")
     def test_apply_tablet_mode(self, mock_md):
         """Test apply en mode tablette."""
-        from src.ui.tablet_mode import apply_tablet_mode
+        from src.ui.tablet import apply_tablet_mode
 
         apply_tablet_mode()
 
@@ -112,7 +112,7 @@ class TestApplyTabletMode:
     @patch("streamlit.markdown")
     def test_apply_kitchen_mode(self, mock_md):
         """Test apply en mode cuisine."""
-        from src.ui.tablet_mode import apply_tablet_mode
+        from src.ui.tablet import apply_tablet_mode
 
         apply_tablet_mode()
 
@@ -126,7 +126,7 @@ class TestCloseTabletMode:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.tablet_mode import close_tablet_mode
+        from src.ui.tablet import close_tablet_mode
 
         assert close_tablet_mode is not None
 
@@ -134,7 +134,7 @@ class TestCloseTabletMode:
     @patch("streamlit.markdown")
     def test_close_normal(self, mock_md):
         """Test close en mode normal - ne fait rien."""
-        from src.ui.tablet_mode import close_tablet_mode
+        from src.ui.tablet import close_tablet_mode
 
         close_tablet_mode()
 
@@ -144,7 +144,7 @@ class TestCloseTabletMode:
     @patch("streamlit.markdown")
     def test_close_tablet(self, mock_md):
         """Test close en mode tablette."""
-        from src.ui.tablet_mode import close_tablet_mode
+        from src.ui.tablet import close_tablet_mode
 
         close_tablet_mode()
 
@@ -162,14 +162,14 @@ class TestTabletButton:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.tablet_mode import tablet_button
+        from src.ui.tablet import tablet_button
 
         assert tablet_button is not None
 
     @patch("streamlit.button", return_value=True)
     def test_basic_button(self, mock_btn):
         """Test bouton basique."""
-        from src.ui.tablet_mode import tablet_button
+        from src.ui.tablet import tablet_button
 
         result = tablet_button("Cliquer", key="test")
 
@@ -179,7 +179,7 @@ class TestTabletButton:
     @patch("streamlit.button", return_value=False)
     def test_button_with_icon(self, mock_btn):
         """Test bouton avec icône."""
-        from src.ui.tablet_mode import tablet_button
+        from src.ui.tablet import tablet_button
 
         tablet_button("Action", key="icon_test", icon="ðŸ”¥")
 
@@ -190,7 +190,7 @@ class TestTabletButton:
     @patch("streamlit.button", return_value=False)
     def test_button_primary(self, mock_btn):
         """Test bouton primary."""
-        from src.ui.tablet_mode import tablet_button
+        from src.ui.tablet import tablet_button
 
         tablet_button("Primary", key="primary_test", type="primary")
 
@@ -200,7 +200,7 @@ class TestTabletButton:
     @patch("streamlit.button", return_value=False)
     def test_button_danger(self, mock_btn):
         """Test bouton danger."""
-        from src.ui.tablet_mode import tablet_button
+        from src.ui.tablet import tablet_button
 
         tablet_button("Delete", key="danger_test", type="danger")
 
@@ -218,7 +218,7 @@ class TestTabletSelectGrid:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.tablet_mode import tablet_select_grid
+        from src.ui.tablet import tablet_select_grid
 
         assert tablet_select_grid is not None
 
@@ -227,7 +227,7 @@ class TestTabletSelectGrid:
     @patch("streamlit.button", return_value=False)
     def test_grid_no_selection(self, mock_btn, mock_cols):
         """Test grille sans sélection."""
-        from src.ui.tablet_mode import tablet_select_grid
+        from src.ui.tablet import tablet_select_grid
 
         mock_cols.return_value = [MagicMock() for _ in range(3)]
         for col in mock_cols.return_value:
@@ -248,7 +248,7 @@ class TestTabletSelectGrid:
     @patch("streamlit.button", return_value=False)
     def test_grid_with_existing_selection(self, mock_btn, mock_cols):
         """Test grille avec sélection existante."""
-        from src.ui.tablet_mode import tablet_select_grid
+        from src.ui.tablet import tablet_select_grid
 
         mock_cols.return_value = [MagicMock() for _ in range(3)]
         for col in mock_cols.return_value:
@@ -272,7 +272,7 @@ class TestTabletNumberInput:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.tablet_mode import tablet_number_input
+        from src.ui.tablet import tablet_number_input
 
         assert tablet_number_input is not None
 
@@ -283,7 +283,7 @@ class TestTabletNumberInput:
     @patch("streamlit.markdown")
     def test_number_input_default(self, mock_md, mock_btn, mock_cols, mock_write):
         """Test input avec valeur par défaut."""
-        from src.ui.tablet_mode import tablet_number_input
+        from src.ui.tablet import tablet_number_input
 
         mock_cols.return_value = [MagicMock() for _ in range(3)]
         for col in mock_cols.return_value:
@@ -304,7 +304,7 @@ class TestTabletNumberInput:
         """Test bouton moins."""
         import streamlit as st
 
-        from src.ui.tablet_mode import tablet_number_input
+        from src.ui.tablet import tablet_number_input
 
         mock_cols.return_value = [MagicMock() for _ in range(3)]
         for col in mock_cols.return_value:
@@ -332,7 +332,7 @@ class TestTabletNumberInput:
         """Test bouton plus."""
         import streamlit as st
 
-        from src.ui.tablet_mode import tablet_number_input
+        from src.ui.tablet import tablet_number_input
 
         mock_cols.return_value = [MagicMock() for _ in range(3)]
         for col in mock_cols.return_value:
@@ -360,7 +360,7 @@ class TestTabletChecklist:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.tablet_mode import tablet_checklist
+        from src.ui.tablet import tablet_checklist
 
         assert tablet_checklist is not None
 
@@ -368,7 +368,7 @@ class TestTabletChecklist:
     @patch("streamlit.button", return_value=False)
     def test_checklist_empty(self, mock_btn):
         """Test checklist vide."""
-        from src.ui.tablet_mode import tablet_checklist
+        from src.ui.tablet import tablet_checklist
 
         result = tablet_checklist([], key="check_empty")
 
@@ -378,7 +378,7 @@ class TestTabletChecklist:
     @patch("streamlit.button", return_value=False)
     def test_checklist_unchecked(self, mock_btn):
         """Test checklist non cochée."""
-        from src.ui.tablet_mode import tablet_checklist
+        from src.ui.tablet import tablet_checklist
 
         items = ["Item 1", "Item 2", "Item 3"]
         result = tablet_checklist(items, key="check_test")
@@ -389,7 +389,7 @@ class TestTabletChecklist:
     @patch("streamlit.button", return_value=False)
     def test_checklist_with_callback(self, mock_btn):
         """Test checklist avec callback."""
-        from src.ui.tablet_mode import tablet_checklist
+        from src.ui.tablet import tablet_checklist
 
         callback = MagicMock()
         items = ["A", "B"]
@@ -410,7 +410,7 @@ class TestRenderModeSelector:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.tablet_mode import render_mode_selector
+        from src.ui.tablet import render_mode_selector
 
         assert render_mode_selector is not None
 
@@ -420,7 +420,7 @@ class TestRenderModeSelector:
     @patch("streamlit.markdown")
     def test_render_normal_mode(self, mock_md, mock_select, mock_sidebar):
         """Test render en mode normal."""
-        from src.ui.tablet_mode import TabletMode, render_mode_selector
+        from src.ui.tablet import TabletMode, render_mode_selector
 
         mock_sidebar.__enter__ = MagicMock()
         mock_sidebar.__exit__ = MagicMock()
@@ -437,7 +437,7 @@ class TestRenderModeSelector:
     @patch("streamlit.info")
     def test_render_kitchen_mode(self, mock_info, mock_md, mock_select, mock_sidebar):
         """Test render en mode cuisine - affiche info."""
-        from src.ui.tablet_mode import TabletMode, render_mode_selector
+        from src.ui.tablet import TabletMode, render_mode_selector
 
         mock_sidebar.__enter__ = MagicMock()
         mock_sidebar.__exit__ = MagicMock()
@@ -455,7 +455,7 @@ class TestRenderModeSelector:
     @patch("streamlit.rerun")
     def test_render_mode_change(self, mock_rerun, mock_md, mock_select, mock_sidebar):
         """Test changement de mode déclenche rerun."""
-        from src.ui.tablet_mode import TabletMode, render_mode_selector
+        from src.ui.tablet import TabletMode, render_mode_selector
 
         mock_sidebar.__enter__ = MagicMock()
         mock_sidebar.__exit__ = MagicMock()
@@ -479,7 +479,7 @@ class TestRenderKitchenRecipeView:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.tablet_mode import render_kitchen_recipe_view
+        from src.ui.tablet import render_kitchen_recipe_view
 
         assert render_kitchen_recipe_view is not None
 
@@ -491,7 +491,7 @@ class TestRenderKitchenRecipeView:
     @patch("streamlit.progress")
     def test_recipe_start_screen(self, mock_prog, mock_cols, mock_btn, mock_tabs, mock_md):
         """Test écran de démarrage recette."""
-        from src.ui.tablet_mode import render_kitchen_recipe_view
+        from src.ui.tablet import render_kitchen_recipe_view
 
         mock_tabs.return_value = [MagicMock(), MagicMock()]
         for tab in mock_tabs.return_value:
@@ -526,7 +526,7 @@ class TestRenderKitchenRecipeView:
         """Test affichage étape de recette."""
         import streamlit as st
 
-        from src.ui.tablet_mode import render_kitchen_recipe_view
+        from src.ui.tablet import render_kitchen_recipe_view
 
         st.session_state["test_step"] = 1
 
@@ -560,7 +560,7 @@ class TestRenderKitchenRecipeView:
         """Test écran de fin de recette."""
         import streamlit as st
 
-        from src.ui.tablet_mode import render_kitchen_recipe_view
+        from src.ui.tablet import render_kitchen_recipe_view
 
         st.session_state["test_fin_step"] = 3
 
@@ -596,7 +596,7 @@ class TestRenderKitchenRecipeView:
         """Test recette avec timer actif."""
         import streamlit as st
 
-        from src.ui.tablet_mode import render_kitchen_recipe_view
+        from src.ui.tablet import render_kitchen_recipe_view
 
         st.session_state["test_timer_step"] = 1
         st.session_state["test_timer_timer"] = 5
@@ -633,7 +633,7 @@ class TestRenderKitchenRecipeView:
         """Test navigation précédent."""
         import streamlit as st
 
-        from src.ui.tablet_mode import render_kitchen_recipe_view
+        from src.ui.tablet import render_kitchen_recipe_view
 
         st.session_state["nav_step"] = 2
 
@@ -667,7 +667,7 @@ class TestRenderKitchenRecipeView:
     @patch("streamlit.metric")
     def test_recipe_start_button(self, mock_metric, mock_cols, mock_btn, mock_tabs, mock_md):
         """Test bouton commencer est affiché."""
-        from src.ui.tablet_mode import render_kitchen_recipe_view
+        from src.ui.tablet import render_kitchen_recipe_view
 
         mock_tabs.return_value = [MagicMock(), MagicMock()]
         for tab in mock_tabs.return_value:
@@ -699,20 +699,20 @@ class TestTabletModeIntegration:
 
     def test_css_constants_exist(self):
         """Test que les constantes CSS existent."""
-        from src.ui.tablet_mode import TABLET_CSS
+        from src.ui.tablet import TABLET_CSS
 
         assert TABLET_CSS is not None
         assert len(TABLET_CSS) > 100  # CSS substantiel
 
     def test_kitchen_css_exists(self):
         """Test que le CSS cuisine existe."""
-        from src.ui.tablet_mode import KITCHEN_MODE_CSS
+        from src.ui.tablet import KITCHEN_MODE_CSS
 
         assert KITCHEN_MODE_CSS is not None
 
     def test_all_exports(self):
         """Test tous les exports principaux."""
-        from src.ui.tablet_mode import (
+        from src.ui.tablet import (
             KITCHEN_MODE_CSS,
             TABLET_CSS,
             TabletMode,

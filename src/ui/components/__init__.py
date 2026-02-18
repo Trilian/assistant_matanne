@@ -9,6 +9,14 @@ from .alertes import alerte_stock
 # Atoms
 from .atoms import badge, boite_info, carte_metrique, etat_vide, notification, separateur
 
+# Charts (graphiques Plotly)
+from .charts import (
+    graphique_activite_semaine,
+    graphique_inventaire_categories,
+    graphique_progression_objectifs,
+    graphique_repartition_repas,
+)
+
 # Data
 from .data import (
     barre_progression,
@@ -34,6 +42,12 @@ from .layouts import (
     section_pliable,
 )
 
+# Metrics (cartes métriques avancées)
+from .metrics import carte_metrique_avancee, widget_jules_apercu, widget_meteo_jour
+
+# System (santé système, timeline)
+from .system import afficher_sante_systeme, afficher_timeline_activites, indicateur_sante_systeme
+
 __all__ = [
     # Alertes
     "alerte_stock",
@@ -44,6 +58,11 @@ __all__ = [
     "notification",
     "separateur",
     "boite_info",
+    # Charts
+    "graphique_repartition_repas",
+    "graphique_inventaire_categories",
+    "graphique_activite_semaine",
+    "graphique_progression_objectifs",
     # Forms
     "champ_formulaire",
     "barre_recherche",
@@ -66,4 +85,12 @@ __all__ = [
     "Modale",
     "ListeDynamique",
     "AssistantEtapes",
+    # Metrics
+    "carte_metrique_avancee",
+    "widget_jules_apercu",
+    "widget_meteo_jour",
+    # System
+    "indicateur_sante_systeme",
+    "afficher_sante_systeme",
+    "afficher_timeline_activites",
 ]

@@ -37,7 +37,7 @@ class TestConstantes:
 
     def test_google_scopes(self):
         """Test GOOGLE_SCOPES existe."""
-        from src.ui.components.google_calendar_sync import GOOGLE_SCOPES
+        from src.ui.integrations import GOOGLE_SCOPES
 
         assert GOOGLE_SCOPES is not None
         assert len(GOOGLE_SCOPES) >= 1
@@ -45,7 +45,7 @@ class TestConstantes:
 
     def test_redirect_uri(self):
         """Test REDIRECT_URI_LOCAL."""
-        from src.ui.components.google_calendar_sync import REDIRECT_URI_LOCAL
+        from src.ui.integrations import REDIRECT_URI_LOCAL
 
         assert REDIRECT_URI_LOCAL is not None
         assert "localhost" in REDIRECT_URI_LOCAL
@@ -61,14 +61,14 @@ class TestVerifierConfigGoogle:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.components.google_calendar_sync import verifier_config_google
+        from src.ui.integrations import verifier_config_google
 
         assert verifier_config_google is not None
 
-    @patch("src.ui.components.google_calendar_sync.obtenir_parametres")
+    @patch("src.ui.integrations.google_calendar.obtenir_parametres")
     def test_config_ok(self, mock_params):
         """Test configuration valide."""
-        from src.ui.components.google_calendar_sync import verifier_config_google
+        from src.ui.integrations import verifier_config_google
 
         mock_params.return_value = MagicMock(
             GOOGLE_CLIENT_ID="test_id", GOOGLE_CLIENT_SECRET="test_secret"
@@ -79,10 +79,10 @@ class TestVerifierConfigGoogle:
         assert ok is True
         assert message == "Configuration OK"
 
-    @patch("src.ui.components.google_calendar_sync.obtenir_parametres")
+    @patch("src.ui.integrations.google_calendar.obtenir_parametres")
     def test_missing_client_id(self, mock_params):
         """Test client_id manquant."""
-        from src.ui.components.google_calendar_sync import verifier_config_google
+        from src.ui.integrations import verifier_config_google
 
         mock_params.return_value = MagicMock(
             GOOGLE_CLIENT_ID="", GOOGLE_CLIENT_SECRET="test_secret"
@@ -93,10 +93,10 @@ class TestVerifierConfigGoogle:
         assert ok is False
         assert "GOOGLE_CLIENT_ID" in message
 
-    @patch("src.ui.components.google_calendar_sync.obtenir_parametres")
+    @patch("src.ui.integrations.google_calendar.obtenir_parametres")
     def test_missing_client_secret(self, mock_params):
         """Test client_secret manquant."""
-        from src.ui.components.google_calendar_sync import verifier_config_google
+        from src.ui.integrations import verifier_config_google
 
         mock_config = MagicMock()
         mock_config.GOOGLE_CLIENT_ID = "test_id"
@@ -119,7 +119,7 @@ class TestRenderGoogleCalendarConfig:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.components.google_calendar_sync import render_google_calendar_config
+        from src.ui.integrations import render_google_calendar_config
 
         assert render_google_calendar_config is not None
 
@@ -127,10 +127,10 @@ class TestRenderGoogleCalendarConfig:
     @patch("streamlit.markdown")
     @patch("streamlit.warning")
     @patch("streamlit.expander")
-    @patch("src.ui.components.google_calendar_sync.verifier_config_google")
+    @patch("src.ui.integrations.google_calendar.verifier_config_google")
     def test_render_config_not_ok(self, mock_verif, mock_exp, mock_warn, mock_md):
         """Test render quand config non valide."""
-        from src.ui.components.google_calendar_sync import render_google_calendar_config
+        from src.ui.integrations import render_google_calendar_config
 
         mock_verif.return_value = (False, "Config manquante")
         mock_exp.return_value.__enter__ = MagicMock()
@@ -146,12 +146,12 @@ class TestRenderGoogleCalendarConfig:
     @patch("streamlit.success")
     @patch("streamlit.info")
     @patch("streamlit.button", return_value=False)
-    @patch("src.ui.components.google_calendar_sync.verifier_config_google")
+    @patch("src.ui.integrations.google_calendar.verifier_config_google")
     def test_render_config_ok_not_connected(
         self, mock_verif, mock_btn, mock_info, mock_success, mock_md
     ):
         """Test render config OK mais non connecté."""
-        from src.ui.components.google_calendar_sync import render_google_calendar_config
+        from src.ui.integrations import render_google_calendar_config
 
         mock_verif.return_value = (True, "Configuration OK")
 
@@ -171,12 +171,12 @@ class TestRenderGoogleCalendarConfig:
     @patch("streamlit.caption")
     @patch("streamlit.columns")
     @patch("streamlit.button", return_value=False)
-    @patch("src.ui.components.google_calendar_sync.verifier_config_google")
+    @patch("src.ui.integrations.google_calendar.verifier_config_google")
     def test_render_config_connected(
         self, mock_verif, mock_btn, mock_cols, mock_caption, mock_success, mock_md
     ):
         """Test render quand connecté."""
-        from src.ui.components.google_calendar_sync import render_google_calendar_config
+        from src.ui.integrations import render_google_calendar_config
 
         mock_verif.return_value = (True, "Configuration OK")
 
@@ -202,8 +202,8 @@ class TestRenderGoogleCalendarConfig:
     @patch("streamlit.button")
     @patch("streamlit.spinner")
     @patch("streamlit.rerun")
-    @patch("src.ui.components.google_calendar_sync.verifier_config_google")
-    @patch("src.ui.components.google_calendar_sync.get_calendar_sync_service")
+    @patch("src.ui.integrations.google_calendar.verifier_config_google")
+    @patch("src.ui.integrations.google_calendar.get_calendar_sync_service")
     def test_render_sync_button(
         self,
         mock_service,
@@ -217,7 +217,7 @@ class TestRenderGoogleCalendarConfig:
         mock_md,
     ):
         """Test clic sur bouton sync."""
-        from src.ui.components.google_calendar_sync import render_google_calendar_config
+        from src.ui.integrations import render_google_calendar_config
 
         mock_verif.return_value = (True, "Configuration OK")
         mock_btn.side_effect = [True, False, False]  # Sync cliqué
@@ -249,14 +249,14 @@ class TestRenderGoogleCalendarConfig:
     @patch("streamlit.columns")
     @patch("streamlit.button")
     @patch("streamlit.rerun")
-    @patch("src.ui.components.google_calendar_sync.verifier_config_google")
+    @patch("src.ui.integrations.google_calendar.verifier_config_google")
     def test_render_disconnect_button(
         self, mock_verif, mock_rerun, mock_btn, mock_cols, mock_caption, mock_success, mock_md
     ):
         """Test bouton déconnexion."""
         import streamlit as st
 
-        from src.ui.components.google_calendar_sync import render_google_calendar_config
+        from src.ui.integrations import render_google_calendar_config
 
         mock_verif.return_value = (True, "Configuration OK")
         mock_btn.side_effect = [False, False, True]  # Déconnecter cliqué
@@ -284,14 +284,14 @@ class TestRenderSyncStatus:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.components.google_calendar_sync import render_sync_status
+        from src.ui.integrations import render_sync_status
 
         assert render_sync_status is not None
 
     @patch("streamlit.session_state", MockSessionState())
     def test_no_config(self):
         """Test sans config."""
-        from src.ui.components.google_calendar_sync import render_sync_status
+        from src.ui.integrations import render_sync_status
 
         # Ne doit pas lever d'erreur
         render_sync_status()
@@ -302,7 +302,7 @@ class TestRenderSyncStatus:
     )
     def test_no_last_sync(self):
         """Test sans dernière sync."""
-        from src.ui.components.google_calendar_sync import render_sync_status
+        from src.ui.integrations import render_sync_status
 
         render_sync_status()
 
@@ -313,7 +313,7 @@ class TestRenderSyncStatus:
     @patch("streamlit.success")
     def test_sync_recent(self, mock_success):
         """Test sync récente (<5 min)."""
-        from src.ui.components.google_calendar_sync import render_sync_status
+        from src.ui.integrations import render_sync_status
 
         render_sync_status()
 
@@ -325,7 +325,7 @@ class TestRenderSyncStatus:
         """Test sync il y a quelques minutes."""
         import streamlit as st
 
-        from src.ui.components.google_calendar_sync import render_sync_status
+        from src.ui.integrations import render_sync_status
 
         st.session_state["google_calendar_config"] = MagicMock(
             last_sync=datetime.now() - timedelta(minutes=30)
@@ -341,7 +341,7 @@ class TestRenderSyncStatus:
         """Test sync il y a quelques heures."""
         import streamlit as st
 
-        from src.ui.components.google_calendar_sync import render_sync_status
+        from src.ui.integrations import render_sync_status
 
         st.session_state["google_calendar_config"] = MagicMock(
             last_sync=datetime.now() - timedelta(hours=5)
@@ -357,7 +357,7 @@ class TestRenderSyncStatus:
         """Test sync il y a plusieurs jours."""
         import streamlit as st
 
-        from src.ui.components.google_calendar_sync import render_sync_status
+        from src.ui.integrations import render_sync_status
 
         st.session_state["google_calendar_config"] = MagicMock(
             last_sync=datetime.now() - timedelta(days=3)
@@ -378,14 +378,14 @@ class TestRenderQuickSyncButton:
 
     def test_import(self):
         """Test import réussi."""
-        from src.ui.components.google_calendar_sync import render_quick_sync_button
+        from src.ui.integrations import render_quick_sync_button
 
         assert render_quick_sync_button is not None
 
     @patch("streamlit.session_state", MockSessionState())
     def test_no_config_quick_sync(self):
         """Test sans config."""
-        from src.ui.components.google_calendar_sync import render_quick_sync_button
+        from src.ui.integrations import render_quick_sync_button
 
         # Ne doit rien afficher
         render_quick_sync_button()
@@ -394,7 +394,7 @@ class TestRenderQuickSyncButton:
     @patch("streamlit.button", return_value=False)
     def test_button_displayed(self, mock_btn):
         """Test bouton affiché quand connecté."""
-        from src.ui.components.google_calendar_sync import render_quick_sync_button
+        from src.ui.integrations import render_quick_sync_button
 
         render_quick_sync_button()
 
@@ -403,10 +403,10 @@ class TestRenderQuickSyncButton:
     @patch("streamlit.session_state", MockSessionState({"google_calendar_config": MagicMock()}))
     @patch("streamlit.button", return_value=True)
     @patch("streamlit.toast")
-    @patch("src.ui.components.google_calendar_sync.get_calendar_sync_service")
+    @patch("src.ui.integrations.google_calendar.get_calendar_sync_service")
     def test_sync_success(self, mock_service, mock_toast, mock_btn):
         """Test sync réussie."""
-        from src.ui.components.google_calendar_sync import render_quick_sync_button
+        from src.ui.integrations import render_quick_sync_button
 
         mock_result = MagicMock(success=True, events_imported=3)
         mock_service.return_value.sync_google_calendar.return_value = mock_result
@@ -419,10 +419,10 @@ class TestRenderQuickSyncButton:
     @patch("streamlit.session_state", MockSessionState({"google_calendar_config": MagicMock()}))
     @patch("streamlit.button", return_value=True)
     @patch("streamlit.toast")
-    @patch("src.ui.components.google_calendar_sync.get_calendar_sync_service")
+    @patch("src.ui.integrations.google_calendar.get_calendar_sync_service")
     def test_sync_failure(self, mock_service, mock_toast, mock_btn):
         """Test sync échouée."""
-        from src.ui.components.google_calendar_sync import render_quick_sync_button
+        from src.ui.integrations import render_quick_sync_button
 
         mock_result = MagicMock(success=False, message="Erreur réseau")
         mock_service.return_value.sync_google_calendar.return_value = mock_result
@@ -446,13 +446,13 @@ class TestConnectFlow:
     @patch("streamlit.info")
     @patch("streamlit.button", return_value=True)
     @patch("streamlit.text_input", return_value="")
-    @patch("src.ui.components.google_calendar_sync.verifier_config_google")
-    @patch("src.ui.components.google_calendar_sync.get_calendar_sync_service")
+    @patch("src.ui.integrations.google_calendar.verifier_config_google")
+    @patch("src.ui.integrations.google_calendar.get_calendar_sync_service")
     def test_connect_button_shows_auth_url(
         self, mock_service, mock_verif, mock_input, mock_btn, mock_info, mock_success, mock_md
     ):
         """Test bouton connexion affiche URL auth."""
-        from src.ui.components.google_calendar_sync import render_google_calendar_config
+        from src.ui.integrations import render_google_calendar_config
 
         mock_verif.return_value = (True, "Configuration OK")
         mock_service.return_value.get_google_auth_url.return_value = "https://auth.google.com/..."
@@ -469,8 +469,8 @@ class TestConnectFlow:
     @patch("streamlit.text_input", return_value="auth_code_123")
     @patch("streamlit.spinner")
     @patch("streamlit.rerun")
-    @patch("src.ui.components.google_calendar_sync.verifier_config_google")
-    @patch("src.ui.components.google_calendar_sync.get_calendar_sync_service")
+    @patch("src.ui.integrations.google_calendar.verifier_config_google")
+    @patch("src.ui.integrations.google_calendar.get_calendar_sync_service")
     def test_validate_auth_code(
         self,
         mock_service,
@@ -486,7 +486,7 @@ class TestConnectFlow:
         """Test validation code auth."""
         import streamlit as st
 
-        from src.ui.components.google_calendar_sync import render_google_calendar_config
+        from src.ui.integrations import render_google_calendar_config
 
         mock_verif.return_value = (True, "Configuration OK")
         mock_btn.side_effect = [True, True]  # Connect + Valider
@@ -511,13 +511,13 @@ class TestConnectFlow:
     @patch("streamlit.info")
     @patch("streamlit.button", return_value=True)
     @patch("streamlit.error")
-    @patch("src.ui.components.google_calendar_sync.verifier_config_google")
-    @patch("src.ui.components.google_calendar_sync.get_calendar_sync_service")
+    @patch("src.ui.integrations.google_calendar.verifier_config_google")
+    @patch("src.ui.integrations.google_calendar.get_calendar_sync_service")
     def test_connect_error(
         self, mock_service, mock_verif, mock_error, mock_btn, mock_info, mock_success, mock_md
     ):
         """Test erreur connexion."""
-        from src.ui.components.google_calendar_sync import render_google_calendar_config
+        from src.ui.integrations import render_google_calendar_config
 
         mock_verif.return_value = (True, "Configuration OK")
         mock_service.return_value.get_google_auth_url.side_effect = ValueError("API Error")
@@ -537,7 +537,7 @@ class TestIntegration:
 
     def test_all_exports(self):
         """Test tous les exports."""
-        from src.ui.components.google_calendar_sync import (
+        from src.ui.integrations import (
             render_google_calendar_config,
             render_quick_sync_button,
             render_sync_status,

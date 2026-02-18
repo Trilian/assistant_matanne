@@ -904,16 +904,22 @@ def require_role(role: Role):
 _auth_service: AuthService | None = None
 
 
-def get_auth_service() -> AuthService:
-    """Factory pour le service d'authentification."""
+def obtenir_service_authentification() -> AuthService:
+    """Factory pour le service d'authentification (convention française)."""
     global _auth_service
     if _auth_service is None:
         _auth_service = AuthService()
     return _auth_service
 
 
+def get_auth_service() -> AuthService:
+    """Factory pour le service d'authentification (alias anglais)."""
+    return obtenir_service_authentification()
+
+
 __all__ = [
     "AuthService",
+    "obtenir_service_authentification",
     "get_auth_service",
     "UserProfile",
     "AuthResult",

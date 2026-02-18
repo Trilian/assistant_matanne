@@ -293,9 +293,16 @@ class UserPreferenceService:
 _preference_service: UserPreferenceService | None = None
 
 
-def get_user_preference_service(user_id: str = DEFAULT_USER_ID) -> UserPreferenceService:
-    """Factory pour obtenir le service de préférences."""
+def obtenir_service_preferences_utilisateur(
+    user_id: str = DEFAULT_USER_ID,
+) -> UserPreferenceService:
+    """Factory pour obtenir le service de préférences (convention française)."""
     global _preference_service
     if _preference_service is None or _preference_service.user_id != user_id:
         _preference_service = UserPreferenceService(user_id)
     return _preference_service
+
+
+def get_user_preference_service(user_id: str = DEFAULT_USER_ID) -> UserPreferenceService:
+    """Factory pour obtenir le service de préférences (alias anglais)."""
+    return obtenir_service_preferences_utilisateur(user_id)

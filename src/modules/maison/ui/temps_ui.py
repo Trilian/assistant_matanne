@@ -605,7 +605,7 @@ def carte_suggestion(
         <div class="suggestion-card">
             <div class="suggestion-titre">{icone} {titre}</div>
             <div class="suggestion-description">{description}</div>
-            {f'<div class="suggestion-economie">⏱️ ~{temps_eco} min/semaine économisées</div>' if temps_eco else ''}
+            {f'<div class="suggestion-economie">⏱️ ~{temps_eco} min/semaine économisées</div>' if temps_eco else ""}
         </div>
         """,
         unsafe_allow_html=True,

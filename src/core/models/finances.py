@@ -9,7 +9,7 @@ Contient :
 
 from datetime import date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import Enum, StrEnum
 from uuid import UUID
 
 from sqlalchemy import (
@@ -35,7 +35,7 @@ from .base import Base
 # ═══════════════════════════════════════════════════════════
 
 
-class CategorieDepenseDB(str, Enum):
+class CategorieDepenseDB(StrEnum):
     """Catégories de dépenses (aligné avec contrainte SQL)."""
 
     ALIMENTATION = "alimentation"
@@ -53,7 +53,7 @@ class CategorieDepenseDB(str, Enum):
     AUTRE = "autre"
 
 
-class RecurrenceType(str, Enum):
+class RecurrenceType(StrEnum):
     """Types de récurrence."""
 
     PONCTUEL = "ponctuel"
@@ -63,7 +63,7 @@ class RecurrenceType(str, Enum):
     ANNUEL = "annuel"
 
 
-class ExpenseCategory(str, Enum):
+class ExpenseCategory(StrEnum):
     """Catégorie de dépense maison."""
 
     GAZ = "gaz"

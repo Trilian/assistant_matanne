@@ -395,7 +395,7 @@ def app():
                 st.markdown(
                     f'<div style="padding:8px;margin:4px 0;background:#f8f9fa;'
                     f'border-left:4px solid {couleur};border-radius:4px;">'
-                    f'<strong>{jour} {heure}</strong> - {event["titre"]}'
+                    f"<strong>{jour} {heure}</strong> - {event['titre']}"
                     f'<span style="color:#666;">{lieu}</span></div>',
                     unsafe_allow_html=True,
                 )

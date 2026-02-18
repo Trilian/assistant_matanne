@@ -7,7 +7,7 @@ Contient :
 """
 
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Optional
 from uuid import UUID
 
@@ -32,7 +32,7 @@ from .base import Base
 # ═══════════════════════════════════════════════════════════
 
 
-class CalendarProvider(str, Enum):
+class CalendarProvider(StrEnum):
     """Fournisseurs de calendrier."""
 
     GOOGLE = "google"
@@ -41,7 +41,7 @@ class CalendarProvider(str, Enum):
     ICAL = "ical"
 
 
-class SyncDirection(str, Enum):
+class SyncDirection(StrEnum):
     """Direction de synchronisation calendrier."""
 
     IMPORT = "import"

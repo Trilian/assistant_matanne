@@ -4,7 +4,7 @@ Tests unitaires pour food.py
 Module: src.utils.helpers.food
 """
 
-from src.utils.helpers.food import (
+from src.core.helpers import (
     convertir_unite,
     extraire_ingredient,
     multiplier_portion,

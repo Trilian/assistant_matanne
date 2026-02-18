@@ -12,22 +12,22 @@ Architecture:
 - backtest_service.py    : Backtesting sur données historiques
 """
 
-from .ai_service import (
+from ._internal.ai_service import (
     AnalyseIA,
     JeuxAIService,
     OpportuniteAnalysee,
     get_jeux_ai_service,
 )
-from .backtest_service import (
+from ._internal.backtest_service import (
     BacktestService,
     Prediction,
     ResultatBacktest,
     ResultatPrediction,
     get_backtest_service,
 )
-from .football_data import FootballDataService, get_football_data_service
-from .loto_data import LotoDataService, get_loto_data_service
-from .notification_service import (
+from ._internal.football_data import FootballDataService, get_football_data_service
+from ._internal.loto_data import LotoDataService, get_loto_data_service
+from ._internal.notification_service import (
     NiveauUrgence,
     NotificationJeux,
     NotificationJeuxService,
@@ -37,14 +37,14 @@ from .notification_service import (
     afficher_notification,
     get_notification_jeux_service,
 )
-from .scheduler_service import (
+from ._internal.scheduler_service import (
     APSCHEDULER_AVAILABLE,
     SchedulerService,
     get_scheduler_service,
     reset_scheduler_service,
 )
-from .series_service import SeriesService, get_series_service
-from .sync_service import SyncService, get_sync_service
+from ._internal.series_service import SeriesService, get_series_service
+from ._internal.sync_service import SyncService, get_sync_service
 
 __all__ = [
     # Séries

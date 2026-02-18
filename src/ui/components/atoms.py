@@ -1,6 +1,9 @@
 """
 UI Components - Atoms (composants de base)
-badge, etat_vide, carte_metrique
+badge, etat_vide, carte_metrique, notification, separateur, boite_info
+
+Note: Pour des métriques plus avancées avec icônes et liens,
+utilisez carte_metrique_avancee depuis src.ui.components.metrics
 """
 
 import streamlit as st
@@ -55,7 +58,10 @@ def etat_vide(message: str, icone: str = "📭", sous_texte: str | None = None):
 
 def carte_metrique(label: str, valeur: str, delta: str | None = None, couleur: str = "#ffffff"):
     """
-    Carte métrique stylée
+    Carte métrique simple.
+
+    Pour des métriques plus avancées (avec icône, lien module, gradient),
+    préférez `carte_metrique_avancee` de src.ui.components.metrics.
 
     Args:
         label: Label métrique
@@ -65,6 +71,9 @@ def carte_metrique(label: str, valeur: str, delta: str | None = None, couleur: s
 
     Example:
         carte_metrique("Total", "42", "+5", "#f0f0f0")
+
+    See Also:
+        carte_metrique_avancee: Version avancée avec plus d'options
     """
     html_delta = (
         f'<div style="font-size: 0.875rem; color: #4CAF50; margin-top: 0.25rem;">{delta}</div>'
@@ -85,14 +94,23 @@ def carte_metrique(label: str, valeur: str, delta: str | None = None, couleur: s
 
 def notification(message: str, type: str = "success"):
     """
-    Notification simple
+    Notification simple immédiate (wrapper Streamlit).
+
+    Affiche un message de notification qui reste visible jusqu'au prochain rerun.
+    Pour des notifications temporaires avec expiration automatique,
+    utilisez le système de toasts: `afficher_succes()`, `afficher_erreur()`, etc.
+    depuis src.ui.feedback.
 
     Args:
-        message: Message
+        message: Message à afficher
         type: "success", "error", "warning", "info"
 
     Example:
         notification("Sauvegarde réussie", "success")
+
+    See Also:
+        src.ui.feedback.afficher_succes: Toast avec expiration automatique
+        src.ui.feedback.afficher_erreur: Toast erreur
     """
     if type == "success":
         st.success(message)

@@ -34,7 +34,7 @@ from .base import Base
 # ═══════════════════════════════════════════════════════════
 
 
-class StatutSessionEnum(str, enum.Enum):
+class StatutSessionEnum(enum.StrEnum):
     """Statut d'une session batch cooking."""
 
     PLANIFIEE = "planifiee"
@@ -43,7 +43,7 @@ class StatutSessionEnum(str, enum.Enum):
     ANNULEE = "annulee"
 
 
-class StatutEtapeEnum(str, enum.Enum):
+class StatutEtapeEnum(enum.StrEnum):
     """Statut d'une étape batch cooking."""
 
     A_FAIRE = "a_faire"
@@ -52,7 +52,7 @@ class StatutEtapeEnum(str, enum.Enum):
     PASSEE = "passee"  # Sautée
 
 
-class TypeRobotEnum(str, enum.Enum):
+class TypeRobotEnum(enum.StrEnum):
     """Types de robots/appareils de cuisine."""
 
     COOKEO = "cookeo"
@@ -66,7 +66,7 @@ class TypeRobotEnum(str, enum.Enum):
     HACHOIR = "hachoir"
 
 
-class LocalisationStockageEnum(str, enum.Enum):
+class LocalisationStockageEnum(enum.StrEnum):
     """Localisation du stockage des préparations."""
 
     FRIGO = "frigo"

@@ -15,7 +15,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 
 import streamlit as st
 from pydantic import BaseModel, Field
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
-class SyncEventType(str, Enum):
+class SyncEventType(StrEnum):
     """Types d'événements de synchronisation."""
 
     ITEM_ADDED = "item_added"
@@ -577,16 +577,22 @@ def render_sync_status():
 _sync_service: RealtimeSyncService | None = None
 
 
-def get_realtime_sync_service() -> RealtimeSyncService:
-    """Factory pour le service de synchronisation."""
+def obtenir_service_synchronisation_temps_reel() -> RealtimeSyncService:
+    """Factory pour le service de synchronisation (convention française)."""
     global _sync_service
     if _sync_service is None:
         _sync_service = RealtimeSyncService()
     return _sync_service
 
 
+def get_realtime_sync_service() -> RealtimeSyncService:
+    """Factory pour le service de synchronisation (alias anglais)."""
+    return obtenir_service_synchronisation_temps_reel()
+
+
 __all__ = [
     "RealtimeSyncService",
+    "obtenir_service_synchronisation_temps_reel",
     "get_realtime_sync_service",
     "SyncEvent",
     "SyncEventType",

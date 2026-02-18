@@ -420,8 +420,8 @@ Réponds en JSON:
 # ═══════════════════════════════════════════════════════════
 
 
-def get_jardin_service(client: ClientIA | None = None) -> JardinService:
-    """Factory pour obtenir le service jardin.
+def obtenir_service_jardin(client: ClientIA | None = None) -> JardinService:
+    """Factory pour obtenir le service jardin (convention française).
 
     Args:
         client: Client IA optionnel
@@ -430,3 +430,8 @@ def get_jardin_service(client: ClientIA | None = None) -> JardinService:
         Instance de JardinService
     """
     return JardinService(client=client)
+
+
+def get_jardin_service(client: ClientIA | None = None) -> JardinService:
+    """Factory pour obtenir le service jardin (alias anglais)."""
+    return obtenir_service_jardin(client)

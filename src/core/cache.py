@@ -357,101 +357,53 @@ def cached(ttl: int = 300, cle: str | None = None, dependencies: list[str] | Non
 
 
 # ═══════════════════════════════════════════════════════════
-# RATE LIMITING
+# RATE LIMITING (consolidé dans ai/rate_limit.py)
 # ═══════════════════════════════════════════════════════════
+# Import depuis ai.rate_limit pour éviter la duplication
+# Note: Import lazy pour éviter les imports circulaires
+def _get_rate_limit_class():
+    """Import lazy de RateLimitIA pour éviter import circulaire."""
+    from .ai.rate_limit import RateLimitIA
+
+    return RateLimitIA
 
 
+# Alias pour rétrocompatibilité - redirige vers RateLimitIA
 class LimiteDebit:
     """
     Rate limiting pour contrôler les appels API IA.
 
-    Limite le nombre d'appels par jour et par heure
-    pour éviter de dépasser les quotas.
+    DEPRECATED: Utiliser RateLimitIA depuis src.core.ai à la place.
+    Cette classe est un wrapper de compatibilité.
     """
-
-    CLE_RATE_LIMIT = "limite_debit"
-    """Clé pour stocker les compteurs."""
 
     @staticmethod
     def _initialiser():
-        """
-        Initialise les compteurs de rate limit.
-        """
-        if LimiteDebit.CLE_RATE_LIMIT not in st.session_state:
-            st.session_state[LimiteDebit.CLE_RATE_LIMIT] = {
-                "appels_jour": 0,
-                "appels_heure": 0,
-                "dernier_reset": datetime.now().date(),
-                "dernier_reset_heure": datetime.now().replace(minute=0, second=0, microsecond=0),
-            }
+        """Initialise les structures de rate limiting."""
+        return _get_rate_limit_class()._initialiser()
 
     @staticmethod
     def peut_appeler() -> tuple[bool, str]:
-        """
-        Vérifie si un appel API est autorisé.
-
-        Returns:
-            Tuple (autorisé, message_erreur)
-
-        Example:
-            >>> autorise, erreur = LimiteDebit.peut_appeler()
-            >>> if not autorise:
-            >>>     st.warning(erreur)
-        """
-        LimiteDebit._initialiser()
-
-        # Reset quotidien
-        aujourd_hui = datetime.now().date()
-        if st.session_state[LimiteDebit.CLE_RATE_LIMIT]["dernier_reset"] != aujourd_hui:
-            st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_jour"] = 0
-            st.session_state[LimiteDebit.CLE_RATE_LIMIT]["dernier_reset"] = aujourd_hui
-
-        # Reset horaire
-        heure_actuelle = datetime.now().replace(minute=0, second=0, microsecond=0)
-        if st.session_state[LimiteDebit.CLE_RATE_LIMIT]["dernier_reset_heure"] != heure_actuelle:
-            st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_heure"] = 0
-            st.session_state[LimiteDebit.CLE_RATE_LIMIT]["dernier_reset_heure"] = heure_actuelle
-
-        # Vérifier limites
-        if st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_jour"] >= AI_RATE_LIMIT_DAILY:
-            return False, "⏳ Limite quotidienne d'appels IA atteinte"
-
-        if st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_heure"] >= AI_RATE_LIMIT_HOURLY:
-            return False, "⏳ Limite horaire d'appels IA atteinte"
-
-        return True, ""
+        """Vérifie si un appel API est autorisé."""
+        return _get_rate_limit_class().peut_appeler()
 
     @staticmethod
-    def enregistrer_appel():
-        """
-        Enregistre un appel API.
-        """
-        LimiteDebit._initialiser()
-        st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_jour"] += 1
-        st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_heure"] += 1
+    def enregistrer_appel(service: str = "unknown", tokens_utilises: int = 0):
+        """Enregistre un appel API."""
+        return _get_rate_limit_class().enregistrer_appel(service, tokens_utilises)
 
     @staticmethod
     def obtenir_statistiques() -> dict:
-        """
-        Retourne les statistiques de rate limiting.
+        """Retourne les statistiques de rate limiting."""
+        return _get_rate_limit_class().obtenir_statistiques()
 
-        Returns:
-            Dictionnaire avec compteurs
-        """
-        LimiteDebit._initialiser()
-        return {
-            "appels_jour": st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_jour"],
-            "limite_jour": AI_RATE_LIMIT_DAILY,
-            "appels_heure": st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_heure"],
-            "limite_heure": AI_RATE_LIMIT_HOURLY,
-            "restant_jour": AI_RATE_LIMIT_DAILY
-            - st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_jour"],
-            "restant_heure": AI_RATE_LIMIT_HOURLY
-            - st.session_state[LimiteDebit.CLE_RATE_LIMIT]["appels_heure"],
-        }
+    @staticmethod
+    def reset_quotas():
+        """Reset manuel des quotas."""
+        return _get_rate_limit_class().reset_quotas()
 
 
-# Alias pour compatibilité
+# Alias anglais pour compatibilité
 RateLimit = LimiteDebit
 
 

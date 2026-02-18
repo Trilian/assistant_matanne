@@ -123,7 +123,7 @@ class PlanJardinService(BaseAIService):
         svg = f"""<svg width="{largeur}" height="{hauteur}" viewBox="0 0 {largeur} {hauteur}">
   <rect width="100%" height="100%" fill="#90EE90"/>
   <!-- Zones et plantes à ajouter dynamiquement -->
-  <text x="10" y="30" fill="#333">Plan: {plan.get('nom', 'Jardin')}</text>
+  <text x="10" y="30" fill="#333">Plan: {plan.get("nom", "Jardin")}</text>
 </svg>"""
 
         return svg
@@ -295,7 +295,7 @@ class PlanJardinService(BaseAIService):
             return {}
 
         prompt = f"""Compatibilité compagnonnage pour "{plante_nom}" avec:
-{', '.join(voisins)}
+{", ".join(voisins)}
 
 Pour chaque voisin, indique: bon, neutre, ou mauvais.
 Format JSON: {{"tomate": "bon", "fenouil": "mauvais"}}"""
@@ -311,7 +311,7 @@ Format JSON: {{"tomate": "bon", "fenouil": "mauvais"}}"""
             return json.loads(response)
         except Exception as e:
             logger.warning(f"Vérification compagnonnage échouée: {e}")
-            return {v: "neutre" for v in voisins}
+            return dict.fromkeys(voisins, "neutre")
 
     async def suggerer_compagnons(self, plante_nom: str) -> list[str]:
         """Suggère des plantes compagnes idéales.
@@ -388,7 +388,7 @@ Format JSON: ["tomate - aide à repousser les pucerons", ...]"""
         cultures_passees = [h["culture"] for h in historique[:3]]
 
         prompt = f"""Historique de rotation de cette parcelle:
-{', '.join(cultures_passees)} (du plus récent au plus ancien)
+{", ".join(cultures_passees)} (du plus récent au plus ancien)
 
 Suggère 3 cultures pour l'année suivante en respectant la rotation:
 - Éviter la même famille botanique 2 ans de suite
@@ -539,8 +539,8 @@ Format JSON: ["suggestion1", "suggestion2", "suggestion3"]"""
 # ═══════════════════════════════════════════════════════════
 
 
-def get_plan_jardin_service(client: ClientIA | None = None) -> PlanJardinService:
-    """Factory pour obtenir le service plan jardin.
+def obtenir_service_plan_jardin(client: ClientIA | None = None) -> PlanJardinService:
+    """Factory pour obtenir le service plan jardin (convention française).
 
     Args:
         client: Client IA optionnel
@@ -549,3 +549,8 @@ def get_plan_jardin_service(client: ClientIA | None = None) -> PlanJardinService
         Instance de PlanJardinService
     """
     return PlanJardinService(client=client)
+
+
+def get_plan_jardin_service(client: ClientIA | None = None) -> PlanJardinService:
+    """Factory pour obtenir le service plan jardin (alias anglais)."""
+    return obtenir_service_plan_jardin(client)

@@ -804,8 +804,8 @@ Sois pratique et logique."""
 # ═══════════════════════════════════════════════════════════
 
 
-def get_inventaire_service(client: ClientIA | None = None) -> InventaireMaisonService:
-    """Factory pour obtenir le service inventaire maison.
+def obtenir_service_inventaire_maison(client: ClientIA | None = None) -> InventaireMaisonService:
+    """Factory pour obtenir le service inventaire maison (convention française).
 
     Args:
         client: Client IA optionnel
@@ -814,3 +814,8 @@ def get_inventaire_service(client: ClientIA | None = None) -> InventaireMaisonSe
         Instance de InventaireMaisonService
     """
     return InventaireMaisonService(client=client)
+
+
+def get_inventaire_service(client: ClientIA | None = None) -> InventaireMaisonService:
+    """Factory pour obtenir le service inventaire maison (alias anglais)."""
+    return obtenir_service_inventaire_maison(client)

@@ -242,8 +242,8 @@ class TestBusinessConstants:
     """Tests des constantes métier."""
 
     def test_jours_semaine_correct(self):
-        """Test que JOURS_SEMAINE = 7."""
-        assert constants.JOURS_SEMAINE == 7
+        """Test que JOURS_SEMAINE contient 7 jours."""
+        assert len(constants.JOURS_SEMAINE) == 7
 
     def test_planning_semaine_debut_jour_valide(self):
         """Test que PLANNING_SEMAINE_DEBUT_JOUR est valide."""
@@ -277,7 +277,7 @@ class TestConstantsConsistency:
         numeric_constants = [
             attr
             for attr in dir(constants)
-            if attr.isupper() and isinstance(getattr(constants, attr), (int, float))
+            if attr.isupper() and isinstance(getattr(constants, attr), int | float)
         ]
         for const_name in numeric_constants:
             value = getattr(constants, const_name)
@@ -291,5 +291,5 @@ class TestConstantsConsistency:
                 value = getattr(constants, attr)
                 # Peut être int, float, str, list, tuple, dict
                 assert isinstance(
-                    value, (int, float, str, list, tuple, dict)
+                    value, int | float | str | list | tuple | dict
                 ), f"{attr} a un type inattendu: {type(value)}"

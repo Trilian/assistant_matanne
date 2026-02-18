@@ -7,7 +7,7 @@ from datetime import date, datetime, timedelta
 
 import pytest
 
-from src.utils.formatters.dates import (
+from src.core.formatters import (
     formater_date,
     formater_datetime,
     formater_duree,

@@ -4,7 +4,7 @@ Tests pour src/utils/helpers/dates.py
 
 from datetime import date
 
-from src.utils.helpers.dates import (
+from src.core.date_utils import (
     ajouter_jours_ouvres,
     est_weekend,
     obtenir_bornes_mois,

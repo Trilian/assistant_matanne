@@ -3,34 +3,43 @@ Core - Module central de l'application.
 
 Expose les composants essentiels pour l'ensemble de l'application.
 Convention : Noms en français uniquement.
-"""
 
-# ═══════════════════════════════════════════════════════════
-# CONFIGURATION
-# ═══════════════════════════════════════════════════════════
+Refactorisé en sous-modules thématiques:
+- config/: Configuration Pydantic
+- db/: Base de données et migrations
+- caching/: Cache multi-niveaux
+- validation/: Sanitization et schémas Pydantic
+- monitoring/: Performance et métriques
+"""
 
 # ═══════════════════════════════════════════════════════════
 # AI
 # ═══════════════════════════════════════════════════════════
-from .ai import AnalyseurIA, CacheIA, ClientIA, obtenir_client_ia
+# Rate limiting (source de vérité: ai/rate_limit.py)
+from .ai import AnalyseurIA, CacheIA, ClientIA, LimiteDebit, RateLimitIA, obtenir_client_ia
 
 # ═══════════════════════════════════════════════════════════
-# CACHE
+# CACHE (ancien module pour compatibilité)
 # ═══════════════════════════════════════════════════════════
 from .cache import (
     Cache,
-    LimiteDebit,
     cached,
 )
 
-# Cache multi-niveaux
-from .cache_multi import (
+# ═══════════════════════════════════════════════════════════
+# CACHE MULTI-NIVEAUX (nouveau sous-module caching/)
+# ═══════════════════════════════════════════════════════════
+from .caching import (
     CacheMultiNiveau,
     EntreeCache,
     StatistiquesCache,
     avec_cache_multi,
     obtenir_cache,
 )
+
+# ═══════════════════════════════════════════════════════════
+# CONFIGURATION (nouveau sous-module config/)
+# ═══════════════════════════════════════════════════════════
 from .config import Parametres, obtenir_parametres
 
 # ═══════════════════════════════════════════════════════════
@@ -39,16 +48,22 @@ from .config import Parametres, obtenir_parametres
 from .constants import *
 
 # ═══════════════════════════════════════════════════════════
-# DATABASE
+# DATABASE (nouveau sous-module db/)
 # ═══════════════════════════════════════════════════════════
-from .database import (
+from .db import (
     GestionnaireMigrations,
+    creer_toutes_tables,
+    get_db_context,
     initialiser_database,
     obtenir_contexte_db,
     obtenir_db_securise,
+    obtenir_fabrique_session,
     obtenir_infos_db,
     obtenir_moteur,
+    obtenir_moteur_securise,
+    vacuum_database,
     verifier_connexion,
+    verifier_sante,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -105,6 +120,24 @@ from .logging import (
 )
 
 # ═══════════════════════════════════════════════════════════
+# MONITORING (nouveau sous-module monitoring/)
+# ═══════════════════════════════════════════════════════════
+from .monitoring import (
+    ChargeurComposant,
+    MoniteurMemoire,
+    OptimiseurSQL,
+    ProfileurFonction,
+    TableauBordPerformance,
+    afficher_badge_mini_performance,
+    afficher_panneau_performance,
+    antirrebond,
+    limiter_debit,
+    mesurer_temps,
+    profiler,
+    suivre_requete,
+)
+
+# ═══════════════════════════════════════════════════════════
 # MULTI-TENANT
 # ═══════════════════════════════════════════════════════════
 from .multi_tenant import (
@@ -127,24 +160,6 @@ from .offline import (
     afficher_panneau_sync,
     afficher_statut_connexion,
     avec_mode_hors_ligne,
-)
-
-# ═══════════════════════════════════════════════════════════
-# PERFORMANCE
-# ═══════════════════════════════════════════════════════════
-from .performance import (
-    ChargeurComposant,
-    MoniteurMemoire,
-    OptimiseurSQL,
-    ProfileurFonction,
-    TableauBordPerformance,
-    afficher_badge_mini_performance,
-    afficher_panneau_performance,
-    antirrebond,
-    limiter_debit,
-    mesurer_temps,
-    profiler,
-    suivre_requete,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -175,10 +190,7 @@ from .sql_optimizer import (
 from .state import EtatApp, GestionnaireEtat, naviguer, obtenir_etat, revenir
 
 # ═══════════════════════════════════════════════════════════
-# VALIDATORS PYDANTIC (depuis validation.py)
-# ═══════════════════════════════════════════════════════════
-# ═══════════════════════════════════════════════════════════
-# VALIDATION
+# VALIDATION (nouveau sous-module validation/)
 # ═══════════════════════════════════════════════════════════
 from .validation import (
     EntreeJournalInput,
@@ -207,11 +219,17 @@ __all__ = [
     "obtenir_logger",
     # Database
     "obtenir_moteur",
+    "obtenir_moteur_securise",
     "obtenir_contexte_db",
+    "get_db_context",  # Alias anglais
     "obtenir_db_securise",
+    "obtenir_fabrique_session",
     "verifier_connexion",
     "obtenir_infos_db",
     "initialiser_database",
+    "creer_toutes_tables",
+    "verifier_sante",
+    "vacuum_database",
     "GestionnaireMigrations",
     # State
     "EtatApp",
@@ -222,7 +240,8 @@ __all__ = [
     # Cache
     "Cache",
     "cached",
-    "LimiteDebit",
+    "LimiteDebit",  # Alias vers RateLimitIA
+    "RateLimitIA",  # Source de vérité pour rate limiting
     # Cache multi-niveaux
     "CacheMultiNiveau",
     "obtenir_cache",

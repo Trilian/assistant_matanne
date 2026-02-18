@@ -4,7 +4,7 @@ Tests unitaires pour text.py
 Module: src.utils.formatters.text
 """
 
-from src.utils.formatters.text import (
+from src.core.formatters import (
     capitaliser_mots,
     capitaliser_premiere,
     extraire_nombre,

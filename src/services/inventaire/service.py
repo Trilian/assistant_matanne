@@ -19,6 +19,8 @@ from src.core.errors_base import ErreurValidation
 from src.core.models import ArticleInventaire
 from src.services.base import BaseAIService, BaseService, InventoryAIMixin
 
+from .inventaire_io import InventaireIOMixin
+from .inventaire_stats import InventaireStatsMixin
 from .types import ArticleImport, SuggestionCourses
 
 logger = logging.getLogger(__name__)
@@ -47,7 +49,13 @@ EMPLACEMENTS = ["Frigo", "Congélateur", "Placard", "Cave", "Garde-manger"]
 # ═══════════════════════════════════════════════════════════
 
 
-class ServiceInventaire(BaseService[ArticleInventaire], BaseAIService, InventoryAIMixin):
+class ServiceInventaire(
+    BaseService[ArticleInventaire],
+    BaseAIService,
+    InventoryAIMixin,
+    InventaireIOMixin,
+    InventaireStatsMixin,
+):
     """
     Service complet pour l'inventaire.
 
@@ -55,6 +63,8 @@ class ServiceInventaire(BaseService[ArticleInventaire], BaseAIService, Inventory
     - BaseService → CRUD optimisé
     - BaseAIService → IA avec rate limiting auto
     - InventoryAIMixin → Contextes métier inventaire
+    - InventaireIOMixin → Import/export d'articles
+    - InventaireStatsMixin → Statistiques et alertes
 
     Fonctionnalités:
     - CRUD optimisé avec cache
@@ -341,7 +351,6 @@ RULES:
         Returns:
             List of modifications with details
         """
-        from datetime import timedelta
 
         from src.core.models import HistoriqueInventaire
 
@@ -682,371 +691,18 @@ RULES:
         }
 
     # ═══════════════════════════════════════════════════════════
-    # SECTION 8: NOTIFICATIONS & ALERTES
+    # NOTE: Notifications & alertes déléguées à InventaireStatsMixin
+    #   → generer_notifications_alertes, obtenir_alertes_actives
+    #   → get_statistiques, get_stats_par_categorie, get_articles_a_prelever
+    #   Voir: inventaire_stats.py
     # ═══════════════════════════════════════════════════════════
 
-    @avec_gestion_erreurs(default_return={})
-    def generer_notifications_alertes(self) -> dict[str, Any]:
-        """Génère les notifications d'alertes selon l'état de l'inventaire.
-
-        Returns:
-            Dict avec notifications créées par type
-        """
-        from src.services.notifications import obtenir_service_notifications
-
-        service_notifs = obtenir_service_notifications()
-        inventaire = self.get_inventaire_complet()
-        stats = {
-            "stock_critique": [],
-            "stock_bas": [],
-            "peremption_proche": [],
-            "peremption_depassee": [],
-        }
-
-        # Vérifie chaque article
-        for article_data in inventaire["articles"]:
-            date_peremption = article_data.get("date_peremption")
-
-            # Check stock critique
-            if article_data.get("est_critique"):
-                notif = service_notifs.creer_notification_stock_critique(article_data)
-                if notif:
-                    service_notifs.ajouter_notification(notif)
-                    stats["stock_critique"].append(article_data["nom"])
-
-            # Check stock bas
-            elif article_data.get("est_stock_bas"):
-                notif = service_notifs.creer_notification_stock_bas(article_data)
-                if notif:
-                    service_notifs.ajouter_notification(notif)
-                    stats["stock_bas"].append(article_data["nom"])
-
-            # Check péremption
-            if date_peremption:
-                jours_avant = (date_peremption - date.today()).days
-                if jours_avant <= 7:  # Alerter si <= 7 jours
-                    notif = service_notifs.creer_notification_peremption(article_data, jours_avant)
-                    if notif:
-                        service_notifs.ajouter_notification(notif)
-                        if jours_avant <= 0:
-                            stats["peremption_depassee"].append(article_data["nom"])
-                        else:
-                            stats["peremption_proche"].append(article_data["nom"])
-
-        logger.info(
-            f"📊 Notifications générées: "
-            f"Critique={len(stats['stock_critique'])}, "
-            f"Bas={len(stats['stock_bas'])}, "
-            f"Péremption={len(stats['peremption_proche']) + len(stats['peremption_depassee'])}"
-        )
-
-        return stats
-
-    @avec_gestion_erreurs(default_return=[])
-    def obtenir_alertes_actives(self) -> list[dict[str, Any]]:
-        """Récupère les alertes actives pour l'utilisateur.
-
-        Returns:
-            Liste des notifications non lues
-        """
-        from src.services.notifications import obtenir_service_notifications
-
-        service_notifs = obtenir_service_notifications()
-        notifs = service_notifs.obtenir_notifications(non_lues_seulement=True)
-
-        return [
-            {
-                "id": notif.id,
-                "titre": notif.titre,
-                "message": notif.message,
-                "icone": notif.icone,
-                "type": notif.type_alerte.value,
-                "priorite": notif.priorite,
-                "article_id": notif.article_id,
-                "date": notif.date_creation.isoformat(),
-            }
-            for notif in notifs
-        ]
-
     # ═══════════════════════════════════════════════════════════
-    # SECTION 9: STATISTIQUES & RAPPORTS
+    # NOTE: Import/export avancé délégué à InventaireIOMixin
+    #   → importer_articles, exporter_inventaire
+    #   → _exporter_csv, _exporter_json, valider_fichier_import
+    #   Voir: inventaire_io.py
     # ═══════════════════════════════════════════════════════════
-
-    @avec_gestion_erreurs(default_return={})
-    def get_statistiques(self) -> dict[str, Any]:
-        """Récupère statistiques complètes de l'inventaire.
-
-        Returns:
-            Dict with statistics and insights
-        """
-        inventaire = self.get_inventaire_complet()
-        alertes = self.get_alertes()
-
-        if not inventaire:
-            return {"total_articles": 0}
-
-        return {
-            "total_articles": len(inventaire),
-            "total_quantite": sum(a["quantite"] for a in inventaire),
-            "emplacements": len(set(a["emplacement"] for a in inventaire if a["emplacement"])),
-            "categories": len(set(a["ingredient_categorie"] for a in inventaire)),
-            "alertes_totales": sum(len(v) for v in alertes.values()),
-            "articles_critiques": len(alertes.get("critique", [])),
-            "articles_stock_bas": len(alertes.get("stock_bas", [])),
-            "articles_peremption": len(alertes.get("peremption_proche", [])),
-            "derniere_maj": max((a.get("derniere_maj") for a in inventaire), default=None),
-        }
-
-    @avec_gestion_erreurs(default_return={})
-    def get_stats_par_categorie(self) -> dict[str, dict[str, Any]]:
-        """Récupère statistiques par catégorie.
-
-        Returns:
-            Dict with per-category statistics
-        """
-        inventaire = self.get_inventaire_complet()
-
-        categories = {}
-        for article in inventaire:
-            cat = article["ingredient_categorie"]
-            if cat not in categories:
-                categories[cat] = {
-                    "articles": 0,
-                    "quantite_totale": 0,
-                    "seuil_moyen": 0,
-                    "critiques": 0,
-                }
-
-            categories[cat]["articles"] += 1
-            categories[cat]["quantite_totale"] += article["quantite"]
-            categories[cat]["seuil_moyen"] += article["quantite_min"]
-            if article["statut"] == "critique":
-                categories[cat]["critiques"] += 1
-
-        # Calculer moyenne des seuils
-        for cat in categories:
-            if categories[cat]["articles"] > 0:
-                categories[cat]["seuil_moyen"] /= categories[cat]["articles"]
-
-        logger.info(f"📊 Statistics for {len(categories)} categories")
-        return categories
-
-    @avec_gestion_erreurs(default_return=[])
-    def get_articles_a_prelever(self, date_limite: date | None = None) -> list[dict[str, Any]]:
-        """Récupère articles à utiliser en priorité.
-
-        Args:
-            date_limite: Date limite de péremption (par défaut aujourd'hui + 3 jours)
-
-        Returns:
-            List of articles to use first (FIFO)
-        """
-
-        if date_limite is None:
-            date_limite = date.today() + timedelta(days=3)
-
-        inventaire = self.get_inventaire_complet()
-
-        a_prelever = [
-            a for a in inventaire if a["date_peremption"] and a["date_peremption"] <= date_limite
-        ]
-
-        # Trier par date de péremption (plus ancien d'abord)
-        a_prelever.sort(key=lambda x: x["date_peremption"])
-
-        return a_prelever
-
-    # ═══════════════════════════════════════════════════════════
-    # SECTION 10: IMPORT/EXPORT AVANCÉ
-    # ═══════════════════════════════════════════════════════════
-
-    @avec_gestion_erreurs(default_return=[])
-    def importer_articles(  # pragma: no cover
-        self,
-        articles_data: list[dict[str, Any]],
-    ) -> list[dict[str, Any]]:
-        """Importe plusieurs articles en batch.
-
-        Args:
-            articles_data: Liste des articles à importer (dictionnaires)
-
-        Returns:
-            Liste des articles importés avec leurs IDs
-        """
-        resultats: list[dict[str, Any]] = []
-        errors: list[str] = []
-
-        for idx, article_data in enumerate(articles_data):
-            try:
-                # Valide avec Pydantic
-                article_import = ArticleImport(**article_data)
-
-                # Cherche ou crée l'ingrédient
-                from src.core.database import obtenir_contexte_db
-                from src.core.models import Ingredient
-
-                db = obtenir_contexte_db().session
-
-                ingredient = db.query(Ingredient).filter_by(nom=article_import.nom).first()
-
-                if not ingredient:
-                    ingredient = Ingredient(
-                        nom=article_import.nom,
-                        unite=article_import.unite,
-                        categorie=article_import.categorie or "Autre",
-                    )
-                    db.add(ingredient)
-                    db.commit()
-                    db.refresh(ingredient)
-
-                # Ajoute l'article à l'inventaire
-                self.ajouter_article(
-                    ingredient_id=ingredient.id,
-                    quantite=article_import.quantite,
-                    quantite_min=article_import.quantite_min,
-                    emplacement=article_import.emplacement,
-                    date_peremption=(
-                        date.fromisoformat(article_import.date_peremption)
-                        if article_import.date_peremption
-                        else None
-                    ),
-                )
-
-                resultats.append(
-                    {
-                        "nom": article_import.nom,
-                        "status": "✅",
-                        "message": "Importé avec succès",
-                    }
-                )
-
-            except Exception as e:
-                errors.append(f"Ligne {idx + 2}: {str(e)}")
-                resultats.append(
-                    {
-                        "nom": article_data.get("nom", "?"),
-                        "status": "❌",
-                        "message": str(e),
-                    }
-                )
-
-        logger.info(f"✅ {len(resultats) - len(errors)}/{len(resultats)} articles importés")
-
-        return resultats
-
-    @avec_gestion_erreurs(default_return=None)
-    def exporter_inventaire(  # pragma: no cover
-        self,
-        format_export: str = "csv",
-    ) -> str | None:
-        """Exporte l'inventaire dans le format demandé.
-
-        Args:
-            format_export: "csv" ou "json"
-
-        Returns:
-            Contenu du fichier en string
-        """
-        inventaire = self.get_inventaire_complet()
-
-        if format_export == "csv":
-            return self._exporter_csv(inventaire)
-        elif format_export == "json":
-            return self._exporter_json(inventaire)
-        else:
-            raise ErreurValidation(f"Format non supporté: {format_export}")
-
-    def _exporter_csv(self, inventaire: dict[str, Any]) -> str:  # pragma: no cover
-        """Exporte en CSV"""
-        import io
-
-        output = io.StringIO()
-
-        # Headers
-        headers = [
-            "Nom",
-            "Quantité",
-            "Unité",
-            "Seuil Min",
-            "Emplacement",
-            "Catégorie",
-            "Date Péremption",
-            "État",
-        ]
-        output.write(",".join(headers) + "\n")
-
-        # Données
-        for article in inventaire["articles"]:
-            row = [
-                article["nom"],
-                str(article["quantite"]),
-                article.get("unite", ""),
-                str(article["quantite_min"]),
-                article.get("emplacement", ""),
-                article.get("categorie", ""),
-                str(article.get("date_peremption", "")),
-                article.get("statut", ""),
-            ]
-            # Échapper les valeurs contenant des virgules
-            row = [f'"{v}"' if "," in str(v) else str(v) for v in row]
-            output.write(",".join(row) + "\n")
-
-        return output.getvalue()
-
-    def _exporter_json(self, inventaire: dict[str, Any]) -> str:  # pragma: no cover
-        """Exporte en JSON"""
-        import json
-
-        export_data = {
-            "date_export": datetime.utcnow().isoformat(),
-            "nombre_articles": len(inventaire["articles"]),
-            "articles": inventaire["articles"],
-            "statistiques": inventaire.get("statistiques", {}),
-        }
-
-        return json.dumps(export_data, indent=2, ensure_ascii=False, default=str)
-
-    def valider_fichier_import(  # pragma: no cover
-        self,
-        donnees: list[dict[str, Any]],
-    ) -> dict[str, Any]:
-        """Valide les données d'import et retourne un rapport.
-
-        Args:
-            donnees: Données parsées du fichier
-
-        Returns:
-            Rapport de validation
-        """
-        rapport = {
-            "valides": 0,
-            "invalides": 0,
-            "erreurs": [],
-            "articles_valides": [],
-            "articles_invalides": [],
-        }
-
-        for idx, article in enumerate(donnees):
-            try:
-                article_import = ArticleImport(**article)
-                rapport["valides"] += 1
-                rapport["articles_valides"].append(
-                    {
-                        "nom": article_import.nom,
-                        "quantite": article_import.quantite,
-                    }
-                )
-            except Exception as e:
-                rapport["invalides"] += 1
-                rapport["erreurs"].append(
-                    {
-                        "ligne": idx + 2,
-                        "erreur": str(e),
-                    }
-                )
-                rapport["articles_invalides"].append(article.get("nom", "?"))
-
-        return rapport
 
 
 # ═══════════════════════════════════════════════════════════

@@ -66,9 +66,9 @@ def afficher_series_loto():
         type_numero = st.selectbox(
             "Type de numéro",
             options=["principal", "chance"],
-            format_func=lambda x: "Numéros principaux (1-49)"
-            if x == "principal"
-            else "Numéro Chance (1-10)",
+            format_func=lambda x: (
+                "Numéros principaux (1-49)" if x == "principal" else "Numéro Chance (1-10)"
+            ),
         )
 
     with col2:
@@ -132,7 +132,7 @@ def afficher_series_loto():
             st.markdown(
                 f"""
             <div style="text-align: center; padding: 10px; border-radius: 10px;
-                        background-color: {'#90EE90' if niveau == '🟢' else '#FFFFE0' if niveau == '🟡' else '#F5F5F5'};">
+                        background-color: {"#90EE90" if niveau == "🟢" else "#FFFFE0" if niveau == "🟡" else "#F5F5F5"};">
                 <span style="font-size: 24px; font-weight: bold;">{numero}</span><br>
                 <span style="font-size: 14px;">{niveau} Value: {value:.1f}</span><br>
                 <span style="font-size: 12px; color: gray;">{serie} tirages</span>

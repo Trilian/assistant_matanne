@@ -41,7 +41,7 @@ def utc_now() -> datetime:
 # ═══════════════════════════════════════════════════════════
 
 
-class FeedbackType(str, enum.Enum):
+class FeedbackType(enum.StrEnum):
     """Types de feedback pour les recettes."""
 
     LIKE = "like"
@@ -49,7 +49,7 @@ class FeedbackType(str, enum.Enum):
     NEUTRAL = "neutral"
 
 
-class CalendarProvider(str, enum.Enum):
+class CalendarProvider(enum.StrEnum):
     """Providers de calendriers externes."""
 
     GOOGLE = "google"

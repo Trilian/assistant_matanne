@@ -2,7 +2,7 @@
 Tests pour src/utils/helpers/strings.py
 """
 
-from src.utils.helpers.strings import (
+from src.core.helpers import (
     camel_vers_snake,
     generer_id,
     masquer_sensible,
