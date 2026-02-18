@@ -16,9 +16,10 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Any
 
+from src.core.constants import JOURS_SEMAINE
+
 # Import des schemas partages (evite import circulaire)
 from src.modules.cuisine.schemas import FeedbackRecette, PreferencesUtilisateur
-from src.modules.shared.constantes import JOURS_SEMAINE
 
 logger = logging.getLogger(__name__)
 

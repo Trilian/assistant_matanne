@@ -7,7 +7,7 @@ import logging
 from datetime import date, timedelta
 from typing import Any
 
-from src.modules.shared.constantes import JOURS_SEMAINE
+from src.core.constants import JOURS_SEMAINE
 from src.modules.shared.date_utils import (
     obtenir_debut_semaine as get_debut_semaine,
 )

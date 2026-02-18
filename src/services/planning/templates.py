@@ -11,10 +11,9 @@ from datetime import date, datetime, timedelta
 
 from sqlalchemy.orm import Session
 
+from src.core.constants import JOURS_SEMAINE
 from src.core.decorators import avec_session_db
 from src.core.models import CalendarEvent, TemplateItem, TemplateSemaine
-
-JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
 
 class ServiceTemplates:

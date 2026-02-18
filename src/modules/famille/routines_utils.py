@@ -7,7 +7,7 @@ import logging
 from datetime import date, time, timedelta
 from typing import Any
 
-from src.modules.shared.constantes import JOURS_SEMAINE
+from src.core.constants import JOURS_SEMAINE
 
 logger = logging.getLogger(__name__)
 

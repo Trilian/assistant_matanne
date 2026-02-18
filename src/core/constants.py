@@ -152,10 +152,103 @@ MAX_ITEMS_EXPORT = 1000
 """Nombre maximum d'items à exporter."""
 
 # ═══════════════════════════════════════════════════════════
+# JOURS DE LA SEMAINE / MOIS
+# ═══════════════════════════════════════════════════════════
+
+JOURS_SEMAINE: list[str] = [
+    "Lundi",
+    "Mardi",
+    "Mercredi",
+    "Jeudi",
+    "Vendredi",
+    "Samedi",
+    "Dimanche",
+]
+"""Noms des jours de la semaine."""
+
+JOURS_SEMAINE_COURT: list[str] = [
+    "Lun",
+    "Mar",
+    "Mer",
+    "Jeu",
+    "Ven",
+    "Sam",
+    "Dim",
+]
+"""Noms courts des jours de la semaine."""
+
+JOURS_SEMAINE_LOWER: list[str] = [
+    "lundi",
+    "mardi",
+    "mercredi",
+    "jeudi",
+    "vendredi",
+    "samedi",
+    "dimanche",
+]
+"""Noms des jours en minuscule (pour sélecteurs UI)."""
+
+MOIS_FRANCAIS: list[str] = [
+    "Janvier",
+    "Fevrier",
+    "Mars",
+    "Avril",
+    "Mai",
+    "Juin",
+    "Juillet",
+    "Août",
+    "Septembre",
+    "Octobre",
+    "Novembre",
+    "Decembre",
+]
+"""Noms des mois en français."""
+
+MOIS_FRANCAIS_COURT: list[str] = [
+    "Jan",
+    "Fev",
+    "Mar",
+    "Avr",
+    "Mai",
+    "Juin",
+    "Juil",
+    "Août",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+]
+"""Noms courts des mois."""
+
+TYPES_REPAS_KEYS: list[str] = [
+    "petit_dejeuner",
+    "dejeuner",
+    "gouter",
+    "diner",
+]
+"""Clés techniques pour types de repas."""
+
+TYPES_REPAS_AFFICHAGE: dict[str, str] = {
+    "petit_dejeuner": "Petit-dejeuner",
+    "dejeuner": "Dejeuner",
+    "gouter": "Goûter",
+    "diner": "Dîner",
+}
+"""Labels d'affichage pour types de repas."""
+
+TYPES_PROTEINES: dict[str, list[str]] = {
+    "poisson": ["poisson", "saumon", "thon", "cabillaud", "sardine", "crevette"],
+    "viande_rouge": ["boeuf", "veau", "agneau", "viande rouge"],
+    "volaille": ["poulet", "dinde", "canard", "volaille"],
+    "vegetarien": ["légumes", "tofu", "seitan", "légumineuses"],
+}
+"""Types de protéines avec mots-clés associés."""
+
+# ═══════════════════════════════════════════════════════════
 # RÈGLES MÉTIER - CUISINE
 # ═══════════════════════════════════════════════════════════
 
-JOURS_SEMAINE = 7
+NOMBRE_JOURS_SEMAINE = 7
 """Nombre de jours dans une semaine."""
 
 PLANNING_SEMAINE_DEBUT_JOUR = 0

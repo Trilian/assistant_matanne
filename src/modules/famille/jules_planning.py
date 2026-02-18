@@ -13,9 +13,9 @@ from datetime import date
 
 import streamlit as st
 
+from src.core.constants import JOURS_SEMAINE
 from src.core.database import obtenir_contexte_db
 from src.core.models import ChildProfile
-from src.modules.shared.constantes import JOURS_SEMAINE
 
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES - ACTIVITÉS PAR CATÉGORIE

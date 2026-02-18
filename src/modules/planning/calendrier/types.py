@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from datetime import date, time, timedelta
 from enum import StrEnum
 
-from src.modules.shared.constantes import JOURS_SEMAINE, JOURS_SEMAINE_COURT
+from src.core.constants import JOURS_SEMAINE, JOURS_SEMAINE_COURT
 
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES LOCALES

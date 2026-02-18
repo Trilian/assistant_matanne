@@ -30,11 +30,13 @@ Compatibilité:
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES
 # ═══════════════════════════════════════════════════════════
-from src.modules.shared.constantes import (
+from src.core.constants import (
     JOURS_SEMAINE,
     JOURS_SEMAINE_LOWER,
     TYPES_PROTEINES,
-    TYPES_REPAS,
+)
+from src.core.constants import (
+    TYPES_REPAS_KEYS as TYPES_REPAS,
 )
 
 from .global_planning import (

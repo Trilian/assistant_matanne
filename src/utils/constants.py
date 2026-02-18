@@ -56,7 +56,8 @@ MAGASINS = {
 # CUISINE - PLANNING
 # ═══════════════════════════════════════════════════════════
 
-JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+# JOURS_SEMAINE importé depuis src.core.constants pour éviter duplication
+from src.core.constants import JOURS_SEMAINE
 
 STATUTS_REPAS = ["planifié", "préparé", "terminé", "annulé"]
 

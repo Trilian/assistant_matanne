@@ -7,7 +7,7 @@ qui etaient dupliquees dans plusieurs fichiers.
 
 from datetime import date, timedelta
 
-from src.modules.shared.constantes import (
+from src.core.constants import (
     JOURS_SEMAINE,
     JOURS_SEMAINE_COURT,
     MOIS_FRANCAIS,
@@ -137,7 +137,7 @@ def formater_mois_fr(d: date, court: bool = False) -> str:
     Returns:
         Nom du mois en français
     """
-    from src.modules.shared.constantes import MOIS_FRANCAIS_COURT
+    from src.core.constants import MOIS_FRANCAIS_COURT
 
     if court:
         return MOIS_FRANCAIS_COURT[d.month - 1]

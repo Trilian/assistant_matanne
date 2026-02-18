@@ -7,13 +7,15 @@ Ce module centralise:
 - Les patterns de validation de base
 """
 
-from src.modules.shared.constantes import (
+from src.core.constants import (
     JOURS_SEMAINE,
     JOURS_SEMAINE_COURT,
     JOURS_SEMAINE_LOWER,
     MOIS_FRANCAIS,
     MOIS_FRANCAIS_COURT,
-    TYPES_REPAS,
+)
+from src.core.constants import (
+    TYPES_REPAS_KEYS as TYPES_REPAS,
 )
 from src.modules.shared.date_utils import (
     formater_date_fr,

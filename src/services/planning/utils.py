@@ -7,7 +7,7 @@ Elles représentent la logique métier pure extraite du planning.
 
 from datetime import date, datetime, timedelta
 
-from src.modules.shared.constantes import (
+from src.core.constants import (
     JOURS_SEMAINE,
     JOURS_SEMAINE_LOWER,
     TYPES_PROTEINES,

@@ -6,6 +6,8 @@ Exports:
 - get_calendar_sync_service: Factory
 - Schémas: CalendarProvider, SyncDirection, ExternalCalendarConfig, etc.
 - ICalGenerator: Génération/parsing iCal
+
+NOTE: render_calendar_sync_ui déplacé vers src/modules/planning/calendar_sync_ui.py
 """
 
 from .generateur import ICalGenerator
@@ -21,19 +23,6 @@ from .service import (
     get_calendar_sync_service,
 )
 
-
-def render_calendar_sync_ui():
-    """
-    Interface Streamlit pour la synchronisation des calendriers.
-
-    Déplacé vers src/modules/planning/ui/calendar_sync_ui.py
-    Cette fonction assure la rétrocompatibilité.
-    """
-    from src.modules.planning.calendar_sync_ui import render_calendar_sync_ui as _render
-
-    return _render()
-
-
 __all__ = [
     # Schémas
     "CalendarProvider",
@@ -46,6 +35,4 @@ __all__ = [
     # Service
     "CalendarSyncService",
     "get_calendar_sync_service",
-    # UI (rétrocompatibilité)
-    "render_calendar_sync_ui",
 ]

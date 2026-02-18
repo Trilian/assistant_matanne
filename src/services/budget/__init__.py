@@ -50,17 +50,8 @@ from .utils import (
     valider_montant,
 )
 
-
-def render_budget_dashboard():
-    """
-    Affiche le tableau de bord budget dans Streamlit.
-
-    Déplacé vers src/modules/famille/ui/budget_dashboard.py
-    Cette fonction assure la rétrocompatibilité.
-    """
-    from src.modules.famille.budget_dashboard import render_budget_dashboard as _render
-
-    return _render()
+# NOTE: render_budget_dashboard déplacé vers src/modules/famille/budget_dashboard.py
+# Ne plus importer l'UI depuis ce package services
 
 
 __all__ = [
@@ -102,6 +93,4 @@ __all__ = [
     "valider_montant",
     "valider_mois",
     "valider_annee",
-    # UI (rétrocompatibilité)
-    "render_budget_dashboard",
 ]

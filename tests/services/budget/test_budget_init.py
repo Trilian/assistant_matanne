@@ -1,36 +1,10 @@
 """
 Tests pour src/services/budget/__init__.py
 
-Couvre les fonctions wrapper de rétrocompatibilité.
+Couvre les exports du module budget.
 """
 
-from unittest.mock import patch
-
 import pytest
-
-
-@pytest.mark.unit
-class TestRenderBudgetDashboard:
-    """Tests pour render_budget_dashboard (rétrocompatibilité)."""
-
-    @patch("src.modules.famille.budget_dashboard.render_budget_dashboard")
-    def test_render_budget_dashboard_calls_underlying(self, mock_render):
-        """La fonction wrapper appelle la fonction sous-jacente."""
-        mock_render.return_value = "dashboard_result"
-
-        # Import APRÈS le patch pour que le lazy import utilise le mock
-        from src.services.budget import render_budget_dashboard
-
-        result = render_budget_dashboard()
-
-        mock_render.assert_called_once()
-        assert result == "dashboard_result"
-
-    def test_render_budget_dashboard_import(self):
-        """Import de render_budget_dashboard fonctionne."""
-        from src.services.budget import render_budget_dashboard
-
-        assert callable(render_budget_dashboard)
 
 
 @pytest.mark.unit

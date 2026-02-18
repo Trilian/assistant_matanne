@@ -34,7 +34,7 @@ OPTIONS_RECURRENCE = [
     (TypeRecurrence.ANNUEL, "Tous les ans"),
 ]
 
-JOURS_SEMAINE = [
+JOURS_SEMAINE_INDEX = [
     (0, "Lun"),
     (1, "Mar"),
     (2, "Mer"),
@@ -63,7 +63,7 @@ def format_recurrence(event: CalendarEvent) -> str:
     # Ajouter les jours pour weekly
     if event.recurrence_type == "weekly" and event.recurrence_jours:
         jours_idx = [int(j) for j in event.recurrence_jours.split(",")]
-        jours_noms = [nom for idx, nom in JOURS_SEMAINE if idx in jours_idx]
+        jours_noms = [nom for idx, nom in JOURS_SEMAINE_INDEX if idx in jours_idx]
         if jours_noms:
             result += f" ({', '.join(jours_noms)})"
 
@@ -282,7 +282,7 @@ get_recurrence_service = obtenir_service_recurrence
 __all__ = [
     "TypeRecurrence",
     "OPTIONS_RECURRENCE",
-    "JOURS_SEMAINE",
+    "JOURS_SEMAINE_INDEX",
     "format_recurrence",
     "ServiceRecurrence",
     "obtenir_service_recurrence",

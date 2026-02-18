@@ -50,7 +50,7 @@ FREQUENCES = {
     "annuel": 365,
 }
 
-JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+# Note: JOURS_SEMAINE importé de src.core.constants si nécessaire
 
 
 # ═══════════════════════════════════════════════════════════

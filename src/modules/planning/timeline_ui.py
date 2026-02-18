@@ -11,6 +11,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+from src.core.constants import JOURS_SEMAINE
 from src.core.database import obtenir_contexte_db
 from src.core.models import CalendarEvent, FamilyActivity, Repas
 
@@ -23,8 +24,6 @@ COULEURS_TYPES = {
     "routine": "#8E24AA",  # Violet
     "autre": "#757575",  # Gris
 }
-
-JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
 
 def get_lundi_semaine(d: date) -> date:
