@@ -4,8 +4,10 @@ Routes API pour le planning.
 
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, field_validator
+
+from src.api.dependencies import require_auth
 
 router = APIRouter(prefix="/api/v1/planning", tags=["Planning"])
 
@@ -67,7 +69,7 @@ async def get_planning_semaine(
 ):
     """Récupère le planning de la semaine."""
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import Repas
 
         if not date_debut:
@@ -110,10 +112,10 @@ async def get_planning_semaine(
 
 
 @router.post("/repas")
-async def create_repas(repas: RepasCreate):
+async def create_repas(repas: RepasCreate, user: dict = Depends(require_auth)):
     """Planifie un repas."""
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import Planning, Repas
 
         with obtenir_contexte_db() as session:
@@ -173,5 +175,58 @@ async def create_repas(repas: RepasCreate):
 
             return {"message": "Repas planifié", "id": db_repas.id}
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.put("/repas/{repas_id}")
+async def update_repas(repas_id: int, repas: RepasCreate, user: dict = Depends(require_auth)):
+    """Met à jour un repas planifié."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Repas
+
+        with obtenir_contexte_db() as session:
+            db_repas = session.query(Repas).filter(Repas.id == repas_id).first()
+
+            if not db_repas:
+                raise HTTPException(status_code=404, detail="Repas non trouvé")
+
+            db_repas.type_repas = repas.type_repas
+            db_repas.recette_id = repas.recette_id
+            if hasattr(db_repas, "notes") and repas.notes:
+                db_repas.notes = repas.notes
+
+            session.commit()
+            session.refresh(db_repas)
+
+            return {"message": "Repas mis à jour", "id": db_repas.id}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.delete("/repas/{repas_id}")
+async def delete_repas(repas_id: int, user: dict = Depends(require_auth)):
+    """Supprime un repas planifié."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Repas
+
+        with obtenir_contexte_db() as session:
+            repas = session.query(Repas).filter(Repas.id == repas_id).first()
+
+            if not repas:
+                raise HTTPException(status_code=404, detail="Repas non trouvé")
+
+            session.delete(repas)
+            session.commit()
+
+            return {"message": "Repas supprimé", "id": repas_id}
+
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e

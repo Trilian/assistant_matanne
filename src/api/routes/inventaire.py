@@ -4,8 +4,10 @@ Routes API pour l'inventaire.
 
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, field_validator
+
+from src.api.dependencies import require_auth
 
 router = APIRouter(prefix="/api/v1/inventaire", tags=["Inventaire"])
 
@@ -76,7 +78,7 @@ async def list_inventaire(
     try:
         from datetime import timedelta
 
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import ArticleInventaire
 
         with obtenir_contexte_db() as session:
@@ -132,10 +134,10 @@ async def list_inventaire(
 
 
 @router.post("", response_model=InventaireItemResponse)
-async def create_inventaire_item(item: InventaireItemCreate):
+async def create_inventaire_item(item: InventaireItemCreate, user: dict = Depends(require_auth)):
     """Crée un nouvel article d'inventaire."""
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import ArticleInventaire
 
         with obtenir_contexte_db() as session:
@@ -162,7 +164,7 @@ async def create_inventaire_item(item: InventaireItemCreate):
 async def get_by_barcode(code: str):
     """Récupère un article par son code-barres."""
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import ArticleInventaire
 
         with obtenir_contexte_db() as session:
@@ -176,6 +178,89 @@ async def get_by_barcode(code: str):
                 raise HTTPException(status_code=404, detail="Article non trouvé")
 
             return InventaireItemResponse.model_validate(item)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.get("/{item_id}", response_model=InventaireItemResponse)
+async def get_inventaire_item(item_id: int):
+    """Récupère un article par son ID."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleInventaire
+
+        with obtenir_contexte_db() as session:
+            item = session.query(ArticleInventaire).filter(ArticleInventaire.id == item_id).first()
+
+            if not item:
+                raise HTTPException(status_code=404, detail="Article non trouvé")
+
+            return InventaireItemResponse.model_validate(item)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.put("/{item_id}", response_model=InventaireItemResponse)
+async def update_inventaire_item(
+    item_id: int, item: InventaireItemCreate, user: dict = Depends(require_auth)
+):
+    """Met à jour un article d'inventaire."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleInventaire
+
+        with obtenir_contexte_db() as session:
+            db_item = (
+                session.query(ArticleInventaire).filter(ArticleInventaire.id == item_id).first()
+            )
+
+            if not db_item:
+                raise HTTPException(status_code=404, detail="Article non trouvé")
+
+            db_item.quantite = item.quantite
+            if item.date_peremption:
+                db_item.date_peremption = item.date_peremption
+            if item.code_barres:
+                db_item.code_barres = item.code_barres
+            if item.emplacement:
+                db_item.emplacement = item.emplacement
+
+            session.commit()
+            session.refresh(db_item)
+
+            return InventaireItemResponse.model_validate(db_item)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.delete("/{item_id}")
+async def delete_inventaire_item(item_id: int, user: dict = Depends(require_auth)):
+    """Supprime un article d'inventaire."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleInventaire
+
+        with obtenir_contexte_db() as session:
+            db_item = (
+                session.query(ArticleInventaire).filter(ArticleInventaire.id == item_id).first()
+            )
+
+            if not db_item:
+                raise HTTPException(status_code=404, detail="Article non trouvé")
+
+            session.delete(db_item)
+            session.commit()
+
+            return {"message": "Article supprimé", "id": item_id}
 
     except HTTPException:
         raise

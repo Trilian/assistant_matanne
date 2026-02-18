@@ -4,8 +4,10 @@ Routes API pour les recettes.
 
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
+
+from src.api.dependencies import require_auth
 
 router = APIRouter(prefix="/api/v1/recettes", tags=["Recettes"])
 
@@ -66,7 +68,7 @@ async def list_recettes(
 ):
     """Liste les recettes avec pagination et filtres."""
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import Recette
 
         with obtenir_contexte_db() as session:
@@ -100,7 +102,7 @@ async def list_recettes(
 async def get_recette(recette_id: int):
     """Récupère une recette par son ID."""
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import Recette
 
         with obtenir_contexte_db() as session:
@@ -118,10 +120,10 @@ async def get_recette(recette_id: int):
 
 
 @router.post("", response_model=RecetteResponse)
-async def create_recette(recette: RecetteCreate):
+async def create_recette(recette: RecetteCreate, user: dict = Depends(require_auth)):
     """Crée une nouvelle recette."""
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import Recette
 
         with obtenir_contexte_db() as session:
@@ -145,10 +147,12 @@ async def create_recette(recette: RecetteCreate):
 
 
 @router.put("/{recette_id}", response_model=RecetteResponse)
-async def update_recette(recette_id: int, recette: RecetteCreate):
+async def update_recette(
+    recette_id: int, recette: RecetteCreate, user: dict = Depends(require_auth)
+):
     """Met à jour une recette."""
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import Recette
 
         with obtenir_contexte_db() as session:
@@ -173,10 +177,10 @@ async def update_recette(recette_id: int, recette: RecetteCreate):
 
 
 @router.delete("/{recette_id}")
-async def delete_recette(recette_id: int):
+async def delete_recette(recette_id: int, user: dict = Depends(require_auth)):
     """Supprime une recette."""
     try:
-        from src.core.database import obtenir_contexte_db
+        from src.core.db import obtenir_contexte_db
         from src.core.models import Recette
 
         with obtenir_contexte_db() as session:

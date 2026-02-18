@@ -1,5 +1,5 @@
 """
-Tests pour src/api/limitation_debit.py
+Tests pour src/api/rate_limiting/
 
 Tests unitaires avec vraies données pour la limitation de débit.
 """
@@ -9,9 +9,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 # DONNÉES DE TEST
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
 
 ADRESSES_IP = [
@@ -36,9 +36,9 @@ CHEMINS_IA = [
 ]
 
 
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 # TESTS STRATEGIE
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
 
 class TestStrategieLimitationDebit:
@@ -46,7 +46,7 @@ class TestStrategieLimitationDebit:
 
     def test_strategies_francaises_existent(self):
         """Les stratégies françaises sont définies."""
-        from src.api.limitation_debit import StrategieLimitationDebit
+        from src.api.rate_limiting import StrategieLimitationDebit
 
         assert hasattr(StrategieLimitationDebit, "FENETRE_FIXE")
         assert hasattr(StrategieLimitationDebit, "FENETRE_GLISSANTE")
@@ -54,7 +54,7 @@ class TestStrategieLimitationDebit:
 
     def test_alias_anglais_existent(self):
         """Les alias anglais sont définis."""
-        from src.api.limitation_debit import RateLimitStrategy
+        from src.api.rate_limiting import RateLimitStrategy
 
         assert hasattr(RateLimitStrategy, "FIXED_WINDOW")
         assert hasattr(RateLimitStrategy, "SLIDING_WINDOW")
@@ -62,16 +62,16 @@ class TestStrategieLimitationDebit:
 
     def test_valeurs_equivalentes(self):
         """Stratégies françaises et anglaises ont mêmes valeurs."""
-        from src.api.limitation_debit import StrategieLimitationDebit
+        from src.api.rate_limiting import StrategieLimitationDebit
 
         assert StrategieLimitationDebit.FENETRE_FIXE.value == "fixed_window"
         assert StrategieLimitationDebit.FENETRE_GLISSANTE.value == "sliding_window"
         assert StrategieLimitationDebit.SEAU_A_JETONS.value == "token_bucket"
 
 
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 # TESTS CONFIG
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
 
 class TestConfigLimitationDebit:
@@ -79,7 +79,7 @@ class TestConfigLimitationDebit:
 
     def test_valeurs_par_defaut(self):
         """Les valeurs par défaut sont raisonnables."""
-        from src.api.limitation_debit import ConfigLimitationDebit
+        from src.api.rate_limiting import ConfigLimitationDebit
 
         config = ConfigLimitationDebit()
 
@@ -89,7 +89,7 @@ class TestConfigLimitationDebit:
 
     def test_limites_utilisateurs(self):
         """Les limites par type d'utilisateur sont cohérentes."""
-        from src.api.limitation_debit import ConfigLimitationDebit
+        from src.api.rate_limiting import ConfigLimitationDebit
 
         config = ConfigLimitationDebit()
 
@@ -99,7 +99,7 @@ class TestConfigLimitationDebit:
 
     def test_limites_ia_restrictives(self):
         """Les limites IA sont plus restrictives."""
-        from src.api.limitation_debit import ConfigLimitationDebit
+        from src.api.rate_limiting import ConfigLimitationDebit
 
         config = ConfigLimitationDebit()
 
@@ -110,7 +110,7 @@ class TestConfigLimitationDebit:
 
     def test_alias_anglais_proprietaires(self):
         """Les alias anglais retournent les bonnes valeurs."""
-        from src.api.limitation_debit import ConfigLimitationDebit
+        from src.api.rate_limiting import ConfigLimitationDebit
 
         config = ConfigLimitationDebit(requetes_par_minute=42)
 
@@ -119,7 +119,7 @@ class TestConfigLimitationDebit:
 
     def test_tous_alias_anglais(self):
         """Tous les alias anglais sont testés pour couverture."""
-        from src.api.limitation_debit import ConfigLimitationDebit
+        from src.api.rate_limiting import ConfigLimitationDebit
 
         config = ConfigLimitationDebit()
 
@@ -139,7 +139,7 @@ class TestConfigLimitationDebit:
 
     def test_chemins_exemptes_par_defaut(self):
         """Les chemins exemptés par défaut sont corrects."""
-        from src.api.limitation_debit import ConfigLimitationDebit
+        from src.api.rate_limiting import ConfigLimitationDebit
 
         config = ConfigLimitationDebit()
 
@@ -147,9 +147,9 @@ class TestConfigLimitationDebit:
             assert chemin in config.chemins_exemptes
 
 
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 # TESTS STOCKAGE
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
 
 class TestStockageLimitationDebit:
@@ -158,7 +158,7 @@ class TestStockageLimitationDebit:
     @pytest.fixture
     def stockage(self):
         """Crée un stockage frais pour chaque test."""
-        from src.api.limitation_debit import StockageLimitationDebit
+        from src.api.rate_limiting import StockageLimitationDebit
 
         return StockageLimitationDebit()
 
@@ -246,9 +246,9 @@ class TestStockageLimitationDebit:
         assert compte == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 # TESTS LIMITEUR
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
 
 class TestLimiteurDebit:
@@ -257,7 +257,7 @@ class TestLimiteurDebit:
     @pytest.fixture
     def limiteur(self):
         """Crée un limiteur frais."""
-        from src.api.limitation_debit import (
+        from src.api.rate_limiting import (
             ConfigLimitationDebit,
             LimiteurDebit,
             StockageLimitationDebit,
@@ -354,9 +354,9 @@ class TestLimiteurDebit:
         assert resultat["allowed"] is True
 
 
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 # TESTS MIDDLEWARE
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
 
 class TestMiddlewareLimitationDebit:
@@ -364,13 +364,13 @@ class TestMiddlewareLimitationDebit:
 
     def test_import_middleware(self):
         """Le middleware s'importe correctement."""
-        from src.api.limitation_debit import MiddlewareLimitationDebit
+        from src.api.rate_limiting import MiddlewareLimitationDebit
 
         assert MiddlewareLimitationDebit is not None
 
     def test_alias_anglais(self):
         """L'alias anglais existe."""
-        from src.api.limitation_debit import MiddlewareLimitationDebit, RateLimitMiddleware
+        from src.api.rate_limiting import MiddlewareLimitationDebit, RateLimitMiddleware
 
         assert RateLimitMiddleware is MiddlewareLimitationDebit
 
@@ -378,7 +378,7 @@ class TestMiddlewareLimitationDebit:
         """Le middleware est utilisable dans une app FastAPI."""
         from fastapi import FastAPI
 
-        from src.api.limitation_debit import MiddlewareLimitationDebit
+        from src.api.rate_limiting import MiddlewareLimitationDebit
 
         app = FastAPI()
         app.add_middleware(MiddlewareLimitationDebit)
@@ -388,9 +388,9 @@ class TestMiddlewareLimitationDebit:
         assert MiddlewareLimitationDebit in middleware_classes
 
 
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 # TESTS DÉCORATEURS
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
 
 class TestDecorateurLimiteDebit:
@@ -398,14 +398,14 @@ class TestDecorateurLimiteDebit:
 
     def test_import_decorateur(self):
         """Le décorateur s'importe."""
-        from src.api.limitation_debit import limite_debit, rate_limit
+        from src.api.rate_limiting import limite_debit, rate_limit
 
         assert callable(limite_debit)
         assert callable(rate_limit)
 
     def test_decorateur_sur_fonction(self):
         """Le décorateur peut décorer une fonction."""
-        from src.api.limitation_debit import limite_debit
+        from src.api.rate_limiting import limite_debit
 
         @limite_debit(requetes_par_minute=10)
         async def ma_fonction():
@@ -415,7 +415,7 @@ class TestDecorateurLimiteDebit:
 
     def test_alias_rate_limit(self):
         """L'alias rate_limit fonctionne."""
-        from src.api.limitation_debit import rate_limit
+        from src.api.rate_limiting import rate_limit
 
         @rate_limit(requests_per_minute=10)
         async def english_function():
@@ -424,9 +424,9 @@ class TestDecorateurLimiteDebit:
         assert callable(english_function)
 
 
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 # TESTS INTÉGRATION
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
 
 class TestIntegrationLimitationDebit:
@@ -437,7 +437,7 @@ class TestIntegrationLimitationDebit:
         """Crée une app FastAPI de test avec rate limiting activé."""
         from fastapi import FastAPI
 
-        from src.api.limitation_debit import (
+        from src.api.rate_limiting import (
             ConfigLimitationDebit,
             LimiteurDebit,
             MiddlewareLimitationDebit,
@@ -508,9 +508,9 @@ class TestIntegrationLimitationDebit:
         assert "X-RateLimit-Reset" in response.headers
 
 
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 # TESTS ALIAS RÉTROCOMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
 
 class TestAliasRetrocompatibilite:
@@ -518,7 +518,7 @@ class TestAliasRetrocompatibilite:
 
     def test_tous_les_alias_existent(self):
         """Tous les anciens noms anglais sont disponibles."""
-        from src.api.limitation_debit import (
+        from src.api.rate_limiting import (
             RateLimitConfig,
             RateLimiter,
             RateLimitMiddleware,
@@ -538,7 +538,7 @@ class TestAliasRetrocompatibilite:
 
     def test_instances_globales(self):
         """Les instances globales sont accessibles."""
-        from src.api.limitation_debit import (
+        from src.api.rate_limiting import (
             config_limitation_debit,
             limiteur_debit,
             rate_limit_config,
@@ -550,9 +550,9 @@ class TestAliasRetrocompatibilite:
         assert rate_limiter is limiteur_debit
 
 
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 # TESTS UTILITAIRES ET FONCTIONS ADDITIONNELLES
-# ═══════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════
 
 
 class TestUtilitaires:
@@ -560,7 +560,7 @@ class TestUtilitaires:
 
     def test_obtenir_stats_limitation(self):
         """obtenir_stats_limitation retourne les stats."""
-        from src.api.limitation_debit import obtenir_stats_limitation
+        from src.api.rate_limiting import obtenir_stats_limitation
 
         stats = obtenir_stats_limitation()
 
@@ -571,7 +571,7 @@ class TestUtilitaires:
 
     def test_get_rate_limit_stats_alias(self):
         """Alias anglais pour obtenir_stats_limitation."""
-        from src.api.limitation_debit import get_rate_limit_stats
+        from src.api.rate_limiting import get_rate_limit_stats
 
         stats = get_rate_limit_stats()
 
@@ -579,7 +579,7 @@ class TestUtilitaires:
 
     def test_reinitialiser_limites(self):
         """reinitialiser_limites réinitialise les compteurs."""
-        from src.api.limitation_debit import (
+        from src.api.rate_limiting import (
             _stockage,
             reinitialiser_limites,
         )
@@ -594,14 +594,14 @@ class TestUtilitaires:
 
     def test_reset_rate_limits_alias(self):
         """Alias anglais pour reinitialiser_limites."""
-        from src.api.limitation_debit import reset_rate_limits
+        from src.api.rate_limiting import reset_rate_limits
 
         # Doit s'exécuter sans erreur
         reset_rate_limits()
 
     def test_configurer_limites(self):
         """configurer_limites met à jour la config globale."""
-        from src.api.limitation_debit import (
+        from src.api.rate_limiting import (
             ConfigLimitationDebit,
             configurer_limites,
         )
@@ -613,7 +613,7 @@ class TestUtilitaires:
         configurer_limites(nouvelle_config)
 
         # Vérifier
-        from src.api.limitation_debit import (
+        from src.api.rate_limiting import (
             config_limitation_debit as config_après,
         )
 
@@ -621,7 +621,7 @@ class TestUtilitaires:
 
     def test_configure_rate_limits_alias(self):
         """Alias anglais pour configurer_limites."""
-        from src.api.limitation_debit import (
+        from src.api.rate_limiting import (
             ConfigLimitationDebit,
             configure_rate_limits,
         )
@@ -636,7 +636,7 @@ class TestLimiteurDebitHeaders:
     @pytest.fixture
     def limiteur_avec_headers_actifs(self):
         """Limiteur avec headers activés."""
-        from src.api.limitation_debit import (
+        from src.api.rate_limiting import (
             ConfigLimitationDebit,
             LimiteurDebit,
             StockageLimitationDebit,
@@ -649,7 +649,7 @@ class TestLimiteurDebitHeaders:
     @pytest.fixture
     def limiteur_sans_headers(self):
         """Limiteur avec headers désactivés."""
-        from src.api.limitation_debit import (
+        from src.api.rate_limiting import (
             ConfigLimitationDebit,
             LimiteurDebit,
             StockageLimitationDebit,
@@ -714,7 +714,7 @@ class TestLimiteurDebitClé:
     @pytest.fixture
     def limiteur(self):
         """Crée un limiteur de test."""
-        from src.api.limitation_debit import LimiteurDebit, StockageLimitationDebit
+        from src.api.rate_limiting import LimiteurDebit, StockageLimitationDebit
 
         return LimiteurDebit(stockage=StockageLimitationDebit())
 
@@ -767,7 +767,7 @@ class TestLimiteurDebitPremium:
     @pytest.fixture
     def limiteur(self):
         """Crée un limiteur avec config de test."""
-        from src.api.limitation_debit import (
+        from src.api.rate_limiting import (
             ConfigLimitationDebit,
             LimiteurDebit,
             StockageLimitationDebit,
@@ -808,7 +808,7 @@ class TestLimiteurDebitBlocage:
         """Clé bloquée lève HTTPException."""
         from fastapi import HTTPException
 
-        from src.api.limitation_debit import LimiteurDebit, StockageLimitationDebit
+        from src.api.rate_limiting import LimiteurDebit, StockageLimitationDebit
 
         stockage = StockageLimitationDebit()
         limiteur = LimiteurDebit(stockage=stockage)
@@ -833,7 +833,7 @@ class TestStockageTempsReset:
 
     def test_temps_reset_cle_vide(self):
         """Temps reset = 0 si clé vide."""
-        from src.api.limitation_debit import StockageLimitationDebit
+        from src.api.rate_limiting import StockageLimitationDebit
 
         stockage = StockageLimitationDebit()
 
@@ -843,7 +843,7 @@ class TestStockageTempsReset:
 
     def test_temps_reset_avec_donnees(self):
         """Temps reset calculé correctement."""
-        from src.api.limitation_debit import StockageLimitationDebit
+        from src.api.rate_limiting import StockageLimitationDebit
 
         stockage = StockageLimitationDebit()
 
@@ -857,7 +857,7 @@ class TestStockageTempsReset:
 
     def test_get_reset_time_alias(self):
         """Alias get_reset_time fonctionne."""
-        from src.api.limitation_debit import StockageLimitationDebit
+        from src.api.rate_limiting import StockageLimitationDebit
 
         stockage = StockageLimitationDebit()
         stockage.incrementer("test:alias", 60)
@@ -873,7 +873,7 @@ class TestDecorateurLimiteDebitAvance:
     @pytest.mark.asyncio
     async def test_decorateur_sans_request(self):
         """Décorateur fonctionne sans Request."""
-        from src.api.limitation_debit import limite_debit
+        from src.api.rate_limiting import limite_debit
 
         @limite_debit(requetes_par_minute=10)
         async def fonction_sans_request():
@@ -888,7 +888,7 @@ class TestDecorateurLimiteDebitAvance:
         """Décorateur avec fonction de clé personnalisée."""
         from fastapi import Request
 
-        from src.api.limitation_debit import limite_debit
+        from src.api.rate_limiting import limite_debit
 
         def ma_fonction_cle(request: Request) -> str:
             return f"custom:{request.client.host}"
@@ -908,7 +908,7 @@ class TestDecorateurLimiteDebitAvance:
     @pytest.mark.asyncio
     async def test_decorateur_limite_heure(self):
         """Décorateur avec limite par heure."""
-        from src.api.limitation_debit import limite_debit, reinitialiser_limites
+        from src.api.rate_limiting import limite_debit, reinitialiser_limites
 
         reinitialiser_limites()
 
@@ -927,7 +927,7 @@ class TestDependancesFastAPI:
     @pytest.mark.asyncio
     async def test_verifier_limite_debit_dependency(self):
         """Dépendance verifier_limite_debit fonctionne."""
-        from src.api.limitation_debit import verifier_limite_debit
+        from src.api.rate_limiting import verifier_limite_debit
 
         request = MagicMock()
         request.client.host = "1.2.3.4"
@@ -941,7 +941,7 @@ class TestDependancesFastAPI:
     @pytest.mark.asyncio
     async def test_verifier_limite_debit_ia_dependency(self):
         """Dépendance verifier_limite_debit_ia fonctionne."""
-        from src.api.limitation_debit import verifier_limite_debit_ia
+        from src.api.rate_limiting import verifier_limite_debit_ia
 
         request = MagicMock()
         request.client.host = "5.6.7.8"
@@ -955,7 +955,7 @@ class TestDependancesFastAPI:
     @pytest.mark.asyncio
     async def test_check_rate_limit_alias(self):
         """Alias check_rate_limit fonctionne."""
-        from src.api.limitation_debit import check_rate_limit
+        from src.api.rate_limiting import check_rate_limit
 
         request = MagicMock()
         request.client.host = "9.10.11.12"
@@ -969,7 +969,7 @@ class TestDependancesFastAPI:
     @pytest.mark.asyncio
     async def test_check_ai_rate_limit_alias(self):
         """Alias check_ai_rate_limit fonctionne."""
-        from src.api.limitation_debit import check_ai_rate_limit, reinitialiser_limites
+        from src.api.rate_limiting import check_ai_rate_limit, reinitialiser_limites
 
         reinitialiser_limites()
 
