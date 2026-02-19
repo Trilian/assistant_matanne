@@ -346,14 +346,14 @@ class TestMeublesUI:
     @patch("src.modules.maison.meubles.obtenir_contexte_db")
     def test_render_formulaire_nouveau(self, mock_ctx, mock_st):
         """Test formulaire d'ajout nouveau meuble"""
-        from src.modules.maison.meubles import render_formulaire
+        from src.modules.maison.meubles import afficher_formulaire
 
         mock_st.form.return_value.__enter__ = MagicMock()
         mock_st.form.return_value.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
         mock_st.form_submit_button.return_value = False
 
-        render_formulaire(None)
+        afficher_formulaire(None)
 
         mock_st.form.assert_called_once()
         mock_st.text_input.assert_called()
@@ -362,21 +362,21 @@ class TestMeublesUI:
     @patch("src.modules.maison.meubles.obtenir_contexte_db")
     def test_render_formulaire_edition(self, mock_ctx, mock_st, mock_meuble):
         """Test formulaire d'édition meuble existant"""
-        from src.modules.maison.meubles import render_formulaire
+        from src.modules.maison.meubles import afficher_formulaire
 
         mock_st.form.return_value.__enter__ = MagicMock()
         mock_st.form.return_value.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
         mock_st.form_submit_button.return_value = False
 
-        render_formulaire(mock_meuble)
+        afficher_formulaire(mock_meuble)
 
         mock_st.form.assert_called_once()
 
     @patch("src.modules.maison.meubles.st")
     def test_render_meuble_card(self, mock_st, mock_meuble):
         """Test affichage card meuble"""
-        from src.modules.maison.meubles import render_meuble_card
+        from src.modules.maison.meubles import afficher_meuble_card
 
         mock_st.container.return_value.__enter__ = MagicMock()
         mock_st.container.return_value.__exit__ = MagicMock(return_value=False)
@@ -392,7 +392,7 @@ class TestMeublesUI:
         ]
         mock_st.button.return_value = False
 
-        render_meuble_card(mock_meuble)
+        afficher_meuble_card(mock_meuble)
 
         mock_st.container.assert_called_once()
         mock_st.markdown.assert_called()
@@ -400,7 +400,7 @@ class TestMeublesUI:
     @patch("src.modules.maison.meubles.st")
     def test_render_meuble_card_description_longue(self, mock_st, mock_meuble):
         """Test card avec description longue (tronquée)"""
-        from src.modules.maison.meubles import render_meuble_card
+        from src.modules.maison.meubles import afficher_meuble_card
 
         mock_meuble.description = "A" * 150  # Description > 100 chars
 
@@ -417,7 +417,7 @@ class TestMeublesUI:
         ]
         mock_st.button.return_value = False
 
-        render_meuble_card(mock_meuble)
+        afficher_meuble_card(mock_meuble)
 
         mock_st.container.assert_called()
 
@@ -425,7 +425,7 @@ class TestMeublesUI:
     @patch("src.modules.maison.meubles.st")
     def test_render_budget_summary(self, mock_st, mock_budget):
         """Test affichage résumé budget"""
-        from src.modules.maison.meubles import render_budget_summary
+        from src.modules.maison.meubles import afficher_budget_summary
 
         mock_budget.return_value = {
             "nb_articles": 5,
@@ -435,7 +435,7 @@ class TestMeublesUI:
         }
         mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
 
-        render_budget_summary()
+        afficher_budget_summary()
 
         mock_st.subheader.assert_called()
         mock_st.metric.assert_called()
@@ -444,28 +444,28 @@ class TestMeublesUI:
     @patch("src.modules.maison.meubles.st")
     def test_render_vue_par_piece_vide(self, mock_st, mock_get_all):
         """Test vue par pièce sans meubles"""
-        from src.modules.maison.meubles import render_vue_par_piece
+        from src.modules.maison.meubles import afficher_vue_par_piece
 
         mock_get_all.return_value = []
 
-        render_vue_par_piece()
+        afficher_vue_par_piece()
 
         mock_st.info.assert_called_once()
 
-    @patch("src.modules.maison.meubles.render_meuble_card")
+    @patch("src.modules.maison.meubles.afficher_meuble_card")
     @patch("src.modules.maison.meubles.get_all_meubles")
     @patch("src.modules.maison.meubles.st")
     def test_render_vue_par_piece_avec_meubles(
         self, mock_st, mock_get_all, mock_render_card, mock_meuble
     ):
         """Test vue par pièce avec meubles"""
-        from src.modules.maison.meubles import render_vue_par_piece
+        from src.modules.maison.meubles import afficher_vue_par_piece
 
         mock_get_all.return_value = [mock_meuble]
         mock_st.expander.return_value.__enter__ = MagicMock()
         mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_vue_par_piece()
+        afficher_vue_par_piece()
 
         mock_st.expander.assert_called()
 
@@ -478,58 +478,58 @@ class TestMeublesUI:
 class TestMeublesOnglets:
     """Tests des onglets"""
 
-    @patch("src.modules.maison.meubles.render_meuble_card")
+    @patch("src.modules.maison.meubles.afficher_meuble_card")
     @patch("src.modules.maison.meubles.get_all_meubles")
     @patch("src.modules.maison.meubles.st")
     def test_render_onglet_wishlist_vide(self, mock_st, mock_get_all, mock_render_card):
         """Test onglet wishlist vide"""
-        from src.modules.maison.meubles import render_onglet_wishlist
+        from src.modules.maison.meubles import afficher_onglet_wishlist
 
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
         mock_st.selectbox.return_value = ""
         mock_get_all.return_value = []
 
-        render_onglet_wishlist()
+        afficher_onglet_wishlist()
 
         mock_st.info.assert_called()
 
-    @patch("src.modules.maison.meubles.render_meuble_card")
+    @patch("src.modules.maison.meubles.afficher_meuble_card")
     @patch("src.modules.maison.meubles.get_all_meubles")
     @patch("src.modules.maison.meubles.st")
     def test_render_onglet_wishlist_avec_filtres(
         self, mock_st, mock_get_all, mock_render_card, mock_meuble
     ):
         """Test onglet wishlist avec filtres et résultats"""
-        from src.modules.maison.meubles import render_onglet_wishlist
+        from src.modules.maison.meubles import afficher_onglet_wishlist
 
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
         mock_st.selectbox.side_effect = ["souhaite", "salon"]
         mock_get_all.return_value = [mock_meuble]
 
-        render_onglet_wishlist()
+        afficher_onglet_wishlist()
 
         mock_st.caption.assert_called()
         mock_render_card.assert_called_once_with(mock_meuble)
 
-    @patch("src.modules.maison.meubles.render_formulaire")
+    @patch("src.modules.maison.meubles.afficher_formulaire")
     @patch("src.modules.maison.meubles.st")
     def test_render_onglet_ajouter(self, mock_st, mock_render_form):
         """Test onglet ajout"""
-        from src.modules.maison.meubles import render_onglet_ajouter
+        from src.modules.maison.meubles import afficher_onglet_ajouter
 
-        render_onglet_ajouter()
+        afficher_onglet_ajouter()
 
         mock_st.subheader.assert_called_once()
         mock_render_form.assert_called_once_with(None)
 
-    @patch("src.modules.maison.meubles.render_vue_par_piece")
-    @patch("src.modules.maison.meubles.render_budget_summary")
+    @patch("src.modules.maison.meubles.afficher_vue_par_piece")
+    @patch("src.modules.maison.meubles.afficher_budget_summary")
     @patch("src.modules.maison.meubles.st")
     def test_render_onglet_budget(self, mock_st, mock_summary, mock_vue):
         """Test onglet budget"""
-        from src.modules.maison.meubles import render_onglet_budget
+        from src.modules.maison.meubles import afficher_onglet_budget
 
-        render_onglet_budget()
+        afficher_onglet_budget()
 
         mock_summary.assert_called_once()
         mock_st.divider.assert_called_once()
@@ -544,9 +544,9 @@ class TestMeublesOnglets:
 class TestMeublesApp:
     """Tests de la fonction app() - point d'entrée"""
 
-    @patch("src.modules.maison.meubles.render_onglet_budget")
-    @patch("src.modules.maison.meubles.render_onglet_ajouter")
-    @patch("src.modules.maison.meubles.render_onglet_wishlist")
+    @patch("src.modules.maison.meubles.afficher_onglet_budget")
+    @patch("src.modules.maison.meubles.afficher_onglet_ajouter")
+    @patch("src.modules.maison.meubles.afficher_onglet_wishlist")
     @patch("src.modules.maison.meubles.st")
     def test_app_affichage_normal(self, mock_st, mock_wishlist, mock_ajouter, mock_budget):
         """Test app en mode normal (pas d'édition)"""
@@ -561,7 +561,7 @@ class TestMeublesApp:
         mock_st.caption.assert_called_once()
         mock_st.tabs.assert_called_once()
 
-    @patch("src.modules.maison.meubles.render_formulaire")
+    @patch("src.modules.maison.meubles.afficher_formulaire")
     @patch("src.modules.maison.meubles.get_meuble_by_id")
     @patch("src.modules.maison.meubles.st")
     def test_app_mode_edition(self, mock_st, mock_get_by_id, mock_formulaire, mock_meuble):
@@ -578,9 +578,9 @@ class TestMeublesApp:
         mock_st.subheader.assert_called()
         mock_formulaire.assert_called_once_with(mock_meuble)
 
-    @patch("src.modules.maison.meubles.render_onglet_budget")
-    @patch("src.modules.maison.meubles.render_onglet_ajouter")
-    @patch("src.modules.maison.meubles.render_onglet_wishlist")
+    @patch("src.modules.maison.meubles.afficher_onglet_budget")
+    @patch("src.modules.maison.meubles.afficher_onglet_ajouter")
+    @patch("src.modules.maison.meubles.afficher_onglet_wishlist")
     @patch("src.modules.maison.meubles.get_meuble_by_id")
     @patch("src.modules.maison.meubles.st")
     def test_app_mode_edition_meuble_inexistant(
@@ -598,7 +598,7 @@ class TestMeublesApp:
         # Devrait continuer vers l'affichage normal
         mock_st.tabs.assert_called()
 
-    @patch("src.modules.maison.meubles.render_formulaire")
+    @patch("src.modules.maison.meubles.afficher_formulaire")
     @patch("src.modules.maison.meubles.get_meuble_by_id")
     @patch("src.modules.maison.meubles.st")
     def test_app_annulation_edition(self, mock_st, mock_get_by_id, mock_formulaire, mock_meuble):

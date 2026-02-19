@@ -12,16 +12,13 @@ from datetime import date, timedelta
 
 import streamlit as st
 
+from src.core.date_utils import obtenir_debut_semaine
 from src.services.cuisine.planning.templates import (
     JOURS_SEMAINE,
     obtenir_service_templates,
 )
+from src.ui import etat_vide
 from src.ui.feedback import afficher_erreur, afficher_succes
-
-
-def get_lundi_semaine(d: date) -> date:
-    """Retourne le lundi de la semaine contenant la date."""
-    return d - timedelta(days=d.weekday())
 
 
 def app():
@@ -47,7 +44,7 @@ def app():
         templates = service.lister_templates(actifs_seulement=False)
 
         if not templates:
-            st.info("Aucun template créé. Utilisez l'onglet 'Créer' pour commencer.")
+            etat_vide("Aucun template créé", "📋", "Utilisez l'onglet 'Créer' pour commencer")
         else:
             for template in templates:
                 with st.expander(f"📋 {template.nom}", expanded=False):
@@ -159,7 +156,7 @@ def app():
                 "Description", placeholder="Description optionnelle..."
             )
 
-            lundi = get_lundi_semaine(date_ref)
+            lundi = obtenir_debut_semaine(date_ref)
             st.info(
                 f"📅 Semaine du {lundi.strftime('%d/%m/%Y')} au {(lundi + timedelta(days=6)).strftime('%d/%m/%Y')}"
             )
@@ -190,7 +187,7 @@ def app():
         templates = service.lister_templates()
 
         if not templates:
-            st.warning("Aucun template disponible. Créez-en un d'abord.")
+            etat_vide("Aucun template disponible", "📋", "Créez-en un d'abord")
         else:
             col1, col2 = st.columns(2)
             with col1:
@@ -203,7 +200,7 @@ def app():
             with col2:
                 date_cible = st.date_input("Date dans la semaine cible", value=date.today())
 
-            lundi_cible = get_lundi_semaine(date_cible)
+            lundi_cible = obtenir_debut_semaine(date_cible)
             st.info(
                 f"📅 Les événements seront créés du {lundi_cible.strftime('%d/%m/%Y')} au {(lundi_cible + timedelta(days=6)).strftime('%d/%m/%Y')}"
             )

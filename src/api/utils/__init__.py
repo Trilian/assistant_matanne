@@ -10,8 +10,9 @@ from .cache import (
 )
 from .crud import (
     construire_reponse_paginee,
-    creer_dependance_session,
+    executer_async,
     executer_avec_session,
+    query_async,
 )
 from .exceptions import gerer_exception_api
 from .metrics import (
@@ -26,8 +27,9 @@ from .metrics import (
 __all__ = [
     # CRUD
     "construire_reponse_paginee",
-    "creer_dependance_session",
     "executer_avec_session",
+    "executer_async",
+    "query_async",
     # Exceptions
     "gerer_exception_api",
     # Metrics

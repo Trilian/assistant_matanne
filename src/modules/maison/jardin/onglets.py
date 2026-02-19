@@ -5,6 +5,8 @@ from datetime import date, datetime
 
 import streamlit as st
 
+from src.ui import etat_vide
+
 from .data import charger_catalogue_plantes
 from .logic import (
     calculer_autonomie,
@@ -74,7 +76,17 @@ def onglet_taches(mes_plantes: list[dict], meteo: dict):
         done = afficher_tache(tache, f"tache_{i}")
         if done:
             st.toast(f"✅ {tache['titre']} accompli !")
-            # TODO: Sauvegarder en base
+            # Sauvegarder en session_state pour historique
+            if "historique_jardin" not in st.session_state:
+                st.session_state.historique_jardin = []
+            st.session_state.historique_jardin.append(
+                {
+                    "titre": tache["titre"],
+                    "date": datetime.now().isoformat(),
+                    "duree_min": tache["duree_min"],
+                    "categorie": tache.get("categorie", "autre"),
+                }
+            )
 
 
 def onglet_mes_plantes(mes_plantes: list[dict]):
@@ -515,7 +527,7 @@ def onglet_export(mes_plantes: list[dict], recoltes: list[dict]):
         st.markdown("### 🌱 Mes Plantations")
 
         if not mes_plantes:
-            st.info("Aucune plantation à exporter.")
+            etat_vide("Aucune plantation à exporter", "🌱")
         else:
             catalogue = charger_catalogue_plantes()
 
@@ -556,7 +568,7 @@ def onglet_export(mes_plantes: list[dict], recoltes: list[dict]):
         st.markdown("### 🥕 Historique Récoltes")
 
         if not recoltes:
-            st.info("Aucune récolte à exporter.")
+            etat_vide("Aucune récolte à exporter", "🥕")
         else:
             catalogue = charger_catalogue_plantes()
 

@@ -22,7 +22,13 @@ import streamlit as st
 
 from .data import calculer_charge, obtenir_alertes, obtenir_stats_globales, obtenir_taches_jour
 from .styles import CSS
-from .ui import render_alertes, render_header, render_modules, render_stats_mois, render_taches
+from .ui import (
+    afficher_alertes,
+    afficher_header,
+    afficher_modules,
+    afficher_stats_mois,
+    afficher_taches,
+)
 
 
 def app():
@@ -36,18 +42,18 @@ def app():
     charge = calculer_charge(taches)
 
     # Rendu
-    render_header()
+    afficher_header()
 
     # Layout principal
     col_main, col_side = st.columns([2, 1])
 
     with col_main:
-        render_taches(taches, charge)
-        render_modules(stats)
+        afficher_taches(taches, charge)
+        afficher_modules(stats)
 
     with col_side:
-        render_alertes(alertes)
-        render_stats_mois(stats)
+        afficher_alertes(alertes)
+        afficher_stats_mois(stats)
 
     # Actions rapides
     st.markdown("---")

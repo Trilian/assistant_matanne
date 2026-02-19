@@ -388,9 +388,9 @@ __all__ = [
     "SessionMixin",
     "TokenValidationMixin",
     "ProfileMixin",
-    "render_login_form",
-    "render_user_menu",
-    "render_profile_settings",
+    "afficher_login_form",
+    "afficher_user_menu",
+    "afficher_profile_settings",
     "require_authenticated",
     "require_role",
 ]

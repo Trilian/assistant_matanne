@@ -4,8 +4,9 @@ Utilitaires CRUD pour l'API REST.
 Fournit des helpers pour les opérations courantes dans les routes.
 """
 
+import asyncio
 from collections.abc import Callable, Generator
-from contextlib import contextmanager
+from contextlib import asynccontextmanager, contextmanager
 from typing import Any, TypeVar
 
 from fastapi import HTTPException
@@ -13,6 +14,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 T = TypeVar("T", bound=BaseModel)
+R = TypeVar("R")
 
 
 def construire_reponse_paginee(
@@ -78,21 +80,68 @@ def executer_avec_session() -> Generator[Session, None, None]:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-def creer_dependance_session():
+# ═══════════════════════════════════════════════════════════
+# HELPERS ASYNC
+# ═══════════════════════════════════════════════════════════
+
+
+async def executer_async(func: Callable[..., R], *args: Any, **kwargs: Any) -> R:
     """
-    Crée une dépendance FastAPI pour la session DB.
+    Exécute une fonction synchrone dans un thread pool.
 
-    Usage dans les routes:
-        @router.get("/items")
-        async def get_items(session: Session = Depends(creer_dependance_session())):
-            return session.query(Item).all()
+    Permet d'exécuter des opérations bloquantes (comme les requêtes DB)
+    sans bloquer l'event loop asyncio.
 
-    Note: Préférer executer_avec_session() pour le context manager explicite.
+    Usage:
+        async def get_recettes():
+            def _query():
+                with executer_avec_session() as session:
+                    return session.query(Recette).all()
+
+            return await executer_async(_query)
+
+    Args:
+        func: Fonction synchrone à exécuter
+        *args: Arguments positionnels
+        **kwargs: Arguments nommés
+
+    Returns:
+        Résultat de la fonction
+
+    Raises:
+        HTTPException: Re-levée depuis la fonction
     """
-    from src.core.db import obtenir_contexte_db
+    try:
+        return await asyncio.to_thread(func, *args, **kwargs)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
-    def get_db():
-        with obtenir_contexte_db() as session:
-            yield session
 
-    return get_db
+async def query_async(query_func: Callable[[Session], R]) -> R:
+    """
+    Exécute une fonction de requête DB de manière asynchrone.
+
+    Wrapper pratique pour les requêtes DB simples.
+
+    Usage:
+        result = await query_async(
+            lambda session: session.query(Recette).filter(Recette.id == 1).first()
+        )
+
+    Args:
+        query_func: Fonction prenant une Session et retournant le résultat
+
+    Returns:
+        Résultat de la requête
+
+    Raises:
+        HTTPException: En cas d'erreur
+    """
+
+    def _execute():
+        with executer_avec_session() as session:
+            return query_func(session)
+
+    return await executer_async(_execute)

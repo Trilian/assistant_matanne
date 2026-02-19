@@ -44,54 +44,54 @@ class TestImports:
     """Tests des imports."""
 
     def test_import_render_stats_dashboard(self) -> None:
-        from src.modules.maison.depenses.components import render_stats_dashboard
+        from src.modules.maison.depenses.components import afficher_stats_dashboard
 
-        assert callable(render_stats_dashboard)
+        assert callable(afficher_stats_dashboard)
 
     def test_import_render_depense_card(self) -> None:
-        from src.modules.maison.depenses.components import render_depense_card
+        from src.modules.maison.depenses.components import afficher_depense_card
 
-        assert callable(render_depense_card)
+        assert callable(afficher_depense_card)
 
     def test_import_render_formulaire(self) -> None:
-        from src.modules.maison.depenses.components import render_formulaire
+        from src.modules.maison.depenses.components import afficher_formulaire
 
-        assert callable(render_formulaire)
+        assert callable(afficher_formulaire)
 
     def test_import_render_onglet_mois(self) -> None:
-        from src.modules.maison.depenses.components import render_onglet_mois
+        from src.modules.maison.depenses.components import afficher_onglet_mois
 
-        assert callable(render_onglet_mois)
+        assert callable(afficher_onglet_mois)
 
     def test_import_render_onglet_ajouter(self) -> None:
-        from src.modules.maison.depenses.components import render_onglet_ajouter
+        from src.modules.maison.depenses.components import afficher_onglet_ajouter
 
-        assert callable(render_onglet_ajouter)
+        assert callable(afficher_onglet_ajouter)
 
     def test_import_render_onglet_analyse(self) -> None:
-        from src.modules.maison.depenses.components import render_onglet_analyse
+        from src.modules.maison.depenses.components import afficher_onglet_analyse
 
-        assert callable(render_onglet_analyse)
+        assert callable(afficher_onglet_analyse)
 
     def test_import_render_graphique_evolution(self) -> None:
-        from src.modules.maison.depenses.components import render_graphique_evolution
+        from src.modules.maison.depenses.components import afficher_graphique_evolution
 
-        assert callable(render_graphique_evolution)
+        assert callable(afficher_graphique_evolution)
 
     def test_import_render_comparaison_mois(self) -> None:
-        from src.modules.maison.depenses.components import render_comparaison_mois
+        from src.modules.maison.depenses.components import afficher_comparaison_mois
 
-        assert callable(render_comparaison_mois)
+        assert callable(afficher_comparaison_mois)
 
 
 @pytest.mark.unit
 class TestRenderStatsDashboard:
-    """Tests pour render_stats_dashboard."""
+    """Tests pour afficher_stats_dashboard."""
 
     @patch("src.modules.maison.depenses.components.get_stats_globales")
     @patch("src.modules.maison.depenses.components.st")
     def test_render_stats_dashboard_affiche_metrics(self, mock_st, mock_stats) -> None:
-        from src.modules.maison.depenses.components import render_stats_dashboard
+        from src.modules.maison.depenses.components import afficher_stats_dashboard
 
         setup_mock_st(mock_st)
         mock_stats.return_value = {
@@ -101,14 +101,14 @@ class TestRenderStatsDashboard:
             "moyenne_mensuelle": 480.0,
             "nb_categories": 5,
         }
-        render_stats_dashboard()
+        afficher_stats_dashboard()
         mock_st.subheader.assert_called()
         assert mock_st.metric.call_count >= 4
 
     @patch("src.modules.maison.depenses.components.get_stats_globales")
     @patch("src.modules.maison.depenses.components.st")
     def test_render_stats_dashboard_delta_zero(self, mock_st, mock_stats) -> None:
-        from src.modules.maison.depenses.components import render_stats_dashboard
+        from src.modules.maison.depenses.components import afficher_stats_dashboard
 
         setup_mock_st(mock_st)
         mock_stats.return_value = {
@@ -118,17 +118,17 @@ class TestRenderStatsDashboard:
             "moyenne_mensuelle": 500.0,
             "nb_categories": 3,
         }
-        render_stats_dashboard()
+        afficher_stats_dashboard()
         mock_st.metric.assert_called()
 
 
 @pytest.mark.unit
 class TestRenderDepenseCard:
-    """Tests pour render_depense_card."""
+    """Tests pour afficher_depense_card."""
 
     @patch("src.modules.maison.depenses.components.st")
     def test_render_depense_card_basique(self, mock_st) -> None:
-        from src.modules.maison.depenses.components import render_depense_card
+        from src.modules.maison.depenses.components import afficher_depense_card
 
         setup_mock_st(mock_st)
         depense = MagicMock()
@@ -137,13 +137,13 @@ class TestRenderDepenseCard:
         depense.montant = Decimal("125.50")
         depense.note = "Facture EDF"
         depense.consommation = Decimal("350")
-        render_depense_card(depense)
+        afficher_depense_card(depense)
         mock_st.container.assert_called()
         mock_st.markdown.assert_called()
 
     @patch("src.modules.maison.depenses.components.st")
     def test_render_depense_card_sans_note(self, mock_st) -> None:
-        from src.modules.maison.depenses.components import render_depense_card
+        from src.modules.maison.depenses.components import afficher_depense_card
 
         setup_mock_st(mock_st)
         depense = MagicMock()
@@ -152,25 +152,25 @@ class TestRenderDepenseCard:
         depense.montant = Decimal("80.00")
         depense.note = None
         depense.consommation = None
-        render_depense_card(depense)
+        afficher_depense_card(depense)
         mock_st.container.assert_called()
 
 
 @pytest.mark.unit
 class TestRenderFormulaire:
-    """Tests pour render_formulaire."""
+    """Tests pour afficher_formulaire."""
 
     @patch("src.modules.maison.depenses.components.st")
     def test_render_formulaire_nouveau(self, mock_st) -> None:
-        from src.modules.maison.depenses.components import render_formulaire
+        from src.modules.maison.depenses.components import afficher_formulaire
 
         setup_mock_st(mock_st)
-        render_formulaire(None)
+        afficher_formulaire(None)
         mock_st.form.assert_called()
 
     @patch("src.modules.maison.depenses.components.st")
     def test_render_formulaire_edition(self, mock_st) -> None:
-        from src.modules.maison.depenses.components import render_formulaire
+        from src.modules.maison.depenses.components import afficher_formulaire
 
         setup_mock_st(mock_st)
         depense = MagicMock()
@@ -181,31 +181,31 @@ class TestRenderFormulaire:
         depense.mois = 2
         depense.annee = 2026
         depense.note = "Test"
-        render_formulaire(depense)
+        afficher_formulaire(depense)
         mock_st.form.assert_called()
 
 
 @pytest.mark.unit
 class TestRenderOnglets:
-    """Tests pour les fonctions render_onglet_*."""
+    """Tests pour les fonctions afficher_onglet_*."""
 
     @patch("src.modules.maison.depenses.components.get_depenses_mois")
     @patch("src.modules.maison.depenses.components.st")
     def test_render_onglet_mois_vide(self, mock_st, mock_get) -> None:
-        from src.modules.maison.depenses.components import render_onglet_mois
+        from src.modules.maison.depenses.components import afficher_onglet_mois
 
         setup_mock_st(mock_st)
         mock_get.return_value = []
         mock_st.selectbox.return_value = 2
         mock_st.number_input.return_value = 2026
-        render_onglet_mois()
+        afficher_onglet_mois()
         mock_st.info.assert_called()
 
     @patch("src.modules.maison.depenses.components.get_depenses_mois")
-    @patch("src.modules.maison.depenses.components.render_depense_card")
+    @patch("src.modules.maison.depenses.components.afficher_depense_card")
     @patch("src.modules.maison.depenses.components.st")
     def test_render_onglet_mois_avec_depenses(self, mock_st, mock_card, mock_get) -> None:
-        from src.modules.maison.depenses.components import render_onglet_mois
+        from src.modules.maison.depenses.components import afficher_onglet_mois
 
         setup_mock_st(mock_st)
         dep1 = MagicMock()
@@ -213,65 +213,65 @@ class TestRenderOnglets:
         mock_get.return_value = [dep1]
         mock_st.selectbox.return_value = 2
         mock_st.number_input.return_value = 2026
-        render_onglet_mois()
+        afficher_onglet_mois()
         mock_st.metric.assert_called()
 
-    @patch("src.modules.maison.depenses.components.render_formulaire")
+    @patch("src.modules.maison.depenses.components.afficher_formulaire")
     @patch("src.modules.maison.depenses.components.st")
     def test_render_onglet_ajouter(self, mock_st, mock_form) -> None:
-        from src.modules.maison.depenses.components import render_onglet_ajouter
+        from src.modules.maison.depenses.components import afficher_onglet_ajouter
 
         setup_mock_st(mock_st)
-        render_onglet_ajouter()
+        afficher_onglet_ajouter()
         mock_st.subheader.assert_called()
         mock_form.assert_called_once_with(None)
 
-    @patch("src.modules.maison.depenses.components.render_graphique_evolution")
-    @patch("src.modules.maison.depenses.components.render_comparaison_mois")
+    @patch("src.modules.maison.depenses.components.afficher_graphique_evolution")
+    @patch("src.modules.maison.depenses.components.afficher_comparaison_mois")
     @patch("src.modules.maison.depenses.components.st")
     def test_render_onglet_analyse(self, mock_st, mock_comp, mock_graph) -> None:
-        from src.modules.maison.depenses.components import render_onglet_analyse
+        from src.modules.maison.depenses.components import afficher_onglet_analyse
 
         setup_mock_st(mock_st)
-        render_onglet_analyse()
+        afficher_onglet_analyse()
         mock_graph.assert_called_once()
         mock_comp.assert_called_once()
 
 
 @pytest.mark.unit
 class TestRenderGraphiqueEvolution:
-    """Tests pour render_graphique_evolution."""
+    """Tests pour afficher_graphique_evolution."""
 
     @patch("src.modules.maison.depenses.components.get_depenses_mois")
     @patch("src.modules.maison.depenses.components.st")
     def test_render_graphique_total(self, mock_st, mock_get) -> None:
-        from src.modules.maison.depenses.components import render_graphique_evolution
+        from src.modules.maison.depenses.components import afficher_graphique_evolution
 
         setup_mock_st(mock_st)
         mock_st.selectbox.return_value = "total"
         mock_get.return_value = []
-        render_graphique_evolution()
+        afficher_graphique_evolution()
         mock_st.subheader.assert_called()
 
 
 @pytest.mark.unit
 class TestRenderComparaisonMois:
-    """Tests pour render_comparaison_mois."""
+    """Tests pour afficher_comparaison_mois."""
 
     @patch("src.modules.maison.depenses.components.get_depenses_mois")
     @patch("src.modules.maison.depenses.components.st")
     def test_render_comparaison_sans_clic(self, mock_st, mock_get) -> None:
-        from src.modules.maison.depenses.components import render_comparaison_mois
+        from src.modules.maison.depenses.components import afficher_comparaison_mois
 
         setup_mock_st(mock_st)
         mock_st.button.return_value = False
-        render_comparaison_mois()
+        afficher_comparaison_mois()
         mock_st.subheader.assert_called()
 
     @patch("src.modules.maison.depenses.components.get_depenses_mois")
     @patch("src.modules.maison.depenses.components.st")
     def test_render_comparaison_avec_clic(self, mock_st, mock_get) -> None:
-        from src.modules.maison.depenses.components import render_comparaison_mois
+        from src.modules.maison.depenses.components import afficher_comparaison_mois
 
         setup_mock_st(mock_st)
         mock_st.button.return_value = True
@@ -281,5 +281,5 @@ class TestRenderComparaisonMois:
         dep1.categorie = "electricite"
         dep1.montant = Decimal("100")
         mock_get.return_value = [dep1]
-        render_comparaison_mois()
+        afficher_comparaison_mois()
         assert mock_get.call_count >= 2

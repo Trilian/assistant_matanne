@@ -98,45 +98,45 @@ class TestImports:
 
     @patch("src.modules.maison.eco_tips.st")
     def test_import_render_stats_dashboard(self, mock_st):
-        """Test import fonction render_stats_dashboard."""
-        from src.modules.maison.eco_tips import render_stats_dashboard
+        """Test import fonction afficher_stats_dashboard."""
+        from src.modules.maison.eco_tips import afficher_stats_dashboard
 
-        assert callable(render_stats_dashboard)
+        assert callable(afficher_stats_dashboard)
 
     @patch("src.modules.maison.eco_tips.st")
     def test_import_render_action_card(self, mock_st):
-        """Test import fonction render_action_card."""
-        from src.modules.maison.eco_tips import render_action_card
+        """Test import fonction afficher_action_card."""
+        from src.modules.maison.eco_tips import afficher_action_card
 
-        assert callable(render_action_card)
+        assert callable(afficher_action_card)
 
     @patch("src.modules.maison.eco_tips.st")
     def test_import_render_formulaire(self, mock_st):
-        """Test import fonction render_formulaire."""
-        from src.modules.maison.eco_tips import render_formulaire
+        """Test import fonction afficher_formulaire."""
+        from src.modules.maison.eco_tips import afficher_formulaire
 
-        assert callable(render_formulaire)
+        assert callable(afficher_formulaire)
 
     @patch("src.modules.maison.eco_tips.st")
     def test_import_render_idees(self, mock_st):
-        """Test import fonction render_idees."""
-        from src.modules.maison.eco_tips import render_idees
+        """Test import fonction afficher_idees."""
+        from src.modules.maison.eco_tips import afficher_idees
 
-        assert callable(render_idees)
+        assert callable(afficher_idees)
 
     @patch("src.modules.maison.eco_tips.st")
     def test_import_render_onglet_mes_actions(self, mock_st):
-        """Test import fonction render_onglet_mes_actions."""
-        from src.modules.maison.eco_tips import render_onglet_mes_actions
+        """Test import fonction afficher_onglet_mes_actions."""
+        from src.modules.maison.eco_tips import afficher_onglet_mes_actions
 
-        assert callable(render_onglet_mes_actions)
+        assert callable(afficher_onglet_mes_actions)
 
     @patch("src.modules.maison.eco_tips.st")
     def test_import_render_onglet_ajouter(self, mock_st):
-        """Test import fonction render_onglet_ajouter."""
-        from src.modules.maison.eco_tips import render_onglet_ajouter
+        """Test import fonction afficher_onglet_ajouter."""
+        from src.modules.maison.eco_tips import afficher_onglet_ajouter
 
-        assert callable(render_onglet_ajouter)
+        assert callable(afficher_onglet_ajouter)
 
     @patch("src.modules.maison.eco_tips.st")
     def test_import_app(self, mock_st):
@@ -382,7 +382,7 @@ class TestUIComponents:
     @patch("src.modules.maison.eco_tips.st")
     @patch("src.modules.maison.eco_tips.calculate_stats")
     def test_render_stats_dashboard(self, mock_stats, mock_st):
-        """Test render_stats_dashboard s'exécute sans erreur."""
+        """Test afficher_stats_dashboard s'exécute sans erreur."""
         mock_stats.return_value = {
             "nb_actions": 3,
             "economie_mensuelle": 30.0,
@@ -399,9 +399,9 @@ class TestUIComponents:
             col.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = mock_cols
 
-        from src.modules.maison.eco_tips import render_stats_dashboard
+        from src.modules.maison.eco_tips import afficher_stats_dashboard
 
-        render_stats_dashboard()
+        afficher_stats_dashboard()
 
         mock_st.subheader.assert_called_once()
         mock_st.columns.assert_called_once()
@@ -409,7 +409,7 @@ class TestUIComponents:
     @patch("src.modules.maison.eco_tips.st")
     @patch("src.modules.maison.eco_tips.update_action")
     def test_render_action_card(self, mock_update, mock_st):
-        """Test render_action_card s'exécute sans erreur."""
+        """Test afficher_action_card s'exécute sans erreur."""
         mock_action = MagicMock()
         mock_action.id = 1
         mock_action.nom = "Test Action"
@@ -440,16 +440,16 @@ class TestUIComponents:
         mock_st.checkbox.return_value = True
         mock_st.button.return_value = False
 
-        from src.modules.maison.eco_tips import render_action_card
+        from src.modules.maison.eco_tips import afficher_action_card
 
-        render_action_card(mock_action)
+        afficher_action_card(mock_action)
 
         mock_st.container.assert_called()
 
     @patch("src.modules.maison.eco_tips.st")
     @patch("src.modules.maison.eco_tips.get_all_actions")
     def test_render_idees(self, mock_get_actions, mock_st):
-        """Test render_idees s'exécute sans erreur."""
+        """Test afficher_idees s'exécute sans erreur."""
         mock_get_actions.return_value = []
 
         # Mock container
@@ -467,9 +467,9 @@ class TestUIComponents:
 
         mock_st.button.return_value = False
 
-        from src.modules.maison.eco_tips import render_idees
+        from src.modules.maison.eco_tips import afficher_idees
 
-        render_idees()
+        afficher_idees()
 
         mock_st.subheader.assert_called_once()
 
@@ -483,10 +483,10 @@ class TestApp:
     """Tests pour la fonction app (point d'entrée UI)."""
 
     @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.render_stats_dashboard")
-    @patch("src.modules.maison.eco_tips.render_onglet_mes_actions")
-    @patch("src.modules.maison.eco_tips.render_onglet_ajouter")
-    @patch("src.modules.maison.eco_tips.render_idees")
+    @patch("src.modules.maison.eco_tips.afficher_stats_dashboard")
+    @patch("src.modules.maison.eco_tips.afficher_onglet_mes_actions")
+    @patch("src.modules.maison.eco_tips.afficher_onglet_ajouter")
+    @patch("src.modules.maison.eco_tips.afficher_idees")
     @patch("src.modules.maison.eco_tips.get_action_by_id")
     def test_app_runs(
         self,
@@ -519,8 +519,8 @@ class TestApp:
         mock_st.tabs.assert_called_once()
 
     @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.render_stats_dashboard")
-    @patch("src.modules.maison.eco_tips.render_formulaire")
+    @patch("src.modules.maison.eco_tips.afficher_stats_dashboard")
+    @patch("src.modules.maison.eco_tips.afficher_formulaire")
     @patch("src.modules.maison.eco_tips.get_action_by_id")
     def test_app_edit_mode(
         self,
@@ -550,10 +550,10 @@ class TestApp:
         mock_render_form.assert_called_once_with(mock_action)
 
     @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.render_stats_dashboard")
-    @patch("src.modules.maison.eco_tips.render_onglet_mes_actions")
-    @patch("src.modules.maison.eco_tips.render_onglet_ajouter")
-    @patch("src.modules.maison.eco_tips.render_idees")
+    @patch("src.modules.maison.eco_tips.afficher_stats_dashboard")
+    @patch("src.modules.maison.eco_tips.afficher_onglet_mes_actions")
+    @patch("src.modules.maison.eco_tips.afficher_onglet_ajouter")
+    @patch("src.modules.maison.eco_tips.afficher_idees")
     @patch("src.modules.maison.eco_tips.get_action_by_id")
     def test_app_edit_mode_action_not_found(
         self,
@@ -596,21 +596,21 @@ class TestOnglets:
 
     @patch("src.modules.maison.eco_tips.st")
     @patch("src.modules.maison.eco_tips.get_all_actions")
-    @patch("src.modules.maison.eco_tips.render_action_card")
+    @patch("src.modules.maison.eco_tips.afficher_action_card")
     def test_render_onglet_mes_actions_empty(self, mock_render_card, mock_get_actions, mock_st):
         """Test onglet mes actions sans données."""
         mock_get_actions.return_value = []
 
-        from src.modules.maison.eco_tips import render_onglet_mes_actions
+        from src.modules.maison.eco_tips import afficher_onglet_mes_actions
 
-        render_onglet_mes_actions()
+        afficher_onglet_mes_actions()
 
         mock_st.info.assert_called_once()
         mock_render_card.assert_not_called()
 
     @patch("src.modules.maison.eco_tips.st")
     @patch("src.modules.maison.eco_tips.get_all_actions")
-    @patch("src.modules.maison.eco_tips.render_action_card")
+    @patch("src.modules.maison.eco_tips.afficher_action_card")
     def test_render_onglet_mes_actions_with_data(self, mock_render_card, mock_get_actions, mock_st):
         """Test onglet mes actions avec données."""
         mock_action = MagicMock()
@@ -618,16 +618,16 @@ class TestOnglets:
         mock_get_actions.return_value = [mock_action]
         mock_st.radio.return_value = "Toutes"
 
-        from src.modules.maison.eco_tips import render_onglet_mes_actions
+        from src.modules.maison.eco_tips import afficher_onglet_mes_actions
 
-        render_onglet_mes_actions()
+        afficher_onglet_mes_actions()
 
         mock_st.radio.assert_called_once()
         mock_render_card.assert_called_once_with(mock_action)
 
     @patch("src.modules.maison.eco_tips.st")
     @patch("src.modules.maison.eco_tips.get_all_actions")
-    @patch("src.modules.maison.eco_tips.render_action_card")
+    @patch("src.modules.maison.eco_tips.afficher_action_card")
     def test_render_onglet_mes_actions_filter_actives(
         self, mock_render_card, mock_get_actions, mock_st
     ):
@@ -640,20 +640,20 @@ class TestOnglets:
         mock_get_actions.return_value = [mock_action_active, mock_action_inactive]
         mock_st.radio.return_value = "Actives"
 
-        from src.modules.maison.eco_tips import render_onglet_mes_actions
+        from src.modules.maison.eco_tips import afficher_onglet_mes_actions
 
-        render_onglet_mes_actions()
+        afficher_onglet_mes_actions()
 
         # Seule l'action active devrait être rendue
         mock_render_card.assert_called_once_with(mock_action_active)
 
     @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.render_formulaire")
+    @patch("src.modules.maison.eco_tips.afficher_formulaire")
     def test_render_onglet_ajouter(self, mock_render_form, mock_st):
         """Test onglet ajouter."""
-        from src.modules.maison.eco_tips import render_onglet_ajouter
+        from src.modules.maison.eco_tips import afficher_onglet_ajouter
 
-        render_onglet_ajouter()
+        afficher_onglet_ajouter()
 
         mock_st.subheader.assert_called_once()
         mock_render_form.assert_called_once_with(None)

@@ -46,33 +46,33 @@ def make_db_context_error(error):
 
 
 class TestRenderListeActive:
-    """Tests pour render_liste_active()."""
+    """Tests pour afficher_liste_active()."""
 
     def test_import(self):
         """Test import réussi."""
-        from src.modules.cuisine.courses.liste_active import render_liste_active
+        from src.modules.cuisine.courses.liste_active import afficher_liste_active
 
-        assert render_liste_active is not None
+        assert afficher_liste_active is not None
 
-    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_liste_active_service_unavailable(
         self, mock_st, mock_courses_service, mock_inv_service
     ):
         """Test service indisponible."""
-        from src.modules.cuisine.courses.liste_active import render_liste_active
+        from src.modules.cuisine.courses.liste_active import afficher_liste_active
 
         mock_courses_service.return_value = None
-        render_liste_active()
+        afficher_liste_active()
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_liste_active_empty(self, mock_st, mock_courses_service, mock_inv_service):
         """Test liste vide."""
-        from src.modules.cuisine.courses.liste_active import render_liste_active
+        from src.modules.cuisine.courses.liste_active import afficher_liste_active
 
         mock_service = MagicMock()
         mock_service.get_liste_courses.return_value = []
@@ -86,18 +86,18 @@ class TestRenderListeActive:
         mock_st.session_state = MockSessionState({"new_article_mode": False, "courses_refresh": 0})
         mock_st.button.return_value = False
 
-        render_liste_active()
+        afficher_liste_active()
 
         mock_st.info.assert_called()
 
-    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_liste_active_with_articles(
         self, mock_st, mock_courses_service, mock_inv_service
     ):
         """Test avec articles."""
-        from src.modules.cuisine.courses.liste_active import render_liste_active
+        from src.modules.cuisine.courses.liste_active import afficher_liste_active
 
         mock_service = MagicMock()
         mock_service.get_liste_courses.side_effect = [
@@ -136,19 +136,19 @@ class TestRenderListeActive:
         mock_st.expander.return_value.__enter__ = MagicMock(return_value=expander_mock)
         mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_liste_active()
+        afficher_liste_active()
 
         mock_st.metric.assert_called()
 
-    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     @patch("src.modules.cuisine.courses.liste_active.logger")
     def test_render_liste_active_exception(
         self, mock_logger, mock_st, mock_courses_service, mock_inv_service
     ):
         """Test gestion erreur."""
-        from src.modules.cuisine.courses.liste_active import render_liste_active
+        from src.modules.cuisine.courses.liste_active import afficher_liste_active
 
         mock_service = MagicMock()
         mock_service.get_liste_courses.side_effect = Exception("DB error")
@@ -157,17 +157,17 @@ class TestRenderListeActive:
         mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock(), MagicMock()]
         mock_st.session_state = MockSessionState({})
 
-        render_liste_active()
+        afficher_liste_active()
 
         mock_st.error.assert_called()
         mock_logger.error.assert_called()
 
-    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_liste_active_search(self, mock_st, mock_courses_service, mock_inv_service):
         """Test recherche."""
-        from src.modules.cuisine.courses.liste_active import render_liste_active
+        from src.modules.cuisine.courses.liste_active import afficher_liste_active
 
         mock_service = MagicMock()
         mock_service.get_liste_courses.side_effect = [
@@ -207,24 +207,24 @@ class TestRenderListeActive:
         mock_st.expander.return_value.__enter__ = MagicMock(return_value=expander_mock)
         mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_liste_active()
+        afficher_liste_active()
 
         mock_st.success.assert_called()
 
 
 class TestRenderRayonArticles:
-    """Tests pour render_rayon_articles()."""
+    """Tests pour afficher_rayon_articles()."""
 
     def test_import(self):
         """Test import."""
-        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+        from src.modules.cuisine.courses.liste_active import afficher_rayon_articles
 
-        assert render_rayon_articles is not None
+        assert afficher_rayon_articles is not None
 
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_rayon_articles_basic(self, mock_st):
         """Test affichage articles rayon."""
-        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+        from src.modules.cuisine.courses.liste_active import afficher_rayon_articles
 
         mock_service = MagicMock()
         articles = [
@@ -243,14 +243,14 @@ class TestRenderRayonArticles:
         mock_st.button.return_value = False
         mock_st.session_state = MockSessionState({"edit_article_id": None, "courses_refresh": 0})
 
-        render_rayon_articles(mock_service, "Crèmerie", articles)
+        afficher_rayon_articles(mock_service, "Crèmerie", articles)
 
         mock_st.write.assert_called()
 
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_rayon_articles_with_notes_and_ia(self, mock_st):
         """Test avec notes et badge IA."""
-        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+        from src.modules.cuisine.courses.liste_active import afficher_rayon_articles
 
         mock_service = MagicMock()
         articles = [
@@ -269,14 +269,14 @@ class TestRenderRayonArticles:
         mock_st.button.return_value = False
         mock_st.session_state = MockSessionState({"edit_article_id": None, "courses_refresh": 0})
 
-        render_rayon_articles(mock_service, "Boulangerie", articles)
+        afficher_rayon_articles(mock_service, "Boulangerie", articles)
 
         mock_st.write.assert_called()
 
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_rayon_articles_mark_bought(self, mock_st):
         """Test marquer acheté."""
-        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+        from src.modules.cuisine.courses.liste_active import afficher_rayon_articles
 
         mock_service = MagicMock()
         articles = [
@@ -295,7 +295,7 @@ class TestRenderRayonArticles:
         mock_st.button.side_effect = [True, False, False]  # First button clicked
         mock_st.session_state = MockSessionState({"edit_article_id": None, "courses_refresh": 0})
 
-        render_rayon_articles(mock_service, "Crèmerie", articles)
+        afficher_rayon_articles(mock_service, "Crèmerie", articles)
 
         mock_service.update.assert_called()
         mock_st.success.assert_called()
@@ -303,7 +303,7 @@ class TestRenderRayonArticles:
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_rayon_articles_delete(self, mock_st):
         """Test supprimer article."""
-        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+        from src.modules.cuisine.courses.liste_active import afficher_rayon_articles
 
         mock_service = MagicMock()
         articles = [
@@ -322,7 +322,7 @@ class TestRenderRayonArticles:
         mock_st.button.side_effect = [False, False, True]  # Delete button clicked
         mock_st.session_state = MockSessionState({"edit_article_id": None, "courses_refresh": 0})
 
-        render_rayon_articles(mock_service, "Crèmerie", articles)
+        afficher_rayon_articles(mock_service, "Crèmerie", articles)
 
         mock_service.delete.assert_called_with(4)
         mock_st.success.assert_called()
@@ -330,7 +330,7 @@ class TestRenderRayonArticles:
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_rayon_articles_update_error(self, mock_st):
         """Test erreur lors de la mise à jour."""
-        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+        from src.modules.cuisine.courses.liste_active import afficher_rayon_articles
 
         mock_service = MagicMock()
         mock_service.update.side_effect = Exception("Update failed")
@@ -350,14 +350,14 @@ class TestRenderRayonArticles:
         mock_st.button.side_effect = [True, False, False]
         mock_st.session_state = MockSessionState({"edit_article_id": None, "courses_refresh": 0})
 
-        render_rayon_articles(mock_service, "Crèmerie", articles)
+        afficher_rayon_articles(mock_service, "Crèmerie", articles)
 
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_rayon_articles_delete_error(self, mock_st):
         """Test erreur lors de suppression."""
-        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+        from src.modules.cuisine.courses.liste_active import afficher_rayon_articles
 
         mock_service = MagicMock()
         mock_service.delete.side_effect = Exception("Delete failed")
@@ -377,7 +377,7 @@ class TestRenderRayonArticles:
         mock_st.button.side_effect = [False, False, True]
         mock_st.session_state = MockSessionState({"edit_article_id": None, "courses_refresh": 0})
 
-        render_rayon_articles(mock_service, "Rayon", articles)
+        afficher_rayon_articles(mock_service, "Rayon", articles)
 
         mock_st.error.assert_called()
 
@@ -389,7 +389,7 @@ class TestRenderRayonArticles:
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_rayon_articles_edit_inline_form(self, mock_st):
         """Test formulaire édition inline affiché."""
-        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+        from src.modules.cuisine.courses.liste_active import afficher_rayon_articles
 
         mock_service = MagicMock()
         articles = [
@@ -424,35 +424,35 @@ class TestRenderRayonArticles:
         mock_st.text_area.return_value = "Updated note"
         mock_st.form_submit_button.return_value = False
 
-        render_rayon_articles(mock_service, "Crèmerie", articles)
+        afficher_rayon_articles(mock_service, "Crèmerie", articles)
 
         mock_st.divider.assert_called()
 
 
 class TestRenderAjouterArticle:
-    """Tests pour render_ajouter_article()."""
+    """Tests pour afficher_ajouter_article()."""
 
     def test_import(self):
         """Test import."""
-        from src.modules.cuisine.courses.liste_active import render_ajouter_article
+        from src.modules.cuisine.courses.liste_active import afficher_ajouter_article
 
-        assert render_ajouter_article is not None
+        assert afficher_ajouter_article is not None
 
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_ajouter_article_service_unavailable(self, mock_st, mock_service):
         """Test service indisponible."""
-        from src.modules.cuisine.courses.liste_active import render_ajouter_article
+        from src.modules.cuisine.courses.liste_active import afficher_ajouter_article
 
         mock_service.return_value = None
-        render_ajouter_article()
+        afficher_ajouter_article()
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_ajouter_article_empty_name(self, mock_st, mock_service):
         """Test nom vide."""
-        from src.modules.cuisine.courses.liste_active import render_ajouter_article
+        from src.modules.cuisine.courses.liste_active import afficher_ajouter_article
 
         mock_service.return_value = MagicMock()
 
@@ -466,19 +466,19 @@ class TestRenderAjouterArticle:
         mock_st.text_area.return_value = ""
         mock_st.form_submit_button.return_value = True
 
-        render_ajouter_article()
+        afficher_ajouter_article()
 
         mock_st.error.assert_called()
 
     @patch("src.core.models.Ingredient")
     @patch("src.core.db.obtenir_contexte_db")
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_ajouter_article_success_existing_ingredient(
         self, mock_st, mock_service, mock_db, mock_ingredient_class
     ):
         """Test ajout réussi avec ingrédient existant."""
-        from src.modules.cuisine.courses.liste_active import render_ajouter_article
+        from src.modules.cuisine.courses.liste_active import afficher_ajouter_article
 
         svc = MagicMock()
         mock_service.return_value = svc
@@ -500,20 +500,20 @@ class TestRenderAjouterArticle:
         mock_session.query.return_value.filter.return_value.first.return_value = mock_ingredient
         mock_db.return_value = make_db_context(mock_session)()
 
-        render_ajouter_article()
+        afficher_ajouter_article()
 
         svc.create.assert_called()
         mock_st.success.assert_called()
 
     @patch("src.core.models.Ingredient")
     @patch("src.core.db.obtenir_contexte_db")
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_ajouter_article_success_new_ingredient(
         self, mock_st, mock_service, mock_db, mock_ingredient_class
     ):
         """Test ajout réussi avec nouvel ingrédient."""
-        from src.modules.cuisine.courses.liste_active import render_ajouter_article
+        from src.modules.cuisine.courses.liste_active import afficher_ajouter_article
 
         svc = MagicMock()
         mock_service.return_value = svc
@@ -540,21 +540,21 @@ class TestRenderAjouterArticle:
 
         mock_db.return_value = make_db_context(mock_session)()
 
-        render_ajouter_article()
+        afficher_ajouter_article()
 
         mock_session.add.assert_called()
         svc.create.assert_called()
 
     @patch("src.core.models.Ingredient")
     @patch("src.core.db.obtenir_contexte_db")
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     @patch("src.modules.cuisine.courses.liste_active.logger")
     def test_render_ajouter_article_error(
         self, mock_logger, mock_st, mock_service, mock_db, mock_ingredient_class
     ):
         """Test erreur ajout."""
-        from src.modules.cuisine.courses.liste_active import render_ajouter_article
+        from src.modules.cuisine.courses.liste_active import afficher_ajouter_article
 
         svc = MagicMock()
         mock_service.return_value = svc
@@ -572,25 +572,25 @@ class TestRenderAjouterArticle:
 
         mock_db.return_value = make_db_context_error(Exception("DB Error"))()
 
-        render_ajouter_article()
+        afficher_ajouter_article()
 
         mock_st.error.assert_called()
         mock_logger.error.assert_called()
 
 
 class TestRenderPrintView:
-    """Tests pour render_print_view()."""
+    """Tests pour afficher_print_view()."""
 
     def test_import(self):
         """Test import."""
-        from src.modules.cuisine.courses.liste_active import render_print_view
+        from src.modules.cuisine.courses.liste_active import afficher_print_view
 
-        assert render_print_view is not None
+        assert afficher_print_view is not None
 
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_print_view_basic(self, mock_st):
         """Test vue impression basique."""
-        from src.modules.cuisine.courses.liste_active import render_print_view
+        from src.modules.cuisine.courses.liste_active import afficher_print_view
 
         liste = [
             {
@@ -601,7 +601,7 @@ class TestRenderPrintView:
             }
         ]
 
-        render_print_view(liste)
+        afficher_print_view(liste)
 
         mock_st.subheader.assert_called()
         mock_st.text_area.assert_called()
@@ -609,7 +609,7 @@ class TestRenderPrintView:
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_print_view_multiple_rayons(self, mock_st):
         """Test impression plusieurs rayons."""
-        from src.modules.cuisine.courses.liste_active import render_print_view
+        from src.modules.cuisine.courses.liste_active import afficher_print_view
 
         liste = [
             {
@@ -632,23 +632,23 @@ class TestRenderPrintView:
             },
         ]
 
-        render_print_view(liste)
+        afficher_print_view(liste)
 
         mock_st.text_area.assert_called()
 
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_print_view_empty(self, mock_st):
         """Test impression liste vide."""
-        from src.modules.cuisine.courses.liste_active import render_print_view
+        from src.modules.cuisine.courses.liste_active import afficher_print_view
 
-        render_print_view([])
+        afficher_print_view([])
 
         mock_st.text_area.assert_called()
 
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_print_view_autre_rayon(self, mock_st):
         """Test rayon 'Autre' par défaut."""
-        from src.modules.cuisine.courses.liste_active import render_print_view
+        from src.modules.cuisine.courses.liste_active import afficher_print_view
 
         liste = [
             {
@@ -659,7 +659,7 @@ class TestRenderPrintView:
             }
         ]
 
-        render_print_view(liste)
+        afficher_print_view(liste)
 
         mock_st.text_area.assert_called()
 
@@ -671,23 +671,23 @@ class TestListeActiveModule:
         """Test __all__ exports."""
         from src.modules.cuisine.courses import liste_active
 
-        assert "render_liste_active" in liste_active.__all__
-        assert "render_rayon_articles" in liste_active.__all__
-        assert "render_ajouter_article" in liste_active.__all__
-        assert "render_print_view" in liste_active.__all__
+        assert "afficher_liste_active" in liste_active.__all__
+        assert "afficher_rayon_articles" in liste_active.__all__
+        assert "afficher_ajouter_article" in liste_active.__all__
+        assert "afficher_print_view" in liste_active.__all__
 
 
 class TestRenderListeActiveAdditional:
     """Tests supplémentaires pour couverture branches manquantes."""
 
-    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_liste_inventaire_service_none(
         self, mock_st, mock_courses_service, mock_inv_service
     ):
         """Test quand inventaire_service est None (ligne 37)."""
-        from src.modules.cuisine.courses.liste_active import render_liste_active
+        from src.modules.cuisine.courses.liste_active import afficher_liste_active
 
         mock_service = MagicMock()
         mock_service.get_liste_courses.side_effect = [
@@ -719,19 +719,19 @@ class TestRenderListeActiveAdditional:
         mock_st.expander.return_value.__enter__ = MagicMock(return_value=expander_mock)
         mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_liste_active()
+        afficher_liste_active()
 
         # Vérifier que metric a été appelé (sans stock_bas)
         mock_st.metric.assert_called()
 
-    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_liste_empty_generate_ia_clicked(
         self, mock_st, mock_courses_service, mock_inv_service
     ):
         """Test bouton générer suggestions IA cliqué (lignes 49-50)."""
-        from src.modules.cuisine.courses.liste_active import render_liste_active
+        from src.modules.cuisine.courses.liste_active import afficher_liste_active
 
         mock_service = MagicMock()
         mock_service.get_liste_courses.return_value = []  # Liste vide
@@ -745,16 +745,16 @@ class TestRenderListeActiveAdditional:
         mock_st.session_state = MockSessionState({"new_article_mode": True, "courses_refresh": 0})
         mock_st.button.return_value = True  # Button clicked
 
-        render_liste_active()
+        afficher_liste_active()
 
         mock_st.rerun.assert_called()
 
-    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_liste_filter_by_priority(self, mock_st, mock_courses_service, mock_inv_service):
         """Test filtre par priorité (lignes 74-75)."""
-        from src.modules.cuisine.courses.liste_active import render_liste_active
+        from src.modules.cuisine.courses.liste_active import afficher_liste_active
 
         mock_service = MagicMock()
         mock_service.get_liste_courses.side_effect = [
@@ -805,17 +805,17 @@ class TestRenderListeActiveAdditional:
         mock_st.expander.return_value.__enter__ = MagicMock(return_value=expander_mock)
         mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_liste_active()
+        afficher_liste_active()
 
         # Vérifie que le filtre par priorité fonctionne (1 sur 2 articles)
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_liste_filter_by_rayon(self, mock_st, mock_courses_service, mock_inv_service):
         """Test filtre par rayon (ligne 80)."""
-        from src.modules.cuisine.courses.liste_active import render_liste_active
+        from src.modules.cuisine.courses.liste_active import afficher_liste_active
 
         mock_service = MagicMock()
         mock_service.get_liste_courses.side_effect = [
@@ -866,19 +866,19 @@ class TestRenderListeActiveAdditional:
         mock_st.expander.return_value.__enter__ = MagicMock(return_value=expander_mock)
         mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_liste_active()
+        afficher_liste_active()
 
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.courses.liste_active.render_print_view")
-    @patch("src.modules.cuisine.courses.liste_active.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.liste_active.get_courses_service")
+    @patch("src.modules.cuisine.courses.liste_active.afficher_print_view")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_liste_print_button_clicked(
         self, mock_st, mock_courses_service, mock_inv_service, mock_print_view
     ):
         """Test bouton imprimer cliqué (ligne 284)."""
-        from src.modules.cuisine.courses.liste_active import render_liste_active
+        from src.modules.cuisine.courses.liste_active import afficher_liste_active
 
         mock_service = MagicMock()
         mock_service.get_liste_courses.side_effect = [
@@ -920,13 +920,13 @@ class TestRenderListeActiveAdditional:
         mock_st.expander.return_value.__enter__ = MagicMock(return_value=expander_mock)
         mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_liste_active()
+        afficher_liste_active()
 
         mock_print_view.assert_called()
 
 
 class TestRenderRayonArticlesAdditional:
-    """Tests supplémentaires pour render_rayon_articles."""
+    """Tests supplémentaires pour afficher_rayon_articles."""
 
     @patch(
         "src.modules.cuisine.courses.liste_active.PRIORITY_EMOJIS",
@@ -936,7 +936,7 @@ class TestRenderRayonArticlesAdditional:
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_rayon_edit_form_save_success(self, mock_st):
         """Test sauvegarde formulaire édition réussie (lignes 97-106)."""
-        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+        from src.modules.cuisine.courses.liste_active import afficher_rayon_articles
 
         mock_service = MagicMock()
         articles = [
@@ -968,7 +968,7 @@ class TestRenderRayonArticlesAdditional:
         mock_st.text_area.return_value = "New note"
         mock_st.form_submit_button.side_effect = [True, False]  # Save clicked, Cancel not
 
-        render_rayon_articles(mock_service, "Crèmerie", articles)
+        afficher_rayon_articles(mock_service, "Crèmerie", articles)
 
         mock_service.update.assert_called()
         mock_st.success.assert_called()
@@ -981,7 +981,7 @@ class TestRenderRayonArticlesAdditional:
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_rayon_edit_form_cancel(self, mock_st):
         """Test annulation formulaire édition (lignes 172-173)."""
-        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+        from src.modules.cuisine.courses.liste_active import afficher_rayon_articles
 
         mock_service = MagicMock()
         articles = [
@@ -1013,7 +1013,7 @@ class TestRenderRayonArticlesAdditional:
         mock_st.text_area.return_value = ""
         mock_st.form_submit_button.side_effect = [False, True]  # Save not, Cancel clicked
 
-        render_rayon_articles(mock_service, "Crèmerie", articles)
+        afficher_rayon_articles(mock_service, "Crèmerie", articles)
 
         mock_st.rerun.assert_called()
 
@@ -1025,7 +1025,7 @@ class TestRenderRayonArticlesAdditional:
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_rayon_edit_form_save_error(self, mock_st):
         """Test erreur sauvegarde formulaire édition."""
-        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+        from src.modules.cuisine.courses.liste_active import afficher_rayon_articles
 
         mock_service = MagicMock()
         mock_service.update.side_effect = Exception("Update failed")
@@ -1058,7 +1058,7 @@ class TestRenderRayonArticlesAdditional:
         mock_st.text_area.return_value = ""
         mock_st.form_submit_button.side_effect = [True, False]  # Save clicked
 
-        render_rayon_articles(mock_service, "Crèmerie", articles)
+        afficher_rayon_articles(mock_service, "Crèmerie", articles)
 
         mock_st.error.assert_called()
 
@@ -1070,7 +1070,7 @@ class TestRenderRayonArticlesAdditional:
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_rayon_articles_edit_button_clicked(self, mock_st):
         """Test bouton édition cliqué."""
-        from src.modules.cuisine.courses.liste_active import render_rayon_articles
+        from src.modules.cuisine.courses.liste_active import afficher_rayon_articles
 
         mock_service = MagicMock()
         articles = [
@@ -1105,6 +1105,6 @@ class TestRenderRayonArticlesAdditional:
         mock_st.text_area.return_value = ""
         mock_st.form_submit_button.side_effect = [False, False]  # Save=F, Cancel=F
 
-        render_rayon_articles(mock_service, "Rayon", articles)
+        afficher_rayon_articles(mock_service, "Rayon", articles)
 
         mock_st.rerun.assert_called()

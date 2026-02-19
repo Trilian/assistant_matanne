@@ -9,7 +9,7 @@ from src.core.config import obtenir_parametres as get_settings
 from src.core.state import GestionnaireEtat
 
 
-def render_about():
+def afficher_about():
     """Informations sur l'application"""
 
     settings = get_settings()

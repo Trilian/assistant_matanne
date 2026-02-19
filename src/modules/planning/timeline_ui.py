@@ -12,8 +12,10 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.core.constants import JOURS_SEMAINE
+from src.core.date_utils import obtenir_debut_semaine
 from src.core.db import obtenir_contexte_db
 from src.core.models import CalendarEvent, FamilyActivity, Repas
+from src.ui import etat_vide
 
 # Couleurs par type d'événement
 COULEURS_TYPES = {
@@ -24,11 +26,6 @@ COULEURS_TYPES = {
     "routine": "#8E24AA",  # Violet
     "autre": "#757575",  # Gris
 }
-
-
-def get_lundi_semaine(d: date) -> date:
-    """Retourne le lundi de la semaine."""
-    return d - timedelta(days=d.weekday())
 
 
 def charger_events_periode(date_debut: date, date_fin: date) -> list[dict]:
@@ -339,7 +336,7 @@ def app():
 
     else:
         # Vue semaine
-        lundi = get_lundi_semaine(date_ref)
+        lundi = obtenir_debut_semaine(date_ref)
         dimanche = lundi + timedelta(days=6)
 
         events = charger_events_periode(lundi, dimanche)
@@ -378,12 +375,12 @@ def app():
         if vue_mode == "📅 Jour":
             events_afficher = [e for e in events if e["date_debut"].date() == date_ref]
         else:
-            lundi = get_lundi_semaine(date_ref)
+            lundi = obtenir_debut_semaine(date_ref)
             dimanche = lundi + timedelta(days=6)
             events_afficher = [e for e in events if lundi <= e["date_debut"].date() <= dimanche]
 
         if not events_afficher:
-            st.info("Aucun événement")
+            etat_vide("Aucun événement", "📅")
         else:
             events_afficher.sort(key=lambda e: e["date_debut"])
             for event in events_afficher:

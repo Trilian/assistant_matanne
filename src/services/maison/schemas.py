@@ -4,8 +4,7 @@ Schemas Pydantic pour les services Maison.
 Hub de ré-export — les schemas sont définis dans des sous-modules par domaine:
 - schemas_enums: Tous les StrEnum/Enum
 - schemas_jardin: Jardin (conseils, arrosage, plantes)
-- schemas_inventaire: Inventaire, versioning, intégration inter-modules
-- schemas_temps: Suivi du temps d'entretien & jardinage
+
 
 Ce fichier conserve les schemas de:
 - Briefings et alertes
@@ -18,7 +17,6 @@ Tous les imports ``from .schemas import X`` restent fonctionnels.
 """
 
 from datetime import date as date_type
-from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
@@ -31,9 +29,7 @@ from .schemas_enums import *  # noqa: F401,F403
 
 # Imports locaux nécessaires aux classes restantes
 from .schemas_enums import NiveauUrgence, TypeAlerteMaison
-from .schemas_inventaire import *  # noqa: F401,F403
 from .schemas_jardin import *  # noqa: F401,F403
-from .schemas_temps import *  # noqa: F401,F403
 
 # ═══════════════════════════════════════════════════════════
 # BRIEFING & ALERTES
@@ -165,59 +161,6 @@ class ProjetEstimation(BaseModel):
     materiels_necessaires: list[MaterielProjet]
     risques_identifies: list[str] = Field(default_factory=list)
     conseils_ia: list[str] = Field(default_factory=list)
-
-
-# ═══════════════════════════════════════════════════════════
-# ÉNERGIE & ÉCO-SCORE
-# ═══════════════════════════════════════════════════════════
-
-
-class ConsommationMois(BaseModel):
-    """Consommation mensuelle d'une énergie."""
-
-    mois: date_type
-    energie: str  # electricite, gaz, eau
-    consommation: float
-    unite: str
-    montant: Decimal | None = None
-    variation_pct: float | None = None  # vs mois précédent
-
-
-class BadgeEco(BaseModel):
-    """Badge éco-score gagné."""
-
-    nom: str
-    description: str
-    icone: str
-    date_obtention: date_type
-    categorie: str  # energie, eau, dechets
-
-
-class EcoScoreResult(BaseModel):
-    """Résultat éco-score mensuel."""
-
-    mois: date_type
-    score: int = Field(ge=0, le=100)
-    score_precedent: int | None = None
-    variation: int | None = None
-    streak_jours: int = 0
-    economies_euros: Decimal = Decimal("0.00")
-    badges_obtenus: list[BadgeEco] = Field(default_factory=list)
-    conseils_amelioration: list[str] = Field(default_factory=list)
-    comparaison_moyenne: str | None = None  # "10% sous la moyenne"
-
-
-class AnalyseEnergie(BaseModel):
-    """Analyse détaillée consommation énergie."""
-
-    periode: str
-    energie: str
-    consommation_totale: float
-    cout_total: Decimal
-    tendance: str  # hausse, stable, baisse
-    anomalies_detectees: list[str] = Field(default_factory=list)
-    correlation_meteo: str | None = None
-    suggestions_economies: list[str] = Field(default_factory=list)
 
 
 # ═══════════════════════════════════════════════════════════

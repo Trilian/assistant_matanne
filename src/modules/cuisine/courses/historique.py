@@ -5,18 +5,18 @@ Historique des courses.
 from ._common import (
     PRIORITY_EMOJIS,
     datetime,
-    get_courses_service,
     logger,
     obtenir_contexte_db,
+    obtenir_service_courses,
     pd,
     st,
     timedelta,
 )
 
 
-def render_historique():
+def afficher_historique():
     """Historique des listes de courses"""
-    _service = get_courses_service()
+    _service = obtenir_service_courses()
 
     st.subheader("📋 Historique des courses")
 
@@ -45,7 +45,7 @@ def render_historique():
             )
 
         if not articles_achetes:
-            st.info("Aucun achat pendant cette période")
+            etat_vide("Aucun achat pendant cette période", "🛒")
             return
 
         # Statistiques
@@ -97,4 +97,4 @@ def render_historique():
         logger.error(f"Erreur historique: {e}")
 
 
-__all__ = ["render_historique"]
+__all__ = ["afficher_historique"]

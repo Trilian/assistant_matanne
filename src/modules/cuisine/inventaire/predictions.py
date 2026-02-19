@@ -7,15 +7,16 @@ import pandas as pd
 import streamlit as st
 
 from src.services.cuisine.suggestions import obtenir_service_predictions
-from src.services.inventaire import get_inventaire_service
+from src.services.inventaire import obtenir_service_inventaire
+from src.ui.components.atoms import etat_vide
 
 
-def render_predictions():
+def afficher_predictions():
     """Affiche les prédictions et recommandations ML"""
     st.subheader("🔮 Prévisions et Recommandations")
 
     try:
-        service = get_inventaire_service()
+        service = obtenir_service_inventaire()
         service_pred = obtenir_service_predictions()
 
         if service is None:
@@ -27,7 +28,11 @@ def render_predictions():
         historique_complet = service.get_historique(days=90)  # 3 mois d'historique
 
         if not articles:
-            st.info("Aucun article dans l'inventaire pour générer les prédictions")
+            etat_vide(
+                "Aucun article dans l'inventaire",
+                "🔮",
+                "Ajoutez des articles pour générer des prédictions",
+            )
             return
 
         # Bouton pour générer les prédictions
@@ -260,7 +265,11 @@ def render_predictions():
                                         ):
                                             st.toast(f"⏰ {rec.nom} ajouté", icon="🛒")
                 else:
-                    st.info("Aucune recommandation d'achat pour le moment")
+                    etat_vide(
+                        "Aucune recommandation d'achat",
+                        "✅",
+                        "Votre inventaire est bien approvisionné",
+                    )
 
             with tab_analyse:
                 st.write("**Analyse globale de l'inventaire**")
@@ -335,4 +344,4 @@ def render_predictions():
         st.text(traceback.format_exc())
 
 
-__all__ = ["render_predictions"]
+__all__ = ["afficher_predictions"]

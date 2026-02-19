@@ -492,11 +492,7 @@ class ActionHistoryService:
         try:
             with obtenir_contexte_db() as session:
                 # Récupérer l'action en DB
-                action = (
-                    session.query(ActionHistory)
-                    .filter(ActionHistory.id == action_id)
-                    .first()
-                )
+                action = session.query(ActionHistory).filter(ActionHistory.id == action_id).first()
 
                 if not action:
                     logger.warning(f"Action {action_id} non trouvée")
@@ -699,7 +695,7 @@ __all__ = [
     "ActionFilter",
     "ActionStats",
     # UI rétrocompat — réexportées depuis src.ui.views.historique
-    "render_activity_timeline",
-    "render_user_activity",
-    "render_activity_stats",
+    "afficher_activity_timeline",
+    "afficher_user_activity",
+    "afficher_activity_stats",
 ]

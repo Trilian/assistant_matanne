@@ -15,9 +15,6 @@ from .config import (
     config_limitation_debit,
 )
 
-# Décorateurs
-from .decorators import limite_debit
-
 # Dépendances FastAPI
 from .dependencies import (
     verifier_limite_debit,
@@ -59,8 +56,6 @@ __all__ = [
     "limiteur_debit",
     # Middleware
     "MiddlewareLimitationDebit",
-    # Decorators
-    "limite_debit",
     # Dependencies
     "verifier_limite_debit",
     "verifier_limite_debit_ia",

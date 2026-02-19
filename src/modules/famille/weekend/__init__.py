@@ -11,12 +11,12 @@ Fonctionnalités:
 # Import des fonctions pour exposer l'API publique
 from .ai_service import WeekendAIService
 from .components import (
-    render_add_activity,
-    render_day_activities,
-    render_lieux_testes,
-    render_noter_sortie,
-    render_planning,
-    render_suggestions,
+    afficher_add_activity,
+    afficher_day_activities,
+    afficher_lieux_testes,
+    afficher_noter_sortie,
+    afficher_planning,
+    afficher_suggestions,
 )
 from .utils import (
     get_age_jules_mois,
@@ -40,19 +40,19 @@ def app():
     tabs = st.tabs(["📅 Planning", "💡 Suggestions IA", "🗺️ Lieux testés", "➕ Ajouter", "⭐ Noter"])
 
     with tabs[0]:
-        render_planning()
+        afficher_planning()
 
     with tabs[1]:
-        render_suggestions()
+        afficher_suggestions()
 
     with tabs[2]:
-        render_lieux_testes()
+        afficher_lieux_testes()
 
     with tabs[3]:
-        render_add_activity()
+        afficher_add_activity()
 
     with tabs[4]:
-        render_noter_sortie()
+        afficher_noter_sortie()
 
 
 __all__ = [
@@ -68,10 +68,10 @@ __all__ = [
     "get_age_jules_mois",
     "mark_activity_done",
     # UI
-    "render_planning",
-    "render_day_activities",
-    "render_suggestions",
-    "render_lieux_testes",
-    "render_add_activity",
-    "render_noter_sortie",
+    "afficher_planning",
+    "afficher_day_activities",
+    "afficher_suggestions",
+    "afficher_lieux_testes",
+    "afficher_add_activity",
+    "afficher_noter_sortie",
 ]

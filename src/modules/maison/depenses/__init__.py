@@ -11,17 +11,17 @@ Utilise le service Budget unifié (src/services/budget.py).
 """
 
 from .components import (
-    render_comparaison_mois,
-    render_depense_card,
-    render_export_section,
-    render_formulaire,
-    render_graphique_evolution,
-    render_graphique_repartition,
-    render_onglet_ajouter,
-    render_onglet_analyse,
-    render_onglet_mois,
-    render_previsions_ia,
-    render_stats_dashboard,
+    afficher_comparaison_mois,
+    afficher_depense_card,
+    afficher_export_section,
+    afficher_formulaire,
+    afficher_graphique_evolution,
+    afficher_graphique_repartition,
+    afficher_onglet_ajouter,
+    afficher_onglet_analyse,
+    afficher_onglet_mois,
+    afficher_previsions_ia,
+    afficher_stats_dashboard,
 )
 
 # Import des fonctions pour exposer l'API publique
@@ -53,12 +53,12 @@ def app():
             if st.button("❌ Annuler"):
                 del st.session_state["edit_depense_id"]
                 st.rerun()
-            render_formulaire(depense)
+            afficher_formulaire(depense)
             del st.session_state["edit_depense_id"]
             return
 
     # Dashboard
-    render_stats_dashboard()
+    afficher_stats_dashboard()
 
     st.divider()
 
@@ -66,13 +66,13 @@ def app():
     tab1, tab2, tab3 = st.tabs(["📅 Ce mois", "➕ Ajouter", "📊 Analyse"])
 
     with tab1:
-        render_onglet_mois()
+        afficher_onglet_mois()
 
     with tab2:
-        render_onglet_ajouter()
+        afficher_onglet_ajouter()
 
     with tab3:
-        render_onglet_analyse()
+        afficher_onglet_analyse()
 
 
 __all__ = [
@@ -88,15 +88,15 @@ __all__ = [
     "get_stats_globales",
     "get_historique_categorie",
     # UI
-    "render_stats_dashboard",
-    "render_depense_card",
-    "render_formulaire",
-    "render_graphique_evolution",
-    "render_graphique_repartition",
-    "render_comparaison_mois",
-    "render_export_section",
-    "render_previsions_ia",
-    "render_onglet_mois",
-    "render_onglet_ajouter",
-    "render_onglet_analyse",
+    "afficher_stats_dashboard",
+    "afficher_depense_card",
+    "afficher_formulaire",
+    "afficher_graphique_evolution",
+    "afficher_graphique_repartition",
+    "afficher_comparaison_mois",
+    "afficher_export_section",
+    "afficher_previsions_ia",
+    "afficher_onglet_mois",
+    "afficher_onglet_ajouter",
+    "afficher_onglet_analyse",
 ]

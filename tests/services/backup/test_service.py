@@ -10,7 +10,6 @@ import pytest
 
 from src.services.core.backup.service import (
     ServiceBackup,
-    get_backup_service,
     obtenir_service_backup,
 )
 from src.services.core.backup.types import (
@@ -1114,17 +1113,17 @@ class TestEdgeCases:
     # ═══════════════════════════════════════════════════════════
     # TESTS UI (DÉPLACÉS VERS tests/ui/views/test_backup.py)
     # ═══════════════════════════════════════════════════════════
-    # NOTE: Les fonctions render_backup_ui ont été déplacées vers src.ui.views.backup
+    # NOTE: Les fonctions afficher_backup_ui ont été déplacées vers src.ui.views.backup
     # Ces tests sont conservés comme référence mais skipés.
     # Pour tester l'UI sauvegarde, voir tests/ui/views/test_sauvegarde.py
     # Note: TestRenderBackupUI supprimée - backup.py a été supprimé (doublon de sauvegarde.py)
 
-    @pytest.mark.skip(reason="render_backup_ui déplacé vers src.ui.views.backup")
+    @pytest.mark.skip(reason="afficher_backup_ui déplacé vers src.ui.views.backup")
     @patch("src.services.core.backup.service.st")
     @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_with_backups(self, mock_get_service, mock_st):
-        """Test render_backup_ui avec des backups."""
-        from src.services.core.backup.service import render_backup_ui
+        """Test afficher_backup_ui avec des backups."""
+        from src.services.core.backup.service import afficher_backup_ui
 
         mock_backup = MagicMock()
         mock_backup.id = "20240115_143000"
@@ -1143,17 +1142,17 @@ class TestEdgeCases:
         mock_st.expander.return_value.__enter__ = MagicMock(return_value=MagicMock())
         mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_backup_ui()
+        afficher_backup_ui()
 
         mock_st.subheader.assert_called()
         mock_st.expander.assert_called()
 
-    @pytest.mark.skip(reason="render_backup_ui déplacé vers src.ui.views.backup")
+    @pytest.mark.skip(reason="afficher_backup_ui déplacé vers src.ui.views.backup")
     @patch("src.services.core.backup.service.st")
     @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_create_button_clicked(self, mock_get_service, mock_st):
         """Test clic sur bouton créer backup."""
-        from src.services.core.backup.service import render_backup_ui
+        from src.services.core.backup.service import afficher_backup_ui
 
         mock_result = MagicMock()
         mock_result.success = True
@@ -1175,17 +1174,17 @@ class TestEdgeCases:
         mock_st.spinner.return_value.__enter__ = MagicMock()
         mock_st.spinner.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_backup_ui()
+        afficher_backup_ui()
 
         mock_service.create_backup.assert_called_once_with(compress=True)
         mock_st.success.assert_called()
 
-    @pytest.mark.skip(reason="render_backup_ui déplacé vers src.ui.views.backup")
+    @pytest.mark.skip(reason="afficher_backup_ui déplacé vers src.ui.views.backup")
     @patch("src.services.core.backup.service.st")
     @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_create_backup_fails(self, mock_get_service, mock_st):
         """Test échec création backup."""
-        from src.services.core.backup.service import render_backup_ui
+        from src.services.core.backup.service import afficher_backup_ui
 
         mock_result = MagicMock()
         mock_result.success = False
@@ -1202,16 +1201,16 @@ class TestEdgeCases:
         mock_st.spinner.return_value.__enter__ = MagicMock()
         mock_st.spinner.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_backup_ui()
+        afficher_backup_ui()
 
         mock_st.error.assert_called()
 
-    @pytest.mark.skip(reason="render_backup_ui déplacé vers src.ui.views.backup")
+    @pytest.mark.skip(reason="afficher_backup_ui déplacé vers src.ui.views.backup")
     @patch("src.services.core.backup.service.st")
     @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_restore_button(self, mock_get_service, mock_st):
         """Test clic sur bouton restaurer dans expander."""
-        from src.services.core.backup.service import render_backup_ui
+        from src.services.core.backup.service import afficher_backup_ui
 
         mock_backup = MagicMock()
         mock_backup.id = "20240115_143000"
@@ -1236,16 +1235,16 @@ class TestEdgeCases:
         # Bouton restaurer cliqué
         mock_st.button.side_effect = [False, True, False]
 
-        render_backup_ui()
+        afficher_backup_ui()
 
         mock_st.warning.assert_called()  # Affiche l'avertissement
 
-    @pytest.mark.skip(reason="render_backup_ui déplacé vers src.ui.views.backup")
+    @pytest.mark.skip(reason="afficher_backup_ui déplacé vers src.ui.views.backup")
     @patch("src.services.core.backup.service.st")
     @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_delete_button(self, mock_get_service, mock_st):
         """Test clic sur bouton supprimer."""
-        from src.services.core.backup.service import render_backup_ui
+        from src.services.core.backup.service import afficher_backup_ui
 
         mock_backup = MagicMock()
         mock_backup.id = "20240115_143000"
@@ -1270,17 +1269,17 @@ class TestEdgeCases:
         # Bouton supprimer cliqué (2ème bouton dans inner cols)
         mock_st.button.side_effect = [False, False, True]
 
-        render_backup_ui()
+        afficher_backup_ui()
 
         mock_service.delete_backup.assert_called_once_with("20240115_143000")
         mock_st.success.assert_called()
 
-    @pytest.mark.skip(reason="render_backup_ui déplacé vers src.ui.views.backup")
+    @pytest.mark.skip(reason="afficher_backup_ui déplacé vers src.ui.views.backup")
     @patch("src.services.core.backup.service.st")
     @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_file_upload(self, mock_get_service, mock_st, temp_backup_dir):
         """Test upload et restauration de fichier."""
-        from src.services.core.backup.service import render_backup_ui
+        from src.services.core.backup.service import afficher_backup_ui
 
         mock_result = MagicMock()
         mock_result.success = True
@@ -1306,17 +1305,17 @@ class TestEdgeCases:
         mock_st.spinner.return_value.__enter__ = MagicMock()
         mock_st.spinner.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_backup_ui()
+        afficher_backup_ui()
 
         mock_service.restore_backup.assert_called_once()
         mock_st.success.assert_called()
 
-    @pytest.mark.skip(reason="render_backup_ui déplacé vers src.ui.views.backup")
+    @pytest.mark.skip(reason="afficher_backup_ui déplacé vers src.ui.views.backup")
     @patch("src.services.core.backup.service.st")
     @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_file_upload_fails(self, mock_get_service, mock_st, temp_backup_dir):
         """Test échec restauration fichier uploadé."""
-        from src.services.core.backup.service import render_backup_ui
+        from src.services.core.backup.service import afficher_backup_ui
 
         mock_result = MagicMock()
         mock_result.success = False
@@ -1340,7 +1339,7 @@ class TestEdgeCases:
         mock_st.spinner.return_value.__enter__ = MagicMock()
         mock_st.spinner.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_backup_ui()
+        afficher_backup_ui()
 
         mock_st.error.assert_called()
         # Vérifie les warnings pour chaque erreur

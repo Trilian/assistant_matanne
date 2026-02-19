@@ -5,7 +5,7 @@ Module Suivi Perso - Dashboard et graphiques
 from .utils import date, get_current_user, go, set_current_user, st, timedelta
 
 
-def render_user_switch():
+def afficher_user_switch():
     """Affiche le switch utilisateur"""
     current = get_current_user()
 
@@ -24,7 +24,7 @@ def render_user_switch():
             st.rerun()
 
 
-def render_dashboard(data: dict):
+def afficher_dashboard(data: dict):
     """Affiche le dashboard principal"""
     user = data.get("user")
     if not user:
@@ -83,10 +83,10 @@ def render_dashboard(data: dict):
 
     # Graphique des 7 derniers jours
     st.markdown("---")
-    render_weekly_chart(data.get("summaries", []), data.get("objectif_pas", 10000))
+    afficher_weekly_chart(data.get("summaries", []), data.get("objectif_pas", 10000))
 
 
-def render_weekly_chart(summaries: list, objectif: int):
+def afficher_weekly_chart(summaries: list, objectif: int):
     """Affiche le graphique des 7 derniers jours"""
     if not summaries:
         st.info("Pas de données Garmin. Connectez votre montre pour voir vos stats.")

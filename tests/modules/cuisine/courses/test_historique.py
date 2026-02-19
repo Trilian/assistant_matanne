@@ -31,20 +31,20 @@ def make_db_context_error(error):
 
 
 class TestRenderHistorique:
-    """Tests pour render_historique()."""
+    """Tests pour afficher_historique()."""
 
     def test_import(self):
         """Test import réussi."""
-        from src.modules.cuisine.courses.historique import render_historique
+        from src.modules.cuisine.courses.historique import afficher_historique
 
-        assert render_historique is not None
+        assert afficher_historique is not None
 
-    @patch("src.modules.cuisine.courses.historique.get_courses_service")
+    @patch("src.modules.cuisine.courses.historique.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.historique.st")
     @patch("src.modules.cuisine.courses.historique.obtenir_contexte_db")
     def test_render_historique_no_articles(self, mock_db, mock_st, mock_service):
         """Test avec aucun article acheté."""
-        from src.modules.cuisine.courses.historique import render_historique
+        from src.modules.cuisine.courses.historique import afficher_historique
 
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
         mock_st.date_input.side_effect = [
@@ -56,18 +56,18 @@ class TestRenderHistorique:
         mock_session.query.return_value.options.return_value.filter.return_value.all.return_value = []
         mock_db.return_value = make_db_context(mock_session)()
 
-        render_historique()
+        afficher_historique()
 
         mock_st.subheader.assert_called()
         mock_st.info.assert_called_with("Aucun achat pendant cette période")
 
-    @patch("src.modules.cuisine.courses.historique.get_courses_service")
+    @patch("src.modules.cuisine.courses.historique.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.historique.st")
     @patch("src.modules.cuisine.courses.historique.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.historique.pd")
     def test_render_historique_with_articles(self, mock_pd, mock_db, mock_st, mock_service):
         """Test avec articles achetés."""
-        from src.modules.cuisine.courses.historique import render_historique
+        from src.modules.cuisine.courses.historique import afficher_historique
 
         # Ensure columns returns enough mocks
         mock_st.columns.side_effect = [
@@ -103,18 +103,18 @@ class TestRenderHistorique:
         mock_df.to_csv.return_value = "test,csv"
         mock_pd.DataFrame.return_value = mock_df
 
-        render_historique()
+        afficher_historique()
 
         mock_st.metric.assert_called()
         mock_st.dataframe.assert_called()
         mock_st.download_button.assert_called()
 
-    @patch("src.modules.cuisine.courses.historique.get_courses_service")
+    @patch("src.modules.cuisine.courses.historique.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.historique.st")
     @patch("src.modules.cuisine.courses.historique.obtenir_contexte_db")
     def test_render_historique_with_multiple_rayons(self, mock_db, mock_st, mock_service):
         """Test statistiques multiples rayons."""
-        from src.modules.cuisine.courses.historique import render_historique
+        from src.modules.cuisine.courses.historique import afficher_historique
 
         mock_st.columns.side_effect = [
             [MagicMock(), MagicMock()],  # date inputs
@@ -144,18 +144,18 @@ class TestRenderHistorique:
         mock_session.query.return_value.options.return_value.filter.return_value.all.return_value = articles
         mock_db.return_value = make_db_context(mock_session)()
 
-        render_historique()
+        afficher_historique()
 
         # Verify metrics called with stats
         assert mock_st.metric.call_count >= 3
 
-    @patch("src.modules.cuisine.courses.historique.get_courses_service")
+    @patch("src.modules.cuisine.courses.historique.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.historique.st")
     @patch("src.modules.cuisine.courses.historique.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.historique.logger")
     def test_render_historique_exception(self, mock_logger, mock_db, mock_st, mock_service):
         """Test gestion erreur."""
-        from src.modules.cuisine.courses.historique import render_historique
+        from src.modules.cuisine.courses.historique import afficher_historique
 
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
         mock_st.date_input.side_effect = [
@@ -164,17 +164,17 @@ class TestRenderHistorique:
         ]
         mock_db.return_value = make_db_context_error(Exception("DB error"))()
 
-        render_historique()
+        afficher_historique()
 
         mock_st.error.assert_called()
         mock_logger.error.assert_called()
 
-    @patch("src.modules.cuisine.courses.historique.get_courses_service")
+    @patch("src.modules.cuisine.courses.historique.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.historique.st")
     @patch("src.modules.cuisine.courses.historique.obtenir_contexte_db")
     def test_render_historique_ia_badge(self, mock_db, mock_st, mock_service):
         """Test badge IA pour suggestions."""
-        from src.modules.cuisine.courses.historique import render_historique
+        from src.modules.cuisine.courses.historique import afficher_historique
 
         mock_st.columns.side_effect = [
             [MagicMock(), MagicMock()],  # date
@@ -203,16 +203,16 @@ class TestRenderHistorique:
         ]
         mock_db.return_value = make_db_context(mock_session)()
 
-        render_historique()
+        afficher_historique()
 
         mock_st.dataframe.assert_called()
 
-    @patch("src.modules.cuisine.courses.historique.get_courses_service")
+    @patch("src.modules.cuisine.courses.historique.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.historique.st")
     @patch("src.modules.cuisine.courses.historique.obtenir_contexte_db")
     def test_render_historique_empty_df(self, mock_db, mock_st, mock_service):
         """Test avec DataFrame vide (cas edge)."""
-        from src.modules.cuisine.courses.historique import render_historique
+        from src.modules.cuisine.courses.historique import afficher_historique
 
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
         mock_st.date_input.side_effect = [
@@ -224,16 +224,16 @@ class TestRenderHistorique:
         mock_session.query.return_value.options.return_value.filter.return_value.all.return_value = []
         mock_db.return_value = make_db_context(mock_session)()
 
-        render_historique()
+        afficher_historique()
 
         mock_st.info.assert_called_with("Aucun achat pendant cette période")
 
-    @patch("src.modules.cuisine.courses.historique.get_courses_service")
+    @patch("src.modules.cuisine.courses.historique.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.historique.st")
     @patch("src.modules.cuisine.courses.historique.obtenir_contexte_db")
     def test_render_historique_null_ingredient(self, mock_db, mock_st, mock_service):
         """Test avec ingrédient null."""
-        from src.modules.cuisine.courses.historique import render_historique
+        from src.modules.cuisine.courses.historique import afficher_historique
 
         mock_st.columns.side_effect = [
             [MagicMock(), MagicMock()],  # date
@@ -258,16 +258,16 @@ class TestRenderHistorique:
         ]
         mock_db.return_value = make_db_context(mock_session)()
 
-        render_historique()
+        afficher_historique()
 
         mock_st.dataframe.assert_called()
 
-    @patch("src.modules.cuisine.courses.historique.get_courses_service")
+    @patch("src.modules.cuisine.courses.historique.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.historique.st")
     @patch("src.modules.cuisine.courses.historique.obtenir_contexte_db")
     def test_render_historique_unknown_priority(self, mock_db, mock_st, mock_service):
         """Test avec priorité inconnue."""
-        from src.modules.cuisine.courses.historique import render_historique
+        from src.modules.cuisine.courses.historique import afficher_historique
 
         mock_st.columns.side_effect = [
             [MagicMock(), MagicMock()],
@@ -296,7 +296,7 @@ class TestRenderHistorique:
         ]
         mock_db.return_value = make_db_context(mock_session)()
 
-        render_historique()
+        afficher_historique()
 
         mock_st.dataframe.assert_called()
 
@@ -308,4 +308,4 @@ class TestHistoriqueModule:
         """Test __all__ exports."""
         from src.modules.cuisine.courses import historique
 
-        assert "render_historique" in historique.__all__
+        assert "afficher_historique" in historique.__all__

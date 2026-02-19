@@ -140,38 +140,38 @@ class TestInitRealtimeSync:
 
 
 class TestRenderRealtimeStatus:
-    """Tests pour render_realtime_status()."""
+    """Tests pour afficher_realtime_status()."""
 
     def test_import(self):
         """Test import réussi."""
-        from src.modules.cuisine.courses.realtime import render_realtime_status
+        from src.modules.cuisine.courses.realtime import afficher_realtime_status
 
-        assert render_realtime_status is not None
+        assert afficher_realtime_status is not None
 
     @patch("src.modules.cuisine.courses.realtime.get_realtime_sync_service")
     @patch("src.modules.cuisine.courses.realtime.st")
     def test_render_not_configured(self, mock_st, mock_service):
         """Test service non configuré."""
-        from src.modules.cuisine.courses.realtime import render_realtime_status
+        from src.modules.cuisine.courses.realtime import afficher_realtime_status
 
         sync_svc = MagicMock()
         sync_svc.is_configured = False
         mock_service.return_value = sync_svc
 
-        render_realtime_status()
+        afficher_realtime_status()
 
         # sidebar should not be used when not configured
         assert True  # Just check no exception
 
-    @patch("src.services.integrations.web.render_presence_indicator")
-    @patch("src.services.integrations.web.render_sync_status")
+    @patch("src.services.integrations.web.afficher_presence_indicator")
+    @patch("src.services.integrations.web.afficher_sync_status")
     @patch("src.modules.cuisine.courses.realtime.get_realtime_sync_service")
     @patch("src.modules.cuisine.courses.realtime.st")
     def test_render_configured_no_typing(
         self, mock_st, mock_service, mock_render_sync, mock_render_presence
     ):
         """Test service configuré sans utilisateurs qui tapent."""
-        from src.modules.cuisine.courses.realtime import render_realtime_status
+        from src.modules.cuisine.courses.realtime import afficher_realtime_status
 
         sync_svc = MagicMock()
         sync_svc.is_configured = True
@@ -182,21 +182,21 @@ class TestRenderRealtimeStatus:
         mock_st.sidebar.__enter__ = MagicMock(return_value=sidebar_mock)
         mock_st.sidebar.__exit__ = MagicMock(return_value=False)
 
-        render_realtime_status()
+        afficher_realtime_status()
 
         # Just check no exception - functions are called internally
         assert True
 
-    @patch("src.services.integrations.web.render_typing_indicator")
-    @patch("src.services.integrations.web.render_presence_indicator")
-    @patch("src.services.integrations.web.render_sync_status")
+    @patch("src.services.integrations.web.afficher_typing_indicator")
+    @patch("src.services.integrations.web.afficher_presence_indicator")
+    @patch("src.services.integrations.web.afficher_sync_status")
     @patch("src.modules.cuisine.courses.realtime.get_realtime_sync_service")
     @patch("src.modules.cuisine.courses.realtime.st")
     def test_render_with_typing_users(
         self, mock_st, mock_service, mock_render_sync, mock_render_presence, mock_render_typing
     ):
         """Test avec utilisateurs qui tapent."""
-        from src.modules.cuisine.courses.realtime import render_realtime_status
+        from src.modules.cuisine.courses.realtime import afficher_realtime_status
 
         typing_user = MagicMock()
         typing_user.is_typing = True
@@ -210,7 +210,7 @@ class TestRenderRealtimeStatus:
         mock_st.sidebar.__enter__ = MagicMock(return_value=sidebar_mock)
         mock_st.sidebar.__exit__ = MagicMock(return_value=False)
 
-        render_realtime_status()
+        afficher_realtime_status()
 
         # Just check no exception
         assert True
@@ -220,11 +220,11 @@ class TestRenderRealtimeStatus:
     @patch("src.modules.cuisine.courses.realtime.logger")
     def test_render_exception(self, mock_logger, mock_st, mock_service):
         """Test gestion exception."""
-        from src.modules.cuisine.courses.realtime import render_realtime_status
+        from src.modules.cuisine.courses.realtime import afficher_realtime_status
 
         mock_service.side_effect = Exception("Service error")
 
-        render_realtime_status()
+        afficher_realtime_status()
 
         mock_logger.debug.assert_called()
 
@@ -381,5 +381,5 @@ class TestRealtimeModule:
         from src.modules.cuisine.courses import realtime
 
         assert "_init_realtime_sync" in realtime.__all__
-        assert "render_realtime_status" in realtime.__all__
+        assert "afficher_realtime_status" in realtime.__all__
         assert "_broadcast_article_change" in realtime.__all__

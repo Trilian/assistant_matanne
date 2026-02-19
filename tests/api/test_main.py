@@ -77,17 +77,18 @@ class TestHealthEndpoint:
 
         assert "status" in data
         assert "version" in data
-        assert "database" in data
+        assert "services" in data
         assert "timestamp" in data
+        assert "uptime_seconds" in data
+        assert "database" in data["services"]
 
     def test_health_db_status(self, client):
         """Endpoint health rapporte l'état de la DB."""
         response = client.get("/health")
         data = response.json()
 
-        # Avec SQLite de test, la DB devrait être "ok" ou "error"
-        # (error possible si SELECT 1 ne fonctionne pas sur SQLite)
-        assert data["database"] in ("ok",) or data["database"].startswith("error")
+        db_status = data["services"]["database"]["status"]
+        assert db_status in ("ok", "error")
 
 
 class TestRecettesEndpoint:
@@ -263,7 +264,7 @@ class TestAuthentication:
         monkeypatch.setenv("ENVIRONMENT", "production")
 
         # Supprimer l'override de l'auth pour tester le vrai comportement
-        from src.api.main import get_current_user
+        from src.api.dependencies import get_current_user
 
         if get_current_user in app.dependency_overrides:
             del app.dependency_overrides[get_current_user]
@@ -286,7 +287,7 @@ class TestAuthentication:
         """La dependency require_auth fonctionne."""
         from fastapi import HTTPException
 
-        from src.api.main import require_auth
+        from src.api.dependencies import require_auth
 
         # Utilisateur valide
         user = {"id": "123", "email": "test@test.com", "role": "admin"}
@@ -335,7 +336,7 @@ class TestIAEndpoints:
         from unittest.mock import patch
 
         # Simuler une limite de débit atteinte
-        with patch("src.api.limitation_debit.verifier_limite_debit_ia") as mock_limit:
+        with patch("src.api.rate_limiting.verifier_limite_debit_ia") as mock_limit:
             from fastapi import HTTPException
 
             mock_limit.side_effect = HTTPException(status_code=429, detail="Limite IA atteinte")
@@ -357,7 +358,7 @@ class TestIAEndpoints:
             mock_instance = mock_service.return_value
             mock_instance.suggerer_recettes_ia.return_value = mock_suggestions
 
-            with patch("src.api.limitation_debit.verifier_limite_debit_ia"):
+            with patch("src.api.rate_limiting.verifier_limite_debit_ia"):
                 response = client.get("/api/v1/suggestions/recettes")
 
                 if response.status_code == 200:

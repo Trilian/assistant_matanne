@@ -9,9 +9,10 @@ import time
 import streamlit as st
 
 from src.services.cuisine.recettes import obtenir_service_recettes
+from src.ui.components.atoms import etat_vide
 
 
-def render_liste():
+def afficher_liste():
     """Affiche la liste des recettes avec pagination"""
     service = obtenir_service_recettes()
 
@@ -157,7 +158,11 @@ def render_liste():
         recettes = [r for r in recettes if r.congelable]
 
     if not recettes:
-        st.info("Aucune recette ne correspond à vos critères. Créez-en une!")
+        etat_vide(
+            "Aucune recette ne correspond à vos critères",
+            "🍳",
+            "Modifiez les filtres ou créez une recette",
+        )
         return
 
     # Pagination
@@ -358,4 +363,4 @@ def render_liste():
                 st.rerun()
 
 
-__all__ = ["render_liste"]
+__all__ = ["afficher_liste"]

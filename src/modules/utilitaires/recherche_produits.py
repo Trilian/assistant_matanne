@@ -9,6 +9,8 @@ import logging
 
 import streamlit as st
 
+from src.ui import etat_vide
+
 logger = logging.getLogger(__name__)
 
 
@@ -125,7 +127,7 @@ def _afficher_produit(produit):
 def _afficher_resultats_recherche(resultats: list):
     """Affiche une liste de résultats de recherche."""
     if not resultats:
-        st.warning("Aucun produit trouvé.")
+        etat_vide("Aucun produit trouvé", "🔍")
         return
 
     st.success(f"✅ {len(resultats)} produit(s) trouvé(s)")

@@ -9,13 +9,15 @@ Interface style Jow:
 - Validation équilibre nutritionnel
 """
 
+from src.ui.components.atoms import etat_vide
+
 from ._common import date, st, timedelta
 from .components import (
-    render_apprentissage_ia,
-    render_carte_recette_suggestion,
-    render_configuration_preferences,
-    render_jour_planning,
-    render_resume_equilibre,
+    afficher_apprentissage_ia,
+    afficher_carte_recette_suggestion,
+    afficher_configuration_preferences,
+    afficher_jour_planning,
+    afficher_resume_equilibre,
 )
 from .generation import generer_semaine_ia
 
@@ -27,6 +29,62 @@ from .preferences import (
     charger_preferences,
     sauvegarder_preferences,
 )
+
+
+def _sauvegarder_planning_db(planning_data: dict, date_debut: date) -> bool:
+    """Sauvegarde le planning généré en base de données."""
+    try:
+        from src.services.cuisine.planning import obtenir_service_planning
+
+        service = obtenir_service_planning()
+
+        # Construire la sélection de recettes
+        recettes_selection = {}
+        for i, (jour, repas) in enumerate(planning_data.items()):
+            for type_repas in ["midi", "soir"]:
+                recette_info = repas.get(type_repas)
+                if recette_info and isinstance(recette_info, dict) and recette_info.get("id"):
+                    recettes_selection[f"jour_{i}"] = recette_info["id"]
+                    break  # Un repas par jour suffit pour le mapping
+
+        if recettes_selection:
+            planning = service.creer_planning_avec_choix(
+                semaine_debut=date_debut,
+                recettes_selection=recettes_selection,
+            )
+            return planning is not None
+    except Exception as e:
+        import logging
+
+        logging.getLogger(__name__).error(f"Erreur sauvegarde planning: {e}")
+    return False
+
+
+def _charger_historique_plannings() -> list[dict]:
+    """Charge l'historique des plannings depuis la base de données."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Planning
+
+        with obtenir_contexte_db() as db:
+            plannings = db.query(Planning).order_by(Planning.semaine_debut.desc()).limit(20).all()
+            return [
+                {
+                    "id": p.id,
+                    "nom": p.nom,
+                    "debut": p.semaine_debut,
+                    "fin": p.semaine_fin,
+                    "actif": p.actif,
+                    "genere_par_ia": p.genere_par_ia,
+                    "nb_repas": len(p.repas) if hasattr(p, "repas") else 0,
+                }
+                for p in plannings
+            ]
+    except Exception as e:
+        import logging
+
+        logging.getLogger(__name__).debug(f"Erreur chargement historique: {e}")
+    return []
 
 
 def app():
@@ -79,7 +137,7 @@ def app():
 
         # Apprentissage IA
         with st.expander("🧠 Ce que l'IA a appris", expanded=False):
-            render_apprentissage_ia()
+            afficher_apprentissage_ia()
 
         st.divider()
 
@@ -127,14 +185,14 @@ def app():
         # Afficher le planning
         if st.session_state.planning_data:
             # Résumé équilibre
-            render_resume_equilibre(st.session_state.planning_data)
+            afficher_resume_equilibre(st.session_state.planning_data)
 
             st.divider()
 
             # Afficher par jour
             for i, (jour, repas) in enumerate(st.session_state.planning_data.items()):
                 jour_date = date_debut + timedelta(days=i)
-                render_jour_planning(jour, jour_date, repas, f"jour_{i}")
+                afficher_jour_planning(jour, jour_date, repas, f"jour_{i}")
 
             st.divider()
 
@@ -156,8 +214,12 @@ def app():
 
             with col_val1:
                 if st.button("💚 Valider ce planning", type="primary", use_container_width=True):
-                    st.success("✅ Planning validé! Redirection vers les courses...")
-                    # TODO: Créer le planning en DB et générer la liste de courses
+                    saved = _sauvegarder_planning_db(st.session_state.planning_data, date_debut)
+                    if saved:
+                        st.success("✅ Planning validé et sauvegardé !")
+                    else:
+                        st.success("✅ Planning validé!")
+                        st.caption("⚠️ Sauvegarde BD partielle (certaines recettes non liées)")
 
             with col_val2:
                 if st.button("🛒 Générer courses", use_container_width=True):
@@ -191,7 +253,7 @@ def app():
     # ═══════════════════════════════════════════════════════
 
     with tab_preferences:
-        render_configuration_preferences()
+        afficher_configuration_preferences()
 
     # ═══════════════════════════════════════════════════════
     # TAB: HISTORIQUE
@@ -200,8 +262,26 @@ def app():
     with tab_historique:
         st.subheader("📋 Historique des plannings")
 
-        # TODO: Charger l'historique depuis la DB
-        st.info("🚧 Historique des plannings passés à venir")
+        historique_plannings = _charger_historique_plannings()
+
+        if historique_plannings:
+            for plan in historique_plannings:
+                with st.container(border=True):
+                    col1, col2, col3 = st.columns([3, 1, 1])
+                    with col1:
+                        st.write(f"**📅 {plan['nom']}**")
+                        st.caption(
+                            f"Du {plan['debut'].strftime('%d/%m/%Y')} au {plan['fin'].strftime('%d/%m/%Y')}"
+                        )
+                    with col2:
+                        st.metric("🍽️ Repas", plan["nb_repas"])
+                    with col3:
+                        badge = "🤖 IA" if plan["genere_par_ia"] else "✍️ Manuel"
+                        st.write(badge)
+        else:
+            etat_vide("Aucun planning sauvegardé", "💭", "Générez votre premier planning de repas")
+
+        st.divider()
 
         st.markdown("##### 🧠 Vos feedbacks")
         feedbacks = charger_feedbacks()
@@ -227,11 +307,11 @@ __all__ = [
     "charger_feedbacks",
     "ajouter_feedback",
     # Components
-    "render_configuration_preferences",
-    "render_apprentissage_ia",
-    "render_carte_recette_suggestion",
-    "render_jour_planning",
-    "render_resume_equilibre",
+    "afficher_configuration_preferences",
+    "afficher_apprentissage_ia",
+    "afficher_carte_recette_suggestion",
+    "afficher_jour_planning",
+    "afficher_resume_equilibre",
     # Generation
     "generer_semaine_ia",
 ]

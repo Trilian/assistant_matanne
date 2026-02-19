@@ -19,19 +19,19 @@ def make_db_context(mock_session):
 
 
 class TestRenderModeles:
-    """Tests pour render_modeles()."""
+    """Tests pour afficher_modeles()."""
 
     def test_import(self):
         """Test import réussi."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
-        assert render_modeles is not None
+        assert afficher_modeles is not None
 
-    @patch("src.modules.cuisine.courses.modeles.get_courses_service")
+    @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_empty(self, mock_st, mock_service):
         """Test sans modèles."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
         svc = MagicMock()
         svc.get_modeles.return_value = []
@@ -45,16 +45,16 @@ class TestRenderModeles:
         tab2.__enter__ = MagicMock(return_value=tab2)
         tab2.__exit__ = MagicMock(return_value=False)
 
-        render_modeles()
+        afficher_modeles()
 
         mock_st.subheader.assert_called()
         mock_st.info.assert_called()
 
-    @patch("src.modules.cuisine.courses.modeles.get_courses_service")
+    @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_with_modeles(self, mock_st, mock_service):
         """Test avec modèles existants."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
         modele = {
             "id": 1,
@@ -97,15 +97,15 @@ class TestRenderModeles:
         mock_st.button.return_value = False
         mock_st.session_state = {"courses_refresh": 0}
 
-        render_modeles()
+        afficher_modeles()
 
         mock_st.write.assert_called()
 
-    @patch("src.modules.cuisine.courses.modeles.get_courses_service")
+    @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_with_modele_notes(self, mock_st, mock_service):
         """Test avec modèles ayant des notes."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
         modele = {
             "id": 2,
@@ -148,15 +148,15 @@ class TestRenderModeles:
         mock_st.button.return_value = False
         mock_st.session_state = {"courses_refresh": 0}
 
-        render_modeles()
+        afficher_modeles()
 
         mock_st.caption.assert_called()
 
-    @patch("src.modules.cuisine.courses.modeles.get_courses_service")
+    @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_load_modele(self, mock_st, mock_service):
         """Test charger modèle."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
         modele = {
             "id": 2,
@@ -191,16 +191,16 @@ class TestRenderModeles:
         mock_st.button.side_effect = [True, False]  # Load button clicked
         mock_st.session_state = {"courses_refresh": 0}
 
-        render_modeles()
+        afficher_modeles()
 
         svc.appliquer_modele.assert_called_with(2)
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.courses.modeles.get_courses_service")
+    @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_load_empty_result(self, mock_st, mock_service):
         """Test charger modèle sans articles."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
         modele = {
             "id": 3,
@@ -235,15 +235,15 @@ class TestRenderModeles:
         mock_st.button.side_effect = [True, False]
         mock_st.session_state = {"courses_refresh": 0}
 
-        render_modeles()
+        afficher_modeles()
 
         mock_st.warning.assert_called()
 
-    @patch("src.modules.cuisine.courses.modeles.get_courses_service")
+    @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_delete_modele(self, mock_st, mock_service):
         """Test supprimer modèle."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
         modele = {
             "id": 4,
@@ -277,16 +277,16 @@ class TestRenderModeles:
         mock_st.button.side_effect = [False, True]  # Delete button clicked
         mock_st.session_state = {"courses_refresh": 0}
 
-        render_modeles()
+        afficher_modeles()
 
         svc.delete_modele.assert_called_with(4)
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.courses.modeles.get_courses_service")
+    @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_delete_error(self, mock_st, mock_service):
         """Test erreur suppression modèle."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
         modele = {
             "id": 5,
@@ -321,15 +321,15 @@ class TestRenderModeles:
         mock_st.button.side_effect = [False, True]
         mock_st.session_state = {"courses_refresh": 0}
 
-        render_modeles()
+        afficher_modeles()
 
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.courses.modeles.get_courses_service")
+    @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_create_empty_name(self, mock_st, mock_service):
         """Test création modèle nom vide."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
         svc = MagicMock()
         svc.get_modeles.return_value = []
@@ -359,15 +359,15 @@ class TestRenderModeles:
         mock_st.button.return_value = True  # Save clicked
         mock_st.session_state = {}
 
-        render_modeles()
+        afficher_modeles()
 
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.courses.modeles.get_courses_service")
+    @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_create_success(self, mock_st, mock_service):
         """Test création modèle réussie."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
         svc = MagicMock()
         svc.get_modeles.return_value = []
@@ -398,18 +398,18 @@ class TestRenderModeles:
         mock_st.button.return_value = True
         mock_st.session_state = {}
 
-        render_modeles()
+        afficher_modeles()
 
         svc.create_modele.assert_called()
         mock_st.success.assert_called()
         mock_st.balloons.assert_called()
 
-    @patch("src.modules.cuisine.courses.modeles.get_courses_service")
+    @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
     @patch("src.modules.cuisine.courses.modeles.logger")
     def test_render_modeles_create_error(self, mock_logger, mock_st, mock_service):
         """Test erreur création modèle."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
         svc = MagicMock()
         svc.get_modeles.return_value = []
@@ -440,16 +440,16 @@ class TestRenderModeles:
         mock_st.button.return_value = True
         mock_st.session_state = {}
 
-        render_modeles()
+        afficher_modeles()
 
         mock_st.error.assert_called()
         mock_logger.error.assert_called()
 
-    @patch("src.modules.cuisine.courses.modeles.get_courses_service")
+    @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_new_tab_empty_list(self, mock_st, mock_service):
         """Test onglet nouveau avec liste vide."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
         svc = MagicMock()
         svc.get_modeles.return_value = []
@@ -463,29 +463,29 @@ class TestRenderModeles:
         tab2.__enter__ = MagicMock(return_value=tab2)
         tab2.__exit__ = MagicMock(return_value=False)
 
-        render_modeles()
+        afficher_modeles()
 
         mock_st.warning.assert_called()
 
-    @patch("src.modules.cuisine.courses.modeles.get_courses_service")
+    @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
     @patch("src.modules.cuisine.courses.modeles.logger")
     def test_render_modeles_global_exception(self, mock_logger, mock_st, mock_service):
         """Test exception globale."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
         mock_service.return_value.get_modeles.side_effect = Exception("Service error")
 
-        render_modeles()
+        afficher_modeles()
 
         mock_st.error.assert_called()
         mock_logger.error.assert_called()
 
-    @patch("src.modules.cuisine.courses.modeles.get_courses_service")
+    @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_load_error_with_traceback(self, mock_st, mock_service):
         """Test charger modèle avec erreur et traceback."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
         modele = {
             "id": 5,
@@ -520,15 +520,15 @@ class TestRenderModeles:
         mock_st.button.side_effect = [True, False]
         mock_st.session_state = {"courses_refresh": 0}
 
-        render_modeles()
+        afficher_modeles()
 
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.courses.modeles.get_courses_service")
+    @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_articles_all_priorities(self, mock_st, mock_service):
         """Test affichage articles avec toutes priorités."""
-        from src.modules.cuisine.courses.modeles import render_modeles
+        from src.modules.cuisine.courses.modeles import afficher_modeles
 
         modele = {
             "id": 6,
@@ -587,7 +587,7 @@ class TestRenderModeles:
         mock_st.button.return_value = False
         mock_st.session_state = {"courses_refresh": 0}
 
-        render_modeles()
+        afficher_modeles()
 
         # Should display articles with different priorities
         assert mock_st.write.call_count >= 3
@@ -600,4 +600,4 @@ class TestModelesModule:
         """Test __all__ exports."""
         from src.modules.cuisine.courses import modeles
 
-        assert "render_modeles" in modeles.__all__
+        assert "afficher_modeles" in modeles.__all__

@@ -112,18 +112,18 @@ class TestImports:
     def test_import_render_functions(self):
         """Test que les fonctions de rendu sont importables."""
         from src.modules.utilitaires.notifications_push import (
-            render_abonnement,
-            render_aide,
-            render_configuration,
-            render_taches_retard,
-            render_test,
+            afficher_abonnement,
+            afficher_aide,
+            afficher_configuration,
+            afficher_taches_retard,
+            afficher_test,
         )
 
-        assert callable(render_configuration)
-        assert callable(render_abonnement)
-        assert callable(render_test)
-        assert callable(render_taches_retard)
-        assert callable(render_aide)
+        assert callable(afficher_configuration)
+        assert callable(afficher_abonnement)
+        assert callable(afficher_test)
+        assert callable(afficher_taches_retard)
+        assert callable(afficher_aide)
 
 
 # â•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Â
@@ -168,20 +168,20 @@ class TestHelpers:
 
 
 class TestRenderConfiguration:
-    """Tests de la fonction render_configuration."""
+    """Tests de la fonction afficher_configuration."""
 
     @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
     def test_render_configuration_affiche_formulaire(
         self, mock_charger_config, mock_get_service, mock_st, mock_config
     ):
-        """Test que render_configuration affiche le formulaire."""
-        from src.modules.utilitaires.notifications_push import render_configuration
+        """Test que afficher_configuration affiche le formulaire."""
+        from src.modules.utilitaires.notifications_push import afficher_configuration
 
         mock_charger_config.return_value = mock_config
         mock_st.form_submit_button.return_value = False
 
-        render_configuration()
+        afficher_configuration()
 
         mock_st.subheader.assert_called_once()
         mock_st.form.assert_called_once_with("config_notif")
@@ -192,7 +192,7 @@ class TestRenderConfiguration:
         self, mock_charger_config, mock_sauvegarder, mock_st, mock_config
     ):
         """Test la soumission du formulaire de configuration."""
-        from src.modules.utilitaires.notifications_push import render_configuration
+        from src.modules.utilitaires.notifications_push import afficher_configuration
 
         mock_charger_config.return_value = mock_config
         mock_st.form_submit_button.return_value = True
@@ -200,27 +200,27 @@ class TestRenderConfiguration:
         mock_st.toggle.side_effect = [True, True, False]  # actif, rappels_taches, rappels_courses
         mock_st.slider.return_value = 10
 
-        render_configuration()
+        afficher_configuration()
 
         mock_sauvegarder.assert_called_once()
         mock_st.success.assert_called()
 
 
 class TestRenderAbonnement:
-    """Tests de la fonction render_abonnement."""
+    """Tests de la fonction afficher_abonnement."""
 
     @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
     def test_render_abonnement_affiche_qr_code(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
     ):
-        """Test que render_abonnement affiche le QR code."""
-        from src.modules.utilitaires.notifications_push import render_abonnement
+        """Test que afficher_abonnement affiche le QR code."""
+        from src.modules.utilitaires.notifications_push import afficher_abonnement
 
         mock_charger_config.return_value = mock_config
         mock_get_service.return_value = mock_service
 
-        render_abonnement()
+        afficher_abonnement()
 
         mock_st.subheader.assert_called_once()
         mock_service.get_subscribe_qr_url.assert_called_once()
@@ -231,28 +231,28 @@ class TestRenderAbonnement:
     def test_render_abonnement_affiche_urls(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
     ):
-        """Test que render_abonnement affiche les URLs."""
-        from src.modules.utilitaires.notifications_push import render_abonnement
+        """Test que afficher_abonnement affiche les URLs."""
+        from src.modules.utilitaires.notifications_push import afficher_abonnement
 
         mock_charger_config.return_value = mock_config
         mock_get_service.return_value = mock_service
 
-        render_abonnement()
+        afficher_abonnement()
 
         mock_service.get_web_url.assert_called_once()
         mock_st.markdown.assert_called()
 
 
 class TestRenderTest:
-    """Tests de la fonction render_test."""
+    """Tests de la fonction afficher_test."""
 
     @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
     def test_render_test_affiche_boutons(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
     ):
-        """Test que render_test affiche les boutons de test."""
-        from src.modules.utilitaires.notifications_push import render_test
+        """Test que afficher_test affiche les boutons de test."""
+        from src.modules.utilitaires.notifications_push import afficher_test
 
         mock_charger_config.return_value = mock_config
         mock_get_service.return_value = mock_service
@@ -260,7 +260,7 @@ class TestRenderTest:
         mock_st.button.return_value = False
         mock_st.form_submit_button.return_value = False
 
-        render_test()
+        afficher_test()
 
         mock_st.subheader.assert_called_once()
         assert mock_st.button.call_count >= 2
@@ -271,7 +271,7 @@ class TestRenderTest:
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
     ):
         """Test l'envoi d'une notification de test."""
-        from src.modules.utilitaires.notifications_push import render_test
+        from src.modules.utilitaires.notifications_push import afficher_test
 
         mock_charger_config.return_value = mock_config
         mock_get_service.return_value = mock_service
@@ -279,7 +279,7 @@ class TestRenderTest:
         mock_st.button.side_effect = [True, False]  # Premier bouton cliquÃƒÂ©
         mock_st.form_submit_button.return_value = False
 
-        render_test()
+        afficher_test()
 
         mock_service.test_connexion_sync.assert_called_once()
         mock_st.success.assert_called()
@@ -290,7 +290,7 @@ class TestRenderTest:
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
     ):
         """Test l'affichage d'erreur si test ÃƒÂ©choue."""
-        from src.modules.utilitaires.notifications_push import render_test
+        from src.modules.utilitaires.notifications_push import afficher_test
 
         mock_charger_config.return_value = mock_config
         mock_service.test_connexion_sync.return_value = MagicMock(
@@ -301,7 +301,7 @@ class TestRenderTest:
         mock_st.button.side_effect = [True, False]
         mock_st.form_submit_button.return_value = False
 
-        render_test()
+        afficher_test()
 
         mock_st.error.assert_called()
 
@@ -311,7 +311,7 @@ class TestRenderTest:
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
     ):
         """Test le mode dÃƒÂ©mo est disponible via toggle."""
-        from src.modules.utilitaires.notifications_push import render_test
+        from src.modules.utilitaires.notifications_push import afficher_test
 
         mock_charger_config.return_value = mock_config
         mock_get_service.return_value = mock_service
@@ -319,7 +319,7 @@ class TestRenderTest:
         mock_st.button.return_value = False
         mock_st.form_submit_button.return_value = False
 
-        render_test()
+        afficher_test()
 
         # VÃƒÂ©rifier que le toggle mode dÃƒÂ©mo est affichÃƒÂ©
         mock_st.toggle.assert_called_once()
@@ -328,7 +328,7 @@ class TestRenderTest:
 
 
 class TestRenderTachesRetard:
-    """Tests de la fonction render_taches_retard."""
+    """Tests de la fonction afficher_taches_retard."""
 
     @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
@@ -336,14 +336,14 @@ class TestRenderTachesRetard:
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
     ):
         """Test l'affichage sans tÃƒÂ¢ches en retard."""
-        from src.modules.utilitaires.notifications_push import render_taches_retard
+        from src.modules.utilitaires.notifications_push import afficher_taches_retard
 
         mock_charger_config.return_value = mock_config
         mock_get_service.return_value = mock_service
         mock_service.obtenir_taches_en_retard.return_value = []
         mock_service.obtenir_taches_du_jour.return_value = []
 
-        render_taches_retard()
+        afficher_taches_retard()
 
         mock_st.success.assert_called()  # "Aucune tÃƒÂ¢che en retard"
 
@@ -359,7 +359,7 @@ class TestRenderTachesRetard:
         mock_tache_retard,
     ):
         """Test l'affichage avec tÃƒÂ¢ches en retard."""
-        from src.modules.utilitaires.notifications_push import render_taches_retard
+        from src.modules.utilitaires.notifications_push import afficher_taches_retard
 
         mock_charger_config.return_value = mock_config
         mock_service.obtenir_taches_en_retard.return_value = [mock_tache_retard]
@@ -367,7 +367,7 @@ class TestRenderTachesRetard:
         mock_get_service.return_value = mock_service
         mock_st.button.return_value = False
 
-        render_taches_retard()
+        afficher_taches_retard()
 
         mock_st.metric.assert_called()
         mock_st.container.assert_called()
@@ -378,24 +378,24 @@ class TestRenderTachesRetard:
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
     ):
         """Test l'affichage des mÃƒÂ©triques."""
-        from src.modules.utilitaires.notifications_push import render_taches_retard
+        from src.modules.utilitaires.notifications_push import afficher_taches_retard
 
         mock_charger_config.return_value = mock_config
         mock_get_service.return_value = mock_service
 
-        render_taches_retard()
+        afficher_taches_retard()
 
         assert mock_st.metric.call_count == 3  # En retard, Aujourd'hui, Total
 
 
 class TestRenderAide:
-    """Tests de la fonction render_aide."""
+    """Tests de la fonction afficher_aide."""
 
     def test_render_aide_affiche_aide(self, mock_st):
-        """Test que render_aide affiche l'aide."""
-        from src.modules.utilitaires.notifications_push import render_aide
+        """Test que afficher_aide affiche l'aide."""
+        from src.modules.utilitaires.notifications_push import afficher_aide
 
-        render_aide()
+        afficher_aide()
 
         mock_st.subheader.assert_called_once()
         mock_st.markdown.assert_called()
@@ -409,11 +409,11 @@ class TestRenderAide:
 class TestApp:
     """Tests de la fonction app() point d'entrÃƒÂ©e."""
 
-    @patch("src.modules.utilitaires.notifications_push.render_aide")
-    @patch("src.modules.utilitaires.notifications_push.render_test")
-    @patch("src.modules.utilitaires.notifications_push.render_taches_retard")
-    @patch("src.modules.utilitaires.notifications_push.render_configuration")
-    @patch("src.modules.utilitaires.notifications_push.render_abonnement")
+    @patch("src.modules.utilitaires.notifications_push.afficher_aide")
+    @patch("src.modules.utilitaires.notifications_push.afficher_test")
+    @patch("src.modules.utilitaires.notifications_push.afficher_taches_retard")
+    @patch("src.modules.utilitaires.notifications_push.afficher_configuration")
+    @patch("src.modules.utilitaires.notifications_push.afficher_abonnement")
     def test_app_affiche_titre(
         self,
         mock_render_abonnement,
@@ -431,11 +431,11 @@ class TestApp:
         mock_st.title.assert_called_once_with("Ã°Å¸❌❌ Notifications Push")
         mock_st.caption.assert_called()
 
-    @patch("src.modules.utilitaires.notifications_push.render_aide")
-    @patch("src.modules.utilitaires.notifications_push.render_test")
-    @patch("src.modules.utilitaires.notifications_push.render_taches_retard")
-    @patch("src.modules.utilitaires.notifications_push.render_configuration")
-    @patch("src.modules.utilitaires.notifications_push.render_abonnement")
+    @patch("src.modules.utilitaires.notifications_push.afficher_aide")
+    @patch("src.modules.utilitaires.notifications_push.afficher_test")
+    @patch("src.modules.utilitaires.notifications_push.afficher_taches_retard")
+    @patch("src.modules.utilitaires.notifications_push.afficher_configuration")
+    @patch("src.modules.utilitaires.notifications_push.afficher_abonnement")
     def test_app_cree_tabs(
         self,
         mock_render_abonnement,
@@ -455,11 +455,11 @@ class TestApp:
         args = mock_st.tabs.call_args[0][0]
         assert len(args) == 5
 
-    @patch("src.modules.utilitaires.notifications_push.render_aide")
-    @patch("src.modules.utilitaires.notifications_push.render_test")
-    @patch("src.modules.utilitaires.notifications_push.render_taches_retard")
-    @patch("src.modules.utilitaires.notifications_push.render_configuration")
-    @patch("src.modules.utilitaires.notifications_push.render_abonnement")
+    @patch("src.modules.utilitaires.notifications_push.afficher_aide")
+    @patch("src.modules.utilitaires.notifications_push.afficher_test")
+    @patch("src.modules.utilitaires.notifications_push.afficher_taches_retard")
+    @patch("src.modules.utilitaires.notifications_push.afficher_configuration")
+    @patch("src.modules.utilitaires.notifications_push.afficher_abonnement")
     def test_app_appelle_toutes_les_fonctions_render(
         self,
         mock_render_abonnement,

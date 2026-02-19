@@ -142,14 +142,14 @@ class TestInjectPwaMeta:
 
 
 class TestRenderInstallPrompt:
-    """Tests pour render_install_prompt."""
+    """Tests pour afficher_install_prompt."""
 
     @patch("src.ui.views.synchronisation.components", create=True)
     def test_render_install_calls_components(self, mock_components):
         """Test appel de components.html."""
-        from src.services.integrations.web.pwa import render_install_prompt
+        from src.services.integrations.web.pwa import afficher_install_prompt
 
-        render_install_prompt()
+        afficher_install_prompt()
 
         mock_components.html.assert_called_once()
         call_args = mock_components.html.call_args

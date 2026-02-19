@@ -19,19 +19,19 @@ def create_columns_side_effect(*sizes):
 
 
 class TestRenderOutils:
-    """Tests pour render_outils()."""
+    """Tests pour afficher_outils()."""
 
     def test_import(self):
         """Test import réussi."""
-        from src.modules.cuisine.courses.outils import render_outils
+        from src.modules.cuisine.courses.outils import afficher_outils
 
-        assert render_outils is not None
+        assert afficher_outils is not None
 
-    @patch("src.modules.cuisine.courses.outils.get_courses_service")
+    @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.outils.st")
     def test_render_outils_tabs(self, mock_st, mock_service):
         """Test affichage des onglets."""
-        from src.modules.cuisine.courses.outils import render_outils
+        from src.modules.cuisine.courses.outils import afficher_outils
 
         svc = MagicMock()
         svc.get_liste_courses.return_value = []
@@ -47,16 +47,16 @@ class TestRenderOutils:
         mock_st.columns.side_effect = create_columns_side_effect(2, 2, 2, 4, 3)
         mock_st.file_uploader.return_value = None
 
-        render_outils()
+        afficher_outils()
 
         mock_st.subheader.assert_called()
         mock_st.tabs.assert_called()
 
-    @patch("src.modules.cuisine.courses.outils.get_courses_service")
+    @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.outils.st")
     def test_render_outils_barcode_tab(self, mock_st, mock_service):
         """Test onglet code-barres."""
-        from src.modules.cuisine.courses.outils import render_outils
+        from src.modules.cuisine.courses.outils import afficher_outils
 
         svc = MagicMock()
         svc.get_liste_courses.return_value = []
@@ -71,16 +71,16 @@ class TestRenderOutils:
         mock_st.columns.side_effect = create_columns_side_effect(2, 2, 2, 4, 3)
         mock_st.file_uploader.return_value = None
 
-        render_outils()
+        afficher_outils()
 
         mock_st.info.assert_called()
         mock_st.write.assert_called()
 
-    @patch("src.modules.cuisine.courses.outils.get_courses_service")
+    @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.outils.st")
     def test_render_outils_share_tab(self, mock_st, mock_service):
         """Test onglet partage."""
-        from src.modules.cuisine.courses.outils import render_outils
+        from src.modules.cuisine.courses.outils import afficher_outils
 
         svc = MagicMock()
         svc.get_liste_courses.return_value = []
@@ -96,16 +96,16 @@ class TestRenderOutils:
         mock_st.multiselect.return_value = []
         mock_st.file_uploader.return_value = None
 
-        render_outils()
+        afficher_outils()
 
         mock_st.multiselect.assert_called()
 
-    @patch("src.modules.cuisine.courses.outils.get_courses_service")
+    @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.outils.st")
     @patch("src.modules.cuisine.courses.outils.pd")
     def test_render_outils_export_with_data(self, mock_pd, mock_st, mock_service):
         """Test export avec données."""
-        from src.modules.cuisine.courses.outils import render_outils
+        from src.modules.cuisine.courses.outils import afficher_outils
 
         articles = [
             {
@@ -135,17 +135,17 @@ class TestRenderOutils:
         mock_st.columns.side_effect = create_columns_side_effect(2, 2, 2, 4, 3)
         mock_st.file_uploader.return_value = None
 
-        render_outils()
+        afficher_outils()
 
         mock_st.download_button.assert_called()
 
-    @patch("src.modules.cuisine.courses.outils.get_courses_service")
+    @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.outils.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.outils.st")
     @patch("src.modules.cuisine.courses.outils.pd")
     def test_render_outils_import_csv(self, mock_pd, mock_st, mock_db, mock_service):
         """Test import CSV."""
-        from src.modules.cuisine.courses.outils import render_outils
+        from src.modules.cuisine.courses.outils import afficher_outils
 
         svc = MagicMock()
         svc.get_liste_courses.return_value = []
@@ -170,17 +170,17 @@ class TestRenderOutils:
         mock_st.columns.side_effect = create_columns_side_effect(2, 2, 2, 4, 3)
         mock_st.button.return_value = False
 
-        render_outils()
+        afficher_outils()
 
         mock_st.write.assert_called()
 
-    @patch("src.modules.cuisine.courses.outils.get_courses_service")
+    @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.outils.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.outils.st")
     @patch("src.modules.cuisine.courses.outils.pd")
     def test_render_outils_import_confirm(self, mock_pd, mock_st, mock_db, mock_service):
         """Test confirmation import."""
-        from src.modules.cuisine.courses.outils import render_outils
+        from src.modules.cuisine.courses.outils import afficher_outils
 
         svc = MagicMock()
         svc.get_liste_courses.return_value = []
@@ -237,18 +237,18 @@ class TestRenderOutils:
         mock_session.query.return_value.filter.return_value.first.return_value = mock_ingredient
         mock_db.return_value = iter([mock_session])
 
-        render_outils()
+        afficher_outils()
 
         svc.create.assert_called()
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.courses.outils.get_courses_service")
+    @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.outils.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.outils.st")
     @patch("src.modules.cuisine.courses.outils.pd")
     def test_render_outils_import_new_ingredient(self, mock_pd, mock_st, mock_db, mock_service):
         """Test import créant nouvel ingrédient."""
-        from src.modules.cuisine.courses.outils import render_outils
+        from src.modules.cuisine.courses.outils import afficher_outils
 
         svc = MagicMock()
         svc.get_liste_courses.return_value = []
@@ -302,16 +302,16 @@ class TestRenderOutils:
         mock_session.query.return_value.filter.return_value.first.return_value = None  # No existing
         mock_db.return_value = iter([mock_session])
 
-        render_outils()
+        afficher_outils()
 
         mock_session.add.assert_called()
 
-    @patch("src.modules.cuisine.courses.outils.get_courses_service")
+    @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.outils.st")
     @patch("src.modules.cuisine.courses.outils.pd")
     def test_render_outils_import_error(self, mock_pd, mock_st, mock_service):
         """Test erreur import."""
-        from src.modules.cuisine.courses.outils import render_outils
+        from src.modules.cuisine.courses.outils import afficher_outils
 
         svc = MagicMock()
         svc.get_liste_courses.return_value = []
@@ -331,15 +331,15 @@ class TestRenderOutils:
 
         mock_st.columns.side_effect = create_columns_side_effect(2, 2, 2, 4, 3)
 
-        render_outils()
+        afficher_outils()
 
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.courses.outils.get_courses_service")
+    @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.outils.st")
     def test_render_outils_stats_tab(self, mock_st, mock_service):
         """Test onglet statistiques."""
-        from src.modules.cuisine.courses.outils import render_outils
+        from src.modules.cuisine.courses.outils import afficher_outils
 
         articles = [
             {"priorite": "haute", "rayon_magasin": "R1"},
@@ -360,15 +360,15 @@ class TestRenderOutils:
         mock_st.columns.side_effect = create_columns_side_effect(2, 2, 2, 4, 3)
         mock_st.file_uploader.return_value = None
 
-        render_outils()
+        afficher_outils()
 
         mock_st.metric.assert_called()
 
-    @patch("src.modules.cuisine.courses.outils.get_courses_service")
+    @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.outils.st")
     def test_render_outils_stats_error(self, mock_st, mock_service):
         """Test erreur stats."""
-        from src.modules.cuisine.courses.outils import render_outils
+        from src.modules.cuisine.courses.outils import afficher_outils
 
         svc = MagicMock()
         svc.get_liste_courses.side_effect = [[], [], Exception("Stats error")]
@@ -383,15 +383,15 @@ class TestRenderOutils:
         mock_st.columns.side_effect = create_columns_side_effect(2, 2, 2, 4, 3)
         mock_st.file_uploader.return_value = None
 
-        render_outils()
+        afficher_outils()
 
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.courses.outils.get_courses_service")
+    @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.outils.st")
     def test_render_outils_export_empty_list(self, mock_st, mock_service):
         """Test export liste vide."""
-        from src.modules.cuisine.courses.outils import render_outils
+        from src.modules.cuisine.courses.outils import afficher_outils
 
         svc = MagicMock()
         svc.get_liste_courses.return_value = []
@@ -406,7 +406,7 @@ class TestRenderOutils:
         mock_st.columns.side_effect = create_columns_side_effect(2, 2, 2, 4, 3)
         mock_st.file_uploader.return_value = None
 
-        render_outils()
+        afficher_outils()
 
         # download_button should not be called for empty list
         assert mock_st.download_button.call_count == 0 or True  # May or may not be called
@@ -419,4 +419,4 @@ class TestOutilsModule:
         """Test __all__ exports."""
         from src.modules.cuisine.courses import outils
 
-        assert "render_outils" in outils.__all__
+        assert "afficher_outils" in outils.__all__

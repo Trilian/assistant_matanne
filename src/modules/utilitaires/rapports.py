@@ -13,17 +13,17 @@ import pandas as pd
 import streamlit as st
 
 # Logique metier pure
-from src.services.rapports import RapportsPDFService
+from src.services.rapports import ServiceRapportsPDF
 
 # ═══════════════════════════════════════════════════════════
 # INITIALISATION
 # ═══════════════════════════════════════════════════════════
 
 
-def get_rapports_service() -> RapportsPDFService:
+def get_rapports_service() -> ServiceRapportsPDF:
     """Get ou creer service rapports"""
     if "rapports_service" not in st.session_state:
-        st.session_state.rapports_service = RapportsPDFService()
+        st.session_state.rapports_service = ServiceRapportsPDF()
     return st.session_state.rapports_service
 
 
@@ -47,16 +47,16 @@ def app():
     tab1, tab2, tab3, tab4 = st.tabs(["📦 Stocks", "💡 Budget", "🎯 Gaspillage", "🗑️ Historique"])
 
     with tab1:
-        render_rapport_stocks()
+        afficher_rapport_stocks()
 
     with tab2:
-        render_rapport_budget()
+        afficher_rapport_budget()
 
     with tab3:
-        render_analyse_gaspillage()
+        afficher_analyse_gaspillage()
 
     with tab4:
-        render_historique()
+        afficher_historique()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -64,7 +64,7 @@ def app():
 # ═══════════════════════════════════════════════════════════
 
 
-def render_rapport_stocks():
+def afficher_rapport_stocks():
     """Rapport hebdo stocks"""
 
     service = get_rapports_service()
@@ -203,7 +203,7 @@ def render_rapport_stocks():
 # ═══════════════════════════════════════════════════════════
 
 
-def render_rapport_budget():
+def afficher_rapport_budget():
     """Rapport budget/depenses"""
 
     service = get_rapports_service()
@@ -339,7 +339,7 @@ def render_rapport_budget():
 # ═══════════════════════════════════════════════════════════
 
 
-def render_analyse_gaspillage():
+def afficher_analyse_gaspillage():
     """Analyse gaspillage"""
 
     service = get_rapports_service()
@@ -472,7 +472,7 @@ def render_analyse_gaspillage():
 # ═══════════════════════════════════════════════════════════
 
 
-def render_historique():
+def afficher_historique():
     """Historique rapports generes"""
 
     st.subheader("🗑️ Historique & Planification")

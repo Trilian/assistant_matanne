@@ -12,9 +12,7 @@ import pytest
 
 from src.core.errors_base import ErreurNonTrouve, ErreurValidation
 from src.services.rapports.generation import (
-    RapportsPDFService,
     ServiceRapportsPDF,
-    get_rapports_pdf_service,
     obtenir_service_rapports_pdf,
 )
 from src.services.rapports.types import (
@@ -659,11 +657,3 @@ class TestFactoryFunctions:
         service2 = obtenir_service_rapports_pdf()
         assert service1 is service2
         assert isinstance(service1, ServiceRapportsPDF)
-
-    def test_alias_rapports_pdf_service(self):
-        """Vérifie l'alias RapportsPDFService."""
-        assert RapportsPDFService is ServiceRapportsPDF
-
-    def test_alias_get_rapports_pdf_service(self):
-        """Vérifie l'alias get_rapports_pdf_service."""
-        assert get_rapports_pdf_service is obtenir_service_rapports_pdf

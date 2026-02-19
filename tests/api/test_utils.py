@@ -9,7 +9,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi import HTTPException
 
-
 # ═══════════════════════════════════════════════════════════════════════
 # TESTS construire_reponse_paginee
 # ═══════════════════════════════════════════════════════════════════════
@@ -237,31 +236,6 @@ class TestGererExceptionApi:
 # ═══════════════════════════════════════════════════════════════════════
 
 
-class TestCreerDependanceSession:
-    """Tests pour la factory de dépendance session."""
-
-    def test_retourne_callable(self):
-        """Retourne une fonction utilisable comme dépendance FastAPI."""
-        from src.api.utils import creer_dependance_session
-
-        dep = creer_dependance_session()
-        assert callable(dep)
-
-    @patch("src.core.db.obtenir_contexte_db")
-    def test_yield_session_via_generateur(self, mock_db):
-        """Le générateur yield une session."""
-        from src.api.utils import creer_dependance_session
-
-        mock_session = MagicMock()
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
-
-        dep = creer_dependance_session()
-        gen = dep()
-        session = next(gen)
-        assert session is mock_session
-
-
 # ═══════════════════════════════════════════════════════════════════════
 # TESTS D'IMPORT
 # ═══════════════════════════════════════════════════════════════════════
@@ -277,19 +251,16 @@ class TestImports:
         assert hasattr(utils, "executer_avec_session")
         assert hasattr(utils, "construire_reponse_paginee")
         assert hasattr(utils, "gerer_exception_api")
-        assert hasattr(utils, "creer_dependance_session")
 
     def test_import_crud(self):
         """Le module crud s'importe directement."""
         from src.api.utils.crud import (
             construire_reponse_paginee,
-            creer_dependance_session,
             executer_avec_session,
         )
 
         assert callable(executer_avec_session)
         assert callable(construire_reponse_paginee)
-        assert callable(creer_dependance_session)
 
     def test_import_exceptions(self):
         """Le module exceptions s'importe directement."""

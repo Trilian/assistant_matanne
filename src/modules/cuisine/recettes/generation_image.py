@@ -7,7 +7,7 @@ import streamlit as st
 from src.services.cuisine.recettes import obtenir_service_recettes
 
 
-def render_generer_image(recette):
+def afficher_generer_image(recette):
     """Affiche l'interface pour générer une image pour la recette"""
     st.subheader("⏰ Générer une image pertinente")
 
@@ -95,4 +95,4 @@ def render_generer_image(recette):
                     st.error(f"❌ Erreur sauvegarde: {str(e)}")
 
 
-__all__ = ["render_generer_image"]
+__all__ = ["afficher_generer_image"]

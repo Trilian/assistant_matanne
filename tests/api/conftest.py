@@ -79,8 +79,8 @@ def app(monkeypatch, db):
     monkeypatch.setattr("src.core.db.obtenir_contexte_db", mock_obtenir_contexte_db)
 
     # Maintenant import l'app
+    from src.api.dependencies import get_current_user
     from src.api.main import app as fastapi_app
-    from src.api.main import get_current_user
 
     # Override FastAPI dependency pour get_current_user
     def mock_get_current_user():
@@ -387,28 +387,12 @@ def set_development_environment(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def mock_rate_limit_dispatch(monkeypatch):
-    """Mock le LimiteurDebit pour désactiver le rate limiting dans les tests."""
+    """Désactive le rate limiting global pour les tests API.
 
-    # Mock le LimiteurDebit pour qu'il ne bloque jamais
-    async def mock_verifier_limite(*args, **kwargs):
-        """Mock verifier_limite qui ne lève jamais d'exception."""
-        return {"remaining": 100, "limit": 1000, "reset": 0}
-
-    async def mock_dispatch(self, request, call_next):
-        """Mock dispatch qui passe directement au handler."""
-        return await call_next(request)
-
-    # Patch les méthodes du rate limiter
-    try:
-        from src.api import rate_limiting
-
-        # Patch verifier_limite pour ne jamais lever HTTPException
-        monkeypatch.setattr(rate_limiting.LimiteurDebit, "verifier_limite", mock_verifier_limite)
-        # Patch le middleware dispatch
-        monkeypatch.setattr(rate_limiting.MiddlewareLimitationDebit, "dispatch", mock_dispatch)
-    except (ImportError, AttributeError):
-        pass
-
+    Ne patch PAS les méthodes de classe (LimiteurDebit, MiddlewareLimitationDebit)
+    car les tests de limitation de débit créent leurs propres instances.
+    Le rate limiting est déjà désactivé via RATE_LIMITING_DISABLED=true (fixture disable_rate_limiting).
+    """
     yield
 
 

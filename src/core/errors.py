@@ -304,9 +304,9 @@ def afficher_erreur_streamlit(erreur: Exception, contexte: str = "") -> None:
             ErreurServiceExterne: (st.error, "🌐"),
         }
 
-        for exc_type, (render_fn, prefix) in mapping.items():
+        for exc_type, (afficher_fn, prefix) in mapping.items():
             if isinstance(erreur, exc_type):
-                render_fn(f"{prefix} {erreur.message_utilisateur}")
+                afficher_fn(f"{prefix} {erreur.message_utilisateur}")
                 break
         else:
             st.error(f"[ERROR] {erreur.message_utilisateur}")

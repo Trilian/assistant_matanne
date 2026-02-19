@@ -133,28 +133,28 @@ class TestImports:
         assert callable(count_urgent_purchases)
 
     def test_import_render_card_jules(self):
-        """Test import de render_card_jules."""
-        from src.modules.famille.hub_famille import render_card_jules
+        """Test import de afficher_card_jules."""
+        from src.modules.famille.hub_famille import afficher_card_jules
 
-        assert callable(render_card_jules)
+        assert callable(afficher_card_jules)
 
     def test_import_render_card_weekend(self):
-        """Test import de render_card_weekend."""
-        from src.modules.famille.hub_famille import render_card_weekend
+        """Test import de afficher_card_weekend."""
+        from src.modules.famille.hub_famille import afficher_card_weekend
 
-        assert callable(render_card_weekend)
+        assert callable(afficher_card_weekend)
 
     def test_import_render_card_user(self):
-        """Test import de render_card_user."""
-        from src.modules.famille.hub_famille import render_card_user
+        """Test import de afficher_card_user."""
+        from src.modules.famille.hub_famille import afficher_card_user
 
-        assert callable(render_card_user)
+        assert callable(afficher_card_user)
 
     def test_import_render_card_achats(self):
-        """Test import de render_card_achats."""
-        from src.modules.famille.hub_famille import render_card_achats
+        """Test import de afficher_card_achats."""
+        from src.modules.famille.hub_famille import afficher_card_achats
 
-        assert callable(render_card_achats)
+        assert callable(afficher_card_achats)
 
     def test_import_app(self):
         """Test import de app."""
@@ -163,16 +163,16 @@ class TestImports:
         assert callable(app)
 
     def test_import_render_hub(self):
-        """Test import de render_hub."""
-        from src.modules.famille.hub_famille import render_hub
+        """Test import de afficher_hub."""
+        from src.modules.famille.hub_famille import afficher_hub
 
-        assert callable(render_hub)
+        assert callable(afficher_hub)
 
     def test_import_render_weekend_preview(self):
-        """Test import de render_weekend_preview."""
-        from src.modules.famille.hub_famille import render_weekend_preview
+        """Test import de afficher_weekend_preview."""
+        from src.modules.famille.hub_famille import afficher_weekend_preview
 
-        assert callable(render_weekend_preview)
+        assert callable(afficher_weekend_preview)
 
     def test_import_card_styles(self):
         """Test import de CARD_STYLES."""
@@ -444,19 +444,19 @@ class TestCountUrgentPurchases:
 
 @pytest.mark.unit
 class TestRenderCardJules:
-    """Tests pour render_card_jules."""
+    """Tests pour afficher_card_jules."""
 
     @patch("src.modules.famille.hub_famille.st")
     @patch("src.modules.famille.hub_famille.calculer_age_jules")
     def test_render_card_jules_affiche_bouton(self, mock_age, mock_st):
         """Test que la card Jules affiche un bouton."""
-        from src.modules.famille.hub_famille import render_card_jules
+        from src.modules.famille.hub_famille import afficher_card_jules
 
         mock_age.return_value = {"mois": 19, "jours": 0, "texte": "19 mois"}
         mock_st.button.return_value = False
         mock_st.session_state = {}
 
-        render_card_jules()
+        afficher_card_jules()
 
         mock_st.button.assert_called_once()
         mock_st.caption.assert_called_once()
@@ -465,13 +465,13 @@ class TestRenderCardJules:
     @patch("src.modules.famille.hub_famille.calculer_age_jules")
     def test_render_card_jules_clic_navigation(self, mock_age, mock_st):
         """Test navigation au clic sur la card Jules."""
-        from src.modules.famille.hub_famille import render_card_jules
+        from src.modules.famille.hub_famille import afficher_card_jules
 
         mock_age.return_value = {"mois": 19, "jours": 0, "texte": "19 mois"}
         mock_st.button.return_value = True
         mock_st.session_state = {}
 
-        render_card_jules()
+        afficher_card_jules()
 
         assert mock_st.session_state.get("famille_page") == "jules"
         mock_st.rerun.assert_called_once()
@@ -479,19 +479,19 @@ class TestRenderCardJules:
 
 @pytest.mark.unit
 class TestRenderCardWeekend:
-    """Tests pour render_card_weekend."""
+    """Tests pour afficher_card_weekend."""
 
     @patch("src.modules.famille.hub_famille.st")
     @patch("src.modules.famille.hub_famille.count_weekend_activities")
     def test_render_card_weekend_sans_activites(self, mock_count, mock_st):
         """Test card weekend sans activités."""
-        from src.modules.famille.hub_famille import render_card_weekend
+        from src.modules.famille.hub_famille import afficher_card_weekend
 
         mock_count.return_value = 0
         mock_st.button.return_value = False
         mock_st.session_state = {}
 
-        render_card_weekend()
+        afficher_card_weekend()
 
         mock_st.button.assert_called_once()
         mock_st.caption.assert_called_with("💡 Decouvrir des idees IA")
@@ -500,34 +500,34 @@ class TestRenderCardWeekend:
     @patch("src.modules.famille.hub_famille.count_weekend_activities")
     def test_render_card_weekend_avec_activites(self, mock_count, mock_st):
         """Test card weekend avec activités."""
-        from src.modules.famille.hub_famille import render_card_weekend
+        from src.modules.famille.hub_famille import afficher_card_weekend
 
         mock_count.return_value = 3
         mock_st.button.return_value = False
         mock_st.session_state = {}
 
-        render_card_weekend()
+        afficher_card_weekend()
 
         mock_st.caption.assert_called_with("📅 3 activite(s) planifiee(s)")
 
 
 @pytest.mark.unit
 class TestRenderCardUser:
-    """Tests pour render_card_user."""
+    """Tests pour afficher_card_user."""
 
     @patch("src.modules.famille.hub_famille.st")
     @patch("src.modules.famille.hub_famille.get_user_streak")
     @patch("src.modules.famille.hub_famille.get_user_garmin_connected")
     def test_render_card_user_anne(self, mock_garmin, mock_streak, mock_st):
         """Test card pour Anne."""
-        from src.modules.famille.hub_famille import render_card_user
+        from src.modules.famille.hub_famille import afficher_card_user
 
         mock_streak.return_value = 5
         mock_garmin.return_value = True
         mock_st.button.return_value = False
         mock_st.session_state = {}
 
-        render_card_user("anne", "Anne", "👩")
+        afficher_card_user("anne", "Anne", "👩")
 
         mock_st.button.assert_called_once()
         mock_st.caption.assert_called_once()
@@ -537,14 +537,14 @@ class TestRenderCardUser:
     @patch("src.modules.famille.hub_famille.get_user_garmin_connected")
     def test_render_card_user_clic_navigation(self, mock_garmin, mock_streak, mock_st):
         """Test navigation au clic sur card utilisateur."""
-        from src.modules.famille.hub_famille import render_card_user
+        from src.modules.famille.hub_famille import afficher_card_user
 
         mock_streak.return_value = 0
         mock_garmin.return_value = False
         mock_st.button.return_value = True
         mock_st.session_state = {}
 
-        render_card_user("mathieu", "Mathieu", "👨")
+        afficher_card_user("mathieu", "Mathieu", "👨")
 
         assert mock_st.session_state.get("famille_page") == "suivi"
         assert mock_st.session_state.get("suivi_user") == "mathieu"
@@ -553,21 +553,21 @@ class TestRenderCardUser:
 
 @pytest.mark.unit
 class TestRenderCardAchats:
-    """Tests pour render_card_achats."""
+    """Tests pour afficher_card_achats."""
 
     @patch("src.modules.famille.hub_famille.st")
     @patch("src.modules.famille.hub_famille.count_pending_purchases")
     @patch("src.modules.famille.hub_famille.count_urgent_purchases")
     def test_render_card_achats_rien_en_attente(self, mock_urgent, mock_pending, mock_st):
         """Test card achats sans articles."""
-        from src.modules.famille.hub_famille import render_card_achats
+        from src.modules.famille.hub_famille import afficher_card_achats
 
         mock_pending.return_value = 0
         mock_urgent.return_value = 0
         mock_st.button.return_value = False
         mock_st.session_state = {}
 
-        render_card_achats()
+        afficher_card_achats()
 
         mock_st.caption.assert_called_with("✅ Rien en attente")
 
@@ -576,14 +576,14 @@ class TestRenderCardAchats:
     @patch("src.modules.famille.hub_famille.count_urgent_purchases")
     def test_render_card_achats_avec_urgents(self, mock_urgent, mock_pending, mock_st):
         """Test card achats avec urgents."""
-        from src.modules.famille.hub_famille import render_card_achats
+        from src.modules.famille.hub_famille import afficher_card_achats
 
         mock_pending.return_value = 5
         mock_urgent.return_value = 2
         mock_st.button.return_value = False
         mock_st.session_state = {}
 
-        render_card_achats()
+        afficher_card_achats()
 
         mock_st.caption.assert_called_with("⚠️ 2 urgent(s) • 📋 5 en attente")
 
@@ -599,7 +599,7 @@ class TestApp:
 
     @patch("src.modules.famille.hub_famille.st")
     @patch("src.modules.famille.hub_famille.init_family_users")
-    @patch("src.modules.famille.hub_famille.render_hub")
+    @patch("src.modules.famille.hub_famille.afficher_hub")
     def test_app_runs_without_error(self, mock_render_hub, mock_init_users, mock_st):
         """Test que app() s'exécute sans erreur."""
         from src.modules.famille.hub_famille import app
@@ -613,7 +613,7 @@ class TestApp:
 
     @patch("src.modules.famille.hub_famille.st")
     @patch("src.modules.famille.hub_famille.init_family_users")
-    @patch("src.modules.famille.hub_famille.render_hub")
+    @patch("src.modules.famille.hub_famille.afficher_hub")
     def test_app_affiche_hub_par_defaut(self, mock_render_hub, mock_init_users, mock_st):
         """Test que app() affiche le hub par défaut."""
         from src.modules.famille.hub_famille import app
@@ -649,7 +649,7 @@ class TestApp:
         mock_st.session_state = {}
         mock_init_users.side_effect = Exception("Init error")
 
-        with patch("src.modules.famille.hub_famille.render_hub"):
+        with patch("src.modules.famille.hub_famille.afficher_hub"):
             # Ne devrait pas lever d'exception
             app()
 
@@ -658,14 +658,14 @@ class TestApp:
 
 @pytest.mark.unit
 class TestRenderHub:
-    """Tests pour render_hub."""
+    """Tests pour afficher_hub."""
 
     @patch("src.modules.famille.hub_famille.st")
-    @patch("src.modules.famille.hub_famille.render_card_jules")
-    @patch("src.modules.famille.hub_famille.render_card_weekend")
-    @patch("src.modules.famille.hub_famille.render_card_user")
-    @patch("src.modules.famille.hub_famille.render_card_achats")
-    @patch("src.modules.famille.hub_famille.render_weekend_preview")
+    @patch("src.modules.famille.hub_famille.afficher_card_jules")
+    @patch("src.modules.famille.hub_famille.afficher_card_weekend")
+    @patch("src.modules.famille.hub_famille.afficher_card_user")
+    @patch("src.modules.famille.hub_famille.afficher_card_achats")
+    @patch("src.modules.famille.hub_famille.afficher_weekend_preview")
     def test_render_hub_affiche_toutes_cards(
         self,
         mock_preview,
@@ -675,8 +675,8 @@ class TestRenderHub:
         mock_jules,
         mock_st,
     ):
-        """Test que render_hub affiche toutes les cards."""
-        from src.modules.famille.hub_famille import render_hub
+        """Test que afficher_hub affiche toutes les cards."""
+        from src.modules.famille.hub_famille import afficher_hub
 
         # Setup mocks pour columns et containers
         mock_col = MagicMock()
@@ -689,7 +689,7 @@ class TestRenderHub:
         mock_container.__exit__ = MagicMock(return_value=False)
         mock_st.container.return_value = mock_container
 
-        render_hub()
+        afficher_hub()
 
         mock_jules.assert_called_once()
         mock_weekend.assert_called_once()
@@ -700,34 +700,34 @@ class TestRenderHub:
 
 @pytest.mark.unit
 class TestRenderWeekendPreview:
-    """Tests pour render_weekend_preview."""
+    """Tests pour afficher_weekend_preview."""
 
     @patch("src.modules.famille.hub_famille.st")
-    @patch("src.modules.famille.hub_famille._render_day_activities")
+    @patch("src.modules.famille.hub_famille._afficher_day_activities")
     def test_render_weekend_preview_affiche_deux_jours(self, mock_render_day, mock_st):
         """Test que l'aperçu weekend affiche samedi et dimanche."""
-        from src.modules.famille.hub_famille import render_weekend_preview
+        from src.modules.famille.hub_famille import afficher_weekend_preview
 
         mock_col = MagicMock()
         mock_col.__enter__ = MagicMock(return_value=mock_col)
         mock_col.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = [mock_col, mock_col]
 
-        render_weekend_preview()
+        afficher_weekend_preview()
 
-        # Vérifie que _render_day_activities est appelé 2 fois (samedi + dimanche)
+        # Vérifie que _afficher_day_activities est appelé 2 fois (samedi + dimanche)
         assert mock_render_day.call_count == 2
 
 
 @pytest.mark.unit
 class TestRenderDayActivities:
-    """Tests pour _render_day_activities."""
+    """Tests pour _afficher_day_activities."""
 
     @patch("src.modules.famille.hub_famille.st")
     @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
     def test_render_day_activities_sans_activites(self, mock_db_ctx, mock_st):
         """Test render jour sans activités."""
-        from src.modules.famille.hub_famille import _render_day_activities
+        from src.modules.famille.hub_famille import _afficher_day_activities
 
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.all.return_value = []
@@ -735,7 +735,7 @@ class TestRenderDayActivities:
         mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
         mock_st.button.return_value = False
 
-        _render_day_activities(date.today())
+        _afficher_day_activities(date.today())
 
         mock_st.caption.assert_called_with("Rien de prevu")
 
@@ -745,7 +745,7 @@ class TestRenderDayActivities:
         self, mock_db_ctx, mock_st, mock_weekend_activity
     ):
         """Test render jour avec activités."""
-        from src.modules.famille.hub_famille import _render_day_activities
+        from src.modules.famille.hub_famille import _afficher_day_activities
 
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.all.return_value = [
@@ -754,6 +754,6 @@ class TestRenderDayActivities:
         mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
 
-        _render_day_activities(date.today())
+        _afficher_day_activities(date.today())
 
         mock_st.write.assert_called_once()

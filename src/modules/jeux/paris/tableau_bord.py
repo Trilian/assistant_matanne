@@ -2,6 +2,8 @@
 Dashboard de performance des paris.
 """
 
+from src.ui import etat_vide
+
 from .utils import calculer_performance_paris, charger_paris_utilisateur, pd, st
 
 
@@ -10,7 +12,7 @@ def afficher_dashboard_performance():
     paris = charger_paris_utilisateur()
 
     if not paris:
-        st.info("📊 Aucun pari enregistré. Commencez par faire des prédictions!")
+        etat_vide("Aucun pari enregistré", "📊", "Commencez par faire des prédictions !")
         return
 
     # Calculs

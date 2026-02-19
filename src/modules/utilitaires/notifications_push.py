@@ -14,8 +14,8 @@ from datetime import date
 import streamlit as st
 
 from src.services.core.notifications import (
-    NotificationPush,
     ConfigurationNtfy,
+    NotificationPush,
     obtenir_service_ntfy,
 )
 
@@ -61,7 +61,7 @@ def sauvegarder_config(config: ConfigurationNtfy):
 # ═══════════════════════════════════════════════════════════
 
 
-def render_configuration():
+def afficher_configuration():
     """Interface de configuration des notifications."""
     st.subheader("⚙️ Configuration")
 
@@ -109,7 +109,7 @@ def render_configuration():
             st.success("✅ Configuration sauvegardée!")
 
 
-def render_abonnement():
+def afficher_abonnement():
     """Interface pour s'abonner aux notifications."""
     st.subheader("📷 S'abonner aux notifications")
 
@@ -180,7 +180,7 @@ def _simuler_notification(titre: str, message: str, priorite: int = 3, tags: lis
     return notif_id
 
 
-def render_test():
+def afficher_test():
     """Interface de test des notifications."""
     st.subheader("🧪 Tester les notifications")
 
@@ -310,7 +310,7 @@ def render_test():
                 st.caption(f"🕐 {notif['timestamp'][:19]} | ID: {notif['id']}")
 
 
-def render_taches_retard():
+def afficher_taches_retard():
     """Affiche les tâches en retard et permet d'envoyer des alertes."""
     st.subheader("⏰ Tâches en retard")
 
@@ -387,7 +387,7 @@ def render_taches_retard():
             st.markdown(f"• {tache.titre}")
 
 
-def render_aide():
+def afficher_aide():
     """Affiche l'aide sur ntfy.sh."""
     st.subheader("❓ Aide")
     st.markdown(HELP_NTFY)
@@ -407,19 +407,19 @@ def app():
     tabs = st.tabs(["📷 S'abonner", "⚙️ Configuration", "⏰ Tâches", "🧪 Test", "❓ Aide"])
 
     with tabs[0]:
-        render_abonnement()
+        afficher_abonnement()
 
     with tabs[1]:
-        render_configuration()
+        afficher_configuration()
 
     with tabs[2]:
-        render_taches_retard()
+        afficher_taches_retard()
 
     with tabs[3]:
-        render_test()
+        afficher_test()
 
     with tabs[4]:
-        render_aide()
+        afficher_aide()
 
 
 if __name__ == "__main__":

@@ -1083,7 +1083,7 @@ class TestInitClient:
 class TestRequireAuth:
     """Tests pour require_auth."""
 
-    @patch("src.services.core.utilisateur.authentification.render_login_form")
+    @patch("src.services.core.utilisateur.authentification.afficher_login_form")
     @patch("src.services.core.utilisateur.authentification.st")
     def test_require_auth_not_authenticated(self, mock_st, mock_render):
         """require_auth sans utilisateur connecté."""
@@ -1268,62 +1268,62 @@ class TestValidateTokenExtended:
 
 @pytest.mark.unit
 class TestRenderLoginForm:
-    """Tests pour render_login_form - ces tests vérifient la fonction est appelable."""
+    """Tests pour afficher_login_form - ces tests vérifient la fonction est appelable."""
 
     def test_render_login_form_exists(self):
-        """render_login_form existe et est importable."""
-        from src.services.core.utilisateur.authentification import render_login_form
+        """afficher_login_form existe et est importable."""
+        from src.services.core.utilisateur.authentification import afficher_login_form
 
-        assert callable(render_login_form)
+        assert callable(afficher_login_form)
 
     def test_render_login_form_raises_without_context(self):
-        """render_login_form lève une erreur sans contexte Streamlit."""
-        from src.services.core.utilisateur.authentification import render_login_form
+        """afficher_login_form lève une erreur sans contexte Streamlit."""
+        from src.services.core.utilisateur.authentification import afficher_login_form
 
         # Without proper Streamlit context, function will fail
         # This is expected behavior
         try:
-            render_login_form()
+            afficher_login_form()
         except (ValueError, AttributeError):
             pass  # Expected without Streamlit context
 
 
 @pytest.mark.unit
 class TestRenderUserMenu:
-    """Tests pour render_user_menu."""
+    """Tests pour afficher_user_menu."""
 
     def test_render_user_menu_exists(self):
-        """render_user_menu existe et est importable."""
-        from src.services.core.utilisateur.authentification import render_user_menu
+        """afficher_user_menu existe et est importable."""
+        from src.services.core.utilisateur.authentification import afficher_user_menu
 
-        assert callable(render_user_menu)
+        assert callable(afficher_user_menu)
 
     def test_render_user_menu_raises_without_context(self):
-        """render_user_menu lève une erreur sans contexte Streamlit."""
-        from src.services.core.utilisateur.authentification import render_user_menu
+        """afficher_user_menu lève une erreur sans contexte Streamlit."""
+        from src.services.core.utilisateur.authentification import afficher_user_menu
 
         try:
-            render_user_menu()
+            afficher_user_menu()
         except (ValueError, AttributeError):
             pass  # Expected without Streamlit context
 
 
 @pytest.mark.unit
 class TestRenderProfileSettings:
-    """Tests pour render_profile_settings."""
+    """Tests pour afficher_profile_settings."""
 
     def test_render_profile_settings_exists(self):
-        """render_profile_settings existe et est importable."""
-        from src.services.core.utilisateur.authentification import render_profile_settings
+        """afficher_profile_settings existe et est importable."""
+        from src.services.core.utilisateur.authentification import afficher_profile_settings
 
-        assert callable(render_profile_settings)
+        assert callable(afficher_profile_settings)
 
     def test_render_profile_settings_raises_without_context(self):
-        """render_profile_settings lève une erreur sans contexte Streamlit."""
-        from src.services.core.utilisateur.authentification import render_profile_settings
+        """afficher_profile_settings lève une erreur sans contexte Streamlit."""
+        from src.services.core.utilisateur.authentification import afficher_profile_settings
 
         try:
-            render_profile_settings()
+            afficher_profile_settings()
         except (ValueError, AttributeError):
             pass  # Expected without Streamlit context
 
@@ -1523,8 +1523,8 @@ class TestRenderFunctions:
     @patch("src.ui.views.authentification.st")
     @patch("src.ui.views.authentification.get_auth_service")
     def test_render_login_form_basic(self, mock_get_auth, mock_st):
-        """Test render_login_form est appelable."""
-        from src.services.core.utilisateur.authentification import render_login_form
+        """Test afficher_login_form est appelable."""
+        from src.services.core.utilisateur.authentification import afficher_login_form
 
         mock_st.form.return_value.__enter__ = Mock()
         mock_st.form.return_value.__exit__ = Mock(return_value=False)
@@ -1535,15 +1535,15 @@ class TestRenderFunctions:
 
         # Vérifier juste que la fonction ne crash pas
         try:
-            render_login_form()
+            afficher_login_form()
         except Exception:
             pass  # OK si exception due aux mocks incomplets
 
     @patch("src.ui.views.authentification.st")
     @patch("src.ui.views.authentification.get_auth_service")
     def test_render_user_menu_not_logged(self, mock_get_auth, mock_st):
-        """Test render_user_menu sans utilisateur connecté."""
-        from src.services.core.utilisateur.authentification import render_user_menu
+        """Test afficher_user_menu sans utilisateur connecté."""
+        from src.services.core.utilisateur.authentification import afficher_user_menu
 
         mock_service = Mock()
         mock_service.get_current_user.return_value = None
@@ -1553,21 +1553,21 @@ class TestRenderFunctions:
         mock_st.sidebar.__exit__ = Mock(return_value=False)
 
         try:
-            render_user_menu()
+            afficher_user_menu()
         except Exception:
             pass  # OK pour ce test basique
 
     @patch("src.ui.views.authentification.st")
     @patch("src.ui.views.authentification.get_auth_service")
     def test_render_profile_settings_not_logged(self, mock_get_auth, mock_st):
-        """Test render_profile_settings sans utilisateur connecté."""
-        from src.services.core.utilisateur.authentification import render_profile_settings
+        """Test afficher_profile_settings sans utilisateur connecté."""
+        from src.services.core.utilisateur.authentification import afficher_profile_settings
 
         mock_service = Mock()
         mock_service.get_current_user.return_value = None
         mock_get_auth.return_value = mock_service
 
-        render_profile_settings()
+        afficher_profile_settings()
 
         mock_st.warning.assert_called_once()
 
@@ -1580,7 +1580,7 @@ class TestRenderFunctionsAdditional:
     @patch("src.ui.views.authentification.get_auth_service")
     def test_render_login_form_login_success(self, mock_get_auth, mock_st):
         """Test login réussi avec rerun."""
-        from src.services.core.utilisateur.authentification import render_login_form
+        from src.services.core.utilisateur.authentification import afficher_login_form
 
         mock_service = Mock()
         mock_service.login.return_value = AuthResult(success=True, message="Bienvenue!")
@@ -1602,7 +1602,7 @@ class TestRenderFunctionsAdditional:
         tab2_mock = MagicMock()
         mock_st.tabs.return_value = [tab1_mock, tab2_mock]
 
-        render_login_form(redirect_on_success=True)
+        afficher_login_form(redirect_on_success=True)
 
         mock_st.success.assert_called()
         mock_st.rerun.assert_called()
@@ -1613,7 +1613,7 @@ class TestRenderFunctionsAdditional:
         """Test login échoué."""
         from unittest.mock import MagicMock
 
-        from src.services.core.utilisateur.authentification import render_login_form
+        from src.services.core.utilisateur.authentification import afficher_login_form
 
         mock_service = Mock()
         mock_service.login.return_value = AuthResult(
@@ -1631,7 +1631,7 @@ class TestRenderFunctionsAdditional:
         tab2_mock = MagicMock()
         mock_st.tabs.return_value = [tab1_mock, tab2_mock]
 
-        render_login_form()
+        afficher_login_form()
 
         mock_st.error.assert_called()
 
@@ -1641,7 +1641,7 @@ class TestRenderFunctionsAdditional:
         """Test mot de passe oublié."""
         from unittest.mock import MagicMock
 
-        from src.services.core.utilisateur.authentification import render_login_form
+        from src.services.core.utilisateur.authentification import afficher_login_form
 
         mock_service = Mock()
         mock_service.reset_password.return_value = AuthResult(success=True, message="Email envoyé")
@@ -1657,7 +1657,7 @@ class TestRenderFunctionsAdditional:
         tab2_mock = MagicMock()
         mock_st.tabs.return_value = [tab1_mock, tab2_mock]
 
-        render_login_form()
+        afficher_login_form()
 
         mock_st.info.assert_called()
 
@@ -1667,7 +1667,7 @@ class TestRenderFunctionsAdditional:
         """Test menu utilisateur connecté."""
         from unittest.mock import MagicMock
 
-        from src.services.core.utilisateur.authentification import render_user_menu
+        from src.services.core.utilisateur.authentification import afficher_user_menu
 
         mock_user = Mock()
         mock_user.display_name = "Test User"
@@ -1683,7 +1683,7 @@ class TestRenderFunctionsAdditional:
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
         mock_st.button.return_value = False
 
-        render_user_menu()
+        afficher_user_menu()
 
         mock_st.markdown.assert_called()
 
@@ -1693,7 +1693,7 @@ class TestRenderFunctionsAdditional:
         """Test bouton déconnexion cliqué."""
         from unittest.mock import MagicMock
 
-        from src.services.core.utilisateur.authentification import render_user_menu
+        from src.services.core.utilisateur.authentification import afficher_user_menu
 
         mock_user = Mock()
         mock_user.display_name = "Test User"
@@ -1708,7 +1708,7 @@ class TestRenderFunctionsAdditional:
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
         mock_st.button.return_value = True  # Logout clicked
 
-        render_user_menu()
+        afficher_user_menu()
 
         mock_service.logout.assert_called_once()
         mock_st.rerun.assert_called()
@@ -1719,7 +1719,7 @@ class TestRenderFunctionsAdditional:
         """Test bouton connexion cliqué (non connecté)."""
         from unittest.mock import MagicMock
 
-        from src.services.core.utilisateur.authentification import render_user_menu
+        from src.services.core.utilisateur.authentification import afficher_user_menu
 
         mock_service = Mock()
         mock_service.get_current_user.return_value = None
@@ -1730,7 +1730,7 @@ class TestRenderFunctionsAdditional:
         mock_st.button.return_value = True  # Login button clicked
         mock_st.session_state = {}
 
-        render_user_menu()
+        afficher_user_menu()
 
         assert mock_st.session_state["show_login"] is True
 
@@ -1741,7 +1741,7 @@ class TestRenderFunctionsAdditional:
         from datetime import datetime
         from unittest.mock import MagicMock
 
-        from src.services.core.utilisateur.authentification import render_profile_settings
+        from src.services.core.utilisateur.authentification import afficher_profile_settings
 
         mock_user = Mock()
         mock_user.prenom = "Jean"
@@ -1761,7 +1761,7 @@ class TestRenderFunctionsAdditional:
         mock_st.text_input.side_effect = ["Jean", "Dupont", "", "newpass", "newpass"]
         mock_st.form_submit_button.side_effect = [True, False]  # Save=True, Change pwd=False
 
-        render_profile_settings()
+        afficher_profile_settings()
 
         mock_st.success.assert_called()
 
@@ -1772,7 +1772,7 @@ class TestRenderFunctionsAdditional:
         from datetime import datetime
         from unittest.mock import MagicMock
 
-        from src.services.core.utilisateur.authentification import render_profile_settings
+        from src.services.core.utilisateur.authentification import afficher_profile_settings
 
         mock_user = Mock()
         mock_user.prenom = "Test"
@@ -1793,7 +1793,7 @@ class TestRenderFunctionsAdditional:
         mock_st.text_input.side_effect = ["Test", "User", "", "newpass123", "newpass123"]
         mock_st.form_submit_button.side_effect = [False, True]  # Save=False, Change pwd=True
 
-        render_profile_settings()
+        afficher_profile_settings()
 
         mock_service.change_password.assert_called_with("newpass123")
         mock_st.success.assert_called()

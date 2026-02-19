@@ -3,11 +3,11 @@ PHASE 9: Integration and E2E tests - 50+ tests
 Focus: Cross-domain workflows, system integration, real user scenarios
 """
 
-from src.services.cuisine.courses import get_courses_service
-from src.services.cuisine.planning import get_planning_service
+from src.services.cuisine.courses import obtenir_service_courses
+from src.services.cuisine.planning import obtenir_service_planning
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.services.famille.budget import get_budget_service
-from src.services.inventaire import get_inventaire_service
+from src.services.inventaire import obtenir_service_inventaire
 
 # ═══════════════════════════════════════════════════════════════════
 # KITCHEN-TO-SHOPPING WORKFLOW
@@ -15,29 +15,29 @@ from src.services.inventaire import get_inventaire_service
 
 
 class TestKitchenShoppingWorkflow:
-    """Test kitchen planning â†’ shopping list workflow"""
+    """Test kitchen planning â⚠’ shopping list workflow"""
 
     def test_services_available(self):
         """Services available for workflow"""
-        planning_service = get_planning_service()
-        courses_service = get_courses_service()
+        planning_service = obtenir_service_planning()
+        courses_service = obtenir_service_courses()
 
         assert planning_service is not None
         assert courses_service is not None
 
     def test_inventory_services_available(self):
         """Inventory services available"""
-        inventaire_service = get_inventaire_service()
-        courses_service = get_courses_service()
+        inventaire_service = obtenir_service_inventaire()
+        courses_service = obtenir_service_courses()
 
         assert inventaire_service is not None
         assert courses_service is not None
 
     def test_complete_kitchen_cycle(self):
-        """Complete cycle: plan â†’ shop â†’ cook â†’ store"""
-        planning_service = get_planning_service()
-        courses_service = get_courses_service()
-        inventaire_service = get_inventaire_service()
+        """Complete cycle: plan â⚠’ shop â⚠’ cook â⚠’ store"""
+        planning_service = obtenir_service_planning()
+        courses_service = obtenir_service_courses()
+        inventaire_service = obtenir_service_inventaire()
 
         # All services should be available
         assert planning_service is not None
@@ -51,12 +51,12 @@ class TestKitchenShoppingWorkflow:
 
 
 class TestBudgetShoppingWorkflow:
-    """Test budget management â†’ shopping workflow"""
+    """Test budget management â⚠’ shopping workflow"""
 
     def test_budget_awareness_shopping(self):
         """Shopping considers monthly budget"""
         budget_service = get_budget_service()
-        courses_service = get_courses_service()
+        courses_service = obtenir_service_courses()
 
         # Should track spending vs budget
         assert budget_service is not None
@@ -64,7 +64,7 @@ class TestBudgetShoppingWorkflow:
 
     def test_expense_tracking_integration(self):
         """Shopping expenses logged to budget"""
-        courses_service = get_courses_service()
+        courses_service = obtenir_service_courses()
         budget_service = get_budget_service()
 
         # Both services functional
@@ -73,7 +73,7 @@ class TestBudgetShoppingWorkflow:
 
     def test_monthly_budget_forecast(self):
         """Forecast budget based on planning"""
-        planning_service = get_planning_service()
+        planning_service = obtenir_service_planning()
         budget_service = get_budget_service()
 
         # Can forecast meal costs
@@ -87,12 +87,12 @@ class TestBudgetShoppingWorkflow:
 
 
 class TestRecipePlanningWorkflow:
-    """Test recipe selection â†’ meal planning workflow"""
+    """Test recipe selection â⚠’ meal planning workflow"""
 
     def test_recipe_selection_to_planning(self):
         """Selected recipe creates planning event"""
         recette_service = obtenir_service_recettes()
-        planning_service = get_planning_service()
+        planning_service = obtenir_service_planning()
 
         assert recette_service is not None
         assert planning_service is not None
@@ -100,7 +100,7 @@ class TestRecipePlanningWorkflow:
     def test_recipe_categories_in_planning(self):
         """Recipe categories influence meal planning"""
         recette_service = obtenir_service_recettes()
-        planning_service = get_planning_service()
+        planning_service = obtenir_service_planning()
 
         # Both services should be able to collaborate
         assert recette_service is not None
@@ -109,7 +109,7 @@ class TestRecipePlanningWorkflow:
     def test_weekly_menu_generation(self):
         """Generate week menu from recipes"""
         recette_service = obtenir_service_recettes()
-        planning_service = get_planning_service()
+        planning_service = obtenir_service_planning()
 
         # Should create planning events
         assert recette_service is not None
@@ -126,14 +126,14 @@ class TestDataConsistency:
 
     def test_inventory_article_consistency(self):
         """ArticleInventaire data remains consistent"""
-        inventaire_service = get_inventaire_service()
+        inventaire_service = obtenir_service_inventaire()
 
         # Create and retrieve should match
         assert inventaire_service is not None
 
     def test_planning_recette_consistency(self):
         """Planning and Recette data align"""
-        planning_service = get_planning_service()
+        planning_service = obtenir_service_planning()
         recette_service = obtenir_service_recettes()
 
         # Both models should reference same recipes
@@ -149,8 +149,8 @@ class TestDataConsistency:
 
     def test_date_consistency_across_services(self):
         """Date handling consistent"""
-        planning_service = get_planning_service()
-        courses_service = get_courses_service()
+        planning_service = obtenir_service_planning()
+        courses_service = obtenir_service_courses()
         budget_service = get_budget_service()
 
         # All handle dates consistently
@@ -169,7 +169,7 @@ class TestErrorRecovery:
 
     def test_invalid_planning_handling(self):
         """System handles invalid planning gracefully"""
-        planning_service = get_planning_service()
+        planning_service = obtenir_service_planning()
 
         try:
             # Attempt to create invalid planning
@@ -182,7 +182,7 @@ class TestErrorRecovery:
 
     def test_invalid_inventory_handling(self):
         """System handles invalid inventory gracefully"""
-        inventaire_service = get_inventaire_service()
+        inventaire_service = obtenir_service_inventaire()
 
         try:
             result = inventaire_service.delete(99999)
@@ -203,10 +203,10 @@ class TestErrorRecovery:
     def test_service_initialization_resilience(self):
         """Services initialize even if some fail"""
         try:
-            p_service = get_planning_service()
-            i_service = get_inventaire_service()
+            p_service = obtenir_service_planning()
+            i_service = obtenir_service_inventaire()
             b_service = get_budget_service()
-            c_service = get_courses_service()
+            c_service = obtenir_service_courses()
 
             # All should initialize
             assert p_service is not None
@@ -227,9 +227,9 @@ class TestPerformanceIntegration:
 
     def test_multiple_service_calls(self):
         """Multiple service calls complete quickly"""
-        planning_service = get_planning_service()
-        courses_service = get_courses_service()
-        inventory_service = get_inventaire_service()
+        planning_service = obtenir_service_planning()
+        courses_service = obtenir_service_courses()
+        inventory_service = obtenir_service_inventaire()
         budget_service = get_budget_service()
 
         # Should handle multiple calls
@@ -241,8 +241,8 @@ class TestPerformanceIntegration:
 
     def test_service_caching(self):
         """Services use caching efficiently"""
-        service1 = get_planning_service()
-        service2 = get_planning_service()
+        service1 = obtenir_service_planning()
+        service2 = obtenir_service_planning()
 
         # Should return same cached instance
         assert service1 is service2
@@ -250,10 +250,10 @@ class TestPerformanceIntegration:
     def test_concurrent_data_access(self):
         """Multiple services access data concurrently"""
         services = [
-            get_planning_service(),
-            get_inventaire_service(),
+            obtenir_service_planning(),
+            obtenir_service_inventaire(),
             get_budget_service(),
-            get_courses_service(),
+            obtenir_service_courses(),
         ]
 
         # All services should function
@@ -271,7 +271,7 @@ class TestUserScenarios:
 
     def test_sunday_planning_scenario(self):
         """User plans meals for the week"""
-        planning_service = get_planning_service()
+        planning_service = obtenir_service_planning()
         recette_service = obtenir_service_recettes()
 
         # Sunday: plan week
@@ -280,8 +280,8 @@ class TestUserScenarios:
 
     def test_shopping_day_scenario(self):
         """User does weekly shopping"""
-        courses_service = get_courses_service()
-        inventory_service = get_inventaire_service()
+        courses_service = obtenir_service_courses()
+        inventory_service = obtenir_service_inventaire()
         budget_service = get_budget_service()
 
         # Thursday: shop
@@ -291,8 +291,8 @@ class TestUserScenarios:
 
     def test_cooking_day_scenario(self):
         """User cooks meals from plan"""
-        planning_service = get_planning_service()
-        inventory_service = get_inventaire_service()
+        planning_service = obtenir_service_planning()
+        inventory_service = obtenir_service_inventaire()
         recette_service = obtenir_service_recettes()
 
         # Tuesday: cook from plan
@@ -303,8 +303,8 @@ class TestUserScenarios:
     def test_monthly_review_scenario(self):
         """User reviews monthly spending"""
         budget_service = get_budget_service()
-        courses_service = get_courses_service()
-        planning_service = get_planning_service()
+        courses_service = obtenir_service_courses()
+        planning_service = obtenir_service_planning()
 
         # Month-end: review
         assert budget_service is not None
@@ -322,7 +322,7 @@ class TestCrossDomainFiltering:
 
     def test_filter_recipes_by_planning(self):
         """Filter recipes based on meal plan"""
-        planning_service = get_planning_service()
+        planning_service = obtenir_service_planning()
         recette_service = obtenir_service_recettes()
 
         # Filter recipes for this week
@@ -332,7 +332,7 @@ class TestCrossDomainFiltering:
     def test_filter_inventory_by_recipe(self):
         """Filter inventory for recipe needs"""
         recette_service = obtenir_service_recettes()
-        inventory_service = get_inventaire_service()
+        inventory_service = obtenir_service_inventaire()
 
         # Get ingredients needed
         assert recette_service is not None
@@ -356,7 +356,7 @@ class TestStateManagement:
 
     def test_state_consistency_after_update(self):
         """State remains consistent after updates"""
-        planning_service = get_planning_service()
+        planning_service = obtenir_service_planning()
 
         # Update should not corrupt state
         assert planning_service is not None
@@ -364,7 +364,7 @@ class TestStateManagement:
     def test_state_persistence(self):
         """State persists across sessions"""
         budget_service = get_budget_service()
-        courses_service = get_courses_service()
+        courses_service = obtenir_service_courses()
 
         # Data should persist
         assert budget_service is not None
@@ -372,7 +372,7 @@ class TestStateManagement:
 
     def test_state_isolation(self):
         """Services maintain state isolation"""
-        planning_service = get_planning_service()
+        planning_service = obtenir_service_planning()
         budget_service = get_budget_service()
 
         # One service update shouldn't affect other
@@ -390,7 +390,7 @@ class TestExternalIntegration:
 
     def test_ai_integration_across_services(self):
         """AI features available across services"""
-        planning_service = get_planning_service()
+        planning_service = obtenir_service_planning()
         recette_service = obtenir_service_recettes()
 
         # Both should support AI features
@@ -399,8 +399,8 @@ class TestExternalIntegration:
 
     def test_cache_integration(self):
         """Caching works across services"""
-        planning_service = get_planning_service()
-        courses_service = get_courses_service()
+        planning_service = obtenir_service_planning()
+        courses_service = obtenir_service_courses()
 
         # Both should use caching
         assert planning_service is not None
@@ -409,10 +409,10 @@ class TestExternalIntegration:
     def test_database_integration(self):
         """All services use same database"""
         services = [
-            get_planning_service(),
-            get_inventaire_service(),
+            obtenir_service_planning(),
+            obtenir_service_inventaire(),
             get_budget_service(),
-            get_courses_service(),
+            obtenir_service_courses(),
             obtenir_service_recettes(),
         ]
 
@@ -431,10 +431,10 @@ class TestSystemReliability:
     def test_service_availability(self):
         """All services available when needed"""
         services = [
-            get_planning_service,
-            get_inventaire_service,
+            obtenir_service_planning,
+            obtenir_service_inventaire,
             get_budget_service,
-            get_courses_service,
+            obtenir_service_courses,
         ]
 
         for factory in services:
@@ -445,7 +445,7 @@ class TestSystemReliability:
         """System recovers from service failures"""
         # Try to create and recover
         try:
-            planning_service = get_planning_service()
+            planning_service = obtenir_service_planning()
             assert planning_service is not None
         except Exception:
             # Should still recover
@@ -453,7 +453,7 @@ class TestSystemReliability:
 
     def test_data_integrity_under_load(self):
         """Data integrity maintained under load"""
-        services = [get_planning_service(), get_inventaire_service(), get_budget_service()]
+        services = [obtenir_service_planning(), obtenir_service_inventaire(), get_budget_service()]
 
         # Run multiple operations
         for _ in range(10):
@@ -472,10 +472,10 @@ class TestSystemMonitoring:
     def test_service_health_check(self):
         """All services report healthy"""
         services = [
-            get_planning_service(),
-            get_inventaire_service(),
+            obtenir_service_planning(),
+            obtenir_service_inventaire(),
             get_budget_service(),
-            get_courses_service(),
+            obtenir_service_courses(),
         ]
 
         for service in services:
@@ -483,7 +483,7 @@ class TestSystemMonitoring:
 
     def test_error_logging(self):
         """Errors are logged properly"""
-        planning_service = get_planning_service()
+        planning_service = obtenir_service_planning()
 
         # Should log errors gracefully
         try:
@@ -498,7 +498,7 @@ class TestSystemMonitoring:
         import time
 
         start = time.time()
-        service = get_planning_service()
+        service = obtenir_service_planning()
         elapsed = time.time() - start
 
         # Should be fast

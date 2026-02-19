@@ -27,7 +27,7 @@ class UserMock:
 
 
 class TestRenderUserSwitch:
-    """Tests pour render_user_switch()"""
+    """Tests pour afficher_user_switch()"""
 
     @pytest.fixture
     def mock_utils(self):
@@ -45,9 +45,9 @@ class TestRenderUserSwitch:
         mock_utils["get_user"].return_value = "anne"
         mock_utils["st"].button.return_value = False
 
-        from src.modules.famille.suivi_perso.tableau_bord import render_user_switch
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_user_switch
 
-        render_user_switch()
+        afficher_user_switch()
 
         mock_utils["st"].columns.assert_called_once_with(2)
 
@@ -56,9 +56,9 @@ class TestRenderUserSwitch:
         mock_utils["get_user"].return_value = "anne"
         mock_utils["st"].button.return_value = False
 
-        from src.modules.famille.suivi_perso.tableau_bord import render_user_switch
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_user_switch
 
-        render_user_switch()
+        afficher_user_switch()
 
         # Vérifie les appels button
         calls = mock_utils["st"].button.call_args_list
@@ -70,9 +70,9 @@ class TestRenderUserSwitch:
         # Premier bouton False, deuxième True
         mock_utils["st"].button.side_effect = [False, True]
 
-        from src.modules.famille.suivi_perso.tableau_bord import render_user_switch
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_user_switch
 
-        render_user_switch()
+        afficher_user_switch()
 
         mock_utils["set_user"].assert_called_with("mathieu")
         mock_utils["st"].rerun.assert_called()
@@ -83,15 +83,15 @@ class TestRenderUserSwitch:
         # Premier bouton True
         mock_utils["st"].button.side_effect = [True, False]
 
-        from src.modules.famille.suivi_perso.tableau_bord import render_user_switch
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_user_switch
 
-        render_user_switch()
+        afficher_user_switch()
 
         mock_utils["set_user"].assert_called_with("anne")
 
 
 class TestRenderDashboard:
-    """Tests pour render_dashboard()"""
+    """Tests pour afficher_dashboard()"""
 
     @pytest.fixture
     def mock_st(self):
@@ -102,40 +102,40 @@ class TestRenderDashboard:
 
     @pytest.fixture
     def mock_weekly_chart(self):
-        """Mock render_weekly_chart"""
-        with patch("src.modules.famille.suivi_perso.tableau_bord.render_weekly_chart") as mock:
+        """Mock afficher_weekly_chart"""
+        with patch("src.modules.famille.suivi_perso.tableau_bord.afficher_weekly_chart") as mock:
             yield mock
 
     def test_affiche_warning_si_pas_user(self, mock_st, mock_weekly_chart):
         """Vérifie le warning si utilisateur manquant"""
-        from src.modules.famille.suivi_perso.tableau_bord import render_dashboard
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_dashboard
 
-        render_dashboard({})
+        afficher_dashboard({})
 
         mock_st.warning.assert_called_once()
 
     def test_affiche_subheader(self, mock_st, mock_weekly_chart):
         """Vérifie l'affichage du titre"""
-        from src.modules.famille.suivi_perso.tableau_bord import render_dashboard
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_dashboard
 
-        render_dashboard({"user": UserMock()})
+        afficher_dashboard({"user": UserMock()})
 
         mock_st.subheader.assert_called()
         assert "Dashboard" in mock_st.subheader.call_args[0][0]
 
     def test_affiche_4_metriques(self, mock_st, mock_weekly_chart):
         """Vérifie les 4 colonnes de métriques"""
-        from src.modules.famille.suivi_perso.tableau_bord import render_dashboard
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_dashboard
 
-        render_dashboard({"user": UserMock()})
+        afficher_dashboard({"user": UserMock()})
 
         mock_st.columns.assert_called_with(4)
 
     def test_affiche_streak(self, mock_st, mock_weekly_chart):
         """Vérifie l'affichage du streak"""
-        from src.modules.famille.suivi_perso.tableau_bord import render_dashboard
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_dashboard
 
-        render_dashboard({"user": UserMock(), "streak": 5})
+        afficher_dashboard({"user": UserMock(), "streak": 5})
 
         calls = [str(call) for call in mock_st.metric.call_args_list]
         assert any("Streak" in str(call) and "5" in str(call) for call in calls)
@@ -144,9 +144,9 @@ class TestRenderDashboard:
         """Vérifie l'affichage des pas"""
         today_summary = SummaryMock(date.today(), pas=8500)
 
-        from src.modules.famille.suivi_perso.tableau_bord import render_dashboard
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_dashboard
 
-        render_dashboard({"user": UserMock(), "summaries": [today_summary]})
+        afficher_dashboard({"user": UserMock(), "summaries": [today_summary]})
 
         calls = [str(call) for call in mock_st.metric.call_args_list]
         assert any("8" in str(call) for call in calls)
@@ -155,27 +155,27 @@ class TestRenderDashboard:
         """Vérifie l'affichage des calories"""
         today_summary = SummaryMock(date.today(), calories_actives=450)
 
-        from src.modules.famille.suivi_perso.tableau_bord import render_dashboard
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_dashboard
 
-        render_dashboard({"user": UserMock(), "summaries": [today_summary]})
+        afficher_dashboard({"user": UserMock(), "summaries": [today_summary]})
 
         calls = [str(call) for call in mock_st.metric.call_args_list]
         assert any("450" in str(call) for call in calls)
 
     def test_affiche_statut_garmin_connecte(self, mock_st, mock_weekly_chart):
         """Vérifie le statut Garmin connecté"""
-        from src.modules.famille.suivi_perso.tableau_bord import render_dashboard
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_dashboard
 
-        render_dashboard({"user": UserMock(), "garmin_connected": True})
+        afficher_dashboard({"user": UserMock(), "garmin_connected": True})
 
         calls = [str(call) for call in mock_st.metric.call_args_list]
         assert any("Connecté" in str(call) for call in calls)
 
     def test_affiche_statut_garmin_non_connecte(self, mock_st, mock_weekly_chart):
         """Vérifie le statut Garmin non connecté"""
-        from src.modules.famille.suivi_perso.tableau_bord import render_dashboard
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_dashboard
 
-        render_dashboard({"user": UserMock(), "garmin_connected": False})
+        afficher_dashboard({"user": UserMock(), "garmin_connected": False})
 
         calls = [str(call) for call in mock_st.metric.call_args_list]
         assert any("Non connecté" in str(call) for call in calls)
@@ -184,15 +184,15 @@ class TestRenderDashboard:
         """Vérifie l'appel au graphique hebdo"""
         summaries = [SummaryMock(date.today())]
 
-        from src.modules.famille.suivi_perso.tableau_bord import render_dashboard
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_dashboard
 
-        render_dashboard({"user": UserMock(), "summaries": summaries, "objectif_pas": 8000})
+        afficher_dashboard({"user": UserMock(), "summaries": summaries, "objectif_pas": 8000})
 
         mock_weekly_chart.assert_called_once_with(summaries, 8000)
 
 
 class TestRenderWeeklyChart:
-    """Tests pour render_weekly_chart()"""
+    """Tests pour afficher_weekly_chart()"""
 
     @pytest.fixture
     def mock_utils(self):
@@ -208,9 +208,9 @@ class TestRenderWeeklyChart:
 
     def test_affiche_info_si_pas_de_donnees(self, mock_utils):
         """Vérifie le message si pas de données"""
-        from src.modules.famille.suivi_perso.tableau_bord import render_weekly_chart
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_weekly_chart
 
-        render_weekly_chart([], 10000)
+        afficher_weekly_chart([], 10000)
 
         mock_utils["st"].info.assert_called_once()
         assert "Garmin" in mock_utils["st"].info.call_args[0][0]
@@ -219,9 +219,9 @@ class TestRenderWeeklyChart:
         """Vérifie la création du graphique"""
         summaries = [SummaryMock(date.today(), pas=5000)]
 
-        from src.modules.famille.suivi_perso.tableau_bord import render_weekly_chart
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_weekly_chart
 
-        render_weekly_chart(summaries, 10000)
+        afficher_weekly_chart(summaries, 10000)
 
         mock_utils["go"].Figure.assert_called_once()
 
@@ -229,9 +229,9 @@ class TestRenderWeeklyChart:
         """Vérifie l'ajout des barres"""
         summaries = [SummaryMock(date.today(), pas=5000)]
 
-        from src.modules.famille.suivi_perso.tableau_bord import render_weekly_chart
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_weekly_chart
 
-        render_weekly_chart(summaries, 10000)
+        afficher_weekly_chart(summaries, 10000)
 
         mock_utils["go"].Bar.assert_called()
 
@@ -239,9 +239,9 @@ class TestRenderWeeklyChart:
         """Vérifie la ligne d'objectif"""
         summaries = [SummaryMock(date.today(), pas=5000)]
 
-        from src.modules.famille.suivi_perso.tableau_bord import render_weekly_chart
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_weekly_chart
 
-        render_weekly_chart(summaries, 10000)
+        afficher_weekly_chart(summaries, 10000)
 
         mock_utils["fig"].add_hline.assert_called()
 
@@ -249,9 +249,9 @@ class TestRenderWeeklyChart:
         """Vérifie la config du layout"""
         summaries = [SummaryMock(date.today(), pas=5000)]
 
-        from src.modules.famille.suivi_perso.tableau_bord import render_weekly_chart
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_weekly_chart
 
-        render_weekly_chart(summaries, 10000)
+        afficher_weekly_chart(summaries, 10000)
 
         mock_utils["fig"].update_layout.assert_called()
 
@@ -259,9 +259,9 @@ class TestRenderWeeklyChart:
         """Vérifie l'affichage du chart"""
         summaries = [SummaryMock(date.today(), pas=5000)]
 
-        from src.modules.famille.suivi_perso.tableau_bord import render_weekly_chart
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_weekly_chart
 
-        render_weekly_chart(summaries, 10000)
+        afficher_weekly_chart(summaries, 10000)
 
         mock_utils["st"].plotly_chart.assert_called_once()
 
@@ -271,18 +271,18 @@ class TestTableauBordExports:
 
     def test_import_render_user_switch(self):
         """Vérifie l'import"""
-        from src.modules.famille.suivi_perso.tableau_bord import render_user_switch
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_user_switch
 
-        assert callable(render_user_switch)
+        assert callable(afficher_user_switch)
 
     def test_import_render_dashboard(self):
         """Vérifie l'import"""
-        from src.modules.famille.suivi_perso.tableau_bord import render_dashboard
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_dashboard
 
-        assert callable(render_dashboard)
+        assert callable(afficher_dashboard)
 
     def test_import_render_weekly_chart(self):
         """Vérifie l'import"""
-        from src.modules.famille.suivi_perso.tableau_bord import render_weekly_chart
+        from src.modules.famille.suivi_perso.tableau_bord import afficher_weekly_chart
 
-        assert callable(render_weekly_chart)
+        assert callable(afficher_weekly_chart)

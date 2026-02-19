@@ -6,7 +6,7 @@ Mode tablette et personnalisation de l'interface
 import streamlit as st
 
 
-def render_display_config():
+def afficher_display_config():
     """Configuration de l'affichage et mode tablette."""
 
     st.markdown("### 🖥️ Configuration Affichage")

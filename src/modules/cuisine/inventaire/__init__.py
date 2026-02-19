@@ -13,17 +13,17 @@ Fonctionnalités complètes:
 
 import streamlit as st
 
-from .alertes import render_alertes
-from .categories import render_categories
-from .historique import render_historique
-from .notifications import render_notifications, render_notifications_widget
-from .photos import render_photos
-from .predictions import render_predictions
+from .alertes import afficher_alertes
+from .categories import afficher_categories
+from .historique import afficher_historique
+from .notifications import afficher_notifications, afficher_notifications_widget
+from .photos import afficher_photos
+from .predictions import afficher_predictions
 
 # Imports des sous-modules
-from .stock import render_add_article_form, render_stock
-from .suggestions import render_suggestions_ia
-from .tools import render_tools
+from .stock import afficher_add_article_form, afficher_stock
+from .suggestions import afficher_suggestions_ia
+from .tools import afficher_tools
 
 
 def app():
@@ -72,49 +72,49 @@ def app():
     )
 
     with tab_stock:
-        render_stock()
+        afficher_stock()
 
     with tab_alertes:
-        render_alertes()
+        afficher_alertes()
 
     with tab_categories:
-        render_categories()
+        afficher_categories()
 
     with tab_suggestions:
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
     with tab_historique:
-        render_historique()
+        afficher_historique()
 
     with tab_photos:
-        render_photos()
+        afficher_photos()
 
     with tab_notifications:
-        render_notifications()
+        afficher_notifications()
 
     with tab_predictions:
-        render_predictions()
+        afficher_predictions()
 
     with tab_tools:
-        render_tools()
+        afficher_tools()
 
     # Afficher formulaire d'ajout si demandé
     if st.session_state.show_form:
         st.divider()
-        render_add_article_form()
+        afficher_add_article_form()
 
 
 __all__ = [
     "app",
-    "render_stock",
-    "render_add_article_form",
-    "render_alertes",
-    "render_categories",
-    "render_suggestions_ia",
-    "render_photos",
-    "render_notifications",
-    "render_notifications_widget",
-    "render_predictions",
-    "render_tools",
-    "render_historique",
+    "afficher_stock",
+    "afficher_add_article_form",
+    "afficher_alertes",
+    "afficher_categories",
+    "afficher_suggestions_ia",
+    "afficher_photos",
+    "afficher_notifications",
+    "afficher_notifications_widget",
+    "afficher_predictions",
+    "afficher_tools",
+    "afficher_historique",
 ]

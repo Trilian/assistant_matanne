@@ -71,7 +71,7 @@ class TestSchemasPlanning:
 
     def test_repas_base_valide(self):
         """RepasBase accepte données valides."""
-        from src.api.routes.planning import RepasBase
+        from src.api.schemas import RepasBase
 
         repas = RepasBase(
             type_repas="dejeuner",
@@ -86,7 +86,7 @@ class TestSchemasPlanning:
         """Type de repas invalide est rejeté."""
         from pydantic import ValidationError
 
-        from src.api.routes.planning import RepasBase
+        from src.api.schemas import RepasBase
 
         with pytest.raises(ValidationError):
             RepasBase(
@@ -96,7 +96,7 @@ class TestSchemasPlanning:
 
     def test_types_repas_valides(self):
         """Tous les types de repas valides sont acceptés."""
-        from src.api.routes.planning import RepasBase
+        from src.api.schemas import RepasBase
 
         types_valides = ["petit_dejeuner", "dejeuner", "diner", "gouter"]
 
@@ -311,14 +311,14 @@ class TestSchemasPlanningCoverage:
 
     def test_repas_avec_notes(self):
         """RepasBase accepte les notes optionnelles."""
-        from src.api.routes.planning import RepasBase
+        from src.api.schemas import RepasBase
 
         repas = RepasBase(type_repas="dejeuner", date=datetime.now(), notes="Notes de test")
         assert repas.notes == "Notes de test"
 
     def test_repas_sans_recette(self):
         """RepasBase sans recette_id valide."""
-        from src.api.routes.planning import RepasBase
+        from src.api.schemas import RepasBase
 
         repas = RepasBase(type_repas="dejeuner", date=datetime.now())
         assert repas.recette_id is None

@@ -1,7 +1,7 @@
 """
 Tests pour src/modules/famille/suivi_perso/activities.py
 
-Tests complets pour render_activities() avec mocking Streamlit.
+Tests complets pour afficher_activities() avec mocking Streamlit.
 """
 
 from datetime import datetime
@@ -35,7 +35,7 @@ class ActivityMock:
 
 
 class TestRenderActivities:
-    """Tests pour render_activities()"""
+    """Tests pour afficher_activities()"""
 
     @pytest.fixture
     def mock_st(self):
@@ -50,27 +50,27 @@ class TestRenderActivities:
 
     def test_affiche_subheader(self, mock_st):
         """Vérifie l'affichage du titre"""
-        from src.modules.famille.suivi_perso.activities import render_activities
+        from src.modules.famille.suivi_perso.activities import afficher_activities
 
-        render_activities({"activities": []})
+        afficher_activities({"activities": []})
 
         mock_st.subheader.assert_called_once()
         assert "Activités" in mock_st.subheader.call_args[0][0]
 
     def test_affiche_info_si_pas_activites(self, mock_st):
         """Vérifie le message si aucune activité"""
-        from src.modules.famille.suivi_perso.activities import render_activities
+        from src.modules.famille.suivi_perso.activities import afficher_activities
 
-        render_activities({"activities": []})
+        afficher_activities({"activities": []})
 
         mock_st.info.assert_called_once()
         assert "Aucune" in mock_st.info.call_args[0][0]
 
     def test_affiche_info_si_data_vide(self, mock_st):
         """Vérifie le message si data vide"""
-        from src.modules.famille.suivi_perso.activities import render_activities
+        from src.modules.famille.suivi_perso.activities import afficher_activities
 
-        render_activities({})
+        afficher_activities({})
 
         mock_st.info.assert_called_once()
 
@@ -81,9 +81,9 @@ class TestRenderActivities:
             ActivityMock(nom="Vélo", type_activite="cycling"),
         ]
 
-        from src.modules.famille.suivi_perso.activities import render_activities
+        from src.modules.famille.suivi_perso.activities import afficher_activities
 
-        render_activities({"activities": activities})
+        afficher_activities({"activities": activities})
 
         # Container appelé pour chaque activité
         assert mock_st.container.call_count == 2
@@ -92,9 +92,9 @@ class TestRenderActivities:
         """Vérifie qu'on affiche max 5 activités"""
         activities = [ActivityMock(nom=f"Activité {i}") for i in range(10)]
 
-        from src.modules.famille.suivi_perso.activities import render_activities
+        from src.modules.famille.suivi_perso.activities import afficher_activities
 
-        render_activities({"activities": activities})
+        afficher_activities({"activities": activities})
 
         # Seulement 5 containers
         assert mock_st.container.call_count == 5
@@ -106,9 +106,9 @@ class TestRenderActivities:
             ActivityMock(nom="Récente", date_debut=datetime(2024, 12, 1)),
         ]
 
-        from src.modules.famille.suivi_perso.activities import render_activities
+        from src.modules.famille.suivi_perso.activities import afficher_activities
 
-        render_activities({"activities": activities})
+        afficher_activities({"activities": activities})
 
         # Les activités sont triées par date décroissante
         assert mock_st.container.call_count == 2
@@ -117,9 +117,9 @@ class TestRenderActivities:
         """Vérifie l'emoji selon le type d'activité"""
         activities = [ActivityMock(type_activite="swimming")]
 
-        from src.modules.famille.suivi_perso.activities import render_activities
+        from src.modules.famille.suivi_perso.activities import afficher_activities
 
-        render_activities({"activities": activities})
+        afficher_activities({"activities": activities})
 
         # markdown appelé avec emoji natation
         calls = [str(call) for call in mock_st.markdown.call_args_list]
@@ -129,9 +129,9 @@ class TestRenderActivities:
         """Vérifie l'affichage de la durée"""
         activities = [ActivityMock(duree_formatted="45:00")]
 
-        from src.modules.famille.suivi_perso.activities import render_activities
+        from src.modules.famille.suivi_perso.activities import afficher_activities
 
-        render_activities({"activities": activities})
+        afficher_activities({"activities": activities})
 
         calls = [str(call) for call in mock_st.write.call_args_list]
         assert any("45:00" in str(call) for call in calls)
@@ -140,9 +140,9 @@ class TestRenderActivities:
         """Vérifie l'affichage de la distance"""
         activities = [ActivityMock(distance_metres=5000, distance_km=5.0)]
 
-        from src.modules.famille.suivi_perso.activities import render_activities
+        from src.modules.famille.suivi_perso.activities import afficher_activities
 
-        render_activities({"activities": activities})
+        afficher_activities({"activities": activities})
 
         calls = [str(call) for call in mock_st.write.call_args_list]
         assert any("5.0 km" in str(call) for call in calls)
@@ -151,9 +151,9 @@ class TestRenderActivities:
         """Vérifie l'affichage des calories"""
         activities = [ActivityMock(calories=350)]
 
-        from src.modules.famille.suivi_perso.activities import render_activities
+        from src.modules.famille.suivi_perso.activities import afficher_activities
 
-        render_activities({"activities": activities})
+        afficher_activities({"activities": activities})
 
         calls = [str(call) for call in mock_st.write.call_args_list]
         assert any("350" in str(call) and "kcal" in str(call) for call in calls)
@@ -162,9 +162,9 @@ class TestRenderActivities:
         """Vérifie l'affichage de la FC moyenne"""
         activities = [ActivityMock(fc_moyenne=145)]
 
-        from src.modules.famille.suivi_perso.activities import render_activities
+        from src.modules.famille.suivi_perso.activities import afficher_activities
 
-        render_activities({"activities": activities})
+        afficher_activities({"activities": activities})
 
         calls = [str(call) for call in mock_st.write.call_args_list]
         assert any("145" in str(call) and "bpm" in str(call) for call in calls)
@@ -185,9 +185,9 @@ class TestRenderActivities:
             mock_st.reset_mock()
             activities = [ActivityMock(type_activite=type_act)]
 
-            from src.modules.famille.suivi_perso.activities import render_activities
+            from src.modules.famille.suivi_perso.activities import afficher_activities
 
-            render_activities({"activities": activities})
+            afficher_activities({"activities": activities})
 
             calls = [str(call) for call in mock_st.markdown.call_args_list]
             assert any(
@@ -200,6 +200,6 @@ class TestActivitiesExports:
 
     def test_import_render_activities(self):
         """Vérifie l'import"""
-        from src.modules.famille.suivi_perso.activities import render_activities
+        from src.modules.famille.suivi_perso.activities import afficher_activities
 
-        assert callable(render_activities)
+        assert callable(afficher_activities)

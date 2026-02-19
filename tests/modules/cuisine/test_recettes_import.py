@@ -49,28 +49,28 @@ class TestImports:
     """Tests d import des fonctions"""
 
     def test_import_render_importer(self):
-        """Test import render_importer"""
-        from src.modules.cuisine.recettes_import import render_importer
+        """Test import afficher_importer"""
+        from src.modules.cuisine.recettes_import import afficher_importer
 
-        assert callable(render_importer)
+        assert callable(afficher_importer)
 
     def test_import_render_import_url(self):
-        """Test import _render_import_url"""
-        from src.modules.cuisine.recettes_import import _render_import_url
+        """Test import _afficher_import_url"""
+        from src.modules.cuisine.recettes_import import _afficher_import_url
 
-        assert callable(_render_import_url)
+        assert callable(_afficher_import_url)
 
     def test_import_render_import_pdf(self):
-        """Test import _render_import_pdf"""
-        from src.modules.cuisine.recettes_import import _render_import_pdf
+        """Test import _afficher_import_pdf"""
+        from src.modules.cuisine.recettes_import import _afficher_import_pdf
 
-        assert callable(_render_import_pdf)
+        assert callable(_afficher_import_pdf)
 
     def test_import_render_import_text(self):
-        """Test import _render_import_text"""
-        from src.modules.cuisine.recettes_import import _render_import_text
+        """Test import _afficher_import_text"""
+        from src.modules.cuisine.recettes_import import _afficher_import_text
 
-        assert callable(_render_import_text)
+        assert callable(_afficher_import_text)
 
     def test_import_show_import_preview(self):
         """Test import _show_import_preview"""
@@ -81,57 +81,57 @@ class TestImports:
 
 @pytest.mark.unit
 class TestRenderImporter:
-    """Tests pour render_importer"""
+    """Tests pour afficher_importer"""
 
     @patch("src.modules.cuisine.recettes_import.st")
     def test_render_importer_basic(self, mock_st):
-        """Test render_importer s execute sans erreur"""
-        from src.modules.cuisine.recettes_import import render_importer
+        """Test afficher_importer s execute sans erreur"""
+        from src.modules.cuisine.recettes_import import afficher_importer
 
         setup_mock_st(mock_st)
-        render_importer()
+        afficher_importer()
         mock_st.subheader.assert_called_once()
         mock_st.tabs.assert_called_once()
 
 
 @pytest.mark.unit
 class TestRenderImportUrl:
-    """Tests pour _render_import_url"""
+    """Tests pour _afficher_import_url"""
 
     @patch("src.modules.cuisine.recettes_import.st")
     def test_render_import_url_basic(self, mock_st):
-        """Test render_import_url sans action"""
-        from src.modules.cuisine.recettes_import import _render_import_url
+        """Test afficher_import_url sans action"""
+        from src.modules.cuisine.recettes_import import _afficher_import_url
 
         setup_mock_st(mock_st)
-        _render_import_url()
+        _afficher_import_url()
         mock_st.markdown.assert_called()
         mock_st.text_input.assert_called()
 
     @patch("src.modules.cuisine.recettes_import.st")
     def test_render_import_url_no_url_error(self, mock_st):
-        """Test render_import_url avec bouton mais pas d URL"""
-        from src.modules.cuisine.recettes_import import _render_import_url
+        """Test afficher_import_url avec bouton mais pas d URL"""
+        from src.modules.cuisine.recettes_import import _afficher_import_url
 
         setup_mock_st(mock_st)
         mock_st.button.return_value = True
         mock_st.text_input.return_value = ""
 
-        _render_import_url()
+        _afficher_import_url()
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes_import.RecipeImporter")
     @patch("src.modules.cuisine.recettes_import.st")
     def test_render_import_url_extract_success(self, mock_st, mock_importer):
         """Test extraction reussie depuis URL"""
-        from src.modules.cuisine.recettes_import import _render_import_url
+        from src.modules.cuisine.recettes_import import _afficher_import_url
 
         setup_mock_st(mock_st, {"extracted_recipe": None})
         mock_st.button.return_value = True
         mock_st.text_input.return_value = "https://example.com/recette"
         mock_importer.from_url.return_value = {"nom": "Test Recette"}
 
-        _render_import_url()
+        _afficher_import_url()
         mock_importer.from_url.assert_called_once()
         mock_st.success.assert_called()
 
@@ -139,72 +139,72 @@ class TestRenderImportUrl:
     @patch("src.modules.cuisine.recettes_import.st")
     def test_render_import_url_extract_failure(self, mock_st, mock_importer):
         """Test extraction echouee depuis URL"""
-        from src.modules.cuisine.recettes_import import _render_import_url
+        from src.modules.cuisine.recettes_import import _afficher_import_url
 
         setup_mock_st(mock_st, {"extracted_recipe": None})
         mock_st.button.return_value = True
         mock_st.text_input.return_value = "https://example.com/recette"
         mock_importer.from_url.return_value = None
 
-        _render_import_url()
+        _afficher_import_url()
         mock_st.error.assert_called()
 
 
 @pytest.mark.unit
 class TestRenderImportPdf:
-    """Tests pour _render_import_pdf"""
+    """Tests pour _afficher_import_pdf"""
 
     @patch("src.modules.cuisine.recettes_import.st")
     def test_render_import_pdf_basic(self, mock_st):
-        """Test render_import_pdf sans fichier"""
-        from src.modules.cuisine.recettes_import import _render_import_pdf
+        """Test afficher_import_pdf sans fichier"""
+        from src.modules.cuisine.recettes_import import _afficher_import_pdf
 
         setup_mock_st(mock_st)
         mock_st.file_uploader.return_value = None
 
-        _render_import_pdf()
+        _afficher_import_pdf()
         mock_st.markdown.assert_called()
         mock_st.file_uploader.assert_called()
 
 
 @pytest.mark.unit
 class TestRenderImportText:
-    """Tests pour _render_import_text"""
+    """Tests pour _afficher_import_text"""
 
     @patch("src.modules.cuisine.recettes_import.st")
     def test_render_import_text_basic(self, mock_st):
-        """Test render_import_text sans action"""
-        from src.modules.cuisine.recettes_import import _render_import_text
+        """Test afficher_import_text sans action"""
+        from src.modules.cuisine.recettes_import import _afficher_import_text
 
         setup_mock_st(mock_st)
-        _render_import_text()
+        _afficher_import_text()
         mock_st.markdown.assert_called()
         mock_st.text_area.assert_called()
 
     @patch("src.modules.cuisine.recettes_import.st")
     def test_render_import_text_no_text_error(self, mock_st):
-        """Test render_import_text avec bouton mais pas de texte"""
-        from src.modules.cuisine.recettes_import import _render_import_text
+        """Test afficher_import_text avec bouton mais pas de texte"""
+        from src.modules.cuisine.recettes_import import _afficher_import_text
 
         setup_mock_st(mock_st)
         mock_st.button.return_value = True
         mock_st.text_area.return_value = ""
 
-        _render_import_text()
+        _afficher_import_text()
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes_import.RecipeImporter")
     @patch("src.modules.cuisine.recettes_import.st")
     def test_render_import_text_extract_success(self, mock_st, mock_importer):
         """Test extraction reussie depuis texte"""
-        from src.modules.cuisine.recettes_import import _render_import_text
+        from src.modules.cuisine.recettes_import import _afficher_import_text
 
         setup_mock_st(mock_st)
         mock_st.button.return_value = True
         mock_st.text_area.return_value = "Ma recette\nIngredients:\n- 1 item"
         mock_importer.from_text.return_value = {"nom": "Ma recette", "ingredients": ["1 item"]}
 
-        _render_import_text()
+        _afficher_import_text()
         mock_importer.from_text.assert_called_once()
         mock_st.success.assert_called()
 

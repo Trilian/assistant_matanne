@@ -1,7 +1,7 @@
 """
 Tests pour src/modules/cuisine/inventaire/alertes.py
 
-Tests complets pour render_alertes() avec mocking Streamlit.
+Tests complets pour afficher_alertes() avec mocking Streamlit.
 """
 
 from unittest.mock import MagicMock, patch
@@ -10,7 +10,7 @@ import pytest
 
 
 class TestRenderAlertes:
-    """Tests pour render_alertes()"""
+    """Tests pour afficher_alertes()"""
 
     @pytest.fixture
     def mock_st(self):
@@ -21,7 +21,7 @@ class TestRenderAlertes:
     @pytest.fixture
     def mock_service(self):
         """Mock inventaire service"""
-        with patch("src.modules.cuisine.inventaire.alertes.get_inventaire_service") as mock:
+        with patch("src.modules.cuisine.inventaire.alertes.obtenir_service_inventaire") as mock:
             mock_svc = MagicMock()
             mock.return_value = mock_svc
             yield mock_svc
@@ -35,12 +35,12 @@ class TestRenderAlertes:
 
     def test_affiche_erreur_si_service_none(self, mock_st):
         """Vérifie l'erreur si service indisponible"""
-        with patch("src.modules.cuisine.inventaire.alertes.get_inventaire_service") as mock:
+        with patch("src.modules.cuisine.inventaire.alertes.obtenir_service_inventaire") as mock:
             mock.return_value = None
 
-            from src.modules.cuisine.inventaire.alertes import render_alertes
+            from src.modules.cuisine.inventaire.alertes import afficher_alertes
 
-            render_alertes()
+            afficher_alertes()
 
             mock_st.error.assert_called_once()
 
@@ -52,9 +52,9 @@ class TestRenderAlertes:
             "peremption_proche": [],
         }
 
-        from src.modules.cuisine.inventaire.alertes import render_alertes
+        from src.modules.cuisine.inventaire.alertes import afficher_alertes
 
-        render_alertes()
+        afficher_alertes()
 
         mock_st.success.assert_called_once()
         assert "Aucune alerte" in mock_st.success.call_args[0][0]
@@ -67,9 +67,9 @@ class TestRenderAlertes:
             "peremption_proche": [],
         }
 
-        from src.modules.cuisine.inventaire.alertes import render_alertes
+        from src.modules.cuisine.inventaire.alertes import afficher_alertes
 
-        render_alertes()
+        afficher_alertes()
 
         mock_st.error.assert_called()
         mock_st.dataframe.assert_called()
@@ -82,9 +82,9 @@ class TestRenderAlertes:
             "peremption_proche": [],
         }
 
-        from src.modules.cuisine.inventaire.alertes import render_alertes
+        from src.modules.cuisine.inventaire.alertes import afficher_alertes
 
-        render_alertes()
+        afficher_alertes()
 
         mock_st.warning.assert_called()
 
@@ -96,9 +96,9 @@ class TestRenderAlertes:
             "peremption_proche": [{"nom": "Yaourt", "date_peremption": "2025-01-15"}],
         }
 
-        from src.modules.cuisine.inventaire.alertes import render_alertes
+        from src.modules.cuisine.inventaire.alertes import afficher_alertes
 
-        render_alertes()
+        afficher_alertes()
 
         mock_st.warning.assert_called()
         assert "péremption" in mock_st.warning.call_args[0][0].lower()
@@ -111,9 +111,9 @@ class TestRenderAlertes:
             "peremption_proche": [],
         }
 
-        from src.modules.cuisine.inventaire.alertes import render_alertes
+        from src.modules.cuisine.inventaire.alertes import afficher_alertes
 
-        render_alertes()
+        afficher_alertes()
 
         assert mock_st.divider.call_count >= 1
 
@@ -121,9 +121,9 @@ class TestRenderAlertes:
         """Vérifie la gestion d'exception"""
         mock_service.get_alertes.side_effect = Exception("DB Error")
 
-        from src.modules.cuisine.inventaire.alertes import render_alertes
+        from src.modules.cuisine.inventaire.alertes import afficher_alertes
 
-        render_alertes()
+        afficher_alertes()
 
         mock_st.error.assert_called()
 
@@ -132,13 +132,13 @@ class TestAlertesIntegration:
     """Tests d'intégration"""
 
     def test_import_render_alertes(self):
-        """Vérifie que render_alertes s'importe"""
-        from src.modules.cuisine.inventaire.alertes import render_alertes
+        """Vérifie que afficher_alertes s'importe"""
+        from src.modules.cuisine.inventaire.alertes import afficher_alertes
 
-        assert callable(render_alertes)
+        assert callable(afficher_alertes)
 
     def test_all_exports(self):
         """Vérifie __all__"""
         from src.modules.cuisine.inventaire.alertes import __all__
 
-        assert "render_alertes" in __all__
+        assert "afficher_alertes" in __all__

@@ -79,14 +79,14 @@ def create_mock_recette(with_image=False, with_nutrition=True, with_robots=False
 
 @pytest.mark.unit
 class TestRenderDetailRecette:
-    """Tests pour render_detail_recette."""
+    """Tests pour afficher_detail_recette."""
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_recette_basic(self, mock_st, mock_svc_factory, mock_render_img) -> None:
-        """Test render_detail_recette sans erreur."""
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        """Test afficher_detail_recette sans erreur."""
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -96,16 +96,16 @@ class TestRenderDetailRecette:
         mock_svc_factory.return_value = mock_service
 
         recette = create_mock_recette()
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
 
         mock_st.header.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_with_image(self, mock_st, mock_svc_factory, mock_render_img) -> None:
         """Test avec image."""
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -115,18 +115,18 @@ class TestRenderDetailRecette:
         mock_svc_factory.return_value = mock_service
 
         recette = create_mock_recette(with_image=True)
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
 
         mock_st.image.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_difficulte_moyen(
         self, mock_st, mock_svc_factory, mock_render_img
     ) -> None:
         """Test difficulte moyenne."""
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -137,18 +137,18 @@ class TestRenderDetailRecette:
 
         recette = create_mock_recette()
         recette.difficulte = "moyen"
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
 
         mock_st.markdown.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_difficulte_difficile(
         self, mock_st, mock_svc_factory, mock_render_img
     ) -> None:
         """Test difficulte difficile."""
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -159,16 +159,16 @@ class TestRenderDetailRecette:
 
         recette = create_mock_recette()
         recette.difficulte = "difficile"
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
 
         mock_st.markdown.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_with_robots(self, mock_st, mock_svc_factory, mock_render_img) -> None:
         """Test avec robots menagers."""
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -178,16 +178,16 @@ class TestRenderDetailRecette:
         mock_svc_factory.return_value = mock_service
 
         recette = create_mock_recette(with_robots=True)
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
 
         mock_st.markdown.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_no_nutrition(self, mock_st, mock_svc_factory, mock_render_img) -> None:
         """Test sans nutrition."""
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -197,18 +197,18 @@ class TestRenderDetailRecette:
         mock_svc_factory.return_value = mock_service
 
         recette = create_mock_recette(with_nutrition=False)
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
 
         mock_st.metric.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_with_historique(
         self, mock_st, mock_svc_factory, mock_render_img
     ) -> None:
         """Test avec historique."""
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -228,7 +228,7 @@ class TestRenderDetailRecette:
         mock_svc_factory.return_value = mock_service
 
         recette = create_mock_recette()
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
 
         mock_st.metric.assert_called()
 
@@ -237,22 +237,22 @@ class TestImports:
     """Tests des imports."""
 
     def test_import_render_detail_recette(self) -> None:
-        """Test import render_detail_recette."""
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        """Test import afficher_detail_recette."""
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
-        assert callable(render_detail_recette)
+        assert callable(afficher_detail_recette)
 
 
 @pytest.mark.unit
 class TestRenderDetailRecetteExtended:
-    """Tests etendus pour render_detail_recette."""
+    """Tests etendus pour afficher_detail_recette."""
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_image_exception(self, mock_st, mock_svc_factory, mock_render_img):
         """Test quand l image ne peut pas etre chargee."""
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.image.side_effect = Exception("Image error")
@@ -262,15 +262,15 @@ class TestRenderDetailRecetteExtended:
         mock_service.get_versions_recette.return_value = []
         mock_svc_factory.return_value = mock_service
         recette = create_mock_recette(with_image=True)
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.caption.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_no_badges(self, mock_st, mock_svc_factory, mock_render_img):
         """Test sans badges."""
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -286,15 +286,15 @@ class TestRenderDetailRecetteExtended:
         recette.congelable = False
         recette.score_bio = 0
         recette.score_local = 0
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.header.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_all_badges(self, mock_st, mock_svc_factory, mock_render_img):
         """Test avec tous les badges."""
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -308,14 +308,14 @@ class TestRenderDetailRecetteExtended:
         recette.est_rapide = True
         recette.est_equilibre = True
         recette.congelable = True
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.markdown.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_robots_iteration(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -325,14 +325,14 @@ class TestRenderDetailRecetteExtended:
         mock_svc_factory.return_value = mock_service
         recette = create_mock_recette(with_robots=True)
         recette.robots_compatibles = ["Cookeo", "Monsieur Cuisine", "Airfryer"]
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.markdown.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_cuisson_button_clicked(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.button.side_effect = [True] + [False] * 10
@@ -347,14 +347,14 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.form.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_cuisson_form_submit_success(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.button.side_effect = [True] + [False] * 10
@@ -373,14 +373,14 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_cuisson_form_submit_failure(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.button.side_effect = [True] + [False] * 10
@@ -399,14 +399,14 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_historique_avec_avis(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -430,14 +430,14 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.caption.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_versions_vides(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -450,14 +450,14 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.info.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_generer_bebe_success(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.button.side_effect = [False, True] + [False] * 10
@@ -472,14 +472,14 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_generer_bebe_failure(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.button.side_effect = [False, True] + [False] * 10
@@ -494,14 +494,14 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_generer_bebe_exception(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.button.side_effect = [False, True] + [False] * 10
@@ -516,14 +516,14 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_generer_batch_success(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.button.side_effect = [False, False, True] + [False] * 10
@@ -538,14 +538,14 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_generer_batch_failure(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.button.side_effect = [False, False, True] + [False] * 10
@@ -560,14 +560,14 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_generer_batch_exception(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.button.side_effect = [False, False, True] + [False] * 10
@@ -582,14 +582,14 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_action_dupliquer_success(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.button.side_effect = [False, False, False, False, True] + [False] * 10
@@ -607,14 +607,14 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_action_dupliquer_exception(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.button.side_effect = [False, False, False, False, True] + [False] * 10
@@ -632,15 +632,15 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.time")
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_action_supprimer_success(self, mock_st, mock_svc_factory, mock_render_img, mock_time):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.button.side_effect = [False, False, False, False, False, True] + [False] * 10
@@ -655,14 +655,14 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_action_supprimer_failure(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.button.side_effect = [False, False, False, False, False, True] + [False] * 10
@@ -677,14 +677,14 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.recettes.detail.render_generer_image")
+    @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_action_supprimer_exception(self, mock_st, mock_svc_factory, mock_render_img):
-        from src.modules.cuisine.recettes.detail import render_detail_recette
+        from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
         mock_st.button.side_effect = [False, False, False, False, False, True] + [False] * 10
@@ -699,5 +699,5 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_monsieur_cuisine = False
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
-        render_detail_recette(recette)
+        afficher_detail_recette(recette)
         mock_st.error.assert_called()

@@ -71,7 +71,7 @@ def create_mock_achat(
 
 
 class TestRenderDashboard:
-    """Tests pour render_dashboard"""
+    """Tests pour afficher_dashboard"""
 
     @patch("src.modules.famille.jules.components.st")
     @patch("src.modules.famille.jules.components.get_age_jules")
@@ -84,9 +84,9 @@ class TestRenderDashboard:
         mock_tailles.return_value = {"vetements": "2 ans", "chaussures": "24"}
         mock_achats.return_value = []
 
-        from src.modules.famille.jules.components import render_dashboard
+        from src.modules.famille.jules.components import afficher_dashboard
 
-        render_dashboard()
+        afficher_dashboard()
 
         mock_st.subheader.assert_called_once_with("📊 Dashboard")
         mock_st.metric.assert_any_call("🎂 Âge", "24 mois", "104 semaines")
@@ -115,9 +115,9 @@ class TestRenderDashboard:
 
         mock_achats.return_value = [achat1, achat2]
 
-        from src.modules.famille.jules.components import render_dashboard
+        from src.modules.famille.jules.components import afficher_dashboard
 
-        render_dashboard()
+        afficher_dashboard()
 
         mock_st.markdown.assert_any_call("---")
         mock_st.markdown.assert_any_call("**🛒 Achats suggeres:**")
@@ -139,9 +139,9 @@ class TestRenderDashboard:
         achat.priorite = "haute"
         mock_achats.return_value = [achat]
 
-        from src.modules.famille.jules.components import render_dashboard
+        from src.modules.famille.jules.components import afficher_dashboard
 
-        render_dashboard()
+        afficher_dashboard()
 
         # Verifie que l'emoji rouge est utilise pour haute priorite
         calls = [str(c) for c in mock_st.write.call_args_list]
@@ -149,7 +149,7 @@ class TestRenderDashboard:
 
 
 class TestRenderActivites:
-    """Tests pour render_activites"""
+    """Tests pour afficher_activites"""
 
     @patch("src.modules.famille.jules.components.st")
     @patch("src.modules.famille.jules.components.get_age_jules")
@@ -168,9 +168,9 @@ class TestRenderActivites:
             }
         ]
 
-        from src.modules.famille.jules.components import render_activites
+        from src.modules.famille.jules.components import afficher_activites
 
-        render_activites()
+        afficher_activites()
 
         mock_st.subheader.assert_called_once_with("🎨 Activites du jour")
         mock_st.selectbox.assert_called()
@@ -200,9 +200,9 @@ class TestRenderActivites:
             },
         ]
 
-        from src.modules.famille.jules.components import render_activites
+        from src.modules.famille.jules.components import afficher_activites
 
-        render_activites()
+        afficher_activites()
 
         # Verifie que les activites sont filtrees
         assert mock_st.container.call_count >= 1
@@ -232,9 +232,9 @@ class TestRenderActivites:
             },
         ]
 
-        from src.modules.famille.jules.components import render_activites
+        from src.modules.famille.jules.components import afficher_activites
 
-        render_activites()
+        afficher_activites()
 
         # Le filtre exterieur doit filtrer les activites interieures
         mock_st.subheader.assert_called_once()
@@ -251,9 +251,9 @@ class TestRenderActivites:
         # Simuler click sur le bouton IA
         mock_st.button.side_effect = [True, False]  # Premier bouton IA clicked
 
-        from src.modules.famille.jules.components import render_activites
+        from src.modules.famille.jules.components import afficher_activites
 
-        render_activites()
+        afficher_activites()
 
         assert mock_st.session_state.get("jules_show_ai_activities") == True
 
@@ -277,9 +277,9 @@ class TestRenderActivites:
         # Simuler: premier bouton (IA) = False, deuxieme (Fait) = True
         mock_st.button.side_effect = [False, True]
 
-        from src.modules.famille.jules.components import render_activites
+        from src.modules.famille.jules.components import afficher_activites
 
-        render_activites()
+        afficher_activites()
 
         mock_st.success.assert_called_once_with("Super ! 🎉")
 
@@ -303,9 +303,9 @@ class TestRenderActivites:
         # Bouton Fermer = False
         mock_st.button.return_value = False
 
-        from src.modules.famille.jules.components import render_activites
+        from src.modules.famille.jules.components import afficher_activites
 
-        render_activites()
+        afficher_activites()
 
         mock_st.markdown.assert_any_call("---")
         mock_st.markdown.assert_any_call("**🤖 Suggestions IA:**")
@@ -326,9 +326,9 @@ class TestRenderActivites:
         mock_service_instance.suggerer_activites = AsyncMock(side_effect=Exception("Erreur API"))
         mock_ai_service.return_value = mock_service_instance
 
-        from src.modules.famille.jules.components import render_activites
+        from src.modules.famille.jules.components import afficher_activites
 
-        render_activites()
+        afficher_activites()
 
         # Verifie qu'une erreur est affichee
         error_calls = [c for c in mock_st.error.call_args_list]
@@ -353,19 +353,19 @@ class TestRenderActivites:
         # Simuler click sur Fermer (2e bouton apres IA)
         mock_st.button.side_effect = [False, True]
 
-        from src.modules.famille.jules.components import render_activites
+        from src.modules.famille.jules.components import afficher_activites
 
-        render_activites()
+        afficher_activites()
 
         assert mock_st.session_state.get("jules_show_ai_activities") == False
         mock_st.rerun.assert_called_once()
 
 
 class TestRenderShopping:
-    """Tests pour render_shopping"""
+    """Tests pour afficher_shopping"""
 
-    @patch("src.modules.famille.jules.components.render_form_ajout_achat")
-    @patch("src.modules.famille.jules.components.render_achats_categorie")
+    @patch("src.modules.famille.jules.components.afficher_form_ajout_achat")
+    @patch("src.modules.famille.jules.components.afficher_achats_categorie")
     @patch("src.modules.famille.jules.components.st")
     @patch("src.modules.famille.jules.components.get_age_jules")
     @patch("src.modules.famille.jules.components.get_taille_vetements")
@@ -375,18 +375,18 @@ class TestRenderShopping:
         mock_age.return_value = {"mois": 19, "semaines": 82}
         mock_tailles.return_value = {"vetements": "18-24 mois", "chaussures": "22"}
 
-        from src.modules.famille.jules.components import render_shopping
+        from src.modules.famille.jules.components import afficher_shopping
 
-        render_shopping()
+        afficher_shopping()
 
         mock_st.subheader.assert_called_once_with("🛒 Shopping Jules")
         mock_st.tabs.assert_called_once()
-        # Verifie que render_achats_categorie est appele pour chaque categorie
+        # Verifie que afficher_achats_categorie est appele pour chaque categorie
         assert mock_render_achats.call_count == 3
 
     @patch("src.modules.famille.jules.components.JulesAIService")
-    @patch("src.modules.famille.jules.components.render_form_ajout_achat")
-    @patch("src.modules.famille.jules.components.render_achats_categorie")
+    @patch("src.modules.famille.jules.components.afficher_form_ajout_achat")
+    @patch("src.modules.famille.jules.components.afficher_achats_categorie")
     @patch("src.modules.famille.jules.components.st")
     @patch("src.modules.famille.jules.components.get_age_jules")
     @patch("src.modules.famille.jules.components.get_taille_vetements")
@@ -408,15 +408,15 @@ class TestRenderShopping:
         )
         mock_ai_service.return_value = mock_service_instance
 
-        from src.modules.famille.jules.components import render_shopping
+        from src.modules.famille.jules.components import afficher_shopping
 
-        render_shopping()
+        afficher_shopping()
 
         mock_st.markdown.assert_any_call("Jouets suggeres: Lego, Puzzle")
 
     @patch("src.modules.famille.jules.components.JulesAIService")
-    @patch("src.modules.famille.jules.components.render_form_ajout_achat")
-    @patch("src.modules.famille.jules.components.render_achats_categorie")
+    @patch("src.modules.famille.jules.components.afficher_form_ajout_achat")
+    @patch("src.modules.famille.jules.components.afficher_achats_categorie")
     @patch("src.modules.famille.jules.components.st")
     @patch("src.modules.famille.jules.components.get_age_jules")
     @patch("src.modules.famille.jules.components.get_taille_vetements")
@@ -435,16 +435,16 @@ class TestRenderShopping:
         mock_service_instance.suggerer_jouets = AsyncMock(side_effect=Exception("Erreur API"))
         mock_ai_service.return_value = mock_service_instance
 
-        from src.modules.famille.jules.components import render_shopping
+        from src.modules.famille.jules.components import afficher_shopping
 
-        render_shopping()
+        afficher_shopping()
 
         error_calls = [c for c in mock_st.error.call_args_list]
         assert len(error_calls) > 0
 
 
 class TestRenderAchatsCategorie:
-    """Tests pour render_achats_categorie"""
+    """Tests pour afficher_achats_categorie"""
 
     @patch("src.modules.famille.jules.components.obtenir_contexte_db")
     @patch("src.modules.famille.jules.components.st")
@@ -459,9 +459,9 @@ class TestRenderAchatsCategorie:
         mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_db.return_value.__exit__ = MagicMock(return_value=False)
 
-        from src.modules.famille.jules.components import render_achats_categorie
+        from src.modules.famille.jules.components import afficher_achats_categorie
 
-        render_achats_categorie("jules_vetements")
+        afficher_achats_categorie("jules_vetements")
 
         mock_st.caption.assert_called_with("Aucun article en attente")
 
@@ -480,9 +480,9 @@ class TestRenderAchatsCategorie:
         mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_db.return_value.__exit__ = MagicMock(return_value=False)
 
-        from src.modules.famille.jules.components import render_achats_categorie
+        from src.modules.famille.jules.components import afficher_achats_categorie
 
-        render_achats_categorie("jules_vetements")
+        afficher_achats_categorie("jules_vetements")
 
         mock_st.container.assert_called()
         # Verifie que le nom et les details sont affiches
@@ -507,9 +507,9 @@ class TestRenderAchatsCategorie:
         # Simuler click sur le bouton acheter
         mock_st.button.return_value = True
 
-        from src.modules.famille.jules.components import render_achats_categorie
+        from src.modules.famille.jules.components import afficher_achats_categorie
 
-        render_achats_categorie("jules_vetements")
+        afficher_achats_categorie("jules_vetements")
 
         # Verifie que l'achat est marque comme achete
         assert achat.achete == True
@@ -539,9 +539,9 @@ class TestRenderAchatsCategorie:
         mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_db.return_value.__exit__ = MagicMock(return_value=False)
 
-        from src.modules.famille.jules.components import render_achats_categorie
+        from src.modules.famille.jules.components import afficher_achats_categorie
 
-        render_achats_categorie("jules_vetements")
+        afficher_achats_categorie("jules_vetements")
 
         markdown_calls = [str(c) for c in mock_st.markdown.call_args_list]
         # Verifie les emojis de priorite
@@ -559,9 +559,9 @@ class TestRenderAchatsCategorie:
         mock_db.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
         mock_db.return_value.__exit__ = MagicMock(return_value=False)
 
-        from src.modules.famille.jules.components import render_achats_categorie
+        from src.modules.famille.jules.components import afficher_achats_categorie
 
-        render_achats_categorie("jules_vetements")
+        afficher_achats_categorie("jules_vetements")
 
         mock_st.error.assert_called()
 
@@ -581,25 +581,25 @@ class TestRenderAchatsCategorie:
         mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_db.return_value.__exit__ = MagicMock(return_value=False)
 
-        from src.modules.famille.jules.components import render_achats_categorie
+        from src.modules.famille.jules.components import afficher_achats_categorie
 
-        render_achats_categorie("jules_vetements")
+        afficher_achats_categorie("jules_vetements")
 
         markdown_calls = [str(c) for c in mock_st.markdown.call_args_list]
         assert any("⚪" in str(c) for c in markdown_calls)
 
 
 class TestRenderFormAjoutAchat:
-    """Tests pour render_form_ajout_achat"""
+    """Tests pour afficher_form_ajout_achat"""
 
     @patch("src.modules.famille.jules.components.st")
     def test_form_display(self, mock_st):
         """Test affichage du formulaire"""
         setup_mock_st(mock_st)
 
-        from src.modules.famille.jules.components import render_form_ajout_achat
+        from src.modules.famille.jules.components import afficher_form_ajout_achat
 
-        render_form_ajout_achat()
+        afficher_form_ajout_achat()
 
         mock_st.form.assert_called_once_with("add_purchase_jules")
         mock_st.text_input.assert_called()
@@ -613,9 +613,9 @@ class TestRenderFormAjoutAchat:
         mock_st.form_submit_button.return_value = True
         mock_st.text_input.return_value = ""
 
-        from src.modules.famille.jules.components import render_form_ajout_achat
+        from src.modules.famille.jules.components import afficher_form_ajout_achat
 
-        render_form_ajout_achat()
+        afficher_form_ajout_achat()
 
         mock_st.error.assert_called_with("Nom requis")
 
@@ -637,9 +637,9 @@ class TestRenderFormAjoutAchat:
         mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_db.return_value.__exit__ = MagicMock(return_value=False)
 
-        from src.modules.famille.jules.components import render_form_ajout_achat
+        from src.modules.famille.jules.components import afficher_form_ajout_achat
 
-        render_form_ajout_achat()
+        afficher_form_ajout_achat()
 
         mock_purchase.assert_called_once()
         mock_session.add.assert_called_once()
@@ -665,9 +665,9 @@ class TestRenderFormAjoutAchat:
         mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_db.return_value.__exit__ = MagicMock(return_value=False)
 
-        from src.modules.famille.jules.components import render_form_ajout_achat
+        from src.modules.famille.jules.components import afficher_form_ajout_achat
 
-        render_form_ajout_achat()
+        afficher_form_ajout_achat()
 
         # Verifie que l'achat est cree avec les valeurs None pour les champs optionnels
         call_kwargs = mock_purchase.call_args
@@ -689,15 +689,15 @@ class TestRenderFormAjoutAchat:
         mock_db.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
         mock_db.return_value.__exit__ = MagicMock(return_value=False)
 
-        from src.modules.famille.jules.components import render_form_ajout_achat
+        from src.modules.famille.jules.components import afficher_form_ajout_achat
 
-        render_form_ajout_achat()
+        afficher_form_ajout_achat()
 
         mock_st.error.assert_called()
 
 
 class TestRenderConseils:
-    """Tests pour render_conseils"""
+    """Tests pour afficher_conseils"""
 
     @patch(
         "src.modules.famille.jules.components.CATEGORIES_CONSEILS",
@@ -714,9 +714,9 @@ class TestRenderConseils:
         setup_mock_st(mock_st)
         mock_age.return_value = {"mois": 19, "semaines": 82}
 
-        from src.modules.famille.jules.components import render_conseils
+        from src.modules.famille.jules.components import afficher_conseils
 
-        render_conseils()
+        afficher_conseils()
 
         mock_st.subheader.assert_called_once_with("💡 Conseils Developpement")
         mock_st.caption.assert_called()
@@ -733,9 +733,9 @@ class TestRenderConseils:
         mock_age.return_value = {"mois": 19, "semaines": 82}
         mock_st.button.return_value = True
 
-        from src.modules.famille.jules.components import render_conseils
+        from src.modules.famille.jules.components import afficher_conseils
 
-        render_conseils()
+        afficher_conseils()
 
         assert mock_st.session_state.get("jules_conseil_theme") == "moteur"
 
@@ -757,9 +757,9 @@ class TestRenderConseils:
         mock_service_instance.conseil_developpement = AsyncMock(return_value="Conseil IA genere")
         mock_ai_service.return_value = mock_service_instance
 
-        from src.modules.famille.jules.components import render_conseils
+        from src.modules.famille.jules.components import afficher_conseils
 
-        render_conseils()
+        afficher_conseils()
 
         mock_st.markdown.assert_any_call("---")
         mock_st.markdown.assert_any_call("### 🏃 Motricite")
@@ -783,9 +783,9 @@ class TestRenderConseils:
         mock_service_instance.conseil_developpement = AsyncMock(side_effect=Exception("Erreur API"))
         mock_ai_service.return_value = mock_service_instance
 
-        from src.modules.famille.jules.components import render_conseils
+        from src.modules.famille.jules.components import afficher_conseils
 
-        render_conseils()
+        afficher_conseils()
 
         mock_st.error.assert_called()
 
@@ -813,9 +813,9 @@ class TestEdgeCases:
             achats.append(a)
         mock_achats.return_value = achats
 
-        from src.modules.famille.jules.components import render_dashboard
+        from src.modules.famille.jules.components import afficher_dashboard
 
-        render_dashboard()
+        afficher_dashboard()
 
         # Seulement 3 achats doivent etre ecrits
         assert mock_st.write.call_count == 3
@@ -844,9 +844,9 @@ class TestEdgeCases:
         mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_db.return_value.__exit__ = MagicMock(return_value=False)
 
-        from src.modules.famille.jules.components import render_achats_categorie
+        from src.modules.famille.jules.components import afficher_achats_categorie
 
-        render_achats_categorie("jules_vetements")
+        afficher_achats_categorie("jules_vetements")
 
         # Pas d'erreur, le prix n'est pas affiche
         assert not mock_st.error.called
@@ -865,9 +865,9 @@ class TestEdgeCases:
             {"nom": "Test", "emoji": "🎨", "duree": "10 min", "description": "Desc"}
         ]
 
-        from src.modules.famille.jules.components import render_activites
+        from src.modules.famille.jules.components import afficher_activites
 
-        render_activites()
+        afficher_activites()
 
         # Doit utiliser la valeur par defaut True
         mock_st.container.assert_called()

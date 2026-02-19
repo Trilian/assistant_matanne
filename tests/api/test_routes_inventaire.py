@@ -86,7 +86,7 @@ class TestSchemasInventaire:
 
     def test_inventaire_item_base_valide(self):
         """InventaireItemBase accepte données valides."""
-        from src.api.routes.inventaire import InventaireItemBase
+        from src.api.schemas import InventaireItemBase
 
         item = InventaireItemBase(nom="Lait", quantite=1.0)
 
@@ -97,7 +97,7 @@ class TestSchemasInventaire:
         """Nom vide est rejeté."""
         from pydantic import ValidationError
 
-        from src.api.routes.inventaire import InventaireItemBase
+        from src.api.schemas import InventaireItemBase
 
         with pytest.raises(ValidationError):
             InventaireItemBase(nom="", quantite=1.0)
@@ -106,7 +106,7 @@ class TestSchemasInventaire:
         """Quantité négative est rejetée."""
         from pydantic import ValidationError
 
-        from src.api.routes.inventaire import InventaireItemBase
+        from src.api.schemas import InventaireItemBase
 
         with pytest.raises(ValidationError):
             InventaireItemBase(nom="Test", quantite=-1.0)
@@ -115,14 +115,14 @@ class TestSchemasInventaire:
         """Quantité zéro est rejetée."""
         from pydantic import ValidationError
 
-        from src.api.routes.inventaire import InventaireItemBase
+        from src.api.schemas import InventaireItemBase
 
         with pytest.raises(ValidationError):
             InventaireItemBase(nom="Test", quantite=0.0)
 
     def test_inventaire_item_create_avec_code_barres(self):
         """InventaireItemCreate accepte code-barres."""
-        from src.api.routes.inventaire import InventaireItemCreate
+        from src.api.schemas import InventaireItemCreate
 
         item = InventaireItemCreate(
             nom="Produit",

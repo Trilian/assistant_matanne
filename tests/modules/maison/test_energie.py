@@ -302,15 +302,15 @@ class TestUIComponents:
 
     @patch("src.modules.maison.energie.st")
     def test_render_metric_energie_import(self, mock_st):
-        """Test import render_metric_energie."""
-        from src.modules.maison.energie import render_metric_energie
+        """Test import afficher_metric_energie."""
+        from src.modules.maison.energie import afficher_metric_energie
 
-        assert callable(render_metric_energie)
+        assert callable(afficher_metric_energie)
 
     @patch("src.modules.maison.energie.st")
     @patch("src.modules.maison.energie.get_stats_energie")
     def test_render_metric_energie_execution(self, mock_stats, mock_st):
-        """Test exécution render_metric_energie."""
+        """Test exécution afficher_metric_energie."""
         mock_stats.return_value = {
             "total_annuel": 1200.0,
             "moyenne_mensuelle": 100.0,
@@ -335,24 +335,24 @@ class TestUIComponents:
             col.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = mock_cols
 
-        from src.modules.maison.energie import render_metric_energie
+        from src.modules.maison.energie import afficher_metric_energie
 
-        render_metric_energie("electricite")
+        afficher_metric_energie("electricite")
 
         mock_st.container.assert_called()
 
     @patch("src.modules.maison.energie.st")
     def test_render_dashboard_global_import(self, mock_st):
-        """Test import render_dashboard_global."""
-        from src.modules.maison.energie import render_dashboard_global
+        """Test import afficher_dashboard_global."""
+        from src.modules.maison.energie import afficher_dashboard_global
 
-        assert callable(render_dashboard_global)
+        assert callable(afficher_dashboard_global)
 
     @patch("src.modules.maison.energie.st")
     @patch("src.modules.maison.energie.get_stats_energie")
-    @patch("src.modules.maison.energie.render_metric_energie")
+    @patch("src.modules.maison.energie.afficher_metric_energie")
     def test_render_dashboard_global_execution(self, mock_render, mock_stats, mock_st):
-        """Test exécution render_dashboard_global."""
+        """Test exécution afficher_dashboard_global."""
         mock_stats.return_value = {
             "total_annuel": 500.0,
             "moyenne_mensuelle": 41.67,
@@ -371,25 +371,25 @@ class TestUIComponents:
             col.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = mock_cols
 
-        from src.modules.maison.energie import render_dashboard_global
+        from src.modules.maison.energie import afficher_dashboard_global
 
-        render_dashboard_global()
+        afficher_dashboard_global()
 
         mock_st.subheader.assert_called()
 
     @patch("src.modules.maison.energie.st")
     def test_render_detail_energie_import(self, mock_st):
-        """Test import render_detail_energie."""
-        from src.modules.maison.energie import render_detail_energie
+        """Test import afficher_detail_energie."""
+        from src.modules.maison.energie import afficher_detail_energie
 
-        assert callable(render_detail_energie)
+        assert callable(afficher_detail_energie)
 
     @patch("src.modules.maison.energie.st")
     @patch("src.modules.maison.energie.get_stats_energie")
     @patch("src.modules.maison.energie.graphique_evolution")
     @patch("src.modules.maison.energie.graphique_comparaison_annees")
     def test_render_detail_energie_execution(self, mock_comp, mock_evol, mock_stats, mock_st):
-        """Test exécution render_detail_energie."""
+        """Test exécution afficher_detail_energie."""
         mock_stats.return_value = {
             "total_annuel": 1200.0,
             "moyenne_mensuelle": 100.0,
@@ -416,23 +416,23 @@ class TestUIComponents:
             tab.__exit__ = MagicMock(return_value=False)
         mock_st.tabs.return_value = mock_tabs
 
-        from src.modules.maison.energie import render_detail_energie
+        from src.modules.maison.energie import afficher_detail_energie
 
-        render_detail_energie("electricite")
+        afficher_detail_energie("electricite")
 
         mock_st.subheader.assert_called()
 
     @patch("src.modules.maison.energie.st")
     def test_render_alertes_import(self, mock_st):
-        """Test import render_alertes."""
-        from src.modules.maison.energie import render_alertes
+        """Test import afficher_alertes."""
+        from src.modules.maison.energie import afficher_alertes
 
-        assert callable(render_alertes)
+        assert callable(afficher_alertes)
 
     @patch("src.modules.maison.energie.st")
     @patch("src.modules.maison.energie.get_stats_energie")
     def test_render_alertes_sans_alerte(self, mock_stats, mock_st):
-        """Test render_alertes sans alerte."""
+        """Test afficher_alertes sans alerte."""
         mock_stats.return_value = {
             "total_annuel": 1200.0,
             "moyenne_mensuelle": 100.0,
@@ -445,16 +445,16 @@ class TestUIComponents:
             "prix_unitaire": 2.0,
         }
 
-        from src.modules.maison.energie import render_alertes
+        from src.modules.maison.energie import afficher_alertes
 
-        render_alertes()
+        afficher_alertes()
 
         mock_st.success.assert_called()
 
     @patch("src.modules.maison.energie.st")
     @patch("src.modules.maison.energie.get_stats_energie")
     def test_render_alertes_avec_alerte_warning(self, mock_stats, mock_st):
-        """Test render_alertes avec alerte warning (dépassement 120%)."""
+        """Test afficher_alertes avec alerte warning (dépassement 120%)."""
         mock_stats.return_value = {
             "total_annuel": 1200.0,
             "moyenne_mensuelle": 100.0,
@@ -467,16 +467,16 @@ class TestUIComponents:
             "prix_unitaire": 2.0,
         }
 
-        from src.modules.maison.energie import render_alertes
+        from src.modules.maison.energie import afficher_alertes
 
-        render_alertes()
+        afficher_alertes()
 
         mock_st.warning.assert_called()
 
     @patch("src.modules.maison.energie.st")
     @patch("src.modules.maison.energie.get_stats_energie")
     def test_render_alertes_avec_alerte_error(self, mock_stats, mock_st):
-        """Test render_alertes avec alerte error (forte hausse conso)."""
+        """Test afficher_alertes avec alerte error (forte hausse conso)."""
         mock_stats.return_value = {
             "total_annuel": 1200.0,
             "moyenne_mensuelle": 100.0,
@@ -489,9 +489,9 @@ class TestUIComponents:
             "prix_unitaire": 2.0,
         }
 
-        from src.modules.maison.energie import render_alertes
+        from src.modules.maison.energie import afficher_alertes
 
-        render_alertes()
+        afficher_alertes()
 
         mock_st.error.assert_called()
 
@@ -512,9 +512,9 @@ class TestApp:
         assert callable(app)
 
     @patch("src.modules.maison.energie.st")
-    @patch("src.modules.maison.energie.render_dashboard_global")
-    @patch("src.modules.maison.energie.render_detail_energie")
-    @patch("src.modules.maison.energie.render_alertes")
+    @patch("src.modules.maison.energie.afficher_dashboard_global")
+    @patch("src.modules.maison.energie.afficher_detail_energie")
+    @patch("src.modules.maison.energie.afficher_alertes")
     @patch("src.modules.maison.energie.graphique_repartition")
     def test_app_runs_without_error(
         self, mock_repartition, mock_alertes, mock_detail, mock_dashboard, mock_st
@@ -549,9 +549,9 @@ class TestApp:
         mock_st.caption.assert_called()
 
     @patch("src.modules.maison.energie.st")
-    @patch("src.modules.maison.energie.render_dashboard_global")
-    @patch("src.modules.maison.energie.render_detail_energie")
-    @patch("src.modules.maison.energie.render_alertes")
+    @patch("src.modules.maison.energie.afficher_dashboard_global")
+    @patch("src.modules.maison.energie.afficher_detail_energie")
+    @patch("src.modules.maison.energie.afficher_alertes")
     @patch("src.modules.maison.energie.graphique_repartition")
     def test_app_calls_render_functions(
         self, mock_repartition, mock_alertes, mock_detail, mock_dashboard, mock_st
@@ -580,7 +580,7 @@ class TestApp:
 
         # Vérifier que les fonctions de rendu sont appelées
         mock_dashboard.assert_called()
-        # render_detail_energie est appelé 3 fois (electricite, gaz, eau)
+        # afficher_detail_energie est appelé 3 fois (electricite, gaz, eau)
         assert mock_detail.call_count == 3
-        # render_alertes est appelé 2 fois (vue globale et onglet alertes)
+        # afficher_alertes est appelé 2 fois (vue globale et onglet alertes)
         assert mock_alertes.call_count >= 1

@@ -93,7 +93,7 @@ class TestPlanningModule:
 
     # NOTE: test_planning_initialization supprimé - streamlit.calendar n'existe pas
 
-    @patch("src.services.cuisine.planning.PlanningService")
+    @patch("src.services.cuisine.planning.ServicePlanning")
     def test_planning_display_week(self, mock_service):
         """Le module Planning affiche la semaine."""
         mock_service.return_value.obtenir_planning_semaine.return_value = None
@@ -101,7 +101,7 @@ class TestPlanningModule:
         # Placeholder: implementation en Phase 17+
         assert True
 
-    @patch("src.services.cuisine.planning.PlanningService")
+    @patch("src.services.cuisine.planning.ServicePlanning")
     def test_planning_update_meal(self, mock_service):
         """Le module Planning peut mettre a jour un repas."""
         mock_service.return_value.mettre_a_jour_repas.return_value = None

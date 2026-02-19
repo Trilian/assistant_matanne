@@ -11,7 +11,7 @@ from src.core.state import obtenir_etat
 from src.ui.feedback import afficher_succes
 
 
-def render_ia_config():
+def afficher_ia_config():
     """Configuration IA"""
 
     st.markdown("### 🤖 Configuration IA")

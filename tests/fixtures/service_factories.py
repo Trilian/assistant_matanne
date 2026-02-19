@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 
 # Import des services réels
 try:
-    from src.services.cuisine.courses import CoursesService
-    from src.services.cuisine.planning import PlanningService
+    from src.services.cuisine.courses import ServiceCourses
+    from src.services.cuisine.planning import ServicePlanning
     from src.services.cuisine.recettes import ServiceRecettes
 except ImportError:
     pass
@@ -35,7 +35,7 @@ class ServiceMockFactory:
 
     @staticmethod
     def mock_planning_service():
-        """Mock PlanningService avec méthodes standard."""
+        """Mock ServicePlanning avec méthodes standard."""
         mock = MagicMock()
         mock.obtenir_plannings = MagicMock(return_value=[])
         mock.obtenir_planning = MagicMock(return_value=None)
@@ -44,7 +44,7 @@ class ServiceMockFactory:
 
     @staticmethod
     def mock_courses_service():
-        """Mock CoursesService avec méthodes standard."""
+        """Mock ServiceCourses avec méthodes standard."""
         mock = MagicMock()
         mock.obtenir_courses = MagicMock(return_value=[])
         mock.obtenir_course = MagicMock(return_value=None)
@@ -87,23 +87,23 @@ def recette_service(test_db: Session) -> ServiceRecettes:
 
 
 @pytest.fixture
-def planning_service(test_db: Session) -> PlanningService:
-    """Factory pour PlanningService avec DB de test."""
+def planning_service(test_db: Session) -> ServicePlanning:
+    """Factory pour ServicePlanning avec DB de test."""
     try:
-        return PlanningService(session=test_db)
+        return ServicePlanning(session=test_db)
     except TypeError:
         # Si signature différente, adapter ici
-        return MagicMock(spec=PlanningService)
+        return MagicMock(spec=ServicePlanning)
 
 
 @pytest.fixture
-def courses_service(test_db: Session) -> CoursesService:
-    """Factory pour CoursesService avec DB de test."""
+def courses_service(test_db: Session) -> ServiceCourses:
+    """Factory pour ServiceCourses avec DB de test."""
     try:
-        return CoursesService(session=test_db)
+        return ServiceCourses(session=test_db)
     except TypeError:
         # Si signature différente, adapter ici
-        return MagicMock(spec=CoursesService)
+        return MagicMock(spec=ServiceCourses)
 
 
 @pytest.fixture

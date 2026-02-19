@@ -7,7 +7,6 @@ Module d'interface utilisateur basé sur **Atomic Design** pour l'application St
 ```
 src/ui/
 ├── components/     # Widgets atomiques réutilisables
-├── core/           # Classes de base (formulaires, CRUD, I/O)
 ├── feedback/       # Retour utilisateur (spinners, toasts)
 ├── integrations/   # Services tiers (Google Calendar)
 ├── layout/         # Mise en page (header, sidebar, footer)
@@ -19,33 +18,25 @@ src/ui/
 
 ### `components/` - Widgets Atomiques
 
-| Fichier             | Description                                                                     |
-| ------------------- | ------------------------------------------------------------------------------- |
-| `atoms.py`          | Éléments de base: `badge`, `etat_vide`, `carte_metrique`, `notification`        |
-| `forms.py`          | Champs de formulaire: `champ_formulaire`, `panneau_filtres`                     |
-| `data.py`           | Affichage de données: `tableau_donnees`, `pagination`, `barre_recherche`        |
-| `charts.py`         | Graphiques Plotly: `graphique_ligne`, `graphique_barres`, `graphique_camembert` |
-| `dynamic.py`        | Composants dynamiques: `Modale`, `ListeDynamique`, `AssistantEtapes`            |
-| `alertes.py`        | Alertes contextuelles: `alerte_stock`, `alerte_peremption`                      |
-| `layouts.py`        | Mise en page: `carte_item`, `grille_cartes`, `accordeon`                        |
-| `metrics.py`        | Métriques: `ligne_metriques`, `jauge_progression`                               |
-| `system.py`         | Système: `indicateur_sante`, `info_version`                                     |
-| `camera_scanner.py` | Scanner codes-barres (pyzbar/zxing)                                             |
-
-### `core/` - Classes de Base
-
-| Classe                   | Description                          | Alias français                                      |
-| ------------------------ | ------------------------------------ | --------------------------------------------------- |
-| `ConstructeurFormulaire` | Générateur de formulaires dynamiques | `ajouter_texte()`, `ajouter_nombre()`, `afficher()` |
-| `ModuleUIBase`           | Renderer CRUD universel              | `afficher()`                                        |
-| `ServiceIOBase`          | Import/Export CSV/JSON               | `vers_csv()`, `depuis_json()`                       |
-| `ConfigurationModule`    | Configuration dataclass pour modules |
+| Fichier      | Composants                                                                                |
+| ------------ | ----------------------------------------------------------------------------------------- |
+| `atoms.py`   | `badge`, `etat_vide`, `carte_metrique`, `notification`, `separateur`, `boite_info`        |
+| `forms.py`   | `champ_formulaire`, `barre_recherche`, `panneau_filtres`, `filtres_rapides`               |
+| `data.py`    | `tableau_donnees`, `pagination`, `boutons_export`, `ligne_metriques`, `barre_progression` |
+| `charts.py`  | `graphique_repartition_repas`, `graphique_inventaire_categories`                          |
+| `dynamic.py` | `Modale` (avec aliases français/anglais)                                                  |
+| `alertes.py` | `alerte_stock`                                                                            |
+| `layouts.py` | `carte_item`, `disposition_grille`                                                        |
+| `metrics.py` | `carte_metrique_avancee`, `widget_jules_apercu`, `widget_meteo_jour`                      |
+| `system.py`  | `indicateur_sante_systeme`, `afficher_sante_systeme`, `afficher_timeline_activites`       |
 
 ### `feedback/` - Retour Utilisateur
 
-- `spinners.py`: `smart_spinner()` avec messages contextuels
-- `toasts.py`: `afficher_succes()`, `afficher_erreur()`, `afficher_warning()`
-- `progress.py`: `barre_progression()`, `indicateur_chargement()`
+| Fichier       | Composants                                                                      |
+| ------------- | ------------------------------------------------------------------------------- |
+| `spinners.py` | `spinner_intelligent`, `indicateur_chargement`, `chargeur_squelette`            |
+| `toasts.py`   | `afficher_succes`, `afficher_erreur`, `afficher_avertissement`, `afficher_info` |
+| `progress.py` | `SuiviProgression`, `EtatChargement`                                            |
 
 ### `tablet/` - Mode Tablette
 
@@ -58,75 +49,40 @@ Mode optimisé pour tablettes en cuisine:
 
 ### `views/` - Vues Extraites
 
-Vues UI extraites des services pour séparation des responsabilités:
-
-- `authentification.py`: `afficher_formulaire_connexion()`, `require_authenticated()`
-- `meteo.py`: `afficher_meteo_jardin()`
-- `pwa.py`: `afficher_invite_installation_pwa()`, `injecter_meta_pwa()`
-- `notifications.py`: `afficher_preferences_notification()`
-- `historique.py`: `afficher_timeline_activite()`
-- `synchronisation.py`: `afficher_statut_synchronisation()`
+| Fichier               | Composants                                                               |
+| --------------------- | ------------------------------------------------------------------------ |
+| `authentification.py` | `afficher_formulaire_connexion`, `require_authenticated`, `require_role` |
+| `meteo.py`            | `afficher_meteo_jardin`                                                  |
+| `synchronisation.py`  | `afficher_statut_synchronisation`, `afficher_indicateur_presence`        |
+| `notifications.py`    | `afficher_preferences_notification`                                      |
+| `historique.py`       | `afficher_timeline_activite`                                             |
+| `jeux.py`             | `afficher_badge_notifications_jeux`, `afficher_notification_jeux`        |
 
 ### `integrations/` - Services Tiers
 
-- `google_calendar.py`: Sync Google Calendar
-  - `afficher_config_google_calendar()`
-  - `afficher_statut_synchronisation()`
-  - `afficher_bouton_sync_rapide()`
+| Fichier              | Composants                                                                                      |
+| -------------------- | ----------------------------------------------------------------------------------------------- |
+| `google_calendar.py` | `afficher_config_google_calendar`, `afficher_statut_sync_google`, `afficher_bouton_sync_rapide` |
 
 ## 🔧 Utilisation
 
 ### Import centralisé
 
 ```python
-# Tout depuis src.ui
 from src.ui import (
     badge,
     etat_vide,
-    ConstructeurFormulaire,
     afficher_succes,
     ModeTablette,
+    Modale,
 )
 ```
 
-### Formulaire dynamique
+### Modale de confirmation
 
 ```python
-from src.ui.core import ConstructeurFormulaire
+from src.ui import Modale
 
-form = ConstructeurFormulaire("recette_form", title="Nouvelle Recette")
-form.ajouter_texte("nom", "Nom", required=True)
-form.ajouter_nombre("temps", "Temps (min)", min_value=1)
-form.ajouter_selection("difficulte", "Difficulté", ["Facile", "Moyen", "Difficile"])
-
-if form.afficher():
-    data = form.obtenir_donnees()
-    # Traiter les données...
-```
-
-### Module CRUD
-
-```python
-from src.ui.core import ConfigurationModule, creer_module_ui
-
-config = ConfigurationModule(
-    name="recettes",
-    title="Mes Recettes",
-    icon="🍽️",
-    service=recette_service,
-    search_fields=["nom", "description"],
-)
-
-module = creer_module_ui(config)
-module.afficher()  # Génère automatiquement liste, recherche, pagination, actions
-```
-
-### Composants dynamiques
-
-```python
-from src.ui.components.dynamic import Modale, AssistantEtapes
-
-# Modal de confirmation
 modal = Modale("supprimer")
 if modal.est_affichee():
     st.warning("Confirmer la suppression ?")
@@ -134,31 +90,26 @@ if modal.est_affichee():
         supprimer_item()
         modal.fermer()
     modal.annuler()
+```
 
-# Assistant multi-étapes
-wizard = AssistantEtapes("import", ["Upload", "Validation", "Import"])
-etape = wizard.afficher()
-if etape == 0:
-    # Contenu étape 1...
-    if st.button("Suivant"):
-        wizard.suivant()
+### État vide standardisé
+
+```python
+from src.ui import etat_vide
+
+# Au lieu de st.info("Aucun résultat")
+etat_vide("Aucun résultat", icone="🔍", conseil="Essayez une autre recherche")
 ```
 
 ## 🧪 Tests
 
 ```bash
-# Tous les tests UI
 pytest tests/ui/ -v
-
-# Tests d'import uniquement
-pytest tests/ui/test_imports_ui.py -v
-
-# Tests mode tablette
-pytest tests/ui/test_tablet_mode.py -v
 ```
 
 ## 📋 Conventions
 
-1. **Nommage français** pour toutes les fonctions/classes publiques
-2. **Docstrings** en français
+1. **Nommage français** pour toutes les fonctions/classes publiques (`afficher_*`, `obtenir_*`)
+2. **Docstrings** en français avec Args et Example
 3. **Point d'entrée unique**: `src.ui` re-exporte tous les symboles publics
+4. **Décorateurs Streamlit**: Utiliser `@st.cache_data(ttl=...)` pour les données cachées

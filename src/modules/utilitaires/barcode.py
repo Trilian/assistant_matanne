@@ -22,7 +22,8 @@ from src.core.errors_base import ErreurNonTrouve, ErreurValidation
 
 # Logique metier pure
 from src.services.integrations import BarcodeService
-from src.services.inventaire import InventaireService
+from src.services.inventaire import ServiceInventaire
+from src.ui import etat_vide
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +179,7 @@ class BarcodeScanner:
                 "📦 Packages requis non installés.\n\n"
                 "Exécutez: `pip install streamlit-webrtc av`"
             )
-            self._render_fallback_input(key)
+            self._afficher_fallback_input(key)
             return
 
         # Configuration RTC (serveurs STUN publics)
@@ -291,7 +292,7 @@ class BarcodeScanner:
                 for scan in reversed(detected[-10:]):
                     st.caption(f"{scan['time']}: [{scan['type']}] {scan['data']}")
 
-    def _render_fallback_input(self, key: str):
+    def _afficher_fallback_input(self, key: str):
         """Affiche un input texte en fallback."""
         st.warning("Caméra streaming non disponible - utilisez la saisie manuelle ou mode photo")
 
@@ -339,19 +340,19 @@ def app():
     )
 
     with tab1:
-        render_scanner()
+        afficher_scanner()
 
     with tab2:
-        render_ajout_rapide()
+        afficher_ajout_rapide()
 
     with tab3:
-        render_verifier_stock()
+        afficher_verifier_stock()
 
     with tab4:
-        render_gestion_barcodes()
+        afficher_gestion_barcodes()
 
     with tab5:
-        render_import_export()
+        afficher_import_export()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -359,7 +360,7 @@ def app():
 # ═══════════════════════════════════════════════════════════
 
 
-def _render_scanner_camera(service: BarcodeService):
+def _afficher_scanner_camera(service: BarcodeService):
     """Scanner via caméra (st.camera_input) - Mode photo."""
     import cv2
     import numpy as np
@@ -417,7 +418,7 @@ def _render_scanner_camera(service: BarcodeService):
                 st.error(f"❌ Erreur: {e}")
 
 
-def _render_scanner_webrtc(service: BarcodeService):
+def _afficher_scanner_webrtc(service: BarcodeService):
     """Scanner via streaming vidéo webrtc - Mode temps réel."""
 
     def on_scan_callback(code_type: str, code_data: str):
@@ -475,7 +476,7 @@ def _process_scanned_code(service: BarcodeService, code_input: str):
         st.error(f"❌ Erreur: {e}")
 
 
-def render_scanner():
+def afficher_scanner():
     """Scanner codes-barres avec 3 modes: vidéo streaming, photo, manuel."""
 
     service = get_barcode_service()
@@ -525,10 +526,10 @@ def render_scanner():
     )
 
     if mode == "📹 Vidéo (temps réel)":
-        _render_scanner_webrtc(service)
+        _afficher_scanner_webrtc(service)
 
     elif mode == "📷 Photo":
-        _render_scanner_camera(service)
+        _afficher_scanner_camera(service)
     elif mode == "🎮 Démo (codes test)":
         st.info("💡 **Mode Démo** - Sélectionnez un code-barres de test")
         demo_codes = {
@@ -638,7 +639,7 @@ def render_scanner():
 # ═══════════════════════════════════════════════════════════
 
 
-def render_ajout_rapide():
+def afficher_ajout_rapide():
     """Ajouter rapidement un article avec code-barres"""
 
     service = get_barcode_service()
@@ -737,7 +738,7 @@ def render_ajout_rapide():
 # ═══════════════════════════════════════════════════════════
 
 
-def render_verifier_stock():
+def afficher_verifier_stock():
     """Vérifier stock par code-barres"""
 
     service = get_barcode_service()
@@ -820,7 +821,7 @@ def render_verifier_stock():
 # ═══════════════════════════════════════════════════════════
 
 
-def render_gestion_barcodes():
+def afficher_gestion_barcodes():
     """Gestion des codes-barres"""
 
     service = get_barcode_service()
@@ -884,7 +885,7 @@ def render_gestion_barcodes():
                             st.error(f"❌ Erreur: {str(e)}")
 
         else:
-            st.info("ℹ️ Aucun article avec code-barres pour le moment")
+            etat_vide("Aucun article avec code-barres", "📦")
 
     except Exception as e:
         st.error(f"❌ Erreur: {str(e)}")
@@ -895,7 +896,7 @@ def render_gestion_barcodes():
 # ═══════════════════════════════════════════════════════════
 
 
-def render_import_export():
+def afficher_import_export():
     """Import/Export codes-barres"""
 
     service = get_barcode_service()

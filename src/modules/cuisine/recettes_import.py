@@ -14,7 +14,7 @@ from src.services.cuisine.recettes import obtenir_service_recettes
 from src.services.cuisine.recettes.importer import RecipeImporter
 
 
-def render_importer():
+def afficher_importer():
     """Interface pour importer une recette"""
     # Marquer cet onglet comme actif
     st.session_state.recettes_selected_tab = 2
@@ -28,16 +28,16 @@ def render_importer():
     )
 
     with import_tab1:
-        _render_import_url()
+        _afficher_import_url()
 
     with import_tab2:
-        _render_import_pdf()
+        _afficher_import_pdf()
 
     with import_tab3:
-        _render_import_text()
+        _afficher_import_text()
 
 
-def _render_import_url():
+def _afficher_import_url():
     """Import depuis une URL"""
     st.markdown("### 🌐 Importer depuis une URL")
     st.info("Entrez l'URL d'un site contenant une recette (recipetin, marmiton, cuisineaz, etc.)")
@@ -73,7 +73,7 @@ def _render_import_url():
         _show_import_preview(st.session_state.extracted_recipe)
 
 
-def _render_import_pdf():
+def _afficher_import_pdf():
     """Import depuis un PDF"""
     st.markdown("### 📄 Importer depuis un PDF")
     st.info("Telechargez un fichier PDF contenant une recette")
@@ -106,7 +106,7 @@ def _render_import_pdf():
                     os.unlink(tmp_path)
 
 
-def _render_import_text():
+def _afficher_import_text():
     """Import depuis du texte"""
     st.markdown("### 📝 Importer depuis du texte")
     st.info("Collez le texte d'une recette (HTML, texte brut, etc.)")

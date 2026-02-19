@@ -10,6 +10,8 @@ from typing import Any
 import pandas as pd
 import streamlit as st
 
+from src.ui import etat_vide
+
 # AgentIA non implementé - stub pour éviter erreur d'import
 AgentIA = Any  # type: ignore
 
@@ -541,7 +543,7 @@ def app():
         df_all = charger_routines(actives_uniquement=False)
 
         if df_all.empty:
-            st.info("Aucune routine à analyser")
+            etat_vide("Aucune routine à analyser", "📊")
         else:
             # Metriques
             col_m1, col_m2, col_m3, col_m4 = st.columns(4)

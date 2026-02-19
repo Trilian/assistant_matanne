@@ -7,14 +7,14 @@ import logging
 
 import streamlit as st
 
-from src.services.inventaire import get_inventaire_service
+from src.services.inventaire import obtenir_service_inventaire
 
 logger = logging.getLogger(__name__)
 
 
-def render_suggestions_ia():
+def afficher_suggestions_ia():
     """Affiche les suggestions IA pour les courses"""
-    service = get_inventaire_service()
+    service = obtenir_service_inventaire()
 
     if service is None:
         st.error("❌ Service inventaire indisponible")
@@ -78,4 +78,4 @@ def render_suggestions_ia():
             st.warning("Aucune suggestion générée")
 
 
-__all__ = ["render_suggestions_ia"]
+__all__ = ["afficher_suggestions_ia"]

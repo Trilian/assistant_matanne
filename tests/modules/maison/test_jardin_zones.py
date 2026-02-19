@@ -41,23 +41,23 @@ class TestJardinZonesImport:
     def test_import_fonctions(self):
         """Test import des fonctions principales."""
         from src.modules.maison.jardin_zones import (
+            afficher_carte_zone,
+            afficher_conseils_amelioration,
+            afficher_detail_zone,
+            afficher_vue_ensemble,
             ajouter_photo_zone,
             app,
             charger_zones,
             mettre_a_jour_zone,
-            render_carte_zone,
-            render_conseils_amelioration,
-            render_detail_zone,
-            render_vue_ensemble,
         )
 
         assert callable(charger_zones)
         assert callable(mettre_a_jour_zone)
         assert callable(ajouter_photo_zone)
-        assert callable(render_carte_zone)
-        assert callable(render_vue_ensemble)
-        assert callable(render_detail_zone)
-        assert callable(render_conseils_amelioration)
+        assert callable(afficher_carte_zone)
+        assert callable(afficher_vue_ensemble)
+        assert callable(afficher_detail_zone)
+        assert callable(afficher_conseils_amelioration)
         assert callable(app)
 
 
@@ -356,7 +356,7 @@ class TestAjouterPhotoZone:
 
 
 class TestRenderCarteZone:
-    """Tests pour la fonction render_carte_zone."""
+    """Tests pour la fonction afficher_carte_zone."""
 
     @patch("src.modules.maison.jardin_zones.st")
     def test_render_carte_zone_basique(self, mock_st):
@@ -376,9 +376,9 @@ class TestRenderCarteZone:
             "photos_url": [],
         }
 
-        from src.modules.maison.jardin_zones import render_carte_zone
+        from src.modules.maison.jardin_zones import afficher_carte_zone
 
-        render_carte_zone(zone)
+        afficher_carte_zone(zone)
 
         mock_st.container.assert_called_once_with(border=True)
         mock_st.progress.assert_called()
@@ -404,9 +404,9 @@ class TestRenderCarteZone:
             "photos_url": ["avant:url1", "apres:url2"],
         }
 
-        from src.modules.maison.jardin_zones import render_carte_zone
+        from src.modules.maison.jardin_zones import afficher_carte_zone
 
-        render_carte_zone(zone)
+        afficher_carte_zone(zone)
 
         mock_st.container.assert_called()
 
@@ -428,9 +428,9 @@ class TestRenderCarteZone:
             "photos_url": [],
         }
 
-        from src.modules.maison.jardin_zones import render_carte_zone
+        from src.modules.maison.jardin_zones import afficher_carte_zone
 
-        render_carte_zone(zone)
+        afficher_carte_zone(zone)
 
         mock_st.container.assert_called()
 
@@ -441,7 +441,7 @@ class TestRenderCarteZone:
 
 
 class TestRenderVueEnsemble:
-    """Tests pour la fonction render_vue_ensemble."""
+    """Tests pour la fonction afficher_vue_ensemble."""
 
     @patch("src.modules.maison.jardin_zones.charger_zones")
     @patch("src.modules.maison.jardin_zones.st")
@@ -449,9 +449,9 @@ class TestRenderVueEnsemble:
         """Test vue d'ensemble sans zones."""
         mock_charger.return_value = []
 
-        from src.modules.maison.jardin_zones import render_vue_ensemble
+        from src.modules.maison.jardin_zones import afficher_vue_ensemble
 
-        render_vue_ensemble()
+        afficher_vue_ensemble()
 
         mock_st.warning.assert_called()
 
@@ -481,9 +481,9 @@ class TestRenderVueEnsemble:
         mock_fig = MagicMock()
         mock_go.Figure.return_value = mock_fig
 
-        from src.modules.maison.jardin_zones import render_vue_ensemble
+        from src.modules.maison.jardin_zones import afficher_vue_ensemble
 
-        render_vue_ensemble()
+        afficher_vue_ensemble()
 
         mock_st.metric.assert_called()
         mock_st.plotly_chart.assert_called()
@@ -507,9 +507,9 @@ class TestRenderVueEnsemble:
         mock_fig = MagicMock()
         mock_go.Figure.return_value = mock_fig
 
-        from src.modules.maison.jardin_zones import render_vue_ensemble
+        from src.modules.maison.jardin_zones import afficher_vue_ensemble
 
-        render_vue_ensemble()
+        afficher_vue_ensemble()
 
         mock_st.error.assert_called()
 
@@ -520,7 +520,7 @@ class TestRenderVueEnsemble:
 
 
 class TestRenderDetailZone:
-    """Tests pour la fonction render_detail_zone."""
+    """Tests pour la fonction afficher_detail_zone."""
 
     @pytest.mark.skip(reason="Mock context manager complexe à configurer")
     @patch("src.modules.maison.jardin_zones.st")
@@ -550,9 +550,9 @@ class TestRenderDetailZone:
             "photos_url": [],
         }
 
-        from src.modules.maison.jardin_zones import render_detail_zone
+        from src.modules.maison.jardin_zones import afficher_detail_zone
 
-        render_detail_zone(zone)
+        afficher_detail_zone(zone)
 
         mock_st.markdown.assert_called()
         mock_st.progress.assert_called()
@@ -585,9 +585,9 @@ class TestRenderDetailZone:
             "photos_url": ["avant:url1", "avant:url2", "apres:url3"],
         }
 
-        from src.modules.maison.jardin_zones import render_detail_zone
+        from src.modules.maison.jardin_zones import afficher_detail_zone
 
-        render_detail_zone(zone)
+        afficher_detail_zone(zone)
 
         mock_st.tabs.assert_called()
 
@@ -598,7 +598,7 @@ class TestRenderDetailZone:
 
 
 class TestRenderConseilsAmelioration:
-    """Tests pour la fonction render_conseils_amelioration."""
+    """Tests pour la fonction afficher_conseils_amelioration."""
 
     @patch("src.modules.maison.jardin_zones.st")
     def test_render_conseils_amelioration(self, mock_st):
@@ -608,9 +608,9 @@ class TestRenderConseilsAmelioration:
         mock_expander.__exit__ = MagicMock(return_value=False)
         mock_st.expander.return_value = mock_expander
 
-        from src.modules.maison.jardin_zones import render_conseils_amelioration
+        from src.modules.maison.jardin_zones import afficher_conseils_amelioration
 
-        render_conseils_amelioration()
+        afficher_conseils_amelioration()
 
         mock_st.markdown.assert_called()
         mock_st.info.assert_called()
@@ -625,10 +625,10 @@ class TestRenderConseilsAmelioration:
 class TestApp:
     """Tests pour la fonction app (point d'entrée)."""
 
-    @patch("src.modules.maison.jardin_zones.render_conseils_amelioration")
-    @patch("src.modules.maison.jardin_zones.render_detail_zone")
-    @patch("src.modules.maison.jardin_zones.render_vue_ensemble")
-    @patch("src.modules.maison.jardin_zones.render_carte_zone")
+    @patch("src.modules.maison.jardin_zones.afficher_conseils_amelioration")
+    @patch("src.modules.maison.jardin_zones.afficher_detail_zone")
+    @patch("src.modules.maison.jardin_zones.afficher_vue_ensemble")
+    @patch("src.modules.maison.jardin_zones.afficher_carte_zone")
     @patch("src.modules.maison.jardin_zones.charger_zones")
     @patch("src.modules.maison.jardin_zones.st")
     def test_app_sans_zones(
@@ -656,10 +656,10 @@ class TestApp:
         mock_st.tabs.assert_called_once()
         mock_render_vue.assert_called_once()
 
-    @patch("src.modules.maison.jardin_zones.render_conseils_amelioration")
-    @patch("src.modules.maison.jardin_zones.render_detail_zone")
-    @patch("src.modules.maison.jardin_zones.render_vue_ensemble")
-    @patch("src.modules.maison.jardin_zones.render_carte_zone")
+    @patch("src.modules.maison.jardin_zones.afficher_conseils_amelioration")
+    @patch("src.modules.maison.jardin_zones.afficher_detail_zone")
+    @patch("src.modules.maison.jardin_zones.afficher_vue_ensemble")
+    @patch("src.modules.maison.jardin_zones.afficher_carte_zone")
     @patch("src.modules.maison.jardin_zones.charger_zones")
     @patch("src.modules.maison.jardin_zones.st")
     def test_app_avec_zones(
@@ -718,10 +718,10 @@ class TestApp:
         mock_render_detail.assert_called_once()
         mock_render_conseils.assert_called_once()
 
-    @patch("src.modules.maison.jardin_zones.render_conseils_amelioration")
-    @patch("src.modules.maison.jardin_zones.render_detail_zone")
-    @patch("src.modules.maison.jardin_zones.render_vue_ensemble")
-    @patch("src.modules.maison.jardin_zones.render_carte_zone")
+    @patch("src.modules.maison.jardin_zones.afficher_conseils_amelioration")
+    @patch("src.modules.maison.jardin_zones.afficher_detail_zone")
+    @patch("src.modules.maison.jardin_zones.afficher_vue_ensemble")
+    @patch("src.modules.maison.jardin_zones.afficher_carte_zone")
     @patch("src.modules.maison.jardin_zones.charger_zones")
     @patch("src.modules.maison.jardin_zones.st")
     def test_app_selection_zone(

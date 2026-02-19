@@ -5,10 +5,11 @@ Catégories de dépenses et sauvegarde des données
 
 import streamlit as st
 
+from src.ui import etat_vide
 from src.ui.feedback import afficher_erreur, afficher_succes, spinner_intelligent
 
 
-def render_budget_config():
+def afficher_budget_config():
     """Configuration du budget."""
 
     st.markdown("### 💰 Budget")
@@ -59,33 +60,5 @@ def render_budget_config():
 
     st.markdown("---")
 
-    # Section Backup
-    st.markdown("#### 💾 Sauvegarde des données")
-
-    try:
-        from src.services.core.backup import get_backup_service
-
-        backup_service = get_backup_service()
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            if st.button("💾 Créer une sauvegarde", type="primary", use_container_width=True):
-                with spinner_intelligent("Sauvegarde en cours..."):
-                    result = backup_service.create_backup()
-                    if result.success:
-                        afficher_succes(f"✅ {result.message}")
-                    else:
-                        afficher_erreur(f"❌ {result.message}")
-
-        with col2:
-            if st.button("📂 Voir les sauvegardes", use_container_width=True):
-                backups = backup_service.list_backups()
-                if backups:
-                    for b in backups[:5]:
-                        st.text(f"📄 {b.filename} ({b.size_bytes // 1024} KB)")
-                else:
-                    st.info("Aucune sauvegarde trouvée")
-
-    except ImportError:
-        st.warning("Module backup non disponible")
+    # Lien vers l'onglet Sauvegarde dédié
+    st.caption("💾 Pour la gestion complète des sauvegardes, utilisez l'onglet **Sauvegarde**.")

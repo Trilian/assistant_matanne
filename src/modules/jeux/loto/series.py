@@ -28,6 +28,7 @@ from src.services.jeux import (
     SeriesService,
     get_sync_service,
 )
+from src.ui import etat_vide
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +105,7 @@ def afficher_series_loto():
     df = df.sort_values("value", ascending=False)
 
     if df.empty:
-        st.info("Aucun numéro en retard avec ce filtre.")
+        etat_vide("Aucun numéro en retard avec ce filtre", "🔢")
         return
 
     # ─────────────────────────────────────────────────────────────────

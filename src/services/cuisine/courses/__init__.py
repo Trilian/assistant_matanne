@@ -28,7 +28,6 @@ from .service import (
     CoursesService,
     ServiceCourses,
     courses_service,
-    get_courses_service,
     obtenir_service_courses,
 )
 
@@ -36,7 +35,6 @@ from .service import (
 from .suggestion import (
     CoursesIntelligentesService,
     ServiceCoursesIntelligentes,
-    get_courses_intelligentes_service,
     obtenir_service_courses_intelligentes,
 )
 from .types import (
@@ -74,9 +72,7 @@ __all__ = [
     # ═══════════════════════════════════════════════════════════
     # Service base
     "CoursesService",
-    "get_courses_service",
     "courses_service",
     # Service intelligent
     "CoursesIntelligentesService",
-    "get_courses_intelligentes_service",
 ]

@@ -67,7 +67,7 @@ class TestSchemasCourses:
 
     def test_course_item_base_valide(self):
         """CourseItemBase accepte données valides."""
-        from src.api.routes.courses import CourseItemBase
+        from src.api.schemas import CourseItemBase
 
         item = CourseItemBase(nom="Lait", quantite=2.0)
 
@@ -79,14 +79,14 @@ class TestSchemasCourses:
         """Nom vide est rejeté."""
         from pydantic import ValidationError
 
-        from src.api.routes.courses import CourseItemBase
+        from src.api.schemas import CourseItemBase
 
         with pytest.raises(ValidationError):
             CourseItemBase(nom="", quantite=1.0)
 
     def test_course_list_create_valide(self):
         """CourseListCreate accepte données valides."""
-        from src.api.routes.courses import CourseListCreate
+        from src.api.schemas import CourseListCreate
 
         liste = CourseListCreate(nom="Ma liste")
 
@@ -94,7 +94,7 @@ class TestSchemasCourses:
 
     def test_course_list_nom_defaut(self):
         """CourseListCreate a un nom par défaut."""
-        from src.api.routes.courses import CourseListCreate
+        from src.api.schemas import CourseListCreate
 
         liste = CourseListCreate()
 
@@ -117,7 +117,7 @@ class TestRoutesCourses:
     def test_creer_liste_endpoint_existe(self, client):
         """POST /api/v1/courses existe."""
         response = client.post("/api/v1/courses", json=NOUVELLE_LISTE)
-        assert response.status_code in (200, 500)
+        assert response.status_code in (200, 201, 500)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -144,8 +144,8 @@ class TestRoutesCoursesAvecMock:
     def test_creer_liste_succes(self, client):
         """POST crée une nouvelle liste."""
         response = client.post("/api/v1/courses", json=NOUVELLE_LISTE)
-        # 200 ou 500 selon état BD
-        assert response.status_code in (200, 500)
+        # 200/201 ou 500 selon état BD
+        assert response.status_code in (200, 201, 500)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -204,10 +204,10 @@ class TestCoursesCreationDB:
             },
         )
 
-        assert response.status_code == 200
+        assert response.status_code in (200, 201)
         data = response.json()
         assert "id" in data
-        assert data["nom"] == "Ma liste de test"
+        assert data["message"] == "Liste créée"
 
     def test_creer_liste_et_verifier_en_db(self, client, db):
         """La liste créée existe en DB."""
@@ -220,7 +220,7 @@ class TestCoursesCreationDB:
             },
         )
 
-        assert response.status_code == 200
+        assert response.status_code in (200, 201)
         liste_id = response.json()["id"]
 
         # Vérifier en DB
@@ -265,10 +265,10 @@ class TestCoursesItemsDB:
         )
 
         # Doit réussir ou retourner 500 (problème d'intégration DB)
-        assert response.status_code in (200, 500)
-        if response.status_code == 200:
+        assert response.status_code in (200, 201, 500)
+        if response.status_code in (200, 201):
             data = response.json()
-            assert "item_id" in data
+            assert "id" in data
 
     def test_ajouter_item_liste_inexistante(self, client, db):
         """POST /{id}/items retourne 404 si liste inexistante."""
@@ -295,7 +295,7 @@ class TestCoursesItemsDB:
 
         for item in items:
             response = client.post(f"/api/v1/courses/{liste.id}/items", json=item)
-            assert response.status_code in (200, 500)
+            assert response.status_code in (200, 201, 500)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -310,28 +310,28 @@ class TestCoursesSchemasValidation:
         """Quantité négative est rejetée."""
         from pydantic import ValidationError
 
-        from src.api.routes.courses import CourseItemBase
+        from src.api.schemas import CourseItemBase
 
         with pytest.raises(ValidationError):
             CourseItemBase(nom="Produit", quantite=-5.0)
 
     def test_course_item_nom_spaces_stripped(self):
         """Les espaces du nom sont supprimés."""
-        from src.api.routes.courses import CourseItemBase
+        from src.api.schemas import CourseItemBase
 
         item = CourseItemBase(nom="  Lait  ", quantite=1.0)
         assert item.nom == "Lait"
 
     def test_course_list_create_nom_stripped(self):
         """Les espaces sont supprimés du nom de liste."""
-        from src.api.routes.courses import CourseListCreate
+        from src.api.schemas import CourseListCreate
 
         liste = CourseListCreate(nom="  Ma liste  ")
         assert liste.nom == "Ma liste"
 
     def test_course_item_optional_fields(self):
         """Les champs optionnels sont None par défaut."""
-        from src.api.routes.courses import CourseItemBase
+        from src.api.schemas import CourseItemBase
 
         item = CourseItemBase(nom="Produit", quantite=1.0)
         assert item.unite is None
@@ -341,7 +341,7 @@ class TestCoursesSchemasValidation:
         """Test du schéma de réponse."""
         from datetime import datetime
 
-        from src.api.routes.courses import ListeCoursesResponse
+        from src.api.schemas import ListeCoursesResponse
 
         response = ListeCoursesResponse(id=1, nom="Test", items=[], created_at=datetime.now())
         assert response.id == 1

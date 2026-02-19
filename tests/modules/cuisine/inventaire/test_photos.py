@@ -9,6 +9,6 @@ class TestPhotos:
     """Tests pour le module photos"""
 
     def test_render_photos(self):
-        """Test de la fonction render_photos"""
+        """Test de la fonction afficher_photos"""
         # TODO: Implémenter le test
         pass

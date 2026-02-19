@@ -30,7 +30,7 @@ from src.modules.cuisine.inventaire.utils import (
     valider_article_inventaire,
 )
 from src.services.cuisine.suggestions import obtenir_service_predictions
-from src.services.inventaire import get_inventaire_service
+from src.services.inventaire import obtenir_service_inventaire
 
 # Logger pour le module
 logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ __all__ = [
     "timedelta",
     "Any",
     # Services
-    "get_inventaire_service",
+    "obtenir_service_inventaire",
     "obtenir_service_predictions",
     "ErreurValidation",
     # Logic

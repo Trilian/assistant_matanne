@@ -12,11 +12,9 @@ Fonctionnalités:
 import logging
 from datetime import date, timedelta
 from decimal import Decimal
-from enum import Enum, StrEnum
 from uuid import UUID
 
 import httpx
-from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
@@ -28,6 +26,14 @@ from src.core.models import (
 )
 
 from .meteo_jardin import MeteoJardinMixin
+from .types import (
+    AlerteMeteo,
+    ConseilJardin,
+    MeteoJour,
+    NiveauAlerte,
+    PlanArrosage,
+    TypeAlertMeteo,
+)
 from .weather_codes import (
     direction_from_degrees,
     weathercode_to_condition,
@@ -35,85 +41,6 @@ from .weather_codes import (
 )
 
 logger = logging.getLogger(__name__)
-
-
-# ═══════════════════════════════════════════════════════════
-# TYPES ET SCHÉMAS
-# ═══════════════════════════════════════════════════════════
-
-
-class TypeAlertMeteo(StrEnum):
-    """Types d'alertes météo."""
-
-    GEL = "gel"
-    CANICULE = "canicule"
-    PLUIE_FORTE = "pluie_forte"
-    SECHERESSE = "sécheresse"
-    VENT_FORT = "vent_fort"
-    ORAGE = "orage"
-    GRELE = "grêle"
-    NEIGE = "neige"
-
-
-class NiveauAlerte(StrEnum):
-    """Niveau de gravité de l'alerte."""
-
-    INFO = "info"
-    ATTENTION = "attention"
-    DANGER = "danger"
-
-
-class MeteoJour(BaseModel):
-    """Données météo pour un jour."""
-
-    date: date
-    temperature_min: float
-    temperature_max: float
-    temperature_moyenne: float
-    humidite: int  # %
-    precipitation_mm: float
-    probabilite_pluie: int  # %
-    vent_km_h: float
-    direction_vent: str = ""
-    uv_index: int = 0
-    lever_soleil: str = ""
-    coucher_soleil: str = ""
-    condition: str = ""  # ensoleillé, nuageux, pluvieux, etc.
-    icone: str = ""
-
-
-class AlerteMeteo(BaseModel):
-    """Alerte météo pour le jardin."""
-
-    type_alerte: TypeAlertMeteo
-    niveau: NiveauAlerte
-    titre: str
-    message: str
-    conseil_jardin: str
-    date_debut: date
-    date_fin: date | None = None
-    temperature: float | None = None
-
-
-class ConseilJardin(BaseModel):
-    """Conseil de jardinage basé sur la météo."""
-
-    priorite: int = 1  # 1 = haute, 3 = basse
-    icone: str = "🌱"
-    titre: str
-    description: str
-    plantes_concernees: list[str] = Field(default_factory=list)
-    action_recommandee: str = ""
-
-
-class PlanArrosage(BaseModel):
-    """Plan d'arrosage intelligent."""
-
-    date: date
-    besoin_arrosage: bool
-    quantite_recommandee_litres: float = 0.0
-    raison: str = ""
-    plantes_prioritaires: list[str] = Field(default_factory=list)
 
 
 # ═══════════════════════════════════════════════════════════

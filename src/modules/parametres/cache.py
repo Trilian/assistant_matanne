@@ -10,7 +10,7 @@ from src.core.caching import Cache
 from src.ui.feedback import afficher_succes
 
 
-def render_cache_config():
+def afficher_cache_config():
     """Configuration cache"""
 
     st.markdown("### 💾 Gestion du Cache")

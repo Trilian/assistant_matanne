@@ -867,8 +867,8 @@ class TestFactories:
 
     def test_get_planning_unified_service_alias(self):
         """Test de l'alias."""
-        from src.services.cuisine.planning.global_planning import get_planning_unified_service
+        from src.services.cuisine.planning.global_planning import obtenir_service_planning_unifie
 
         with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
-            service = get_planning_unified_service()
+            service = obtenir_service_planning_unifie()
             assert service is not None

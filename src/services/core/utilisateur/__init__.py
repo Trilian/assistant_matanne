@@ -10,12 +10,12 @@ Usage:
     from src.services.core.utilisateur import (
         # Auth
         AuthService, get_auth_service, UserProfile, AuthResult, Role, Permission,
-        render_login_form, render_user_menu, render_profile_settings,
+        afficher_login_form, afficher_user_menu, afficher_profile_settings,
         require_authenticated, require_role,
         # Historique
         ActionHistoryService, get_action_history_service,
         ActionType, ActionEntry, ActionFilter, ActionStats,
-        render_activity_timeline, render_user_activity, render_activity_stats,
+        afficher_activity_timeline, afficher_user_activity, afficher_activity_stats,
         # Préférences
         UserPreferenceService, get_user_preference_service,
     )

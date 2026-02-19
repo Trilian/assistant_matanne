@@ -13,7 +13,7 @@ from .utils import formater_quantite
 logger = logging.getLogger(__name__)
 
 
-def render_generer_ia():
+def afficher_generer_ia():
     """Interface pour générer des recettes avec l'IA"""
     # Marquer cet onglet comme actif
     st.session_state.recettes_selected_tab = 3
@@ -34,12 +34,12 @@ def render_generer_ia():
     )
 
     if mode_gen == "Recherche spécifique":
-        _render_recherche_specifique(service)
+        _afficher_recherche_specifique(service)
     else:
-        _render_mode_personnalise(service)
+        _afficher_mode_personnalise(service)
 
 
-def _render_recherche_specifique(service):
+def _afficher_recherche_specifique(service):
     """Mode recherche de variantes d'une recette spécifique"""
     st.info("🔍 Générez plusieurs variantes d'une recette spécifique")
     with st.form("form_recette_specifique", border=True):
@@ -71,13 +71,13 @@ def _render_recherche_specifique(service):
 
                 # Afficher les suggestions en cartes
                 for idx, suggestion in enumerate(recettes_variantes, 1):
-                    _render_suggestion_card(suggestion, idx, service, is_variant=True)
+                    _afficher_suggestion_card(suggestion, idx, service, is_variant=True)
 
             except Exception as e:
                 st.error(f"❌ Erreur: {str(e)}")
 
 
-def _render_mode_personnalise(service):
+def _afficher_mode_personnalise(service):
     """Mode génération personnalisée"""
     st.info("💡 Laissez l'IA générer des recettes personnalisées basées sur vos préférences")
     with st.form("form_recette_ia", border=True):
@@ -135,7 +135,7 @@ def _render_mode_personnalise(service):
 
                     # Afficher les suggestions en cartes
                     for idx, suggestion in enumerate(recettes_suggestions, 1):
-                        _render_suggestion_card(
+                        _afficher_suggestion_card(
                             suggestion, idx, service, type_repas=type_repas, saison=saison
                         )
 
@@ -144,7 +144,7 @@ def _render_mode_personnalise(service):
                     logger.error(f"Erreur IA recettes: {e}")
 
 
-def _render_suggestion_card(
+def _afficher_suggestion_card(
     suggestion, idx, service, is_variant=False, type_repas=None, saison=None
 ):
     """Affiche une carte de suggestion de recette"""
@@ -256,4 +256,4 @@ def _render_suggestion_card(
         st.write("")  # Espacement
 
 
-__all__ = ["render_generer_ia"]
+__all__ = ["afficher_generer_ia"]

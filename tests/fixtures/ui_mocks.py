@@ -400,8 +400,8 @@ def patch_streamlit_for_module(module_path: str, session_state: dict[str, Any] =
 
     Usage:
         with patch_streamlit_for_module("src.modules.cuisine.recettes") as mock_st:
-            from src.modules.cuisine.recettes import render_liste
-            render_liste(mock_db)
+            from src.modules.cuisine.recettes import afficher_liste
+            afficher_liste(mock_db)
     """
     mock_st = create_streamlit_mock(session_state)
 

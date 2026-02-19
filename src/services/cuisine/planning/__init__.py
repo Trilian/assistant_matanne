@@ -19,8 +19,8 @@ Compatibilité:
     Les anciens noms sont conservés comme alias:
     - PlanningService = ServicePlanning
     - PlanningAIService = ServicePlanningUnifie
-    - get_planning_service = obtenir_service_planning
-    - get_planning_unified_service = obtenir_service_planning_unifie
+    - get_planning_service = obtenir_service_planning (déprécié)
+    - get_planning_unified_service = obtenir_service_planning_unifie (déprécié)
 """
 
 # ═══════════════════════════════════════════════════════════
@@ -42,8 +42,6 @@ from src.core.constants import (
 from .global_planning import (
     # Classe principale
     ServicePlanningUnifie,
-    get_planning_unified_service,
-    get_unified_planning_service,
     # Factories
     obtenir_service_planning_unifie,
 )
@@ -74,7 +72,6 @@ from .recurrence import (
 from .service import (
     # Classe principale
     ServicePlanning,
-    get_planning_service,
     # Factory
     obtenir_service_planning,
 )
@@ -191,14 +188,11 @@ __all__ = [
     "ServicePlanning",
     "PlanningService",  # Alias compatibilité
     "obtenir_service_planning",
-    "get_planning_service",  # Alias compatibilité
     # ─────────────────────────────────────────────────────────
     # Services - Planning unifié
     # ─────────────────────────────────────────────────────────
     "ServicePlanningUnifie",
     "obtenir_service_planning_unifie",
-    "get_planning_unified_service",  # Alias compatibilité
-    "get_unified_planning_service",  # Alias compatibilité
     # ─────────────────────────────────────────────────────────
     # Services - Rappels
     # ─────────────────────────────────────────────────────────

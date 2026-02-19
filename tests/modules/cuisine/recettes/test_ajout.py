@@ -48,14 +48,14 @@ def setup_mock_st(mock_st, session_state=None):
 
 class TestImports:
     def test_import_render_ajouter_manuel(self):
-        from src.modules.cuisine.recettes.ajout import render_ajouter_manuel
+        from src.modules.cuisine.recettes.ajout import afficher_ajouter_manuel
 
-        assert callable(render_ajouter_manuel)
+        assert callable(afficher_ajouter_manuel)
 
     def test_all_exports(self):
         from src.modules.cuisine.recettes.ajout import __all__
 
-        assert "render_ajouter_manuel" in __all__
+        assert "afficher_ajouter_manuel" in __all__
 
 
 class TestRenderAjouterManuel:
@@ -63,9 +63,9 @@ class TestRenderAjouterManuel:
     def test_render_ajouter_manuel_basic(self, mock_st):
         setup_mock_st(mock_st)
         mock_st.number_input.return_value = 3
-        from src.modules.cuisine.recettes.ajout import render_ajouter_manuel
+        from src.modules.cuisine.recettes.ajout import afficher_ajouter_manuel
 
-        render_ajouter_manuel()
+        afficher_ajouter_manuel()
         mock_st.subheader.assert_called()
         mock_st.button.assert_called()
 
@@ -74,9 +74,9 @@ class TestRenderAjouterManuel:
         session = SessionStateMock()
         setup_mock_st(mock_st, session)
         mock_st.number_input.return_value = 3
-        from src.modules.cuisine.recettes.ajout import render_ajouter_manuel
+        from src.modules.cuisine.recettes.ajout import afficher_ajouter_manuel
 
-        render_ajouter_manuel()
+        afficher_ajouter_manuel()
         assert mock_st.session_state.form_num_ingredients == 3
 
     @patch("src.modules.cuisine.recettes.ajout.st")
@@ -85,9 +85,9 @@ class TestRenderAjouterManuel:
         mock_st.button.return_value = True
         mock_st.text_input.return_value = ""
         mock_st.number_input.return_value = 3
-        from src.modules.cuisine.recettes.ajout import render_ajouter_manuel
+        from src.modules.cuisine.recettes.ajout import afficher_ajouter_manuel
 
-        render_ajouter_manuel()
+        afficher_ajouter_manuel()
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.ajout.st")
@@ -102,9 +102,9 @@ class TestRenderAjouterManuel:
 
         mock_st.text_input.side_effect = text_input_side_effect
         mock_st.number_input.return_value = 3
-        from src.modules.cuisine.recettes.ajout import render_ajouter_manuel
+        from src.modules.cuisine.recettes.ajout import afficher_ajouter_manuel
 
-        render_ajouter_manuel()
+        afficher_ajouter_manuel()
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.ajout.st")
@@ -125,9 +125,9 @@ class TestRenderAjouterManuel:
         mock_st.text_input.side_effect = text_input_side_effect
         mock_st.text_area.return_value = ""
         mock_st.number_input.return_value = 1
-        from src.modules.cuisine.recettes.ajout import render_ajouter_manuel
+        from src.modules.cuisine.recettes.ajout import afficher_ajouter_manuel
 
-        render_ajouter_manuel()
+        afficher_ajouter_manuel()
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.ajout.obtenir_service_recettes")
@@ -159,9 +159,9 @@ class TestRenderAjouterManuel:
 
         mock_st.text_area.side_effect = text_area_side_effect
         mock_st.number_input.return_value = 1
-        from src.modules.cuisine.recettes.ajout import render_ajouter_manuel
+        from src.modules.cuisine.recettes.ajout import afficher_ajouter_manuel
 
-        render_ajouter_manuel()
+        afficher_ajouter_manuel()
         mock_st.error.assert_called()
 
     @patch("src.core.db.obtenir_contexte_db")
@@ -204,9 +204,9 @@ class TestRenderAjouterManuel:
 
         mock_st.text_area.side_effect = text_area_side_effect
         mock_st.number_input.return_value = 1
-        from src.modules.cuisine.recettes.ajout import render_ajouter_manuel
+        from src.modules.cuisine.recettes.ajout import afficher_ajouter_manuel
 
-        render_ajouter_manuel()
+        afficher_ajouter_manuel()
         mock_st.success.assert_called()
         mock_st.balloons.assert_called()
 
@@ -247,9 +247,9 @@ class TestRenderAjouterManuel:
 
         mock_st.text_area.side_effect = text_area_side_effect
         mock_st.number_input.return_value = 1
-        from src.modules.cuisine.recettes.ajout import render_ajouter_manuel
+        from src.modules.cuisine.recettes.ajout import afficher_ajouter_manuel
 
-        render_ajouter_manuel()
+        afficher_ajouter_manuel()
         mock_st.error.assert_called()
 
     @patch("src.core.db.obtenir_contexte_db")
@@ -287,18 +287,18 @@ class TestRenderAjouterManuel:
 
         mock_st.text_area.side_effect = text_area_side_effect
         mock_st.number_input.return_value = 1
-        from src.modules.cuisine.recettes.ajout import render_ajouter_manuel
+        from src.modules.cuisine.recettes.ajout import afficher_ajouter_manuel
 
-        render_ajouter_manuel()
+        afficher_ajouter_manuel()
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.ajout.st")
     def test_render_ajouter_manuel_form_fields_displayed(self, mock_st):
         setup_mock_st(mock_st)
         mock_st.number_input.return_value = 3
-        from src.modules.cuisine.recettes.ajout import render_ajouter_manuel
+        from src.modules.cuisine.recettes.ajout import afficher_ajouter_manuel
 
-        render_ajouter_manuel()
+        afficher_ajouter_manuel()
         assert mock_st.text_input.call_count > 0
         assert mock_st.text_area.call_count > 0
         assert mock_st.number_input.call_count > 0

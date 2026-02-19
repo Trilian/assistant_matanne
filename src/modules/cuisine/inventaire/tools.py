@@ -6,20 +6,20 @@ Import/Export et statistiques globales.
 import pandas as pd
 import streamlit as st
 
-from src.services.inventaire import get_inventaire_service
+from src.services.inventaire import obtenir_service_inventaire
 
 
-def render_tools():
+def afficher_tools():
     """Outils utilitaires pour l'inventaire"""
     st.subheader("🔧 Outils d'administration")
 
     tab_import_export, tab_stats = st.tabs(["📤 Import/Export", "📊 Statistiques"])
 
     with tab_import_export:
-        render_import_export()
+        afficher_import_export()
 
     with tab_stats:
-        service = get_inventaire_service()
+        service = obtenir_service_inventaire()
         if service:
             try:
                 inventaire = service.get_inventaire_complet()
@@ -69,9 +69,9 @@ def render_tools():
                 st.error(f"❌ Erreur: {str(e)}")
 
 
-def render_import_export():
+def afficher_import_export():
     """Gestion import/export avancée"""
-    service = get_inventaire_service()
+    service = obtenir_service_inventaire()
 
     st.subheader("📤 Import/Export Avancé")
 
@@ -220,4 +220,4 @@ def render_import_export():
         )
 
 
-__all__ = ["render_tools", "render_import_export"]
+__all__ = ["afficher_tools", "afficher_import_export"]

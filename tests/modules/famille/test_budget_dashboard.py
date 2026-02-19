@@ -64,7 +64,7 @@ def create_mock_service():
 
 @pytest.mark.unit
 class TestRenderBudgetDashboard:
-    """Tests pour render_budget_dashboard."""
+    """Tests pour afficher_budget_dashboard."""
 
     @patch("src.modules.famille.budget_dashboard.px")
     @patch("src.modules.famille.budget_dashboard.go")
@@ -73,13 +73,13 @@ class TestRenderBudgetDashboard:
     def test_render_budget_dashboard_basic(
         self, mock_st, mock_svc_factory, mock_go, mock_px
     ) -> None:
-        """Test render_budget_dashboard sans erreur."""
-        from src.modules.famille.budget_dashboard import render_budget_dashboard
+        """Test afficher_budget_dashboard sans erreur."""
+        from src.modules.famille.budget_dashboard import afficher_budget_dashboard
 
         setup_mock_st(mock_st)
         mock_svc_factory.return_value = create_mock_service()
 
-        render_budget_dashboard()
+        afficher_budget_dashboard()
         mock_st.subheader.assert_called()
 
     @patch("src.modules.famille.budget_dashboard.px")
@@ -88,7 +88,7 @@ class TestRenderBudgetDashboard:
     @patch("src.modules.famille.budget_dashboard.st")
     def test_render_with_depassement(self, mock_st, mock_svc_factory, mock_go, mock_px) -> None:
         """Test avec categories depassees."""
-        from src.modules.famille.budget_dashboard import render_budget_dashboard
+        from src.modules.famille.budget_dashboard import afficher_budget_dashboard
 
         setup_mock_st(mock_st)
         mock_svc = create_mock_service()
@@ -96,7 +96,7 @@ class TestRenderBudgetDashboard:
         resume.categories_depassees = ["alimentation"]
         mock_svc_factory.return_value = mock_svc
 
-        render_budget_dashboard()
+        afficher_budget_dashboard()
         mock_st.error.assert_called()
 
     @patch("src.modules.famille.budget_dashboard.px")
@@ -105,7 +105,7 @@ class TestRenderBudgetDashboard:
     @patch("src.modules.famille.budget_dashboard.st")
     def test_render_with_risque(self, mock_st, mock_svc_factory, mock_go, mock_px) -> None:
         """Test avec categories a risque."""
-        from src.modules.famille.budget_dashboard import render_budget_dashboard
+        from src.modules.famille.budget_dashboard import afficher_budget_dashboard
 
         setup_mock_st(mock_st)
         mock_svc = create_mock_service()
@@ -113,62 +113,62 @@ class TestRenderBudgetDashboard:
         resume.categories_a_risque = ["transport"]
         mock_svc_factory.return_value = mock_svc
 
-        render_budget_dashboard()
+        afficher_budget_dashboard()
         mock_st.warning.assert_called()
 
 
 @pytest.mark.unit
 class TestRenderMetrics:
-    """Tests pour _render_metrics."""
+    """Tests pour _afficher_metrics."""
 
     @patch("src.modules.famille.budget_dashboard.st")
     def test_render_metrics_basic(self, mock_st) -> None:
-        """Test render_metrics affiche les metriques."""
-        from src.modules.famille.budget_dashboard import _render_metrics
+        """Test afficher_metrics affiche les metriques."""
+        from src.modules.famille.budget_dashboard import _afficher_metrics
 
         setup_mock_st(mock_st)
         resume = create_mock_resume()
 
-        _render_metrics(resume)
+        _afficher_metrics(resume)
         assert mock_st.metric.call_count >= 4
 
     @patch("src.modules.famille.budget_dashboard.st")
     def test_render_metrics_budget_depasse(self, mock_st) -> None:
         """Test avec budget depasse."""
-        from src.modules.famille.budget_dashboard import _render_metrics
+        from src.modules.famille.budget_dashboard import _afficher_metrics
 
         setup_mock_st(mock_st)
         resume = create_mock_resume()
         resume.total_depenses = 2500.0
         resume.total_budget = 2000.0
 
-        _render_metrics(resume)
+        _afficher_metrics(resume)
         mock_st.metric.assert_called()
 
 
 @pytest.mark.unit
 class TestRenderOverviewTab:
-    """Tests pour _render_overview_tab."""
+    """Tests pour _afficher_overview_tab."""
 
     @patch("src.modules.famille.budget_dashboard.px")
     @patch("src.modules.famille.budget_dashboard.go")
     @patch("src.modules.famille.budget_dashboard.st")
     def test_render_overview_with_data(self, mock_st, mock_go, mock_px) -> None:
         """Test overview avec donnees."""
-        from src.modules.famille.budget_dashboard import _render_overview_tab
+        from src.modules.famille.budget_dashboard import _afficher_overview_tab
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
         mock_service.get_depenses_mois.return_value = []
         resume = create_mock_resume()
 
-        _render_overview_tab(mock_service, resume, 1, 2026)
+        _afficher_overview_tab(mock_service, resume, 1, 2026)
         mock_st.plotly_chart.assert_called()
 
     @patch("src.modules.famille.budget_dashboard.st")
     def test_render_overview_empty(self, mock_st) -> None:
         """Test overview sans donnees."""
-        from src.modules.famille.budget_dashboard import _render_overview_tab
+        from src.modules.famille.budget_dashboard import _afficher_overview_tab
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -176,7 +176,7 @@ class TestRenderOverviewTab:
         resume = create_mock_resume()
         resume.depenses_par_categorie = {}
 
-        _render_overview_tab(mock_service, resume, 1, 2026)
+        _afficher_overview_tab(mock_service, resume, 1, 2026)
         mock_st.info.assert_called()
 
     @patch("src.modules.famille.budget_dashboard.px")
@@ -184,7 +184,7 @@ class TestRenderOverviewTab:
     @patch("src.modules.famille.budget_dashboard.st")
     def test_render_overview_with_budgets(self, mock_st, mock_go, mock_px) -> None:
         """Test overview avec budgets par categorie."""
-        from src.modules.famille.budget_dashboard import _render_overview_tab
+        from src.modules.famille.budget_dashboard import _afficher_overview_tab
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -196,7 +196,7 @@ class TestRenderOverviewTab:
         budget_item.depense_reelle = 400
         resume.budgets_par_categorie = {"alimentation": budget_item}
 
-        _render_overview_tab(mock_service, resume, 1, 2026)
+        _afficher_overview_tab(mock_service, resume, 1, 2026)
         mock_go.Figure.assert_called()
 
     @patch("src.modules.famille.budget_dashboard.px")
@@ -206,7 +206,7 @@ class TestRenderOverviewTab:
         """Test overview avec liste depenses recentes."""
         from src.modules.famille.budget_dashboard import (
             CategorieDepense,
-            _render_overview_tab,
+            _afficher_overview_tab,
         )
 
         setup_mock_st(mock_st)
@@ -220,23 +220,23 @@ class TestRenderOverviewTab:
         mock_service.get_depenses_mois.return_value = [dep]
 
         resume = create_mock_resume()
-        _render_overview_tab(mock_service, resume, 1, 2026)
+        _afficher_overview_tab(mock_service, resume, 1, 2026)
         mock_st.caption.assert_called()
 
 
 @pytest.mark.unit
 class TestRenderAddExpenseTab:
-    """Tests pour _render_add_expense_tab."""
+    """Tests pour _afficher_add_expense_tab."""
 
     @patch("src.modules.famille.budget_dashboard.st")
     def test_render_add_expense_form(self, mock_st) -> None:
         """Test formulaire ajout depense."""
-        from src.modules.famille.budget_dashboard import _render_add_expense_tab
+        from src.modules.famille.budget_dashboard import _afficher_add_expense_tab
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
 
-        _render_add_expense_tab(mock_service)
+        _afficher_add_expense_tab(mock_service)
         mock_st.form.assert_called()
 
     @patch("src.modules.famille.budget_dashboard.st")
@@ -244,7 +244,7 @@ class TestRenderAddExpenseTab:
         """Test soumission formulaire avec montant valide."""
         from src.modules.famille.budget_dashboard import (
             CategorieDepense,
-            _render_add_expense_tab,
+            _afficher_add_expense_tab,
         )
 
         setup_mock_st(mock_st)
@@ -258,7 +258,7 @@ class TestRenderAddExpenseTab:
 
         mock_service = MagicMock()
 
-        _render_add_expense_tab(mock_service)
+        _afficher_add_expense_tab(mock_service)
         mock_service.ajouter_depense.assert_called_once()
         mock_st.success.assert_called()
 
@@ -267,7 +267,7 @@ class TestRenderAddExpenseTab:
         """Test soumission formulaire avec montant zero."""
         from src.modules.famille.budget_dashboard import (
             CategorieDepense,
-            _render_add_expense_tab,
+            _afficher_add_expense_tab,
         )
 
         setup_mock_st(mock_st)
@@ -280,32 +280,32 @@ class TestRenderAddExpenseTab:
 
         mock_service = MagicMock()
 
-        _render_add_expense_tab(mock_service)
+        _afficher_add_expense_tab(mock_service)
         mock_st.error.assert_called()
 
 
 @pytest.mark.unit
 class TestRenderTrendsTab:
-    """Tests pour _render_trends_tab."""
+    """Tests pour _afficher_trends_tab."""
 
     @patch("src.modules.famille.budget_dashboard.go")
     @patch("src.modules.famille.budget_dashboard.st")
     def test_render_trends_empty(self, mock_st, mock_go) -> None:
         """Test tendances sans donnees."""
-        from src.modules.famille.budget_dashboard import _render_trends_tab
+        from src.modules.famille.budget_dashboard import _afficher_trends_tab
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
         mock_service.get_tendances.return_value = {}
         mock_service.prevoir_depenses.return_value = []
 
-        _render_trends_tab(mock_service, 1, 2026)
+        _afficher_trends_tab(mock_service, 1, 2026)
 
     @patch("src.modules.famille.budget_dashboard.go")
     @patch("src.modules.famille.budget_dashboard.st")
     def test_render_trends_with_data(self, mock_st, mock_go) -> None:
         """Test tendances avec donnees."""
-        from src.modules.famille.budget_dashboard import _render_trends_tab
+        from src.modules.famille.budget_dashboard import _afficher_trends_tab
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -316,14 +316,14 @@ class TestRenderTrendsTab:
         }
         mock_service.prevoir_depenses.return_value = []
 
-        _render_trends_tab(mock_service, 1, 2026)
+        _afficher_trends_tab(mock_service, 1, 2026)
         mock_st.plotly_chart.assert_called()
 
     @patch("src.modules.famille.budget_dashboard.go")
     @patch("src.modules.famille.budget_dashboard.st")
     def test_render_trends_with_previsions(self, mock_st, mock_go) -> None:
         """Test tendances avec previsions."""
-        from src.modules.famille.budget_dashboard import CategorieDepense, _render_trends_tab
+        from src.modules.famille.budget_dashboard import CategorieDepense, _afficher_trends_tab
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -335,31 +335,31 @@ class TestRenderTrendsTab:
         prev.confiance = 0.85
         mock_service.prevoir_depenses.return_value = [prev]
 
-        _render_trends_tab(mock_service, 1, 2026)
+        _afficher_trends_tab(mock_service, 1, 2026)
         mock_st.metric.assert_called()
 
 
 @pytest.mark.unit
 class TestRenderBudgetsConfigTab:
-    """Tests pour _render_budgets_config_tab."""
+    """Tests pour _afficher_budgets_config_tab."""
 
     @patch("src.modules.famille.budget_dashboard.st")
     def test_render_budgets_config(self, mock_st) -> None:
         """Test configuration budgets."""
-        from src.modules.famille.budget_dashboard import _render_budgets_config_tab
+        from src.modules.famille.budget_dashboard import _afficher_budgets_config_tab
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
         mock_service.get_tous_budgets.return_value = {}
         mock_service.BUDGETS_DEFAUT = {}
 
-        _render_budgets_config_tab(mock_service, 1, 2026)
+        _afficher_budgets_config_tab(mock_service, 1, 2026)
         mock_st.form.assert_called()
 
     @patch("src.modules.famille.budget_dashboard.st")
     def test_budgets_config_submit(self, mock_st) -> None:
         """Test soumission configuration budgets."""
-        from src.modules.famille.budget_dashboard import _render_budgets_config_tab
+        from src.modules.famille.budget_dashboard import _afficher_budgets_config_tab
 
         setup_mock_st(mock_st)
         mock_st.form_submit_button.return_value = True
@@ -370,7 +370,7 @@ class TestRenderBudgetsConfigTab:
         mock_service.get_tous_budgets.return_value = {}
         mock_service.BUDGETS_DEFAUT = {}
 
-        _render_budgets_config_tab(mock_service, 1, 2026)
+        _afficher_budgets_config_tab(mock_service, 1, 2026)
         mock_service.definir_budget.assert_called()
         mock_st.success.assert_called()
 
@@ -379,37 +379,37 @@ class TestImports:
     """Tests des imports."""
 
     def test_import_render_budget_dashboard(self) -> None:
-        """Test import render_budget_dashboard."""
-        from src.modules.famille.budget_dashboard import render_budget_dashboard
+        """Test import afficher_budget_dashboard."""
+        from src.modules.famille.budget_dashboard import afficher_budget_dashboard
 
-        assert callable(render_budget_dashboard)
+        assert callable(afficher_budget_dashboard)
 
     def test_import_render_metrics(self) -> None:
-        """Test import _render_metrics."""
-        from src.modules.famille.budget_dashboard import _render_metrics
+        """Test import _afficher_metrics."""
+        from src.modules.famille.budget_dashboard import _afficher_metrics
 
-        assert callable(_render_metrics)
+        assert callable(_afficher_metrics)
 
     def test_import_render_overview_tab(self) -> None:
-        """Test import _render_overview_tab."""
-        from src.modules.famille.budget_dashboard import _render_overview_tab
+        """Test import _afficher_overview_tab."""
+        from src.modules.famille.budget_dashboard import _afficher_overview_tab
 
-        assert callable(_render_overview_tab)
+        assert callable(_afficher_overview_tab)
 
     def test_import_render_add_expense_tab(self) -> None:
-        """Test import _render_add_expense_tab."""
-        from src.modules.famille.budget_dashboard import _render_add_expense_tab
+        """Test import _afficher_add_expense_tab."""
+        from src.modules.famille.budget_dashboard import _afficher_add_expense_tab
 
-        assert callable(_render_add_expense_tab)
+        assert callable(_afficher_add_expense_tab)
 
     def test_import_render_trends_tab(self) -> None:
-        """Test import _render_trends_tab."""
-        from src.modules.famille.budget_dashboard import _render_trends_tab
+        """Test import _afficher_trends_tab."""
+        from src.modules.famille.budget_dashboard import _afficher_trends_tab
 
-        assert callable(_render_trends_tab)
+        assert callable(_afficher_trends_tab)
 
     def test_import_render_budgets_config_tab(self) -> None:
-        """Test import _render_budgets_config_tab."""
-        from src.modules.famille.budget_dashboard import _render_budgets_config_tab
+        """Test import _afficher_budgets_config_tab."""
+        from src.modules.famille.budget_dashboard import _afficher_budgets_config_tab
 
-        assert callable(_render_budgets_config_tab)
+        assert callable(_afficher_budgets_config_tab)

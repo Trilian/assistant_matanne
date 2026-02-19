@@ -4,14 +4,14 @@ Outils utilitaires pour les courses.
 
 from ._common import (
     datetime,
-    get_courses_service,
     obtenir_contexte_db,
+    obtenir_service_courses,
     pd,
     st,
 )
 
 
-def render_outils():
+def afficher_outils():
     """Outils utilitaires - Phase 2: Code-barres, partage, UX améliorée"""
     st.subheader("🔧 Outils")
 
@@ -98,7 +98,7 @@ def render_outils():
 
         col1, col2 = st.columns(2)
         with col1:
-            service = get_courses_service()
+            service = obtenir_service_courses()
             liste = service.get_liste_courses(achetes=False)
 
             if liste:
@@ -137,7 +137,7 @@ def render_outils():
                         from src.core.models import Ingredient
 
                         db = next(obtenir_contexte_db())
-                        service = get_courses_service()
+                        service = obtenir_service_courses()
 
                         count = 0
                         for _, row in df_import.iterrows():
@@ -179,7 +179,7 @@ def render_outils():
         st.write("**📊 Statistiques globales**")
 
         try:
-            service = get_courses_service()
+            service = obtenir_service_courses()
 
             # Stats existantes
             col1, col2, col3, col4 = st.columns(4)
@@ -218,4 +218,4 @@ def render_outils():
             st.error(f"❌ Erreur chargement stats: {str(e)}")
 
 
-__all__ = ["render_outils"]
+__all__ = ["afficher_outils"]

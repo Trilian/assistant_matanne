@@ -60,20 +60,20 @@ class TestJulesPlanningImports:
     def test_import_render_functions(self):
         """Test import des fonctions de rendu."""
         from src.modules.famille.jules_planning import (
-            render_activite_card,
-            render_categories,
-            render_jour,
-            render_stats_semaine,
-            render_vue_aujourd_hui,
-            render_vue_semaine,
+            afficher_activite_card,
+            afficher_categories,
+            afficher_jour,
+            afficher_stats_semaine,
+            afficher_vue_aujourd_hui,
+            afficher_vue_semaine,
         )
 
-        assert callable(render_activite_card)
-        assert callable(render_jour)
-        assert callable(render_vue_semaine)
-        assert callable(render_vue_aujourd_hui)
-        assert callable(render_categories)
-        assert callable(render_stats_semaine)
+        assert callable(afficher_activite_card)
+        assert callable(afficher_jour)
+        assert callable(afficher_vue_semaine)
+        assert callable(afficher_vue_aujourd_hui)
+        assert callable(afficher_categories)
+        assert callable(afficher_stats_semaine)
 
     def test_import_constants(self):
         """Test import des constantes."""
@@ -266,8 +266,8 @@ class TestJulesPlanningUI:
     @patch("src.modules.famille.jules_planning.st")
     @patch("src.modules.famille.jules_planning.obtenir_contexte_db")
     def test_render_vue_aujourd_hui(self, mock_db_context, mock_st):
-        """Test render_vue_aujourd_hui avec mocks."""
-        from src.modules.famille.jules_planning import render_vue_aujourd_hui
+        """Test afficher_vue_aujourd_hui avec mocks."""
+        from src.modules.famille.jules_planning import afficher_vue_aujourd_hui
 
         mock_st.session_state = {"jules_activites_faites": {}}
         mock_st.subheader = MagicMock()
@@ -283,7 +283,7 @@ class TestJulesPlanningUI:
         mock_db_context.side_effect = Exception("DB Error")
 
         try:
-            render_vue_aujourd_hui()
+            afficher_vue_aujourd_hui()
         except Exception:
             pass  # UI tests acceptent les erreurs liées au mock
 
@@ -292,8 +292,8 @@ class TestJulesPlanningUI:
     @patch("src.modules.famille.jules_planning.st")
     @patch("src.modules.famille.jules_planning.obtenir_contexte_db")
     def test_render_vue_semaine(self, mock_db_context, mock_st):
-        """Test render_vue_semaine avec mocks."""
-        from src.modules.famille.jules_planning import render_vue_semaine
+        """Test afficher_vue_semaine avec mocks."""
+        from src.modules.famille.jules_planning import afficher_vue_semaine
 
         mock_st.session_state = {"jules_activites_faites": {}}
         mock_st.subheader = MagicMock()
@@ -306,7 +306,7 @@ class TestJulesPlanningUI:
         mock_db_context.side_effect = Exception("DB Error")
 
         try:
-            render_vue_semaine()
+            afficher_vue_semaine()
         except Exception:
             pass  # UI tests acceptent les erreurs liées au mock
 
@@ -314,8 +314,8 @@ class TestJulesPlanningUI:
 
     @patch("src.modules.famille.jules_planning.st")
     def test_render_categories(self, mock_st):
-        """Test render_categories avec mocks."""
-        from src.modules.famille.jules_planning import render_categories
+        """Test afficher_categories avec mocks."""
+        from src.modules.famille.jules_planning import afficher_categories
 
         mock_st.subheader = MagicMock()
         mock_st.tabs = MagicMock(return_value=[MagicMock() for _ in range(6)])
@@ -326,7 +326,7 @@ class TestJulesPlanningUI:
         )
 
         try:
-            render_categories()
+            afficher_categories()
         except Exception:
             pass  # UI tests acceptent les erreurs liées au mock
 
@@ -334,8 +334,8 @@ class TestJulesPlanningUI:
 
     @patch("src.modules.famille.jules_planning.st")
     def test_render_stats_semaine(self, mock_st):
-        """Test render_stats_semaine avec mocks."""
-        from src.modules.famille.jules_planning import render_stats_semaine
+        """Test afficher_stats_semaine avec mocks."""
+        from src.modules.famille.jules_planning import afficher_stats_semaine
 
         mock_st.session_state = {"jules_activites_faites": {}}
         mock_st.subheader = MagicMock()
@@ -345,7 +345,7 @@ class TestJulesPlanningUI:
         mock_st.markdown = MagicMock()
 
         try:
-            render_stats_semaine()
+            afficher_stats_semaine()
         except Exception:
             pass  # UI tests acceptent les erreurs liées au mock
 
@@ -353,8 +353,8 @@ class TestJulesPlanningUI:
 
     @patch("src.modules.famille.jules_planning.st")
     def test_render_activite_card(self, mock_st):
-        """Test render_activite_card avec mocks."""
-        from src.modules.famille.jules_planning import render_activite_card
+        """Test afficher_activite_card avec mocks."""
+        from src.modules.famille.jules_planning import afficher_activite_card
 
         mock_st.session_state = {"jules_activites_faites": {}}
         mock_st.container = MagicMock(
@@ -376,14 +376,14 @@ class TestJulesPlanningUI:
         }
 
         try:
-            render_activite_card(0, activite, 0)
+            afficher_activite_card(0, activite, 0)
         except Exception:
             pass  # UI tests acceptent les erreurs liées au mock
 
     @patch("src.modules.famille.jules_planning.st")
     def test_render_jour(self, mock_st):
-        """Test render_jour avec mocks."""
-        from src.modules.famille.jules_planning import render_jour
+        """Test afficher_jour avec mocks."""
+        from src.modules.famille.jules_planning import afficher_jour
 
         mock_st.session_state = {"jules_activites_faites": {}}
         mock_st.expander = MagicMock(
@@ -408,7 +408,7 @@ class TestJulesPlanningUI:
         ]
 
         try:
-            render_jour(0, "Lundi", activites, est_aujourd_hui=True)
+            afficher_jour(0, "Lundi", activites, est_aujourd_hui=True)
         except Exception:
             pass  # UI tests acceptent les erreurs liées au mock
 

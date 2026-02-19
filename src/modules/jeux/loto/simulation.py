@@ -10,6 +10,7 @@ from ._common import (
     analyser_patterns_tirages,
     calculer_frequences_numeros,
     date,
+    etat_vide,
     go,
     logger,
     pd,
@@ -194,4 +195,4 @@ def afficher_gestion_tirages():
         )
         st.dataframe(df, hide_index=True, width="stretch")
     else:
-        st.info("Aucun tirage enregistré")
+        etat_vide("Aucun tirage enregistré", "🎲")

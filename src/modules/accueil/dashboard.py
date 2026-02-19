@@ -8,11 +8,13 @@ from datetime import date
 import streamlit as st
 
 from src.core.state import GestionnaireEtat, obtenir_etat
-from src.services.cuisine.courses import get_courses_service
-from src.services.cuisine.planning import get_planning_service
+from src.services.cuisine.courses import obtenir_service_courses
+from src.services.cuisine.planning import obtenir_service_planning
 from src.services.cuisine.recettes import obtenir_service_recettes
-from src.services.inventaire import get_inventaire_service
+from src.services.inventaire import obtenir_service_inventaire
 from src.ui.components.alertes import alerte_stock
+from src.ui.components.atoms import etat_vide
+from src.ui.views.historique import afficher_timeline_activite
 
 # Dashboard widgets enrichis
 try:
@@ -54,23 +56,23 @@ def app():
     st.markdown("---")
 
     # Alertes critiques en haut
-    render_critical_alerts()
+    afficher_critical_alerts()
 
     st.markdown("---")
 
     # Stats globales
-    render_global_stats()
+    afficher_global_stats()
 
     st.markdown("---")
 
     # Raccourcis rapides
-    render_quick_actions()
+    afficher_quick_actions()
 
     st.markdown("---")
 
     # Graphiques enrichis (si widgets disponibles)
     if WIDGETS_DISPONIBLES:
-        render_graphiques_enrichis()
+        afficher_graphiques_enrichis()
         st.markdown("---")
 
     # ═══════════════════════════════════════════════════════════
@@ -110,7 +112,7 @@ def app():
             if len(events) > 5:
                 st.caption(f"... et {len(events) - 5} autres événements cette semaine")
         else:
-            st.info("Aucun événement prévu cette semaine")
+            etat_vide("Aucun événement prévu cette semaine", "📅")
 
     except ImportError:
         st.caption("Module timeline non disponible")
@@ -142,14 +144,14 @@ def app():
     col1, col2 = st.columns(2)
 
     with col1:
-        render_cuisine_summary()
+        afficher_cuisine_summary()
         st.markdown("")
-        render_planning_summary()
+        afficher_planning_summary()
 
     with col2:
-        render_inventaire_summary()
+        afficher_inventaire_summary()
         st.markdown("")
-        render_courses_summary()
+        afficher_courses_summary()
 
     # Footer avec sante système
     st.markdown("---")
@@ -160,8 +162,16 @@ def app():
         with col_footer2:
             widget_jules_apercu()
 
+    # Section activité récente
+    st.markdown("---")
+    with st.expander("📝 Activité récente", expanded=False):
+        try:
+            afficher_timeline_activite(limit=5)
+        except Exception as e:
+            st.caption(f"Timeline indisponible: {e}")
 
-def render_graphiques_enrichis():
+
+def afficher_graphiques_enrichis():
     """Affiche les graphiques Plotly enrichis."""
 
     st.markdown("### 📈 Visualisations")
@@ -170,7 +180,7 @@ def render_graphiques_enrichis():
 
     with col1:
         # Graphique inventaire par categorie
-        inventaire = get_inventaire_service().get_inventaire_complet()
+        inventaire = obtenir_service_inventaire().get_inventaire_complet()
         fig = graphique_inventaire_categories(inventaire)
         if fig:
             st.markdown("**📦 Stock par Categorie**")
@@ -180,7 +190,7 @@ def render_graphiques_enrichis():
 
     with col2:
         # Graphique repartition repas
-        planning = get_planning_service().get_planning()
+        planning = obtenir_service_planning().get_planning()
         if planning and planning.repas:
             repas_data = [{"type_repas": getattr(r, "type_repas", "autre")} for r in planning.repas]
             fig = graphique_repartition_repas(repas_data)
@@ -198,13 +208,13 @@ def render_graphiques_enrichis():
 # ═══════════════════════════════════════════════════════════
 
 
-def render_critical_alerts():
+def afficher_critical_alerts():
     """Affiche les alertes importantes"""
 
     alerts = []
 
     # Inventaire critique
-    inventaire = get_inventaire_service().get_inventaire_complet()
+    inventaire = obtenir_service_inventaire().get_inventaire_complet()
     critiques = [art for art in inventaire if art.get("statut") in ["critique", "sous_seuil"]]
 
     if critiques:
@@ -233,7 +243,7 @@ def render_critical_alerts():
         )
 
     # Planning vide
-    planning = get_planning_service().get_planning()
+    planning = obtenir_service_planning().get_planning()
 
     if not planning or not planning.repas:
         alerts.append(
@@ -318,17 +328,17 @@ def render_critical_alerts():
 # ═══════════════════════════════════════════════════════════
 
 
-def render_global_stats():
+def afficher_global_stats():
     """Stats globales de l'application"""
 
     st.markdown("### 📊 Vue d'Ensemble")
 
     # Charger stats
     stats_recettes = obtenir_service_recettes().get_stats()
-    stats_inventaire = get_inventaire_service().get_stats()
-    stats_courses = get_courses_service().get_stats()
+    stats_inventaire = obtenir_service_inventaire().get_stats()
+    stats_courses = obtenir_service_courses().get_stats()
 
-    inventaire = get_inventaire_service().get_inventaire_complet()
+    inventaire = obtenir_service_inventaire().get_inventaire_complet()
 
     # Afficher metriques
     col1, col2, col3, col4 = st.columns(4)
@@ -354,7 +364,7 @@ def render_global_stats():
 
     with col4:
         # Planning semaine
-        planning = get_planning_service().get_planning()
+        planning = obtenir_service_planning().get_planning()
         nb_repas = len(planning.repas) if planning else 0
 
         st.metric("🧹 Repas Planifies", nb_repas, help="Cette semaine")
@@ -365,7 +375,7 @@ def render_global_stats():
 # ═══════════════════════════════════════════════════════════
 
 
-def render_quick_actions():
+def afficher_quick_actions():
     """Raccourcis d'actions rapides"""
 
     st.markdown("### ⚡ Actions Rapides")
@@ -401,7 +411,7 @@ def render_quick_actions():
 # ═══════════════════════════════════════════════════════════
 
 
-def render_cuisine_summary():
+def afficher_cuisine_summary():
     """Resume module Cuisine"""
 
     with st.container():
@@ -438,7 +448,7 @@ def render_cuisine_summary():
         st.markdown("</div>", unsafe_allow_html=True)
 
 
-def render_inventaire_summary():
+def afficher_inventaire_summary():
     """Resume inventaire"""
 
     with st.container():
@@ -450,7 +460,7 @@ def render_inventaire_summary():
 
         st.markdown("### 📦 Inventaire")
 
-        inventaire = get_inventaire_service().get_inventaire_complet()
+        inventaire = obtenir_service_inventaire().get_inventaire_complet()
 
         stock_bas = len([a for a in inventaire if a.get("statut") == "sous_seuil"])
         critiques = len([a for a in inventaire if a.get("statut") == "critique"])
@@ -482,7 +492,7 @@ def render_inventaire_summary():
         st.markdown("</div>", unsafe_allow_html=True)
 
 
-def render_courses_summary():
+def afficher_courses_summary():
     """Resume courses"""
 
     with st.container():
@@ -493,7 +503,7 @@ def render_courses_summary():
         )
         st.markdown("### 📅 Courses")
 
-        liste = get_courses_service().get_liste_courses()
+        liste = obtenir_service_courses().get_liste_courses()
 
         haute = len([a for a in liste if a.get("priorite") == "haute"])
         moyenne = len([a for a in liste if a.get("priorite") == "moyenne"])
@@ -530,7 +540,7 @@ def render_courses_summary():
         st.markdown("</div>", unsafe_allow_html=True)
 
 
-def render_planning_summary():
+def afficher_planning_summary():
     """Resume planning"""
 
     with st.container():
@@ -542,7 +552,7 @@ def render_planning_summary():
 
         st.markdown("### 🧹 Planning Semaine")
 
-        planning = get_planning_service().get_planning()
+        planning = obtenir_service_planning().get_planning()
 
         if planning and planning.repas:
             total_repas = len(planning.repas)
@@ -572,7 +582,7 @@ def render_planning_summary():
                     st.caption(f"• {type_repas}: {nom_recette}")
 
         else:
-            st.info("Aucun planning cette semaine")
+            etat_vide("Aucun planning cette semaine", "🍽️", "Planifiez vos repas pour la semaine")
 
         if st.button("🧹 Voir le planning", key="nav_planning", width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")

@@ -59,82 +59,82 @@ class TestImports:
     """Verify module imports work"""
 
     def test_import_render_planning(self) -> None:
-        from src.modules.famille.weekend.components import render_planning
+        from src.modules.famille.weekend.components import afficher_planning
 
-        assert callable(render_planning)
+        assert callable(afficher_planning)
 
     def test_import_render_day_activities(self) -> None:
-        from src.modules.famille.weekend.components import render_day_activities
+        from src.modules.famille.weekend.components import afficher_day_activities
 
-        assert callable(render_day_activities)
+        assert callable(afficher_day_activities)
 
     def test_import_render_suggestions(self) -> None:
-        from src.modules.famille.weekend.components import render_suggestions
+        from src.modules.famille.weekend.components import afficher_suggestions
 
-        assert callable(render_suggestions)
+        assert callable(afficher_suggestions)
 
     def test_import_render_lieux_testes(self) -> None:
-        from src.modules.famille.weekend.components import render_lieux_testes
+        from src.modules.famille.weekend.components import afficher_lieux_testes
 
-        assert callable(render_lieux_testes)
+        assert callable(afficher_lieux_testes)
 
     def test_import_render_add_activity(self) -> None:
-        from src.modules.famille.weekend.components import render_add_activity
+        from src.modules.famille.weekend.components import afficher_add_activity
 
-        assert callable(render_add_activity)
+        assert callable(afficher_add_activity)
 
     def test_import_render_noter_sortie(self) -> None:
-        from src.modules.famille.weekend.components import render_noter_sortie
+        from src.modules.famille.weekend.components import afficher_noter_sortie
 
-        assert callable(render_noter_sortie)
+        assert callable(afficher_noter_sortie)
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS RENDER_PLANNING
+# TESTS AFFICHER_PLANNING
 # ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
 class TestRenderPlanning:
-    """Tests for render_planning function"""
+    """Tests for afficher_planning function"""
 
     @patch("src.modules.famille.weekend.components.get_budget_weekend")
-    @patch("src.modules.famille.weekend.components.render_day_activities")
+    @patch("src.modules.famille.weekend.components.afficher_day_activities")
     @patch("src.modules.famille.weekend.components.get_weekend_activities")
     @patch("src.modules.famille.weekend.components.get_next_weekend")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_planning_basic(
         self, mock_st, mock_next, mock_activities, mock_day, mock_budget
     ) -> None:
-        from src.modules.famille.weekend.components import render_planning
+        from src.modules.famille.weekend.components import afficher_planning
 
         setup_mock_st(mock_st)
         mock_next.return_value = (date(2026, 2, 21), date(2026, 2, 22))
         mock_activities.return_value = {"saturday": [], "sunday": []}
         mock_budget.return_value = {"estime": 100, "reel": 50}
 
-        render_planning()
+        afficher_planning()
 
         mock_st.subheader.assert_called()
         mock_st.metric.assert_called()
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS RENDER_DAY_ACTIVITIES
+# TESTS AFFICHER_DAY_ACTIVITIES
 # ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
 class TestRenderDayActivities:
-    """Tests for render_day_activities function"""
+    """Tests for afficher_day_activities function"""
 
     @patch("src.modules.famille.weekend.components.st")
     def test_render_day_activities_empty(self, mock_st) -> None:
-        from src.modules.famille.weekend.components import render_day_activities
+        from src.modules.famille.weekend.components import afficher_day_activities
 
         setup_mock_st(mock_st)
 
-        render_day_activities(date(2026, 2, 21), [])
+        afficher_day_activities(date(2026, 2, 21), [])
 
         mock_st.caption.assert_called()
 
@@ -144,7 +144,7 @@ class TestRenderDayActivities:
     )
     @patch("src.modules.famille.weekend.components.st")
     def test_render_day_activities_with_activities(self, mock_st) -> None:
-        from src.modules.famille.weekend.components import render_day_activities
+        from src.modules.famille.weekend.components import afficher_day_activities
 
         setup_mock_st(mock_st)
         mock_activity = MagicMock()
@@ -156,29 +156,29 @@ class TestRenderDayActivities:
         mock_activity.cout_estime = 0
         mock_activity.statut = "planifie"
 
-        render_day_activities(date(2026, 2, 21), [mock_activity])
+        afficher_day_activities(date(2026, 2, 21), [mock_activity])
 
         mock_st.markdown.assert_called()
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS RENDER_SUGGESTIONS
+# TESTS AFFICHER_SUGGESTIONS
 # ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
 class TestRenderSuggestions:
-    """Tests for render_suggestions function"""
+    """Tests for afficher_suggestions function"""
 
     @patch("src.modules.famille.weekend.components.get_age_jules_mois")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_suggestions_ui(self, mock_st, mock_age) -> None:
-        from src.modules.famille.weekend.components import render_suggestions
+        from src.modules.famille.weekend.components import afficher_suggestions
 
         setup_mock_st(mock_st)
         mock_age.return_value = 20
 
-        render_suggestions()
+        afficher_suggestions()
 
         mock_st.subheader.assert_called()
         mock_st.selectbox.assert_called()
@@ -187,23 +187,23 @@ class TestRenderSuggestions:
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS RENDER_LIEUX_TESTES
+# TESTS AFFICHER_LIEUX_TESTES
 # ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
 class TestRenderLieuxTestes:
-    """Tests for render_lieux_testes function"""
+    """Tests for afficher_lieux_testes function"""
 
     @patch("src.modules.famille.weekend.components.get_lieux_testes")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_lieux_testes_empty(self, mock_st, mock_lieux) -> None:
-        from src.modules.famille.weekend.components import render_lieux_testes
+        from src.modules.famille.weekend.components import afficher_lieux_testes
 
         setup_mock_st(mock_st)
         mock_lieux.return_value = []
 
-        render_lieux_testes()
+        afficher_lieux_testes()
 
         mock_st.subheader.assert_called()
         mock_st.info.assert_called()
@@ -215,7 +215,7 @@ class TestRenderLieuxTestes:
     @patch("src.modules.famille.weekend.components.get_lieux_testes")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_lieux_testes_with_items(self, mock_st, mock_lieux) -> None:
-        from src.modules.famille.weekend.components import render_lieux_testes
+        from src.modules.famille.weekend.components import afficher_lieux_testes
 
         setup_mock_st(mock_st)
         mock_lieu = MagicMock()
@@ -229,29 +229,29 @@ class TestRenderLieuxTestes:
         mock_lieu.date_prevue = date(2026, 2, 15)
         mock_lieux.return_value = [mock_lieu]
 
-        render_lieux_testes()
+        afficher_lieux_testes()
 
         mock_st.selectbox.assert_called()
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS RENDER_ADD_ACTIVITY
+# TESTS AFFICHER_ADD_ACTIVITY
 # ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
 class TestRenderAddActivity:
-    """Tests for render_add_activity function"""
+    """Tests for afficher_add_activity function"""
 
     @patch("src.modules.famille.weekend.components.get_next_weekend")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_add_activity_form(self, mock_st, mock_weekend) -> None:
-        from src.modules.famille.weekend.components import render_add_activity
+        from src.modules.famille.weekend.components import afficher_add_activity
 
         setup_mock_st(mock_st)
         mock_weekend.return_value = (date(2026, 2, 21), date(2026, 2, 22))
 
-        render_add_activity()
+        afficher_add_activity()
 
         mock_st.subheader.assert_called()
         mock_st.form.assert_called()
@@ -260,31 +260,31 @@ class TestRenderAddActivity:
     @patch("src.modules.famille.weekend.components.get_next_weekend")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_add_activity_submit_empty_title(self, mock_st, mock_weekend) -> None:
-        from src.modules.famille.weekend.components import render_add_activity
+        from src.modules.famille.weekend.components import afficher_add_activity
 
         setup_mock_st(mock_st)
         mock_st.form_submit_button.return_value = True
         mock_st.text_input.return_value = ""
         mock_weekend.return_value = (date(2026, 2, 21), date(2026, 2, 22))
 
-        render_add_activity()
+        afficher_add_activity()
 
         mock_st.error.assert_called()
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS RENDER_NOTER_SORTIE
+# TESTS AFFICHER_NOTER_SORTIE
 # ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
 class TestRenderNoterSortie:
-    """Tests for render_noter_sortie function"""
+    """Tests for afficher_noter_sortie function"""
 
     @patch("src.modules.famille.weekend.components.obtenir_contexte_db")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_noter_sortie_no_activities(self, mock_st, mock_ctx) -> None:
-        from src.modules.famille.weekend.components import render_noter_sortie
+        from src.modules.famille.weekend.components import afficher_noter_sortie
 
         setup_mock_st(mock_st)
         mock_db = MagicMock()
@@ -292,7 +292,7 @@ class TestRenderNoterSortie:
         mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
         mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_noter_sortie()
+        afficher_noter_sortie()
 
         mock_st.subheader.assert_called()
         mock_st.info.assert_called()
@@ -304,7 +304,7 @@ class TestRenderNoterSortie:
     @patch("src.modules.famille.weekend.components.obtenir_contexte_db")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_noter_sortie_with_activities(self, mock_st, mock_ctx) -> None:
-        from src.modules.famille.weekend.components import render_noter_sortie
+        from src.modules.famille.weekend.components import afficher_noter_sortie
 
         setup_mock_st(mock_st)
         mock_activity = MagicMock()
@@ -318,7 +318,7 @@ class TestRenderNoterSortie:
         mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
         mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_noter_sortie()
+        afficher_noter_sortie()
 
         mock_st.markdown.assert_called()
         mock_st.slider.assert_called()
@@ -331,7 +331,7 @@ class TestRenderNoterSortie:
     @patch("src.modules.famille.weekend.components.st")
     def test_render_noter_sortie_save_button(self, mock_st, mock_ctx) -> None:
         """Test saving a rating via the save button (lines 279-288)"""
-        from src.modules.famille.weekend.components import render_noter_sortie
+        from src.modules.famille.weekend.components import afficher_noter_sortie
 
         setup_mock_st(mock_st)
         mock_st.slider.return_value = 4
@@ -351,7 +351,7 @@ class TestRenderNoterSortie:
         mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
         mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_noter_sortie()
+        afficher_noter_sortie()
 
         assert mock_activity.note_lieu == 4
         assert mock_activity.a_refaire is True
@@ -361,17 +361,17 @@ class TestRenderNoterSortie:
 
 @pytest.mark.unit
 class TestRenderDayActivitiesAddButton:
-    """Tests for add button in render_day_activities (lines 54-56)"""
+    """Tests for add button in afficher_day_activities (lines 54-56)"""
 
     @patch("src.modules.famille.weekend.components.st")
     def test_render_day_activities_add_button_click(self, mock_st) -> None:
-        from src.modules.famille.weekend.components import render_day_activities
+        from src.modules.famille.weekend.components import afficher_day_activities
 
         setup_mock_st(mock_st)
         mock_st.button.return_value = True
 
         test_date = date(2026, 2, 21)
-        render_day_activities(test_date, [])
+        afficher_day_activities(test_date, [])
 
         assert mock_st.session_state["weekend_add_date"] == test_date
         assert mock_st.session_state["weekend_tab"] == "add"
@@ -380,7 +380,7 @@ class TestRenderDayActivitiesAddButton:
 
 @pytest.mark.unit
 class TestRenderDayActivitiesDoneButton:
-    """Tests for done button in render_day_activities (lines 76-82)"""
+    """Tests for done button in afficher_day_activities (lines 76-82)"""
 
     @patch("src.modules.famille.weekend.components.mark_activity_done")
     @patch(
@@ -389,7 +389,7 @@ class TestRenderDayActivitiesDoneButton:
     )
     @patch("src.modules.famille.weekend.components.st")
     def test_render_day_activities_done_button_click(self, mock_st, mock_mark_done) -> None:
-        from src.modules.famille.weekend.components import render_day_activities
+        from src.modules.famille.weekend.components import afficher_day_activities
 
         setup_mock_st(mock_st)
         mock_st.button.return_value = True
@@ -403,7 +403,7 @@ class TestRenderDayActivitiesDoneButton:
         mock_activity.cout_estime = None
         mock_activity.statut = "planifie"
 
-        render_day_activities(date(2026, 2, 21), [mock_activity])
+        afficher_day_activities(date(2026, 2, 21), [mock_activity])
 
         mock_mark_done.assert_called_with(42)
         mock_st.rerun.assert_called()
@@ -414,7 +414,7 @@ class TestRenderDayActivitiesDoneButton:
     )
     @patch("src.modules.famille.weekend.components.st")
     def test_render_day_activities_completed_with_rating(self, mock_st) -> None:
-        from src.modules.famille.weekend.components import render_day_activities
+        from src.modules.famille.weekend.components import afficher_day_activities
 
         setup_mock_st(mock_st)
 
@@ -428,7 +428,7 @@ class TestRenderDayActivitiesDoneButton:
         mock_activity.statut = "termine"
         mock_activity.note_lieu = 4
 
-        render_day_activities(date(2026, 2, 21), [mock_activity])
+        afficher_day_activities(date(2026, 2, 21), [mock_activity])
 
         mock_st.write.assert_called_with("⭐⭐⭐⭐")
 
@@ -438,7 +438,7 @@ class TestRenderDayActivitiesDoneButton:
     )
     @patch("src.modules.famille.weekend.components.st")
     def test_render_day_activities_completed_no_rating(self, mock_st) -> None:
-        from src.modules.famille.weekend.components import render_day_activities
+        from src.modules.famille.weekend.components import afficher_day_activities
 
         setup_mock_st(mock_st)
 
@@ -452,20 +452,20 @@ class TestRenderDayActivitiesDoneButton:
         mock_activity.statut = "termine"
         mock_activity.note_lieu = None
 
-        render_day_activities(date(2026, 2, 21), [mock_activity])
+        afficher_day_activities(date(2026, 2, 21), [mock_activity])
 
         mock_st.caption.assert_called_with("✅ Fait")
 
 
 @pytest.mark.unit
 class TestRenderSuggestionsGenerate:
-    """Tests for generate button in render_suggestions (lines 104-121)"""
+    """Tests for generate button in afficher_suggestions (lines 104-121)"""
 
     @patch("src.modules.famille.weekend.components.WeekendAIService")
     @patch("src.modules.famille.weekend.components.get_age_jules_mois")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_suggestions_generate_success(self, mock_st, mock_age, mock_ai_service) -> None:
-        from src.modules.famille.weekend.components import render_suggestions
+        from src.modules.famille.weekend.components import afficher_suggestions
 
         setup_mock_st(mock_st)
         mock_st.button.return_value = True
@@ -482,7 +482,7 @@ class TestRenderSuggestionsGenerate:
 
         mock_service_instance.suggerer_activites = mock_suggest
 
-        render_suggestions()
+        afficher_suggestions()
 
         mock_st.markdown.assert_called()
         mock_st.info.assert_called()
@@ -491,21 +491,21 @@ class TestRenderSuggestionsGenerate:
     @patch("src.modules.famille.weekend.components.get_age_jules_mois")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_suggestions_generate_error(self, mock_st, mock_age, mock_ai_service) -> None:
-        from src.modules.famille.weekend.components import render_suggestions
+        from src.modules.famille.weekend.components import afficher_suggestions
 
         setup_mock_st(mock_st)
         mock_st.button.return_value = True
         mock_age.return_value = 20
         mock_ai_service.side_effect = Exception("API Error")
 
-        render_suggestions()
+        afficher_suggestions()
 
         mock_st.error.assert_called()
 
 
 @pytest.mark.unit
 class TestRenderLieuxTestesFilter:
-    """Tests for filter in render_lieux_testes (line 140)"""
+    """Tests for filter in afficher_lieux_testes (line 140)"""
 
     @patch(
         "src.modules.famille.weekend.components.TYPES_ACTIVITES",
@@ -518,7 +518,7 @@ class TestRenderLieuxTestesFilter:
     @patch("src.modules.famille.weekend.components.get_lieux_testes")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_lieux_filter_by_type(self, mock_st, mock_lieux) -> None:
-        from src.modules.famille.weekend.components import render_lieux_testes
+        from src.modules.famille.weekend.components import afficher_lieux_testes
 
         setup_mock_st(mock_st)
         mock_st.selectbox.return_value = "musee"
@@ -545,7 +545,7 @@ class TestRenderLieuxTestesFilter:
 
         mock_lieux.return_value = [mock_lieu1, mock_lieu2]
 
-        render_lieux_testes()
+        afficher_lieux_testes()
 
         mock_st.selectbox.assert_called()
 
@@ -556,7 +556,7 @@ class TestRenderLieuxTestesFilter:
     @patch("src.modules.famille.weekend.components.get_lieux_testes")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_lieux_with_a_refaire_false(self, mock_st, mock_lieux) -> None:
-        from src.modules.famille.weekend.components import render_lieux_testes
+        from src.modules.famille.weekend.components import afficher_lieux_testes
 
         setup_mock_st(mock_st)
 
@@ -572,14 +572,14 @@ class TestRenderLieuxTestesFilter:
 
         mock_lieux.return_value = [mock_lieu]
 
-        render_lieux_testes()
+        afficher_lieux_testes()
 
         mock_st.write.assert_called()
 
 
 @pytest.mark.unit
 class TestRenderAddActivitySubmit:
-    """Tests for form submission in render_add_activity (lines 217-239)"""
+    """Tests for form submission in afficher_add_activity (lines 217-239)"""
 
     @patch("src.modules.famille.weekend.components.WeekendActivity")
     @patch("src.modules.famille.weekend.components.obtenir_contexte_db")
@@ -588,7 +588,7 @@ class TestRenderAddActivitySubmit:
     def test_render_add_activity_submit_valid(
         self, mock_st, mock_weekend, mock_ctx, mock_activity_class
     ) -> None:
-        from src.modules.famille.weekend.components import render_add_activity
+        from src.modules.famille.weekend.components import afficher_add_activity
 
         setup_mock_st(mock_st, {"weekend_add_date": date(2026, 2, 21)})
         mock_st.form_submit_button.return_value = True
@@ -605,7 +605,7 @@ class TestRenderAddActivitySubmit:
         mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
         mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_add_activity()
+        afficher_add_activity()
 
         mock_activity_class.assert_called()
         mock_db.add.assert_called()
@@ -620,7 +620,7 @@ class TestRenderAddActivitySubmit:
     def test_render_add_activity_submit_exception(
         self, mock_st, mock_weekend, mock_ctx, mock_activity_class
     ) -> None:
-        from src.modules.famille.weekend.components import render_add_activity
+        from src.modules.famille.weekend.components import afficher_add_activity
 
         setup_mock_st(mock_st)
         mock_st.form_submit_button.return_value = True
@@ -630,6 +630,6 @@ class TestRenderAddActivitySubmit:
         mock_ctx.return_value.__enter__ = MagicMock(side_effect=Exception("Database error"))
         mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_add_activity()
+        afficher_add_activity()
 
         mock_st.error.assert_called()

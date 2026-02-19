@@ -14,23 +14,23 @@ import streamlit as st
 
 # Re-export constants depuis _common
 from ._common import PRIORITY_EMOJIS, RAYONS_DEFAULT
-from .historique import render_historique
+from .historique import afficher_historique
 
 # Imports des sous-modules
 from .liste_active import (
-    render_ajouter_article,
-    render_liste_active,
-    render_print_view,
-    render_rayon_articles,
+    afficher_ajouter_article,
+    afficher_liste_active,
+    afficher_print_view,
+    afficher_rayon_articles,
 )
-from .modeles import render_modeles
-from .outils import render_outils
-from .planning import render_courses_depuis_planning
+from .modeles import afficher_modeles
+from .outils import afficher_outils
+from .planning import afficher_courses_depuis_planning
 from .realtime import (
     _init_realtime_sync,
-    render_realtime_status,
+    afficher_realtime_status,
 )
-from .suggestions_ia import render_suggestions_ia
+from .suggestions_ia import afficher_suggestions_ia
 
 
 def app():
@@ -63,41 +63,41 @@ def app():
 
     with tab_liste:
         st.session_state.courses_active_tab = 0
-        render_liste_active()
+        afficher_liste_active()
 
     with tab_planning:
         st.session_state.courses_active_tab = 1
-        render_courses_depuis_planning()
+        afficher_courses_depuis_planning()
 
     with tab_suggestions:
         st.session_state.courses_active_tab = 2
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
     with tab_historique:
         st.session_state.courses_active_tab = 3
-        render_historique()
+        afficher_historique()
 
     with tab_modeles:
         st.session_state.courses_active_tab = 4
-        render_modeles()
+        afficher_modeles()
 
     with tab_outils:
         st.session_state.courses_active_tab = 5
-        render_outils()
+        afficher_outils()
 
 
 __all__ = [
     "app",
-    "render_liste_active",
-    "render_rayon_articles",
-    "render_ajouter_article",
-    "render_print_view",
-    "render_courses_depuis_planning",
-    "render_suggestions_ia",
-    "render_historique",
-    "render_modeles",
-    "render_outils",
-    "render_realtime_status",
+    "afficher_liste_active",
+    "afficher_rayon_articles",
+    "afficher_ajouter_article",
+    "afficher_print_view",
+    "afficher_courses_depuis_planning",
+    "afficher_suggestions_ia",
+    "afficher_historique",
+    "afficher_modeles",
+    "afficher_outils",
+    "afficher_realtime_status",
     "PRIORITY_EMOJIS",
     "RAYONS_DEFAULT",
 ]

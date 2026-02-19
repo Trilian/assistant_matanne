@@ -200,7 +200,7 @@ def est_fait(jour: int, activite_nom: str) -> bool:
 # ═══════════════════════════════════════════════════════════
 
 
-def render_activite_card(jour: int, activite: dict, index: int, key_prefix: str = "week"):
+def afficher_activite_card(jour: int, activite: dict, index: int, key_prefix: str = "week"):
     """Affiche une carte d'activite."""
     fait = est_fait(jour, activite["nom"])
 
@@ -224,7 +224,7 @@ def render_activite_card(jour: int, activite: dict, index: int, key_prefix: str 
                     st.rerun()
 
 
-def render_jour(jour_idx: int, nom_jour: str, activites: list[dict], est_aujourd_hui: bool):
+def afficher_jour(jour_idx: int, nom_jour: str, activites: list[dict], est_aujourd_hui: bool):
     """Affiche un jour du planning."""
     header = f"{'📍 ' if est_aujourd_hui else ''}{nom_jour}"
 
@@ -242,10 +242,10 @@ def render_jour(jour_idx: int, nom_jour: str, activites: list[dict], est_aujourd
 
         # Activites
         for i, act in enumerate(activites):
-            render_activite_card(jour_idx, act, i)
+            afficher_activite_card(jour_idx, act, i)
 
 
-def render_vue_semaine():
+def afficher_vue_semaine():
     """Affiche la vue semaine complète."""
     st.subheader("📅 Planning de la semaine")
 
@@ -261,7 +261,7 @@ def render_vue_semaine():
 
     for jour_idx, tab in enumerate(tabs):
         with tab:
-            render_jour(
+            afficher_jour(
                 jour_idx,
                 JOURS_SEMAINE[jour_idx],
                 planning.get(jour_idx, []),
@@ -269,7 +269,7 @@ def render_vue_semaine():
             )
 
 
-def render_vue_aujourd_hui():
+def afficher_vue_aujourd_hui():
     """Affiche les activites du jour."""
     st.subheader("🌟 Aujourd'hui")
 
@@ -299,10 +299,10 @@ def render_vue_aujourd_hui():
 
     # Activites
     for i, act in enumerate(activites):
-        render_activite_card(jour_actuel, act, i, key_prefix="today")
+        afficher_activite_card(jour_actuel, act, i, key_prefix="today")
 
 
-def render_categories():
+def afficher_categories():
     """Affiche toutes les categories d'activites."""
     st.subheader("📚 Toutes les activites par categorie")
 
@@ -320,7 +320,7 @@ def render_categories():
                     st.caption(f"⏱️ {act['duree']} min • {act['desc']}")
 
 
-def render_stats_semaine():
+def afficher_stats_semaine():
     """Affiche les stats de la semaine."""
     planning = get_planning_semaine()
 
@@ -388,16 +388,16 @@ def app():
     tabs = st.tabs(["🌟 Aujourd'hui", "📅 Semaine", "📊 Bilan", "📚 Catalogue"])
 
     with tabs[0]:
-        render_vue_aujourd_hui()
+        afficher_vue_aujourd_hui()
 
     with tabs[1]:
-        render_vue_semaine()
+        afficher_vue_semaine()
 
     with tabs[2]:
-        render_stats_semaine()
+        afficher_stats_semaine()
 
     with tabs[3]:
-        render_categories()
+        afficher_categories()
 
 
 if __name__ == "__main__":

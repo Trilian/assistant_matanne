@@ -8,6 +8,8 @@ import logging
 
 import streamlit as st
 
+from src.ui import etat_vide
+
 logger = logging.getLogger(__name__)
 
 
@@ -150,7 +152,7 @@ def afficher_alertes_predictives(alertes: list[dict]):
 def afficher_planning_previsionnel(taches_futures: list[dict]):
     """Affiche le planning prévisionnel des tâches."""
     if not taches_futures:
-        st.info("✅ Aucune tâche prévue dans les prochaines semaines !")
+        etat_vide("Aucune tâche prévue", "✅", "Tout est à jour !")
         return
 
     # Grouper par période

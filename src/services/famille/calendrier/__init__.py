@@ -7,7 +7,7 @@ Exports:
 - Schémas: CalendarProvider, SyncDirection, ExternalCalendarConfig, etc.
 - ICalGenerator: Génération/parsing iCal
 
-NOTE: render_calendar_sync_ui déplacé vers src/modules/planning/calendar_sync_ui.py
+NOTE: afficher_calendar_sync_ui déplacé vers src/modules/planning/calendar_sync_ui.py
 """
 
 from .generateur import ICalGenerator

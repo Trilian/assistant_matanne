@@ -6,13 +6,13 @@ Affiche et gère les notifications d'alerte.
 import streamlit as st
 
 from src.services.core.notifications import obtenir_service_notifications_inventaire
-from src.services.inventaire import get_inventaire_service
+from src.services.inventaire import obtenir_service_inventaire
 
 # Alias pour rétrocompatibilité
 obtenir_service_notifications = obtenir_service_notifications_inventaire
 
 
-def render_notifications_widget():
+def afficher_notifications_widget():
     """Widget affichant les notifications actives (à utiliser en sidebar)"""
     service_notifs = obtenir_service_notifications()
     notifs = service_notifs.obtenir_notifications(non_lues_seulement=True)
@@ -73,11 +73,11 @@ def render_notifications_widget():
             st.caption(f"... et {len(moyennes) - 3} autres")
 
 
-def render_notifications():
+def afficher_notifications():
     """Gestion et affichage des notifications d'alerte"""
     st.subheader("🔔 Notifications et Alertes")
 
-    service = get_inventaire_service()
+    service = obtenir_service_inventaire()
     service_notifs = obtenir_service_notifications()
 
     # Onglets
@@ -112,7 +112,7 @@ def render_notifications():
         notifs = service_notifs.obtenir_notifications()
 
         if not notifs:
-            st.info("⏰ Aucune notification pour le moment")
+            etat_vide("Aucune notification pour le moment", "🔔")
         else:
             # Grouper par priorité
             critiques = [n for n in notifs if n.priorite == "haute"]
@@ -262,4 +262,4 @@ def render_notifications():
                 st.error(f"Erreur: {str(e)}")
 
 
-__all__ = ["render_notifications", "render_notifications_widget"]
+__all__ = ["afficher_notifications", "afficher_notifications_widget"]

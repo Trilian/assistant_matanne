@@ -836,20 +836,6 @@ class TestFactory:
         service = obtenir_service_meteo()
         assert isinstance(service, ServiceMeteo)
 
-    def test_get_weather_service(self):
-        """Alias anglais fonctionne."""
-        from src.services.integrations.weather.service import get_weather_service
-
-        service = get_weather_service()
-        assert isinstance(service, ServiceMeteo)
-
-    def test_get_weather_garden_service(self):
-        """Alias rétrocompatibilité fonctionne."""
-        from src.services.integrations.weather.service import get_weather_garden_service
-
-        service = get_weather_garden_service()
-        assert isinstance(service, ServiceMeteo)
-
 
 # ═══════════════════════════════════════════════════════════
 # TESTS ALIAS

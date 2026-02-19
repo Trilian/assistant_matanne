@@ -9,7 +9,7 @@ import streamlit as st
 from src.core.state import GestionnaireEtat
 
 
-def render_header():
+def afficher_header():
     """Affiche l'en-tête principal."""
     aujourdhui = date.today()
     jours = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
@@ -41,7 +41,7 @@ def render_header():
     )
 
 
-def render_taches(taches: list[dict], charge: dict):
+def afficher_taches(taches: list[dict], charge: dict):
     """Affiche la section des tâches du jour."""
     niveau_class = f"charge-{charge['niveau']}"
     jauge_class = f"jauge-{charge['niveau']}"
@@ -98,7 +98,7 @@ def render_taches(taches: list[dict], charge: dict):
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-def render_alertes(alertes: list[dict]):
+def afficher_alertes(alertes: list[dict]):
     """Affiche les alertes actives."""
     if not alertes:
         return
@@ -121,7 +121,7 @@ def render_alertes(alertes: list[dict]):
         )
 
 
-def render_modules(stats: dict):
+def afficher_modules(stats: dict):
     """Affiche la navigation vers les modules."""
     st.markdown("#### 📂 Modules")
 
@@ -192,7 +192,7 @@ def render_modules(stats: dict):
         )
 
 
-def render_stats_mois(stats: dict):
+def afficher_stats_mois(stats: dict):
     """Affiche les mini stats du mois."""
     heures = stats.get("temps_mois_heures", 0)
 

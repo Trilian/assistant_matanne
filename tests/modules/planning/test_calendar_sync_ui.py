@@ -10,7 +10,7 @@ import pytest
 
 
 class TestRenderCalendarSyncUI:
-    """Tests pour render_calendar_sync_ui()"""
+    """Tests pour afficher_calendar_sync_ui()"""
 
     @pytest.fixture
     def mock_st(self):
@@ -40,9 +40,9 @@ class TestRenderCalendarSyncUI:
         with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID=None)
 
-            from src.modules.planning.calendar_sync_ui import render_calendar_sync_ui
+            from src.modules.planning.calendar_sync_ui import afficher_calendar_sync_ui
 
-            render_calendar_sync_ui()
+            afficher_calendar_sync_ui()
 
             mock_st.subheader.assert_called_once()
             assert "Synchronisation" in mock_st.subheader.call_args[0][0]
@@ -52,9 +52,9 @@ class TestRenderCalendarSyncUI:
         with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID=None)
 
-            from src.modules.planning.calendar_sync_ui import render_calendar_sync_ui
+            from src.modules.planning.calendar_sync_ui import afficher_calendar_sync_ui
 
-            render_calendar_sync_ui()
+            afficher_calendar_sync_ui()
 
             mock_st.tabs.assert_called_once()
             args = mock_st.tabs.call_args[0][0]
@@ -62,7 +62,7 @@ class TestRenderCalendarSyncUI:
 
 
 class TestRenderExportTab:
-    """Tests pour _render_export_tab()"""
+    """Tests pour _afficher_export_tab()"""
 
     @pytest.fixture
     def mock_st(self):
@@ -81,9 +81,9 @@ class TestRenderExportTab:
 
     def test_affiche_titre_export(self, mock_st, mock_service):
         """Vérifie le titre de l'onglet export"""
-        from src.modules.planning.calendar_sync_ui import _render_export_tab
+        from src.modules.planning.calendar_sync_ui import _afficher_export_tab
 
-        _render_export_tab(mock_service)
+        _afficher_export_tab(mock_service)
 
         mock_st.markdown.assert_called()
         calls = [str(call) for call in mock_st.markdown.call_args_list]
@@ -91,35 +91,35 @@ class TestRenderExportTab:
 
     def test_affiche_checkbox_repas(self, mock_st, mock_service):
         """Vérifie la checkbox pour les repas"""
-        from src.modules.planning.calendar_sync_ui import _render_export_tab
+        from src.modules.planning.calendar_sync_ui import _afficher_export_tab
 
-        _render_export_tab(mock_service)
+        _afficher_export_tab(mock_service)
 
         calls = [str(call) for call in mock_st.checkbox.call_args_list]
         assert any("repas" in str(call).lower() for call in calls)
 
     def test_affiche_checkbox_activites(self, mock_st, mock_service):
         """Vérifie la checkbox pour les activités"""
-        from src.modules.planning.calendar_sync_ui import _render_export_tab
+        from src.modules.planning.calendar_sync_ui import _afficher_export_tab
 
-        _render_export_tab(mock_service)
+        _afficher_export_tab(mock_service)
 
         calls = [str(call) for call in mock_st.checkbox.call_args_list]
         assert any("activit" in str(call).lower() for call in calls)
 
     def test_affiche_slider_periode(self, mock_st, mock_service):
         """Vérifie le slider de période"""
-        from src.modules.planning.calendar_sync_ui import _render_export_tab
+        from src.modules.planning.calendar_sync_ui import _afficher_export_tab
 
-        _render_export_tab(mock_service)
+        _afficher_export_tab(mock_service)
 
         mock_st.slider.assert_called()
 
     def test_bouton_generer(self, mock_st, mock_service):
         """Vérifie le bouton de génération"""
-        from src.modules.planning.calendar_sync_ui import _render_export_tab
+        from src.modules.planning.calendar_sync_ui import _afficher_export_tab
 
-        _render_export_tab(mock_service)
+        _afficher_export_tab(mock_service)
 
         mock_st.button.assert_called()
 
@@ -133,9 +133,9 @@ class TestRenderExportTab:
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user
 
-            from src.modules.planning.calendar_sync_ui import _render_export_tab
+            from src.modules.planning.calendar_sync_ui import _afficher_export_tab
 
-            _render_export_tab(mock_service)
+            _afficher_export_tab(mock_service)
 
             mock_service.export_to_ical.assert_called()
 
@@ -149,15 +149,15 @@ class TestRenderExportTab:
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user
 
-            from src.modules.planning.calendar_sync_ui import _render_export_tab
+            from src.modules.planning.calendar_sync_ui import _afficher_export_tab
 
-            _render_export_tab(mock_service)
+            _afficher_export_tab(mock_service)
 
             mock_st.download_button.assert_called()
 
 
 class TestRenderImportTab:
-    """Tests pour _render_import_tab()"""
+    """Tests pour _afficher_import_tab()"""
 
     @pytest.fixture
     def mock_st(self):
@@ -174,26 +174,26 @@ class TestRenderImportTab:
 
     def test_affiche_titre_import(self, mock_st, mock_service):
         """Vérifie le titre de l'onglet import"""
-        from src.modules.planning.calendar_sync_ui import _render_import_tab
+        from src.modules.planning.calendar_sync_ui import _afficher_import_tab
 
-        _render_import_tab(mock_service)
+        _afficher_import_tab(mock_service)
 
         mock_st.markdown.assert_called()
 
     def test_affiche_input_url(self, mock_st, mock_service):
         """Vérifie l'input URL"""
-        from src.modules.planning.calendar_sync_ui import _render_import_tab
+        from src.modules.planning.calendar_sync_ui import _afficher_import_tab
 
-        _render_import_tab(mock_service)
+        _afficher_import_tab(mock_service)
 
         calls = [str(call) for call in mock_st.text_input.call_args_list]
         assert any("URL" in str(call) for call in calls)
 
     def test_affiche_input_nom(self, mock_st, mock_service):
         """Vérifie l'input nom du calendrier"""
-        from src.modules.planning.calendar_sync_ui import _render_import_tab
+        from src.modules.planning.calendar_sync_ui import _afficher_import_tab
 
-        _render_import_tab(mock_service)
+        _afficher_import_tab(mock_service)
 
         calls = [str(call) for call in mock_st.text_input.call_args_list]
         assert any("Nom" in str(call) or "calendrier" in str(call).lower() for call in calls)
@@ -216,9 +216,9 @@ class TestRenderImportTab:
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user
 
-            from src.modules.planning.calendar_sync_ui import _render_import_tab
+            from src.modules.planning.calendar_sync_ui import _afficher_import_tab
 
-            _render_import_tab(mock_service)
+            _afficher_import_tab(mock_service)
 
             mock_service.import_from_ical_url.assert_called()
 
@@ -240,9 +240,9 @@ class TestRenderImportTab:
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user
 
-            from src.modules.planning.calendar_sync_ui import _render_import_tab
+            from src.modules.planning.calendar_sync_ui import _afficher_import_tab
 
-            _render_import_tab(mock_service)
+            _afficher_import_tab(mock_service)
 
             mock_st.success.assert_called()
 
@@ -264,15 +264,15 @@ class TestRenderImportTab:
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user
 
-            from src.modules.planning.calendar_sync_ui import _render_import_tab
+            from src.modules.planning.calendar_sync_ui import _afficher_import_tab
 
-            _render_import_tab(mock_service)
+            _afficher_import_tab(mock_service)
 
             mock_st.error.assert_called()
 
 
 class TestRenderConnectTab:
-    """Tests pour _render_connect_tab()"""
+    """Tests pour _afficher_connect_tab()"""
 
     @pytest.fixture
     def mock_st(self):
@@ -291,9 +291,9 @@ class TestRenderConnectTab:
         with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID=None)
 
-            from src.modules.planning.calendar_sync_ui import _render_connect_tab
+            from src.modules.planning.calendar_sync_ui import _afficher_connect_tab
 
-            _render_connect_tab(mock_service)
+            _afficher_connect_tab(mock_service)
 
             mock_st.markdown.assert_called()
 
@@ -302,9 +302,9 @@ class TestRenderConnectTab:
         with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID=None)
 
-            from src.modules.planning.calendar_sync_ui import _render_connect_tab
+            from src.modules.planning.calendar_sync_ui import _afficher_connect_tab
 
-            _render_connect_tab(mock_service)
+            _afficher_connect_tab(mock_service)
 
             mock_st.warning.assert_called()
 
@@ -313,9 +313,9 @@ class TestRenderConnectTab:
         with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID="client_id_123")
 
-            from src.modules.planning.calendar_sync_ui import _render_connect_tab
+            from src.modules.planning.calendar_sync_ui import _afficher_connect_tab
 
-            _render_connect_tab(mock_service)
+            _afficher_connect_tab(mock_service)
 
             calls = [str(call) for call in mock_st.button.call_args_list]
             assert any("Google" in str(call) for call in calls)
@@ -328,9 +328,9 @@ class TestRenderConnectTab:
         with patch("src.core.config.obtenir_parametres") as mock_params:
             mock_params.return_value = MagicMock(GOOGLE_CLIENT_ID="client_id_123")
 
-            from src.modules.planning.calendar_sync_ui import _render_connect_tab
+            from src.modules.planning.calendar_sync_ui import _afficher_connect_tab
 
-            _render_connect_tab(mock_service)
+            _afficher_connect_tab(mock_service)
 
             mock_service.get_google_auth_url.assert_called()
 
@@ -340,6 +340,6 @@ class TestCalendarSyncUIExports:
 
     def test_import_render_calendar_sync_ui(self):
         """Vérifie l'import"""
-        from src.modules.planning.calendar_sync_ui import render_calendar_sync_ui
+        from src.modules.planning.calendar_sync_ui import afficher_calendar_sync_ui
 
-        assert callable(render_calendar_sync_ui)
+        assert callable(afficher_calendar_sync_ui)

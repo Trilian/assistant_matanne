@@ -50,11 +50,11 @@ class TestDepensesApp:
     def mock_components(self):
         """Mock des composants UI"""
         with (
-            patch("src.modules.maison.depenses.render_stats_dashboard") as mock_stats,
-            patch("src.modules.maison.depenses.render_onglet_mois") as mock_mois,
-            patch("src.modules.maison.depenses.render_onglet_ajouter") as mock_ajouter,
-            patch("src.modules.maison.depenses.render_onglet_analyse") as mock_analyse,
-            patch("src.modules.maison.depenses.render_formulaire") as mock_formulaire,
+            patch("src.modules.maison.depenses.afficher_stats_dashboard") as mock_stats,
+            patch("src.modules.maison.depenses.afficher_onglet_mois") as mock_mois,
+            patch("src.modules.maison.depenses.afficher_onglet_ajouter") as mock_ajouter,
+            patch("src.modules.maison.depenses.afficher_onglet_analyse") as mock_analyse,
+            patch("src.modules.maison.depenses.afficher_formulaire") as mock_formulaire,
         ):
             yield {
                 "stats": mock_stats,
@@ -99,7 +99,7 @@ class TestDepensesApp:
 
         with (
             patch("src.modules.maison.depenses.get_depense_by_id") as mock_get,
-            patch("src.modules.maison.depenses.render_formulaire"),
+            patch("src.modules.maison.depenses.afficher_formulaire"),
             patch("src.modules.maison.depenses.CATEGORY_LABELS", {"electricite": "Électricité"}),
         ):
             mock_get.return_value = mock_depense
@@ -175,24 +175,24 @@ class TestDepensesExports:
     def test_exports_ui(self):
         """Vérifie que les composants UI sont exportés"""
         from src.modules.maison.depenses import (
-            render_comparaison_mois,
-            render_depense_card,
-            render_formulaire,
-            render_graphique_evolution,
-            render_onglet_ajouter,
-            render_onglet_analyse,
-            render_onglet_mois,
-            render_stats_dashboard,
+            afficher_comparaison_mois,
+            afficher_depense_card,
+            afficher_formulaire,
+            afficher_graphique_evolution,
+            afficher_onglet_ajouter,
+            afficher_onglet_analyse,
+            afficher_onglet_mois,
+            afficher_stats_dashboard,
         )
 
-        assert callable(render_comparaison_mois)
-        assert callable(render_depense_card)
-        assert callable(render_formulaire)
-        assert callable(render_graphique_evolution)
-        assert callable(render_onglet_ajouter)
-        assert callable(render_onglet_analyse)
-        assert callable(render_onglet_mois)
-        assert callable(render_stats_dashboard)
+        assert callable(afficher_comparaison_mois)
+        assert callable(afficher_depense_card)
+        assert callable(afficher_formulaire)
+        assert callable(afficher_graphique_evolution)
+        assert callable(afficher_onglet_ajouter)
+        assert callable(afficher_onglet_analyse)
+        assert callable(afficher_onglet_mois)
+        assert callable(afficher_stats_dashboard)
 
     def test_all_contains_expected(self):
         """Vérifie le contenu de __all__"""
@@ -200,4 +200,4 @@ class TestDepensesExports:
 
         assert "app" in __all__
         assert "get_depenses_mois" in __all__
-        assert "render_stats_dashboard" in __all__
+        assert "afficher_stats_dashboard" in __all__

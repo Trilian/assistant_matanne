@@ -62,24 +62,24 @@ def setup_mock_st(mock_st, session_state=None):
 
 class TestImports:
     def test_import_render_generer_ia(self):
-        from src.modules.cuisine.recettes.generation_ia import render_generer_ia
+        from src.modules.cuisine.recettes.generation_ia import afficher_generer_ia
 
-        assert callable(render_generer_ia)
+        assert callable(afficher_generer_ia)
 
     def test_import_render_recherche_specifique(self):
-        from src.modules.cuisine.recettes.generation_ia import _render_recherche_specifique
+        from src.modules.cuisine.recettes.generation_ia import _afficher_recherche_specifique
 
-        assert callable(_render_recherche_specifique)
+        assert callable(_afficher_recherche_specifique)
 
     def test_import_render_mode_personnalise(self):
-        from src.modules.cuisine.recettes.generation_ia import _render_mode_personnalise
+        from src.modules.cuisine.recettes.generation_ia import _afficher_mode_personnalise
 
-        assert callable(_render_mode_personnalise)
+        assert callable(_afficher_mode_personnalise)
 
     def test_import_render_suggestion_card(self):
-        from src.modules.cuisine.recettes.generation_ia import _render_suggestion_card
+        from src.modules.cuisine.recettes.generation_ia import _afficher_suggestion_card
 
-        assert callable(_render_suggestion_card)
+        assert callable(_afficher_suggestion_card)
 
 
 class TestRenderGenererIa:
@@ -88,9 +88,9 @@ class TestRenderGenererIa:
     def test_render_generer_ia_service_none(self, mock_get_service, mock_st):
         setup_mock_st(mock_st)
         mock_get_service.return_value = None
-        from src.modules.cuisine.recettes.generation_ia import render_generer_ia
+        from src.modules.cuisine.recettes.generation_ia import afficher_generer_ia
 
-        render_generer_ia()
+        afficher_generer_ia()
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
@@ -99,9 +99,9 @@ class TestRenderGenererIa:
         setup_mock_st(mock_st)
         mock_st.radio.return_value = "Personnalise"
         mock_get_service.return_value = MagicMock()
-        from src.modules.cuisine.recettes.generation_ia import render_generer_ia
+        from src.modules.cuisine.recettes.generation_ia import afficher_generer_ia
 
-        render_generer_ia()
+        afficher_generer_ia()
         mock_st.radio.assert_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
@@ -110,9 +110,9 @@ class TestRenderGenererIa:
         setup_mock_st(mock_st)
         mock_st.radio.return_value = "Recherche specifique"
         mock_get_service.return_value = MagicMock()
-        from src.modules.cuisine.recettes.generation_ia import render_generer_ia
+        from src.modules.cuisine.recettes.generation_ia import afficher_generer_ia
 
-        render_generer_ia()
+        afficher_generer_ia()
         mock_st.radio.assert_called()
 
 
@@ -120,9 +120,9 @@ class TestRenderRechercheSpecifique:
     @patch("src.modules.cuisine.recettes.generation_ia.st")
     def test_render_recherche_specifique_basic(self, mock_st):
         setup_mock_st(mock_st)
-        from src.modules.cuisine.recettes.generation_ia import _render_recherche_specifique
+        from src.modules.cuisine.recettes.generation_ia import _afficher_recherche_specifique
 
-        _render_recherche_specifique(MagicMock())
+        _afficher_recherche_specifique(MagicMock())
         mock_st.info.assert_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
@@ -131,9 +131,9 @@ class TestRenderRechercheSpecifique:
         mock_st.form_submit_button.return_value = True
         mock_st.text_input.return_value = ""
         mock_service = MagicMock()
-        from src.modules.cuisine.recettes.generation_ia import _render_recherche_specifique
+        from src.modules.cuisine.recettes.generation_ia import _afficher_recherche_specifique
 
-        _render_recherche_specifique(mock_service)
+        _afficher_recherche_specifique(mock_service)
         mock_service.generer_variantes_recette_ia.assert_not_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
@@ -153,9 +153,9 @@ class TestRenderRechercheSpecifique:
             etapes=[],
         )
         mock_service.generer_variantes_recette_ia.return_value = [mock_sug]
-        from src.modules.cuisine.recettes.generation_ia import _render_recherche_specifique
+        from src.modules.cuisine.recettes.generation_ia import _afficher_recherche_specifique
 
-        _render_recherche_specifique(mock_service)
+        _afficher_recherche_specifique(mock_service)
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
@@ -165,9 +165,9 @@ class TestRenderRechercheSpecifique:
         mock_st.text_input.return_value = "Recette rare"
         mock_service = MagicMock()
         mock_service.generer_variantes_recette_ia.return_value = []
-        from src.modules.cuisine.recettes.generation_ia import _render_recherche_specifique
+        from src.modules.cuisine.recettes.generation_ia import _afficher_recherche_specifique
 
-        _render_recherche_specifique(mock_service)
+        _afficher_recherche_specifique(mock_service)
         mock_st.warning.assert_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
@@ -177,9 +177,9 @@ class TestRenderRechercheSpecifique:
         mock_st.text_input.return_value = "Pates"
         mock_service = MagicMock()
         mock_service.generer_variantes_recette_ia.side_effect = Exception("Erreur")
-        from src.modules.cuisine.recettes.generation_ia import _render_recherche_specifique
+        from src.modules.cuisine.recettes.generation_ia import _afficher_recherche_specifique
 
-        _render_recherche_specifique(mock_service)
+        _afficher_recherche_specifique(mock_service)
         mock_st.error.assert_called()
 
 
@@ -187,9 +187,9 @@ class TestRenderModePersonnalise:
     @patch("src.modules.cuisine.recettes.generation_ia.st")
     def test_render_mode_personnalise_basic(self, mock_st):
         setup_mock_st(mock_st)
-        from src.modules.cuisine.recettes.generation_ia import _render_mode_personnalise
+        from src.modules.cuisine.recettes.generation_ia import _afficher_mode_personnalise
 
-        _render_mode_personnalise(MagicMock())
+        _afficher_mode_personnalise(MagicMock())
         mock_st.info.assert_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
@@ -198,9 +198,9 @@ class TestRenderModePersonnalise:
         mock_st.form_submit_button.return_value = True
         mock_st.selectbox.return_value = ""
         mock_service = MagicMock()
-        from src.modules.cuisine.recettes.generation_ia import _render_mode_personnalise
+        from src.modules.cuisine.recettes.generation_ia import _afficher_mode_personnalise
 
-        _render_mode_personnalise(mock_service)
+        _afficher_mode_personnalise(mock_service)
         mock_service.generer_recettes_ia.assert_not_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
@@ -220,9 +220,9 @@ class TestRenderModePersonnalise:
             etapes=[],
         )
         mock_service.generer_recettes_ia.return_value = [mock_sug]
-        from src.modules.cuisine.recettes.generation_ia import _render_mode_personnalise
+        from src.modules.cuisine.recettes.generation_ia import _afficher_mode_personnalise
 
-        _render_mode_personnalise(mock_service)
+        _afficher_mode_personnalise(mock_service)
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
@@ -233,9 +233,9 @@ class TestRenderModePersonnalise:
         mock_st.text_area.return_value = "tomate, oignon, ail"
         mock_service = MagicMock()
         mock_service.generer_recettes_ia.return_value = []
-        from src.modules.cuisine.recettes.generation_ia import _render_mode_personnalise
+        from src.modules.cuisine.recettes.generation_ia import _afficher_mode_personnalise
 
-        _render_mode_personnalise(mock_service)
+        _afficher_mode_personnalise(mock_service)
         call_args = mock_service.generer_recettes_ia.call_args
         assert call_args[1].get("ingredients_dispo") == ["tomate", "oignon", "ail"]
 
@@ -246,9 +246,9 @@ class TestRenderModePersonnalise:
         mock_st.selectbox.return_value = "dejeuner"
         mock_service = MagicMock()
         mock_service.generer_recettes_ia.side_effect = Exception("Erreur")
-        from src.modules.cuisine.recettes.generation_ia import _render_mode_personnalise
+        from src.modules.cuisine.recettes.generation_ia import _afficher_mode_personnalise
 
-        _render_mode_personnalise(mock_service)
+        _afficher_mode_personnalise(mock_service)
         mock_st.error.assert_called()
 
 
@@ -266,9 +266,9 @@ class TestRenderSuggestionCard:
             ingredients=[],
             etapes=[],
         )
-        from src.modules.cuisine.recettes.generation_ia import _render_suggestion_card
+        from src.modules.cuisine.recettes.generation_ia import _afficher_suggestion_card
 
-        _render_suggestion_card(mock_sug, 1, MagicMock())
+        _afficher_suggestion_card(mock_sug, 1, MagicMock())
         mock_st.container.assert_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
@@ -284,9 +284,9 @@ class TestRenderSuggestionCard:
             ingredients=[],
             etapes=[],
         )
-        from src.modules.cuisine.recettes.generation_ia import _render_suggestion_card
+        from src.modules.cuisine.recettes.generation_ia import _afficher_suggestion_card
 
-        _render_suggestion_card(mock_sug, 2, MagicMock(), is_variant=True)
+        _afficher_suggestion_card(mock_sug, 2, MagicMock(), is_variant=True)
         mock_st.container.assert_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
@@ -302,9 +302,9 @@ class TestRenderSuggestionCard:
             ingredients=[{"nom": "farine", "quantite": 250, "unite": "g"}],
             etapes=[],
         )
-        from src.modules.cuisine.recettes.generation_ia import _render_suggestion_card
+        from src.modules.cuisine.recettes.generation_ia import _afficher_suggestion_card
 
-        _render_suggestion_card(mock_sug, 1, MagicMock())
+        _afficher_suggestion_card(mock_sug, 1, MagicMock())
         mock_st.markdown.assert_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
@@ -320,9 +320,9 @@ class TestRenderSuggestionCard:
             ingredients=[],
             etapes=["Etape 1", "Etape 2"],
         )
-        from src.modules.cuisine.recettes.generation_ia import _render_suggestion_card
+        from src.modules.cuisine.recettes.generation_ia import _afficher_suggestion_card
 
-        _render_suggestion_card(mock_sug, 1, MagicMock())
+        _afficher_suggestion_card(mock_sug, 1, MagicMock())
         mock_st.expander.assert_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
@@ -338,9 +338,9 @@ class TestRenderSuggestionCard:
             ingredients=[],
             etapes=[],
         )
-        from src.modules.cuisine.recettes.generation_ia import _render_suggestion_card
+        from src.modules.cuisine.recettes.generation_ia import _afficher_suggestion_card
 
-        _render_suggestion_card(mock_sug, 1, MagicMock())
+        _afficher_suggestion_card(mock_sug, 1, MagicMock())
         mock_st.button.assert_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
@@ -356,7 +356,7 @@ class TestRenderSuggestionCard:
             ingredients=None,
             etapes=None,
         )
-        from src.modules.cuisine.recettes.generation_ia import _render_suggestion_card
+        from src.modules.cuisine.recettes.generation_ia import _afficher_suggestion_card
 
-        _render_suggestion_card(mock_sug, 1, MagicMock(), type_repas="dejeuner", saison="ete")
+        _afficher_suggestion_card(mock_sug, 1, MagicMock(), type_repas="dejeuner", saison="ete")
         mock_st.container.assert_called()

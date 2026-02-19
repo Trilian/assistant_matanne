@@ -5,14 +5,14 @@ Affiche les articles en alerte avec actions rapides.
 
 import streamlit as st
 
-from src.services.inventaire import get_inventaire_service
+from src.services.inventaire import obtenir_service_inventaire
 
 from .utils import _prepare_alert_dataframe
 
 
-def render_alertes():
+def afficher_alertes():
     """Affiche les articles en alerte avec actions rapides"""
-    service = get_inventaire_service()
+    service = obtenir_service_inventaire()
 
     if service is None:
         st.error("❌ Service inventaire indisponible")
@@ -51,4 +51,4 @@ def render_alertes():
         st.error(f"❌ Erreur: {str(e)}")
 
 
-__all__ = ["render_alertes"]
+__all__ = ["afficher_alertes"]

@@ -11,7 +11,7 @@ from .preferences import (
 )
 
 
-def render_configuration_preferences():
+def afficher_configuration_preferences():
     """Affiche le formulaire de configuration des préférences."""
 
     prefs = charger_preferences()
@@ -105,7 +105,7 @@ def render_configuration_preferences():
             st.rerun()
 
 
-def render_apprentissage_ia():
+def afficher_apprentissage_ia():
     """Affiche ce que l'IA a appris des goûts."""
 
     feedbacks = charger_feedbacks()
@@ -138,7 +138,7 @@ def render_apprentissage_ia():
             st.caption("Pas encore de données")
 
 
-def render_carte_recette_suggestion(
+def afficher_carte_recette_suggestion(
     suggestion: dict,
     jour: str,
     type_repas: str,
@@ -198,7 +198,7 @@ def render_carte_recette_suggestion(
                 st.rerun()
 
 
-def render_jour_planning(
+def afficher_jour_planning(
     jour: str,
     jour_date: date,
     repas_jour: dict,
@@ -211,7 +211,7 @@ def render_jour_planning(
         st.markdown("##### 🌞 Midi")
         midi = repas_jour.get("midi")
         if midi:
-            render_carte_recette_suggestion(midi, jour, "midi", f"{key_prefix}_midi")
+            afficher_carte_recette_suggestion(midi, jour, "midi", f"{key_prefix}_midi")
         else:
             st.info("Pas encore planifié")
             if st.button("➕ Ajouter midi", key=f"{key_prefix}_add_midi"):
@@ -223,7 +223,7 @@ def render_jour_planning(
         st.markdown("##### 🌙 Soir")
         soir = repas_jour.get("soir")
         if soir:
-            render_carte_recette_suggestion(soir, jour, "soir", f"{key_prefix}_soir")
+            afficher_carte_recette_suggestion(soir, jour, "soir", f"{key_prefix}_soir")
         else:
             st.info("Pas encore planifié")
             if st.button("➕ Ajouter soir", key=f"{key_prefix}_add_soir"):
@@ -234,10 +234,10 @@ def render_jour_planning(
         if gouter:
             st.divider()
             st.markdown("##### 🍰 Goûter")
-            render_carte_recette_suggestion(gouter, jour, "gouter", f"{key_prefix}_gouter")
+            afficher_carte_recette_suggestion(gouter, jour, "gouter", f"{key_prefix}_gouter")
 
 
-def render_resume_equilibre(planning_data: dict):
+def afficher_resume_equilibre(planning_data: dict):
     """Affiche le résumé de l'équilibre nutritionnel."""
 
     # Compter les types de protéines

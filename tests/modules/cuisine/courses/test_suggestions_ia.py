@@ -24,21 +24,21 @@ class MockSessionState(dict):
 
 
 class TestRenderSuggestionsIA:
-    """Tests pour render_suggestions_ia()."""
+    """Tests pour afficher_suggestions_ia()."""
 
     def test_import(self):
         """Test import réussi."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
-        assert render_suggestions_ia is not None
+        assert afficher_suggestions_ia is not None
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     def test_render_tabs(self, mock_st, mock_courses, mock_inv, mock_recettes):
         """Test affichage des onglets."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         mock_courses.return_value = MagicMock()
         mock_inv.return_value = MagicMock()
@@ -54,18 +54,18 @@ class TestRenderSuggestionsIA:
         mock_st.button.return_value = False
         mock_recettes.return_value.get_all.return_value = []
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         mock_st.subheader.assert_called()
         mock_st.tabs.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     def test_render_inventaire_no_suggestions(self, mock_st, mock_courses, mock_inv, mock_recettes):
         """Test inventaire sans suggestions."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         svc = MagicMock()
         svc.generer_suggestions_ia_depuis_inventaire.return_value = []
@@ -83,20 +83,20 @@ class TestRenderSuggestionsIA:
         mock_st.spinner.return_value.__exit__ = MagicMock(return_value=False)
         mock_recettes.return_value.get_all.return_value = []
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         mock_st.info.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     @patch("src.modules.cuisine.courses.suggestions_ia.pd")
     def test_render_inventaire_with_suggestions(
         self, mock_pd, mock_st, mock_courses, mock_inv, mock_recettes
     ):
         """Test inventaire avec suggestions."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         suggestion = MagicMock()
         suggestion.nom = "Lait"
@@ -125,15 +125,15 @@ class TestRenderSuggestionsIA:
 
         mock_recettes.return_value.get_all.return_value = []
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         mock_st.success.assert_called()
         mock_st.dataframe.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     @patch("src.modules.cuisine.courses.suggestions_ia.pd")
     @patch("src.modules.cuisine.courses.suggestions_ia.time")
@@ -141,7 +141,7 @@ class TestRenderSuggestionsIA:
         self, mock_time, mock_pd, mock_st, mock_courses, mock_inv, mock_recettes, mock_db
     ):
         """Test ajout toutes suggestions."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         suggestion = MagicMock()
         suggestion.nom = "Pain"
@@ -175,7 +175,7 @@ class TestRenderSuggestionsIA:
 
         mock_recettes.return_value.get_all.return_value = []
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         # Verify the service was used correctly
         svc.generer_suggestions_ia_depuis_inventaire.assert_called()
@@ -183,8 +183,8 @@ class TestRenderSuggestionsIA:
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     @patch("src.modules.cuisine.courses.suggestions_ia.pd")
     @patch("src.modules.cuisine.courses.suggestions_ia.time")
@@ -192,7 +192,7 @@ class TestRenderSuggestionsIA:
         self, mock_time, mock_pd, mock_st, mock_courses, mock_inv, mock_recettes, mock_db
     ):
         """Test ajout nouvel ingrédient."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         suggestion = MagicMock()
         suggestion.nom = "Nouveau"
@@ -223,19 +223,19 @@ class TestRenderSuggestionsIA:
 
         mock_recettes.return_value.get_all.return_value = []
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         # Verify suggestions were generated
         svc.generer_suggestions_ia_depuis_inventaire.assert_called()
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     def test_render_inventaire_exception(self, mock_st, mock_courses, mock_inv, mock_recettes):
         """Test gestion exception inventaire."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         svc = MagicMock()
         svc.generer_suggestions_ia_depuis_inventaire.side_effect = Exception("IA Error")
@@ -253,19 +253,19 @@ class TestRenderSuggestionsIA:
         mock_st.spinner.return_value.__exit__ = MagicMock(return_value=False)
         mock_recettes.return_value.get_all.return_value = []
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     def test_render_recettes_service_unavailable(
         self, mock_st, mock_courses, mock_inv, mock_recettes
     ):
         """Test service recettes indisponible."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         mock_courses.return_value = MagicMock()
         mock_inv.return_value = MagicMock()
@@ -280,17 +280,17 @@ class TestRenderSuggestionsIA:
 
         mock_st.button.return_value = False
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         mock_st.warning.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     def test_render_recettes_empty(self, mock_st, mock_courses, mock_inv, mock_recettes):
         """Test aucune recette disponible."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         mock_courses.return_value = MagicMock()
         mock_inv.return_value = MagicMock()
@@ -307,17 +307,17 @@ class TestRenderSuggestionsIA:
 
         mock_st.button.return_value = False
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         mock_st.info.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     def test_render_recettes_with_data(self, mock_st, mock_courses, mock_inv, mock_recettes):
         """Test avec recettes disponibles."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         mock_courses.return_value = MagicMock()
         mock_inv.return_value = MagicMock()
@@ -341,20 +341,20 @@ class TestRenderSuggestionsIA:
         mock_st.button.return_value = False
         mock_st.selectbox.return_value = 1
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         mock_st.selectbox.assert_called()
 
     @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     def test_render_add_ingredients_from_recette(
         self, mock_st, mock_courses, mock_inv, mock_recettes, mock_db
     ):
         """Test ajout ingrédients depuis recette."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         courses_svc = MagicMock()
         mock_courses.return_value = courses_svc
@@ -394,18 +394,18 @@ class TestRenderSuggestionsIA:
         mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_db.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         courses_svc.create.assert_called()
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     def test_render_recette_no_ingredients(self, mock_st, mock_courses, mock_inv, mock_recettes):
         """Test recette sans ingrédients."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         mock_courses.return_value = MagicMock()
         mock_inv.return_value = MagicMock()
@@ -431,20 +431,20 @@ class TestRenderSuggestionsIA:
         mock_st.selectbox.return_value = 1
         mock_st.session_state = MockSessionState({})
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         mock_st.warning.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     @patch("src.modules.cuisine.courses.suggestions_ia.logger")
     def test_render_recettes_exception(
         self, mock_logger, mock_st, mock_courses, mock_inv, mock_recettes
     ):
         """Test exception onglet recettes."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         mock_courses.return_value = MagicMock()
         mock_inv.return_value = MagicMock()
@@ -459,22 +459,22 @@ class TestRenderSuggestionsIA:
 
         mock_st.button.return_value = False
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         mock_st.error.assert_called()
         mock_logger.error.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     @patch("src.modules.cuisine.courses.suggestions_ia.logger")
     def test_render_add_ingredients_error(
         self, mock_logger, mock_st, mock_courses, mock_inv, mock_recettes, mock_db
     ):
         """Test erreur ajout ingrédients."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         mock_courses.return_value = MagicMock()
         mock_inv.return_value = MagicMock()
@@ -508,22 +508,22 @@ class TestRenderSuggestionsIA:
         mock_db.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
         mock_db.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         mock_st.error.assert_called()
         mock_logger.error.assert_called()
 
     @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     @patch("src.modules.cuisine.courses.suggestions_ia.time")
     def test_render_ingredient_direct_nom_attribute(
         self, mock_time, mock_st, mock_courses, mock_inv, mock_recettes, mock_db
     ):
         """Test ingrédient avec nom direct (sans .ingredient)."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         courses_svc = MagicMock()
         mock_courses.return_value = courses_svc
@@ -562,22 +562,22 @@ class TestRenderSuggestionsIA:
         mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_db.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         courses_svc.create.assert_called()
         mock_st.success.assert_called()
 
     @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     @patch("src.modules.cuisine.courses.suggestions_ia.time")
     def test_render_ingredient_nom_empty_skip(
         self, mock_time, mock_st, mock_courses, mock_inv, mock_recettes, mock_db
     ):
         """Test ingrédient avec nom vide est ignoré."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         courses_svc = MagicMock()
         mock_courses.return_value = courses_svc
@@ -624,7 +624,7 @@ class TestRenderSuggestionsIA:
         mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_db.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         # Seulement un appel pour l'ingrédient valide
         assert courses_svc.create.call_count == 1
@@ -632,15 +632,15 @@ class TestRenderSuggestionsIA:
 
     @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     @patch("src.modules.cuisine.courses.suggestions_ia.time")
     def test_render_create_new_ingredient_from_recette(
         self, mock_time, mock_st, mock_courses, mock_inv, mock_recettes, mock_db
     ):
         """Test création nouvel ingrédient depuis recette."""
-        from src.modules.cuisine.courses.suggestions_ia import render_suggestions_ia
+        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
         courses_svc = MagicMock()
         mock_courses.return_value = courses_svc
@@ -679,7 +679,7 @@ class TestRenderSuggestionsIA:
         mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_db.return_value.__exit__ = MagicMock(return_value=False)
 
-        render_suggestions_ia()
+        afficher_suggestions_ia()
 
         # Vérifier que add et flush ont été appelés pour créer l'ingrédient
         mock_session.add.assert_called()
@@ -694,4 +694,4 @@ class TestSuggestionsIAModule:
         """Test __all__ exports."""
         from src.modules.cuisine.courses import suggestions_ia
 
-        assert "render_suggestions_ia" in suggestions_ia.__all__
+        assert "afficher_suggestions_ia" in suggestions_ia.__all__

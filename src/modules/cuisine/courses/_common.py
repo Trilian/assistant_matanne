@@ -25,12 +25,29 @@ from src.modules.cuisine.courses.utils import (
     trier_par_priorite,
     valider_article,
 )
-from src.services.cuisine.courses import get_courses_intelligentes_service, get_courses_service
+from src.services.cuisine.courses import (
+    obtenir_service_courses,
+    obtenir_service_courses_intelligentes,
+)
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.services.integrations.web import get_realtime_sync_service
-from src.services.inventaire import get_inventaire_service
+from src.services.inventaire import obtenir_service_inventaire
+from src.ui.components.atoms import etat_vide
 
 logger = logging.getLogger(__name__)
+
+
+def get_current_user_id() -> str | None:
+    """Retourne l'ID de l'utilisateur courant ou None si non authentifié."""
+    try:
+        from src.services.core.utilisateur import get_auth_service
+
+        auth = get_auth_service()
+        user = auth.get_current_user()
+        return user.id if user else None
+    except Exception:
+        return None
+
 
 __all__ = [
     "logging",
@@ -38,11 +55,12 @@ __all__ = [
     "pd",
     "datetime",
     "timedelta",
-    "get_courses_service",
-    "get_inventaire_service",
+    "obtenir_service_courses",
+    "obtenir_service_inventaire",
     "obtenir_service_recettes",
     "get_realtime_sync_service",
-    "get_courses_intelligentes_service",
+    "obtenir_service_courses_intelligentes",
+    "get_current_user_id",
     "ErreurValidation",
     "obtenir_contexte_db",
     "PRIORITY_EMOJIS",

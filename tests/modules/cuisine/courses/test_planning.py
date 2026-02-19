@@ -37,19 +37,19 @@ def create_columns_side_effect(*sizes):
 
 
 class TestRenderCoursesDepuisPlanning:
-    """Tests pour render_courses_depuis_planning()."""
+    """Tests pour afficher_courses_depuis_planning()."""
 
     def test_import(self):
         """Test import réussi."""
-        from src.modules.cuisine.courses.planning import render_courses_depuis_planning
+        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
 
-        assert render_courses_depuis_planning is not None
+        assert afficher_courses_depuis_planning is not None
 
-    @patch("src.modules.cuisine.courses.planning.get_courses_intelligentes_service")
+    @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_no_planning(self, mock_st, mock_service):
         """Test sans planning actif."""
-        from src.modules.cuisine.courses.planning import render_courses_depuis_planning
+        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
 
         svc = MagicMock()
         svc.obtenir_planning_actif.return_value = None
@@ -58,15 +58,15 @@ class TestRenderCoursesDepuisPlanning:
         mock_st.button.return_value = False
         mock_st.session_state = MockSessionState({})
 
-        render_courses_depuis_planning()
+        afficher_courses_depuis_planning()
 
         mock_st.warning.assert_called()
 
-    @patch("src.modules.cuisine.courses.planning.get_courses_intelligentes_service")
+    @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_no_planning_navigate(self, mock_st, mock_service):
         """Test navigation vers planning."""
-        from src.modules.cuisine.courses.planning import render_courses_depuis_planning
+        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
 
         svc = MagicMock()
         svc.obtenir_planning_actif.return_value = None
@@ -76,15 +76,15 @@ class TestRenderCoursesDepuisPlanning:
         session_state = MockSessionState({})
         mock_st.session_state = session_state
 
-        render_courses_depuis_planning()
+        afficher_courses_depuis_planning()
 
         assert session_state.get("current_page") == "cuisine.planning_semaine"
 
-    @patch("src.modules.cuisine.courses.planning.get_courses_intelligentes_service")
+    @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_with_planning(self, mock_st, mock_service):
         """Test avec planning actif."""
-        from src.modules.cuisine.courses.planning import render_courses_depuis_planning
+        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Semaine 5"
@@ -100,16 +100,16 @@ class TestRenderCoursesDepuisPlanning:
         mock_st.button.return_value = False
         mock_st.session_state = MockSessionState({})
 
-        render_courses_depuis_planning()
+        afficher_courses_depuis_planning()
 
         mock_st.success.assert_called()
         mock_st.subheader.assert_called()
 
-    @patch("src.modules.cuisine.courses.planning.get_courses_intelligentes_service")
+    @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_generate_list(self, mock_st, mock_service):
         """Test génération liste."""
-        from src.modules.cuisine.courses.planning import render_courses_depuis_planning
+        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -134,15 +134,15 @@ class TestRenderCoursesDepuisPlanning:
         mock_st.spinner.return_value.__exit__ = MagicMock(return_value=False)
         mock_st.session_state = MockSessionState({})
 
-        render_courses_depuis_planning()
+        afficher_courses_depuis_planning()
 
         svc.generer_liste_courses.assert_called()
 
-    @patch("src.modules.cuisine.courses.planning.get_courses_intelligentes_service")
+    @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_with_result_articles(self, mock_st, mock_service):
         """Test affichage résultat avec articles."""
-        from src.modules.cuisine.courses.planning import render_courses_depuis_planning
+        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -178,15 +178,15 @@ class TestRenderCoursesDepuisPlanning:
         mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
         mock_st.checkbox.return_value = True
 
-        render_courses_depuis_planning()
+        afficher_courses_depuis_planning()
 
         mock_st.metric.assert_called()
 
-    @patch("src.modules.cuisine.courses.planning.get_courses_intelligentes_service")
+    @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_add_articles(self, mock_st, mock_service):
         """Test ajout articles à la liste."""
-        from src.modules.cuisine.courses.planning import render_courses_depuis_planning
+        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -227,16 +227,16 @@ class TestRenderCoursesDepuisPlanning:
         mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
         mock_st.checkbox.return_value = True
 
-        render_courses_depuis_planning()
+        afficher_courses_depuis_planning()
 
         svc.ajouter_a_liste_courses.assert_called()
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.courses.planning.get_courses_intelligentes_service")
+    @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_regenerate(self, mock_st, mock_service):
         """Test régénération liste."""
-        from src.modules.cuisine.courses.planning import render_courses_depuis_planning
+        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -275,16 +275,16 @@ class TestRenderCoursesDepuisPlanning:
         mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
         mock_st.checkbox.return_value = True
 
-        render_courses_depuis_planning()
+        afficher_courses_depuis_planning()
 
         # Regenerate was clicked -> session_state key should be deleted (but rerun is mocked)
         mock_st.rerun.assert_called()
 
-    @patch("src.modules.cuisine.courses.planning.get_courses_intelligentes_service")
+    @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_alertes_types(self, mock_st, mock_service):
         """Test différents types d'alertes."""
-        from src.modules.cuisine.courses.planning import render_courses_depuis_planning
+        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -322,16 +322,16 @@ class TestRenderCoursesDepuisPlanning:
         mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
         mock_st.checkbox.return_value = True
 
-        render_courses_depuis_planning()
+        afficher_courses_depuis_planning()
 
         # Les alertes sans emoji spécifique vont en st.info (branche else)
         mock_st.info.assert_called()
 
-    @patch("src.modules.cuisine.courses.planning.get_courses_intelligentes_service")
+    @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_uncheck_article(self, mock_st, mock_service):
         """Test désélection article."""
-        from src.modules.cuisine.courses.planning import render_courses_depuis_planning
+        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -370,17 +370,17 @@ class TestRenderCoursesDepuisPlanning:
         mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
         mock_st.checkbox.return_value = False  # Unchecked
 
-        render_courses_depuis_planning()
+        afficher_courses_depuis_planning()
 
         # Should not add any articles (disabled button)
         # Function is called but since articles_selectionnes is empty, disabled=True
         assert True  # Just check no exception
 
-    @patch("src.modules.cuisine.courses.planning.get_courses_intelligentes_service")
+    @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_instructions(self, mock_st, mock_service):
         """Test affichage instructions."""
-        from src.modules.cuisine.courses.planning import render_courses_depuis_planning
+        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -396,15 +396,15 @@ class TestRenderCoursesDepuisPlanning:
         mock_st.button.return_value = False
         mock_st.session_state = MockSessionState({})  # No result yet
 
-        render_courses_depuis_planning()
+        afficher_courses_depuis_planning()
 
         mock_st.markdown.assert_called()
 
-    @patch("src.modules.cuisine.courses.planning.get_courses_intelligentes_service")
+    @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_multiple_rayons(self, mock_st, mock_service):
         """Test plusieurs rayons."""
-        from src.modules.cuisine.courses.planning import render_courses_depuis_planning
+        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -446,7 +446,7 @@ class TestRenderCoursesDepuisPlanning:
         mock_st.expander.return_value.__exit__ = MagicMock(return_value=False)
         mock_st.checkbox.return_value = True
 
-        render_courses_depuis_planning()
+        afficher_courses_depuis_planning()
 
         # Should create 2 expanders (Cremerie and Boulangerie)
         assert mock_st.expander.call_count >= 2
@@ -459,4 +459,4 @@ class TestPlanningModule:
         """Test __all__ exports."""
         from src.modules.cuisine.courses import planning
 
-        assert "render_courses_depuis_planning" in planning.__all__
+        assert "afficher_courses_depuis_planning" in planning.__all__

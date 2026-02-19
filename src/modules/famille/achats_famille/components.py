@@ -2,6 +2,8 @@
 Module Achats Famille - Composants UI
 """
 
+from src.ui import etat_vide
+
 from .utils import (
     CATEGORIES,
     PRIORITES,
@@ -17,7 +19,7 @@ from .utils import (
 )
 
 
-def render_dashboard():
+def afficher_dashboard():
     """Affiche le dashboard des achats"""
     stats = get_stats()
 
@@ -67,17 +69,17 @@ def render_dashboard():
             else:
                 st.success("✅ Rien d'urgent!")
     except:
-        st.info("Aucun achat urgent")
+        etat_vide("Aucun achat urgent", "💳")
 
 
-def render_liste_groupe(groupe: str, titre: str):
+def afficher_liste_groupe(groupe: str, titre: str):
     """Affiche la liste d'achats d'un groupe"""
     st.subheader(titre)
 
     achats = get_purchases_by_groupe(groupe, achete=False)
 
     if not achats:
-        st.info("Aucun article en attente dans cette categorie")
+        etat_vide("Aucun article en attente", "📦")
         return
 
     # Grouper par priorite
@@ -90,10 +92,10 @@ def render_liste_groupe(groupe: str, titre: str):
         st.markdown(f"**{prio_info['emoji']} {prio_info['label']}**")
 
         for achat in achats_prio:
-            render_achat_card(achat)
+            afficher_achat_card(achat)
 
 
-def render_achat_card(achat: FamilyPurchase):
+def afficher_achat_card(achat: FamilyPurchase):
     """Affiche une card d'achat"""
     cat_info = CATEGORIES.get(achat.categorie, {"emoji": "📦", "label": "Autre"})
 
@@ -131,7 +133,7 @@ def render_achat_card(achat: FamilyPurchase):
                 st.rerun()
 
 
-def render_add_form():
+def afficher_add_form():
     """Formulaire d'ajout d'achat"""
     st.subheader("➕ Ajouter un article")
 
@@ -207,14 +209,14 @@ def render_add_form():
                     st.error(f"Erreur: {e}")
 
 
-def render_historique():
+def afficher_historique():
     """Affiche l'historique des achats"""
     st.subheader("📜 Historique des achats")
 
     achats = get_all_purchases(achete=True)
 
     if not achats:
-        st.info("Aucun achat enregistré")
+        etat_vide("Aucun achat enregistré", "📜")
         return
 
     # Trier par date d'achat (plus récent d'abord)
@@ -247,14 +249,14 @@ def render_historique():
                     st.caption(achat.date_achat.strftime("%d/%m/%Y"))
 
 
-def render_par_magasin():
+def afficher_par_magasin():
     """Vue par magasin pour les courses"""
     st.subheader("🏪 Par magasin")
 
     achats = get_all_purchases(achete=False)
 
     if not achats:
-        st.info("Aucun article en attente")
+        etat_vide("Aucun article en attente", "🏪")
         return
 
     # Grouper par magasin

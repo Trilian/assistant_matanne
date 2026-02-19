@@ -24,6 +24,7 @@ from src.services.jeux import (
     get_scheduler_service,
     get_sync_service,
 )
+from src.ui import etat_vide
 
 logger = logging.getLogger(__name__)
 
@@ -126,7 +127,7 @@ def afficher_series_paris():
         df = df[df["value"] >= SEUIL_VALUE_HAUTE]
 
     if df.empty:
-        st.info("Aucune opportunité détectée avec ce filtre.")
+        etat_vide("Aucune opportunité détectée avec ce filtre", "🔍")
         return
 
     # Trier par value décroissante

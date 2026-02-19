@@ -38,11 +38,11 @@ def setup_mock_st(mock_st: MagicMock, session_data: dict | None = None) -> None:
 class TestBarcodeUI:
     """Tests pour les fonctions UI du module barcode."""
 
-    @patch("src.modules.utilitaires.barcode.render_import_export")
-    @patch("src.modules.utilitaires.barcode.render_gestion_barcodes")
-    @patch("src.modules.utilitaires.barcode.render_verifier_stock")
-    @patch("src.modules.utilitaires.barcode.render_ajout_rapide")
-    @patch("src.modules.utilitaires.barcode.render_scanner")
+    @patch("src.modules.utilitaires.barcode.afficher_import_export")
+    @patch("src.modules.utilitaires.barcode.afficher_gestion_barcodes")
+    @patch("src.modules.utilitaires.barcode.afficher_verifier_stock")
+    @patch("src.modules.utilitaires.barcode.afficher_ajout_rapide")
+    @patch("src.modules.utilitaires.barcode.afficher_scanner")
     @patch("src.modules.utilitaires.barcode.st")
     def test_app_basic(self, mock_st, *mocks) -> None:
         """Test du rendu basique de app()."""
@@ -57,20 +57,20 @@ class TestBarcodeUI:
     @patch("src.modules.utilitaires.barcode.st")
     def test_render_scanner_no_input(self, mock_st, mock_srv) -> None:
         """Test scanner sans input."""
-        from src.modules.utilitaires.barcode import render_scanner
+        from src.modules.utilitaires.barcode import afficher_scanner
 
         setup_mock_st(mock_st)
         mock_st.radio.return_value = "⌨️ Manuel"  # Mode manuel
         mock_st.text_input.return_value = ""
         mock_st.button.return_value = False
-        render_scanner()
+        afficher_scanner()
         mock_st.subheader.assert_called()
 
     @patch("src.modules.utilitaires.barcode.get_barcode_service")
     @patch("src.modules.utilitaires.barcode.st")
     def test_render_scanner_with_valid_code(self, mock_st, mock_srv) -> None:
         """Test scanner avec code valide."""
-        from src.modules.utilitaires.barcode import render_scanner
+        from src.modules.utilitaires.barcode import afficher_scanner
 
         setup_mock_st(mock_st)
         mock_st.radio.return_value = "⌨️ Manuel"  # Mode manuel
@@ -78,97 +78,97 @@ class TestBarcodeUI:
         mock_st.button.return_value = True
         mock_srv.return_value.valider_barcode.return_value = (True, "EAN13")
         mock_srv.return_value.rechercher_produit.return_value = {"nom": "Nutella"}
-        render_scanner()
+        afficher_scanner()
         mock_srv.return_value.valider_barcode.assert_called()
 
     @patch("src.modules.utilitaires.barcode.get_barcode_service")
     @patch("src.modules.utilitaires.barcode.st")
     def test_render_scanner_with_invalid_code(self, mock_st, mock_srv) -> None:
         """Test scanner avec code invalide."""
-        from src.modules.utilitaires.barcode import render_scanner
+        from src.modules.utilitaires.barcode import afficher_scanner
 
         setup_mock_st(mock_st)
         mock_st.radio.return_value = "⌨️ Manuel"  # Mode manuel
         mock_st.text_input.return_value = "invalid"
         mock_st.button.return_value = True
         mock_srv.return_value.valider_barcode.return_value = (False, "Invalid format")
-        render_scanner()
+        afficher_scanner()
         mock_st.error.assert_called()
 
     @patch("src.modules.utilitaires.barcode.get_barcode_service")
     @patch("src.modules.utilitaires.barcode.st")
     def test_render_scanner_demo_mode(self, mock_st, mock_srv) -> None:
         """Test scanner en mode démo."""
-        from src.modules.utilitaires.barcode import render_scanner
+        from src.modules.utilitaires.barcode import afficher_scanner
 
         setup_mock_st(mock_st)
         mock_st.radio.return_value = "🎮 Démo (codes test)"  # Mode démo
         mock_st.selectbox.return_value = "Lait demi-écrémé 1L"
         mock_st.button.return_value = True
         mock_srv.return_value.valider_barcode.return_value = (True, "EAN13")
-        render_scanner()
+        afficher_scanner()
         mock_st.info.assert_called()  # Mode démo affiche un info
 
     @patch("src.modules.utilitaires.barcode.st")
     def test_render_ajout_rapide(self, mock_st) -> None:
         """Test ajout rapide."""
-        from src.modules.utilitaires.barcode import render_ajout_rapide
+        from src.modules.utilitaires.barcode import afficher_ajout_rapide
 
         setup_mock_st(mock_st)
         mock_st.text_input.return_value = ""
         mock_st.number_input.return_value = 1
         mock_st.selectbox.return_value = "Alimentaire"
         mock_st.form_submit_button.return_value = False
-        render_ajout_rapide()
+        afficher_ajout_rapide()
         assert True
 
     @patch("src.modules.utilitaires.barcode.get_barcode_service")
     @patch("src.modules.utilitaires.barcode.st")
     def test_render_verifier_stock_empty(self, mock_st, mock_srv) -> None:
         """Test verification stock vide."""
-        from src.modules.utilitaires.barcode import render_verifier_stock
+        from src.modules.utilitaires.barcode import afficher_verifier_stock
 
         setup_mock_st(mock_st)
         mock_st.text_input.return_value = ""
         mock_st.button.return_value = False
-        render_verifier_stock()
+        afficher_verifier_stock()
         assert True
 
     @patch("src.modules.utilitaires.barcode.get_barcode_service")
     @patch("src.modules.utilitaires.barcode.st")
     def test_render_gestion_barcodes(self, mock_st, mock_srv) -> None:
         """Test gestion barcodes."""
-        from src.modules.utilitaires.barcode import render_gestion_barcodes
+        from src.modules.utilitaires.barcode import afficher_gestion_barcodes
 
         setup_mock_st(mock_st)
         mock_srv.return_value.get_tous_barcodes.return_value = []
-        render_gestion_barcodes()
+        afficher_gestion_barcodes()
         assert True
 
     @patch("src.modules.utilitaires.barcode.get_barcode_service")
     @patch("src.modules.utilitaires.barcode.st")
     def test_render_gestion_barcodes_with_data(self, mock_st, mock_srv) -> None:
         """Test gestion barcodes avec donnees."""
-        from src.modules.utilitaires.barcode import render_gestion_barcodes
+        from src.modules.utilitaires.barcode import afficher_gestion_barcodes
 
         setup_mock_st(mock_st)
         mock_srv.return_value.get_tous_barcodes.return_value = [
             {"code": "123", "nom": "Prod1"},
             {"code": "456", "nom": "Prod2"},
         ]
-        render_gestion_barcodes()
+        afficher_gestion_barcodes()
         assert True
 
     @patch("src.modules.utilitaires.barcode.get_barcode_service")
     @patch("src.modules.utilitaires.barcode.st")
     def test_render_import_export(self, mock_st, mock_srv) -> None:
         """Test import/export."""
-        from src.modules.utilitaires.barcode import render_import_export
+        from src.modules.utilitaires.barcode import afficher_import_export
 
         setup_mock_st(mock_st)
         mock_st.file_uploader.return_value = None
         mock_srv.return_value.exporter_barcodes.return_value = "code,nom\n123,Test"
-        render_import_export()
+        afficher_import_export()
         mock_st.download_button.assert_called()  # Download button affiché directement
 
 
@@ -214,31 +214,31 @@ class TestImports:
         assert callable(get_barcode_service)
 
     def test_import_render_scanner(self) -> None:
-        """Test import render_scanner."""
-        from src.modules.utilitaires.barcode import render_scanner
+        """Test import afficher_scanner."""
+        from src.modules.utilitaires.barcode import afficher_scanner
 
-        assert callable(render_scanner)
+        assert callable(afficher_scanner)
 
     def test_import_render_ajout_rapide(self) -> None:
-        """Test import render_ajout_rapide."""
-        from src.modules.utilitaires.barcode import render_ajout_rapide
+        """Test import afficher_ajout_rapide."""
+        from src.modules.utilitaires.barcode import afficher_ajout_rapide
 
-        assert callable(render_ajout_rapide)
+        assert callable(afficher_ajout_rapide)
 
     def test_import_render_verifier_stock(self) -> None:
-        """Test import render_verifier_stock."""
-        from src.modules.utilitaires.barcode import render_verifier_stock
+        """Test import afficher_verifier_stock."""
+        from src.modules.utilitaires.barcode import afficher_verifier_stock
 
-        assert callable(render_verifier_stock)
+        assert callable(afficher_verifier_stock)
 
     def test_import_render_gestion_barcodes(self) -> None:
-        """Test import render_gestion_barcodes."""
-        from src.modules.utilitaires.barcode import render_gestion_barcodes
+        """Test import afficher_gestion_barcodes."""
+        from src.modules.utilitaires.barcode import afficher_gestion_barcodes
 
-        assert callable(render_gestion_barcodes)
+        assert callable(afficher_gestion_barcodes)
 
     def test_import_render_import_export(self) -> None:
-        """Test import render_import_export."""
-        from src.modules.utilitaires.barcode import render_import_export
+        """Test import afficher_import_export."""
+        from src.modules.utilitaires.barcode import afficher_import_export
 
-        assert callable(render_import_export)
+        assert callable(afficher_import_export)

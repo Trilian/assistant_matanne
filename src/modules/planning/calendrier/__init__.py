@@ -17,30 +17,30 @@ Fonctionnalités:
 """
 
 # Import Google Calendar UI
-from src.ui.integrations import render_google_calendar_config
+from src.ui.integrations import afficher_config_google_calendar
 
 from ._common import construire_semaine_calendrier, date, get_debut_semaine, st
 from .analytics import (
-    render_actions_prioritaires,
-    render_formulaire_optimisation_ia,
-    render_graphique_charge_semaine,
-    render_graphique_repartition,
-    render_metriques_detaillees,
-    render_observations,
-    render_reequilibrage,
-    render_suggestions,
+    afficher_actions_prioritaires,
+    afficher_formulaire_optimisation_ia,
+    afficher_graphique_charge_semaine,
+    afficher_graphique_repartition,
+    afficher_metriques_detaillees,
+    afficher_observations,
+    afficher_reequilibrage,
+    afficher_suggestions,
 )
 from .components import (
-    render_actions_rapides,
-    render_cellule_jour,
-    render_formulaire_ajout_event,
-    render_jour_calendrier,
-    render_legende,
-    render_modal_impression,
-    render_navigation_semaine,
-    render_stats_semaine,
-    render_vue_semaine_grille,
-    render_vue_semaine_liste,
+    afficher_actions_rapides,
+    afficher_cellule_jour,
+    afficher_formulaire_ajout_event,
+    afficher_jour_calendrier,
+    afficher_legende,
+    afficher_modal_impression,
+    afficher_navigation_semaine,
+    afficher_stats_semaine,
+    afficher_vue_semaine_grille,
+    afficher_vue_semaine_liste,
 )
 
 # Import des fonctions pour exposer l'API publique
@@ -54,7 +54,7 @@ def app():
     st.caption("Vue unifiée de toute votre semaine: repas, batch, courses, activités, ménage, RDV")
 
     # Navigation
-    render_navigation_semaine()
+    afficher_navigation_semaine()
 
     st.divider()
 
@@ -86,12 +86,12 @@ def app():
     # ═══════════════════════════════════════════════════════════
     with tab_calendrier:
         # Stats en haut
-        render_stats_semaine(semaine)
+        afficher_stats_semaine(semaine)
 
         st.divider()
 
         # Actions rapides
-        render_actions_rapides(semaine)
+        afficher_actions_rapides(semaine)
 
         st.divider()
 
@@ -105,16 +105,16 @@ def app():
 
         # Affichage principal
         if mode == "📋 Liste détaillée":
-            render_vue_semaine_liste(semaine)
+            afficher_vue_semaine_liste(semaine)
         else:
-            render_vue_semaine_grille(semaine)
+            afficher_vue_semaine_grille(semaine)
 
         # Modals
-        render_modal_impression(semaine)
-        render_formulaire_ajout_event()
+        afficher_modal_impression(semaine)
+        afficher_formulaire_ajout_event()
 
         # Légende
-        render_legende()
+        afficher_legende()
 
     # ═══════════════════════════════════════════════════════════
     # ONGLET ANALYSE
@@ -135,7 +135,7 @@ def app():
         charge_globale = semaine.stats.get("charge_globale", "normal")
 
         # Métriques détaillées
-        render_metriques_detaillees(stats, charge_globale)
+        afficher_metriques_detaillees(stats, charge_globale)
 
         st.divider()
 
@@ -143,10 +143,10 @@ def app():
         col1, col2 = st.columns(2)
 
         with col1:
-            render_graphique_charge_semaine(semaine.jours)
+            afficher_graphique_charge_semaine(semaine.jours)
 
         with col2:
-            render_graphique_repartition(stats)
+            afficher_graphique_repartition(stats)
 
         st.divider()
 
@@ -155,11 +155,11 @@ def app():
 
         with col_obs:
             st.markdown("#### 🔍 Observations")
-            render_observations(semaine.jours)
+            afficher_observations(semaine.jours)
 
         with col_sug:
             st.markdown("#### 💡 Suggestions")
-            render_suggestions(stats)
+            afficher_suggestions(stats)
 
     # ═══════════════════════════════════════════════════════════
     # ONGLET IA
@@ -168,13 +168,13 @@ def app():
         st.subheader("🤖 Optimisation Intelligente")
 
         # Formulaire d'optimisation IA
-        render_formulaire_optimisation_ia(st.session_state.cal_semaine_debut)
+        afficher_formulaire_optimisation_ia(st.session_state.cal_semaine_debut)
 
         st.divider()
 
         # Rééquilibrage
         st.markdown("#### 🔄 Rééquilibrage des jours chargés")
-        render_reequilibrage(semaine.jours)
+        afficher_reequilibrage(semaine.jours)
 
     # ═══════════════════════════════════════════════════════════
     # ONGLET GOOGLE CALENDAR
@@ -182,7 +182,7 @@ def app():
     with tab_google:
         st.subheader("🔗 Synchronisation Google Calendar")
         st.caption("Connectez votre Google Calendar pour synchroniser vos événements")
-        render_google_calendar_config()
+        afficher_config_google_calendar()
 
 
 __all__ = [
@@ -191,23 +191,23 @@ __all__ = [
     # Data
     "charger_donnees_semaine",
     # UI Components
-    "render_navigation_semaine",
-    "render_jour_calendrier",
-    "render_vue_semaine_grille",
-    "render_cellule_jour",
-    "render_vue_semaine_liste",
-    "render_stats_semaine",
-    "render_actions_rapides",
-    "render_modal_impression",
-    "render_formulaire_ajout_event",
-    "render_legende",
+    "afficher_navigation_semaine",
+    "afficher_jour_calendrier",
+    "afficher_vue_semaine_grille",
+    "afficher_cellule_jour",
+    "afficher_vue_semaine_liste",
+    "afficher_stats_semaine",
+    "afficher_actions_rapides",
+    "afficher_modal_impression",
+    "afficher_formulaire_ajout_event",
+    "afficher_legende",
     # Analytics
-    "render_graphique_charge_semaine",
-    "render_graphique_repartition",
-    "render_actions_prioritaires",
-    "render_metriques_detaillees",
-    "render_suggestions",
-    "render_observations",
-    "render_formulaire_optimisation_ia",
-    "render_reequilibrage",
+    "afficher_graphique_charge_semaine",
+    "afficher_graphique_repartition",
+    "afficher_actions_prioritaires",
+    "afficher_metriques_detaillees",
+    "afficher_suggestions",
+    "afficher_observations",
+    "afficher_formulaire_optimisation_ia",
+    "afficher_reequilibrage",
 ]

@@ -10,12 +10,12 @@ Categories:
 import streamlit as st
 
 from .components import (
-    render_achat_card,
-    render_add_form,
-    render_dashboard,
-    render_historique,
-    render_liste_groupe,
-    render_par_magasin,
+    afficher_achat_card,
+    afficher_add_form,
+    afficher_dashboard,
+    afficher_historique,
+    afficher_liste_groupe,
+    afficher_par_magasin,
 )
 
 # Import des fonctions pour exposer l'API publique
@@ -49,22 +49,22 @@ def app():
     )
 
     with tabs[0]:
-        render_dashboard()
+        afficher_dashboard()
 
     with tabs[1]:
-        render_liste_groupe("jules", "👶 Achats pour Jules")
+        afficher_liste_groupe("jules", "👶 Achats pour Jules")
 
     with tabs[2]:
-        render_liste_groupe("nous", "👨‍👩‍👦 Achats pour nous")
+        afficher_liste_groupe("nous", "👨‍👩‍👦 Achats pour nous")
 
     with tabs[3]:
-        render_par_magasin()
+        afficher_par_magasin()
 
     with tabs[4]:
-        render_add_form()
+        afficher_add_form()
 
     with tabs[5]:
-        render_historique()
+        afficher_historique()
 
 
 __all__ = [
@@ -78,10 +78,10 @@ __all__ = [
     "mark_as_bought",
     "delete_purchase",
     # UI
-    "render_dashboard",
-    "render_liste_groupe",
-    "render_achat_card",
-    "render_add_form",
-    "render_historique",
-    "render_par_magasin",
+    "afficher_dashboard",
+    "afficher_liste_groupe",
+    "afficher_achat_card",
+    "afficher_add_form",
+    "afficher_historique",
+    "afficher_par_magasin",
 ]

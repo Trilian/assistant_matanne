@@ -8,6 +8,7 @@ from ._common import (
     NUMERO_MIN,
     calculer_esperance_mathematique,
     calculer_frequences_numeros,
+    etat_vide,
     go,
     identifier_numeros_chauds_froids,
     pd,
@@ -18,7 +19,7 @@ from ._common import (
 def afficher_dernier_tirage(tirages: list):
     """Affiche le dernier tirage avec style"""
     if not tirages:
-        st.info("📊 Aucun tirage enregistré")
+        etat_vide("Aucun tirage enregistré", "📊")
         return
 
     dernier = tirages[0]

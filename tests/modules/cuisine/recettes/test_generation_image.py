@@ -9,6 +9,6 @@ class TestGenerationImage:
     """Tests pour le module generation_image"""
 
     def test_render_generer_image(self):
-        """Test de la fonction render_generer_image"""
+        """Test de la fonction afficher_generer_image"""
         # TODO: Implémenter le test
         pass

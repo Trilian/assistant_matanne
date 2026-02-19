@@ -265,7 +265,7 @@ class TestSchedulerServiceHistorique:
 class TestSchedulerServiceIntegration:
     """Tests d'intégration avec mocks."""
 
-    @patch("src.services.jeux.scheduler_service.get_sync_service")
+    @patch("src.services.jeux._internal.scheduler_service.get_sync_service")
     def test_integration_sync_service(self, mock_get_sync):
         """Test intégration avec SyncService."""
         mock_sync = MagicMock()

@@ -4,8 +4,8 @@ Imports paresseux pour éviter les imports circulaires.
 Importez directement depuis les sous-packages:
 
     from src.services.cuisine.recettes import ServiceRecettes, obtenir_service_recettes
-    from src.services.cuisine.planning import ServicePlanning, get_planning_service
-    from src.services.cuisine.courses import get_courses_service
+    from src.services.cuisine.planning import ServicePlanning, obtenir_service_planning
+    from src.services.cuisine.courses import obtenir_service_courses
 """
 
 __all__ = [
@@ -31,14 +31,14 @@ def __getattr__(name: str):
         from src.services.cuisine.planning import ServicePlanning
 
         return ServicePlanning
-    if name == "get_planning_service":
-        from src.services.cuisine.planning import get_planning_service
+    if name == "obtenir_service_planning":
+        from src.services.cuisine.planning import obtenir_service_planning
 
-        return get_planning_service
-    if name == "get_courses_service":
-        from src.services.cuisine.courses import get_courses_service
+        return obtenir_service_planning
+    if name == "obtenir_service_courses":
+        from src.services.cuisine.courses import obtenir_service_courses
 
-        return get_courses_service
+        return obtenir_service_courses
     if name == "obtenir_service_suggestions":
         from src.services.cuisine.suggestions import obtenir_service_suggestions
 

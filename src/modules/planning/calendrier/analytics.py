@@ -15,6 +15,8 @@ from datetime import date
 import plotly.graph_objects as go
 import streamlit as st
 
+from src.ui import etat_vide
+
 logger = logging.getLogger(__name__)
 
 
@@ -36,7 +38,7 @@ JOURS_NOMS_COURTS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
 # ═══════════════════════════════════════════════════════════
 
 
-def render_graphique_charge_semaine(jours: dict) -> None:
+def afficher_graphique_charge_semaine(jours: dict) -> None:
     """Graphique en barres de la charge familiale par jour."""
     jours_list = list(jours.values())
     charges = [j.charge_score for j in jours_list]
@@ -73,7 +75,7 @@ def render_graphique_charge_semaine(jours: dict) -> None:
     st.plotly_chart(fig, use_container_width=True, key="analytics_charge_daily")
 
 
-def render_graphique_repartition(stats: dict) -> None:
+def afficher_graphique_repartition(stats: dict) -> None:
     """Graphique camembert de répartition des événements."""
     labels = ["Repas", "Activités", "Projets", "Événements"]
     values = [
@@ -84,7 +86,7 @@ def render_graphique_repartition(stats: dict) -> None:
     ]
 
     if sum(values) == 0:
-        st.info("Aucun événement cette semaine")
+        etat_vide("Aucun événement cette semaine", "📅")
         return
 
     fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=0.3)])
@@ -98,7 +100,7 @@ def render_graphique_repartition(stats: dict) -> None:
 # ═══════════════════════════════════════════════════════════
 
 
-def render_actions_prioritaires(alertes: list[str]) -> None:
+def afficher_actions_prioritaires(alertes: list[str]) -> None:
     """Affiche les actions critiques."""
     if not alertes:
         st.success("✅ Semaine bien équilibrée")
@@ -115,7 +117,7 @@ def render_actions_prioritaires(alertes: list[str]) -> None:
 # ═══════════════════════════════════════════════════════════
 
 
-def render_metriques_detaillees(stats: dict, charge_globale: str) -> None:
+def afficher_metriques_detaillees(stats: dict, charge_globale: str) -> None:
     """Affiche les KPIs principaux en détail."""
     col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -141,7 +143,7 @@ def render_metriques_detaillees(stats: dict, charge_globale: str) -> None:
 # ═══════════════════════════════════════════════════════════
 
 
-def render_suggestions(stats: dict) -> None:
+def afficher_suggestions(stats: dict) -> None:
     """Suggère automatiquement des améliorations."""
     suggestions = []
 
@@ -172,7 +174,7 @@ def render_suggestions(stats: dict) -> None:
 # ═══════════════════════════════════════════════════════════
 
 
-def render_observations(jours: dict) -> None:
+def afficher_observations(jours: dict) -> None:
     """Affiche les observations sur la semaine."""
     jours_list = list(jours.values())
     jours_noms = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
@@ -195,7 +197,7 @@ def render_observations(jours: dict) -> None:
 # ═══════════════════════════════════════════════════════════
 
 
-def render_formulaire_optimisation_ia(week_start: date) -> None:
+def afficher_formulaire_optimisation_ia(week_start: date) -> None:
     """Formulaire pour générer une semaine optimisée par IA."""
     st.info("L'IA peut générer une semaine optimale basée sur vos contraintes")
 
@@ -222,9 +224,9 @@ def render_formulaire_optimisation_ia(week_start: date) -> None:
         if submitted:
             with st.spinner("🤖 L'IA analyse..."):
                 # Import différé pour éviter les dépendances circulaires
-                from src.services.cuisine.planning import get_planning_unified_service
+                from src.services.cuisine.planning import obtenir_service_planning_unifie
 
-                service = get_planning_unified_service()
+                service = obtenir_service_planning_unifie()
                 result = service.generer_semaine_ia(
                     date_debut=week_start,
                     contraintes={"budget": budget, "energie": energie},
@@ -250,7 +252,7 @@ def render_formulaire_optimisation_ia(week_start: date) -> None:
 # ═══════════════════════════════════════════════════════════
 
 
-def render_reequilibrage(jours: dict) -> None:
+def afficher_reequilibrage(jours: dict) -> None:
     """Propose le rééquilibrage des jours surchargés."""
     jours_list = list(jours.values())
     jours_noms = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
@@ -277,12 +279,12 @@ def render_reequilibrage(jours: dict) -> None:
 
 __all__ = [
     "EMOJIS_CHARGE",
-    "render_graphique_charge_semaine",
-    "render_graphique_repartition",
-    "render_actions_prioritaires",
-    "render_metriques_detaillees",
-    "render_suggestions",
-    "render_observations",
-    "render_formulaire_optimisation_ia",
-    "render_reequilibrage",
+    "afficher_graphique_charge_semaine",
+    "afficher_graphique_repartition",
+    "afficher_actions_prioritaires",
+    "afficher_metriques_detaillees",
+    "afficher_suggestions",
+    "afficher_observations",
+    "afficher_formulaire_optimisation_ia",
+    "afficher_reequilibrage",
 ]

@@ -5,19 +5,22 @@ Upload et affichage des photos des articles.
 
 import streamlit as st
 
-from src.services.inventaire import get_inventaire_service
+from src.services.inventaire import obtenir_service_inventaire
+from src.ui.components.atoms import etat_vide
 
 
-def render_photos():
+def afficher_photos():
     """Gestion des photos pour les articles de l'inventaire"""
     st.subheader("📷 Gestion des photos")
 
     # Récupère l'inventaire
-    service = get_inventaire_service()
+    service = obtenir_service_inventaire()
     articles_data = service.get_inventaire_complet()
 
     if not articles_data:
-        st.info("Aucun article dans l'inventaire")
+        etat_vide(
+            "Aucun article dans l'inventaire", "📷", "Ajoutez des articles pour gérer leurs photos"
+        )
         return
 
     # Sélectionne un article
@@ -120,4 +123,4 @@ def render_photos():
             st.write("Ajoute une photo dans l'onglet 'Ajouter/Remplacer'")
 
 
-__all__ = ["render_photos"]
+__all__ = ["afficher_photos"]

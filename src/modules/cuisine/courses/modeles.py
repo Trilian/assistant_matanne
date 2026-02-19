@@ -2,18 +2,18 @@
 Gestion des modèles de listes récurrentes.
 """
 
-from ._common import get_courses_service, logger, st
+from ._common import etat_vide, get_current_user_id, logger, obtenir_service_courses, st
 
 
-def render_modeles():
+def afficher_modeles():
     """Gestion des modèles de listes récurrentes (Phase 2: Persistance BD)"""
     st.subheader("📄 Modèles de listes - Phase 2")
 
-    service = get_courses_service()
+    service = obtenir_service_courses()
 
     try:
         # Récupérer modèles depuis BD (Phase 2)
-        modeles = service.get_modeles(utilisateur_id=None)  # TODO: user_id depuis auth
+        modeles = service.get_modeles(utilisateur_id=get_current_user_id())
 
         tab_mes_modeles, tab_nouveau = st.tabs(["📋 Mes modèles", "➕ Nouveau"])
 
@@ -25,7 +25,7 @@ def render_modeles():
             st.write("**Modèles sauvegardés en BD**")
 
             if not modeles:
-                st.info("⏰ Aucun modèle sauvegardé. Créez-en un dans l'onglet 'Nouveau'!")
+                etat_vide("Aucun modèle sauvegardé", "📝", "Créez-en un dans l'onglet 'Nouveau'")
             else:
                 for modele in modeles:
                     with st.container(border=True):
@@ -165,7 +165,7 @@ def render_modeles():
                                 nom=nom_modele.strip(),
                                 articles=articles_data,
                                 description=description.strip() if description else None,
-                                utilisateur_id=None,  # TODO: user_id depuis auth
+                                utilisateur_id=get_current_user_id(),
                             )
 
                             st.success(f"✅ Modèle '{nom_modele}' créé et sauvegardé en BD!")
@@ -177,7 +177,7 @@ def render_modeles():
 
     except Exception as e:
         st.error(f"❌ Erreur: {str(e)}")
-        logger.error(f"Erreur render_modeles: {e}")
+        logger.error(f"Erreur afficher_modeles: {e}")
 
 
-__all__ = ["render_modeles"]
+__all__ = ["afficher_modeles"]

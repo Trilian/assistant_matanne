@@ -58,9 +58,9 @@ class TestCommonServices:
 
     def test_export_inventaire_service(self):
         """Vérifie l'export du service inventaire"""
-        from src.modules.cuisine.inventaire._common import get_inventaire_service
+        from src.modules.cuisine.inventaire._common import obtenir_service_inventaire
 
-        assert callable(get_inventaire_service)
+        assert callable(obtenir_service_inventaire)
 
     def test_export_predictions_service(self):
         """Vérifie l'export du service prédictions"""

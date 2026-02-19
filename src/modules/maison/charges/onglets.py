@@ -6,6 +6,8 @@ from decimal import Decimal
 
 import streamlit as st
 
+from src.ui import etat_vide
+
 from .constantes import CONSEILS_ECONOMIES, ENERGIES
 from .logic import (
     analyser_consommation,
@@ -160,7 +162,7 @@ def onglet_factures(factures: list[dict]):
     else:
         # Liste des factures
         if not factures:
-            st.info("📄 Aucune facture enregistrée. Ajoutez vos factures pour commencer le suivi !")
+            etat_vide("Aucune facture enregistrée", "📄", "Ajoutez vos factures pour commencer")
 
             # Aide pour démarrer
             st.markdown("""

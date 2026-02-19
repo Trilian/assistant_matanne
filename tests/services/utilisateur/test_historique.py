@@ -863,11 +863,11 @@ class TestUIComponents:
     @patch("src.ui.views.historique.get_action_history_service")
     def test_render_activity_timeline_empty(self, mock_service, mock_st):
         """Timeline vide affiche message info."""
-        from src.services.core.utilisateur.historique import render_activity_timeline
+        from src.services.core.utilisateur.historique import afficher_activity_timeline
 
         mock_service.return_value.get_recent_actions.return_value = []
 
-        render_activity_timeline(limit=10)
+        afficher_activity_timeline(limit=10)
 
         mock_st.info.assert_called_once()
 
@@ -875,7 +875,7 @@ class TestUIComponents:
     @patch("src.ui.views.historique.get_action_history_service")
     def test_render_activity_timeline_with_actions(self, mock_service, mock_st):
         """Timeline avec actions."""
-        from src.services.core.utilisateur.historique import render_activity_timeline
+        from src.services.core.utilisateur.historique import afficher_activity_timeline
 
         mock_action = Mock()
         mock_action.entity_type = "recette"
@@ -886,7 +886,7 @@ class TestUIComponents:
         mock_service.return_value.get_recent_actions.return_value = [mock_action]
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
 
-        render_activity_timeline(limit=10)
+        afficher_activity_timeline(limit=10)
 
         mock_st.markdown.assert_called()
 
@@ -894,11 +894,11 @@ class TestUIComponents:
     @patch("src.ui.views.historique.get_action_history_service")
     def test_render_user_activity_empty(self, mock_service, mock_st):
         """Activité utilisateur vide."""
-        from src.services.core.utilisateur.historique import render_user_activity
+        from src.services.core.utilisateur.historique import afficher_user_activity
 
         mock_service.return_value.get_user_history.return_value = []
 
-        render_user_activity("user123")
+        afficher_user_activity("user123")
 
         mock_st.info.assert_called()
 
@@ -906,7 +906,7 @@ class TestUIComponents:
     @patch("src.ui.views.historique.get_action_history_service")
     def test_render_user_activity_with_actions(self, mock_service, mock_st):
         """Activité utilisateur avec actions."""
-        from src.services.core.utilisateur.historique import render_user_activity
+        from src.services.core.utilisateur.historique import afficher_user_activity
 
         mock_action = Mock()
         mock_action.description = "Test action"
@@ -917,7 +917,7 @@ class TestUIComponents:
         mock_st.expander.return_value.__enter__ = Mock(return_value=Mock())
         mock_st.expander.return_value.__exit__ = Mock(return_value=False)
 
-        render_user_activity("user123")
+        afficher_user_activity("user123")
 
         mock_st.markdown.assert_called()
 
@@ -925,7 +925,7 @@ class TestUIComponents:
     @patch("src.ui.views.historique.get_action_history_service")
     def test_render_activity_stats(self, mock_service, mock_st):
         """Statistiques d'activité."""
-        from src.services.core.utilisateur.historique import render_activity_stats
+        from src.services.core.utilisateur.historique import afficher_activity_stats
 
         mock_stats = ActionStats(
             total_actions=100,
@@ -936,7 +936,7 @@ class TestUIComponents:
         mock_service.return_value.get_stats.return_value = mock_stats
         mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
 
-        render_activity_stats()
+        afficher_activity_stats()
 
         mock_st.markdown.assert_called()
         mock_st.metric.assert_called()
@@ -945,7 +945,7 @@ class TestUIComponents:
     @patch("src.ui.views.historique.get_action_history_service")
     def test_render_activity_stats_no_users(self, mock_service, mock_st):
         """Statistiques sans utilisateurs actifs."""
-        from src.services.core.utilisateur.historique import render_activity_stats
+        from src.services.core.utilisateur.historique import afficher_activity_stats
 
         mock_stats = ActionStats(
             total_actions=0, actions_today=0, actions_this_week=0, most_active_users=[]
@@ -953,7 +953,7 @@ class TestUIComponents:
         mock_service.return_value.get_stats.return_value = mock_stats
         mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
 
-        render_activity_stats()
+        afficher_activity_stats()
 
         mock_st.metric.assert_called()
 

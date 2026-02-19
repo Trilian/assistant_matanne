@@ -1,7 +1,7 @@
 """
 Tests pour src/modules/famille/suivi_perso/alimentation.py
 
-Tests complets pour render_food_log et render_food_form.
+Tests complets pour afficher_food_log et afficher_food_form.
 """
 
 from unittest.mock import MagicMock, patch
@@ -10,7 +10,7 @@ import pytest
 
 
 class TestRenderFoodLog:
-    """Tests pour render_food_log()"""
+    """Tests pour afficher_food_log()"""
 
     @pytest.fixture
     def mock_st(self):
@@ -34,17 +34,17 @@ class TestRenderFoodLog:
 
     @pytest.fixture
     def mock_render_form(self):
-        """Mock render_food_form"""
-        with patch("src.modules.famille.suivi_perso.alimentation.render_food_form") as mock:
+        """Mock afficher_food_form"""
+        with patch("src.modules.famille.suivi_perso.alimentation.afficher_food_form") as mock:
             yield mock
 
     def test_affiche_subheader(self, mock_st, mock_get_food_logs, mock_render_form):
         """Vérifie l'affichage du titre"""
         mock_get_food_logs.return_value = []
 
-        from src.modules.famille.suivi_perso.alimentation import render_food_log
+        from src.modules.famille.suivi_perso.alimentation import afficher_food_log
 
-        render_food_log("anne")
+        afficher_food_log("anne")
 
         mock_st.subheader.assert_called_once()
         assert "Alimentation" in mock_st.subheader.call_args[0][0]
@@ -53,9 +53,9 @@ class TestRenderFoodLog:
         """Vérifie la création des onglets"""
         mock_get_food_logs.return_value = []
 
-        from src.modules.famille.suivi_perso.alimentation import render_food_log
+        from src.modules.famille.suivi_perso.alimentation import afficher_food_log
 
-        render_food_log("anne")
+        afficher_food_log("anne")
 
         mock_st.tabs.assert_called_once()
         tabs_arg = mock_st.tabs.call_args[0][0]
@@ -67,9 +67,9 @@ class TestRenderFoodLog:
         """Vérifie le message sans logs"""
         mock_get_food_logs.return_value = []
 
-        from src.modules.famille.suivi_perso.alimentation import render_food_log
+        from src.modules.famille.suivi_perso.alimentation import afficher_food_log
 
-        render_food_log("anne")
+        afficher_food_log("anne")
 
         mock_st.caption.assert_called()
 
@@ -95,9 +95,9 @@ class TestRenderFoodLog:
         mock_st.container.return_value.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
 
-        from src.modules.famille.suivi_perso.alimentation import render_food_log
+        from src.modules.famille.suivi_perso.alimentation import afficher_food_log
 
-        render_food_log("anne")
+        afficher_food_log("anne")
 
         # Vérifie que metric est appelé avec le total
         mock_st.metric.assert_called()
@@ -118,10 +118,10 @@ class TestRenderFoodLog:
         mock_st.container.return_value.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
 
-        from src.modules.famille.suivi_perso.alimentation import render_food_log
+        from src.modules.famille.suivi_perso.alimentation import afficher_food_log
 
         # Ne doit pas lever d'exception
-        render_food_log("anne")
+        afficher_food_log("anne")
 
     def test_formate_emojis_par_type_repas(self, mock_st, mock_get_food_logs, mock_render_form):
         """Vérifie les emojis par type de repas"""
@@ -140,16 +140,16 @@ class TestRenderFoodLog:
             mock_st.container.return_value.__exit__ = MagicMock(return_value=False)
             mock_st.columns.return_value = [MagicMock(), MagicMock()]
 
-            from src.modules.famille.suivi_perso.alimentation import render_food_log
+            from src.modules.famille.suivi_perso.alimentation import afficher_food_log
 
-            render_food_log("anne")
+            afficher_food_log("anne")
 
             # Vérifie que markdown a été appelé
             assert mock_st.markdown.called
 
 
 class TestRenderFoodForm:
-    """Tests pour render_food_form()"""
+    """Tests pour afficher_food_form()"""
 
     @pytest.fixture
     def mock_st(self):
@@ -184,9 +184,9 @@ class TestRenderFoodForm:
         """Vérifie la création du formulaire"""
         mock_st.form_submit_button.return_value = False
 
-        from src.modules.famille.suivi_perso.alimentation import render_food_form
+        from src.modules.famille.suivi_perso.alimentation import afficher_food_form
 
-        render_food_form("anne")
+        afficher_food_form("anne")
 
         mock_st.form.assert_called_once_with("add_food")
 
@@ -194,9 +194,9 @@ class TestRenderFoodForm:
         """Vérifie les champs du formulaire"""
         mock_st.form_submit_button.return_value = False
 
-        from src.modules.famille.suivi_perso.alimentation import render_food_form
+        from src.modules.famille.suivi_perso.alimentation import afficher_food_form
 
-        render_food_form("anne")
+        afficher_food_form("anne")
 
         mock_st.selectbox.assert_called()
         mock_st.text_area.assert_called()
@@ -209,9 +209,9 @@ class TestRenderFoodForm:
         mock_st.form_submit_button.return_value = True
         mock_st.text_area.return_value = ""
 
-        from src.modules.famille.suivi_perso.alimentation import render_food_form
+        from src.modules.famille.suivi_perso.alimentation import afficher_food_form
 
-        render_food_form("anne")
+        afficher_food_form("anne")
 
         mock_st.error.assert_called()
 
@@ -230,9 +230,9 @@ class TestRenderFoodForm:
         mock_user.id = 1
         mock_session.query.return_value.filter_by.return_value.first.return_value = mock_user
 
-        from src.modules.famille.suivi_perso.alimentation import render_food_form
+        from src.modules.famille.suivi_perso.alimentation import afficher_food_form
 
-        render_food_form("anne")
+        afficher_food_form("anne")
 
         mock_session.add.assert_called_once()
         mock_session.commit.assert_called_once()
@@ -249,9 +249,9 @@ class TestRenderFoodForm:
         mock_st.text_input.return_value = ""
         mock_ctx.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
 
-        from src.modules.famille.suivi_perso.alimentation import render_food_form
+        from src.modules.famille.suivi_perso.alimentation import afficher_food_form
 
-        render_food_form("anne")
+        afficher_food_form("anne")
 
         mock_st.error.assert_called()
 
@@ -260,13 +260,13 @@ class TestAlimentationIntegration:
     """Tests d'intégration pour le module alimentation"""
 
     def test_import_render_food_log(self):
-        """Vérifie que render_food_log est importable"""
-        from src.modules.famille.suivi_perso.alimentation import render_food_log
+        """Vérifie que afficher_food_log est importable"""
+        from src.modules.famille.suivi_perso.alimentation import afficher_food_log
 
-        assert callable(render_food_log)
+        assert callable(afficher_food_log)
 
     def test_import_render_food_form(self):
-        """Vérifie que render_food_form est importable"""
-        from src.modules.famille.suivi_perso.alimentation import render_food_form
+        """Vérifie que afficher_food_form est importable"""
+        from src.modules.famille.suivi_perso.alimentation import afficher_food_form
 
-        assert callable(render_food_form)
+        assert callable(afficher_food_form)

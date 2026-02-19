@@ -19,6 +19,7 @@ from src.modules.famille.utils import (
     get_budget_activites_mois,
     get_budget_par_period,
 )
+from src.ui import etat_vide
 
 
 def ajouter_activite(
@@ -124,7 +125,7 @@ def app():
                                     st.caption(f"📅 {', '.join(act['participants'])}")
                                 st.caption(f"💡 {act.get('cout_estime', 0):.2f}€")
                 else:
-                    st.info("Aucune activite cette semaine. Planifiez une activite!")
+                    etat_vide("Aucune activité cette semaine", "📅", "Planifiez une activité !")
 
             except Exception as e:
                 st.error(f"❌ Erreur chargement: {str(e)}")
@@ -314,7 +315,7 @@ def app():
                     )
                     st.plotly_chart(fig2, width="stretch", key="activities_budget_by_type")
                 else:
-                    st.info("Aucune activite sur 30 jours")
+                    etat_vide("Aucune activité sur 30 jours", "📊")
 
         except Exception as e:
             st.error(f"❌ Erreur graphiques: {str(e)}")

@@ -6,12 +6,13 @@ Affiche l'historique des modifications de l'inventaire.
 import pandas as pd
 import streamlit as st
 
-from src.services.inventaire import get_inventaire_service
+from src.services.inventaire import obtenir_service_inventaire
+from src.ui.components.atoms import etat_vide
 
 
-def render_historique():
+def afficher_historique():
     """Affiche l'historique des modifications de l'inventaire"""
-    service = get_inventaire_service()
+    service = obtenir_service_inventaire()
 
     if service is None:
         st.error("❌ Service inventaire indisponible")
@@ -44,14 +45,20 @@ def render_historique():
         historique = service.get_historique(days=days)
 
         if not historique:
-            st.info("📋 Aucune modification enregistrée dans cette période")
+            etat_vide(
+                "Aucune modification enregistrée", "📋", "Aucun changement dans cette période"
+            )
             return
 
         # Filtrer par type
         historique_filtres = [h for h in historique if h["type"] in type_modif]
 
         if not historique_filtres:
-            st.info("Aucune modification ne correspond aux filtres")
+            etat_vide(
+                "Aucune modification trouvée",
+                "🔍",
+                "Modifiez les filtres pour voir plus de résultats",
+            )
             return
 
         # Afficher tableau
@@ -103,4 +110,4 @@ def render_historique():
         st.error(f"❌ Erreur: {str(e)}")
 
 
-__all__ = ["render_historique"]
+__all__ = ["afficher_historique"]

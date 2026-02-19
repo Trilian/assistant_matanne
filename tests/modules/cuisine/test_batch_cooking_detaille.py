@@ -236,26 +236,26 @@ class TestImports:
     def test_import_render_functions(self):
         """Vérifie que les fonctions de rendu existent."""
         from src.modules.cuisine.batch_cooking_detaille import (
-            render_etape_batch,
-            render_finition_jour_j,
-            render_ingredient_detaille,
-            render_instruction_robot,
-            render_liste_courses_batch,
-            render_moments_jules,
-            render_planning_semaine_preview,
-            render_selecteur_session,
-            render_timeline_session,
+            afficher_etape_batch,
+            afficher_finition_jour_j,
+            afficher_ingredient_detaille,
+            afficher_instruction_robot,
+            afficher_liste_courses_batch,
+            afficher_moments_jules,
+            afficher_planning_semaine_preview,
+            afficher_selecteur_session,
+            afficher_timeline_session,
         )
 
-        assert callable(render_selecteur_session)
-        assert callable(render_planning_semaine_preview)
-        assert callable(render_ingredient_detaille)
-        assert callable(render_etape_batch)
-        assert callable(render_instruction_robot)
-        assert callable(render_timeline_session)
-        assert callable(render_moments_jules)
-        assert callable(render_liste_courses_batch)
-        assert callable(render_finition_jour_j)
+        assert callable(afficher_selecteur_session)
+        assert callable(afficher_planning_semaine_preview)
+        assert callable(afficher_ingredient_detaille)
+        assert callable(afficher_etape_batch)
+        assert callable(afficher_instruction_robot)
+        assert callable(afficher_timeline_session)
+        assert callable(afficher_moments_jules)
+        assert callable(afficher_liste_courses_batch)
+        assert callable(afficher_finition_jour_j)
 
     def test_import_generer_batch_ia(self):
         """Vérifie que la fonction IA existe."""
@@ -334,13 +334,13 @@ class TestConstantes:
 
 
 class TestRenderSelecteurSession:
-    """Tests pour render_selecteur_session."""
+    """Tests pour afficher_selecteur_session."""
 
     def test_render_selecteur_session(self, mock_st):
         """Teste le rendu du sélecteur de session."""
-        from src.modules.cuisine.batch_cooking_detaille import render_selecteur_session
+        from src.modules.cuisine.batch_cooking_detaille import afficher_selecteur_session
 
-        render_selecteur_session()
+        afficher_selecteur_session()
 
         mock_st.subheader.assert_called_once()
         mock_st.columns.assert_called_once()
@@ -348,15 +348,15 @@ class TestRenderSelecteurSession:
 
 
 class TestRenderPlanningPreview:
-    """Tests pour render_planning_semaine_preview."""
+    """Tests pour afficher_planning_semaine_preview."""
 
     def test_render_planning_avec_donnees(self, mock_st, sample_planning_data):
         """Teste le rendu avec des données de planning."""
         from src.modules.cuisine.batch_cooking_detaille import (
-            render_planning_semaine_preview,
+            afficher_planning_semaine_preview,
         )
 
-        render_planning_semaine_preview(sample_planning_data)
+        afficher_planning_semaine_preview(sample_planning_data)
 
         mock_st.markdown.assert_called()
         # Vérifie que les jours sont affichés
@@ -365,61 +365,61 @@ class TestRenderPlanningPreview:
     def test_render_planning_vide(self, mock_st):
         """Teste le rendu sans données de planning."""
         from src.modules.cuisine.batch_cooking_detaille import (
-            render_planning_semaine_preview,
+            afficher_planning_semaine_preview,
         )
 
-        render_planning_semaine_preview({})
+        afficher_planning_semaine_preview({})
 
         mock_st.info.assert_called_once()
 
     def test_render_planning_none(self, mock_st):
         """Teste le rendu avec None."""
         from src.modules.cuisine.batch_cooking_detaille import (
-            render_planning_semaine_preview,
+            afficher_planning_semaine_preview,
         )
 
-        render_planning_semaine_preview(None)
+        afficher_planning_semaine_preview(None)
 
         mock_st.info.assert_called_once()
 
 
 class TestRenderIngredientDetaille:
-    """Tests pour render_ingredient_detaille."""
+    """Tests pour afficher_ingredient_detaille."""
 
     def test_render_ingredient_complet(self, mock_st, sample_ingredient):
         """Teste le rendu d'un ingrédient complet."""
-        from src.modules.cuisine.batch_cooking_detaille import render_ingredient_detaille
+        from src.modules.cuisine.batch_cooking_detaille import afficher_ingredient_detaille
 
-        render_ingredient_detaille(sample_ingredient, "test_key")
+        afficher_ingredient_detaille(sample_ingredient, "test_key")
 
         mock_st.container.assert_called()
         mock_st.markdown.assert_called()
 
     def test_render_ingredient_minimal(self, mock_st):
         """Teste le rendu d'un ingrédient minimal."""
-        from src.modules.cuisine.batch_cooking_detaille import render_ingredient_detaille
+        from src.modules.cuisine.batch_cooking_detaille import afficher_ingredient_detaille
 
         ingredient = {"nom": "sel", "quantite": 1, "unite": "pincée"}
-        render_ingredient_detaille(ingredient, "test_key")
+        afficher_ingredient_detaille(ingredient, "test_key")
 
         mock_st.container.assert_called()
 
     def test_render_ingredient_jules_peut_aider(self, mock_st, sample_ingredient):
         """Teste l'affichage du badge Jules."""
-        from src.modules.cuisine.batch_cooking_detaille import render_ingredient_detaille
+        from src.modules.cuisine.batch_cooking_detaille import afficher_ingredient_detaille
 
-        render_ingredient_detaille(sample_ingredient, "test_key")
+        afficher_ingredient_detaille(sample_ingredient, "test_key")
 
         # Jules peut aider devrait déclencher st.success
         mock_st.success.assert_called()
 
 
 class TestRenderEtapeBatch:
-    """Tests pour render_etape_batch."""
+    """Tests pour afficher_etape_batch."""
 
     def test_render_etape_active(self, mock_st):
         """Teste le rendu d'une étape active."""
-        from src.modules.cuisine.batch_cooking_detaille import render_etape_batch
+        from src.modules.cuisine.batch_cooking_detaille import afficher_etape_batch
 
         etape = {
             "titre": "Préparer les légumes",
@@ -428,22 +428,22 @@ class TestRenderEtapeBatch:
             "est_passif": False,
         }
 
-        render_etape_batch(etape, 1, "test_key")
+        afficher_etape_batch(etape, 1, "test_key")
 
         mock_st.container.assert_called()
         mock_st.divider.assert_called()
 
     def test_render_etape_passive(self, mock_st, sample_etape):
         """Teste le rendu d'une étape passive (robot)."""
-        from src.modules.cuisine.batch_cooking_detaille import render_etape_batch
+        from src.modules.cuisine.batch_cooking_detaille import afficher_etape_batch
 
-        render_etape_batch(sample_etape, 1, "test_key")
+        afficher_etape_batch(sample_etape, 1, "test_key")
 
         mock_st.container.assert_called()
 
     def test_render_etape_avec_jules(self, mock_st):
         """Teste le rendu d'une étape avec participation Jules."""
-        from src.modules.cuisine.batch_cooking_detaille import render_etape_batch
+        from src.modules.cuisine.batch_cooking_detaille import afficher_etape_batch
 
         etape = {
             "titre": "Mélanger",
@@ -454,17 +454,17 @@ class TestRenderEtapeBatch:
             "tache_jules": "Remuer avec la cuillère",
         }
 
-        render_etape_batch(etape, 1, "test_key")
+        afficher_etape_batch(etape, 1, "test_key")
 
         mock_st.success.assert_called()
 
 
 class TestRenderInstructionRobot:
-    """Tests pour render_instruction_robot."""
+    """Tests pour afficher_instruction_robot."""
 
     def test_render_robot_cookeo(self, mock_st):
         """Teste le rendu d'instructions Cookeo."""
-        from src.modules.cuisine.batch_cooking_detaille import render_instruction_robot
+        from src.modules.cuisine.batch_cooking_detaille import afficher_instruction_robot
 
         robot_config = {
             "type": "cookeo",
@@ -472,13 +472,13 @@ class TestRenderInstructionRobot:
             "duree_secondes": 1200,
         }
 
-        render_instruction_robot(robot_config)
+        afficher_instruction_robot(robot_config)
 
         mock_st.info.assert_called()
 
     def test_render_robot_monsieur_cuisine(self, mock_st):
         """Teste le rendu d'instructions Monsieur Cuisine."""
-        from src.modules.cuisine.batch_cooking_detaille import render_instruction_robot
+        from src.modules.cuisine.batch_cooking_detaille import afficher_instruction_robot
 
         robot_config = {
             "type": "monsieur_cuisine",
@@ -487,13 +487,13 @@ class TestRenderInstructionRobot:
             "temperature": 100,
         }
 
-        render_instruction_robot(robot_config)
+        afficher_instruction_robot(robot_config)
 
         mock_st.info.assert_called()
 
     def test_render_robot_four(self, mock_st):
         """Teste le rendu d'instructions Four."""
-        from src.modules.cuisine.batch_cooking_detaille import render_instruction_robot
+        from src.modules.cuisine.batch_cooking_detaille import afficher_instruction_robot
 
         robot_config = {
             "type": "four",
@@ -502,27 +502,27 @@ class TestRenderInstructionRobot:
             "duree_secondes": 1800,
         }
 
-        render_instruction_robot(robot_config)
+        afficher_instruction_robot(robot_config)
 
         mock_st.info.assert_called()
 
     def test_render_robot_inconnu(self, mock_st):
         """Teste le rendu d'un robot inconnu."""
-        from src.modules.cuisine.batch_cooking_detaille import render_instruction_robot
+        from src.modules.cuisine.batch_cooking_detaille import afficher_instruction_robot
 
         robot_config = {"type": "unknown_robot"}
 
-        render_instruction_robot(robot_config)
+        afficher_instruction_robot(robot_config)
 
         mock_st.info.assert_called()
 
 
 class TestRenderTimelineSession:
-    """Tests pour render_timeline_session."""
+    """Tests pour afficher_timeline_session."""
 
     def test_render_timeline(self, mock_st):
         """Teste le rendu de la timeline."""
-        from src.modules.cuisine.batch_cooking_detaille import render_timeline_session
+        from src.modules.cuisine.batch_cooking_detaille import afficher_timeline_session
 
         etapes = [
             {"titre": "Préparation", "duree_minutes": 15, "est_passif": False},
@@ -530,94 +530,94 @@ class TestRenderTimelineSession:
             {"titre": "Finition", "duree_minutes": 10, "est_passif": False},
         ]
 
-        render_timeline_session(etapes, time(10, 0))
+        afficher_timeline_session(etapes, time(10, 0))
 
         mock_st.markdown.assert_called()
         mock_st.container.assert_called()
 
     def test_render_timeline_vide(self, mock_st):
         """Teste le rendu avec une liste vide."""
-        from src.modules.cuisine.batch_cooking_detaille import render_timeline_session
+        from src.modules.cuisine.batch_cooking_detaille import afficher_timeline_session
 
-        render_timeline_session([], time(10, 0))
+        afficher_timeline_session([], time(10, 0))
 
         mock_st.markdown.assert_called()
 
 
 class TestRenderMomentsJules:
-    """Tests pour render_moments_jules."""
+    """Tests pour afficher_moments_jules."""
 
     def test_render_moments_jules_avec_donnees(self, mock_st):
         """Teste le rendu des moments Jules."""
-        from src.modules.cuisine.batch_cooking_detaille import render_moments_jules
+        from src.modules.cuisine.batch_cooking_detaille import afficher_moments_jules
 
         moments = [
             "0-15min: Laver les légumes",
             "30-40min: Mélanger les ingrédients",
         ]
 
-        render_moments_jules(moments)
+        afficher_moments_jules(moments)
 
         mock_st.markdown.assert_called()
         assert mock_st.success.call_count == 2
 
     def test_render_moments_jules_vide(self, mock_st):
         """Teste le rendu sans moments."""
-        from src.modules.cuisine.batch_cooking_detaille import render_moments_jules
+        from src.modules.cuisine.batch_cooking_detaille import afficher_moments_jules
 
-        render_moments_jules([])
+        afficher_moments_jules([])
 
         mock_st.markdown.assert_not_called()
 
     def test_render_moments_jules_none(self, mock_st):
         """Teste le rendu avec None."""
-        from src.modules.cuisine.batch_cooking_detaille import render_moments_jules
+        from src.modules.cuisine.batch_cooking_detaille import afficher_moments_jules
 
-        render_moments_jules(None)
+        afficher_moments_jules(None)
 
         mock_st.markdown.assert_not_called()
 
 
 class TestRenderListeCoursesBatch:
-    """Tests pour render_liste_courses_batch."""
+    """Tests pour afficher_liste_courses_batch."""
 
     def test_render_liste_courses(self, mock_st, sample_batch_data):
         """Teste le rendu de la liste de courses."""
-        from src.modules.cuisine.batch_cooking_detaille import render_liste_courses_batch
+        from src.modules.cuisine.batch_cooking_detaille import afficher_liste_courses_batch
 
-        render_liste_courses_batch(sample_batch_data["liste_courses"])
+        afficher_liste_courses_batch(sample_batch_data["liste_courses"])
 
         mock_st.markdown.assert_called()
         mock_st.expander.assert_called()
 
     def test_render_liste_courses_vide(self, mock_st):
         """Teste le rendu avec liste vide."""
-        from src.modules.cuisine.batch_cooking_detaille import render_liste_courses_batch
+        from src.modules.cuisine.batch_cooking_detaille import afficher_liste_courses_batch
 
-        render_liste_courses_batch({})
+        afficher_liste_courses_batch({})
 
         mock_st.markdown.assert_called()
 
 
 class TestRenderFinitionJourJ:
-    """Tests pour render_finition_jour_j."""
+    """Tests pour afficher_finition_jour_j."""
 
     def test_render_finition(self, mock_st, sample_batch_data):
         """Teste le rendu des instructions de finition."""
-        from src.modules.cuisine.batch_cooking_detaille import render_finition_jour_j
+        from src.modules.cuisine.batch_cooking_detaille import afficher_finition_jour_j
 
         recette = sample_batch_data["recettes"][0]
-        render_finition_jour_j(recette)
+        afficher_finition_jour_j(recette)
 
         mock_st.markdown.assert_called()
         mock_st.caption.assert_called()
 
     def test_render_finition_avec_version_jules(self, mock_st, sample_batch_data):
         """Teste le rendu avec version Jules."""
-        from src.modules.cuisine.batch_cooking_detaille import render_finition_jour_j
+        from src.modules.cuisine.batch_cooking_detaille import afficher_finition_jour_j
 
         recette = sample_batch_data["recettes"][0]
-        render_finition_jour_j(recette)
+        afficher_finition_jour_j(recette)
 
         mock_st.info.assert_called()
 
@@ -783,16 +783,16 @@ class TestEdgeCases:
 
     def test_ingredient_sans_decoupe(self, mock_st):
         """Teste un ingrédient sans découpe."""
-        from src.modules.cuisine.batch_cooking_detaille import render_ingredient_detaille
+        from src.modules.cuisine.batch_cooking_detaille import afficher_ingredient_detaille
 
         ingredient = {"nom": "huile", "quantite": 2, "unite": "cuillères"}
-        render_ingredient_detaille(ingredient, "test_key")
+        afficher_ingredient_detaille(ingredient, "test_key")
 
         mock_st.container.assert_called()
 
     def test_etape_sans_robot(self, mock_st):
         """Teste une étape sans robot."""
-        from src.modules.cuisine.batch_cooking_detaille import render_etape_batch
+        from src.modules.cuisine.batch_cooking_detaille import afficher_etape_batch
 
         etape = {
             "titre": "Mélanger",
@@ -801,13 +801,13 @@ class TestEdgeCases:
             "robot": None,
         }
 
-        render_etape_batch(etape, 1, "test_key")
+        afficher_etape_batch(etape, 1, "test_key")
 
         mock_st.container.assert_called()
 
     def test_robot_duree_secondes_conversion(self, mock_st):
         """Teste la conversion de durée en minutes."""
-        from src.modules.cuisine.batch_cooking_detaille import render_instruction_robot
+        from src.modules.cuisine.batch_cooking_detaille import afficher_instruction_robot
 
         # Test avec durée > 60 secondes
         robot_config = {
@@ -816,14 +816,14 @@ class TestEdgeCases:
             "duree_secondes": 90,
         }
 
-        render_instruction_robot(robot_config)
+        afficher_instruction_robot(robot_config)
 
         call_args = mock_st.info.call_args[0][0]
         assert "1min30" in call_args or "1min" in call_args
 
     def test_timeline_calcul_temps(self, mock_st):
         """Teste le calcul des temps dans la timeline."""
-        from src.modules.cuisine.batch_cooking_detaille import render_timeline_session
+        from src.modules.cuisine.batch_cooking_detaille import afficher_timeline_session
 
         etapes = [
             {"titre": "Étape 1", "duree_minutes": 30, "est_passif": False},
@@ -831,14 +831,14 @@ class TestEdgeCases:
             {"titre": "Étape 3", "duree_minutes": 15, "est_passif": False},
         ]
 
-        render_timeline_session(etapes, time(10, 0))
+        afficher_timeline_session(etapes, time(10, 0))
 
         # Le test vérifie que le calcul ne génère pas d'erreur
         mock_st.container.assert_called()
 
     def test_planning_preview_repas_manquant(self, mock_st):
         """Teste le preview avec repas manquant."""
-        from src.modules.cuisine.batch_cooking_detaille import render_planning_semaine_preview
+        from src.modules.cuisine.batch_cooking_detaille import afficher_planning_semaine_preview
 
         planning = {
             "Lundi": {
@@ -847,6 +847,6 @@ class TestEdgeCases:
             }
         }
 
-        render_planning_semaine_preview(planning)
+        afficher_planning_semaine_preview(planning)
 
         mock_st.container.assert_called()

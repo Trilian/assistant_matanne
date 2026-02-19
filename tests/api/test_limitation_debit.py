@@ -322,31 +322,6 @@ class TestMiddlewareLimitationDebit:
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS DÉCORATEURS
-# ═══════════════════════════════════════════════════════════
-
-
-class TestDecorateurLimiteDebit:
-    """Tests du décorateur @limite_debit."""
-
-    def test_import_decorateur(self):
-        """Le décorateur s'importe."""
-        from src.api.rate_limiting import limite_debit
-
-        assert callable(limite_debit)
-
-    def test_decorateur_sur_fonction(self):
-        """Le décorateur peut décorer une fonction."""
-        from src.api.rate_limiting import limite_debit
-
-        @limite_debit(requetes_par_minute=10)
-        async def ma_fonction():
-            return "ok"
-
-        assert callable(ma_fonction)
-
-
-# ═══════════════════════════════════════════════════════════
 # TESTS INTÉGRATION
 # ═══════════════════════════════════════════════════════════
 
@@ -477,12 +452,10 @@ class TestUtilitaires:
         # Configurer
         configurer_limites(nouvelle_config)
 
-        # Vérifier
-        from src.api.rate_limiting import (
-            config_limitation_debit as config_après,
-        )
+        # Vérifier via le module config (pas via __init__ qui cache l'ancienne référence)
+        from src.api.rate_limiting import config as config_module
 
-        assert config_après.requetes_par_minute == 999
+        assert config_module.config_limitation_debit.requetes_par_minute == 999
 
 
 class TestLimiteurDebitHeaders:
@@ -690,60 +663,6 @@ class TestStockageTempsReset:
 
         # Devrait être proche de 60 secondes
         assert 55 <= reset <= 60
-
-
-class TestDecorateurLimiteDebitAvance:
-    """Tests avancés pour le décorateur limite_debit."""
-
-    @pytest.mark.asyncio
-    async def test_decorateur_sans_request(self):
-        """Décorateur fonctionne sans Request."""
-        from src.api.rate_limiting import limite_debit
-
-        @limite_debit(requetes_par_minute=10)
-        async def fonction_sans_request():
-            return "ok"
-
-        result = await fonction_sans_request()
-
-        assert result == "ok"
-
-    @pytest.mark.asyncio
-    async def test_decorateur_avec_fonction_cle(self):
-        """Décorateur avec fonction de clé personnalisée."""
-        from fastapi import Request
-
-        from src.api.rate_limiting import limite_debit
-
-        def ma_fonction_cle(request: Request) -> str:
-            return f"custom:{request.client.host}"
-
-        @limite_debit(requetes_par_minute=100, fonction_cle=ma_fonction_cle)
-        async def fonction_avec_cle_custom(request: Request):
-            return "ok"
-
-        request = MagicMock(spec=Request)
-        request.client.host = "1.2.3.4"
-        request.headers.get.return_value = None
-
-        result = await fonction_avec_cle_custom(request)
-
-        assert result == "ok"
-
-    @pytest.mark.asyncio
-    async def test_decorateur_limite_heure(self):
-        """Décorateur avec limite par heure."""
-        from src.api.rate_limiting import limite_debit, reinitialiser_limites
-
-        reinitialiser_limites()
-
-        @limite_debit(requetes_par_heure=100)
-        async def fonction_limite_heure():
-            return "ok"
-
-        result = await fonction_limite_heure()
-
-        assert result == "ok"
 
 
 class TestDependancesFastAPI:

@@ -232,7 +232,7 @@ def count_urgent_purchases() -> int:
 # ═══════════════════════════════════════════════════════════
 
 
-def render_card_jules():
+def afficher_card_jules():
     """Affiche la card Jules"""
     age = calculer_age_jules()
 
@@ -243,7 +243,7 @@ def render_card_jules():
     st.caption(f"🎂 {age['texte']} • 🎨 Activites adaptees")
 
 
-def render_card_weekend():
+def afficher_card_weekend():
     """Affiche la card Weekend"""
     count = count_weekend_activities()
 
@@ -259,7 +259,7 @@ def render_card_weekend():
         st.caption("💡 Decouvrir des idees IA")
 
 
-def render_card_user(username: str, display_name: str, emoji: str):
+def afficher_card_user(username: str, display_name: str, emoji: str):
     """Affiche la card utilisateur (Anne ou Mathieu)"""
     streak = get_user_streak(username)
     garmin = get_user_garmin_connected(username)
@@ -287,7 +287,7 @@ def render_card_user(username: str, display_name: str, emoji: str):
     st.caption(" • ".join(status_parts))
 
 
-def render_card_achats():
+def afficher_card_achats():
     """Affiche la card Achats"""
     pending = count_pending_purchases()
     urgent = count_urgent_purchases()
@@ -325,7 +325,7 @@ def app():
     page = st.session_state.get("famille_page", "hub")
 
     if page == "hub":
-        render_hub()
+        afficher_hub()
     elif page == "jules":
         from src.modules.famille.jules import app as jules_app
 
@@ -355,10 +355,10 @@ def app():
             st.rerun()
         achats_app()
     else:
-        render_hub()
+        afficher_hub()
 
 
-def render_hub():
+def afficher_hub():
     """Affiche le hub principal avec les cards"""
 
     st.markdown("---")
@@ -368,35 +368,35 @@ def render_hub():
 
     with col1:
         with st.container(border=True):
-            render_card_jules()
+            afficher_card_jules()
 
     with col2:
         with st.container(border=True):
-            render_card_weekend()
+            afficher_card_weekend()
 
     # Deuxième ligne: Anne + Mathieu
     col3, col4 = st.columns(2)
 
     with col3:
         with st.container(border=True):
-            render_card_user("anne", "Anne", "👩")
+            afficher_card_user("anne", "Anne", "👩")
 
     with col4:
         with st.container(border=True):
-            render_card_user("mathieu", "Mathieu", "👨")
+            afficher_card_user("mathieu", "Mathieu", "👨")
 
     # Troisième ligne: Achats (pleine largeur)
     with st.container(border=True):
-        render_card_achats()
+        afficher_card_achats()
 
     # Section rapide: Ce weekend
     st.markdown("---")
     st.subheader("🎯 Ce Weekend")
 
-    render_weekend_preview()
+    afficher_weekend_preview()
 
 
-def render_weekend_preview():
+def afficher_weekend_preview():
     """Aperçu rapide du weekend"""
     today = date.today()
 
@@ -418,14 +418,14 @@ def render_weekend_preview():
 
     with col1:
         st.markdown(f"**📅 Samedi {saturday.strftime('%d/%m')}**")
-        _render_day_activities(saturday)
+        _afficher_day_activities(saturday)
 
     with col2:
         st.markdown(f"**📅 Dimanche {sunday.strftime('%d/%m')}**")
-        _render_day_activities(sunday)
+        _afficher_day_activities(sunday)
 
 
-def _render_day_activities(day: date):
+def _afficher_day_activities(day: date):
     """Affiche les activites d'un jour"""
     try:
         with obtenir_contexte_db() as db:

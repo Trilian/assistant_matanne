@@ -61,9 +61,9 @@ from .feedback import (
 from .integrations import (
     GOOGLE_SCOPES,
     REDIRECT_URI_LOCAL,
-    render_google_calendar_config,
-    render_quick_sync_button,
-    render_sync_status,
+    afficher_bouton_sync_rapide,
+    afficher_config_google_calendar,
+    afficher_statut_sync_google,
     verifier_config_google,
 )
 
@@ -174,9 +174,9 @@ __all__ = [
     "GOOGLE_SCOPES",
     "REDIRECT_URI_LOCAL",
     "verifier_config_google",
-    "render_google_calendar_config",
-    "render_sync_status",
-    "render_quick_sync_button",
+    "afficher_config_google_calendar",
+    "afficher_statut_sync_google",
+    "afficher_bouton_sync_rapide",
     # Views
     "afficher_demande_permission_push",
     "afficher_preferences_notification",

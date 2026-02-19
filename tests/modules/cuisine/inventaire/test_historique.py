@@ -1,7 +1,7 @@
 """
 Tests pour src/modules/cuisine/inventaire/historique.py
 
-Tests complets pour render_historique().
+Tests complets pour afficher_historique().
 """
 
 from datetime import datetime
@@ -11,7 +11,7 @@ import pytest
 
 
 class TestRenderHistorique:
-    """Tests pour render_historique()"""
+    """Tests pour afficher_historique()"""
 
     @pytest.fixture
     def mock_st(self):
@@ -23,19 +23,19 @@ class TestRenderHistorique:
     @pytest.fixture
     def mock_service(self):
         """Mock inventaire service"""
-        with patch("src.modules.cuisine.inventaire.historique.get_inventaire_service") as mock:
+        with patch("src.modules.cuisine.inventaire.historique.obtenir_service_inventaire") as mock:
             mock_svc = MagicMock()
             mock.return_value = mock_svc
             yield mock_svc
 
     def test_affiche_erreur_si_service_none(self, mock_st):
         """Vérifie l'erreur si service indisponible"""
-        with patch("src.modules.cuisine.inventaire.historique.get_inventaire_service") as mock:
+        with patch("src.modules.cuisine.inventaire.historique.obtenir_service_inventaire") as mock:
             mock.return_value = None
 
-            from src.modules.cuisine.inventaire.historique import render_historique
+            from src.modules.cuisine.inventaire.historique import afficher_historique
 
-            render_historique()
+            afficher_historique()
 
             mock_st.error.assert_called()
 
@@ -43,9 +43,9 @@ class TestRenderHistorique:
         """Vérifie l'affichage du titre"""
         mock_service.get_historique.return_value = []
 
-        from src.modules.cuisine.inventaire.historique import render_historique
+        from src.modules.cuisine.inventaire.historique import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.subheader.assert_called_once()
         assert "Historique" in mock_st.subheader.call_args[0][0]
@@ -54,9 +54,9 @@ class TestRenderHistorique:
         """Vérifie l'affichage des filtres"""
         mock_service.get_historique.return_value = []
 
-        from src.modules.cuisine.inventaire.historique import render_historique
+        from src.modules.cuisine.inventaire.historique import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.slider.assert_called()
         mock_st.selectbox.assert_called()
@@ -66,9 +66,9 @@ class TestRenderHistorique:
         """Vérifie le message sans historique"""
         mock_service.get_historique.return_value = []
 
-        from src.modules.cuisine.inventaire.historique import render_historique
+        from src.modules.cuisine.inventaire.historique import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.info.assert_called()
 
@@ -103,9 +103,9 @@ class TestRenderHistorique:
             },
         ]
 
-        from src.modules.cuisine.inventaire.historique import render_historique
+        from src.modules.cuisine.inventaire.historique import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         # Le dataframe devrait être créé avec les données filtrées
         mock_st.dataframe.assert_called()
@@ -130,9 +130,9 @@ class TestRenderHistorique:
             }
         ]
 
-        from src.modules.cuisine.inventaire.historique import render_historique
+        from src.modules.cuisine.inventaire.historique import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.dataframe.assert_called_once()
 
@@ -156,9 +156,9 @@ class TestRenderHistorique:
             }
         ]
 
-        from src.modules.cuisine.inventaire.historique import render_historique
+        from src.modules.cuisine.inventaire.historique import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.dataframe.assert_called_once()
 
@@ -182,9 +182,9 @@ class TestRenderHistorique:
             }
         ]
 
-        from src.modules.cuisine.inventaire.historique import render_historique
+        from src.modules.cuisine.inventaire.historique import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.dataframe.assert_called_once()
 
@@ -230,9 +230,9 @@ class TestRenderHistorique:
             },
         ]
 
-        from src.modules.cuisine.inventaire.historique import render_historique
+        from src.modules.cuisine.inventaire.historique import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.dataframe.assert_called_once()
 
@@ -278,9 +278,9 @@ class TestRenderHistorique:
             },
         ]
 
-        from src.modules.cuisine.inventaire.historique import render_historique
+        from src.modules.cuisine.inventaire.historique import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         # Vérifie que metric est appelé pour les stats
         assert mock_st.metric.call_count >= 3
@@ -299,9 +299,9 @@ class TestRenderHistorique:
             }
         ]
 
-        from src.modules.cuisine.inventaire.historique import render_historique
+        from src.modules.cuisine.inventaire.historique import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.info.assert_called()
 
@@ -309,9 +309,9 @@ class TestRenderHistorique:
         """Vérifie la gestion d'erreur du service"""
         mock_service.get_historique.side_effect = Exception("Service error")
 
-        from src.modules.cuisine.inventaire.historique import render_historique
+        from src.modules.cuisine.inventaire.historique import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.error.assert_called()
 
@@ -320,13 +320,13 @@ class TestHistoriqueIntegration:
     """Tests d'intégration pour le module historique"""
 
     def test_import_render_historique(self):
-        """Vérifie que render_historique est importable"""
-        from src.modules.cuisine.inventaire.historique import render_historique
+        """Vérifie que afficher_historique est importable"""
+        from src.modules.cuisine.inventaire.historique import afficher_historique
 
-        assert callable(render_historique)
+        assert callable(afficher_historique)
 
     def test_all_exports(self):
         """Vérifie __all__"""
         from src.modules.cuisine.inventaire.historique import __all__
 
-        assert "render_historique" in __all__
+        assert "afficher_historique" in __all__

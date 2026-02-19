@@ -17,7 +17,7 @@ Importez directement depuis les sous-packages:
     from src.services.cuisine.courses import CoursesService
 
     # Planning
-    from src.services.cuisine.planning import ServicePlanning, get_planning_service
+    from src.services.cuisine.planning import ServicePlanning, obtenir_service_planning
 
     # Utilisateur (auth, historique)
     from src.services.core.utilisateur import AuthService, get_auth_service

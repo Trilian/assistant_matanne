@@ -11,12 +11,12 @@ Fonctionnalités:
 # Import des fonctions pour exposer l'API publique
 from .ai_service import JulesAIService
 from .components import (
-    render_achats_categorie,
-    render_activites,
-    render_conseils,
-    render_dashboard,
-    render_form_ajout_achat,
-    render_shopping,
+    afficher_achats_categorie,
+    afficher_activites,
+    afficher_conseils,
+    afficher_dashboard,
+    afficher_form_ajout_achat,
+    afficher_shopping,
 )
 from .utils import (
     get_achats_jules_en_attente,
@@ -38,16 +38,16 @@ def app():
     tabs = st.tabs(["📊 Dashboard", "🎨 Activités", "🛒 Shopping", "💡 Conseils"])
 
     with tabs[0]:
-        render_dashboard()
+        afficher_dashboard()
 
     with tabs[1]:
-        render_activites()
+        afficher_activites()
 
     with tabs[2]:
-        render_shopping()
+        afficher_shopping()
 
     with tabs[3]:
-        render_conseils()
+        afficher_conseils()
 
 
 __all__ = [
@@ -61,10 +61,10 @@ __all__ = [
     "get_taille_vetements",
     "get_achats_jules_en_attente",
     # UI
-    "render_dashboard",
-    "render_activites",
-    "render_shopping",
-    "render_achats_categorie",
-    "render_form_ajout_achat",
-    "render_conseils",
+    "afficher_dashboard",
+    "afficher_activites",
+    "afficher_shopping",
+    "afficher_achats_categorie",
+    "afficher_form_ajout_achat",
+    "afficher_conseils",
 ]

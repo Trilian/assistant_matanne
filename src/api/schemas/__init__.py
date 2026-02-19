@@ -21,14 +21,10 @@ from .base import (
 
 # Common
 from .common import (
-    CursorPaginationParams,
     ErreurResponse,
     MessageResponse,
     PaginationParams,
-    ReponseCurseur,
     ReponsePaginee,
-    decode_cursor,
-    encode_cursor,
 )
 
 # Courses
@@ -75,10 +71,6 @@ __all__ = [
     "ReponsePaginee",
     "MessageResponse",
     "ErreurResponse",
-    "CursorPaginationParams",
-    "ReponseCurseur",
-    "encode_cursor",
-    "decode_cursor",
     # Auth
     "LoginRequest",
     "UserInfoResponse",

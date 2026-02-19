@@ -174,48 +174,48 @@ class TestImports:
     """Tests d'import."""
 
     def test_import_render_liste(self) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
-        assert callable(render_liste)
+        assert callable(afficher_liste)
 
 
 @pytest.mark.unit
 class TestRenderListeBase:
-    """Tests de base pour render_liste."""
+    """Tests de base pour afficher_liste."""
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_render_liste_basic(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
         mock_service.search_advanced.return_value = []
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.columns.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_render_liste_no_service(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_svc_factory.return_value = None
-        render_liste()
+        afficher_liste()
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_render_liste_with_recettes(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
         recettes = [create_mock_recette(i, nom=f"Recette {i}") for i in range(5)]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.success.assert_called()
 
 
@@ -226,7 +226,7 @@ class TestRenderListeFilters:
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_by_nom(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, nom_filter="tarte")
         mock_service = MagicMock()
@@ -237,39 +237,39 @@ class TestRenderListeFilters:
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_by_type_repas(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, type_repas="dejeuner")
         mock_service = MagicMock()
         mock_service.search_advanced.return_value = [create_mock_recette()]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         call_kwargs = mock_service.search_advanced.call_args[1]
         assert call_kwargs["type_repas"] == "dejeuner"
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_by_difficulte(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, difficulte="difficile")
         mock_service = MagicMock()
         mock_service.search_advanced.return_value = [create_mock_recette()]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         call_kwargs = mock_service.search_advanced.call_args[1]
         assert call_kwargs["difficulte"] == "difficile"
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_score_bio_min(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, min_score_bio=50)
         mock_service = MagicMock()
@@ -280,13 +280,13 @@ class TestRenderListeFilters:
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_score_local_min(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, min_score_local=40)
         mock_service = MagicMock()
@@ -296,7 +296,7 @@ class TestRenderListeFilters:
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.success.assert_called()
 
 
@@ -307,7 +307,7 @@ class TestRenderListeRobotFilters:
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_cookeo(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, checkbox_values={"robot_cookeo": True})
         mock_service = MagicMock()
@@ -317,13 +317,13 @@ class TestRenderListeRobotFilters:
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_monsieur_cuisine(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, checkbox_values={"robot_mc": True})
         mock_service = MagicMock()
@@ -333,13 +333,13 @@ class TestRenderListeRobotFilters:
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_airfryer(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, checkbox_values={"robot_airfryer": True})
         mock_service = MagicMock()
@@ -349,13 +349,13 @@ class TestRenderListeRobotFilters:
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_multicooker(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, checkbox_values={"robot_multicooker": True})
         mock_service = MagicMock()
@@ -365,7 +365,7 @@ class TestRenderListeRobotFilters:
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.success.assert_called()
 
 
@@ -376,7 +376,7 @@ class TestRenderListeTagFilters:
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_rapide(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, checkbox_values={"tag_rapide": True})
         mock_service = MagicMock()
@@ -386,13 +386,13 @@ class TestRenderListeTagFilters:
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_equilibre(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, checkbox_values={"tag_equilibre": True})
         mock_service = MagicMock()
@@ -402,13 +402,13 @@ class TestRenderListeTagFilters:
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_congelable(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, checkbox_values={"tag_congelable": True})
         mock_service = MagicMock()
@@ -418,7 +418,7 @@ class TestRenderListeTagFilters:
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.success.assert_called()
 
 
@@ -429,33 +429,33 @@ class TestRenderListeDisplay:
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_with_image_url(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
         recette = create_mock_recette(1, url_image="https://example.com/img.jpg")
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.markdown.called
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_without_image(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
         recette = create_mock_recette(1, url_image=None)
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.markdown.called
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_with_long_description(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -463,39 +463,39 @@ class TestRenderListeDisplay:
         recette = create_mock_recette(1, description=long_desc)
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.markdown.called
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_without_description(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
         recette = create_mock_recette(1, description=None)
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.markdown.called
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_without_calories(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
         recette = create_mock_recette(1, calories=None)
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.markdown.called
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_difficulty_levels(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -506,7 +506,7 @@ class TestRenderListeDisplay:
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.markdown.called
 
 
@@ -517,7 +517,7 @@ class TestRenderListeBadges:
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_all_badges(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -531,13 +531,13 @@ class TestRenderListeBadges:
         )
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.markdown.called
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_with_robots_compatibles(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -547,20 +547,20 @@ class TestRenderListeBadges:
         )
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.markdown.called
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_with_unknown_robot(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
         recette = create_mock_recette(1, robots_compatibles=["Unknown Robot"])
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.markdown.called
 
 
@@ -571,21 +571,21 @@ class TestRenderListeActions:
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_click_voir_details(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, button_clicked="detail_1")
         mock_service = MagicMock()
         recette = create_mock_recette(1)
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.session_state.get("detail_recette_id") == 1
         # OK
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_click_supprimer_confirm(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, button_clicked="btn_del_oui_1")
         mock_service = MagicMock()
@@ -593,14 +593,14 @@ class TestRenderListeActions:
         recette = create_mock_recette(1)
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_service.delete.assert_called_with(1)
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_click_supprimer_failed(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, button_clicked="btn_del_oui_1")
         mock_service = MagicMock()
@@ -608,14 +608,14 @@ class TestRenderListeActions:
         recette = create_mock_recette(1)
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_service.delete.assert_called()
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_click_supprimer_exception(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, button_clicked="btn_del_oui_1")
         mock_service = MagicMock()
@@ -623,20 +623,20 @@ class TestRenderListeActions:
         recette = create_mock_recette(1)
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_click_annuler_suppression(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, button_clicked="btn_del_non_1")
         mock_service = MagicMock()
         recette = create_mock_recette(1)
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         # OK
 
 
@@ -647,7 +647,7 @@ class TestRenderListePagination:
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_pagination_next_page(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(
             mock_st,
@@ -659,14 +659,14 @@ class TestRenderListePagination:
         recettes = [create_mock_recette(i) for i in range(6)]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         # Pagination next button rendered
         # OK
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_pagination_previous_page(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(
             mock_st,
@@ -678,13 +678,13 @@ class TestRenderListePagination:
         recettes = [create_mock_recette(i) for i in range(6)]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         # Pagination previous button rendered
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_pagination_page_overflow_adjusted(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(
             mock_st,
@@ -695,7 +695,7 @@ class TestRenderListePagination:
         recettes = [create_mock_recette(i) for i in range(3)]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.session_state.recettes_page == 0
 
 
@@ -706,7 +706,7 @@ class TestRenderListeSessionState:
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_init_session_state_page(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         mock_st.session_state = SessionStateMock({"recettes_page_size": 9})
         setup_mock_st(mock_st, session_data={"recettes_page_size": 9})
@@ -716,13 +716,13 @@ class TestRenderListeSessionState:
         mock_service = MagicMock()
         mock_service.search_advanced.return_value = []
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert "recettes_page" in mock_st.session_state
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_init_session_state_page_size(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         mock_st.session_state = SessionStateMock({"recettes_page": 0})
         setup_mock_st(mock_st, session_data={"recettes_page": 0})
@@ -732,7 +732,7 @@ class TestRenderListeSessionState:
         mock_service = MagicMock()
         mock_service.search_advanced.return_value = []
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert "recettes_page_size" in mock_st.session_state
 
 
@@ -743,13 +743,13 @@ class TestRenderListeEmptyResults:
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_no_recettes_found(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
         mock_service.search_advanced.return_value = []
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.info.assert_called()
 
 
@@ -760,25 +760,25 @@ class TestRenderListePageSizes:
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_page_size_6(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, page_size=6)
         mock_service = MagicMock()
         mock_service.search_advanced.return_value = [create_mock_recette(i) for i in range(10)]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.session_state.recettes_page_size == 6
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_page_size_12(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, page_size=12)
         mock_service = MagicMock()
         mock_service.search_advanced.return_value = [create_mock_recette(i) for i in range(20)]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.session_state.recettes_page_size == 12
 
 
@@ -789,19 +789,19 @@ class TestRenderListeEdgeCases:
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_nom_empty_whitespace(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, nom_filter="   ")
         mock_service = MagicMock()
         mock_service.search_advanced.return_value = [create_mock_recette()]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_description_truncate_no_space(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
@@ -809,52 +809,52 @@ class TestRenderListeEdgeCases:
         recette = create_mock_recette(1, description=long_desc)
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.markdown.called
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_recette_score_bio_none(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, min_score_bio=20)
         mock_service = MagicMock()
         recette = create_mock_recette(1, score_bio=None)
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.info.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_recette_score_local_none(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, min_score_local=20)
         mock_service = MagicMock()
         recette = create_mock_recette(1, score_local=None)
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.info.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_difficulty_unknown(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
         recette = create_mock_recette(1, difficulte="expert")
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.markdown.called
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_combined_robot_filters(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(
             mock_st,
@@ -868,7 +868,7 @@ class TestRenderListeEdgeCases:
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         mock_st.success.assert_called()
 
 
@@ -879,13 +879,13 @@ class TestRenderListeMultipleRecettes:
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_grid_3_columns(self, mock_st, mock_svc_factory) -> None:
-        from src.modules.cuisine.recettes.liste import render_liste
+        from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
         mock_service = MagicMock()
         recettes = [create_mock_recette(i, nom=f"Recette {i}") for i in range(5)]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
-        render_liste()
+        afficher_liste()
         assert mock_st.markdown.called
         mock_st.success.assert_called()

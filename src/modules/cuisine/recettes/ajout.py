@@ -13,7 +13,7 @@ from src.services.cuisine.recettes import obtenir_service_recettes
 logger = logging.getLogger(__name__)
 
 
-def render_ajouter_manuel():
+def afficher_ajouter_manuel():
     """Formulaire pour ajouter une recette manuellement"""
     st.subheader("➕ Ajouter une recette manuellement")
 
@@ -189,4 +189,4 @@ def render_ajouter_manuel():
                     logger.error(f"Erreur création recette: {e}")
 
 
-__all__ = ["render_ajouter_manuel"]
+__all__ = ["afficher_ajouter_manuel"]

@@ -39,10 +39,10 @@ from src.core.models import (  # noqa: E402
     Planning,
     Recette,
 )
-from src.services.cuisine.courses import CoursesService  # noqa: E402
-from src.services.cuisine.planning import PlanningService  # noqa: E402
+from src.services.cuisine.courses import ServiceCourses  # noqa: E402
+from src.services.cuisine.planning import ServicePlanning  # noqa: E402
 from src.services.cuisine.recettes import ServiceRecettes  # noqa: E402
-from src.services.inventaire import InventaireService  # noqa: E402
+from src.services.inventaire import ServiceInventaire  # noqa: E402
 
 # ==================== DATABASE SETUP - SQLite JSON compatibility ====================
 
@@ -151,20 +151,20 @@ def recette_service():
 
 @pytest.fixture
 def inventaire_service():
-    """InventaireService instance for testing."""
-    return InventaireService()
+    """ServiceInventaire instance for testing."""
+    return ServiceInventaire()
 
 
 @pytest.fixture
 def planning_service(patch_db_context):
-    """PlanningService instance for testing with test DB."""
-    return PlanningService()
+    """ServicePlanning instance for testing with test DB."""
+    return ServicePlanning()
 
 
 @pytest.fixture
 def courses_service(patch_db_context):
-    """CoursesService instance for testing with test DB."""
-    return CoursesService()
+    """ServiceCourses instance for testing with test DB."""
+    return ServiceCourses()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -384,8 +384,8 @@ def sample_suggestions():
 
 @pytest.fixture
 def courses_service_instance(db_session):
-    """Get or create CoursesService instance for tests"""
-    return CoursesService()
+    """Get or create ServiceCourses instance for tests"""
+    return ServiceCourses()
 
 
 # ═══════════════════════════════════════════════════════════

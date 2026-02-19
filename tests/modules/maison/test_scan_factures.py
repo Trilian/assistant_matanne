@@ -75,31 +75,31 @@ class TestImports:
 
     @patch("src.modules.maison.scan_factures.st")
     def test_import_render_upload(self, mock_st):
-        """Test import fonction render_upload."""
-        from src.modules.maison.scan_factures import render_upload
+        """Test import fonction afficher_upload."""
+        from src.modules.maison.scan_factures import afficher_upload
 
-        assert callable(render_upload)
+        assert callable(afficher_upload)
 
     @patch("src.modules.maison.scan_factures.st")
     def test_import_render_resultat(self, mock_st):
-        """Test import fonction render_resultat."""
-        from src.modules.maison.scan_factures import render_resultat
+        """Test import fonction afficher_resultat."""
+        from src.modules.maison.scan_factures import afficher_resultat
 
-        assert callable(render_resultat)
+        assert callable(afficher_resultat)
 
     @patch("src.modules.maison.scan_factures.st")
     def test_import_render_formulaire_correction(self, mock_st):
-        """Test import fonction render_formulaire_correction."""
-        from src.modules.maison.scan_factures import render_formulaire_correction
+        """Test import fonction afficher_formulaire_correction."""
+        from src.modules.maison.scan_factures import afficher_formulaire_correction
 
-        assert callable(render_formulaire_correction)
+        assert callable(afficher_formulaire_correction)
 
     @patch("src.modules.maison.scan_factures.st")
     def test_import_render_historique(self, mock_st):
-        """Test import fonction render_historique."""
-        from src.modules.maison.scan_factures import render_historique
+        """Test import fonction afficher_historique."""
+        from src.modules.maison.scan_factures import afficher_historique
 
-        assert callable(render_historique)
+        assert callable(afficher_historique)
 
     @patch("src.modules.maison.scan_factures.st")
     def test_import_app(self, mock_st):
@@ -267,16 +267,16 @@ class TestHelpers:
 
 
 class TestRenderUpload:
-    """Tests pour la fonction render_upload."""
+    """Tests pour la fonction afficher_upload."""
 
     @patch("src.modules.maison.scan_factures.st")
     def test_render_upload_no_file(self, mock_st):
-        """Test render_upload sans fichier uploadé."""
+        """Test afficher_upload sans fichier uploadé."""
         mock_st.file_uploader.return_value = None
 
-        from src.modules.maison.scan_factures import render_upload
+        from src.modules.maison.scan_factures import afficher_upload
 
-        result = render_upload()
+        result = afficher_upload()
 
         assert result is None
         mock_st.subheader.assert_called_once()
@@ -285,7 +285,7 @@ class TestRenderUpload:
 
     @patch("src.modules.maison.scan_factures.st")
     def test_render_upload_with_file(self, mock_st):
-        """Test render_upload avec fichier uploadé."""
+        """Test afficher_upload avec fichier uploadé."""
         mock_file = MagicMock()
         mock_file.name = "facture.jpg"
         mock_file.size = 1024 * 500  # 500 Ko
@@ -301,9 +301,9 @@ class TestRenderUpload:
         mock_col2.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = [mock_col1, mock_col2]
 
-        from src.modules.maison.scan_factures import render_upload
+        from src.modules.maison.scan_factures import afficher_upload
 
-        result = render_upload()
+        result = afficher_upload()
 
         assert result == mock_file
         mock_st.image.assert_called()
@@ -312,7 +312,7 @@ class TestRenderUpload:
     @patch("src.modules.maison.scan_factures.image_to_base64")
     @patch("src.modules.maison.scan_factures.get_facture_ocr_service")
     def test_render_upload_analyze_button(self, mock_get_service, mock_to_base64, mock_st):
-        """Test render_upload avec clic sur analyse."""
+        """Test afficher_upload avec clic sur analyse."""
         from src.services.integrations import DonneesFacture, ResultatOCR
 
         mock_file = MagicMock()
@@ -356,9 +356,9 @@ class TestRenderUpload:
         # Mock session_state
         mock_st.session_state = {}
 
-        from src.modules.maison.scan_factures import render_upload
+        from src.modules.maison.scan_factures import afficher_upload
 
-        render_upload()
+        afficher_upload()
 
         mock_st.spinner.assert_called_once()
         mock_to_base64.assert_called_once_with(mock_file)
@@ -372,37 +372,37 @@ class TestRenderUpload:
 
 
 class TestRenderResultat:
-    """Tests pour la fonction render_resultat."""
+    """Tests pour la fonction afficher_resultat."""
 
     @patch("src.modules.maison.scan_factures.st")
     def test_render_resultat_echec(self, mock_st):
-        """Test render_resultat avec échec."""
+        """Test afficher_resultat avec échec."""
         from src.services.integrations import ResultatOCR
 
         resultat = ResultatOCR(succes=False, message="Erreur OCR")
 
-        from src.modules.maison.scan_factures import render_resultat
+        from src.modules.maison.scan_factures import afficher_resultat
 
-        render_resultat(resultat)
+        afficher_resultat(resultat)
 
         mock_st.error.assert_called_once()
 
     @patch("src.modules.maison.scan_factures.st")
     def test_render_resultat_no_data(self, mock_st):
-        """Test render_resultat sans données."""
+        """Test afficher_resultat sans données."""
         from src.services.integrations import ResultatOCR
 
         resultat = ResultatOCR(succes=True, donnees=None)
 
-        from src.modules.maison.scan_factures import render_resultat
+        from src.modules.maison.scan_factures import afficher_resultat
 
-        render_resultat(resultat)
+        afficher_resultat(resultat)
 
         mock_st.warning.assert_called_once()
 
     @patch("src.modules.maison.scan_factures.st")
     def test_render_resultat_success_high_confidence(self, mock_st):
-        """Test render_resultat avec succès et haute confiance."""
+        """Test afficher_resultat avec succès et haute confiance."""
         from src.services.integrations import DonneesFacture, ResultatOCR
 
         donnees = DonneesFacture(
@@ -424,16 +424,16 @@ class TestRenderResultat:
         mock_col2.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = [mock_col1, mock_col2]
 
-        from src.modules.maison.scan_factures import render_resultat
+        from src.modules.maison.scan_factures import afficher_resultat
 
-        render_resultat(resultat)
+        afficher_resultat(resultat)
 
         mock_st.subheader.assert_called_once()
         mock_st.metric.assert_called()
 
     @patch("src.modules.maison.scan_factures.st")
     def test_render_resultat_with_errors(self, mock_st):
-        """Test render_resultat avec erreurs d'extraction."""
+        """Test afficher_resultat avec erreurs d'extraction."""
         from src.services.integrations import DonneesFacture, ResultatOCR
 
         donnees = DonneesFacture(
@@ -454,16 +454,16 @@ class TestRenderResultat:
         mock_col2.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = [mock_col1, mock_col2]
 
-        from src.modules.maison.scan_factures import render_resultat
+        from src.modules.maison.scan_factures import afficher_resultat
 
-        render_resultat(resultat)
+        afficher_resultat(resultat)
 
         # Vérifier que les erreurs sont affichées (2 warnings)
         assert mock_st.warning.call_count == 2
 
     @patch("src.modules.maison.scan_factures.st")
     def test_render_resultat_with_periode(self, mock_st):
-        """Test render_resultat avec période de facturation."""
+        """Test afficher_resultat avec période de facturation."""
         from src.services.integrations import DonneesFacture, ResultatOCR
 
         donnees = DonneesFacture(
@@ -487,9 +487,9 @@ class TestRenderResultat:
         mock_col2.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = [mock_col1, mock_col2]
 
-        from src.modules.maison.scan_factures import render_resultat
+        from src.modules.maison.scan_factures import afficher_resultat
 
-        render_resultat(resultat)
+        afficher_resultat(resultat)
 
         # Vérifier que la période est affichée
         mock_st.markdown.assert_called()
@@ -497,7 +497,7 @@ class TestRenderResultat:
 
     @patch("src.modules.maison.scan_factures.st")
     def test_render_resultat_with_tarif_details(self, mock_st):
-        """Test render_resultat avec détails tarif."""
+        """Test afficher_resultat avec détails tarif."""
         from src.services.integrations import DonneesFacture, ResultatOCR
 
         donnees = DonneesFacture(
@@ -519,9 +519,9 @@ class TestRenderResultat:
         mock_col2.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = [mock_col1, mock_col2]
 
-        from src.modules.maison.scan_factures import render_resultat
+        from src.modules.maison.scan_factures import afficher_resultat
 
-        render_resultat(resultat)
+        afficher_resultat(resultat)
 
         # Les détails tarif devraient être affichés
         mock_st.divider.assert_called()
@@ -533,7 +533,7 @@ class TestRenderResultat:
 
 
 class TestRenderFormulaireCorrection:
-    """Tests pour la fonction render_formulaire_correction."""
+    """Tests pour la fonction afficher_formulaire_correction."""
 
     @patch("src.modules.maison.scan_factures.st")
     def test_render_formulaire_correction_display(self, mock_st):
@@ -568,9 +568,9 @@ class TestRenderFormulaireCorrection:
 
         mock_st.form_submit_button.return_value = False
 
-        from src.modules.maison.scan_factures import render_formulaire_correction
+        from src.modules.maison.scan_factures import afficher_formulaire_correction
 
-        result = render_formulaire_correction(donnees)
+        result = afficher_formulaire_correction(donnees)
 
         mock_st.subheader.assert_called_once()
         mock_st.form.assert_called_once()
@@ -615,9 +615,9 @@ class TestRenderFormulaireCorrection:
 
         mock_st.session_state = {}
 
-        from src.modules.maison.scan_factures import render_formulaire_correction
+        from src.modules.maison.scan_factures import afficher_formulaire_correction
 
-        render_formulaire_correction(donnees)
+        afficher_formulaire_correction(donnees)
 
         mock_sauvegarder.assert_called_once()
         mock_st.success.assert_called_once()
@@ -660,9 +660,9 @@ class TestRenderFormulaireCorrection:
 
         mock_st.session_state = {"ocr_resultat": MagicMock()}
 
-        from src.modules.maison.scan_factures import render_formulaire_correction
+        from src.modules.maison.scan_factures import afficher_formulaire_correction
 
-        render_formulaire_correction(donnees)
+        afficher_formulaire_correction(donnees)
 
         assert "ocr_resultat" not in mock_st.session_state
         mock_st.rerun.assert_called_once()
@@ -674,7 +674,7 @@ class TestRenderFormulaireCorrection:
 
 
 class TestRenderHistorique:
-    """Tests pour la fonction render_historique."""
+    """Tests pour la fonction afficher_historique."""
 
     @patch("src.modules.maison.scan_factures.st")
     @patch("src.modules.maison.scan_factures.obtenir_contexte_db")
@@ -684,9 +684,9 @@ class TestRenderHistorique:
         mock_db.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = []
         mock_db_context.return_value.__enter__.return_value = mock_db
 
-        from src.modules.maison.scan_factures import render_historique
+        from src.modules.maison.scan_factures import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.subheader.assert_called_once()
         mock_st.caption.assert_called()
@@ -727,9 +727,9 @@ class TestRenderHistorique:
         mock_col3.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = [mock_col1, mock_col2, mock_col3]
 
-        from src.modules.maison.scan_factures import render_historique
+        from src.modules.maison.scan_factures import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.subheader.assert_called_once()
         mock_st.container.assert_called()
@@ -741,9 +741,9 @@ class TestRenderHistorique:
         """Test historique avec erreur DB."""
         mock_db_context.return_value.__enter__.side_effect = Exception("Erreur DB")
 
-        from src.modules.maison.scan_factures import render_historique
+        from src.modules.maison.scan_factures import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.error.assert_called()
 
@@ -783,9 +783,9 @@ class TestRenderHistorique:
         mock_col3.__exit__ = MagicMock(return_value=False)
         mock_st.columns.return_value = [mock_col1, mock_col2, mock_col3]
 
-        from src.modules.maison.scan_factures import render_historique
+        from src.modules.maison.scan_factures import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.subheader.assert_called_once()
 
@@ -799,8 +799,8 @@ class TestApp:
     """Tests pour la fonction app principale."""
 
     @patch("src.modules.maison.scan_factures.st")
-    @patch("src.modules.maison.scan_factures.render_upload")
-    @patch("src.modules.maison.scan_factures.render_historique")
+    @patch("src.modules.maison.scan_factures.afficher_upload")
+    @patch("src.modules.maison.scan_factures.afficher_historique")
     def test_app_initial_state(self, mock_historique, mock_upload, mock_st):
         """Test app sans résultat OCR en session."""
         mock_st.session_state = {}
@@ -825,9 +825,9 @@ class TestApp:
         mock_historique.assert_called_once()
 
     @patch("src.modules.maison.scan_factures.st")
-    @patch("src.modules.maison.scan_factures.render_resultat")
-    @patch("src.modules.maison.scan_factures.render_formulaire_correction")
-    @patch("src.modules.maison.scan_factures.render_historique")
+    @patch("src.modules.maison.scan_factures.afficher_resultat")
+    @patch("src.modules.maison.scan_factures.afficher_formulaire_correction")
+    @patch("src.modules.maison.scan_factures.afficher_historique")
     def test_app_with_ocr_result(self, mock_historique, mock_correction, mock_resultat, mock_st):
         """Test app avec résultat OCR en session."""
         from src.services.integrations import DonneesFacture, ResultatOCR
@@ -860,8 +860,8 @@ class TestApp:
         mock_historique.assert_called_once()
 
     @patch("src.modules.maison.scan_factures.st")
-    @patch("src.modules.maison.scan_factures.render_upload")
-    @patch("src.modules.maison.scan_factures.render_historique")
+    @patch("src.modules.maison.scan_factures.afficher_upload")
+    @patch("src.modules.maison.scan_factures.afficher_historique")
     def test_app_with_failed_ocr(self, mock_historique, mock_upload, mock_st):
         """Test app avec OCR échoué."""
         from src.services.integrations import ResultatOCR
@@ -887,8 +887,8 @@ class TestApp:
         mock_st.error.assert_called()
 
     @patch("src.modules.maison.scan_factures.st")
-    @patch("src.modules.maison.scan_factures.render_upload")
-    @patch("src.modules.maison.scan_factures.render_historique")
+    @patch("src.modules.maison.scan_factures.afficher_upload")
+    @patch("src.modules.maison.scan_factures.afficher_historique")
     def test_app_tabs_structure(self, mock_historique, mock_upload, mock_st):
         """Test structure des onglets."""
         mock_st.session_state = {}

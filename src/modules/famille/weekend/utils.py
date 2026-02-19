@@ -17,6 +17,7 @@ from src.core.ai import ClientIA
 from src.core.db import obtenir_contexte_db
 from src.core.models import ChildProfile, WeekendActivity
 from src.services.core.base import BaseAIService
+from src.ui import etat_vide
 
 TYPES_ACTIVITES = {
     "parc": {"emoji": "🌳", "label": "Parc / Nature"},

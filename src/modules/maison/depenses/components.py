@@ -32,7 +32,7 @@ from .crud import (
 from .utils import CATEGORY_LABELS, MOIS_FR, Decimal, HouseExpense, Optional, date, st
 
 
-def render_stats_dashboard():
+def afficher_stats_dashboard():
     """Affiche le dashboard de stats"""
     stats = get_stats_globales()
     today = date.today()
@@ -55,7 +55,7 @@ def render_stats_dashboard():
         st.metric("Categories", stats["nb_categories"])
 
 
-def render_depense_card(depense: HouseExpense):
+def afficher_depense_card(depense: HouseExpense):
     """Affiche une card de depense"""
     with st.container(border=True):
         col1, col2, col3 = st.columns([2, 1, 1])
@@ -92,7 +92,7 @@ def render_depense_card(depense: HouseExpense):
                     st.rerun()
 
 
-def render_formulaire(depense: Optional[HouseExpense] = None):
+def afficher_formulaire(depense: Optional[HouseExpense] = None):
     """Formulaire d'ajout/edition"""
     is_edit = depense is not None
     prefix = "edit" if is_edit else "new"
@@ -185,7 +185,7 @@ def render_formulaire(depense: Optional[HouseExpense] = None):
             st.rerun()
 
 
-def render_graphique_evolution():
+def afficher_graphique_evolution():
     """Affiche le graphique d'evolution avec Plotly"""
     st.subheader("📈 Évolution")
 
@@ -266,7 +266,7 @@ def render_graphique_evolution():
             st.bar_chart(df.set_index("Mois")["Montant"])
 
 
-def render_graphique_repartition():
+def afficher_graphique_repartition():
     """Affiche un graphique camembert de répartition par catégorie."""
     st.subheader("🥧 Répartition par catégorie")
 
@@ -324,7 +324,7 @@ def render_graphique_repartition():
             st.write(f"{cat}: {montant:.0f}€")
 
 
-def render_export_section():
+def afficher_export_section():
     """Section d'export PDF/CSV des dépenses."""
     st.subheader("📥 Export des données")
 
@@ -397,7 +397,7 @@ def render_export_section():
         st.success("✅ Export généré avec succès !")
 
 
-def render_previsions_ia():
+def afficher_previsions_ia():
     """Affiche les prévisions IA pour les prochains mois."""
     st.subheader("🤖 Prévisions IA")
 
@@ -558,7 +558,7 @@ def render_previsions_ia():
         st.markdown(insight)
 
 
-def render_comparaison_mois():
+def afficher_comparaison_mois():
     """Compare les depenses de 2 mois"""
     st.subheader("⚖️ Comparaison")
 
@@ -622,7 +622,7 @@ def render_comparaison_mois():
         st.markdown(f"**TOTAL**: {total1:.0f}€ vs {total2:.0f}€ = **{delta_total:+.0f}€**")
 
 
-def render_onglet_mois():
+def afficher_onglet_mois():
     """Onglet depenses du mois"""
     today = date.today()
 
@@ -647,16 +647,16 @@ def render_onglet_mois():
     st.divider()
 
     for depense in depenses:
-        render_depense_card(depense)
+        afficher_depense_card(depense)
 
 
-def render_onglet_ajouter():
+def afficher_onglet_ajouter():
     """Onglet ajout"""
     st.subheader("➕ Ajouter une depense")
-    render_formulaire(None)
+    afficher_formulaire(None)
 
 
-def render_onglet_analyse():
+def afficher_onglet_analyse():
     """Onglet analyse et graphiques enrichie avec Plotly, export et prévisions IA."""
 
     # Sous-onglets pour organisation
@@ -665,15 +665,15 @@ def render_onglet_analyse():
     )
 
     with sub_tab1:
-        render_graphique_evolution()
+        afficher_graphique_evolution()
         st.divider()
-        render_comparaison_mois()
+        afficher_comparaison_mois()
 
     with sub_tab2:
-        render_graphique_repartition()
+        afficher_graphique_repartition()
 
     with sub_tab3:
-        render_previsions_ia()
+        afficher_previsions_ia()
 
     with sub_tab4:
-        render_export_section()
+        afficher_export_section()

@@ -63,6 +63,7 @@ from src.ui.layout import (
     initialiser_app,
     injecter_css,
 )
+from src.ui.views.pwa import injecter_meta_pwa
 
 parametres = obtenir_parametres()
 
@@ -85,6 +86,9 @@ st.set_page_config(
 
 # Injecter CSS
 injecter_css()
+
+# Injecter les meta tags PWA (manifest, service worker, icons)
+injecter_meta_pwa()
 
 # Initialiser
 if not initialiser_app():

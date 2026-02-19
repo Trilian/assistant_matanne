@@ -14,7 +14,7 @@ from .utils import (
 )
 
 
-def render_food_log(username: str):
+def afficher_food_log(username: str):
     """Affiche et permet d'ajouter des logs alimentation"""
     st.subheader("🥗 Alimentation")
 
@@ -49,10 +49,10 @@ def render_food_log(username: str):
                             st.write("⭐" * log.qualite)
 
     with tabs[1]:
-        render_food_form(username)
+        afficher_food_form(username)
 
 
-def render_food_form(username: str):
+def afficher_food_form(username: str):
     """Formulaire d'ajout de repas"""
     with st.form("add_food"):
         repas = st.selectbox(

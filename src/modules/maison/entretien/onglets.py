@@ -5,6 +5,8 @@ from datetime import date, datetime, timedelta
 
 import streamlit as st
 
+from src.ui import etat_vide
+
 from .data import charger_catalogue_entretien
 from .logic import (
     calculer_score_proprete,
@@ -625,7 +627,7 @@ def onglet_export(mes_objets: list[dict], historique: list[dict]):
         st.markdown("### 📜 Historique des entretiens")
 
         if not historique:
-            st.info("Aucun historique à exporter.")
+            etat_vide("Aucun historique à exporter", "📜")
         else:
             # Préparer le DataFrame
             df_hist = pd.DataFrame(
@@ -659,7 +661,7 @@ def onglet_export(mes_objets: list[dict], historique: list[dict]):
         st.markdown("### 📦 Inventaire équipements")
 
         if not mes_objets:
-            st.info("Aucun équipement à exporter.")
+            etat_vide("Aucun équipement à exporter", "📦")
         else:
             df_inv = pd.DataFrame(
                 [

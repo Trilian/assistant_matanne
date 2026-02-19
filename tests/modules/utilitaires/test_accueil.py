@@ -15,49 +15,49 @@ class TestAccueil:
         pass
 
     def test_render_graphiques_enrichis(self):
-        """Test de la fonction render_graphiques_enrichis"""
+        """Test de la fonction afficher_graphiques_enrichis"""
         # Affiche les graphiques Plotly enrichis.
         # TODO: Implémenter le test
         pass
 
     def test_render_critical_alerts(self):
-        """Test de la fonction render_critical_alerts"""
+        """Test de la fonction afficher_critical_alerts"""
         # Affiche les alertes importantes
         # TODO: Implémenter le test
         pass
 
     def test_render_global_stats(self):
-        """Test de la fonction render_global_stats"""
+        """Test de la fonction afficher_global_stats"""
         # Stats globales de l'application
         # TODO: Implémenter le test
         pass
 
     def test_render_quick_actions(self):
-        """Test de la fonction render_quick_actions"""
+        """Test de la fonction afficher_quick_actions"""
         # Raccourcis d'actions rapides
         # TODO: Implémenter le test
         pass
 
     def test_render_cuisine_summary(self):
-        """Test de la fonction render_cuisine_summary"""
+        """Test de la fonction afficher_cuisine_summary"""
         # Resume module Cuisine
         # TODO: Implémenter le test
         pass
 
     def test_render_inventaire_summary(self):
-        """Test de la fonction render_inventaire_summary"""
+        """Test de la fonction afficher_inventaire_summary"""
         # Resume inventaire
         # TODO: Implémenter le test
         pass
 
     def test_render_courses_summary(self):
-        """Test de la fonction render_courses_summary"""
+        """Test de la fonction afficher_courses_summary"""
         # Resume courses
         # TODO: Implémenter le test
         pass
 
     def test_render_planning_summary(self):
-        """Test de la fonction render_planning_summary"""
+        """Test de la fonction afficher_planning_summary"""
         # Resume planning
         # TODO: Implémenter le test
         pass

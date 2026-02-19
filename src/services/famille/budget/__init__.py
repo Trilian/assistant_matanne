@@ -51,7 +51,7 @@ from .utils import (
     valider_montant,
 )
 
-# NOTE: render_budget_dashboard déplacé vers src/modules/famille/budget_dashboard.py
+# NOTE: afficher_budget_dashboard déplacé vers src/modules/famille/budget_dashboard.py
 # Ne plus importer l'UI depuis ce package services
 
 

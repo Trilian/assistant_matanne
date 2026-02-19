@@ -5,7 +5,7 @@ Module Suivi Perso - Paramètres Garmin et objectifs
 from .utils import UserProfile, get_garmin_service, obtenir_contexte_db, st
 
 
-def render_garmin_settings(data: dict):
+def afficher_garmin_settings(data: dict):
     """Affiche les paramètres Garmin"""
     st.subheader("⌚ Garmin Connect")
 
@@ -91,7 +91,7 @@ def render_garmin_settings(data: dict):
                 """)
 
 
-def render_objectifs(data: dict):
+def afficher_objectifs(data: dict):
     """Affiche et permet de modifier les objectifs"""
     st.subheader("🎯 Objectifs")
 

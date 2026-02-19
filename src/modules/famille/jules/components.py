@@ -16,7 +16,7 @@ from .utils import (
 )
 
 
-def render_dashboard():
+def afficher_dashboard():
     """Affiche le dashboard Jules"""
     age = get_age_jules()
     tailles = get_taille_vetements(age["mois"])
@@ -44,7 +44,7 @@ def render_dashboard():
             st.write(f"{emoji} {achat.nom} ({achat.categorie.replace('jules_', '')})")
 
 
-def render_activites():
+def afficher_activites():
     """Affiche les activites du jour"""
     age = get_age_jules()
     activites = get_activites_pour_age(age["mois"])
@@ -98,7 +98,7 @@ def render_activites():
             st.rerun()
 
 
-def render_shopping():
+def afficher_shopping():
     """Affiche le shopping Jules"""
     age = get_age_jules()
     tailles = get_taille_vetements(age["mois"])
@@ -114,10 +114,10 @@ def render_shopping():
     tabs = st.tabs(["👕 Vêtements", "🧸 Jouets", "🛠️ Équipement", "➕ Ajouter"])
 
     with tabs[0]:
-        render_achats_categorie("jules_vetements")
+        afficher_achats_categorie("jules_vetements")
 
     with tabs[1]:
-        render_achats_categorie("jules_jouets")
+        afficher_achats_categorie("jules_jouets")
 
         # Suggestions IA jouets
         if st.button("🤖 Suggerer des jouets"):
@@ -132,13 +132,13 @@ def render_shopping():
                     st.error(f"Erreur: {e}")
 
     with tabs[2]:
-        render_achats_categorie("jules_equipement")
+        afficher_achats_categorie("jules_equipement")
 
     with tabs[3]:
-        render_form_ajout_achat()
+        afficher_form_ajout_achat()
 
 
-def render_achats_categorie(categorie: str):
+def afficher_achats_categorie(categorie: str):
     """Affiche les achats d'une categorie"""
     try:
         with obtenir_contexte_db() as db:
@@ -185,7 +185,7 @@ def render_achats_categorie(categorie: str):
         st.error(f"Erreur: {e}")
 
 
-def render_form_ajout_achat():
+def afficher_form_ajout_achat():
     """Formulaire d'ajout d'achat"""
     with st.form("add_purchase_jules"):
         nom = st.text_input("Nom de l'article *")
@@ -238,7 +238,7 @@ def render_form_ajout_achat():
                     st.error(f"Erreur: {e}")
 
 
-def render_conseils():
+def afficher_conseils():
     """Affiche les conseils developpement"""
     age = get_age_jules()
 

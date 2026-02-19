@@ -30,8 +30,8 @@ class BaseUITest:
 
             def test_render_liste(self):
                 with self.mock_streamlit() as mock_st:
-                    from src.modules.cuisine.recettes import render_liste
-                    render_liste()
+                    from src.modules.cuisine.recettes import afficher_liste
+                    afficher_liste()
                     self.assert_called(mock_st, "title")
     """
 

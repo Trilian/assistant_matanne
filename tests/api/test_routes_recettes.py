@@ -96,7 +96,7 @@ class TestSchemasRecettes:
 
     def test_recette_base_creation(self):
         """RecetteBase valide."""
-        from src.api.routes.recettes import RecetteBase
+        from src.api.schemas import RecetteBase
 
         recette = RecetteBase(nom="Test recette")
 
@@ -109,14 +109,14 @@ class TestSchemasRecettes:
         """Nom vide est rejeté."""
         from pydantic import ValidationError
 
-        from src.api.routes.recettes import RecetteBase
+        from src.api.schemas import RecetteBase
 
         with pytest.raises(ValidationError):
             RecetteBase(nom="")
 
     def test_recette_base_nom_strip(self):
         """Le nom est nettoyé des espaces."""
-        from src.api.routes.recettes import RecetteBase
+        from src.api.schemas import RecetteBase
 
         recette = RecetteBase(nom="  Ma recette  ")
 
@@ -124,7 +124,7 @@ class TestSchemasRecettes:
 
     def test_recette_create_avec_ingredients(self):
         """RecetteCreate accepte les ingrédients."""
-        from src.api.routes.recettes import RecetteCreate
+        from src.api.schemas import RecetteCreate
 
         recette = RecetteCreate(
             nom="Test",
@@ -137,7 +137,7 @@ class TestSchemasRecettes:
 
     def test_recette_response_validation(self):
         """RecetteResponse valide les données."""
-        from src.api.routes.recettes import RecetteResponse
+        from src.api.schemas import RecetteResponse
 
         data = RECETTES_TEST[0].copy()
         recette = RecetteResponse(**data)

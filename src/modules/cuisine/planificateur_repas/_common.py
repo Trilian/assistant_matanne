@@ -46,7 +46,7 @@ from src.modules.cuisine.planificateur_repas.utils import (
     valider_equilibre_semaine,
 )
 from src.services.core.utilisateur import get_user_preference_service
-from src.services.cuisine.planning import get_planning_service
+from src.services.cuisine.planning import obtenir_service_planning
 from src.services.cuisine.recettes import obtenir_service_recettes
 
 __all__ = [
@@ -67,7 +67,7 @@ __all__ = [
     "SessionBatchCooking",
     "obtenir_client_ia",
     "obtenir_service_recettes",
-    "get_planning_service",
+    "obtenir_service_planning",
     "get_user_preference_service",
     # Logic - constants
     "JOURS_SEMAINE",

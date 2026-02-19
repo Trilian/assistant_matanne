@@ -2,10 +2,10 @@
 Génération de courses depuis le planning repas.
 """
 
-from ._common import get_courses_intelligentes_service, st
+from ._common import obtenir_service_courses_intelligentes, st
 
 
-def render_courses_depuis_planning():
+def afficher_courses_depuis_planning():
     """Génère la liste de courses depuis le planning repas actif."""
     st.subheader("🍽️ Courses depuis le Planning")
 
@@ -16,7 +16,7 @@ def render_courses_depuis_planning():
     compare avec votre inventaire et génère une liste optimisée.
     """)
 
-    service = get_courses_intelligentes_service()
+    service = obtenir_service_courses_intelligentes()
 
     # Vérifier planning actif
     planning = service.obtenir_planning_actif()
@@ -163,4 +163,4 @@ def render_courses_depuis_planning():
         """)
 
 
-__all__ = ["render_courses_depuis_planning"]
+__all__ = ["afficher_courses_depuis_planning"]

@@ -1,4 +1,4 @@
-"""Module Maison - Gestion intégrée de l'habitat.
+"""Module Maison - Gestion intégrée de l'habitat avec lazy loading.
 
 Sous-modules disponibles:
 - hub: Hub central intelligent avec briefing IA
@@ -8,14 +8,6 @@ Sous-modules disponibles:
 - depenses: Suivi dépenses maison
 """
 
-from . import (
-    charges,
-    depenses,
-    entretien,
-    hub,
-    jardin,
-)
-
 __all__ = [
     "charges",
     "depenses",
@@ -23,3 +15,14 @@ __all__ = [
     "hub",
     "jardin",
 ]
+
+
+def __getattr__(name: str):
+    """Import differé pour éviter les imports circulaires."""
+    if name in __all__:
+        from importlib import import_module
+
+        module = import_module(f".{name}", __package__)
+        globals()[name] = module
+        return module
+    raise AttributeError(f"module 'src.modules.maison' has no attribute '{name}'")

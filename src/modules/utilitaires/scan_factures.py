@@ -11,6 +11,8 @@ from datetime import date
 
 import streamlit as st
 
+from src.ui import etat_vide
+
 logger = logging.getLogger(__name__)
 
 
@@ -125,7 +127,7 @@ def _afficher_historique():
     historique = st.session_state.get("historique_factures", [])
 
     if not historique:
-        st.info("Aucune facture scannée. Utilisez l'onglet Scanner pour commencer.")
+        etat_vide("Aucune facture scannée", "📄", "Utilisez l'onglet Scanner pour commencer")
         return
 
     for i, facture in enumerate(reversed(historique)):

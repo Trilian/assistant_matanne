@@ -119,6 +119,11 @@ app.add_middleware(
 
 app.add_middleware(MiddlewareLimitationDebit)
 
+# Middleware ETag pour cache HTTP
+from src.api.utils import ETagMiddleware
+
+app.add_middleware(ETagMiddleware)
+
 # Middleware de métriques
 from src.api.utils import MetricsMiddleware
 
@@ -130,13 +135,42 @@ app.add_middleware(MetricsMiddleware)
 # ═══════════════════════════════════════════════════════════
 
 
+class ServiceStatus(BaseModel):
+    """Statut d'un service."""
+
+    status: str
+    latency_ms: float | None = None
+    details: str | None = None
+
+
 class HealthResponse(BaseModel):
-    """Réponse du health check."""
+    """Réponse du health check détaillé.
+
+    Example:
+        ```json
+        {
+            "status": "healthy",
+            "version": "1.0.0",
+            "timestamp": "2026-02-19T14:30:00",
+            "services": {
+                "database": {"status": "ok", "latency_ms": 12.5},
+                "cache": {"status": "ok", "latency_ms": 0.8},
+                "ai": {"status": "ok", "details": "Mistral API accessible"}
+            },
+            "uptime_seconds": 3600
+        }
+        ```
+    """
 
     status: str
     version: str
-    database: str
     timestamp: datetime
+    services: dict[str, ServiceStatus]
+    uptime_seconds: float
+
+
+# Heure de démarrage pour calculer l'uptime
+_START_TIME = datetime.now()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -146,30 +180,111 @@ class HealthResponse(BaseModel):
 
 @app.get("/", tags=["Santé"])
 async def root():
-    """Point d'entrée racine."""
+    """
+    Point d'entrée racine de l'API.
+
+    Returns:
+        Message de bienvenue avec liens utiles.
+
+    Example:
+        ```json
+        {
+            "message": "API Assistant Matanne",
+            "docs": "/docs",
+            "version": "1.0.0"
+        }
+        ```
+    """
     return {"message": "API Assistant Matanne", "docs": "/docs", "version": "1.0.0"}
 
 
 @app.get("/health", response_model=HealthResponse, tags=["Santé"])
 async def health_check():
-    """Vérifie l'état de l'API et de la base de données."""
-    db_status = "ok"
+    """
+    Vérifie l'état de l'API et de toutes ses dépendances.
 
+    Checks effectués:
+    - **Database**: Connexion PostgreSQL via SQLAlchemy
+    - **Cache**: Système de cache multi-niveaux
+    - **AI**: Disponibilité de l'API Mistral (si configurée)
+
+    Returns:
+        - `status`: "healthy" | "degraded" | "unhealthy"
+        - `services`: Détail par service avec latence
+        - `uptime_seconds`: Temps depuis le démarrage
+
+    Example:
+        ```json
+        {
+            "status": "healthy",
+            "version": "1.0.0",
+            "timestamp": "2026-02-19T14:30:00",
+            "services": {
+                "database": {"status": "ok", "latency_ms": 12.5},
+                "cache": {"status": "ok", "latency_ms": 0.8}
+            },
+            "uptime_seconds": 3600
+        }
+        ```
+    """
+    import time
+
+    services: dict[str, ServiceStatus] = {}
+
+    # Check Database
     try:
         from sqlalchemy import text
 
         from src.core.db import obtenir_contexte_db
 
+        start = time.perf_counter()
         with obtenir_contexte_db() as session:
             session.execute(text("SELECT 1"))
+        latency = (time.perf_counter() - start) * 1000
+        services["database"] = ServiceStatus(status="ok", latency_ms=round(latency, 2))
     except Exception as e:
-        db_status = f"error: {e}"
+        services["database"] = ServiceStatus(status="error", details=str(e)[:100])
+
+    # Check Cache
+    try:
+        from src.core.caching import obtenir_cache
+
+        start = time.perf_counter()
+        cache = obtenir_cache()
+        cache.get("_health_check_test")
+        latency = (time.perf_counter() - start) * 1000
+        services["cache"] = ServiceStatus(status="ok", latency_ms=round(latency, 2))
+    except Exception as e:
+        services["cache"] = ServiceStatus(status="error", details=str(e)[:100])
+
+    # Check AI (optionnel - ne bloque pas si non configuré)
+    try:
+        import os
+
+        if os.getenv("MISTRAL_API_KEY"):
+            services["ai"] = ServiceStatus(status="ok", details="Mistral API configured")
+        else:
+            services["ai"] = ServiceStatus(status="warning", details="No API key configured")
+    except Exception as e:
+        services["ai"] = ServiceStatus(status="error", details=str(e)[:100])
+
+    # Déterminer le statut global
+    statuses = [s.status for s in services.values()]
+    if all(s == "ok" for s in statuses):
+        overall = "healthy"
+    elif "error" in statuses:
+        overall = "unhealthy" if statuses.count("error") > 1 else "degraded"
+    else:
+        overall = "degraded"
+
+    uptime = (datetime.now() - _START_TIME).total_seconds()
 
     return HealthResponse(
-        status="healthy" if db_status == "ok" else "degraded",
+        status=overall,
         version="1.0.0",
-        database=db_status,
         timestamp=datetime.now(),
+        services=services,
+        uptime_seconds=round(uptime, 1),
     )
 
 

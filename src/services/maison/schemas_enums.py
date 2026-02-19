@@ -2,22 +2,17 @@
 Enums pour les services Maison.
 
 Tous les StrEnum/Enum utilisés par les schemas du module maison:
-- NiveauUrgence, TypeAlerteMaison, CategorieObjet
-- TypeZoneJardin, EtatPlante, StatutObjet
-- TypeModificationPiece, PrioriteRemplacement
+- NiveauUrgence, TypeAlerteMaison
+- TypeZoneJardin, EtatPlante
 """
 
-from enum import Enum, StrEnum
+from enum import StrEnum
 
 __all__ = [
     "NiveauUrgence",
     "TypeAlerteMaison",
-    "CategorieObjet",
     "TypeZoneJardin",
     "EtatPlante",
-    "StatutObjet",
-    "TypeModificationPiece",
-    "PrioriteRemplacement",
 ]
 
 
@@ -45,22 +40,6 @@ class TypeAlerteMaison(StrEnum):
     STOCK = "stock"
     ENERGIE = "energie"
     JARDIN = "jardin"
-
-
-class CategorieObjet(StrEnum):
-    """Catégories d'objets maison."""
-
-    ELECTROMENAGER = "electromenager"
-    VAISSELLE = "vaisselle"
-    OUTIL = "outil"
-    DECORATION = "decoration"
-    VETEMENT = "vetement"
-    ELECTRONIQUE = "electronique"
-    MEUBLE = "meuble"
-    LINGE = "linge"
-    JOUET = "jouet"
-    LIVRE = "livre"
-    AUTRE = "autre"
 
 
 class TypeZoneJardin(StrEnum):
@@ -91,38 +70,3 @@ class EtatPlante(StrEnum):
     ATTENTION = "attention"
     PROBLEME = "probleme"
     RECOLTE = "recolte"
-
-
-class StatutObjet(StrEnum):
-    """Statut d'un objet dans l'inventaire."""
-
-    FONCTIONNE = "fonctionne"  # En bon état
-    A_REPARER = "a_reparer"  # Nécessite réparation
-    A_CHANGER = "a_changer"  # À remplacer
-    A_ACHETER = "a_acheter"  # Nouvel achat prévu
-    EN_COMMANDE = "en_commande"  # Déjà commandé
-    HORS_SERVICE = "hors_service"  # Ne fonctionne plus
-    A_DONNER = "a_donner"  # À donner/vendre
-    ARCHIVE = "archive"  # Historique seulement
-
-
-class TypeModificationPiece(StrEnum):
-    """Types de modifications de pièce."""
-
-    AJOUT_MEUBLE = "ajout_meuble"
-    RETRAIT_MEUBLE = "retrait_meuble"
-    DEPLACEMENT = "deplacement"
-    RENOVATION = "renovation"
-    PEINTURE = "peinture"
-    AMENAGEMENT = "amenagement"
-    REPARATION = "reparation"
-
-
-class PrioriteRemplacement(StrEnum):
-    """Priorité pour remplacement d'objet."""
-
-    URGENTE = "urgente"  # Dans la semaine
-    HAUTE = "haute"  # Dans le mois
-    NORMALE = "normale"  # Quand budget permet
-    BASSE = "basse"  # Optionnel
-    FUTURE = "future"  # Un jour...

@@ -2,17 +2,19 @@
 Module Suivi Perso - Activités sportives
 """
 
+from src.ui import etat_vide
+
 from .utils import st
 
 
-def render_activities(data: dict):
+def afficher_activities(data: dict):
     """Affiche les activités sportives"""
     st.subheader("🏃 Activités récentes")
 
     activities = data.get("activities", [])
 
     if not activities:
-        st.info("Aucune activité enregistrée cette semaine")
+        etat_vide("Aucune activité enregistrée", "🏃", "Commencez à suivre vos activités !")
         return
 
     for act in sorted(activities, key=lambda x: x.date_debut, reverse=True)[:5]:

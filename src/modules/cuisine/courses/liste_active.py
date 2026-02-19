@@ -6,9 +6,9 @@ from ._common import (
     PRIORITY_EMOJIS,
     RAYONS_DEFAULT,
     datetime,
-    get_courses_service,
-    get_inventaire_service,
     logger,
+    obtenir_service_courses,
+    obtenir_service_inventaire,
     st,
 )
 from .liste_utils import (
@@ -18,10 +18,10 @@ from .liste_utils import (
 )
 
 
-def render_liste_active():
+def afficher_liste_active():
     """Gestion interactive de la liste active"""
-    service = get_courses_service()
-    inventaire_service = get_inventaire_service()
+    service = obtenir_service_courses()
+    inventaire_service = obtenir_service_inventaire()
 
     if service is None:
         st.error("❌ Service courses indisponible")
@@ -92,7 +92,7 @@ def render_liste_active():
 
         for rayon in sorted(rayons.keys()):
             with st.expander(f"🍪‘ {rayon} ({len(rayons[rayon])} articles)", expanded=True):
-                render_rayon_articles(service, rayon, rayons[rayon])
+                afficher_rayon_articles(service, rayon, rayons[rayon])
 
         st.divider()
 
@@ -104,7 +104,7 @@ def render_liste_active():
                 st.rerun()
         with col2:
             if st.button("📄 Imprimer liste", use_container_width=True):
-                render_print_view(liste_filtree)
+                afficher_print_view(liste_filtree)
         with col3:
             if st.button("🗑️ Vider (achetés)", use_container_width=True):
                 if service.get_liste_courses(achetes=True):
@@ -115,14 +115,14 @@ def render_liste_active():
         # Formulaire ajout article
         if st.session_state.new_article_mode:
             st.divider()
-            render_ajouter_article()
+            afficher_ajouter_article()
 
     except Exception as e:
         st.error(f"❌ Erreur: {str(e)}")
-        logger.error(f"Erreur render_liste_active: {e}")
+        logger.error(f"Erreur afficher_liste_active: {e}")
 
 
-def render_rayon_articles(service, rayon: str, articles: list):
+def afficher_rayon_articles(service, rayon: str, articles: list):
     """Affiche et gère les articles d'un rayon"""
     for article in articles:
         col1, col2, col3, col4 = st.columns([4, 1, 1, 1], gap="small")
@@ -236,11 +236,11 @@ def render_rayon_articles(service, rayon: str, articles: list):
                         st.rerun()
 
 
-def render_ajouter_article():
+def afficher_ajouter_article():
     """Formulaire ajout article"""
     st.subheader("➕ Ajouter un article")
 
-    service = get_courses_service()
+    service = obtenir_service_courses()
     if service is None:
         st.error("❌ Service indisponible")
         return
@@ -304,7 +304,7 @@ def render_ajouter_article():
                 logger.error(f"Erreur ajout article: {e}")
 
 
-def render_print_view(liste):
+def afficher_print_view(liste):
     """Vue d'impression optimisée"""
     st.subheader("🖨️ Liste à imprimer")
 
@@ -332,8 +332,8 @@ def render_print_view(liste):
 
 
 __all__ = [
-    "render_liste_active",
-    "render_rayon_articles",
-    "render_ajouter_article",
-    "render_print_view",
+    "afficher_liste_active",
+    "afficher_rayon_articles",
+    "afficher_ajouter_article",
+    "afficher_print_view",
 ]

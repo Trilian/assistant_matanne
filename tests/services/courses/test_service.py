@@ -17,7 +17,6 @@ from sqlalchemy.orm import Session
 from src.core.models import ArticleCourses, ArticleModele, Ingredient, ModeleCourses
 from src.services.cuisine.courses.service import (
     ServiceCourses,
-    get_courses_service,
     obtenir_service_courses,
 )
 from src.services.cuisine.courses.types import SuggestionCourses
@@ -175,7 +174,7 @@ class TestServiceCoursesCreation:
             "src.services.cuisine.courses.service.obtenir_client_ia", return_value=mock_client_ia
         ):
             with patch("src.services.cuisine.courses.service._service_courses", None):
-                service = get_courses_service()
+                service = obtenir_service_courses()
                 assert isinstance(service, ServiceCourses)
 
 
@@ -359,7 +358,7 @@ class TestSuggestionsIA:
 
     def test_suggestions_inventaire_vide(self, service_courses, patch_db_context):
         """Test suggestions avec inventaire vide."""
-        with patch("src.services.inventaire.get_inventaire_service") as mock_get_inv:
+        with patch("src.services.inventaire.obtenir_service_inventaire") as mock_get_inv:
             mock_inv = MagicMock()
             mock_inv.get_inventaire_complet.return_value = []
             mock_get_inv.return_value = mock_inv
@@ -369,7 +368,7 @@ class TestSuggestionsIA:
 
     def test_suggestions_service_inventaire_indisponible(self, service_courses, patch_db_context):
         """Test suggestions quand service inventaire indisponible."""
-        with patch("src.services.inventaire.get_inventaire_service") as mock_get_inv:
+        with patch("src.services.inventaire.obtenir_service_inventaire") as mock_get_inv:
             mock_get_inv.return_value = None
 
             result = service_courses.generer_suggestions_ia_depuis_inventaire()
@@ -388,7 +387,7 @@ class TestSuggestionsIA:
             ),
         ]
 
-        with patch("src.services.inventaire.get_inventaire_service") as mock_get_inv:
+        with patch("src.services.inventaire.obtenir_service_inventaire") as mock_get_inv:
             mock_inv = MagicMock()
             mock_inv.get_inventaire_complet.return_value = mock_inventaire
             mock_inv.build_inventory_summary.return_value = "Inventaire: Tomates, Lait"
@@ -405,7 +404,7 @@ class TestSuggestionsIA:
         """Test gestion erreur de parsing."""
         mock_inventaire = [{"nom": "Test", "quantite": 1}]
 
-        with patch("src.services.inventaire.get_inventaire_service") as mock_get_inv:
+        with patch("src.services.inventaire.obtenir_service_inventaire") as mock_get_inv:
             mock_inv = MagicMock()
             mock_inv.get_inventaire_complet.return_value = mock_inventaire
             mock_inv.build_inventory_summary.return_value = "Test"
@@ -423,7 +422,7 @@ class TestSuggestionsIA:
         """Test gestion erreur générique."""
         mock_inventaire = [{"nom": "Test", "quantite": 1}]
 
-        with patch("src.services.inventaire.get_inventaire_service") as mock_get_inv:
+        with patch("src.services.inventaire.obtenir_service_inventaire") as mock_get_inv:
             mock_inv = MagicMock()
             mock_inv.get_inventaire_complet.return_value = mock_inventaire
             mock_inv.build_inventory_summary.return_value = "Test"

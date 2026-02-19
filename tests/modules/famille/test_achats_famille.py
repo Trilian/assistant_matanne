@@ -52,20 +52,20 @@ class TestImports:
         """Vérifie l'export des fonctions UI"""
         with patch("src.modules.famille.achats_famille.st"):
             from src.modules.famille.achats_famille import (
-                render_achat_card,
-                render_add_form,
-                render_dashboard,
-                render_historique,
-                render_liste_groupe,
-                render_par_magasin,
+                afficher_achat_card,
+                afficher_add_form,
+                afficher_dashboard,
+                afficher_historique,
+                afficher_liste_groupe,
+                afficher_par_magasin,
             )
 
-            assert callable(render_dashboard)
-            assert callable(render_liste_groupe)
-            assert callable(render_achat_card)
-            assert callable(render_add_form)
-            assert callable(render_historique)
-            assert callable(render_par_magasin)
+            assert callable(afficher_dashboard)
+            assert callable(afficher_liste_groupe)
+            assert callable(afficher_achat_card)
+            assert callable(afficher_add_form)
+            assert callable(afficher_historique)
+            assert callable(afficher_par_magasin)
 
     def test_module_all_exports(self):
         """Vérifie que __all__ est défini correctement"""
@@ -75,7 +75,7 @@ class TestImports:
             assert hasattr(achats_famille, "__all__")
             assert "app" in achats_famille.__all__
             assert "get_all_purchases" in achats_famille.__all__
-            assert "render_dashboard" in achats_famille.__all__
+            assert "afficher_dashboard" in achats_famille.__all__
 
 
 # ============================================================
@@ -88,11 +88,11 @@ class TestAppFunction:
 
     @patch("src.modules.famille.achats_famille.st")
     @patch("src.modules.famille.achats_famille.get_stats")
-    @patch("src.modules.famille.achats_famille.render_dashboard")
-    @patch("src.modules.famille.achats_famille.render_liste_groupe")
-    @patch("src.modules.famille.achats_famille.render_par_magasin")
-    @patch("src.modules.famille.achats_famille.render_add_form")
-    @patch("src.modules.famille.achats_famille.render_historique")
+    @patch("src.modules.famille.achats_famille.afficher_dashboard")
+    @patch("src.modules.famille.achats_famille.afficher_liste_groupe")
+    @patch("src.modules.famille.achats_famille.afficher_par_magasin")
+    @patch("src.modules.famille.achats_famille.afficher_add_form")
+    @patch("src.modules.famille.achats_famille.afficher_historique")
     def test_app_affiche_titre(
         self,
         mock_render_historique,
@@ -115,11 +115,11 @@ class TestAppFunction:
 
     @patch("src.modules.famille.achats_famille.st")
     @patch("src.modules.famille.achats_famille.get_stats")
-    @patch("src.modules.famille.achats_famille.render_dashboard")
-    @patch("src.modules.famille.achats_famille.render_liste_groupe")
-    @patch("src.modules.famille.achats_famille.render_par_magasin")
-    @patch("src.modules.famille.achats_famille.render_add_form")
-    @patch("src.modules.famille.achats_famille.render_historique")
+    @patch("src.modules.famille.achats_famille.afficher_dashboard")
+    @patch("src.modules.famille.achats_famille.afficher_liste_groupe")
+    @patch("src.modules.famille.achats_famille.afficher_par_magasin")
+    @patch("src.modules.famille.achats_famille.afficher_add_form")
+    @patch("src.modules.famille.achats_famille.afficher_historique")
     def test_app_affiche_stats_caption(
         self,
         mock_render_historique,
@@ -145,11 +145,11 @@ class TestAppFunction:
 
     @patch("src.modules.famille.achats_famille.st")
     @patch("src.modules.famille.achats_famille.get_stats")
-    @patch("src.modules.famille.achats_famille.render_dashboard")
-    @patch("src.modules.famille.achats_famille.render_liste_groupe")
-    @patch("src.modules.famille.achats_famille.render_par_magasin")
-    @patch("src.modules.famille.achats_famille.render_add_form")
-    @patch("src.modules.famille.achats_famille.render_historique")
+    @patch("src.modules.famille.achats_famille.afficher_dashboard")
+    @patch("src.modules.famille.achats_famille.afficher_liste_groupe")
+    @patch("src.modules.famille.achats_famille.afficher_par_magasin")
+    @patch("src.modules.famille.achats_famille.afficher_add_form")
+    @patch("src.modules.famille.achats_famille.afficher_historique")
     def test_app_cree_tabs(
         self,
         mock_render_historique,
@@ -527,13 +527,13 @@ class TestDeletePurchase:
 
 
 class TestRenderDashboard:
-    """Tests pour render_dashboard"""
+    """Tests pour afficher_dashboard"""
 
     @patch("src.modules.famille.achats_famille.components.obtenir_contexte_db")
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.get_stats")
     def test_affiche_metriques(self, mock_get_stats, mock_st, mock_db_ctx):
-        """render_dashboard affiche les métriques principales"""
+        """afficher_dashboard affiche les métriques principales"""
         mock_get_stats.return_value = {
             "en_attente": 5,
             "urgents": 2,
@@ -549,9 +549,9 @@ class TestRenderDashboard:
         mock_col = MagicMock()
         mock_st.columns.return_value = [mock_col, mock_col, mock_col, mock_col]
 
-        from src.modules.famille.achats_famille.components import render_dashboard
+        from src.modules.famille.achats_famille.components import afficher_dashboard
 
-        render_dashboard()
+        afficher_dashboard()
 
         mock_st.subheader.assert_called_once_with("📊 Vue d'ensemble")
         assert mock_st.columns.called
@@ -560,7 +560,7 @@ class TestRenderDashboard:
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.get_stats")
     def test_affiche_message_si_pas_urgents(self, mock_get_stats, mock_st, mock_db_ctx):
-        """render_dashboard affiche un message si aucun achat urgent"""
+        """afficher_dashboard affiche un message si aucun achat urgent"""
         mock_get_stats.return_value = {
             "en_attente": 0,
             "urgents": 0,
@@ -576,54 +576,54 @@ class TestRenderDashboard:
         mock_col = MagicMock()
         mock_st.columns.return_value = [mock_col, mock_col, mock_col, mock_col]
 
-        from src.modules.famille.achats_famille.components import render_dashboard
+        from src.modules.famille.achats_famille.components import afficher_dashboard
 
-        render_dashboard()
+        afficher_dashboard()
 
         mock_st.success.assert_called_once_with("✅ Rien d'urgent!")
 
 
 class TestRenderListeGroupe:
-    """Tests pour render_liste_groupe"""
+    """Tests pour afficher_liste_groupe"""
 
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.get_purchases_by_groupe")
-    @patch("src.modules.famille.achats_famille.components.render_achat_card")
+    @patch("src.modules.famille.achats_famille.components.afficher_achat_card")
     def test_affiche_message_si_vide(self, mock_render_card, mock_get_purchases, mock_st):
-        """render_liste_groupe affiche un message si aucun achat"""
+        """afficher_liste_groupe affiche un message si aucun achat"""
         mock_get_purchases.return_value = []
 
-        from src.modules.famille.achats_famille.components import render_liste_groupe
+        from src.modules.famille.achats_famille.components import afficher_liste_groupe
 
-        render_liste_groupe("jules", "👶 Achats pour Jules")
+        afficher_liste_groupe("jules", "👶 Achats pour Jules")
 
         mock_st.info.assert_called_once()
         mock_render_card.assert_not_called()
 
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.get_purchases_by_groupe")
-    @patch("src.modules.famille.achats_famille.components.render_achat_card")
+    @patch("src.modules.famille.achats_famille.components.afficher_achat_card")
     def test_affiche_achats_par_priorite(self, mock_render_card, mock_get_purchases, mock_st):
-        """render_liste_groupe affiche les achats groupés par priorité"""
+        """afficher_liste_groupe affiche les achats groupés par priorité"""
         mock_achat_urgent = MagicMock(priorite="urgent", nom="Article urgent")
         mock_achat_moyenne = MagicMock(priorite="moyenne", nom="Article moyen")
         mock_get_purchases.return_value = [mock_achat_urgent, mock_achat_moyenne]
 
-        from src.modules.famille.achats_famille.components import render_liste_groupe
+        from src.modules.famille.achats_famille.components import afficher_liste_groupe
 
-        render_liste_groupe("jules", "👶 Achats pour Jules")
+        afficher_liste_groupe("jules", "👶 Achats pour Jules")
 
         assert mock_render_card.call_count == 2
 
 
 class TestRenderAchatCard:
-    """Tests pour render_achat_card"""
+    """Tests pour afficher_achat_card"""
 
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.mark_as_bought")
     @patch("src.modules.famille.achats_famille.components.delete_purchase")
     def test_affiche_card_avec_infos(self, mock_delete, mock_mark, mock_st):
-        """render_achat_card affiche les informations de l'achat"""
+        """afficher_achat_card affiche les informations de l'achat"""
         mock_achat = MagicMock(
             id=1,
             nom="Test Article",
@@ -645,9 +645,9 @@ class TestRenderAchatCard:
         # Mock buttons to return False (non cliqués)
         mock_st.button.return_value = False
 
-        from src.modules.famille.achats_famille.components import render_achat_card
+        from src.modules.famille.achats_famille.components import afficher_achat_card
 
-        render_achat_card(mock_achat)
+        afficher_achat_card(mock_achat)
 
         mock_st.container.assert_called_once_with(border=True)
 
@@ -677,20 +677,20 @@ class TestRenderAchatCard:
         # Premier bouton (✅) cliqué, deuxième non
         mock_st.button.side_effect = [True, False]
 
-        from src.modules.famille.achats_famille.components import render_achat_card
+        from src.modules.famille.achats_famille.components import afficher_achat_card
 
-        render_achat_card(mock_achat)
+        afficher_achat_card(mock_achat)
 
         mock_mark.assert_called_once_with(42)
         mock_st.rerun.assert_called()
 
 
 class TestRenderAddForm:
-    """Tests pour render_add_form"""
+    """Tests pour afficher_add_form"""
 
     @patch("src.modules.famille.achats_famille.components.st")
     def test_affiche_formulaire(self, mock_st):
-        """render_add_form affiche le formulaire d'ajout"""
+        """afficher_add_form affiche le formulaire d'ajout"""
         mock_form = MagicMock()
         mock_st.form.return_value.__enter__ = MagicMock(return_value=mock_form)
         mock_st.form.return_value.__exit__ = MagicMock(return_value=False)
@@ -704,33 +704,33 @@ class TestRenderAddForm:
         mock_st.text_area.return_value = ""
         mock_st.form_submit_button.return_value = False
 
-        from src.modules.famille.achats_famille.components import render_add_form
+        from src.modules.famille.achats_famille.components import afficher_add_form
 
-        render_add_form()
+        afficher_add_form()
 
         mock_st.subheader.assert_called_once_with("➕ Ajouter un article")
         mock_st.form.assert_called_once_with("add_purchase")
 
 
 class TestRenderHistorique:
-    """Tests pour render_historique"""
+    """Tests pour afficher_historique"""
 
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.get_all_purchases")
     def test_affiche_message_si_vide(self, mock_get_all, mock_st):
-        """render_historique affiche un message si aucun historique"""
+        """afficher_historique affiche un message si aucun historique"""
         mock_get_all.return_value = []
 
-        from src.modules.famille.achats_famille.components import render_historique
+        from src.modules.famille.achats_famille.components import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.info.assert_called_once_with("Aucun achat enregistré")
 
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.get_all_purchases")
     def test_affiche_total_depense(self, mock_get_all, mock_st):
-        """render_historique affiche le total dépensé"""
+        """afficher_historique affiche le total dépensé"""
         mock_achat = MagicMock(
             prix_reel=50.0,
             prix_estime=45.0,
@@ -748,9 +748,9 @@ class TestRenderHistorique:
         mock_col = MagicMock()
         mock_st.columns.return_value = [mock_col, mock_col, mock_col]
 
-        from src.modules.famille.achats_famille.components import render_historique
+        from src.modules.famille.achats_famille.components import afficher_historique
 
-        render_historique()
+        afficher_historique()
 
         mock_st.metric.assert_called_once()
         call_args = mock_st.metric.call_args
@@ -758,17 +758,17 @@ class TestRenderHistorique:
 
 
 class TestRenderParMagasin:
-    """Tests pour render_par_magasin"""
+    """Tests pour afficher_par_magasin"""
 
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.get_all_purchases")
     def test_affiche_message_si_vide(self, mock_get_all, mock_st):
-        """render_par_magasin affiche un message si aucun article"""
+        """afficher_par_magasin affiche un message si aucun article"""
         mock_get_all.return_value = []
 
-        from src.modules.famille.achats_famille.components import render_par_magasin
+        from src.modules.famille.achats_famille.components import afficher_par_magasin
 
-        render_par_magasin()
+        afficher_par_magasin()
 
         mock_st.info.assert_called_once_with("Aucun article en attente")
 
@@ -776,7 +776,7 @@ class TestRenderParMagasin:
     @patch("src.modules.famille.achats_famille.components.get_all_purchases")
     @patch("src.modules.famille.achats_famille.components.mark_as_bought")
     def test_groupe_par_magasin(self, mock_mark, mock_get_all, mock_st):
-        """render_par_magasin groupe les achats par magasin"""
+        """afficher_par_magasin groupe les achats par magasin"""
         mock_achat1 = MagicMock(magasin="Amazon", nom="Article 1", prix_estime=20.0, id=1)
         mock_achat2 = MagicMock(magasin="Amazon", nom="Article 2", prix_estime=30.0, id=2)
         mock_achat3 = MagicMock(magasin=None, nom="Article 3", prix_estime=10.0, id=3)
@@ -791,9 +791,9 @@ class TestRenderParMagasin:
         mock_st.columns.return_value = [mock_col, mock_col]
         mock_st.checkbox.return_value = False
 
-        from src.modules.famille.achats_famille.components import render_par_magasin
+        from src.modules.famille.achats_famille.components import afficher_par_magasin
 
-        render_par_magasin()
+        afficher_par_magasin()
 
         # Vérifie qu'il y a au moins 2 expanders (Amazon + Sans magasin)
         assert mock_st.expander.call_count >= 2
@@ -811,17 +811,17 @@ class TestIntegrationBasique:
         """Vérifie que la structure du module est cohérente"""
         with patch("src.modules.famille.achats_famille.st"):
             from src.modules.famille.achats_famille import (
+                afficher_dashboard,
                 app,
                 get_all_purchases,
                 get_stats,
-                render_dashboard,
             )
 
             # Vérifie que toutes les fonctions sont appelables
             assert callable(app)
             assert callable(get_all_purchases)
             assert callable(get_stats)
-            assert callable(render_dashboard)
+            assert callable(afficher_dashboard)
 
     def test_categories_utilisees_dans_components(self):
         """Vérifie que les constantes sont accessibles depuis components"""

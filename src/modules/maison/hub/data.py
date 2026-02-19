@@ -31,7 +31,7 @@ def obtenir_stats_globales() -> dict:
         "objets_a_changer": 0,
         "taches_jour": 0,
         "temps_prevu_min": 0,
-        "autonomie_pourcent": 47,  # TODO: calculer depuis recoltes via service jardin
+        "autonomie_pourcent": 0,
     }
 
     try:
@@ -51,6 +51,21 @@ def obtenir_stats_globales() -> dict:
                 .all()
             )
             stats["temps_mois_heures"] = sum(s.duree_minutes or 0 for s in sessions) / 60
+
+        # Calculer autonomie via le service jardin
+        try:
+            import streamlit as _st
+
+            from src.services.maison import get_jardin_service
+
+            jardin_service = get_jardin_service()
+            plantes = _st.session_state.get("mes_plantes_jardin", [])
+            recoltes = _st.session_state.get("recoltes_jardin", [])
+            autonomie = jardin_service.calculer_autonomie(plantes, recoltes)
+            stats["autonomie_pourcent"] = autonomie.get("pourcentage_prevu", 0)
+        except Exception:
+            pass
+
     except Exception as e:
         logger.debug(f"Erreur récupération stats hub: {e}")
 

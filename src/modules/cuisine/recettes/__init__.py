@@ -14,13 +14,13 @@ import streamlit as st
 from src.services.cuisine.recettes import obtenir_service_recettes
 
 # Import externe pour l'onglet import
-from ..recettes_import import render_importer
-from .ajout import render_ajouter_manuel
-from .detail import render_detail_recette
-from .generation_ia import render_generer_ia
+from ..recettes_import import afficher_importer
+from .ajout import afficher_ajouter_manuel
+from .detail import afficher_detail_recette
+from .generation_ia import afficher_generer_ia
 
 # Imports des sous-modules
-from .liste import render_liste
+from .liste import afficher_liste
 from .utils import formater_quantite
 
 
@@ -48,7 +48,7 @@ def app():
                 with col_titre:
                     st.write(f"**{recette.nom}**")
                 st.divider()
-                render_detail_recette(recette)
+                afficher_detail_recette(recette)
                 return
         st.error("❌ Recette non trouvée")
         st.session_state.detail_recette_id = None
@@ -63,26 +63,26 @@ def app():
 
     with tab_liste:
         st.session_state.recettes_selected_tab = 0
-        render_liste()
+        afficher_liste()
 
     with tab_ajout:
         st.session_state.recettes_selected_tab = 1
-        render_ajouter_manuel()
+        afficher_ajouter_manuel()
 
     with tab_import:
         st.session_state.recettes_selected_tab = 2
-        render_importer()
+        afficher_importer()
 
     with tab_ia:
         st.session_state.recettes_selected_tab = 3
-        render_generer_ia()
+        afficher_generer_ia()
 
 
 __all__ = [
     "app",
-    "render_liste",
-    "render_detail_recette",
-    "render_ajouter_manuel",
-    "render_generer_ia",
+    "afficher_liste",
+    "afficher_detail_recette",
+    "afficher_ajouter_manuel",
+    "afficher_generer_ia",
     "formater_quantite",
 ]

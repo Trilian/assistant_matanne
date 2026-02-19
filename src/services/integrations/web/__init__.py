@@ -6,7 +6,7 @@ Ce package fournit:
 ## Synchronisation temps réel (anciennement sync/)
 - RealtimeSyncService: Synchronisation temps réel des listes de courses
 - Types: SyncEventType, SyncEvent, PresenceInfo, SyncState
-- Composants UI: render_presence_indicator, render_typing_indicator, render_sync_status
+- Composants UI: afficher_indicateur_presence, afficher_indicateur_frappe, afficher_statut_synchronisation
 
 ## PWA - Progressive Web App (anciennement pwa/)
 - Configuration PWA (manifest.json, service worker, icônes)

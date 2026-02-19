@@ -21,7 +21,7 @@ from ._common import (
 )
 
 
-def render_navigation_semaine():
+def afficher_navigation_semaine():
     """Affiche la navigation entre semaines."""
     if "cal_semaine_debut" not in st.session_state:
         st.session_state.cal_semaine_debut = get_debut_semaine(date.today())
@@ -58,7 +58,7 @@ def render_navigation_semaine():
             st.rerun()
 
 
-def render_jour_calendrier(jour: JourCalendrier):
+def afficher_jour_calendrier(jour: JourCalendrier):
     """Affiche un jour du calendrier dans une carte."""
 
     with st.container():
@@ -126,7 +126,7 @@ def render_jour_calendrier(jour: JourCalendrier):
             st.caption(f"{evt.emoji} {evt.titre}")
 
 
-def render_vue_semaine_grille(semaine: SemaineCalendrier):
+def afficher_vue_semaine_grille(semaine: SemaineCalendrier):
     """Affiche la semaine en grille 7 colonnes."""
 
     # En-têtes des jours
@@ -144,10 +144,10 @@ def render_vue_semaine_grille(semaine: SemaineCalendrier):
     for i, col in enumerate(cols):
         jour = semaine.jours[i]
         with col:
-            render_cellule_jour(jour)
+            afficher_cellule_jour(jour)
 
 
-def render_cellule_jour(jour: JourCalendrier):
+def afficher_cellule_jour(jour: JourCalendrier):
     """Affiche une cellule de jour dans la grille."""
 
     # Date
@@ -175,7 +175,7 @@ def render_cellule_jour(jour: JourCalendrier):
         st.caption(f"+{nb_autres} autres")
 
 
-def render_vue_semaine_liste(semaine: SemaineCalendrier):
+def afficher_vue_semaine_liste(semaine: SemaineCalendrier):
     """Affiche la semaine en liste (plus détaillée)."""
 
     for jour in semaine.jours:
@@ -201,10 +201,10 @@ def render_vue_semaine_liste(semaine: SemaineCalendrier):
             f"{marqueur}**{jour.jour_semaine}** {jour.date_jour.strftime('%d/%m')} │ {indicateurs_str}",
             expanded=expanded,
         ):
-            render_jour_calendrier(jour)
+            afficher_jour_calendrier(jour)
 
 
-def render_stats_semaine(semaine: SemaineCalendrier):
+def afficher_stats_semaine(semaine: SemaineCalendrier):
     """Affiche les statistiques de la semaine."""
 
     col1, col2, col3, col4 = st.columns(4)
@@ -222,7 +222,7 @@ def render_stats_semaine(semaine: SemaineCalendrier):
         st.metric("🎨 Activités", semaine.nb_activites)
 
 
-def render_actions_rapides(semaine: SemaineCalendrier):
+def afficher_actions_rapides(semaine: SemaineCalendrier):
     """Affiche les boutons d'actions rapides."""
 
     col1, col2, col3, col4 = st.columns(4)
@@ -254,7 +254,7 @@ def render_actions_rapides(semaine: SemaineCalendrier):
             st.session_state.show_print_modal = True
 
 
-def render_modal_impression(semaine: SemaineCalendrier):
+def afficher_modal_impression(semaine: SemaineCalendrier):
     """Affiche le modal d'impression."""
 
     if st.session_state.get("show_print_modal"):
@@ -284,7 +284,7 @@ def render_modal_impression(semaine: SemaineCalendrier):
                     st.rerun()
 
 
-def render_formulaire_ajout_event():
+def afficher_formulaire_ajout_event():
     """Affiche le formulaire d'ajout d'événement."""
 
     if "ajouter_event_date" in st.session_state:
@@ -432,7 +432,7 @@ def render_formulaire_ajout_event():
                         st.error(f"❌ Erreur: {str(e)}")
 
 
-def render_legende():
+def afficher_legende():
     """Affiche la légende du calendrier."""
     with st.expander("ℹ️ Légende"):
         cols = st.columns(6)

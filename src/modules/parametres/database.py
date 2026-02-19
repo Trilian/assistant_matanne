@@ -8,11 +8,12 @@ import streamlit as st
 from src.core.db import GestionnaireMigrations, vacuum_database
 from src.core.db import obtenir_infos_db as get_db_info
 from src.core.db import verifier_sante as health_check
+from src.ui import etat_vide
 from src.ui.components import Modale as Modal
 from src.ui.feedback import afficher_erreur, afficher_succes, spinner_intelligent
 
 
-def render_database_config():
+def afficher_database_config():
     """Configuration base de donnees"""
 
     st.markdown("### 🗄️ Base de Données")
@@ -99,7 +100,7 @@ def render_database_config():
                     status = "✅" if m["version"] <= current_version else "⏳"
                     st.markdown(f"{status} **v{m['version']}** - {m['name']}")
             else:
-                st.info("Aucune migration définie")
+                etat_vide("Aucune migration définie", "🗄️")
 
     st.markdown("---")
 
@@ -133,9 +134,9 @@ def render_database_config():
     with col8:
         if st.button("💾 Backup", key="btn_backup_db", use_container_width=True):
             try:
-                from src.services.core.backup import get_backup_service
+                from src.services.core.backup import obtenir_service_backup
 
-                backup_service = get_backup_service()
+                backup_service = obtenir_service_backup()
                 with spinner_intelligent("Sauvegarde en cours..."):
                     result = backup_service.create_backup()
                     if result.success:

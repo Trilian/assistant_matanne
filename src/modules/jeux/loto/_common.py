@@ -17,6 +17,7 @@ import streamlit as st
 from src.core.db import obtenir_contexte_db
 from src.core.models import GrilleLoto, TirageLoto
 from src.modules.jeux.scraper_loto import charger_tirages_loto
+from src.ui import etat_vide
 
 logger = logging.getLogger(__name__)
 

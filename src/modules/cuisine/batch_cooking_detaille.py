@@ -23,6 +23,7 @@ from src.modules.cuisine.batch_cooking_utils import (
     estimer_heure_fin,
     formater_duree,
 )
+from src.ui.components.atoms import etat_vide
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +67,7 @@ TYPES_SESSION = {
 # ═══════════════════════════════════════════════════════════
 
 
-def render_selecteur_session():
+def afficher_selecteur_session():
     """Sélecteur de type de session."""
 
     st.subheader("📅 Type de session")
@@ -94,13 +95,13 @@ def render_selecteur_session():
             st.rerun()
 
 
-def render_planning_semaine_preview(planning_data: dict):
+def afficher_planning_semaine_preview(planning_data: dict):
     """Affiche les repas de la semaine pour lesquels on fait le batch."""
 
     st.markdown("##### 📋 Repas à préparer")
 
     if not planning_data:
-        st.info("Aucun planning trouvé. Allez d'abord dans 'Planifier mes repas'.")
+        etat_vide("Aucun planning trouvé", "📋", "Allez d'abord dans 'Planifier mes repas'")
         return
 
     # Afficher en tableau compact
@@ -124,7 +125,7 @@ def render_planning_semaine_preview(planning_data: dict):
                     st.caption("🌙 -")
 
 
-def render_ingredient_detaille(ingredient: dict, key_prefix: str):
+def afficher_ingredient_detaille(ingredient: dict, key_prefix: str):
     """Affiche un ingrédient avec tous ses détails."""
 
     with st.container():
@@ -166,7 +167,7 @@ def render_ingredient_detaille(ingredient: dict, key_prefix: str):
             st.success(f"👶 Jules: {ingredient.get('tache_jules', 'Peut aider')}", icon="👶")
 
 
-def render_etape_batch(etape: dict, numero: int, key_prefix: str):
+def afficher_etape_batch(etape: dict, numero: int, key_prefix: str):
     """Affiche une étape de batch cooking."""
 
     est_passif = etape.get("est_passif", False)
@@ -194,7 +195,7 @@ def render_etape_batch(etape: dict, numero: int, key_prefix: str):
         # Robot
         robot = etape.get("robot")
         if robot:
-            render_instruction_robot(robot)
+            afficher_instruction_robot(robot)
 
         # Jules
         if etape.get("jules_participation"):
@@ -203,7 +204,7 @@ def render_etape_batch(etape: dict, numero: int, key_prefix: str):
         st.divider()
 
 
-def render_instruction_robot(robot_config: dict):
+def afficher_instruction_robot(robot_config: dict):
     """Affiche les instructions détaillées pour un robot."""
 
     robot_type = robot_config.get("type", "")
@@ -250,7 +251,7 @@ def render_instruction_robot(robot_config: dict):
     st.info(" │ ".join(parts))
 
 
-def render_timeline_session(etapes: list, heure_debut: time):
+def afficher_timeline_session(etapes: list, heure_debut: time):
     """Affiche une timeline visuelle de la session."""
 
     st.markdown("##### ⏱️ Timeline")
@@ -285,7 +286,7 @@ def render_timeline_session(etapes: list, heure_debut: time):
             temps_courant += duree
 
 
-def render_moments_jules(moments: list):
+def afficher_moments_jules(moments: list):
     """Affiche les moments de participation de Jules."""
 
     if not moments:
@@ -297,7 +298,7 @@ def render_moments_jules(moments: list):
         st.success(moment, icon="👶")
 
 
-def render_liste_courses_batch(ingredients: dict):
+def afficher_liste_courses_batch(ingredients: dict):
     """Affiche la liste de courses groupée par rayon."""
 
     st.markdown("##### 🛒 Liste de courses")
@@ -330,7 +331,7 @@ def render_liste_courses_batch(ingredients: dict):
                     st.checkbox(ligne, key=f"course_{rayon_key}_{nom}")
 
 
-def render_finition_jour_j(recette: dict):
+def afficher_finition_jour_j(recette: dict):
     """Affiche les instructions de finition pour le jour J."""
 
     st.markdown(f"##### 🍽️ {recette.get('nom', 'Recette')}")
@@ -511,7 +512,7 @@ def app():
 
     with tab_preparer:
         # Sélection du type de session
-        render_selecteur_session()
+        afficher_selecteur_session()
 
         st.divider()
 
@@ -561,7 +562,7 @@ def app():
         st.markdown("##### 📋 Recettes du planning")
 
         if planning_data:
-            render_planning_semaine_preview(planning_data)
+            afficher_planning_semaine_preview(planning_data)
         else:
             st.warning("⚠️ Aucun planning de repas trouvé.")
             if st.button("📅 Aller au planificateur de repas"):
@@ -635,13 +636,13 @@ def app():
                 all_etapes.append(etape)
 
         if all_etapes:
-            render_timeline_session(all_etapes, heure_debut)
+            afficher_timeline_session(all_etapes, heure_debut)
 
         st.divider()
 
         # Moments Jules
         moments_jules = batch_data.get("moments_jules", [])
-        render_moments_jules(moments_jules)
+        afficher_moments_jules(moments_jules)
 
         st.divider()
 
@@ -651,14 +652,14 @@ def app():
                 # Ingrédients
                 st.markdown("**Ingrédients:**")
                 for ing in recette.get("ingredients", []):
-                    render_ingredient_detaille(ing, f"ing_{recette.get('nom', '')}")
+                    afficher_ingredient_detaille(ing, f"ing_{recette.get('nom', '')}")
 
                 st.divider()
 
                 # Étapes
                 st.markdown("**Étapes batch:**")
                 for i, etape in enumerate(recette.get("etapes_batch", []), 1):
-                    render_etape_batch(etape, i, f"etape_{recette.get('nom', '')}")
+                    afficher_etape_batch(etape, i, f"etape_{recette.get('nom', '')}")
 
                 # Stockage
                 st.info(
@@ -670,7 +671,7 @@ def app():
         # Liste de courses
         liste_courses = batch_data.get("liste_courses", {})
         if liste_courses:
-            render_liste_courses_batch(liste_courses)
+            afficher_liste_courses_batch(liste_courses)
 
         st.divider()
 
@@ -716,9 +717,9 @@ def app():
             for jour in sorted(finitions_par_jour.keys()):
                 with st.expander(f"📅 {jour}", expanded=False):
                     for recette in finitions_par_jour[jour]:
-                        render_finition_jour_j(recette)
+                        afficher_finition_jour_j(recette)
         else:
             # Afficher toutes les recettes
             for recette in recettes:
                 with st.expander(f"🍽️ {recette.get('nom', 'Recette')}", expanded=False):
-                    render_finition_jour_j(recette)
+                    afficher_finition_jour_j(recette)

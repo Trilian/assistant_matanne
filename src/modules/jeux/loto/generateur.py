@@ -9,6 +9,7 @@ from ._common import (
     NUMERO_MIN,
     analyser_patterns_tirages,
     calculer_frequences_numeros,
+    etat_vide,
     generer_grille_aleatoire,
     generer_grille_chauds_froids,
     generer_grille_equilibree,
@@ -125,7 +126,7 @@ def afficher_mes_grilles():
     grilles = charger_grilles_utilisateur()
 
     if not grilles:
-        st.info("🎫 Aucune grille enregistrée. Générez-en une!")
+        etat_vide("Aucune grille enregistrée", "🎫", "Générez-en une !")
         return
 
     # Stats globales

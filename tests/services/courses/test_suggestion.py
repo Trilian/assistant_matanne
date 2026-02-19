@@ -28,7 +28,6 @@ from src.core.models import (
 )
 from src.services.cuisine.courses.suggestion import (
     ServiceCoursesIntelligentes,
-    get_courses_intelligentes_service,
     obtenir_service_courses_intelligentes,
 )
 from src.services.cuisine.courses.types import (
@@ -226,7 +225,7 @@ class TestServiceCreation:
             with patch(
                 "src.services.cuisine.courses.suggestion._service_courses_intelligentes", None
             ):
-                service = get_courses_intelligentes_service()
+                service = obtenir_service_courses_intelligentes()
                 assert isinstance(service, ServiceCoursesIntelligentes)
 
 

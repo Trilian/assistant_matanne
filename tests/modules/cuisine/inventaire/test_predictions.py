@@ -9,6 +9,6 @@ class TestPredictions:
     """Tests pour le module predictions"""
 
     def test_render_predictions(self):
-        """Test de la fonction render_predictions"""
+        """Test de la fonction afficher_predictions"""
         # TODO: Implémenter le test
         pass

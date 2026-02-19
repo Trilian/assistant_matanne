@@ -98,7 +98,3 @@ def require_role(required_role: str):
         return user
 
     return role_checker
-
-
-auth_required = require_auth
-role_required = require_role

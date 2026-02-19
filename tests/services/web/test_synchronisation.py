@@ -931,7 +931,7 @@ class TestUIComponents:
     @patch("src.ui.views.synchronisation.st")
     @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_presence_indicator_many_users(self, mock_get_service, mock_st):
-        """Test render_presence avec plus de 5 utilisateurs."""
+        """Test afficher_presence avec plus de 5 utilisateurs."""
         mock_st.session_state = {}
         mock_cols = [MagicMock() for _ in range(5)]
         mock_st.columns.return_value = mock_cols
@@ -1009,7 +1009,7 @@ class TestUIComponents:
     @patch("src.ui.views.synchronisation.st")
     @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_sync_status_pending(self, mock_get_service, mock_st):
-        """Test render_sync_status avec pending."""
+        """Test afficher_sync_status avec pending."""
         mock_st.session_state = {}
 
         from src.services.integrations.web.synchronisation import (
@@ -1163,9 +1163,9 @@ class TestExports:
             "SyncEvent",
             "SyncEventType",
             "PresenceInfo",
-            "render_presence_indicator",
-            "render_typing_indicator",
-            "render_sync_status",
+            "afficher_presence_indicator",
+            "afficher_typing_indicator",
+            "afficher_sync_status",
         ]
 
         for name in expected:

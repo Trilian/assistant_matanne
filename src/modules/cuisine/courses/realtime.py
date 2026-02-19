@@ -29,7 +29,7 @@ def _init_realtime_sync():
         logger.warning(f"Sync temps réel non disponible: {e}")
 
 
-def render_realtime_status():
+def afficher_realtime_status():
     """Affiche le statut de synchronisation temps réel."""
     try:
         sync_service = get_realtime_sync_service()
@@ -38,13 +38,9 @@ def render_realtime_status():
             return
 
         from src.ui.views.synchronisation import (
-            afficher_indicateur_frappe as render_typing_indicator,
-        )
-        from src.ui.views.synchronisation import (
-            afficher_indicateur_presence as render_presence_indicator,
-        )
-        from src.ui.views.synchronisation import (
-            afficher_statut_synchronisation as render_sync_status,
+            afficher_indicateur_frappe,
+            afficher_indicateur_presence,
+            afficher_statut_synchronisation,
         )
 
         # Statut dans la sidebar
@@ -52,14 +48,14 @@ def render_realtime_status():
             st.divider()
             st.markdown("### 📄 Synchronisation")
 
-            render_sync_status()
-            render_presence_indicator()
+            afficher_statut_synchronisation()
+            afficher_indicateur_presence()
 
             # Afficher qui tape
             if sync_service.state.users_present:
                 typing_users = [u for u in sync_service.state.users_present.values() if u.is_typing]
                 if typing_users:
-                    render_typing_indicator()
+                    afficher_indicateur_frappe()
 
     except Exception as e:
         logger.debug(f"Statut realtime non affiché: {e}")
@@ -90,6 +86,6 @@ def _broadcast_article_change(event_type: str, article_data: dict):
 
 __all__ = [
     "_init_realtime_sync",
-    "render_realtime_status",
+    "afficher_realtime_status",
     "_broadcast_article_change",
 ]

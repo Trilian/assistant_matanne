@@ -2,6 +2,8 @@
 Module Sorties Weekend - Composants UI
 """
 
+from src.ui import etat_vide
+
 from .ai_service import WeekendAIService
 from .utils import (
     METEO_OPTIONS,
@@ -19,7 +21,7 @@ from .utils import (
 )
 
 
-def render_planning():
+def afficher_planning():
     """Affiche le planning du weekend"""
     saturday, sunday = get_next_weekend()
     activities = get_weekend_activities(saturday, sunday)
@@ -30,11 +32,11 @@ def render_planning():
 
     with col1:
         st.markdown(f"**🗓️ Samedi {saturday.strftime('%d/%m')}**")
-        render_day_activities(saturday, activities["saturday"])
+        afficher_day_activities(saturday, activities["saturday"])
 
     with col2:
         st.markdown(f"**🗓️ Dimanche {sunday.strftime('%d/%m')}**")
-        render_day_activities(sunday, activities["sunday"])
+        afficher_day_activities(sunday, activities["sunday"])
 
     # Budget
     budget = get_budget_weekend(saturday, sunday)
@@ -46,7 +48,7 @@ def render_planning():
         st.metric("💸 Depense", f"{budget['reel']:.0f}€")
 
 
-def render_day_activities(day: date, activities: list):
+def afficher_day_activities(day: date, activities: list):
     """Affiche les activites d'un jour"""
     if not activities:
         st.caption("Rien de prevu")
@@ -82,7 +84,7 @@ def render_day_activities(day: date, activities: list):
                         st.caption("✅ Fait")
 
 
-def render_suggestions():
+def afficher_suggestions():
     """Affiche les suggestions IA"""
     st.subheader("💡 Suggestions IA")
 
@@ -121,14 +123,14 @@ def render_suggestions():
                 st.error(f"Erreur IA: {e}")
 
 
-def render_lieux_testes():
+def afficher_lieux_testes():
     """Affiche les lieux dejà testes"""
     st.subheader("🗺️ Lieux testes")
 
     lieux = get_lieux_testes()
 
     if not lieux:
-        st.info("Aucun lieu note pour l'instant. Notez vos sorties pour les retrouver ici!")
+        etat_vide("Aucun lieu noté", "📍", "Notez vos sorties pour les retrouver ici !")
         return
 
     # Filtres
@@ -162,7 +164,7 @@ def render_lieux_testes():
                 st.caption(lieu.date_prevue.strftime("%d/%m/%Y"))
 
 
-def render_add_activity():
+def afficher_add_activity():
     """Formulaire d'ajout d'activite"""
     st.subheader("➕ Ajouter une activite")
 
@@ -241,7 +243,7 @@ def render_add_activity():
                     st.error(f"Erreur: {e}")
 
 
-def render_noter_sortie():
+def afficher_noter_sortie():
     """Permet de noter une sortie terminee"""
     st.subheader("⭐ Noter une sortie")
 
@@ -255,7 +257,7 @@ def render_noter_sortie():
             )
 
             if not activities:
-                st.info("Aucune sortie à noter")
+                etat_vide("Aucune sortie à noter", "⭐", "Les sorties terminées apparaîtront ici")
                 return
 
             for act in activities:

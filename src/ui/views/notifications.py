@@ -88,7 +88,9 @@ def afficher_demande_permission_push():
 
                 // Envoyer l'abonnement au serveur
                 console.log('Push subscription:', JSON.stringify(subscription));
-                // TODO: Envoyer à l'API
+                // TODO: Créer un endpoint FastAPI POST /api/push/subscribe
+                // qui appelle notif_web.sauvegarder_abonnement_supabase()
+                // puis envoyer via fetch() depuis ce JS
             }}
         }}
 

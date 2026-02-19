@@ -5,20 +5,21 @@ Suggestions IA pour les courses.
 import time
 
 from ._common import (
-    get_courses_service,
-    get_inventaire_service,
+    etat_vide,
     logger,
     obtenir_contexte_db,
+    obtenir_service_courses,
+    obtenir_service_inventaire,
     obtenir_service_recettes,
     pd,
     st,
 )
 
 
-def render_suggestions_ia():
+def afficher_suggestions_ia():
     """Suggestions IA depuis inventaire & recettes"""
-    service = get_courses_service()
-    _inventaire_service = get_inventaire_service()
+    service = obtenir_service_courses()
+    _inventaire_service = obtenir_service_inventaire()
     recettes_service = obtenir_service_recettes()
 
     st.subheader("⏰ Suggestions intelligentes")
@@ -91,7 +92,7 @@ def render_suggestions_ia():
                             except Exception as e:
                                 st.error(f"❌ Erreur sauvegarde: {str(e)}")
                     else:
-                        st.info("Aucune suggestion (inventaire OK)")
+                        etat_vide("Aucune suggestion", "✅", "Votre inventaire est complet")
                 except Exception as e:
                     st.error(f"❌ Erreur: {str(e)}")
 
@@ -106,7 +107,11 @@ def render_suggestions_ia():
                 recettes = recettes_service.get_all()
 
                 if not recettes:
-                    st.info("Aucune recette disponible")
+                    etat_vide(
+                        "Aucune recette disponible",
+                        "🍳",
+                        "Ajoutez des recettes pour générer des suggestions",
+                    )
                 else:
                     recette_names = {r.id: r.nom for r in recettes}
                     selected_recette_id = st.selectbox(
@@ -204,4 +209,4 @@ def render_suggestions_ia():
                 logger.error(f"Erreur render tab recettes: {e}")
 
 
-__all__ = ["render_suggestions_ia"]
+__all__ = ["afficher_suggestions_ia"]

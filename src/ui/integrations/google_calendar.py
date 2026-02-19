@@ -52,7 +52,7 @@ def verifier_config_google() -> tuple[bool, str]:
     return True, "Configuration OK"
 
 
-def render_google_calendar_config():
+def afficher_config_google_calendar():
     """Affiche le panneau de configuration Google Calendar."""
 
     st.markdown("### 📅 Google Calendar")
@@ -170,8 +170,8 @@ def render_google_calendar_config():
                 st.error(f"❌ {str(e)}")
 
 
-def render_sync_status():
-    """Affiche le statut de synchronisation."""
+def afficher_statut_sync_google():
+    """Affiche le statut de synchronisation Google Calendar."""
 
     config = st.session_state.get("google_calendar_config")
 
@@ -191,8 +191,8 @@ def render_sync_status():
             st.error(f"🔴 Dernière sync: {config.last_sync.strftime('%d/%m')}")
 
 
-def render_quick_sync_button():
-    """Bouton de sync rapide pour la sidebar."""
+def afficher_bouton_sync_rapide():
+    """Bouton de sync rapide Google Calendar pour la sidebar."""
 
     config = st.session_state.get("google_calendar_config")
 
@@ -205,12 +205,3 @@ def render_quick_sync_button():
                 st.toast(f"✅ {result.events_imported} événements synchronisés")
             else:
                 st.toast(f"❌ Erreur sync: {result.message}")
-
-
-# ═══════════════════════════════════════════════════════
-# ALIAS FRANÇAIS
-# ═══════════════════════════════════════════════════════
-
-afficher_config_google_calendar = render_google_calendar_config
-afficher_statut_synchronisation = render_sync_status
-afficher_bouton_sync_rapide = render_quick_sync_button

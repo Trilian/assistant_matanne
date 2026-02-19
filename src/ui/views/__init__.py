@@ -1,7 +1,7 @@
 """
 Views - Vues UI extraites des services.
 
-Ce package contient les fonctions d'affichage (render_*, afficher_*)
+Ce package contient les fonctions d'affichage (afficher_*)
 qui ont été extraites des services pour respecter la séparation des responsabilités.
 
 Structure:

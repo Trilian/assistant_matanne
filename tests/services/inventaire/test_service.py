@@ -20,9 +20,7 @@ from src.core.models import ArticleInventaire, HistoriqueInventaire, Ingredient
 from src.services.inventaire.service import (
     CATEGORIES,
     EMPLACEMENTS,
-    InventaireService,
     ServiceInventaire,
-    get_inventaire_service,
     obtenir_service_inventaire,
 )
 
@@ -204,21 +202,17 @@ class TestServiceInventaireInit:
         # Cleanup
         service_module._service_inventaire = None
 
-    def test_alias_get_inventaire_service(self, mock_client_ia):
-        """Test alias get_inventaire_service."""
+    def test_alias_obtenir_service_inventaire(self, mock_client_ia):
+        """Test alias obtenir_service_inventaire."""
         import src.services.inventaire.service as service_module
 
         service_module._service_inventaire = None
 
-        service = get_inventaire_service()
+        service = obtenir_service_inventaire()
         assert isinstance(service, ServiceInventaire)
 
         # Cleanup
         service_module._service_inventaire = None
-
-    def test_alias_inventaire_service_class(self):
-        """Test alias InventaireService."""
-        assert InventaireService is ServiceInventaire
 
 
 # ═══════════════════════════════════════════════════════════

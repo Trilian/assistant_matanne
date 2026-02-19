@@ -8,16 +8,17 @@ import logging
 import streamlit as st
 
 from src.core.errors_base import ErreurValidation
-from src.services.inventaire import get_inventaire_service
+from src.services.inventaire import obtenir_service_inventaire
+from src.ui.components.atoms import etat_vide
 
 from .utils import _prepare_inventory_dataframe
 
 logger = logging.getLogger(__name__)
 
 
-def render_add_article_form():
+def afficher_add_article_form():
     """Affiche le formulaire pour ajouter un nouvel article"""
-    service = get_inventaire_service()
+    service = obtenir_service_inventaire()
 
     if service is None:
         st.error("❌ Service inventaire indisponible")
@@ -78,12 +79,12 @@ def render_add_article_form():
 
     except Exception as e:
         st.error(f"❌ Erreur: {str(e)}")
-        logger.error(f"Erreur render_add_article_form: {e}")
+        logger.error(f"Erreur afficher_add_article_form: {e}")
 
 
-def render_stock():
+def afficher_stock():
     """Affiche le stock actuel avec filtres et statistiques"""
-    service = get_inventaire_service()
+    service = obtenir_service_inventaire()
 
     if service is None:
         st.error("❌ Service inventaire indisponible")
@@ -170,7 +171,11 @@ def render_stock():
                 },
             )
         else:
-            st.info("Aucun article ne correspond aux filtres sélectionnés.")
+            etat_vide(
+                "Aucun article ne correspond aux filtres",
+                "🔍",
+                "Modifiez les filtres pour voir plus d'articles",
+            )
 
         # BOUTONS D'ACTION
         st.divider()
@@ -196,4 +201,4 @@ def render_stock():
         st.error(f"❌ Erreur: {str(e)}")
 
 
-__all__ = ["render_stock", "render_add_article_form"]
+__all__ = ["afficher_stock", "afficher_add_article_form"]

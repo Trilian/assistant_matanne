@@ -11,7 +11,7 @@ from src.core.state import obtenir_etat
 from src.ui.feedback import afficher_succes
 
 
-def render_foyer_config():
+def afficher_foyer_config():
     """Configuration du foyer"""
 
     st.markdown("### 👨‍👩‍👧‍👦 Configuration Foyer")

@@ -49,20 +49,20 @@ class TestJulesImports:
     def test_exports_ui_functions(self):
         """Test que les fonctions UI sont exportées"""
         from src.modules.famille.jules import (
-            render_achats_categorie,
-            render_activites,
-            render_conseils,
-            render_dashboard,
-            render_form_ajout_achat,
-            render_shopping,
+            afficher_achats_categorie,
+            afficher_activites,
+            afficher_conseils,
+            afficher_dashboard,
+            afficher_form_ajout_achat,
+            afficher_shopping,
         )
 
-        assert callable(render_dashboard)
-        assert callable(render_activites)
-        assert callable(render_shopping)
-        assert callable(render_achats_categorie)
-        assert callable(render_form_ajout_achat)
-        assert callable(render_conseils)
+        assert callable(afficher_dashboard)
+        assert callable(afficher_activites)
+        assert callable(afficher_shopping)
+        assert callable(afficher_achats_categorie)
+        assert callable(afficher_form_ajout_achat)
+        assert callable(afficher_conseils)
 
     def test_all_exports(self):
         """Test que __all__ contient les bons exports"""
@@ -75,12 +75,12 @@ class TestJulesImports:
             "get_activites_pour_age",
             "get_taille_vetements",
             "get_achats_jules_en_attente",
-            "render_dashboard",
-            "render_activites",
-            "render_shopping",
-            "render_achats_categorie",
-            "render_form_ajout_achat",
-            "render_conseils",
+            "afficher_dashboard",
+            "afficher_activites",
+            "afficher_shopping",
+            "afficher_achats_categorie",
+            "afficher_form_ajout_achat",
+            "afficher_conseils",
         ]
 
         for export in expected_exports:
@@ -91,10 +91,10 @@ class TestJulesApp:
     """Tests de la fonction app() du module Jules"""
 
     @patch("src.modules.famille.jules.st")
-    @patch("src.modules.famille.jules.render_dashboard")
-    @patch("src.modules.famille.jules.render_activites")
-    @patch("src.modules.famille.jules.render_shopping")
-    @patch("src.modules.famille.jules.render_conseils")
+    @patch("src.modules.famille.jules.afficher_dashboard")
+    @patch("src.modules.famille.jules.afficher_activites")
+    @patch("src.modules.famille.jules.afficher_shopping")
+    @patch("src.modules.famille.jules.afficher_conseils")
     @patch("src.modules.famille.jules.get_age_jules")
     def test_app_calls_st_title(
         self,
@@ -131,10 +131,10 @@ class TestJulesApp:
         mock_st.title.assert_called_once_with("👶 Jules")
 
     @patch("src.modules.famille.jules.st")
-    @patch("src.modules.famille.jules.render_dashboard")
-    @patch("src.modules.famille.jules.render_activites")
-    @patch("src.modules.famille.jules.render_shopping")
-    @patch("src.modules.famille.jules.render_conseils")
+    @patch("src.modules.famille.jules.afficher_dashboard")
+    @patch("src.modules.famille.jules.afficher_activites")
+    @patch("src.modules.famille.jules.afficher_shopping")
+    @patch("src.modules.famille.jules.afficher_conseils")
     @patch("src.modules.famille.jules.get_age_jules")
     def test_app_displays_age_caption(
         self,
@@ -173,10 +173,10 @@ class TestJulesApp:
         assert "22/06/2024" in call_args
 
     @patch("src.modules.famille.jules.st")
-    @patch("src.modules.famille.jules.render_dashboard")
-    @patch("src.modules.famille.jules.render_activites")
-    @patch("src.modules.famille.jules.render_shopping")
-    @patch("src.modules.famille.jules.render_conseils")
+    @patch("src.modules.famille.jules.afficher_dashboard")
+    @patch("src.modules.famille.jules.afficher_activites")
+    @patch("src.modules.famille.jules.afficher_shopping")
+    @patch("src.modules.famille.jules.afficher_conseils")
     @patch("src.modules.famille.jules.get_age_jules")
     def test_app_creates_tabs(
         self,
@@ -218,10 +218,10 @@ class TestJulesApp:
         assert "💡 Conseils" in tabs_arg
 
     @patch("src.modules.famille.jules.st")
-    @patch("src.modules.famille.jules.render_dashboard")
-    @patch("src.modules.famille.jules.render_activites")
-    @patch("src.modules.famille.jules.render_shopping")
-    @patch("src.modules.famille.jules.render_conseils")
+    @patch("src.modules.famille.jules.afficher_dashboard")
+    @patch("src.modules.famille.jules.afficher_activites")
+    @patch("src.modules.famille.jules.afficher_shopping")
+    @patch("src.modules.famille.jules.afficher_conseils")
     @patch("src.modules.famille.jules.get_age_jules")
     def test_app_calls_render_functions(
         self,

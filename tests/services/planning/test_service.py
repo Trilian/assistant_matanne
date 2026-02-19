@@ -755,10 +755,10 @@ class TestServicePlanningFactories:
 
     def test_get_planning_service_alias(self):
         """Test de l'alias anglais."""
-        from src.services.cuisine.planning.service import get_planning_service
+        from src.services.cuisine.planning.service import obtenir_service_planning
 
         with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
-            service = get_planning_service()
+            service = obtenir_service_planning()
             assert service is not None
             assert isinstance(service, ServicePlanning)
 
@@ -774,13 +774,3 @@ class TestServicePlanningFactories:
             service1 = obtenir_service_planning()
             service2 = obtenir_service_planning()
             assert service1 is service2
-
-
-class TestPlanningServiceAlias:
-    """Tests pour l'alias PlanningService."""
-
-    def test_alias_exists(self):
-        """Vérifie que l'alias existe."""
-        from src.services.cuisine.planning.service import PlanningService
-
-        assert PlanningService is ServicePlanning

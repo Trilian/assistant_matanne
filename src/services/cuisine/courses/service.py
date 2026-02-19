@@ -120,13 +120,13 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
         Returns:
             Liste de SuggestionCourses, liste vide en cas d'erreur
         """
-        from src.services.inventaire import get_inventaire_service
+        from src.services.inventaire import obtenir_service_inventaire
 
         logger.info("Generation suggestions courses depuis inventaire avec IA")
 
         try:
             # Recuperer etat inventaire
-            inventaire_service = get_inventaire_service()
+            inventaire_service = obtenir_service_inventaire()
             if not inventaire_service:
                 logger.warning("Service inventaire indisponible")
                 return []

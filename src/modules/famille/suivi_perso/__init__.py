@@ -10,10 +10,10 @@ Fonctionnalités:
 - Sync Garmin
 """
 
-from .activities import render_activities
-from .alimentation import render_food_form, render_food_log
-from .settings import render_garmin_settings, render_objectifs
-from .tableau_bord import render_dashboard, render_user_switch, render_weekly_chart
+from .activities import afficher_activities
+from .alimentation import afficher_food_form, afficher_food_log
+from .settings import afficher_garmin_settings, afficher_objectifs
+from .tableau_bord import afficher_dashboard, afficher_user_switch, afficher_weekly_chart
 
 # Import des fonctions pour exposer l'API publique
 from .utils import get_current_user, get_food_logs_today, get_user_data, set_current_user, st
@@ -24,7 +24,7 @@ def app():
     st.title("💪 Mon Suivi")
 
     # Switch utilisateur
-    render_user_switch()
+    afficher_user_switch()
 
     username = get_current_user()
     display_name = "Anne" if username == "anne" else "Mathieu"
@@ -39,19 +39,19 @@ def app():
     tabs = st.tabs(["📊 Dashboard", "🏃 Activités", "🥗 Alimentation", "🎯 Objectifs", "⌚ Garmin"])
 
     with tabs[0]:
-        render_dashboard(data)
+        afficher_dashboard(data)
 
     with tabs[1]:
-        render_activities(data)
+        afficher_activities(data)
 
     with tabs[2]:
-        render_food_log(username)
+        afficher_food_log(username)
 
     with tabs[3]:
-        render_objectifs(data)
+        afficher_objectifs(data)
 
     with tabs[4]:
-        render_garmin_settings(data)
+        afficher_garmin_settings(data)
 
 
 __all__ = [
@@ -63,12 +63,12 @@ __all__ = [
     "get_user_data",
     "get_food_logs_today",
     # UI
-    "render_user_switch",
-    "render_dashboard",
-    "render_weekly_chart",
-    "render_activities",
-    "render_food_log",
-    "render_food_form",
-    "render_garmin_settings",
-    "render_objectifs",
+    "afficher_user_switch",
+    "afficher_dashboard",
+    "afficher_weekly_chart",
+    "afficher_activities",
+    "afficher_food_log",
+    "afficher_food_form",
+    "afficher_garmin_settings",
+    "afficher_objectifs",
 ]

@@ -2,6 +2,8 @@
 Interface de gestion des equipes et matchs.
 """
 
+from src.ui import etat_vide
+
 from .crud import ajouter_equipe, ajouter_match, enregistrer_resultat_match, supprimer_match
 from .utils import (
     CHAMPIONNATS,
@@ -95,7 +97,7 @@ def afficher_gestion_donnees():
                                     enregistrer_resultat_match(m.id, score_d, score_e)
                                     st.rerun()
                 else:
-                    st.info("Aucun match en attente de resultat")
+                    etat_vide("Aucun match en attente de résultat", "⚽")
         except Exception as e:
             st.error(f"Erreur: {e}")
 
@@ -140,7 +142,7 @@ def afficher_gestion_donnees():
                     else:
                         st.info(f"Aucun match pour {champ_filter}")
                 else:
-                    st.info("Aucun match enregistre")
+                    etat_vide("Aucun match enregistré", "⚽")
         except Exception as e:
             st.error(f"Erreur: {e}")
 

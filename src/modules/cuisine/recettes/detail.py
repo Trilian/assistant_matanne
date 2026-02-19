@@ -8,12 +8,13 @@ import time
 import streamlit as st
 
 from src.services.cuisine.recettes import obtenir_service_recettes
+from src.ui.components.atoms import etat_vide
 
-from .generation_image import render_generer_image
+from .generation_image import afficher_generer_image
 from .utils import formater_quantite
 
 
-def render_detail_recette(recette):
+def afficher_detail_recette(recette):
     """Affiche les détails d'une recette avec badges, historique et versions"""
     service = obtenir_service_recettes()
 
@@ -60,7 +61,7 @@ def render_detail_recette(recette):
             )
 
     # Section génération d'image (fusionnée en une seule)
-    render_generer_image(recette)
+    afficher_generer_image(recette)
 
     # Badges et caractéristiques
     badges = []
@@ -263,7 +264,11 @@ def render_detail_recette(recette):
                                 f"â±ï¸ Temps optimisé: {version.temps_optimise_batch} minutes"
                             )
             else:
-                st.info("Aucune version adaptée générée.")
+                etat_vide(
+                    "Aucune version adaptée générée",
+                    "🧪",
+                    "Générez des adaptations pour cette recette",
+                )
 
         # Afficher onglet robots si compatible
         if robots_compatibles:
@@ -459,4 +464,4 @@ def render_detail_recette(recette):
                     st.rerun()
 
 
-__all__ = ["render_detail_recette"]
+__all__ = ["afficher_detail_recette"]

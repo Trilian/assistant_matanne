@@ -9,20 +9,20 @@ import pytest
 class TestTimelineHelpers:
     """Tests pour les helpers de timeline."""
 
-    def test_get_lundi_semaine_lundi(self):
-        """get_lundi_semaine retourne lundi si déjà lundi."""
-        from src.modules.planning.timeline_ui import get_lundi_semaine
+    def test_obtenir_debut_semaine_lundi(self):
+        """obtenir_debut_semaine retourne lundi si déjà lundi."""
+        from src.core.date_utils import obtenir_debut_semaine
 
         lundi = date(2026, 2, 16)  # Lundi
-        assert get_lundi_semaine(lundi) == lundi
+        assert obtenir_debut_semaine(lundi) == lundi
 
-    def test_get_lundi_semaine_autre_jour(self):
-        """get_lundi_semaine retourne le lundi de la semaine."""
-        from src.modules.planning.timeline_ui import get_lundi_semaine
+    def test_obtenir_debut_semaine_autre_jour(self):
+        """obtenir_debut_semaine retourne le lundi de la semaine."""
+        from src.core.date_utils import obtenir_debut_semaine
 
         mercredi = date(2026, 2, 18)  # Mercredi
         lundi = date(2026, 2, 16)
-        assert get_lundi_semaine(mercredi) == lundi
+        assert obtenir_debut_semaine(mercredi) == lundi
 
     def test_couleurs_types(self):
         """COULEURS_TYPES contient les couleurs par défaut."""

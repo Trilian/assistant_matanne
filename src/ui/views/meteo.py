@@ -9,7 +9,7 @@ import streamlit as st
 
 from src.services.integrations.weather.service import (
     NiveauAlerte,
-    get_weather_garden_service,
+    obtenir_service_meteo,
 )
 
 
@@ -17,7 +17,7 @@ def afficher_meteo_jardin():  # pragma: no cover
     """Interface Streamlit pour les alertes météo jardin."""
     st.subheader("🌤️ Météo & Jardin")
 
-    service = get_weather_garden_service()
+    service = obtenir_service_meteo()
 
     # Configuration localisation
     with st.expander("📝 Configurer la localisation"):
