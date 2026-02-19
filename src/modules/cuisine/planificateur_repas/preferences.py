@@ -2,13 +2,15 @@
 Module Planificateur de Repas - Gestion des préférences et feedbacks
 """
 
-from ._common import (
-    FeedbackRecette,
-    PreferencesUtilisateur,
-    get_user_preference_service,
-    logger,
-    st,
-)
+import logging
+
+import streamlit as st
+
+from src.services.core.utilisateur import get_user_preference_service
+
+from .utils import FeedbackRecette, PreferencesUtilisateur
+
+logger = logging.getLogger(__name__)
 
 
 def charger_preferences() -> PreferencesUtilisateur:

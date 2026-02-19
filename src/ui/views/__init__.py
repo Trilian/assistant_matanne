@@ -43,6 +43,7 @@ from .notifications import (
     afficher_preferences_notification,
 )
 from .pwa import (
+    afficher_invite_installation_pwa,
     injecter_meta_pwa,
 )
 from .sauvegarde import (
@@ -51,7 +52,6 @@ from .sauvegarde import (
 from .synchronisation import (
     afficher_indicateur_frappe,
     afficher_indicateur_presence,
-    afficher_invite_installation_pwa,
     afficher_statut_synchronisation,
 )
 

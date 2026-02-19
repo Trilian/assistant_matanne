@@ -265,3 +265,8 @@ def obtenir_service_backup(config: BackupConfig | None = None) -> ServiceBackup:
     if _backup_service is None:
         _backup_service = ServiceBackup(config)
     return _backup_service
+
+
+def get_backup_service(config: BackupConfig | None = None) -> ServiceBackup:
+    """Factory for backup service (English alias)."""
+    return obtenir_service_backup(config)

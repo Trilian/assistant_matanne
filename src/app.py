@@ -41,7 +41,9 @@ import streamlit as st
 # PATH & LOGGING
 # ═══════════════════════════════════════════════════════════
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+_project_root_str = str(Path(__file__).parent.parent)
+if _project_root_str not in sys.path:
+    sys.path.insert(0, _project_root_str)
 
 from src.core.logging import GestionnaireLog, obtenir_logger
 
@@ -52,7 +54,7 @@ logger = obtenir_logger(__name__)
 # IMPORTS OPTIMISÉS (MINIMAL au démarrage)
 # ═══════════════════════════════════════════════════════════
 
-from src.core import Cache, GestionnaireEtat, obtenir_etat, obtenir_parametres
+from src.core import GestionnaireEtat, obtenir_etat, obtenir_parametres
 from src.core.lazy_loader import RouteurOptimise
 
 # Layout modulaire
@@ -78,8 +80,8 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
-        "Get Help": "https://github.com/ton-repo",
-        "Report a bug": "https://github.com/ton-repo/issues",
+        "Get Help": "https://github.com/Trilian/assistant_matanne",
+        "Report a bug": "https://github.com/Trilian/assistant_matanne/issues",
         "About": f"{parametres.APP_NAME} v{parametres.APP_VERSION}",
     },
 )
@@ -100,7 +102,7 @@ if not initialiser_app():
 # ═══════════════════════════════════════════════════════════
 
 
-def main():
+def main() -> None:
     """Fonction principale."""
     try:
         # Header
@@ -118,14 +120,13 @@ def main():
 
     except Exception as e:
         logger.exception("❌ Erreur critique dans main()")
-        st.error(f"❌ Erreur critique: {str(e)}")
+        st.error("❌ Une erreur critique est survenue. Veuillez redémarrer l'application.")
 
         if obtenir_etat().mode_debug:
             st.exception(e)
 
         if st.button("🔄 Redémarrer"):
-            GestionnaireEtat.reinitialiser()
-            Cache.vider()
+            GestionnaireEtat.reset_complet()
             st.rerun()
 
 

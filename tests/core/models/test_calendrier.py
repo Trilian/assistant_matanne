@@ -27,7 +27,7 @@ class TestCalendarProvider:
         assert CalendarProvider.GOOGLE.value == "google"
         assert CalendarProvider.APPLE.value == "apple"
         assert CalendarProvider.OUTLOOK.value == "outlook"
-        assert CalendarProvider.ICAL.value == "ical"
+        assert CalendarProvider.ICAL_URL.value == "ical_url"
 
 
 class TestSyncDirection:

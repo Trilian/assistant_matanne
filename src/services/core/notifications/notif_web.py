@@ -641,7 +641,12 @@ def obtenir_service_webpush() -> ServiceWebPush:
     return _service_webpush
 
 
+# Alias anglais pour compatibilité API routes
+get_push_notification_service = obtenir_service_webpush
+
+
 __all__ = [
     "ServiceWebPush",
     "obtenir_service_webpush",
+    "get_push_notification_service",
 ]

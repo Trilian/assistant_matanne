@@ -325,7 +325,13 @@ def obtenir_service_courses_intelligentes() -> ServiceCoursesIntelligentes:
     return _service_courses_intelligentes
 
 
+def get_smart_shopping_service() -> ServiceCoursesIntelligentes:
+    """Factory for smart shopping service (English alias)."""
+    return obtenir_service_courses_intelligentes()
+
+
 __all__ = [
     "ServiceCoursesIntelligentes",
     "obtenir_service_courses_intelligentes",
+    "get_smart_shopping_service",
 ]

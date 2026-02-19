@@ -208,7 +208,7 @@ class RecipeImporter:
                             yield_val = yield_val[0] if yield_val else 4
                         try:
                             recipe["portions"] = int(str(yield_val).split()[0])
-                        except:
+                        except (ValueError, IndexError):
                             recipe["portions"] = 4
 
                     # Récupérer l'image
@@ -223,7 +223,7 @@ class RecipeImporter:
                     # Si on a un nom, on a trouvé la recette!
                     if recipe["nom"]:
                         return recipe
-            except:
+            except Exception:
                 pass  # Continuer si erreur JSON
 
         # Fallback: chercher le titre (h1, h2, ou property og:title)
@@ -419,5 +419,5 @@ class RecipeImporter:
                     total_minutes = int(number_match.group(1))
 
             return total_minutes
-        except:
+        except (ValueError, TypeError):
             return 0

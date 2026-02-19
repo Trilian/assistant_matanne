@@ -8,7 +8,6 @@ Fonctionnalités:
 - Support multi-appareils (abonnement topic)
 """
 
-import asyncio
 import logging
 from datetime import date
 
@@ -17,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.models import ArticleCourses, MaintenanceTask
+from src.services.core.base import sync_wrapper
 from src.services.core.notifications.types import (
     NTFY_BASE_URL,
     ConfigurationNtfy,
@@ -87,7 +87,7 @@ class ServiceNtfy:
 
     def envoyer_sync(self, notification: NotificationNtfy) -> ResultatEnvoiNtfy:
         """Version synchrone de l'envoi."""
-        return asyncio.run(self.envoyer(notification))
+        return sync_wrapper(self.envoyer)(notification)
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
@@ -187,7 +187,7 @@ class ServiceNtfy:
 
     def envoyer_digest_quotidien_sync(self) -> ResultatEnvoiNtfy:
         """Version synchrone de l'envoi du digest quotidien."""
-        return asyncio.run(self.envoyer_digest_quotidien())
+        return sync_wrapper(self.envoyer_digest_quotidien)()
 
     async def envoyer_rappel_courses(self, nb_articles: int) -> ResultatEnvoiNtfy:
         """Envoie un rappel pour les courses."""
@@ -220,7 +220,7 @@ class ServiceNtfy:
 
     def test_connexion_sync(self) -> ResultatEnvoiNtfy:
         """Version synchrone du test de connexion."""
-        return asyncio.run(self.test_connexion())
+        return sync_wrapper(self.test_connexion)()
 
     def get_subscribe_url(self) -> str:
         """Retourne l'URL d'abonnement pour les appareils."""
@@ -256,7 +256,7 @@ class PlanificateurNtfy:
 
     def lancer_verification_sync(self) -> list[ResultatEnvoiNtfy]:
         """Lance la vérification de manière synchrone."""
-        return asyncio.run(self.verifier_et_envoyer_alertes())
+        return sync_wrapper(self.verifier_et_envoyer_alertes)()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -269,6 +269,11 @@ def obtenir_service_ntfy(config: ConfigurationNtfy | None = None) -> ServiceNtfy
     return ServiceNtfy(config)
 
 
+def get_ntfy_service(config: ConfigurationNtfy | None = None) -> ServiceNtfy:
+    """Factory for ntfy notification service (English alias)."""
+    return obtenir_service_ntfy(config)
+
+
 def obtenir_planificateur_ntfy() -> PlanificateurNtfy:
     """Factory pour le planificateur de notifications ntfy."""
     service = obtenir_service_ntfy()
@@ -279,5 +284,6 @@ __all__ = [
     "ServiceNtfy",
     "PlanificateurNtfy",
     "obtenir_service_ntfy",
+    "get_ntfy_service",
     "obtenir_planificateur_ntfy",
 ]

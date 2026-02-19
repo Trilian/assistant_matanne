@@ -2,18 +2,19 @@
 Suggestions IA pour les courses.
 """
 
+import logging
 import time
 
-from ._common import (
-    etat_vide,
-    logger,
-    obtenir_contexte_db,
-    obtenir_service_courses,
-    obtenir_service_inventaire,
-    obtenir_service_recettes,
-    pd,
-    st,
-)
+import pandas as pd
+import streamlit as st
+
+from src.core.db import obtenir_contexte_db
+from src.services.cuisine.courses import obtenir_service_courses
+from src.services.cuisine.recettes import obtenir_service_recettes
+from src.services.inventaire import obtenir_service_inventaire
+from src.ui.components.atoms import etat_vide
+
+logger = logging.getLogger(__name__)
 
 
 def afficher_suggestions_ia():

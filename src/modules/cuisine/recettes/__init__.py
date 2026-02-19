@@ -54,27 +54,20 @@ def app():
         st.session_state.detail_recette_id = None
 
     # Sous-tabs avec persistence d'état
-    if "recettes_selected_tab" not in st.session_state:
-        st.session_state.recettes_selected_tab = 0
-
     tab_liste, tab_ajout, tab_import, tab_ia = st.tabs(
         ["📋 Liste", "➕ Ajouter Manuel", "📥 Importer", "⏰ Générer IA"]
     )
 
     with tab_liste:
-        st.session_state.recettes_selected_tab = 0
         afficher_liste()
 
     with tab_ajout:
-        st.session_state.recettes_selected_tab = 1
         afficher_ajouter_manuel()
 
     with tab_import:
-        st.session_state.recettes_selected_tab = 2
         afficher_importer()
 
     with tab_ia:
-        st.session_state.recettes_selected_tab = 3
         afficher_generer_ia()
 
 

@@ -1,10 +1,18 @@
 """
 Core - Module central de l'application.
 
-Expose les composants essentiels pour l'ensemble de l'application.
+Expose les composants essentiels via chargement paresseux (PEP 562).
 Convention : Noms en français uniquement.
 
-Refactorisé en sous-modules thématiques:
+Usage recommandé (imports directs depuis les sous-modules):
+    from src.core.config import obtenir_parametres
+    from src.core.db import obtenir_contexte_db
+    from src.core.errors_base import ErreurValidation
+
+Usage général (lazy, via __getattr__):
+    from src.core import obtenir_parametres  # charge config/ à la demande
+
+Sous-modules thématiques:
 - config/: Configuration Pydantic
 - db/: Base de données et migrations
 - caching/: Cache multi-niveaux
@@ -12,205 +20,106 @@ Refactorisé en sous-modules thématiques:
 - ai/: Client IA, rate limiting, cache sémantique
 """
 
-# ═══════════════════════════════════════════════════════════
-# AI
-# ═══════════════════════════════════════════════════════════
-from .ai import AnalyseurIA, CacheIA, ClientIA, RateLimitIA, obtenir_client_ia
+from __future__ import annotations
 
-# ═══════════════════════════════════════════════════════════
-# CACHE MULTI-NIVEAUX (sous-module caching/)
-# ═══════════════════════════════════════════════════════════
-from .caching import (
-    Cache,
-    CacheMultiNiveau,
-    EntreeCache,
-    StatistiquesCache,
-    avec_cache_multi,
-    cached,
-    obtenir_cache,
-)
+import importlib
+from typing import Any
 
-# ═══════════════════════════════════════════════════════════
-# CONFIGURATION (sous-module config/)
-# ═══════════════════════════════════════════════════════════
-from .config import Parametres, obtenir_parametres
-
-# Note: Les constantes sont accessibles via `from src.core.constants import ...`
-# Ne pas utiliser `from src.core import CONSTANT` - utiliser l'import direct depuis constants
-# ═══════════════════════════════════════════════════════════
-# DATABASE (nouveau sous-module db/)
-# ═══════════════════════════════════════════════════════════
-from .db import (
-    GestionnaireMigrations,
-    creer_toutes_tables,
-    initialiser_database,
-    obtenir_contexte_db,
-    obtenir_db_securise,
-    obtenir_fabrique_session,
-    obtenir_infos_db,
-    obtenir_moteur,
-    obtenir_moteur_securise,
-    vacuum_database,
-    verifier_connexion,
-    verifier_sante,
-)
-
-# ═══════════════════════════════════════════════════════════
-# DECORATORS
-# ═══════════════════════════════════════════════════════════
-from .decorators import (
-    avec_cache,
-    avec_gestion_erreurs,
-    avec_session_db,
-    avec_validation,
-)
-
-# ═══════════════════════════════════════════════════════════
-# ERRORS (avec UI Streamlit)
-# ═══════════════════════════════════════════════════════════
-from .errors import (
-    GestionnaireErreurs,
-    afficher_erreur_streamlit,
-    gerer_erreurs,
-)
-
-# ═══════════════════════════════════════════════════════════
-# ERRORS BASE (pures, sans UI)
-# ═══════════════════════════════════════════════════════════
-from .errors_base import (
-    ErreurBaseDeDonnees,
-    ErreurConfiguration,
-    ErreurLimiteDebit,
-    ErreurNonTrouve,
-    ErreurServiceExterne,
-    ErreurServiceIA,
-    ErreurValidation,
-    ExceptionApp,
-    exiger_champs,
-    valider_plage,
-    valider_type,
-)
-
-# ═══════════════════════════════════════════════════════════
-# LAZY LOADER
-# ═══════════════════════════════════════════════════════════
-from .lazy_loader import (
-    ChargeurModuleDiffere,
-    RouteurOptimise,
-    afficher_stats_chargement_differe,
-)
-
-# ═══════════════════════════════════════════════════════════
-# LOGGING
-# ═══════════════════════════════════════════════════════════
-from .logging import (
-    GestionnaireLog,
-    obtenir_logger,
-)
-
-# ═══════════════════════════════════════════════════════════
-# STATE
-# ═══════════════════════════════════════════════════════════
-from .state import EtatApp, GestionnaireEtat, naviguer, obtenir_etat, revenir
-
-# ═══════════════════════════════════════════════════════════
-# VALIDATION (nouveau sous-module validation/)
-# ═══════════════════════════════════════════════════════════
-from .validation import (
-    EntreeJournalInput,
-    EtapeInput,
-    IngredientInput,
-    IngredientStockInput,
-    NettoyeurEntrees,
-    ProjetInput,
-    RecetteInput,
-    RepasInput,
-    RoutineInput,
-    TacheRoutineInput,
-    valider_modele,
-)
-
-# ═══════════════════════════════════════════════════════════
-# EXPORTS
-# ═══════════════════════════════════════════════════════════
-
-__all__ = [
-    # Config
-    "Parametres",
-    "obtenir_parametres",
-    # Logging
-    "GestionnaireLog",
-    "obtenir_logger",
-    # Database
-    "obtenir_moteur",
-    "obtenir_moteur_securise",
-    "obtenir_contexte_db",
-    "obtenir_db_securise",
-    "obtenir_fabrique_session",
-    "verifier_connexion",
-    "obtenir_infos_db",
-    "initialiser_database",
-    "creer_toutes_tables",
-    "verifier_sante",
-    "vacuum_database",
-    "GestionnaireMigrations",
-    # State
-    "EtatApp",
-    "GestionnaireEtat",
-    "obtenir_etat",
-    "naviguer",
-    "revenir",
-    # Cache
-    "Cache",
-    "cached",
-    "RateLimitIA",
-    # Cache multi-niveaux
-    "CacheMultiNiveau",
-    "obtenir_cache",
-    "avec_cache_multi",
-    "EntreeCache",
-    "StatistiquesCache",
-    # Errors Base (pures)
-    "ExceptionApp",
-    "ErreurValidation",
-    "ErreurNonTrouve",
-    "ErreurBaseDeDonnees",
-    "ErreurServiceIA",
-    "ErreurLimiteDebit",
-    "ErreurServiceExterne",
-    "ErreurConfiguration",
-    "exiger_champs",
-    "valider_type",
-    "valider_plage",
-    # Errors (avec UI)
-    "gerer_erreurs",
-    "afficher_erreur_streamlit",
-    "GestionnaireErreurs",
-    # Decorators
-    "avec_session_db",
-    "avec_cache",
-    "avec_gestion_erreurs",
-    "avec_validation",
-    # Validators Pydantic
-    "RecetteInput",
-    "IngredientInput",
-    "EtapeInput",
-    "IngredientStockInput",
-    "RepasInput",
-    "RoutineInput",
-    "TacheRoutineInput",
-    "EntreeJournalInput",
-    "ProjetInput",
-    # Validation
-    "NettoyeurEntrees",
-    "valider_modele",
+# Mapping: nom de symbole → (sous-module relatif, nom dans le module)
+_LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # AI
-    "ClientIA",
-    "obtenir_client_ia",
-    "AnalyseurIA",
-    "CacheIA",
+    "AnalyseurIA": (".ai", "AnalyseurIA"),
+    "CacheIA": (".ai", "CacheIA"),
+    "ClientIA": (".ai", "ClientIA"),
+    "RateLimitIA": (".ai", "RateLimitIA"),
+    "obtenir_client_ia": (".ai", "obtenir_client_ia"),
+    # Cache
+    "Cache": (".caching", "Cache"),
+    "CacheMultiNiveau": (".caching", "CacheMultiNiveau"),
+    "EntreeCache": (".caching", "EntreeCache"),
+    "StatistiquesCache": (".caching", "StatistiquesCache"),
+    "avec_cache_multi": (".caching", "avec_cache_multi"),
+    "cached": (".caching", "cached"),
+    "obtenir_cache": (".caching", "obtenir_cache"),
+    # Config
+    "Parametres": (".config", "Parametres"),
+    "obtenir_parametres": (".config", "obtenir_parametres"),
+    "reinitialiser_parametres": (".config", "reinitialiser_parametres"),
+    # Database
+    "GestionnaireMigrations": (".db", "GestionnaireMigrations"),
+    "creer_toutes_tables": (".db", "creer_toutes_tables"),
+    "initialiser_database": (".db", "initialiser_database"),
+    "obtenir_contexte_db": (".db", "obtenir_contexte_db"),
+    "obtenir_db_securise": (".db", "obtenir_db_securise"),
+    "obtenir_fabrique_session": (".db", "obtenir_fabrique_session"),
+    "obtenir_infos_db": (".db", "obtenir_infos_db"),
+    "obtenir_moteur": (".db", "obtenir_moteur"),
+    "obtenir_moteur_securise": (".db", "obtenir_moteur_securise"),
+    "vacuum_database": (".db", "vacuum_database"),
+    "verifier_connexion": (".db", "verifier_connexion"),
+    "verifier_sante": (".db", "verifier_sante"),
+    # Decorators
+    "avec_cache": (".decorators", "avec_cache"),
+    "avec_gestion_erreurs": (".decorators", "avec_gestion_erreurs"),
+    "avec_session_db": (".decorators", "avec_session_db"),
+    "avec_validation": (".decorators", "avec_validation"),
+    # Errors (UI)
+    "GestionnaireErreurs": (".errors", "GestionnaireErreurs"),
+    "afficher_erreur_streamlit": (".errors", "afficher_erreur_streamlit"),
+    "gerer_erreurs": (".errors", "gerer_erreurs"),
+    # Errors Base (pures)
+    "ErreurBaseDeDonnees": (".errors_base", "ErreurBaseDeDonnees"),
+    "ErreurConfiguration": (".errors_base", "ErreurConfiguration"),
+    "ErreurLimiteDebit": (".errors_base", "ErreurLimiteDebit"),
+    "ErreurNonTrouve": (".errors_base", "ErreurNonTrouve"),
+    "ErreurServiceExterne": (".errors_base", "ErreurServiceExterne"),
+    "ErreurServiceIA": (".errors_base", "ErreurServiceIA"),
+    "ErreurValidation": (".errors_base", "ErreurValidation"),
+    "ExceptionApp": (".errors_base", "ExceptionApp"),
+    "exiger_champs": (".errors_base", "exiger_champs"),
+    "exiger_existence": (".errors_base", "exiger_existence"),
+    "exiger_longueur": (".errors_base", "exiger_longueur"),
+    "exiger_plage": (".errors_base", "exiger_plage"),
+    "exiger_positif": (".errors_base", "exiger_positif"),
+    "valider_plage": (".errors_base", "valider_plage"),
+    "valider_type": (".errors_base", "valider_type"),
     # Lazy Loader
-    "ChargeurModuleDiffere",
-    "RouteurOptimise",
-    "afficher_stats_chargement_differe",
-]
+    "ChargeurModuleDiffere": (".lazy_loader", "ChargeurModuleDiffere"),
+    "RouteurOptimise": (".lazy_loader", "RouteurOptimise"),
+    "afficher_stats_chargement_differe": (".lazy_loader", "afficher_stats_chargement_differe"),
+    # Logging
+    "GestionnaireLog": (".logging", "GestionnaireLog"),
+    "obtenir_logger": (".logging", "obtenir_logger"),
+    # State
+    "EtatApp": (".state", "EtatApp"),
+    "GestionnaireEtat": (".state", "GestionnaireEtat"),
+    "naviguer": (".state", "naviguer"),
+    "obtenir_etat": (".state", "obtenir_etat"),
+    "revenir": (".state", "revenir"),
+    # Validation
+    "EntreeJournalInput": (".validation", "EntreeJournalInput"),
+    "EtapeInput": (".validation", "EtapeInput"),
+    "IngredientInput": (".validation", "IngredientInput"),
+    "IngredientStockInput": (".validation", "IngredientStockInput"),
+    "NettoyeurEntrees": (".validation", "NettoyeurEntrees"),
+    "ProjetInput": (".validation", "ProjetInput"),
+    "RecetteInput": (".validation", "RecetteInput"),
+    "RepasInput": (".validation", "RepasInput"),
+    "RoutineInput": (".validation", "RoutineInput"),
+    "TacheRoutineInput": (".validation", "TacheRoutineInput"),
+    "valider_modele": (".validation", "valider_modele"),
+}
+
+__all__ = list(_LAZY_IMPORTS.keys())
+
+
+def __getattr__(name: str) -> Any:
+    """Chargement paresseux des symboles (PEP 562)."""
+    if name in _LAZY_IMPORTS:
+        module_path, attr_name = _LAZY_IMPORTS[name]
+        module = importlib.import_module(module_path, __name__)
+        value = getattr(module, attr_name)
+        # Cache dans le namespace du module pour éviter les appels répétés
+        globals()[name] = value
+        return value
+    raise AttributeError(f"module 'src.core' has no attribute {name!r}")

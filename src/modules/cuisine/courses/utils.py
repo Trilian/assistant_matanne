@@ -613,3 +613,15 @@ def generer_modele_depuis_historique(analyse: dict, seuil_frequence: int = 3) ->
         for item in analyse.get("recurrents", [])
         if item["frequence"] >= seuil_frequence
     ]
+
+
+def get_current_user_id() -> str | None:
+    """Retourne l'ID de l'utilisateur courant ou None si non authentifié."""
+    try:
+        from src.services.core.utilisateur import get_auth_service
+
+        auth = get_auth_service()
+        user = auth.get_current_user()
+        return user.id if user else None
+    except Exception:
+        return None

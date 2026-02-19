@@ -22,7 +22,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from .base import Base, utc_now
 
 if TYPE_CHECKING:
     from .recettes import Recette
@@ -54,7 +54,7 @@ class Planning(Base):
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     genere_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     repas: Mapped[list["Repas"]] = relationship(
@@ -150,7 +150,7 @@ class CalendarEvent(Base):
     recurrence_fin: Mapped[date | None] = mapped_column(Date)  # Date de fin de la récurrence
     parent_event_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("calendar_events.id"))
 
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         Index("idx_date_type", "date_debut", "type_event"),
@@ -184,9 +184,9 @@ class TemplateSemaine(Base):
     nom: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     description: Mapped[str | None] = mapped_column(Text)
     actif: Mapped[bool] = mapped_column(Boolean, default=True)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     # Relations

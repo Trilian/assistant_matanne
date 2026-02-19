@@ -2,7 +2,11 @@
 Module Planificateur de Repas - Génération PDF
 """
 
-from ._common import BytesIO, date, datetime, logger, timedelta
+import logging
+from datetime import date, datetime, timedelta
+from io import BytesIO
+
+logger = logging.getLogger(__name__)
 
 
 def generer_pdf_planning_session(

@@ -9,7 +9,7 @@ import streamlit as st
 
 from src.core.errors_base import ErreurValidation
 from src.services.inventaire import obtenir_service_inventaire
-from src.ui.components.atoms import etat_vide
+from src.ui import etat_vide
 
 from .utils import _prepare_inventory_dataframe
 
@@ -193,7 +193,7 @@ def afficher_stock():
 
         with col_btn3:
             if st.button("📥 Importer CSV", width="stretch"):
-                st.session_state.show_import = True
+                pass
 
     except ErreurValidation as e:
         st.error(f"❌ Erreur de validation: {e}")

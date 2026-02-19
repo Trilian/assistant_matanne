@@ -12,6 +12,7 @@ from src.services.jeux import (
     NotificationJeuxService,
     get_notification_jeux_service,
 )
+from src.ui.utils import echapper_html
 
 
 def afficher_badge_notifications_jeux(service: NotificationJeuxService | None = None) -> None:
@@ -26,7 +27,7 @@ def afficher_badge_notifications_jeux(service: NotificationJeuxService | None = 
             <span style="background-color: #FF4B4B; color: white;
                          padding: 2px 8px; border-radius: 10px;
                          font-size: 12px; font-weight: bold;">
-                {non_lues}
+                {echapper_html(str(non_lues))}
             </span>
             """,
             unsafe_allow_html=True,
@@ -44,7 +45,7 @@ def afficher_notification_jeux(notification: NotificationJeux) -> None:
         with col2:
             titre_style = "font-weight: normal;" if notification.lue else "font-weight: bold;"
             st.markdown(
-                f"<span style='{titre_style}'>{notification.titre}</span>",
+                f"<span style='{titre_style}'>{echapper_html(notification.titre)}</span>",
                 unsafe_allow_html=True,
             )
             st.caption(notification.message)

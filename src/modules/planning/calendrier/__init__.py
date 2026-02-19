@@ -16,10 +16,14 @@ Fonctionnalités:
 - Export pour le frigo
 """
 
+from datetime import date
+
+import streamlit as st
+
 # Import Google Calendar UI
 from src.ui.integrations import afficher_config_google_calendar
 
-from ._common import construire_semaine_calendrier, date, get_debut_semaine, st
+from .utils import construire_semaine_calendrier, get_debut_semaine
 from .analytics import (
     afficher_actions_prioritaires,
     afficher_formulaire_optimisation_ia,

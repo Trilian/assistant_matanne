@@ -72,10 +72,9 @@ class TestSuiviProgression:
 
         assert suivi.courant == 5  # Ne dépasse pas le total
 
-    @patch("time.sleep")
     @patch("streamlit.empty")
     @patch("streamlit.progress")
-    def test_suivi_progression_terminer(self, mock_progress, mock_empty, mock_sleep):
+    def test_suivi_progression_terminer(self, mock_progress, mock_empty):
         """Test de la méthode terminer."""
         from src.ui.feedback.progress import SuiviProgression
 
@@ -88,12 +87,10 @@ class TestSuiviProgression:
         suivi.terminer("Terminé avec succès")
 
         assert suivi.courant == suivi.total
-        mock_sleep.assert_called_once_with(2)
 
-    @patch("time.sleep")
     @patch("streamlit.empty")
     @patch("streamlit.progress")
-    def test_suivi_progression_terminer_sans_message(self, mock_progress, mock_empty, mock_sleep):
+    def test_suivi_progression_terminer_sans_message(self, mock_progress, mock_empty):
         """Test de terminer sans message personnalisé."""
         from src.ui.feedback.progress import SuiviProgression
 
@@ -269,9 +266,8 @@ class TestEtatChargement:
         assert etat.etapes[0]["completed"] is True
         assert "Erreur" in etat.etapes[0]["status"]
 
-    @patch("time.sleep")
     @patch("streamlit.empty")
-    def test_etat_chargement_finaliser(self, mock_empty, mock_sleep):
+    def test_etat_chargement_finaliser(self, mock_empty):
         """Test de finaliser."""
         from src.ui.feedback.progress import EtatChargement
 
@@ -284,11 +280,9 @@ class TestEtatChargement:
         etat.finaliser("Tout est prêt")
 
         mock_placeholder.success.assert_called()
-        mock_sleep.assert_called_once_with(3)
 
-    @patch("time.sleep")
     @patch("streamlit.empty")
-    def test_etat_chargement_finaliser_sans_message(self, mock_empty, mock_sleep):
+    def test_etat_chargement_finaliser_sans_message(self, mock_empty):
         """Test de finaliser sans message."""
         from src.ui.feedback.progress import EtatChargement
 

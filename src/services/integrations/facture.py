@@ -15,7 +15,7 @@ from datetime import date
 
 from pydantic import BaseModel, Field
 
-from src.core.ai import ClientIA
+from src.core.ai import ClientIA, obtenir_client_ia
 from src.services.core.base import BaseAIService
 
 logger = logging.getLogger(__name__)
@@ -78,7 +78,7 @@ class FactureOCRService(BaseAIService):
 
     def __init__(self):
         super().__init__(
-            client=ClientIA(),
+            client=obtenir_client_ia(),
             cache_prefix="facture_ocr",
             default_ttl=3600,
             service_name="facture_ocr",
@@ -164,7 +164,7 @@ Réponds UNIQUEMENT avec le JSON, sans texte autour."""
             if data.get(date_field):
                 try:
                     data[date_field] = date.fromisoformat(data[date_field])
-                except:
+                except (ValueError, TypeError):
                     data[date_field] = None
 
         # Valider et calculer confiance
@@ -241,7 +241,7 @@ def extraire_montant(texte: str, pattern: str) -> float | None:
         valeur = match.group(1).replace(",", ".").replace(" ", "")
         try:
             return float(valeur)
-        except:
+        except (ValueError, TypeError):
             pass
     return None
 

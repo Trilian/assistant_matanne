@@ -294,7 +294,6 @@ class TestAtomsImports:
             boite_info,
             carte_metrique,
             etat_vide,
-            notification,
             separateur,
         )
 
@@ -304,7 +303,6 @@ class TestAtomsImports:
                 badge,
                 etat_vide,
                 carte_metrique,
-                notification,
                 separateur,
                 boite_info,
             ]
@@ -317,7 +315,6 @@ class TestAtomsImports:
             boite_info,
             carte_metrique,
             etat_vide,
-            notification,
             separateur,
         )
 
@@ -327,7 +324,6 @@ class TestAtomsImports:
                 badge,
                 etat_vide,
                 carte_metrique,
-                notification,
                 separateur,
                 boite_info,
             ]

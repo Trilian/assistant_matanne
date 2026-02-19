@@ -2,15 +2,15 @@
 Module Loto - Operations CRUD (creation/mise à jour)
 """
 
-from ._common import (
-    COUT_GRILLE,
-    GrilleLoto,
-    TirageLoto,
-    date,
-    obtenir_contexte_db,
-    st,
-    verifier_grille,
-)
+from datetime import date
+
+import streamlit as st
+
+from src.core.db import obtenir_contexte_db
+from src.core.models import GrilleLoto, TirageLoto
+
+from .calculs import verifier_grille
+from .constants import COUT_GRILLE
 
 
 def ajouter_tirage(date_t: date, numeros: list, chance: int, jackpot: int = None):

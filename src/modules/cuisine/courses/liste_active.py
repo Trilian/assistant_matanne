@@ -2,15 +2,17 @@
 Liste active des courses.
 """
 
-from ._common import (
-    PRIORITY_EMOJIS,
-    RAYONS_DEFAULT,
-    datetime,
-    logger,
-    obtenir_service_courses,
-    obtenir_service_inventaire,
-    st,
-)
+import logging
+from datetime import datetime
+
+import streamlit as st
+
+from src.services.cuisine.courses import obtenir_service_courses
+from src.services.inventaire import obtenir_service_inventaire
+
+from .utils import PRIORITY_EMOJIS, RAYONS_DEFAULT
+
+logger = logging.getLogger(__name__)
 from .liste_utils import (
     filtrer_liste,
     formater_article_label,

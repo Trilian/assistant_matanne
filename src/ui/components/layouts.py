@@ -7,6 +7,8 @@ from collections.abc import Callable
 
 import streamlit as st
 
+from src.ui.utils import echapper_html
+
 
 def disposition_grille(
     items: list[dict],
@@ -107,7 +109,7 @@ def carte_item(
                 with col_status:
                     st.markdown(
                         f'<div style="text-align: right; color: {couleur_statut or "#6c757d"}; '
-                        f'font-weight: 600;">{statut}</div>',
+                        f'font-weight: 600;">{echapper_html(statut)}</div>',
                         unsafe_allow_html=True,
                     )
             else:
@@ -120,7 +122,7 @@ def carte_item(
                 tag_html = " ".join(
                     [
                         f'<span style="background: #e7f3ff; padding: 0.25rem 0.5rem; '
-                        f'border-radius: 12px; font-size: 0.875rem;">{tag}</span>'
+                        f'border-radius: 12px; font-size: 0.875rem;">{echapper_html(tag)}</span>'
                         for tag in tags
                     ]
                 )

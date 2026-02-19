@@ -141,15 +141,16 @@ class TestCloseModeTablette:
         mock_md.assert_not_called()
 
     @patch("streamlit.session_state", {"mode_tablette": "tablette"})
-    @patch("streamlit.markdown")
-    def test_fermer_tablette(self, mock_md):
+    @patch("streamlit.components.v1.html")
+    def test_fermer_tablette(self, mock_html):
         """Test close en mode tablette."""
         from src.ui.tablet import fermer_mode_tablette
 
         fermer_mode_tablette()
 
-        mock_md.assert_called_once()
-        assert "</div>" in mock_md.call_args[0][0]
+        mock_html.assert_called_once()
+        call_args = mock_html.call_args
+        assert "classList.remove" in call_args[0][0]
 
 
 # ═══════════════════════════════════════════════════════════

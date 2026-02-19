@@ -23,7 +23,7 @@ from src.modules.cuisine.batch_cooking_utils import (
     estimer_heure_fin,
     formater_duree,
 )
-from src.ui.components.atoms import etat_vide
+from src.ui import etat_vide
 
 logger = logging.getLogger(__name__)
 

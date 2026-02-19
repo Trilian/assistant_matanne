@@ -190,15 +190,13 @@ class TestRendreMenu:
 class TestAfficherSidebarInteractions:
     """Tests interaction sidebar."""
 
-    @patch("src.ui.layout.sidebar.Cache")
-    @patch("src.ui.layout.sidebar.ChargeurModuleDiffere")
     @patch("src.ui.layout.sidebar._rendre_menu")
     @patch("src.ui.layout.sidebar.st")
     @patch("src.ui.layout.sidebar.afficher_stats_chargement_differe")
     @patch("src.ui.layout.sidebar.obtenir_etat")
     @patch("src.ui.layout.sidebar.GestionnaireEtat")
     def test_sidebar_debug_mode(
-        self, mock_gest, mock_etat, mock_stats, mock_st, mock_menu, mock_loader, mock_cache
+        self, mock_gest, mock_etat, mock_stats, mock_st, mock_menu
     ):
         """Test mode debug activé."""
         from src.ui.layout.sidebar import afficher_sidebar
@@ -219,15 +217,13 @@ class TestAfficherSidebarInteractions:
         mock_st.checkbox.assert_called()
         mock_st.json.assert_called()
 
-    @patch("src.ui.layout.sidebar.Cache")
-    @patch("src.ui.layout.sidebar.ChargeurModuleDiffere")
     @patch("src.ui.layout.sidebar._rendre_menu")
     @patch("src.ui.layout.sidebar.st")
     @patch("src.ui.layout.sidebar.afficher_stats_chargement_differe")
     @patch("src.ui.layout.sidebar.obtenir_etat")
     @patch("src.ui.layout.sidebar.GestionnaireEtat")
     def test_sidebar_reset_click(
-        self, mock_gest, mock_etat, mock_stats, mock_st, mock_menu, mock_loader, mock_cache
+        self, mock_gest, mock_etat, mock_stats, mock_st, mock_menu
     ):
         """Test clic sur Reset."""
         from src.ui.layout.sidebar import afficher_sidebar
@@ -250,8 +246,7 @@ class TestAfficherSidebarInteractions:
         except Exception:
             pass
 
-        mock_gest.reinitialiser.assert_called()
-        mock_cache.vider.assert_called()
+        mock_gest.reset_complet.assert_called()
 
     @patch("src.ui.layout.sidebar._rendre_menu")
     @patch("src.ui.layout.sidebar.st")

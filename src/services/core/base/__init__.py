@@ -13,14 +13,20 @@ Ce package regroupe les classes fondamentales des services:
 # UTILITAIRES ASYNC
 # ═══════════════════════════════════════════════════════════
 # ═══════════════════════════════════════════════════════════
-# BASE AI SERVICE (avec mixins spécialisés)
+# BASE AI SERVICE
 # ═══════════════════════════════════════════════════════════
 from .ai_service import (
     BaseAIService,
+    create_base_ai_service,
+)
+
+# ═══════════════════════════════════════════════════════════
+# MIXINS IA SPÉCIALISÉS (source unique)
+# ═══════════════════════════════════════════════════════════
+from .ai_mixins import (
     InventoryAIMixin,
     PlanningAIMixin,
     RecipeAIMixin,
-    create_base_ai_service,
 )
 from .async_utils import make_sync_alias, sync_wrapper
 

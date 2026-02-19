@@ -21,7 +21,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.core.models.base import Base
+from .base import Base, utc_now
 
 # ═══════════════════════════════════════════════════════════════════
 # ENUMS
@@ -93,9 +93,9 @@ class Equipe(Base):
     buts_encaisses: Mapped[int] = mapped_column(Integer, default=0)
 
     # Méta
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     # Relations
@@ -162,9 +162,9 @@ class Match(Base):
     prediction_raison: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Méta
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     # Relations
@@ -208,7 +208,7 @@ class PariSportif(Base):
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Méta
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     match: Mapped["Match"] = relationship("Match", back_populates="paris")
@@ -243,7 +243,7 @@ class TirageLoto(Base):
     gagnants_rang1: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # Méta
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     def __repr__(self) -> str:
         return f"<Tirage {self.date_tirage}: {self.numeros_str}>"
@@ -291,7 +291,7 @@ class GrilleLoto(Base):
     rang: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 1-9 ou null
 
     # Méta
-    date_creation: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    date_creation: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relations
@@ -315,7 +315,7 @@ class StatistiquesLoto(Base):
     __tablename__ = "jeux_stats_loto"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    date_calcul: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    date_calcul: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Stats par numéro (JSON: {1: {freq: 123, dernier: "2024-01-01", ecart: 5}, ...})
     frequences_numeros: Mapped[dict] = mapped_column(JSON, nullable=True)
@@ -360,7 +360,7 @@ class HistoriqueJeux(Base):
     predictions_totales: Mapped[int] = mapped_column(Integer, default=0)
 
     # Méta
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     @property
     def roi(self) -> float:
@@ -456,10 +456,10 @@ class SerieJeux(Base):
 
     # Tracking
     derniere_occurrence: Mapped[date | None] = mapped_column(Date, nullable=True)
-    derniere_mise_a_jour: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    derniere_mise_a_jour: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Méta
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     def __repr__(self) -> str:
         return f"<Serie {self.type_jeu}/{self.championnat or 'global'}/{self.marche}: {self.serie_actuelle}>"
@@ -511,7 +511,7 @@ class AlerteJeux(Base):
     )  # True si la série s'est brisée
 
     # Méta
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     serie: Mapped["SerieJeux"] = relationship("SerieJeux")
@@ -534,7 +534,7 @@ class ConfigurationJeux(Base):
     valeur: Mapped[str] = mapped_column(Text, nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     def __repr__(self) -> str:

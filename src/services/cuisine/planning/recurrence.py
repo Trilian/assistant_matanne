@@ -276,6 +276,11 @@ def obtenir_service_recurrence() -> ServiceRecurrence:
     return _service_recurrence
 
 
+def get_recurrence_service() -> ServiceRecurrence:
+    """Factory for recurrence service (English alias)."""
+    return obtenir_service_recurrence()
+
+
 __all__ = [
     "TypeRecurrence",
     "OPTIONS_RECURRENCE",
@@ -283,4 +288,5 @@ __all__ = [
     "format_recurrence",
     "ServiceRecurrence",
     "obtenir_service_recurrence",
+    "get_recurrence_service",
 ]

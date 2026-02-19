@@ -7,29 +7,6 @@ from datetime import date
 
 import streamlit as st
 
-from src.core.state import GestionnaireEtat, obtenir_etat
-from src.services.cuisine.courses import obtenir_service_courses
-from src.services.cuisine.planning import obtenir_service_planning
-from src.services.cuisine.recettes import obtenir_service_recettes
-from src.services.inventaire import obtenir_service_inventaire
-from src.ui.components.alertes import alerte_stock
-from src.ui.components.atoms import etat_vide
-from src.ui.views.historique import afficher_timeline_activite
-
-# Dashboard widgets enrichis
-try:
-    from src.ui.components import (
-        afficher_sante_systeme,
-        graphique_inventaire_categories,
-        graphique_repartition_repas,
-        widget_jules_apercu,
-    )
-
-    WIDGETS_DISPONIBLES = True
-except ImportError:
-    WIDGETS_DISPONIBLES = False
-
-
 # ═══════════════════════════════════════════════════════════
 # MODULE PRINCIPAL
 # ═══════════════════════════════════════════════════════════
@@ -37,6 +14,20 @@ except ImportError:
 
 def app():
     """Point d'entree module accueil"""
+
+    from src.core.state import obtenir_etat
+    from src.ui import etat_vide
+
+    # Dashboard widgets enrichis
+    try:
+        from src.ui.components import (
+            afficher_sante_systeme,
+            widget_jules_apercu,
+        )
+
+        WIDGETS_DISPONIBLES = True
+    except ImportError:
+        WIDGETS_DISPONIBLES = False
 
     # Header
     state = obtenir_etat()
@@ -166,6 +157,8 @@ def app():
     st.markdown("---")
     with st.expander("📝 Activité récente", expanded=False):
         try:
+            from src.ui.views.historique import afficher_timeline_activite
+
             afficher_timeline_activite(limit=5)
         except Exception as e:
             st.caption(f"Timeline indisponible: {e}")
@@ -173,6 +166,9 @@ def app():
 
 def afficher_graphiques_enrichis():
     """Affiche les graphiques Plotly enrichis."""
+    from src.services.cuisine.planning import obtenir_service_planning
+    from src.services.inventaire import obtenir_service_inventaire
+    from src.ui.components import graphique_inventaire_categories, graphique_repartition_repas
 
     st.markdown("### 📈 Visualisations")
 
@@ -210,6 +206,9 @@ def afficher_graphiques_enrichis():
 
 def afficher_critical_alerts():
     """Affiche les alertes importantes"""
+    from src.core.state import GestionnaireEtat
+    from src.services.cuisine.planning import obtenir_service_planning
+    from src.services.inventaire import obtenir_service_inventaire
 
     alerts = []
 
@@ -330,6 +329,10 @@ def afficher_critical_alerts():
 
 def afficher_global_stats():
     """Stats globales de l'application"""
+    from src.services.cuisine.courses import obtenir_service_courses
+    from src.services.cuisine.planning import obtenir_service_planning
+    from src.services.cuisine.recettes import obtenir_service_recettes
+    from src.services.inventaire import obtenir_service_inventaire
 
     st.markdown("### 📊 Vue d'Ensemble")
 
@@ -377,6 +380,7 @@ def afficher_global_stats():
 
 def afficher_quick_actions():
     """Raccourcis d'actions rapides"""
+    from src.core.state import GestionnaireEtat
 
     st.markdown("### ⚡ Actions Rapides")
 
@@ -387,7 +391,6 @@ def afficher_quick_actions():
             "➕ Ajouter Recette", key="quick_add_recette", width="stretch", type="primary"
         ):
             GestionnaireEtat.naviguer_vers("cuisine.recettes")
-            st.session_state.show_add_form = True
             st.rerun()
 
     with col2:
@@ -413,6 +416,8 @@ def afficher_quick_actions():
 
 def afficher_cuisine_summary():
     """Resume module Cuisine"""
+    from src.core.state import GestionnaireEtat
+    from src.services.cuisine.recettes import obtenir_service_recettes
 
     with st.container():
         st.markdown(
@@ -450,6 +455,9 @@ def afficher_cuisine_summary():
 
 def afficher_inventaire_summary():
     """Resume inventaire"""
+    from src.core.state import GestionnaireEtat
+    from src.services.inventaire import obtenir_service_inventaire
+    from src.ui import alerte_stock
 
     with st.container():
         st.markdown(
@@ -494,6 +502,8 @@ def afficher_inventaire_summary():
 
 def afficher_courses_summary():
     """Resume courses"""
+    from src.core.state import GestionnaireEtat
+    from src.services.cuisine.courses import obtenir_service_courses
 
     with st.container():
         st.markdown(
@@ -542,6 +552,9 @@ def afficher_courses_summary():
 
 def afficher_planning_summary():
     """Resume planning"""
+    from src.core.state import GestionnaireEtat
+    from src.services.cuisine.planning import obtenir_service_planning
+    from src.ui import etat_vide
 
     with st.container():
         st.markdown(

@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
 
-from src.core.ai import AnalyseurIA, ClientIA
+from src.core.ai import AnalyseurIA, ClientIA, obtenir_client_ia
 from src.core.caching import obtenir_cache
 from src.core.decorators import avec_session_db
 from src.core.models import (
@@ -41,7 +41,7 @@ class ServiceSuggestions:
     """
 
     def __init__(self):
-        self.client_ia = ClientIA()
+        self.client_ia = obtenir_client_ia()
         self.analyseur = AnalyseurIA()
         self.cache = obtenir_cache()
 
@@ -522,7 +522,13 @@ def obtenir_service_suggestions() -> ServiceSuggestions:
     return _suggestions_service
 
 
+def get_suggestions_service() -> ServiceSuggestions:
+    """Factory for suggestions service (English alias)."""
+    return obtenir_service_suggestions()
+
+
 __all__ = [
     "ServiceSuggestions",
     "obtenir_service_suggestions",
+    "get_suggestions_service",
 ]

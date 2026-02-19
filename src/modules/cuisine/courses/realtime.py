@@ -2,7 +2,13 @@
 Synchronisation temps réel pour les courses.
 """
 
-from ._common import get_realtime_sync_service, logger, st
+import logging
+
+import streamlit as st
+
+from src.services.integrations.web import get_realtime_sync_service
+
+logger = logging.getLogger(__name__)
 
 
 def _init_realtime_sync():

@@ -2,17 +2,19 @@
 Historique des courses.
 """
 
-from ._common import (
-    PRIORITY_EMOJIS,
-    datetime,
-    etat_vide,
-    logger,
-    obtenir_contexte_db,
-    obtenir_service_courses,
-    pd,
-    st,
-    timedelta,
-)
+import logging
+from datetime import datetime, timedelta
+
+import pandas as pd
+import streamlit as st
+
+from src.core.db import obtenir_contexte_db
+from src.services.cuisine.courses import obtenir_service_courses
+from src.ui.components.atoms import etat_vide
+
+from .utils import PRIORITY_EMOJIS
+
+logger = logging.getLogger(__name__)
 
 
 def afficher_historique():

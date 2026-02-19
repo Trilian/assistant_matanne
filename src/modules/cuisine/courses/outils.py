@@ -2,13 +2,13 @@
 Outils utilitaires pour les courses.
 """
 
-from ._common import (
-    datetime,
-    obtenir_contexte_db,
-    obtenir_service_courses,
-    pd,
-    st,
-)
+from datetime import datetime
+
+import pandas as pd
+import streamlit as st
+
+from src.core.db import obtenir_contexte_db
+from src.services.cuisine.courses import obtenir_service_courses
 
 
 def afficher_outils():

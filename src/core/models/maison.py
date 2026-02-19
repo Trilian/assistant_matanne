@@ -24,7 +24,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from .base import Base, utc_now
 
 # ═══════════════════════════════════════════════════════════
 # PROJETS DOMESTIQUES
@@ -54,7 +54,7 @@ class Project(Base):
     date_debut: Mapped[date | None] = mapped_column(Date)
     date_fin_prevue: Mapped[date | None] = mapped_column(Date)
     date_fin_reelle: Mapped[date | None] = mapped_column(Date)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     tasks: Mapped[list["ProjectTask"]] = relationship(
@@ -90,7 +90,7 @@ class ProjectTask(Base):
     priorite: Mapped[str] = mapped_column(String(50), nullable=False, default="moyenne")
     date_echeance: Mapped[date | None] = mapped_column(Date)
     assigne_a: Mapped[str | None] = mapped_column(String(200))
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     project: Mapped["Project"] = relationship(back_populates="tasks")
@@ -123,7 +123,7 @@ class Routine(Base):
     categorie: Mapped[str | None] = mapped_column(String(100), index=True)
     frequence: Mapped[str] = mapped_column(String(50), nullable=False, default="quotidien")
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     tasks: Mapped[list["RoutineTask"]] = relationship(
@@ -159,7 +159,7 @@ class RoutineTask(Base):
     heure_prevue: Mapped[str | None] = mapped_column(String(5))  # Format: HH:MM
     fait_le: Mapped[date | None] = mapped_column(Date)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     routine: Mapped["Routine"] = relationship(back_populates="tasks")
@@ -196,7 +196,7 @@ class GardenItem(Base):
     date_plantation: Mapped[date | None] = mapped_column(Date)
     date_recolte_prevue: Mapped[date | None] = mapped_column(Date)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     logs: Mapped[list["GardenLog"]] = relationship(
@@ -226,7 +226,7 @@ class GardenLog(Base):
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True, default=date.today)
     action: Mapped[str] = mapped_column(String(200), nullable=False)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     garden_item: Mapped[Optional["GardenItem"]] = relationship(back_populates="logs")

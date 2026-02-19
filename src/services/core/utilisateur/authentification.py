@@ -20,8 +20,6 @@ from collections.abc import MutableMapping
 from datetime import datetime
 from typing import Any
 
-import streamlit as st
-
 # Ré-exports pour rétrocompatibilité
 from .auth_permissions import ROLE_PERMISSIONS, PermissionsMixin
 from .auth_profile import ProfileMixin
@@ -65,6 +63,8 @@ class AuthService(PermissionsMixin, SessionMixin, TokenValidationMixin, ProfileM
     @staticmethod
     def _get_default_storage() -> MutableMapping[str, Any]:
         """Retourne le stockage par défaut (st.session_state)."""
+        import streamlit as st
+
         return st.session_state
 
     def _init_client(self):

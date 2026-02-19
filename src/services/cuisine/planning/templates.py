@@ -276,8 +276,14 @@ def obtenir_service_templates() -> ServiceTemplates:
     return _service_templates
 
 
+def get_templates_service() -> ServiceTemplates:
+    """Factory for templates service (English alias)."""
+    return obtenir_service_templates()
+
+
 __all__ = [
     "JOURS_SEMAINE",
     "ServiceTemplates",
     "obtenir_service_templates",
+    "get_templates_service",
 ]

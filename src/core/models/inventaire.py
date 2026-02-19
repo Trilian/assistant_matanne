@@ -20,7 +20,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from .base import Base, utc_now
 
 if TYPE_CHECKING:
     from .recettes import Ingredient
@@ -57,7 +57,7 @@ class ArticleInventaire(Base):
     emplacement: Mapped[str | None] = mapped_column(String(100), index=True)
     date_peremption: Mapped[date | None] = mapped_column(Date, index=True)
     derniere_maj: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, index=True
+        DateTime, default=utc_now, onupdate=utc_now, index=True
     )
 
     # Photos
@@ -135,7 +135,7 @@ class HistoriqueInventaire(Base):
 
     # Métadonnées
     date_modification: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, index=True
+        DateTime, default=utc_now, index=True
     )
     utilisateur: Mapped[str | None] = mapped_column(String(100))
     notes: Mapped[str | None] = mapped_column(Text)

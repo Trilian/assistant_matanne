@@ -378,33 +378,44 @@ class Parametres(BaseSettings):
 # ═══════════════════════════════════════════════════════════
 
 _parametres: Parametres | None = None
+_logging_configured: bool = False
 
 
 def obtenir_parametres() -> Parametres:
     """
     Récupère l'instance Parametres.
 
-    Important: Avec Streamlit qui redémarre, on recrée l'instance
-    à chaque appel pour recharger les variables d'environnement.
+    Utilise un singleton avec rechargement des .env au premier appel
+    du cycle Streamlit. Le logging n'est configuré qu'une seule fois.
 
     Returns:
         Instance Parametres configurée
     """
-    global _parametres
+    global _parametres, _logging_configured
 
-    # Recharger .env files à chaque appel (important pour Streamlit qui redémarre)
+    if _parametres is not None:
+        return _parametres
+
+    # Charger .env files une seule fois
     _reload_env_files()
 
-    # Toujours recréer l'instance pour Streamlit (pas de cache singleton)
     _parametres = Parametres()
 
-    # Configure logging according to loaded settings
-    try:
-        from ..logging import configure_logging
+    # Configure logging une seule fois
+    if not _logging_configured:
+        try:
+            from ..logging import configure_logging
 
-        configure_logging(_parametres.LOG_LEVEL)
-    except Exception:
-        # Fallback: continue if logging config échoue
-        pass
+            configure_logging(_parametres.LOG_LEVEL)
+            _logging_configured = True
+        except Exception:
+            pass
 
     return _parametres
+
+
+def reinitialiser_parametres() -> Parametres:
+    """Force le rechargement des paramètres (utile après changement .env)."""
+    global _parametres
+    _parametres = None
+    return obtenir_parametres()

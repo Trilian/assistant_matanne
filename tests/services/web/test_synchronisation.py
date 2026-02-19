@@ -1087,7 +1087,7 @@ class TestInitClient:
             from src.services.integrations.web.synchronisation import RealtimeSyncService
 
             with patch(
-                "src.services.web.synchronisation.obtenir_parametres",
+                "src.services.integrations.web.synchronisation.obtenir_parametres",
                 return_value=mock_params,
                 create=True,
             ):
@@ -1121,7 +1121,7 @@ class TestGetCurrentUser:
         mock_auth.get_current_user.return_value = mock_user
 
         with patch(
-            "src.services.web.synchronisation.get_auth_service", return_value=mock_auth, create=True
+            "src.services.integrations.web.synchronisation.get_auth_service", return_value=mock_auth, create=True
         ):
             from src.services.integrations.web.synchronisation import RealtimeSyncService
 
@@ -1142,7 +1142,7 @@ class TestGetCurrentUser:
         mock_auth.get_current_user.return_value = mock_user
 
         with patch(
-            "src.services.web.synchronisation.get_auth_service", return_value=mock_auth, create=True
+            "src.services.integrations.web.synchronisation.get_auth_service", return_value=mock_auth, create=True
         ):
             from src.services.integrations.web.synchronisation import RealtimeSyncService
 
@@ -1163,9 +1163,6 @@ class TestExports:
             "SyncEvent",
             "SyncEventType",
             "PresenceInfo",
-            "afficher_presence_indicator",
-            "afficher_typing_indicator",
-            "afficher_sync_status",
         ]
 
         for name in expected:

@@ -259,8 +259,9 @@ class TestRouteurOptimise:
         """Test la structure des entrées du registry"""
         for name, config in RouteurOptimise.MODULE_REGISTRY.items():
             assert "path" in config, f"Module {name} manque 'path'"
-            assert "type" in config, f"Module {name} manque 'type'"
-            assert config["type"] in ["simple", "hub"], f"Module {name} type invalide"
+            # Le champ 'type' était optionnel et a été supprimé du registry
+            # Vérifie juste que 'path' pointe vers un chemin de module valide
+            assert config["path"].startswith("src."), f"Module {name} path invalide"
 
     @patch("streamlit.error")
     @patch("streamlit.spinner")

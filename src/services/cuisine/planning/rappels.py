@@ -177,6 +177,11 @@ def obtenir_service_rappels() -> ServiceRappels:
     return _service_rappels
 
 
+def get_reminders_service() -> ServiceRappels:
+    """Factory for reminders service (English alias)."""
+    return obtenir_service_rappels()
+
+
 # ═══════════════════════════════════════════════════════════
 # UTILITAIRES UI
 # ═══════════════════════════════════════════════════════════
@@ -220,5 +225,6 @@ __all__ = [
     "format_rappel",
     "ServiceRappels",
     "obtenir_service_rappels",
+    "get_reminders_service",
     "verifier_et_envoyer_rappels",
 ]

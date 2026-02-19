@@ -2,7 +2,14 @@
 Module Loto - Synchronisation des tirages
 """
 
-from ._common import TirageLoto, charger_tirages_loto, datetime, logger, obtenir_contexte_db
+import logging
+from datetime import datetime
+
+from src.core.db import obtenir_contexte_db
+from src.core.models import TirageLoto
+from src.modules.jeux.scraper_loto import charger_tirages_loto
+
+logger = logging.getLogger(__name__)
 
 
 def sync_tirages_loto(limite: int = 50) -> int:

@@ -2,7 +2,9 @@
 Génération de courses depuis le planning repas.
 """
 
-from ._common import obtenir_service_courses_intelligentes, st
+import streamlit as st
+
+from src.services.cuisine.courses import obtenir_service_courses_intelligentes
 
 
 def afficher_courses_depuis_planning():

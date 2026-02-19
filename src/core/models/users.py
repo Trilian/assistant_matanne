@@ -30,7 +30,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from .base import Base, utc_now
 
 # ═══════════════════════════════════════════════════════════
 # ENUMS
@@ -118,9 +118,9 @@ class UserProfile(Base):
     garmin_connected: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # Timestamps
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     # Relations
@@ -176,9 +176,9 @@ class GarminToken(Base):
     derniere_sync: Mapped[datetime | None] = mapped_column(DateTime)
     sync_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     # Relations
@@ -239,7 +239,7 @@ class GarminActivity(Base):
     # Données brutes Garmin (JSON)
     raw_data: Mapped[dict | None] = mapped_column(JSONB)
 
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     user: Mapped["UserProfile"] = relationship(back_populates="garmin_activities")
@@ -319,7 +319,7 @@ class GarminDailySummary(Base):
     # Données brutes
     raw_data: Mapped[dict | None] = mapped_column(JSONB)
 
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     user: Mapped["UserProfile"] = relationship(back_populates="daily_summaries")
@@ -373,7 +373,7 @@ class FoodLog(Base):
     qualite: Mapped[int | None] = mapped_column(Integer)  # 1-5 étoiles
     notes: Mapped[str | None] = mapped_column(Text)
 
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     user: Mapped["UserProfile"] = relationship(back_populates="food_logs")
@@ -452,9 +452,9 @@ class WeekendActivity(Base):
     # Participants
     participants: Mapped[list[str] | None] = mapped_column(JSONB)  # ["Anne", "Mathieu", "Jules"]
 
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     __table_args__ = (
@@ -519,9 +519,9 @@ class FamilyPurchase(Base):
     suggere_par: Mapped[str | None] = mapped_column(String(50))  # anne, mathieu, ia
 
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     def __repr__(self) -> str:

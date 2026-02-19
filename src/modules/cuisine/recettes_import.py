@@ -16,9 +16,6 @@ from src.services.cuisine.recettes.importer import RecipeImporter
 
 def afficher_importer():
     """Interface pour importer une recette"""
-    # Marquer cet onglet comme actif
-    st.session_state.recettes_selected_tab = 2
-
     st.subheader("📥 Importer une recette")
     st.write("Importez une recette depuis un site web, un PDF ou du texte")
 
@@ -161,7 +158,6 @@ def _show_import_preview(recipe_data: dict):
             )
         with col_action:
             if st.button("✨ Voir la recette", use_container_width=True):
-                st.session_state.recettes_selected_tab = 0  # Retour à la liste
                 st.rerun()
         st.divider()
         # Reinitialiser le message après l'affichage

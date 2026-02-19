@@ -5,18 +5,19 @@ Point d'entrée avec navigation par onglets
 
 import streamlit as st
 
-from src.modules.parametres.about import afficher_about
-from src.modules.parametres.affichage import afficher_display_config
-from src.modules.parametres.budget import afficher_budget_config
-from src.modules.parametres.cache import afficher_cache_config
-from src.modules.parametres.database import afficher_database_config
-from src.modules.parametres.foyer import afficher_foyer_config
-from src.modules.parametres.ia import afficher_ia_config
-from src.ui.views.sauvegarde import afficher_sauvegarde
-
 
 def app():
     """Point d'entree module paramètres"""
+
+    # Imports différés — chaque sous-module n'est chargé que quand son onglet est affiché
+    from src.modules.parametres.about import afficher_about
+    from src.modules.parametres.affichage import afficher_display_config
+    from src.modules.parametres.budget import afficher_budget_config
+    from src.modules.parametres.cache import afficher_cache_config
+    from src.modules.parametres.database import afficher_database_config
+    from src.modules.parametres.foyer import afficher_foyer_config
+    from src.modules.parametres.ia import afficher_ia_config
+    from src.ui.views.sauvegarde import afficher_sauvegarde
 
     st.title("⚙️ Paramètres")
 

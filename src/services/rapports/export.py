@@ -501,7 +501,13 @@ def obtenir_service_export_pdf() -> ServiceExportPDF:
     return _service_export_pdf
 
 
+def get_pdf_export_service() -> ServiceExportPDF:
+    """Factory for PDF export service (English alias)."""
+    return obtenir_service_export_pdf()
+
+
 __all__ = [
     "ServiceExportPDF",
     "obtenir_service_export_pdf",
+    "get_pdf_export_service",
 ]

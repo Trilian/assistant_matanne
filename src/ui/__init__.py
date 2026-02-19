@@ -34,7 +34,6 @@ from .components import (
     graphique_repartition_repas,
     indicateur_sante_systeme,
     ligne_metriques,
-    notification,
     pagination,
     panneau_filtres,
     separateur,
@@ -115,7 +114,6 @@ __all__ = [
     "badge",
     "etat_vide",
     "carte_metrique",
-    "notification",
     "separateur",
     "boite_info",
     # Components - Forms

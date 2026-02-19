@@ -355,3 +355,8 @@ def obtenir_service_predictions() -> PredictionService:
         logger.info("✅ Service de prédictions ML initialisé")
 
     return _prediction_service
+
+
+def get_predictions_service() -> PredictionService:
+    """Factory for predictions service (English alias)."""
+    return obtenir_service_predictions()

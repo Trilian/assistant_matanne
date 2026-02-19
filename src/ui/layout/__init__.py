@@ -5,7 +5,7 @@ Extraits de app.py pour meilleure maintenabilité
 
 from .footer import afficher_footer
 from .header import afficher_header
-from .init import initialiser_app
+from .initialisation import initialiser_app
 from .sidebar import MODULES_MENU, afficher_sidebar
 from .styles import injecter_css
 

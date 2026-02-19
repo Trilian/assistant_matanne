@@ -25,7 +25,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from .base import Base, utc_now
 
 # ═══════════════════════════════════════════════════════════
 # ENUMS
@@ -147,7 +147,7 @@ class SessionTravail(Base):
     satisfaction: Mapped[int | None] = mapped_column(Integer)
 
     # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         CheckConstraint(
@@ -209,7 +209,7 @@ class VersionPiece(Base):
     photo_apres_url: Mapped[str | None] = mapped_column(String(500))
 
     # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     cree_par: Mapped[str | None] = mapped_column(String(100))
 
     # Relations
@@ -256,7 +256,7 @@ class CoutTravaux(Base):
     date_paiement: Mapped[date | None] = mapped_column(Date)
 
     # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     version: Mapped["VersionPiece"] = relationship(back_populates="couts")
@@ -309,7 +309,7 @@ class LogStatutObjet(Base):
     ajoute_budget: Mapped[bool | None] = mapped_column(default=False)
 
     # Métadonnées
-    date_changement: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    date_changement: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     change_par: Mapped[str | None] = mapped_column(String(100))
 
     def __repr__(self) -> str:
@@ -345,9 +345,9 @@ class PieceMaison(Base):
     description: Mapped[str | None] = mapped_column(Text)
 
     # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     # Relations
@@ -404,9 +404,9 @@ class ObjetMaison(Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     # Relations
@@ -470,9 +470,9 @@ class ZoneJardin(Base):
     )  # ["avant:url", "apres:url"]
 
     # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     # Relations
@@ -528,9 +528,9 @@ class PlanteJardin(Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     # Relations
@@ -568,9 +568,9 @@ class PlanJardin(Base):
     description: Mapped[str | None] = mapped_column(Text)
 
     # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     # Relations
@@ -615,7 +615,7 @@ class ActionPlante(Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     plante: Mapped["PlanteJardin"] = relationship(back_populates="actions")

@@ -71,6 +71,52 @@ def injecter_meta_pwa():
     components.html(pwa_meta, height=0)
 
 
+def afficher_invite_installation_pwa():
+    """Affiche un bouton d'installation PWA si disponible."""
+    install_script = """
+    <div id="pwa-install-container" style="display: none;">
+        <button id="pwa-install-btn" onclick="installPWA()" style="
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        ">
+            📲 Installer l'application
+        </button>
+    </div>
+
+    <script>
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('pwa-install-container').style.display = 'block';
+        });
+
+        async function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('Install outcome:', outcome);
+                deferredPrompt = null;
+                document.getElementById('pwa-install-container').style.display = 'none';
+            }
+        }
+    </script>
+    """
+
+    components.html(install_script, height=60)
+
+
 __all__ = [
     "injecter_meta_pwa",
+    "afficher_invite_installation_pwa",
 ]

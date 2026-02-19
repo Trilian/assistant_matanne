@@ -2,21 +2,21 @@
 Module Calendrier Familial Unifié - Chargement des données
 """
 
-from ._common import (
+import logging
+from datetime import date, datetime, time, timedelta
+
+from src.core.db import obtenir_contexte_db
+from src.core.models import (
     CalendarEvent,
     FamilyActivity,
     Planning,
     Recette,
     Repas,
     SessionBatchCooking,
-    date,
-    datetime,
-    get_debut_semaine,
-    logger,
-    obtenir_contexte_db,
-    time,
-    timedelta,
 )
+from .utils import get_debut_semaine
+
+logger = logging.getLogger(__name__)
 
 
 def charger_donnees_semaine(date_debut: date) -> dict:

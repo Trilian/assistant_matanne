@@ -27,7 +27,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from .base import Base, utc_now
 
 # ═══════════════════════════════════════════════════════════
 # ÉNUMÉRATIONS
@@ -119,9 +119,9 @@ class ConfigBatchCooking(Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     # Timestamps
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     def __repr__(self) -> str:
@@ -194,9 +194,9 @@ class SessionBatchCooking(Base):
     nb_recettes_completees: Mapped[int] = mapped_column(Integer, default=0)
 
     # Timestamps
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     # Relations
@@ -384,9 +384,9 @@ class PreparationBatch(Base):
     consomme: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
 
     # Timestamps
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     # Relations

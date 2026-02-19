@@ -13,6 +13,8 @@ from typing import Any
 
 import streamlit as st
 
+from src.ui.utils import echapper_html
+
 logger = logging.getLogger(__name__)
 
 
@@ -45,11 +47,11 @@ def carte_metrique_avancee(
         delta_color = "#4CAF50" if delta_positif else "#FF5722"
         delta_arrow = "↑" if delta_positif else "↓"
         delta_html = (
-            f'<span style="color: {delta_color}; font-size: 0.9rem;">{delta_arrow} {delta}</span>'
+            f'<span style="color: {delta_color}; font-size: 0.9rem;">{delta_arrow} {echapper_html(delta)}</span>'
         )
 
     sous_titre_html = (
-        f'<p style="color: #6c757d; margin: 0; font-size: 0.85rem;">{sous_titre}</p>'
+        f'<p style="color: #6c757d; margin: 0; font-size: 0.85rem;">{echapper_html(sous_titre)}</p>'
         if sous_titre
         else ""
     )
@@ -64,12 +66,12 @@ def carte_metrique_avancee(
     ">
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-                <p style="color: #6c757d; margin: 0 0 0.3rem 0; font-size: 0.9rem;">{titre}</p>
-                <h2 style="margin: 0; color: #212529;">{valeur}</h2>
+                <p style="color: #6c757d; margin: 0 0 0.3rem 0; font-size: 0.9rem;">{echapper_html(titre)}</p>
+                <h2 style="margin: 0; color: #212529;">{echapper_html(str(valeur))}</h2>
                 {delta_html}
                 {sous_titre_html}
             </div>
-            <span style="font-size: 2.5rem;">{icone}</span>
+            <span style="font-size: 2.5rem;">{echapper_html(icone)}</span>
         </div>
     </div>
     """
@@ -84,11 +86,16 @@ def carte_metrique_avancee(
             st.rerun()
 
 
-def widget_jules_apercu():
-    """Widget d'aperçu de Jules pour le dashboard."""
+def widget_jules_apercu(date_naissance: date | None = None):
+    """Widget d'aperçu de Jules pour le dashboard.
 
-    # Calculer l'âge de Jules (né le 15/06/2024)
-    naissance = date(2024, 6, 15)
+    Args:
+        date_naissance: Date de naissance de Jules. Si None, utilise la
+            valeur par défaut (15/06/2024).
+    """
+
+    # Calculer l'âge de Jules
+    naissance = date_naissance or date(2024, 6, 15)
     aujourd_hui = date.today()
     age_jours = (aujourd_hui - naissance).days
     age_mois = age_jours // 30
@@ -110,15 +117,19 @@ def widget_jules_apercu():
     )
 
 
-def widget_meteo_jour():
-    """Widget météo simplifié (données statiques pour demo)."""
+def widget_meteo_jour(donnees_meteo: dict | None = None):
+    """Widget météo simplifié.
 
-    # Données simulées - à remplacer par API météo
-    meteo = {
-        "temp": 12,
-        "condition": "☁️ Nuageux",
-        "conseil": "Prévoir une veste légère",
-    }
+    Args:
+        donnees_meteo: Dict avec les clés 'temp', 'condition', 'conseil'.
+            Si None, affiche un placeholder.
+    """
+
+    if donnees_meteo is None:
+        st.info("🌤️ Données météo non disponibles")
+        return
+
+    meteo = donnees_meteo
 
     st.markdown(
         f"""

@@ -36,6 +36,7 @@ from .base import (
     TypeRepasEnum,
     TypeVersionRecetteEnum,
     metadata,
+    utc_now,
 )
 
 # Batch Cooking

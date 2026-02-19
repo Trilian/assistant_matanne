@@ -812,23 +812,53 @@ class TestObtenirParametresAvance:
     """Tests avancés pour obtenir_parametres."""
 
     def test_obtenir_parametres_reloads_env(self):
-        """Test que obtenir_parametres recharge .env."""
+        """Test que obtenir_parametres recharge .env au premier appel."""
+        import src.core.config.settings as settings_mod
+
+        # Réinitialiser le singleton pour forcer un rechargement
+        settings_mod._parametres = None
         with patch("src.core.config.settings._reload_env_files") as mock_reload:
             with patch("src.core.logging.configure_logging"):
                 obtenir_parametres()
 
                 mock_reload.assert_called()
+        # Nettoyage
+        settings_mod._parametres = None
+
+    def test_obtenir_parametres_cached_second_call(self):
+        """Test que obtenir_parametres ne recharge pas .env au deuxième appel."""
+        import src.core.config.settings as settings_mod
+
+        settings_mod._parametres = None
+        with patch("src.core.config.settings._reload_env_files"):
+            with patch("src.core.logging.configure_logging"):
+                first = obtenir_parametres()
+                # Deuxième appel ne doit pas recharger
+                with patch("src.core.config.settings._reload_env_files") as mock_reload2:
+                    second = obtenir_parametres()
+                    mock_reload2.assert_not_called()
+                    assert first is second
+        settings_mod._parametres = None
 
     def test_obtenir_parametres_configures_logging(self):
         """Test que obtenir_parametres configure le logging."""
+        import src.core.config.settings as settings_mod
+
+        settings_mod._parametres = None
+        settings_mod._logging_configured = False
         with patch("src.core.config.settings._reload_env_files"):
             with patch("src.core.logging.configure_logging") as mock_logging:
                 obtenir_parametres()
 
                 mock_logging.assert_called()
+        settings_mod._parametres = None
 
     def test_obtenir_parametres_logging_exception_handled(self):
         """Test gestion exception logging."""
+        import src.core.config.settings as settings_mod
+
+        settings_mod._parametres = None
+        settings_mod._logging_configured = False
         with patch("src.core.config.settings._reload_env_files"):
             with patch(
                 "src.core.logging.configure_logging", side_effect=Exception("Logging error")
@@ -837,6 +867,21 @@ class TestObtenirParametresAvance:
                 params = obtenir_parametres()
 
                 assert params is not None
+        settings_mod._parametres = None
+
+    def test_reinitialiser_parametres(self):
+        """Test reinitialiser_parametres force le rechargement."""
+        from src.core.config.settings import reinitialiser_parametres
+        import src.core.config.settings as settings_mod
+
+        settings_mod._parametres = None
+        with patch("src.core.config.settings._reload_env_files"):
+            with patch("src.core.logging.configure_logging"):
+                first = obtenir_parametres()
+                second = reinitialiser_parametres()
+                # Doit être une nouvelle instance
+                assert second is not first
+        settings_mod._parametres = None
 
 
 # ═══════════════════════════════════════════════════════════

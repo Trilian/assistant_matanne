@@ -9,7 +9,7 @@ import time
 import streamlit as st
 
 from src.services.cuisine.recettes import obtenir_service_recettes
-from src.ui.components.atoms import etat_vide
+from src.ui import etat_vide
 
 
 def afficher_liste():

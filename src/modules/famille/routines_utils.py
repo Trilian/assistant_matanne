@@ -10,19 +10,11 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import date, datetime, time, timedelta
 
+from src.core.constants import JOURS_SEMAINE
+
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES
 # ═══════════════════════════════════════════════════════════
-
-JOURS_SEMAINE: list[str] = [
-    "Lundi",
-    "Mardi",
-    "Mercredi",
-    "Jeudi",
-    "Vendredi",
-    "Samedi",
-    "Dimanche",
-]
 
 MOMENTS_JOURNEE: list[str] = [
     "Matin",

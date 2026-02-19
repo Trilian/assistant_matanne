@@ -8,10 +8,11 @@ Ce module fournit:
 """
 
 from .loader import charger_secrets_streamlit
-from .settings import Parametres, obtenir_parametres
+from .settings import Parametres, obtenir_parametres, reinitialiser_parametres
 
 __all__ = [
     "Parametres",
     "obtenir_parametres",
+    "reinitialiser_parametres",
     "charger_secrets_streamlit",
 ]

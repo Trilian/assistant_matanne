@@ -8,11 +8,15 @@ Usage:
 import sys
 from pathlib import Path
 
+import pytest
+
 # Ajouter le projet au path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 
+@pytest.mark.integration
+@pytest.mark.skip(reason="Test d'intégration nécessitant des APIs externes (Football-Data, FDJ)")
 def test_football_api():
     """Test Football-Data API"""
     print("\n" + "=" * 60)
@@ -64,6 +68,8 @@ def test_football_api():
         # Do not return - let test continue
 
 
+@pytest.mark.integration
+@pytest.mark.skip(reason="Test d'intégration nécessitant des APIs externes (Football-Data, FDJ)")
 def test_loto_scraper():
     """Test Scraper FDJ Loto"""
     print("\n" + "=" * 60)
@@ -105,6 +111,8 @@ def test_loto_scraper():
         # Do not return - let test continue
 
 
+@pytest.mark.integration
+@pytest.mark.skip(reason="Test d'intégration nécessitant des APIs externes (Football-Data, FDJ)")
 def test_ui_helpers():
     """Test des helpers UI"""
     print("\n" + "=" * 60)

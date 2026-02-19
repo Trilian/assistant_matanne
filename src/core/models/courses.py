@@ -23,7 +23,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from .base import Base, utc_now
 
 if TYPE_CHECKING:
     from .recettes import Ingredient
@@ -48,9 +48,9 @@ class ListeCourses(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     nom: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
     archivee: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
 
     # Relations
@@ -91,7 +91,7 @@ class ArticleCourses(Base):
     suggere_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # Timestamps
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
     achete_le: Mapped[datetime | None] = mapped_column(DateTime)
 
     # Organisation
@@ -137,12 +137,12 @@ class ModeleCourses(Base):
     utilisateur_id: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
 
     # Métadonnées
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
@@ -194,7 +194,7 @@ class ArticleModele(Base):
     ordre: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     # Métadonnées
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         CheckConstraint("quantite > 0", name="ck_article_modele_quantite_positive"),

@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
+from src.core.ai import obtenir_client_ia
 from src.core.ai.client import ClientIA
 from src.core.errors import ErreurServiceIA
 from src.services.jeux._internal.series_service import (
@@ -110,7 +111,7 @@ FORMAT DE RÉPONSE:
     def client(self) -> ClientIA:
         """Lazy loading du client IA."""
         if self._client is None:
-            self._client = ClientIA()
+            self._client = obtenir_client_ia()
         return self._client
 
     # ───────────────────────────────────────────────────────────────

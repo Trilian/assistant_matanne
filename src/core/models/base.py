@@ -8,9 +8,15 @@ Ce module contient :
 """
 
 import enum
+from datetime import UTC, datetime
 
 from sqlalchemy import MetaData
 from sqlalchemy.orm import DeclarativeBase
+
+
+def utc_now() -> datetime:
+    """Retourne datetime UTC aware (remplace datetime.utcnow déprécié)."""
+    return datetime.now(UTC)
 
 # ═══════════════════════════════════════════════════════════
 # BASE SQLALCHEMY

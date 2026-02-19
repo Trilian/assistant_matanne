@@ -13,7 +13,7 @@ Fonctionnalités:
 - Simulation et backtesting
 """
 
-from ._common import st
+import streamlit as st
 from .crud import ajouter_tirage, enregistrer_grille
 from .generateur import afficher_generateur_grilles, afficher_mes_grilles
 from .series import afficher_series_loto

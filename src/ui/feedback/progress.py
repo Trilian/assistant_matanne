@@ -7,6 +7,8 @@ from datetime import datetime
 
 import streamlit as st
 
+from src.ui.utils import echapper_html
+
 
 class SuiviProgression:
     """
@@ -62,8 +64,7 @@ class SuiviProgression:
         else:
             self.statut_placeholder.success(f"✅ Terminé en {temps_ecoule:.1f}s")
 
-        # Nettoyer après 2s
-        time.sleep(2)
+        # Nettoyage immédiat des éléments de progression (le message success reste)
         self.titre_placeholder.empty()
         self.barre_progression.empty()
 
@@ -188,9 +189,7 @@ class EtatChargement:
         else:
             self.titre_placeholder.success(f"✅ {self.titre} terminé (en {temps_ecoule:.1f}s)")
 
-        # Nettoyer après 3s
-        time.sleep(3)
-        self.titre_placeholder.empty()
+        # Nettoyage immédiat de la liste d'étapes (le message success reste)
         self.etapes_placeholder.empty()
 
     def _mettre_a_jour_affichage(self):
@@ -206,7 +205,7 @@ class EtatChargement:
 
         for etape in self.etapes:
             etapes_html += "<div style='margin: 0.5rem 0;'>"
-            etapes_html += f"<strong>{etape['name']}</strong> • {etape['status']}"
+            etapes_html += f"<strong>{echapper_html(etape['name'])}</strong> • {echapper_html(etape['status'])}"
             etapes_html += "</div>"
 
         etapes_html += "</div>"

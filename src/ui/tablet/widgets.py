@@ -17,7 +17,7 @@ def bouton_tablette(
     label: str,
     key: str | None = None,
     icon: str = "",
-    type: str = "secondary",
+    type_bouton: str = "secondary",
     on_click: Callable | None = None,
     **kwargs,
 ) -> bool:
@@ -28,18 +28,21 @@ def bouton_tablette(
         label: Texte du bouton
         key: Clé unique
         icon: Emoji/icône à afficher
-        type: "primary", "secondary", "danger"
+        type_bouton: "primary", "secondary", "danger"
         on_click: Callback au clic
 
     Returns:
         True si cliqué
     """
+    # Rétrocompatibilité: accepter l'ancien paramètre 'type'
+    if "type" in kwargs:
+        type_bouton = kwargs.pop("type")
     full_label = f"{icon} {label}" if icon else label
 
     # Styles selon le type
-    if type == "primary":
+    if type_bouton == "primary":
         kwargs["type"] = "primary"
-    elif type == "danger":
+    elif type_bouton == "danger":
         kwargs["help"] = "⚠️ Action irréversible"
 
     return st.button(full_label, key=key, on_click=on_click, **kwargs)

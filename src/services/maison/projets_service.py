@@ -14,8 +14,8 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
-from src.core.ai import ClientIA
-from src.core.db import obtenir_contexte_db
+from src.core.ai import ClientIA, obtenir_client_ia
+from src.core.decorators import avec_session_db
 from src.core.models import Project
 from src.services.core.base import BaseAIService
 
@@ -79,7 +79,7 @@ class ProjetsService(BaseAIService):
             client: Client IA optionnel
         """
         if client is None:
-            client = ClientIA()
+            client = obtenir_client_ia()
         super().__init__(
             client=client,
             cache_prefix="projets",
@@ -401,21 +401,19 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
     # CRUD HELPERS
     # ─────────────────────────────────────────────────────────
 
+    @avec_session_db
     def obtenir_projets(
         self, db: Session | None = None, statut: str | None = None
     ) -> list[Project]:
         """Récupère les projets.
 
         Args:
-            db: Session DB optionnelle
+            db: Session DB (injectée automatiquement par @avec_session_db)
             statut: Filtrer par statut (en_cours, termine, etc.)
 
         Returns:
             Liste des projets
         """
-        if db is None:
-            with obtenir_contexte_db() as session:
-                return self._query_projets(session, statut)
         return self._query_projets(db, statut)
 
     def get_projets(self, db: Session | None = None, statut: str | None = None) -> list[Project]:
@@ -429,18 +427,16 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
             query = query.filter(Project.statut == statut)
         return query.order_by(Project.priorite.desc()).all()
 
+    @avec_session_db
     def obtenir_projets_urgents(self, db: Session | None = None) -> list[Project]:
         """Récupère les projets urgents/prioritaires.
 
         Args:
-            db: Session DB optionnelle
+            db: Session DB (injectée automatiquement par @avec_session_db)
 
         Returns:
             Liste des projets urgents
         """
-        if db is None:
-            with obtenir_contexte_db() as session:
-                return self._query_projets_urgents(session)
         return self._query_projets_urgents(db)
 
     def get_projets_urgents(self, db: Session | None = None) -> list[Project]:

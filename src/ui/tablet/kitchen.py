@@ -11,6 +11,8 @@ from typing import Any
 
 import streamlit as st
 
+from src.ui.utils import echapper_html
+
 from .config import ModeTablette, definir_mode_tablette, obtenir_mode_tablette
 
 
@@ -90,7 +92,7 @@ def afficher_vue_recette_cuisine(
                 f"""
                 <div class="kitchen-step-card kitchen-step-transition">
                     <span class="kitchen-step-number">{etape_courante}</span>
-                    <span style="font-size: 1.4rem;">{instruction}</span>
+                    <span style="font-size: 1.4rem;">{echapper_html(instruction)}</span>
                 </div>
                 """,
                 unsafe_allow_html=True,

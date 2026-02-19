@@ -2,7 +2,16 @@
 Gestion des modèles de listes récurrentes.
 """
 
-from ._common import etat_vide, get_current_user_id, logger, obtenir_service_courses, st
+import logging
+
+import streamlit as st
+
+from src.services.cuisine.courses import obtenir_service_courses
+from src.ui.components.atoms import etat_vide
+
+from .utils import get_current_user_id
+
+logger = logging.getLogger(__name__)
 
 
 def afficher_modeles():

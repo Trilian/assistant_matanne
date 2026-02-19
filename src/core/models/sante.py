@@ -24,7 +24,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from .base import Base, utc_now
 
 # ═══════════════════════════════════════════════════════════
 # ROUTINES SANTÉ
@@ -59,7 +59,7 @@ class HealthRoutine(Base):
     calories_brulees_estimees: Mapped[int | None] = mapped_column(Integer)
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     entries: Mapped[list["HealthEntry"]] = relationship(
@@ -102,7 +102,7 @@ class HealthObjective(Base):
     priorite: Mapped[str] = mapped_column(String(50), nullable=False, default="moyenne")
     statut: Mapped[str] = mapped_column(String(50), nullable=False, default="en_cours", index=True)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         CheckConstraint("valeur_cible > 0", name="ck_objective_valeur_positive"),
@@ -144,7 +144,7 @@ class HealthEntry(Base):
     note_moral: Mapped[int | None] = mapped_column(Integer)
     ressenti: Mapped[str | None] = mapped_column(Text)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     routine: Mapped[Optional["HealthRoutine"]] = relationship(back_populates="entries")

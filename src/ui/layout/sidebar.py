@@ -4,8 +4,7 @@ Sidebar avec navigation par modules.
 
 import streamlit as st
 
-from src.core.caching import Cache
-from src.core.lazy_loader import ChargeurModuleDiffere, afficher_stats_chargement_differe
+from src.core.lazy_loader import afficher_stats_chargement_differe
 from src.core.state import GestionnaireEtat, obtenir_etat
 
 # ═══════════════════════════════════════════════════════════
@@ -39,9 +38,9 @@ MODULES_MENU = {
     # Maison
     "🏠 Maison": {
         "🏠 Hub": "maison.hub",
-        "� Jardin": "maison.jardin",
+        "🌱 Jardin": "maison.jardin",
         "🏡 Entretien": "maison.entretien",
-        "💡 Charges": "maison.energie",
+        "💡 Charges": "maison.charges",
         "💰 Dépenses": "maison.depenses",
     },
     # Jeux
@@ -95,9 +94,7 @@ def afficher_sidebar():
                 st.json(GestionnaireEtat.obtenir_resume_etat())
 
                 if st.button("🔄 Reset"):
-                    GestionnaireEtat.reinitialiser()
-                    Cache.vider()
-                    ChargeurModuleDiffere.clear_cache()
+                    GestionnaireEtat.reset_complet()
                     st.success("Reset OK")
                     st.rerun()
 

@@ -8,7 +8,7 @@ import time
 import streamlit as st
 
 from src.services.cuisine.recettes import obtenir_service_recettes
-from src.ui.components.atoms import etat_vide
+from src.ui import etat_vide
 
 from .generation_image import afficher_generer_image
 from .utils import formater_quantite
@@ -407,7 +407,6 @@ def afficher_detail_recette(recette):
 
     with action_cols[0]:
         if st.button("✏️ Modifier", use_container_width=True, key="btn_modifier_recette"):
-            st.session_state.edit_mode_recette = recette.id
             st.rerun()
 
     with action_cols[1]:

@@ -9,6 +9,7 @@ Stratégie d'écriture: L1 + L2 (L3 optionnel si persistent=True)
 """
 
 import logging
+import threading
 from collections.abc import Callable
 from functools import wraps
 from typing import Any, ParamSpec, TypeVar
@@ -33,12 +34,16 @@ class CacheMultiNiveau:
     """
 
     _instance: "CacheMultiNiveau | None" = None
+    _lock = threading.Lock()
 
     def __new__(cls, *args, **kwargs):
-        """Singleton pattern."""
+        """Singleton thread-safe."""
         if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance._initialized = False
+            with cls._lock:
+                # Double-check locking
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+                    cls._instance._initialized = False
         return cls._instance
 
     def __init__(

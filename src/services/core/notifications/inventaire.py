@@ -271,7 +271,13 @@ def obtenir_service_notifications_inventaire() -> ServiceNotificationsInventaire
     return _service_notifications_inventaire
 
 
+def get_inventory_notification_service() -> ServiceNotificationsInventaire:
+    """Factory for inventory notification service (English alias)."""
+    return obtenir_service_notifications_inventaire()
+
+
 __all__ = [
     "ServiceNotificationsInventaire",
     "obtenir_service_notifications_inventaire",
+    "get_inventory_notification_service",
 ]

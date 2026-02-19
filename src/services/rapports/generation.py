@@ -410,6 +410,11 @@ def obtenir_service_rapports_pdf() -> ServiceRapportsPDF:
     return _service_rapports_pdf
 
 
+def get_pdf_reports_service() -> ServiceRapportsPDF:
+    """Factory for PDF reports service (English alias)."""
+    return obtenir_service_rapports_pdf()
+
+
 # ═══════════════════════════════════════════════════════════
 # EXPORTS
 # ═══════════════════════════════════════════════════════════
@@ -417,4 +422,5 @@ def obtenir_service_rapports_pdf() -> ServiceRapportsPDF:
 __all__ = [
     "ServiceRapportsPDF",
     "obtenir_service_rapports_pdf",
+    "get_pdf_reports_service",
 ]

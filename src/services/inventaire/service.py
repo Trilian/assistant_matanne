@@ -203,10 +203,16 @@ def obtenir_service_inventaire() -> ServiceInventaire:
     return _service_inventaire
 
 
+def get_inventory_service() -> ServiceInventaire:
+    """Factory for inventory service (English alias)."""
+    return obtenir_service_inventaire()
+
+
 __all__ = [
     # Service principal
     "ServiceInventaire",
     "obtenir_service_inventaire",
+    "get_inventory_service",
     # Constantes
     "CATEGORIES",
     "EMPLACEMENTS",

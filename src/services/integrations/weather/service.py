@@ -538,3 +538,8 @@ def obtenir_service_meteo() -> ServiceMeteo:
     if _weather_service is None:
         _weather_service = ServiceMeteo()
     return _weather_service
+
+
+def get_weather_service() -> ServiceMeteo:
+    """Factory for weather service (English alias)."""
+    return obtenir_service_meteo()

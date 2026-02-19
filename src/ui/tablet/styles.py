@@ -8,6 +8,7 @@ Fournit les feuilles de style pour:
 """
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 from .config import ModeTablette, obtenir_mode_tablette
 
@@ -429,6 +430,9 @@ def appliquer_mode_tablette():
     """
     Applique le mode tablette à la page courante.
 
+    Utilise une approche CSS-only via injection de classe sur le body
+    plutôt que des <div> ouvrants/fermants (incompatibles avec le DOM Streamlit).
+
     À appeler au début de chaque page/module.
     """
     mode = obtenir_mode_tablette()
@@ -437,15 +441,24 @@ def appliquer_mode_tablette():
     st.markdown(CSS_TABLETTE, unsafe_allow_html=True)
 
     if mode == ModeTablette.TABLETTE:
-        st.markdown('<div class="tablet-mode">', unsafe_allow_html=True)
+        components.html(
+            "<script>document.body.classList.add('tablet-mode');</script>",
+            height=0,
+        )
     elif mode == ModeTablette.CUISINE:
         st.markdown(CSS_MODE_CUISINE, unsafe_allow_html=True)
-        st.markdown('<div class="tablet-mode kitchen-mode">', unsafe_allow_html=True)
+        components.html(
+            "<script>document.body.classList.add('tablet-mode', 'kitchen-mode');</script>",
+            height=0,
+        )
 
 
 def fermer_mode_tablette():
-    """Ferme les balises du mode tablette."""
+    """Retire les classes CSS du mode tablette."""
     mode = obtenir_mode_tablette()
 
     if mode in [ModeTablette.TABLETTE, ModeTablette.CUISINE]:
-        st.markdown("</div>", unsafe_allow_html=True)
+        components.html(
+            "<script>document.body.classList.remove('tablet-mode', 'kitchen-mode');</script>",
+            height=0,
+        )

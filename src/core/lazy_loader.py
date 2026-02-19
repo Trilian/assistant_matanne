@@ -166,6 +166,41 @@ def lazy_import(module_path: str, attr_name: str | None = None):
 
 
 # ═══════════════════════════════════════════════════════════
+# VALIDATION MENU / REGISTRY
+# ═══════════════════════════════════════════════════════════
+
+
+def valider_coherence_menu(modules_menu: dict, registry: dict) -> list[str]:
+    """Valide que toutes les clés du menu existent dans le registry.
+
+    Args:
+        modules_menu: Dictionnaire MODULES_MENU (sidebar).
+        registry: MODULE_REGISTRY du routeur.
+
+    Returns:
+        Liste des clés manquantes (vide si tout est cohérent).
+    """
+    manquantes = []
+
+    for label, value in modules_menu.items():
+        if isinstance(value, dict):
+            for sub_label, sub_value in value.items():
+                if sub_value is not None and sub_value not in registry:
+                    manquantes.append(sub_value)
+                    logger.warning(
+                        f"⚠️ Clé menu '{sub_value}' ({sub_label}) absente du MODULE_REGISTRY"
+                    )
+        elif value is not None and value not in registry:
+            manquantes.append(value)
+            logger.warning(f"⚠️ Clé menu '{value}' ({label}) absente du MODULE_REGISTRY")
+
+    if not manquantes:
+        logger.debug("✅ Cohérence menu/registry OK")
+
+    return manquantes
+
+
+# ═══════════════════════════════════════════════════════════
 # ROUTER OPTIMISÉ AVEC LAZY LOADING
 # ═══════════════════════════════════════════════════════════
 
@@ -183,79 +218,44 @@ class RouteurOptimise:
 
     MODULE_REGISTRY = {
         # ACCUEIL
-        "accueil": {"path": "src.modules.accueil", "type": "simple"},
+        "accueil": {"path": "src.modules.accueil"},
         # CALENDRIER UNIFIÉ - VUE CENTRALE
-        "planning.calendrier": {
-            "path": "src.modules.planning.calendrier",
-            "type": "simple",
-        },
-        "planning.templates_ui": {
-            "path": "src.modules.planning.templates_ui",
-            "type": "simple",
-        },
-        "planning.timeline_ui": {
-            "path": "src.modules.planning.timeline_ui",
-            "type": "simple",
-        },
+        "planning.calendrier": {"path": "src.modules.planning.calendrier"},
+        "planning.templates_ui": {"path": "src.modules.planning.templates_ui"},
+        "planning.timeline_ui": {"path": "src.modules.planning.timeline_ui"},
         # DOMAINE CUISINE
-        "cuisine.recettes": {"path": "src.modules.cuisine.recettes", "type": "simple"},
-        "cuisine.inventaire": {"path": "src.modules.cuisine.inventaire", "type": "simple"},
-        "cuisine.planificateur_repas": {
-            "path": "src.modules.cuisine.planificateur_repas",
-            "type": "simple",
-        },
-        "cuisine.planning_semaine": {
-            "path": "src.modules.cuisine.planificateur_repas",
-            "type": "simple",
-        },  # Alias legacy
-        "cuisine.batch_cooking": {
-            "path": "src.modules.cuisine.batch_cooking_detaille",
-            "type": "simple",
-        },
-        "cuisine.batch_cooking_detaille": {
-            "path": "src.modules.cuisine.batch_cooking_detaille",
-            "type": "simple",
-        },
-        "cuisine.courses": {"path": "src.modules.cuisine.courses", "type": "simple"},
+        "cuisine.recettes": {"path": "src.modules.cuisine.recettes"},
+        "cuisine.inventaire": {"path": "src.modules.cuisine.inventaire"},
+        "cuisine.planificateur_repas": {"path": "src.modules.cuisine.planificateur_repas"},
+        "cuisine.batch_cooking_detaille": {"path": "src.modules.cuisine.batch_cooking_detaille"},
+        "cuisine.courses": {"path": "src.modules.cuisine.courses"},
         # OUTILS TRANSVERSAUX
-        "barcode": {"path": "src.modules.utilitaires.barcode", "type": "simple"},
-        "rapports": {"path": "src.modules.utilitaires.rapports", "type": "simple"},
+        "barcode": {"path": "src.modules.utilitaires.barcode"},
+        "rapports": {"path": "src.modules.utilitaires.rapports"},
         # DOMAINE FAMILLE
-        "famille.hub": {"path": "src.modules.famille.hub_famille", "type": "simple"},
-        "famille.jules": {"path": "src.modules.famille.jules", "type": "simple"},
-        "famille.jules_planning": {
-            "path": "src.modules.famille.jules_planning",
-            "type": "simple",
-        },
-        "famille.suivi_perso": {"path": "src.modules.famille.suivi_perso", "type": "simple"},
-        "famille.weekend": {"path": "src.modules.famille.weekend", "type": "simple"},
-        "famille.achats_famille": {
-            "path": "src.modules.famille.achats_famille",
-            "type": "simple",
-        },
-        "famille.activites": {"path": "src.modules.famille.activites", "type": "simple"},
-        "famille.routines": {"path": "src.modules.famille.routines", "type": "simple"},
+        "famille.hub": {"path": "src.modules.famille.hub_famille"},
+        "famille.jules": {"path": "src.modules.famille.jules"},
+        "famille.jules_planning": {"path": "src.modules.famille.jules_planning"},
+        "famille.suivi_perso": {"path": "src.modules.famille.suivi_perso"},
+        "famille.weekend": {"path": "src.modules.famille.weekend"},
+        "famille.achats_famille": {"path": "src.modules.famille.achats_famille"},
+        "famille.activites": {"path": "src.modules.famille.activites"},
+        "famille.routines": {"path": "src.modules.famille.routines"},
         # DOMAINE MAISON
-        "maison": {"path": "src.modules.maison.hub", "type": "simple"},
-        "maison.jardin": {"path": "src.modules.maison.jardin", "type": "simple"},
-        "maison.entretien": {"path": "src.modules.maison.entretien", "type": "simple"},
-        "maison.depenses": {"path": "src.modules.maison.depenses", "type": "simple"},
-        "maison.charges": {"path": "src.modules.maison.charges", "type": "simple"},
+        "maison.hub": {"path": "src.modules.maison.hub"},
+        "maison.jardin": {"path": "src.modules.maison.jardin"},
+        "maison.entretien": {"path": "src.modules.maison.entretien"},
+        "maison.depenses": {"path": "src.modules.maison.depenses"},
+        "maison.charges": {"path": "src.modules.maison.charges"},
         # DOMAINE JEUX
-        "jeux.paris": {"path": "src.modules.jeux.paris", "type": "simple"},
-        "jeux.loto": {"path": "src.modules.jeux.loto", "type": "simple"},
+        "jeux.paris": {"path": "src.modules.jeux.paris"},
+        "jeux.loto": {"path": "src.modules.jeux.loto"},
         # OUTILS ADDITIONNELS
-        "scan_factures": {"path": "src.modules.utilitaires.scan_factures", "type": "simple"},
-        "recherche_produits": {
-            "path": "src.modules.utilitaires.recherche_produits",
-            "type": "simple",
-        },
+        "scan_factures": {"path": "src.modules.utilitaires.scan_factures"},
+        "recherche_produits": {"path": "src.modules.utilitaires.recherche_produits"},
         # PARAMÈTRES & NOTIFICATIONS
-        "parametres": {"path": "src.modules.parametres", "type": "simple"},
-        "notifications_push": {
-            "path": "src.modules.utilitaires.notifications_push",
-            "type": "simple",
-        },
+        "parametres": {"path": "src.modules.parametres"},
+        "notifications_push": {"path": "src.modules.utilitaires.notifications_push"},
     }
 
     @staticmethod

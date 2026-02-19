@@ -182,7 +182,7 @@ def app():
                     if st.button(
                         suggestion, key=f"suggest_{type_key}_{suggestion}", use_container_width=True
                     ):
-                        st.session_state.suggestion = suggestion
+                        pass
 
         col4, col5, col6 = st.columns(3)
         cols2 = [col4, col5, col6]
@@ -209,7 +209,7 @@ def app():
                     if st.button(
                         suggestion, key=f"suggest_{type_key}_{suggestion}", use_container_width=True
                     ):
-                        st.session_state.suggestion = suggestion
+                        pass
 
     # ═══════════════════════════════════════════════════════════
     # TAB 3: BUDGET

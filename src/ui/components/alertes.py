@@ -14,7 +14,7 @@ def alerte_stock(articles: list[dict[str, Any]], cle: str = "alerte_stock") -> N
 
     Args:
         articles: Liste des articles en alerte
-        cle: Clé unique Streamlit pour le widget
+        cle: (Déprécié, ignoré) Conservé pour rétrocompatibilité.
     """
     if not articles:
         return

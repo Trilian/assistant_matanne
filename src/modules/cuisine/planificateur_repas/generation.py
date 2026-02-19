@@ -2,8 +2,18 @@
 Module Planificateur de Repas - Génération IA
 """
 
-from ._common import date, generer_prompt_semaine, json, logger, obtenir_client_ia, st
+import json
+import logging
+from datetime import date
+
+import streamlit as st
+
+from src.core.ai import obtenir_client_ia
+
 from .preferences import charger_feedbacks, charger_preferences
+from .utils import generer_prompt_semaine
+
+logger = logging.getLogger(__name__)
 
 
 def generer_semaine_ia(date_debut: date) -> dict:

@@ -134,7 +134,7 @@ class RecipeParser:
                     quantite_str, unite, nom = groups
                     try:
                         quantite = float(quantite_str.replace(",", "."))
-                    except:
+                    except (ValueError, TypeError):
                         quantite = None
                     return ImportedIngredient(
                         nom=nom.strip(), quantite=quantite, unite=unite.strip()
@@ -143,7 +143,7 @@ class RecipeParser:
                     quantite_str, nom = groups
                     try:
                         quantite = float(quantite_str.replace(",", "."))
-                    except:
+                    except (ValueError, TypeError):
                         quantite = None
                     return ImportedIngredient(nom=nom.strip(), quantite=quantite, unite="")
 
@@ -283,7 +283,7 @@ class CuisineAZParser(RecipeParser):
                                     recipe.etapes.append(step)
                                 elif isinstance(step, dict) and "text" in step:
                                     recipe.etapes.append(step["text"])
-            except:
+            except Exception:
                 pass
 
         # Fallback HTML si pas de JSON-LD
@@ -376,7 +376,7 @@ class GenericRecipeParser(RecipeParser):
 
                     recipe.confiance_score = 0.9
                     return recipe
-            except:
+            except Exception:
                 continue
 
         # 2. Fallback: extraction HTML heuristique

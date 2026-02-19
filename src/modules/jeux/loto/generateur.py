@@ -2,19 +2,17 @@
 Module Loto - Génération et gestion des grilles
 """
 
-from ._common import (
-    CHANCE_MAX,
-    CHANCE_MIN,
-    NUMERO_MAX,
-    NUMERO_MIN,
-    analyser_patterns_tirages,
-    calculer_frequences_numeros,
-    etat_vide,
+import streamlit as st
+
+from src.ui import etat_vide
+
+from .constants import CHANCE_MAX, CHANCE_MIN, NUMERO_MAX, NUMERO_MIN
+from .frequences import analyser_patterns_tirages, calculer_frequences_numeros
+from .generation import (
     generer_grille_aleatoire,
     generer_grille_chauds_froids,
     generer_grille_equilibree,
     generer_grille_eviter_populaires,
-    st,
 )
 from .crud import enregistrer_grille
 from .utils import charger_grilles_utilisateur

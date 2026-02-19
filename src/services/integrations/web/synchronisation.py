@@ -18,7 +18,6 @@ from datetime import datetime
 from enum import Enum, StrEnum
 from typing import Any
 
-import streamlit as st
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -117,11 +116,15 @@ class RealtimeSyncService:
     @staticmethod
     def _get_default_storage() -> MutableMapping[str, Any]:
         """Retourne le stockage par défaut (st.session_state)."""
+        import streamlit as st
+
         return st.session_state
 
     @staticmethod
     def _get_default_rerun() -> Callable[[], None]:
         """Retourne le callback rerun par défaut (st.rerun)."""
+        import streamlit as st
+
         return st.rerun
 
     def _init_client(self):

@@ -31,6 +31,20 @@ from src.core.logging import (
 class TestConfigureLogging:
     """Tests pour configure_logging."""
 
+    @pytest.fixture(autouse=True)
+    def reset_logging_state(self):
+        """Réinitialise l'état du logging avant chaque test."""
+        logger = logging.getLogger()
+        original_level = logger.level
+        original_handlers = logger.handlers.copy()
+        # Réinitialiser l'état du GestionnaireLog
+        GestionnaireLog._initialise = False
+        yield
+        # Restaurer après le test
+        logger.level = original_level
+        logger.handlers = original_handlers
+        GestionnaireLog._initialise = False
+
     def test_configure_logging_default_level(self):
         """Test que configure_logging définit INFO par défaut."""
         logger = logging.getLogger()
@@ -61,10 +75,14 @@ class TestConfigureLogging:
     def test_configure_logging_updates_existing_handler(self):
         """Test que configure_logging met à jour les handlers existants."""
         logger = logging.getLogger()
-        initial_handler_count = len(logger.handlers)
+        # Configure d'abord
+        configure_logging("INFO")
+        handler_count_after_first = len(logger.handlers)
+        # Reconfigure - ne devrait pas ajouter d'handlers
+        GestionnaireLog._initialise = False  # Reset pour permettre reconfiguration
         configure_logging("WARNING")
-        # Devrait mettre à jour, pas ajouter
-        assert len(logger.handlers) >= initial_handler_count
+        # Devrait avoir le même nombre (pas multiplier)
+        assert len(logger.handlers) <= handler_count_after_first + 1
 
     @patch.dict("os.environ", {"LOG_LEVEL": "DEBUG"})
     def test_configure_logging_reads_env_var(self):

@@ -257,6 +257,20 @@ class SemaineCalendrier:
     def nb_activites(self) -> int:
         return sum(len(jour.activites) for jour in self.jours)
 
+    @property
+    def stats(self) -> dict:
+        """Statistiques agrégées de la semaine."""
+        return {
+            "repas": self.nb_repas_planifies,
+            "activites": self.nb_activites,
+            "events": sum(len(jour.evenements) for jour in self.jours),
+            "projets": 0,
+            "activites_jules": 0,
+            "budget": 0,
+            "charge_moyenne": 50,
+            "charge_globale": "normal",
+        }
+
 
 __all__ = [
     "TypeEvenement",

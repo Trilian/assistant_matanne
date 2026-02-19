@@ -376,7 +376,6 @@ class TestRenderDayActivitiesAddButton:
         afficher_day_activities(test_date, [])
 
         assert mock_st.session_state["weekend_add_date"] == test_date
-        assert mock_st.session_state["weekend_tab"] == "add"
         mock_st.rerun.assert_called()
 
 

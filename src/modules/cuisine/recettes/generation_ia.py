@@ -15,9 +15,6 @@ logger = logging.getLogger(__name__)
 
 def afficher_generer_ia():
     """Interface pour générer des recettes avec l'IA"""
-    # Marquer cet onglet comme actif
-    st.session_state.recettes_selected_tab = 3
-
     st.subheader("⏰ Générer des recettes avec l'IA")
 
     service = obtenir_service_recettes()

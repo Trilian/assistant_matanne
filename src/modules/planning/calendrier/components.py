@@ -2,22 +2,20 @@
 Module Calendrier Familial Unifié - Composants UI
 """
 
-from ._common import (
-    CalendarEvent,
-    FamilyActivity,
+from datetime import date, datetime, time, timedelta
+
+import streamlit as st
+
+from src.core.db import obtenir_contexte_db
+from src.core.models import CalendarEvent, FamilyActivity
+from .utils import (
     JourCalendrier,
     SemaineCalendrier,
     TypeEvenement,
-    date,
-    datetime,
     generer_texte_semaine_pour_impression,
     get_debut_semaine,
     get_semaine_precedente,
     get_semaine_suivante,
-    obtenir_contexte_db,
-    st,
-    time,
-    timedelta,
 )
 
 

@@ -11,6 +11,8 @@ from datetime import datetime
 
 import streamlit as st
 
+from src.ui.utils import echapper_html
+
 logger = logging.getLogger(__name__)
 
 
@@ -83,9 +85,9 @@ def afficher_sante_systeme():
             st.write(f"{icon} **{detail['nom']}**: {detail['message']}")
 
 
-def afficher_timeline_activites(activites: list[dict], max_items: int = 5):
+def afficher_timeline_systeme(activites: list[dict], max_items: int = 5):
     """
-    Affiche une timeline des activités récentes.
+    Affiche une timeline des activités système récentes.
 
     Args:
         activites: Liste {'date': datetime, 'action': str, 'type': str}
@@ -118,11 +120,15 @@ def afficher_timeline_activites(activites: list[dict], max_items: int = 5):
         st.markdown(
             f'<div style="padding: 0.5rem; margin: 0.3rem 0; '
             f'background: #f8f9fa; border-radius: 8px; display: flex; align-items: center;">'
-            f'<span style="margin-right: 0.8rem; font-size: 1.3rem;">{icone}</span>'
+            f'<span style="margin-right: 0.8rem; font-size: 1.3rem;">{echapper_html(icone)}</span>'
             f"<div>"
-            f'<span style="font-weight: 500;">{action}</span><br>'
-            f'<small style="color: #6c757d;">{date_str}</small>'
+            f'<span style="font-weight: 500;">{echapper_html(action)}</span><br>'
+            f'<small style="color: #6c757d;">{echapper_html(str(date_str))}</small>'
             f"</div>"
             f"</div>",
             unsafe_allow_html=True,
         )
+
+
+# Alias rétrocompatibilité
+afficher_timeline_activites = afficher_timeline_systeme

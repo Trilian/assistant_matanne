@@ -287,3 +287,118 @@ def valider_plage(
             f"{nom_param} doit être <= {max_val}, reçu {valeur}",
             details={"parametre": nom_param, "max": max_val, "recu": valeur},
         )
+
+
+def exiger_positif(valeur: float, nom_champ: str) -> None:
+    """
+    Vérifie qu'une valeur numérique est positive.
+
+    Args:
+        valeur: Valeur à vérifier
+        nom_champ: Nom du champ pour le message d'erreur
+
+    Raises:
+        ErreurValidation: Si la valeur n'est pas positive
+
+    Example:
+        >>> exiger_positif(quantite, "quantité")
+    """
+    if valeur <= 0:
+        raise ErreurValidation(
+            f"{nom_champ} doit être positif: {valeur}",
+            message_utilisateur=f"{nom_champ} doit être supérieur à 0",
+        )
+
+
+def exiger_existence(obj: Any, type_objet: str, id_objet: Any) -> None:
+    """
+    Vérifie qu'un objet existe (n'est pas None).
+
+    Args:
+        obj: Objet à vérifier
+        type_objet: Type d'objet (pour le message)
+        id_objet: ID de l'objet (pour le message)
+
+    Raises:
+        ErreurNonTrouve: Si l'objet est None
+
+    Example:
+        >>> recette = recette_service.get_by_id(42)
+        >>> exiger_existence(recette, "Recette", 42)
+    """
+    if obj is None:
+        raise ErreurNonTrouve(
+            f"{type_objet} {id_objet} non trouvé",
+            details={"type": type_objet, "id": id_objet},
+            message_utilisateur=f"{type_objet} introuvable",
+        )
+
+
+def exiger_plage(
+    valeur: float,
+    minimum: float | None = None,
+    maximum: float | None = None,
+    nom_champ: str = "valeur",
+) -> None:
+    """
+    Vérifie qu'une valeur est dans une plage donnée.
+
+    Args:
+        valeur: Valeur à vérifier
+        minimum: Valeur minimale (optionnelle)
+        maximum: Valeur maximale (optionnelle)
+        nom_champ: Nom du champ pour le message d'erreur
+
+    Raises:
+        ErreurValidation: Si la valeur est hors plage
+
+    Example:
+        >>> exiger_plage(portions, minimum=1, maximum=20, nom_champ="portions")
+    """
+    if minimum is not None and valeur < minimum:
+        raise ErreurValidation(
+            f"{nom_champ} trop petit: {valeur} < {minimum}",
+            message_utilisateur=f"{nom_champ} doit être au minimum {minimum}",
+        )
+
+    if maximum is not None and valeur > maximum:
+        raise ErreurValidation(
+            f"{nom_champ} trop grand: {valeur} > {maximum}",
+            message_utilisateur=f"{nom_champ} doit être au maximum {maximum}",
+        )
+
+
+def exiger_longueur(
+    texte: str,
+    minimum: int | None = None,
+    maximum: int | None = None,
+    nom_champ: str = "texte",
+) -> None:
+    """
+    Vérifie la longueur d'une chaîne de caractères.
+
+    Args:
+        texte: Chaîne à vérifier
+        minimum: Longueur minimale (optionnelle)
+        maximum: Longueur maximale (optionnelle)
+        nom_champ: Nom du champ pour le message d'erreur
+
+    Raises:
+        ErreurValidation: Si la longueur est invalide
+
+    Example:
+        >>> exiger_longueur(nom_recette, minimum=3, maximum=200, nom_champ="nom")
+    """
+    longueur = len(texte)
+
+    if minimum is not None and longueur < minimum:
+        raise ErreurValidation(
+            f"{nom_champ} trop court: {longueur} < {minimum}",
+            message_utilisateur=f"{nom_champ} doit faire au moins {minimum} caractères",
+        )
+
+    if maximum is not None and longueur > maximum:
+        raise ErreurValidation(
+            f"{nom_champ} trop long: {longueur} > {maximum}",
+            message_utilisateur=f"{nom_champ} doit faire au maximum {maximum} caractères",
+        )

@@ -12,8 +12,7 @@ Fonctionnalités complètes:
 
 import streamlit as st
 
-# Re-export constants depuis _common
-from ._common import PRIORITY_EMOJIS, RAYONS_DEFAULT
+from .utils import PRIORITY_EMOJIS, RAYONS_DEFAULT
 from .historique import afficher_historique
 
 # Imports des sous-modules
@@ -43,9 +42,6 @@ def app():
         st.session_state.courses_refresh = 0
     if "new_article_mode" not in st.session_state:
         st.session_state.new_article_mode = False
-    if "courses_active_tab" not in st.session_state:
-        st.session_state.courses_active_tab = 0
-
     # Initialiser la synchronisation temps réel
     _init_realtime_sync()
 
@@ -62,27 +58,21 @@ def app():
     )
 
     with tab_liste:
-        st.session_state.courses_active_tab = 0
         afficher_liste_active()
 
     with tab_planning:
-        st.session_state.courses_active_tab = 1
         afficher_courses_depuis_planning()
 
     with tab_suggestions:
-        st.session_state.courses_active_tab = 2
         afficher_suggestions_ia()
 
     with tab_historique:
-        st.session_state.courses_active_tab = 3
         afficher_historique()
 
     with tab_modeles:
-        st.session_state.courses_active_tab = 4
         afficher_modeles()
 
     with tab_outils:
-        st.session_state.courses_active_tab = 5
         afficher_outils()
 
 

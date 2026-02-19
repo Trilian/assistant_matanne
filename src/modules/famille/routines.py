@@ -11,10 +11,6 @@ import pandas as pd
 import streamlit as st
 
 from src.ui import etat_vide
-
-# AgentIA non implementé - stub pour éviter erreur d'import
-AgentIA = Any  # type: ignore
-
 from src.core.db import obtenir_contexte_db
 from src.core.models import ChildProfile, Routine, RoutineTask
 
@@ -188,7 +184,7 @@ def app():
     st.caption("Gestion intelligente des routines familiales")
 
     # Recuperer l'agent IA
-    agent: AgentIA = st.session_state.get("agent_ia")
+    agent: Any = st.session_state.get("agent_ia")
 
     # ===================================
     # HEURE ACTUELLE & ALERTES

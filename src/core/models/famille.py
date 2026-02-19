@@ -27,7 +27,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from .base import Base, utc_now
 
 # ═══════════════════════════════════════════════════════════
 # PROFIL ENFANT
@@ -53,7 +53,7 @@ class ChildProfile(Base):
     gender: Mapped[str | None] = mapped_column(String(20))
     notes: Mapped[str | None] = mapped_column(Text)
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     wellbeing_entries: Mapped[list["WellbeingEntry"]] = relationship(
@@ -92,7 +92,7 @@ class WellbeingEntry(Base):
     sleep_hours: Mapped[float | None] = mapped_column(Float)
     activity: Mapped[str | None] = mapped_column(String(200))
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     child: Mapped[Optional["ChildProfile"]] = relationship(back_populates="wellbeing_entries")
@@ -131,7 +131,7 @@ class Milestone(Base):
     date_atteint: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     photo_url: Mapped[str | None] = mapped_column(String(500))
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     child: Mapped["ChildProfile"] = relationship(back_populates="milestones")
@@ -177,7 +177,7 @@ class FamilyActivity(Base):
     cout_reel: Mapped[float | None] = mapped_column(Float)
     statut: Mapped[str] = mapped_column(String(50), nullable=False, default="planifié", index=True)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         CheckConstraint("duree_heures > 0", name="ck_activite_duree_positive"),
@@ -220,7 +220,7 @@ class FamilyBudget(Base):
         String(50)
     )  # mensuel, hebdomadaire, etc.
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (CheckConstraint("montant > 0", name="ck_budget_montant_positive"),)
 
@@ -258,7 +258,7 @@ class ShoppingItem(Base):
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
     # Timestamps
-    date_ajout: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    date_ajout: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
     date_achat: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     def __repr__(self) -> str:

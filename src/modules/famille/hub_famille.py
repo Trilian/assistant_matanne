@@ -443,7 +443,6 @@ def _afficher_day_activities(day: date):
                 st.caption("Rien de prevu")
                 if st.button("💡 Suggerer", key=f"suggest_{day}"):
                     st.session_state["famille_page"] = "weekend"
-                    st.session_state["weekend_suggest_date"] = day
                     st.rerun()
     except:
         st.caption("Rien de prevu")

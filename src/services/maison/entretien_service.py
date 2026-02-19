@@ -14,8 +14,8 @@ from datetime import date, timedelta
 
 from sqlalchemy.orm import Session
 
-from src.core.ai import ClientIA
-from src.core.db import obtenir_contexte_db
+from src.core.ai import ClientIA, obtenir_client_ia
+from src.core.decorators import avec_session_db
 from src.core.models import Routine, RoutineTask
 from src.services.core.base import BaseAIService
 
@@ -84,7 +84,7 @@ class EntretienService(EntretienGamificationMixin, BaseAIService):
             client: Client IA optionnel
         """
         if client is None:
-            client = ClientIA()
+            client = obtenir_client_ia()
         super().__init__(
             client=client,
             cache_prefix="entretien",
@@ -322,39 +322,33 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
     # CRUD HELPERS
     # ─────────────────────────────────────────────────────────
 
+    @avec_session_db
     def obtenir_routines(self, db: Session | None = None) -> list[Routine]:
         """Récupère toutes les routines actives.
 
         Args:
-            db: Session DB optionnelle
+            db: Session DB (injectée automatiquement par @avec_session_db)
 
         Returns:
             Liste des routines
         """
-        if db is None:
-            with obtenir_contexte_db() as session:
-                return session.query(Routine).filter(Routine.actif.is_(True)).all()
         return db.query(Routine).filter(Routine.actif.is_(True)).all()
 
     def get_routines(self, db: Session | None = None) -> list[Routine]:
         """Alias anglais pour obtenir_routines (rétrocompatibilité)."""
         return self.obtenir_routines(db)
 
+    @avec_session_db
     def obtenir_taches_du_jour(self, db: Session | None = None) -> list[RoutineTask]:
         """Récupère les tâches à faire aujourd'hui.
 
         Args:
-            db: Session DB optionnelle
+            db: Session DB (injectée automatiquement par @avec_session_db)
 
         Returns:
             Liste des tâches du jour
         """
-        aujourd_hui = date.today()
-        jour_semaine = aujourd_hui.weekday()
-
-        if db is None:
-            with obtenir_contexte_db() as session:
-                return self._query_taches_jour(session, jour_semaine)
+        jour_semaine = date.today().weekday()
         return self._query_taches_jour(db, jour_semaine)
 
     def get_taches_du_jour(self, db: Session | None = None) -> list[RoutineTask]:

@@ -2,18 +2,15 @@
 Module Loto - Composants UI de statistiques
 """
 
-from ._common import (
-    GAINS_PAR_RANG,
-    NUMERO_MAX,
-    NUMERO_MIN,
-    calculer_esperance_mathematique,
-    calculer_frequences_numeros,
-    etat_vide,
-    go,
-    identifier_numeros_chauds_froids,
-    pd,
-    st,
-)
+import pandas as pd
+import plotly.graph_objects as go
+import streamlit as st
+
+from src.ui import etat_vide
+
+from .calculs import calculer_esperance_mathematique
+from .constants import GAINS_PAR_RANG, NUMERO_MAX, NUMERO_MIN
+from .frequences import calculer_frequences_numeros, identifier_numeros_chauds_froids
 
 
 def afficher_dernier_tirage(tirages: list):

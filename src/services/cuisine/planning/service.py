@@ -344,6 +344,11 @@ def obtenir_service_planning() -> ServicePlanning:
     return _service_planning
 
 
+def get_planning_service() -> ServicePlanning:
+    """Factory for planning service (English alias)."""
+    return obtenir_service_planning()
+
+
 # ═══════════════════════════════════════════════════════════
 # EXPORTS
 # ═══════════════════════════════════════════════════════════
@@ -354,4 +359,5 @@ __all__ = [
     "ServicePlanning",
     # Factory
     "obtenir_service_planning",
+    "get_planning_service",
 ]

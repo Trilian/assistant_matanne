@@ -527,7 +527,13 @@ def obtenir_service_recettes() -> ServiceRecettes:
     return _service_recettes
 
 
+def get_recipes_service() -> ServiceRecettes:
+    """Factory for recipes service (English alias)."""
+    return obtenir_service_recettes()
+
+
 __all__ = [
     "ServiceRecettes",
     "obtenir_service_recettes",
+    "get_recipes_service",
 ]

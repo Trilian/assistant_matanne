@@ -422,7 +422,13 @@ def obtenir_service_batch_cooking() -> ServiceBatchCooking:
     return _service_batch_cooking
 
 
+def get_batch_cooking_service() -> ServiceBatchCooking:
+    """Factory for batch cooking service (English alias)."""
+    return obtenir_service_batch_cooking()
+
+
 __all__ = [
     "ServiceBatchCooking",
     "obtenir_service_batch_cooking",
+    "get_batch_cooking_service",
 ]

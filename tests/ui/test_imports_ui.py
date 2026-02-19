@@ -24,7 +24,7 @@ import pytest
         "src.ui.layout.footer",
         "src.ui.layout.header",
         "src.ui.layout.sidebar",
-        "src.ui.layout.init",
+        "src.ui.layout.initialisation",
         "src.ui.layout.styles",
         # Integrations
         "src.ui.integrations.google_calendar",

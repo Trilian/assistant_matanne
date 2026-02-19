@@ -7,6 +7,7 @@ import streamlit as st
 from src.core.config import obtenir_parametres
 from src.core.state import obtenir_etat
 from src.ui.components.atoms import badge
+from src.ui.utils import echapper_html
 
 
 def afficher_header():
@@ -19,7 +20,7 @@ def afficher_header():
     with col1:
         st.markdown(
             f"<div class='main-header'>"
-            f"<h1>🤖 {parametres.APP_NAME}</h1>"
+            f"<h1>🤖 {echapper_html(parametres.APP_NAME)}</h1>"
             f"<p style='color: var(--secondary); margin: 0;'>"
             f"Assistant familial intelligent"
             f"</p></div>",

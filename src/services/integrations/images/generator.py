@@ -41,9 +41,9 @@ def _get_api_key(key_name: str) -> str | None:
                     return st.secrets.get("pexels", {}).get("api_key")
                 elif key_name == "PIXABAY_API_KEY":
                     return st.secrets.get("pixabay", {}).get("api_key")
-            except:
+            except Exception:
                 pass
-    except:
+    except Exception:
         pass
 
     # Fallback à os.getenv (pour dev local avec .env)

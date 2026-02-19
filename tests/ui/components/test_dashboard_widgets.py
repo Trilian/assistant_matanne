@@ -436,10 +436,10 @@ class TestWidgetMeteoJour:
 
     @patch("streamlit.markdown")
     def test_display(self, mock_md):
-        """Test affichage."""
+        """Test affichage avec données."""
         from src.ui.components import widget_meteo_jour
 
-        widget_meteo_jour()
+        widget_meteo_jour({"temp": 22, "condition": "☀️ Ensoleillé", "conseil": "Sortez!"})
 
         mock_md.assert_called_once()
         html = mock_md.call_args[0][0]

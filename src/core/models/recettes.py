@@ -28,7 +28,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from .base import Base, utc_now
 
 if TYPE_CHECKING:
     from .inventaire import ArticleInventaire
@@ -57,7 +57,7 @@ class Ingredient(Base):
     nom: Mapped[str] = mapped_column(String(200), nullable=False, unique=True, index=True)
     categorie: Mapped[str | None] = mapped_column(String(100), index=True)
     unite: Mapped[str] = mapped_column(String(50), nullable=False, default="pcs")
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     recette_ingredients: Mapped[list["RecetteIngredient"]] = relationship(
@@ -173,9 +173,9 @@ class Recette(Base):
     url_image: Mapped[str | None] = mapped_column(String(500))
 
     # Timestamps
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
     modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime, default=utc_now, onupdate=utc_now
     )
     updated_at: Mapped[datetime | None] = mapped_column(
         DateTime, nullable=True
@@ -346,7 +346,7 @@ class VersionRecette(Base):
     etapes_paralleles_batch: Mapped[list[str] | None] = mapped_column(JSONB)
     temps_optimise_batch: Mapped[int | None] = mapped_column(Integer)
 
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     recette_base: Mapped["Recette"] = relationship(back_populates="versions")
@@ -376,7 +376,7 @@ class HistoriqueRecette(Base):
     portions_cuisinees: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     note: Mapped[int | None] = mapped_column(Integer)
     avis: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     recette: Mapped["Recette"] = relationship(back_populates="historique")
@@ -427,7 +427,7 @@ class BatchMeal(Base):
     container_type: Mapped[str | None] = mapped_column(String(100))
     localisation: Mapped[str | None] = mapped_column(String(200))
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     def __repr__(self) -> str:
         return f"<BatchMeal(id={self.id}, nom='{self.nom}', portions={self.portions_restantes})>"

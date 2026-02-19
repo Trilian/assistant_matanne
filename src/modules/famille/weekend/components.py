@@ -54,7 +54,6 @@ def afficher_day_activities(day: date, activities: list):
         st.caption("Rien de prevu")
         if st.button("➕ Ajouter", key=f"add_{day}"):
             st.session_state["weekend_add_date"] = day
-            st.session_state["weekend_tab"] = "add"
             st.rerun()
         return
 

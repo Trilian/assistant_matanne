@@ -155,15 +155,11 @@ class GestionnaireEtat:
             "famille.suivi_perso": "Mon Suivi",
             "famille.activites": "Activités",
             "famille.shopping": "Shopping",
-            "maison": "Hub Maison",
-            "maison.projets": "Projets",
+            "maison.hub": "Hub Maison",
             "maison.jardin": "Jardin",
-            "maison.jardin_zones": "Zones Jardin",
             "maison.entretien": "Entretien",
-            "maison.meubles": "Meubles",
-            "maison.eco": "Éco-Tips",
             "maison.depenses": "Dépenses",
-            "maison.energie": "Énergie",
+            "maison.charges": "Charges",
             "planning.calendrier": "Calendrier",
             "parametres": "Paramètres",
         }
@@ -178,6 +174,17 @@ class GestionnaireEtat:
 
         GestionnaireEtat.initialiser()
         logger.info("🔄 State réinitialisé")
+
+    @staticmethod
+    def reset_complet():
+        """Reset complet: state + cache app + cache lazy loader."""
+        from src.core.caching import Cache
+        from src.core.lazy_loader import ChargeurModuleDiffere
+
+        GestionnaireEtat.reinitialiser()
+        Cache.vider()
+        ChargeurModuleDiffere.vider_cache()
+        logger.info("🔄 Reset complet effectué")
 
     @staticmethod
     def obtenir_resume_etat() -> dict:

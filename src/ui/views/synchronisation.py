@@ -9,6 +9,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from src.services.integrations.web.synchronisation import get_realtime_sync_service
+from src.ui.utils import echapper_html
 
 
 def afficher_indicateur_presence():
@@ -41,8 +42,8 @@ def afficher_indicateur_presence():
                         color: white;
                         font-weight: bold;
                         font-size: 14px;
-                    ">{initials}</div>
-                    <div style="font-size: 11px; margin-top: 4px;">{user.user_name}</div>
+                    ">{echapper_html(initials)}</div>
+                    <div style="font-size: 11px; margin-top: 4px;">{echapper_html(user.user_name)}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -82,48 +83,14 @@ def afficher_statut_synchronisation():
 
 
 def afficher_invite_installation_pwa():
-    """Affiche un bouton d'installation PWA si disponible."""
-    install_script = """
-    <div id="pwa-install-container" style="display: none;">
-        <button id="pwa-install-btn" onclick="installPWA()" style="
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        ">
-            📲 Installer l'application
-        </button>
-    </div>
+    """Affiche un bouton d'installation PWA si disponible.
 
-    <script>
-        let deferredPrompt;
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('pwa-install-container').style.display = 'block';
-        });
-
-        async function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log('Install outcome:', outcome);
-                deferredPrompt = null;
-                document.getElementById('pwa-install-container').style.display = 'none';
-            }
-        }
-    </script>
+    .. deprecated::
+        Importez depuis ``src.ui.views.pwa`` directement.
     """
+    from src.ui.views.pwa import afficher_invite_installation_pwa as _impl
 
-    components.html(install_script, height=60)
+    _impl()
 
 
 __all__ = [

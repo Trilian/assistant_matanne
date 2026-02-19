@@ -284,8 +284,7 @@ class TestMainFunction:
         monkeypatch.setattr(
             app, "obtenir_etat", lambda: Mock(module_actuel="accueil", mode_debug=False)
         )
-        monkeypatch.setattr(app, "Cache", Mock(vider=lambda: None))
-        monkeypatch.setattr(app, "GestionnaireEtat", Mock(reinitialiser=lambda: None))
+        monkeypatch.setattr(app, "GestionnaireEtat", Mock(reset_complet=lambda: None))
         monkeypatch.setattr(st, "set_page_config", lambda **kwargs: None)
         monkeypatch.setattr(st, "stop", lambda: None)
         monkeypatch.setattr(st, "error", lambda msg: None)
@@ -312,8 +311,7 @@ class TestMainFunction:
         monkeypatch.setattr(
             app, "obtenir_etat", lambda: Mock(module_actuel="accueil", mode_debug=True)
         )
-        monkeypatch.setattr(app, "Cache", Mock(vider=lambda: None))
-        monkeypatch.setattr(app, "GestionnaireEtat", Mock(reinitialiser=lambda: None))
+        monkeypatch.setattr(app, "GestionnaireEtat", Mock(reset_complet=lambda: None))
         monkeypatch.setattr(st, "set_page_config", lambda **kwargs: None)
         monkeypatch.setattr(st, "stop", lambda: None)
         monkeypatch.setattr(st, "error", lambda msg: None)
@@ -345,7 +343,6 @@ class TestMainFunction:
         def raise_error():
             raise Exception("Test error")
 
-        mock_cache = Mock()
         mock_gestionnaire = Mock()
         rerun_called = []
 
@@ -355,7 +352,6 @@ class TestMainFunction:
         monkeypatch.setattr(
             app, "obtenir_etat", lambda: Mock(module_actuel="accueil", mode_debug=False)
         )
-        monkeypatch.setattr(app, "Cache", mock_cache)
         monkeypatch.setattr(app, "GestionnaireEtat", mock_gestionnaire)
         monkeypatch.setattr(st, "error", lambda msg: None)
         monkeypatch.setattr(st, "exception", lambda e: None)
@@ -365,9 +361,8 @@ class TestMainFunction:
 
         app.main()
 
-        # Vérifier que reinitialiser et vider ont été appelés
-        mock_gestionnaire.reinitialiser.assert_called_once()
-        mock_cache.vider.assert_called_once()
+        # Vérifier que reset_complet a été appelé
+        mock_gestionnaire.reset_complet.assert_called_once()
         assert len(rerun_called) == 1
 
     def test_main_exception_mode_debug(self, monkeypatch):
@@ -388,8 +383,7 @@ class TestMainFunction:
         monkeypatch.setattr(
             app, "obtenir_etat", lambda: Mock(module_actuel="accueil", mode_debug=True)
         )
-        monkeypatch.setattr(app, "Cache", Mock(vider=lambda: None))
-        monkeypatch.setattr(app, "GestionnaireEtat", Mock(reinitialiser=lambda: None))
+        monkeypatch.setattr(app, "GestionnaireEtat", Mock(reset_complet=lambda: None))
         monkeypatch.setattr(st, "error", lambda msg: None)
         monkeypatch.setattr(st, "exception", lambda e: exception_shown.append(e))
         monkeypatch.setattr(st, "button", lambda label: False)

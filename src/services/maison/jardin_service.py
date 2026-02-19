@@ -16,8 +16,8 @@ from datetime import date, timedelta
 
 from sqlalchemy.orm import Session
 
-from src.core.ai import ClientIA
-from src.core.db import obtenir_contexte_db
+from src.core.ai import ClientIA, obtenir_client_ia
+from src.core.decorators import avec_session_db
 from src.core.models import GardenItem
 from src.services.core.base import BaseAIService
 
@@ -81,7 +81,7 @@ class JardinService(JardinGamificationMixin, BaseAIService):
             client: Client IA optionnel (créé automatiquement si None)
         """
         if client is None:
-            client = ClientIA()
+            client = obtenir_client_ia()
         super().__init__(
             client=client,
             cache_prefix="jardin",
@@ -389,36 +389,32 @@ Réponds en JSON:
         """Alias anglais pour obtenir_saison_actuelle (rétrocompatibilité)."""
         return JardinService.obtenir_saison_actuelle()
 
+    @avec_session_db
     def obtenir_plantes(self, db: Session | None = None) -> list[GardenItem]:
         """Récupère toutes les plantes du jardin.
 
         Args:
-            db: Session DB optionnelle
+            db: Session DB (injectée automatiquement par @avec_session_db)
 
         Returns:
             Liste des plantes
         """
-        if db is None:
-            with obtenir_contexte_db() as session:
-                return session.query(GardenItem).all()
         return db.query(GardenItem).all()
 
     def get_plantes(self, db: Session | None = None) -> list[GardenItem]:
         """Alias anglais pour obtenir_plantes (rétrocompatibilité)."""
         return self.obtenir_plantes(db)
 
+    @avec_session_db
     def obtenir_plantes_a_arroser(self, db: Session | None = None) -> list[GardenItem]:
         """Récupère les plantes nécessitant arrosage.
 
         Args:
-            db: Session DB optionnelle
+            db: Session DB (injectée automatiquement par @avec_session_db)
 
         Returns:
             Liste des plantes à arroser
         """
-        if db is None:
-            with obtenir_contexte_db() as session:
-                return self._query_plantes_arrosage(session)
         return self._query_plantes_arrosage(db)
 
     def get_plantes_a_arroser(self, db: Session | None = None) -> list[GardenItem]:

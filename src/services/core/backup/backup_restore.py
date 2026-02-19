@@ -104,7 +104,7 @@ class BackupRestoreMixin:
                         if isinstance(value, str) and "T" in value:
                             try:
                                 record_data[key] = datetime.fromisoformat(value)
-                            except:
+                            except (ValueError, TypeError):
                                 pass
 
                     record = model_class(**record_data)

@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 import httpx
 from bs4 import BeautifulSoup
 
-from src.core.ai import ClientIA
+from src.core.ai import ClientIA, obtenir_client_ia
 from src.core.decorators import avec_gestion_erreurs
 from src.services.core.base import BaseAIService
 
@@ -79,8 +79,8 @@ class RecipeImportService(BaseAIService):
     def __init__(self):
         """Initialise le service d'import."""
         try:
-            client = ClientIA()
-        except:
+            client = obtenir_client_ia()
+        except Exception:
             client = None
 
         super().__init__(

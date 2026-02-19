@@ -359,7 +359,13 @@ def obtenir_service_courses() -> ServiceCourses:
     return _service_courses
 
 
+def get_shopping_service() -> ServiceCourses:
+    """Factory for shopping service (English alias)."""
+    return obtenir_service_courses()
+
+
 __all__ = [
     "ServiceCourses",
     "obtenir_service_courses",
+    "get_shopping_service",
 ]

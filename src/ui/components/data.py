@@ -53,10 +53,13 @@ def pagination(
             key=f"{key}_select",
             label_visibility="collapsed",
         )
+        # Synchroniser la sélection du selectbox avec le session_state
+        if page != st.session_state[f"{key}_page"]:
+            st.session_state[f"{key}_page"] = page
 
     with col3:
         if st.button("Suiv ➡️", key=f"{key}_next"):
-            st.session_state[f"{key}_page"] = min(total_pages, page + 1)
+            st.session_state[f"{key}_page"] = min(total_pages, st.session_state[f"{key}_page"] + 1)
             st.rerun()
 
     current_page = st.session_state[f"{key}_page"]

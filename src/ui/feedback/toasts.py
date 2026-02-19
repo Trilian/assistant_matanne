@@ -2,8 +2,6 @@
 UI Feedback - Notifications
 """
 
-from datetime import datetime, timedelta
-
 import streamlit as st
 
 
@@ -11,69 +9,32 @@ class GestionnaireNotifications:
     """
     Gestionnaire de notifications
 
-    Affiche des notifications temporaires
+    Affiche des notifications via les fonctions Streamlit natives.
+    Les notifications persistent jusqu'au prochain rerun de l'application.
 
     Usage:
-        GestionnaireNotifications.afficher("Sauvegarde réussie", "success", duree=3)
-        GestionnaireNotifications.rendre()  # À appeler dans le main
+        GestionnaireNotifications.afficher("Sauvegarde réussie", "success")
+        # Ou via les raccourcis:
+        afficher_succes("Sauvegarde réussie")
     """
 
-    CLE_NOTIFICATIONS = "notifications"
-
     @staticmethod
-    def _init():
-        if GestionnaireNotifications.CLE_NOTIFICATIONS not in st.session_state:
-            st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS] = []
-
-    @staticmethod
-    def afficher(message: str, type: str = "info", duree: int = 3):
+    def afficher(message: str, type_notif: str = "info"):
         """
-        Affiche une notification
+        Affiche une notification immédiate.
 
         Args:
             message: Message
-            type: "success", "error", "warning", "info"
-            duree: Durée en secondes
+            type_notif: "success", "error", "warning", "info"
         """
-        GestionnaireNotifications._init()
-
-        notification = {
-            "message": message,
-            "type": type,
-            "created_at": datetime.now(),
-            "expires_at": datetime.now() + timedelta(seconds=duree),
+        type_map = {
+            "success": st.success,
+            "error": st.error,
+            "warning": st.warning,
+            "info": st.info,
         }
-
-        st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS].append(notification)
-
-    @staticmethod
-    def rendre():
-        """Affiche les notifications actives"""
-        GestionnaireNotifications._init()
-
-        notifications = st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS]
-        maintenant = datetime.now()
-
-        # Filtrer expirées
-        notifications_actives = [n for n in notifications if n["expires_at"] > maintenant]
-
-        st.session_state[GestionnaireNotifications.CLE_NOTIFICATIONS] = notifications_actives
-
-        # Afficher (max 3)
-        if notifications_actives:
-            conteneur = st.container()
-
-            with conteneur:
-                for notification in notifications_actives[-3:]:
-                    type_map = {
-                        "success": st.success,
-                        "error": st.error,
-                        "warning": st.warning,
-                        "info": st.info,
-                    }
-
-                    func_affichage = type_map.get(notification["type"], st.info)
-                    func_affichage(notification["message"])
+        func_affichage = type_map.get(type_notif, st.info)
+        func_affichage(message)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -83,19 +44,19 @@ class GestionnaireNotifications:
 
 def afficher_succes(message: str, duree: int = 3):
     """Raccourci pour notification succès"""
-    GestionnaireNotifications.afficher(message, "success", duree)
+    GestionnaireNotifications.afficher(message, "success")
 
 
 def afficher_erreur(message: str, duree: int = 5):
     """Raccourci pour notification erreur"""
-    GestionnaireNotifications.afficher(message, "error", duree)
+    GestionnaireNotifications.afficher(message, "error")
 
 
 def afficher_avertissement(message: str, duree: int = 4):
     """Raccourci pour notification avertissement"""
-    GestionnaireNotifications.afficher(message, "warning", duree)
+    GestionnaireNotifications.afficher(message, "warning")
 
 
 def afficher_info(message: str, duree: int = 3):
     """Raccourci pour notification info"""
-    GestionnaireNotifications.afficher(message, "info", duree)
+    GestionnaireNotifications.afficher(message, "info")

@@ -9,7 +9,7 @@ Contient :
 """
 
 import enum
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import (
@@ -25,15 +25,10 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from .base import Base, utc_now
 
 if TYPE_CHECKING:
     from .recettes import Recette
-
-
-def utc_now() -> datetime:
-    """Retourne datetime UTC aware."""
-    return datetime.now(UTC)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -49,13 +44,8 @@ class FeedbackType(enum.StrEnum):
     NEUTRAL = "neutral"
 
 
-class CalendarProvider(enum.StrEnum):
-    """Providers de calendriers externes."""
-
-    GOOGLE = "google"
-    APPLE = "apple"
-    OUTLOOK = "outlook"
-    ICAL_URL = "ical_url"
+# CalendarProvider est défini dans calendrier.py (source unique)
+from .calendrier import CalendarProvider  # noqa: F401
 
 
 # ═══════════════════════════════════════════════════════════

@@ -2,22 +2,21 @@
 Module Loto - Simulation et gestion des tirages
 """
 
-from ._common import (
-    CHANCE_MAX,
-    CHANCE_MIN,
-    NUMERO_MAX,
-    NUMERO_MIN,
-    analyser_patterns_tirages,
-    calculer_frequences_numeros,
-    date,
-    etat_vide,
-    go,
-    logger,
-    pd,
-    random,
-    simuler_strategie,
-    st,
-)
+import logging
+import random
+from datetime import date
+
+import pandas as pd
+import plotly.graph_objects as go
+import streamlit as st
+
+from src.ui import etat_vide
+
+from .constants import CHANCE_MAX, CHANCE_MIN, NUMERO_MAX, NUMERO_MIN
+from .frequences import analyser_patterns_tirages, calculer_frequences_numeros
+from .strategies import simuler_strategie
+
+logger = logging.getLogger(__name__)
 from .crud import ajouter_tirage
 from .sync import sync_tirages_loto
 from .utils import charger_tirages
