@@ -22,17 +22,6 @@ from typing import Any
 
 import streamlit as st
 
-# Ré-exports UI — fonctions view rétrocompatibles
-from src.ui.views.authentification import (
-    afficher_formulaire_connexion as afficher_login_form,
-)
-from src.ui.views.authentification import (
-    afficher_menu_utilisateur as afficher_user_menu,
-)
-from src.ui.views.authentification import (
-    afficher_parametres_profil as afficher_profile_settings,
-)
-
 # Ré-exports pour rétrocompatibilité
 from .auth_permissions import ROLE_PERMISSIONS, PermissionsMixin
 from .auth_profile import ProfileMixin
@@ -384,6 +373,32 @@ def obtenir_service_authentification() -> AuthService:
 def get_auth_service() -> AuthService:
     """Factory pour le service d'authentification (alias anglais)."""
     return obtenir_service_authentification()
+
+
+# -----------------------------------------------------------
+# RÉ-EXPORTS UI (lazy pour éviter import circulaire)
+# -----------------------------------------------------------
+
+
+def afficher_login_form(*args, **kwargs):
+    """Ré-export lazy de afficher_formulaire_connexion pour rétrocompatibilité."""
+    from src.ui.views.authentification import afficher_formulaire_connexion
+
+    return afficher_formulaire_connexion(*args, **kwargs)
+
+
+def afficher_user_menu(*args, **kwargs):
+    """Ré-export lazy de afficher_menu_utilisateur pour rétrocompatibilité."""
+    from src.ui.views.authentification import afficher_menu_utilisateur
+
+    return afficher_menu_utilisateur(*args, **kwargs)
+
+
+def afficher_profile_settings(*args, **kwargs):
+    """Ré-export lazy de afficher_parametres_profil pour rétrocompatibilité."""
+    from src.ui.views.authentification import afficher_parametres_profil
+
+    return afficher_parametres_profil(*args, **kwargs)
 
 
 __all__ = [
