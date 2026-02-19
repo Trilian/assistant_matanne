@@ -131,12 +131,6 @@ class ChargeurModuleDiffere:
         ChargeurModuleDiffere._load_times.clear()
         logger.info("🗑️ Cache lazy loader vidé")
 
-    # Alias anglais pour compatibilité
-    load = charger
-    preload = precharger
-    get_stats = obtenir_statistiques
-    clear_cache = vider_cache
-
 
 # ═══════════════════════════════════════════════════════════
 # DECORATOR LAZY LOAD
@@ -250,6 +244,12 @@ class RouteurOptimise:
         # DOMAINE JEUX
         "jeux.paris": {"path": "src.modules.jeux.paris", "type": "simple"},
         "jeux.loto": {"path": "src.modules.jeux.loto", "type": "simple"},
+        # OUTILS ADDITIONNELS
+        "scan_factures": {"path": "src.modules.utilitaires.scan_factures", "type": "simple"},
+        "recherche_produits": {
+            "path": "src.modules.utilitaires.recherche_produits",
+            "type": "simple",
+        },
         # PARAMÈTRES & NOTIFICATIONS
         "parametres": {"path": "src.modules.parametres", "type": "simple"},
         "notifications_push": {
@@ -316,9 +316,6 @@ class RouteurOptimise:
             "src.modules.cuisine",  # [OK] Précharger module unifié
         ]
         ChargeurModuleDiffere.precharger(common, background=True)
-
-    # Alias anglais pour compatibilité avec app.py
-    load_module = charger_module
 
 
 # ═══════════════════════════════════════════════════════════

@@ -8,12 +8,12 @@ import time
 
 import streamlit as st
 
-from src.services.cuisine.recettes import get_recette_service
+from src.services.cuisine.recettes import obtenir_service_recettes
 
 
 def render_liste():
     """Affiche la liste des recettes avec pagination"""
-    service = get_recette_service()
+    service = obtenir_service_recettes()
 
     if service is None:
         st.error("❌ Service recettes indisponible")

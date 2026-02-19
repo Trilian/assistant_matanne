@@ -15,9 +15,7 @@ from src.core.models import (
     VersionRecette,
 )
 from src.services.cuisine.recettes.service import (
-    RecetteService,
     ServiceRecettes,
-    get_recette_service,
     obtenir_service_recettes,
 )
 
@@ -133,10 +131,6 @@ class TestServiceRecettesInit:
         assert service is not None
         assert service.cache_prefix == "recettes"
 
-    def test_alias_recette_service(self):
-        """Test alias RecetteService."""
-        assert RecetteService is ServiceRecettes
-
     def test_obtenir_service_recettes_singleton(self):
         """Test singleton."""
         import src.services.cuisine.recettes.service as module
@@ -148,10 +142,6 @@ class TestServiceRecettesInit:
 
         assert s1 is s2
         assert isinstance(s1, ServiceRecettes)
-
-    def test_get_recette_service_alias(self):
-        """Test alias anglais."""
-        assert get_recette_service is obtenir_service_recettes
 
 
 # ═══════════════════════════════════════════════════════════

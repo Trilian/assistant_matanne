@@ -52,6 +52,8 @@ MODULES_MENU = {
     # Outils & Config
     "🔧 Outils": {
         "📱 Code-barres": "barcode",
+        "🧾 Scan Factures": "scan_factures",
+        "🔍 Produits": "recherche_produits",
         "📊 Rapports": "rapports",
         "🔔 Notifications": "notifications_push",
     },

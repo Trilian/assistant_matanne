@@ -1,104 +1,37 @@
 """
 Jardin - Chargement des données.
 
-Fonctions de récupération du catalogue plantes et données météo.
+⚠️ charger_catalogue_plantes est maintenant un PROXY vers le service.
+obtenir_meteo_jardin reste local (données simulées pour l'UI).
 """
 
-import json
 import logging
 from datetime import datetime
-from pathlib import Path
-
-import streamlit as st
+from functools import lru_cache
 
 logger = logging.getLogger(__name__)
 
 
-# =============================================================================
-# CHARGEMENT DONNÉES
-# =============================================================================
+# ═══════════════════════════════════════════════════════════
+# CHARGEMENT DONNÉES - PROXY VERS SERVICE
+# ═══════════════════════════════════════════════════════════
 
 
-@st.cache_data(ttl=3600)
+@lru_cache(maxsize=1)
+def _get_service():
+    """Retourne une instance singleton du service jardin."""
+    from src.services.maison import get_jardin_service
+
+    return get_jardin_service()
+
+
 def charger_catalogue_plantes() -> dict:
-    """Charge le catalogue des plantes depuis le fichier JSON."""
-    try:
-        catalogue_path = (
-            Path(__file__).parent.parent.parent.parent.parent / "data" / "catalogue_jardin.json"
-        )
-        if catalogue_path.exists():
-            with open(catalogue_path, encoding="utf-8") as f:
-                return json.load(f)
-    except Exception as e:
-        logger.error(f"Erreur chargement catalogue: {e}")
+    """
+    Charge le catalogue des plantes.
 
-    # Catalogue minimal par défaut
-    return {
-        "plantes": {
-            "tomate": {
-                "nom": "Tomate",
-                "emoji": "🍅",
-                "categorie": "légume-fruit",
-                "semis_interieur": [2, 3],
-                "plantation_exterieur": [5, 6],
-                "recolte": [7, 8, 9],
-                "rendement_kg_m2": 4,
-                "besoin_eau": "moyen",
-                "exposition": "soleil",
-                "compagnons_positifs": ["basilic", "carotte", "persil"],
-                "compagnons_negatifs": ["fenouil", "chou"],
-            },
-            "courgette": {
-                "nom": "Courgette",
-                "emoji": "🥒",
-                "categorie": "légume-fruit",
-                "semis_interieur": [3, 4],
-                "plantation_exterieur": [5, 6],
-                "recolte": [6, 7, 8, 9],
-                "rendement_kg_m2": 5,
-                "besoin_eau": "élevé",
-                "exposition": "soleil",
-            },
-            "carotte": {
-                "nom": "Carotte",
-                "emoji": "🥕",
-                "categorie": "légume-racine",
-                "semis_direct": [3, 4, 5, 6],
-                "recolte": [6, 7, 8, 9, 10],
-                "rendement_kg_m2": 3,
-                "besoin_eau": "faible",
-                "exposition": "mi-ombre",
-            },
-            "salade": {
-                "nom": "Salade",
-                "emoji": "🥬",
-                "categorie": "légume-feuille",
-                "semis_direct": [3, 4, 5, 6, 7, 8],
-                "recolte": [4, 5, 6, 7, 8, 9, 10],
-                "rendement_kg_m2": 2,
-                "besoin_eau": "moyen",
-                "exposition": "mi-ombre",
-            },
-            "basilic": {
-                "nom": "Basilic",
-                "emoji": "🌿",
-                "categorie": "aromatique",
-                "semis_interieur": [3, 4],
-                "plantation_exterieur": [5, 6],
-                "recolte": [6, 7, 8, 9],
-                "rendement_kg_m2": 0.5,
-                "besoin_eau": "moyen",
-                "exposition": "soleil",
-            },
-        },
-        "calendrier_lunaire": {},
-        "objectifs_autonomie": {
-            "legumes_fruits_kg": 150,
-            "legumes_feuilles_kg": 50,
-            "legumes_racines_kg": 60,
-            "aromatiques_kg": 5,
-        },
-    }
+    Proxy vers JardinService.charger_catalogue_plantes()
+    """
+    return _get_service().charger_catalogue_plantes()
 
 
 def obtenir_meteo_jardin() -> dict:

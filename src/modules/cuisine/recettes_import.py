@@ -10,7 +10,7 @@ from src.core.db import obtenir_contexte_db
 from src.core.models import EtapeRecette, Ingredient, Recette, RecetteIngredient
 
 # Logique metier pure
-from src.services.cuisine.recettes import get_recette_service
+from src.services.cuisine.recettes import obtenir_service_recettes
 from src.services.cuisine.recettes.importer import RecipeImporter
 
 
@@ -352,7 +352,7 @@ def _save_imported_recipe(
         logger = logging.getLogger(__name__)
         logger.info(f"🔄 Tentative sauvegarde recette: {nom}")
 
-        service = get_recette_service()
+        service = obtenir_service_recettes()
         if not service:
             st.error("❌ Service indisponible")
             logger.error("Service recette indisponible")

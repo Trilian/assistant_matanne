@@ -568,8 +568,8 @@ Format: Liste courte et actionnable."""
 # ═══════════════════════════════════════════════════════════
 
 
-def get_maison_assistant(client: ClientIA | None = None) -> MaisonAssistantIA:
-    """Factory pour obtenir l'assistant maison.
+def obtenir_assistant_maison(client: ClientIA | None = None) -> MaisonAssistantIA:
+    """Factory pour obtenir l'assistant maison (convention française).
 
     Args:
         client: Client IA optionnel
@@ -578,3 +578,8 @@ def get_maison_assistant(client: ClientIA | None = None) -> MaisonAssistantIA:
         Instance de MaisonAssistantIA
     """
     return MaisonAssistantIA(client=client)
+
+
+def get_maison_assistant(client: ClientIA | None = None) -> MaisonAssistantIA:
+    """Factory pour obtenir l'assistant maison (alias anglais)."""
+    return obtenir_assistant_maison(client)

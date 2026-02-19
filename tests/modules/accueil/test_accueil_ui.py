@@ -117,7 +117,7 @@ class TestAccueilUI:
         assert True
 
     @patch("src.modules.accueil.get_inventaire_service")
-    @patch("src.modules.accueil.get_recette_service")
+    @patch("src.modules.accueil.obtenir_service_recettes")
     @patch("src.modules.accueil.get_courses_service")
     @patch("src.modules.accueil.get_planning_service")
     @patch("src.modules.accueil.st")
@@ -142,7 +142,7 @@ class TestAccueilUI:
         render_quick_actions()
         mock_st.columns.assert_called()
 
-    @patch("src.modules.accueil.get_recette_service")
+    @patch("src.modules.accueil.obtenir_service_recettes")
     @patch("src.modules.accueil.get_planning_service")
     @patch("src.modules.accueil.st")
     def test_render_cuisine_summary(self, mock_st, mock_plan, mock_rec) -> None:

@@ -26,7 +26,7 @@ from src.modules.cuisine.courses.utils import (
     valider_article,
 )
 from src.services.cuisine.courses import get_courses_intelligentes_service, get_courses_service
-from src.services.cuisine.recettes import get_recette_service
+from src.services.cuisine.recettes import obtenir_service_recettes
 from src.services.integrations.web import get_realtime_sync_service
 from src.services.inventaire import get_inventaire_service
 
@@ -40,7 +40,7 @@ __all__ = [
     "timedelta",
     "get_courses_service",
     "get_inventaire_service",
-    "get_recette_service",
+    "obtenir_service_recettes",
     "get_realtime_sync_service",
     "get_courses_intelligentes_service",
     "ErreurValidation",

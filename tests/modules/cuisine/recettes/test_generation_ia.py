@@ -84,7 +84,7 @@ class TestImports:
 
 class TestRenderGenererIa:
     @patch("src.modules.cuisine.recettes.generation_ia.st")
-    @patch("src.modules.cuisine.recettes.generation_ia.get_recette_service")
+    @patch("src.modules.cuisine.recettes.generation_ia.obtenir_service_recettes")
     def test_render_generer_ia_service_none(self, mock_get_service, mock_st):
         setup_mock_st(mock_st)
         mock_get_service.return_value = None
@@ -94,7 +94,7 @@ class TestRenderGenererIa:
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
-    @patch("src.modules.cuisine.recettes.generation_ia.get_recette_service")
+    @patch("src.modules.cuisine.recettes.generation_ia.obtenir_service_recettes")
     def test_render_generer_ia_mode_personnalise(self, mock_get_service, mock_st):
         setup_mock_st(mock_st)
         mock_st.radio.return_value = "Personnalise"
@@ -105,7 +105,7 @@ class TestRenderGenererIa:
         mock_st.radio.assert_called()
 
     @patch("src.modules.cuisine.recettes.generation_ia.st")
-    @patch("src.modules.cuisine.recettes.generation_ia.get_recette_service")
+    @patch("src.modules.cuisine.recettes.generation_ia.obtenir_service_recettes")
     def test_render_generer_ia_mode_recherche(self, mock_get_service, mock_st):
         setup_mock_st(mock_st)
         mock_st.radio.return_value = "Recherche specifique"

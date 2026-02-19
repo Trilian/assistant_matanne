@@ -1,0 +1,29 @@
+
+--- STDERR ---
+ImportError while loading conftest 'D:\Projet_streamlit\assistant_matanne\tests\conftest.py'.
+tests\conftest.py:36: in <module>
+    from src.core.models import (  # noqa: E402
+src\core\__init__.py:18: in <module>
+    from .ai import AnalyseurIA, CacheIA, ClientIA, RateLimitIA, obtenir_client_ia
+src\core\ai\__init__.py:7: in <module>
+    from .client import ClientIA, obtenir_client_ia
+src\core\ai\client.py:9: in <module>
+    import httpx
+.venv\Lib\site-packages\httpx\__init__.py:15: in <module>
+    from ._main import main
+.venv\Lib\site-packages\httpx\_main.py:11: in <module>
+    import rich.console
+.venv\Lib\site-packages\rich\console.py:56: in <module>
+    from .scope import render_scope
+.venv\Lib\site-packages\rich\scope.py:5: in <module>
+    from .panel import Panel
+.venv\Lib\site-packages\rich\panel.py:4: in <module>
+    from .box import ROUNDED, Box
+.venv\Lib\site-packages\rich\box.py:222: in <module>
+    SQUARE: Box = Box(
+.venv\Lib\site-packages\rich\box.py:32: in __init__
+    self.top_left, self.top, self.top_divider, self.top_right = iter(line1)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ValueError: too many values to unpack (expected 4)
+
+Return code: 4

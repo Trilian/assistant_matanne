@@ -45,7 +45,7 @@ def indicateur_sante_systeme() -> dict:
         from src.core.caching import obtenir_cache
 
         cache = obtenir_cache()
-        cache_stats = cache.get_stats()
+        cache_stats = cache.obtenir_statistiques()
         hit_rate = float(cache_stats.get("hit_rate", "0%").replace("%", ""))
 
         if hit_rate >= 70:

@@ -176,28 +176,3 @@ def barre_progression(valeur: float, label: str = "", cle: str = "progress"):
         st.markdown(f"**{label}**")
 
     st.progress(valeur, key=cle)
-
-
-def indicateur_statut(statut: str, label: str = ""):
-    """
-    Indicateur de statut (LED)
-
-    Args:
-        statut: "success", "warning", "error", "info"
-        label: Label
-
-    Example:
-        indicateur_statut("success", "Connecté")
-    """
-    couleurs = {"success": "#4CAF50", "warning": "#FFC107", "error": "#f44336", "info": "#2196F3"}
-
-    couleur = couleurs.get(statut, "#gray")
-
-    st.markdown(
-        f'<div style="display: flex; align-items: center; gap: 0.5rem;">'
-        f'<div style="width: 12px; height: 12px; background: {couleur}; '
-        f'border-radius: 50%; box-shadow: 0 0 8px {couleur};"></div>'
-        f"<span>{label}</span>"
-        f"</div>",
-        unsafe_allow_html=True,
-    )

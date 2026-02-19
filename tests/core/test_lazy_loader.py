@@ -95,12 +95,6 @@ class TestChargeurModuleDiffereCharger:
         assert "collections" in stats["load_times"]
         assert stats["load_times"]["collections"] >= 0
 
-    def test_charger_alias_load(self):
-        """Test de l'alias anglais 'load'"""
-        module = ChargeurModuleDiffere.load("re")
-        assert module is not None
-        assert hasattr(module, "match")
-
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 # TESTS CHARGEUR MODULE DIFFERE - METHODE PRECHARGER
@@ -142,11 +136,6 @@ class TestChargeurModuleDifferePrecharger:
         # json doit être chargé
         assert "json" in ChargeurModuleDiffere._cache
 
-    def test_precharger_alias_preload(self):
-        """Test de l'alias anglais 'preload'"""
-        ChargeurModuleDiffere.preload(["functools"], background=False)
-        assert "functools" in ChargeurModuleDiffere._cache
-
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 # TESTS CHARGEUR MODULE DIFFERE - STATISTIQUES
@@ -179,13 +168,6 @@ class TestChargeurModuleDiffereStatistiques:
         assert stats["average_load_time"] >= 0
         assert len(stats["load_times"]) == 2
 
-    def test_alias_get_stats(self):
-        """Test de l'alias anglais 'get_stats'"""
-        ChargeurModuleDiffere.charger("sys")
-        stats = ChargeurModuleDiffere.get_stats()
-
-        assert stats["cached_modules"] >= 1
-
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 # TESTS CHARGEUR MODULE DIFFERE - VIDER CACHE
@@ -205,13 +187,6 @@ class TestChargeurModuleDiffereViderCache:
 
         assert len(ChargeurModuleDiffere._cache) == 0
         assert len(ChargeurModuleDiffere._load_times) == 0
-
-    def test_alias_clear_cache(self):
-        """Test de l'alias anglais 'clear_cache'"""
-        ChargeurModuleDiffere.charger("os")
-        ChargeurModuleDiffere.clear_cache()
-
-        assert len(ChargeurModuleDiffere._cache) == 0
 
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -435,12 +410,12 @@ class TestChargeurModuleDiffereAdvanced:
         assert "average_load_time" in stats
         assert "load_times" in stats
 
-    def test_alias_get_stats(self):
-        """Test de l'alias anglais get_stats."""
+    def test_obtenir_statistiques(self):
+        """Test obtenir_statistiques."""
         ChargeurModuleDiffere.vider_cache()
         ChargeurModuleDiffere.charger("os")
 
-        stats = ChargeurModuleDiffere.get_stats()
+        stats = ChargeurModuleDiffere.obtenir_statistiques()
         assert "cached_modules" in stats
 
 

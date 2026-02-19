@@ -3,85 +3,30 @@ Routes API pour le planning.
 """
 
 from datetime import datetime, timedelta
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, field_validator
 
 from src.api.dependencies import require_auth
-from src.api.schemas import MessageResponse
+from src.api.schemas import (
+    MessageResponse,
+    PlanningSemaineResponse,
+    RepasCreate,
+)
 from src.api.utils import executer_avec_session
 
 router = APIRouter(prefix="/api/v1/planning", tags=["Planning"])
 
 
-# ═══════════════════════════════════════════════════════════
-# SCHÉMAS
-# ═══════════════════════════════════════════════════════════
-
-
-class RepasBase(BaseModel):
-    """Schéma de base pour un repas."""
-
-    type_repas: str
-    date: datetime
-    recette_id: int | None = None
-    notes: str | None = None
-
-    @field_validator("type_repas")
-    @classmethod
-    def validate_type_repas(cls, v: str) -> str:
-        valid_types = [
-            "petit_déjeuner",
-            "petit_dejeuner",
-            "déjeuner",
-            "dejeuner",
-            "dîner",
-            "diner",
-            "goûter",
-            "gouter",
-        ]
-        if v not in valid_types:
-            raise ValueError("Type de repas invalide")
-        return v
-
-
-class RepasCreate(RepasBase):
-    """Schéma pour créer un repas."""
-
-    pass
-
-
-class RepasResponse(RepasBase):
-    """Schéma de réponse pour un repas."""
-
-    id: int
-    created_at: datetime | None = None
-
-    model_config = {"from_attributes": True}
-
-
-class PlanningSemaineResponse(BaseModel):
-    """Réponse du planning hebdomadaire."""
-
-    date_debut: str
-    date_fin: str
-    planning: dict
-
-
-# ═══════════════════════════════════════════════════════════
-# ROUTES
-# ═══════════════════════════════════════════════════════════
-
-
 @router.get("/semaine", response_model=PlanningSemaineResponse)
 async def get_planning_semaine(
     date_debut: datetime | None = None,
-):
+) -> dict[str, Any]:
     """Récupère le planning de la semaine."""
     from src.core.models import Repas
 
     if not date_debut:
-        today = datetime.now().date()
+        today = datetime.now()
         date_debut = today - timedelta(days=today.weekday())
 
     date_fin = date_debut + timedelta(days=7)
@@ -106,16 +51,14 @@ async def get_planning_semaine(
             }
 
         return {
-            "date_debut": date_debut.isoformat()
-            if hasattr(date_debut, "isoformat")
-            else str(date_debut),
-            "date_fin": date_fin.isoformat() if hasattr(date_fin, "isoformat") else str(date_fin),
+            "date_debut": date_debut.isoformat(),
+            "date_fin": date_fin.isoformat(),
             "planning": planning,
         }
 
 
 @router.post("/repas", response_model=MessageResponse)
-async def create_repas(repas: RepasCreate, user: dict = Depends(require_auth)):
+async def create_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require_auth)):
     """Planifie un repas."""
     from src.core.models import Planning, Repas
 
@@ -176,7 +119,9 @@ async def create_repas(repas: RepasCreate, user: dict = Depends(require_auth)):
 
 
 @router.put("/repas/{repas_id}", response_model=MessageResponse)
-async def update_repas(repas_id: int, repas: RepasCreate, user: dict = Depends(require_auth)):
+async def update_repas(
+    repas_id: int, repas: RepasCreate, user: dict[str, Any] = Depends(require_auth)
+):
     """Met à jour un repas planifié."""
     from src.core.models import Repas
 
@@ -198,7 +143,7 @@ async def update_repas(repas_id: int, repas: RepasCreate, user: dict = Depends(r
 
 
 @router.delete("/repas/{repas_id}", response_model=MessageResponse)
-async def delete_repas(repas_id: int, user: dict = Depends(require_auth)):
+async def delete_repas(repas_id: int, user: dict[str, Any] = Depends(require_auth)):
     """Supprime un repas planifié."""
     from src.core.models import Repas
 

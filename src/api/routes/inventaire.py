@@ -3,68 +3,15 @@ Routes API pour l'inventaire.
 """
 
 from datetime import datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, field_validator
 
 from src.api.dependencies import require_auth
-from src.api.schemas import MessageResponse
+from src.api.schemas import InventaireItemCreate, InventaireItemResponse, MessageResponse
 from src.api.utils import executer_avec_session
 
 router = APIRouter(prefix="/api/v1/inventaire", tags=["Inventaire"])
-
-
-# ═══════════════════════════════════════════════════════════
-# SCHÉMAS
-# ═══════════════════════════════════════════════════════════
-
-
-class InventaireItemBase(BaseModel):
-    """Schéma de base pour un article d'inventaire."""
-
-    nom: str
-    quantite: float = 1.0
-    unite: str | None = None
-    categorie: str | None = None
-    date_peremption: datetime | None = None
-
-    @field_validator("nom")
-    @classmethod
-    def validate_nom(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Le nom ne peut pas être vide")
-        return v.strip()
-
-    @field_validator("quantite")
-    @classmethod
-    def validate_quantite(cls, v: float) -> float:
-        if v < 0:
-            raise ValueError("La quantité ne peut pas être négative")
-        if v == 0:
-            raise ValueError("La quantité doit être supérieure à 0")
-        return v
-
-
-class InventaireItemCreate(InventaireItemBase):
-    """Schéma pour créer un article."""
-
-    code_barres: str | None = None
-    emplacement: str | None = None
-
-
-class InventaireItemResponse(InventaireItemBase):
-    """Schéma de réponse pour un article."""
-
-    id: int
-    code_barres: str | None = None
-    created_at: datetime | None = None
-
-    model_config = {"from_attributes": True}
-
-
-# ═══════════════════════════════════════════════════════════
-# ROUTES
-# ═══════════════════════════════════════════════════════════
 
 
 @router.get("")
@@ -75,7 +22,7 @@ async def list_inventaire(
     emplacement: str | None = None,
     stock_bas: bool = False,
     peremption_proche: bool = False,
-):
+) -> dict[str, Any]:
     """Liste les articles d'inventaire avec filtres."""
     from datetime import timedelta
 
@@ -131,7 +78,9 @@ async def list_inventaire(
 
 
 @router.post("", response_model=InventaireItemResponse)
-async def create_inventaire_item(item: InventaireItemCreate, user: dict = Depends(require_auth)):
+async def create_inventaire_item(
+    item: InventaireItemCreate, user: dict[str, Any] = Depends(require_auth)
+):
     """Crée un nouvel article d'inventaire."""
     from src.core.models import ArticleInventaire
 
@@ -184,7 +133,7 @@ async def get_inventaire_item(item_id: int):
 
 @router.put("/{item_id}", response_model=InventaireItemResponse)
 async def update_inventaire_item(
-    item_id: int, item: InventaireItemCreate, user: dict = Depends(require_auth)
+    item_id: int, item: InventaireItemCreate, user: dict[str, Any] = Depends(require_auth)
 ):
     """Met à jour un article d'inventaire."""
     from src.core.models import ArticleInventaire
@@ -210,7 +159,7 @@ async def update_inventaire_item(
 
 
 @router.delete("/{item_id}", response_model=MessageResponse)
-async def delete_inventaire_item(item_id: int, user: dict = Depends(require_auth)):
+async def delete_inventaire_item(item_id: int, user: dict[str, Any] = Depends(require_auth)):
     """Supprime un article d'inventaire."""
     from src.core.models import ArticleInventaire
 

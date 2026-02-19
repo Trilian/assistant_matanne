@@ -7,7 +7,7 @@ import time
 
 import streamlit as st
 
-from src.services.cuisine.recettes import get_recette_service
+from src.services.cuisine.recettes import obtenir_service_recettes
 
 from .generation_image import render_generer_image
 from .utils import formater_quantite
@@ -15,7 +15,7 @@ from .utils import formater_quantite
 
 def render_detail_recette(recette):
     """Affiche les détails d'une recette avec badges, historique et versions"""
-    service = get_recette_service()
+    service = obtenir_service_recettes()
 
     # En-tête
     col1, col2 = st.columns([3, 1])

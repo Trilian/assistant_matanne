@@ -401,7 +401,9 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
     # CRUD HELPERS
     # ─────────────────────────────────────────────────────────
 
-    def get_projets(self, db: Session | None = None, statut: str | None = None) -> list[Project]:
+    def obtenir_projets(
+        self, db: Session | None = None, statut: str | None = None
+    ) -> list[Project]:
         """Récupère les projets.
 
         Args:
@@ -416,6 +418,10 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
                 return self._query_projets(session, statut)
         return self._query_projets(db, statut)
 
+    def get_projets(self, db: Session | None = None, statut: str | None = None) -> list[Project]:
+        """Alias anglais pour obtenir_projets (rétrocompatibilité)."""
+        return self.obtenir_projets(db, statut)
+
     def _query_projets(self, db: Session, statut: str | None = None) -> list[Project]:
         """Query interne pour projets."""
         query = db.query(Project)
@@ -423,7 +429,7 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
             query = query.filter(Project.statut == statut)
         return query.order_by(Project.priorite.desc()).all()
 
-    def get_projets_urgents(self, db: Session | None = None) -> list[Project]:
+    def obtenir_projets_urgents(self, db: Session | None = None) -> list[Project]:
         """Récupère les projets urgents/prioritaires.
 
         Args:
@@ -436,6 +442,10 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
             with obtenir_contexte_db() as session:
                 return self._query_projets_urgents(session)
         return self._query_projets_urgents(db)
+
+    def get_projets_urgents(self, db: Session | None = None) -> list[Project]:
+        """Alias anglais pour obtenir_projets_urgents (rétrocompatibilité)."""
+        return self.obtenir_projets_urgents(db)
 
     def _query_projets_urgents(self, db: Session) -> list[Project]:
         """Query interne pour projets urgents."""

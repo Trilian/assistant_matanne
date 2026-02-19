@@ -9,7 +9,6 @@ import pytest
         # Components
         "src.ui.components.alertes",
         "src.ui.components.atoms",
-        "src.ui.components.camera_scanner",
         "src.ui.components.charts",
         "src.ui.components.data",
         "src.ui.components.dynamic",
@@ -17,11 +16,6 @@ import pytest
         "src.ui.components.layouts",
         "src.ui.components.metrics",
         "src.ui.components.system",
-        # Core
-        "src.ui.core.base_form",
-        "src.ui.core.base_io",
-        "src.ui.core.crud_renderer",
-        "src.ui.core.module_config",
         # Feedback
         "src.ui.feedback.progress",
         "src.ui.feedback.spinners",

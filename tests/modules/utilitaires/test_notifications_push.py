@@ -9,9 +9,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-# ═══════════════════════════════════════════════════════════
+# â•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Â
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Â
 
 
 @pytest.fixture
@@ -33,7 +33,7 @@ def mock_st():
 
 @pytest.fixture
 def mock_config():
-    """Configuration de notification mockée."""
+    """Configuration de notification mockÃƒÂ©e."""
     config = MagicMock()
     config.topic = "test-topic"
     config.actif = True
@@ -45,15 +45,17 @@ def mock_config():
 
 @pytest.fixture
 def mock_service():
-    """Service de notification mocké."""
+    """Service de notification mockÃƒÂ©."""
     service = MagicMock()
     service.get_subscribe_qr_url.return_value = "https://qr.example.com/test"
     service.get_web_url.return_value = "https://ntfy.sh/test-topic"
     service.test_connexion_sync.return_value = MagicMock(
-        succes=True, message="Test réussi", notification_id="123"
+        succes=True, message="Test rÃƒÂ©ussi", notification_id="123"
     )
-    service.envoyer_sync.return_value = MagicMock(succes=True, message="Envoyé")
-    service.envoyer_digest_quotidien.return_value = MagicMock(succes=True, message="Digest envoyé")
+    service.envoyer_sync.return_value = MagicMock(succes=True, message="EnvoyÃƒÂ©")
+    service.envoyer_digest_quotidien.return_value = MagicMock(
+        succes=True, message="Digest envoyÃƒÂ©"
+    )
     service.obtenir_taches_en_retard.return_value = []
     service.obtenir_taches_du_jour.return_value = []
     return service
@@ -61,19 +63,19 @@ def mock_service():
 
 @pytest.fixture
 def mock_tache_retard():
-    """Tâche en retard mockée."""
+    """TÃƒÂ¢che en retard mockÃƒÂ©e."""
     tache = MagicMock()
     tache.id = 1
-    tache.titre = "Tâche test"
-    tache.nom = "Tâche test"
+    tache.titre = "TÃƒÂ¢che test"
+    tache.nom = "TÃƒÂ¢che test"
     tache.date_echeance = date.today() - timedelta(days=5)
     tache.prochaine_fois = date.today() - timedelta(days=5)
     return tache
 
 
-# ═══════════════════════════════════════════════════════════
+# â•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Â
 # TESTS - IMPORTS
-# ═══════════════════════════════════════════════════════════
+# â•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Â
 
 
 class TestImports:
@@ -124,16 +126,16 @@ class TestImports:
         assert callable(render_aide)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Â
 # TESTS - HELPERS
-# ═══════════════════════════════════════════════════════════
+# â•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Â
 
 
 class TestHelpers:
     """Tests des fonctions helper."""
 
     def test_charger_config_cree_config_defaut(self, mock_st):
-        """Test que charger_config crée une config par défaut si absente."""
+        """Test que charger_config crÃƒÂ©e une config par dÃƒÂ©faut si absente."""
         from src.modules.utilitaires.notifications_push import charger_config
 
         config = charger_config()
@@ -160,9 +162,9 @@ class TestHelpers:
         assert mock_st.session_state["notif_config"] == mock_config
 
 
-# ═══════════════════════════════════════════════════════════
+# â•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Â
 # TESTS - RENDER FUNCTIONS
-# ═══════════════════════════════════════════════════════════
+# â•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Â
 
 
 class TestRenderConfiguration:
@@ -254,7 +256,7 @@ class TestRenderTest:
 
         mock_charger_config.return_value = mock_config
         mock_get_service.return_value = mock_service
-        mock_st.toggle.return_value = False  # Mode réel (pas démo)
+        mock_st.toggle.return_value = False  # Mode rÃƒÂ©el (pas dÃƒÂ©mo)
         mock_st.button.return_value = False
         mock_st.form_submit_button.return_value = False
 
@@ -273,8 +275,8 @@ class TestRenderTest:
 
         mock_charger_config.return_value = mock_config
         mock_get_service.return_value = mock_service
-        mock_st.toggle.return_value = False  # Mode réel (pas démo)
-        mock_st.button.side_effect = [True, False]  # Premier bouton cliqué
+        mock_st.toggle.return_value = False  # Mode rÃƒÂ©el (pas dÃƒÂ©mo)
+        mock_st.button.side_effect = [True, False]  # Premier bouton cliquÃƒÂ©
         mock_st.form_submit_button.return_value = False
 
         render_test()
@@ -287,7 +289,7 @@ class TestRenderTest:
     def test_render_test_affiche_erreur(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
     ):
-        """Test l'affichage d'erreur si test échoue."""
+        """Test l'affichage d'erreur si test ÃƒÂ©choue."""
         from src.modules.utilitaires.notifications_push import render_test
 
         mock_charger_config.return_value = mock_config
@@ -295,7 +297,7 @@ class TestRenderTest:
             succes=False, message="Erreur connexion"
         )
         mock_get_service.return_value = mock_service
-        mock_st.toggle.return_value = False  # Mode réel (pas démo)
+        mock_st.toggle.return_value = False  # Mode rÃƒÂ©el (pas dÃƒÂ©mo)
         mock_st.button.side_effect = [True, False]
         mock_st.form_submit_button.return_value = False
 
@@ -308,21 +310,21 @@ class TestRenderTest:
     def test_render_test_mode_demo(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
     ):
-        """Test le mode démo est disponible via toggle."""
+        """Test le mode dÃƒÂ©mo est disponible via toggle."""
         from src.modules.utilitaires.notifications_push import render_test
 
         mock_charger_config.return_value = mock_config
         mock_get_service.return_value = mock_service
-        mock_st.toggle.return_value = False  # Mode réel par défaut
+        mock_st.toggle.return_value = False  # Mode rÃƒÂ©el par dÃƒÂ©faut
         mock_st.button.return_value = False
         mock_st.form_submit_button.return_value = False
 
         render_test()
 
-        # Vérifier que le toggle mode démo est affiché
+        # VÃƒÂ©rifier que le toggle mode dÃƒÂ©mo est affichÃƒÂ©
         mock_st.toggle.assert_called_once()
         call_args = mock_st.toggle.call_args
-        assert "démo" in call_args[0][0].lower() or "demo" in str(call_args).lower()
+        assert "dÃƒÂ©mo" in call_args[0][0].lower() or "demo" in str(call_args).lower()
 
 
 class TestRenderTachesRetard:
@@ -333,7 +335,7 @@ class TestRenderTachesRetard:
     def test_render_taches_retard_sans_taches(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
     ):
-        """Test l'affichage sans tâches en retard."""
+        """Test l'affichage sans tÃƒÂ¢ches en retard."""
         from src.modules.utilitaires.notifications_push import render_taches_retard
 
         mock_charger_config.return_value = mock_config
@@ -343,7 +345,7 @@ class TestRenderTachesRetard:
 
         render_taches_retard()
 
-        mock_st.success.assert_called()  # "Aucune tâche en retard"
+        mock_st.success.assert_called()  # "Aucune tÃƒÂ¢che en retard"
 
     @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
@@ -356,7 +358,7 @@ class TestRenderTachesRetard:
         mock_service,
         mock_tache_retard,
     ):
-        """Test l'affichage avec tâches en retard."""
+        """Test l'affichage avec tÃƒÂ¢ches en retard."""
         from src.modules.utilitaires.notifications_push import render_taches_retard
 
         mock_charger_config.return_value = mock_config
@@ -375,7 +377,7 @@ class TestRenderTachesRetard:
     def test_render_taches_retard_affiche_metriques(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
     ):
-        """Test l'affichage des métriques."""
+        """Test l'affichage des mÃƒÂ©triques."""
         from src.modules.utilitaires.notifications_push import render_taches_retard
 
         mock_charger_config.return_value = mock_config
@@ -399,13 +401,13 @@ class TestRenderAide:
         mock_st.markdown.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS - POINT D'ENTRÉE APP
-# ═══════════════════════════════════════════════════════════
+# â•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Â
+# TESTS - POINT D'ENTRÃƒâ€°E APP
+# â•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Â
 
 
 class TestApp:
-    """Tests de la fonction app() point d'entrée."""
+    """Tests de la fonction app() point d'entrÃƒÂ©e."""
 
     @patch("src.modules.utilitaires.notifications_push.render_aide")
     @patch("src.modules.utilitaires.notifications_push.render_test")
@@ -426,7 +428,7 @@ class TestApp:
 
         app()
 
-        mock_st.title.assert_called_once_with("🔔 Notifications Push")
+        mock_st.title.assert_called_once_with("Ã°Å¸❌❌ Notifications Push")
         mock_st.caption.assert_called()
 
     @patch("src.modules.utilitaires.notifications_push.render_aide")
@@ -443,13 +445,13 @@ class TestApp:
         mock_render_aide,
         mock_st,
     ):
-        """Test que app() crée les onglets."""
+        """Test que app() crÃƒÂ©e les onglets."""
         from src.modules.utilitaires.notifications_push import app
 
         app()
 
         mock_st.tabs.assert_called_once()
-        # Vérifie que 5 onglets sont créés
+        # VÃƒÂ©rifie que 5 onglets sont crÃƒÂ©ÃƒÂ©s
         args = mock_st.tabs.call_args[0][0]
         assert len(args) == 5
 
@@ -485,19 +487,19 @@ class TestApp:
         assert callable(app)
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS - INTÉGRATION
-# ═══════════════════════════════════════════════════════════
+# â•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Â
+# TESTS - INTÃƒâ€°GRATION
+# â•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Ââ•Â
 
 
 class TestIntegration:
-    """Tests d'intégration."""
+    """Tests d'intÃƒÂ©gration."""
 
     @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     def test_workflow_configuration_to_test(
         self, mock_get_service, mock_st, mock_config, mock_service
     ):
-        """Test le workflow configuration → test."""
+        """Test le workflow configuration â⚠’ test."""
         from src.modules.utilitaires.notifications_push import (
             charger_config,
             sauvegarder_config,
@@ -506,7 +508,7 @@ class TestIntegration:
         # Sauvegarder une config
         sauvegarder_config(mock_config)
 
-        # Recharger et vérifier
+        # Recharger et vÃƒÂ©rifier
         config = charger_config()
         assert config == mock_config
 
@@ -516,5 +518,5 @@ class TestIntegration:
         from src.modules.utilitaires.notifications_push import HELP_NTFY
 
         assert "ntfy.sh" in HELP_NTFY
-        assert "Android" in HELP_NTFY or "téléphone" in HELP_NTFY
+        assert "Android" in HELP_NTFY or "tÃƒÂ©lÃƒÂ©phone" in HELP_NTFY
         assert "Gratuit" in HELP_NTFY or "gratuit" in HELP_NTFY

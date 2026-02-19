@@ -11,9 +11,7 @@ from .atoms import badge, boite_info, carte_metrique, etat_vide, notification, s
 
 # Charts (graphiques Plotly)
 from .charts import (
-    graphique_activite_semaine,
     graphique_inventaire_categories,
-    graphique_progression_objectifs,
     graphique_repartition_repas,
 )
 
@@ -21,14 +19,13 @@ from .charts import (
 from .data import (
     barre_progression,
     boutons_export,
-    indicateur_statut,
     ligne_metriques,
     pagination,
     tableau_donnees,
 )
 
 # Dynamic
-from .dynamic import AssistantEtapes, ListeDynamique, Modale
+from .dynamic import Modale
 
 # Forms
 from .forms import barre_recherche, champ_formulaire, filtres_rapides, panneau_filtres
@@ -36,10 +33,7 @@ from .forms import barre_recherche, champ_formulaire, filtres_rapides, panneau_f
 # Layouts
 from .layouts import (
     carte_item,
-    conteneur_carte,
     disposition_grille,
-    disposition_onglets,
-    section_pliable,
 )
 
 # Metrics (cartes métriques avancées)
@@ -61,8 +55,6 @@ __all__ = [
     # Charts
     "graphique_repartition_repas",
     "graphique_inventaire_categories",
-    "graphique_activite_semaine",
-    "graphique_progression_objectifs",
     # Forms
     "champ_formulaire",
     "barre_recherche",
@@ -74,17 +66,11 @@ __all__ = [
     "boutons_export",
     "tableau_donnees",
     "barre_progression",
-    "indicateur_statut",
     # Layouts
     "disposition_grille",
     "carte_item",
-    "section_pliable",
-    "disposition_onglets",
-    "conteneur_carte",
     # Dynamic
     "Modale",
-    "ListeDynamique",
-    "AssistantEtapes",
     # Metrics
     "carte_metrique_avancee",
     "widget_jules_apercu",

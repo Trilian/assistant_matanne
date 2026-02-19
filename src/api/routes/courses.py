@@ -2,92 +2,20 @@
 Routes API pour les courses.
 """
 
-from datetime import datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field, field_validator
 
 from src.api.dependencies import require_auth
-from src.api.schemas import MessageResponse
+from src.api.schemas import (
+    CourseItemBase,
+    CourseListCreate,
+    ListeCoursesResponse,
+    MessageResponse,
+)
 from src.api.utils import executer_avec_session
 
 router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
-
-
-# ═══════════════════════════════════════════════════════════
-# SCHÉMAS
-# ═══════════════════════════════════════════════════════════
-
-
-class CourseItemBase(BaseModel):
-    """Schéma pour un article de liste de courses."""
-
-    nom: str
-    quantite: float = 1.0
-    unite: str | None = None
-    categorie: str | None = None
-    coche: bool = False
-
-    @field_validator("nom")
-    @classmethod
-    def validate_nom(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Le nom ne peut pas être vide")
-        return v.strip()
-
-    @field_validator("quantite")
-    @classmethod
-    def validate_quantite(cls, v: float) -> float:
-        if v < 0:
-            raise ValueError("La quantité ne peut pas être négative")
-        return v
-
-
-class CourseListCreate(BaseModel):
-    """Schéma pour créer une liste de courses."""
-
-    nom: str = Field("Liste de courses", min_length=1)
-
-    @field_validator("nom")
-    @classmethod
-    def validate_nom(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Le nom ne peut pas être vide")
-        return v.strip()
-
-
-class ListeCoursesResume(BaseModel):
-    """Résumé d'une liste de courses (pour la liste paginée)."""
-
-    id: int
-    nom: str
-    items_count: int = 0
-    created_at: datetime | None = None
-
-
-class ArticleResponse(BaseModel):
-    """Réponse pour un article de liste."""
-
-    id: int
-    nom: str
-    quantite: float
-    coche: bool = False
-    categorie: str | None = None
-
-
-class ListeCoursesResponse(BaseModel):
-    """Réponse complète pour une liste de courses."""
-
-    id: int
-    nom: str
-    archivee: bool = False
-    created_at: datetime | None = None
-    items: list[ArticleResponse] = Field(default_factory=list)
-
-
-# ═══════════════════════════════════════════════════════════
-# ROUTES
-# ═══════════════════════════════════════════════════════════
 
 
 @router.get("")
@@ -95,7 +23,7 @@ async def list_courses(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     active_only: bool = True,
-) -> dict:
+) -> dict[str, Any]:
     """Liste les listes de courses."""
     from src.core.models import ListeCourses
 
@@ -131,7 +59,7 @@ async def list_courses(
 
 
 @router.post("", response_model=MessageResponse, status_code=201)
-async def create_liste(data: CourseListCreate, user: dict = Depends(require_auth)):
+async def create_liste(data: CourseListCreate, user: dict[str, Any] = Depends(require_auth)):
     """Crée une nouvelle liste de courses."""
     from src.core.models import ListeCourses
 
@@ -145,7 +73,9 @@ async def create_liste(data: CourseListCreate, user: dict = Depends(require_auth
 
 
 @router.post("/{liste_id}/items", response_model=MessageResponse, status_code=201)
-async def add_item(liste_id: int, item: CourseItemBase, user: dict = Depends(require_auth)):
+async def add_item(
+    liste_id: int, item: CourseItemBase, user: dict[str, Any] = Depends(require_auth)
+):
     """Ajoute un article à une liste."""
     from src.core.models import ArticleCourses, Ingredient, ListeCourses
 
@@ -205,7 +135,9 @@ async def get_liste(liste_id: int):
 
 
 @router.put("/{liste_id}", response_model=MessageResponse)
-async def update_liste(liste_id: int, data: CourseListCreate, user: dict = Depends(require_auth)):
+async def update_liste(
+    liste_id: int, data: CourseListCreate, user: dict[str, Any] = Depends(require_auth)
+):
     """Met à jour une liste de courses."""
     from src.core.models import ListeCourses
 
@@ -224,7 +156,7 @@ async def update_liste(liste_id: int, data: CourseListCreate, user: dict = Depen
 
 @router.put("/{liste_id}/items/{item_id}", response_model=MessageResponse)
 async def update_item(
-    liste_id: int, item_id: int, item: CourseItemBase, user: dict = Depends(require_auth)
+    liste_id: int, item_id: int, item: CourseItemBase, user: dict[str, Any] = Depends(require_auth)
 ):
     """Met à jour un article d'une liste."""
     from src.core.models import ArticleCourses
@@ -249,7 +181,7 @@ async def update_item(
 
 
 @router.delete("/{liste_id}", response_model=MessageResponse)
-async def delete_liste(liste_id: int, user: dict = Depends(require_auth)):
+async def delete_liste(liste_id: int, user: dict[str, Any] = Depends(require_auth)):
     """Supprime une liste de courses."""
     from src.core.models import ListeCourses
 
@@ -266,7 +198,7 @@ async def delete_liste(liste_id: int, user: dict = Depends(require_auth)):
 
 
 @router.delete("/{liste_id}/items/{item_id}", response_model=MessageResponse)
-async def delete_item(liste_id: int, item_id: int, user: dict = Depends(require_auth)):
+async def delete_item(liste_id: int, item_id: int, user: dict[str, Any] = Depends(require_auth)):
     """Supprime un article d'une liste."""
     from src.core.models import ArticleCourses
 

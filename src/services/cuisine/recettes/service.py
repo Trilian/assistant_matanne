@@ -513,13 +513,6 @@ class ServiceRecettes(
 
 
 # ═══════════════════════════════════════════════════════════
-# ALIASES (compatibilité avec l'ancien code)
-# ═══════════════════════════════════════════════════════════
-
-RecetteService = ServiceRecettes
-
-
-# ═══════════════════════════════════════════════════════════
 # INSTANCE SINGLETON - LAZY LOADING
 # ═══════════════════════════════════════════════════════════
 
@@ -534,17 +527,7 @@ def obtenir_service_recettes() -> ServiceRecettes:
     return _service_recettes
 
 
-# Alias anglais pour compatibilité
-get_recette_service = obtenir_service_recettes
-recette_service = None
-
-
 __all__ = [
-    # Service principal
     "ServiceRecettes",
     "obtenir_service_recettes",
-    # Aliases pour compatibilité
-    "RecetteService",
-    "get_recette_service",
-    "recette_service",
 ]

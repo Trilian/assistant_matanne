@@ -222,20 +222,10 @@ def require_role(role: Role):
     return decorator
 
 
-# Alias rétrocompatibilité
-render_login_form = afficher_formulaire_connexion
-render_user_menu = afficher_menu_utilisateur
-render_profile_settings = afficher_parametres_profil
-
-
 __all__ = [
     "afficher_formulaire_connexion",
     "afficher_menu_utilisateur",
     "afficher_parametres_profil",
     "require_authenticated",
     "require_role",
-    # Alias rétrocompatibilité
-    "render_login_form",
-    "render_user_menu",
-    "render_profile_settings",
 ]

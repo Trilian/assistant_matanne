@@ -8,7 +8,7 @@ Importez directement depuis les sous-packages:
     from src.services.core.base import BaseService, BaseAIService
 
     # Recettes
-    from src.services.cuisine.recettes import RecetteService, obtenir_service_recettes
+    from src.services.cuisine.recettes import ServiceRecettes, obtenir_service_recettes
 
     # Inventaire
     from src.services.inventaire import InventaireService

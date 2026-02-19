@@ -2,63 +2,15 @@
 Routes API pour les recettes.
 """
 
-from datetime import datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field, field_validator
 
 from src.api.dependencies import require_auth
-from src.api.schemas import MessageResponse
+from src.api.schemas import MessageResponse, RecetteCreate, RecetteResponse
 from src.api.utils import construire_reponse_paginee, executer_avec_session
 
 router = APIRouter(prefix="/api/v1/recettes", tags=["Recettes"])
-
-
-# ═══════════════════════════════════════════════════════════
-# SCHÉMAS
-# ═══════════════════════════════════════════════════════════
-
-
-class RecetteBase(BaseModel):
-    """Schéma de base pour une recette."""
-
-    nom: str
-    description: str | None = None
-    temps_preparation: int = Field(15, description="Minutes", ge=0)
-    temps_cuisson: int = Field(0, description="Minutes", ge=0)
-    portions: int = Field(4, ge=1)
-    difficulte: str = "moyen"
-    categorie: str | None = None
-
-    @field_validator("nom")
-    @classmethod
-    def validate_nom(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Le nom ne peut pas être vide")
-        return v.strip()
-
-
-class RecetteCreate(RecetteBase):
-    """Schéma pour créer une recette."""
-
-    ingredients: list[dict] = Field(default_factory=list)
-    instructions: list[str] = Field(default_factory=list)
-    tags: list[str] = Field(default_factory=list)
-
-
-class RecetteResponse(RecetteBase):
-    """Schéma de réponse pour une recette."""
-
-    id: int
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
-
-    model_config = {"from_attributes": True}
-
-
-# ═══════════════════════════════════════════════════════════
-# ROUTES
-# ═══════════════════════════════════════════════════════════
 
 
 @router.get("")
@@ -67,7 +19,7 @@ async def list_recettes(
     page_size: int = Query(20, ge=1, le=100),
     categorie: str | None = None,
     search: str | None = None,
-):
+) -> dict[str, Any]:
     """Liste les recettes avec pagination et filtres."""
     from src.core.models import Recette
 
@@ -101,7 +53,7 @@ async def get_recette(recette_id: int):
 
 
 @router.post("", response_model=RecetteResponse)
-async def create_recette(recette: RecetteCreate, user: dict = Depends(require_auth)):
+async def create_recette(recette: RecetteCreate, user: dict[str, Any] = Depends(require_auth)):
     """Crée une nouvelle recette."""
     from src.core.models import Recette
 
@@ -124,7 +76,7 @@ async def create_recette(recette: RecetteCreate, user: dict = Depends(require_au
 
 @router.put("/{recette_id}", response_model=RecetteResponse)
 async def update_recette(
-    recette_id: int, recette: RecetteCreate, user: dict = Depends(require_auth)
+    recette_id: int, recette: RecetteCreate, user: dict[str, Any] = Depends(require_auth)
 ):
     """Met à jour une recette."""
     from src.core.models import Recette
@@ -146,7 +98,7 @@ async def update_recette(
 
 
 @router.delete("/{recette_id}", response_model=MessageResponse)
-async def delete_recette(recette_id: int, user: dict = Depends(require_auth)):
+async def delete_recette(recette_id: int, user: dict[str, Any] = Depends(require_auth)):
     """Supprime une recette."""
     from src.core.models import Recette
 

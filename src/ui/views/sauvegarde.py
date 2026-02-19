@@ -99,11 +99,6 @@ def afficher_sauvegarde():
             temp_path.unlink(missing_ok=True)
 
 
-# Alias rétrocompatibilité
-render_backup_ui = afficher_sauvegarde
-
-
 __all__ = [
     "afficher_sauvegarde",
-    "render_backup_ui",
 ]

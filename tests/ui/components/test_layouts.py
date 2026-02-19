@@ -1,6 +1,9 @@
 """
 Tests complets pour src/ui/components/layouts.py
 Couverture cible: >80%
+
+Note: Tests pour section_pliable, disposition_onglets, conteneur_carte supprimés
+      (composants retirés lors du nettoyage UI)
 """
 
 from unittest.mock import MagicMock, patch
@@ -119,121 +122,6 @@ class TestCarteItem:
 
 
 # ═══════════════════════════════════════════════════════════
-# SECTION_PLIABLE (collapsible_section)
-# ═══════════════════════════════════════════════════════════
-
-
-class TestSectionPliable:
-    """Tests pour section_pliable()."""
-
-    def test_section_pliable_import(self):
-        """Test import réussi."""
-        from src.ui.components.layouts import section_pliable
-
-        assert callable(section_pliable)
-
-    @patch("streamlit.expander")
-    def test_section_pliable_basic(self, mock_expander):
-        """Test section pliable basique."""
-        from src.ui.components.layouts import section_pliable
-
-        mock_expander.return_value.__enter__ = MagicMock()
-        mock_expander.return_value.__exit__ = MagicMock()
-
-        content_fn = MagicMock()
-
-        section_pliable("Titre", content_fn)
-
-        mock_expander.assert_called_once()
-        content_fn.assert_called_once()
-
-    @patch("streamlit.expander")
-    def test_section_pliable_expanded(self, mock_expander):
-        """Test section pliable ouverte."""
-        from src.ui.components.layouts import section_pliable
-
-        mock_expander.return_value.__enter__ = MagicMock()
-        mock_expander.return_value.__exit__ = MagicMock()
-
-        section_pliable("Titre", lambda: None, etendu=True)
-
-        mock_expander.assert_called_with("Titre", expanded=True)
-
-
-# ═══════════════════════════════════════════════════════════
-# DISPOSITION_ONGLETS (tabs_layout)
-# ═══════════════════════════════════════════════════════════
-
-
-class TestDispositionOnglets:
-    """Tests pour disposition_onglets()."""
-
-    def test_disposition_onglets_import(self):
-        """Test import réussi."""
-        from src.ui.components.layouts import disposition_onglets
-
-        assert callable(disposition_onglets)
-
-    @patch("streamlit.tabs")
-    def test_disposition_onglets_basic(self, mock_tabs):
-        """Test onglets basiques."""
-        from src.ui.components.layouts import disposition_onglets
-
-        tab1, tab2 = MagicMock(), MagicMock()
-        tab1.__enter__ = MagicMock()
-        tab1.__exit__ = MagicMock()
-        tab2.__enter__ = MagicMock()
-        tab2.__exit__ = MagicMock()
-        mock_tabs.return_value = [tab1, tab2]
-
-        content1, content2 = MagicMock(), MagicMock()
-
-        disposition_onglets({"Tab1": content1, "Tab2": content2})
-
-        mock_tabs.assert_called_with(["Tab1", "Tab2"])
-        content1.assert_called_once()
-        content2.assert_called_once()
-
-
-# ═══════════════════════════════════════════════════════════
-# CONTENEUR_CARTE (card_container)
-# ═══════════════════════════════════════════════════════════
-
-
-class TestConteneurCarte:
-    """Tests pour conteneur_carte()."""
-
-    def test_conteneur_carte_import(self):
-        """Test import réussi."""
-        from src.ui.components.layouts import conteneur_carte
-
-        assert callable(conteneur_carte)
-
-    @patch("streamlit.markdown")
-    def test_conteneur_carte_basic(self, mock_markdown):
-        """Test conteneur basique."""
-        from src.ui.components.layouts import conteneur_carte
-
-        content_fn = MagicMock()
-
-        conteneur_carte(content_fn)
-
-        assert mock_markdown.call_count == 2  # Début et fin div
-        content_fn.assert_called_once()
-
-    @patch("streamlit.markdown")
-    def test_conteneur_carte_custom_color(self, mock_markdown):
-        """Test conteneur avec couleur personnalisée."""
-        from src.ui.components.layouts import conteneur_carte
-
-        conteneur_carte(lambda: None, couleur="#f0f0f0")
-
-        # Vérifie que la couleur est utilisée
-        call_args = mock_markdown.call_args_list[0][0][0]
-        assert "#f0f0f0" in call_args
-
-
-# ═══════════════════════════════════════════════════════════
 # TESTS D'INTÉGRATION
 # ═══════════════════════════════════════════════════════════
 
@@ -241,44 +129,29 @@ class TestConteneurCarte:
 class TestLayoutsIntegration:
     """Tests d'intégration pour le module layouts."""
 
-    def test_all_functions_exported(self):
-        """Test que toutes les fonctions sont exportées."""
+    def test_functions_exported(self):
+        """Test que les fonctions conservées sont exportées."""
         from src.ui.components import layouts
 
         assert hasattr(layouts, "disposition_grille")
         assert hasattr(layouts, "carte_item")
-        assert hasattr(layouts, "section_pliable")
-        assert hasattr(layouts, "disposition_onglets")
-        assert hasattr(layouts, "conteneur_carte")
 
     def test_imports_from_components(self):
         """Test imports depuis components."""
         from src.ui.components import (
             carte_item,
-            conteneur_carte,
             disposition_grille,
-            disposition_onglets,
-            section_pliable,
         )
 
-        assert callable(disposition_grille)
-        assert callable(carte_item)
-        assert callable(section_pliable)
-        assert callable(disposition_onglets)
-        assert callable(conteneur_carte)
+        assert disposition_grille is not None
+        assert carte_item is not None
 
     def test_imports_from_ui(self):
         """Test imports depuis ui."""
         from src.ui import (
             carte_item,
-            conteneur_carte,
             disposition_grille,
-            disposition_onglets,
-            section_pliable,
         )
 
-        assert callable(disposition_grille)
-        assert callable(carte_item)
-        assert callable(section_pliable)
-        assert callable(disposition_onglets)
-        assert callable(conteneur_carte)
+        assert disposition_grille is not None
+        assert carte_item is not None

@@ -184,7 +184,7 @@ class TestL1MemoryCache:
         l1_cache.get("key1")
         l1_cache.get("key1")
 
-        stats = l1_cache.get_stats()
+        stats = l1_cache.obtenir_statistiques()
 
         assert stats["entries"] == 1
         assert stats["max_entries"] == 10
@@ -379,8 +379,8 @@ class TestMultiLevelCache:
         assert multi_cache.get("tagged:2") is None
         assert multi_cache.get("other:1") == "v3"
 
-    def test_get_or_compute(self, multi_cache):
-        """Test get_or_compute (lazy loading)."""
+    def test_obtenir_ou_calculer(self, multi_cache):
+        """Test obtenir_ou_calculer (lazy loading)."""
         call_count = 0
 
         def loader():
@@ -389,12 +389,12 @@ class TestMultiLevelCache:
             return {"loaded": True}
 
         # Premier appel → exécute loader
-        result1 = multi_cache.get_or_compute("lazy_key", loader, ttl=60)
+        result1 = multi_cache.obtenir_ou_calculer("lazy_key", loader, ttl=60)
         assert result1["loaded"] is True
         assert call_count == 1
 
         # Deuxième appel → utilise cache
-        result2 = multi_cache.get_or_compute("lazy_key", loader, ttl=60)
+        result2 = multi_cache.obtenir_ou_calculer("lazy_key", loader, ttl=60)
         assert result2["loaded"] is True
         assert call_count == 1  # Pas de nouvel appel
 
@@ -404,7 +404,7 @@ class TestMultiLevelCache:
         multi_cache.get("key1")  # Hit L1
         multi_cache.get("nonexistent")  # Miss
 
-        stats = multi_cache.get_stats()
+        stats = multi_cache.obtenir_statistiques()
 
         assert "l1" in stats or "hits" in str(stats)
 
@@ -714,13 +714,6 @@ class TestEntreeCacheAdvanced:
         age = entry.age_seconds
         assert age >= 10
 
-    def test_entree_cache_is_expired_alias(self):
-        """Test alias anglais is_expired."""
-        from src.core.caching import EntreeCache
-
-        entry = EntreeCache(value="test", ttl=3600)
-        assert entry.is_expired == entry.est_expire
-
 
 class TestStatistiquesCacheAdvanced:
     """Tests avancés pour StatistiquesCache."""
@@ -810,12 +803,14 @@ class TestCacheMultiNiveauAdvanced:
 
         assert multi_cache.l1.size == 0
 
-    def test_get_or_compute_with_tags(self, multi_cache):
-        """Test get_or_compute avec tags."""
+    def test_obtenir_ou_calculer_with_tags(self, multi_cache):
+        """Test obtenir_ou_calculer avec tags."""
 
         def loader():
             return {"computed": True}
 
-        result = multi_cache.get_or_compute("computed_key", loader, ttl=60, tags=["test_group"])
+        result = multi_cache.obtenir_ou_calculer(
+            "computed_key", loader, ttl=60, tags=["test_group"]
+        )
 
         assert result["computed"] is True

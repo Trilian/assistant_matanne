@@ -8,7 +8,7 @@ import time
 import streamlit as st
 
 from src.core.errors_base import ErreurValidation
-from src.services.cuisine.recettes import get_recette_service
+from src.services.cuisine.recettes import obtenir_service_recettes
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +124,7 @@ def render_ajouter_manuel():
             st.error("❌ Ajoutez au moins une étape")
         else:
             # Créer la recette
-            service = get_recette_service()
+            service = obtenir_service_recettes()
             if service is None:
                 st.error("❌ Service indisponible")
             else:

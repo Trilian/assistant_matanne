@@ -308,7 +308,7 @@ class TestFonctionsDB:
     """Tests pour les fonctions nécessitant un mock de la DB."""
 
     @patch("src.modules.cuisine.recettes.utils.obtenir_contexte_db")
-    @patch("src.modules.cuisine.recettes.utils.get_recette_service")
+    @patch("src.modules.cuisine.recettes.utils.obtenir_service_recettes")
     def test_get_toutes_recettes(self, mock_service, mock_db):
         """Test get_toutes_recettes avec mock."""
         from src.modules.cuisine.recettes.utils import get_toutes_recettes
@@ -411,7 +411,7 @@ class TestFonctionsDB:
             pytest.skip("L'attribut favorite n'existe pas dans le modèle Recette")
 
     @patch("src.modules.cuisine.recettes.utils.obtenir_contexte_db")
-    @patch("src.modules.cuisine.recettes.utils.get_recette_service")
+    @patch("src.modules.cuisine.recettes.utils.obtenir_service_recettes")
     def test_creer_recette(self, mock_service, mock_db):
         """Test creer_recette - vérifie que la session est utilisée."""
         # Ce test est simplifié car la fonction réelle crée un objet SQLAlchemy

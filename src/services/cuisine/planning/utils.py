@@ -17,13 +17,19 @@ Préférez importer directement depuis les modules spécifiques:
 # ═══════════════════════════════════════════════════════════
 
 from src.core.date_utils import (
-    calculate_week_dates,
     format_week_label,
-    get_monday_of_week,
-    get_week_range,
     get_weekday_index,
     get_weekday_name,
     get_weekday_names,
+)
+from src.core.date_utils import (
+    obtenir_bornes_semaine as get_week_range,
+)
+from src.core.date_utils import (
+    obtenir_debut_semaine as get_monday_of_week,
+)
+from src.core.date_utils import (
+    obtenir_jours_semaine as calculate_week_dates,
 )
 
 # ═══════════════════════════════════════════════════════════

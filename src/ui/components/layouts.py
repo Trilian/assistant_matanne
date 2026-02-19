@@ -1,6 +1,6 @@
 """
 UI Components - Layouts
-Grilles, cartes, containers
+Grilles et cartes
 """
 
 from collections.abc import Callable
@@ -132,71 +132,3 @@ def carte_item(
                 with cols[idx]:
                     if st.button(label, key=f"{cle}_action_{idx}", use_container_width=True):
                         callback()
-
-
-def section_pliable(
-    titre: str, fonction_contenu: Callable, etendu: bool = False, cle: str = "section"
-):
-    """
-    Section pliable
-
-    Args:
-        titre: Titre
-        fonction_contenu: Fonction qui render le contenu
-        etendu: Ouvert par défaut
-        cle: Clé unique
-
-    Example:
-        section_pliable(
-            "Détails avancés",
-            lambda: st.write("Contenu détaillé"),
-            etendu=False,
-            cle="advanced"
-        )
-    """
-    with st.expander(titre, expanded=etendu):
-        fonction_contenu()
-
-
-def disposition_onglets(onglets: dict[str, Callable], cle: str = "tabs"):
-    """
-    Layout tabs
-
-    Args:
-        onglets: Dict {label: content_fn}
-        cle: Clé unique
-
-    Example:
-        disposition_onglets({
-            "Vue 1": lambda: st.write("Contenu 1"),
-            "Vue 2": lambda: st.write("Contenu 2")
-        }, "views")
-    """
-    tab_objects = st.tabs(list(onglets.keys()))
-
-    for idx, (label, content_fn) in enumerate(onglets.items()):
-        with tab_objects[idx]:
-            content_fn()
-
-
-def conteneur_carte(fonction_contenu: Callable, couleur: str = "#ffffff"):
-    """
-    Container carte stylé
-
-    Args:
-        fonction_contenu: Fonction render contenu
-        couleur: Couleur fond
-
-    Example:
-        conteneur_carte(
-            lambda: st.write("Contenu"),
-            couleur="#f0f0f0"
-        )
-    """
-    st.markdown(
-        f'<div style="background: {couleur}; padding: 1.5rem; '
-        f'border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">',
-        unsafe_allow_html=True,
-    )
-    fonction_contenu()
-    st.markdown("</div>", unsafe_allow_html=True)

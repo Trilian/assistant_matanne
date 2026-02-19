@@ -7,6 +7,7 @@ Utilise le module auth autonome (sans dépendance Streamlit).
 
 import logging
 import os
+from typing import Any
 
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -30,7 +31,7 @@ security = HTTPBearer(auto_error=False)
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Security(security),
-) -> dict | None:
+) -> dict[str, Any] | None:
     """
     Valide le token JWT (API ou Supabase) et retourne l'utilisateur.
 
@@ -64,7 +65,7 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="Token invalide ou expiré") from e
 
 
-def require_auth(user: dict = Depends(get_current_user)) -> dict:
+def require_auth(user: dict[str, Any] = Depends(get_current_user)) -> dict[str, Any]:
     """
     Dependency qui exige une authentification.
 
@@ -88,7 +89,7 @@ def require_role(required_role: str):
             ...
     """
 
-    def role_checker(user: dict = Depends(require_auth)) -> dict:
+    def role_checker(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
         if user.get("role") != required_role:
             raise HTTPException(
                 status_code=403,

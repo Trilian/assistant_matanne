@@ -10,12 +10,13 @@ Endpoints:
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
 
-from src.api.auth import TokenResponse, creer_token_acces, valider_token
+from src.api.auth import TokenResponse, creer_token_acces
 from src.api.dependencies import get_current_user
+from src.api.schemas import LoginRequest, UserInfoResponse
 
 logger = logging.getLogger(__name__)
 
@@ -23,31 +24,6 @@ router = APIRouter(
     prefix="/api/v1/auth",
     tags=["Authentification"],
 )
-
-
-# ═══════════════════════════════════════════════════════════
-# SCHÉMAS
-# ═══════════════════════════════════════════════════════════
-
-
-class LoginRequest(BaseModel):
-    """Requête de connexion."""
-
-    email: str = Field(..., description="Adresse email de l'utilisateur")
-    password: str = Field(..., description="Mot de passe")
-
-
-class UserInfoResponse(BaseModel):
-    """Réponse avec les infos utilisateur."""
-
-    id: str
-    email: str
-    role: str
-
-
-# ═══════════════════════════════════════════════════════════
-# ENDPOINTS
-# ═══════════════════════════════════════════════════════════
 
 
 @router.post(
@@ -118,7 +94,7 @@ async def login(request: LoginRequest):
     summary="Rafraîchir le token",
     description="Génère un nouveau token à partir d'un token valide.",
 )
-async def refresh_token(user: dict = Depends(get_current_user)):
+async def refresh_token(user: dict[str, Any] = Depends(get_current_user)):
     """
     Rafraîchit le token JWT API.
 
@@ -143,7 +119,7 @@ async def refresh_token(user: dict = Depends(get_current_user)):
     summary="Profil utilisateur",
     description="Retourne les informations de l'utilisateur connecté.",
 )
-async def get_me(user: dict = Depends(get_current_user)):
+async def get_me(user: dict[str, Any] = Depends(get_current_user)):
     """Retourne les informations de l'utilisateur authentifié."""
     if not user:
         raise HTTPException(status_code=401, detail="Authentification requise")

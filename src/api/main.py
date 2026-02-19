@@ -119,6 +119,11 @@ app.add_middleware(
 
 app.add_middleware(MiddlewareLimitationDebit)
 
+# Middleware de métriques
+from src.api.utils import MetricsMiddleware
+
+app.add_middleware(MetricsMiddleware)
+
 
 # ═══════════════════════════════════════════════════════════
 # SCHÉMAS COMMUNS
@@ -166,6 +171,14 @@ async def health_check():
         database=db_status,
         timestamp=datetime.now(),
     )
+
+
+@app.get("/metrics", tags=["Santé"])
+async def get_api_metrics():
+    """Retourne les métriques de l'API (latence, requêtes, rate limiting)."""
+    from src.api.utils import get_metrics
+
+    return get_metrics()
 
 
 # ═══════════════════════════════════════════════════════════

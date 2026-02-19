@@ -82,7 +82,7 @@ class TestRenderDetailRecette:
     """Tests pour render_detail_recette."""
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_recette_basic(self, mock_st, mock_svc_factory, mock_render_img) -> None:
         """Test render_detail_recette sans erreur."""
@@ -101,7 +101,7 @@ class TestRenderDetailRecette:
         mock_st.header.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_with_image(self, mock_st, mock_svc_factory, mock_render_img) -> None:
         """Test avec image."""
@@ -120,7 +120,7 @@ class TestRenderDetailRecette:
         mock_st.image.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_difficulte_moyen(
         self, mock_st, mock_svc_factory, mock_render_img
@@ -142,7 +142,7 @@ class TestRenderDetailRecette:
         mock_st.markdown.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_difficulte_difficile(
         self, mock_st, mock_svc_factory, mock_render_img
@@ -164,7 +164,7 @@ class TestRenderDetailRecette:
         mock_st.markdown.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_with_robots(self, mock_st, mock_svc_factory, mock_render_img) -> None:
         """Test avec robots menagers."""
@@ -183,7 +183,7 @@ class TestRenderDetailRecette:
         mock_st.markdown.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_no_nutrition(self, mock_st, mock_svc_factory, mock_render_img) -> None:
         """Test sans nutrition."""
@@ -202,7 +202,7 @@ class TestRenderDetailRecette:
         mock_st.metric.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_with_historique(
         self, mock_st, mock_svc_factory, mock_render_img
@@ -248,7 +248,7 @@ class TestRenderDetailRecetteExtended:
     """Tests etendus pour render_detail_recette."""
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_image_exception(self, mock_st, mock_svc_factory, mock_render_img):
         """Test quand l image ne peut pas etre chargee."""
@@ -266,7 +266,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.caption.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_no_badges(self, mock_st, mock_svc_factory, mock_render_img):
         """Test sans badges."""
@@ -290,7 +290,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.header.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_detail_all_badges(self, mock_st, mock_svc_factory, mock_render_img):
         """Test avec tous les badges."""
@@ -312,7 +312,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.markdown.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_render_robots_iteration(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -329,7 +329,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.markdown.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_cuisson_button_clicked(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -351,7 +351,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.form.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_cuisson_form_submit_success(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -377,7 +377,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_cuisson_form_submit_failure(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -403,7 +403,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_historique_avec_avis(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -434,7 +434,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.caption.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_versions_vides(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -454,7 +454,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.info.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_generer_bebe_success(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -476,7 +476,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_generer_bebe_failure(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -498,7 +498,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_generer_bebe_exception(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -520,7 +520,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_generer_batch_success(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -542,7 +542,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_generer_batch_failure(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -564,7 +564,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_generer_batch_exception(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -586,7 +586,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_action_dupliquer_success(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -611,7 +611,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_action_dupliquer_exception(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -637,7 +637,7 @@ class TestRenderDetailRecetteExtended:
 
     @patch("src.modules.cuisine.recettes.detail.time")
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_action_supprimer_success(self, mock_st, mock_svc_factory, mock_render_img, mock_time):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -659,7 +659,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_action_supprimer_failure(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette
@@ -681,7 +681,7 @@ class TestRenderDetailRecetteExtended:
         mock_st.error.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.render_generer_image")
-    @patch("src.modules.cuisine.recettes.detail.get_recette_service")
+    @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
     def test_action_supprimer_exception(self, mock_st, mock_svc_factory, mock_render_img):
         from src.modules.cuisine.recettes.detail import render_detail_recette

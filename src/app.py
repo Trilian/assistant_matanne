@@ -107,7 +107,7 @@ def main():
 
         # Router vers module actif
         etat = obtenir_etat()
-        RouteurOptimise.load_module(etat.module_actuel)
+        RouteurOptimise.charger_module(etat.module_actuel)
 
         # Footer
         afficher_footer()

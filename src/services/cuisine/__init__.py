@@ -3,7 +3,7 @@
 Imports paresseux pour éviter les imports circulaires.
 Importez directement depuis les sous-packages:
 
-    from src.services.cuisine.recettes import RecetteService, get_recette_service
+    from src.services.cuisine.recettes import ServiceRecettes, obtenir_service_recettes
     from src.services.cuisine.planning import ServicePlanning, get_planning_service
     from src.services.cuisine.courses import get_courses_service
 """
@@ -19,14 +19,14 @@ __all__ = [
 
 def __getattr__(name: str):
     """Lazy import pour éviter les imports circulaires."""
-    if name == "RecetteService":
-        from src.services.cuisine.recettes import RecetteService
+    if name == "ServiceRecettes":
+        from src.services.cuisine.recettes import ServiceRecettes
 
-        return RecetteService
-    if name == "get_recette_service":
-        from src.services.cuisine.recettes import get_recette_service
+        return ServiceRecettes
+    if name == "obtenir_service_recettes":
+        from src.services.cuisine.recettes import obtenir_service_recettes
 
-        return get_recette_service
+        return obtenir_service_recettes
     if name == "ServicePlanning":
         from src.services.cuisine.planning import ServicePlanning
 

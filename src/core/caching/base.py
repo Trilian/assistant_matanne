@@ -26,9 +26,6 @@ class EntreeCache:
         """Vérifie si l'entrée est expirée."""
         return time.time() - self.created_at > self.ttl
 
-    # Alias anglais
-    is_expired = est_expire
-
     @property
     def age_seconds(self) -> float:
         """Âge de l'entrée en secondes."""

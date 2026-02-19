@@ -229,10 +229,6 @@ class CacheMultiNiveau:
 
         return value
 
-    # Alias anglais
-    get_stats = obtenir_statistiques
-    get_or_compute = obtenir_ou_calculer
-
 
 def avec_cache_multi(
     ttl: int = 300,

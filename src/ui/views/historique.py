@@ -85,18 +85,8 @@ def afficher_statistiques_activite():
             st.write(f"• {user['name']}: {user['count']} actions")
 
 
-# Alias rétrocompatibilité
-render_activity_timeline = afficher_timeline_activite
-render_user_activity = afficher_activite_utilisateur
-render_activity_stats = afficher_statistiques_activite
-
-
 __all__ = [
     "afficher_timeline_activite",
     "afficher_activite_utilisateur",
     "afficher_statistiques_activite",
-    # Alias rétrocompatibilité
-    "render_activity_timeline",
-    "render_user_activity",
-    "render_activity_stats",
 ]

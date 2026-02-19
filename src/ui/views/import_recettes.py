@@ -159,11 +159,6 @@ def afficher_import_recette():  # pragma: no cover
                         st.error(f"❌ {url}: {result.message}")
 
 
-# Alias rétrocompatibilité
-render_import_recipe_ui = afficher_import_recette
-
-
 __all__ = [
     "afficher_import_recette",
-    "render_import_recipe_ui",
 ]

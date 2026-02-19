@@ -19,6 +19,7 @@ from src.core.db import obtenir_contexte_db
 from src.core.models import Routine, RoutineTask
 from src.services.core.base import BaseAIService
 
+from .entretien_gamification_mixin import EntretienGamificationMixin
 from .schemas import (
     RoutineSuggestionIA,
 )
@@ -58,7 +59,7 @@ FREQUENCES = {
 # ═══════════════════════════════════════════════════════════
 
 
-class EntretienService(BaseAIService):
+class EntretienService(EntretienGamificationMixin, BaseAIService):
     """Service IA pour la gestion des routines ménage.
 
     Fonctionnalités:
@@ -66,11 +67,14 @@ class EntretienService(BaseAIService):
     - Optimisation répartition hebdomadaire
     - Détection automatique de périodicité
     - Adaptation aux contraintes météo
+    - Gamification: badges, streaks, score propreté
+    - Génération automatique des tâches d'entretien
 
     Example:
         >>> service = get_entretien_service()
-        >>> routine = await service.creer_routine_ia("Ménage hebdo", "Appartement 80m²")
-        >>> print(routine.taches_suggerees)
+        >>> taches = service.generer_taches(mes_objets, historique)
+        >>> stats = service.calculer_stats_globales(objets, historique)
+        >>> badges = service.obtenir_badges(stats)
     """
 
     def __init__(self, client: ClientIA | None = None):
@@ -318,7 +322,7 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
     # CRUD HELPERS
     # ─────────────────────────────────────────────────────────
 
-    def get_routines(self, db: Session | None = None) -> list[Routine]:
+    def obtenir_routines(self, db: Session | None = None) -> list[Routine]:
         """Récupère toutes les routines actives.
 
         Args:
@@ -332,7 +336,11 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
                 return session.query(Routine).filter(Routine.actif.is_(True)).all()
         return db.query(Routine).filter(Routine.actif.is_(True)).all()
 
-    def get_taches_du_jour(self, db: Session | None = None) -> list[RoutineTask]:
+    def get_routines(self, db: Session | None = None) -> list[Routine]:
+        """Alias anglais pour obtenir_routines (rétrocompatibilité)."""
+        return self.obtenir_routines(db)
+
+    def obtenir_taches_du_jour(self, db: Session | None = None) -> list[RoutineTask]:
         """Récupère les tâches à faire aujourd'hui.
 
         Args:
@@ -348,6 +356,10 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
             with obtenir_contexte_db() as session:
                 return self._query_taches_jour(session, jour_semaine)
         return self._query_taches_jour(db, jour_semaine)
+
+    def get_taches_du_jour(self, db: Session | None = None) -> list[RoutineTask]:
+        """Alias anglais pour obtenir_taches_du_jour (rétrocompatibilité)."""
+        return self.obtenir_taches_du_jour(db)
 
     def _query_taches_jour(self, db: Session, jour_semaine: int) -> list[RoutineTask]:
         """Query interne pour tâches du jour."""

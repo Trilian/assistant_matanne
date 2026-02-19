@@ -49,12 +49,8 @@ from .import_url import (
 
 # Service principal
 from .service import (
-    # Aliases pour compatibilité
-    RecetteService,
     ServiceRecettes,
-    get_recette_service,
     obtenir_service_recettes,
-    recette_service,
 )
 from .types import (
     RecetteSuggestion,
@@ -110,10 +106,6 @@ __all__ = [
     # ═══════════════════════════════════════════════════════════
     "ServiceRecettes",
     "obtenir_service_recettes",
-    # Aliases pour compatibilité
-    "RecetteService",
-    "get_recette_service",
-    "recette_service",
     # ═══════════════════════════════════════════════════════════
     # TYPES PYDANTIC
     # ═══════════════════════════════════════════════════════════

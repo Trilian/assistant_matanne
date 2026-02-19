@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 try:
     from src.services.cuisine.courses import CoursesService
     from src.services.cuisine.planning import PlanningService
-    from src.services.cuisine.recettes import RecetteService
+    from src.services.cuisine.recettes import ServiceRecettes
 except ImportError:
     pass
 
@@ -24,7 +24,7 @@ class ServiceMockFactory:
 
     @staticmethod
     def mock_recette_service():
-        """Mock RecetteService avec méthodes standard."""
+        """Mock ServiceRecettes avec méthodes standard."""
         mock = MagicMock()
         mock.obtenir_recettes = MagicMock(return_value=[])
         mock.obtenir_recette = MagicMock(return_value=None)
@@ -77,13 +77,13 @@ def mock_services():
 
 
 @pytest.fixture
-def recette_service(test_db: Session) -> RecetteService:
-    """Factory pour RecetteService avec DB de test."""
+def recette_service(test_db: Session) -> ServiceRecettes:
+    """Factory pour ServiceRecettes avec DB de test."""
     try:
-        return RecetteService(session=test_db)
+        return ServiceRecettes(session=test_db)
     except TypeError:
         # Si signature différente, adapter ici
-        return MagicMock(spec=RecetteService)
+        return MagicMock(spec=ServiceRecettes)
 
 
 @pytest.fixture

@@ -66,7 +66,7 @@ class CacheSessionN2:
 
         try:
             entry = EntreeCache(**data)
-            if entry.is_expired:
+            if entry.est_expire:
                 self.remove(key)
                 return None
             entry.hits += 1

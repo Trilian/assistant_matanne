@@ -431,48 +431,6 @@ class TestIntegrationLimitationDebit:
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS ALIAS RÉTROCOMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
-
-
-class TestAliasRetrocompatibilite:
-    """Tests que tous les alias anglais existent."""
-
-    def test_tous_les_alias_existent(self):
-        """Tous les anciens noms anglais sont disponibles."""
-        from src.api.rate_limiting import (
-            RateLimitConfig,
-            RateLimiter,
-            RateLimitMiddleware,
-            RateLimitStore,
-            # Classes
-            RateLimitStrategy,
-            # Fonctions
-            rate_limit,
-        )
-
-        assert RateLimitStrategy is not None
-        assert RateLimitConfig is not None
-        assert RateLimitStore is not None
-        assert RateLimiter is not None
-        assert RateLimitMiddleware is not None
-        assert rate_limit is not None
-
-    def test_instances_globales(self):
-        """Les instances globales sont accessibles."""
-        from src.api.rate_limiting import (
-            config_limitation_debit,
-            limiteur_debit,
-            rate_limit_config,
-            rate_limiter,
-        )
-
-        # Alias pointent vers mêmes objets
-        assert rate_limit_config is config_limitation_debit
-        assert rate_limiter is limiteur_debit
-
-
-# ═══════════════════════════════════════════════════════════
 # TESTS UTILITAIRES ET FONCTIONS ADDITIONNELLES
 # ═══════════════════════════════════════════════════════════
 

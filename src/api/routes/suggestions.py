@@ -39,9 +39,9 @@ async def suggest_recettes(
     Returns:
         Liste de suggestions de recettes
     """
-    from src.services.cuisine.recettes import get_recette_service
+    from src.services.cuisine.recettes import obtenir_service_recettes
 
-    service = get_recette_service()
+    service = obtenir_service_recettes()
 
     suggestions = service.suggerer_recettes_ia(
         contexte=contexte,

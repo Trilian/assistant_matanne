@@ -6,7 +6,7 @@ import logging
 
 import streamlit as st
 
-from src.services.cuisine.recettes import get_recette_service
+from src.services.cuisine.recettes import obtenir_service_recettes
 
 from .utils import formater_quantite
 
@@ -20,7 +20,7 @@ def render_generer_ia():
 
     st.subheader("⏰ Générer des recettes avec l'IA")
 
-    service = get_recette_service()
+    service = obtenir_service_recettes()
     if service is None:
         st.error("❌ Service IA indisponible")
         return

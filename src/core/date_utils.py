@@ -359,24 +359,6 @@ def format_week_label(semaine_debut: date, semaine_fin: date | None = None) -> s
 
 
 # ═══════════════════════════════════════════════════════════
-# ALIAS POUR COMPATIBILITÉ
-# (permet migration progressive du code existant)
-# ═══════════════════════════════════════════════════════════
-
-# Alias anglais -> français
-get_debut_semaine = obtenir_debut_semaine
-get_fin_semaine = obtenir_fin_semaine
-get_jours_semaine = obtenir_jours_semaine
-get_semaine_precedente = obtenir_semaine_precedente
-get_semaine_suivante = obtenir_semaine_suivante
-
-# Alias planning utils
-get_monday_of_week = obtenir_debut_semaine
-get_week_range = obtenir_bornes_semaine
-calculate_week_dates = obtenir_jours_semaine
-
-
-# ═══════════════════════════════════════════════════════════
 # FORMATAGE DURÉES
 # ═══════════════════════════════════════════════════════════
 
@@ -441,15 +423,6 @@ __all__ = [
     "formater_jour_fr",
     "formater_mois_fr",
     "format_week_label",
-    # Alias compatibilité
-    "get_debut_semaine",
-    "get_fin_semaine",
-    "get_jours_semaine",
-    "get_semaine_precedente",
-    "get_semaine_suivante",
-    "get_monday_of_week",
-    "get_week_range",
-    "calculate_week_dates",
     # Formatage durées
     "formater_temps",
 ]

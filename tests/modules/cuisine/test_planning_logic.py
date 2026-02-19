@@ -41,19 +41,19 @@ class TestGetFinSemaine:
 
     def test_fin_semaine_dimanche(self):
         """Dimanche retourne lui-même."""
-        from src.modules.cuisine.planning_utils import get_fin_semaine
+        from src.core.date_utils import obtenir_fin_semaine
 
         dimanche = date(2025, 2, 9)
-        result = get_fin_semaine(dimanche)
+        result = obtenir_fin_semaine(dimanche)
         assert result == dimanche
         assert result.weekday() == 6  # Dimanche
 
     def test_fin_semaine_lundi(self):
         """Lundi retourne le dimanche suivant."""
-        from src.modules.cuisine.planning_utils import get_fin_semaine
+        from src.core.date_utils import obtenir_fin_semaine
 
         lundi = date(2025, 2, 3)
-        result = get_fin_semaine(lundi)
+        result = obtenir_fin_semaine(lundi)
         assert result == date(2025, 2, 9)  # Dimanche
 
 

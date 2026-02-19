@@ -54,7 +54,7 @@ class TestCuisineModule:
         # Placeholder: implementation en Phase 17+
         assert True
 
-    @patch("src.services.cuisine.recettes.RecetteService")
+    @patch("src.services.cuisine.recettes.ServiceRecettes")
     def test_cuisine_list_recipes(self, mock_service):
         """Le module Cuisine affiche la liste des recettes."""
         mock_service.return_value.lister_recettes.return_value = []
@@ -62,7 +62,7 @@ class TestCuisineModule:
         # Placeholder: implementation en Phase 17+
         assert True
 
-    @patch("src.services.cuisine.recettes.RecetteService")
+    @patch("src.services.cuisine.recettes.ServiceRecettes")
     def test_cuisine_search_recipes(self, mock_service):
         """Le module Cuisine peut chercher des recettes."""
         mock_service.return_value.chercher_recettes.return_value = []

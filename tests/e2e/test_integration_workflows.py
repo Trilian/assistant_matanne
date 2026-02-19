@@ -5,7 +5,7 @@ Focus: Cross-domain workflows, system integration, real user scenarios
 
 from src.services.cuisine.courses import get_courses_service
 from src.services.cuisine.planning import get_planning_service
-from src.services.cuisine.recettes import get_recette_service
+from src.services.cuisine.recettes import obtenir_service_recettes
 from src.services.famille.budget import get_budget_service
 from src.services.inventaire import get_inventaire_service
 
@@ -91,7 +91,7 @@ class TestRecipePlanningWorkflow:
 
     def test_recipe_selection_to_planning(self):
         """Selected recipe creates planning event"""
-        recette_service = get_recette_service()
+        recette_service = obtenir_service_recettes()
         planning_service = get_planning_service()
 
         assert recette_service is not None
@@ -99,7 +99,7 @@ class TestRecipePlanningWorkflow:
 
     def test_recipe_categories_in_planning(self):
         """Recipe categories influence meal planning"""
-        recette_service = get_recette_service()
+        recette_service = obtenir_service_recettes()
         planning_service = get_planning_service()
 
         # Both services should be able to collaborate
@@ -108,7 +108,7 @@ class TestRecipePlanningWorkflow:
 
     def test_weekly_menu_generation(self):
         """Generate week menu from recipes"""
-        recette_service = get_recette_service()
+        recette_service = obtenir_service_recettes()
         planning_service = get_planning_service()
 
         # Should create planning events
@@ -134,7 +134,7 @@ class TestDataConsistency:
     def test_planning_recette_consistency(self):
         """Planning and Recette data align"""
         planning_service = get_planning_service()
-        recette_service = get_recette_service()
+        recette_service = obtenir_service_recettes()
 
         # Both models should reference same recipes
         assert planning_service is not None
@@ -272,7 +272,7 @@ class TestUserScenarios:
     def test_sunday_planning_scenario(self):
         """User plans meals for the week"""
         planning_service = get_planning_service()
-        recette_service = get_recette_service()
+        recette_service = obtenir_service_recettes()
 
         # Sunday: plan week
         assert planning_service is not None
@@ -293,7 +293,7 @@ class TestUserScenarios:
         """User cooks meals from plan"""
         planning_service = get_planning_service()
         inventory_service = get_inventaire_service()
-        recette_service = get_recette_service()
+        recette_service = obtenir_service_recettes()
 
         # Tuesday: cook from plan
         assert planning_service is not None
@@ -323,7 +323,7 @@ class TestCrossDomainFiltering:
     def test_filter_recipes_by_planning(self):
         """Filter recipes based on meal plan"""
         planning_service = get_planning_service()
-        recette_service = get_recette_service()
+        recette_service = obtenir_service_recettes()
 
         # Filter recipes for this week
         assert planning_service is not None
@@ -331,7 +331,7 @@ class TestCrossDomainFiltering:
 
     def test_filter_inventory_by_recipe(self):
         """Filter inventory for recipe needs"""
-        recette_service = get_recette_service()
+        recette_service = obtenir_service_recettes()
         inventory_service = get_inventaire_service()
 
         # Get ingredients needed
@@ -391,7 +391,7 @@ class TestExternalIntegration:
     def test_ai_integration_across_services(self):
         """AI features available across services"""
         planning_service = get_planning_service()
-        recette_service = get_recette_service()
+        recette_service = obtenir_service_recettes()
 
         # Both should support AI features
         assert planning_service is not None
@@ -413,7 +413,7 @@ class TestExternalIntegration:
             get_inventaire_service(),
             get_budget_service(),
             get_courses_service(),
-            get_recette_service(),
+            obtenir_service_recettes(),
         ]
 
         for service in services:

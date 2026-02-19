@@ -183,7 +183,7 @@ class TestImports:
 class TestRenderListeBase:
     """Tests de base pour render_liste."""
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_render_liste_basic(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -195,7 +195,7 @@ class TestRenderListeBase:
         render_liste()
         mock_st.columns.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_render_liste_no_service(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -205,7 +205,7 @@ class TestRenderListeBase:
         render_liste()
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_render_liste_with_recettes(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -223,7 +223,7 @@ class TestRenderListeBase:
 class TestRenderListeFilters:
     """Tests pour les filtres de la liste."""
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_by_nom(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -240,7 +240,7 @@ class TestRenderListeFilters:
         render_liste()
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_by_type_repas(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -253,7 +253,7 @@ class TestRenderListeFilters:
         call_kwargs = mock_service.search_advanced.call_args[1]
         assert call_kwargs["type_repas"] == "dejeuner"
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_by_difficulte(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -266,7 +266,7 @@ class TestRenderListeFilters:
         call_kwargs = mock_service.search_advanced.call_args[1]
         assert call_kwargs["difficulte"] == "difficile"
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_score_bio_min(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -283,7 +283,7 @@ class TestRenderListeFilters:
         render_liste()
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_score_local_min(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -304,7 +304,7 @@ class TestRenderListeFilters:
 class TestRenderListeRobotFilters:
     """Tests pour les filtres robots."""
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_cookeo(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -320,7 +320,7 @@ class TestRenderListeRobotFilters:
         render_liste()
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_monsieur_cuisine(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -336,7 +336,7 @@ class TestRenderListeRobotFilters:
         render_liste()
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_airfryer(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -352,7 +352,7 @@ class TestRenderListeRobotFilters:
         render_liste()
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_multicooker(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -373,7 +373,7 @@ class TestRenderListeRobotFilters:
 class TestRenderListeTagFilters:
     """Tests pour les filtres tags."""
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_rapide(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -389,7 +389,7 @@ class TestRenderListeTagFilters:
         render_liste()
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_equilibre(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -405,7 +405,7 @@ class TestRenderListeTagFilters:
         render_liste()
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_congelable(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -426,7 +426,7 @@ class TestRenderListeTagFilters:
 class TestRenderListeDisplay:
     """Tests pour l'affichage des recettes."""
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_with_image_url(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -439,7 +439,7 @@ class TestRenderListeDisplay:
         render_liste()
         assert mock_st.markdown.called
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_without_image(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -452,7 +452,7 @@ class TestRenderListeDisplay:
         render_liste()
         assert mock_st.markdown.called
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_with_long_description(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -466,7 +466,7 @@ class TestRenderListeDisplay:
         render_liste()
         assert mock_st.markdown.called
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_without_description(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -479,7 +479,7 @@ class TestRenderListeDisplay:
         render_liste()
         assert mock_st.markdown.called
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_without_calories(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -492,7 +492,7 @@ class TestRenderListeDisplay:
         render_liste()
         assert mock_st.markdown.called
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_difficulty_levels(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -514,7 +514,7 @@ class TestRenderListeDisplay:
 class TestRenderListeBadges:
     """Tests pour les badges."""
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_all_badges(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -534,7 +534,7 @@ class TestRenderListeBadges:
         render_liste()
         assert mock_st.markdown.called
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_with_robots_compatibles(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -550,7 +550,7 @@ class TestRenderListeBadges:
         render_liste()
         assert mock_st.markdown.called
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_with_unknown_robot(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -568,7 +568,7 @@ class TestRenderListeBadges:
 class TestRenderListeActions:
     """Tests pour les actions (boutons)."""
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_click_voir_details(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -582,7 +582,7 @@ class TestRenderListeActions:
         assert mock_st.session_state.get("detail_recette_id") == 1
         # OK
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_click_supprimer_confirm(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -597,7 +597,7 @@ class TestRenderListeActions:
         mock_service.delete.assert_called_with(1)
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_click_supprimer_failed(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -612,7 +612,7 @@ class TestRenderListeActions:
         mock_service.delete.assert_called()
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_click_supprimer_exception(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -626,7 +626,7 @@ class TestRenderListeActions:
         render_liste()
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_click_annuler_suppression(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -644,7 +644,7 @@ class TestRenderListeActions:
 class TestRenderListePagination:
     """Tests pour la pagination."""
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_pagination_next_page(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -663,7 +663,7 @@ class TestRenderListePagination:
         # Pagination next button rendered
         # OK
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_pagination_previous_page(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -681,7 +681,7 @@ class TestRenderListePagination:
         render_liste()
         # Pagination previous button rendered
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_pagination_page_overflow_adjusted(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -703,7 +703,7 @@ class TestRenderListePagination:
 class TestRenderListeSessionState:
     """Tests pour l'initialisation du session_state."""
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_init_session_state_page(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -719,7 +719,7 @@ class TestRenderListeSessionState:
         render_liste()
         assert "recettes_page" in mock_st.session_state
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_init_session_state_page_size(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -740,7 +740,7 @@ class TestRenderListeSessionState:
 class TestRenderListeEmptyResults:
     """Tests pour resultats vides."""
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_no_recettes_found(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -757,7 +757,7 @@ class TestRenderListeEmptyResults:
 class TestRenderListePageSizes:
     """Tests pour differentes tailles de page."""
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_page_size_6(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -769,7 +769,7 @@ class TestRenderListePageSizes:
         render_liste()
         assert mock_st.session_state.recettes_page_size == 6
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_page_size_12(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -786,7 +786,7 @@ class TestRenderListePageSizes:
 class TestRenderListeEdgeCases:
     """Tests pour cas limites."""
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_filter_nom_empty_whitespace(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -798,7 +798,7 @@ class TestRenderListeEdgeCases:
         render_liste()
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_description_truncate_no_space(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -812,7 +812,7 @@ class TestRenderListeEdgeCases:
         render_liste()
         assert mock_st.markdown.called
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_recette_score_bio_none(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -825,7 +825,7 @@ class TestRenderListeEdgeCases:
         render_liste()
         mock_st.info.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_recette_score_local_none(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -838,7 +838,7 @@ class TestRenderListeEdgeCases:
         render_liste()
         mock_st.info.assert_called()
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_difficulty_unknown(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -851,7 +851,7 @@ class TestRenderListeEdgeCases:
         render_liste()
         assert mock_st.markdown.called
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_combined_robot_filters(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste
@@ -876,7 +876,7 @@ class TestRenderListeEdgeCases:
 class TestRenderListeMultipleRecettes:
     """Tests avec plusieurs recettes pour couvrir grid display."""
 
-    @patch("src.modules.cuisine.recettes.liste.get_recette_service")
+    @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_display_grid_3_columns(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import render_liste

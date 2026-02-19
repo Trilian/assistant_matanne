@@ -46,6 +46,7 @@ _SERVICES = {
     "get_inventaire_service": "inventaire_service",
     "get_plan_jardin_service": "plan_jardin_service",
     "get_maison_assistant": "assistant_ia",
+    "obtenir_assistant_maison": "assistant_ia",
     "get_temps_entretien_service": "temps_entretien_service",
     # Factories (français)
     "obtenir_service_jardin": "jardin_service",
@@ -55,6 +56,9 @@ _SERVICES = {
     "obtenir_service_inventaire_maison": "inventaire_service",
     "obtenir_service_plan_jardin": "plan_jardin_service",
     "obtenir_service_temps_entretien": "temps_entretien_service",
+    # Constantes gamification
+    "BADGES_JARDIN": "jardin_gamification_mixin",
+    "BADGES_ENTRETIEN": "entretien_gamification_mixin",
 }
 
 _SCHEMAS = {
@@ -97,7 +101,7 @@ def __dir__():
 
 # Type hints pour IDE sans charger les modules
 if TYPE_CHECKING:
-    from .assistant_ia import MaisonAssistantIA, get_maison_assistant
+    from .assistant_ia import MaisonAssistantIA, get_maison_assistant, obtenir_assistant_maison
     from .energie_service import EnergieService, get_energie_service, obtenir_service_energie
     from .entretien_service import (
         EntretienService,
@@ -164,6 +168,7 @@ __all__ = [
     "obtenir_service_inventaire_maison",
     "obtenir_service_plan_jardin",
     "obtenir_service_temps_entretien",
+    "obtenir_assistant_maison",
     # Schemas
     "BriefingMaison",
     "AlerteMaison",
@@ -178,4 +183,7 @@ __all__ = [
     "ZoneJardinCreate",
     "PlanteCreate",
     "ResultatRecherche",
+    # Constantes
+    "BADGES_JARDIN",
+    "BADGES_ENTRETIEN",
 ]

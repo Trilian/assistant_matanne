@@ -3,7 +3,7 @@ Tests complets pour src/ui/components/dashboard_widgets.py
 Couverture cible: >80%
 """
 
-from datetime import date, datetime, timedelta
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 # ═══════════════════════════════════════════════════════════
@@ -117,109 +117,6 @@ class TestGraphiqueInventaireCategories:
         data = [{"categorie": f"Cat{i}", "statut": "ok"} for i in range(15)]
 
         result = graphique_inventaire_categories(data)
-        assert result is not None
-
-
-# ═══════════════════════════════════════════════════════════
-# GRAPHIQUE ACTIVITE SEMAINE
-# ═══════════════════════════════════════════════════════════
-
-
-class TestGraphiqueActiviteSemaine:
-    """Tests pour graphique_activite_semaine."""
-
-    def test_import(self):
-        """Test import réussi."""
-        from src.ui.components import graphique_activite_semaine
-
-        assert graphique_activite_semaine is not None
-
-    def test_empty_data(self):
-        """Test avec données vides - génère données vides."""
-        from src.ui.components import graphique_activite_semaine
-
-        result = graphique_activite_semaine([])
-
-        # Retourne une figure même avec données vides
-        assert result is not None
-
-    def test_with_data(self):
-        """Test avec données valides."""
-        from src.ui.components import graphique_activite_semaine
-
-        today = date.today()
-        data = [
-            {"date": today - timedelta(days=i), "count": i * 2, "type": "action"} for i in range(7)
-        ]
-
-        result = graphique_activite_semaine(data)
-
-        assert result is not None
-        assert hasattr(result, "update_layout")
-
-    def test_with_string_dates(self):
-        """Test avec dates en string ISO."""
-        from src.ui.components import graphique_activite_semaine
-
-        today = date.today()
-        data = [{"date": (today - timedelta(days=i)).isoformat(), "count": 5} for i in range(3)]
-
-        result = graphique_activite_semaine(data)
-        assert result is not None
-
-
-# ═══════════════════════════════════════════════════════════
-# GRAPHIQUE PROGRESSION OBJECTIFS
-# ═══════════════════════════════════════════════════════════
-
-
-class TestGraphiqueProgressionObjectifs:
-    """Tests pour graphique_progression_objectifs."""
-
-    def test_import(self):
-        """Test import réussi."""
-        from src.ui.components import graphique_progression_objectifs
-
-        assert graphique_progression_objectifs is not None
-
-    def test_empty_data(self):
-        """Test avec données vides."""
-        from src.ui.components import graphique_progression_objectifs
-
-        result = graphique_progression_objectifs([])
-        assert result is None
-
-    def test_with_data(self):
-        """Test avec données valides."""
-        from src.ui.components import graphique_progression_objectifs
-
-        data = [
-            {"nom": "Recettes créées", "actuel": 8, "cible": 10},
-            {"nom": "Repas planifiés", "actuel": 5, "cible": 7},
-            {"nom": "Courses faites", "actuel": 2, "cible": 10},
-        ]
-
-        result = graphique_progression_objectifs(data)
-
-        assert result is not None
-        assert hasattr(result, "update_layout")
-
-    def test_over_100_percent(self):
-        """Test avec progression > 100%."""
-        from src.ui.components import graphique_progression_objectifs
-
-        data = [{"nom": "Dépassé", "actuel": 15, "cible": 10}]  # 150%
-
-        result = graphique_progression_objectifs(data)
-        assert result is not None
-
-    def test_missing_values(self):
-        """Test avec valeurs manquantes."""
-        from src.ui.components import graphique_progression_objectifs
-
-        data = [{"nom": "Test"}]  # Pas actuel ni cible
-
-        result = graphique_progression_objectifs(data)
         assert result is not None
 
 

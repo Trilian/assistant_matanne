@@ -391,83 +391,6 @@ class TestBarreProgression:
 
 
 # ═══════════════════════════════════════════════════════════
-# INDICATEUR_STATUT (status_indicator)
-# ═══════════════════════════════════════════════════════════
-
-
-class TestIndicateurStatut:
-    """Tests pour indicateur_statut()."""
-
-    def test_indicateur_statut_import(self):
-        """Test import réussi."""
-        from src.ui.components.data import indicateur_statut
-
-        assert callable(indicateur_statut)
-
-    @patch("streamlit.markdown")
-    def test_indicateur_statut_success(self, mock_markdown):
-        """Test statut success."""
-        from src.ui.components.data import indicateur_statut
-
-        indicateur_statut("success", "Connecté")
-
-        # Vérifie que markdown est appelé avec couleur verte
-        call_args = mock_markdown.call_args[0][0]
-        assert "#4CAF50" in call_args
-        assert "Connecté" in call_args
-
-    @patch("streamlit.markdown")
-    def test_indicateur_statut_warning(self, mock_markdown):
-        """Test statut warning."""
-        from src.ui.components.data import indicateur_statut
-
-        indicateur_statut("warning", "Attention")
-
-        call_args = mock_markdown.call_args[0][0]
-        assert "#FFC107" in call_args
-
-    @patch("streamlit.markdown")
-    def test_indicateur_statut_error(self, mock_markdown):
-        """Test statut error."""
-        from src.ui.components.data import indicateur_statut
-
-        indicateur_statut("error", "Erreur")
-
-        call_args = mock_markdown.call_args[0][0]
-        assert "#f44336" in call_args
-
-    @patch("streamlit.markdown")
-    def test_indicateur_statut_info(self, mock_markdown):
-        """Test statut info."""
-        from src.ui.components.data import indicateur_statut
-
-        indicateur_statut("info", "Information")
-
-        call_args = mock_markdown.call_args[0][0]
-        assert "#2196F3" in call_args
-
-    @patch("streamlit.markdown")
-    def test_indicateur_statut_unknown(self, mock_markdown):
-        """Test statut inconnu (fallback gris)."""
-        from src.ui.components.data import indicateur_statut
-
-        indicateur_statut("unknown", "Inconnu")
-
-        call_args = mock_markdown.call_args[0][0]
-        # Fallback couleur grise
-        assert "#gray" in call_args or "gray" in call_args
-
-    @patch("streamlit.markdown")
-    def test_indicateur_statut_empty_label(self, mock_markdown):
-        """Test sans label."""
-        from src.ui.components.data import indicateur_statut
-
-        indicateur_statut("success")
-
-        assert mock_markdown.called
-
-
-# ═══════════════════════════════════════════════════════════
 # TESTS D'INTÉGRATION
 # ═══════════════════════════════════════════════════════════
 
@@ -484,14 +407,12 @@ class TestDataIntegration:
         assert hasattr(data, "boutons_export")
         assert hasattr(data, "tableau_donnees")
         assert hasattr(data, "barre_progression")
-        assert hasattr(data, "indicateur_statut")
 
     def test_imports_from_components(self):
         """Test imports depuis components."""
         from src.ui.components import (
             barre_progression,
             boutons_export,
-            indicateur_statut,
             ligne_metriques,
             pagination,
             tableau_donnees,
@@ -502,14 +423,12 @@ class TestDataIntegration:
         assert callable(boutons_export)
         assert callable(tableau_donnees)
         assert callable(barre_progression)
-        assert callable(indicateur_statut)
 
     def test_imports_from_ui(self):
         """Test imports depuis ui."""
         from src.ui import (
             barre_progression,
             boutons_export,
-            indicateur_statut,
             ligne_metriques,
             pagination,
             tableau_donnees,
@@ -520,4 +439,3 @@ class TestDataIntegration:
         assert callable(boutons_export)
         assert callable(tableau_donnees)
         assert callable(barre_progression)
-        assert callable(indicateur_statut)

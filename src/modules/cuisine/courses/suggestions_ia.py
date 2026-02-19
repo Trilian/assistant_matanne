@@ -7,9 +7,9 @@ import time
 from ._common import (
     get_courses_service,
     get_inventaire_service,
-    get_recette_service,
     logger,
     obtenir_contexte_db,
+    obtenir_service_recettes,
     pd,
     st,
 )
@@ -19,7 +19,7 @@ def render_suggestions_ia():
     """Suggestions IA depuis inventaire & recettes"""
     service = get_courses_service()
     _inventaire_service = get_inventaire_service()
-    recettes_service = get_recette_service()
+    recettes_service = obtenir_service_recettes()
 
     st.subheader("⏰ Suggestions intelligentes")
 

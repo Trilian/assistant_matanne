@@ -280,7 +280,7 @@ class TestMainFunction:
         monkeypatch.setattr(app, "afficher_footer", lambda: None)
         monkeypatch.setattr(app, "injecter_css", lambda: None)
         monkeypatch.setattr(app, "initialiser_app", lambda: True)
-        monkeypatch.setattr(app, "RouteurOptimise", Mock(load_module=lambda x: None))
+        monkeypatch.setattr(app, "RouteurOptimise", Mock(charger_module=lambda x: None))
         monkeypatch.setattr(
             app, "obtenir_etat", lambda: Mock(module_actuel="accueil", mode_debug=False)
         )
@@ -308,7 +308,7 @@ class TestMainFunction:
         monkeypatch.setattr(app, "afficher_footer", lambda: None)
         monkeypatch.setattr(app, "injecter_css", lambda: None)
         monkeypatch.setattr(app, "initialiser_app", lambda: True)
-        monkeypatch.setattr(app, "RouteurOptimise", Mock(load_module=lambda x: None))
+        monkeypatch.setattr(app, "RouteurOptimise", Mock(charger_module=lambda x: None))
         monkeypatch.setattr(
             app, "obtenir_etat", lambda: Mock(module_actuel="accueil", mode_debug=True)
         )

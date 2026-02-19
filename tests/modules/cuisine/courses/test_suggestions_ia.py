@@ -32,7 +32,7 @@ class TestRenderSuggestionsIA:
 
         assert render_suggestions_ia is not None
 
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -59,7 +59,7 @@ class TestRenderSuggestionsIA:
         mock_st.subheader.assert_called()
         mock_st.tabs.assert_called()
 
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -87,7 +87,7 @@ class TestRenderSuggestionsIA:
 
         mock_st.info.assert_called()
 
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -131,7 +131,7 @@ class TestRenderSuggestionsIA:
         mock_st.dataframe.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_contexte_db")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -182,7 +182,7 @@ class TestRenderSuggestionsIA:
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_contexte_db")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -229,7 +229,7 @@ class TestRenderSuggestionsIA:
         svc.generer_suggestions_ia_depuis_inventaire.assert_called()
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -257,7 +257,7 @@ class TestRenderSuggestionsIA:
 
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -284,7 +284,7 @@ class TestRenderSuggestionsIA:
 
         mock_st.warning.assert_called()
 
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -311,7 +311,7 @@ class TestRenderSuggestionsIA:
 
         mock_st.info.assert_called()
 
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -346,7 +346,7 @@ class TestRenderSuggestionsIA:
         mock_st.selectbox.assert_called()
 
     @patch("src.core.db.obtenir_contexte_db")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -399,7 +399,7 @@ class TestRenderSuggestionsIA:
         courses_svc.create.assert_called()
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -435,7 +435,7 @@ class TestRenderSuggestionsIA:
 
         mock_st.warning.assert_called()
 
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -465,7 +465,7 @@ class TestRenderSuggestionsIA:
         mock_logger.error.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_contexte_db")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -514,7 +514,7 @@ class TestRenderSuggestionsIA:
         mock_logger.error.assert_called()
 
     @patch("src.core.db.obtenir_contexte_db")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -568,7 +568,7 @@ class TestRenderSuggestionsIA:
         mock_st.success.assert_called()
 
     @patch("src.core.db.obtenir_contexte_db")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
@@ -631,7 +631,7 @@ class TestRenderSuggestionsIA:
         mock_st.success.assert_called()
 
     @patch("src.core.db.obtenir_contexte_db")
-    @patch("src.modules.cuisine.courses.suggestions_ia.get_recette_service")
+    @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_inventaire_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.get_courses_service")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")

@@ -51,7 +51,7 @@ class CacheFichierN3:
                     data = pickle.load(f)
 
                 entry = EntreeCache(**data)
-                if entry.is_expired:
+                if entry.est_expire:
                     self.remove(key)
                     return None
 

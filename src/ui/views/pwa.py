@@ -71,12 +71,6 @@ def injecter_meta_pwa():
     components.html(pwa_meta, height=0)
 
 
-# Alias rétrocompatibilité
-inject_pwa_meta = injecter_meta_pwa
-
-
 __all__ = [
     "injecter_meta_pwa",
-    # Alias rétrocompatibilité
-    "inject_pwa_meta",
 ]

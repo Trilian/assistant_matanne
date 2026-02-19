@@ -4,12 +4,9 @@ Graphiques Plotly pour le tableau de bord.
 Fournit des graphiques interactifs:
 - Répartition des repas (camembert)
 - Inventaire par catégorie (barres)
-- Activité semaine (lignes)
-- Progression objectifs (barres horizontales)
 """
 
 import logging
-from datetime import date, timedelta
 
 import plotly.graph_objects as go
 import streamlit as st
@@ -146,119 +143,6 @@ def graphique_inventaire_categories(inventaire: list[dict]) -> go.Figure | None:
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         xaxis_title="Articles",
-    )
-
-    return fig
-
-
-@st.cache_data(ttl=300)
-def graphique_activite_semaine(activites: list[dict]) -> go.Figure | None:
-    """
-    Graphique de l'activité sur les 7 derniers jours.
-
-    Args:
-        activites: Liste avec {'date': date, 'count': int, 'type': str}
-
-    Returns:
-        Figure Plotly
-    """
-    if not activites:
-        # Générer des données vides pour les 7 jours
-        today = date.today()
-        activites = [
-            {"date": today - timedelta(days=i), "count": 0, "type": "aucune"}
-            for i in range(6, -1, -1)
-        ]
-
-    dates = [
-        a["date"] if isinstance(a["date"], date) else date.fromisoformat(str(a["date"]))
-        for a in activites
-    ]
-    counts = [a.get("count", 0) for a in activites]
-
-    # Noms des jours
-    jours_fr = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
-    labels = [jours_fr[d.weekday()] for d in dates]
-
-    fig = go.Figure()
-
-    fig.add_trace(
-        go.Scatter(
-            x=labels,
-            y=counts,
-            mode="lines+markers",
-            line=dict(color="#2196F3", width=3),
-            marker=dict(size=10, color="#2196F3"),
-            fill="tozeroy",
-            fillcolor="rgba(33, 150, 243, 0.1)",
-        )
-    )
-
-    fig.update_layout(
-        margin=dict(l=40, r=20, t=20, b=40),
-        height=200,
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        yaxis=dict(showgrid=True, gridcolor="rgba(0,0,0,0.1)"),
-        xaxis=dict(showgrid=False),
-    )
-
-    return fig
-
-
-@st.cache_data(ttl=300)
-def graphique_progression_objectifs(objectifs: list[dict]) -> go.Figure | None:
-    """
-    Graphique de progression des objectifs.
-
-    Args:
-        objectifs: Liste {'nom': str, 'actuel': float, 'cible': float}
-
-    Returns:
-        Figure Plotly
-    """
-    if not objectifs:
-        return None
-
-    noms = [o["nom"] for o in objectifs]
-    progressions = [min(100, (o.get("actuel", 0) / o.get("cible", 1)) * 100) for o in objectifs]
-
-    # Couleurs selon progression
-    colors = ["#4CAF50" if p >= 80 else "#FFB74D" if p >= 50 else "#FF5722" for p in progressions]
-
-    fig = go.Figure()
-
-    # Barres de fond (100%)
-    fig.add_trace(
-        go.Bar(
-            y=noms,
-            x=[100] * len(noms),
-            orientation="h",
-            marker_color="rgba(0,0,0,0.1)",
-            showlegend=False,
-        )
-    )
-
-    # Barres de progression
-    fig.add_trace(
-        go.Bar(
-            y=noms,
-            x=progressions,
-            orientation="h",
-            marker_color=colors,
-            text=[f"{p:.0f}%" for p in progressions],
-            textposition="inside",
-            showlegend=False,
-        )
-    )
-
-    fig.update_layout(
-        barmode="overlay",
-        margin=dict(l=120, r=20, t=20, b=20),
-        height=200,
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        xaxis=dict(showticklabels=False, showgrid=False),
     )
 
     return fig

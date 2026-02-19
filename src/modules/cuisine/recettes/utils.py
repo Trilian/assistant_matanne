@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from src.core.db import obtenir_contexte_db
 from src.core.models import Recette, Repas
-from src.services.cuisine.recettes import get_recette_service
+from src.services.cuisine.recettes import obtenir_service_recettes
 
 # ═══════════════════════════════════════════════════════════
 # LOGIQUE RECETTES - LECTURE

@@ -47,7 +47,7 @@ from src.modules.cuisine.planificateur_repas.utils import (
 )
 from src.services.core.utilisateur import get_user_preference_service
 from src.services.cuisine.planning import get_planning_service
-from src.services.cuisine.recettes import get_recette_service
+from src.services.cuisine.recettes import obtenir_service_recettes
 
 __all__ = [
     # Standard libs
@@ -66,7 +66,7 @@ __all__ = [
     "Repas",
     "SessionBatchCooking",
     "obtenir_client_ia",
-    "get_recette_service",
+    "obtenir_service_recettes",
     "get_planning_service",
     "get_user_preference_service",
     # Logic - constants

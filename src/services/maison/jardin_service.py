@@ -7,6 +7,8 @@ Features:
 - Diagnostic plantes via vision IA
 - Alertes gel/canicule automatiques
 - Suggestions plantation par saison
+- Gamification : badges, streaks, autonomie alimentaire
+- Génération automatique des tâches jardin
 """
 
 import logging
@@ -19,6 +21,7 @@ from src.core.db import obtenir_contexte_db
 from src.core.models import GardenItem
 from src.services.core.base import BaseAIService
 
+from .jardin_gamification_mixin import BADGES_JARDIN, JardinGamificationMixin
 from .schemas import (
     AlerteMaison,
     ConseilJardin,
@@ -52,7 +55,7 @@ SEUIL_SECHERESSE_JOURS = 7  # Jours sans pluie
 # ═══════════════════════════════════════════════════════════
 
 
-class JardinService(BaseAIService):
+class JardinService(JardinGamificationMixin, BaseAIService):
     """Service IA pour la gestion intelligente du jardin.
 
     Fonctionnalités:
@@ -60,11 +63,15 @@ class JardinService(BaseAIService):
     - Adaptation à la météo locale
     - Diagnostic plantes par photo
     - Planification arrosage intelligent
+    - Gamification: badges, streaks, autonomie alimentaire
+    - Génération automatique des tâches
 
     Example:
         >>> service = get_jardin_service()
         >>> conseils = await service.generer_conseils_saison("printemps")
-        >>> print(conseils)
+        >>> taches = service.generer_taches(mes_plantes, meteo)
+        >>> stats = service.calculer_stats(plantes, recoltes)
+        >>> badges = service.obtenir_badges(stats)
     """
 
     def __init__(self, client: ClientIA | None = None):
@@ -96,7 +103,7 @@ class JardinService(BaseAIService):
             Conseils formatés en texte
         """
         if saison is None:
-            saison = self.get_saison_actuelle()
+            saison = self.obtenir_saison_actuelle()
 
         prompt = f"""Tu es un expert jardinier. Donne 4-5 conseils pratiques
 pour les travaux de jardinage en {saison} (maintenant).
@@ -122,7 +129,7 @@ Sois concis et actionnable."""
             Liste de plantes suggérées avec descriptions
         """
         if saison is None:
-            saison = self.get_saison_actuelle()
+            saison = self.obtenir_saison_actuelle()
 
         prompt = f"""Suggère 6 plantes/légumes parfaits à planter en {saison}
 sous climat {climat}. Pour chaque plante indique:
@@ -152,7 +159,7 @@ Format liste avec tirets."""
             Conseils d'arrosage détaillés
         """
         if saison is None:
-            saison = self.get_saison_actuelle()
+            saison = self.obtenir_saison_actuelle()
 
         prompt = f"""Donne un conseil d'arrosage complet pour {nom_plante} en {saison}.
 Inclus: fréquence, quantité (litres), meilleur moment de la journée,
@@ -186,7 +193,7 @@ signes de sur/sous-arrosage, adaptation si canicule/pluie."""
 
         for plante in plantes:
             # Déterminer fréquence selon saison et météo
-            saison = self.get_saison_actuelle()
+            saison = self.obtenir_saison_actuelle()
             if saison == "été":
                 frequence = "quotidien" if not pluie_prevue else "tous_2_jours"
             elif saison in ("printemps", "automne"):
@@ -369,7 +376,7 @@ Réponds en JSON:
     # ─────────────────────────────────────────────────────────
 
     @staticmethod
-    def get_saison_actuelle() -> str:
+    def obtenir_saison_actuelle() -> str:
         """Retourne la saison actuelle."""
         mois = date.today().month
         for mois_tuple, saison in SAISONS.items():
@@ -377,7 +384,12 @@ Réponds en JSON:
                 return saison
         return "printemps"
 
-    def get_plantes(self, db: Session | None = None) -> list[GardenItem]:
+    @staticmethod
+    def get_saison_actuelle() -> str:
+        """Alias anglais pour obtenir_saison_actuelle (rétrocompatibilité)."""
+        return JardinService.obtenir_saison_actuelle()
+
+    def obtenir_plantes(self, db: Session | None = None) -> list[GardenItem]:
         """Récupère toutes les plantes du jardin.
 
         Args:
@@ -391,7 +403,11 @@ Réponds en JSON:
                 return session.query(GardenItem).all()
         return db.query(GardenItem).all()
 
-    def get_plantes_a_arroser(self, db: Session | None = None) -> list[GardenItem]:
+    def get_plantes(self, db: Session | None = None) -> list[GardenItem]:
+        """Alias anglais pour obtenir_plantes (rétrocompatibilité)."""
+        return self.obtenir_plantes(db)
+
+    def obtenir_plantes_a_arroser(self, db: Session | None = None) -> list[GardenItem]:
         """Récupère les plantes nécessitant arrosage.
 
         Args:
@@ -404,6 +420,10 @@ Réponds en JSON:
             with obtenir_contexte_db() as session:
                 return self._query_plantes_arrosage(session)
         return self._query_plantes_arrosage(db)
+
+    def get_plantes_a_arroser(self, db: Session | None = None) -> list[GardenItem]:
+        """Alias anglais pour obtenir_plantes_a_arroser (rétrocompatibilité)."""
+        return self.obtenir_plantes_a_arroser(db)
 
     def _query_plantes_arrosage(self, db: Session) -> list[GardenItem]:
         """Query interne pour plantes à arroser."""

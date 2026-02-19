@@ -4,7 +4,7 @@ Génération d'images pour les recettes.
 
 import streamlit as st
 
-from src.services.cuisine.recettes import get_recette_service
+from src.services.cuisine.recettes import obtenir_service_recettes
 
 
 def render_generer_image(recette):
@@ -84,7 +84,7 @@ def render_generer_image(recette):
         if st.button(
             "💾 Sauvegarder cette image", use_container_width=True, key=f"save_img_{recette.id}"
         ):
-            service = get_recette_service()
+            service = obtenir_service_recettes()
             if service:
                 try:
                     recette.url_image = url_image

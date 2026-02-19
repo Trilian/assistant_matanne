@@ -37,7 +37,7 @@ class CacheMemoireN1:
             if entry is None:
                 return None
 
-            if entry.is_expired:
+            if entry.est_expire:
                 self._remove(key)
                 return None
 
@@ -100,6 +100,3 @@ class CacheMemoireN1:
             "max_entries": self.max_entries,
             "usage_percent": len(self._cache) / self.max_entries * 100,
         }
-
-    # Alias anglais
-    get_stats = obtenir_statistiques

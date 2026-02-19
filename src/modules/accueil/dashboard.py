@@ -10,7 +10,7 @@ import streamlit as st
 from src.core.state import GestionnaireEtat, obtenir_etat
 from src.services.cuisine.courses import get_courses_service
 from src.services.cuisine.planning import get_planning_service
-from src.services.cuisine.recettes import get_recette_service
+from src.services.cuisine.recettes import obtenir_service_recettes
 from src.services.inventaire import get_inventaire_service
 from src.ui.components.alertes import alerte_stock
 
@@ -324,7 +324,7 @@ def render_global_stats():
     st.markdown("### 📊 Vue d'Ensemble")
 
     # Charger stats
-    stats_recettes = get_recette_service().get_stats()
+    stats_recettes = obtenir_service_recettes().get_stats()
     stats_inventaire = get_inventaire_service().get_stats()
     stats_courses = get_courses_service().get_stats()
 
@@ -413,7 +413,7 @@ def render_cuisine_summary():
 
         st.markdown("### 💡 Recettes")
 
-        stats = get_recette_service().get_stats(
+        stats = obtenir_service_recettes().get_stats(
             count_filters={
                 "rapides": {"temps_preparation": {"lte": 30}},
                 "bebe": {"compatible_bebe": True},

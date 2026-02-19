@@ -9,6 +9,9 @@ from unittest.mock import patch
 
 import pytest
 
+# Patch target: le service utilise la méthode du mixin en interne
+_PATCH_CATALOGUE = "src.services.maison.jardin_gamification_mixin.JardinGamificationMixin.charger_catalogue_plantes"
+
 
 class TestBadgesJardin:
     """Tests pour les badges de jardin."""
@@ -108,7 +111,16 @@ class TestBadgesJardin:
 class TestGenererTachesJardin:
     """Tests pour generer_taches_jardin."""
 
-    @patch("src.modules.maison.jardin.logic.charger_catalogue_plantes")
+    @pytest.fixture(autouse=True)
+    def _clear_service_cache(self):
+        """Nettoie le cache singleton du service entre chaque test."""
+        from src.modules.maison.jardin.logic import _get_service
+
+        _get_service.cache_clear()
+        yield
+        _get_service.cache_clear()
+
+    @patch(_PATCH_CATALOGUE)
     def test_sans_plantes(self, mock_catalogue):
         """Test génération sans plantes."""
         mock_catalogue.return_value = {"plantes": {}}
@@ -118,7 +130,7 @@ class TestGenererTachesJardin:
         taches = generer_taches_jardin([], {})
         assert isinstance(taches, list)
 
-    @patch("src.modules.maison.jardin.logic.charger_catalogue_plantes")
+    @patch(_PATCH_CATALOGUE)
     def test_tache_semis_interieur(self, mock_catalogue):
         """Test tâche semis si période bonne."""
         mois_actuel = date.today().month
@@ -141,7 +153,7 @@ class TestGenererTachesJardin:
         assert len(semis_taches) >= 1
         assert "Tomate" in semis_taches[0]["titre"]
 
-    @patch("src.modules.maison.jardin.logic.charger_catalogue_plantes")
+    @patch(_PATCH_CATALOGUE)
     def test_pas_semis_si_deja_fait(self, mock_catalogue):
         """Test pas de semis si déjà effectué."""
         mois_actuel = date.today().month
@@ -166,7 +178,7 @@ class TestGenererTachesJardin:
         ]
         assert len(semis_taches) == 0
 
-    @patch("src.modules.maison.jardin.logic.charger_catalogue_plantes")
+    @patch(_PATCH_CATALOGUE)
     def test_tache_arrosage_chaleur(self, mock_catalogue):
         """Test tâche arrosage si température élevée."""
         mock_catalogue.return_value = {"plantes": {}}
@@ -182,7 +194,7 @@ class TestGenererTachesJardin:
         assert len(arrosage_taches) >= 1
         assert arrosage_taches[0]["priorite"] == "urgente"
 
-    @patch("src.modules.maison.jardin.logic.charger_catalogue_plantes")
+    @patch(_PATCH_CATALOGUE)
     def test_arrosage_haute_priorite(self, mock_catalogue):
         """Test arrosage haute priorité si temp > 20."""
         mock_catalogue.return_value = {"plantes": {}}
@@ -198,7 +210,7 @@ class TestGenererTachesJardin:
         assert len(arrosage_taches) >= 1
         assert arrosage_taches[0]["priorite"] == "haute"
 
-    @patch("src.modules.maison.jardin.logic.charger_catalogue_plantes")
+    @patch(_PATCH_CATALOGUE)
     def test_pas_arrosage_si_pluie(self, mock_catalogue):
         """Test pas d'arrosage si pluie prévue."""
         mock_catalogue.return_value = {"plantes": {}}
@@ -213,7 +225,7 @@ class TestGenererTachesJardin:
         arrosage_taches = [t for t in taches if t.get("type") == "arrosage"]
         assert len(arrosage_taches) == 0
 
-    @patch("src.modules.maison.jardin.logic.charger_catalogue_plantes")
+    @patch(_PATCH_CATALOGUE)
     def test_tache_protection_gel(self, mock_catalogue):
         """Test tâche protection si gel prévu."""
         mock_catalogue.return_value = {"plantes": {}}
@@ -229,7 +241,7 @@ class TestGenererTachesJardin:
         assert len(protection_taches) >= 1
         assert protection_taches[0]["priorite"] == "urgente"
 
-    @patch("src.modules.maison.jardin.logic.charger_catalogue_plantes")
+    @patch(_PATCH_CATALOGUE)
     def test_pas_protection_si_pas_plantes_terre(self, mock_catalogue):
         """Test pas de protection si pas de plantes en terre."""
         mock_catalogue.return_value = {"plantes": {}}
@@ -244,7 +256,7 @@ class TestGenererTachesJardin:
         protection_taches = [t for t in taches if t.get("type") == "protection"]
         assert len(protection_taches) == 0
 
-    @patch("src.modules.maison.jardin.logic.charger_catalogue_plantes")
+    @patch(_PATCH_CATALOGUE)
     def test_structure_tache(self, mock_catalogue):
         """Test structure d'une tâche générée."""
         mock_catalogue.return_value = {"plantes": {}}
@@ -264,7 +276,7 @@ class TestGenererTachesJardin:
             assert "priorite" in tache
             assert "duree_min" in tache
 
-    @patch("src.modules.maison.jardin.logic.charger_catalogue_plantes")
+    @patch(_PATCH_CATALOGUE)
     def test_tache_plantation_exterieur(self, mock_catalogue):
         """Test tâche plantation si plants prêts."""
         mois_actuel = date.today().month

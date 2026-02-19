@@ -11,7 +11,7 @@ Fonctionnalités:
 
 import streamlit as st
 
-from src.services.cuisine.recettes import get_recette_service
+from src.services.cuisine.recettes import obtenir_service_recettes
 
 # Import externe pour l'onglet import
 from ..recettes_import import render_importer
@@ -35,7 +35,7 @@ def app():
 
     # Si une recette est sélectionnée, afficher son détail
     if st.session_state.detail_recette_id is not None:
-        service = get_recette_service()
+        service = obtenir_service_recettes()
         if service is not None:
             recette = service.get_by_id_full(st.session_state.detail_recette_id)
             if recette:
