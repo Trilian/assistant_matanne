@@ -371,17 +371,17 @@ barre_progression(75, 100, "Progression")
 
 ## Layouts (layouts.py)
 
-### `disposition_grille(items, colonnes, render_func)`
+### `disposition_grille(items, colonnes_par_ligne, rendu_carte, cle)`
 
 Grille responsive.
 
 ```python
 from src.ui.components import disposition_grille
 
-def render_recette(recette):
-    st.write(recette.nom)
+def rendu_recette(recette, key):
+    st.write(recette["nom"])
 
-disposition_grille(recettes, colonnes=3, render_func=render_recette)
+disposition_grille(recettes, colonnes_par_ligne=3, rendu_carte=rendu_recette)
 ```
 
 ### `carte_item(titre, metadonnees, statut, ...)`
@@ -560,49 +560,139 @@ else:
 
 ---
 
-## Module CRUD Générique (core/)
+## Vues Extraites (views/)
 
-### ConfigurationModule
+Fonctions d'affichage extraites des services pour respecter la séparation UI/logique.
 
-Dataclass de configuration pour générer un module CRUD complet.
+### Authentification (authentification.py)
 
 ```python
-from src.ui.core import ConfigurationModule, creer_module_ui
-
-config = ConfigurationModule(
-    name="recettes",
-    title="Recettes",
-    icon="🍽️",
-    service=recette_service,
-    display_fields=[{"key": "nom", "label": "Nom"}],
-    search_fields=["nom", "description"],
-    filters_config={"categorie": ["Entrée", "Plat", "Dessert"]},
-    stats_config=[{"label": "Total", "value_key": "count"}],
-    actions=[{"label": "Voir", "icon": "👁️", "callback": voir_recette}],
-    status_field="statut",
-    status_colors={"actif": "#4CAF50", "archive": "#9E9E9E"},
-    items_per_page=20,
+from src.ui.views import (
+    afficher_formulaire_connexion,
+    afficher_menu_utilisateur,
+    afficher_parametres_profil,
+    require_authenticated,
+    require_role,
 )
 
-module = creer_module_ui(config)
-module.render()  # UI complète générée automatiquement
+# Formulaire de connexion
+afficher_formulaire_connexion(rediriger_apres_succes=True)
+
+# Menu utilisateur dans la sidebar
+afficher_menu_utilisateur()
+
+# Page paramètres profil
+afficher_parametres_profil()
+
+# Décorateurs de protection
+@require_authenticated
+def page_protegee():
+    st.write("Contenu protégé")
+
+@require_role(Role.ADMIN)
+def page_admin():
+    st.write("Admin uniquement")
 ```
 
-### ConstructeurFormulaire
-
-Générateur de formulaires dynamiques.
+### Historique (historique.py)
 
 ```python
-from src.ui.core import ConstructeurFormulaire
+from src.ui.views import afficher_timeline_activite, afficher_activite_utilisateur, afficher_statistiques_activite
 
-builder = ConstructeurFormulaire()
-builder.ajouter_texte("nom", "Nom de la recette", requis=True)
-builder.ajouter_nombre("temps", "Temps (min)", min_val=5, max_val=240)
-builder.ajouter_selection("categorie", "Catégorie", ["Entrée", "Plat", "Dessert"])
+# Timeline d'activité récente (10 dernières par défaut)
+afficher_timeline_activite(limit=10)
 
-if builder.valider():
-    donnees = builder.obtenir_donnees()
-    # {"nom": "...", "temps": 30, "categorie": "Plat"}
+# Activité d'un utilisateur spécifique
+afficher_activite_utilisateur(user_id="...")
+
+# Statistiques d'activité globales
+afficher_statistiques_activite()
+```
+
+### Import Recettes (import_recettes.py)
+
+```python
+from src.ui.views import afficher_import_recette
+
+# Interface d'import URL/PDF
+afficher_import_recette()
+```
+
+### Notifications Push (notifications.py)
+
+```python
+from src.ui.views import afficher_demande_permission_push, afficher_preferences_notification
+
+# Demander permission push au navigateur
+afficher_demande_permission_push()
+
+# Paramètres de notifications
+afficher_preferences_notification()
+```
+
+### Météo Jardin (meteo.py)
+
+```python
+from src.ui.views import afficher_meteo_jardin
+
+# Alertes météo pour le jardin
+afficher_meteo_jardin()
+```
+
+### Sauvegarde (sauvegarde.py)
+
+```python
+from src.ui.views import afficher_sauvegarde
+
+# Interface backup/restauration complète
+afficher_sauvegarde()
+```
+
+### Synchronisation (synchronisation.py)
+
+```python
+from src.ui.views import (
+    afficher_indicateur_presence,
+    afficher_indicateur_frappe,
+    afficher_statut_synchronisation,
+    afficher_invite_installation_pwa,
+)
+
+# Utilisateurs connectés en temps réel
+afficher_indicateur_presence()
+
+# Indicateurs de frappe
+afficher_indicateur_frappe()
+
+# Statut sync
+afficher_statut_synchronisation()
+
+# Bouton install PWA
+afficher_invite_installation_pwa()
+```
+
+### Jeux (jeux.py)
+
+```python
+from src.ui.views import afficher_badge_notifications_jeux, afficher_notification_jeux, afficher_liste_notifications_jeux
+
+# Badge compteur non-lues
+afficher_badge_notifications_jeux(service=None)
+
+# Notification individuelle
+afficher_notification_jeux(notification)
+
+# Liste paginée
+afficher_liste_notifications_jeux(service=None, limite=10, type_jeu=None)
+```
+
+### PWA (pwa.py)
+
+```python
+from src.ui.views import injecter_meta_pwa
+
+# Appelé dans app.py après injecter_css()
+injecter_meta_pwa()
 ```
 
 ---
@@ -613,13 +703,32 @@ if builder.valider():
 
 ```python
 # ✅ Import depuis le point d'entrée unifié
-from src.ui import badge, carte_metrique_avancee, afficher_succes
+from src.ui import badge, carte_metrique_avancee, afficher_succes, etat_vide
 
-# ✅ Import spécifique si besoin de tout un module
-from src.ui.tablet import TabletMode, get_tablet_mode
+# ✅ Import spécifique par sous-package
+from src.ui.tablet import ModeTablette, obtenir_mode_tablette
+from src.ui.views import afficher_timeline_activite
+from src.ui.integrations import verifier_config_google
 
-# ❌ Éviter les imports profonds
-from src.ui.components.atoms import badge  # Fonctionne mais moins propre
+# ✅ Import dans _common.py des modules métier
+from src.ui.components.atoms import etat_vide  # re-exporté via _common.py
+
+# ❌ Éviter les imports profonds dans le code métier
+from src.ui.components.atoms import badge  # Préférer from src.ui import badge
+```
+
+### Motif `etat_vide`
+
+Utiliser `etat_vide()` au lieu de `st.info("Aucun ...")` pour les états vides :
+
+```python
+from src.ui import etat_vide
+
+# ✅ Composant unifié
+etat_vide("Aucune recette trouvée", "🍽️", "Ajoutez votre première recette")
+
+# ❌ Ancien style
+st.info("Aucune recette trouvée")
 ```
 
 ### Cache
@@ -634,19 +743,29 @@ Les composants avec calculs coûteux utilisent `@st.cache_data`:
 Pour le chargement différé des modules, voir `src/core/lazy_loader.py`.
 Chaque module métier (`src/modules/`) exporte une fonction `app()` comme point d'entrée.
 
+### Nommage
+
+- Fonctions d'affichage : `afficher_*()`
+- Fonctions d'obtention : `obtenir_*()`
+- Fonctions de définition : `definir_*()`
+- Classes : `NomEnFrancais` (PascalCase)
+- Constantes : `NOM_EN_MAJUSCULES`
+
 ---
 
-## Imports
+## Imports Rapides
 
 ```python
-# Import depuis le point d'entrée unifié
+# Point d'entrée unifié (~90 exports)
 from src.ui import badge, carte_metrique_avancee, afficher_succes
 
-# Import spécifique si besoin de tout un module
-from src.ui.tablet import TabletMode, get_tablet_mode
-
-# Import direct depuis sous-module
+# Sous-packages spécifiques
 from src.ui.components import graphique_repartition_repas
+from src.ui.feedback import spinner_intelligent, SuiviProgression
+from src.ui.tablet import ModeTablette, bouton_tablette
+from src.ui.views import afficher_sauvegarde, afficher_timeline_activite
 from src.ui.integrations import verifier_config_google
-from src.ui.core import ConfigurationModule, ModuleUIBase
+
+# Layout (réservé à app.py)
+from src.ui.layout import afficher_header, afficher_sidebar, injecter_css
 ```

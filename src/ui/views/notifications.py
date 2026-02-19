@@ -86,11 +86,30 @@ def afficher_demande_permission_push():
                     applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
                 }});
 
-                // Envoyer l'abonnement au serveur
-                console.log('Push subscription:', JSON.stringify(subscription));
-                // TODO: Créer un endpoint FastAPI POST /api/push/subscribe
-                // qui appelle notif_web.sauvegarder_abonnement_supabase()
-                // puis envoyer via fetch() depuis ce JS
+                // Envoyer l'abonnement au serveur via l'API FastAPI
+                const subscriptionJSON = subscription.toJSON();
+                try {{
+                    const response = await fetch('/api/v1/push/subscribe', {{
+                        method: 'POST',
+                        headers: {{
+                            'Content-Type': 'application/json',
+                            // Note: Le JWT token devrait être récupéré depuis localStorage
+                            // ou un cookie si l'authentification est requise
+                        }},
+                        body: JSON.stringify({{
+                            endpoint: subscriptionJSON.endpoint,
+                            keys: subscriptionJSON.keys
+                        }})
+                    }});
+
+                    if (response.ok) {{
+                        console.log('Push subscription saved to server');
+                    }} else {{
+                        console.error('Failed to save push subscription:', await response.text());
+                    }}
+                }} catch (error) {{
+                    console.error('Error sending subscription to server:', error);
+                }}
             }}
         }}
 

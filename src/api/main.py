@@ -56,6 +56,10 @@ tags_metadata = [
         "description": "Planning des repas de la semaine",
     },
     {
+        "name": "Notifications Push",
+        "description": "Gestion des abonnements Web Push pour notifications",
+    },
+    {
         "name": "IA",
         "description": "Suggestions intelligentes via Mistral AI",
     },
@@ -302,10 +306,12 @@ async def get_api_metrics():
 
 
 from src.api.routes.auth import router as auth_router
+from src.api.routes.push import router as push_router
 
 app.include_router(auth_router)
 app.include_router(recettes_router)
 app.include_router(inventaire_router)
 app.include_router(courses_router)
 app.include_router(planning_router)
+app.include_router(push_router)
 app.include_router(suggestions_router)
