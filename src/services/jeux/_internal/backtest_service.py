@@ -114,10 +114,6 @@ class BacktestService:
     MAX_TIRAGES_ATTENTE_LOTO = 50
     MAX_MATCHS_ATTENTE_PARIS = 30
 
-    def __init__(self):
-        """Initialise le service."""
-        pass
-
     # ───────────────────────────────────────────────────────────────
     # BACKTESTING LOTO
     # ───────────────────────────────────────────────────────────────

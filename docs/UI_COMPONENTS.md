@@ -419,35 +419,6 @@ if modale.ouvrir():
         modale.fermer()
 ```
 
-### `ListeDynamique`
-
-Liste avec ajout/suppression dynamique.
-
-```python
-from src.ui.components import ListeDynamique
-
-liste = ListeDynamique("ingredients", ["Farine", "Sucre"])
-elements = liste.render()  # Retourne liste mise à jour
-```
-
-### `AssistantEtapes`
-
-Assistant multi-étapes (wizard).
-
-```python
-from src.ui.components import AssistantEtapes
-
-assistant = AssistantEtapes(["Info", "Ingrédients", "Instructions"])
-etape = assistant.render()
-
-if etape == 0:
-    # Formulaire info
-    pass
-elif etape == 1:
-    # Formulaire ingrédients
-    pass
-```
-
 ---
 
 ## Feedback (feedback/)
@@ -503,49 +474,49 @@ GestionnaireNotifications.rendre()  # Dans le main
 ### Configuration
 
 ```python
-from src.ui.tablet import TabletMode, get_tablet_mode, set_tablet_mode
+from src.ui.tablet import ModeTablette, obtenir_mode_tablette, definir_mode_tablette
 
-# Modes: NORMAL, TABLET, KITCHEN
-mode = get_tablet_mode()
-set_tablet_mode(TabletMode.KITCHEN)
+# Modes: NORMAL, TABLETTE, CUISINE
+mode = obtenir_mode_tablette()
+definir_mode_tablette(ModeTablette.CUISINE)
 ```
 
 ### Styles
 
 ```python
-from src.ui.tablet import TABLET_CSS, KITCHEN_MODE_CSS, apply_tablet_mode, close_tablet_mode
+from src.ui.tablet import CSS_TABLETTE, CSS_MODE_CUISINE, appliquer_mode_tablette, fermer_mode_tablette
 
-apply_tablet_mode()    # Active le CSS tablette
-close_tablet_mode()    # Remet en mode normal
+appliquer_mode_tablette()    # Active le CSS tablette
+fermer_mode_tablette()       # Remet en mode normal
 ```
 
 ### Widgets Tactiles
 
 ```python
-from src.ui.tablet import tablet_button, tablet_select_grid, tablet_number_input, tablet_checklist
+from src.ui.tablet import bouton_tablette, grille_selection_tablette, saisie_nombre_tablette, liste_cases_tablette
 
 # Bouton large tactile
-if tablet_button("Valider", icon="✓", key="btn_valider"):
+if bouton_tablette("Valider", icon="✓", key="btn_valider"):
     # Action
     pass
 
-# Grille de sélection
-selection = tablet_select_grid(
-    options=["Entrée", "Plat", "Dessert"],
+# Grille de sélection (3 colonnes par défaut)
+selection = grille_selection_tablette(
+    options=[{"label": "Entrée"}, {"label": "Plat"}, {"label": "Dessert"}],
     key="select_type"
 )
 
-# Input numérique avec +/-
-quantite = tablet_number_input(
+# Input numérique avec boutons +/-
+quantite = saisie_nombre_tablette(
     label="Quantité",
-    value=4,
-    min_val=1,
-    max_val=20,
-    key="qty"
+    key="qty",
+    min_value=1,
+    max_value=20,
+    default=4
 )
 
 # Checklist tactile
-selections = tablet_checklist(
+selections = liste_cases_tablette(
     items=["Œufs", "Lait", "Farine"],
     key="ingredients"
 )
@@ -554,13 +525,13 @@ selections = tablet_checklist(
 ### Vue Cuisine
 
 ```python
-from src.ui.tablet import render_kitchen_recipe_view, render_mode_selector
+from src.ui.tablet import afficher_vue_recette_cuisine, afficher_selecteur_mode
 
-# Sélecteur de mode UI
-render_mode_selector()
+# Sélecteur de mode UI (dans la sidebar)
+afficher_selecteur_mode()
 
-# Vue recette format cuisine (grandes étapes, navigation tactile)
-render_kitchen_recipe_view(recette)
+# Vue recette format cuisine (step-by-step, navigation tactile)
+afficher_vue_recette_cuisine(recette, cle="kitchen_recipe")
 ```
 
 ---
@@ -572,19 +543,19 @@ render_kitchen_recipe_view(recette)
 ```python
 from src.ui.integrations import (
     verifier_config_google,
-    render_google_calendar_config,
-    render_sync_status,
-    render_quick_sync_button,
+    afficher_config_google_calendar,
+    afficher_statut_sync_google,
+    afficher_bouton_sync_rapide,
     GOOGLE_SCOPES,
     REDIRECT_URI_LOCAL
 )
 
 # Vérifier la configuration
 if verifier_config_google():
-    render_sync_status()
-    render_quick_sync_button()
+    afficher_statut_sync_google()
+    afficher_bouton_sync_rapide()
 else:
-    render_google_calendar_config()
+    afficher_config_google_calendar()
 ```
 
 ---
