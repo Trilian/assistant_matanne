@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/courses/types.py
 
 Tests des modèles Pydantic:
@@ -11,7 +11,7 @@ Tests des modèles Pydantic:
 import pytest
 from pydantic import ValidationError
 
-from src.services.courses.types import (
+from src.services.cuisine.courses.types import (
     ArticleCourse,
     ListeCoursesIntelligente,
     ShoppingItem,

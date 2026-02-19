@@ -1,13 +1,13 @@
-"""Tests pour le service de récurrence."""
+﻿"""Tests pour le service de récurrence."""
 
 from datetime import date, datetime, timedelta
 
 import pytest
 
-from src.services.planning.recurrence import (
+from src.services.cuisine.planning.recurrence import (
     JOURS_SEMAINE_INDEX as JOURS_SEMAINE,
 )
-from src.services.planning.recurrence import (
+from src.services.cuisine.planning.recurrence import (
     OPTIONS_RECURRENCE,
     ServiceRecurrence,
     TypeRecurrence,

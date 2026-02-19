@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour service.py
 
 Module: src.services.budget.service
@@ -8,7 +8,7 @@ Couverture cible: >80%
 from datetime import date
 from unittest.mock import MagicMock, patch
 
-from src.services.budget.schemas import (
+from src.services.famille.budget.schemas import (
     CategorieDepense,
     Depense,
     FactureMaison,
@@ -16,7 +16,7 @@ from src.services.budget.schemas import (
     PrevisionDepense,
     ResumeFinancier,
 )
-from src.services.budget.service import (
+from src.services.famille.budget.service import (
     BudgetService,
     get_budget_service,
 )
@@ -71,7 +71,7 @@ class TestGetBudgetService:
     def test_retourne_instance(self):
         """Factory retourne une instance."""
         # Reset le singleton pour le test
-        import src.services.budget.service as module
+        import src.services.famille.budget.service as module
 
         module._budget_service = None
 
@@ -94,7 +94,7 @@ class TestGetBudgetService:
 class TestAjouterDepense:
     """Tests pour ajouter_depense."""
 
-    @patch("src.services.budget.service.obtenir_contexte_db")
+    @patch("src.services.famille.budget.service.obtenir_contexte_db")
     def test_ajouter_depense_simple(self, mock_db_ctx):
         """Ajout d'une dépense simple."""
         mock_session = MagicMock()
@@ -121,7 +121,7 @@ class TestAjouterDepense:
         assert mock_session.add.called
         assert mock_session.commit.called
 
-    @patch("src.services.budget.service.obtenir_contexte_db")
+    @patch("src.services.famille.budget.service.obtenir_contexte_db")
     def test_ajouter_depense_recurrente(self, mock_db_ctx):
         """Ajout d'une dépense récurrente."""
         mock_session = MagicMock()
@@ -421,7 +421,7 @@ class TestGetTendances:
 class TestPrevoirDepenses:
     """Tests pour prevoir_depenses."""
 
-    @patch("src.services.budget.service.obtenir_contexte_db")
+    @patch("src.services.famille.budget.service.obtenir_contexte_db")
     def test_prevoir_depenses(self, mock_db_ctx):
         """Génère des prévisions."""
         mock_session = MagicMock()

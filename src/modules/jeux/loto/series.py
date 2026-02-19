@@ -20,15 +20,14 @@ import streamlit as st
 
 from src.services.jeux import (
     LotoDataService,
-    SeriesService,
-    get_sync_service,
-)
-from src.services.jeux.loto_data import (
     NB_NUMEROS_CHANCE,
     NB_NUMEROS_PRINCIPAUX,
     NUMEROS_PAR_TIRAGE,
+    SEUIL_VALUE_ALERTE,
+    SEUIL_VALUE_HAUTE,
+    SeriesService,
+    get_sync_service,
 )
-from src.services.jeux.series_service import SEUIL_VALUE_ALERTE, SEUIL_VALUE_HAUTE
 
 logger = logging.getLogger(__name__)
 

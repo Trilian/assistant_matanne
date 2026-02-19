@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Plan Jardin - Gestion du plan 2D avec zones et plantes.
 
 Features:
@@ -15,7 +15,7 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from src.core.ai import ClientIA
-from src.services.base import BaseAIService
+from src.services.core.base import BaseAIService
 
 from .schemas import (
     ActionPlanteCreate,

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Projets - Gestion intelligente des projets maison avec estimation IA.
 
 Features:
@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from src.core.ai import ClientIA
 from src.core.db import obtenir_contexte_db
 from src.core.models import Project
-from src.services.base import BaseAIService
+from src.services.core.base import BaseAIService
 
 from .schemas import (
     MaterielProjet,

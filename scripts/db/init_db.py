@@ -16,10 +16,10 @@ sys.path.insert(0, str(project_root))
 from sqlalchemy import text
 
 from src.core.db import obtenir_moteur
-from src.core.logging import get_logger
+from src.core.logging import obtenir_logger
 from src.core.models import Base
 
-logger = get_logger(__name__)
+logger = obtenir_logger(__name__)
 
 
 def drop_all_tables():

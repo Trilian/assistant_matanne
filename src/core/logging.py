@@ -47,9 +47,7 @@ __all__ = [
     "FiltreSecrets",
     "FormatteurColore",
     "GestionnaireLog",
-    "LogManager",
     "obtenir_logger",
-    "get_logger",
 ]
 """
 Logging - Système de logging centralisé.
@@ -261,30 +259,6 @@ class GestionnaireLog:
     def activer_production():
         """Active le mode production (INFO uniquement)."""
         GestionnaireLog.definir_niveau("INFO")
-
-
-# ═══════════════════════════════════════════════════════════
-# ALIAS ANGLAIS (pour compatibilité)
-# ═══════════════════════════════════════════════════════════
-
-# Alias de classe
-LogManager = GestionnaireLog
-
-
-# Alias de méthodes au niveau module
-def init(log_level: str = "INFO"):
-    """Alias anglais pour initialiser()"""
-    return GestionnaireLog.initialiser(log_level)
-
-
-def get_logger(name: str) -> logging.Logger:
-    """Alias anglais pour obtenir_logger()"""
-    return GestionnaireLog.obtenir_logger(name)
-
-
-# Ajouter les alias directement sur la classe
-LogManager.init = staticmethod(init)
-LogManager.get_logger = staticmethod(get_logger)
 
 
 # Fonction raccourci française

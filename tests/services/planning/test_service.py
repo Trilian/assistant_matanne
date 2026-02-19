@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/planning/service.py
 
 Tests du service de planning avec mocks.
@@ -9,8 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.services.planning.service import ServicePlanning
-from src.services.planning.types import JourPlanning, ParametresEquilibre
+from src.services.cuisine.planning.service import ServicePlanning
+from src.services.cuisine.planning.types import JourPlanning, ParametresEquilibre
 
 
 class TestServicePlanningInit:
@@ -18,13 +18,13 @@ class TestServicePlanningInit:
 
     def test_service_creation(self):
         """Vérifie que le service peut être créé."""
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             service = ServicePlanning()
             assert service is not None
 
     def test_service_has_model(self):
         """Vérifie que le service a un modèle défini."""
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             service = ServicePlanning()
             assert service.model is not None
 
@@ -35,7 +35,7 @@ class TestServicePlanningMethods:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             return ServicePlanning()
 
     @pytest.fixture
@@ -141,14 +141,14 @@ class TestServicePlanningCache:
 
     def test_cache_key_generation(self):
         """Vérifie la génération des clés de cache."""
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             service = ServicePlanning()
             # Le service utilise des décorateurs @avec_cache
             assert hasattr(service, "get_planning")
 
     def test_cache_ttl(self):
         """Vérifie le TTL de cache configuré."""
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             service = ServicePlanning()
             assert service.cache_ttl == 1800  # 30 minutes
 
@@ -171,7 +171,7 @@ class TestServicePlanningIntegration:
 
     def test_get_planning_complet_format(self, mock_planning):
         """Vérifie le format de retour de get_planning_complet."""
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             service = ServicePlanning()
 
             mock_db = MagicMock()
@@ -196,7 +196,7 @@ class TestServicePlanningPlanningComplet:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             return ServicePlanning()
 
     def test_get_planning_complet_with_repas(self, service):
@@ -239,7 +239,7 @@ class TestServicePlanningSuggestions:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             return ServicePlanning()
 
     @pytest.fixture
@@ -277,7 +277,7 @@ class TestServicePlanningCreerAvecChoix:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             return ServicePlanning()
 
     def test_creer_planning_avec_choix_empty_selection(self, service):
@@ -324,7 +324,7 @@ class TestServicePlanningAgregerCourses:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             return ServicePlanning()
 
     def test_agreger_courses_planning_not_found(self, service):
@@ -571,7 +571,7 @@ class TestServicePlanningGenererIA:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             return ServicePlanning()
 
     def test_generer_planning_ia_method_exists(self, service):
@@ -585,7 +585,7 @@ class TestServicePlanningGetPlanning:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             return ServicePlanning()
 
     def test_get_planning_with_id(self, service):
@@ -627,7 +627,7 @@ class TestGenererPlanningIA:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             return ServicePlanning()
 
     @pytest.fixture
@@ -655,7 +655,7 @@ class TestGenererPlanningIA:
 
         with (
             patch.object(service, "call_with_list_parsing_sync", return_value=mock_jours),
-            patch("src.services.planning.service.Cache"),
+            patch("src.services.cuisine.planning.service.Cache"),
         ):
             _result = service.generer_planning_ia(
                 semaine_debut=date(2024, 1, 15), preferences={}, db=mock_db
@@ -703,7 +703,7 @@ class TestGenererPlanningIA:
 
         with (
             patch.object(service, "call_with_list_parsing_sync", return_value=mock_jours),
-            patch("src.services.planning.service.Cache"),
+            patch("src.services.cuisine.planning.service.Cache"),
         ):
             _result = service.generer_planning_ia(
                 semaine_debut=date(2024, 1, 15), preferences=preferences, db=mock_db
@@ -726,7 +726,7 @@ class TestGenererPlanningIA:
 
         with (
             patch.object(service, "call_with_list_parsing_sync", return_value=mock_jours),
-            patch("src.services.planning.service.Cache"),
+            patch("src.services.cuisine.planning.service.Cache"),
         ):
             service.generer_planning_ia(semaine_debut=date(2024, 1, 15), db=mock_db)
 
@@ -746,31 +746,31 @@ class TestServicePlanningFactories:
 
     def test_obtenir_service_planning(self):
         """Test de la factory principale."""
-        from src.services.planning.service import obtenir_service_planning
+        from src.services.cuisine.planning.service import obtenir_service_planning
 
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             service = obtenir_service_planning()
             assert service is not None
             assert isinstance(service, ServicePlanning)
 
     def test_get_planning_service_alias(self):
         """Test de l'alias anglais."""
-        from src.services.planning.service import get_planning_service
+        from src.services.cuisine.planning.service import get_planning_service
 
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             service = get_planning_service()
             assert service is not None
             assert isinstance(service, ServicePlanning)
 
     def test_singleton_pattern(self):
         """Test que la factory retourne un singleton."""
-        import src.services.planning.service as service_module
-        from src.services.planning.service import obtenir_service_planning
+        import src.services.cuisine.planning.service as service_module
+        from src.services.cuisine.planning.service import obtenir_service_planning
 
         # Reset singleton
         service_module._service_planning = None
 
-        with patch("src.services.planning.service.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.service.obtenir_client_ia"):
             service1 = obtenir_service_planning()
             service2 = obtenir_service_planning()
             assert service1 is service2
@@ -781,6 +781,6 @@ class TestPlanningServiceAlias:
 
     def test_alias_exists(self):
         """Vérifie que l'alias existe."""
-        from src.services.planning.service import PlanningService
+        from src.services.cuisine.planning.service import PlanningService
 
         assert PlanningService is ServicePlanning

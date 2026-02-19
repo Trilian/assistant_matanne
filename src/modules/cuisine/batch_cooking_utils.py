@@ -7,7 +7,7 @@ import logging
 from datetime import date, datetime, time, timedelta
 from typing import Any
 
-from src.core.formatters import formater_temps
+from src.core.date_utils import formater_temps
 
 logger = logging.getLogger(__name__)
 

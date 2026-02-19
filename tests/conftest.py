@@ -1,4 +1,4 @@
-"""
+﻿"""
 Pytest configuration and shared fixtures for all tests.
 
 This module provides:
@@ -39,10 +39,10 @@ from src.core.models import (  # noqa: E402
     Planning,
     Recette,
 )
-from src.services.courses import CoursesService  # noqa: E402
+from src.services.cuisine.courses import CoursesService  # noqa: E402
 from src.services.inventaire import InventaireService  # noqa: E402
-from src.services.planning import PlanningService  # noqa: E402
-from src.services.recettes import RecetteService  # noqa: E402
+from src.services.cuisine.planning import PlanningService  # noqa: E402
+from src.services.cuisine.recettes import RecetteService  # noqa: E402
 
 # ==================== DATABASE SETUP - SQLite JSON compatibility ====================
 

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Interface UI pour l'historique d'activité.
 
 Note: Ce fichier a été extrait depuis src/services/utilisateur/historique.py
@@ -7,7 +7,7 @@ pour respecter la séparation UI/Services.
 
 import streamlit as st
 
-from src.services.utilisateur.historique import get_action_history_service
+from src.services.core.utilisateur.historique import get_action_history_service
 
 
 def afficher_timeline_activite(limit: int = 10):

@@ -1,4 +1,4 @@
-"""Tests pour src/services/notifications/notif_web.py - ServiceWebPush.
+﻿"""Tests pour src/services/notifications/notif_web.py - ServiceWebPush.
 
 Couverture des fonctionnalités:
 - Gestion des abonnements push
@@ -12,11 +12,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.services.notifications.notif_web import (
+from src.services.core.notifications.notif_web import (
     ServiceWebPush,
     obtenir_service_webpush,
 )
-from src.services.notifications.types import (
+from src.services.core.notifications.types import (
     AbonnementPush,
     NotificationPush,
     PreferencesNotification,
@@ -89,7 +89,7 @@ class TestServiceWebPushInit:
 
     def test_factory_obtenir_service(self):
         """Test factory obtenir_service_webpush."""
-        import src.services.notifications.notif_web as module
+        import src.services.core.notifications.notif_web as module
 
         # Reset singleton
         if hasattr(module, "_service_webpush"):
@@ -266,7 +266,7 @@ class TestDoitEnvoyer:
         service._preferences["user123"] = preferences
 
         # Mock datetime pour 3h du matin
-        with patch("src.services.notifications.notif_web.datetime") as mock_dt:
+        with patch("src.services.core.notifications.notif_web.datetime") as mock_dt:
             mock_now = MagicMock()
             mock_now.hour = 3
             mock_dt.now.return_value = mock_now
@@ -283,7 +283,7 @@ class TestDoitEnvoyer:
         service._preferences["user123"] = preferences
 
         # Simuler 5 envois cette heure avec le vrai datetime
-        from src.services.notifications.utils import generer_cle_compteur
+        from src.services.core.notifications.utils import generer_cle_compteur
 
         now = datetime.now()
         count_key = generer_cle_compteur("user123", now)
@@ -526,7 +526,7 @@ class TestGetSupabaseClient:
             type(service), "_get_supabase_client", side_effect=Exception("Test error")
         ):
             # Appeler via le module
-            from src.services.notifications.notif_web import ServiceWebPush
+            from src.services.core.notifications.notif_web import ServiceWebPush
 
             svc = ServiceWebPush()
             # La vraie méthode doit capturer les exceptions
@@ -1030,31 +1030,31 @@ class TestAliasRetrocompatibilite:
 
     def test_alias_push_notification_service(self):
         """Alias PushNotificationService disponible."""
-        from src.services.notifications.notif_web import PushNotificationService
+        from src.services.core.notifications.notif_web import PushNotificationService
 
         assert PushNotificationService is ServiceWebPush
 
     def test_alias_get_push_notification_service(self):
         """Alias get_push_notification_service disponible."""
-        from src.services.notifications.notif_web import get_push_notification_service
+        from src.services.core.notifications.notif_web import get_push_notification_service
 
         assert get_push_notification_service is obtenir_service_webpush
 
     def test_alias_push_subscription(self):
         """Alias PushSubscription disponible."""
-        from src.services.notifications.notif_web import PushSubscription
+        from src.services.core.notifications.notif_web import PushSubscription
 
         assert PushSubscription is AbonnementPush
 
     def test_alias_push_notification(self):
         """Alias PushNotification disponible."""
-        from src.services.notifications.notif_web import PushNotification
+        from src.services.core.notifications.notif_web import PushNotification
 
         assert PushNotification is NotificationPush
 
     def test_alias_notification_preferences(self):
         """Alias NotificationPreferences disponible."""
-        from src.services.notifications.notif_web import NotificationPreferences
+        from src.services.core.notifications.notif_web import NotificationPreferences
 
         assert NotificationPreferences is PreferencesNotification
 

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/weather/service.py
 
 Couvre le service météo principal avec mocks des appels HTTP et base de données.
@@ -12,7 +12,7 @@ from uuid import uuid4
 import httpx
 import pytest
 
-from src.services.weather.service import (
+from src.services.integrations.weather.service import (
     AlerteMeteo,
     MeteoJour,
     NiveauAlerte,
@@ -831,21 +831,21 @@ class TestFactory:
 
     def test_obtenir_service_meteo(self):
         """Factory retourne un service."""
-        from src.services.weather.service import obtenir_service_meteo
+        from src.services.integrations.weather.service import obtenir_service_meteo
 
         service = obtenir_service_meteo()
         assert isinstance(service, ServiceMeteo)
 
     def test_get_weather_service(self):
         """Alias anglais fonctionne."""
-        from src.services.weather.service import get_weather_service
+        from src.services.integrations.weather.service import get_weather_service
 
         service = get_weather_service()
         assert isinstance(service, ServiceMeteo)
 
     def test_get_weather_garden_service(self):
         """Alias rétrocompatibilité fonctionne."""
-        from src.services.weather.service import get_weather_garden_service
+        from src.services.integrations.weather.service import get_weather_garden_service
 
         service = get_weather_garden_service()
         assert isinstance(service, ServiceMeteo)
@@ -861,12 +861,12 @@ class TestAlias:
 
     def test_weather_garden_service_alias(self):
         """WeatherGardenService est alias de ServiceMeteo."""
-        from src.services.weather.service import WeatherGardenService
+        from src.services.integrations.weather.service import WeatherGardenService
 
         assert WeatherGardenService is ServiceMeteo
 
     def test_weather_service_alias(self):
         """WeatherService est alias de ServiceMeteo."""
-        from src.services.weather.service import WeatherService
+        from src.services.integrations.weather.service import WeatherService
 
         assert WeatherService is ServiceMeteo

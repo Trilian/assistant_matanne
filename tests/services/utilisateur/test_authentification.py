@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/utilisateur/authentification.py
 Cible: Couverture >80%
 
@@ -18,7 +18,7 @@ import pytest
 # ═══════════════════════════════════════════════════════════
 # IMPORTS DU MODULE
 # ═══════════════════════════════════════════════════════════
-from src.services.utilisateur.authentification import (
+from src.services.core.utilisateur.authentification import (
     ROLE_PERMISSIONS,
     AuthResult,
     AuthService,
@@ -26,6 +26,8 @@ from src.services.utilisateur.authentification import (
     Role,
     UserProfile,
     get_auth_service,
+)
+from src.ui.views.authentification import (
     require_authenticated,
     require_role,
 )
@@ -191,7 +193,7 @@ class TestAuthResult:
 class TestAuthServiceInit:
     """Tests pour l'initialisation d'AuthService."""
 
-    @patch("src.services.utilisateur.authentification.AuthService._init_client")
+    @patch("src.services.core.utilisateur.authentification.AuthService._init_client")
     def test_init_calls_init_client(self, mock_init):
         """Vérifie que _init_client est appelé."""
         _service = AuthService()  # noqa: F841
@@ -212,7 +214,7 @@ class TestAuthServiceInit:
 class TestAuthServiceLogin:
     """Tests pour la méthode login."""
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_login_demo_mode_success(self, mock_st):
         """Login en mode démo avec compte valide."""
         mock_st.session_state = {}
@@ -229,7 +231,7 @@ class TestAuthServiceLogin:
         # Vérifie que "demo" ou "démo" est dans le message (encodage variable)
         assert "mo" in result.message.lower()  # Mode/demo
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_login_demo_mode_membre(self, mock_st):
         """Login en mode démo avec compte membre."""
         mock_st.session_state = {}
@@ -242,7 +244,7 @@ class TestAuthServiceLogin:
         assert result.success is True
         assert result.user.role == Role.MEMBRE
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_login_demo_mode_invite(self, mock_st):
         """Login en mode démo avec compte invité."""
         mock_st.session_state = {}
@@ -255,7 +257,7 @@ class TestAuthServiceLogin:
         assert result.success is True
         assert result.user.role == Role.INVITE
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_login_demo_mode_invalid(self, mock_st):
         """Login en mode démo avec mauvais identifiants."""
         mock_st.session_state = {}
@@ -268,7 +270,7 @@ class TestAuthServiceLogin:
         assert result.success is False
         assert result.error_code == "DEMO_MODE"
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_login_supabase_success(self, mock_st):
         """Login avec Supabase succès."""
         mock_st.session_state = {}
@@ -290,7 +292,7 @@ class TestAuthServiceLogin:
         assert result.success is True
         assert result.user.email == "test@test.fr"
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_login_supabase_no_user(self, mock_st):
         """Login avec Supabase sans utilisateur retourné."""
         mock_st.session_state = {}
@@ -308,7 +310,7 @@ class TestAuthServiceLogin:
         assert result.success is False
         assert "incorrect" in result.message.lower()
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_login_supabase_invalid_credentials(self, mock_st):
         """Login avec Supabase credentials invalides."""
         mock_st.session_state = {}
@@ -324,7 +326,7 @@ class TestAuthServiceLogin:
         assert result.success is False
         assert result.error_code == "INVALID_CREDENTIALS"
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_login_supabase_generic_error(self, mock_st):
         """Login avec Supabase erreur générique."""
         mock_st.session_state = {}
@@ -350,7 +352,7 @@ class TestAuthServiceLogin:
 class TestAuthServiceSignup:
     """Tests pour la méthode signup."""
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_signup_not_configured(self, mock_st):
         """Signup quand non configuré."""
         service = AuthService()
@@ -361,7 +363,7 @@ class TestAuthServiceSignup:
         assert result.success is False
         assert result.error_code == "NOT_CONFIGURED"
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_signup_success(self, mock_st):
         """Signup avec succès."""
         mock_st.session_state = {}
@@ -382,7 +384,7 @@ class TestAuthServiceSignup:
         assert result.user.nom == "Test"
         assert result.user.prenom == "User"
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_signup_no_user(self, mock_st):
         """Signup sans utilisateur retourné."""
         mock_client = Mock()
@@ -397,7 +399,7 @@ class TestAuthServiceSignup:
 
         assert result.success is False
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_signup_email_exists(self, mock_st):
         """Signup avec email déjà existant."""
         mock_client = Mock()
@@ -411,7 +413,7 @@ class TestAuthServiceSignup:
         assert result.success is False
         assert result.error_code == "EMAIL_EXISTS"
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_signup_generic_error(self, mock_st):
         """Signup avec erreur générique."""
         mock_client = Mock()
@@ -435,7 +437,7 @@ class TestAuthServiceSignup:
 class TestAuthServiceLogout:
     """Tests pour la méthode logout."""
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_logout_not_configured(self, mock_st):
         """Logout quand non configuré."""
         service = AuthService()
@@ -445,7 +447,7 @@ class TestAuthServiceLogout:
 
         assert result.success is True
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_logout_success(self, mock_st):
         """Logout avec succès."""
         mock_st.session_state = {AuthService.SESSION_KEY: "session", AuthService.USER_KEY: "user"}
@@ -461,7 +463,7 @@ class TestAuthServiceLogout:
         assert result.success is True
         mock_client.auth.sign_out.assert_called_once()
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_logout_with_error(self, mock_st):
         """Logout avec erreur (session toujours nettoyée)."""
         mock_st.session_state = {AuthService.SESSION_KEY: "session", AuthService.USER_KEY: "user"}
@@ -532,7 +534,7 @@ class TestAuthServiceResetPassword:
 class TestAuthServiceSession:
     """Tests pour la gestion des sessions."""
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_get_current_user_exists(self, mock_st):
         """Récupère l'utilisateur connecté."""
         user = UserProfile(email="test@test.fr")
@@ -545,7 +547,7 @@ class TestAuthServiceSession:
 
         assert result == user
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_get_current_user_none(self, mock_st):
         """Pas d'utilisateur connecté."""
         mock_st.session_state = {}
@@ -557,7 +559,7 @@ class TestAuthServiceSession:
 
         assert result is None
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_is_authenticated_true(self, mock_st):
         """Utilisateur authentifié."""
         mock_st.session_state = {AuthService.USER_KEY: UserProfile()}
@@ -567,7 +569,7 @@ class TestAuthServiceSession:
 
         assert service.is_authenticated() is True
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_is_authenticated_false(self, mock_st):
         """Utilisateur non authentifié."""
         mock_st.session_state = {}
@@ -577,7 +579,7 @@ class TestAuthServiceSession:
 
         assert service.is_authenticated() is False
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_require_permission_with_user(self, mock_st):
         """Vérifie permission avec utilisateur."""
         user = UserProfile(role=Role.ADMIN)
@@ -588,7 +590,7 @@ class TestAuthServiceSession:
 
         assert service.require_permission(Permission.ADMIN_ALL) is True
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_require_permission_no_user(self, mock_st):
         """Vérifie permission sans utilisateur."""
         mock_st.session_state = {}
@@ -598,7 +600,7 @@ class TestAuthServiceSession:
 
         assert service.require_permission(Permission.READ_RECIPES) is False
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_save_session(self, mock_st):
         """Sauvegarde de session."""
         mock_st.session_state = {}
@@ -614,7 +616,7 @@ class TestAuthServiceSession:
         assert mock_st.session_state[AuthService.SESSION_KEY] == session
         assert mock_st.session_state[AuthService.USER_KEY] == user
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_clear_session(self, mock_st):
         """Nettoyage de session."""
         mock_st.session_state = {AuthService.SESSION_KEY: "session", AuthService.USER_KEY: "user"}
@@ -733,7 +735,7 @@ class TestAuthServiceJWT:
 class TestAuthServiceUpdateProfile:
     """Tests pour update_profile."""
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_update_profile_not_configured(self, mock_st):
         """Update profile quand non configuré."""
         service = AuthService()
@@ -744,7 +746,7 @@ class TestAuthServiceUpdateProfile:
         assert result.success is False
         assert result.error_code == "NOT_CONFIGURED"
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_update_profile_not_authenticated(self, mock_st):
         """Update profile quand non connecté."""
         mock_st.session_state = {}
@@ -758,7 +760,7 @@ class TestAuthServiceUpdateProfile:
         assert result.success is False
         assert result.error_code == "NOT_AUTHENTICATED"
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_update_profile_no_changes(self, mock_st):
         """Update profile sans modifications."""
         user = UserProfile(email="test@test.fr")
@@ -773,7 +775,7 @@ class TestAuthServiceUpdateProfile:
         assert result.success is True
         assert "modification" in result.message.lower()
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_update_profile_success(self, mock_st):
         """Update profile avec succès."""
         user = UserProfile(email="test@test.fr", nom="Old", prenom="Name")
@@ -795,7 +797,7 @@ class TestAuthServiceUpdateProfile:
         assert result.success is True
         assert result.user.nom == "New"
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_update_profile_no_response(self, mock_st):
         """Update profile sans réponse."""
         user = UserProfile(email="test@test.fr")
@@ -811,7 +813,7 @@ class TestAuthServiceUpdateProfile:
 
         assert result.success is False
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_update_profile_error(self, mock_st):
         """Update profile avec erreur."""
         user = UserProfile(email="test@test.fr")
@@ -907,7 +909,7 @@ class TestAuthServiceFactory:
     def test_get_auth_service_singleton(self):
         """Factory retourne la même instance."""
         # Reset le singleton
-        import src.services.utilisateur.authentification as auth_module
+        import src.services.core.utilisateur.authentification as auth_module
 
         auth_module._auth_service = None
 
@@ -918,7 +920,7 @@ class TestAuthServiceFactory:
 
     def test_get_auth_service_returns_authservice(self):
         """Factory retourne AuthService."""
-        import src.services.utilisateur.authentification as auth_module
+        import src.services.core.utilisateur.authentification as auth_module
 
         auth_module._auth_service = None
 
@@ -1081,8 +1083,8 @@ class TestInitClient:
 class TestRequireAuth:
     """Tests pour require_auth."""
 
-    @patch("src.services.utilisateur.authentification.render_login_form")
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.render_login_form")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_require_auth_not_authenticated(self, mock_st, mock_render):
         """require_auth sans utilisateur connecté."""
         mock_st.session_state = {}
@@ -1095,7 +1097,7 @@ class TestRequireAuth:
         assert result is None
         mock_render.assert_called_once()
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_require_auth_authenticated(self, mock_st):
         """require_auth avec utilisateur connecté."""
         user = UserProfile(email="test@test.fr")
@@ -1118,7 +1120,7 @@ class TestRequireAuth:
 class TestRefreshSession:
     """Tests pour refresh_session."""
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_refresh_session_not_configured(self, mock_st):
         """refresh_session quand non configuré."""
         service = AuthService()
@@ -1128,7 +1130,7 @@ class TestRefreshSession:
 
         assert result is False
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_refresh_session_no_session(self, mock_st):
         """refresh_session sans session."""
         mock_st.session_state = {}
@@ -1141,7 +1143,7 @@ class TestRefreshSession:
 
         assert result is False
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_refresh_session_success(self, mock_st):
         """refresh_session avec succès."""
         mock_st.session_state = {AuthService.SESSION_KEY: Mock()}
@@ -1156,7 +1158,7 @@ class TestRefreshSession:
 
         assert result is True
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_refresh_session_error(self, mock_st):
         """refresh_session avec erreur."""
         mock_st.session_state = {AuthService.SESSION_KEY: Mock()}
@@ -1181,7 +1183,7 @@ class TestRefreshSession:
 class TestUpdateProfileExtended:
     """Tests étendus pour update_profile avec avatar et preferences."""
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_update_profile_with_avatar(self, mock_st):
         """Update profile avec avatar_url."""
         user = UserProfile(email="test@test.fr", nom="Test", avatar_url=None)
@@ -1208,7 +1210,7 @@ class TestUpdateProfileExtended:
         assert result.success is True
         assert result.user.avatar_url == "https://example.com/avatar.png"
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_update_profile_with_preferences(self, mock_st):
         """Update profile avec preferences."""
         user = UserProfile(email="test@test.fr", nom="Test")
@@ -1270,13 +1272,13 @@ class TestRenderLoginForm:
 
     def test_render_login_form_exists(self):
         """render_login_form existe et est importable."""
-        from src.services.utilisateur.authentification import render_login_form
+        from src.services.core.utilisateur.authentification import render_login_form
 
         assert callable(render_login_form)
 
     def test_render_login_form_raises_without_context(self):
         """render_login_form lève une erreur sans contexte Streamlit."""
-        from src.services.utilisateur.authentification import render_login_form
+        from src.services.core.utilisateur.authentification import render_login_form
 
         # Without proper Streamlit context, function will fail
         # This is expected behavior
@@ -1292,13 +1294,13 @@ class TestRenderUserMenu:
 
     def test_render_user_menu_exists(self):
         """render_user_menu existe et est importable."""
-        from src.services.utilisateur.authentification import render_user_menu
+        from src.services.core.utilisateur.authentification import render_user_menu
 
         assert callable(render_user_menu)
 
     def test_render_user_menu_raises_without_context(self):
         """render_user_menu lève une erreur sans contexte Streamlit."""
-        from src.services.utilisateur.authentification import render_user_menu
+        from src.services.core.utilisateur.authentification import render_user_menu
 
         try:
             render_user_menu()
@@ -1312,13 +1314,13 @@ class TestRenderProfileSettings:
 
     def test_render_profile_settings_exists(self):
         """render_profile_settings existe et est importable."""
-        from src.services.utilisateur.authentification import render_profile_settings
+        from src.services.core.utilisateur.authentification import render_profile_settings
 
         assert callable(render_profile_settings)
 
     def test_render_profile_settings_raises_without_context(self):
         """render_profile_settings lève une erreur sans contexte Streamlit."""
-        from src.services.utilisateur.authentification import render_profile_settings
+        from src.services.core.utilisateur.authentification import render_profile_settings
 
         try:
             render_profile_settings()
@@ -1346,7 +1348,7 @@ class TestAdditionalCoverage:
         assert Permission.READ_RECIPES.value == "read_recipes"
         assert Permission.ADMIN_ALL.value == "admin_all"
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_auth_service_init_with_session_state(self, mock_st):
         """AuthService init avec st.session_state préexistant."""
         mock_st.session_state = {
@@ -1360,7 +1362,7 @@ class TestAdditionalCoverage:
         assert user is not None
         assert user.email == "test@test.fr"
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_login_invalid_email(self, mock_st):
         """Login avec email invalide."""
         mock_st.session_state = {}
@@ -1375,7 +1377,7 @@ class TestAdditionalCoverage:
 
         assert result.success is False
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_signup_weak_password(self, mock_st):
         """Signup avec mot de passe faible."""
         mock_st.session_state = {}
@@ -1439,7 +1441,7 @@ class TestInitClientBranches:
 class TestRefreshSessionBranches:
     """Tests branches pour refresh_session."""
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_refresh_session_not_configured(self, mock_st):
         """refresh_session retourne False si pas configuré."""
         mock_st.session_state = {}
@@ -1451,7 +1453,7 @@ class TestRefreshSessionBranches:
 
         assert result is False
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_refresh_session_no_session_key(self, mock_st):
         """refresh_session retourne False sans clé de session."""
         # session_state vide (pas de SESSION_KEY)
@@ -1466,7 +1468,7 @@ class TestRefreshSessionBranches:
 
         assert result is False
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_refresh_session_exception(self, mock_st):
         """refresh_session gère les exceptions."""
         mock_st.session_state = {AuthService.SESSION_KEY: {"token": "abc"}}
@@ -1491,7 +1493,7 @@ class TestRefreshSessionBranches:
 class TestUpdateProfileNoChange:
     """Tests pour update_profile sans modifications."""
 
-    @patch("src.services.utilisateur.authentification.st")
+    @patch("src.services.core.utilisateur.authentification.st")
     def test_update_profile_no_changes(self, mock_st):
         """update_profile sans aucune modification."""
         user = UserProfile(email="test@test.fr", nom="Doe", prenom="John")
@@ -1522,7 +1524,7 @@ class TestRenderFunctions:
     @patch("src.ui.views.authentification.get_auth_service")
     def test_render_login_form_basic(self, mock_get_auth, mock_st):
         """Test render_login_form est appelable."""
-        from src.services.utilisateur.authentification import render_login_form
+        from src.services.core.utilisateur.authentification import render_login_form
 
         mock_st.form.return_value.__enter__ = Mock()
         mock_st.form.return_value.__exit__ = Mock(return_value=False)
@@ -1541,7 +1543,7 @@ class TestRenderFunctions:
     @patch("src.ui.views.authentification.get_auth_service")
     def test_render_user_menu_not_logged(self, mock_get_auth, mock_st):
         """Test render_user_menu sans utilisateur connecté."""
-        from src.services.utilisateur.authentification import render_user_menu
+        from src.services.core.utilisateur.authentification import render_user_menu
 
         mock_service = Mock()
         mock_service.get_current_user.return_value = None
@@ -1559,7 +1561,7 @@ class TestRenderFunctions:
     @patch("src.ui.views.authentification.get_auth_service")
     def test_render_profile_settings_not_logged(self, mock_get_auth, mock_st):
         """Test render_profile_settings sans utilisateur connecté."""
-        from src.services.utilisateur.authentification import render_profile_settings
+        from src.services.core.utilisateur.authentification import render_profile_settings
 
         mock_service = Mock()
         mock_service.get_current_user.return_value = None
@@ -1578,7 +1580,7 @@ class TestRenderFunctionsAdditional:
     @patch("src.ui.views.authentification.get_auth_service")
     def test_render_login_form_login_success(self, mock_get_auth, mock_st):
         """Test login réussi avec rerun."""
-        from src.services.utilisateur.authentification import render_login_form
+        from src.services.core.utilisateur.authentification import render_login_form
 
         mock_service = Mock()
         mock_service.login.return_value = AuthResult(success=True, message="Bienvenue!")
@@ -1611,7 +1613,7 @@ class TestRenderFunctionsAdditional:
         """Test login échoué."""
         from unittest.mock import MagicMock
 
-        from src.services.utilisateur.authentification import render_login_form
+        from src.services.core.utilisateur.authentification import render_login_form
 
         mock_service = Mock()
         mock_service.login.return_value = AuthResult(
@@ -1639,7 +1641,7 @@ class TestRenderFunctionsAdditional:
         """Test mot de passe oublié."""
         from unittest.mock import MagicMock
 
-        from src.services.utilisateur.authentification import render_login_form
+        from src.services.core.utilisateur.authentification import render_login_form
 
         mock_service = Mock()
         mock_service.reset_password.return_value = AuthResult(success=True, message="Email envoyé")
@@ -1665,7 +1667,7 @@ class TestRenderFunctionsAdditional:
         """Test menu utilisateur connecté."""
         from unittest.mock import MagicMock
 
-        from src.services.utilisateur.authentification import render_user_menu
+        from src.services.core.utilisateur.authentification import render_user_menu
 
         mock_user = Mock()
         mock_user.display_name = "Test User"
@@ -1691,7 +1693,7 @@ class TestRenderFunctionsAdditional:
         """Test bouton déconnexion cliqué."""
         from unittest.mock import MagicMock
 
-        from src.services.utilisateur.authentification import render_user_menu
+        from src.services.core.utilisateur.authentification import render_user_menu
 
         mock_user = Mock()
         mock_user.display_name = "Test User"
@@ -1717,7 +1719,7 @@ class TestRenderFunctionsAdditional:
         """Test bouton connexion cliqué (non connecté)."""
         from unittest.mock import MagicMock
 
-        from src.services.utilisateur.authentification import render_user_menu
+        from src.services.core.utilisateur.authentification import render_user_menu
 
         mock_service = Mock()
         mock_service.get_current_user.return_value = None
@@ -1739,7 +1741,7 @@ class TestRenderFunctionsAdditional:
         from datetime import datetime
         from unittest.mock import MagicMock
 
-        from src.services.utilisateur.authentification import render_profile_settings
+        from src.services.core.utilisateur.authentification import render_profile_settings
 
         mock_user = Mock()
         mock_user.prenom = "Jean"
@@ -1770,7 +1772,7 @@ class TestRenderFunctionsAdditional:
         from datetime import datetime
         from unittest.mock import MagicMock
 
-        from src.services.utilisateur.authentification import render_profile_settings
+        from src.services.core.utilisateur.authentification import render_profile_settings
 
         mock_user = Mock()
         mock_user.prenom = "Test"

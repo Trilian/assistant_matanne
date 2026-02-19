@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires complets pour src/services/base/ai_service.py
 Module: BaseAIService - Rate limiting, cache, parsing Pydantic.
 
@@ -87,7 +87,7 @@ def mock_cache_miss():
 @pytest.fixture
 def base_ai_service(mock_client_ia):
     """Instance BaseAIService pour tests."""
-    from src.services.base.ai_service import BaseAIService
+    from src.services.core.base.ai_service import BaseAIService
 
     return BaseAIService(
         client=mock_client_ia,
@@ -101,7 +101,7 @@ def base_ai_service(mock_client_ia):
 @pytest.fixture
 def base_ai_service_list(mock_client_ia_list):
     """Instance BaseAIService pour tests de liste."""
-    from src.services.base.ai_service import BaseAIService
+    from src.services.core.base.ai_service import BaseAIService
 
     return BaseAIService(
         client=mock_client_ia_list,
@@ -123,7 +123,7 @@ class TestBaseAIServiceInit:
 
     def test_init_sets_client(self, mock_client_ia):
         """Vérifie que le client est correctement défini."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia)
 
@@ -131,7 +131,7 @@ class TestBaseAIServiceInit:
 
     def test_init_sets_cache_prefix(self, mock_client_ia):
         """Vérifie que le préfixe cache est correctement défini."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia, cache_prefix="recipes")
 
@@ -139,7 +139,7 @@ class TestBaseAIServiceInit:
 
     def test_init_sets_default_values(self, mock_client_ia):
         """Vérifie les valeurs par défaut."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia)
 
@@ -149,7 +149,7 @@ class TestBaseAIServiceInit:
 
     def test_init_custom_values(self, mock_client_ia):
         """Vérifie les valeurs personnalisées."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(
             client=mock_client_ia,
@@ -164,7 +164,7 @@ class TestBaseAIServiceInit:
 
     def test_init_accepts_none_client(self):
         """Vérifie que le service accepte un client None."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=None)
 
@@ -185,7 +185,7 @@ class TestCallWithCache:
         self, mock_client_ia, mock_rate_limit_ok, mock_cache_miss
     ):
         """Test appel basique."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia, service_name="test")
 
@@ -196,7 +196,7 @@ class TestCallWithCache:
 
     async def test_call_with_cache_none_client(self):
         """Test avec client None."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=None, service_name="test")
 
@@ -206,7 +206,7 @@ class TestCallWithCache:
 
     async def test_call_with_cache_uses_cache(self, mock_client_ia):
         """Test que le cache est utilisé."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia, service_name="test")
 
@@ -220,7 +220,7 @@ class TestCallWithCache:
         self, mock_client_ia, mock_rate_limit_ok
     ):
         """Test que le cache est ignoré quand désactivé."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia, service_name="test")
 
@@ -233,7 +233,7 @@ class TestCallWithCache:
     async def test_call_with_cache_rate_limit_exceeded(self, mock_client_ia, mock_cache_miss):
         """Test rate limit dépassé."""
         from src.core.errors import ErreurLimiteDebit
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia, service_name="test")
 
@@ -252,7 +252,7 @@ class TestCallWithCache:
         self, mock_client_ia, mock_rate_limit_ok, mock_cache_miss
     ):
         """Test avec température personnalisée."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia, default_temperature=0.5)
 
@@ -264,7 +264,7 @@ class TestCallWithCache:
 
     async def test_call_with_cache_saves_to_cache(self, mock_client_ia, mock_rate_limit_ok):
         """Test que la réponse est sauvegardée en cache."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia, service_name="test")
 
@@ -289,7 +289,7 @@ class TestCallWithParsing:
         self, mock_client_ia, mock_rate_limit_ok, mock_cache_miss
     ):
         """Test parsing vers modèle Pydantic."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia, service_name="test")
 
@@ -305,7 +305,7 @@ class TestCallWithParsing:
         self, mock_client_ia_none, mock_rate_limit_ok, mock_cache_miss
     ):
         """Test parsing sans réponse IA."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia_none, service_name="test")
 
@@ -317,7 +317,7 @@ class TestCallWithParsing:
         self, mock_client_ia, mock_rate_limit_ok, mock_cache_miss
     ):
         """Test parsing avec erreur et fallback."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia, service_name="test")
 
@@ -350,7 +350,7 @@ class TestCallWithParsingSync:
 
     def test_sync_calls_async_version(self, mock_client_ia, mock_rate_limit_ok, mock_cache_miss):
         """Test que sync appelle la version async."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia, service_name="test")
 
@@ -377,7 +377,7 @@ class TestCallWithListParsing:
         self, mock_client_ia_list, mock_rate_limit_ok, mock_cache_miss
     ):
         """Test parsing liste."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia_list, service_name="test")
 
@@ -398,7 +398,7 @@ class TestCallWithListParsing:
         self, mock_client_ia_list, mock_rate_limit_ok, mock_cache_miss
     ):
         """Test limite du nombre d'items."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia_list, service_name="test")
 
@@ -420,7 +420,7 @@ class TestCallWithListParsing:
         self, mock_client_ia_none, mock_rate_limit_ok, mock_cache_miss
     ):
         """Test parsing liste sans réponse."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia_none, service_name="test")
 
@@ -432,7 +432,7 @@ class TestCallWithListParsing:
         self, mock_client_ia_list, mock_rate_limit_ok, mock_cache_miss
     ):
         """Test parsing liste avec erreur."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia_list, service_name="test")
 
@@ -471,7 +471,7 @@ class TestCallWithJsonParsing:
 
     async def test_json_parsing_basic(self, mock_rate_limit_ok, mock_cache_miss):
         """Test parsing JSON basique."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         client = Mock()
         client.appeler = AsyncMock(return_value='{"nom": "Test", "temps_preparation": 30}')
@@ -485,7 +485,7 @@ class TestCallWithJsonParsing:
 
     async def test_json_parsing_with_markdown_blocks(self, mock_rate_limit_ok, mock_cache_miss):
         """Test parsing JSON avec blocs markdown."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         client = Mock()
         client.appeler = AsyncMock(
@@ -501,7 +501,7 @@ class TestCallWithJsonParsing:
 
     async def test_json_parsing_invalid_json(self, mock_rate_limit_ok, mock_cache_miss):
         """Test parsing JSON invalide."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         client = Mock()
         client.appeler = AsyncMock(return_value="not valid json")
@@ -514,7 +514,7 @@ class TestCallWithJsonParsing:
 
     async def test_json_parsing_validation_error(self, mock_rate_limit_ok, mock_cache_miss):
         """Test parsing JSON avec erreur de validation."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         client = Mock()
         # JSON valide mais ne correspond pas au modèle (manque 'nom')
@@ -528,7 +528,7 @@ class TestCallWithJsonParsing:
 
     async def test_json_parsing_no_response(self, mock_rate_limit_ok, mock_cache_miss):
         """Test parsing JSON sans réponse."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         client = Mock()
         client.appeler = AsyncMock(return_value=None)
@@ -668,7 +668,7 @@ class TestRecipeAIMixin:
 
     def test_build_recipe_context_basic(self):
         """Test construction contexte recette basique."""
-        from src.services.base.ai_service import RecipeAIMixin
+        from src.services.core.base.ai_service import RecipeAIMixin
 
         mixin = RecipeAIMixin()
 
@@ -679,7 +679,7 @@ class TestRecipeAIMixin:
 
     def test_build_recipe_context_with_type_repas(self):
         """Test contexte avec type de repas."""
-        from src.services.base.ai_service import RecipeAIMixin
+        from src.services.core.base.ai_service import RecipeAIMixin
 
         mixin = RecipeAIMixin()
 
@@ -689,7 +689,7 @@ class TestRecipeAIMixin:
 
     def test_build_recipe_context_with_difficulte(self):
         """Test contexte avec difficulté."""
-        from src.services.base.ai_service import RecipeAIMixin
+        from src.services.core.base.ai_service import RecipeAIMixin
 
         mixin = RecipeAIMixin()
 
@@ -699,7 +699,7 @@ class TestRecipeAIMixin:
 
     def test_build_recipe_context_quick(self):
         """Test contexte recettes rapides."""
-        from src.services.base.ai_service import RecipeAIMixin
+        from src.services.core.base.ai_service import RecipeAIMixin
 
         mixin = RecipeAIMixin()
 
@@ -709,7 +709,7 @@ class TestRecipeAIMixin:
 
     def test_build_recipe_context_with_ingredients(self):
         """Test contexte avec ingrédients."""
-        from src.services.base.ai_service import RecipeAIMixin
+        from src.services.core.base.ai_service import RecipeAIMixin
 
         mixin = RecipeAIMixin()
 
@@ -727,7 +727,7 @@ class TestPlanningAIMixin:
 
     def test_build_planning_context_basic(self):
         """Test construction contexte planning basique."""
-        from src.services.base.ai_service import PlanningAIMixin
+        from src.services.core.base.ai_service import PlanningAIMixin
 
         mixin = PlanningAIMixin()
 
@@ -741,7 +741,7 @@ class TestPlanningAIMixin:
 
     def test_build_planning_context_with_bebe(self):
         """Test contexte avec bébé."""
-        from src.services.base.ai_service import PlanningAIMixin
+        from src.services.core.base.ai_service import PlanningAIMixin
 
         mixin = PlanningAIMixin()
 
@@ -753,7 +753,7 @@ class TestPlanningAIMixin:
 
     def test_build_planning_context_batch_cooking(self):
         """Test contexte avec batch cooking."""
-        from src.services.base.ai_service import PlanningAIMixin
+        from src.services.core.base.ai_service import PlanningAIMixin
 
         mixin = PlanningAIMixin()
 
@@ -770,7 +770,7 @@ class TestInventoryAIMixin:
 
     def test_build_inventory_summary_basic(self):
         """Test résumé inventaire basique."""
-        from src.services.base.ai_service import InventoryAIMixin
+        from src.services.core.base.ai_service import InventoryAIMixin
 
         mixin = InventoryAIMixin()
 
@@ -799,7 +799,7 @@ class TestInventoryAIMixin:
 
     def test_build_inventory_summary_status_icons(self):
         """Test icônes de statut."""
-        from src.services.base.ai_service import InventoryAIMixin
+        from src.services.core.base.ai_service import InventoryAIMixin
 
         mixin = InventoryAIMixin()
 
@@ -817,7 +817,7 @@ class TestInventoryAIMixin:
 
     def test_build_inventory_summary_limits_items(self):
         """Test limite d'items par catégorie."""
-        from src.services.base.ai_service import InventoryAIMixin
+        from src.services.core.base.ai_service import InventoryAIMixin
 
         mixin = InventoryAIMixin()
 
@@ -834,7 +834,7 @@ class TestInventoryAIMixin:
 
     def test_build_inventory_summary_counts(self):
         """Test comptage des statuts."""
-        from src.services.base.ai_service import InventoryAIMixin
+        from src.services.core.base.ai_service import InventoryAIMixin
 
         mixin = InventoryAIMixin()
 
@@ -862,7 +862,7 @@ class TestFactory:
 
     def test_factory_creates_service(self):
         """Test création via factory."""
-        from src.services.base.ai_service import create_base_ai_service
+        from src.services.core.base.ai_service import create_base_ai_service
 
         with patch("src.core.ai.obtenir_client_ia") as mock_get_client:
             mock_get_client.return_value = Mock()
@@ -881,7 +881,7 @@ class TestFactory:
 
     def test_factory_default_values(self):
         """Test factory avec valeurs par défaut."""
-        from src.services.base.ai_service import create_base_ai_service
+        from src.services.core.base.ai_service import create_base_ai_service
 
         with patch("src.core.ai.obtenir_client_ia") as mock_get_client:
             mock_get_client.return_value = Mock()
@@ -941,7 +941,7 @@ class TestAsyncContext:
 
     def test_sync_without_running_loop(self, mock_client_ia, mock_rate_limit_ok, mock_cache_miss):
         """Test sync sans boucle d'événements en cours."""
-        from src.services.base.ai_service import BaseAIService
+        from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia, service_name="test")
 

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Composants UI pour les notifications push.
 
 Widgets Streamlit pour demander les permissions et configurer les préférences.
@@ -10,7 +10,7 @@ pour respecter la séparation UI/Services.
 import streamlit as st
 import streamlit.components.v1 as components
 
-from src.services.notifications.types import (
+from src.services.core.notifications.types import (
     VAPID_PUBLIC_KEY,
     PreferencesNotification,
 )
@@ -119,13 +119,13 @@ def afficher_demande_permission_push():
 
 def afficher_preferences_notification():
     """Affiche les paramètres de notifications."""
-    from src.services.notifications.notif_web import obtenir_service_webpush
+    from src.services.core.notifications.notif_web import obtenir_service_webpush
 
     push_service = obtenir_service_webpush()
 
     # Récupérer l'utilisateur courant
     try:
-        from src.services.utilisateur import get_auth_service
+        from src.services.core.utilisateur import get_auth_service
 
         auth = get_auth_service()
         user = auth.get_current_user()

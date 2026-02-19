@@ -326,14 +326,14 @@ class TestCacheNettoyerExpires:
 
 
 class TestLimiteDebitBase:
-    """Tests de base pour LimiteDebit."""
+    """Tests de base pour RateLimitIA."""
 
     def test_initialise_creates_structures(self, mock_session_state):
         """Test initialisation crée les structures."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai import LimiteDebit
+            from src.core.ai import RateLimitIA
 
-            LimiteDebit._initialiser()
+            RateLimitIA._initialiser()
 
             assert "rate_limit_ia" in mock_session_state._mock_state
             assert "appels_jour" in mock_session_state._mock_state["rate_limit_ia"]
@@ -341,14 +341,14 @@ class TestLimiteDebitBase:
 
 
 class TestLimiteDebitPeutAppeler:
-    """Tests pour LimiteDebit.peut_appeler()."""
+    """Tests pour RateLimitIA.peut_appeler()."""
 
     def test_peut_appeler_returns_true_initially(self, mock_session_state):
         """Test peut_appeler retourne True au départ."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai import LimiteDebit
+            from src.core.ai import RateLimitIA
 
-            autorise, erreur = LimiteDebit.peut_appeler()
+            autorise, erreur = RateLimitIA.peut_appeler()
 
             assert autorise is True
             assert erreur == ""
@@ -356,13 +356,13 @@ class TestLimiteDebitPeutAppeler:
     def test_peut_appeler_false_when_daily_limit_reached(self, mock_session_state):
         """Test peut_appeler retourne False si limite jour atteinte."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai import LimiteDebit
+            from src.core.ai import RateLimitIA
             from src.core.constants import AI_RATE_LIMIT_DAILY
 
-            LimiteDebit._initialiser()
+            RateLimitIA._initialiser()
             mock_session_state._mock_state["rate_limit_ia"]["appels_jour"] = AI_RATE_LIMIT_DAILY
 
-            autorise, erreur = LimiteDebit.peut_appeler()
+            autorise, erreur = RateLimitIA.peut_appeler()
 
             assert autorise is False
             assert "quotidienne" in erreur.lower()
@@ -370,31 +370,31 @@ class TestLimiteDebitPeutAppeler:
     def test_peut_appeler_false_when_hourly_limit_reached(self, mock_session_state):
         """Test peut_appeler retourne False si limite heure atteinte."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai import LimiteDebit
+            from src.core.ai import RateLimitIA
             from src.core.constants import AI_RATE_LIMIT_HOURLY
 
-            LimiteDebit._initialiser()
+            RateLimitIA._initialiser()
             mock_session_state._mock_state["rate_limit_ia"]["appels_heure"] = AI_RATE_LIMIT_HOURLY
 
-            autorise, erreur = LimiteDebit.peut_appeler()
+            autorise, erreur = RateLimitIA.peut_appeler()
 
             assert autorise is False
             assert "horaire" in erreur.lower()
 
 
 class TestLimiteDebitEnregistrer:
-    """Tests pour LimiteDebit.enregistrer_appel()."""
+    """Tests pour RateLimitIA.enregistrer_appel()."""
 
     def test_enregistrer_appel_increments_counters(self, mock_session_state):
         """Test enregistrer_appel incrémente les compteurs."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai import LimiteDebit
+            from src.core.ai import RateLimitIA
 
-            LimiteDebit._initialiser()
+            RateLimitIA._initialiser()
             initial_jour = mock_session_state._mock_state["rate_limit_ia"]["appels_jour"]
             initial_heure = mock_session_state._mock_state["rate_limit_ia"]["appels_heure"]
 
-            LimiteDebit.enregistrer_appel()
+            RateLimitIA.enregistrer_appel()
 
             assert (
                 mock_session_state._mock_state["rate_limit_ia"]["appels_jour"] == initial_jour + 1
@@ -405,14 +405,14 @@ class TestLimiteDebitEnregistrer:
 
 
 class TestLimiteDebitStatistiques:
-    """Tests pour LimiteDebit.obtenir_statistiques()."""
+    """Tests pour RateLimitIA.obtenir_statistiques()."""
 
     def test_obtenir_statistiques_returns_dict(self, mock_session_state):
         """Test statistiques retourne dict complet."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai import LimiteDebit
+            from src.core.ai import RateLimitIA
 
-            stats = LimiteDebit.obtenir_statistiques()
+            stats = RateLimitIA.obtenir_statistiques()
 
             assert isinstance(stats, dict)
             assert "appels_jour" in stats
@@ -431,14 +431,14 @@ class TestLimiteDebitReset:
         with patch("streamlit.session_state", mock_session_state):
             from datetime import date
 
-            from src.core.ai import LimiteDebit
+            from src.core.ai import RateLimitIA
 
-            LimiteDebit._initialiser()
+            RateLimitIA._initialiser()
             mock_session_state._mock_state["rate_limit_ia"]["appels_jour"] = 50
             mock_session_state._mock_state["rate_limit_ia"]["dernier_reset_jour"] = date(2024, 1, 1)
 
             # peut_appeler() devrait reset le compteur
-            LimiteDebit.peut_appeler()
+            RateLimitIA.peut_appeler()
 
             assert mock_session_state._mock_state["rate_limit_ia"]["appels_jour"] == 0
 

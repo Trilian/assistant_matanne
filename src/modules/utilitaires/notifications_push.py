@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Notifications Push - Configuration et test des alertes.
 
 Fonctionnalités:
@@ -13,7 +13,7 @@ from datetime import date
 
 import streamlit as st
 
-from src.services.notifications import (
+from src.services.core.notifications import (
     NotificationPush,
     NotificationPushConfig,
     get_notification_push_service,
@@ -367,7 +367,7 @@ def render_taches_retard():
             type="primary",
             use_container_width=True,
         ):
-            from src.services.notifications_push import get_notification_push_scheduler
+            from src.services.core.notifications_push import get_notification_push_scheduler
 
             scheduler = get_notification_push_scheduler()
 

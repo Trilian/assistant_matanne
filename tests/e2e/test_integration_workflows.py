@@ -1,13 +1,13 @@
-"""
+﻿"""
 PHASE 9: Integration and E2E tests - 50+ tests
 Focus: Cross-domain workflows, system integration, real user scenarios
 """
 
-from src.services.budget import get_budget_service
-from src.services.courses import get_courses_service
+from src.services.famille.budget import get_budget_service
+from src.services.cuisine.courses import get_courses_service
 from src.services.inventaire import get_inventaire_service
-from src.services.planning import get_planning_service
-from src.services.recettes import get_recette_service
+from src.services.cuisine.planning import get_planning_service
+from src.services.cuisine.recettes import get_recette_service
 
 # ═══════════════════════════════════════════════════════════════════
 # KITCHEN-TO-SHOPPING WORKFLOW

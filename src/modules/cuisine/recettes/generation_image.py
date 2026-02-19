@@ -1,10 +1,10 @@
-"""
+﻿"""
 Génération d'images pour les recettes.
 """
 
 import streamlit as st
 
-from src.services.recettes import get_recette_service
+from src.services.cuisine.recettes import get_recette_service
 
 
 def render_generer_image(recette):
@@ -21,7 +21,7 @@ def render_generer_image(recette):
     if st.button("🎨 Générer Image", use_container_width=True, key=f"gen_img_{recette.id}"):
         try:
             # Import et vérification des clés
-            from src.services.images import (
+            from src.services.integrations.images import (
                 PEXELS_API_KEY,
                 PIXABAY_API_KEY,
                 UNSPLASH_API_KEY,

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Suivi du Temps - Entretien et Jardinage.
 
 Features:
@@ -15,7 +15,7 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta
 
 from src.core.ai import ClientIA
-from src.services.base import BaseAIService
+from src.services.core.base import BaseAIService
 
 from .schemas import (
     ResumeTempsHebdo,

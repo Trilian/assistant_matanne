@@ -1,4 +1,4 @@
-"""
+﻿"""
 Génération de recettes avec l'IA.
 """
 
@@ -6,7 +6,7 @@ import logging
 
 import streamlit as st
 
-from src.services.recettes import get_recette_service
+from src.services.cuisine.recettes import get_recette_service
 
 from .utils import formater_quantite
 

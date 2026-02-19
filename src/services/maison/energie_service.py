@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Énergie - Analyse consommation et éco-score gamifié.
 
 Features:
@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session
 from src.core.ai import ClientIA
 from src.core.db import obtenir_contexte_db
 from src.core.models import HouseExpense
-from src.services.base import BaseAIService
+from src.services.core.base import BaseAIService
 
 from .schemas import (
     AnalyseEnergie,

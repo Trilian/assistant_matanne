@@ -1,4 +1,4 @@
-"""Tests pour src/services/notifications/inventaire.py - ServiceNotificationsInventaire.
+﻿"""Tests pour src/services/notifications/inventaire.py - ServiceNotificationsInventaire.
 
 Couverture des fonctionnalités:
 - Création de notifications (stock critique, stock bas, péremption)
@@ -8,14 +8,14 @@ Couverture des fonctionnalités:
 
 import pytest
 
-from src.services.notifications.inventaire import (
+from src.services.core.notifications.inventaire import (
     Notification,
     NotificationService,
     ServiceNotificationsInventaire,
     obtenir_service_notifications,
     obtenir_service_notifications_inventaire,
 )
-from src.services.notifications.types import (
+from src.services.core.notifications.types import (
     NotificationInventaire,
     TypeAlerte,
 )
@@ -76,7 +76,7 @@ class TestServiceNotificationsInit:
 
     def test_singleton_obtenir_service(self):
         """Test obtenir_service_notifications_inventaire retourne singleton."""
-        import src.services.notifications.inventaire as module
+        import src.services.core.notifications.inventaire as module
 
         module._service_notifications_inventaire = None
 

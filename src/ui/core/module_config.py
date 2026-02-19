@@ -1,11 +1,11 @@
-"""
+﻿"""
 Configuration Module - Dataclass de configuration CRUD
 """
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
-from src.services.base import BaseService
+from src.services.core.base import BaseService
 
 
 @dataclass

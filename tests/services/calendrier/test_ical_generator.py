@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests du package calendar_sync - Générateur iCal.
 
 Tests de génération et parsing de fichiers .ics.
@@ -6,8 +6,8 @@ Tests de génération et parsing de fichiers .ics.
 
 from datetime import datetime
 
-from src.services.calendrier.generateur import ICalGenerator
-from src.services.calendrier.schemas import CalendarEventExternal
+from src.services.famille.calendrier.generateur import ICalGenerator
+from src.services.famille.calendrier.schemas import CalendarEventExternal
 
 
 class TestICalGeneratorGenerate:

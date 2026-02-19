@@ -7,13 +7,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.services.jeux.ai_service import (
+from src.services.jeux import (
     AnalyseIA,
     JeuxAIService,
     OpportuniteAnalysee,
+    SEUIL_VALUE_ALERTE,
+    SEUIL_VALUE_HAUTE,
     get_jeux_ai_service,
 )
-from src.services.jeux.series_service import SEUIL_VALUE_ALERTE, SEUIL_VALUE_HAUTE
 
 # ═══════════════════════════════════════════════════════════
 # FIXTURES

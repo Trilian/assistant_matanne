@@ -3,7 +3,7 @@ Ancien module logic paris - rétro-compatibilité.
 La logique a été migrée vers src.services.jeux.prediction_service.
 """
 
-from src.services.jeux.prediction_service import (
+from src.services.jeux import (
     generer_conseil_pari,
     generer_conseils_avances,
     predire_over_under,

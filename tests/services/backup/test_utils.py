@@ -1,11 +1,11 @@
-"""Tests pour backup/utils.py - Fonctions utilitaires pures."""
+﻿"""Tests pour backup/utils.py - Fonctions utilitaires pures."""
 
 from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
 
-from src.services.backup import (
+from src.services.core.backup import (
     calculate_backup_stats,
     calculate_checksum,
     compare_backup_stats,

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Interface UI pour l'authentification et le profil utilisateur.
 
 Note: Ce fichier a été extrait depuis src/services/utilisateur/authentification.py
@@ -7,7 +7,7 @@ pour respecter la séparation UI/Services.
 
 import streamlit as st
 
-from src.services.utilisateur.authentification import (
+from src.services.core.utilisateur.authentification import (
     Role,
     get_auth_service,
 )

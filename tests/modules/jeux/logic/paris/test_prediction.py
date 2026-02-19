@@ -6,7 +6,7 @@ Tests unitaires du service de prédiction de matchs.
 
 import pytest
 
-from src.services.jeux.prediction_service import (
+from src.services.jeux import (
     PredictionService,
     generer_conseils_avances,
     get_prediction_service,

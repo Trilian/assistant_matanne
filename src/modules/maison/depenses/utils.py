@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Depenses Maison - Imports et constantes partages
 
 Focus sur les depenses recurrentes de la maison avec consommation.
@@ -15,7 +15,7 @@ import streamlit as st
 from src.core.db import obtenir_contexte_db
 from src.core.models import HouseExpense
 from src.core.models.finances import ExpenseCategory
-from src.services.budget import (
+from src.services.famille.budget import (
     CategorieDepense,
     FactureMaison,
     get_budget_service,

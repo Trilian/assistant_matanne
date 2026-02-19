@@ -17,11 +17,11 @@ from src.core.models import Equipe, HistoriqueJeux, Match, PariSportif
 
 logger = logging.getLogger(__name__)
 
-# Imports directs depuis le service unifié football_data
-from src.services.jeux.football_data import charger_classement as api_charger_classement
-from src.services.jeux.football_data import charger_historique_equipe, charger_matchs_termines
-from src.services.jeux.football_data import charger_matchs_a_venir as api_charger_matchs_a_venir
-from src.services.jeux.football_data import vider_cache as api_vider_cache
+# Imports directs depuis le service unifié jeux
+from src.services.jeux import charger_classement as api_charger_classement
+from src.services.jeux import charger_historique_equipe, charger_matchs_termines
+from src.services.jeux import charger_matchs_a_venir as api_charger_matchs_a_venir
+from src.services.jeux import vider_cache as api_vider_cache
 
 from .constants import CHAMPIONNATS, SEUIL_SERIE_SANS_NUL
 from .forme import calculer_forme_equipe, calculer_historique_face_a_face

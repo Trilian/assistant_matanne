@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/garmin/service.py
 
 Couvre:
@@ -14,7 +14,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.services.garmin.service import (
+from src.services.integrations.garmin.service import (
     GarminService,
     ServiceGarmin,
     get_garmin_config,
@@ -25,7 +25,7 @@ from src.services.garmin.service import (
     list_all_users,
     obtenir_service_garmin,
 )
-from src.services.garmin.types import GarminConfig
+from src.services.integrations.garmin.types import GarminConfig
 
 
 # Helper pour créer un mock de contexte DB compatible avec 'with'
@@ -99,7 +99,7 @@ def service(mock_config):
 class TestGetGarminConfig:
     """Tests pour get_garmin_config."""
 
-    @patch("src.services.garmin.service.obtenir_parametres")
+    @patch("src.services.integrations.garmin.service.obtenir_parametres")
     def test_config_depuis_settings(self, mock_settings):
         """La config est chargée depuis les paramètres."""
         mock_settings.return_value = Mock(
@@ -112,7 +112,7 @@ class TestGetGarminConfig:
         assert config.consumer_key == "key123"
         assert config.consumer_secret == "secret456"
 
-    @patch("src.services.garmin.service.obtenir_parametres")
+    @patch("src.services.integrations.garmin.service.obtenir_parametres")
     def test_config_valeurs_defaut(self, mock_settings):
         """Valeurs par défaut si paramètres absents."""
         mock_settings.return_value = Mock(spec=[])
@@ -139,7 +139,7 @@ class TestServiceGarminInit:
         assert service._oauth_session is None
         assert service._temp_request_token is None
 
-    @patch("src.services.garmin.service.get_garmin_config")
+    @patch("src.services.integrations.garmin.service.get_garmin_config")
     def test_init_sans_config(self, mock_get_config, mock_config):
         """Initialisation sans config charge depuis factory."""
         mock_get_config.return_value = mock_config
@@ -166,7 +166,7 @@ class TestGetAuthorizationUrl:
         with pytest.raises(ValueError, match="Clés Garmin non configurées"):
             service.get_authorization_url()
 
-    @patch("src.services.garmin.service.OAuth1Session")
+    @patch("src.services.integrations.garmin.service.OAuth1Session")
     def test_generation_url(self, mock_oauth_class, mock_config):
         """URL d'autorisation générée correctement."""
         # Mock de la session OAuth
@@ -186,7 +186,7 @@ class TestGetAuthorizationUrl:
         assert token["oauth_token_secret"] == "request_secret_456"
         assert service._temp_request_token == token
 
-    @patch("src.services.garmin.service.OAuth1Session")
+    @patch("src.services.integrations.garmin.service.OAuth1Session")
     def test_callback_url_personnalisee(self, mock_oauth_class, mock_config):
         """Callback URL personnalisée utilisée."""
         mock_oauth = Mock()
@@ -204,7 +204,7 @@ class TestGetAuthorizationUrl:
         call_kwargs = mock_oauth_class.call_args[1]
         assert call_kwargs["callback_uri"] == "https://myapp.com/callback"
 
-    @patch("src.services.garmin.service.OAuth1Session")
+    @patch("src.services.integrations.garmin.service.OAuth1Session")
     def test_erreur_fetch_token(self, mock_oauth_class, mock_config):
         """Exception si fetch_request_token échoue."""
         mock_oauth = Mock()
@@ -220,7 +220,7 @@ class TestGetAuthorizationUrl:
 class TestCompleteAuthorization:
     """Tests pour complete_authorization."""
 
-    @patch("src.services.garmin.service.OAuth1Session")
+    @patch("src.services.integrations.garmin.service.OAuth1Session")
     @patch("src.core.db.obtenir_contexte_db")
     def test_token_manquant(self, mock_db_ctx, mock_oauth_class, mock_config):
         """Erreur si request token manquant."""
@@ -233,7 +233,7 @@ class TestCompleteAuthorization:
         with pytest.raises(ValueError, match="Request token manquant"):
             service.complete_authorization(user_id=1, oauth_verifier="verifier")
 
-    @patch("src.services.garmin.service.OAuth1Session")
+    @patch("src.services.integrations.garmin.service.OAuth1Session")
     @patch("src.core.db.obtenir_contexte_db")
     def test_autorisation_complete(
         self, mock_db_ctx, mock_oauth_class, mock_config, mock_user, mock_garmin_token
@@ -266,7 +266,7 @@ class TestCompleteAuthorization:
         assert result is True
         assert service._temp_request_token is None
 
-    @patch("src.services.garmin.service.OAuth1Session")
+    @patch("src.services.integrations.garmin.service.OAuth1Session")
     @patch("src.core.db.obtenir_contexte_db")
     def test_utilisateur_non_trouve(self, mock_db_ctx, mock_oauth_class, mock_config):
         """Erreur si utilisateur non trouvé."""
@@ -287,7 +287,7 @@ class TestCompleteAuthorization:
         with pytest.raises(ValueError, match="non trouvé"):
             service.complete_authorization(user_id=999, oauth_verifier="verifier")
 
-    @patch("src.services.garmin.service.OAuth1Session")
+    @patch("src.services.integrations.garmin.service.OAuth1Session")
     @patch("src.core.db.obtenir_contexte_db")
     def test_request_token_fourni(self, mock_db_ctx, mock_oauth_class, mock_config, mock_user):
         """Request token fourni explicitement."""
@@ -349,7 +349,7 @@ class TestSyncUserData:
         assert result["activities_synced"] == 0
         assert result["summaries_synced"] == 0
 
-    @patch("src.services.garmin.service.OAuth1Session")
+    @patch("src.services.integrations.garmin.service.OAuth1Session")
     @patch("src.core.db.obtenir_contexte_db")
     def test_sync_complete(self, mock_db_ctx, mock_oauth_class, mock_config, mock_user):
         """Sync complète avec activités et résumés."""
@@ -632,7 +632,7 @@ class TestCalculateStreak:
 class TestFactories:
     """Tests pour les fonctions factory."""
 
-    @patch("src.services.garmin.service.get_garmin_config")
+    @patch("src.services.integrations.garmin.service.get_garmin_config")
     def test_obtenir_service_garmin(self, mock_config_fn, mock_config):
         """Factory française retourne un service."""
         mock_config_fn.return_value = mock_config
@@ -641,7 +641,7 @@ class TestFactories:
 
         assert isinstance(service, ServiceGarmin)
 
-    @patch("src.services.garmin.service.get_garmin_config")
+    @patch("src.services.integrations.garmin.service.get_garmin_config")
     def test_get_garmin_service(self, mock_config_fn, mock_config):
         """Factory anglaise retourne un service."""
         mock_config_fn.return_value = mock_config
@@ -650,7 +650,7 @@ class TestFactories:
 
         assert isinstance(service, ServiceGarmin)
 
-    @patch("src.services.garmin.service.get_garmin_config")
+    @patch("src.services.integrations.garmin.service.get_garmin_config")
     def test_get_garmin_sync_service_alias(self, mock_config_fn, mock_config):
         """Alias de rétrocompatibilité fonctionne."""
         mock_config_fn.return_value = mock_config
@@ -758,7 +758,7 @@ class TestListAllUsers:
 class TestAuthenticationErrors:
     """Tests pour la gestion des erreurs d'authentification."""
 
-    @patch("src.services.garmin.service.OAuth1Session")
+    @patch("src.services.integrations.garmin.service.OAuth1Session")
     def test_oauth_token_error(self, mock_oauth_class, mock_config):
         """Gère les erreurs de récupération de token."""
         mock_oauth = Mock()
@@ -770,7 +770,7 @@ class TestAuthenticationErrors:
         with pytest.raises(Exception, match="Invalid consumer key"):
             service.get_authorization_url()
 
-    @patch("src.services.garmin.service.OAuth1Session")
+    @patch("src.services.integrations.garmin.service.OAuth1Session")
     @patch("src.core.db.obtenir_contexte_db")
     def test_access_token_error(self, mock_db_ctx, mock_oauth_class, mock_config, mock_user):
         """Gère les erreurs de récupération d'access token."""
@@ -791,7 +791,7 @@ class TestAuthenticationErrors:
 class TestGetAuthenticatedSession:
     """Tests pour _get_authenticated_session."""
 
-    @patch("src.services.garmin.service.OAuth1Session")
+    @patch("src.services.integrations.garmin.service.OAuth1Session")
     def test_session_creation(self, mock_oauth_class, mock_config, mock_garmin_token):
         """Crée une session OAuth authentifiée."""
         mock_oauth = Mock()

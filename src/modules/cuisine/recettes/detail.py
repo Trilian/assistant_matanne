@@ -1,4 +1,4 @@
-"""
+﻿"""
 Détail d'une recette - Affichage complet avec historique et versions.
 """
 
@@ -7,7 +7,7 @@ import time
 
 import streamlit as st
 
-from src.services.recettes import get_recette_service
+from src.services.cuisine.recettes import get_recette_service
 
 from .generation_image import render_generer_image
 from .utils import formater_quantite

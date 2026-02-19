@@ -5,11 +5,14 @@ Gestion des routines quotidiennes avec rappels intelligents
 
 import asyncio
 from datetime import datetime
+from typing import Any
 
 import pandas as pd
 import streamlit as st
 
-from src.core.ai import AgentIA
+# AgentIA non implementé - stub pour éviter erreur d'import
+AgentIA = Any  # type: ignore
+
 from src.core.db import obtenir_contexte_db
 from src.core.models import ChildProfile, Routine, RoutineTask
 

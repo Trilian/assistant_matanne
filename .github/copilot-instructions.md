@@ -34,8 +34,7 @@ Le core est organisé en **5 sous-packages** + fichiers utilitaires. Des shims d
 - **models/**: Modèles SQLAlchemy ORM modulaires (18 fichiers organisés par domaine)
 - **ai/**: Sous-module avec `ClientIA` (client Mistral), `AnalyseurIA` (parsing JSON/Pydantic), `CacheIA` (cache sémantique), `RateLimitIA` (source de vérité rate limiting)
 - **decorators.py**: `@with_db_session`, `@with_cache`, `@with_error_handling`
-- **Shims rétrocompat**: `database.py` → db/, `cache_multi.py` → caching/, `performance.py` → monitoring/
-- **Utilitaires**: `date_utils.py`, `formatters.py`, `helpers.py`, `constants.py`, `errors.py`
+- **Utilitaires**: `date_utils.py`, `formatters/`, `helpers/`, `constants.py`, `errors.py`
 
 ### Couche Services (src/services/)
 

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Mixin Statistiques & Alertes pour le service inventaire.
 
 Contient les méthodes de statistiques et notifications:
@@ -43,7 +43,7 @@ class InventaireStatsMixin:
         Returns:
             Dict avec notifications créées par type
         """
-        from src.services.notifications import obtenir_service_notifications
+        from src.services.core.notifications import obtenir_service_notifications
 
         service_notifs = obtenir_service_notifications()
         inventaire = self.get_inventaire_complet()
@@ -100,7 +100,7 @@ class InventaireStatsMixin:
         Returns:
             Liste des notifications non lues
         """
-        from src.services.notifications import obtenir_service_notifications
+        from src.services.core.notifications import obtenir_service_notifications
 
         service_notifs = obtenir_service_notifications()
         notifs = service_notifs.obtenir_notifications(non_lues_seulement=True)

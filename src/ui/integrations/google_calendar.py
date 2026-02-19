@@ -1,4 +1,4 @@
-"""
+﻿"""
 Composant UI pour la synchronisation Google Calendar.
 
 Interface utilisateur pour:
@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 import streamlit as st
 
 from src.core.config import obtenir_parametres
-from src.services.calendrier import (
+from src.services.famille.calendrier import (
     get_calendar_sync_service,
 )
 

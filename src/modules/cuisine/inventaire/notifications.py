@@ -1,4 +1,4 @@
-"""
+﻿"""
 Gestion des notifications - Onglet notifications de l'inventaire.
 Affiche et gère les notifications d'alerte.
 """
@@ -6,7 +6,7 @@ Affiche et gère les notifications d'alerte.
 import streamlit as st
 
 from src.services.inventaire import get_inventaire_service
-from src.services.notifications import obtenir_service_notifications_inventaire
+from src.services.core.notifications import obtenir_service_notifications_inventaire
 
 # Alias pour rétrocompatibilité
 obtenir_service_notifications = obtenir_service_notifications_inventaire

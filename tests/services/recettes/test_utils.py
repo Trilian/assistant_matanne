@@ -1,8 +1,8 @@
-"""Tests pour src/services/recettes/utils.py"""
+﻿"""Tests pour src/services/recettes/utils.py"""
 
 import pytest
 
-from src.services.recettes.utils import (
+from src.services.cuisine.recettes.utils import (
     # Constantes
     DIFFICULTES,
     ROBOTS_COMPATIBLES,

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/utilisateur/historique.py
 Cible: Couverture >80%
 
@@ -17,7 +17,7 @@ import pytest
 # ═══════════════════════════════════════════════════════════
 # IMPORTS DU MODULE
 # ═══════════════════════════════════════════════════════════
-from src.services.utilisateur.historique import (
+from src.services.core.utilisateur.historique import (
     ActionEntry,
     ActionFilter,
     ActionHistoryService,
@@ -691,7 +691,7 @@ class TestPrivateMethods:
 
         service = ActionHistoryService()
 
-        with patch("src.services.utilisateur.authentification.get_auth_service") as mock_get_auth:
+        with patch("src.services.core.utilisateur.authentification.get_auth_service") as mock_get_auth:
             mock_get_auth.return_value = mock_auth
             user_id, user_name = service._get_current_user()
 
@@ -705,7 +705,7 @@ class TestPrivateMethods:
 
         service = ActionHistoryService()
 
-        with patch("src.services.utilisateur.authentification.get_auth_service") as mock_get_auth:
+        with patch("src.services.core.utilisateur.authentification.get_auth_service") as mock_get_auth:
             mock_get_auth.return_value = mock_auth
             user_id, user_name = service._get_current_user()
 
@@ -716,7 +716,7 @@ class TestPrivateMethods:
         """Récupération utilisateur avec exception."""
         service = ActionHistoryService()
 
-        with patch("src.services.utilisateur.authentification.get_auth_service") as mock_get_auth:
+        with patch("src.services.core.utilisateur.authentification.get_auth_service") as mock_get_auth:
             mock_get_auth.side_effect = Exception("Error")
             user_id, user_name = service._get_current_user()
 
@@ -824,7 +824,7 @@ class TestFactory:
 
     def test_factory_returns_service(self):
         """Factory retourne ActionHistoryService."""
-        import src.services.utilisateur.historique as hist_module
+        import src.services.core.utilisateur.historique as hist_module
 
         hist_module._history_service = None
 
@@ -834,7 +834,7 @@ class TestFactory:
 
     def test_factory_singleton(self):
         """Factory retourne la même instance."""
-        import src.services.utilisateur.historique as hist_module
+        import src.services.core.utilisateur.historique as hist_module
 
         hist_module._history_service = None
 
@@ -857,7 +857,7 @@ class TestUIComponents:
     @patch("src.ui.views.historique.get_action_history_service")
     def test_render_activity_timeline_empty(self, mock_service, mock_st):
         """Timeline vide affiche message info."""
-        from src.services.utilisateur.historique import render_activity_timeline
+        from src.services.core.utilisateur.historique import render_activity_timeline
 
         mock_service.return_value.get_recent_actions.return_value = []
 
@@ -869,7 +869,7 @@ class TestUIComponents:
     @patch("src.ui.views.historique.get_action_history_service")
     def test_render_activity_timeline_with_actions(self, mock_service, mock_st):
         """Timeline avec actions."""
-        from src.services.utilisateur.historique import render_activity_timeline
+        from src.services.core.utilisateur.historique import render_activity_timeline
 
         mock_action = Mock()
         mock_action.entity_type = "recette"
@@ -888,7 +888,7 @@ class TestUIComponents:
     @patch("src.ui.views.historique.get_action_history_service")
     def test_render_user_activity_empty(self, mock_service, mock_st):
         """Activité utilisateur vide."""
-        from src.services.utilisateur.historique import render_user_activity
+        from src.services.core.utilisateur.historique import render_user_activity
 
         mock_service.return_value.get_user_history.return_value = []
 
@@ -900,7 +900,7 @@ class TestUIComponents:
     @patch("src.ui.views.historique.get_action_history_service")
     def test_render_user_activity_with_actions(self, mock_service, mock_st):
         """Activité utilisateur avec actions."""
-        from src.services.utilisateur.historique import render_user_activity
+        from src.services.core.utilisateur.historique import render_user_activity
 
         mock_action = Mock()
         mock_action.description = "Test action"
@@ -919,7 +919,7 @@ class TestUIComponents:
     @patch("src.ui.views.historique.get_action_history_service")
     def test_render_activity_stats(self, mock_service, mock_st):
         """Statistiques d'activité."""
-        from src.services.utilisateur.historique import render_activity_stats
+        from src.services.core.utilisateur.historique import render_activity_stats
 
         mock_stats = ActionStats(
             total_actions=100,
@@ -939,7 +939,7 @@ class TestUIComponents:
     @patch("src.ui.views.historique.get_action_history_service")
     def test_render_activity_stats_no_users(self, mock_service, mock_st):
         """Statistiques sans utilisateurs actifs."""
-        from src.services.utilisateur.historique import render_activity_stats
+        from src.services.core.utilisateur.historique import render_activity_stats
 
         mock_stats = ActionStats(
             total_actions=0, actions_today=0, actions_this_week=0, most_active_users=[]

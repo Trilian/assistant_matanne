@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/planning/global_planning.py
 
 Tests du service de planning unifié.
@@ -9,8 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.services.planning.global_planning import ServicePlanningUnifie
-from src.services.planning.types import JourCompletSchema, SemaineCompleSchema
+from src.services.cuisine.planning.global_planning import ServicePlanningUnifie
+from src.services.cuisine.planning.types import JourCompletSchema, SemaineCompleSchema
 
 
 class TestServicePlanningUnifieInit:
@@ -18,19 +18,19 @@ class TestServicePlanningUnifieInit:
 
     def test_service_creation(self):
         """Vérifie que le service peut être créé."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             service = ServicePlanningUnifie()
             assert service is not None
 
     def test_service_has_cache_ttl(self):
         """Vérifie que le TTL de cache est défini."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             service = ServicePlanningUnifie()
             assert service.cache_ttl == 1800
 
     def test_service_has_model(self):
         """Vérifie que le service a un modèle défini."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             service = ServicePlanningUnifie()
             assert service.model is not None
 
@@ -41,7 +41,7 @@ class TestServicePlanningUnifieMethods:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     @pytest.fixture
@@ -71,7 +71,7 @@ class TestSemaineCompleSchema:
 
     def test_import_schema(self):
         """Vérifie que le schéma peut être importé."""
-        from src.services.planning.types import SemaineCompleSchema
+        from src.services.cuisine.planning.types import SemaineCompleSchema
 
         assert SemaineCompleSchema is not None
 
@@ -81,7 +81,7 @@ class TestJourCompletSchema:
 
     def test_import_schema(self):
         """Vérifie que le schéma peut être importé."""
-        from src.services.planning.types import JourCompletSchema
+        from src.services.cuisine.planning.types import JourCompletSchema
 
         assert JourCompletSchema is not None
 
@@ -92,7 +92,7 @@ class TestServicePlanningUnifieAggregation:
     @pytest.fixture
     def service(self):
         """Fixture pour le service."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     @pytest.fixture
@@ -118,7 +118,7 @@ class TestServicePlanningUnifieCache:
 
     def test_cache_key_includes_date(self):
         """Vérifie que la clé de cache inclut la date."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             service = ServicePlanningUnifie()
             # Le décorateur @avec_cache utilise une key_func
             # qui génère une clé basée sur la date
@@ -131,7 +131,7 @@ class TestServicePlanningUnifieIA:
     @pytest.fixture
     def service(self):
         """Fixture pour le service."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     def test_service_has_generer_semaine_ia_method(self, service):
@@ -154,7 +154,7 @@ class TestCalculerCharge:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     def test_empty_data_returns_zero(self, service):
@@ -210,7 +210,7 @@ class TestScoreToCharge:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     def test_faible_for_low_score(self, service):
@@ -235,7 +235,7 @@ class TestDetecterAlertes:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     def test_alerte_jour_tres_charge(self, service):
@@ -297,7 +297,7 @@ class TestDetecterAlertesSemaine:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     def test_alerte_pas_activite_jules_semaine(self, service):
@@ -343,7 +343,7 @@ class TestCalculerBudgetJour:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     def test_empty_lists_return_zero(self, service):
@@ -370,7 +370,7 @@ class TestCalculerStatsSemaine:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     def test_stats_structure(self, service):
@@ -429,7 +429,7 @@ class TestChargerRepas:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     def test_returns_dict(self, service):
@@ -500,7 +500,7 @@ class TestChargerActivites:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     def test_returns_dict(self, service):
@@ -555,7 +555,7 @@ class TestChargerProjets:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     def test_returns_dict(self, service):
@@ -605,7 +605,7 @@ class TestChargerRoutines:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     def test_returns_dict(self, service):
@@ -663,7 +663,7 @@ class TestChargerEvents:
     @pytest.fixture
     def service(self):
         """Fixture pour créer un service mocké."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     def test_returns_dict(self, service):
@@ -705,7 +705,7 @@ class TestGenererSemaineIA:
     @pytest.fixture
     def service(self):
         """Fixture pour le service."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     def test_generer_semaine_ia_appel_base(self, service):
@@ -769,7 +769,7 @@ class TestCreerEvent:
     @pytest.fixture
     def service(self):
         """Fixture pour le service."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     @pytest.fixture
@@ -829,12 +829,12 @@ class TestInvaliderCacheSemaine:
     @pytest.fixture
     def service(self):
         """Fixture pour le service."""
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             return ServicePlanningUnifie()
 
     def test_invalider_cache_semaine(self, service):
         """Test invalidation du cache."""
-        with patch("src.services.planning.global_planning.Cache") as mock_cache:
+        with patch("src.services.cuisine.planning.global_planning.Cache") as mock_cache:
             service._invalider_cache_semaine(date(2024, 1, 17))  # Mercredi
 
             # Vérifie que le cache est invalidé pour le lundi de la semaine (15 janvier)
@@ -842,7 +842,7 @@ class TestInvaliderCacheSemaine:
 
     def test_invalider_cache_lundi(self, service):
         """Test invalidation quand date est lundi."""
-        with patch("src.services.planning.global_planning.Cache") as mock_cache:
+        with patch("src.services.cuisine.planning.global_planning.Cache") as mock_cache:
             service._invalider_cache_semaine(date(2024, 1, 15))  # Lundi
 
             assert mock_cache.invalider.call_count == 2
@@ -858,17 +858,17 @@ class TestFactories:
 
     def test_obtenir_service_planning_unifie(self):
         """Test de la factory."""
-        from src.services.planning.global_planning import obtenir_service_planning_unifie
+        from src.services.cuisine.planning.global_planning import obtenir_service_planning_unifie
 
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             service = obtenir_service_planning_unifie()
             assert service is not None
             assert isinstance(service, ServicePlanningUnifie)
 
     def test_get_planning_unified_service_alias(self):
         """Test de l'alias."""
-        from src.services.planning.global_planning import get_planning_unified_service
+        from src.services.cuisine.planning.global_planning import get_planning_unified_service
 
-        with patch("src.services.planning.global_planning.obtenir_client_ia"):
+        with patch("src.services.cuisine.planning.global_planning.obtenir_client_ia"):
             service = get_planning_unified_service()
             assert service is not None

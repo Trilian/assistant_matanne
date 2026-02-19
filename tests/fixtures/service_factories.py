@@ -1,4 +1,4 @@
-"""Fixtures pour services Phase 18."""
+﻿"""Fixtures pour services Phase 18."""
 
 from unittest.mock import MagicMock, patch
 
@@ -7,9 +7,9 @@ from sqlalchemy.orm import Session
 
 # Import des services réels
 try:
-    from src.services.courses import CoursesService
-    from src.services.planning import PlanningService
-    from src.services.recettes import RecetteService
+    from src.services.cuisine.courses import CoursesService
+    from src.services.cuisine.planning import PlanningService
+    from src.services.cuisine.recettes import RecetteService
 except ImportError:
     pass
 

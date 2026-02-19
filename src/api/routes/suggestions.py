@@ -1,4 +1,4 @@
-"""
+﻿"""
 Routes API pour les suggestions IA.
 """
 
@@ -38,7 +38,7 @@ async def suggest_recettes(
         Liste de suggestions de recettes
     """
     try:
-        from src.services.recettes import get_recette_service
+        from src.services.cuisine.recettes import get_recette_service
 
         service = get_recette_service()
 
@@ -79,7 +79,7 @@ async def suggest_planning(
         Suggestion de planning hebdomadaire
     """
     try:
-        from src.services.planning import get_planning_service
+        from src.services.cuisine.planning import get_planning_service
 
         service = get_planning_service()
 

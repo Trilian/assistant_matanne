@@ -21,8 +21,7 @@ from src.services.jeux import (
     get_scheduler_service,
     get_sync_service,
 )
-from src.services.jeux.football_data import COMPETITIONS
-from src.services.jeux.series_service import SEUIL_VALUE_ALERTE, SEUIL_VALUE_HAUTE
+from src.services.jeux import COMPETITIONS, SEUIL_VALUE_ALERTE, SEUIL_VALUE_HAUTE
 
 logger = logging.getLogger(__name__)
 

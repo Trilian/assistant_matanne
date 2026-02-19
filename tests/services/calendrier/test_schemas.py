@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests du package calendar_sync - Schémas Pydantic.
 
 Tests de validation des modèles de données pour la synchronisation calendrier.
@@ -6,7 +6,7 @@ Tests de validation des modèles de données pour la synchronisation calendrier.
 
 from datetime import datetime
 
-from src.services.calendrier.schemas import (
+from src.services.famille.calendrier.schemas import (
     CalendarEventExternal,
     CalendarProvider,
     ExternalCalendarConfig,

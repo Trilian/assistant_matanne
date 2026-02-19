@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Jules - Imports et constantes partages
 
 Activites adaptees, achats suggeres, conseils developpement:
@@ -16,7 +16,7 @@ import streamlit as st
 from src.core.ai import ClientIA
 from src.core.db import obtenir_contexte_db
 from src.core.models import ChildProfile, FamilyPurchase, Milestone
-from src.services.base import BaseAIService
+from src.services.core.base import BaseAIService
 
 # Activites par tranche d'âge (mois)
 ACTIVITES_PAR_AGE = {

@@ -217,7 +217,3 @@ class NettoyeurEntrees:
                 nettoye[champ] = valeur
 
         return nettoye
-
-
-# Alias pour compatibilité
-InputSanitizer = NettoyeurEntrees

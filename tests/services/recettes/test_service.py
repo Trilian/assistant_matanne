@@ -1,4 +1,4 @@
-"""Tests pour src/services/recettes/service.py"""
+﻿"""Tests pour src/services/recettes/service.py"""
 
 from unittest.mock import patch
 
@@ -14,7 +14,7 @@ from src.core.models import (
     RecetteIngredient,
     VersionRecette,
 )
-from src.services.recettes.service import (
+from src.services.cuisine.recettes.service import (
     RecetteService,
     ServiceRecettes,
     get_recette_service,
@@ -139,7 +139,7 @@ class TestServiceRecettesInit:
 
     def test_obtenir_service_recettes_singleton(self):
         """Test singleton."""
-        import src.services.recettes.service as module
+        import src.services.cuisine.recettes.service as module
 
         module._service_recettes = None
 
@@ -573,13 +573,13 @@ class TestServiceMixin:
 
     def test_service_is_base_ai_service(self, service):
         """Test que le service hérite de BaseAIService."""
-        from src.services.base import BaseAIService
+        from src.services.core.base import BaseAIService
 
         assert isinstance(service, BaseAIService)
 
     def test_service_has_recipe_mixin(self, service):
         """Test que le service a RecipeAIMixin."""
-        from src.services.base import RecipeAIMixin
+        from src.services.core.base import RecipeAIMixin
 
         assert isinstance(service, RecipeAIMixin)
 
@@ -904,7 +904,7 @@ class TestErrorHandling:
 
     def test_get_by_type_exception(self, service, db, patch_db_context):
         """Test exception lors de get_by_type."""
-        with patch("src.services.recettes.service.logger"):
+        with patch("src.services.cuisine.recettes.service.logger"):
             # Simuler une exception en mockant la méthode query
             result = service.get_by_type("invalid")
             assert isinstance(result, list)
@@ -1099,7 +1099,7 @@ class TestGenererVersionBebe:
 
     def test_generer_version_bebe_success_mocked(self, service, db, patch_db_context):
         """Test génération version bébé avec IA mockée."""
-        from src.services.recettes.types import VersionBebeGeneree
+        from src.services.cuisine.recettes.types import VersionBebeGeneree
 
         # Créer recette avec ingrédients et étapes
         recette = Recette(
@@ -1226,7 +1226,7 @@ class TestGenererVersionBatchCooking:
 
     def test_generer_version_batch_cooking_success_mocked(self, service, db, patch_db_context):
         """Test génération batch cooking avec IA mockée."""
-        from src.services.recettes.types import VersionBatchCookingGeneree
+        from src.services.cuisine.recettes.types import VersionBatchCookingGeneree
 
         recette = Recette(
             nom="Chili con carne",
@@ -1287,7 +1287,7 @@ class TestGenererVersionRobot:
 
     def test_generer_version_robot_cookeo(self, service, db, patch_db_context):
         """Test génération version Cookeo."""
-        from src.services.recettes.types import VersionRobotGeneree
+        from src.services.cuisine.recettes.types import VersionRobotGeneree
 
         recette = Recette(
             nom="Boeuf bourguignon",
@@ -1334,7 +1334,7 @@ class TestGenererVersionRobot:
 
     def test_generer_version_robot_airfryer(self, service, db, patch_db_context):
         """Test génération version Airfryer."""
-        from src.services.recettes.types import VersionRobotGeneree
+        from src.services.cuisine.recettes.types import VersionRobotGeneree
 
         recette = Recette(
             nom="Poulet croustillant",
@@ -1380,7 +1380,7 @@ class TestGenererVersionRobot:
 
     def test_generer_version_robot_multicooker(self, service, db, patch_db_context):
         """Test génération version Multicooker."""
-        from src.services.recettes.types import VersionRobotGeneree
+        from src.services.cuisine.recettes.types import VersionRobotGeneree
 
         recette = Recette(
             nom="Risotto aux champignons",
@@ -1426,7 +1426,7 @@ class TestGenererVersionRobot:
 
     def test_generer_version_robot_monsieur_cuisine(self, service, db, patch_db_context):
         """Test génération version Monsieur Cuisine."""
-        from src.services.recettes.types import VersionRobotGeneree
+        from src.services.cuisine.recettes.types import VersionRobotGeneree
 
         recette = Recette(
             nom="Velouté de courgettes",

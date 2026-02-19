@@ -1,4 +1,4 @@
-"""Tests pour src/services/notifications/notif_ntfy.py - ServiceNtfy.
+﻿"""Tests pour src/services/notifications/notif_ntfy.py - ServiceNtfy.
 
 Couverture des fonctionnalités:
 - Envoi de notifications via ntfy.sh
@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.services.notifications.notif_ntfy import (
+from src.services.core.notifications.notif_ntfy import (
     NotificationPushConfig,
     NotificationPushScheduler,
     # Alias rétrocompatibilité
@@ -23,7 +23,7 @@ from src.services.notifications.notif_ntfy import (
     obtenir_planificateur_ntfy,
     obtenir_service_ntfy,
 )
-from src.services.notifications.types import (
+from src.services.core.notifications.types import (
     ConfigurationNtfy,
     NotificationNtfy,
     ResultatEnvoiNtfy,

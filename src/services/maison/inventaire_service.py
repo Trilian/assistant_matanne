@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Inventaire Maison - Gestion des pièces, objets et recherche "Où est...".
 
 Features:
@@ -23,7 +23,7 @@ from decimal import Decimal
 from sqlalchemy.orm import Session
 
 from src.core.ai import ClientIA
-from src.services.base import BaseAIService
+from src.services.core.base import BaseAIService
 
 from .inventaire_recherche_mixin import InventaireRechercheMixin
 from .inventaire_statut_mixin import InventaireStatutMixin

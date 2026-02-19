@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/modules/planning/calendar_sync_ui.py
 
 Tests complets pour l'interface de synchronisation calendrier avec mocking Streamlit.
@@ -128,7 +128,7 @@ class TestRenderExportTab:
         mock_st.button.return_value = True
         mock_service.export_to_ical.return_value = "BEGIN:VCALENDAR..."
 
-        with patch("src.services.utilisateur.get_auth_service") as mock_auth:
+        with patch("src.services.core.utilisateur.get_auth_service") as mock_auth:
             mock_user = MagicMock()
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user
@@ -144,7 +144,7 @@ class TestRenderExportTab:
         mock_st.button.return_value = True
         mock_service.export_to_ical.return_value = "BEGIN:VCALENDAR..."
 
-        with patch("src.services.utilisateur.get_auth_service") as mock_auth:
+        with patch("src.services.core.utilisateur.get_auth_service") as mock_auth:
             mock_user = MagicMock()
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user
@@ -211,7 +211,7 @@ class TestRenderImportTab:
         result_mock.message = "Import réussi"
         mock_service.import_from_ical_url.return_value = result_mock
 
-        with patch("src.services.utilisateur.get_auth_service") as mock_auth:
+        with patch("src.services.core.utilisateur.get_auth_service") as mock_auth:
             mock_user = MagicMock()
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user
@@ -235,7 +235,7 @@ class TestRenderImportTab:
         result_mock.message = "Import réussi"
         mock_service.import_from_ical_url.return_value = result_mock
 
-        with patch("src.services.utilisateur.get_auth_service") as mock_auth:
+        with patch("src.services.core.utilisateur.get_auth_service") as mock_auth:
             mock_user = MagicMock()
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user
@@ -259,7 +259,7 @@ class TestRenderImportTab:
         result_mock.message = "Erreur d'import"
         mock_service.import_from_ical_url.return_value = result_mock
 
-        with patch("src.services.utilisateur.get_auth_service") as mock_auth:
+        with patch("src.services.core.utilisateur.get_auth_service") as mock_auth:
             mock_user = MagicMock()
             mock_user.id = "user123"
             mock_auth.return_value.get_current_user.return_value = mock_user

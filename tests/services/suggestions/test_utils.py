@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for src/services/suggestions/utils.py
 
 Pure utility functions - no mocking needed.
@@ -6,7 +6,7 @@ Pure utility functions - no mocking needed.
 
 from datetime import date, datetime
 
-from src.services.suggestions.analyse_historique import (
+from src.services.cuisine.suggestions.analyse_historique import (
     analyze_categories,
     analyze_frequent_ingredients,
     calculate_average_difficulty,
@@ -15,7 +15,7 @@ from src.services.suggestions.analyse_historique import (
     days_since_last_preparation,
     identify_favorites,
 )
-from src.services.suggestions.constantes_suggestions import (
+from src.services.cuisine.suggestions.constantes_suggestions import (
     SCORE_CATEGORIE_PREFEREE,
     SCORE_DIFFICULTE_ADAPTEE,
     SCORE_INGREDIENT_DISPONIBLE,
@@ -25,24 +25,24 @@ from src.services.suggestions.constantes_suggestions import (
     SCORE_TEMPS_ADAPTE,
     SCORE_VARIETE,
 )
-from src.services.suggestions.equilibre import (
+from src.services.cuisine.suggestions.equilibre import (
     calculate_variety_score,
     calculate_week_protein_balance,
     detect_protein_type,
     get_least_prepared_recipes,
     is_week_balanced,
 )
-from src.services.suggestions.formatage import (
+from src.services.cuisine.suggestions.formatage import (
     filter_by_constraints,
     format_profile_summary,
     format_suggestion,
 )
-from src.services.suggestions.saisons import (
+from src.services.cuisine.suggestions.saisons import (
     get_current_season,
     get_seasonal_ingredients,
     is_ingredient_in_season,
 )
-from src.services.suggestions.scoring import (
+from src.services.cuisine.suggestions.scoring import (
     calculate_recipe_score,
     generate_suggestion_reason,
     rank_recipes,

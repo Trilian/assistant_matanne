@@ -1,4 +1,4 @@
-"""
+﻿"""
 Base IO - Import/Export universel
 Gestion automatique CSV/JSON depuis config
 """
@@ -8,7 +8,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
-from src.services.base import IOService
+from src.services.core.base import IOService
 
 logger = logging.getLogger(__name__)
 

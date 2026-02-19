@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests du package budget - Schémas Pydantic.
 
 Tests de validation des modèles de données pour le budget familial.
@@ -6,7 +6,7 @@ Tests de validation des modèles de données pour le budget familial.
 
 from datetime import date, datetime
 
-from src.services.budget.schemas import (
+from src.services.famille.budget.schemas import (
     DEFAULT_USER_ID,
     BudgetMensuel,
     CategorieDepense,

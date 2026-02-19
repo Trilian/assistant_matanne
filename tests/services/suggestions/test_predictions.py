@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for src/services/suggestions/predictions.py
 
 PredictionService - ML predictions for inventory.
@@ -6,7 +6,7 @@ PredictionService - ML predictions for inventory.
 
 import pytest
 
-from src.services.suggestions.predictions import (
+from src.services.cuisine.suggestions.predictions import (
     AnalysePrediction,
     PredictionArticle,
     PredictionService,

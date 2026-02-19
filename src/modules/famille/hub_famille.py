@@ -1,4 +1,4 @@
-"""
+﻿"""
 Hub Famille - Dashboard principal avec cards cliquables.
 
 Structure:
@@ -27,7 +27,7 @@ from src.core.models import (
     UserProfile,
     WeekendActivity,
 )
-from src.services.garmin import init_family_users
+from src.services.integrations.garmin import init_family_users
 
 # ═══════════════════════════════════════════════════════════
 # STYLES CSS

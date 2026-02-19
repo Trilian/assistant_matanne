@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Recettes - Gestion complète des recettes
 
 Fonctionnalités:
@@ -11,7 +11,7 @@ Fonctionnalités:
 
 import streamlit as st
 
-from src.services.recettes import get_recette_service
+from src.services.cuisine.recettes import get_recette_service
 
 # Import externe pour l'onglet import
 from ..recettes_import import render_importer

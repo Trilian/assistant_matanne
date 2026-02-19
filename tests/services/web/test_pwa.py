@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/web/pwa.py
 """
 
@@ -11,7 +11,7 @@ class TestGenerateManifest:
 
     def test_generate_manifest_creates_file(self, tmp_path):
         """Test création du fichier manifest.json."""
-        from src.services.web.pwa import generate_manifest
+        from src.services.integrations.web.pwa import generate_manifest
 
         result = generate_manifest(tmp_path)
 
@@ -20,7 +20,7 @@ class TestGenerateManifest:
 
     def test_generate_manifest_content(self, tmp_path):
         """Test le contenu du manifest."""
-        from src.services.web.pwa import PWA_CONFIG, generate_manifest
+        from src.services.integrations.web.pwa import PWA_CONFIG, generate_manifest
 
         generate_manifest(tmp_path)
         manifest_path = tmp_path / "manifest.json"
@@ -33,7 +33,7 @@ class TestGenerateManifest:
 
     def test_generate_manifest_creates_directory(self, tmp_path):
         """Test création du dossier si inexistant."""
-        from src.services.web.pwa import generate_manifest
+        from src.services.integrations.web.pwa import generate_manifest
 
         nested_path = tmp_path / "nested" / "folder"
         result = generate_manifest(nested_path)
@@ -47,7 +47,7 @@ class TestGenerateServiceWorker:
 
     def test_generate_sw_creates_file(self, tmp_path):
         """Test création du fichier sw.js."""
-        from src.services.web.pwa import generate_service_worker
+        from src.services.integrations.web.pwa import generate_service_worker
 
         result = generate_service_worker(tmp_path)
 
@@ -56,7 +56,7 @@ class TestGenerateServiceWorker:
 
     def test_generate_sw_content(self, tmp_path):
         """Test le contenu du service worker."""
-        from src.services.web.pwa import generate_service_worker
+        from src.services.integrations.web.pwa import generate_service_worker
 
         generate_service_worker(tmp_path)
         sw_path = tmp_path / "sw.js"
@@ -73,7 +73,7 @@ class TestGenerateOfflinePage:
 
     def test_generate_offline_creates_file(self, tmp_path):
         """Test création du fichier offline.html."""
-        from src.services.web.pwa import generate_offline_page
+        from src.services.integrations.web.pwa import generate_offline_page
 
         result = generate_offline_page(tmp_path)
 
@@ -82,7 +82,7 @@ class TestGenerateOfflinePage:
 
     def test_generate_offline_content(self, tmp_path):
         """Test le contenu de la page offline."""
-        from src.services.web.pwa import generate_offline_page
+        from src.services.integrations.web.pwa import generate_offline_page
 
         generate_offline_page(tmp_path)
         offline_path = tmp_path / "offline.html"
@@ -99,7 +99,7 @@ class TestGeneratePwaFiles:
 
     def test_generate_all_files(self, tmp_path):
         """Test génération de tous les fichiers PWA."""
-        from src.services.web.pwa import generate_pwa_files
+        from src.services.integrations.web.pwa import generate_pwa_files
 
         result = generate_pwa_files(tmp_path)
 
@@ -113,7 +113,7 @@ class TestGeneratePwaFiles:
 
     def test_creates_icons_folder(self, tmp_path):
         """Test création du dossier icons."""
-        from src.services.web.pwa import generate_pwa_files
+        from src.services.integrations.web.pwa import generate_pwa_files
 
         generate_pwa_files(tmp_path)
 
@@ -128,7 +128,7 @@ class TestInjectPwaMeta:
     @patch("src.ui.views.pwa.components")
     def test_inject_meta_calls_components(self, mock_components):
         """Test appel de components.html."""
-        from src.services.web.pwa import inject_pwa_meta
+        from src.services.integrations.web.pwa import inject_pwa_meta
 
         inject_pwa_meta()
 
@@ -147,7 +147,7 @@ class TestRenderInstallPrompt:
     @patch("src.ui.views.synchronisation.components", create=True)
     def test_render_install_calls_components(self, mock_components):
         """Test appel de components.html."""
-        from src.services.web.pwa import render_install_prompt
+        from src.services.integrations.web.pwa import render_install_prompt
 
         render_install_prompt()
 
@@ -164,7 +164,7 @@ class TestIsPwaInstalled:
 
     def test_returns_false(self):
         """Test retourne toujours False (vérif côté client)."""
-        from src.services.web.pwa import is_pwa_installed
+        from src.services.integrations.web.pwa import is_pwa_installed
 
         result = is_pwa_installed()
 
@@ -176,7 +176,7 @@ class TestGenerateIconSvg:
 
     def test_default_size(self):
         """Test génération avec taille par défaut."""
-        from src.services.web.pwa import generate_icon_svg
+        from src.services.integrations.web.pwa import generate_icon_svg
 
         result = generate_icon_svg()
 
@@ -185,7 +185,7 @@ class TestGenerateIconSvg:
 
     def test_custom_size(self):
         """Test génération avec taille personnalisée."""
-        from src.services.web.pwa import generate_icon_svg
+        from src.services.integrations.web.pwa import generate_icon_svg
 
         result = generate_icon_svg(size=256)
 
@@ -194,7 +194,7 @@ class TestGenerateIconSvg:
 
     def test_svg_structure(self):
         """Test structure SVG valide."""
-        from src.services.web.pwa import generate_icon_svg
+        from src.services.integrations.web.pwa import generate_icon_svg
 
         result = generate_icon_svg()
 
@@ -209,7 +209,7 @@ class TestPwaConfig:
 
     def test_pwa_config_structure(self):
         """Test structure de la configuration."""
-        from src.services.web.pwa import PWA_CONFIG
+        from src.services.integrations.web.pwa import PWA_CONFIG
 
         assert "name" in PWA_CONFIG
         assert "short_name" in PWA_CONFIG
@@ -218,7 +218,7 @@ class TestPwaConfig:
 
     def test_pwa_config_icons(self):
         """Test configuration des icônes."""
-        from src.services.web.pwa import PWA_CONFIG
+        from src.services.integrations.web.pwa import PWA_CONFIG
 
         icons = PWA_CONFIG["icons"]
 
@@ -234,7 +234,7 @@ class TestServiceWorkerJs:
 
     def test_sw_contains_cache_strategies(self):
         """Test présence des stratégies de cache."""
-        from src.services.web.pwa import SERVICE_WORKER_JS
+        from src.services.integrations.web.pwa import SERVICE_WORKER_JS
 
         assert "PRECACHE_URLS" in SERVICE_WORKER_JS
         assert "install" in SERVICE_WORKER_JS
@@ -243,7 +243,7 @@ class TestServiceWorkerJs:
 
     def test_sw_contains_offline_support(self):
         """Test support offline."""
-        from src.services.web.pwa import SERVICE_WORKER_JS
+        from src.services.integrations.web.pwa import SERVICE_WORKER_JS
 
         assert "offline" in SERVICE_WORKER_JS.lower()
         assert "caches" in SERVICE_WORKER_JS
@@ -254,7 +254,7 @@ class TestOfflineHtml:
 
     def test_offline_html_structure(self):
         """Test structure HTML."""
-        from src.services.web.pwa import OFFLINE_HTML
+        from src.services.integrations.web.pwa import OFFLINE_HTML
 
         assert "<!DOCTYPE html>" in OFFLINE_HTML
         assert "<html" in OFFLINE_HTML
@@ -262,7 +262,7 @@ class TestOfflineHtml:
 
     def test_offline_html_french(self):
         """Test contenu en français."""
-        from src.services.web.pwa import OFFLINE_HTML
+        from src.services.integrations.web.pwa import OFFLINE_HTML
 
         assert 'lang="fr"' in OFFLINE_HTML
         assert "hors ligne" in OFFLINE_HTML.lower()

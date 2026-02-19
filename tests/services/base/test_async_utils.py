@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour le module async_utils.
 
 Teste le décorateur sync_wrapper qui convertit les méthodes async en sync.
@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.services.base.async_utils import make_sync_alias, sync_wrapper
+from src.services.core.base.async_utils import make_sync_alias, sync_wrapper
 
 # ═══════════════════════════════════════════════════════════
 # FIXTURES

@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.services.jeux.football_data import (
+from src.services.jeux import (
     COMPETITIONS,
     FootballDataService,
     Match,

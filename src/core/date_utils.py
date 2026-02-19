@@ -377,6 +377,45 @@ calculate_week_dates = obtenir_jours_semaine
 
 
 # ═══════════════════════════════════════════════════════════
+# FORMATAGE DURÉES
+# ═══════════════════════════════════════════════════════════
+
+
+def formater_temps(minutes: int | float | None, avec_espace: bool = False) -> str:
+    """
+    Formate une durée en minutes vers format lisible.
+
+    Args:
+        minutes: Durée en minutes
+        avec_espace: Ajoute un espace entre le nombre et l'unité
+
+    Examples:
+        >>> formater_temps(90)
+        "1h30"
+        >>> formater_temps(45, avec_espace=True)
+        "45 min"
+    """
+    if minutes is None or minutes == 0:
+        return "0 min" if avec_espace else "0min"
+
+    try:
+        total_minutes = int(minutes)
+    except (ValueError, TypeError):
+        return "0 min" if avec_espace else "0min"
+
+    if total_minutes < 60:
+        return f"{total_minutes} min" if avec_espace else f"{total_minutes}min"
+
+    hours = total_minutes // 60
+    remaining_minutes = total_minutes % 60
+
+    if remaining_minutes == 0:
+        return f"{hours}h"
+
+    return f"{hours}h{remaining_minutes:02d}"
+
+
+# ═══════════════════════════════════════════════════════════
 # EXPORTS
 # ═══════════════════════════════════════════════════════════
 
@@ -411,4 +450,6 @@ __all__ = [
     "get_monday_of_week",
     "get_week_range",
     "calculate_week_dates",
+    # Formatage durées
+    "formater_temps",
 ]

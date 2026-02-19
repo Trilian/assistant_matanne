@@ -8,7 +8,7 @@ Ce module fournit:
 - Helpers et décorateurs de validation
 """
 
-from .sanitizer import InputSanitizer, NettoyeurEntrees
+from .sanitizer import NettoyeurEntrees
 from .schemas import (
     # Constantes
     MAX_ETAPES,
@@ -48,12 +48,6 @@ from .schemas import (
 )
 from .validators import (
     afficher_erreurs_validation,
-    # Alias anglais
-    show_validation_errors,
-    validate_and_sanitize_form,
-    validate_input,
-    validate_model,
-    validate_streamlit_form,
     valider_entree,
     valider_et_nettoyer_formulaire,
     valider_formulaire_streamlit,
@@ -63,7 +57,6 @@ from .validators import (
 __all__ = [
     # Sanitizer
     "NettoyeurEntrees",
-    "InputSanitizer",
     # Helpers
     "nettoyer_texte",
     # Constantes
@@ -97,10 +90,4 @@ __all__ = [
     "valider_et_nettoyer_formulaire",
     "afficher_erreurs_validation",
     "valider_entree",
-    # Alias anglais
-    "validate_model",
-    "validate_streamlit_form",
-    "validate_and_sanitize_form",
-    "show_validation_errors",
-    "validate_input",
 ]

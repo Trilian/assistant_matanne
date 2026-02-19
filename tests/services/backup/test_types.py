@@ -1,11 +1,11 @@
-"""Tests pour backup/types.py - Pydantic models et validation."""
+﻿"""Tests pour backup/types.py - Pydantic models et validation."""
 
 from datetime import datetime
 
 import pytest
 from pydantic import ValidationError
 
-from src.services.backup.types import (
+from src.services.core.backup.types import (
     BackupConfig,
     BackupMetadata,
     BackupResult,

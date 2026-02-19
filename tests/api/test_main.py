@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour l'API principale (main.py).
 
 Utilise une vraie DB SQLite en mémoire via les fixtures.
@@ -353,7 +353,7 @@ class TestIAEndpoints:
             {"nom": "Pasta Carbonara", "difficulte": "moyen"},
         ]
 
-        with patch("src.services.recettes.get_recette_service") as mock_service:
+        with patch("src.services.cuisine.recettes.get_recette_service") as mock_service:
             mock_instance = mock_service.return_value
             mock_instance.suggerer_recettes_ia.return_value = mock_suggestions
 

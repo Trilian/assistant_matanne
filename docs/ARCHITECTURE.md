@@ -51,12 +51,12 @@ from src.core.config import obtenir_parametres
 config = obtenir_parametres()
 ```
 
-### database.py
+### db/ (Base de données)
 ```python
 # Connexion avec QueuePool (5 connexions, max 10)
-from src.core.database import get_db_context
+from src.core.db import obtenir_contexte_db
 
-with get_db_context() as session:
+with obtenir_contexte_db() as session:
     result = session.query(Recette).all()
 ```
 
@@ -135,13 +135,9 @@ CREATE POLICY depenses_user_policy ON depenses
 ```
 
 ### Multi-tenant
-```python
-from src.core.multi_tenant import user_context
 
-with user_context(user_id) as ctx:
-    # Requêtes filtrées automatiquement
-    depenses = ctx.query(Depense).all()
-```
+> **Note**: Le module multi-tenant (`multi_tenant.py`) a été supprimé car inutilisé en production.
+> L'isolation des données se fait via les politiques RLS de Supabase (voir ci-dessus).
 
 ## Cache
 

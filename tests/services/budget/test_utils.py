@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour utils.py
 
 Module: src.services.budget.utils
@@ -10,13 +10,13 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.services.budget.schemas import (
+from src.services.famille.budget.schemas import (
     CategorieDepense,
     Depense,
     FrequenceRecurrence,
     PrevisionDepense,
 )
-from src.services.budget.utils import (
+from src.services.famille.budget.utils import (
     # Agrégation
     agreger_depenses_par_categorie,
     calculer_confiance_prevision,

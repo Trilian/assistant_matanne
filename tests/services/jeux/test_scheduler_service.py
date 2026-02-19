@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.services.jeux.scheduler_service import (
+from src.services.jeux import (
     APSCHEDULER_AVAILABLE,
     HEURE_LOTO,
     INTERVALLE_PARIS_HEURES,

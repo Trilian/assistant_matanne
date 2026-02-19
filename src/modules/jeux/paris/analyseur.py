@@ -12,7 +12,7 @@ import logging
 from datetime import datetime
 from typing import Any
 
-from src.services.jeux.prediction_service import predire_over_under, predire_resultat_match
+from src.services.jeux import predire_over_under, predire_resultat_match
 
 from .forme import calculer_forme_equipe, calculer_historique_face_a_face
 

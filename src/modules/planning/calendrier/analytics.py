@@ -1,4 +1,4 @@
-"""
+﻿"""
 Composants d'analyse et graphiques pour le Calendrier Familial.
 
 Intègre les fonctionnalités de vue_ensemble.py et vue_semaine.py:
@@ -222,7 +222,7 @@ def render_formulaire_optimisation_ia(week_start: date) -> None:
         if submitted:
             with st.spinner("🤖 L'IA analyse..."):
                 # Import différé pour éviter les dépendances circulaires
-                from src.services.planning import get_planning_unified_service
+                from src.services.cuisine.planning import get_planning_unified_service
 
                 service = get_planning_unified_service()
                 result = service.generer_semaine_ia(

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tableau de bord budget familial - Interface Streamlit.
 
 Fonctionnalités:
@@ -14,7 +14,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.services.budget import (
+from src.services.famille.budget import (
     CategorieDepense,
     Depense,
     get_budget_service,

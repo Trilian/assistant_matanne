@@ -1,4 +1,4 @@
-"""
+﻿"""
 Interface Streamlit pour la synchronisation des calendriers externes.
 
 Fonctionnalités:
@@ -11,7 +11,7 @@ from datetime import date, timedelta
 
 import streamlit as st
 
-from src.services.calendrier import get_calendar_sync_service
+from src.services.famille.calendrier import get_calendar_sync_service
 
 
 def render_calendar_sync_ui():
@@ -51,7 +51,7 @@ def _render_export_tab(service):
     days_ahead = st.slider("Période (jours)", 7, 90, 30, key="export_days")
 
     if st.button("📥 Générer le fichier iCal", type="primary"):
-        from src.services.utilisateur import get_auth_service
+        from src.services.core.utilisateur import get_auth_service
 
         auth = get_auth_service()
         user = auth.get_current_user()
@@ -90,7 +90,7 @@ def _render_import_tab(service):
     )
 
     if st.button("📤 Importer", type="primary") and ical_url:
-        from src.services.utilisateur import get_auth_service
+        from src.services.core.utilisateur import get_auth_service
 
         auth = get_auth_service()
         user = auth.get_current_user()

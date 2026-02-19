@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Suivi Perso - Imports et constantes partages
 
 Dashboard sante/sport pour Anne et Mathieu:
@@ -25,7 +25,7 @@ from src.core.models import (
     HealthRoutine,
     UserProfile,
 )
-from src.services.garmin import (
+from src.services.integrations.garmin import (
     GarminService,
     get_garmin_service,
     get_or_create_user,

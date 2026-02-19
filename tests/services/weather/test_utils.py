@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/weather/utils.py
 
 Couvre les fonctions utilitaires pures du service météo.
@@ -6,7 +6,7 @@ Couvre les fonctions utilitaires pures du service météo.
 
 from datetime import date, datetime
 
-from src.services.weather import (
+from src.services.integrations.weather import (
     DIRECTIONS_CARDINALES,
     SEUIL_CANICULE,
     SEUIL_CANICULE_SEVERE,
@@ -44,7 +44,7 @@ from src.services.weather import (
     weathercode_to_condition,
     weathercode_to_icon,
 )
-from src.services.weather.parsing import _safe_get_index
+from src.services.integrations.weather.parsing import _safe_get_index
 
 # ═══════════════════════════════════════════════════════════
 # TESTS CONSTANTES

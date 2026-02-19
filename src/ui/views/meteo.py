@@ -1,4 +1,4 @@
-"""
+﻿"""
 Interface UI pour les alertes météo jardin.
 
 Note: Ce fichier a été extrait depuis src/services/weather/service.py
@@ -7,7 +7,7 @@ pour respecter la séparation UI/Services.
 
 import streamlit as st
 
-from src.services.weather.service import (
+from src.services.integrations.weather.service import (
     NiveauAlerte,
     get_weather_garden_service,
 )

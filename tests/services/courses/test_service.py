@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/courses/service.py
 
 Tests du ServiceCourses:
@@ -15,12 +15,12 @@ import pytest
 from sqlalchemy.orm import Session
 
 from src.core.models import ArticleCourses, ArticleModele, Ingredient, ModeleCourses
-from src.services.courses.service import (
+from src.services.cuisine.courses.service import (
     ServiceCourses,
     get_courses_service,
     obtenir_service_courses,
 )
-from src.services.courses.types import SuggestionCourses
+from src.services.cuisine.courses.types import SuggestionCourses
 
 # ═══════════════════════════════════════════════════════════
 # FIXTURES
@@ -38,7 +38,7 @@ def mock_client_ia():
 @pytest.fixture
 def service_courses(mock_client_ia):
     """Instance du service courses avec client IA mocké."""
-    with patch("src.services.courses.service.obtenir_client_ia", return_value=mock_client_ia):
+    with patch("src.services.cuisine.courses.service.obtenir_client_ia", return_value=mock_client_ia):
         service = ServiceCourses()
         return service
 
@@ -139,7 +139,7 @@ class TestServiceCoursesCreation:
 
     def test_creation_service(self, mock_client_ia):
         """Test création du service."""
-        with patch("src.services.courses.service.obtenir_client_ia", return_value=mock_client_ia):
+        with patch("src.services.cuisine.courses.service.obtenir_client_ia", return_value=mock_client_ia):
             service = ServiceCourses()
             assert service is not None
             assert service.model == ArticleCourses
@@ -147,24 +147,24 @@ class TestServiceCoursesCreation:
 
     def test_factory_obtenir_service_courses(self, mock_client_ia):
         """Test factory function retourne instance."""
-        with patch("src.services.courses.service.obtenir_client_ia", return_value=mock_client_ia):
-            with patch("src.services.courses.service._service_courses", None):
+        with patch("src.services.cuisine.courses.service.obtenir_client_ia", return_value=mock_client_ia):
+            with patch("src.services.cuisine.courses.service._service_courses", None):
                 service = obtenir_service_courses()
                 assert service is not None
                 assert isinstance(service, ServiceCourses)
 
     def test_factory_singleton(self, mock_client_ia):
         """Test factory retourne même instance."""
-        with patch("src.services.courses.service.obtenir_client_ia", return_value=mock_client_ia):
-            with patch("src.services.courses.service._service_courses", None):
+        with patch("src.services.cuisine.courses.service.obtenir_client_ia", return_value=mock_client_ia):
+            with patch("src.services.cuisine.courses.service._service_courses", None):
                 service1 = obtenir_service_courses()
                 service2 = obtenir_service_courses()
                 assert service1 is service2
 
     def test_alias_get_courses_service(self, mock_client_ia):
         """Test alias anglais."""
-        with patch("src.services.courses.service.obtenir_client_ia", return_value=mock_client_ia):
-            with patch("src.services.courses.service._service_courses", None):
+        with patch("src.services.cuisine.courses.service.obtenir_client_ia", return_value=mock_client_ia):
+            with patch("src.services.cuisine.courses.service._service_courses", None):
                 service = get_courses_service()
                 assert isinstance(service, ServiceCourses)
 

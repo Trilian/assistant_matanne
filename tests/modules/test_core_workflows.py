@@ -1,4 +1,4 @@
-"""Phase 17: Tests pour workflows core des domains.
+﻿"""Phase 17: Tests pour workflows core des domains.
 
 Ces tests couvrent:
 - Initialisation des pages modules
@@ -54,7 +54,7 @@ class TestCuisineModule:
         # Placeholder: implementation en Phase 17+
         assert True
 
-    @patch("src.services.recettes.RecetteService")
+    @patch("src.services.cuisine.recettes.RecetteService")
     def test_cuisine_list_recipes(self, mock_service):
         """Le module Cuisine affiche la liste des recettes."""
         mock_service.return_value.lister_recettes.return_value = []
@@ -62,7 +62,7 @@ class TestCuisineModule:
         # Placeholder: implementation en Phase 17+
         assert True
 
-    @patch("src.services.recettes.RecetteService")
+    @patch("src.services.cuisine.recettes.RecetteService")
     def test_cuisine_search_recipes(self, mock_service):
         """Le module Cuisine peut chercher des recettes."""
         mock_service.return_value.chercher_recettes.return_value = []
@@ -93,7 +93,7 @@ class TestPlanningModule:
 
     # NOTE: test_planning_initialization supprimé - streamlit.calendar n'existe pas
 
-    @patch("src.services.planning.PlanningService")
+    @patch("src.services.cuisine.planning.PlanningService")
     def test_planning_display_week(self, mock_service):
         """Le module Planning affiche la semaine."""
         mock_service.return_value.obtenir_planning_semaine.return_value = None
@@ -101,7 +101,7 @@ class TestPlanningModule:
         # Placeholder: implementation en Phase 17+
         assert True
 
-    @patch("src.services.planning.PlanningService")
+    @patch("src.services.cuisine.planning.PlanningService")
     def test_planning_update_meal(self, mock_service):
         """Le module Planning peut mettre a jour un repas."""
         mock_service.return_value.mettre_a_jour_repas.return_value = None

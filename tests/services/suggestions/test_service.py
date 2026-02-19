@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for src/services/suggestions/service.py
 
 ServiceSuggestions - IA-powered recipe suggestions.
@@ -9,13 +9,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.services.suggestions.service import (
+from src.services.cuisine.suggestions.service import (
     ServiceSuggestions,
     SuggestionsIAService,
     get_suggestions_ia_service,
     obtenir_service_suggestions,
 )
-from src.services.suggestions.types import (
+from src.services.cuisine.suggestions.types import (
     ContexteSuggestion,
     ProfilCulinaire,
     SuggestionRecette,
@@ -118,9 +118,9 @@ class TestServiceSuggestions:
     def service(self):
         """Fixture service avec mocks."""
         with (
-            patch("src.services.suggestions.service.ClientIA") as mock_client,
-            patch("src.services.suggestions.service.AnalyseurIA") as mock_analyseur,
-            patch("src.services.suggestions.service.obtenir_cache") as mock_cache,
+            patch("src.services.cuisine.suggestions.service.ClientIA") as mock_client,
+            patch("src.services.cuisine.suggestions.service.AnalyseurIA") as mock_analyseur,
+            patch("src.services.cuisine.suggestions.service.obtenir_cache") as mock_cache,
         ):
             mock_cache.return_value = MagicMock()
             s = ServiceSuggestions()
@@ -286,7 +286,7 @@ class TestServiceSuggestions:
         """Test saison printemps."""
         mock_session.query.return_value.filter.return_value.all.return_value = []
 
-        with patch("src.services.suggestions.service.datetime") as mock_dt:
+        with patch("src.services.cuisine.suggestions.service.datetime") as mock_dt:
             mock_dt.now.return_value = datetime(2024, 4, 15)
             contexte = service.construire_contexte(session=mock_session)
 
@@ -296,7 +296,7 @@ class TestServiceSuggestions:
         """Test saison été."""
         mock_session.query.return_value.filter.return_value.all.return_value = []
 
-        with patch("src.services.suggestions.service.datetime") as mock_dt:
+        with patch("src.services.cuisine.suggestions.service.datetime") as mock_dt:
             mock_dt.now.return_value = datetime(2024, 7, 15)
             contexte = service.construire_contexte(session=mock_session)
 
@@ -306,7 +306,7 @@ class TestServiceSuggestions:
         """Test saison automne."""
         mock_session.query.return_value.filter.return_value.all.return_value = []
 
-        with patch("src.services.suggestions.service.datetime") as mock_dt:
+        with patch("src.services.cuisine.suggestions.service.datetime") as mock_dt:
             mock_dt.now.return_value = datetime(2024, 10, 15)
             contexte = service.construire_contexte(session=mock_session)
 
@@ -316,7 +316,7 @@ class TestServiceSuggestions:
         """Test saison hiver."""
         mock_session.query.return_value.filter.return_value.all.return_value = []
 
-        with patch("src.services.suggestions.service.datetime") as mock_dt:
+        with patch("src.services.cuisine.suggestions.service.datetime") as mock_dt:
             mock_dt.now.return_value = datetime(2024, 1, 15)
             contexte = service.construire_contexte(session=mock_session)
 
@@ -832,7 +832,7 @@ class TestFactory:
     def test_obtenir_service_suggestions_singleton(self):
         """Test singleton."""
         # Reset singleton
-        import src.services.suggestions.service as module
+        import src.services.cuisine.suggestions.service as module
 
         module._suggestions_service = None
 

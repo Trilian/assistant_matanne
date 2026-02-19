@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Jardin - Gestion intelligente du jardin avec IA.
 
 Features:
@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from src.core.ai import ClientIA
 from src.core.db import obtenir_contexte_db
 from src.core.models import GardenItem
-from src.services.base import BaseAIService
+from src.services.core.base import BaseAIService
 
 from .schemas import (
     AlerteMaison,

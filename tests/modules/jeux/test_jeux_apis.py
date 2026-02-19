@@ -20,7 +20,7 @@ def test_football_api():
     print("=" * 60)
 
     try:
-        from src.services.jeux.football_data import (
+        from src.services.jeux import (
             charger_classement,
             charger_matchs_a_venir,
             chercher_equipe,

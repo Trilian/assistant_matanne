@@ -5,7 +5,7 @@ Affichage des predictions pour les matchs.
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.services.jeux.prediction_service import predire_over_under, predire_resultat_match
+from src.services.jeux import predire_over_under, predire_resultat_match
 
 from .analyseur import generer_analyse_complete
 from .crud import enregistrer_pari

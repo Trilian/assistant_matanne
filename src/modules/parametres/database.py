@@ -1,4 +1,4 @@
-"""
+﻿"""
 Paramètres - Configuration Base de Données
 Gestion et maintenance de la base PostgreSQL/Supabase
 """
@@ -133,7 +133,7 @@ def render_database_config():
     with col8:
         if st.button("💾 Backup", key="btn_backup_db", use_container_width=True):
             try:
-                from src.services.backup import get_backup_service
+                from src.services.core.backup import get_backup_service
 
                 backup_service = get_backup_service()
                 with spinner_intelligent("Sauvegarde en cours..."):

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Ajout manuel de recettes.
 """
 
@@ -8,7 +8,7 @@ import time
 import streamlit as st
 
 from src.core.errors_base import ErreurValidation
-from src.services.recettes import get_recette_service
+from src.services.cuisine.recettes import get_recette_service
 
 logger = logging.getLogger(__name__)
 

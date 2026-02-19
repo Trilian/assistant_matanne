@@ -1,4 +1,4 @@
-"""
+﻿"""
 Interface UI pour l'import de recettes depuis le web.
 
 Note: Ce fichier a été extrait depuis src/services/recettes/import_url.py
@@ -7,7 +7,7 @@ pour respecter la séparation UI/Services.
 
 import streamlit as st
 
-from src.services.recettes.import_url import get_recipe_import_service
+from src.services.cuisine.recettes.import_url import get_recipe_import_service
 
 
 def afficher_import_recette():  # pragma: no cover
@@ -79,7 +79,7 @@ def afficher_import_recette():  # pragma: no cover
             # Bouton pour sauvegarder
             if st.button("💾 Ajouter à mes recettes", type="primary"):
                 try:
-                    from src.services.recettes import obtenir_service_recettes
+                    from src.services.cuisine.recettes import obtenir_service_recettes
 
                     service = obtenir_service_recettes()
 

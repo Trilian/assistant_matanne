@@ -1,4 +1,4 @@
-"""Tests pour backup/service.py - ServiceBackup class."""
+﻿"""Tests pour backup/service.py - ServiceBackup class."""
 
 import gzip
 import json
@@ -8,13 +8,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.services.backup.service import (
+from src.services.core.backup.service import (
     BackupService,
     ServiceBackup,
     get_backup_service,
     obtenir_service_backup,
 )
-from src.services.backup.types import (
+from src.services.core.backup.types import (
     BackupConfig,
     BackupMetadata,
 )
@@ -922,7 +922,7 @@ class TestFactoryAndAliases:
     def test_obtenir_service_backup_returns_instance(self):
         """Test que la factory retourne une instance."""
         # Reset singleton pour le test
-        import src.services.backup.service as service_module
+        import src.services.core.backup.service as service_module
 
         service_module._backup_service = None
 
@@ -934,7 +934,7 @@ class TestFactoryAndAliases:
 
     def test_obtenir_service_backup_singleton(self):
         """Test que la factory retourne un singleton."""
-        import src.services.backup.service as service_module
+        import src.services.core.backup.service as service_module
 
         service_module._backup_service = None
 
@@ -1118,17 +1118,21 @@ class TestEdgeCases:
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS UI (SANS STREAMLIT)
+# TESTS UI (DÉPLACÉS VERS tests/ui/views/test_backup.py)
 # ═══════════════════════════════════════════════════════════
+# NOTE: Les fonctions render_backup_ui ont été déplacées vers src.ui.views.backup
+# Ces tests sont conservés comme référence mais skipés.
+# Pour tester l'UI backup, voir tests/ui/views/test_backup.py
 
 
+@pytest.mark.skip(reason="UI déplacée vers src.ui.views.backup")
 @pytest.mark.unit
 class TestRenderBackupUI:
     """Tests pour render_backup_ui (mocked)."""
 
     def test_render_backup_ui_exists(self):
         """Test que render_backup_ui est importable."""
-        from src.services.backup.service import render_backup_ui
+        from src.ui.views.backup import render_backup_ui
 
         assert callable(render_backup_ui)
 
@@ -1136,7 +1140,7 @@ class TestRenderBackupUI:
         """Test la signature de la fonction."""
         import inspect
 
-        from src.services.backup.service import render_backup_ui
+        from src.services.core.backup.service import render_backup_ui
 
         sig = inspect.signature(render_backup_ui)
         # Doit être une fonction sans paramètres obligatoires
@@ -1144,11 +1148,11 @@ class TestRenderBackupUI:
             len([p for p in sig.parameters.values() if p.default is inspect.Parameter.empty]) == 0
         )
 
-    @patch("src.services.backup.service.st")
-    @patch("src.services.backup.service.obtenir_service_backup")
+    @patch("src.services.core.backup.service.st")
+    @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_no_backups(self, mock_get_service, mock_st):
         """Test render_backup_ui sans backups."""
-        from src.services.backup.service import render_backup_ui
+        from src.services.core.backup.service import render_backup_ui
 
         mock_service = MagicMock()
         mock_service.list_backups.return_value = []
@@ -1164,11 +1168,11 @@ class TestRenderBackupUI:
         mock_st.subheader.assert_called_once()
         mock_st.info.assert_called()
 
-    @patch("src.services.backup.service.st")
-    @patch("src.services.backup.service.obtenir_service_backup")
+    @patch("src.services.core.backup.service.st")
+    @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_with_backups(self, mock_get_service, mock_st):
         """Test render_backup_ui avec des backups."""
-        from src.services.backup.service import render_backup_ui
+        from src.services.core.backup.service import render_backup_ui
 
         mock_backup = MagicMock()
         mock_backup.id = "20240115_143000"
@@ -1192,11 +1196,11 @@ class TestRenderBackupUI:
         mock_st.subheader.assert_called()
         mock_st.expander.assert_called()
 
-    @patch("src.services.backup.service.st")
-    @patch("src.services.backup.service.obtenir_service_backup")
+    @patch("src.services.core.backup.service.st")
+    @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_create_button_clicked(self, mock_get_service, mock_st):
         """Test clic sur bouton créer backup."""
-        from src.services.backup.service import render_backup_ui
+        from src.services.core.backup.service import render_backup_ui
 
         mock_result = MagicMock()
         mock_result.success = True
@@ -1223,11 +1227,11 @@ class TestRenderBackupUI:
         mock_service.create_backup.assert_called_once_with(compress=True)
         mock_st.success.assert_called()
 
-    @patch("src.services.backup.service.st")
-    @patch("src.services.backup.service.obtenir_service_backup")
+    @patch("src.services.core.backup.service.st")
+    @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_create_backup_fails(self, mock_get_service, mock_st):
         """Test échec création backup."""
-        from src.services.backup.service import render_backup_ui
+        from src.services.core.backup.service import render_backup_ui
 
         mock_result = MagicMock()
         mock_result.success = False
@@ -1248,11 +1252,11 @@ class TestRenderBackupUI:
 
         mock_st.error.assert_called()
 
-    @patch("src.services.backup.service.st")
-    @patch("src.services.backup.service.obtenir_service_backup")
+    @patch("src.services.core.backup.service.st")
+    @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_restore_button(self, mock_get_service, mock_st):
         """Test clic sur bouton restaurer dans expander."""
-        from src.services.backup.service import render_backup_ui
+        from src.services.core.backup.service import render_backup_ui
 
         mock_backup = MagicMock()
         mock_backup.id = "20240115_143000"
@@ -1281,11 +1285,11 @@ class TestRenderBackupUI:
 
         mock_st.warning.assert_called()  # Affiche l'avertissement
 
-    @patch("src.services.backup.service.st")
-    @patch("src.services.backup.service.obtenir_service_backup")
+    @patch("src.services.core.backup.service.st")
+    @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_delete_button(self, mock_get_service, mock_st):
         """Test clic sur bouton supprimer."""
-        from src.services.backup.service import render_backup_ui
+        from src.services.core.backup.service import render_backup_ui
 
         mock_backup = MagicMock()
         mock_backup.id = "20240115_143000"
@@ -1315,11 +1319,11 @@ class TestRenderBackupUI:
         mock_service.delete_backup.assert_called_once_with("20240115_143000")
         mock_st.success.assert_called()
 
-    @patch("src.services.backup.service.st")
-    @patch("src.services.backup.service.obtenir_service_backup")
+    @patch("src.services.core.backup.service.st")
+    @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_file_upload(self, mock_get_service, mock_st, temp_backup_dir):
         """Test upload et restauration de fichier."""
-        from src.services.backup.service import render_backup_ui
+        from src.services.core.backup.service import render_backup_ui
 
         mock_result = MagicMock()
         mock_result.success = True
@@ -1350,11 +1354,11 @@ class TestRenderBackupUI:
         mock_service.restore_backup.assert_called_once()
         mock_st.success.assert_called()
 
-    @patch("src.services.backup.service.st")
-    @patch("src.services.backup.service.obtenir_service_backup")
+    @patch("src.services.core.backup.service.st")
+    @patch("src.services.core.backup.service.obtenir_service_backup")
     def test_render_backup_ui_file_upload_fails(self, mock_get_service, mock_st, temp_backup_dir):
         """Test échec restauration fichier uploadé."""
-        from src.services.backup.service import render_backup_ui
+        from src.services.core.backup.service import render_backup_ui
 
         mock_result = MagicMock()
         mock_result.success = False

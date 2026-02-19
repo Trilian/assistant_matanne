@@ -45,9 +45,17 @@ from ._internal.backtest_service import (
 # FOOTBALL (données & types)
 # ═══════════════════════════════════════════════════════════
 from ._internal.football_data import (
+    COMPETITIONS,
     FootballDataService,
+    charger_classement,
+    charger_historique_equipe,
+    charger_matchs_a_venir,
+    charger_matchs_termines,
+    chercher_equipe,
+    configurer_api_key,
     get_football_data_service,
     obtenir_service_donnees_football,
+    vider_cache,
 )
 from ._internal.football_types import (
     Match,
@@ -61,6 +69,9 @@ from ._internal.football_types import (
 # LOTO (données FDJ)
 # ═══════════════════════════════════════════════════════════
 from ._internal.loto_data import (
+    NB_NUMEROS_CHANCE,
+    NB_NUMEROS_PRINCIPAUX,
+    NUMEROS_PAR_TIRAGE,
     LotoDataService,
     StatistiqueNumeroLoto,
     StatistiquesGlobalesLoto,
@@ -108,12 +119,18 @@ from ._internal.prediction_service import (
 # ═══════════════════════════════════════════════════════════
 from ._internal.scheduler_service import (
     APSCHEDULER_AVAILABLE,
+    HEURE_LOTO,
+    INTERVALLE_PARIS_HEURES,
+    MINUTE_LOTO,
     SchedulerService,
     get_scheduler_service,
     obtenir_service_planificateur_jeux,
     reset_scheduler_service,
 )
 from ._internal.series_service import (
+    SEUIL_SERIES_MINIMUM,
+    SEUIL_VALUE_ALERTE,
+    SEUIL_VALUE_HAUTE,
     SeriesService,
     get_series_service,
     obtenir_service_series,
@@ -135,12 +152,23 @@ __all__ = [
     "SeriesService",
     "get_series_service",
     "obtenir_service_series",
+    "SEUIL_VALUE_ALERTE",
+    "SEUIL_VALUE_HAUTE",
+    "SEUIL_SERIES_MINIMUM",
     # ─────────────────────────────────────────────────────────
     # Football - Sources de données
     # ─────────────────────────────────────────────────────────
     "FootballDataService",
     "get_football_data_service",
     "obtenir_service_donnees_football",
+    "COMPETITIONS",
+    "configurer_api_key",
+    "charger_matchs_a_venir",
+    "charger_matchs_termines",
+    "charger_classement",
+    "charger_historique_equipe",
+    "chercher_equipe",
+    "vider_cache",
     # Football - Types
     "Match",
     "ScoreMatch",
@@ -153,10 +181,13 @@ __all__ = [
     "LotoDataService",
     "get_loto_data_service",
     "obtenir_service_donnees_loto",
-    # Loto - Types
+    # Loto - Types & constantes
     "TirageLoto",
     "StatistiqueNumeroLoto",
     "StatistiquesGlobalesLoto",
+    "NB_NUMEROS_PRINCIPAUX",
+    "NB_NUMEROS_CHANCE",
+    "NUMEROS_PAR_TIRAGE",
     # ─────────────────────────────────────────────────────────
     # Synchronisation
     # ─────────────────────────────────────────────────────────
@@ -171,6 +202,9 @@ __all__ = [
     "obtenir_service_planificateur_jeux",
     "reset_scheduler_service",
     "APSCHEDULER_AVAILABLE",
+    "HEURE_LOTO",
+    "MINUTE_LOTO",
+    "INTERVALLE_PARIS_HEURES",
     # ─────────────────────────────────────────────────────────
     # IA
     # ─────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Dépendances FastAPI centralisées.
 
 Contient les dépendances communes pour l'authentification et l'autorisation.
@@ -42,7 +42,7 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="Token requis")
 
     try:
-        from src.services.utilisateur import get_auth_service
+        from src.services.core.utilisateur import get_auth_service
 
         auth = get_auth_service()
         user = auth.validate_token(credentials.credentials)

@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.services.jeux.loto_data import (
+from src.services.jeux import (
     NB_NUMEROS_CHANCE,
     NB_NUMEROS_PRINCIPAUX,
     NUMEROS_PAR_TIRAGE,
@@ -251,7 +251,7 @@ class TestLotoDataServiceScenarios:
         Fréquence théorique: 5/49 ≈ 10.2%
         Si absent 25 tirages: value = 0.102 × 25 = 2.55 (opportunité)
         """
-        from src.services.jeux.series_service import SeriesService
+        from src.services.jeux import SeriesService
 
         frequence_theorique = NUMEROS_PAR_TIRAGE / NB_NUMEROS_PRINCIPAUX
         serie = 25
@@ -267,7 +267,7 @@ class TestLotoDataServiceScenarios:
         Fréquence théorique: 1/10 = 10%
         Si absent 25 tirages: value = 0.1 × 25 = 2.5 (opportunité)
         """
-        from src.services.jeux.series_service import SeriesService
+        from src.services.jeux import SeriesService
 
         frequence_theorique = 1 / NB_NUMEROS_CHANCE
         serie = 25

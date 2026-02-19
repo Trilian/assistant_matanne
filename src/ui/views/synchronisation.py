@@ -1,4 +1,4 @@
-"""
+﻿"""
 Interface UI pour la synchronisation temps réel et PWA.
 
 Note: Ce fichier a été extrait depuis src/services/web/synchronisation.py et pwa.py
@@ -8,7 +8,7 @@ pour respecter la séparation UI/Services.
 import streamlit as st
 import streamlit.components.v1 as components
 
-from src.services.web.synchronisation import get_realtime_sync_service
+from src.services.integrations.web.synchronisation import get_realtime_sync_service
 
 
 def afficher_indicateur_presence():

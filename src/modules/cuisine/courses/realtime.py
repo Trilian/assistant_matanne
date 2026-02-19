@@ -37,10 +37,10 @@ def render_realtime_status():
         if not sync_service.is_configured:
             return
 
-        from src.services.web import (
-            render_presence_indicator,
-            render_sync_status,
-            render_typing_indicator,
+        from src.ui.views.synchronisation import (
+            afficher_indicateur_frappe as render_typing_indicator,
+            afficher_indicateur_presence as render_presence_indicator,
+            afficher_statut_synchronisation as render_sync_status,
         )
 
         # Statut dans la sidebar

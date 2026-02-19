@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests complémentaires pour utils.py - Batch Cooking.
 
 Ce fichier vise à couvrir les branches manquantes:
@@ -12,7 +12,7 @@ from datetime import date, datetime, time, timedelta
 
 import pytest
 
-from src.services.batch_cooking import (
+from src.services.cuisine.batch_cooking import (
     construire_contexte_recette,
     est_preparation_a_risque,
     est_preparation_expiree,
@@ -247,7 +247,7 @@ class TestCalculsDuree:
 
     def test_calculer_duree_totale_etapes(self):
         """calculer_duree_totale_etapes retourne la somme des durées."""
-        from src.services.batch_cooking import calculer_duree_totale_etapes
+        from src.services.cuisine.batch_cooking import calculer_duree_totale_etapes
 
         etapes = [
             {"duree_minutes": 10},
@@ -261,7 +261,7 @@ class TestCalculsDuree:
 
     def test_calculer_duree_totale_etapes_missing_duree(self):
         """calculer_duree_totale_etapes utilise 10 par défaut si durée manquante."""
-        from src.services.batch_cooking import calculer_duree_totale_etapes
+        from src.services.cuisine.batch_cooking import calculer_duree_totale_etapes
 
         etapes = [
             {"titre": "Etape sans durée"},
@@ -274,7 +274,7 @@ class TestCalculsDuree:
 
     def test_calculer_duree_parallele_empty(self):
         """calculer_duree_parallele retourne 0 pour liste vide."""
-        from src.services.batch_cooking import calculer_duree_parallele
+        from src.services.cuisine.batch_cooking import calculer_duree_parallele
 
         result = calculer_duree_parallele([])
 
@@ -282,7 +282,7 @@ class TestCalculsDuree:
 
     def test_calculer_duree_parallele_sequential(self):
         """calculer_duree_parallele avec groupe_parallele=0 (séquentiel)."""
-        from src.services.batch_cooking import calculer_duree_parallele
+        from src.services.cuisine.batch_cooking import calculer_duree_parallele
 
         etapes = [
             {"duree_minutes": 10, "groupe_parallele": 0},
@@ -295,7 +295,7 @@ class TestCalculsDuree:
 
     def test_calculer_duree_parallele_parallel(self):
         """calculer_duree_parallele avec groupe_parallele>0 (parallèle)."""
-        from src.services.batch_cooking import calculer_duree_parallele
+        from src.services.cuisine.batch_cooking import calculer_duree_parallele
 
         etapes = [
             {"duree_minutes": 10, "groupe_parallele": 1},
@@ -308,7 +308,7 @@ class TestCalculsDuree:
 
     def test_calculer_duree_parallele_mixed(self):
         """calculer_duree_parallele avec groupes mixtes."""
-        from src.services.batch_cooking import calculer_duree_parallele
+        from src.services.cuisine.batch_cooking import calculer_duree_parallele
 
         etapes = [
             {"duree_minutes": 10, "groupe_parallele": 0},  # Séquentiel
@@ -323,7 +323,7 @@ class TestCalculsDuree:
 
     def test_calculer_duree_reelle(self):
         """calculer_duree_reelle calcule la différence en minutes."""
-        from src.services.batch_cooking import calculer_duree_reelle
+        from src.services.cuisine.batch_cooking import calculer_duree_reelle
 
         debut = datetime(2026, 2, 11, 10, 0, 0)
         fin = datetime(2026, 2, 11, 11, 30, 0)
@@ -334,7 +334,7 @@ class TestCalculsDuree:
 
     def test_calculer_duree_reelle_none(self):
         """calculer_duree_reelle retourne 0 si None."""
-        from src.services.batch_cooking import calculer_duree_reelle
+        from src.services.cuisine.batch_cooking import calculer_duree_reelle
 
         result = calculer_duree_reelle(None, datetime.now())
 
@@ -346,7 +346,7 @@ class TestCalculsDuree:
 
     def test_estimer_heure_fin(self):
         """estimer_heure_fin calcule l'heure de fin."""
-        from src.services.batch_cooking import estimer_heure_fin
+        from src.services.cuisine.batch_cooking import estimer_heure_fin
 
         heure_debut = time(10, 0)
         duree = 90
@@ -367,7 +367,7 @@ class TestRobotsEquipements:
 
     def test_obtenir_info_robot_known(self):
         """obtenir_info_robot retourne info pour robot connu."""
-        from src.services.batch_cooking import obtenir_info_robot
+        from src.services.cuisine.batch_cooking import obtenir_info_robot
 
         result = obtenir_info_robot("four")
 
@@ -376,7 +376,7 @@ class TestRobotsEquipements:
 
     def test_obtenir_info_robot_unknown(self):
         """obtenir_info_robot retourne défaut pour robot inconnu."""
-        from src.services.batch_cooking import obtenir_info_robot
+        from src.services.cuisine.batch_cooking import obtenir_info_robot
 
         result = obtenir_info_robot("robot_inconnu")
 
@@ -386,7 +386,7 @@ class TestRobotsEquipements:
 
     def test_obtenir_nom_robot(self):
         """obtenir_nom_robot retourne le nom d'affichage."""
-        from src.services.batch_cooking import obtenir_nom_robot
+        from src.services.cuisine.batch_cooking import obtenir_nom_robot
 
         result = obtenir_nom_robot("four")
 
@@ -395,7 +395,7 @@ class TestRobotsEquipements:
 
     def test_obtenir_emoji_robot(self):
         """obtenir_emoji_robot retourne l'emoji."""
-        from src.services.batch_cooking import obtenir_emoji_robot
+        from src.services.cuisine.batch_cooking import obtenir_emoji_robot
 
         result = obtenir_emoji_robot("four")
 
@@ -403,7 +403,7 @@ class TestRobotsEquipements:
 
     def test_est_robot_parallele(self):
         """est_robot_parallele vérifie si parallélisable."""
-        from src.services.batch_cooking import est_robot_parallele
+        from src.services.cuisine.batch_cooking import est_robot_parallele
 
         result = est_robot_parallele("four")
 
@@ -411,7 +411,7 @@ class TestRobotsEquipements:
 
     def test_formater_liste_robots_empty(self):
         """formater_liste_robots retourne 'Aucun' si vide."""
-        from src.services.batch_cooking import formater_liste_robots
+        from src.services.cuisine.batch_cooking import formater_liste_robots
 
         result = formater_liste_robots([])
 
@@ -419,7 +419,7 @@ class TestRobotsEquipements:
 
     def test_formater_liste_robots_multiple(self):
         """formater_liste_robots formate plusieurs robots."""
-        from src.services.batch_cooking import formater_liste_robots
+        from src.services.cuisine.batch_cooking import formater_liste_robots
 
         result = formater_liste_robots(["four", "plaques"])
 
@@ -427,7 +427,7 @@ class TestRobotsEquipements:
 
     def test_filtrer_robots_paralleles(self):
         """filtrer_robots_paralleles filtre les robots parallélisables."""
-        from src.services.batch_cooking import filtrer_robots_paralleles
+        from src.services.cuisine.batch_cooking import filtrer_robots_paralleles
 
         result = filtrer_robots_paralleles(["four", "plaques"])
 
@@ -445,7 +445,7 @@ class TestJoursDates:
 
     def test_obtenir_nom_jour_valid(self):
         """obtenir_nom_jour retourne le nom pour index valide."""
-        from src.services.batch_cooking import obtenir_nom_jour
+        from src.services.cuisine.batch_cooking import obtenir_nom_jour
 
         result = obtenir_nom_jour(0)  # Lundi
 
@@ -457,7 +457,7 @@ class TestJoursDates:
 
     def test_obtenir_nom_jour_invalid(self):
         """obtenir_nom_jour retourne '' pour index invalide."""
-        from src.services.batch_cooking import obtenir_nom_jour
+        from src.services.cuisine.batch_cooking import obtenir_nom_jour
 
         result = obtenir_nom_jour(-1)
         assert result == ""
@@ -467,7 +467,7 @@ class TestJoursDates:
 
     def test_obtenir_index_jour_valid(self):
         """obtenir_index_jour retourne l'index pour nom valide."""
-        from src.services.batch_cooking import obtenir_index_jour
+        from src.services.cuisine.batch_cooking import obtenir_index_jour
 
         result = obtenir_index_jour("lundi")
         assert result == 0
@@ -477,7 +477,7 @@ class TestJoursDates:
 
     def test_obtenir_index_jour_invalid(self):
         """obtenir_index_jour retourne -1 pour nom invalide."""
-        from src.services.batch_cooking import obtenir_index_jour
+        from src.services.cuisine.batch_cooking import obtenir_index_jour
 
         result = obtenir_index_jour("jour_inconnu")
 
@@ -485,7 +485,7 @@ class TestJoursDates:
 
     def test_formater_jours_batch_valid(self):
         """formater_jours_batch formate les indices de jours."""
-        from src.services.batch_cooking import formater_jours_batch
+        from src.services.cuisine.batch_cooking import formater_jours_batch
 
         result = formater_jours_batch([5, 6])
 
@@ -494,7 +494,7 @@ class TestJoursDates:
 
     def test_formater_jours_batch_empty(self):
         """formater_jours_batch retourne 'Aucun' si vide."""
-        from src.services.batch_cooking import formater_jours_batch
+        from src.services.cuisine.batch_cooking import formater_jours_batch
 
         result = formater_jours_batch([])
 
@@ -502,7 +502,7 @@ class TestJoursDates:
 
     def test_est_jour_batch_true(self):
         """est_jour_batch retourne True si jour dans la liste."""
-        from src.services.batch_cooking import est_jour_batch
+        from src.services.cuisine.batch_cooking import est_jour_batch
 
         # Créer une date pour dimanche
         dimanche = date(2026, 2, 15)  # Dimanche
@@ -513,7 +513,7 @@ class TestJoursDates:
 
     def test_est_jour_batch_false(self):
         """est_jour_batch retourne False si jour pas dans la liste."""
-        from src.services.batch_cooking import est_jour_batch
+        from src.services.cuisine.batch_cooking import est_jour_batch
 
         lundi = date(2026, 2, 16)  # Lundi
 
@@ -539,7 +539,7 @@ class TestContexteJules:
 
     def test_contexte_jules_present(self):
         """construire_contexte_jules avec present=True."""
-        from src.services.batch_cooking import construire_contexte_jules
+        from src.services.cuisine.batch_cooking import construire_contexte_jules
 
         result = construire_contexte_jules(present=True)
 
@@ -548,7 +548,7 @@ class TestContexteJules:
 
     def test_contexte_jules_absent(self):
         """construire_contexte_jules avec present=False."""
-        from src.services.batch_cooking import construire_contexte_jules
+        from src.services.cuisine.batch_cooking import construire_contexte_jules
 
         result = construire_contexte_jules(present=False)
 
@@ -566,7 +566,7 @@ class TestCalculsSession:
 
     def test_calculer_progression_session_zero(self):
         """calculer_progression_session retourne 0 si total=0."""
-        from src.services.batch_cooking import calculer_progression_session
+        from src.services.cuisine.batch_cooking import calculer_progression_session
 
         result = calculer_progression_session(0, 0)
 
@@ -574,7 +574,7 @@ class TestCalculsSession:
 
     def test_calculer_progression_session_partial(self):
         """calculer_progression_session retourne pourcentage partiel."""
-        from src.services.batch_cooking import calculer_progression_session
+        from src.services.cuisine.batch_cooking import calculer_progression_session
 
         result = calculer_progression_session(3, 10)
 
@@ -582,7 +582,7 @@ class TestCalculsSession:
 
     def test_calculer_progression_session_complete(self):
         """calculer_progression_session retourne 100 si complet."""
-        from src.services.batch_cooking import calculer_progression_session
+        from src.services.cuisine.batch_cooking import calculer_progression_session
 
         result = calculer_progression_session(10, 10)
 
@@ -590,7 +590,7 @@ class TestCalculsSession:
 
     def test_calculer_temps_restant_empty(self):
         """calculer_temps_restant retourne 0 si liste vide."""
-        from src.services.batch_cooking import calculer_temps_restant
+        from src.services.cuisine.batch_cooking import calculer_temps_restant
 
         result = calculer_temps_restant([])
 
@@ -598,7 +598,7 @@ class TestCalculsSession:
 
     def test_calculer_temps_restant_parallele(self):
         """calculer_temps_restant avec parallélisme."""
-        from src.services.batch_cooking import calculer_temps_restant
+        from src.services.cuisine.batch_cooking import calculer_temps_restant
 
         etapes = [
             {"duree_minutes": 10, "groupe_parallele": 0},
@@ -612,7 +612,7 @@ class TestCalculsSession:
 
     def test_calculer_temps_restant_sequentiel(self):
         """calculer_temps_restant sans parallélisme."""
-        from src.services.batch_cooking import calculer_temps_restant
+        from src.services.cuisine.batch_cooking import calculer_temps_restant
 
         etapes = [
             {"duree_minutes": 10},
@@ -635,7 +635,7 @@ class TestPreparations:
 
     def test_calculer_portions_restantes(self):
         """calculer_portions_restantes retourne la différence."""
-        from src.services.batch_cooking import calculer_portions_restantes
+        from src.services.cuisine.batch_cooking import calculer_portions_restantes
 
         result = calculer_portions_restantes(10, 3)
 
@@ -643,7 +643,7 @@ class TestPreparations:
 
     def test_calculer_portions_restantes_negative_becomes_zero(self):
         """calculer_portions_restantes retourne 0 minimum."""
-        from src.services.batch_cooking import calculer_portions_restantes
+        from src.services.cuisine.batch_cooking import calculer_portions_restantes
 
         result = calculer_portions_restantes(5, 10)
 
@@ -661,7 +661,7 @@ class TestValidation:
 
     def test_valider_jours_batch_duplicates(self):
         """valider_jours_batch supprime les doublons."""
-        from src.services.batch_cooking import valider_jours_batch
+        from src.services.cuisine.batch_cooking import valider_jours_batch
 
         result = valider_jours_batch([5, 5, 6, 6])
 
@@ -669,7 +669,7 @@ class TestValidation:
 
     def test_valider_jours_batch_invalid(self):
         """valider_jours_batch filtre les valeurs invalides."""
-        from src.services.batch_cooking import valider_jours_batch
+        from src.services.cuisine.batch_cooking import valider_jours_batch
 
         result = valider_jours_batch([-1, 0, 7, 6])
 
@@ -677,7 +677,7 @@ class TestValidation:
 
     def test_valider_duree_none(self):
         """valider_duree retourne défaut si None."""
-        from src.services.batch_cooking import valider_duree
+        from src.services.cuisine.batch_cooking import valider_duree
 
         result = valider_duree(None, defaut=15)
 
@@ -685,7 +685,7 @@ class TestValidation:
 
     def test_valider_duree_zero(self):
         """valider_duree retourne défaut si 0."""
-        from src.services.batch_cooking import valider_duree
+        from src.services.cuisine.batch_cooking import valider_duree
 
         result = valider_duree(0, defaut=10)
 
@@ -693,7 +693,7 @@ class TestValidation:
 
     def test_valider_duree_max(self):
         """valider_duree limite à 480 minutes."""
-        from src.services.batch_cooking import valider_duree
+        from src.services.cuisine.batch_cooking import valider_duree
 
         result = valider_duree(600)
 
@@ -701,7 +701,7 @@ class TestValidation:
 
     def test_valider_portions_none(self):
         """valider_portions retourne défaut si None."""
-        from src.services.batch_cooking import valider_portions
+        from src.services.cuisine.batch_cooking import valider_portions
 
         result = valider_portions(None, defaut=6)
 
@@ -709,7 +709,7 @@ class TestValidation:
 
     def test_valider_portions_max(self):
         """valider_portions limite à 20."""
-        from src.services.batch_cooking import valider_portions
+        from src.services.cuisine.batch_cooking import valider_portions
 
         result = valider_portions(50)
 
@@ -717,7 +717,7 @@ class TestValidation:
 
     def test_valider_conservation_none(self):
         """valider_conservation retourne défaut si None."""
-        from src.services.batch_cooking import valider_conservation
+        from src.services.cuisine.batch_cooking import valider_conservation
 
         result = valider_conservation(None, defaut=5)
 
@@ -725,7 +725,7 @@ class TestValidation:
 
     def test_valider_conservation_max(self):
         """valider_conservation limite à 90 jours."""
-        from src.services.batch_cooking import valider_conservation
+        from src.services.cuisine.batch_cooking import valider_conservation
 
         result = valider_conservation(120)
 

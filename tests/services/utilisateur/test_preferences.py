@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/utilisateur/preferences.py
 Cible: Couverture >80%
 
@@ -21,7 +21,7 @@ from src.modules.cuisine.schemas import (
 # ═══════════════════════════════════════════════════════════
 # IMPORTS DU MODULE
 # ═══════════════════════════════════════════════════════════
-from src.services.utilisateur.preferences import (
+from src.services.core.utilisateur.preferences import (
     DEFAULT_USER_ID,
     UserPreferenceService,
     get_user_preference_service,
@@ -127,7 +127,7 @@ class TestUserPreferenceServiceInit:
 class TestChargerPreferences:
     """Tests pour charger_preferences."""
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_charger_preferences_existantes(
         self, mock_select, mock_db_session, mock_user_preference
     ):
@@ -142,7 +142,7 @@ class TestChargerPreferences:
         assert result.jules_present is True
         assert result.jules_age_mois == 19
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_charger_preferences_non_existantes(self, mock_select, mock_db_session):
         """Charge préférences non existantes - crée défauts."""
         mock_db_session.execute.return_value.scalar_one_or_none.return_value = None
@@ -168,7 +168,7 @@ class TestChargerPreferences:
 class TestSauvegarderPreferences:
     """Tests pour sauvegarder_preferences."""
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_sauvegarder_update_existant(
         self, mock_select, mock_db_session, mock_user_preference, preferences_dataclass
     ):
@@ -181,7 +181,7 @@ class TestSauvegarderPreferences:
         assert result is True
         mock_db_session.commit.assert_called_once()
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_sauvegarder_insert_nouveau(self, mock_select, mock_db_session, preferences_dataclass):
         """Insert nouvelles préférences."""
         mock_db_session.execute.return_value.scalar_one_or_none.return_value = None
@@ -193,7 +193,7 @@ class TestSauvegarderPreferences:
         mock_db_session.add.assert_called_once()
         mock_db_session.commit.assert_called_once()
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_sauvegarder_error(self, mock_select, mock_db_session, preferences_dataclass):
         """Gestion erreur sauvegarde."""
         mock_db_session.execute.side_effect = Exception("DB Error")
@@ -214,7 +214,7 @@ class TestSauvegarderPreferences:
 class TestChargerFeedbacks:
     """Tests pour charger_feedbacks."""
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_charger_feedbacks_vide(self, mock_select, mock_db_session):
         """Charge feedbacks vides."""
         mock_db_session.execute.return_value.scalars.return_value.all.return_value = []
@@ -224,7 +224,7 @@ class TestChargerFeedbacks:
 
         assert result == []
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_charger_feedbacks_avec_donnees(
         self, mock_select, mock_db_session, mock_recipe_feedback
     ):
@@ -241,7 +241,7 @@ class TestChargerFeedbacks:
         assert result[0].recette_id == 42
         assert result[0].feedback == "like"
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_charger_feedbacks_sans_created_at(self, mock_select, mock_db_session):
         """Charge feedback sans date création."""
         fb = Mock()
@@ -269,7 +269,7 @@ class TestChargerFeedbacks:
 class TestAjouterFeedback:
     """Tests pour ajouter_feedback."""
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_ajouter_nouveau_feedback(self, mock_select, mock_db_session):
         """Ajoute un nouveau feedback."""
         mock_db_session.execute.return_value.scalar_one_or_none.return_value = None
@@ -287,7 +287,7 @@ class TestAjouterFeedback:
         mock_db_session.add.assert_called_once()
         mock_db_session.commit.assert_called_once()
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_ajouter_update_feedback_existant(
         self, mock_select, mock_db_session, mock_recipe_feedback
     ):
@@ -308,7 +308,7 @@ class TestAjouterFeedback:
         assert mock_recipe_feedback.contexte == "trop sucré"
         mock_db_session.commit.assert_called_once()
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_ajouter_feedback_error(self, mock_select, mock_db_session):
         """Gestion erreur ajout feedback."""
         mock_db_session.execute.side_effect = Exception("DB Error")
@@ -331,7 +331,7 @@ class TestAjouterFeedback:
 class TestSupprimerFeedback:
     """Tests pour supprimer_feedback."""
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_supprimer_feedback_existant(self, mock_select, mock_db_session, mock_recipe_feedback):
         """Supprime feedback existant."""
         mock_db_session.execute.return_value.scalar_one_or_none.return_value = mock_recipe_feedback
@@ -343,7 +343,7 @@ class TestSupprimerFeedback:
         mock_db_session.delete.assert_called_once_with(mock_recipe_feedback)
         mock_db_session.commit.assert_called_once()
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_supprimer_feedback_non_existant(self, mock_select, mock_db_session):
         """Supprime feedback non existant."""
         mock_db_session.execute.return_value.scalar_one_or_none.return_value = None
@@ -354,7 +354,7 @@ class TestSupprimerFeedback:
         assert result is False
         mock_db_session.delete.assert_not_called()
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_supprimer_feedback_error(self, mock_select, mock_db_session):
         """Gestion erreur suppression feedback."""
         mock_db_session.execute.side_effect = Exception("DB Error")
@@ -375,7 +375,7 @@ class TestSupprimerFeedback:
 class TestGetFeedbacksStats:
     """Tests pour get_feedbacks_stats."""
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_get_stats_vide(self, mock_select, mock_db_session):
         """Stats avec feedbacks vides."""
         mock_db_session.execute.return_value.scalars.return_value.all.return_value = []
@@ -385,7 +385,7 @@ class TestGetFeedbacksStats:
 
         assert result == {"like": 0, "dislike": 0, "neutral": 0, "total": 0}
 
-    @patch("src.services.utilisateur.preferences.select")
+    @patch("src.services.core.utilisateur.preferences.select")
     def test_get_stats_avec_donnees(self, mock_select, mock_db_session):
         """Stats avec feedbacks."""
         fb1 = Mock()
@@ -499,7 +499,7 @@ class TestFactory:
 
     def test_factory_returns_service(self):
         """Factory retourne UserPreferenceService."""
-        import src.services.utilisateur.preferences as pref_module
+        import src.services.core.utilisateur.preferences as pref_module
 
         pref_module._preference_service = None
 
@@ -509,7 +509,7 @@ class TestFactory:
 
     def test_factory_singleton_same_user(self):
         """Factory retourne la même instance pour même user."""
-        import src.services.utilisateur.preferences as pref_module
+        import src.services.core.utilisateur.preferences as pref_module
 
         pref_module._preference_service = None
 
@@ -520,7 +520,7 @@ class TestFactory:
 
     def test_factory_new_instance_different_user(self):
         """Factory crée nouvelle instance pour user différent."""
-        import src.services.utilisateur.preferences as pref_module
+        import src.services.core.utilisateur.preferences as pref_module
 
         pref_module._preference_service = None
 
@@ -636,6 +636,6 @@ class TestDecoratorIntegration:
         # On appelle avec session explicite pour éviter le décorateur
         with patch.object(service, "sauvegarder_preferences") as mock_save:
             mock_save.return_value = True
-            with patch("src.services.utilisateur.preferences.select"):
+            with patch("src.services.core.utilisateur.preferences.select"):
                 result = service.charger_preferences(db=mock_session)
                 assert isinstance(result, PreferencesUtilisateur)

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Sorties Weekend - Imports et constantes partages
 
 Planning et suggestions IA:
@@ -16,7 +16,7 @@ import streamlit as st
 from src.core.ai import ClientIA
 from src.core.db import obtenir_contexte_db
 from src.core.models import ChildProfile, WeekendActivity
-from src.services.base import BaseAIService
+from src.services.core.base import BaseAIService
 
 TYPES_ACTIVITES = {
     "parc": {"emoji": "🌳", "label": "Parc / Nature"},

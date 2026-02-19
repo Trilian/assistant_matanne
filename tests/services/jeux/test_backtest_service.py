@@ -7,14 +7,15 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.services.jeux.backtest_service import (
+from src.services.jeux import (
     BacktestService,
     Prediction,
     ResultatBacktest,
     ResultatPrediction,
+    SEUIL_VALUE_ALERTE,
+    SEUIL_VALUE_HAUTE,
     get_backtest_service,
 )
-from src.services.jeux.series_service import SEUIL_VALUE_ALERTE, SEUIL_VALUE_HAUTE
 
 # ═══════════════════════════════════════════════════════════
 # FIXTURES

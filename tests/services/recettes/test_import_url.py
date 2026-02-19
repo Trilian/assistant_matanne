@@ -1,11 +1,11 @@
-"""Tests pour src/services/recettes/import_url.py"""
+﻿"""Tests pour src/services/recettes/import_url.py"""
 
 from unittest.mock import Mock, patch
 
 import pytest
 from bs4 import BeautifulSoup
 
-from src.services.recettes.import_url import (
+from src.services.cuisine.recettes.import_url import (
     CuisineAZParser,
     GenericRecipeParser,
     ImportedIngredient,
@@ -570,7 +570,7 @@ class TestGetRecipeImportService:
     def test_get_service_singleton(self):
         """Test singleton."""
         # Reset singleton
-        import src.services.recettes.import_url as module
+        import src.services.cuisine.recettes.import_url as module
 
         module._import_service = None
 
@@ -581,7 +581,7 @@ class TestGetRecipeImportService:
 
     def test_get_service_returns_instance(self):
         """Test retourne une instance."""
-        import src.services.recettes.import_url as module
+        import src.services.cuisine.recettes.import_url as module
 
         module._import_service = None
 

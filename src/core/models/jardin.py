@@ -2,7 +2,6 @@
 Modèles SQLAlchemy pour le jardin et la météo.
 
 Contient :
-- GardenZone : Zones du jardin (2600m²)
 - AlerteMeteo : Alertes météo pour le jardin
 - ConfigMeteo : Configuration météo par utilisateur
 """
@@ -33,19 +32,6 @@ from .base import Base
 # ═══════════════════════════════════════════════════════════
 
 
-class GardenZoneType(StrEnum):
-    """Type de zone jardin."""
-
-    PELOUSE = "pelouse"
-    POTAGER = "potager"
-    ARBRES = "arbres"
-    PISCINE = "piscine"
-    TERRAIN_BOULES = "terrain_boules"
-    TERRASSE = "terrasse"
-    ALLEE = "allee"
-    AUTRE = "autre"
-
-
 class NiveauAlerte(StrEnum):
     """Niveaux d'alerte météo."""
 
@@ -63,56 +49,6 @@ class TypeAlerteMeteo(StrEnum):
     VENT_FORT = "vent_fort"
     GRELE = "grele"
     NEIGE = "neige"
-
-
-# ═══════════════════════════════════════════════════════════
-# ZONES JARDIN (pour 2600m²)
-# ═══════════════════════════════════════════════════════════
-
-
-class GardenZone(Base):
-    """Zone du jardin avec état et plan d'action.
-
-    Pour gérer un grand jardin (2600m²) par zones.
-
-    .. deprecated::
-        Ce modèle est obsolète. Utiliser ZoneJardin de temps_entretien.py
-        qui unifie les fonctionnalités jardin avec le suivi du temps.
-        GardenZone sera supprimé dans une prochaine version.
-    """
-
-    __tablename__ = "garden_zones"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    # Infos zone
-    nom: Mapped[str] = mapped_column(String(200), nullable=False)
-    type_zone: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
-    surface_m2: Mapped[int | None] = mapped_column(Integer)
-
-    # État actuel (1-5)
-    etat_note: Mapped[int] = mapped_column(Integer, default=1)  # 1=catastrophe, 5=parfait
-    etat_description: Mapped[str | None] = mapped_column(Text)  # "Herbe jaune, pas entretenu"
-
-    # Plan de remise en état
-    objectif: Mapped[str | None] = mapped_column(Text)  # "Pelouse verte et tondue"
-    budget_estime: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
-
-    # Prochaine action
-    prochaine_action: Mapped[str | None] = mapped_column(String(200))
-    date_prochaine_action: Mapped[date | None] = mapped_column(Date)
-
-    # Photos (JSON array: ["avant:url1", "apres:url2"])
-    photos_url: Mapped[list[str] | None] = mapped_column(JSON, default=list)
-
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
-
-    def __repr__(self) -> str:
-        return f"<GardenZone(id={self.id}, nom='{self.nom}', etat={self.etat_note}/5)>"
 
 
 # ═══════════════════════════════════════════════════════════

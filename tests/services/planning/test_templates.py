@@ -1,10 +1,10 @@
-"""Tests pour le service de templates."""
+﻿"""Tests pour le service de templates."""
 
 from datetime import date, timedelta
 
 import pytest
 
-from src.services.planning.templates import (
+from src.services.cuisine.planning.templates import (
     JOURS_SEMAINE,
     ServiceTemplates,
     obtenir_service_templates,

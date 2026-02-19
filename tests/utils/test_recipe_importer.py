@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/utils/recipe_importer.py
 """
 
@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.services.recettes.importer import RecipeImporter
+from src.services.cuisine.recettes.importer import RecipeImporter
 
 
 @pytest.mark.unit

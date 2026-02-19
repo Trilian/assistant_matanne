@@ -24,7 +24,7 @@ Utilisation:
 # ═══════════════════════════════════════════════════════════
 # MÉTÉO (TRANSVERSAL) - réexportation depuis weather/
 # ═══════════════════════════════════════════════════════════
-from ..weather import (
+from .weather import (
     AlerteMeteo,
     ConseilJardin,
     MeteoJour,

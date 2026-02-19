@@ -6,7 +6,7 @@ Tests couvrant:
 - Filtre de secrets (FiltreSecrets)
 - Formatage coloré (FormatteurColore)
 - Gestionnaire de logs (GestionnaireLog)
-- Fonctions d'alias (init, get_logger, obtenir_logger)
+- Fonctions raccourcis (obtenir_logger)
 """
 
 import logging
@@ -18,10 +18,7 @@ from src.core.logging import (
     FiltreSecrets,
     FormatteurColore,
     GestionnaireLog,
-    LogManager,
     configure_logging,
-    get_logger,
-    init,
     obtenir_logger,
 )
 
@@ -301,33 +298,12 @@ class TestGestionnaireLog:
 
 @pytest.mark.unit
 class TestAlias:
-    """Tests pour les alias anglais."""
-
-    def test_logmanager_alias(self):
-        """Test que LogManager est un alias de GestionnaireLog."""
-        assert LogManager == GestionnaireLog
-
-    def test_init_function(self):
-        """Test que init() fonctionne."""
-        init("INFO")
-        logger = logging.getLogger()
-        assert logger is not None
-
-    def test_get_logger_function(self):
-        """Test que get_logger() fonctionne."""
-        logger = get_logger("test_alias")
-        assert logger.name == "test_alias"
+    """Tests pour les fonctions raccourcis."""
 
     def test_obtenir_logger_function(self):
         """Test que obtenir_logger() fonctionne."""
         logger = obtenir_logger("test_fr")
         assert logger.name == "test_fr"
-
-    def test_get_logger_vs_obtenir_logger(self):
-        """Test que get_logger et obtenir_logger retournent la même chose."""
-        logger1 = get_logger("test_same")
-        logger2 = obtenir_logger("test_same")
-        assert logger1 == logger2
 
 
 # ═══════════════════════════════════════════════════════════

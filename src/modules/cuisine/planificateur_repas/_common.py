@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Planificateur de Repas - Imports et constantes partagés
 
 Interface style Jow:
@@ -45,9 +45,9 @@ from src.modules.cuisine.planificateur_repas.utils import (
     suggerer_ajustements_equilibre,
     valider_equilibre_semaine,
 )
-from src.services.planning import get_planning_service
-from src.services.recettes import get_recette_service
-from src.services.utilisateur import get_user_preference_service
+from src.services.cuisine.planning import get_planning_service
+from src.services.cuisine.recettes import get_recette_service
+from src.services.core.utilisateur import get_user_preference_service
 
 __all__ = [
     # Standard libs

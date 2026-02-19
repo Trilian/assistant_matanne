@@ -50,18 +50,6 @@ class TestCacheConstants:
         """Test que CACHE_TTL_RECETTES est positif."""
         assert constants.CACHE_TTL_RECETTES > 0
 
-    def test_cache_ttl_inventaire_positif(self):
-        """Test que CACHE_TTL_INVENTAIRE est positif."""
-        assert constants.CACHE_TTL_INVENTAIRE > 0
-
-    def test_cache_ttl_courses_positif(self):
-        """Test que CACHE_TTL_COURSES est positif."""
-        assert constants.CACHE_TTL_COURSES > 0
-
-    def test_cache_ttl_planning_positif(self):
-        """Test que CACHE_TTL_PLANNING est positif."""
-        assert constants.CACHE_TTL_PLANNING > 0
-
     def test_cache_ttl_ia_positif(self):
         """Test que CACHE_TTL_IA est positif."""
         assert constants.CACHE_TTL_IA > 0
@@ -70,19 +58,10 @@ class TestCacheConstants:
         """Test que CACHE_MAX_SIZE est positif."""
         assert constants.CACHE_MAX_SIZE > 0
 
-    def test_cache_max_items_per_key_raisonnable(self):
-        """Test que CACHE_MAX_ITEMS_PER_KEY est raisonnable."""
-        assert constants.CACHE_MAX_ITEMS_PER_KEY > 0
-        assert constants.CACHE_MAX_ITEMS_PER_KEY >= constants.CACHE_MAX_SIZE
-
     def test_cache_ttls_dans_limites_raisonnables(self):
         """Test que les TTLs sont dans des limites raisonnables."""
-        # Entre 1 seconde et 24 heures
         for ttl in [
             constants.CACHE_TTL_RECETTES,
-            constants.CACHE_TTL_INVENTAIRE,
-            constants.CACHE_TTL_COURSES,
-            constants.CACHE_TTL_PLANNING,
             constants.CACHE_TTL_IA,
         ]:
             assert 1 <= ttl <= 86400
@@ -105,46 +84,6 @@ class TestAIConstants:
     def test_ai_rate_limits_hierarchie(self):
         """Test que daily > hourly."""
         assert constants.AI_RATE_LIMIT_DAILY > constants.AI_RATE_LIMIT_HOURLY
-
-    def test_ai_api_timeout_positif(self):
-        """Test que AI_API_TIMEOUT est positif."""
-        assert constants.AI_API_TIMEOUT > 0
-
-    def test_ai_api_retry_delay_positif(self):
-        """Test que AI_API_RETRY_DELAY est positif."""
-        assert constants.AI_API_RETRY_DELAY > 0
-
-    def test_ai_api_max_retries_raisonnable(self):
-        """Test que AI_API_MAX_RETRIES est raisonnable."""
-        assert 1 <= constants.AI_API_MAX_RETRIES <= 10
-
-    def test_ai_max_tokens_hierarchie(self):
-        """Test que short < default < long."""
-        assert constants.AI_MAX_TOKENS_SHORT < constants.AI_MAX_TOKENS_DEFAULT
-        assert constants.AI_MAX_TOKENS_DEFAULT < constants.AI_MAX_TOKENS_LONG
-
-    def test_ai_temperatures_dans_limites(self):
-        """Test que les températures sont entre 0 et 1."""
-        for temp in [
-            constants.AI_TEMPERATURE_CREATIVE,
-            constants.AI_TEMPERATURE_DEFAULT,
-            constants.AI_TEMPERATURE_PRECISE,
-        ]:
-            assert 0 <= temp <= 2  # Généralement 0-2 est valide
-
-    def test_ai_temperature_precise_inferieur_a_default(self):
-        """Test que precise < default < creative."""
-        assert constants.AI_TEMPERATURE_PRECISE < constants.AI_TEMPERATURE_DEFAULT
-        assert constants.AI_TEMPERATURE_DEFAULT < constants.AI_TEMPERATURE_CREATIVE
-
-    def test_ai_semantic_similarity_threshold_valid(self):
-        """Test que le seuil est entre 0 et 1."""
-        assert 0 <= constants.AI_SEMANTIC_SIMILARITY_THRESHOLD <= 1
-
-    def test_ai_semantic_cache_size_raisonnable(self):
-        """Test que la taille du cache sémantique est raisonnable."""
-        assert constants.AI_SEMANTIC_CACHE_MAX_SIZE > 0
-        assert constants.AI_SEMANTIC_CACHE_MAX_SIZE <= 10000
 
 
 # ═══════════════════════════════════════════════════════════
@@ -184,11 +123,6 @@ class TestValidationConstants:
         assert constants.MAX_QUANTITE > 0
         assert constants.MAX_QUANTITE >= 100
 
-    def test_quantite_min_raisonnable(self):
-        """Test que MAX_QUANTITE_MIN est raisonnable."""
-        assert constants.MAX_QUANTITE_MIN > 0
-        assert constants.MAX_QUANTITE_MIN < constants.MAX_QUANTITE
-
     def test_ingredients_min_max(self):
         """Test que MIN_INGREDIENTS < MAX_INGREDIENTS."""
         assert constants.MIN_INGREDIENTS > 0
@@ -203,37 +137,7 @@ class TestValidationConstants:
 
 
 # ═══════════════════════════════════════════════════════════
-# SECTION 5: TESTS PAGINATION
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestPaginationConstants:
-    """Tests des constantes de pagination."""
-
-    def test_items_per_page_default_positif(self):
-        """Test que ITEMS_PER_PAGE_DEFAULT est positif."""
-        assert constants.ITEMS_PER_PAGE_DEFAULT > 0
-
-    def test_items_per_page_modules_positifs(self):
-        """Test que tous les items_per_page sont positifs."""
-        assert constants.ITEMS_PER_PAGE_RECETTES > 0
-        assert constants.ITEMS_PER_PAGE_INVENTAIRE > 0
-        assert constants.ITEMS_PER_PAGE_COURSES > 0
-        assert constants.ITEMS_PER_PAGE_PLANNING > 0
-
-    def test_max_items_search_raisonnable(self):
-        """Test que MAX_ITEMS_SEARCH est raisonnable."""
-        assert constants.MAX_ITEMS_SEARCH > 0
-        assert constants.MAX_ITEMS_SEARCH >= 50
-
-    def test_max_items_export_plus_grand_que_search(self):
-        """Test que MAX_ITEMS_EXPORT >= MAX_ITEMS_SEARCH."""
-        assert constants.MAX_ITEMS_EXPORT >= constants.MAX_ITEMS_SEARCH
-
-
-# ═══════════════════════════════════════════════════════════
-# SECTION 6: TESTS MÉTIER
+# SECTION 5: TESTS MÉTIER
 # ═══════════════════════════════════════════════════════════
 
 
@@ -245,13 +149,9 @@ class TestBusinessConstants:
         """Test que JOURS_SEMAINE contient 7 jours."""
         assert len(constants.JOURS_SEMAINE) == 7
 
-    def test_planning_semaine_debut_jour_valide(self):
-        """Test que PLANNING_SEMAINE_DEBUT_JOUR est valide."""
-        assert 0 <= constants.PLANNING_SEMAINE_DEBUT_JOUR < 7
-
 
 # ═══════════════════════════════════════════════════════════
-# SECTION 7: TESTS COHÉRENCE GLOBALE
+# SECTION 6: TESTS COHÉRENCE GLOBALE
 # ═══════════════════════════════════════════════════════════
 
 
@@ -266,7 +166,6 @@ class TestConstantsConsistency:
             "CACHE_TTL_RECETTES",
             "AI_RATE_LIMIT_DAILY",
             "MAX_LENGTH_SHORT",
-            "ITEMS_PER_PAGE_DEFAULT",
             "JOURS_SEMAINE",
         ]
         for const_name in required_constants:

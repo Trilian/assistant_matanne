@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.services.jeux.series_service import (
+from src.services.jeux import (
     SEUIL_SERIES_MINIMUM,
     SEUIL_VALUE_ALERTE,
     SEUIL_VALUE_HAUTE,

@@ -1,4 +1,4 @@
-"""Tests pour src/services/notifications/ui.py - Composants UI.
+﻿"""Tests pour src/services/notifications/ui.py - Composants UI.
 
 Note: Ces tests sont limités car les fonctions font appel à Streamlit
 qui nécessite un contexte d'exécution spécifique.
@@ -19,20 +19,20 @@ class TestImports:
 
     def test_import_module(self):
         """Import du module réussit."""
-        from src.services.notifications import ui
+        from src.services.core.notifications import ui
 
         assert ui is not None
 
     def test_fonctions_exportees(self):
         """Fonctions principales exportées."""
-        from src.services.notifications.ui import __all__
+        from src.services.core.notifications.ui import __all__
 
         assert "afficher_demande_permission_push" in __all__
         assert "afficher_preferences_notification" in __all__
 
     def test_alias_retrocompatibilite(self):
         """Alias de rétrocompatibilité exportés."""
-        from src.services.notifications.ui import (
+        from src.services.core.notifications.ui import (
             afficher_demande_permission_push,
             afficher_preferences_notification,
             render_notification_preferences,
@@ -54,7 +54,7 @@ class TestConstantes:
 
     def test_vapid_public_key_defini(self):
         """VAPID_PUBLIC_KEY est défini."""
-        from src.services.notifications.types import VAPID_PUBLIC_KEY
+        from src.services.core.notifications.types import VAPID_PUBLIC_KEY
 
         assert VAPID_PUBLIC_KEY is not None
         # Peut être vide en environnement de test
@@ -72,14 +72,14 @@ class TestAfficherDemandePermissionPush:
 
     def test_fonction_callable(self):
         """La fonction est appelable."""
-        from src.services.notifications.ui import afficher_demande_permission_push
+        from src.services.core.notifications.ui import afficher_demande_permission_push
 
         assert callable(afficher_demande_permission_push)
 
     @patch("streamlit.components.v1.html")
     def test_afficher_html_component(self, mock_html):
         """La fonction affiche un composant HTML."""
-        from src.services.notifications.ui import afficher_demande_permission_push
+        from src.services.core.notifications.ui import afficher_demande_permission_push
 
         afficher_demande_permission_push()
 
@@ -102,17 +102,17 @@ class TestAfficherPreferencesNotification:
 
     def test_fonction_callable(self):
         """La fonction est appelable."""
-        from src.services.notifications.ui import afficher_preferences_notification
+        from src.services.core.notifications.ui import afficher_preferences_notification
 
         assert callable(afficher_preferences_notification)
 
     @patch("streamlit.markdown")
     @patch("streamlit.form")
-    @patch("src.services.notifications.notif_web.obtenir_service_webpush")
+    @patch("src.services.core.notifications.notif_web.obtenir_service_webpush")
     def test_afficher_preferences_utilise_service(self, mock_service, mock_form, mock_markdown):
         """La fonction utilise le service webpush."""
-        from src.services.notifications.types import PreferencesNotification
-        from src.services.notifications.ui import afficher_preferences_notification
+        from src.services.core.notifications.types import PreferencesNotification
+        from src.services.core.notifications.ui import afficher_preferences_notification
 
         # Mock du service
         mock_push_service = MagicMock()
@@ -155,7 +155,7 @@ class TestIntegration:
 
     def test_html_genere_valide(self):
         """Le HTML généré par la demande de permission est valide."""
-        from src.services.notifications.types import VAPID_PUBLIC_KEY
+        from src.services.core.notifications.types import VAPID_PUBLIC_KEY
 
         # Le HTML template contient les éléments essentiels
         html_template = f"""
@@ -173,7 +173,7 @@ class TestIntegration:
 
     def test_preferences_default_values(self):
         """Valeurs par défaut des préférences."""
-        from src.services.notifications.types import PreferencesNotification
+        from src.services.core.notifications.types import PreferencesNotification
 
         prefs = PreferencesNotification(user_id="test")
 
@@ -195,7 +195,7 @@ class TestSecurite:
 
     def test_vapid_key_format(self):
         """VAPID key a un format valide (si défini)."""
-        from src.services.notifications.types import VAPID_PUBLIC_KEY
+        from src.services.core.notifications.types import VAPID_PUBLIC_KEY
 
         if VAPID_PUBLIC_KEY:
             # Les clés VAPID sont généralement des strings base64url
@@ -204,7 +204,7 @@ class TestSecurite:
 
     def test_html_escape_vapid_key(self):
         """La clé VAPID est correctement échappée dans le HTML."""
-        from src.services.notifications.types import VAPID_PUBLIC_KEY
+        from src.services.core.notifications.types import VAPID_PUBLIC_KEY
 
         # Vérifier qu'il n'y a pas de caractères dangereux
         if VAPID_PUBLIC_KEY:

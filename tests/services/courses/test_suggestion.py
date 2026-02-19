@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/courses/suggestion.py
 
 Tests du ServiceCoursesIntelligentes:
@@ -26,12 +26,12 @@ from src.core.models import (
     RecetteIngredient,
     Repas,
 )
-from src.services.courses.suggestion import (
+from src.services.cuisine.courses.suggestion import (
     ServiceCoursesIntelligentes,
     get_courses_intelligentes_service,
     obtenir_service_courses_intelligentes,
 )
-from src.services.courses.types import (
+from src.services.cuisine.courses.types import (
     ArticleCourse,
     ListeCoursesIntelligente,
 )
@@ -52,7 +52,7 @@ def mock_client_ia():
 @pytest.fixture
 def service_suggestions(mock_client_ia):
     """Instance du service avec client IA mocké."""
-    with patch("src.services.courses.suggestion.obtenir_client_ia", return_value=mock_client_ia):
+    with patch("src.services.cuisine.courses.suggestion.obtenir_client_ia", return_value=mock_client_ia):
         service = ServiceCoursesIntelligentes()
         service.client = mock_client_ia
         return service
@@ -189,7 +189,7 @@ class TestServiceCreation:
 
     def test_creation_sans_client_ia_leve_erreur(self):
         """Test erreur si client IA non disponible."""
-        with patch("src.services.courses.suggestion.obtenir_client_ia", return_value=None):
+        with patch("src.services.cuisine.courses.suggestion.obtenir_client_ia", return_value=None):
             with pytest.raises(RuntimeError, match="Client IA non disponible"):
                 ServiceCoursesIntelligentes()
 
@@ -198,7 +198,7 @@ class TestServiceCreation:
         with patch(
             "src.services.courses.suggestion.obtenir_client_ia", return_value=mock_client_ia
         ):
-            with patch("src.services.courses.suggestion._service_courses_intelligentes", None):
+            with patch("src.services.cuisine.courses.suggestion._service_courses_intelligentes", None):
                 service = obtenir_service_courses_intelligentes()
                 assert isinstance(service, ServiceCoursesIntelligentes)
 
@@ -207,7 +207,7 @@ class TestServiceCreation:
         with patch(
             "src.services.courses.suggestion.obtenir_client_ia", return_value=mock_client_ia
         ):
-            with patch("src.services.courses.suggestion._service_courses_intelligentes", None):
+            with patch("src.services.cuisine.courses.suggestion._service_courses_intelligentes", None):
                 service1 = obtenir_service_courses_intelligentes()
                 service2 = obtenir_service_courses_intelligentes()
                 assert service1 is service2
@@ -217,7 +217,7 @@ class TestServiceCreation:
         with patch(
             "src.services.courses.suggestion.obtenir_client_ia", return_value=mock_client_ia
         ):
-            with patch("src.services.courses.suggestion._service_courses_intelligentes", None):
+            with patch("src.services.cuisine.courses.suggestion._service_courses_intelligentes", None):
                 service = get_courses_intelligentes_service()
                 assert isinstance(service, ServiceCoursesIntelligentes)
 

@@ -9,20 +9,16 @@ Refactorisé en sous-modules thématiques:
 - db/: Base de données et migrations
 - caching/: Cache multi-niveaux
 - validation/: Sanitization et schémas Pydantic
-- monitoring/: Performance et métriques
+- ai/: Client IA, rate limiting, cache sémantique
 """
 
 # ═══════════════════════════════════════════════════════════
 # AI
 # ═══════════════════════════════════════════════════════════
-# Rate limiting (source de vérité: ai/rate_limit.py)
-from .ai import AnalyseurIA, CacheIA, ClientIA, LimiteDebit, RateLimitIA, obtenir_client_ia
+from .ai import AnalyseurIA, CacheIA, ClientIA, RateLimitIA, obtenir_client_ia
 
 # ═══════════════════════════════════════════════════════════
-# CACHE (depuis caching/)
-# ═══════════════════════════════════════════════════════════
-# ═══════════════════════════════════════════════════════════
-# CACHE MULTI-NIVEAUX (nouveau sous-module caching/)
+# CACHE MULTI-NIVEAUX (sous-module caching/)
 # ═══════════════════════════════════════════════════════════
 from .caching import (
     Cache,
@@ -35,18 +31,7 @@ from .caching import (
 )
 
 # ═══════════════════════════════════════════════════════════
-# REDIS CACHE
-# ═══════════════════════════════════════════════════════════
-from .caching.redis import (
-    CacheMemoire,
-    CacheRedis,
-    ConfigurationRedis,
-    avec_cache_redis,
-    obtenir_cache_redis,
-)
-
-# ═══════════════════════════════════════════════════════════
-# CONFIGURATION (nouveau sous-module config/)
+# CONFIGURATION (sous-module config/)
 # ═══════════════════════════════════════════════════════════
 from .config import Parametres, obtenir_parametres
 
@@ -125,60 +110,6 @@ from .logging import (
 )
 
 # ═══════════════════════════════════════════════════════════
-# MONITORING (nouveau sous-module monitoring/)
-# ═══════════════════════════════════════════════════════════
-from .monitoring import (
-    ChargeurComposant,
-    MoniteurMemoire,
-    OptimiseurSQL,
-    ProfileurFonction,
-    TableauBordPerformance,
-    afficher_badge_mini_performance,
-    afficher_panneau_performance,
-    antirrebond,
-    limiter_debit,
-    mesurer_temps,
-    profiler,
-    suivre_requete,
-)
-
-# ═══════════════════════════════════════════════════════════
-# SQL OPTIMIZER
-# ═══════════════════════════════════════════════════════════
-from .monitoring.sql_optimizer import (
-    ChargeurParLots,
-    ConstructeurRequeteOptimisee,
-    DetecteurN1,
-    EcouteurSQLAlchemy,
-    afficher_analyse_sql,
-)
-
-# ═══════════════════════════════════════════════════════════
-# MULTI-TENANT
-# ═══════════════════════════════════════════════════════════
-from .multi_tenant import (
-    ContexteUtilisateur,
-    RequeteMultiLocataire,
-    ServiceMultiLocataire,
-    creer_multi_tenant_service,
-    definir_utilisateur_from_auth,
-    initialiser_contexte_utilisateur_streamlit,
-)
-
-# Mode hors ligne
-from .offline import (
-    FileAttenteHorsLigne,
-    GestionnaireConnexion,
-    OperationEnAttente,
-    StatutConnexion,
-    SynchroniseurHorsLigne,
-    TypeOperation,
-    afficher_panneau_sync,
-    afficher_statut_connexion,
-    avec_mode_hors_ligne,
-)
-
-# ═══════════════════════════════════════════════════════════
 # STATE
 # ═══════════════════════════════════════════════════════════
 from .state import EtatApp, GestionnaireEtat, naviguer, obtenir_etat, revenir
@@ -234,24 +165,14 @@ __all__ = [
     # Cache
     "Cache",
     "cached",
-    "LimiteDebit",  # Alias vers RateLimitIA
-    "RateLimitIA",  # Source de vérité pour rate limiting
+    "RateLimitIA",
     # Cache multi-niveaux
     "CacheMultiNiveau",
     "obtenir_cache",
     "avec_cache_multi",
     "EntreeCache",
     "StatistiquesCache",
-    # Mode hors ligne
-    "StatutConnexion",
-    "GestionnaireConnexion",
-    "TypeOperation",
-    "OperationEnAttente",
-    "FileAttenteHorsLigne",
-    "SynchroniseurHorsLigne",
-    "avec_mode_hors_ligne",
-    "afficher_statut_connexion",
-    "afficher_panneau_sync",
+
     # Errors Base (pures)
     "ExceptionApp",
     "ErreurValidation",
@@ -291,40 +212,8 @@ __all__ = [
     "obtenir_client_ia",
     "AnalyseurIA",
     "CacheIA",
-    # Performance
-    "ProfileurFonction",
-    "MoniteurMemoire",
-    "OptimiseurSQL",
-    "TableauBordPerformance",
-    "ChargeurComposant",
-    "profiler",
-    "antirrebond",
-    "limiter_debit",
-    "mesurer_temps",
-    "suivre_requete",
-    "afficher_panneau_performance",
-    "afficher_badge_mini_performance",
-    # SQL Optimizer
-    "EcouteurSQLAlchemy",
-    "DetecteurN1",
-    "ChargeurParLots",
-    "ConstructeurRequeteOptimisee",
-    "afficher_analyse_sql",
-    # Redis Cache
-    "ConfigurationRedis",
-    "CacheMemoire",
-    "CacheRedis",
-    "avec_cache_redis",
-    "obtenir_cache_redis",
     # Lazy Loader
     "ChargeurModuleDiffere",
     "RouteurOptimise",
     "afficher_stats_chargement_differe",
-    # Multi-Tenant
-    "ContexteUtilisateur",
-    "RequeteMultiLocataire",
-    "ServiceMultiLocataire",
-    "initialiser_contexte_utilisateur_streamlit",
-    "definir_utilisateur_from_auth",
-    "creer_multi_tenant_service",
 ]

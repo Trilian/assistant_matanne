@@ -1,4 +1,4 @@
-"""Tests pour src/services/notifications/utils.py - Fonctions utilitaires.
+﻿"""Tests pour src/services/notifications/utils.py - Fonctions utilitaires.
 
 Couverture des fonctionnalités:
 - Vérification des préférences de notification
@@ -12,8 +12,8 @@ from datetime import datetime
 
 import pytest
 
-from src.services.notifications.types import TypeNotification
-from src.services.notifications.utils import (
+from src.services.core.notifications.types import TypeNotification
+from src.services.core.notifications.utils import (
     # Alias rétrocompatibilité
     NotificationType,
     can_send_during_quiet_hours,

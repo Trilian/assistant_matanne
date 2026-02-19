@@ -1,11 +1,11 @@
-"""Tests pour le service de rappels."""
+﻿"""Tests pour le service de rappels."""
 
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.services.planning.rappels import (
+from src.services.cuisine.planning.rappels import (
     OPTIONS_RAPPEL,
     ServiceRappels,
     format_rappel,
@@ -44,7 +44,7 @@ class TestServiceRappels:
         service = obtenir_service_rappels()
         assert isinstance(service, ServiceRappels)
 
-    @patch("src.services.planning.rappels.obtenir_service_webpush")
+    @patch("src.services.cuisine.planning.rappels.obtenir_service_webpush")
     def test_envoyer_rappels_vide(self, mock_webpush):
         """envoyer_rappels_en_attente avec aucun rappel retourne 0."""
         service = ServiceRappels()

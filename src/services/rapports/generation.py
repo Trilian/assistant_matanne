@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Génération Rapports PDF
 
 Orchestre les mixins de génération PDF:
@@ -24,7 +24,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_session_db
 from src.core.errors_base import ErreurValidation
 from src.core.models import ArticleInventaire
-from src.services.base import BaseService
+from src.services.core.base import BaseService
 from src.services.rapports.planning_pdf import PlanningReportMixin
 from src.services.rapports.rapports_budget import BudgetReportMixin
 from src.services.rapports.rapports_gaspillage import GaspillageReportMixin

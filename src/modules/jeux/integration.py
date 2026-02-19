@@ -15,7 +15,7 @@ def configurer_jeux():
     try:
         # Configurer la clé API Football-Data si disponible
         from src.core.config import obtenir_parametres
-        from src.services.jeux.football_data import configurer_api_key
+        from src.services.jeux import configurer_api_key
 
         config = obtenir_parametres()
         api_key = config.get("FOOTBALL_DATA_API_KEY")

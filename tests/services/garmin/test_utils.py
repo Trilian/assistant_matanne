@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/garmin/utils.py
 
 Couvre:
@@ -11,7 +11,7 @@ Couvre:
 
 from datetime import date, datetime, timedelta
 
-from src.services.garmin import (
+from src.services.integrations.garmin import (
     build_api_params,
     calculate_activity_stats,
     calculate_daily_stats,

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service OCR Factures - Extraction automatique depuis photos de factures.
 
 Supporte:
@@ -16,7 +16,7 @@ from datetime import date
 from pydantic import BaseModel, Field
 
 from src.core.ai import ClientIA
-from src.services.base import BaseAIService
+from src.services.core.base import BaseAIService
 
 logger = logging.getLogger(__name__)
 

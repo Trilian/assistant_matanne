@@ -2,7 +2,7 @@
 
 ## Résumé
 
-Le module `src/core/` a été réorganisé en **5 sous-packages modulaires** pour améliorer la maintenabilité et la séparation des responsabilités. Les anciens fichiers monolithiques sont conservés comme **shims de rétrocompatibilité** — aucun changement n'est requis immédiatement.
+Le module `src/core/` a été réorganisé en **5 sous-packages modulaires** pour améliorer la maintenabilité et la séparation des responsabilités. Les anciens fichiers shims de rétrocompatibilité (`database.py`, `cache_multi.py`, `performance.py`) ont été **supprimés** — tous les imports doivent utiliser les nouveaux sous-packages.
 
 ## Tableau de migration
 
@@ -59,7 +59,7 @@ src/core/caching/
 src/core/validation/
 ├── __init__.py     # Re-exports complets
 ├── schemas.py      # Modèles Pydantic (RecetteInput, IngredientInput, etc.)
-├── sanitizer.py    # NettoyeurEntrees, InputSanitizer (anti-XSS/injection SQL)
+├── sanitizer.py    # NettoyeurEntrees (anti-XSS/injection SQL)
 └── validators.py   # valider_modele(), valider_entree(), afficher_erreurs_validation()
 ```
 
@@ -83,23 +83,18 @@ Avant : deux implémentations coexistaient (`LimiteDebit` dans `cache.py` et `Ra
 # Source de vérité
 from src.core.ai import RateLimitIA
 
-# Alias (délègue à RateLimitIA)
-from src.core.cache import LimiteDebit
-from src.core import LimiteDebit  # Aussi disponible
-
-# Les deux fonctionnent de manière identique
 RateLimitIA.peut_appeler()
-LimiteDebit.peut_appeler()
 ```
 
-## Fichiers shims (rétrocompatibilité)
+## Fichiers shims (supprimés)
 
-| Shim | Redirige vers | Note |
-|------|---------------|------|
-| `src/core/database.py` | `src/core/db/` | Inclut `import streamlit as st` pour les mocks de test |
-| `src/core/cache_multi.py` | `src/core/caching/` | Re-export complet + alias `cached` |
-| `src/core/performance.py` | `src/core/monitoring/` | Re-export complet |
-| `src/core/config.py` → package | `src/core/config/` | Devenu un package (pas de shim nécessaire) |
+Les fichiers shims suivants ont été **supprimés**. Tous les imports doivent utiliser les sous-packages directement :
+
+| Ancien shim (supprimé) | Remplacé par |
+|------------------------|---------------|
+| `src/core/database.py` | `src/core/db/` |
+| `src/core/cache_multi.py` | `src/core/caching/` |
+| `src/core/performance.py` | `src/core/monitoring/` |
 
 ## Impacts sur les tests
 
@@ -137,9 +132,8 @@ LimiteDebit.peut_appeler()
 | `src.core.performance.ProfileurFonction` | `src.core.monitoring.profiler.ProfileurFonction` |
 | `src.core.performance.st` | `src.core.monitoring.{profiler,memory,sql,dashboard}.st` |
 
-## Notes de migration progressive
+## Notes de migration
 
-1. **Aucun changement requis** immédiatement — les shims garantissent la rétrocompatibilité
-2. **Nouveaux fichiers/modules** : préférer les imports depuis les sous-packages (`src.core.db`, `src.core.caching`, etc.)
+1. **Migration terminée** — les anciens shims ont été supprimés, tous les imports utilisent les sous-packages
+2. **Imports** : utiliser `src.core.db`, `src.core.caching`, `src.core.monitoring`, etc.
 3. **Tests** : les mock paths doivent cibler les sous-modules (voir tableau ci-dessus)
-4. **Migration optionnelle** : remplacer les anciens imports au fur et à mesure des modifications de fichiers

@@ -207,11 +207,3 @@ def valider_entree(schema: dict | None = None, nettoyer_tout: bool = True):
         return wrapper
 
     return decorateur
-
-
-# Alias anglais pour compatibilité
-validate_input = valider_entree
-validate_model = valider_modele
-validate_streamlit_form = valider_formulaire_streamlit
-validate_and_sanitize_form = valider_et_nettoyer_formulaire
-show_validation_errors = afficher_erreurs_validation

@@ -23,7 +23,6 @@ from pydantic import ValidationError
 
 from src.core.validation import (
     IngredientInput,
-    InputSanitizer,
     NettoyeurEntrees,
     nettoyer_texte,
 )
@@ -161,28 +160,7 @@ class TestNettoyeurEntrees:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# SECTION 2: TESTS ALIAS InputSanitizer
-# ═══════════════════════════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestInputSanitizerAlias:
-    """Tests pour l'alias InputSanitizer."""
-
-    def test_input_sanitizer_equals_nettoyeur(self):
-        """Test que InputSanitizer est un alias de NettoyeurEntrees."""
-        assert InputSanitizer == NettoyeurEntrees
-
-    def test_input_sanitizer_methods_exist(self):
-        """Test que InputSanitizer a les mêmes méthodes."""
-        assert hasattr(InputSanitizer, "nettoyer_chaine")
-        assert hasattr(InputSanitizer, "nettoyer_nombre")
-        assert hasattr(InputSanitizer, "nettoyer_date")
-        assert hasattr(InputSanitizer, "nettoyer_email")
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# SECTION 3: TESTS nettoyer_texte
+# SECTION 2: TESTS nettoyer_texte
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
@@ -839,47 +817,7 @@ class TestConstantesValidation:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# SECTION 16: TESTS Alias de validation
-# ═══════════════════════════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestAliasValidation:
-    """Tests pour les alias de validation."""
-
-    def test_validate_input_alias(self):
-        """Test alias validate_input."""
-        from src.core.validation import validate_input, valider_entree
-
-        assert validate_input is valider_entree
-
-    def test_validate_model_alias(self):
-        """Test alias validate_model."""
-        from src.core.validation import validate_model, valider_modele
-
-        assert validate_model is valider_modele
-
-    def test_validate_streamlit_form_alias(self):
-        """Test alias validate_streamlit_form."""
-        from src.core.validation import validate_streamlit_form, valider_formulaire_streamlit
-
-        assert validate_streamlit_form is valider_formulaire_streamlit
-
-    def test_validate_and_sanitize_form_alias(self):
-        """Test alias validate_and_sanitize_form."""
-        from src.core.validation import validate_and_sanitize_form, valider_et_nettoyer_formulaire
-
-        assert validate_and_sanitize_form is valider_et_nettoyer_formulaire
-
-    def test_show_validation_errors_alias(self):
-        """Test alias show_validation_errors."""
-        from src.core.validation import afficher_erreurs_validation, show_validation_errors
-
-        assert show_validation_errors is afficher_erreurs_validation
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# SECTION 17: TESTS Sécurité
+# SECTION 16: TESTS Sécurité
 # ═══════════════════════════════════════════════════════════════════════════════
 
 

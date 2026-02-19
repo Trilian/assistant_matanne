@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires complets pour src/services/base/types.py
 Module: BaseService - CRUD, recherche avancée, statistiques, bulk operations.
 
@@ -89,7 +89,7 @@ def integration_db():
 @pytest.fixture
 def integration_service(integration_db):
     """BaseService avec modèle réel pour intégration."""
-    from src.services.base.types import BaseService
+    from src.services.core.base.types import BaseService
 
     return BaseService(model=ItemModel, cache_ttl=60)
 
@@ -97,7 +97,7 @@ def integration_service(integration_db):
 @pytest.fixture
 def base_service():
     """Instance de BaseService avec modèle mocké."""
-    from src.services.base.types import BaseService
+    from src.services.core.base.types import BaseService
 
     service = BaseService(model=MockModel, cache_ttl=60)
     return service
@@ -123,7 +123,7 @@ class TestBaseServiceInit:
 
     def test_init_sets_model(self):
         """Vérifie que le modèle est correctement défini."""
-        from src.services.base.types import BaseService
+        from src.services.core.base.types import BaseService
 
         service = BaseService(model=MockModel)
 
@@ -131,7 +131,7 @@ class TestBaseServiceInit:
 
     def test_init_sets_model_name(self):
         """Vérifie que le nom du modèle est extrait."""
-        from src.services.base.types import BaseService
+        from src.services.core.base.types import BaseService
 
         service = BaseService(model=MockModel)
 
@@ -139,7 +139,7 @@ class TestBaseServiceInit:
 
     def test_init_sets_default_cache_ttl(self):
         """Vérifie le TTL cache par défaut."""
-        from src.services.base.types import BaseService
+        from src.services.core.base.types import BaseService
 
         service = BaseService(model=MockModel)
 
@@ -147,7 +147,7 @@ class TestBaseServiceInit:
 
     def test_init_custom_cache_ttl(self):
         """Vérifie le TTL cache personnalisé."""
-        from src.services.base.types import BaseService
+        from src.services.core.base.types import BaseService
 
         service = BaseService(model=MockModel, cache_ttl=300)
 
@@ -737,7 +737,7 @@ class TestBaseServiceGeneric:
     def test_is_generic(self):
         """Vérifie que BaseService est Generic[T]."""
 
-        from src.services.base.types import BaseService
+        from src.services.core.base.types import BaseService
 
         # Vérifier que c'est une classe générique
         assert hasattr(BaseService, "__class_getitem__")
@@ -746,13 +746,13 @@ class TestBaseServiceGeneric:
         """Vérifie que T est exporté."""
         from typing import TypeVar
 
-        from src.services.base.types import T
+        from src.services.core.base.types import T
 
         assert isinstance(T, TypeVar)
 
     def test_all_exports(self):
         """Vérifie les exports __all__."""
-        from src.services.base import types
+        from src.services.core.base import types
 
         assert hasattr(types, "__all__")
         assert "BaseService" in types.__all__

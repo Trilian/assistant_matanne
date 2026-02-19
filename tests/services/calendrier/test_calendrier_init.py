@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/calendrier/__init__.py
 
 Couvre les exports du module calendrier.
@@ -13,25 +13,25 @@ class TestCalendrierModuleExports:
 
     def test_exports_calendar_sync_service(self):
         """Export CalendarSyncService."""
-        from src.services.calendrier import CalendarSyncService
+        from src.services.famille.calendrier import CalendarSyncService
 
         assert CalendarSyncService is not None
 
     def test_exports_get_calendar_sync_service(self):
         """Export get_calendar_sync_service."""
-        from src.services.calendrier import get_calendar_sync_service
+        from src.services.famille.calendrier import get_calendar_sync_service
 
         assert callable(get_calendar_sync_service)
 
     def test_exports_ical_generator(self):
         """Export ICalGenerator."""
-        from src.services.calendrier import ICalGenerator
+        from src.services.famille.calendrier import ICalGenerator
 
         assert ICalGenerator is not None
 
     def test_exports_schemas(self):
         """Export des schémas."""
-        from src.services.calendrier import (
+        from src.services.famille.calendrier import (
             CalendarProvider,
             ExternalCalendarConfig,
             SyncDirection,

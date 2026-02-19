@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour le service OCR de factures.
 
 Couverture cible: >80%
@@ -521,6 +521,6 @@ class TestServiceInit:
 
     def test_service_heritage(self, service):
         """Test que le service hérite de BaseAIService."""
-        from src.services.base import BaseAIService
+        from src.services.core.base import BaseAIService
 
         assert isinstance(service, BaseAIService)

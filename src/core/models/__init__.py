@@ -102,9 +102,7 @@ from .inventaire import (
 from .jardin import (
     AlerteMeteo,
     ConfigMeteo,
-    GardenZone,
     # Enums
-    GardenZoneType,
     NiveauAlerte,
     TypeAlerteMeteo,
 )
@@ -280,10 +278,8 @@ __all__ = [
     "RecurrenceType",
     "ExpenseCategory",
     # Jardin
-    "GardenZone",
     "AlerteMeteo",
     "ConfigMeteo",
-    "GardenZoneType",
     "NiveauAlerte",
     "TypeAlerteMeteo",
     # Calendrier

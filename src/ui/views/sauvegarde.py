@@ -1,4 +1,4 @@
-"""
+﻿"""
 Interface UI pour la gestion des sauvegardes.
 
 Note: Ce fichier a été extrait depuis src/services/backup/service.py
@@ -9,7 +9,7 @@ from pathlib import Path
 
 import streamlit as st
 
-from src.services.backup.service import obtenir_service_backup
+from src.services.core.backup.service import obtenir_service_backup
 
 
 def afficher_sauvegarde():

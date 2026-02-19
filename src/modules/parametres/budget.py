@@ -1,4 +1,4 @@
-"""
+﻿"""
 Paramètres - Configuration Budget
 Catégories de dépenses et sauvegarde des données
 """
@@ -17,7 +17,7 @@ def render_budget_config():
     st.markdown("#### 📈 Catégories de dépenses")
 
     try:
-        from src.services.budget import CategorieDepense
+        from src.services.famille.budget import CategorieDepense
 
         # Mapping complet avec accents
         emoji_map = {
@@ -63,7 +63,7 @@ def render_budget_config():
     st.markdown("#### 💾 Sauvegarde des données")
 
     try:
-        from src.services.backup import get_backup_service
+        from src.services.core.backup import get_backup_service
 
         backup_service = get_backup_service()
 

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Interface utilisateur pour la gestion des templates de semaine.
 
 Permet de:
@@ -12,7 +12,7 @@ from datetime import date, timedelta
 
 import streamlit as st
 
-from src.services.planning.templates import (
+from src.services.cuisine.planning.templates import (
     JOURS_SEMAINE,
     obtenir_service_templates,
 )

@@ -7,7 +7,7 @@ pour respecter la séparation UI/Services.
 
 import streamlit as st
 
-from src.services.jeux.notification_service import (
+from src.services.jeux import (
     NotificationJeux,
     NotificationJeuxService,
     get_notification_jeux_service,
