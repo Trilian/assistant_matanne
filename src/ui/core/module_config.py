@@ -1,4 +1,4 @@
-﻿"""
+"""
 Configuration Module - Dataclass de configuration CRUD
 """
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Hub Famille - Dashboard principal avec cards cliquables.
 
 Structure:

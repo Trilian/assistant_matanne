@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service de Backup Automatique pour l'Assistant Matanne.
 
 Fonctionnalités:

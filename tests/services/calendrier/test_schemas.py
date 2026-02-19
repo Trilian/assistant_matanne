@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests du package calendar_sync - Schémas Pydantic.
 
 Tests de validation des modèles de données pour la synchronisation calendrier.

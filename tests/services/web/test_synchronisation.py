@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/web/synchronisation.py
 """
 
@@ -253,7 +253,9 @@ class TestJoinLeaveList:
 
     @patch("src.services.integrations.web.synchronisation.st")
     @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_id")
-    @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_name")
+    @patch(
+        "src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_name"
+    )
     def test_leave_list_with_channel(self, mock_name, mock_id, mock_st):
         """Test leave_list avec channel actif."""
         mock_st.session_state = {}
@@ -278,7 +280,9 @@ class TestJoinLeaveList:
 
     @patch("src.services.integrations.web.synchronisation.st")
     @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_id")
-    @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_name")
+    @patch(
+        "src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_name"
+    )
     def test_leave_list_exception(self, mock_name, mock_id, mock_st):
         """Test leave_list avec exception."""
         mock_st.session_state = {}
@@ -305,7 +309,11 @@ class TestBroadcastEvent:
         """Test broadcast sans channel (stockage local)."""
         mock_st.session_state = {}
 
-        from src.services.integrations.web.synchronisation import RealtimeSyncService, SyncEvent, SyncEventType
+        from src.services.integrations.web.synchronisation import (
+            RealtimeSyncService,
+            SyncEvent,
+            SyncEventType,
+        )
 
         service = RealtimeSyncService()
         service._channel = None
@@ -323,7 +331,11 @@ class TestBroadcastEvent:
         """Test broadcast avec channel actif."""
         mock_st.session_state = {}
 
-        from src.services.integrations.web.synchronisation import RealtimeSyncService, SyncEvent, SyncEventType
+        from src.services.integrations.web.synchronisation import (
+            RealtimeSyncService,
+            SyncEvent,
+            SyncEventType,
+        )
 
         service = RealtimeSyncService()
         mock_channel = MagicMock()
@@ -342,7 +354,11 @@ class TestBroadcastEvent:
         """Test broadcast avec exception (stockage local fallback)."""
         mock_st.session_state = {}
 
-        from src.services.integrations.web.synchronisation import RealtimeSyncService, SyncEvent, SyncEventType
+        from src.services.integrations.web.synchronisation import (
+            RealtimeSyncService,
+            SyncEvent,
+            SyncEventType,
+        )
 
         service = RealtimeSyncService()
         mock_channel = MagicMock()
@@ -364,7 +380,9 @@ class TestBroadcastHelpers:
 
     @patch("src.services.integrations.web.synchronisation.st")
     @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_id")
-    @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_name")
+    @patch(
+        "src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_name"
+    )
     def test_broadcast_item_added(self, mock_name, mock_id, mock_st):
         """Test broadcast_item_added."""
         mock_st.session_state = {}
@@ -383,7 +401,9 @@ class TestBroadcastHelpers:
 
     @patch("src.services.integrations.web.synchronisation.st")
     @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_id")
-    @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_name")
+    @patch(
+        "src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_name"
+    )
     def test_broadcast_item_checked(self, mock_name, mock_id, mock_st):
         """Test broadcast_item_checked."""
         mock_st.session_state = {}
@@ -403,7 +423,9 @@ class TestBroadcastHelpers:
 
     @patch("src.services.integrations.web.synchronisation.st")
     @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_id")
-    @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_name")
+    @patch(
+        "src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_name"
+    )
     def test_broadcast_item_unchecked(self, mock_name, mock_id, mock_st):
         """Test broadcast_item_checked avec unchecked."""
         mock_st.session_state = {}
@@ -422,7 +444,9 @@ class TestBroadcastHelpers:
 
     @patch("src.services.integrations.web.synchronisation.st")
     @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_id")
-    @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_name")
+    @patch(
+        "src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_name"
+    )
     def test_broadcast_item_deleted(self, mock_name, mock_id, mock_st):
         """Test broadcast_item_deleted."""
         mock_st.session_state = {}
@@ -442,7 +466,9 @@ class TestBroadcastHelpers:
 
     @patch("src.services.integrations.web.synchronisation.st")
     @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_id")
-    @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_name")
+    @patch(
+        "src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_name"
+    )
     def test_broadcast_typing(self, mock_name, mock_id, mock_st):
         """Test broadcast_typing."""
         mock_st.session_state = {}
@@ -817,7 +843,11 @@ class TestUtilities:
         """Test sync_pending sans channel."""
         mock_st.session_state = {}
 
-        from src.services.integrations.web.synchronisation import RealtimeSyncService, SyncEvent, SyncEventType
+        from src.services.integrations.web.synchronisation import (
+            RealtimeSyncService,
+            SyncEvent,
+            SyncEventType,
+        )
 
         service = RealtimeSyncService()
         service._channel = None
@@ -837,7 +867,11 @@ class TestUtilities:
         """Test sync_pending avec channel."""
         mock_st.session_state = {}
 
-        from src.services.integrations.web.synchronisation import RealtimeSyncService, SyncEvent, SyncEventType
+        from src.services.integrations.web.synchronisation import (
+            RealtimeSyncService,
+            SyncEvent,
+            SyncEventType,
+        )
 
         service = RealtimeSyncService()
         mock_channel = MagicMock()
@@ -978,7 +1012,11 @@ class TestUIComponents:
         """Test render_sync_status avec pending."""
         mock_st.session_state = {}
 
-        from src.services.integrations.web.synchronisation import SyncEvent, SyncEventType, SyncState
+        from src.services.integrations.web.synchronisation import (
+            SyncEvent,
+            SyncEventType,
+            SyncState,
+        )
 
         mock_service = MagicMock()
         pending_event = SyncEvent(
@@ -1043,7 +1081,9 @@ class TestInitClient:
         mock_params.SUPABASE_URL = "https://test.supabase.co"
         mock_params.SUPABASE_ANON_KEY = "test_key"
 
-        with patch("src.services.integrations.web.synchronisation.create_client", create=True) as _mock_create:
+        with patch(
+            "src.services.integrations.web.synchronisation.create_client", create=True
+        ) as _mock_create:
             from src.services.integrations.web.synchronisation import RealtimeSyncService
 
             with patch(

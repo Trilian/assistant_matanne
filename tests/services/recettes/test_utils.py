@@ -1,4 +1,4 @@
-﻿"""Tests pour src/services/recettes/utils.py"""
+"""Tests pour src/services/recettes/utils.py"""
 
 import pytest
 

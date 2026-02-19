@@ -1,4 +1,4 @@
-﻿"""Tests pour src/services/recettes/types.py"""
+"""Tests pour src/services/recettes/types.py"""
 
 import pytest
 from pydantic import ValidationError

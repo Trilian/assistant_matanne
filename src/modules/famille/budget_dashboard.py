@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tableau de bord budget familial - Interface Streamlit.
 
 Fonctionnalités:

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service de notifications pour l'inventaire.
 
 Gère les notifications locales (en mémoire) pour les alertes de stock

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Assistant IA Maison - Orchestrateur intelligent pour la gestion maison.
 
 Features:

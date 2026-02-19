@@ -39,7 +39,11 @@ def render_realtime_status():
 
         from src.ui.views.synchronisation import (
             afficher_indicateur_frappe as render_typing_indicator,
+        )
+        from src.ui.views.synchronisation import (
             afficher_indicateur_presence as render_presence_indicator,
+        )
+        from src.ui.views.synchronisation import (
             afficher_statut_synchronisation as render_sync_status,
         )
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Fonctions de scoring et classement des recettes.
 
 Calcule les scores de pertinence des recettes en fonction du contexte,

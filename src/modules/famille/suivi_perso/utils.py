@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Suivi Perso - Imports et constantes partages
 
 Dashboard sante/sport pour Anne et Mathieu:

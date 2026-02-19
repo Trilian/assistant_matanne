@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/utils/recipe_importer.py
 """
 

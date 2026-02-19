@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Sorties Weekend - Imports et constantes partages
 
 Planning et suggestions IA:

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Entretien - Gestion intelligente des routines ménage.
 
 Features:

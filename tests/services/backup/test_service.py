@@ -1,4 +1,4 @@
-﻿"""Tests pour backup/service.py - ServiceBackup class."""
+"""Tests pour backup/service.py - ServiceBackup class."""
 
 import gzip
 import json

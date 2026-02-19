@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Notifications Push - Configuration et test des alertes.
 
 Fonctionnalités:

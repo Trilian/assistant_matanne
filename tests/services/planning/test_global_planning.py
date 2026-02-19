@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/planning/global_planning.py
 
 Tests du service de planning unifié.

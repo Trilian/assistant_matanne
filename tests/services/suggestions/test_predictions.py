@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests for src/services/suggestions/predictions.py
 
 PredictionService - ML predictions for inventory.

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Composant UI pour la synchronisation Google Calendar.
 
 Interface utilisateur pour:

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Interface utilisateur pour la gestion des templates de semaine.
 
 Permet de:

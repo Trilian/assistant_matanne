@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests unitaires pour utils.py
 
 Module: src.services.budget.utils

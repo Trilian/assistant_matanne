@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Projets - Gestion intelligente des projets maison avec estimation IA.
 
 Features:

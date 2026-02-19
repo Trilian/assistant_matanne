@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests complémentaires pour service.py - Batch Cooking.
 
 Ce fichier vise à augmenter la couverture des méthodes non testées:

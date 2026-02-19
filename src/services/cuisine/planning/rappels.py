@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service de gestion des rappels d'événements.
 
 Permet de:

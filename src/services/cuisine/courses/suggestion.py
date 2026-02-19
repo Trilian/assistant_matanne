@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Courses Intelligentes.
 
 Generation de liste de courses depuis le planning repas avec comparaison inventaire.

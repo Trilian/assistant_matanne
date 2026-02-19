@@ -1,4 +1,4 @@
-﻿"""
+"""
 Interface UI pour l'historique d'activité.
 
 Note: Ce fichier a été extrait depuis src/services/utilisateur/historique.py

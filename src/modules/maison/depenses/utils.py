@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Depenses Maison - Imports et constantes partages
 
 Focus sur les depenses recurrentes de la maison avec consommation.

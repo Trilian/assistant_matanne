@@ -1,4 +1,4 @@
-﻿"""Tests pour backup/utils.py - Fonctions utilitaires pures."""
+"""Tests pour backup/utils.py - Fonctions utilitaires pures."""
 
 from datetime import datetime, timedelta
 from pathlib import Path

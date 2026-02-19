@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests unitaires complets pour src/services/base/io_service.py
 Module: IOService - Import/Export CSV, JSON.
 

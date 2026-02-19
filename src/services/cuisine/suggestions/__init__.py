@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package de suggestions IA pour la planification de repas.
 
 Ce package fournit des suggestions intelligentes basées sur:
@@ -20,25 +20,15 @@ Exemple d'utilisation:
 
 # Types/Schémas
 # Prédictions ML (inventaire)
-from .predictions import (
-    AnalysePrediction,
-    PredictionArticle,
-    PredictionService,
-    obtenir_service_predictions,
-)
-
-# Service principal
-from .service import (
-    ServiceSuggestions,
-    # Alias de compatibilité
-    SuggestionsIAService,
-    get_suggestions_ia_service,
-    obtenir_service_suggestions,
-)
-from .types import (
-    ContexteSuggestion,
-    ProfilCulinaire,
-    SuggestionRecette,
+# Analyse historique
+from .analyse_historique import (
+    analyze_categories,
+    analyze_frequent_ingredients,
+    calculate_average_difficulty,
+    calculate_average_portions,
+    calculate_average_time,
+    days_since_last_preparation,
+    identify_favorites,
 )
 
 # Constantes
@@ -59,17 +49,6 @@ from .constantes_suggestions import (
     SCORE_VARIETE,
 )
 
-# Analyse historique
-from .analyse_historique import (
-    analyze_categories,
-    analyze_frequent_ingredients,
-    calculate_average_difficulty,
-    calculate_average_portions,
-    calculate_average_time,
-    days_since_last_preparation,
-    identify_favorites,
-)
-
 # Équilibre et variété
 from .equilibre import (
     calculate_variety_score,
@@ -77,6 +56,19 @@ from .equilibre import (
     detect_protein_type,
     get_least_prepared_recipes,
     is_week_balanced,
+)
+
+# Formatage
+from .formatage import (
+    filter_by_constraints,
+    format_profile_summary,
+    format_suggestion,
+)
+from .predictions import (
+    AnalysePrediction,
+    PredictionArticle,
+    PredictionService,
+    obtenir_service_predictions,
 )
 
 # Saisons
@@ -93,11 +85,18 @@ from .scoring import (
     rank_recipes,
 )
 
-# Formatage
-from .formatage import (
-    filter_by_constraints,
-    format_profile_summary,
-    format_suggestion,
+# Service principal
+from .service import (
+    ServiceSuggestions,
+    # Alias de compatibilité
+    SuggestionsIAService,
+    get_suggestions_ia_service,
+    obtenir_service_suggestions,
+)
+from .types import (
+    ContexteSuggestion,
+    ProfilCulinaire,
+    SuggestionRecette,
 )
 
 __all__ = [

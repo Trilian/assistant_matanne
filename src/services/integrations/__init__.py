@@ -24,17 +24,6 @@ Utilisation:
 # ═══════════════════════════════════════════════════════════
 # MÉTÉO (TRANSVERSAL) - réexportation depuis weather/
 # ═══════════════════════════════════════════════════════════
-from .weather import (
-    AlerteMeteo,
-    ConseilJardin,
-    MeteoJour,
-    PlanArrosage,
-    ServiceMeteo,
-    WeatherService,
-    get_weather_garden_service,
-    get_weather_service,
-    obtenir_service_meteo,
-)
 from .codes_barres import (
     BarcodeArticle,
     # Schémas Pydantic
@@ -77,6 +66,17 @@ from .produit import (
     OpenFoodFactsService,
     ProduitOpenFoodFacts,
     get_openfoodfacts_service,
+)
+from .weather import (
+    AlerteMeteo,
+    ConseilJardin,
+    MeteoJour,
+    PlanArrosage,
+    ServiceMeteo,
+    WeatherService,
+    get_weather_garden_service,
+    get_weather_service,
+    obtenir_service_meteo,
 )
 
 # ═══════════════════════════════════════════════════════════

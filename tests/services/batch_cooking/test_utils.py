@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests complémentaires pour utils.py - Batch Cooking.
 
 Ce fichier vise à couvrir les branches manquantes:

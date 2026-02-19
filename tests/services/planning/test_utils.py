@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/planning/utils.py
 
 Tests des fonctions utilitaires pures pour le planning.

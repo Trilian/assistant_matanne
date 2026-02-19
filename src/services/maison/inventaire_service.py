@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Inventaire Maison - Gestion des pièces, objets et recherche "Où est...".
 
 Features:

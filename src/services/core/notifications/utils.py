@@ -1,4 +1,4 @@
-﻿"""
+"""
 Fonctions utilitaires pures pour les notifications push.
 
 Ces fonctions peuvent être testées sans base de données ni dépendances externes.

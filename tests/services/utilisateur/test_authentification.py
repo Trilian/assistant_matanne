@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/utilisateur/authentification.py
 Cible: Couverture >80%
 

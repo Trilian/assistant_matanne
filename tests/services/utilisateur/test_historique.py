@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/utilisateur/historique.py
 Cible: Couverture >80%
 
@@ -691,7 +691,9 @@ class TestPrivateMethods:
 
         service = ActionHistoryService()
 
-        with patch("src.services.core.utilisateur.authentification.get_auth_service") as mock_get_auth:
+        with patch(
+            "src.services.core.utilisateur.authentification.get_auth_service"
+        ) as mock_get_auth:
             mock_get_auth.return_value = mock_auth
             user_id, user_name = service._get_current_user()
 
@@ -705,7 +707,9 @@ class TestPrivateMethods:
 
         service = ActionHistoryService()
 
-        with patch("src.services.core.utilisateur.authentification.get_auth_service") as mock_get_auth:
+        with patch(
+            "src.services.core.utilisateur.authentification.get_auth_service"
+        ) as mock_get_auth:
             mock_get_auth.return_value = mock_auth
             user_id, user_name = service._get_current_user()
 
@@ -716,7 +720,9 @@ class TestPrivateMethods:
         """Récupération utilisateur avec exception."""
         service = ActionHistoryService()
 
-        with patch("src.services.core.utilisateur.authentification.get_auth_service") as mock_get_auth:
+        with patch(
+            "src.services.core.utilisateur.authentification.get_auth_service"
+        ) as mock_get_auth:
             mock_get_auth.side_effect = Exception("Error")
             user_id, user_name = service._get_current_user()
 

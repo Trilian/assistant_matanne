@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Courses Unifie.
 
 Service complet pour la gestion de la liste de courses avec support IA.

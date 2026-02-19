@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package courses - Services de gestion des listes de courses.
 
 Ce package regroupe:

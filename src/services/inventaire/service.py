@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Inventaire Unifié.
 
 ✅ Utilise @avec_session_db et @avec_cache

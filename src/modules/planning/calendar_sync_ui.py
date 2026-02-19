@@ -1,4 +1,4 @@
-﻿"""
+"""
 Interface Streamlit pour la synchronisation des calendriers externes.
 
 Fonctionnalités:

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Génération de recettes avec l'IA.
 """
 

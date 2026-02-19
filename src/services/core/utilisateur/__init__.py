@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package Utilisateur - Services liés à l'utilisateur.
 
 Regroupe:

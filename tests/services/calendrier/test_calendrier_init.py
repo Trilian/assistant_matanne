@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/calendrier/__init__.py
 
 Couvre les exports du module calendrier.

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Prédictions ML - Onglet prévisions de l'inventaire.
 Affiche les prédictions et recommandations basées sur le Machine Learning.
 """
@@ -6,8 +6,8 @@ Affiche les prédictions et recommandations basées sur le Machine Learning.
 import pandas as pd
 import streamlit as st
 
-from src.services.inventaire import get_inventaire_service
 from src.services.cuisine.suggestions import obtenir_service_predictions
+from src.services.inventaire import get_inventaire_service
 
 
 def render_predictions():

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package web - Services web unifiés (synchronisation temps réel + PWA).
 
 Ce package fournit:

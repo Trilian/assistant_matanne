@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Jardin - Gestion intelligente du jardin avec IA.
 
 Features:

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Imports communs et constantes pour le module courses.
 """
 
@@ -26,9 +26,9 @@ from src.modules.cuisine.courses.utils import (
     valider_article,
 )
 from src.services.cuisine.courses import get_courses_intelligentes_service, get_courses_service
-from src.services.inventaire import get_inventaire_service
 from src.services.cuisine.recettes import get_recette_service
 from src.services.integrations.web import get_realtime_sync_service
+from src.services.inventaire import get_inventaire_service
 
 logger = logging.getLogger(__name__)
 

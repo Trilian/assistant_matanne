@@ -8,12 +8,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.services.jeux import (
+    SEUIL_VALUE_ALERTE,
+    SEUIL_VALUE_HAUTE,
     BacktestService,
     Prediction,
     ResultatBacktest,
     ResultatPrediction,
-    SEUIL_VALUE_ALERTE,
-    SEUIL_VALUE_HAUTE,
     get_backtest_service,
 )
 

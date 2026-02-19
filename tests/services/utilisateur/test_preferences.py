@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/utilisateur/preferences.py
 Cible: Couverture >80%
 

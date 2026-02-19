@@ -1,4 +1,4 @@
-﻿"""
+"""
 Dépendances FastAPI centralisées.
 
 Contient les dépendances communes pour l'authentification et l'autorisation.

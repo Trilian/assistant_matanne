@@ -1,4 +1,4 @@
-﻿"""
+"""
 Interface UI pour la synchronisation temps réel et PWA.
 
 Note: Ce fichier a été extrait depuis src/services/web/synchronisation.py et pwa.py

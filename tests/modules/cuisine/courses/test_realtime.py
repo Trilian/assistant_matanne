@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/modules/cuisine/courses/realtime.py
 
 Couverture complète des fonctions UI synchronisation temps réel courses.

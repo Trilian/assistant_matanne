@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests unitaires complets pour src/services/base/types.py
 Module: BaseService - CRUD, recherche avancée, statistiques, bulk operations.
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Fonctions d'équilibre protéique et de variété des recettes.
 
 Détecte le type de protéine, calcule l'équilibre hebdomadaire,

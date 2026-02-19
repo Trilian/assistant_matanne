@@ -16,12 +16,14 @@ import streamlit as st
 
 from src.services.jeux import (
     APSCHEDULER_AVAILABLE,
+    COMPETITIONS,
+    SEUIL_VALUE_ALERTE,
+    SEUIL_VALUE_HAUTE,
     FootballDataService,
     SeriesService,
     get_scheduler_service,
     get_sync_service,
 )
-from src.services.jeux import COMPETITIONS, SEUIL_VALUE_ALERTE, SEUIL_VALUE_HAUTE
 
 logger = logging.getLogger(__name__)
 

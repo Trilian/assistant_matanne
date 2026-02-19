@@ -1,4 +1,4 @@
-﻿"""
+"""
 Mixin Statistiques & Alertes pour le service inventaire.
 
 Contient les méthodes de statistiques et notifications:

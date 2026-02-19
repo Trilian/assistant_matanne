@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/modules/planning/calendar_sync_ui.py
 
 Tests complets pour l'interface de synchronisation calendrier avec mocking Streamlit.

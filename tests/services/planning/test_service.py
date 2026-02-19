@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/planning/service.py
 
 Tests du service de planning avec mocks.

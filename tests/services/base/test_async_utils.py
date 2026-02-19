@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour le module async_utils.
 
 Teste le décorateur sync_wrapper qui convertit les méthodes async en sync.

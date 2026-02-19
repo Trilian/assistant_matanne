@@ -1,4 +1,4 @@
-﻿"""Tests pour src/services/notifications/notif_ntfy.py - ServiceNtfy.
+"""Tests pour src/services/notifications/notif_ntfy.py - ServiceNtfy.
 
 Couverture des fonctionnalités:
 - Envoi de notifications via ntfy.sh

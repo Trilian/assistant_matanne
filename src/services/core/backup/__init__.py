@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package de backup pour l'Assistant Matanne.
 
 Ce package fournit des services pour:

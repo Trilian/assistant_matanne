@@ -1,4 +1,4 @@
-﻿"""
+"""
 Fonctions de formatage et filtrage des suggestions de recettes.
 
 Formate les suggestions pour l'affichage UI, résume le profil culinaire,

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/courses/types.py
 
 Tests des modèles Pydantic:

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package batch_cooking - Gestion des sessions de préparation de repas en lot.
 
 Ce package fournit:

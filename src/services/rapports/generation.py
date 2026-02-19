@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Génération Rapports PDF
 
 Orchestre les mixins de génération PDF:

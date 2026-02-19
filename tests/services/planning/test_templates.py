@@ -1,4 +1,4 @@
-﻿"""Tests pour le service de templates."""
+"""Tests pour le service de templates."""
 
 from datetime import date, timedelta
 

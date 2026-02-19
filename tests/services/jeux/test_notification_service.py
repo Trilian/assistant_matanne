@@ -8,11 +8,11 @@ from unittest.mock import MagicMock
 import pytest
 
 from src.services.jeux import (
+    SEUIL_VALUE_ALERTE,
+    SEUIL_VALUE_HAUTE,
     NiveauUrgence,
     NotificationJeux,
     NotificationJeuxService,
-    SEUIL_VALUE_ALERTE,
-    SEUIL_VALUE_HAUTE,
     TypeNotification,
     afficher_badge_notifications,
     afficher_liste_notifications,

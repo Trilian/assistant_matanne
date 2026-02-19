@@ -1,4 +1,4 @@
-﻿"""
+"""
 Interface UI pour l'authentification et le profil utilisateur.
 
 Note: Ce fichier a été extrait depuis src/services/utilisateur/authentification.py

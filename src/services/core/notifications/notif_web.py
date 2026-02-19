@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service de notifications Web Push.
 
 Utilise Web Push API avec VAPID pour envoyer des notifications

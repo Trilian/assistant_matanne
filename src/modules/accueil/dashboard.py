@@ -1,4 +1,4 @@
-﻿"""
+"""
 Dashboard Central - Interface utilisateur
 Vue d'ensemble de l'application avec stats, alertes et raccourcis
 """
@@ -9,9 +9,9 @@ import streamlit as st
 
 from src.core.state import GestionnaireEtat, obtenir_etat
 from src.services.cuisine.courses import get_courses_service
-from src.services.inventaire import get_inventaire_service
 from src.services.cuisine.planning import get_planning_service
 from src.services.cuisine.recettes import get_recette_service
+from src.services.inventaire import get_inventaire_service
 from src.ui.components.alertes import alerte_stock
 
 # Dashboard widgets enrichis

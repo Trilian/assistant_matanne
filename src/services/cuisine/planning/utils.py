@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module de compatibilité - Réexporte les fonctions des sous-modules.
 
 DEPRECATED: Ce fichier existe uniquement pour la rétrocompatibilité.

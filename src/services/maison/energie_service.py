@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Énergie - Analyse consommation et éco-score gamifié.
 
 Features:

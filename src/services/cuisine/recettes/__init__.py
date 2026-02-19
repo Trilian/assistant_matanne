@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package recettes - Services de gestion des recettes.
 
 Ce package regroupe:

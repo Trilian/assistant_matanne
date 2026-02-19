@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Jules - Imports et constantes partages
 
 Activites adaptees, achats suggeres, conseils developpement:

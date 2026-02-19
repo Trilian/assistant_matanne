@@ -1,4 +1,4 @@
-﻿"""
+"""
 Interface UI pour la gestion des sauvegardes.
 
 Note: Ce fichier a été extrait depuis src/services/backup/service.py

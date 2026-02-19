@@ -1,4 +1,4 @@
-﻿"""
+"""
 Mixin d'export Supabase et historique des backups.
 
 Contient les méthodes d'upload/download vers Supabase Storage

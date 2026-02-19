@@ -1,4 +1,4 @@
-﻿"""
+"""
 Détail d'une recette - Affichage complet avec historique et versions.
 """
 

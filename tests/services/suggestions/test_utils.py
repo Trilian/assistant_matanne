@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests for src/services/suggestions/utils.py
 
 Pure utility functions - no mocking needed.

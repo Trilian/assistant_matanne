@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Batch Cooking - Gestion des sessions de préparation de repas en lot.
 
 Ce service gère :

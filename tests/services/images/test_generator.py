@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/core/image_generator.py
 
 Tests des fonctions de génération d'images recettes avec mocks pour les APIs.
@@ -506,7 +506,9 @@ class TestGenererImageRecette:
 
         assert result is not None
 
-    @patch("src.services.integrations.images.generator._generer_via_pollinations", return_value=None)
+    @patch(
+        "src.services.integrations.images.generator._generer_via_pollinations", return_value=None
+    )
     @patch("src.services.integrations.images.generator._generer_via_replicate", return_value=None)
     def test_toutes_apis_echouent(self, mock_replicate, mock_pollinations):
         """Retourne None si toutes les APIs échouent."""

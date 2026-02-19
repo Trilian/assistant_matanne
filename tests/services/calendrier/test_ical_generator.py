@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests du package calendar_sync - Générateur iCal.
 
 Tests de génération et parsing de fichiers .ics.

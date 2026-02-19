@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Suivi du Temps - Entretien et Jardinage.
 
 Features:

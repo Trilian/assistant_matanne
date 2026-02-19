@@ -1,4 +1,4 @@
-﻿"""Tests pour le service de récurrence."""
+"""Tests pour le service de récurrence."""
 
 from datetime import date, datetime, timedelta
 

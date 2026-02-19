@@ -1,4 +1,4 @@
-﻿"""
+"""
 Interface UI pour l'import de recettes depuis le web.
 
 Note: Ce fichier a été extrait depuis src/services/recettes/import_url.py

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Fonctions utilitaires pures pour le service budget.
 
 Ces fonctions ne dépendent pas de la base de données et sont testables unitairement.

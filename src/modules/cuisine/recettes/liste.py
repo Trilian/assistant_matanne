@@ -1,4 +1,4 @@
-﻿"""
+"""
 Liste des recettes - Affichage et pagination.
 """
 

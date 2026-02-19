@@ -1,4 +1,4 @@
-﻿"""Fixtures pour services Phase 18."""
+"""Fixtures pour services Phase 18."""
 
 from unittest.mock import MagicMock, patch
 

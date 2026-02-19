@@ -1,4 +1,4 @@
-﻿"""
+"""
 Interface Streamlit pour la gestion des backups.
 
 Déplacé depuis src/services/backup/service.py pour respecter

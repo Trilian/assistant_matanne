@@ -1,4 +1,4 @@
-﻿"""
+"""
 Interface UI pour les alertes météo jardin.
 
 Note: Ce fichier a été extrait depuis src/services/weather/service.py

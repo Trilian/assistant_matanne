@@ -1,4 +1,4 @@
-﻿"""
+"""
 Ajout manuel de recettes.
 """
 

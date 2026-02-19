@@ -172,7 +172,6 @@ __all__ = [
     "avec_cache_multi",
     "EntreeCache",
     "StatistiquesCache",
-
     # Errors Base (pures)
     "ExceptionApp",
     "ErreurValidation",

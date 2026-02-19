@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service OCR Factures - Extraction automatique depuis photos de factures.
 
 Supporte:

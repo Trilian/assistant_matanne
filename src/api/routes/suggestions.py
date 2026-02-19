@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API pour les suggestions IA.
 """
 

@@ -1,4 +1,4 @@
-﻿"""Tests pour le service de rappels."""
+"""Tests pour le service de rappels."""
 
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch

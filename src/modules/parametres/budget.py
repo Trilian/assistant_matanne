@@ -1,4 +1,4 @@
-﻿"""
+"""
 Paramètres - Configuration Budget
 Catégories de dépenses et sauvegarde des données
 """

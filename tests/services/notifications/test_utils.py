@@ -1,4 +1,4 @@
-﻿"""Tests pour src/services/notifications/utils.py - Fonctions utilitaires.
+"""Tests pour src/services/notifications/utils.py - Fonctions utilitaires.
 
 Couverture des fonctionnalités:
 - Vérification des préférences de notification

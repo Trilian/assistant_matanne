@@ -1,4 +1,4 @@
-﻿"""
+"""
 Composants UI pour les notifications push.
 
 Widgets Streamlit pour demander les permissions et configurer les préférences.

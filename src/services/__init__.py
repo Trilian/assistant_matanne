@@ -1,4 +1,4 @@
-﻿"""
+"""
 Services - Package des services métier.
 
 Ce package contient tous les services de l'application.

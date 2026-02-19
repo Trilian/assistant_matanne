@@ -8,11 +8,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from src.services.jeux import (
+    SEUIL_VALUE_ALERTE,
+    SEUIL_VALUE_HAUTE,
     AnalyseIA,
     JeuxAIService,
     OpportuniteAnalysee,
-    SEUIL_VALUE_ALERTE,
-    SEUIL_VALUE_HAUTE,
     get_jeux_ai_service,
 )
 

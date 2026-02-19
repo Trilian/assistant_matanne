@@ -19,12 +19,12 @@ import pandas as pd
 import streamlit as st
 
 from src.services.jeux import (
-    LotoDataService,
     NB_NUMEROS_CHANCE,
     NB_NUMEROS_PRINCIPAUX,
     NUMEROS_PAR_TIRAGE,
     SEUIL_VALUE_ALERTE,
     SEUIL_VALUE_HAUTE,
+    LotoDataService,
     SeriesService,
     get_sync_service,
 )

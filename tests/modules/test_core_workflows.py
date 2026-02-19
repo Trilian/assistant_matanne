@@ -1,4 +1,4 @@
-﻿"""Phase 17: Tests pour workflows core des domains.
+"""Phase 17: Tests pour workflows core des domains.
 
 Ces tests couvrent:
 - Initialisation des pages modules

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Mixin de restauration et consultation des backups.
 
 Contient les méthodes de restauration, listing, suppression

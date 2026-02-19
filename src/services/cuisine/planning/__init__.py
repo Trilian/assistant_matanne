@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package Planning - Services de gestion du planning familial.
 
 Ce package fournit:

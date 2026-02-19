@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests unitaires complets pour src/services/base/ai_service.py
 Module: BaseAIService - Rate limiting, cache, parsing Pydantic.
 

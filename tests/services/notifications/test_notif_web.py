@@ -1,4 +1,4 @@
-﻿"""Tests pour src/services/notifications/notif_web.py - ServiceWebPush.
+"""Tests pour src/services/notifications/notif_web.py - ServiceWebPush.
 
 Couverture des fonctionnalités:
 - Gestion des abonnements push

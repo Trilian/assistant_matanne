@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour l'API principale (main.py).
 
 Utilise une vraie DB SQLite en mémoire via les fixtures.

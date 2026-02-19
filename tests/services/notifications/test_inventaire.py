@@ -1,4 +1,4 @@
-﻿"""Tests pour src/services/notifications/inventaire.py - ServiceNotificationsInventaire.
+"""Tests pour src/services/notifications/inventaire.py - ServiceNotificationsInventaire.
 
 Couverture des fonctionnalités:
 - Création de notifications (stock critique, stock bas, péremption)

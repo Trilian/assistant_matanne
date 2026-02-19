@@ -1,4 +1,4 @@
-﻿"""
+"""
 Fonctions de gestion des saisons et ingrédients saisonniers.
 
 Détermine la saison courante et vérifie la saisonnalité des ingrédients.

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Package de notifications unifié.
 
 Fusionne les 3 anciens services:

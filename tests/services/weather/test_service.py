@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/weather/service.py
 
 Couvre le service météo principal avec mocks des appels HTTP et base de données.

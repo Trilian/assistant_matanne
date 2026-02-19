@@ -1,4 +1,4 @@
-﻿"""Tests pour backup/types.py - Pydantic models et validation."""
+"""Tests pour backup/types.py - Pydantic models et validation."""
 
 from datetime import datetime
 

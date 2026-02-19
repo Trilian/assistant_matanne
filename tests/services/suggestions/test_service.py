@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests for src/services/suggestions/service.py
 
 ServiceSuggestions - IA-powered recipe suggestions.

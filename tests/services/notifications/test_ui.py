@@ -1,4 +1,4 @@
-﻿"""Tests pour src/services/notifications/ui.py - Composants UI.
+"""Tests pour src/services/notifications/ui.py - Composants UI.
 
 Note: Ces tests sont limités car les fonctions font appel à Streamlit
 qui nécessite un contexte d'exécution spécifique.

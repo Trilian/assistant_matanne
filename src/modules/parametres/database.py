@@ -1,4 +1,4 @@
-﻿"""
+"""
 Paramètres - Configuration Base de Données
 Gestion et maintenance de la base PostgreSQL/Supabase
 """

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service de notifications push via ntfy.sh.
 
 Fonctionnalités:

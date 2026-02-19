@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/weather/utils.py
 
 Couvre les fonctions utilitaires pures du service météo.

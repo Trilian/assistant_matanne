@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests du package budget - Schémas Pydantic.
 
 Tests de validation des modèles de données pour le budget familial.

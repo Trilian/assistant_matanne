@@ -1,4 +1,4 @@
-﻿"""
+"""
 Composants d'analyse et graphiques pour le Calendrier Familial.
 
 Intègre les fonctionnalités de vue_ensemble.py et vue_semaine.py:

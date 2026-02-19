@@ -1,4 +1,4 @@
-﻿"""
+"""
 DEPRECATED: Ce fichier a été déplacé vers src/ui/views/notifications.py
 
 Ce module est conservé pour la rétrocompatibilité temporaire.

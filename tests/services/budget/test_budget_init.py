@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/budget/__init__.py
 
 Couvre les exports du module budget.

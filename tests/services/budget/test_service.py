@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests unitaires pour service.py
 
 Module: src.services.budget.service

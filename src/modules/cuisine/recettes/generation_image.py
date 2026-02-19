@@ -1,4 +1,4 @@
-﻿"""
+"""
 Génération d'images pour les recettes.
 """
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/garmin/utils.py
 
 Couvre:

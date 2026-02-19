@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Plan Jardin - Gestion du plan 2D avec zones et plantes.
 
 Features:
