@@ -40,16 +40,16 @@ def setup_mock_st(mock_st: MagicMock, session_data: dict | None = None) -> None:
 class TestAccueilUI:
     """Tests pour les fonctions UI du module accueil."""
 
-    @patch("src.modules.accueil.afficher_graphiques_enrichis")
-    @patch("src.modules.accueil.afficher_courses_summary")
-    @patch("src.modules.accueil.afficher_inventaire_summary")
-    @patch("src.modules.accueil.afficher_planning_summary")
-    @patch("src.modules.accueil.afficher_cuisine_summary")
-    @patch("src.modules.accueil.afficher_quick_actions")
-    @patch("src.modules.accueil.afficher_global_stats")
-    @patch("src.modules.accueil.afficher_critical_alerts")
-    @patch("src.modules.accueil.obtenir_etat")
-    @patch("src.modules.accueil.st")
+    @patch("src.modules.accueil.dashboard.afficher_graphiques_enrichis")
+    @patch("src.modules.accueil.dashboard.afficher_courses_summary")
+    @patch("src.modules.accueil.dashboard.afficher_inventaire_summary")
+    @patch("src.modules.accueil.dashboard.afficher_planning_summary")
+    @patch("src.modules.accueil.dashboard.afficher_cuisine_summary")
+    @patch("src.modules.accueil.dashboard.afficher_quick_actions")
+    @patch("src.modules.accueil.dashboard.afficher_global_stats")
+    @patch("src.modules.accueil.dashboard.afficher_critical_alerts")
+    @patch("src.modules.accueil.dashboard.obtenir_etat")
+    @patch("src.modules.accueil.dashboard.st")
     def test_app_basic(self, mock_st, mock_etat, *mocks) -> None:
         """Test du rendu basique de app()."""
         from src.modules.accueil import app
@@ -59,9 +59,9 @@ class TestAccueilUI:
         app()
         mock_st.markdown.assert_called()
 
-    @patch("src.modules.accueil.obtenir_service_inventaire")
-    @patch("src.modules.accueil.obtenir_service_planning")
-    @patch("src.modules.accueil.st")
+    @patch("src.modules.accueil.dashboard.obtenir_service_inventaire")
+    @patch("src.modules.accueil.dashboard.obtenir_service_planning")
+    @patch("src.modules.accueil.dashboard.st")
     def test_render_critical_alerts_empty(self, mock_st, mock_plan, mock_inv) -> None:
         """Test des alertes sans problemes."""
         from src.modules.accueil import afficher_critical_alerts
@@ -72,9 +72,9 @@ class TestAccueilUI:
         afficher_critical_alerts()
         assert True
 
-    @patch("src.modules.accueil.obtenir_service_inventaire")
-    @patch("src.modules.accueil.obtenir_service_planning")
-    @patch("src.modules.accueil.st")
+    @patch("src.modules.accueil.dashboard.obtenir_service_inventaire")
+    @patch("src.modules.accueil.dashboard.obtenir_service_planning")
+    @patch("src.modules.accueil.dashboard.st")
     def test_render_critical_alerts_with_critiques(self, mock_st, mock_plan, mock_inv) -> None:
         """Test des alertes avec articles critiques."""
         from src.modules.accueil import afficher_critical_alerts
@@ -88,9 +88,9 @@ class TestAccueilUI:
         afficher_critical_alerts()
         assert True
 
-    @patch("src.modules.accueil.obtenir_service_inventaire")
-    @patch("src.modules.accueil.obtenir_service_planning")
-    @patch("src.modules.accueil.st")
+    @patch("src.modules.accueil.dashboard.obtenir_service_inventaire")
+    @patch("src.modules.accueil.dashboard.obtenir_service_planning")
+    @patch("src.modules.accueil.dashboard.st")
     def test_render_critical_alerts_peremption(self, mock_st, mock_plan, mock_inv) -> None:
         """Test des alertes de peremption."""
         from src.modules.accueil import afficher_critical_alerts
@@ -103,9 +103,9 @@ class TestAccueilUI:
         afficher_critical_alerts()
         assert True
 
-    @patch("src.modules.accueil.obtenir_service_inventaire")
-    @patch("src.modules.accueil.obtenir_service_planning")
-    @patch("src.modules.accueil.st")
+    @patch("src.modules.accueil.dashboard.obtenir_service_inventaire")
+    @patch("src.modules.accueil.dashboard.obtenir_service_planning")
+    @patch("src.modules.accueil.dashboard.st")
     def test_render_critical_alerts_no_planning(self, mock_st, mock_plan, mock_inv) -> None:
         """Test des alertes sans planning."""
         from src.modules.accueil import afficher_critical_alerts
@@ -116,11 +116,11 @@ class TestAccueilUI:
         afficher_critical_alerts()
         assert True
 
-    @patch("src.modules.accueil.obtenir_service_inventaire")
-    @patch("src.modules.accueil.obtenir_service_recettes")
-    @patch("src.modules.accueil.obtenir_service_courses")
-    @patch("src.modules.accueil.obtenir_service_planning")
-    @patch("src.modules.accueil.st")
+    @patch("src.modules.accueil.dashboard.obtenir_service_inventaire")
+    @patch("src.modules.accueil.dashboard.obtenir_service_recettes")
+    @patch("src.modules.accueil.dashboard.obtenir_service_courses")
+    @patch("src.modules.accueil.dashboard.obtenir_service_planning")
+    @patch("src.modules.accueil.dashboard.st")
     def test_render_global_stats(self, mock_st, mock_plan, mock_crs, mock_rec, mock_inv) -> None:
         """Test des stats globales."""
         from src.modules.accueil import afficher_global_stats
@@ -133,7 +133,7 @@ class TestAccueilUI:
         afficher_global_stats()
         mock_st.columns.assert_called()
 
-    @patch("src.modules.accueil.st")
+    @patch("src.modules.accueil.dashboard.st")
     def test_render_quick_actions(self, mock_st) -> None:
         """Test des actions rapides."""
         from src.modules.accueil import afficher_quick_actions
@@ -142,9 +142,9 @@ class TestAccueilUI:
         afficher_quick_actions()
         mock_st.columns.assert_called()
 
-    @patch("src.modules.accueil.obtenir_service_recettes")
-    @patch("src.modules.accueil.obtenir_service_planning")
-    @patch("src.modules.accueil.st")
+    @patch("src.modules.accueil.dashboard.obtenir_service_recettes")
+    @patch("src.modules.accueil.dashboard.obtenir_service_planning")
+    @patch("src.modules.accueil.dashboard.st")
     def test_render_cuisine_summary(self, mock_st, mock_plan, mock_rec) -> None:
         """Test resume cuisine."""
         from src.modules.accueil import afficher_cuisine_summary
@@ -155,8 +155,8 @@ class TestAccueilUI:
         afficher_cuisine_summary()
         assert True
 
-    @patch("src.modules.accueil.obtenir_service_inventaire")
-    @patch("src.modules.accueil.st")
+    @patch("src.modules.accueil.dashboard.obtenir_service_inventaire")
+    @patch("src.modules.accueil.dashboard.st")
     def test_render_inventaire_summary(self, mock_st, mock_inv) -> None:
         """Test resume inventaire."""
         from src.modules.accueil import afficher_inventaire_summary
@@ -166,8 +166,8 @@ class TestAccueilUI:
         afficher_inventaire_summary()
         assert True
 
-    @patch("src.modules.accueil.obtenir_service_inventaire")
-    @patch("src.modules.accueil.st")
+    @patch("src.modules.accueil.dashboard.obtenir_service_inventaire")
+    @patch("src.modules.accueil.dashboard.st")
     def test_render_inventaire_summary_with_data(self, mock_st, mock_inv) -> None:
         """Test resume inventaire avec donnees."""
         from src.modules.accueil import afficher_inventaire_summary
@@ -181,8 +181,8 @@ class TestAccueilUI:
         afficher_inventaire_summary()
         assert True
 
-    @patch("src.modules.accueil.obtenir_service_courses")
-    @patch("src.modules.accueil.st")
+    @patch("src.modules.accueil.dashboard.obtenir_service_courses")
+    @patch("src.modules.accueil.dashboard.st")
     def test_render_courses_summary(self, mock_st, mock_crs) -> None:
         """Test resume courses."""
         from src.modules.accueil import afficher_courses_summary
@@ -192,8 +192,8 @@ class TestAccueilUI:
         afficher_courses_summary()
         assert True
 
-    @patch("src.modules.accueil.obtenir_service_courses")
-    @patch("src.modules.accueil.st")
+    @patch("src.modules.accueil.dashboard.obtenir_service_courses")
+    @patch("src.modules.accueil.dashboard.st")
     def test_render_courses_summary_with_data(self, mock_st, mock_crs) -> None:
         """Test resume courses avec donnees."""
         from src.modules.accueil import afficher_courses_summary
@@ -208,8 +208,8 @@ class TestAccueilUI:
         afficher_courses_summary()
         assert True
 
-    @patch("src.modules.accueil.obtenir_service_planning")
-    @patch("src.modules.accueil.st")
+    @patch("src.modules.accueil.dashboard.obtenir_service_planning")
+    @patch("src.modules.accueil.dashboard.st")
     def test_render_planning_summary(self, mock_st, mock_plan) -> None:
         """Test resume planning."""
         from src.modules.accueil import afficher_planning_summary
@@ -219,8 +219,8 @@ class TestAccueilUI:
         afficher_planning_summary()
         assert True
 
-    @patch("src.modules.accueil.obtenir_service_planning")
-    @patch("src.modules.accueil.st")
+    @patch("src.modules.accueil.dashboard.obtenir_service_planning")
+    @patch("src.modules.accueil.dashboard.st")
     def test_render_planning_summary_with_data(self, mock_st, mock_plan) -> None:
         """Test resume planning avec donnees."""
         from src.modules.accueil import afficher_planning_summary
