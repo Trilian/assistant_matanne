@@ -11,10 +11,10 @@ Importez directement depuis les sous-packages:
     from src.services.cuisine.recettes import ServiceRecettes, obtenir_service_recettes
 
     # Inventaire
-    from src.services.inventaire import InventaireService
+    from src.services.inventaire import ServiceInventaire, obtenir_service_inventaire
 
     # Courses
-    from src.services.cuisine.courses import CoursesService
+    from src.services.cuisine.courses import ServiceCourses, obtenir_service_courses
 
     # Planning
     from src.services.cuisine.planning import ServicePlanning, obtenir_service_planning

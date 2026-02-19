@@ -14,13 +14,6 @@ Utilisation:
     service = obtenir_service_planning()
     planning = service.get_planning()
     ```
-
-Compatibilité:
-    Les anciens noms sont conservés comme alias:
-    - PlanningService = ServicePlanning
-    - PlanningAIService = ServicePlanningUnifie
-    - get_planning_service = obtenir_service_planning (déprécié)
-    - get_planning_unified_service = obtenir_service_planning_unifie (déprécié)
 """
 
 # ═══════════════════════════════════════════════════════════

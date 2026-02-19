@@ -9,9 +9,7 @@ Interface style Jow:
 - Validation équilibre nutritionnel
 """
 
-from src.ui.components.atoms import etat_vide
-
-from ._common import date, st, timedelta
+from ._common import date, etat_vide, st, timedelta
 from .components import (
     afficher_apprentissage_ia,
     afficher_carte_recette_suggestion,

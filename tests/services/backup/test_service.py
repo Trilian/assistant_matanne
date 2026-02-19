@@ -909,10 +909,6 @@ class TestHistoriqueDB:
 class TestFactoryAndAliases:
     """Tests pour les factories et alias."""
 
-    def test_get_backup_service_alias(self):
-        """Test que get_backup_service est un alias."""
-        assert get_backup_service is obtenir_service_backup
-
     def test_obtenir_service_backup_returns_instance(self):
         """Test que la factory retourne une instance."""
         # Reset singleton pour le test

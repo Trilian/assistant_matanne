@@ -411,23 +411,10 @@ def obtenir_service_rapports_pdf() -> ServiceRapportsPDF:
 
 
 # ═══════════════════════════════════════════════════════════
-# ALIAS RÉTROCOMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
-
-RapportsPDFService = ServiceRapportsPDF
-get_rapports_pdf_service = obtenir_service_rapports_pdf
-
-
-# ═══════════════════════════════════════════════════════════
 # EXPORTS
 # ═══════════════════════════════════════════════════════════
 
 __all__ = [
-    # Classe principale (français)
     "ServiceRapportsPDF",
-    # Factory function (français)
     "obtenir_service_rapports_pdf",
-    # Alias rétrocompatibilité (anglais)
-    "RapportsPDFService",
-    "get_rapports_pdf_service",
 ]

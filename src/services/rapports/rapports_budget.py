@@ -48,8 +48,8 @@ class BudgetReportMixin:
         """
         rapport = RapportBudget(periode_jours=periode_jours)
 
-        # TODO: Implémenter avec historique d'achats si disponible
-        # Pour maintenant, calculer à partir du stock actuel
+        # Évolution possible : utiliser l'historique d'achats pour un rapport plus précis
+        # Actuellement calculé à partir du stock existant (prix_unitaire * quantite)
 
         articles = session.query(ArticleInventaire).all()
         depenses_par_cat = {}

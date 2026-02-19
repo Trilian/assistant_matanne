@@ -7,6 +7,7 @@ import streamlit as st
 
 from src.services.core.notifications import obtenir_service_notifications_inventaire
 from src.services.inventaire import obtenir_service_inventaire
+from src.ui.components.atoms import etat_vide
 
 # Alias pour rétrocompatibilité
 obtenir_service_notifications = obtenir_service_notifications_inventaire

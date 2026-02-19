@@ -8,26 +8,27 @@ Le module `src/core/` a été réorganisé en **7 sous-packages modulaires** pou
 
 ## Tableau de migration
 
-| Ancien import (déprécié) | Nouvel import (requis) |
-|---------------------------------------------|----------------------------|
-| `from src.core.config import obtenir_parametres` | `from src.core.config import obtenir_parametres` *(inchangé)* |
-| `from src.core.config import _get_mistral_api_key_from_secrets` | `from src.core.config.loader import _get_mistral_api_key_from_secrets` |
-| `from src.core.database import obtenir_moteur` | `from src.core.db import obtenir_moteur` |
-| `from src.core.database import obtenir_contexte_db` | `from src.core.db import obtenir_contexte_db` |
-| `from src.core.database import obtenir_fabrique_session` | `from src.core.db import obtenir_fabrique_session` |
-| `from src.core.database import GestionnaireMigrations` | `from src.core.db import GestionnaireMigrations` |
-| `from src.core.database import verifier_connexion` | `from src.core.db import verifier_connexion` |
-| `from src.core.cache_multi import CacheMultiNiveau` | `from src.core.caching import CacheMultiNiveau` |
-| `from src.core.cache_multi import avec_cache_multi` | `from src.core.caching import avec_cache_multi` |
-| `from src.core.cache_multi import obtenir_cache` | `from src.core.caching import obtenir_cache` |
-| `from src.core.caching import clear_all` | *(supprimé — utiliser `cache.clear()` directement)* |
-| `from src.core.models.base import obtenir_valeurs_enum` | *(supprimé — code mort)* |
-| `from src.core.date_utils import ...` (fichier) | `from src.core.date_utils import ...` *(même API, package interne)* |
-| `from src.core.validation.schemas import RecetteInput` | `from src.core.validation.schemas import RecetteInput` *(même API, package interne)* |
+| Ancien import (déprécié)                                        | Nouvel import (requis)                                                               |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `from src.core.config import obtenir_parametres`                | `from src.core.config import obtenir_parametres` _(inchangé)_                        |
+| `from src.core.config import _get_mistral_api_key_from_secrets` | `from src.core.config.loader import _get_mistral_api_key_from_secrets`               |
+| `from src.core.database import obtenir_moteur`                  | `from src.core.db import obtenir_moteur`                                             |
+| `from src.core.database import obtenir_contexte_db`             | `from src.core.db import obtenir_contexte_db`                                        |
+| `from src.core.database import obtenir_fabrique_session`        | `from src.core.db import obtenir_fabrique_session`                                   |
+| `from src.core.database import GestionnaireMigrations`          | `from src.core.db import GestionnaireMigrations`                                     |
+| `from src.core.database import verifier_connexion`              | `from src.core.db import verifier_connexion`                                         |
+| `from src.core.cache_multi import CacheMultiNiveau`             | `from src.core.caching import CacheMultiNiveau`                                      |
+| `from src.core.cache_multi import avec_cache_multi`             | `from src.core.caching import avec_cache_multi`                                      |
+| `from src.core.cache_multi import obtenir_cache`                | `from src.core.caching import obtenir_cache`                                         |
+| `from src.core.caching import clear_all`                        | _(supprimé — utiliser `cache.clear()` directement)_                                  |
+| `from src.core.models.base import obtenir_valeurs_enum`         | _(supprimé — code mort)_                                                             |
+| `from src.core.date_utils import ...` (fichier)                 | `from src.core.date_utils import ...` _(même API, package interne)_                  |
+| `from src.core.validation.schemas import RecetteInput`          | `from src.core.validation.schemas import RecetteInput` _(même API, package interne)_ |
 
 ## Structure des nouveaux packages
 
 ### config/ — Configuration centralisée
+
 ```
 src/core/config/
 ├── __init__.py     # Re-exports: obtenir_parametres, Parametres, charger_secrets_streamlit
@@ -39,6 +40,7 @@ src/core/config/
 > depuis `__init__.py`. Pour les tests, importer depuis `src.core.config.loader` directement.
 
 ### db/ — Base de données
+
 ```
 src/core/db/
 ├── __init__.py     # Re-exports
@@ -49,6 +51,7 @@ src/core/db/
 ```
 
 ### caching/ — Cache multi-niveaux
+
 ```
 src/core/caching/
 ├── __init__.py      # Re-exports
@@ -65,6 +68,7 @@ src/core/caching/
 > préserver les signatures de fonctions dans les outils de typage.
 
 ### date_utils/ — Utilitaires de dates (NOUVEAU package)
+
 ```
 src/core/date_utils/
 ├── __init__.py     # Re-exports de toutes les fonctions publiques
@@ -79,6 +83,7 @@ src/core/date_utils/
 > (`from src.core.date_utils import ...`) fonctionnent sans changement.
 
 ### validation/ — Validation & sanitization
+
 ```
 src/core/validation/
 ├── __init__.py     # Re-exports complets
@@ -113,10 +118,10 @@ RateLimitIA.peut_appeler()
 
 Les fichiers shims suivants ont été **supprimés**. Tous les imports doivent utiliser les sous-packages directement :
 
-| Ancien shim (supprimé) | Remplacé par |
-|------------------------|---------------|
-| `src/core/database.py` | `src/core/db/` |
-| `src/core/cache_multi.py` | `src/core/caching/` |
+| Ancien shim (supprimé)    | Remplacé par           |
+| ------------------------- | ---------------------- |
+| `src/core/database.py`    | `src/core/db/`         |
+| `src/core/cache_multi.py` | `src/core/caching/`    |
 | `src/core/performance.py` | `src/core/monitoring/` |
 
 ## Impacts sur les tests
@@ -141,38 +146,38 @@ Les fichiers shims suivants ont été **supprimés**. Tous les imports doivent u
 
 ### Correspondances de mock paths
 
-| Ancien mock path | Nouveau mock path |
-|------------------|-------------------|
-| `src.core.database.obtenir_moteur` | `src.core.db.engine.obtenir_moteur` |
-| `src.core.database.obtenir_fabrique_session` | `src.core.db.session.obtenir_fabrique_session` |
-| `src.core.database.obtenir_contexte_db` | `src.core.db.session.obtenir_contexte_db` |
-| `src.core.database.GestionnaireMigrations` | `src.core.db.migrations.GestionnaireMigrations` |
-| `src.core.database.create_engine` | `src.core.db.engine.create_engine` |
-| `src.core.database.st` | `src.core.db.engine.st` ou `src.core.db.utils.st` |
+| Ancien mock path                                    | Nouveau mock path                                          |
+| --------------------------------------------------- | ---------------------------------------------------------- |
+| `src.core.database.obtenir_moteur`                  | `src.core.db.engine.obtenir_moteur`                        |
+| `src.core.database.obtenir_fabrique_session`        | `src.core.db.session.obtenir_fabrique_session`             |
+| `src.core.database.obtenir_contexte_db`             | `src.core.db.session.obtenir_contexte_db`                  |
+| `src.core.database.GestionnaireMigrations`          | `src.core.db.migrations.GestionnaireMigrations`            |
+| `src.core.database.create_engine`                   | `src.core.db.engine.create_engine`                         |
+| `src.core.database.st`                              | `src.core.db.engine.st` ou `src.core.db.utils.st`          |
 | `src.core.config._get_mistral_api_key_from_secrets` | `src.core.config.loader._get_mistral_api_key_from_secrets` |
-| `src.core.config._read_st_secret` | `src.core.config.settings._read_st_secret` |
-| `src.core.config._reload_env_files` | `src.core.config.settings._reload_env_files` |
-| `src.core.config.charger_secrets_streamlit` | `src.core.config.settings.charger_secrets_streamlit` |
-| `src.core.config.configure_logging` | `src.core.logging.configure_logging` |
-| `src.core.performance.ProfileurFonction` | `src.core.monitoring.profiler.ProfileurFonction` |
-| `src.core.performance.st` | `src.core.monitoring.{profiler,memory,sql,dashboard}.st` |
+| `src.core.config._read_st_secret`                   | `src.core.config.settings._read_st_secret`                 |
+| `src.core.config._reload_env_files`                 | `src.core.config.settings._reload_env_files`               |
+| `src.core.config.charger_secrets_streamlit`         | `src.core.config.settings.charger_secrets_streamlit`       |
+| `src.core.config.configure_logging`                 | `src.core.logging.configure_logging`                       |
+| `src.core.performance.ProfileurFonction`            | `src.core.monitoring.profiler.ProfileurFonction`           |
+| `src.core.performance.st`                           | `src.core.monitoring.{profiler,memory,sql,dashboard}.st`   |
 
 ## Symboles supprimés
 
-| Symbole | Ancien emplacement | Raison |
-|---------|-------------------|--------|
-| `clear_all` | `src.core.caching` | Alias inutilisé — utiliser `cache.clear()` |
-| `obtenir_valeurs_enum` | `src.core.models.base` | Code mort, jamais appelé |
-| `_get_mistral_api_key_from_secrets` (export) | `src.core.config.__init__` | Fonction privée, importer depuis `loader.py` |
-| `_read_st_secret` (export) | `src.core.config.__init__` | Fonction privée, importer depuis `settings.py` |
-| `_reload_env_files` (export) | `src.core.config.__init__` | Fonction privée, importer depuis `settings.py` |
-| `_charger_configuration` (export) | `src.core.config.__init__` | Fonction privée, importer depuis `settings.py` |
+| Symbole                                      | Ancien emplacement         | Raison                                         |
+| -------------------------------------------- | -------------------------- | ---------------------------------------------- |
+| `clear_all`                                  | `src.core.caching`         | Alias inutilisé — utiliser `cache.clear()`     |
+| `obtenir_valeurs_enum`                       | `src.core.models.base`     | Code mort, jamais appelé                       |
+| `_get_mistral_api_key_from_secrets` (export) | `src.core.config.__init__` | Fonction privée, importer depuis `loader.py`   |
+| `_read_st_secret` (export)                   | `src.core.config.__init__` | Fonction privée, importer depuis `settings.py` |
+| `_reload_env_files` (export)                 | `src.core.config.__init__` | Fonction privée, importer depuis `settings.py` |
+| `_charger_configuration` (export)            | `src.core.config.__init__` | Fonction privée, importer depuis `settings.py` |
 
 ## Notes de migration
 
 1. **Migration terminée** — les anciens shims ont été supprimés, tous les imports utilisent les sous-packages
 2. **Imports** : utiliser `src.core.db`, `src.core.caching`, `src.core.monitoring`, etc.
-3. **Tests** : les mock paths doivent cibler les sous-modules (voir tableau ci-dessus)  
+3. **Tests** : les mock paths doivent cibler les sous-modules (voir tableau ci-dessus)
 4. **date_utils** et **validation/schemas** : migration transparente via re-exports dans `__init__.py`
 5. **py.typed** : marqueur PEP 561 ajouté pour compatibilité avec mypy/pyright
 6. **Typage décorateurs** : `cached()` et `avec_cache_multi()` préservent les signatures via `ParamSpec`

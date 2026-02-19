@@ -48,6 +48,7 @@ from src.modules.cuisine.planificateur_repas.utils import (
 from src.services.core.utilisateur import get_user_preference_service
 from src.services.cuisine.planning import obtenir_service_planning
 from src.services.cuisine.recettes import obtenir_service_recettes
+from src.ui.components.atoms import etat_vide
 
 __all__ = [
     # Standard libs
@@ -88,4 +89,6 @@ __all__ = [
     "generer_prompt_alternative",
     "valider_equilibre_semaine",
     "suggerer_ajustements_equilibre",
+    # UI
+    "etat_vide",
 ]

@@ -73,9 +73,6 @@ from .weather import (
     MeteoJour,
     PlanArrosage,
     ServiceMeteo,
-    WeatherService,
-    get_weather_garden_service,
-    get_weather_service,
     obtenir_service_meteo,
 )
 
@@ -110,10 +107,7 @@ __all__ = [
     "extraire_montant",
     # Météo
     "ServiceMeteo",
-    "WeatherService",
-    "get_weather_service",
     "obtenir_service_meteo",
-    "get_weather_garden_service",
     "MeteoJour",
     "AlerteMeteo",
     "ConseilJardin",

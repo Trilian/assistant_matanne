@@ -20,10 +20,7 @@ from src.services.rapports.export import (
     obtenir_service_export_pdf,
 )
 from src.services.rapports.generation import (
-    # Alias rétrocompatibilité
-    RapportsPDFService,
     ServiceRapportsPDF,
-    get_rapports_pdf_service,
     obtenir_service_rapports_pdf,
 )
 from src.services.rapports.types import (
@@ -54,7 +51,4 @@ __all__ = [
     "obtenir_service_export_pdf",
     "ServiceRapportsPDF",
     "obtenir_service_rapports_pdf",
-    # === ALIAS RÉTROCOMPATIBILITÉ ===
-    "RapportsPDFService",
-    "get_rapports_pdf_service",
 ]

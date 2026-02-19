@@ -73,15 +73,18 @@ src/core/
 ```
 
 ### config/ — Configuration centralisée
+
 ```python
 # Pydantic BaseSettings avec chargement en cascade:
 # .env.local → .env → st.secrets → constantes
 from src.core.config import obtenir_parametres
 config = obtenir_parametres()
 ```
+
 Fichiers: `settings.py` (Parametres), `loader.py` (chargement .env, secrets Streamlit)
 
 ### db/ — Base de données
+
 ```python
 # Connexion avec QueuePool (5 connexions, max 10)
 from src.core.db import obtenir_contexte_db
@@ -89,9 +92,11 @@ from src.core.db import obtenir_contexte_db
 with obtenir_contexte_db() as session:
     result = session.query(Recette).all()
 ```
+
 Fichiers: `engine.py`, `session.py`, `migrations.py`, `utils.py`
 
 ### caching/ — Cache multi-niveaux
+
 ```python
 from src.core.caching import avec_cache_multi, obtenir_cache, cached
 
@@ -102,20 +107,24 @@ def get_recettes(): ...
 @cached(ttl=60)
 def get_data(): ...
 ```
+
 Fichiers: `base.py` (types), `memory.py` (L1), `session.py` (L2), `file.py` (L3), `orchestrator.py`, `cache.py`
 
 ### date_utils/ — Utilitaires de dates (package)
+
 ```python
 from src.core.date_utils import obtenir_debut_semaine, formater_date_fr, plage_dates
 ```
-| Module | Fonctions |
-|--------|-----------|
-| `semaines.py` | `obtenir_debut_semaine`, `obtenir_fin_semaine`, `obtenir_semaine_courante` |
-| `periodes.py` | `plage_dates`, `ajouter_jours_ouvres`, `obtenir_bornes_mois`, `obtenir_trimestre` |
-| `formatage.py` | `formater_date_fr`, `formater_jour_fr`, `formater_mois_fr`, `format_week_label` |
-| `helpers.py` | `est_aujourd_hui`, `est_weekend`, `get_weekday_index`, `get_weekday_name` |
+
+| Module         | Fonctions                                                                         |
+| -------------- | --------------------------------------------------------------------------------- |
+| `semaines.py`  | `obtenir_debut_semaine`, `obtenir_fin_semaine`, `obtenir_semaine_courante`        |
+| `periodes.py`  | `plage_dates`, `ajouter_jours_ouvres`, `obtenir_bornes_mois`, `obtenir_trimestre` |
+| `formatage.py` | `formater_date_fr`, `formater_jour_fr`, `formater_mois_fr`, `format_week_label`   |
+| `helpers.py`   | `est_aujourd_hui`, `est_weekend`, `get_weekday_index`, `get_weekday_name`         |
 
 ### validation/ — Validation & sanitization
+
 ```
 src/core/validation/
 ├── schemas/          # Package Pydantic (7 modules par domaine)
@@ -131,6 +140,7 @@ src/core/validation/
 ```
 
 ### decorators.py
+
 ```python
 @with_db_session      # Injecte automatiquement Session
 @with_cache(ttl=300)  # Cache Streamlit 5 min
@@ -138,29 +148,31 @@ src/core/validation/
 ```
 
 ### models/ — SQLAlchemy 2.0 ORM (19 fichiers)
-| Fichier | Domaine |
-|---------|---------|
-| `base.py` | Base déclarative, convention de nommage |
-| `recettes.py` | Recette, Ingredient, EtapeRecette, RecetteIngredient |
-| `inventaire.py` | ArticleInventaire, HistoriqueInventaire |
-| `courses.py` | ArticleCourses, ModeleCourses |
-| `planning.py` | Planning, Repas, CalendarEvent |
-| `famille.py` | ChildProfile, Milestone, FamilyActivity, FamilyBudget |
-| `sante.py` | HealthRoutine, HealthObjective, HealthEntry |
-| `maison.py` | Project, Routine, GardenItem |
-| `finances.py` | Depense, BudgetMensuelDB |
-| `habitat.py` | Modèles habitat/logement |
-| `jardin.py` | Modèles jardin (zones, plantes) |
-| `jeux.py` | Modèles jeux (loto, paris) |
-| `calendrier.py` | CalendrierExterne |
-| `notifications.py` | PushSubscription, alertes |
-| `batch_cooking.py` | Sessions batch cooking |
-| `temps_entretien.py` | Tâches d'entretien maison |
-| `systeme.py` | Backup, configuration système |
-| `users.py` | Utilisateurs |
-| `user_preferences.py` | Préférences utilisateur |
+
+| Fichier               | Domaine                                               |
+| --------------------- | ----------------------------------------------------- |
+| `base.py`             | Base déclarative, convention de nommage               |
+| `recettes.py`         | Recette, Ingredient, EtapeRecette, RecetteIngredient  |
+| `inventaire.py`       | ArticleInventaire, HistoriqueInventaire               |
+| `courses.py`          | ArticleCourses, ModeleCourses                         |
+| `planning.py`         | Planning, Repas, CalendarEvent                        |
+| `famille.py`          | ChildProfile, Milestone, FamilyActivity, FamilyBudget |
+| `sante.py`            | HealthRoutine, HealthObjective, HealthEntry           |
+| `maison.py`           | Project, Routine, GardenItem                          |
+| `finances.py`         | Depense, BudgetMensuelDB                              |
+| `habitat.py`          | Modèles habitat/logement                              |
+| `jardin.py`           | Modèles jardin (zones, plantes)                       |
+| `jeux.py`             | Modèles jeux (loto, paris)                            |
+| `calendrier.py`       | CalendrierExterne                                     |
+| `notifications.py`    | PushSubscription, alertes                             |
+| `batch_cooking.py`    | Sessions batch cooking                                |
+| `temps_entretien.py`  | Tâches d'entretien maison                             |
+| `systeme.py`          | Backup, configuration système                         |
+| `users.py`            | Utilisateurs                                          |
+| `user_preferences.py` | Préférences utilisateur                               |
 
 ### ai/ — Intelligence Artificielle
+
 ```python
 from src.core.ai import ClientIA, AnalyseurIA, CacheIA, RateLimitIA
 
@@ -218,20 +230,21 @@ def app():
 
 Chaque module est un sous-package avec `__init__.py` exportant `app()`:
 
-| Module | Sous-modules | Description |
-|--------|-------------|-------------|
-| `accueil/` | `dashboard.py` | Tableau de bord, métriques, alertes |
-| `cuisine/` | `recettes/`, `courses/`, `inventaire/`, `planificateur_repas/`, `batch_cooking_detaille.py` | Recettes, courses, stocks, planning repas |
-| `famille/` | `activites.py`, `routines.py`, `jules/`, `suivi_perso/`, `achats_famille/`, `weekend/`, `hub_famille.py` | Vie familiale, suivi enfant, santé |
-| `maison/` | `entretien/`, `charges/`, `depenses/`, `jardin/`, `hub/` | Habitat, entretien, dépenses |
-| `jeux/` | `loto/`, `paris/` | Loto, paris sportifs |
-| `planning/` | `calendrier/`, `timeline_ui.py`, `templates_ui.py` | Calendrier, timeline |
-| `parametres/` | `about.py`, `affichage.py`, `budget.py`, `cache.py`, `database.py`, `foyer.py`, `ia.py` | Réglages applicatifs |
-| `utilitaires/` | `barcode.py`, `rapports.py`, `notifications_push.py`, `scan_factures.py` | Outils transversaux |
+| Module         | Sous-modules                                                                                             | Description                               |
+| -------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `accueil/`     | `dashboard.py`                                                                                           | Tableau de bord, métriques, alertes       |
+| `cuisine/`     | `recettes/`, `courses/`, `inventaire/`, `planificateur_repas/`, `batch_cooking_detaille.py`              | Recettes, courses, stocks, planning repas |
+| `famille/`     | `activites.py`, `routines.py`, `jules/`, `suivi_perso/`, `achats_famille/`, `weekend/`, `hub_famille.py` | Vie familiale, suivi enfant, santé        |
+| `maison/`      | `entretien/`, `charges/`, `depenses/`, `jardin/`, `hub/`                                                 | Habitat, entretien, dépenses              |
+| `jeux/`        | `loto/`, `paris/`                                                                                        | Loto, paris sportifs                      |
+| `planning/`    | `calendrier/`, `timeline_ui.py`, `templates_ui.py`                                                       | Calendrier, timeline                      |
+| `parametres/`  | `about.py`, `affichage.py`, `budget.py`, `cache.py`, `database.py`, `foyer.py`, `ia.py`                  | Réglages applicatifs                      |
+| `utilitaires/` | `barcode.py`, `rapports.py`, `notifications_push.py`, `scan_factures.py`                                 | Outils transversaux                       |
 
 ## Sécurité
 
 ### Row Level Security (RLS)
+
 ```sql
 -- Supabase: chaque utilisateur voit ses données
 CREATE POLICY depenses_user_policy ON depenses
@@ -275,6 +288,7 @@ cache.set("clé", valeur, ttl=600)
 ```
 
 ### Cache Redis (optionnel)
+
 ```python
 from src.core.redis_cache import redis_cached
 
@@ -284,6 +298,7 @@ def get_recettes():
 ```
 
 ### Cache sémantique IA
+
 ```python
 from src.core.ai import CacheIA
 # Cache les réponses IA par similarité sémantique
@@ -293,20 +308,22 @@ from src.core.ai import CacheIA
 
 Modules de logique pure extraits pour testabilité:
 
-| Fichier | Contenu |
-|---------|---------|
+| Fichier              | Contenu                                                              |
+| -------------------- | -------------------------------------------------------------------- |
 | `activites_utils.py` | Constantes (TYPES_ACTIVITE, LIEUX), filtrage, stats, recommandations |
-| `routines_utils.py` | Constantes (JOURS_SEMAINE, MOMENTS_JOURNEE), gestion du temps, stats |
-| `utils.py` | Helpers partagés avec `@st.cache_data` |
+| `routines_utils.py`  | Constantes (JOURS_SEMAINE, MOMENTS_JOURNEE), gestion du temps, stats |
+| `utils.py`           | Helpers partagés avec `@st.cache_data`                               |
 
 ## Conventions
 
 ### Nommage (Français)
+
 - Variables: `obtenir_recettes()`, `liste_courses`
 - Classes: `GestionnaireMigrations`, `ArticleInventaire`
 - Constantes: `CATEGORIES_DEPENSE`, `TYPES_REPAS`
 
 ### Structure fichiers
+
 ```python
 """
 Docstring module

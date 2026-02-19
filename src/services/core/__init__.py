@@ -39,10 +39,6 @@ def __getattr__(name: str):
         from src.services.core.backup import obtenir_service_backup
 
         return obtenir_service_backup
-    if name == "get_backup_service":
-        from src.services.core.backup import get_backup_service
-
-        return get_backup_service
     if name == "obtenir_service_notifications":
         from src.services.core.notifications import obtenir_service_notifications
 

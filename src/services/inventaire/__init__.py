@@ -19,13 +19,8 @@ from .service import (
     # Constantes
     CATEGORIES,
     EMPLACEMENTS,
-    # Aliases rétrocompatibilité
-    InventaireService,
     # Service principal
     ServiceInventaire,
-    get_inventaire_service,
-    # Variable globale
-    inventaire_service,
     obtenir_service_inventaire,
 )
 from .types import (
@@ -40,12 +35,7 @@ __all__ = [
     # Service principal
     "ServiceInventaire",
     "obtenir_service_inventaire",
-    # Aliases rétrocompatibilité
-    "InventaireService",
-    "get_inventaire_service",
     # Constantes
     "CATEGORIES",
     "EMPLACEMENTS",
-    # Variable globale
-    "inventaire_service",
 ]

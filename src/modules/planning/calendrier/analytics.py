@@ -15,7 +15,7 @@ from datetime import date
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.ui import etat_vide
+from ._common import etat_vide
 
 logger = logging.getLogger(__name__)
 

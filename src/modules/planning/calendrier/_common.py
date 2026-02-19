@@ -40,6 +40,7 @@ from src.modules.planning.calendrier.utils import (
     get_semaine_precedente,
     get_semaine_suivante,
 )
+from src.ui.components.atoms import etat_vide
 
 logger = logging.getLogger(__name__)
 
@@ -74,4 +75,6 @@ __all__ = [
     "get_semaine_suivante",
     "construire_semaine_calendrier",
     "generer_texte_semaine_pour_impression",
+    # UI
+    "etat_vide",
 ]

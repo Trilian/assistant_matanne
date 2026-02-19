@@ -28,7 +28,8 @@ from src.services.jeux import (
     SeriesService,
     get_sync_service,
 )
-from src.ui import etat_vide
+
+from ._common import etat_vide
 
 logger = logging.getLogger(__name__)
 

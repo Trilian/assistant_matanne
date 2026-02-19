@@ -5,6 +5,7 @@ Historique des courses.
 from ._common import (
     PRIORITY_EMOJIS,
     datetime,
+    etat_vide,
     logger,
     obtenir_contexte_db,
     obtenir_service_courses,

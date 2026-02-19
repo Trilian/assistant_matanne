@@ -608,11 +608,6 @@ def obtenir_service_planning() -> ServicePlanning:
     return _service_planning
 
 
-# Alias pour rétro-compatibilité
-get_planning_service = obtenir_service_planning
-PlanningService = ServicePlanning
-
-
 # ═══════════════════════════════════════════════════════════
 # EXPORTS
 # ═══════════════════════════════════════════════════════════
@@ -621,8 +616,6 @@ PlanningService = ServicePlanning
 __all__ = [
     # Classe principale
     "ServicePlanning",
-    "PlanningService",
     # Factory
     "obtenir_service_planning",
-    "get_planning_service",
 ]

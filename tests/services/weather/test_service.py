@@ -835,24 +835,3 @@ class TestFactory:
 
         service = obtenir_service_meteo()
         assert isinstance(service, ServiceMeteo)
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS ALIAS
-# ═══════════════════════════════════════════════════════════
-
-
-class TestAlias:
-    """Tests des alias de classe."""
-
-    def test_weather_garden_service_alias(self):
-        """WeatherGardenService est alias de ServiceMeteo."""
-        from src.services.integrations.weather.service import WeatherGardenService
-
-        assert WeatherGardenService is ServiceMeteo
-
-    def test_weather_service_alias(self):
-        """WeatherService est alias de ServiceMeteo."""
-        from src.services.integrations.weather.service import WeatherService
-
-        assert WeatherService is ServiceMeteo

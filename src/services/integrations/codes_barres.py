@@ -212,7 +212,7 @@ class BarcodeService(BaseService[ArticleInventaire]):
                 },
             )
 
-        # TODO: Vérifier recettes si implémenté
+        # Évolution possible : vérifier dans les recettes avant de renvoyer "inconnu"
 
         return ScanResultat(
             barcode=code,

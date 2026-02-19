@@ -25,15 +25,12 @@ from .constantes import MAPPING_RAYONS, PRIORITES
 
 # Service de base
 from .service import (
-    CoursesService,
     ServiceCourses,
-    courses_service,
     obtenir_service_courses,
 )
 
 # Service intelligent
 from .suggestion import (
-    CoursesIntelligentesService,
     ServiceCoursesIntelligentes,
     obtenir_service_courses_intelligentes,
 )

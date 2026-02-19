@@ -46,11 +46,7 @@ from .service import (
     ServiceMeteo,
     # Types
     TypeAlertMeteo,
-    WeatherGardenService,  # Alias
-    WeatherService,  # Alias
-    get_weather_garden_service,
-    get_weather_service,
-    # Factories
+    # Factory
     obtenir_service_meteo,
 )
 from .weather_codes import (
@@ -98,12 +94,8 @@ __all__ = [
     "PlanArrosage",
     # Service
     "ServiceMeteo",
-    "WeatherGardenService",
-    "WeatherService",
     # Factories
     "obtenir_service_meteo",
-    "get_weather_service",
-    "get_weather_garden_service",
     # Utils - Conversion
     "direction_from_degrees",
     "degrees_from_direction",

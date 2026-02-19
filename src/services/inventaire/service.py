@@ -189,14 +189,6 @@ class ServiceInventaire(
 
 
 # ═══════════════════════════════════════════════════════════
-# ALIASES DE COMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
-
-# Alias pour rétrocompatibilité
-InventaireService = ServiceInventaire
-
-
-# ═══════════════════════════════════════════════════════════
 # INSTANCE SINGLETON - LAZY LOADING
 # ═══════════════════════════════════════════════════════════
 
@@ -211,20 +203,10 @@ def obtenir_service_inventaire() -> ServiceInventaire:
     return _service_inventaire
 
 
-# Alias pour rétrocompatibilité
-get_inventaire_service = obtenir_service_inventaire
-
-# Variable globale pour compatibilité
-inventaire_service: ServiceInventaire | None = None
-
-
 __all__ = [
     # Service principal
     "ServiceInventaire",
     "obtenir_service_inventaire",
-    # Aliases rétrocompatibilité
-    "InventaireService",
-    "get_inventaire_service",
     # Constantes
     "CATEGORIES",
     "EMPLACEMENTS",

@@ -359,17 +359,7 @@ def obtenir_service_courses() -> ServiceCourses:
     return _service_courses
 
 
-# Aliases pour compatibilite
-CoursesService = ServiceCourses
-get_courses_service = obtenir_service_courses
-courses_service = None
-
 __all__ = [
-    # Noms francais
     "ServiceCourses",
     "obtenir_service_courses",
-    # Aliases anglais
-    "CoursesService",
-    "get_courses_service",
-    "courses_service",
 ]

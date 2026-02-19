@@ -265,7 +265,3 @@ def obtenir_service_backup(config: BackupConfig | None = None) -> ServiceBackup:
     if _backup_service is None:
         _backup_service = ServiceBackup(config)
     return _backup_service
-
-
-# Alias pour rétrocompatibilité (utilisé par 3 modules)
-get_backup_service = obtenir_service_backup

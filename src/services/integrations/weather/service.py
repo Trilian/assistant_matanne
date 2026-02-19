@@ -524,11 +524,6 @@ class ServiceMeteo(MeteoJardinMixin):
         return config
 
 
-# Alias pour rétrocompatibilité
-WeatherGardenService = ServiceMeteo
-WeatherService = ServiceMeteo
-
-
 # ═══════════════════════════════════════════════════════════
 # FACTORY
 # ═══════════════════════════════════════════════════════════
@@ -538,18 +533,8 @@ _weather_service: ServiceMeteo | None = None
 
 
 def obtenir_service_meteo() -> ServiceMeteo:
-    """Factory pour le service météo (convention française)."""
+    """Factory pour le service météo."""
     global _weather_service
     if _weather_service is None:
         _weather_service = ServiceMeteo()
     return _weather_service
-
-
-def get_weather_service() -> ServiceMeteo:
-    """Factory pour le service météo (alias anglais)."""
-    return obtenir_service_meteo()
-
-
-def get_weather_garden_service() -> ServiceMeteo:
-    """Factory pour le service météo jardin (alias rétrocompatibilité)."""
-    return obtenir_service_meteo()

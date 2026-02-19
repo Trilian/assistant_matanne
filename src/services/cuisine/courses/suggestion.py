@@ -325,15 +325,7 @@ def obtenir_service_courses_intelligentes() -> ServiceCoursesIntelligentes:
     return _service_courses_intelligentes
 
 
-# Aliases pour compatibilite
-CoursesIntelligentesService = ServiceCoursesIntelligentes
-get_courses_intelligentes_service = obtenir_service_courses_intelligentes
-
 __all__ = [
-    # Noms francais
     "ServiceCoursesIntelligentes",
     "obtenir_service_courses_intelligentes",
-    # Aliases anglais
-    "CoursesIntelligentesService",
-    "get_courses_intelligentes_service",
 ]

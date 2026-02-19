@@ -340,21 +340,21 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 
 ## Référence des fichiers clés
 
-| Fichier                                          | Objectif                                              |
-| ------------------------------------------------ | ----------------------------------------------------- |
-| [src/core/config/](src/core/config/)             | Package configuration (Pydantic BaseSettings)         |
-| [src/core/db/](src/core/db/)                     | Package base de données (engine, sessions, migrations)|
-| [src/core/caching/](src/core/caching/)           | Package cache multi-niveaux (L1/L2/L3, @cached typé)  |
-| [src/core/date_utils/](src/core/date_utils/)     | Package utilitaires dates (semaines, periodes, formatage) |
-| [src/core/validation/](src/core/validation/)     | Package validation (schemas/ sous-package, sanitizer)  |
-| [src/core/monitoring/](src/core/monitoring/)      | Package métriques & performance                       |
-| [src/core/ai/](src/core/ai/)                     | Package IA (Mistral, rate limiting, cache sémantique) |
-| [src/core/models/](src/core/models/)             | Tous les modèles ORM SQLAlchemy (19 fichiers)         |
-| [src/core/decorators.py](src/core/decorators.py) | Utilitaires `@with_db_session`, `@with_cache`         |
-| [src/app.py](src/app.py)                         | App Streamlit principale, routage, chargement différé |
-| [pyproject.toml](pyproject.toml)                 | Dépendances (Poetry), config test, règles de linting  |
-| [alembic/env.py](alembic/env.py)                 | Configuration d'environnement des migrations          |
-| [docs/MIGRATION_CORE_PACKAGES.md](docs/MIGRATION_CORE_PACKAGES.md) | Guide de migration des imports    |
+| Fichier                                                            | Objectif                                                  |
+| ------------------------------------------------------------------ | --------------------------------------------------------- |
+| [src/core/config/](src/core/config/)                               | Package configuration (Pydantic BaseSettings)             |
+| [src/core/db/](src/core/db/)                                       | Package base de données (engine, sessions, migrations)    |
+| [src/core/caching/](src/core/caching/)                             | Package cache multi-niveaux (L1/L2/L3, @cached typé)      |
+| [src/core/date_utils/](src/core/date_utils/)                       | Package utilitaires dates (semaines, periodes, formatage) |
+| [src/core/validation/](src/core/validation/)                       | Package validation (schemas/ sous-package, sanitizer)     |
+| [src/core/monitoring/](src/core/monitoring/)                       | Package métriques & performance                           |
+| [src/core/ai/](src/core/ai/)                                       | Package IA (Mistral, rate limiting, cache sémantique)     |
+| [src/core/models/](src/core/models/)                               | Tous les modèles ORM SQLAlchemy (19 fichiers)             |
+| [src/core/decorators.py](src/core/decorators.py)                   | Utilitaires `@with_db_session`, `@with_cache`             |
+| [src/app.py](src/app.py)                                           | App Streamlit principale, routage, chargement différé     |
+| [pyproject.toml](pyproject.toml)                                   | Dépendances (Poetry), config test, règles de linting      |
+| [alembic/env.py](alembic/env.py)                                   | Configuration d'environnement des migrations              |
+| [docs/MIGRATION_CORE_PACKAGES.md](docs/MIGRATION_CORE_PACKAGES.md) | Guide de migration des imports                            |
 
 ---
 

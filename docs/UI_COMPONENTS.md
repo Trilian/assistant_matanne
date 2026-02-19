@@ -1,37 +1,49 @@
 # Référence des Composants UI
 
 Guide complet des composants UI réutilisables de l'application.
+Tous les noms suivent la convention française : `afficher_*`, `obtenir_*`, `definir_*`.
 
 ## Architecture
 
 ```
 src/ui/
-├── __init__.py          # Point d'entrée unifié
-├── components/          # Composants UI réutilisables
-│   ├── atoms.py         # Badge, état vide, etc.
+├── __init__.py          # Point d'entrée unifié (~90 exports)
+├── components/          # Composants UI réutilisables (27 exports)
+│   ├── atoms.py         # Badge, état vide, notification, etc.
 │   ├── alertes.py       # Alertes stock
 │   ├── charts.py        # Graphiques Plotly
-│   ├── data.py          # Pagination, tableaux
-│   ├── dynamic.py       # Modale, listes dynamiques
-│   ├── forms.py         # Formulaires, recherche
-│   ├── layouts.py       # Grilles, cartes, sections
+│   ├── data.py          # Pagination, tableaux, export
+│   ├── dynamic.py       # Modale
+│   ├── forms.py         # Formulaires, recherche, filtres
+│   ├── layouts.py       # Grilles, cartes
 │   ├── metrics.py       # Cartes métriques avancées
 │   └── system.py        # Santé système, timeline
-├── core/                # Modules CRUD génériques
-│   ├── module_config.py # Configuration module
-│   ├── crud_renderer.py # Rendu CRUD automatique
-│   ├── base_form.py     # Constructeur formulaires
-│   └── base_io.py       # Import/export
-├── feedback/            # Notifications, spinners
+├── feedback/            # Notifications, spinners (10 exports)
 │   ├── spinners.py      # Indicateurs chargement
+│   ├── progress.py      # Suivi progression
 │   └── toasts.py        # Notifications temporaires
-├── layout/              # Header, sidebar, footer
-├── tablet/              # Mode tablette/cuisine
-│   ├── config.py        # TabletMode enum
+├── layout/              # Header, sidebar, footer (6 exports, app-level)
+│   ├── header.py        # En-tête application
+│   ├── sidebar.py       # Barre latérale + menu
+│   ├── footer.py        # Pied de page
+│   ├── styles.py        # Injection CSS
+│   └── init.py          # Initialisation app
+├── tablet/              # Mode tablette/cuisine (13 exports)
+│   ├── config.py        # ModeTablette enum
 │   ├── styles.py        # CSS tablette
 │   ├── widgets.py       # Boutons tactiles
 │   └── kitchen.py       # Vue recette cuisine
-└── integrations/        # Intégrations externes
+├── views/               # Vues extraites des services (21 exports)
+│   ├── authentification.py  # Connexion, profil, rôles
+│   ├── historique.py        # Timeline activité
+│   ├── import_recettes.py   # Import URL/PDF
+│   ├── jeux.py              # Notifications jeux/paris
+│   ├── meteo.py             # Météo jardin
+│   ├── notifications.py     # Push notifications
+│   ├── pwa.py               # Meta tags PWA
+│   ├── sauvegarde.py        # Backup/restauration
+│   └── synchronisation.py   # Présence, frappe, PWA install
+└── integrations/        # Intégrations externes (6 exports)
     └── google_calendar.py
 ```
 
@@ -152,35 +164,6 @@ data = [
     {"categorie": "Légumes", "quantite": 20},
 ]
 graphique_inventaire_categories(data)
-```
-
-### `graphique_activite_semaine(data)`
-
-Courbe d'activité sur 7 jours.
-
-```python
-from src.ui.components import graphique_activite_semaine
-
-data = [
-    {"jour": "Lun", "activites": 5},
-    {"jour": "Mar", "activites": 3},
-    # ...
-]
-graphique_activite_semaine(data)
-```
-
-### `graphique_progression_objectifs(data)`
-
-Barres de progression vers objectifs.
-
-```python
-from src.ui.components import graphique_progression_objectifs
-
-data = [
-    {"objectif": "Sport", "progression": 75, "cible": 100},
-    {"objectif": "Lecture", "progression": 50, "cible": 60},
-]
-graphique_progression_objectifs(data)
 ```
 
 ---
@@ -384,18 +367,6 @@ from src.ui.components import barre_progression
 barre_progression(75, 100, "Progression")
 ```
 
-### `indicateur_statut(statut, texte)`
-
-Indicateur de statut coloré.
-
-```python
-from src.ui.components import indicateur_statut
-
-indicateur_statut("success", "Connecté")
-indicateur_statut("error", "Déconnecté")
-indicateur_statut("warning", "En attente")
-```
-
 ---
 
 ## Layouts (layouts.py)
@@ -428,38 +399,6 @@ carte_item(
     url_image="https://...",
     actions=[("Voir", lambda: ...)]
 )
-```
-
-### `section_pliable(titre, contenu, ouverte)`
-
-Section accordéon.
-
-```python
-from src.ui.components import section_pliable
-
-with section_pliable("Détails", ouverte=False):
-    st.write("Contenu caché par défaut")
-```
-
-### `disposition_onglets(onglets)`
-
-Onglets personnalisés.
-
-```python
-from src.ui.components import disposition_onglets
-
-tab = disposition_onglets(["Vue", "Édition", "Historique"])
-```
-
-### `conteneur_carte(titre, icone)`
-
-Conteneur carte avec header.
-
-```python
-from src.ui.components import conteneur_carte
-
-with conteneur_carte("Statistiques", "📊"):
-    st.metric("Total", 42)
 ```
 
 ---

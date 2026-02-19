@@ -11,7 +11,7 @@
 | **[API_REFERENCE.md](./API_REFERENCE.md)**                       | **Référence complète de l'API REST**   |
 | **[SERVICES_REFERENCE.md](./SERVICES_REFERENCE.md)**             | **Documentation des services backend** |
 | **[ARCHITECTURE.md](./ARCHITECTURE.md)**                         | Architecture technique                 |
-| **[MIGRATION_CORE_PACKAGES.md](./MIGRATION_CORE_PACKAGES.md)**  | **Guide migration imports core**       |
+| **[MIGRATION_CORE_PACKAGES.md](./MIGRATION_CORE_PACKAGES.md)**   | **Guide migration imports core**       |
 | **[FONCTIONNALITES.md](./FONCTIONNALITES.md)**                   | Fonctionnalités détaillées             |
 | **[SQLALCHEMY_SESSION_GUIDE.md](./SQLALCHEMY_SESSION_GUIDE.md)** | Guide sessions DB                      |
 | **[ERD_SCHEMA.md](./ERD_SCHEMA.md)**                             | Schéma entité-relation                 |
@@ -128,16 +128,16 @@ pytest tests/ --cov=src --cov-report=html
 
 ### 📚 Documentation (docs/)
 
-| Fichier | Contenu |
-|---------|---------|
-| `ARCHITECTURE.md` | Architecture technique (core, services, modules) |
-| `API_REFERENCE.md` | Référence API REST FastAPI |
-| `SERVICES_REFERENCE.md` | Documentation services backend |
-| `MIGRATION_CORE_PACKAGES.md` | Guide migration imports core |
-| `FONCTIONNALITES.md` | Fonctionnalités détaillées |
-| `SQLALCHEMY_SESSION_GUIDE.md` | Guide sessions DB |
-| `ERD_SCHEMA.md` | Schéma entité-relation |
-| `UI_COMPONENTS.md` | Composants UI Streamlit |
+| Fichier                       | Contenu                                          |
+| ----------------------------- | ------------------------------------------------ |
+| `ARCHITECTURE.md`             | Architecture technique (core, services, modules) |
+| `API_REFERENCE.md`            | Référence API REST FastAPI                       |
+| `SERVICES_REFERENCE.md`       | Documentation services backend                   |
+| `MIGRATION_CORE_PACKAGES.md`  | Guide migration imports core                     |
+| `FONCTIONNALITES.md`          | Fonctionnalités détaillées                       |
+| `SQLALCHEMY_SESSION_GUIDE.md` | Guide sessions DB                                |
+| `ERD_SCHEMA.md`               | Schéma entité-relation                           |
+| `UI_COMPONENTS.md`            | Composants UI Streamlit                          |
 
 ### 📊 Données (data/)
 
@@ -198,6 +198,7 @@ pytest tests/modules/ -v
 5. `/ROADMAP.md` - Plan de développement
 
 **Structure du core (`src/core/`):**
+
 - 7 sous-packages: `ai/`, `caching/`, `config/`, `date_utils/`, `db/`, `models/`, `validation/`
 - Fichiers utilitaires: `constants.py`, `decorators.py`, `errors.py`, `state.py`, `logging.py`
 - Marqueur typing: `py.typed` (PEP 561)

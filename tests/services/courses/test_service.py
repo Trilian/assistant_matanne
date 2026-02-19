@@ -168,8 +168,8 @@ class TestServiceCoursesCreation:
                 service2 = obtenir_service_courses()
                 assert service1 is service2
 
-    def test_alias_get_courses_service(self, mock_client_ia):
-        """Test alias anglais."""
+    def test_factory_returns_instance(self, mock_client_ia):
+        """Test factory retourne une instance ServiceCourses."""
         with patch(
             "src.services.cuisine.courses.service.obtenir_client_ia", return_value=mock_client_ia
         ):
