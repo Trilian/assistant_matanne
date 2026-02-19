@@ -686,6 +686,17 @@ def get_action_history_service() -> ActionHistoryService:
     return obtenir_service_historique_actions()
 
 
+# Ré-exports UI — fonctions view rétrocompatibles
+from src.ui.views.historique import (
+    afficher_activite_utilisateur as afficher_user_activity,
+)
+from src.ui.views.historique import (
+    afficher_statistiques_activite as afficher_activity_stats,
+)
+from src.ui.views.historique import (
+    afficher_timeline_activite as afficher_activity_timeline,
+)
+
 __all__ = [
     "ActionHistoryService",
     "obtenir_service_historique_actions",

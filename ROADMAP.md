@@ -1,6 +1,34 @@
 # 🗺️ ROADMAP - Assistant Matanne
 
-> Dernière mise à jour: 18 février 2026
+> Dernière mise à jour: 19 février 2026
+
+---
+
+## ✅ Terminé (Session 19 février)
+
+### 🎯 AMÉLIORATION COUVERTURE TESTS
+
+Session focalisée sur l'augmentation de la couverture de tests avec 137 nouveaux tests.
+
+#### Tests Loto (49 tests)
+
+| Fichier                                      | Tests | Description                                                                                                            |
+| -------------------------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------- |
+| `tests/modules/jeux/loto/test_calculs.py`    | 23    | Tests `verifier_grille`, `calculer_esperance_mathematique`                                                             |
+| `tests/modules/jeux/loto/test_frequences.py` | 26    | Tests `calculer_frequences_numeros`, `calculer_ecart`, `identifier_numeros_chauds_froids`, `analyser_patterns_tirages` |
+
+#### Tests Famille Utils (88 tests)
+
+| Fichier                                         | Tests | Description                                                                                     |
+| ----------------------------------------------- | ----- | ----------------------------------------------------------------------------------------------- |
+| `tests/modules/famille/test_routines_utils.py`  | 49    | Tests complets des utilitaires routines (filtrage, statistiques, conflits horaires, régularité) |
+| `tests/modules/famille/test_activites_utils.py` | 39    | Tests complets des utilitaires activités (filtrage, statistiques, recommandations, validation)  |
+
+#### Nettoyage dette technique
+
+- Commit `deea911`: Nettoyage fichiers modifiés (service.py mixin refactor, chemins tests)
+- Suppression tests obsolètes (`test_calendar_sync_ui.py`)
+- Correction tests loto (assertions froids, gestion None)
 
 ---
 
@@ -246,17 +274,17 @@ streamlit run src/app.py
 
 ## 📊 Métriques projet
 
-| Métrique              | Actuel        | Objectif | Status           |
-| --------------------- | ------------- | -------- | ---------------- |
-| Tests collectés       | **8 661**     | ✅       | ✅               |
-| Tests passés          | **8 115**     | 100%     | 🟡 93.7%         |
-| Tests en échec        | **507**       | 0        | 🔴 5.9%          |
-| Couverture tests      | **~70%**      | 80%      | 🟢 (était 28%)   |
-| Lint (ruff)           | **2 issues**  | 0        | 🟡 auto-fixable  |
-| Fichiers 0% coverage  | **22**        | 0        | 🟡 2758 stmts    |
-| Temps démarrage       | ~1.5s         | <1.5s    | ✅               |
-| Tables SQL            | 35            | ✅       | ✅               |
-| Services              | 30+           | ✅       | ✅               |
+| Métrique             | Actuel       | Objectif | Status          |
+| -------------------- | ------------ | -------- | --------------- |
+| Tests collectés      | **8 661**    | ✅       | ✅              |
+| Tests passés         | **8 115**    | 100%     | 🟡 93.7%        |
+| Tests en échec       | **507**      | 0        | 🔴 5.9%         |
+| Couverture tests     | **~70%**     | 80%      | 🟢 (était 28%)  |
+| Lint (ruff)          | **2 issues** | 0        | 🟡 auto-fixable |
+| Fichiers 0% coverage | **22**       | 0        | 🟡 2758 stmts   |
+| Temps démarrage      | ~1.5s        | <1.5s    | ✅              |
+| Tables SQL           | 35           | ✅       | ✅              |
+| Services             | 30+          | ✅       | ✅              |
 
 ---
 

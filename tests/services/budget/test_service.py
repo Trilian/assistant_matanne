@@ -94,12 +94,9 @@ class TestGetBudgetService:
 class TestAjouterDepense:
     """Tests pour ajouter_depense."""
 
-    @patch("src.services.famille.budget.service.obtenir_contexte_db")
-    def test_ajouter_depense_simple(self, mock_db_ctx):
+    def test_ajouter_depense_simple(self):
         """Ajout d'une dépense simple."""
         mock_session = MagicMock()
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
 
         service = BudgetService()
         depense = Depense(
@@ -121,8 +118,7 @@ class TestAjouterDepense:
         assert mock_session.add.called
         assert mock_session.commit.called
 
-    @patch("src.services.famille.budget.service.obtenir_contexte_db")
-    def test_ajouter_depense_recurrente(self, mock_db_ctx):
+    def test_ajouter_depense_recurrente(self):
         """Ajout d'une dépense récurrente."""
         mock_session = MagicMock()
 
@@ -421,12 +417,9 @@ class TestGetTendances:
 class TestPrevoirDepenses:
     """Tests pour prevoir_depenses."""
 
-    @patch("src.services.famille.budget.service.obtenir_contexte_db")
-    def test_prevoir_depenses(self, mock_db_ctx):
+    def test_prevoir_depenses(self):
         """Génère des prévisions."""
         mock_session = MagicMock()
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
 
         service = BudgetService()
 

@@ -512,7 +512,7 @@ class TestGetSupabaseClient:
     def test_get_supabase_client_not_configured(self, service):
         """Retourne None si Supabase non configuré."""
         with patch(
-            "src.services.notifications.notif_web.ServiceWebPush._get_supabase_client"
+            "src.services.core.notifications.notif_web.ServiceWebPush._get_supabase_client"
         ) as mock:
             mock.return_value = None
             result = service._get_supabase_client()

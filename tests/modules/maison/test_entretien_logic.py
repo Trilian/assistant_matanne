@@ -92,7 +92,9 @@ class TestBadgesEntretien:
 class TestGenererTachesEntretien:
     """Tests pour generer_taches_entretien."""
 
-    @patch("src.modules.maison.entretien.logic.charger_catalogue_entretien")
+    @patch(
+        "src.services.maison.entretien_gamification_mixin.EntretienGamificationMixin.charger_catalogue_entretien"
+    )
     def test_sans_objets(self, mock_catalogue):
         """Test génération sans objets."""
         mock_catalogue.return_value = {"categories": {}}
@@ -102,7 +104,9 @@ class TestGenererTachesEntretien:
         taches = generer_taches_entretien([], [])
         assert taches == []
 
-    @patch("src.modules.maison.entretien.logic.charger_catalogue_entretien")
+    @patch(
+        "src.services.maison.entretien_gamification_mixin.EntretienGamificationMixin.charger_catalogue_entretien"
+    )
     def test_avec_objet_sans_historique(self, mock_catalogue):
         """Test tâche créée si jamais fait."""
         mock_catalogue.return_value = {
@@ -134,7 +138,9 @@ class TestGenererTachesEntretien:
         assert taches[0]["tache_nom"] == "Nettoyer filtre"
         assert taches[0]["priorite"] in ["urgente", "haute", "moyenne"]
 
-    @patch("src.modules.maison.entretien.logic.charger_catalogue_entretien")
+    @patch(
+        "src.services.maison.entretien_gamification_mixin.EntretienGamificationMixin.charger_catalogue_entretien"
+    )
     def test_historique_recent(self, mock_catalogue):
         """Test pas de tâche si fait récemment."""
         mock_catalogue.return_value = {
@@ -165,7 +171,9 @@ class TestGenererTachesEntretien:
 
         assert len(taches) == 0
 
-    @patch("src.modules.maison.entretien.logic.charger_catalogue_entretien")
+    @patch(
+        "src.services.maison.entretien_gamification_mixin.EntretienGamificationMixin.charger_catalogue_entretien"
+    )
     def test_historique_ancien(self, mock_catalogue):
         """Test tâche créée si historique ancien."""
         mock_catalogue.return_value = {
@@ -197,7 +205,9 @@ class TestGenererTachesEntretien:
 
         assert len(taches) == 1
 
-    @patch("src.modules.maison.entretien.logic.charger_catalogue_entretien")
+    @patch(
+        "src.services.maison.entretien_gamification_mixin.EntretienGamificationMixin.charger_catalogue_entretien"
+    )
     def test_tri_priorite(self, mock_catalogue):
         """Test tri par priorité."""
         mock_catalogue.return_value = {
@@ -236,7 +246,9 @@ class TestGenererTachesEntretien:
         # Les duas doivent être générées
         assert len(taches) == 2
 
-    @patch("src.modules.maison.entretien.logic.charger_catalogue_entretien")
+    @patch(
+        "src.services.maison.entretien_gamification_mixin.EntretienGamificationMixin.charger_catalogue_entretien"
+    )
     def test_tache_saisonniere(self, mock_catalogue):
         """Test tâche saisonnière ignorée hors saison."""
         mois_actuel = datetime.now().month
@@ -271,7 +283,9 @@ class TestGenererTachesEntretien:
         # Tâche ignorée car hors saison
         assert len(taches) == 0
 
-    @patch("src.modules.maison.entretien.logic.charger_catalogue_entretien")
+    @patch(
+        "src.services.maison.entretien_gamification_mixin.EntretienGamificationMixin.charger_catalogue_entretien"
+    )
     def test_structure_tache_generee(self, mock_catalogue):
         """Test structure complète d'une tâche générée."""
         mock_catalogue.return_value = {
@@ -312,7 +326,9 @@ class TestGenererTachesEntretien:
         assert "priorite" in tache
         assert "retard_jours" in tache
 
-    @patch("src.modules.maison.entretien.logic.charger_catalogue_entretien")
+    @patch(
+        "src.services.maison.entretien_gamification_mixin.EntretienGamificationMixin.charger_catalogue_entretien"
+    )
     def test_objet_inconnu_ignore(self, mock_catalogue):
         """Test que les objets inconnus sont ignorés."""
         mock_catalogue.return_value = {

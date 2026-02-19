@@ -682,6 +682,53 @@ def generate_icon_svg(size: int = 512) -> str:
     """
 
 
+# ═══════════════════════════════════════════════════════════
+# RE-EXPORTS UI (rétrocompatibilité)
+# ═══════════════════════════════════════════════════════════
+
+
+def inject_pwa_meta() -> None:
+    """Injecte les meta tags PWA (délègue à src.ui.views.pwa)."""
+    from src.ui.views.pwa import injecter_meta_pwa
+
+    injecter_meta_pwa()
+
+
+def afficher_install_prompt() -> None:
+    """Affiche le bouton d'installation PWA."""
+    import streamlit.components.v1 as components
+
+    install_html = """
+    <div id="pwa-install-container" style="text-align: center; padding: 10px;">
+        <button id="pwa-install-btn" onclick="installPWA()"
+                style="background: linear-gradient(135deg, #667eea, #764ba2);
+                       color: white; border: none; padding: 12px 24px;
+                       border-radius: 8px; cursor: pointer; font-size: 16px;">
+            📱 Installer l'application
+        </button>
+    </div>
+    <script>
+        let deferredPrompt;
+        const installBtn = document.getElementById('pwa-install-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        async function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('Install outcome:', outcome);
+                deferredPrompt = null;
+            }
+        }
+    </script>
+    """
+    components.html(install_html, height=80)
+
+
 __all__ = [
     "PWA_CONFIG",
     "generate_manifest",
@@ -690,4 +737,6 @@ __all__ = [
     "generate_pwa_files",
     "is_pwa_installed",
     "generate_icon_svg",
+    "inject_pwa_meta",
+    "afficher_install_prompt",
 ]

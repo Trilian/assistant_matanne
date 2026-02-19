@@ -22,6 +22,17 @@ from typing import Any
 
 import streamlit as st
 
+# Ré-exports UI — fonctions view rétrocompatibles
+from src.ui.views.authentification import (
+    afficher_formulaire_connexion as afficher_login_form,
+)
+from src.ui.views.authentification import (
+    afficher_menu_utilisateur as afficher_user_menu,
+)
+from src.ui.views.authentification import (
+    afficher_parametres_profil as afficher_profile_settings,
+)
+
 # Ré-exports pour rétrocompatibilité
 from .auth_permissions import ROLE_PERMISSIONS, PermissionsMixin
 from .auth_profile import ProfileMixin

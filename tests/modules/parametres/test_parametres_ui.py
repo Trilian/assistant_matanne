@@ -55,8 +55,8 @@ class TestParametresUI:
         mock_st.title.assert_called()
         mock_st.tabs.assert_called()  # Navigation par onglets
 
-    @patch("src.modules.parametres.obtenir_etat")
-    @patch("src.modules.parametres.st")
+    @patch("src.modules.parametres.foyer.obtenir_etat")
+    @patch("src.modules.parametres.foyer.st")
     def test_render_foyer_config(self, mock_st, mock_etat) -> None:
         """Test config foyer."""
         from src.modules.parametres import afficher_foyer_config
@@ -70,8 +70,8 @@ class TestParametresUI:
         afficher_foyer_config()
         mock_st.markdown.assert_called()
 
-    @patch("src.modules.parametres.get_settings")
-    @patch("src.modules.parametres.st")
+    @patch("src.modules.parametres.ia.get_settings")
+    @patch("src.modules.parametres.ia.st")
     def test_render_ia_config(self, mock_st, mock_settings) -> None:
         """Test config IA."""
         from src.modules.parametres import afficher_ia_config
@@ -85,9 +85,9 @@ class TestParametresUI:
         afficher_ia_config()
         mock_st.markdown.assert_called()
 
-    @patch("src.modules.parametres.get_db_info")
-    @patch("src.modules.parametres.health_check")
-    @patch("src.modules.parametres.st")
+    @patch("src.modules.parametres.database.get_db_info")
+    @patch("src.modules.parametres.database.health_check")
+    @patch("src.modules.parametres.database.st")
     def test_render_database_config(self, mock_st, mock_health, mock_info) -> None:
         """Test config database."""
         from src.modules.parametres import afficher_database_config
@@ -99,9 +99,9 @@ class TestParametresUI:
         afficher_database_config()
         mock_st.markdown.assert_called()
 
-    @patch("src.modules.parametres.Cache")
-    @patch("src.modules.parametres.SemanticCache")
-    @patch("src.modules.parametres.st")
+    @patch("src.modules.parametres.cache.Cache")
+    @patch("src.modules.parametres.cache.SemanticCache")
+    @patch("src.modules.parametres.cache.st")
     def test_render_cache_config(self, mock_st, mock_sem, mock_cache) -> None:
         """Test config cache."""
         from src.modules.parametres import afficher_cache_config
@@ -111,7 +111,7 @@ class TestParametresUI:
         afficher_cache_config()
         mock_st.markdown.assert_called()
 
-    @patch("src.modules.parametres.st")
+    @patch("src.modules.parametres.affichage.st")
     def test_render_display_config(self, mock_st) -> None:
         """Test config affichage."""
         from src.modules.parametres import afficher_display_config
@@ -129,7 +129,7 @@ class TestParametresUI:
 
         assert callable(afficher_budget_config)
 
-    @patch("src.modules.parametres.st")
+    @patch("src.modules.parametres.about.st")
     def test_render_about(self, mock_st) -> None:
         """Test page a propos."""
         from src.modules.parametres import afficher_about

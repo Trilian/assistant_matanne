@@ -183,7 +183,7 @@ class TestServiceCreation:
     def test_creation_service(self, mock_client_ia):
         """Test création du service."""
         with patch(
-            "src.services.courses.suggestion.obtenir_client_ia", return_value=mock_client_ia
+            "src.services.cuisine.courses.suggestion.obtenir_client_ia", return_value=mock_client_ia
         ):
             service = ServiceCoursesIntelligentes()
             assert service is not None
@@ -197,7 +197,7 @@ class TestServiceCreation:
     def test_factory_obtenir_service(self, mock_client_ia):
         """Test factory function."""
         with patch(
-            "src.services.courses.suggestion.obtenir_client_ia", return_value=mock_client_ia
+            "src.services.cuisine.courses.suggestion.obtenir_client_ia", return_value=mock_client_ia
         ):
             with patch(
                 "src.services.cuisine.courses.suggestion._service_courses_intelligentes", None
@@ -208,7 +208,7 @@ class TestServiceCreation:
     def test_factory_singleton(self, mock_client_ia):
         """Test factory retourne même instance."""
         with patch(
-            "src.services.courses.suggestion.obtenir_client_ia", return_value=mock_client_ia
+            "src.services.cuisine.courses.suggestion.obtenir_client_ia", return_value=mock_client_ia
         ):
             with patch(
                 "src.services.cuisine.courses.suggestion._service_courses_intelligentes", None
@@ -220,7 +220,7 @@ class TestServiceCreation:
     def test_alias_get_courses_intelligentes_service(self, mock_client_ia):
         """Test alias anglais."""
         with patch(
-            "src.services.courses.suggestion.obtenir_client_ia", return_value=mock_client_ia
+            "src.services.cuisine.courses.suggestion.obtenir_client_ia", return_value=mock_client_ia
         ):
             with patch(
                 "src.services.cuisine.courses.suggestion._service_courses_intelligentes", None

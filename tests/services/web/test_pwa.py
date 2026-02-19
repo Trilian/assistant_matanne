@@ -144,7 +144,7 @@ class TestInjectPwaMeta:
 class TestRenderInstallPrompt:
     """Tests pour afficher_install_prompt."""
 
-    @patch("src.ui.views.synchronisation.components", create=True)
+    @patch("streamlit.components.v1")
     def test_render_install_calls_components(self, mock_components):
         """Test appel de components.html."""
         from src.services.integrations.web.pwa import afficher_install_prompt
