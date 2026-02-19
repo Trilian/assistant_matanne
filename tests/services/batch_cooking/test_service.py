@@ -23,11 +23,9 @@ from src.core.models import (
     StatutSessionEnum,
 )
 from src.services.cuisine.batch_cooking import (
-    BatchCookingService,
     EtapeBatchIA,
     ServiceBatchCooking,
     SessionBatchIA,
-    get_batch_cooking_service,
     obtenir_service_batch_cooking,
 )
 
@@ -62,7 +60,7 @@ class TestObtenirSessionWithResult:
         """obtenir_session retourne la session si elle existe."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # 1. Créer une session
         session = service.creer_session(
@@ -96,7 +94,7 @@ class TestObtenirSessionsPlanifieesWithFilters:
         """obtenir_sessions_planifiees retourne les sessions planifiées."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer des sessions
         for i in range(3):
@@ -116,7 +114,7 @@ class TestObtenirSessionsPlanifieesWithFilters:
         """obtenir_sessions_planifiees filtre par date_debut."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer une session pour dans 5 jours
         tomorrow = date.today() + timedelta(days=5)
@@ -135,7 +133,7 @@ class TestObtenirSessionsPlanifieesWithFilters:
         """obtenir_sessions_planifiees filtre par date_fin."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer une session pour dans 10 jours
         future = date.today() + timedelta(days=10)
@@ -154,7 +152,7 @@ class TestObtenirSessionsPlanifieesWithFilters:
         """obtenir_sessions_planifiees filtre par date_debut ET date_fin."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer une session
         target_date = date.today() + timedelta(days=7)
@@ -197,7 +195,7 @@ class TestSuggererRecettesBatch:
             patched_db_context.add(recette)
         patched_db_context.commit()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
         result = service.suggerer_recettes_batch(nb_recettes=3, db=patched_db_context)
 
         assert isinstance(result, list)
@@ -219,7 +217,7 @@ class TestSuggererRecettesBatch:
         patched_db_context.add(recette)
         patched_db_context.commit()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
         result = service.suggerer_recettes_batch(
             nb_recettes=3, robots_disponibles=["cookeo"], db=patched_db_context
         )
@@ -244,7 +242,7 @@ class TestSuggererRecettesBatch:
         patched_db_context.add(recette)
         patched_db_context.commit()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
         result = service.suggerer_recettes_batch(
             nb_recettes=3, robots_disponibles=["monsieur_cuisine"], db=patched_db_context
         )
@@ -267,7 +265,7 @@ class TestSuggererRecettesBatch:
         patched_db_context.add(recette)
         patched_db_context.commit()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
         result = service.suggerer_recettes_batch(
             nb_recettes=3, robots_disponibles=["airfryer"], db=patched_db_context
         )
@@ -291,7 +289,7 @@ class TestSuggererRecettesBatch:
         patched_db_context.add(recette)
         patched_db_context.commit()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
         result = service.suggerer_recettes_batch(
             nb_recettes=3, avec_jules=True, db=patched_db_context
         )
@@ -315,7 +313,7 @@ class TestAttribuerPreparationsPlanning:
         """attribuer_preparations_planning retourne None si session non trouvée."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
         result = service.attribuer_preparations_planning(session_id=99999, db=patched_db_context)
 
         assert result is None
@@ -325,7 +323,7 @@ class TestAttribuerPreparationsPlanning:
         """attribuer_preparations_planning retourne None si pas de planning associé."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer une session SANS planning_id
         session = service.creer_session(
@@ -349,7 +347,7 @@ class TestAttribuerPreparationsPlanning:
         """attribuer_preparations_planning avec planning existant."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # 1. Créer un planning
         today = date.today()
@@ -417,7 +415,7 @@ class TestTerminerSessionBranches:
         """terminer_session sans étapes (branche session.etapes vide)."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer session sans étapes
         session = service.creer_session(
@@ -443,7 +441,7 @@ class TestTerminerSessionBranches:
         """terminer_session lève ErreurValidation si session pas EN_COURS."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer session (statut PLANIFIEE)
         session = service.creer_session(
@@ -472,7 +470,7 @@ class TestDemarrerSessionBranches:
         """demarrer_session lève ErreurValidation si session pas PLANIFIEE."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer et démarrer session
         session = service.creer_session(
@@ -531,7 +529,7 @@ class TestGenererPlanIABranches:
         patched_db_context.commit()
         patched_db_context.refresh(recette)
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Appel - le mock devrait retourner le résultat
         result = service.generer_plan_ia(
@@ -571,13 +569,6 @@ class TestFactoryFunctions:
         # Cleanup
         svc_module._service_batch_cooking = None
 
-    @patch("src.services.cuisine.batch_cooking.service.obtenir_client_ia")
-    def test_alias_batch_cooking_service(self, mock_client):
-        """BatchCookingService est un alias de ServiceBatchCooking."""
-        mock_client.return_value = Mock()
-
-        assert BatchCookingService is ServiceBatchCooking
-
 
 # ═══════════════════════════════════════════════════════════
 # TESTS - CRÉATION PRÉPARATION COMPLÈTE
@@ -604,7 +595,7 @@ class TestCreerPreparationComplete:
         patched_db_context.commit()
         patched_db_context.refresh(recette)
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         result = service.creer_preparation(
             nom="Préparation complète",
@@ -639,7 +630,7 @@ class TestUpdateConfigComplete:
         """update_config avec tous les paramètres."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer une config d'abord
         service.get_config(db=patched_db_context)
@@ -664,7 +655,7 @@ class TestUpdateConfigComplete:
         """update_config crée une nouvelle config si inexistante."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         result = service.update_config(jours_batch=[4], db=patched_db_context)
 
@@ -685,7 +676,7 @@ class TestGetSessionActive:
         """get_session_active retourne None si aucune session active."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         result = service.get_session_active(db=patched_db_context)
 
@@ -696,7 +687,7 @@ class TestGetSessionActive:
         """get_session_active retourne la session EN_COURS."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer et démarrer une session
         session = service.creer_session(
@@ -728,7 +719,7 @@ class TestDemarrerSessionNotFound:
         """demarrer_session lève ErreurNonTrouve si session inexistante."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         with pytest.raises(ErreurNonTrouve):
             service.demarrer_session(session_id=99999, db=patched_db_context)
@@ -748,7 +739,7 @@ class TestTerminerSessionNotFound:
         """terminer_session lève ErreurNonTrouve si session inexistante."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         with pytest.raises(ErreurNonTrouve):
             service.terminer_session(session_id=99999, db=patched_db_context)
@@ -768,7 +759,7 @@ class TestAjouterEtapes:
         """ajouter_etapes ajoute les étapes à la session."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         session = service.creer_session(
             date_session=date.today(), recettes_ids=[1], db=patched_db_context
@@ -812,7 +803,7 @@ class TestAjouterEtapes:
         """ajouter_etapes lève ErreurNonTrouve si session inexistante."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         with pytest.raises(ErreurNonTrouve):
             service.ajouter_etapes(
@@ -834,7 +825,7 @@ class TestDemarrerEtape:
         """demarrer_etape lève ErreurNonTrouve si étape inexistante."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         with pytest.raises(ErreurNonTrouve):
             service.demarrer_etape(etape_id=99999, db=patched_db_context)
@@ -844,7 +835,7 @@ class TestDemarrerEtape:
         """demarrer_etape démarre l'étape correctement."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer session et ajouter étapes
         session = service.creer_session(
@@ -887,7 +878,7 @@ class TestTerminerEtape:
         """terminer_etape lève ErreurNonTrouve si étape inexistante."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         with pytest.raises(ErreurNonTrouve):
             service.terminer_etape(etape_id=99999, db=patched_db_context)
@@ -897,7 +888,7 @@ class TestTerminerEtape:
         """terminer_etape termine l'étape correctement."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer session et ajouter étapes
         session = service.creer_session(
@@ -941,7 +932,7 @@ class TestPasserEtape:
         """passer_etape lève ErreurNonTrouve si étape inexistante."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         with pytest.raises(ErreurNonTrouve):
             service.passer_etape(etape_id=99999, db=patched_db_context)
@@ -951,7 +942,7 @@ class TestPasserEtape:
         """passer_etape saute l'étape correctement."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         session = service.creer_session(
             date_session=date.today(), recettes_ids=[1], db=patched_db_context
@@ -992,7 +983,7 @@ class TestGetPreparations:
         """get_preparations retourne liste vide si aucune préparation."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         result = service.get_preparations(db=patched_db_context)
 
@@ -1003,7 +994,7 @@ class TestGetPreparations:
         """get_preparations filtre par localisation."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer des préparations avec différentes localisations
         service.creer_preparation(
@@ -1033,7 +1024,7 @@ class TestGetPreparations:
         """get_preparations filtre par consommees."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         result = service.get_preparations(consommees=True, db=patched_db_context)
 
@@ -1054,7 +1045,7 @@ class TestGetPreparationsAlertes:
         """get_preparations_alertes retourne liste vide si pas d'alertes."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer une préparation qui n'expire pas bientôt
         service.creer_preparation(
@@ -1075,7 +1066,7 @@ class TestGetPreparationsAlertes:
         """get_preparations_alertes retourne les préparations à risque."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer une préparation qui expire dans 1 jour
         service.creer_preparation(
@@ -1105,7 +1096,7 @@ class TestConsommerPreparation:
         """consommer_preparation lève ErreurNonTrouve si préparation inexistante."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         with pytest.raises(ErreurNonTrouve):
             service.consommer_preparation(preparation_id=99999, portions=1, db=patched_db_context)
@@ -1115,7 +1106,7 @@ class TestConsommerPreparation:
         """consommer_preparation consomme les portions."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer une préparation
         prep = service.creer_preparation(
@@ -1151,7 +1142,7 @@ class TestCreerSessionValidation:
         """creer_session lève ErreurValidation si pas de recettes."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         with pytest.raises(ErreurValidation):
             service.creer_session(date_session=date.today(), recettes_ids=[], db=patched_db_context)
@@ -1171,7 +1162,7 @@ class TestTerminerSessionAvecEtapes:
         """terminer_session calcule nb_recettes_completees."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Créer une recette
         recette = Recette(
@@ -1236,7 +1227,7 @@ class TestGenererPlanIAComplete:
         """generer_plan_ia lève ErreurValidation si aucune recette trouvée."""
         mock_client.return_value = Mock()
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         with pytest.raises(ErreurValidation):
             service.generer_plan_ia(
@@ -1262,7 +1253,7 @@ class TestGenererPlanIAComplete:
         patched_db_context.commit()
         patched_db_context.refresh(recette)
 
-        service = BatchCookingService()
+        service = ServiceBatchCooking()
 
         # Le test couvre le chemin avec_jules=True
         result = service.generer_plan_ia(
@@ -1284,13 +1275,6 @@ class TestGenererPlanIAComplete:
 @pytest.mark.unit
 class TestSingletonFactory:
     """Tests pour la factory singleton."""
-
-    @patch("src.services.cuisine.batch_cooking.service.obtenir_client_ia")
-    def test_get_batch_cooking_service_alias(self, mock_client):
-        """get_batch_cooking_service est un alias de obtenir_service_batch_cooking."""
-        mock_client.return_value = Mock()
-
-        assert get_batch_cooking_service is obtenir_service_batch_cooking
 
     @patch("src.services.cuisine.batch_cooking.service.obtenir_client_ia")
     def test_singleton_returns_same_instance(self, mock_client):

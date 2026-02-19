@@ -13,13 +13,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from src.services.core.notifications.notif_ntfy import (
-    NotificationPushConfig,
-    NotificationPushScheduler,
-    # Alias rétrocompatibilité
-    NotificationPushService,
     PlanificateurNtfy,
     ServiceNtfy,
-    get_notification_push_service,
     obtenir_planificateur_ntfy,
     obtenir_service_ntfy,
 )
@@ -566,29 +561,3 @@ class TestPlanificateurNtfy:
         planificateur = obtenir_planificateur_ntfy()
 
         assert isinstance(planificateur, PlanificateurNtfy)
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS ALIAS RÉTROCOMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestAliasRetrocompatibilite:
-    """Tests pour les alias de rétrocompatibilité."""
-
-    def test_notification_push_service_alias(self):
-        """NotificationPushService = ServiceNtfy."""
-        assert NotificationPushService is ServiceNtfy
-
-    def test_notification_push_scheduler_alias(self):
-        """NotificationPushScheduler = PlanificateurNtfy."""
-        assert NotificationPushScheduler is PlanificateurNtfy
-
-    def test_notification_push_config_alias(self):
-        """NotificationPushConfig = ConfigurationNtfy."""
-        assert NotificationPushConfig is ConfigurationNtfy
-
-    def test_get_service_alias(self):
-        """get_notification_push_service = obtenir_service_ntfy."""
-        assert get_notification_push_service is obtenir_service_ntfy

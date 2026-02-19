@@ -2,6 +2,7 @@
 Dépendances FastAPI centralisées.
 
 Contient les dépendances communes pour l'authentification et l'autorisation.
+Utilise le module auth autonome (sans dépendance Streamlit).
 """
 
 import logging
@@ -9,6 +10,8 @@ import os
 
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from .auth import valider_token
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +32,9 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ) -> dict | None:
     """
-    Valide le token JWT Supabase et retourne l'utilisateur.
+    Valide le token JWT (API ou Supabase) et retourne l'utilisateur.
 
+    Utilise le module auth autonome basé sur PyJWT.
     En mode développement, retourne un utilisateur dev si pas de token.
 
     Returns:
@@ -42,24 +46,13 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="Token requis")
 
     try:
-        from src.services.core.utilisateur import get_auth_service
+        utilisateur = valider_token(credentials.credentials)
 
-        auth = get_auth_service()
-        user = auth.validate_token(credentials.credentials)
-
-        if user:
+        if utilisateur:
             return {
-                "id": user.id,
-                "email": user.email,
-                "role": user.role.value,
-            }
-
-        payload = auth.decode_jwt_payload(credentials.credentials)
-        if payload:
-            return {
-                "id": payload.get("sub", "unknown"),
-                "email": payload.get("email", ""),
-                "role": payload.get("user_metadata", {}).get("role", "membre"),
+                "id": utilisateur.id,
+                "email": utilisateur.email,
+                "role": utilisateur.role,
             }
 
         raise HTTPException(status_code=401, detail="Token invalide")

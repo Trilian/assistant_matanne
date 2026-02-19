@@ -9,10 +9,7 @@ Couverture des fonctionnalités:
 import pytest
 
 from src.services.core.notifications.inventaire import (
-    Notification,
-    NotificationService,
     ServiceNotificationsInventaire,
-    obtenir_service_notifications,
     obtenir_service_notifications_inventaire,
 )
 from src.services.core.notifications.types import (
@@ -87,12 +84,6 @@ class TestServiceNotificationsInit:
 
         # Cleanup
         module._service_notifications_inventaire = None
-
-    def test_alias_retrocompatibilite(self):
-        """Test les alias de rétrocompatibilité."""
-        assert NotificationService is ServiceNotificationsInventaire
-        assert obtenir_service_notifications is obtenir_service_notifications_inventaire
-        assert Notification is NotificationInventaire
 
 
 # ═══════════════════════════════════════════════════════════

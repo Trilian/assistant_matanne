@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
 
 from src.api.dependencies import require_auth
+from src.api.schemas import MessageResponse
 from src.api.utils import construire_reponse_paginee, executer_avec_session
 
 router = APIRouter(prefix="/api/v1/recettes", tags=["Recettes"])
@@ -144,7 +145,7 @@ async def update_recette(
         return RecetteResponse.model_validate(db_recette)
 
 
-@router.delete("/{recette_id}")
+@router.delete("/{recette_id}", response_model=MessageResponse)
 async def delete_recette(recette_id: int, user: dict = Depends(require_auth)):
     """Supprime une recette."""
     from src.core.models import Recette
@@ -158,4 +159,4 @@ async def delete_recette(recette_id: int, user: dict = Depends(require_auth)):
         session.delete(db_recette)
         session.commit()
 
-        return {"message": f"Recette {recette_id} supprimée"}
+        return MessageResponse(message=f"Recette {recette_id} supprimée", id=recette_id)

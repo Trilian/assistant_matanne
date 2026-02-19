@@ -88,9 +88,6 @@ from .scoring import (
 # Service principal
 from .service import (
     ServiceSuggestions,
-    # Alias de compatibilité
-    SuggestionsIAService,
-    get_suggestions_ia_service,
     obtenir_service_suggestions,
 )
 from .types import (
@@ -107,9 +104,6 @@ __all__ = [
     # Service principal
     "ServiceSuggestions",
     "obtenir_service_suggestions",
-    # Alias de compatibilité
-    "SuggestionsIAService",
-    "get_suggestions_ia_service",
     # Constantes
     "SAISONS",
     "INGREDIENTS_SAISON",

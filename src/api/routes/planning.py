@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, field_validator
 
 from src.api.dependencies import require_auth
+from src.api.schemas import MessageResponse
 from src.api.utils import executer_avec_session
 
 router = APIRouter(prefix="/api/v1/planning", tags=["Planning"])
@@ -59,12 +60,20 @@ class RepasResponse(RepasBase):
     model_config = {"from_attributes": True}
 
 
+class PlanningSemaineResponse(BaseModel):
+    """Réponse du planning hebdomadaire."""
+
+    date_debut: str
+    date_fin: str
+    planning: dict
+
+
 # ═══════════════════════════════════════════════════════════
 # ROUTES
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/semaine")
+@router.get("/semaine", response_model=PlanningSemaineResponse)
 async def get_planning_semaine(
     date_debut: datetime | None = None,
 ):
@@ -105,7 +114,7 @@ async def get_planning_semaine(
         }
 
 
-@router.post("/repas")
+@router.post("/repas", response_model=MessageResponse)
 async def create_repas(repas: RepasCreate, user: dict = Depends(require_auth)):
     """Planifie un repas."""
     from src.core.models import Planning, Repas
@@ -151,7 +160,7 @@ async def create_repas(repas: RepasCreate, user: dict = Depends(require_auth)):
             if hasattr(existing, "notes"):
                 existing.notes = repas.notes
             session.commit()
-            return {"message": "Repas mis à jour", "id": existing.id}
+            return MessageResponse(message="Repas mis à jour", id=existing.id)
 
         # Créer
         db_repas = Repas(
@@ -163,10 +172,10 @@ async def create_repas(repas: RepasCreate, user: dict = Depends(require_auth)):
         session.add(db_repas)
         session.commit()
 
-        return {"message": "Repas planifié", "id": db_repas.id}
+        return MessageResponse(message="Repas planifié", id=db_repas.id)
 
 
-@router.put("/repas/{repas_id}")
+@router.put("/repas/{repas_id}", response_model=MessageResponse)
 async def update_repas(repas_id: int, repas: RepasCreate, user: dict = Depends(require_auth)):
     """Met à jour un repas planifié."""
     from src.core.models import Repas
@@ -185,10 +194,10 @@ async def update_repas(repas_id: int, repas: RepasCreate, user: dict = Depends(r
         session.commit()
         session.refresh(db_repas)
 
-        return {"message": "Repas mis à jour", "id": db_repas.id}
+        return MessageResponse(message="Repas mis à jour", id=db_repas.id)
 
 
-@router.delete("/repas/{repas_id}")
+@router.delete("/repas/{repas_id}", response_model=MessageResponse)
 async def delete_repas(repas_id: int, user: dict = Depends(require_auth)):
     """Supprime un repas planifié."""
     from src.core.models import Repas
@@ -202,4 +211,4 @@ async def delete_repas(repas_id: int, user: dict = Depends(require_auth)):
         session.delete(repas)
         session.commit()
 
-        return {"message": "Repas supprimé", "id": repas_id}
+        return MessageResponse(message="Repas supprimé", id=repas_id)

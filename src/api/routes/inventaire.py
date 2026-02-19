@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, field_validator
 
 from src.api.dependencies import require_auth
+from src.api.schemas import MessageResponse
 from src.api.utils import executer_avec_session
 
 router = APIRouter(prefix="/api/v1/inventaire", tags=["Inventaire"])
@@ -208,7 +209,7 @@ async def update_inventaire_item(
         return InventaireItemResponse.model_validate(db_item)
 
 
-@router.delete("/{item_id}")
+@router.delete("/{item_id}", response_model=MessageResponse)
 async def delete_inventaire_item(item_id: int, user: dict = Depends(require_auth)):
     """Supprime un article d'inventaire."""
     from src.core.models import ArticleInventaire
@@ -222,4 +223,4 @@ async def delete_inventaire_item(item_id: int, user: dict = Depends(require_auth
         session.delete(db_item)
         session.commit()
 
-        return {"message": "Article supprimé", "id": item_id}
+        return MessageResponse(message="Article supprimé", id=item_id)

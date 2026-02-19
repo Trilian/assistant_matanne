@@ -15,8 +15,8 @@ import streamlit as st
 
 from src.services.core.notifications import (
     NotificationPush,
-    NotificationPushConfig,
-    get_notification_push_service,
+    ConfigurationNtfy,
+    obtenir_service_ntfy,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -44,14 +44,14 @@ HELP_NTFY = """
 # ═══════════════════════════════════════════════════════════
 
 
-def charger_config() -> NotificationPushConfig:
+def charger_config() -> ConfigurationNtfy:
     """Charge la configuration depuis session_state."""
     if "notif_config" not in st.session_state:
-        st.session_state["notif_config"] = NotificationPushConfig()
+        st.session_state["notif_config"] = ConfigurationNtfy()
     return st.session_state["notif_config"]
 
 
-def sauvegarder_config(config: NotificationPushConfig):
+def sauvegarder_config(config: ConfigurationNtfy):
     """Sauvegarde la configuration en session_state."""
     st.session_state["notif_config"] = config
 
@@ -98,7 +98,7 @@ def render_configuration():
         )
 
         if submitted:
-            new_config = NotificationPushConfig(
+            new_config = ConfigurationNtfy(
                 topic=topic,
                 actif=actif,
                 rappels_taches=rappels_taches,
@@ -114,7 +114,7 @@ def render_abonnement():
     st.subheader("📷 S'abonner aux notifications")
 
     config = charger_config()
-    service = get_notification_push_service(config)
+    service = obtenir_service_ntfy(config)
 
     col1, col2 = st.columns([1, 1])
 
@@ -185,7 +185,7 @@ def render_test():
     st.subheader("🧪 Tester les notifications")
 
     config = charger_config()
-    service = get_notification_push_service(config)
+    service = obtenir_service_ntfy(config)
 
     # Mode démo toggle
     mode_demo = st.toggle(
@@ -315,7 +315,7 @@ def render_taches_retard():
     st.subheader("⏰ Tâches en retard")
 
     config = charger_config()
-    service = get_notification_push_service(config)
+    service = obtenir_service_ntfy(config)
 
     taches_retard = service.obtenir_taches_en_retard()
     taches_jour = service.obtenir_taches_du_jour()

@@ -55,7 +55,6 @@ from .rappels import (
     OPTIONS_RAPPEL,
     ServiceRappels,
     format_rappel,
-    get_rappels_service,
     obtenir_service_rappels,
 )
 from .recurrence import (
@@ -66,7 +65,6 @@ from .recurrence import (
     ServiceRecurrence,
     TypeRecurrence,
     format_recurrence,
-    get_recurrence_service,
     obtenir_service_recurrence,
 )
 
@@ -82,7 +80,6 @@ from .service import (
 )
 from .templates import (
     ServiceTemplates,
-    get_templates_service,
     obtenir_service_templates,
 )
 from .types import (
@@ -131,7 +128,6 @@ from .utils import (
 
 # Alias de compatibilité (anciens noms)
 PlanningService = ServicePlanning
-PlanningAIService = ServicePlanningUnifie
 
 __all__ = [
     # ─────────────────────────────────────────────────────────
@@ -200,7 +196,6 @@ __all__ = [
     # Services - Planning unifié
     # ─────────────────────────────────────────────────────────
     "ServicePlanningUnifie",
-    "PlanningAIService",  # Alias compatibilité
     "obtenir_service_planning_unifie",
     "get_planning_unified_service",  # Alias compatibilité
     "get_unified_planning_service",  # Alias compatibilité
@@ -210,7 +205,6 @@ __all__ = [
     "OPTIONS_RAPPEL",
     "ServiceRappels",
     "format_rappel",
-    "get_rappels_service",
     "obtenir_service_rappels",
     # ─────────────────────────────────────────────────────────
     # Services - Récurrence
@@ -220,12 +214,10 @@ __all__ = [
     "ServiceRecurrence",
     "TypeRecurrence",
     "format_recurrence",
-    "get_recurrence_service",
     "obtenir_service_recurrence",
     # ─────────────────────────────────────────────────────────
     # Services - Templates de semaine
     # ─────────────────────────────────────────────────────────
     "ServiceTemplates",
-    "get_templates_service",
     "obtenir_service_templates",
 ]

@@ -14,11 +14,6 @@ from pydantic import ValidationError
 from src.services.cuisine.courses.types import (
     ArticleCourse,
     ListeCoursesIntelligente,
-    ShoppingItem,
-    # Aliases
-    ShoppingSuggestion,
-    SmartShoppingList,
-    SubstitutionSuggestion,
     SuggestionCourses,
     SuggestionSubstitution,
 )
@@ -370,33 +365,3 @@ class TestSuggestionSubstitution:
         """Test économie None par défaut."""
         suggestion = SuggestionSubstitution(ingredient_original="A", suggestion="B", raison="Test")
         assert suggestion.economie_estimee is None
-
-
-class TestAliases:
-    """Tests pour les alias anglais."""
-
-    def test_shopping_suggestion_alias(self):
-        """Test alias ShoppingSuggestion."""
-        assert ShoppingSuggestion is SuggestionCourses
-        suggestion = ShoppingSuggestion(
-            nom="Test", quantite=1.0, unite="kg", priorite="haute", rayon="Test"
-        )
-        assert isinstance(suggestion, SuggestionCourses)
-
-    def test_shopping_item_alias(self):
-        """Test alias ShoppingItem."""
-        assert ShoppingItem is ArticleCourse
-        item = ShoppingItem(nom="Test", quantite=1.0)
-        assert isinstance(item, ArticleCourse)
-
-    def test_smart_shopping_list_alias(self):
-        """Test alias SmartShoppingList."""
-        assert SmartShoppingList is ListeCoursesIntelligente
-        liste = SmartShoppingList()
-        assert isinstance(liste, ListeCoursesIntelligente)
-
-    def test_substitution_suggestion_alias(self):
-        """Test alias SubstitutionSuggestion."""
-        assert SubstitutionSuggestion is SuggestionSubstitution
-        sub = SubstitutionSuggestion(ingredient_original="A", suggestion="B", raison="C")
-        assert isinstance(sub, SuggestionSubstitution)

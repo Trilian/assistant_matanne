@@ -14,9 +14,6 @@ import pytest
 
 from src.services.core.notifications.types import TypeNotification
 from src.services.core.notifications.utils import (
-    # Alias rétrocompatibilité
-    NotificationType,
-    can_send_during_quiet_hours,
     construire_info_abonnement,
     # Payloads
     construire_payload_push,
@@ -33,7 +30,6 @@ from src.services.core.notifications.utils import (
     est_heures_silencieuses,
     # Compteur
     generer_cle_compteur,
-    is_quiet_hours,
     # Mapping et vérification
     obtenir_mapping_types_notification,
     parser_cle_compteur,
@@ -652,25 +648,3 @@ class TestValiderPreferences:
 
         assert is_valid is False
         assert any("élevé" in w for w in warnings)
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS ALIAS RÉTROCOMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestAliasRetrocompatibilite:
-    """Tests pour les alias de rétrocompatibilité."""
-
-    def test_notification_type_alias(self):
-        """NotificationType = TypeNotification."""
-        assert NotificationType is TypeNotification
-
-    def test_is_quiet_hours_alias(self):
-        """is_quiet_hours = est_heures_silencieuses."""
-        assert is_quiet_hours is est_heures_silencieuses
-
-    def test_can_send_alias(self):
-        """can_send_during_quiet_hours = peut_envoyer_pendant_silence."""
-        assert can_send_during_quiet_hours is peut_envoyer_pendant_silence

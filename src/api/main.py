@@ -32,6 +32,10 @@ logger = logging.getLogger(__name__)
 # Tags pour organiser la documentation OpenAPI
 tags_metadata = [
     {
+        "name": "Authentification",
+        "description": "Inscription, connexion et gestion des tokens JWT",
+    },
+    {
         "name": "Santé",
         "description": "Endpoints de vérification de l'état de l'API",
     },
@@ -72,7 +76,8 @@ Cette API permet d'accéder aux fonctionnalités de l'Assistant Matanne:
 
 ### Authentification
 
-L'API utilise des tokens JWT. En mode développement, un utilisateur dev est utilisé par défaut.
+L'API utilise des tokens JWT Bearer. Obtenez un token via `POST /api/v1/auth/login`.
+En mode développement, un utilisateur dev est utilisé par défaut.
 
 ### Rate Limiting
 
@@ -168,6 +173,9 @@ async def health_check():
 # ═══════════════════════════════════════════════════════════
 
 
+from src.api.routes.auth import router as auth_router
+
+app.include_router(auth_router)
 app.include_router(recettes_router)
 app.include_router(inventaire_router)
 app.include_router(courses_router)

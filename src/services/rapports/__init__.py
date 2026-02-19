@@ -16,10 +16,7 @@ Tous renommés en français avec alias rétrocompatibilité.
 # SERVICES
 # ═══════════════════════════════════════════════════════════
 from src.services.rapports.export import (
-    # Alias rétrocompatibilité
-    PDFExportService,
     ServiceExportPDF,
-    get_pdf_export_service,
     obtenir_service_export_pdf,
 )
 from src.services.rapports.generation import (
@@ -31,18 +28,12 @@ from src.services.rapports.generation import (
 )
 from src.services.rapports.types import (
     AnalyseGaspillage,
-    CoursesPDFData,
     DonneesCoursesPDF,
     DonneesPlanningPDF,
-    # Schémas export (français)
     DonneesRecettePDF,
-    PlanningPDFData,
     RapportBudget,
     RapportPlanning,
-    # Schémas rapports (français)
     RapportStocks,
-    # Alias rétrocompatibilité
-    RecettePDFData,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -64,13 +55,6 @@ __all__ = [
     "ServiceRapportsPDF",
     "obtenir_service_rapports_pdf",
     # === ALIAS RÉTROCOMPATIBILITÉ ===
-    # Types
-    "RecettePDFData",
-    "PlanningPDFData",
-    "CoursesPDFData",
-    # Services
-    "PDFExportService",
-    "get_pdf_export_service",
     "RapportsPDFService",
     "get_rapports_pdf_service",
 ]

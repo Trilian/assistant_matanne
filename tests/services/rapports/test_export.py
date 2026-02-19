@@ -11,9 +11,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.services.rapports.export import (
-    PDFExportService,
     ServiceExportPDF,
-    get_pdf_export_service,
     obtenir_service_export_pdf,
 )
 from src.services.rapports.types import DonneesCoursesPDF, DonneesPlanningPDF, DonneesRecettePDF
@@ -460,11 +458,3 @@ class TestFactoryFunctions:
         service2 = obtenir_service_export_pdf()
         assert service1 is service2
         assert isinstance(service1, ServiceExportPDF)
-
-    def test_alias_pdf_export_service(self):
-        """Vérifie l'alias PDFExportService."""
-        assert PDFExportService is ServiceExportPDF
-
-    def test_alias_get_pdf_export_service(self):
-        """Vérifie l'alias get_pdf_export_service."""
-        assert get_pdf_export_service is obtenir_service_export_pdf

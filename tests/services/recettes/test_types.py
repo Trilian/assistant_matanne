@@ -4,12 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from src.services.cuisine.recettes.types import (
-    BabyVersionGenerated,
-    BatchCookingVersionGenerated,
     RecetteSuggestion,
-    # Aliases anglais
-    RecipeSuggestion,
-    RobotVersionGenerated,
     VersionBatchCookingGeneree,
     VersionBebeGeneree,
     VersionRobotGeneree,
@@ -325,21 +320,4 @@ class TestVersionRobotGeneree:
             )
 
 
-class TestAliasesAnglais:
-    """Tests pour les aliases anglais."""
 
-    def test_recipe_suggestion_is_alias(self):
-        """Test que RecipeSuggestion est un alias."""
-        assert RecipeSuggestion is RecetteSuggestion
-
-    def test_baby_version_is_alias(self):
-        """Test que BabyVersionGenerated est un alias."""
-        assert BabyVersionGenerated is VersionBebeGeneree
-
-    def test_batch_cooking_is_alias(self):
-        """Test que BatchCookingVersionGenerated est un alias."""
-        assert BatchCookingVersionGenerated is VersionBatchCookingGeneree
-
-    def test_robot_version_is_alias(self):
-        """Test que RobotVersionGenerated est un alias."""
-        assert RobotVersionGenerated is VersionRobotGeneree

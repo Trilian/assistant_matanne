@@ -57,12 +57,7 @@ from .service import (
     recette_service,
 )
 from .types import (
-    BabyVersionGenerated,
-    BatchCookingVersionGenerated,
     RecetteSuggestion,
-    # Aliases anglais
-    RecipeSuggestion,
-    RobotVersionGenerated,
     VersionBatchCookingGeneree,
     VersionBebeGeneree,
     VersionRobotGeneree,
@@ -126,11 +121,6 @@ __all__ = [
     "VersionBebeGeneree",
     "VersionBatchCookingGeneree",
     "VersionRobotGeneree",
-    # Aliases anglais
-    "RecipeSuggestion",
-    "BabyVersionGenerated",
-    "BatchCookingVersionGenerated",
-    "RobotVersionGenerated",
     # ═══════════════════════════════════════════════════════════
     # CONSTANTES
     # ═══════════════════════════════════════════════════════════

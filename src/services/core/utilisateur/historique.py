@@ -472,7 +472,13 @@ class ActionHistoryService:
 
     def undo_action(self, action_id: int) -> bool:
         """
-        Annule une action.
+        Annule une action en restaurant l'ancienne valeur.
+
+        Fonctionne pour les types réversibles qui ont un old_value sauvegardé:
+        - Recettes (updated, deleted, favorited)
+        - Inventaire (updated, consumed)
+        - Courses (item_checked)
+        - Planning (repas_deleted)
 
         Args:
             action_id: ID de l'action à annuler
@@ -480,9 +486,117 @@ class ActionHistoryService:
         Returns:
             True si l'annulation a réussi
         """
-        # TODO: Implémenter la restauration basée sur old_value
-        logger.warning(f"Undo action {action_id} not fully implemented")
-        return False
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ActionHistory
+
+        try:
+            with obtenir_contexte_db() as session:
+                # Récupérer l'action en DB
+                action = (
+                    session.query(ActionHistory)
+                    .filter(ActionHistory.id == action_id)
+                    .first()
+                )
+
+                if not action:
+                    logger.warning(f"Action {action_id} non trouvée")
+                    return False
+
+                if not action.old_value:
+                    logger.warning(f"Action {action_id} n'a pas de old_value pour restauration")
+                    return False
+
+                entity_type = action.entity_type
+                entity_id = action.entity_id
+                old_data = action.old_value
+
+                # Restaurer selon le type d'entité
+                restored = self._restore_entity(session, entity_type, entity_id, old_data)
+
+                if restored:
+                    # Logger l'action d'annulation
+                    undo_entry = ActionHistory(
+                        user_id=action.user_id,
+                        user_name=action.user_name,
+                        action_type="system.undo",
+                        entity_type=entity_type,
+                        entity_id=entity_id,
+                        entity_name=action.entity_name,
+                        description=f"Annulation de: {action.description}",
+                        details={"undo_of_action_id": action_id},
+                        old_value=action.new_value,
+                        new_value=action.old_value,
+                    )
+                    session.add(undo_entry)
+                    session.commit()
+                    logger.info(f"Action {action_id} annulée avec succès")
+
+                return restored
+
+        except Exception as e:
+            logger.error(f"Erreur undo action {action_id}: {e}")
+            return False
+
+    def _restore_entity(
+        self, session: Session, entity_type: str, entity_id: int | None, old_data: dict
+    ) -> bool:
+        """Restaure une entité à partir des données sauvegardées.
+
+        Args:
+            session: Session DB active
+            entity_type: Type d'entité (recette, inventaire, etc.)
+            entity_id: ID de l'entité
+            old_data: Données à restaurer
+
+        Returns:
+            True si restauration réussie
+        """
+        if not entity_id:
+            logger.warning("Pas d'entity_id pour la restauration")
+            return False
+
+        try:
+            model_class = self._get_model_class(entity_type)
+            if not model_class:
+                logger.warning(f"Type d'entité inconnu: {entity_type}")
+                return False
+
+            entity = session.query(model_class).filter(model_class.id == entity_id).first()
+
+            if entity:
+                # Mettre à jour les champs avec les anciennes valeurs
+                for key, value in old_data.items():
+                    if hasattr(entity, key) and key != "id":
+                        setattr(entity, key, value)
+                return True
+            else:
+                logger.warning(f"{entity_type} {entity_id} non trouvé, impossible de restaurer")
+                return False
+
+        except Exception as e:
+            logger.error(f"Erreur restauration {entity_type} {entity_id}: {e}")
+            return False
+
+    @staticmethod
+    def _get_model_class(entity_type: str):
+        """Retourne la classe de modèle SQLAlchemy pour un type d'entité."""
+        try:
+            from src.core.models import (
+                ArticleCourses,
+                Ingredient,
+                PlanningRepas,
+                Recette,
+            )
+
+            mapping = {
+                "recette": Recette,
+                "inventaire": Ingredient,
+                "courses": ArticleCourses,
+                "planning": PlanningRepas,
+            }
+            return mapping.get(entity_type)
+        except ImportError:
+            return None
 
     # -----------------------------------------------------------
     # MÉTHODES PRIVÉES

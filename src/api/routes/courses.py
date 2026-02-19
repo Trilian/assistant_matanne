@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
 
 from src.api.dependencies import require_auth
+from src.api.schemas import MessageResponse
 from src.api.utils import executer_avec_session
 
 router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
@@ -55,13 +56,33 @@ class CourseListCreate(BaseModel):
         return v.strip()
 
 
-class ListeCoursesResponse(BaseModel):
-    """Réponse pour une liste de courses."""
+class ListeCoursesResume(BaseModel):
+    """Résumé d'une liste de courses (pour la liste paginée)."""
 
     id: int
     nom: str
-    items: list[CourseItemBase]
+    items_count: int = 0
     created_at: datetime | None = None
+
+
+class ArticleResponse(BaseModel):
+    """Réponse pour un article de liste."""
+
+    id: int
+    nom: str
+    quantite: float
+    coche: bool = False
+    categorie: str | None = None
+
+
+class ListeCoursesResponse(BaseModel):
+    """Réponse complète pour une liste de courses."""
+
+    id: int
+    nom: str
+    archivee: bool = False
+    created_at: datetime | None = None
+    items: list[ArticleResponse] = Field(default_factory=list)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -74,7 +95,7 @@ async def list_courses(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     active_only: bool = True,
-):
+) -> dict:
     """Liste les listes de courses."""
     from src.core.models import ListeCourses
 
@@ -109,7 +130,7 @@ async def list_courses(
         }
 
 
-@router.post("")
+@router.post("", response_model=MessageResponse, status_code=201)
 async def create_liste(data: CourseListCreate, user: dict = Depends(require_auth)):
     """Crée une nouvelle liste de courses."""
     from src.core.models import ListeCourses
@@ -120,10 +141,10 @@ async def create_liste(data: CourseListCreate, user: dict = Depends(require_auth
         session.commit()
         session.refresh(liste)
 
-        return {"id": liste.id, "nom": liste.nom, "message": "Liste créée"}
+        return MessageResponse(message="Liste créée", id=liste.id)
 
 
-@router.post("/{liste_id}/items")
+@router.post("/{liste_id}/items", response_model=MessageResponse, status_code=201)
 async def add_item(liste_id: int, item: CourseItemBase, user: dict = Depends(require_auth)):
     """Ajoute un article à une liste."""
     from src.core.models import ArticleCourses, Ingredient, ListeCourses
@@ -151,10 +172,10 @@ async def add_item(liste_id: int, item: CourseItemBase, user: dict = Depends(req
         session.add(article)
         session.commit()
 
-        return {"message": "Article ajouté", "item_id": article.id}
+        return MessageResponse(message="Article ajouté", id=article.id)
 
 
-@router.get("/{liste_id}")
+@router.get("/{liste_id}", response_model=ListeCoursesResponse)
 async def get_liste(liste_id: int):
     """Récupère une liste de courses avec ses articles."""
     from src.core.models import ListeCourses
@@ -183,7 +204,7 @@ async def get_liste(liste_id: int):
         }
 
 
-@router.put("/{liste_id}")
+@router.put("/{liste_id}", response_model=MessageResponse)
 async def update_liste(liste_id: int, data: CourseListCreate, user: dict = Depends(require_auth)):
     """Met à jour une liste de courses."""
     from src.core.models import ListeCourses
@@ -198,10 +219,10 @@ async def update_liste(liste_id: int, data: CourseListCreate, user: dict = Depen
         session.commit()
         session.refresh(liste)
 
-        return {"id": liste.id, "nom": liste.nom, "message": "Liste mise à jour"}
+        return MessageResponse(message="Liste mise à jour", id=liste.id)
 
 
-@router.put("/{liste_id}/items/{item_id}")
+@router.put("/{liste_id}/items/{item_id}", response_model=MessageResponse)
 async def update_item(
     liste_id: int, item_id: int, item: CourseItemBase, user: dict = Depends(require_auth)
 ):
@@ -224,10 +245,10 @@ async def update_item(
             article.rayon_magasin = item.categorie
         session.commit()
 
-        return {"message": "Article mis à jour", "id": item_id}
+        return MessageResponse(message="Article mis à jour", id=item_id)
 
 
-@router.delete("/{liste_id}")
+@router.delete("/{liste_id}", response_model=MessageResponse)
 async def delete_liste(liste_id: int, user: dict = Depends(require_auth)):
     """Supprime une liste de courses."""
     from src.core.models import ListeCourses
@@ -241,10 +262,10 @@ async def delete_liste(liste_id: int, user: dict = Depends(require_auth)):
         session.delete(liste)
         session.commit()
 
-        return {"message": "Liste supprimée", "id": liste_id}
+        return MessageResponse(message="Liste supprimée", id=liste_id)
 
 
-@router.delete("/{liste_id}/items/{item_id}")
+@router.delete("/{liste_id}/items/{item_id}", response_model=MessageResponse)
 async def delete_item(liste_id: int, item_id: int, user: dict = Depends(require_auth)):
     """Supprime un article d'une liste."""
     from src.core.models import ArticleCourses
@@ -262,4 +283,4 @@ async def delete_item(liste_id: int, item_id: int, user: dict = Depends(require_
         session.delete(article)
         session.commit()
 
-        return {"message": "Article supprimé", "id": item_id}
+        return MessageResponse(message="Article supprimé", id=item_id)

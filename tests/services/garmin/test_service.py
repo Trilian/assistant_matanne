@@ -15,11 +15,9 @@ from unittest.mock import Mock, patch
 import pytest
 
 from src.services.integrations.garmin.service import (
-    GarminService,
     ServiceGarmin,
     get_garmin_config,
     get_garmin_service,
-    get_garmin_sync_service,
     get_or_create_user,
     get_user_by_username,
     list_all_users,
@@ -649,23 +647,6 @@ class TestFactories:
         service = get_garmin_service()
 
         assert isinstance(service, ServiceGarmin)
-
-    @patch("src.services.integrations.garmin.service.get_garmin_config")
-    def test_get_garmin_sync_service_alias(self, mock_config_fn, mock_config):
-        """Alias de rétrocompatibilité fonctionne."""
-        mock_config_fn.return_value = mock_config
-
-        service = get_garmin_sync_service()
-
-        assert isinstance(service, ServiceGarmin)
-
-
-class TestGarminServiceAlias:
-    """Test de l'alias GarminService."""
-
-    def test_alias_identique(self):
-        """GarminService est un alias de ServiceGarmin."""
-        assert GarminService is ServiceGarmin
 
 
 # ═══════════════════════════════════════════════════════════

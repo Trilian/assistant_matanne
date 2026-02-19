@@ -11,13 +11,11 @@ Exports:
 """
 
 from .service import (
-    GarminService,  # Alias
     # Service principal
     ServiceGarmin,
     # Configuration
     get_garmin_config,
     get_garmin_service,
-    get_garmin_sync_service,  # Alias rétrocompatibilité
     # Helpers utilisateurs
     get_or_create_user,
     get_user_by_username,
@@ -86,11 +84,9 @@ __all__ = [
     "SECONDS_TO_HOURS",
     # Service
     "ServiceGarmin",
-    "GarminService",
     # Factories
     "obtenir_service_garmin",
     "get_garmin_service",
-    "get_garmin_sync_service",
     # Helpers
     "get_or_create_user",
     "init_family_users",

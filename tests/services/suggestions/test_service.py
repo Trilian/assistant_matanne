@@ -11,8 +11,6 @@ import pytest
 
 from src.services.cuisine.suggestions.service import (
     ServiceSuggestions,
-    SuggestionsIAService,
-    get_suggestions_ia_service,
     obtenir_service_suggestions,
 )
 from src.services.cuisine.suggestions.types import (
@@ -841,11 +839,3 @@ class TestFactory:
 
         assert service1 is service2
         assert isinstance(service1, ServiceSuggestions)
-
-    def test_get_suggestions_ia_service_alias(self):
-        """Test alias."""
-        assert get_suggestions_ia_service == obtenir_service_suggestions
-
-    def test_suggestions_ia_service_alias(self):
-        """Test alias de classe."""
-        assert SuggestionsIAService == ServiceSuggestions

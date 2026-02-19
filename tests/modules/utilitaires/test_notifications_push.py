@@ -168,7 +168,7 @@ class TestHelpers:
 class TestRenderConfiguration:
     """Tests de la fonction render_configuration."""
 
-    @patch("src.modules.utilitaires.notifications_push.get_notification_push_service")
+    @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
     def test_render_configuration_affiche_formulaire(
         self, mock_charger_config, mock_get_service, mock_st, mock_config
@@ -207,7 +207,7 @@ class TestRenderConfiguration:
 class TestRenderAbonnement:
     """Tests de la fonction render_abonnement."""
 
-    @patch("src.modules.utilitaires.notifications_push.get_notification_push_service")
+    @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
     def test_render_abonnement_affiche_qr_code(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
@@ -224,7 +224,7 @@ class TestRenderAbonnement:
         mock_service.get_subscribe_qr_url.assert_called_once()
         mock_st.image.assert_called()
 
-    @patch("src.modules.utilitaires.notifications_push.get_notification_push_service")
+    @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
     def test_render_abonnement_affiche_urls(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
@@ -244,7 +244,7 @@ class TestRenderAbonnement:
 class TestRenderTest:
     """Tests de la fonction render_test."""
 
-    @patch("src.modules.utilitaires.notifications_push.get_notification_push_service")
+    @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
     def test_render_test_affiche_boutons(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
@@ -263,7 +263,7 @@ class TestRenderTest:
         mock_st.subheader.assert_called_once()
         assert mock_st.button.call_count >= 2
 
-    @patch("src.modules.utilitaires.notifications_push.get_notification_push_service")
+    @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
     def test_render_test_envoie_notification_test(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
@@ -282,7 +282,7 @@ class TestRenderTest:
         mock_service.test_connexion_sync.assert_called_once()
         mock_st.success.assert_called()
 
-    @patch("src.modules.utilitaires.notifications_push.get_notification_push_service")
+    @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
     def test_render_test_affiche_erreur(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
@@ -303,7 +303,7 @@ class TestRenderTest:
 
         mock_st.error.assert_called()
 
-    @patch("src.modules.utilitaires.notifications_push.get_notification_push_service")
+    @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
     def test_render_test_mode_demo(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
@@ -328,7 +328,7 @@ class TestRenderTest:
 class TestRenderTachesRetard:
     """Tests de la fonction render_taches_retard."""
 
-    @patch("src.modules.utilitaires.notifications_push.get_notification_push_service")
+    @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
     def test_render_taches_retard_sans_taches(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
@@ -345,7 +345,7 @@ class TestRenderTachesRetard:
 
         mock_st.success.assert_called()  # "Aucune tâche en retard"
 
-    @patch("src.modules.utilitaires.notifications_push.get_notification_push_service")
+    @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
     def test_render_taches_retard_avec_taches(
         self,
@@ -370,7 +370,7 @@ class TestRenderTachesRetard:
         mock_st.metric.assert_called()
         mock_st.container.assert_called()
 
-    @patch("src.modules.utilitaires.notifications_push.get_notification_push_service")
+    @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     @patch("src.modules.utilitaires.notifications_push.charger_config")
     def test_render_taches_retard_affiche_metriques(
         self, mock_charger_config, mock_get_service, mock_st, mock_config, mock_service
@@ -493,7 +493,7 @@ class TestApp:
 class TestIntegration:
     """Tests d'intégration."""
 
-    @patch("src.modules.utilitaires.notifications_push.get_notification_push_service")
+    @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     def test_workflow_configuration_to_test(
         self, mock_get_service, mock_st, mock_config, mock_service
     ):
@@ -510,7 +510,7 @@ class TestIntegration:
         config = charger_config()
         assert config == mock_config
 
-    @patch("src.modules.utilitaires.notifications_push.get_notification_push_service")
+    @patch("src.modules.utilitaires.notifications_push.obtenir_service_ntfy")
     def test_constante_help_ntfy_contenu(self, mock_get_service):
         """Test le contenu de la constante HELP_NTFY."""
         from src.modules.utilitaires.notifications_push import HELP_NTFY

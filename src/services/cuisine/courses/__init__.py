@@ -25,7 +25,6 @@ from .constantes import MAPPING_RAYONS, PRIORITES
 
 # Service de base
 from .service import (
-    # Aliases anglais
     CoursesService,
     ServiceCourses,
     courses_service,
@@ -35,7 +34,6 @@ from .service import (
 
 # Service intelligent
 from .suggestion import (
-    # Aliases anglais
     CoursesIntelligentesService,
     ServiceCoursesIntelligentes,
     get_courses_intelligentes_service,
@@ -44,11 +42,6 @@ from .suggestion import (
 from .types import (
     ArticleCourse,
     ListeCoursesIntelligente,
-    ShoppingItem,
-    # Aliases anglais
-    ShoppingSuggestion,
-    SmartShoppingList,
-    SubstitutionSuggestion,
     SuggestionCourses,
     SuggestionSubstitution,
 )
@@ -77,13 +70,8 @@ __all__ = [
     "ServiceCoursesIntelligentes",
     "obtenir_service_courses_intelligentes",
     # ═══════════════════════════════════════════════════════════
-    # ALIASES ANGLAIS (COMPATIBILITE)
+    # ALIASES UTILISÉS (COMPATIBILITÉ)
     # ═══════════════════════════════════════════════════════════
-    # Types
-    "ShoppingSuggestion",
-    "ShoppingItem",
-    "SmartShoppingList",
-    "SubstitutionSuggestion",
     # Service base
     "CoursesService",
     "get_courses_service",

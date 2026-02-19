@@ -26,7 +26,7 @@ from src.core.models import (
     UserProfile,
 )
 from src.services.integrations.garmin import (
-    GarminService,
+    ServiceGarmin,
     get_garmin_service,
     get_or_create_user,
     get_user_by_username,
@@ -50,7 +50,7 @@ __all__ = [
     "FoodLog",
     "HealthRoutine",
     # Services
-    "GarminService",
+    "ServiceGarmin",
     "get_garmin_service",
     "get_or_create_user",
     "get_user_by_username",

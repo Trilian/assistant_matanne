@@ -24,9 +24,7 @@ from .constantes import (
     ROBOTS_DISPONIBLES,
 )
 from .service import (
-    BatchCookingService,  # Alias rétrocompatibilité
     ServiceBatchCooking,
-    get_batch_cooking_service,  # Alias rétrocompatibilité
     obtenir_service_batch_cooking,
 )
 
@@ -78,9 +76,7 @@ from .utils import (
 __all__ = [
     # Service
     "ServiceBatchCooking",
-    "BatchCookingService",
     "obtenir_service_batch_cooking",
-    "get_batch_cooking_service",
     # Mixins
     "BatchCookingIAMixin",
     "BatchCookingStatsMixin",

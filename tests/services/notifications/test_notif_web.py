@@ -1020,43 +1020,13 @@ class TestSauvegarderPreferencesDB:
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS ALIAS RÉTROCOMPATIBILITÉ
+# TESTS ALIAS MÉTHODES
 # ═══════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
-class TestAliasRetrocompatibilite:
-    """Tests pour les alias de rétrocompatibilité."""
-
-    def test_alias_push_notification_service(self):
-        """Alias PushNotificationService disponible."""
-        from src.services.core.notifications.notif_web import PushNotificationService
-
-        assert PushNotificationService is ServiceWebPush
-
-    def test_alias_get_push_notification_service(self):
-        """Alias get_push_notification_service disponible."""
-        from src.services.core.notifications.notif_web import get_push_notification_service
-
-        assert get_push_notification_service is obtenir_service_webpush
-
-    def test_alias_push_subscription(self):
-        """Alias PushSubscription disponible."""
-        from src.services.core.notifications.notif_web import PushSubscription
-
-        assert PushSubscription is AbonnementPush
-
-    def test_alias_push_notification(self):
-        """Alias PushNotification disponible."""
-        from src.services.core.notifications.notif_web import PushNotification
-
-        assert PushNotification is NotificationPush
-
-    def test_alias_notification_preferences(self):
-        """Alias NotificationPreferences disponible."""
-        from src.services.core.notifications.notif_web import NotificationPreferences
-
-        assert NotificationPreferences is PreferencesNotification
+class TestMethodesAlias:
+    """Tests pour les alias de méthodes."""
 
     def test_methodes_alias(self, service):
         """Les méthodes alias sont liées aux originales."""

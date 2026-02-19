@@ -23,8 +23,6 @@ from src.services.core.backup.backup_restore import BackupRestoreMixin
 
 # Service principal
 from src.services.core.backup.service import (
-    # Aliases pour rétrocompatibilité
-    BackupService,
     ServiceBackup,
     get_backup_service,
     obtenir_service_backup,
@@ -76,8 +74,6 @@ __all__ = [
     # Mixins
     "BackupRestoreMixin",
     "BackupExportMixin",
-    # Aliases rétrocompatibilité
-    "BackupService",
     "get_backup_service",
     # Utilitaires - Identifiants
     "generate_backup_id",
