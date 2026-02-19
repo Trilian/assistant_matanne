@@ -433,10 +433,11 @@ class TestRenderDetailRecetteExtended:
         afficher_detail_recette(recette)
         mock_st.caption.assert_called()
 
+    @patch("src.modules.cuisine.recettes.detail.etat_vide")
     @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.detail.st")
-    def test_versions_vides(self, mock_st, mock_svc_factory, mock_render_img):
+    def test_versions_vides(self, mock_st, mock_svc_factory, mock_render_img, mock_etat_vide):
         from src.modules.cuisine.recettes.detail import afficher_detail_recette
 
         setup_mock_st(mock_st)
@@ -451,7 +452,7 @@ class TestRenderDetailRecetteExtended:
         recette.compatible_airfryer = False
         recette.compatible_multicooker = False
         afficher_detail_recette(recette)
-        mock_st.info.assert_called()
+        mock_etat_vide.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")

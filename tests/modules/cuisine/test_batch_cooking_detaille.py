@@ -83,6 +83,13 @@ def mock_st():
 
 
 @pytest.fixture
+def mock_etat_vide():
+    """Mock etat_vide."""
+    with patch("src.modules.cuisine.batch_cooking_detaille.etat_vide") as mock:
+        yield mock
+
+
+@pytest.fixture
 def sample_planning_data():
     """Données de planning exemple."""
     return {
@@ -362,7 +369,7 @@ class TestRenderPlanningPreview:
         # Vérifie que les jours sont affichés
         assert mock_st.container.call_count > 0
 
-    def test_render_planning_vide(self, mock_st):
+    def test_render_planning_vide(self, mock_st, mock_etat_vide):
         """Teste le rendu sans données de planning."""
         from src.modules.cuisine.batch_cooking_detaille import (
             afficher_planning_semaine_preview,
@@ -370,9 +377,9 @@ class TestRenderPlanningPreview:
 
         afficher_planning_semaine_preview({})
 
-        mock_st.info.assert_called_once()
+        mock_etat_vide.assert_called_once()
 
-    def test_render_planning_none(self, mock_st):
+    def test_render_planning_none(self, mock_st, mock_etat_vide):
         """Teste le rendu avec None."""
         from src.modules.cuisine.batch_cooking_detaille import (
             afficher_planning_semaine_preview,
@@ -380,7 +387,7 @@ class TestRenderPlanningPreview:
 
         afficher_planning_semaine_preview(None)
 
-        mock_st.info.assert_called_once()
+        mock_etat_vide.assert_called_once()
 
 
 class TestRenderIngredientDetaille:

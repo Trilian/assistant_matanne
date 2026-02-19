@@ -740,9 +740,10 @@ class TestRenderListeSessionState:
 class TestRenderListeEmptyResults:
     """Tests pour resultats vides."""
 
+    @patch("src.modules.cuisine.recettes.liste.etat_vide")
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
-    def test_no_recettes_found(self, mock_st, mock_svc_factory) -> None:
+    def test_no_recettes_found(self, mock_st, mock_svc_factory, mock_etat_vide) -> None:
         from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st)
@@ -750,7 +751,7 @@ class TestRenderListeEmptyResults:
         mock_service.search_advanced.return_value = []
         mock_svc_factory.return_value = mock_service
         afficher_liste()
-        mock_st.info.assert_called()
+        mock_etat_vide.assert_called()
 
 
 @pytest.mark.unit
@@ -812,9 +813,10 @@ class TestRenderListeEdgeCases:
         afficher_liste()
         assert mock_st.markdown.called
 
+    @patch("src.modules.cuisine.recettes.liste.etat_vide")
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
-    def test_recette_score_bio_none(self, mock_st, mock_svc_factory) -> None:
+    def test_recette_score_bio_none(self, mock_st, mock_svc_factory, mock_etat_vide) -> None:
         from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, min_score_bio=20)
@@ -823,11 +825,12 @@ class TestRenderListeEdgeCases:
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
         afficher_liste()
-        mock_st.info.assert_called()
+        mock_etat_vide.assert_called()
 
+    @patch("src.modules.cuisine.recettes.liste.etat_vide")
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
-    def test_recette_score_local_none(self, mock_st, mock_svc_factory) -> None:
+    def test_recette_score_local_none(self, mock_st, mock_svc_factory, mock_etat_vide) -> None:
         from src.modules.cuisine.recettes.liste import afficher_liste
 
         setup_mock_st(mock_st, min_score_local=20)
@@ -836,7 +839,7 @@ class TestRenderListeEdgeCases:
         mock_service.search_advanced.return_value = [recette]
         mock_svc_factory.return_value = mock_service
         afficher_liste()
-        mock_st.info.assert_called()
+        mock_etat_vide.assert_called()
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")

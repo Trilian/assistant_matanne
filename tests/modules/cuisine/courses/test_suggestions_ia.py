@@ -59,11 +59,14 @@ class TestRenderSuggestionsIA:
         mock_st.subheader.assert_called()
         mock_st.tabs.assert_called()
 
+    @patch("src.modules.cuisine.courses.suggestions_ia.etat_vide")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
-    def test_render_inventaire_no_suggestions(self, mock_st, mock_courses, mock_inv, mock_recettes):
+    def test_render_inventaire_no_suggestions(
+        self, mock_st, mock_courses, mock_inv, mock_recettes, mock_etat_vide
+    ):
         """Test inventaire sans suggestions."""
         from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
@@ -85,7 +88,7 @@ class TestRenderSuggestionsIA:
 
         afficher_suggestions_ia()
 
-        mock_st.info.assert_called()
+        mock_etat_vide.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
@@ -284,11 +287,14 @@ class TestRenderSuggestionsIA:
 
         mock_st.warning.assert_called()
 
+    @patch("src.modules.cuisine.courses.suggestions_ia.etat_vide")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
-    def test_render_recettes_empty(self, mock_st, mock_courses, mock_inv, mock_recettes):
+    def test_render_recettes_empty(
+        self, mock_st, mock_courses, mock_inv, mock_recettes, mock_etat_vide
+    ):
         """Test aucune recette disponible."""
         from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
 
@@ -309,7 +315,7 @@ class TestRenderSuggestionsIA:
 
         afficher_suggestions_ia()
 
-        mock_st.info.assert_called()
+        mock_etat_vide.assert_called()
 
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_recettes")
     @patch("src.modules.cuisine.courses.suggestions_ia.obtenir_service_inventaire")

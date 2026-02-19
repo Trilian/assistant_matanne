@@ -27,9 +27,10 @@ class TestRenderModeles:
 
         assert afficher_modeles is not None
 
+    @patch("src.modules.cuisine.courses.modeles.etat_vide")
     @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")
-    def test_render_modeles_empty(self, mock_st, mock_service):
+    def test_render_modeles_empty(self, mock_st, mock_service, mock_etat_vide):
         """Test sans modèles."""
         from src.modules.cuisine.courses.modeles import afficher_modeles
 
@@ -48,7 +49,7 @@ class TestRenderModeles:
         afficher_modeles()
 
         mock_st.subheader.assert_called()
-        mock_st.info.assert_called()
+        mock_etat_vide.assert_called()
 
     @patch("src.modules.cuisine.courses.modeles.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.modeles.st")

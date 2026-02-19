@@ -195,9 +195,10 @@ class TestRenderSuggestions:
 class TestRenderLieuxTestes:
     """Tests for afficher_lieux_testes function"""
 
+    @patch("src.modules.famille.weekend.components.etat_vide")
     @patch("src.modules.famille.weekend.components.get_lieux_testes")
     @patch("src.modules.famille.weekend.components.st")
-    def test_render_lieux_testes_empty(self, mock_st, mock_lieux) -> None:
+    def test_render_lieux_testes_empty(self, mock_st, mock_lieux, mock_etat_vide) -> None:
         from src.modules.famille.weekend.components import afficher_lieux_testes
 
         setup_mock_st(mock_st)
@@ -206,7 +207,7 @@ class TestRenderLieuxTestes:
         afficher_lieux_testes()
 
         mock_st.subheader.assert_called()
-        mock_st.info.assert_called()
+        mock_etat_vide.assert_called()
 
     @patch(
         "src.modules.famille.weekend.components.TYPES_ACTIVITES",
@@ -281,9 +282,10 @@ class TestRenderAddActivity:
 class TestRenderNoterSortie:
     """Tests for afficher_noter_sortie function"""
 
+    @patch("src.modules.famille.weekend.components.etat_vide")
     @patch("src.modules.famille.weekend.components.obtenir_contexte_db")
     @patch("src.modules.famille.weekend.components.st")
-    def test_render_noter_sortie_no_activities(self, mock_st, mock_ctx) -> None:
+    def test_render_noter_sortie_no_activities(self, mock_st, mock_ctx, mock_etat_vide) -> None:
         from src.modules.famille.weekend.components import afficher_noter_sortie
 
         setup_mock_st(mock_st)
@@ -295,7 +297,7 @@ class TestRenderNoterSortie:
         afficher_noter_sortie()
 
         mock_st.subheader.assert_called()
-        mock_st.info.assert_called()
+        mock_etat_vide.assert_called()
 
     @patch(
         "src.modules.famille.weekend.components.TYPES_ACTIVITES",

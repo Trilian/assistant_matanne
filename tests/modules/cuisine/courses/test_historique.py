@@ -39,10 +39,11 @@ class TestRenderHistorique:
 
         assert afficher_historique is not None
 
+    @patch("src.modules.cuisine.courses.historique.etat_vide")
     @patch("src.modules.cuisine.courses.historique.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.historique.st")
     @patch("src.modules.cuisine.courses.historique.obtenir_contexte_db")
-    def test_render_historique_no_articles(self, mock_db, mock_st, mock_service):
+    def test_render_historique_no_articles(self, mock_db, mock_st, mock_service, mock_etat_vide):
         """Test avec aucun article acheté."""
         from src.modules.cuisine.courses.historique import afficher_historique
 
@@ -59,7 +60,7 @@ class TestRenderHistorique:
         afficher_historique()
 
         mock_st.subheader.assert_called()
-        mock_st.info.assert_called_with("Aucun achat pendant cette période")
+        mock_etat_vide.assert_called_with("Aucun achat pendant cette période", "🛒")
 
     @patch("src.modules.cuisine.courses.historique.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.historique.st")
@@ -207,10 +208,11 @@ class TestRenderHistorique:
 
         mock_st.dataframe.assert_called()
 
+    @patch("src.modules.cuisine.courses.historique.etat_vide")
     @patch("src.modules.cuisine.courses.historique.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.historique.st")
     @patch("src.modules.cuisine.courses.historique.obtenir_contexte_db")
-    def test_render_historique_empty_df(self, mock_db, mock_st, mock_service):
+    def test_render_historique_empty_df(self, mock_db, mock_st, mock_service, mock_etat_vide):
         """Test avec DataFrame vide (cas edge)."""
         from src.modules.cuisine.courses.historique import afficher_historique
 
@@ -226,7 +228,7 @@ class TestRenderHistorique:
 
         afficher_historique()
 
-        mock_st.info.assert_called_with("Aucun achat pendant cette période")
+        mock_etat_vide.assert_called_with("Aucun achat pendant cette période", "🛒")
 
     @patch("src.modules.cuisine.courses.historique.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.historique.st")

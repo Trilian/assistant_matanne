@@ -48,6 +48,12 @@ class TestRenderActivities:
             mock.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
             yield mock
 
+    @pytest.fixture
+    def mock_etat_vide(self):
+        """Mock etat_vide"""
+        with patch("src.modules.famille.suivi_perso.activities.etat_vide") as mock:
+            yield mock
+
     def test_affiche_subheader(self, mock_st):
         """Vérifie l'affichage du titre"""
         from src.modules.famille.suivi_perso.activities import afficher_activities
@@ -57,22 +63,21 @@ class TestRenderActivities:
         mock_st.subheader.assert_called_once()
         assert "Activités" in mock_st.subheader.call_args[0][0]
 
-    def test_affiche_info_si_pas_activites(self, mock_st):
+    def test_affiche_info_si_pas_activites(self, mock_st, mock_etat_vide):
         """Vérifie le message si aucune activité"""
         from src.modules.famille.suivi_perso.activities import afficher_activities
 
         afficher_activities({"activities": []})
 
-        mock_st.info.assert_called_once()
-        assert "Aucune" in mock_st.info.call_args[0][0]
+        mock_etat_vide.assert_called_once()
 
-    def test_affiche_info_si_data_vide(self, mock_st):
+    def test_affiche_info_si_data_vide(self, mock_st, mock_etat_vide):
         """Vérifie le message si data vide"""
         from src.modules.famille.suivi_perso.activities import afficher_activities
 
         afficher_activities({})
 
-        mock_st.info.assert_called_once()
+        mock_etat_vide.assert_called_once()
 
     def test_affiche_activites_recentes(self, mock_st):
         """Vérifie l'affichage des activités"""

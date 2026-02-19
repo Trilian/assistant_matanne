@@ -28,6 +28,12 @@ class TestRenderHistorique:
             mock.return_value = mock_svc
             yield mock_svc
 
+    @pytest.fixture
+    def mock_etat_vide(self):
+        """Mock etat_vide"""
+        with patch("src.modules.cuisine.inventaire.historique.etat_vide") as mock:
+            yield mock
+
     def test_affiche_erreur_si_service_none(self, mock_st):
         """Vérifie l'erreur si service indisponible"""
         with patch("src.modules.cuisine.inventaire.historique.obtenir_service_inventaire") as mock:
@@ -62,7 +68,7 @@ class TestRenderHistorique:
         mock_st.selectbox.assert_called()
         mock_st.multiselect.assert_called()
 
-    def test_affiche_info_si_pas_historique(self, mock_st, mock_service):
+    def test_affiche_info_si_pas_historique(self, mock_st, mock_service, mock_etat_vide):
         """Vérifie le message sans historique"""
         mock_service.get_historique.return_value = []
 
@@ -70,7 +76,7 @@ class TestRenderHistorique:
 
         afficher_historique()
 
-        mock_st.info.assert_called()
+        mock_etat_vide.assert_called()
 
     def test_filtre_par_type_modification(self, mock_st, mock_service):
         """Vérifie le filtrage par type"""
@@ -285,7 +291,7 @@ class TestRenderHistorique:
         # Vérifie que metric est appelé pour les stats
         assert mock_st.metric.call_count >= 3
 
-    def test_affiche_info_si_filtres_vident_resultats(self, mock_st, mock_service):
+    def test_affiche_info_si_filtres_vident_resultats(self, mock_st, mock_service, mock_etat_vide):
         """Vérifie le message si filtres ne matchent rien"""
         mock_st.slider.return_value = 30
         mock_st.selectbox.return_value = "Tous"
@@ -303,7 +309,7 @@ class TestRenderHistorique:
 
         afficher_historique()
 
-        mock_st.info.assert_called()
+        mock_etat_vide.assert_called()
 
     def test_gere_exception_service(self, mock_st, mock_service):
         """Vérifie la gestion d'erreur du service"""
