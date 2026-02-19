@@ -18,7 +18,7 @@ class ConstructeurFormulaire:
     Générateur de formulaires dynamiques
 
     Usage:
-        form = FormBuilder("my_form")
+        form = ConstructeurFormulaire("my_form")
         form.add_text("nom", "Nom", required=True)
         form.add_number("age", "Âge", min_value=0)
 
@@ -406,7 +406,3 @@ class ConstructeurFormulaire:
     # Alias render/data
     afficher = render
     obtenir_donnees = get_data
-
-
-# Alias pour compatibilité
-FormBuilder = ConstructeurFormulaire

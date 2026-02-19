@@ -23,7 +23,6 @@ class LimiteurDebit:
     ):
         self.stockage = stockage or _stockage
         self.config = config or config_limitation_debit
-        self.store = self.stockage
 
     def _generer_cle(
         self,
@@ -151,28 +150,6 @@ class LimiteurDebit:
             response.headers["X-RateLimit-Remaining"] = str(info_limite.get("remaining", 0))
             response.headers["X-RateLimit-Reset"] = str(info_limite.get("reset", 0))
 
-    # Alias anglais
-    def check_rate_limit(
-        self,
-        request: Request,
-        user_id: str | None = None,
-        is_premium: bool = False,
-        is_ai_endpoint: bool = False,
-    ) -> dict[str, Any]:
-        return self.verifier_limite(request, user_id, is_premium, is_ai_endpoint)
-
-    def add_headers(self, response: Response, rate_info: dict[str, Any]):
-        return self.ajouter_headers(response, rate_info)
-
-    def _get_key(
-        self, request: Request, identifier: str | None = None, endpoint: str | None = None
-    ) -> str:
-        return self._generer_cle(request, identifier, endpoint)
-
-
-# Alias rétrocompatibilité
-RateLimiter = LimiteurDebit
 
 # Instance globale
 limiteur_debit = LimiteurDebit()
-rate_limiter = limiteur_debit

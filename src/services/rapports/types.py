@@ -100,16 +100,6 @@ class RapportPlanning(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# ALIAS RÉTROCOMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
-
-# Alias anglais pour pdf_export.py
-RecettePDFData = DonneesRecettePDF
-PlanningPDFData = DonneesPlanningPDF
-CoursesPDFData = DonneesCoursesPDF
-
-
-# ═══════════════════════════════════════════════════════════
 # EXPORTS
 # ═══════════════════════════════════════════════════════════
 
@@ -123,8 +113,4 @@ __all__ = [
     "RapportBudget",
     "AnalyseGaspillage",
     "RapportPlanning",
-    # Alias rétrocompatibilité
-    "RecettePDFData",
-    "PlanningPDFData",
-    "CoursesPDFData",
 ]

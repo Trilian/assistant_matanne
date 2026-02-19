@@ -52,14 +52,6 @@ class TestStrategieLimitationDebit:
         assert hasattr(StrategieLimitationDebit, "FENETRE_GLISSANTE")
         assert hasattr(StrategieLimitationDebit, "SEAU_A_JETONS")
 
-    def test_alias_anglais_existent(self):
-        """Les alias anglais sont définis."""
-        from src.api.rate_limiting import RateLimitStrategy
-
-        assert hasattr(RateLimitStrategy, "FIXED_WINDOW")
-        assert hasattr(RateLimitStrategy, "SLIDING_WINDOW")
-        assert hasattr(RateLimitStrategy, "TOKEN_BUCKET")
-
     def test_valeurs_equivalentes(self):
         """Stratégies françaises et anglaises ont mêmes valeurs."""
         from src.api.rate_limiting import StrategieLimitationDebit
@@ -107,35 +99,6 @@ class TestConfigLimitationDebit:
         assert config.requetes_ia_par_minute < config.requetes_par_minute
         assert config.requetes_ia_par_heure < config.requetes_par_heure
         assert config.requetes_ia_par_jour < config.requetes_par_jour
-
-    def test_alias_anglais_proprietaires(self):
-        """Les alias anglais retournent les bonnes valeurs."""
-        from src.api.rate_limiting import ConfigLimitationDebit
-
-        config = ConfigLimitationDebit(requetes_par_minute=42)
-
-        assert config.requests_per_minute == 42
-        assert config.requests_per_minute == config.requetes_par_minute
-
-    def test_tous_alias_anglais(self):
-        """Tous les alias anglais sont testés pour couverture."""
-        from src.api.rate_limiting import ConfigLimitationDebit
-
-        config = ConfigLimitationDebit()
-
-        # Tous les alias anglais doivent fonctionner
-        assert config.requests_per_minute == config.requetes_par_minute
-        assert config.requests_per_hour == config.requetes_par_heure
-        assert config.requests_per_day == config.requetes_par_jour
-        assert config.anonymous_requests_per_minute == config.requetes_anonyme_par_minute
-        assert config.authenticated_requests_per_minute == config.requetes_authentifie_par_minute
-        assert config.premium_requests_per_minute == config.requetes_premium_par_minute
-        assert config.ai_requests_per_minute == config.requetes_ia_par_minute
-        assert config.ai_requests_per_hour == config.requetes_ia_par_heure
-        assert config.ai_requests_per_day == config.requetes_ia_par_jour
-        assert config.strategy == config.strategie
-        assert config.enable_headers == config.activer_headers
-        assert config.exempt_paths == config.chemins_exemptes
 
     def test_chemins_exemptes_par_defaut(self):
         """Les chemins exemptés par défaut sont corrects."""
@@ -212,22 +175,6 @@ class TestStockageLimitationDebit:
         stockage.bloquer(cle, 60)
 
         assert stockage.est_bloque(cle)
-
-    def test_alias_anglais_stockage(self, stockage):
-        """Les alias anglais fonctionnent."""
-        cle = "test:alias"
-
-        compte = stockage.increment(cle, 60)
-        assert compte == 1
-
-        compte = stockage.get_count(cle, 60)
-        assert compte == 1
-
-        restant = stockage.get_remaining(cle, 60, 10)
-        assert restant == 9
-
-        stockage.block(cle, 60)
-        assert stockage.is_blocked(cle)
 
     def test_nettoyage_anciennes_entrees(self, stockage):
         """Les entrées expirées sont nettoyées."""
@@ -345,14 +292,6 @@ class TestLimiteurDebit:
             resultat = limiteur.verifier_limite(request2, id_utilisateur="user_abc")
             assert resultat["allowed"]
 
-    def test_alias_check_rate_limit(self, limiteur):
-        """L'alias anglais fonctionne."""
-        request = self._creer_requete_mock()
-
-        resultat = limiteur.check_rate_limit(request)
-
-        assert resultat["allowed"] is True
-
 
 # ═══════════════════════════════════════════════════════════
 # TESTS MIDDLEWARE
@@ -367,12 +306,6 @@ class TestMiddlewareLimitationDebit:
         from src.api.rate_limiting import MiddlewareLimitationDebit
 
         assert MiddlewareLimitationDebit is not None
-
-    def test_alias_anglais(self):
-        """L'alias anglais existe."""
-        from src.api.rate_limiting import MiddlewareLimitationDebit, RateLimitMiddleware
-
-        assert RateLimitMiddleware is MiddlewareLimitationDebit
 
     def test_middleware_dans_app(self):
         """Le middleware est utilisable dans une app FastAPI."""
@@ -398,10 +331,9 @@ class TestDecorateurLimiteDebit:
 
     def test_import_decorateur(self):
         """Le décorateur s'importe."""
-        from src.api.rate_limiting import limite_debit, rate_limit
+        from src.api.rate_limiting import limite_debit
 
         assert callable(limite_debit)
-        assert callable(rate_limit)
 
     def test_decorateur_sur_fonction(self):
         """Le décorateur peut décorer une fonction."""
@@ -412,16 +344,6 @@ class TestDecorateurLimiteDebit:
             return "ok"
 
         assert callable(ma_fonction)
-
-    def test_alias_rate_limit(self):
-        """L'alias rate_limit fonctionne."""
-        from src.api.rate_limiting import rate_limit
-
-        @rate_limit(requests_per_minute=10)
-        async def english_function():
-            return "ok"
-
-        assert callable(english_function)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -569,14 +491,6 @@ class TestUtilitaires:
         assert "configuration" in stats
         assert "requetes_par_minute" in stats["configuration"]
 
-    def test_get_rate_limit_stats_alias(self):
-        """Alias anglais pour obtenir_stats_limitation."""
-        from src.api.rate_limiting import get_rate_limit_stats
-
-        stats = get_rate_limit_stats()
-
-        assert "cles_actives" in stats
-
     def test_reinitialiser_limites(self):
         """reinitialiser_limites réinitialise les compteurs."""
         from src.api.rate_limiting import (
@@ -591,13 +505,6 @@ class TestUtilitaires:
         reinitialiser_limites()
 
         # Les données devraient être nettoyées (nouveau stockage)
-
-    def test_reset_rate_limits_alias(self):
-        """Alias anglais pour reinitialiser_limites."""
-        from src.api.rate_limiting import reset_rate_limits
-
-        # Doit s'exécuter sans erreur
-        reset_rate_limits()
 
     def test_configurer_limites(self):
         """configurer_limites met à jour la config globale."""
@@ -618,16 +525,6 @@ class TestUtilitaires:
         )
 
         assert config_après.requetes_par_minute == 999
-
-    def test_configure_rate_limits_alias(self):
-        """Alias anglais pour configurer_limites."""
-        from src.api.rate_limiting import (
-            ConfigLimitationDebit,
-            configure_rate_limits,
-        )
-
-        config = ConfigLimitationDebit(requetes_par_minute=777)
-        configure_rate_limits(config)
 
 
 class TestLimiteurDebitHeaders:
@@ -684,17 +581,6 @@ class TestLimiteurDebitHeaders:
         # Headers ne devraient pas être ajoutés
         assert "X-RateLimit-Limit" not in response.headers
 
-    def test_add_headers_alias(self, limiteur_avec_headers_actifs):
-        """Alias add_headers fonctionne."""
-        response = MagicMock()
-        response.headers = {}
-
-        info_limite = {"limit": 60, "remaining": 55, "reset": 30}
-
-        limiteur_avec_headers_actifs.add_headers(response, info_limite)
-
-        assert "X-RateLimit-Limit" in response.headers
-
     def test_ajouter_headers_limite_negative(self, limiteur_avec_headers_actifs):
         """Headers non ajoutés si limite négative (chemin exempté)."""
         response = MagicMock()
@@ -741,14 +627,6 @@ class TestLimiteurDebitClé:
 
         # Doit utiliser la première IP du X-Forwarded-For
         assert "ip:203.0.113.195" in cle
-
-    def test_get_key_alias(self, limiteur):
-        """Alias _get_key fonctionne."""
-        request = self._creer_requete_mock()
-
-        cle = limiteur._get_key(request, identifier="user_123")
-
-        assert "user:user_123" in cle
 
     def test_generer_cle_client_none(self, limiteur):
         """Génère clé avec client=None."""
@@ -855,17 +733,6 @@ class TestStockageTempsReset:
         # Devrait être proche de 60 secondes
         assert 55 <= reset <= 60
 
-    def test_get_reset_time_alias(self):
-        """Alias get_reset_time fonctionne."""
-        from src.api.rate_limiting import StockageLimitationDebit
-
-        stockage = StockageLimitationDebit()
-        stockage.incrementer("test:alias", 60)
-
-        reset = stockage.get_reset_time("test:alias", 60)
-
-        assert reset >= 0
-
 
 class TestDecorateurLimiteDebitAvance:
     """Tests avancés pour le décorateur limite_debit."""
@@ -949,35 +816,5 @@ class TestDependancesFastAPI:
         request.headers.get.return_value = None
 
         result = await verifier_limite_debit_ia(request)
-
-        assert result["allowed"] is True
-
-    @pytest.mark.asyncio
-    async def test_check_rate_limit_alias(self):
-        """Alias check_rate_limit fonctionne."""
-        from src.api.rate_limiting import check_rate_limit
-
-        request = MagicMock()
-        request.client.host = "9.10.11.12"
-        request.url.path = "/api/test"
-        request.headers.get.return_value = None
-
-        result = await check_rate_limit(request)
-
-        assert result["allowed"] is True
-
-    @pytest.mark.asyncio
-    async def test_check_ai_rate_limit_alias(self):
-        """Alias check_ai_rate_limit fonctionne."""
-        from src.api.rate_limiting import check_ai_rate_limit, reinitialiser_limites
-
-        reinitialiser_limites()
-
-        request = MagicMock()
-        request.client.host = "13.14.15.16"
-        request.url.path = "/api/ai/suggest"
-        request.headers.get.return_value = None
-
-        result = await check_ai_rate_limit(request)
 
         assert result["allowed"] is True

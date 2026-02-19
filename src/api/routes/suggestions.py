@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.dependencies import get_current_user
 from src.api.rate_limiting import verifier_limite_debit_ia
+from src.api.utils import gerer_exception_api
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ router = APIRouter(prefix="/api/v1/suggestions", tags=["IA"])
 
 
 @router.get("/recettes")
+@gerer_exception_api
 async def suggest_recettes(
     contexte: str = "repas équilibré",
     nombre: int = 3,
@@ -37,30 +39,24 @@ async def suggest_recettes(
     Returns:
         Liste de suggestions de recettes
     """
-    try:
-        from src.services.cuisine.recettes import get_recette_service
+    from src.services.cuisine.recettes import get_recette_service
 
-        service = get_recette_service()
+    service = get_recette_service()
 
-        suggestions = service.suggerer_recettes_ia(
-            contexte=contexte,
-            nombre_suggestions=nombre,
-        )
+    suggestions = service.suggerer_recettes_ia(
+        contexte=contexte,
+        nombre_suggestions=nombre,
+    )
 
-        return {
-            "suggestions": suggestions,
-            "contexte": contexte,
-            "nombre": nombre,
-        }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erreur suggestions IA: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    return {
+        "suggestions": suggestions,
+        "contexte": contexte,
+        "nombre": nombre,
+    }
 
 
 @router.get("/planning")
+@gerer_exception_api
 async def suggest_planning(
     jours: int = 7,
     personnes: int = 4,
@@ -78,24 +74,17 @@ async def suggest_planning(
     Returns:
         Suggestion de planning hebdomadaire
     """
-    try:
-        from src.services.cuisine.planning import get_planning_service
+    from src.services.cuisine.planning import get_planning_service
 
-        service = get_planning_service()
+    service = get_planning_service()
 
-        planning = service.generer_planning_ia(
-            nombre_jours=jours,
-            nombre_personnes=personnes,
-        )
+    planning = service.generer_planning_ia(
+        nombre_jours=jours,
+        nombre_personnes=personnes,
+    )
 
-        return {
-            "planning": planning,
-            "jours": jours,
-            "personnes": personnes,
-        }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erreur suggestions planning: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    return {
+        "planning": planning,
+        "jours": jours,
+        "personnes": personnes,
+    }

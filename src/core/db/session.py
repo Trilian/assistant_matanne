@@ -103,7 +103,3 @@ def obtenir_db_securise() -> Generator[Session | None, None, None]:
     except Exception as e:
         logger.error(f"Erreur DB: {e}")
         yield None
-
-
-# Alias pour compatibilité
-get_db_context = obtenir_contexte_db

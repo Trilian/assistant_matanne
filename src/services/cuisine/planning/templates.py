@@ -276,12 +276,8 @@ def obtenir_service_templates() -> ServiceTemplates:
     return _service_templates
 
 
-get_templates_service = obtenir_service_templates
-
-
 __all__ = [
     "JOURS_SEMAINE",
     "ServiceTemplates",
     "obtenir_service_templates",
-    "get_templates_service",
 ]

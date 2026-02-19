@@ -29,12 +29,68 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
+# Tags pour organiser la documentation OpenAPI
+tags_metadata = [
+    {
+        "name": "Santé",
+        "description": "Endpoints de vérification de l'état de l'API",
+    },
+    {
+        "name": "Recettes",
+        "description": "Gestion des recettes de cuisine - CRUD complet",
+    },
+    {
+        "name": "Inventaire",
+        "description": "Gestion du stock alimentaire et des articles",
+    },
+    {
+        "name": "Courses",
+        "description": "Listes de courses et articles à acheter",
+    },
+    {
+        "name": "Planning",
+        "description": "Planning des repas de la semaine",
+    },
+    {
+        "name": "IA",
+        "description": "Suggestions intelligentes via Mistral AI",
+    },
+]
+
 app = FastAPI(
     title="Assistant Matanne API",
-    description="API REST pour la gestion familiale",
+    description="""
+## API REST pour la gestion familiale
+
+Cette API permet d'accéder aux fonctionnalités de l'Assistant Matanne:
+
+- 🍽️ **Recettes**: CRUD complet pour gérer les recettes
+- 📦 **Inventaire**: Suivi du stock alimentaire
+- 🛒 **Courses**: Gestion des listes de courses
+- 📅 **Planning**: Planification des repas
+- 🤖 **IA**: Suggestions intelligentes
+
+### Authentification
+
+L'API utilise des tokens JWT. En mode développement, un utilisateur dev est utilisé par défaut.
+
+### Rate Limiting
+
+Les endpoints sont protégés par une limitation de débit:
+- Endpoints standards: 60 req/min
+- Endpoints IA: 10 req/min
+    """,
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
+    openapi_tags=tags_metadata,
+    contact={
+        "name": "Assistant Matanne",
+        "url": "https://github.com/Trilian/assistant_matanne",
+    },
+    license_info={
+        "name": "MIT",
+    },
 )
 
 # CORS sécurisé

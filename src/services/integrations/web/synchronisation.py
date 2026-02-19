@@ -544,7 +544,4 @@ __all__ = [
     "SyncEvent",
     "SyncEventType",
     "PresenceInfo",
-    "render_presence_indicator",
-    "render_typing_indicator",
-    "render_sync_status",
 ]

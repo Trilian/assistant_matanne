@@ -3,6 +3,7 @@ Modèles SQLAlchemy pour le système et les sauvegardes.
 
 Contient :
 - Backup : Historique des sauvegardes
+- ActionHistory : Historique des actions utilisateur (audit)
 """
 
 from datetime import datetime
@@ -13,6 +14,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     String,
+    Text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
@@ -60,3 +62,54 @@ class Backup(Base):
 
     def __repr__(self) -> str:
         return f"<Backup(id={self.id}, filename='{self.filename}', size={self.size_bytes})>"
+
+
+# ═══════════════════════════════════════════════════════════
+# TABLE ACTION_HISTORY
+# ═══════════════════════════════════════════════════════════
+
+
+class ActionHistory(Base):
+    """Historique des actions utilisateur pour audit.
+
+    Table SQL: action_history
+    Utilisé par: src/services/core/utilisateur/historique.py
+
+    Attributes:
+        user_id: ID de l'utilisateur
+        user_name: Nom de l'utilisateur
+        action_type: Type d'action (recette.created, etc.)
+        entity_type: Type d'entité (recette, inventaire, etc.)
+        entity_id: ID de l'entité concernée
+        entity_name: Nom de l'entité
+        description: Description lisible de l'action
+        details: Détails additionnels (JSON)
+        old_value: Valeur avant modification (pour undo)
+        new_value: Valeur après modification
+        ip_address: Adresse IP
+        user_agent: User agent du navigateur
+    """
+
+    __tablename__ = "action_history"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    user_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    action_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    entity_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    entity_id: Mapped[int | None] = mapped_column(BigInteger)
+    entity_name: Mapped[str | None] = mapped_column(String(255))
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    details: Mapped[dict | None] = mapped_column(JSONB, default=dict)
+    old_value: Mapped[dict | None] = mapped_column(JSONB)
+    new_value: Mapped[dict | None] = mapped_column(JSONB)
+    ip_address: Mapped[str | None] = mapped_column(String(45))
+    user_agent: Mapped[str | None] = mapped_column(String(500))
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+    def __repr__(self) -> str:
+        return (
+            f"<ActionHistory(id={self.id}, user='{self.user_name}', action='{self.action_type}')>"
+        )

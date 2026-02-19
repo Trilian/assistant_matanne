@@ -40,12 +40,6 @@ class TestConstructeurFormulaireCreation:
         assert form.form_id == "my_form"
         assert form.title == "Mon Formulaire"
 
-    def test_alias_form_builder(self):
-        """Test alias FormBuilder."""
-        from src.ui.core.base_form import ConstructeurFormulaire, FormBuilder
-
-        assert FormBuilder is ConstructeurFormulaire
-
 
 # ═══════════════════════════════════════════════════════════
 # AJOUT CHAMPS
@@ -597,14 +591,12 @@ class TestIntegration:
 
     def test_exports_from_core(self):
         """Test exports depuis core."""
-        from src.ui.core import ConstructeurFormulaire, FormBuilder
+        from src.ui.core import ConstructeurFormulaire
 
         assert ConstructeurFormulaire is not None
-        assert FormBuilder is ConstructeurFormulaire
 
     def test_exports_from_ui(self):
         """Test exports depuis ui."""
-        from src.ui import ConstructeurFormulaire, FormBuilder
+        from src.ui import ConstructeurFormulaire
 
         assert ConstructeurFormulaire is not None
-        assert FormBuilder is ConstructeurFormulaire

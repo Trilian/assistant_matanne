@@ -522,15 +522,7 @@ def obtenir_service_suggestions() -> ServiceSuggestions:
     return _suggestions_service
 
 
-# Alias pour compatibilité
-SuggestionsIAService = ServiceSuggestions
-get_suggestions_ia_service = obtenir_service_suggestions
-
-
 __all__ = [
     "ServiceSuggestions",
     "obtenir_service_suggestions",
-    # Alias de compatibilité
-    "SuggestionsIAService",
-    "get_suggestions_ia_service",
 ]

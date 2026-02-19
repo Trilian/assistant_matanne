@@ -444,6 +444,11 @@ class ZoneJardin(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
+    # Lien avec le plan jardin (optionnel)
+    plan_id: Mapped[int | None] = mapped_column(
+        ForeignKey("plans_jardin.id", ondelete="SET NULL"), index=True
+    )
+
     nom: Mapped[str] = mapped_column(String(100), nullable=False)
     type_zone: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     superficie_m2: Mapped[Decimal | None] = mapped_column(Numeric(8, 2))
@@ -509,6 +514,10 @@ class PlanteJardin(Base):
     # État
     etat: Mapped[str] = mapped_column(String(20), default="bon")
 
+    # Position sur le plan (optionnel, pour affichage 2D)
+    position_x: Mapped[Decimal | None] = mapped_column(Numeric(8, 2))
+    position_y: Mapped[Decimal | None] = mapped_column(Numeric(8, 2))
+
     # Dates
     date_plantation: Mapped[date | None] = mapped_column(Date)
     mois_semis: Mapped[str | None] = mapped_column(String(100))  # JSON array: "[3,4,5]"
@@ -526,6 +535,90 @@ class PlanteJardin(Base):
 
     # Relations
     zone: Mapped["ZoneJardin"] = relationship(back_populates="plantes")
+    actions: Mapped[list["ActionPlante"]] = relationship(
+        back_populates="plante", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<PlanteJardin(id={self.id}, nom='{self.nom}', etat='{self.etat}')>"
+
+
+# ═══════════════════════════════════════════════════════════
+# PLAN JARDIN
+# ═══════════════════════════════════════════════════════════
+
+
+class PlanJardin(Base):
+    """Plan 2D du jardin avec ses dimensions.
+
+    Attributes:
+        nom: Nom du plan
+        largeur: Largeur en mètres
+        hauteur: Hauteur en mètres
+        description: Description du plan
+    """
+
+    __tablename__ = "plans_jardin"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    nom: Mapped[str] = mapped_column(String(100), nullable=False)
+    largeur: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False)
+    hauteur: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+
+    # Métadonnées
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    # Relations
+    zones: Mapped[list["ZoneJardin"]] = relationship(
+        foreign_keys="ZoneJardin.plan_id",
+        backref="plan",
+    )
+
+    def __repr__(self) -> str:
+        return f"<PlanJardin(id={self.id}, nom='{self.nom}', {self.largeur}x{self.hauteur}m)>"
+
+
+# ═══════════════════════════════════════════════════════════
+# ACTIONS PLANTES
+# ═══════════════════════════════════════════════════════════
+
+
+class ActionPlante(Base):
+    """Historique des actions effectuées sur une plante.
+
+    Attributes:
+        plante_id: Plante concernée
+        type_action: Type d'action (arrosage, taille, récolte, traitement...)
+        date_action: Date de l'action
+        quantite: Quantité (pour récoltes)
+        notes: Notes supplémentaires
+    """
+
+    __tablename__ = "actions_plantes"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    # Lien plante
+    plante_id: Mapped[int] = mapped_column(
+        ForeignKey("plantes_jardin.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+
+    # Détails action
+    type_action: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    date_action: Mapped[date] = mapped_column(Date, nullable=False, default=date.today)
+    quantite: Mapped[Decimal | None] = mapped_column(Numeric(8, 2))
+    notes: Mapped[str | None] = mapped_column(Text)
+
+    # Métadonnées
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    # Relations
+    plante: Mapped["PlanteJardin"] = relationship(back_populates="actions")
+
+    def __repr__(self) -> str:
+        return f"<ActionPlante(id={self.id}, plante={self.plante_id}, type='{self.type_action}')>"

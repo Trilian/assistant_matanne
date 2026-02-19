@@ -45,7 +45,7 @@ class TestImports:
             assert "nom" in idee
             assert "type" in idee
             assert "economie_estimee" in idee
-            assert "cout_initial" in idee
+            assert "cout_nouveau_initial" in idee
             assert "description" in idee
 
     @patch("src.modules.maison.eco_tips.st")
@@ -328,7 +328,7 @@ class TestCalculateStats:
         assert stats["nb_actions"] == 0
         assert stats["economie_mensuelle"] == 0
         assert stats["economie_annuelle"] == 0
-        assert stats["cout_initial"] == 0
+        assert stats["cout_nouveau_initial"] == 0
         assert stats["roi_mois"] == 0
         assert stats["economies_totales"] == 0
 
@@ -337,7 +337,7 @@ class TestCalculateStats:
         """Test calculate_stats avec des actions."""
         mock_action = MagicMock()
         mock_action.economie_mensuelle = Decimal("10")
-        mock_action.cout_initial = Decimal("50")
+        mock_action.cout_nouveau_initial = Decimal("50")
         mock_action.date_debut = date(2025, 1, 1)
 
         mock_get_actions.return_value = [mock_action]
@@ -349,7 +349,7 @@ class TestCalculateStats:
         assert stats["nb_actions"] == 1
         assert stats["economie_mensuelle"] == 10.0
         assert stats["economie_annuelle"] == 120.0
-        assert stats["cout_initial"] == 50.0
+        assert stats["cout_nouveau_initial"] == 50.0
         assert stats["roi_mois"] == 5.0  # 50 / 10 = 5 mois
 
     @patch("src.modules.maison.eco_tips.get_all_actions")
@@ -357,7 +357,7 @@ class TestCalculateStats:
         """Test calculate_stats avec valeurs None."""
         mock_action = MagicMock()
         mock_action.economie_mensuelle = None
-        mock_action.cout_initial = None
+        mock_action.cout_nouveau_initial = None
         mock_action.date_debut = None
 
         mock_get_actions.return_value = [mock_action]
@@ -387,7 +387,7 @@ class TestUIComponents:
             "nb_actions": 3,
             "economie_mensuelle": 30.0,
             "economie_annuelle": 360.0,
-            "cout_initial": 100.0,
+            "cout_nouveau_initial": 100.0,
             "roi_mois": 3.3,
             "economies_totales": 150.0,
         }
@@ -417,7 +417,7 @@ class TestUIComponents:
         mock_action.description = "Test description"
         mock_action.date_debut = date.today()
         mock_action.economie_mensuelle = Decimal("10")
-        mock_action.cout_initial = Decimal("50")
+        mock_action.cout_nouveau_initial = Decimal("50")
         mock_action.actif = True
 
         # Mock container

@@ -48,7 +48,7 @@ class ServiceIOBase:
     Génère automatiquement Import/Export depuis config
 
     Usage:
-        config = IOConfig(
+        config = ConfigurationIO(
             field_mapping={
                 "nom": "Nom",
                 "quantite": "Quantité"
@@ -56,7 +56,7 @@ class ServiceIOBase:
             required_fields=["nom"]
         )
 
-        io = BaseIOService(config)
+        io = ServiceIOBase(config)
 
         # Export
         csv = io.to_csv(items)
@@ -187,9 +187,3 @@ class ServiceIOBase:
 def creer_service_io(config: ConfigurationIO) -> ServiceIOBase:
     """Factory pour créer service I/O"""
     return ServiceIOBase(config)
-
-
-# Alias pour compatibilité
-IOConfig = ConfigurationIO
-BaseIOService = ServiceIOBase
-create_io_service = creer_service_io

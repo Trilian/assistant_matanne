@@ -608,23 +608,7 @@ class TestGestionnaireErreurs:
 
 
 # ═══════════════════════════════════════════════════════════
-# SECTION 9: TESTS ALIAS
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestAliases:
-    """Tests des alias pour compatibilité."""
-
-    def test_handle_errors_alias_exists(self):
-        """Test que l'alias handle_errors existe."""
-        from src.core.errors import handle_errors
-
-        assert callable(handle_errors)
-
-
-# ═══════════════════════════════════════════════════════════
-# SECTION 10: TESTS AVANCÉS POUR COUVERTURE 85%+
+# SECTION 9: TESTS AVANCÉS POUR COUVERTURE 85%+
 # ═══════════════════════════════════════════════════════════
 
 

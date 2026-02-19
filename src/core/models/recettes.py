@@ -251,10 +251,6 @@ class Recette(Base):
         return f"<Recette(id={self.id}, nom='{self.nom}')>"
 
 
-# Alias pour compatibilité
-Recipe = Recette
-
-
 class RecetteIngredient(Base):
     """Association Recette ↔ Ingrédient avec quantité.
 

@@ -251,10 +251,6 @@ class ServiceBackup(BackupRestoreMixin, BackupExportMixin):
                 logger.info(f"🗑️ Ancien backup supprimé: {old_backup.name}")
 
 
-# Alias pour rétrocompatibilité
-BackupService = ServiceBackup
-
-
 # ═══════════════════════════════════════════════════════════
 # FACTORY
 # ═══════════════════════════════════════════════════════════
@@ -271,5 +267,5 @@ def obtenir_service_backup(config: BackupConfig | None = None) -> ServiceBackup:
     return _backup_service
 
 
-# Alias pour rétrocompatibilité
+# Alias pour rétrocompatibilité (utilisé par 3 modules)
 get_backup_service = obtenir_service_backup

@@ -19,27 +19,27 @@ src/ui/
 
 ### `components/` - Widgets Atomiques
 
-| Fichier | Description |
-|---------|-------------|
-| `atoms.py` | Éléments de base: `badge`, `etat_vide`, `carte_metrique`, `notification` |
-| `forms.py` | Champs de formulaire: `champ_formulaire`, `panneau_filtres` |
-| `data.py` | Affichage de données: `tableau_donnees`, `pagination`, `barre_recherche` |
-| `charts.py` | Graphiques Plotly: `graphique_ligne`, `graphique_barres`, `graphique_camembert` |
-| `dynamic.py` | Composants dynamiques: `Modale`, `ListeDynamique`, `AssistantEtapes` |
-| `alertes.py` | Alertes contextuelles: `alerte_stock`, `alerte_peremption` |
-| `layouts.py` | Mise en page: `carte_item`, `grille_cartes`, `accordeon` |
-| `metrics.py` | Métriques: `ligne_metriques`, `jauge_progression` |
-| `system.py` | Système: `indicateur_sante`, `info_version` |
-| `camera_scanner.py` | Scanner codes-barres (pyzbar/zxing) |
+| Fichier             | Description                                                                     |
+| ------------------- | ------------------------------------------------------------------------------- |
+| `atoms.py`          | Éléments de base: `badge`, `etat_vide`, `carte_metrique`, `notification`        |
+| `forms.py`          | Champs de formulaire: `champ_formulaire`, `panneau_filtres`                     |
+| `data.py`           | Affichage de données: `tableau_donnees`, `pagination`, `barre_recherche`        |
+| `charts.py`         | Graphiques Plotly: `graphique_ligne`, `graphique_barres`, `graphique_camembert` |
+| `dynamic.py`        | Composants dynamiques: `Modale`, `ListeDynamique`, `AssistantEtapes`            |
+| `alertes.py`        | Alertes contextuelles: `alerte_stock`, `alerte_peremption`                      |
+| `layouts.py`        | Mise en page: `carte_item`, `grille_cartes`, `accordeon`                        |
+| `metrics.py`        | Métriques: `ligne_metriques`, `jauge_progression`                               |
+| `system.py`         | Système: `indicateur_sante`, `info_version`                                     |
+| `camera_scanner.py` | Scanner codes-barres (pyzbar/zxing)                                             |
 
 ### `core/` - Classes de Base
 
-| Classe | Description | Alias français |
-|--------|-------------|----------------|
+| Classe                   | Description                          | Alias français                                      |
+| ------------------------ | ------------------------------------ | --------------------------------------------------- |
 | `ConstructeurFormulaire` | Générateur de formulaires dynamiques | `ajouter_texte()`, `ajouter_nombre()`, `afficher()` |
-| `ModuleUIBase` | Renderer CRUD universel | `afficher()` |
-| `ServiceIOBase` | Import/Export CSV/JSON | `vers_csv()`, `depuis_json()` |
-| `ConfigurationModule` | Configuration dataclass pour modules |
+| `ModuleUIBase`           | Renderer CRUD universel              | `afficher()`                                        |
+| `ServiceIOBase`          | Import/Export CSV/JSON               | `vers_csv()`, `depuis_json()`                       |
+| `ConfigurationModule`    | Configuration dataclass pour modules |
 
 ### `feedback/` - Retour Utilisateur
 
@@ -50,6 +50,7 @@ src/ui/
 ### `tablet/` - Mode Tablette
 
 Mode optimisé pour tablettes en cuisine:
+
 - `ModeTablette`: Enum des modes (NORMAL, TABLETTE, CUISINE)
 - `appliquer_mode_tablette()`, `fermer_mode_tablette()`
 - `afficher_vue_recette_cuisine()`: Vue recette pas-à-pas
@@ -58,6 +59,7 @@ Mode optimisé pour tablettes en cuisine:
 ### `views/` - Vues Extraites
 
 Vues UI extraites des services pour séparation des responsabilités:
+
 - `authentification.py`: `afficher_formulaire_connexion()`, `require_authenticated()`
 - `meteo.py`: `afficher_meteo_jardin()`
 - `pwa.py`: `afficher_invite_installation_pwa()`, `injecter_meta_pwa()`
@@ -158,6 +160,5 @@ pytest tests/ui/test_tablet_mode.py -v
 ## 📋 Conventions
 
 1. **Nommage français** pour toutes les fonctions/classes publiques
-2. **Alias anglais** conservés pour rétrocompatibilité (`FormBuilder = ConstructeurFormulaire`)
-3. **Docstrings** en français
-4. **Point d'entrée unique**: `src.ui` re-exporte tous les symboles publics
+2. **Docstrings** en français
+3. **Point d'entrée unique**: `src.ui` re-exporte tous les symboles publics

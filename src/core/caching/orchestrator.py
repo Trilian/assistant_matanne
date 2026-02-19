@@ -295,8 +295,3 @@ def avec_cache_multi(
 def obtenir_cache() -> CacheMultiNiveau:
     """Retourne l'instance globale du cache."""
     return CacheMultiNiveau()
-
-
-# Alias anglais
-cached = avec_cache_multi
-get_cache = obtenir_cache

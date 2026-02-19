@@ -72,6 +72,9 @@ class InventaireStatutMixin:
         Returns:
             ActionObjetResult avec les liens créés
         """
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.temps_entretien import LogStatutObjet, ObjetMaison
+
         logger.info(
             f"Changement statut objet {demande.objet_id}: "
             f"{demande.ancien_statut} → {demande.nouveau_statut}"
@@ -81,10 +84,39 @@ class InventaireStatutMixin:
         lien_courses = None
         erreurs = []
 
-        try:
+        def _update_objet(session: Session) -> None:
             # 1. Mettre à jour le statut de l'objet
-            # TODO: Implémenter avec modèle ObjetMaison
-            # Pour l'instant, simulation
+            objet = session.query(ObjetMaison).filter(ObjetMaison.id == demande.objet_id).first()
+            if objet:
+                ancien_statut = objet.statut
+                objet.statut = demande.nouveau_statut.value
+                if demande.priorite:
+                    objet.priorite_remplacement = demande.priorite.value
+                if demande.cout_estime:
+                    objet.prix_remplacement_estime = demande.cout_estime
+
+                # Logger le changement
+                log = LogStatutObjet(
+                    objet_id=demande.objet_id,
+                    ancien_statut=ancien_statut,
+                    nouveau_statut=demande.nouveau_statut.value,
+                    raison=demande.raison,
+                    prix_estime=demande.cout_estime,
+                    priorite=demande.priorite.value if demande.priorite else None,
+                    ajoute_courses=demande.ajouter_liste_courses,
+                    ajoute_budget=demande.ajouter_budget,
+                )
+                session.add(log)
+                session.commit()
+            else:
+                raise ValueError(f"Objet {demande.objet_id} non trouvé")
+
+        try:
+            if db is None:
+                with obtenir_contexte_db() as session:
+                    _update_objet(session)
+            else:
+                _update_objet(db)
 
             # 2. Si "à acheter", créer article liste courses
             if demande.ajouter_liste_courses and demande.nouveau_statut in [
@@ -218,9 +250,47 @@ class InventaireStatutMixin:
         Returns:
             Liste des objets avec statut à remplacer/acheter
         """
-        # TODO: Implémenter avec modèle ObjetMaison
-        # Pour l'instant, retourne liste vide
-        return []
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.temps_entretien import ObjetMaison, PieceMaison
+
+        def _impl(session: Session) -> list[ObjetAvecStatut]:
+            objets = (
+                session.query(ObjetMaison, PieceMaison.nom.label("piece_nom"))
+                .join(PieceMaison, ObjetMaison.piece_id == PieceMaison.id)
+                .filter(
+                    ObjetMaison.statut.in_(
+                        [
+                            StatutObjet.A_CHANGER.value,
+                            StatutObjet.A_ACHETER.value,
+                            StatutObjet.A_REPARER.value,
+                        ]
+                    )
+                )
+                .all()
+            )
+
+            return [
+                ObjetAvecStatut(
+                    id=obj.ObjetMaison.id,
+                    nom=obj.ObjetMaison.nom,
+                    piece_id=obj.ObjetMaison.piece_id,
+                    piece_nom=obj.piece_nom,
+                    categorie=obj.ObjetMaison.categorie,
+                    statut=StatutObjet(obj.ObjetMaison.statut),
+                    priorite=(
+                        PrioriteRemplacement(obj.ObjetMaison.priorite_remplacement)
+                        if obj.ObjetMaison.priorite_remplacement
+                        else PrioriteRemplacement.NORMALE
+                    ),
+                    cout_estime=obj.ObjetMaison.prix_remplacement_estime,
+                )
+                for obj in objets
+            ]
+
+        if db is None:
+            with obtenir_contexte_db() as session:
+                return _impl(session)
+        return _impl(db)
 
     # ─────────────────────────────────────────────────────────
     # LIENS INTER-MODULES (Courses / Budget)
@@ -231,15 +301,79 @@ class InventaireStatutMixin:
         objet_id: int,
         cout_estime: Decimal | None,
     ) -> LienObjetCourses:
-        """Crée un article de courses pour un objet à acheter."""
-        # TODO: Appeler ServiceCourses.ajouter_article()
+        """Crée un article de courses pour un objet à acheter.
+
+        Args:
+            objet_id: ID de l'objet à ajouter aux courses
+            cout_estime: Coût estimé de l'achat
+
+        Returns:
+            LienObjetCourses avec l'ID de l'article créé
+        """
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleCourses, Ingredient
+        from src.core.models.temps_entretien import ObjetMaison
+
         logger.info(f"Création article courses pour objet {objet_id}")
-        return LienObjetCourses(
-            objet_id=objet_id,
-            objet_nom="Objet placeholder",  # Récupérer de la DB
-            article_courses_id=None,  # Sera rempli après création
-            prix_estime=cout_estime,
-        )
+
+        with obtenir_contexte_db() as session:
+            # Récupérer l'objet pour avoir son nom
+            objet = session.query(ObjetMaison).filter(ObjetMaison.id == objet_id).first()
+            if not objet:
+                logger.warning(f"Objet {objet_id} non trouvé pour création article courses")
+                return LienObjetCourses(
+                    objet_id=objet_id,
+                    objet_nom="Objet inconnu",
+                    article_courses_id=None,
+                    prix_estime=cout_estime,
+                )
+
+            # Créer ou trouver un ingrédient "placeholder" pour objets maison
+            ingredient = (
+                session.query(Ingredient).filter(Ingredient.nom.ilike(f"%{objet.nom}%")).first()
+            )
+            if not ingredient:
+                ingredient = Ingredient(
+                    nom=objet.nom,
+                    categorie="maison",
+                    unite="pcs",
+                )
+                session.add(ingredient)
+                session.flush()
+
+            # Vérifier si article existe déjà
+            existant = (
+                session.query(ArticleCourses)
+                .filter(
+                    ArticleCourses.ingredient_id == ingredient.id,
+                    ArticleCourses.achete == False,
+                )
+                .first()
+            )
+
+            if existant:
+                article_id = existant.id
+                logger.info(f"Article courses existant trouvé: {article_id}")
+            else:
+                # Créer nouvel article courses
+                article = ArticleCourses(
+                    ingredient_id=ingredient.id,
+                    quantite_necessaire=1,
+                    notes=f"Objet maison - {objet.categorie or 'divers'}",
+                    priorite="haute" if cout_estime and cout_estime > 100 else "normale",
+                )
+                session.add(article)
+                session.commit()
+                session.refresh(article)
+                article_id = article.id
+                logger.info(f"Article courses créé: {article_id}")
+
+            return LienObjetCourses(
+                objet_id=objet_id,
+                objet_nom=objet.nom,
+                article_courses_id=article_id,
+                prix_estime=cout_estime,
+            )
 
     async def _creer_depense_budget_objet(
         self,
@@ -247,13 +381,55 @@ class InventaireStatutMixin:
         montant: Decimal,
         date_prevue: date | None = None,
     ) -> LienObjetBudget:
-        """Crée une dépense budget prévue pour un objet."""
-        # TODO: Appeler BudgetService.ajouter_depense_prevue()
+        """Crée une dépense budget prévue pour un objet.
+
+        Args:
+            objet_id: ID de l'objet pour lequel créer une dépense
+            montant: Montant prévu de la dépense
+            date_prevue: Date prévue de l'achat (optionnel)
+
+        Returns:
+            LienObjetBudget avec l'ID de la dépense créée
+        """
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.temps_entretien import ObjetMaison
+        from src.services.famille.budget import get_budget_service
+        from src.services.famille.budget.schemas import (
+            CategorieDepense,
+            Depense,
+        )
+
         logger.info(f"Création dépense budget pour objet {objet_id}: {montant}€")
+
+        with obtenir_contexte_db() as session:
+            # Récupérer l'objet pour avoir son nom
+            objet = session.query(ObjetMaison).filter(ObjetMaison.id == objet_id).first()
+            objet_nom = objet.nom if objet else "Objet inconnu"
+
+        # Créer la dépense via le service Budget
+        budget_service = get_budget_service()
+
+        depense = Depense(
+            date=date_prevue or date.today(),
+            montant=float(montant),
+            categorie=CategorieDepense.MAISON,
+            description=f"Achat prévu: {objet_nom}",
+            magasin="",
+            est_recurrente=False,
+        )
+
+        try:
+            depense_creee = budget_service.ajouter_depense(depense)
+            depense_id = depense_creee.id if depense_creee else None
+            logger.info(f"Dépense budget créée: {depense_id}")
+        except Exception as e:
+            logger.error(f"Erreur création dépense budget: {e}")
+            depense_id = None
+
         return LienObjetBudget(
             objet_id=objet_id,
-            objet_nom="Objet placeholder",  # Récupérer de la DB
-            depense_budget_id=None,  # Sera rempli après création
+            objet_nom=objet_nom,
+            depense_budget_id=depense_id,
             montant_prevu=montant,
             date_prevue=date_prevue,
         )

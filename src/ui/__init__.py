@@ -51,20 +51,12 @@ from .components import (
     widget_meteo_jour,
 )
 from .core import (
-    # Alias compatibilité
-    BaseIOService,
-    BaseModuleUI,
-    # Nouveaux noms français
+    # Noms français
     ConfigurationIO,
     ConfigurationModule,
     ConstructeurFormulaire,
-    FormBuilder,
-    IOConfig,
-    ModuleConfig,
     ModuleUIBase,
     ServiceIOBase,
-    create_io_service,
-    create_module_ui,
     creer_module_ui,
     creer_service_io,
 )
@@ -144,14 +136,6 @@ __all__ = [
     "ConfigurationIO",
     "ServiceIOBase",
     "creer_service_io",
-    # Core - Alias compatibilité
-    "BaseModuleUI",
-    "ModuleConfig",
-    "create_module_ui",
-    "FormBuilder",
-    "BaseIOService",
-    "IOConfig",
-    "create_io_service",
     # Components - Atoms
     "alerte_stock",
     "badge",

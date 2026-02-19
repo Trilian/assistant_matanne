@@ -12,36 +12,20 @@ from datetime import date
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-# Import des constantes avec gestion d'erreur
-try:
-    from ..constants import (
-        MAX_ETAPES,
-        MAX_INGREDIENTS,
-        MAX_LENGTH_LONG,
-        MAX_LENGTH_MEDIUM,
-        MAX_LENGTH_SHORT,
-        MAX_LENGTH_TEXT,
-        MAX_PORTIONS,
-        MAX_QUANTITE,
-        MAX_TEMPS_CUISSON,
-        MAX_TEMPS_PREPARATION,
-        MIN_ETAPES,
-        MIN_INGREDIENTS,
-    )
-except ImportError:
-    # Valeurs par défaut si constants.py n'est pas disponible
-    MAX_LENGTH_SHORT = 100
-    MAX_LENGTH_MEDIUM = 200
-    MAX_LENGTH_LONG = 1000
-    MAX_LENGTH_TEXT = 2000
-    MAX_PORTIONS = 20
-    MAX_TEMPS_PREPARATION = 300
-    MAX_TEMPS_CUISSON = 300
-    MAX_QUANTITE = 10000
-    MIN_INGREDIENTS = 1
-    MAX_INGREDIENTS = 50
-    MIN_ETAPES = 1
-    MAX_ETAPES = 50
+from ..constants import (
+    MAX_ETAPES,
+    MAX_INGREDIENTS,
+    MAX_LENGTH_LONG,
+    MAX_LENGTH_MEDIUM,
+    MAX_LENGTH_SHORT,
+    MAX_LENGTH_TEXT,
+    MAX_PORTIONS,
+    MAX_QUANTITE,
+    MAX_TEMPS_CUISSON,
+    MAX_TEMPS_PREPARATION,
+    MIN_ETAPES,
+    MIN_INGREDIENTS,
+)
 
 
 def nettoyer_texte(v: str) -> str:

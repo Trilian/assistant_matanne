@@ -106,7 +106,5 @@ def require_role(required_role: str):
     return role_checker
 
 
-# Alias anglais
-get_user = get_current_user
 auth_required = require_auth
 role_required = require_role

@@ -534,34 +534,6 @@ def valider_preferences(preferences: dict) -> tuple[bool, list[str]]:
 
 
 # ═══════════════════════════════════════════════════════════
-# ALIAS RÉTROCOMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
-
-# Enum alias (pour anciens imports)
-NotificationType = TypeNotification
-
-# Fonctions alias
-get_notification_type_mapping = obtenir_mapping_types_notification
-check_notification_type_enabled = verifier_type_notification_active
-is_quiet_hours = est_heures_silencieuses
-can_send_during_quiet_hours = peut_envoyer_pendant_silence
-should_send_notification = doit_envoyer_notification
-build_push_payload = construire_payload_push
-build_subscription_info = construire_info_abonnement
-create_stock_notification = creer_notification_stock
-create_expiration_notification = creer_notification_peremption
-create_meal_reminder_notification = creer_notification_rappel_repas
-create_shopping_shared_notification = creer_notification_liste_partagee
-create_activity_reminder_notification = creer_notification_rappel_activite
-create_milestone_reminder_notification = creer_notification_rappel_jalon
-generate_count_key = generer_cle_compteur
-parse_count_key = parser_cle_compteur
-should_reset_counter = doit_reinitialiser_compteur
-validate_subscription = valider_abonnement
-validate_preferences = valider_preferences
-
-
-# ═══════════════════════════════════════════════════════════
 # EXPORTS
 # ═══════════════════════════════════════════════════════════
 
@@ -592,24 +564,4 @@ __all__ = [
     # Validation (français)
     "valider_abonnement",
     "valider_preferences",
-    # Alias rétrocompatibilité (anglais)
-    "NotificationType",
-    "get_notification_type_mapping",
-    "check_notification_type_enabled",
-    "is_quiet_hours",
-    "can_send_during_quiet_hours",
-    "should_send_notification",
-    "build_push_payload",
-    "build_subscription_info",
-    "create_stock_notification",
-    "create_expiration_notification",
-    "create_meal_reminder_notification",
-    "create_shopping_shared_notification",
-    "create_activity_reminder_notification",
-    "create_milestone_reminder_notification",
-    "generate_count_key",
-    "parse_count_key",
-    "should_reset_counter",
-    "validate_subscription",
-    "validate_preferences",
 ]

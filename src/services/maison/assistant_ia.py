@@ -181,12 +181,12 @@ class MaisonAssistantIA(BaseAIService):
     async def _collecter_taches_jour(self, db: Session | None) -> list[str]:
         """Collecte les tâches du jour depuis EntretienService."""
         try:
-            # TODO: Appeler entretien.obtenir_taches_jour(db)
-            # Simulation pour l'instant
+            taches = self.entretien.get_taches_du_jour(db)
             return [
-                "Passer l'aspirateur (salon, chambres)",
-                "Arroser les plantes d'intérieur",
-                "Sortir les poubelles recyclage",
+                f"{tache.titre} ({tache.duree_minutes}min)"
+                if hasattr(tache, "titre")
+                else str(tache)
+                for tache in taches
             ]
         except Exception as e:
             logger.warning(f"Erreur collecte tâches: {e}")
@@ -194,32 +194,45 @@ class MaisonAssistantIA(BaseAIService):
 
     async def _collecter_alertes(self, db: Session | None) -> list[AlerteMaison]:
         """Collecte les alertes de tous les services."""
+        from src.services.integrations.weather import obtenir_service_meteo
+
         alertes = []
 
         try:
             # Alertes entretien (tâches en retard)
-            # TODO: Implémenter avec données réelles
-            alertes.append(
-                AlerteMaison(
-                    type=TypeAlerteMaison.ENTRETIEN,
-                    niveau=NiveauUrgence.MOYENNE,
-                    titre="Nettoyage filtres VMC",
-                    message="Prévu il y a 5 jours, à faire cette semaine",
-                    action_suggeree="Planifier 30min ce weekend",
-                )
-            )
+            taches_retard = self.entretien.get_taches_du_jour(db)
+            for tache in taches_retard:
+                if hasattr(tache, "en_retard") and tache.en_retard:
+                    alertes.append(
+                        AlerteMaison(
+                            type=TypeAlerteMaison.ENTRETIEN,
+                            niveau=NiveauUrgence.MOYENNE,
+                            titre=f"Tâche en retard: {tache.titre}",
+                            message=f"Prévu il y a {getattr(tache, 'jours_retard', 0)} jours",
+                            action_suggeree="Planifier cette semaine",
+                        )
+                    )
 
             # Alertes jardin (météo)
-            # TODO: Intégrer avec service météo réel
-            alertes.append(
-                AlerteMaison(
-                    type=TypeAlerteMaison.METEO,
-                    niveau=NiveauUrgence.HAUTE,
-                    titre="Gel nocturne prévu",
-                    message="Températures négatives cette nuit",
-                    action_suggeree="Protéger les plantes sensibles",
+            meteo_service = obtenir_service_meteo()
+            alertes_meteo = meteo_service.generer_alertes()
+            for alerte in alertes_meteo:
+                niveau = (
+                    NiveauUrgence.CRITIQUE
+                    if alerte.severite == "severe"
+                    else NiveauUrgence.HAUTE
+                    if alerte.severite == "haute"
+                    else NiveauUrgence.MOYENNE
                 )
-            )
+                alertes.append(
+                    AlerteMaison(
+                        type=TypeAlerteMaison.METEO,
+                        niveau=niveau,
+                        titre=alerte.titre,
+                        message=alerte.message,
+                        action_suggeree=getattr(alerte, "action_suggeree", "Surveiller la météo"),
+                    )
+                )
 
         except Exception as e:
             logger.warning(f"Erreur collecte alertes: {e}")
@@ -228,9 +241,20 @@ class MaisonAssistantIA(BaseAIService):
 
     async def _collecter_meteo(self) -> str:
         """Collecte les informations météo pertinentes."""
+        from src.services.integrations.weather import obtenir_service_meteo
+
         try:
-            # TODO: Intégrer avec ServiceMeteo
-            return "Ensoleillé, 18°C, risque de gel cette nuit (-2°C)"
+            meteo_service = obtenir_service_meteo()
+            previsions = meteo_service.get_previsions(nb_jours=1)
+
+            if previsions and len(previsions) > 0:
+                jour = previsions[0]
+                condition = jour.condition if hasattr(jour, "condition") else "Variable"
+                temp_max = jour.temp_max if hasattr(jour, "temp_max") else "?"
+                temp_min = jour.temp_min if hasattr(jour, "temp_min") else "?"
+                return f"{condition}, {temp_max}°C max / {temp_min}°C min"
+
+            return "Météo indisponible"
         except Exception as e:
             logger.warning(f"Erreur collecte météo: {e}")
             return "Météo indisponible"
@@ -238,10 +262,13 @@ class MaisonAssistantIA(BaseAIService):
     async def _collecter_projets_actifs(self, db: Session | None) -> list[dict]:
         """Collecte les projets en cours."""
         try:
-            # TODO: Appeler projets.obtenir_projets_actifs(db)
+            projets = self.projets.get_projets(db, statut="en_cours")
             return [
-                {"nom": "Peinture chambre", "avancement": 60},
-                {"nom": "Installation étagères", "avancement": 20},
+                {
+                    "nom": projet.nom if hasattr(projet, "nom") else str(projet),
+                    "avancement": getattr(projet, "avancement", 0),
+                }
+                for projet in projets
             ]
         except Exception as e:
             logger.warning(f"Erreur collecte projets: {e}")
@@ -489,21 +516,49 @@ Format: Liste courte et actionnable."""
         Returns:
             Dict jour → liste de tâches
         """
-        # TODO: Intégrer avec les préférences utilisateur et services
         jours = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
-        planning = {}
+        planning = {jour: [] for jour in jours}
 
-        for jour in jours:
-            planning[jour] = []
+        # Récupérer les jours off depuis les préférences
+        jours_off = (preferences or {}).get("jours_off", ["dimanche"])
 
-        # Distribution intelligente des tâches
-        planning["lundi"] = ["Courses", "Tri du courrier"]
-        planning["mardi"] = ["Aspirateur étages"]
-        planning["mercredi"] = ["Arrosage jardin", "Entretien plantes"]
-        planning["jeudi"] = ["Nettoyage cuisine"]
-        planning["vendredi"] = ["Nettoyage salles de bain"]
-        planning["samedi"] = ["Projets bricolage", "Jardin"]
-        planning["dimanche"] = ["Repos 🌿"]
+        try:
+            # Récupérer les tâches périodiques du service entretien
+            taches = self.entretien.get_taches_du_jour(db)
+
+            # Récupérer les projets actifs
+            projets = self.projets.get_projets(db, statut="en_cours")
+
+            # Distribuer les tâches sur les jours disponibles
+            jours_dispos = [j for j in jours if j not in jours_off]
+            idx = 0
+
+            for tache in taches[:14]:  # Max 14 tâches/semaine
+                jour = jours_dispos[idx % len(jours_dispos)]
+                tache_str = tache.titre if hasattr(tache, "titre") else str(tache)
+                planning[jour].append(tache_str)
+                idx += 1
+
+            # Ajouter projets le samedi si disponible
+            if "samedi" in jours_dispos and projets:
+                for projet in projets[:2]:
+                    nom = projet.nom if hasattr(projet, "nom") else str(projet)
+                    planning["samedi"].append(f"Projet: {nom}")
+
+            # Repos le dimanche
+            if "dimanche" in jours_off:
+                planning["dimanche"] = ["Repos 🌿"]
+
+        except Exception as e:
+            logger.warning(f"Erreur planification semaine: {e}")
+            # Fallback planning par défaut
+            planning["lundi"] = ["Courses", "Tri du courrier"]
+            planning["mardi"] = ["Aspirateur étages"]
+            planning["mercredi"] = ["Arrosage jardin", "Entretien plantes"]
+            planning["jeudi"] = ["Nettoyage cuisine"]
+            planning["vendredi"] = ["Nettoyage salles de bain"]
+            planning["samedi"] = ["Projets bricolage", "Jardin"]
+            planning["dimanche"] = ["Repos 🌿"]
 
         return planning
 

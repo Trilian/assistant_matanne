@@ -87,25 +87,9 @@ class VersionRobotGeneree(BaseModel):
         return v
 
 
-# ═══════════════════════════════════════════════════════════
-# ALIASES ANGLAIS (pour compatibilité)
-# ═══════════════════════════════════════════════════════════
-
-RecipeSuggestion = RecetteSuggestion
-BabyVersionGenerated = VersionBebeGeneree
-BatchCookingVersionGenerated = VersionBatchCookingGeneree
-RobotVersionGenerated = VersionRobotGeneree
-
-
 __all__ = [
-    # Types français
     "RecetteSuggestion",
     "VersionBebeGeneree",
     "VersionBatchCookingGeneree",
     "VersionRobotGeneree",
-    # Aliases anglais
-    "RecipeSuggestion",
-    "BabyVersionGenerated",
-    "BatchCookingVersionGenerated",
-    "RobotVersionGenerated",
 ]

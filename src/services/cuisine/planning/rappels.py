@@ -177,10 +177,6 @@ def obtenir_service_rappels() -> ServiceRappels:
     return _service_rappels
 
 
-# Alias
-get_rappels_service = obtenir_service_rappels
-
-
 # ═══════════════════════════════════════════════════════════
 # UTILITAIRES UI
 # ═══════════════════════════════════════════════════════════
@@ -224,6 +220,5 @@ __all__ = [
     "format_rappel",
     "ServiceRappels",
     "obtenir_service_rappels",
-    "get_rappels_service",
     "verifier_et_envoyer_rappels",
 ]

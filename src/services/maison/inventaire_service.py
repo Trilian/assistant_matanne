@@ -93,9 +93,28 @@ class InventaireMaisonService(
         Returns:
             ID de la pièce créée
         """
-        # TODO: Implémenter avec modèle Piece
-        logger.info(f"Création pièce: {piece.nom}")
-        return 1  # Placeholder
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.temps_entretien import PieceMaison
+
+        def _impl(session: Session) -> int:
+            # Convertir étage texte en entier
+            etage_map = {"sous-sol": -1, "rdc": 0, "1er": 1, "2eme": 2, "grenier": 3}
+            etage_int = etage_map.get(piece.etage.lower(), 0)
+
+            piece_db = PieceMaison(
+                nom=piece.nom,
+                etage=etage_int,
+                superficie_m2=piece.superficie_m2,
+            )
+            session.add(piece_db)
+            session.commit()
+            logger.info(f"Pièce créée: {piece.nom} (ID={piece_db.id})")
+            return piece_db.id
+
+        if db is None:
+            with obtenir_contexte_db() as session:
+                return _impl(session)
+        return _impl(db)
 
     def lister_pieces(self, db: Session | None = None) -> list[dict]:
         """Liste toutes les pièces avec stats.
@@ -106,8 +125,26 @@ class InventaireMaisonService(
         Returns:
             Liste des pièces avec nombre d'objets
         """
-        # TODO: Implémenter avec modèle Piece
-        return []
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.temps_entretien import PieceMaison
+
+        def _impl(session: Session) -> list[dict]:
+            pieces = session.query(PieceMaison).all()
+            return [
+                {
+                    "id": p.id,
+                    "nom": p.nom,
+                    "etage": p.etage,
+                    "superficie_m2": float(p.superficie_m2) if p.superficie_m2 else None,
+                    "nb_objets": len(p.objets),
+                }
+                for p in pieces
+            ]
+
+        if db is None:
+            with obtenir_contexte_db() as session:
+                return _impl(session)
+        return _impl(db)
 
     # ─────────────────────────────────────────────────────────
     # GESTION OBJETS
@@ -123,9 +160,34 @@ class InventaireMaisonService(
         Returns:
             ID de l'objet créé
         """
-        # TODO: Implémenter avec modèle ObjetMaison
-        logger.info(f"Ajout objet: {objet.nom}")
-        return 1  # Placeholder
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.temps_entretien import ObjetMaison
+
+        def _impl(session: Session) -> int:
+            objet_db = ObjetMaison(
+                piece_id=objet.conteneur_id or 1,  # Default to first piece if not specified
+                nom=objet.nom,
+                categorie=objet.categorie.value if objet.categorie else None,
+                statut=objet.statut.value if objet.statut else "fonctionne",
+                priorite_remplacement=(
+                    objet.priorite_remplacement.value if objet.priorite_remplacement else None
+                ),
+                date_achat=objet.date_achat,
+                prix_achat=objet.prix_achat,
+                prix_remplacement_estime=objet.cout_remplacement_estime,
+                marque=objet.marque,
+                modele=objet.modele,
+                notes=objet.notes,
+            )
+            session.add(objet_db)
+            session.commit()
+            logger.info(f"Objet créé: {objet.nom} (ID={objet_db.id})")
+            return objet_db.id
+
+        if db is None:
+            with obtenir_contexte_db() as session:
+                return _impl(session)
+        return _impl(db)
 
     def deplacer_objet(
         self,
@@ -137,14 +199,29 @@ class InventaireMaisonService(
 
         Args:
             objet_id: ID de l'objet
-            nouveau_conteneur_id: ID du nouveau conteneur
+            nouveau_conteneur_id: ID du nouveau conteneur (piece_id)
             db: Session DB optionnelle
 
         Returns:
             True si déplacé avec succès
         """
-        # TODO: Implémenter
-        return True
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.temps_entretien import ObjetMaison
+
+        def _impl(session: Session) -> bool:
+            objet = session.query(ObjetMaison).filter(ObjetMaison.id == objet_id).first()
+            if not objet:
+                logger.warning(f"Objet {objet_id} non trouvé")
+                return False
+            objet.piece_id = nouveau_conteneur_id
+            session.commit()
+            logger.info(f"Objet {objet_id} déplacé vers pièce {nouveau_conteneur_id}")
+            return True
+
+        if db is None:
+            with obtenir_contexte_db() as session:
+                return _impl(session)
+        return _impl(db)
 
     # ─────────────────────────────────────────────────────────
     # VALEUR ASSURANCE
@@ -160,8 +237,23 @@ class InventaireMaisonService(
         Returns:
             Valeur totale en euros
         """
-        # TODO: Implémenter avec modèle ObjetMaison
-        return Decimal("0")
+        from sqlalchemy import func
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.temps_entretien import ObjetMaison
+
+        def _impl(session: Session) -> Decimal:
+            total = (
+                session.query(func.sum(ObjetMaison.prix_achat))
+                .filter(ObjetMaison.piece_id == piece_id)
+                .scalar()
+            )
+            return Decimal(str(total or 0))
+
+        if db is None:
+            with obtenir_contexte_db() as session:
+                return _impl(session)
+        return _impl(db)
 
     def calculer_valeur_totale(self, db: Session | None = None) -> dict[str, Decimal]:
         """Calcule la valeur totale par pièce et globale.
@@ -172,8 +264,31 @@ class InventaireMaisonService(
         Returns:
             Dict avec valeur par pièce et total
         """
-        # TODO: Implémenter
-        return {"total": Decimal("0")}
+        from sqlalchemy import func
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.temps_entretien import ObjetMaison, PieceMaison
+
+        def _impl(session: Session) -> dict[str, Decimal]:
+            # Agrégation par pièce
+            resultats = (
+                session.query(
+                    PieceMaison.nom,
+                    func.coalesce(func.sum(ObjetMaison.prix_achat), 0).label("total"),
+                )
+                .outerjoin(ObjetMaison, PieceMaison.id == ObjetMaison.piece_id)
+                .group_by(PieceMaison.id, PieceMaison.nom)
+                .all()
+            )
+
+            valeurs = {nom: Decimal(str(total)) for nom, total in resultats}
+            valeurs["total"] = sum(valeurs.values(), Decimal("0"))
+            return valeurs
+
+        if db is None:
+            with obtenir_contexte_db() as session:
+                return _impl(session)
+        return _impl(db)
 
     def generer_inventaire_assurance(self, db: Session | None = None) -> list[dict]:
         """Génère un inventaire pour déclaration assurance.
@@ -184,8 +299,43 @@ class InventaireMaisonService(
         Returns:
             Liste des objets avec valeurs pour assurance
         """
-        # TODO: Implémenter
-        return []
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.temps_entretien import ObjetMaison, PieceMaison
+
+        def _impl(session: Session) -> list[dict]:
+            objets = (
+                session.query(ObjetMaison, PieceMaison.nom.label("piece_nom"))
+                .join(PieceMaison, ObjetMaison.piece_id == PieceMaison.id)
+                .filter(ObjetMaison.prix_achat.isnot(None))
+                .filter(ObjetMaison.prix_achat > 0)
+                .all()
+            )
+
+            return [
+                {
+                    "id": obj.ObjetMaison.id,
+                    "nom": obj.ObjetMaison.nom,
+                    "piece": obj.piece_nom,
+                    "categorie": obj.ObjetMaison.categorie,
+                    "marque": obj.ObjetMaison.marque,
+                    "modele": obj.ObjetMaison.modele,
+                    "date_achat": (
+                        obj.ObjetMaison.date_achat.isoformat()
+                        if obj.ObjetMaison.date_achat
+                        else None
+                    ),
+                    "prix_achat": float(obj.ObjetMaison.prix_achat),
+                    "valeur_actuelle": float(
+                        obj.ObjetMaison.prix_remplacement_estime or obj.ObjetMaison.prix_achat
+                    ),
+                }
+                for obj in objets
+            ]
+
+        if db is None:
+            with obtenir_contexte_db() as session:
+                return _impl(session)
+        return _impl(db)
 
 
 # ═══════════════════════════════════════════════════════════

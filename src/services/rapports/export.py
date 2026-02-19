@@ -501,19 +501,7 @@ def obtenir_service_export_pdf() -> ServiceExportPDF:
     return _service_export_pdf
 
 
-# ═══════════════════════════════════════════════════════════
-# ALIAS RÉTROCOMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
-
-PDFExportService = ServiceExportPDF
-get_pdf_export_service = obtenir_service_export_pdf
-
-
 __all__ = [
-    # Français
     "ServiceExportPDF",
     "obtenir_service_export_pdf",
-    # Alias rétrocompatibilité
-    "PDFExportService",
-    "get_pdf_export_service",
 ]

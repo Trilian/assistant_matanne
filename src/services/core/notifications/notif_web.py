@@ -641,22 +641,7 @@ def obtenir_service_webpush() -> ServiceWebPush:
     return _service_webpush
 
 
-# Alias rétrocompatibilité
-PushNotificationService = ServiceWebPush
-get_push_notification_service = obtenir_service_webpush
-# Alias pour types originaux (déjà dans types.py mais référencés ici pour l'ancien import)
-PushSubscription = AbonnementPush
-PushNotification = NotificationPush
-NotificationPreferences = PreferencesNotification
-
-
 __all__ = [
     "ServiceWebPush",
     "obtenir_service_webpush",
-    # Alias rétrocompatibilité
-    "PushNotificationService",
-    "get_push_notification_service",
-    "PushSubscription",
-    "PushNotification",
-    "NotificationPreferences",
 ]

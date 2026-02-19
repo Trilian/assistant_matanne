@@ -23,10 +23,6 @@ from .orchestrator import (
 )
 from .session import CacheSessionN2
 
-# Alias anglais pour compatibilité
-cache = obtenir_cache()
-get_cache = obtenir_cache
-
 __all__ = [
     # Types
     "EntreeCache",
@@ -43,7 +39,4 @@ __all__ = [
     "CacheMultiNiveau",
     "obtenir_cache",
     "avec_cache_multi",
-    # Alias
-    "cache",
-    "get_cache",
 ]

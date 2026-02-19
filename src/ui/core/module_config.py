@@ -92,7 +92,3 @@ class ConfigurationModule:
     on_edit: Callable | None = None
     on_delete: Callable | None = None
     on_create: Callable | None = None
-
-
-# Alias pour compatibilité
-ModuleConfig = ConfigurationModule

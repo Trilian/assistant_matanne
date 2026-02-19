@@ -43,12 +43,6 @@ class TestConfigurationIO:
 
         assert config.transformers == transformers
 
-    def test_alias_io_config(self):
-        """Test alias IOConfig."""
-        from src.ui.core.base_io import ConfigurationIO, IOConfig
-
-        assert IOConfig is ConfigurationIO
-
 
 # ═══════════════════════════════════════════════════════════
 # SERVICE IO BASE - EXPORT
@@ -306,19 +300,6 @@ class TestFactory:
         service = creer_service_io(config)
 
         assert isinstance(service, ServiceIOBase)
-
-    @patch("src.ui.core.base_io.IOService")
-    def test_alias_create_io_service(self, mock_io_cls):
-        """Test alias create_io_service."""
-        from src.ui.core.base_io import create_io_service, creer_service_io
-
-        assert create_io_service is creer_service_io
-
-    def test_alias_base_io_service(self):
-        """Test alias BaseIOService."""
-        from src.ui.core.base_io import BaseIOService, ServiceIOBase
-
-        assert BaseIOService is ServiceIOBase
 
 
 # ═══════════════════════════════════════════════════════════

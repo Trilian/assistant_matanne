@@ -894,15 +894,15 @@ class TestUIComponents:
     @patch("src.ui.views.synchronisation.st")
     @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_presence_indicator_empty(self, mock_get_service, mock_st):
-        """Test render_presence sans utilisateurs."""
+        """Test afficher_indicateur_presence sans utilisateurs."""
         mock_st.session_state = {}
         mock_service = MagicMock()
         mock_service.get_connected_users.return_value = []
         mock_get_service.return_value = mock_service
 
-        from src.services.integrations.web.synchronisation import render_presence_indicator
+        from src.ui.views.synchronisation import afficher_indicateur_presence
 
-        render_presence_indicator()
+        afficher_indicateur_presence()
 
         # Should not call markdown if no users
         mock_st.markdown.assert_not_called()
@@ -910,7 +910,7 @@ class TestUIComponents:
     @patch("src.ui.views.synchronisation.st")
     @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_presence_indicator_with_users(self, mock_get_service, mock_st):
-        """Test render_presence avec utilisateurs."""
+        """Test afficher_indicateur_presence avec utilisateurs."""
         mock_st.session_state = {}
         mock_st.columns.return_value = [MagicMock()]
 
@@ -922,9 +922,9 @@ class TestUIComponents:
         ]
         mock_get_service.return_value = mock_service
 
-        from src.services.integrations.web.synchronisation import render_presence_indicator
+        from src.ui.views.synchronisation import afficher_indicateur_presence
 
-        render_presence_indicator()
+        afficher_indicateur_presence()
 
         mock_st.markdown.assert_called()
 
@@ -944,32 +944,32 @@ class TestUIComponents:
         mock_service.get_connected_users.return_value = users
         mock_get_service.return_value = mock_service
 
-        from src.services.integrations.web.synchronisation import render_presence_indicator
+        from src.ui.views.synchronisation import afficher_indicateur_presence
 
-        render_presence_indicator()
+        afficher_indicateur_presence()
 
         mock_st.caption.assert_called()  # Should show "... et 2 autre(s)"
 
     @patch("src.ui.views.synchronisation.st")
     @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_typing_indicator_no_typing(self, mock_get_service, mock_st):
-        """Test render_typing sans frappe en cours."""
+        """Test afficher_indicateur_frappe sans frappe en cours."""
         mock_st.session_state = {}
         mock_service = MagicMock()
         mock_service.get_connected_users.return_value = []
         mock_service._get_current_user_id.return_value = "me"
         mock_get_service.return_value = mock_service
 
-        from src.services.integrations.web.synchronisation import render_typing_indicator
+        from src.ui.views.synchronisation import afficher_indicateur_frappe
 
-        render_typing_indicator()
+        afficher_indicateur_frappe()
 
         mock_st.caption.assert_not_called()
 
     @patch("src.ui.views.synchronisation.st")
     @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_typing_indicator_with_typing(self, mock_get_service, mock_st):
-        """Test render_typing avec frappe en cours."""
+        """Test afficher_indicateur_frappe avec frappe en cours."""
         mock_st.session_state = {}
 
         from src.services.integrations.web.synchronisation import PresenceInfo
@@ -981,16 +981,16 @@ class TestUIComponents:
         mock_service._get_current_user_id.return_value = "me"
         mock_get_service.return_value = mock_service
 
-        from src.services.integrations.web.synchronisation import render_typing_indicator
+        from src.ui.views.synchronisation import afficher_indicateur_frappe
 
-        render_typing_indicator()
+        afficher_indicateur_frappe()
 
         mock_st.caption.assert_called()
 
     @patch("src.ui.views.synchronisation.st")
     @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_sync_status_connected(self, mock_get_service, mock_st):
-        """Test render_sync_status connecté."""
+        """Test afficher_statut_synchronisation connecté."""
         mock_st.session_state = {}
 
         from src.services.integrations.web.synchronisation import SyncState
@@ -1000,9 +1000,9 @@ class TestUIComponents:
         mock_service.get_connected_users.return_value = []
         mock_get_service.return_value = mock_service
 
-        from src.services.integrations.web.synchronisation import render_sync_status
+        from src.ui.views.synchronisation import afficher_statut_synchronisation
 
-        render_sync_status()
+        afficher_statut_synchronisation()
 
         mock_st.success.assert_called()
 
@@ -1025,16 +1025,16 @@ class TestUIComponents:
         mock_service.state = SyncState(connected=False, pending_events=[pending_event])
         mock_get_service.return_value = mock_service
 
-        from src.services.integrations.web.synchronisation import render_sync_status
+        from src.ui.views.synchronisation import afficher_statut_synchronisation
 
-        render_sync_status()
+        afficher_statut_synchronisation()
 
         mock_st.warning.assert_called()
 
     @patch("src.ui.views.synchronisation.st")
     @patch("src.ui.views.synchronisation.get_realtime_sync_service")
     def test_render_sync_status_offline(self, mock_get_service, mock_st):
-        """Test render_sync_status hors ligne."""
+        """Test afficher_statut_synchronisation hors ligne."""
         mock_st.session_state = {}
 
         from src.services.integrations.web.synchronisation import SyncState
@@ -1043,9 +1043,9 @@ class TestUIComponents:
         mock_service.state = SyncState(connected=False, pending_events=[])
         mock_get_service.return_value = mock_service
 
-        from src.services.integrations.web.synchronisation import render_sync_status
+        from src.ui.views.synchronisation import afficher_statut_synchronisation
 
-        render_sync_status()
+        afficher_statut_synchronisation()
 
         mock_st.info.assert_called()
 

@@ -271,18 +271,7 @@ def obtenir_service_notifications_inventaire() -> ServiceNotificationsInventaire
     return _service_notifications_inventaire
 
 
-# Alias pour rétrocompatibilité
-NotificationService = ServiceNotificationsInventaire
-obtenir_service_notifications = obtenir_service_notifications_inventaire
-# Alias pour le type original
-Notification = NotificationInventaire
-
-
 __all__ = [
     "ServiceNotificationsInventaire",
     "obtenir_service_notifications_inventaire",
-    # Alias rétrocompatibilité
-    "NotificationService",
-    "obtenir_service_notifications",
-    "Notification",
 ]

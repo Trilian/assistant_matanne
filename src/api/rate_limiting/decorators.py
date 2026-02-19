@@ -75,17 +75,3 @@ def limite_debit(
         return wrapper
 
     return decorator
-
-
-# Alias anglais avec mêmes paramètres
-def rate_limit(
-    requests_per_minute: int | None = None,
-    requests_per_hour: int | None = None,
-    key_func: Callable[[Request], str] | None = None,
-):
-    """Alias anglais de limite_debit."""
-    return limite_debit(
-        requetes_par_minute=requests_per_minute,
-        requetes_par_heure=requests_per_hour,
-        fonction_cle=key_func,
-    )

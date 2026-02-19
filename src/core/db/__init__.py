@@ -24,9 +24,6 @@ from .utils import (
     verifier_sante,
 )
 
-# Alias pour compatibilité avec l'ancien module
-get_db_context = obtenir_contexte_db
-
 __all__ = [
     # Engine
     "obtenir_moteur",
@@ -35,7 +32,6 @@ __all__ = [
     "obtenir_contexte_db",
     "obtenir_db_securise",
     "obtenir_fabrique_session",
-    "get_db_context",
     # Migrations
     "GestionnaireMigrations",
     # Utils

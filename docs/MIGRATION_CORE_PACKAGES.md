@@ -6,21 +6,17 @@ Le module `src/core/` a été réorganisé en **5 sous-packages modulaires** pou
 
 ## Tableau de migration
 
-| Ancien import (déprécié, toujours supporté) | Nouvel import (recommandé) |
+| Ancien import (déprécié) | Nouvel import (requis) |
 |---------------------------------------------|----------------------------|
 | `from src.core.config import obtenir_parametres` | `from src.core.config import obtenir_parametres` *(inchangé)* |
 | `from src.core.database import obtenir_moteur` | `from src.core.db import obtenir_moteur` |
-| `from src.core.database import get_db_context` | `from src.core.db import obtenir_contexte_db` |
+| `from src.core.database import obtenir_contexte_db` | `from src.core.db import obtenir_contexte_db` |
 | `from src.core.database import obtenir_fabrique_session` | `from src.core.db import obtenir_fabrique_session` |
 | `from src.core.database import GestionnaireMigrations` | `from src.core.db import GestionnaireMigrations` |
 | `from src.core.database import verifier_connexion` | `from src.core.db import verifier_connexion` |
 | `from src.core.cache_multi import CacheMultiNiveau` | `from src.core.caching import CacheMultiNiveau` |
 | `from src.core.cache_multi import avec_cache_multi` | `from src.core.caching import avec_cache_multi` |
 | `from src.core.cache_multi import obtenir_cache` | `from src.core.caching import obtenir_cache` |
-| `from src.core.performance import ProfileurFonction` | `from src.core.monitoring import ProfileurFonction` |
-| `from src.core.performance import MoniteurMemoire` | `from src.core.monitoring import MoniteurMemoire` |
-| `from src.core.performance import OptimiseurSQL` | `from src.core.monitoring import OptimiseurSQL` |
-| `from src.core.performance import profiler` | `from src.core.monitoring import profiler` |
 | *(pas de changement)* `from src.core.validation import ...` | `from src.core.validation import ...` |
 
 ## Structure des nouveaux packages
@@ -36,7 +32,7 @@ src/core/config/
 ### db/ — Base de données
 ```
 src/core/db/
-├── __init__.py     # Re-exports + alias get_db_context
+├── __init__.py     # Re-exports
 ├── engine.py       # obtenir_moteur(), obtenir_moteur_securise(), QueuePool
 ├── session.py      # obtenir_fabrique_session(), obtenir_contexte_db()
 ├── migrations.py   # GestionnaireMigrations
@@ -46,7 +42,7 @@ src/core/db/
 ### caching/ — Cache multi-niveaux
 ```
 src/core/caching/
-├── __init__.py      # Re-exports + alias: cache, cached, get_cache
+├── __init__.py      # Re-exports
 ├── base.py          # EntreeCache, StatistiquesCache (types)
 ├── memory.py        # CacheMemoireN1 (L1: dict Python)
 ├── session.py       # CacheSessionN2 (L2: st.session_state)
@@ -63,24 +59,11 @@ src/core/validation/
 └── validators.py   # valider_modele(), valider_entree(), afficher_erreurs_validation()
 ```
 
-### monitoring/ — Métriques & performance
-```
-src/core/monitoring/
-├── __init__.py     # Re-exports complets
-├── profiler.py     # ProfileurFonction, @profiler, @mesurer_temps, @antirrebond
-├── memory.py       # MoniteurMemoire (suivi RAM, objets, garbage collector)
-├── sql.py          # OptimiseurSQL, suivre_requete (tracking requêtes lentes)
-└── dashboard.py    # TableauBordPerformance (UI Streamlit de métriques)
-```
-
 ## Rate Limiting — Source de vérité unifiée
 
-Avant : deux implémentations coexistaient (`LimiteDebit` dans `cache.py` et `RateLimitIA` dans `ai/rate_limit.py`).
-
-**Maintenant** : `RateLimitIA` est la **source de vérité unique**. `LimiteDebit` dans `cache.py` est un wrapper léger qui délègue à `RateLimitIA` via lazy import.
+`RateLimitIA` dans `src/core/ai/rate_limit.py` est la **source de vérité unique** pour la limitation de débit des appels IA.
 
 ```python
-# Source de vérité
 from src.core.ai import RateLimitIA
 
 RateLimitIA.peut_appeler()

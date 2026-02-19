@@ -43,7 +43,6 @@ from .config import Parametres, obtenir_parametres
 from .db import (
     GestionnaireMigrations,
     creer_toutes_tables,
-    get_db_context,
     initialiser_database,
     obtenir_contexte_db,
     obtenir_db_securise,
@@ -146,7 +145,6 @@ __all__ = [
     "obtenir_moteur",
     "obtenir_moteur_securise",
     "obtenir_contexte_db",
-    "get_db_context",  # Alias anglais
     "obtenir_db_securise",
     "obtenir_fabrique_session",
     "verifier_connexion",

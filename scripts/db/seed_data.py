@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from datetime import date, timedelta
 
-from src.core.db import obtenir_contexte_db as get_db_context
+from src.core.db import obtenir_contexte_db
 from src.core.models import (
     BatchMeal,
     CalendarEvent,
@@ -23,8 +23,8 @@ from src.core.models import (
     Notification,
     Project,
     ProjectTask,
-    Recipe,
-    RecipeIngredient,
+    Recette,
+    RecetteIngredient,
     Routine,
     RoutineTask,
     ShoppingList,
@@ -37,9 +37,9 @@ from src.core.models import (
 
 def clear_database():
     """Nettoie toutes les donnÃ©es (optionnel)"""
-    print("ðŸ§¹ Nettoyage de la base...")
+    print("ð§¹ Nettoyage de la base...")
 
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         # Supprimer dans l'ordre inverse des dÃ©pendances
         db.query(GardenLog).delete()
         db.query(GardenItem).delete()
@@ -51,9 +51,9 @@ def clear_database():
         db.query(ChildProfile).delete()
         db.query(ShoppingList).delete()
         db.query(BatchMeal).delete()
-        db.query(RecipeIngredient).delete()
+        db.query(RecetteIngredient).delete()
         db.query(InventoryItem).delete()
-        db.query(Recipe).delete()
+        db.query(Recette).delete()
         db.query(Ingredient).delete()
         db.query(CalendarEvent).delete()
         db.query(WeatherLog).delete()
@@ -68,9 +68,9 @@ def clear_database():
 
 def seed_users():
     """CrÃ©e les utilisateurs"""
-    print("ðŸ‘¤ CrÃ©ation des utilisateurs...")
+    print("ð¤ Création des utilisateurs...")
 
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         # Utilisateur principal
         anne = User(
             username="Anne",
@@ -143,23 +143,23 @@ def seed_ingredients():
         ("Ail", "pcs", "Ã‰pices"),
     ]
 
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         for nom, unite, categorie in ingredients_data:
             ingredient = Ingredient(name=nom, unit=unite, category=categorie)
             db.add(ingredient)
 
         db.commit()
 
-    print(f"âœ… {len(ingredients_data)} ingrÃ©dients crÃ©Ã©s")
+    print(f"â {len(ingredients_data)} ingrédients créés")
 
 
 def seed_recipes():
-    """CrÃ©e des recettes d'exemple"""
-    print("ðŸ“– CrÃ©ation des recettes...")
+    """ÃCrée des recettes d'exemple"""
+    print("ð Création des recettes...")
 
-    with get_db_context() as db:
-        # Recette 1 : PÃ¢tes Ã  la tomate
-        r1 = Recipe(
+    with obtenir_contexte_db() as db:
+        # Recette 1 : Pâtes à la tomate
+        r1 = Recette(
             name="PÃ¢tes Ã  la tomate",
             category="Plat",
             instructions="1. Faire cuire les pÃ¢tes\n2. PrÃ©parer la sauce tomate\n3. MÃ©langer et servir",
@@ -178,18 +178,20 @@ def seed_recipes():
 
         db.add_all(
             [
-                RecipeIngredient(
-                    recipe_id=r1.id, ingredient_id=ing_pates.id, quantity=400, unit="g"
+                RecetteIngredient(
+                    recette_id=r1.id, ingredient_id=ing_pates.id, quantity=400, unit="g"
                 ),
-                RecipeIngredient(
-                    recipe_id=r1.id, ingredient_id=ing_tomates.id, quantity=0.5, unit="kg"
+                RecetteIngredient(
+                    recette_id=r1.id, ingredient_id=ing_tomates.id, quantity=0.5, unit="kg"
                 ),
-                RecipeIngredient(recipe_id=r1.id, ingredient_id=ing_ail.id, quantity=2, unit="pcs"),
+                RecetteIngredient(
+                    recette_id=r1.id, ingredient_id=ing_ail.id, quantity=2, unit="pcs"
+                ),
             ]
         )
 
         # Recette 2 : Poulet rÃ´ti
-        r2 = Recipe(
+        r2 = Recette(
             name="Poulet rÃ´ti aux lÃ©gumes",
             category="Plat",
             instructions="1. PrÃ©parer le poulet\n2. Couper les lÃ©gumes\n3. Enfourner 45min Ã  180Â°C",
@@ -207,20 +209,20 @@ def seed_recipes():
 
         db.add_all(
             [
-                RecipeIngredient(
-                    recipe_id=r2.id, ingredient_id=ing_poulet.id, quantity=1200, unit="g"
+                RecetteIngredient(
+                    recette_id=r2.id, ingredient_id=ing_poulet.id, quantity=1200, unit="g"
                 ),
-                RecipeIngredient(
-                    recipe_id=r2.id, ingredient_id=ing_carottes.id, quantity=0.5, unit="kg"
+                RecetteIngredient(
+                    recette_id=r2.id, ingredient_id=ing_carottes.id, quantity=0.5, unit="kg"
                 ),
-                RecipeIngredient(
-                    recipe_id=r2.id, ingredient_id=ing_pdt.id, quantity=0.6, unit="kg"
+                RecetteIngredient(
+                    recette_id=r2.id, ingredient_id=ing_pdt.id, quantity=0.6, unit="kg"
                 ),
             ]
         )
 
         # Recette 3 : Omelette
-        r3 = Recipe(
+        r3 = Recette(
             name="Omelette nature",
             category="Plat",
             instructions="1. Battre les oeufs\n2. Cuire Ã  la poÃªle\n3. Servir chaud",
@@ -237,17 +239,17 @@ def seed_recipes():
 
         db.add_all(
             [
-                RecipeIngredient(
-                    recipe_id=r3.id, ingredient_id=ing_oeufs.id, quantity=4, unit="pcs"
+                RecetteIngredient(
+                    recette_id=r3.id, ingredient_id=ing_oeufs.id, quantity=4, unit="pcs"
                 ),
-                RecipeIngredient(
-                    recipe_id=r3.id, ingredient_id=ing_beurre.id, quantity=20, unit="g"
+                RecetteIngredient(
+                    recette_id=r3.id, ingredient_id=ing_beurre.id, quantity=20, unit="g"
                 ),
             ]
         )
 
         # Recette 4 : Gratin dauphinois (gÃ©nÃ©rÃ©e par IA)
-        r4 = Recipe(
+        r4 = Recette(
             name="Gratin dauphinois",
             category="Accompagnement",
             instructions="1. Ã‰mincer les pommes de terre\n2. PrÃ©parer la crÃ¨me\n3. Enfourner 1h",
@@ -266,14 +268,14 @@ def seed_recipes():
 
         db.add_all(
             [
-                RecipeIngredient(
-                    recipe_id=r4.id, ingredient_id=ing_pdt.id, quantity=1.0, unit="kg"
+                RecetteIngredient(
+                    recette_id=r4.id, ingredient_id=ing_pdt.id, quantity=1.0, unit="kg"
                 ),
-                RecipeIngredient(
-                    recipe_id=r4.id, ingredient_id=ing_creme.id, quantity=300, unit="mL"
+                RecetteIngredient(
+                    recette_id=r4.id, ingredient_id=ing_creme.id, quantity=300, unit="mL"
                 ),
-                RecipeIngredient(
-                    recipe_id=r4.id, ingredient_id=ing_fromage.id, quantity=150, unit="g"
+                RecetteIngredient(
+                    recette_id=r4.id, ingredient_id=ing_fromage.id, quantity=150, unit="g"
                 ),
             ]
         )
@@ -301,7 +303,7 @@ def seed_inventory():
         ("Huile d'olive", 500, 100, "Placard"),
     ]
 
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         for nom, qty, seuil, location in inventory_data:
             ingredient = db.query(Ingredient).filter(Ingredient.name == nom).first()
             if ingredient:
@@ -319,15 +321,15 @@ def seed_batch_meals():
     """Planifie des repas"""
     print("ðŸ½ï¸ Planification de repas...")
 
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         today = date.today()
 
         # RÃ©cupÃ©rer les recettes
-        recettes = db.query(Recipe).all()
+        recettes = db.query(Recette).all()
 
         for i, recette in enumerate(recettes[:7]):  # 7 jours
             batch = BatchMeal(
-                recipe_id=recette.id,
+                recette_id=recette.id,
                 scheduled_date=today + timedelta(days=i),
                 portions=4,
                 status="TERMINE" if i < 2 else "A_FAIRE",
@@ -344,7 +346,7 @@ def seed_child_and_family():
     """CrÃ©e Jules et ses donnÃ©es"""
     print("ðŸ‘¶ CrÃ©ation du profil de Jules...")
 
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         # Jules
         jules = ChildProfile(
             name="Jules", birth_date=date(2024, 6, 22), notes="Notre petit bout de chou â¤ï¸"
@@ -399,7 +401,7 @@ def seed_projects():
     """CrÃ©e des projets maison"""
     print("ðŸ—ï¸ CrÃ©ation des projets...")
 
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         # Projet 1
         p1 = Project(
             name="AmÃ©nagement jardin",
@@ -473,7 +475,7 @@ def seed_garden():
     """CrÃ©e le jardin"""
     print("ðŸŒ± Plantation du jardin...")
 
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         plantes = [
             ("Tomates cerises", "LÃ©gume", date(2025, 5, 1), date(2025, 8, 1), 3, 2),
             ("Courgettes", "LÃ©gume", date(2025, 5, 10), date(2025, 7, 15), 2, 3),
@@ -512,7 +514,7 @@ def seed_notifications(user_id: int):
     """CrÃ©e des notifications"""
     print("ðŸ”” CrÃ©ation de notifications...")
 
-    with get_db_context() as db:
+    with obtenir_contexte_db() as db:
         notifs = [
             ("Inventaire", "Stock bas : Lait, Fromage rÃ¢pÃ©", "HAUTE", False),
             ("Batch Cooking", "Aucun repas planifiÃ© pour aprÃ¨s-demain", "MOYENNE", False),

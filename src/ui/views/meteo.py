@@ -172,11 +172,6 @@ def afficher_meteo_jardin():  # pragma: no cover
         st.dataframe(df, use_container_width=True, hide_index=True)
 
 
-# Alias rétrocompatibilité
-render_weather_garden_ui = afficher_meteo_jardin
-
-
 __all__ = [
     "afficher_meteo_jardin",
-    "render_weather_garden_ui",
 ]

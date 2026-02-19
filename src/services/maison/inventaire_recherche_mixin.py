@@ -226,8 +226,48 @@ Sois pratique et logique."""
         Returns:
             Liste des doublons potentiels
         """
-        # TODO: Implémenter
-        return []
+        from collections import defaultdict
+
+        from src.core.models.temps_entretien import ObjetMaison, PieceMaison
+
+        def _impl(session: Session) -> list[dict]:
+            objets = (
+                session.query(ObjetMaison, PieceMaison.nom.label("piece_nom"))
+                .join(PieceMaison, ObjetMaison.piece_id == PieceMaison.id)
+                .all()
+            )
+
+            # Grouper par nom normalisé (lowercase, sans espaces multiples)
+            groupes: dict[str, list[dict]] = defaultdict(list)
+            for obj in objets:
+                nom_normalise = " ".join(obj.ObjetMaison.nom.lower().split())
+                groupes[nom_normalise].append(
+                    {
+                        "id": obj.ObjetMaison.id,
+                        "nom": obj.ObjetMaison.nom,
+                        "piece": obj.piece_nom,
+                        "categorie": obj.ObjetMaison.categorie,
+                    }
+                )
+
+            # Retourner seulement les groupes avec plus d'un élément
+            doublons = []
+            for nom, items in groupes.items():
+                if len(items) > 1:
+                    doublons.append(
+                        {
+                            "nom_base": nom,
+                            "occurrences": len(items),
+                            "objets": items,
+                        }
+                    )
+
+            return doublons
+
+        if db is None:
+            with obtenir_contexte_db() as session:
+                return _impl(session)
+        return _impl(db)
 
     async def optimiser_rangement(self, piece_id: int, db: Session | None = None) -> list[str]:
         """Suggère des optimisations de rangement pour une pièce.
@@ -239,9 +279,74 @@ Sois pratique et logique."""
         Returns:
             Liste de suggestions d'optimisation
         """
-        # TODO: Implémenter avec données réelles de la pièce
-        return [
-            "Regrouper les objets similaires",
-            "Utiliser des boîtes étiquetées",
-            "Désencombrer les objets inutilisés depuis 1 an",
-        ]
+        from collections import Counter
+
+        from src.core.models.temps_entretien import ObjetMaison, PieceMaison
+
+        def _impl(session: Session) -> list[str]:
+            # Récupérer la pièce et ses objets
+            piece = session.query(PieceMaison).filter(PieceMaison.id == piece_id).first()
+            if not piece:
+                return ["Pièce non trouvée"]
+
+            objets = session.query(ObjetMaison).filter(ObjetMaison.piece_id == piece_id).all()
+
+            if not objets:
+                return ["Aucun objet dans cette pièce - commencez par inventorier !"]
+
+            suggestions = []
+
+            # Analyser les catégories
+            categories = Counter(obj.categorie for obj in objets if obj.categorie)
+            if len(categories) > 5:
+                suggestions.append(
+                    "Beaucoup de catégories différentes - envisagez de regrouper les objets similaires"
+                )
+
+            # Vérifier les objets sans catégorie
+            sans_categorie = sum(1 for obj in objets if not obj.categorie)
+            if sans_categorie > 0:
+                suggestions.append(
+                    f"{sans_categorie} objet(s) sans catégorie - ajoutez des catégories pour mieux organiser"
+                )
+
+            # Vérifier les objets à remplacer
+            a_remplacer = sum(
+                1 for obj in objets if obj.statut in ["a_changer", "a_acheter", "hors_service"]
+            )
+            if a_remplacer > 0:
+                suggestions.append(
+                    f"{a_remplacer} objet(s) à remplacer - faire le tri et désencombrer"
+                )
+
+            # Suggestions génériques basées sur le nombre d'objets
+            nb_objets = len(objets)
+            if nb_objets > 50:
+                suggestions.append(
+                    "Plus de 50 objets - envisagez d'utiliser des boîtes étiquetées ou des rangements supplémentaires"
+                )
+            elif nb_objets > 20:
+                suggestions.append(
+                    "Pensez à trier régulièrement les objets inutilisés depuis plus d'un an"
+                )
+
+            # Catégories dominantes
+            if categories:
+                cat_principale, count = categories.most_common(1)[0]
+                if count > nb_objets * 0.5:
+                    suggestions.append(
+                        f"La catégorie '{cat_principale}' domine - dédiez un espace spécifique"
+                    )
+
+            if not suggestions:
+                suggestions = [
+                    "Pièce bien organisée !",
+                    "Continuez à maintenir l'inventaire à jour",
+                ]
+
+            return suggestions
+
+        if db is None:
+            with obtenir_contexte_db() as session:
+                return _impl(session)
+        return _impl(db)

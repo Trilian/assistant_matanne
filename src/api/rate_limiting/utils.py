@@ -28,9 +28,7 @@ def reinitialiser_limites():
     from . import storage
 
     storage._stockage = StockageLimitationDebit()
-    storage._store = storage._stockage
     limiter_module.limiteur_debit = LimiteurDebit()
-    limiter_module.rate_limiter = limiter_module.limiteur_debit
 
 
 def configurer_limites(config: ConfigLimitationDebit):
@@ -39,19 +37,4 @@ def configurer_limites(config: ConfigLimitationDebit):
     from . import limiter as limiter_module
 
     config_module.config_limitation_debit = config
-    config_module.rate_limit_config = config
     limiter_module.limiteur_debit = LimiteurDebit(config=config)
-    limiter_module.rate_limiter = limiter_module.limiteur_debit
-
-
-# Alias anglais
-def get_rate_limit_stats() -> dict[str, Any]:
-    return obtenir_stats_limitation()
-
-
-def reset_rate_limits():
-    return reinitialiser_limites()
-
-
-def configure_rate_limits(config: ConfigLimitationDebit):
-    return configurer_limites(config)

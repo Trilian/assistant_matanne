@@ -1,4 +1,4 @@
-"""Tests pour src/services/notifications/ui.py - Composants UI.
+"""Tests pour src/ui/views/notifications.py - Composants UI notifications.
 
 Note: Ces tests sont limités car les fonctions font appel à Streamlit
 qui nécessite un contexte d'exécution spécifique.
@@ -15,32 +15,23 @@ import pytest
 
 @pytest.mark.unit
 class TestImports:
-    """Tests pour les imports du module UI."""
+    """Tests pour les imports du module UI notifications."""
 
     def test_import_module(self):
         """Import du module réussit."""
-        from src.services.core.notifications import ui
+        from src.ui.views import notifications
 
-        assert ui is not None
+        assert notifications is not None
 
     def test_fonctions_exportees(self):
         """Fonctions principales exportées."""
-        from src.services.core.notifications.ui import __all__
-
-        assert "afficher_demande_permission_push" in __all__
-        assert "afficher_preferences_notification" in __all__
-
-    def test_alias_retrocompatibilite(self):
-        """Alias de rétrocompatibilité exportés."""
-        from src.services.core.notifications.ui import (
+        from src.ui.views.notifications import (
             afficher_demande_permission_push,
             afficher_preferences_notification,
-            render_notification_preferences,
-            render_push_permission_request,
         )
 
-        assert render_push_permission_request is afficher_demande_permission_push
-        assert render_notification_preferences is afficher_preferences_notification
+        assert callable(afficher_demande_permission_push)
+        assert callable(afficher_preferences_notification)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -72,14 +63,14 @@ class TestAfficherDemandePermissionPush:
 
     def test_fonction_callable(self):
         """La fonction est appelable."""
-        from src.services.core.notifications.ui import afficher_demande_permission_push
+        from src.ui.views.notifications import afficher_demande_permission_push
 
         assert callable(afficher_demande_permission_push)
 
     @patch("streamlit.components.v1.html")
     def test_afficher_html_component(self, mock_html):
         """La fonction affiche un composant HTML."""
-        from src.services.core.notifications.ui import afficher_demande_permission_push
+        from src.ui.views.notifications import afficher_demande_permission_push
 
         afficher_demande_permission_push()
 
@@ -102,7 +93,7 @@ class TestAfficherPreferencesNotification:
 
     def test_fonction_callable(self):
         """La fonction est appelable."""
-        from src.services.core.notifications.ui import afficher_preferences_notification
+        from src.ui.views.notifications import afficher_preferences_notification
 
         assert callable(afficher_preferences_notification)
 
@@ -112,7 +103,7 @@ class TestAfficherPreferencesNotification:
     def test_afficher_preferences_utilise_service(self, mock_service, mock_form, mock_markdown):
         """La fonction utilise le service webpush."""
         from src.services.core.notifications.types import PreferencesNotification
-        from src.services.core.notifications.ui import afficher_preferences_notification
+        from src.ui.views.notifications import afficher_preferences_notification
 
         # Mock du service
         mock_push_service = MagicMock()

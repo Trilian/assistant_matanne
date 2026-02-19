@@ -30,12 +30,3 @@ async def verifier_limite_debit(
 async def verifier_limite_debit_ia(request: Request) -> dict[str, Any]:
     """Dépendance pour les endpoints IA."""
     return await verifier_limite_debit(request, est_ia=True)
-
-
-# Alias anglais
-async def check_rate_limit(request: Request, is_ai: bool = False) -> dict[str, Any]:
-    return await verifier_limite_debit(request, est_ia=is_ai)
-
-
-async def check_ai_rate_limit(request: Request) -> dict[str, Any]:
-    return await verifier_limite_debit_ia(request)

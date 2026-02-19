@@ -162,10 +162,6 @@ def gerer_erreurs(
     return decorateur
 
 
-# Alias pour compatibilité
-handle_errors = gerer_erreurs
-
-
 # ═══════════════════════════════════════════════════════════
 # HELPERS DE VALIDATION
 # ═══════════════════════════════════════════════════════════

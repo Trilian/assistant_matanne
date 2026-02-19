@@ -71,17 +71,6 @@ from src.services.core.notifications.types import (
 )
 
 # ═══════════════════════════════════════════════════════════
-# COMPOSANTS UI
-# ═══════════════════════════════════════════════════════════
-from src.services.core.notifications.ui import (
-    afficher_demande_permission_push,
-    afficher_preferences_notification,
-    render_notification_preferences,
-    # Alias rétrocompatibilité
-    render_push_permission_request,
-)
-
-# ═══════════════════════════════════════════════════════════
 # UTILITAIRES
 # ═══════════════════════════════════════════════════════════
 from src.services.core.notifications.utils import (
@@ -216,7 +205,4 @@ __all__ = [
     "should_reset_counter",
     "validate_subscription",
     "validate_preferences",
-    # UI
-    "render_push_permission_request",
-    "render_notification_preferences",
 ]

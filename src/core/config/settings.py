@@ -228,6 +228,56 @@ class Parametres(BaseSettings):
         return None
 
     # ═══════════════════════════════════════════════════════════
+    # GOOGLE CALENDAR
+    # ═══════════════════════════════════════════════════════════
+
+    @property
+    def GOOGLE_CLIENT_ID(self) -> str:
+        """
+        Client ID OAuth2 Google Calendar.
+
+        Returns:
+            Client ID ou chaîne vide si non configuré
+        """
+        # 1. Variable d'environnement directe
+        cle = os.getenv("GOOGLE_CLIENT_ID")
+        if cle and cle.strip():
+            return cle
+
+        # 2. Secrets Streamlit
+        try:
+            cle = st.secrets.get("google", {}).get("client_id")
+            if cle and cle.strip():
+                return cle
+        except Exception:
+            pass
+
+        return ""
+
+    @property
+    def GOOGLE_CLIENT_SECRET(self) -> str:
+        """
+        Client Secret OAuth2 Google Calendar.
+
+        Returns:
+            Client Secret ou chaîne vide si non configuré
+        """
+        # 1. Variable d'environnement directe
+        cle = os.getenv("GOOGLE_CLIENT_SECRET")
+        if cle and cle.strip():
+            return cle
+
+        # 2. Secrets Streamlit
+        try:
+            cle = st.secrets.get("google", {}).get("client_secret")
+            if cle and cle.strip():
+                return cle
+        except Exception:
+            pass
+
+        return ""
+
+    # ═══════════════════════════════════════════════════════════
     # RATE LIMITING
     # ═══════════════════════════════════════════════════════════
 

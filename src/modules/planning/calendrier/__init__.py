@@ -16,6 +16,9 @@ Fonctionnalités:
 - Export pour le frigo
 """
 
+# Import Google Calendar UI
+from src.ui.integrations import render_google_calendar_config
+
 from ._common import construire_semaine_calendrier, date, get_debut_semaine, st
 from .analytics import (
     render_actions_prioritaires,
@@ -74,7 +77,9 @@ def app():
         )
 
     # Onglets principaux
-    tab_calendrier, tab_analyse, tab_ia = st.tabs(["📅 Calendrier", "📊 Analyse", "🤖 IA"])
+    tab_calendrier, tab_analyse, tab_ia, tab_google = st.tabs(
+        ["📅 Calendrier", "📊 Analyse", "🤖 IA", "🔗 Google"]
+    )
 
     # ═══════════════════════════════════════════════════════════
     # ONGLET CALENDRIER
@@ -170,6 +175,14 @@ def app():
         # Rééquilibrage
         st.markdown("#### 🔄 Rééquilibrage des jours chargés")
         render_reequilibrage(semaine.jours)
+
+    # ═══════════════════════════════════════════════════════════
+    # ONGLET GOOGLE CALENDAR
+    # ═══════════════════════════════════════════════════════════
+    with tab_google:
+        st.subheader("🔗 Synchronisation Google Calendar")
+        st.caption("Connectez votre Google Calendar pour synchroniser vos événements")
+        render_google_calendar_config()
 
 
 __all__ = [

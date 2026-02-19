@@ -422,8 +422,3 @@ def creer_module_ui(config: ConfigurationModule) -> ModuleUIBase:
         module.render()
     """
     return ModuleUIBase(config)
-
-
-# Alias pour compatibilité
-BaseModuleUI = ModuleUIBase
-create_module_ui = creer_module_ui

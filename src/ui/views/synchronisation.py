@@ -126,21 +126,9 @@ def afficher_invite_installation_pwa():
     components.html(install_script, height=60)
 
 
-# Alias rétrocompatibilité
-render_presence_indicator = afficher_indicateur_presence
-render_typing_indicator = afficher_indicateur_frappe
-render_sync_status = afficher_statut_synchronisation
-render_install_prompt = afficher_invite_installation_pwa
-
-
 __all__ = [
     "afficher_indicateur_presence",
     "afficher_indicateur_frappe",
     "afficher_statut_synchronisation",
     "afficher_invite_installation_pwa",
-    # Alias rétrocompatibilité
-    "render_presence_indicator",
-    "render_typing_indicator",
-    "render_sync_status",
-    "render_install_prompt",
 ]

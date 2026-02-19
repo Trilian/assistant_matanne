@@ -1116,57 +1116,13 @@ class TestEdgeCases:
         assert result.success is True
         assert result.metadata.tables_count == len(ServiceBackup.MODELS_TO_BACKUP)
 
-
-# ═══════════════════════════════════════════════════════════
-# TESTS UI (DÉPLACÉS VERS tests/ui/views/test_backup.py)
-# ═══════════════════════════════════════════════════════════
-# NOTE: Les fonctions render_backup_ui ont été déplacées vers src.ui.views.backup
-# Ces tests sont conservés comme référence mais skipés.
-# Pour tester l'UI backup, voir tests/ui/views/test_backup.py
-
-
-@pytest.mark.skip(reason="UI déplacée vers src.ui.views.backup")
-@pytest.mark.unit
-class TestRenderBackupUI:
-    """Tests pour render_backup_ui (mocked)."""
-
-    def test_render_backup_ui_exists(self):
-        """Test que render_backup_ui est importable."""
-        from src.ui.views.backup import render_backup_ui
-
-        assert callable(render_backup_ui)
-
-    def test_render_backup_ui_function_signature(self):
-        """Test la signature de la fonction."""
-        import inspect
-
-        from src.services.core.backup.service import render_backup_ui
-
-        sig = inspect.signature(render_backup_ui)
-        # Doit être une fonction sans paramètres obligatoires
-        assert (
-            len([p for p in sig.parameters.values() if p.default is inspect.Parameter.empty]) == 0
-        )
-
-    @patch("src.services.core.backup.service.st")
-    @patch("src.services.core.backup.service.obtenir_service_backup")
-    def test_render_backup_ui_no_backups(self, mock_get_service, mock_st):
-        """Test render_backup_ui sans backups."""
-        from src.services.core.backup.service import render_backup_ui
-
-        mock_service = MagicMock()
-        mock_service.list_backups.return_value = []
-        mock_get_service.return_value = mock_service
-
-        mock_st.columns.return_value = (MagicMock(), MagicMock())
-        mock_st.button.return_value = False
-        mock_st.checkbox.return_value = True
-        mock_st.file_uploader.return_value = None
-
-        render_backup_ui()
-
-        mock_st.subheader.assert_called_once()
-        mock_st.info.assert_called()
+    # ═══════════════════════════════════════════════════════════
+    # TESTS UI (DÉPLACÉS VERS tests/ui/views/test_backup.py)
+    # ═══════════════════════════════════════════════════════════
+    # NOTE: Les fonctions render_backup_ui ont été déplacées vers src.ui.views.backup
+    # Ces tests sont conservés comme référence mais skipés.
+    # Pour tester l'UI sauvegarde, voir tests/ui/views/test_sauvegarde.py
+    # Note: TestRenderBackupUI supprimée - backup.py a été supprimé (doublon de sauvegarde.py)
 
     @patch("src.services.core.backup.service.st")
     @patch("src.services.core.backup.service.obtenir_service_backup")

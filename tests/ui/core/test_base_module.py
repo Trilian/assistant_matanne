@@ -50,16 +50,10 @@ class TestConfigurationModule:
         stats = [{"label": "Total", "value_key": "total"}]
 
         config = ConfigurationModule(
-            name="test", title="Test", icon="ðŸ§ª", service=MagicMock(), stats_config=stats
+            name="test", title="Test", icon="🧪", service=MagicMock(), stats_config=stats
         )
 
         assert config.stats_config == stats
-
-    def test_alias_module_config(self):
-        """Test alias ModuleConfig."""
-        from src.ui.core import ConfigurationModule, ModuleConfig
-
-        assert ModuleConfig is ConfigurationModule
 
 
 # ═══════════════════════════════════════════════════════════
@@ -104,12 +98,6 @@ class TestModuleUIBase:
         assert "module_init_test" in st.session_state
         assert st.session_state["module_init_test"]["current_page"] == 1
         assert st.session_state["module_init_test"]["view_mode"] == "grid"
-
-    def test_alias_base_module_ui(self):
-        """Test alias BaseModuleUI."""
-        from src.ui.core import BaseModuleUI, ModuleUIBase
-
-        assert BaseModuleUI is ModuleUIBase
 
 
 # ═══════════════════════════════════════════════════════════
@@ -299,19 +287,12 @@ class TestFactory:
         from src.ui.core import ConfigurationModule, ModuleUIBase, creer_module_ui
 
         config = ConfigurationModule(
-            name="factory_test", title="Factory Test", icon="ðŸ§ª", service=MagicMock()
+            name="factory_test", title="Factory Test", icon="🧪", service=MagicMock()
         )
 
         module = creer_module_ui(config)
 
         assert isinstance(module, ModuleUIBase)
-
-    @patch("streamlit.session_state", {})
-    def test_create_module_ui_alias(self):
-        """Test alias create_module_ui."""
-        from src.ui.core import create_module_ui, creer_module_ui
-
-        assert create_module_ui is creer_module_ui
 
 
 # ═══════════════════════════════════════════════════════════

@@ -355,22 +355,77 @@ class EnergieService(BaseAIService):
         else:
             conseils.append("Excellent! Vous êtes un éco-champion 🏆")
 
+        # Calculer le streak de jours consécutifs sous la moyenne
+        streak = self._calculer_streak_eco(db, mois)
+
+        # Sauvegarder le score pour comparaison future
+        self._sauvegarder_score(mois, score)
+
         return EcoScoreResult(
             mois=mois,
             score=score,
             score_precedent=score_prec,
             variation=score - score_prec if score_prec else None,
-            streak_jours=0,  # TODO: calculer streak
+            streak_jours=streak,
             economies_euros=economies,
             badges_obtenus=badges_obtenus,
             conseils_amelioration=conseils,
             comparaison_moyenne=self._comparaison_moyenne(score),
         )
 
+    def _calculer_streak_eco(self, db: Session, mois: date) -> int:
+        """Calcule le nombre de jours consécutifs sous la moyenne de conso."""
+        try:
+            debut = mois.replace(day=1)
+            streak = 0
+            jour = mois
+
+            while jour >= debut:
+                # Récupérer conso du jour
+                conso_jour = (
+                    db.query(func.sum(HouseExpense.consommation))
+                    .filter(
+                        func.date(HouseExpense.date_facture) == jour,
+                        HouseExpense.consommation.isnot(None),
+                    )
+                    .scalar()
+                )
+
+                if conso_jour is not None:
+                    # Comparer avec moyenne journalière (approx)
+                    moyenne_jour = sum(cfg["conso_moyenne_mois"] / 30 for cfg in ENERGIES.values())
+                    if conso_jour <= moyenne_jour:
+                        streak += 1
+                    else:
+                        break
+                else:
+                    break
+
+                jour -= timedelta(days=1)
+
+            return streak
+        except Exception:
+            return 0
+
     def _get_score_precedent(self, db: Session, mois: date) -> int | None:
-        """Récupère le score du mois précédent."""
-        # TODO: stocker les scores en DB
-        return None
+        """Récupère le score du mois précédent depuis le cache."""
+        try:
+            import streamlit as st
+
+            cache_key = f"eco_score_{mois.year}_{mois.month}"
+            return st.session_state.get(cache_key)
+        except Exception:
+            return None
+
+    def _sauvegarder_score(self, mois: date, score: int) -> None:
+        """Sauvegarde le score dans le cache session."""
+        try:
+            import streamlit as st
+
+            cache_key = f"eco_score_{mois.year}_{mois.month}"
+            st.session_state[cache_key] = score
+        except Exception:
+            pass
 
     def _comparaison_moyenne(self, score: int) -> str:
         """Génère le texte de comparaison vs moyenne."""

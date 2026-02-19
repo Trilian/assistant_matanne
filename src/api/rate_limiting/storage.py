@@ -71,29 +71,6 @@ class StockageLimitationDebit:
         """Bloque temporairement une clé."""
         self._lock_store[cle] = time.time() + duree_secondes
 
-    # Alias anglais
-    def increment(self, key: str, window_seconds: int) -> int:
-        return self.incrementer(key, window_seconds)
-
-    def get_count(self, key: str, window_seconds: int) -> int:
-        return self.obtenir_compte(key, window_seconds)
-
-    def get_remaining(self, key: str, window_seconds: int, limit: int) -> int:
-        return self.obtenir_restant(key, window_seconds, limit)
-
-    def get_reset_time(self, key: str, window_seconds: int) -> int:
-        return self.obtenir_temps_reset(key, window_seconds)
-
-    def is_blocked(self, key: str) -> bool:
-        return self.est_bloque(key)
-
-    def block(self, key: str, duration_seconds: int):
-        return self.bloquer(key, duration_seconds)
-
-
-# Alias rétrocompatibilité
-RateLimitStore = StockageLimitationDebit
 
 # Instance globale
 _stockage = StockageLimitationDebit()
-_store = _stockage

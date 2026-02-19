@@ -494,10 +494,6 @@ class ServiceGarmin:
         return streak
 
 
-# Alias pour rétrocompatibilité
-GarminService = ServiceGarmin
-
-
 # ═══════════════════════════════════════════════════════════
 # FACTORY
 # ═══════════════════════════════════════════════════════════
@@ -511,10 +507,6 @@ def obtenir_service_garmin() -> ServiceGarmin:
 def get_garmin_service() -> ServiceGarmin:
     """Factory pour obtenir le service Garmin (alias anglais)"""
     return ServiceGarmin()
-
-
-# Alias pour rétrocompatibilité
-get_garmin_sync_service = get_garmin_service
 
 
 # ═══════════════════════════════════════════════════════════

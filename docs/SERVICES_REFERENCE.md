@@ -465,14 +465,14 @@ ma_methode_synchrone = make_sync_alias(ma_methode_async, suffix="_synchrone")
 - ❌ Code déjà synchrone
 - ❌ Contextes purement async (utiliser `await` directement)
 
-### BaseIOService
+### ServiceIOBase
 
-Classe de base pour les opérations I/O.
+Classe de base pour les opérations I/O (import/export).
 
 ```python
-from src.services.base import BaseIOService
+from src.ui.core import ServiceIOBase, ConfigurationIO
 
-class MonService(BaseIOService):
+class MonService(ServiceIOBase):
     def exporter_donnees(self):
         return self.exporter_json(data, "export.json")
 

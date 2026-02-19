@@ -24,14 +24,13 @@ Hub de gestion familiale en production avec modules pour:
 
 ### Modules principaux (src/core/)
 
-Le core est organisé en **5 sous-packages** + fichiers utilitaires. Des shims de rétrocompatibilité conservent les anciens chemins d'import fonctionnels.
+Le core est organisé en **4 sous-packages** + fichiers utilitaires.
 
 - **config/**: Package Pydantic `BaseSettings` — `settings.py` (Parametres, obtenir_parametres), `loader.py` (chargement .env, secrets Streamlit)
 - **db/**: Package base de données — `engine.py` (Engine SQLAlchemy, QueuePool), `session.py` (context managers), `migrations.py` (GestionnaireMigrations), `utils.py` (health checks)
 - **caching/**: Package cache multi-niveaux — `memory.py` (L1 dict), `session.py` (L2 session_state), `file.py` (L3 pickle), `orchestrator.py` (CacheMultiNiveau, @avec_cache_multi)
 - **validation/**: Package validation — `schemas.py` (modèles Pydantic), `sanitizer.py` (anti-XSS/injection), `validators.py` (helpers)
-- **monitoring/**: Package métriques — `profiler.py` (ProfileurFonction), `memory.py` (MoniteurMemoire), `sql.py` (OptimiseurSQL), `dashboard.py` (UI)
-- **models/**: Modèles SQLAlchemy ORM modulaires (18 fichiers organisés par domaine)
+- **models/**: Modèles SQLAlchemy ORM modulaires (19 fichiers organisés par domaine)
 - **ai/**: Sous-module avec `ClientIA` (client Mistral), `AnalyseurIA` (parsing JSON/Pydantic), `CacheIA` (cache sémantique), `RateLimitIA` (source de vérité rate limiting)
 - **decorators.py**: `@with_db_session`, `@with_cache`, `@with_error_handling`
 - **Utilitaires**: `date_utils.py`, `formatters/`, `helpers/`, `constants.py`, `errors.py`
@@ -191,7 +190,7 @@ with obtenir_contexte_db() as session:
     session.commit()
 ```
 
-Clé: Toujours utiliser `obtenir_contexte_db()` (ou alias `get_db_context()`) — ne jamais créer Engine/Session directement.
+Clé: Toujours utiliser `obtenir_contexte_db()` — ne jamais créer Engine/Session directement.
 
 ### Stratégie de cache
 

@@ -161,7 +161,6 @@ from .recettes import (
     Ingredient,
     Recette,
     RecetteIngredient,
-    Recipe,  # Alias
     VersionRecette,
 )
 
@@ -174,15 +173,18 @@ from .sante import (
 
 # Système
 from .systeme import (
+    ActionHistory,
     Backup,
 )
 
 # Temps d'entretien et jardin
 from .temps_entretien import (
+    ActionPlante,
     CoutTravaux,
     LogStatutObjet,
     ObjetMaison,
     PieceMaison,
+    PlanJardin,
     PlanteJardin,
     PrioriteRemplacement,
     # Modèles
@@ -232,7 +234,6 @@ __all__ = [
     # Recettes
     "Ingredient",
     "Recette",
-    "Recipe",
     "RecetteIngredient",
     "EtapeRecette",
     "VersionRecette",
@@ -292,6 +293,7 @@ __all__ = [
     "NotificationPreference",
     # Système
     "Backup",
+    "ActionHistory",
     # Jeux
     "Equipe",
     "Match",
@@ -357,4 +359,6 @@ __all__ = [
     "ObjetMaison",
     "ZoneJardin",
     "PlanteJardin",
+    "PlanJardin",
+    "ActionPlante",
 ]

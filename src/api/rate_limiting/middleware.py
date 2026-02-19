@@ -24,7 +24,6 @@ class MiddlewareLimitationDebit(BaseHTTPMiddleware):
     def __init__(self, app, limiteur: LimiteurDebit | None = None):
         super().__init__(app)
         self.limiteur = limiteur or limiteur_debit
-        self.limiter = self.limiteur
 
     async def dispatch(self, request: Request, call_next) -> Response:
         """Intercepte les requêtes et applique la limitation de débit."""
@@ -57,7 +56,3 @@ class MiddlewareLimitationDebit(BaseHTTPMiddleware):
         self.limiteur.ajouter_headers(response, info_limite)
 
         return response
-
-
-# Alias rétrocompatibilité
-RateLimitMiddleware = MiddlewareLimitationDebit

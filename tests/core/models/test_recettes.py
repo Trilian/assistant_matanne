@@ -15,7 +15,6 @@ from src.core.models.recettes import (
     Ingredient,
     Recette,
     RecetteIngredient,
-    Recipe,
     VersionRecette,
 )
 
@@ -219,10 +218,6 @@ class TestRecette:
         assert "bio" in tags
         assert "équilibré" not in tags
         assert len(tags) == 2
-
-    def test_recipe_alias(self):
-        """Test que Recipe est un alias de Recette."""
-        assert Recipe is Recette
 
 
 @pytest.mark.unit

@@ -253,18 +253,16 @@ class TestEcoAction:
         colonnes = EcoAction.__table__.columns
         assert colonnes["actif"].default is not None
 
-    def test_cout_initial_alias(self):
-        """Test de l'alias cout_initial."""
+    def test_cout_nouveau_initial(self):
+        """Test du champ cout_nouveau_initial."""
         action = EcoAction(
             nom="Test",
             type_action="energie",
             cout_nouveau_initial=Decimal("50.00"),
         )
-        # Property alias
-        assert action.cout_initial == Decimal("50.00")
+        assert action.cout_nouveau_initial == Decimal("50.00")
 
-        # Setter alias
-        action.cout_initial = Decimal("75.00")
+        action.cout_nouveau_initial = Decimal("75.00")
         assert action.cout_nouveau_initial == Decimal("75.00")
 
     def test_repr(self):

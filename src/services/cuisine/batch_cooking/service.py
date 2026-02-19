@@ -408,12 +408,6 @@ class ServiceBatchCooking(
 # ═══════════════════════════════════════════════════════════
 # ALIAS POUR RÉTROCOMPATIBILITÉ
 # ═══════════════════════════════════════════════════════════
-
-# Alias de classe (ancien nom)
-BatchCookingService = ServiceBatchCooking
-
-
-# ═══════════════════════════════════════════════════════════
 # INSTANCE SINGLETON - LAZY LOADING
 # ═══════════════════════════════════════════════════════════
 
@@ -428,13 +422,7 @@ def obtenir_service_batch_cooking() -> ServiceBatchCooking:
     return _service_batch_cooking
 
 
-# Alias pour rétrocompatibilité
-get_batch_cooking_service = obtenir_service_batch_cooking
-
-
 __all__ = [
     "ServiceBatchCooking",
-    "BatchCookingService",  # Alias
     "obtenir_service_batch_cooking",
-    "get_batch_cooking_service",  # Alias
 ]

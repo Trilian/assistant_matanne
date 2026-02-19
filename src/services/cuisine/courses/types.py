@@ -86,21 +86,9 @@ class SuggestionSubstitution(BaseModel):
     economie_estimee: float | None = None
 
 
-# Aliases pour compatibilite
-ShoppingSuggestion = SuggestionCourses
-ShoppingItem = ArticleCourse
-SmartShoppingList = ListeCoursesIntelligente
-SubstitutionSuggestion = SuggestionSubstitution
-
 __all__ = [
-    # Noms francais
     "SuggestionCourses",
     "ArticleCourse",
     "ListeCoursesIntelligente",
     "SuggestionSubstitution",
-    # Aliases anglais
-    "ShoppingSuggestion",
-    "ShoppingItem",
-    "SmartShoppingList",
-    "SubstitutionSuggestion",
 ]

@@ -275,27 +275,9 @@ def obtenir_planificateur_ntfy() -> PlanificateurNtfy:
     return PlanificateurNtfy(service)
 
 
-# Alias rétrocompatibilité
-NotificationPushService = ServiceNtfy
-NotificationPushScheduler = PlanificateurNtfy
-NotificationPushConfig = ConfigurationNtfy
-NotificationPush = NotificationNtfy
-ResultatEnvoiPush = ResultatEnvoiNtfy
-get_notification_push_service = obtenir_service_ntfy
-get_notification_push_scheduler = obtenir_planificateur_ntfy
-
-
 __all__ = [
     "ServiceNtfy",
     "PlanificateurNtfy",
     "obtenir_service_ntfy",
     "obtenir_planificateur_ntfy",
-    # Alias rétrocompatibilité
-    "NotificationPushService",
-    "NotificationPushScheduler",
-    "NotificationPushConfig",
-    "NotificationPush",
-    "ResultatEnvoiPush",
-    "get_notification_push_service",
-    "get_notification_push_scheduler",
 ]

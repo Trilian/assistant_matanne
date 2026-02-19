@@ -387,11 +387,11 @@ def set_development_environment(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def mock_rate_limit_dispatch(monkeypatch):
-    """Mock le RateLimiter pour désactiver le rate limiting dans les tests."""
+    """Mock le LimiteurDebit pour désactiver le rate limiting dans les tests."""
 
-    # Mock le RateLimiter pour qu'il ne bloque jamais
-    async def mock_check_rate_limit(*args, **kwargs):
-        """Mock check qui ne lève jamais d'exception."""
+    # Mock le LimiteurDebit pour qu'il ne bloque jamais
+    async def mock_verifier_limite(*args, **kwargs):
+        """Mock verifier_limite qui ne lève jamais d'exception."""
         return {"remaining": 100, "limit": 1000, "reset": 0}
 
     async def mock_dispatch(self, request, call_next):
@@ -402,10 +402,10 @@ def mock_rate_limit_dispatch(monkeypatch):
     try:
         from src.api import rate_limiting
 
-        # Patch check_rate_limit pour ne jamais lever HTTPException
-        monkeypatch.setattr(rate_limiting.RateLimiter, "check_rate_limit", mock_check_rate_limit)
+        # Patch verifier_limite pour ne jamais lever HTTPException
+        monkeypatch.setattr(rate_limiting.LimiteurDebit, "verifier_limite", mock_verifier_limite)
         # Patch le middleware dispatch
-        monkeypatch.setattr(rate_limiting.RateLimitMiddleware, "dispatch", mock_dispatch)
+        monkeypatch.setattr(rate_limiting.MiddlewareLimitationDebit, "dispatch", mock_dispatch)
     except (ImportError, AttributeError):
         pass
 

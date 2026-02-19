@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
 
 from src.api.dependencies import require_auth
+from src.api.utils import executer_avec_session
 
 router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
 
@@ -75,160 +76,129 @@ async def list_courses(
     active_only: bool = True,
 ):
     """Liste les listes de courses."""
-    try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import ListeCourses
+    from src.core.models import ListeCourses
 
-        with obtenir_contexte_db() as session:
-            query = session.query(ListeCourses)
+    with executer_avec_session() as session:
+        query = session.query(ListeCourses)
 
-            if active_only:
-                query = query.filter(ListeCourses.archivee == False)
+        if active_only:
+            query = query.filter(ListeCourses.archivee == False)
 
-            total = query.count()
+        total = query.count()
 
-            items = (
-                query.order_by(ListeCourses.created_at.desc())
-                .offset((page - 1) * page_size)
-                .limit(page_size)
-                .all()
-            )
+        items = (
+            query.order_by(ListeCourses.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+            .all()
+        )
 
-            return {
-                "items": [
-                    {
-                        "id": liste.id,
-                        "nom": liste.nom,
-                        "items_count": len(liste.articles) if liste.articles else 0,
-                        "created_at": liste.created_at,
-                    }
-                    for liste in items
-                ],
-                "total": total,
-                "page": page,
-                "page_size": page_size,
-            }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        return {
+            "items": [
+                {
+                    "id": liste.id,
+                    "nom": liste.nom,
+                    "items_count": len(liste.articles) if liste.articles else 0,
+                    "created_at": liste.created_at,
+                }
+                for liste in items
+            ],
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+        }
 
 
 @router.post("")
 async def create_liste(data: CourseListCreate, user: dict = Depends(require_auth)):
     """Crée une nouvelle liste de courses."""
-    try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import ListeCourses
+    from src.core.models import ListeCourses
 
-        with obtenir_contexte_db() as session:
-            liste = ListeCourses(nom=data.nom, archivee=False)
-            session.add(liste)
-            session.commit()
-            session.refresh(liste)
+    with executer_avec_session() as session:
+        liste = ListeCourses(nom=data.nom, archivee=False)
+        session.add(liste)
+        session.commit()
+        session.refresh(liste)
 
-            return {"id": liste.id, "nom": liste.nom, "message": "Liste créée"}
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        return {"id": liste.id, "nom": liste.nom, "message": "Liste créée"}
 
 
 @router.post("/{liste_id}/items")
 async def add_item(liste_id: int, item: CourseItemBase, user: dict = Depends(require_auth)):
     """Ajoute un article à une liste."""
-    try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import ArticleCourses, Ingredient, ListeCourses
+    from src.core.models import ArticleCourses, Ingredient, ListeCourses
 
-        with obtenir_contexte_db() as session:
-            liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+    with executer_avec_session() as session:
+        liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
 
-            if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvée")
+        if not liste:
+            raise HTTPException(status_code=404, detail="Liste non trouvée")
 
-            # Trouver ou créer l'ingrédient
-            ingredient = session.query(Ingredient).filter(Ingredient.nom == item.nom).first()
-            if not ingredient:
-                ingredient = Ingredient(nom=item.nom, unite=item.unite or "pcs")
-                session.add(ingredient)
-                session.flush()
+        # Trouver ou créer l'ingrédient
+        ingredient = session.query(Ingredient).filter(Ingredient.nom == item.nom).first()
+        if not ingredient:
+            ingredient = Ingredient(nom=item.nom, unite=item.unite or "pcs")
+            session.add(ingredient)
+            session.flush()
 
-            article = ArticleCourses(
-                liste_id=liste_id,
-                ingredient_id=ingredient.id,
-                quantite_necessaire=item.quantite or 1.0,
-                priorite="moyenne",
-                rayon_magasin=item.categorie,
-            )
-            session.add(article)
-            session.commit()
+        article = ArticleCourses(
+            liste_id=liste_id,
+            ingredient_id=ingredient.id,
+            quantite_necessaire=item.quantite or 1.0,
+            priorite="moyenne",
+            rayon_magasin=item.categorie,
+        )
+        session.add(article)
+        session.commit()
 
-            return {"message": "Article ajouté", "item_id": article.id}
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        return {"message": "Article ajouté", "item_id": article.id}
 
 
 @router.get("/{liste_id}")
 async def get_liste(liste_id: int):
     """Récupère une liste de courses avec ses articles."""
-    try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import ListeCourses
+    from src.core.models import ListeCourses
 
-        with obtenir_contexte_db() as session:
-            liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+    with executer_avec_session() as session:
+        liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
 
-            if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvée")
+        if not liste:
+            raise HTTPException(status_code=404, detail="Liste non trouvée")
 
-            return {
-                "id": liste.id,
-                "nom": liste.nom,
-                "archivee": liste.archivee,
-                "created_at": liste.created_at,
-                "items": [
-                    {
-                        "id": a.id,
-                        "nom": a.ingredient.nom if a.ingredient else "Article",
-                        "quantite": a.quantite_necessaire,
-                        "coche": a.achete,
-                        "categorie": a.rayon_magasin,
-                    }
-                    for a in (liste.articles or [])
-                ],
-            }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        return {
+            "id": liste.id,
+            "nom": liste.nom,
+            "archivee": liste.archivee,
+            "created_at": liste.created_at,
+            "items": [
+                {
+                    "id": a.id,
+                    "nom": a.ingredient.nom if a.ingredient else "Article",
+                    "quantite": a.quantite_necessaire,
+                    "coche": a.achete,
+                    "categorie": a.rayon_magasin,
+                }
+                for a in (liste.articles or [])
+            ],
+        }
 
 
 @router.put("/{liste_id}")
 async def update_liste(liste_id: int, data: CourseListCreate, user: dict = Depends(require_auth)):
     """Met à jour une liste de courses."""
-    try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import ListeCourses
+    from src.core.models import ListeCourses
 
-        with obtenir_contexte_db() as session:
-            liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+    with executer_avec_session() as session:
+        liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
 
-            if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvée")
+        if not liste:
+            raise HTTPException(status_code=404, detail="Liste non trouvée")
 
-            liste.nom = data.nom
-            session.commit()
-            session.refresh(liste)
+        liste.nom = data.nom
+        session.commit()
+        session.refresh(liste)
 
-            return {"id": liste.id, "nom": liste.nom, "message": "Liste mise à jour"}
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        return {"id": liste.id, "nom": liste.nom, "message": "Liste mise à jour"}
 
 
 @router.put("/{liste_id}/items/{item_id}")
@@ -236,81 +206,60 @@ async def update_item(
     liste_id: int, item_id: int, item: CourseItemBase, user: dict = Depends(require_auth)
 ):
     """Met à jour un article d'une liste."""
-    try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import ArticleCourses
+    from src.core.models import ArticleCourses
 
-        with obtenir_contexte_db() as session:
-            article = (
-                session.query(ArticleCourses)
-                .filter(ArticleCourses.id == item_id, ArticleCourses.liste_id == liste_id)
-                .first()
-            )
+    with executer_avec_session() as session:
+        article = (
+            session.query(ArticleCourses)
+            .filter(ArticleCourses.id == item_id, ArticleCourses.liste_id == liste_id)
+            .first()
+        )
 
-            if not article:
-                raise HTTPException(status_code=404, detail="Article non trouvé")
+        if not article:
+            raise HTTPException(status_code=404, detail="Article non trouvé")
 
-            article.quantite_necessaire = item.quantite or 1.0
-            article.achete = item.coche
-            if item.categorie:
-                article.rayon_magasin = item.categorie
-            session.commit()
+        article.quantite_necessaire = item.quantite or 1.0
+        article.achete = item.coche
+        if item.categorie:
+            article.rayon_magasin = item.categorie
+        session.commit()
 
-            return {"message": "Article mis à jour", "id": item_id}
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        return {"message": "Article mis à jour", "id": item_id}
 
 
 @router.delete("/{liste_id}")
 async def delete_liste(liste_id: int, user: dict = Depends(require_auth)):
     """Supprime une liste de courses."""
-    try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import ListeCourses
+    from src.core.models import ListeCourses
 
-        with obtenir_contexte_db() as session:
-            liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+    with executer_avec_session() as session:
+        liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
 
-            if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvée")
+        if not liste:
+            raise HTTPException(status_code=404, detail="Liste non trouvée")
 
-            session.delete(liste)
-            session.commit()
+        session.delete(liste)
+        session.commit()
 
-            return {"message": "Liste supprimée", "id": liste_id}
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        return {"message": "Liste supprimée", "id": liste_id}
 
 
 @router.delete("/{liste_id}/items/{item_id}")
 async def delete_item(liste_id: int, item_id: int, user: dict = Depends(require_auth)):
     """Supprime un article d'une liste."""
-    try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import ArticleCourses
+    from src.core.models import ArticleCourses
 
-        with obtenir_contexte_db() as session:
-            article = (
-                session.query(ArticleCourses)
-                .filter(ArticleCourses.id == item_id, ArticleCourses.liste_id == liste_id)
-                .first()
-            )
+    with executer_avec_session() as session:
+        article = (
+            session.query(ArticleCourses)
+            .filter(ArticleCourses.id == item_id, ArticleCourses.liste_id == liste_id)
+            .first()
+        )
 
-            if not article:
-                raise HTTPException(status_code=404, detail="Article non trouvé")
+        if not article:
+            raise HTTPException(status_code=404, detail="Article non trouvé")
 
-            session.delete(article)
-            session.commit()
+        session.delete(article)
+        session.commit()
 
-            return {"message": "Article supprimé", "id": item_id}
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        return {"message": "Article supprimé", "id": item_id}

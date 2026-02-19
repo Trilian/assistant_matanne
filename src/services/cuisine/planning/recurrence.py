@@ -276,9 +276,6 @@ def obtenir_service_recurrence() -> ServiceRecurrence:
     return _service_recurrence
 
 
-get_recurrence_service = obtenir_service_recurrence
-
-
 __all__ = [
     "TypeRecurrence",
     "OPTIONS_RECURRENCE",
@@ -286,5 +283,4 @@ __all__ = [
     "format_recurrence",
     "ServiceRecurrence",
     "obtenir_service_recurrence",
-    "get_recurrence_service",
 ]
