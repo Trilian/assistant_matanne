@@ -16,7 +16,7 @@ Hub de gestion familiale en production avec modules pour:
 - 💪 Suivi de la santé et du fitness
 - 📊 Tableau de bord familial avec métriques
 
-**Architecture**: Chargement différé avec ~60% d'accélération au démarrage via `OptimizedRouter`, modèles SQLAlchemy modulaires dans `core/models/` (18 fichiers), codebase en français.
+**Architecture**: Chargement différé avec ~60% d'accélération au démarrage via `OptimizedRouter`, modèles SQLAlchemy modulaires dans `core/models/` (19 fichiers), codebase en français. Marqueur `py.typed` (PEP 561).
 
 ---
 
@@ -24,16 +24,17 @@ Hub de gestion familiale en production avec modules pour:
 
 ### Modules principaux (src/core/)
 
-Le core est organisé en **4 sous-packages** + fichiers utilitaires.
+Le core est organisé en **7 sous-packages** + fichiers utilitaires.
 
-- **config/**: Package Pydantic `BaseSettings` — `settings.py` (Parametres, obtenir_parametres), `loader.py` (chargement .env, secrets Streamlit)
-- **db/**: Package base de données — `engine.py` (Engine SQLAlchemy, QueuePool), `session.py` (context managers), `migrations.py` (GestionnaireMigrations), `utils.py` (health checks)
-- **caching/**: Package cache multi-niveaux — `memory.py` (L1 dict), `session.py` (L2 session_state), `file.py` (L3 pickle), `orchestrator.py` (CacheMultiNiveau, @avec_cache_multi)
-- **validation/**: Package validation — `schemas.py` (modèles Pydantic), `sanitizer.py` (anti-XSS/injection), `validators.py` (helpers)
+- **ai/**: `ClientIA` (client Mistral), `AnalyseurIA` (parsing JSON/Pydantic), `CacheIA` (cache sémantique), `RateLimitIA` (source de vérité rate limiting)
+- **caching/**: Cache multi-niveaux — `base.py` (types), `cache.py` (Cache, @cached typé ParamSpec), `memory.py` (L1), `session.py` (L2), `file.py` (L3), `orchestrator.py` (CacheMultiNiveau, @avec_cache_multi typé ParamSpec)
+- **config/**: Pydantic `BaseSettings` — `settings.py` (Parametres, obtenir_parametres), `loader.py` (chargement .env, secrets Streamlit). Seuls `Parametres`, `obtenir_parametres`, `charger_secrets_streamlit` sont exportés.
+- **date_utils/**: Package utilitaires de dates (ex-fichier unique 429 lignes) — `semaines.py`, `periodes.py`, `formatage.py`, `helpers.py`. Re-exports transparents via `__init__.py`.
+- **db/**: Base de données — `engine.py` (Engine SQLAlchemy, QueuePool), `session.py` (context managers), `migrations.py` (GestionnaireMigrations), `utils.py` (health checks)
 - **models/**: Modèles SQLAlchemy ORM modulaires (19 fichiers organisés par domaine)
-- **ai/**: Sous-module avec `ClientIA` (client Mistral), `AnalyseurIA` (parsing JSON/Pydantic), `CacheIA` (cache sémantique), `RateLimitIA` (source de vérité rate limiting)
+- **validation/**: Package validation — `schemas/` (sous-package Pydantic: `recettes.py`, `inventaire.py`, `courses.py`, `planning.py`, `famille.py`, `projets.py`, `_helpers.py`), `sanitizer.py` (anti-XSS/injection), `validators.py` (helpers)
 - **decorators.py**: `@with_db_session`, `@with_cache`, `@with_error_handling`
-- **Utilitaires**: `date_utils.py`, `formatters/`, `helpers/`, `constants.py`, `errors.py`
+- **Utilitaires**: `constants.py`, `errors.py`, `errors_base.py`, `state.py`, `logging.py`, `lazy_loader.py`, `py.typed`
 
 ### Couche Services (src/services/)
 
@@ -61,12 +62,14 @@ Le core est organisé en **4 sous-packages** + fichiers utilitaires.
 
 Chaque module exporte la fonction `app()` (point d'entrée pour le chargement différé):
 
-- **accueil.py**: Tableau de bord avec métriques familiales, alertes critiques, raccourcis rapides
-- **cuisine/**: Recettes, planification des repas, gestion des stocks
-- **famille/**: Hub de la vie familiale: suivi de Jules (enfant), santé/bien-être, activités, achats
-- **planning/**: Calendrier, routines, planification d'activités
-- **barcode.py**: Scan de codes-barres pour les courses/stocks
-- **parametres.py**: Paramètres, vérification de la santé de la base de données, runner de migrations
+- **accueil/**: Tableau de bord avec métriques familiales, alertes critiques, raccourcis rapides
+- **cuisine/**: Recettes, planification des repas, gestion des stocks, cours, inventaire, batch cooking
+- **famille/**: Hub de la vie familiale: suivi de Jules (enfant), activités, routines, achats, suivi_perso, weekend. Inclut `activites_utils.py` et `routines_utils.py` (logique pure testable)
+- **maison/**: Habitat, entretien, charges, dépenses, jardin
+- **jeux/**: Loto et paris sportifs
+- **planning/**: Calendrier, timeline, templates
+- **parametres/**: Paramètres multi-onglets (about, affichage, budget, cache, database, foyer, ia)
+- **utilitaires/**: Barcode, rapports, notifications push, scan factures, recherche produits
 
 ---
 
@@ -97,7 +100,7 @@ python manage.py migrate
 # Exécute: alembic upgrade head
 
 # Vérifie la version actuelle de migration
-python -c "from src.core.database import GestionnaireMigrations; print(GestionnaireMigrations.obtenir_version_courante())"
+python -c "from src.core.db import GestionnaireMigrations; print(GestionnaireMigrations.obtenir_version_courante())"
 
 # Voir le statut d'Alembic
 alembic current
@@ -124,7 +127,7 @@ pytest -m integration
 ### Qualité du code
 
 ```bash
-# Formate le code (black, longueur de ligne 100)
+# Formate le code (ruff format, longueur de ligne 100)
 python manage.py format_code
 
 # Vérifie le code (ruff)
@@ -141,7 +144,7 @@ python manage.py generate_requirements
 ### Nommage et langage
 
 - **Français partout**: Tous les noms de variables, commentaires, docstrings et noms de fonctions utilisent le français (ex: `obtenir_parametres()`, `GestionnaireMigrations`, `avec_session_db`)
-- **Structure des fichiers**: Modèles SQLAlchemy dans `src/core/models/` (18 fichiers modulaires), tous les décorateurs dans `src/core/decorators.py`, utilitaires dans `src/core/` (date_utils, formatters, helpers)
+- **Structure des fichiers**: Modèles SQLAlchemy dans `src/core/models/` (19 fichiers modulaires), tous les décorateurs dans `src/core/decorators.py`, utilitaires dans `src/core/` (date_utils/, constants, errors, state)
 - **Nommage des modules**: Les modules sont `src/modules/{name}.py` ou `src/modules/{name}/__init__.py`
 - **Factories de services**: Toujours exporter une fonction `get_{service_name}_service()` pour l'injection de dépendances (ex: `get_recette_service()`)
 
@@ -251,7 +254,7 @@ Clé: Tous les appels IA sont enveloppés avec limitation de débit automatique,
 
 ### Communication inter-modules
 
-- **Helpers partagés**: `src/modules/famille/helpers.py` fournit des fonctions réutilisables avec décorateurs `@st.cache_data`
+- **Helpers partagés**: `src/modules/famille/helpers.py` et modules de logique pure (`activites_utils.py`, `routines_utils.py`) avec constantes, filtrage, statistiques, recommandations
 - **Gestion d'état**: `StateManager` dans [src/core/state.py](src/core/state.py) fournit un magasin clé-valeur global (nom de famille, préférences utilisateur)
 - **Relations de base de données**: SQLAlchemy `relationship()` avec `back_populates` pour l'accès aux objets bidirectionnel entre modèles
 
@@ -341,11 +344,12 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 | ------------------------------------------------ | ----------------------------------------------------- |
 | [src/core/config/](src/core/config/)             | Package configuration (Pydantic BaseSettings)         |
 | [src/core/db/](src/core/db/)                     | Package base de données (engine, sessions, migrations)|
-| [src/core/caching/](src/core/caching/)           | Package cache multi-niveaux (L1/L2/L3)                |
-| [src/core/validation/](src/core/validation/)     | Package validation & sanitization                     |
+| [src/core/caching/](src/core/caching/)           | Package cache multi-niveaux (L1/L2/L3, @cached typé)  |
+| [src/core/date_utils/](src/core/date_utils/)     | Package utilitaires dates (semaines, periodes, formatage) |
+| [src/core/validation/](src/core/validation/)     | Package validation (schemas/ sous-package, sanitizer)  |
 | [src/core/monitoring/](src/core/monitoring/)      | Package métriques & performance                       |
 | [src/core/ai/](src/core/ai/)                     | Package IA (Mistral, rate limiting, cache sémantique) |
-| [src/core/models/](src/core/models/)             | Tous les modèles ORM SQLAlchemy (18 fichiers)         |
+| [src/core/models/](src/core/models/)             | Tous les modèles ORM SQLAlchemy (19 fichiers)         |
 | [src/core/decorators.py](src/core/decorators.py) | Utilitaires `@with_db_session`, `@with_cache`         |
 | [src/app.py](src/app.py)                         | App Streamlit principale, routage, chargement différé |
 | [pyproject.toml](pyproject.toml)                 | Dépendances (Poetry), config test, règles de linting  |

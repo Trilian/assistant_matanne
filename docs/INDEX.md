@@ -1,5 +1,7 @@
 # 📚 Documentation Index - MaTanne v2
 
+> **Dernière mise à jour**: 19 Février 2026
+
 ## 🎯 Documents Essentiels
 
 | Fichier                                                          | Description                            |
@@ -9,8 +11,11 @@
 | **[API_REFERENCE.md](./API_REFERENCE.md)**                       | **Référence complète de l'API REST**   |
 | **[SERVICES_REFERENCE.md](./SERVICES_REFERENCE.md)**             | **Documentation des services backend** |
 | **[ARCHITECTURE.md](./ARCHITECTURE.md)**                         | Architecture technique                 |
+| **[MIGRATION_CORE_PACKAGES.md](./MIGRATION_CORE_PACKAGES.md)**  | **Guide migration imports core**       |
 | **[FONCTIONNALITES.md](./FONCTIONNALITES.md)**                   | Fonctionnalités détaillées             |
 | **[SQLALCHEMY_SESSION_GUIDE.md](./SQLALCHEMY_SESSION_GUIDE.md)** | Guide sessions DB                      |
+| **[ERD_SCHEMA.md](./ERD_SCHEMA.md)**                             | Schéma entité-relation                 |
+| **[UI_COMPONENTS.md](./UI_COMPONENTS.md)**                       | Composants UI Streamlit                |
 
 ## 📁 Structure des Dossiers
 
@@ -20,16 +25,15 @@
 docs/
 ├── INDEX.md                          ← Vous êtes ici
 ├── ARCHITECTURE.md                   ← Architecture technique
-├── API_REFERENCE.md                  ← Documentation API REST (NEW!)
-├── SERVICES_REFERENCE.md             ← Documentation Services (NEW!)
+├── API_REFERENCE.md                  ← Documentation API REST
+├── SERVICES_REFERENCE.md             ← Documentation Services
+├── MIGRATION_CORE_PACKAGES.md        ← Guide migration imports core
 ├── FONCTIONNALITES.md                ← Fonctionnalités
 ├── SQLALCHEMY_SESSION_GUIDE.md       ← Guide sessions DB
 ├── ERD_SCHEMA.md                     ← Schéma ERD
-├── reports/                          ← Rapports d'analyse
-│   ├── ANALYSIS_SUMMARY.json
-│   ├── COVERAGE_REPORT.md
-│   └── coverage.json
-└── archive/                          ← Anciens documents (archivés)
+├── UI_COMPONENTS.md                  ← Composants UI
+├── PLAN_DIVISION_FICHIERS.md         ← Plan de découpage
+└── SERVICES_RESTRUCTURATION.md       ← Historique restructuration services
 ```
 
 ### `/scripts/` - Scripts & Outils
@@ -51,11 +55,14 @@ scripts/
 │   └── test_manager.py              ← Gestionnaire tests
 ├── analysis/                        ← Analyse de code
 │   └── analyze_api.py               ← Analyser API
-└── setup/                           ← Configuration
-    ├── convert_utf8.py              ← Fix encodage
-    ├── generate_vapid.py            ← Clés VAPID
-    ├── setup_api_key.py             ← Config API Football
-    └── setup_jeux.py                ← Setup module Jeux
+├── setup/                           ← Configuration
+│   ├── convert_utf8.py              ← Fix encodage
+│   ├── generate_vapid.py            ← Clés VAPID
+│   ├── setup_api_key.py             ← Config API Football
+│   └── setup_jeux.py                ← Setup module Jeux
+├── fix_encoding.py                  ← Script fix encoding (pre-commit hook)
+├── convert_to_utf8.py               ← Conversion batch UTF-8
+└── run_api.py                       ← Lancer l'API FastAPI
 ```
 
 ## 🚀 Démarrage rapide
@@ -93,11 +100,10 @@ pytest tests/ --cov=src --cov-report=html
 
 ### Structure Finale
 
-- ✅ Tests réorganisés dans `tests/phases/`
-- ✅ Imports corrigés (3-level parent path)
-- ✅ Documentation complète
-- ✅ Outils centralisés
-- ✅ Racine propre!
+- ✅ Tests organisés dans `tests/` (core, modules, services, api, e2e)
+- ✅ Documentation maintenue à jour dans `docs/`
+- ✅ Outils centralisés dans `scripts/`
+- ✅ Racine propre
 
 ## 📌 Fichiers par Catégorie
 
@@ -105,39 +111,41 @@ pytest tests/ --cov=src --cov-report=html
 
 - `pyproject.toml` - Dépendances Poetry
 - `requirements.txt` - Dépendances pip
-- `poetry.lock` - Lock file
 - `alembic.ini` - Config migrations
+- `pytest.ini` - Config pytest
 - `.env.local` - Config locale
-- `.env.example` - Template config
 - `.gitignore` - Git ignore rules
+- `.pre-commit-config.yaml` - Hooks pre-commit
 
 ### 🏗️ Infrastructure (Racine)
 
 - `manage.py` - CLI manager
 - `alembic/` - Migrations Alembic
 - `src/` - Code source
-- `tests/` - Tests (restructurés!)
-- `scripts/` - Scripts utilities
+- `tests/` - Tests
+- `scripts/` - Scripts utilitaires
 - `backups/` - Backups BD
 
 ### 📚 Documentation (docs/)
 
-- `ARCHITECTURE.md` - Architecture technique
-- `reports/` - Rapports d'analyse
-- `archive/` - Docs archivées
-
-### 🔨 Scripts (scripts/)
-
-- db/ - 5 scripts opérations BD
-- test/ - 5 scripts tests
-- analysis/ - 1 script analyse
-- setup/ - 4 scripts configuration
+| Fichier | Contenu |
+|---------|---------|
+| `ARCHITECTURE.md` | Architecture technique (core, services, modules) |
+| `API_REFERENCE.md` | Référence API REST FastAPI |
+| `SERVICES_REFERENCE.md` | Documentation services backend |
+| `MIGRATION_CORE_PACKAGES.md` | Guide migration imports core |
+| `FONCTIONNALITES.md` | Fonctionnalités détaillées |
+| `SQLALCHEMY_SESSION_GUIDE.md` | Guide sessions DB |
+| `ERD_SCHEMA.md` | Schéma entité-relation |
+| `UI_COMPONENTS.md` | Composants UI Streamlit |
 
 ### 📊 Données (data/)
 
-- `recettes_standard.json` - Recettes
-- `TEMPLATE_IMPORT.csv` - Template
-- `tests_new.txt` - Liste tests
+- `recettes_standard.json` - Recettes de base
+- `entretien_catalogue.json` - Catalogue entretien maison
+- `plantes_catalogue.json` - Catalogue plantes jardin
+- `TEMPLATE_IMPORT.csv` - Template import
+- `parisSportifs - Recapitulatif.csv` - Données paris
 
 ## ✨ Nettoyage Effectué
 
@@ -163,46 +171,38 @@ pytest tests/ --cov=src --cov-report=html
 
 ## 🎯 Prochaines Étapes
 
-### Immédiat
+### Tests
 
 ```bash
-# 1. Mesurer couverture réelle
-python tools/measure_coverage.py 40
+# Tous les tests
+pytest tests/ -v
 
-# 2. Vérifier résultats
-cat docs/reports/coverage.json
-```
+# Avec couverture
+pytest tests/ --cov=src --cov-report=html
 
-### Court Terme
+# Tests core uniquement
+pytest tests/core/ -v
 
-```bash
-# 3. Si <40%: Identifier gaps
-grep -l "0%" docs/reports/coverage.json
-
-# 4. Phase 4 si nécessaire
-pytest tests/phases/ --cov=src -v
+# Tests modules
+pytest tests/modules/ -v
 ```
 
 ## 📞 Support
 
 **Fichiers clés pour comprendre le projet:**
 
-1. `/docs/ARCHITECTURE.md` - Architecture générale
-2. `/README.md` - Documentation principale
-3. `/ROADMAP.md` - Plan de développement
-4. `/RESULTAT_FINAL_PHASE3.md` - Derniers résultats
+1. `/docs/ARCHITECTURE.md` - Architecture générale (core, services, modules)
+2. `/docs/MIGRATION_CORE_PACKAGES.md` - Guide de migration des imports core
+3. `/README.md` - Documentation principale
+4. `/.github/copilot-instructions.md` - Instructions Copilot (workflow, conventions)
+5. `/ROADMAP.md` - Plan de développement
 
-**Pour exécuter des tests:**
-
-- Voir `tools/measure_coverage.py` pour couverture
-- Voir `README.md` pour commands pytest
-
-**Pour trouver des rapports:**
-
-- Tous dans `docs/reports/`
-- Anciens docs dans `docs/archive/`
+**Structure du core (`src/core/`):**
+- 7 sous-packages: `ai/`, `caching/`, `config/`, `date_utils/`, `db/`, `models/`, `validation/`
+- Fichiers utilitaires: `constants.py`, `decorators.py`, `errors.py`, `state.py`, `logging.py`
+- Marqueur typing: `py.typed` (PEP 561)
 
 ---
 
-**Dernière mise à jour:** 29 Janvier 2026  
-**État:** ✅ Structure complètement réorganisée et nettoyée!
+**Dernière mise à jour:** 19 Février 2026  
+**État:** ✅ Documentation à jour après refactoring core (date_utils, schemas, caching)
