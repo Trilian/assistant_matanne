@@ -8,9 +8,7 @@ Ce module fournit:
 - Helpers et décorateurs de validation
 """
 
-from .sanitizer import NettoyeurEntrees
-from .schemas import (
-    # Constantes
+from ..constants import (
     MAX_ETAPES,
     MAX_INGREDIENTS,
     MAX_LENGTH_LONG,
@@ -23,6 +21,9 @@ from .schemas import (
     MAX_TEMPS_PREPARATION,
     MIN_ETAPES,
     MIN_INGREDIENTS,
+)
+from .sanitizer import NettoyeurEntrees
+from .schemas import (
     # Schémas dict
     SCHEMA_COURSES,
     SCHEMA_INVENTAIRE,

@@ -1,68 +1,152 @@
 """
-Logique metier du module Activites (famille) - Separee de l'UI
-Ce module contient toute la logique pure, testable sans Streamlit
+Fonctions utilitaires pures pour les activités familiales.
+
+Ce module contient la logique métier pure (sans dépendances Streamlit/DB)
+pour le filtrage, les statistiques, la validation et les recommandations d'activités.
 """
 
-import logging
-from datetime import date, timedelta
-from typing import Any
+from __future__ import annotations
 
-logger = logging.getLogger(__name__)
-
+from collections import defaultdict
+from datetime import date, datetime
 
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES
 # ═══════════════════════════════════════════════════════════
 
-TYPES_ACTIVITE = ["Sport", "Culture", "Sortie", "Atelier", "Rendez-vous", "Jeu", "Autre"]
-LIEUX = ["Maison", "Parc", "Centre culturel", "École", "Bibliothèque", "Piscine", "Autre"]
-CATEGORIES_AGE = ["0-1 an", "1-2 ans", "2-3 ans", "3-5 ans", "5+ ans", "Famille"]
+TYPES_ACTIVITE: list[str] = [
+    "Sport",
+    "Culture",
+    "Sortie",
+    "Jeux",
+    "Créatif",
+    "Nature",
+    "Éveil",
+]
+
+LIEUX: list[str] = [
+    "Maison",
+    "Parc",
+    "Piscine",
+    "Bibliothèque",
+    "Centre culturel",
+    "Forêt",
+    "Plage",
+    "Salle de sport",
+]
+
+CATEGORIES_AGE: list[str] = [
+    "0-6 mois",
+    "6-12 mois",
+    "1-2 ans",
+    "2-3 ans",
+    "3+ ans",
+]
 
 
 # ═══════════════════════════════════════════════════════════
-# FILTRAGE ET TRI
+# HELPERS INTERNES
 # ═══════════════════════════════════════════════════════════
 
 
-def filtrer_par_type(activites: list[dict[str, Any]], type_act: str) -> list[dict[str, Any]]:
-    """Filtre les activites par type."""
-    return [a for a in activites if a.get("type") == type_act]
+def _parse_date(d: date | str) -> date:
+    """Convertit une date string ISO en objet date si nécessaire."""
+    if isinstance(d, str):
+        return datetime.fromisoformat(d).date()
+    return d
 
 
-def filtrer_par_lieu(activites: list[dict[str, Any]], lieu: str) -> list[dict[str, Any]]:
-    """Filtre les activites par lieu."""
+# ═══════════════════════════════════════════════════════════
+# FILTRAGE
+# ═══════════════════════════════════════════════════════════
+
+
+def filtrer_par_type(activites: list[dict], type_activite: str) -> list[dict]:
+    """Filtre les activités par type.
+
+    Args:
+        activites: Liste de dicts avec clé 'type'.
+        type_activite: Type à filtrer (ex: 'Sport').
+
+    Returns:
+        Sous-liste des activités correspondant au type.
+    """
+    return [a for a in activites if a.get("type") == type_activite]
+
+
+def filtrer_par_lieu(activites: list[dict], lieu: str) -> list[dict]:
+    """Filtre les activités par lieu.
+
+    Args:
+        activites: Liste de dicts avec clé 'lieu'.
+        lieu: Lieu à filtrer (ex: 'Parc').
+
+    Returns:
+        Sous-liste des activités correspondant au lieu.
+    """
     return [a for a in activites if a.get("lieu") == lieu]
 
 
 def filtrer_par_date(
-    activites: list[dict[str, Any]], date_debut: date, date_fin: date
-) -> list[dict[str, Any]]:
-    """Filtre les activites par periode."""
-    resultats = []
+    activites: list[dict],
+    date_debut: date,
+    date_fin: date,
+) -> list[dict]:
+    """Filtre les activités dans une période donnée (bornes incluses).
 
-    for act in activites:
-        date_act = act.get("date")
-        if isinstance(date_act, str):
-            from datetime import datetime
+    Args:
+        activites: Liste de dicts avec clé 'date' (date ou str ISO).
+        date_debut: Date de début de la période.
+        date_fin: Date de fin de la période.
 
-            date_act = datetime.fromisoformat(date_act).date()
-
-        if date_debut <= date_act <= date_fin:
-            resultats.append(act)
-
-    return resultats
-
-
-def get_activites_a_venir(activites: list[dict[str, Any]], jours: int = 7) -> list[dict[str, Any]]:
-    """Retourne les activites à venir dans X jours."""
-    date_fin = date.today() + timedelta(days=jours)
-    return filtrer_par_date(activites, date.today(), date_fin)
+    Returns:
+        Sous-liste des activités dont la date est dans [date_debut, date_fin].
+    """
+    result: list[dict] = []
+    for a in activites:
+        d = _parse_date(a["date"])
+        if date_debut <= d <= date_fin:
+            result.append(a)
+    return result
 
 
-def get_activites_passees(activites: list[dict[str, Any]], jours: int = 30) -> list[dict[str, Any]]:
-    """Retourne les activites passees des X derniers jours."""
-    date_debut = date.today() - timedelta(days=jours)
-    return filtrer_par_date(activites, date_debut, date.today())
+def get_activites_a_venir(activites: list[dict], jours: int = 7) -> list[dict]:
+    """Retourne les activités des *jours* prochains jours (à partir d'aujourd'hui inclus).
+
+    Args:
+        activites: Liste de dicts avec clé 'date'.
+        jours: Nombre de jours à considérer (défaut: 7).
+
+    Returns:
+        Sous-liste des activités à venir.
+    """
+    today = date.today()
+    from datetime import timedelta
+
+    fin = today + timedelta(days=jours)
+    return filtrer_par_date(activites, today, fin)
+
+
+def get_activites_passees(activites: list[dict], jours: int = 30) -> list[dict]:
+    """Retourne les activités des *jours* derniers jours.
+
+    Args:
+        activites: Liste de dicts avec clé 'date'.
+        jours: Nombre de jours passés à considérer (défaut: 30).
+
+    Returns:
+        Sous-liste des activités passées.
+    """
+    today = date.today()
+    from datetime import timedelta
+
+    debut = today - timedelta(days=jours)
+    result: list[dict] = []
+    for a in activites:
+        d = _parse_date(a["date"])
+        if debut <= d < today:
+            result.append(a)
+    return result
 
 
 # ═══════════════════════════════════════════════════════════
@@ -70,45 +154,59 @@ def get_activites_passees(activites: list[dict[str, Any]], jours: int = 30) -> l
 # ═══════════════════════════════════════════════════════════
 
 
-def calculer_statistiques_activites(activites: list[dict[str, Any]]) -> dict[str, Any]:
-    """Calcule les statistiques des activites."""
+def calculer_statistiques_activites(activites: list[dict]) -> dict:
+    """Calcule des statistiques agrégées sur une liste d'activités.
+
+    Args:
+        activites: Liste de dicts avec clés 'type', 'lieu', 'cout', 'duree'.
+
+    Returns:
+        Dict avec 'total', 'par_type', 'par_lieu', 'cout_total', 'cout_moyen', 'duree_moyenne'.
+    """
     total = len(activites)
-
     if total == 0:
-        return {"total": 0, "par_type": {}, "par_lieu": {}, "cout_total": 0.0, "duree_moyenne": 0.0}
+        return {
+            "total": 0,
+            "par_type": {},
+            "par_lieu": {},
+            "cout_total": 0.0,
+            "cout_moyen": 0.0,
+            "duree_moyenne": 0.0,
+        }
 
-    # Par type
-    par_type = {}
-    for act in activites:
-        type_act = act.get("type", "Autre")
-        par_type[type_act] = par_type.get(type_act, 0) + 1
+    par_type: dict[str, int] = defaultdict(int)
+    par_lieu: dict[str, int] = defaultdict(int)
+    cout_total = 0.0
+    duree_total = 0.0
 
-    # Par lieu
-    par_lieu = {}
-    for act in activites:
-        lieu = act.get("lieu", "Autre")
-        par_lieu[lieu] = par_lieu.get(lieu, 0) + 1
-
-    # Coûts et duree
-    cout_total = sum(act.get("cout", 0.0) for act in activites)
-    durees = [act.get("duree", 0) for act in activites if act.get("duree")]
-    duree_moyenne = sum(durees) / len(durees) if durees else 0.0
+    for a in activites:
+        par_type[a.get("type", "Inconnu")] += 1
+        par_lieu[a.get("lieu", "Inconnu")] += 1
+        cout_total += a.get("cout", 0.0)
+        duree_total += a.get("duree", 0)
 
     return {
         "total": total,
-        "par_type": par_type,
-        "par_lieu": par_lieu,
+        "par_type": dict(par_type),
+        "par_lieu": dict(par_lieu),
         "cout_total": cout_total,
         "cout_moyen": cout_total / total,
-        "duree_moyenne": duree_moyenne,
+        "duree_moyenne": duree_total / total,
     }
 
 
-def calculer_frequence_hebdomadaire(activites: list[dict[str, Any]], semaines: int = 4) -> float:
-    """Calcule la frequence hebdomadaire moyenne d'activites."""
-    if not activites or semaines == 0:
-        return 0.0
+def calculer_frequence_hebdomadaire(activites: list[dict], semaines: int = 4) -> float:
+    """Calcule la fréquence hebdomadaire moyenne des activités.
 
+    Args:
+        activites: Liste d'activités.
+        semaines: Nombre de semaines sur lesquelles calculer.
+
+    Returns:
+        Nombre moyen d'activités par semaine. 0.0 si semaines <= 0.
+    """
+    if semaines <= 0:
+        return 0.0
     return len(activites) / semaines
 
 
@@ -116,73 +214,115 @@ def calculer_frequence_hebdomadaire(activites: list[dict[str, Any]], semaines: i
 # RECOMMANDATIONS
 # ═══════════════════════════════════════════════════════════
 
+_SUGGESTIONS_PAR_AGE: dict[str, list[dict]] = {
+    "bebe": [
+        {"type": "Éveil", "titre": "Jeux d'éveil", "description": "Jouets sensoriels et hochets"},
+        {"type": "Nature", "titre": "Promenade", "description": "Sortie en poussette au parc"},
+        {"type": "Créatif", "titre": "Comptines", "description": "Chansons et comptines"},
+        {
+            "type": "Sport",
+            "titre": "Motricité libre",
+            "description": "Tapis d'éveil et exploration",
+        },
+    ],
+    "1-2 ans": [
+        {
+            "type": "Éveil",
+            "titre": "Jeux de manipulation",
+            "description": "Empiler, encastrer, transvaser",
+        },
+        {"type": "Nature", "titre": "Parc à jeux", "description": "Toboggan, balançoire adapté"},
+        {
+            "type": "Créatif",
+            "titre": "Peinture doigts",
+            "description": "Peinture propre et pâte à modeler",
+        },
+        {"type": "Sport", "titre": "Parcours moteur", "description": "Grimper, ramper, sauter"},
+    ],
+    "2-3 ans": [
+        {"type": "Éveil", "titre": "Jeux symboliques", "description": "Dînette, poupée, voitures"},
+        {"type": "Culture", "titre": "Bibliothèque", "description": "Heure du conte"},
+        {"type": "Créatif", "titre": "Bricolage", "description": "Collage, découpage, gommettes"},
+        {
+            "type": "Sport",
+            "titre": "Vélo draisienne",
+            "description": "Apprentissage de l'équilibre",
+        },
+    ],
+    "3+ ans": [
+        {
+            "type": "Créatif",
+            "titre": "Activités créatives",
+            "description": "Dessin, peinture, collage avancé",
+        },
+        {
+            "type": "Sport",
+            "titre": "Sport collectif",
+            "description": "Football, danse, gymnastique",
+        },
+        {"type": "Culture", "titre": "Musée enfants", "description": "Expositions interactives"},
+        {"type": "Nature", "titre": "Randonnée", "description": "Balade nature avec observation"},
+    ],
+}
 
-def suggerer_activites_age(age_mois: int) -> list[dict[str, str]]:
-    """Suggère des activités adaptées à l'âge."""
-    suggestions = []
 
+def suggerer_activites_age(age_mois: int) -> list[dict]:
+    """Suggère des activités adaptées à l'âge de l'enfant.
+
+    Args:
+        age_mois: Âge de l'enfant en mois.
+
+    Returns:
+        Liste de dicts avec 'type', 'titre', 'description'.
+    """
     if age_mois < 12:
-        suggestions = [
-            {"type": "Jeu", "titre": "Jeux d'éveil", "description": "Hochets, tapis d'éveil"},
-            {
-                "type": "Sport",
-                "titre": "Motricité libre",
-                "description": "Temps au sol pour ramper",
-            },
-            {"type": "Culture", "titre": "Comptines", "description": "Chansons et comptines"},
-        ]
+        return _SUGGESTIONS_PAR_AGE["bebe"]
     elif age_mois < 24:
-        suggestions = [
-            {"type": "Jeu", "titre": "Jeux de manipulation", "description": "Empiler, encastrer"},
-            {"type": "Sport", "titre": "Marche", "description": "Promenades, parc"},
-            {"type": "Culture", "titre": "Histoires", "description": "Livres images"},
-        ]
+        return _SUGGESTIONS_PAR_AGE["1-2 ans"]
     elif age_mois < 36:
-        suggestions = [
-            {"type": "Jeu", "titre": "Jeux symboliques", "description": "Poupées, voitures"},
-            {"type": "Sport", "titre": "Parcours moteur", "description": "Escalade, vélo"},
-            {"type": "Culture", "titre": "Musique", "description": "Instruments simples"},
-        ]
+        return _SUGGESTIONS_PAR_AGE["2-3 ans"]
     else:
-        suggestions = [
-            {
-                "type": "Atelier",
-                "titre": "Activités créatives",
-                "description": "Peinture, pâte à modeler",
-            },
-            {"type": "Sport", "titre": "Sport collectif", "description": "Football, natation"},
-            {
-                "type": "Culture",
-                "titre": "Sorties culturelles",
-                "description": "Musées, spectacles",
-            },
-        ]
-
-    return suggestions
+        return _SUGGESTIONS_PAR_AGE["3+ ans"]
 
 
-def detecter_desequilibre_types(activites: list[dict[str, Any]]) -> dict[str, Any]:
-    """Detecte les desequilibres dans les types d'activites."""
-    stats = calculer_statistiques_activites(activites)
-    par_type = stats.get("par_type", {})
+def detecter_desequilibre_types(activites: list[dict]) -> dict:
+    """Détecte les déséquilibres dans la répartition des types d'activités.
 
-    if not par_type:
+    Un type est considéré dominant s'il représente > 60% des activités.
+    Les types absents sont signalés en recommandation.
+
+    Args:
+        activites: Liste de dicts avec clé 'type'.
+
+    Returns:
+        Dict avec 'equilibre' (bool) et 'recommandations' (list[str]).
+    """
+    if not activites:
         return {"equilibre": True, "recommandations": []}
 
-    total = stats["total"]
-    recommandations = []
+    total = len(activites)
+    par_type: dict[str, int] = defaultdict(int)
+    for a in activites:
+        par_type[a.get("type", "Inconnu")] += 1
 
-    # Verifier si un type est sous-represente (< 15%)
-    for type_act in TYPES_ACTIVITE[:3]:  # Sport, Culture, Sortie
-        count = par_type.get(type_act, 0)
-        pourcentage = (count / total * 100) if total > 0 else 0
+    recommandations: list[str] = []
 
-        if pourcentage < 15:
+    # Vérifier les types dominants (> 60%)
+    for type_act, count in par_type.items():
+        pct = count / total * 100
+        if pct > 60:
             recommandations.append(
-                f"Augmenter les activites de type '{type_act}' ({pourcentage:.0f}%)"
+                f"Type '{type_act}' surreprésenté ({pct:.0f}%). Diversifiez les activités."
             )
 
-    return {"equilibre": len(recommandations) == 0, "recommandations": recommandations}
+    # Vérifier les types essentiels absents
+    types_essentiels = ["Sport", "Culture", "Sortie"]
+    for type_ess in types_essentiels:
+        if type_ess not in par_type:
+            recommandations.append(f"Aucune activité de type '{type_ess}'. Pensez à en ajouter.")
+
+    equilibre = len(recommandations) == 0
+    return {"equilibre": equilibre, "recommandations": recommandations}
 
 
 # ═══════════════════════════════════════════════════════════
@@ -190,30 +330,38 @@ def detecter_desequilibre_types(activites: list[dict[str, Any]]) -> dict[str, An
 # ═══════════════════════════════════════════════════════════
 
 
-def valider_activite(data: dict[str, Any]) -> tuple[bool, list[str]]:
-    """Valide une activite."""
-    erreurs = []
+def valider_activite(data: dict) -> tuple[bool, list[str]]:
+    """Valide les données d'une activité.
 
-    if "titre" not in data or not data["titre"]:
-        erreurs.append("Le titre est requis")
+    Args:
+        data: Dict avec les champs de l'activité.
 
-    if "type" in data and data["type"] not in TYPES_ACTIVITE:
-        erreurs.append(f"Type invalide. Valeurs: {', '.join(TYPES_ACTIVITE)}")
+    Returns:
+        Tuple (valide: bool, erreurs: list[str]).
+    """
+    erreurs: list[str] = []
 
-    if "date" not in data or not data["date"]:
-        erreurs.append("La date est requise")
+    if not data.get("titre"):
+        erreurs.append("Le titre est obligatoire.")
 
-    if "duree" in data:
-        duree = data["duree"]
-        if not isinstance(duree, (int, float)) or duree <= 0:
-            erreurs.append("La durée doit être > 0")
+    if not data.get("date"):
+        erreurs.append("La date est obligatoire.")
 
-    if "cout" in data:
-        cout = data["cout"]
-        if not isinstance(cout, (int, float)) or cout < 0:
-            erreurs.append("Le coût doit être >= 0")
+    type_act = data.get("type")
+    if type_act and type_act not in TYPES_ACTIVITE:
+        erreurs.append(
+            f"Le type '{type_act}' est invalide. Types acceptés: {', '.join(TYPES_ACTIVITE)}."
+        )
 
-    return len(erreurs) == 0, erreurs
+    duree = data.get("duree")
+    if duree is not None and duree < 0:
+        erreurs.append("La durée ne peut pas être négative.")
+
+    cout = data.get("cout")
+    if cout is not None and cout < 0:
+        erreurs.append("Le coût ne peut pas être négatif.")
+
+    return (len(erreurs) == 0, erreurs)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -221,36 +369,40 @@ def valider_activite(data: dict[str, Any]) -> tuple[bool, list[str]]:
 # ═══════════════════════════════════════════════════════════
 
 
-def formater_activite_resume(activite: dict[str, Any]) -> str:
-    """Formate le résumé d'une activité."""
+def formater_activite_resume(activite: dict) -> str:
+    """Formate un résumé lisible d'une activité.
+
+    Args:
+        activite: Dict avec clés optionnelles 'titre', 'type', 'lieu'.
+
+    Returns:
+        Résumé formaté (ex: "Football (Sport) — Parc").
+    """
     titre = activite.get("titre", "Activité")
-    type_act = activite.get("type", "")
-    lieu = activite.get("lieu", "")
+    type_act = activite.get("type")
+    lieu = activite.get("lieu")
 
     parts = [titre]
     if type_act:
-        parts.append(f"({type_act})")
+        parts[0] = f"{titre} ({type_act})"
     if lieu:
-        parts.append(f"@ {lieu}")
+        parts.append(lieu)
 
-    return " ".join(parts)
+    return " — ".join(parts)
 
 
-def grouper_par_mois(activites: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
-    """Groupe les activites par mois."""
-    groupes = {}
+def grouper_par_mois(activites: list[dict]) -> dict[str, list[dict]]:
+    """Groupe les activités par mois (format 'YYYY-MM').
 
-    for act in activites:
-        date_act = act.get("date")
-        if isinstance(date_act, str):
-            from datetime import datetime
+    Args:
+        activites: Liste de dicts avec clé 'date' (date ou str ISO).
 
-            date_act = datetime.fromisoformat(date_act).date()
-
-        if date_act:
-            mois_key = date_act.strftime("%Y-%m")
-            if mois_key not in groupes:
-                groupes[mois_key] = []
-            groupes[mois_key].append(act)
-
-    return groupes
+    Returns:
+        Dict {clé_mois: [activités]}.
+    """
+    groupes: dict[str, list[dict]] = defaultdict(list)
+    for a in activites:
+        d = _parse_date(a["date"])
+        cle = d.strftime("%Y-%m")
+        groupes[cle].append(a)
+    return dict(groupes)

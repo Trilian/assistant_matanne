@@ -15,9 +15,12 @@ import pytest
 
 from src.core.config import (
     Parametres,
+    obtenir_parametres,
+)
+from src.core.config.loader import (
+    _get_mistral_api_key_from_secrets,
     _read_st_secret,
     _reload_env_files,
-    obtenir_parametres,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -455,8 +458,6 @@ class TestProprietesConfig:
 
     def test_get_mistral_api_key_from_secrets_returns_none_if_no_secrets(self):
         """Test _get_mistral_api_key_from_secrets retourne None sans secrets."""
-        from src.core.config import _get_mistral_api_key_from_secrets
-
         with patch("streamlit.secrets", None):
             result = _get_mistral_api_key_from_secrets()
             # Devrait retourner None sans lever d'exception
@@ -524,7 +525,7 @@ class TestProprietesAvancees:
             {"MISTRAL_API_KEY": "", "STREAMLIT_SECRETS_MISTRAL_API_KEY": ""},
             clear=False,
         ):
-            with patch("src.core.config._get_mistral_api_key_from_secrets", return_value=None):
+            with patch("src.core.config.settings.charger_secrets_streamlit", return_value=None):
                 params = Parametres()
 
                 with pytest.raises(ValueError) as exc_info:
@@ -537,7 +538,7 @@ class TestProprietesAvancees:
         with patch.dict(
             os.environ, {"MISTRAL_API_KEY": "sk-test-dummy-key-replace-with-real-key"}, clear=False
         ):
-            with patch("src.core.config._get_mistral_api_key_from_secrets", return_value=None):
+            with patch("src.core.config.settings.charger_secrets_streamlit", return_value=None):
                 params = Parametres()
 
                 with pytest.raises(ValueError):
@@ -693,7 +694,7 @@ class TestMethodesHelpers:
     def test_verifier_mistral_configure_false(self):
         """Test _verifier_mistral_configure retourne False."""
         with patch.dict(os.environ, {"MISTRAL_API_KEY": ""}, clear=False):
-            with patch("src.core.config._get_mistral_api_key_from_secrets", return_value=None):
+            with patch("src.core.config.settings.charger_secrets_streamlit", return_value=None):
                 params = Parametres()
 
                 assert params._verifier_mistral_configure() is False
@@ -779,8 +780,6 @@ class TestGetMistralApiKeyFromSecrets:
 
     def test_get_from_secrets_dict_access(self):
         """Test accès dict st.secrets."""
-        from src.core.config import _get_mistral_api_key_from_secrets
-
         mock_secrets = MagicMock()
         mock_secrets.get.return_value = {"api_key": "sk-from-secrets"}
         mock_secrets.__contains__ = MagicMock(return_value=True)
@@ -794,8 +793,6 @@ class TestGetMistralApiKeyFromSecrets:
 
     def test_get_from_secrets_exception_handling(self):
         """Test gestion exception."""
-        from src.core.config import _get_mistral_api_key_from_secrets
-
         with patch("streamlit.secrets") as mock_secrets:
             mock_secrets.get.side_effect = Exception("No secrets")
 

@@ -71,24 +71,3 @@ class TypeVersionRecetteEnum(enum.StrEnum):
     STANDARD = "standard"
     BEBE = "bébé"
     BATCH_COOKING = "batch_cooking"
-
-
-# ═══════════════════════════════════════════════════════════
-# HELPERS
-# ═══════════════════════════════════════════════════════════
-
-
-def obtenir_valeurs_enum(enum_class: type[enum.Enum]) -> list[str]:
-    """Récupère toutes les valeurs d'un enum.
-
-    Args:
-        enum_class: Classe d'énumération
-
-    Returns:
-        Liste des valeurs de l'enum
-
-    Example:
-        >>> obtenir_valeurs_enum(PrioriteEnum)
-        ['basse', 'moyenne', 'haute']
-    """
-    return [e.value for e in enum_class]

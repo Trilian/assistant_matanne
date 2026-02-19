@@ -14,7 +14,10 @@ import logging
 from collections.abc import Callable
 from datetime import datetime
 from functools import wraps
-from typing import Any
+from typing import Any, ParamSpec, TypeVar
+
+P = ParamSpec("P")
+T = TypeVar("T")
 
 import streamlit as st
 
@@ -240,9 +243,6 @@ class Cache:
         st.session_state[Cache.CLE_STATS]["invalidations"] += 1
         logger.info("Cache complètement vidé")
 
-    # Alias pour compatibilité
-    clear_all = vider
-
     @staticmethod
     def obtenir_statistiques() -> dict:
         """
@@ -296,16 +296,16 @@ class Cache:
             logger.debug("Impossible de calculer la taille du cache (sys.getsizeof échoué)")
 
 
-# Alias pour compatibilité
-clear_all = Cache.vider
-
-
 # ═══════════════════════════════════════════════════════════
 # DÉCORATEUR CACHE
 # ═══════════════════════════════════════════════════════════
 
 
-def cached(ttl: int = 300, cle: str | None = None, dependencies: list[str] | None = None):
+def cached(
+    ttl: int = 300,
+    cle: str | None = None,
+    dependencies: list[str] | None = None,
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """
     Décorateur pour cacher les résultats d'une fonction.
 
@@ -323,9 +323,9 @@ def cached(ttl: int = 300, cle: str | None = None, dependencies: list[str] | Non
         >>>     return recette_service.get_all()
     """
 
-    def decorateur(func: Callable) -> Callable:
+    def decorateur(func: Callable[P, T]) -> Callable[P, T]:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             # Générer clé cache
             if cle:
                 cle_cache = cle

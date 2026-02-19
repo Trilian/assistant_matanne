@@ -20,7 +20,7 @@ repos:
 
       - id: check-mojibake
         name: Verifier absence de mojibake
-        entry: python fix_encoding.py --check
+        entry: python scripts/fix_encoding.py --check
         language: system
         pass_filenames: false
         always_run: true

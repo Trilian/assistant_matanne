@@ -11,7 +11,7 @@ Stratégie d'écriture: L1 + L2 (L3 optionnel si persistent=True)
 import logging
 from collections.abc import Callable
 from functools import wraps
-from typing import Any, TypeVar
+from typing import Any, ParamSpec, TypeVar
 
 from .base import EntreeCache, StatistiquesCache
 from .file import CacheFichierN3
@@ -20,6 +20,7 @@ from .session import CacheSessionN2
 
 logger = logging.getLogger(__name__)
 
+P = ParamSpec("P")
 T = TypeVar("T")
 
 
@@ -235,7 +236,7 @@ def avec_cache_multi(
     key_prefix: str | None = None,
     tags: list[str] | None = None,
     persistent: bool = False,
-):
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """
     Décorateur pour cacher automatiquement les résultats.
 
@@ -251,9 +252,9 @@ def avec_cache_multi(
         >>>     return db.query(Recette).offset(page * 20).limit(20).all()
     """
 
-    def decorator(func: Callable[..., T]) -> Callable[..., T]:
+    def decorator(func: Callable[P, T]) -> Callable[P, T]:
         @wraps(func)
-        def wrapper(*args, **kwargs) -> T:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             # Générer la clé
             prefix = key_prefix or func.__name__
             key_parts = [prefix]

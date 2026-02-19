@@ -7,6 +7,17 @@ Ce module centralise UNIQUEMENT :
 - Les détails d'erreur
 
 [!] IMPORTANT: Ne doit JAMAIS importer streamlit ou éléments UI
+
+USAGE:
+- Services, modules backend → importer depuis errors_base
+- Modules UI Streamlit → importer depuis errors (hérite + helpers UI)
+
+Exemples:
+    # Backend/services (pas d'UI)
+    from src.core.errors_base import ErreurValidation, ErreurNonTrouve
+
+    # Modules Streamlit avec affichage d'erreurs
+    from src.core.errors import afficher_erreur, ErreurValidation
 """
 
 from typing import Any

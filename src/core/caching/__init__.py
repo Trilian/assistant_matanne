@@ -13,7 +13,7 @@ Ce module fournit:
 """
 
 from .base import EntreeCache, StatistiquesCache
-from .cache import Cache, cached, clear_all
+from .cache import Cache, cached
 from .file import CacheFichierN3
 from .memory import CacheMemoireN1
 from .orchestrator import (
@@ -30,7 +30,6 @@ __all__ = [
     # Cache session simple
     "Cache",
     "cached",
-    "clear_all",
     # Caches par niveau
     "CacheMemoireN1",
     "CacheSessionN2",

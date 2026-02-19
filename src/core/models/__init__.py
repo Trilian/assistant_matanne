@@ -11,9 +11,20 @@ Architecture modulaire :
 - sante.py     : HealthRoutine, HealthObjective, HealthEntry
 - maison.py    : Project, Routine, GardenItem, etc.
 
-Usage:
+Usage recommandé par domaine (imports explicites):
+    # Recettes
+    from src.core.models.recettes import Recette, Ingredient, EtapeRecette
+    # Planning
+    from src.core.models.planning import Planning, Repas, CalendarEvent
+    # Famille
+    from src.core.models.famille import ChildProfile, Milestone
+    # Santé
+    from src.core.models.sante import HealthRoutine, HealthEntry
+    # Courses
+    from src.core.models.courses import ArticleCourses, ListeCourses
+
+Usage général (tous les modèles):
     from src.core.models import Recette, Ingredient, Planning
-    # ou
     from src.core.models import Base, metadata
 """
 
@@ -25,7 +36,6 @@ from .base import (
     TypeRepasEnum,
     TypeVersionRecetteEnum,
     metadata,
-    obtenir_valeurs_enum,
 )
 
 # Batch Cooking
@@ -230,7 +240,6 @@ __all__ = [
     "SaisonEnum",
     "TypeRepasEnum",
     "TypeVersionRecetteEnum",
-    "obtenir_valeurs_enum",
     # Recettes
     "Ingredient",
     "Recette",
