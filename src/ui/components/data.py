@@ -3,8 +3,14 @@ UI Components - Data
 Pagination, métriques, export
 """
 
-import pandas as pd
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import streamlit as st
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 def pagination(
@@ -107,6 +113,8 @@ def boutons_export(
     Example:
         boutons_export(items, "recettes", ["csv", "json"], "recipes_export")
     """
+    import pandas as pd  # Lazy load
+
     if isinstance(data, list):
         df = pd.DataFrame(data)
     else:
@@ -152,6 +160,8 @@ def tableau_donnees(data: list[dict] | pd.DataFrame, cle: str = "table"):
     Example:
         tableau_donnees(recipes, "recipes_table")
     """
+    import pandas as pd  # Lazy load
+
     if isinstance(data, list):
         df = pd.DataFrame(data)
     else:
