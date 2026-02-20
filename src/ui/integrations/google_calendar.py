@@ -185,9 +185,9 @@ def afficher_statut_sync_google():
         if delta < timedelta(minutes=5):
             st.success("🟢 Synchronisé à l'instant")
         elif delta < timedelta(hours=1):
-            st.info(f"🟡 Synchronisé il y a {delta.seconds // 60} min")
+            st.info(f"🟡 Synchronisé il y a {int(delta.total_seconds()) // 60} min")
         elif delta < timedelta(days=1):
-            st.warning(f"🟠 Synchronisé il y a {delta.seconds // 3600}h")
+            st.warning(f"🟠 Synchronisé il y a {int(delta.total_seconds()) // 3600}h")
         else:
             st.error(f"🔴 Dernière sync: {config.last_sync.strftime('%d/%m')}")
 

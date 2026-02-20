@@ -10,12 +10,16 @@ Dashboard sante/sport pour Anne et Mathieu:
 - Sync Garmin
 """
 
+import logging
 from datetime import date, datetime, timedelta
 
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+logger = logging.getLogger(__name__)
+
+from src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUT
 from src.core.db import obtenir_contexte_db
 from src.core.models import (
     FoodLog,
@@ -35,7 +39,6 @@ from src.services.integrations.garmin import (
 
 __all__ = [
     # Standard libs
-    "st",
     "date",
     "datetime",
     "timedelta",
@@ -137,7 +140,7 @@ def _calculate_streak(user: UserProfile, summaries: list) -> int:
     if not summaries:
         return 0
 
-    objectif = user.objectif_pas_quotidien or 10000
+    objectif = user.objectif_pas_quotidien or OBJECTIF_PAS_QUOTIDIEN_DEFAUT
     summary_by_date = {s.date: s for s in summaries}
 
     streak = 0
@@ -168,5 +171,6 @@ def get_food_logs_today(username: str) -> list:
                 .order_by(FoodLog.heure)
                 .all()
             )
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         return []

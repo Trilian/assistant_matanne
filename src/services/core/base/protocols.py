@@ -17,20 +17,15 @@ Usage:
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Generic, Protocol, TypeVar, runtime_checkable
+from typing import Any, Protocol, TypeVar, runtime_checkable
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-logger = logging.getLogger(__name__)
-
 T = TypeVar("T")
-T_co = TypeVar("T_co", covariant=True)
-E = TypeVar("E", bound=Exception)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -210,6 +205,4 @@ __all__ = [
     "ServiceHealth",
     # TypeVars
     "T",
-    "T_co",
-    "E",
 ]

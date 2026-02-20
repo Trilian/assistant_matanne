@@ -15,6 +15,8 @@ Design system : tokens/ html_builder/ theme/ registry/
 # Components - Charts
 # Components - Metrics
 # Components - System
+from .a11y import A11y
+from .animations import Animation, animer, injecter_animations
 from .components import (
     ConfigChamp,
     Modale,
@@ -59,6 +61,14 @@ from .feedback import (
     indicateur_chargement,
     spinner_intelligent,
 )
+from .hooks import (
+    use_confirmation,
+    use_filtres,
+    use_onglets,
+    use_pagination,
+    use_recherche,
+    use_tri,
+)
 from .html_builder import HtmlBuilder, render_html
 
 # Integrations (Google Calendar, etc.)
@@ -90,7 +100,18 @@ from .tablet import (
     saisie_nombre_tablette,
 )
 from .theme import ModeTheme, Theme, appliquer_theme, obtenir_theme
-from .tokens import Couleur, Espacement, Ombre, Rayon, Transition, Typographie, ZIndex
+from .tokens import (
+    Couleur,
+    Espacement,
+    Ombre,
+    Rayon,
+    Transition,
+    Typographie,
+    Variante,
+    ZIndex,
+    obtenir_couleurs_variante,
+)
+from .tokens_semantic import Sem, injecter_tokens_semantiques
 
 # Views (vues UI extraites des services)
 from .views import (
@@ -126,8 +147,23 @@ __all__ = [
     "Ombre",
     "Transition",
     "ZIndex",
+    "Variante",
+    "obtenir_couleurs_variante",
+    "Sem",
+    "injecter_tokens_semantiques",
     "HtmlBuilder",
     "render_html",
+    "A11y",
+    "Animation",
+    "animer",
+    "injecter_animations",
+    # Hooks
+    "use_pagination",
+    "use_recherche",
+    "use_filtres",
+    "use_confirmation",
+    "use_tri",
+    "use_onglets",
     "ModeTheme",
     "Theme",
     "obtenir_theme",

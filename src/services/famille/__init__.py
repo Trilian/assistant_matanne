@@ -1,15 +1,19 @@
-"""Package famille - Services calendrier et budget.
+"""Package famille - Services calendrier, budget, routines et activités.
 
 Imports paresseux pour éviter les imports circulaires.
 Importez directement depuis les sous-packages:
 
     from src.services.famille.calendrier import get_calendar_sync_service
     from src.services.famille.budget import CategorieDepense
+    from src.services.famille.routines import obtenir_service_routines
+    from src.services.famille.activites import obtenir_service_activites
 """
 
 __all__ = [
     "calendrier",
     "budget",
+    "routines",
+    "activites",
 ]
 
 
@@ -23,4 +27,12 @@ def __getattr__(name: str):
         from src.services.famille.budget import CategorieDepense
 
         return CategorieDepense
+    if name in ("obtenir_service_routines", "get_routines_service"):
+        from src.services.famille.routines import obtenir_service_routines
+
+        return obtenir_service_routines
+    if name in ("obtenir_service_activites", "get_activites_service"):
+        from src.services.famille.activites import obtenir_service_activites
+
+        return obtenir_service_activites
     raise AttributeError(f"module 'src.services.famille' has no attribute '{name}'")

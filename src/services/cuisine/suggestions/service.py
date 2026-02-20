@@ -529,15 +529,13 @@ Réponds avec 3 suggestions au format JSON:
 # ═══════════════════════════════════════════════════════════
 
 
-_suggestions_service: ServiceSuggestions | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("suggestions", tags={"cuisine", "ia"})
 def obtenir_service_suggestions() -> ServiceSuggestions:
-    """Factory pour le service de suggestions IA."""
-    global _suggestions_service
-    if _suggestions_service is None:
-        _suggestions_service = ServiceSuggestions()
-    return _suggestions_service
+    """Factory pour le service de suggestions IA (thread-safe via registre)."""
+    return ServiceSuggestions()
 
 
 def get_suggestions_service() -> ServiceSuggestions:

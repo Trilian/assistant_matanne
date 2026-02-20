@@ -9,10 +9,13 @@ from typing import TYPE_CHECKING
 
 import streamlit as st
 
+from src.ui.registry import composant_ui
+
 if TYPE_CHECKING:
     import pandas as pd
 
 
+@composant_ui("data", exemple='pagination(100, 20, "recipes")', tags=["pagination", "navigation"])
 def pagination(
     total_items: int, items_per_page: int = 20, key: str = "pagination"
 ) -> tuple[int, int]:
@@ -68,6 +71,9 @@ def pagination(
     return current_page, items_per_page
 
 
+@composant_ui(
+    "data", exemple='ligne_metriques([{"label": "Total", "value": 42}])', tags=["metrics", "stats"]
+)
 def ligne_metriques(stats: list[dict], cols: int | None = None):
     """
     Ligne de métriques
@@ -98,6 +104,9 @@ def ligne_metriques(stats: list[dict], cols: int | None = None):
             )
 
 
+@composant_ui(
+    "data", exemple='boutons_export(items, "export", ["csv", "json"])', tags=["export", "download"]
+)
 def boutons_export(
     data: list[dict] | pd.DataFrame,
     nom_fichier: str = "export",
@@ -152,6 +161,7 @@ def boutons_export(
                 )
 
 
+@composant_ui("data", exemple='tableau_donnees(data, "table")', tags=["table", "dataframe"])
 def tableau_donnees(data: list[dict] | pd.DataFrame, cle: str = "table"):
     """
     Tableau de données interactif
@@ -173,6 +183,7 @@ def tableau_donnees(data: list[dict] | pd.DataFrame, cle: str = "table"):
     st.dataframe(df, width="stretch", key=cle)
 
 
+@composant_ui("data", exemple='barre_progression(0.75, "Import")', tags=["progress", "bar"])
 def barre_progression(valeur: float, label: str = "", cle: str = "progress"):
     """
     Barre de progression

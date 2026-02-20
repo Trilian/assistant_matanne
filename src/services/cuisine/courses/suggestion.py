@@ -314,15 +314,13 @@ Reponds UNIQUEMENT avec le JSON."""
 # FACTORY FUNCTION
 # ═══════════════════════════════════════════════════════════
 
-_service_courses_intelligentes: ServiceCoursesIntelligentes | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("courses_intelligentes", tags={"cuisine", "ia"})
 def obtenir_service_courses_intelligentes() -> ServiceCoursesIntelligentes:
-    """Factory pour le service courses intelligentes."""
-    global _service_courses_intelligentes
-    if _service_courses_intelligentes is None:
-        _service_courses_intelligentes = ServiceCoursesIntelligentes()
-    return _service_courses_intelligentes
+    """Factory pour le service courses intelligentes (thread-safe via registre)."""
+    return ServiceCoursesIntelligentes()
 
 
 def get_smart_shopping_service() -> ServiceCoursesIntelligentes:

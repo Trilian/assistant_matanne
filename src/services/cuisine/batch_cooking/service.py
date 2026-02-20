@@ -69,8 +69,8 @@ class ServiceBatchCooking(
     # SECTION 1: CONFIGURATION
     # ═══════════════════════════════════════════════════════════
 
-    @avec_cache(ttl=3600, key_func=lambda self: "batch_config")
     @avec_gestion_erreurs(default_return=None)
+    @avec_cache(ttl=3600, key_func=lambda self: "batch_config")
     @avec_session_db
     def get_config(self, db: Session | None = None) -> ConfigBatchCooking | None:
         """Récupère la configuration batch cooking (singleton)."""
@@ -134,8 +134,8 @@ class ServiceBatchCooking(
     # SECTION 2: SESSIONS BATCH COOKING
     # ═══════════════════════════════════════════════════════════
 
-    @avec_cache(ttl=600, key_func=lambda self, session_id: f"batch_session_{session_id}")
     @avec_gestion_erreurs(default_return=None)
+    @avec_cache(ttl=600, key_func=lambda self, session_id: f"batch_session_{session_id}")
     @avec_session_db
     def obtenir_session(
         self, session_id: int, db: Session | None = None
@@ -151,8 +151,8 @@ class ServiceBatchCooking(
             .first()
         )
 
-    @avec_cache(ttl=600, key_func=lambda self: "batch_session_active")
     @avec_gestion_erreurs(default_return=None)
+    @avec_cache(ttl=600, key_func=lambda self: "batch_session_active")
     @avec_session_db
     def get_session_active(self, db: Session | None = None) -> SessionBatchCooking | None:
         """Récupère la session en cours (si elle existe)."""
@@ -411,15 +411,13 @@ class ServiceBatchCooking(
 # INSTANCE SINGLETON - LAZY LOADING
 # ═══════════════════════════════════════════════════════════
 
-_service_batch_cooking: ServiceBatchCooking | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("batch_cooking", tags={"cuisine", "ia"})
 def obtenir_service_batch_cooking() -> ServiceBatchCooking:
-    """Obtient ou crée l'instance globale ServiceBatchCooking."""
-    global _service_batch_cooking
-    if _service_batch_cooking is None:
-        _service_batch_cooking = ServiceBatchCooking()
-    return _service_batch_cooking
+    """Obtient l'instance ServiceBatchCooking (thread-safe via registre)."""
+    return ServiceBatchCooking()
 
 
 def get_batch_cooking_service() -> ServiceBatchCooking:

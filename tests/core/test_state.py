@@ -1,49 +1,42 @@
 """
-Tests pour src/core/state.py - Gestionnaire d'état avec mocks Streamlit.
+Tests pour src/core/state.py - Gestionnaire d'Ã©tat avec MemorySessionStorage.
 """
 
 from unittest.mock import MagicMock, patch
 
 import pytest
 
+from src.core.storage import MemorySessionStorage, configurer_storage
+
+
+@pytest.fixture(autouse=True)
+def memory_storage():
+    """Configure un storage mÃ©moire propre pour chaque test."""
+    storage = MemorySessionStorage()
+    configurer_storage(storage)
+    yield storage
+    # Cleanup
+    storage.clear()
+
 
 @pytest.fixture
 def mock_session_state():
-    """Mock st.session_state pour tests isolés."""
-    mock_state = {}
-
-    def getitem(key):
-        return mock_state[key]
-
-    def setitem(key, value):
-        mock_state[key] = value
-
-    def contains(key):
-        return key in mock_state
-
-    def delitem(key):
-        del mock_state[key]
-
-    mock = MagicMock()
-    mock.__getitem__ = MagicMock(side_effect=getitem)
-    mock.__setitem__ = MagicMock(side_effect=setitem)
-    mock.__contains__ = MagicMock(side_effect=contains)
-    mock.__delitem__ = MagicMock(side_effect=delitem)
-    mock._mock_state = mock_state
-
-    return mock
+    """Legacy fixture â€” redirige vers MemorySessionStorage."""
+    # Fixture conservÃ©e pour compatibilitÃ© mais ne fait plus rien
+    # car memory_storage (autouse) gÃ¨re le setup
+    yield None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ETAT APP DATACLASS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEtatApp:
     """Tests pour la dataclass EtatApp."""
 
     def test_default_values(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         from src.core.state import EtatApp
 
         etat = EtatApp()
@@ -56,7 +49,7 @@ class TestEtatApp:
         assert etat.cache_active is True
 
     def test_historique_initialized_with_module(self):
-        """Test historique initialisé avec module actuel."""
+        """Test historique initialisÃ© avec module actuel."""
         from src.core.state import EtatApp
 
         etat = EtatApp()
@@ -64,7 +57,7 @@ class TestEtatApp:
         assert etat.historique_navigation == ["accueil"]
 
     def test_custom_module(self):
-        """Test module personnalisé."""
+        """Test module personnalisÃ©."""
         from src.core.state import EtatApp
 
         etat = EtatApp(module_actuel="cuisine.recettes")
@@ -73,45 +66,45 @@ class TestEtatApp:
         assert etat.historique_navigation == ["cuisine.recettes"]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GESTIONNAIRE ETAT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGestionnaireEtatInit:
     """Tests pour GestionnaireEtat.initialiser()."""
 
-    def test_initialiser_creates_etat(self, mock_session_state):
+    def test_initialiser_creates_etat(self, memory_storage):
         """Test initialiser crée l'état."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.state import GestionnaireEtat
+        from src.core.state import GestionnaireEtat
 
-            GestionnaireEtat.initialiser()
+        GestionnaireEtat.initialiser()
 
-            assert "etat_app" in mock_session_state._mock_state
+        assert memory_storage.contains("etat_app")
 
-    def test_initialiser_only_once(self, mock_session_state):
+    def test_initialiser_only_once(self, memory_storage):
         """Test initialiser ne réécrit pas si existant."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.state import GestionnaireEtat
+        from src.core.state import GestionnaireEtat
 
-            # Première init
-            GestionnaireEtat.initialiser()
+        # Première init
+        GestionnaireEtat.initialiser()
 
-            # Modifier l'état
-            mock_session_state._mock_state["etat_app"].nom_utilisateur = "Mathieu"
+        # Modifier l'état
+        etat = memory_storage.get("etat_app")
+        etat.nom_utilisateur = "Mathieu"
+        memory_storage.set("etat_app", etat)
 
-            # Deuxième init ne doit pas écraser
-            GestionnaireEtat.initialiser()
+        # Deuxième init ne doit pas écraser
+        GestionnaireEtat.initialiser()
 
-            assert mock_session_state._mock_state["etat_app"].nom_utilisateur == "Mathieu"
+        assert memory_storage.get("etat_app").nom_utilisateur == "Mathieu"
 
 
 class TestGestionnaireEtatObtenir:
     """Tests pour GestionnaireEtat.obtenir()."""
 
-    def test_obtenir_returns_etat(self, mock_session_state):
-        """Test obtenir retourne l'état."""
+    def test_obtenir_returns_etat(self):
+        """Test obtenir retourne l'Ã©tat."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import EtatApp, GestionnaireEtat
 
@@ -119,12 +112,12 @@ class TestGestionnaireEtatObtenir:
 
             assert isinstance(etat, EtatApp)
 
-    def test_obtenir_initializes_if_needed(self, mock_session_state):
+    def test_obtenir_initializes_if_needed(self):
         """Test obtenir initialise si besoin."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
-            # Pas d'init préalable
+            # Pas d'init prÃ©alable
             etat = GestionnaireEtat.obtenir()
 
             assert etat.module_actuel == "accueil"
@@ -133,8 +126,8 @@ class TestGestionnaireEtatObtenir:
 class TestGestionnaireEtatNavigation:
     """Tests pour la navigation."""
 
-    def test_naviguer_vers_updates_module(self, mock_session_state):
-        """Test naviguer_vers met à jour le module."""
+    def test_naviguer_vers_updates_module(self):
+        """Test naviguer_vers met Ã  jour le module."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -143,8 +136,8 @@ class TestGestionnaireEtatNavigation:
             etat = GestionnaireEtat.obtenir()
             assert etat.module_actuel == "cuisine.recettes"
 
-    def test_naviguer_vers_saves_previous(self, mock_session_state):
-        """Test naviguer_vers sauvegarde le précédent."""
+    def test_naviguer_vers_saves_previous(self):
+        """Test naviguer_vers sauvegarde le prÃ©cÃ©dent."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -154,8 +147,8 @@ class TestGestionnaireEtatNavigation:
             etat = GestionnaireEtat.obtenir()
             assert etat.module_precedent == "cuisine.recettes"
 
-    def test_naviguer_vers_adds_to_historique(self, mock_session_state):
-        """Test naviguer_vers ajoute à l'historique."""
+    def test_naviguer_vers_adds_to_historique(self):
+        """Test naviguer_vers ajoute Ã  l'historique."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -166,8 +159,8 @@ class TestGestionnaireEtatNavigation:
             assert "cuisine.recettes" in etat.historique_navigation
             assert "famille.jules" in etat.historique_navigation
 
-    def test_naviguer_vers_same_module_no_duplicate(self, mock_session_state):
-        """Test naviguer vers même module ne duplique pas."""
+    def test_naviguer_vers_same_module_no_duplicate(self):
+        """Test naviguer vers mÃªme module ne duplique pas."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -176,11 +169,11 @@ class TestGestionnaireEtatNavigation:
 
             GestionnaireEtat.naviguer_vers("cuisine.recettes")
 
-            # Même longueur car même module
+            # MÃªme longueur car mÃªme module
             assert len(GestionnaireEtat.obtenir().historique_navigation) == historique_len
 
-    def test_historique_limited_to_50(self, mock_session_state):
-        """Test historique limité à 50 entrées."""
+    def test_historique_limited_to_50(self):
+        """Test historique limitÃ© Ã  50 entrÃ©es."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -195,8 +188,8 @@ class TestGestionnaireEtatNavigation:
 class TestGestionnaireEtatRevenir:
     """Tests pour GestionnaireEtat.revenir()."""
 
-    def test_revenir_to_previous(self, mock_session_state):
-        """Test revenir au module précédent."""
+    def test_revenir_to_previous(self):
+        """Test revenir au module prÃ©cÃ©dent."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -207,8 +200,8 @@ class TestGestionnaireEtatRevenir:
             etat = GestionnaireEtat.obtenir()
             assert etat.module_actuel == "cuisine.recettes"
 
-    def test_revenir_uses_historique_if_no_previous(self, mock_session_state):
-        """Test revenir utilise historique si pas de précédent."""
+    def test_revenir_uses_historique_if_no_previous(self):
+        """Test revenir utilise historique si pas de prÃ©cÃ©dent."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -220,14 +213,14 @@ class TestGestionnaireEtatRevenir:
 
             GestionnaireEtat.revenir()
 
-            # Devrait revenir à cuisine.recettes (avant-dernier)
+            # Devrait revenir Ã  cuisine.recettes (avant-dernier)
             assert etat.module_actuel in ["cuisine.recettes", "famille.jules"]
 
 
 class TestGestionnaireEtatFilAriane:
     """Tests pour le fil d'Ariane."""
 
-    def test_fil_ariane_returns_list(self, mock_session_state):
+    def test_fil_ariane_returns_list(self):
         """Test fil d'Ariane retourne une liste."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
@@ -236,8 +229,8 @@ class TestGestionnaireEtatFilAriane:
 
             assert isinstance(fil, list)
 
-    def test_fil_ariane_default_accueil(self, mock_session_state):
-        """Test fil d'Ariane par défaut contient Accueil."""
+    def test_fil_ariane_default_accueil(self):
+        """Test fil d'Ariane par dÃ©faut contient Accueil."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -245,8 +238,8 @@ class TestGestionnaireEtatFilAriane:
 
             assert len(fil) >= 1
 
-    def test_fil_ariane_limited_to_5(self, mock_session_state):
-        """Test fil d'Ariane limité à 5."""
+    def test_fil_ariane_limited_to_5(self):
+        """Test fil d'Ariane limitÃ© Ã  5."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -262,7 +255,7 @@ class TestGestionnaireEtatFilAriane:
 class TestGestionnaireEtatModuleVersLabel:
     """Tests pour _module_vers_label()."""
 
-    def test_known_module_returns_label(self, mock_session_state):
+    def test_known_module_returns_label(self):
         """Test module connu retourne label."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
@@ -270,7 +263,7 @@ class TestGestionnaireEtatModuleVersLabel:
             label = GestionnaireEtat._module_vers_label("cuisine.recettes")
             assert label == "Recettes"
 
-    def test_unknown_module_capitalizes(self, mock_session_state):
+    def test_unknown_module_capitalizes(self):
         """Test module inconnu capitalise le nom."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
@@ -282,8 +275,8 @@ class TestGestionnaireEtatModuleVersLabel:
 class TestGestionnaireEtatReinitialiser:
     """Tests pour GestionnaireEtat.reinitialiser()."""
 
-    def test_reinitialiser_clears_state(self, mock_session_state):
-        """Test réinitialiser efface l'état."""
+    def test_reinitialiser_clears_state(self):
+        """Test rÃ©initialiser efface l'Ã©tat."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -297,8 +290,8 @@ class TestGestionnaireEtatReinitialiser:
 class TestGestionnaireEtatResume:
     """Tests pour GestionnaireEtat.obtenir_resume_etat()."""
 
-    def test_resume_returns_dict(self, mock_session_state):
-        """Test résumé retourne dict."""
+    def test_resume_returns_dict(self):
+        """Test rÃ©sumÃ© retourne dict."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -313,8 +306,8 @@ class TestGestionnaireEtatResume:
 class TestGestionnaireEtatNettoyerUI:
     """Tests pour GestionnaireEtat.nettoyer_etats_ui()."""
 
-    def test_nettoyer_resets_ui_flags(self, mock_session_state):
-        """Test nettoyer réinitialise les flags UI."""
+    def test_nettoyer_resets_ui_flags(self):
+        """Test nettoyer rÃ©initialise les flags UI."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -331,8 +324,8 @@ class TestGestionnaireEtatNettoyerUI:
 class TestGestionnaireEtatRecette:
     """Tests pour gestion recette."""
 
-    def test_definir_recette_visualisation(self, mock_session_state):
-        """Test définir recette visualisation."""
+    def test_definir_recette_visualisation(self):
+        """Test dÃ©finir recette visualisation."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -341,8 +334,8 @@ class TestGestionnaireEtatRecette:
             etat = GestionnaireEtat.obtenir()
             assert etat.id_recette_visualisation == 42
 
-    def test_definir_recette_edition(self, mock_session_state):
-        """Test définir recette édition."""
+    def test_definir_recette_edition(self):
+        """Test dÃ©finir recette Ã©dition."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -351,8 +344,8 @@ class TestGestionnaireEtatRecette:
             etat = GestionnaireEtat.obtenir()
             assert etat.id_recette_edition == 42
 
-    def test_definir_recette_null(self, mock_session_state):
-        """Test définir recette null."""
+    def test_definir_recette_null(self):
+        """Test dÃ©finir recette null."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -366,8 +359,8 @@ class TestGestionnaireEtatRecette:
 class TestGestionnaireEtatPlanning:
     """Tests pour gestion planning."""
 
-    def test_definir_planning_visualisation(self, mock_session_state):
-        """Test définir planning visualisation."""
+    def test_definir_planning_visualisation(self):
+        """Test dÃ©finir planning visualisation."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -380,8 +373,8 @@ class TestGestionnaireEtatPlanning:
 class TestGestionnaireEtatContexte:
     """Tests pour definir_contexte()."""
 
-    def test_definir_contexte_recette(self, mock_session_state):
-        """Test définir contexte recette."""
+    def test_definir_contexte_recette(self):
+        """Test dÃ©finir contexte recette."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -390,8 +383,8 @@ class TestGestionnaireEtatContexte:
             etat = GestionnaireEtat.obtenir()
             assert etat.id_recette_visualisation == 42
 
-    def test_definir_contexte_planning(self, mock_session_state):
-        """Test définir contexte planning."""
+    def test_definir_contexte_planning(self):
+        """Test dÃ©finir contexte planning."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -404,8 +397,8 @@ class TestGestionnaireEtatContexte:
 class TestGestionnaireEtatNotifications:
     """Tests pour notifications."""
 
-    def test_incrementer_notifications(self, mock_session_state):
-        """Test incrémenter notifications."""
+    def test_incrementer_notifications(self):
+        """Test incrÃ©menter notifications."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
 
@@ -416,7 +409,7 @@ class TestGestionnaireEtatNotifications:
 
             assert etat.notifications_non_lues == initial + 1
 
-    def test_effacer_notifications(self, mock_session_state):
+    def test_effacer_notifications(self):
         """Test effacer notifications."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
@@ -432,7 +425,7 @@ class TestGestionnaireEtatNotifications:
 class TestGestionnaireEtatDebug:
     """Tests pour mode debug."""
 
-    def test_basculer_mode_debug(self, mock_session_state):
+    def test_basculer_mode_debug(self):
         """Test basculer mode debug."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
@@ -448,7 +441,7 @@ class TestGestionnaireEtatDebug:
 class TestGestionnaireEtatEstDansModule:
     """Tests pour est_dans_module()."""
 
-    def test_est_dans_module_true(self, mock_session_state):
+    def test_est_dans_module_true(self):
         """Test est_dans_module retourne True."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
@@ -457,7 +450,7 @@ class TestGestionnaireEtatEstDansModule:
 
             assert GestionnaireEtat.est_dans_module("cuisine") is True
 
-    def test_est_dans_module_false(self, mock_session_state):
+    def test_est_dans_module_false(self):
         """Test est_dans_module retourne False."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat
@@ -470,7 +463,7 @@ class TestGestionnaireEtatEstDansModule:
 class TestGestionnaireEtatContexteModule:
     """Tests pour obtenir_contexte_module()."""
 
-    def test_contexte_module_returns_dict(self, mock_session_state):
+    def test_contexte_module_returns_dict(self):
         """Test contexte module retourne dict."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.state import GestionnaireEtat

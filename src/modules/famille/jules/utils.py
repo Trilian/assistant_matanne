@@ -8,6 +8,7 @@ Activites adaptees, achats suggeres, conseils developpement:
 - 💡 Conseils (proprete, sommeil, alimentation) - IA
 """
 
+import logging
 from datetime import date, timedelta
 from typing import Optional
 
@@ -17,6 +18,8 @@ from src.core.ai import ClientIA
 from src.core.db import obtenir_contexte_db
 from src.core.models import ChildProfile, FamilyPurchase, Milestone
 from src.services.core.base import BaseAIService
+
+logger = logging.getLogger(__name__)
 
 # Activites par tranche d'âge (mois)
 ACTIVITES_PAR_AGE = {
@@ -141,7 +144,6 @@ CATEGORIES_CONSEILS = {
 
 __all__ = [
     # Standard libs
-    "st",
     "date",
     "timedelta",
     "Optional",
@@ -198,5 +200,6 @@ def get_achats_jules_en_attente() -> list:
                 .order_by(FamilyPurchase.priorite)
                 .all()
             )
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         return []

@@ -10,7 +10,6 @@ Classe Parametres avec auto-détection des sources:
 import logging
 import os
 
-import streamlit as st
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -181,6 +180,8 @@ class Parametres(BaseSettings):
             Nom du modèle
         """
         try:
+            import streamlit as st
+
             return st.secrets.get("mistral", {}).get("model", "mistral-small-latest")
         except Exception:
             return os.getenv("MISTRAL_MODEL", "mistral-small-latest")
@@ -210,6 +211,8 @@ class Parametres(BaseSettings):
 
         # 2. Secrets Streamlit - format plat
         try:
+            import streamlit as st
+
             cle = st.secrets.get("FOOTBALL_DATA_API_KEY")
             if cle and cle.strip():
                 return cle
@@ -218,6 +221,8 @@ class Parametres(BaseSettings):
 
         # 3. Secrets Streamlit - format structuré
         try:
+            import streamlit as st
+
             cle = st.secrets.get("football_data", {}).get("api_key")
             if cle and cle.strip():
                 return cle
@@ -246,6 +251,8 @@ class Parametres(BaseSettings):
 
         # 2. Secrets Streamlit
         try:
+            import streamlit as st
+
             cle = st.secrets.get("google", {}).get("client_id")
             if cle and cle.strip():
                 return cle
@@ -269,6 +276,8 @@ class Parametres(BaseSettings):
 
         # 2. Secrets Streamlit
         try:
+            import streamlit as st
+
             cle = st.secrets.get("google", {}).get("client_secret")
             if cle and cle.strip():
                 return cle

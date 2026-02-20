@@ -393,20 +393,13 @@ class ServiceRapportsPDF(
 # FACTORY FUNCTION (Singleton pattern)
 # ═══════════════════════════════════════════════════════════
 
-_service_rapports_pdf = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("rapports_pdf", tags={"rapports", "export"})
 def obtenir_service_rapports_pdf() -> ServiceRapportsPDF:
-    """
-    Retourne une instance singleton du service de rapports PDF.
-
-    Returns:
-        Instance de ServiceRapportsPDF
-    """
-    global _service_rapports_pdf
-    if _service_rapports_pdf is None:
-        _service_rapports_pdf = ServiceRapportsPDF()
-    return _service_rapports_pdf
+    """Retourne l'instance du service de rapports PDF (thread-safe via registre)."""
+    return ServiceRapportsPDF()
 
 
 def get_pdf_reports_service() -> ServiceRapportsPDF:

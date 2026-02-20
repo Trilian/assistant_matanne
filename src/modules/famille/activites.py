@@ -1,18 +1,19 @@
 """
-Module Activites - Planning et budget des activites familiales
-Version amelioree avec helpers, caching, graphiques et Plotly
+Module Activites - Planning et budget des activites familiales.
+
+Refactorisé: la logique CRUD est dans ``src.services.famille.activites.ServiceActivites``.
+Ce module ne contient que l'UI Streamlit.
 """
 
+from __future__ import annotations
+
 from datetime import date, timedelta
+from typing import TYPE_CHECKING
 
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
-from src.core.models import FamilyActivity
-
-# Logique metier pure
 from src.modules.famille.utils import (
     clear_famille_cache,
     get_activites_semaine,
@@ -21,57 +22,15 @@ from src.modules.famille.utils import (
 )
 from src.ui import etat_vide
 
-
-def ajouter_activite(
-    titre: str,
-    type_activite: str,
-    date_prevue: date,
-    duree: float,
-    lieu: str,
-    participants: list,
-    cout_estime: float,
-    notes: str = "",
-):
-    """Ajoute une nouvelle activite familiale"""
-    try:
-        with obtenir_contexte_db() as session:
-            activity = FamilyActivity(
-                titre=titre,
-                type_activite=type_activite,
-                date_prevue=date_prevue,
-                duree_heures=duree,
-                lieu=lieu,
-                qui_participe=participants,
-                cout_estime=cout_estime,
-                statut="planifie",
-                notes=notes,
-            )
-            session.add(activity)
-            session.commit()
-            st.success(f"✅ Activite '{titre}' creee!")
-            clear_famille_cache()
-            return True
-    except Exception as e:
-        st.error(f"❌ Erreur ajout activite: {str(e)}")
-        return False
+if TYPE_CHECKING:
+    from src.services.famille.activites import ServiceActivites
 
 
-def marquer_terminee(activity_id: int, cout_reel: float = None, notes: str = ""):
-    """Marque une activite comme terminee"""
-    try:
-        with obtenir_contexte_db() as session:
-            activity = session.get(FamilyActivity, activity_id)
-            if activity:
-                activity.statut = "termine"
-                if cout_reel is not None:
-                    activity.cout_reel = cout_reel
-                session.commit()
-                st.success("✅ Activite marquee comme terminee!")
-                clear_famille_cache()
-                return True
-    except Exception as e:
-        st.error(f"❌ Erreur mise à jour: {str(e)}")
-        return False
+def _get_service() -> ServiceActivites:
+    """Lazy-load du service activites."""
+    from src.services.famille.activites import obtenir_service_activites
+
+    return obtenir_service_activites()
 
 
 SUGGESTIONS_ACTIVITES = {
@@ -84,8 +43,10 @@ SUGGESTIONS_ACTIVITES = {
 }
 
 
-def app():
-    """Interface principale du module Activites"""
+def app() -> None:
+    """Interface principale du module Activites."""
+    svc = _get_service()
+
     st.title("🎨 Activites Familiales")
 
     tabs = st.tabs(["📱 Planning Semaine", "👶 Idees Activites", "💡 Budget"])
@@ -145,7 +106,15 @@ def app():
 
                 if st.form_submit_button("✅ Ajouter", use_container_width=True):
                     if titre and type_act:
-                        ajouter_activite(titre, type_act, date_act, duree, lieu, ["Famille"], cout)
+                        try:
+                            svc.ajouter_activite(
+                                titre, type_act, date_act, duree, lieu, ["Famille"], cout
+                            )
+                            st.success(f"✅ Activite '{titre}' creee!")
+                            clear_famille_cache()
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"❌ Erreur ajout activite: {e}")
 
     # ═══════════════════════════════════════════════════════════
     # TAB 2: IDÉES ACTIVITÉS
@@ -240,17 +209,13 @@ def app():
         st.subheader("🗑️ Graphique Depenses")
 
         try:
-            with obtenir_contexte_db() as session:
-                # Recuperer les 30 derniers jours
-                debut = date.today() - timedelta(days=30)
-                activites = (
-                    session.query(FamilyActivity).filter(FamilyActivity.date_prevue >= debut).all()
-                )
+            activites_list = svc.lister_activites()
 
-                if activites:
-                    # Creer DataFrame
-                    data = []
-                    for act in activites:
+            if activites_list:
+                # Creer DataFrame
+                data = []
+                for act in activites_list:
+                    if act.date_prevue and act.date_prevue >= date.today() - timedelta(days=30):
                         data.append(
                             {
                                 "date": act.date_prevue,
@@ -261,6 +226,7 @@ def app():
                             }
                         )
 
+                if data:
                     df = pd.DataFrame(data)
                     df["date"] = pd.to_datetime(df["date"])
 
@@ -316,10 +282,8 @@ def app():
                     st.plotly_chart(fig2, width="stretch", key="activities_budget_by_type")
                 else:
                     etat_vide("Aucune activité sur 30 jours", "📊")
+            else:
+                etat_vide("Aucune activité sur 30 jours", "📊")
 
         except Exception as e:
-            st.error(f"❌ Erreur graphiques: {str(e)}")
-
-
-if __name__ == "__main__":
-    main()
+            st.error(f"❌ Erreur graphiques: {e}")

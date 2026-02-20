@@ -106,26 +106,14 @@ class RealtimeSyncService:
             storage: Stockage clé-valeur mutable (défaut: st.session_state).
             on_rerun: Callback pour déclencher un rerun (défaut: st.rerun).
         """
-        self._storage = storage if storage is not None else self._get_default_storage()
-        self._on_rerun = on_rerun if on_rerun is not None else self._get_default_rerun()
+        from src.core.storage import obtenir_rerun_callback, obtenir_session_state
+
+        self._storage = storage if storage is not None else obtenir_session_state()
+        self._on_rerun = on_rerun if on_rerun is not None else obtenir_rerun_callback()
         self._client = None
         self._channel = None
         self._callbacks: dict[SyncEventType, list[Callable]] = {}
         self._init_client()
-
-    @staticmethod
-    def _get_default_storage() -> MutableMapping[str, Any]:
-        """Retourne le stockage par défaut (st.session_state)."""
-        import streamlit as st
-
-        return st.session_state
-
-    @staticmethod
-    def _get_default_rerun() -> Callable[[], None]:
-        """Retourne le callback rerun par défaut (st.rerun)."""
-        import streamlit as st
-
-        return st.rerun
 
     def _init_client(self):
         """Initialise le client Supabase Realtime."""
@@ -524,15 +512,13 @@ class RealtimeSyncService:
 # ═══════════════════════════════════════════════════════════
 
 
-_sync_service: RealtimeSyncService | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("sync_temps_reel", tags={"integrations", "web"})
 def obtenir_service_synchronisation_temps_reel() -> RealtimeSyncService:
-    """Factory pour le service de synchronisation (convention française)."""
-    global _sync_service
-    if _sync_service is None:
-        _sync_service = RealtimeSyncService()
-    return _sync_service
+    """Factory pour le service de synchronisation (thread-safe via registre)."""
+    return RealtimeSyncService()
 
 
 def get_realtime_sync_service() -> RealtimeSyncService:

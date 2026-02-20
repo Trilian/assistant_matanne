@@ -1,8 +1,10 @@
-# 🎨 Module UI - Architecture
+# 🎨 Module UI - Architecture Design System 2.0
 
 ## Vue d'ensemble
 
 Module d'interface utilisateur basé sur **Atomic Design** pour l'application Streamlit.
+Design system professionnel avec tokens sémantiques, accessibilité WCAG, animations
+centralisées et hooks réutilisables.
 
 ```
 src/ui/
@@ -11,7 +13,16 @@ src/ui/
 ├── integrations/   # Services tiers (Google Calendar)
 ├── layout/         # Mise en page (header, sidebar, footer)
 ├── tablet/         # Mode tablette/cuisine
-└── views/          # Vues extraites des services
+├── views/          # Vues extraites des services
+├── a11y.py         # Accessibilité (ARIA, contraste WCAG, sr-only)
+├── animations.py   # Système d'animation centralisé (@keyframes)
+├── hooks.py        # Hooks Streamlit (use_pagination, use_recherche…)
+├── tokens.py       # Design tokens bruts (Couleur, Espacement…)
+├── tokens_semantic.py # Tokens sémantiques (dark mode auto)
+├── theme.py        # Thème dynamique (clair/sombre/auto)
+├── registry.py     # Registre @composant_ui + catalogue
+├── html_builder.py # Builder HTML fluide avec XSS + ARIA
+└── utils.py        # Helpers (echapper_html)
 ```
 
 ## 📦 Packages
@@ -20,7 +31,7 @@ src/ui/
 
 | Fichier      | Composants                                                                                |
 | ------------ | ----------------------------------------------------------------------------------------- |
-| `atoms.py`   | `badge`, `etat_vide`, `carte_metrique`, `notification`, `separateur`, `boite_info`        |
+| `atoms.py`   | `badge`, `etat_vide`, `carte_metrique`, `separateur`, `boite_info`                        |
 | `forms.py`   | `champ_formulaire`, `barre_recherche`, `panneau_filtres`, `filtres_rapides`               |
 | `data.py`    | `tableau_donnees`, `pagination`, `boutons_export`, `ligne_metriques`, `barre_progression` |
 | `charts.py`  | `graphique_repartition_repas`, `graphique_inventaire_categories`                          |
@@ -37,6 +48,17 @@ src/ui/
 | `spinners.py` | `spinner_intelligent`, `indicateur_chargement`, `chargeur_squelette`            |
 | `toasts.py`   | `afficher_succes`, `afficher_erreur`, `afficher_avertissement`, `afficher_info` |
 | `progress.py` | `SuiviProgression`, `EtatChargement`                                            |
+
+### Design System
+
+| Fichier              | Rôle                                                              |
+| -------------------- | ----------------------------------------------------------------- |
+| `tokens.py`          | Couleurs, espacements, rayons, `Variante` sémantique              |
+| `tokens_semantic.py` | CSS custom properties avec mappings light/dark automatiques       |
+| `a11y.py`            | `A11y` : sr-only, ARIA attrs, landmarks, vérification contraste   |
+| `animations.py`      | `Animation` StrEnum + `injecter_animations()` + `animer()`        |
+| `hooks.py`           | `use_pagination`, `use_recherche`, `use_filtres`, `use_tri`, etc. |
+| `html_builder.py`    | Builder HTML fluide avec `.aria()`, `.focusable()`                |
 
 ### `tablet/` - Mode Tablette
 
@@ -73,9 +95,62 @@ from src.ui import (
     badge,
     etat_vide,
     afficher_succes,
-    ModeTablette,
+    Variante,
+    Sem,
+    A11y,
+    Animation,
     Modale,
 )
+```
+
+### Variantes sémantiques
+
+```python
+from src.ui import badge, boite_info, Variante
+
+badge("Actif", variante=Variante.SUCCESS)
+badge("Urgent", variante=Variante.DANGER)
+boite_info("Attention", "Stock faible", "⚠️", variante=Variante.WARNING)
+```
+
+### Hooks réutilisables
+
+```python
+from src.ui.hooks import use_pagination, use_recherche
+
+# Recherche + pagination composables
+filtered, show_search = use_recherche(recipes, ["nom", "categorie"])
+visible, show_pagination = use_pagination(filtered, per_page=12)
+
+show_search()
+for r in visible:
+    display_recipe(r)
+show_pagination()
+```
+
+### Tokens sémantiques (dark mode auto)
+
+```python
+from src.ui.tokens_semantic import Sem
+
+# Les composants référencent des CSS vars qui s'adaptent au thème
+html = f'<div style="background: {Sem.SURFACE}; color: {Sem.ON_SURFACE};">...'
+```
+
+### Accessibilité
+
+```python
+from src.ui import A11y, HtmlBuilder
+
+# ARIA attributes helper
+html = (HtmlBuilder("nav")
+    .aria(role="navigation", label="Menu principal")
+    .child("a", text="Accueil")
+    .build())
+
+# Vérification contraste
+ratio = A11y.ratio_contraste("#212529", "#ffffff")
+assert A11y.est_conforme_aa("#212529", "#ffffff")  # True
 ```
 
 ### Modale de confirmation
@@ -92,15 +167,6 @@ if modal.est_affichee():
     modal.annuler()
 ```
 
-### État vide standardisé
-
-```python
-from src.ui import etat_vide
-
-# Au lieu de st.info("Aucun résultat")
-etat_vide("Aucun résultat", icone="🔍", conseil="Essayez une autre recherche")
-```
-
 ## 🧪 Tests
 
 ```bash
@@ -112,4 +178,7 @@ pytest tests/ui/ -v
 1. **Nommage français** pour toutes les fonctions/classes publiques (`afficher_*`, `obtenir_*`)
 2. **Docstrings** en français avec Args et Example
 3. **Point d'entrée unique**: `src.ui` re-exporte tous les symboles publics
-4. **Décorateurs Streamlit**: Utiliser `@st.cache_data(ttl=...)` pour les données cachées
+4. **@composant_ui** obligatoire sur tous les composants pour le registre Design System
+5. **Variante** sémantique plutôt que couleurs brutes dans les composants
+6. **Tokens sémantiques** (`Sem.*`) pour les composants custom — dark mode gratuit
+7. **A11y** : `aria-label`, `role`, `sr-only` sur tous les composants interactifs

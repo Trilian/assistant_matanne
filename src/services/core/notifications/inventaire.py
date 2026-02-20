@@ -257,18 +257,13 @@ class ServiceNotificationsInventaire:
 # SINGLETON
 # ═══════════════════════════════════════════════════════════
 
-_service_notifications_inventaire: ServiceNotificationsInventaire | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("notifications_inventaire", tags={"notifications", "inventaire"})
 def obtenir_service_notifications_inventaire() -> ServiceNotificationsInventaire:
-    """Obtient l'instance singleton du service de notifications inventaire."""
-    global _service_notifications_inventaire
-
-    if _service_notifications_inventaire is None:
-        _service_notifications_inventaire = ServiceNotificationsInventaire()
-        logger.info("✅ Service de notifications inventaire initialisé")
-
-    return _service_notifications_inventaire
+    """Obtient l'instance du service de notifications inventaire (thread-safe via registre)."""
+    return ServiceNotificationsInventaire()
 
 
 def get_inventory_notification_service() -> ServiceNotificationsInventaire:

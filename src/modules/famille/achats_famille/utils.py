@@ -7,6 +7,7 @@ Categories:
 - 📋 Wishlist & priorites
 """
 
+import logging
 from datetime import date
 from typing import Optional
 
@@ -14,6 +15,8 @@ import streamlit as st
 
 from src.core.db import obtenir_contexte_db
 from src.core.models import FamilyPurchase
+
+logger = logging.getLogger(__name__)
 
 # Categories d'achats
 CATEGORIES = {
@@ -38,7 +41,6 @@ PRIORITES = {
 
 __all__ = [
     # Standard libs
-    "st",
     "date",
     "Optional",
     # Database
@@ -59,7 +61,8 @@ def get_all_purchases(achete: bool = False) -> list:
     try:
         with obtenir_contexte_db() as db:
             return db.query(FamilyPurchase).filter_by(achete=achete).all()
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         return []
 
 
@@ -73,7 +76,8 @@ def get_purchases_by_category(categorie: str, achete: bool = False) -> list:
                 .order_by(FamilyPurchase.priorite)
                 .all()
             )
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         return []
 
 
@@ -88,7 +92,8 @@ def get_purchases_by_groupe(groupe: str, achete: bool = False) -> list:
                 .order_by(FamilyPurchase.priorite)
                 .all()
             )
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         return []
 
 
@@ -110,7 +115,8 @@ def get_stats() -> dict:
                 "total_depense": total_depense,
                 "urgents": urgents,
             }
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         return {
             "en_attente": 0,
             "achetes": 0,
@@ -131,8 +137,8 @@ def mark_as_bought(purchase_id: int, prix_reel: float = None):
                 if prix_reel:
                     purchase.prix_reel = prix_reel
                 db.commit()
-    except:
-        pass
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
 
 
 def delete_purchase(purchase_id: int):
@@ -143,5 +149,5 @@ def delete_purchase(purchase_id: int):
             if purchase:
                 db.delete(purchase)
                 db.commit()
-    except:
-        pass
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")

@@ -77,35 +77,11 @@ def inject_pwa_meta() -> None:
 
 
 def afficher_install_prompt() -> None:
-    """Affiche le bouton d'installation PWA."""
-    import streamlit.components.v1 as components
+    """Affiche le bouton d'installation PWA.
 
-    install_html = """
-    <div id="pwa-install-container" style="text-align: center; padding: 10px;">
-        <button id="pwa-install-btn" onclick="installPWA()"
-                style="background: linear-gradient(135deg, #667eea, #764ba2);
-                       color: white; border: none; padding: 12px 24px;
-                       border-radius: 8px; cursor: pointer; font-size: 16px;">
-            📱 Installer l'application
-        </button>
-    </div>
-    <script>
-        let deferredPrompt;
-        const installBtn = document.getElementById('pwa-install-btn');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-        });
-
-        async function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log('Install outcome:', outcome);
-                deferredPrompt = null;
-            }
-        }
-    </script>
+    Délègue à ``src.ui.views.pwa.afficher_invite_installation_pwa``
+    pour respecter la séparation services/UI.
     """
-    components.html(install_html, height=80)
+    from src.ui.views.pwa import afficher_invite_installation_pwa
+
+    afficher_invite_installation_pwa()

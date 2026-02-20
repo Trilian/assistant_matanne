@@ -3,7 +3,7 @@ Errors - Gestion des erreurs avec intégration UI (Streamlit).
 
 Ce module :
 - Ré-exporte les exceptions pures depuis errors_base.py
-- Ajoute les fonctions d'affichage UI
+- Ajoute les fonctions d'affichage UI (avec import lazy de Streamlit)
 - Fournit des décorateurs de gestion d'erreurs avec UI
 
 [!] IMPORTANT: Les exceptions pures sont dans errors_base.py (sans dépendances UI)
@@ -14,8 +14,6 @@ import traceback
 from collections.abc import Callable
 from functools import wraps
 from typing import Any
-
-import streamlit as st
 
 # Ré-exporter les exceptions et helpers purs
 from .errors_base import (  # noqa: F401
@@ -40,6 +38,16 @@ from .session_keys import SK
 logger = logging.getLogger(__name__)
 
 
+def _get_st():
+    """Import lazy de Streamlit (None si indisponible)."""
+    try:
+        import streamlit as st
+
+        return st
+    except Exception:
+        return None
+
+
 def _est_mode_debug() -> bool:
     """
     Retourne l'état du mode debug de l'application.
@@ -55,6 +63,9 @@ def _est_mode_debug() -> bool:
     except Exception:
         # Fallback safe: st may not be initialisé
         try:
+            st = _get_st()
+            if st is None:
+                return False
             return bool(st.session_state.get(SK.DEBUG_MODE, False))
         except Exception:
             return False
@@ -103,7 +114,9 @@ def gerer_erreurs(
             except ErreurValidation as e:
                 logger.warning(f"ErreurValidation dans {func.__name__}: {e.message}")
                 if afficher_dans_ui:
-                    st.error(f"[ERROR] {e.message_utilisateur}")
+                    _st = _get_st()
+                    if _st:
+                        _st.error(f"[ERROR] {e.message_utilisateur}")
                 if relancer:
                     raise
                 return valeur_fallback
@@ -111,7 +124,9 @@ def gerer_erreurs(
             except ErreurNonTrouve as e:
                 logger.info(f"ErreurNonTrouve dans {func.__name__}: {e.message}")
                 if afficher_dans_ui:
-                    st.warning(f"[!] {e.message_utilisateur}")
+                    _st = _get_st()
+                    if _st:
+                        _st.warning(f"[!] {e.message_utilisateur}")
                 if relancer:
                     raise
                 return valeur_fallback
@@ -119,7 +134,9 @@ def gerer_erreurs(
             except ErreurBaseDeDonnees as e:
                 logger.error(f"ErreurBaseDeDonnees dans {func.__name__}: {e.message}")
                 if afficher_dans_ui:
-                    st.error("💾 Erreur de base de données")
+                    _st = _get_st()
+                    if _st:
+                        _st.error("💾 Erreur de base de données")
                 if relancer:
                     raise
                 return valeur_fallback
@@ -127,7 +144,9 @@ def gerer_erreurs(
             except ErreurServiceIA as e:
                 logger.warning(f"ErreurServiceIA dans {func.__name__}: {e.message}")
                 if afficher_dans_ui:
-                    st.error(f"🤖 {e.message_utilisateur}")
+                    _st = _get_st()
+                    if _st:
+                        _st.error(f"🤖 {e.message_utilisateur}")
                 if relancer:
                     raise
                 return valeur_fallback
@@ -135,7 +154,9 @@ def gerer_erreurs(
             except ErreurLimiteDebit as e:
                 logger.warning(f"ErreurLimiteDebit dans {func.__name__}: {e.message}")
                 if afficher_dans_ui:
-                    st.warning(f"⏳ {e.message_utilisateur}")
+                    _st = _get_st()
+                    if _st:
+                        _st.warning(f"⏳ {e.message_utilisateur}")
                 if relancer:
                     raise
                 return valeur_fallback
@@ -143,7 +164,9 @@ def gerer_erreurs(
             except ErreurServiceExterne as e:
                 logger.warning(f"ErreurServiceExterne dans {func.__name__}: {e.message}")
                 if afficher_dans_ui:
-                    st.error(f"🌐 {e.message_utilisateur}")
+                    _st = _get_st()
+                    if _st:
+                        _st.error(f"🌐 {e.message_utilisateur}")
                 if relancer:
                     raise
                 return valeur_fallback
@@ -151,12 +174,14 @@ def gerer_erreurs(
             except Exception as e:
                 logger.critical(f"Erreur inattendue dans {func.__name__}: {e}", exc_info=True)
                 if afficher_dans_ui:
-                    st.error("[ERROR] Une erreur inattendue s'est produite")
+                    _st = _get_st()
+                    if _st:
+                        _st.error("[ERROR] Une erreur inattendue s'est produite")
 
-                    # Afficher stack trace en mode debug
-                    if _est_mode_debug():
-                        with st.expander("🐛 Stack trace"):
-                            st.code(traceback.format_exc())
+                        # Afficher stack trace en mode debug
+                        if _est_mode_debug():
+                            with _st.expander("🐛 Stack trace"):
+                                _st.code(traceback.format_exc())
 
                 if relancer:
                     raise
@@ -182,6 +207,11 @@ def afficher_erreur_streamlit(erreur: Exception, contexte: str = "") -> None:
         erreur: Exception à afficher
         contexte: Contexte additionnel (optionnel)
     """
+    st = _get_st()
+    if st is None:
+        logger.error(f"Erreur (Streamlit indisponible): {erreur}")
+        return
+
     if isinstance(erreur, ExceptionApp):
         mapping = {
             ErreurValidation: (st.error, "[ERROR]"),

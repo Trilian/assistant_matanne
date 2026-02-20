@@ -50,8 +50,8 @@ class RecettesIAVersionsMixin:
     - call_with_parsing_sync() (BaseAIService)
     """
 
-    @avec_cache(ttl=3600, key_func=lambda self, rid: f"version_bebe_{rid}")
     @avec_gestion_erreurs(default_return=None)
+    @avec_cache(ttl=3600, key_func=lambda self, rid: f"version_bebe_{rid}")
     @avec_session_db
     def generer_version_bebe(self, recette_id: int, db: Session) -> VersionRecette | None:
         """Génère une version bébé sécurisée de la recette avec l'IA.

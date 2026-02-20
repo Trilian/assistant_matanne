@@ -36,7 +36,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Generic, TypeVar, overload
+from typing import Any, Generic, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -204,6 +204,10 @@ class Success(Generic[T]):
         """Ne fait rien (c'est un succès)."""
         return self
 
+    def recover(self, _func: Callable[[Any], T]) -> Result[T, Any]:
+        """Retourne self (succès), ignore la tentative de récupération."""
+        return self
+
     @property
     def error(self) -> None:
         """Pas d'erreur dans un Success."""
@@ -270,6 +274,20 @@ class Failure(Generic[E]):
         except Exception as e:
             logger.warning(f"Erreur dans on_failure callback: {e}")
         return self  # type: ignore[return-value]
+
+    def recover(self, func: Callable[[E], T]) -> Result[T, E]:
+        """Tente de récupérer un Failure en Success.
+
+        Si ``func`` réussit, retourne ``Success(func(error))``.
+        Si ``func`` lève, retourne le Failure original.
+
+        Usage:
+            result = get_config().recover(lambda e: default_config)
+        """
+        try:
+            return Success(func(self.error))
+        except Exception:
+            return self  # type: ignore[return-value]
 
     @property
     def value(self) -> None:
@@ -367,6 +385,130 @@ def safe(func: Callable[..., T]) -> Callable[..., Result[T, ErrorInfo]]:
 
 
 # ═══════════════════════════════════════════════════════════
+# MAPPING EXCEPTION → ERROR CODE
+# ═══════════════════════════════════════════════════════════
+
+# Extension point: les modules peuvent ajouter des mappings via register_error_mapping()
+_EXCEPTION_ERROR_MAP: dict[type, ErrorCode] = {}
+
+
+def _classify_exception(exc: Exception) -> ErrorCode:
+    """Classifie automatiquement une exception en ErrorCode.
+
+    Vérifie d'abord les mappings enregistrés, puis les types connus.
+    """
+    # 1. Mappings enregistrés (précédence maximale)
+    for exc_type, code in _EXCEPTION_ERROR_MAP.items():
+        if isinstance(exc, exc_type):
+            return code
+
+    # 2. ExceptionApp (hiérarchie projet)
+    try:
+        from src.core.errors_base import ExceptionApp
+
+        if isinstance(exc, ExceptionApp) and exc.code_erreur:
+            try:
+                return ErrorCode(exc.code_erreur)
+            except ValueError:
+                pass
+    except ImportError:
+        pass
+
+    # 3. Types Python built-in
+    if isinstance(exc, ValueError | TypeError):
+        return ErrorCode.VALIDATION_ERROR
+    if isinstance(exc, KeyError):
+        return ErrorCode.NOT_FOUND
+    if isinstance(exc, PermissionError):
+        return ErrorCode.PERMISSION_DENIED
+    if isinstance(exc, TimeoutError):
+        return ErrorCode.TIMEOUT
+    if isinstance(exc, ConnectionError | OSError):
+        return ErrorCode.NETWORK_ERROR
+
+    return ErrorCode.INTERNAL_ERROR
+
+
+def register_error_mapping(exception_type: type, code: ErrorCode) -> None:
+    """Enregistre un mapping exception → ErrorCode.
+
+    Permet aux modules métier d'étendre la classification automatique
+    sans modifier le code du Result.
+
+    Args:
+        exception_type: Type d'exception à mapper
+        code: ErrorCode correspondant
+
+    Example:
+        >>> from src.core.errors_base import ErreurLimiteDebit
+        >>> register_error_mapping(ErreurLimiteDebit, ErrorCode.RATE_LIMITED)
+    """
+    _EXCEPTION_ERROR_MAP[exception_type] = code
+
+
+def result_api(
+    default_code: ErrorCode = ErrorCode.INTERNAL_ERROR,
+    log_errors: bool = True,
+    message_utilisateur: str = "",
+) -> Callable:
+    """Décorateur avancé combinant @safe + classification auto + logging.
+
+    Surensemble de ``@safe`` avec:
+    - Classification automatique des exceptions en ``ErrorCode``
+    - Logging structuré des échecs
+    - Source tracking automatique (``qualname``)
+    - Message utilisateur configurable en fallback
+
+    Usage:
+        @result_api(message_utilisateur="Impossible de charger les recettes")
+        def charger_recettes(categorie: str) -> list[Recette]:
+            return db.query(Recette).filter_by(categorie=categorie).all()
+
+        result = charger_recettes("desserts")
+        # Success(list[Recette]) ou Failure(ErrorInfo) — jamais d'exception
+
+    Args:
+        default_code: Code d'erreur par défaut si non classifiable
+        log_errors: Écrire un log.error sur les échecs
+        message_utilisateur: Message friendly par défaut pour les erreurs non mappées
+    """
+    import functools
+
+    def decorator(func: Callable[..., T]) -> Callable[..., Result[T, ErrorInfo]]:
+        source = func.__qualname__
+
+        @functools.wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Result[T, ErrorInfo]:
+            try:
+                return Success(func(*args, **kwargs))
+            except Exception as e:
+                code = _classify_exception(e) or default_code
+
+                error_info = ErrorInfo(
+                    code=code,
+                    message=str(e),
+                    message_utilisateur=message_utilisateur or str(e),
+                    source=source,
+                    stack_trace=traceback.format_exc(),
+                )
+
+                if log_errors:
+                    logger.error(
+                        "[%s] %s dans %s: %s",
+                        code.value,
+                        type(e).__name__,
+                        source,
+                        e,
+                    )
+
+                return Failure(error_info)
+
+        return wrapper
+
+    return decorator
+
+
+# ═══════════════════════════════════════════════════════════
 # COMBINATEURS — Opérations sur plusieurs Result
 # ═══════════════════════════════════════════════════════════
 
@@ -426,7 +568,10 @@ __all__ = [
     "success",
     "failure",
     "from_exception",
+    # Décorateurs
     "safe",
+    "result_api",
+    "register_error_mapping",
     # Combinateurs
     "collect",
     "collect_all",

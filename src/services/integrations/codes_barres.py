@@ -486,15 +486,13 @@ class BarcodeService(BaseService[ArticleInventaire]):
 # FACTORY
 # ═══════════════════════════════════════════════════════════
 
-_service_instance: BarcodeService | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("codes_barres", tags={"integrations", "scan"})
 def obtenir_service_codes_barres() -> BarcodeService:
-    """Factory pour obtenir le service Barcode (convention française)."""
-    global _service_instance
-    if _service_instance is None:
-        _service_instance = BarcodeService()
-    return _service_instance
+    """Factory pour obtenir le service Barcode (thread-safe via registre)."""
+    return BarcodeService()
 
 
 def get_barcode_service() -> BarcodeService:

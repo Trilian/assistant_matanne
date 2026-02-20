@@ -256,15 +256,17 @@ class ServiceBackup(BackupRestoreMixin, BackupExportMixin):
 # ═══════════════════════════════════════════════════════════
 
 
-_backup_service: ServiceBackup | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("backup", tags={"core", "maintenance"})
 def obtenir_service_backup(config: BackupConfig | None = None) -> ServiceBackup:
-    """Factory pour obtenir le service de backup."""
-    global _backup_service
-    if _backup_service is None:
-        _backup_service = ServiceBackup(config)
-    return _backup_service
+    """Factory pour obtenir le service de backup (thread-safe via registre).
+
+    Note: Le config est utilisé uniquement lors de la première création.
+    Les appels suivants retournent la même instance.
+    """
+    return ServiceBackup(config)
 
 
 def get_backup_service(config: BackupConfig | None = None) -> ServiceBackup:

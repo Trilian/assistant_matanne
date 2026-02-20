@@ -8,9 +8,14 @@ Découple le code métier de ``st.session_state`` pour:
 Implémentations:
 - ``StreamlitSessionStorage``: Wraps ``st.session_state``
 - ``MemorySessionStorage``: Dict en mémoire (tests)
+
+Helpers de découplage:
+- ``obtenir_session_state()``: MutableMapping vers ``st.session_state``
+- ``obtenir_rerun_callback()``: Callback vers ``st.rerun``
 """
 
 import logging
+from collections.abc import Callable, MutableMapping
 from typing import Any, Protocol, runtime_checkable
 
 logger = logging.getLogger(__name__)
@@ -142,3 +147,53 @@ def configurer_storage(storage: SessionStorage) -> None:
     global _storage
     _storage = storage
     logger.info(f"Storage configuré: {type(storage).__name__}")
+
+
+# ═══════════════════════════════════════════════════════════
+# HELPERS DE DÉCOUPLAGE — Centralisent les imports Streamlit
+# ═══════════════════════════════════════════════════════════
+
+_fallback_state: dict[str, Any] | None = None
+
+
+def obtenir_session_state() -> MutableMapping[str, Any]:
+    """Retourne ``st.session_state`` comme ``MutableMapping``.
+
+    Utilisé par les services qui ont besoin d'un stockage clé-valeur
+    directement compatible ``MutableMapping`` (``__getitem__``, ``__setitem__``,
+    ``__contains__``).  Centralise l'import Streamlit pour découpler
+    la couche service du framework UI.
+
+    En dehors d'un contexte Streamlit (tests, CLI), retourne un dict
+    en mémoire partagé.
+    """
+    try:
+        import streamlit as st
+
+        return st.session_state
+    except Exception:
+        global _fallback_state
+        if _fallback_state is None:
+            _fallback_state = {}
+            logger.info("Streamlit non disponible, utilisation dict en mémoire")
+        return _fallback_state
+
+
+def obtenir_rerun_callback() -> Callable[[], None]:
+    """Retourne ``st.rerun`` comme callable.
+
+    Utilisé par les services qui doivent déclencher un rafraîchissement
+    de l'interface.  Centralise l'import pour découpler du framework.
+
+    En dehors d'un contexte Streamlit, retourne un no-op.
+    """
+    try:
+        import streamlit as st
+
+        return st.rerun
+    except Exception:
+
+        def _noop_rerun() -> None:
+            logger.debug("Rerun ignoré (Streamlit non disponible)")
+
+        return _noop_rerun

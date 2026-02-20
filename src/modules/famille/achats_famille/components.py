@@ -2,7 +2,11 @@
 Module Achats Famille - Composants UI
 """
 
+import logging
+
 from src.ui import etat_vide
+
+logger = logging.getLogger(__name__)
 
 from .utils import (
     CATEGORIES,
@@ -68,7 +72,8 @@ def afficher_dashboard():
                             st.write(f"~{p.prix_estime:.0f}€")
             else:
                 st.success("✅ Rien d'urgent!")
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         etat_vide("Aucun achat urgent", "💳")
 
 

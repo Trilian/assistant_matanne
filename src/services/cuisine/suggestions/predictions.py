@@ -343,18 +343,13 @@ class PredictionService:
 
 
 # Singleton global
-_prediction_service: PredictionService | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("predictions", tags={"cuisine", "ia", "ml"})
 def obtenir_service_predictions() -> PredictionService:
-    """Obtient l'instance singleton"""
-    global _prediction_service
-
-    if _prediction_service is None:
-        _prediction_service = PredictionService()
-        logger.info("✅ Service de prédictions ML initialisé")
-
-    return _prediction_service
+    """Obtient l'instance du service de prédictions (thread-safe via registre)."""
+    return PredictionService()
 
 
 def get_predictions_service() -> PredictionService:

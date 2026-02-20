@@ -8,6 +8,7 @@ Planning et suggestions IA:
 - 💰 Budget sorties
 """
 
+import logging
 from datetime import date, timedelta
 from typing import Optional
 
@@ -18,6 +19,8 @@ from src.core.db import obtenir_contexte_db
 from src.core.models import ChildProfile, WeekendActivity
 from src.services.core.base import BaseAIService
 from src.ui import etat_vide
+
+logger = logging.getLogger(__name__)
 
 TYPES_ACTIVITES = {
     "parc": {"emoji": "🌳", "label": "Parc / Nature"},
@@ -38,7 +41,6 @@ METEO_OPTIONS = ["ensoleille", "nuageux", "pluvieux", "interieur"]
 
 __all__ = [
     # Standard libs
-    "st",
     "date",
     "timedelta",
     "Optional",
@@ -92,7 +94,8 @@ def get_weekend_activities(saturday: date, sunday: date) -> dict:
                 "saturday": [a for a in activities if a.date_prevue == saturday],
                 "sunday": [a for a in activities if a.date_prevue == sunday],
             }
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         return {"saturday": [], "sunday": []}
 
 
@@ -110,7 +113,8 @@ def get_budget_weekend(saturday: date, sunday: date) -> dict:
             reel = sum(a.cout_reel or 0 for a in activities if a.statut == "termine")
 
             return {"estime": estime, "reel": reel}
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         return {"estime": 0, "reel": 0}
 
 
@@ -124,7 +128,8 @@ def get_lieux_testes() -> list:
                 .order_by(WeekendActivity.note_lieu.desc())
                 .all()
             )
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         return []
 
 
@@ -143,5 +148,5 @@ def mark_activity_done(activity_id: int):
             if act:
                 act.statut = "termine"
                 db.commit()
-    except:
-        pass
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")

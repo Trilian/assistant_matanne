@@ -309,15 +309,13 @@ Réponds en JSON avec cette structure exacte:
 # ═══════════════════════════════════════════════════════════
 
 
-_import_service: RecipeImportService | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("import_recettes", tags={"cuisine", "ia", "import"})
 def obtenir_service_import_recettes() -> RecipeImportService:
-    """Factory pour le service d'import de recettes (convention française)."""
-    global _import_service
-    if _import_service is None:
-        _import_service = RecipeImportService()
-    return _import_service
+    """Factory pour le service d'import de recettes (thread-safe via registre)."""
+    return RecipeImportService()
 
 
 def get_recipe_import_service() -> RecipeImportService:

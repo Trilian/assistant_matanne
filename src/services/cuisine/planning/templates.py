@@ -265,15 +265,13 @@ class ServiceTemplates:
 
 
 # Factory
-_service_templates: ServiceTemplates | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("templates", tags={"cuisine", "planning"})
 def obtenir_service_templates() -> ServiceTemplates:
-    """Retourne l'instance singleton du service de templates."""
-    global _service_templates
-    if _service_templates is None:
-        _service_templates = ServiceTemplates()
-    return _service_templates
+    """Retourne l'instance du service de templates (thread-safe via registre)."""
+    return ServiceTemplates()
 
 
 def get_templates_service() -> ServiceTemplates:

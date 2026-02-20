@@ -42,12 +42,13 @@ def sync_tirages_loto(limite: int = 50) -> int:
                         # Parser la date
                         try:
                             date_tirage = datetime.strptime(tirage_api["date"], "%Y-%m-%d").date()
-                        except:
+                        except Exception as e:
                             try:
                                 date_tirage = datetime.strptime(
                                     tirage_api["date"], "%d/%m/%Y"
                                 ).date()
-                            except:
+                            except Exception as e:
+                                logger.debug(f"Erreur ignorée: {e}")
                                 continue
                     else:
                         date_tirage = tirage_api.get("date")

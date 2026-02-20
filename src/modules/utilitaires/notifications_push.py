@@ -13,6 +13,7 @@ from datetime import date
 
 import streamlit as st
 
+from src.core.async_utils import executer_async
 from src.core.session_keys import SK
 from src.services.core.notifications import (
     ConfigurationNtfy,
@@ -353,9 +354,7 @@ def afficher_taches_retard():
 
                 with col3:
                     if st.button("📤", key=f"notif_{tache.id}", help="Envoyer alerte"):
-                        import asyncio
-
-                        resultat = asyncio.run(service.envoyer_alerte_tache_retard(tache))
+                        resultat = executer_async(service.envoyer_alerte_tache_retard(tache))
                         if resultat.succes:
                             st.toast(f"✅ Alerte envoyée pour {tache.titre}")
                         else:

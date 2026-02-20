@@ -570,6 +570,7 @@ class BaseAIService:
             return from_exception(e, source=self.service_name)
 
     # Versions synchrones des méthodes safe
+    safe_call_with_cache_sync = sync_wrapper(safe_call_with_cache)
     safe_call_with_parsing_sync = sync_wrapper(safe_call_with_parsing)
     safe_call_with_list_parsing_sync = sync_wrapper(safe_call_with_list_parsing)
     safe_call_with_json_parsing_sync = sync_wrapper(safe_call_with_json_parsing)

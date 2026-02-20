@@ -7,46 +7,34 @@ import base64
 import logging
 import os
 import random
-from pathlib import Path
 from urllib.parse import quote
 
 import requests
 
-# Charger les variables d'environnement depuis .env.local et .env
-try:
-    from dotenv import load_dotenv
-
-    # Chercher .env.local et .env depuis la racine du projet
-    project_root = Path(__file__).parent.parent.parent.parent
-    load_dotenv(project_root / ".env.local")
-    load_dotenv(project_root / ".env")
-except ImportError:
-    pass
-
 logger = logging.getLogger(__name__)
 
 
-# Fonction helper pour charger les clés depuis st.secrets (Streamlit Cloud) ou os.getenv (local)
+# ─── Chargement centralisé des clés API via le système de config ───
+
+
 def _get_api_key(key_name: str) -> str | None:
-    """Charge une clé API depuis st.secrets (Streamlit Cloud) ou os.getenv (local)"""
+    """Charge une clé API via obtenir_parametres() (cascade .env.local → .env → st.secrets).
+
+    Centralise la résolution en passant par le système de configuration
+    du projet plutôt qu'importer directement Streamlit.
+    """
     try:
-        import streamlit as st
+        from src.core.config import obtenir_parametres
 
-        if hasattr(st, "secrets") and st.secrets:
-            try:
-                # Essayer section spécifique d'abord (ex: st.secrets["unsplash"]["api_key"])
-                if key_name == "UNSPLASH_API_KEY":
-                    return st.secrets.get("unsplash", {}).get("api_key")
-                elif key_name == "PEXELS_API_KEY":
-                    return st.secrets.get("pexels", {}).get("api_key")
-                elif key_name == "PIXABAY_API_KEY":
-                    return st.secrets.get("pixabay", {}).get("api_key")
-            except Exception as e:
-                logger.debug("Secrets indisponible pour %s: %s", key_name, e)
+        params = obtenir_parametres()
+        # Tenter d'obtenir la clé depuis les Pydantic settings
+        value = getattr(params, key_name, None)
+        if value:
+            return value
     except Exception as e:
-        logger.debug("Streamlit non disponible: %s", e)
+        logger.debug("Config non disponible pour %s: %s", key_name, e)
 
-    # Fallback à os.getenv (pour dev local avec .env)
+    # Fallback ultime à os.getenv (pour dev local sans config chargée)
     return os.getenv(key_name)
 
 

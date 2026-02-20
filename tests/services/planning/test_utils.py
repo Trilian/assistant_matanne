@@ -7,16 +7,24 @@ Ces tests ne nécessitent pas de base de données.
 
 from datetime import date, datetime
 
-from src.services.cuisine.planning.utils import (
-    calculate_week_dates,
-    determine_protein_type,
+from src.core.date_utils import (
     format_week_label,
-    get_default_protein_schedule,
-    get_monday_of_week,
-    get_week_range,
     get_weekday_index,
     get_weekday_name,
     get_weekday_names,
+)
+from src.core.date_utils import (
+    obtenir_bornes_semaine as get_week_range,
+)
+from src.core.date_utils import (
+    obtenir_debut_semaine as get_monday_of_week,
+)
+from src.core.date_utils import (
+    obtenir_jours_semaine as calculate_week_dates,
+)
+from src.services.cuisine.planning.nutrition import (
+    determine_protein_type,
+    get_default_protein_schedule,
 )
 
 
@@ -279,7 +287,7 @@ class TestGetDefaultProteinSchedule:
 # TESTS ÉQUILIBRE NUTRITIONNEL (NOUVELLES FONCTIONS)
 # ═══════════════════════════════════════════════════════════
 
-from src.services.cuisine.planning.utils import (
+from src.services.cuisine.planning.nutrition import (
     calculate_week_balance,
     is_balanced_week,
 )
@@ -390,7 +398,7 @@ class TestIsBalancedWeek:
 # TESTS FORMATAGE
 # ═══════════════════════════════════════════════════════════
 
-from src.services.cuisine.planning.utils import (
+from src.services.cuisine.planning.formatters import (
     format_meal_for_display,
     format_planning_summary,
     group_meals_by_type,
@@ -532,7 +540,7 @@ class TestGroupMealsByType:
 # TESTS AGRÉGATION COURSES
 # ═══════════════════════════════════════════════════════════
 
-from src.services.cuisine.planning.utils import (
+from src.services.cuisine.planning.agregation import (
     aggregate_ingredients,
     get_rayon_order,
     sort_ingredients_by_rayon,
@@ -664,7 +672,7 @@ class TestGetRayonOrder:
 # TESTS VALIDATION
 # ═══════════════════════════════════════════════════════════
 
-from src.services.cuisine.planning.utils import (
+from src.services.cuisine.planning.validators import (
     validate_meal_selection,
     validate_planning_dates,
 )
@@ -729,7 +737,7 @@ class TestValidateMealSelection:
 # TESTS GÉNÉRATION PROMPT IA
 # ═══════════════════════════════════════════════════════════
 
-from src.services.cuisine.planning.utils import (
+from src.services.cuisine.planning.prompts import (
     build_planning_prompt_context,
     parse_ai_planning_response,
 )

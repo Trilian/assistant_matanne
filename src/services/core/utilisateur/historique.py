@@ -581,15 +581,13 @@ class ActionHistoryService:
 # -----------------------------------------------------------
 
 
-_history_service: ActionHistoryService | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("historique_actions", tags={"utilisateur", "audit"})
 def obtenir_service_historique_actions() -> ActionHistoryService:
-    """Factory pour le service d'historique (convention française)."""
-    global _history_service
-    if _history_service is None:
-        _history_service = ActionHistoryService()
-    return _history_service
+    """Factory pour le service d'historique (thread-safe via registre)."""
+    return ActionHistoryService()
 
 
 def get_action_history_service() -> ActionHistoryService:

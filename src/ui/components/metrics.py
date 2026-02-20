@@ -20,7 +20,6 @@ from src.ui.utils import echapper_html
 logger = logging.getLogger(__name__)
 
 
-@st.cache_data(ttl=60)
 @composant_ui(
     "metrics",
     exemple='carte_metrique_avancee("Recettes", 42, "🍽️")',
@@ -143,6 +142,8 @@ def widget_meteo_jour(donnees_meteo: dict | None = None):
         return
 
     meteo = donnees_meteo
+    condition_parts = meteo.get("condition", "").split()
+    icone_meteo = condition_parts[0] if condition_parts else "🌤️"
 
     st.markdown(
         f"""
@@ -152,7 +153,7 @@ def widget_meteo_jour(donnees_meteo: dict | None = None):
             padding: {Espacement.MD};
             text-align: center;
         ">
-            <span style="font-size: {Typographie.ICON_MD};">{meteo["condition"].split()[0]}</span>
+            <span style="font-size: {Typographie.ICON_MD};">{icone_meteo}</span>
             <p style="margin: 0.3rem 0; font-size: {Typographie.H3}; font-weight: 600;">{meteo["temp"]}°C</p>
             <small style="color: {Couleur.TEXT_SECONDARY};">{meteo["conseil"]}</small>
         </div>

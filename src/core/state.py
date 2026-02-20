@@ -1,13 +1,12 @@
 """
 State Unifié - Gestionnaire État Complet
 Tout harmonisé en français avec alias anglais
+Découplé de Streamlit via SessionStorage Protocol.
 """
 
 import logging
 from dataclasses import dataclass, field
 from typing import Any
-
-import streamlit as st
 
 logger = logging.getLogger(__name__)
 
@@ -63,22 +62,30 @@ class EtatApp:
 
 
 class GestionnaireEtat:
-    """Gestionnaire centralisé du state"""
+    """Gestionnaire centralisé du state — découplé de Streamlit."""
 
     CLE_ETAT = "etat_app"
 
     @staticmethod
+    def _storage():
+        """Accès lazy au storage pour éviter import circulaire."""
+        from src.core.storage import obtenir_storage
+
+        return obtenir_storage()
+
+    @staticmethod
     def initialiser():
         """Initialise le state si pas déjà fait"""
-        if GestionnaireEtat.CLE_ETAT not in st.session_state:
-            st.session_state[GestionnaireEtat.CLE_ETAT] = EtatApp()
+        storage = GestionnaireEtat._storage()
+        if not storage.contains(GestionnaireEtat.CLE_ETAT):
+            storage.set(GestionnaireEtat.CLE_ETAT, EtatApp())
             logger.info("[OK] EtatApp initialisé")
 
     @staticmethod
     def obtenir() -> EtatApp:
         """Récupère le state actuel"""
         GestionnaireEtat.initialiser()
-        return st.session_state[GestionnaireEtat.CLE_ETAT]
+        return GestionnaireEtat._storage().get(GestionnaireEtat.CLE_ETAT)
 
     @staticmethod
     def naviguer_vers(module: str):
@@ -169,8 +176,9 @@ class GestionnaireEtat:
     @staticmethod
     def reinitialiser():
         """Réinitialise complètement le state"""
-        if GestionnaireEtat.CLE_ETAT in st.session_state:
-            del st.session_state[GestionnaireEtat.CLE_ETAT]
+        storage = GestionnaireEtat._storage()
+        if storage.contains(GestionnaireEtat.CLE_ETAT):
+            storage.delete(GestionnaireEtat.CLE_ETAT)
 
         GestionnaireEtat.initialiser()
         logger.info("🔄 State réinitialisé")
@@ -341,13 +349,23 @@ def obtenir_etat() -> EtatApp:
 def naviguer(module: str):
     """Raccourci pour naviguer"""
     GestionnaireEtat.naviguer_vers(module)
-    st.rerun()
+    try:
+        import streamlit as st
+
+        st.rerun()
+    except Exception:
+        pass
 
 
 def revenir():
     """Raccourci pour revenir en arrière"""
     GestionnaireEtat.revenir()
-    st.rerun()
+    try:
+        import streamlit as st
+
+        st.rerun()
+    except Exception:
+        pass
 
 
 def obtenir_fil_ariane() -> list[str]:

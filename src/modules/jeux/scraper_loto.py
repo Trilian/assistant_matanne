@@ -178,7 +178,8 @@ class ScraperLotoFDJ:
                             "source": "FDJ API",
                         }
                     )
-            except:
+            except Exception as e:
+                logger.debug(f"Erreur ignorée: {e}")
                 continue
 
         return tirages
@@ -309,7 +310,8 @@ class ScraperLotoFDJ:
 
                     if str(date_obj) == aujourd_hui:
                         return tirage
-            except:
+            except Exception as e:
+                logger.debug(f"Erreur ignorée: {e}")
                 continue
 
         return None

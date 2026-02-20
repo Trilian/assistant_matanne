@@ -4,26 +4,34 @@ Engine - Création et gestion de l'engine SQLAlchemy.
 Fonctions pour:
 - Créer l'engine PostgreSQL avec retry automatique
 - Obtenir l'engine de façon sécurisée
+
+Découplé de Streamlit — le cache est géré par le conteneur IoC.
 """
 
 import logging
+import threading
 import time
 
-import streamlit as st
 from sqlalchemy import create_engine, pool, text
 from sqlalchemy.exc import DatabaseError, OperationalError
 
 from ..config import obtenir_parametres
 from ..constants import DB_CONNECTION_RETRY, DB_CONNECTION_TIMEOUT
-from ..errors import ErreurBaseDeDonnees
+from ..errors_base import ErreurBaseDeDonnees
 
 logger = logging.getLogger(__name__)
 
+# Cache thread-safe pour singleton d'engine (remplace @st.cache_resource)
+_engine_lock = threading.Lock()
+_engine_instance = None
 
-@st.cache_resource(ttl=3600)
+
 def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative: int = 2):
     """
     Crée l'engine PostgreSQL avec retry automatique.
+
+    Utilise un cache singleton thread-safe au lieu de @st.cache_resource
+    pour être testable sans Streamlit.
 
     Args:
         nombre_tentatives: Nombre de tentatives de reconnexion
@@ -35,53 +43,77 @@ def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative
     Raises:
         ErreurBaseDeDonnees: Si connexion impossible après toutes les tentatives
     """
-    parametres = obtenir_parametres()
-    derniere_erreur = None
+    global _engine_instance
 
-    for tentative in range(nombre_tentatives):
-        try:
-            url_base = parametres.DATABASE_URL
+    if _engine_instance is not None:
+        return _engine_instance
 
-            # Utiliser QueuePool pour de meilleures performances
-            moteur = create_engine(
-                url_base,
-                poolclass=pool.QueuePool,
-                pool_size=5,  # Connexions de base
-                max_overflow=10,  # Connexions supplémentaires si nécessaire
-                pool_timeout=30,  # Timeout attente connexion
-                pool_recycle=1800,  # Recycler connexions après 30min
-                pool_pre_ping=True,  # Vérifier connexion avant utilisation
-                echo=parametres.DEBUG,
-                connect_args={
-                    "connect_timeout": DB_CONNECTION_TIMEOUT,
-                    "options": "-c timezone=utc",
-                    "sslmode": "require",
-                },
-            )
+    with _engine_lock:
+        # Double-check locking
+        if _engine_instance is not None:
+            return _engine_instance
 
-            # Test de connexion
-            with moteur.connect() as conn:
-                conn.execute(text("SELECT 1"))
+        parametres = obtenir_parametres()
+        derniere_erreur = None
 
-            logger.info(f"[OK] Connexion DB établie (tentative {tentative + 1})")
-            return moteur
+        for tentative in range(nombre_tentatives):
+            try:
+                url_base = parametres.DATABASE_URL
 
-        except (OperationalError, DatabaseError) as e:
-            derniere_erreur = e
-            logger.warning(f"[ERROR] Tentative {tentative + 1}/{nombre_tentatives} échouée: {e}")
+                moteur = create_engine(
+                    url_base,
+                    poolclass=pool.QueuePool,
+                    pool_size=5,
+                    max_overflow=10,
+                    pool_timeout=30,
+                    pool_recycle=1800,
+                    pool_pre_ping=True,
+                    echo=parametres.DEBUG,
+                    connect_args={
+                        "connect_timeout": DB_CONNECTION_TIMEOUT,
+                        "options": "-c timezone=utc",
+                        "sslmode": "require",
+                    },
+                )
 
-            if tentative < nombre_tentatives - 1:
-                time.sleep(delai_tentative)
-                continue
+                # Test de connexion
+                with moteur.connect() as conn:
+                    conn.execute(text("SELECT 1"))
 
-    # Toutes les tentatives ont échoué
-    message_erreur = (
-        f"Impossible de se connecter après {nombre_tentatives} tentatives: {derniere_erreur}"
-    )
-    logger.error(message_erreur)
-    raise ErreurBaseDeDonnees(
-        message_erreur, message_utilisateur="Impossible de se connecter à la base de données"
-    )
+                logger.info(f"[OK] Connexion DB établie (tentative {tentative + 1})")
+                _engine_instance = moteur
+                return moteur
+
+            except (OperationalError, DatabaseError) as e:
+                derniere_erreur = e
+                logger.warning(
+                    f"[ERROR] Tentative {tentative + 1}/{nombre_tentatives} échouée: {e}"
+                )
+
+                if tentative < nombre_tentatives - 1:
+                    time.sleep(delai_tentative)
+                    continue
+
+        message_erreur = (
+            f"Impossible de se connecter après {nombre_tentatives} tentatives: {derniere_erreur}"
+        )
+        logger.error(message_erreur)
+        raise ErreurBaseDeDonnees(
+            message_erreur,
+            message_utilisateur="Impossible de se connecter à la base de données",
+        )
+
+
+def reinitialiser_moteur() -> None:
+    """Réinitialise le cache du moteur (utile pour les tests)."""
+    global _engine_instance
+    with _engine_lock:
+        if _engine_instance is not None:
+            try:
+                _engine_instance.dispose()
+            except Exception:
+                pass
+            _engine_instance = None
 
 
 def obtenir_moteur_securise() -> object | None:

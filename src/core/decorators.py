@@ -80,7 +80,12 @@ def avec_session_db(func: F) -> F:
 # ═══════════════════════════════════════════════════════════
 
 
-def avec_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = None):
+def avec_cache(
+    ttl: int = 300,
+    key_prefix: str | None = None,
+    key_func: None = None,
+    cache_none: bool = False,
+):
     """
     Décorateur pour cache automatique avec TTL.
 
@@ -95,10 +100,17 @@ def avec_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = N
             # Custom key generation
             return recette
 
+        @avec_cache(ttl=300, cache_none=False)  # Ne cache jamais None
+        def operation_risquee() -> dict | None:
+            return None  # Ne sera PAS mis en cache
+
     Args:
         ttl: Durée de vie en secondes
         key_prefix: Préfixe pour la clé de cache
         key_func: Fonction personnalisée pour générer la clé (optionnel)
+        cache_none: Si False (défaut), les résultats None ne sont PAS mis en cache.
+            Empêche le cache poisoning quand un décorateur d'erreur retourne None
+            comme valeur de fallback.
 
     Returns:
         Valeur en cache ou résultat du calcul
@@ -168,7 +180,11 @@ def avec_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = N
             # Calculer et cacher (L1 + L2)
             logger.debug(f"Cache MISS: {cache_key}")
             result = func(*args, **kwargs)
-            cache.set(cache_key, result, ttl=ttl)
+
+            # Ne pas cacher None si cache_none=False (évite le cache poisoning
+            # quand @avec_gestion_erreurs retourne None comme fallback)
+            if result is not None or cache_none:
+                cache.set(cache_key, result, ttl=ttl)
 
             return result
 

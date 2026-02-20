@@ -27,6 +27,10 @@ from typing import Any
 
 # Mapping: nom de symbole → (sous-module relatif, nom dans le module)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
+    # Container (IoC)
+    "Conteneur": (".container", "Conteneur"),
+    "Scope": (".container", "Scope"),
+    "conteneur": (".container", "conteneur"),
     # AI
     "AnalyseurIA": (".ai", "AnalyseurIA"),
     "CacheIA": (".ai", "CacheIA"),

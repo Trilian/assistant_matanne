@@ -154,6 +154,42 @@ class ZIndex(StrEnum):
     TOOLTIP = "1100"
 
 
+class Variante(StrEnum):
+    """Variantes sémantiques pour les composants.
+
+    Permet de spécifier l'intention visuelle (succès, danger, info…)
+    au lieu de couleurs brutes. Les composants mappent automatiquement
+    vers les couleurs bg/text/border correspondantes.
+    """
+
+    SUCCESS = "success"
+    WARNING = "warning"
+    DANGER = "danger"
+    INFO = "info"
+    NEUTRAL = "neutral"
+    ACCENT = "accent"
+
+
+def obtenir_couleurs_variante(variante: Variante) -> tuple[str, str, str]:
+    """Retourne (background, text, border) pour une variante donnée.
+
+    Args:
+        variante: Variante sémantique.
+
+    Returns:
+        Tuple (couleur_fond, couleur_texte, couleur_bordure).
+    """
+    _MAP: dict[Variante, tuple[str, str, str]] = {
+        Variante.SUCCESS: (Couleur.BG_SUCCESS, Couleur.BADGE_SUCCESS_TEXT, Couleur.SUCCESS),
+        Variante.WARNING: (Couleur.BG_WARNING, Couleur.BADGE_WARNING_TEXT, Couleur.WARNING),
+        Variante.DANGER: (Couleur.BG_DANGER, Couleur.BADGE_DANGER_TEXT, Couleur.DANGER),
+        Variante.INFO: (Couleur.BG_INFO, Couleur.INFO, Couleur.BORDER_INFO),
+        Variante.NEUTRAL: (Couleur.BG_SUBTLE, Couleur.TEXT_SECONDARY, Couleur.BORDER),
+        Variante.ACCENT: (Couleur.ACCENT, "#ffffff", Couleur.ACCENT),
+    }
+    return _MAP.get(variante, _MAP[Variante.NEUTRAL])
+
+
 # ═══════════════════════════════════════════════════════════
 # HELPERS
 # ═══════════════════════════════════════════════════════════
@@ -195,6 +231,8 @@ __all__ = [
     "Ombre",
     "Transition",
     "ZIndex",
+    "Variante",
+    "obtenir_couleurs_variante",
     "gradient",
     "gradient_subtil",
 ]

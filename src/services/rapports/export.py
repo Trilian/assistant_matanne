@@ -490,15 +490,13 @@ class ServiceExportPDF:
 # SINGLETON
 # ═══════════════════════════════════════════════════════════
 
-_service_export_pdf: ServiceExportPDF | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("export_pdf", tags={"rapports", "export"})
 def obtenir_service_export_pdf() -> ServiceExportPDF:
-    """Factory pour obtenir le service d'export PDF."""
-    global _service_export_pdf
-    if _service_export_pdf is None:
-        _service_export_pdf = ServiceExportPDF()
-    return _service_export_pdf
+    """Factory pour obtenir le service d'export PDF (thread-safe via registre)."""
+    return ServiceExportPDF()
 
 
 def get_pdf_export_service() -> ServiceExportPDF:

@@ -56,16 +56,11 @@ class AuthService(PermissionsMixin, SessionMixin, TokenValidationMixin, ProfileM
         Args:
             storage: Stockage clé-valeur mutable (défaut: st.session_state).
         """
-        self._storage = storage if storage is not None else self._get_default_storage()
+        from src.core.storage import obtenir_session_state
+
+        self._storage = storage if storage is not None else obtenir_session_state()
         self._client = None
         self._init_client()
-
-    @staticmethod
-    def _get_default_storage() -> MutableMapping[str, Any]:
-        """Retourne le stockage par défaut (st.session_state)."""
-        import streamlit as st
-
-        return st.session_state
 
     def _init_client(self):
         """Initialise le client Supabase."""
@@ -359,77 +354,18 @@ class AuthService(PermissionsMixin, SessionMixin, TokenValidationMixin, ProfileM
 # -----------------------------------------------------------
 
 
-_auth_service: AuthService | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("authentification", tags={"utilisateur", "auth"})
 def obtenir_service_authentification() -> AuthService:
-    """Factory pour le service d'authentification (convention française)."""
-    global _auth_service
-    if _auth_service is None:
-        _auth_service = AuthService()
-    return _auth_service
+    """Factory pour le service d'authentification (thread-safe via registre)."""
+    return AuthService()
 
 
 def get_auth_service() -> AuthService:
     """Factory pour le service d'authentification (alias anglais)."""
     return obtenir_service_authentification()
-
-
-# -----------------------------------------------------------
-# RÉ-EXPORTS UI (lazy pour éviter import circulaire)
-# -----------------------------------------------------------
-
-
-def afficher_login_form(*args, **kwargs):
-    """Ré-export lazy de afficher_formulaire_connexion pour rétrocompatibilité.
-
-    DEPRECATED: Importer directement depuis src.ui.views.authentification.
-    """
-    import warnings
-
-    warnings.warn(
-        "afficher_login_form est déprécié ici. " "Importer depuis src.ui.views.authentification.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    from src.ui.views.authentification import afficher_formulaire_connexion
-
-    return afficher_formulaire_connexion(*args, **kwargs)
-
-
-def afficher_user_menu(*args, **kwargs):
-    """Ré-export lazy de afficher_menu_utilisateur pour rétrocompatibilité.
-
-    DEPRECATED: Importer directement depuis src.ui.views.authentification.
-    """
-    import warnings
-
-    warnings.warn(
-        "afficher_user_menu est déprécié ici. " "Importer depuis src.ui.views.authentification.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    from src.ui.views.authentification import afficher_menu_utilisateur
-
-    return afficher_menu_utilisateur(*args, **kwargs)
-
-
-def afficher_profile_settings(*args, **kwargs):
-    """Ré-export lazy de afficher_parametres_profil pour rétrocompatibilité.
-
-    DEPRECATED: Importer directement depuis src.ui.views.authentification.
-    """
-    import warnings
-
-    warnings.warn(
-        "afficher_profile_settings est déprécié ici. "
-        "Importer depuis src.ui.views.authentification.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    from src.ui.views.authentification import afficher_parametres_profil
-
-    return afficher_parametres_profil(*args, **kwargs)
 
 
 __all__ = [
@@ -445,9 +381,4 @@ __all__ = [
     "SessionMixin",
     "TokenValidationMixin",
     "ProfileMixin",
-    "afficher_login_form",
-    "afficher_user_menu",
-    "afficher_profile_settings",
-    "require_authenticated",
-    "require_role",
 ]

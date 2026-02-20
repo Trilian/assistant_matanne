@@ -7,10 +7,12 @@ from collections.abc import Callable
 
 import streamlit as st
 
+from src.ui.registry import composant_ui
 from src.ui.tokens import Couleur, Espacement, Rayon
 from src.ui.utils import echapper_html
 
 
+@composant_ui("layouts", exemple="disposition_grille(items, 3)", tags=["grid", "layout"])
 def disposition_grille(
     items: list[dict],
     colonnes_par_ligne: int = 3,
@@ -52,6 +54,7 @@ def disposition_grille(
                         st.write(items[item_idx])
 
 
+@composant_ui("layouts", exemple='carte_item("Titre", ["meta1", "meta2"])', tags=["card", "item"])
 def carte_item(
     titre: str,
     metadonnees: list[str],

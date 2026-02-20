@@ -2,7 +2,6 @@
 UI Feedback - Progress tracking
 """
 
-import time
 from datetime import datetime
 
 import streamlit as st

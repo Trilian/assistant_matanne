@@ -66,8 +66,11 @@ class ServicePlanning(
     # SECTION 1: CRUD & PLANNING (REFACTORED)
     # ═══════════════════════════════════════════════════════════
 
-    @avec_cache(ttl=1800, key_func=lambda self, planning_id=None, **kw: "planning_active")
     @avec_gestion_erreurs(default_return=None)
+    @avec_cache(
+        ttl=1800,
+        key_func=lambda self, planning_id=None, **kw: f"planning_{planning_id or 'active'}",
+    )
     @avec_session_db
     def get_planning(
         self, planning_id: int | None = None, db: Session | None = None
@@ -114,8 +117,8 @@ class ServicePlanning(
 
         return planning
 
-    @avec_cache(ttl=1800, key_func=lambda self, planning_id, **kw: f"planning_full_{planning_id}")
     @avec_gestion_erreurs(default_return=None)
+    @avec_cache(ttl=1800, key_func=lambda self, planning_id, **kw: f"planning_full_{planning_id}")
     @avec_session_db
     def get_planning_complet(
         self, planning_id: int, db: Session | None = None
@@ -332,16 +335,13 @@ class ServicePlanning(
 # ═══════════════════════════════════════════════════════════
 
 
-# INSTANCE SINGLETON - LAZY LOADING
-_service_planning = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("planning", tags={"cuisine", "ia", "crud"})
 def obtenir_service_planning() -> ServicePlanning:
-    """Obtenir ou créer l'instance globale de ServicePlanning."""
-    global _service_planning
-    if _service_planning is None:
-        _service_planning = ServicePlanning()
-    return _service_planning
+    """Obtenir l'instance globale de ServicePlanning (thread-safe via registre)."""
+    return ServicePlanning()
 
 
 def get_planning_service() -> ServicePlanning:

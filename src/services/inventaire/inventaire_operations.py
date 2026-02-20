@@ -351,8 +351,8 @@ class InventaireOperationsMixin:
     # SUGGESTIONS IA
     # ═══════════════════════════════════════════════════════════
 
-    @avec_cache(ttl=3600, key_func=lambda self: "suggestions_courses_ia")
     @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=3600, key_func=lambda self: "suggestions_courses_ia")
     def suggerer_courses_ia(self) -> list[SuggestionCourses]:  # pragma: no cover
         """Suggère des articles à ajouter aux courses via IA.
 

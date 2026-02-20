@@ -112,8 +112,8 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
     # SECTION 2: SUGGESTIONS IA
     # ═══════════════════════════════════════════════════════════
 
-    @avec_cache(ttl=3600, key_func=lambda self: "suggestions_courses_ia")
     @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=3600, key_func=lambda self: "suggestions_courses_ia")
     def generer_suggestions_ia_depuis_inventaire(self) -> list[SuggestionCourses]:
         """Genere des suggestions de courses depuis l'inventaire via IA.
 

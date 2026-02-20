@@ -166,15 +166,13 @@ class ServiceRappels:
 # FACTORY
 # ═══════════════════════════════════════════════════════════
 
-_service_rappels: ServiceRappels | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("rappels", tags={"cuisine", "planning", "notifications"})
 def obtenir_service_rappels() -> ServiceRappels:
-    """Retourne l'instance singleton du service de rappels."""
-    global _service_rappels
-    if _service_rappels is None:
-        _service_rappels = ServiceRappels()
-    return _service_rappels
+    """Retourne l'instance du service de rappels (thread-safe via registre)."""
+    return ServiceRappels()
 
 
 def get_reminders_service() -> ServiceRappels:

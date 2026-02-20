@@ -305,15 +305,13 @@ class OpenFoodFactsService:
 # SINGLETON
 # ═══════════════════════════════════════════════════════════
 
-_service_instance: OpenFoodFactsService | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("openfoodfacts", tags={"integrations", "api"})
 def obtenir_service_openfoodfacts() -> OpenFoodFactsService:
-    """Factory pour obtenir le service OpenFoodFacts (convention française)."""
-    global _service_instance
-    if _service_instance is None:
-        _service_instance = OpenFoodFactsService()
-    return _service_instance
+    """Factory pour obtenir le service OpenFoodFacts (thread-safe via registre)."""
+    return OpenFoodFactsService()
 
 
 def get_openfoodfacts_service() -> OpenFoodFactsService:

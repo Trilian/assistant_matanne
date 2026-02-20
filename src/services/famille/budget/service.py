@@ -355,15 +355,13 @@ class BudgetService(BudgetAnalysesMixin, BudgetAlertesMixin):
 # ═══════════════════════════════════════════════════════════
 
 
-_budget_service: BudgetService | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("budget", tags={"famille", "crud"})
 def obtenir_service_budget() -> BudgetService:
-    """Factory pour le service budget (convention française)."""
-    global _budget_service
-    if _budget_service is None:
-        _budget_service = BudgetService()
-    return _budget_service
+    """Factory pour le service budget (thread-safe via registre)."""
+    return BudgetService()
 
 
 def get_budget_service() -> BudgetService:

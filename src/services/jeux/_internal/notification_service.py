@@ -108,15 +108,10 @@ class NotificationJeuxService:
         Args:
             storage: Stockage clé-valeur mutable (défaut: st.session_state).
         """
-        self._storage = storage if storage is not None else self._get_default_storage()
+        from src.core.storage import obtenir_session_state
+
+        self._storage = storage if storage is not None else obtenir_session_state()
         self._init_session()
-
-    @staticmethod
-    def _get_default_storage() -> MutableMapping[str, Any]:
-        """Retourne le stockage par défaut (st.session_state)."""
-        import streamlit as st
-
-        return st.session_state
 
     def _init_session(self):
         """Initialise le stockage session."""

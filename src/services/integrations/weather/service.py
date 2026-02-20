@@ -116,8 +116,8 @@ class ServiceMeteo(MeteoJardinMixin):
     # RÉCUPÉRATION MÉTÉO
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_cache(ttl=3600)  # Cache 1h
-    @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
     def get_previsions(self, nb_jours: int = 7) -> list[MeteoJour] | None:
         """
         Récupère les prévisions météo.
@@ -529,15 +529,13 @@ class ServiceMeteo(MeteoJardinMixin):
 # ═══════════════════════════════════════════════════════════
 
 
-_weather_service: ServiceMeteo | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("meteo", tags={"integrations", "api"})
 def obtenir_service_meteo() -> ServiceMeteo:
-    """Factory pour le service météo."""
-    global _weather_service
-    if _weather_service is None:
-        _weather_service = ServiceMeteo()
-    return _weather_service
+    """Factory pour le service météo (thread-safe via registre)."""
+    return ServiceMeteo()
 
 
 def get_weather_service() -> ServiceMeteo:

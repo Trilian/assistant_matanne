@@ -69,18 +69,17 @@ def chargeur_squelette(lignes: int = 3):
     """
     Chargeur squelette (placeholder animé)
 
+    Utilise l'animation ``shimmer`` du système centralisé.
+    Les @keyframes sont injectés une seule fois via ``injecter_animations()``.
+
     Usage:
         chargeur_squelette(lignes=5)
     """
     for _ in range(lignes):
         st.markdown(
-            "<style>@keyframes loading { "
-            "0% { background-position: -200px 0; } "
-            "100% { background-position: calc(200px + 100%) 0; } "
-            "}</style>"
             f'<div style="background: linear-gradient(90deg, {Couleur.BG_HOVER} 25%, '
             f"{Couleur.BORDER_LIGHT} 50%, {Couleur.BG_HOVER} 75%); "
             f"height: 20px; margin: {Espacement.SM} 0; border-radius: {Rayon.SM}; "
-            f'background-size: 200% 100%; animation: loading 1.5s infinite;"></div>',
+            f'background-size: 200% 100%; animation: shimmer 1.5s infinite;"></div>',
             unsafe_allow_html=True,
         )

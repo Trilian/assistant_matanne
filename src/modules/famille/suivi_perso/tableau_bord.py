@@ -2,6 +2,7 @@
 Module Suivi Perso - Dashboard et graphiques
 """
 
+from src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUT
 from src.ui.css import charger_css
 
 from .utils import date, get_current_user, go, set_current_user, st, timedelta
@@ -56,7 +57,7 @@ def afficher_dashboard(data: dict):
                 break
 
         today_pas = today_summary.pas if today_summary else 0
-        objectif = data.get("objectif_pas", 10000)
+        objectif = data.get("objectif_pas", OBJECTIF_PAS_QUOTIDIEN_DEFAUT)
         pct = min(100, (today_pas / objectif) * 100)
         st.metric("👣 Pas aujourd'hui", f"{today_pas:,}", f"{pct:.0f}%")
 
@@ -70,7 +71,9 @@ def afficher_dashboard(data: dict):
 
     # Graphique des 7 derniers jours
     st.markdown("---")
-    afficher_weekly_chart(data.get("summaries", []), data.get("objectif_pas", 10000))
+    afficher_weekly_chart(
+        data.get("summaries", []), data.get("objectif_pas", OBJECTIF_PAS_QUOTIDIEN_DEFAUT)
+    )
 
 
 def afficher_weekly_chart(summaries: list, objectif: int):

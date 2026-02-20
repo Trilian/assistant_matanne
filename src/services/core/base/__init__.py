@@ -55,6 +55,8 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "failure": (".result", "failure"),
     "from_exception": (".result", "from_exception"),
     "safe": (".result", "safe"),
+    "result_api": (".result", "result_api"),
+    "register_error_mapping": (".result", "register_error_mapping"),
     "collect": (".result", "collect"),
     "collect_all": (".result", "collect_all"),
 }

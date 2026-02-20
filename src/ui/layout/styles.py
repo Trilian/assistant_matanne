@@ -12,6 +12,7 @@ from src.ui.tokens import (
     Ombre,
     Rayon,
     Transition,
+    Typographie,
 )
 
 
@@ -33,6 +34,22 @@ def injecter_css():
     --warning: {Couleur.WARNING};
     --danger: {Couleur.DANGER};
     --info: {Couleur.INFO};
+}}
+
+/* Focus visible — accessibilit\u00e9 */
+*:focus-visible {{
+    outline: 2px solid var(--sem-interactive, {Couleur.ACCENT});
+    outline-offset: 2px;
+}}
+
+/* Reduced motion — accessibilit\u00e9 */
+@media (prefers-reduced-motion: reduce) {{
+    *, *::before, *::after {{
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }}
 }}
 
 .main-header {{
@@ -97,14 +114,101 @@ def injecter_css():
 #MainMenu {{visibility: hidden;}}
 footer {{visibility: hidden;}}
 
-/* Responsive */
-@media (max-width: 768px) {{
+/* ══════════════════════════════════════════════════════ */
+/* RESPONSIVE — Mobile first breakpoints                  */
+/* ══════════════════════════════════════════════════════ */
+
+/* Smartphones (< 480px) */
+@media (max-width: 480px) {{
+    .main-header h1 {{
+        font-size: clamp(1.2rem, 4vw, 1.5rem);
+    }}
+
+    .metric-card {{
+        padding: {Espacement.SM};
+    }}
+
+    .nav-card {{
+        padding: {Espacement.MD};
+        font-size: {Typographie.BODY_SM};
+    }}
+
+    /* Streamlit columns → stack en mobile */
+    [data-testid="column"] {{
+        min-width: 100% !important;
+    }}
+
+    /* Boutons pleine largeur */
+    .stButton > button {{
+        font-size: {Typographie.BODY_SM} !important;
+        padding: 8px 12px !important;
+    }}
+}}
+
+/* Petites tablettes (480px — 768px) */
+@media (min-width: 481px) and (max-width: 768px) {{
     .main-header h1 {{
         font-size: 1.5rem;
     }}
 
     .metric-card {{
         padding: {Espacement.MD};
+    }}
+
+    [data-testid="column"] {{
+        min-width: 48% !important;
+    }}
+}}
+
+/* Tablettes + desktop (> 768px) */
+@media (min-width: 769px) {{
+    .main-header h1 {{
+        font-size: clamp(1.5rem, 3vw, 2rem);
+    }}
+}}
+
+/* Typographie fluide */
+html {{
+    font-size: clamp(14px, 1.5vw, 16px);
+}}
+
+/* ══════════════════════════════════════════════════════ */
+/* PRINT — Impression propre des recettes/plannings       */
+/* ══════════════════════════════════════════════════════ */
+
+@media print {{
+    /* Masquer navigation et éléments interactifs */
+    [data-testid="stSidebar"],
+    [data-testid="stToolbar"],
+    .stButton,
+    .stDownloadButton,
+    #MainMenu,
+    footer,
+    header {{
+        display: none !important;
+    }}
+
+    /* Fond blanc, texte noir */
+    .stApp {{
+        background: white !important;
+        color: black !important;
+    }}
+
+    /* Pas de coupure dans les cartes */
+    .metric-card, .nav-card, [data-testid="stExpander"] {{
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }}
+
+    /* Réinitialiser les ombres et bordures */
+    * {{
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }}
+
+    /* Colonnes en lignes empilées */
+    [data-testid="column"] {{
+        min-width: 100% !important;
     }}
 }}
 </style>

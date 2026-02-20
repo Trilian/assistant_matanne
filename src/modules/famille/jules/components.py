@@ -2,6 +2,7 @@
 Module Jules - Composants UI
 """
 
+from src.core.async_utils import executer_async
 from src.core.session_keys import SK
 
 from .ai_service import JulesAIService
@@ -86,11 +87,9 @@ def afficher_activites():
 
         with st.spinner("Generation en cours..."):
             try:
-                import asyncio
-
                 service = JulesAIService()
                 meteo = "interieur" if filtre_lieu != "Exterieur" else "exterieur"
-                result = asyncio.run(service.suggerer_activites(age["mois"], meteo))
+                result = executer_async(service.suggerer_activites(age["mois"], meteo))
                 st.markdown(result)
             except Exception as e:
                 st.error(f"Erreur IA: {e}")
@@ -125,10 +124,8 @@ def afficher_shopping():
         if st.button("🤖 Suggerer des jouets"):
             with st.spinner("Generation..."):
                 try:
-                    import asyncio
-
                     service = JulesAIService()
-                    result = asyncio.run(service.suggerer_jouets(age["mois"]))
+                    result = executer_async(service.suggerer_jouets(age["mois"]))
                     st.markdown(result)
                 except Exception as e:
                     st.error(f"Erreur: {e}")
@@ -268,10 +265,8 @@ def afficher_conseils():
 
         with st.spinner("Generation du conseil..."):
             try:
-                import asyncio
-
                 service = JulesAIService()
-                result = asyncio.run(service.conseil_developpement(age["mois"], theme))
+                result = executer_async(service.conseil_developpement(age["mois"], theme))
                 st.markdown(result)
             except Exception as e:
                 st.error(f"Erreur: {e}")

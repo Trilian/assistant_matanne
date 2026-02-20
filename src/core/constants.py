@@ -178,3 +178,9 @@ from datetime import date as _date  # noqa: E402
 
 JULES_NAISSANCE: _date = _date(2024, 6, 22)
 """Date de naissance de Jules (22 juin 2024)."""
+
+OBJECTIF_PAS_QUOTIDIEN_DEFAUT: int = 10_000
+"""Objectif de pas quotidien par défaut."""
+
+OBJECTIF_CALORIES_BRULEES_DEFAUT: int = 500
+"""Objectif de calories brûlées par défaut."""

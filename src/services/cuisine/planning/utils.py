@@ -9,7 +9,18 @@ Préférez importer directement depuis les modules spécifiques:
 - src.services.planning.agregation pour l'agrégation des courses
 - src.services.planning.validators pour la validation
 - src.services.planning.prompts pour les prompts IA
+
+TODO: Supprimer ce fichier une fois les derniers consommateurs migrés.
 """
+
+import warnings as _warnings
+
+_warnings.warn(
+    "src.services.cuisine.planning.utils est déprécié. "
+    "Importer directement depuis les sous-modules (nutrition, formatters, etc.).",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 # ═══════════════════════════════════════════════════════════
 # DATES ET CALENDRIER

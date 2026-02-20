@@ -15,10 +15,14 @@ Structure:
 └─────────────────────────────┘
 """
 
+import logging
 from datetime import date, timedelta
 
 import streamlit as st
 
+logger = logging.getLogger(__name__)
+
+from src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUT
 from src.core.db import obtenir_contexte_db
 from src.core.models import (
     ChildProfile,
@@ -69,7 +73,7 @@ def get_user_streak(username: str) -> int:
             streak = 0
             current_date = end_date
             summary_by_date = {s.date: s for s in summaries}
-            objectif = user.objectif_pas_quotidien or 10000
+            objectif = user.objectif_pas_quotidien or OBJECTIF_PAS_QUOTIDIEN_DEFAUT
 
             while current_date >= start_date:
                 summary = summary_by_date.get(current_date)
@@ -80,7 +84,8 @@ def get_user_streak(username: str) -> int:
                     break
 
             return streak
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         return 0
 
 
@@ -90,7 +95,8 @@ def get_user_garmin_connected(username: str) -> bool:
         with obtenir_contexte_db() as db:
             user = db.query(UserProfile).filter_by(username=username).first()
             return user.garmin_connected if user else False
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         return False
 
 
@@ -115,7 +121,8 @@ def count_weekend_activities() -> int:
                 .count()
             )
             return count
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         return 0
 
 
@@ -124,7 +131,8 @@ def count_pending_purchases() -> int:
     try:
         with obtenir_contexte_db() as db:
             return db.query(FamilyPurchase).filter_by(achete=False).count()
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         return 0
 
 
@@ -139,7 +147,8 @@ def count_urgent_purchases() -> int:
                 )
                 .count()
             )
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         return 0
 
 
@@ -234,8 +243,8 @@ def app():
     # Initialiser les utilisateurs si necessaire
     try:
         init_family_users()
-    except:
-        pass
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
 
     # Gerer la navigation
     page = st.session_state.get(SK.FAMILLE_PAGE, "hub")
@@ -360,5 +369,6 @@ def _afficher_day_activities(day: date):
                 if st.button("💡 Suggerer", key=f"suggest_{day}"):
                     st.session_state[SK.FAMILLE_PAGE] = "weekend"
                     st.rerun()
-    except:
+    except Exception as e:
+        logger.debug(f"Erreur ignorée: {e}")
         st.caption("Rien de prevu")

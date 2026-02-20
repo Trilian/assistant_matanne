@@ -13,7 +13,7 @@ from contextlib import contextmanager
 from sqlalchemy.exc import DatabaseError, OperationalError
 from sqlalchemy.orm import Session, sessionmaker
 
-from ..errors import ErreurBaseDeDonnees
+from ..errors_base import ErreurBaseDeDonnees
 from .engine import obtenir_moteur
 
 logger = logging.getLogger(__name__)

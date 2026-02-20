@@ -489,15 +489,13 @@ class CalendarSyncService(GoogleCalendarMixin):
 # ═══════════════════════════════════════════════════════════
 
 
-_calendar_sync_service: CalendarSyncService | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("calendrier", tags={"famille", "integration"})
 def obtenir_service_synchronisation_calendrier() -> CalendarSyncService:
-    """Factory pour le service de synchronisation calendrier (convention française)."""
-    global _calendar_sync_service
-    if _calendar_sync_service is None:
-        _calendar_sync_service = CalendarSyncService()
-    return _calendar_sync_service
+    """Factory pour le service de synchronisation calendrier (thread-safe via registre)."""
+    return CalendarSyncService()
 
 
 def get_calendar_sync_service() -> CalendarSyncService:

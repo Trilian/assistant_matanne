@@ -2,6 +2,7 @@
 Module Sorties Weekend - Composants UI
 """
 
+from src.core.async_utils import executer_async
 from src.core.session_keys import SK
 from src.ui import etat_vide
 
@@ -105,10 +106,8 @@ def afficher_suggestions():
     if st.button("🤖 Generer des idees", type="primary"):
         with st.spinner("Reflexion en cours..."):
             try:
-                import asyncio
-
                 service = WeekendAIService()
-                result = asyncio.run(
+                result = executer_async(
                     service.suggerer_activites(
                         meteo=meteo, age_enfant_mois=age_jules, budget=budget, region=region
                     )

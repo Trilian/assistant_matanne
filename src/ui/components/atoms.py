@@ -11,24 +11,47 @@ from __future__ import annotations
 import streamlit as st
 
 from src.ui.registry import composant_ui
-from src.ui.tokens import Couleur, Espacement, Ombre, Rayon, Typographie
+from src.ui.tokens import (
+    Couleur,
+    Espacement,
+    Ombre,
+    Rayon,
+    Typographie,
+    Variante,
+    obtenir_couleurs_variante,
+)
 from src.ui.utils import echapper_html
 
 
-@composant_ui("atoms", exemple='badge("Actif", Couleur.SUCCESS)', tags=["badge", "label"])
-def badge(texte: str, couleur: str = Couleur.SUCCESS) -> None:
+@composant_ui("atoms", exemple='badge("Actif", variante=Variante.SUCCESS)', tags=["badge", "label"])
+def badge(
+    texte: str,
+    variante: Variante | None = None,
+    couleur: str | None = None,
+) -> None:
     """
-    Badge coloré
+    Badge coloré avec variante sémantique.
 
     Args:
         texte: Texte du badge
-        couleur: Couleur (hex)
+        variante: Variante sémantique (SUCCESS, WARNING, DANGER, INFO, NEUTRAL, ACCENT)
+        couleur: Couleur brute (hex) — déprécié, préférer ``variante``
 
     Example:
-        badge("Actif", "#4CAF50")
+        badge("Actif", variante=Variante.SUCCESS)
+        badge("Urgent", variante=Variante.DANGER)
     """
+    if couleur and variante is None:
+        # Rétrocompatibilité : couleur brute
+        bg = couleur
+        text_color = "white"
+    elif variante is not None:
+        bg, text_color, _ = obtenir_couleurs_variante(variante)
+    else:
+        bg, text_color, _ = obtenir_couleurs_variante(Variante.SUCCESS)
+
     st.markdown(
-        f'<span style="background: {couleur}; color: white; '
+        f'<span style="background: {bg}; color: {text_color}; '
         f"padding: {Espacement.XS} 0.75rem; border-radius: {Rayon.PILL}; "
         f'font-size: {Typographie.BODY_SM}; font-weight: 600;">{echapper_html(texte)}</span>',
         unsafe_allow_html=True,
@@ -134,19 +157,32 @@ def separateur(texte: str | None = None):
     exemple='boite_info("Astuce", "Ctrl+S pour sauvegarder", "💡")',
     tags=["info", "callout"],
 )
-def boite_info(titre: str, contenu: str, icone: str = "ℹ️"):
+def boite_info(
+    titre: str,
+    contenu: str,
+    icone: str = "ℹ️",
+    variante: Variante = Variante.INFO,
+):
     """
-    Boîte d'information
+    Boîte d'information avec variante sémantique.
+
+    Args:
+        titre: Titre de la boîte
+        contenu: Contenu textuel
+        icone: Icône emoji
+        variante: Variante visuelle (INFO, SUCCESS, WARNING, DANGER)
 
     Example:
         boite_info("Astuce", "Utilisez Ctrl+S pour sauvegarder", "💡")
+        boite_info("Attention", "Stock faible", "⚠️", variante=Variante.WARNING)
     """
+    bg, text_color, border_color = obtenir_couleurs_variante(variante)
     st.markdown(
-        f'<div style="background: {Couleur.BG_INFO}; border-left: 4px solid {Couleur.BORDER_INFO}; '
+        f'<div style="background: {bg}; border-left: 4px solid {border_color}; '
         f'padding: {Espacement.MD}; border-radius: {Rayon.SM}; margin: {Espacement.MD} 0;">'
-        f'<div style="font-weight: 600; margin-bottom: {Espacement.SM};">'
+        f'<div style="font-weight: 600; margin-bottom: {Espacement.SM}; color: {text_color};">'
         f"{echapper_html(icone)} {echapper_html(titre)}</div>"
-        f"<div>{echapper_html(contenu)}</div>"
+        f'<div style="color: {text_color};">{echapper_html(contenu)}</div>'
         f"</div>",
         unsafe_allow_html=True,
     )

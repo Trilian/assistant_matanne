@@ -292,17 +292,32 @@ class UserPreferenceService:
 # FACTORY
 # -----------------------------------------------------------
 
-_preference_service: UserPreferenceService | None = None
+from src.services.core.registry import service_factory
+
+
+@service_factory("preferences_utilisateur", tags={"utilisateur", "config"})
+def _creer_service_preferences_defaut() -> UserPreferenceService:
+    """Factory interne pour le registre (utilisateur par défaut)."""
+    return UserPreferenceService(DEFAULT_USER_ID)
+
+
+# Cache par user_id pour supporter le multi-utilisateur
+_preferences_par_user: dict[str, UserPreferenceService] = {}
 
 
 def obtenir_service_preferences_utilisateur(
     user_id: str = DEFAULT_USER_ID,
 ) -> UserPreferenceService:
-    """Factory pour obtenir le service de préférences (convention française)."""
-    global _preference_service
-    if _preference_service is None or _preference_service.user_id != user_id:
-        _preference_service = UserPreferenceService(user_id)
-    return _preference_service
+    """Factory pour obtenir le service de préférences (thread-safe, multi-utilisateur).
+
+    Retourne l'instance du registre pour l'utilisateur par défaut,
+    ou crée une instance dédiée pour les autres utilisateurs.
+    """
+    if user_id == DEFAULT_USER_ID:
+        return _creer_service_preferences_defaut()
+    if user_id not in _preferences_par_user:
+        _preferences_par_user[user_id] = UserPreferenceService(user_id)
+    return _preferences_par_user[user_id]
 
 
 def get_user_preference_service(user_id: str = DEFAULT_USER_ID) -> UserPreferenceService:

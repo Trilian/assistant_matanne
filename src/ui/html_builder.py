@@ -141,6 +141,60 @@ class HtmlBuilder:
         self._children.append(echapper_html(content))
         return self
 
+    # ── Accessibilité ────────────────────────────────────
+
+    def aria(
+        self,
+        label: str | None = None,
+        role: str | None = None,
+        live: str | None = None,
+        describedby: str | None = None,
+        expanded: bool | None = None,
+        hidden: bool | None = None,
+        current: str | None = None,
+    ) -> HtmlBuilder:
+        """Ajoute des attributs ARIA pour l'accessibilité.
+
+        Args:
+            label: ``aria-label`` pour l'élément.
+            role: Rôle ARIA (``"navigation"``, ``"dialog"``…).
+            live: ``aria-live`` (``"polite"``, ``"assertive"``).
+            describedby: ID de l'élément descriptif.
+            expanded: ``aria-expanded`` pour les accordeons.
+            hidden: ``aria-hidden`` pour masquer du contenu.
+            current: ``aria-current`` (``"page"``, ``"step"``…).
+
+        Returns:
+            Self pour chaînage.
+        """
+        if role:
+            self.attrs["role"] = role
+        if label:
+            self.attrs["aria-label"] = label
+        if live:
+            self.attrs["aria-live"] = live
+        if describedby:
+            self.attrs["aria-describedby"] = describedby
+        if expanded is not None:
+            self.attrs["aria-expanded"] = "true" if expanded else "false"
+        if hidden is not None:
+            self.attrs["aria-hidden"] = "true" if hidden else "false"
+        if current:
+            self.attrs["aria-current"] = current
+        return self
+
+    def focusable(self, tabindex: int = 0) -> HtmlBuilder:
+        """Rend l'élément focusable au clavier.
+
+        Args:
+            tabindex: Ordre dans la navigation clavier (0 = ordre naturel).
+
+        Returns:
+            Self pour chaînage.
+        """
+        self.attrs["tabindex"] = str(tabindex)
+        return self
+
     def conditional(
         self,
         condition: bool,

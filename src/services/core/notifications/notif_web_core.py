@@ -280,15 +280,13 @@ class ServiceWebPush(NotificationPersistenceMixin, NotificationTemplatesMixin):
 # SINGLETON
 # ═══════════════════════════════════════════════════════════
 
-_service_webpush: ServiceWebPush | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("webpush", tags={"notifications", "web"})
 def obtenir_service_webpush() -> ServiceWebPush:
-    """Factory pour le service de notifications Web Push."""
-    global _service_webpush
-    if _service_webpush is None:
-        _service_webpush = ServiceWebPush()
-    return _service_webpush
+    """Factory pour le service de notifications Web Push (thread-safe via registre)."""
+    return ServiceWebPush()
 
 
 # Alias anglais pour compatibilité API routes

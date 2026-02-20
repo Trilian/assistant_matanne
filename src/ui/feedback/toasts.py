@@ -117,26 +117,25 @@ _FALLBACK = {
 # ═══════════════════════════════════════════════════════════
 
 
-def afficher_succes(message: str, duree: int = 3) -> None:
+def afficher_succes(message: str) -> None:
     """Raccourci pour notification succès.
 
     Args:
         message: Message à afficher.
-        duree: Durée approximative en secondes (utilisée si ``st.toast`` est disponible).
     """
     GestionnaireNotifications.afficher(message, "success")
 
 
-def afficher_erreur(message: str, duree: int = 5) -> None:
+def afficher_erreur(message: str) -> None:
     """Raccourci pour notification erreur."""
     GestionnaireNotifications.afficher(message, "error")
 
 
-def afficher_avertissement(message: str, duree: int = 4) -> None:
+def afficher_avertissement(message: str) -> None:
     """Raccourci pour notification avertissement."""
     GestionnaireNotifications.afficher(message, "warning")
 
 
-def afficher_info(message: str, duree: int = 3) -> None:
+def afficher_info(message: str) -> None:
     """Raccourci pour notification info."""
     GestionnaireNotifications.afficher(message, "info")

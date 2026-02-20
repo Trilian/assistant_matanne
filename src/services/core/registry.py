@@ -183,8 +183,9 @@ class ServiceRegistry:
 
         # Fast path — vérification sans lock
         if entry.instance is not None:
-            entry.access_count += 1
-            entry.last_accessed = datetime.now()
+            with entry.lock:
+                entry.access_count += 1
+                entry.last_accessed = datetime.now()
             return entry.instance
 
         # Slow path — double-checked locking

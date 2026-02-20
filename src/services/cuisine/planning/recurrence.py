@@ -265,15 +265,13 @@ class ServiceRecurrence:
 
 
 # Factory
-_service_recurrence: ServiceRecurrence | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("recurrence", tags={"cuisine", "planning"})
 def obtenir_service_recurrence() -> ServiceRecurrence:
-    """Retourne l'instance singleton du service de récurrence."""
-    global _service_recurrence
-    if _service_recurrence is None:
-        _service_recurrence = ServiceRecurrence()
-    return _service_recurrence
+    """Retourne l'instance du service de récurrence (thread-safe via registre)."""
+    return ServiceRecurrence()
 
 
 def get_recurrence_service() -> ServiceRecurrence:

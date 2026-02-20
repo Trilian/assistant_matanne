@@ -6,23 +6,23 @@ Fonctions pour:
 - Informations sur la DB
 - Initialisation et maintenance
 - Health checks
+
+Découplé de Streamlit — cache géré via @avec_cache.
 """
 
 import logging
 import time
 
-import streamlit as st
 from sqlalchemy import text
 
 from ..config import obtenir_parametres
-from ..errors import ErreurBaseDeDonnees
+from ..errors_base import ErreurBaseDeDonnees
 from .engine import obtenir_moteur, obtenir_moteur_securise
 from .migrations import GestionnaireMigrations
 
 logger = logging.getLogger(__name__)
 
 
-@st.cache_data(ttl=60)
 def verifier_connexion() -> tuple[bool, str]:
     """
     Vérifie la connexion à la base de données.
@@ -48,7 +48,6 @@ def verifier_connexion() -> tuple[bool, str]:
         return False, f"Erreur: {str(e)}"
 
 
-@st.cache_data(ttl=300)
 def obtenir_infos_db() -> dict:
     """
     Retourne les informations sur la base de données.

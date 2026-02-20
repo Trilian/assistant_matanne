@@ -52,5 +52,23 @@ def initialiser_app() -> bool:
     if manquantes:
         logger.error(f"❌ Clés menu sans registry: {manquantes}")
 
+    # Tokens sémantiques (CSS custom properties light/dark)
+    from src.ui.tokens_semantic import injecter_tokens_semantiques
+
+    injecter_tokens_semantiques()
+    logger.info("✅ Tokens sémantiques injectés")
+
+    # CSS accessibilité (sr-only, focus-visible, reduced-motion)
+    from src.ui.a11y import A11y
+
+    A11y.injecter_css()
+    logger.info("✅ CSS accessibilité injecté")
+
+    # Animations centralisées (@keyframes, micro-interactions)
+    from src.ui.animations import injecter_animations
+
+    injecter_animations()
+    logger.info("✅ Animations injectées")
+
     logger.info("✅ App initialisée (lazy mode)")
     return True

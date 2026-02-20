@@ -260,5 +260,6 @@ def obtenir_logger(nom: str) -> logging.Logger:
     return GestionnaireLog.obtenir_logger(nom)
 
 
-# Initialisation automatique au chargement du module
-GestionnaireLog.initialiser()
+# Note: L'initialisation automatique a été supprimée.
+# L'init se fait via obtenir_parametres() → configure_logging()
+# ou explicitement via GestionnaireLog.initialiser().
