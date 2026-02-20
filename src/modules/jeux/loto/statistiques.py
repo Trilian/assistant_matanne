@@ -30,25 +30,15 @@ def afficher_dernier_tirage(tirages: list):
             st.markdown(f"**{dernier['date_tirage']}**")
 
             # Afficher les boules
+            from src.ui import boule_loto
+
             cols_boules = st.columns(6)
             for i, num in enumerate(dernier["numeros"]):
                 with cols_boules[i]:
-                    st.markdown(
-                        f"<div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); "
-                        f"color: white; border-radius: 50%; width: 50px; height: 50px; "
-                        f"display: flex; align-items: center; justify-content: center; "
-                        f"font-size: 20px; font-weight: bold; margin: auto;'>{num}</div>",
-                        unsafe_allow_html=True,
-                    )
+                    boule_loto(num)
 
             with cols_boules[5]:
-                st.markdown(
-                    f"<div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); "
-                    f"color: white; border-radius: 50%; width: 50px; height: 50px; "
-                    f"display: flex; align-items: center; justify-content: center; "
-                    f"font-size: 20px; font-weight: bold; margin: auto;'>{dernier['numero_chance']}</div>",
-                    unsafe_allow_html=True,
-                )
+                boule_loto(dernier["numero_chance"], is_chance=True)
 
         with col2:
             if dernier.get("jackpot_euros"):

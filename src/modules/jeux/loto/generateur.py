@@ -79,6 +79,8 @@ def afficher_generateur_grilles(tirages: list):
 
     # Afficher la grille générée
     if grille_generee:
+        from src.ui import boule_loto
+
         st.divider()
         st.markdown("### ⏰ Votre grille")
 
@@ -86,22 +88,10 @@ def afficher_generateur_grilles(tirages: list):
             cols = st.columns(6)
             for i, num in enumerate(grille_generee["numeros"]):
                 with cols[i]:
-                    st.markdown(
-                        f"<div style='background: #667eea; color: white; "
-                        f"border-radius: 50%; width: 60px; height: 60px; "
-                        f"display: flex; align-items: center; justify-content: center; "
-                        f"font-size: 24px; font-weight: bold; margin: auto;'>{num}</div>",
-                        unsafe_allow_html=True,
-                    )
+                    boule_loto(num, taille=60)
 
             with cols[5]:
-                st.markdown(
-                    f"<div style='background: #f5576c; color: white; "
-                    f"border-radius: 50%; width: 60px; height: 60px; "
-                    f"display: flex; align-items: center; justify-content: center; "
-                    f"font-size: 24px; font-weight: bold; margin: auto;'>{grille_generee['numero_chance']}</div>",
-                    unsafe_allow_html=True,
-                )
+                boule_loto(grille_generee["numero_chance"], is_chance=True, taille=60)
 
             if grille_generee.get("note"):
                 st.caption(grille_generee["note"])

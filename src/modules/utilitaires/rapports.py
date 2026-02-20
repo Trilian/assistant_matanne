@@ -36,11 +36,7 @@ def get_rapports_service() -> ServiceRapportsPDF:
 def app():
     """Point d'entree module rapports PDF"""
 
-    st.markdown(
-        "<h1 style='text-align: center;'>📊 Rapports PDF</h1>",
-        unsafe_allow_html=True,
-    )
-
+    st.title("📊 Rapports PDF")
     st.markdown("Générez des rapports professionnels pour votre gestion")
     st.markdown("---")
 

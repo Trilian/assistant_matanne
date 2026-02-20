@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
 from src.core.models import FamilyActivity
+from src.services.core.events.bus import obtenir_bus
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +72,11 @@ class ServiceActivites:
         db.add(activity)
         db.commit()
         logger.info("Activité créée: %s (id=%d)", titre, activity.id)
+        obtenir_bus().emettre(
+            "activites.cree",
+            {"id": activity.id, "titre": titre, "date": date_prevue.isoformat()},
+            source="ServiceActivites",
+        )
         return activity
 
     @avec_session_db
@@ -100,6 +106,7 @@ class ServiceActivites:
                 activity.cout_reel = cout_reel
             db.commit()
             logger.info("Activité terminée: id=%d", activity_id)
+            obtenir_bus().emettre("activites.terminee", {"id": activity_id}, source="ServiceActivites")
             return True
         return False
 
@@ -142,6 +149,8 @@ class ServiceActivites:
         assert db is not None
         deleted = db.query(FamilyActivity).filter(FamilyActivity.id == activity_id).delete()
         db.commit()
+        if deleted > 0:
+            obtenir_bus().emettre("activites.supprimee", {"id": activity_id}, source="ServiceActivites")
         return deleted > 0
 
 

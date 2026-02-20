@@ -47,9 +47,8 @@ class TestDatabaseEngine:
                 DATABASE_URL="sqlite:///:memory:",
                 DEBUG=False,
             )
-            with patch("src.core.db.engine.st.cache_resource", lambda **kw: lambda f: f):
-                # Le test vérifie que la logique fonctionne
-                assert callable(obtenir_moteur)
+            # Le test vérifie que la logique fonctionne
+            assert callable(obtenir_moteur)
 
     def test_obtenir_moteur_securise_returns_none_on_error(self):
         """Test que obtenir_moteur_securise retourne None en cas d'erreur."""
@@ -248,13 +247,12 @@ class TestDatabaseVerifications:
 
         with patch("src.core.db.utils.obtenir_moteur_securise") as mock_moteur:
             mock_moteur.return_value = mock_engine
-            with patch("src.core.db.utils.st.cache_data", lambda **kw: lambda f: f):
-                result = verifier_connexion()
+            result = verifier_connexion()
 
-                assert isinstance(result, tuple)
-                assert len(result) == 2
-                assert isinstance(result[0], bool)
-                assert isinstance(result[1], str)
+            assert isinstance(result, tuple)
+            assert len(result) == 2
+            assert isinstance(result[0], bool)
+            assert isinstance(result[1], str)
 
     def test_verifier_connexion_returns_false_if_no_engine(self):
         """Test que verifier_connexion retourne False si pas d'engine."""
@@ -401,26 +399,21 @@ class TestDatabaseInfos:
 
     def test_obtenir_infos_db_has_statut_key(self):
         """Test que obtenir_infos_db contient la clé 'statut'."""
-        # La fonction est cachée par Streamlit, donc on vérifie la structure attendue
-        # en cas d'erreur (seul cas testable facilement)
+        # Pas de cache Streamlit, on teste directement la structure
         with patch("src.core.db.utils.obtenir_moteur") as mock_moteur:
             mock_moteur.side_effect = Exception("Test error")
-            with patch("src.core.db.utils.st.cache_data", lambda **kw: lambda f: f):
-                # Ré-importer la fonction pour bypass le cache
-                from src.core.db import obtenir_infos_db as get_infos
+            result = obtenir_infos_db()
 
-                # Le test vérifie que la fonction est callable
-                assert callable(get_infos)
+            assert "statut" in result
 
     def test_obtenir_infos_db_returns_error_on_exception(self):
         """Test que obtenir_infos_db retourne erreur en cas d'exception."""
         with patch("src.core.db.utils.obtenir_moteur") as mock_moteur:
             mock_moteur.side_effect = Exception("Test error")
-            with patch("src.core.db.utils.st.cache_data", lambda **kw: lambda f: f):
-                result = obtenir_infos_db()
+            result = obtenir_infos_db()
 
-                assert result["statut"] == "error"
-                assert "erreur" in result
+            assert result["statut"] == "error"
+            assert "erreur" in result
 
 
 # ═══════════════════════════════════════════════════════════
@@ -609,10 +602,8 @@ class TestObteniMoteurRetry:
                 mock_params.return_value = MagicMock(
                     DATABASE_URL="postgresql://user:pass@host/db", DEBUG=False
                 )
-                with patch("src.core.db.engine.st.cache_resource", lambda **kw: lambda f: f):
-                    # Appeler directement la fonction déwrappée
-                    # La fonction est décorée, donc on vérifie juste qu'elle est callable
-                    assert callable(obtenir_moteur)
+                # La fonction est un singleton thread-safe, on vérifie qu'elle est callable
+                assert callable(obtenir_moteur)
 
     def test_obtenir_moteur_retry_on_operational_error(self):
         """Test retry sur OperationalError."""
@@ -634,10 +625,9 @@ class TestObteniMoteurRetry:
                 mock_params.return_value = MagicMock(
                     DATABASE_URL="postgresql://user:pass@host/db", DEBUG=False
                 )
-                with patch("src.core.db.engine.st.cache_resource", lambda **kw: lambda f: f):
-                    with patch("time.sleep"):
-                        # Vérifier que la logique de retry existe
-                        assert callable(obtenir_moteur)
+                with patch("time.sleep"):
+                    # Vérifier que la logique de retry existe
+                    assert callable(obtenir_moteur)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -820,19 +810,15 @@ class TestVerifierConnexionAvance:
         mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
 
         with patch("src.core.db.utils.obtenir_moteur_securise", return_value=mock_engine):
-            with patch("src.core.db.utils.st.cache_data", lambda **kw: lambda f: f):
-                result = verifier_connexion()
+            result = verifier_connexion()
 
-                assert result[0] is True
-                assert "OK" in result[1]
+            assert result[0] is True
+            assert "OK" in result[1]
 
     def test_verifier_connexion_erreur_base_donnees(self):
         """Test vérification avec ErreurBaseDeDonnees."""
-        # Clear cache to avoid cached results from previous tests
-        verifier_connexion.clear()
         with patch("src.core.db.utils.obtenir_moteur_securise") as mock:
             mock.side_effect = ErreurBaseDeDonnees("Test", message_utilisateur="Test error")
-            with patch("src.core.db.utils.st.cache_data", lambda **kw: lambda f: f):
-                result = verifier_connexion()
+            result = verifier_connexion()
 
-                assert result[0] is False
+            assert result[0] is False

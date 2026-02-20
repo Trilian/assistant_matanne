@@ -28,6 +28,7 @@ from .components import (
     barre_progression,
     barre_recherche,
     boite_info,
+    boule_loto,
     boutons_export,
     carte_item,
     carte_metrique,

@@ -9,14 +9,38 @@ Opérations:
 
 import logging
 from datetime import datetime
-from typing import Any
+from typing import Any, TypedDict
 
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
 from src.core.models import ChildProfile, Routine, RoutineTask
+from src.services.core.events.bus import obtenir_bus
 
 logger = logging.getLogger(__name__)
+
+
+class RoutineDict(TypedDict):
+    """Structure de données pour une routine."""
+
+    id: int
+    nom: str
+    description: str
+    pour: str
+    frequence: str
+    active: bool
+    ia: str
+    nb_taches: int
+
+
+class TacheDict(TypedDict):
+    """Structure de données pour une tâche de routine."""
+
+    id: int
+    nom: str
+    heure: str
+    statut: str
+    completed_at: datetime | None
 
 
 class ServiceRoutines:
@@ -33,7 +57,7 @@ class ServiceRoutines:
     @avec_session_db
     def lister_routines(
         self, actives_uniquement: bool = True, db: Session | None = None
-    ) -> list[dict[str, Any]]:
+    ) -> list[RoutineDict]:
         """Liste les routines avec métadonnées.
 
         Args:
@@ -41,7 +65,7 @@ class ServiceRoutines:
             db: Session DB (injectée automatiquement).
 
         Returns:
-            Liste de dictionnaires contenant les données de chaque routine.
+            Liste de RoutineDict contenant les données de chaque routine.
         """
         assert db is not None
         query = db.query(Routine)
@@ -71,7 +95,7 @@ class ServiceRoutines:
         return result
 
     @avec_session_db
-    def lister_taches(self, routine_id: int, db: Session | None = None) -> list[dict[str, Any]]:
+    def lister_taches(self, routine_id: int, db: Session | None = None) -> list[TacheDict]:
         """Liste les tâches d'une routine.
 
         Args:
@@ -79,7 +103,7 @@ class ServiceRoutines:
             db: Session DB (injectée automatiquement).
 
         Returns:
-            Liste de dictionnaires contenant les tâches.
+            Liste de TacheDict contenant les tâches.
         """
         assert db is not None
         tasks = (
@@ -153,6 +177,7 @@ class ServiceRoutines:
         db.add(routine)
         db.commit()
         logger.info("Routine créée: %s (id=%d)", nom, routine.id)
+        obtenir_bus().emettre("routines.cree", {"id": routine.id, "nom": nom}, source="ServiceRoutines")
         return routine.id
 
     @avec_session_db
@@ -183,6 +208,11 @@ class ServiceRoutines:
         )
         db.add(task)
         db.commit()
+        obtenir_bus().emettre(
+            "routines.tache_ajoutee",
+            {"routine_id": routine_id, "tache_id": task.id, "nom": nom},
+            source="ServiceRoutines",
+        )
         return task.id
 
     @avec_session_db
@@ -202,6 +232,7 @@ class ServiceRoutines:
             task.status = "termine"
             task.completed_at = datetime.now()
             db.commit()
+            obtenir_bus().emettre("routines.tache_complete", {"id": task_id}, source="ServiceRoutines")
             return True
         return False
 
@@ -235,6 +266,8 @@ class ServiceRoutines:
         assert db is not None
         deleted = db.query(Routine).filter(Routine.id == routine_id).delete()
         db.commit()
+        if deleted > 0:
+            obtenir_bus().emettre("routines.supprimee", {"id": routine_id}, source="ServiceRoutines")
         return deleted > 0
 
     @avec_session_db
@@ -253,6 +286,7 @@ class ServiceRoutines:
         if routine:
             routine.is_active = False
             db.commit()
+            obtenir_bus().emettre("routines.desactivee", {"id": routine_id}, source="ServiceRoutines")
             return True
         return False
 

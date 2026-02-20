@@ -186,3 +186,39 @@ def boite_info(
         f"</div>",
         unsafe_allow_html=True,
     )
+
+
+@composant_ui(
+    "atoms",
+    exemple='boule_loto(7)',
+    tags=["loto", "ball", "jeux"],
+)
+def boule_loto(numero: int, is_chance: bool = False, taille: int = 50) -> None:
+    """
+    Boule de loto stylisée avec dégradé.
+
+    Args:
+        numero: Numéro à afficher (1-49 ou numéro chance)
+        is_chance: True pour style numéro chance (rose), False pour normal (bleu)
+        taille: Taille en pixels (défaut: 50)
+
+    Example:
+        boule_loto(7)  # Boule bleue normale
+        boule_loto(3, is_chance=True)  # Boule chance rose
+        boule_loto(42, taille=60)  # Plus grande
+    """
+    # Dégradé bleu pour boules normales, rose pour numéro chance
+    gradient = (
+        "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+        if is_chance
+        else "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+    )
+    font_size = int(taille * 0.4)
+
+    st.markdown(
+        f'<div style="background: {gradient}; color: white; border-radius: 50%; '
+        f'width: {taille}px; height: {taille}px; display: flex; align-items: center; '
+        f'justify-content: center; font-size: {font_size}px; font-weight: bold; '
+        f'margin: auto;">{numero}</div>',
+        unsafe_allow_html=True,
+    )

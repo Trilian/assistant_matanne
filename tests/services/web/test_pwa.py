@@ -144,9 +144,9 @@ class TestInjectPwaMeta:
 class TestRenderInstallPrompt:
     """Tests pour afficher_install_prompt."""
 
-    @patch("streamlit.components.v1")
+    @patch("src.ui.views.pwa.components")
     def test_render_install_calls_components(self, mock_components):
-        """Test appel de components.html."""
+        """Test appel de components.html via délégation UI."""
         from src.services.integrations.web.pwa import afficher_install_prompt
 
         afficher_install_prompt()
@@ -155,7 +155,7 @@ class TestRenderInstallPrompt:
         call_args = mock_components.html.call_args
         html_content = call_args[0][0]
 
-        assert "pwa-install-btn" in html_content
+        assert "pwa-install" in html_content
         assert "installPWA" in html_content
 
 
