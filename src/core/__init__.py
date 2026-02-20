@@ -81,6 +81,48 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "par_champs": (".specifications", "par_champs"),
     # Unit of Work
     "UnitOfWork": (".unit_of_work", "UnitOfWork"),
+    # Result (Pattern Monad)
+    "Result": (".result", "Result"),
+    "Ok": (".result", "Ok"),
+    "Err": (".result", "Err"),
+    "capturer": (".result", "capturer"),
+    "capturer_async": (".result", "capturer_async"),
+    "depuis_option": (".result", "depuis_option"),
+    "depuis_bool": (".result", "depuis_bool"),
+    "combiner": (".result", "combiner"),
+    "premier_ok": (".result", "premier_ok"),
+    # Resilience Policies
+    "Policy": (".resilience", "Policy"),
+    "RetryPolicy": (".resilience", "RetryPolicy"),
+    "TimeoutPolicy": (".resilience", "TimeoutPolicy"),
+    "BulkheadPolicy": (".resilience", "BulkheadPolicy"),
+    "FallbackPolicy": (".resilience", "FallbackPolicy"),
+    "PolicyComposee": (".resilience", "PolicyComposee"),
+    "politique_api_externe": (".resilience", "politique_api_externe"),
+    "politique_base_de_donnees": (".resilience", "politique_base_de_donnees"),
+    "politique_cache": (".resilience", "politique_cache"),
+    "politique_ia": (".resilience", "politique_ia"),
+    # Observability (Correlation ID)
+    "ContexteExecution": (".observability", "ContexteExecution"),
+    "obtenir_contexte": (".observability", "obtenir_contexte"),
+    "contexte_operation": (".observability", "contexte_operation"),
+    "FiltreCorrelation": (".observability", "FiltreCorrelation"),
+    "configurer_logging_avec_correlation": (
+        ".observability",
+        "configurer_logging_avec_correlation",
+    ),
+    # Query Builder
+    "Requete": (".query", "Requete"),
+    # Bootstrap
+    "demarrer_application": (".bootstrap", "demarrer_application"),
+    "arreter_application": (".bootstrap", "arreter_application"),
+    "est_demarree": (".bootstrap", "est_demarree"),
+    "RapportDemarrage": (".bootstrap", "RapportDemarrage"),
+    # Config Validator
+    "ValidateurConfiguration": (".config.validator", "ValidateurConfiguration"),
+    "NiveauValidation": (".config.validator", "NiveauValidation"),
+    "RapportValidation": (".config.validator", "RapportValidation"),
+    "creer_validateur_defaut": (".config.validator", "creer_validateur_defaut"),
     # Decorators
     "avec_cache": (".decorators", "avec_cache"),
     "avec_gestion_erreurs": (".decorators", "avec_gestion_erreurs"),

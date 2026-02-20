@@ -62,14 +62,31 @@ from .feedback import (
     indicateur_chargement,
     spinner_intelligent,
 )
-from .hooks import (
-    use_confirmation,
-    use_filtres,
-    use_onglets,
-    use_pagination,
-    use_recherche,
-    use_tri,
+
+# UI 3.0 - Hooks avancés
+from .hooks_v2 import (
+    FormState,
+    QueryResult,
+    QueryStatus,
+    State,
+    use_counter,
+    use_form,
+    use_list,
+    use_mutation,
+    use_query,
+    use_state,
+    use_toggle,
 )
+
+# Hooks désactivés (module vide) - utiliser hooks_v2 pour les nouvelles implémentations
+# from .hooks import (
+#     use_confirmation,
+#     use_filtres,
+#     use_onglets,
+#     use_pagination,
+#     use_recherche,
+#     use_tri,
+# )
 from .html_builder import HtmlBuilder, render_html
 
 # Integrations (Google Calendar, etc.)
@@ -81,7 +98,23 @@ from .integrations import (
     afficher_statut_sync_google,
     verifier_config_google,
 )
+
+# UI 3.0 - Primitives (Box, Stack, Text)
+from .primitives import Box, BoxProps, HStack, Stack, Text, TextProps, VStack
 from .registry import ComponentMeta, composant_ui, obtenir_catalogue, rechercher_composants
+
+# UI 3.0 - Système de variants CVA
+from .system import (
+    BADGE_VARIANTS,
+    BUTTON_VARIANTS,
+    CARD_SLOTS,
+    StyleSheet,
+    VariantConfig,
+    cva,
+    slot,
+    styled,
+    tv,
+)
 
 # Tablet mode
 from .tablet import (
@@ -99,6 +132,14 @@ from .tablet import (
     liste_cases_tablette,
     obtenir_mode_tablette,
     saisie_nombre_tablette,
+)
+
+# UI 3.0 - Tests visuels
+from .testing import (
+    ComponentSnapshot,
+    SnapshotTester,
+    assert_html_contains,
+    assert_html_not_contains,
 )
 from .theme import ModeTheme, Theme, appliquer_theme, obtenir_theme
 from .tokens import (
@@ -158,13 +199,13 @@ __all__ = [
     "Animation",
     "animer",
     "injecter_animations",
-    # Hooks
-    "use_pagination",
-    "use_recherche",
-    "use_filtres",
-    "use_confirmation",
-    "use_tri",
-    "use_onglets",
+    # Hooks (désactivés - utiliser hooks_v2)
+    # "use_pagination",
+    # "use_recherche",
+    # "use_filtres",
+    # "use_confirmation",
+    # "use_tri",
+    # "use_onglets",
     "ModeTheme",
     "Theme",
     "obtenir_theme",
@@ -264,4 +305,39 @@ __all__ = [
     "afficher_badge_notifications_jeux",
     "afficher_notification_jeux",
     "afficher_liste_notifications_jeux",
+    # UI 3.0 - System (CVA variants)
+    "cva",
+    "tv",
+    "slot",
+    "VariantConfig",
+    "BADGE_VARIANTS",
+    "BUTTON_VARIANTS",
+    "CARD_SLOTS",
+    "StyleSheet",
+    "styled",
+    # UI 3.0 - Primitives
+    "Box",
+    "BoxProps",
+    "Stack",
+    "HStack",
+    "VStack",
+    "Text",
+    "TextProps",
+    # UI 3.0 - Hooks v2
+    "use_state",
+    "use_toggle",
+    "use_counter",
+    "use_list",
+    "use_query",
+    "use_mutation",
+    "use_form",
+    "State",
+    "QueryResult",
+    "QueryStatus",
+    "FormState",
+    # UI 3.0 - Testing
+    "SnapshotTester",
+    "ComponentSnapshot",
+    "assert_html_contains",
+    "assert_html_not_contains",
 ]

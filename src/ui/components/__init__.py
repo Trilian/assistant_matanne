@@ -27,6 +27,16 @@ from .data import (
 # Dynamic
 from .dynamic import Modale
 
+# Filters (nouveau - composants de filtrage réutilisables)
+from .filters import (
+    FilterConfig,
+    afficher_barre_filtres,
+    afficher_filtres_rapides,
+    afficher_recherche,
+    appliquer_filtres,
+    appliquer_recherche,
+)
+
 # Forms
 from .forms import (
     ConfigChamp,
@@ -46,6 +56,15 @@ from .layouts import (
 # Metrics (cartes métriques avancées)
 from .metrics import carte_metrique_avancee, widget_jules_apercu, widget_meteo_jour
 
+# Metrics Row (nouveau - lignes de métriques réutilisables)
+from .metrics_row import (
+    MetricConfig,
+    afficher_kpi_banner,
+    afficher_metriques_row,
+    afficher_progress_metrics,
+    afficher_stats_cards,
+)
+
 # System (santé système, timeline)
 from .system import afficher_sante_systeme, afficher_timeline_activites, indicateur_sante_systeme
 
@@ -61,6 +80,13 @@ __all__ = [
     # Charts
     "graphique_repartition_repas",
     "graphique_inventaire_categories",
+    # Filters (nouveau)
+    "FilterConfig",
+    "afficher_barre_filtres",
+    "afficher_recherche",
+    "afficher_filtres_rapides",
+    "appliquer_filtres",
+    "appliquer_recherche",
     # Forms
     "champ_formulaire",
     "barre_recherche",
@@ -83,6 +109,12 @@ __all__ = [
     "carte_metrique_avancee",
     "widget_jules_apercu",
     "widget_meteo_jour",
+    # Metrics Row (nouveau)
+    "MetricConfig",
+    "afficher_metriques_row",
+    "afficher_stats_cards",
+    "afficher_kpi_banner",
+    "afficher_progress_metrics",
     # System
     "indicateur_sante_systeme",
     "afficher_sante_systeme",
