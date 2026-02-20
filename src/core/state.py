@@ -4,6 +4,17 @@ Tout harmonisé en français avec alias anglais
 Découplé de Streamlit via SessionStorage Protocol.
 """
 
+__all__ = [
+    "EtatApp",
+    "GestionnaireEtat",
+    "obtenir_etat",
+    "naviguer",
+    "revenir",
+    "obtenir_fil_ariane",
+    "est_mode_debug",
+    "nettoyer_etats_ui",
+]
+
 import logging
 from dataclasses import dataclass, field
 from typing import Any

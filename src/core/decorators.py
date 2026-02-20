@@ -12,11 +12,12 @@ import inspect
 import logging
 from collections.abc import Callable
 from functools import wraps
-from typing import Any, TypeVar
+from typing import Any, ParamSpec, TypeVar, overload
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+P = ParamSpec("P")
 F = TypeVar("F", bound=Callable[..., Any])
 
 
@@ -83,7 +84,7 @@ def avec_session_db(func: F) -> F:
 def avec_cache(
     ttl: int = 300,
     key_prefix: str | None = None,
-    key_func: None = None,
+    key_func: Callable[..., str] | None = None,
     cache_none: bool = False,
 ):
     """

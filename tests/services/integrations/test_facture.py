@@ -497,12 +497,12 @@ class TestFactory:
         service = get_facture_ocr_service()
         assert isinstance(service, FactureOCRService)
 
-    def test_factory_nouvelle_instance(self):
-        """Test que la factory crée une nouvelle instance à chaque appel."""
+    def test_factory_singleton(self):
+        """Test que la factory retourne la même instance (singleton)."""
         s1 = get_facture_ocr_service()
         s2 = get_facture_ocr_service()
-        # La factory crée une nouvelle instance à chaque appel (pas de singleton)
-        assert s1 is not s2
+        # La factory est un singleton — même instance à chaque appel
+        assert s1 is s2
 
 
 # ═══════════════════════════════════════════════════════════

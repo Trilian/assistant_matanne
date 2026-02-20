@@ -20,6 +20,24 @@ Exemples:
     from src.core.errors import afficher_erreur, ErreurValidation
 """
 
+__all__ = [
+    "ExceptionApp",
+    "ErreurValidation",
+    "ErreurNonTrouve",
+    "ErreurBaseDeDonnees",
+    "ErreurServiceIA",
+    "ErreurLimiteDebit",
+    "ErreurServiceExterne",
+    "ErreurConfiguration",
+    "exiger_champs",
+    "valider_type",
+    "valider_plage",
+    "exiger_positif",
+    "exiger_existence",
+    "exiger_plage",
+    "exiger_longueur",
+]
+
 from typing import Any
 
 # ═══════════════════════════════════════════════════════════

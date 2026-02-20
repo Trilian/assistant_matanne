@@ -24,14 +24,16 @@ class TestFootballDataServiceFactory:
 
     def test_get_football_data_service(self):
         """Test création service via factory."""
-        service = get_football_data_service()
-        assert isinstance(service, FootballDataService)
+        with patch("src.services.jeux._internal.football_data._football_data_instance", None):
+            service = get_football_data_service()
+            assert isinstance(service, FootballDataService)
 
     def test_get_football_data_service_with_api_key(self):
         """Test création service avec clé API."""
-        service = get_football_data_service("test_api_key")
-        assert isinstance(service, FootballDataService)
-        assert service.api_key == "test_api_key"
+        with patch("src.services.jeux._internal.football_data._football_data_instance", None):
+            service = get_football_data_service("test_api_key")
+            assert isinstance(service, FootballDataService)
+            assert service.api_key == "test_api_key"
 
 
 class TestFootballDataServiceConstantes:

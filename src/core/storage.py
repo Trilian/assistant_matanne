@@ -14,6 +14,16 @@ Helpers de découplage:
 - ``obtenir_rerun_callback()``: Callback vers ``st.rerun``
 """
 
+__all__ = [
+    "SessionStorage",
+    "StreamlitSessionStorage",
+    "MemorySessionStorage",
+    "obtenir_storage",
+    "configurer_storage",
+    "obtenir_session_state",
+    "obtenir_rerun_callback",
+]
+
 import logging
 from collections.abc import Callable, MutableMapping
 from typing import Any, Protocol, runtime_checkable

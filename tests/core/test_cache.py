@@ -1,323 +1,277 @@
 """
-Tests pour src/core/cache.py - Système de cache avec mocks Streamlit.
+Tests pour src/core/cache.py - Système de cache (façade sur CacheMultiNiveau).
 """
 
-from datetime import datetime, timedelta
-from unittest.mock import MagicMock, patch
+import time
 
 import pytest
 
 
-@pytest.fixture
-def mock_session_state():
-    """Mock st.session_state pour tests isolés."""
-    mock_state = {}
+@pytest.fixture(autouse=True)
+def _reset_cache_singleton():
+    """Réinitialise le singleton CacheMultiNiveau entre chaque test.
 
-    def getitem(key):
-        return mock_state[key]
+    L2 (session Streamlit) et L3 (fichier) sont désactivés pour isoler
+    les tests sur la logique pure du cache (L1 mémoire uniquement).
+    """
+    from src.core.caching.orchestrator import CacheMultiNiveau
 
-    def setitem(key, value):
-        mock_state[key] = value
-
-    def contains(key):
-        return key in mock_state
-
-    def delitem(key):
-        del mock_state[key]
-
-    mock = MagicMock()
-    mock.__getitem__ = MagicMock(side_effect=getitem)
-    mock.__setitem__ = MagicMock(side_effect=setitem)
-    mock.__contains__ = MagicMock(side_effect=contains)
-    mock.__delitem__ = MagicMock(side_effect=delitem)
-    mock._mock_state = mock_state  # Accès direct pour tests
-
-    return mock
-
-
-@pytest.fixture
-def cache_module(mock_session_state):
-    """Import cache avec session_state mocké."""
-    with patch("streamlit.session_state", mock_session_state):
-        # Import après le patch pour que le module utilise le mock
-        import importlib
-
-        import src.core.caching.cache as cache_module
-
-        importlib.reload(cache_module)
-        yield cache_module
+    # Forcer un nouveau singleton L1-only pour chaque test
+    CacheMultiNiveau._instance = None
+    CacheMultiNiveau(l2_enabled=False, l3_enabled=False)
+    yield
+    # Nettoyage final
+    CacheMultiNiveau._instance = None
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS CACHE CLASS
+# TESTS CACHE CLASS (façade statique → CacheMultiNiveau)
 # ═══════════════════════════════════════════════════════════
 
 
 class TestCacheBase:
     """Tests de base pour la classe Cache."""
 
-    def test_initialise_creates_structures(self, mock_session_state):
-        """Test initialisation crée les structures."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+    def test_initialise_creates_structures(self):
+        """Test initialisation — le singleton CacheMultiNiveau se crée."""
+        from src.core.caching.cache import Cache, _cache
 
-            Cache._initialiser()
+        # L'accès au cache crée le singleton
+        c = _cache()
+        assert c is not None
+        assert c.l1 is not None
 
-            assert "cache_donnees" in mock_session_state._mock_state
-            assert "cache_timestamps" in mock_session_state._mock_state
-            assert "cache_dependances" in mock_session_state._mock_state
-            assert "cache_statistiques" in mock_session_state._mock_state
+        # L'API statique fonctionne sans exception
+        stats = Cache.obtenir_statistiques()
+        assert isinstance(stats, dict)
 
-    def test_initialise_only_once(self, mock_session_state):
-        """Test initialisation ne réécrit pas si existant."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+    def test_initialise_only_once(self):
+        """Test le singleton ne se recrée pas — les données persistent."""
+        from src.core.caching.cache import Cache
 
-            # Première init
-            Cache._initialiser()
-            mock_session_state._mock_state["cache_donnees"]["test"] = "valeur"
+        Cache.definir("test", "valeur")
 
-            # Deuxième init ne doit pas écraser
-            Cache._initialiser()
-            assert mock_session_state._mock_state["cache_donnees"]["test"] == "valeur"
+        # Deuxième accès au cache — la valeur doit être toujours là
+        result = Cache.obtenir("test")
+        assert result == "valeur"
 
 
 class TestCacheObtenir:
     """Tests pour Cache.obtenir()."""
 
-    def test_obtenir_returns_sentinelle_if_missing(self, mock_session_state):
+    def test_obtenir_returns_sentinelle_if_missing(self):
         """Test obtenir retourne sentinelle si clé absente."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+        from src.core.caching.cache import Cache
 
-            result = Cache.obtenir("inexistant", sentinelle="default")
-            assert result == "default"
+        result = Cache.obtenir("inexistant", sentinelle="default")
+        assert result == "default"
 
-    def test_obtenir_returns_value_if_present_and_fresh(self, mock_session_state):
+    def test_obtenir_returns_value_if_present_and_fresh(self):
         """Test obtenir retourne valeur si présente et fraîche."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+        from src.core.caching.cache import Cache
 
-            Cache.definir("ma_cle", "ma_valeur", ttl=300)
-            result = Cache.obtenir("ma_cle", ttl=300)
-            assert result == "ma_valeur"
+        Cache.definir("ma_cle", "ma_valeur", ttl=300)
+        result = Cache.obtenir("ma_cle", ttl=300)
+        assert result == "ma_valeur"
 
-    def test_obtenir_returns_sentinelle_if_expired(self, mock_session_state):
+    def test_obtenir_returns_sentinelle_if_expired(self):
         """Test obtenir retourne sentinelle si expiré."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+        from src.core.caching.cache import Cache, _cache
 
-            Cache.definir("ma_cle", "ma_valeur", ttl=300)
+        Cache.definir("ma_cle", "ma_valeur", ttl=300)
 
-            # Simuler expiration
-            mock_session_state._mock_state["cache_timestamps"]["ma_cle"] = (
-                datetime.now() - timedelta(seconds=400)
-            )
+        # Simuler expiration en modifiant created_at dans L1
+        entry = _cache().l1._cache["ma_cle"]
+        entry.created_at = time.time() - 400
 
-            result = Cache.obtenir("ma_cle", ttl=300, sentinelle="expiré")
-            assert result == "expiré"
+        result = Cache.obtenir("ma_cle", sentinelle="expiré")
+        assert result == "expiré"
 
-    def test_obtenir_increments_miss_counter(self, mock_session_state):
+    def test_obtenir_increments_miss_counter(self):
         """Test obtenir incrémente compteur miss."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+        from src.core.caching.cache import Cache
 
-            Cache._initialiser()
-            initial_misses = mock_session_state._mock_state["cache_statistiques"]["misses"]
+        stats_before = Cache.obtenir_statistiques()
+        initial_misses = stats_before["misses"]
 
-            Cache.obtenir("inexistant")
+        Cache.obtenir("inexistant")
 
-            assert (
-                mock_session_state._mock_state["cache_statistiques"]["misses"] == initial_misses + 1
-            )
+        stats_after = Cache.obtenir_statistiques()
+        assert stats_after["misses"] == initial_misses + 1
 
-    def test_obtenir_increments_hit_counter(self, mock_session_state):
+    def test_obtenir_increments_hit_counter(self):
         """Test obtenir incrémente compteur hit."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+        from src.core.caching.cache import Cache
 
-            Cache.definir("ma_cle", "ma_valeur")
-            initial_hits = mock_session_state._mock_state["cache_statistiques"]["hits"]
+        Cache.definir("ma_cle", "ma_valeur")
 
-            Cache.obtenir("ma_cle")
+        stats_before = Cache.obtenir_statistiques()
+        initial_hits = stats_before["hits"]
 
-            assert mock_session_state._mock_state["cache_statistiques"]["hits"] == initial_hits + 1
+        Cache.obtenir("ma_cle")
+
+        stats_after = Cache.obtenir_statistiques()
+        assert stats_after["hits"] == initial_hits + 1
 
 
 class TestCacheDefinir:
     """Tests pour Cache.definir()."""
 
-    def test_definir_stores_value(self, mock_session_state):
+    def test_definir_stores_value(self):
         """Test definir stocke la valeur."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+        from src.core.caching.cache import Cache
 
-            Cache.definir("test_cle", {"data": "valeur"})
+        Cache.definir("test_cle", {"data": "valeur"})
 
-            assert mock_session_state._mock_state["cache_donnees"]["test_cle"] == {"data": "valeur"}
+        result = Cache.obtenir("test_cle")
+        assert result == {"data": "valeur"}
 
-    def test_definir_stores_timestamp(self, mock_session_state):
-        """Test definir stocke le timestamp."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+    def test_definir_stores_timestamp(self):
+        """Test definir stocke le timestamp (created_at dans EntreeCache)."""
+        from src.core.caching.cache import Cache, _cache
 
-            avant = datetime.now()
-            Cache.definir("test_cle", "valeur")
-            apres = datetime.now()
+        avant = time.time()
+        Cache.definir("test_cle", "valeur")
+        apres = time.time()
 
-            timestamp = mock_session_state._mock_state["cache_timestamps"]["test_cle"]
-            assert avant <= timestamp <= apres
+        entry = _cache().l1._cache["test_cle"]
+        assert avant <= entry.created_at <= apres
 
-    def test_definir_with_dependencies(self, mock_session_state):
-        """Test definir avec dépendances."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+    def test_definir_with_dependencies(self):
+        """Test definir avec dépendances (tags)."""
+        from src.core.caching.cache import Cache, _cache
 
-            Cache.definir("recette_1", "data", dependencies=["recettes", "recette_1"])
+        Cache.definir("recette_1", "data", dependencies=["recettes", "recette_1"])
 
-            assert (
-                "test_cle"
-                not in mock_session_state._mock_state["cache_dependances"].get("recettes", [])
-                or "recette_1" in mock_session_state._mock_state["cache_dependances"]["recettes"]
-            )
+        entry = _cache().l1._cache["recette_1"]
+        assert "recettes" in entry.tags
+        assert "recette_1" in entry.tags
 
 
 class TestCacheInvalider:
     """Tests pour Cache.invalider()."""
 
-    def test_invalider_by_pattern(self, mock_session_state):
+    def test_invalider_by_pattern(self):
         """Test invalidation par pattern."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+        from src.core.caching.cache import Cache
 
-            Cache.definir("recettes_liste", "data1")
-            Cache.definir("recettes_detail_1", "data2")
-            Cache.definir("courses_liste", "data3")
+        Cache.definir("recettes_liste", "data1")
+        Cache.definir("recettes_detail_1", "data2")
+        Cache.definir("courses_liste", "data3")
 
-            Cache.invalider(pattern="recettes")
+        Cache.invalider(pattern="recettes")
 
-            assert "recettes_liste" not in mock_session_state._mock_state["cache_donnees"]
-            assert "recettes_detail_1" not in mock_session_state._mock_state["cache_donnees"]
-            assert "courses_liste" in mock_session_state._mock_state["cache_donnees"]
+        assert Cache.obtenir("recettes_liste") is None
+        assert Cache.obtenir("recettes_detail_1") is None
+        assert Cache.obtenir("courses_liste") == "data3"
 
-    def test_invalider_by_dependencies(self, mock_session_state):
-        """Test invalidation par dépendances."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+    def test_invalider_by_dependencies(self):
+        """Test invalidation par dépendances (tags)."""
+        from src.core.caching.cache import Cache
 
-            Cache.definir("recette_1", "data1", dependencies=["tag_recette"])
-            Cache.definir("recette_2", "data2", dependencies=["tag_recette"])
-            Cache.definir("autre", "data3")
+        Cache.definir("recette_1", "data1", dependencies=["tag_recette"])
+        Cache.definir("recette_2", "data2", dependencies=["tag_recette"])
+        Cache.definir("autre", "data3")
 
-            Cache.invalider(dependencies=["tag_recette"])
+        Cache.invalider(dependencies=["tag_recette"])
 
-            assert "recette_1" not in mock_session_state._mock_state["cache_donnees"]
-            assert "recette_2" not in mock_session_state._mock_state["cache_donnees"]
-            assert "autre" in mock_session_state._mock_state["cache_donnees"]
+        assert Cache.obtenir("recette_1") is None
+        assert Cache.obtenir("recette_2") is None
+        assert Cache.obtenir("autre") == "data3"
 
-    def test_invalider_increments_counter(self, mock_session_state):
-        """Test invalidation incrémente compteur."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+    def test_invalider_increments_counter(self):
+        """Test invalidation met à jour les statistiques (evictions)."""
+        from src.core.caching.cache import Cache
 
-            Cache.definir("test", "valeur")
-            initial_invalidations = mock_session_state._mock_state["cache_statistiques"][
-                "invalidations"
-            ]
+        Cache.definir("test", "valeur")
 
-            Cache.invalider(pattern="test")
+        stats_before = Cache.obtenir_statistiques()
+        initial_invalidations = stats_before["invalidations"]
 
-            assert (
-                mock_session_state._mock_state["cache_statistiques"]["invalidations"]
-                > initial_invalidations
-            )
+        Cache.invalider(pattern="test")
+
+        stats_after = Cache.obtenir_statistiques()
+        assert stats_after["invalidations"] > initial_invalidations
 
 
 class TestCacheVider:
     """Tests pour Cache.vider() et clear()."""
 
-    def test_vider_removes_all_data(self, mock_session_state):
+    def test_vider_removes_all_data(self):
         """Test vider supprime toutes les données."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+        from src.core.caching.cache import Cache
 
-            Cache.definir("cle1", "val1")
-            Cache.definir("cle2", "val2")
+        Cache.definir("cle1", "val1")
+        Cache.definir("cle2", "val2")
 
-            Cache.vider()
+        Cache.vider()
 
-            assert mock_session_state._mock_state["cache_donnees"] == {}
+        assert Cache.obtenir("cle1") is None
+        assert Cache.obtenir("cle2") is None
 
-    def test_clear_alias_works(self, mock_session_state):
+    def test_clear_alias_works(self):
         """Test alias clear fonctionne."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+        from src.core.caching.cache import Cache
 
-            Cache.definir("cle", "val")
+        Cache.definir("cle", "val")
 
-            Cache.clear()
+        Cache.clear()
 
-            assert mock_session_state._mock_state["cache_donnees"] == {}
+        assert Cache.obtenir("cle") is None
 
 
 class TestCacheStatistiques:
     """Tests pour Cache.obtenir_statistiques()."""
 
-    def test_obtenir_statistiques_returns_dict(self, mock_session_state):
+    def test_obtenir_statistiques_returns_dict(self):
         """Test statistiques retourne dict."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+        from src.core.caching.cache import Cache
 
-            Cache._initialiser()
-            stats = Cache.obtenir_statistiques()
+        stats = Cache.obtenir_statistiques()
 
-            assert isinstance(stats, dict)
-            assert "hits" in stats
-            assert "misses" in stats
-            assert "entrees" in stats
-            assert "taux_hit" in stats
+        assert isinstance(stats, dict)
+        assert "hits" in stats
+        assert "misses" in stats
+        assert "entrees" in stats
+        assert "taux_hit" in stats
 
-    def test_taux_hit_calculation(self, mock_session_state):
+    def test_taux_hit_calculation(self):
         """Test calcul taux de hit."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+        from src.core.caching.cache import Cache
 
-            Cache._initialiser()
-            Cache.definir("cle", "val")
+        Cache.definir("cle", "val")
 
-            # 2 hits
-            Cache.obtenir("cle")
-            Cache.obtenir("cle")
+        # 2 hits
+        Cache.obtenir("cle")
+        Cache.obtenir("cle")
 
-            # 1 miss
-            Cache.obtenir("inexistant")
+        # 1 miss
+        Cache.obtenir("inexistant")
 
-            stats = Cache.obtenir_statistiques()
+        stats = Cache.obtenir_statistiques()
 
-            # 2 hits sur 3 requêtes = 66.67%
-            assert stats["taux_hit"] == pytest.approx(66.67, rel=0.01)
+        # 2 hits sur 3 requêtes = 66.67%
+        assert stats["taux_hit"] == pytest.approx(66.67, rel=0.01)
 
 
 class TestCacheNettoyerExpires:
     """Tests pour Cache.nettoyer_expires()."""
 
-    def test_nettoyer_removes_old_entries(self, mock_session_state):
+    def test_nettoyer_removes_old_entries(self):
         """Test nettoyer supprime entrées anciennes."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import Cache
+        from src.core.caching.cache import Cache, _cache
 
-            Cache.definir("recente", "val1")
-            Cache.definir("ancienne", "val2")
+        Cache.definir("recente", "val1", ttl=7200)
+        Cache.definir("ancienne", "val2", ttl=300)
 
-            # Simuler entrée ancienne
-            mock_session_state._mock_state["cache_timestamps"]["ancienne"] = (
-                datetime.now() - timedelta(hours=2)
-            )
+        # Simuler entrée ancienne en modifiant created_at dans L1
+        entry = _cache().l1._cache["ancienne"]
+        entry.created_at = time.time() - 7200  # 2h dans le passé
 
-            Cache.nettoyer_expires(age_max_secondes=3600)
+        Cache.nettoyer_expires(age_max_secondes=3600)
 
-            assert "recente" in mock_session_state._mock_state["cache_donnees"]
-            assert "ancienne" not in mock_session_state._mock_state["cache_donnees"]
+        assert Cache.obtenir("recente") == "val1"
+        assert Cache.obtenir("ancienne") is None
 
 
 # ═══════════════════════════════════════════════════════════
@@ -496,25 +450,24 @@ class TestLimiteDebitReset:
 class TestAvecCacheDecorator:
     """Tests pour le décorateur @avec_cache (unifié, multi-niveaux)."""
 
-    def test_avec_cache_returns_cached_value(self, mock_session_state):
+    def test_avec_cache_returns_cached_value(self):
         """Test avec_cache retourne valeur en cache."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.decorators import avec_cache
+        from src.core.decorators import avec_cache
 
-            call_count = 0
+        call_count = 0
 
-            @avec_cache(ttl=300)
-            def ma_fonction():
-                nonlocal call_count
-                call_count += 1
-                return "résultat"
+        @avec_cache(ttl=300)
+        def ma_fonction():
+            nonlocal call_count
+            call_count += 1
+            return "résultat"
 
-            # Premier appel - exécute la fonction
-            result1 = ma_fonction()
-            assert result1 == "résultat"
-            assert call_count == 1
+        # Premier appel - exécute la fonction
+        result1 = ma_fonction()
+        assert result1 == "résultat"
+        assert call_count == 1
 
-            # Deuxième appel - retourne du cache
-            result2 = ma_fonction()
-            assert result2 == "résultat"
-            assert call_count == 1  # Pas réexécuté
+        # Deuxième appel - retourne du cache
+        result2 = ma_fonction()
+        assert result2 == "résultat"
+        assert call_count == 1  # Pas réexécuté

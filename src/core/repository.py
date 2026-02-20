@@ -4,7 +4,8 @@ Repository - Pattern Repository générique pour les accès DB.
 Encapsule les opérations CRUD courantes de SQLAlchemy
 dans une interface propre et réutilisable.
 
-Usage:
+Usage classique::
+
     >>> class RecetteRepository(Repository[Recette]):
     >>>     pass
     >>>
@@ -12,6 +13,13 @@ Usage:
     >>> recette = repo.obtenir_par_id(42)
     >>> toutes = repo.lister(filtre={"saison": "été"})
     >>> repo.creer(Recette(nom="Tarte"))
+
+Usage avec Specification::
+
+    >>> from src.core.specifications import par_champ, contient, paginer
+    >>>
+    >>> spec = par_champ("actif", True) & contient("nom", "tarte") & paginer(1, 20)
+    >>> recettes = repo.lister(spec=spec)
 """
 
 import logging
@@ -25,6 +33,8 @@ from .errors_base import ErreurNonTrouve
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+
+__all__ = ["Repository"]
 
 
 class Repository(Generic[T]):
@@ -83,22 +93,28 @@ class Repository(Generic[T]):
         ordre: str | None = None,
         limite: int | None = None,
         offset: int | None = None,
+        spec: "Specification | None" = None,
     ) -> list[T]:
         """
-        Liste les entités avec filtres optionnels.
+        Liste les entités avec filtres optionnels ou spécification.
 
         Args:
             filtre: Dict {colonne: valeur} pour filtrage par égalité
             ordre: Nom de colonne pour tri (préfixer par '-' pour DESC)
             limite: Nombre max de résultats
             offset: Décalage pour pagination
+            spec: Spécification composable (prioritaire sur filtre/ordre)
 
         Returns:
             Liste d'entités
         """
         stmt = select(self.model)
 
-        # Appliquer les filtres
+        # Spécification composable (prioritaire)
+        if spec is not None:
+            stmt = spec.appliquer(stmt, self.model)
+
+        # Filtres classiques (fallback si pas de spec)
         if filtre:
             for col_name, value in filtre.items():
                 col = getattr(self.model, col_name, None)
@@ -124,17 +140,23 @@ class Repository(Generic[T]):
 
         return list(self.session.scalars(stmt).all())
 
-    def compter(self, filtre: dict[str, Any] | None = None) -> int:
+    def compter(
+        self, filtre: dict[str, Any] | None = None, spec: "Specification | None" = None
+    ) -> int:
         """
-        Compte les entités (avec filtres optionnels).
+        Compte les entités (avec filtres optionnels ou spécification).
 
         Args:
             filtre: Dict {colonne: valeur} pour filtrage
+            spec: Spécification composable
 
         Returns:
             Nombre d'entités
         """
         stmt = select(func.count()).select_from(self.model)
+
+        if spec is not None:
+            stmt = spec.appliquer(stmt, self.model)
 
         if filtre:
             for col_name, value in filtre.items():
@@ -204,3 +226,53 @@ class Repository(Generic[T]):
     def existe(self, id: int) -> bool:
         """Vérifie si une entité existe par ID."""
         return self.obtenir_par_id(id) is not None
+
+    # ── Opérations en masse ──────────────────────────────────
+
+    def creer_en_masse(self, entites: list[T]) -> list[T]:
+        """
+        Crée plusieurs entités en une seule opération.
+
+        Args:
+            entites: Liste d'instances du modèle
+
+        Returns:
+            Liste d'entités persistées
+        """
+        self.session.add_all(entites)
+        self.session.flush()
+        logger.debug(f"[+] {self.model.__name__} x{len(entites)} créés en masse")
+        return entites
+
+    def supprimer_par_spec(self, spec: "Specification") -> int:
+        """
+        Supprime les entités correspondant à une spécification.
+
+        Args:
+            spec: Spécification de filtrage
+
+        Returns:
+            Nombre d'entités supprimées
+        """
+        entites = self.lister(spec=spec)
+        for entite in entites:
+            self.session.delete(entite)
+        self.session.flush()
+        logger.debug(f"[-] {self.model.__name__} x{len(entites)} supprimés par spec")
+        return len(entites)
+
+    def premier(self, spec: "Specification | None" = None) -> T | None:
+        """
+        Retourne la première entité correspondant à la spec.
+
+        Args:
+            spec: Spécification de filtrage (optionnel)
+
+        Returns:
+            Première entité ou None
+        """
+        stmt = select(self.model)
+        if spec is not None:
+            stmt = spec.appliquer(stmt, self.model)
+        stmt = stmt.limit(1)
+        return self.session.scalars(stmt).first()

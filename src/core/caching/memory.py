@@ -78,6 +78,18 @@ class CacheMemoireN1:
         with self._lock:
             self._cache.clear()
 
+    def cleanup_expired(self) -> int:
+        """Supprime toutes les entrées expirées.
+
+        Returns:
+            Nombre d'entrées supprimées.
+        """
+        with self._lock:
+            expired = [k for k, e in self._cache.items() if e.est_expire]
+            for key in expired:
+                self._remove(key)
+            return len(expired)
+
     def _remove(self, key: str) -> None:
         """Supprime une entrée — O(1)."""
         self._cache.pop(key, None)

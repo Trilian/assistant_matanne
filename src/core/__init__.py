@@ -69,6 +69,18 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "bus_evenements": (".events", "bus_evenements"),
     # Repository
     "Repository": (".repository", "Repository"),
+    # Specifications
+    "Spec": (".specifications", "Spec"),
+    "Specification": (".specifications", "Specification"),
+    "contient": (".specifications", "contient"),
+    "entre": (".specifications", "entre"),
+    "limite": (".specifications", "limite"),
+    "ordre_par": (".specifications", "ordre_par"),
+    "paginer": (".specifications", "paginer"),
+    "par_champ": (".specifications", "par_champ"),
+    "par_champs": (".specifications", "par_champs"),
+    # Unit of Work
+    "UnitOfWork": (".unit_of_work", "UnitOfWork"),
     # Decorators
     "avec_cache": (".decorators", "avec_cache"),
     "avec_gestion_erreurs": (".decorators", "avec_gestion_erreurs"),
@@ -101,6 +113,24 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # Logging
     "GestionnaireLog": (".logging", "GestionnaireLog"),
     "obtenir_logger": (".logging", "obtenir_logger"),
+    # Middleware
+    "CacheMiddleware": (".middleware", "CacheMiddleware"),
+    "CircuitBreakerMiddleware": (".middleware", "CircuitBreakerMiddleware"),
+    "Contexte": (".middleware", "Contexte"),
+    "LogMiddleware": (".middleware", "LogMiddleware"),
+    "Middleware": (".middleware", "Middleware"),
+    "Pipeline": (".middleware", "Pipeline"),
+    "RetryMiddleware": (".middleware", "RetryMiddleware"),
+    "TimingMiddleware": (".middleware", "TimingMiddleware"),
+    "ValidationMiddleware": (".middleware", "ValidationMiddleware"),
+    # Monitoring
+    "CollecteurMetriques": (".monitoring", "CollecteurMetriques"),
+    "SanteSysteme": (".monitoring", "SanteSysteme"),
+    "chronometre": (".monitoring", "chronometre"),
+    "collecteur": (".monitoring", "collecteur"),
+    "enregistrer_metrique": (".monitoring", "enregistrer_metrique"),
+    "obtenir_snapshot": (".monitoring", "obtenir_snapshot"),
+    "verifier_sante_globale": (".monitoring", "verifier_sante_globale"),
     # State
     "EtatApp": (".state", "EtatApp"),
     "GestionnaireEtat": (".state", "GestionnaireEtat"),

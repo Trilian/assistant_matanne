@@ -417,13 +417,15 @@ class TestConversionHelpers:
 
     def test_get_default_preferences(self):
         """Récupère les préférences par défaut."""
+        from src.modules.famille.age_utils import get_age_jules_mois
+
         service = UserPreferenceService()
         result = service._get_default_preferences()
 
         assert isinstance(result, PreferencesUtilisateur)
         assert result.nb_adultes == 2
         assert result.jules_present is True
-        assert result.jules_age_mois == 19
+        assert result.jules_age_mois == get_age_jules_mois()
         assert "poulet" in result.aliments_favoris
         assert "monsieur_cuisine" in result.robots
 
