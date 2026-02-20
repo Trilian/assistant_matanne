@@ -8,16 +8,14 @@ Contient :
 
 from datetime import date, datetime
 from decimal import Decimal
-from enum import Enum, StrEnum
+from enum import StrEnum
 from uuid import UUID
 
 from sqlalchemy import (
-    JSON,
     BigInteger,
     Boolean,
     Date,
     DateTime,
-    Integer,
     Numeric,
     String,
     Text,
@@ -133,9 +131,7 @@ class ConfigMeteo(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     def __repr__(self) -> str:
         return f"<ConfigMeteo(id={self.id}, ville='{self.ville}')>"

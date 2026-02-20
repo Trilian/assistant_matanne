@@ -28,7 +28,14 @@ from .data import (
 from .dynamic import Modale
 
 # Forms
-from .forms import barre_recherche, champ_formulaire, filtres_rapides, panneau_filtres
+from .forms import (
+    ConfigChamp,
+    TypeChamp,
+    barre_recherche,
+    champ_formulaire,
+    filtres_rapides,
+    panneau_filtres,
+)
 
 # Layouts
 from .layouts import (
@@ -59,6 +66,8 @@ __all__ = [
     "barre_recherche",
     "panneau_filtres",
     "filtres_rapides",
+    "ConfigChamp",
+    "TypeChamp",
     # Data
     "pagination",
     "ligne_metriques",

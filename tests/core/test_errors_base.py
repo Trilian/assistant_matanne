@@ -389,18 +389,16 @@ class TestValiderPlage:
         with pytest.raises(ErreurValidation) as exc_info:
             valider_plage(0, min_val=1, max_val=10, nom_param="age")
 
-        assert ">= 1" in str(exc_info.value)
-        assert exc_info.value.details["min"] == 1
-        assert exc_info.value.details["recu"] == 0
+        # exiger_plage produit "trop petit: 0 < 1"
+        assert "trop petit" in str(exc_info.value) or ">= 1" in str(exc_info.value)
 
     def test_above_max_raises(self):
         """Test valeur au-dessus du maximum."""
         with pytest.raises(ErreurValidation) as exc_info:
             valider_plage(15, min_val=1, max_val=10, nom_param="age")
 
-        assert "<= 10" in str(exc_info.value)
-        assert exc_info.value.details["max"] == 10
-        assert exc_info.value.details["recu"] == 15
+        # exiger_plage produit "trop grand: 15 > 10"
+        assert "trop grand" in str(exc_info.value) or "<= 10" in str(exc_info.value)
 
     def test_min_only(self):
         """Test avec min seulement."""

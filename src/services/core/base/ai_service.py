@@ -1,17 +1,20 @@
 """
 Base AI Service - Service IA Générique avec Rate Limiting Auto
 Version améliorée avec gestion automatique des quotas et retry
+
+[!] Ce module N'IMPORTE PAS streamlit — découplé de l'UI.
+    Les erreurs sont loguées et propagées, l'affichage est géré
+    par la couche UI via l'Event Bus.
 """
 
-import asyncio
 import logging
 from datetime import datetime
 
 from pydantic import BaseModel, ValidationError
 
-from src.core.ai import AnalyseurIA, ClientIA, RateLimitIA
+from src.core.ai import AnalyseurIA, CircuitBreaker, ClientIA, RateLimitIA, obtenir_circuit
 from src.core.ai.cache import CacheIA
-from src.core.errors import ErreurLimiteDebit, gerer_erreurs
+from src.core.errors_base import ErreurLimiteDebit
 from src.services.core.base.async_utils import sync_wrapper
 
 logger = logging.getLogger(__name__)
@@ -29,6 +32,7 @@ class BaseAIService:
     Fonctionnalités AUTO :
     - ✅ Rate limiting avec retry intelligent
     - ✅ Cache sémantique automatique
+    - ✅ Circuit breaker (protection service externe)
     - ✅ Parsing JSON robuste
     - ✅ Gestion d'erreurs unifiée
     - ✅ Logging avec métriques
@@ -41,6 +45,7 @@ class BaseAIService:
         default_ttl: int = 3600,
         default_temperature: float = 0.7,
         service_name: str = "unknown",
+        circuit_breaker: CircuitBreaker | None = None,
     ):
         """
         Initialise le service IA
@@ -51,18 +56,23 @@ class BaseAIService:
             default_ttl: TTL cache par défaut (secondes)
             default_temperature: Température par défaut
             service_name: Nom du service (pour analytics)
+            circuit_breaker: Circuit breaker (auto-créé si None)
         """
         self.client = client
         self.cache_prefix = cache_prefix
         self.default_ttl = default_ttl
         self.default_temperature = default_temperature
         self.service_name = service_name
+        self.circuit_breaker = circuit_breaker or obtenir_circuit(
+            nom=f"ai_{service_name}",
+            seuil_echecs=5,
+            delai_reset=60.0,
+        )
 
     # ═══════════════════════════════════════════════════════════
     # APPELS IA AVEC RATE LIMITING AUTO + CACHE
     # ═══════════════════════════════════════════════════════════
 
-    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
     async def call_with_cache(
         self,
         prompt: str,
@@ -115,16 +125,30 @@ class BaseAIService:
             logger.warning(f"⏳ Rate limit: {msg}")
             raise ErreurLimiteDebit(msg, message_utilisateur=msg)
 
-        # Appel IA
+        # ✅ Vérifier circuit breaker AVANT l'appel
+        from src.core.ai.circuit_breaker import EtatCircuit
+
+        etat = self.circuit_breaker.etat
+        if etat == EtatCircuit.OUVERT:
+            logger.warning(f"⚡ Circuit '{self.circuit_breaker.nom}' OUVERT — appel bloqué")
+            return None
+
+        # Appel IA protégé par CircuitBreaker
         start_time = datetime.now()
 
-        response = await self.client.appeler(
-            prompt=prompt,
-            prompt_systeme=system_prompt,
-            temperature=temp,
-            max_tokens=max_tokens,
-            utiliser_cache=False,  # On gère le cache nous-mêmes
-        )
+        try:
+            response = await self.client.appeler(
+                prompt=prompt,
+                prompt_systeme=system_prompt,
+                temperature=temp,
+                max_tokens=max_tokens,
+                utiliser_cache=False,  # On gère le cache nous-mêmes
+            )
+            self.circuit_breaker._enregistrer_succes()
+        except Exception as e:
+            self.circuit_breaker._enregistrer_echec()
+            logger.warning("Appel IA échoué (%s): %s", self.service_name, e)
+            raise
 
         duration = (datetime.now() - start_time).total_seconds()
 
@@ -154,7 +178,6 @@ class BaseAIService:
     # PARSING AVEC VALIDATION
     # ═══════════════════════════════════════════════════════════
 
-    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
     async def call_with_parsing(
         self,
         prompt: str,
@@ -203,7 +226,6 @@ class BaseAIService:
     # Version synchrone auto-générée via sync_wrapper
     call_with_parsing_sync = sync_wrapper(call_with_parsing)
 
-    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=[])
     async def call_with_list_parsing(
         self,
         prompt: str,
@@ -255,7 +277,6 @@ class BaseAIService:
     # Version synchrone auto-générée via sync_wrapper
     call_with_list_parsing_sync = sync_wrapper(call_with_list_parsing)
 
-    @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
     async def call_with_json_parsing(
         self,
         prompt: str,
@@ -291,32 +312,17 @@ class BaseAIService:
         if not response:
             return None
 
-        # Parser JSON vers modèle Pydantic
+        # Déléguer le parsing JSON à AnalyseurIA (nettoyage markdown inclus)
         try:
-            import json
-
-            # Nettoyer la réponse des markdown code blocks
-            cleaned = response.strip()
-            if cleaned.startswith("```json"):
-                cleaned = cleaned[7:]
-            elif cleaned.startswith("```"):
-                cleaned = cleaned[3:]
-            if cleaned.endswith("```"):
-                cleaned = cleaned[:-3]
-            cleaned = cleaned.strip()
-
-            # Parser JSON
-            data = json.loads(cleaned)
-
-            # Valider avec Pydantic
-            result = response_model(**data)
+            parsed = AnalyseurIA.analyser(
+                reponse=response,
+                modele=response_model,
+                valeur_secours=None,
+                strict=False,
+            )
             logger.info(f"✅ JSON parsé vers {response_model.__name__}")
-            return result
+            return parsed
 
-        except json.JSONDecodeError as e:
-            logger.error(f"❌ Erreur parsing JSON: {e}")
-            logger.debug(f"Réponse brute: {response[:500]}")
-            return None
         except ValidationError as e:
             logger.error(f"❌ Erreur validation Pydantic: {e}")
             return None
@@ -388,12 +394,277 @@ class BaseAIService:
         CacheIA.invalider_tout()
         logger.info(f"🗑️ Cache {self.cache_prefix} vidé")
 
+    def get_circuit_breaker_stats(self) -> dict:
+        """Retourne statistiques du circuit breaker."""
+        return self.circuit_breaker.obtenir_statistiques()
+
+    def reset_circuit_breaker(self):
+        """Reset manuel du circuit breaker."""
+        self.circuit_breaker.reset()
+
+    # ═══════════════════════════════════════════════════════════
+    # API SAFE — Retourne Result[T, ErrorInfo] au lieu de None
+    # ═══════════════════════════════════════════════════════════
+
+    async def safe_call_with_cache(
+        self,
+        prompt: str,
+        system_prompt: str = "",
+        temperature: float | None = None,
+        max_tokens: int = 1000,
+        use_cache: bool = True,
+        category: str | None = None,
+    ):
+        """Appel IA retournant Result au lieu de str|None.
+
+        Returns:
+            Success[str] si réponse, Failure[ErrorInfo] si erreur/rate limit
+        """
+        from src.services.core.base.result import (
+            ErrorCode,
+            failure,
+            from_exception,
+            success,
+        )
+
+        try:
+            response = await self.call_with_cache(
+                prompt=prompt,
+                system_prompt=system_prompt,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                use_cache=use_cache,
+                category=category,
+            )
+            if response is None:
+                return failure(
+                    ErrorCode.AI_UNAVAILABLE,
+                    "Client IA indisponible",
+                    message_utilisateur="Le service IA est temporairement indisponible",
+                    source=self.service_name,
+                )
+            return success(response)
+        except ErreurLimiteDebit as e:
+            return failure(
+                ErrorCode.RATE_LIMITED,
+                str(e),
+                message_utilisateur=str(e),
+                source=self.service_name,
+            )
+        except Exception as e:
+            return from_exception(e, source=self.service_name)
+
+    async def safe_call_with_parsing(
+        self,
+        prompt: str,
+        response_model: type[BaseModel],
+        system_prompt: str = "",
+        temperature: float | None = None,
+        max_tokens: int = 1000,
+        use_cache: bool = True,
+        fallback: dict | None = None,
+    ):
+        """Appel IA avec parsing Pydantic, retourne Result.
+
+        Returns:
+            Success[BaseModel] si parsé, Failure[ErrorInfo] si échec
+        """
+        from src.services.core.base.result import (
+            ErrorCode,
+            failure,
+            from_exception,
+            success,
+        )
+
+        try:
+            parsed = await self.call_with_parsing(
+                prompt=prompt,
+                response_model=response_model,
+                system_prompt=system_prompt,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                use_cache=use_cache,
+                fallback=fallback,
+            )
+            if parsed is None:
+                return failure(
+                    ErrorCode.PARSING_ERROR,
+                    f"Impossible de parser la réponse vers {response_model.__name__}",
+                    source=self.service_name,
+                )
+            return success(parsed)
+        except Exception as e:
+            return from_exception(e, source=self.service_name)
+
+    async def safe_call_with_list_parsing(
+        self,
+        prompt: str,
+        item_model: type[BaseModel],
+        list_key: str = "items",
+        system_prompt: str = "",
+        temperature: float | None = None,
+        max_tokens: int = 2000,
+        use_cache: bool = True,
+        max_items: int | None = None,
+    ):
+        """Appel IA avec parsing liste, retourne Result.
+
+        Returns:
+            Success[list[BaseModel]], Failure[ErrorInfo] si erreur
+        """
+        from src.services.core.base.result import from_exception, success
+
+        try:
+            items = await self.call_with_list_parsing(
+                prompt=prompt,
+                item_model=item_model,
+                list_key=list_key,
+                system_prompt=system_prompt,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                use_cache=use_cache,
+                max_items=max_items,
+            )
+            return success(items)
+        except Exception as e:
+            return from_exception(e, source=self.service_name)
+
+    async def safe_call_with_json_parsing(
+        self,
+        prompt: str,
+        response_model: type[BaseModel],
+        system_prompt: str = "",
+        temperature: float | None = None,
+        max_tokens: int = 2000,
+        use_cache: bool = True,
+    ):
+        """Appel IA avec parsing JSON, retourne Result.
+
+        Returns:
+            Success[BaseModel] si parsé, Failure[ErrorInfo] si échec
+        """
+        from src.services.core.base.result import (
+            ErrorCode,
+            failure,
+            from_exception,
+            success,
+        )
+
+        try:
+            parsed = await self.call_with_json_parsing(
+                prompt=prompt,
+                response_model=response_model,
+                system_prompt=system_prompt,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                use_cache=use_cache,
+            )
+            if parsed is None:
+                return failure(
+                    ErrorCode.PARSING_ERROR,
+                    f"Impossible de parser JSON vers {response_model.__name__}",
+                    source=self.service_name,
+                )
+            return success(parsed)
+        except Exception as e:
+            return from_exception(e, source=self.service_name)
+
+    # Versions synchrones des méthodes safe
+    safe_call_with_parsing_sync = sync_wrapper(safe_call_with_parsing)
+    safe_call_with_list_parsing_sync = sync_wrapper(safe_call_with_list_parsing)
+    safe_call_with_json_parsing_sync = sync_wrapper(safe_call_with_json_parsing)
+
+    # ═══════════════════════════════════════════════════════════
+    # HEALTH CHECK — Satisfait HealthCheckProtocol
+    # ═══════════════════════════════════════════════════════════
+
+    def health_check(self):
+        """Vérifie la santé du service IA (client, rate limit).
+
+        Returns:
+            ServiceHealth avec statut, latence et détails quotas
+        """
+        import time
+
+        from src.services.core.base.protocols import ServiceHealth, ServiceStatus
+
+        start = time.perf_counter()
+        details: dict = {"service_name": self.service_name}
+
+        try:
+            # Vérifier client
+            client_ok = self.client is not None
+            details["client_available"] = client_ok
+
+            # Vérifier rate limit
+            autorise, msg = RateLimitIA.peut_appeler()
+            details["rate_limit_ok"] = autorise
+            if not autorise:
+                details["rate_limit_message"] = msg
+
+            # Vérifier circuit breaker
+            cb_stats = self.circuit_breaker.obtenir_statistiques()
+            details["circuit_breaker"] = cb_stats
+
+            # Récupérer stats
+            details["rate_limit_stats"] = self.get_rate_limit_stats()
+            details["cache_stats"] = self.get_cache_stats()
+
+            latency = (time.perf_counter() - start) * 1000
+
+            if not client_ok:
+                return ServiceHealth(
+                    status=ServiceStatus.UNHEALTHY,
+                    service_name=f"AI:{self.service_name}",
+                    message="Client IA indisponible",
+                    latency_ms=latency,
+                    details=details,
+                )
+
+            if not autorise:
+                return ServiceHealth(
+                    status=ServiceStatus.DEGRADED,
+                    service_name=f"AI:{self.service_name}",
+                    message=f"Rate limité: {msg}",
+                    latency_ms=latency,
+                    details=details,
+                )
+
+            # Vérifier état du circuit breaker
+            from src.core.ai.circuit_breaker import EtatCircuit
+
+            if cb_stats["etat"] != EtatCircuit.FERME.value:
+                return ServiceHealth(
+                    status=ServiceStatus.DEGRADED,
+                    service_name=f"AI:{self.service_name}",
+                    message=f"Circuit breaker {cb_stats['etat']} "
+                    f"({cb_stats['echecs_consecutifs']} échecs)",
+                    latency_ms=latency,
+                    details=details,
+                )
+
+            return ServiceHealth(
+                status=ServiceStatus.HEALTHY,
+                service_name=f"AI:{self.service_name}",
+                message="Service IA opérationnel",
+                latency_ms=latency,
+                details=details,
+            )
+        except Exception as e:
+            latency = (time.perf_counter() - start) * 1000
+            return ServiceHealth(
+                status=ServiceStatus.UNHEALTHY,
+                service_name=f"AI:{self.service_name}",
+                message=f"Erreur health check: {e}",
+                latency_ms=latency,
+                details={"error": str(e)},
+            )
+
 
 # ═══════════════════════════════════════════════════════════
 # MIXINS SPÉCIALISÉS — voir ai_mixins.py (source unique)
 # ═══════════════════════════════════════════════════════════
 from .ai_mixins import InventoryAIMixin, PlanningAIMixin, RecipeAIMixin  # noqa: E402, F401
-
 
 # ═══════════════════════════════════════════════════════════
 # FACTORY
@@ -405,11 +676,27 @@ def create_base_ai_service(
     default_ttl: int = 3600,
     default_temperature: float = 0.7,
     service_name: str = "unknown",
+    seuil_echecs: int = 5,
+    delai_reset: float = 60.0,
 ) -> BaseAIService:
-    """Factory pour créer un BaseAIService"""
+    """Factory pour créer un BaseAIService avec CircuitBreaker.
+
+    Args:
+        cache_prefix: Préfixe pour clés cache
+        default_ttl: TTL cache par défaut (secondes)
+        default_temperature: Température par défaut
+        service_name: Nom du service (pour analytics)
+        seuil_echecs: Échecs consécutifs avant ouverture du circuit
+        delai_reset: Délai en secondes avant test de reprise
+    """
     from src.core.ai import obtenir_client_ia
 
     client = obtenir_client_ia()
+    cb = obtenir_circuit(
+        nom=f"ai_{service_name}",
+        seuil_echecs=seuil_echecs,
+        delai_reset=delai_reset,
+    )
 
     return BaseAIService(
         client=client,
@@ -417,4 +704,5 @@ def create_base_ai_service(
         default_ttl=default_ttl,
         default_temperature=default_temperature,
         service_name=service_name,
+        circuit_breaker=cb,
     )

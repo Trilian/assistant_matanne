@@ -13,12 +13,19 @@ from typing import Any
 
 import streamlit as st
 
+from src.ui.registry import composant_ui
+from src.ui.tokens import Couleur, Espacement, Rayon, Typographie, gradient_subtil
 from src.ui.utils import echapper_html
 
 logger = logging.getLogger(__name__)
 
 
 @st.cache_data(ttl=60)
+@composant_ui(
+    "metrics",
+    exemple='carte_metrique_avancee("Recettes", 42, "🍽️")',
+    tags=["metric", "kpi", "dashboard"],
+)
 def carte_metrique_avancee(
     titre: str,
     valeur: Any,
@@ -26,7 +33,7 @@ def carte_metrique_avancee(
     delta: str | None = None,
     delta_positif: bool = True,
     sous_titre: str | None = None,
-    couleur: str = "#4CAF50",
+    couleur: str = Couleur.ACCENT,
     lien_module: str | None = None,
 ):
     """
@@ -44,34 +51,32 @@ def carte_metrique_avancee(
     """
     delta_html = ""
     if delta:
-        delta_color = "#4CAF50" if delta_positif else "#FF5722"
+        delta_color = Couleur.DELTA_POSITIVE if delta_positif else Couleur.DELTA_NEGATIVE
         delta_arrow = "↑" if delta_positif else "↓"
-        delta_html = (
-            f'<span style="color: {delta_color}; font-size: 0.9rem;">{delta_arrow} {echapper_html(delta)}</span>'
-        )
+        delta_html = f'<span style="color: {delta_color}; font-size: 0.9rem;">{delta_arrow} {echapper_html(delta)}</span>'
 
     sous_titre_html = (
-        f'<p style="color: #6c757d; margin: 0; font-size: 0.85rem;">{echapper_html(sous_titre)}</p>'
+        f'<p style="color: {Couleur.TEXT_SECONDARY}; margin: 0; font-size: {Typographie.CAPTION};">{echapper_html(sous_titre)}</p>'
         if sous_titre
         else ""
     )
 
     html = f"""
     <div style="
-        background: linear-gradient(135deg, {couleur}15, {couleur}05);
+        background: {gradient_subtil(couleur)};
         border-left: 4px solid {couleur};
-        border-radius: 12px;
+        border-radius: {Rayon.LG};
         padding: 1.2rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: {Espacement.SM};
     ">
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-                <p style="color: #6c757d; margin: 0 0 0.3rem 0; font-size: 0.9rem;">{echapper_html(titre)}</p>
-                <h2 style="margin: 0; color: #212529;">{echapper_html(str(valeur))}</h2>
+                <p style="color: {Couleur.TEXT_SECONDARY}; margin: 0 0 0.3rem 0; font-size: 0.9rem;">{echapper_html(titre)}</p>
+                <h2 style="margin: 0; color: {Couleur.TEXT_PRIMARY};">{echapper_html(str(valeur))}</h2>
                 {delta_html}
                 {sous_titre_html}
             </div>
-            <span style="font-size: 2.5rem;">{echapper_html(icone)}</span>
+            <span style="font-size: {Typographie.ICON_LG};">{echapper_html(icone)}</span>
         </div>
     </div>
     """
@@ -86,6 +91,7 @@ def carte_metrique_avancee(
             st.rerun()
 
 
+@composant_ui("metrics", exemple="widget_jules_apercu()", tags=["jules", "famille", "dashboard"])
 def widget_jules_apercu(date_naissance: date | None = None):
     """Widget d'aperçu de Jules pour le dashboard.
 
@@ -95,7 +101,9 @@ def widget_jules_apercu(date_naissance: date | None = None):
     """
 
     # Calculer l'âge de Jules
-    naissance = date_naissance or date(2024, 6, 15)
+    from src.core.constants import JULES_NAISSANCE
+
+    naissance = date_naissance or JULES_NAISSANCE
     aujourd_hui = date.today()
     age_jours = (aujourd_hui - naissance).days
     age_mois = age_jours // 30
@@ -103,20 +111,25 @@ def widget_jules_apercu(date_naissance: date | None = None):
     st.markdown(
         f"""
         <div style="
-            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
-            border-radius: 16px;
-            padding: 1.5rem;
+            background: linear-gradient(135deg, {Couleur.BG_JULES_START}, {Couleur.BG_JULES_END});
+            border-radius: {Rayon.XL};
+            padding: {Espacement.LG};
             text-align: center;
         ">
-            <span style="font-size: 3rem;">👶</span>
-            <h3 style="margin: 0.5rem 0;">Jules</h3>
-            <p style="margin: 0; color: #1565C0; font-weight: 500;">{age_mois} mois</p>
+            <span style="font-size: {Typographie.ICON_XL};">👶</span>
+            <h3 style="margin: {Espacement.SM} 0;">Jules</h3>
+            <p style="margin: 0; color: {Couleur.JULES_PRIMARY}; font-weight: 500;">{age_mois} mois</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
 
+@composant_ui(
+    "metrics",
+    exemple='widget_meteo_jour({"temp": 22, "condition": "☀️ Ensoleillé", "conseil": "Promenade"})',
+    tags=["meteo", "weather", "dashboard"],
+)
 def widget_meteo_jour(donnees_meteo: dict | None = None):
     """Widget météo simplifié.
 
@@ -134,14 +147,14 @@ def widget_meteo_jour(donnees_meteo: dict | None = None):
     st.markdown(
         f"""
         <div style="
-            background: linear-gradient(135deg, #FFF8E1, #FFECB3);
-            border-radius: 12px;
-            padding: 1rem;
+            background: linear-gradient(135deg, {Couleur.BG_METEO_START}, {Couleur.BG_METEO_END});
+            border-radius: {Rayon.LG};
+            padding: {Espacement.MD};
             text-align: center;
         ">
-            <span style="font-size: 2rem;">{meteo["condition"].split()[0]}</span>
-            <p style="margin: 0.3rem 0; font-size: 1.5rem; font-weight: 600;">{meteo["temp"]}°C</p>
-            <small style="color: #6c757d;">{meteo["conseil"]}</small>
+            <span style="font-size: {Typographie.ICON_MD};">{meteo["condition"].split()[0]}</span>
+            <p style="margin: 0.3rem 0; font-size: {Typographie.H3}; font-weight: 600;">{meteo["temp"]}°C</p>
+            <small style="color: {Couleur.TEXT_SECONDARY};">{meteo["conseil"]}</small>
         </div>
         """,
         unsafe_allow_html=True,

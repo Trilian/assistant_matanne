@@ -24,7 +24,6 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_session_db
 from src.core.errors_base import ErreurValidation
 from src.core.models import ArticleInventaire
-from src.services.core.base import BaseService
 from src.services.rapports.planning_pdf import PlanningReportMixin
 from src.services.rapports.rapports_budget import BudgetReportMixin
 from src.services.rapports.rapports_gaspillage import GaspillageReportMixin
@@ -39,7 +38,6 @@ logger = logging.getLogger(__name__)
 
 
 class ServiceRapportsPDF(
-    BaseService[ArticleInventaire],
     PlanningReportMixin,
     BudgetReportMixin,
     GaspillageReportMixin,
@@ -52,11 +50,12 @@ class ServiceRapportsPDF(
     - Rapport budget/dépenses
     - Analyse gaspillage
     - Export professionnel
+
+    Note: Ce service n'est PAS un CRUD — il génère des PDFs.
+    Les accès DB se font via @avec_session_db sur chaque méthode.
     """
 
     def __init__(self):
-        super().__init__(ArticleInventaire, cache_ttl=3600)
-        # Cache est statique, pas besoin d'instancier
         self.cache_ttl = 3600
 
     # ═══════════════════════════════════════════════════════════

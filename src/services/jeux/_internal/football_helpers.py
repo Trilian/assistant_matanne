@@ -8,42 +8,19 @@ pour la rétro-compatibilité avec l'ancien api_football.py.
 import logging
 from datetime import date, timedelta
 
-from src.core.config import obtenir_parametres
-
 from .football_types import CHAMP_MAPPING
 
 logger = logging.getLogger(__name__)
 
 
 # ═══════════════════════════════════════════════════════════
-# VARIABLE GLOBALE CLÉ API (compatibilité)
+# CLÉ API (ré-exportée depuis football_data — source unique)
 # ═══════════════════════════════════════════════════════════
 
-_API_KEY: str | None = None
-
-
-# ═══════════════════════════════════════════════════════════
-# CONFIGURATION
-# ═══════════════════════════════════════════════════════════
-
-
-def configurer_api_key(api_key: str) -> None:
-    """Configure la clé API Football-Data (fonction de compatibilité)."""
-    global _API_KEY
-    _API_KEY = api_key
-    logger.info("✅ Clé API Football-Data configurée")
-
-
-def obtenir_cle_api() -> str | None:
-    """Obtient la clé API depuis la config ou variable globale."""
-    global _API_KEY
-    if _API_KEY:
-        return _API_KEY
-    try:
-        return obtenir_parametres().FOOTBALL_DATA_API_KEY
-    except Exception:
-        return None
-
+# NOTE: obtenir_cle_api() et configurer_api_key() sont définis
+# dans football_data.py (source unique). Ré-exportés ici pour
+# compatibilité ascendante.
+from .football_data import configurer_api_key, obtenir_cle_api  # noqa: F401
 
 # ═══════════════════════════════════════════════════════════
 # FONCTIONS DE COMPATIBILITÉ (rétro-compat avec api_football.py)

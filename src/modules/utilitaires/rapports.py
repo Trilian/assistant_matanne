@@ -13,6 +13,7 @@ import pandas as pd
 import streamlit as st
 
 # Logique metier pure
+from src.core.session_keys import SK
 from src.services.rapports import ServiceRapportsPDF
 
 # ═══════════════════════════════════════════════════════════
@@ -100,7 +101,7 @@ def afficher_rapport_stocks():
             st.session_state.download_stocks = True
 
     # Aperçu
-    if st.session_state.get("preview_stocks"):
+    if st.session_state.get(SK.PREVIEW_STOCKS):
         try:
             donnees = service.generer_donnees_rapport_stocks(periode)
 
@@ -179,7 +180,7 @@ def afficher_rapport_stocks():
             st.error(f"❌ Erreur: {str(e)}")
 
     # Telechargement
-    if st.session_state.get("download_stocks"):
+    if st.session_state.get(SK.DOWNLOAD_STOCKS):
         try:
             pdf = service.generer_pdf_rapport_stocks(periode)
             filename = f"rapport_stocks_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
@@ -240,7 +241,7 @@ def afficher_rapport_budget():
             st.session_state.download_budget = True
 
     # Aperçu
-    if st.session_state.get("preview_budget"):
+    if st.session_state.get(SK.PREVIEW_BUDGET):
         try:
             donnees = service.generer_donnees_rapport_budget(periode)
 
@@ -315,7 +316,7 @@ def afficher_rapport_budget():
             st.error(f"❌ Erreur: {str(e)}")
 
     # Telechargement
-    if st.session_state.get("download_budget"):
+    if st.session_state.get(SK.DOWNLOAD_BUDGET):
         try:
             pdf = service.generer_pdf_rapport_budget(periode)
             filename = f"rapport_budget_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
@@ -376,7 +377,7 @@ def afficher_analyse_gaspillage():
             st.session_state.download_gaspillage = True
 
     # Aperçu
-    if st.session_state.get("preview_gaspillage"):
+    if st.session_state.get(SK.PREVIEW_GASPILLAGE):
         try:
             analyse = service.generer_analyse_gaspillage(periode)
 
@@ -448,7 +449,7 @@ def afficher_analyse_gaspillage():
             st.error(f"❌ Erreur: {str(e)}")
 
     # Telechargement
-    if st.session_state.get("download_gaspillage"):
+    if st.session_state.get(SK.DOWNLOAD_GASPILLAGE):
         try:
             pdf = service.generer_pdf_analyse_gaspillage(periode)
             filename = f"analyse_gaspillage_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"

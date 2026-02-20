@@ -183,6 +183,7 @@ class TestActivitesApp:
         app()
         mock_st.title.assert_called_once()
 
+    @patch("src.modules.famille.activites.etat_vide")
     @patch("src.modules.famille.activites.go")
     @patch("src.modules.famille.activites.pd")
     @patch("src.modules.famille.activites.obtenir_contexte_db")
@@ -199,6 +200,7 @@ class TestActivitesApp:
         mock_db_ctx,
         mock_pd,
         mock_go,
+        mock_etat_vide,
     ):
         from src.modules.famille.activites import app
 
@@ -211,7 +213,7 @@ class TestActivitesApp:
         mock_db_ctx.return_value.__enter__.return_value = mock_session
         mock_db_ctx.return_value.__exit__.return_value = False
         app()
-        mock_st.info.assert_called()
+        mock_etat_vide.assert_called()
 
 
 @pytest.mark.unit

@@ -30,16 +30,18 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # AI
     "AnalyseurIA": (".ai", "AnalyseurIA"),
     "CacheIA": (".ai", "CacheIA"),
+    "CircuitBreaker": (".ai", "CircuitBreaker"),
     "ClientIA": (".ai", "ClientIA"),
+    "EtatCircuit": (".ai", "EtatCircuit"),
     "RateLimitIA": (".ai", "RateLimitIA"),
+    "avec_circuit_breaker": (".ai", "avec_circuit_breaker"),
+    "obtenir_circuit": (".ai", "obtenir_circuit"),
     "obtenir_client_ia": (".ai", "obtenir_client_ia"),
     # Cache
     "Cache": (".caching", "Cache"),
     "CacheMultiNiveau": (".caching", "CacheMultiNiveau"),
     "EntreeCache": (".caching", "EntreeCache"),
     "StatistiquesCache": (".caching", "StatistiquesCache"),
-    "avec_cache_multi": (".caching", "avec_cache_multi"),
-    "cached": (".caching", "cached"),
     "obtenir_cache": (".caching", "obtenir_cache"),
     # Config
     "Parametres": (".config", "Parametres"),
@@ -58,6 +60,11 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "vacuum_database": (".db", "vacuum_database"),
     "verifier_connexion": (".db", "verifier_connexion"),
     "verifier_sante": (".db", "verifier_sante"),
+    # Events
+    "BusEvenements": (".events", "BusEvenements"),
+    "bus_evenements": (".events", "bus_evenements"),
+    # Repository
+    "Repository": (".repository", "Repository"),
     # Decorators
     "avec_cache": (".decorators", "avec_cache"),
     "avec_gestion_erreurs": (".decorators", "avec_gestion_erreurs"),
@@ -96,6 +103,12 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "naviguer": (".state", "naviguer"),
     "obtenir_etat": (".state", "obtenir_etat"),
     "revenir": (".state", "revenir"),
+    # Storage
+    "MemorySessionStorage": (".storage", "MemorySessionStorage"),
+    "SessionStorage": (".storage", "SessionStorage"),
+    "StreamlitSessionStorage": (".storage", "StreamlitSessionStorage"),
+    "configurer_storage": (".storage", "configurer_storage"),
+    "obtenir_storage": (".storage", "obtenir_storage"),
     # Validation
     "EntreeJournalInput": (".validation", "EntreeJournalInput"),
     "EtapeInput": (".validation", "EtapeInput"),

@@ -36,10 +36,12 @@ class TestServiceRapportsPDFInit:
         service = ServiceRapportsPDF()
         assert service.cache_ttl == 3600
 
-    def test_service_has_model(self):
-        """Vérifie que le modèle est défini."""
+    def test_service_is_not_crud(self):
+        """Vérifie que le service n'hérite plus de BaseService (pas CRUD)."""
+        from src.services.core.base import BaseService
+
         service = ServiceRapportsPDF()
-        assert service.model is not None
+        assert not isinstance(service, BaseService)
 
 
 class TestRapportStocks:

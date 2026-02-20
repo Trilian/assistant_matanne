@@ -5,179 +5,88 @@ Ce package regroupe:
 - types.py: Schemas Pydantic (RecetteSuggestion, VersionBebeGeneree, etc.)
 - utils.py: Fonctions utilitaires pures (export/import, calculs, filtres)
 - service.py: ServiceRecettes - CRUD, génération IA, import/export
+- import_url.py: Import de recettes depuis URL (avec IA)
+
+Imports paresseux (__getattr__) pour performance au démarrage.
 
 Exemple d'utilisation:
     from src.services.cuisine.recettes import obtenir_service_recettes, ServiceRecettes
 
-    # Obtenir le service singleton
     service = obtenir_service_recettes()
-
-    # Créer une recette
-    recette = service.create_complete({
-        "nom": "Poulet rôti",
-        "temps_preparation": 15,
-        "temps_cuisson": 60,
-        "portions": 4,
-        "difficulte": "facile",
-        "type_repas": "diner",
-    })
-
-    # Générer des suggestions IA
-    suggestions = service.generer_recettes_ia(
-        type_repas="diner",
-        saison="hiver",
-        nb_recettes=3,
-    )
 """
 
-# Types et schemas Pydantic
-# Import URL (scraping)
-from .import_url import (
-    CuisineAZParser,
-    GenericRecipeParser,
-    # Schemas
-    ImportedIngredient,
-    ImportedRecipe,
-    ImportResult,
-    MarmitonParser,
-    # Service
-    RecipeImportService,
-    # Parsers
-    RecipeParser,
-    get_recipe_import_service,
-)
+# ═══════════════════════════════════════════════════════════
+# LAZY IMPORTS — Mapping symbol → (module, attr_name)
+# ═══════════════════════════════════════════════════════════
 
-# Service principal
-from .service import (
-    ServiceRecettes,
-    obtenir_service_recettes,
-)
-from .types import (
-    RecetteSuggestion,
-    VersionBatchCookingGeneree,
-    VersionBebeGeneree,
-    VersionRobotGeneree,
-)
+_LAZY_IMPORTS: dict[str, tuple[str, str]] = {
+    # ─── Service Principal ───
+    "ServiceRecettes": (".service", "ServiceRecettes"),
+    "obtenir_service_recettes": (".service", "obtenir_service_recettes"),
+    # ─── Types Pydantic ───
+    "RecetteSuggestion": (".types", "RecetteSuggestion"),
+    "VersionBebeGeneree": (".types", "VersionBebeGeneree"),
+    "VersionBatchCookingGeneree": (".types", "VersionBatchCookingGeneree"),
+    "VersionRobotGeneree": (".types", "VersionRobotGeneree"),
+    # ─── Import URL (scraping + IA) ───
+    "ImportedIngredient": (".import_url", "ImportedIngredient"),
+    "ImportedRecipe": (".import_url", "ImportedRecipe"),
+    "ImportResult": (".import_url", "ImportResult"),
+    "RecipeParser": (".import_url", "RecipeParser"),
+    "MarmitonParser": (".import_url", "MarmitonParser"),
+    "CuisineAZParser": (".import_url", "CuisineAZParser"),
+    "GenericRecipeParser": (".import_url", "GenericRecipeParser"),
+    "RecipeImportService": (".import_url", "RecipeImportService"),
+    "get_recipe_import_service": (".import_url", "get_recipe_import_service"),
+    # ─── Constantes (utils.py) ───
+    "DIFFICULTES": (".utils", "DIFFICULTES"),
+    "TYPES_REPAS": (".utils", "TYPES_REPAS"),
+    "SAISONS": (".utils", "SAISONS"),
+    "ROBOTS_COMPATIBLES": (".utils", "ROBOTS_COMPATIBLES"),
+    # ─── Utilitaires Export/Import ───
+    "export_recettes_to_csv": (".utils", "export_recettes_to_csv"),
+    "parse_csv_to_recettes": (".utils", "parse_csv_to_recettes"),
+    "export_recettes_to_json": (".utils", "export_recettes_to_json"),
+    "parse_json_to_recettes": (".utils", "parse_json_to_recettes"),
+    # ─── Utilitaires Conversion ───
+    "recette_to_dict": (".utils", "recette_to_dict"),
+    "ingredient_to_dict": (".utils", "ingredient_to_dict"),
+    "etape_to_dict": (".utils", "etape_to_dict"),
+    # ─── Utilitaires Temps ───
+    "calculer_temps_total": (".utils", "calculer_temps_total"),
+    "estimer_temps_robot": (".utils", "estimer_temps_robot"),
+    "formater_temps": (".utils", "formater_temps"),
+    # ─── Utilitaires Portions ───
+    "ajuster_quantite_ingredient": (".utils", "ajuster_quantite_ingredient"),
+    "ajuster_ingredients": (".utils", "ajuster_ingredients"),
+    # ─── Utilitaires Filtres ───
+    "filtrer_recettes_par_temps": (".utils", "filtrer_recettes_par_temps"),
+    "filtrer_recettes_par_difficulte": (".utils", "filtrer_recettes_par_difficulte"),
+    "filtrer_recettes_par_type": (".utils", "filtrer_recettes_par_type"),
+    "filtrer_recettes_par_saison": (".utils", "filtrer_recettes_par_saison"),
+    "rechercher_par_nom": (".utils", "rechercher_par_nom"),
+    "rechercher_par_ingredient": (".utils", "rechercher_par_ingredient"),
+    # ─── Utilitaires Statistiques ───
+    "calculer_stats_recettes": (".utils", "calculer_stats_recettes"),
+    "calculer_score_recette": (".utils", "calculer_score_recette"),
+    # ─── Utilitaires Validation ───
+    "valider_difficulte": (".utils", "valider_difficulte"),
+    "valider_type_repas": (".utils", "valider_type_repas"),
+    "valider_temps": (".utils", "valider_temps"),
+    "valider_portions": (".utils", "valider_portions"),
+}
 
-# Fonctions utilitaires
-from .utils import (
-    # Constantes
-    DIFFICULTES,
-    ROBOTS_COMPATIBLES,
-    SAISONS,
-    TYPES_REPAS,
-    ajuster_ingredients,
-    # Portions
-    ajuster_quantite_ingredient,
-    calculer_score_recette,
-    # Stats
-    calculer_stats_recettes,
-    # Temps
-    calculer_temps_total,
-    estimer_temps_robot,
-    etape_to_dict,
-    # Export CSV
-    export_recettes_to_csv,
-    # Export JSON
-    export_recettes_to_json,
-    filtrer_recettes_par_difficulte,
-    filtrer_recettes_par_saison,
-    # Filtres
-    filtrer_recettes_par_temps,
-    filtrer_recettes_par_type,
-    formater_temps,
-    ingredient_to_dict,
-    parse_csv_to_recettes,
-    parse_json_to_recettes,
-    # Conversion
-    recette_to_dict,
-    rechercher_par_ingredient,
-    rechercher_par_nom,
-    # Validation
-    valider_difficulte,
-    valider_portions,
-    valider_temps,
-    valider_type_repas,
-)
 
-__all__ = [
-    # ═══════════════════════════════════════════════════════════
-    # SERVICE PRINCIPAL
-    # ═══════════════════════════════════════════════════════════
-    "ServiceRecettes",
-    "obtenir_service_recettes",
-    # ═══════════════════════════════════════════════════════════
-    # TYPES PYDANTIC
-    # ═══════════════════════════════════════════════════════════
-    "RecetteSuggestion",
-    "VersionBebeGeneree",
-    "VersionBatchCookingGeneree",
-    "VersionRobotGeneree",
-    # ═══════════════════════════════════════════════════════════
-    # CONSTANTES
-    # ═══════════════════════════════════════════════════════════
-    "DIFFICULTES",
-    "TYPES_REPAS",
-    "SAISONS",
-    "ROBOTS_COMPATIBLES",
-    # ═══════════════════════════════════════════════════════════
-    # UTILITAIRES - EXPORT/IMPORT
-    # ═══════════════════════════════════════════════════════════
-    "export_recettes_to_csv",
-    "parse_csv_to_recettes",
-    "export_recettes_to_json",
-    "parse_json_to_recettes",
-    # ═══════════════════════════════════════════════════════════
-    # UTILITAIRES - CONVERSION
-    # ═══════════════════════════════════════════════════════════
-    "recette_to_dict",
-    "ingredient_to_dict",
-    "etape_to_dict",
-    # ═══════════════════════════════════════════════════════════
-    # UTILITAIRES - TEMPS
-    # ═══════════════════════════════════════════════════════════
-    "calculer_temps_total",
-    "estimer_temps_robot",
-    "formater_temps",
-    # ═══════════════════════════════════════════════════════════
-    # UTILITAIRES - PORTIONS
-    # ═══════════════════════════════════════════════════════════
-    "ajuster_quantite_ingredient",
-    "ajuster_ingredients",
-    # ═══════════════════════════════════════════════════════════
-    # UTILITAIRES - FILTRES
-    # ═══════════════════════════════════════════════════════════
-    "filtrer_recettes_par_temps",
-    "filtrer_recettes_par_difficulte",
-    "filtrer_recettes_par_type",
-    "filtrer_recettes_par_saison",
-    "rechercher_par_nom",
-    "rechercher_par_ingredient",
-    # ═══════════════════════════════════════════════════════════
-    # UTILITAIRES - STATISTIQUES
-    # ═══════════════════════════════════════════════════════════
-    "calculer_stats_recettes",
-    "calculer_score_recette",
-    # ═══════════════════════════════════════════════════════════
-    # UTILITAIRES - VALIDATION
-    # ═══════════════════════════════════════════════════════════
-    "valider_difficulte",
-    "valider_type_repas",
-    "valider_temps",
-    "valider_portions",
-    # ═══════════════════════════════════════════════════════════
-    # IMPORT URL (SCRAPING)
-    # ═══════════════════════════════════════════════════════════
-    # Schemas
-    "ImportedIngredient",
-    "ImportedRecipe",
-    "ImportResult",
-    # Parsers
-    "RecipeParser",
-    "MarmitonParser",
-    "CuisineAZParser",
-    "GenericRecipeParser",
-    # Service
-    "RecipeImportService",
-    "get_recipe_import_service",
-]
+def __getattr__(name: str):
+    """Lazy import pour performance au démarrage."""
+    if name in _LAZY_IMPORTS:
+        module_path, attr_name = _LAZY_IMPORTS[name]
+        import importlib
+
+        mod = importlib.import_module(module_path, package=__name__)
+        return getattr(mod, attr_name)
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+__all__ = list(_LAZY_IMPORTS.keys())

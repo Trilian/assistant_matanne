@@ -63,7 +63,7 @@ async def list_courses(
             total = query.count()
 
             items = (
-                query.order_by(ListeCourses.created_at.desc())
+                query.order_by(ListeCourses.cree_le.desc())
                 .offset((page - 1) * page_size)
                 .limit(page_size)
                 .all()
@@ -75,7 +75,7 @@ async def list_courses(
                         "id": liste.id,
                         "nom": liste.nom,
                         "items_count": len(liste.articles) if liste.articles else 0,
-                        "created_at": liste.created_at,
+                        "created_at": liste.cree_le,
                     }
                     for liste in items
                 ],
@@ -234,7 +234,7 @@ async def get_liste(liste_id: int):
                 "id": liste.id,
                 "nom": liste.nom,
                 "archivee": liste.archivee,
-                "created_at": liste.created_at,
+                "created_at": liste.cree_le,
                 "items": [
                     {
                         "id": a.id,

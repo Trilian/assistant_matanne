@@ -189,18 +189,16 @@ class ServiceInventaire(
 
 
 # ═══════════════════════════════════════════════════════════
-# INSTANCE SINGLETON - LAZY LOADING
+# INSTANCE SINGLETON — Via ServiceRegistry (thread-safe)
 # ═══════════════════════════════════════════════════════════
 
-_service_inventaire: ServiceInventaire | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("inventaire", tags={"cuisine", "ia", "crud", "stock"})
 def obtenir_service_inventaire() -> ServiceInventaire:
-    """Obtient ou crée l'instance globale de ServiceInventaire."""
-    global _service_inventaire
-    if _service_inventaire is None:
-        _service_inventaire = ServiceInventaire()
-    return _service_inventaire
+    """Obtient ou crée l'instance ServiceInventaire (via registre, thread-safe)."""
+    return ServiceInventaire()
 
 
 def get_inventory_service() -> ServiceInventaire:

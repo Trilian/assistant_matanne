@@ -23,14 +23,14 @@ from .onglets import (
     onglet_stats,
     onglet_taches,
 )
-from .styles import ENTRETIEN_CSS
+from .styles import injecter_css_entretien
 
 __all__ = ["app"]
 
 
 def app():
     """Point d'entrée du module Entretien avec gamification."""
-    st.markdown(ENTRETIEN_CSS, unsafe_allow_html=True)
+    injecter_css_entretien()
 
     # Initialiser les données en session
     if "mes_objets_entretien" not in st.session_state:

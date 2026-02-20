@@ -113,7 +113,9 @@ def avec_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = N
 
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
-            from src.core.caching import Cache
+            from src.core.caching import CacheMultiNiveau
+
+            cache = CacheMultiNiveau()
 
             # Générer clé de cache
             if key_func is not None:
@@ -157,16 +159,16 @@ def avec_cache(ttl: int = 300, key_prefix: str | None = None, key_func: None = N
                 filtered_kwargs = {k: v for k, v in kwargs.items() if k != "db"}
                 cache_key = f"{prefix}_{str(args)}_{str(filtered_kwargs)}"
 
-            # Chercher en cache avec sentinelle
-            cached_value = Cache.obtenir(cache_key, sentinelle=_CACHE_MISS, ttl=ttl)
+            # Chercher dans le cache multi-niveaux (L1 → L2 → L3)
+            cached_value = cache.get(cache_key, default=_CACHE_MISS)
             if cached_value is not _CACHE_MISS:
                 logger.debug(f"Cache HIT: {cache_key}")
                 return cached_value
 
-            # Calculer et cacher
+            # Calculer et cacher (L1 + L2)
             logger.debug(f"Cache MISS: {cache_key}")
             result = func(*args, **kwargs)
-            Cache.definir(cache_key, result, ttl=ttl)
+            cache.set(cache_key, result, ttl=ttl)
 
             return result
 

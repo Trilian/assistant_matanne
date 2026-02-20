@@ -8,6 +8,7 @@ import streamlit as st
 from src.core.db import GestionnaireMigrations, vacuum_database
 from src.core.db import obtenir_infos_db as get_db_info
 from src.core.db import verifier_sante as health_check
+from src.core.session_keys import SK
 from src.ui import etat_vide
 from src.ui.components import Modale as Modal
 from src.ui.feedback import afficher_erreur, afficher_succes, spinner_intelligent
@@ -88,19 +89,33 @@ def afficher_database_config():
             "📜 Voir Historique", key="btn_show_migration_history", use_container_width=True
         ):
             st.session_state.show_migrations_history = not st.session_state.get(
-                "show_migrations_history", False
+                SK.SHOW_MIGRATIONS_HISTORY, False
             )
 
     # Afficher l'historique si demandé
-    if st.session_state.get("show_migrations_history", False):
+    if st.session_state.get(SK.SHOW_MIGRATIONS_HISTORY, False):
         with st.expander("📜 Historique des Migrations", expanded=True):
-            migrations_disponibles = GestionnaireMigrations.obtenir_migrations_disponibles()
-            if migrations_disponibles:
-                for m in migrations_disponibles:
-                    status = "✅" if m["version"] <= current_version else "⏳"
-                    st.markdown(f"{status} **v{m['version']}** - {m['name']}")
+            appliquees = GestionnaireMigrations.obtenir_migrations_appliquees()
+            disponibles = GestionnaireMigrations.obtenir_migrations_disponibles()
+
+            if disponibles:
+                for m in disponibles:
+                    v = m["version"]
+                    if v in appliquees:
+                        date_app = appliquees[v].get("applied_at", "")
+                        date_str = f" ({date_app:%Y-%m-%d})" if date_app else ""
+                        st.markdown(f"✅ **v{v}** - {m['name']} " f"(`{m['fichier']}`){date_str}")
+                    else:
+                        st.markdown(
+                            f"⏳ **v{v}** - {m['name']} " f"(`{m['fichier']}`) — en attente"
+                        )
+
+                # Vérifier les checksums modifiés
+                modifiees = GestionnaireMigrations.verifier_checksums()
+                if modifiees:
+                    st.warning(f"⚠️ {len(modifiees)} migration(s) modifiée(s) " f"après application")
             else:
-                etat_vide("Aucune migration définie", "🗄️")
+                etat_vide("Aucun fichier SQL dans sql/migrations/", "🗄️")
 
     st.markdown("---")
 

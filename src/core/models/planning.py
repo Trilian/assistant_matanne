@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     Date,
     DateTime,
     ForeignKey,
@@ -97,6 +98,13 @@ class Repas(Base):
     planning: Mapped["Planning"] = relationship(back_populates="repas")
     recette: Mapped[Optional["Recette"]] = relationship()
 
+    __table_args__ = (
+        CheckConstraint(
+            "portion_ajustee IS NULL OR (portion_ajustee > 0 AND portion_ajustee <= 20)",
+            name="ck_repas_portions_valides",
+        ),
+    )
+
     def __repr__(self) -> str:
         return f"<Repas(id={self.id}, date={self.date_repas}, type='{self.type_repas}')>"
 
@@ -155,6 +163,10 @@ class CalendarEvent(Base):
     __table_args__ = (
         Index("idx_date_type", "date_debut", "type_event"),
         Index("idx_date_range", "date_debut", "date_fin"),
+        CheckConstraint(
+            "rappel_avant_minutes IS NULL OR rappel_avant_minutes >= 0",
+            name="ck_event_rappel_positif",
+        ),
     )
 
     def __repr__(self) -> str:
@@ -185,9 +197,7 @@ class TemplateSemaine(Base):
     description: Mapped[str | None] = mapped_column(Text)
     actif: Mapped[bool] = mapped_column(Boolean, default=True)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     items: Mapped[list["TemplateItem"]] = relationship(
@@ -233,7 +243,13 @@ class TemplateItem(Base):
     # Relations
     template: Mapped["TemplateSemaine"] = relationship("TemplateSemaine", back_populates="items")
 
-    __table_args__ = (Index("idx_template_jour", "template_id", "jour_semaine"),)
+    __table_args__ = (
+        Index("idx_template_jour", "template_id", "jour_semaine"),
+        CheckConstraint(
+            "jour_semaine >= 0 AND jour_semaine <= 6",
+            name="ck_template_jour_valide",
+        ),
+    )
 
     def __repr__(self) -> str:
         return f"<TemplateItem(jour={self.jour_semaine}, heure={self.heure_debut}, titre='{self.titre}')>"

@@ -150,32 +150,44 @@ class TestServiceCoursesCreation:
 
     def test_factory_obtenir_service_courses(self, mock_client_ia):
         """Test factory function retourne instance."""
+        from src.services.core.registry import obtenir_registre
+
+        registre = obtenir_registre()
+        registre.reinitialiser("courses")
         with patch(
             "src.services.cuisine.courses.service.obtenir_client_ia", return_value=mock_client_ia
         ):
-            with patch("src.services.cuisine.courses.service._service_courses", None):
-                service = obtenir_service_courses()
-                assert service is not None
-                assert isinstance(service, ServiceCourses)
+            service = obtenir_service_courses()
+            assert service is not None
+            assert isinstance(service, ServiceCourses)
+        registre.reinitialiser("courses")
 
     def test_factory_singleton(self, mock_client_ia):
         """Test factory retourne même instance."""
+        from src.services.core.registry import obtenir_registre
+
+        registre = obtenir_registre()
+        registre.reinitialiser("courses")
         with patch(
             "src.services.cuisine.courses.service.obtenir_client_ia", return_value=mock_client_ia
         ):
-            with patch("src.services.cuisine.courses.service._service_courses", None):
-                service1 = obtenir_service_courses()
-                service2 = obtenir_service_courses()
-                assert service1 is service2
+            service1 = obtenir_service_courses()
+            service2 = obtenir_service_courses()
+            assert service1 is service2
+        registre.reinitialiser("courses")
 
     def test_factory_returns_instance(self, mock_client_ia):
         """Test factory retourne une instance ServiceCourses."""
+        from src.services.core.registry import obtenir_registre
+
+        registre = obtenir_registre()
+        registre.reinitialiser("courses")
         with patch(
             "src.services.cuisine.courses.service.obtenir_client_ia", return_value=mock_client_ia
         ):
-            with patch("src.services.cuisine.courses.service._service_courses", None):
-                service = obtenir_service_courses()
-                assert isinstance(service, ServiceCourses)
+            service = obtenir_service_courses()
+            assert isinstance(service, ServiceCourses)
+        registre.reinitialiser("courses")
 
 
 # ═══════════════════════════════════════════════════════════

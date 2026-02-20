@@ -2,6 +2,7 @@
 Module Sorties Weekend - Composants UI
 """
 
+from src.core.session_keys import SK
 from src.ui import etat_vide
 
 from .ai_service import WeekendAIService
@@ -53,7 +54,7 @@ def afficher_day_activities(day: date, activities: list):
     if not activities:
         st.caption("Rien de prevu")
         if st.button("➕ Ajouter", key=f"add_{day}"):
-            st.session_state["weekend_add_date"] = day
+            st.session_state[SK.WEEKEND_ADD_DATE] = day
             st.rerun()
         return
 
@@ -170,7 +171,7 @@ def afficher_add_activity():
     saturday, sunday = get_next_weekend()
 
     # Preremplir avec la date si selectionnee
-    default_date = st.session_state.get("weekend_add_date", saturday)
+    default_date = st.session_state.get(SK.WEEKEND_ADD_DATE, saturday)
 
     with st.form("add_weekend_activity"):
         titre = st.text_input("Titre *", placeholder="Ex: Parc de la Villette")
@@ -236,7 +237,7 @@ def afficher_add_activity():
                         db.add(activity)
                         db.commit()
                         st.success(f"✅ {titre} ajoute!")
-                        st.session_state.pop("weekend_add_date", None)
+                        st.session_state.pop(SK.WEEKEND_ADD_DATE, None)
                         st.rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")

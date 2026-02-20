@@ -10,7 +10,7 @@ Contient :
 
 from datetime import date, datetime
 from decimal import Decimal
-from enum import Enum, StrEnum
+from enum import StrEnum
 
 from sqlalchemy import (
     Boolean,
@@ -133,9 +133,7 @@ class Furniture(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     def __repr__(self) -> str:
         return f"<Furniture(id={self.id}, nom='{self.nom}', piece='{self.piece}')>"
@@ -177,9 +175,7 @@ class HouseStock(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     def __repr__(self) -> str:
         return f"<HouseStock(id={self.id}, nom='{self.nom}', qte={self.quantite})>"
@@ -234,9 +230,7 @@ class MaintenanceTask(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     def __repr__(self) -> str:
         return f"<MaintenanceTask(id={self.id}, nom='{self.nom}', fait={self.fait})>"

@@ -6,18 +6,15 @@ Ce module fournit un cache en mémoire avec :
 - Invalidations granulaires par tags/patterns
 - Statistiques en temps réel
 - Auto-cleanup des entrées expirées
+
+Note:
+    Pour le cache multi-niveaux (L1/L2/L3), utiliser :func:`CacheMultiNiveau`
+    via le décorateur :func:`@avec_cache` de ``src.core.decorators``.
 """
 
-import hashlib
-import json
 import logging
-from collections.abc import Callable
 from datetime import datetime
-from functools import wraps
-from typing import Any, ParamSpec, TypeVar
-
-P = ParamSpec("P")
-T = TypeVar("T")
+from typing import Any
 
 import streamlit as st
 
@@ -294,60 +291,3 @@ class Cache:
             st.session_state[Cache.CLE_STATS]["taille_octets"] = taille
         except Exception:
             logger.debug("Impossible de calculer la taille du cache (sys.getsizeof échoué)")
-
-
-# ═══════════════════════════════════════════════════════════
-# DÉCORATEUR CACHE
-# ═══════════════════════════════════════════════════════════
-
-
-def cached(
-    ttl: int = 300,
-    cle: str | None = None,
-    dependencies: list[str] | None = None,
-) -> Callable[[Callable[P, T]], Callable[P, T]]:
-    """
-    Décorateur pour cacher les résultats d'une fonction.
-
-    Args:
-        ttl: Durée de vie en secondes
-        cle: Clé personnalisée (sinon auto-générée)
-        dependencies: Tags pour invalidations
-
-    Returns:
-        Décorateur de fonction
-
-    Example:
-        >>> @cached(ttl=600, dependencies=["recettes"])
-        >>> def obtenir_recettes():
-        >>>     return recette_service.get_all()
-    """
-
-    def decorateur(func: Callable[P, T]) -> Callable[P, T]:
-        @wraps(func)
-        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-            # Générer clé cache
-            if cle:
-                cle_cache = cle
-            else:
-                cle_data = {"fonction": func.__name__, "args": str(args), "kwargs": str(kwargs)}
-                cle_cache = hashlib.md5(json.dumps(cle_data, sort_keys=True).encode()).hexdigest()
-
-            # Vérifier cache
-            resultat = Cache.obtenir(cle_cache, ttl)
-            if resultat is not None:
-                logger.debug(f"Cache HIT : {func.__name__}")
-                return resultat
-
-            # Exécuter fonction
-            resultat = func(*args, **kwargs)
-
-            # Cacher résultat
-            Cache.definir(cle_cache, resultat, ttl, dependencies)
-            logger.debug(f"Cache SET : {func.__name__}")
-
-            return resultat
-
-        return wrapper
-
-    return decorateur

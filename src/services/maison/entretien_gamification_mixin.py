@@ -260,8 +260,8 @@ class EntretienGamificationMixin:
                     d = datetime.fromisoformat(date_h).date() if isinstance(date_h, str) else date_h
                     if cle not in index or d > index[cle]:
                         index[cle] = d
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug("Date parsing ignorée: %s", e)
         return index
 
     def _evaluer_tache(
@@ -390,8 +390,8 @@ class EntretienGamificationMixin:
                         else date_str
                     )
                     dates_accomplies.add(d)
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug("Date parsing ignorée: %s", e)
 
         if not dates_accomplies:
             return 0
@@ -444,8 +444,8 @@ class EntretienGamificationMixin:
                             "description": badge_def["description"],
                         }
                     )
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Évaluation badge ignorée: %s", e)
         return obtenus
 
     def obtenir_ids_badges(self, stats: dict) -> list[str]:

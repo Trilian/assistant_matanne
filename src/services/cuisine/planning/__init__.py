@@ -7,6 +7,8 @@ Ce package fournit:
 - Types Pydantic: Schémas de validation pour tous les modèles planning
 - Utilitaires: Fonctions pures pour dates, équilibre, formatage
 
+Imports paresseux (__getattr__) pour performance au démarrage.
+
 Utilisation:
     ```python
     from src.services.cuisine.planning import obtenir_service_planning, ServicePlanning
@@ -17,194 +19,82 @@ Utilisation:
 """
 
 # ═══════════════════════════════════════════════════════════
-# TYPES & SCHÉMAS PYDANTIC
+# LAZY IMPORTS — Mapping symbol → (module, attr_name)
 # ═══════════════════════════════════════════════════════════
 
-# ═══════════════════════════════════════════════════════════
-# CONSTANTES
-# ═══════════════════════════════════════════════════════════
-from src.core.constants import (
-    JOURS_SEMAINE,
-    JOURS_SEMAINE_LOWER,
-    TYPES_PROTEINES,
-)
-from src.core.constants import (
-    TYPES_REPAS_KEYS as TYPES_REPAS,
-)
+_LAZY_IMPORTS: dict[str, tuple[str, str]] = {
+    # ─── Types & Schémas (types.py) ───
+    "JourPlanning": (".types", "JourPlanning"),
+    "SuggestionRecettesDay": (".types", "SuggestionRecettesDay"),
+    "ParametresEquilibre": (".types", "ParametresEquilibre"),
+    "JourCompletSchema": (".types", "JourCompletSchema"),
+    "SemaineCompleSchema": (".types", "SemaineCompleSchema"),
+    "SemaineGenereeIASchema": (".types", "SemaineGenereeIASchema"),
+    # ─── Constantes (src.core.constants) ───
+    "JOURS_SEMAINE": ("src.core.constants", "JOURS_SEMAINE"),
+    "JOURS_SEMAINE_LOWER": ("src.core.constants", "JOURS_SEMAINE_LOWER"),
+    "TYPES_PROTEINES": ("src.core.constants", "TYPES_PROTEINES"),
+    "TYPES_REPAS": ("src.core.constants", "TYPES_REPAS_KEYS"),
+    # ─── Service Planning (service.py) ───
+    "ServicePlanning": (".service", "ServicePlanning"),
+    "PlanningService": (".service", "ServicePlanning"),
+    "obtenir_service_planning": (".service", "obtenir_service_planning"),
+    # ─── Service Planning Unifié (global_planning.py) ───
+    "ServicePlanningUnifie": (".global_planning", "ServicePlanningUnifie"),
+    "obtenir_service_planning_unifie": (".global_planning", "obtenir_service_planning_unifie"),
+    # ─── Service Rappels (rappels.py) ───
+    "OPTIONS_RAPPEL": (".rappels", "OPTIONS_RAPPEL"),
+    "ServiceRappels": (".rappels", "ServiceRappels"),
+    "format_rappel": (".rappels", "format_rappel"),
+    "obtenir_service_rappels": (".rappels", "obtenir_service_rappels"),
+    # ─── Service Récurrence (recurrence.py) ───
+    "JOURS_SEMAINE_RECURRENCE": (".recurrence", "JOURS_SEMAINE_INDEX"),
+    "OPTIONS_RECURRENCE": (".recurrence", "OPTIONS_RECURRENCE"),
+    "ServiceRecurrence": (".recurrence", "ServiceRecurrence"),
+    "TypeRecurrence": (".recurrence", "TypeRecurrence"),
+    "format_recurrence": (".recurrence", "format_recurrence"),
+    "obtenir_service_recurrence": (".recurrence", "obtenir_service_recurrence"),
+    # ─── Service Templates (templates.py) ───
+    "ServiceTemplates": (".templates", "ServiceTemplates"),
+    "obtenir_service_templates": (".templates", "obtenir_service_templates"),
+    # ─── Utilitaires (utils.py) ───
+    "get_weekday_names": (".utils", "get_weekday_names"),
+    "get_weekday_name": (".utils", "get_weekday_name"),
+    "get_weekday_index": (".utils", "get_weekday_index"),
+    "calculate_week_dates": (".utils", "calculate_week_dates"),
+    "get_week_range": (".utils", "get_week_range"),
+    "get_monday_of_week": (".utils", "get_monday_of_week"),
+    "format_week_label": (".utils", "format_week_label"),
+    "determine_protein_type": (".utils", "determine_protein_type"),
+    "get_default_protein_schedule": (".utils", "get_default_protein_schedule"),
+    "calculate_week_balance": (".utils", "calculate_week_balance"),
+    "is_balanced_week": (".utils", "is_balanced_week"),
+    "format_meal_for_display": (".utils", "format_meal_for_display"),
+    "format_planning_summary": (".utils", "format_planning_summary"),
+    "group_meals_by_type": (".utils", "group_meals_by_type"),
+    "aggregate_ingredients": (".utils", "aggregate_ingredients"),
+    "sort_ingredients_by_rayon": (".utils", "sort_ingredients_by_rayon"),
+    "get_rayon_order": (".utils", "get_rayon_order"),
+    "validate_planning_dates": (".utils", "validate_planning_dates"),
+    "validate_meal_selection": (".utils", "validate_meal_selection"),
+    "build_planning_prompt_context": (".utils", "build_planning_prompt_context"),
+    "parse_ai_planning_response": (".utils", "parse_ai_planning_response"),
+}
 
-from .global_planning import (
-    # Classe principale
-    ServicePlanningUnifie,
-    # Factories
-    obtenir_service_planning_unifie,
-)
 
-# ═══════════════════════════════════════════════════════════
-# UTILITAIRES
-# ═══════════════════════════════════════════════════════════
-from .rappels import (
-    OPTIONS_RAPPEL,
-    ServiceRappels,
-    format_rappel,
-    obtenir_service_rappels,
-)
-from .recurrence import (
-    JOURS_SEMAINE_INDEX as JOURS_SEMAINE_RECURRENCE,
-)
-from .recurrence import (
-    OPTIONS_RECURRENCE,
-    ServiceRecurrence,
-    TypeRecurrence,
-    format_recurrence,
-    obtenir_service_recurrence,
-)
+def __getattr__(name: str):
+    """Lazy import pour performance au démarrage."""
+    if name in _LAZY_IMPORTS:
+        module_path, attr_name = _LAZY_IMPORTS[name]
+        import importlib
 
-# ═══════════════════════════════════════════════════════════
-# SERVICES
-# ═══════════════════════════════════════════════════════════
-from .service import (
-    # Classe principale
-    ServicePlanning,
-    # Factory
-    obtenir_service_planning,
-)
-from .templates import (
-    ServiceTemplates,
-    obtenir_service_templates,
-)
-from .types import (
-    # Schémas planning unifié
-    JourCompletSchema,
-    # Schémas planning de base
-    JourPlanning,
-    ParametresEquilibre,
-    SemaineCompleSchema,
-    SemaineGenereeIASchema,
-    SuggestionRecettesDay,
-)
-from .utils import (
-    # Courses
-    aggregate_ingredients,
-    # IA
-    build_planning_prompt_context,
-    calculate_week_balance,
-    calculate_week_dates,
-    # Équilibre nutritionnel
-    determine_protein_type,
-    # Formatage
-    format_meal_for_display,
-    format_planning_summary,
-    format_week_label,
-    get_default_protein_schedule,
-    get_monday_of_week,
-    get_rayon_order,
-    get_week_range,
-    get_weekday_index,
-    get_weekday_name,
-    # Dates
-    get_weekday_names,
-    group_meals_by_type,
-    is_balanced_week,
-    parse_ai_planning_response,
-    sort_ingredients_by_rayon,
-    validate_meal_selection,
-    # Validation
-    validate_planning_dates,
-)
+        if module_path.startswith("."):
+            mod = importlib.import_module(module_path, package=__name__)
+        else:
+            mod = importlib.import_module(module_path)
+        return getattr(mod, attr_name)
 
-# ═══════════════════════════════════════════════════════════
-# EXPORTS
-# ═══════════════════════════════════════════════════════════
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
-# Alias de compatibilité (anciens noms)
-PlanningService = ServicePlanning
 
-__all__ = [
-    # ─────────────────────────────────────────────────────────
-    # Types & Schémas
-    # ─────────────────────────────────────────────────────────
-    "JourPlanning",
-    "SuggestionRecettesDay",
-    "ParametresEquilibre",
-    "JourCompletSchema",
-    "SemaineCompleSchema",
-    "SemaineGenereeIASchema",
-    # ─────────────────────────────────────────────────────────
-    # Constantes
-    # ─────────────────────────────────────────────────────────
-    "JOURS_SEMAINE",
-    "JOURS_SEMAINE_LOWER",
-    "TYPES_REPAS",
-    "TYPES_PROTEINES",
-    # ─────────────────────────────────────────────────────────
-    # Utilitaires - Dates
-    # ─────────────────────────────────────────────────────────
-    "get_weekday_names",
-    "get_weekday_name",
-    "get_weekday_index",
-    "calculate_week_dates",
-    "get_week_range",
-    "get_monday_of_week",
-    "format_week_label",
-    # ─────────────────────────────────────────────────────────
-    # Utilitaires - Équilibre
-    # ─────────────────────────────────────────────────────────
-    "determine_protein_type",
-    "get_default_protein_schedule",
-    "calculate_week_balance",
-    "is_balanced_week",
-    # ─────────────────────────────────────────────────────────
-    # Utilitaires - Formatage
-    # ─────────────────────────────────────────────────────────
-    "format_meal_for_display",
-    "format_planning_summary",
-    "group_meals_by_type",
-    # ─────────────────────────────────────────────────────────
-    # Utilitaires - Courses
-    # ─────────────────────────────────────────────────────────
-    "aggregate_ingredients",
-    "sort_ingredients_by_rayon",
-    "get_rayon_order",
-    # ─────────────────────────────────────────────────────────
-    # Utilitaires - Validation
-    # ─────────────────────────────────────────────────────────
-    "validate_planning_dates",
-    "validate_meal_selection",
-    # ─────────────────────────────────────────────────────────
-    # Utilitaires - IA
-    # ─────────────────────────────────────────────────────────
-    "build_planning_prompt_context",
-    "parse_ai_planning_response",
-    # ─────────────────────────────────────────────────────────
-    # Services - Planning de base
-    # ─────────────────────────────────────────────────────────
-    "ServicePlanning",
-    "PlanningService",  # Alias compatibilité
-    "obtenir_service_planning",
-    # ─────────────────────────────────────────────────────────
-    # Services - Planning unifié
-    # ─────────────────────────────────────────────────────────
-    "ServicePlanningUnifie",
-    "obtenir_service_planning_unifie",
-    # ─────────────────────────────────────────────────────────
-    # Services - Rappels
-    # ─────────────────────────────────────────────────────────
-    "OPTIONS_RAPPEL",
-    "ServiceRappels",
-    "format_rappel",
-    "obtenir_service_rappels",
-    # ─────────────────────────────────────────────────────────
-    # Services - Récurrence
-    # ─────────────────────────────────────────────────────────
-    "JOURS_SEMAINE_RECURRENCE",
-    "OPTIONS_RECURRENCE",
-    "ServiceRecurrence",
-    "TypeRecurrence",
-    "format_recurrence",
-    "obtenir_service_recurrence",
-    # ─────────────────────────────────────────────────────────
-    # Services - Templates de semaine
-    # ─────────────────────────────────────────────────────────
-    "ServiceTemplates",
-    "obtenir_service_templates",
-]
+__all__ = list(_LAZY_IMPORTS.keys())

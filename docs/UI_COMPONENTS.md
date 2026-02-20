@@ -9,7 +9,7 @@ Tous les noms suivent la convention française : `afficher_*`, `obtenir_*`, `def
 src/ui/
 ├── __init__.py          # Point d'entrée unifié (~90 exports)
 ├── components/          # Composants UI réutilisables (27 exports)
-│   ├── atoms.py         # Badge, état vide, notification, etc.
+│   ├── atoms.py         # Badge, état vide, carte métrique, etc.
 │   ├── alertes.py       # Alertes stock
 │   ├── charts.py        # Graphiques Plotly
 │   ├── data.py          # Pagination, tableaux, export
@@ -83,17 +83,18 @@ from src.ui.components import carte_metrique
 carte_metrique("Total", "42", "+5", "#f0f0f0")
 ```
 
-### `notification(message, type)`
+### Notifications (via `GestionnaireNotifications`)
 
-Notification immédiate (wrapper Streamlit). Pour notifications temporaires, utilisez les toasts.
+Les notifications passent désormais par `GestionnaireNotifications` dans `src/ui/feedback/toasts.py`.
+Utilise `st.toast()` avec déduplication automatique (fenêtre de 3s).
 
 ```python
-from src.ui.components import notification
+from src.ui.feedback.toasts import GestionnaireNotifications
 
-notification("Sauvegardé", "success")    # st.success
-notification("Erreur!", "error")          # st.error
-notification("Attention", "warning")      # st.warning
-notification("Info", "info")              # st.info
+GestionnaireNotifications.afficher("Sauvegardé", "success")   # st.toast avec ✅
+GestionnaireNotifications.afficher("Erreur!", "error")          # st.toast avec ❌
+GestionnaireNotifications.afficher("Attention", "warning")      # st.toast avec ⚠️
+GestionnaireNotifications.afficher("Info", "info")              # st.toast avec ℹ️
 ```
 
 ### `separateur(texte)`

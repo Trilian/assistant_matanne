@@ -35,35 +35,24 @@ class TypeNotification(StrEnum):
 
     # Alertes importantes
     STOCK_BAS = "stock_low"
-    STOCK_LOW = "stock_low"  # Alias rétrocompat
     PEREMPTION_ALERTE = "expiration_warning"
-    EXPIRATION_WARNING = "expiration_warning"  # Alias rétrocompat
     PEREMPTION_CRITIQUE = "expiration_critical"
-    EXPIRATION_CRITICAL = "expiration_critical"  # Alias rétrocompat
 
     # Planning
     RAPPEL_REPAS = "meal_reminder"
-    MEAL_REMINDER = "meal_reminder"  # Alias rétrocompat
     RAPPEL_ACTIVITE = "activity_reminder"
-    ACTIVITY_REMINDER = "activity_reminder"  # Alias rétrocompat
 
     # Courses
     LISTE_PARTAGEE = "shopping_list_shared"
-    SHOPPING_LIST_SHARED = "shopping_list_shared"  # Alias rétrocompat
     LISTE_MISE_A_JOUR = "shopping_list_updated"
-    SHOPPING_LIST_UPDATED = "shopping_list_updated"  # Alias rétrocompat
 
     # Famille
     RAPPEL_JALON = "milestone_reminder"
-    MILESTONE_REMINDER = "milestone_reminder"  # Alias rétrocompat
     RAPPEL_SANTE = "health_check_reminder"
-    HEALTH_CHECK_REMINDER = "health_check_reminder"  # Alias rétrocompat
 
     # Système
     MISE_A_JOUR_SYSTEME = "system_update"
-    SYSTEM_UPDATE = "system_update"  # Alias rétrocompat
     SYNC_TERMINEE = "sync_complete"
-    SYNC_COMPLETE = "sync_complete"  # Alias rétrocompat
 
 
 # ═══════════════════════════════════════════════════════════

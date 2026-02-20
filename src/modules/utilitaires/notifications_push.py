@@ -13,6 +13,7 @@ from datetime import date
 
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.services.core.notifications import (
     ConfigurationNtfy,
     NotificationPush,
@@ -46,14 +47,14 @@ HELP_NTFY = """
 
 def charger_config() -> ConfigurationNtfy:
     """Charge la configuration depuis session_state."""
-    if "notif_config" not in st.session_state:
-        st.session_state["notif_config"] = ConfigurationNtfy()
-    return st.session_state["notif_config"]
+    if SK.NOTIF_CONFIG not in st.session_state:
+        st.session_state[SK.NOTIF_CONFIG] = ConfigurationNtfy()
+    return st.session_state[SK.NOTIF_CONFIG]
 
 
 def sauvegarder_config(config: ConfigurationNtfy):
     """Sauvegarde la configuration en session_state."""
-    st.session_state["notif_config"] = config
+    st.session_state[SK.NOTIF_CONFIG] = config
 
 
 # ═══════════════════════════════════════════════════════════
@@ -152,11 +153,11 @@ def _simuler_notification(titre: str, message: str, priorite: int = 3, tags: lis
     from datetime import datetime
 
     # Stocker dans session_state
-    if "notif_demo_history" not in st.session_state:
-        st.session_state["notif_demo_history"] = []
+    if SK.NOTIF_DEMO_HISTORY not in st.session_state:
+        st.session_state[SK.NOTIF_DEMO_HISTORY] = []
 
     notif_id = str(uuid.uuid4())[:8]
-    st.session_state["notif_demo_history"].append(
+    st.session_state[SK.NOTIF_DEMO_HISTORY].append(
         {
             "id": notif_id,
             "titre": titre,
@@ -190,9 +191,9 @@ def afficher_test():
     # Mode démo toggle
     mode_demo = st.toggle(
         "🎭 Mode démo (simulation locale)",
-        value=st.session_state.get("notif_mode_demo", False),
+        value=st.session_state.get(SK.NOTIF_MODE_DEMO, False),
         help="Affiche les notifications localement sans les envoyer à ntfy.sh",
-        key="notif_mode_demo",
+        key=SK.NOTIF_MODE_DEMO,
     )
 
     if mode_demo:
@@ -292,17 +293,17 @@ def afficher_test():
                         st.error(f"❌ {resultat.message}")
 
     # Historique des notifications démo
-    if mode_demo and st.session_state.get("notif_demo_history"):
+    if mode_demo and st.session_state.get(SK.NOTIF_DEMO_HISTORY):
         st.divider()
         col1, col2 = st.columns([3, 1])
         with col1:
             st.markdown("### 📜 Historique démo")
         with col2:
             if st.button("🗑️ Effacer", key="clear_demo_history"):
-                st.session_state["notif_demo_history"] = []
+                st.session_state[SK.NOTIF_DEMO_HISTORY] = []
                 st.rerun()
 
-        for notif in reversed(st.session_state["notif_demo_history"][-5:]):
+        for notif in reversed(st.session_state[SK.NOTIF_DEMO_HISTORY][-5:]):
             priorite_emoji = {1: "⬜", 2: "🟦", 3: "🟩", 4: "🟧", 5: "🟥"}[notif["priorite"]]
             with st.container(border=True):
                 st.markdown(f"**{priorite_emoji} {notif['titre']}**")

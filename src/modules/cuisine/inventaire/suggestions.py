@@ -7,6 +7,7 @@ import logging
 
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.services.inventaire import obtenir_service_inventaire
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ def afficher_suggestions_ia():
     st.info("🤖 Suggestions IA basées sur l'état de votre inventaire")
 
     # Initialiser l'état
-    if "suggestions_data" not in st.session_state:
+    if SK.SUGGESTIONS_DATA not in st.session_state:
         st.session_state.suggestions_data = None
 
     if st.button("🛒 Générer les suggestions", width="stretch"):
@@ -42,7 +43,7 @@ def afficher_suggestions_ia():
             logger.error(f"Erreur suggestions IA: {e}", exc_info=True)
 
     # Afficher les suggestions stockées
-    if st.session_state.get("suggestions_data"):
+    if st.session_state.get(SK.SUGGESTIONS_DATA):
         suggestions = st.session_state.suggestions_data
 
         if suggestions:

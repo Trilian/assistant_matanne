@@ -184,11 +184,12 @@ class TestConstantsConsistency:
 
     def test_constantes_type_coherent(self):
         """Test que les types de constantes sont cohérents."""
-        # Les constantes numérotées doivent être int, float, str ou list/tuple
+        import datetime
+
+        # Les constantes peuvent être int, float, str, list, tuple, dict ou date
         for attr in dir(constants):
             if attr.isupper():
                 value = getattr(constants, attr)
-                # Peut être int, float, str, list, tuple, dict
                 assert isinstance(
-                    value, int | float | str | list | tuple | dict
+                    value, int | float | str | list | tuple | dict | datetime.date
                 ), f"{attr} a un type inattendu: {type(value)}"

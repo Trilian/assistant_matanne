@@ -237,6 +237,7 @@ __all__ = [
     # Base
     "Base",
     "metadata",
+    "utc_now",
     "PrioriteEnum",
     "SaisonEnum",
     "TypeRepasEnum",

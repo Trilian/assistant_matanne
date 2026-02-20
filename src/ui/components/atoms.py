@@ -1,19 +1,22 @@
 """
 UI Components - Atoms (composants de base)
-badge, etat_vide, carte_metrique, notification, separateur, boite_info
+badge, etat_vide, carte_metrique, separateur, boite_info
 
 Note: Pour des métriques plus avancées avec icônes et liens,
 utilisez carte_metrique_avancee depuis src.ui.components.metrics
 """
 
-import warnings
+from __future__ import annotations
 
 import streamlit as st
 
+from src.ui.registry import composant_ui
+from src.ui.tokens import Couleur, Espacement, Ombre, Rayon, Typographie
 from src.ui.utils import echapper_html
 
 
-def badge(texte: str, couleur: str = "#4CAF50"):
+@composant_ui("atoms", exemple='badge("Actif", Couleur.SUCCESS)', tags=["badge", "label"])
+def badge(texte: str, couleur: str = Couleur.SUCCESS) -> None:
     """
     Badge coloré
 
@@ -26,12 +29,13 @@ def badge(texte: str, couleur: str = "#4CAF50"):
     """
     st.markdown(
         f'<span style="background: {couleur}; color: white; '
-        f"padding: 0.25rem 0.75rem; border-radius: 12px; "
-        f'font-size: 0.875rem; font-weight: 600;">{echapper_html(texte)}</span>',
+        f"padding: {Espacement.XS} 0.75rem; border-radius: {Rayon.PILL}; "
+        f'font-size: {Typographie.BODY_SM}; font-weight: 600;">{echapper_html(texte)}</span>',
         unsafe_allow_html=True,
     )
 
 
+@composant_ui("atoms", exemple='etat_vide("Aucune recette", "🍽️")', tags=["empty", "placeholder"])
 def etat_vide(message: str, icone: str = "📭", sous_texte: str | None = None):
     """
     État vide centré
@@ -45,22 +49,27 @@ def etat_vide(message: str, icone: str = "📭", sous_texte: str | None = None):
         etat_vide("Aucune recette", "🍽️", "Ajoutez-en une")
     """
     html_sous_texte = (
-        f'<div style="font-size: 1rem; margin-top: 0.5rem;">{echapper_html(sous_texte)}</div>'
+        f'<div style="font-size: {Typographie.BODY}; margin-top: {Espacement.SM};">'
+        f"{echapper_html(sous_texte)}</div>"
         if sous_texte
         else ""
     )
 
     st.markdown(
-        f'<div style="text-align: center; padding: 3rem; color: #6c757d;">'
-        f'<div style="font-size: 4rem;">{echapper_html(icone)}</div>'
-        f'<div style="font-size: 1.5rem; margin-top: 1rem; font-weight: 500;">{echapper_html(message)}</div>'
+        f'<div style="text-align: center; padding: {Espacement.XXL}; color: {Couleur.TEXT_SECONDARY};">'
+        f'<div style="font-size: {Typographie.DISPLAY};">{echapper_html(icone)}</div>'
+        f'<div style="font-size: {Typographie.H3}; margin-top: {Espacement.MD}; font-weight: 500;">'
+        f"{echapper_html(message)}</div>"
         f"{html_sous_texte}"
         f"</div>",
         unsafe_allow_html=True,
     )
 
 
-def carte_metrique(label: str, valeur: str, delta: str | None = None, couleur: str = "#ffffff"):
+@composant_ui("atoms", exemple='carte_metrique("Total", "42", "+5")', tags=["metric", "kpi"])
+def carte_metrique(
+    label: str, valeur: str, delta: str | None = None, couleur: str = Couleur.BG_SURFACE
+):
     """
     Carte métrique simple.
 
@@ -80,60 +89,26 @@ def carte_metrique(label: str, valeur: str, delta: str | None = None, couleur: s
         carte_metrique_avancee: Version avancée avec plus d'options
     """
     html_delta = (
-        f'<div style="font-size: 0.875rem; color: #4CAF50; margin-top: 0.25rem;">{echapper_html(delta)}</div>'
+        f'<div style="font-size: {Typographie.BODY_SM}; color: {Couleur.DELTA_POSITIVE}; '
+        f'margin-top: {Espacement.XS};">{echapper_html(delta)}</div>'
         if delta
         else ""
     )
 
     st.markdown(
-        f'<div style="background: {couleur}; padding: 1.5rem; '
-        f'border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">'
-        f'<div style="font-size: 0.875rem; color: #666; font-weight: 500;">{echapper_html(label)}</div>'
-        f'<div style="font-size: 2rem; font-weight: 700; margin-top: 0.5rem;">{echapper_html(valeur)}</div>'
+        f'<div style="background: {couleur}; padding: {Espacement.LG}; '
+        f'border-radius: {Rayon.LG}; box-shadow: {Ombre.SM};">'
+        f'<div style="font-size: {Typographie.BODY_SM}; color: {Couleur.TEXT_SECONDARY}; '
+        f'font-weight: 500;">{echapper_html(label)}</div>'
+        f'<div style="font-size: {Typographie.H2}; font-weight: 700; '
+        f'margin-top: {Espacement.SM};">{echapper_html(valeur)}</div>'
         f"{html_delta}"
         f"</div>",
         unsafe_allow_html=True,
     )
 
 
-def notification(message: str, type_notif: str = "success", **kwargs):
-    """
-    Notification simple immédiate (wrapper Streamlit).
-
-    .. deprecated::
-        Utiliser ``afficher_succes``, ``afficher_erreur``, ``afficher_avertissement``,
-        ``afficher_info`` depuis ``src.ui.feedback`` à la place.
-
-    Args:
-        message: Message à afficher
-        type_notif: "success", "error", "warning", "info"
-
-    Example:
-        notification("Sauvegarde réussie", "success")
-
-    See Also:
-        src.ui.feedback.afficher_succes: Toast avec expiration automatique
-        src.ui.feedback.afficher_erreur: Toast erreur
-    """
-    # Rétrocompatibilité: accepter l'ancien paramètre 'type'
-    if "type" in kwargs:
-        type_notif = kwargs.pop("type")
-    warnings.warn(
-        "notification() est déprécié. Utiliser afficher_succes/afficher_erreur "
-        "de src.ui.feedback à la place.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    if type_notif == "success":
-        st.success(message)
-    elif type_notif == "error":
-        st.error(message)
-    elif type_notif == "warning":
-        st.warning(message)
-    else:
-        st.info(message)
-
-
+@composant_ui("atoms", exemple='separateur("OU")', tags=["divider", "separator"])
 def separateur(texte: str | None = None):
     """
     Séparateur avec texte optionnel
@@ -143,10 +118,10 @@ def separateur(texte: str | None = None):
     """
     if texte:
         st.markdown(
-            f'<div style="text-align: center; margin: 1.5rem 0;">'
-            f'<span style="padding: 0 1rem; background: white; '
+            f'<div style="text-align: center; margin: {Espacement.LG} 0;">'
+            f'<span style="padding: 0 {Espacement.MD}; background: white; '
             f'position: relative; top: -0.75rem;">{echapper_html(texte)}</span>'
-            f'<hr style="margin-top: -1.5rem; border: 1px solid #e0e0e0;">'
+            f'<hr style="margin-top: -{Espacement.LG}; border: 1px solid {Couleur.BORDER_LIGHT};">'
             f"</div>",
             unsafe_allow_html=True,
         )
@@ -154,6 +129,11 @@ def separateur(texte: str | None = None):
         st.markdown("---")
 
 
+@composant_ui(
+    "atoms",
+    exemple='boite_info("Astuce", "Ctrl+S pour sauvegarder", "💡")',
+    tags=["info", "callout"],
+)
 def boite_info(titre: str, contenu: str, icone: str = "ℹ️"):
     """
     Boîte d'information
@@ -162,9 +142,9 @@ def boite_info(titre: str, contenu: str, icone: str = "ℹ️"):
         boite_info("Astuce", "Utilisez Ctrl+S pour sauvegarder", "💡")
     """
     st.markdown(
-        f'<div style="background: #e7f3ff; border-left: 4px solid #2196F3; '
-        f'padding: 1rem; border-radius: 4px; margin: 1rem 0;">'
-        f'<div style="font-weight: 600; margin-bottom: 0.5rem;">'
+        f'<div style="background: {Couleur.BG_INFO}; border-left: 4px solid {Couleur.BORDER_INFO}; '
+        f'padding: {Espacement.MD}; border-radius: {Rayon.SM}; margin: {Espacement.MD} 0;">'
+        f'<div style="font-weight: 600; margin-bottom: {Espacement.SM};">'
         f"{echapper_html(icone)} {echapper_html(titre)}</div>"
         f"<div>{echapper_html(contenu)}</div>"
         f"</div>",

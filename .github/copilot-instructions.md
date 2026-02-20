@@ -4,7 +4,7 @@
 
 **Type**: Application Streamlit de gestion familiale  
 **Langage**: Python 3.11+ avec SQLAlchemy 2.0 ORM  
-**Base de données**: Supabase PostgreSQL avec migrations Alembic  
+**Base de données**: Supabase PostgreSQL avec migrations SQL-file  
 **Stack clé**: Streamlit, SQLAlchemy, Pydantic v2, API Mistral AI, pandas, Plotly
 
 Hub de gestion familiale en production avec modules pour:
@@ -26,15 +26,15 @@ Hub de gestion familiale en production avec modules pour:
 
 Le core est organisé en **7 sous-packages** + fichiers utilitaires.
 
-- **ai/**: `ClientIA` (client Mistral), `AnalyseurIA` (parsing JSON/Pydantic), `CacheIA` (cache sémantique), `RateLimitIA` (source de vérité rate limiting)
-- **caching/**: Cache multi-niveaux — `base.py` (types), `cache.py` (Cache, @cached typé ParamSpec), `memory.py` (L1), `session.py` (L2), `file.py` (L3), `orchestrator.py` (CacheMultiNiveau, @avec_cache_multi typé ParamSpec)
+- **ai/**: `ClientIA` (client Mistral), `AnalyseurIA` (parsing JSON/Pydantic), `CacheIA` (cache sémantique), `RateLimitIA` (rate limiting), `CircuitBreaker` (résilience API)
+- **caching/**: Cache multi-niveaux — `base.py` (types), `cache.py` (Cache), `memory.py` (L1), `session.py` (L2), `file.py` (L3), `orchestrator.py` (CacheMultiNiveau). Décorateur unifié `@avec_cache` dans `decorators.py`
 - **config/**: Pydantic `BaseSettings` — `settings.py` (Parametres, obtenir_parametres), `loader.py` (chargement .env, secrets Streamlit). Seuls `Parametres`, `obtenir_parametres`, `charger_secrets_streamlit` sont exportés.
 - **date_utils/**: Package utilitaires de dates (ex-fichier unique 429 lignes) — `semaines.py`, `periodes.py`, `formatage.py`, `helpers.py`. Re-exports transparents via `__init__.py`.
-- **db/**: Base de données — `engine.py` (Engine SQLAlchemy, QueuePool), `session.py` (context managers), `migrations.py` (GestionnaireMigrations), `utils.py` (health checks)
+- **db/**: Base de données — `engine.py` (Engine SQLAlchemy, QueuePool), `session.py` (context managers), `migrations.py` (GestionnaireMigrations SQL-file), `utils.py` (health checks)
 - **models/**: Modèles SQLAlchemy ORM modulaires (19 fichiers organisés par domaine)
 - **validation/**: Package validation — `schemas/` (sous-package Pydantic: `recettes.py`, `inventaire.py`, `courses.py`, `planning.py`, `famille.py`, `projets.py`, `_helpers.py`), `sanitizer.py` (anti-XSS/injection), `validators.py` (helpers)
-- **decorators.py**: `@with_db_session`, `@with_cache`, `@with_error_handling`
-- **Utilitaires**: `constants.py`, `errors.py`, `errors_base.py`, `state.py`, `logging.py`, `lazy_loader.py`, `py.typed`
+- **decorators.py**: `@avec_session_db`, `@avec_cache` (multi-niveaux unifié), `@avec_gestion_erreurs`, `@avec_validation`
+- **Utilitaires**: `constants.py`, `errors.py`, `errors_base.py`, `state.py`, `storage.py` (SessionStorage Protocol), `events.py` (bus pub/sub), `repository.py` (CRUD générique), `logging.py`, `lazy_loader.py`, `py.typed`
 
 ### Couche Services (src/services/)
 
@@ -91,20 +91,16 @@ python manage.py run
 ### Base de données et migrations
 
 ```bash
-# Génère automatiquement une migration à partir des changements de modèles
+# Crée un fichier SQL numéroté dans sql/migrations/
 python manage.py create_migration
-# Vous demande un message, exécute: alembic revision --autogenerate -m "message"
+# Vous demande un message, génère: sql/migrations/NNN_description.sql
 
-# Applique les migrations en attente
+# Applique les migrations SQL en attente
 python manage.py migrate
-# Exécute: alembic upgrade head
+# Exécute les fichiers SQL non encore appliqués, vérifie les checksums SHA-256
 
-# Vérifie la version actuelle de migration
-python -c "from src.core.db import GestionnaireMigrations; print(GestionnaireMigrations.obtenir_version_courante())"
-
-# Voir le statut d'Alembic
-alembic current
-alembic history
+# Vérifie les migrations appliquées
+python -c "from src.core.db import GestionnaireMigrations; print(GestionnaireMigrations.obtenir_migrations_appliquees())"
 ```
 
 ### Tests
@@ -197,16 +193,19 @@ Clé: Toujours utiliser `obtenir_contexte_db()` — ne jamais créer Engine/Sess
 
 ### Stratégie de cache
 
-- **Cache multi-niveaux**: `src/core/caching/` — L1 mémoire, L2 session, L3 fichier avec `@avec_cache_multi`
+- **Cache multi-niveaux unifié**: `@avec_cache(ttl=300)` dans `src/core/decorators.py` — délègue à `CacheMultiNiveau` (L1 mémoire → L2 session → L3 fichier)
 - **Cache Streamlit**: `@st.cache_data(ttl=1800)` pour les données UI (par défaut 30 min)
 - **Cache des réponses IA**: `CacheIA` dans `src/core/ai/cache.py` pour le cache sémantique des appels IA
 - **Invalidation manuelle**: `StateManager` peut nettoyer le cache lors d'actions utilisateur
 - Exemple:
   ```python
-  from src.core.caching import obtenir_cache
-  cache = obtenir_cache()
-  # Utilisation via orchestrateur multi-niveaux
+  from src.core.decorators import avec_cache
+
+  @avec_cache(ttl=300)
+  def get_recettes(): ...
   ```
+
+> **Note**: Un seul décorateur de cache `@avec_cache`. Les anciens `@cached` et `@avec_cache_multi` ont été supprimés.
 
 ### Modèle de chargement différé
 
@@ -290,9 +289,9 @@ Importer via: `from src.core.config import obtenir_parametres()`
 1. Ajouter la classe dans le fichier approprié sous [src/core/models/](src/core/models/) en héritant de `Base`
 2. Suivre les modèles ORM SQLAlchemy 2.0 avec indices de type `mapped_column` et `Mapped`
 3. Utiliser la convention de nommage pour les contraintes (déjà configurée dans models.py)
-4. Créer la migration: `python manage.py create_migration "Add new model fields"`
-5. Migration générée automatiquement par la fonctionnalité autogenerate d'Alembic
-6. Les fichiers de migration apparaissent dans `alembic/versions/` numérotés avec préfixe de date
+4. Créer la migration: `python manage.py create_migration` (génère un fichier SQL numéroté)
+5. Écrire le DDL SQL dans le fichier généré sous `sql/migrations/`
+6. Appliquer: `python manage.py migrate`
 
 ### Intégration IA
 
@@ -344,16 +343,18 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 | ------------------------------------------------------------------ | --------------------------------------------------------- |
 | [src/core/config/](src/core/config/)                               | Package configuration (Pydantic BaseSettings)             |
 | [src/core/db/](src/core/db/)                                       | Package base de données (engine, sessions, migrations)    |
-| [src/core/caching/](src/core/caching/)                             | Package cache multi-niveaux (L1/L2/L3, @cached typé)      |
+| [src/core/caching/](src/core/caching/)                             | Package cache multi-niveaux (L1/L2/L3, @avec_cache unifié)|
 | [src/core/date_utils/](src/core/date_utils/)                       | Package utilitaires dates (semaines, periodes, formatage) |
 | [src/core/validation/](src/core/validation/)                       | Package validation (schemas/ sous-package, sanitizer)     |
 | [src/core/monitoring/](src/core/monitoring/)                       | Package métriques & performance                           |
-| [src/core/ai/](src/core/ai/)                                       | Package IA (Mistral, rate limiting, cache sémantique)     |
+| [src/core/ai/](src/core/ai/)                                       | Package IA (Mistral, rate limiting, cache, circuit breaker)|
 | [src/core/models/](src/core/models/)                               | Tous les modèles ORM SQLAlchemy (19 fichiers)             |
-| [src/core/decorators.py](src/core/decorators.py)                   | Utilitaires `@with_db_session`, `@with_cache`             |
+| [src/core/decorators.py](src/core/decorators.py)                   | `@avec_session_db`, `@avec_cache`, `@avec_gestion_erreurs`|
+| [src/core/storage.py](src/core/storage.py)                         | SessionStorage Protocol (découplage Streamlit)            |
+| [src/core/events.py](src/core/events.py)                           | Bus d'événements pub/sub avec wildcards                    |
+| [src/core/repository.py](src/core/repository.py)                   | Repository générique CRUD typé                             |
 | [src/app.py](src/app.py)                                           | App Streamlit principale, routage, chargement différé     |
 | [pyproject.toml](pyproject.toml)                                   | Dépendances (Poetry), config test, règles de linting      |
-| [alembic/env.py](alembic/env.py)                                   | Configuration d'environnement des migrations              |
 | [docs/MIGRATION_CORE_PACKAGES.md](docs/MIGRATION_CORE_PACKAGES.md) | Guide de migration des imports                            |
 
 ---
@@ -377,6 +378,6 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 
 **Les migrations ne s'appliquent pas?**
 
-- Vérifier `alembic/versions/` pour les erreurs de syntaxe
-- Assurer que tous les imports dans les fichiers de migration sont valides
-- Exécuter `alembic current` pour voir la version appliquée
+- Vérifier `sql/migrations/` pour les erreurs de syntaxe SQL
+- Vérifier la table `schema_migrations` dans la base de données
+- Exécuter `python manage.py migrate` pour voir les détails

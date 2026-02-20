@@ -345,18 +345,16 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
 
 
 # ═══════════════════════════════════════════════════════════
-# SINGLETON SERVICE INSTANCE
+# SINGLETON SERVICE INSTANCE — Via ServiceRegistry (thread-safe)
 # ═══════════════════════════════════════════════════════════
 
-_service_courses: ServiceCourses | None = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("courses", tags={"cuisine", "ia", "crud"})
 def obtenir_service_courses() -> ServiceCourses:
-    """Obtient ou cree l'instance globale ServiceCourses."""
-    global _service_courses
-    if _service_courses is None:
-        _service_courses = ServiceCourses()
-    return _service_courses
+    """Obtient ou crée l'instance ServiceCourses (via registre, thread-safe)."""
+    return ServiceCourses()
 
 
 def get_shopping_service() -> ServiceCourses:

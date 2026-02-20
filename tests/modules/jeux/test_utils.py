@@ -115,11 +115,11 @@ class TestChargerMatchsAvecFallback:
 
     def test_charge_depuis_api_success(self, mock_match_api):
         """Test chargement réussi depuis l'API"""
-        # Mock api_service module
-        mock_api_service = MagicMock()
-        mock_api_service.charger_matchs_depuis_api.return_value = [mock_match_api]
+        # Mock src.services.jeux (le vrai module importé par utils.py)
+        mock_services_jeux = MagicMock()
+        mock_services_jeux.charger_matchs_a_venir.return_value = [mock_match_api]
 
-        with patch.dict(sys.modules, {"src.modules.jeux.api_service": mock_api_service}):
+        with patch.dict(sys.modules, {"src.services.jeux": mock_services_jeux}):
             from src.modules.jeux.utils import charger_matchs_avec_fallback
 
             result, source = charger_matchs_avec_fallback.__wrapped__(
@@ -130,39 +130,75 @@ class TestChargerMatchsAvecFallback:
             assert len(result) == 1
             assert result[0]["dom_nom"] == "PSG"
 
-    def test_fallback_bd_quand_prefer_api_false(self):
+    def test_fallback_bd_quand_prefer_api_false(self, mock_match_bd, mock_db_context_manager):
         """Test fallback vers BD quand prefer_api=False (vérifie que BD est tentée)"""
-        # Note: Cette fonction est complexe car elle utilise des imports dynamiques.
-        # On vérifie simplement que la fonction ne lève pas d'exception avec prefer_api=False
-        # et retourne un tuple (liste, source)
-        from src.modules.jeux.utils import charger_matchs_avec_fallback
+        cm, session = mock_db_context_manager
+        query_mock = MagicMock()
+        query_mock.filter.return_value = query_mock
+        query_mock.order_by.return_value = query_mock
+        query_mock.all.return_value = [mock_match_bd]
+        session.query.return_value = query_mock
 
-        result, source = charger_matchs_avec_fallback.__wrapped__(
-            "NonExistentLeague", jours=1, prefer_api=False
-        )
+        mock_db = MagicMock()
+        mock_db.obtenir_contexte_db.return_value = cm
+        mock_models = MagicMock()
 
-        # La fonction doit retourner une liste (vide si pas de données) et une source
-        assert isinstance(result, list)
-        assert source in ("BD", "API")
+        with patch.dict(
+            sys.modules,
+            {
+                "src.core.db": mock_db,
+                "src.core.models": mock_models,
+            },
+        ):
+            from src.modules.jeux.utils import charger_matchs_avec_fallback
 
-    def test_api_echoue_fallback_bd(self):
+            result, source = charger_matchs_avec_fallback.__wrapped__(
+                "Ligue 1", jours=7, prefer_api=False
+            )
+
+            # La fonction ne crashe pas et retourne un résultat valide
+            assert isinstance(result, list)
+            assert source == "BD"
+
+    def test_api_echoue_fallback_bd(self, mock_match_bd, mock_db_context_manager):
         """Test que l'erreur API déclenche le fallback BD (via exception interne)"""
-        # Ce test vérifie que la logique de fallback fonctionne
-        from src.modules.jeux.utils import charger_matchs_avec_fallback
+        cm, session = mock_db_context_manager
+        query_mock = MagicMock()
+        query_mock.filter.return_value = query_mock
+        query_mock.order_by.return_value = query_mock
+        query_mock.all.return_value = [mock_match_bd]
+        session.query.return_value = query_mock
 
-        # Appelé avec prefer_api=True et un championnat invalide
-        result, source = charger_matchs_avec_fallback.__wrapped__(
-            "ChampionnatInexistant999", jours=1, prefer_api=True
-        )
+        # Mock API qui échoue
+        mock_api_module = MagicMock()
+        mock_api_module.charger_matchs_a_venir.side_effect = Exception("API error")
 
-        # La fonction gère les erreurs gracieusement
-        assert isinstance(result, list)
-        assert source in ("BD", "API")
+        mock_db = MagicMock()
+        mock_db.obtenir_contexte_db.return_value = cm
+        mock_models = MagicMock()
+
+        with patch.dict(
+            sys.modules,
+            {
+                "src.services.jeux": mock_api_module,
+                "src.core.db": mock_db,
+                "src.core.models": mock_models,
+            },
+        ):
+            from src.modules.jeux.utils import charger_matchs_avec_fallback
+
+            result, source = charger_matchs_avec_fallback.__wrapped__(
+                "Ligue 1", jours=7, prefer_api=True
+            )
+
+            # API échoue, fallback BD est tenté (peut retourner vide si mock filter échoue)
+            assert isinstance(result, list)
+            assert source == "BD"
 
     def test_tout_echoue_retourne_liste_vide(self):
         """Test que la fonction retourne liste vide si tout échoue"""
         mock_api_service = MagicMock()
-        mock_api_service.charger_matchs_depuis_api.side_effect = Exception("API error")
+        mock_api_service.charger_matchs_a_venir.side_effect = Exception("API error")
 
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.side_effect = Exception("DB error")
@@ -171,8 +207,8 @@ class TestChargerMatchsAvecFallback:
         with patch.dict(
             sys.modules,
             {
-                "src.modules.jeux.api_service": mock_api_service,
-                "src.core.database": mock_database,
+                "src.services.jeux": mock_api_service,
+                "src.core.db": mock_database,
                 "src.core.models": mock_models,
             },
         ):
@@ -189,9 +225,9 @@ class TestChargerMatchsAvecFallback:
         # Note: Quand l'API retourne une liste vide, la fonction retourne source="API"
         # avec une liste vide (comportement attendu du code)
         mock_api_service = MagicMock()
-        mock_api_service.charger_matchs_depuis_api.return_value = []
+        mock_api_service.charger_matchs_a_venir.return_value = []
 
-        with patch.dict(sys.modules, {"src.modules.jeux.api_service": mock_api_service}):
+        with patch.dict(sys.modules, {"src.services.jeux": mock_api_service}):
             from src.modules.jeux.utils import charger_matchs_avec_fallback
 
             result, source = charger_matchs_avec_fallback.__wrapped__(
@@ -219,9 +255,9 @@ class TestChargerClassementAvecFallback:
         ]
 
         mock_api_service = MagicMock()
-        mock_api_service.charger_classement_depuis_api.return_value = classement_api
+        mock_api_service.charger_classement.return_value = classement_api
 
-        with patch.dict(sys.modules, {"src.modules.jeux.api_service": mock_api_service}):
+        with patch.dict(sys.modules, {"src.services.jeux": mock_api_service}):
             from src.modules.jeux.utils import charger_classement_avec_fallback
 
             result, source = charger_classement_avec_fallback.__wrapped__("Ligue 1")
@@ -239,7 +275,7 @@ class TestChargerClassementAvecFallback:
         session.query.return_value = mock_query
 
         mock_api_service = MagicMock()
-        mock_api_service.charger_classement_depuis_api.side_effect = Exception("API error")
+        mock_api_service.charger_classement.side_effect = Exception("API error")
 
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.return_value = cm
@@ -248,8 +284,8 @@ class TestChargerClassementAvecFallback:
         with patch.dict(
             sys.modules,
             {
-                "src.modules.jeux.api_service": mock_api_service,
-                "src.core.database": mock_database,
+                "src.services.jeux": mock_api_service,
+                "src.core.db": mock_database,
                 "src.core.models": mock_models,
             },
         ):
@@ -271,7 +307,7 @@ class TestChargerClassementAvecFallback:
         session.query.return_value = mock_query
 
         mock_api_service = MagicMock()
-        mock_api_service.charger_classement_depuis_api.return_value = []
+        mock_api_service.charger_classement.return_value = []
 
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.return_value = cm
@@ -280,8 +316,8 @@ class TestChargerClassementAvecFallback:
         with patch.dict(
             sys.modules,
             {
-                "src.modules.jeux.api_service": mock_api_service,
-                "src.core.database": mock_database,
+                "src.services.jeux": mock_api_service,
+                "src.core.db": mock_database,
                 "src.core.models": mock_models,
             },
         ):
@@ -294,7 +330,7 @@ class TestChargerClassementAvecFallback:
     def test_classement_tout_echoue(self):
         """Test que la fonction gère tout échoue"""
         mock_api_service = MagicMock()
-        mock_api_service.charger_classement_depuis_api.side_effect = Exception("API error")
+        mock_api_service.charger_classement.side_effect = Exception("API error")
 
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.side_effect = Exception("DB error")
@@ -303,8 +339,8 @@ class TestChargerClassementAvecFallback:
         with patch.dict(
             sys.modules,
             {
-                "src.modules.jeux.api_service": mock_api_service,
-                "src.core.database": mock_database,
+                "src.services.jeux": mock_api_service,
+                "src.core.db": mock_database,
                 "src.core.models": mock_models,
             },
         ):
@@ -336,9 +372,9 @@ class TestChargerHistoriqueEquipeAvecFallback:
         ]
 
         mock_api_service = MagicMock()
-        mock_api_service.charger_historique_equipe_depuis_api.return_value = historique_api
+        mock_api_service.charger_historique_equipe.return_value = historique_api
 
-        with patch.dict(sys.modules, {"src.modules.jeux.api_service": mock_api_service}):
+        with patch.dict(sys.modules, {"src.services.jeux": mock_api_service}):
             from src.modules.jeux.utils import charger_historique_equipe_avec_fallback
 
             result, source = charger_historique_equipe_avec_fallback.__wrapped__("PSG")
@@ -358,7 +394,7 @@ class TestChargerHistoriqueEquipeAvecFallback:
         session.query.return_value = mock_query
 
         mock_api_service = MagicMock()
-        mock_api_service.charger_historique_equipe_depuis_api.side_effect = Exception("API error")
+        mock_api_service.charger_historique_equipe.side_effect = Exception("API error")
 
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.return_value = cm
@@ -367,8 +403,8 @@ class TestChargerHistoriqueEquipeAvecFallback:
         with patch.dict(
             sys.modules,
             {
-                "src.modules.jeux.api_service": mock_api_service,
-                "src.core.database": mock_database,
+                "src.services.jeux": mock_api_service,
+                "src.core.db": mock_database,
                 "src.core.models": mock_models,
             },
         ):
@@ -390,7 +426,7 @@ class TestChargerHistoriqueEquipeAvecFallback:
         session.query.return_value = mock_query
 
         mock_api_service = MagicMock()
-        mock_api_service.charger_historique_equipe_depuis_api.return_value = []
+        mock_api_service.charger_historique_equipe.return_value = []
 
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.return_value = cm
@@ -399,8 +435,8 @@ class TestChargerHistoriqueEquipeAvecFallback:
         with patch.dict(
             sys.modules,
             {
-                "src.modules.jeux.api_service": mock_api_service,
-                "src.core.database": mock_database,
+                "src.services.jeux": mock_api_service,
+                "src.core.db": mock_database,
                 "src.core.models": mock_models,
             },
         ):
@@ -413,7 +449,7 @@ class TestChargerHistoriqueEquipeAvecFallback:
     def test_historique_tout_echoue(self):
         """Test historique tout échoue"""
         mock_api_service = MagicMock()
-        mock_api_service.charger_historique_equipe_depuis_api.side_effect = Exception("API error")
+        mock_api_service.charger_historique_equipe.side_effect = Exception("API error")
 
         mock_database = MagicMock()
         mock_database.obtenir_contexte_db.side_effect = Exception("DB error")
@@ -422,8 +458,8 @@ class TestChargerHistoriqueEquipeAvecFallback:
         with patch.dict(
             sys.modules,
             {
-                "src.modules.jeux.api_service": mock_api_service,
-                "src.core.database": mock_database,
+                "src.services.jeux": mock_api_service,
+                "src.core.db": mock_database,
                 "src.core.models": mock_models,
             },
         ):
@@ -479,7 +515,7 @@ class TestChargerTiragesLotoAvecFallback:
             sys.modules,
             {
                 "src.modules.jeux.scraper_loto": mock_scraper,
-                "src.core.database": mock_database,
+                "src.core.db": mock_database,
                 "src.core.models": mock_models,
             },
         ):
@@ -510,7 +546,7 @@ class TestChargerTiragesLotoAvecFallback:
             sys.modules,
             {
                 "src.modules.jeux.scraper_loto": mock_scraper,
-                "src.core.database": mock_database,
+                "src.core.db": mock_database,
                 "src.core.models": mock_models,
             },
         ):
@@ -533,7 +569,7 @@ class TestChargerTiragesLotoAvecFallback:
             sys.modules,
             {
                 "src.modules.jeux.scraper_loto": mock_scraper,
-                "src.core.database": mock_database,
+                "src.core.db": mock_database,
                 "src.core.models": mock_models,
             },
         ):
@@ -586,7 +622,7 @@ class TestChargerStatsLotoAvecFallback:
             sys.modules,
             {
                 "src.modules.jeux.scraper_loto": mock_scraper,
-                "src.core.database": mock_database,
+                "src.core.db": mock_database,
                 "src.core.models": mock_models,
             },
         ):
@@ -616,7 +652,7 @@ class TestChargerStatsLotoAvecFallback:
             sys.modules,
             {
                 "src.modules.jeux.scraper_loto": mock_scraper,
-                "src.core.database": mock_database,
+                "src.core.db": mock_database,
                 "src.core.models": mock_models,
             },
         ):
@@ -639,7 +675,7 @@ class TestChargerStatsLotoAvecFallback:
             sys.modules,
             {
                 "src.modules.jeux.scraper_loto": mock_scraper,
-                "src.core.database": mock_database,
+                "src.core.db": mock_database,
                 "src.core.models": mock_models,
             },
         ):

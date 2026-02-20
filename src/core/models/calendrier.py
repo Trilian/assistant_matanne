@@ -7,7 +7,7 @@ Contient :
 """
 
 from datetime import datetime
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Optional
 from uuid import UUID
 
@@ -88,9 +88,7 @@ class CalendrierExterne(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     evenements: Mapped[list["EvenementCalendrier"]] = relationship(
@@ -147,9 +145,7 @@ class EvenementCalendrier(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     __table_args__ = (UniqueConstraint("uid", "user_id", name="uq_event_uid_user"),)
 

@@ -189,10 +189,10 @@ class TestServiceInventaireInit:
 
     def test_obtenir_service_inventaire_singleton(self, mock_client_ia):
         """Test que obtenir_service_inventaire retourne singleton."""
-        # Reset singleton pour le test
-        import src.services.inventaire.service as service_module
+        from src.services.core.registry import obtenir_registre
 
-        service_module._service_inventaire = None
+        registre = obtenir_registre()
+        registre.reinitialiser("inventaire")
 
         service1 = obtenir_service_inventaire()
         service2 = obtenir_service_inventaire()
@@ -200,19 +200,20 @@ class TestServiceInventaireInit:
         assert service1 is service2
 
         # Cleanup
-        service_module._service_inventaire = None
+        registre.reinitialiser("inventaire")
 
     def test_alias_obtenir_service_inventaire(self, mock_client_ia):
         """Test alias obtenir_service_inventaire."""
-        import src.services.inventaire.service as service_module
+        from src.services.core.registry import obtenir_registre
 
-        service_module._service_inventaire = None
+        registre = obtenir_registre()
+        registre.reinitialiser("inventaire")
 
         service = obtenir_service_inventaire()
         assert isinstance(service, ServiceInventaire)
 
         # Cleanup
-        service_module._service_inventaire = None
+        registre.reinitialiser("inventaire")
 
 
 # ═══════════════════════════════════════════════════════════

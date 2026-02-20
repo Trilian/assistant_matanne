@@ -5,6 +5,7 @@ from datetime import date, datetime
 
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.ui import etat_vide
 
 from .data import charger_catalogue_plantes
@@ -100,7 +101,7 @@ def onglet_mes_plantes(mes_plantes: list[dict]):
         st.session_state.jardin_mode_ajout = True
 
     # Mode ajout
-    if st.session_state.get("jardin_mode_ajout"):
+    if st.session_state.get(SK.JARDIN_MODE_AJOUT):
         st.markdown("### Choisir une plante")
 
         # Filtres
@@ -127,7 +128,7 @@ def onglet_mes_plantes(mes_plantes: list[dict]):
                     st.session_state.jardin_plante_selectionnee = plante_id
 
         # Formulaire d'ajout détaillé
-        if st.session_state.get("jardin_plante_selectionnee"):
+        if st.session_state.get(SK.JARDIN_PLANTE_SELECTIONNEE):
             plante_id = st.session_state.jardin_plante_selectionnee
             plante_data = catalogue.get("plantes", {}).get(plante_id, {})
 

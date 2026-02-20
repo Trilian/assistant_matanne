@@ -541,7 +541,13 @@ class TestGestionnaireMigrationsAvance:
                         GestionnaireMigrations, "obtenir_migrations_disponibles"
                     ) as mock_get_migrations:
                         mock_get_migrations.return_value = [
-                            {"version": 1, "name": "test", "sql": "SELECT 1"}
+                            {
+                                "version": 1,
+                                "name": "test",
+                                "sql": "SELECT 1",
+                                "checksum": "abc123",
+                                "fichier": "001_test.sql",
+                            }
                         ]
 
                         # Ne devrait pas lever d'exception
@@ -566,7 +572,13 @@ class TestGestionnaireMigrationsAvance:
                         GestionnaireMigrations, "obtenir_migrations_disponibles"
                     ) as mock_get_migrations:
                         mock_get_migrations.return_value = [
-                            {"version": 1, "name": "test", "sql": "SELECT 1"}
+                            {
+                                "version": 1,
+                                "name": "test",
+                                "sql": "SELECT 1",
+                                "checksum": "abc123",
+                                "fichier": "001_test.sql",
+                            }
                         ]
                         with patch.object(
                             GestionnaireMigrations, "appliquer_migration"

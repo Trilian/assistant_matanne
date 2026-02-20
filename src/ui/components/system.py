@@ -11,6 +11,8 @@ from datetime import datetime
 
 import streamlit as st
 
+from src.ui.registry import composant_ui
+from src.ui.tokens import Couleur, Espacement, Rayon, Typographie
 from src.ui.utils import echapper_html
 
 logger = logging.getLogger(__name__)
@@ -70,6 +72,7 @@ def indicateur_sante_systeme() -> dict:
     return status
 
 
+@composant_ui("system", exemple="afficher_sante_systeme()", tags=["health", "monitoring"])
 def afficher_sante_systeme():
     """Affiche les indicateurs de santé."""
 
@@ -85,6 +88,9 @@ def afficher_sante_systeme():
             st.write(f"{icon} **{detail['nom']}**: {detail['message']}")
 
 
+@composant_ui(
+    "system", exemple="afficher_timeline_systeme(activites)", tags=["timeline", "activity"]
+)
 def afficher_timeline_systeme(activites: list[dict], max_items: int = 5):
     """
     Affiche une timeline des activités système récentes.
@@ -118,12 +124,12 @@ def afficher_timeline_systeme(activites: list[dict], max_items: int = 5):
         action = activite.get("action", "Action")
 
         st.markdown(
-            f'<div style="padding: 0.5rem; margin: 0.3rem 0; '
-            f'background: #f8f9fa; border-radius: 8px; display: flex; align-items: center;">'
-            f'<span style="margin-right: 0.8rem; font-size: 1.3rem;">{echapper_html(icone)}</span>'
+            f'<div style="padding: {Espacement.SM}; margin: 0.3rem 0; '
+            f'background: {Couleur.BG_SUBTLE}; border-radius: {Rayon.MD}; display: flex; align-items: center;">'
+            f'<span style="margin-right: 0.8rem; font-size: {Typographie.ICON_SM};">{echapper_html(icone)}</span>'
             f"<div>"
             f'<span style="font-weight: 500;">{echapper_html(action)}</span><br>'
-            f'<small style="color: #6c757d;">{echapper_html(str(date_str))}</small>'
+            f'<small style="color: {Couleur.TEXT_SECONDARY};">{echapper_html(str(date_str))}</small>'
             f"</div>"
             f"</div>",
             unsafe_allow_html=True,

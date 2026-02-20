@@ -2,6 +2,8 @@
 Module Suivi Perso - Paramètres Garmin et objectifs
 """
 
+from src.core.session_keys import SK
+
 from .utils import UserProfile, get_garmin_service, obtenir_contexte_db, st
 
 
@@ -51,13 +53,13 @@ def afficher_garmin_settings(data: dict):
         st.info("Connectez votre montre Garmin pour synchroniser vos donnees.")
 
         if st.button("🔗 Connecter Garmin", type="primary"):
-            st.session_state["garmin_auth_user"] = user.id
+            st.session_state[SK.GARMIN_AUTH_USER] = user.id
 
             try:
                 service = get_garmin_service()
                 auth_url, request_token = service.get_authorization_url()
 
-                st.session_state["garmin_request_token"] = request_token
+                st.session_state[SK.GARMIN_REQUEST_TOKEN] = request_token
 
                 st.markdown(f"""
                 ### Étapes de connexion:

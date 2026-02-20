@@ -11,7 +11,6 @@ Stratégie d'écriture: L1 + L2 (L3 optionnel si persistent=True)
 import logging
 import threading
 from collections.abc import Callable
-from functools import wraps
 from typing import Any, ParamSpec, TypeVar
 
 from .base import EntreeCache, StatistiquesCache
@@ -234,64 +233,6 @@ class CacheMultiNiveau:
         self.set(key, value, ttl=ttl, tags=tags, persistent=persistent)
 
         return value
-
-
-def avec_cache_multi(
-    ttl: int = 300,
-    key_prefix: str | None = None,
-    tags: list[str] | None = None,
-    persistent: bool = False,
-) -> Callable[[Callable[P, T]], Callable[P, T]]:
-    """
-    Décorateur pour cacher automatiquement les résultats.
-
-    Args:
-        ttl: Durée de vie en secondes
-        key_prefix: Préfixe pour la clé
-        tags: Tags pour invalidation groupée
-        persistent: Persister en L3
-
-    Example:
-        >>> @avec_cache_multi(ttl=600, tags=["recettes"])
-        >>> def charger_recettes(page: int) -> list:
-        >>>     return db.query(Recette).offset(page * 20).limit(20).all()
-    """
-
-    def decorator(func: Callable[P, T]) -> Callable[P, T]:
-        @wraps(func)
-        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-            # Générer la clé
-            prefix = key_prefix or func.__name__
-            key_parts = [prefix]
-
-            # Exclure 'db' et 'session' des arguments
-            filtered_args = [str(a) for a in args if not hasattr(a, "execute")]
-            filtered_kwargs = {
-                k: str(v)
-                for k, v in kwargs.items()
-                if k not in ("db", "session") and not hasattr(v, "execute")
-            }
-
-            if filtered_args:
-                key_parts.append(str(filtered_args))
-            if filtered_kwargs:
-                key_parts.append(str(sorted(filtered_kwargs.items())))
-
-            cache_key = "_".join(key_parts)
-
-            # Utiliser le cache
-            cache = CacheMultiNiveau()
-            return cache.obtenir_ou_calculer(
-                key=cache_key,
-                compute_fn=lambda: func(*args, **kwargs),
-                ttl=ttl,
-                tags=tags,
-                persistent=persistent,
-            )
-
-        return wrapper
-
-    return decorator
 
 
 def obtenir_cache() -> CacheMultiNiveau:

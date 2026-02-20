@@ -14,6 +14,7 @@ import streamlit as st
 from src.core.db import obtenir_contexte_db
 from src.core.models import ObjetMaison, PieceMaison
 from src.core.models.temps_entretien import SessionTravail, ZoneJardin
+from src.core.session_keys import SK
 
 logger = logging.getLogger(__name__)
 
@@ -59,8 +60,8 @@ def obtenir_stats_globales() -> dict:
             from src.services.maison import get_jardin_service
 
             jardin_service = get_jardin_service()
-            plantes = _st.session_state.get("mes_plantes_jardin", [])
-            recoltes = _st.session_state.get("recoltes_jardin", [])
+            plantes = _st.session_state.get(SK.MES_PLANTES_JARDIN, [])
+            recoltes = _st.session_state.get(SK.RECOLTES_JARDIN, [])
             autonomie = jardin_service.calculer_autonomie(plantes, recoltes)
             stats["autonomie_pourcent"] = autonomie.get("pourcentage_prevu", 0)
         except Exception:
@@ -79,17 +80,17 @@ def obtenir_stats_globales() -> dict:
 
 def _obtenir_objets_entretien() -> list[dict]:
     """Récupère les objets d'entretien depuis session_state ou DB."""
-    return st.session_state.get("mes_objets_entretien", [])
+    return st.session_state.get(SK.MES_OBJETS_ENTRETIEN, [])
 
 
 def _obtenir_historique_entretien() -> list[dict]:
     """Récupère l'historique d'entretien depuis session_state ou DB."""
-    return st.session_state.get("historique_entretien", [])
+    return st.session_state.get(SK.HISTORIQUE_ENTRETIEN, [])
 
 
 def _obtenir_plantes_jardin() -> list[dict]:
     """Récupère les plantes du jardin depuis session_state ou DB."""
-    return st.session_state.get("mes_plantes", [])
+    return st.session_state.get(SK.MES_PLANTES, [])
 
 
 def _obtenir_meteo_jardin() -> dict:

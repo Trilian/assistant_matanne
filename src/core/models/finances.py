@@ -9,7 +9,7 @@ Contient :
 
 from datetime import date, datetime
 from decimal import Decimal
-from enum import Enum, StrEnum
+from enum import StrEnum
 from uuid import UUID
 
 from sqlalchemy import (
@@ -117,9 +117,7 @@ class Depense(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     __table_args__ = (
         CheckConstraint(
@@ -128,6 +126,7 @@ class Depense(Base):
             "'restaurant', 'vacances', 'bebe', 'autre')",
             name="check_categorie_valide",
         ),
+        CheckConstraint("montant > 0", name="ck_depense_montant_positif"),
     )
 
     def __repr__(self) -> str:
@@ -170,11 +169,12 @@ class BudgetMensuelDB(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
-    __table_args__ = (UniqueConstraint("mois", "user_id", name="uq_budget_mois_user"),)
+    __table_args__ = (
+        UniqueConstraint("mois", "user_id", name="uq_budget_mois_user"),
+        CheckConstraint("budget_total >= 0", name="ck_budget_total_positif"),
+    )
 
     def __repr__(self) -> str:
         return f"<BudgetMensuelDB(id={self.id}, mois={self.mois}, total={self.budget_total})>"
@@ -216,6 +216,15 @@ class HouseExpense(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+    __table_args__ = (
+        CheckConstraint("mois >= 1 AND mois <= 12", name="ck_house_mois_valide"),
+        CheckConstraint("montant >= 0", name="ck_house_montant_positif"),
+        CheckConstraint(
+            "consommation IS NULL OR consommation >= 0",
+            name="ck_house_consommation_positive",
+        ),
+    )
 
     def __repr__(self) -> str:
         return f"<HouseExpense(id={self.id}, cat='{self.categorie}', montant={self.montant})>"

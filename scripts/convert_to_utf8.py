@@ -63,7 +63,6 @@ def find_python_files(root_dir: str = ".") -> list[str]:
         f"{root_dir}/src/**/*.py",
         f"{root_dir}/tests/**/*.py",
         f"{root_dir}/scripts/**/*.py",
-        f"{root_dir}/alembic/**/*.py",
         f"{root_dir}/*.py",
     ]
 

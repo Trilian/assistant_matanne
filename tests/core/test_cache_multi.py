@@ -412,70 +412,9 @@ class TestMultiLevelCache:
 # ═══════════════════════════════════════════════════════════
 # TESTS DECORATOR @cached
 # ═══════════════════════════════════════════════════════════
-
-
-class TestCachedDecorator:
-    """Tests pour le décorateur @cached."""
-
-    @pytest.fixture(autouse=True)
-    def reset_singleton(self):
-        """Reset singleton avant et après chaque test."""
-        from src.core.caching import CacheMultiNiveau
-
-        CacheMultiNiveau._instance = None
-        yield
-        CacheMultiNiveau._instance = None
-
-    def test_basic_caching(self, mock_session_state, temp_cache_dir):
-        """Test caching basique."""
-        from src.core.caching import cached
-
-        call_count = 0
-
-        @cached(ttl=60)
-        def expensive_function(x: int) -> int:
-            nonlocal call_count
-            call_count += 1
-            return x * 2
-
-        # Premier appel
-        result1 = expensive_function(5)
-        assert result1 == 10
-        assert call_count == 1
-
-        # Deuxième appel avec mêmes args → cache
-        result2 = expensive_function(5)
-        assert result2 == 10
-        assert call_count == 1  # Pas de nouvel appel
-
-        # Appel avec args différents
-        result3 = expensive_function(7)
-        assert result3 == 14
-        assert call_count == 2
-
-    def test_cache_key_generation(self, mock_session_state, temp_cache_dir):
-        """Test génération des clés de cache."""
-        from src.core.caching import cached
-
-        @cached(ttl=60)
-        def func_with_kwargs(a: int, b: str = "default") -> str:
-            return f"{a}-{b}"
-
-        # Différentes combinaisons d'args
-        assert func_with_kwargs(1) == "1-default"
-        assert func_with_kwargs(1, "custom") == "1-custom"
-        assert func_with_kwargs(1, b="custom") == "1-custom"  # Depuis cache
-
-    def test_tags_decorator(self, mock_session_state, temp_cache_dir):
-        """Test tags via décorateur."""
-        from src.core.caching import cached
-
-        @cached(ttl=60, dependencies=["test_group"])
-        def tagged_function(x: int) -> int:
-            return x + 1
-
-        result = tagged_function(5)
-        assert result == 6
+# Note: Le décorateur @cached a été supprimé en faveur de @avec_cache.
+# Les tests pour @avec_cache sont dans test_decorators.py et test_cache.py.
+# ═══════════════════════════════════════════════════════════
 
 
 # ═══════════════════════════════════════════════════════════

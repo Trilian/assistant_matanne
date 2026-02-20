@@ -475,23 +475,31 @@ def create_streamlit_mock(session_state_data: dict = None):
 
 @pytest.fixture(autouse=True)
 def clear_cache():
-    """Clear cache before/after each test."""
-    try:
-        from src.core.caching.cache import Cache
+    """Clear cache before/after each test (L2 Cache + L1 CacheMultiNiveau singleton)."""
 
-        # Clear before test - catch errors when st.session_state is unavailable
+    def _clear_all():
         try:
+            from src.core.caching.cache import Cache
+
             Cache.clear()
         except Exception:
-            pass  # Ignore errors when running outside Streamlit context
-        yield
-        # Clear after test
+            pass
         try:
-            Cache.clear()
+            from src.core.caching.orchestrator import CacheMultiNiveau
+
+            if CacheMultiNiveau._instance is not None:
+                # Clear all levels (L1 memory + L2 session + L3 file)
+                try:
+                    CacheMultiNiveau._instance.clear("all")
+                except Exception:
+                    # Fallback: at least clear L1 if L2/L3 fail (no Streamlit context)
+                    CacheMultiNiveau._instance.l1.clear()
         except Exception:
-            pass  # Ignore errors when running outside Streamlit context
-    except ImportError:
-        yield
+            pass
+
+    _clear_all()
+    yield
+    _clear_all()
 
 
 @pytest.fixture

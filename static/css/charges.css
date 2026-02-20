@@ -1,0 +1,528 @@
+/* Variables couleurs charges */
+:root {
+    --charges-primary: #8e44ad;
+    --charges-secondary: #9b59b6;
+    --charges-elec: #FFEB3B;
+    --charges-gaz: #FF5722;
+    --charges-eau: #2196F3;
+    --charges-success: #27ae60;
+    --charges-warning: #f39c12;
+    --charges-danger: #e74c3c;
+    --charges-gold: #FFD700;
+    --charges-silver: #C0C0C0;
+    --charges-bronze: #CD7F32;
+}
+
+/* Header charges */
+.charges-header {
+    background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
+}
+
+.charges-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ÉCO-SCORE GAMIFIÉ
+═══════════════════════════════════════════════════════ */
+
+.eco-score-container {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.eco-score-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.eco-score-ring {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 1rem;
+}
+
+.eco-score-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 0 20px rgba(255,255,255,0.5);
+}
+
+.eco-score-label {
+    color: #a0aec0;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.eco-score-variation {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.eco-score-variation.up {
+    background: rgba(39, 174, 96, 0.2);
+    color: #27ae60;
+}
+
+.eco-score-variation.down {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+.eco-score-variation.stable {
+    background: rgba(255, 255, 255, 0.1);
+    color: #a0aec0;
+}
+
+/* Niveau/Rang */
+.eco-level {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--charges-gold), #FFA000);
+    border-radius: 25px;
+    color: #1a1a2e;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-top: 1rem;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+.eco-level.silver { background: linear-gradient(135deg, var(--charges-silver), #9E9E9E); }
+.eco-level.bronze { background: linear-gradient(135deg, var(--charges-bronze), #8B4513); }
+.eco-level.beginner { background: linear-gradient(135deg, #6c757d, #495057); color: white; }
+
+/* ═══════════════════════════════════════════════════════
+   BADGES COLLECTION
+═══════════════════════════════════════════════════════ */
+
+.badges-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.badge-eco {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    min-width: 100px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.badge-eco:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.badge-eco .icon {
+    font-size: 2.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.badge-eco .name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #2d3748;
+    text-align: center;
+}
+
+.badge-eco .date {
+    font-size: 0.75rem;
+    color: #718096;
+}
+
+.badge-eco.locked {
+    opacity: 0.5;
+    filter: grayscale(1);
+}
+
+.badge-eco.locked .icon {
+    filter: grayscale(1) opacity(0.5);
+}
+
+.badge-eco.new::after {
+    content: 'NEW';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--charges-danger);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Streak counter */
+.streak-counter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+    border-radius: 12px;
+    color: white;
+}
+
+.streak-counter .fire {
+    font-size: 2rem;
+    animation: flame 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes flame {
+    from { transform: scale(1) rotate(-5deg); }
+    to { transform: scale(1.1) rotate(5deg); }
+}
+
+.streak-counter .count {
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.streak-counter .label {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CARTES ÉNERGIE
+═══════════════════════════════════════════════════════ */
+
+.energie-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    margin-bottom: 1rem;
+    border-left: 5px solid var(--charges-primary);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.energie-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.energie-card.electricite { border-left-color: var(--charges-elec); }
+.energie-card.gaz { border-left-color: var(--charges-gaz); }
+.energie-card.eau { border-left-color: var(--charges-eau); }
+
+.energie-card .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.energie-card .icon {
+    font-size: 2.5rem;
+}
+
+.energie-card .title {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.energie-card .value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--charges-primary);
+}
+
+.energie-card .unit {
+    font-size: 0.9rem;
+    color: #718096;
+    font-weight: normal;
+}
+
+.energie-card .trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.energie-card .trend.up {
+    background: #fed7d7;
+    color: var(--charges-danger);
+}
+.energie-card .trend.down {
+    background: #c6f6d5;
+    color: var(--charges-success);
+}
+.energie-card .trend.stable {
+    background: #e2e8f0;
+    color: #718096;
+}
+
+/* Barre de progression comparaison */
+.progress-bar-compare {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    margin-top: 1rem;
+    overflow: hidden;
+}
+
+.progress-bar-compare .fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.progress-bar-compare .fill.good { background: var(--charges-success); }
+.progress-bar-compare .fill.warning { background: var(--charges-warning); }
+.progress-bar-compare .fill.bad { background: var(--charges-danger); }
+
+/* ═══════════════════════════════════════════════════════
+   ALERTES & ANOMALIES
+═══════════════════════════════════════════════════════ */
+
+.anomalie-alert {
+    background: linear-gradient(to right, #fff5f5, white);
+    border: 1px solid #feb2b2;
+    border-left: 4px solid var(--charges-danger);
+    padding: 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.anomalie-alert .icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.anomalie-alert .content {
+    flex: 1;
+}
+
+.anomalie-alert .title {
+    font-weight: 600;
+    color: var(--charges-danger);
+    margin-bottom: 0.25rem;
+}
+
+.anomalie-alert .description {
+    font-size: 0.9rem;
+    color: #718096;
+}
+
+.anomalie-alert .action {
+    font-size: 0.85rem;
+    color: var(--charges-primary);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SIMULATION ÉCONOMIES
+═══════════════════════════════════════════════════════ */
+
+.simulation-card {
+    background: linear-gradient(135deg, #f0fff4, #c6f6d5);
+    border: 2px solid #9ae6b4;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.simulation-card .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.simulation-card .result {
+    text-align: center;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+}
+
+.simulation-card .savings {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--charges-success);
+}
+
+.simulation-card .period {
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+/* Conseil économie */
+.conseil-eco {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    border-left: 3px solid var(--charges-success);
+    transition: all 0.2s;
+}
+
+.conseil-eco:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.conseil-eco .icon {
+    font-size: 1.5rem;
+}
+
+.conseil-eco .text {
+    flex: 1;
+}
+
+.conseil-eco .title {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.conseil-eco .desc {
+    font-size: 0.85rem;
+    color: #718096;
+}
+
+.conseil-eco .economie {
+    font-weight: 700;
+    color: var(--charges-success);
+    font-size: 1.1rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FACTURES
+═══════════════════════════════════════════════════════ */
+
+.facture-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+}
+
+.facture-item:hover {
+    border-color: var(--charges-primary);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.facture-item .icon {
+    font-size: 2rem;
+    width: 50px;
+    text-align: center;
+}
+
+.facture-item .details {
+    flex: 1;
+}
+
+.facture-item .type {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.facture-item .date {
+    font-size: 0.85rem;
+    color: #718096;
+}
+
+.facture-item .conso {
+    font-size: 0.8rem;
+    color: #a0aec0;
+}
+
+.facture-item .montant {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--charges-primary);
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════════════ */
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+    animation: slideIn 0.5s ease forwards;
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(142, 68, 173, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(142, 68, 173, 0.8); }
+}
+
+.glow-effect {
+    animation: glow 2s ease-in-out infinite;
+}

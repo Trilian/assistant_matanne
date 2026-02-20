@@ -160,38 +160,10 @@ __all__ = [
 ]
 
 # ============================================================
-# Fonctions importées depuis utilitaires.py
+# Fonctions importées depuis age_utils (source de vérité unique)
 # ============================================================
 
-
-def get_age_jules() -> dict:
-    """Recupère l'âge de Jules"""
-    try:
-        with obtenir_contexte_db() as db:
-            jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
-            if jules and jules.date_of_birth:
-                today = date.today()
-                delta = today - jules.date_of_birth
-                mois = delta.days // 30
-                semaines = delta.days // 7
-                return {
-                    "mois": mois,
-                    "semaines": semaines,
-                    "jours": delta.days,
-                    "date_naissance": jules.date_of_birth,
-                }
-    except:
-        pass
-
-    # Valeur par defaut si pas trouve (Jules ne le 22 juin 2024)
-    default_birth = date(2024, 6, 22)
-    delta = date.today() - default_birth
-    return {
-        "mois": delta.days // 30,
-        "semaines": delta.days // 7,
-        "jours": delta.days,
-        "date_naissance": default_birth,
-    }
+from src.modules.famille.age_utils import get_age_jules  # noqa: E402, F401
 
 
 def get_activites_pour_age(age_mois: int) -> list[dict]:

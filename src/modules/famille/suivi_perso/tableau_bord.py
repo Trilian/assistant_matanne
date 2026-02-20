@@ -2,6 +2,8 @@
 Module Suivi Perso - Dashboard et graphiques
 """
 
+from src.ui.css import charger_css
+
 from .utils import date, get_current_user, go, set_current_user, st, timedelta
 
 
@@ -35,22 +37,7 @@ def afficher_dashboard(data: dict):
 
     # CSS pour réduire la taille des métriques
     st.markdown(
-        """
-        <style>
-        [data-testid="stMetric"] {
-            padding: 8px 12px;
-        }
-        [data-testid="stMetric"] label {
-            font-size: 0.85rem !important;
-        }
-        [data-testid="stMetric"] [data-testid="stMetricValue"] {
-            font-size: 1.2rem !important;
-        }
-        [data-testid="stMetric"] [data-testid="stMetricDelta"] {
-            font-size: 0.75rem !important;
-        }
-        </style>
-        """,
+        f"<style>{charger_css('suivi_perso.css')}</style>",
         unsafe_allow_html=True,
     )
 

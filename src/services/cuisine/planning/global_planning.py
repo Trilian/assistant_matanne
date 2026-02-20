@@ -507,7 +507,10 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         """Construit prompt pour génération IA"""
         budget = contraintes.get("budget", 400)
         energie = contraintes.get("energie", "normal")
-        jules_mois = contexte.get("jules_age_mois", 19)
+        # Défaut dynamique basé sur la date de naissance réelle
+        from src.modules.famille.age_utils import get_age_jules_mois
+
+        jules_mois = contexte.get("jules_age_mois", get_age_jules_mois())
         objectifs_sante = contexte.get("objectifs_sante", [])
 
         return f"""

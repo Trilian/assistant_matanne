@@ -28,6 +28,7 @@ def setup_mock_st(mock_st: MagicMock, session_data: dict | None = None) -> None:
     mock_st.columns.side_effect = lambda n: [
         MagicMock() for _ in range(n if isinstance(n, int) else len(n))
     ]
+    mock_st.tabs.side_effect = lambda labels: [MagicMock() for _ in labels]
     mock_st.session_state = SessionStateMock(session_data or {})
     mock_st.button.return_value = False
     mock_st.form.return_value.__enter__ = MagicMock(return_value=MagicMock())
@@ -226,16 +227,24 @@ class TestRenderOnglets:
         mock_st.subheader.assert_called()
         mock_form.assert_called_once_with(None)
 
+    @patch("src.modules.maison.depenses.components.afficher_export_section")
+    @patch("src.modules.maison.depenses.components.afficher_previsions_ia")
+    @patch("src.modules.maison.depenses.components.afficher_graphique_repartition")
     @patch("src.modules.maison.depenses.components.afficher_graphique_evolution")
     @patch("src.modules.maison.depenses.components.afficher_comparaison_mois")
     @patch("src.modules.maison.depenses.components.st")
-    def test_render_onglet_analyse(self, mock_st, mock_comp, mock_graph) -> None:
+    def test_render_onglet_analyse(
+        self, mock_st, mock_comp, mock_graph, mock_repart, mock_prev, mock_export
+    ) -> None:
         from src.modules.maison.depenses.components import afficher_onglet_analyse
 
         setup_mock_st(mock_st)
         afficher_onglet_analyse()
         mock_graph.assert_called_once()
         mock_comp.assert_called_once()
+        mock_repart.assert_called_once()
+        mock_prev.assert_called_once()
+        mock_export.assert_called_once()
 
 
 @pytest.mark.unit

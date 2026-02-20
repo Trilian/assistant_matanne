@@ -2,6 +2,8 @@
 Module Jules - Composants UI
 """
 
+from src.core.session_keys import SK
+
 from .ai_service import JulesAIService
 from .utils import (
     CATEGORIES_CONSEILS,
@@ -57,7 +59,7 @@ def afficher_activites():
         filtre_lieu = st.selectbox("Lieu", ["Tous", "Interieur", "Exterieur"], key="filtre_lieu")
     with col2:
         if st.button("🤖 Suggestions IA"):
-            st.session_state["jules_show_ai_activities"] = True
+            st.session_state[SK.JULES_SHOW_AI_ACTIVITIES] = True
 
     # Filtrer
     if filtre_lieu == "Interieur":
@@ -78,7 +80,7 @@ def afficher_activites():
                     st.success("Super ! 🎉")
 
     # Suggestions IA
-    if st.session_state.get("jules_show_ai_activities"):
+    if st.session_state.get(SK.JULES_SHOW_AI_ACTIVITIES):
         st.markdown("---")
         st.markdown("**🤖 Suggestions IA:**")
 
@@ -94,7 +96,7 @@ def afficher_activites():
                 st.error(f"Erreur IA: {e}")
 
         if st.button("Fermer"):
-            st.session_state["jules_show_ai_activities"] = False
+            st.session_state[SK.JULES_SHOW_AI_ACTIVITIES] = False
             st.rerun()
 
 
@@ -255,10 +257,10 @@ def afficher_conseils():
             if st.button(
                 f"{info['emoji']} {info['titre']}", key=f"conseil_{key}", use_container_width=True
             ):
-                st.session_state["jules_conseil_theme"] = key
+                st.session_state[SK.JULES_CONSEIL_THEME] = key
 
     # Afficher le conseil selectionne
-    theme = st.session_state.get("jules_conseil_theme")
+    theme = st.session_state.get(SK.JULES_CONSEIL_THEME)
     if theme:
         st.markdown("---")
         info = CATEGORIES_CONSEILS[theme]

@@ -174,12 +174,7 @@ class Recette(Base):
 
     # Timestamps
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
-    updated_at: Mapped[datetime | None] = mapped_column(
-        DateTime, nullable=True
-    )  # TODO: Make NOT NULL after migration applied
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     ingredients: Mapped[list["RecetteIngredient"]] = relationship(

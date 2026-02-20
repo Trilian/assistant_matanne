@@ -10,9 +10,10 @@ from typing import Any
 import pandas as pd
 import streamlit as st
 
-from src.ui import etat_vide
 from src.core.db import obtenir_contexte_db
 from src.core.models import ChildProfile, Routine, RoutineTask
+from src.core.session_keys import SK
+from src.ui import etat_vide
 
 # Logique metier pure
 
@@ -184,7 +185,7 @@ def app():
     st.caption("Gestion intelligente des routines familiales")
 
     # Recuperer l'agent IA
-    agent: Any = st.session_state.get("agent_ia")
+    agent: Any = st.session_state.get(SK.AGENT_IA)
 
     # ===================================
     # HEURE ACTUELLE & ALERTES
@@ -292,10 +293,10 @@ def app():
                                 if st.button(
                                     "➕ Tâche", key=f"add_{routine['id']}", use_container_width=True
                                 ):
-                                    st.session_state["adding_task_to"] = routine["id"]
+                                    st.session_state[SK.ADDING_TASK_TO] = routine["id"]
 
                         # Ajouter tâche (si active)
-                        if st.session_state.get("adding_task_to") == routine["id"]:
+                        if st.session_state.get(SK.ADDING_TASK_TO) == routine["id"]:
                             with st.form(f"form_add_task_{routine['id']}"):
                                 new_task_name = st.text_input("Nom de la tâche")
                                 new_task_time = st.time_input("Heure (optionnel)")
@@ -312,12 +313,12 @@ def app():
                                             )
                                             ajouter_tache(routine["id"], new_task_name, time_str)
                                             st.success("Tâche ajoutee")
-                                            del st.session_state["adding_task_to"]
+                                            del st.session_state[SK.ADDING_TASK_TO]
                                             st.rerun()
 
                                 with col_f2:
                                     if st.form_submit_button("❌ Annuler"):
-                                        del st.session_state["adding_task_to"]
+                                        del st.session_state[SK.ADDING_TASK_TO]
                                         st.rerun()
 
                     # Actions routine
@@ -390,15 +391,15 @@ def app():
                             agent.rappeler_routines(routines_data, heure_actuelle)
                         )
 
-                        st.session_state["rappels_ia"] = rappels
+                        st.session_state[SK.RAPPELS_IA] = rappels
                         st.success("✅ Rappels generes")
 
                     except Exception as e:
                         st.error(f"Erreur IA : {e}")
 
             # Afficher rappels
-            if "rappels_ia" in st.session_state:
-                rappels = st.session_state["rappels_ia"]
+            if SK.RAPPELS_IA in st.session_state:
+                rappels = st.session_state[SK.RAPPELS_IA]
 
                 if not rappels:
                     st.success("✅ Aucune routine urgente ! Tout est sous contrôle.")

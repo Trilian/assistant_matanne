@@ -21,7 +21,7 @@ Architecture:
 import streamlit as st
 
 from .data import calculer_charge, obtenir_alertes, obtenir_stats_globales, obtenir_taches_jour
-from .styles import CSS
+from .styles import injecter_css_hub
 from .ui import (
     afficher_alertes,
     afficher_header,
@@ -33,7 +33,7 @@ from .ui import (
 
 def app():
     """Point d'entrée du hub maison."""
-    st.markdown(CSS, unsafe_allow_html=True)
+    injecter_css_hub()
 
     # Données
     stats = obtenir_stats_globales()

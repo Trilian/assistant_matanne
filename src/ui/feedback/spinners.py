@@ -7,6 +7,7 @@ from datetime import datetime
 
 import streamlit as st
 
+from src.ui.tokens import Couleur, Espacement, Rayon, Typographie
 from src.ui.utils import echapper_html
 
 
@@ -56,9 +57,9 @@ def indicateur_chargement(message: str = "Chargement..."):
         indicateur_chargement("Chargement des données...")
     """
     st.markdown(
-        f'<div style="text-align: center; padding: 2rem;">'
-        f'<div style="font-size: 2rem;">⏳</div>'
-        f'<div style="margin-top: 0.5rem; color: #666;">{echapper_html(message)}</div>'
+        f'<div style="text-align: center; padding: {Espacement.XL};">'
+        f'<div style="font-size: {Typographie.ICON_MD};">⏳</div>'
+        f'<div style="margin-top: {Espacement.SM}; color: {Couleur.TEXT_SECONDARY};">{echapper_html(message)}</div>'
         f"</div>",
         unsafe_allow_html=True,
     )
@@ -73,12 +74,13 @@ def chargeur_squelette(lignes: int = 3):
     """
     for _ in range(lignes):
         st.markdown(
-            '<style>@keyframes loading { '
-            '0% { background-position: -200px 0; } '
-            '100% { background-position: calc(200px + 100%) 0; } '
-            '}</style>'
-            '<div style="background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); '
-            "height: 20px; margin: 0.5rem 0; border-radius: 4px; "
-            'background-size: 200% 100%; animation: loading 1.5s infinite;"></div>',
+            "<style>@keyframes loading { "
+            "0% { background-position: -200px 0; } "
+            "100% { background-position: calc(200px + 100%) 0; } "
+            "}</style>"
+            f'<div style="background: linear-gradient(90deg, {Couleur.BG_HOVER} 25%, '
+            f"{Couleur.BORDER_LIGHT} 50%, {Couleur.BG_HOVER} 75%); "
+            f"height: 20px; margin: {Espacement.SM} 0; border-radius: {Rayon.SM}; "
+            f'background-size: 200% 100%; animation: loading 1.5s infinite;"></div>',
             unsafe_allow_html=True,
         )

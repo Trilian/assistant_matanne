@@ -17,6 +17,9 @@ from .kitchen import afficher_selecteur_mode, afficher_vue_recette_cuisine
 # Styles CSS
 from .styles import CSS_MODE_CUISINE, CSS_TABLETTE, appliquer_mode_tablette, fermer_mode_tablette
 
+# Timer cuisine
+from .timer import TimerCuisine
+
 # Widgets tactiles
 from .widgets import (
     bouton_tablette,
@@ -43,4 +46,6 @@ __all__ = [
     # Kitchen
     "afficher_vue_recette_cuisine",
     "afficher_selecteur_mode",
+    # Timer
+    "TimerCuisine",
 ]

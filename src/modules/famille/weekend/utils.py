@@ -129,16 +129,10 @@ def get_lieux_testes() -> list:
 
 
 def get_age_jules_mois() -> int:
-    """Recupère l'âge de Jules en mois"""
-    try:
-        with obtenir_contexte_db() as db:
-            jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
-            if jules and jules.date_of_birth:
-                delta = date.today() - jules.date_of_birth
-                return delta.days // 30
-    except:
-        pass
-    return 19  # Valeur par defaut
+    """Récupère l'âge de Jules en mois (délègue à age_utils)."""
+    from src.modules.famille.age_utils import get_age_jules_mois as _get
+
+    return _get()
 
 
 def mark_activity_done(activity_id: int):

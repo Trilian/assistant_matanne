@@ -15,6 +15,7 @@ from typing import Optional
 
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     Date,
     DateTime,
     ForeignKey,
@@ -120,8 +121,11 @@ class ConfigBatchCooking(Base):
 
     # Timestamps
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
+
+    __table_args__ = (
+        CheckConstraint("duree_max_session > 0", name="ck_config_batch_duree_positive"),
+        CheckConstraint("objectif_portions_semaine > 0", name="ck_config_batch_objectif_positif"),
     )
 
     def __repr__(self) -> str:
@@ -195,9 +199,7 @@ class SessionBatchCooking(Base):
 
     # Timestamps
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     etapes: Mapped[list["EtapeBatchCooking"]] = relationship(
@@ -207,7 +209,16 @@ class SessionBatchCooking(Base):
         back_populates="session", cascade="all, delete-orphan"
     )
 
-    __table_args__ = (Index("idx_session_date_statut", "date_session", "statut"),)
+    __table_args__ = (
+        Index("idx_session_date_statut", "date_session", "statut"),
+        CheckConstraint("duree_estimee > 0", name="ck_session_duree_estimee_positive"),
+        CheckConstraint(
+            "duree_reelle IS NULL OR duree_reelle > 0",
+            name="ck_session_duree_reelle_positive",
+        ),
+        CheckConstraint("nb_portions_preparees >= 0", name="ck_session_portions_positive"),
+        CheckConstraint("nb_recettes_completees >= 0", name="ck_session_recettes_positive"),
+    )
 
     @property
     def est_en_cours(self) -> bool:
@@ -300,7 +311,15 @@ class EtapeBatchCooking(Base):
     # Relations
     session: Mapped["SessionBatchCooking"] = relationship(back_populates="etapes")
 
-    __table_args__ = (Index("idx_etape_session_ordre", "session_id", "ordre"),)
+    __table_args__ = (
+        Index("idx_etape_session_ordre", "session_id", "ordre"),
+        CheckConstraint("ordre > 0", name="ck_etape_batch_ordre_positif"),
+        CheckConstraint("duree_minutes > 0", name="ck_etape_batch_duree_positive"),
+        CheckConstraint(
+            "duree_reelle IS NULL OR duree_reelle > 0",
+            name="ck_etape_batch_duree_reelle_positive",
+        ),
+    )
 
     @property
     def est_terminee(self) -> bool:
@@ -385,9 +404,7 @@ class PreparationBatch(Base):
 
     # Timestamps
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     session: Mapped[Optional["SessionBatchCooking"]] = relationship(back_populates="preparations")
@@ -395,6 +412,8 @@ class PreparationBatch(Base):
     __table_args__ = (
         Index("idx_prep_localisation_peremption", "localisation", "date_peremption"),
         Index("idx_prep_consomme_peremption", "consomme", "date_peremption"),
+        CheckConstraint("portions_initiales > 0", name="ck_prep_portions_initiales_positive"),
+        CheckConstraint("portions_restantes >= 0", name="ck_prep_portions_restantes_positive"),
     )
 
     @property

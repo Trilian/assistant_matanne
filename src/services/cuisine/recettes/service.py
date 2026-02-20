@@ -174,9 +174,8 @@ class ServiceRecettes(
             logger.error(f"Validation error: {e} - Data: {data}")
             raise ErreurValidation(f"Données invalides: {str(e)}") from e
 
-        # Créer recette avec updated_at
+        # Créer recette
         recette_dict = validated.model_dump(exclude={"ingredients", "etapes"})
-        recette_dict["updated_at"] = datetime.utcnow()  # â† Requis par le trigger PostgreSQL
         recette = Recette(**recette_dict)
         db.add(recette)
         db.flush()
@@ -513,18 +512,16 @@ class ServiceRecettes(
 
 
 # ═══════════════════════════════════════════════════════════
-# INSTANCE SINGLETON - LAZY LOADING
+# INSTANCE SINGLETON — Via ServiceRegistry (thread-safe)
 # ═══════════════════════════════════════════════════════════
 
-_service_recettes = None
+from src.services.core.registry import service_factory
 
 
+@service_factory("recettes", tags={"cuisine", "ia", "crud"})
 def obtenir_service_recettes() -> ServiceRecettes:
-    """Obtient ou crée l'instance globale ServiceRecettes."""
-    global _service_recettes
-    if _service_recettes is None:
-        _service_recettes = ServiceRecettes()
-    return _service_recettes
+    """Obtient ou crée l'instance ServiceRecettes (via registre, thread-safe)."""
+    return ServiceRecettes()
 
 
 def get_recipes_service() -> ServiceRecettes:

@@ -27,76 +27,8 @@ from src.core.models import (
     UserProfile,
     WeekendActivity,
 )
+from src.core.session_keys import SK
 from src.services.integrations.garmin import init_family_users
-
-# ═══════════════════════════════════════════════════════════
-# STYLES CSS
-# ═══════════════════════════════════════════════════════════
-
-CARD_STYLES = """
-<style>
-.family-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 16px;
-    padding: 20px;
-    color: white;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    margin-bottom: 10px;
-    min-height: 120px;
-}
-.family-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-}
-.family-card.jules {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-.family-card.weekend {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-.family-card.anne {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-}
-.family-card.mathieu {
-    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-    color: #333;
-}
-.family-card.achats {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-.card-emoji {
-    font-size: 2.5rem;
-    margin-bottom: 5px;
-}
-.card-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-.card-subtitle {
-    font-size: 0.9rem;
-    opacity: 0.9;
-}
-.card-stats {
-    display: flex;
-    gap: 15px;
-    margin-top: 10px;
-}
-.card-stat {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.streak-badge {
-    background: rgba(255,255,255,0.2);
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-}
-</style>
-"""
-
 
 # ═══════════════════════════════════════════════════════════
 # HELPERS
@@ -104,26 +36,10 @@ CARD_STYLES = """
 
 
 def calculer_age_jules() -> dict:
-    """Calcule l'âge de Jules"""
-    try:
-        with obtenir_contexte_db() as db:
-            jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
-            if not jules or not jules.date_of_birth:
-                # Valeurs par defaut si pas trouve
-                return {"mois": 19, "jours": 0, "texte": "19 mois"}
+    """Calcule l'âge de Jules (délègue à age_utils)."""
+    from src.modules.famille.age_utils import get_age_jules
 
-            today = date.today()
-            delta = today - jules.date_of_birth
-            mois = delta.days // 30
-            jours_restants = delta.days % 30
-
-            return {
-                "mois": mois,
-                "jours": jours_restants,
-                "texte": f"{mois} mois" + (f" et {jours_restants}j" if jours_restants > 0 else ""),
-            }
-    except:
-        return {"mois": 19, "jours": 0, "texte": "19 mois"}
+    return get_age_jules()
 
 
 def get_user_streak(username: str) -> int:
@@ -237,7 +153,7 @@ def afficher_card_jules():
     age = calculer_age_jules()
 
     if st.button("👶 **Jules**", key="card_jules", use_container_width=True, type="primary"):
-        st.session_state["famille_page"] = "jules"
+        st.session_state[SK.FAMILLE_PAGE] = "jules"
         st.rerun()
 
     st.caption(f"🎂 {age['texte']} • 🎨 Activites adaptees")
@@ -250,7 +166,7 @@ def afficher_card_weekend():
     if st.button(
         "🎉 **Ce Weekend**", key="card_weekend", use_container_width=True, type="secondary"
     ):
-        st.session_state["famille_page"] = "weekend"
+        st.session_state[SK.FAMILLE_PAGE] = "weekend"
         st.rerun()
 
     if count > 0:
@@ -272,8 +188,8 @@ def afficher_card_user(username: str, display_name: str, emoji: str):
         use_container_width=True,
         type=btn_type,
     ):
-        st.session_state["famille_page"] = "suivi"
-        st.session_state["suivi_user"] = username
+        st.session_state[SK.FAMILLE_PAGE] = "suivi"
+        st.session_state[SK.SUIVI_USER] = username
         st.rerun()
 
     status_parts = []
@@ -295,7 +211,7 @@ def afficher_card_achats():
     if st.button(
         "🛍️ **Achats Famille**", key="card_achats", use_container_width=True, type="secondary"
     ):
-        st.session_state["famille_page"] = "achats"
+        st.session_state[SK.FAMILLE_PAGE] = "achats"
         st.rerun()
 
     if urgent > 0:
@@ -322,7 +238,7 @@ def app():
         pass
 
     # Gerer la navigation
-    page = st.session_state.get("famille_page", "hub")
+    page = st.session_state.get(SK.FAMILLE_PAGE, "hub")
 
     if page == "hub":
         afficher_hub()
@@ -330,28 +246,28 @@ def app():
         from src.modules.famille.jules import app as jules_app
 
         if st.button("⬅️ Retour au Hub"):
-            st.session_state["famille_page"] = "hub"
+            st.session_state[SK.FAMILLE_PAGE] = "hub"
             st.rerun()
         jules_app()
     elif page == "weekend":
         from src.modules.famille.weekend import app as weekend_app
 
         if st.button("⬅️ Retour au Hub"):
-            st.session_state["famille_page"] = "hub"
+            st.session_state[SK.FAMILLE_PAGE] = "hub"
             st.rerun()
         weekend_app()
     elif page == "suivi":
         from src.modules.famille.suivi_perso import app as suivi_app
 
         if st.button("⬅️ Retour au Hub"):
-            st.session_state["famille_page"] = "hub"
+            st.session_state[SK.FAMILLE_PAGE] = "hub"
             st.rerun()
         suivi_app()
     elif page == "achats":
         from src.modules.famille.achats_famille import app as achats_app
 
         if st.button("⬅️ Retour au Hub"):
-            st.session_state["famille_page"] = "hub"
+            st.session_state[SK.FAMILLE_PAGE] = "hub"
             st.rerun()
         achats_app()
     else:
@@ -442,7 +358,7 @@ def _afficher_day_activities(day: date):
             else:
                 st.caption("Rien de prevu")
                 if st.button("💡 Suggerer", key=f"suggest_{day}"):
-                    st.session_state["famille_page"] = "weekend"
+                    st.session_state[SK.FAMILLE_PAGE] = "weekend"
                     st.rerun()
     except:
         st.caption("Rien de prevu")

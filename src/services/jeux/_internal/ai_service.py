@@ -1,16 +1,16 @@
 """
 Service IA pour les Jeux - Analyse Mistral
 
-Utilise l'IA Mistral pour:
-- Analyser les opportunités détectées (séries)
-- Générer des synthèses et conseils
-- Prédire des tendances (avec avertissement sur le hasard)
+Hérite de BaseAIService pour bénéficier automatiquement de:
+- ✅ Rate limiting unifié (RateLimitIA)
+- ✅ Cache sémantique (CacheIA) — économise les appels API
+- ✅ Métriques et logging
+- ✅ Health check
 
 ⚠️ RAPPEL: Les prédictions IA ne changent pas les probabilités.
 Les jeux de hasard restent du hasard.
 """
 
-import asyncio
 import logging
 from dataclasses import dataclass
 from datetime import datetime
@@ -18,7 +18,9 @@ from typing import Any
 
 from src.core.ai import obtenir_client_ia
 from src.core.ai.client import ClientIA
-from src.core.errors import ErreurServiceIA
+from src.core.errors_base import ErreurLimiteDebit, ErreurServiceIA
+from src.services.core.base.ai_service import BaseAIService
+from src.services.core.base.async_utils import sync_wrapper
 from src.services.jeux._internal.series_service import (
     SEUIL_VALUE_ALERTE,
     SEUIL_VALUE_HAUTE,
@@ -65,9 +67,15 @@ class OpportuniteAnalysee:
 # ═══════════════════════════════════════════════════════════
 
 
-class JeuxAIService:
+class JeuxAIService(BaseAIService):
     """
     Service d'analyse IA pour les jeux.
+
+    Hérite de BaseAIService pour bénéficier automatiquement de:
+    - Rate limiting unifié via RateLimitIA
+    - Cache sémantique via CacheIA (économise les appels IA)
+    - Métriques et logging
+    - Health check
 
     Utilise Mistral pour générer des analyses intelligentes
     des opportunités détectées par la loi des séries.
@@ -104,15 +112,31 @@ FORMAT DE RÉPONSE:
     )
 
     def __init__(self):
-        """Initialise le service IA."""
-        self._client: ClientIA | None = None
+        """Initialise le service IA Jeux via BaseAIService."""
+        self._client_ia: ClientIA | None = None
+        super().__init__(
+            client=None,  # Lazy-loaded via property
+            cache_prefix="jeux",
+            default_ttl=3600,
+            default_temperature=0.3,
+            service_name="jeux",
+        )
 
-    @property
-    def client(self) -> ClientIA:
+    @property  # type: ignore[override]
+    def client(self) -> ClientIA | None:
         """Lazy loading du client IA."""
-        if self._client is None:
-            self._client = obtenir_client_ia()
-        return self._client
+        if self._client_ia is None:
+            try:
+                self._client_ia = obtenir_client_ia()
+            except Exception as e:
+                logger.debug("Client IA indisponible: %s", e)
+                return None
+        return self._client_ia
+
+    @client.setter
+    def client(self, value: ClientIA | None) -> None:
+        """Setter pour compatibilité avec BaseAIService.__init__."""
+        self._client_ia = value
 
     # ───────────────────────────────────────────────────────────────
     # ANALYSES PARIS SPORTIFS
@@ -148,16 +172,19 @@ FORMAT DE RÉPONSE:
         prompt = self._construire_prompt_paris(opportunites, competition)
 
         try:
-            reponse = await self.client.appeler(
+            reponse = await self.call_with_cache(
                 prompt=prompt,
-                prompt_systeme=self.SYSTEM_PROMPT,
-                temperature=0.3,  # Réponses plus déterministes
+                system_prompt=self.SYSTEM_PROMPT,
+                temperature=0.3,
                 max_tokens=800,
             )
 
+            if not reponse:
+                return self._analyse_fallback("paris", opportunites)
+
             return self._parser_reponse_analyse(reponse, "paris")
 
-        except ErreurServiceIA as e:
+        except (ErreurServiceIA, ErreurLimiteDebit) as e:
             logger.warning(f"Erreur IA Paris: {e}")
             return self._analyse_fallback("paris", opportunites)
 
@@ -167,7 +194,8 @@ FORMAT DE RÉPONSE:
         competition: str = "Général",
     ) -> AnalyseIA:
         """Version synchrone de analyser_paris_async."""
-        return asyncio.run(self.analyser_paris_async(opportunites, competition))
+        _sync = sync_wrapper(self.analyser_paris_async)
+        return _sync(opportunites, competition)
 
     def _construire_prompt_paris(self, opportunites: list[dict[str, Any]], competition: str) -> str:
         """Construit le prompt pour l'analyse Paris."""
@@ -229,16 +257,19 @@ FORMAT DE RÉPONSE:
         prompt = self._construire_prompt_loto(numeros_retard, type_numero)
 
         try:
-            reponse = await self.client.appeler(
+            reponse = await self.call_with_cache(
                 prompt=prompt,
-                prompt_systeme=self.SYSTEM_PROMPT,
+                system_prompt=self.SYSTEM_PROMPT,
                 temperature=0.3,
                 max_tokens=800,
             )
 
+            if not reponse:
+                return self._analyse_fallback("loto", numeros_retard)
+
             return self._parser_reponse_analyse(reponse, "loto")
 
-        except ErreurServiceIA as e:
+        except (ErreurServiceIA, ErreurLimiteDebit) as e:
             logger.warning(f"Erreur IA Loto: {e}")
             return self._analyse_fallback("loto", numeros_retard)
 
@@ -248,7 +279,8 @@ FORMAT DE RÉPONSE:
         type_numero: str = "principal",
     ) -> AnalyseIA:
         """Version synchrone de analyser_loto_async."""
-        return asyncio.run(self.analyser_loto_async(numeros_retard, type_numero))
+        _sync = sync_wrapper(self.analyser_loto_async)
+        return _sync(numeros_retard, type_numero)
 
     def _construire_prompt_loto(
         self, numeros_retard: list[dict[str, Any]], type_numero: str
@@ -319,16 +351,27 @@ Génère un résumé court (3-4 phrases) avec:
 """
 
         try:
-            reponse = await self.client.appeler(
+            reponse = await self.call_with_cache(
                 prompt=prompt,
-                prompt_systeme=self.SYSTEM_PROMPT,
+                system_prompt=self.SYSTEM_PROMPT,
                 temperature=0.4,
                 max_tokens=500,
             )
 
+            if not reponse:
+                return AnalyseIA(
+                    type_analyse="global",
+                    resume=f"{alertes_actives} alertes actives.",
+                    points_cles=["Service IA indisponible"],
+                    recommandations=["Réessayer ultérieurement"],
+                    avertissement=self.AVERTISSEMENT_STANDARD,
+                    confiance=0.3,
+                    genere_le=datetime.now(),
+                )
+
             return self._parser_reponse_analyse(reponse, "global")
 
-        except ErreurServiceIA as e:
+        except (ErreurServiceIA, ErreurLimiteDebit) as e:
             logger.warning(f"Erreur IA synthèse: {e}")
             return AnalyseIA(
                 type_analyse="global",
@@ -350,9 +393,8 @@ Génère un résumé court (3-4 phrases) avec:
         opportunites_loto: int,
     ) -> AnalyseIA:
         """Version synchrone de generer_synthese_async."""
-        return asyncio.run(
-            self.generer_synthese_async(alertes_actives, opportunites_paris, opportunites_loto)
-        )
+        _sync = sync_wrapper(self.generer_synthese_async)
+        return _sync(alertes_actives, opportunites_paris, opportunites_loto)
 
     # ───────────────────────────────────────────────────────────────
     # HELPERS

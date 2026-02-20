@@ -5,14 +5,16 @@ Ce module gère le rate limiting spécifique aux appels IA :
 - Quotas journaliers et horaires
 - Reset automatique
 - Statistiques d'utilisation
+
+Utilise ``SessionStorage`` pour le stockage des compteurs,
+ce qui permet de tester sans Streamlit.
 """
 
 import logging
 from datetime import datetime
 
-import streamlit as st
-
 from ..constants import AI_RATE_LIMIT_DAILY, AI_RATE_LIMIT_HOURLY
+from ..storage import obtenir_storage
 
 logger = logging.getLogger(__name__)
 
@@ -22,22 +24,46 @@ class RateLimitIA:
     Rate limiting spécifique pour les appels IA.
 
     Gère les quotas API Mistral avec reset automatique.
+    Découplé de ``st.session_state`` via ``SessionStorage``.
     """
 
     CLE_RATE_LIMIT = "rate_limit_ia"
     """Clé session state."""
 
     @staticmethod
+    def _obtenir_storage():
+        """Retourne le backend de stockage."""
+        return obtenir_storage()
+
+    @staticmethod
     def _initialiser():
-        """Initialise les compteurs dans session_state."""
-        if RateLimitIA.CLE_RATE_LIMIT not in st.session_state:
-            st.session_state[RateLimitIA.CLE_RATE_LIMIT] = {
-                "appels_jour": 0,
-                "appels_heure": 0,
-                "dernier_reset_jour": datetime.now().date(),
-                "dernier_reset_heure": datetime.now().replace(minute=0, second=0, microsecond=0),
-                "historique": [],  # Pour analytics
-            }
+        """Initialise les compteurs dans le storage."""
+        storage = RateLimitIA._obtenir_storage()
+        if not storage.contains(RateLimitIA.CLE_RATE_LIMIT):
+            storage.set(
+                RateLimitIA.CLE_RATE_LIMIT,
+                {
+                    "appels_jour": 0,
+                    "appels_heure": 0,
+                    "dernier_reset_jour": datetime.now().date(),
+                    "dernier_reset_heure": datetime.now().replace(
+                        minute=0, second=0, microsecond=0
+                    ),
+                    "historique": [],
+                },
+            )
+
+    @staticmethod
+    def _obtenir_data() -> dict:
+        """Retourne les données de rate limiting."""
+        storage = RateLimitIA._obtenir_storage()
+        return storage.get(RateLimitIA.CLE_RATE_LIMIT, {})
+
+    @staticmethod
+    def _sauvegarder_data(data: dict):
+        """Sauvegarde les données de rate limiting."""
+        storage = RateLimitIA._obtenir_storage()
+        storage.set(RateLimitIA.CLE_RATE_LIMIT, data)
 
     @staticmethod
     def peut_appeler() -> tuple[bool, str]:
@@ -46,36 +72,31 @@ class RateLimitIA:
 
         Returns:
             Tuple (autorisé, message_erreur)
-
-        Example:
-            >>> autorise, erreur = RateLimitIA.peut_appeler()
-            >>> if not autorise:
-            >>>     st.warning(erreur)
         """
         RateLimitIA._initialiser()
+        data = RateLimitIA._obtenir_data()
 
         # Reset quotidien
         aujourd_hui = datetime.now().date()
-        if st.session_state[RateLimitIA.CLE_RATE_LIMIT]["dernier_reset_jour"] != aujourd_hui:
-            st.session_state[RateLimitIA.CLE_RATE_LIMIT]["appels_jour"] = 0
-            st.session_state[RateLimitIA.CLE_RATE_LIMIT]["dernier_reset_jour"] = aujourd_hui
+        if data["dernier_reset_jour"] != aujourd_hui:
+            data["appels_jour"] = 0
+            data["dernier_reset_jour"] = aujourd_hui
             logger.info("🔄 Reset quota journalier")
 
         # Reset horaire
         heure_actuelle = datetime.now().replace(minute=0, second=0, microsecond=0)
-        if st.session_state[RateLimitIA.CLE_RATE_LIMIT]["dernier_reset_heure"] != heure_actuelle:
-            st.session_state[RateLimitIA.CLE_RATE_LIMIT]["appels_heure"] = 0
-            st.session_state[RateLimitIA.CLE_RATE_LIMIT]["dernier_reset_heure"] = heure_actuelle
+        if data["dernier_reset_heure"] != heure_actuelle:
+            data["appels_heure"] = 0
+            data["dernier_reset_heure"] = heure_actuelle
             logger.info("🔄 Reset quota horaire")
 
-        # Vérifier limites
-        appels_jour = st.session_state[RateLimitIA.CLE_RATE_LIMIT]["appels_jour"]
-        appels_heure = st.session_state[RateLimitIA.CLE_RATE_LIMIT]["appels_heure"]
+        RateLimitIA._sauvegarder_data(data)
 
-        if appels_jour >= AI_RATE_LIMIT_DAILY:
+        # Vérifier limites
+        if data["appels_jour"] >= AI_RATE_LIMIT_DAILY:
             return False, f"⏳ Limite quotidienne atteinte ({AI_RATE_LIMIT_DAILY} appels/jour)"
 
-        if appels_heure >= AI_RATE_LIMIT_HOURLY:
+        if data["appels_heure"] >= AI_RATE_LIMIT_HOURLY:
             return False, f"⏳ Limite horaire atteinte ({AI_RATE_LIMIT_HOURLY} appels/heure)"
 
         return True, ""
@@ -86,25 +107,25 @@ class RateLimitIA:
         Enregistre un appel IA.
 
         Args:
-            service: Nom du service appelant (recettes, inventaire, etc.)
-            tokens_utilises: Nombre de tokens utilisés (si disponible)
+            service: Nom du service appelant
+            tokens_utilises: Nombre de tokens utilisés
         """
         RateLimitIA._initialiser()
+        data = RateLimitIA._obtenir_data()
 
-        st.session_state[RateLimitIA.CLE_RATE_LIMIT]["appels_jour"] += 1
-        st.session_state[RateLimitIA.CLE_RATE_LIMIT]["appels_heure"] += 1
+        data["appels_jour"] += 1
+        data["appels_heure"] += 1
 
         # Historique pour analytics
-        st.session_state[RateLimitIA.CLE_RATE_LIMIT]["historique"].append(
+        data["historique"].append(
             {"timestamp": datetime.now(), "service": service, "tokens": tokens_utilises}
         )
 
         # Limiter historique (garder 100 derniers appels)
-        if len(st.session_state[RateLimitIA.CLE_RATE_LIMIT]["historique"]) > 100:
-            st.session_state[RateLimitIA.CLE_RATE_LIMIT]["historique"] = st.session_state[
-                RateLimitIA.CLE_RATE_LIMIT
-            ]["historique"][-100:]
+        if len(data["historique"]) > 100:
+            data["historique"] = data["historique"][-100:]
 
+        RateLimitIA._sauvegarder_data(data)
         logger.debug(f"[OK] Appel IA enregistré ({service})")
 
     @staticmethod
@@ -114,14 +135,9 @@ class RateLimitIA:
 
         Returns:
             Dict avec compteurs et métriques
-
-        Example:
-            >>> stats = RateLimitIA.obtenir_statistiques()
-            >>> st.metric("Appels aujourd'hui", stats["appels_jour"])
         """
         RateLimitIA._initialiser()
-
-        data = st.session_state[RateLimitIA.CLE_RATE_LIMIT]
+        data = RateLimitIA._obtenir_data()
 
         # Calcul répartition par service
         services_usage = {}
@@ -146,8 +162,10 @@ class RateLimitIA:
     def reset_quotas():
         """Reset manuel des quotas (debug/admin)."""
         RateLimitIA._initialiser()
-        st.session_state[RateLimitIA.CLE_RATE_LIMIT]["appels_jour"] = 0
-        st.session_state[RateLimitIA.CLE_RATE_LIMIT]["appels_heure"] = 0
+        data = RateLimitIA._obtenir_data()
+        data["appels_jour"] = 0
+        data["appels_heure"] = 0
+        RateLimitIA._sauvegarder_data(data)
         logger.warning("[!] Reset manuel des quotas IA")
 
 

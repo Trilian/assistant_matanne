@@ -9,16 +9,15 @@ Architecture à 3 niveaux:
 Ce module fournit:
 - Classes de cache par niveau (L1, L2, L3)
 - Orchestrateur multi-niveaux unifié
-- Décorateur @avec_cache_multi
+- Décorateur unifié @avec_cache dans src.core.decorators
 """
 
 from .base import EntreeCache, StatistiquesCache
-from .cache import Cache, cached
+from .cache import Cache
 from .file import CacheFichierN3
 from .memory import CacheMemoireN1
 from .orchestrator import (
     CacheMultiNiveau,
-    avec_cache_multi,
     obtenir_cache,
 )
 from .session import CacheSessionN2
@@ -27,15 +26,13 @@ __all__ = [
     # Types
     "EntreeCache",
     "StatistiquesCache",
-    # Cache session simple
+    # Cache session simple (usage legacy)
     "Cache",
-    "cached",
     # Caches par niveau
     "CacheMemoireN1",
     "CacheSessionN2",
     "CacheFichierN3",
-    # Orchestrateur
+    # Orchestrateur (usage recommandé)
     "CacheMultiNiveau",
     "obtenir_cache",
-    "avec_cache_multi",
 ]

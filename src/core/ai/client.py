@@ -374,6 +374,8 @@ class ClientIA:
         except RuntimeError:
             loop = None
 
+        response: str | None = None
+
         async def _call():
             return await self.appeler(
                 prompt=prompt,
@@ -411,7 +413,7 @@ class ClientIA:
         except json.JSONDecodeError:
             # Retourner la réponse brute si pas du JSON valide
             logger.warning("Réponse non-JSON, retour brut")
-            return response if "response" in dir() else None
+            return response
 
         except Exception as e:
             logger.error(f"Erreur generer_json: {e}")

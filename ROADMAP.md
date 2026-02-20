@@ -228,12 +228,11 @@ python -m pytest --tb=no -q
 - [ ] `src/modules/maison/ui/plan_jardin.py` (240 stmts)
 - [ ] `src/modules/utilitaires/rapports.py` (200 stmts)
 
-### 5. Migration Alembic (1h)
+### 5. Migrations SQL (1h)
 
 ```bash
-# Générer migration pour FamilyBudget modifié
-python manage.py create_migration "Ajout magasin et recurrence FamilyBudget"
-alembic upgrade head
+# Appliquer les migrations en attente
+python manage.py migrate
 ```
 
 ### 6. Validation complète (1h)

@@ -14,9 +14,11 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
 
-from src.core.ai import AnalyseurIA, ClientIA, obtenir_client_ia
+from src.core.ai import AnalyseurIA, ClientIA, RateLimitIA, obtenir_client_ia
+from src.core.ai.cache import CacheIA
 from src.core.caching import obtenir_cache
 from src.core.decorators import avec_session_db
+from src.core.errors_base import ErreurLimiteDebit
 from src.core.models import (
     ArticleInventaire,
     HistoriqueRecette,
@@ -44,6 +46,7 @@ class ServiceSuggestions:
         self.client_ia = obtenir_client_ia()
         self.analyseur = AnalyseurIA()
         self.cache = obtenir_cache()
+        self.service_name = "suggestions"
 
     # ═══════════════════════════════════════════════════════════
     # ANALYSE DU PROFIL
@@ -489,10 +492,22 @@ Réponds avec 3 suggestions au format JSON:
 """
 
         try:
+            # ✅ Rate limiting — empêche l'épuisement du quota Mistral
+            autorise, msg = RateLimitIA.peut_appeler()
+            if not autorise:
+                logger.warning(f"⏳ Rate limit suggestions: {msg}")
+                return []
+
             reponse = self.client_ia.generer(
                 prompt=prompt,
                 system="Tu es un chef cuisinier créatif qui fait des suggestions personnalisées.",
                 temperature=0.7,
+            )
+
+            # ✅ Enregistrer l'appel dans le rate limiter
+            RateLimitIA.enregistrer_appel(
+                service=self.service_name,
+                tokens_utilises=len(reponse) if reponse else 0,
             )
 
             suggestions = self.analyseur.extraire_json(reponse)
@@ -500,6 +515,9 @@ Réponds avec 3 suggestions au format JSON:
             if isinstance(suggestions, list):
                 return suggestions
 
+        except ErreurLimiteDebit:
+            logger.warning("⏳ Quota IA atteint pour suggestions")
+            return []
         except Exception as e:
             logger.error(f"Erreur suggestion IA: {e}")
 

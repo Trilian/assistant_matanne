@@ -41,10 +41,10 @@ def _get_api_key(key_name: str) -> str | None:
                     return st.secrets.get("pexels", {}).get("api_key")
                 elif key_name == "PIXABAY_API_KEY":
                     return st.secrets.get("pixabay", {}).get("api_key")
-            except Exception:
-                pass
-    except Exception:
-        pass
+            except Exception as e:
+                logger.debug("Secrets indisponible pour %s: %s", key_name, e)
+    except Exception as e:
+        logger.debug("Streamlit non disponible: %s", e)
 
     # Fallback à os.getenv (pour dev local avec .env)
     return os.getenv(key_name)
@@ -58,27 +58,17 @@ UNSPLASH_API_KEY = _get_api_key(
     "UNSPLASH_API_KEY"
 )  # Gratuit: https://unsplash.com/oauth/applications
 
-# Debug logging pour Streamlit Cloud
-# Utiliser print() en plus de logger pour être visible dans Streamlit logs
-print("\n" + "=" * 60)
-print("IMAGE GENERATOR INITIALIZED")
-print("=" * 60)
-print(
-    f"Leonardo:  {'CONFIGURED' if LEONARDO_API_KEY else 'NOT SET'} {LEONARDO_API_KEY[:10] if LEONARDO_API_KEY else ''}..."
+# API status logging (sans leak de clés)
+logger.info(
+    "Image generator initialisé — Leonardo=%s, Unsplash=%s, Pexels=%s, Pixabay=%s",
+    "OK" if LEONARDO_API_KEY else "NON",
+    "OK" if UNSPLASH_API_KEY else "NON",
+    "OK" if PEXELS_API_KEY else "NON",
+    "OK" if PIXABAY_API_KEY else "NON",
 )
-print(
-    f"Unsplash:  {'CONFIGURED' if UNSPLASH_API_KEY else 'NOT SET'} {UNSPLASH_API_KEY[:10] if UNSPLASH_API_KEY else ''}..."
-)
-print(
-    f"Pexels:    {'CONFIGURED' if PEXELS_API_KEY else 'NOT SET'} {PEXELS_API_KEY[:10] if PEXELS_API_KEY else ''}..."
-)
-print(
-    f"Pixabay:   {'CONFIGURED' if PIXABAY_API_KEY else 'NOT SET'} {PIXABAY_API_KEY[:10] if PIXABAY_API_KEY else ''}..."
-)
-print("=" * 60 + "\n")
 
 if UNSPLASH_API_KEY:
-    logger.info(f"Clé Unsplash chargée (premiers caractères: {UNSPLASH_API_KEY[:10]}...)")
+    logger.info("Clé Unsplash chargée")
 else:
     logger.warning(
         "Clé Unsplash non trouvée - vérifiez st.secrets['unsplash']['api_key'] ou UNSPLASH_API_KEY"

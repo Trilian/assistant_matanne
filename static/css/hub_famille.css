@@ -1,0 +1,59 @@
+.family-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 20px;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-bottom: 10px;
+    min-height: 120px;
+}
+.family-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+.family-card.jules {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+.family-card.weekend {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+.family-card.anne {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+.family-card.mathieu {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    color: #333;
+}
+.family-card.achats {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.card-emoji {
+    font-size: 2.5rem;
+    margin-bottom: 5px;
+}
+.card-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.card-subtitle {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+.card-stats {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+.card-stat {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.streak-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}

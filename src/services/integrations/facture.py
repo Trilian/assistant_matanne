@@ -190,9 +190,10 @@ Réponds UNIQUEMENT avec le JSON, sans texte autour."""
 
     def extraire_donnees_facture_sync(self, image_base64: str) -> ResultatOCR:
         """Version synchrone de l'extraction."""
-        import asyncio
+        from src.services.core.base.async_utils import sync_wrapper
 
-        return asyncio.run(self.extraire_donnees_facture(image_base64))
+        _sync = sync_wrapper(self.extraire_donnees_facture)
+        return _sync(image_base64)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -251,9 +252,15 @@ def extraire_montant(texte: str, pattern: str) -> float | None:
 # ═══════════════════════════════════════════════════════════
 
 
+_facture_ocr_instance: FactureOCRService | None = None
+
+
 def obtenir_service_ocr_facture() -> FactureOCRService:
-    """Factory pour le service OCR (convention française)."""
-    return FactureOCRService()
+    """Factory singleton pour le service OCR."""
+    global _facture_ocr_instance
+    if _facture_ocr_instance is None:
+        _facture_ocr_instance = FactureOCRService()
+    return _facture_ocr_instance
 
 
 def get_facture_ocr_service() -> FactureOCRService:

@@ -6,6 +6,7 @@ Affiche les prédictions et recommandations basées sur le Machine Learning.
 import pandas as pd
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.services.cuisine.suggestions import obtenir_service_predictions
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui import etat_vide
@@ -58,7 +59,7 @@ def afficher_predictions():
         st.divider()
 
         # Affiche les prédictions si générées
-        if st.session_state.get("predictions_generated", False):
+        if st.session_state.get(SK.PREDICTIONS_GENERATED, False):
             with st.spinner("📊 Génération des prédictions ML..."):
                 try:
                     predictions = service_pred.generer_predictions(articles, historique_complet)
@@ -76,7 +77,7 @@ def afficher_predictions():
                     return
 
         # Affiche les résultats
-        if st.session_state.get("predictions_data"):
+        if st.session_state.get(SK.PREDICTIONS_DATA):
             data = st.session_state.predictions_data
             predictions = data["predictions"]
             analyse = data["analyse"]

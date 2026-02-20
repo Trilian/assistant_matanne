@@ -4,6 +4,8 @@ Charges - Composants UI gamifiés.
 
 import streamlit as st
 
+from src.core.session_keys import SK
+
 from .constantes import BADGES_DEFINITIONS, ENERGIES, NIVEAUX_ECO
 
 
@@ -90,7 +92,7 @@ def afficher_badges_collection(badges_obtenus: list[str], stats: dict):
     for i, badge_def in enumerate(BADGES_DEFINITIONS):
         badge_id = badge_def["id"]
         est_obtenu = badge_id in badges_obtenus or badge_def["condition"](stats)
-        is_new = badge_id not in st.session_state.get("badges_vus", []) and est_obtenu
+        is_new = badge_id not in st.session_state.get(SK.BADGES_VUS, []) and est_obtenu
         locked_class = "" if est_obtenu else "locked"
         new_class = "new" if is_new else ""
 

@@ -1,8 +1,10 @@
 """
 UI - Point d'entrée unifié optimisé
 Architecture claire : core/ components/ feedback/ layout/ tablet/ integrations/
+Design system : tokens/ html_builder/ theme/ registry/
 """
 
+# Design System primitives
 # Core (modules, forms, io)
 # Components - Atoms
 # Components - Forms
@@ -14,7 +16,9 @@ Architecture claire : core/ components/ feedback/ layout/ tablet/ integrations/
 # Components - Metrics
 # Components - System
 from .components import (
+    ConfigChamp,
     Modale,
+    TypeChamp,
     afficher_sante_systeme,
     afficher_timeline_activites,
     alerte_stock,
@@ -55,6 +59,7 @@ from .feedback import (
     indicateur_chargement,
     spinner_intelligent,
 )
+from .html_builder import HtmlBuilder, render_html
 
 # Integrations (Google Calendar, etc.)
 from .integrations import (
@@ -65,12 +70,14 @@ from .integrations import (
     afficher_statut_sync_google,
     verifier_config_google,
 )
+from .registry import ComponentMeta, composant_ui, obtenir_catalogue, rechercher_composants
 
 # Tablet mode
 from .tablet import (
     CSS_MODE_CUISINE,
     CSS_TABLETTE,
     ModeTablette,
+    TimerCuisine,
     afficher_selecteur_mode,
     afficher_vue_recette_cuisine,
     appliquer_mode_tablette,
@@ -82,6 +89,8 @@ from .tablet import (
     obtenir_mode_tablette,
     saisie_nombre_tablette,
 )
+from .theme import ModeTheme, Theme, appliquer_theme, obtenir_theme
+from .tokens import Couleur, Espacement, Ombre, Rayon, Transition, Typographie, ZIndex
 
 # Views (vues UI extraites des services)
 from .views import (
@@ -109,6 +118,24 @@ from .views import (
 )
 
 __all__ = [
+    # Design System
+    "Couleur",
+    "Espacement",
+    "Rayon",
+    "Typographie",
+    "Ombre",
+    "Transition",
+    "ZIndex",
+    "HtmlBuilder",
+    "render_html",
+    "ModeTheme",
+    "Theme",
+    "obtenir_theme",
+    "appliquer_theme",
+    "ComponentMeta",
+    "composant_ui",
+    "obtenir_catalogue",
+    "rechercher_composants",
     # Components - Atoms
     "alerte_stock",
     "badge",
@@ -121,6 +148,8 @@ __all__ = [
     "barre_recherche",
     "panneau_filtres",
     "filtres_rapides",
+    "ConfigChamp",
+    "TypeChamp",
     # Components - Data
     "pagination",
     "ligne_metriques",
@@ -168,6 +197,7 @@ __all__ = [
     "liste_cases_tablette",
     "afficher_vue_recette_cuisine",
     "afficher_selecteur_mode",
+    "TimerCuisine",
     # Integrations
     "GOOGLE_SCOPES",
     "REDIRECT_URI_LOCAL",

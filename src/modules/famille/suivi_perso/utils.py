@@ -25,6 +25,7 @@ from src.core.models import (
     HealthRoutine,
     UserProfile,
 )
+from src.core.session_keys import SK
 from src.services.integrations.garmin import (
     ServiceGarmin,
     get_garmin_service,
@@ -63,12 +64,12 @@ __all__ = [
 
 def get_current_user() -> str:
     """Recupère l'utilisateur courant"""
-    return st.session_state.get("suivi_user", "anne")
+    return st.session_state.get(SK.SUIVI_USER, "anne")
 
 
 def set_current_user(username: str):
     """Definit l'utilisateur courant"""
-    st.session_state["suivi_user"] = username
+    st.session_state[SK.SUIVI_USER] = username
 
 
 def get_user_data(username: str) -> dict:

@@ -13,6 +13,7 @@ from datetime import date, timedelta
 
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.ui import etat_vide
 
 from .components import (
@@ -200,12 +201,12 @@ def app():
             st.divider()
 
             # Conseils batch
-            if st.session_state.get("planning_conseils"):
+            if st.session_state.get(SK.PLANNING_CONSEILS):
                 st.markdown("##### 🍳 Conseils Batch Cooking")
                 st.info(st.session_state.planning_conseils)
 
             # Suggestions bio
-            if st.session_state.get("planning_suggestions_bio"):
+            if st.session_state.get(SK.PLANNING_SUGGESTIONS_BIO):
                 st.markdown("##### 🌿 Suggestions bio/local")
                 for sug in st.session_state.planning_suggestions_bio:
                     st.caption(f"• {sug}")
@@ -234,8 +235,8 @@ def app():
                     pdf_buffer = generer_pdf_planning_session(
                         planning_data=st.session_state.planning_data,
                         date_debut=date_debut,
-                        conseils=st.session_state.get("planning_conseils", ""),
-                        suggestions_bio=st.session_state.get("planning_suggestions_bio", []),
+                        conseils=st.session_state.get(SK.PLANNING_CONSEILS, ""),
+                        suggestions_bio=st.session_state.get(SK.PLANNING_SUGGESTIONS_BIO, []),
                     )
                     if pdf_buffer:
                         st.download_button(

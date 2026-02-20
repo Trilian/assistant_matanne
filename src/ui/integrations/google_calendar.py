@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 import streamlit as st
 
 from src.core.config import obtenir_parametres
+from src.core.session_keys import SK
 from src.services.famille.calendrier import (
     get_calendar_sync_service,
 )
@@ -89,7 +90,7 @@ def afficher_config_google_calendar():
     st.success("✅ Google Calendar configuré")
 
     # État de la connexion
-    if "google_calendar_config" not in st.session_state:
+    if SK.GOOGLE_CALENDAR_CONFIG not in st.session_state:
         st.session_state.google_calendar_config = None
 
     config = st.session_state.google_calendar_config
@@ -173,7 +174,7 @@ def afficher_config_google_calendar():
 def afficher_statut_sync_google():
     """Affiche le statut de synchronisation Google Calendar."""
 
-    config = st.session_state.get("google_calendar_config")
+    config = st.session_state.get(SK.GOOGLE_CALENDAR_CONFIG)
 
     if not config:
         return
@@ -194,7 +195,7 @@ def afficher_statut_sync_google():
 def afficher_bouton_sync_rapide():
     """Bouton de sync rapide Google Calendar pour la sidebar."""
 
-    config = st.session_state.get("google_calendar_config")
+    config = st.session_state.get(SK.GOOGLE_CALENDAR_CONFIG)
 
     if config:
         if st.button("🔄 Sync Google", use_container_width=True):

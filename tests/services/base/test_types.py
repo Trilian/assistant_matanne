@@ -882,11 +882,12 @@ class TestBaseServiceIntegration:
         assert result.nom == "Updated"
 
     def test_update_not_found(self, integration_service, integration_db):
-        """Test mise à jour entité non trouvée."""
-        with patch("src.core.caching.cache.Cache.invalider"):
-            result = integration_service.update(999, {"nom": "Test"}, db=integration_db)
+        """Test mise à jour entité non trouvée lève ErreurNonTrouve."""
+        from src.core.errors_base import ErreurNonTrouve
 
-        assert result is None
+        with patch("src.core.caching.cache.Cache.invalider"):
+            with pytest.raises(ErreurNonTrouve):
+                integration_service.update(999, {"nom": "Test"}, db=integration_db)
 
     def test_delete_success(self, integration_service, integration_db):
         """Test suppression réussie."""

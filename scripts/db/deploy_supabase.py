@@ -222,21 +222,21 @@ class SupabaseDeployer:
 
             print(f"\nðŸ“ˆ Total: {total_rows} lignes")
 
-            # Migrations
+            # Migrations (schema_migrations)
             self.cursor.execute("""
                 SELECT EXISTS (
                     SELECT FROM information_schema.tables
                     WHERE table_schema = 'public'
-                    AND table_name = 'alembic_version'
+                    AND table_name = 'schema_migrations'
                 );
             """)
-            has_alembic = self.cursor.fetchone()[0]
+            has_migrations = self.cursor.fetchone()[0]
 
-            if has_alembic:
-                self.cursor.execute("SELECT version_num FROM alembic_version;")
-                version = self.cursor.fetchone()
-                if version:
-                    print(f"\nðŸ”„ Version Alembic: {version[0]}")
+            if has_migrations:
+                self.cursor.execute("SELECT MAX(version), COUNT(*) FROM schema_migrations;")
+                row = self.cursor.fetchone()
+                if row and row[0]:
+                    print(f"\n🔄 Schema v{row[0]} ({row[1]} migration(s))")
 
             print("\n" + "=" * 60)
             return True

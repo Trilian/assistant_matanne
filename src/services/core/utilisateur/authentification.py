@@ -381,21 +381,52 @@ def get_auth_service() -> AuthService:
 
 
 def afficher_login_form(*args, **kwargs):
-    """Ré-export lazy de afficher_formulaire_connexion pour rétrocompatibilité."""
+    """Ré-export lazy de afficher_formulaire_connexion pour rétrocompatibilité.
+
+    DEPRECATED: Importer directement depuis src.ui.views.authentification.
+    """
+    import warnings
+
+    warnings.warn(
+        "afficher_login_form est déprécié ici. " "Importer depuis src.ui.views.authentification.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     from src.ui.views.authentification import afficher_formulaire_connexion
 
     return afficher_formulaire_connexion(*args, **kwargs)
 
 
 def afficher_user_menu(*args, **kwargs):
-    """Ré-export lazy de afficher_menu_utilisateur pour rétrocompatibilité."""
+    """Ré-export lazy de afficher_menu_utilisateur pour rétrocompatibilité.
+
+    DEPRECATED: Importer directement depuis src.ui.views.authentification.
+    """
+    import warnings
+
+    warnings.warn(
+        "afficher_user_menu est déprécié ici. " "Importer depuis src.ui.views.authentification.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     from src.ui.views.authentification import afficher_menu_utilisateur
 
     return afficher_menu_utilisateur(*args, **kwargs)
 
 
 def afficher_profile_settings(*args, **kwargs):
-    """Ré-export lazy de afficher_parametres_profil pour rétrocompatibilité."""
+    """Ré-export lazy de afficher_parametres_profil pour rétrocompatibilité.
+
+    DEPRECATED: Importer directement depuis src.ui.views.authentification.
+    """
+    import warnings
+
+    warnings.warn(
+        "afficher_profile_settings est déprécié ici. "
+        "Importer depuis src.ui.views.authentification.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     from src.ui.views.authentification import afficher_parametres_profil
 
     return afficher_parametres_profil(*args, **kwargs)

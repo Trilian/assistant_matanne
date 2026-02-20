@@ -8,11 +8,14 @@ Inclut les schémas Pydantic pour les recettes importées.
 """
 
 import json
+import logging
 import re
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════════
 # SCHÉMAS
@@ -283,8 +286,8 @@ class CuisineAZParser(RecipeParser):
                                     recipe.etapes.append(step)
                                 elif isinstance(step, dict) and "text" in step:
                                     recipe.etapes.append(step["text"])
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Erreur parsing JSON-LD: %s", e)
 
         # Fallback HTML si pas de JSON-LD
         if not recipe.ingredients:
@@ -376,7 +379,8 @@ class GenericRecipeParser(RecipeParser):
 
                     recipe.confiance_score = 0.9
                     return recipe
-            except Exception:
+            except Exception as e:
+                logger.debug("Erreur parsing JSON-LD bloc: %s", e)
                 continue
 
         # 2. Fallback: extraction HTML heuristique

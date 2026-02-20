@@ -1,8 +1,16 @@
 """
 Module d'import de recettes depuis différentes sources
-- Sites web (URLs HTML)
+- Sites web (URLs HTML)  ← DÉPRÉCIÉ pour les URLs, utiliser import_url.py
 - Fichiers PDF
 - Texte brut
+
+⚠️ MIGRATION EN COURS:
+    - L'import URL est dupliqué avec import_url.py (RecipeImportService)
+      qui offre: AI fallback, modèles Pydantic, parsers modulaires, scoring
+    - Ce fichier reste nécessaire pour from_pdf() et from_text()
+    - TODO: Migrer l'UI (recettes_import.py) vers RecipeImportService pour les URLs
+    - TODO: Ajouter import_from_pdf/text dans RecipeImportService
+    - TODO: Supprimer from_url() d'ici quand la migration est complète
 """
 
 import logging
@@ -223,8 +231,8 @@ class RecipeImporter:
                     # Si on a un nom, on a trouvé la recette!
                     if recipe["nom"]:
                         return recipe
-            except Exception:
-                pass  # Continuer si erreur JSON
+            except Exception as e:
+                logger.debug("Erreur parsing JSON-LD recette: %s", e)
 
         # Fallback: chercher le titre (h1, h2, ou property og:title)
         if not recipe["nom"]:

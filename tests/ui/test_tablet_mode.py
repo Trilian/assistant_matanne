@@ -584,23 +584,19 @@ class TestRenderKitchenRecipeView:
 
         mock_balloons.assert_called_once()
 
-    @patch("streamlit.session_state", {"test_timer_etape": 1, "test_timer_minuteur": 5})
+    @patch("streamlit.session_state", {"test_timer_etape": 1})
     @patch("streamlit.markdown")
     @patch("streamlit.tabs")
     @patch("streamlit.button", return_value=False)
     @patch("streamlit.columns")
     @patch("streamlit.progress")
     @patch("streamlit.checkbox")
+    @patch("streamlit.expander")
     def test_recipe_with_timer(
-        self, mock_check, mock_prog, mock_cols, mock_btn, mock_tabs, mock_md
+        self, mock_expander, mock_check, mock_prog, mock_cols, mock_btn, mock_tabs, mock_md
     ):
-        """Test recette avec timer actif."""
-        import streamlit as st
-
+        """Test recette avec timer (TimerCuisine intégré)."""
         from src.ui.tablet import afficher_vue_recette_cuisine
-
-        st.session_state["test_timer_etape"] = 1
-        st.session_state["test_timer_minuteur"] = 5
 
         mock_tabs.return_value = [MagicMock(), MagicMock()]
         for tab in mock_tabs.return_value:
@@ -612,13 +608,17 @@ class TestRenderKitchenRecipeView:
             col.__enter__ = MagicMock(return_value=col)
             col.__exit__ = MagicMock()
 
+        mock_exp = MagicMock()
+        mock_exp.__enter__ = MagicMock(return_value=mock_exp)
+        mock_exp.__exit__ = MagicMock()
+        mock_expander.return_value = mock_exp
+
         recette = {"nom": "Test", "instructions": ["Cuire"]}
 
         afficher_vue_recette_cuisine(recette, cle="test_timer")
 
-        # Timer markdown should contain "5 min"
-        timer_calls = [str(call) for call in mock_md.call_args_list]
-        assert any("5" in call and "min" in call for call in timer_calls)
+        # L'expander timer doit être affiché
+        mock_expander.assert_called()
 
     @patch("streamlit.session_state", {"nav_etape": 2})
     @patch("streamlit.markdown")
@@ -628,8 +628,17 @@ class TestRenderKitchenRecipeView:
     @patch("streamlit.progress")
     @patch("streamlit.checkbox")
     @patch("streamlit.rerun")
+    @patch("streamlit.expander")
     def test_recipe_navigation_prev(
-        self, mock_rerun, mock_check, mock_prog, mock_cols, mock_btn, mock_tabs, mock_md
+        self,
+        mock_expander,
+        mock_rerun,
+        mock_check,
+        mock_prog,
+        mock_cols,
+        mock_btn,
+        mock_tabs,
+        mock_md,
     ):
         """Test navigation précédent."""
         import streamlit as st
@@ -648,8 +657,13 @@ class TestRenderKitchenRecipeView:
             col.__enter__ = MagicMock(return_value=col)
             col.__exit__ = MagicMock()
 
-        # Simule: Timer1=False, Timer5=False, Timer10=False, Prev=True
-        mock_btn.side_effect = [False, False, False, True, False, False]
+        mock_exp = MagicMock()
+        mock_exp.__enter__ = MagicMock(return_value=mock_exp)
+        mock_exp.__exit__ = MagicMock()
+        mock_expander.return_value = mock_exp
+
+        # Buttons: Précédent=True, Quitter=False, Suivant=False
+        mock_btn.side_effect = [True, False, False]
 
         recette = {"nom": "Test", "instructions": ["A", "B", "C"]}
 

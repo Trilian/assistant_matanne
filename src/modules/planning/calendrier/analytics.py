@@ -224,6 +224,7 @@ def afficher_formulaire_optimisation_ia(week_start: date) -> None:
         if submitted:
             with st.spinner("🤖 L'IA analyse..."):
                 # Import différé pour éviter les dépendances circulaires
+                from src.modules.famille.age_utils import get_age_jules_mois as _get_jules_age_mois
                 from src.services.cuisine.planning import obtenir_service_planning_unifie
 
                 service = obtenir_service_planning_unifie()
@@ -233,7 +234,7 @@ def afficher_formulaire_optimisation_ia(week_start: date) -> None:
                     contexte={
                         "objectifs_sante": objectifs,
                         "priorites": priorites,
-                        "jules_age_mois": 19,
+                        "jules_age_mois": _get_jules_age_mois(),
                     },
                 )
 

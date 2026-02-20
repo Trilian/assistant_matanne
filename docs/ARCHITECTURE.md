@@ -55,20 +55,23 @@ Le core est organisé en **7 sous-packages** + fichiers utilitaires:
 
 ```
 src/core/
-├── ai/              # Client Mistral, cache sémantique, rate limiting
-├── caching/         # Cache multi-niveaux L1/L2/L3
+├── ai/              # Client Mistral, cache sémantique, rate limiting, circuit breaker
+├── caching/         # Cache multi-niveaux L1/L2/L3 (décorateur unifié @avec_cache)
 ├── config/          # Pydantic BaseSettings, chargement .env
 ├── date_utils/      # Package utilitaires de dates (4 modules)
-├── db/              # Engine, sessions, migrations
+├── db/              # Engine, sessions, migrations SQL-file
 ├── models/          # 19 modèles SQLAlchemy ORM
 ├── validation/      # Schemas Pydantic (7 domaines), sanitizer
 ├── constants.py     # Constantes globales
-├── decorators.py    # @with_db_session, @with_cache, @with_error_handling
-├── errors.py        # Classes d'erreurs métier
-├── errors_base.py   # Classe de base ErreurApplication
+├── decorators.py    # @avec_session_db, @avec_cache (multi-niveaux), @avec_gestion_erreurs
+├── errors.py        # Classes d'erreurs métier (UI)
+├── errors_base.py   # Classe de base ExceptionApp + guards
+├── events.py        # Bus d'événements pub/sub avec wildcards
 ├── lazy_loader.py   # Import différé à la demande
 ├── logging.py       # Configuration logging
+├── repository.py    # Repository générique CRUD typé
 ├── state.py         # StateManager (st.session_state)
+├── storage.py       # SessionStorage Protocol (découplage Streamlit)
 └── py.typed         # Marqueur PEP 561 pour typing
 ```
 
@@ -93,22 +96,25 @@ with obtenir_contexte_db() as session:
     result = session.query(Recette).all()
 ```
 
-Fichiers: `engine.py`, `session.py`, `migrations.py`, `utils.py`
+Fichiers: `engine.py`, `session.py`, `migrations.py` (SQL-file based, post-Alembic), `utils.py`
+
+**Migrations SQL**: Les migrations sont des fichiers `.sql` numérotés dans `sql/migrations/`.
+Le système suit les versions appliquées dans la table `schema_migrations` avec checksums SHA-256.
 
 ### caching/ — Cache multi-niveaux
 
 ```python
-from src.core.caching import avec_cache_multi, obtenir_cache, cached
+from src.core.decorators import avec_cache
 
-@avec_cache_multi(ttl=300, niveaux=["L1", "L2"])
+# Décorateur unifié — délègue à CacheMultiNiveau (L1→L2→L3)
+@avec_cache(ttl=300)
 def get_recettes(): ...
-
-# Ou via le décorateur typé cached()
-@cached(ttl=60)
-def get_data(): ...
 ```
 
 Fichiers: `base.py` (types), `memory.py` (L1), `session.py` (L2), `file.py` (L3), `orchestrator.py`, `cache.py`
+
+> **Note**: Les anciens décorateurs `@cached` et `@avec_cache_multi` ont été supprimés.
+> Seul `@avec_cache` (dans `decorators.py`) est utilisé — il passe par `CacheMultiNiveau` automatiquement.
 
 ### date_utils/ — Utilitaires de dates (package)
 
@@ -142,9 +148,46 @@ src/core/validation/
 ### decorators.py
 
 ```python
-@with_db_session      # Injecte automatiquement Session
-@with_cache(ttl=300)  # Cache Streamlit 5 min
-@with_error_handling  # Gestion erreurs unifiée
+@avec_session_db      # Injecte automatiquement Session
+@avec_cache(ttl=300)  # Cache multi-niveaux unifié (L1→L2→L3)
+@avec_gestion_erreurs # Gestion erreurs unifiée
+@avec_validation      # Validation Pydantic automatique
+```
+
+### events.py — Bus d'événements
+
+```python
+from src.core.events import bus_evenements
+
+@bus_evenements.on("recette.creee")
+def notifier_creation(data):
+    logger.info(f"Recette créée: {data['nom']}")
+
+bus_evenements.emettre("recette.creee", {"nom": "Tarte"})
+```
+
+Support wildcards (`*`, `**`), priorités, isolation d'erreurs.
+
+### repository.py — Repository générique
+
+```python
+from src.core.repository import Repository
+from src.core.models import Recette
+
+repo = Repository(Recette, session)
+recettes = repo.lister(filtres={"categorie": "dessert"}, limite=10)
+recette = repo.creer({"nom": "Tarte", "categorie": "dessert"})
+```
+
+### storage.py — Abstraction SessionStorage
+
+```python
+from src.core.storage import obtenir_storage, MemorySessionStorage
+
+# Production: StreamlitSessionStorage (st.session_state)
+# Tests/CLI: MemorySessionStorage (dict)
+storage = obtenir_storage()
+storage["clé"] = valeur
 ```
 
 ### models/ — SQLAlchemy 2.0 ORM (19 fichiers)
@@ -175,6 +218,7 @@ src/core/validation/
 
 ```python
 from src.core.ai import ClientIA, AnalyseurIA, CacheIA, RateLimitIA
+from src.core.ai import CircuitBreaker, avec_circuit_breaker, obtenir_circuit
 
 # Utilisation via BaseAIService (recommandé)
 class MonService(BaseAIService):
@@ -183,7 +227,13 @@ class MonService(BaseAIService):
             prompt=prompt,
             item_model=MonModel
         )
+
+# Circuit Breaker pour résilience API
+@avec_circuit_breaker("mistral", seuil_echecs=5, delai_recuperation=60)
+def appel_ia(prompt: str) -> str: ...
 ```
+
+Fichiers: `client.py`, `parser.py`, `cache.py`, `rate_limit.py`, `circuit_breaker.py`
 
 ## Services (src/services/)
 
@@ -263,29 +313,32 @@ CREATE POLICY depenses_user_policy ON depenses
 ```
 src/core/caching/
 ├── base.py          # EntreeCache, StatistiquesCache (types)
-├── cache.py         # Cache simple, décorateur @cached (typé ParamSpec)
+├── cache.py         # Cache simple (accès direct)
 ├── memory.py        # CacheMemoireN1 (L1: dict Python)
-├── session.py       # CacheSessionN2 (L2: st.session_state)
+├── session.py       # CacheSessionN2 (L2: SessionStorage)
 ├── file.py          # CacheFichierN3 (L3: pickle sur disque)
-└── orchestrator.py  # CacheMultiNiveau, @avec_cache_multi (typé ParamSpec)
+└── orchestrator.py  # CacheMultiNiveau (orchestration L1→L2→L3)
 ```
 
 1. **L1**: `CacheMemoireN1` — dict Python en mémoire (ultra rapide, volatile)
-2. **L2**: `CacheSessionN2` — st.session_state (persistant pendant la session)
+2. **L2**: `CacheSessionN2` — SessionStorage (persistant pendant la session)
 3. **L3**: `CacheFichierN3` — pickle sur disque (persistant entre sessions)
 
 ```python
-from src.core.caching import avec_cache_multi, obtenir_cache
+from src.core.decorators import avec_cache
 
-# Décorateur
-@avec_cache_multi(ttl=300, niveaux=["L1", "L2"])
+# Décorateur unifié — délègue à CacheMultiNiveau
+@avec_cache(ttl=300)
 def get_recettes():
     ...
 
-# Cache orchestrateur
+# Cache orchestrateur direct
+from src.core.caching import obtenir_cache
 cache = obtenir_cache()
 cache.set("clé", valeur, ttl=600)
 ```
+
+> **Note**: Un seul décorateur `@avec_cache` — les anciens `@cached` et `@avec_cache_multi` ont été supprimés.
 
 ### Cache Redis (optionnel)
 

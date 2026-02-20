@@ -11,6 +11,8 @@ import logging
 import plotly.graph_objects as go
 import streamlit as st
 
+from src.ui.tokens import Couleur
+
 logger = logging.getLogger(__name__)
 
 
@@ -36,15 +38,15 @@ def graphique_repartition_repas(planning_data: list[dict]) -> go.Figure | None:
 
     # Couleurs personnalisées
     couleurs = {
-        "petit_déjeuner": "#FFB74D",
-        "déjeuner": "#4CAF50",
-        "dîner": "#2196F3",
-        "goûter": "#E91E63",
+        "petit_déjeuner": Couleur.CHART_BREAKFAST,
+        "déjeuner": Couleur.CHART_LUNCH,
+        "dîner": Couleur.CHART_DINNER,
+        "goûter": Couleur.CHART_SNACK,
     }
 
     labels = list(types_count.keys())
     values = list(types_count.values())
-    colors = [couleurs.get(t, "#9E9E9E") for t in labels]
+    colors = [couleurs.get(t, Couleur.CHART_DEFAULT) for t in labels]
 
     # Labels français
     labels_fr = {
@@ -119,7 +121,7 @@ def graphique_inventaire_categories(inventaire: list[dict]) -> go.Figure | None:
             x=[t - b for t, b in zip(totaux, bas, strict=False)],
             name="Stock OK",
             orientation="h",
-            marker_color="#4CAF50",
+            marker_color=Couleur.CHART_STOCK_OK,
         )
     )
 
@@ -130,7 +132,7 @@ def graphique_inventaire_categories(inventaire: list[dict]) -> go.Figure | None:
             x=bas,
             name="Stock bas",
             orientation="h",
-            marker_color="#FF5722",
+            marker_color=Couleur.CHART_STOCK_BAS,
         )
     )
 

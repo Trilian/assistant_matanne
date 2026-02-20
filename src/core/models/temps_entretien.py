@@ -10,7 +10,7 @@ Contient :
 
 from datetime import date, datetime
 from decimal import Decimal
-from enum import Enum, StrEnum
+from enum import StrEnum
 
 from sqlalchemy import (
     JSON,
@@ -346,9 +346,7 @@ class PieceMaison(Base):
 
     # Métadonnées
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     objets: Mapped[list["ObjetMaison"]] = relationship(
@@ -405,9 +403,7 @@ class ObjetMaison(Base):
 
     # Métadonnées
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     piece: Mapped["PieceMaison"] = relationship(back_populates="objets")
@@ -471,9 +467,7 @@ class ZoneJardin(Base):
 
     # Métadonnées
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     plantes: Mapped[list["PlanteJardin"]] = relationship(
@@ -529,9 +523,7 @@ class PlanteJardin(Base):
 
     # Métadonnées
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     zone: Mapped["ZoneJardin"] = relationship(back_populates="plantes")
@@ -569,9 +561,7 @@ class PlanJardin(Base):
 
     # Métadonnées
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     zones: Mapped[list["ZoneJardin"]] = relationship(

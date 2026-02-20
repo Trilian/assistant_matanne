@@ -6,6 +6,7 @@ from decimal import Decimal
 
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.ui import etat_vide
 
 from .constantes import CONSEILS_ECONOMIES, ENERGIES
@@ -36,7 +37,7 @@ def onglet_dashboard(factures: list[dict]):
     badges_obtenus = obtenir_badges_obtenus(stats)
 
     # Calculer variation (si score précédent en session)
-    prev_score = st.session_state.get("prev_eco_score")
+    prev_score = st.session_state.get(SK.PREV_ECO_SCORE)
     variation = eco_score - prev_score if prev_score is not None else None
     st.session_state.prev_eco_score = eco_score
 
@@ -104,7 +105,7 @@ def onglet_factures(factures: list[dict]):
         st.session_state.charges_mode_ajout = True
 
     # Mode ajout
-    if st.session_state.get("charges_mode_ajout"):
+    if st.session_state.get(SK.CHARGES_MODE_AJOUT):
         st.markdown("### Nouvelle facture")
 
         with st.form("form_facture"):

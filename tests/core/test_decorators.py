@@ -131,10 +131,11 @@ class TestAvecCache:
         assert result1["id"] == 1
         assert call_count[0] == 1
 
-        # Vérifier le cache
-        cached = Cache.obtenir("item_1")
-        assert cached is not None
-        assert cached["id"] == 1
+        # Deuxième appel - le cache doit retourner la même valeur sans ré-exécuter
+        result2 = get_item(instance, 1)
+        assert result2 is not None
+        assert result2["id"] == 1
+        assert call_count[0] == 1  # Pas de nouvel appel
 
     def test_with_cache_retrieves_from_cache(self, clear_cache):
         """Test que le cache est utilisé pour les appels suivants"""
@@ -170,18 +171,22 @@ class TestAvecCache:
 
     def test_with_cache_uses_custom_key_func(self, clear_cache):
         """Test de la fonction de clé personnalisée"""
+        call_count = [0]
 
         @avec_cache(ttl=3600, key_func=lambda self, a, b: f"sum_{a}_{b}")
         def add(self, a, b):
+            call_count[0] += 1
             return a + b
 
         instance = Mock()
         result = add(instance, 3, 4)
         assert result == 7
+        assert call_count[0] == 1
 
-        # Vérifier cache avec clé custom
-        cached = Cache.obtenir("sum_3_4")
-        assert cached == 7
+        # Deuxième appel avec mêmes args — doit venir du cache
+        result2 = add(instance, 3, 4)
+        assert result2 == 7
+        assert call_count[0] == 1  # Pas de nouvel appel
 
     def test_with_cache_uses_key_prefix(self, clear_cache):
         """Test du préfixe de clé"""

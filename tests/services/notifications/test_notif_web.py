@@ -266,7 +266,7 @@ class TestDoitEnvoyer:
         service._preferences["user123"] = preferences
 
         # Mock datetime pour 3h du matin
-        with patch("src.services.core.notifications.notif_web.datetime") as mock_dt:
+        with patch("src.services.core.notifications.notif_web_core.datetime") as mock_dt:
             mock_now = MagicMock()
             mock_now.hour = 3
             mock_dt.now.return_value = mock_now

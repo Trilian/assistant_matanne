@@ -13,6 +13,8 @@ from typing import Any
 
 import streamlit as st
 
+from src.core.session_keys import SK
+
 logger = logging.getLogger(__name__)
 
 
@@ -305,7 +307,7 @@ class RouteurOptimise:
                 logger.exception(f"Erreur render {module_name}")
                 st.error("[ERROR] Erreur lors du chargement du module")
 
-                if st.session_state.get("debug_mode", False):
+                if st.session_state.get(SK.DEBUG_MODE, False):
                     st.exception(e)
 
     @staticmethod

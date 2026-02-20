@@ -163,8 +163,8 @@ class TestRenderRealtimeStatus:
         # sidebar should not be used when not configured
         assert True  # Just check no exception
 
-    @patch("src.services.integrations.web.afficher_presence_indicator")
-    @patch("src.services.integrations.web.afficher_sync_status")
+    @patch("src.ui.views.synchronisation.afficher_indicateur_presence")
+    @patch("src.ui.views.synchronisation.afficher_statut_synchronisation")
     @patch("src.modules.cuisine.courses.realtime.get_realtime_sync_service")
     @patch("src.modules.cuisine.courses.realtime.st")
     def test_render_configured_no_typing(
@@ -187,9 +187,9 @@ class TestRenderRealtimeStatus:
         # Just check no exception - functions are called internally
         assert True
 
-    @patch("src.services.integrations.web.afficher_typing_indicator")
-    @patch("src.services.integrations.web.afficher_presence_indicator")
-    @patch("src.services.integrations.web.afficher_sync_status")
+    @patch("src.ui.views.synchronisation.afficher_indicateur_frappe")
+    @patch("src.ui.views.synchronisation.afficher_indicateur_presence")
+    @patch("src.ui.views.synchronisation.afficher_statut_synchronisation")
     @patch("src.modules.cuisine.courses.realtime.get_realtime_sync_service")
     @patch("src.modules.cuisine.courses.realtime.st")
     def test_render_with_typing_users(

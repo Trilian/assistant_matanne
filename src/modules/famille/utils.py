@@ -50,32 +50,10 @@ def get_or_create_jules() -> int:
 
 
 def calculer_age_jules() -> dict:
-    """Calcule l'âge de Jules en jours, semaines, mois"""
-    try:
-        with obtenir_contexte_db() as session:
-            child = session.query(ChildProfile).filter_by(name="Jules").first()
+    """Calcule l'âge de Jules (délègue à age_utils)."""
+    from src.modules.famille.age_utils import get_age_jules
 
-            if not child or not child.date_of_birth:
-                return {"jours": 0, "semaines": 0, "mois": 0, "ans": 0}
-
-            aujourd_hui = date.today()
-            delta = aujourd_hui - child.date_of_birth
-
-            jours = delta.days
-            semaines = jours // 7
-            mois = jours // 30
-            ans = jours // 365
-
-            return {
-                "jours": jours,
-                "semaines": semaines,
-                "mois": mois,
-                "ans": ans,
-                "date_naissance": child.date_of_birth,
-            }
-    except Exception as e:
-        st.error(f"❌ Erreur calcul âge: {str(e)}")
-        return {"jours": 0, "semaines": 0, "mois": 0, "ans": 0}
+    return get_age_jules()
 
 
 # ═══════════════════════════════════════════════════════════

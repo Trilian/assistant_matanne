@@ -29,11 +29,14 @@ def service():
 
 @pytest.fixture
 def mock_client_ia():
-    """Mock du ClientIA."""
-    with patch("src.services.jeux._internal.ai_service.ClientIA") as mock:
+    """Mock du ClientIA et BaseAIService.call_with_cache."""
+    with (
+        patch("src.services.jeux._internal.ai_service.obtenir_client_ia") as mock_obtenir,
+        patch.object(JeuxAIService, "call_with_cache", new_callable=AsyncMock) as mock_call,
+    ):
         client_instance = MagicMock()
-        mock.return_value = client_instance
-        yield client_instance
+        mock_obtenir.return_value = client_instance
+        yield mock_call
 
 
 @pytest.fixture
@@ -66,12 +69,21 @@ class TestJeuxAIServiceInit:
 
     def test_init(self, service):
         """Le service s'initialise correctement."""
-        assert service._client is None
+        assert service._client_ia is None
+        assert service.service_name == "jeux"
+        assert service.cache_prefix == "jeux"
+        assert service.default_temperature == 0.3
 
     def test_lazy_client(self, service, mock_client_ia):
         """Le client est chargé en lazy loading."""
         _ = service.client
-        assert service._client is not None
+        assert service._client_ia is not None
+
+    def test_inherits_base_ai(self, service):
+        """Le service hérite bien de BaseAIService."""
+        from src.services.core.base.ai_service import BaseAIService
+
+        assert isinstance(service, BaseAIService)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -94,8 +106,7 @@ class TestAnalyserParis:
     @pytest.mark.asyncio
     async def test_analyse_avec_donnees(self, service, opportunites_paris, mock_client_ia):
         """Analyse avec données appelle l'IA."""
-        mock_client_ia.appeler = AsyncMock(
-            return_value="""
+        mock_client_ia.return_value = """
             Résumé de l'analyse Paris sportifs.
 
             Points clés:
@@ -105,13 +116,12 @@ class TestAnalyserParis:
             Recommandations:
             - Surveiller le marché More_2_5
             """
-        )
 
         result = await service.analyser_paris_async(opportunites_paris)
 
         assert isinstance(result, AnalyseIA)
         assert result.type_analyse == "paris"
-        mock_client_ia.appeler.assert_called_once()
+        mock_client_ia.assert_called_once()
 
     def test_construire_prompt_paris(self, service, opportunites_paris):
         """Le prompt Paris est correctement construit."""
@@ -150,8 +160,7 @@ class TestAnalyserLoto:
     @pytest.mark.asyncio
     async def test_analyse_avec_donnees(self, service, numeros_loto, mock_client_ia):
         """Analyse avec données appelle l'IA."""
-        mock_client_ia.appeler = AsyncMock(
-            return_value="""
+        mock_client_ia.return_value = """
             Analyse des numéros en retard.
 
             Points clés:
@@ -160,7 +169,6 @@ class TestAnalyserLoto:
             Recommandations:
             - Rappel: chaque tirage est indépendant
             """
-        )
 
         result = await service.analyser_loto_async(numeros_loto)
 
@@ -187,7 +195,7 @@ class TestGenererSynthese:
     @pytest.mark.asyncio
     async def test_synthese(self, service, mock_client_ia):
         """Synthèse génère un résumé global."""
-        mock_client_ia.appeler = AsyncMock(return_value="Synthèse globale des opportunités.")
+        mock_client_ia.return_value = "Synthèse globale des opportunités."
 
         result = await service.generer_synthese_async(
             alertes_actives=5,

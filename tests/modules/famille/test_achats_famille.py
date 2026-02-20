@@ -586,10 +586,13 @@ class TestRenderDashboard:
 class TestRenderListeGroupe:
     """Tests pour afficher_liste_groupe"""
 
+    @patch("src.modules.famille.achats_famille.components.etat_vide")
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.get_purchases_by_groupe")
     @patch("src.modules.famille.achats_famille.components.afficher_achat_card")
-    def test_affiche_message_si_vide(self, mock_render_card, mock_get_purchases, mock_st):
+    def test_affiche_message_si_vide(
+        self, mock_render_card, mock_get_purchases, mock_st, mock_etat_vide
+    ):
         """afficher_liste_groupe affiche un message si aucun achat"""
         mock_get_purchases.return_value = []
 
@@ -597,7 +600,7 @@ class TestRenderListeGroupe:
 
         afficher_liste_groupe("jules", "👶 Achats pour Jules")
 
-        mock_st.info.assert_called_once()
+        mock_etat_vide.assert_called()
         mock_render_card.assert_not_called()
 
     @patch("src.modules.famille.achats_famille.components.st")
@@ -715,9 +718,10 @@ class TestRenderAddForm:
 class TestRenderHistorique:
     """Tests pour afficher_historique"""
 
+    @patch("src.modules.famille.achats_famille.components.etat_vide")
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.get_all_purchases")
-    def test_affiche_message_si_vide(self, mock_get_all, mock_st):
+    def test_affiche_message_si_vide(self, mock_get_all, mock_st, mock_etat_vide):
         """afficher_historique affiche un message si aucun historique"""
         mock_get_all.return_value = []
 
@@ -725,7 +729,7 @@ class TestRenderHistorique:
 
         afficher_historique()
 
-        mock_st.info.assert_called_once_with("Aucun achat enregistré")
+        mock_etat_vide.assert_called()
 
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.get_all_purchases")
@@ -760,9 +764,10 @@ class TestRenderHistorique:
 class TestRenderParMagasin:
     """Tests pour afficher_par_magasin"""
 
+    @patch("src.modules.famille.achats_famille.components.etat_vide")
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.get_all_purchases")
-    def test_affiche_message_si_vide(self, mock_get_all, mock_st):
+    def test_affiche_message_si_vide(self, mock_get_all, mock_st, mock_etat_vide):
         """afficher_par_magasin affiche un message si aucun article"""
         mock_get_all.return_value = []
 
@@ -770,7 +775,7 @@ class TestRenderParMagasin:
 
         afficher_par_magasin()
 
-        mock_st.info.assert_called_once_with("Aucun article en attente")
+        mock_etat_vide.assert_called()
 
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.get_all_purchases")

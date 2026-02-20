@@ -13,7 +13,7 @@ from .onglets import (
     onglet_factures,
     onglet_simulation,
 )
-from .styles import CHARGES_CSS
+from .styles import injecter_css_charges
 from .ui import afficher_header
 
 __all__ = ["app"]
@@ -21,7 +21,7 @@ __all__ = ["app"]
 
 def app():
     """Point d'entrée du module Charges gamifié."""
-    st.markdown(CHARGES_CSS, unsafe_allow_html=True)
+    injecter_css_charges()
 
     # Initialiser les données en session
     if "factures_charges" not in st.session_state:

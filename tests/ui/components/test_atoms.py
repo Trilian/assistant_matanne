@@ -138,53 +138,49 @@ class TestCarteMetrique:
         assert "#f0f0f0" in call_args
 
 
-class TestNotification:
-    """Tests pour la fonction notification."""
+class TestNotificationsFeedback:
+    """Tests pour le système de notifications (anciennement notification() déprécié)."""
 
-    @patch("streamlit.success")
-    def test_notification_success(self, mock_success):
-        """Test notification type success."""
-        from src.ui.components.atoms import notification
+    @patch("streamlit.toast")
+    def test_afficher_succes_utilise_toast(self, mock_toast):
+        """Test que afficher_succes utilise st.toast."""
+        from src.ui.feedback.toasts import GestionnaireNotifications
 
-        notification("Opération réussie", type="success")
+        # Reset le state pour éviter la déduplication
+        GestionnaireNotifications._STATE_KEY = "_notif_test_1"
+        GestionnaireNotifications.afficher("Opération réussie", "success")
 
-        mock_success.assert_called_once_with("Opération réussie")
+        mock_toast.assert_called_once_with("Opération réussie", icon="✅")
 
-    @patch("streamlit.error")
-    def test_notification_error(self, mock_error):
-        """Test notification type error."""
-        from src.ui.components.atoms import notification
+    @patch("streamlit.toast")
+    def test_afficher_erreur_utilise_toast(self, mock_toast):
+        """Test que afficher_erreur utilise st.toast."""
+        from src.ui.feedback.toasts import GestionnaireNotifications
 
-        notification("Erreur!", type="error")
+        GestionnaireNotifications._STATE_KEY = "_notif_test_2"
+        GestionnaireNotifications.afficher("Erreur!", "error")
 
-        mock_error.assert_called_once_with("Erreur!")
+        mock_toast.assert_called_once_with("Erreur!", icon="❌")
 
-    @patch("streamlit.warning")
-    def test_notification_warning(self, mock_warning):
-        """Test notification type warning."""
-        from src.ui.components.atoms import notification
+    @patch("streamlit.toast")
+    def test_afficher_warning_utilise_toast(self, mock_toast):
+        """Test que afficher_warning utilise st.toast."""
+        from src.ui.feedback.toasts import GestionnaireNotifications
 
-        notification("Attention", type="warning")
+        GestionnaireNotifications._STATE_KEY = "_notif_test_3"
+        GestionnaireNotifications.afficher("Attention", "warning")
 
-        mock_warning.assert_called_once_with("Attention")
+        mock_toast.assert_called_once_with("Attention", icon="⚠️")
 
-    @patch("streamlit.info")
-    def test_notification_info(self, mock_info):
-        """Test notification type info."""
-        from src.ui.components.atoms import notification
+    @patch("streamlit.toast")
+    def test_afficher_info_utilise_toast(self, mock_toast):
+        """Test que afficher_info utilise st.toast."""
+        from src.ui.feedback.toasts import GestionnaireNotifications
 
-        notification("Information", type="info")
+        GestionnaireNotifications._STATE_KEY = "_notif_test_4"
+        GestionnaireNotifications.afficher("Information", "info")
 
-        mock_info.assert_called_once_with("Information")
-
-    @patch("streamlit.info")
-    def test_notification_type_inconnu(self, mock_info):
-        """Test notification avec type inconnu utilise info."""
-        from src.ui.components.atoms import notification
-
-        notification("Message", type="autre")
-
-        mock_info.assert_called_once_with("Message")
+        mock_toast.assert_called_once_with("Information", icon="ℹ️")
 
 
 class TestSeparateur:
@@ -269,11 +265,11 @@ class TestAtomsImports:
 
         assert callable(carte_metrique)
 
-    def test_import_notification(self):
-        """Vérifie que notification est importable."""
-        from src.ui.components.atoms import notification
+    def test_import_notifications_feedback(self):
+        """Vérifie que le système de notifications est importable via feedback."""
+        from src.ui.feedback.toasts import GestionnaireNotifications
 
-        assert callable(notification)
+        assert hasattr(GestionnaireNotifications, "afficher")
 
     def test_import_separateur(self):
         """Vérifie que separateur est importable."""

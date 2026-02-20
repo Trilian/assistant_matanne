@@ -7,6 +7,7 @@ from collections.abc import Callable
 
 import streamlit as st
 
+from src.ui.tokens import Couleur, Espacement, Rayon
 from src.ui.utils import echapper_html
 
 
@@ -84,15 +85,9 @@ def carte_item(
             actions=[("Voir", lambda: view()), ("Éditer", lambda: edit())]
         )
     """
-    border_color = couleur_statut or "#e2e8e5"
+    border_color = couleur_statut or Couleur.BORDER
 
-    with st.container():
-        st.markdown(
-            f'<div style="border-left: 4px solid {border_color}; padding: 1rem; '
-            f'background: #f8f9fa; border-radius: 8px; margin-bottom: 0.5rem;"></div>',
-            unsafe_allow_html=True,
-        )
-
+    with st.container(border=True):
         if url_image:
             col_img, col_content = st.columns([1, 4])
             with col_img:
@@ -108,7 +103,7 @@ def carte_item(
                     st.markdown(f"### {titre}")
                 with col_status:
                     st.markdown(
-                        f'<div style="text-align: right; color: {couleur_statut or "#6c757d"}; '
+                        f'<div style="text-align: right; color: {couleur_statut or Couleur.TEXT_SECONDARY}; '
                         f'font-weight: 600;">{echapper_html(statut)}</div>',
                         unsafe_allow_html=True,
                     )
@@ -121,8 +116,8 @@ def carte_item(
             if tags:
                 tag_html = " ".join(
                     [
-                        f'<span style="background: #e7f3ff; padding: 0.25rem 0.5rem; '
-                        f'border-radius: 12px; font-size: 0.875rem;">{echapper_html(tag)}</span>'
+                        f'<span style="background: {Couleur.BG_INFO}; padding: {Espacement.XS} {Espacement.SM}; '
+                        f'border-radius: {Rayon.PILL}; font-size: 0.875rem;">{echapper_html(tag)}</span>'
                         for tag in tags
                     ]
                 )

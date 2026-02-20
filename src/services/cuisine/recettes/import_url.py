@@ -80,7 +80,8 @@ class RecipeImportService(BaseAIService):
         """Initialise le service d'import."""
         try:
             client = obtenir_client_ia()
-        except Exception:
+        except Exception as e:
+            logger.debug("Client IA indisponible pour import: %s", e)
             client = None
 
         super().__init__(
@@ -234,18 +235,16 @@ Réponds en JSON avec cette structure exacte:
 """
 
         try:
-            import asyncio
+            from src.services.core.base.async_utils import sync_wrapper
 
-            async def call_ai():
-                return await self.call_with_cache(
-                    prompt=prompt,
-                    system_prompt="Tu es un expert en extraction de recettes. Réponds uniquement en JSON valide.",
-                    temperature=0.3,
-                    max_tokens=2000,
-                    use_cache=False,
-                )
-
-            response = asyncio.run(call_ai())
+            _call_sync = sync_wrapper(self.call_with_cache)
+            response = _call_sync(
+                prompt=prompt,
+                system_prompt="Tu es un expert en extraction de recettes. Réponds uniquement en JSON valide.",
+                temperature=0.3,
+                max_tokens=2000,
+                use_cache=False,
+            )
 
             if response:
                 # Parser la réponse JSON

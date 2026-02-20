@@ -19,84 +19,18 @@ from pydantic import BaseModel, Field
 
 from src.core.config import obtenir_parametres
 
+# Types importés depuis la source unique (plus de duplication)
+from src.services.jeux._internal.football_types import (
+    BASE_URL,
+    COMPETITIONS,
+    Match,
+    ResultatFinal,
+    ResultatMiTemps,
+    ScoreMatch,
+    StatistiquesMarcheData,
+)
+
 logger = logging.getLogger(__name__)
-
-
-# ═══════════════════════════════════════════════════════════
-# CONSTANTES
-# ═══════════════════════════════════════════════════════════
-
-BASE_URL = "https://api.football-data.org/v4"
-
-# Codes des compétitions (plan gratuit)
-COMPETITIONS = {
-    "PL": "Premier League",
-    "BL1": "Bundesliga",
-    "SA": "Serie A",
-    "PD": "La Liga",
-    "FL1": "Ligue 1",
-}
-
-
-# ═══════════════════════════════════════════════════════════
-# TYPES ET SCHÉMAS
-# ═══════════════════════════════════════════════════════════
-
-
-class ResultatMiTemps(StrEnum):
-    """Résultat à la mi-temps."""
-
-    DOMICILE = "domicile"
-    EXTERIEUR = "exterieur"
-    NUL = "nul"
-
-
-class ResultatFinal(StrEnum):
-    """Résultat final."""
-
-    DOMICILE = "domicile"
-    EXTERIEUR = "exterieur"
-    NUL = "nul"
-
-
-class ScoreMatch(BaseModel):
-    """Score d'un match."""
-
-    domicile_mi_temps: int = 0
-    exterieur_mi_temps: int = 0
-    domicile_final: int = 0
-    exterieur_final: int = 0
-
-
-class Match(BaseModel):
-    """Données d'un match."""
-
-    id: int
-    competition: str
-    competition_nom: str = ""
-    date_match: date
-    equipe_domicile: str
-    equipe_exterieur: str
-    score: ScoreMatch = Field(default_factory=ScoreMatch)
-    statut: str = "SCHEDULED"  # SCHEDULED, LIVE, FINISHED, POSTPONED, etc.
-    resultat_mi_temps: ResultatMiTemps | None = None
-    resultat_final: ResultatFinal | None = None
-
-    @property
-    def est_termine(self) -> bool:
-        """Vérifie si le match est terminé."""
-        return self.statut == "FINISHED"
-
-
-class StatistiquesMarcheData(BaseModel):
-    """Statistiques pour un marché donné."""
-
-    marche: str  # ex: "domicile_mi_temps", "nul_final"
-    total_matchs: int = 0
-    nb_occurrences: int = 0
-    frequence: float = 0.0  # nb_occurrences / total_matchs
-    serie_actuelle: int = 0  # Matchs depuis dernière occurrence
-    derniere_occurrence: date | None = None
 
 
 # ═══════════════════════════════════════════════════════════
@@ -129,7 +63,8 @@ class FootballDataService:
         try:
             config = obtenir_parametres()
             return getattr(config, "FOOTBALL_DATA_API_KEY", "")
-        except Exception:
+        except Exception as e:
+            logger.debug("Clé API Football indisponible: %s", e)
             return ""
 
     def _faire_requete(self, endpoint: str, params: dict | None = None) -> dict | None:
@@ -381,21 +316,26 @@ class FootballDataService:
 
 
 # ═══════════════════════════════════════════════════════════
-# FACTORY
+# FACTORY (SINGLETON)
 # ═══════════════════════════════════════════════════════════
+
+_football_data_instance: FootballDataService | None = None
 
 
 def obtenir_service_donnees_football(api_key: str | None = None) -> FootballDataService:
     """
-    Factory pour créer une instance du service (convention française).
+    Factory singleton pour le service Football-Data.
 
     Args:
-        api_key: Clé API optionnelle
+        api_key: Clé API optionnelle (utilisée seulement à la première création)
 
     Returns:
         Instance FootballDataService
     """
-    return FootballDataService(api_key)
+    global _football_data_instance
+    if _football_data_instance is None:
+        _football_data_instance = FootballDataService(api_key)
+    return _football_data_instance
 
 
 def get_football_data_service(api_key: str | None = None) -> FootballDataService:
@@ -442,7 +382,8 @@ def obtenir_cle_api() -> str | None:
         return _API_KEY
     try:
         return obtenir_parametres().FOOTBALL_DATA_API_KEY
-    except Exception:
+    except Exception as e:
+        logger.debug("Clé API Football indisponible: %s", e)
         return None
 
 

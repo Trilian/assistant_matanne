@@ -9,6 +9,7 @@ import logging
 
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.ui import etat_vide
 
 logger = logging.getLogger(__name__)
@@ -188,9 +189,9 @@ def app():
 
                             # Sauvegarder dans favoris
                             if st.button("⭐ Ajouter aux favoris"):
-                                if "produits_favoris" not in st.session_state:
-                                    st.session_state["produits_favoris"] = []
-                                st.session_state["produits_favoris"].append(
+                                if SK.PRODUITS_FAVORIS not in st.session_state:
+                                    st.session_state[SK.PRODUITS_FAVORIS] = []
+                                st.session_state[SK.PRODUITS_FAVORIS].append(
                                     {
                                         "code": produit.code_barres,
                                         "nom": produit.nom,
@@ -245,7 +246,7 @@ def app():
     # ─── Onglet Favoris ───
     with onglet_favoris:
         st.markdown("### ⭐ Produits favoris")
-        favoris = st.session_state.get("produits_favoris", [])
+        favoris = st.session_state.get(SK.PRODUITS_FAVORIS, [])
 
         if not favoris:
             st.info(
@@ -266,9 +267,9 @@ def app():
 
                 with col_action:
                     if st.button("🗑️", key=f"del_fav_{i}"):
-                        st.session_state["produits_favoris"].pop(i)
+                        st.session_state[SK.PRODUITS_FAVORIS].pop(i)
                         st.rerun()
 
             if st.button("🗑️ Effacer tous les favoris"):
-                st.session_state["produits_favoris"] = []
+                st.session_state[SK.PRODUITS_FAVORIS] = []
                 st.rerun()

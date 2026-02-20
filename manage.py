@@ -56,16 +56,61 @@ def lint():
 
 
 def migrate():
-    """Applique les migrations Alembic"""
-    print("[DB] Application des migrations...")
-    run_cmd("alembic upgrade head")
+    """Applique les migrations SQL depuis sql/migrations/"""
+    print("[DB] Application des migrations SQL...")
+    try:
+        from src.core.db import GestionnaireMigrations
+
+        GestionnaireMigrations.executer_migrations()
+        version = GestionnaireMigrations.obtenir_version_courante()
+        print(f"[OK] Migrations appliqu\u00e9es. Schema v{version}")
+    except Exception as e:
+        print(f"[ERROR] Erreur: {e}")
+        sys.exit(1)
 
 
 def create_migration():
-    """Crée une nouvelle migration"""
-    message = input("Message de migration: ")
-    print(f"[EDIT] Création migration: {message}")
-    run_cmd(f"alembic revision --autogenerate -m '{message}'", shell=True)
+    """Crée un nouveau fichier de migration SQL dans sql/migrations/"""
+    import re
+    from datetime import datetime
+
+    message = input("Message de migration: ").strip()
+    if not message:
+        print("[ERROR] Message requis")
+        sys.exit(1)
+
+    migrations_dir = Path("sql/migrations")
+    migrations_dir.mkdir(parents=True, exist_ok=True)
+
+    # Trouver le prochain numéro
+    existing = sorted(migrations_dir.glob("*.sql"))
+    if existing:
+        last_num = int(existing[-1].name.split("_")[0])
+        next_num = last_num + 1
+    else:
+        next_num = 1
+
+    # Slug du message
+    slug = re.sub(r"[^a-z0-9]+", "_", message.lower()).strip("_")
+    date_str = datetime.now().strftime("%Y%m%d")
+    filename = f"{next_num:03d}_{slug}.sql"
+    filepath = migrations_dir / filename
+
+    template = f"""-- ============================================================================
+-- Migration {next_num:03d}: {message}
+-- Date: {date_str}
+-- Description: [Décrire les changements ici]
+-- ============================================================================
+BEGIN;
+
+-- [Votre SQL ici]
+
+COMMIT;
+"""
+
+    filepath.write_text(template, encoding="utf-8")
+    print(f"[EDIT] Migration créée: {filepath}")
+    print("  -> Éditez le fichier puis lancez: python manage.py migrate")
 
 
 def generate_requirements():
@@ -164,8 +209,8 @@ Développement:
   clean                Nettoie les fichiers temporaires
 
 Base de données:
-  migrate              Applique les migrations
-  create-migration     Crée une nouvelle migration
+  migrate              Applique les migrations SQL (sql/migrations/)
+  create-migration     Crée un fichier de migration SQL
   reset-supabase       [FIRE] Reset COMPLET Supabase (DANGER)
   deploy-schema        Déploie le schéma SQL vers Supabase
   check-db             Vérifie la connexion Supabase

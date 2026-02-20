@@ -11,6 +11,7 @@ from datetime import date
 
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.ui import etat_vide
 
 logger = logging.getLogger(__name__)
@@ -124,7 +125,7 @@ def _afficher_resultat(donnees):
 
 def _afficher_historique():
     """Affiche l'historique des factures scannées."""
-    historique = st.session_state.get("historique_factures", [])
+    historique = st.session_state.get(SK.HISTORIQUE_FACTURES, [])
 
     if not historique:
         etat_vide("Aucune facture scannée", "📄", "Utilisez l'onglet Scanner pour commencer")
@@ -155,8 +156,8 @@ def app():
     st.caption("Extraction automatique des données de factures énergie par IA")
 
     # Initialiser l'état
-    if "historique_factures" not in st.session_state:
-        st.session_state["historique_factures"] = []
+    if SK.HISTORIQUE_FACTURES not in st.session_state:
+        st.session_state[SK.HISTORIQUE_FACTURES] = []
 
     # Onglets
     onglet_scan, onglet_historique = st.tabs(["📷 Scanner", "📋 Historique"])
@@ -205,7 +206,7 @@ def app():
                                 st.success("✅ Extraction réussie !")
 
                                 # Sauvegarder dans l'historique
-                                st.session_state["historique_factures"].append(
+                                st.session_state[SK.HISTORIQUE_FACTURES].append(
                                     {
                                         "donnees": resultat.donnees,
                                         "date_scan": date.today().isoformat(),
@@ -269,13 +270,13 @@ def app():
     # ─── Onglet Historique ───
     with onglet_historique:
         st.markdown("### 📋 Historique des scans")
-        historique = st.session_state.get("historique_factures", [])
+        historique = st.session_state.get(SK.HISTORIQUE_FACTURES, [])
 
         if historique:
             st.caption(f"{len(historique)} facture(s) scannée(s)")
 
             if st.button("🗑️ Effacer l'historique"):
-                st.session_state["historique_factures"] = []
+                st.session_state[SK.HISTORIQUE_FACTURES] = []
                 st.rerun()
 
         _afficher_historique()

@@ -10,6 +10,8 @@ Fonctionnalités avancées:
 Utilise le service Budget unifié (src/services/budget.py).
 """
 
+from src.core.session_keys import SK
+
 from .components import (
     afficher_comparaison_mois,
     afficher_depense_card,
@@ -46,15 +48,15 @@ def app():
     )
 
     # Mode édition
-    if "edit_depense_id" in st.session_state:
-        depense = get_depense_by_id(st.session_state["edit_depense_id"])
+    if SK.EDIT_DEPENSE_ID in st.session_state:
+        depense = get_depense_by_id(st.session_state[SK.EDIT_DEPENSE_ID])
         if depense:
             st.subheader(f"✏️ Modifier: {CATEGORY_LABELS.get(depense.categorie, depense.categorie)}")
             if st.button("❌ Annuler"):
-                del st.session_state["edit_depense_id"]
+                del st.session_state[SK.EDIT_DEPENSE_ID]
                 st.rerun()
             afficher_formulaire(depense)
-            del st.session_state["edit_depense_id"]
+            del st.session_state[SK.EDIT_DEPENSE_ID]
             return
 
     # Dashboard

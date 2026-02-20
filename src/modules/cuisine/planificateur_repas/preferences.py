@@ -34,10 +34,12 @@ def charger_preferences() -> PreferencesUtilisateur:
     except Exception as e:
         logger.error(f"❌ Erreur chargement préférences: {e}")
         # Fallback sur valeurs par défaut
+        from src.modules.famille.age_utils import get_age_jules_mois
+
         prefs = PreferencesUtilisateur(
             nb_adultes=2,
             jules_present=True,
-            jules_age_mois=19,
+            jules_age_mois=get_age_jules_mois(),
             temps_semaine="normal",
             temps_weekend="long",
             aliments_exclus=[],

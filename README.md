@@ -24,16 +24,16 @@ streamlit run src/app.py
 
 ## 📋 Fonctionnalités
 
-| Module | Description |
-|--------|-------------|
-| 🍽️ **Cuisine** | Recettes, planning repas, suggestions IA, batch cooking |
-| 🛒 **Courses** | Listes intelligentes, scan codes-barres, modèles |
-| 📦 **Inventaire** | Stock, alertes péremption, seuils automatiques |
-| 👶 **Famille** | Suivi Jules (développement), activités, bien-être |
-| 💰 **Budget** | Suivi dépenses, budgets mensuels, alertes |
-| 🏡 **Maison** | Projets, routines, jardin |
-| 💪 **Santé** | Objectifs fitness, routines sport |
-| 📅 **Planning** | Calendrier, synchronisation externe |
+| Module            | Description                                             |
+| ----------------- | ------------------------------------------------------- |
+| 🍽️ **Cuisine**    | Recettes, planning repas, suggestions IA, batch cooking |
+| 🛒 **Courses**    | Listes intelligentes, scan codes-barres, modèles        |
+| 📦 **Inventaire** | Stock, alertes péremption, seuils automatiques          |
+| 👶 **Famille**    | Suivi Jules (développement), activités, bien-être       |
+| 💰 **Budget**     | Suivi dépenses, budgets mensuels, alertes               |
+| 🏡 **Maison**     | Projets, routines, jardin                               |
+| 💪 **Santé**      | Objectifs fitness, routines sport                       |
+| 📅 **Planning**   | Calendrier, synchronisation externe                     |
 
 ## 🏗️ Architecture
 
@@ -69,12 +69,11 @@ VAPID_PRIVATE_KEY=your_vapid_key
 
 ### Fichiers de configuration
 
-| Fichier | Usage |
-|---------|-------|
-| `.env.local` | Variables d'environnement locales (prioritaire) |
-| `.env` | Variables par défaut |
-| `pyproject.toml` | Dépendances Poetry, config tests/lint |
-| `alembic.ini` | Configuration migrations |
+| Fichier          | Usage                                           |
+| ---------------- | ----------------------------------------------- |
+| `.env.local`     | Variables d'environnement locales (prioritaire) |
+| `.env`           | Variables par défaut                            |
+| `pyproject.toml` | Dépendances Poetry, config tests/lint           |
 
 ## 🗄️ Base de données
 
@@ -84,18 +83,17 @@ VAPID_PRIVATE_KEY=your_vapid_key
 2. Copier-coller le contenu de `sql/SUPABASE_COMPLET_V3.sql`
 3. Exécuter
 
-### Migrations locales (Alembic)
+### Migrations SQL (sql/migrations/)
 
 ```bash
-# Créer une migration
-python manage.py create_migration "Description"
+# Créer un fichier de migration SQL
+python manage.py create-migration
 
-# Appliquer les migrations
+# Appliquer les migrations en attente
 python manage.py migrate
-
-# Voir l'historique
-alembic history
 ```
+
+Les fichiers SQL dans `sql/migrations/` sont numérotés (`001_xxx.sql`, `002_xxx.sql`, ...) et appliqués automatiquement dans l'ordre par `GestionnaireMigrations`.
 
 ## 🧪 Tests
 

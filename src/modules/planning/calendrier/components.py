@@ -8,6 +8,8 @@ import streamlit as st
 
 from src.core.db import obtenir_contexte_db
 from src.core.models import CalendarEvent, FamilyActivity
+from src.core.session_keys import SK
+
 from .utils import (
     JourCalendrier,
     SemaineCalendrier,
@@ -255,7 +257,7 @@ def afficher_actions_rapides(semaine: SemaineCalendrier):
 def afficher_modal_impression(semaine: SemaineCalendrier):
     """Affiche le modal d'impression."""
 
-    if st.session_state.get("show_print_modal"):
+    if st.session_state.get(SK.SHOW_PRINT_MODAL):
         with st.container():
             st.subheader("🖨️ Imprimer le planning")
 

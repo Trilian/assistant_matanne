@@ -165,7 +165,7 @@ SCHEMA_RECETTE = {
     "description": {"type": "string", "max_length": MAX_LENGTH_TEXT, "label": "Description"},
     "temps_preparation": {
         "type": "number",
-        "min": 0,
+        "min": 1,
         "max": MAX_TEMPS_PREPARATION,
         "required": True,
         "label": "Temps préparation",

@@ -7,6 +7,7 @@ from datetime import datetime
 
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.services.cuisine.courses import obtenir_service_courses
 from src.services.inventaire import obtenir_service_inventaire
 
@@ -174,7 +175,7 @@ def afficher_rayon_articles(service, rayon: str, articles: list):
                     st.error(f"❌ Erreur: {str(e)}")
 
         # Formulaire édition inline si sélectionné
-        if st.session_state.get("edit_article_id") == article["id"]:
+        if st.session_state.get(SK.EDIT_ARTICLE_ID) == article["id"]:
             st.divider()
             with st.form(f"article_edit_form_{article['id']}"):
                 col1, col2 = st.columns(2)

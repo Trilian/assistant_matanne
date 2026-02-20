@@ -261,6 +261,9 @@ def valider_plage(
     """
     Vérifie qu'une valeur est dans une plage.
 
+    .. deprecated::
+        Utiliser :func:`exiger_plage` à la place.
+
     Args:
         valeur: Valeur à vérifier
         min_val: Valeur minimale (incluse)
@@ -269,24 +272,8 @@ def valider_plage(
 
     Raises:
         ErreurValidation: Si hors plage
-
-    Example:
-        >>> valider_plage(15, 1, 10, "âge")
-        Traceback (most recent call last):
-            ...
-        ErreurValidation: âge doit être entre 1 et 10
     """
-    if min_val is not None and valeur < min_val:
-        raise ErreurValidation(
-            f"{nom_param} doit être >= {min_val}, reçu {valeur}",
-            details={"parametre": nom_param, "min": min_val, "recu": valeur},
-        )
-
-    if max_val is not None and valeur > max_val:
-        raise ErreurValidation(
-            f"{nom_param} doit être <= {max_val}, reçu {valeur}",
-            details={"parametre": nom_param, "max": max_val, "recu": valeur},
-        )
+    exiger_plage(valeur, minimum=min_val, maximum=max_val, nom_champ=nom_param)
 
 
 def exiger_positif(valeur: float, nom_champ: str) -> None:

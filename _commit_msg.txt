@@ -1,0 +1,11 @@
+feat: design system UI, CSS stylesheets, services core tests
+
+- Add UI design system: tokens.py, theme.py, html_builder, registry
+- Add TimerCuisine with real countdown for kitchen tablet mode
+- Add CSS stylesheets: charges, entretien, hub_famille, hub_maison, jardin
+- Add services core tests: protocols, result pattern, event bus, middleware, registry, service factory
+- Add safe API tests for BaseService and BaseAIService
+- Refactor modules: inventaire split, batch_cooking, entretien onglets
+- Add circuit breaker, events bus, repository, session_keys
+- Update SQL migrations to numbered format in sql/migrations/
+- Various fixes and improvements across services and modules

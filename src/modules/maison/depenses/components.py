@@ -20,6 +20,8 @@ try:
 except ImportError:
     PLOTLY_AVAILABLE = False
 
+from src.core.session_keys import SK
+
 from .crud import (
     create_depense,
     delete_depense,
@@ -84,7 +86,7 @@ def afficher_depense_card(depense: HouseExpense):
             col_edit, col_del = st.columns(2)
             with col_edit:
                 if st.button("✏️", key=f"edit_{depense.id}", help="Modifier"):
-                    st.session_state["edit_depense_id"] = depense.id
+                    st.session_state[SK.EDIT_DEPENSE_ID] = depense.id
                     st.rerun()
             with col_del:
                 if st.button("🗑️", key=f"del_{depense.id}", help="Supprimer"):

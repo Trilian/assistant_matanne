@@ -169,3 +169,12 @@ TYPES_PROTEINES: dict[str, list[str]] = {
 
 LOG_LEVEL_PRODUCTION = "INFO"
 """Niveau de log en production."""
+
+# ═══════════════════════════════════════════════════════════
+# FAMILLE
+# ═══════════════════════════════════════════════════════════
+
+from datetime import date as _date  # noqa: E402
+
+JULES_NAISSANCE: _date = _date(2024, 6, 22)
+"""Date de naissance de Jules (22 juin 2024)."""

@@ -7,6 +7,7 @@ from datetime import datetime
 
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.services.integrations import BarcodeService
 
 from .detection import BarcodeScanner, detect_barcodes
@@ -82,7 +83,7 @@ def _afficher_scanner_webrtc(service: BarcodeService):
 
     def on_scan_callback(code_type: str, code_data: str):
         """Callback quand un code est détecté en streaming."""
-        st.session_state["last_webrtc_scan"] = {
+        st.session_state[SK.LAST_WEBRTC_SCAN] = {
             "type": code_type,
             "data": code_data,
             "time": datetime.now(),
@@ -92,8 +93,8 @@ def _afficher_scanner_webrtc(service: BarcodeService):
     scanner.render(key="webrtc_scanner")
 
     # Traiter le dernier code scanné
-    if "last_webrtc_scan" in st.session_state:
-        last_scan = st.session_state["last_webrtc_scan"]
+    if SK.LAST_WEBRTC_SCAN in st.session_state:
+        last_scan = st.session_state[SK.LAST_WEBRTC_SCAN]
         st.divider()
         st.subheader("🔄 Dernier code détecté")
         _process_scanned_code(service, last_scan["data"])
@@ -137,8 +138,10 @@ def _process_scanned_code(service: BarcodeService, code_input: str):
 def afficher_scanner():
     """Scanner codes-barres avec 3 modes: vidéo streaming, photo, manuel."""
 
-    from src.modules.utilitaires.barcode import get_barcode_service
-    from src.modules.utilitaires.barcode import st  # noqa: F811 — resolve via package for @patch
+    from src.modules.utilitaires.barcode import (
+        get_barcode_service,
+        st,  # noqa: F811 — resolve via package for @patch
+    )
 
     service = get_barcode_service()
 

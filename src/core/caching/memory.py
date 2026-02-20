@@ -8,6 +8,7 @@ Cache ultra rapide (accès O(1)):
 
 import logging
 import threading
+from collections import OrderedDict
 
 from .base import EntreeCache
 
@@ -16,16 +17,15 @@ logger = logging.getLogger(__name__)
 
 class CacheMemoireN1:
     """
-    Cache L1 en mémoire pure (dict Python).
+    Cache L1 en mémoire pure (OrderedDict Python).
 
-    - Ultra rapide (accès O(1))
-    - Limité en taille (éviction LRU)
+    - Ultra rapide (accès O(1), LRU O(1))
+    - Limité en taille (éviction LRU via OrderedDict.move_to_end/popitem)
     - Volatile (perdu au redémarrage)
     """
 
     def __init__(self, max_entries: int = 500, max_size_mb: float = 50):
-        self._cache: dict[str, EntreeCache] = {}
-        self._access_order: list[str] = []  # Pour LRU
+        self._cache: OrderedDict[str, EntreeCache] = OrderedDict()
         self._lock = threading.RLock()
         self.max_entries = max_entries
         self.max_size_bytes = int(max_size_mb * 1024 * 1024)
@@ -41,10 +41,8 @@ class CacheMemoireN1:
                 self._remove(key)
                 return None
 
-            # Mettre à jour LRU
-            if key in self._access_order:
-                self._access_order.remove(key)
-            self._access_order.append(key)
+            # Mettre à jour LRU — O(1) via move_to_end
+            self._cache.move_to_end(key)
             entry.hits += 1
 
             return entry
@@ -52,13 +50,12 @@ class CacheMemoireN1:
     def set(self, key: str, entry: EntreeCache) -> None:
         """Stocke une entrée dans le cache L1."""
         with self._lock:
-            # Éviction si nécessaire
-            while len(self._cache) >= self.max_entries and self._access_order:
-                oldest = self._access_order.pop(0)
-                self._remove(oldest)
+            # Éviction LRU si nécessaire — O(1) via popitem(last=False)
+            while len(self._cache) >= self.max_entries:
+                self._cache.popitem(last=False)
 
             self._cache[key] = entry
-            self._access_order.append(key)
+            self._cache.move_to_end(key)
 
     def invalidate(self, pattern: str | None = None, tags: list[str] | None = None) -> int:
         """Invalide des entrées par pattern ou tags."""
@@ -80,14 +77,10 @@ class CacheMemoireN1:
         """Vide le cache L1."""
         with self._lock:
             self._cache.clear()
-            self._access_order.clear()
 
     def _remove(self, key: str) -> None:
-        """Supprime une entrée."""
-        if key in self._cache:
-            del self._cache[key]
-        if key in self._access_order:
-            self._access_order.remove(key)
+        """Supprime une entrée — O(1)."""
+        self._cache.pop(key, None)
 
     @property
     def size(self) -> int:

@@ -132,16 +132,18 @@ class TestServiceRecettesInit:
         assert service.cache_prefix == "recettes"
 
     def test_obtenir_service_recettes_singleton(self):
-        """Test singleton."""
-        import src.services.cuisine.recettes.service as module
+        """Test singleton via registre."""
+        from src.services.core.registry import obtenir_registre
 
-        module._service_recettes = None
+        registre = obtenir_registre()
+        registre.reinitialiser("recettes")
 
         s1 = obtenir_service_recettes()
         s2 = obtenir_service_recettes()
 
         assert s1 is s2
         assert isinstance(s1, ServiceRecettes)
+        registre.reinitialiser("recettes")
 
 
 # ═══════════════════════════════════════════════════════════

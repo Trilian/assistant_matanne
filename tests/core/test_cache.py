@@ -322,143 +322,188 @@ class TestCacheNettoyerExpires:
 
 # ═══════════════════════════════════════════════════════════
 # TESTS LIMITE DEBIT (RATE LIMIT)
+# via MemorySessionStorage (plus de mock st.session_state)
 # ═══════════════════════════════════════════════════════════
 
 
 class TestLimiteDebitBase:
     """Tests de base pour RateLimitIA."""
 
-    def test_initialise_creates_structures(self, mock_session_state):
+    @pytest.fixture(autouse=True)
+    def setup_memory_storage(self):
+        from src.core.storage import MemorySessionStorage, configurer_storage
+
+        self._storage = MemorySessionStorage()
+        configurer_storage(self._storage)
+        yield
+        configurer_storage(MemorySessionStorage())
+
+    def test_initialise_creates_structures(self):
         """Test initialisation crée les structures."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai import RateLimitIA
+        from src.core.ai import RateLimitIA
 
-            RateLimitIA._initialiser()
+        RateLimitIA._initialiser()
 
-            assert "rate_limit_ia" in mock_session_state._mock_state
-            assert "appels_jour" in mock_session_state._mock_state["rate_limit_ia"]
-            assert "appels_heure" in mock_session_state._mock_state["rate_limit_ia"]
+        data = self._storage.get("rate_limit_ia")
+        assert data is not None
+        assert "appels_jour" in data
+        assert "appels_heure" in data
 
 
 class TestLimiteDebitPeutAppeler:
     """Tests pour RateLimitIA.peut_appeler()."""
 
-    def test_peut_appeler_returns_true_initially(self, mock_session_state):
+    @pytest.fixture(autouse=True)
+    def setup_memory_storage(self):
+        from src.core.storage import MemorySessionStorage, configurer_storage
+
+        self._storage = MemorySessionStorage()
+        configurer_storage(self._storage)
+        yield
+        configurer_storage(MemorySessionStorage())
+
+    def test_peut_appeler_returns_true_initially(self):
         """Test peut_appeler retourne True au départ."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai import RateLimitIA
+        from src.core.ai import RateLimitIA
 
-            autorise, erreur = RateLimitIA.peut_appeler()
+        autorise, erreur = RateLimitIA.peut_appeler()
 
-            assert autorise is True
-            assert erreur == ""
+        assert autorise is True
+        assert erreur == ""
 
-    def test_peut_appeler_false_when_daily_limit_reached(self, mock_session_state):
+    def test_peut_appeler_false_when_daily_limit_reached(self):
         """Test peut_appeler retourne False si limite jour atteinte."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai import RateLimitIA
-            from src.core.constants import AI_RATE_LIMIT_DAILY
+        from src.core.ai import RateLimitIA
+        from src.core.constants import AI_RATE_LIMIT_DAILY
 
-            RateLimitIA._initialiser()
-            mock_session_state._mock_state["rate_limit_ia"]["appels_jour"] = AI_RATE_LIMIT_DAILY
+        RateLimitIA._initialiser()
+        data = self._storage.get("rate_limit_ia")
+        data["appels_jour"] = AI_RATE_LIMIT_DAILY
+        self._storage.set("rate_limit_ia", data)
 
-            autorise, erreur = RateLimitIA.peut_appeler()
+        autorise, erreur = RateLimitIA.peut_appeler()
 
-            assert autorise is False
-            assert "quotidienne" in erreur.lower()
+        assert autorise is False
+        assert "quotidienne" in erreur.lower()
 
-    def test_peut_appeler_false_when_hourly_limit_reached(self, mock_session_state):
+    def test_peut_appeler_false_when_hourly_limit_reached(self):
         """Test peut_appeler retourne False si limite heure atteinte."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai import RateLimitIA
-            from src.core.constants import AI_RATE_LIMIT_HOURLY
+        from src.core.ai import RateLimitIA
+        from src.core.constants import AI_RATE_LIMIT_HOURLY
 
-            RateLimitIA._initialiser()
-            mock_session_state._mock_state["rate_limit_ia"]["appels_heure"] = AI_RATE_LIMIT_HOURLY
+        RateLimitIA._initialiser()
+        data = self._storage.get("rate_limit_ia")
+        data["appels_heure"] = AI_RATE_LIMIT_HOURLY
+        self._storage.set("rate_limit_ia", data)
 
-            autorise, erreur = RateLimitIA.peut_appeler()
+        autorise, erreur = RateLimitIA.peut_appeler()
 
-            assert autorise is False
-            assert "horaire" in erreur.lower()
+        assert autorise is False
+        assert "horaire" in erreur.lower()
 
 
 class TestLimiteDebitEnregistrer:
     """Tests pour RateLimitIA.enregistrer_appel()."""
 
-    def test_enregistrer_appel_increments_counters(self, mock_session_state):
+    @pytest.fixture(autouse=True)
+    def setup_memory_storage(self):
+        from src.core.storage import MemorySessionStorage, configurer_storage
+
+        self._storage = MemorySessionStorage()
+        configurer_storage(self._storage)
+        yield
+        configurer_storage(MemorySessionStorage())
+
+    def test_enregistrer_appel_increments_counters(self):
         """Test enregistrer_appel incrémente les compteurs."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai import RateLimitIA
+        from src.core.ai import RateLimitIA
 
-            RateLimitIA._initialiser()
-            initial_jour = mock_session_state._mock_state["rate_limit_ia"]["appels_jour"]
-            initial_heure = mock_session_state._mock_state["rate_limit_ia"]["appels_heure"]
+        RateLimitIA._initialiser()
+        data = self._storage.get("rate_limit_ia")
+        initial_jour = data["appels_jour"]
+        initial_heure = data["appels_heure"]
 
-            RateLimitIA.enregistrer_appel()
+        RateLimitIA.enregistrer_appel()
 
-            assert (
-                mock_session_state._mock_state["rate_limit_ia"]["appels_jour"] == initial_jour + 1
-            )
-            assert (
-                mock_session_state._mock_state["rate_limit_ia"]["appels_heure"] == initial_heure + 1
-            )
+        data = self._storage.get("rate_limit_ia")
+        assert data["appels_jour"] == initial_jour + 1
+        assert data["appels_heure"] == initial_heure + 1
 
 
 class TestLimiteDebitStatistiques:
     """Tests pour RateLimitIA.obtenir_statistiques()."""
 
-    def test_obtenir_statistiques_returns_dict(self, mock_session_state):
+    @pytest.fixture(autouse=True)
+    def setup_memory_storage(self):
+        from src.core.storage import MemorySessionStorage, configurer_storage
+
+        self._storage = MemorySessionStorage()
+        configurer_storage(self._storage)
+        yield
+        configurer_storage(MemorySessionStorage())
+
+    def test_obtenir_statistiques_returns_dict(self):
         """Test statistiques retourne dict complet."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai import RateLimitIA
+        from src.core.ai import RateLimitIA
 
-            stats = RateLimitIA.obtenir_statistiques()
+        stats = RateLimitIA.obtenir_statistiques()
 
-            assert isinstance(stats, dict)
-            assert "appels_jour" in stats
-            assert "limite_jour" in stats
-            assert "appels_heure" in stats
-            assert "limite_heure" in stats
-            assert "restant_jour" in stats
-            assert "restant_heure" in stats
+        assert isinstance(stats, dict)
+        assert "appels_jour" in stats
+        assert "limite_jour" in stats
+        assert "appels_heure" in stats
+        assert "limite_heure" in stats
+        assert "restant_jour" in stats
+        assert "restant_heure" in stats
 
 
 class TestLimiteDebitReset:
     """Tests pour le reset automatique des compteurs."""
 
-    def test_reset_daily_on_new_day(self, mock_session_state):
+    @pytest.fixture(autouse=True)
+    def setup_memory_storage(self):
+        from src.core.storage import MemorySessionStorage, configurer_storage
+
+        self._storage = MemorySessionStorage()
+        configurer_storage(self._storage)
+        yield
+        configurer_storage(MemorySessionStorage())
+
+    def test_reset_daily_on_new_day(self):
         """Test reset journalier au changement de jour."""
-        with patch("streamlit.session_state", mock_session_state):
-            from datetime import date
+        from datetime import date
 
-            from src.core.ai import RateLimitIA
+        from src.core.ai import RateLimitIA
 
-            RateLimitIA._initialiser()
-            mock_session_state._mock_state["rate_limit_ia"]["appels_jour"] = 50
-            mock_session_state._mock_state["rate_limit_ia"]["dernier_reset_jour"] = date(2024, 1, 1)
+        RateLimitIA._initialiser()
+        data = self._storage.get("rate_limit_ia")
+        data["appels_jour"] = 50
+        data["dernier_reset_jour"] = date(2024, 1, 1)
+        self._storage.set("rate_limit_ia", data)
 
-            # peut_appeler() devrait reset le compteur
-            RateLimitIA.peut_appeler()
+        # peut_appeler() devrait reset le compteur
+        RateLimitIA.peut_appeler()
 
-            assert mock_session_state._mock_state["rate_limit_ia"]["appels_jour"] == 0
+        data = self._storage.get("rate_limit_ia")
+        assert data["appels_jour"] == 0
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS DECORATEUR CACHED
+# TESTS DECORATEUR @avec_cache (unifié)
 # ═══════════════════════════════════════════════════════════
 
 
-class TestCachedDecorator:
-    """Tests pour le décorateur @cached."""
+class TestAvecCacheDecorator:
+    """Tests pour le décorateur @avec_cache (unifié, multi-niveaux)."""
 
-    def test_cached_returns_cached_value(self, mock_session_state):
-        """Test cached retourne valeur en cache."""
+    def test_avec_cache_returns_cached_value(self, mock_session_state):
+        """Test avec_cache retourne valeur en cache."""
         with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import cached
+            from src.core.decorators import avec_cache
 
             call_count = 0
 
-            @cached(ttl=300, cle="test_func")
+            @avec_cache(ttl=300)
             def ma_fonction():
                 nonlocal call_count
                 call_count += 1
@@ -473,34 +518,3 @@ class TestCachedDecorator:
             result2 = ma_fonction()
             assert result2 == "résultat"
             assert call_count == 1  # Pas réexécuté
-
-    def test_cached_with_dependencies(self, mock_session_state):
-        """Test cached avec dépendances."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import cached
-
-            @cached(ttl=300, cle="dep_func", dependencies=["tag1"])
-            def ma_fonction():
-                return "valeur"
-
-            ma_fonction()
-
-            # Vérifier que la dépendance est enregistrée
-            assert "dep_func" in mock_session_state._mock_state.get("cache_dependances", {}).get(
-                "tag1", []
-            )
-
-    def test_cached_auto_generates_key(self, mock_session_state):
-        """Test cached génère clé auto si non spécifiée."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.caching.cache import cached
-
-            @cached(ttl=300)
-            def fonction_avec_args(x, y):
-                return x + y
-
-            result = fonction_avec_args(1, 2)
-            assert result == 3
-
-            # Vérifie qu'une clé a été créée (hash MD5)
-            assert len(mock_session_state._mock_state["cache_donnees"]) == 1

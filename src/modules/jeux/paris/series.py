@@ -25,6 +25,7 @@ from src.services.jeux import (
     get_sync_service,
 )
 from src.ui import etat_vide
+from src.ui.css import charger_css
 
 logger = logging.getLogger(__name__)
 
@@ -42,23 +43,6 @@ NOMS_MARCHES = {
     "nul_final": "Nul Final",
 }
 
-# CSS pour réduire la taille des éléments
-STYLES_SERIES = """
-<style>
-/* Réduire taille metrics dans les séries */
-div[data-testid="stMetric"] > div {
-    font-size: 0.85rem !important;
-}
-div[data-testid="stMetric"] label {
-    font-size: 0.7rem !important;
-}
-div[data-testid="stMetric"] [data-testid="stMetricValue"] {
-    font-size: 1.1rem !important;
-}
-</style>
-"""
-
-
 # ═══════════════════════════════════════════════════════════
 # FONCTIONS UI
 # ═══════════════════════════════════════════════════════════
@@ -67,7 +51,7 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {
 def afficher_series_paris():
     """Affiche le tableau des séries pour les paris sportifs."""
     # Injecter CSS pour tailles réduites
-    st.markdown(STYLES_SERIES, unsafe_allow_html=True)
+    st.markdown(f"<style>{charger_css('paris_series.css')}</style>", unsafe_allow_html=True)
 
     st.header("📈 Loi des Séries - Opportunités")
 

@@ -3,7 +3,7 @@ Mode cuisine - Interface step-by-step pour recettes.
 
 Fournit une interface tactile simplifiée pour:
 - Suivre les étapes d'une recette
-- Timer intégré
+- Timer intégré (vrai compte à rebours via ``TimerCuisine``)
 - Navigation par gestes/boutons
 """
 
@@ -11,6 +11,7 @@ from typing import Any
 
 import streamlit as st
 
+from src.ui.tablet.timer import TimerCuisine
 from src.ui.utils import echapper_html
 
 from .config import ModeTablette, definir_mode_tablette, obtenir_mode_tablette
@@ -35,16 +36,9 @@ def afficher_vue_recette_cuisine(
     instructions = recette.get("instructions", [])
     total_etapes = len(instructions)
 
-    # Timer (si défini)
-    if f"{cle}_minuteur" in st.session_state and st.session_state[f"{cle}_minuteur"] > 0:
-        st.markdown(
-            f"""
-            <div class="kitchen-timer active">
-                ⏱️ {st.session_state[f"{cle}_minuteur"]} min
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    # Timer de cuisine (vrai compte à rebours)
+    timer = TimerCuisine()
+    timer.afficher(compact=True)
 
     # Titre de la recette
     st.markdown(f"## 👨‍🍳 {recette.get('nom', 'Recette')}")
@@ -102,17 +96,9 @@ def afficher_vue_recette_cuisine(
             progression = etape_courante / total_etapes
             st.progress(progression, text=f"Étape {etape_courante}/{total_etapes}")
 
-            # Timer rapide
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                if st.button("⏱️ 1 min", key=f"{cle}_minuteur_1"):
-                    st.session_state[f"{cle}_minuteur"] = 1
-            with col2:
-                if st.button("⏱️ 5 min", key=f"{cle}_minuteur_5"):
-                    st.session_state[f"{cle}_minuteur"] = 5
-            with col3:
-                if st.button("⏱️ 10 min", key=f"{cle}_minuteur_10"):
-                    st.session_state[f"{cle}_minuteur"] = 10
+            # Timer intégré
+            with st.expander("⏱️ Timer", expanded=timer.est_actif):
+                timer.afficher()
 
     with tab2:
         # Liste des ingrédients

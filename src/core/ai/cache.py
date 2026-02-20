@@ -61,9 +61,9 @@ class CacheIA:
         }
 
         chaine = json.dumps(donnees, sort_keys=True)
-        hash_md5 = hashlib.md5(chaine.encode()).hexdigest()
+        hash_sha = hashlib.sha256(chaine.encode()).hexdigest()[:32]
 
-        return f"{CacheIA.PREFIXE}{hash_md5}"
+        return f"{CacheIA.PREFIXE}{hash_sha}"
 
     @staticmethod
     def obtenir(

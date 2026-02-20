@@ -460,7 +460,8 @@ class GoogleCalendarMixin:
             response.raise_for_status()
             items = response.json().get("items", [])
             return items[0] if items else None
-        except Exception:
+        except Exception as e:
+            logger.debug("Recherche événement échouée: %s", e)
             return None
 
     def export_planning_to_google(

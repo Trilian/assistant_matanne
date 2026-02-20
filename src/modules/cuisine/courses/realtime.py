@@ -6,6 +6,7 @@ import logging
 
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.services.integrations.web import get_realtime_sync_service
 
 logger = logging.getLogger(__name__)
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def _init_realtime_sync():
     """Initialise la synchronisation temps réel."""
-    if "realtime_initialized" not in st.session_state:
+    if SK.REALTIME_INITIALIZED not in st.session_state:
         st.session_state.realtime_initialized = False
 
     try:
@@ -21,11 +22,11 @@ def _init_realtime_sync():
 
         if sync_service.is_configured and not st.session_state.realtime_initialized:
             # Récupérer l'utilisateur courant
-            user_id = st.session_state.get("user_id", "anonymous")
-            user_name = st.session_state.get("user_name", "Utilisateur")
+            user_id = st.session_state.get(SK.USER_ID, "anonymous")
+            user_name = st.session_state.get(SK.USER_NAME, "Utilisateur")
 
             # Rejoindre le canal de synchronisation (liste par défaut = 1)
-            liste_id = st.session_state.get("liste_active_id", 1)
+            liste_id = st.session_state.get(SK.LISTE_ACTIVE_ID, 1)
 
             if sync_service.join_list(liste_id, user_id, user_name):
                 st.session_state.realtime_initialized = True
@@ -75,7 +76,7 @@ def _broadcast_article_change(event_type: str, article_data: dict):
         if not sync_service.is_configured or not sync_service.state.connected:
             return
 
-        liste_id = st.session_state.get("liste_active_id", 1)
+        liste_id = st.session_state.get(SK.LISTE_ACTIVE_ID, 1)
 
         if event_type == "added":
             sync_service.broadcast_item_added(liste_id, article_data)

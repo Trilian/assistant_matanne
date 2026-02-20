@@ -16,6 +16,7 @@ import streamlit as st
 from src.core.constants import JOURS_SEMAINE
 from src.core.db import obtenir_contexte_db
 from src.core.models import ChildProfile
+from src.core.session_keys import SK
 
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES - ACTIVITÉS PAR CATÉGORIE
@@ -122,17 +123,10 @@ PLANNING_SEMAINE_TYPE = {
 
 
 def get_age_jules_mois() -> int:
-    """Retourne l'âge de Jules en mois"""
-    try:
-        with obtenir_contexte_db() as db:
-            jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
-            if jules and jules.date_of_birth:
-                delta = date.today() - jules.date_of_birth
-                return delta.days // 30
-    except:
-        pass
-    # Defaut: ne le 22/06/2024
-    return (date.today() - date(2024, 6, 22)).days // 30
+    """Retourne l'âge de Jules en mois (délègue à age_utils)."""
+    from src.modules.famille.age_utils import get_age_jules_mois as _get
+
+    return _get()
 
 
 def generer_activites_jour(jour_semaine: int, seed: int | None = None) -> list[dict]:
@@ -179,20 +173,20 @@ def get_planning_semaine() -> dict[int, list[dict]]:
 
 def init_tracking():
     """Initialise le tracking des activites faites."""
-    if "jules_activites_faites" not in st.session_state:
-        st.session_state["jules_activites_faites"] = {}
+    if SK.JULES_ACTIVITES_FAITES not in st.session_state:
+        st.session_state[SK.JULES_ACTIVITES_FAITES] = {}
 
 
 def marquer_fait(jour: int, activite_nom: str):
     """Marque une activite comme faite."""
     key = f"{date.today().isocalendar()[1]}_{jour}_{activite_nom}"
-    st.session_state["jules_activites_faites"][key] = True
+    st.session_state[SK.JULES_ACTIVITES_FAITES][key] = True
 
 
 def est_fait(jour: int, activite_nom: str) -> bool:
     """Verifie si une activite est faite."""
     key = f"{date.today().isocalendar()[1]}_{jour}_{activite_nom}"
-    return st.session_state.get("jules_activites_faites", {}).get(key, False)
+    return st.session_state.get(SK.JULES_ACTIVITES_FAITES, {}).get(key, False)
 
 
 # ═══════════════════════════════════════════════════════════

@@ -7,6 +7,7 @@ import streamlit as st
 from src.core.config import obtenir_parametres
 from src.core.state import obtenir_etat
 from src.ui.components.atoms import badge
+from src.ui.tokens import Couleur
 from src.ui.utils import echapper_html
 
 
@@ -21,7 +22,7 @@ def afficher_header():
         st.markdown(
             f"<div class='main-header'>"
             f"<h1>🤖 {echapper_html(parametres.APP_NAME)}</h1>"
-            f"<p style='color: var(--secondary); margin: 0;'>"
+            f"<p style='color: {Couleur.SECONDARY}; margin: 0;'>"
             f"Assistant familial intelligent"
             f"</p></div>",
             unsafe_allow_html=True,
@@ -29,9 +30,9 @@ def afficher_header():
 
     with col2:
         if etat.agent_ia:
-            badge("🤖 IA Active", "#4CAF50")
+            badge("🤖 IA Active", Couleur.SUCCESS)
         else:
-            badge("🤖 IA Indispo", "#FFC107")
+            badge("🤖 IA Indispo", Couleur.WARNING)
 
     with col3:
         if etat.notifications_non_lues > 0:

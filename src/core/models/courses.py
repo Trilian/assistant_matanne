@@ -40,7 +40,8 @@ class ListeCourses(Base):
     Attributes:
         nom: Nom de la liste
         archivee: Si la liste est archivée
-        created_at: Date de création
+        cree_le: Date de création
+        modifie_le: Date de modification
     """
 
     __tablename__ = "listes_courses"
@@ -48,9 +49,9 @@ class ListeCourses(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     nom: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
     archivee: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
+    cree_le: Mapped[datetime] = mapped_column("created_at", DateTime, default=utc_now, index=True)
+    modifie_le: Mapped[datetime] = mapped_column(
+        "updated_at", DateTime, default=utc_now, onupdate=utc_now
     )
 
     # Relations
@@ -138,12 +139,7 @@ class ModeleCourses(Base):
 
     # Métadonnées
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
     # Données articles (JSON)

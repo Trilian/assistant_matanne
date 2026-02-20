@@ -7,6 +7,7 @@ pour respecter la séparation UI/Services.
 
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.services.core.utilisateur.authentification import (
     Role,
     get_auth_service,
@@ -103,7 +104,7 @@ def afficher_menu_utilisateur():
         with st.sidebar:
             st.markdown("---")
             if st.button("🔐 Se connecter", use_container_width=True, key="login_btn"):
-                st.session_state["show_login"] = True
+                st.session_state[SK.SHOW_LOGIN] = True
 
 
 def afficher_parametres_profil():

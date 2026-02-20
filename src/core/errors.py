@@ -35,6 +35,7 @@ from .errors_base import (  # noqa: F401
     valider_plage,
     valider_type,
 )
+from .session_keys import SK
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +55,7 @@ def _est_mode_debug() -> bool:
     except Exception:
         # Fallback safe: st may not be initialisé
         try:
-            return bool(st.session_state.get("debug_mode", False))
+            return bool(st.session_state.get(SK.DEBUG_MODE, False))
         except Exception:
             return False
 

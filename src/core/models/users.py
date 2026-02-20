@@ -11,7 +11,6 @@ Contient :
 """
 
 from datetime import date, datetime
-from enum import Enum as PyEnum
 from enum import StrEnum
 from typing import Optional
 
@@ -119,9 +118,7 @@ class UserProfile(Base):
 
     # Timestamps
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     garmin_token: Mapped[Optional["GarminToken"]] = relationship(
@@ -177,9 +174,7 @@ class GarminToken(Base):
     sync_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     user: Mapped["UserProfile"] = relationship(back_populates="garmin_token")
@@ -453,9 +448,7 @@ class WeekendActivity(Base):
     participants: Mapped[list[str] | None] = mapped_column(JSONB)  # ["Anne", "Mathieu", "Jules"]
 
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     __table_args__ = (
         CheckConstraint("note_lieu >= 1 AND note_lieu <= 5", name="ck_weekend_note_range"),
@@ -520,9 +513,7 @@ class FamilyPurchase(Base):
 
     notes: Mapped[str | None] = mapped_column(Text)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     def __repr__(self) -> str:
         return f"<FamilyPurchase(id={self.id}, nom='{self.nom}', categorie='{self.categorie}')>"

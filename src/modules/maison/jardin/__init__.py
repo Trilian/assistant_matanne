@@ -29,14 +29,14 @@ from .onglets import (
     onglet_recoltes,
     onglet_taches,
 )
-from .styles import CSS as JARDIN_CSS
+from .styles import injecter_css_jardin
 
 __all__ = ["app"]
 
 
 def app():
     """Point d'entrée du module Jardin avec gamification."""
-    st.markdown(JARDIN_CSS, unsafe_allow_html=True)
+    injecter_css_jardin()
 
     # Initialiser les données en session
     if "mes_plantes_jardin" not in st.session_state:
