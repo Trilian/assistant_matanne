@@ -26,13 +26,13 @@ import logging
 from typing import Any, Generic, TypeVar
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import DeclarativeBase, Session
 
 from .errors_base import ErreurNonTrouve
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar("T")
+T = TypeVar("T", bound=DeclarativeBase)
 
 __all__ = ["Repository"]
 

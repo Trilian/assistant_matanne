@@ -79,9 +79,17 @@ class FiltreSecrets(logging.Filter):
     ]
     """Patterns de détection des secrets avec leur remplacement."""
 
+    def _masquer_texte(self, texte: str) -> str:
+        """Applique tous les patterns de masquage sur un texte."""
+        for pattern, replacement in self.PATTERNS_SECRETS:
+            texte = re.sub(pattern, replacement, texte, flags=re.IGNORECASE)
+        return texte
+
     def filter(self, record: logging.LogRecord) -> bool:
         """
         Filtre un enregistrement de log pour masquer les secrets.
+
+        Masque dans: message, arguments formatés, et tracebacks d'exception.
 
         Args:
             record: Enregistrement de log
@@ -90,10 +98,7 @@ class FiltreSecrets(logging.Filter):
             True (on garde toujours l'enregistrement, on le modifie juste)
         """
         if record.msg:
-            message = str(record.msg)
-            for pattern, replacement in self.PATTERNS_SECRETS:
-                message = re.sub(pattern, replacement, message, flags=re.IGNORECASE)
-            record.msg = message
+            record.msg = self._masquer_texte(str(record.msg))
 
         # Aussi filtrer les arguments
         if record.args:
@@ -101,10 +106,13 @@ class FiltreSecrets(logging.Filter):
             filtered_args = []
             for arg in args_list:
                 if isinstance(arg, str):
-                    for pattern, replacement in self.PATTERNS_SECRETS:
-                        arg = re.sub(pattern, replacement, arg, flags=re.IGNORECASE)
+                    arg = self._masquer_texte(arg)
                 filtered_args.append(arg)
             record.args = tuple(filtered_args)
+
+        # Masquer les secrets dans les tracebacks d'exception
+        if record.exc_text:
+            record.exc_text = self._masquer_texte(record.exc_text)
 
         return True
 

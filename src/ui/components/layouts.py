@@ -8,6 +8,7 @@ from collections.abc import Callable
 import streamlit as st
 
 from src.ui.registry import composant_ui
+from src.ui.system.css import StyleSheet
 from src.ui.tokens import Couleur, Espacement, Rayon
 from src.ui.utils import echapper_html
 
@@ -117,13 +118,18 @@ def carte_item(
                 st.caption(" • ".join(metadonnees))
 
             if tags:
-                tag_html = " ".join(
-                    [
-                        f'<span style="background: {Couleur.BG_INFO}; padding: {Espacement.XS} {Espacement.SM}; '
-                        f'border-radius: {Rayon.PILL}; font-size: 0.875rem;">{echapper_html(tag)}</span>'
-                        for tag in tags
-                    ]
+                tag_cls = StyleSheet.create_class(
+                    {
+                        "background": Couleur.BG_INFO,
+                        "padding": f"{Espacement.XS} {Espacement.SM}",
+                        "border-radius": Rayon.PILL,
+                        "font-size": "0.875rem",
+                    }
                 )
+                tag_html = " ".join(
+                    f'<span class="{tag_cls}">{echapper_html(tag)}</span>' for tag in tags
+                )
+                StyleSheet.inject()
                 st.markdown(tag_html, unsafe_allow_html=True)
 
         if actions:

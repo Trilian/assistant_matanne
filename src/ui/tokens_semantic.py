@@ -23,8 +23,6 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-import streamlit as st
-
 
 class Sem(StrEnum):
     """Tokens sémantiques — référencent des CSS custom properties.
@@ -204,7 +202,9 @@ def injecter_tokens_semantiques() -> None:
     else:
         css = _generer_css_tokens(_LIGHT_MAPPING)
 
-    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+    from src.ui.css import CSSManager
+
+    CSSManager.register("tokens-semantic", css)
 
 
 __all__ = [

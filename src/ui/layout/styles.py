@@ -2,10 +2,11 @@
 Styles CSS pour l'application.
 
 Utilise les Design Tokens pour garantir la cohérence visuelle.
+Enregistre le CSS dans le :class:`CSSManager` au lieu d'injecter
+directement via ``st.markdown``.
 """
 
-import streamlit as st
-
+from src.ui.css import CSSManager
 from src.ui.tokens import (
     Couleur,
     Espacement,
@@ -17,10 +18,10 @@ from src.ui.tokens import (
 
 
 def injecter_css():
-    """Injecte les styles CSS modernes dans l'application en utilisant les design tokens."""
-    st.markdown(
+    """Enregistre les styles CSS globaux dans le CSSManager."""
+    CSSManager.register(
+        "global-styles",
         f"""
-<style>
 :root {{
     --primary: {Couleur.PRIMARY};
     --secondary: {Couleur.SECONDARY};
@@ -211,7 +212,5 @@ html {{
         min-width: 100% !important;
     }}
 }}
-</style>
 """,
-        unsafe_allow_html=True,
     )

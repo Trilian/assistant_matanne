@@ -22,7 +22,7 @@ def afficher_header():
         st.markdown(
             f"<div class='main-header'>"
             f"<h1>🤖 {echapper_html(parametres.APP_NAME)}</h1>"
-            f"<p style='color: {Couleur.SECONDARY}; margin: 0;'>"
+            f"<p style='color: var(--sem-on-surface-muted, {Couleur.SECONDARY}); margin: 0;'>"
             f"Assistant familial intelligent"
             f"</p></div>",
             unsafe_allow_html=True,

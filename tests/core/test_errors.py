@@ -231,7 +231,8 @@ class TestDecoratorGererErreurs:
 
     def test_gerer_erreurs_log_niveau(self):
         """Test que le décorateur utilise le niveau de log correct."""
-        with patch("src.core.errors.logger") as mock_logger:
+        # gerer_erreurs est déprécié et délègue à avec_gestion_erreurs (src.core.decorators)
+        with patch("src.core.decorators.logger") as mock_logger:
 
             @gerer_erreurs(niveau_log="WARNING", afficher_dans_ui=False, relancer=False)
             def ma_fonction():
@@ -330,7 +331,8 @@ class TestIntegrationErrorHandling:
     def test_error_chain_validation_to_ui(self):
         """Test le chaînage complet erreur -> logging -> UI."""
         with patch("streamlit.error") as mock_error:
-            with patch("src.core.errors.logger") as mock_logger:
+            # gerer_erreurs délègue à avec_gestion_erreurs (src.core.decorators)
+            with patch("src.core.decorators.logger") as mock_logger:
 
                 @gerer_erreurs(afficher_dans_ui=True, relancer=False)
                 def operation():
@@ -616,27 +618,20 @@ class TestGestionnaireErreurs:
 class TestEstModeDebugAdvanced:
     """Tests avancés pour _est_mode_debug."""
 
-    @patch("src.core.state.obtenir_etat")
-    def test_est_mode_debug_from_etat_app_true(self, mock_obtenir_etat):
-        """Test _est_mode_debug retourne True depuis EtatApp."""
+    @patch.dict("os.environ", {"DEBUG": "true"}, clear=False)
+    def test_est_mode_debug_from_etat_app_true(self):
+        """Test _est_mode_debug retourne True via variable d'environnement DEBUG."""
         from src.core.errors import _est_mode_debug
-
-        mock_etat = Mock()
-        mock_etat.mode_debug = True
-        mock_obtenir_etat.return_value = mock_etat
 
         result = _est_mode_debug()
         assert result is True
 
-    @patch("src.core.state.obtenir_etat")
-    def test_est_mode_debug_from_etat_app_false(self, mock_obtenir_etat):
-        """Test _est_mode_debug retourne False depuis EtatApp."""
+    @patch.dict("os.environ", {"DEBUG": ""}, clear=False)
+    def test_est_mode_debug_from_etat_app_false(self):
+        """Test _est_mode_debug retourne False quand DEBUG non défini."""
         from src.core.errors import _est_mode_debug
 
-        mock_etat = Mock()
-        mock_etat.mode_debug = False
-        mock_obtenir_etat.return_value = mock_etat
-
+        # _est_mode_debug vérifie os.environ["DEBUG"] puis st.session_state
         result = _est_mode_debug()
         assert result is False
 
@@ -651,14 +646,16 @@ class TestEstModeDebugAdvanced:
         # Should fallback to session_state or False
         assert isinstance(result, bool)
 
-    @patch("src.core.state.obtenir_etat")
-    def test_est_mode_debug_etat_sans_mode_debug(self, mock_obtenir_etat):
-        """Test _est_mode_debug quand EtatApp n'a pas mode_debug."""
+    @patch.dict("os.environ", {}, clear=False)
+    def test_est_mode_debug_etat_sans_mode_debug(self):
+        """Test _est_mode_debug retourne False quand aucun indicateur debug."""
+        # Aucune variable DEBUG, pas de session_state → False
+        # Supprimer DEBUG si présent
+        import os
+
         from src.core.errors import _est_mode_debug
 
-        mock_etat = Mock(spec=[])  # Object sans attribut mode_debug
-        mock_obtenir_etat.return_value = mock_etat
-
+        os.environ.pop("DEBUG", None)
         result = _est_mode_debug()
         assert result is False
 

@@ -35,22 +35,20 @@ class A11y:
 
     # ── CSS utilitaire ────────────────────────────────────
 
-    _CSS_INJECTED_KEY = "_a11y_css_injected"
-
     @staticmethod
     def injecter_css() -> None:
-        """Injecte le CSS utilitaire d'accessibilité (une seule fois).
+        """Enregistre le CSS utilitaire d'accessibilité dans le CSSManager.
 
         Inclut :
         - ``.sr-only`` : texte invisible visuellement mais lu par les screen readers
         - ``:focus-visible`` : indicateurs de focus clairs
         - ``@media (prefers-reduced-motion)`` : désactive les animations
         """
-        if st.session_state.get(A11y._CSS_INJECTED_KEY):
-            return
+        from src.ui.css import CSSManager
 
-        st.markdown(
-            """<style>
+        CSSManager.register(
+            "a11y",
+            """
 /* ── Screen reader only ────────────────────────── */
 .sr-only {
     position: absolute !important;
@@ -87,10 +85,8 @@ class A11y:
 [aria-live] {
     position: relative;
 }
-</style>""",
-            unsafe_allow_html=True,
+""",
         )
-        st.session_state[A11y._CSS_INJECTED_KEY] = True
 
     # ── Screen Reader ─────────────────────────────────────
 

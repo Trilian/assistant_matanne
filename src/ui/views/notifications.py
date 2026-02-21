@@ -20,6 +20,10 @@ def afficher_demande_permission_push():
     """
     Affiche une demande de permission pour les notifications push.
     """
+    import json
+
+    safe_vapid_key = json.dumps(VAPID_PUBLIC_KEY)[1:-1]  # Strip quotes, JS-safe
+
     html = f"""
     <div id="push-permission-container" style="
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -57,7 +61,7 @@ def afficher_demande_permission_push():
     </div>
 
     <script>
-        const VAPID_PUBLIC_KEY = '{VAPID_PUBLIC_KEY}';
+        const VAPID_PUBLIC_KEY = '{safe_vapid_key}';
 
         // Afficher si permission non accordée
         if ('Notification' in window && Notification.permission === 'default') {{

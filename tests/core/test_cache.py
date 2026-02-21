@@ -14,14 +14,14 @@ def _reset_cache_singleton():
     L2 (session Streamlit) et L3 (fichier) sont désactivés pour isoler
     les tests sur la logique pure du cache (L1 mémoire uniquement).
     """
-    from src.core.caching.orchestrator import CacheMultiNiveau
+    from src.core.caching.orchestrator import obtenir_cache, reinitialiser_cache
 
     # Forcer un nouveau singleton L1-only pour chaque test
-    CacheMultiNiveau._instance = None
-    CacheMultiNiveau(l2_enabled=False, l3_enabled=False)
+    reinitialiser_cache()
+    obtenir_cache(l2_enabled=False, l3_enabled=False)
     yield
     # Nettoyage final
-    CacheMultiNiveau._instance = None
+    reinitialiser_cache()
 
 
 # ═══════════════════════════════════════════════════════════

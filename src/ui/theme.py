@@ -223,10 +223,15 @@ def definir_theme(
 
 
 def appliquer_theme() -> None:
-    """Injecte le CSS du thème actuel dans la page Streamlit."""
+    """Enregistre le CSS du thème actuel dans le CSSManager.
+
+    Le CSS sera injecté en batch via ``CSSManager.inject_all()``.
+    """
+    from src.ui.css import CSSManager
+
     theme = obtenir_theme()
     css = theme.generer_css_complet()
-    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+    CSSManager.register("theme", css)
 
 
 def afficher_selecteur_theme() -> None:

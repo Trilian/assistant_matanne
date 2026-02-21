@@ -7,10 +7,16 @@ Ce module :
 - Fournit des décorateurs de gestion d'erreurs avec UI
 
 [!] IMPORTANT: Les exceptions pures sont dans errors_base.py (sans dépendances UI)
+
+.. note::
+    ``gerer_erreurs`` est déprécié au profit de ``avec_gestion_erreurs``
+    dans ``src.core.decorators`` (version plus complète et unifiée).
 """
 
 import logging
+import os
 import traceback
+import warnings
 from collections.abc import Callable
 from functools import wraps
 from typing import Any
@@ -52,23 +58,23 @@ def _est_mode_debug() -> bool:
     """
     Retourne l'état du mode debug de l'application.
 
-    Essaie d'utiliser le `EtatApp.mode_debug` via `obtenir_etat()` si disponible,
-    sinon fallback sur `st.session_state['debug_mode']` pour compatibilité.
+    Utilise os.environ et st.session_state directement pour éviter
+    la chaîne de dépendances errors → state → storage.
     """
-    try:
-        from .state import obtenir_etat
+    # Priorité 1: Variable d'environnement (évite toute dépendance)
+    env_debug = os.environ.get("DEBUG", "").lower()
+    if env_debug in ("1", "true", "yes"):
+        return True
 
-        etat = obtenir_etat()
-        return bool(getattr(etat, "mode_debug", False))
-    except Exception:
-        # Fallback safe: st may not be initialisé
-        try:
-            st = _get_st()
-            if st is None:
-                return False
+    # Priorité 2: Streamlit session_state (accès direct, pas via state.py)
+    try:
+        st = _get_st()
+        if st is not None:
             return bool(st.session_state.get(SK.DEBUG_MODE, False))
-        except Exception:
-            return False
+    except Exception:
+        pass
+
+    return False
 
 
 # ═══════════════════════════════════════════════════════════
@@ -85,111 +91,31 @@ def gerer_erreurs(
     """
     Décorateur pour gérer automatiquement les erreurs.
 
-    Capture les exceptions, les log, et optionnellement :
-    - Affiche un message à l'utilisateur (Streamlit)
-    - Retourne une valeur de fallback
-    - Relance l'exception
+    .. deprecated:: 2.0
+        Utiliser :func:`src.core.decorators.avec_gestion_erreurs` à la place.
+        Ce décorateur est conservé pour compatibilité et délègue au décorateur
+        unifié.
 
     Args:
         afficher_dans_ui: Afficher l'erreur dans Streamlit
         niveau_log: Niveau de log (ERROR, WARNING, INFO)
         relancer: Relancer l'exception après traitement
         valeur_fallback: Valeur à retourner en cas d'erreur
-
-    Returns:
-        Décorateur de fonction
-
-    Example:
-        >>> @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=[])
-        >>> def obtenir_recettes():
-        >>>     return recette_service.get_all()
     """
+    warnings.warn(
+        "gerer_erreurs() est déprécié, utiliser avec_gestion_erreurs() de src.core.decorators",
+        DeprecationWarning,
+        stacklevel=2,
+    )
 
-    def decorateur(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            try:
-                return func(*args, **kwargs)
+    from .decorators import avec_gestion_erreurs
 
-            except ErreurValidation as e:
-                logger.warning(f"ErreurValidation dans {func.__name__}: {e.message}")
-                if afficher_dans_ui:
-                    _st = _get_st()
-                    if _st:
-                        _st.error(f"[ERROR] {e.message_utilisateur}")
-                if relancer:
-                    raise
-                return valeur_fallback
-
-            except ErreurNonTrouve as e:
-                logger.info(f"ErreurNonTrouve dans {func.__name__}: {e.message}")
-                if afficher_dans_ui:
-                    _st = _get_st()
-                    if _st:
-                        _st.warning(f"[!] {e.message_utilisateur}")
-                if relancer:
-                    raise
-                return valeur_fallback
-
-            except ErreurBaseDeDonnees as e:
-                logger.error(f"ErreurBaseDeDonnees dans {func.__name__}: {e.message}")
-                if afficher_dans_ui:
-                    _st = _get_st()
-                    if _st:
-                        _st.error("💾 Erreur de base de données")
-                if relancer:
-                    raise
-                return valeur_fallback
-
-            except ErreurServiceIA as e:
-                logger.warning(f"ErreurServiceIA dans {func.__name__}: {e.message}")
-                if afficher_dans_ui:
-                    _st = _get_st()
-                    if _st:
-                        _st.error(f"🤖 {e.message_utilisateur}")
-                if relancer:
-                    raise
-                return valeur_fallback
-
-            except ErreurLimiteDebit as e:
-                logger.warning(f"ErreurLimiteDebit dans {func.__name__}: {e.message}")
-                if afficher_dans_ui:
-                    _st = _get_st()
-                    if _st:
-                        _st.warning(f"⏳ {e.message_utilisateur}")
-                if relancer:
-                    raise
-                return valeur_fallback
-
-            except ErreurServiceExterne as e:
-                logger.warning(f"ErreurServiceExterne dans {func.__name__}: {e.message}")
-                if afficher_dans_ui:
-                    _st = _get_st()
-                    if _st:
-                        _st.error(f"🌐 {e.message_utilisateur}")
-                if relancer:
-                    raise
-                return valeur_fallback
-
-            except Exception as e:
-                logger.critical(f"Erreur inattendue dans {func.__name__}: {e}", exc_info=True)
-                if afficher_dans_ui:
-                    _st = _get_st()
-                    if _st:
-                        _st.error("[ERROR] Une erreur inattendue s'est produite")
-
-                        # Afficher stack trace en mode debug
-                        if _est_mode_debug():
-                            with _st.expander("🐛 Stack trace"):
-                                _st.code(traceback.format_exc())
-
-                if relancer:
-                    raise
-                return valeur_fallback
-
-        return wrapper
-
-    return decorateur
+    return avec_gestion_erreurs(
+        default_return=valeur_fallback,
+        log_level=niveau_log,
+        afficher_erreur=afficher_dans_ui,
+        relancer_metier=relancer,
+    )
 
 
 # ═══════════════════════════════════════════════════════════

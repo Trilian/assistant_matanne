@@ -26,7 +26,11 @@ __all__ = [
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any
+from datetime import date
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from src.core.ai.client import ClientIA
 
 logger = logging.getLogger(__name__)
 
@@ -64,10 +68,10 @@ class EtatCuisine:
 
     # Planning
     id_planning_visualisation: int | None = None
-    semaine_actuelle: Any | None = None
+    semaine_actuelle: date | None = None
     id_planning_ajout_repas: int | None = None
     jour_ajout_repas: int | None = None
-    date_ajout_repas: Any | None = None
+    date_ajout_repas: date | None = None
     id_repas_edition: int | None = None
 
 
@@ -130,10 +134,10 @@ class EtatApp:
         id_article_visualisation: int | None = None,
         id_article_edition: int | None = None,
         id_planning_visualisation: int | None = None,
-        semaine_actuelle: Any | None = None,
+        semaine_actuelle: date | None = None,
         id_planning_ajout_repas: int | None = None,
         jour_ajout_repas: int | None = None,
-        date_ajout_repas: Any | None = None,
+        date_ajout_repas: date | None = None,
         id_repas_edition: int | None = None,
         # UI (rétro-compat)
         afficher_formulaire_ajout: bool = False,
@@ -145,7 +149,7 @@ class EtatApp:
         # Top-level
         nom_utilisateur: str = "Anne",
         notifications_non_lues: int = 0,
-        agent_ia: Any | None = None,
+        agent_ia: "ClientIA | None" = None,
         mode_debug: bool = False,
         cache_active: bool = True,
         # Slices (pour usage direct avancé)

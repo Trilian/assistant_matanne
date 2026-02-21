@@ -19,6 +19,7 @@ from .memory import CacheMemoireN1
 from .orchestrator import (
     CacheMultiNiveau,
     obtenir_cache,
+    reinitialiser_cache,
 )
 from .session import CacheSessionN2
 
@@ -35,4 +36,5 @@ __all__ = [
     # Orchestrateur (usage recommandé)
     "CacheMultiNiveau",
     "obtenir_cache",
+    "reinitialiser_cache",
 ]

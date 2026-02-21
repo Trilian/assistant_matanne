@@ -1,6 +1,8 @@
 """
 Cartes métriques avancées pour le tableau de bord.
 
+Implémentées avec Box/Text primitives et StyleSheet pour la déduplication CSS.
+
 Fournit des composants pour afficher:
 - Métriques avec delta
 - KPIs colorés
@@ -13,7 +15,10 @@ from typing import Any
 
 import streamlit as st
 
+from src.ui.primitives.box import Box
+from src.ui.primitives.text import Text
 from src.ui.registry import composant_ui
+from src.ui.system.css import StyleSheet
 from src.ui.tokens import Couleur, Espacement, Rayon, Typographie, gradient_subtil
 from src.ui.utils import echapper_html
 
@@ -38,6 +43,9 @@ def carte_metrique_avancee(
     """
     Carte métrique stylisée.
 
+    Utilise ``StyleSheet`` pour le conteneur (déduplication) et ``Text``
+    pour l'échappement automatique du contenu.
+
     Args:
         titre: Titre de la métrique
         valeur: Valeur principale
@@ -48,39 +56,58 @@ def carte_metrique_avancee(
         couleur: Couleur d'accent
         lien_module: Module vers lequel naviguer
     """
+    # Conteneur avec border-left (hors BoxProps)
+    container_cls = StyleSheet.create_class(
+        {
+            "background": gradient_subtil(couleur),
+            "border-left": f"4px solid {couleur}",
+            "border-radius": Rayon.LG,
+            "padding": "1.2rem",
+            "margin-bottom": Espacement.SM,
+        }
+    )
+
+    # Delta optionnel
     delta_html = ""
     if delta:
         delta_color = Couleur.DELTA_POSITIVE if delta_positif else Couleur.DELTA_NEGATIVE
         delta_arrow = "↑" if delta_positif else "↓"
-        delta_html = f'<span style="color: {delta_color}; font-size: 0.9rem;">{delta_arrow} {echapper_html(delta)}</span>'
+        delta_html = (
+            f'<span style="color: {delta_color}; font-size: 0.9rem;">'
+            f"{delta_arrow} {echapper_html(delta)}</span>"
+        )
 
+    # Sous-titre optionnel
     sous_titre_html = (
-        f'<p style="color: {Couleur.TEXT_SECONDARY}; margin: 0; font-size: {Typographie.CAPTION};">{echapper_html(sous_titre)}</p>'
+        Text(
+            sous_titre,
+            size="xs",
+            color=Couleur.TEXT_SECONDARY,
+            tag="p",
+        ).html()
         if sous_titre
         else ""
     )
 
-    html = f"""
-    <div style="
-        background: {gradient_subtil(couleur)};
-        border-left: 4px solid {couleur};
-        border-radius: {Rayon.LG};
-        padding: 1.2rem;
-        margin-bottom: {Espacement.SM};
-    ">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div>
-                <p style="color: {Couleur.TEXT_SECONDARY}; margin: 0 0 0.3rem 0; font-size: 0.9rem;">{echapper_html(titre)}</p>
-                <h2 style="margin: 0; color: {Couleur.TEXT_PRIMARY};">{echapper_html(str(valeur))}</h2>
-                {delta_html}
-                {sous_titre_html}
-            </div>
-            <span style="font-size: {Typographie.ICON_LG};">{echapper_html(icone)}</span>
-        </div>
-    </div>
-    """
+    # Contenu structuré
+    inner = Box(display="flex", justify="between", align="start")
+    inner.child(
+        f"<div>"
+        f'<p style="color: {Couleur.TEXT_SECONDARY}; margin: 0 0 0.3rem 0; font-size: 0.9rem;">'
+        f"{echapper_html(titre)}</p>"
+        f'<h2 style="margin: 0; color: {Couleur.TEXT_PRIMARY};">'
+        f"{echapper_html(str(valeur))}</h2>"
+        f"{delta_html}"
+        f"{sous_titre_html}"
+        f"</div>"
+    )
+    inner.child(f'<span style="font-size: {Typographie.ICON_LG};">{echapper_html(icone)}</span>')
 
-    st.markdown(html, unsafe_allow_html=True)
+    StyleSheet.inject()
+    st.markdown(
+        f'<div class="{container_cls}">{inner.html()}</div>',
+        unsafe_allow_html=True,
+    )
 
     if lien_module:
         if st.button(f"Voir {titre}", key=f"link_{lien_module}", use_container_width=True):
@@ -94,12 +121,12 @@ def carte_metrique_avancee(
 def widget_jules_apercu(date_naissance: date | None = None):
     """Widget d'aperçu de Jules pour le dashboard.
 
+    Utilise ``Box`` pour le conteneur gradient centré.
+
     Args:
         date_naissance: Date de naissance de Jules. Si None, utilise la
             valeur par défaut (15/06/2024).
     """
-
-    # Calculer l'âge de Jules
     from src.core.constants import JULES_NAISSANCE
 
     naissance = date_naissance or JULES_NAISSANCE
@@ -107,21 +134,23 @@ def widget_jules_apercu(date_naissance: date | None = None):
     age_jours = (aujourd_hui - naissance).days
     age_mois = age_jours // 30
 
-    st.markdown(
-        f"""
-        <div style="
-            background: linear-gradient(135deg, {Couleur.BG_JULES_START}, {Couleur.BG_JULES_END});
-            border-radius: {Rayon.XL};
-            padding: {Espacement.LG};
-            text-align: center;
-        ">
-            <span style="font-size: {Typographie.ICON_XL};">👶</span>
-            <h3 style="margin: {Espacement.SM} 0;">Jules</h3>
-            <p style="margin: 0; color: {Couleur.JULES_PRIMARY}; font-weight: 500;">{age_mois} mois</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    container = Box(
+        bg=f"linear-gradient(135deg, {Couleur.BG_JULES_START}, {Couleur.BG_JULES_END})",
+        radius=Rayon.XL,
+        p=Espacement.LG,
+        text_align="center",
     )
+    container.child(f'<span style="font-size: {Typographie.ICON_XL};">👶</span>')
+    container.child(Text("Jules", size="2xl", weight="bold", mt=Espacement.SM, tag="h3").html())
+    container.child(
+        Text(
+            f"{age_mois} mois",
+            weight="medium",
+            color=Couleur.JULES_PRIMARY,
+            tag="p",
+        ).html()
+    )
+    container.show()
 
 
 @composant_ui(
@@ -132,11 +161,13 @@ def widget_jules_apercu(date_naissance: date | None = None):
 def widget_meteo_jour(donnees_meteo: dict | None = None):
     """Widget météo simplifié.
 
+    Utilise ``Box`` pour le conteneur gradient centré et ``Text``
+    pour l'échappement automatique.
+
     Args:
         donnees_meteo: Dict avec les clés 'temp', 'condition', 'conseil'.
             Si None, affiche un placeholder.
     """
-
     if donnees_meteo is None:
         st.info("🌤️ Données météo non disponibles")
         return
@@ -145,18 +176,25 @@ def widget_meteo_jour(donnees_meteo: dict | None = None):
     condition_parts = meteo.get("condition", "").split()
     icone_meteo = condition_parts[0] if condition_parts else "🌤️"
 
-    st.markdown(
-        f"""
-        <div style="
-            background: linear-gradient(135deg, {Couleur.BG_METEO_START}, {Couleur.BG_METEO_END});
-            border-radius: {Rayon.LG};
-            padding: {Espacement.MD};
-            text-align: center;
-        ">
-            <span style="font-size: {Typographie.ICON_MD};">{icone_meteo}</span>
-            <p style="margin: 0.3rem 0; font-size: {Typographie.H3}; font-weight: 600;">{meteo["temp"]}°C</p>
-            <small style="color: {Couleur.TEXT_SECONDARY};">{meteo["conseil"]}</small>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    safe_temp = echapper_html(str(meteo.get("temp", "")))
+
+    container = Box(
+        bg=f"linear-gradient(135deg, {Couleur.BG_METEO_START}, {Couleur.BG_METEO_END})",
+        radius=Rayon.LG,
+        p=Espacement.MD,
+        text_align="center",
     )
+    container.child(f'<span style="font-size: {Typographie.ICON_MD};">{icone_meteo}</span>')
+    container.child(
+        f'<p style="margin: 0.3rem 0; font-size: {Typographie.H3}; font-weight: 600;">'
+        f"{safe_temp}°C</p>"
+    )
+    container.child(
+        Text(
+            str(meteo.get("conseil", "")),
+            size="xs",
+            color=Couleur.TEXT_SECONDARY,
+            tag="small",
+        ).html()
+    )
+    container.show()

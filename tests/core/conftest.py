@@ -11,8 +11,20 @@ Auto-découverte: pytest charge automatiquement ce fichier.
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import String, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
+
+# ═════════════════════════════════════════════════════════════════════
+# CHARGEMENT ANTICIPÉ DE TOUS LES MODÈLES
+# ═════════════════════════════════════════════════════════════════════
+# Nécessaire AVANT toute importation de modèle individuel pour que
+# SQLAlchemy puisse résoudre les chaînes de relationship (ex: "RecipeFeedback").
+try:
+    from src.core.models import charger_tous_modeles
+
+    charger_tous_modeles()
+except (ImportError, Exception):
+    pass
 
 # ═════════════════════════════════════════════════════════════════════
 # SECTION 1: PYTEST CONFIGURATION
@@ -40,6 +52,23 @@ def test_db() -> Session:
     Chaque test obtient sa propre BD fraîche.
     Auto-cleanup après le test.
     """
+    from sqlalchemy import Text
+    from sqlalchemy.ext.compiler import compiles
+
+    # Adapter les types PostgreSQL pour SQLite
+    try:
+        from sqlalchemy.dialects.postgresql import ARRAY, JSONB
+
+        @compiles(JSONB, "sqlite")
+        def _compile_jsonb_sqlite(element, compiler, **kw):
+            return "TEXT"
+
+        @compiles(ARRAY, "sqlite")
+        def _compile_array_sqlite(element, compiler, **kw):
+            return "TEXT"
+    except ImportError:
+        pass
+
     engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
 
     # Créer tables si modèles disponibles

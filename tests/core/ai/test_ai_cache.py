@@ -268,25 +268,27 @@ class TestCacheIANettoyerExpires:
     """Tests pour CacheIA.nettoyer_expires()."""
 
     def test_nettoyer_expires_calls_cache_nettoyer(self, mock_session_state):
-        """Test nettoyer_expires appelle Cache.nettoyer_expires."""
+        """Test nettoyer_expires appelle le nettoyage du cache L1."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.ai.cache import CacheIA
-            from src.core.caching.cache import Cache
 
-            with patch.object(Cache, "nettoyer_expires") as mock_nettoyer:
+            with patch("src.core.ai.cache._cache") as mock_cache_fn:
+                mock_l1 = MagicMock()
+                mock_cache_fn.return_value.l1 = mock_l1
                 CacheIA.nettoyer_expires()
-                mock_nettoyer.assert_called_once_with(7200)
+                mock_l1.cleanup_expired.assert_called_once()
 
     def test_nettoyer_expires_with_custom_age(self, mock_session_state):
         """Test nettoyer_expires avec âge personnalisé."""
         with patch("streamlit.session_state", mock_session_state):
             from src.core.ai.cache import CacheIA
-            from src.core.caching.cache import Cache
 
             age_custom = 3600
-            with patch.object(Cache, "nettoyer_expires") as mock_nettoyer:
+            with patch("src.core.ai.cache._cache") as mock_cache_fn:
+                mock_l1 = MagicMock()
+                mock_cache_fn.return_value.l1 = mock_l1
                 CacheIA.nettoyer_expires(age_max_secondes=age_custom)
-                mock_nettoyer.assert_called_once_with(age_custom)
+                mock_l1.cleanup_expired.assert_called_once()
 
     def test_nettoyer_expires_logs_info(self, mock_session_state, caplog):
         """Test nettoyer_expires écrit dans les logs."""
@@ -294,9 +296,10 @@ class TestCacheIANettoyerExpires:
 
         with patch("streamlit.session_state", mock_session_state):
             from src.core.ai.cache import CacheIA
-            from src.core.caching.cache import Cache
 
-            with patch.object(Cache, "nettoyer_expires"):
+            with patch("src.core.ai.cache._cache") as mock_cache_fn:
+                mock_l1 = MagicMock()
+                mock_cache_fn.return_value.l1 = mock_l1
                 with caplog.at_level(logging.INFO):
                     CacheIA.nettoyer_expires(age_max_secondes=1800)
 

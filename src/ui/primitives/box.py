@@ -322,8 +322,9 @@ class Box:
 
     def show(self) -> None:
         """Affiche le Box dans Streamlit."""
-        StyleSheet.inject()  # S'assurer que le CSS est injecté
-        st.markdown(self.html(), unsafe_allow_html=True)
+        html_content = self.html()  # Génère d'abord le HTML (enregistre la classe CSS)
+        StyleSheet.inject()  # Injecte tout le CSS en attente (y compris cette classe)
+        st.markdown(html_content, unsafe_allow_html=True)
 
     def __enter__(self) -> Box:
         """Context manager entry."""

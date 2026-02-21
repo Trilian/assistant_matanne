@@ -2,11 +2,12 @@
 Session - Gestion des sessions SQLAlchemy.
 
 Fonctions pour:
-- Créer des session factories
+- Créer des session factories (cachées au niveau module)
 - Context managers pour les sessions
 """
 
 import logging
+import threading
 from collections.abc import Generator
 from contextlib import contextmanager
 
@@ -20,20 +21,42 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["obtenir_fabrique_session", "obtenir_contexte_db", "obtenir_db_securise"]
 
+# Session factory cachée au niveau module (créée une seule fois)
+_session_factory: sessionmaker | None = None
+_factory_lock = threading.Lock()
 
-def obtenir_fabrique_session():
+
+def obtenir_fabrique_session() -> sessionmaker:
     """
-    Retourne une session factory.
+    Retourne une session factory (cachée au niveau module).
+
+    La factory est créée une seule fois puis réutilisée.
 
     Returns:
         Session factory configurée
     """
-    moteur = obtenir_moteur()
-    return sessionmaker(autocommit=False, autoflush=False, bind=moteur, expire_on_commit=False)
+    global _session_factory
+
+    if _session_factory is not None:
+        return _session_factory
+
+    with _factory_lock:
+        if _session_factory is None:
+            moteur = obtenir_moteur()
+            _session_factory = sessionmaker(
+                autocommit=False,
+                autoflush=False,
+                bind=moteur,
+                expire_on_commit=False,
+            )
+    return _session_factory
 
 
-# Session factory initialisée à la demande (évite side-effects à l'import)
-SessionLocale = None
+def reinitialiser_fabrique() -> None:
+    """Réinitialise la factory (utile après changement de moteur ou en tests)."""
+    global _session_factory
+    with _factory_lock:
+        _session_factory = None
 
 
 @contextmanager

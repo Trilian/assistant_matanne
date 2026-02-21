@@ -32,20 +32,9 @@ class CacheMultiNiveau:
 
     Combine L1 (mémoire), L2 (session) et L3 (fichier)
     pour une performance optimale avec persistance.
+
+    Utiliser ``obtenir_cache()`` pour obtenir l'instance singleton.
     """
-
-    _instance: "CacheMultiNiveau | None" = None
-    _lock = threading.Lock()
-
-    def __new__(cls, *args, **kwargs):
-        """Singleton thread-safe."""
-        if cls._instance is None:
-            with cls._lock:
-                # Double-check locking
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
-                    cls._instance._initialized = False
-        return cls._instance
 
     def __init__(
         self,
@@ -54,14 +43,10 @@ class CacheMultiNiveau:
         l3_enabled: bool = True,
         l3_cache_dir: str = ".cache",
     ):
-        if self._initialized:
-            return
-
         self.l1 = CacheMemoireN1(max_entries=l1_max_entries)
         self.l2 = CacheSessionN2() if l2_enabled else None
         self.l3 = CacheFichierN3(cache_dir=l3_cache_dir) if l3_enabled else None
         self.stats = StatistiquesCache()
-        self._initialized = True
 
         logger.info(
             f"CacheMultiNiveau initialisé (L1={l1_max_entries}, L2={l2_enabled}, L3={l3_enabled})"
@@ -237,6 +222,38 @@ class CacheMultiNiveau:
         return value
 
 
-def obtenir_cache() -> CacheMultiNiveau:
-    """Retourne l'instance globale du cache."""
-    return CacheMultiNiveau()
+# ── Singleton via factory function (pas __new__) ─────────────
+_cache_instance: CacheMultiNiveau | None = None
+_cache_lock = threading.Lock()
+
+
+def obtenir_cache(
+    l1_max_entries: int = 500,
+    l2_enabled: bool = True,
+    l3_enabled: bool = True,
+) -> CacheMultiNiveau:
+    """
+    Retourne l'instance globale du cache (créée au premier appel).
+
+    Les paramètres sont ignorés après la première création.
+    """
+    global _cache_instance
+
+    if _cache_instance is not None:
+        return _cache_instance
+
+    with _cache_lock:
+        if _cache_instance is None:
+            _cache_instance = CacheMultiNiveau(
+                l1_max_entries=l1_max_entries,
+                l2_enabled=l2_enabled,
+                l3_enabled=l3_enabled,
+            )
+    return _cache_instance
+
+
+def reinitialiser_cache() -> None:
+    """Réinitialise le singleton cache (utile pour les tests)."""
+    global _cache_instance
+    with _cache_lock:
+        _cache_instance = None

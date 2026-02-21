@@ -7,6 +7,8 @@ from datetime import datetime
 
 import streamlit as st
 
+from src.ui.primitives.box import Box
+from src.ui.primitives.text import Text
 from src.ui.tokens import Couleur, Espacement, Rayon, Typographie
 from src.ui.utils import echapper_html
 
@@ -53,16 +55,15 @@ def indicateur_chargement(message: str = "Chargement..."):
     """
     Indicateur de chargement simple
 
+    Utilise ``Box`` pour le conteneur centré et ``Text`` pour l'échappement.
+
     Usage:
         indicateur_chargement("Chargement des données...")
     """
-    st.markdown(
-        f'<div style="text-align: center; padding: {Espacement.XL};">'
-        f'<div style="font-size: {Typographie.ICON_MD};">⏳</div>'
-        f'<div style="margin-top: {Espacement.SM}; color: {Couleur.TEXT_SECONDARY};">{echapper_html(message)}</div>'
-        f"</div>",
-        unsafe_allow_html=True,
-    )
+    container = Box(text_align="center", p=Espacement.XL)
+    container.child(f'<div style="font-size: {Typographie.ICON_MD};">\u23f3</div>')
+    container.child(Text(message, color=Couleur.TEXT_SECONDARY, mt=Espacement.SM, tag="div").html())
+    container.show()
 
 
 def chargeur_squelette(lignes: int = 3):

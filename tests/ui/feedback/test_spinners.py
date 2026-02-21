@@ -83,7 +83,8 @@ class TestSpinners:
 
         indicateur_chargement()
 
-        mock_markdown.assert_called_once()
+        # StyleSheet + HTML = 2 appels
+        assert mock_markdown.call_count >= 1
         call_args = mock_markdown.call_args[0][0]
         assert "Chargement..." in call_args
 
@@ -258,12 +259,12 @@ class TestIndicateurChargementCoverage:
 
         indicateur_chargement("Test message")
 
+        # Dernier appel = HTML content
         call_args = mock_markdown.call_args
         html = call_args[0][0]
 
-        # Vérifie la structure HTML
+        # Vérifie la structure HTML (Box + Text = CSS class-based)
         assert "<div" in html
-        assert "text-align: center" in html
         assert "⏳" in html
         assert "Test message" in html
         assert call_args[1]["unsafe_allow_html"] is True

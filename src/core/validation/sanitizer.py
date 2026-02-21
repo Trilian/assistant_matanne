@@ -11,9 +11,10 @@ __all__ = ["NettoyeurEntrees"]
 
 import html
 import logging
+import os
 import re
 from datetime import date, datetime
-from typing import Any
+from typing import Any, Literal
 
 logger = logging.getLogger(__name__)
 
@@ -44,17 +45,32 @@ class NettoyeurEntrees:
     ]
     """Patterns de détection injection SQL."""
 
+    # Mode par défaut : "log" pour compatibilité, "strict" pour bloquer.
+    # Configurable via env SANITIZER_SQL_MODE ou à l'appel.
+    MODE_SQL_DEFAUT: Literal["log", "strict"] = "log"
+
     @staticmethod
-    def nettoyer_chaine(valeur: str, longueur_max: int = 1000) -> str:
+    def nettoyer_chaine(
+        valeur: str,
+        longueur_max: int = 1000,
+        *,
+        mode_sql: Literal["log", "strict"] | None = None,
+    ) -> str:
         """
         Nettoie une chaîne de caractères.
 
         Args:
             valeur: Chaîne à nettoyer
             longueur_max: Longueur maximale
+            mode_sql: "log" (défaut) pour juste logger les injections SQL,
+                      "strict" pour lever ``ErreurValidation``.
+                      Si None, utilise ``SANITIZER_SQL_MODE`` env ou ``MODE_SQL_DEFAUT``.
 
         Returns:
             Chaîne nettoyée
+
+        Raises:
+            ErreurValidation: En mode strict, si injection SQL détectée.
 
         Example:
             >>> NettoyeurEntrees.nettoyer_chaine("<script>alert('xss')</script>")
@@ -73,11 +89,23 @@ class NettoyeurEntrees:
         for pattern in NettoyeurEntrees.PATTERNS_XSS:
             valeur = re.sub(pattern, "", valeur, flags=re.IGNORECASE)
 
+        # Résoudre le mode SQL effectif
+        mode_effectif = (
+            mode_sql or os.environ.get("SANITIZER_SQL_MODE") or NettoyeurEntrees.MODE_SQL_DEFAUT
+        )
+
         # Détecter patterns SQL
         for pattern in NettoyeurEntrees.PATTERNS_SQL:
             if re.search(pattern, valeur, re.IGNORECASE):
-                logger.warning(f"[!] Tentative injection SQL détectée: {valeur[:50]}")
-                # On laisse passer mais on log (pour ne pas bloquer faux positifs)
+                extrait = valeur[:50]
+                logger.warning("[!] Tentative injection SQL détectée: %s", extrait)
+                if mode_effectif == "strict":
+                    from src.core.errors_base import ErreurValidation
+
+                    raise ErreurValidation(
+                        "Entrée invalide : injection SQL détectée",
+                        details={"extrait": extrait},
+                    )
 
         # Supprimer caractères de contrôle
         valeur = re.sub(r"[\x00-\x1F\x7F]", "", valeur)

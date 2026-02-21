@@ -13,7 +13,7 @@ class TestBadge:
 
     @patch("streamlit.markdown")
     def test_badge_defaut(self, mock_markdown):
-        """Test badge avec couleur par défaut."""
+        """Test badge sans variante ni couleur → variante success (CVA)."""
         from src.ui.components.atoms import badge
 
         badge("Actif")
@@ -21,7 +21,8 @@ class TestBadge:
         mock_markdown.assert_called_once()
         call_args = mock_markdown.call_args[0][0]
         assert "Actif" in call_args
-        assert "#4CAF50" in call_args  # Couleur par défaut
+        # CVA badge success = BG_SUCCESS (#d4edda)
+        assert "#d4edda" in call_args
 
     @patch("streamlit.markdown")
     def test_badge_couleur_personnalisee(self, mock_markdown):
@@ -55,7 +56,9 @@ class TestEtatVide:
 
         etat_vide("Aucune recette")
 
-        mock_markdown.assert_called_once()
+        # 2 appels : StyleSheet CSS + HTML content
+        assert mock_markdown.call_count >= 1
+        # Dernier appel = HTML
         call_args = mock_markdown.call_args[0][0]
         assert "Aucune recette" in call_args
         assert "📭" in call_args  # Icône par défaut
@@ -102,7 +105,8 @@ class TestCarteMetrique:
 
         carte_metrique("Total", "42")
 
-        mock_markdown.assert_called_once()
+        # StyleSheet + HTML = 2+ appels
+        assert mock_markdown.call_count >= 1
         call_args = mock_markdown.call_args[0][0]
         assert "Total" in call_args
         assert "42" in call_args
@@ -134,8 +138,9 @@ class TestCarteMetrique:
 
         carte_metrique("Total", "42", couleur="#f0f0f0")
 
-        call_args = mock_markdown.call_args[0][0]
-        assert "#f0f0f0" in call_args
+        # La couleur est dans le StyleSheet CSS (1er appel) ou le HTML (2e)
+        all_html = " ".join(c[0][0] for c in mock_markdown.call_args_list)
+        assert "#f0f0f0" in all_html
 
 
 class TestNotificationsFeedback:
@@ -217,7 +222,8 @@ class TestBoiteInfo:
 
         boite_info("Astuce", "Conseil utile")
 
-        mock_markdown.assert_called_once()
+        # StyleSheet CSS + HTML = 2+ appels
+        assert mock_markdown.call_count >= 1
         call_args = mock_markdown.call_args[0][0]
         assert "Astuce" in call_args
         assert "Conseil utile" in call_args

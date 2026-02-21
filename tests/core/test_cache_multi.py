@@ -725,13 +725,15 @@ class TestCacheMultiNiveauAdvanced:
         return CacheMultiNiveau(l1_max_entries=100, l3_cache_dir=temp_cache_dir)
 
     def test_singleton_pattern(self, mock_session_state, temp_cache_dir):
-        """Test que CacheMultiNiveau est un singleton."""
-        from src.core.caching import CacheMultiNiveau
+        """Test que obtenir_cache() retourne un singleton."""
+        from src.core.caching.orchestrator import obtenir_cache, reinitialiser_cache
 
-        cache1 = CacheMultiNiveau()
-        cache2 = CacheMultiNiveau()
+        reinitialiser_cache()
+        cache1 = obtenir_cache()
+        cache2 = obtenir_cache()
 
         assert cache1 is cache2
+        reinitialiser_cache()
 
     def test_clear_all_levels(self, multi_cache):
         """Test vidage de tous les niveaux."""

@@ -2,39 +2,35 @@
 Loader - Chargement des fichiers de configuration.
 
 Fonctions pour charger:
-- Fichiers .env et .env.local
+- Fichiers .env et .env.local (via python-dotenv)
 - Secrets Streamlit
 """
 
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 
 def _reload_env_files():
-    """Recharge les fichiers .env (appelé à chaque accès config pour Streamlit)"""
+    """Recharge les fichiers .env (appelé à chaque accès config pour Streamlit).
+
+    Utilise python-dotenv pour un parsing robuste (multilignes, échappements,
+    exports, interpolation, etc.) au lieu d'un parser naïf ligne par ligne.
+    """
     try:
         # Trouver le répertoire racine du projet (parent du dossier src)
         _config_dir = Path(__file__).parent.parent.parent.parent
-        _env_files = [_config_dir / ".env.local", _config_dir / ".env"]
 
-        for env_path in _env_files:
-            if env_path.exists():
-                # Charger manuellement le fichier .env
-                with open(env_path) as f:
-                    for line in f:
-                        line = line.strip()
-                        if line and not line.startswith("#"):
-                            if "=" in line:
-                                key, value = line.split("=", 1)
-                                key = key.strip()
-                                value = value.strip()
-                                # Retirer les guillemets
-                                if value.startswith('"') and value.endswith('"'):
-                                    value = value[1:-1]
-                                elif value.startswith("'") and value.endswith("'"):
-                                    value = value[1:-1]
-                                # Pour Streamlit : forcer le rechargement
-                                os.environ[key] = value
+        # .env.local a priorité — on charge .env d'abord puis .env.local
+        # avec override=True pour que .env.local écrase les valeurs de .env
+        env_path = _config_dir / ".env"
+        env_local_path = _config_dir / ".env.local"
+
+        if env_path.exists():
+            load_dotenv(env_path, override=True)
+        if env_local_path.exists():
+            load_dotenv(env_local_path, override=True)
     except Exception:
         # Ignorer les erreurs si le chargement échoue
         pass

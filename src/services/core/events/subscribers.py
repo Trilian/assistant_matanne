@@ -1,0 +1,183 @@
+"""
+Subscribers — Handlers d'événements enregistrés au démarrage.
+
+Ces subscribers réagissent aux événements domaine émis par les services
+pour effectuer des actions transversales :
+- Invalidation de cache quand les données changent
+- Enregistrement de métriques (compteurs, durées)
+- Logging structuré pour audit trail
+
+Tous les handlers sont tolérants aux pannes (never crash the bus).
+"""
+
+from __future__ import annotations
+
+import logging
+
+from .bus import EvenementDomaine
+
+logger = logging.getLogger(__name__)
+
+
+# ═══════════════════════════════════════════════════════════
+# CACHE INVALIDATION
+# ═══════════════════════════════════════════════════════════
+
+
+def _invalider_cache_recettes(event: EvenementDomaine) -> None:
+    """Invalide le cache des recettes quand le catalogue change."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="recettes")
+        logger.debug(
+            "Cache recettes invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache recettes: %s", e)
+
+
+def _invalider_cache_stock(event: EvenementDomaine) -> None:
+    """Invalide le cache inventaire/stock quand le stock change."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="inventaire")
+        nb += cache.invalidate(pattern="stock")
+        logger.debug(
+            "Cache stock invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache stock: %s", e)
+
+
+def _invalider_cache_courses(event: EvenementDomaine) -> None:
+    """Invalide le cache courses quand une liste est générée."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="courses")
+        logger.debug(
+            "Cache courses invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache courses: %s", e)
+
+
+# ═══════════════════════════════════════════════════════════
+# MÉTRIQUES
+# ═══════════════════════════════════════════════════════════
+
+
+def _enregistrer_metrique_evenement(event: EvenementDomaine) -> None:
+    """Enregistre une métrique pour chaque événement domaine émis."""
+    try:
+        from src.core.monitoring import MetriqueType, enregistrer_metrique
+
+        enregistrer_metrique(
+            f"events.{event.type}",
+            1,
+            MetriqueType.COMPTEUR,
+        )
+    except ImportError:
+        pass  # Module monitoring optionnel
+    except Exception as e:  # noqa: BLE001
+        logger.debug("Échec enregistrement métrique événement: %s", e)
+
+
+def _enregistrer_erreur_service(event: EvenementDomaine) -> None:
+    """Enregistre les erreurs de service dans les métriques."""
+    try:
+        from src.core.monitoring import MetriqueType, enregistrer_metrique
+
+        service = event.data.get("service", "inconnu")
+        enregistrer_metrique(
+            f"errors.service.{service}",
+            1,
+            MetriqueType.COMPTEUR,
+        )
+        duree = event.data.get("duration_ms", 0.0)
+        if duree:
+            enregistrer_metrique(
+                f"errors.service.{service}.duree_ms",
+                duree,
+                MetriqueType.HISTOGRAMME,
+            )
+    except ImportError:
+        pass
+    except Exception as e:  # noqa: BLE001
+        logger.debug("Échec enregistrement métrique erreur: %s", e)
+
+
+# ═══════════════════════════════════════════════════════════
+# AUDIT / LOGGING
+# ═══════════════════════════════════════════════════════════
+
+
+def _logger_evenement_audit(event: EvenementDomaine) -> None:
+    """Log structuré de tous les événements domaine pour audit trail."""
+    logger.info(
+        "[AUDIT] %s | source=%s | data_keys=%s",
+        event.type,
+        event.source or "N/A",
+        list(event.data.keys()) if event.data else [],
+    )
+
+
+# ═══════════════════════════════════════════════════════════
+# ENREGISTREMENT — Appelé au bootstrap
+# ═══════════════════════════════════════════════════════════
+
+_subscribers_enregistres = False
+
+
+def enregistrer_subscribers() -> int:
+    """Enregistre tous les subscribers sur le bus d'événements.
+
+    Idempotent : ne s'exécute qu'une fois.
+
+    Returns:
+        Nombre de souscriptions créées.
+    """
+    global _subscribers_enregistres
+    if _subscribers_enregistres:
+        return 0
+
+    from .bus import obtenir_bus
+
+    bus = obtenir_bus()
+    compteur = 0
+
+    # ── Cache invalidation (haute priorité) ──
+    bus.souscrire("recette.*", _invalider_cache_recettes, priority=100)
+    compteur += 1
+    bus.souscrire("stock.*", _invalider_cache_stock, priority=100)
+    compteur += 1
+    bus.souscrire("courses.*", _invalider_cache_courses, priority=100)
+    compteur += 1
+
+    # ── Métriques (priorité moyenne) ──
+    bus.souscrire("*", _enregistrer_metrique_evenement, priority=50)
+    compteur += 1
+    bus.souscrire("service.error", _enregistrer_erreur_service, priority=50)
+    compteur += 1
+
+    # ── Audit logging (basse priorité) ──
+    bus.souscrire("*", _logger_evenement_audit, priority=10)
+    compteur += 1
+
+    _subscribers_enregistres = True
+    logger.info("📡 %d event subscribers enregistrés", compteur)
+    return compteur
+
+
+__all__ = ["enregistrer_subscribers"]

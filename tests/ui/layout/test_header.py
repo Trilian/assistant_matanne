@@ -4,6 +4,8 @@ Tests unitaires pour src/ui/layout/header.py
 
 from unittest.mock import MagicMock, patch
 
+from src.ui.tokens import Variante
+
 
 class TestAfficherHeader:
     """Tests pour afficher_header()."""
@@ -45,7 +47,7 @@ class TestAfficherHeader:
 
         afficher_header()
 
-        mock_badge.assert_called_with("🤖 IA Active", "#4CAF50")
+        mock_badge.assert_called_with("🤖 IA Active", variante=Variante.SUCCESS)
 
     @patch("src.ui.layout.header.st")
     @patch("src.ui.layout.header.badge")
@@ -61,7 +63,7 @@ class TestAfficherHeader:
 
         afficher_header()
 
-        mock_badge.assert_called_with("🤖 IA Indispo", "#FFC107")
+        mock_badge.assert_called_with("🤖 IA Indispo", variante=Variante.WARNING)
 
     @patch("src.ui.layout.header.st")
     @patch("src.ui.layout.header.badge")

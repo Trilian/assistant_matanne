@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 
 def _cache() -> "CacheMultiNiveau":  # noqa: F821
     """Accès lazy au singleton CacheMultiNiveau (évite import circulaire)."""
-    from .orchestrator import CacheMultiNiveau
+    from .orchestrator import obtenir_cache
 
-    return CacheMultiNiveau()
+    return obtenir_cache()
 
 
 # ═══════════════════════════════════════════════════════════

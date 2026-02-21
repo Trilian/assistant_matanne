@@ -2,6 +2,7 @@
 Composant de ligne de métriques réutilisable.
 
 Élimine la duplication des affichages de métriques en colonnes.
+Utilise ``StyleSheet`` pour la déduplication CSS et ``Text`` pour l'échappement.
 
 Usage:
     from src.ui.components.metrics_row import MetricConfig, afficher_metriques_row
@@ -19,8 +20,11 @@ from typing import Any, Callable
 
 import streamlit as st
 
+from src.ui.primitives.text import Text
+from src.ui.system.css import StyleSheet
 from src.ui.tokens import Couleur
 from src.ui.tokens_semantic import Sem
+from src.ui.utils import echapper_html
 
 
 @dataclass
@@ -108,6 +112,9 @@ def afficher_stats_cards(
 ) -> None:
     """Affiche des cartes de statistiques stylisées.
 
+    Utilise ``StyleSheet.create_class`` pour la déduplication CSS
+    et ``Text`` pour l'échappement automatique.
+
     Args:
         stats: Liste de dicts avec keys: title, value, subtitle, color, icon
         columns: Nombre de colonnes
@@ -129,26 +136,37 @@ def afficher_stats_cards(
             icon = stat.get("icon", "")
             title = f"{icon} {stat.get('title', '')}" if icon else stat.get("title", "")
 
+            # Classe CSS dédupliquée par couleur (seulement ~6 variantes en pratique)
+            card_cls = StyleSheet.create_class(
+                {
+                    "background": f"linear-gradient(135deg, {color}22, {color}11)",
+                    "border-left": f"4px solid {color}",
+                    "padding": "1rem",
+                    "border-radius": "8px",
+                    "margin-bottom": "0.5rem",
+                }
+            )
+
+            title_html = Text(
+                str(title), size="sm", color=str(Sem.ON_SURFACE_SECONDARY), tag="div"
+            ).html()
+            value_html = Text(
+                str(stat.get("value", "")),
+                size="xl",
+                weight="bold",
+                color=color,
+                tag="div",
+            ).html()
+            subtitle_html = Text(
+                str(stat.get("subtitle", "")),
+                size="xs",
+                color=str(Sem.ON_SURFACE_MUTED),
+                tag="div",
+            ).html()
+
+            StyleSheet.inject()
             st.markdown(
-                f"""
-                <div style="
-                    background: linear-gradient(135deg, {color}22, {color}11);
-                    border-left: 4px solid {color};
-                    padding: 1rem;
-                    border-radius: 8px;
-                    margin-bottom: 0.5rem;
-                ">
-                    <div style="font-size: 0.85rem; color: {Sem.ON_SURFACE_SECONDARY};">
-                        {title}
-                    </div>
-                    <div style="font-size: 1.75rem; font-weight: bold; color: {color};">
-                        {stat.get('value', '')}
-                    </div>
-                    <div style="font-size: 0.75rem; color: {Sem.ON_SURFACE_MUTED};">
-                        {stat.get('subtitle', '')}
-                    </div>
-                </div>
-                """,
+                f'<div class="{card_cls}">{title_html}{value_html}{subtitle_html}</div>',
                 unsafe_allow_html=True,
             )
 
@@ -158,6 +176,8 @@ def afficher_kpi_banner(
     background_color: str = "#f8f9fa",
 ) -> None:
     """Bannière de KPIs horizontale.
+
+    Utilise ``StyleSheet`` pour les classes CSS et ``Text`` pour l'échappement.
 
     Args:
         kpis: Liste de dicts avec keys: label, value, trend (up/down/neutral)
@@ -179,41 +199,52 @@ def afficher_kpi_banner(
         "neutral": Couleur.TEXT_SECONDARY,
     }
 
+    # Classe dédupliquée pour chaque item KPI
+    item_cls = StyleSheet.create_class(
+        {
+            "display": "inline-block",
+            "padding": "0.5rem 1.5rem",
+            "text-align": "center",
+            "border-right": f"1px solid {Sem.BORDER_SUBTLE}",
+        }
+    )
+
     kpi_html = ""
     for kpi in kpis:
         trend = kpi.get("trend", "neutral")
         icon = trend_icons.get(trend, "")
-        color = trend_colors.get(trend, "#757575")
+        color = trend_colors.get(trend, Couleur.TEXT_SECONDARY)
 
-        kpi_html += (
-            f"""
-        <div style="
-            display: inline-block;
-            padding: 0.5rem 1.5rem;
-            text-align: center;
-            border-right: 1px solid {Sem.BORDER_SUBTLE};
-        ">
-            <div style="font-size: 0.75rem; color: {Sem.ON_SURFACE_SECONDARY};">{kpi.get('label', '')}</div>
-            <div style="font-size: 1.25rem; font-weight: bold; color: {color};">
-                {kpi.get('value', '')} {icon}
-            </div>
-        </div>
-        """
-            ""
-        )
+        label_html = Text(
+            str(kpi.get("label", "")),
+            size="xs",
+            color=str(Sem.ON_SURFACE_SECONDARY),
+            tag="div",
+        ).html()
+        value_html = Text(
+            f"{kpi.get('value', '')} {icon}",
+            size="lg",
+            weight="bold",
+            color=color,
+            tag="div",
+        ).html()
 
+        kpi_html += f'<div class="{item_cls}">{label_html}{value_html}</div>'
+
+    # Conteneur horizontal
+    banner_cls = StyleSheet.create_class(
+        {
+            "background": str(Sem.SURFACE_ALT),
+            "border-radius": "8px",
+            "padding": "0.5rem",
+            "overflow-x": "auto",
+            "white-space": "nowrap",
+        }
+    )
+
+    StyleSheet.inject()
     st.markdown(
-        f"""
-        <div style="
-            background: {Sem.SURFACE_ALT};
-            border-radius: 8px;
-            padding: 0.5rem;
-            overflow-x: auto;
-            white-space: nowrap;
-        ">
-            {kpi_html}
-        </div>
-        """,
+        f'<div class="{banner_cls}">{kpi_html}</div>',
         unsafe_allow_html=True,
     )
 

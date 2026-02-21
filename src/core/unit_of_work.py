@@ -63,16 +63,19 @@ class UnitOfWork:
         self._session: Session | None = None
         self._repositories: dict[type, Repository] = {}
         self._committed = False
-        self._ctx = None
+        self._owns_session = False
 
     def __enter__(self) -> UnitOfWork:
         if self._session_externe:
             self._session = self._session_externe
         else:
-            from src.core.db import obtenir_contexte_db
+            from src.core.db import obtenir_fabrique_session
 
-            self._ctx = obtenir_contexte_db()
-            self._session = self._ctx.__enter__()
+            # Créer la session directement via la factory (pas via obtenir_contexte_db)
+            # pour éviter le double-commit: UoW gère commit/rollback lui-même.
+            fabrique = obtenir_fabrique_session()
+            self._session = fabrique()
+            self._owns_session = True
 
         return self
 
@@ -83,9 +86,9 @@ class UnitOfWork:
         elif not self._committed:
             self.commit()
 
-        # Fermer le context manager de session si on l'a créé
-        if self._ctx is not None:
-            self._ctx.__exit__(exc_type, exc_val, exc_tb)
+        # Fermer la session si on l'a créée
+        if getattr(self, "_owns_session", False) and self._session is not None:
+            self._session.close()
 
         self._repositories.clear()
         self._session = None

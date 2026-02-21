@@ -11,6 +11,8 @@ from datetime import datetime
 
 import streamlit as st
 
+from src.ui.primitives.box import Box
+from src.ui.primitives.text import Text
 from src.ui.registry import composant_ui
 from src.ui.tokens import Couleur, Espacement, Rayon, Typographie
 from src.ui.utils import echapper_html
@@ -123,17 +125,25 @@ def afficher_timeline_systeme(activites: list[dict], max_items: int = 5):
 
         action = activite.get("action", "Action")
 
-        st.markdown(
-            f'<div style="padding: {Espacement.SM}; margin: 0.3rem 0; '
-            f'background: {Couleur.BG_SUBTLE}; border-radius: {Rayon.MD}; display: flex; align-items: center;">'
-            f'<span style="margin-right: 0.8rem; font-size: {Typographie.ICON_SM};">{echapper_html(icone)}</span>'
-            f"<div>"
-            f'<span style="font-weight: 500;">{echapper_html(action)}</span><br>'
-            f'<small style="color: {Couleur.TEXT_SECONDARY};">{echapper_html(str(date_str))}</small>'
-            f"</div>"
-            f"</div>",
-            unsafe_allow_html=True,
+        # Box pour le conteneur flex de chaque item timeline
+        item = Box(
+            display="flex",
+            align="center",
+            p=Espacement.SM,
+            my="0.3rem",
+            bg=Couleur.BG_SUBTLE,
+            radius=Rayon.MD,
         )
+        item.child(
+            f'<span style="margin-right: 0.8rem; font-size: {Typographie.ICON_SM};">{echapper_html(icone)}</span>'
+        )
+        item.child(
+            f"<div>"
+            f"{Text(action, weight='medium').html()}<br>"
+            f"{Text(str(date_str), size='xs', color=Couleur.TEXT_SECONDARY, tag='small').html()}"
+            f"</div>"
+        )
+        item.show()
 
 
 # Alias rétrocompatibilité

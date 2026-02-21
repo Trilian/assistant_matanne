@@ -4,8 +4,9 @@ Bootstrap - Initialisation complète et unifiée de l'application.
 Point d'entrée unique pour:
 1. Validation de la configuration
 2. Enregistrement des composants dans le container IoC
-3. Initialisation des singletons
-4. Vérification de santé
+3. Pont container ↔ registre de services
+4. Initialisation des singletons
+5. Vérification de santé
 
 Usage::
     from src.core.bootstrap import demarrer_application, arreter_application
@@ -18,6 +19,10 @@ Usage::
             st.error(err)
         st.stop()
 
+    # Résolution unifiée (container + registre de services)
+    from src.core.bootstrap import resoudre_service
+    service = resoudre_service("recettes")
+
     # À l'arrêt (optionnel, cleanup)
     arreter_application()
 """
@@ -28,9 +33,11 @@ import atexit
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, TypeVar, overload
 
 logger = logging.getLogger(__name__)
+
+T = TypeVar("T")
 
 
 @dataclass
@@ -133,6 +140,19 @@ def _enregistrer_composants() -> list[str]:
     except Exception as e:
         logger.warning(f"Échec enregistrement Métriques: {e}")
 
+    # 6. Registre de services (pont container ↔ services)
+    try:
+        from src.services.core.registry import ServiceRegistry, obtenir_registre
+
+        conteneur.singleton(
+            ServiceRegistry,
+            factory=lambda: obtenir_registre(),
+            alias="service_registry",
+        )
+        composants.append("ServiceRegistry")
+    except Exception as e:
+        logger.warning(f"Échec enregistrement ServiceRegistry: {e}")
+
     return composants
 
 
@@ -202,7 +222,22 @@ def demarrer_application(
         logger.error(f"❌ Erreur enregistrement: {e}")
         return rapport
 
-    # ─── Étape 3: Initialisation eager (optionnel) ───
+    # ─── Étape 3: Enregistrement des event subscribers ───
+    logger.info("📡 Enregistrement des event subscribers...")
+    try:
+        from src.services.core.events.subscribers import enregistrer_subscribers
+
+        nb_subs = enregistrer_subscribers()
+        if nb_subs:
+            rapport.composants_enregistres.append(f"EventSubscribers({nb_subs})")
+            logger.info(f"✅ {nb_subs} event subscribers enregistrés")
+    except ImportError:
+        logger.debug("Module events.subscribers non disponible, skip")
+    except Exception as e:
+        rapport.avertissements.append(f"Event subscribers: {e}")
+        logger.warning(f"⚠ Échec enregistrement subscribers: {e}")
+
+    # ─── Étape 4: Initialisation eager (optionnel) ───
     if initialiser_eager:
         logger.info("⚡ Initialisation des singletons...")
         try:
@@ -259,9 +294,75 @@ def est_demarree() -> bool:
     return _deja_demarre
 
 
+# ═══════════════════════════════════════════════════════════
+# RÉSOLUTION UNIFIÉE — Pont Container IoC ↔ ServiceRegistry
+# ═══════════════════════════════════════════════════════════
+
+
+@overload
+def resoudre_service(service: type[T]) -> T: ...
+
+
+@overload
+def resoudre_service(service: str) -> Any: ...
+
+
+def resoudre_service(service: type[T] | str) -> T | Any:
+    """Résout un service depuis le container IoC ou le registre de services.
+
+    Ordre de résolution:
+    1. Container IoC (composants core: Parametres, Engine, Cache, ClientIA…)
+    2. ServiceRegistry (services métier: recettes, planning, inventaire…)
+
+    Args:
+        service: Type de classe ou nom (alias) du service
+
+    Returns:
+        Instance du service
+
+    Raises:
+        KeyError: Si le service n'est trouvé nulle part
+
+    Example::
+
+        from src.core.bootstrap import resoudre_service
+
+        # Par type (composants core)
+        params = resoudre_service(Parametres)
+
+        # Par alias (services métier)
+        recettes = resoudre_service("recettes")
+    """
+    # 1. Essayer le container IoC
+    from .container import conteneur
+
+    result = conteneur.try_resolve(service)
+    if result is not None:
+        return result
+
+    # 2. Essayer le registre de services (uniquement pour les alias string)
+    if isinstance(service, str):
+        try:
+            from src.services.core.registry import obtenir_registre
+
+            registre = obtenir_registre()
+            if registre.est_enregistre(service):
+                return registre.obtenir(service)
+        except ImportError:
+            pass
+
+    # 3. Aucun fournisseur trouvé
+    nom = service.__name__ if isinstance(service, type) else service
+    raise KeyError(
+        f"Service non trouvé: '{nom}'. "
+        f"Vérifiez qu'il est enregistré dans le container IoC ou le registre de services."
+    )
+
+
 __all__ = [
     "demarrer_application",
     "arreter_application",
     "est_demarree",
+    "resoudre_service",
     "RapportDemarrage",
 ]

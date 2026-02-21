@@ -110,6 +110,19 @@ class Result(ABC, Generic[T, E]):
             return self.unwrap()
         raise ValueError(f"{message}: {self.err()}")
 
+    def unwrap_err(self) -> E:
+        """Retourne l'erreur ou lève ValueError si Ok.
+
+        Symétrique de ``unwrap()`` — utile pour extraire l'erreur
+        de manière type-safe quand on sait que c'est un Err.
+
+        Raises:
+            ValueError: Si c'est un Ok.
+        """
+        if self.is_err():
+            return self.err()  # type: ignore[return-value]
+        raise ValueError(f"Appelé unwrap_err() sur Ok: {self.ok()}")
+
     def __bool__(self) -> bool:
         """Permet `if result:` comme raccourci pour `if result.is_ok():`."""
         return self.is_ok()
@@ -301,6 +314,72 @@ def premier_ok(*results: Result[T, E]) -> Result[T, list[E]]:
     return Err(erreurs)
 
 
+# ═══════════════════════════════════════════════════════════
+# DÉCORATEUR — Transformation automatique en Result
+# ═══════════════════════════════════════════════════════════
+
+import functools
+import inspect
+
+
+def avec_result(
+    *exceptions: type[Exception],
+) -> Callable:
+    """Décorateur qui transforme une fonction en version Result.
+
+    La fonction décorée ne lève plus d'exception — elle retourne
+    ``Ok(valeur)`` en cas de succès ou ``Err(exception)`` si une
+    exception survient.
+
+    Args:
+        *exceptions: Types d'exceptions à capturer.
+                     Par défaut, capture ``Exception``.
+
+    Usage::
+
+        @avec_result(ValueError, TypeError)
+        def diviser(a: int, b: int) -> float:
+            return a / b
+
+        result = diviser(10, 0)  # Err(ZeroDivisionError(...))
+        result = diviser(10, 2)  # Ok(5.0)
+
+        # Version async supportée aussi
+        @avec_result(httpx.HTTPError)
+        async def fetch(url: str) -> str:
+            async with httpx.AsyncClient() as c:
+                r = await c.get(url)
+                return r.text
+    """
+    exceptions_cibles = exceptions or (Exception,)
+
+    def decorator(func: Callable) -> Callable:
+        if inspect.iscoroutinefunction(func):
+
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs) -> Result:
+                try:
+                    valeur = await func(*args, **kwargs)
+                    return Ok(valeur)
+                except exceptions_cibles as e:
+                    return Err(e)
+
+            return async_wrapper
+        else:
+
+            @functools.wraps(func)
+            def sync_wrapper(*args, **kwargs) -> Result:
+                try:
+                    valeur = func(*args, **kwargs)
+                    return Ok(valeur)
+                except exceptions_cibles as e:
+                    return Err(e)
+
+            return sync_wrapper
+
+    return decorator
+
+
 __all__ = [
     "Result",
     "Ok",
@@ -311,4 +390,5 @@ __all__ = [
     "depuis_bool",
     "combiner",
     "premier_ok",
+    "avec_result",
 ]

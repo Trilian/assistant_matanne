@@ -47,6 +47,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "EntreeCache": (".caching", "EntreeCache"),
     "StatistiquesCache": (".caching", "StatistiquesCache"),
     "obtenir_cache": (".caching", "obtenir_cache"),
+    "reinitialiser_cache": (".caching", "reinitialiser_cache"),
     # Config
     "Parametres": (".config", "Parametres"),
     "obtenir_parametres": (".config", "obtenir_parametres"),
@@ -88,6 +89,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "depuis_bool": (".result", "depuis_bool"),
     "combiner": (".result", "combiner"),
     "premier_ok": (".result", "premier_ok"),
+    "avec_result": (".result", "avec_result"),
     # Resilience Policies
     "Policy": (".resilience", "Policy"),
     "RetryPolicy": (".resilience", "RetryPolicy"),
@@ -108,12 +110,11 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         ".observability",
         "configurer_logging_avec_correlation",
     ),
-    # Query Builder
-    "Requete": (".query", "Requete"),
     # Bootstrap
     "demarrer_application": (".bootstrap", "demarrer_application"),
     "arreter_application": (".bootstrap", "arreter_application"),
     "est_demarree": (".bootstrap", "est_demarree"),
+    "resoudre_service": (".bootstrap", "resoudre_service"),
     "RapportDemarrage": (".bootstrap", "RapportDemarrage"),
     # Config Validator
     "ValidateurConfiguration": (".config.validator", "ValidateurConfiguration"),

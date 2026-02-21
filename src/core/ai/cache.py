@@ -6,6 +6,8 @@ Ce module fournit un cache dédié aux réponses IA avec :
 - TTL optimisé pour les réponses IA
 - Invalidations ciblées
 - Statistiques de performance
+
+Utilise ``CacheMultiNiveau`` directement (sans la façade ``Cache``).
 """
 
 __all__ = ["CacheIA", "afficher_statistiques_cache_ia"]
@@ -15,10 +17,16 @@ import json
 import logging
 from typing import Any
 
-from ..caching import Cache
 from ..constants import CACHE_TTL_IA
 
 logger = logging.getLogger(__name__)
+
+
+def _cache():
+    """Accès lazy au singleton CacheMultiNiveau."""
+    from ..caching.orchestrator import obtenir_cache
+
+    return obtenir_cache()
 
 
 class CacheIA:
@@ -94,9 +102,8 @@ class CacheIA:
             >>>     logger.debug("Cache HIT!")
         """
         cle = CacheIA.generer_cle(prompt, systeme, temperature, modele)
-        ttl_final = ttl or CacheIA.TTL_PAR_DEFAUT
 
-        resultat = Cache.obtenir(cle, ttl=ttl_final)
+        resultat = _cache().get(cle)
 
         if resultat:
             logger.debug(f"Cache IA HIT: {cle[:16]}...")
@@ -133,7 +140,7 @@ class CacheIA:
         cle = CacheIA.generer_cle(prompt, systeme, temperature, modele)
         ttl_final = ttl or CacheIA.TTL_PAR_DEFAUT
 
-        Cache.definir(cle, reponse, ttl=ttl_final, dependencies=["ia", "mistral"])
+        _cache().set(cle, reponse, ttl=ttl_final, tags=["ia", "mistral"])
 
         logger.debug(f"Cache IA SET: {cle[:16]}...")
 
@@ -149,7 +156,7 @@ class CacheIA:
             >>> CacheIA.invalider_tout()
             >>> # Toutes les réponses IA seront recalculées
         """
-        Cache.invalider(pattern=CacheIA.PREFIXE)
+        _cache().invalidate(pattern=CacheIA.PREFIXE)
         logger.info("Cache IA vidé")
 
     @staticmethod
@@ -164,37 +171,30 @@ class CacheIA:
             >>> stats = CacheIA.obtenir_statistiques()
             >>> logger.debug(f"Entrées IA: {stats['entrees_ia']}")
         """
-        stats_globales = Cache.obtenir_statistiques()
+        stats_globales = _cache().obtenir_statistiques()
 
-        # Compter les entrées IA via l'API Storage (pas d'accès direct st.session_state)
-        from ..storage import obtenir_storage
-
-        storage = obtenir_storage()
+        # Compter les entrées IA via le L1 directement
         entrees_ia = 0
-
         try:
-            # Utiliser le CLE_DONNEES via l'abstraction storage
-            donnees_cache = storage.get(Cache.CLE_DONNEES, {})
-            if isinstance(donnees_cache, dict):
-                entrees_ia = sum(
-                    1 for cle in donnees_cache.keys() if cle.startswith(CacheIA.PREFIXE)
-                )
+            cache = _cache()
+            entrees_l1 = cache.l1._cache
+            entrees_ia = sum(1 for cle in entrees_l1.keys() if cle.startswith(CacheIA.PREFIXE))
         except Exception:
-            # Fallback: compter via le cache multi-niveaux L1
-            try:
-                from ..caching import CacheMultiNiveau
+            pass
 
-                cache = CacheMultiNiveau()
-                entrees_l1 = cache.l1._cache
-                entrees_ia = sum(1 for cle in entrees_l1.keys() if cle.startswith(CacheIA.PREFIXE))
-            except Exception:
-                pass
+        hits = (
+            stats_globales.get("l1_hits", 0)
+            + stats_globales.get("l2_hits", 0)
+            + stats_globales.get("l3_hits", 0)
+        )
+        misses = stats_globales.get("misses", 0)
+        total = hits + misses
 
         return {
             "entrees_ia": entrees_ia,
-            "entrees_totales": stats_globales["entrees"],
-            "taux_hit": stats_globales["taux_hit"],
-            "taille_mo": stats_globales["taille_mo"],
+            "entrees_totales": stats_globales.get("l1", {}).get("entries", 0),
+            "taux_hit": (hits / total * 100) if total > 0 else 0,
+            "taille_mo": 0.0,
             "ttl_defaut": CacheIA.TTL_PAR_DEFAUT,
         }
 
@@ -210,7 +210,7 @@ class CacheIA:
             >>> # Nettoyer réponses > 2h
             >>> CacheIA.nettoyer_expires()
         """
-        Cache.nettoyer_expires(age_max_secondes)
+        _cache().l1.cleanup_expired()
         logger.info(f"Nettoyage cache IA (âge max: {age_max_secondes}s)")
 
 

@@ -14,25 +14,28 @@ class TestInjecterCss:
 
         assert injecter_css is not None
 
-    @patch("streamlit.markdown")
-    def test_injecter_css(self, mock_md):
-        """Test injection CSS."""
+    @patch("src.ui.css.CSSManager.register")
+    def test_injecter_css_registers_in_manager(self, mock_register):
+        """Test que le CSS est enregistré dans CSSManager."""
         from src.ui.layout.styles import injecter_css
 
         injecter_css()
 
-        mock_md.assert_called()
-        call_args = mock_md.call_args
-        # CSS should be injected with unsafe_allow_html=True
-        assert call_args[1].get("unsafe_allow_html") is True
+        mock_register.assert_called_once()
+        name, css = mock_register.call_args[0]
+        assert name == "global-styles"
+        assert "--primary:" in css
+        assert "--accent:" in css
 
-    @patch("streamlit.markdown")
-    def test_css_content(self, mock_md):
-        """Test contenu CSS."""
+    @patch("src.ui.css.CSSManager.register")
+    def test_css_content(self, mock_register):
+        """Test que le contenu CSS inclut les classes principales."""
         from src.ui.layout.styles import injecter_css
 
         injecter_css()
 
-        # CSS should contain style tags
-        content = mock_md.call_args[0][0]
-        assert "<style>" in content or "style" in content.lower()
+        css = mock_register.call_args[0][1]
+        assert ".main-header" in css
+        assert ".metric-card" in css
+        assert "@media print" in css
+        assert "focus-visible" in css

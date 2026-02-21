@@ -3,13 +3,16 @@ Decorateurs - Décorateurs utilitaires réutilisables.
 
 Contient :
 - @avec_session_db : Gestion unifiée des sessions DB
-- @avec_cache : Cache automatique pour fonctions
-- @avec_gestion_erreurs : Gestion d'erreurs centralisée
+- @avec_cache : Cache automatique multi-niveaux
+- @avec_gestion_erreurs : Gestion d'erreurs centralisée avec affichage UI
 - @avec_validation : Validation Pydantic automatique
+- @avec_resilience : Résilience composable (retry, timeout, circuit breaker)
 """
 
+import hashlib
 import inspect
 import logging
+import traceback
 from collections.abc import Callable
 from functools import wraps
 from typing import Any, ParamSpec, TypeVar, overload
@@ -19,6 +22,12 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 P = ParamSpec("P")
 F = TypeVar("F", bound=Callable[..., Any])
+
+# Note: les décorateurs utilisent `F` et retournent `wrapper  # type: ignore`
+# car Python ne peut pas exprimer de manière statique qu'un décorateur
+# qui injecte un paramètre (comme `db`) conserve le type de la fonction.
+# ParamSpec + Concatenate ne suffisent pas pour `avec_session_db` car le
+# paramètre injecté est optionnel (kwarg-only avec default).
 
 
 # ═══════════════════════════════════════════════════════════
@@ -53,6 +62,10 @@ def avec_session_db(func: F) -> F:
         ErreurBaseDeDonnees: Si création de session échoue
     """
 
+    # Pré-calculer la signature à la décoration (pas à chaque appel)
+    _sig = inspect.signature(func)
+    _param_name = "session" if "session" in _sig.parameters else "db"
+
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
         # Si 'db' ou 'session' est déjà fourni(e), utiliser directement
@@ -65,12 +78,7 @@ def avec_session_db(func: F) -> F:
         from src.core.db import obtenir_contexte_db
 
         with obtenir_contexte_db() as session:
-            # Ajouter 'db' ou 'session' selon le paramètre attendu
-            sig = inspect.signature(func)
-            if "session" in sig.parameters:
-                kwargs["session"] = session
-            else:
-                kwargs["db"] = session
+            kwargs[_param_name] = session
             return func(*args, **kwargs)
 
     return wrapper  # type: ignore
@@ -170,7 +178,11 @@ def avec_cache(
                 prefix = key_prefix or func.__name__
                 # Exclure 'db' des kwargs dans le cache key
                 filtered_kwargs = {k: v for k, v in kwargs.items() if k != "db"}
-                cache_key = f"{prefix}_{str(args)}_{str(filtered_kwargs)}"
+                # Hash déterministe au lieu de str() (plus rapide et fiable)
+                raw_key = f"{prefix}:{repr(args)}:{repr(sorted(filtered_kwargs.items()))}"
+                cache_key = (
+                    f"{prefix}_{hashlib.blake2b(raw_key.encode(), digest_size=16).hexdigest()}"
+                )
 
             # Chercher dans le cache multi-niveaux (L1 → L2 → L3)
             cached_value = cache.get(cache_key, default=_CACHE_MISS)
@@ -203,20 +215,44 @@ def avec_gestion_erreurs(
     default_return: Any = None,
     log_level: str = "ERROR",
     afficher_erreur: bool = False,
+    relancer_metier: bool = True,
+    afficher_details_debug: bool = True,
 ):
     """
-    Décorateur pour gestion centralisée d'erreurs.
+    Décorateur unifié pour gestion centralisée d'erreurs avec affichage UI.
 
-    Usage:
+    Gère intelligemment les exceptions métier (``ExceptionApp``) et génériques:
+
+    - **Exceptions métier** : affichage typé dans l'UI (icônes par type),
+      log au bon niveau, puis relancées (ou fallback selon ``relancer_metier``).
+    - **Exceptions génériques** : loguées, affichées si demandé, puis
+      retournent ``default_return``.
+    - **Mode debug** : affiche automatiquement la stack trace dans un
+      expander Streamlit.
+
+    Usage::
+
         @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
         def operation_risquee(data: dict) -> dict:
             # Code qui peut lever des exceptions
             return resultat
 
+        # Avec gestion fine des erreurs métier
+        @avec_gestion_erreurs(
+            default_return=[],
+            afficher_erreur=True,
+            relancer_metier=False,  # Retourne default_return même pour ExceptionApp
+        )
+        def charger_recettes() -> list:
+            return service.get_all()
+
     Args:
         default_return: Valeur retournée en cas d'erreur
         log_level: Niveau de log ("DEBUG", "INFO", "WARNING", "ERROR")
         afficher_erreur: Afficher l'erreur dans Streamlit
+        relancer_metier: Re-raise les ExceptionApp (défaut True pour backward compat).
+            Si False, retourne ``default_return`` pour toutes les erreurs.
+        afficher_details_debug: Affiche la stack trace en mode debug (défaut True)
 
     Returns:
         Résultat de la fonction ou default_return
@@ -229,30 +265,100 @@ def avec_gestion_erreurs(
                 return func(*args, **kwargs)
 
             except Exception as e:
-                # Relever les exceptions métier (héritant de ExceptionApp)
-                from src.core.errors_base import ExceptionApp
+                from src.core.errors_base import (
+                    ErreurBaseDeDonnees,
+                    ErreurLimiteDebit,
+                    ErreurNonTrouve,
+                    ErreurServiceExterne,
+                    ErreurServiceIA,
+                    ErreurValidation,
+                    ExceptionApp,
+                )
 
+                # ── Déterminer le niveau de log adapté ──
                 if isinstance(e, ExceptionApp):
-                    raise  # Relever les exceptions métier
+                    _LOG_MAP: dict[type, str] = {
+                        ErreurValidation: "warning",
+                        ErreurNonTrouve: "info",
+                        ErreurLimiteDebit: "warning",
+                        ErreurServiceExterne: "warning",
+                        ErreurServiceIA: "warning",
+                        ErreurBaseDeDonnees: "error",
+                    }
+                    effective_level = _LOG_MAP.get(type(e), log_level.lower())
+                else:
+                    effective_level = "critical" if log_level == "ERROR" else log_level.lower()
 
-                # Logger l'erreur
                 log_msg = f"Erreur dans {func.__name__}: {e}"
-                getattr(logger, log_level.lower())(log_msg)
+                getattr(logger, effective_level, logger.error)(log_msg)
 
-                # Afficher dans Streamlit si demandé
+                # ── Affichage UI intelligent par type d'erreur ──
                 if afficher_erreur:
-                    try:
-                        import streamlit as st
+                    _afficher_erreur_ui(e, func.__name__, afficher_details_debug)
 
-                        st.error(f"[ERROR] {str(e)}")
-                    except Exception:
-                        pass  # Streamlit pas initialisé
+                # ── Relancer ou fallback ──
+                if isinstance(e, ExceptionApp) and relancer_metier:
+                    raise
 
                 return default_return
 
         return wrapper  # type: ignore
 
     return decorator
+
+
+def _afficher_erreur_ui(
+    erreur: Exception,
+    nom_fonction: str,
+    afficher_details_debug: bool = True,
+) -> None:
+    """Affiche une erreur dans Streamlit avec formatage intelligent par type."""
+    try:
+        import streamlit as st
+    except Exception:
+        return
+
+    from src.core.errors_base import (
+        ErreurBaseDeDonnees,
+        ErreurLimiteDebit,
+        ErreurNonTrouve,
+        ErreurServiceExterne,
+        ErreurServiceIA,
+        ErreurValidation,
+        ExceptionApp,
+    )
+
+    try:
+        if isinstance(erreur, ExceptionApp):
+            _UI_MAP: dict[type, tuple[Any, str]] = {
+                ErreurValidation: (st.error, "[ERROR]"),
+                ErreurNonTrouve: (st.warning, "[!]"),
+                ErreurBaseDeDonnees: (st.error, "\U0001f4be"),  # 💾
+                ErreurServiceIA: (st.error, "\U0001f916"),  # 🤖
+                ErreurLimiteDebit: (st.warning, "\u23f3"),  # ⏳
+                ErreurServiceExterne: (st.error, "\U0001f310"),  # 🌐
+            }
+            afficher_fn, prefix = _UI_MAP.get(type(erreur), (st.error, "[ERROR]"))
+            afficher_fn(f"{prefix} {erreur.message_utilisateur}")
+        else:
+            st.error("[ERROR] Une erreur inattendue s'est produite")
+    except Exception:
+        # Streamlit non initialisé ou contexte invalide
+        return
+
+    # Stack trace en mode debug
+    if afficher_details_debug:
+        try:
+            import os
+
+            is_debug = os.environ.get("DEBUG", "").lower() in ("1", "true")
+            if not is_debug:
+                is_debug = st.session_state.get("debug_mode", False)
+            if is_debug:
+                with st.expander("\U0001f41b Stack trace"):  # 🐛
+                    st.code(traceback.format_exc())
+        except Exception:
+            pass
 
 
 # ═══════════════════════════════════════════════════════════
@@ -333,9 +439,8 @@ def avec_resilience(
     """
     Décorateur unifié de résilience — compose retry, timeout, circuit breaker et fallback.
 
-    Combine toutes les stratégies de gestion d'erreurs en un seul point
-    d'entrée cohérent, éliminant la confusion entre ``@avec_gestion_erreurs``,
-    ``@gerer_erreurs`` et les policies manuelles.
+    Construit la chaîne de policies à la décoration (pas à chaque appel)
+    pour une performance optimale.
 
     Args:
         retry: Nombre de retentatives (0 = pas de retry)
@@ -370,39 +475,26 @@ def avec_resilience(
     _fallback = _NO_FALLBACK if fallback is None else fallback
 
     def decorator(func: F) -> F:
+        # Construire la chaîne de policies à la décoration (lazy import)
+        from src.core.resilience import (
+            PolicyComposee,
+            RetryPolicy,
+            TimeoutPolicy,
+        )
+
+        policies = []
+
+        if timeout_s is not None:
+            policies.append(TimeoutPolicy(timeout_secondes=timeout_s))
+
+        if retry > 0:
+            policies.append(RetryPolicy(max_tentatives=retry, delai_base=1.0, jitter=True))
+
+        composed = PolicyComposee(policies) if policies else None
+
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
-            # Construire la chaîne de policies à la demande (lazy import)
-            from src.core.resilience import (
-                BulkheadPolicy,
-                FallbackPolicy,
-                PolicyComposee,
-                RetryPolicy,
-                TimeoutPolicy,
-            )
-
-            policies = []
-
-            if timeout_s is not None:
-                policies.append(TimeoutPolicy(timeout_secondes=timeout_s))
-
-            if circuit is not None:
-                from src.core.ai.circuit_breaker import obtenir_circuit
-
-                cb = obtenir_circuit(circuit)
-                # Wrapper le circuit breaker comme policy
-                policies.append(
-                    FallbackPolicy(
-                        fallback_fn=lambda e: (_ for _ in ()).throw(e),  # type: ignore
-                        log_erreur=False,
-                    )
-                )
-                # Le circuit breaker sera appliqué directement
-
-            if retry > 0:
-                policies.append(RetryPolicy(max_tentatives=retry, delai_base=1.0, jitter=True))
-
-            # Exécuter
+            # Fonction interne avec circuit breaker optionnel
             def _inner() -> Any:
                 if circuit is not None:
                     from src.core.ai.circuit_breaker import obtenir_circuit
@@ -412,8 +504,7 @@ def avec_resilience(
                 return func(*args, **kwargs)
 
             try:
-                if policies:
-                    composed = PolicyComposee(policies)
+                if composed is not None:
                     result = composed.executer(_inner)
                     if result.is_err():
                         raise result.err()  # type: ignore
@@ -426,17 +517,9 @@ def avec_resilience(
                 log_fn = getattr(logger, log_level.lower(), logger.error)
                 log_fn(f"Erreur dans {func.__name__}: {e}")
 
-                # Afficher dans l'UI
+                # Afficher dans l'UI (réutilise le helper unifié)
                 if afficher_ui:
-                    try:
-                        import streamlit as st
-
-                        if hasattr(e, "message_utilisateur"):
-                            st.error(f"[ERROR] {e.message_utilisateur}")  # type: ignore
-                        else:
-                            st.error(f"[ERROR] {str(e)}")
-                    except Exception:
-                        pass
+                    _afficher_erreur_ui(e, func.__name__)
 
                 # Fallback ou re-raise
                 if _fallback is not _NO_FALLBACK:

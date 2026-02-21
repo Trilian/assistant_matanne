@@ -174,6 +174,17 @@ class StyleSheet:
         """Retourne tout le CSS généré (pour debug/export)."""
         return "\n".join(cls._styles.values())
 
+    @classmethod
+    def mark_all_injected(cls) -> None:
+        """Marque toutes les classes comme déjà injectées.
+
+        Appelé par ``CSSManager`` après injection batch pour éviter
+        que ``StyleSheet.inject()`` ne réinjecte les mêmes classes.
+        """
+        cls._init_session()
+        cls._injected.update(cls._styles.keys())
+        st.session_state[cls._SESSION_KEY] = cls._injected
+
 
 def styled(tag: str = "div", **styles: str) -> str:
     """Crée un élément HTML avec styles optimisés.

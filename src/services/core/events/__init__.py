@@ -34,6 +34,7 @@ from .events import (
     EvenementRecettePlanifiee,
     EvenementStockModifie,
 )
+from .subscribers import enregistrer_subscribers
 
 __all__ = [
     # Bus
@@ -48,4 +49,6 @@ __all__ = [
     "EvenementRecetteImportee",
     "EvenementBatchCookingTermine",
     "EvenementErreurService",
+    # Subscribers
+    "enregistrer_subscribers",
 ]

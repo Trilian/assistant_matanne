@@ -12,7 +12,7 @@ import logging
 import threading
 import time
 
-from sqlalchemy import create_engine, pool, text
+from sqlalchemy import Engine, create_engine, pool, text
 from sqlalchemy.exc import DatabaseError, OperationalError
 
 from ..config import obtenir_parametres
@@ -62,6 +62,16 @@ def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative
             try:
                 url_base = parametres.DATABASE_URL
 
+                # connect_args adaptés au driver (PostgreSQL vs SQLite, etc.)
+                connect_args: dict = {}
+                if url_base.startswith("postgresql"):
+                    sslmode = getattr(parametres, "DB_SSLMODE", "require")
+                    connect_args = {
+                        "connect_timeout": DB_CONNECTION_TIMEOUT,
+                        "options": "-c timezone=utc",
+                        "sslmode": sslmode,
+                    }
+
                 moteur = create_engine(
                     url_base,
                     poolclass=pool.QueuePool,
@@ -71,11 +81,7 @@ def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative
                     pool_recycle=1800,
                     pool_pre_ping=True,
                     echo=parametres.DEBUG,
-                    connect_args={
-                        "connect_timeout": DB_CONNECTION_TIMEOUT,
-                        "options": "-c timezone=utc",
-                        "sslmode": "require",
-                    },
+                    connect_args=connect_args,
                 )
 
                 # Test de connexion
@@ -118,7 +124,7 @@ def reinitialiser_moteur() -> None:
             _engine_instance = None
 
 
-def obtenir_moteur_securise() -> object | None:
+def obtenir_moteur_securise() -> "Engine | None":
     """
     Version sécurisée qui retourne None au lieu de lever une exception.
 

@@ -291,6 +291,13 @@ def valider_plage(
     Raises:
         ErreurValidation: Si hors plage
     """
+    import warnings
+
+    warnings.warn(
+        "valider_plage() est déprécié, utiliser exiger_plage() à la place",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     exiger_plage(valeur, minimum=min_val, maximum=max_val, nom_champ=nom_param)
 
 

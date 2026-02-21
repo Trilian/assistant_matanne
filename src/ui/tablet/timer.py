@@ -173,8 +173,14 @@ class TimerCuisine:
         temps_str = self.formater_temps()
         pct = self.progression
 
-        # Grand affichage du temps
-        couleur = "#4CAF50" if pct < 0.75 else "#FF9800" if pct < 0.9 else "#f44336"
+        # Grand affichage du temps — semantic tokens pour dark mode
+        if pct < 0.75:
+            couleur = "var(--sem-success, #4CAF50)"
+        elif pct < 0.9:
+            couleur = "var(--sem-warning, #FF9800)"
+        else:
+            couleur = "var(--sem-danger, #f44336)"
+
         st.markdown(
             f'<div style="text-align:center;font-size:3em;font-weight:bold;'
             f'color:{couleur};font-family:monospace">{temps_str}</div>',
@@ -183,7 +189,8 @@ class TimerCuisine:
 
         if label:
             st.markdown(
-                f'<p style="text-align:center;color:#888">{label}</p>',
+                f'<p style="text-align:center;'
+                f'color:var(--sem-on-surface-muted, #888)">{label}</p>',
                 unsafe_allow_html=True,
             )
 
@@ -214,14 +221,16 @@ class TimerCuisine:
 
         if self.est_termine:
             badge_html = (
-                '<span style="background:#f44336;color:white;padding:4px 12px;'
+                '<span style="background:var(--sem-danger, #f44336);'
+                "color:var(--sem-on-interactive, white);padding:4px 12px;"
                 'border-radius:12px;font-size:0.85em;animation:pulse 1s infinite">'
                 "⏰ Terminé!</span>"
             )
         else:
             temps_str = self.formater_temps()
             badge_html = (
-                f'<span style="background:#4CAF50;color:white;padding:4px 12px;'
+                f'<span style="background:var(--sem-interactive, #4CAF50);'
+                f"color:var(--sem-on-interactive, white);padding:4px 12px;"
                 f'border-radius:12px;font-size:0.85em;font-family:monospace">'
                 f"⏱️ {temps_str}</span>"
             )

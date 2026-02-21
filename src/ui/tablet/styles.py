@@ -5,20 +5,23 @@ Fournit les feuilles de style pour:
 - Mode tablette (interface tactile)
 - Mode cuisine (gros boutons, navigation simplifiée)
 - Responsive media queries
+
+Les couleurs utilisent des CSS custom properties (``var(--sem-*)``)
+pour le support dark mode automatique via les tokens sémantiques.
 """
 
-import streamlit as st
 import streamlit.components.v1 as components
+
+from src.ui.css import CSSManager
 
 from .config import ModeTablette, obtenir_mode_tablette
 
 # ═══════════════════════════════════════════════════════════
-# CSS TABLETTE
+# CSS TABLETTE — tokens sémantiques avec fallbacks
 # ═══════════════════════════════════════════════════════════
 
 
 CSS_TABLETTE = """
-<style>
 /* ═══════════════════════════════════════════════════════════
    MODE TABLETTE - CSS RESPONSIVE
    ═══════════════════════════════════════════════════════════ */
@@ -154,9 +157,11 @@ CSS_TABLETTE = """
 
 /* Mode cuisine: boutons primaires colorés */
 .kitchen-mode .stButton > button[kind="primary"] {
-    background: linear-gradient(135deg, #4CAF50, #45a049) !important;
-    color: white !important;
-    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3) !important;
+    background: linear-gradient(135deg,
+        var(--sem-interactive, #4CAF50),
+        var(--sem-interactive-hover, #45a049)) !important;
+    color: var(--sem-on-interactive, white) !important;
+    box-shadow: var(--sem-shadow-md, 0 4px 12px rgba(76, 175, 80, 0.3)) !important;
 }
 
 /* Mode cuisine: inputs très grands */
@@ -177,7 +182,7 @@ CSS_TABLETTE = """
     height: 60px;
     border-radius: 50%;
     background: linear-gradient(135deg, #FF6B6B, #ee5a5a);
-    color: white;
+    color: var(--sem-on-interactive, white);
     font-size: 1.8rem;
     font-weight: 700;
     margin-right: 16px;
@@ -186,12 +191,12 @@ CSS_TABLETTE = """
 
 /* Mode cuisine: carte d'étape */
 .kitchen-step-card {
-    background: white;
+    background: var(--sem-surface, white);
     border-radius: 20px;
     padding: 24px;
     margin: 20px 0;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    border-left: 6px solid #4CAF50;
+    box-shadow: var(--sem-shadow-md, 0 4px 20px rgba(0,0,0,0.08));
+    border-left: 6px solid var(--sem-interactive, #4CAF50);
 }
 
 /* Mode cuisine: navigation bas de page */
@@ -200,9 +205,9 @@ CSS_TABLETTE = """
     bottom: 0;
     left: 0;
     right: 0;
-    background: white;
+    background: var(--sem-surface, white);
     padding: 16px 24px;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+    box-shadow: var(--sem-shadow-lg, 0 -4px 20px rgba(0,0,0,0.1));
     display: flex;
     justify-content: space-between;
     gap: 16px;
@@ -221,7 +226,7 @@ CSS_TABLETTE = """
     top: 20px;
     right: 20px;
     background: linear-gradient(135deg, #FF6B6B, #ee5a5a);
-    color: white;
+    color: var(--sem-on-interactive, white);
     padding: 16px 24px;
     border-radius: 50px;
     font-size: 2rem;
@@ -302,18 +307,18 @@ CSS_TABLETTE = """
 }
 
 .tablet-badge.success {
-    background: #E8F5E9;
-    color: #2E7D32;
+    background: var(--sem-success-subtle, #E8F5E9);
+    color: var(--sem-on-success, #2E7D32);
 }
 
 .tablet-badge.warning {
-    background: #FFF3E0;
-    color: #E65100;
+    background: var(--sem-warning-subtle, #FFF3E0);
+    color: var(--sem-on-warning, #E65100);
 }
 
 .tablet-badge.danger {
-    background: #FFEBEE;
-    color: #C62828;
+    background: var(--sem-danger-subtle, #FFEBEE);
+    color: var(--sem-on-danger, #C62828);
 }
 
 /* Grille tactile pour sélection */
@@ -325,8 +330,8 @@ CSS_TABLETTE = """
 }
 
 .tablet-grid-item {
-    background: white;
-    border: 2px solid #e0e0e0;
+    background: var(--sem-surface, white);
+    border: 2px solid var(--sem-border, #e0e0e0);
     border-radius: 16px;
     padding: 20px;
     text-align: center;
@@ -336,8 +341,8 @@ CSS_TABLETTE = """
 
 .tablet-grid-item:active,
 .tablet-grid-item.selected {
-    border-color: #4CAF50;
-    background: #E8F5E9;
+    border-color: var(--sem-interactive, #4CAF50);
+    background: var(--sem-success-subtle, #E8F5E9);
 }
 
 .tablet-grid-item .icon {
@@ -349,19 +354,17 @@ CSS_TABLETTE = """
 .swipe-indicator {
     text-align: center;
     padding: 12px;
-    color: #9e9e9e;
+    color: var(--sem-on-surface-muted, #9e9e9e);
     font-size: 0.9rem;
 }
 
 .swipe-indicator::before {
     content: "← swipe →";
 }
-</style>
 """
 
 
 CSS_MODE_CUISINE = """
-<style>
 /* CSS spécifique au mode cuisine (superpose tablet CSS) */
 
 /* Corps principal avec padding pour nav fixe */
@@ -385,7 +388,7 @@ CSS_MODE_CUISINE = """
     display: flex;
     align-items: center;
     padding: 16px;
-    background: #f5f5f5;
+    background: var(--sem-surface-alt, #f5f5f5);
     border-radius: 12px;
     margin: 8px 0;
     font-size: 1.3rem;
@@ -417,7 +420,6 @@ CSS_MODE_CUISINE = """
         transform: translateX(0);
     }
 }
-</style>
 """
 
 
@@ -430,15 +432,13 @@ def appliquer_mode_tablette():
     """
     Applique le mode tablette à la page courante.
 
-    Utilise une approche CSS-only via injection de classe sur le body
-    plutôt que des <div> ouvrants/fermants (incompatibles avec le DOM Streamlit).
-
-    À appeler au début de chaque page/module.
+    Enregistre le CSS dans le ``CSSManager`` et ajoute la classe
+    appropriée sur le body via un script inline.
     """
     mode = obtenir_mode_tablette()
 
-    # Toujours inclure le CSS de base
-    st.markdown(CSS_TABLETTE, unsafe_allow_html=True)
+    # Toujours enregistrer le CSS tablette de base (class-guarded, zéro coût si inactif)
+    CSSManager.register("tablet-base", CSS_TABLETTE)
 
     if mode == ModeTablette.TABLETTE:
         components.html(
@@ -446,11 +446,14 @@ def appliquer_mode_tablette():
             height=0,
         )
     elif mode == ModeTablette.CUISINE:
-        st.markdown(CSS_MODE_CUISINE, unsafe_allow_html=True)
+        CSSManager.register("tablet-kitchen", CSS_MODE_CUISINE)
         components.html(
             "<script>document.body.classList.add('tablet-mode', 'kitchen-mode');</script>",
             height=0,
         )
+
+    # Réinjecter le CSS si de nouveaux blocs ont été ajoutés
+    CSSManager.inject_all()
 
 
 def fermer_mode_tablette():

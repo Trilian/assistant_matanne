@@ -25,8 +25,6 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-import streamlit as st
-
 
 class Animation(StrEnum):
     """Noms de classes CSS d'animation.
@@ -184,16 +182,14 @@ _INJECTED_KEY = "_animations_css_injected"
 
 
 def injecter_animations() -> None:
-    """Injecte TOUS les @keyframes et classes d'animation une seule fois.
+    """Enregistre les @keyframes et classes d'animation dans le CSSManager.
 
     Appelé automatiquement dans ``initialiser_app()``.
-    L'injection est dédupliquée via ``session_state``.
+    L'injection réelle est faite par ``CSSManager.inject_all()``.
     """
-    if st.session_state.get(_INJECTED_KEY):
-        return
+    from src.ui.css import CSSManager
 
-    st.markdown(f"<style>{_ANIMATION_CSS}</style>", unsafe_allow_html=True)
-    st.session_state[_INJECTED_KEY] = True
+    CSSManager.register("animations", _ANIMATION_CSS)
 
 
 def animer(
