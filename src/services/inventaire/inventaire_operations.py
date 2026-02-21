@@ -219,8 +219,8 @@ class InventaireOperationsMixin:
     # GESTION DES PHOTOS
     # ═══════════════════════════════════════════════════════════
 
-    @avec_session_db
     @avec_gestion_erreurs(default_return={})
+    @avec_session_db
     def ajouter_photo(
         self,
         article_id: int,
@@ -281,8 +281,8 @@ class InventaireOperationsMixin:
             "ancien": old_photo,
         }
 
-    @avec_session_db
     @avec_gestion_erreurs(default_return=False)
+    @avec_session_db
     def supprimer_photo(self, article_id: int, db: Session | None = None) -> bool:
         """Supprime la photo d'un article.
 
@@ -325,8 +325,8 @@ class InventaireOperationsMixin:
 
         return True
 
-    @avec_session_db
     @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
     def obtenir_photo(self, article_id: int, db: Session | None = None) -> dict[str, Any] | None:
         """Récupère les info photo d'un article.
 

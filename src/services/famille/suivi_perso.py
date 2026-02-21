@@ -17,6 +17,7 @@ from src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUT
 from src.core.decorators import avec_session_db
 from src.core.models import FoodLog, GarminActivity, GarminDailySummary, UserProfile
 from src.services.core.events.bus import obtenir_bus
+from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
@@ -258,15 +259,11 @@ class ServiceSuiviPerso:
 # FACTORY
 # ═══════════════════════════════════════════════════════════
 
-_instance: ServiceSuiviPerso | None = None
 
-
+@service_factory("suivi_perso", tags={"famille", "sante"})
 def obtenir_service_suivi_perso() -> ServiceSuiviPerso:
-    """Factory pour le service suivi perso (singleton)."""
-    global _instance
-    if _instance is None:
-        _instance = ServiceSuiviPerso()
-    return _instance
+    """Factory pour le service suivi perso (singleton via ServiceRegistry)."""
+    return ServiceSuiviPerso()
 
 
 # Alias anglais

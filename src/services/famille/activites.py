@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_session_db
 from src.core.models import FamilyActivity
 from src.services.core.events.bus import obtenir_bus
+from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
@@ -162,15 +163,11 @@ class ServiceActivites:
 # FACTORY
 # ═══════════════════════════════════════════════════════════
 
-_instance: ServiceActivites | None = None
 
-
+@service_factory("activites", tags={"famille", "crud"})
 def obtenir_service_activites() -> ServiceActivites:
-    """Factory pour le service activités (singleton)."""
-    global _instance
-    if _instance is None:
-        _instance = ServiceActivites()
-    return _instance
+    """Factory pour le service activités (singleton via ServiceRegistry)."""
+    return ServiceActivites()
 
 
 # Alias anglais

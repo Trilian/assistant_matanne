@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_session_db
 from src.core.models import FamilyPurchase
 from src.services.core.events.bus import obtenir_bus
+from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
@@ -306,15 +307,11 @@ class ServiceAchatsFamille:
 # FACTORY
 # ═══════════════════════════════════════════════════════════
 
-_instance: ServiceAchatsFamille | None = None
 
-
+@service_factory("achats_famille", tags={"famille", "crud"})
 def obtenir_service_achats_famille() -> ServiceAchatsFamille:
-    """Factory pour le service achats famille (singleton)."""
-    global _instance
-    if _instance is None:
-        _instance = ServiceAchatsFamille()
-    return _instance
+    """Factory pour le service achats famille (singleton via ServiceRegistry)."""
+    return ServiceAchatsFamille()
 
 
 # Alias anglais

@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any, Protocol, TypeVar, runtime_checkable
 
 from pydantic import BaseModel
@@ -142,7 +142,7 @@ class CacheableProtocol(Protocol):
 # ═══════════════════════════════════════════════════════════
 
 
-class ServiceStatus(str, Enum):
+class ServiceStatus(StrEnum):
     """Statuts possibles d'un service."""
 
     HEALTHY = "healthy"

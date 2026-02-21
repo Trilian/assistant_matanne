@@ -3,7 +3,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-streamlit = "^1.30.0"
+streamlit = "^1.37.0"
 sqlalchemy = "^2.0.0"
 psycopg2-binary = "^2.9.9"
 beautifulsoup4 = ">=4.12.0"

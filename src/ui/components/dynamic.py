@@ -1,16 +1,41 @@
 """
 UI Components - Dynamic
-Modales et composants interactifs
+
+Composant Modale **DÉPRÉCIÉ** — migrer vers DialogBuilder.
+
+Migration recommandée::
+
+    # Ancien code (déprécié)
+    from src.ui import Modale
+    modal = Modale("delete")
+    if modal.is_showing():
+        if modal.confirm():
+            delete()
+            modal.close()
+
+    # Nouveau code
+    from src.ui import confirm_dialog, ouvrir_dialog
+    if st.button("Supprimer"):
+        ouvrir_dialog("delete")
+    if confirm_dialog("delete", titre="Confirmer ?", on_confirm=delete):
+        st.success("Supprimé")
+
+Voir docs/MIGRATION_UI_V2.md pour le guide complet.
 """
+
+import warnings
 
 import streamlit as st
 
 
 class Modale:
     """
-    Modal simple
+    **DÉPRÉCIÉ** — Utiliser DialogBuilder ou confirm_dialog à la place.
 
-    Usage:
+    Cette classe reste fonctionnelle mais émet un DeprecationWarning.
+    Voir docs/MIGRATION_UI_V2.md pour migrer.
+
+    Usage legacy:
         modal = Modale("delete_confirm")
 
         if modal.is_showing():
@@ -22,6 +47,12 @@ class Modale:
     """
 
     def __init__(self, key: str):
+        warnings.warn(
+            "Modale est déprécié. Utiliser DialogBuilder ou confirm_dialog. "
+            "Voir docs/MIGRATION_UI_V2.md",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self.key = f"modal_{key}"
         if self.key not in st.session_state:
             st.session_state[self.key] = False
@@ -33,7 +64,6 @@ class Modale:
     def close(self):
         """Ferme modal"""
         st.session_state[self.key] = False
-        st.rerun()
 
     def is_showing(self) -> bool:
         """Modal visible ?"""
@@ -44,7 +74,7 @@ class Modale:
         return st.button(label, key=f"{self.key}_yes", type="primary", use_container_width=True)
 
     def cancel(self, label: str = "❌ Annuler"):
-        """Bouton annuler"""
+        """Bouton annuler — ferme la modal si cliqué"""
         if st.button(label, key=f"{self.key}_no", use_container_width=True):
             self.close()
 
@@ -54,3 +84,6 @@ class Modale:
     est_affichee = is_showing
     confirmer = confirm
     annuler = cancel
+
+
+__all__ = ["Modale"]

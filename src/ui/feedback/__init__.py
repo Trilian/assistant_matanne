@@ -4,8 +4,22 @@ Feedback temps réel pour l'utilisateur
 """
 
 # Spinners
-# Progress
+# Progress (legacy)
 from .progress import EtatChargement, SuiviProgression
+from .progress_v2 import (
+    EtapeProgression,
+    EtatProgression,
+    avec_progression,
+    suivi_operation,
+)
+
+# Progress v2 (st.status)
+from .progress_v2 import (
+    EtatChargement as EtatChargementV2,
+)
+from .progress_v2 import (
+    SuiviProgression as SuiviProgressionV2,
+)
 
 # Result → Streamlit
 from .results import (
@@ -31,9 +45,16 @@ __all__ = [
     "spinner_intelligent",
     "indicateur_chargement",
     "chargeur_squelette",
-    # Progress
+    # Progress (legacy)
     "SuiviProgression",
     "EtatChargement",
+    # Progress v2 (st.status)
+    "SuiviProgressionV2",
+    "EtatChargementV2",
+    "EtatProgression",
+    "EtapeProgression",
+    "suivi_operation",
+    "avec_progression",
     # Notifications
     "GestionnaireNotifications",
     "afficher_succes",

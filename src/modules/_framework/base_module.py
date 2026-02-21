@@ -129,8 +129,9 @@ class BaseModule(ABC, Generic[T]):
 
         with col3:
             if self.show_refresh_button:
-                if st.button("🔄", help="Rafraîchir", key=f"{self._get_module_name()}_refresh"):
-                    st.rerun()
+                # Note: Le bouton refresh déclenche un rerun automatique
+                # car st.button() avec callback vide rerender la page
+                st.button("🔄", help="Rafraîchir", key=f"{self._get_module_name()}_refresh")
 
         if show_divider:
             st.divider()

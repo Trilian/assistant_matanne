@@ -65,6 +65,15 @@ from .metrics_row import (
     afficher_stats_cards,
 )
 
+# Streaming (réponses IA progressives)
+from .streaming import (
+    StreamingContainer,
+    safe_write_stream,
+    streaming_placeholder,
+    streaming_response,
+    streaming_section,
+)
+
 # System (santé système, timeline)
 from .system import afficher_sante_systeme, afficher_timeline_activites, indicateur_sante_systeme
 
@@ -119,4 +128,10 @@ __all__ = [
     "indicateur_sante_systeme",
     "afficher_sante_systeme",
     "afficher_timeline_activites",
+    # Streaming
+    "StreamingContainer",
+    "streaming_response",
+    "streaming_section",
+    "streaming_placeholder",
+    "safe_write_stream",
 ]

@@ -5,24 +5,44 @@ Fournit une interface tactile simplifiée pour:
 - Suivre les étapes d'une recette
 - Timer intégré (vrai compte à rebours via ``TimerCuisine``)
 - Navigation par gestes/boutons
+
+Utilise `@ui_fragment` pour des rerenders isolés et performants.
 """
 
 from typing import Any
 
 import streamlit as st
 
+from src.ui.fragments import ui_fragment
 from src.ui.tablet.timer import TimerCuisine
 from src.ui.utils import echapper_html
 
 from .config import ModeTablette, definir_mode_tablette, obtenir_mode_tablette
 
+# ═══════════════════════════════════════════════════════════
+# CALLBACKS — Changement d'état sans st.rerun explicite
+# ═══════════════════════════════════════════════════════════
 
+
+def _avancer_etape(cle: str, delta: int = 1) -> None:
+    """Callback: avance/recule d'une étape."""
+    st.session_state[f"{cle}_etape"] = st.session_state.get(f"{cle}_etape", 0) + delta
+
+
+def _aller_etape(cle: str, etape: int) -> None:
+    """Callback: va directement à une étape."""
+    st.session_state[f"{cle}_etape"] = etape
+
+
+@ui_fragment
 def afficher_vue_recette_cuisine(
     recette: dict[str, Any],
     cle: str = "kitchen_recipe",
 ):
     """
     Affiche une recette en mode cuisine (step-by-step).
+
+    Décoré @ui_fragment pour isoler les rerenders.
 
     Args:
         recette: Dict avec nom, ingredients, instructions
@@ -62,11 +82,14 @@ def afficher_vue_recette_cuisine(
                 with col2:
                     st.metric("🔥 Cuisson", f"{temps_cuisson} min")
 
-            if st.button(
-                "▶️ Commencer", key=f"{cle}_demarrer", type="primary", use_container_width=True
-            ):
-                st.session_state[f"{cle}_etape"] = 1
-                st.rerun()
+            st.button(
+                "▶️ Commencer",
+                key=f"{cle}_demarrer",
+                type="primary",
+                use_container_width=True,
+                on_click=_aller_etape,
+                args=(cle, 1),
+            )
 
         elif etape_courante > total_etapes:
             # Fin de la recette
@@ -74,9 +97,13 @@ def afficher_vue_recette_cuisine(
             st.markdown("Votre plat est prêt. Bon appétit !")
             st.balloons()
 
-            if st.button("🔄 Recommencer", key=f"{cle}_recommencer", use_container_width=True):
-                st.session_state[f"{cle}_etape"] = 0
-                st.rerun()
+            st.button(
+                "🔄 Recommencer",
+                key=f"{cle}_recommencer",
+                use_container_width=True,
+                on_click=_aller_etape,
+                args=(cle, 0),
+            )
 
         else:
             # Étape courante
@@ -124,20 +151,41 @@ def afficher_vue_recette_cuisine(
 
     with col1:
         if etape_courante > 1:
-            if st.button("◀️ Précédent", key=f"{cle}_prec", use_container_width=True):
-                st.session_state[f"{cle}_etape"] = etape_courante - 1
-                st.rerun()
+            st.button(
+                "◀️ Précédent",
+                key=f"{cle}_prec",
+                use_container_width=True,
+                on_click=_avancer_etape,
+                args=(cle, -1),
+            )
 
     with col2:
-        if st.button("❌ Quitter", key=f"{cle}_quitter", use_container_width=True):
-            st.session_state[f"{cle}_etape"] = 0
+        st.button(
+            "❌ Quitter",
+            key=f"{cle}_quitter",
+            use_container_width=True,
+            on_click=_aller_etape,
+            args=(cle, 0),
+        )
 
     with col3:
         if etape_courante >= 1 and etape_courante <= total_etapes:
             btn_label = "✅ Terminé" if etape_courante == total_etapes else "Suivant ▶️"
-            if st.button(btn_label, key=f"{cle}_suiv", type="primary", use_container_width=True):
-                st.session_state[f"{cle}_etape"] = etape_courante + 1
-                st.rerun()
+            st.button(
+                btn_label,
+                key=f"{cle}_suiv",
+                type="primary",
+                use_container_width=True,
+                on_click=_avancer_etape,
+                args=(cle, 1),
+            )
+
+
+def _on_mode_change() -> None:
+    """Callback: changement de mode tablette."""
+    selectionne = st.session_state.get("selecteur_mode")
+    if selectionne is not None:
+        definir_mode_tablette(selectionne)
 
 
 def afficher_selecteur_mode():
@@ -154,18 +202,15 @@ def afficher_selecteur_mode():
             ModeTablette.CUISINE: "👨‍🍳 Cuisine",
         }
 
-        selectionne = st.selectbox(
+        st.selectbox(
             "Choisir le mode",
             options=list(options.keys()),
             format_func=lambda x: options[x],
             index=list(options.keys()).index(mode),
             key="selecteur_mode",
             label_visibility="collapsed",
+            on_change=_on_mode_change,
         )
-
-        if selectionne != mode:
-            definir_mode_tablette(selectionne)
-            st.rerun()
 
         if mode == ModeTablette.CUISINE:
             st.info(

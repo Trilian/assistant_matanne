@@ -1,12 +1,30 @@
 """
-Pipeline - Middleware composable pour services.
+Middleware Pipeline - Pipeline composable pour les appels de service.
 
-Pattern Chain of Responsibility avec middleware composable.
-Chaque middleware peut :
-- Pré-traiter la requête (cache lookup, rate limit check)
-- Post-traiter la réponse (logging, cache save)
-- Court-circuiter le pipeline (cache hit, rate limit exceeded)
-- Transformer les erreurs (exception → Result)
+Remplace l'empilement de @avec_cache + @avec_gestion_erreurs + @avec_session_db
+par un pipeline middleware unique et composable avec ordre garanti correct.
+
+Architecture:
+    Service Method → Logging → RateLimit → Cache → ErrorHandler → Session → Execute
+
+Usage:
+    from src.services.core.middleware import service_method, with_pipeline
+
+    # Option 1: Décorateur configurable
+    @service_method(cache=True, rate_limit=True, session=True)
+    def ma_methode(self, data: dict, db: Session = None) -> Recette:
+        ...
+
+    # Option 2: Preset pipeline
+    @with_pipeline("ia")  # ou "db", "full", "minimal"
+    def autre_methode(self, prompt: str) -> str:
+        ...
+
+Presets disponibles:
+    - "minimal" : Logging + ErrorHandler
+    - "db"      : Logging + ErrorHandler + Session
+    - "ia"      : Logging + RateLimit + Cache + ErrorHandler
+    - "full"    : Logging + RateLimit + Cache + ErrorHandler + Session
 
 STATUS: Infrastructure optionnelle — disponible mais non câblée en production.
 Les services utilisent actuellement BaseService._with_session() et BaseAIService.call_with_cache()
@@ -25,11 +43,17 @@ import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, TypeVar
+from typing import Any, Literal, TypeVar
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+
+# ═══════════════════════════════════════════════════════════
+# TYPES — Presets de pipelines
+# ═══════════════════════════════════════════════════════════
+
+PipelinePreset = Literal["minimal", "db", "ia", "full"]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -504,17 +528,142 @@ def service_method(
     return decorator
 
 
+# ═══════════════════════════════════════════════════════════
+# DÉCORATEUR: @with_pipeline — Utilise un preset nommé
+# ═══════════════════════════════════════════════════════════
+
+# Cache des pipelines par preset (lazy init)
+_preset_pipelines: dict[PipelinePreset, ServicePipeline] = {}
+
+
+def _get_preset_pipeline(preset: PipelinePreset) -> ServicePipeline:
+    """Obtient ou crée un pipeline pour un preset donné."""
+    if preset not in _preset_pipelines:
+        if preset == "minimal":
+            _preset_pipelines[preset] = ServicePipeline.minimal()
+        elif preset == "db":
+            pipeline = ServicePipeline()
+            pipeline.add(LoggingMiddleware())
+            pipeline.add(ErrorHandlerMiddleware())
+            pipeline.add(SessionMiddleware())
+            _preset_pipelines[preset] = pipeline
+        elif preset == "ia":
+            _preset_pipelines[preset] = ServicePipeline.ai_pipeline()
+        elif preset == "full":
+            _preset_pipelines[preset] = ServicePipeline.default()
+        else:
+            raise ValueError(f"Preset inconnu: {preset}")
+    return _preset_pipelines[preset]
+
+
+def with_pipeline(
+    preset: PipelinePreset = "full",
+    cache_ttl: int = 300,
+    cache_key_func: Callable[..., str] | None = None,
+    fallback: Any = None,
+) -> Callable:
+    """
+    Décorateur simplifié utilisant un preset de pipeline nommé.
+
+    Plus simple que @service_method quand on veut juste un preset standard.
+
+    Usage:
+        @with_pipeline("ia")
+        def suggerer(self, prompt: str) -> str:
+            ...
+
+        @with_pipeline("db")
+        def charger(self, id: int, db: Session = None) -> Recette:
+            ...
+
+        @with_pipeline("full", cache_ttl=600, fallback=[])
+        def lister(self, db: Session = None) -> list[Recette]:
+            ...
+
+    Presets:
+        - "minimal" : Logging + ErrorHandler (pas de cache, DB, rate limit)
+        - "db"      : Logging + ErrorHandler + Session DB
+        - "ia"      : Logging + RateLimit + Cache + ErrorHandler
+        - "full"    : Tous les middlewares (Logging + RateLimit + Cache + Error + Session)
+
+    Args:
+        preset: Nom du preset ("minimal", "db", "ia", "full")
+        cache_ttl: TTL cache (si le preset inclut le cache)
+        cache_key_func: Fonction custom pour clé de cache
+        fallback: Valeur de retour en cas d'erreur
+    """
+    pipeline = _get_preset_pipeline(preset)
+
+    # Déterminer les flags selon le preset
+    use_cache = preset in ("ia", "full")
+    use_rate_limit = preset in ("ia", "full")
+    use_session = preset in ("db", "full")
+
+    def decorator(func: Callable[..., T]) -> Callable[..., T]:
+        @functools.wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> T:
+            # Extraire le service_name
+            service_name = ""
+            if args and hasattr(args[0], "service_name"):
+                service_name = args[0].service_name
+            elif args and hasattr(args[0], "__class__"):
+                service_name = args[0].__class__.__name__
+
+            ctx = MiddlewareContext(
+                service_name=service_name,
+                method_name=func.__name__,
+                args=args,
+                kwargs=kwargs,
+                use_cache=use_cache,
+                cache_ttl=cache_ttl,
+                use_rate_limit=use_rate_limit,
+                use_session=use_session,
+                use_logging=True,
+                fallback_value=fallback,
+            )
+
+            if use_cache and cache_key_func:
+                try:
+                    ctx.cache_key = cache_key_func(*args, **kwargs)
+                except Exception as e:
+                    logger.debug("Cache key generation échouée: %s", e)
+
+            return pipeline.execute(func, ctx)
+
+        return wrapper
+
+    return decorator
+
+
+# ═══════════════════════════════════════════════════════════
+# PRESETS — Constantes pour configuration programmatique
+# ═══════════════════════════════════════════════════════════
+
+# Ces constantes permettent de référencer les presets sans chaînes
+PIPELINE_MINIMAL: PipelinePreset = "minimal"
+PIPELINE_DB: PipelinePreset = "db"
+PIPELINE_IA: PipelinePreset = "ia"
+PIPELINE_FULL: PipelinePreset = "full"
+
+
 __all__ = [
     # Core
     "Middleware",
     "MiddlewareContext",
     "ServicePipeline",
+    "PipelinePreset",
     # Middlewares
     "CacheMiddleware",
     "ErrorHandlerMiddleware",
     "LoggingMiddleware",
     "RateLimitMiddleware",
     "SessionMiddleware",
-    # Décorateur
+    # Décorateurs
     "service_method",
+    "with_pipeline",
+    # Presets
+    "PIPELINE_MINIMAL",
+    "PIPELINE_DB",
+    "PIPELINE_IA",
+    "PIPELINE_FULL",
 ]

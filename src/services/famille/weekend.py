@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_session_db
 from src.core.models import WeekendActivity
 from src.services.core.events.bus import obtenir_bus
+from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
@@ -329,15 +330,11 @@ class ServiceWeekend:
 # FACTORY
 # ═══════════════════════════════════════════════════════════
 
-_instance: ServiceWeekend | None = None
 
-
+@service_factory("weekend", tags={"famille", "crud"})
 def obtenir_service_weekend() -> ServiceWeekend:
-    """Factory pour le service weekend (singleton)."""
-    global _instance
-    if _instance is None:
-        _instance = ServiceWeekend()
-    return _instance
+    """Factory pour le service weekend (singleton via ServiceRegistry)."""
+    return ServiceWeekend()
 
 
 # Alias anglais

@@ -19,9 +19,11 @@ from src.ui.utils import echapper_html
 logger = logging.getLogger(__name__)
 
 
+@st.cache_data(ttl=30, show_spinner=False)
 def indicateur_sante_systeme() -> dict:
     """
     Calcule les indicateurs de santé du système.
+    Caché 30s pour éviter les checks répétitifs.
 
     Returns:
         Dict avec status et détails

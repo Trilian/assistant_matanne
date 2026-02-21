@@ -50,6 +50,12 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # ── System (StyleSheet) ────────────────────────────
     "styled": (".system", "styled"),
     "StyleSheet": (".system", "StyleSheet"),
+    # ── CSS Engine (unified) ───────────────────────────
+    "CSSEngine": (".engine", "CSSEngine"),
+    "CSSManager": (".engine", "CSSManager"),
+    "css_class": (".engine", "css_class"),
+    "inject_all": (".engine", "inject_all"),
+    "charger_css": (".engine", "charger_css"),
     # ── Components – Atoms ─────────────────────────────
     "alerte_stock": (".components", "alerte_stock"),
     "badge": (".components", "badge"),
@@ -161,6 +167,46 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "ComponentSnapshot": (".testing", "ComponentSnapshot"),
     "assert_html_contains": (".testing", "assert_html_contains"),
     "assert_html_not_contains": (".testing", "assert_html_not_contains"),
+    # ══════════════════════════════════════════════════════
+    # ✨ NEW MODERN PATTERNS (v2.0) ✨
+    # ══════════════════════════════════════════════════════
+    # ── Dialogs (st.dialog wrapper) ────────────────────
+    "DialogBuilder": (".dialogs", "DialogBuilder"),
+    "confirm_dialog": (".dialogs", "confirm_dialog"),
+    "alert_dialog": (".dialogs", "alert_dialog"),
+    "form_dialog": (".dialogs", "form_dialog"),
+    "ouvrir_dialog": (".dialogs", "ouvrir_dialog"),
+    "fermer_dialog": (".dialogs", "fermer_dialog"),
+    # ── Fragments (st.fragment decorators) ─────────────
+    "ui_fragment": (".fragments", "ui_fragment"),
+    "auto_refresh": (".fragments", "auto_refresh"),
+    "isolated": (".fragments", "isolated"),
+    "lazy_fragment": (".fragments", "lazy"),
+    "cached_fragment": (".fragments", "cached_fragment"),
+    "FragmentGroup": (".fragments", "FragmentGroup"),
+    # ── Layouts (composable) ───────────────────────────
+    "Row": (".layouts", "Row"),
+    "Grid": (".layouts", "Grid"),
+    "Stack": (".layouts", "Stack"),
+    "Gap": (".layouts", "Gap"),
+    "two_columns": (".layouts", "two_columns"),
+    "three_columns": (".layouts", "three_columns"),
+    "metrics_row": (".layouts", "metrics_row"),
+    "card_grid": (".layouts", "card_grid"),
+    "sidebar_main": (".layouts", "sidebar_main"),
+    # ── State / URL Sync ───────────────────────────────
+    "URLState": (".state", "URLState"),
+    "url_state": (".state", "url_state"),
+    "sync_to_url": (".state", "sync_to_url"),
+    "get_url_param": (".state", "get_url_param"),
+    "set_url_param": (".state", "set_url_param"),
+    "pagination_with_url": (".state", "pagination_with_url"),
+    "selectbox_with_url": (".state", "selectbox_with_url"),
+    "tabs_with_url": (".state", "tabs_with_url"),
+    # ── Forms Builder ──────────────────────────────────
+    "FormBuilder": (".forms", "FormBuilder"),
+    "FormResult": (".forms", "FormResult"),
+    "creer_formulaire": (".forms", "creer_formulaire"),
 }
 
 

@@ -29,7 +29,7 @@ import threading
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 from uuid import uuid4
 
@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
-class SpanStatus(str, Enum):
+class SpanStatus(StrEnum):
     """Statuts possibles d'un span."""
 
     UNSET = "unset"  # En cours

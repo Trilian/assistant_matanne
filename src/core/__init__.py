@@ -143,6 +143,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "avec_resilience": (".decorators", "avec_resilience"),
     "avec_session_db": (".decorators", "avec_session_db"),
     "avec_validation": (".decorators", "avec_validation"),
+    "cache_ui": (".decorators", "cache_ui"),
     # Errors (UI)
     "GestionnaireErreurs": (".errors", "GestionnaireErreurs"),
     "afficher_erreur_streamlit": (".errors", "afficher_erreur_streamlit"),

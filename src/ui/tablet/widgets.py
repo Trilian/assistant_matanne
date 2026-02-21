@@ -5,12 +5,39 @@ Fournit des composants avec:
 - Zones tactiles agrandies
 - Gestion des gestes
 - Feedback visuel adapté au touch
+
+Migré pour utiliser `on_click` callbacks (Streamlit 1.37+).
 """
 
 from collections.abc import Callable
 from typing import Any
 
 import streamlit as st
+
+# ═══════════════════════════════════════════════════════════
+# CALLBACKS — Helper functions for state changes
+# ═══════════════════════════════════════════════════════════
+
+
+def _set_selection(key: str, value: Any) -> None:
+    """Callback: met à jour la sélection."""
+    st.session_state[f"{key}_selected"] = value
+
+
+def _adjust_value(key: str, delta: int, min_val: int, max_val: int) -> None:
+    """Callback: ajuste une valeur numérique."""
+    current = st.session_state.get(f"{key}_value", 0)
+    new_val = max(min_val, min(max_val, current + delta))
+    st.session_state[f"{key}_value"] = new_val
+
+
+def _toggle_check(key: str, item: str, on_check: Callable[[str, bool], None] | None) -> None:
+    """Callback: bascule l'état d'une checkbox."""
+    checked = st.session_state.get(f"{key}_checked", {})
+    new_state = not checked.get(item, False)
+    st.session_state[f"{key}_checked"][item] = new_state
+    if on_check:
+        on_check(item, new_state)
 
 
 def bouton_tablette(
@@ -79,9 +106,10 @@ def grille_selection_tablette(
                 key=f"{key}_{i}",
                 use_container_width=True,
                 type="primary" if is_selected else "secondary",
+                on_click=_set_selection,
+                args=(key, opt.get("value")),
             ):
-                st.session_state[f"{key}_selected"] = opt.get("value")
-                st.rerun()
+                pass  # Callback handles state update
 
     return selected
 
@@ -118,10 +146,13 @@ def saisie_nombre_tablette(
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col1:
-        if st.button("➖", key=f"{key}_minus", use_container_width=True):
-            new_val = max(min_value, current - step)
-            st.session_state[f"{key}_value"] = new_val
-            st.rerun()
+        st.button(
+            "➖",
+            key=f"{key}_minus",
+            use_container_width=True,
+            on_click=_adjust_value,
+            args=(key, -step, min_value, max_value),
+        )
 
     with col2:
         st.markdown(
@@ -130,10 +161,13 @@ def saisie_nombre_tablette(
         )
 
     with col3:
-        if st.button("➕", key=f"{key}_plus", use_container_width=True):
-            new_val = min(max_value, current + step)
-            st.session_state[f"{key}_value"] = new_val
-            st.rerun()
+        st.button(
+            "➕",
+            key=f"{key}_plus",
+            use_container_width=True,
+            on_click=_adjust_value,
+            args=(key, step, min_value, max_value),
+        )
 
     return current
 
@@ -163,17 +197,12 @@ def liste_cases_tablette(
         is_checked = checked.get(item, False)
         icon = "✅" if is_checked else "⬜"
 
-        if st.button(
+        st.button(
             f"{icon} {item}",
             key=f"{key}_{item}",
             use_container_width=True,
-        ):
-            new_state = not is_checked
-            st.session_state[f"{key}_checked"][item] = new_state
-
-            if on_check:
-                on_check(item, new_state)
-
-            st.rerun()
+            on_click=_toggle_check,
+            args=(key, item, on_check),
+        )
 
     return checked
