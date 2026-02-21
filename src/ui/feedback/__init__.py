@@ -8,7 +8,13 @@ Feedback temps réel pour l'utilisateur
 from .progress import EtatChargement, SuiviProgression
 
 # Result → Streamlit
-from .results import afficher_resultat, afficher_resultat_toast
+from .results import (
+    afficher_resultat,
+    afficher_resultat_toast,
+    result_avec_spinner,
+    result_ou_none,
+    result_ou_vide,
+)
 from .spinners import chargeur_squelette, indicateur_chargement, spinner_intelligent
 
 # Notifications
@@ -37,4 +43,7 @@ __all__ = [
     # Result → Streamlit
     "afficher_resultat",
     "afficher_resultat_toast",
+    "result_ou_vide",
+    "result_ou_none",
+    "result_avec_spinner",
 ]

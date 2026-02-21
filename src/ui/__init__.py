@@ -2,7 +2,7 @@
 UI - Point d'entrée unifié optimisé (PEP 562 lazy imports).
 
 Architecture claire : core/ components/ feedback/ layout/ tablet/ integrations/
-Design system : tokens/ theme/ registry/ hooks_v2/ primitives/ system/
+Design system : tokens/ theme/ registry/ system/
 
 Tous les symboles sont importés paresseusement via ``__getattr__``.
 Seul le dictionnaire ``_LAZY_IMPORTS`` est chargé à l'import du package.
@@ -47,23 +47,8 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "composant_ui": (".registry", "composant_ui"),
     "obtenir_catalogue": (".registry", "obtenir_catalogue"),
     "rechercher_composants": (".registry", "rechercher_composants"),
-    # ── Primitives (Box, Stack, Text) ──────────────────
-    "Box": (".primitives", "Box"),
-    "BoxProps": (".primitives", "BoxProps"),
-    "Stack": (".primitives", "Stack"),
-    "HStack": (".primitives", "HStack"),
-    "VStack": (".primitives", "VStack"),
-    "Text": (".primitives", "Text"),
-    "TextProps": (".primitives", "TextProps"),
-    # ── System (CVA / TV / StyleSheet) ─────────────────
-    "cva": (".system", "cva"),
-    "tv": (".system", "tv"),
-    "slot": (".system", "slot"),
+    # ── System (StyleSheet) ────────────────────────────
     "styled": (".system", "styled"),
-    "VariantConfig": (".system", "VariantConfig"),
-    "BADGE_VARIANTS": (".system", "BADGE_VARIANTS"),
-    "BUTTON_VARIANTS": (".system", "BUTTON_VARIANTS"),
-    "CARD_SLOTS": (".system", "CARD_SLOTS"),
     "StyleSheet": (".system", "StyleSheet"),
     # ── Components – Atoms ─────────────────────────────
     "alerte_stock": (".components", "alerte_stock"),
@@ -127,27 +112,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "afficher_info": (".feedback", "afficher_info"),
     "afficher_resultat": (".feedback", "afficher_resultat"),
     "afficher_resultat_toast": (".feedback", "afficher_resultat_toast"),
-    # ── Hooks v2 ───────────────────────────────────────
-    "use_state": (".hooks_v2", "use_state"),
-    "use_toggle": (".hooks_v2", "use_toggle"),
-    "use_counter": (".hooks_v2", "use_counter"),
-    "use_list": (".hooks_v2", "use_list"),
-    "use_query": (".hooks_v2", "use_query"),
-    "use_mutation": (".hooks_v2", "use_mutation"),
-    "use_form": (".hooks_v2", "use_form"),
-    "use_service": (".hooks_v2", "use_service"),
-    "use_memo": (".hooks_v2", "use_memo"),
-    "use_effect": (".hooks_v2", "use_effect"),
-    "use_callback": (".hooks_v2", "use_callback"),
-    "use_previous": (".hooks_v2", "use_previous"),
-    "State": (".hooks_v2", "State"),
-    "CounterState": (".hooks_v2", "CounterState"),
-    "ToggleState": (".hooks_v2", "ToggleState"),
-    "ListState": (".hooks_v2", "ListState"),
-    "MutationState": (".hooks_v2", "MutationState"),
-    "QueryResult": (".hooks_v2", "QueryResult"),
-    "QueryStatus": (".hooks_v2", "QueryStatus"),
-    "FormState": (".hooks_v2", "FormState"),
     # ── Integrations ───────────────────────────────────
     "GOOGLE_SCOPES": (".integrations", "GOOGLE_SCOPES"),
     "REDIRECT_URI_LOCAL": (".integrations", "REDIRECT_URI_LOCAL"),

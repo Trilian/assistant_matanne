@@ -60,6 +60,70 @@ class Pipeline:
         self._middlewares: list[Middleware] = []
         self._construit = False
 
+    # ── Factories (pipelines pré-configurées) ────────────────
+
+    @classmethod
+    def defaut(cls) -> Pipeline:
+        """Pipeline standard: Log + Timing + ErrorHandler."""
+        from .builtin import ErrorHandlerMiddleware, LogMiddleware, TimingMiddleware
+
+        return (
+            cls("defaut")
+            .utiliser(LogMiddleware())
+            .utiliser(TimingMiddleware(seuil_ms=500))
+            .utiliser(ErrorHandlerMiddleware())
+            .construire()
+        )
+
+    @classmethod
+    def minimal(cls) -> Pipeline:
+        """Pipeline minimale: Log uniquement."""
+        from .builtin import LogMiddleware
+
+        return cls("minimal").utiliser(LogMiddleware(niveau="DEBUG")).construire()
+
+    @classmethod
+    def ia(cls) -> Pipeline:
+        """Pipeline IA: Log + Timing + RateLimit + Retry + CircuitBreaker + ErrorHandler."""
+        from .builtin import (
+            CircuitBreakerMiddleware,
+            ErrorHandlerMiddleware,
+            LogMiddleware,
+            RateLimitMiddleware,
+            RetryMiddleware,
+            TimingMiddleware,
+        )
+
+        return (
+            cls("ia")
+            .utiliser(LogMiddleware())
+            .utiliser(TimingMiddleware(seuil_ms=2000))
+            .utiliser(RateLimitMiddleware(max_par_minute=30))
+            .utiliser(RetryMiddleware(max_tentatives=2, delai_base=1.0))
+            .utiliser(CircuitBreakerMiddleware(seuil_erreurs=3, delai_reset=120))
+            .utiliser(ErrorHandlerMiddleware())
+            .construire()
+        )
+
+    @classmethod
+    def crud(cls) -> Pipeline:
+        """Pipeline CRUD: Log + Timing + Session + ErrorHandler."""
+        from .builtin import (
+            ErrorHandlerMiddleware,
+            LogMiddleware,
+            SessionMiddleware,
+            TimingMiddleware,
+        )
+
+        return (
+            cls("crud")
+            .utiliser(LogMiddleware())
+            .utiliser(TimingMiddleware(seuil_ms=300))
+            .utiliser(SessionMiddleware())
+            .utiliser(ErrorHandlerMiddleware())
+            .construire()
+        )
+
     # ── Builder (Fluent API) ─────────────────────────────────
 
     def utiliser(self, middleware: Middleware) -> Pipeline:

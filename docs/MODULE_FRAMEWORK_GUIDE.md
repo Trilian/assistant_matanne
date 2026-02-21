@@ -1,6 +1,6 @@
-# Module Framework - Guide de Migration
+# Module Framework - Guide
 
-Ce guide montre comment migrer un module existant vers le nouveau framework modulaire.
+Ce guide montre comment structurer un module avec le framework.
 
 ## Architecture du Framework
 
@@ -10,8 +10,7 @@ src/modules/_framework/
 ├── base_module.py       # BaseModule + décorateur module_app
 ├── error_boundary.py    # Gestion d'erreurs unifiée
 ├── fragments.py         # Fragments auto-refresh et isolation
-├── hooks.py             # Hooks React-like (use_state, use_query...)
-└── state_manager.py     # Gestion d'état avec préfixes
+└── state_manager.py     # Gestion d'état avec préfixes (ModuleState)
 ```
 
 ## Exemple: Migration du Module Inventaire
@@ -53,95 +52,40 @@ def app():
 ```python
 # src/modules/cuisine/inventaire/__init__.py (après)
 from src.modules._framework import (
-    BaseModule,
     error_boundary,
-    use_state,
-    use_query,
     ModuleState,
     init_module_state,
 )
-from src.services.inventaire import get_inventaire_service
+from src.services.inventaire import obtenir_service_inventaire
 
 import streamlit as st
 
 
-class InventaireModule(BaseModule):
-    """Module inventaire avec le nouveau framework."""
-
-    # Configuration du module
-    titre = "📦 Inventaire"
-    description = "Gestion complète de votre stock d'ingrédients"
-
-    def setup(self) -> None:
-        """Initialise l'état du module."""
-        # État géré automatiquement avec préfixes
-        init_module_state("inventaire", {
-            "show_form": False,
-            "refresh_counter": 0,
-            "filtre_categorie": None,
-            "recherche": "",
-        })
-
-    def render(self) -> None:
-        """Rendu principal du module."""
-        # Header avec aide contextuelle
-        self.render_header()
-
-        # Tabs avec gestion d'erreurs automatique
-        tab_stock, tab_alertes = st.tabs(["📊 Stock", "⚠️ Alertes"])
-
-        with tab_stock:
-            with error_boundary(fallback_message="Impossible de charger le stock"):
-                self.render_stock()
-
-        with tab_alertes:
-            with error_boundary(fallback_message="Impossible de charger les alertes"):
-                self.render_alertes()
-
-    def render_stock(self) -> None:
-        """Affiche le stock avec hooks."""
-        state = ModuleState("inventaire")
-        service = get_inventaire_service()
-
-        # Hook use_query pour le chargement des données
-        articles = use_query(
-            "inventaire_articles",
-            fetcher=service.obtenir_articles,
-            stale_time=300,  # 5 minutes
-        )
-
-        if articles.is_loading:
-            st.spinner("Chargement...")
-            return
-
-        if articles.is_error:
-            st.error(f"Erreur: {articles.error}")
-            if st.button("🔄 Réessayer"):
-                articles.refetch()
-            return
-
-        # Filtres avec état géré
-        recherche = use_state("recherche", "", prefix="inventaire")
-        st.text_input("🔍 Rechercher", value=recherche.value, on_change=lambda: recherche.set(st.session_state.get("recherche_input", "")), key="recherche_input")
-
-        # Affichage des articles
-        for article in articles.data or []:
-            if recherche.value.lower() in article.nom.lower():
-                self.render_article_card(article)
-
-    def render_article_card(self, article) -> None:
-        """Carte d'article individuelle."""
-        with st.container():
-            col1, col2, col3 = st.columns([3, 1, 1])
-            col1.write(f"**{article.nom}**")
-            col2.write(f"{article.quantite} {article.unite}")
-            col3.write(f"📅 {article.date_peremption}")
-
-
 def app():
-    """Point d'entrée du module."""
-    module = InventaireModule()
-    module()
+    """Point d'entrée du module inventaire."""
+
+    init_module_state("inventaire", {
+        "show_form": False,
+        "refresh_counter": 0,
+    })
+
+    state = ModuleState("inventaire")
+
+    st.title("📦 Inventaire")
+    st.caption("Gestion complète de votre stock d'ingrédients")
+
+    tab_stock, tab_alertes = st.tabs(["📊 Stock", "⚠️ Alertes"])
+
+    with tab_stock:
+        with error_boundary(titre="Erreur dans l'onglet Stock"):
+            service = obtenir_service_inventaire()
+            articles = service.get_inventaire_complet() or []
+            # Affichage...
+
+    with tab_alertes:
+        with error_boundary(titre="Erreur dans l'onglet Alertes"):
+            alertes = service.get_alertes() or {}
+            # Affichage...
 ```
 
 ## Patterns Clés
@@ -165,28 +109,23 @@ state.toggle("expanded")  # True/False
 state.increment("compteur")
 ```
 
-### 2. Data Fetching avec use_query
+### 2. Data Fetching
 
 ```python
-from src.modules._framework import use_query
+# Appels directs aux services avec gestion d'erreurs
+service = obtenir_service_inventaire()
 
-# Chargement avec cache et états
-result = use_query(
-    "ma_query",
-    fetcher=lambda: service.get_data(),
-    stale_time=300,  # Durée de fraîcheur en secondes
-    enabled=True,    # Peut être conditionnel
-    on_success=lambda data: st.toast("Chargé!"),
-    on_error=lambda e: logger.error(e),
-)
+try:
+    with st.spinner("Chargement..."):
+        articles = service.get_inventaire_complet() or []
+except Exception as e:
+    st.error(f"Erreur: {e}")
+    if st.button("🔄 Réessayer"):
+        st.rerun()
+    return
 
-if result.is_loading:
-    st.spinner("...")
-elif result.is_error:
-    st.error(result.error)
-elif result.is_success:
-    for item in result.data:
-        st.write(item)
+for article in articles:
+    st.write(article)
 ```
 
 ### 3. Error Boundaries
@@ -256,16 +195,16 @@ afficher_metriques_row([
 
 1. **Phase 1**: Ajouter `error_boundary` autour des sections critiques
 2. **Phase 2**: Migrer l'état vers `ModuleState` avec préfixes
-3. **Phase 3**: Remplacer les requêtes DB par `use_query`
+3. **Phase 3**: Utiliser les services directement pour le data fetching
 4. **Phase 4**: Créer une classe `BaseModule` si le module est complexe
 5. **Phase 5**: Extraire les composants réutilisables vers `src/ui/components/`
 
-## Bénéfices Attendus
+## Bénéfices
 
 | Aspect            | Avant                     | Après                       |
 | ----------------- | ------------------------- | --------------------------- |
 | Gestion d'erreurs | Try/except partout        | `error_boundary` centralisé |
 | État              | `st.session_state` direct | `ModuleState` avec préfixes |
-| Data fetching     | Code dupliqué             | `use_query` avec cache      |
+| Data fetching     | Code dupliqué             | Services directs + spinner  |
 | Résilience        | Crash complet             | Fallback gracieux           |
-| Testabilité       | Difficile                 | Hooks mockables             |
+| Testabilité       | Difficile                 | Services mockables          |

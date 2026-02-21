@@ -123,28 +123,11 @@ class TestLazyBarrel:
         assert Espacement.MD is not None
         assert Variante.SUCCESS is not None
 
-    def test_lazy_import_primitives(self):
-        """Les primitives sont importables via le barrel."""
-        from src.ui import Box, Text, VStack
-
-        assert callable(Box)
-        assert callable(Text)
-        assert callable(VStack)
-
     def test_lazy_import_system(self):
-        """Le système CVA est importable via le barrel."""
-        from src.ui import BADGE_VARIANTS, StyleSheet, cva
+        """Le système StyleSheet est importable via le barrel."""
+        from src.ui import StyleSheet
 
-        assert callable(cva)
         assert StyleSheet is not None
-        assert BADGE_VARIANTS is not None
-
-    def test_lazy_import_hooks(self):
-        """Les hooks v2 sont importables via le barrel."""
-        from src.ui import use_memo, use_state
-
-        assert callable(use_state)
-        assert callable(use_memo)
 
     def test_all_exports_match_lazy_imports(self):
         """__all__ correspond exactement aux clés de _LAZY_IMPORTS."""

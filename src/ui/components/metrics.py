@@ -1,7 +1,7 @@
 """
 Cartes métriques avancées pour le tableau de bord.
 
-Implémentées avec Box/Text primitives et StyleSheet pour la déduplication CSS.
+Implémentées avec StyleSheet pour la déduplication CSS.
 
 Fournit des composants pour afficher:
 - Métriques avec delta
@@ -15,8 +15,6 @@ from typing import Any
 
 import streamlit as st
 
-from src.ui.primitives.box import Box
-from src.ui.primitives.text import Text
 from src.ui.registry import composant_ui
 from src.ui.system.css import StyleSheet
 from src.ui.tokens import Couleur, Espacement, Rayon, Typographie, gradient_subtil
@@ -43,9 +41,6 @@ def carte_metrique_avancee(
     """
     Carte métrique stylisée.
 
-    Utilise ``StyleSheet`` pour le conteneur (déduplication) et ``Text``
-    pour l'échappement automatique du contenu.
-
     Args:
         titre: Titre de la métrique
         valeur: Valeur principale
@@ -56,7 +51,6 @@ def carte_metrique_avancee(
         couleur: Couleur d'accent
         lien_module: Module vers lequel naviguer
     """
-    # Conteneur avec border-left (hors BoxProps)
     container_cls = StyleSheet.create_class(
         {
             "background": gradient_subtil(couleur),
@@ -64,6 +58,14 @@ def carte_metrique_avancee(
             "border-radius": Rayon.LG,
             "padding": "1.2rem",
             "margin-bottom": Espacement.SM,
+        }
+    )
+
+    inner_cls = StyleSheet.create_class(
+        {
+            "display": "flex",
+            "justify-content": "space-between",
+            "align-items": "flex-start",
         }
     )
 
@@ -78,34 +80,31 @@ def carte_metrique_avancee(
         )
 
     # Sous-titre optionnel
-    sous_titre_html = (
-        Text(
-            sous_titre,
-            size="xs",
-            color=Couleur.TEXT_SECONDARY,
-            tag="p",
-        ).html()
-        if sous_titre
-        else ""
-    )
+    sous_titre_html = ""
+    if sous_titre:
+        sous_titre_html = (
+            f'<p style="font-size: {Typographie.CAPTION}; color: {Couleur.TEXT_SECONDARY}; '
+            f'margin: 0.2rem 0 0 0;">{echapper_html(sous_titre)}</p>'
+        )
 
-    # Contenu structuré
-    inner = Box(display="flex", justify="between", align="start")
-    inner.child(
-        f"<div>"
-        f'<p style="color: {Couleur.TEXT_SECONDARY}; margin: 0 0 0.3rem 0; font-size: 0.9rem;">'
-        f"{echapper_html(titre)}</p>"
-        f'<h2 style="margin: 0; color: {Couleur.TEXT_PRIMARY};">'
-        f"{echapper_html(str(valeur))}</h2>"
-        f"{delta_html}"
-        f"{sous_titre_html}"
-        f"</div>"
-    )
-    inner.child(f'<span style="font-size: {Typographie.ICON_LG};">{echapper_html(icone)}</span>')
+    safe_titre = echapper_html(titre)
+    safe_valeur = echapper_html(str(valeur))
+    safe_icone = echapper_html(icone)
 
     StyleSheet.inject()
     st.markdown(
-        f'<div class="{container_cls}">{inner.html()}</div>',
+        f'<div class="{container_cls}">'
+        f'<div class="{inner_cls}">'
+        f"<div>"
+        f'<p style="color: {Couleur.TEXT_SECONDARY}; margin: 0 0 0.3rem 0; font-size: 0.9rem;">'
+        f"{safe_titre}</p>"
+        f'<h2 style="margin: 0; color: {Couleur.TEXT_PRIMARY};">{safe_valeur}</h2>'
+        f"{delta_html}"
+        f"{sous_titre_html}"
+        f"</div>"
+        f'<span style="font-size: {Typographie.ICON_LG};">{safe_icone}</span>'
+        f"</div>"
+        f"</div>",
         unsafe_allow_html=True,
     )
 
@@ -121,8 +120,6 @@ def carte_metrique_avancee(
 def widget_jules_apercu(date_naissance: date | None = None):
     """Widget d'aperçu de Jules pour le dashboard.
 
-    Utilise ``Box`` pour le conteneur gradient centré.
-
     Args:
         date_naissance: Date de naissance de Jules. Si None, utilise la
             valeur par défaut (15/06/2024).
@@ -134,23 +131,26 @@ def widget_jules_apercu(date_naissance: date | None = None):
     age_jours = (aujourd_hui - naissance).days
     age_mois = age_jours // 30
 
-    container = Box(
-        bg=f"linear-gradient(135deg, {Couleur.BG_JULES_START}, {Couleur.BG_JULES_END})",
-        radius=Rayon.XL,
-        p=Espacement.LG,
-        text_align="center",
+    container_cls = StyleSheet.create_class(
+        {
+            "background": f"linear-gradient(135deg, {Couleur.BG_JULES_START}, {Couleur.BG_JULES_END})",
+            "border-radius": Rayon.XL,
+            "padding": Espacement.LG,
+            "text-align": "center",
+        }
     )
-    container.child(f'<span style="font-size: {Typographie.ICON_XL};">👶</span>')
-    container.child(Text("Jules", size="2xl", weight="bold", mt=Espacement.SM, tag="h3").html())
-    container.child(
-        Text(
-            f"{age_mois} mois",
-            weight="medium",
-            color=Couleur.JULES_PRIMARY,
-            tag="p",
-        ).html()
+
+    StyleSheet.inject()
+    st.markdown(
+        f'<div class="{container_cls}">'
+        f'<span style="font-size: {Typographie.ICON_XL};">👶</span>'
+        f'<h3 style="font-size: {Typographie.H3}; font-weight: bold; '
+        f'margin-top: {Espacement.SM};">Jules</h3>'
+        f'<p style="font-weight: 500; color: {Couleur.JULES_PRIMARY};">'
+        f"{age_mois} mois</p>"
+        f"</div>",
+        unsafe_allow_html=True,
     )
-    container.show()
 
 
 @composant_ui(
@@ -160,9 +160,6 @@ def widget_jules_apercu(date_naissance: date | None = None):
 )
 def widget_meteo_jour(donnees_meteo: dict | None = None):
     """Widget météo simplifié.
-
-    Utilise ``Box`` pour le conteneur gradient centré et ``Text``
-    pour l'échappement automatique.
 
     Args:
         donnees_meteo: Dict avec les clés 'temp', 'condition', 'conseil'.
@@ -177,24 +174,25 @@ def widget_meteo_jour(donnees_meteo: dict | None = None):
     icone_meteo = condition_parts[0] if condition_parts else "🌤️"
 
     safe_temp = echapper_html(str(meteo.get("temp", "")))
+    safe_conseil = echapper_html(str(meteo.get("conseil", "")))
 
-    container = Box(
-        bg=f"linear-gradient(135deg, {Couleur.BG_METEO_START}, {Couleur.BG_METEO_END})",
-        radius=Rayon.LG,
-        p=Espacement.MD,
-        text_align="center",
+    container_cls = StyleSheet.create_class(
+        {
+            "background": f"linear-gradient(135deg, {Couleur.BG_METEO_START}, {Couleur.BG_METEO_END})",
+            "border-radius": Rayon.LG,
+            "padding": Espacement.MD,
+            "text-align": "center",
+        }
     )
-    container.child(f'<span style="font-size: {Typographie.ICON_MD};">{icone_meteo}</span>')
-    container.child(
+
+    StyleSheet.inject()
+    st.markdown(
+        f'<div class="{container_cls}">'
+        f'<span style="font-size: {Typographie.ICON_MD};">{icone_meteo}</span>'
         f'<p style="margin: 0.3rem 0; font-size: {Typographie.H3}; font-weight: 600;">'
         f"{safe_temp}°C</p>"
+        f'<small style="font-size: {Typographie.CAPTION}; color: {Couleur.TEXT_SECONDARY};">'
+        f"{safe_conseil}</small>"
+        f"</div>",
+        unsafe_allow_html=True,
     )
-    container.child(
-        Text(
-            str(meteo.get("conseil", "")),
-            size="xs",
-            color=Couleur.TEXT_SECONDARY,
-            tag="small",
-        ).html()
-    )
-    container.show()

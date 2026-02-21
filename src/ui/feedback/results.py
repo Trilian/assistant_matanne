@@ -101,7 +101,83 @@ def afficher_resultat_toast(
     return None
 
 
+def result_ou_vide(result: Any, default: Any = None) -> Any:
+    """Extrait la valeur du Result ou retourne un défaut (sans feedback UI).
+
+    Utile dans les templates où on veut silencieusement ignorer les erreurs.
+
+    Usage::
+        recettes = result_ou_vide(service.lister(), default=[])
+    """
+    if result is not None and result.is_success:
+        return result.value
+    return default if default is not None else None
+
+
+def result_ou_none(result: Any) -> Any | None:
+    """Raccourci: extrait la valeur ou None (log l'erreur silencieusement).
+
+    Usage::
+        recette = result_ou_none(service.obtenir(42))
+    """
+    if result is not None and result.is_success:
+        return result.value
+
+    if result is not None and result.is_failure:
+        error = result.error
+        msg = getattr(error, "message", str(error))
+        logger.debug(f"Result silencieux (None): {msg}")
+
+    return None
+
+
+def result_avec_spinner(
+    fn: Any,
+    message: str = "Chargement...",
+    succes_msg: str = "",
+) -> Any | None:
+    """Exécute une fn retournant un Result avec un spinner Streamlit.
+
+    Affiche automatiquement le spinner pendant l'exécution et le feedback
+    résultat après.
+
+    Usage::
+        recette = result_avec_spinner(
+            lambda: service.charger_recette(42),
+            message="Chargement de la recette...",
+            succes_msg="Recette chargée !"
+        )
+
+    Args:
+        fn: Callable retournant un Result
+        message: Message du spinner
+        succes_msg: Message succès (si vide, pas de feedback succès)
+
+    Returns:
+        La valeur si succès, None sinon
+    """
+    with st.spinner(message):
+        result = fn()
+
+    if result is None:
+        return None
+
+    if result.is_success:
+        if succes_msg:
+            st.success(succes_msg)
+        return result.value
+
+    # Failure
+    error = result.error
+    msg = getattr(error, "message_utilisateur", str(error))
+    st.error(f"❌ {msg}")
+    return None
+
+
 __all__ = [
     "afficher_resultat",
     "afficher_resultat_toast",
+    "result_ou_vide",
+    "result_ou_none",
+    "result_avec_spinner",
 ]

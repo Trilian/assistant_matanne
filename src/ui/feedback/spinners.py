@@ -7,8 +7,6 @@ from datetime import datetime
 
 import streamlit as st
 
-from src.ui.primitives.box import Box
-from src.ui.primitives.text import Text
 from src.ui.tokens import Couleur, Espacement, Rayon, Typographie
 from src.ui.utils import echapper_html
 
@@ -53,17 +51,20 @@ def spinner_intelligent(
 
 def indicateur_chargement(message: str = "Chargement..."):
     """
-    Indicateur de chargement simple
-
-    Utilise ``Box`` pour le conteneur centré et ``Text`` pour l'échappement.
+    Indicateur de chargement simple.
 
     Usage:
         indicateur_chargement("Chargement des données...")
     """
-    container = Box(text_align="center", p=Espacement.XL)
-    container.child(f'<div style="font-size: {Typographie.ICON_MD};">\u23f3</div>')
-    container.child(Text(message, color=Couleur.TEXT_SECONDARY, mt=Espacement.SM, tag="div").html())
-    container.show()
+    safe_msg = echapper_html(message)
+    st.markdown(
+        f'<div style="text-align: center; padding: {Espacement.XL};">'
+        f'<div style="font-size: {Typographie.ICON_MD};">\u23f3</div>'
+        f'<div style="color: {Couleur.TEXT_SECONDARY}; margin-top: {Espacement.SM};">'
+        f"{safe_msg}</div>"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
 
 
 def chargeur_squelette(lignes: int = 3):

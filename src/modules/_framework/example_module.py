@@ -1,12 +1,11 @@
 """
-Exemple de module migré vers le framework moderne.
+Exemple de module utilisant le framework.
 
 Ce fichier est un template démontrant l'utilisation de:
-- BaseModule pour structurer le module
 - error_boundary pour la gestion d'erreurs
-- use_state/use_query pour l'état et le data fetching
 - ModuleState pour l'état avec préfixes
 - Composants UI réutilisables (FilterConfig, MetricConfig)
+- auto_refresh_fragment pour le temps réel
 
 Usage: Copier ce template et l'adapter pour votre module.
 """
@@ -22,14 +21,9 @@ from src.modules._framework import (
     avec_gestion_erreurs_ui,
     error_boundary,
     init_module_state,
-    use_memo,
-    use_query,
-    use_state,
 )
 from src.ui.components import (
-    FilterConfig,
     MetricConfig,
-    afficher_barre_filtres,
     afficher_metriques_row,
 )
 
@@ -156,34 +150,15 @@ def app() -> None:
     # Service via factory
     service = get_article_service()
 
-    # Chargement des données avec use_query
-    articles_query = use_query(
-        "exemple_articles",
-        fetcher=service.obtenir_articles,
-        stale_time=300,  # Cache 5 minutes
-    )
-
-    categories_query = use_query(
-        "exemple_categories",
-        fetcher=service.obtenir_categories,
-        stale_time=600,  # Cache 10 minutes
-    )
-
-    # Gestion du chargement
-    if articles_query.is_loading or categories_query.is_loading:
-        with st.spinner("Chargement des données..."):
-            st.info("Récupération en cours...")
-        return
-
-    # Gestion des erreurs
-    if articles_query.is_error:
-        st.error(f"Erreur de chargement: {articles_query.error}")
+    # Chargement des données directement
+    try:
+        articles = service.obtenir_articles()
+        categories = service.obtenir_categories()
+    except Exception as e:
+        st.error(f"Erreur de chargement: {e}")
         if st.button("🔄 Réessayer"):
-            articles_query.refetch()
+            st.rerun()
         return
-
-    articles = articles_query.data or []
-    categories = categories_query.data or []
 
     # Section métriques avec error boundary
     with error_boundary(fallback_message="Erreur d'affichage des métriques"):
@@ -196,30 +171,26 @@ def app() -> None:
 
     st.divider()
 
-    # Filtres avec composant réutilisable
-    filtres = afficher_barre_filtres(
-        key="exemple_filtres",
-        recherche=True,
-        filtres=[
-            FilterConfig(
-                key="categorie",
-                label="Catégorie",
-                options=categories,
-            ),
-        ],
-    )
+    # Filtres avec Streamlit natif
+    state = ModuleState("exemple")
 
-    # Filtrage des articles avec use_memo pour performance
-    articles_filtres = use_memo(
-        "articles_filtres",
-        lambda: [
-            a
-            for a in articles
-            if (not filtres["recherche"] or filtres["recherche"].lower() in a.nom.lower())
-            and (not filtres["categorie"] or filtres["categorie"] == a.categorie)
-        ],
-        deps=[filtres["recherche"], filtres["categorie"], len(articles)],
-    )
+    col_f1, col_f2 = st.columns(2)
+    with col_f1:
+        recherche = st.text_input("🔍 Rechercher", key="exemple_recherche")
+    with col_f2:
+        categorie_filtre = st.selectbox(
+            "🏷️ Catégorie",
+            options=[""] + categories,
+            key="exemple_categorie",
+        )
+
+    # Filtrage des articles
+    articles_filtres = [
+        a
+        for a in articles
+        if (not recherche or recherche.lower() in a.nom.lower())
+        and (not categorie_filtre or categorie_filtre == a.categorie)
+    ]
 
     # Affichage de la liste avec gestion d'erreurs
     st.subheader(f"📋 Articles ({len(articles_filtres)} résultats)")
@@ -231,12 +202,13 @@ def app() -> None:
             with error_boundary(fallback_message=f"Erreur article {article.id}"):
                 afficher_article_card(article)
 
-    # Section actions avec état local
+    # Section actions avec ModuleState
     st.divider()
-    show_actions, set_show_actions = use_state("show_actions", False, prefix="exemple")
+    show_actions = state.get("show_actions", False)
 
     if st.button("⚙️ Actions avancées", key="toggle_actions"):
-        set_show_actions(not show_actions)
+        state.set("show_actions", not show_actions)
+        st.rerun()
 
     if show_actions:
         with st.container(border=True):

@@ -92,10 +92,29 @@ class RetryPolicy(Policy[T]):
         return Err(derniere_exception or Exception("Échec après toutes les tentatives"))
 
 
+# Shared executor pour TimeoutPolicy (évite la création par appel)
+_TIMEOUT_EXECUTOR: ThreadPoolExecutor | None = None
+_TIMEOUT_EXECUTOR_LOCK = threading.Lock()
+
+
+def _get_timeout_executor() -> ThreadPoolExecutor:
+    """Retourne l'executor partagé pour TimeoutPolicy (lazy singleton)."""
+    global _TIMEOUT_EXECUTOR
+    if _TIMEOUT_EXECUTOR is None:
+        with _TIMEOUT_EXECUTOR_LOCK:
+            if _TIMEOUT_EXECUTOR is None:
+                _TIMEOUT_EXECUTOR = ThreadPoolExecutor(
+                    max_workers=4, thread_name_prefix="timeout-policy"
+                )
+    return _TIMEOUT_EXECUTOR
+
+
 @dataclass
 class TimeoutPolicy(Policy[T]):
     """
     Politique de timeout.
+
+    Utilise un ThreadPoolExecutor partagé pour éviter la surcharge.
 
     Args:
         timeout_secondes: Durée max d'exécution (défaut: 30.0)
@@ -108,16 +127,16 @@ class TimeoutPolicy(Policy[T]):
     timeout_secondes: float = 30.0
 
     def executer(self, fn: Callable[[], T]) -> Result[T, Exception]:
-        with ThreadPoolExecutor(max_workers=1) as executor:
-            future = executor.submit(fn)
-            try:
-                result = future.result(timeout=self.timeout_secondes)
-                return Ok(result)
-            except FuturesTimeoutError:
-                future.cancel()
-                return Err(TimeoutError(f"Timeout après {self.timeout_secondes}s"))
-            except Exception as e:
-                return Err(e)
+        executor = _get_timeout_executor()
+        future = executor.submit(fn)
+        try:
+            result = future.result(timeout=self.timeout_secondes)
+            return Ok(result)
+        except FuturesTimeoutError:
+            future.cancel()
+            return Err(TimeoutError(f"Timeout après {self.timeout_secondes}s"))
+        except Exception as e:
+            return Err(e)
 
 
 @dataclass
@@ -224,7 +243,7 @@ class PolicyComposee(Policy[T]):
     policies: list[Policy[Any]]
 
     def executer(self, fn: Callable[[], T]) -> Result[T, Exception]:
-        """Exécute la chaîne de policies."""
+        """Exécute la chaîne de policies (préserve les tracebacks)."""
         if not self.policies:
             try:
                 return Ok(fn())
@@ -236,7 +255,10 @@ class PolicyComposee(Policy[T]):
             def wrapper() -> T:
                 result = p.executer(f)
                 if result.is_err():
-                    raise result.err()  # type: ignore
+                    exc = result.err()
+                    if isinstance(exc, Exception):
+                        raise exc from exc  # préserve le traceback original
+                    raise RuntimeError(str(exc))
                 return result.unwrap()
 
             return wrapper

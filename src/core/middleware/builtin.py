@@ -13,6 +13,7 @@ Chaque middleware est autonome et configurable:
 from __future__ import annotations
 
 import logging
+import threading
 import time
 from collections.abc import Callable
 from typing import Any
@@ -287,9 +288,9 @@ class CacheMiddleware(Middleware):
         self._cache_none = cache_none
 
     def traiter(self, ctx: Contexte, suivant: NextFn) -> Any:
-        from src.core.caching import CacheMultiNiveau
+        from src.core.caching import obtenir_cache
 
-        cache = CacheMultiNiveau()
+        cache = obtenir_cache()
         _MISS = object()
 
         # Générer la clé
@@ -342,49 +343,165 @@ class CircuitBreakerMiddleware(Middleware):
         self._seuil = seuil_erreurs
         self._delai_reset = delai_reset
         self._exceptions = exceptions
+        self._lock = threading.RLock()
         self._erreurs = 0
         self._dernier_echec: float = 0
         self._etat: str = "FERME"
 
     def traiter(self, ctx: Contexte, suivant: NextFn) -> Any:
-        ctx.metadata["circuit_breaker_etat"] = self._etat
+        with self._lock:
+            ctx.metadata["circuit_breaker_etat"] = self._etat
 
-        # Circuit ouvert — rejeter immédiatement
-        if self._etat == "OUVERT":
-            if time.time() - self._dernier_echec > self._delai_reset:
-                self._etat = "SEMI_OUVERT"
-                logger.info(f"[CB] {ctx.operation}: passage en SEMI_OUVERT " f"(test de reprise)")
-            else:
-                raise RuntimeError(
-                    f"Circuit ouvert pour '{ctx.operation}'. "
-                    f"Retry dans {self._delai_reset - (time.time() - self._dernier_echec):.0f}s"
-                )
+            # Circuit ouvert — rejeter immédiatement
+            if self._etat == "OUVERT":
+                if time.time() - self._dernier_echec > self._delai_reset:
+                    self._etat = "SEMI_OUVERT"
+                    logger.info(f"[CB] {ctx.operation}: passage en SEMI_OUVERT (test de reprise)")
+                else:
+                    raise RuntimeError(
+                        f"Circuit ouvert pour '{ctx.operation}'. "
+                        f"Retry dans "
+                        f"{self._delai_reset - (time.time() - self._dernier_echec):.0f}s"
+                    )
 
         try:
             result = suivant(ctx)
 
             # Reset en cas de succès
-            if self._etat == "SEMI_OUVERT":
-                logger.info(f"[CB] {ctx.operation}: circuit refermé (succès)")
-            self._etat = "FERME"
-            self._erreurs = 0
+            with self._lock:
+                if self._etat == "SEMI_OUVERT":
+                    logger.info(f"[CB] {ctx.operation}: circuit refermé (succès)")
+                self._etat = "FERME"
+                self._erreurs = 0
             return result
 
         except self._exceptions as e:
-            self._erreurs += 1
-            self._dernier_echec = time.time()
+            with self._lock:
+                self._erreurs += 1
+                self._dernier_echec = time.time()
 
-            if self._erreurs >= self._seuil:
-                self._etat = "OUVERT"
-                logger.error(
-                    f"[CB] {ctx.operation}: circuit OUVERT après "
-                    f"{self._erreurs} erreurs consécutives"
-                )
-            elif self._etat == "SEMI_OUVERT":
-                self._etat = "OUVERT"
-                logger.warning(
-                    f"[CB] {ctx.operation}: test de reprise échoué, " f"retour en OUVERT"
-                )
+                if self._erreurs >= self._seuil:
+                    self._etat = "OUVERT"
+                    logger.error(
+                        f"[CB] {ctx.operation}: circuit OUVERT après "
+                        f"{self._erreurs} erreurs consécutives"
+                    )
+                elif self._etat == "SEMI_OUVERT":
+                    self._etat = "OUVERT"
+                    logger.warning(
+                        f"[CB] {ctx.operation}: test de reprise échoué, retour en OUVERT"
+                    )
 
             ctx.error = e
             raise
+
+
+# ═══════════════════════════════════════════════════════════
+# ERROR HANDLER — Conversion exceptions → Result
+# ═══════════════════════════════════════════════════════════
+
+
+class ErrorHandlerMiddleware(Middleware):
+    """
+    Middleware de conversion d'exceptions en Result.
+
+    Capture les exceptions et les convertit en Err(ErrorInfo) via
+    la classification automatique. Garantit que la pipeline ne lève
+    jamais — retourne toujours un Result.
+
+    Args:
+        message_utilisateur: Message par défaut pour l'UI
+    """
+
+    def __init__(self, message_utilisateur: str = ""):
+        self._message_utilisateur = message_utilisateur
+
+    def traiter(self, ctx: Contexte, suivant: NextFn) -> Any:
+        from src.core.result import from_exception
+
+        try:
+            return suivant(ctx)
+        except Exception as e:
+            ctx.error = e
+            result = from_exception(e, source=ctx.operation)
+            if self._message_utilisateur:
+                from src.core.result import ErrorInfo
+
+                error_info = result.err()
+                if isinstance(error_info, ErrorInfo):
+                    result = from_exception(e, source=ctx.operation)
+            logger.error(f"[ERROR_HANDLER] {ctx.operation}: {type(e).__name__}: {e}")
+            ctx.result = result
+            return result
+
+
+# ═══════════════════════════════════════════════════════════
+# RATE LIMIT — Limitation de débit
+# ═══════════════════════════════════════════════════════════
+
+
+class RateLimitMiddleware(Middleware):
+    """
+    Middleware de limitation de débit (token bucket simplifié).
+
+    Rejette les requêtes excédentaires avec une erreur explicite.
+
+    Args:
+        max_par_minute: Nombre maximum d'appels par minute (default: 60)
+    """
+
+    def __init__(self, max_par_minute: int = 60):
+        self._max = max_par_minute
+        self._lock = threading.RLock()
+        self._appels: list[float] = []
+
+    def traiter(self, ctx: Contexte, suivant: NextFn) -> Any:
+        maintenant = time.time()
+
+        with self._lock:
+            # Nettoyer les appels de plus d'une minute
+            self._appels = [t for t in self._appels if maintenant - t < 60]
+
+            if len(self._appels) >= self._max:
+                from src.core.result import ErrorCode, failure
+
+                logger.warning(f"[RATE_LIMIT] {ctx.operation}: {self._max} appels/min dépassé")
+                return failure(
+                    ErrorCode.RATE_LIMITED,
+                    f"Limite de débit atteinte pour '{ctx.operation}' " f"({self._max}/min)",
+                    message_utilisateur="Trop de requêtes. Réessayez dans un instant.",
+                )
+
+            self._appels.append(maintenant)
+
+        ctx.metadata["rate_limit_restant"] = self._max - len(self._appels)
+        return suivant(ctx)
+
+
+# ═══════════════════════════════════════════════════════════
+# SESSION — Injection de session DB
+# ═══════════════════════════════════════════════════════════
+
+
+class SessionMiddleware(Middleware):
+    """
+    Middleware d'injection de session de base de données.
+
+    Ouvre une session SQLAlchemy dans ``ctx.metadata['session']``
+    et assure le commit/rollback automatique.
+    """
+
+    def traiter(self, ctx: Contexte, suivant: NextFn) -> Any:
+        from src.core.db import obtenir_contexte_db
+
+        with obtenir_contexte_db() as session:
+            ctx.metadata["session"] = session
+            try:
+                result = suivant(ctx)
+                session.commit()
+                return result
+            except Exception:
+                session.rollback()
+                raise
+            finally:
+                ctx.metadata.pop("session", None)

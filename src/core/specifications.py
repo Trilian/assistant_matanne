@@ -282,6 +282,66 @@ def paginer(page: int, par_page: int = 20) -> Spec:
     )
 
 
+# ═══════════════════════════════════════════════════════════
+# SPÉCIFICATIONS DOMAINE
+# ═══════════════════════════════════════════════════════════
+
+
+def avec_chargement(*relations: str) -> Spec:
+    """
+    Spécification: eager loading de relations.
+
+    Usage:
+        spec = avec_chargement("ingredients", "categories")
+    """
+    from sqlalchemy.orm import joinedload
+
+    def appliquer(q: Select, m: type) -> Select:
+        for rel in relations:
+            rel_attr = getattr(m, rel, None)
+            if rel_attr is not None:
+                q = q.options(joinedload(rel_attr))
+        return q
+
+    return Spec(appliquer, description=f"LOAD {', '.join(relations)}")
+
+
+def par_date_range(
+    nom_champ: str,
+    debut: Any,
+    fin: Any,
+) -> Spec:
+    """
+    Spécification: filtrage par plage de dates.
+
+    Usage:
+        cette_semaine = par_date_range("created_at", lundi, dimanche)
+    """
+    return Spec(
+        lambda q, m: q.where(getattr(m, nom_champ).between(debut, fin)),
+        description=f"{nom_champ} BETWEEN {debut} AND {fin}",
+    )
+
+
+def actif() -> Spec:
+    """
+    Spécification: filtre les entités actives (actif=True).
+
+    Convention: le modèle doit avoir une colonne ``actif``.
+    """
+    return par_champ("actif", True)
+
+
+def recent(nom_champ: str = "created_at", n: int = 10) -> Spec:
+    """
+    Spécification: les N entités les plus récentes.
+
+    Usage:
+        dernieres = recent("date_ajout", 5)
+    """
+    return ordre_par(nom_champ, descendant=True) & limite(n)
+
+
 __all__ = [
     "Specification",
     "Spec",
@@ -295,4 +355,9 @@ __all__ = [
     "ordre_par",
     "limite",
     "paginer",
+    # Nouvelles specs domaine
+    "avec_chargement",
+    "par_date_range",
+    "actif",
+    "recent",
 ]

@@ -2,8 +2,8 @@
 UI Components - Atoms (composants de base)
 badge, etat_vide, carte_metrique, separateur, boite_info, boule_loto
 
-Implémentés avec les primitives Box/Text et le système CVA
-pour la déduplication CSS et l'échappement automatique.
+Implémentés avec StyleSheet pour la déduplication CSS
+et échappement HTML manuel pour la sécurité XSS.
 
 Note: Pour des métriques plus avancées avec icônes et liens,
 utilisez carte_metrique_avancee depuis src.ui.components.metrics
@@ -13,11 +13,8 @@ from __future__ import annotations
 
 import streamlit as st
 
-from src.ui.primitives.box import Box
-from src.ui.primitives.text import Text
 from src.ui.registry import composant_ui
 from src.ui.system.css import StyleSheet
-from src.ui.system.variants import BADGE_VARIANTS, cva
 from src.ui.tokens import (
     Couleur,
     Espacement,
@@ -29,8 +26,23 @@ from src.ui.tokens import (
 )
 from src.ui.utils import echapper_html
 
-# ── Générateur CVA pré-compilé ─────────────────────────────
-_badge_style = cva(BADGE_VARIANTS)
+# ── Styles de badges pré-définis par variante ─────────────
+_BADGE_BASE = (
+    "display: inline-flex; align-items: center; "
+    f"padding: {Espacement.XS} 0.75rem; "
+    f"border-radius: {Rayon.PILL}; "
+    f"font-size: {Typographie.BODY_SM}; font-weight: 600; "
+    "line-height: 1.4;"
+)
+
+_BADGE_STYLES: dict[str, str] = {
+    "success": f"{_BADGE_BASE} background: {Couleur.BG_SUCCESS}; color: {Couleur.BADGE_SUCCESS_TEXT}; border: 1px solid {Couleur.SUCCESS};",
+    "warning": f"{_BADGE_BASE} background: {Couleur.BG_WARNING}; color: {Couleur.BADGE_WARNING_TEXT}; border: 1px solid {Couleur.WARNING};",
+    "danger": f"{_BADGE_BASE} background: {Couleur.BG_DANGER}; color: {Couleur.BADGE_DANGER_TEXT}; border: 1px solid {Couleur.DANGER};",
+    "info": f"{_BADGE_BASE} background: {Couleur.BG_INFO}; color: {Couleur.INFO}; border: 1px solid {Couleur.INFO};",
+    "neutral": f"{_BADGE_BASE} background: {Couleur.BG_HOVER}; color: {Couleur.TEXT_PRIMARY}; border: 1px solid {Couleur.BORDER_LIGHT};",
+    "accent": f"{_BADGE_BASE} background: {Couleur.ACCENT}; color: white; border: 1px solid {Couleur.ACCENT};",
+}
 
 
 @composant_ui("atoms", exemple='badge("Actif", variante=Variante.SUCCESS)', tags=["badge", "label"])
@@ -41,8 +53,6 @@ def badge(
 ) -> None:
     """
     Badge coloré avec variante sémantique.
-
-    Utilise ``cva(BADGE_VARIANTS)`` pour la résolution des styles.
 
     Args:
         texte: Texte du badge
@@ -56,7 +66,7 @@ def badge(
     safe_text = echapper_html(texte)
 
     if couleur and variante is None:
-        # Rétrocompatibilité : couleur brute → inline style (pas de preset CVA)
+        # Rétrocompatibilité : couleur brute → inline style
         st.markdown(
             f'<span style="display: inline-flex; background: {couleur}; color: white; '
             f"padding: {Espacement.XS} 0.75rem; border-radius: {Rayon.PILL}; "
@@ -64,9 +74,8 @@ def badge(
             unsafe_allow_html=True,
         )
     else:
-        # CVA : résolution automatique des styles depuis BADGE_VARIANTS
         variant_name = variante.value if variante else "success"
-        style = _badge_style(variant=variant_name)
+        style = _BADGE_STYLES.get(variant_name, _BADGE_STYLES["success"])
         st.markdown(
             f'<span style="{style}">{safe_text}</span>',
             unsafe_allow_html=True,
@@ -78,8 +87,6 @@ def etat_vide(message: str, icone: str = "📭", sous_texte: str | None = None):
     """
     État vide centré.
 
-    Utilise ``Box`` (flexbox column centré) + ``Text`` (échappement auto).
-
     Args:
         message: Message principal
         icone: Icône (emoji)
@@ -88,28 +95,38 @@ def etat_vide(message: str, icone: str = "📭", sous_texte: str | None = None):
     Example:
         etat_vide("Aucune recette", "🍽️", "Ajoutez-en une")
     """
-    container = Box(
-        display="flex",
-        direction="column",
-        align="center",
-        p=Espacement.XXL,
-        color=Couleur.TEXT_SECONDARY,
-        text_align="center",
+    container_cls = StyleSheet.create_class(
+        {
+            "display": "flex",
+            "flex-direction": "column",
+            "align-items": "center",
+            "padding": Espacement.XXL,
+            "color": Couleur.TEXT_SECONDARY,
+            "text-align": "center",
+        }
     )
 
-    # Icône (taille DISPLAY hors du mapping Text)
-    container.child(
-        f'<div style="font-size: {Typographie.DISPLAY};">' f"{echapper_html(icone)}</div>"
-    )
+    safe_icone = echapper_html(icone)
+    safe_message = echapper_html(message)
 
-    # Message principal
-    container.child(Text(message, size="2xl", weight="medium", mt=Espacement.MD, tag="div").html())
-
-    # Sous-texte optionnel
+    sous_texte_html = ""
     if sous_texte:
-        container.child(Text(sous_texte, size="md", mt=Espacement.SM, tag="div").html())
+        safe_sous_texte = echapper_html(sous_texte)
+        sous_texte_html = (
+            f'<div style="font-size: {Typographie.BODY}; margin-top: {Espacement.SM};">'
+            f"{safe_sous_texte}</div>"
+        )
 
-    container.show()
+    StyleSheet.inject()
+    st.markdown(
+        f'<div class="{container_cls}">'
+        f'<div style="font-size: {Typographie.DISPLAY};">{safe_icone}</div>'
+        f'<div style="font-size: {Typographie.H3}; font-weight: 500; margin-top: {Espacement.MD};">'
+        f"{safe_message}</div>"
+        f"{sous_texte_html}"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
 
 
 @composant_ui("atoms", exemple='carte_metrique("Total", "42", "+5")', tags=["metric", "kpi"])
@@ -122,8 +139,6 @@ def carte_metrique(
     """
     Carte métrique simple.
 
-    Utilise ``Box`` pour la carte et ``Text`` pour le contenu échappé.
-
     Pour des métriques plus avancées (avec icône, lien module, gradient),
     préférez `carte_metrique_avancee` de src.ui.components.metrics.
 
@@ -133,29 +148,23 @@ def carte_metrique(
         delta: Variation (optionnel)
         couleur: Couleur fond
 
-    Example:
-        carte_metrique("Total", "42", "+5", "#f0f0f0")
-
     See Also:
         carte_metrique_avancee: Version avancée avec plus d'options
     """
-    card = Box(bg=couleur, p=Espacement.LG, radius=Rayon.LG, shadow=Ombre.SM)
-
-    # Label
-    card.child(
-        Text(
-            label,
-            size="sm",
-            weight="medium",
-            color=Couleur.TEXT_SECONDARY,
-            tag="div",
-        ).html()
+    card_cls = StyleSheet.create_class(
+        {
+            "background": couleur,
+            "padding": Espacement.LG,
+            "border-radius": Rayon.LG,
+            "box-shadow": Ombre.SM,
+        }
     )
 
-    # Valeur
-    card.child(Text(valeur, size="3xl", weight="bold", mt=Espacement.SM, tag="div").html())
+    safe_label = echapper_html(label)
+    safe_valeur = echapper_html(valeur)
 
     # Delta optionnel
+    delta_html = ""
     if delta:
         delta_str = str(delta).strip()
         if delta_str.startswith("-") or delta_str.startswith("↓"):
@@ -164,17 +173,23 @@ def carte_metrique(
             delta_couleur = Couleur.TEXT_SECONDARY
         else:
             delta_couleur = Couleur.DELTA_POSITIVE
-        card.child(
-            Text(
-                delta,
-                size="sm",
-                color=delta_couleur,
-                mt=Espacement.XS,
-                tag="div",
-            ).html()
+        safe_delta = echapper_html(delta)
+        delta_html = (
+            f'<div style="font-size: {Typographie.BODY_SM}; color: {delta_couleur}; '
+            f'margin-top: {Espacement.XS};">{safe_delta}</div>'
         )
 
-    card.show()
+    StyleSheet.inject()
+    st.markdown(
+        f'<div class="{card_cls}">'
+        f'<div style="font-size: {Typographie.BODY_SM}; font-weight: 500; '
+        f'color: {Couleur.TEXT_SECONDARY};">{safe_label}</div>'
+        f'<div style="font-size: {Typographie.H2}; font-weight: bold; '
+        f'margin-top: {Espacement.SM};">{safe_valeur}</div>'
+        f"{delta_html}"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
 
 
 @composant_ui("atoms", exemple='separateur("OU")', tags=["divider", "separator"])
@@ -214,9 +229,6 @@ def boite_info(
     """
     Boîte d'information avec variante sémantique.
 
-    Utilise ``StyleSheet`` pour la classe du conteneur (déduplication)
-    et ``Text`` pour l'échappement automatique du contenu.
-
     Args:
         titre: Titre de la boîte
         contenu: Contenu textuel
@@ -229,7 +241,6 @@ def boite_info(
     """
     bg, text_color, border_color = obtenir_couleurs_variante(variante)
 
-    # Classe CSS dédupliquée via StyleSheet (border-left hors BoxProps)
     container_cls = StyleSheet.create_class(
         {
             "background": bg,
@@ -240,18 +251,16 @@ def boite_info(
         }
     )
 
-    header = Text(
-        f"{icone} {titre}",
-        weight="semibold",
-        color=text_color,
-        mb=Espacement.SM,
-        tag="div",
-    )
-    body = Text(contenu, color=text_color, tag="div")
+    safe_titre = echapper_html(f"{icone} {titre}")
+    safe_contenu = echapper_html(contenu)
 
     StyleSheet.inject()
     st.markdown(
-        f'<div class="{container_cls}">{header.html()}{body.html()}</div>',
+        f'<div class="{container_cls}">'
+        f'<div style="font-weight: 600; color: {text_color}; margin-bottom: {Espacement.SM};">'
+        f"{safe_titre}</div>"
+        f'<div style="color: {text_color};">{safe_contenu}</div>'
+        f"</div>",
         unsafe_allow_html=True,
     )
 
@@ -264,8 +273,6 @@ def boite_info(
 def boule_loto(numero: int, is_chance: bool = False, taille: int = 50) -> None:
     """
     Boule de loto stylisée avec dégradé.
-
-    Utilise ``Box`` pour le conteneur circulaire.
 
     Args:
         numero: Numéro à afficher (1-49 ou numéro chance)
@@ -284,16 +291,24 @@ def boule_loto(numero: int, is_chance: bool = False, taille: int = 50) -> None:
     )
     font_size = int(taille * 0.4)
 
-    circle = Box(
-        bg=gradient,
-        color="white",
-        radius="50%",
-        w=f"{taille}px",
-        h=f"{taille}px",
-        display="flex",
-        align="center",
-        justify="center",
-        m="auto",
+    circle_cls = StyleSheet.create_class(
+        {
+            "background": gradient,
+            "color": "white",
+            "border-radius": "50%",
+            "width": f"{taille}px",
+            "height": f"{taille}px",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            "margin": "auto",
+        }
     )
-    circle.child(f'<span style="font-size: {font_size}px; font-weight: bold;">{numero}</span>')
-    circle.show()
+
+    StyleSheet.inject()
+    st.markdown(
+        f'<div class="{circle_cls}">'
+        f'<span style="font-size: {font_size}px; font-weight: bold;">{numero}</span>'
+        f"</div>",
+        unsafe_allow_html=True,
+    )

@@ -31,8 +31,11 @@ from .base import Contexte, Middleware, NextFn
 from .builtin import (
     CacheMiddleware,
     CircuitBreakerMiddleware,
+    ErrorHandlerMiddleware,
     LogMiddleware,
+    RateLimitMiddleware,
     RetryMiddleware,
+    SessionMiddleware,
     TimingMiddleware,
     ValidationMiddleware,
 )
@@ -44,11 +47,15 @@ __all__ = [
     "Middleware",
     "NextFn",
     "Pipeline",
-    # Built-in
+    # Built-in (originaux)
     "CacheMiddleware",
     "CircuitBreakerMiddleware",
     "LogMiddleware",
     "RetryMiddleware",
     "TimingMiddleware",
     "ValidationMiddleware",
+    # Built-in (nouveaux)
+    "ErrorHandlerMiddleware",
+    "RateLimitMiddleware",
+    "SessionMiddleware",
 ]

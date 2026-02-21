@@ -11,9 +11,8 @@ from datetime import datetime
 
 import streamlit as st
 
-from src.ui.primitives.box import Box
-from src.ui.primitives.text import Text
 from src.ui.registry import composant_ui
+from src.ui.system.css import StyleSheet
 from src.ui.tokens import Couleur, Espacement, Rayon, Typographie
 from src.ui.utils import echapper_html
 
@@ -125,25 +124,32 @@ def afficher_timeline_systeme(activites: list[dict], max_items: int = 5):
 
         action = activite.get("action", "Action")
 
-        # Box pour le conteneur flex de chaque item timeline
-        item = Box(
-            display="flex",
-            align="center",
-            p=Espacement.SM,
-            my="0.3rem",
-            bg=Couleur.BG_SUBTLE,
-            radius=Rayon.MD,
+        item_cls = StyleSheet.create_class(
+            {
+                "display": "flex",
+                "align-items": "center",
+                "padding": Espacement.SM,
+                "margin": "0.3rem 0",
+                "background": Couleur.BG_SUBTLE,
+                "border-radius": Rayon.MD,
+            }
         )
-        item.child(
-            f'<span style="margin-right: 0.8rem; font-size: {Typographie.ICON_SM};">{echapper_html(icone)}</span>'
-        )
-        item.child(
+
+        safe_action = echapper_html(action)
+        safe_date = echapper_html(str(date_str))
+        safe_icone = echapper_html(icone)
+
+        StyleSheet.inject()
+        st.markdown(
+            f'<div class="{item_cls}">'
+            f'<span style="margin-right: 0.8rem; font-size: {Typographie.ICON_SM};">{safe_icone}</span>'
             f"<div>"
-            f"{Text(action, weight='medium').html()}<br>"
-            f"{Text(str(date_str), size='xs', color=Couleur.TEXT_SECONDARY, tag='small').html()}"
+            f'<span style="font-weight: 500;">{safe_action}</span><br>'
+            f'<small style="font-size: 0.75rem; color: {Couleur.TEXT_SECONDARY};">{safe_date}</small>'
             f"</div>"
+            f"</div>",
+            unsafe_allow_html=True,
         )
-        item.show()
 
 
 # Alias rétrocompatibilité

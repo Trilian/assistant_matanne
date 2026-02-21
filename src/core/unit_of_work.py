@@ -148,5 +148,33 @@ class UnitOfWork:
         """
         self.session.flush()
 
+    def executer(self, fn: Callable[[UnitOfWork], T]) -> Result[T, ErrorInfo]:
+        """
+        Exécute une fonction dans le contexte du UoW et retourne un Result.
+
+        Encapsule automatiquement commit/rollback + conversion exception → Err.
+
+        Usage::
+
+            with UnitOfWork() as uow:
+                result = uow.executer(lambda u: u.repository(Recette).creer(r))
+                # Ok(Recette) ou Err(ErrorInfo)
+
+        Args:
+            fn: Fonction recevant le UoW et retournant une valeur
+
+        Returns:
+            Ok(valeur) ou Err(ErrorInfo)
+        """
+        from src.core.result import Ok, from_exception
+
+        try:
+            value = fn(self)
+            self.flush()
+            return Ok(value)
+        except Exception as e:
+            logger.warning(f"UnitOfWork.executer échec: {type(e).__name__}: {e}")
+            return from_exception(e, source="UnitOfWork.executer")
+
 
 __all__ = ["UnitOfWork"]

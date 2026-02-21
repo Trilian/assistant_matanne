@@ -276,3 +276,76 @@ class Repository(Generic[T]):
             stmt = spec.appliquer(stmt, self.model)
         stmt = stmt.limit(1)
         return self.session.scalars(stmt).first()
+
+    # ── Opérations retournant Result ─────────────────────────
+
+    def obtenir_result(self, id: int) -> "Result[T, ErrorInfo]":
+        """
+        Récupère une entité par ID, retourne Result.
+
+        Returns:
+            Ok(entité) ou Err(ErrorInfo NOT_FOUND)
+        """
+        from .result import ErrorCode, Ok, failure
+
+        entity = self.obtenir_par_id(id)
+        if entity is None:
+            return failure(
+                ErrorCode.NOT_FOUND,
+                f"{self.model.__name__} #{id} non trouvé",
+                message_utilisateur=f"{self.model.__name__} introuvable",
+                details={"model": self.model.__name__, "id": id},
+            )
+        return Ok(entity)
+
+    def premier_result(self, spec: "Specification | None" = None) -> "Result[T, ErrorInfo]":
+        """
+        Retourne la première entité correspondant à la spec, ou Err.
+
+        Returns:
+            Ok(entité) ou Err(ErrorInfo NOT_FOUND)
+        """
+        from .result import ErrorCode, Ok, failure
+
+        entity = self.premier(spec)
+        if entity is None:
+            return failure(
+                ErrorCode.NOT_FOUND,
+                f"Aucun {self.model.__name__} trouvé",
+                message_utilisateur=f"{self.model.__name__} introuvable",
+            )
+        return Ok(entity)
+
+    def creer_result(self, entite: T) -> "Result[T, ErrorInfo]":
+        """
+        Crée une entité, retourne Result.
+
+        Returns:
+            Ok(entité) ou Err(ErrorInfo) en cas d'erreur DB
+        """
+        from .result import Ok, from_exception
+
+        try:
+            created = self.creer(entite)
+            return Ok(created)
+        except Exception as e:
+            return from_exception(e, source=f"{self.model.__name__}.creer")
+
+    def mettre_a_jour_en_masse(self, spec: "Specification", **valeurs: Any) -> int:
+        """
+        Met à jour en masse les entités correspondant à la spec.
+
+        Args:
+            spec: Spécification de filtrage
+            **valeurs: Colonnes à mettre à jour
+
+        Returns:
+            Nombre d'entités modifiées
+        """
+        entites = self.lister(spec=spec)
+        for entite in entites:
+            for col_name, value in valeurs.items():
+                setattr(entite, col_name, value)
+        self.session.flush()
+        logger.debug(f"[~] {self.model.__name__} x{len(entites)} mis à jour en masse")
+        return len(entites)

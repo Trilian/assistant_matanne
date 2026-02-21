@@ -2,7 +2,7 @@
 Composant de ligne de métriques réutilisable.
 
 Élimine la duplication des affichages de métriques en colonnes.
-Utilise ``StyleSheet`` pour la déduplication CSS et ``Text`` pour l'échappement.
+Utilise ``StyleSheet`` pour la déduplication CSS et ``echapper_html`` pour la sécurité.
 
 Usage:
     from src.ui.components.metrics_row import MetricConfig, afficher_metriques_row
@@ -20,7 +20,6 @@ from typing import Any, Callable
 
 import streamlit as st
 
-from src.ui.primitives.text import Text
 from src.ui.system.css import StyleSheet
 from src.ui.tokens import Couleur
 from src.ui.tokens_semantic import Sem
@@ -147,22 +146,13 @@ def afficher_stats_cards(
                 }
             )
 
-            title_html = Text(
-                str(title), size="sm", color=str(Sem.ON_SURFACE_SECONDARY), tag="div"
-            ).html()
-            value_html = Text(
-                str(stat.get("value", "")),
-                size="xl",
-                weight="bold",
-                color=color,
-                tag="div",
-            ).html()
-            subtitle_html = Text(
-                str(stat.get("subtitle", "")),
-                size="xs",
-                color=str(Sem.ON_SURFACE_MUTED),
-                tag="div",
-            ).html()
+            safe_title = echapper_html(str(title))
+            safe_value = echapper_html(str(stat.get("value", "")))
+            safe_subtitle = echapper_html(str(stat.get("subtitle", "")))
+
+            title_html = f'<div style="font-size: 0.875rem; color: {Sem.ON_SURFACE_SECONDARY};">{safe_title}</div>'
+            value_html = f'<div style="font-size: 1.25rem; font-weight: bold; color: {color};">{safe_value}</div>'
+            subtitle_html = f'<div style="font-size: 0.75rem; color: {Sem.ON_SURFACE_MUTED};">{safe_subtitle}</div>'
 
             StyleSheet.inject()
             st.markdown(
@@ -177,7 +167,7 @@ def afficher_kpi_banner(
 ) -> None:
     """Bannière de KPIs horizontale.
 
-    Utilise ``StyleSheet`` pour les classes CSS et ``Text`` pour l'échappement.
+    Utilise ``StyleSheet`` pour les classes CSS et ``echapper_html`` pour la sécurité.
 
     Args:
         kpis: Liste de dicts avec keys: label, value, trend (up/down/neutral)
@@ -215,19 +205,11 @@ def afficher_kpi_banner(
         icon = trend_icons.get(trend, "")
         color = trend_colors.get(trend, Couleur.TEXT_SECONDARY)
 
-        label_html = Text(
-            str(kpi.get("label", "")),
-            size="xs",
-            color=str(Sem.ON_SURFACE_SECONDARY),
-            tag="div",
-        ).html()
-        value_html = Text(
-            f"{kpi.get('value', '')} {icon}",
-            size="lg",
-            weight="bold",
-            color=color,
-            tag="div",
-        ).html()
+        safe_label = echapper_html(str(kpi.get("label", "")))
+        safe_value = echapper_html(f"{kpi.get('value', '')} {icon}")
+
+        label_html = f'<div style="font-size: 0.75rem; color: {Sem.ON_SURFACE_SECONDARY};">{safe_label}</div>'
+        value_html = f'<div style="font-size: 1.125rem; font-weight: bold; color: {color};">{safe_value}</div>'
 
         kpi_html += f'<div class="{item_cls}">{label_html}{value_html}</div>'
 

@@ -3,19 +3,17 @@ Module Framework - Architecture moderne pour modules Streamlit.
 
 Ce package fournit une architecture robuste et réutilisable pour les modules:
 - Error Boundary: Gestion d'erreurs unifiée avec fallback UI
-- Hooks: Pattern React-like pour état et services (use_state, use_service, use_query)
 - BaseModule: Classe de base avec lifecycle et injection de dépendances
 - Fragments: Composants auto-refresh avec isolation
-- State Manager: Gestion centralisée du session_state
+- State Manager: Gestion centralisée du session_state via ModuleState
 
 Usage:
     from src.modules._framework import (
         BaseModule,
         module_app,
         error_boundary,
-        use_state,
-        use_service,
-        use_query,
+        ModuleState,
+        init_module_state,
     )
 
     @module_app
@@ -27,13 +25,13 @@ Usage:
             return obtenir_mon_service
 
         def render(self):
-            result = use_query(self.service.get_data, "data_key")
-            if result.is_success:
-                self._render_data(result.data)
+            state = ModuleState("mon_module")
+            data = self.service.get_data()
+            self._render_data(data)
 
-Architecture inspirée de React avec adaptations pour Streamlit:
+Architecture:
 - Error Boundaries pour UX gracieuse
-- Hooks pour état local et requêtes
+- ModuleState pour état local avec préfixes
 - Fragments pour refresh partiel
 - Convention over Configuration
 """
@@ -58,17 +56,6 @@ from src.modules._framework.fragments import (
     lazy_fragment,
     with_loading_state,
 )
-from src.modules._framework.hooks import (
-    QueryResult,
-    StateHook,
-    use_callback,
-    use_effect,
-    use_memo,
-    use_previous,
-    use_query,
-    use_service,
-    use_state,
-)
 from src.modules._framework.state_manager import (
     ModuleState,
     clear_all_module_states,
@@ -84,16 +71,6 @@ __all__ = [
     "avec_gestion_erreurs_ui",
     "safe_call",
     "try_render",
-    # Hooks
-    "use_state",
-    "use_service",
-    "use_query",
-    "use_memo",
-    "use_effect",
-    "use_callback",
-    "use_previous",
-    "StateHook",
-    "QueryResult",
     # State Manager
     "ModuleState",
     "init_module_state",

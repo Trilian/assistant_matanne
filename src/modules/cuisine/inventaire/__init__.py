@@ -1,11 +1,9 @@
 """
-Module Inventaire - Gestion du stock (version migrée vers le framework)
+Module Inventaire - Gestion du stock
 
-Migration du module inventaire vers le nouveau framework modulaire.
-Fonctionnalités identiques avec:
+Fonctionnalités:
 - Gestion d'erreurs unifiée via error_boundary
 - État managé via ModuleState (préfixes automatiques)
-- Data fetching via use_query avec cache
 - Composants UI réutilisables
 """
 
@@ -18,8 +16,6 @@ from src.modules._framework import (
     ModuleState,
     error_boundary,
     init_module_state,
-    use_query,
-    use_state,
 )
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui import etat_vide
@@ -230,7 +226,7 @@ def afficher_formulaire_ajout(state: ModuleState) -> None:
 
 
 def afficher_stock_complet() -> None:
-    """Affiche l'onglet stock complet avec le nouveau framework."""
+    """Affiche l'onglet stock complet."""
     state = ModuleState("inventaire")
     service = obtenir_service_inventaire()
 
@@ -238,34 +234,16 @@ def afficher_stock_complet() -> None:
         st.error("❌ Service inventaire indisponible")
         return
 
-    # Data fetching avec use_query
-    inventaire_query = use_query(
-        "inventaire_stock",
-        fetcher=service.get_inventaire_complet,
-        stale_time=60,  # Cache 1 minute
-    )
-
-    alertes_query = use_query(
-        "inventaire_alertes",
-        fetcher=service.get_alertes,
-        stale_time=60,
-    )
-
-    # Gestion du chargement
-    if inventaire_query.is_loading or alertes_query.is_loading:
+    # Chargement des données directement depuis le service
+    try:
         with st.spinner("Chargement de l'inventaire..."):
-            st.info("Récupération des données...")
-        return
-
-    # Gestion des erreurs
-    if inventaire_query.is_error:
-        st.error(f"❌ Erreur: {inventaire_query.error}")
+            inventaire = service.get_inventaire_complet() or []
+            alertes = service.get_alertes() or {}
+    except Exception as e:
+        st.error(f"❌ Erreur: {e}")
         if st.button("🔄 Réessayer", key="retry_stock"):
-            inventaire_query.refetch()
+            st.rerun()
         return
-
-    inventaire = inventaire_query.data or []
-    alertes = alertes_query.data or {}
 
     # Inventaire vide
     if not inventaire:
