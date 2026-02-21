@@ -166,16 +166,15 @@ class TestBaseServiceCreate:
     def test_create_with_db_session(self, base_service, mock_db):
         """Test création avec session fournie."""
         with patch.object(base_service, "_invalider_cache"):
-            with patch("src.core.errors.gerer_erreurs", lambda **kwargs: lambda f: f):
-                # On doit patcher _with_session pour exécuter directement
-                data = {"nom": "Nouvelle entité", "statut": "actif"}
+            # On doit patcher _with_session pour exécuter directement
+            data = {"nom": "Nouvelle entité", "statut": "actif"}
 
-                # Le modèle est appelé avec les données
-                result = base_service.create(data=data, db=mock_db)
+            # Le modèle est appelé avec les données
+            result = base_service.create(data=data, db=mock_db)
 
-                # Vérifier que add et commit ont été appelés
-                mock_db.add.assert_called()
-                mock_db.commit.assert_called()
+            # Vérifier que add et commit ont été appelés
+            mock_db.add.assert_called()
+            mock_db.commit.assert_called()
 
     def test_create_returns_entity(self, base_service, mock_db):
         """Test que create retourne l'entité créée."""

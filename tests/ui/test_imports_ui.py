@@ -17,7 +17,7 @@ import pytest
         "src.ui.components.metrics",
         "src.ui.components.system",
         # Feedback
-        "src.ui.feedback.progress",
+        "src.ui.feedback.progress_v2",
         "src.ui.feedback.spinners",
         "src.ui.feedback.toasts",
         # Layout

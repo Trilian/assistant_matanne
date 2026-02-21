@@ -7,14 +7,19 @@ from datetime import date
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.ui.keys import KeyNamespace
 from src.ui.tokens import Couleur
 from src.ui.tokens_semantic import Sem
+
+_keys = KeyNamespace("accueil")
 
 # ═══════════════════════════════════════════════════════════
 # MODULE PRINCIPAL
 # ═══════════════════════════════════════════════════════════
 
 
+@profiler_rerun("accueil")
 def app():
     """Point d'entree module accueil"""
 
@@ -183,7 +188,7 @@ def afficher_graphiques_enrichis():
         fig = graphique_inventaire_categories(inventaire)
         if fig:
             st.markdown("**📦 Stock par Categorie**")
-            st.plotly_chart(fig, width="stretch", key="chart_inventaire")
+            st.plotly_chart(fig, width="stretch", key=_keys("chart_inventaire"))
         else:
             st.info("Pas de donnees d'inventaire")
 
@@ -195,7 +200,7 @@ def afficher_graphiques_enrichis():
             fig = graphique_repartition_repas(repas_data)
             if fig:
                 st.markdown("**💡 Repartition des Repas**")
-                st.plotly_chart(fig, width="stretch", key="chart_repas")
+                st.plotly_chart(fig, width="stretch", key=_keys("chart_repas"))
             else:
                 st.info("Pas de planning cette semaine")
         else:
@@ -320,7 +325,7 @@ def afficher_critical_alerts():
                     st.error(f"{alert['icon']} **{alert['title']}**")
 
             with col2:
-                if st.button(alert["action"], key=f"alert_{alert['module']}", width="stretch"):
+                if st.button(alert["action"], key=_keys("alert", alert["module"]), width="stretch"):
                     GestionnaireEtat.naviguer_vers(alert["module"])
                     st.rerun()
 
@@ -391,23 +396,23 @@ def afficher_quick_actions():
 
     with col1:
         if st.button(
-            "➕ Ajouter Recette", key="quick_add_recette", width="stretch", type="primary"
+            "➕ Ajouter Recette", key=_keys("quick_add_recette"), width="stretch", type="primary"
         ):
             GestionnaireEtat.naviguer_vers("cuisine.recettes")
             st.rerun()
 
     with col2:
-        if st.button("📅 Voir Courses", key="quick_view_courses", width="stretch"):
+        if st.button("📅 Voir Courses", key=_keys("quick_view_courses"), width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.courses")
             st.rerun()
 
     with col3:
-        if st.button("📦 Gerer Inventaire", key="quick_view_inventaire", width="stretch"):
+        if st.button("📦 Gerer Inventaire", key=_keys("quick_view_inventaire"), width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.inventaire")
             st.rerun()
 
     with col4:
-        if st.button("🧹 Planning Semaine", key="quick_view_planning", width="stretch"):
+        if st.button("🧹 Planning Semaine", key=_keys("quick_view_planning"), width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
             st.rerun()
 
@@ -449,7 +454,7 @@ def afficher_cuisine_summary():
         with col3:
             st.metric("🎯 Bebe", stats.get("bebe", 0))
 
-        if st.button("👶 Voir les recettes", key="nav_recettes", width="stretch"):
+        if st.button("👶 Voir les recettes", key=_keys("nav_recettes"), width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.recettes")
             st.rerun()
 
@@ -496,7 +501,7 @@ def afficher_inventaire_summary():
 
             alerte_stock(articles_alert[:3], cle="home_inventory_alert")  # Max 3
 
-        if st.button("📦 Gerer l'inventaire", key="nav_inventaire", width="stretch"):
+        if st.button("📦 Gerer l'inventaire", key=_keys("nav_inventaire"), width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.inventaire")
             st.rerun()
 
@@ -546,7 +551,7 @@ def afficher_courses_summary():
             if len(prioritaires) > 3:
                 st.caption(f"... et {len(prioritaires) - 3} autre(s)")
 
-        if st.button("📅 Voir la liste", key="nav_courses", width="stretch"):
+        if st.button("📅 Voir la liste", key=_keys("nav_courses"), width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.courses")
             st.rerun()
 
@@ -600,7 +605,7 @@ def afficher_planning_summary():
         else:
             etat_vide("Aucun planning cette semaine", "🍽️", "Planifiez vos repas pour la semaine")
 
-        if st.button("🧹 Voir le planning", key="nav_planning", width="stretch"):
+        if st.button("🧹 Voir le planning", key=_keys("nav_planning"), width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
             st.rerun()
 

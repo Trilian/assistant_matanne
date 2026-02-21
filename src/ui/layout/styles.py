@@ -6,7 +6,7 @@ Enregistre le CSS dans le :class:`CSSManager` au lieu d'injecter
 directement via ``st.markdown``.
 """
 
-from src.ui.css import CSSManager
+from src.ui.engine import CSSManager
 from src.ui.tokens import (
     Couleur,
     Espacement,

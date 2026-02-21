@@ -202,7 +202,7 @@ def injecter_tokens_semantiques() -> None:
     else:
         css = _generer_css_tokens(_LIGHT_MAPPING)
 
-    from src.ui.css import CSSManager
+    from src.ui.engine import CSSManager
 
     CSSManager.register("tokens-semantic", css)
 

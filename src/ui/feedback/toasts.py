@@ -117,25 +117,41 @@ _FALLBACK = {
 # ═══════════════════════════════════════════════════════════
 
 
-def afficher_succes(message: str) -> None:
+def afficher_succes(message: str, *, duree: int | None = None) -> None:
     """Raccourci pour notification succès.
 
     Args:
         message: Message à afficher.
+        duree: Durée d'affichage en secondes (réservé pour usage futur).
     """
     GestionnaireNotifications.afficher(message, "success")
 
 
-def afficher_erreur(message: str) -> None:
-    """Raccourci pour notification erreur."""
+def afficher_erreur(message: str, *, duree: int | None = None) -> None:
+    """Raccourci pour notification erreur.
+
+    Args:
+        message: Message à afficher.
+        duree: Durée d'affichage en secondes (réservé pour usage futur).
+    """
     GestionnaireNotifications.afficher(message, "error")
 
 
-def afficher_avertissement(message: str) -> None:
-    """Raccourci pour notification avertissement."""
+def afficher_avertissement(message: str, *, duree: int | None = None) -> None:
+    """Raccourci pour notification avertissement.
+
+    Args:
+        message: Message à afficher.
+        duree: Durée d'affichage en secondes (réservé pour usage futur).
+    """
     GestionnaireNotifications.afficher(message, "warning")
 
 
-def afficher_info(message: str) -> None:
-    """Raccourci pour notification info."""
+def afficher_info(message: str, *, duree: int | None = None) -> None:
+    """Raccourci pour notification info.
+
+    Args:
+        message: Message à afficher.
+        duree: Durée d'affichage en secondes (réservé pour usage futur).
+    """
     GestionnaireNotifications.afficher(message, "info")

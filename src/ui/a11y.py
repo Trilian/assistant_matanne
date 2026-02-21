@@ -44,7 +44,7 @@ class A11y:
         - ``:focus-visible`` : indicateurs de focus clairs
         - ``@media (prefers-reduced-motion)`` : désactive les animations
         """
-        from src.ui.css import CSSManager
+        from src.ui.engine import CSSManager
 
         CSSManager.register(
             "a11y",

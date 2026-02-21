@@ -147,7 +147,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # Errors (UI)
     "GestionnaireErreurs": (".errors", "GestionnaireErreurs"),
     "afficher_erreur_streamlit": (".errors", "afficher_erreur_streamlit"),
-    "gerer_erreurs": (".errors", "gerer_erreurs"),
     # Errors Base (pures)
     "ErreurBaseDeDonnees": (".errors_base", "ErreurBaseDeDonnees"),
     "ErreurConfiguration": (".errors_base", "ErreurConfiguration"),

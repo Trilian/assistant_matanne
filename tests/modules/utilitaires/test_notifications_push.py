@@ -428,7 +428,7 @@ class TestApp:
 
         app()
 
-        mock_st.title.assert_called_once_with("Ã°Å¸❌❌ Notifications Push")
+        mock_st.title.assert_called_once_with("\U0001f514 Notifications Push")
         mock_st.caption.assert_called()
 
     @patch("src.modules.utilitaires.notifications_push.afficher_aide")

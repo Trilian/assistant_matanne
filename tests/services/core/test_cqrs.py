@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.services.core.base.result import ErrorCode, ErrorInfo, Failure, Success
+from src.core.result import ErrorCode, ErrorInfo, Failure, Success
 from src.services.core.cqrs.commands import (
     Command,
     CommandResult,

@@ -227,7 +227,9 @@ class TestIndicateurSanteSysteme:
         """Test avec tout OK."""
         from src.ui.components import indicateur_sante_systeme
 
-        mock_cache.return_value.get_stats.return_value = {"hit_rate": "85%"}
+        indicateur_sante_systeme.clear()  # Vider le cache st.cache_data
+
+        mock_cache.return_value.obtenir_statistiques.return_value = {"hit_rate": "85%"}
 
         result = indicateur_sante_systeme()
 
@@ -240,7 +242,9 @@ class TestIndicateurSanteSysteme:
         """Test avec DB déconnectée."""
         from src.ui.components import indicateur_sante_systeme
 
-        mock_cache.return_value.get_stats.return_value = {"hit_rate": "50%"}
+        indicateur_sante_systeme.clear()
+
+        mock_cache.return_value.obtenir_statistiques.return_value = {"hit_rate": "50%"}
 
         result = indicateur_sante_systeme()
 
@@ -252,7 +256,9 @@ class TestIndicateurSanteSysteme:
         """Test avec exception DB."""
         from src.ui.components import indicateur_sante_systeme
 
-        mock_cache.return_value.get_stats.return_value = {"hit_rate": "50%"}
+        indicateur_sante_systeme.clear()
+
+        mock_cache.return_value.obtenir_statistiques.return_value = {"hit_rate": "50%"}
 
         result = indicateur_sante_systeme()
 
@@ -264,7 +270,9 @@ class TestIndicateurSanteSysteme:
         """Test avec cache en warning."""
         from src.ui.components import indicateur_sante_systeme
 
-        mock_cache.return_value.get_stats.return_value = {"hit_rate": "50%"}
+        indicateur_sante_systeme.clear()
+
+        mock_cache.return_value.obtenir_statistiques.return_value = {"hit_rate": "50%"}
 
         result = indicateur_sante_systeme()
 

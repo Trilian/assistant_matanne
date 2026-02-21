@@ -31,6 +31,7 @@ from src.core.models import (
     UserProfile,
     WeekendActivity,
 )
+from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.services.integrations.garmin import init_family_users
 
@@ -236,6 +237,7 @@ def afficher_card_achats():
 # ═══════════════════════════════════════════════════════════
 
 
+@profiler_rerun("famille")
 def app():
     """Point d'entree du Hub Famille"""
     st.title("👨‍👩‍👧 Hub Famille")

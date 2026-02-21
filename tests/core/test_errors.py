@@ -3,7 +3,6 @@ Tests unitaires pour errors.py (src/core/errors.py).
 
 Tests couvrant:
 - Re-export des exceptions pures depuis errors_base.py
-- Décorateur gerer_erreurs avec UI
 - Gestion d'affichage des erreurs Streamlit
 - Logging des erreurs
 """
@@ -30,7 +29,6 @@ from src.core.errors import (
     ErreurServiceIA,
     ErreurValidation,
     ExceptionApp,
-    gerer_erreurs,
 )
 from src.core.errors_base import (
     exiger_champs,
@@ -128,164 +126,7 @@ class TestHelperFunctions:
 
 
 # ═══════════════════════════════════════════════════════════
-# SECTION 3: TESTS DÉCORATEUR gerer_erreurs
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestDecoratorGererErreurs:
-    """Tests du décorateur gerer_erreurs."""
-
-    def test_fonction_normale_pas_erreur(self):
-        """Test que une fonction sans erreur retourne le résultat."""
-
-        @gerer_erreurs()
-        def ma_fonction():
-            return "succès"
-
-        result = ma_fonction()
-        assert result == "succès"
-
-    def test_capture_exception_validation(self):
-        """Test capture d'ErreurValidation."""
-
-        @gerer_erreurs(afficher_dans_ui=False, relancer=False, valeur_fallback=None)
-        def ma_fonction():
-            raise ErreurValidation("Erreur de validation")
-
-        result = ma_fonction()
-        assert result is None
-
-    def test_capture_exception_non_trouve(self):
-        """Test capture d'ErreurNonTrouve."""
-
-        @gerer_erreurs(afficher_dans_ui=False, relancer=False, valeur_fallback=[])
-        def ma_fonction():
-            raise ErreurNonTrouve("Recette not found")
-
-        result = ma_fonction()
-        assert result == []
-
-    def test_capture_exception_base_de_donnees(self):
-        """Test capture d'ErreurBaseDeDonnees."""
-
-        @gerer_erreurs(afficher_dans_ui=False, relancer=False, valeur_fallback={})
-        def ma_fonction():
-            raise ErreurBaseDeDonnees("Connexion perdue")
-
-        result = ma_fonction()
-        assert result == {}
-
-    def test_relancer_exception(self):
-        """Test que relancer=True relève l'exception."""
-
-        @gerer_erreurs(afficher_dans_ui=False, relancer=True)
-        def ma_fonction():
-            raise ErreurValidation("Erreur", message_utilisateur="Message")
-
-        with pytest.raises(ErreurValidation):
-            ma_fonction()
-
-    @patch("streamlit.error")
-    def test_afficher_dans_ui_validation(self, mock_st_error):
-        """Test affichage UI pour ErreurValidation."""
-
-        @gerer_erreurs(afficher_dans_ui=True, relancer=False, valeur_fallback=None)
-        def ma_fonction():
-            raise ErreurValidation("Erreur", message_utilisateur="Erreur pour l'utilisateur")
-
-        ma_fonction()
-        mock_st_error.assert_called_once()
-
-    @patch("streamlit.warning")
-    def test_afficher_dans_ui_non_trouve(self, mock_st_warning):
-        """Test affichage UI pour ErreurNonTrouve."""
-
-        @gerer_erreurs(afficher_dans_ui=True, relancer=False, valeur_fallback=None)
-        def ma_fonction():
-            raise ErreurNonTrouve("Resource not found")
-
-        ma_fonction()
-        mock_st_warning.assert_called_once()
-
-    @patch("streamlit.error")
-    def test_afficher_dans_ui_base_donnees(self, mock_st_error):
-        """Test affichage UI pour ErreurBaseDeDonnees."""
-
-        @gerer_erreurs(afficher_dans_ui=True, relancer=False, valeur_fallback=None)
-        def ma_fonction():
-            raise ErreurBaseDeDonnees("Erreur DB")
-
-        ma_fonction()
-        mock_st_error.assert_called_once()
-
-    def test_gerer_erreurs_arguments_fonction(self):
-        """Test que le décorateur préserve les arguments."""
-
-        @gerer_erreurs()
-        def ma_fonction(a, b, c=None):
-            return (a, b, c)
-
-        result = ma_fonction(1, 2, c=3)
-        assert result == (1, 2, 3)
-
-    def test_gerer_erreurs_log_niveau(self):
-        """Test que le décorateur utilise le niveau de log correct."""
-        # gerer_erreurs est déprécié et délègue à avec_gestion_erreurs (src.core.decorators)
-        with patch("src.core.decorators.logger") as mock_logger:
-
-            @gerer_erreurs(niveau_log="WARNING", afficher_dans_ui=False, relancer=False)
-            def ma_fonction():
-                raise ErreurValidation("field", "Message", "Internal")
-
-            ma_fonction()
-            mock_logger.warning.assert_called_once()
-
-    @patch("streamlit.error")
-    def test_capture_exception_service_ia(self, mock_st_error):
-        """Test capture d'ErreurServiceIA."""
-
-        @gerer_erreurs(afficher_dans_ui=True, relancer=False, valeur_fallback=None)
-        def ma_fonction():
-            raise ErreurServiceIA("Service IA indisponible")
-
-        result = ma_fonction()
-        assert result is None
-        mock_st_error.assert_called_once()
-
-    def test_capture_exception_limite_debit(self):
-        """Test capture d'ErreurLimiteDebit."""
-
-        @gerer_erreurs(afficher_dans_ui=False, relancer=False, valeur_fallback=None)
-        def ma_fonction():
-            raise ErreurLimiteDebit("Limite de 10 appels/min atteinte")
-
-        result = ma_fonction()
-        assert result is None
-
-    def test_capture_exception_service_externe(self):
-        """Test capture d'ErreurServiceExterne."""
-
-        @gerer_erreurs(afficher_dans_ui=False, relancer=False, valeur_fallback=None)
-        def ma_fonction():
-            raise ErreurServiceExterne("Service externe indisponible")
-
-        result = ma_fonction()
-        assert result is None
-
-    def test_capture_exception_configuration(self):
-        """Test capture d'ErreurConfiguration."""
-
-        @gerer_erreurs(afficher_dans_ui=False, relancer=False, valeur_fallback=None)
-        def ma_fonction():
-            raise ErreurConfiguration("Clé de configuration manquante: API_KEY")
-
-        result = ma_fonction()
-        assert result is None
-
-
-# ═══════════════════════════════════════════════════════════
-# SECTION 4: TESTS EXCEPTIONS ELLES-MÊMES
+# SECTION 3: TESTS EXCEPTIONS ELLES-MÊMES
 # ═══════════════════════════════════════════════════════════
 
 
@@ -330,11 +171,14 @@ class TestIntegrationErrorHandling:
 
     def test_error_chain_validation_to_ui(self):
         """Test le chaînage complet erreur -> logging -> UI."""
-        with patch("streamlit.error") as mock_error:
-            # gerer_erreurs délègue à avec_gestion_erreurs (src.core.decorators)
-            with patch("src.core.decorators.logger") as mock_logger:
+        from src.core.decorators import avec_gestion_erreurs
 
-                @gerer_erreurs(afficher_dans_ui=True, relancer=False)
+        with patch("streamlit.error") as mock_error:
+            with patch("src.core.decorators.errors.logger") as mock_logger:
+
+                @avec_gestion_erreurs(
+                    default_return=None, afficher_erreur=True, relancer_metier=False
+                )
                 def operation():
                     raise ErreurValidation("Erreur validation", message_utilisateur="Nom invalide")
 
@@ -349,8 +193,9 @@ class TestIntegrationErrorHandling:
 
     def test_error_chaining_with_relancer(self):
         """Test que relancer=True correctement propage l'exception."""
+        from src.core.decorators import avec_gestion_erreurs
 
-        @gerer_erreurs(relancer=True)
+        @avec_gestion_erreurs(relancer_metier=True)
         def operation():
             raise ErreurNonTrouve("Recette not found")
 
@@ -359,17 +204,17 @@ class TestIntegrationErrorHandling:
 
     def test_multiple_exception_types(self):
         """Test qu'on peut capturer plusieurs types d'exceptions."""
-        exceptions_levees = []
+        from src.core.decorators import avec_gestion_erreurs
 
-        @gerer_erreurs(afficher_dans_ui=False, relancer=False, valeur_fallback=None)
+        @avec_gestion_erreurs(default_return=None, afficher_erreur=False, relancer_metier=False)
         def operation_validation():
             raise ErreurValidation("validation error")
 
-        @gerer_erreurs(afficher_dans_ui=False, relancer=False, valeur_fallback=None)
+        @avec_gestion_erreurs(default_return=None, afficher_erreur=False, relancer_metier=False)
         def operation_non_trouve():
             raise ErreurNonTrouve("not found")
 
-        @gerer_erreurs(afficher_dans_ui=False, relancer=False, valeur_fallback=None)
+        @avec_gestion_erreurs(default_return=None, afficher_erreur=False, relancer_metier=False)
         def operation_db():
             raise ErreurBaseDeDonnees("db error")
 
@@ -661,15 +506,17 @@ class TestEstModeDebugAdvanced:
 
 
 @pytest.mark.unit
-class TestGererErreursAdvanced:
-    """Tests avancés pour @gerer_erreurs."""
+class TestAvecGestionErreursAdvanced:
+    """Tests avancés pour @avec_gestion_erreurs (ex-gerer_erreurs)."""
 
-    @patch("streamlit.warning")
-    def test_gerer_erreurs_erreur_validation(self, mock_warning):
+    @patch("streamlit.error")
+    def test_avec_gestion_erreurs_erreur_validation(self, mock_error):
         """Test gestion spécifique ErreurValidation."""
-        from src.core.errors import gerer_erreurs
+        from src.core.decorators import avec_gestion_erreurs
 
-        @gerer_erreurs(afficher_dans_ui=True, valeur_fallback="fallback")
+        @avec_gestion_erreurs(
+            default_return="fallback", afficher_erreur=True, relancer_metier=False
+        )
         def validation_fail():
             raise ErreurValidation("champ invalide", message_utilisateur="Données invalides")
 
@@ -677,11 +524,11 @@ class TestGererErreursAdvanced:
         assert result == "fallback"
 
     @patch("streamlit.warning")
-    def test_gerer_erreurs_erreur_non_trouve(self, mock_warning):
+    def test_avec_gestion_erreurs_erreur_non_trouve(self, mock_warning):
         """Test gestion spécifique ErreurNonTrouve."""
-        from src.core.errors import gerer_erreurs
+        from src.core.decorators import avec_gestion_erreurs
 
-        @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
+        @avec_gestion_erreurs(default_return=None, afficher_erreur=True, relancer_metier=False)
         def not_found():
             raise ErreurNonTrouve("Recette 42", message_utilisateur="Non trouvé")
 
@@ -690,11 +537,11 @@ class TestGererErreursAdvanced:
         assert result is None
 
     @patch("streamlit.error")
-    def test_gerer_erreurs_erreur_base_donnees(self, mock_error):
+    def test_avec_gestion_erreurs_erreur_base_donnees(self, mock_error):
         """Test gestion spécifique ErreurBaseDeDonnees."""
-        from src.core.errors import gerer_erreurs
+        from src.core.decorators import avec_gestion_erreurs
 
-        @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=[])
+        @avec_gestion_erreurs(default_return=[], afficher_erreur=True, relancer_metier=False)
         def db_error():
             raise ErreurBaseDeDonnees("connexion perdue")
 
@@ -703,11 +550,11 @@ class TestGererErreursAdvanced:
         assert result == []
 
     @patch("streamlit.error")
-    def test_gerer_erreurs_erreur_service_ia(self, mock_error):
+    def test_avec_gestion_erreurs_erreur_service_ia(self, mock_error):
         """Test gestion spécifique ErreurServiceIA."""
-        from src.core.errors import gerer_erreurs
+        from src.core.decorators import avec_gestion_erreurs
 
-        @gerer_erreurs(afficher_dans_ui=True, valeur_fallback={})
+        @avec_gestion_erreurs(default_return={}, afficher_erreur=True, relancer_metier=False)
         def ia_error():
             raise ErreurServiceIA("API Mistral down")
 
@@ -716,11 +563,13 @@ class TestGererErreursAdvanced:
         assert result == {}
 
     @patch("streamlit.warning")
-    def test_gerer_erreurs_erreur_limite_debit(self, mock_warning):
+    def test_avec_gestion_erreurs_erreur_limite_debit(self, mock_warning):
         """Test gestion spécifique ErreurLimiteDebit."""
-        from src.core.errors import gerer_erreurs
+        from src.core.decorators import avec_gestion_erreurs
 
-        @gerer_erreurs(afficher_dans_ui=True, valeur_fallback="rate_limited")
+        @avec_gestion_erreurs(
+            default_return="rate_limited", afficher_erreur=True, relancer_metier=False
+        )
         def rate_limit():
             raise ErreurLimiteDebit("10/min atteint")
 
@@ -729,11 +578,13 @@ class TestGererErreursAdvanced:
         assert result == "rate_limited"
 
     @patch("streamlit.error")
-    def test_gerer_erreurs_erreur_service_externe(self, mock_error):
+    def test_avec_gestion_erreurs_erreur_service_externe(self, mock_error):
         """Test gestion spécifique ErreurServiceExterne."""
-        from src.core.errors import gerer_erreurs
+        from src.core.decorators import avec_gestion_erreurs
 
-        @gerer_erreurs(afficher_dans_ui=True, valeur_fallback="external_error")
+        @avec_gestion_erreurs(
+            default_return="external_error", afficher_erreur=True, relancer_metier=False
+        )
         def external_error():
             raise ErreurServiceExterne("OpenFood API down")
 
@@ -741,11 +592,11 @@ class TestGererErreursAdvanced:
         mock_error.assert_called_once()
         assert result == "external_error"
 
-    def test_gerer_erreurs_relancer_true(self):
-        """Test que relancer=True relance l'exception."""
-        from src.core.errors import gerer_erreurs
+    def test_avec_gestion_erreurs_relancer_true(self):
+        """Test que relancer_metier=True relance l'exception."""
+        from src.core.decorators import avec_gestion_erreurs
 
-        @gerer_erreurs(afficher_dans_ui=False, relancer=True)
+        @avec_gestion_erreurs(afficher_erreur=False, relancer_metier=True)
         def will_raise():
             raise ErreurValidation("test")
 
@@ -755,14 +606,16 @@ class TestGererErreursAdvanced:
     @patch("streamlit.error")
     @patch("streamlit.expander")
     @patch("streamlit.code")
-    def test_gerer_erreurs_debug_mode_shows_stacktrace(self, mock_code, mock_expander, mock_error):
+    def test_avec_gestion_erreurs_debug_mode_shows_stacktrace(
+        self, mock_code, mock_expander, mock_error
+    ):
         """Test que le mode debug affiche la stack trace."""
-        from src.core.errors import gerer_erreurs
+        from src.core.decorators import avec_gestion_erreurs
 
         mock_expander.return_value.__enter__ = Mock(return_value=None)
         mock_expander.return_value.__exit__ = Mock(return_value=False)
 
-        @gerer_erreurs(afficher_dans_ui=True, valeur_fallback=None)
+        @avec_gestion_erreurs(default_return=None, afficher_erreur=True, relancer_metier=False)
         def unexpected_error():
             raise RuntimeError("Unexpected!")
 

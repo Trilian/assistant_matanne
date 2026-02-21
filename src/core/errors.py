@@ -4,21 +4,17 @@ Errors - Gestion des erreurs avec intégration UI (Streamlit).
 Ce module :
 - Ré-exporte les exceptions pures depuis errors_base.py
 - Ajoute les fonctions d'affichage UI (avec import lazy de Streamlit)
-- Fournit des décorateurs de gestion d'erreurs avec UI
+- Fournit le GestionnaireErreurs (context manager)
 
 [!] IMPORTANT: Les exceptions pures sont dans errors_base.py (sans dépendances UI)
-
-.. note::
-    ``gerer_erreurs`` est déprécié au profit de ``avec_gestion_erreurs``
-    dans ``src.core.decorators`` (version plus complète et unifiée).
+Pour la gestion d'erreurs par décorateur, utiliser ``avec_gestion_erreurs``
+dans ``src.core.decorators``.
 """
 
 import logging
 import os
 import traceback
-import warnings
 from collections.abc import Callable
-from functools import wraps
 from typing import Any
 
 # Ré-exporter les exceptions et helpers purs
@@ -75,47 +71,6 @@ def _est_mode_debug() -> bool:
         pass
 
     return False
-
-
-# ═══════════════════════════════════════════════════════════
-# DÉCORATEUR DE GESTION D'ERREURS
-# ═══════════════════════════════════════════════════════════
-
-
-def gerer_erreurs(
-    afficher_dans_ui: bool = True,
-    niveau_log: str = "ERROR",
-    relancer: bool = False,
-    valeur_fallback: Any = None,
-) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-    """
-    Décorateur pour gérer automatiquement les erreurs.
-
-    .. deprecated:: 2.0
-        Utiliser :func:`src.core.decorators.avec_gestion_erreurs` à la place.
-        Ce décorateur est conservé pour compatibilité et délègue au décorateur
-        unifié.
-
-    Args:
-        afficher_dans_ui: Afficher l'erreur dans Streamlit
-        niveau_log: Niveau de log (ERROR, WARNING, INFO)
-        relancer: Relancer l'exception après traitement
-        valeur_fallback: Valeur à retourner en cas d'erreur
-    """
-    warnings.warn(
-        "gerer_erreurs() est déprécié, utiliser avec_gestion_erreurs() de src.core.decorators",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-
-    from .decorators import avec_gestion_erreurs
-
-    return avec_gestion_erreurs(
-        default_return=valeur_fallback,
-        log_level=niveau_log,
-        afficher_erreur=afficher_dans_ui,
-        relancer_metier=relancer,
-    )
 
 
 # ═══════════════════════════════════════════════════════════
@@ -195,7 +150,6 @@ __all__ = [
     "valider_plage",
     "valider_type",
     # Fonctions UI
-    "gerer_erreurs",
     "afficher_erreur_streamlit",
     "GestionnaireErreurs",
 ]

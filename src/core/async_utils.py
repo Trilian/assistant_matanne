@@ -11,6 +11,8 @@ Ce module fournit un wrapper sûr qui fonctionne dans tous les contextes.
 __all__ = ["executer_async"]
 
 import asyncio
+import atexit
+import concurrent.futures
 import logging
 from collections.abc import Coroutine
 from typing import TypeVar
@@ -18,6 +20,11 @@ from typing import TypeVar
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+
+# Executor singleton réutilisé entre appels (évite la création/destruction
+# d'un ThreadPoolExecutor à chaque invocation)
+_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=2, thread_name_prefix="async-bridge")
+atexit.register(_EXECUTOR.shutdown, wait=False)
 
 
 def executer_async(coro: Coroutine[object, object, T]) -> T:
@@ -49,10 +56,7 @@ def executer_async(coro: Coroutine[object, object, T]) -> T:
 
     if loop and loop.is_running():
         # Streamlit tourne déjà un loop — on exécute dans un thread séparé
-        import concurrent.futures
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-            future = pool.submit(asyncio.run, coro)
-            return future.result(timeout=120)
+        future = _EXECUTOR.submit(asyncio.run, coro)
+        return future.result(timeout=120)
     else:
         return asyncio.run(coro)

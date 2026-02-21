@@ -1,19 +1,17 @@
 """
 UI System - Design System Core.
 
-Fournit les fondations du Design System:
-- css: Moteur CSS optimisé avec déduplication (StyleSheet, styled)
+Fournit les fondations du Design System via le moteur CSS unifié.
 
 Usage:
-    from src.ui.system import StyleSheet, styled
+    from src.ui.engine import StyleSheet, styled
 """
 
-from .css import StyleSheet, css_class, inject_keyframes, styled, styled_with_attrs
+from src.ui.engine import StyleSheet, css_class, styled, styled_with_attrs
 
 __all__ = [
     "StyleSheet",
     "styled",
     "styled_with_attrs",
     "css_class",
-    "inject_keyframes",
 ]

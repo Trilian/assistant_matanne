@@ -43,6 +43,13 @@ from .health import (
     verifier_sante_globale,
     verifier_startup,
 )
+from .rerun_profiler import (
+    RerunProfiler,
+    RerunRecord,
+    obtenir_stats_rerun,
+    profiler_rerun,
+    reset_profiler,
+)
 
 __all__ = [
     "CollecteurMetriques",
@@ -59,4 +66,10 @@ __all__ = [
     "verifier_readiness",
     "verifier_sante_globale",
     "verifier_startup",
+    # Rerun Profiler
+    "RerunProfiler",
+    "RerunRecord",
+    "obtenir_stats_rerun",
+    "profiler_rerun",
+    "reset_profiler",
 ]

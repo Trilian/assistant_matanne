@@ -187,7 +187,7 @@ def injecter_animations() -> None:
     Appelé automatiquement dans ``initialiser_app()``.
     L'injection réelle est faite par ``CSSManager.inject_all()``.
     """
-    from src.ui.css import CSSManager
+    from src.ui.engine import CSSManager
 
     CSSManager.register("animations", _ANIMATION_CSS)
 

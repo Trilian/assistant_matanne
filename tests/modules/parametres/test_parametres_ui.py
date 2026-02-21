@@ -27,7 +27,7 @@ def setup_mock_st(mock_st: MagicMock, session_data: dict | None = None) -> None:
     mock_st.columns.side_effect = lambda n: [
         MagicMock() for _ in range(n if isinstance(n, int) else len(n))
     ]
-    mock_st.tabs.return_value = [MagicMock() for _ in range(7)]
+    mock_st.tabs.return_value = [MagicMock() for _ in range(8)]
     mock_st.session_state = SessionStateMock(session_data or {"parametres_tab": "👨‍👩‍👧‍👦 Foyer"})
     for cm in ["container", "expander", "spinner", "form"]:
         getattr(mock_st, cm).return_value.__enter__ = MagicMock(return_value=MagicMock())
@@ -45,6 +45,7 @@ class TestParametresUI:
     @patch("src.modules.parametres.afficher_database_config")
     @patch("src.modules.parametres.afficher_ia_config")
     @patch("src.modules.parametres.afficher_foyer_config")
+    @patch("src.ui.views.sauvegarde.afficher_sauvegarde")
     @patch("src.modules.parametres.st")
     def test_app_basic(self, mock_st, *mocks) -> None:
         """Test du rendu basique de app()."""
@@ -81,6 +82,7 @@ class TestParametresUI:
         mock_st.text_input.return_value = ""
         mock_st.selectbox.return_value = "mistral-small-latest"
         mock_st.slider.return_value = 0.7
+        mock_st.button.return_value = False
         mock_st.form_submit_button.return_value = False
         afficher_ia_config()
         mock_st.markdown.assert_called()

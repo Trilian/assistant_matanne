@@ -43,7 +43,7 @@ from datetime import datetime
 from typing import Any, Generic, Protocol, TypeVar, runtime_checkable
 from uuid import uuid4
 
-from src.services.core.base.result import ErrorCode, ErrorInfo, Failure, Result, Success
+from src.core.result import ErrorCode, ErrorInfo, Failure, Result, Success
 
 logger = logging.getLogger(__name__)
 

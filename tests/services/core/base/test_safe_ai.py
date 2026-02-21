@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from pydantic import BaseModel
 
-from src.services.core.base.result import (
+from src.core.result import (
     ErrorCode,
     Failure,
     Success,
@@ -266,7 +266,11 @@ class TestAIHealthCheck:
 
         ai_service._mock_rate_limit.peut_appeler.return_value = (False, "Quota 100/100")
 
-        health = ai_service.health_check()
+        with patch(
+            "src.services.core.base.ai_diagnostics.RateLimitIA",
+            ai_service._mock_rate_limit,
+        ):
+            health = ai_service.health_check()
 
         assert health.status == ServiceStatus.DEGRADED
         assert "limité" in health.message.lower()

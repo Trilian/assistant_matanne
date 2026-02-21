@@ -35,58 +35,66 @@ class SessionStateMock(dict):
 
 @pytest.fixture
 def mock_st():
-    """Mock complet de Streamlit."""
-    with patch("src.modules.cuisine.batch_cooking_detaille.st") as st_mock:
-        # Session state - utilise le mock dict custom
-        st_mock.session_state = SessionStateMock(
-            {
-                "batch_type": "dimanche",
-                "batch_data": {},
-                "planning_data": {},
-            }
-        )
+    """Mock complet de Streamlit (patché dans les sous-modules du package)."""
+    with patch("src.modules.cuisine.batch_cooking_detaille.components.st") as st_mock:
+        # Partager le même mock st entre tous les sous-modules
+        with (
+            patch("src.modules.cuisine.batch_cooking_detaille.app.st", st_mock),
+            patch("src.modules.cuisine.batch_cooking_detaille.generation.st", st_mock),
+        ):
+            # Session state
+            st_mock.session_state = SessionStateMock(
+                {
+                    "batch_type": "dimanche",
+                    "batch_data": {},
+                    "planning_data": {},
+                }
+            )
 
-        # Columns context manager - return the right number based on argument
-        def create_columns(n):
-            cols = []
-            for _ in range(n if isinstance(n, int) else len(n)):
-                col = MagicMock()
-                col.__enter__ = MagicMock(return_value=col)
-                col.__exit__ = MagicMock(return_value=False)
-                cols.append(col)
-            return cols
+            # Columns context manager
+            def create_columns(n):
+                cols = []
+                for _ in range(n if isinstance(n, int) else len(n)):
+                    col = MagicMock()
+                    col.__enter__ = MagicMock(return_value=col)
+                    col.__exit__ = MagicMock(return_value=False)
+                    cols.append(col)
+                return cols
 
-        st_mock.columns.side_effect = create_columns
+            st_mock.columns.side_effect = create_columns
 
-        # Container context manager
-        container_mock = MagicMock()
-        container_mock.__enter__ = MagicMock(return_value=container_mock)
-        container_mock.__exit__ = MagicMock(return_value=False)
-        st_mock.container.return_value = container_mock
+            # Container context manager
+            container_mock = MagicMock()
+            container_mock.__enter__ = MagicMock(return_value=container_mock)
+            container_mock.__exit__ = MagicMock(return_value=False)
+            st_mock.container.return_value = container_mock
 
-        # Expander context manager
-        expander_mock = MagicMock()
-        expander_mock.__enter__ = MagicMock(return_value=expander_mock)
-        expander_mock.__exit__ = MagicMock(return_value=False)
-        st_mock.expander.return_value = expander_mock
+            # Expander context manager
+            expander_mock = MagicMock()
+            expander_mock.__enter__ = MagicMock(return_value=expander_mock)
+            expander_mock.__exit__ = MagicMock(return_value=False)
+            st_mock.expander.return_value = expander_mock
 
-        # Tabs context manager
-        tab_mock = MagicMock()
-        tab_mock.__enter__ = MagicMock(return_value=tab_mock)
-        tab_mock.__exit__ = MagicMock(return_value=False)
-        st_mock.tabs.return_value = [tab_mock, tab_mock, tab_mock]
+            # Tabs context manager
+            tab_mock = MagicMock()
+            tab_mock.__enter__ = MagicMock(return_value=tab_mock)
+            tab_mock.__exit__ = MagicMock(return_value=False)
+            st_mock.tabs.return_value = [tab_mock, tab_mock, tab_mock]
 
-        # time_input returns a proper time object
-        st_mock.time_input.return_value = time(9, 0)
+            # time_input returns a proper time object
+            st_mock.time_input.return_value = time(9, 0)
 
-        yield st_mock
+            yield st_mock
 
 
 @pytest.fixture
 def mock_etat_vide():
     """Mock etat_vide."""
-    with patch("src.modules.cuisine.batch_cooking_detaille.etat_vide") as mock:
-        yield mock
+    with (
+        patch("src.modules.cuisine.batch_cooking_detaille.components.etat_vide") as mock_comp,
+        patch("src.modules.cuisine.batch_cooking_detaille.app.etat_vide") as mock_app,
+    ):
+        yield mock_comp
 
 
 @pytest.fixture
@@ -637,7 +645,7 @@ class TestRenderFinitionJourJ:
 class TestGenererBatchIA:
     """Tests pour generer_batch_ia."""
 
-    @patch("src.modules.cuisine.batch_cooking_detaille.obtenir_client_ia")
+    @patch("src.modules.cuisine.batch_cooking_detaille.generation.obtenir_client_ia")
     def test_generer_batch_ia_succes(
         self, mock_obtenir_client, mock_st, sample_planning_data, sample_batch_data
     ):
@@ -653,7 +661,7 @@ class TestGenererBatchIA:
         assert result == sample_batch_data
         mock_client.generer_json.assert_called_once()
 
-    @patch("src.modules.cuisine.batch_cooking_detaille.obtenir_client_ia")
+    @patch("src.modules.cuisine.batch_cooking_detaille.generation.obtenir_client_ia")
     def test_generer_batch_ia_client_none(self, mock_obtenir_client, mock_st, sample_planning_data):
         """Teste quand le client IA n'est pas disponible."""
         from src.modules.cuisine.batch_cooking_detaille import generer_batch_ia
@@ -665,7 +673,7 @@ class TestGenererBatchIA:
         assert result == {}
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.batch_cooking_detaille.obtenir_client_ia")
+    @patch("src.modules.cuisine.batch_cooking_detaille.generation.obtenir_client_ia")
     def test_generer_batch_ia_retourne_string_json(
         self, mock_obtenir_client, mock_st, sample_planning_data, sample_batch_data
     ):
@@ -682,7 +690,7 @@ class TestGenererBatchIA:
 
         assert result == sample_batch_data
 
-    @patch("src.modules.cuisine.batch_cooking_detaille.obtenir_client_ia")
+    @patch("src.modules.cuisine.batch_cooking_detaille.generation.obtenir_client_ia")
     def test_generer_batch_ia_erreur(self, mock_obtenir_client, mock_st, sample_planning_data):
         """Teste la gestion des erreurs IA."""
         from src.modules.cuisine.batch_cooking_detaille import generer_batch_ia
@@ -696,7 +704,7 @@ class TestGenererBatchIA:
         assert result == {}
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.batch_cooking_detaille.obtenir_client_ia")
+    @patch("src.modules.cuisine.batch_cooking_detaille.generation.obtenir_client_ia")
     def test_generer_batch_ia_session_mercredi(
         self, mock_obtenir_client, mock_st, sample_planning_data, sample_batch_data
     ):
@@ -775,7 +783,7 @@ class TestApp:
         mock_st.tabs.assert_called_once()
         call_args = mock_st.tabs.call_args[0][0]
         assert len(call_args) == 3
-        assert "Préparer" in call_args[0]
+        assert "parer" in call_args[0].lower()  # "Préparer" (encoding-safe)
         assert "Session" in call_args[1]
         assert "Finitions" in call_args[2]
 

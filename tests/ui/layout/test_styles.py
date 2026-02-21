@@ -14,7 +14,7 @@ class TestInjecterCss:
 
         assert injecter_css is not None
 
-    @patch("src.ui.css.CSSManager.register")
+    @patch("src.ui.engine.CSSManager.register")
     def test_injecter_css_registers_in_manager(self, mock_register):
         """Test que le CSS est enregistré dans CSSManager."""
         from src.ui.layout.styles import injecter_css
@@ -27,7 +27,7 @@ class TestInjecterCss:
         assert "--primary:" in css
         assert "--accent:" in css
 
-    @patch("src.ui.css.CSSManager.register")
+    @patch("src.ui.engine.CSSManager.register")
     def test_css_content(self, mock_register):
         """Test que le contenu CSS inclut les classes principales."""
         from src.ui.layout.styles import injecter_css

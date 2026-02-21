@@ -13,8 +13,8 @@ from __future__ import annotations
 
 import streamlit as st
 
+from src.ui.engine import StyleSheet
 from src.ui.registry import composant_ui
-from src.ui.system.css import StyleSheet
 from src.ui.tokens import (
     Couleur,
     Espacement,

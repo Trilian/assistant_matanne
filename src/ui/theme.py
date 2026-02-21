@@ -227,7 +227,7 @@ def appliquer_theme() -> None:
 
     Le CSS sera injecté en batch via ``CSSManager.inject_all()``.
     """
-    from src.ui.css import CSSManager
+    from src.ui.engine import CSSManager
 
     theme = obtenir_theme()
     css = theme.generer_css_complet()

@@ -11,6 +11,7 @@ Fonctionnalités:
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.services.cuisine.recettes import obtenir_service_recettes
 
 # Import externe pour l'onglet import
@@ -24,6 +25,7 @@ from .liste import afficher_liste
 from .utils import formater_quantite
 
 
+@profiler_rerun("recettes")
 def app():
     """Point d'entrée module recettes"""
     st.title("🍽️ Mes Recettes")

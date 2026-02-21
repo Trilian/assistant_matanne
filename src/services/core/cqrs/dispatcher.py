@@ -29,7 +29,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Generic, TypeVar
 
-from src.services.core.base.result import ErrorCode, ErrorInfo, Failure, Result, Success
+from src.core.result import ErrorCode, ErrorInfo, Failure, Result, Success
 
 from .commands import Command, CommandHandler, CommandResult
 from .queries import Query, QueryHandler

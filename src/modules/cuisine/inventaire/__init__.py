@@ -12,12 +12,16 @@ import logging
 import streamlit as st
 
 from src.core.errors_base import ErreurValidation
+from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import (
     ModuleState,
     error_boundary,
     init_module_state,
 )
 from src.services.inventaire import obtenir_service_inventaire
+from src.ui.keys import KeyNamespace
+
+_keys = KeyNamespace("inventaire")
 from src.ui import etat_vide
 from src.ui.components import MetricConfig, afficher_metriques_row
 
@@ -82,13 +86,13 @@ def afficher_filtres_stock(inventaire: list) -> dict:
     with col_filter1:
         emplacements = sorted(set(a["emplacement"] for a in inventaire if a["emplacement"]))
         selected_emplacements = st.multiselect(
-            "📝 Emplacement", options=emplacements, default=[], key="inv_filtre_emplacement"
+            "📝 Emplacement", options=emplacements, default=[], key=_keys("filtre_emplacement")
         )
 
     with col_filter2:
         categories = sorted(set(a["ingredient_categorie"] for a in inventaire))
         selected_categories = st.multiselect(
-            "🏷️ Catégorie", options=categories, default=[], key="inv_filtre_categorie"
+            "🏷️ Catégorie", options=categories, default=[], key=_keys("filtre_categorie")
         )
 
     with col_filter3:
@@ -96,7 +100,7 @@ def afficher_filtres_stock(inventaire: list) -> dict:
             "⚠️ Statut",
             options=["critique", "stock_bas", "peremption_proche", "ok"],
             default=[],
-            key="inv_filtre_statut",
+            key=_keys("filtre_statut"),
         )
 
     return {
@@ -149,17 +153,19 @@ def afficher_actions_stock(state: ModuleState) -> None:
     col_btn1, col_btn2, col_btn3 = st.columns(3)
 
     with col_btn1:
-        if st.button("➕ Ajouter un article", use_container_width=True, key="btn_add_article"):
+        if st.button(
+            "➕ Ajouter un article", use_container_width=True, key=_keys("btn_add_article")
+        ):
             state.set("show_form", True)
             st.rerun()
 
     with col_btn2:
-        if st.button("🔄 Rafraîchir", use_container_width=True, key="btn_refresh"):
+        if st.button("🔄 Rafraîchir", use_container_width=True, key=_keys("btn_refresh")):
             state.increment("refresh_counter")
             st.rerun()
 
     with col_btn3:
-        st.button("📥 Importer CSV", use_container_width=True, key="btn_import")
+        st.button("📥 Importer CSV", use_container_width=True, key=_keys("btn_import"))
 
 
 def afficher_formulaire_ajout(state: ModuleState) -> None:
@@ -178,11 +184,11 @@ def afficher_formulaire_ajout(state: ModuleState) -> None:
         ingredient_nom = st.text_input(
             "Nom de l'article *",
             placeholder="Ex: Tomates cerises",
-            key="form_nom_article",
+            key=_keys("form_nom_article"),
         )
 
     with col2:
-        quantite = st.number_input("Quantité", value=1.0, min_value=0.0, key="form_quantite")
+        quantite = st.number_input("Quantité", value=1.0, min_value=0.0, key=_keys("form_quantite"))
 
     col1, col2 = st.columns(2)
 
@@ -190,16 +196,18 @@ def afficher_formulaire_ajout(state: ModuleState) -> None:
         emplacement = st.text_input(
             "Emplacement",
             placeholder="Frigo, Placard...",
-            key="form_emplacement",
+            key=_keys("form_emplacement"),
         )
 
     with col2:
-        date_peremption = st.date_input("Date de péremption", value=None, key="form_date")
+        date_peremption = st.date_input("Date de péremption", value=None, key=_keys("form_date"))
 
     col1, col2 = st.columns([1, 4])
 
     with col1:
-        if st.button("⏰ Ajouter", use_container_width=True, type="primary", key="btn_confirm_add"):
+        if st.button(
+            "⏰ Ajouter", use_container_width=True, type="primary", key=_keys("btn_confirm_add")
+        ):
             if not ingredient_nom:
                 st.error("❌ Le nom est obligatoire")
             else:
@@ -220,7 +228,7 @@ def afficher_formulaire_ajout(state: ModuleState) -> None:
                         st.error("❌ Impossible d'ajouter l'article")
 
     with col2:
-        if st.button("❌ Annuler", use_container_width=True, key="btn_cancel_add"):
+        if st.button("❌ Annuler", use_container_width=True, key=_keys("btn_cancel_add")):
             state.set("show_form", False)
             st.rerun()
 
@@ -241,14 +249,14 @@ def afficher_stock_complet() -> None:
             alertes = service.get_alertes() or {}
     except Exception as e:
         st.error(f"❌ Erreur: {e}")
-        if st.button("🔄 Réessayer", key="retry_stock"):
+        if st.button("🔄 Réessayer", key=_keys("retry_stock")):
             st.rerun()
         return
 
     # Inventaire vide
     if not inventaire:
         st.info("📦 Inventaire vide. Commencez par ajouter des articles!")
-        if st.button("➕ Ajouter un article", key="btn_add_empty"):
+        if st.button("➕ Ajouter un article", key=_keys("btn_add_empty")):
             state.set("show_form", True)
         return
 
@@ -276,6 +284,7 @@ def afficher_stock_complet() -> None:
 # ============================================================================
 
 
+@profiler_rerun("inventaire")
 def app():
     """Point d'entrée du module inventaire (version migrée)."""
 

@@ -16,34 +16,34 @@ class TestCSSManager:
 
     def _reset(self):
         """Réinitialise le singleton CSSManager entre les tests."""
-        from src.ui.css import CSSManager
+        from src.ui.engine import CSSManager
 
         CSSManager.reset()
 
     def test_register_stores_block(self):
         """Register stocke un bloc CSS sous un nom."""
-        from src.ui.css import CSSManager
+        from src.ui.engine import CSSManager
 
         self._reset()
         CSSManager.register("test-block", ".foo { color: red; }")
         stats = CSSManager.get_stats()
-        assert stats["registered_blocks"] >= 1
+        assert stats["blocks"] >= 1
 
     def test_register_overwrites_same_name(self):
         """Register écrase un bloc existant avec le même nom."""
-        from src.ui.css import CSSManager
+        from src.ui.engine import CSSManager
 
         self._reset()
         CSSManager.register("dup", ".a { }")
         CSSManager.register("dup", ".b { }")
         stats = CSSManager.get_stats()
-        # Un seul bloc nommé "dup" → count == 1
-        assert stats["registered_blocks"] == 1
+        # Un seul bloc nommé "dup" â†’ count == 1
+        assert stats["blocks"] == 1
 
     @patch("streamlit.markdown")
     def test_inject_all_calls_markdown_once(self, mock_md):
         """inject_all produit un seul appel st.markdown."""
-        from src.ui.css import CSSManager
+        from src.ui.engine import CSSManager
 
         self._reset()
         # Simuler session_state vide
@@ -63,7 +63,7 @@ class TestCSSManager:
     @patch("streamlit.markdown")
     def test_inject_all_dedup_same_hash(self, mock_md):
         """inject_all ne réinjecte pas si le hash MD5 n'a pas changé."""
-        from src.ui.css import CSSManager
+        from src.ui.engine import CSSManager
 
         self._reset()
         session = {}
@@ -72,14 +72,14 @@ class TestCSSManager:
             CSSManager.inject_all()
             assert mock_md.call_count == 1
 
-            # Deuxième appel — même contenu → pas d'injection
+            # Deuxième appel — même contenu â†’ pas d'injection
             CSSManager.inject_all()
             assert mock_md.call_count == 1
 
     @patch("streamlit.markdown")
     def test_inject_all_reinjects_after_invalidate(self, mock_md):
         """Après invalidate(), inject_all réinjecte le CSS."""
-        from src.ui.css import CSSManager
+        from src.ui.engine import CSSManager
 
         self._reset()
         session = {}
@@ -94,22 +94,22 @@ class TestCSSManager:
 
     def test_reset_clears_all(self):
         """reset() vide le registre."""
-        from src.ui.css import CSSManager
+        from src.ui.engine import CSSManager
 
         self._reset()
         CSSManager.register("z", ".z { }")
         CSSManager.reset()
         stats = CSSManager.get_stats()
-        assert stats["registered_blocks"] == 0
+        assert stats["blocks"] == 0
 
     def test_get_stats_structure(self):
         """get_stats retourne les clés attendues."""
-        from src.ui.css import CSSManager
+        from src.ui.engine import CSSManager
 
         self._reset()
         stats = CSSManager.get_stats()
-        assert "registered_blocks" in stats
-        assert "total_size_bytes" in stats
+        assert "blocks" in stats
+        assert "total_bytes" in stats
 
 
 class TestLazyBarrel:

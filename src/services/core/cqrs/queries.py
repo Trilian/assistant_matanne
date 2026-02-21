@@ -30,7 +30,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, fields
 from typing import Any, Generic, Protocol, TypeVar, runtime_checkable
 
-from src.services.core.base.result import ErrorInfo, Result
+from src.core.result import ErrorInfo, Result
 
 logger = logging.getLogger(__name__)
 

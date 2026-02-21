@@ -1,9 +1,26 @@
 """
-Tests complets pour src/ui/tablet_mode.py
+Tests complets pour src/ui/tablet (mode tablette)
 Couverture cible: >80%
 """
 
+from functools import wraps
 from unittest.mock import MagicMock, patch
+
+
+def _noop_decorator(func):
+    """Remplace @ui_fragment pendant les tests (pas de ScriptRunContext)."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+# Patch ui_fragment AVANT l'import de kitchen
+_ui_frag_patch = patch(
+    "src.ui.tablet.kitchen.ui_fragment", side_effect=lambda f: _noop_decorator(f)
+)
 
 # ═══════════════════════════════════════════════════════════
 # TABLET MODE ENUM
@@ -300,27 +317,24 @@ class TestTabletNumberInput:
     @patch("streamlit.columns")
     @patch("streamlit.button")
     @patch("streamlit.markdown")
-    @patch("streamlit.rerun")
-    def test_number_input_minus(self, mock_rerun, mock_md, mock_btn, mock_cols, mock_write):
-        """Test bouton moins."""
+    def test_number_input_minus(self, mock_md, mock_btn, mock_cols, mock_write):
+        """Test bouton moins (via on_click callback)."""
         import streamlit as st
 
         from src.ui.tablet import saisie_nombre_tablette
+        from src.ui.tablet.widgets import _adjust_value
 
         mock_cols.return_value = [MagicMock() for _ in range(3)]
         for col in mock_cols.return_value:
             col.__enter__ = MagicMock(return_value=col)
             col.__exit__ = MagicMock()
 
-        # Premier bouton (minus) retourne True
-        mock_btn.side_effect = [True, False]
+        mock_btn.return_value = False
 
-        try:
-            saisie_nombre_tablette("Test", key="num_minus")
-        except Exception:
-            pass
+        saisie_nombre_tablette("Test", key="num_minus")
 
-        # La valeur devrait diminuer
+        # Simuler le clic: invoquer le callback on_click directement
+        _adjust_value("num_minus", -1, 0, 100)
         assert st.session_state.get("num_minus_value") == 9
 
     @patch("streamlit.session_state", {"num_plus_value": 5})
@@ -328,26 +342,24 @@ class TestTabletNumberInput:
     @patch("streamlit.columns")
     @patch("streamlit.button")
     @patch("streamlit.markdown")
-    @patch("streamlit.rerun")
-    def test_number_input_plus(self, mock_rerun, mock_md, mock_btn, mock_cols, mock_write):
-        """Test bouton plus."""
+    def test_number_input_plus(self, mock_md, mock_btn, mock_cols, mock_write):
+        """Test bouton plus (via on_click callback)."""
         import streamlit as st
 
         from src.ui.tablet import saisie_nombre_tablette
+        from src.ui.tablet.widgets import _adjust_value
 
         mock_cols.return_value = [MagicMock() for _ in range(3)]
         for col in mock_cols.return_value:
             col.__enter__ = MagicMock(return_value=col)
             col.__exit__ = MagicMock()
 
-        # Deuxième bouton (plus) retourne True
-        mock_btn.side_effect = [False, True]
+        mock_btn.return_value = False
 
-        try:
-            saisie_nombre_tablette("Test", key="num_plus", max_value=10)
-        except Exception:
-            pass
+        saisie_nombre_tablette("Test", key="num_plus", max_value=10)
 
+        # Simuler le clic: invoquer le callback on_click directement
+        _adjust_value("num_plus", 1, 0, 10)
         assert st.session_state.get("num_plus_value") == 6
 
 
@@ -453,21 +465,21 @@ class TestRenderModeSelector:
     @patch("streamlit.sidebar")
     @patch("streamlit.selectbox")
     @patch("streamlit.markdown")
-    @patch("streamlit.rerun")
-    def test_render_mode_change(self, mock_rerun, mock_md, mock_select, mock_sidebar):
-        """Test changement de mode déclenche rerun."""
+    def test_render_mode_change(self, mock_md, mock_select, mock_sidebar):
+        """Test changement de mode via on_change callback."""
         from src.ui.tablet import ModeTablette, afficher_selecteur_mode
 
         mock_sidebar.__enter__ = MagicMock()
         mock_sidebar.__exit__ = MagicMock()
-        mock_select.return_value = ModeTablette.TABLETTE  # Différent du mode actuel
+        mock_select.return_value = ModeTablette.TABLETTE
 
-        try:
-            afficher_selecteur_mode()
-        except Exception:
-            pass
+        afficher_selecteur_mode()
 
-        mock_rerun.assert_called_once()
+        # Le selectbox doit être créé avec un on_change callback
+        mock_select.assert_called_once()
+        call_kwargs = mock_select.call_args[1]
+        assert "on_change" in call_kwargs
+        assert callable(call_kwargs["on_change"])
 
 
 # ═══════════════════════════════════════════════════════════
@@ -484,13 +496,16 @@ class TestRenderKitchenRecipeView:
 
         assert afficher_vue_recette_cuisine is not None
 
+    @patch("src.ui.fragments._has_fragment", return_value=False)
     @patch("streamlit.session_state", {})
     @patch("streamlit.markdown")
     @patch("streamlit.tabs")
     @patch("streamlit.button", return_value=False)
     @patch("streamlit.columns")
     @patch("streamlit.progress")
-    def test_recipe_start_screen(self, mock_prog, mock_cols, mock_btn, mock_tabs, mock_md):
+    def test_recipe_start_screen(
+        self, mock_prog, mock_cols, mock_btn, mock_tabs, mock_md, mock_frag
+    ):
         """Test écran de démarrage recette."""
         from src.ui.tablet import afficher_vue_recette_cuisine
 
@@ -516,6 +531,7 @@ class TestRenderKitchenRecipeView:
 
         mock_md.assert_called()
 
+    @patch("src.ui.fragments._has_fragment", return_value=False)
     @patch("streamlit.session_state", {"test_etape": 1})
     @patch("streamlit.markdown")
     @patch("streamlit.tabs")
@@ -523,7 +539,9 @@ class TestRenderKitchenRecipeView:
     @patch("streamlit.columns")
     @patch("streamlit.progress")
     @patch("streamlit.checkbox")
-    def test_recipe_step_view(self, mock_check, mock_prog, mock_cols, mock_btn, mock_tabs, mock_md):
+    def test_recipe_step_view(
+        self, mock_check, mock_prog, mock_cols, mock_btn, mock_tabs, mock_md, mock_frag
+    ):
         """Test affichage étape de recette."""
         import streamlit as st
 
@@ -551,13 +569,16 @@ class TestRenderKitchenRecipeView:
 
         mock_prog.assert_called()
 
+    @patch("src.ui.fragments._has_fragment", return_value=False)
     @patch("streamlit.session_state", {"test_fin_etape": 3})
     @patch("streamlit.markdown")
     @patch("streamlit.tabs")
     @patch("streamlit.button", return_value=False)
     @patch("streamlit.columns")
     @patch("streamlit.balloons")
-    def test_recipe_end_screen(self, mock_balloons, mock_cols, mock_btn, mock_tabs, mock_md):
+    def test_recipe_end_screen(
+        self, mock_balloons, mock_cols, mock_btn, mock_tabs, mock_md, mock_frag
+    ):
         """Test écran de fin de recette."""
         import streamlit as st
 
@@ -584,6 +605,7 @@ class TestRenderKitchenRecipeView:
 
         mock_balloons.assert_called_once()
 
+    @patch("src.ui.fragments._has_fragment", return_value=False)
     @patch("streamlit.session_state", {"test_timer_etape": 1})
     @patch("streamlit.markdown")
     @patch("streamlit.tabs")
@@ -593,7 +615,15 @@ class TestRenderKitchenRecipeView:
     @patch("streamlit.checkbox")
     @patch("streamlit.expander")
     def test_recipe_with_timer(
-        self, mock_expander, mock_check, mock_prog, mock_cols, mock_btn, mock_tabs, mock_md
+        self,
+        mock_expander,
+        mock_check,
+        mock_prog,
+        mock_cols,
+        mock_btn,
+        mock_tabs,
+        mock_md,
+        mock_frag,
     ):
         """Test recette avec timer (TimerCuisine intégré)."""
         from src.ui.tablet import afficher_vue_recette_cuisine
@@ -620,30 +650,31 @@ class TestRenderKitchenRecipeView:
         # L'expander timer doit être affiché
         mock_expander.assert_called()
 
+    @patch("src.ui.fragments._has_fragment", return_value=False)
     @patch("streamlit.session_state", {"nav_etape": 2})
     @patch("streamlit.markdown")
     @patch("streamlit.tabs")
-    @patch("streamlit.button")
+    @patch("streamlit.button", return_value=False)
     @patch("streamlit.columns")
     @patch("streamlit.progress")
     @patch("streamlit.checkbox")
-    @patch("streamlit.rerun")
     @patch("streamlit.expander")
     def test_recipe_navigation_prev(
         self,
         mock_expander,
-        mock_rerun,
         mock_check,
         mock_prog,
         mock_cols,
         mock_btn,
         mock_tabs,
         mock_md,
+        mock_frag,
     ):
-        """Test navigation précédent."""
+        """Test navigation précédent (via on_click callback)."""
         import streamlit as st
 
         from src.ui.tablet import afficher_vue_recette_cuisine
+        from src.ui.tablet.kitchen import _avancer_etape
 
         st.session_state["nav_etape"] = 2
 
@@ -662,25 +693,26 @@ class TestRenderKitchenRecipeView:
         mock_exp.__exit__ = MagicMock()
         mock_expander.return_value = mock_exp
 
-        # Buttons: Précédent=True, Quitter=False, Suivant=False
-        mock_btn.side_effect = [True, False, False]
+        mock_btn.return_value = False
 
         recette = {"nom": "Test", "instructions": ["A", "B", "C"]}
 
-        try:
-            afficher_vue_recette_cuisine(recette, cle="nav")
-        except Exception:
-            pass
+        afficher_vue_recette_cuisine(recette, cle="nav")
 
+        # Simuler le clic sur Précédent via le callback
+        _avancer_etape("nav", -1)
         assert st.session_state.get("nav_etape") == 1
 
+    @patch("src.ui.fragments._has_fragment", return_value=False)
     @patch("streamlit.session_state", {"start_etape": 0})
     @patch("streamlit.markdown")
     @patch("streamlit.tabs")
     @patch("streamlit.button")
     @patch("streamlit.columns")
     @patch("streamlit.metric")
-    def test_recipe_start_button(self, mock_metric, mock_cols, mock_btn, mock_tabs, mock_md):
+    def test_recipe_start_button(
+        self, mock_metric, mock_cols, mock_btn, mock_tabs, mock_md, mock_frag
+    ):
         """Test bouton commencer est affiché."""
         from src.ui.tablet import afficher_vue_recette_cuisine
 

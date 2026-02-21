@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.services.core.base.result import (
+from src.core.result import (
     ErrorCode,
     ErrorInfo,
     Failure,

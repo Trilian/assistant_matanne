@@ -14,7 +14,7 @@ class TestStyleSheet:
 
     def test_create_class_deterministic(self):
         """Test que les classes sont déterministes."""
-        from src.ui.system.css import StyleSheet
+        from src.ui.engine import StyleSheet
 
         StyleSheet.reset()
 
@@ -26,7 +26,7 @@ class TestStyleSheet:
 
     def test_create_class_different_styles(self):
         """Test que styles différents = classes différentes."""
-        from src.ui.system.css import StyleSheet
+        from src.ui.engine import StyleSheet
 
         StyleSheet.reset()
 
@@ -36,8 +36,8 @@ class TestStyleSheet:
         assert class1 != class2
 
     def test_underscore_to_dash(self):
-        """Test conversion underscore → tiret."""
-        from src.ui.system.css import StyleSheet
+        """Test conversion underscore â†’ tiret."""
+        from src.ui.engine import StyleSheet
 
         StyleSheet.reset()
 
@@ -49,7 +49,7 @@ class TestStyleSheet:
 
     def test_styled_helper(self):
         """Test le helper styled()."""
-        from src.ui.system.css import styled
+        from src.ui.engine import styled
 
         html = styled("div", display="flex", gap="1rem")
 
@@ -58,7 +58,7 @@ class TestStyleSheet:
 
     def test_styled_with_attrs(self):
         """Test styled_with_attrs() avec attributs ARIA."""
-        from src.ui.system.css import styled_with_attrs
+        from src.ui.engine import styled_with_attrs
 
         html = styled_with_attrs(
             "nav",
@@ -73,7 +73,7 @@ class TestStyleSheet:
 
     def test_css_class_helper(self):
         """Test le helper css_class()."""
-        from src.ui.system.css import css_class
+        from src.ui.engine import css_class
 
         class_name = css_class(display="flex", gap="1rem")
 

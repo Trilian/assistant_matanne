@@ -7,14 +7,16 @@ from .generation import (
     inject_pwa_meta,
     is_pwa_installed,
 )
-from .offline import generate_offline_page
-from .service_worker import generate_service_worker
+from .offline import OFFLINE_HTML, generate_offline_page
+from .service_worker import SERVICE_WORKER_JS, generate_service_worker
 
 __all__ = [
     "PWA_CONFIG",
     "generate_manifest",
     "generate_service_worker",
+    "SERVICE_WORKER_JS",
     "generate_offline_page",
+    "OFFLINE_HTML",
     "generate_pwa_files",
     "is_pwa_installed",
     "generate_icon_svg",

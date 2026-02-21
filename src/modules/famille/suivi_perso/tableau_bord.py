@@ -3,7 +3,7 @@ Module Suivi Perso - Dashboard et graphiques
 """
 
 from src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUT
-from src.ui.css import charger_css
+from src.ui.engine import charger_css
 
 from .utils import date, get_current_user, go, set_current_user, st, timedelta
 

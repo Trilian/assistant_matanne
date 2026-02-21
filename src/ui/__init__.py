@@ -207,6 +207,9 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "FormBuilder": (".forms", "FormBuilder"),
     "FormResult": (".forms", "FormResult"),
     "creer_formulaire": (".forms", "creer_formulaire"),
+    # ── Key Policy Engine ──────────────────────────────
+    "KeyNamespace": (".keys", "KeyNamespace"),
+    "widget_keys": (".keys", "widget_keys"),
 }
 
 

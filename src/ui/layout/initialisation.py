@@ -55,7 +55,7 @@ def initialiser_app() -> bool:
     # ── Pipeline CSS unifié ──────────────────────────────
     # Chaque source enregistre son CSS dans le CSSManager,
     # puis une seule injection batch à la fin.
-    from src.ui.css import CSSManager
+    from src.ui.engine import CSSManager
 
     # 0. Styles globaux (root vars, main-header, responsive, print)
     from src.ui.layout.styles import injecter_css

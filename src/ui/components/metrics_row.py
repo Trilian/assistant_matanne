@@ -20,7 +20,7 @@ from typing import Any, Callable
 
 import streamlit as st
 
-from src.ui.system.css import StyleSheet
+from src.ui.engine import StyleSheet
 from src.ui.tokens import Couleur
 from src.ui.tokens_semantic import Sem
 from src.ui.utils import echapper_html

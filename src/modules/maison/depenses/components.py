@@ -21,6 +21,9 @@ except ImportError:
     PLOTLY_AVAILABLE = False
 
 from src.core.session_keys import SK
+from src.ui.keys import KeyNamespace
+
+_keys = KeyNamespace("depenses")
 
 from .crud import (
     create_depense,
@@ -85,11 +88,11 @@ def afficher_depense_card(depense: HouseExpense):
         with col3:
             col_edit, col_del = st.columns(2)
             with col_edit:
-                if st.button("✏️", key=f"edit_{depense.id}", help="Modifier"):
+                if st.button("✏️", key=_keys("edit", depense.id), help="Modifier"):
                     st.session_state[SK.EDIT_DEPENSE_ID] = depense.id
                     st.rerun()
             with col_del:
-                if st.button("🗑️", key=f"del_{depense.id}", help="Supprimer"):
+                if st.button("🗑️", key=_keys("del", depense.id), help="Supprimer"):
                     delete_depense(depense.id)
                     st.rerun()
 
@@ -281,11 +284,15 @@ def afficher_graphique_repartition():
             options=range(1, 13),
             format_func=lambda x: MOIS_FR[x],
             index=today.month - 1,
-            key="repartition_mois",
+            key=_keys("repartition_mois"),
         )
     with col2:
         annee = st.number_input(
-            "Année", min_value=2020, max_value=2030, value=today.year, key="repartition_annee"
+            "Année",
+            min_value=2020,
+            max_value=2030,
+            value=today.year,
+            key=_keys("repartition_annee"),
         )
 
     depenses = get_depenses_mois(mois, int(annee))
@@ -335,10 +342,10 @@ def afficher_export_section():
     col1, col2 = st.columns(2)
     with col1:
         annee_export = st.selectbox(
-            "Année à exporter", options=range(today.year, 2019, -1), key="export_annee"
+            "Année à exporter", options=range(today.year, 2019, -1), key=_keys("export_annee")
         )
     with col2:
-        format_export = st.selectbox("Format", options=["CSV", "Excel"], key="export_format")
+        format_export = st.selectbox("Format", options=["CSV", "Excel"], key=_keys("export_format"))
 
     if st.button("📥 Générer l'export", type="primary", use_container_width=True):
         # Récupérer toutes les dépenses de l'année
@@ -575,18 +582,22 @@ def afficher_comparaison_mois():
             range(1, 13),
             format_func=lambda x: MOIS_FR[x],
             index=today.month - 1,
-            key="mois1",
+            key=_keys("mois1"),
         )
-        annee1 = st.number_input("Annee", 2020, 2030, today.year, key="annee1")
+        annee1 = st.number_input("Annee", 2020, 2030, today.year, key=_keys("annee1"))
 
     with col2:
         st.caption("Mois 2")
         mois_prec = today.month - 1 if today.month > 1 else 12
         annee_prec = today.year if today.month > 1 else today.year - 1
         mois2 = st.selectbox(
-            "Mois", range(1, 13), format_func=lambda x: MOIS_FR[x], index=mois_prec - 1, key="mois2"
+            "Mois",
+            range(1, 13),
+            format_func=lambda x: MOIS_FR[x],
+            index=mois_prec - 1,
+            key=_keys("mois2"),
         )
-        annee2 = st.number_input("Annee", 2020, 2030, annee_prec, key="annee2")
+        annee2 = st.number_input("Annee", 2020, 2030, annee_prec, key=_keys("annee2"))
 
     if st.button("Comparer", type="primary"):
         dep1 = get_depenses_mois(mois1, int(annee1))

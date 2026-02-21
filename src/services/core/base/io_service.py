@@ -105,6 +105,8 @@ class IOService:
 
         if isinstance(data, str | bytes):
             data = [data]
+        elif isinstance(data, dict):
+            data = [data]
 
         items = []
         errors = []

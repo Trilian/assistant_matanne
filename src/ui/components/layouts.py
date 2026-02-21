@@ -7,8 +7,8 @@ from collections.abc import Callable
 
 import streamlit as st
 
+from src.ui.engine import StyleSheet
 from src.ui.registry import composant_ui
-from src.ui.system.css import StyleSheet
 from src.ui.tokens import Couleur, Espacement, Rayon
 from src.ui.utils import echapper_html
 

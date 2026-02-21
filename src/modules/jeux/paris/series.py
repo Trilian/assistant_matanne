@@ -25,7 +25,7 @@ from src.services.jeux import (
     get_sync_service,
 )
 from src.ui import etat_vide
-from src.ui.css import charger_css
+from src.ui.engine import charger_css
 
 logger = logging.getLogger(__name__)
 

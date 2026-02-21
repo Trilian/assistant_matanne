@@ -12,7 +12,7 @@ pour le support dark mode automatique via les tokens sémantiques.
 
 import streamlit.components.v1 as components
 
-from src.ui.css import CSSManager
+from src.ui.engine import CSSManager
 
 from .config import ModeTablette, obtenir_mode_tablette
 

@@ -10,6 +10,9 @@ import streamlit as st
 
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.ui import etat_vide
+from src.ui.keys import KeyNamespace
+
+_keys = KeyNamespace("recettes_liste")
 
 
 def afficher_liste():
@@ -36,7 +39,7 @@ def afficher_liste():
             "Recettes/page",
             [6, 9, 12, 15],
             index=[6, 9, 12, 15].index(st.session_state.recettes_page_size),
-            key="select_page_size",
+            key=_keys("page_size"),
             label_visibility="collapsed",
         )
         st.session_state.recettes_page_size = page_size
@@ -51,21 +54,21 @@ def afficher_liste():
         nom_filter = st.text_input(
             "Chercher par nom",
             placeholder="ex: pâte, gâteau...",
-            key="filter_nom",
+            key=_keys("filter_nom"),
             label_visibility="collapsed",
         )
     with col2:
         type_repas = st.selectbox(
             "Type de repas",
             ["Tous", "petit_déjeuner", "déjeuner", "dîner", "goûter"],
-            key="filter_type_repas",
+            key=_keys("filter_type_repas"),
             label_visibility="collapsed",
         )
     with col3:
         difficulte = st.selectbox(
             "Difficulté",
             ["Tous", "facile", "moyen", "difficile"],
-            key="filter_difficulte",
+            key=_keys("filter_difficulte"),
             label_visibility="collapsed",
         )
     with col4:
@@ -74,7 +77,7 @@ def afficher_liste():
             min_value=0,
             max_value=300,
             value=60,
-            key="filter_temps",
+            key=_keys("filter_temps"),
             label_visibility="collapsed",
         )
 
@@ -82,10 +85,12 @@ def afficher_liste():
     with st.expander("⚙️ Filtres avancés", expanded=False):
         col_bio, col_local = st.columns(2)
         with col_bio:
-            min_score_bio = st.slider("🌱 Score bio min (%)", 0, 100, 0, key="filter_score_bio")
+            min_score_bio = st.slider(
+                "🌱 Score bio min (%)", 0, 100, 0, key=_keys("filter_score_bio")
+            )
         with col_local:
             min_score_local = st.slider(
-                "🚜 Score local min (%)", 0, 100, 0, key="filter_score_local"
+                "🚜 Score local min (%)", 0, 100, 0, key=_keys("filter_score_local")
             )
 
         # Filtres robots
@@ -93,23 +98,27 @@ def afficher_liste():
         col_robots = st.columns(4)
         robots_selected = {}
         with col_robots[0]:
-            robots_selected["cookeo"] = st.checkbox("Cookeo", key="robot_cookeo")
+            robots_selected["cookeo"] = st.checkbox("Cookeo", key=_keys("robot_cookeo"))
         with col_robots[1]:
-            robots_selected["monsieur_cuisine"] = st.checkbox("Monsieur Cuisine", key="robot_mc")
+            robots_selected["monsieur_cuisine"] = st.checkbox(
+                "Monsieur Cuisine", key=_keys("robot_mc")
+            )
         with col_robots[2]:
-            robots_selected["airfryer"] = st.checkbox("Airfryer", key="robot_airfryer")
+            robots_selected["airfryer"] = st.checkbox("Airfryer", key=_keys("robot_airfryer"))
         with col_robots[3]:
-            robots_selected["multicooker"] = st.checkbox("Multicooker", key="robot_multicooker")
+            robots_selected["multicooker"] = st.checkbox(
+                "Multicooker", key=_keys("robot_multicooker")
+            )
 
         # Filtres tags
         st.markdown("**🏷️ Caractéristiques:**")
         col_tags = st.columns(3)
         with col_tags[0]:
-            est_rapide = st.checkbox("⚡ Rapide", key="tag_rapide")
+            est_rapide = st.checkbox("⚡ Rapide", key=_keys("tag_rapide"))
         with col_tags[1]:
-            est_equilibre = st.checkbox("💪 Équilibré", key="tag_equilibre")
+            est_equilibre = st.checkbox("💪 Équilibré", key=_keys("tag_equilibre"))
         with col_tags[2]:
-            congelable = st.checkbox("❄️ Congélable", key="tag_congelable")
+            congelable = st.checkbox("❄️ Congélable", key=_keys("tag_congelable"))
 
     # Chercher les recettes
     type_repas_filter = None if type_repas == "Tous" else type_repas
@@ -312,7 +321,7 @@ def afficher_liste():
 
                 # Bouton voir détails
                 if st.button(
-                    "👁️ Voir détails", use_container_width=True, key=f"detail_{recette.id}"
+                    "👁️ Voir détails", use_container_width=True, key=_keys("detail", recette.id)
                 ):
                     st.session_state.detail_recette_id = recette.id
                     st.rerun()
@@ -323,7 +332,7 @@ def afficher_liste():
                     col_del_oui, col_del_non = st.columns(2)
                     with col_del_oui:
                         if st.button(
-                            "✅ Oui, supprimer", width="stretch", key=f"btn_del_oui_{recette.id}"
+                            "✅ Oui, supprimer", width="stretch", key=_keys("del_oui", recette.id)
                         ):
                             if service:
                                 try:
@@ -339,7 +348,7 @@ def afficher_liste():
                                     st.error(f"❌ Erreur lors de la suppression: {str(e)}")
                     with col_del_non:
                         if st.button(
-                            "❌ Annuler", width="stretch", key=f"btn_del_non_{recette.id}"
+                            "❌ Annuler", width="stretch", key=_keys("del_non", recette.id)
                         ):
                             st.rerun()
 

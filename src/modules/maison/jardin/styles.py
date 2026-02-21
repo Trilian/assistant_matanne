@@ -1,6 +1,6 @@
 """Styles CSS pour le module Jardin."""
 
-from src.ui.css import charger_css
+from src.ui.engine import charger_css
 
 
 def injecter_css_jardin() -> None:
