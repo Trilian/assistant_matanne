@@ -4,8 +4,11 @@ use_query - Hook de data fetching avec cache et loading states.
 Inspiré de TanStack Query (React Query), adapté pour Streamlit.
 Gère automatiquement le cache, les états de chargement et les erreurs.
 
+Inclut également use_mutation pour les opérations d'écriture avec
+invalidation automatique des queries liées.
+
 Usage:
-    from src.ui.hooks_v2 import use_query
+    from src.ui.hooks_v2 import use_query, use_mutation
 
     # Simple query
     result = use_query(
@@ -18,23 +21,29 @@ Usage:
         st.spinner("Chargement...")
     elif result.is_error:
         st.error(f"Erreur: {result.error}")
+    elif result.is_empty:
+        st.info("Aucune donnée")
     else:
         for recette in result.data:
             st.write(recette.nom)
 
-    # Refetch manuel
-    if st.button("Actualiser"):
-        result.refetch()
-        st.rerun()
+    # Mutation avec invalidation
+    mutation = use_mutation(
+        "create_recette",
+        lambda data: service.create(data),
+        invalidate_queries=["recettes"],
+    )
+    if st.button("Créer"):
+        mutation.mutate(form_data)
 """
 
 from __future__ import annotations
 
 import logging
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import Callable, Generic, TypeVar
+from typing import Any, Callable, Generic, TypeVar
 
 import streamlit as st
 
@@ -77,6 +86,20 @@ class QueryResult(Generic[T]):
     is_stale: bool
     refetch: Callable[[], None]
     last_updated: float | None
+
+    @property
+    def is_empty(self) -> bool:
+        """True si data est None ou vide (liste, dict, etc.).
+
+        Example:
+            if result.is_empty:
+                st.info("Aucune donnée")
+        """
+        if self.data is None:
+            return True
+        if hasattr(self.data, "__len__"):
+            return len(self.data) == 0
+        return False
 
 
 def use_query(
@@ -197,78 +220,166 @@ def use_query(
     )
 
 
+@dataclass
+class MutationState(Generic[T]):
+    """État d'une mutation avec loading/error/data et invalidation de queries.
+
+    Combine l'API riche par dataclass avec l'invalidation automatique
+    des queries liées après succès.
+
+    Attributes:
+        is_loading: True si la mutation est en cours.
+        is_error: True si la dernière mutation a échoué.
+        is_success: True si la dernière mutation a réussi.
+        data: Données retournées par la mutation.
+        error: Exception si erreur, None sinon.
+
+    Example:
+        mutation = use_mutation("save", save_fn, invalidate_queries=["items"])
+        if st.button("Sauvegarder"):
+            mutation.mutate({"name": "test"})
+        if mutation.is_success:
+            st.success("Sauvegardé!")
+    """
+
+    is_loading: bool = False
+    is_error: bool = False
+    is_success: bool = False
+    data: T | None = None
+    error: Exception | None = None
+    _key: str = field(default="", repr=False)
+    _mutate_fn: Callable[..., T] | None = field(default=None, repr=False)
+    _invalidate_queries: list[str] = field(default_factory=list, repr=False)
+    _on_success: Callable[[], None] | None = field(default=None, repr=False)
+    _on_error: Callable[[Exception], None] | None = field(default=None, repr=False)
+
+    def mutate(self, *args: Any, **kwargs: Any) -> T | None:
+        """Exécute la mutation de manière synchrone.
+
+        Après succès, invalide automatiquement les queries listées
+        dans ``invalidate_queries`` pour forcer leur rechargement.
+
+        Returns:
+            Le résultat de la mutation ou None si erreur.
+        """
+        if self._mutate_fn is None:
+            return None
+
+        # Set loading state
+        st.session_state[f"{self._key}_loading"] = True
+        st.session_state[f"{self._key}_error"] = None
+
+        try:
+            result = self._mutate_fn(*args, **kwargs)
+            st.session_state[f"{self._key}_data"] = result
+            st.session_state[f"{self._key}_success"] = True
+            st.session_state[f"{self._key}_loading"] = False
+
+            # Invalider les queries liées
+            for query_key in self._invalidate_queries:
+                full_key = f"_query_{query_key}"
+                if full_key in st.session_state:
+                    st.session_state[full_key]["status"] = QueryStatus.IDLE
+
+            if self._on_success:
+                self._on_success()
+
+            return result
+        except Exception as e:
+            st.session_state[f"{self._key}_error"] = e
+            st.session_state[f"{self._key}_success"] = False
+            st.session_state[f"{self._key}_loading"] = False
+
+            if self._on_error:
+                self._on_error(e)
+
+            return None
+
+    def reset(self) -> None:
+        """Réinitialise l'état de la mutation."""
+        st.session_state[f"{self._key}_loading"] = False
+        st.session_state[f"{self._key}_error"] = None
+        st.session_state[f"{self._key}_data"] = None
+        st.session_state[f"{self._key}_success"] = False
+
+
 def use_mutation(
     key: str,
-    mutation_fn: Callable[[T], None],
+    mutation_fn: Callable[..., T],
     *,
     on_success: Callable[[], None] | None = None,
     on_error: Callable[[Exception], None] | None = None,
     invalidate_queries: list[str] | None = None,
-) -> tuple[Callable[[T], None], bool, Exception | None]:
-    """Hook pour les mutations (create, update, delete).
+) -> MutationState[T]:
+    """Hook pour les mutations (create, update, delete) avec invalidation de queries.
+
+    Fournit une API riche via ``MutationState`` avec:
+    - États loading/error/success accessibles comme propriétés
+    - Méthode ``mutate()`` pour exécuter la mutation
+    - Invalidation automatique des queries après succès
+    - Méthode ``reset()`` pour réinitialiser l'état
 
     Args:
-        key: Clé unique.
-        mutation_fn: Fonction de mutation.
-        on_success: Callback succès.
-        on_error: Callback erreur.
-        invalidate_queries: Liste de queries à invalider après succès.
+        key: Clé unique dans session_state.
+        mutation_fn: Fonction à exécuter lors de la mutation.
+        on_success: Callback appelé après succès.
+        on_error: Callback appelé après erreur.
+        invalidate_queries: Liste de clés de queries à invalider après succès.
 
     Returns:
-        Tuple (mutate_fn, is_loading, error).
+        MutationState avec méthodes mutate/reset et états loading/error/success.
 
     Example:
-        mutate, is_loading, error = use_mutation(
-            "create_recette",
-            lambda data: service.create(data),
-            invalidate_queries=["recettes"],
+        def save_data(data: dict) -> bool:
+            db.save(data)
+            return True
+
+        mutation = use_mutation(
+            "save",
+            save_data,
+            invalidate_queries=["items", "stats"],
+            on_success=lambda: st.toast("Sauvegardé!"),
         )
 
-        if st.button("Créer"):
-            mutate(form_data)
-            st.rerun()
+        if st.button("Sauvegarder"):
+            mutation.mutate({"name": "test"})
+
+        if mutation.is_loading:
+            st.spinner("Sauvegarde...")
+        elif mutation.is_error:
+            st.error(f"Erreur: {mutation.error}")
+        elif mutation.is_success:
+            st.success("Sauvegardé!")
     """
-    state_key = f"_mutation_{key}"
+    # Initialize state keys if not present
+    for suffix, default in [
+        ("_loading", False),
+        ("_error", None),
+        ("_data", None),
+        ("_success", False),
+    ]:
+        state_key = f"{key}{suffix}"
+        if state_key not in st.session_state:
+            st.session_state[state_key] = default
 
-    if state_key not in st.session_state:
-        st.session_state[state_key] = {
-            "is_loading": False,
-            "error": None,
-        }
-
-    state = st.session_state[state_key]
-
-    def mutate(data: T) -> None:
-        state["is_loading"] = True
-        state["error"] = None
-
-        try:
-            mutation_fn(data)
-
-            # Invalider les queries liées
-            if invalidate_queries:
-                for query_key in invalidate_queries:
-                    full_key = f"_query_{query_key}"
-                    if full_key in st.session_state:
-                        st.session_state[full_key]["status"] = QueryStatus.IDLE
-
-            if on_success:
-                on_success()
-
-        except Exception as e:
-            state["error"] = e
-            if on_error:
-                on_error(e)
-
-        finally:
-            state["is_loading"] = False
-
-    return mutate, state["is_loading"], state["error"]
+    return MutationState(
+        is_loading=st.session_state[f"{key}_loading"],
+        is_error=st.session_state[f"{key}_error"] is not None,
+        is_success=st.session_state[f"{key}_success"],
+        data=st.session_state[f"{key}_data"],
+        error=st.session_state[f"{key}_error"],
+        _key=key,
+        _mutate_fn=mutation_fn,
+        _invalidate_queries=invalidate_queries or [],
+        _on_success=on_success,
+        _on_error=on_error,
+    )
 
 
 __all__ = [
     "QueryStatus",
     "QueryResult",
+    "MutationState",
     "use_query",
     "use_mutation",
 ]

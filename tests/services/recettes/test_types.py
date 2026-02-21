@@ -318,6 +318,3 @@ class TestVersionRobotGeneree:
                 conseils_preparation="Conseils",
                 temps_cuisson_adapte_minutes=350,  # Trop élevé
             )
-
-
-

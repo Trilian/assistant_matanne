@@ -195,9 +195,7 @@ class TestAfficherSidebarInteractions:
     @patch("src.ui.layout.sidebar.afficher_stats_chargement_differe")
     @patch("src.ui.layout.sidebar.obtenir_etat")
     @patch("src.ui.layout.sidebar.GestionnaireEtat")
-    def test_sidebar_debug_mode(
-        self, mock_gest, mock_etat, mock_stats, mock_st, mock_menu
-    ):
+    def test_sidebar_debug_mode(self, mock_gest, mock_etat, mock_stats, mock_st, mock_menu):
         """Test mode debug activé."""
         from src.ui.layout.sidebar import afficher_sidebar
 
@@ -222,9 +220,7 @@ class TestAfficherSidebarInteractions:
     @patch("src.ui.layout.sidebar.afficher_stats_chargement_differe")
     @patch("src.ui.layout.sidebar.obtenir_etat")
     @patch("src.ui.layout.sidebar.GestionnaireEtat")
-    def test_sidebar_reset_click(
-        self, mock_gest, mock_etat, mock_stats, mock_st, mock_menu
-    ):
+    def test_sidebar_reset_click(self, mock_gest, mock_etat, mock_stats, mock_st, mock_menu):
         """Test clic sur Reset."""
         from src.ui.layout.sidebar import afficher_sidebar
 

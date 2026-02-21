@@ -357,6 +357,7 @@ class ClientIA:
         Génère une réponse JSON de manière synchrone.
 
         Wrapper sync autour de appeler() pour les contextes UI.
+        Utilise ``executer_async`` centralisé pour éviter les conflits de boucle.
 
         Args:
             prompt: Prompt utilisateur
@@ -367,35 +368,20 @@ class ClientIA:
         Returns:
             Dictionnaire parsé, string JSON brut, ou None si erreur
         """
-        import concurrent.futures
         import json
 
-        # Exécuter async dans un thread pour éviter les conflits de boucle
+        from src.core.async_utils import executer_async
+
         try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = None
-
-        response: str | None = None
-
-        async def _call():
-            return await self.appeler(
-                prompt=prompt,
-                prompt_systeme=system_prompt,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                utiliser_cache=True,
+            response = executer_async(
+                self.appeler(
+                    prompt=prompt,
+                    prompt_systeme=system_prompt,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    utiliser_cache=True,
+                )
             )
-
-        try:
-            if loop is not None:
-                # Boucle d'événements active - utiliser un thread
-                with concurrent.futures.ThreadPoolExecutor() as pool:
-                    future = pool.submit(asyncio.run, _call())
-                    response = future.result(timeout=60)
-            else:
-                # Pas de boucle - exécuter directement
-                response = asyncio.run(_call())
 
             if not response:
                 return None
@@ -415,7 +401,7 @@ class ClientIA:
         except json.JSONDecodeError:
             # Retourner la réponse brute si pas du JSON valide
             logger.warning("Réponse non-JSON, retour brut")
-            return response
+            return response  # type: ignore[possibly-undefined]
 
         except Exception as e:
             logger.error(f"Erreur generer_json: {e}")
@@ -435,17 +421,16 @@ class ClientIA:
 _client: ClientIA | None = None
 
 
-def obtenir_client_ia() -> ClientIA | None:
+def obtenir_client_ia() -> ClientIA:
     """
-    Récupère l'instance ClientIA (singleton lazy)
+    Récupère l'instance ClientIA (singleton lazy).
 
     Returns:
-        Instance ClientIA ou None si non disponible
+        Instance ClientIA (toujours valide — la config est chargée en lazy
+        au moment du premier appel API, pas à la création)
     """
     global _client
     if _client is None:
         _client = ClientIA()
-        # NE PAS vérifier cle_api ici - la config est chargée en lazy
-        # Elle sera validée au moment du premier appel
         logger.debug("[OK] ClientIA créé (config chargée en lazy)")
     return _client

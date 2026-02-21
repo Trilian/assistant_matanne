@@ -1,11 +1,19 @@
 """
 Circuit Breaker - Protection contre les défaillances de services externes.
 
-.. deprecated:: 2026.02
-    Préférer ``src.core.resilience.policies`` pour les nouvelles intégrations.
-    Ce module est conservé pour compatibilité avec le client IA existant.
-    Voir :class:`src.core.resilience.RetryPolicy` et
-    :class:`src.core.resilience.FallbackPolicy` pour les alternatives composables.
+Module canonique pour le circuit breaker des services IA (client Mistral,
+BaseAIService).  Fournit un registre singleton ``obtenir_circuit()`` et le
+décorateur ``@avec_circuit_breaker``.
+
+.. note::
+
+    Le module ``src.core.middleware.builtin`` contient un
+    ``CircuitBreakerMiddleware`` distinct, conçu pour le pipeline middleware.
+    Les deux implémentations ciblent des couches architecturales différentes
+    et ne sont pas interchangeables.
+
+    Pour les politiques de résilience composables (retry, timeout, bulkhead,
+    fallback), voir ``src.core.resilience.policies``.
 
 Implémente le pattern Circuit Breaker pour:
 - Éviter de marteler un service externe en panne

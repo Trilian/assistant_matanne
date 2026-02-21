@@ -134,9 +134,7 @@ class HistoriqueInventaire(Base):
     emplacement_apres: Mapped[str | None] = mapped_column(String(100))
 
     # Métadonnées
-    date_modification: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, index=True
-    )
+    date_modification: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
     utilisateur: Mapped[str | None] = mapped_column(String(100))
     notes: Mapped[str | None] = mapped_column(Text)
 

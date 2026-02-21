@@ -21,8 +21,10 @@ logger = logging.getLogger(__name__)
 def afficher_ajout_rapide():
     """Ajouter rapidement un article avec code-barres"""
 
-    from src.modules.utilitaires.barcode import get_barcode_service
-    from src.modules.utilitaires.barcode import st  # noqa: F811 — resolve via package for @patch
+    from src.modules.utilitaires.barcode import (
+        get_barcode_service,
+        st,  # noqa: F811 — resolve via package for @patch
+    )
 
     service = get_barcode_service()
 
@@ -126,8 +128,10 @@ def afficher_ajout_rapide():
 def afficher_verifier_stock():
     """Vérifier stock par code-barres"""
 
-    from src.modules.utilitaires.barcode import get_barcode_service
-    from src.modules.utilitaires.barcode import st  # noqa: F811 — resolve via package for @patch
+    from src.modules.utilitaires.barcode import (
+        get_barcode_service,
+        st,  # noqa: F811 — resolve via package for @patch
+    )
 
     service = get_barcode_service()
 
@@ -212,8 +216,10 @@ def afficher_verifier_stock():
 def afficher_gestion_barcodes():
     """Gestion des codes-barres"""
 
-    from src.modules.utilitaires.barcode import get_barcode_service
-    from src.modules.utilitaires.barcode import st  # noqa: F811 — resolve via package for @patch
+    from src.modules.utilitaires.barcode import (
+        get_barcode_service,
+        st,  # noqa: F811 — resolve via package for @patch
+    )
 
     service = get_barcode_service()
 
@@ -290,8 +296,10 @@ def afficher_gestion_barcodes():
 def afficher_import_export():
     """Import/Export codes-barres"""
 
-    from src.modules.utilitaires.barcode import get_barcode_service
-    from src.modules.utilitaires.barcode import st  # noqa: F811 — resolve via package for @patch
+    from src.modules.utilitaires.barcode import (
+        get_barcode_service,
+        st,  # noqa: F811 — resolve via package for @patch
+    )
 
     service = get_barcode_service()
 

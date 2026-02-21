@@ -64,10 +64,12 @@ ANALYTICS_PATCHES = [
 
 def _apply_analytics_patches():
     """Crée les décorateurs patch pour les fonctions analytics."""
+
     def decorator(func):
         for target in reversed(ANALYTICS_PATCHES):
             func = patch(target)(func)
         return func
+
     return decorator
 
 

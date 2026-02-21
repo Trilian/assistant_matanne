@@ -106,7 +106,9 @@ class ServiceActivites:
                 activity.cout_reel = cout_reel
             db.commit()
             logger.info("Activité terminée: id=%d", activity_id)
-            obtenir_bus().emettre("activites.terminee", {"id": activity_id}, source="ServiceActivites")
+            obtenir_bus().emettre(
+                "activites.terminee", {"id": activity_id}, source="ServiceActivites"
+            )
             return True
         return False
 
@@ -150,7 +152,9 @@ class ServiceActivites:
         deleted = db.query(FamilyActivity).filter(FamilyActivity.id == activity_id).delete()
         db.commit()
         if deleted > 0:
-            obtenir_bus().emettre("activites.supprimee", {"id": activity_id}, source="ServiceActivites")
+            obtenir_bus().emettre(
+                "activites.supprimee", {"id": activity_id}, source="ServiceActivites"
+            )
         return deleted > 0
 
 

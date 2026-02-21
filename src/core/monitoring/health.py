@@ -4,10 +4,22 @@ Vérification de santé globale du système.
 Agrège la santé de tous les sous-systèmes (base de données, cache, IA,
 event bus) dans un rapport unifié.
 
+Trois niveaux de probes (style Kubernetes) :
+
+- **Liveness**: Le processus est-il vivant ? (rapide, ~1 ms)
+- **Readiness**: Peut-il servir du trafic ? (vérifie DB + cache, ~100 ms)
+- **Startup**: A-t-il fini de s'initialiser ? (vérifie config + migrations)
+
 Usage::
 
     from src.core.monitoring import verifier_sante_globale
+    from src.core.monitoring.health import verifier_liveness, verifier_readiness
 
+    # Kubernetes-style probes
+    liveness = verifier_liveness()     # {"vivant": True}
+    readiness = verifier_readiness()   # {"pret": True, "composants": {...}}
+
+    # Full health check (dashboard)
     rapport = verifier_sante_globale()
     # {"sain": True, "composants": {"db": {...}, "cache": {...}, ...}}
 """
@@ -261,3 +273,95 @@ def verifier_sante_globale(inclure_db: bool = True) -> SanteSysteme:
     sain = all(c.statut != StatutSante.CRITIQUE for c in composants.values())
 
     return SanteSysteme(sain=sain, composants=composants)
+
+
+# ───────────────────────────────────────────────────────────
+# PROBES KUBERNETES-STYLE
+# ───────────────────────────────────────────────────────────
+
+
+class TypeVerification(Enum):
+    """Types de probes de santé."""
+
+    LIVENESS = auto()
+    READINESS = auto()
+    STARTUP = auto()
+
+
+def verifier_liveness() -> dict[str, Any]:
+    """Probe *liveness* — le processus est-il vivant ?
+
+    Très rapide (~1 ms). Vérifie uniquement que l'interpréteur Python
+    fonctionne et que le module applicatif est importable.
+
+    Returns:
+        ``{"vivant": True, "pid": <pid>}``
+    """
+    import os
+
+    return {"vivant": True, "pid": os.getpid()}
+
+
+def verifier_readiness() -> dict[str, Any]:
+    """Probe *readiness* — l'application peut-elle servir du trafic ?
+
+    Vérifie les dépendances critiques (DB, cache) sans inclure les
+    composants optionnels (IA, métriques).
+
+    Returns:
+        ``{"pret": bool, "composants": {...}}``
+    """
+    composants: dict[str, SanteComposant] = {}
+
+    for nom, fn in [("database", _verifier_db), ("cache", _verifier_cache)]:
+        try:
+            composants[nom] = fn()
+        except Exception as e:
+            composants[nom] = SanteComposant(
+                nom=nom,
+                statut=StatutSante.CRITIQUE,
+                message=str(e),
+            )
+
+    pret = all(c.statut != StatutSante.CRITIQUE for c in composants.values())
+    return {
+        "pret": pret,
+        "composants": {
+            nom: {"statut": c.statut.name, "message": c.message} for nom, c in composants.items()
+        },
+    }
+
+
+def verifier_startup() -> dict[str, Any]:
+    """Probe *startup* — l'application a-t-elle fini de s'initialiser ?
+
+    Vérifie que la configuration est chargée et que la base de données
+    est accessible.
+
+    Returns:
+        ``{"initialise": bool, "details": {...}}``
+    """
+    details: dict[str, bool] = {}
+
+    # Config chargée ?
+    try:
+        from src.core.config import obtenir_parametres
+
+        params = obtenir_parametres()
+        details["config"] = params is not None
+    except Exception:
+        details["config"] = False
+
+    # DB accessible ?
+    try:
+        from src.core.db import verifier_connexion
+
+        ok, _ = verifier_connexion()
+        details["database"] = ok
+    except Exception:
+        details["database"] = False
+
+    return {
+        "initialise": all(details.values()),
+        "details": details,
+    }

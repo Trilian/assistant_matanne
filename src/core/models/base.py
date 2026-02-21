@@ -18,6 +18,7 @@ def utc_now() -> datetime:
     """Retourne datetime UTC aware (remplace datetime.utcnow déprécié)."""
     return datetime.now(UTC)
 
+
 # ═══════════════════════════════════════════════════════════
 # BASE SQLALCHEMY
 # ═══════════════════════════════════════════════════════════

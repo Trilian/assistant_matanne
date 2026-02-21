@@ -47,7 +47,6 @@ class FeedbackType(enum.StrEnum):
 # CalendarProvider est défini dans calendrier.py (source unique)
 from .calendrier import CalendarProvider  # noqa: F401
 
-
 # ═══════════════════════════════════════════════════════════
 # PRÉFÉRENCES UTILISATEUR
 # ═══════════════════════════════════════════════════════════

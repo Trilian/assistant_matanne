@@ -9,7 +9,7 @@ Vérifie:
 """
 
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from unittest.mock import patch
 
 import jwt
@@ -25,7 +25,6 @@ from src.api.auth import (
     valider_token_api,
     valider_token_supabase,
 )
-
 
 # ═══════════════════════════════════════════════════════════
 # FIXTURES
@@ -56,8 +55,8 @@ def token_expire(api_secret):
         "sub": "user-expired",
         "email": "expired@example.com",
         "role": "membre",
-        "iat": datetime.now(timezone.utc) - timedelta(hours=48),
-        "exp": datetime.now(timezone.utc) - timedelta(hours=1),
+        "iat": datetime.now(UTC) - timedelta(hours=48),
+        "exp": datetime.now(UTC) - timedelta(hours=1),
         "iss": "assistant-matanne-api",
     }
     return jwt.encode(payload, api_secret, algorithm=ALGORITHME)
@@ -73,8 +72,8 @@ def token_supabase():
         "user_metadata": {"role": "admin", "nom": "Dupont"},
         "app_metadata": {},
         "aud": "authenticated",
-        "iat": datetime.now(timezone.utc),
-        "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+        "iat": datetime.now(UTC),
+        "exp": datetime.now(UTC) + timedelta(hours=1),
     }
     return jwt.encode(payload, "supabase-jwt-secret-test", algorithm=ALGORITHME)
 
@@ -87,8 +86,8 @@ def token_supabase_expire():
         "email": "expired@supabase.io",
         "role": "authenticated",
         "aud": "authenticated",
-        "iat": datetime.now(timezone.utc) - timedelta(hours=48),
-        "exp": datetime.now(timezone.utc) - timedelta(hours=1),
+        "iat": datetime.now(UTC) - timedelta(hours=48),
+        "exp": datetime.now(UTC) - timedelta(hours=1),
     }
     return jwt.encode(payload, "supabase-jwt-secret-test", algorithm=ALGORITHME)
 
@@ -128,8 +127,8 @@ class TestCreerTokenAcces:
             token = creer_token_acces("user-1", "a@b.com", duree_heures=1)
 
         payload = jwt.decode(token, api_secret, algorithms=[ALGORITHME])
-        exp = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
-        iat = datetime.fromtimestamp(payload["iat"], tz=timezone.utc)
+        exp = datetime.fromtimestamp(payload["exp"], tz=UTC)
+        iat = datetime.fromtimestamp(payload["iat"], tz=UTC)
         delta = exp - iat
         assert 3500 < delta.total_seconds() < 3700  # ~1 heure
 
@@ -191,8 +190,8 @@ class TestValiderTokenApi:
             "sub": "user-1",
             "email": "a@b.com",
             "role": "membre",
-            "iat": datetime.now(timezone.utc),
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+            "iat": datetime.now(UTC),
+            "exp": datetime.now(UTC) + timedelta(hours=1),
             "iss": "autre-api",
         }
         token = jwt.encode(payload, api_secret, algorithm=ALGORITHME)

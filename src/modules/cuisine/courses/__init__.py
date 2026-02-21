@@ -12,7 +12,6 @@ Fonctionnalités complètes:
 
 import streamlit as st
 
-from .utils import PRIORITY_EMOJIS, RAYONS_DEFAULT
 from .historique import afficher_historique
 
 # Imports des sous-modules
@@ -30,6 +29,7 @@ from .realtime import (
     afficher_realtime_status,
 )
 from .suggestions_ia import afficher_suggestions_ia
+from .utils import PRIORITY_EMOJIS, RAYONS_DEFAULT
 
 
 def app():

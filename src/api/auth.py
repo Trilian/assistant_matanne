@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from typing import Any
 
 import jwt
@@ -93,7 +93,7 @@ def creer_token_acces(
     Returns:
         Token JWT encodé
     """
-    maintenant = datetime.now(timezone.utc)
+    maintenant = datetime.now(UTC)
     expiration = maintenant + timedelta(hours=duree_heures)
 
     payload = {
@@ -164,9 +164,7 @@ def valider_token_supabase(token: str) -> UtilisateurToken | None:
     return _decoder_supabase_sans_signature(token)
 
 
-def _valider_supabase_avec_signature(
-    token: str, secret: str
-) -> UtilisateurToken | None:
+def _valider_supabase_avec_signature(token: str, secret: str) -> UtilisateurToken | None:
     """Valide un token Supabase avec vérification de signature."""
     try:
         payload = jwt.decode(
@@ -215,11 +213,7 @@ def _extraire_utilisateur_supabase(payload: dict[str, Any]) -> UtilisateurToken:
     metadata = payload.get("user_metadata", {})
     app_metadata = payload.get("app_metadata", {})
 
-    role = (
-        metadata.get("role")
-        or app_metadata.get("role")
-        or payload.get("role", "membre")
-    )
+    role = metadata.get("role") or app_metadata.get("role") or payload.get("role", "membre")
 
     return UtilisateurToken(
         id=payload.get("sub", "unknown"),

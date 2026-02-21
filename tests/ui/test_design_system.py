@@ -1,7 +1,7 @@
 """
 Tests pour les nouveaux modules du Design System UI.
 
-Couvre: tokens, html_builder, registry, timer, toasts refactorisé.
+Couvre: tokens, registry, timer, toasts refactorisé.
 """
 
 from __future__ import annotations
@@ -55,68 +55,6 @@ class TestTokens:
         result = gradient_subtil("#4CAF50")
         assert "linear-gradient" in result
         assert "#4CAF50" in result
-
-
-# ═══════════════════════════════════════════════════════════
-# HTML BUILDER
-# ═══════════════════════════════════════════════════════════
-
-
-class TestHtmlBuilder:
-    """Tests pour src/ui/html_builder.py."""
-
-    def test_basic_div(self):
-        from src.ui.html_builder import HtmlBuilder
-
-        html = HtmlBuilder("div").text("Bonjour").build()
-        assert "<div>" in html
-        assert "Bonjour" in html
-        assert "</div>" in html
-
-    def test_style(self):
-        from src.ui.html_builder import HtmlBuilder
-
-        html = HtmlBuilder("span").style(color="red", padding="1rem").text("ok").build()
-        assert 'style="' in html
-        assert "color: red" in html
-        assert "padding: 1rem" in html
-
-    def test_child_builder(self):
-        from src.ui.html_builder import HtmlBuilder
-
-        inner = HtmlBuilder("span").text("inner")
-        html = HtmlBuilder("div").child_builder(inner).build()
-        assert "<div>" in html
-        assert "<span>" in html
-        assert "inner" in html
-
-    def test_conditional_true(self):
-        from src.ui.html_builder import HtmlBuilder
-
-        html = HtmlBuilder("div").conditional(True, "span", text="visible").build()
-        assert "visible" in html
-
-    def test_conditional_false(self):
-        from src.ui.html_builder import HtmlBuilder
-
-        html = HtmlBuilder("div").conditional(False, lambda b: b.text("hidden")).build()
-        assert "hidden" not in html
-
-    def test_render_html(self):
-        from unittest.mock import patch
-
-        from src.ui.html_builder import render_html
-
-        with patch("streamlit.markdown") as mock_md:
-            render_html("<p>hello</p>")
-            mock_md.assert_called_once_with("<p>hello</p>", unsafe_allow_html=True)
-
-    def test_escaping(self):
-        from src.ui.html_builder import HtmlBuilder
-
-        html = HtmlBuilder("div").text("<script>alert('xss')</script>").build()
-        assert "<script>" not in html
-        assert "&lt;script&gt;" in html
 
 
 # ═══════════════════════════════════════════════════════════

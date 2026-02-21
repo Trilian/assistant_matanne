@@ -7,7 +7,8 @@ Opérations:
 """
 
 import logging
-from datetime import date as date_type, datetime, timedelta
+from datetime import date as date_type
+from datetime import datetime, timedelta
 from typing import Any, TypedDict
 
 from sqlalchemy.orm import Session

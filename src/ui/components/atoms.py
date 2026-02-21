@@ -190,7 +190,7 @@ def boite_info(
 
 @composant_ui(
     "atoms",
-    exemple='boule_loto(7)',
+    exemple="boule_loto(7)",
     tags=["loto", "ball", "jeux"],
 )
 def boule_loto(numero: int, is_chance: bool = False, taille: int = 50) -> None:
@@ -217,8 +217,8 @@ def boule_loto(numero: int, is_chance: bool = False, taille: int = 50) -> None:
 
     st.markdown(
         f'<div style="background: {gradient}; color: white; border-radius: 50%; '
-        f'width: {taille}px; height: {taille}px; display: flex; align-items: center; '
-        f'justify-content: center; font-size: {font_size}px; font-weight: bold; '
+        f"width: {taille}px; height: {taille}px; display: flex; align-items: center; "
+        f"justify-content: center; font-size: {font_size}px; font-weight: bold; "
         f'margin: auto;">{numero}</div>',
         unsafe_allow_html=True,
     )

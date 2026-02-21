@@ -2,19 +2,23 @@
 Logging - Système de logging centralisé.
 
 Ce module fournit :
-- Formatage coloré pour la console
+- Formatage coloré pour la console (dev)
+- Formatage JSON structuré (production / observabilité)
 - Filtrage automatique des secrets
+- Intégration correlation_id via ContexteExecution
 - Configuration automatique via GestionnaireLog
 - Fonction raccourci obtenir_logger()
 """
 
+import json
 import logging
 import os
 import re
 import sys
+from datetime import UTC, datetime, timezone
 
 
-def configure_logging(level: str | None = None):
+def configure_logging(level: str | None = None, structured: bool = False):
     """Configure le logging global.
 
     Délègue à GestionnaireLog.initialiser() pour une configuration unifiée
@@ -23,12 +27,14 @@ def configure_logging(level: str | None = None):
     Args:
         level: Niveau de log en string (DEBUG, INFO, WARNING, ERROR).
                If None, will read from `LOG_LEVEL` env var or default to INFO.
+        structured: Si True, utilise le format JSON structuré (production).
     """
     if level is None:
         level = os.getenv("LOG_LEVEL", "INFO")
 
-    if GestionnaireLog._initialise:
-        # Déjà initialisé : juste mettre à jour le niveau
+    if structured or os.getenv("LOG_FORMAT", "").lower() == "json":
+        GestionnaireLog.activer_mode_structure(level)
+    elif GestionnaireLog._initialise:
         GestionnaireLog.definir_niveau(level)
     else:
         GestionnaireLog.initialiser(level)
@@ -38,6 +44,7 @@ __all__ = [
     "configure_logging",
     "FiltreSecrets",
     "FormatteurColore",
+    "FormatteurStructure",
     "GestionnaireLog",
     "obtenir_logger",
 ]
@@ -133,6 +140,61 @@ class FormatteurColore(logging.Formatter):
         if levelname in self.COULEURS:
             record.levelname = f"{self.COULEURS[levelname]}{levelname}{self.COULEURS['RESET']}"
         return super().format(record)
+
+
+class FormatteurStructure(logging.Formatter):
+    """Formateur JSON structuré pour l'observabilité en production.
+
+    Chaque ligne de log est un objet JSON contenant:
+    - ``timestamp``: ISO-8601 UTC
+    - ``level``: Niveau de log (INFO, ERROR, …)
+    - ``logger``: Nom du logger (module source)
+    - ``message``: Message texte
+    - ``correlation_id``: ID de corrélation (si disponible via ContexteExecution)
+    - ``operation``: Opération en cours (si disponible)
+    - ``module``: Module applicatif (si disponible)
+    - ``exception``: Traceback (si présent)
+
+    Usage::
+
+        handler = logging.StreamHandler()
+        handler.setFormatter(FormatteurStructure())
+    """
+
+    def format(self, record: logging.LogRecord) -> str:
+        """Produit une ligne JSON par enregistrement de log."""
+        entry: dict = {
+            "timestamp": datetime.now(UTC).isoformat(),
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+        }
+
+        # Enrichir avec le contexte de corrélation (si disponible)
+        try:
+            from src.core.observability.context import _contexte_execution
+
+            ctx = _contexte_execution.get()
+            if ctx is not None:
+                entry["correlation_id"] = ctx.correlation_id
+                if ctx.operation:
+                    entry["operation"] = ctx.operation
+                if ctx.module:
+                    entry["module"] = ctx.module
+        except Exception:  # noqa: BLE001
+            pass
+
+        # Ajouter l'exception si présente
+        if record.exc_info and record.exc_info[1] is not None:
+            entry["exception"] = self.formatException(record.exc_info)
+
+        # Champs supplémentaires passés via extra={}
+        for key in ("correlation_id", "operation", "duree_ms", "utilisateur"):
+            val = getattr(record, key, None)
+            if val is not None and key not in entry:
+                entry[key] = val
+
+        return json.dumps(entry, ensure_ascii=False, default=str)
 
 
 class GestionnaireLog:
@@ -240,6 +302,29 @@ class GestionnaireLog:
     def activer_production():
         """Active le mode production (INFO uniquement)."""
         GestionnaireLog.definir_niveau("INFO")
+
+    @staticmethod
+    def activer_mode_structure(niveau_log: str = "INFO"):
+        """Bascule tous les handlers vers le format JSON structuré.
+
+        Utile pour la production ou l'intégration avec des outils
+        d'observabilité (ELK, Loki, Datadog, etc.).
+
+        Args:
+            niveau_log: Niveau de log (DEBUG, INFO, WARNING, ERROR).
+        """
+        root_logger = logging.getLogger()
+        root_logger.setLevel(getattr(logging, niveau_log.upper()))
+
+        # Remplacer tous les handlers par un handler JSON
+        root_logger.handlers = []
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(getattr(logging, niveau_log.upper()))
+        console_handler.setFormatter(FormatteurStructure())
+        console_handler.addFilter(FiltreSecrets())
+        root_logger.addHandler(console_handler)
+
+        root_logger.info("Logging structuré JSON activé")
 
 
 # Fonction raccourci française

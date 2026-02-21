@@ -9,7 +9,8 @@ Opérations:
 """
 
 import logging
-from datetime import date as date_type, timedelta
+from datetime import date as date_type
+from datetime import timedelta
 from typing import TypedDict
 
 from sqlalchemy.orm import Session
@@ -317,9 +318,7 @@ class ServiceWeekend:
             True si supprimée.
         """
         assert db is not None
-        deleted = (
-            db.query(WeekendActivity).filter(WeekendActivity.id == activity_id).delete()
-        )
+        deleted = db.query(WeekendActivity).filter(WeekendActivity.id == activity_id).delete()
         db.commit()
         if deleted > 0:
             logger.info("Activité weekend supprimée: id=%d", activity_id)

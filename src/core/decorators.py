@@ -317,6 +317,138 @@ def avec_validation(
 
 
 # ═══════════════════════════════════════════════════════════
+# DÉCORATEUR: AVEC_RESILIENCE (UNIFIÉ)
+# ═══════════════════════════════════════════════════════════
+
+
+def avec_resilience(
+    *,
+    retry: int = 0,
+    timeout_s: float | None = None,
+    fallback: Any = None,
+    circuit: str | None = None,
+    log_level: str = "error",
+    afficher_ui: bool = False,
+):
+    """
+    Décorateur unifié de résilience — compose retry, timeout, circuit breaker et fallback.
+
+    Combine toutes les stratégies de gestion d'erreurs en un seul point
+    d'entrée cohérent, éliminant la confusion entre ``@avec_gestion_erreurs``,
+    ``@gerer_erreurs`` et les policies manuelles.
+
+    Args:
+        retry: Nombre de retentatives (0 = pas de retry)
+        timeout_s: Timeout en secondes (None = pas de timeout)
+        fallback: Valeur retournée en cas d'échec final (None = relève l'exception)
+        circuit: Nom du circuit breaker (None = pas de circuit breaker)
+        log_level: Niveau de log pour les erreurs ('debug', 'info', 'warning', 'error')
+        afficher_ui: Afficher l'erreur dans Streamlit UI
+
+    Returns:
+        Décorateur de fonction
+
+    Usage::
+
+        # Appel IA avec retry + timeout + fallback
+        @avec_resilience(retry=3, timeout_s=30, fallback=[], afficher_ui=True)
+        def generer_recettes(contexte: str) -> list[Recette]:
+            return service.generer(contexte)
+
+        # Requête DB avec circuit breaker
+        @avec_resilience(circuit="database", timeout_s=10, log_level="warning")
+        def charger_donnees() -> list[dict]:
+            return db.query(Model).all()
+
+        # Simple protection avec fallback
+        @avec_resilience(fallback={})
+        def operation_risquee() -> dict:
+            return api.call()
+    """
+    # Sentinel pour distinguer «fallback None» de «pas de fallback»
+    _NO_FALLBACK = object()
+    _fallback = _NO_FALLBACK if fallback is None else fallback
+
+    def decorator(func: F) -> F:
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> Any:
+            # Construire la chaîne de policies à la demande (lazy import)
+            from src.core.resilience import (
+                BulkheadPolicy,
+                FallbackPolicy,
+                PolicyComposee,
+                RetryPolicy,
+                TimeoutPolicy,
+            )
+
+            policies = []
+
+            if timeout_s is not None:
+                policies.append(TimeoutPolicy(timeout_secondes=timeout_s))
+
+            if circuit is not None:
+                from src.core.ai.circuit_breaker import obtenir_circuit
+
+                cb = obtenir_circuit(circuit)
+                # Wrapper le circuit breaker comme policy
+                policies.append(
+                    FallbackPolicy(
+                        fallback_fn=lambda e: (_ for _ in ()).throw(e),  # type: ignore
+                        log_erreur=False,
+                    )
+                )
+                # Le circuit breaker sera appliqué directement
+
+            if retry > 0:
+                policies.append(RetryPolicy(max_tentatives=retry, delai_base=1.0, jitter=True))
+
+            # Exécuter
+            def _inner() -> Any:
+                if circuit is not None:
+                    from src.core.ai.circuit_breaker import obtenir_circuit
+
+                    cb = obtenir_circuit(circuit)
+                    return cb.appeler(fn=lambda: func(*args, **kwargs))
+                return func(*args, **kwargs)
+
+            try:
+                if policies:
+                    composed = PolicyComposee(policies)
+                    result = composed.executer(_inner)
+                    if result.is_err():
+                        raise result.err()  # type: ignore
+                    return result.unwrap()
+                else:
+                    return _inner()
+
+            except Exception as e:
+                # Logger
+                log_fn = getattr(logger, log_level.lower(), logger.error)
+                log_fn(f"Erreur dans {func.__name__}: {e}")
+
+                # Afficher dans l'UI
+                if afficher_ui:
+                    try:
+                        import streamlit as st
+
+                        if hasattr(e, "message_utilisateur"):
+                            st.error(f"[ERROR] {e.message_utilisateur}")  # type: ignore
+                        else:
+                            st.error(f"[ERROR] {str(e)}")
+                    except Exception:
+                        pass
+
+                # Fallback ou re-raise
+                if _fallback is not _NO_FALLBACK:
+                    return _fallback
+                raise
+
+        return wrapper  # type: ignore
+
+    return decorator
+
+
+# ═══════════════════════════════════════════════════════════
 # EXPORTS PRINCIPAUX
 # ═══════════════════════════════════════════════════════════
 
@@ -325,4 +457,5 @@ __all__ = [
     "avec_cache",
     "avec_gestion_erreurs",
     "avec_validation",
+    "avec_resilience",
 ]

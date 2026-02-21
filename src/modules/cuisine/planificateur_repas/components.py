@@ -6,13 +6,13 @@ from datetime import date
 
 import streamlit as st
 
-from .utils import PROTEINES, ROBOTS_CUISINE, TEMPS_CATEGORIES, PreferencesUtilisateur
 from .preferences import (
     ajouter_feedback,
     charger_feedbacks,
     charger_preferences,
     sauvegarder_preferences,
 )
+from .utils import PROTEINES, ROBOTS_CUISINE, TEMPS_CATEGORIES, PreferencesUtilisateur
 
 
 def afficher_configuration_preferences():

@@ -1,29 +1,44 @@
 """
-File - Cache L3 basé sur fichiers pickle.
+File - Cache L3 basé sur fichiers JSON.
 
 Cache persistant entre sessions:
 - Plus lent mais durable
 - Limité par espace disque
+- Sérialisé en JSON (sûr — pas de pickle/exécution de code arbitraire)
 """
 
 import hashlib
+import json
 import logging
-import pickle
 import threading
 from pathlib import Path
+from typing import Any
 
 from .base import EntreeCache
 
 logger = logging.getLogger(__name__)
 
 
+def _json_serialisable(obj: Any) -> Any:
+    """Convertit un objet en type sérialisable JSON."""
+    if isinstance(obj, str | bytes | int | float | bool | type(None)):
+        return obj
+    if isinstance(obj, list | tuple):
+        return [_json_serialisable(item) for item in obj]
+    if isinstance(obj, dict):
+        return {str(k): _json_serialisable(v) for k, v in obj.items()}
+    # Fallback: convertir en string
+    return str(obj)
+
+
 class CacheFichierN3:
     """
-    Cache L3 basé sur fichiers pickle.
+    Cache L3 basé sur fichiers JSON.
 
     - Persistant entre sessions
     - Plus lent mais durable
     - Limité par espace disque
+    - Sérialisé en JSON (sûr — pas de risque d'exécution de code arbitraire)
     """
 
     def __init__(self, cache_dir: str = ".cache", max_size_mb: float = 100):
@@ -34,9 +49,8 @@ class CacheFichierN3:
 
     def _key_to_filename(self, key: str) -> Path:
         """Convertit une clé en chemin de fichier."""
-        # Hash pour éviter les problèmes de caractères spéciaux
         hash_key = hashlib.md5(key.encode()).hexdigest()
-        return self.cache_dir / f"{hash_key}.cache"
+        return self.cache_dir / f"{hash_key}.json"
 
     def get(self, key: str) -> EntreeCache | None:
         """Récupère une entrée du cache L3."""
@@ -47,8 +61,8 @@ class CacheFichierN3:
 
         try:
             with self._lock:
-                with open(filepath, "rb") as f:
-                    data = pickle.load(f)
+                with open(filepath, encoding="utf-8") as f:
+                    data = json.load(f)
 
                 entry = EntreeCache(**data)
                 if entry.est_expire:
@@ -59,6 +73,11 @@ class CacheFichierN3:
                 return entry
         except Exception as e:
             logger.debug(f"Erreur lecture cache L3: {e}")
+            # Fichier corrompu ou ancien format pickle → supprimer
+            try:
+                filepath.unlink(missing_ok=True)
+            except Exception:
+                pass
             return None
 
     def set(self, key: str, entry: EntreeCache) -> None:
@@ -71,7 +90,7 @@ class CacheFichierN3:
 
             with self._lock:
                 data = {
-                    "value": entry.value,
+                    "value": _json_serialisable(entry.value),
                     "created_at": entry.created_at,
                     "ttl": entry.ttl,
                     "tags": entry.tags,
@@ -80,8 +99,8 @@ class CacheFichierN3:
 
                 # Écrire dans un fichier temporaire puis renommer (atomique)
                 temp_file = filepath.with_suffix(".tmp")
-                with open(temp_file, "wb") as f:
-                    pickle.dump(data, f)
+                with open(temp_file, "w", encoding="utf-8") as f:
+                    json.dump(data, f, ensure_ascii=False, default=str)
                 temp_file.rename(filepath)
 
         except Exception as e:
@@ -101,13 +120,11 @@ class CacheFichierN3:
         count = 0
 
         try:
-            for filepath in self.cache_dir.glob("*.cache"):
+            for filepath in self.cache_dir.glob("*.json"):
                 try:
-                    with open(filepath, "rb") as f:
-                        data = pickle.load(f)
+                    with open(filepath, encoding="utf-8") as f:
+                        data = json.load(f)
 
-                    # Reconstruire la clé depuis les données n'est pas possible
-                    # Donc on invalide par tags seulement
                     if tags and any(tag in data.get("tags", []) for tag in tags):
                         filepath.unlink()
                         count += 1
@@ -121,19 +138,21 @@ class CacheFichierN3:
     def clear(self) -> None:
         """Vide le cache L3."""
         try:
-            for filepath in self.cache_dir.glob("*.cache"):
-                filepath.unlink()
+            # Nettoyer aussi d'anciens fichiers .cache (format pickle legacy)
+            for ext in ("*.json", "*.cache"):
+                for filepath in self.cache_dir.glob(ext):
+                    filepath.unlink()
         except Exception as e:
             logger.debug(f"Erreur vidage cache L3: {e}")
 
     def _cleanup_if_needed(self) -> None:
         """Nettoie si la taille dépasse la limite."""
         try:
-            total_size = sum(f.stat().st_size for f in self.cache_dir.glob("*.cache"))
+            total_size = sum(f.stat().st_size for f in self.cache_dir.glob("*.json"))
 
             if total_size > self.max_size_bytes:
                 # Supprimer les fichiers les plus anciens
-                files = sorted(self.cache_dir.glob("*.cache"), key=lambda f: f.stat().st_mtime)
+                files = sorted(self.cache_dir.glob("*.json"), key=lambda f: f.stat().st_mtime)
 
                 while total_size > self.max_size_bytes * 0.8 and files:
                     oldest = files.pop(0)
@@ -146,6 +165,6 @@ class CacheFichierN3:
     @property
     def size(self) -> int:
         try:
-            return len(list(self.cache_dir.glob("*.cache")))
+            return len(list(self.cache_dir.glob("*.json")))
         except Exception:
             return 0

@@ -103,7 +103,7 @@ class IOService:
         except json.JSONDecodeError as e:
             return [], [f"JSON invalide: {str(e)}"]
 
-        if not isinstance(data, list):
+        if isinstance(data, str | bytes):
             data = [data]
 
         items = []
@@ -127,13 +127,13 @@ class IOService:
         """Formate valeur pour export"""
         if value is None:
             return ""
-        if isinstance(value, (date, datetime)):
+        if isinstance(value, date | datetime):
             if isinstance(value, datetime):
                 return value.strftime("%d/%m/%Y %H:%M")
             return value.strftime("%d/%m/%Y")
         if isinstance(value, bool):
             return "Oui" if value else "Non"
-        if isinstance(value, (list, tuple)):
+        if isinstance(value, list | tuple):
             return ", ".join(str(v) for v in value)
         return str(value)
 

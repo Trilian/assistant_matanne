@@ -7,7 +7,6 @@ Couvre la validation, sérialisation et les cas limites.
 import pytest
 from pydantic import ValidationError
 
-
 # ═══════════════════════════════════════════════════════════════════════
 # TESTS PaginationParams
 # ═══════════════════════════════════════════════════════════════════════

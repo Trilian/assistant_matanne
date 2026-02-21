@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Any, Generic, TypeVar
 
-from sqlalchemy import Select, and_, func, or_, select
+from sqlalchemy import Select, and_, delete, func, or_, select
 from sqlalchemy.orm import Session
 
 T = TypeVar("T")
@@ -418,7 +418,11 @@ class Requete(Generic[T]):
 
     def supprimer(self, session: Session) -> int:
         """
-        Supprime les entités correspondantes.
+        Supprime les entités correspondantes via DELETE SQL direct.
+
+        Utilise un ``DELETE ... WHERE`` au lieu de charger les objets
+        en mémoire, ce qui est nettement plus performant sur les
+        grandes tables (O(1) mémoire au lieu de O(n)).
 
         Args:
             session: Session SQLAlchemy
@@ -426,10 +430,18 @@ class Requete(Generic[T]):
         Returns:
             Nombre d'entités supprimées
         """
-        entites = self.executer(session)
-        for entite in entites:
-            session.delete(entite)
-        return len(entites)
+        stmt = delete(self.model)
+
+        all_conditions = list(self._conditions)
+        if self._conditions_or:
+            all_conditions.extend(self._conditions_or)
+
+        if all_conditions:
+            stmt = stmt.where(and_(*all_conditions))
+
+        result = session.execute(stmt)
+        session.flush()
+        return result.rowcount  # type: ignore[return-value]
 
     def __repr__(self) -> str:
         return (

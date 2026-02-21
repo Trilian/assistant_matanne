@@ -871,8 +871,8 @@ class TestObtenirParametresAvance:
 
     def test_reinitialiser_parametres(self):
         """Test reinitialiser_parametres force le rechargement."""
-        from src.core.config.settings import reinitialiser_parametres
         import src.core.config.settings as settings_mod
+        from src.core.config.settings import reinitialiser_parametres
 
         settings_mod._parametres = None
         with patch("src.core.config.settings._reload_env_files"):

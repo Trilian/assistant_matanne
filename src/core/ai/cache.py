@@ -166,12 +166,29 @@ class CacheIA:
         """
         stats_globales = Cache.obtenir_statistiques()
 
-        # Compter uniquement les entrées IA
-        import streamlit as st
+        # Compter les entrées IA via l'API Storage (pas d'accès direct st.session_state)
+        from ..storage import obtenir_storage
 
-        donnees_cache = st.session_state.get(Cache.CLE_DONNEES, {})
+        storage = obtenir_storage()
+        entrees_ia = 0
 
-        entrees_ia = sum(1 for cle in donnees_cache.keys() if cle.startswith(CacheIA.PREFIXE))
+        try:
+            # Utiliser le CLE_DONNEES via l'abstraction storage
+            donnees_cache = storage.get(Cache.CLE_DONNEES, {})
+            if isinstance(donnees_cache, dict):
+                entrees_ia = sum(
+                    1 for cle in donnees_cache.keys() if cle.startswith(CacheIA.PREFIXE)
+                )
+        except Exception:
+            # Fallback: compter via le cache multi-niveaux L1
+            try:
+                from ..caching import CacheMultiNiveau
+
+                cache = CacheMultiNiveau()
+                entrees_l1 = cache.l1._cache
+                entrees_ia = sum(1 for cle in entrees_l1.keys() if cle.startswith(CacheIA.PREFIXE))
+            except Exception:
+                pass
 
         return {
             "entrees_ia": entrees_ia,

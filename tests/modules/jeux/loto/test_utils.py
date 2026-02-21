@@ -638,7 +638,7 @@ class TestSimulerStrategie:
 
         assert "roi" in result
         assert "profit" in result
-        assert isinstance(result["roi"], (int, float))
+        assert isinstance(result["roi"], int | float)
 
 
 class TestComparerStrategies:

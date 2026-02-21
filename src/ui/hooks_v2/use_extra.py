@@ -5,11 +5,12 @@ Ces hooks complètent la bibliothèque hooks_v2 avec des primitives courantes:
 - use_counter: Compteur incrémentable/décrémentable
 - use_toggle: Booléen toggle
 - use_list: Gestion de listes avec ajout/suppression
-- use_mutation: Mutations asynchrones avec états loading/error
+
+Note: use_mutation a été déplacé dans use_query.py pour l'invalidation de queries.
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Generic, TypeVar
+from typing import Callable, Generic, TypeVar
 
 import streamlit as st
 
@@ -203,105 +204,11 @@ def use_list(key: str, initial: list[T] | None = None) -> ListState[T]:
     return ListState(items=st.session_state[key], _key=key)
 
 
-# ============================================================================
-# use_mutation
-# ============================================================================
-
-
-@dataclass
-class MutationState(Generic[T]):
-    """État d'une mutation avec loading/error/data."""
-
-    is_loading: bool = False
-    is_error: bool = False
-    is_success: bool = False
-    data: T | None = None
-    error: Exception | None = None
-    _key: str = field(default="", repr=False)
-    _mutate_fn: Callable[..., T] | None = field(default=None, repr=False)
-
-    def mutate(self, *args: Any, **kwargs: Any) -> T | None:
-        """
-        Exécute la mutation de manière synchrone.
-
-        Returns:
-            Le résultat de la mutation ou None si erreur
-        """
-        if self._mutate_fn is None:
-            return None
-
-        # Set loading state
-        st.session_state[f"{self._key}_loading"] = True
-        st.session_state[f"{self._key}_error"] = None
-
-        try:
-            result = self._mutate_fn(*args, **kwargs)
-            st.session_state[f"{self._key}_data"] = result
-            st.session_state[f"{self._key}_success"] = True
-            st.session_state[f"{self._key}_loading"] = False
-            return result
-        except Exception as e:
-            st.session_state[f"{self._key}_error"] = e
-            st.session_state[f"{self._key}_success"] = False
-            st.session_state[f"{self._key}_loading"] = False
-            return None
-
-    def reset(self) -> None:
-        """Réinitialise l'état de la mutation."""
-        st.session_state[f"{self._key}_loading"] = False
-        st.session_state[f"{self._key}_error"] = None
-        st.session_state[f"{self._key}_data"] = None
-        st.session_state[f"{self._key}_success"] = False
-
-
-def use_mutation(
-    key: str,
-    mutation_fn: Callable[..., T],
-) -> MutationState[T]:
-    """
-    Hook pour gérer des mutations (opérations d'écriture).
-
-    Args:
-        key: Clé unique dans session_state
-        mutation_fn: Fonction à exécuter lors de la mutation
-
-    Returns:
-        MutationState avec méthodes mutate/reset et états loading/error/success
-
-    Example:
-        def save_data(data: dict) -> bool:
-            db.save(data)
-            return True
-
-        mutation = use_mutation("save", save_data)
-
-        if st.button("Sauvegarder"):
-            mutation.mutate({"name": "test"})
-
-        if mutation.is_loading:
-            st.spinner("Sauvegarde...")
-        elif mutation.is_error:
-            st.error(f"Erreur: {mutation.error}")
-        elif mutation.is_success:
-            st.success("Sauvegardé!")
-    """
-    # Initialize state keys if not present
-    for suffix, default in [
-        ("_loading", False),
-        ("_error", None),
-        ("_data", None),
-        ("_success", False),
-    ]:
-        state_key = f"{key}{suffix}"
-        if state_key not in st.session_state:
-            st.session_state[state_key] = default
-
-    return MutationState(
-        is_loading=st.session_state[f"{key}_loading"],
-        is_error=st.session_state[f"{key}_error"] is not None,
-        is_success=st.session_state[f"{key}_success"],
-        data=st.session_state[f"{key}_data"],
-        error=st.session_state[f"{key}_error"],
-        _key=key,
-        _mutate_fn=mutation_fn,
-    )
+__all__ = [
+    "CounterState",
+    "ToggleState",
+    "ListState",
+    "use_counter",
+    "use_toggle",
+    "use_list",
+]

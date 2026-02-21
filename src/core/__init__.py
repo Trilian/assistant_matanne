@@ -123,6 +123,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # Decorators
     "avec_cache": (".decorators", "avec_cache"),
     "avec_gestion_erreurs": (".decorators", "avec_gestion_erreurs"),
+    "avec_resilience": (".decorators", "avec_resilience"),
     "avec_session_db": (".decorators", "avec_session_db"),
     "avec_validation": (".decorators", "avec_validation"),
     # Errors (UI)
@@ -172,6 +173,9 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "verifier_sante_globale": (".monitoring", "verifier_sante_globale"),
     # State
     "EtatApp": (".state", "EtatApp"),
+    "EtatNavigation": (".state", "EtatNavigation"),
+    "EtatCuisine": (".state", "EtatCuisine"),
+    "EtatUI": (".state", "EtatUI"),
     "GestionnaireEtat": (".state", "GestionnaireEtat"),
     "naviguer": (".state", "naviguer"),
     "obtenir_etat": (".state", "obtenir_etat"),

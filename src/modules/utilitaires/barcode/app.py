@@ -4,7 +4,6 @@ Point d'entrée module scanner barcode.
 
 from __future__ import annotations
 
-
 # ═══════════════════════════════════════════════════════════
 # INITIALISATION
 # ═══════════════════════════════════════════════════════════

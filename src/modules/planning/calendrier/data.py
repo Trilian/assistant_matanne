@@ -14,6 +14,7 @@ from src.core.models import (
     Repas,
     SessionBatchCooking,
 )
+
 from .utils import get_debut_semaine
 
 logger = logging.getLogger(__name__)

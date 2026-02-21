@@ -177,7 +177,9 @@ class ServiceRoutines:
         db.add(routine)
         db.commit()
         logger.info("Routine créée: %s (id=%d)", nom, routine.id)
-        obtenir_bus().emettre("routines.cree", {"id": routine.id, "nom": nom}, source="ServiceRoutines")
+        obtenir_bus().emettre(
+            "routines.cree", {"id": routine.id, "nom": nom}, source="ServiceRoutines"
+        )
         return routine.id
 
     @avec_session_db
@@ -232,7 +234,9 @@ class ServiceRoutines:
             task.status = "termine"
             task.completed_at = datetime.now()
             db.commit()
-            obtenir_bus().emettre("routines.tache_complete", {"id": task_id}, source="ServiceRoutines")
+            obtenir_bus().emettre(
+                "routines.tache_complete", {"id": task_id}, source="ServiceRoutines"
+            )
             return True
         return False
 
@@ -267,7 +271,9 @@ class ServiceRoutines:
         deleted = db.query(Routine).filter(Routine.id == routine_id).delete()
         db.commit()
         if deleted > 0:
-            obtenir_bus().emettre("routines.supprimee", {"id": routine_id}, source="ServiceRoutines")
+            obtenir_bus().emettre(
+                "routines.supprimee", {"id": routine_id}, source="ServiceRoutines"
+            )
         return deleted > 0
 
     @avec_session_db
@@ -286,7 +292,9 @@ class ServiceRoutines:
         if routine:
             routine.is_active = False
             db.commit()
-            obtenir_bus().emettre("routines.desactivee", {"id": routine_id}, source="ServiceRoutines")
+            obtenir_bus().emettre(
+                "routines.desactivee", {"id": routine_id}, source="ServiceRoutines"
+            )
             return True
         return False
 

@@ -35,17 +35,28 @@ from .collector import (
     reinitialiser_collecteur,
 )
 from .decorators import chronometre
-from .health import SanteSysteme, verifier_sante_globale
+from .health import (
+    SanteSysteme,
+    TypeVerification,
+    verifier_liveness,
+    verifier_readiness,
+    verifier_sante_globale,
+    verifier_startup,
+)
 
 __all__ = [
     "CollecteurMetriques",
     "MetriqueType",
     "PointMetrique",
     "SanteSysteme",
+    "TypeVerification",
     "chronometre",
     "collecteur",
     "enregistrer_metrique",
     "obtenir_snapshot",
     "reinitialiser_collecteur",
+    "verifier_liveness",
+    "verifier_readiness",
     "verifier_sante_globale",
+    "verifier_startup",
 ]

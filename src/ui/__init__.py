@@ -1,7 +1,7 @@
 """
 UI - Point d'entrée unifié optimisé
 Architecture claire : core/ components/ feedback/ layout/ tablet/ integrations/
-Design system : tokens/ html_builder/ theme/ registry/
+Design system : tokens/ theme/ registry/ hooks_v2/ primitives/ system/
 """
 
 # Design System primitives
@@ -76,17 +76,26 @@ from .feedback import (
     spinner_intelligent,
 )
 
-# UI 3.0 - Hooks avancés
+# UI 3.0 - Hooks avancés (système unifié)
 from .hooks_v2 import (
+    CounterState,
     FormState,
+    ListState,
+    MutationState,
     QueryResult,
     QueryStatus,
     State,
+    ToggleState,
+    use_callback,
     use_counter,
+    use_effect,
     use_form,
     use_list,
+    use_memo,
     use_mutation,
+    use_previous,
     use_query,
+    use_service,
     use_state,
     use_toggle,
 )
@@ -100,8 +109,6 @@ from .hooks_v2 import (
 #     use_recherche,
 #     use_tri,
 # )
-from .html_builder import HtmlBuilder, render_html
-
 # Integrations (Google Calendar, etc.)
 from .integrations import (
     GOOGLE_SCOPES,
@@ -206,8 +213,6 @@ __all__ = [
     "obtenir_couleurs_variante",
     "Sem",
     "injecter_tokens_semantiques",
-    "HtmlBuilder",
-    "render_html",
     "A11y",
     "Animation",
     "animer",
@@ -351,7 +356,7 @@ __all__ = [
     "VStack",
     "Text",
     "TextProps",
-    # UI 3.0 - Hooks v2
+    # UI 3.0 - Hooks v2 (système unifié)
     "use_state",
     "use_toggle",
     "use_counter",
@@ -359,7 +364,16 @@ __all__ = [
     "use_query",
     "use_mutation",
     "use_form",
+    "use_service",
+    "use_memo",
+    "use_effect",
+    "use_callback",
+    "use_previous",
     "State",
+    "CounterState",
+    "ToggleState",
+    "ListState",
+    "MutationState",
     "QueryResult",
     "QueryStatus",
     "FormState",

@@ -23,7 +23,6 @@ import streamlit as st
 # Import Google Calendar UI
 from src.ui.integrations import afficher_config_google_calendar
 
-from .utils import construire_semaine_calendrier, get_debut_semaine
 from .analytics import (
     afficher_actions_prioritaires,
     afficher_formulaire_optimisation_ia,
@@ -49,6 +48,7 @@ from .components import (
 
 # Import des fonctions pour exposer l'API publique
 from .data import charger_donnees_semaine
+from .utils import construire_semaine_calendrier, get_debut_semaine
 
 
 def app():

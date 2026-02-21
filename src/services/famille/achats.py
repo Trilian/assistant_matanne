@@ -142,9 +142,7 @@ class ServiceAchatsFamille:
         }
 
     @avec_session_db
-    def get_urgents(
-        self, limit: int = 5, db: Session | None = None
-    ) -> list[FamilyPurchase]:
+    def get_urgents(self, limit: int = 5, db: Session | None = None) -> list[FamilyPurchase]:
         """Récupère les achats urgents pour le tableau de bord.
 
         Args:
