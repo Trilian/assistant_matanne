@@ -94,9 +94,7 @@ class Equipe(Base):
 
     # Méta
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     matchs_domicile: Mapped[list["Match"]] = relationship(
@@ -111,9 +109,37 @@ class Equipe(Base):
 
     @property
     def forme_recente(self) -> str:
-        """Retourne la forme sur les 5 derniers matchs (ex: VVNPV)"""
-        # Sera calculé dynamiquement
-        return ""
+        """Retourne la forme sur les 5 derniers matchs (ex: VVNPV).
+
+        V = Victoire, N = Nul, D = Défaite.
+        Calculé dynamiquement à partir des matchs chargés.
+        """
+        tous_matchs = [
+            *[(m, "dom") for m in self.matchs_domicile if m.joue],
+            *[(m, "ext") for m in self.matchs_exterieur if m.joue],
+        ]
+        tous_matchs.sort(key=lambda x: x[0].date_match, reverse=True)
+
+        forme = []
+        for match, position in tous_matchs[:5]:
+            if match.score_domicile is None or match.score_exterieur is None:
+                continue
+            if position == "dom":
+                if match.score_domicile > match.score_exterieur:
+                    forme.append("V")
+                elif match.score_domicile < match.score_exterieur:
+                    forme.append("D")
+                else:
+                    forme.append("N")
+            else:
+                if match.score_exterieur > match.score_domicile:
+                    forme.append("V")
+                elif match.score_exterieur < match.score_domicile:
+                    forme.append("D")
+                else:
+                    forme.append("N")
+
+        return "".join(forme)
 
     @property
     def points(self) -> int:
@@ -163,9 +189,7 @@ class Match(Base):
 
     # Méta
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     equipe_domicile: Mapped["Equipe"] = relationship(
@@ -533,9 +557,7 @@ class ConfigurationJeux(Base):
     cle: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
     valeur: Mapped[str] = mapped_column(Text, nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime, default=utc_now, onupdate=utc_now
-    )
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     def __repr__(self) -> str:
         return f"<Config {self.cle}={self.valeur}>"

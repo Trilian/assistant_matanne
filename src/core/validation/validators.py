@@ -7,6 +7,14 @@ Fonctions pour:
 - Décorateurs de validation automatique
 """
 
+__all__ = [
+    "valider_modele",
+    "valider_formulaire_streamlit",
+    "valider_et_nettoyer_formulaire",
+    "afficher_erreurs_validation",
+    "valider_entree",
+]
+
 import logging
 from collections.abc import Callable
 from functools import wraps
@@ -92,19 +100,26 @@ def valider_formulaire_streamlit(
     return est_valide, erreurs, nettoye
 
 
-def valider_et_nettoyer_formulaire(nom_module: str, donnees_formulaire: dict) -> tuple[bool, dict]:
+def valider_et_nettoyer_formulaire(
+    nom_module: str, donnees_formulaire: dict
+) -> tuple[bool, list[str], dict]:
     """
     Helper pour valider un formulaire selon le module.
+
+    Retourne les erreurs au lieu de les afficher — l'appelant décide
+    de l'affichage (Streamlit, CLI, tests…).
 
     Args:
         nom_module: Nom du module (recettes, inventaire, courses)
         donnees_formulaire: Données à valider
 
     Returns:
-        Tuple (valide, données_nettoyées)
+        Tuple (valide, liste_erreurs, données_nettoyées)
 
     Example:
-        >>> valide, donnees = valider_et_nettoyer_formulaire("recettes", form_data)
+        >>> valide, erreurs, donnees = valider_et_nettoyer_formulaire("recettes", form_data)
+        >>> if not valide:
+        ...     afficher_erreurs_validation(erreurs)
     """
 
     schemas = {
@@ -124,29 +139,36 @@ def valider_et_nettoyer_formulaire(nom_module: str, donnees_formulaire: dict) ->
                 nettoye[cle] = NettoyeurEntrees.nettoyer_chaine(valeur)
             else:
                 nettoye[cle] = valeur
-        return True, nettoye
+        return True, [], nettoye
 
     est_valide, erreurs, nettoye = valider_formulaire_streamlit(donnees_formulaire, schema)
 
-    if not est_valide:
-        afficher_erreurs_validation(erreurs)
-
-    return est_valide, nettoye
+    return est_valide, erreurs, nettoye
 
 
-def afficher_erreurs_validation(erreurs: list[str]):
+def afficher_erreurs_validation(erreurs: list[str]) -> None:
     """
     Affiche les erreurs de validation dans Streamlit.
+
+    Utilise un import lazy de Streamlit pour rester découplé.
+    Fonctionne en mode dégradé (logging) quand Streamlit n'est pas disponible.
 
     Args:
         erreurs: Liste des messages d'erreur
     """
-    import streamlit as st
+    if not erreurs:
+        return
 
-    if erreurs:
-        with st.expander("[ERROR] Erreurs de validation", expanded=True):
+    try:
+        import streamlit as st
+
+        with st.expander("❌ Erreurs de validation", expanded=True):
             for erreur in erreurs:
                 st.error(erreur)
+    except Exception:
+        # Mode dégradé: logging pur (tests, CLI, sans Streamlit)
+        for erreur in erreurs:
+            logger.error(f"Validation: {erreur}")
 
 
 def valider_entree(schema: dict | None = None, nettoyer_tout: bool = True):

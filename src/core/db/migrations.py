@@ -17,6 +17,8 @@ from .engine import obtenir_moteur
 
 logger = logging.getLogger(__name__)
 
+__all__ = ["GestionnaireMigrations", "DOSSIER_MIGRATIONS"]
+
 # Répertoire racine du projet (remonte de src/core/db → racine)
 _RACINE_PROJET = Path(__file__).resolve().parent.parent.parent.parent
 DOSSIER_MIGRATIONS = _RACINE_PROJET / "sql" / "migrations"

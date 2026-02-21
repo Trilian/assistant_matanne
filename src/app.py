@@ -51,6 +51,16 @@ GestionnaireLog.initialiser(niveau_log="INFO")
 logger = obtenir_logger(__name__)
 
 # ═══════════════════════════════════════════════════════════
+# BOOTSTRAP IoC — Initialisation unifiée (container, config, DB)
+# ═══════════════════════════════════════════════════════════
+
+from src.core.bootstrap import demarrer_application
+
+_rapport = demarrer_application(valider_config=False, initialiser_eager=False)
+if not _rapport.succes:
+    logger.error(f"❌ Bootstrap échoué: {_rapport.erreurs}")
+
+# ═══════════════════════════════════════════════════════════
 # IMPORTS OPTIMISÉS (MINIMAL au démarrage)
 # ═══════════════════════════════════════════════════════════
 

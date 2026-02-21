@@ -64,9 +64,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "vacuum_database": (".db", "vacuum_database"),
     "verifier_connexion": (".db", "verifier_connexion"),
     "verifier_sante": (".db", "verifier_sante"),
-    # Events
-    "BusEvenements": (".events", "BusEvenements"),
-    "bus_evenements": (".events", "bus_evenements"),
     # Repository
     "Repository": (".repository", "Repository"),
     # Specifications

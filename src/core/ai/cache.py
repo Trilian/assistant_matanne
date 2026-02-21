@@ -8,6 +8,8 @@ Ce module fournit un cache dédié aux réponses IA avec :
 - Statistiques de performance
 """
 
+__all__ = ["CacheIA", "afficher_statistiques_cache_ia"]
+
 import hashlib
 import json
 import logging

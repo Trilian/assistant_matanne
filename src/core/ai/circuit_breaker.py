@@ -1,6 +1,12 @@
 """
 Circuit Breaker - Protection contre les défaillances de services externes.
 
+.. deprecated:: 2026.02
+    Préférer ``src.core.resilience.policies`` pour les nouvelles intégrations.
+    Ce module est conservé pour compatibilité avec le client IA existant.
+    Voir :class:`src.core.resilience.RetryPolicy` et
+    :class:`src.core.resilience.FallbackPolicy` pour les alternatives composables.
+
 Implémente le pattern Circuit Breaker pour:
 - Éviter de marteler un service externe en panne
 - Reprise automatique progressive (half-open)
@@ -23,6 +29,8 @@ from typing import Any, TypeVar
 from ..errors_base import ErreurServiceExterne
 
 logger = logging.getLogger(__name__)
+
+__all__ = ["CircuitBreaker", "EtatCircuit", "obtenir_circuit", "avec_circuit_breaker"]
 
 T = TypeVar("T")
 

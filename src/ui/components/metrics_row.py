@@ -15,9 +15,12 @@ Usage:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Callable
 
 import streamlit as st
+
+from src.ui.tokens import Couleur
+from src.ui.tokens_semantic import Sem
 
 
 @dataclass
@@ -40,7 +43,7 @@ class MetricConfig:
     delta_color: str = "normal"  # "normal", "inverse", "off"
     help_text: str = ""
     icon: str = ""
-    format_fn: callable | None = None
+    format_fn: Callable | None = None
 
     def get_formatted_value(self) -> Any:
         """Retourne la valeur formatée."""
@@ -122,7 +125,7 @@ def afficher_stats_cards(
 
     for i, stat in enumerate(stats):
         with cols[i % columns]:
-            color = stat.get("color", "#4CAF50")
+            color = stat.get("color", Couleur.SUCCESS)
             icon = stat.get("icon", "")
             title = f"{icon} {stat.get('title', '')}" if icon else stat.get("title", "")
 
@@ -135,13 +138,13 @@ def afficher_stats_cards(
                     border-radius: 8px;
                     margin-bottom: 0.5rem;
                 ">
-                    <div style="font-size: 0.85rem; color: #666;">
+                    <div style="font-size: 0.85rem; color: {Sem.ON_SURFACE_SECONDARY};">
                         {title}
                     </div>
                     <div style="font-size: 1.75rem; font-weight: bold; color: {color};">
                         {stat.get('value', '')}
                     </div>
-                    <div style="font-size: 0.75rem; color: #999;">
+                    <div style="font-size: 0.75rem; color: {Sem.ON_SURFACE_MUTED};">
                         {stat.get('subtitle', '')}
                     </div>
                 </div>
@@ -170,7 +173,11 @@ def afficher_kpi_banner(
         return
 
     trend_icons = {"up": "📈", "down": "📉", "neutral": "➡️"}
-    trend_colors = {"up": "#4CAF50", "down": "#f44336", "neutral": "#757575"}
+    trend_colors = {
+        "up": Couleur.SUCCESS,
+        "down": Couleur.DANGER,
+        "neutral": Couleur.TEXT_SECONDARY,
+    }
 
     kpi_html = ""
     for kpi in kpis:
@@ -178,24 +185,27 @@ def afficher_kpi_banner(
         icon = trend_icons.get(trend, "")
         color = trend_colors.get(trend, "#757575")
 
-        kpi_html += f"""
+        kpi_html += (
+            f"""
         <div style="
             display: inline-block;
             padding: 0.5rem 1.5rem;
             text-align: center;
-            border-right: 1px solid #ddd;
+            border-right: 1px solid {Sem.BORDER_SUBTLE};
         ">
-            <div style="font-size: 0.75rem; color: #666;">{kpi.get('label', '')}</div>
+            <div style="font-size: 0.75rem; color: {Sem.ON_SURFACE_SECONDARY};">{kpi.get('label', '')}</div>
             <div style="font-size: 1.25rem; font-weight: bold; color: {color};">
                 {kpi.get('value', '')} {icon}
             </div>
         </div>
         """
+            ""
+        )
 
     st.markdown(
         f"""
         <div style="
-            background: {background_color};
+            background: {Sem.SURFACE_ALT};
             border-radius: 8px;
             padding: 0.5rem;
             overflow-x: auto;
@@ -239,7 +249,13 @@ def afficher_progress_metrics(
             progress = min(current / target, 1.0) if target > 0 else 0
             percent = int(progress * 100)
 
-            color = "#4CAF50" if percent >= 80 else "#ff9800" if percent >= 50 else "#f44336"
+            color = (
+                Couleur.SUCCESS
+                if percent >= 80
+                else Couleur.WARNING
+                if percent >= 50
+                else Couleur.DANGER
+            )
 
             st.markdown(f"**{label}**")
             st.progress(progress)

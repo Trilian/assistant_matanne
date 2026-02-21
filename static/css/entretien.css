@@ -63,10 +63,7 @@
     animation: pulse 4s ease-in-out infinite;
 }
 
-@keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 0.5; }
-    50% { transform: scale(1.1); opacity: 0.8; }
-}
+/* @keyframes pulse — centralisé dans src/ui/animations.py */
 
 .score-ring {
     position: relative;
@@ -198,10 +195,7 @@
     animation: bounce 1s infinite;
 }
 
-@keyframes bounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-}
+/* @keyframes bounce — centralisé dans src/ui/animations.py */
 
 /* ═══════════════════════════════════════════════════════
    ALERTES PRÉDICTIVES
@@ -571,11 +565,8 @@
     text-transform: uppercase;
 }
 
-/* Animations */
-@keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-}
+/* Animations — centralisées dans src/ui/animations.py
+   @keyframes shimmer et .loading-shimmer sont définis globalement */
 
 .loading-shimmer {
     background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -583,14 +574,7 @@
     animation: shimmer 1.5s infinite;
 }
 
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-in {
-    animation: slideIn 0.5s ease forwards;
-}
+/* @keyframes slideIn et .animate-in — centralisés dans src/ui/animations.py */
 
 /* ═══════════════════════════════════════════════════════
    EXPORT SECTION

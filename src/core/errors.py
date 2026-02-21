@@ -251,6 +251,30 @@ def afficher_erreur_streamlit(erreur: Exception, contexte: str = "") -> None:
 # ═══════════════════════════════════════════════════════════
 
 
+__all__ = [
+    # Ré-exportées depuis errors_base
+    "ExceptionApp",
+    "ErreurValidation",
+    "ErreurBaseDeDonnees",
+    "ErreurNonTrouve",
+    "ErreurServiceIA",
+    "ErreurLimiteDebit",
+    "ErreurServiceExterne",
+    "ErreurConfiguration",
+    "exiger_champs",
+    "exiger_existence",
+    "exiger_longueur",
+    "exiger_plage",
+    "exiger_positif",
+    "valider_plage",
+    "valider_type",
+    # Fonctions UI
+    "gerer_erreurs",
+    "afficher_erreur_streamlit",
+    "GestionnaireErreurs",
+]
+
+
 class GestionnaireErreurs:
     """
     Context manager pour gérer les erreurs dans un bloc de code.

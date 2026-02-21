@@ -21,6 +21,8 @@ from ..errors_base import ErreurBaseDeDonnees
 
 logger = logging.getLogger(__name__)
 
+__all__ = ["obtenir_moteur", "reinitialiser_moteur", "obtenir_moteur_securise"]
+
 # Cache thread-safe pour singleton d'engine (remplace @st.cache_resource)
 _engine_lock = threading.Lock()
 _engine_instance = None

@@ -1,15 +1,9 @@
 """
 Models - Point d'entrée unifié pour tous les modèles SQLAlchemy.
 
-Architecture modulaire :
-- base.py      : Base, MetaData, Enums
-- recettes.py  : Recette, Ingredient, EtapeRecette, etc.
-- inventaire.py: ArticleInventaire, HistoriqueInventaire
-- courses.py   : ArticleCourses, ModeleCourses
-- planning.py  : Planning, Repas, CalendarEvent
-- famille.py   : ChildProfile, Milestone, FamilyActivity, etc.
-- sante.py     : HealthRoutine, HealthObjective, HealthEntry
-- maison.py    : Project, Routine, GardenItem, etc.
+Architecture modulaire avec chargement paresseux (PEP 562).
+Seuls ``Base`` et ``metadata`` sont chargés eagerly (nécessaires
+pour la création de tables et les migrations).
 
 Usage recommandé par domaine (imports explicites):
     # Recettes
@@ -23,12 +17,19 @@ Usage recommandé par domaine (imports explicites):
     # Courses
     from src.core.models.courses import ArticleCourses, ListeCourses
 
-Usage général (tous les modèles):
+Usage général (chargement lazy à la demande):
     from src.core.models import Recette, Ingredient, Planning
     from src.core.models import Base, metadata
 """
 
-# Base et énumérations
+from __future__ import annotations
+
+import importlib
+from typing import Any
+
+# ═══════════════════════════════════════════════════════════
+# EAGER: Base & metadata — requis pour la création de tables
+# ═══════════════════════════════════════════════════════════
 from .base import (
     Base,
     PrioriteEnum,
@@ -39,202 +40,145 @@ from .base import (
     utc_now,
 )
 
-# Batch Cooking
-from .batch_cooking import (
-    ConfigBatchCooking,
-    EtapeBatchCooking,
-    LocalisationStockageEnum,
-    PreparationBatch,
-    SessionBatchCooking,
-    StatutEtapeEnum,
-    # Enums
-    StatutSessionEnum,
-    TypeRobotEnum,
-)
-
-# Calendrier externe
-from .calendrier import (
-    # Enums
-    CalendarProvider,
-    CalendrierExterne,
-    EvenementCalendrier,
-    SyncDirection,
-)
-
-# Courses
-from .courses import (
-    ArticleCourses,
-    ArticleModele,
-    ListeCourses,
-    ModeleCourses,
-)
-
-# Famille et bien-être
-from .famille import (
-    ChildProfile,
-    FamilyActivity,
-    FamilyBudget,
-    Milestone,
-    ShoppingItem,
-    WellbeingEntry,
-)
-
-# Finances et budget
-from .finances import (
-    BudgetMensuelDB,
-    # Enums
-    CategorieDepenseDB,
-    Depense,
-    ExpenseCategory,
-    HouseExpense,
-    RecurrenceType,
-)
-
-# Habitat (meubles, stocks, entretien, éco)
-from .habitat import (
-    EcoAction,
-    EcoActionType,
-    Furniture,
-    FurniturePriority,
-    # Enums
-    FurnitureStatus,
-    HouseStock,
-    MaintenanceTask,
-    RoomType,
-)
-
-# Inventaire
-from .inventaire import (
-    ArticleInventaire,
-    HistoriqueInventaire,
-)
-
-# Jardin et météo
-from .jardin import (
-    AlerteMeteo,
-    ConfigMeteo,
-    # Enums
-    NiveauAlerte,
-    TypeAlerteMeteo,
-)
-
-# Jeux (Paris sportifs & Loto)
-from .jeux import (
-    AlerteJeux,
-    ChampionnatEnum,
-    ConfigurationJeux,
-    Equipe,
-    GrilleLoto,
-    HistoriqueJeux,
-    Match,
-    PariSportif,
-    # Enums
-    ResultatMatchEnum,
-    SerieJeux,
-    StatistiquesLoto,
-    StatutPariEnum,
-    TirageLoto,
-    TypeJeuEnum,
-    TypeMarcheParisEnum,
-    TypePariEnum,
-)
-
-# Maison (projets, routines, jardin)
-from .maison import (
-    GardenItem,
-    GardenLog,
-    Project,
-    ProjectTask,
-    Routine,
-    RoutineTask,
-)
-
-# Notifications
-from .notifications import (
-    NotificationPreference,
-    PushSubscription,
-)
-
-# Planning et calendrier
-from .planning import (
-    CalendarEvent,
-    Planning,
-    Repas,
-    TemplateItem,
-    TemplateSemaine,
-)
-
-# Recettes et cuisine
-from .recettes import (
-    BatchMeal,
-    EtapeRecette,
-    HistoriqueRecette,
-    Ingredient,
-    Recette,
-    RecetteIngredient,
-    VersionRecette,
-)
-
-# Santé
-from .sante import (
-    HealthEntry,
-    HealthObjective,
-    HealthRoutine,
-)
-
-# Système
-from .systeme import (
-    ActionHistory,
-    Backup,
-)
-
-# Temps d'entretien et jardin
-from .temps_entretien import (
-    ActionPlante,
-    CoutTravaux,
-    LogStatutObjet,
-    ObjetMaison,
-    PieceMaison,
-    PlanJardin,
-    PlanteJardin,
-    PrioriteRemplacement,
-    # Modèles
-    SessionTravail,
-    StatutObjet,
-    # Enums
-    TypeActiviteEntretien,
-    TypeModificationPiece,
-    VersionPiece,
-    ZoneJardin,
-)
-
-# Préférences utilisateur et apprentissage IA (NOUVEAU)
-from .user_preferences import (
-    ExternalCalendarConfig,
-    FeedbackType,
-    OpenFoodFactsCache,
-    RecipeFeedback,
-    UserPreference,
-)
-
-# Utilisateurs et Garmin (NOUVEAU)
-from .users import (
-    FamilyPurchase,
-    FoodLog,
-    GarminActivity,
-    # Enums
-    GarminActivityType,
-    GarminDailySummary,
-    GarminToken,
-    PurchaseCategory,
-    PurchasePriority,
-    UserProfile,
-    WeekendActivity,
-)
+# ═══════════════════════════════════════════════════════════
+# LAZY: Mapping symbole → (sous-module, nom_dans_module)
+# ═══════════════════════════════════════════════════════════
+_LAZY_IMPORTS: dict[str, tuple[str, str]] = {
+    # Batch Cooking
+    "ConfigBatchCooking": (".batch_cooking", "ConfigBatchCooking"),
+    "EtapeBatchCooking": (".batch_cooking", "EtapeBatchCooking"),
+    "LocalisationStockageEnum": (".batch_cooking", "LocalisationStockageEnum"),
+    "PreparationBatch": (".batch_cooking", "PreparationBatch"),
+    "SessionBatchCooking": (".batch_cooking", "SessionBatchCooking"),
+    "StatutEtapeEnum": (".batch_cooking", "StatutEtapeEnum"),
+    "StatutSessionEnum": (".batch_cooking", "StatutSessionEnum"),
+    "TypeRobotEnum": (".batch_cooking", "TypeRobotEnum"),
+    # Calendrier externe
+    "CalendarProvider": (".calendrier", "CalendarProvider"),
+    "CalendrierExterne": (".calendrier", "CalendrierExterne"),
+    "EvenementCalendrier": (".calendrier", "EvenementCalendrier"),
+    "SyncDirection": (".calendrier", "SyncDirection"),
+    # Courses
+    "ArticleCourses": (".courses", "ArticleCourses"),
+    "ArticleModele": (".courses", "ArticleModele"),
+    "ListeCourses": (".courses", "ListeCourses"),
+    "ModeleCourses": (".courses", "ModeleCourses"),
+    # Famille
+    "ChildProfile": (".famille", "ChildProfile"),
+    "FamilyActivity": (".famille", "FamilyActivity"),
+    "FamilyBudget": (".famille", "FamilyBudget"),
+    "Milestone": (".famille", "Milestone"),
+    "ShoppingItem": (".famille", "ShoppingItem"),
+    "WellbeingEntry": (".famille", "WellbeingEntry"),
+    # Finances
+    "BudgetMensuelDB": (".finances", "BudgetMensuelDB"),
+    "CategorieDepenseDB": (".finances", "CategorieDepenseDB"),
+    "Depense": (".finances", "Depense"),
+    "ExpenseCategory": (".finances", "ExpenseCategory"),
+    "HouseExpense": (".finances", "HouseExpense"),
+    "RecurrenceType": (".finances", "RecurrenceType"),
+    # Habitat
+    "EcoAction": (".habitat", "EcoAction"),
+    "EcoActionType": (".habitat", "EcoActionType"),
+    "Furniture": (".habitat", "Furniture"),
+    "FurniturePriority": (".habitat", "FurniturePriority"),
+    "FurnitureStatus": (".habitat", "FurnitureStatus"),
+    "HouseStock": (".habitat", "HouseStock"),
+    "MaintenanceTask": (".habitat", "MaintenanceTask"),
+    "RoomType": (".habitat", "RoomType"),
+    # Inventaire
+    "ArticleInventaire": (".inventaire", "ArticleInventaire"),
+    "HistoriqueInventaire": (".inventaire", "HistoriqueInventaire"),
+    # Jardin / Météo
+    "AlerteMeteo": (".jardin", "AlerteMeteo"),
+    "ConfigMeteo": (".jardin", "ConfigMeteo"),
+    "NiveauAlerte": (".jardin", "NiveauAlerte"),
+    "TypeAlerteMeteo": (".jardin", "TypeAlerteMeteo"),
+    # Jeux
+    "AlerteJeux": (".jeux", "AlerteJeux"),
+    "ChampionnatEnum": (".jeux", "ChampionnatEnum"),
+    "ConfigurationJeux": (".jeux", "ConfigurationJeux"),
+    "Equipe": (".jeux", "Equipe"),
+    "GrilleLoto": (".jeux", "GrilleLoto"),
+    "HistoriqueJeux": (".jeux", "HistoriqueJeux"),
+    "Match": (".jeux", "Match"),
+    "PariSportif": (".jeux", "PariSportif"),
+    "ResultatMatchEnum": (".jeux", "ResultatMatchEnum"),
+    "SerieJeux": (".jeux", "SerieJeux"),
+    "StatistiquesLoto": (".jeux", "StatistiquesLoto"),
+    "StatutPariEnum": (".jeux", "StatutPariEnum"),
+    "TirageLoto": (".jeux", "TirageLoto"),
+    "TypeJeuEnum": (".jeux", "TypeJeuEnum"),
+    "TypeMarcheParisEnum": (".jeux", "TypeMarcheParisEnum"),
+    "TypePariEnum": (".jeux", "TypePariEnum"),
+    # Maison
+    "GardenItem": (".maison", "GardenItem"),
+    "GardenLog": (".maison", "GardenLog"),
+    "Project": (".maison", "Project"),
+    "ProjectTask": (".maison", "ProjectTask"),
+    "Routine": (".maison", "Routine"),
+    "RoutineTask": (".maison", "RoutineTask"),
+    # Notifications
+    "NotificationPreference": (".notifications", "NotificationPreference"),
+    "PushSubscription": (".notifications", "PushSubscription"),
+    # Planning
+    "CalendarEvent": (".planning", "CalendarEvent"),
+    "Planning": (".planning", "Planning"),
+    "Repas": (".planning", "Repas"),
+    "TemplateItem": (".planning", "TemplateItem"),
+    "TemplateSemaine": (".planning", "TemplateSemaine"),
+    # Recettes
+    "BatchMeal": (".recettes", "BatchMeal"),
+    "EtapeRecette": (".recettes", "EtapeRecette"),
+    "HistoriqueRecette": (".recettes", "HistoriqueRecette"),
+    "Ingredient": (".recettes", "Ingredient"),
+    "Recette": (".recettes", "Recette"),
+    "RecetteIngredient": (".recettes", "RecetteIngredient"),
+    "VersionRecette": (".recettes", "VersionRecette"),
+    # Santé
+    "HealthEntry": (".sante", "HealthEntry"),
+    "HealthObjective": (".sante", "HealthObjective"),
+    "HealthRoutine": (".sante", "HealthRoutine"),
+    # Système
+    "ActionHistory": (".systeme", "ActionHistory"),
+    "Backup": (".systeme", "Backup"),
+    # Temps d'entretien et jardin
+    "ActionPlante": (".temps_entretien", "ActionPlante"),
+    "CoutTravaux": (".temps_entretien", "CoutTravaux"),
+    "LogStatutObjet": (".temps_entretien", "LogStatutObjet"),
+    "ObjetMaison": (".temps_entretien", "ObjetMaison"),
+    "PieceMaison": (".temps_entretien", "PieceMaison"),
+    "PlanJardin": (".temps_entretien", "PlanJardin"),
+    "PlanteJardin": (".temps_entretien", "PlanteJardin"),
+    "PrioriteRemplacement": (".temps_entretien", "PrioriteRemplacement"),
+    "SessionTravail": (".temps_entretien", "SessionTravail"),
+    "StatutObjet": (".temps_entretien", "StatutObjet"),
+    "TypeActiviteEntretien": (".temps_entretien", "TypeActiviteEntretien"),
+    "TypeModificationPiece": (".temps_entretien", "TypeModificationPiece"),
+    "VersionPiece": (".temps_entretien", "VersionPiece"),
+    "ZoneJardin": (".temps_entretien", "ZoneJardin"),
+    # Préférences utilisateur
+    "ExternalCalendarConfig": (".user_preferences", "ExternalCalendarConfig"),
+    "FeedbackType": (".user_preferences", "FeedbackType"),
+    "OpenFoodFactsCache": (".user_preferences", "OpenFoodFactsCache"),
+    "RecipeFeedback": (".user_preferences", "RecipeFeedback"),
+    "UserPreference": (".user_preferences", "UserPreference"),
+    # Utilisateurs et Garmin
+    "FamilyPurchase": (".users", "FamilyPurchase"),
+    "FoodLog": (".users", "FoodLog"),
+    "GarminActivity": (".users", "GarminActivity"),
+    "GarminActivityType": (".users", "GarminActivityType"),
+    "GarminDailySummary": (".users", "GarminDailySummary"),
+    "GarminToken": (".users", "GarminToken"),
+    "PurchaseCategory": (".users", "PurchaseCategory"),
+    "PurchasePriority": (".users", "PurchasePriority"),
+    "UserProfile": (".users", "UserProfile"),
+    "WeekendActivity": (".users", "WeekendActivity"),
+}
 
 # Export explicite de tous les symboles
 __all__ = [
-    # Base
+    # Base (eager)
     "Base",
     "metadata",
     "utc_now",
@@ -242,134 +186,61 @@ __all__ = [
     "SaisonEnum",
     "TypeRepasEnum",
     "TypeVersionRecetteEnum",
-    # Recettes
-    "Ingredient",
-    "Recette",
-    "RecetteIngredient",
-    "EtapeRecette",
-    "VersionRecette",
-    "HistoriqueRecette",
-    "BatchMeal",
-    # Inventaire
-    "ArticleInventaire",
-    "HistoriqueInventaire",
-    # Courses
-    "ArticleCourses",
-    "ListeCourses",
-    "ModeleCourses",
-    "ArticleModele",
-    # Planning
-    "Planning",
-    "Repas",
-    "CalendarEvent",
-    "TemplateSemaine",
-    "TemplateItem",
-    # Famille
-    "ChildProfile",
-    "WellbeingEntry",
-    "Milestone",
-    "FamilyActivity",
-    "FamilyBudget",
-    "ShoppingItem",
-    # Santé
-    "HealthRoutine",
-    "HealthObjective",
-    "HealthEntry",
-    # Maison
-    "Project",
-    "ProjectTask",
-    "Routine",
-    "RoutineTask",
-    "GardenItem",
-    "GardenLog",
-    # Finances
-    "Depense",
-    "BudgetMensuelDB",
-    "HouseExpense",
-    "CategorieDepenseDB",
-    "RecurrenceType",
-    "ExpenseCategory",
-    # Jardin
-    "AlerteMeteo",
-    "ConfigMeteo",
-    "NiveauAlerte",
-    "TypeAlerteMeteo",
-    # Calendrier
-    "CalendrierExterne",
-    "EvenementCalendrier",
-    "CalendarProvider",
-    "SyncDirection",
-    # Notifications
-    "PushSubscription",
-    "NotificationPreference",
-    # Système
-    "Backup",
-    "ActionHistory",
-    # Jeux
-    "Equipe",
-    "Match",
-    "PariSportif",
-    "TirageLoto",
-    "GrilleLoto",
-    "StatistiquesLoto",
-    "HistoriqueJeux",
-    "SerieJeux",
-    "AlerteJeux",
-    "ConfigurationJeux",
-    "ResultatMatchEnum",
-    "StatutPariEnum",
-    "TypePariEnum",
-    "ChampionnatEnum",
-    "TypeJeuEnum",
-    "TypeMarcheParisEnum",
-    # Batch Cooking
-    "ConfigBatchCooking",
-    "SessionBatchCooking",
-    "EtapeBatchCooking",
-    "PreparationBatch",
-    "StatutSessionEnum",
-    "StatutEtapeEnum",
-    "TypeRobotEnum",
-    "LocalisationStockageEnum",
-    # Préférences utilisateur
-    "UserPreference",
-    "RecipeFeedback",
-    "OpenFoodFactsCache",
-    "ExternalCalendarConfig",
-    "FeedbackType",
-    # Utilisateurs et Garmin (NOUVEAU)
-    "UserProfile",
-    "GarminToken",
-    "GarminActivity",
-    "GarminDailySummary",
-    "FoodLog",
-    "WeekendActivity",
-    "FamilyPurchase",
-    "GarminActivityType",
-    "PurchaseCategory",
-    "PurchasePriority",
-    # Habitat
-    "Furniture",
-    "HouseStock",
-    "MaintenanceTask",
-    "EcoAction",
-    "FurnitureStatus",
-    "FurniturePriority",
-    "EcoActionType",
-    "RoomType",
-    # Temps d'entretien et jardin
-    "TypeActiviteEntretien",
-    "TypeModificationPiece",
-    "StatutObjet",
-    "PrioriteRemplacement",
-    "SessionTravail",
-    "VersionPiece",
-    "CoutTravaux",
-    "LogStatutObjet",
-    "PieceMaison",
-    "ObjetMaison",
-    "ZoneJardin",
-    "PlanteJardin",
-    "PlanJardin",
-    "ActionPlante",
+    # Helper
+    "charger_tous_modeles",
+    # Tous les symboles lazy
+    *_LAZY_IMPORTS.keys(),
 ]
+
+
+# ═══════════════════════════════════════════════════════════
+# SOUS-MODULES à charger pour enregistrer tous les modèles
+# ═══════════════════════════════════════════════════════════
+_MODEL_MODULES = (
+    ".batch_cooking",
+    ".calendrier",
+    ".courses",
+    ".famille",
+    ".finances",
+    ".habitat",
+    ".inventaire",
+    ".jardin",
+    ".jeux",
+    ".maison",
+    ".notifications",
+    ".planning",
+    ".recettes",
+    ".sante",
+    ".systeme",
+    ".temps_entretien",
+    ".user_preferences",
+    ".users",
+)
+
+
+def charger_tous_modeles() -> None:
+    """Force le chargement de tous les fichiers modèles.
+
+    Nécessaire avant ``Base.metadata.create_all()`` pour que
+    SQLAlchemy connaisse toutes les tables.
+
+    Usage::
+
+        from src.core.models import charger_tous_modeles, Base
+        charger_tous_modeles()
+        Base.metadata.create_all(bind=engine)
+    """
+    for mod in _MODEL_MODULES:
+        importlib.import_module(mod, __name__)
+
+
+def __getattr__(name: str) -> Any:
+    """Chargement paresseux des modèles (PEP 562)."""
+    if name in _LAZY_IMPORTS:
+        module_path, attr_name = _LAZY_IMPORTS[name]
+        module = importlib.import_module(module_path, __name__)
+        value = getattr(module, attr_name)
+        # Cache dans le namespace du package pour éviter les appels répétés
+        globals()[name] = value
+        return value
+    raise AttributeError(f"module 'src.core.models' has no attribute {name!r}")

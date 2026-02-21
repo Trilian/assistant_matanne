@@ -2,6 +2,8 @@
 Client IA Unifié - Mistral AI
 """
 
+__all__ = ["ClientIA", "obtenir_client_ia"]
+
 import asyncio
 import logging
 from typing import Any

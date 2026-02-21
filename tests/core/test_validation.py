@@ -102,7 +102,7 @@ class TestNettoyeurEntrees:
     def test_nettoyer_date_string(self):
         """Test nettoyage d'une string date."""
         result = NettoyeurEntrees.nettoyer_date("2024-01-15")
-        assert result is None or isinstance(result, (date, str))
+        assert result is None or isinstance(result, date | str)
 
     def test_nettoyer_date_invalide(self):
         """Test nettoyage d'une date invalide."""
@@ -696,7 +696,7 @@ class TestValiderEtNettoyerFormulaire:
                 "temps_cuisson": 40,
                 "portions": 6,
             }
-            valide, nettoye = valider_et_nettoyer_formulaire("recettes", data)
+            valide, erreurs, nettoye = valider_et_nettoyer_formulaire("recettes", data)
             assert "nom" in nettoye or valide
 
     def test_module_inventaire(self):
@@ -710,7 +710,7 @@ class TestValiderEtNettoyerFormulaire:
                 "quantite": 2,
                 "unite": "paquets",
             }
-            valide, nettoye = valider_et_nettoyer_formulaire("inventaire", data)
+            valide, erreurs, nettoye = valider_et_nettoyer_formulaire("inventaire", data)
             assert nettoye is not None
 
     def test_module_courses(self):
@@ -719,7 +719,7 @@ class TestValiderEtNettoyerFormulaire:
 
         with patch("src.core.validation.afficher_erreurs_validation"):
             data = {"nom": "Beurre", "quantite": 250, "unite": "g"}
-            valide, nettoye = valider_et_nettoyer_formulaire("courses", data)
+            valide, erreurs, nettoye = valider_et_nettoyer_formulaire("courses", data)
             assert nettoye is not None
 
     def test_module_inconnu(self):
@@ -727,8 +727,9 @@ class TestValiderEtNettoyerFormulaire:
         from src.core.validation import valider_et_nettoyer_formulaire
 
         data = {"champ": "<script>alert(1)</script>Test", "nombre": 42}
-        valide, nettoye = valider_et_nettoyer_formulaire("module_inconnu", data)
+        valide, erreurs, nettoye = valider_et_nettoyer_formulaire("module_inconnu", data)
         assert valide is True
+        assert erreurs == []
         assert "<script>" not in str(nettoye.get("champ", ""))
 
 

@@ -8,6 +8,8 @@ import logging
 
 import streamlit as st
 
+from src.ui.tokens import Couleur
+
 logger = logging.getLogger(__name__)
 
 
@@ -22,13 +24,13 @@ def afficher_score_jardin_gamifie(autonomie: dict, streak: int = 0):
 
     # Couleur selon niveau
     if score >= 50:
-        stroke_color = "#27ae60"
+        stroke_color = Couleur.SUCCESS
     elif score >= 25:
-        stroke_color = "#3498db"
+        stroke_color = Couleur.INFO
     elif score >= 10:
-        stroke_color = "#f39c12"
+        stroke_color = Couleur.WARNING
     else:
-        stroke_color = "#e74c3c"
+        stroke_color = Couleur.DANGER
 
     circumference = 2 * 3.14159 * 70
     stroke_dasharray = (score / 100) * circumference

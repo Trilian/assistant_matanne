@@ -168,6 +168,141 @@ class TestComposition:
 
 
 # ═══════════════════════════════════════════════════════════
+# TESTS OU (OR) — Composition OU logique SQL
+# ═══════════════════════════════════════════════════════════
+
+
+class TestOuComposition:
+    """Tests pour la spécification Ou (OR logique SQL).
+
+    Ces tests vérifient que spec1 | spec2 produit un vrai OR SQL
+    (les deux branches sont évaluées, pas seulement la gauche).
+    """
+
+    def test_ou_retourne_les_deux_branches(self, repo):
+        """OU retourne les résultats des DEUX spécifications."""
+        dessert = par_champ("categorie", "dessert")
+        entree = par_champ("categorie", "entrée")
+        spec = dessert | entree
+
+        result = repo.lister(spec=spec)
+        categories = {p.categorie for p in result}
+
+        # DOIT contenir les deux catégories
+        assert "dessert" in categories
+        assert "entrée" in categories
+        assert len(result) == 5  # 3 desserts + 2 entrées
+
+    def test_ou_ne_duplique_pas(self, repo):
+        """OU ne retourne pas de doublons quand les specs se chevauchent."""
+        actif = par_champ("actif", True)
+        dessert = par_champ("categorie", "dessert")
+        spec = actif | dessert
+
+        result = repo.lister(spec=spec)
+        ids = [p.id for p in result]
+
+        # Pas de doublons (OR SQL ne duplique pas)
+        assert len(ids) == len(set(ids))
+
+    def test_ou_avec_aucun_match_droite(self, repo):
+        """OU avec branche droite vide retourne uniquement branche gauche."""
+        dessert = par_champ("categorie", "dessert")
+        inexistant = par_champ("categorie", "poisson")
+        spec = dessert | inexistant
+
+        result = repo.lister(spec=spec)
+        assert len(result) == 3
+        assert all(p.categorie == "dessert" for p in result)
+
+    def test_ou_avec_aucun_match_gauche(self, repo):
+        """OU avec branche gauche vide retourne uniquement branche droite."""
+        inexistant = par_champ("categorie", "poisson")
+        entree = par_champ("categorie", "entrée")
+        spec = inexistant | entree
+
+        result = repo.lister(spec=spec)
+        assert len(result) == 2
+        assert all(p.categorie == "entrée" for p in result)
+
+    def test_ou_repr(self):
+        """Test repr du OU."""
+        spec = par_champ("a", 1) | par_champ("b", 2)
+        assert "|" in repr(spec)
+
+    def test_ou_chaine(self, repo):
+        """Test chaîner plusieurs OU: (a | b) | c."""
+        spec = (
+            par_champ("categorie", "dessert")
+            | par_champ("categorie", "entrée")
+            | par_champ("actif", False)
+        )
+        result = repo.lister(spec=spec)
+        # Tous les 5 produits matchent au moins une condition
+        assert len(result) == 5
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS NON (NOT) — Négation logique SQL
+# ═══════════════════════════════════════════════════════════
+
+
+class TestNonComposition:
+    """Tests pour la spécification Non (NOT logique SQL).
+
+    Ces tests vérifient que ~spec produit un vrai NOT SQL
+    (inverse effectivement la condition).
+    """
+
+    def test_non_inverse_categorie(self, repo):
+        """NOT dessert retourne tout SAUF les desserts."""
+        spec = ~par_champ("categorie", "dessert")
+
+        result = repo.lister(spec=spec)
+        assert len(result) == 2  # 2 entrées
+        assert all(p.categorie != "dessert" for p in result)
+
+    def test_non_inverse_actif(self, repo):
+        """NOT actif retourne les inactifs."""
+        spec = ~par_champ("actif", True)
+
+        result = repo.lister(spec=spec)
+        assert len(result) == 1  # Salade niçoise
+        assert all(not p.actif for p in result)
+
+    def test_non_complement(self, repo):
+        """spec + ~spec = tout (complémentaire)."""
+        spec_actif = par_champ("actif", True)
+        spec_inactif = ~spec_actif
+
+        actifs = repo.lister(spec=spec_actif)
+        inactifs = repo.lister(spec=spec_inactif)
+
+        total = len(actifs) + len(inactifs)
+        assert total == 5  # Tous les produits
+
+    def test_non_repr(self):
+        """Test repr du NON."""
+        spec = ~par_champ("actif", True)
+        assert "~" in repr(spec)
+
+    def test_non_combinee_avec_et(self, repo):
+        """Test NOT combiné avec AND: dessert ET NON cher."""
+        spec = par_champ("categorie", "dessert") & ~entre("prix", 10, 20)
+
+        result = repo.lister(spec=spec)
+        assert all(p.categorie == "dessert" and p.prix < 10 for p in result)
+
+    def test_double_negation(self, repo):
+        """~~spec est équivalent à spec."""
+        spec = ~~par_champ("categorie", "dessert")
+
+        result = repo.lister(spec=spec)
+        assert len(result) == 3
+        assert all(p.categorie == "dessert" for p in result)
+
+
+# ═══════════════════════════════════════════════════════════
 # TESTS REPOSITORY V2 — SPECS
 # ═══════════════════════════════════════════════════════════
 

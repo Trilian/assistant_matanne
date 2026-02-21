@@ -206,3 +206,5 @@ class _SessionKeys:
 
 # Singleton — usage: from src.core.session_keys import SK
 SK = _SessionKeys()
+
+__all__ = ["SK"]

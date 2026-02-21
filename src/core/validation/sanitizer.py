@@ -7,6 +7,8 @@ Protège contre:
 - Caractères dangereux
 """
 
+__all__ = ["NettoyeurEntrees"]
+
 import html
 import logging
 import re

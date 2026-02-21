@@ -20,6 +20,8 @@ from .session import CacheSessionN2
 
 logger = logging.getLogger(__name__)
 
+__all__ = ["CacheMultiNiveau", "obtenir_cache"]
+
 P = ParamSpec("P")
 T = TypeVar("T")
 

@@ -7,7 +7,7 @@ import streamlit as st
 from src.core.config import obtenir_parametres
 from src.core.state import obtenir_etat
 from src.ui.components.atoms import badge
-from src.ui.tokens import Couleur
+from src.ui.tokens import Couleur, Variante
 from src.ui.utils import echapper_html
 
 
@@ -30,9 +30,9 @@ def afficher_header():
 
     with col2:
         if etat.agent_ia:
-            badge("🤖 IA Active", Couleur.SUCCESS)
+            badge("🤖 IA Active", variante=Variante.SUCCESS)
         else:
-            badge("🤖 IA Indispo", Couleur.WARNING)
+            badge("🤖 IA Indispo", variante=Variante.WARNING)
 
     with col3:
         if etat.notifications_non_lues > 0:

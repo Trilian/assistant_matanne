@@ -5,6 +5,8 @@ Ce module centralise tous les "magic numbers" et chaînes constantes
 pour faciliter la maintenance et éviter la duplication.
 """
 
+from datetime import date as _date
+
 # ═══════════════════════════════════════════════════════════
 # BASE DE DONNÉES
 # ═══════════════════════════════════════════════════════════
@@ -174,8 +176,6 @@ LOG_LEVEL_PRODUCTION = "INFO"
 # FAMILLE
 # ═══════════════════════════════════════════════════════════
 
-from datetime import date as _date  # noqa: E402
-
 JULES_NAISSANCE: _date = _date(2024, 6, 22)
 """Date de naissance de Jules (22 juin 2024)."""
 
@@ -184,3 +184,44 @@ OBJECTIF_PAS_QUOTIDIEN_DEFAUT: int = 10_000
 
 OBJECTIF_CALORIES_BRULEES_DEFAUT: int = 500
 """Objectif de calories brûlées par défaut."""
+
+
+__all__ = [
+    # Base de données
+    "DB_CONNECTION_RETRY",
+    "DB_CONNECTION_TIMEOUT",
+    # Cache
+    "CACHE_TTL_RECETTES",
+    "CACHE_TTL_IA",
+    "CACHE_MAX_SIZE",
+    # IA
+    "AI_RATE_LIMIT_DAILY",
+    "AI_RATE_LIMIT_HOURLY",
+    # Validation
+    "MAX_LENGTH_SHORT",
+    "MAX_LENGTH_MEDIUM",
+    "MAX_LENGTH_LONG",
+    "MAX_LENGTH_TEXT",
+    "MAX_PORTIONS",
+    "MAX_TEMPS_PREPARATION",
+    "MAX_TEMPS_CUISSON",
+    "MAX_QUANTITE",
+    "MIN_INGREDIENTS",
+    "MAX_INGREDIENTS",
+    "MIN_ETAPES",
+    "MAX_ETAPES",
+    # Calendrier
+    "JOURS_SEMAINE",
+    "JOURS_SEMAINE_COURT",
+    "JOURS_SEMAINE_LOWER",
+    "MOIS_FRANCAIS",
+    "MOIS_FRANCAIS_COURT",
+    "TYPES_REPAS_KEYS",
+    "TYPES_PROTEINES",
+    # Logging
+    "LOG_LEVEL_PRODUCTION",
+    # Famille
+    "JULES_NAISSANCE",
+    "OBJECTIF_PAS_QUOTIDIEN_DEFAUT",
+    "OBJECTIF_CALORIES_BRULEES_DEFAUT",
+]

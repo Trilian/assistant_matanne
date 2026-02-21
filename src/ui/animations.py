@@ -173,6 +173,10 @@ _ANIMATION_CSS = """
     transform: scale(1.02);
 }
 
+/* ── Aliases rétrocompatibles (modules maison) ────────── */
+.animate-in { animation: fadeIn 0.5s ease forwards; }
+.animate-grow { animation: scaleIn 0.5s ease forwards; }
+
 } /* fin @media (prefers-reduced-motion: no-preference) */
 """
 

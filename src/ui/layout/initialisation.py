@@ -52,6 +52,12 @@ def initialiser_app() -> bool:
     if manquantes:
         logger.error(f"❌ Clés menu sans registry: {manquantes}")
 
+    # Thème dynamique (clair/sombre/auto + CSS overrides)
+    from src.ui.theme import appliquer_theme
+
+    appliquer_theme()
+    logger.info("✅ Thème appliqué")
+
     # Tokens sémantiques (CSS custom properties light/dark)
     from src.ui.tokens_semantic import injecter_tokens_semantiques
 

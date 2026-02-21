@@ -115,10 +115,8 @@ class Ou(Specification):
     """
     Composition OU de deux spécifications.
 
-    Note: Pour un vrai OR SQL, les deux spécifications doivent
-    utiliser des conditions ``or_()`` au niveau SQLAlchemy.
-    Cette implémentation applique les deux comme filtres indépendants
-    à des sous-requêtes unies (UNION).
+    Extrait les clauses WHERE individuelles de chaque spec et les combine
+    avec ``or_()`` SQLAlchemy pour un vrai OU logique SQL.
     """
 
     def __init__(self, gauche: Specification, droite: Specification):
@@ -126,12 +124,27 @@ class Ou(Specification):
         self._droite = droite
 
     def appliquer(self, stmt: Select, model: type[Any]) -> Select:
-        from sqlalchemy import or_
+        from sqlalchemy import or_, select
 
-        # On utilise or_() SQLAlchemy pour un vrai OU
-        # Les deux specs sont appliquées comme conditions dans un or_()
-        # Fallback: appliquer gauche (limitation pour des specs complexes)
-        return self._gauche.appliquer(stmt, model)
+        # Créer des statements vierges pour capturer les clauses WHERE de chaque spec
+        stmt_gauche = select(model)
+        stmt_droite = select(model)
+
+        stmt_gauche = self._gauche.appliquer(stmt_gauche, model)
+        stmt_droite = self._droite.appliquer(stmt_droite, model)
+
+        # Extraire les clauses whereclause de chaque statement
+        clauses = []
+        if stmt_gauche.whereclause is not None:
+            clauses.append(stmt_gauche.whereclause)
+        if stmt_droite.whereclause is not None:
+            clauses.append(stmt_droite.whereclause)
+
+        if len(clauses) == 2:
+            return stmt.where(or_(*clauses))
+        elif len(clauses) == 1:
+            return stmt.where(clauses[0])
+        return stmt
 
     def __repr__(self) -> str:
         return f"({self._gauche!r} | {self._droite!r})"
@@ -141,17 +154,24 @@ class Non(Specification):
     """
     Négation d'une spécification.
 
-    Applique la spec originale puis inverse la dernière clause WHERE.
-    Note: Fonctionne pour les specs simples à une clause.
+    Applique la spec sur un statement vierge, extrait la clause WHERE,
+    puis l'inverse avec ``not_()`` SQLAlchemy.
     """
 
     def __init__(self, spec: Specification):
         self._spec = spec
 
     def appliquer(self, stmt: Select, model: type[Any]) -> Select:
-        # Pour la négation, on applique la spec et on l'inverse
-        # Ceci est une limitation — fonctionne pour les cas simples
-        return self._spec.appliquer(stmt, model)
+        from sqlalchemy import not_, select
+
+        # Créer un statement vierge pour capturer la clause WHERE de la spec
+        stmt_inner = select(model)
+        stmt_inner = self._spec.appliquer(stmt_inner, model)
+
+        # Extraire et nier la clause
+        if stmt_inner.whereclause is not None:
+            return stmt.where(not_(stmt_inner.whereclause))
+        return stmt
 
     def __repr__(self) -> str:
         return f"~{self._spec!r}"

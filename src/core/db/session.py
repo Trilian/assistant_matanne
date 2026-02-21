@@ -18,6 +18,8 @@ from .engine import obtenir_moteur
 
 logger = logging.getLogger(__name__)
 
+__all__ = ["obtenir_fabrique_session", "obtenir_contexte_db", "obtenir_db_securise"]
+
 
 def obtenir_fabrique_session():
     """

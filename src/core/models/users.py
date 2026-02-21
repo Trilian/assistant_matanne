@@ -139,9 +139,33 @@ class UserProfile(Base):
 
     @property
     def streak_jours(self) -> int:
-        """Calcule le streak actuel de jours actifs"""
-        # TODO: Implémenter le calcul du streak
-        return 0
+        """Calcule le streak actuel de jours actifs consécutifs.
+
+        Compte le nombre de jours consécutifs (en remontant depuis aujourd'hui)
+        où l'utilisateur a au moins un FoodLog enregistré.
+        """
+        if not self.food_logs:
+            return 0
+
+        from datetime import timedelta
+
+        dates_actives: set[date] = {log.date for log in self.food_logs}
+        streak = 0
+        jour = date.today()
+
+        # Inclure aujourd'hui s'il y a un log
+        if jour in dates_actives:
+            streak += 1
+            jour -= timedelta(days=1)
+        else:
+            # Commencer depuis hier
+            jour -= timedelta(days=1)
+
+        while jour in dates_actives:
+            streak += 1
+            jour -= timedelta(days=1)
+
+        return streak
 
 
 # ═══════════════════════════════════════════════════════════
@@ -374,7 +398,10 @@ class FoodLog(Base):
     user: Mapped["UserProfile"] = relationship(back_populates="food_logs")
 
     __table_args__ = (
-        CheckConstraint("qualite >= 1 AND qualite <= 5", name="ck_food_qualite_range"),
+        CheckConstraint(
+            "qualite IS NULL OR (qualite >= 1 AND qualite <= 5)",
+            name="ck_food_qualite_range",
+        ),
     )
 
     def __repr__(self) -> str:
@@ -451,7 +478,10 @@ class WeekendActivity(Base):
     modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     __table_args__ = (
-        CheckConstraint("note_lieu >= 1 AND note_lieu <= 5", name="ck_weekend_note_range"),
+        CheckConstraint(
+            "note_lieu IS NULL OR (note_lieu >= 1 AND note_lieu <= 5)",
+            name="ck_weekend_note_range",
+        ),
     )
 
     def __repr__(self) -> str:

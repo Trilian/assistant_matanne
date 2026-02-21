@@ -360,23 +360,17 @@ def obtenir_etat() -> EtatApp:
 def naviguer(module: str):
     """Raccourci pour naviguer"""
     GestionnaireEtat.naviguer_vers(module)
-    try:
-        import streamlit as st
+    from src.core.storage import obtenir_rerun_callback
 
-        st.rerun()
-    except Exception:
-        pass
+    obtenir_rerun_callback()()
 
 
 def revenir():
     """Raccourci pour revenir en arrière"""
     GestionnaireEtat.revenir()
-    try:
-        import streamlit as st
+    from src.core.storage import obtenir_rerun_callback
 
-        st.rerun()
-    except Exception:
-        pass
+    obtenir_rerun_callback()()
 
 
 def obtenir_fil_ariane() -> list[str]:

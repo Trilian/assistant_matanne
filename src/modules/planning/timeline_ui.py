@@ -16,15 +16,16 @@ from src.core.date_utils import obtenir_debut_semaine
 from src.core.db import obtenir_contexte_db
 from src.core.models import CalendarEvent, FamilyActivity, Repas
 from src.ui import etat_vide
+from src.ui.tokens import Couleur
 
 # Couleurs par type d'événement
 COULEURS_TYPES = {
-    "rdv": "#E53935",  # Rouge
-    "activité": "#43A047",  # Vert
-    "fête": "#FB8C00",  # Orange
-    "repas": "#1E88E5",  # Bleu
-    "routine": "#8E24AA",  # Violet
-    "autre": "#757575",  # Gris
+    "rdv": Couleur.DANGER,
+    "activité": Couleur.SUCCESS,
+    "fête": Couleur.WARNING,
+    "repas": Couleur.INFO,
+    "routine": Couleur.ACCENT,
+    "autre": Couleur.TEXT_SECONDARY,
 }
 
 

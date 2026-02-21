@@ -9,6 +9,7 @@ import logging
 import streamlit as st
 
 from src.ui import etat_vide
+from src.ui.tokens import Couleur
 
 logger = logging.getLogger(__name__)
 
@@ -41,16 +42,16 @@ def afficher_score_gamifie(score: dict, streak: int = 0):
 
     # Couleur selon score
     if score_val >= 90:
-        stroke_color = "#27ae60"
+        stroke_color = Couleur.SUCCESS
         niveau_class = "excellent"
     elif score_val >= 70:
-        stroke_color = "#3498db"
+        stroke_color = Couleur.INFO
         niveau_class = "bon"
     elif score_val >= 50:
-        stroke_color = "#f39c12"
+        stroke_color = Couleur.WARNING
         niveau_class = "moyen"
     else:
-        stroke_color = "#e74c3c"
+        stroke_color = Couleur.DANGER
         niveau_class = "mauvais"
 
     # Calcul de l'arc SVG

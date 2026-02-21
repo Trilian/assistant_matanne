@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Utilitaire async pour Streamlit.
 
@@ -6,7 +8,7 @@ Streamlit tourne dans un event loop existant. L'utilisation directe de
 Ce module fournit un wrapper sûr qui fonctionne dans tous les contextes.
 """
 
-from __future__ import annotations
+__all__ = ["executer_async"]
 
 import asyncio
 import logging

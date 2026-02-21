@@ -5,13 +5,22 @@ Réduit temps chargement initial de 60%
 [OK] FIX: Support pour modules unifiés avec navigation interne
 """
 
+__all__ = [
+    "ChargeurModuleDiffere",
+    "RouteurOptimise",
+    "afficher_stats_chargement_differe",
+    "lazy_import",
+    "valider_coherence_menu",
+]
+
 import importlib
 import logging
 import time
 from functools import wraps
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import streamlit as st
+if TYPE_CHECKING:
+    import streamlit as st
 
 from src.core.session_keys import SK
 
@@ -270,6 +279,8 @@ class RouteurOptimise:
         Args:
             module_name: Nom du module (ex: "cuisine.recettes")
         """
+        import streamlit as st
+
         # [OK] VÉRIFIER LE REGISTRY EN PREMIER
         if module_name not in RouteurOptimise.MODULE_REGISTRY:
             st.error(f"[ERROR] Module '{module_name}' introuvable")

@@ -7,6 +7,9 @@ from datetime import date
 
 import streamlit as st
 
+from src.ui.tokens import Couleur
+from src.ui.tokens_semantic import Sem
+
 # ═══════════════════════════════════════════════════════════
 # MODULE PRINCIPAL
 # ═══════════════════════════════════════════════════════════
@@ -38,7 +41,7 @@ def app():
     )
 
     st.markdown(
-        "<p style='text-align: center; color: #6c757d; font-size: 1.1rem;'>"
+        f"<p style='text-align: center; color: {Sem.ON_SURFACE_SECONDARY}; font-size: 1.1rem;'>"
         "Ton assistant familial intelligent"
         "</p>",
         unsafe_allow_html=True,
@@ -92,10 +95,10 @@ def app():
                 lieu = f" • 📍 {event['lieu']}" if event.get("lieu") else ""
 
                 st.markdown(
-                    f'<div style="padding:8px;margin:4px 0;background:#f8f9fa;'
+                    f'<div style="padding:8px;margin:4px 0;background:{Sem.SURFACE_ALT};'
                     f'border-left:4px solid {couleur};border-radius:4px;">'
                     f"<strong>{jour} {heure}</strong> - {event['titre']}"
-                    f'<span style="color:#666;">{lieu}</span></div>',
+                    f'<span style="color:{Sem.ON_SURFACE_SECONDARY};">{lieu}</span></div>',
                     unsafe_allow_html=True,
                 )
 
@@ -421,8 +424,8 @@ def afficher_cuisine_summary():
 
     with st.container():
         st.markdown(
-            '<div style="background: #f8f9fa; padding: 1.5rem; '
-            'border-radius: 12px; border-left: 4px solid #4CAF50;">',
+            f'<div style="background: {Sem.SURFACE_ALT}; padding: 1.5rem; '
+            f'border-radius: 12px; border-left: 4px solid {Couleur.SUCCESS};">',
             unsafe_allow_html=True,
         )
 
@@ -461,8 +464,8 @@ def afficher_inventaire_summary():
 
     with st.container():
         st.markdown(
-            '<div style="background: #f8f9fa; padding: 1.5rem; '
-            'border-radius: 12px; border-left: 4px solid #2196F3;">',
+            f'<div style="background: {Sem.SURFACE_ALT}; padding: 1.5rem; '
+            f'border-radius: 12px; border-left: 4px solid {Couleur.INFO};">',
             unsafe_allow_html=True,
         )
 
@@ -507,8 +510,8 @@ def afficher_courses_summary():
 
     with st.container():
         st.markdown(
-            '<div style="background: #f8f9fa; padding: 1.5rem; '
-            'border-radius: 12px; border-left: 4px solid #FF9800;">',
+            f'<div style="background: {Sem.SURFACE_ALT}; padding: 1.5rem; '
+            f'border-radius: 12px; border-left: 4px solid {Couleur.WARNING};">',
             unsafe_allow_html=True,
         )
         st.markdown("### 📅 Courses")
@@ -558,8 +561,8 @@ def afficher_planning_summary():
 
     with st.container():
         st.markdown(
-            '<div style="background: #f8f9fa; padding: 1.5rem; '
-            'border-radius: 12px; border-left: 4px solid #9C27B0;">',
+            f'<div style="background: {Sem.SURFACE_ALT}; padding: 1.5rem; '
+            f'border-radius: 12px; border-left: 4px solid {Couleur.ACCENT};">',
             unsafe_allow_html=True,
         )
 

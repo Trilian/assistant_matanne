@@ -3,6 +3,8 @@ Analyseur JSON IA Ultra-Robuste
 Gère tous les cas edge des réponses Mistral/GPT
 """
 
+__all__ = ["AnalyseurIA", "analyser_liste_reponse"]
+
 import json
 import logging
 import re

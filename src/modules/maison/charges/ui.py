@@ -5,6 +5,7 @@ Charges - Composants UI gamifiés.
 import streamlit as st
 
 from src.core.session_keys import SK
+from src.ui.tokens import Couleur
 
 from .constantes import BADGES_DEFINITIONS, ENERGIES, NIVEAUX_ECO
 
@@ -25,17 +26,17 @@ def afficher_header():
 def afficher_eco_score_gamifie(score: int, variation: int | None, streak: int):
     """Affiche l'éco-score avec animation et gamification."""
     if score >= 80:
-        couleur = "#27ae60"
-        stroke_color = "#2ecc71"
+        couleur = Couleur.SUCCESS
+        stroke_color = Couleur.SUCCESS
     elif score >= 60:
-        couleur = "#f39c12"
-        stroke_color = "#f1c40f"
+        couleur = Couleur.WARNING
+        stroke_color = Couleur.WARNING
     elif score >= 40:
-        couleur = "#e67e22"
-        stroke_color = "#d35400"
+        couleur = Couleur.DANGER
+        stroke_color = Couleur.DANGER
     else:
-        couleur = "#e74c3c"
-        stroke_color = "#c0392b"
+        couleur = Couleur.DANGER
+        stroke_color = Couleur.DANGER
 
     circumference = 2 * 3.14159 * 70
     stroke_dasharray = (score / 100) * circumference

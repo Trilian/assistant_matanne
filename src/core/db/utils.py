@@ -22,6 +22,15 @@ from .migrations import GestionnaireMigrations
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "verifier_connexion",
+    "obtenir_infos_db",
+    "initialiser_database",
+    "creer_toutes_tables",
+    "verifier_sante",
+    "vacuum_database",
+]
+
 
 def verifier_connexion() -> tuple[bool, str]:
     """

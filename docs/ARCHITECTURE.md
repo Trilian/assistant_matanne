@@ -157,7 +157,7 @@ src/core/validation/
 ### events.py — Bus d'événements
 
 ```python
-from src.core.events import bus_evenements
+from src.services.core.events.bus import obtenir_bus
 
 @bus_evenements.on("recette.creee")
 def notifier_creation(data):
