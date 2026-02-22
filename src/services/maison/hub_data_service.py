@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.models import ObjetMaison, PieceMaison
 from src.core.models.temps_entretien import SessionTravail, ZoneJardin
+from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +70,7 @@ class HubDataService:
 # ═══════════════════════════════════════════════════════════
 
 
+@service_factory("hub_data", tags={"maison", "data"})
 def get_hub_data_service() -> HubDataService:
     """Factory singleton pour le service hub data."""
     if HubDataService._instance is None:

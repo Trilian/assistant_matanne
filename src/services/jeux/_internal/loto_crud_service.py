@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.models import GrilleLoto, StatistiquesLoto, TirageLoto
+from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
@@ -403,6 +404,7 @@ class LotoCrudService:
 _instance: LotoCrudService | None = None
 
 
+@service_factory("loto_crud", tags={"jeux", "crud", "loto"})
 def get_loto_crud_service() -> LotoCrudService:
     """Factory pour LotoCrudService (singleton)."""
     global _instance

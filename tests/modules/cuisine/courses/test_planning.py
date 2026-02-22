@@ -62,9 +62,10 @@ class TestRenderCoursesDepuisPlanning:
 
         mock_st.warning.assert_called()
 
+    @patch("src.modules.cuisine.courses.planning.naviguer")
     @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")
-    def test_render_no_planning_navigate(self, mock_st, mock_service):
+    def test_render_no_planning_navigate(self, mock_st, mock_service, mock_naviguer):
         """Test navigation vers planning."""
         from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
 
@@ -78,7 +79,7 @@ class TestRenderCoursesDepuisPlanning:
 
         afficher_courses_depuis_planning()
 
-        assert session_state.get("current_page") == "cuisine.planning_semaine"
+        mock_naviguer.assert_called_once_with("cuisine.planning_semaine")
 
     @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")

@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 
 from src.core.ai import ClientIA, obtenir_client_ia
 from src.services.core.base import BaseAIService
+from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
@@ -263,6 +264,7 @@ def obtenir_service_ocr_facture() -> FactureOCRService:
     return _facture_ocr_instance
 
 
+@service_factory("facture_ocr", tags={"integrations", "ia", "ocr"})
 def get_facture_ocr_service() -> FactureOCRService:
     """Factory pour le service OCR (alias anglais)."""
     return obtenir_service_ocr_facture()

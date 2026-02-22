@@ -412,7 +412,7 @@ class TestJulesAIService:
 
     def test_jules_ai_service_instantiation(self):
         """Test que JulesAIService peut être instancié"""
-        with patch("src.modules.famille.jules.ai_service.ClientIA"):
+        with patch("src.services.famille.jules_ai.ClientIA"):
             from src.modules.famille.jules import JulesAIService
 
             # Execute
@@ -432,7 +432,7 @@ class TestJulesAIService:
         assert hasattr(JulesAIService, "suggerer_jouets")
 
     @pytest.mark.asyncio
-    @patch("src.modules.famille.jules.ai_service.ClientIA")
+    @patch("src.services.famille.jules_ai.ClientIA")
     async def test_suggerer_activites_calls_ai(self, mock_client_ia):
         """Test que suggerer_activites appelle l'IA"""
         # Setup

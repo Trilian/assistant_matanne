@@ -27,10 +27,6 @@ from typing import Any
 
 # Mapping: nom de symbole → (sous-module relatif, nom dans le module)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    # Container (IoC)
-    "Conteneur": (".container", "Conteneur"),
-    "Scope": (".container", "Scope"),
-    "conteneur": (".container", "conteneur"),
     # AI
     "AnalyseurIA": (".ai", "AnalyseurIA"),
     "CacheIA": (".ai", "CacheIA"),
@@ -65,47 +61,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "vacuum_database": (".db", "vacuum_database"),
     "verifier_connexion": (".db", "verifier_connexion"),
     "verifier_sante": (".db", "verifier_sante"),
-    # Repository
-    "Repository": (".repository", "Repository"),
-    # Specifications
-    "Spec": (".specifications", "Spec"),
-    "Specification": (".specifications", "Specification"),
-    "contient": (".specifications", "contient"),
-    "entre": (".specifications", "entre"),
-    "limite": (".specifications", "limite"),
-    "ordre_par": (".specifications", "ordre_par"),
-    "paginer": (".specifications", "paginer"),
-    "par_champ": (".specifications", "par_champ"),
-    "par_champs": (".specifications", "par_champs"),
-    "avec_chargement": (".specifications", "avec_chargement"),
-    "par_date_range": (".specifications", "par_date_range"),
-    "actif": (".specifications", "actif"),
-    "recent": (".specifications", "recent"),
-    # Unit of Work
-    "UnitOfWork": (".unit_of_work", "UnitOfWork"),
-    # Result (Pattern Monad)
-    "Result": (".result", "Result"),
-    "Ok": (".result", "Ok"),
-    "Err": (".result", "Err"),
-    "Success": (".result", "Success"),
-    "Failure": (".result", "Failure"),
-    "ErrorCode": (".result", "ErrorCode"),
-    "ErrorInfo": (".result", "ErrorInfo"),
-    "capturer": (".result", "capturer"),
-    "capturer_async": (".result", "capturer_async"),
-    "depuis_option": (".result", "depuis_option"),
-    "depuis_bool": (".result", "depuis_bool"),
-    "combiner": (".result", "combiner"),
-    "premier_ok": (".result", "premier_ok"),
-    "collect": (".result", "collect"),
-    "collect_all": (".result", "collect_all"),
-    "avec_result": (".result", "avec_result"),
-    "safe": (".result", "safe"),
-    "result_api": (".result", "result_api"),
-    "success": (".result", "success"),
-    "failure": (".result", "failure"),
-    "from_exception": (".result", "from_exception"),
-    "register_error_mapping": (".result", "register_error_mapping"),
     # Resilience Policies
     "Policy": (".resilience", "Policy"),
     "RetryPolicy": (".resilience", "RetryPolicy"),
@@ -130,7 +85,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "demarrer_application": (".bootstrap", "demarrer_application"),
     "arreter_application": (".bootstrap", "arreter_application"),
     "est_demarree": (".bootstrap", "est_demarree"),
-    "resoudre_service": (".bootstrap", "resoudre_service"),
     "RapportDemarrage": (".bootstrap", "RapportDemarrage"),
     # Config Validator
     "ValidateurConfiguration": (".config.validator", "ValidateurConfiguration"),
@@ -170,19 +124,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # Logging
     "GestionnaireLog": (".logging", "GestionnaireLog"),
     "obtenir_logger": (".logging", "obtenir_logger"),
-    # Middleware
-    "CacheMiddleware": (".middleware", "CacheMiddleware"),
-    "CircuitBreakerMiddleware": (".middleware", "CircuitBreakerMiddleware"),
-    "Contexte": (".middleware", "Contexte"),
-    "ErrorHandlerMiddleware": (".middleware", "ErrorHandlerMiddleware"),
-    "LogMiddleware": (".middleware", "LogMiddleware"),
-    "Middleware": (".middleware", "Middleware"),
-    "Pipeline": (".middleware", "Pipeline"),
-    "RateLimitMiddleware": (".middleware", "RateLimitMiddleware"),
-    "RetryMiddleware": (".middleware", "RetryMiddleware"),
-    "SessionMiddleware": (".middleware", "SessionMiddleware"),
-    "TimingMiddleware": (".middleware", "TimingMiddleware"),
-    "ValidationMiddleware": (".middleware", "ValidationMiddleware"),
     # Monitoring
     "CollecteurMetriques": (".monitoring", "CollecteurMetriques"),
     "SanteSysteme": (".monitoring", "SanteSysteme"),

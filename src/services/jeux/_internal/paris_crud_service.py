@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.models import Equipe, Match, PariSportif
+from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
@@ -662,6 +663,7 @@ class ParisCrudService:
 _instance: ParisCrudService | None = None
 
 
+@service_factory("paris_crud", tags={"jeux", "crud", "paris"})
 def get_paris_crud_service() -> ParisCrudService:
     """Factory pour ParisCrudService (singleton)."""
     global _instance

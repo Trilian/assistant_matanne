@@ -14,6 +14,7 @@ from decimal import Decimal
 
 import streamlit as st
 
+from src.core.decorators import avec_cache
 from src.services.jeux import get_loto_crud_service
 
 logger = logging.getLogger(__name__)
@@ -74,9 +75,9 @@ from .strategies import (
 # ═══════════════════════════════════════════════════════════════════
 
 
-@st.cache_data(ttl=1800)
+@avec_cache(ttl=1800)
 def charger_tirages_db() -> list[dict]:
-    """Charge les tirages depuis la base de données avec cache Streamlit."""
+    """Charge les tirages depuis la base de données avec cache multi-niveaux."""
     service = get_loto_crud_service()
     return service.charger_tirages()
 
@@ -87,7 +88,7 @@ def charger_tirages(limite: int = 100) -> list[dict]:
     return tirages[:limite] if limite else tirages
 
 
-@st.cache_data(ttl=1800)
+@avec_cache(ttl=1800)
 def charger_grilles_utilisateur() -> list[dict]:
     """Charge les grilles enregistrées par l'utilisateur."""
     service = get_loto_crud_service()

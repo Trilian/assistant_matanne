@@ -28,6 +28,7 @@ from src.core.models import (
     GarminToken,
     UserProfile,
 )
+from src.services.core.registry import service_factory
 
 from .types import GarminConfig
 
@@ -504,6 +505,7 @@ def obtenir_service_garmin() -> ServiceGarmin:
     return ServiceGarmin()
 
 
+@service_factory("garmin", tags={"integrations", "garmin"})
 def get_garmin_service() -> ServiceGarmin:
     """Factory pour obtenir le service Garmin (alias anglais)"""
     return ServiceGarmin()

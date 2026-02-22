@@ -1,8 +1,7 @@
 """
-Tests pour les nouveaux modules core refactorés.
+Tests pour les modules core refactorés.
 
 Couvre:
-- Result (monad)
 - Resilience policies
 - Observability (correlation ID)
 - Query builder
@@ -16,136 +15,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # ═══════════════════════════════════════════════════════════
-# TESTS RESULT MONAD
-# ═══════════════════════════════════════════════════════════
-
-
-class TestResultMonad:
-    """Tests pour le pattern Result."""
-
-    def test_ok_creation(self):
-        """Ok contient une valeur."""
-        from src.core.result import Ok
-
-        result = Ok(42)
-        assert result.is_ok() is True
-        assert result.is_err() is False
-        assert result.ok() == 42
-        assert result.err() is None
-
-    def test_err_creation(self):
-        """Err contient une erreur."""
-        from src.core.result import Err
-
-        result = Err("erreur")
-        assert result.is_ok() is False
-        assert result.is_err() is True
-        assert result.ok() is None
-        assert result.err() == "erreur"
-
-    def test_unwrap_ok(self):
-        """unwrap retourne la valeur pour Ok."""
-        from src.core.result import Ok
-
-        result = Ok(42)
-        assert result.unwrap() == 42
-
-    def test_unwrap_err_raises(self):
-        """unwrap lève une exception pour Err."""
-        from src.core.result import Err
-
-        result = Err("erreur")
-        with pytest.raises(ValueError, match="Tentative de unwrap sur Failure"):
-            result.unwrap()
-
-    def test_unwrap_or(self):
-        """unwrap_or retourne le default pour Err."""
-        from src.core.result import Err, Ok
-
-        assert Ok(42).unwrap_or(0) == 42
-        assert Err("erreur").unwrap_or(0) == 0
-
-    def test_map_ok(self):
-        """map applique la fonction sur Ok."""
-        from src.core.result import Ok
-
-        result = Ok(21).map(lambda x: x * 2)
-        assert result.unwrap() == 42
-
-    def test_map_err_skips(self):
-        """map n'applique pas sur Err."""
-        from src.core.result import Err
-
-        result = Err("erreur").map(lambda x: x * 2)
-        assert result.is_err()
-        assert result.err() == "erreur"
-
-    def test_map_err(self):
-        """map_err transforme l'erreur."""
-        from src.core.result import Err
-
-        result = Err("erreur").map_err(lambda e: f"ERREUR: {e}")
-        assert result.err() == "ERREUR: erreur"
-
-    def test_and_then_chaining(self):
-        """and_then chaîne les Results."""
-        from src.core.result import Err, Ok
-
-        def safe_div(a: int, b: int):
-            if b == 0:
-                return Err("division par zéro")
-            return Ok(a / b)
-
-        result = Ok(10).and_then(lambda x: safe_div(x, 2))
-        assert result.unwrap() == 5.0
-
-        result = Ok(10).and_then(lambda x: safe_div(x, 0))
-        assert result.is_err()
-
-    def test_capturer(self):
-        """capturer convertit les exceptions en Err."""
-        from src.core.result import capturer
-
-        result = capturer(lambda: int("abc"))
-        assert result.is_err()
-        assert isinstance(result.err(), ValueError)
-
-        result = capturer(lambda: 42)
-        assert result.is_ok()
-        assert result.unwrap() == 42
-
-    def test_depuis_option(self):
-        """depuis_option convertit None en Err."""
-        from src.core.result import depuis_option
-
-        assert depuis_option(42, "erreur").unwrap() == 42
-        assert depuis_option(None, "erreur").err() == "erreur"
-
-    def test_combiner(self):
-        """combiner agrège plusieurs Results."""
-        from src.core.result import Err, Ok, combiner
-
-        result = combiner(Ok(1), Ok(2), Ok(3))
-        assert result.unwrap() == [1, 2, 3]
-
-        result = combiner(Ok(1), Err("oops"), Ok(3))
-        assert result.is_err()
-
-    def test_bool_conversion(self):
-        """Result supporte la conversion en bool."""
-        from src.core.result import Err, Ok
-
-        assert bool(Ok(42)) is True
-        assert bool(Err("err")) is False
-
-        # if result: pattern
-        if Ok(42):
-            pass  # OK
-        else:
-            pytest.fail("Ok devrait être truthy")
-
-
-# ═══════════════════════════════════════════════════════════
 # TESTS RESILIENCE POLICIES
 # ═══════════════════════════════════════════════════════════
 
@@ -154,14 +23,13 @@ class TestResiliencePolicies:
     """Tests pour les policies de résilience."""
 
     def test_retry_policy_success(self):
-        """RetryPolicy retourne Ok en cas de succès."""
+        """RetryPolicy retourne le résultat directement."""
         from src.core.resilience import RetryPolicy
 
         policy = RetryPolicy(max_tentatives=3)
         result = policy.executer(lambda: 42)
 
-        assert result.is_ok()
-        assert result.unwrap() == 42
+        assert result == 42
 
     def test_retry_policy_eventual_success(self):
         """RetryPolicy réussit après plusieurs tentatives."""
@@ -178,49 +46,42 @@ class TestResiliencePolicies:
         policy = RetryPolicy(max_tentatives=3, delai_base=0.01)
         result = policy.executer(flaky)
 
-        assert result.is_ok()
-        assert result.unwrap() == "succès"
+        assert result == "succès"
         assert counter["count"] == 3
 
     def test_retry_policy_all_failures(self):
-        """RetryPolicy retourne Err après max_tentatives."""
+        """RetryPolicy lève une exception après max_tentatives."""
         from src.core.resilience import RetryPolicy
 
         policy = RetryPolicy(max_tentatives=2, delai_base=0.01)
-        result = policy.executer(lambda: 1 / 0)
-
-        assert result.is_err()
-        assert isinstance(result.err(), ZeroDivisionError)
+        with pytest.raises(ZeroDivisionError):
+            policy.executer(lambda: 1 / 0)
 
     def test_timeout_policy_success(self):
-        """TimeoutPolicy retourne Ok si dans le temps."""
+        """TimeoutPolicy retourne le résultat si dans le temps."""
         from src.core.resilience import TimeoutPolicy
 
         policy = TimeoutPolicy(timeout_secondes=5.0)
         result = policy.executer(lambda: 42)
 
-        assert result.is_ok()
-        assert result.unwrap() == 42
+        assert result == 42
 
     def test_timeout_policy_timeout(self):
-        """TimeoutPolicy retourne Err si timeout."""
+        """TimeoutPolicy lève TimeoutError si timeout."""
         from src.core.resilience import TimeoutPolicy
 
         policy = TimeoutPolicy(timeout_secondes=0.1)
-        result = policy.executer(lambda: time.sleep(1) or 42)
-
-        assert result.is_err()
-        assert isinstance(result.err(), TimeoutError)
+        with pytest.raises(TimeoutError):
+            policy.executer(lambda: time.sleep(1) or 42)
 
     def test_fallback_policy_success(self):
-        """FallbackPolicy retourne Ok si succès."""
+        """FallbackPolicy retourne le résultat si succès."""
         from src.core.resilience import FallbackPolicy
 
         policy = FallbackPolicy(fallback_value="default")
         result = policy.executer(lambda: "success")
 
-        assert result.is_ok()
-        assert result.unwrap() == "success"
+        assert result == "success"
 
     def test_fallback_policy_uses_fallback(self):
         """FallbackPolicy utilise le fallback en cas d'erreur."""
@@ -229,8 +90,7 @@ class TestResiliencePolicies:
         policy = FallbackPolicy(fallback_value="default", log_erreur=False)
         result = policy.executer(lambda: 1 / 0)
 
-        assert result.is_ok()
-        assert result.unwrap() == "default"
+        assert result == "default"
 
     def test_policy_composition(self):
         """Les policies peuvent être composées."""
@@ -239,8 +99,7 @@ class TestResiliencePolicies:
         policy = TimeoutPolicy(5.0) + RetryPolicy(2, delai_base=0.01) + FallbackPolicy("default")
 
         result = policy.executer(lambda: 42)
-        assert result.is_ok()
-        assert result.unwrap() == 42
+        assert result == 42
 
     def test_factory_politique_api_externe(self):
         """politique_api_externe crée une policy composée."""
@@ -523,20 +382,17 @@ class TestBootstrap:
 
         assert bootstrap.est_demarree() is False
 
-    @patch("src.core.bootstrap._enregistrer_composants")
-    def test_demarrer_application_sans_validation(self, mock_enregistrer):
+    def test_demarrer_application_sans_validation(self):
         """demarrer_application peut skip la validation."""
         from src.core import bootstrap
 
         bootstrap._deja_demarre = False
-        mock_enregistrer.return_value = ["Test"]
 
         rapport = bootstrap.demarrer_application(
             valider_config=False, initialiser_eager=False, enregistrer_atexit=False
         )
 
         assert rapport.succes is True
-        assert "Test" in rapport.composants_enregistres
 
         # Cleanup
         bootstrap._deja_demarre = False

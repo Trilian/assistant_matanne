@@ -20,6 +20,7 @@ from src.core.ai import ClientIA, obtenir_client_ia
 from src.core.decorators import avec_session_db
 from src.core.models import GardenItem
 from src.services.core.base import BaseAIService
+from src.services.core.registry import service_factory
 
 from .jardin_gamification_mixin import BADGES_JARDIN, JardinGamificationMixin
 from .schemas import (
@@ -448,6 +449,7 @@ def obtenir_service_jardin(client: ClientIA | None = None) -> JardinService:
     return JardinService(client=client)
 
 
+@service_factory("jardin", tags={"maison", "crud", "jardin"})
 def get_jardin_service(client: ClientIA | None = None) -> JardinService:
     """Factory pour obtenir le service jardin (alias anglais)."""
     return obtenir_service_jardin(client)

@@ -16,7 +16,7 @@ import httpx
 from bs4 import BeautifulSoup
 
 from src.core.ai import ClientIA, obtenir_client_ia
-from src.core.decorators import avec_gestion_erreurs
+from src.core.decorators import avec_gestion_erreurs, avec_resilience
 from src.services.core.base import BaseAIService
 
 # Parsers et schémas extraits dans parsers.py
@@ -109,6 +109,7 @@ class RecipeImportService(BaseAIService):
         return GenericRecipeParser
 
     @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
+    @avec_resilience(retry=2, timeout_s=30)
     def import_from_url(self, url: str, use_ai_fallback: bool = True) -> ImportResult:
         """
         Importe une recette depuis une URL.

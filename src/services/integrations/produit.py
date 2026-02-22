@@ -12,7 +12,7 @@ from datetime import datetime
 import httpx
 
 from src.core.caching import Cache
-from src.core.decorators import avec_gestion_erreurs
+from src.core.decorators import avec_gestion_erreurs, avec_resilience
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +112,7 @@ class OpenFoodFactsService:
         self.timeout = 10.0
         self.user_agent = "AssistantMatanne/1.0 (contact@example.com)"
 
+    @avec_resilience(retry=2, timeout_s=10, fallback=None)
     def rechercher_produit(self, code_barres: str) -> ProduitOpenFoodFacts | None:
         """
         Recherche un produit par son code-barres.

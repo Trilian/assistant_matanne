@@ -17,6 +17,7 @@ from typing import Literal
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
+from src.services.core.registry import service_factory
 
 from .football_data import FootballDataService, StatistiquesMarcheData
 from .loto_data import LotoDataService, StatistiqueNumeroLoto
@@ -347,6 +348,7 @@ def obtenir_service_sync_jeux(session: Session | None = None) -> SyncService:
     return SyncService(session)
 
 
+@service_factory("sync", tags={"jeux", "sync"})
 def get_sync_service(session: Session | None = None) -> SyncService:
     """
     Factory pour créer une instance du service (alias anglais).

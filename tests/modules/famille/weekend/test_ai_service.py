@@ -18,7 +18,7 @@ class TestWeekendAIService:
 
         assert WeekendAIService is not None
 
-    @patch("src.modules.famille.weekend.ai_service.ClientIA")
+    @patch("src.services.famille.weekend_ai.ClientIA")
     def test_creation(self, mock_client_class):
         """Test de création de WeekendAIService."""
         mock_client_class.return_value = MagicMock()
@@ -31,7 +31,7 @@ class TestWeekendAIService:
         assert service.service_name == "weekend_ai"
         assert service.cache_prefix == "weekend"
 
-    @patch("src.modules.famille.weekend.ai_service.ClientIA")
+    @patch("src.services.famille.weekend_ai.ClientIA")
     def test_service_attributes(self, mock_client_class):
         """Test des attributs du service."""
         mock_client_class.return_value = MagicMock()
@@ -44,7 +44,7 @@ class TestWeekendAIService:
         assert service.default_ttl == 3600
 
     @pytest.mark.asyncio
-    @patch("src.modules.famille.weekend.ai_service.ClientIA")
+    @patch("src.services.famille.weekend_ai.ClientIA")
     async def test_suggerer_activites(self, mock_client_class):
         """Test suggestion d'activités weekend."""
         mock_client = MagicMock()
@@ -66,7 +66,7 @@ class TestWeekendAIService:
         assert "100" in call_args.kwargs["prompt"]
 
     @pytest.mark.asyncio
-    @patch("src.modules.famille.weekend.ai_service.ClientIA")
+    @patch("src.services.famille.weekend_ai.ClientIA")
     async def test_suggerer_activites_params_default(self, mock_client_class):
         """Test suggestion avec paramètres par défaut."""
         mock_client_class.return_value = MagicMock()
@@ -84,7 +84,7 @@ class TestWeekendAIService:
         assert "50" in call_args.kwargs["prompt"]  # budget default
 
     @pytest.mark.asyncio
-    @patch("src.modules.famille.weekend.ai_service.ClientIA")
+    @patch("src.services.famille.weekend_ai.ClientIA")
     async def test_details_lieu(self, mock_client_class):
         """Test détails d'un lieu."""
         mock_client_class.return_value = MagicMock()
@@ -103,7 +103,7 @@ class TestWeekendAIService:
         assert "parc" in call_args.kwargs["prompt"]
 
     @pytest.mark.asyncio
-    @patch("src.modules.famille.weekend.ai_service.ClientIA")
+    @patch("src.services.famille.weekend_ai.ClientIA")
     async def test_details_lieu_different_type(self, mock_client_class):
         """Test détails d'un lieu de type différent."""
         mock_client_class.return_value = MagicMock()

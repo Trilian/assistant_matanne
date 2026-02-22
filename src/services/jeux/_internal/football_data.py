@@ -18,6 +18,8 @@ import httpx
 from pydantic import BaseModel, Field
 
 from src.core.config import obtenir_parametres
+from src.core.decorators import avec_cache, avec_resilience
+from src.services.core.registry import service_factory
 
 # Types importés depuis la source unique (plus de duplication)
 from src.services.jeux._internal.football_types import (
@@ -67,6 +69,7 @@ class FootballDataService:
             logger.debug("Clé API Football indisponible: %s", e)
             return ""
 
+    @avec_resilience(retry=2, timeout_s=30, fallback=None)
     def _faire_requete(self, endpoint: str, params: dict | None = None) -> dict | None:
         """
         Effectue une requête à l'API.
@@ -338,6 +341,7 @@ def obtenir_service_donnees_football(api_key: str | None = None) -> FootballData
     return _football_data_instance
 
 
+@service_factory("football_data", tags={"jeux", "data", "football"})
 def get_football_data_service(api_key: str | None = None) -> FootballDataService:
     """
     Factory pour créer une instance du service (alias anglais).
@@ -387,6 +391,7 @@ def obtenir_cle_api() -> str | None:
         return None
 
 
+@avec_cache(ttl=300, key_prefix="football_data_matchs_a_venir")
 def charger_matchs_a_venir(
     championnat: str, jours: int = 7, statut: str = "SCHEDULED,LIVE"
 ) -> list[dict]:
@@ -444,6 +449,7 @@ def charger_matchs_a_venir(
     return matchs
 
 
+@avec_cache(ttl=300, key_prefix="football_data_matchs_termines")
 def charger_matchs_termines(championnat: str, jours: int = 7) -> list[dict]:
     """
     Charge les matchs terminés des derniers jours.
@@ -491,6 +497,7 @@ def charger_matchs_termines(championnat: str, jours: int = 7) -> list[dict]:
     return matchs
 
 
+@avec_cache(ttl=600, key_prefix="football_data_classement")
 def charger_classement(championnat: str) -> list[dict]:
     """
     Charge le classement d'un championnat.
@@ -537,6 +544,7 @@ def charger_classement(championnat: str) -> list[dict]:
     return []
 
 
+@avec_cache(ttl=600, key_prefix="football_data_historique")
 def charger_historique_equipe(nom_equipe: str, limite: int = 10) -> list[dict]:
     """
     Charge l'historique des matchs d'une équipe.
@@ -583,6 +591,7 @@ def charger_historique_equipe(nom_equipe: str, limite: int = 10) -> list[dict]:
     return matchs
 
 
+@avec_cache(ttl=600, key_prefix="football_data_equipe")
 def chercher_equipe(nom: str) -> dict | None:
     """
     Recherche une équipe par son nom.

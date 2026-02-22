@@ -18,6 +18,7 @@ from src.core.ai import ClientIA, obtenir_client_ia
 from src.core.decorators import avec_session_db
 from src.core.models import Routine, RoutineTask
 from src.services.core.base import BaseAIService
+from src.services.core.registry import service_factory
 
 from .entretien_gamification_mixin import EntretienGamificationMixin
 from .schemas import (
@@ -423,6 +424,7 @@ def obtenir_service_entretien(client: ClientIA | None = None) -> EntretienServic
     return EntretienService(client=client)
 
 
+@service_factory("entretien", tags={"maison", "crud", "entretien"})
 def get_entretien_service(client: ClientIA | None = None) -> EntretienService:
     """Factory pour obtenir le service entretien (alias anglais)."""
     return obtenir_service_entretien(client)

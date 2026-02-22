@@ -32,6 +32,8 @@ except ImportError:
     CronTrigger = None
     IntervalTrigger = None
 
+from src.services.core.registry import service_factory
+
 from .sync_service import SyncService, get_sync_service
 
 logger = logging.getLogger(__name__)
@@ -418,6 +420,7 @@ def obtenir_service_planificateur_jeux(
         return _scheduler_instance
 
 
+@service_factory("scheduler", tags={"jeux", "scheduler"})
 def get_scheduler_service(
     sync_service: SyncService | None = None,
     api_key_football: str | None = None,
@@ -446,3 +449,11 @@ def reset_scheduler_service() -> None:
         if _scheduler_instance is not None:
             _scheduler_instance.arreter()
             _scheduler_instance = None
+
+    # Aussi réinitialiser l'entrée du registre
+    try:
+        from src.services.core.registry import obtenir_registre
+
+        obtenir_registre().reinitialiser("scheduler")
+    except Exception:
+        pass

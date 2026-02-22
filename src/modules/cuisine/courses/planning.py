@@ -5,6 +5,7 @@ Génération de courses depuis le planning repas.
 import streamlit as st
 
 from src.core.session_keys import SK
+from src.core.state import naviguer
 from src.services.cuisine.courses import obtenir_service_courses_intelligentes
 
 
@@ -29,9 +30,7 @@ def afficher_courses_depuis_planning():
         st.caption("Créez d'abord un planning de repas dans 'Cuisine → Planning Semaine'")
 
         if st.button("📅 Aller au planning", use_container_width=True):
-            # Naviguer vers planning
-            st.session_state.current_page = "cuisine.planning_semaine"
-            st.rerun()
+            naviguer("cuisine.planning_semaine")
         return
 
     # Afficher info planning

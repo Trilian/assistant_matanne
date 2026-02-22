@@ -25,6 +25,8 @@ __all__ = [
     "jules",
     "sante",
     "calendrier_planning",
+    "jules_ai",
+    "weekend_ai",
 ]
 
 

@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.models import HouseExpense
+from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
@@ -219,6 +220,7 @@ class DepensesCrudService:
 # ═══════════════════════════════════════════════════════════
 
 
+@service_factory("depenses_crud", tags={"maison", "crud", "depenses"})
 def get_depenses_crud_service() -> DepensesCrudService:
     """Factory singleton pour le service CRUD dépenses."""
     if DepensesCrudService._instance is None:

@@ -21,6 +21,7 @@ from src.core.ai.client import ClientIA
 from src.core.errors_base import ErreurLimiteDebit, ErreurServiceIA
 from src.services.core.base.ai_service import BaseAIService
 from src.services.core.base.async_utils import sync_wrapper
+from src.services.core.registry import service_factory
 from src.services.jeux._internal.series_service import (
     SEUIL_VALUE_ALERTE,
     SEUIL_VALUE_HAUTE,
@@ -498,6 +499,7 @@ def obtenir_service_ia_jeux() -> JeuxAIService:
     return _jeux_ai_service_instance
 
 
+@service_factory("jeux_ai", tags={"jeux", "ia"})
 def get_jeux_ai_service() -> JeuxAIService:
     """Factory pour obtenir le service IA Jeux (alias anglais)."""
     return obtenir_service_ia_jeux()

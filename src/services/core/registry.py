@@ -435,8 +435,12 @@ def service_factory(
         _registre.enregistrer(nom, func, tags=tags)
 
         @functools.wraps(func)
-        def wrapper():
-            return obtenir_registre().obtenir(nom)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            if args or kwargs:
+                # Appel avec arguments explicites — bypass singleton registre
+                return func(*args, **kwargs)
+            # Appel sans arguments — singleton via registre
+            return _registre.obtenir(nom)
 
         return wrapper
 

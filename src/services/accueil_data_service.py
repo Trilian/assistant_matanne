@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.models import MaintenanceTask
+from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +54,7 @@ class AccueilDataService:
 # ═══════════════════════════════════════════════════════════
 
 
+@service_factory("accueil_data", tags={"accueil", "data"})
 def get_accueil_data_service() -> AccueilDataService:
     """Factory singleton pour le service accueil data."""
     if AccueilDataService._instance is None:

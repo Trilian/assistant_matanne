@@ -18,6 +18,7 @@ from src.core.ai import ClientIA, obtenir_client_ia
 from src.core.decorators import avec_session_db
 from src.core.models import Project
 from src.services.core.base import BaseAIService
+from src.services.core.registry import service_factory
 
 from .schemas import (
     MaterielProjet,
@@ -472,6 +473,7 @@ def obtenir_service_projets(client: ClientIA | None = None) -> ProjetsService:
     return ProjetsService(client=client)
 
 
+@service_factory("projets", tags={"maison", "crud", "projets"})
 def get_projets_service(client: ClientIA | None = None) -> ProjetsService:
     """Factory pour obtenir le service projets (alias anglais)."""
     return obtenir_service_projets(client)

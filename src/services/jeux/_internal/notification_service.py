@@ -21,6 +21,7 @@ from typing import Any
 
 from src.core.db import obtenir_contexte_db
 from src.core.models import AlerteJeux
+from src.services.core.registry import service_factory
 from src.services.jeux._internal.series_service import SEUIL_VALUE_ALERTE, SEUIL_VALUE_HAUTE
 
 logger = logging.getLogger(__name__)
@@ -435,6 +436,7 @@ def obtenir_service_notifications_jeux() -> NotificationJeuxService:
     return _notification_service_instance
 
 
+@service_factory("notification_jeux", tags={"jeux", "notification"})
 def get_notification_jeux_service() -> NotificationJeuxService:
     """Factory pour obtenir le service de notifications (alias anglais)."""
     return obtenir_service_notifications_jeux()

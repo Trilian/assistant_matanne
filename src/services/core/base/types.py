@@ -2,7 +2,7 @@
 Service Types - Types et classes de base partagés.
 Point d'entrée sans dépendances circulaires.
 
-``BaseService`` compose trois mixins (advanced, safe, pipeline) pour garder
+``BaseService`` compose deux mixins (advanced, pipeline) pour garder
 chaque fichier à taille raisonnable tout en conservant la même API publique.
 """
 
@@ -15,7 +15,6 @@ from sqlalchemy.orm import Session
 
 from .advanced import AdvancedQueryMixin
 from .pipeline import PipelineMixin
-from .safe import SafeOperationsMixin
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
@@ -26,7 +25,7 @@ T = TypeVar("T")
 # ═══════════════════════════════════════════════════════════
 
 
-class BaseService(PipelineMixin, AdvancedQueryMixin, SafeOperationsMixin, Generic[T]):
+class BaseService(PipelineMixin, AdvancedQueryMixin, Generic[T]):
     """
     Service CRUD Universel avec toutes les fonctionnalités.
 
@@ -35,7 +34,6 @@ class BaseService(PipelineMixin, AdvancedQueryMixin, SafeOperationsMixin, Generi
     - Bulk operations avec stratégies de fusion (``AdvancedQueryMixin``)
     - Statistiques génériques (``AdvancedQueryMixin``)
     - Recherche avancée multi-critères (``AdvancedQueryMixin``)
-    - API Safe retournant Result (``SafeOperationsMixin``)
     - Pipeline middleware optionnel (``PipelineMixin``)
 
     ⚠️ ATTENTION : Ce fichier ne doit JAMAIS importer depuis src.ui

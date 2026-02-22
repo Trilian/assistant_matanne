@@ -8,7 +8,6 @@ Ce package regroupe les classes fondamentales des services:
 - Mixins IA: RecipeAIMixin, PlanningAIMixin, InventoryAIMixin
 - Async utils: sync_wrapper pour conversion async→sync
 - Protocols: Contrats d'interface (PEP 544)
-- Result: Pattern Result[T, E] pour contrôle de flux
 
 Imports paresseux (__getattr__) pour performance au démarrage.
 """
@@ -56,20 +55,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "ObservableProtocol": (".protocols", "ObservableProtocol"),
     "ServiceStatus": (".protocols", "ServiceStatus"),
     "ServiceHealth": (".protocols", "ServiceHealth"),
-    # ─── Result Pattern (source de vérité: src.core.result) ───
-    "Result": ("src.core.result", "Result"),
-    "Success": ("src.core.result", "Ok"),
-    "Failure": ("src.core.result", "Err"),
-    "ErrorInfo": ("src.core.result", "ErrorInfo"),
-    "ErrorCode": ("src.core.result", "ErrorCode"),
-    "success": ("src.core.result", "success"),
-    "failure": ("src.core.result", "failure"),
-    "from_exception": ("src.core.result", "from_exception"),
-    "safe": ("src.core.result", "safe"),
-    "result_api": ("src.core.result", "result_api"),
-    "register_error_mapping": ("src.core.result", "register_error_mapping"),
-    "collect": ("src.core.result", "collect"),
-    "collect_all": ("src.core.result", "collect_all"),
 }
 
 

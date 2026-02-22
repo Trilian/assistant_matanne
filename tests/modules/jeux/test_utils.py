@@ -539,19 +539,19 @@ class TestBoutonActualiserApi:
         assert result is False
         mock_st.button.assert_called_once()
 
+    @patch("src.modules.jeux.utils.Cache")
     @patch("src.modules.jeux.utils.st")
-    def test_bouton_clique_nettoie_cache(self, mock_st):
+    def test_bouton_clique_nettoie_cache(self, mock_st, mock_cache):
         """Test que le clic nettoie le cache et retourne True"""
         mock_st.button.return_value = True
         mock_st.session_state = {}
-        mock_st.cache_data = MagicMock()
 
         from src.modules.jeux.utils import bouton_actualiser_api
 
         result = bouton_actualiser_api("test_key")
 
         assert result is True
-        mock_st.cache_data.clear.assert_called_once()
+        mock_cache.invalider.assert_called_once_with(pattern="charger_")
         assert mock_st.session_state["test_key_updated"] is True
 
 

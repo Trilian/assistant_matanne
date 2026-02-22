@@ -19,7 +19,6 @@ from src.core.ai.cache import CacheIA
 from src.core.errors_base import ErreurLimiteDebit
 from src.services.core.base.ai_diagnostics import AIDiagnosticsMixin
 from src.services.core.base.ai_prompts import AIPromptsMixin
-from src.services.core.base.ai_safe import AISafeCallsMixin
 from src.services.core.base.ai_streaming import AIStreamingMixin
 from src.services.core.base.async_utils import ServiceMeta, sync_wrapper
 
@@ -33,7 +32,6 @@ logger = logging.getLogger(__name__)
 
 class BaseAIService(
     AIStreamingMixin,
-    AISafeCallsMixin,
     AIDiagnosticsMixin,
     AIPromptsMixin,
     metaclass=ServiceMeta,

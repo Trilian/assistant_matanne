@@ -24,27 +24,28 @@ Hub de gestion familiale en production avec modules pour:
 
 ### Modules principaux (src/core/)
 
-Le core est organisé en **14 sous-packages** + fichiers utilitaires.
+Le core est organisé en **11 sous-packages** + fichiers utilitaires.
 
 - **ai/**: `ClientIA` (client Mistral), `AnalyseurIA` (parsing JSON/Pydantic), `CacheIA` (cache sémantique), `RateLimitIA` (rate limiting), `CircuitBreaker` (résilience API)
 - **caching/**: Cache multi-niveaux — `base.py` (types), `cache.py` (Cache), `memory.py` (L1), `session.py` (L2), `file.py` (L3), `orchestrator.py` (CacheMultiNiveau). Décorateur unifié `@avec_cache`
 - **config/**: Pydantic `BaseSettings` — `settings.py` (Parametres, obtenir_parametres), `loader.py` (chargement .env, secrets Streamlit), `validator.py` (ValidateurConfiguration)
 - **date_utils/**: Package utilitaires de dates — `semaines.py`, `periodes.py`, `formatage.py`, `helpers.py`. Re-exports transparents via `__init__.py`.
 - **db/**: Base de données — `engine.py` (Engine SQLAlchemy, QueuePool), `session.py` (context managers), `migrations.py` (GestionnaireMigrations SQL-file), `utils.py` (health checks)
-- **decorators/**: Package décorateurs — `db.py` (`@avec_session_db`), `cache.py` (`@avec_cache`), `errors.py` (`@avec_gestion_erreurs`), `validation.py` (`@avec_validation`)
-- **middleware/**: Pipeline de middlewares composables — `base.py`, `builtin.py`, `pipeline.py`
+- **decorators/**: Package décorateurs — `db.py` (`@avec_session_db`), `cache.py` (`@avec_cache`), `errors.py` (`@avec_gestion_erreurs`), `validation.py` (`@avec_validation`, `@avec_resilience`)
 - **models/**: Modèles SQLAlchemy ORM modulaires (19 fichiers organisés par domaine)
 - **monitoring/**: Métriques & performance — `collector.py`, `decorators.py`, `health.py`, `rerun_profiler.py`
 - **observability/**: Contexte d'observabilité — `context.py`
-- **resilience/**: Politiques de résilience composables — `policies.py`
-- **result/**: Result Monad (Ok/Err) — `base.py`, `codes.py`, `combinators.py`, `decorators.py`, `helpers.py`
+- **resilience/**: Politiques de résilience composables — `policies.py`. `executer()` retourne `T` directement ou lève une exception.
 - **state/**: Package état applicatif — `manager.py` (GestionnaireEtat), `shortcuts.py` (naviguer, revenir), `slices.py` (EtatNavigation, EtatCuisine, EtatUI)
 - **validation/**: Package validation — `schemas/` (sous-package Pydantic: `recettes.py`, `inventaire.py`, `courses.py`, `planning.py`, `famille.py`, `projets.py`, `_helpers.py`), `sanitizer.py` (anti-XSS/injection), `validators.py` (helpers)
-- **Utilitaires**: `bootstrap.py` (IoC init), `constants.py`, `container.py` (IoC), `errors.py`, `errors_base.py`, `lazy_loader.py` (RouteurOptimise + MODULE_REGISTRY), `logging.py`, `repository.py` (CRUD générique), `session_keys.py` (KeyNamespace), `specifications.py`, `storage.py` (SessionStorage Protocol), `unit_of_work.py`, `async_utils.py`, `py.typed`
+- **Utilitaires**: `bootstrap.py` (init config + events), `constants.py`, `errors.py`, `errors_base.py`, `lazy_loader.py` (RouteurOptimise + MODULE_REGISTRY), `logging.py`, `session_keys.py` (KeyNamespace), `storage.py` (SessionStorage Protocol), `async_utils.py`, `py.typed`
 
 ### Couche Services (src/services/)
 
 - **core/base/**: `BaseAIService` (dans `ai_service.py`) avec limitation de débit intégrée, cache sémantique, parsing JSON, mixins IA, streaming, protocols, pipeline
+- **core/registry.py**: Registre de services avec décorateur `@service_factory` pour singletons
+- **core/events/**: Bus d'événements pub/sub avec wildcards
+- **famille/**: Services IA famille — `jules_ai.py` (JulesAIService), `weekend_ai.py` (WeekendAIService)
 - **recettes/**: Service recettes avec `importer.py` pour import URL/PDF
 - **planning/**: Service modulaire divisé en sous-modules:
   - `nutrition.py`: Équilibre nutritionnel
@@ -54,7 +55,7 @@ Le core est organisé en **14 sous-packages** + fichiers utilitaires.
   - `prompts.py`: Génération de prompts IA
 - **courses.py**, **inventaire.py**: Services spécifiques au domaine
 - **barcode.py**, **rapports_pdf.py**, **predictions.py**: Services utilitaires
-- Tous exportent des fonctions factory `get_{service_name}_service()` pour l'injection de dépendances
+- Tous exportent des fonctions factory `get_{service_name}_service()` décorées avec `@service_factory` pour le singleton via registre
 
 ### Composants UI (src/ui/)
 
@@ -148,7 +149,7 @@ python manage.py generate_requirements
 - **Français partout**: Tous les noms de variables, commentaires, docstrings et noms de fonctions utilisent le français (ex: `obtenir_parametres()`, `GestionnaireMigrations`, `avec_session_db`)
 - **Structure des fichiers**: Modèles SQLAlchemy dans `src/core/models/` (19 fichiers modulaires), tous les décorateurs dans `src/core/decorators.py`, utilitaires dans `src/core/` (date_utils/, constants, errors, state)
 - **Nommage des modules**: Les modules sont `src/modules/{name}.py` ou `src/modules/{name}/__init__.py`
-- **Factories de services**: Toujours exporter une fonction `get_{service_name}_service()` pour l'injection de dépendances (ex: `get_recette_service()`)
+- **Factories de services**: Toujours exporter une fonction `get_{service_name}_service()` décorée avec `@service_factory` pour le singleton via registre (ex: `get_recette_service()`)
 
 ### Points d'entrée
 
@@ -199,10 +200,10 @@ Clé: Toujours utiliser `obtenir_contexte_db()` — ne jamais créer Engine/Sess
 
 ### Stratégie de cache
 
-- **Cache multi-niveaux unifié**: `@avec_cache(ttl=300)` dans `src/core/decorators.py` — délègue à `CacheMultiNiveau` (L1 mémoire → L2 session → L3 fichier)
-- **Cache Streamlit**: `@st.cache_data(ttl=1800)` pour les données UI (par défaut 30 min)
+- **Cache multi-niveaux unifié**: `@avec_cache(ttl=300)` dans `src/core/decorators/cache.py` — délègue à `CacheMultiNiveau` (L1 mémoire → L2 session → L3 fichier)
+- **Cache Streamlit**: `@st.cache_data` uniquement pour les composants retournant des objets Streamlit/Plotly
 - **Cache des réponses IA**: `CacheIA` dans `src/core/ai/cache.py` pour le cache sémantique des appels IA
-- **Invalidation manuelle**: `StateManager` peut nettoyer le cache lors d'actions utilisateur
+- **Invalidation manuelle**: `Cache.invalider(pattern="prefix_")` ou `cache.invalider_par_tag("tag")`
 - Exemple:
   ```python
   from src.core.decorators import avec_cache
@@ -211,7 +212,7 @@ Clé: Toujours utiliser `obtenir_contexte_db()` — ne jamais créer Engine/Sess
   def get_recettes(): ...
   ```
 
-> **Note**: Un seul décorateur de cache `@avec_cache`. Les anciens `@cached` et `@avec_cache_multi` ont été supprimés.
+> **Règle**: Utiliser `@avec_cache` dans les services/métier. Réserver `@st.cache_data` aux composants UI retournant des objets Streamlit.
 
 ### Modèle de chargement différé
 
@@ -224,6 +225,39 @@ if hasattr(module, "app"):
 ```
 
 Garder les imports de modules DANS la fonction `app()`, pas au niveau du module, pour préserver la performance du démarrage.
+
+### Résilience des appels externes
+
+Tous les appels HTTP/API externes doivent utiliser `@avec_resilience`:
+
+```python
+from src.core.decorators import avec_resilience
+
+@avec_resilience(retry=2, timeout_s=30, fallback=None)
+def appel_api_externe():
+    return httpx.get("https://api.example.com").json()
+```
+
+### Service Factory Pattern
+
+Tous les services singleton utilisent `@service_factory` du registre:
+
+```python
+from src.services.core.registry import service_factory
+
+@service_factory("mon_service", tags={"domaine"})
+def get_mon_service() -> MonService:
+    return MonService()
+```
+
+### Navigation
+
+Toujours utiliser `naviguer()` — ne jamais modifier `st.session_state` directement:
+
+```python
+from src.core.state import naviguer
+naviguer("cuisine.recettes")  # Gère rerun automatiquement
+```
 
 ---
 
@@ -357,12 +391,9 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 | [src/core/models/](src/core/models/)                               | Tous les modèles ORM SQLAlchemy (19 fichiers)             |
 | [src/core/decorators/](src/core/decorators/)                       | Package décorateurs (`@avec_session_db`, `@avec_cache`, etc.)|
 | [src/core/state/](src/core/state/)                                 | Package état applicatif (manager, slices, shortcuts)       |
-| [src/core/result/](src/core/result/)                               | Result Monad (Ok/Err) — gestion d'erreurs style Rust      |
-| [src/core/resilience/](src/core/resilience/)                       | Politiques de résilience composables                       |
-| [src/core/middleware/](src/core/middleware/)                        | Pipeline de middlewares composables                        |
+| [src/core/resilience/](src/core/resilience/)                       | Politiques de résilience composables (retourne T directement) |
 | [src/core/storage.py](src/core/storage.py)                         | SessionStorage Protocol (découplage Streamlit)            |
-| [src/core/container.py](src/core/container.py)                     | IoC Container — injection de dépendances                  |
-| [src/core/repository.py](src/core/repository.py)                   | Repository générique CRUD typé                             |
+| [src/services/core/registry.py](src/services/core/registry.py)     | Registre de services + @service_factory                    |
 | [src/services/core/events/](src/services/core/events/)             | Bus d'événements pub/sub avec wildcards                    |
 | [src/services/core/base/](src/services/core/base/)                 | BaseAIService, mixins IA, streaming, protocols             |
 | [src/app.py](src/app.py)                                           | App Streamlit principale, bootstrap, chargement différé   |

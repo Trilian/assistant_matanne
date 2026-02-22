@@ -153,10 +153,7 @@ def avec_resilience(
 
             try:
                 if composed is not None:
-                    result = composed.executer(_inner)
-                    if result.is_err():
-                        raise result.err()  # type: ignore
-                    return result.unwrap()
+                    return composed.executer(_inner)
                 else:
                     return _inner()
 

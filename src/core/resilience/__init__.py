@@ -22,6 +22,8 @@ Usage::
 
     # Factory pré-configurée
     result = politique_api_externe().executer(lambda: api.call())
+
+Note: ``executer()`` retourne directement le résultat (T) ou lève une exception.
 """
 
 from .policies import (

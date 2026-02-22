@@ -1,15 +1,13 @@
 """
-Bootstrap - Initialisation complète et unifiée de l'application.
+Bootstrap - Initialisation simplifiée de l'application.
 
 Point d'entrée unique pour:
 1. Validation de la configuration
-2. Enregistrement des composants dans le container IoC
-3. Pont container ↔ registre de services
-4. Initialisation des singletons
-5. Vérification de santé
+2. Enregistrement des event subscribers
+3. Cleanup automatique (atexit)
 
 Usage::
-    from src.core.bootstrap import demarrer_application, arreter_application
+    from src.core.bootstrap import demarrer_application
 
     # Au démarrage
     rapport = demarrer_application()
@@ -18,13 +16,6 @@ Usage::
         for err in rapport.erreurs:
             st.error(err)
         st.stop()
-
-    # Résolution unifiée (container + registre de services)
-    from src.core.bootstrap import resoudre_service
-    service = resoudre_service("recettes")
-
-    # À l'arrêt (optionnel, cleanup)
-    arreter_application()
 """
 
 from __future__ import annotations
@@ -33,11 +24,9 @@ import atexit
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any, TypeVar, overload
+from typing import Any
 
 logger = logging.getLogger(__name__)
-
-T = TypeVar("T")
 
 
 @dataclass
@@ -66,107 +55,17 @@ class RapportDemarrage:
 _deja_demarre = False
 
 
-def _enregistrer_composants() -> list[str]:
-    """Enregistre les composants dans le container IoC."""
-    from .container import conteneur
-
-    composants: list[str] = []
-
-    # 1. Configuration
-    try:
-        from .config import Parametres, obtenir_parametres
-
-        conteneur.singleton(
-            Parametres,
-            factory=lambda: obtenir_parametres(),
-            alias="config",
-        )
-        composants.append("Parametres")
-    except Exception as e:
-        logger.warning(f"Échec enregistrement Parametres: {e}")
-
-    # 2. Database Engine
-    try:
-        from sqlalchemy import Engine
-
-        from .db import obtenir_moteur
-
-        conteneur.singleton(
-            Engine,
-            factory=lambda: obtenir_moteur(),
-            cleanup=lambda e: e.dispose(),
-            alias="db_engine",
-        )
-        composants.append("Engine")
-    except Exception as e:
-        logger.warning(f"Échec enregistrement Engine: {e}")
-
-    # 3. Cache Multi-Niveaux
-    try:
-        from .caching import CacheMultiNiveau
-
-        conteneur.singleton(
-            CacheMultiNiveau,
-            factory=lambda: CacheMultiNiveau(),
-            alias="cache",
-        )
-        composants.append("CacheMultiNiveau")
-    except Exception as e:
-        logger.warning(f"Échec enregistrement Cache: {e}")
-
-    # 4. Client IA
-    try:
-        from .ai import ClientIA
-
-        conteneur.singleton(
-            ClientIA,
-            factory=lambda: ClientIA(),
-            alias="ia_client",
-        )
-        composants.append("ClientIA")
-    except Exception as e:
-        logger.warning(f"Échec enregistrement ClientIA: {e}")
-
-    # 5. Métriques
-    try:
-        from .monitoring import CollecteurMetriques
-
-        conteneur.singleton(
-            CollecteurMetriques,
-            factory=lambda: CollecteurMetriques(),
-            alias="metriques",
-        )
-        composants.append("CollecteurMetriques")
-    except Exception as e:
-        logger.warning(f"Échec enregistrement Métriques: {e}")
-
-    # 6. Registre de services (pont container ↔ services)
-    try:
-        from src.services.core.registry import ServiceRegistry, obtenir_registre
-
-        conteneur.singleton(
-            ServiceRegistry,
-            factory=lambda: obtenir_registre(),
-            alias="service_registry",
-        )
-        composants.append("ServiceRegistry")
-    except Exception as e:
-        logger.warning(f"Échec enregistrement ServiceRegistry: {e}")
-
-    return composants
-
-
 def demarrer_application(
     valider_config: bool = True,
     initialiser_eager: bool = False,
     enregistrer_atexit: bool = True,
 ) -> RapportDemarrage:
     """
-    Initialise complètement l'application.
+    Initialise l'application.
 
     Args:
         valider_config: Exécuter les validations de config (défaut: True)
-        initialiser_eager: Créer tous les singletons immédiatement (défaut: False)
+        initialiser_eager: Non utilisé (conservé pour compatibilité API)
         enregistrer_atexit: Enregistrer cleanup automatique à l'arrêt (défaut: True)
 
     Returns:
@@ -211,18 +110,7 @@ def demarrer_application(
         except Exception as e:
             logger.warning(f"⚠ Validation skippée (module non disponible): {e}")
 
-    # ─── Étape 2: Enregistrement des composants ───
-    logger.info("📦 Enregistrement des composants...")
-    try:
-        rapport.composants_enregistres = _enregistrer_composants()
-        logger.info(f"✅ {len(rapport.composants_enregistres)} composants enregistrés")
-    except Exception as e:
-        rapport.succes = False
-        rapport.erreurs.append(f"Enregistrement composants: {e}")
-        logger.error(f"❌ Erreur enregistrement: {e}")
-        return rapport
-
-    # ─── Étape 3: Enregistrement des event subscribers ───
+    # ─── Étape 2: Enregistrement des event subscribers ───
     logger.info("📡 Enregistrement des event subscribers...")
     try:
         from src.services.core.events.subscribers import enregistrer_subscribers
@@ -237,20 +125,7 @@ def demarrer_application(
         rapport.avertissements.append(f"Event subscribers: {e}")
         logger.warning(f"⚠ Échec enregistrement subscribers: {e}")
 
-    # ─── Étape 4: Initialisation eager (optionnel) ───
-    if initialiser_eager:
-        logger.info("⚡ Initialisation des singletons...")
-        try:
-            from .container import conteneur
-
-            conteneur.initialiser()
-            logger.info("✅ Singletons initialisés")
-        except Exception as e:
-            # Non bloquant
-            rapport.avertissements.append(f"Initialisation partielle: {e}")
-            logger.warning(f"⚠ Initialisation partielle: {e}")
-
-    # ─── Étape 4: Enregistrement atexit ───
+    # ─── Étape 3: Enregistrement atexit ───
     if enregistrer_atexit:
         atexit.register(arreter_application)
 
@@ -266,9 +141,7 @@ def arreter_application() -> None:
     """
     Arrête proprement l'application.
 
-    - Ferme le container IoC (cleanup des ressources)
     - Dispose des connexions DB
-    - Vide les caches
     """
     global _deja_demarre
 
@@ -277,13 +150,15 @@ def arreter_application() -> None:
 
     logger.info("🛑 Arrêt de l'application...")
 
+    # Cleanup du moteur DB
     try:
-        from .container import conteneur
+        from .db import obtenir_moteur
 
-        conteneur.fermer()
-        logger.info("✅ Container fermé")
+        moteur = obtenir_moteur()
+        moteur.dispose()
+        logger.info("✅ Connexions DB fermées")
     except Exception as e:
-        logger.error(f"Erreur fermeture container: {e}")
+        logger.debug(f"Cleanup DB ignoré: {e}")
 
     _deja_demarre = False
     logger.info("✅ Application arrêtée")
@@ -294,75 +169,9 @@ def est_demarree() -> bool:
     return _deja_demarre
 
 
-# ═══════════════════════════════════════════════════════════
-# RÉSOLUTION UNIFIÉE — Pont Container IoC ↔ ServiceRegistry
-# ═══════════════════════════════════════════════════════════
-
-
-@overload
-def resoudre_service(service: type[T]) -> T: ...
-
-
-@overload
-def resoudre_service(service: str) -> Any: ...
-
-
-def resoudre_service(service: type[T] | str) -> T | Any:
-    """Résout un service depuis le container IoC ou le registre de services.
-
-    Ordre de résolution:
-    1. Container IoC (composants core: Parametres, Engine, Cache, ClientIA…)
-    2. ServiceRegistry (services métier: recettes, planning, inventaire…)
-
-    Args:
-        service: Type de classe ou nom (alias) du service
-
-    Returns:
-        Instance du service
-
-    Raises:
-        KeyError: Si le service n'est trouvé nulle part
-
-    Example::
-
-        from src.core.bootstrap import resoudre_service
-
-        # Par type (composants core)
-        params = resoudre_service(Parametres)
-
-        # Par alias (services métier)
-        recettes = resoudre_service("recettes")
-    """
-    # 1. Essayer le container IoC
-    from .container import conteneur
-
-    result = conteneur.try_resolve(service)
-    if result is not None:
-        return result
-
-    # 2. Essayer le registre de services (uniquement pour les alias string)
-    if isinstance(service, str):
-        try:
-            from src.services.core.registry import obtenir_registre
-
-            registre = obtenir_registre()
-            if registre.est_enregistre(service):
-                return registre.obtenir(service)
-        except ImportError:
-            pass
-
-    # 3. Aucun fournisseur trouvé
-    nom = service.__name__ if isinstance(service, type) else service
-    raise KeyError(
-        f"Service non trouvé: '{nom}'. "
-        f"Vérifiez qu'il est enregistré dans le container IoC ou le registre de services."
-    )
-
-
 __all__ = [
     "demarrer_application",
     "arreter_application",
     "est_demarree",
-    "resoudre_service",
     "RapportDemarrage",
 ]

@@ -26,6 +26,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
 from src.core.models import AlerteJeux, SerieJeux
+from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
@@ -511,6 +512,7 @@ def obtenir_service_series(session: Session | None = None) -> SeriesService:
     return SeriesService(session)
 
 
+@service_factory("series", tags={"jeux", "crud", "series"})
 def get_series_service(session: Session | None = None) -> SeriesService:
     """
     Factory pour obtenir une instance de SeriesService (alias anglais).

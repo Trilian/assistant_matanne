@@ -14,6 +14,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from src.services.core.registry import service_factory
+
 logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════════
@@ -510,6 +512,7 @@ def obtenir_service_predictions_jeux() -> PredictionService:
     return PredictionService()
 
 
+@service_factory("prediction", tags={"jeux", "ia", "prediction"})
 def get_prediction_service() -> PredictionService:
     """Factory pour créer une instance du service de prédiction (alias anglais)."""
     return obtenir_service_predictions_jeux()

@@ -22,6 +22,9 @@ from datetime import date, datetime
 import httpx
 from pydantic import BaseModel, Field
 
+from src.core.decorators import avec_resilience
+from src.services.core.registry import service_factory
+
 logger = logging.getLogger(__name__)
 
 
@@ -109,6 +112,7 @@ class LotoDataService:
     # RÉCUPÉRATION DES DONNÉES
     # ─────────────────────────────────────────────────────────────────
 
+    @avec_resilience(retry=2, timeout_s=60, fallback=[])
     def telecharger_historique(self, source: str = "nouveau_loto") -> list[TirageLoto]:
         """
         Télécharge l'historique des tirages depuis data.gouv.fr ou FDJ.
@@ -400,6 +404,7 @@ def obtenir_service_donnees_loto() -> LotoDataService:
     return LotoDataService()
 
 
+@service_factory("loto_data", tags={"jeux", "data", "loto"})
 def get_loto_data_service() -> LotoDataService:
     """
     Factory pour créer une instance du service (alias anglais).

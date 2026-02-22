@@ -167,16 +167,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "ComponentSnapshot": (".testing", "ComponentSnapshot"),
     "assert_html_contains": (".testing", "assert_html_contains"),
     "assert_html_not_contains": (".testing", "assert_html_not_contains"),
-    # ══════════════════════════════════════════════════════
-    # ✨ NEW MODERN PATTERNS (v2.0) ✨
-    # ══════════════════════════════════════════════════════
-    # ── Dialogs (st.dialog wrapper) ────────────────────
-    "DialogBuilder": (".dialogs", "DialogBuilder"),
-    "confirm_dialog": (".dialogs", "confirm_dialog"),
-    "alert_dialog": (".dialogs", "alert_dialog"),
-    "form_dialog": (".dialogs", "form_dialog"),
-    "ouvrir_dialog": (".dialogs", "ouvrir_dialog"),
-    "fermer_dialog": (".dialogs", "fermer_dialog"),
     # ── Fragments (st.fragment decorators) ─────────────
     "ui_fragment": (".fragments", "ui_fragment"),
     "auto_refresh": (".fragments", "auto_refresh"),
@@ -203,10 +193,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "pagination_with_url": (".state", "pagination_with_url"),
     "selectbox_with_url": (".state", "selectbox_with_url"),
     "tabs_with_url": (".state", "tabs_with_url"),
-    # ── Forms Builder ──────────────────────────────────
-    "FormBuilder": (".forms", "FormBuilder"),
-    "FormResult": (".forms", "FormResult"),
-    "creer_formulaire": (".forms", "creer_formulaire"),
     # ── Key Policy Engine ──────────────────────────────
     "KeyNamespace": (".keys", "KeyNamespace"),
     "widget_keys": (".keys", "widget_keys"),

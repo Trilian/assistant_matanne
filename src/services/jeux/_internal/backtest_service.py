@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from enum import Enum, StrEnum
 from typing import Any
 
+from src.services.core.registry import service_factory
 from src.services.jeux._internal.series_service import (
     SEUIL_VALUE_ALERTE,
 )
@@ -527,6 +528,7 @@ def obtenir_service_backtest() -> BacktestService:
     return _backtest_service_instance
 
 
+@service_factory("backtest", tags={"jeux", "ia", "backtest"})
 def get_backtest_service() -> BacktestService:
     """Factory pour obtenir le service de backtesting (alias anglais)."""
     return obtenir_service_backtest()

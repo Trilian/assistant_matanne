@@ -8,6 +8,8 @@ pour la rétro-compatibilité avec l'ancien api_football.py.
 import logging
 from datetime import date, timedelta
 
+from src.core.decorators import avec_cache
+
 from .football_types import CHAMP_MAPPING
 
 logger = logging.getLogger(__name__)
@@ -27,6 +29,7 @@ from .football_data import configurer_api_key, obtenir_cle_api  # noqa: F401
 # ═══════════════════════════════════════════════════════════
 
 
+@avec_cache(ttl=300, key_prefix="football_helpers_matchs_a_venir")
 def charger_matchs_a_venir(
     championnat: str, jours: int = 7, statut: str = "SCHEDULED,LIVE"
 ) -> list[dict]:
@@ -87,6 +90,7 @@ def charger_matchs_a_venir(
     return matchs
 
 
+@avec_cache(ttl=300, key_prefix="football_helpers_matchs_termines")
 def charger_matchs_termines(championnat: str, jours: int = 7) -> list[dict]:
     """
     Charge les matchs terminés des derniers jours.
@@ -136,6 +140,7 @@ def charger_matchs_termines(championnat: str, jours: int = 7) -> list[dict]:
     return matchs
 
 
+@avec_cache(ttl=600, key_prefix="football_helpers_classement")
 def charger_classement(championnat: str) -> list[dict]:
     """
     Charge le classement d'un championnat.
@@ -184,6 +189,7 @@ def charger_classement(championnat: str) -> list[dict]:
     return []
 
 
+@avec_cache(ttl=600, key_prefix="football_helpers_historique")
 def charger_historique_equipe(nom_equipe: str, limite: int = 10) -> list[dict]:
     """
     Charge l'historique des matchs d'une équipe.
@@ -232,6 +238,7 @@ def charger_historique_equipe(nom_equipe: str, limite: int = 10) -> list[dict]:
     return matchs
 
 
+@avec_cache(ttl=600, key_prefix="football_helpers_equipe")
 def chercher_equipe(nom: str) -> dict | None:
     """
     Recherche une équipe par son nom.

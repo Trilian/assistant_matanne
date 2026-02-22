@@ -9,10 +9,13 @@ from typing import Any
 
 import streamlit as st
 
+from src.core.caching import Cache
+from src.core.decorators import avec_cache
+
 logger = logging.getLogger(__name__)
 
 
-@st.cache_data(ttl=1800)  # 30 min
+@avec_cache(ttl=1800)  # 30 min
 def charger_matchs_avec_fallback(
     championnat: str, jours: int = 7, prefer_api: bool = True
 ) -> tuple[list[dict[str, Any]], str]:
@@ -58,7 +61,7 @@ def charger_matchs_avec_fallback(
     return (matchs, source)
 
 
-@st.cache_data(ttl=3600)  # 1 heure
+@avec_cache(ttl=3600)  # 1 heure
 def charger_classement_avec_fallback(championnat: str) -> tuple[list[dict], str]:
     """
     Charge le classement avec fallback API -> BD
@@ -94,7 +97,7 @@ def charger_classement_avec_fallback(championnat: str) -> tuple[list[dict], str]
     return (classement, source)
 
 
-@st.cache_data(ttl=1800)  # 30 min
+@avec_cache(ttl=1800)  # 30 min
 def charger_historique_equipe_avec_fallback(nom_equipe: str) -> tuple[list[dict], str]:
     """
     Charge l'historique d'une equipe avec fallback API -> BD
@@ -130,7 +133,7 @@ def charger_historique_equipe_avec_fallback(nom_equipe: str) -> tuple[list[dict]
     return (historique, source)
 
 
-@st.cache_data(ttl=3600)  # 1 heure
+@avec_cache(ttl=3600)  # 1 heure
 def charger_tirages_loto_avec_fallback(limite: int = 50) -> tuple[list[dict], str]:
     """
     Charge les tirages Loto avec fallback Scraper -> BD
@@ -164,7 +167,7 @@ def charger_tirages_loto_avec_fallback(limite: int = 50) -> tuple[list[dict], st
     return (tirages, source)
 
 
-@st.cache_data(ttl=3600)  # 1 heure
+@avec_cache(ttl=3600)  # 1 heure
 def charger_stats_loto_avec_fallback(limite: int = 50) -> tuple[dict, str]:
     """
     Charge les stats Loto (frequences, paires, etc)
@@ -207,7 +210,7 @@ def bouton_actualiser_api(cle: str):
             st.rerun()
     """
     if st.button("🔄 Actualiser depuis API"):
-        st.cache_data.clear()
+        Cache.invalider(pattern="charger_")
         st.session_state[f"{cle}_updated"] = True
         return True
     return False

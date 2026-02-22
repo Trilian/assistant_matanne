@@ -1,5 +1,8 @@
 """
 Policies - Stratégies de résilience individuelles et composables.
+
+Chaque policy exécute une fonction et retourne le résultat directement.
+En cas d'échec, l'exception est propagée (pas de wrapper Result).
 """
 
 from __future__ import annotations
@@ -14,8 +17,6 @@ from concurrent.futures import TimeoutError as FuturesTimeoutError
 from dataclasses import dataclass, field
 from typing import Any, Callable, Generic, TypeVar
 
-from ..result import Err, Ok, Result
-
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
@@ -25,8 +26,8 @@ class Policy(ABC, Generic[T]):
     """Politique de résilience abstraite."""
 
     @abstractmethod
-    def executer(self, fn: Callable[[], T]) -> Result[T, Exception]:
-        """Exécute fn avec la politique appliquée."""
+    def executer(self, fn: Callable[[], T]) -> T:
+        """Exécute fn avec la politique appliquée. Lève une exception en cas d'échec."""
         ...
 
     def __add__(self, other: Policy[T]) -> PolicyComposee[T]:
@@ -65,16 +66,16 @@ class RetryPolicy(Policy[T]):
     jitter: bool = True
     exceptions_a_retry: tuple[type[Exception], ...] = field(default_factory=tuple)
 
-    def executer(self, fn: Callable[[], T]) -> Result[T, Exception]:
+    def executer(self, fn: Callable[[], T]) -> T:
         derniere_exception: Exception | None = None
 
         for tentative in range(self.max_tentatives):
             try:
-                return Ok(fn())
+                return fn()
             except Exception as e:
                 # Vérifier si on doit retenter cette exception
                 if self.exceptions_a_retry and not isinstance(e, self.exceptions_a_retry):
-                    return Err(e)
+                    raise
 
                 derniere_exception = e
 
@@ -89,7 +90,7 @@ class RetryPolicy(Policy[T]):
                     )
                     time.sleep(delai)
 
-        return Err(derniere_exception or Exception("Échec après toutes les tentatives"))
+        raise derniere_exception or Exception("Échec après toutes les tentatives")
 
 
 # Shared executor pour TimeoutPolicy (évite la création par appel)
@@ -126,17 +127,14 @@ class TimeoutPolicy(Policy[T]):
 
     timeout_secondes: float = 30.0
 
-    def executer(self, fn: Callable[[], T]) -> Result[T, Exception]:
+    def executer(self, fn: Callable[[], T]) -> T:
         executor = _get_timeout_executor()
         future = executor.submit(fn)
         try:
-            result = future.result(timeout=self.timeout_secondes)
-            return Ok(result)
+            return future.result(timeout=self.timeout_secondes)
         except FuturesTimeoutError:
             future.cancel()
-            return Err(TimeoutError(f"Timeout après {self.timeout_secondes}s"))
-        except Exception as e:
-            return Err(e)
+            raise TimeoutError(f"Timeout après {self.timeout_secondes}s")
 
 
 @dataclass
@@ -163,20 +161,16 @@ class BulkheadPolicy(Policy[T]):
     def __post_init__(self) -> None:
         object.__setattr__(self, "_semaphore", threading.Semaphore(self.max_concurrent))
 
-    def executer(self, fn: Callable[[], T]) -> Result[T, Exception]:
+    def executer(self, fn: Callable[[], T]) -> T:
         acquired = self._semaphore.acquire(timeout=self.timeout_acquisition)
         if not acquired:
-            return Err(
-                RuntimeError(
-                    f"Bulkhead saturé ({self.max_concurrent} exécutions en cours), "
-                    f"impossible d'acquérir un slot après {self.timeout_acquisition}s"
-                )
+            raise RuntimeError(
+                f"Bulkhead saturé ({self.max_concurrent} exécutions en cours), "
+                f"impossible d'acquérir un slot après {self.timeout_acquisition}s"
             )
 
         try:
-            return Ok(fn())
-        except Exception as e:
-            return Err(e)
+            return fn()
         finally:
             self._semaphore.release()
 
@@ -205,23 +199,20 @@ class FallbackPolicy(Policy[T]):
     fallback_fn: Callable[[Exception], T] | None = None
     log_erreur: bool = True
 
-    def executer(self, fn: Callable[[], T]) -> Result[T, Exception]:
+    def executer(self, fn: Callable[[], T]) -> T:
         try:
-            return Ok(fn())
+            return fn()
         except Exception as e:
             if self.log_erreur:
                 logger.warning(f"[Fallback] Erreur capturée, utilisation fallback: {e}")
 
             if self.fallback_fn:
-                try:
-                    return Ok(self.fallback_fn(e))
-                except Exception as fallback_error:
-                    return Err(fallback_error)
+                return self.fallback_fn(e)
 
             if self.fallback_value is not None:
-                return Ok(self.fallback_value)
+                return self.fallback_value
 
-            return Err(e)
+            raise
 
 
 @dataclass
@@ -242,35 +233,27 @@ class PolicyComposee(Policy[T]):
 
     policies: list[Policy[Any]]
 
-    def executer(self, fn: Callable[[], T]) -> Result[T, Exception]:
+    def executer(self, fn: Callable[[], T]) -> T:
         """Exécute la chaîne de policies (préserve les tracebacks)."""
         if not self.policies:
-            try:
-                return Ok(fn())
-            except Exception as e:
-                return Err(e)
+            return fn()
 
         # Construire la chaîne de l'intérieur vers l'extérieur
-        def make_wrapper(p: Policy[Any], f: Callable[[], T]) -> Callable[[], T]:
-            def wrapper() -> T:
-                result = p.executer(f)
-                if result.is_err():
-                    exc = result.err()
-                    if isinstance(exc, Exception):
-                        raise exc from exc  # préserve le traceback original
-                    raise RuntimeError(str(exc))
-                return result.unwrap()
-
-            return wrapper
-
         wrapped_fn = fn
         for policy in reversed(self.policies):
-            wrapped_fn = make_wrapper(policy, wrapped_fn)
+            # Capture en closure
+            wrapped_fn = _make_policy_wrapper(policy, wrapped_fn)
 
-        try:
-            return Ok(wrapped_fn())
-        except Exception as e:
-            return Err(e)
+        return wrapped_fn()
+
+
+def _make_policy_wrapper(p: Policy[Any], f: Callable[[], Any]) -> Callable[[], Any]:
+    """Crée un wrapper qui applique une policy sur une fonction."""
+
+    def wrapper() -> Any:
+        return p.executer(f)
+
+    return wrapper
 
     def __add__(self, other: Policy[T]) -> PolicyComposee[T]:
         if isinstance(other, PolicyComposee):
