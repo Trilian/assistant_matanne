@@ -1,0 +1,349 @@
+"""
+Service Santé Famille - Logique métier pour objectifs, routines et stats santé.
+
+Opérations:
+- Objectifs santé actifs et progression
+- Routines santé actives
+- Statistiques de santé hebdomadaires
+- Budget santé par période
+"""
+
+import logging
+from datetime import date as date_type
+from datetime import timedelta
+from typing import Any, TypedDict
+
+from sqlalchemy import and_, func
+from sqlalchemy.orm import Session
+
+from src.core.decorators import avec_session_db
+from src.core.models import (
+    FamilyActivity,
+    FamilyBudget,
+    HealthEntry,
+    HealthObjective,
+    HealthRoutine,
+)
+from src.services.core.registry import service_factory
+
+logger = logging.getLogger(__name__)
+
+
+class StatsSanteDict(TypedDict):
+    """Structure de données pour les stats santé hebdomadaires."""
+
+    nb_seances: int
+    total_minutes: int
+    total_calories: int
+    energie_moyenne: float
+    moral_moyen: float
+
+
+class ServiceSante:
+    """Service de gestion de la santé familiale.
+
+    Centralise l'accès DB pour les objectifs, routines et
+    statistiques de santé, éliminant les requêtes directes
+    depuis la couche modules.
+    """
+
+    # ═══════════════════════════════════════════════════════════
+    # OBJECTIFS
+    # ═══════════════════════════════════════════════════════════
+
+    @staticmethod
+    def calculer_progression_objectif(objective: HealthObjective) -> float:
+        """Calcule le % de progression d'un objectif santé.
+
+        Args:
+            objective: L'objectif santé (ou mock avec valeur_cible/valeur_actuelle).
+
+        Returns:
+            Pourcentage entre 0.0 et 100.0.
+        """
+        try:
+            if not objective.valeur_cible or not objective.valeur_actuelle:
+                return 0.0
+            progression = (objective.valeur_actuelle / objective.valeur_cible) * 100
+            return min(progression, 100.0)
+        except Exception:
+            return 0.0
+
+    @avec_session_db
+    def get_objectives_actifs(self, db: Session | None = None) -> list[dict[str, Any]]:
+        """Récupère tous les objectifs en cours avec progression.
+
+        Args:
+            db: Session DB (injectée automatiquement).
+
+        Returns:
+            Liste de dicts avec id, titre, catégorie, progression, etc.
+        """
+        assert db is not None
+
+        objectives = db.query(HealthObjective).filter_by(statut="en_cours").all()
+
+        result = []
+        for obj in objectives:
+            result.append(
+                {
+                    "id": obj.id,
+                    "titre": obj.titre,
+                    "categorie": obj.categorie,
+                    "progression": self.calculer_progression_objectif(obj),
+                    "valeur_cible": obj.valeur_cible,
+                    "valeur_actuelle": obj.valeur_actuelle,
+                    "unite": obj.unite,
+                    "priorite": obj.priorite,
+                    "date_cible": obj.date_cible,
+                    "jours_restants": (obj.date_cible - date_type.today()).days,
+                }
+            )
+
+        return sorted(result, key=lambda x: x["priorite"] == "haute", reverse=True)
+
+    # ═══════════════════════════════════════════════════════════
+    # ROUTINES SANTÉ
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_session_db
+    def get_routines_actives(self, db: Session | None = None) -> list[dict[str, Any]]:
+        """Récupère les routines de santé actives.
+
+        Args:
+            db: Session DB (injectée automatiquement).
+
+        Returns:
+            Liste de dicts décrivant chaque routine active.
+        """
+        assert db is not None
+
+        routines = db.query(HealthRoutine).filter_by(actif=True).all()
+
+        return [
+            {
+                "id": r.id,
+                "nom": r.nom,
+                "type": r.type_routine,
+                "frequence": r.frequence,
+                "duree": r.duree_minutes,
+                "intensite": r.intensite,
+                "calories": r.calories_brulees_estimees,
+            }
+            for r in routines
+        ]
+
+    # ═══════════════════════════════════════════════════════════
+    # STATISTIQUES
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_session_db
+    def get_stats_sante_semaine(self, db: Session | None = None) -> StatsSanteDict:
+        """Calcule les stats de santé pour cette semaine.
+
+        Args:
+            db: Session DB (injectée automatiquement).
+
+        Returns:
+            StatsSanteDict avec nb_seances, total_minutes, etc.
+        """
+        assert db is not None
+
+        debut_semaine = date_type.today() - timedelta(days=date_type.today().weekday())
+
+        entries = db.query(HealthEntry).filter(HealthEntry.date >= debut_semaine).all()
+
+        nb_avec_energie = len([e for e in entries if e.note_energie])
+        nb_avec_moral = len([e for e in entries if e.note_moral])
+
+        return {
+            "nb_seances": len(entries),
+            "total_minutes": sum(e.duree_minutes for e in entries),
+            "total_calories": sum(e.calories_brulees or 0 for e in entries),
+            "energie_moyenne": (
+                sum(e.note_energie or 0 for e in entries if e.note_energie)
+                / max(nb_avec_energie, 1)
+            ),
+            "moral_moyen": (
+                sum(e.note_moral or 0 for e in entries if e.note_moral) / max(nb_avec_moral, 1)
+            ),
+        }
+
+    # ═══════════════════════════════════════════════════════════
+    # BUDGET FAMILLE
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_session_db
+    def get_budget_par_period(
+        self, period: str = "month", db: Session | None = None
+    ) -> dict[str, float]:
+        """Récupère le budget familial par période.
+
+        Args:
+            period: 'day', 'week' ou 'month'.
+            db: Session DB (injectée automatiquement).
+
+        Returns:
+            Dict {catégorie: montant, 'TOTAL': total}.
+        """
+        assert db is not None
+
+        if period == "day":
+            debut = date_type.today()
+            fin = date_type.today()
+        elif period == "week":
+            debut = date_type.today() - timedelta(days=date_type.today().weekday())
+            fin = debut + timedelta(days=6)
+        else:  # month
+            debut = date_type(date_type.today().year, date_type.today().month, 1)
+            if date_type.today().month == 12:
+                fin = date_type(date_type.today().year + 1, 1, 1) - timedelta(days=1)
+            else:
+                fin = date_type(date_type.today().year, date_type.today().month + 1, 1) - timedelta(
+                    days=1
+                )
+
+        budgets = (
+            db.query(FamilyBudget)
+            .filter(and_(FamilyBudget.date >= debut, FamilyBudget.date <= fin))
+            .all()
+        )
+
+        result: dict[str, float] = {}
+        total = 0.0
+        for budget in budgets:
+            cat = budget.categorie
+            if cat not in result:
+                result[cat] = 0.0
+            result[cat] += budget.montant
+            total += budget.montant
+
+        result["TOTAL"] = total
+        return result
+
+    @avec_session_db
+    def get_budget_mois_dernier(self, db: Session | None = None) -> float:
+        """Récupère le budget total du mois dernier.
+
+        Args:
+            db: Session DB (injectée automatiquement).
+
+        Returns:
+            Montant total en euros.
+        """
+        assert db is not None
+
+        aujourd_hui = date_type.today()
+
+        if aujourd_hui.month == 1:
+            mois_dernier = date_type(aujourd_hui.year - 1, 12, 1)
+        else:
+            mois_dernier = date_type(aujourd_hui.year, aujourd_hui.month - 1, 1)
+
+        mois_prochain = date_type(mois_dernier.year, mois_dernier.month, 1) + timedelta(days=32)
+        mois_prochain = date_type(mois_prochain.year, mois_prochain.month, 1)
+
+        total = (
+            db.query(func.sum(FamilyBudget.montant))
+            .filter(and_(FamilyBudget.date >= mois_dernier, FamilyBudget.date < mois_prochain))
+            .scalar()
+            or 0
+        )
+
+        return float(total)
+
+    # ═══════════════════════════════════════════════════════════
+    # ACTIVITÉS - STATS RAPIDES
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_session_db
+    def get_activites_semaine(self, db: Session | None = None) -> list[dict[str, Any]]:
+        """Récupère les activités familiales de cette semaine.
+
+        Args:
+            db: Session DB (injectée automatiquement).
+
+        Returns:
+            Liste de dicts décrivant chaque activité.
+        """
+        assert db is not None
+
+        debut_semaine = date_type.today() - timedelta(days=date_type.today().weekday())
+        fin_semaine = debut_semaine + timedelta(days=6)
+
+        activities = (
+            db.query(FamilyActivity)
+            .filter(
+                and_(
+                    FamilyActivity.date_prevue >= debut_semaine,
+                    FamilyActivity.date_prevue <= fin_semaine,
+                    FamilyActivity.statut != "annule",
+                )
+            )
+            .order_by(FamilyActivity.date_prevue)
+            .all()
+        )
+
+        return [
+            {
+                "id": act.id,
+                "titre": act.titre,
+                "date": act.date_prevue,
+                "type": act.type_activite,
+                "lieu": act.lieu,
+                "participants": act.qui_participe or [],
+                "cout_estime": act.cout_estime,
+                "statut": act.statut,
+            }
+            for act in activities
+        ]
+
+    @avec_session_db
+    def get_budget_activites_mois(self, db: Session | None = None) -> float:
+        """Récupère les dépenses en activités ce mois.
+
+        Args:
+            db: Session DB (injectée automatiquement).
+
+        Returns:
+            Montant total en euros.
+        """
+        assert db is not None
+
+        debut_mois = date_type(date_type.today().year, date_type.today().month, 1)
+        if date_type.today().month == 12:
+            fin_mois = date_type(date_type.today().year + 1, 1, 1) - timedelta(days=1)
+        else:
+            fin_mois = date_type(
+                date_type.today().year, date_type.today().month + 1, 1
+            ) - timedelta(days=1)
+
+        total = (
+            db.query(func.sum(FamilyActivity.cout_reel))
+            .filter(
+                and_(
+                    FamilyActivity.date_prevue >= debut_mois,
+                    FamilyActivity.date_prevue <= fin_mois,
+                    FamilyActivity.cout_reel > 0,
+                )
+            )
+            .scalar()
+            or 0
+        )
+
+        return float(total)
+
+
+# ═══════════════════════════════════════════════════════════
+# FACTORY
+# ═══════════════════════════════════════════════════════════
+
+
+@service_factory("sante", tags={"famille", "sante"})
+def obtenir_service_sante() -> ServiceSante:
+    """Factory pour le service santé (singleton via ServiceRegistry)."""
+    return ServiceSante()
+
+
+# Alias anglais
+get_sante_service = obtenir_service_sante
