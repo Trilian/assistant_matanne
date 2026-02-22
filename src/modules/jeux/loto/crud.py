@@ -1,13 +1,14 @@
 """
 Module Loto - Operations CRUD (creation/mise à jour)
+
+Délègue au service LotoCrudService pour toutes les opérations DB.
 """
 
 from datetime import date
 
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
-from src.core.models import GrilleLoto, TirageLoto
+from src.services.jeux import get_loto_crud_service
 
 from .calculs import verifier_grille
 from .constants import COUT_GRILLE
@@ -20,49 +21,18 @@ def ajouter_tirage(date_t: date, numeros: list, chance: int, jackpot: int = None
             st.error("Il faut exactement 5 numeros")
             return False
 
-        numeros = sorted(numeros)
+        service = get_loto_crud_service()
+        result = service.ajouter_tirage(
+            date_t=date_t,
+            numeros=numeros,
+            chance=chance,
+            jackpot=jackpot,
+            verifier_fn=verifier_grille,
+        )
 
-        with obtenir_contexte_db() as session:
-            tirage = TirageLoto(
-                date_tirage=date_t,
-                numero_1=numeros[0],
-                numero_2=numeros[1],
-                numero_3=numeros[2],
-                numero_4=numeros[3],
-                numero_5=numeros[4],
-                numero_chance=chance,
-                jackpot_euros=jackpot,
-            )
-            session.add(tirage)
-            session.commit()
-
-            # Mettre à jour les grilles en attente
-            grilles = session.query(GrilleLoto).filter(GrilleLoto.tirage_id == None).all()
-
-            for grille in grilles:
-                grille_data = {"numeros": grille.numeros, "numero_chance": grille.numero_chance}
-                resultat = verifier_grille(
-                    grille_data,
-                    {
-                        "numero_1": numeros[0],
-                        "numero_2": numeros[1],
-                        "numero_3": numeros[2],
-                        "numero_4": numeros[3],
-                        "numero_5": numeros[4],
-                        "numero_chance": chance,
-                        "jackpot_euros": jackpot or 2_000_000,
-                    },
-                )
-
-                grille.tirage_id = tirage.id
-                grille.numeros_trouves = resultat["bons_numeros"]
-                grille.chance_trouvee = resultat["chance_ok"]
-                grille.rang = resultat["rang"]
-                grille.gain = resultat["gain"]
-
-            session.commit()
+        if result:
             st.success(f"✅ Tirage du {date_t} enregistre!")
-            return True
+        return result
 
     except Exception as e:
         st.error(f"❌ Erreur ajout tirage: {e}")
@@ -78,24 +48,15 @@ def enregistrer_grille(
             st.error("Il faut exactement 5 numeros")
             return False
 
-        numeros = sorted(numeros)
+        service = get_loto_crud_service()
+        result = service.enregistrer_grille(
+            numeros=numeros, chance=chance, source=source, est_virtuelle=est_virtuelle
+        )
 
-        with obtenir_contexte_db() as session:
-            grille = GrilleLoto(
-                numero_1=numeros[0],
-                numero_2=numeros[1],
-                numero_3=numeros[2],
-                numero_4=numeros[3],
-                numero_5=numeros[4],
-                numero_chance=chance,
-                source_prediction=source,
-                est_virtuelle=est_virtuelle,
-                mise=COUT_GRILLE,
-            )
-            session.add(grille)
-            session.commit()
-            st.success(f"✅ Grille enregistrée: {'-'.join(map(str, numeros))} + N°{chance}")
-            return True
+        if result:
+            numeros_tries = sorted(numeros)
+            st.success(f"✅ Grille enregistrée: {'-'.join(map(str, numeros_tries))} + N°{chance}")
+        return result
 
     except Exception as e:
         st.error(f"❌ Erreur enregistrement grille: {e}")

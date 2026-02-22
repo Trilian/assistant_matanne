@@ -1,6 +1,6 @@
 # 🏗️ Architecture Technique - Assistant Matanne
 
-> **Dernière mise à jour**: 19 Février 2026
+> **Dernière mise à jour**: 25 Juin 2025
 
 ## Vue d'ensemble
 
@@ -13,7 +13,7 @@
 │       │            │            │            │                   │
 │       └────────────┴─────┬──────┴────────────┘                  │
 │                          │                                       │
-│                    OptimizedRouter (lazy loading)                │
+│                    RouteurOptimise (lazy loading)                │
 └──────────────────────────┼───────────────────────────────────────┘
                            │
 ┌──────────────────────────┼───────────────────────────────────────┐
@@ -26,8 +26,9 @@
 │         │              │              │              │           │
 │         └──────────────┴──────┬───────┴──────────────┘          │
 │                               │                                  │
-│                       BaseAIService                              │
-│                    (rate limit, cache IA)                        │
+│                   services/core/base/                            │
+│              BaseAIService, CQRS, Events,                       │
+│              Notifications, Backup, Observability                │
 └───────────────────────────────┼──────────────────────────────────┘
                                 │
 ┌───────────────────────────────┼──────────────────────────────────┐
@@ -37,8 +38,12 @@
 │  │ (Pool)   │  │ (ORM 19) │  │ (Mistral)│  │ (3 niv.) │        │
 │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘        │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
-│  │ Validat° │  │DateUtils │  │  Config  │  │  State   │        │
-│  │ (schemas)│  │(package) │  │(Pydantic)│  │ Manager  │        │
+│  │ Result   │  │Resilience│  │Middleware│  │  State   │        │
+│  │ (Monad)  │  │(policies)│  │(pipeline)│  │ (slices) │        │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘        │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
+│  │ Validat° │  │DateUtils │  │  Config  │  │ Monitor  │        │
+│  │ (schemas)│  │(package) │  │(Pydantic)│  │ (health) │        │
 │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘        │
 └───────┼─────────────┼─────────────┼─────────────┼────────────────┘
         │             │             │             │
@@ -51,27 +56,37 @@
 
 ## Modules Core (src/core/)
 
-Le core est organisé en **7 sous-packages** + fichiers utilitaires:
+Le core est organisé en **14 sous-packages** + fichiers utilitaires:
 
 ```
 src/core/
 ├── ai/              # Client Mistral, cache sémantique, rate limiting, circuit breaker
 ├── caching/         # Cache multi-niveaux L1/L2/L3 (décorateur unifié @avec_cache)
-├── config/          # Pydantic BaseSettings, chargement .env
+├── config/          # Pydantic BaseSettings, chargement .env, validateur
 ├── date_utils/      # Package utilitaires de dates (4 modules)
 ├── db/              # Engine, sessions, migrations SQL-file
+├── decorators/      # Package: cache.py, db.py, errors.py, validation.py
+├── middleware/      # Pipeline de middlewares composables (base, builtin, pipeline)
 ├── models/          # 19 modèles SQLAlchemy ORM
+├── monitoring/      # Collecteur métriques, health checks, RerunProfiler
+├── observability/   # Contexte d'observabilité (spans, traces)
+├── resilience/      # Politiques de résilience composables (retry, timeout, bulkhead)
+├── result/          # Result Monad (Ok/Err) — gestion d'erreurs style Rust
+├── state/           # Package: manager.py, shortcuts.py, slices.py
 ├── validation/      # Schemas Pydantic (7 domaines), sanitizer
+├── async_utils.py   # Utilitaires asynchrones
+├── bootstrap.py     # demarrer_application() — initialisation IoC
 ├── constants.py     # Constantes globales
-├── decorators.py    # @avec_session_db, @avec_cache (multi-niveaux), @avec_gestion_erreurs
+├── container.py     # IoC Container — injection de dépendances typée
 ├── errors.py        # Classes d'erreurs métier (UI)
 ├── errors_base.py   # Classe de base ExceptionApp + guards
-├── events.py        # Bus d'événements pub/sub avec wildcards
-├── lazy_loader.py   # Import différé à la demande
+├── lazy_loader.py   # ChargeurModuleDiffere, RouteurOptimise, MODULE_REGISTRY
 ├── logging.py       # Configuration logging
 ├── repository.py    # Repository générique CRUD typé
-├── state.py         # StateManager (st.session_state)
+├── session_keys.py  # Clés de session typées (KeyNamespace)
+├── specifications.py # Specification Pattern — critères composables
 ├── storage.py       # SessionStorage Protocol (découplage Streamlit)
+├── unit_of_work.py  # Transaction atomique avec rollback automatique
 └── py.typed         # Marqueur PEP 561 pour typing
 ```
 
@@ -84,7 +99,7 @@ from src.core.config import obtenir_parametres
 config = obtenir_parametres()
 ```
 
-Fichiers: `settings.py` (Parametres), `loader.py` (chargement .env, secrets Streamlit)
+Fichiers: `settings.py` (Parametres), `loader.py` (chargement .env, secrets Streamlit), `validator.py` (ValidateurConfiguration)
 
 ### db/ — Base de données
 
@@ -145,28 +160,96 @@ src/core/validation/
 └── validators.py     # valider_modele(), valider_entree(), afficher_erreurs_validation()
 ```
 
-### decorators.py
+### decorators/ — Décorateurs métier (package)
 
 ```python
-@avec_session_db      # Injecte automatiquement Session
-@avec_cache(ttl=300)  # Cache multi-niveaux unifié (L1→L2→L3)
-@avec_gestion_erreurs # Gestion erreurs unifiée
-@avec_validation      # Validation Pydantic automatique
+from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreurs, avec_validation
+
+@avec_session_db      # Injecte automatiquement Session (src/core/decorators/db.py)
+@avec_cache(ttl=300)  # Cache multi-niveaux unifié L1→L2→L3 (src/core/decorators/cache.py)
+@avec_gestion_erreurs # Gestion erreurs unifiée (src/core/decorators/errors.py)
+@avec_validation      # Validation Pydantic automatique (src/core/decorators/validation.py)
 ```
 
-### events.py — Bus d'événements
+### state/ — État applicatif (package)
+
+```python
+from src.core.state import GestionnaireEtat, obtenir_etat, naviguer, revenir
+from src.core.state import EtatNavigation, EtatCuisine, EtatUI
+
+etat = obtenir_etat()
+etat.navigation.module_actuel  # "cuisine.recettes"
+etat.cuisine.id_recette_visualisation  # 42
+```
+
+Fichiers: `manager.py` (GestionnaireEtat), `shortcuts.py` (naviguer, revenir), `slices.py` (EtatNavigation, EtatCuisine, EtatUI)
+
+### result/ — Result Monad
+
+```python
+from src.core.result import Ok, Err, Result, failure, ErrorCode
+
+def charger_recette(id: int) -> Result[Recette, ErrorInfo]:
+    recette = db.get(id)
+    if not recette:
+        return failure(ErrorCode.NOT_FOUND, f"Recette #{id} introuvable")
+    return Ok(recette)
+```
+
+Fichiers: `base.py` (Ok, Err, Result), `codes.py` (ErrorCode), `combinators.py`, `decorators.py` (@result_api), `helpers.py`
+
+### resilience/ — Politiques de résilience
+
+```python
+from src.core.resilience import RetryPolicy, TimeoutPolicy, politique_ia
+
+politique = RetryPolicy(3) + TimeoutPolicy(30)
+result = politique.executer(lambda: appel_risque())
+```
+
+### middleware/ — Pipeline composable
+
+```python
+from src.core.middleware import Pipeline
+
+pipeline = Pipeline().utiliser(LogMiddleware()).utiliser(RetryMiddleware(max_retries=3))
+result = pipeline.executer(lambda ctx: operation(ctx))
+```
+
+Fichiers: `base.py`, `builtin.py` (middlewares built-in), `pipeline.py`
+
+### monitoring/ — Métriques & Performance
+
+```python
+from src.core.monitoring import RerunProfiler, CollecteurMetriques
+
+# Profilage des reruns Streamlit
+profiler = RerunProfiler()
+```
+
+Fichiers: `collector.py`, `decorators.py`, `health.py`, `rerun_profiler.py`
+
+### bootstrap.py — Initialisation
+
+```python
+from src.core.bootstrap import demarrer_application
+
+# Appelé au démarrage dans src/app.py — initialise l'IoC container
+demarrer_application()
+```
+
+### events — Bus d'événements
 
 ```python
 from src.services.core.events.bus import obtenir_bus
 
-@bus_evenements.on("recette.creee")
-def notifier_creation(data):
-    logger.info(f"Recette créée: {data['nom']}")
-
-bus_evenements.emettre("recette.creee", {"nom": "Tarte"})
+bus = obtenir_bus()
+bus.on("recette.creee", lambda data: logger.info(f"Recette: {data['nom']}"))
+bus.emettre("recette.creee", {"nom": "Tarte"})
 ```
 
-Support wildcards (`*`, `**`), priorités, isolation d'erreurs.
+> **Note**: Le bus d'événements est dans `src/services/core/events/` (pas dans core/).
+> Support wildcards (`*`, `**`), priorités, isolation d'erreurs.
 
 ### repository.py — Repository générique
 
@@ -221,16 +304,14 @@ from src.core.ai import ClientIA, AnalyseurIA, CacheIA, RateLimitIA
 from src.core.ai import CircuitBreaker, avec_circuit_breaker, obtenir_circuit
 
 # Utilisation via BaseAIService (recommandé)
+from src.services.core.base import BaseAIService
+
 class MonService(BaseAIService):
     def suggest(self, prompt: str) -> list:
         return self.call_with_list_parsing_sync(
             prompt=prompt,
             item_model=MonModel
         )
-
-# Circuit Breaker pour résilience API
-@avec_circuit_breaker("mistral", seuil_echecs=5, delai_recuperation=60)
-def appel_ia(prompt: str) -> str: ...
 ```
 
 Fichiers: `client.py`, `parser.py`, `cache.py`, `rate_limit.py`, `circuit_breaker.py`
@@ -241,31 +322,80 @@ Les services sont organisés en sous-packages par domaine:
 
 ```
 src/services/
-├── core/           # Services transversaux (utilisateur, historique)
-├── cuisine/        # Recettes, courses, planning repas
-├── famille/        # Services famille
-├── integrations/   # Weather, APIs externes
-├── inventaire/     # Gestion des stocks
-├── jeux/           # Loto, paris sportifs
-├── maison/         # Entretien, dépenses, schemas
-└── rapports/       # Export PDF, rapports
+├── core/               # Services transversaux
+│   ├── base/           # BaseAIService, mixins IA, streaming, protocols, pipeline
+│   ├── backup/         # Backup/restore système complet
+│   ├── cqrs/           # Commands, Queries, Dispatcher (CQRS pattern)
+│   ├── events/         # Bus d'événements (bus.py, events.py, subscribers.py)
+│   ├── middleware/      # Middlewares service-level
+│   ├── notifications/  # Web push, NTFY, templates, persistance
+│   ├── observability/  # Health checks, métriques, spans
+│   ├── specifications/ # Specs domaine (inventaire.py, recettes.py)
+│   ├── utilisateur/    # Préférences, historique
+│   └── registry.py     # Registre de services
+├── cuisine/            # Recettes, courses, planning repas
+├── famille/            # Services famille
+├── integrations/       # APIs externes (codes-barres, factures, Garmin, météo, images)
+├── inventaire/         # Gestion des stocks
+├── jeux/               # Loto, paris sportifs
+├── maison/             # Entretien, dépenses, jardin, projets
+└── rapports/           # Export PDF, rapports budget/gaspillage
 ```
 
-Chaque service exporte une fonction factory `get_{service_name}_service()`.
-
-## Lazy Loading (OptimizedRouter)
+### BaseAIService (src/services/core/base/)
 
 ```python
-# src/app.py
+from src.services.core.base import BaseAIService
+
+class MonService(BaseAIService):
+    def suggest(self, prompt: str) -> list:
+        # Gère automatiquement: rate limiting, cache sémantique, parsing, recovery
+        return self.call_with_list_parsing_sync(
+            prompt=prompt, item_model=MonModel
+        )
+```
+
+Fichiers clés: `ai_service.py`, `ai_mixins.py`, `ai_prompts.py`, `ai_streaming.py`, `protocols.py`, `pipeline.py`
+
+Chaque service domaine exporte une fonction factory `get_{service_name}_service()`.
+
+## Lazy Loading (RouteurOptimise)
+
+Le registry des modules est défini dans `src/core/lazy_loader.py` → `RouteurOptimise.MODULE_REGISTRY`:
+
+```python
+# src/core/lazy_loader.py
 MODULE_REGISTRY = {
-    "accueil": "src.modules.accueil",
-    "cuisine": "src.modules.cuisine",
-    "famille": "src.modules.famille",
-    "maison":  "src.modules.maison",
-    "jeux":    "src.modules.jeux",
-    "planning": "src.modules.planning",
-    "parametres": "src.modules.parametres",
-    "utilitaires": "src.modules.utilitaires",
+    "accueil":                      {"path": "src.modules.accueil"},
+    "planning.calendrier":          {"path": "src.modules.planning.calendrier"},
+    "planning.templates_ui":        {"path": "src.modules.planning.templates_ui"},
+    "planning.timeline_ui":         {"path": "src.modules.planning.timeline_ui"},
+    "cuisine.recettes":             {"path": "src.modules.cuisine.recettes"},
+    "cuisine.inventaire":           {"path": "src.modules.cuisine.inventaire"},
+    "cuisine.planificateur_repas":  {"path": "src.modules.cuisine.planificateur_repas"},
+    "cuisine.batch_cooking_detaille": {"path": "src.modules.cuisine.batch_cooking_detaille"},
+    "cuisine.courses":              {"path": "src.modules.cuisine.courses"},
+    "famille.hub":                  {"path": "src.modules.famille.hub_famille"},
+    "famille.jules":                {"path": "src.modules.famille.jules"},
+    "famille.jules_planning":       {"path": "src.modules.famille.jules_planning"},
+    "famille.suivi_perso":          {"path": "src.modules.famille.suivi_perso"},
+    "famille.weekend":              {"path": "src.modules.famille.weekend"},
+    "famille.achats_famille":       {"path": "src.modules.famille.achats_famille"},
+    "famille.activites":            {"path": "src.modules.famille.activites"},
+    "famille.routines":             {"path": "src.modules.famille.routines"},
+    "maison.hub":                   {"path": "src.modules.maison.hub"},
+    "maison.jardin":                {"path": "src.modules.maison.jardin"},
+    "maison.entretien":             {"path": "src.modules.maison.entretien"},
+    "maison.depenses":              {"path": "src.modules.maison.depenses"},
+    "maison.charges":               {"path": "src.modules.maison.charges"},
+    "jeux.paris":                   {"path": "src.modules.jeux.paris"},
+    "jeux.loto":                    {"path": "src.modules.jeux.loto"},
+    "barcode":                      {"path": "src.modules.utilitaires.barcode"},
+    "rapports":                     {"path": "src.modules.utilitaires.rapports"},
+    "scan_factures":                {"path": "src.modules.utilitaires.scan_factures"},
+    "recherche_produits":           {"path": "src.modules.utilitaires.recherche_produits"},
+    "parametres":                   {"path": "src.modules.parametres"},
+    "notifications_push":           {"path": "src.modules.utilitaires.notifications_push"},
 }
 
 # Chaque module exporte app()
@@ -276,20 +406,53 @@ def app():
 
 **Performance**: ~60% d'accélération au démarrage
 
+**Bootstrap**: `src/app.py` appelle `demarrer_application()` (IoC) puis `RouteurOptimise.charger_module()`.
+
 ## Modules Métier (src/modules/)
 
 Chaque module est un sous-package avec `__init__.py` exportant `app()`:
 
-| Module         | Sous-modules                                                                                             | Description                               |
-| -------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `accueil/`     | `dashboard.py`                                                                                           | Tableau de bord, métriques, alertes       |
-| `cuisine/`     | `recettes/`, `courses/`, `inventaire/`, `planificateur_repas/`, `batch_cooking_detaille.py`              | Recettes, courses, stocks, planning repas |
-| `famille/`     | `activites.py`, `routines.py`, `jules/`, `suivi_perso/`, `achats_famille/`, `weekend/`, `hub_famille.py` | Vie familiale, suivi enfant, santé        |
-| `maison/`      | `entretien/`, `charges/`, `depenses/`, `jardin/`, `hub/`                                                 | Habitat, entretien, dépenses              |
-| `jeux/`        | `loto/`, `paris/`                                                                                        | Loto, paris sportifs                      |
-| `planning/`    | `calendrier/`, `timeline_ui.py`, `templates_ui.py`                                                       | Calendrier, timeline                      |
-| `parametres/`  | `about.py`, `affichage.py`, `budget.py`, `cache.py`, `database.py`, `foyer.py`, `ia.py`                  | Réglages applicatifs                      |
-| `utilitaires/` | `barcode.py`, `rapports.py`, `notifications_push.py`, `scan_factures.py`                                 | Outils transversaux                       |
+| Module         | Sous-modules                                                                                                                 | Description                               |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `_framework/`  | `base_module.py`, `error_boundary.py`, `fragments.py`, `state_manager.py`                                                    | Framework de base pour modules            |
+| `accueil/`     | `dashboard.py`                                                                                                               | Tableau de bord, métriques, alertes       |
+| `cuisine/`     | `recettes/`, `courses/`, `inventaire/`, `planificateur_repas/`, `batch_cooking_detaille.py`                                  | Recettes, courses, stocks, planning repas |
+| `famille/`     | `activites.py`, `routines.py`, `jules/`, `jules_planning.py`, `suivi_perso/`, `achats_famille/`, `weekend/`, `hub_famille.py`, `age_utils.py` | Vie familiale, suivi enfant, santé        |
+| `maison/`      | `entretien/`, `charges/`, `depenses/`, `jardin/`, `hub/`                                                                     | Habitat, entretien, dépenses              |
+| `jeux/`        | `loto/`, `paris/`, `scraper_loto.py`, `utils.py`                                                                             | Loto, paris sportifs                      |
+| `planning/`    | `calendrier/`, `components/`, `timeline_ui.py`, `templates_ui.py`                                                            | Calendrier, timeline                      |
+| `parametres/`  | `about.py`, `affichage.py`, `budget.py`, `cache.py`, `database.py`, `foyer.py`, `ia.py`, `utils.py`                          | Réglages applicatifs                      |
+| `utilitaires/` | `barcode/`, `barcode_utils.py`, `rapports.py`, `rapports_utils.py`, `notifications_push.py`, `scan_factures.py`, `recherche_produits.py` | Outils transversaux                       |
+
+## Composants UI (src/ui/)
+
+```
+src/ui/
+├── components/      # Widgets réutilisables (alertes, atoms, charts, data, filters, forms,
+│                    #   layouts, metrics, metrics_row, streaming, system, dynamic)
+├── dialogs.py       # DialogBuilder — modales fluides
+├── engine/          # Moteur CSS
+├── feedback/        # smart_spinner, show_success, show_error, show_warning
+├── forms/           # FormBuilder — formulaires déclaratifs (builder, fields, rendering, types)
+├── fragments.py     # @ui_fragment, @auto_refresh, FragmentGroup
+├── integrations/    # google_calendar.py
+├── keys.py          # Clés UI typées
+├── layout/          # Header, footer, sidebar, styles, initialisation
+├── layouts/         # Row, Grid, Stack composables
+├── registry.py      # Registre de composants
+├── state/           # URL State — deep linking (url.py)
+├── system/          # Composants système
+├── tablet/          # UI tablette (config, kitchen, styles, timer, widgets)
+├── testing/         # Régression visuelle
+├── theme.py         # Thème et tokens
+├── tokens.py        # Design tokens primitifs
+├── tokens_semantic.py # Design tokens sémantiques
+├── views/           # Vues spécifiques (auth, historique, import, jeux, météo,
+│                    #   notifications, PWA, sauvegarde, synchronisation)
+├── a11y.py          # Accessibilité
+├── animations.py    # Animations UI
+└── utils.py         # Utilitaires UI
+```
 
 ## Sécurité
 
@@ -340,16 +503,6 @@ cache.set("clé", valeur, ttl=600)
 
 > **Note**: Un seul décorateur `@avec_cache` — les anciens `@cached` et `@avec_cache_multi` ont été supprimés.
 
-### Cache Redis (optionnel)
-
-```python
-from src.core.redis_cache import redis_cached
-
-@redis_cached(ttl=3600, tags=["recettes"])
-def get_recettes():
-    ...
-```
-
 ### Cache sémantique IA
 
 ```python
@@ -363,6 +516,7 @@ Modules de logique pure extraits pour testabilité:
 
 | Fichier              | Contenu                                                              |
 | -------------------- | -------------------------------------------------------------------- |
+| `age_utils.py`       | `get_age_jules()`, `_obtenir_date_naissance()` — calcul d'âge centralisé |
 | `activites_utils.py` | Constantes (TYPES_ACTIVITE, LIEUX), filtrage, stats, recommandations |
 | `routines_utils.py`  | Constantes (JOURS_SEMAINE, MOMENTS_JOURNEE), gestion du temps, stats |
 | `utils.py`           | Helpers partagés avec `@st.cache_data`                               |

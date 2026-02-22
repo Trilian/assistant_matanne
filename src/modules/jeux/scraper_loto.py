@@ -360,36 +360,14 @@ def inserer_tirages_en_bd(limite: int = 50):
     À appeler periodiquement (ex: cron job quotidien)
     """
     try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import StatistiquesLoto, TirageLoto
+        from src.services.jeux import get_loto_crud_service
 
         scraper = ScraperLotoFDJ()
         tirages = scraper.charger_derniers_tirages(limite)
         stats = scraper.calculer_statistiques_historiques(tirages)
 
-        with obtenir_contexte_db() as session:
-            for tirage_data in tirages:
-                # Verifier si le tirage existe dejà
-                existing = (
-                    session.query(TirageLoto).filter(TirageLoto.date == tirage_data["date"]).first()
-                )
-
-                if not existing:
-                    tirage = TirageLoto(
-                        date=tirage_data["date"],
-                        numeros=tirage_data["numeros"],
-                        numero_chance=tirage_data.get("numero_chance"),
-                        source=tirage_data.get("source", "FDJ API"),
-                    )
-                    session.add(tirage)
-
-            # Mettre à jour les statistiques
-            stats_entry = StatistiquesLoto(type_stat="frequences", donnees_json=stats)
-            session.add(stats_entry)
-
-            session.commit()
-            logger.info(f"✅ {len(tirages)} tirages inseres en BD")
-            return True
+        service = get_loto_crud_service()
+        return service.inserer_tirages_scraper(tirages, stats)
 
     except Exception as e:
         logger.error(f"❌ Erreur insertion BD: {e}")

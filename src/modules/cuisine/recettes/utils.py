@@ -42,7 +42,7 @@ def valider_recette(data: dict[str, Any]) -> tuple[bool, str | None]:
         return False, "Le nom est requis"
 
     if not data.get("ingredients") or len(data["ingredients"]) == 0:
-        return False, "Au moins un ingredient est requis"
+        return False, "Au moins un ingrédient est requis"
 
     if not data.get("instructions") or len(data["instructions"]) == 0:
         return False, "Au moins une instruction est requise"

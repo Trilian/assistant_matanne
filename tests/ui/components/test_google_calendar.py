@@ -306,14 +306,15 @@ class TestAfficherStatutSyncGoogle:
 
         afficher_statut_sync_google()
 
-    @patch(
-        "streamlit.session_state",
-        MockSessionState({"google_calendar_config": MagicMock(last_sync=datetime.now())}),
-    )
+    @patch("streamlit.session_state", MockSessionState())
     @patch("streamlit.success")
     def test_sync_recent(self, mock_success):
         """Test sync récente (<5 min)."""
+        import streamlit as st
+
         from src.ui.integrations import afficher_statut_sync_google
+
+        st.session_state["google_calendar_config"] = MagicMock(last_sync=datetime.now())
 
         afficher_statut_sync_google()
 

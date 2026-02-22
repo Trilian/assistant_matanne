@@ -13,7 +13,7 @@ import logging
 from datetime import date, timedelta
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 
@@ -183,8 +183,12 @@ class InventaireStockMixin:
 
         from src.core.models import HistoriqueInventaire
 
-        query = db.query(HistoriqueInventaire).filter(
-            HistoriqueInventaire.date_modification >= (date.today() - timedelta(days=days))
+        query = (
+            db.query(HistoriqueInventaire)
+            .options(
+                joinedload(HistoriqueInventaire.ingredient),
+            )
+            .filter(HistoriqueInventaire.date_modification >= (date.today() - timedelta(days=days)))
         )
 
         if article_id:

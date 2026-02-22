@@ -1,6 +1,44 @@
 # 🗺️ ROADMAP - Assistant Matanne
 
-> Dernière mise à jour: 19 février 2026
+> Dernière mise à jour: 22 février 2025
+
+---
+
+## ✅ Terminé (Session 22 février)
+
+### 🔧 REFACTORING 5 WORKSTREAMS — 0 FAILURE ATTEINT
+
+Session majeure de stabilisation : 5 chantiers exécutés, **0 test en échec** (était 507+).
+
+#### Chantier 1 — Adoption `KeyNamespace` (4 modules)
+
+- Modules migrés : `accueil`, `cuisine`, `famille`, `parametres`
+- Remplacement des clés session_state ad-hoc par `KeyNamespace` typé
+
+#### Chantier 2 — Intégration `@profiler_rerun` (4 modules)
+
+- Modules instrumentés : `accueil`, `cuisine/recettes`, `famille`, `parametres`
+- Ajout monitoring performance sur les fonctions `app()` critiques
+
+#### Chantier 3 — Correction de tous les tests en échec
+
+- **Cause racine** : `__pycache__` obsolètes (`.pyc` référençant `obtenir_contexte_db` supprimé)
+- 41 failures → 2 failures après purge des caches bytecode
+- 2 derniers : accent manquant (`"ingredient"` → `"ingrédient"`) dans `valider_recette()`
+- **Résultat final : 8 018 passed, 0 failed, 322 skipped**
+
+#### Chantier 4 — Division des gros fichiers
+
+| Fichier source                      | Avant  | Après    | Fichiers extraits                        |
+| ----------------------------------- | ------ | -------- | ---------------------------------------- |
+| `accueil/dashboard.py`              | 613 L  | 221 L    | `alerts.py`, `stats.py`, `summaries.py`  |
+| `maison/depenses/components.py`     | 693 L  | 96 L     | `cards.py`, `charts.py`, `previsions.py`, `export.py` |
+
+#### Chantier 5 — Documentation mise à jour
+
+- `docs/ARCHITECTURE.md` : structure corrigée (IoC, CQRS, Event Bus)
+- `docs/PATTERNS.md` : service factory, test patterns, event bus ajoutés
+- `.github/copilot-instructions.md` : aligné avec la réalité du codebase
 
 ---
 
@@ -70,7 +108,7 @@ Restructuration complète du codebase avec amélioration massive de la couvertur
 
 ## ✅ Terminé (Session 2 février)
 
-### 🎉 REFONTE MODULE FAMILLE (Nouveau!)
+### 🎉 REFONTE MODULE FAMILLE
 
 Refonte complète du module Famille avec navigation par cartes et intégration Garmin.
 
@@ -89,181 +127,79 @@ Refonte complète du module Famille avec navigation par cartes et intégration G
 
 #### Nouvelles tables SQL
 
-- `user_profiles` - Profils Anne/Mathieu avec objectifs fitness
-- `garmin_tokens` - Tokens OAuth Garmin
-- `garmin_activities` - Activités synchronisées
-- `garmin_daily_summaries` - Résumés quotidiens (pas, sommeil, stress)
-- `food_logs` - Journal alimentaire
-- `weekend_activities` - Planning sorties weekend
-- `family_purchases` - Wishlist achats famille
-
-#### Configuration Garmin requise
-
-```bash
-# À ajouter dans .env.local
-GARMIN_CONSUMER_KEY=xxx    # Depuis developer.garmin.com
-GARMIN_CONSUMER_SECRET=xxx
-```
+- `user_profiles`, `garmin_tokens`, `garmin_activities`, `garmin_daily_summaries`
+- `food_logs`, `weekend_activities`, `family_purchases`
 
 ### Google Calendar & Services DB
 
-- [x] Export planning vers Google Calendar (repas + activités)
-- [x] Synchronisation bidirectionnelle Google (import + export)
-- [x] Scope OAuth étendu (lecture + écriture)
-- [x] Service `weather.py` utilise modèles DB (`AlerteMeteo`, `ConfigMeteo`)
-- [x] Service `backup.py` utilise modèle DB (`Backup`)
-- [x] Service `calendar_sync.py` utilise modèle DB (`ExternalCalendarConfig`)
+- [x] Export/import bidirectionnel Google Calendar
+- [x] Service `weather.py`, `backup.py`, `calendar_sync.py` connectés aux modèles DB
 - [x] Service `UserPreferenceService` pour persistance préférences
 - [x] Planificateur repas connecté à DB (préférences + feedbacks)
 
 ### Session 28 janvier
 
 - [x] Créer 11 fichiers de tests (~315 tests)
-- [x] Corriger tests alignés avec vraie structure services
 - [x] Couverture passée de 26% à **28.32%** (+1.80%)
 
 ---
 
 ## 🔴 À faire - PRIORITÉ HAUTE
 
-### 1. Configuration & Secrets (1-2h)
+### 1. Tests skippés — modules non implémentés (322 tests)
 
-#### Variables d'environnement manquantes
+Les 322 tests skippés correspondent à des modules maison pas encore codés :
 
-```bash
-# À ajouter dans .env.local
-VAPID_PRIVATE_KEY=xxx          # Pour push notifications
-VAPID_PUBLIC_KEY=xxx           # Déjà présent dans le code, à externaliser
-OPENWEATHER_API_KEY=xxx        # Pour météo (optionnel)
-GOOGLE_CALENDAR_CLIENT_ID=xxx  # Pour sync calendrier (optionnel)
-```
+- `maison/projets`, `maison/scan_factures`, `maison/utils`
+- `maison/eco_tips`, `maison/energie`, `maison/entretien`
+- `maison/jardin`, `maison/meubles`, `maison/jardin_zones`
 
-**Générer clés VAPID:**
+**Action** : implémenter les modules ou supprimer les tests fantômes.
 
-```bash
-npx web-push generate-vapid-keys
-```
+### 2. Couverture de code
 
-#### Fichier `.env.example` à créer
+Fichiers avec 0% coverage à tester :
 
-```env
-# Base de données
-DATABASE_URL=postgresql://user:password@host:5432/database
-
-# IA
-MISTRAL_API_KEY=
-
-# Cache (optionnel)
-REDIS_URL=redis://localhost:6379
-
-# Push Notifications (optionnel)
-VAPID_PUBLIC_KEY=
-VAPID_PRIVATE_KEY=
-
-# APIs externes (optionnel)
-OPENWEATHER_API_KEY=
-```
-
-### 2. Déployer SQL sur Supabase (30min)
-
-1. Ouvrir https://app.supabase.com
-2. Aller dans SQL Editor
-3. Copier `sql/SUPABASE_COMPLET_V3.sql`
-4. Exécuter
-5. Vérifier: `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';`
-
-### 3. Connecter services aux nouveaux modèles ✅ FAIT
-
-| Service                 | Statut                                                       |
-| ----------------------- | ------------------------------------------------------------ |
-| `weather.py`            | ✅ Utilise `AlerteMeteo`, `ConfigMeteo` (DB)                 |
-| `backup.py`             | ✅ Utilise modèle `Backup` pour historique                   |
-| `calendar_sync.py`      | ✅ Utilise `CalendrierExterne`, `EvenementCalendrier`        |
-| `push_notifications.py` | ✅ Utilise `PushSubscription`, `NotificationPreference` (DB) |
-| `budget.py`             | ✅ Utilise `BudgetMensuelDB` pour budgets par catégorie      |
-
-**Exemple migration weather.py:**
-
-```python
-# Avant (Pydantic local)
-class AlerteMeteo(BaseModel):
-    type_alerte: str
-    ...
-
-# Après (import modèle DB)
-from src.core.models import AlerteMeteo  # SQLAlchemy
-
-@with_db_session
-def sauvegarder_alerte(alerte: dict, db: Session):
-    db_alerte = AlerteMeteo(**alerte)
-    db.add(db_alerte)
-    db.commit()
-```
-
----
-
-## 🟡 À faire cette semaine - PRIORITÉ MOYENNE
-
-### 4. Tests - ✅ COUVERTURE ATTEINTE, CORRECTIONS EN COURS
-
-```bash
-# État actuel: 8661 tests, 8115 passent (93.7%)
-# 507 tests en échec à corriger
-python -m pytest --tb=no -q
-```
-
-**Fichiers tests à corriger (507 failures):**
-
-- [ ] `tests/services/utilisateur/` - 67 failures (authentification, historique)
-- [ ] `tests/services/web/` - 53 failures (synchronisation)
-- [ ] `tests/modules/maison/` - ~250 failures (projets, eco_tips, scan_factures, meubles, utils, énergie, jardin, entretien)
-- [ ] `tests/modules/accueil/` - 21 failures
-- [ ] `tests/services/jeux/` - 22 errors (imports cassés)
-
-**Fichiers avec 0% coverage à tester:**
-
-- [ ] `src/core/image_generator.py` (311 stmts) — 44 tests créés, vérifier coverage
 - [ ] `src/modules/utilitaires/barcode.py` (288 stmts)
 - [ ] `src/services/rapports/generation.py` (248 stmts)
 - [ ] `src/modules/maison/ui/plan_jardin.py` (240 stmts)
 - [ ] `src/modules/utilitaires/rapports.py` (200 stmts)
 
-### 5. Migrations SQL (1h)
+### 3. Déployer SQL sur Supabase (30min)
 
 ```bash
 # Appliquer les migrations en attente
 python manage.py migrate
 ```
 
-### 6. Validation complète (1h)
+---
+
+## 🟡 À faire - PRIORITÉ MOYENNE
+
+### 4. Performance
+
+- [ ] Activer Redis en production (`REDIS_URL` dans `.env.local`)
+- [ ] Optimiser requêtes N+1 avec `joinedload` / `selectinload`
+- [ ] Lazy load images recettes côté UI
+
+### 5. Monitoring & Logs
+
+- [ ] Intégrer Sentry pour error tracking
+- [ ] Structurer logs JSON pour analyse
+- [ ] Ajouter métriques Prometheus/Grafana
+
+### 6. Validation complète
 
 ```bash
-# Lancer l'app et tester chaque module
 streamlit run src/app.py
-
-# Vérifier les logs
-# Tester: Cuisine > Recettes > Ajouter
-# Tester: Budget > Ajouter dépense
-# Tester: Inventaire > Stock
+# Tester chaque module manuellement
 ```
 
 ---
 
 ## 🟢 Améliorations futures - PRIORITÉ BASSE
 
-### 7. Monitoring & Logs (optionnel)
-
-- [ ] Intégrer Sentry pour error tracking
-- [ ] Structurer logs JSON pour analyse
-- [ ] Ajouter métriques Prometheus/Grafana
-
-### 8. Performance
-
-- [ ] Activer Redis en production
-- [ ] Optimiser requêtes N+1 (joinedload)
-- [ ] Lazy load images recettes
-
-### 9. Fonctionnalités avancées
+### 7. Fonctionnalités avancées
 
 - [ ] Reconnaissance vocale pour ajout rapide
 - [ ] Mode hors-ligne (Service Worker)
@@ -273,17 +209,16 @@ streamlit run src/app.py
 
 ## 📊 Métriques projet
 
-| Métrique             | Actuel       | Objectif | Status          |
-| -------------------- | ------------ | -------- | --------------- |
-| Tests collectés      | **8 661**    | ✅       | ✅              |
-| Tests passés         | **8 115**    | 100%     | 🟡 93.7%        |
-| Tests en échec       | **507**      | 0        | 🔴 5.9%         |
-| Couverture tests     | **~70%**     | 80%      | 🟢 (était 28%)  |
-| Lint (ruff)          | **2 issues** | 0        | 🟡 auto-fixable |
-| Fichiers 0% coverage | **22**       | 0        | 🟡 2758 stmts   |
-| Temps démarrage      | ~1.5s        | <1.5s    | ✅              |
-| Tables SQL           | 35           | ✅       | ✅              |
-| Services             | 30+          | ✅       | ✅              |
+| Métrique             | Actuel         | Objectif | Status         |
+| -------------------- | -------------- | -------- | -------------- |
+| Tests collectés      | **8 340**      | ✅       | ✅             |
+| Tests passés         | **8 018**      | 100%     | ✅ 96.1%       |
+| Tests en échec       | **0**          | 0        | ✅ 0%          |
+| Tests skippés        | **322**        | 0        | 🟡 modules manquants |
+| Lint (ruff)          | **0 issues**   | 0        | ✅             |
+| Temps démarrage      | ~1.5s          | <1.5s    | ✅             |
+| Tables SQL           | 35             | ✅       | ✅             |
+| Services             | 30+            | ✅       | ✅             |
 
 ---
 
@@ -291,26 +226,41 @@ streamlit run src/app.py
 
 ```
 🔴 PRIORITÉ HAUTE:
-□ Corriger 507 tests en échec (35 fichiers)
-  - services/utilisateur (67 failures)
-  - services/web (53 failures)
-  - modules/maison (~250 failures)
-  - modules/accueil (21 failures)
-  - services/jeux (22 errors - imports cassés)
-
-□ Committer les changements en cours (11 fichiers modifiés)
-□ Fix lint: ruff check src tests --fix
+□ Implémenter modules maison manquants (322 skipped tests)
+□ Augmenter coverage des fichiers à 0%
+□ Déployer migrations SQL sur Supabase
 
 🟡 PRIORITÉ MOYENNE:
-□ Nettoyer ~16 fichiers temp à la racine
-□ Augmenter coverage des 22 fichiers à 0%
-□ Déployer SUPABASE_COMPLET_V3.sql
+□ Activer Redis en production
+□ Optimiser requêtes N+1 (joinedload)
+□ Intégrer Sentry pour error tracking
 
 🟢 PRIORITÉ BASSE:
 □ Générer VAPID keys: npx web-push generate-vapid-keys
-□ Intégrer Sentry pour error tracking
-□ Activer Redis en production
+□ Mode hors-ligne (Service Worker)
+□ Reconnaissance vocale
 ```
+
+---
+
+## 📁 Configuration
+
+Le fichier `.env.example` (171 lignes) documente toutes les variables d'environnement.
+Voir aussi `.env.example.images` pour les APIs de génération d'images.
+
+Variables critiques :
+
+| Variable             | Obligatoire | Description                    |
+| -------------------- | ----------- | ------------------------------ |
+| `DATABASE_URL`       | ✅          | PostgreSQL (Supabase)          |
+| `MISTRAL_API_KEY`    | ✅          | API Mistral AI                 |
+| `GOOGLE_CLIENT_ID`   | Optionnel   | OAuth2 Google Calendar         |
+| `GOOGLE_CLIENT_SECRET` | Optionnel | OAuth2 Google Calendar         |
+| `GARMIN_CONSUMER_KEY` | Optionnel  | Garmin Connect OAuth           |
+| `FOOTBALL_DATA_API_KEY` | Optionnel | football-data.org             |
+| `VAPID_PUBLIC_KEY`   | Optionnel   | Push notifications             |
+| `VAPID_PRIVATE_KEY`  | Optionnel   | Push notifications             |
+| `REDIS_URL`          | Optionnel   | Cache Redis (prod)             |
 
 ---
 

@@ -45,43 +45,12 @@ def charger_matchs_avec_fallback(
     # Fallback à la BD
     if not matchs:
         try:
-            from src.core.db import obtenir_contexte_db
-            from src.core.models import Match
+            from src.services.jeux import get_paris_crud_service
 
-            debut = date.today()
-            fin = debut + timedelta(days=jours)
-
-            with obtenir_contexte_db() as session:
-                matches_bd = (
-                    session.query(Match)
-                    .filter(
-                        Match.date_match >= debut,
-                        Match.date_match <= fin,
-                        Match.championnat == championnat,
-                        Match.joue == False,
-                    )
-                    .order_by(Match.date_match, Match.heure)
-                    .all()
-                )
-
-                for m in matches_bd:
-                    matchs.append(
-                        {
-                            "id": m.id,
-                            "date": str(m.date_match),
-                            "heure": str(m.heure) if m.heure else "",
-                            "championnat": m.championnat,
-                            "dom_nom": m.equipe_domicile.nom if m.equipe_domicile else "?",
-                            "ext_nom": m.equipe_exterieur.nom if m.equipe_exterieur else "?",
-                            "cote_dom": m.cote_domicile or 1.8,
-                            "cote_nul": m.cote_nul or 3.5,
-                            "cote_ext": m.cote_exterieur or 4.2,
-                            "source": "BD",
-                        }
-                    )
-
-                source = "BD"
-                logger.info(f"✅ {len(matchs)} matchs depuis BD")
+            service = get_paris_crud_service()
+            matchs = service.charger_matchs_fallback(championnat, jours)
+            source = "BD"
+            logger.info(f"✅ {len(matchs)} matchs depuis BD")
 
         except Exception as e:
             logger.error(f"❌ Erreur fallback BD: {e}")
@@ -112,32 +81,11 @@ def charger_classement_avec_fallback(championnat: str) -> tuple[list[dict], str]
 
     # Fallback BD
     try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import Equipe
+        from src.services.jeux import get_paris_crud_service
 
-        with obtenir_contexte_db() as session:
-            equipes = (
-                session.query(Equipe)
-                .filter_by(championnat=championnat)
-                .order_by(Equipe.points.desc(), Equipe.buts_marques.desc())
-                .all()
-            )
-
-            for i, e in enumerate(equipes, 1):
-                classement.append(
-                    {
-                        "position": i,
-                        "nom": e.nom,
-                        "matchs_joues": e.matchs_joues,
-                        "victoires": e.victoires,
-                        "nuls": e.nuls,
-                        "defaites": e.defaites,
-                        "buts_marques": e.buts_marques,
-                        "buts_encaisses": e.buts_encaisses,
-                        "points": e.points,
-                    }
-                )
-
+        service = get_paris_crud_service()
+        classement = service.charger_classement_fallback(championnat)
+        if classement:
             source = "BD"
 
     except Exception as e:
@@ -169,33 +117,11 @@ def charger_historique_equipe_avec_fallback(nom_equipe: str) -> tuple[list[dict]
 
     # Fallback BD
     try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import Match
+        from src.services.jeux import get_paris_crud_service
 
-        with obtenir_contexte_db() as session:
-            matches = (
-                session.query(Match)
-                .filter(
-                    (Match.equipe_domicile.has(nom=nom_equipe))
-                    | (Match.equipe_exterieur.has(nom=nom_equipe))
-                )
-                .filter(Match.joue == True)
-                .order_by(Match.date_match.desc())
-                .limit(10)
-                .all()
-            )
-
-            for m in matches:
-                historique.append(
-                    {
-                        "date": str(m.date_match),
-                        "equipe_domicile": m.equipe_domicile.nom if m.equipe_domicile else "?",
-                        "equipe_exterieur": m.equipe_exterieur.nom if m.equipe_exterieur else "?",
-                        "score_domicile": m.score_domicile,
-                        "score_exterieur": m.score_exterieur,
-                    }
-                )
-
+        service = get_paris_crud_service()
+        historique = service.charger_historique_equipe_fallback(nom_equipe)
+        if historique:
             source = "BD"
 
     except Exception as e:
@@ -225,24 +151,11 @@ def charger_tirages_loto_avec_fallback(limite: int = 50) -> tuple[list[dict], st
 
     # Fallback BD
     try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import TirageLoto
+        from src.services.jeux import get_loto_crud_service
 
-        with obtenir_contexte_db() as session:
-            tirages_bd = (
-                session.query(TirageLoto).order_by(TirageLoto.date.desc()).limit(limite).all()
-            )
-
-            for t in tirages_bd:
-                tirages.append(
-                    {
-                        "date": str(t.date),
-                        "numeros": t.numeros,
-                        "numero_chance": t.numero_chance,
-                        "source": "BD",
-                    }
-                )
-
+        service = get_loto_crud_service()
+        tirages = service.charger_tirages_fallback(limite)
+        if tirages:
             source = "BD"
 
     except Exception as e:
@@ -272,20 +185,12 @@ def charger_stats_loto_avec_fallback(limite: int = 50) -> tuple[dict, str]:
 
     # Fallback BD
     try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import StatistiquesLoto
+        from src.services.jeux import get_loto_crud_service
 
-        with obtenir_contexte_db() as session:
-            stat_entry = (
-                session.query(StatistiquesLoto)
-                .filter_by(type_stat="frequences")
-                .order_by(StatistiquesLoto.id.desc())
-                .first()
-            )
-
-            if stat_entry:
-                stats = stat_entry.donnees_json
-                source = "BD"
+        service = get_loto_crud_service()
+        stats = service.charger_stats_fallback()
+        if stats:
+            source = "BD"
 
     except Exception as e:
         logger.error(f"❌ Erreur stats BD: {e}")

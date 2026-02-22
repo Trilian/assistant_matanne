@@ -39,7 +39,7 @@ class TestValiderRecette:
         data = {"nom": "Test", "ingredients": [], "instructions": ["Étape 1"], "portions": 4}
         valid, error = valider_recette(data)
         assert valid is False
-        assert "ingredient" in error.lower()
+        assert "ingrédient" in error.lower()
 
     def test_valider_recette_sans_instructions(self):
         """Recette sans instructions = invalide."""

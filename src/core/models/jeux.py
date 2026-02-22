@@ -191,12 +191,18 @@ class Match(Base):
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
-    # Relations
+    # Relations (lazy="joined" pour éviter N+1 sur equipe.nom)
     equipe_domicile: Mapped["Equipe"] = relationship(
-        "Equipe", foreign_keys=[equipe_domicile_id], back_populates="matchs_domicile"
+        "Equipe",
+        foreign_keys=[equipe_domicile_id],
+        back_populates="matchs_domicile",
+        lazy="joined",
     )
     equipe_exterieur: Mapped["Equipe"] = relationship(
-        "Equipe", foreign_keys=[equipe_exterieur_id], back_populates="matchs_exterieur"
+        "Equipe",
+        foreign_keys=[equipe_exterieur_id],
+        back_populates="matchs_exterieur",
+        lazy="joined",
     )
     paris: Mapped[list["PariSportif"]] = relationship("PariSportif", back_populates="match")
 

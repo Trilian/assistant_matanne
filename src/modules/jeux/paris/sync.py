@@ -1,18 +1,20 @@
 """
 Fonctions de synchronisation avec l'API Football-Data.
+
+Délègue au service ParisCrudService pour la persistance DB.
 """
+
+from src.services.jeux import get_paris_crud_service
 
 from .utils import (
     CHAMPIONNATS,
     Dict,
-    Equipe,
-    Match,
     api_charger_classement,
     api_charger_matchs_a_venir,
     charger_matchs_termines,
     date,
     logger,
-    obtenir_contexte_db,
+    st,
 )
 
 
@@ -33,52 +35,9 @@ def sync_equipes_depuis_api(championnat: str) -> int:
             logger.warning(msg)
             return 0
 
-        count = 0
-        with obtenir_contexte_db() as session:
-            for equipe_api in classement:
-                try:
-                    # Chercher si equipe existe dejà
-                    equipe = (
-                        session.query(Equipe)
-                        .filter(Equipe.nom == equipe_api["nom"], Equipe.championnat == championnat)
-                        .first()
-                    )
+        service = get_paris_crud_service()
+        return service.sync_equipes_depuis_api(championnat, classement)
 
-                    if equipe:
-                        # Mettre à jour les stats
-                        equipe.matchs_joues = equipe_api.get("matchs_joues", equipe.matchs_joues)
-                        equipe.victoires = equipe_api.get("victoires", equipe.victoires)
-                        equipe.nuls = equipe_api.get("nuls", equipe.nuls)
-                        equipe.defaites = equipe_api.get("defaites", equipe.defaites)
-                        equipe.buts_marques = equipe_api.get("buts_marques", equipe.buts_marques)
-                        equipe.buts_encaisses = equipe_api.get(
-                            "buts_encaisses", equipe.buts_encaisses
-                        )
-                    else:
-                        # Creer nouvelle equipe
-                        equipe = Equipe(
-                            nom=equipe_api["nom"],
-                            championnat=championnat,
-                            matchs_joues=equipe_api.get("matchs_joues", 0),
-                            victoires=equipe_api.get("victoires", 0),
-                            nuls=equipe_api.get("nuls", 0),
-                            defaites=equipe_api.get("defaites", 0),
-                            buts_marques=equipe_api.get("buts_marques", 0),
-                            buts_encaisses=equipe_api.get("buts_encaisses", 0),
-                        )
-                        session.add(equipe)
-                    count += 1
-                except Exception as e:
-                    logger.debug(f"Erreur equipe {equipe_api.get('nom')}: {e}")
-                    continue
-
-            try:
-                session.commit()
-            except Exception as e:
-                logger.error(f"Erreur commit equipes: {e}")
-                session.rollback()
-
-        return count
     except Exception as e:
         logger.error(f"❌ Erreur sync equipes: {e}")
         return 0
@@ -101,77 +60,20 @@ def sync_matchs_a_venir(jours: int = 7) -> Dict[str, int]:
         Dictionnaire {championnat: nb_matchs_ajoutes}
     """
     resultats = {}
+    service = get_paris_crud_service()
 
     try:
-        with obtenir_contexte_db() as session:
-            for champ in CHAMPIONNATS:
-                try:
-                    matchs_api = api_charger_matchs_a_venir(champ, jours=jours)
-                    count = 0
-
-                    for match_api in matchs_api:
-                        # Chercher les equipes
-                        dom_nom = match_api.get("equipe_domicile", "")
-                        ext_nom = match_api.get("equipe_exterieur", "")
-                        date_match = match_api.get("date")
-
-                        if not dom_nom or not ext_nom or not date_match:
-                            continue
-
-                        dom = (
-                            session.query(Equipe)
-                            .filter(Equipe.nom.ilike(f"%{dom_nom}%"), Equipe.championnat == champ)
-                            .first()
-                        )
-
-                        ext = (
-                            session.query(Equipe)
-                            .filter(Equipe.nom.ilike(f"%{ext_nom}%"), Equipe.championnat == champ)
-                            .first()
-                        )
-
-                        if not dom or not ext:
-                            continue
-
-                        # Verifier si match existe dejà
-                        existing = (
-                            session.query(Match)
-                            .filter(
-                                Match.equipe_domicile_id == dom.id,
-                                Match.equipe_exterieur_id == ext.id,
-                                Match.date_match == date_match,
-                            )
-                            .first()
-                        )
-
-                        if existing:
-                            continue
-
-                        # Creer le match
-                        nouveau_match = Match(
-                            equipe_domicile_id=dom.id,
-                            equipe_exterieur_id=ext.id,
-                            championnat=champ,
-                            date_match=date_match,
-                            heure=match_api.get("heure"),
-                            cote_dom=match_api.get("cote_domicile"),
-                            cote_nul=match_api.get("cote_nul"),
-                            cote_ext=match_api.get("cote_exterieur"),
-                            joue=False,
-                        )
-                        session.add(nouveau_match)
-                        count += 1
-                        logger.debug(f"  ➕ {dom_nom} vs {ext_nom} ({date_match})")
-
-                except Exception as e:
-                    logger.debug(f"Erreur sync {champ}: {e}")
-                    continue
-
+        for champ in CHAMPIONNATS:
+            try:
+                matchs_api = api_charger_matchs_a_venir(champ, jours=jours)
+                count = service.sync_matchs_a_venir(champ, matchs_api)
                 resultats[champ] = count
+            except Exception as e:
+                logger.debug(f"Erreur sync {champ}: {e}")
+                resultats[champ] = 0
 
-            session.commit()
-            total = sum(resultats.values())
-            logger.info(f"✅ {total} nouveaux matchs synchronises")
+        total = sum(resultats.values())
+        logger.info(f"✅ {total} nouveaux matchs synchronises")
 
     except Exception as e:
         logger.error(f"❌ Erreur sync matchs: {e}")
@@ -187,66 +89,23 @@ def refresh_scores_matchs() -> int:
         Nombre de matchs mis à jour
     """
     try:
-        count = 0
-        with obtenir_contexte_db() as session:
-            # Matchs non joues dans le passe
-            matchs_a_maj = (
-                session.query(Match)
-                .filter(Match.joue == False, Match.date_match < date.today())
-                .all()
-            )
+        # Récupérer les matchs terminés pour chaque championnat
+        matchs_api_par_champ = {}
+        for champ in CHAMPIONNATS:
+            try:
+                matchs_api_par_champ[champ] = charger_matchs_termines(champ, jours=14)
+            except Exception as e:
+                logger.debug(f"Erreur API {champ}: {e}")
 
-            if not matchs_a_maj:
-                logger.info("✅ Tous les matchs sont à jour")
-                return 0
+        service = get_paris_crud_service()
+        count = service.refresh_scores_matchs(matchs_api_par_champ)
 
-            logger.info(f"ℹ️ {len(matchs_a_maj)} matchs non termines à verifier")
+        if count > 0:
+            logger.info(f"✅ {count} matchs mis à jour avec scores")
+        else:
+            logger.info("ℹ️ Aucun score trouve dans l'API")
 
-            # Recuperer les scores depuis l'API pour chaque championnat
-            for champ in CHAMPIONNATS:
-                try:
-                    matchs_api = charger_matchs_termines(champ, jours=14)
-
-                    for match_bd in matchs_a_maj:
-                        if match_bd.championnat != champ:
-                            continue
-
-                        dom_nom = match_bd.equipe_domicile.nom if match_bd.equipe_domicile else ""
-                        ext_nom = match_bd.equipe_exterieur.nom if match_bd.equipe_exterieur else ""
-
-                        for match_api in matchs_api:
-                            api_dom = match_api.get("equipe_domicile", "")
-                            api_ext = match_api.get("equipe_exterieur", "")
-
-                            if (
-                                dom_nom.lower() in api_dom.lower()
-                                or api_dom.lower() in dom_nom.lower()
-                            ) and (
-                                ext_nom.lower() in api_ext.lower()
-                                or api_ext.lower() in ext_nom.lower()
-                            ):
-                                score_d = match_api.get("score_domicile")
-                                score_e = match_api.get("score_exterieur")
-
-                                if score_d is not None and score_e is not None:
-                                    match_bd.score_domicile = score_d
-                                    match_bd.score_exterieur = score_e
-                                    match_bd.joue = True
-                                    count += 1
-                                    logger.info(f"✅ {dom_nom} vs {ext_nom}: {score_d}-{score_e}")
-                                break
-
-                except Exception as e:
-                    logger.debug(f"Erreur API {champ}: {e}")
-                    continue
-
-            if count > 0:
-                session.commit()
-                logger.info(f"✅ {count} matchs mis à jour avec scores")
-            else:
-                logger.info("ℹ️ Aucun score trouve dans l'API")
-
-            return count
+        return count
 
     except Exception as e:
         logger.error(f"❌ Erreur refresh scores: {e}")

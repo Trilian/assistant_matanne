@@ -120,7 +120,7 @@ class TestAccueilUI:
     @patch("src.services.cuisine.recettes.obtenir_service_recettes")
     @patch("src.services.cuisine.courses.obtenir_service_courses")
     @patch("src.services.cuisine.planning.obtenir_service_planning")
-    @patch("src.modules.accueil.dashboard.st")
+    @patch("src.modules.accueil.stats.st")
     def test_render_global_stats(self, mock_st, mock_plan, mock_crs, mock_rec, mock_inv) -> None:
         """Test des stats globales."""
         from src.modules.accueil import afficher_global_stats
@@ -144,7 +144,7 @@ class TestAccueilUI:
 
     @patch("src.services.cuisine.recettes.obtenir_service_recettes")
     @patch("src.services.cuisine.planning.obtenir_service_planning")
-    @patch("src.modules.accueil.dashboard.st")
+    @patch("src.modules.accueil.summaries.st")
     def test_render_cuisine_summary(self, mock_st, mock_plan, mock_rec) -> None:
         """Test resume cuisine."""
         from src.modules.accueil import afficher_cuisine_summary

@@ -14,8 +14,7 @@ from decimal import Decimal
 
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
-from src.core.models import GrilleLoto, TirageLoto
+from src.services.jeux import get_loto_crud_service
 
 logger = logging.getLogger(__name__)
 
@@ -78,22 +77,8 @@ from .strategies import (
 @st.cache_data(ttl=1800)
 def charger_tirages_db() -> list[dict]:
     """Charge les tirages depuis la base de données avec cache Streamlit."""
-    with obtenir_contexte_db() as session:
-        tirages = session.query(TirageLoto).order_by(TirageLoto.date_tirage.desc()).all()
-        return [
-            {
-                "id": t.id,
-                "date_tirage": t.date_tirage,
-                "numero_1": t.numero_1,
-                "numero_2": t.numero_2,
-                "numero_3": t.numero_3,
-                "numero_4": t.numero_4,
-                "numero_5": t.numero_5,
-                "numero_chance": t.numero_chance,
-                "jackpot_euros": t.jackpot_euros,
-            }
-            for t in tirages
-        ]
+    service = get_loto_crud_service()
+    return service.charger_tirages()
 
 
 def charger_tirages(limite: int = 100) -> list[dict]:
@@ -105,19 +90,8 @@ def charger_tirages(limite: int = 100) -> list[dict]:
 @st.cache_data(ttl=1800)
 def charger_grilles_utilisateur() -> list[dict]:
     """Charge les grilles enregistrées par l'utilisateur."""
-    with obtenir_contexte_db() as session:
-        grilles = session.query(GrilleLoto).order_by(GrilleLoto.date_creation.desc()).all()
-        return [
-            {
-                "id": g.id,
-                "numeros": [g.numero_1, g.numero_2, g.numero_3, g.numero_4, g.numero_5],
-                "numero_chance": g.numero_chance,
-                "date_creation": g.date_creation,
-                "strategie": g.strategie,
-                "note": g.note,
-            }
-            for g in grilles
-        ]
+    service = get_loto_crud_service()
+    return service.charger_grilles_utilisateur()
 
 
 def sauvegarder_grille(
@@ -127,20 +101,13 @@ def sauvegarder_grille(
     note: str | None = None,
 ) -> int:
     """Sauvegarde une grille dans la base de données."""
-    with obtenir_contexte_db() as session:
-        grille = GrilleLoto(
-            numero_1=numeros[0],
-            numero_2=numeros[1],
-            numero_3=numeros[2],
-            numero_4=numeros[3],
-            numero_5=numeros[4],
-            numero_chance=numero_chance,
-            strategie=strategie,
-            note=note,
-        )
-        session.add(grille)
-        session.commit()
-        return grille.id
+    service = get_loto_crud_service()
+    return service.sauvegarder_grille(
+        numeros=numeros,
+        numero_chance=numero_chance,
+        strategie=strategie,
+        note=note,
+    )
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -179,10 +146,6 @@ __all__ = [
     "charger_tirages",
     "charger_grilles_utilisateur",
     "sauvegarder_grille",
-    # Database
-    "obtenir_contexte_db",
-    "TirageLoto",
-    "GrilleLoto",
     # Standard
     "st",
     "logger",

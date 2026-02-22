@@ -2,15 +2,14 @@
 Interface de gestion des equipes et matchs.
 """
 
+from src.services.jeux import get_paris_crud_service
 from src.ui import etat_vide
 
 from .crud import ajouter_equipe, ajouter_match, enregistrer_resultat_match, supprimer_match
 from .utils import (
     CHAMPIONNATS,
-    Match,
     charger_equipes,
     date,
-    obtenir_contexte_db,
     st,
     timedelta,
 )
@@ -71,33 +70,27 @@ def afficher_gestion_donnees():
         st.subheader("Enregistrer un resultat")
 
         try:
-            with obtenir_contexte_db() as session:
-                matchs_passes = (
-                    session.query(Match)
-                    .filter(Match.date_match <= date.today(), Match.joue == False)
-                    .all()
-                )
+            service = get_paris_crud_service()
+            matchs_passes = service.charger_matchs_passes_non_joues()
 
-                if matchs_passes:
-                    for m in matchs_passes:
-                        with st.container(border=True):
-                            st.write(
-                                f"**{m.equipe_domicile.nom if m.equipe_domicile else '?'} vs "
-                                f"{m.equipe_exterieur.nom if m.equipe_exterieur else '?'}** "
-                                f"({m.date_match})"
-                            )
+            if matchs_passes:
+                for m in matchs_passes:
+                    with st.container(border=True):
+                        st.write(
+                            f"**{m['dom_nom']} vs " f"{m['ext_nom']}** " f"({m['date_match']})"
+                        )
 
-                            col1, col2, col3 = st.columns([1, 1, 1])
-                            with col1:
-                                score_d = st.number_input("Score dom", 0, 20, 0, key=f"sd_{m.id}")
-                            with col2:
-                                score_e = st.number_input("Score ext", 0, 20, 0, key=f"se_{m.id}")
-                            with col3:
-                                if st.button("Valider", key=f"val_{m.id}"):
-                                    enregistrer_resultat_match(m.id, score_d, score_e)
-                                    st.rerun()
-                else:
-                    etat_vide("Aucun match en attente de résultat", "⚽")
+                        col1, col2, col3 = st.columns([1, 1, 1])
+                        with col1:
+                            score_d = st.number_input("Score dom", 0, 20, 0, key=f"sd_{m['id']}")
+                        with col2:
+                            score_e = st.number_input("Score ext", 0, 20, 0, key=f"se_{m['id']}")
+                        with col3:
+                            if st.button("Valider", key=f"val_{m['id']}"):
+                                enregistrer_resultat_match(m["id"], score_d, score_e)
+                                st.rerun()
+            else:
+                etat_vide("Aucun match en attente de résultat", "⚽")
         except Exception as e:
             st.error(f"Erreur: {e}")
 
@@ -106,43 +99,34 @@ def afficher_gestion_donnees():
         st.caption("Supprime un match et tous les paris associes")
 
         try:
-            with obtenir_contexte_db() as session:
-                tous_matchs = session.query(Match).order_by(Match.date_match.desc()).limit(50).all()
+            service = get_paris_crud_service()
 
-                if tous_matchs:
-                    champ_filter = st.selectbox(
-                        "Filtrer par championnat", ["Tous"] + CHAMPIONNATS, key="del_champ_filter"
-                    )
+            champ_filter = st.selectbox(
+                "Filtrer par championnat", ["Tous"] + CHAMPIONNATS, key="del_champ_filter"
+            )
 
-                    matchs_affiches = [
-                        m
-                        for m in tous_matchs
-                        if champ_filter == "Tous" or m.championnat == champ_filter
-                    ]
+            champ_arg = None if champ_filter == "Tous" else champ_filter
+            tous_matchs = service.charger_matchs_recents_tous(limite=50, championnat=champ_arg)
 
-                    if matchs_affiches:
-                        for m in matchs_affiches:
-                            dom = m.equipe_domicile.nom if m.equipe_domicile else "?"
-                            ext = m.equipe_exterieur.nom if m.equipe_exterieur else "?"
-                            statut = "✅ Joue" if m.joue else "⏳ À venir"
-                            score = f"({m.score_domicile}-{m.score_exterieur})" if m.joue else ""
+            if tous_matchs:
+                for m in tous_matchs:
+                    statut = "✅ Joue" if m["joue"] else "⏳ À venir"
+                    score = f"({m['score_domicile']}-{m['score_exterieur']})" if m["joue"] else ""
 
-                            col1, col2 = st.columns([4, 1])
-                            with col1:
-                                st.write(f"**{dom}** vs **{ext}** {score}")
-                                st.caption(f"{m.date_match} | {m.championnat} | {statut}")
-                            with col2:
-                                if st.button("🗑️", key=f"del_{m.id}", help="Supprimer ce match"):
-                                    if supprimer_match(m.id):
-                                        st.success("Match supprime!")
-                                        st.rerun()
-                                    else:
-                                        st.error("Erreur lors de la suppression")
-                            st.divider()
-                    else:
-                        st.info(f"Aucun match pour {champ_filter}")
-                else:
-                    etat_vide("Aucun match enregistré", "⚽")
+                    col1, col2 = st.columns([4, 1])
+                    with col1:
+                        st.write(f"**{m['dom_nom']}** vs **{m['ext_nom']}** {score}")
+                        st.caption(f"{m['date_match']} | {m['championnat']} | {statut}")
+                    with col2:
+                        if st.button("🗑️", key=f"del_{m['id']}", help="Supprimer ce match"):
+                            if supprimer_match(m["id"]):
+                                st.success("Match supprime!")
+                                st.rerun()
+                            else:
+                                st.error("Erreur lors de la suppression")
+                    st.divider()
+            else:
+                etat_vide("Aucun match enregistré", "⚽")
         except Exception as e:
             st.error(f"Erreur: {e}")
 

@@ -204,7 +204,7 @@ class TestValiderRecette:
         donnees_recette_valide["ingredients"] = []
         est_valide, erreur = valider_recette(donnees_recette_valide)
         assert est_valide is False
-        assert "ingredient" in erreur.lower()
+        assert "ingrédient" in erreur.lower()
 
     def test_ingredients_none(self, donnees_recette_valide):
         """Ingredients None est invalide."""

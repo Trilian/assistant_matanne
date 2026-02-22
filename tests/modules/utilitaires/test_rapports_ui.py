@@ -118,7 +118,7 @@ class TestRapportsUI:
 class TestGetRapportsService:
     """Tests pour get_rapports_service."""
 
-    @patch("src.modules.utilitaires.rapports.ServiceRapportsPDF")
+    @patch("src.services.rapports.ServiceRapportsPDF")
     @patch("src.modules.utilitaires.rapports.st")
     def test_creates_service(self, mock_st, mock_cls) -> None:
         """Test creation service."""
@@ -128,7 +128,7 @@ class TestGetRapportsService:
         get_rapports_service()
         mock_cls.assert_called_once()
 
-    @patch("src.modules.utilitaires.rapports.ServiceRapportsPDF")
+    @patch("src.services.rapports.ServiceRapportsPDF")
     @patch("src.modules.utilitaires.rapports.st")
     def test_returns_cached_service(self, mock_st, mock_cls) -> None:
         """Test retourne service cache."""

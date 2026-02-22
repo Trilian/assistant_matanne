@@ -1,17 +1,18 @@
 """
 Fonctions CRUD pour les paris, equipes et matchs.
+
+Délègue au service ParisCrudService pour toutes les opérations DB.
 """
 
-from .utils import (
-    Decimal,
-    Equipe,
-    Match,
-    PariSportif,
-    date,
-    logger,
-    obtenir_contexte_db,
-    st,
-)
+import logging
+from datetime import date
+from decimal import Decimal
+
+import streamlit as st
+
+from src.services.jeux import get_paris_crud_service
+
+logger = logging.getLogger(__name__)
 
 
 def enregistrer_pari(
@@ -19,19 +20,15 @@ def enregistrer_pari(
 ):
     """Enregistre un nouveau pari"""
     try:
-        with obtenir_contexte_db() as session:
-            pari = PariSportif(
-                match_id=match_id,
-                type_pari="1N2",
-                prediction=prediction,
-                cote=cote,
-                mise=Decimal(str(mise)),
-                est_virtuel=est_virtuel,
-                statut="en_attente",
-            )
-            session.add(pari)
-            session.commit()
-            return True
+        service = get_paris_crud_service()
+        result = service.enregistrer_pari(
+            match_id=match_id,
+            prediction=prediction,
+            cote=cote,
+            mise=mise,
+            est_virtuel=est_virtuel,
+        )
+        return result
     except Exception as e:
         st.error(f"❌ Erreur enregistrement pari: {e}")
         return False
@@ -40,12 +37,11 @@ def enregistrer_pari(
 def ajouter_equipe(nom: str, championnat: str):
     """Ajoute une nouvelle equipe"""
     try:
-        with obtenir_contexte_db() as session:
-            equipe = Equipe(nom=nom, championnat=championnat)
-            session.add(equipe)
-            session.commit()
+        service = get_paris_crud_service()
+        result = service.ajouter_equipe(nom=nom, championnat=championnat)
+        if result:
             st.success(f"✅ Équipe '{nom}' ajoutee!")
-            return True
+        return result
     except Exception as e:
         st.error(f"❌ Erreur ajout equipe: {e}")
         return False
@@ -56,19 +52,17 @@ def ajouter_match(
 ):
     """Ajoute un nouveau match"""
     try:
-        with obtenir_contexte_db() as session:
-            match = Match(
-                equipe_domicile_id=equipe_dom_id,
-                equipe_exterieur_id=equipe_ext_id,
-                championnat=championnat,
-                date_match=date_match,
-                heure=heure,
-                joue=False,
-            )
-            session.add(match)
-            session.commit()
+        service = get_paris_crud_service()
+        result = service.ajouter_match(
+            equipe_dom_id=equipe_dom_id,
+            equipe_ext_id=equipe_ext_id,
+            championnat=championnat,
+            date_match=date_match,
+            heure=heure,
+        )
+        if result:
             st.success("✅ Match ajoute!")
-            return True
+        return result
     except Exception as e:
         st.error(f"❌ Erreur ajout match: {e}")
         return False
@@ -77,34 +71,13 @@ def ajouter_match(
 def enregistrer_resultat_match(match_id: int, score_dom: int, score_ext: int):
     """Enregistre le resultat d'un match"""
     try:
-        with obtenir_contexte_db() as session:
-            match = session.query(Match).get(match_id)
-            if match:
-                match.score_domicile = score_dom
-                match.score_exterieur = score_ext
-                match.joue = True
-
-                # Determiner le resultat
-                if score_dom > score_ext:
-                    match.resultat = "1"
-                elif score_ext > score_dom:
-                    match.resultat = "2"
-                else:
-                    match.resultat = "N"
-
-                # Mettre à jour les paris lies
-                for pari in match.paris:
-                    if pari.statut == "en_attente":
-                        if pari.prediction == match.resultat:
-                            pari.statut = "gagne"
-                            pari.gain = pari.mise * Decimal(str(pari.cote))
-                        else:
-                            pari.statut = "perdu"
-                            pari.gain = Decimal("0")
-
-                session.commit()
-                st.success(f"✅ Resultat enregistre: {score_dom}-{score_ext}")
-                return True
+        service = get_paris_crud_service()
+        result = service.enregistrer_resultat_match(
+            match_id=match_id, score_dom=score_dom, score_ext=score_ext
+        )
+        if result:
+            st.success(f"✅ Resultat enregistre: {score_dom}-{score_ext}")
+        return result
     except Exception as e:
         st.error(f"❌ Erreur enregistrement resultat: {e}")
         return False
@@ -121,21 +94,8 @@ def supprimer_match(match_id: int) -> bool:
         True si suppression reussie
     """
     try:
-        with obtenir_contexte_db() as session:
-            match = session.query(Match).get(match_id)
-            if match:
-                # Supprimer d'abord les paris lies
-                for pari in match.paris:
-                    session.delete(pari)
-
-                # Puis le match
-                session.delete(match)
-                session.commit()
-                logger.info(f"🗑️ Match {match_id} supprime")
-                return True
-            else:
-                logger.warning(f"Match {match_id} non trouve")
-                return False
+        service = get_paris_crud_service()
+        return service.supprimer_match(match_id)
     except Exception as e:
         logger.error(f"❌ Erreur suppression match: {e}")
         return False

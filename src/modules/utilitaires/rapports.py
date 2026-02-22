@@ -14,15 +14,16 @@ import streamlit as st
 
 # Logique metier pure
 from src.core.session_keys import SK
-from src.services.rapports import ServiceRapportsPDF
 
 # ═══════════════════════════════════════════════════════════
 # INITIALISATION
 # ═══════════════════════════════════════════════════════════
 
 
-def get_rapports_service() -> ServiceRapportsPDF:
-    """Get ou creer service rapports"""
+def get_rapports_service():
+    """Get ou creer service rapports (import différé pour performance)"""
+    from src.services.rapports import ServiceRapportsPDF
+
     if "rapports_service" not in st.session_state:
         st.session_state.rapports_service = ServiceRapportsPDF()
     return st.session_state.rapports_service

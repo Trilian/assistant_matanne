@@ -16,7 +16,7 @@ Hub de gestion familiale en production avec modules pour:
 - 💪 Suivi de la santé et du fitness
 - 📊 Tableau de bord familial avec métriques
 
-**Architecture**: Chargement différé avec ~60% d'accélération au démarrage via `OptimizedRouter`, modèles SQLAlchemy modulaires dans `core/models/` (19 fichiers), codebase en français. Marqueur `py.typed` (PEP 561).
+**Architecture**: Chargement différé avec ~60% d'accélération au démarrage via `RouteurOptimise`, modèles SQLAlchemy modulaires dans `core/models/` (19 fichiers), codebase en français. Marqueur `py.typed` (PEP 561).
 
 ---
 
@@ -24,21 +24,27 @@ Hub de gestion familiale en production avec modules pour:
 
 ### Modules principaux (src/core/)
 
-Le core est organisé en **7 sous-packages** + fichiers utilitaires.
+Le core est organisé en **14 sous-packages** + fichiers utilitaires.
 
 - **ai/**: `ClientIA` (client Mistral), `AnalyseurIA` (parsing JSON/Pydantic), `CacheIA` (cache sémantique), `RateLimitIA` (rate limiting), `CircuitBreaker` (résilience API)
-- **caching/**: Cache multi-niveaux — `base.py` (types), `cache.py` (Cache), `memory.py` (L1), `session.py` (L2), `file.py` (L3), `orchestrator.py` (CacheMultiNiveau). Décorateur unifié `@avec_cache` dans `decorators.py`
-- **config/**: Pydantic `BaseSettings` — `settings.py` (Parametres, obtenir_parametres), `loader.py` (chargement .env, secrets Streamlit). Seuls `Parametres`, `obtenir_parametres`, `charger_secrets_streamlit` sont exportés.
-- **date_utils/**: Package utilitaires de dates (ex-fichier unique 429 lignes) — `semaines.py`, `periodes.py`, `formatage.py`, `helpers.py`. Re-exports transparents via `__init__.py`.
+- **caching/**: Cache multi-niveaux — `base.py` (types), `cache.py` (Cache), `memory.py` (L1), `session.py` (L2), `file.py` (L3), `orchestrator.py` (CacheMultiNiveau). Décorateur unifié `@avec_cache`
+- **config/**: Pydantic `BaseSettings` — `settings.py` (Parametres, obtenir_parametres), `loader.py` (chargement .env, secrets Streamlit), `validator.py` (ValidateurConfiguration)
+- **date_utils/**: Package utilitaires de dates — `semaines.py`, `periodes.py`, `formatage.py`, `helpers.py`. Re-exports transparents via `__init__.py`.
 - **db/**: Base de données — `engine.py` (Engine SQLAlchemy, QueuePool), `session.py` (context managers), `migrations.py` (GestionnaireMigrations SQL-file), `utils.py` (health checks)
+- **decorators/**: Package décorateurs — `db.py` (`@avec_session_db`), `cache.py` (`@avec_cache`), `errors.py` (`@avec_gestion_erreurs`), `validation.py` (`@avec_validation`)
+- **middleware/**: Pipeline de middlewares composables — `base.py`, `builtin.py`, `pipeline.py`
 - **models/**: Modèles SQLAlchemy ORM modulaires (19 fichiers organisés par domaine)
+- **monitoring/**: Métriques & performance — `collector.py`, `decorators.py`, `health.py`, `rerun_profiler.py`
+- **observability/**: Contexte d'observabilité — `context.py`
+- **resilience/**: Politiques de résilience composables — `policies.py`
+- **result/**: Result Monad (Ok/Err) — `base.py`, `codes.py`, `combinators.py`, `decorators.py`, `helpers.py`
+- **state/**: Package état applicatif — `manager.py` (GestionnaireEtat), `shortcuts.py` (naviguer, revenir), `slices.py` (EtatNavigation, EtatCuisine, EtatUI)
 - **validation/**: Package validation — `schemas/` (sous-package Pydantic: `recettes.py`, `inventaire.py`, `courses.py`, `planning.py`, `famille.py`, `projets.py`, `_helpers.py`), `sanitizer.py` (anti-XSS/injection), `validators.py` (helpers)
-- **decorators.py**: `@avec_session_db`, `@avec_cache` (multi-niveaux unifié), `@avec_gestion_erreurs`, `@avec_validation`
-- **Utilitaires**: `constants.py`, `errors.py`, `errors_base.py`, `state.py`, `storage.py` (SessionStorage Protocol), `events.py` (bus pub/sub), `repository.py` (CRUD générique), `logging.py`, `lazy_loader.py`, `py.typed`
+- **Utilitaires**: `bootstrap.py` (IoC init), `constants.py`, `container.py` (IoC), `errors.py`, `errors_base.py`, `lazy_loader.py` (RouteurOptimise + MODULE_REGISTRY), `logging.py`, `repository.py` (CRUD générique), `session_keys.py` (KeyNamespace), `specifications.py`, `storage.py` (SessionStorage Protocol), `unit_of_work.py`, `async_utils.py`, `py.typed`
 
 ### Couche Services (src/services/)
 
-- **base/**: `BaseAIService` avec limitation de débit intégrée, cache sémantique, parsing JSON, gestion d'erreurs unifiée
+- **core/base/**: `BaseAIService` (dans `ai_service.py`) avec limitation de débit intégrée, cache sémantique, parsing JSON, mixins IA, streaming, protocols, pipeline
 - **recettes/**: Service recettes avec `importer.py` pour import URL/PDF
 - **planning/**: Service modulaire divisé en sous-modules:
   - `nutrition.py`: Équilibre nutritionnel
@@ -282,7 +288,7 @@ Importer via: `from src.core.config import obtenir_parametres()`
    ```
 3. Utiliser les composants UI chargés paresseusement depuis `src.ui`
 4. Interroger la base de données via les fonctions décorées avec `@with_db_session`
-5. Enregistrer dans `OptimizedRouter.MODULE_REGISTRY` dans [src/app.py](src/app.py) (auto-découverte si suit la convention de nommage)
+5. Enregistrer dans `RouteurOptimise.MODULE_REGISTRY` dans [src/core/lazy_loader.py](src/core/lazy_loader.py)
 
 ### Ajouter un modèle de base de données
 
@@ -296,7 +302,7 @@ Importer via: `from src.core.config import obtenir_parametres()`
 ### Intégration IA
 
 ```python
-from src.services.base_ai_service import BaseAIService
+from src.services.core.base import BaseAIService
 from src.core.ai import ClientIA
 
 class RecipeService(BaseAIService):
@@ -349,11 +355,17 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 | [src/core/monitoring/](src/core/monitoring/)                       | Package métriques & performance                           |
 | [src/core/ai/](src/core/ai/)                                       | Package IA (Mistral, rate limiting, cache, circuit breaker)|
 | [src/core/models/](src/core/models/)                               | Tous les modèles ORM SQLAlchemy (19 fichiers)             |
-| [src/core/decorators.py](src/core/decorators.py)                   | `@avec_session_db`, `@avec_cache`, `@avec_gestion_erreurs`|
+| [src/core/decorators/](src/core/decorators/)                       | Package décorateurs (`@avec_session_db`, `@avec_cache`, etc.)|
+| [src/core/state/](src/core/state/)                                 | Package état applicatif (manager, slices, shortcuts)       |
+| [src/core/result/](src/core/result/)                               | Result Monad (Ok/Err) — gestion d'erreurs style Rust      |
+| [src/core/resilience/](src/core/resilience/)                       | Politiques de résilience composables                       |
+| [src/core/middleware/](src/core/middleware/)                        | Pipeline de middlewares composables                        |
 | [src/core/storage.py](src/core/storage.py)                         | SessionStorage Protocol (découplage Streamlit)            |
-| [src/core/events.py](src/core/events.py)                           | Bus d'événements pub/sub avec wildcards                    |
+| [src/core/container.py](src/core/container.py)                     | IoC Container — injection de dépendances                  |
 | [src/core/repository.py](src/core/repository.py)                   | Repository générique CRUD typé                             |
-| [src/app.py](src/app.py)                                           | App Streamlit principale, routage, chargement différé     |
+| [src/services/core/events/](src/services/core/events/)             | Bus d'événements pub/sub avec wildcards                    |
+| [src/services/core/base/](src/services/core/base/)                 | BaseAIService, mixins IA, streaming, protocols             |
+| [src/app.py](src/app.py)                                           | App Streamlit principale, bootstrap, chargement différé   |
 | [pyproject.toml](pyproject.toml)                                   | Dépendances (Poetry), config test, règles de linting      |
 | [docs/MIGRATION_CORE_PACKAGES.md](docs/MIGRATION_CORE_PACKAGES.md) | Guide de migration des imports                            |
 
@@ -375,6 +387,7 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 
 - Conftest.py fournit des fixtures de BD SQLite en mémoire pour les tests isolés
 - Utiliser `pytest tests/test_name.py::TestClass::test_method -v` pour un test unique
+- Après refactoring de tests, toujours supprimer `__pycache__/` (tests/ + src/) pour éviter les `.pyc` obsolètes
 
 **Les migrations ne s'appliquent pas?**
 

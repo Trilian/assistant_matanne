@@ -15,6 +15,9 @@ Ce document présente les patterns utilisés dans le core de l'application avec 
 9. [Circuit Breaker](#circuit-breaker)
 10. [Middleware Pipeline](#middleware-pipeline)
 11. [UI Patterns (v2.0)](#ui-patterns-v20)
+12. [Service Factory Pattern](#service-factory-pattern)
+13. [Event Bus & CQRS](#event-bus--cqrs)
+14. [Test Patterns](#test-patterns)
 
 ---
 
@@ -703,6 +706,159 @@ if result.submitted:
 | `Row`/`Grid`    | Layouts répétitifs, grilles de cartes   |
 | `@url_state`    | Pages avec filtres, pagination, onglets |
 | `FormBuilder`   | Formulaires avec validation côté client |
+
+---
+
+## Service Factory Pattern
+
+**Convention**: Chaque service exporte une fonction factory `get_{service_name}_service()`.
+
+### Définition du service
+
+```python
+# src/services/cuisine/recettes/service.py
+from src.services.core.base import BaseAIService
+
+class RecetteService(BaseAIService):
+    def suggest_recipes(self, context: str) -> list[Recette]:
+        return self.call_with_list_parsing_sync(
+            prompt=f"Suggère des recettes pour: {context}",
+            item_model=Recette,
+            system_prompt="Tu es un expert culinaire..."
+        )
+
+def get_recette_service() -> RecetteService:
+    """Factory — point d'entrée pour l'injection de dépendances"""
+    return RecetteService()
+```
+
+### Lazy-load dans les modules
+
+```python
+# src/modules/cuisine/recettes/__init__.py
+def app():
+    """Point d'entrée module — imports dans la fonction pour lazy loading"""
+    from src.services.cuisine.recettes import get_recette_service
+
+    service = get_recette_service()
+    suggestions = service.suggest_recipes("Dîner rapide")
+```
+
+> **Important**: Garder les imports des services DANS `app()`, pas au niveau du module.
+
+### Centralized age calculation
+
+```python
+# src/modules/famille/age_utils.py
+def get_age_jules() -> dict:
+    """Calcul centralisé de l'âge — DB avec fallback sur JULES_NAISSANCE"""
+    date_naissance = _obtenir_date_naissance()  # DB → fallback constante
+    return {"mois": ..., "label": "19 mois", ...}
+```
+
+---
+
+## Event Bus & CQRS
+
+**Fichiers**: `src/services/core/events/`, `src/services/core/cqrs/`
+
+### Bus d'événements
+
+```python
+from src.services.core.events.bus import obtenir_bus
+
+bus = obtenir_bus()
+
+# S'abonner (support wildcards: *, **)
+bus.on("recette.creee", lambda data: logger.info(f"Recette: {data['nom']}"))
+bus.on("recette.*", lambda data: audit_log(data))
+
+# Émettre
+bus.emettre("recette.creee", {"nom": "Tarte", "id": 42})
+```
+
+### CQRS (Command Query Responsibility Segregation)
+
+```python
+from src.services.core.cqrs import CommandDispatcher, QueryDispatcher
+
+# Commands (écriture)
+dispatcher = CommandDispatcher()
+result = dispatcher.execute(CreerRecetteCommand(nom="Tarte"))
+
+# Queries (lecture)
+query_dispatcher = QueryDispatcher()
+recettes = query_dispatcher.execute(ListerRecettesQuery(categorie="dessert"))
+```
+
+---
+
+## Test Patterns
+
+### Mock DB via `db=` parameter
+
+Le décorateur `@avec_session_db` injecte `db: Session`, mais peut être contourné:
+
+```python
+# Test unitaire — passer la session directement
+def test_create_recipe(test_db: Session):
+    service = RecetteService()
+    result = service.creer_recette({"nom": "Tarte"}, db=test_db)
+    assert result.nom == "Tarte"
+```
+
+### Mock service factory
+
+Pour les modules UI qui utilisent `get_*_service()`:
+
+```python
+@patch("src.modules.cuisine.courses.get_courses_service")
+def test_afficher_courses(mock_factory):
+    mock_service = MagicMock()
+    mock_service.lister_articles.return_value = [article]
+    mock_factory.return_value = mock_service
+
+    from src.modules.cuisine.courses import app
+    app()
+
+    mock_service.lister_articles.assert_called_once()
+```
+
+### Mock age_utils
+
+```python
+@patch("src.modules.famille.age_utils._obtenir_date_naissance")
+def test_age_calculation(mock_naissance):
+    mock_naissance.return_value = date(2023, 7, 15)
+    result = get_age_jules()
+    assert result["mois"] > 0
+```
+
+### Mock Streamlit
+
+```python
+@patch("src.modules.accueil.dashboard.st")
+def test_dashboard(mock_st):
+    mock_st.session_state = {}
+    app()
+    mock_st.title.assert_called()
+```
+
+### Fixtures DB (conftest.py)
+
+```python
+# conftest.py fournit des fixtures SQLite en mémoire
+@pytest.fixture
+def test_db():
+    """Session SQLAlchemy isolée — rollback automatique après le test"""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        yield session
+```
+
+> **Important**: Après refactoring de tests, toujours supprimer les `__pycache__/` pour éviter
+> que Python charge d'anciens `.pyc` avec des patches obsolètes.
 
 ---
 

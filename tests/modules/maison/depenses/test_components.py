@@ -127,7 +127,7 @@ class TestRenderStatsDashboard:
 class TestRenderDepenseCard:
     """Tests pour afficher_depense_card."""
 
-    @patch("src.modules.maison.depenses.components.st")
+    @patch("src.modules.maison.depenses.cards.st")
     def test_render_depense_card_basique(self, mock_st) -> None:
         from src.modules.maison.depenses.components import afficher_depense_card
 
@@ -142,7 +142,7 @@ class TestRenderDepenseCard:
         mock_st.container.assert_called()
         mock_st.markdown.assert_called()
 
-    @patch("src.modules.maison.depenses.components.st")
+    @patch("src.modules.maison.depenses.cards.st")
     def test_render_depense_card_sans_note(self, mock_st) -> None:
         from src.modules.maison.depenses.components import afficher_depense_card
 
@@ -161,7 +161,7 @@ class TestRenderDepenseCard:
 class TestRenderFormulaire:
     """Tests pour afficher_formulaire."""
 
-    @patch("src.modules.maison.depenses.components.st")
+    @patch("src.modules.maison.depenses.cards.st")
     def test_render_formulaire_nouveau(self, mock_st) -> None:
         from src.modules.maison.depenses.components import afficher_formulaire
 
@@ -169,7 +169,7 @@ class TestRenderFormulaire:
         afficher_formulaire(None)
         mock_st.form.assert_called()
 
-    @patch("src.modules.maison.depenses.components.st")
+    @patch("src.modules.maison.depenses.cards.st")
     def test_render_formulaire_edition(self, mock_st) -> None:
         from src.modules.maison.depenses.components import afficher_formulaire
 
@@ -251,10 +251,10 @@ class TestRenderOnglets:
 class TestRenderGraphiqueEvolution:
     """Tests pour afficher_graphique_evolution."""
 
-    @patch("src.modules.maison.depenses.components.get_depenses_mois")
-    @patch("src.modules.maison.depenses.components.st")
+    @patch("src.modules.maison.depenses.charts.get_depenses_mois")
+    @patch("src.modules.maison.depenses.charts.st")
     def test_render_graphique_total(self, mock_st, mock_get) -> None:
-        from src.modules.maison.depenses.components import afficher_graphique_evolution
+        from src.modules.maison.depenses.charts import afficher_graphique_evolution
 
         setup_mock_st(mock_st)
         mock_st.selectbox.return_value = "total"
@@ -267,20 +267,20 @@ class TestRenderGraphiqueEvolution:
 class TestRenderComparaisonMois:
     """Tests pour afficher_comparaison_mois."""
 
-    @patch("src.modules.maison.depenses.components.get_depenses_mois")
-    @patch("src.modules.maison.depenses.components.st")
+    @patch("src.modules.maison.depenses.charts.get_depenses_mois")
+    @patch("src.modules.maison.depenses.charts.st")
     def test_render_comparaison_sans_clic(self, mock_st, mock_get) -> None:
-        from src.modules.maison.depenses.components import afficher_comparaison_mois
+        from src.modules.maison.depenses.charts import afficher_comparaison_mois
 
         setup_mock_st(mock_st)
         mock_st.button.return_value = False
         afficher_comparaison_mois()
         mock_st.subheader.assert_called()
 
-    @patch("src.modules.maison.depenses.components.get_depenses_mois")
-    @patch("src.modules.maison.depenses.components.st")
+    @patch("src.modules.maison.depenses.charts.get_depenses_mois")
+    @patch("src.modules.maison.depenses.charts.st")
     def test_render_comparaison_avec_clic(self, mock_st, mock_get) -> None:
-        from src.modules.maison.depenses.components import afficher_comparaison_mois
+        from src.modules.maison.depenses.charts import afficher_comparaison_mois
 
         setup_mock_st(mock_st)
         mock_st.button.return_value = True

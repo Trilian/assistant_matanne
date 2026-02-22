@@ -107,6 +107,14 @@ _LAZY_IMPORTS: dict[str, str] = {
     "SyncService": "sync_service",
     "get_sync_service": "sync_service",
     "obtenir_service_sync_jeux": "sync_service",
+    # ── Loto CRUD ──
+    "LotoCrudService": "loto_crud_service",
+    "get_loto_crud_service": "loto_crud_service",
+    "obtenir_service_loto_crud": "loto_crud_service",
+    # ── Paris CRUD ──
+    "ParisCrudService": "paris_crud_service",
+    "get_paris_crud_service": "paris_crud_service",
+    "obtenir_service_paris_crud": "paris_crud_service",
 }
 
 
@@ -162,6 +170,11 @@ if TYPE_CHECKING:
         ScoreMatch,
         StatistiquesMarcheData,
     )
+    from ._internal.loto_crud_service import (
+        LotoCrudService,
+        get_loto_crud_service,
+        obtenir_service_loto_crud,
+    )
     from ._internal.loto_data import (
         NB_NUMEROS_CHANCE,
         NB_NUMEROS_PRINCIPAUX,
@@ -183,6 +196,11 @@ if TYPE_CHECKING:
         afficher_notification,
         get_notification_jeux_service,
         obtenir_service_notifications_jeux,
+    )
+    from ._internal.paris_crud_service import (
+        ParisCrudService,
+        get_paris_crud_service,
+        obtenir_service_paris_crud,
     )
     from ._internal.prediction_service import (
         ConseilPari,

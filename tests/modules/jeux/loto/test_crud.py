@@ -20,13 +20,13 @@ class TestAjouterTirage:
             yield mock
 
     @pytest.fixture
-    def mock_db(self):
-        """Mock contexte DB"""
-        with patch("src.modules.jeux.loto.crud.obtenir_contexte_db") as mock_ctx:
-            mock_session = MagicMock()
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-            yield mock_session, mock_ctx
+    def mock_service(self):
+        """Mock service loto crud"""
+        with patch("src.modules.jeux.loto.crud.get_loto_crud_service") as mock_factory:
+            mock_svc = MagicMock()
+            mock_factory.return_value = mock_svc
+            mock_svc.ajouter_tirage.return_value = True
+            yield mock_svc
 
     @pytest.fixture
     def mock_verifier_grille(self):
@@ -40,7 +40,7 @@ class TestAjouterTirage:
             }
             yield mock
 
-    def test_retourne_false_si_moins_de_5_numeros(self, mock_st, mock_db):
+    def test_retourne_false_si_moins_de_5_numeros(self, mock_st, mock_service):
         """Valide qu'il faut exactement 5 numéros"""
         from src.modules.jeux.loto.crud import ajouter_tirage
 
@@ -49,7 +49,7 @@ class TestAjouterTirage:
         assert result is False
         mock_st.error.assert_called()
 
-    def test_retourne_false_si_plus_de_5_numeros(self, mock_st, mock_db):
+    def test_retourne_false_si_plus_de_5_numeros(self, mock_st, mock_service):
         """Valide qu'il faut exactement 5 numéros"""
         from src.modules.jeux.loto.crud import ajouter_tirage
 
@@ -58,73 +58,50 @@ class TestAjouterTirage:
         assert result is False
         mock_st.error.assert_called()
 
-    def test_trie_numeros_avant_insertion(self, mock_st, mock_db, mock_verifier_grille):
-        """Vérifie que les numéros sont triés"""
-        mock_session, _ = mock_db
-        mock_session.query.return_value.filter.return_value.all.return_value = []
-
+    def test_delegue_au_service_avec_bons_args(self, mock_st, mock_service):
+        """Vérifie que le service est appelé avec les bons arguments"""
         from src.modules.jeux.loto.crud import ajouter_tirage
 
         result = ajouter_tirage(date(2025, 1, 6), [45, 12, 7, 34, 23], 8)
 
         assert result is True
-        # Vérifie que add a été appelé
-        mock_session.add.assert_called_once()
-        tirage = mock_session.add.call_args[0][0]
-        assert tirage.numero_1 == 7
-        assert tirage.numero_2 == 12
-        assert tirage.numero_3 == 23
-        assert tirage.numero_4 == 34
-        assert tirage.numero_5 == 45
+        mock_service.ajouter_tirage.assert_called_once()
+        call_kwargs = mock_service.ajouter_tirage.call_args[1]
+        assert call_kwargs["numeros"] == [45, 12, 7, 34, 23]
+        assert call_kwargs["chance"] == 8
+        assert call_kwargs["date_t"] == date(2025, 1, 6)
 
-    def test_enregistre_tirage_avec_jackpot(self, mock_st, mock_db, mock_verifier_grille):
+    def test_enregistre_tirage_avec_jackpot(self, mock_st, mock_service):
         """Teste l'enregistrement avec jackpot"""
-        mock_session, _ = mock_db
-        mock_session.query.return_value.filter.return_value.all.return_value = []
-
         from src.modules.jeux.loto.crud import ajouter_tirage
 
         result = ajouter_tirage(date(2025, 1, 6), [1, 2, 3, 4, 5], 8, jackpot=5000000)
 
         assert result is True
-        tirage = mock_session.add.call_args[0][0]
-        assert tirage.jackpot_euros == 5000000
+        call_kwargs = mock_service.ajouter_tirage.call_args[1]
+        assert call_kwargs["jackpot"] == 5000000
 
-    def test_met_a_jour_grilles_en_attente(self, mock_st, mock_db, mock_verifier_grille):
-        """Vérifie la mise à jour des grilles en attente"""
-        mock_session, _ = mock_db
-
-        # Mock grille en attente
-        mock_grille = MagicMock()
-        mock_grille.tirage_id = None
-        mock_grille.numeros = [1, 2, 3, 4, 5]
-        mock_grille.numero_chance = 8
-        mock_session.query.return_value.filter.return_value.all.return_value = [mock_grille]
-
+    def test_passe_verifier_fn_au_service(self, mock_st, mock_service, mock_verifier_grille):
+        """Vérifie que verifier_fn est passée au service"""
         from src.modules.jeux.loto.crud import ajouter_tirage
 
         result = ajouter_tirage(date(2025, 1, 6), [1, 2, 3, 4, 5], 8)
 
         assert result is True
-        mock_verifier_grille.assert_called_once()
-        assert mock_grille.rang == 6
-        assert mock_grille.gain == 20
+        call_kwargs = mock_service.ajouter_tirage.call_args[1]
+        assert call_kwargs["verifier_fn"] is not None
 
-    def test_affiche_succes_apres_ajout(self, mock_st, mock_db, mock_verifier_grille):
+    def test_affiche_succes_apres_ajout(self, mock_st, mock_service):
         """Vérifie le message de succès"""
-        mock_session, _ = mock_db
-        mock_session.query.return_value.filter.return_value.all.return_value = []
-
         from src.modules.jeux.loto.crud import ajouter_tirage
 
         ajouter_tirage(date(2025, 1, 6), [1, 2, 3, 4, 5], 8)
 
         mock_st.success.assert_called()
 
-    def test_gere_exception_db(self, mock_st, mock_db):
+    def test_gere_exception_db(self, mock_st, mock_service):
         """Teste la gestion d'erreur DB"""
-        mock_session, mock_ctx = mock_db
-        mock_ctx.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
+        mock_service.ajouter_tirage.side_effect = Exception("DB Error")
 
         from src.modules.jeux.loto.crud import ajouter_tirage
 
@@ -144,15 +121,15 @@ class TestEnregistrerGrille:
             yield mock
 
     @pytest.fixture
-    def mock_db(self):
-        """Mock contexte DB"""
-        with patch("src.modules.jeux.loto.crud.obtenir_contexte_db") as mock_ctx:
-            mock_session = MagicMock()
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-            yield mock_session, mock_ctx
+    def mock_service(self):
+        """Mock service loto crud"""
+        with patch("src.modules.jeux.loto.crud.get_loto_crud_service") as mock_factory:
+            mock_svc = MagicMock()
+            mock_factory.return_value = mock_svc
+            mock_svc.enregistrer_grille.return_value = True
+            yield mock_svc
 
-    def test_retourne_false_si_pas_5_numeros(self, mock_st, mock_db):
+    def test_retourne_false_si_pas_5_numeros(self, mock_st, mock_service):
         """Valide qu'il faut exactement 5 numéros"""
         from src.modules.jeux.loto.crud import enregistrer_grille
 
@@ -161,50 +138,40 @@ class TestEnregistrerGrille:
         assert result is False
         mock_st.error.assert_called()
 
-    def test_trie_numeros_avant_insertion(self, mock_st, mock_db):
-        """Vérifie que les numéros sont triés"""
-        mock_session, _ = mock_db
-
+    def test_delegue_au_service_avec_bons_args(self, mock_st, mock_service):
+        """Vérifie que le service est appelé avec les bons arguments"""
         from src.modules.jeux.loto.crud import enregistrer_grille
 
         result = enregistrer_grille([49, 25, 7, 1, 33], 5)
 
         assert result is True
-        grille = mock_session.add.call_args[0][0]
-        assert grille.numero_1 == 1
-        assert grille.numero_2 == 7
-        assert grille.numero_3 == 25
-        assert grille.numero_4 == 33
-        assert grille.numero_5 == 49
+        mock_service.enregistrer_grille.assert_called_once()
+        call_kwargs = mock_service.enregistrer_grille.call_args[1]
+        assert call_kwargs["numeros"] == [49, 25, 7, 1, 33]
+        assert call_kwargs["chance"] == 5
 
-    def test_enregistre_source_et_type_par_defaut(self, mock_st, mock_db):
+    def test_enregistre_source_et_type_par_defaut(self, mock_st, mock_service):
         """Teste les valeurs par défaut"""
-        mock_session, _ = mock_db
-
         from src.modules.jeux.loto.crud import enregistrer_grille
 
         enregistrer_grille([1, 2, 3, 4, 5], 8)
 
-        grille = mock_session.add.call_args[0][0]
-        assert grille.source_prediction == "manuel"
-        assert grille.est_virtuelle is True
+        call_kwargs = mock_service.enregistrer_grille.call_args[1]
+        assert call_kwargs["source"] == "manuel"
+        assert call_kwargs["est_virtuelle"] is True
 
-    def test_enregistre_source_personnalisee(self, mock_st, mock_db):
+    def test_enregistre_source_personnalisee(self, mock_st, mock_service):
         """Teste une source personnalisée"""
-        mock_session, _ = mock_db
-
         from src.modules.jeux.loto.crud import enregistrer_grille
 
         enregistrer_grille([1, 2, 3, 4, 5], 8, source="ia", est_virtuelle=False)
 
-        grille = mock_session.add.call_args[0][0]
-        assert grille.source_prediction == "ia"
-        assert grille.est_virtuelle is False
+        call_kwargs = mock_service.enregistrer_grille.call_args[1]
+        assert call_kwargs["source"] == "ia"
+        assert call_kwargs["est_virtuelle"] is False
 
-    def test_affiche_succes_apres_enregistrement(self, mock_st, mock_db):
+    def test_affiche_succes_apres_enregistrement(self, mock_st, mock_service):
         """Vérifie le message de succès"""
-        mock_session, _ = mock_db
-
         from src.modules.jeux.loto.crud import enregistrer_grille
 
         enregistrer_grille([1, 2, 3, 4, 5], 8)
@@ -214,10 +181,9 @@ class TestEnregistrerGrille:
         assert "1-2-3-4-5" in call_arg
         assert "N°8" in call_arg
 
-    def test_gere_exception_db(self, mock_st, mock_db):
+    def test_gere_exception_db(self, mock_st, mock_service):
         """Teste la gestion d'erreur DB"""
-        mock_session, mock_ctx = mock_db
-        mock_ctx.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
+        mock_service.enregistrer_grille.side_effect = Exception("DB Error")
 
         from src.modules.jeux.loto.crud import enregistrer_grille
 
