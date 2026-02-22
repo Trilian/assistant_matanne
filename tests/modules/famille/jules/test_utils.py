@@ -258,14 +258,12 @@ class TestGetAchatsJulesEnAttente:
         mock_purchase.achete = False
         mock_purchase.categorie = "jules_vetements"
 
-        mock_db = MagicMock()
-        mock_query = mock_db.query.return_value
-        mock_filter = mock_query.filter.return_value
-        mock_filter.order_by.return_value.all.return_value = [mock_purchase]
-
-        with patch("src.modules.famille.jules.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        with patch(
+            "src.modules.famille.jules.utils.obtenir_service_achats_famille"
+        ) as mock_factory:
+            mock_service = MagicMock()
+            mock_factory.return_value = mock_service
+            mock_service.lister_par_groupe.return_value = [mock_purchase]
 
             from src.modules.famille.jules.utils import get_achats_jules_en_attente
 
@@ -275,8 +273,10 @@ class TestGetAchatsJulesEnAttente:
 
     def test_retourne_liste_vide_sur_exception(self):
         """Retourne une liste vide en cas d'erreur"""
-        with patch("src.modules.famille.jules.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.side_effect = Exception("DB error")
+        with patch(
+            "src.modules.famille.jules.utils.obtenir_service_achats_famille"
+        ) as mock_factory:
+            mock_factory.return_value.lister_par_groupe.side_effect = Exception("DB error")
 
             from src.modules.famille.jules.utils import get_achats_jules_en_attente
 
@@ -286,14 +286,12 @@ class TestGetAchatsJulesEnAttente:
 
     def test_retourne_liste_vide_si_aucun_achat(self):
         """Retourne une liste vide si aucun achat"""
-        mock_db = MagicMock()
-        mock_query = mock_db.query.return_value
-        mock_filter = mock_query.filter.return_value
-        mock_filter.order_by.return_value.all.return_value = []
-
-        with patch("src.modules.famille.jules.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        with patch(
+            "src.modules.famille.jules.utils.obtenir_service_achats_famille"
+        ) as mock_factory:
+            mock_service = MagicMock()
+            mock_factory.return_value = mock_service
+            mock_service.lister_par_groupe.return_value = []
 
             from src.modules.famille.jules.utils import get_achats_jules_en_attente
 

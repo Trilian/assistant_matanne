@@ -133,13 +133,12 @@ class TestGetWeekendActivities:
 
     def test_retourne_dict_avec_saturday_sunday(self):
         """Retourne un dict avec les clés saturday et sunday"""
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.order_by.return_value.all.return_value = []
+        mock_service = MagicMock()
+        mock_service.lister_activites_weekend.return_value = {"saturday": [], "sunday": []}
 
-        with patch("src.modules.famille.weekend.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.weekend.utils.obtenir_service_weekend", return_value=mock_service
+        ):
             from src.modules.famille.weekend.utils import get_weekend_activities
 
             saturday = date(2026, 2, 14)
@@ -154,22 +153,18 @@ class TestGetWeekendActivities:
         saturday = date(2026, 2, 14)
         sunday = date(2026, 2, 15)
 
-        mock_act_samedi = MagicMock()
-        mock_act_samedi.date_prevue = saturday
+        mock_act_samedi = MagicMock(date_prevue=saturday)
+        mock_act_dimanche = MagicMock(date_prevue=sunday)
 
-        mock_act_dimanche = MagicMock()
-        mock_act_dimanche.date_prevue = sunday
+        mock_service = MagicMock()
+        mock_service.lister_activites_weekend.return_value = {
+            "saturday": [mock_act_samedi],
+            "sunday": [mock_act_dimanche],
+        }
 
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.order_by.return_value.all.return_value = [
-            mock_act_samedi,
-            mock_act_dimanche,
-        ]
-
-        with patch("src.modules.famille.weekend.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.weekend.utils.obtenir_service_weekend", return_value=mock_service
+        ):
             from src.modules.famille.weekend.utils import get_weekend_activities
 
             result = get_weekend_activities(saturday, sunday)
@@ -179,9 +174,10 @@ class TestGetWeekendActivities:
 
     def test_retourne_dict_vide_sur_exception(self):
         """Retourne des listes vides en cas d'erreur"""
-        with patch("src.modules.famille.weekend.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.side_effect = Exception("DB error")
-
+        with patch(
+            "src.modules.famille.weekend.utils.obtenir_service_weekend",
+            side_effect=Exception("error"),
+        ):
             from src.modules.famille.weekend.utils import get_weekend_activities
 
             result = get_weekend_activities(date(2026, 2, 14), date(2026, 2, 15))
@@ -194,26 +190,12 @@ class TestGetBudgetWeekend:
 
     def test_calcule_budget_estime_et_reel(self):
         """Calcule le budget estimé et réel"""
-        mock_act_1 = MagicMock()
-        mock_act_1.cout_estime = 50.0
-        mock_act_1.cout_reel = 45.0
-        mock_act_1.statut = "termine"
+        mock_service = MagicMock()
+        mock_service.get_budget_weekend.return_value = {"estime": 80.0, "reel": 45.0}
 
-        mock_act_2 = MagicMock()
-        mock_act_2.cout_estime = 30.0
-        mock_act_2.cout_reel = None
-        mock_act_2.statut = "planifie"
-
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.all.return_value = [
-            mock_act_1,
-            mock_act_2,
-        ]
-
-        with patch("src.modules.famille.weekend.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.weekend.utils.obtenir_service_weekend", return_value=mock_service
+        ):
             from src.modules.famille.weekend.utils import get_budget_weekend
 
             result = get_budget_weekend(date(2026, 2, 14), date(2026, 2, 15))
@@ -223,13 +205,12 @@ class TestGetBudgetWeekend:
 
     def test_retourne_zeros_si_pas_activites(self):
         """Retourne des zéros s'il n'y a pas d'activités"""
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.all.return_value = []
+        mock_service = MagicMock()
+        mock_service.get_budget_weekend.return_value = {"estime": 0, "reel": 0}
 
-        with patch("src.modules.famille.weekend.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.weekend.utils.obtenir_service_weekend", return_value=mock_service
+        ):
             from src.modules.famille.weekend.utils import get_budget_weekend
 
             result = get_budget_weekend(date(2026, 2, 14), date(2026, 2, 15))
@@ -238,9 +219,10 @@ class TestGetBudgetWeekend:
 
     def test_retourne_zeros_sur_exception(self):
         """Retourne des zéros en cas d'erreur"""
-        with patch("src.modules.famille.weekend.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.side_effect = Exception("DB error")
-
+        with patch(
+            "src.modules.famille.weekend.utils.obtenir_service_weekend",
+            side_effect=Exception("error"),
+        ):
             from src.modules.famille.weekend.utils import get_budget_weekend
 
             result = get_budget_weekend(date(2026, 2, 14), date(2026, 2, 15))
@@ -249,18 +231,12 @@ class TestGetBudgetWeekend:
 
     def test_gere_cout_none(self):
         """Gère les coûts None"""
-        mock_act = MagicMock()
-        mock_act.cout_estime = None
-        mock_act.cout_reel = None
-        mock_act.statut = "termine"
+        mock_service = MagicMock()
+        mock_service.get_budget_weekend.return_value = {"estime": 0, "reel": 0}
 
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.all.return_value = [mock_act]
-
-        with patch("src.modules.famille.weekend.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.weekend.utils.obtenir_service_weekend", return_value=mock_service
+        ):
             from src.modules.famille.weekend.utils import get_budget_weekend
 
             result = get_budget_weekend(date(2026, 2, 14), date(2026, 2, 15))
@@ -274,18 +250,13 @@ class TestGetLieuxTestes:
 
     def test_retourne_liste_lieux(self):
         """Récupère les lieux déjà testés"""
-        mock_lieu = MagicMock()
-        mock_lieu.note_lieu = 4
+        mock_lieu = MagicMock(note_lieu=4)
+        mock_service = MagicMock()
+        mock_service.get_lieux_testes.return_value = [mock_lieu]
 
-        mock_db = MagicMock()
-        mock_query = mock_db.query.return_value
-        mock_filter = mock_query.filter.return_value
-        mock_filter.order_by.return_value.all.return_value = [mock_lieu]
-
-        with patch("src.modules.famille.weekend.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.weekend.utils.obtenir_service_weekend", return_value=mock_service
+        ):
             from src.modules.famille.weekend.utils import get_lieux_testes
 
             result = get_lieux_testes()
@@ -294,9 +265,10 @@ class TestGetLieuxTestes:
 
     def test_retourne_liste_vide_sur_exception(self):
         """Retourne une liste vide en cas d'erreur"""
-        with patch("src.modules.famille.weekend.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.side_effect = Exception("DB error")
-
+        with patch(
+            "src.modules.famille.weekend.utils.obtenir_service_weekend",
+            side_effect=Exception("error"),
+        ):
             from src.modules.famille.weekend.utils import get_lieux_testes
 
             result = get_lieux_testes()
@@ -305,15 +277,12 @@ class TestGetLieuxTestes:
 
     def test_retourne_liste_vide_si_aucun_lieu(self):
         """Retourne une liste vide si aucun lieu"""
-        mock_db = MagicMock()
-        mock_query = mock_db.query.return_value
-        mock_filter = mock_query.filter.return_value
-        mock_filter.order_by.return_value.all.return_value = []
+        mock_service = MagicMock()
+        mock_service.get_lieux_testes.return_value = []
 
-        with patch("src.modules.famille.weekend.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.weekend.utils.obtenir_service_weekend", return_value=mock_service
+        ):
             from src.modules.famille.weekend.utils import get_lieux_testes
 
             result = get_lieux_testes()
@@ -384,43 +353,36 @@ class TestMarkActivityDone:
 
     def test_marque_activite_terminee(self):
         """Marque une activité comme terminée"""
-        mock_activity = MagicMock()
-        mock_activity.statut = "planifie"
+        mock_service = MagicMock()
 
-        mock_db = MagicMock()
-        mock_db.get.return_value = mock_activity
-
-        with patch("src.modules.famille.weekend.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.weekend.utils.obtenir_service_weekend", return_value=mock_service
+        ):
             from src.modules.famille.weekend.utils import mark_activity_done
 
             mark_activity_done(1)
 
-            assert mock_activity.statut == "termine"
-            mock_db.commit.assert_called_once()
+            mock_service.marquer_termine.assert_called_once_with(1)
 
     def test_ne_fait_rien_si_activite_non_trouvee(self):
-        """Ne fait rien si l'activité n'existe pas"""
-        mock_db = MagicMock()
-        mock_db.get.return_value = None
+        """Délègue au service même si activité inexistante"""
+        mock_service = MagicMock()
 
-        with patch("src.modules.famille.weekend.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.weekend.utils.obtenir_service_weekend", return_value=mock_service
+        ):
             from src.modules.famille.weekend.utils import mark_activity_done
 
             mark_activity_done(999)
 
-            mock_db.commit.assert_not_called()
+            mock_service.marquer_termine.assert_called_once_with(999)
 
     def test_gere_exception_silencieusement(self):
         """Gère les exceptions silencieusement"""
-        with patch("src.modules.famille.weekend.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.side_effect = Exception("DB error")
-
+        with patch(
+            "src.modules.famille.weekend.utils.obtenir_service_weekend",
+            side_effect=Exception("error"),
+        ):
             from src.modules.famille.weekend.utils import mark_activity_done
 
             # Ne doit pas lever d'exception

@@ -164,21 +164,16 @@ class TestRenderFoodForm:
 
     @pytest.fixture
     def mock_db(self):
-        """Mock contexte DB"""
-        with patch("src.modules.famille.suivi_perso.alimentation.obtenir_contexte_db") as mock_ctx:
-            mock_session = MagicMock()
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-            yield mock_session, mock_ctx
+        """Mock service suivi_perso"""
+        with patch("src.services.famille.suivi_perso.obtenir_service_suivi_perso") as mock_factory:
+            mock_service = MagicMock()
+            mock_factory.return_value = mock_service
+            yield mock_service, mock_factory
 
     @pytest.fixture
     def mock_get_user(self):
-        """Mock get_or_create_user"""
-        with patch("src.modules.famille.suivi_perso.alimentation.get_or_create_user") as mock:
-            mock_user = MagicMock()
-            mock_user.id = 1
-            mock.return_value = mock_user
-            yield mock
+        """Mock get_or_create_user - no longer used by alimentation.py"""
+        yield MagicMock()
 
     def test_cree_formulaire(self, mock_st, mock_db):
         """Vérifie la création du formulaire"""
@@ -217,7 +212,7 @@ class TestRenderFoodForm:
 
     def test_enregistre_log_valide(self, mock_st, mock_db, mock_get_user):
         """Vérifie l'enregistrement d'un log valide"""
-        mock_session, _ = mock_db
+        mock_service, _ = mock_db
         mock_st.form_submit_button.return_value = True
         mock_st.selectbox.return_value = ("dejeuner", "🌞 Dejeuner")
         mock_st.text_area.return_value = "Poulet grillé"
@@ -225,29 +220,23 @@ class TestRenderFoodForm:
         mock_st.slider.return_value = 4
         mock_st.text_input.return_value = "Note test"
 
-        # Mock user query
-        mock_user = MagicMock()
-        mock_user.id = 1
-        mock_session.query.return_value.filter_by.return_value.first.return_value = mock_user
-
         from src.modules.famille.suivi_perso.alimentation import afficher_food_form
 
         afficher_food_form("anne")
 
-        mock_session.add.assert_called_once()
-        mock_session.commit.assert_called_once()
+        mock_service.ajouter_food_log.assert_called_once()
         mock_st.success.assert_called()
 
     def test_gere_exception_db(self, mock_st, mock_db):
         """Vérifie la gestion d'erreur DB"""
-        mock_session, mock_ctx = mock_db
+        mock_service, mock_factory = mock_db
         mock_st.form_submit_button.return_value = True
         mock_st.selectbox.return_value = ("dejeuner", "🌞 Dejeuner")
         mock_st.text_area.return_value = "Test"
         mock_st.number_input.return_value = 100
         mock_st.slider.return_value = 3
         mock_st.text_input.return_value = ""
-        mock_ctx.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
+        mock_service.ajouter_food_log.side_effect = Exception("DB Error")
 
         from src.modules.famille.suivi_perso.alimentation import afficher_food_form
 

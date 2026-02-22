@@ -283,16 +283,17 @@ class TestRenderNoterSortie:
     """Tests for afficher_noter_sortie function"""
 
     @patch("src.modules.famille.weekend.components.etat_vide")
-    @patch("src.modules.famille.weekend.components.obtenir_contexte_db")
+    @patch("src.modules.famille.weekend.components.obtenir_service_weekend")
     @patch("src.modules.famille.weekend.components.st")
-    def test_render_noter_sortie_no_activities(self, mock_st, mock_ctx, mock_etat_vide) -> None:
+    def test_render_noter_sortie_no_activities(
+        self, mock_st, mock_svc_factory, mock_etat_vide
+    ) -> None:
         from src.modules.famille.weekend.components import afficher_noter_sortie
 
         setup_mock_st(mock_st)
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.all.return_value = []
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.get_activites_non_notees.return_value = []
+        mock_svc_factory.return_value = mock_service
 
         afficher_noter_sortie()
 
@@ -303,9 +304,9 @@ class TestRenderNoterSortie:
         "src.modules.famille.weekend.components.TYPES_ACTIVITES",
         {"parc": {"emoji": "🌳", "label": "Parc"}, "autre": {"emoji": "📌", "label": "Autre"}},
     )
-    @patch("src.modules.famille.weekend.components.obtenir_contexte_db")
+    @patch("src.modules.famille.weekend.components.obtenir_service_weekend")
     @patch("src.modules.famille.weekend.components.st")
-    def test_render_noter_sortie_with_activities(self, mock_st, mock_ctx) -> None:
+    def test_render_noter_sortie_with_activities(self, mock_st, mock_svc_factory) -> None:
         from src.modules.famille.weekend.components import afficher_noter_sortie
 
         setup_mock_st(mock_st)
@@ -315,10 +316,9 @@ class TestRenderNoterSortie:
         mock_activity.titre = "Test"
         mock_activity.date_prevue = date(2026, 2, 15)
 
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.all.return_value = [mock_activity]
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.get_activites_non_notees.return_value = [mock_activity]
+        mock_svc_factory.return_value = mock_service
 
         afficher_noter_sortie()
 
@@ -329,10 +329,10 @@ class TestRenderNoterSortie:
         "src.modules.famille.weekend.components.TYPES_ACTIVITES",
         {"parc": {"emoji": "🌳", "label": "Parc"}, "autre": {"emoji": "📌", "label": "Autre"}},
     )
-    @patch("src.modules.famille.weekend.components.obtenir_contexte_db")
+    @patch("src.modules.famille.weekend.components.obtenir_service_weekend")
     @patch("src.modules.famille.weekend.components.st")
-    def test_render_noter_sortie_save_button(self, mock_st, mock_ctx) -> None:
-        """Test saving a rating via the save button (lines 279-288)"""
+    def test_render_noter_sortie_save_button(self, mock_st, mock_svc_factory) -> None:
+        """Test saving a rating via the save button"""
         from src.modules.famille.weekend.components import afficher_noter_sortie
 
         setup_mock_st(mock_st)
@@ -348,16 +348,13 @@ class TestRenderNoterSortie:
         mock_activity.titre = "Test"
         mock_activity.date_prevue = date(2026, 2, 15)
 
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.all.return_value = [mock_activity]
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.get_activites_non_notees.return_value = [mock_activity]
+        mock_svc_factory.return_value = mock_service
 
         afficher_noter_sortie()
 
-        assert mock_activity.note_lieu == 4
-        assert mock_activity.a_refaire is True
-        mock_db.commit.assert_called()
+        mock_service.noter_sortie.assert_called()
         mock_st.success.assert_called()
 
 
@@ -583,11 +580,11 @@ class TestRenderAddActivitySubmit:
     """Tests for form submission in afficher_add_activity (lines 217-239)"""
 
     @patch("src.modules.famille.weekend.components.WeekendActivity")
-    @patch("src.modules.famille.weekend.components.obtenir_contexte_db")
+    @patch("src.modules.famille.weekend.components.obtenir_service_weekend")
     @patch("src.modules.famille.weekend.components.get_next_weekend")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_add_activity_submit_valid(
-        self, mock_st, mock_weekend, mock_ctx, mock_activity_class
+        self, mock_st, mock_weekend, mock_svc_factory, mock_activity_class
     ) -> None:
         from src.modules.famille.weekend.components import afficher_add_activity
 
@@ -602,24 +599,23 @@ class TestRenderAddActivitySubmit:
         mock_st.checkbox.return_value = True
         mock_weekend.return_value = (date(2026, 2, 21), date(2026, 2, 22))
 
-        mock_db = MagicMock()
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_svc_factory.return_value = mock_service
 
         afficher_add_activity()
 
-        mock_activity_class.assert_called()
-        mock_db.add.assert_called()
-        mock_db.commit.assert_called()
+        mock_service.ajouter_activite.assert_called()
         mock_st.success.assert_called()
         mock_st.rerun.assert_called()
 
+        mock_st.rerun.assert_called()
+
     @patch("src.modules.famille.weekend.components.WeekendActivity")
-    @patch("src.modules.famille.weekend.components.obtenir_contexte_db")
+    @patch("src.modules.famille.weekend.components.obtenir_service_weekend")
     @patch("src.modules.famille.weekend.components.get_next_weekend")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_add_activity_submit_exception(
-        self, mock_st, mock_weekend, mock_ctx, mock_activity_class
+        self, mock_st, mock_weekend, mock_svc_factory, mock_activity_class
     ) -> None:
         from src.modules.famille.weekend.components import afficher_add_activity
 
@@ -628,8 +624,7 @@ class TestRenderAddActivitySubmit:
         mock_st.text_input.return_value = "Test Activity"
         mock_weekend.return_value = (date(2026, 2, 21), date(2026, 2, 22))
 
-        mock_ctx.return_value.__enter__ = MagicMock(side_effect=Exception("Database error"))
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_svc_factory.return_value.ajouter_activite.side_effect = Exception("Database error")
 
         afficher_add_activity()
 

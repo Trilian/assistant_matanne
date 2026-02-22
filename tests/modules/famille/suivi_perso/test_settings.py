@@ -321,9 +321,9 @@ class TestRenderObjectifs:
         mock_st.subheader.assert_called()
         assert mock_st.number_input.call_count == 3
 
-    @patch("src.modules.famille.suivi_perso.settings.obtenir_contexte_db")
+    @patch("src.services.famille.suivi_perso.obtenir_service_suivi_perso")
     @patch("src.modules.famille.suivi_perso.settings.st")
-    def test_render_objectifs_save_button(self, mock_st, mock_ctx) -> None:
+    def test_render_objectifs_save_button(self, mock_st, mock_svc_factory) -> None:
         from src.modules.famille.suivi_perso.settings import afficher_objectifs
 
         setup_mock_st(mock_st)
@@ -336,23 +336,19 @@ class TestRenderObjectifs:
         mock_user.objectif_calories_brulees = 500
         mock_user.objectif_minutes_actives = 60
 
-        mock_db = MagicMock()
-        mock_db_user = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_db_user
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_svc_factory.return_value = mock_service
 
         afficher_objectifs({"user": mock_user})
 
-        mock_db.commit.assert_called_once()
-        assert mock_db_user.objectif_pas_quotidien == 12000
-        assert mock_db_user.objectif_calories_brulees == 600
-        assert mock_db_user.objectif_minutes_actives == 75
+        mock_service.sauvegarder_objectifs.assert_called_once()
         mock_st.success.assert_called()
 
-    @patch("src.modules.famille.suivi_perso.settings.obtenir_contexte_db")
+    @patch("src.services.famille.suivi_perso.obtenir_service_suivi_perso")
     @patch("src.modules.famille.suivi_perso.settings.st")
-    def test_render_objectifs_save_button_success_and_rerun(self, mock_st, mock_ctx) -> None:
+    def test_render_objectifs_save_button_success_and_rerun(
+        self, mock_st, mock_svc_factory
+    ) -> None:
         """Test save button verifies st.success and st.rerun are called on success"""
         from src.modules.famille.suivi_perso.settings import afficher_objectifs
 
@@ -366,22 +362,19 @@ class TestRenderObjectifs:
         mock_user.objectif_calories_brulees = 500
         mock_user.objectif_minutes_actives = 60
 
-        mock_db = MagicMock()
-        mock_db_user = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_db_user
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_svc_factory.return_value = mock_service
 
         afficher_objectifs({"user": mock_user})
 
-        mock_db.commit.assert_called_once()
+        mock_service.sauvegarder_objectifs.assert_called_once()
         mock_st.success.assert_called()
         mock_st.rerun.assert_called()
 
-    @patch("src.modules.famille.suivi_perso.settings.obtenir_contexte_db")
+    @patch("src.services.famille.suivi_perso.obtenir_service_suivi_perso")
     @patch("src.modules.famille.suivi_perso.settings.st")
-    def test_render_objectifs_save_button_with_exception(self, mock_st, mock_ctx) -> None:
-        """Test save button handles exception properly - lines 141-142"""
+    def test_render_objectifs_save_button_with_exception(self, mock_st, mock_svc_factory) -> None:
+        """Test save button handles exception properly"""
         from src.modules.famille.suivi_perso.settings import afficher_objectifs
 
         setup_mock_st(mock_st)
@@ -394,9 +387,8 @@ class TestRenderObjectifs:
         mock_user.objectif_calories_brulees = 500
         mock_user.objectif_minutes_actives = 60
 
-        # Make the context manager raise an exception
-        mock_ctx.return_value.__enter__ = MagicMock(side_effect=Exception("Database error"))
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        # Make the service raise an exception
+        mock_svc_factory.side_effect = Exception("Database error")
 
         afficher_objectifs({"user": mock_user})
 

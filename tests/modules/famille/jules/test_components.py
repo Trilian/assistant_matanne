@@ -446,18 +446,15 @@ class TestRenderShopping:
 class TestRenderAchatsCategorie:
     """Tests pour afficher_achats_categorie"""
 
-    @patch("src.modules.famille.jules.components.obtenir_contexte_db")
+    @patch("src.modules.famille.jules.components.obtenir_service_achats_famille")
     @patch("src.modules.famille.jules.components.st")
-    def test_achats_categorie_empty(self, mock_st, mock_db):
+    def test_achats_categorie_empty(self, mock_st, mock_factory):
         """Test affichage sans achats"""
         setup_mock_st(mock_st)
 
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter.return_value.order_by.return_value.all.return_value = []
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_factory.return_value = mock_service
+        mock_service.lister_par_categorie.return_value = []
 
         from src.modules.famille.jules.components import afficher_achats_categorie
 
@@ -465,20 +462,17 @@ class TestRenderAchatsCategorie:
 
         mock_st.caption.assert_called_with("Aucun article en attente")
 
-    @patch("src.modules.famille.jules.components.obtenir_contexte_db")
+    @patch("src.modules.famille.jules.components.obtenir_service_achats_famille")
     @patch("src.modules.famille.jules.components.st")
-    def test_achats_categorie_with_items(self, mock_st, mock_db):
+    def test_achats_categorie_with_items(self, mock_st, mock_factory):
         """Test affichage avec des achats"""
         setup_mock_st(mock_st)
 
         achat = create_mock_achat(1, "Pantalon", "jules_vetements", "haute", 25.0, "24M", "Bleu")
 
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter.return_value.order_by.return_value.all.return_value = [achat]
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_factory.return_value = mock_service
+        mock_service.lister_par_categorie.return_value = [achat]
 
         from src.modules.famille.jules.components import afficher_achats_categorie
 
@@ -489,20 +483,17 @@ class TestRenderAchatsCategorie:
         markdown_calls = [str(c) for c in mock_st.markdown.call_args_list]
         assert any("Pantalon" in str(c) for c in markdown_calls)
 
-    @patch("src.modules.famille.jules.components.obtenir_contexte_db")
+    @patch("src.modules.famille.jules.components.obtenir_service_achats_famille")
     @patch("src.modules.famille.jules.components.st")
-    def test_achats_categorie_buy_button(self, mock_st, mock_db):
+    def test_achats_categorie_buy_button(self, mock_st, mock_factory):
         """Test bouton acheter - Lines 179-185"""
         setup_mock_st(mock_st)
 
         achat = create_mock_achat(1, "Pantalon", "jules_vetements", "haute", 25.0)
 
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter.return_value.order_by.return_value.all.return_value = [achat]
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_factory.return_value = mock_service
+        mock_service.lister_par_categorie.return_value = [achat]
 
         # Simuler click sur le bouton acheter
         mock_st.button.return_value = True
@@ -511,16 +502,14 @@ class TestRenderAchatsCategorie:
 
         afficher_achats_categorie("jules_vetements")
 
-        # Verifie que l'achat est marque comme achete
-        assert achat.achete == True
-        assert achat.date_achat is not None
-        mock_session.commit.assert_called_once()
+        # Verifie que le service marque l'achat comme achete
+        mock_service.marquer_achete.assert_called_once_with(achat.id)
         mock_st.success.assert_called_with("Achete!")
         mock_st.rerun.assert_called_once()
 
-    @patch("src.modules.famille.jules.components.obtenir_contexte_db")
+    @patch("src.modules.famille.jules.components.obtenir_service_achats_famille")
     @patch("src.modules.famille.jules.components.st")
-    def test_achats_categorie_priorite_emojis(self, mock_st, mock_db):
+    def test_achats_categorie_priorite_emojis(self, mock_st, mock_factory):
         """Test emojis de priorite correctement affiches"""
         setup_mock_st(mock_st)
         mock_st.button.return_value = False
@@ -532,12 +521,9 @@ class TestRenderAchatsCategorie:
             create_mock_achat(4, "Basse", "jules_vetements", "basse"),
         ]
 
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter.return_value.order_by.return_value.all.return_value = achats
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_factory.return_value = mock_service
+        mock_service.lister_par_categorie.return_value = achats
 
         from src.modules.famille.jules.components import afficher_achats_categorie
 
@@ -550,14 +536,13 @@ class TestRenderAchatsCategorie:
         assert any("🟡" in str(c) for c in markdown_calls)  # moyenne
         assert any("🟢" in str(c) for c in markdown_calls)  # basse
 
-    @patch("src.modules.famille.jules.components.obtenir_contexte_db")
+    @patch("src.modules.famille.jules.components.obtenir_service_achats_famille")
     @patch("src.modules.famille.jules.components.st")
-    def test_achats_categorie_exception(self, mock_st, mock_db):
+    def test_achats_categorie_exception(self, mock_st, mock_factory):
         """Test gestion des erreurs"""
         setup_mock_st(mock_st)
 
-        mock_db.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_factory.return_value.lister_par_categorie.side_effect = Exception("DB Error")
 
         from src.modules.famille.jules.components import afficher_achats_categorie
 
@@ -565,21 +550,18 @@ class TestRenderAchatsCategorie:
 
         mock_st.error.assert_called()
 
-    @patch("src.modules.famille.jules.components.obtenir_contexte_db")
+    @patch("src.modules.famille.jules.components.obtenir_service_achats_famille")
     @patch("src.modules.famille.jules.components.st")
-    def test_achats_categorie_unknown_priorite(self, mock_st, mock_db):
+    def test_achats_categorie_unknown_priorite(self, mock_st, mock_factory):
         """Test priorite inconnue utilise emoji par defaut"""
         setup_mock_st(mock_st)
         mock_st.button.return_value = False
 
         achat = create_mock_achat(1, "Test", "jules_vetements", "inconnue")
 
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter.return_value.order_by.return_value.all.return_value = [achat]
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_factory.return_value = mock_service
+        mock_service.lister_par_categorie.return_value = [achat]
 
         from src.modules.famille.jules.components import afficher_achats_categorie
 
@@ -619,10 +601,9 @@ class TestRenderFormAjoutAchat:
 
         mock_st.error.assert_called_with("Nom requis")
 
-    @patch("src.modules.famille.jules.components.FamilyPurchase")
-    @patch("src.modules.famille.jules.components.obtenir_contexte_db")
+    @patch("src.modules.famille.jules.components.obtenir_service_achats_famille")
     @patch("src.modules.famille.jules.components.st")
-    def test_form_submit_success(self, mock_st, mock_db, mock_purchase):
+    def test_form_submit_success(self, mock_st, mock_factory):
         """Test soumission reussie - Lines 221-238"""
         setup_mock_st(mock_st)
         mock_st.form_submit_button.return_value = True
@@ -633,24 +614,20 @@ class TestRenderFormAjoutAchat:
         mock_st.number_input.return_value = 50.0
         mock_st.selectbox.side_effect = [("jules_vetements", "👕 Vêtements"), "haute"]
 
-        mock_session = MagicMock()
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_factory.return_value = mock_service
 
         from src.modules.famille.jules.components import afficher_form_ajout_achat
 
         afficher_form_ajout_achat()
 
-        mock_purchase.assert_called_once()
-        mock_session.add.assert_called_once()
-        mock_session.commit.assert_called_once()
+        mock_service.ajouter_achat.assert_called_once()
         mock_st.success.assert_called()
         mock_st.rerun.assert_called_once()
 
-    @patch("src.modules.famille.jules.components.FamilyPurchase")
-    @patch("src.modules.famille.jules.components.obtenir_contexte_db")
+    @patch("src.modules.famille.jules.components.obtenir_service_achats_famille")
     @patch("src.modules.famille.jules.components.st")
-    def test_form_submit_minimal(self, mock_st, mock_db, mock_purchase):
+    def test_form_submit_minimal(self, mock_st, mock_factory):
         """Test soumission avec donnees minimales"""
         setup_mock_st(mock_st)
         mock_st.form_submit_button.return_value = True
@@ -661,22 +638,21 @@ class TestRenderFormAjoutAchat:
         mock_st.number_input.return_value = 0.0
         mock_st.selectbox.side_effect = [("jules_jouets", "🧸 Jouets"), "moyenne"]
 
-        mock_session = MagicMock()
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_factory.return_value = mock_service
 
         from src.modules.famille.jules.components import afficher_form_ajout_achat
 
         afficher_form_ajout_achat()
 
-        # Verifie que l'achat est cree avec les valeurs None pour les champs optionnels
-        call_kwargs = mock_purchase.call_args
-        assert "Jouet Simple" in str(call_kwargs)
+        # Verifie que l'achat est cree via le service
+        mock_service.ajouter_achat.assert_called_once()
+        call_kwargs = mock_service.ajouter_achat.call_args
+        assert call_kwargs[1]["nom"] == "Jouet Simple"
 
-    @patch("src.modules.famille.jules.components.FamilyPurchase")
-    @patch("src.modules.famille.jules.components.obtenir_contexte_db")
+    @patch("src.modules.famille.jules.components.obtenir_service_achats_famille")
     @patch("src.modules.famille.jules.components.st")
-    def test_form_submit_exception(self, mock_st, mock_db, mock_purchase):
+    def test_form_submit_exception(self, mock_st, mock_factory):
         """Test exception lors de la soumission - Line 258"""
         setup_mock_st(mock_st)
         mock_st.form_submit_button.return_value = True
@@ -685,9 +661,8 @@ class TestRenderFormAjoutAchat:
         mock_st.number_input.return_value = 0.0
         mock_st.selectbox.side_effect = [("jules_vetements", "👕 Vêtements"), "moyenne"]
 
-        # Simuler une erreur de base de donnees
-        mock_db.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        # Simuler une erreur de service
+        mock_factory.return_value.ajouter_achat.side_effect = Exception("DB Error")
 
         from src.modules.famille.jules.components import afficher_form_ajout_achat
 
@@ -820,9 +795,9 @@ class TestEdgeCases:
         # Seulement 3 achats doivent etre ecrits
         assert mock_st.write.call_count == 3
 
-    @patch("src.modules.famille.jules.components.obtenir_contexte_db")
+    @patch("src.modules.famille.jules.components.obtenir_service_achats_famille")
     @patch("src.modules.famille.jules.components.st")
-    def test_achats_sans_prix(self, mock_st, mock_db):
+    def test_achats_sans_prix(self, mock_st, mock_factory):
         """Test affichage achats sans prix estime"""
         setup_mock_st(mock_st)
         mock_st.button.return_value = False
@@ -837,12 +812,9 @@ class TestEdgeCases:
             description=None,
         )
 
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter.return_value.order_by.return_value.all.return_value = [achat]
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_factory.return_value = mock_service
+        mock_service.lister_par_categorie.return_value = [achat]
 
         from src.modules.famille.jules.components import afficher_achats_categorie
 

@@ -235,8 +235,7 @@ class TestJulesPlanningUI:
     """Tests pour les fonctions UI avec mocks Streamlit."""
 
     @patch("src.modules.famille.jules_planning.st")
-    @patch("src.modules.famille.jules_planning.obtenir_contexte_db")
-    def test_app_runs(self, mock_db_context, mock_st):
+    def test_app_runs(self, mock_st):
         """Test que app() s'exécute sans erreur avec les mocks appropriés."""
         from src.modules.famille.jules_planning import app
 
@@ -245,9 +244,6 @@ class TestJulesPlanningUI:
         mock_st.title = MagicMock()
         mock_st.caption = MagicMock()
         mock_st.tabs = MagicMock(return_value=[MagicMock(), MagicMock(), MagicMock(), MagicMock()])
-
-        # Mock contexte DB
-        mock_db_context.side_effect = Exception("DB Error")
 
         try:
             app()
@@ -258,8 +254,7 @@ class TestJulesPlanningUI:
         mock_st.title.assert_called()
 
     @patch("src.modules.famille.jules_planning.st")
-    @patch("src.modules.famille.jules_planning.obtenir_contexte_db")
-    def test_render_vue_aujourd_hui(self, mock_db_context, mock_st):
+    def test_render_vue_aujourd_hui(self, mock_st):
         """Test afficher_vue_aujourd_hui avec mocks."""
         from src.modules.famille.jules_planning import afficher_vue_aujourd_hui
 
@@ -274,8 +269,6 @@ class TestJulesPlanningUI:
             return_value=MagicMock(__enter__=MagicMock(), __exit__=MagicMock())
         )
 
-        mock_db_context.side_effect = Exception("DB Error")
-
         try:
             afficher_vue_aujourd_hui()
         except Exception:
@@ -284,8 +277,7 @@ class TestJulesPlanningUI:
         mock_st.subheader.assert_called()
 
     @patch("src.modules.famille.jules_planning.st")
-    @patch("src.modules.famille.jules_planning.obtenir_contexte_db")
-    def test_render_vue_semaine(self, mock_db_context, mock_st):
+    def test_render_vue_semaine(self, mock_st):
         """Test afficher_vue_semaine avec mocks."""
         from src.modules.famille.jules_planning import afficher_vue_semaine
 
@@ -296,8 +288,6 @@ class TestJulesPlanningUI:
         mock_st.expander = MagicMock(
             return_value=MagicMock(__enter__=MagicMock(), __exit__=MagicMock())
         )
-
-        mock_db_context.side_effect = Exception("DB Error")
 
         try:
             afficher_vue_semaine()

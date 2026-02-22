@@ -60,46 +60,43 @@ class TestGetAllPurchases:
 
     def test_retourne_liste_achats_non_achetes(self):
         """Récupère les achats non achetés par défaut"""
-        mock_purchase = MagicMock()
-        mock_purchase.achete = False
+        mock_purchase = MagicMock(achete=False)
+        mock_service = MagicMock()
+        mock_service.lister_achats.return_value = [mock_purchase]
 
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.all.return_value = [mock_purchase]
-
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            return_value=mock_service,
+        ):
             from src.modules.famille.achats_famille.utils import get_all_purchases
 
             result = get_all_purchases()
 
             assert result == [mock_purchase]
-            mock_db.query.return_value.filter_by.assert_called_with(achete=False)
+            mock_service.lister_achats.assert_called_with(achete=False)
 
     def test_retourne_liste_achats_achetes(self):
         """Récupère les achats déjà achetés"""
-        mock_purchase = MagicMock()
-        mock_purchase.achete = True
+        mock_purchase = MagicMock(achete=True)
+        mock_service = MagicMock()
+        mock_service.lister_achats.return_value = [mock_purchase]
 
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.all.return_value = [mock_purchase]
-
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            return_value=mock_service,
+        ):
             from src.modules.famille.achats_famille.utils import get_all_purchases
 
             result = get_all_purchases(achete=True)
 
-            mock_db.query.return_value.filter_by.assert_called_with(achete=True)
+            mock_service.lister_achats.assert_called_with(achete=True)
 
     def test_retourne_liste_vide_sur_exception(self):
         """Retourne une liste vide en cas d'erreur"""
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.side_effect = Exception("DB error")
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            side_effect=Exception("error"),
+        ):
             from src.modules.famille.achats_famille.utils import get_all_purchases
 
             result = get_all_purchases()
@@ -112,29 +109,27 @@ class TestGetPurchasesByCategory:
 
     def test_filtre_par_categorie(self):
         """Filtre les achats par catégorie"""
-        mock_purchase = MagicMock()
-        mock_purchase.categorie = "jules_vetements"
+        mock_purchase = MagicMock(categorie="jules_vetements")
+        mock_service = MagicMock()
+        mock_service.lister_par_categorie.return_value = [mock_purchase]
 
-        mock_db = MagicMock()
-        mock_query = mock_db.query.return_value
-        mock_filter = mock_query.filter.return_value
-        mock_filter.order_by.return_value.all.return_value = [mock_purchase]
-
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            return_value=mock_service,
+        ):
             from src.modules.famille.achats_famille.utils import get_purchases_by_category
 
             result = get_purchases_by_category("jules_vetements")
 
             assert len(result) == 1
+            mock_service.lister_par_categorie.assert_called_with("jules_vetements", achete=False)
 
     def test_retourne_liste_vide_sur_exception(self):
         """Retourne une liste vide en cas d'erreur"""
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.side_effect = Exception("DB error")
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            side_effect=Exception("error"),
+        ):
             from src.modules.famille.achats_famille.utils import get_purchases_by_category
 
             result = get_purchases_by_category("jules_vetements")
@@ -148,16 +143,13 @@ class TestGetPurchasesByGroupe:
     def test_filtre_par_groupe_jules(self):
         """Filtre les achats par groupe jules"""
         mock_purchase = MagicMock()
+        mock_service = MagicMock()
+        mock_service.lister_par_groupe.return_value = [mock_purchase]
 
-        mock_db = MagicMock()
-        mock_query = mock_db.query.return_value
-        mock_filter = mock_query.filter.return_value
-        mock_filter.order_by.return_value.all.return_value = [mock_purchase]
-
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            return_value=mock_service,
+        ):
             from src.modules.famille.achats_famille.utils import get_purchases_by_groupe
 
             result = get_purchases_by_groupe("jules")
@@ -166,15 +158,13 @@ class TestGetPurchasesByGroupe:
 
     def test_filtre_par_groupe_nous(self):
         """Filtre les achats par groupe nous"""
-        mock_db = MagicMock()
-        mock_query = mock_db.query.return_value
-        mock_filter = mock_query.filter.return_value
-        mock_filter.order_by.return_value.all.return_value = []
+        mock_service = MagicMock()
+        mock_service.lister_par_groupe.return_value = []
 
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            return_value=mock_service,
+        ):
             from src.modules.famille.achats_famille.utils import get_purchases_by_groupe
 
             result = get_purchases_by_groupe("nous")
@@ -183,9 +173,10 @@ class TestGetPurchasesByGroupe:
 
     def test_retourne_liste_vide_sur_exception(self):
         """Retourne une liste vide en cas d'erreur"""
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.side_effect = Exception("DB error")
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            side_effect=Exception("error"),
+        ):
             from src.modules.famille.achats_famille.utils import get_purchases_by_groupe
 
             result = get_purchases_by_groupe("jules")
@@ -198,36 +189,19 @@ class TestGetStats:
 
     def test_stats_avec_achats(self):
         """Calcule les statistiques avec des achats"""
-        # Achats en attente
-        mock_en_attente_1 = MagicMock()
-        mock_en_attente_1.prix_estime = 50.0
-        mock_en_attente_1.priorite = "urgent"
+        mock_service = MagicMock()
+        mock_service.get_stats.return_value = {
+            "en_attente": 2,
+            "achetes": 1,
+            "total_estime": 80.0,
+            "total_depense": 45.0,
+            "urgents": 1,
+        }
 
-        mock_en_attente_2 = MagicMock()
-        mock_en_attente_2.prix_estime = 30.0
-        mock_en_attente_2.priorite = "basse"
-
-        # Achats effectués
-        mock_achete = MagicMock()
-        mock_achete.prix_reel = 45.0
-        mock_achete.prix_estime = 50.0
-
-        mock_db = MagicMock()
-
-        def filter_by_side_effect(achete):
-            mock_result = MagicMock()
-            if achete:
-                mock_result.all.return_value = [mock_achete]
-            else:
-                mock_result.all.return_value = [mock_en_attente_1, mock_en_attente_2]
-            return mock_result
-
-        mock_db.query.return_value.filter_by.side_effect = filter_by_side_effect
-
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            return_value=mock_service,
+        ):
             from src.modules.famille.achats_famille.utils import get_stats
 
             result = get_stats()
@@ -240,13 +214,19 @@ class TestGetStats:
 
     def test_stats_sans_achats(self):
         """Calcule les statistiques sans achats"""
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.all.return_value = []
+        mock_service = MagicMock()
+        mock_service.get_stats.return_value = {
+            "en_attente": 0,
+            "achetes": 0,
+            "total_estime": 0,
+            "total_depense": 0,
+            "urgents": 0,
+        }
 
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            return_value=mock_service,
+        ):
             from src.modules.famille.achats_famille.utils import get_stats
 
             result = get_stats()
@@ -256,9 +236,10 @@ class TestGetStats:
 
     def test_stats_sur_exception(self):
         """Retourne des stats vides sur exception"""
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.side_effect = Exception("DB error")
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            side_effect=Exception("error"),
+        ):
             from src.modules.famille.achats_famille.utils import get_stats
 
             result = get_stats()
@@ -273,26 +254,19 @@ class TestGetStats:
 
     def test_stats_priorite_haute_compte_comme_urgent(self):
         """Vérifie que la priorité haute est comptée comme urgente"""
-        mock_urgent = MagicMock()
-        mock_urgent.prix_estime = 10.0
-        mock_urgent.priorite = "haute"
+        mock_service = MagicMock()
+        mock_service.get_stats.return_value = {
+            "en_attente": 1,
+            "achetes": 0,
+            "total_estime": 10.0,
+            "total_depense": 0,
+            "urgents": 1,
+        }
 
-        mock_db = MagicMock()
-
-        def filter_by_side_effect(achete):
-            mock_result = MagicMock()
-            if not achete:
-                mock_result.all.return_value = [mock_urgent]
-            else:
-                mock_result.all.return_value = []
-            return mock_result
-
-        mock_db.query.return_value.filter_by.side_effect = filter_by_side_effect
-
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            return_value=mock_service,
+        ):
             from src.modules.famille.achats_famille.utils import get_stats
 
             result = get_stats()
@@ -305,62 +279,52 @@ class TestMarkAsBought:
 
     def test_marque_achat_comme_effectue(self):
         """Marque un achat comme effectué"""
-        mock_purchase = MagicMock()
-        mock_purchase.achete = False
+        mock_service = MagicMock()
 
-        mock_db = MagicMock()
-        mock_db.get.return_value = mock_purchase
-
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            return_value=mock_service,
+        ):
             from src.modules.famille.achats_famille.utils import mark_as_bought
 
             mark_as_bought(1)
 
-            assert mock_purchase.achete is True
-            assert mock_purchase.date_achat == date.today()
-            mock_db.commit.assert_called_once()
+            mock_service.marquer_achete.assert_called_once_with(1, prix_reel=None)
 
     def test_marque_achat_avec_prix_reel(self):
         """Marque un achat avec prix réel"""
-        mock_purchase = MagicMock()
-        mock_purchase.prix_reel = None
+        mock_service = MagicMock()
 
-        mock_db = MagicMock()
-        mock_db.get.return_value = mock_purchase
-
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            return_value=mock_service,
+        ):
             from src.modules.famille.achats_famille.utils import mark_as_bought
 
             mark_as_bought(1, prix_reel=25.50)
 
-            assert mock_purchase.prix_reel == 25.50
+            mock_service.marquer_achete.assert_called_once_with(1, prix_reel=25.50)
 
     def test_ne_fait_rien_si_achat_non_trouve(self):
-        """Ne fait rien si l'achat n'existe pas"""
-        mock_db = MagicMock()
-        mock_db.get.return_value = None
+        """Délègue au service même si achat inexistant"""
+        mock_service = MagicMock()
 
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            return_value=mock_service,
+        ):
             from src.modules.famille.achats_famille.utils import mark_as_bought
 
             mark_as_bought(999)
 
-            mock_db.commit.assert_not_called()
+            mock_service.marquer_achete.assert_called_once_with(999, prix_reel=None)
 
     def test_gere_exception_silencieusement(self):
         """Gère les exceptions silencieusement"""
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.side_effect = Exception("DB error")
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            side_effect=Exception("error"),
+        ):
             from src.modules.famille.achats_famille.utils import mark_as_bought
 
             # Ne doit pas lever d'exception
@@ -372,42 +336,38 @@ class TestDeletePurchase:
 
     def test_supprime_achat(self):
         """Supprime un achat existant"""
-        mock_purchase = MagicMock()
+        mock_service = MagicMock()
 
-        mock_db = MagicMock()
-        mock_db.get.return_value = mock_purchase
-
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            return_value=mock_service,
+        ):
             from src.modules.famille.achats_famille.utils import delete_purchase
 
             delete_purchase(1)
 
-            mock_db.delete.assert_called_once_with(mock_purchase)
-            mock_db.commit.assert_called_once()
+            mock_service.supprimer_achat.assert_called_once_with(1)
 
     def test_ne_fait_rien_si_achat_non_trouve(self):
-        """Ne fait rien si l'achat n'existe pas"""
-        mock_db = MagicMock()
-        mock_db.get.return_value = None
+        """Délègue au service même si achat inexistant"""
+        mock_service = MagicMock()
 
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            return_value=mock_service,
+        ):
             from src.modules.famille.achats_famille.utils import delete_purchase
 
             delete_purchase(999)
 
-            mock_db.delete.assert_not_called()
+            mock_service.supprimer_achat.assert_called_once_with(999)
 
     def test_gere_exception_silencieusement(self):
         """Gère les exceptions silencieusement"""
-        with patch("src.modules.famille.achats_famille.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.side_effect = Exception("DB error")
-
+        with patch(
+            "src.modules.famille.achats_famille.utils.obtenir_service_achats_famille",
+            side_effect=Exception("error"),
+        ):
             from src.modules.famille.achats_famille.utils import delete_purchase
 
             # Ne doit pas lever d'exception

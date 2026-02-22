@@ -370,22 +370,19 @@ class TestJulesHelpers:
         assert "vetements" in result
         assert "chaussures" in result
 
-    @patch("src.modules.famille.jules.utils.obtenir_contexte_db")
-    def test_get_achats_jules_en_attente(self, mock_db_context):
+    @patch("src.modules.famille.jules.utils.obtenir_service_achats_famille")
+    def test_get_achats_jules_en_attente(self, mock_factory):
         """Test get_achats_jules_en_attente"""
         # Setup
-        mock_db = MagicMock()
-        mock_db_context.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_db_context.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_factory.return_value = mock_service
 
         mock_achat = MagicMock()
         mock_achat.nom = "Pantalon"
         mock_achat.categorie = "jules_vetements"
         mock_achat.priorite = "haute"
 
-        mock_db.query.return_value.filter.return_value.order_by.return_value.all.return_value = [
-            mock_achat
-        ]
+        mock_service.lister_par_groupe.return_value = [mock_achat]
 
         from src.modules.famille.jules import get_achats_jules_en_attente
 
@@ -395,11 +392,11 @@ class TestJulesHelpers:
         # Assert
         assert isinstance(result, list)
 
-    @patch("src.modules.famille.jules.utils.obtenir_contexte_db")
-    def test_get_achats_jules_en_attente_error_returns_empty(self, mock_db_context):
+    @patch("src.modules.famille.jules.utils.obtenir_service_achats_famille")
+    def test_get_achats_jules_en_attente_error_returns_empty(self, mock_factory):
         """Test get_achats_jules_en_attente retourne liste vide si erreur"""
         # Setup - simule une erreur
-        mock_db_context.side_effect = Exception("DB Error")
+        mock_factory.return_value.lister_par_groupe.side_effect = Exception("DB Error")
 
         from src.modules.famille.jules import get_achats_jules_en_attente
 
