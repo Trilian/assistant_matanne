@@ -1164,6 +1164,22 @@ class TestTerminerSessionAvecEtapes:
 
         service = ServiceBatchCooking()
 
+        # Pré-créer la config pour éviter que get_config() ouvre une session imbriquée
+        from src.core.models import ConfigBatchCooking
+
+        config = patched_db_context.query(ConfigBatchCooking).first()
+        if not config:
+            config = ConfigBatchCooking(
+                jours_batch=[6],
+                heure_debut_preferee=time(10, 0),
+                duree_max_session=180,
+                avec_jules_par_defaut=True,
+                robots_disponibles=["four", "plaques", "cookeo"],
+                objectif_portions_semaine=20,
+            )
+            patched_db_context.add(config)
+            patched_db_context.commit()
+
         # Créer une recette
         recette = Recette(
             nom="Recette test terminee",

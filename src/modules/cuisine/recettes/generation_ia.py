@@ -238,11 +238,8 @@ def _afficher_suggestion_card(
                         "etapes": suggestion.etapes or [],
                     }
 
-                    # Créer la recette avec session BD
-                    from src.core.db import obtenir_contexte_db
-
-                    with obtenir_contexte_db() as db:
-                        recette = service.create_complete(data, db=db)
+                    # Créer la recette - service gère sa propre session
+                    recette = service.create_complete(data)
                     st.success(f"✅ '{recette.nom}' ajoutée à vos recettes!")
                     st.toast(f"🎉 {recette.nom} sauvegardée!", icon="✅")
 

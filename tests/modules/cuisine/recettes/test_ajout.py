@@ -164,10 +164,9 @@ class TestRenderAjouterManuel:
         afficher_ajouter_manuel()
         mock_st.error.assert_called()
 
-    @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.recettes.ajout.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.ajout.st")
-    def test_render_ajouter_manuel_success(self, mock_st, mock_get_service, mock_db_ctx):
+    def test_render_ajouter_manuel_success(self, mock_st, mock_get_service):
         session = SessionStateMock()
         session["form_nom"] = "test"
         setup_mock_st(mock_st, session)
@@ -178,9 +177,6 @@ class TestRenderAjouterManuel:
         mock_recette.nom = "Ma Recette"
         mock_service.create_complete.return_value = mock_recette
         mock_get_service.return_value = mock_service
-        mock_db = MagicMock()
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
         input_calls = [0]
 
         def text_input_side_effect(label, *args, **kwargs):
@@ -210,10 +206,9 @@ class TestRenderAjouterManuel:
         mock_st.success.assert_called()
         mock_st.balloons.assert_called()
 
-    @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.recettes.ajout.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.ajout.st")
-    def test_render_ajouter_manuel_validation_error(self, mock_st, mock_get_service, mock_db_ctx):
+    def test_render_ajouter_manuel_validation_error(self, mock_st, mock_get_service):
         from src.core.errors_base import ErreurValidation
 
         setup_mock_st(mock_st)
@@ -221,9 +216,6 @@ class TestRenderAjouterManuel:
         mock_service = MagicMock()
         mock_service.create_complete.side_effect = ErreurValidation("Erreur")
         mock_get_service.return_value = mock_service
-        mock_db = MagicMock()
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
         input_calls = [0]
 
         def text_input_side_effect(label, *args, **kwargs):
@@ -252,18 +244,14 @@ class TestRenderAjouterManuel:
         afficher_ajouter_manuel()
         mock_st.error.assert_called()
 
-    @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.recettes.ajout.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.ajout.st")
-    def test_render_ajouter_manuel_generic_error(self, mock_st, mock_get_service, mock_db_ctx):
+    def test_render_ajouter_manuel_generic_error(self, mock_st, mock_get_service):
         setup_mock_st(mock_st)
         mock_st.button.return_value = True
         mock_service = MagicMock()
         mock_service.create_complete.side_effect = Exception("DB Error")
         mock_get_service.return_value = mock_service
-        mock_db = MagicMock()
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
         input_calls = [0]
 
         def text_input_side_effect(label, *args, **kwargs):

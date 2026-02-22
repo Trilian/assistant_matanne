@@ -2,12 +2,7 @@
 Module pour l'import de recettes
 """
 
-from datetime import datetime
-
 import streamlit as st
-
-from src.core.db import obtenir_contexte_db
-from src.core.models import EtapeRecette, Ingredient, Recette, RecetteIngredient
 
 # Logique metier pure
 from src.services.cuisine.recettes import obtenir_service_recettes
@@ -341,7 +336,7 @@ def _save_imported_recipe(
     etapes: list,
     image_path: str = None,
 ):
-    """Sauvegarde la recette importee"""
+    """Sauvegarde la recette importee via ServiceRecettes"""
     try:
         import logging
 
@@ -355,8 +350,7 @@ def _save_imported_recipe(
             return
 
         with st.spinner("💾 Sauvegarde en cours..."):
-            # Creer la recette
-            recette = Recette(
+            recette = service.create_from_import(
                 nom=nom,
                 type_repas=type_repas,
                 description=description,
@@ -364,65 +358,22 @@ def _save_imported_recipe(
                 temps_cuisson=temps_cuisson,
                 portions=portions,
                 difficulte=difficulte,
-                url_image=image_path,  # Ajouter l'image
-                updated_at=datetime.utcnow(),  # Ajouter la date de modification
+                ingredients_textes=ingredients,
+                etapes_textes=etapes,
+                image_path=image_path,
             )
 
-            with obtenir_contexte_db() as db:
-                # Sauvegarder la recette
-                db.add(recette)
-                db.flush()  # Pour avoir l'ID
+            if recette:
+                # Stocker le succès dans session_state pour affichage persistant
+                st.session_state.last_imported_recipe_name = nom
+                # Effacer les donnees extraites
+                st.session_state.extracted_recipe = None
 
-                # Ajouter les ingredients
-                for idx, ing_text in enumerate(ingredients, 1):
-                    # Parser "quantite unite nom"
-                    parts = ing_text.split(maxsplit=2)
-
-                    if len(parts) >= 3:
-                        quantite_str, unite, nom_ing = parts[0], parts[1], " ".join(parts[2:])
-                        quantite = float(quantite_str.replace(",", "."))
-                    elif len(parts) >= 2:
-                        quantite_str, nom_ing = parts[0], parts[1]
-                        quantite = float(quantite_str.replace(",", "."))
-                        unite = "g"
-                    else:
-                        quantite = 1
-                        unite = ""
-                        nom_ing = ing_text
-
-                    # Chercher ou creer l'ingredient
-                    ingredient = db.query(Ingredient).filter_by(nom=nom_ing).first()
-                    if not ingredient:
-                        ingredient = Ingredient(nom=nom_ing)
-                        db.add(ingredient)
-                        db.flush()
-
-                    ri = RecetteIngredient(
-                        recette_id=recette.id,
-                        ingredient_id=ingredient.id,
-                        quantite=quantite,
-                        unite=unite,
-                    )
-                    db.add(ri)
-
-                # Ajouter les etapes
-                for idx, etape_text in enumerate(etapes, 1):
-                    etape = EtapeRecette(recette_id=recette.id, description=etape_text, ordre=idx)
-                    db.add(etape)
-
-                db.commit()
-
-            # Stocker le succès dans session_state pour affichage persistant
-            st.session_state.last_imported_recipe_name = nom
-            # Effacer les donnees extraites
-            st.session_state.extracted_recipe = None
-
-            st.success(f"✅ Recette '{nom}' importee avec succès!")
-            logger.info(f"✅ Recette '{nom}' importee avec succès")
-            st.balloons()
-
-            # Le succès persiste via session_state.last_imported_recipe_name
-            # Pas de rerun ici - laisser le formulaire s'afficher avec le message de succès
+                st.success(f"✅ Recette '{nom}' importee avec succès!")
+                logger.info(f"✅ Recette '{nom}' importee avec succès")
+                st.balloons()
+            else:
+                st.error("❌ Erreur lors de la sauvegarde")
 
     except Exception as e:
         st.error(f"❌ Erreur sauvegarde: {str(e)}")

@@ -263,17 +263,10 @@ class TestJulesApp:
 class TestJulesHelpers:
     """Tests des fonctions helpers du module Jules"""
 
-    @patch("src.modules.famille.jules.utils.obtenir_contexte_db")
-    def test_get_age_jules_with_db_profile(self, mock_db_context):
+    @patch("src.modules.famille.age_utils._obtenir_date_naissance")
+    def test_get_age_jules_with_db_profile(self, mock_naiss):
         """Test get_age_jules avec un profil en base"""
-        # Setup
-        mock_db = MagicMock()
-        mock_db_context.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_db_context.return_value.__exit__ = MagicMock(return_value=False)
-
-        mock_profile = MagicMock()
-        mock_profile.date_of_birth = date(2024, 6, 22)
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_profile
+        mock_naiss.return_value = date(2024, 6, 22)
 
         from src.modules.famille.jules import get_age_jules
 
@@ -287,11 +280,12 @@ class TestJulesHelpers:
         assert "date_naissance" in result
         assert result["date_naissance"] == date(2024, 6, 22)
 
-    @patch("src.modules.famille.jules.utils.obtenir_contexte_db")
-    def test_get_age_jules_fallback_default(self, mock_db_context):
+    @patch("src.modules.famille.age_utils._obtenir_date_naissance")
+    def test_get_age_jules_fallback_default(self, mock_naiss):
         """Test get_age_jules retourne valeur par défaut si erreur DB"""
-        # Setup - simule une erreur DB
-        mock_db_context.side_effect = Exception("DB Error")
+        from src.core.constants import JULES_NAISSANCE
+
+        mock_naiss.return_value = JULES_NAISSANCE
 
         from src.modules.famille.jules import get_age_jules
 

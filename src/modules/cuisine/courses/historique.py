@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 import pandas as pd
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
 from src.services.cuisine.courses import obtenir_service_courses
 from src.ui.components.atoms import etat_vide
 
@@ -19,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def afficher_historique():
     """Historique des listes de courses"""
-    _service = obtenir_service_courses()
+    service = obtenir_service_courses()
 
     st.subheader("📋 Historique des courses")
 
@@ -30,22 +29,11 @@ def afficher_historique():
         date_fin = st.date_input("Au", value=datetime.now())
 
     try:
-        # Récupérer les articles achetés dans la période
-        from sqlalchemy.orm import joinedload
-
-        from src.core.models import ArticleCourses
-
-        with obtenir_contexte_db() as db:
-            articles_achetes = (
-                db.query(ArticleCourses)
-                .options(joinedload(ArticleCourses.ingredient))
-                .filter(
-                    ArticleCourses.achete == True,
-                    ArticleCourses.achete_le >= datetime.combine(date_debut, datetime.min.time()),
-                    ArticleCourses.achete_le <= datetime.combine(date_fin, datetime.max.time()),
-                )
-                .all()
-            )
+        # Via service - plus de DB directe
+        articles_achetes = service.obtenir_historique_achats(
+            date_debut=date_debut,
+            date_fin=date_fin,
+        )
 
         if not articles_achetes:
             etat_vide("Aucun achat pendant cette période", "🛒")
@@ -53,15 +41,17 @@ def afficher_historique():
 
         # Statistiques
         total_articles = len(articles_achetes)
-        rayons_utilises = set(a.rayon_magasin for a in articles_achetes if a.rayon_magasin)
+        rayons_utilises = set(
+            a["rayon_magasin"] for a in articles_achetes if a.get("rayon_magasin")
+        )
 
         col1, col2, col3 = st.columns(3)
         with col1:
             st.metric("📊 Articles achetés", total_articles)
         with col2:
-            st.metric("🍪‘ Rayons différents", len(rayons_utilises))
+            st.metric("🍪' Rayons différents", len(rayons_utilises))
         with col3:
-            priorite_haute = len([a for a in articles_achetes if a.priorite == "haute"])
+            priorite_haute = len([a for a in articles_achetes if a.get("priorite") == "haute"])
             st.metric("🔴 Haute priorité", priorite_haute)
 
         st.divider()
@@ -72,12 +62,16 @@ def afficher_historique():
         df = pd.DataFrame(
             [
                 {
-                    "Article": a.ingredient.nom if a.ingredient else "N/A",
-                    "Quantité": f"{a.quantite_necessaire} {a.ingredient.unite if a.ingredient else ''}",
-                    "Priorité": PRIORITY_EMOJIS.get(a.priorite, "âš«") + " " + a.priorite,
-                    "Rayon": a.rayon_magasin or "N/A",
-                    "Acheté le": a.achete_le.strftime("%d/%m/%Y %H:%M") if a.achete_le else "N/A",
-                    "IA": "⏰" if a.suggere_par_ia else "",
+                    "Article": a.get("ingredient_nom", "N/A"),
+                    "Quantité": f"{a.get('quantite_necessaire', '')} {a.get('unite', '')}",
+                    "Priorité": PRIORITY_EMOJIS.get(a.get("priorite", ""), "⚫")
+                    + " "
+                    + a.get("priorite", ""),
+                    "Rayon": a.get("rayon_magasin") or "N/A",
+                    "Acheté le": a["achete_le"].strftime("%d/%m/%Y %H:%M")
+                    if a.get("achete_le")
+                    else "N/A",
+                    "IA": "⏰" if a.get("suggere_par_ia") else "",
                 }
                 for a in articles_achetes
             ]
@@ -85,7 +79,7 @@ def afficher_historique():
 
         st.dataframe(df, width="stretch")
 
-        # Export CSV - directement, sans button wrapper
+        # Export CSV
         if df is not None and not df.empty:
             csv = df.to_csv(index=False)
             st.download_button(

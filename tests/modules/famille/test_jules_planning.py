@@ -92,33 +92,27 @@ class TestJulesPlanningImports:
 class TestJulesPlanningHelpers:
     """Tests pour les fonctions helpers."""
 
-    @patch("src.modules.famille.jules_planning.obtenir_contexte_db")
-    def test_get_age_jules_mois_with_db(self, mock_db_context):
-        """Test get_age_jules_mois avec mock DB."""
+    @patch("src.modules.famille.age_utils._obtenir_date_naissance")
+    def test_get_age_jules_mois_with_db(self, mock_naissance):
+        """Test get_age_jules_mois avec fallback."""
+        from src.core.constants import JULES_NAISSANCE
         from src.modules.famille.jules_planning import get_age_jules_mois
 
-        # Simuler une erreur DB pour utiliser le fallback
-        mock_db_context.side_effect = Exception("DB Error")
+        # Simuler le fallback sur la constante
+        mock_naissance.return_value = JULES_NAISSANCE
 
         age = get_age_jules_mois()
 
-        # Doit retourner un entier (fallback calculé depuis 22/06/2024)
+        # Doit retourner un entier (fallback calculé depuis JULES_NAISSANCE)
         assert isinstance(age, int)
         assert age >= 0
 
-    @patch("src.modules.famille.jules_planning.obtenir_contexte_db")
-    def test_get_age_jules_mois_with_profile(self, mock_db_context):
+    @patch("src.modules.famille.age_utils._obtenir_date_naissance")
+    def test_get_age_jules_mois_with_profile(self, mock_naissance):
         """Test get_age_jules_mois avec profil Jules."""
         from src.modules.famille.jules_planning import get_age_jules_mois
 
-        # Mock du contexte DB et du profil Jules
-        mock_db = MagicMock()
-        mock_db_context.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_db_context.return_value.__exit__ = MagicMock(return_value=False)
-
-        mock_jules = MagicMock()
-        mock_jules.date_of_birth = date(2024, 6, 22)
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_jules
+        mock_naissance.return_value = date(2024, 6, 22)
 
         age = get_age_jules_mois()
 

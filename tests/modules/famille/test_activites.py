@@ -1,7 +1,8 @@
 """
 Tests unitaires pour src/modules/famille/activites.py
 
-Module Activites - Planning et budget des activités familiales
+Module Activites - Planning et budget des activités familiales.
+Refactorisé: la logique CRUD est dans ServiceActivites, le module ne contient que l'UI.
 """
 
 from datetime import date, timedelta
@@ -60,17 +61,11 @@ class TestActivitesImports:
         assert app is not None
         assert callable(app)
 
-    def test_import_ajouter_activite(self):
-        from src.modules.famille.activites import ajouter_activite
+    def test_import_get_service(self):
+        from src.modules.famille.activites import _get_service
 
-        assert ajouter_activite is not None
-        assert callable(ajouter_activite)
-
-    def test_import_marquer_terminee(self):
-        from src.modules.famille.activites import marquer_terminee
-
-        assert marquer_terminee is not None
-        assert callable(marquer_terminee)
+        assert _get_service is not None
+        assert callable(_get_service)
 
     def test_import_suggestions_activites(self):
         from src.modules.famille.activites import SUGGESTIONS_ACTIVITES
@@ -81,16 +76,22 @@ class TestActivitesImports:
 
 @pytest.mark.unit
 class TestAjouterActivite:
-    @patch("src.modules.famille.activites.st")
-    @patch("src.modules.famille.activites.clear_famille_cache")
-    @patch("src.modules.famille.activites.obtenir_contexte_db")
-    def test_ajouter_activite_success(self, mock_db_ctx, mock_clear_cache, mock_st):
-        from src.modules.famille.activites import ajouter_activite
+    """Tests pour ServiceActivites.ajouter_activite"""
 
-        mock_session = MagicMock()
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
-        result = ajouter_activite(
+    @patch("src.services.famille.activites.obtenir_bus")
+    def test_ajouter_activite_success(self, mock_bus):
+        from src.services.famille.activites import ServiceActivites
+
+        mock_bus.return_value = MagicMock()
+        svc = ServiceActivites()
+        mock_db = MagicMock()
+
+        def set_id(obj):
+            obj.id = 1
+
+        mock_db.add.side_effect = set_id
+
+        result = svc.ajouter_activite(
             titre="Test",
             type_activite="parc",
             date_prevue=date.today(),
@@ -98,64 +99,71 @@ class TestAjouterActivite:
             lieu="Parc",
             participants=["Famille"],
             cout_estime=15.0,
+            db=mock_db,
         )
-        assert result is True
 
-    @patch("src.modules.famille.activites.st")
-    @patch("src.modules.famille.activites.obtenir_contexte_db")
-    def test_ajouter_activite_error(self, mock_db_ctx, mock_st):
-        from src.modules.famille.activites import ajouter_activite
+        mock_db.add.assert_called_once()
+        mock_db.commit.assert_called_once()
+        assert result is not None
 
-        mock_db_ctx.return_value.__enter__ = MagicMock(side_effect=Exception("Error"))
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
-        result = ajouter_activite(
-            titre="Test",
-            type_activite="parc",
-            date_prevue=date.today(),
-            duree=1.0,
-            lieu="",
-            participants=[],
-            cout_estime=0.0,
-        )
-        assert result is False
+    @patch("src.services.famille.activites.obtenir_bus")
+    def test_ajouter_activite_error(self, mock_bus):
+        from src.services.famille.activites import ServiceActivites
+
+        mock_bus.return_value = MagicMock()
+        svc = ServiceActivites()
+        mock_db = MagicMock()
+        mock_db.add.side_effect = Exception("DB Error")
+
+        with pytest.raises(Exception, match="DB Error"):
+            svc.ajouter_activite(
+                titre="Test",
+                type_activite="parc",
+                date_prevue=date.today(),
+                duree=1.0,
+                lieu="",
+                participants=[],
+                cout_estime=0.0,
+                db=mock_db,
+            )
 
 
 @pytest.mark.unit
 class TestMarquerTerminee:
-    @patch("src.modules.famille.activites.st")
-    @patch("src.modules.famille.activites.clear_famille_cache")
-    @patch("src.modules.famille.activites.obtenir_contexte_db")
-    def test_marquer_terminee_success(self, mock_db_ctx, mock_clear_cache, mock_st):
-        from src.modules.famille.activites import marquer_terminee
+    """Tests pour ServiceActivites.marquer_terminee"""
 
+    @patch("src.services.famille.activites.obtenir_bus")
+    def test_marquer_terminee_success(self, mock_bus):
+        from src.services.famille.activites import ServiceActivites
+
+        mock_bus.return_value = MagicMock()
+        svc = ServiceActivites()
         mock_activity = MagicMock()
         mock_activity.statut = "planifie"
-        mock_session = MagicMock()
-        mock_session.get.return_value = mock_activity
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
-        result = marquer_terminee(activity_id=1, cout_reel=20.0)
+        mock_db = MagicMock()
+        mock_db.get.return_value = mock_activity
+
+        result = svc.marquer_terminee(activity_id=1, cout_reel=20.0, db=mock_db)
         assert result is True
         assert mock_activity.statut == "termine"
 
-    @patch("src.modules.famille.activites.st")
-    @patch("src.modules.famille.activites.obtenir_contexte_db")
-    def test_marquer_terminee_not_found(self, mock_db_ctx, mock_st):
-        from src.modules.famille.activites import marquer_terminee
+    @patch("src.services.famille.activites.obtenir_bus")
+    def test_marquer_terminee_not_found(self, mock_bus):
+        from src.services.famille.activites import ServiceActivites
 
-        mock_session = MagicMock()
-        mock_session.get.return_value = None
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
-        result = marquer_terminee(activity_id=999)
-        assert result is None
+        mock_bus.return_value = MagicMock()
+        svc = ServiceActivites()
+        mock_db = MagicMock()
+        mock_db.get.return_value = None
+
+        result = svc.marquer_terminee(activity_id=999, db=mock_db)
+        assert result is False
 
 
 @pytest.mark.unit
 class TestActivitesApp:
-    @patch("src.modules.famille.activites.go")
-    @patch("src.modules.famille.activites.pd")
-    @patch("src.modules.famille.activites.obtenir_contexte_db")
+    @patch("src.modules.famille.activites.etat_vide")
+    @patch("src.modules.famille.activites._get_service")
     @patch("src.modules.famille.activites.get_budget_par_period")
     @patch("src.modules.famille.activites.get_budget_activites_mois")
     @patch("src.modules.famille.activites.get_activites_semaine")
@@ -166,9 +174,8 @@ class TestActivitesApp:
         mock_activites,
         mock_budget_mois,
         mock_budget_period,
-        mock_db_ctx,
-        mock_pd,
-        mock_go,
+        mock_get_svc,
+        mock_etat_vide,
     ):
         from src.modules.famille.activites import app
 
@@ -176,17 +183,14 @@ class TestActivitesApp:
         mock_activites.return_value = []
         mock_budget_mois.return_value = 100.0
         mock_budget_period.return_value = {"Activites": 25.0}
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.all.return_value = []
-        mock_db_ctx.return_value.__enter__.return_value = mock_session
-        mock_db_ctx.return_value.__exit__.return_value = False
+        mock_svc = MagicMock()
+        mock_svc.lister_activites.return_value = []
+        mock_get_svc.return_value = mock_svc
         app()
         mock_st.title.assert_called_once()
 
     @patch("src.modules.famille.activites.etat_vide")
-    @patch("src.modules.famille.activites.go")
-    @patch("src.modules.famille.activites.pd")
-    @patch("src.modules.famille.activites.obtenir_contexte_db")
+    @patch("src.modules.famille.activites._get_service")
     @patch("src.modules.famille.activites.get_budget_par_period")
     @patch("src.modules.famille.activites.get_budget_activites_mois")
     @patch("src.modules.famille.activites.get_activites_semaine")
@@ -197,9 +201,7 @@ class TestActivitesApp:
         mock_activites,
         mock_budget_mois,
         mock_budget_period,
-        mock_db_ctx,
-        mock_pd,
-        mock_go,
+        mock_get_svc,
         mock_etat_vide,
     ):
         from src.modules.famille.activites import app
@@ -208,10 +210,9 @@ class TestActivitesApp:
         mock_activites.return_value = []
         mock_budget_mois.return_value = 0.0
         mock_budget_period.return_value = {"Activites": 0.0}
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.all.return_value = []
-        mock_db_ctx.return_value.__enter__.return_value = mock_session
-        mock_db_ctx.return_value.__exit__.return_value = False
+        mock_svc = MagicMock()
+        mock_svc.lister_activites.return_value = []
+        mock_get_svc.return_value = mock_svc
         app()
         mock_etat_vide.assert_called()
 
@@ -229,24 +230,24 @@ class TestSuggestionsActivites:
 
 @pytest.mark.unit
 class TestMarquerTermineeException:
-    @patch("src.modules.famille.activites.st")
-    @patch("src.modules.famille.activites.obtenir_contexte_db")
-    def test_marquer_terminee_exception(self, mock_db_ctx, mock_st):
-        from src.modules.famille.activites import marquer_terminee
+    @patch("src.services.famille.activites.obtenir_bus")
+    def test_marquer_terminee_exception(self, mock_bus):
+        from src.services.famille.activites import ServiceActivites
 
-        mock_db_ctx.return_value.__enter__ = MagicMock(side_effect=Exception("DB error"))
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
-        result = marquer_terminee(activity_id=1, cout_reel=10.0)
-        assert result is False
-        mock_st.error.assert_called_once()
+        mock_bus.return_value = MagicMock()
+        svc = ServiceActivites()
+        mock_db = MagicMock()
+        mock_db.get.side_effect = Exception("DB error")
+
+        with pytest.raises(Exception, match="DB error"):
+            svc.marquer_terminee(activity_id=1, cout_reel=10.0, db=mock_db)
 
 
 @pytest.mark.unit
 class TestAppFormSubmission:
-    @patch("src.modules.famille.activites.ajouter_activite")
-    @patch("src.modules.famille.activites.go")
-    @patch("src.modules.famille.activites.pd")
-    @patch("src.modules.famille.activites.obtenir_contexte_db")
+    @patch("src.modules.famille.activites.clear_famille_cache")
+    @patch("src.modules.famille.activites.etat_vide")
+    @patch("src.modules.famille.activites._get_service")
     @patch("src.modules.famille.activites.get_budget_par_period")
     @patch("src.modules.famille.activites.get_budget_activites_mois")
     @patch("src.modules.famille.activites.get_activites_semaine")
@@ -257,10 +258,9 @@ class TestAppFormSubmission:
         mock_activites,
         mock_budget_mois,
         mock_budget_period,
-        mock_db_ctx,
-        mock_pd,
-        mock_go,
-        mock_ajouter,
+        mock_get_svc,
+        mock_etat_vide,
+        mock_clear_cache,
     ):
         from src.modules.famille.activites import app
 
@@ -273,19 +273,18 @@ class TestAppFormSubmission:
         mock_activites.return_value = []
         mock_budget_mois.return_value = 100.0
         mock_budget_period.return_value = {"Activites": 25.0}
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.all.return_value = []
-        mock_db_ctx.return_value.__enter__.return_value = mock_session
-        mock_db_ctx.return_value.__exit__.return_value = False
+        mock_svc = MagicMock()
+        mock_svc.lister_activites.return_value = []
+        mock_get_svc.return_value = mock_svc
         app()
-        mock_ajouter.assert_called_once()
+        mock_svc.ajouter_activite.assert_called_once()
 
 
 @pytest.mark.unit
 class TestAppWithActivities:
     @patch("src.modules.famille.activites.go")
     @patch("src.modules.famille.activites.pd")
-    @patch("src.modules.famille.activites.obtenir_contexte_db")
+    @patch("src.modules.famille.activites._get_service")
     @patch("src.modules.famille.activites.get_budget_par_period")
     @patch("src.modules.famille.activites.get_budget_activites_mois")
     @patch("src.modules.famille.activites.get_activites_semaine")
@@ -296,7 +295,7 @@ class TestAppWithActivities:
         mock_activites,
         mock_budget_mois,
         mock_budget_period,
-        mock_db_ctx,
+        mock_get_svc,
         mock_pd,
         mock_go,
     ):
@@ -316,16 +315,17 @@ class TestAppWithActivities:
         ]
         mock_budget_mois.return_value = 100.0
         mock_budget_period.return_value = {"Activites": 35.0}
+
         mock_activity = MagicMock()
         mock_activity.date_prevue = date.today()
         mock_activity.titre = "Test"
         mock_activity.cout_estime = 10.0
         mock_activity.cout_reel = 12.0
         mock_activity.type_activite = "parc"
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.all.return_value = [mock_activity]
-        mock_db_ctx.return_value.__enter__.return_value = mock_session
-        mock_db_ctx.return_value.__exit__.return_value = False
+
+        mock_svc = MagicMock()
+        mock_svc.lister_activites.return_value = [mock_activity]
+        mock_get_svc.return_value = mock_svc
         mock_df = MagicMock()
         mock_pd.DataFrame.return_value = mock_df
         mock_df.groupby.return_value.__getitem__.return_value.sum.return_value.reset_index.return_value = MagicMock()
@@ -335,9 +335,8 @@ class TestAppWithActivities:
 
 @pytest.mark.unit
 class TestAppExceptionHandling:
-    @patch("src.modules.famille.activites.go")
-    @patch("src.modules.famille.activites.pd")
-    @patch("src.modules.famille.activites.obtenir_contexte_db")
+    @patch("src.modules.famille.activites.etat_vide")
+    @patch("src.modules.famille.activites._get_service")
     @patch("src.modules.famille.activites.get_budget_par_period")
     @patch("src.modules.famille.activites.get_budget_activites_mois")
     @patch("src.modules.famille.activites.get_activites_semaine")
@@ -348,9 +347,8 @@ class TestAppExceptionHandling:
         mock_activites,
         mock_budget_mois,
         mock_budget_period,
-        mock_db_ctx,
-        mock_pd,
-        mock_go,
+        mock_get_svc,
+        mock_etat_vide,
     ):
         from src.modules.famille.activites import app
 
@@ -358,16 +356,14 @@ class TestAppExceptionHandling:
         mock_activites.side_effect = Exception("DB error")
         mock_budget_mois.return_value = 100.0
         mock_budget_period.return_value = {"Activites": 25.0}
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.all.return_value = []
-        mock_db_ctx.return_value.__enter__.return_value = mock_session
-        mock_db_ctx.return_value.__exit__.return_value = False
+        mock_svc = MagicMock()
+        mock_svc.lister_activites.return_value = []
+        mock_get_svc.return_value = mock_svc
         app()
         mock_st.error.assert_called()
 
-    @patch("src.modules.famille.activites.go")
-    @patch("src.modules.famille.activites.pd")
-    @patch("src.modules.famille.activites.obtenir_contexte_db")
+    @patch("src.modules.famille.activites.etat_vide")
+    @patch("src.modules.famille.activites._get_service")
     @patch("src.modules.famille.activites.get_budget_par_period")
     @patch("src.modules.famille.activites.get_budget_activites_mois")
     @patch("src.modules.famille.activites.get_activites_semaine")
@@ -378,9 +374,8 @@ class TestAppExceptionHandling:
         mock_activites,
         mock_budget_mois,
         mock_budget_period,
-        mock_db_ctx,
-        mock_pd,
-        mock_go,
+        mock_get_svc,
+        mock_etat_vide,
     ):
         from src.modules.famille.activites import app
 
@@ -388,16 +383,14 @@ class TestAppExceptionHandling:
         mock_activites.return_value = []
         mock_budget_mois.side_effect = Exception("Budget error")
         mock_budget_period.return_value = {"Activites": 0.0}
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.all.return_value = []
-        mock_db_ctx.return_value.__enter__.return_value = mock_session
-        mock_db_ctx.return_value.__exit__.return_value = False
+        mock_svc = MagicMock()
+        mock_svc.lister_activites.return_value = []
+        mock_get_svc.return_value = mock_svc
         app()
         mock_st.error.assert_called()
 
-    @patch("src.modules.famille.activites.go")
-    @patch("src.modules.famille.activites.pd")
-    @patch("src.modules.famille.activites.obtenir_contexte_db")
+    @patch("src.modules.famille.activites.etat_vide")
+    @patch("src.modules.famille.activites._get_service")
     @patch("src.modules.famille.activites.get_budget_par_period")
     @patch("src.modules.famille.activites.get_budget_activites_mois")
     @patch("src.modules.famille.activites.get_activites_semaine")
@@ -408,9 +401,8 @@ class TestAppExceptionHandling:
         mock_activites,
         mock_budget_mois,
         mock_budget_period,
-        mock_db_ctx,
-        mock_pd,
-        mock_go,
+        mock_get_svc,
+        mock_etat_vide,
     ):
         from src.modules.famille.activites import app
 
@@ -418,8 +410,9 @@ class TestAppExceptionHandling:
         mock_activites.return_value = []
         mock_budget_mois.return_value = 100.0
         mock_budget_period.return_value = {"Activites": 25.0}
-        mock_db_ctx.return_value.__enter__.side_effect = Exception("DB error in graphique")
-        mock_db_ctx.return_value.__exit__.return_value = False
+        mock_svc = MagicMock()
+        mock_svc.lister_activites.side_effect = Exception("Graphique error")
+        mock_get_svc.return_value = mock_svc
         app()
         mock_st.error.assert_called()
 
@@ -428,7 +421,7 @@ class TestAppExceptionHandling:
 class TestAppGraphiqueWithData:
     @patch("src.modules.famille.activites.go")
     @patch("src.modules.famille.activites.pd")
-    @patch("src.modules.famille.activites.obtenir_contexte_db")
+    @patch("src.modules.famille.activites._get_service")
     @patch("src.modules.famille.activites.get_budget_par_period")
     @patch("src.modules.famille.activites.get_budget_activites_mois")
     @patch("src.modules.famille.activites.get_activites_semaine")
@@ -439,7 +432,7 @@ class TestAppGraphiqueWithData:
         mock_activites,
         mock_budget_mois,
         mock_budget_period,
-        mock_db_ctx,
+        mock_get_svc,
         mock_pd,
         mock_go,
     ):
@@ -449,16 +442,18 @@ class TestAppGraphiqueWithData:
         mock_activites.return_value = []
         mock_budget_mois.return_value = 100.0
         mock_budget_period.return_value = {"Activites": 25.0}
+
         mock_activity1 = MagicMock()
         mock_activity1.date_prevue = date.today()
         mock_activity1.titre = "Sortie Parc"
         mock_activity1.cout_estime = 15.0
         mock_activity1.cout_reel = 18.0
         mock_activity1.type_activite = "parc"
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.all.return_value = [mock_activity1]
-        mock_db_ctx.return_value.__enter__.return_value = mock_session
-        mock_db_ctx.return_value.__exit__.return_value = False
+
+        mock_svc = MagicMock()
+        mock_svc.lister_activites.return_value = [mock_activity1]
+        mock_get_svc.return_value = mock_svc
+
         mock_df = MagicMock()
         mock_pd.DataFrame.return_value = mock_df
         mock_pd.to_datetime.return_value = mock_df.__getitem__.return_value
@@ -469,7 +464,9 @@ class TestAppGraphiqueWithData:
         mock_go.Figure.return_value = mock_fig
         mock_go.Scatter.return_value = MagicMock()
         mock_go.Bar.return_value = MagicMock()
+
         app()
+
         assert mock_pd.DataFrame.called
         assert mock_go.Figure.called
         mock_st.plotly_chart.assert_called()
@@ -477,19 +474,18 @@ class TestAppGraphiqueWithData:
 
 @pytest.mark.unit
 class TestMarquerTermineeWithoutCout:
-    @patch("src.modules.famille.activites.st")
-    @patch("src.modules.famille.activites.clear_famille_cache")
-    @patch("src.modules.famille.activites.obtenir_contexte_db")
-    def test_marquer_terminee_without_cout(self, mock_db_ctx, mock_clear_cache, mock_st):
-        from src.modules.famille.activites import marquer_terminee
+    @patch("src.services.famille.activites.obtenir_bus")
+    def test_marquer_terminee_without_cout(self, mock_bus):
+        from src.services.famille.activites import ServiceActivites
 
+        mock_bus.return_value = MagicMock()
+        svc = ServiceActivites()
         mock_activity = MagicMock()
         mock_activity.statut = "planifie"
         mock_activity.cout_reel = None
-        mock_session = MagicMock()
-        mock_session.get.return_value = mock_activity
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
-        result = marquer_terminee(activity_id=1)
+        mock_db = MagicMock()
+        mock_db.get.return_value = mock_activity
+
+        result = svc.marquer_terminee(activity_id=1, db=mock_db)
         assert result is True
         assert mock_activity.statut == "termine"

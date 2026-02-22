@@ -174,14 +174,6 @@ class TestImports:
 
         assert callable(afficher_weekend_preview)
 
-    def test_import_card_styles(self):
-        """Test import de CARD_STYLES."""
-        from src.modules.famille.hub_famille import CARD_STYLES
-
-        assert CARD_STYLES is not None
-        assert isinstance(CARD_STYLES, str)
-        assert "family-card" in CARD_STYLES
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # TESTS FONCTIONS HELPER
@@ -191,17 +183,19 @@ class TestImports:
 class TestCalculerAgeJules:
     """Tests pour calculer_age_jules."""
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_calculer_age_jules_avec_profil(self, mock_db_ctx, mock_child_profile):
+    @patch("src.modules.famille.hub_famille.get_age_jules")
+    def test_calculer_age_jules_avec_profil(self, mock_age):
         """Test calcul âge avec profil Jules."""
         from src.modules.famille.hub_famille import calculer_age_jules
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter_by.return_value.first.return_value = (
-            mock_child_profile
-        )
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_age.return_value = {
+            "mois": 20,
+            "jours": 610,
+            "semaines": 87,
+            "ans": 1,
+            "texte": "20 mois",
+            "date_naissance": date(2024, 6, 22),
+        }
 
         result = calculer_age_jules()
 
@@ -210,75 +204,76 @@ class TestCalculerAgeJules:
         assert "jours" in result
         assert "texte" in result
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_calculer_age_jules_sans_profil(self, mock_db_ctx):
+    @patch("src.modules.famille.hub_famille.get_age_jules")
+    def test_calculer_age_jules_sans_profil(self, mock_age):
         """Test calcul âge sans profil (valeur par défaut)."""
         from src.modules.famille.hub_famille import calculer_age_jules
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter_by.return_value.first.return_value = None
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_age.return_value = {
+            "mois": 19,
+            "jours": 570,
+            "semaines": 81,
+            "ans": 1,
+            "texte": "19 mois",
+            "date_naissance": date(2024, 6, 22),
+        }
 
         result = calculer_age_jules()
 
         assert result["mois"] == 19
         assert result["texte"] == "19 mois"
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_calculer_age_jules_erreur_db(self, mock_db_ctx):
-        """Test calcul âge avec erreur DB."""
+    @patch("src.modules.famille.hub_famille.get_age_jules")
+    def test_calculer_age_jules_erreur_db(self, mock_age):
+        """Test calcul âge avec erreur — age_utils gère le fallback."""
         from src.modules.famille.hub_famille import calculer_age_jules
 
-        mock_db_ctx.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
+        mock_age.return_value = {
+            "mois": 19,
+            "jours": 570,
+            "semaines": 81,
+            "ans": 1,
+            "texte": "19 mois",
+            "date_naissance": date(2024, 6, 22),
+        }
 
         result = calculer_age_jules()
 
-        # Retourne les valeurs par défaut en cas d'erreur
         assert result["mois"] == 19
         assert result["texte"] == "19 mois"
 
 
 class TestGetUserStreak:
-    """Tests pour get_user_streak."""
+    """Tests pour get_user_streak — délègue à ServiceSuiviPerso."""
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_get_user_streak_aucun_utilisateur(self, mock_db_ctx):
+    @patch("src.modules.famille.hub_famille._get_service_suivi")
+    def test_get_user_streak_aucun_utilisateur(self, mock_svc):
         """Test streak pour utilisateur inexistant."""
         from src.modules.famille.hub_famille import get_user_streak
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter_by.return_value.first.return_value = None
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_svc.return_value.get_user_data.return_value = {"streak": 0}
 
         result = get_user_streak("inconnu")
 
         assert result == 0
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_get_user_streak_sans_resumes(self, mock_db_ctx, mock_user_profile):
-        """Test streak sans résumés Garmin."""
+    @patch("src.modules.famille.hub_famille._get_service_suivi")
+    def test_get_user_streak_avec_streak(self, mock_svc):
+        """Test streak avec données."""
         from src.modules.famille.hub_famille import get_user_streak
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter_by.return_value.first.return_value = (
-            mock_user_profile
-        )
-        mock_session.query.return_value.filter.return_value.order_by.return_value.all.return_value = []
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_svc.return_value.get_user_data.return_value = {"streak": 5, "garmin_connected": True}
 
         result = get_user_streak("anne")
 
-        assert result == 0
+        assert result == 5
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_get_user_streak_erreur(self, mock_db_ctx):
-        """Test streak avec erreur DB."""
+    @patch("src.modules.famille.hub_famille._get_service_suivi")
+    def test_get_user_streak_erreur(self, mock_svc):
+        """Test streak avec erreur service."""
         from src.modules.famille.hub_famille import get_user_streak
 
-        mock_db_ctx.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
+        mock_svc.return_value.get_user_data.side_effect = Exception("Service Error")
 
         result = get_user_streak("anne")
 
@@ -286,44 +281,36 @@ class TestGetUserStreak:
 
 
 class TestGetUserGarminConnected:
-    """Tests pour get_user_garmin_connected."""
+    """Tests pour get_user_garmin_connected — délègue à ServiceSuiviPerso."""
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_garmin_connected_true(self, mock_db_ctx, mock_user_profile):
+    @patch("src.modules.famille.hub_famille._get_service_suivi")
+    def test_garmin_connected_true(self, mock_svc):
         """Test utilisateur avec Garmin connecté."""
         from src.modules.famille.hub_famille import get_user_garmin_connected
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter_by.return_value.first.return_value = (
-            mock_user_profile
-        )
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_svc.return_value.get_user_data.return_value = {"garmin_connected": True, "streak": 0}
 
         result = get_user_garmin_connected("anne")
 
         assert result is True
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_garmin_connected_user_not_found(self, mock_db_ctx):
+    @patch("src.modules.famille.hub_famille._get_service_suivi")
+    def test_garmin_connected_user_not_found(self, mock_svc):
         """Test utilisateur inexistant."""
         from src.modules.famille.hub_famille import get_user_garmin_connected
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter_by.return_value.first.return_value = None
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_svc.return_value.get_user_data.return_value = {"garmin_connected": False, "streak": 0}
 
         result = get_user_garmin_connected("inconnu")
 
         assert result is False
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_garmin_connected_erreur(self, mock_db_ctx):
-        """Test avec erreur DB."""
+    @patch("src.modules.famille.hub_famille._get_service_suivi")
+    def test_garmin_connected_erreur(self, mock_svc):
+        """Test avec erreur service."""
         from src.modules.famille.hub_famille import get_user_garmin_connected
 
-        mock_db_ctx.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
+        mock_svc.return_value.get_user_data.side_effect = Exception("Service Error")
 
         result = get_user_garmin_connected("anne")
 
@@ -331,42 +318,39 @@ class TestGetUserGarminConnected:
 
 
 class TestCountWeekendActivities:
-    """Tests pour count_weekend_activities."""
+    """Tests pour count_weekend_activities — délègue à ServiceWeekend."""
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_count_weekend_activities_aucune(self, mock_db_ctx):
+    @patch("src.modules.famille.hub_famille._get_service_weekend")
+    def test_count_weekend_activities_aucune(self, mock_svc):
         """Test compte sans activités."""
         from src.modules.famille.hub_famille import count_weekend_activities
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.count.return_value = 0
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_svc.return_value.lister_activites_weekend.return_value = []
 
         result = count_weekend_activities()
 
         assert result == 0
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_count_weekend_activities_avec_activites(self, mock_db_ctx):
-        """Test compte avec activités."""
+    @patch("src.modules.famille.hub_famille._get_service_weekend")
+    def test_count_weekend_activities_avec_activites(self, mock_svc):
+        """Test compte avec activités planifiées."""
         from src.modules.famille.hub_famille import count_weekend_activities
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.count.return_value = 3
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        act1 = MagicMock(statut="planifie")
+        act2 = MagicMock(statut="planifie")
+        act3 = MagicMock(statut="termine")
+        mock_svc.return_value.lister_activites_weekend.return_value = [act1, act2, act3]
 
         result = count_weekend_activities()
 
-        assert result == 3
+        assert result == 2  # Seulement les planifiées
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_count_weekend_activities_erreur(self, mock_db_ctx):
-        """Test avec erreur DB."""
+    @patch("src.modules.famille.hub_famille._get_service_weekend")
+    def test_count_weekend_activities_erreur(self, mock_svc):
+        """Test avec erreur service."""
         from src.modules.famille.hub_famille import count_weekend_activities
 
-        mock_db_ctx.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
+        mock_svc.return_value.lister_activites_weekend.side_effect = Exception("Service Error")
 
         result = count_weekend_activities()
 
@@ -374,31 +358,25 @@ class TestCountWeekendActivities:
 
 
 class TestCountPendingPurchases:
-    """Tests pour count_pending_purchases."""
+    """Tests pour count_pending_purchases — délègue à ServiceAchatsFamille."""
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_count_pending_purchases_zero(self, mock_db_ctx):
+    @patch("src.modules.famille.hub_famille._get_service_achats")
+    def test_count_pending_purchases_zero(self, mock_svc):
         """Test compte sans achats en attente."""
         from src.modules.famille.hub_famille import count_pending_purchases
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter_by.return_value.count.return_value = 0
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_svc.return_value.get_stats.return_value = {"en_attente": 0, "urgents": 0}
 
         result = count_pending_purchases()
 
         assert result == 0
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_count_pending_purchases_avec_achats(self, mock_db_ctx):
+    @patch("src.modules.famille.hub_famille._get_service_achats")
+    def test_count_pending_purchases_avec_achats(self, mock_svc):
         """Test compte avec achats en attente."""
         from src.modules.famille.hub_famille import count_pending_purchases
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter_by.return_value.count.return_value = 5
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_svc.return_value.get_stats.return_value = {"en_attente": 5, "urgents": 2}
 
         result = count_pending_purchases()
 
@@ -406,31 +384,25 @@ class TestCountPendingPurchases:
 
 
 class TestCountUrgentPurchases:
-    """Tests pour count_urgent_purchases."""
+    """Tests pour count_urgent_purchases — délègue à ServiceAchatsFamille."""
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_count_urgent_purchases_zero(self, mock_db_ctx):
+    @patch("src.modules.famille.hub_famille._get_service_achats")
+    def test_count_urgent_purchases_zero(self, mock_svc):
         """Test compte sans achats urgents."""
         from src.modules.famille.hub_famille import count_urgent_purchases
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.count.return_value = 0
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_svc.return_value.get_stats.return_value = {"en_attente": 0, "urgents": 0}
 
         result = count_urgent_purchases()
 
         assert result == 0
 
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_count_urgent_purchases_avec_urgents(self, mock_db_ctx):
+    @patch("src.modules.famille.hub_famille._get_service_achats")
+    def test_count_urgent_purchases_avec_urgents(self, mock_svc):
         """Test compte avec achats urgents."""
         from src.modules.famille.hub_famille import count_urgent_purchases
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.count.return_value = 2
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_svc.return_value.get_stats.return_value = {"en_attente": 5, "urgents": 2}
 
         result = count_urgent_purchases()
 
@@ -598,7 +570,7 @@ class TestApp:
     """Tests pour la fonction app()."""
 
     @patch("src.modules.famille.hub_famille.st")
-    @patch("src.modules.famille.hub_famille.init_family_users")
+    @patch("src.services.integrations.garmin.init_family_users")
     @patch("src.modules.famille.hub_famille.afficher_hub")
     def test_app_runs_without_error(self, mock_render_hub, mock_init_users, mock_st):
         """Test que app() s'exécute sans erreur."""
@@ -608,11 +580,11 @@ class TestApp:
 
         app()
 
-        mock_st.title.assert_called_once_with("👨‍👩‍👧 Hub Famille")
+        mock_st.title.assert_called_once_with("👨\u200d👩\u200d👧 Hub Famille")
         mock_render_hub.assert_called_once()
 
     @patch("src.modules.famille.hub_famille.st")
-    @patch("src.modules.famille.hub_famille.init_family_users")
+    @patch("src.services.integrations.garmin.init_family_users")
     @patch("src.modules.famille.hub_famille.afficher_hub")
     def test_app_affiche_hub_par_defaut(self, mock_render_hub, mock_init_users, mock_st):
         """Test que app() affiche le hub par défaut."""
@@ -625,7 +597,7 @@ class TestApp:
         mock_render_hub.assert_called_once()
 
     @patch("src.modules.famille.hub_famille.st")
-    @patch("src.modules.famille.hub_famille.init_family_users")
+    @patch("src.services.integrations.garmin.init_family_users")
     def test_app_navigation_jules(self, mock_init_users, mock_st):
         """Test navigation vers page Jules."""
         from src.modules.famille.hub_famille import app
@@ -641,13 +613,14 @@ class TestApp:
                 pass  # UI tests acceptent les erreurs liées au mock
 
     @patch("src.modules.famille.hub_famille.st")
-    @patch("src.modules.famille.hub_famille.init_family_users")
+    @patch(
+        "src.services.integrations.garmin.init_family_users", side_effect=Exception("Init error")
+    )
     def test_app_erreur_init_users_ignoree(self, mock_init_users, mock_st):
         """Test que les erreurs d'init sont ignorées."""
         from src.modules.famille.hub_famille import app
 
         mock_st.session_state = {}
-        mock_init_users.side_effect = Exception("Init error")
 
         with patch("src.modules.famille.hub_famille.afficher_hub"):
             # Ne devrait pas lever d'exception
@@ -724,35 +697,26 @@ class TestRenderDayActivities:
     """Tests pour _afficher_day_activities."""
 
     @patch("src.modules.famille.hub_famille.st")
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_render_day_activities_sans_activites(self, mock_db_ctx, mock_st):
+    @patch("src.modules.famille.hub_famille._get_service_weekend")
+    def test_render_day_activities_sans_activites(self, mock_svc, mock_st):
         """Test render jour sans activités."""
         from src.modules.famille.hub_famille import _afficher_day_activities
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.all.return_value = []
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_svc.return_value.lister_activites_weekend.return_value = []
         mock_st.button.return_value = False
 
         _afficher_day_activities(date.today())
 
-        mock_st.caption.assert_called_with("Rien de prevu")
+        mock_st.caption.assert_called_with("Rien de prévu")
 
     @patch("src.modules.famille.hub_famille.st")
-    @patch("src.modules.famille.hub_famille.obtenir_contexte_db")
-    def test_render_day_activities_avec_activites(
-        self, mock_db_ctx, mock_st, mock_weekend_activity
-    ):
+    @patch("src.modules.famille.hub_famille._get_service_weekend")
+    def test_render_day_activities_avec_activites(self, mock_svc, mock_st, mock_weekend_activity):
         """Test render jour avec activités."""
         from src.modules.famille.hub_famille import _afficher_day_activities
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.all.return_value = [
-            mock_weekend_activity
-        ]
-        mock_db_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_weekend_activity.date_prevue = date.today()
+        mock_svc.return_value.lister_activites_weekend.return_value = [mock_weekend_activity]
 
         _afficher_day_activities(date.today())
 

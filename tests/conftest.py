@@ -38,6 +38,7 @@ from src.core.models import (  # noqa: E402
     Ingredient,
     Planning,
     Recette,
+    RecipeFeedback,  # Nécessaire pour résoudre la relation Recette.feedbacks
 )
 from src.services.cuisine.courses import ServiceCourses  # noqa: E402
 from src.services.cuisine.planning import ServicePlanning  # noqa: E402

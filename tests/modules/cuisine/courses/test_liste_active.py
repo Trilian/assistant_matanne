@@ -470,17 +470,14 @@ class TestRenderAjouterArticle:
 
         mock_st.error.assert_called()
 
-    @patch("src.core.models.Ingredient")
-    @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
-    def test_render_ajouter_article_success_existing_ingredient(
-        self, mock_st, mock_service, mock_db, mock_ingredient_class
-    ):
+    def test_render_ajouter_article_success_existing_ingredient(self, mock_st, mock_service):
         """Test ajout réussi avec ingrédient existant."""
         from src.modules.cuisine.courses.liste_active import afficher_ajouter_article
 
         svc = MagicMock()
+        svc.obtenir_ou_creer_ingredient.return_value = 10  # ingredient_id
         mock_service.return_value = svc
 
         form_mock = MagicMock()
@@ -494,28 +491,20 @@ class TestRenderAjouterArticle:
         mock_st.form_submit_button.return_value = True
         mock_st.session_state = MockSessionState({"new_article_mode": True, "courses_refresh": 0})
 
-        mock_session = MagicMock()
-        mock_ingredient = MagicMock()
-        mock_ingredient.id = 10
-        mock_session.query.return_value.filter.return_value.first.return_value = mock_ingredient
-        mock_db.return_value = make_db_context(mock_session)()
-
         afficher_ajouter_article()
 
+        svc.obtenir_ou_creer_ingredient.assert_called_once_with(nom="Carottes", unite="kg")
         svc.create.assert_called()
         mock_st.success.assert_called()
 
-    @patch("src.core.models.Ingredient")
-    @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
-    def test_render_ajouter_article_success_new_ingredient(
-        self, mock_st, mock_service, mock_db, mock_ingredient_class
-    ):
+    def test_render_ajouter_article_success_new_ingredient(self, mock_st, mock_service):
         """Test ajout réussi avec nouvel ingrédient."""
         from src.modules.cuisine.courses.liste_active import afficher_ajouter_article
 
         svc = MagicMock()
+        svc.obtenir_ou_creer_ingredient.return_value = 99  # new ingredient_id
         mock_service.return_value = svc
 
         form_mock = MagicMock()
@@ -529,34 +518,22 @@ class TestRenderAjouterArticle:
         mock_st.form_submit_button.return_value = True
         mock_st.session_state = MockSessionState({"new_article_mode": True, "courses_refresh": 0})
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.first.return_value = (
-            None  # No existing ingredient
-        )
-
-        new_ingredient = MagicMock()
-        new_ingredient.id = 99
-        mock_ingredient_class.return_value = new_ingredient
-
-        mock_db.return_value = make_db_context(mock_session)()
-
         afficher_ajouter_article()
 
-        mock_session.add.assert_called()
+        svc.obtenir_ou_creer_ingredient.assert_called_once_with(
+            nom="Nouvel Ingrédient", unite="pièce"
+        )
         svc.create.assert_called()
 
-    @patch("src.core.models.Ingredient")
-    @patch("src.core.db.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     @patch("src.modules.cuisine.courses.liste_active.logger")
-    def test_render_ajouter_article_error(
-        self, mock_logger, mock_st, mock_service, mock_db, mock_ingredient_class
-    ):
+    def test_render_ajouter_article_error(self, mock_logger, mock_st, mock_service):
         """Test erreur ajout."""
         from src.modules.cuisine.courses.liste_active import afficher_ajouter_article
 
         svc = MagicMock()
+        svc.obtenir_ou_creer_ingredient.side_effect = Exception("DB Error")
         mock_service.return_value = svc
 
         form_mock = MagicMock()
@@ -569,8 +546,6 @@ class TestRenderAjouterArticle:
         mock_st.text_area.return_value = ""
         mock_st.form_submit_button.return_value = True
         mock_st.session_state = MockSessionState({"new_article_mode": True, "courses_refresh": 0})
-
-        mock_db.return_value = make_db_context_error(Exception("DB Error"))()
 
         afficher_ajouter_article()
 

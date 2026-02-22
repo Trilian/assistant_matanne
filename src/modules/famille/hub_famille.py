@@ -1,6 +1,12 @@
 """
 Hub Famille - Dashboard principal avec cards cliquables.
 
+REFACTORISÉ: Les requêtes DB sont déléguées aux services dédiés:
+- ``src.services.famille.suivi_perso`` pour le streak et Garmin
+- ``src.services.famille.weekend`` pour les activités weekend
+- ``src.services.famille.achats`` pour les achats en attente
+- ``src.modules.famille.age_utils`` pour le calcul d'âge Jules
+
 Structure:
 ┌─────────────┐ ┌─────────────┐
 │ 👶 Jules    │ │ 🎉 Weekend  │
@@ -22,134 +28,106 @@ import streamlit as st
 
 logger = logging.getLogger(__name__)
 
-from src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUT
-from src.core.db import obtenir_contexte_db
-from src.core.models import (
-    ChildProfile,
-    FamilyPurchase,
-    GarminDailySummary,
-    UserProfile,
-    WeekendActivity,
-)
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
-from src.services.integrations.garmin import init_family_users
+from src.modules.famille.age_utils import get_age_jules
 
 # ═══════════════════════════════════════════════════════════
-# HELPERS
+# LAZY SERVICE ACCESSORS
+# ═══════════════════════════════════════════════════════════
+
+_service_suivi = None
+_service_weekend = None
+_service_achats = None
+
+
+def _get_service_suivi():
+    """Accès lazy au ServiceSuiviPerso."""
+    global _service_suivi
+    if _service_suivi is None:
+        from src.services.famille.suivi_perso import obtenir_service_suivi_perso
+
+        _service_suivi = obtenir_service_suivi_perso()
+    return _service_suivi
+
+
+def _get_service_weekend():
+    """Accès lazy au ServiceWeekend."""
+    global _service_weekend
+    if _service_weekend is None:
+        from src.services.famille.weekend import obtenir_service_weekend
+
+        _service_weekend = obtenir_service_weekend()
+    return _service_weekend
+
+
+def _get_service_achats():
+    """Accès lazy au ServiceAchatsFamille."""
+    global _service_achats
+    if _service_achats is None:
+        from src.services.famille.achats import obtenir_service_achats_famille
+
+        _service_achats = obtenir_service_achats_famille()
+    return _service_achats
+
+
+# ═══════════════════════════════════════════════════════════
+# HELPERS — délèguent aux services
 # ═══════════════════════════════════════════════════════════
 
 
 def calculer_age_jules() -> dict:
     """Calcule l'âge de Jules (délègue à age_utils)."""
-    from src.modules.famille.age_utils import get_age_jules
-
     return get_age_jules()
 
 
 def get_user_streak(username: str) -> int:
-    """Recupère le streak d'un utilisateur"""
+    """Récupère le streak d'un utilisateur via ServiceSuiviPerso."""
     try:
-        with obtenir_contexte_db() as db:
-            user = db.query(UserProfile).filter_by(username=username).first()
-            if not user:
-                return 0
-
-            # Calculer le streak base sur les resumes quotidiens
-            end_date = date.today()
-            start_date = end_date - timedelta(days=30)
-
-            summaries = (
-                db.query(GarminDailySummary)
-                .filter(
-                    GarminDailySummary.user_id == user.id, GarminDailySummary.date >= start_date
-                )
-                .order_by(GarminDailySummary.date.desc())
-                .all()
-            )
-
-            if not summaries:
-                return 0
-
-            streak = 0
-            current_date = end_date
-            summary_by_date = {s.date: s for s in summaries}
-            objectif = user.objectif_pas_quotidien or OBJECTIF_PAS_QUOTIDIEN_DEFAUT
-
-            while current_date >= start_date:
-                summary = summary_by_date.get(current_date)
-                if summary and summary.pas >= objectif:
-                    streak += 1
-                    current_date -= timedelta(days=1)
-                else:
-                    break
-
-            return streak
+        data = _get_service_suivi().get_user_data(username)
+        return data.get("streak", 0)
     except Exception as e:
-        logger.debug(f"Erreur ignorée: {e}")
+        logger.debug("Erreur streak %s: %s", username, e)
         return 0
 
 
 def get_user_garmin_connected(username: str) -> bool:
-    """Verifie si Garmin est connecte"""
+    """Vérifie si Garmin est connecté via ServiceSuiviPerso."""
     try:
-        with obtenir_contexte_db() as db:
-            user = db.query(UserProfile).filter_by(username=username).first()
-            return user.garmin_connected if user else False
+        data = _get_service_suivi().get_user_data(username)
+        return data.get("garmin_connected", False)
     except Exception as e:
-        logger.debug(f"Erreur ignorée: {e}")
+        logger.debug("Erreur Garmin %s: %s", username, e)
         return False
 
 
 def count_weekend_activities() -> int:
-    """Compte les activites weekend planifiees"""
+    """Compte les activités weekend planifiées via ServiceWeekend."""
     try:
-        with obtenir_contexte_db() as db:
-            today = date.today()
-            # Prochain weekend
-            days_until_saturday = (5 - today.weekday()) % 7
-            if days_until_saturday == 0 and today.weekday() != 5:
-                days_until_saturday = 7
-            saturday = today + timedelta(days=days_until_saturday)
-            sunday = saturday + timedelta(days=1)
-
-            count = (
-                db.query(WeekendActivity)
-                .filter(
-                    WeekendActivity.date_prevue.in_([saturday, sunday]),
-                    WeekendActivity.statut == "planifie",
-                )
-                .count()
-            )
-            return count
+        activities = _get_service_weekend().lister_activites_weekend()
+        return len([a for a in activities if a.statut == "planifie"])
     except Exception as e:
-        logger.debug(f"Erreur ignorée: {e}")
+        logger.debug("Erreur weekend: %s", e)
         return 0
 
 
 def count_pending_purchases() -> int:
-    """Compte les achats en attente"""
+    """Compte les achats en attente via ServiceAchatsFamille."""
     try:
-        with obtenir_contexte_db() as db:
-            return db.query(FamilyPurchase).filter_by(achete=False).count()
+        stats = _get_service_achats().get_stats()
+        return stats.get("en_attente", 0)
     except Exception as e:
-        logger.debug(f"Erreur ignorée: {e}")
+        logger.debug("Erreur achats: %s", e)
         return 0
 
 
 def count_urgent_purchases() -> int:
-    """Compte les achats urgents"""
+    """Compte les achats urgents via ServiceAchatsFamille."""
     try:
-        with obtenir_contexte_db() as db:
-            return (
-                db.query(FamilyPurchase)
-                .filter(
-                    FamilyPurchase.achete == False, FamilyPurchase.priorite.in_(["urgent", "haute"])
-                )
-                .count()
-            )
+        stats = _get_service_achats().get_stats()
+        return stats.get("urgents", 0)
     except Exception as e:
-        logger.debug(f"Erreur ignorée: {e}")
+        logger.debug("Erreur achats urgents: %s", e)
         return 0
 
 
@@ -239,14 +217,16 @@ def afficher_card_achats():
 
 @profiler_rerun("famille")
 def app():
-    """Point d'entree du Hub Famille"""
+    """Point d'entrée du Hub Famille."""
     st.title("👨‍👩‍👧 Hub Famille")
 
-    # Initialiser les utilisateurs si necessaire
+    # Initialiser les utilisateurs si nécessaire
     try:
+        from src.services.integrations.garmin import init_family_users
+
         init_family_users()
     except Exception as e:
-        logger.debug(f"Erreur ignorée: {e}")
+        logger.debug("Init utilisateurs: %s", e)
 
     # Gerer la navigation
     page = st.session_state.get(SK.FAMILLE_PAGE, "hub")
@@ -353,24 +333,20 @@ def afficher_weekend_preview():
 
 
 def _afficher_day_activities(day: date):
-    """Affiche les activites d'un jour"""
+    """Affiche les activités d'un jour via ServiceWeekend."""
     try:
-        with obtenir_contexte_db() as db:
-            activities = (
-                db.query(WeekendActivity)
-                .filter(WeekendActivity.date_prevue == day, WeekendActivity.statut == "planifie")
-                .all()
-            )
+        activities = _get_service_weekend().lister_activites_weekend()
+        day_activities = [a for a in activities if a.date_prevue == day and a.statut == "planifie"]
 
-            if activities:
-                for act in activities:
-                    heure = act.heure_debut or "?"
-                    st.write(f"• {heure} - {act.titre}")
-            else:
-                st.caption("Rien de prevu")
-                if st.button("💡 Suggerer", key=f"suggest_{day}"):
-                    st.session_state[SK.FAMILLE_PAGE] = "weekend"
-                    st.rerun()
+        if day_activities:
+            for act in day_activities:
+                heure = act.heure_debut or "?"
+                st.write(f"• {heure} - {act.titre}")
+        else:
+            st.caption("Rien de prévu")
+            if st.button("💡 Suggérer", key=f"suggest_{day}"):
+                st.session_state[SK.FAMILLE_PAGE] = "weekend"
+                st.rerun()
     except Exception as e:
-        logger.debug(f"Erreur ignorée: {e}")
-        st.caption("Rien de prevu")
+        logger.debug("Erreur activités jour: %s", e)
+        st.caption("Rien de prévu")

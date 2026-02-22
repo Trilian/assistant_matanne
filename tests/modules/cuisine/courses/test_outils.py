@@ -140,10 +140,9 @@ class TestRenderOutils:
         mock_st.download_button.assert_called()
 
     @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
-    @patch("src.modules.cuisine.courses.outils.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.outils.st")
     @patch("src.modules.cuisine.courses.outils.pd")
-    def test_render_outils_import_csv(self, mock_pd, mock_st, mock_db, mock_service):
+    def test_render_outils_import_csv(self, mock_pd, mock_st, mock_service):
         """Test import CSV."""
         from src.modules.cuisine.courses.outils import afficher_outils
 
@@ -175,15 +174,15 @@ class TestRenderOutils:
         mock_st.write.assert_called()
 
     @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
-    @patch("src.modules.cuisine.courses.outils.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.outils.st")
     @patch("src.modules.cuisine.courses.outils.pd")
-    def test_render_outils_import_confirm(self, mock_pd, mock_st, mock_db, mock_service):
+    def test_render_outils_import_confirm(self, mock_pd, mock_st, mock_service):
         """Test confirmation import."""
         from src.modules.cuisine.courses.outils import afficher_outils
 
         svc = MagicMock()
         svc.get_liste_courses.return_value = []
+        svc.importer_articles_csv.return_value = 1
         mock_service.return_value = svc
 
         tabs = [MagicMock() for _ in range(4)]
@@ -199,21 +198,16 @@ class TestRenderOutils:
 
         mock_df = MagicMock()
         mock_df.__len__ = MagicMock(return_value=1)
-        mock_df.iterrows.return_value = iter(
-            [
-                (
-                    0,
-                    {
-                        "Article": "Test",
-                        "Quantité": 1,
-                        "Unité": "kg",
-                        "Priorité": "moyenne",
-                        "Rayon": "Autre",
-                        "Notes": None,
-                    },
-                )
-            ]
-        )
+        mock_df.to_dict.return_value = [
+            {
+                "Article": "Test",
+                "Quantité": 1,
+                "Unité": "kg",
+                "Priorité": "moyenne",
+                "Rayon": "Autre",
+                "Notes": None,
+            }
+        ]
         mock_pd.read_csv.return_value = mock_df
 
         mock_st.columns.side_effect = create_columns_side_effect(2, 2, 2, 4, 3)
@@ -231,27 +225,21 @@ class TestRenderOutils:
 
         mock_st.session_state = MockSessionState({"courses_refresh": 0})
 
-        mock_session = MagicMock()
-        mock_ingredient = MagicMock()
-        mock_ingredient.id = 1
-        mock_session.query.return_value.filter.return_value.first.return_value = mock_ingredient
-        mock_db.return_value = iter([mock_session])
-
         afficher_outils()
 
-        svc.create.assert_called()
+        svc.importer_articles_csv.assert_called()
         mock_st.success.assert_called()
 
     @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
-    @patch("src.modules.cuisine.courses.outils.obtenir_contexte_db")
     @patch("src.modules.cuisine.courses.outils.st")
     @patch("src.modules.cuisine.courses.outils.pd")
-    def test_render_outils_import_new_ingredient(self, mock_pd, mock_st, mock_db, mock_service):
+    def test_render_outils_import_new_ingredient(self, mock_pd, mock_st, mock_service):
         """Test import créant nouvel ingrédient."""
         from src.modules.cuisine.courses.outils import afficher_outils
 
         svc = MagicMock()
         svc.get_liste_courses.return_value = []
+        svc.importer_articles_csv.return_value = 1
         mock_service.return_value = svc
 
         tabs = [MagicMock() for _ in range(4)]
@@ -266,21 +254,16 @@ class TestRenderOutils:
 
         mock_df = MagicMock()
         mock_df.__len__ = MagicMock(return_value=1)
-        mock_df.iterrows.return_value = iter(
-            [
-                (
-                    0,
-                    {
-                        "Article": "New",
-                        "Quantité": 1,
-                        "Unité": "kg",
-                        "Priorité": "moyenne",
-                        "Rayon": "Autre",
-                        "Notes": "",
-                    },
-                )
-            ]
-        )
+        mock_df.to_dict.return_value = [
+            {
+                "Article": "New",
+                "Quantité": 1,
+                "Unité": "kg",
+                "Priorité": "moyenne",
+                "Rayon": "Autre",
+                "Notes": "",
+            }
+        ]
         mock_pd.read_csv.return_value = mock_df
 
         mock_st.columns.side_effect = create_columns_side_effect(2, 2, 2, 4, 3)
@@ -298,13 +281,9 @@ class TestRenderOutils:
 
         mock_st.session_state = MockSessionState({"courses_refresh": 0})
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.first.return_value = None  # No existing
-        mock_db.return_value = iter([mock_session])
-
         afficher_outils()
 
-        mock_session.add.assert_called()
+        svc.importer_articles_csv.assert_called()
 
     @patch("src.modules.cuisine.courses.outils.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.outils.st")

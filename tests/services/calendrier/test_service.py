@@ -677,7 +677,9 @@ class TestGoogleImportExport:
 
         headers = {"Authorization": "Bearer token"}
 
-        with patch("src.services.famille.calendrier.service.obtenir_contexte_db") as mock_db:
+        with patch(
+            "src.services.famille.calendrier.google_calendar.obtenir_contexte_db"
+        ) as mock_db:
             mock_session = MagicMock()
             mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = [
                 mock_repas

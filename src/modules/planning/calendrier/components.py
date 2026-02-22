@@ -6,8 +6,6 @@ from datetime import date, datetime, time, timedelta
 
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
-from src.core.models import CalendarEvent, FamilyActivity
 from src.core.session_keys import SK
 
 from .utils import (
@@ -19,6 +17,20 @@ from .utils import (
     get_semaine_precedente,
     get_semaine_suivante,
 )
+
+# Accesseur lazy pour le service (singleton)
+_service = None
+
+
+def _get_service():
+    global _service
+    if _service is None:
+        from src.services.famille.calendrier_planning import (
+            obtenir_service_calendrier_planning,
+        )
+
+        _service = obtenir_service_calendrier_planning()
+    return _service
 
 
 def afficher_navigation_semaine():
@@ -393,36 +405,32 @@ def afficher_formulaire_ajout_event():
                         st.rerun()
 
                 if submitted and titre:
-                    # Créer l'événement
+                    # Créer l'événement via le service
                     try:
-                        with obtenir_contexte_db() as db:
-                            if type_event[1] == "activite":
-                                evt = FamilyActivity(
-                                    titre=titre,
-                                    date_prevue=date_selectionnee,
-                                    heure_debut=heure,
-                                    lieu=lieu,
-                                    notes=notes,
-                                    type_activite="famille",
-                                    statut="planifié",
-                                )
-                            else:
-                                evt = CalendarEvent(
-                                    titre=titre,
-                                    date_debut=datetime.combine(date_selectionnee, heure),
-                                    type_event=type_event[1],
-                                    lieu=lieu,
-                                    description=notes,
-                                    rappel_avant_minutes=rappel,
-                                    recurrence_type=recurrence_type
-                                    if recurrence_type != "none"
-                                    else None,
-                                    recurrence_interval=recurrence_interval,
-                                    recurrence_jours=recurrence_jours,
-                                    recurrence_fin=recurrence_fin,
-                                )
-                            db.add(evt)
-                            db.commit()
+                        if type_event[1] == "activite":
+                            _get_service().creer_activite(
+                                titre=titre,
+                                date_prevue=date_selectionnee,
+                                heure_debut=heure,
+                                lieu=lieu,
+                                notes=notes,
+                            )
+                        else:
+                            _get_service().creer_event_calendrier(
+                                titre=titre,
+                                date_event=date_selectionnee,
+                                type_event=type_event[1],
+                                heure=heure,
+                                lieu=lieu,
+                                description=notes,
+                                rappel_avant_minutes=rappel,
+                                recurrence_type=recurrence_type
+                                if recurrence_type != "none"
+                                else None,
+                                recurrence_interval=recurrence_interval,
+                                recurrence_jours=recurrence_jours,
+                                recurrence_fin=recurrence_fin,
+                            )
 
                         st.success(f"✅ {titre} ajouté!")
                         del st.session_state.ajouter_event_date

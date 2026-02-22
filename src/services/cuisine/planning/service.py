@@ -329,6 +329,41 @@ class ServicePlanning(
         logger.info(f"✅ Agrégé {len(courses_list)} ingrédients pour planning {planning_id}")
         return courses_list
 
+    # ═══════════════════════════════════════════════════════════
+    # SECTION 4: HISTORIQUE
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
+    def get_historique_plannings(
+        self, limit: int = 20, db: Session | None = None
+    ) -> list[dict[str, Any]]:
+        """Charge l'historique des plannings.
+
+        Args:
+            limit: Nombre max de plannings à charger
+            db: Session DB (injectée)
+
+        Returns:
+            Liste de dicts avec données des plannings
+        """
+        plannings = db.query(Planning).order_by(Planning.semaine_debut.desc()).limit(limit).all()
+        return [
+            {
+                "id": p.id,
+                "nom": p.nom,
+                "debut": p.semaine_debut,
+                "fin": p.semaine_fin,
+                "actif": p.actif,
+                "genere_par_ia": p.genere_par_ia,
+                "nb_repas": len(p.repas) if hasattr(p, "repas") else 0,
+            }
+            for p in plannings
+        ]
+
+    # Alias
+    obtenir_historique_plannings = get_historique_plannings
+
 
 # ═══════════════════════════════════════════════════════════
 # FACTORIES

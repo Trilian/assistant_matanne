@@ -284,7 +284,7 @@ class ServiceBatchCooking(
         if session.heure_debut:
             debut = datetime.combine(session.date_session, session.heure_debut)
             fin = datetime.combine(session.date_session, session.heure_fin)
-            session.duree_reelle = int((fin - debut).total_seconds() / 60)
+            session.duree_reelle = max(1, int((fin - debut).total_seconds() / 60))
 
         # Compter recettes complétées
         if session.etapes:
@@ -379,7 +379,9 @@ class ServiceBatchCooking(
 
         # Calculer durée réelle
         if etape.heure_debut:
-            etape.duree_reelle = int((etape.heure_fin - etape.heure_debut).total_seconds() / 60)
+            etape.duree_reelle = max(
+                1, int((etape.heure_fin - etape.heure_debut).total_seconds() / 60)
+            )
 
         db.commit()
         db.refresh(etape)

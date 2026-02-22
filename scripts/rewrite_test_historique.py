@@ -1,4 +1,8 @@
-"""
+"""Rewrite test_historique.py to mock service instead of DB."""
+
+import os
+
+new_content = '''"""
 Tests pour src/modules/cuisine/courses/historique.py
 
 Couverture complete des fonctions UI historique courses.
@@ -38,7 +42,7 @@ class TestRenderHistorique:
         afficher_historique()
 
         mock_st.subheader.assert_called()
-        mock_etat_vide.assert_called_with("Aucun achat pendant cette p\u00e9riode", "\U0001f6d2")
+        mock_etat_vide.assert_called_with("Aucun achat pendant cette p\\u00e9riode", "\\U0001f6d2")
 
     @patch("src.modules.cuisine.courses.historique.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.historique.st")
@@ -64,7 +68,7 @@ class TestRenderHistorique:
                 "quantite_necessaire": 2.0,
                 "unite": "kg",
                 "priorite": "haute",
-                "rayon_magasin": "Fruits et l\u00e9gumes",
+                "rayon_magasin": "Fruits et l\\u00e9gumes",
                 "achete_le": datetime.now(),
                 "suggere_par_ia": False,
             }
@@ -99,36 +103,12 @@ class TestRenderHistorique:
 
         mock_service = MagicMock()
         mock_service.obtenir_historique_achats.return_value = [
-            {
-                "id": 1,
-                "ingredient_nom": "Lait",
-                "quantite_necessaire": 1.0,
-                "unite": "l",
-                "priorite": "haute",
-                "rayon_magasin": "Cr\u00e8merie",
-                "achete_le": datetime.now(),
-                "suggere_par_ia": True,
-            },
-            {
-                "id": 2,
-                "ingredient_nom": "Pain",
-                "quantite_necessaire": 1.0,
-                "unite": "pi\u00e8ce",
-                "priorite": "moyenne",
-                "rayon_magasin": "Boulangerie",
-                "achete_le": datetime.now(),
-                "suggere_par_ia": False,
-            },
-            {
-                "id": 3,
-                "ingredient_nom": "Beurre",
-                "quantite_necessaire": 1.0,
-                "unite": "pi\u00e8ce",
-                "priorite": "moyenne",
-                "rayon_magasin": "Cr\u00e8merie",
-                "achete_le": datetime.now(),
-                "suggere_par_ia": False,
-            },
+            {"id": 1, "ingredient_nom": "Lait", "quantite_necessaire": 1.0, "unite": "l",
+             "priorite": "haute", "rayon_magasin": "Cr\\u00e8merie", "achete_le": datetime.now(), "suggere_par_ia": True},
+            {"id": 2, "ingredient_nom": "Pain", "quantite_necessaire": 1.0, "unite": "pi\\u00e8ce",
+             "priorite": "moyenne", "rayon_magasin": "Boulangerie", "achete_le": datetime.now(), "suggere_par_ia": False},
+            {"id": 3, "ingredient_nom": "Beurre", "quantite_necessaire": 1.0, "unite": "pi\\u00e8ce",
+             "priorite": "moyenne", "rayon_magasin": "Cr\\u00e8merie", "achete_le": datetime.now(), "suggere_par_ia": False},
         ]
         mock_get_service.return_value = mock_service
 
@@ -175,16 +155,8 @@ class TestRenderHistorique:
 
         mock_service = MagicMock()
         mock_service.obtenir_historique_achats.return_value = [
-            {
-                "id": 1,
-                "ingredient_nom": "Pommes",
-                "quantite_necessaire": 1.5,
-                "unite": "kg",
-                "priorite": "basse",
-                "rayon_magasin": "Fruits",
-                "achete_le": datetime.now(),
-                "suggere_par_ia": True,
-            },
+            {"id": 1, "ingredient_nom": "Pommes", "quantite_necessaire": 1.5, "unite": "kg",
+             "priorite": "basse", "rayon_magasin": "Fruits", "achete_le": datetime.now(), "suggere_par_ia": True},
         ]
         mock_get_service.return_value = mock_service
 
@@ -211,7 +183,7 @@ class TestRenderHistorique:
 
         afficher_historique()
 
-        mock_etat_vide.assert_called_with("Aucun achat pendant cette p\u00e9riode", "\U0001f6d2")
+        mock_etat_vide.assert_called_with("Aucun achat pendant cette p\\u00e9riode", "\\U0001f6d2")
 
     @patch("src.modules.cuisine.courses.historique.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.historique.st")
@@ -230,16 +202,8 @@ class TestRenderHistorique:
 
         mock_service = MagicMock()
         mock_service.obtenir_historique_achats.return_value = [
-            {
-                "id": 1,
-                "ingredient_nom": "N/A",
-                "quantite_necessaire": 1.0,
-                "unite": "",
-                "priorite": "moyenne",
-                "rayon_magasin": None,
-                "achete_le": None,
-                "suggere_par_ia": False,
-            },
+            {"id": 1, "ingredient_nom": "N/A", "quantite_necessaire": 1.0, "unite": "",
+             "priorite": "moyenne", "rayon_magasin": None, "achete_le": None, "suggere_par_ia": False},
         ]
         mock_get_service.return_value = mock_service
 
@@ -264,16 +228,8 @@ class TestRenderHistorique:
 
         mock_service = MagicMock()
         mock_service.obtenir_historique_achats.return_value = [
-            {
-                "id": 1,
-                "ingredient_nom": "Test",
-                "quantite_necessaire": 1.0,
-                "unite": "kg",
-                "priorite": "inconnu",
-                "rayon_magasin": "Autre",
-                "achete_le": datetime.now(),
-                "suggere_par_ia": False,
-            },
+            {"id": 1, "ingredient_nom": "Test", "quantite_necessaire": 1.0, "unite": "kg",
+             "priorite": "inconnu", "rayon_magasin": "Autre", "achete_le": datetime.now(), "suggere_par_ia": False},
         ]
         mock_get_service.return_value = mock_service
 
@@ -290,3 +246,9 @@ class TestHistoriqueModule:
         from src.modules.cuisine.courses import historique
 
         assert "afficher_historique" in historique.__all__
+'''
+
+filepath = os.path.join("tests", "modules", "cuisine", "courses", "test_historique.py")
+with open(filepath, "w", encoding="utf-8") as f:
+    f.write(new_content)
+print(f"Rewrote {filepath}")

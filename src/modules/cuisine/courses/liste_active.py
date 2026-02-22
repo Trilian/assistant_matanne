@@ -272,20 +272,12 @@ def afficher_ajouter_article():
                 return
 
             try:
-                # Créer/trouver l'ingrédient
-                from src.core.db import obtenir_contexte_db
-                from src.core.models import Ingredient
+                # Créer/trouver l'ingrédient via service
+                ingredient_id = service.obtenir_ou_creer_ingredient(nom=nom, unite=unite)
 
-                with obtenir_contexte_db() as db:
-                    ingredient = db.query(Ingredient).filter(Ingredient.nom == nom).first()
-
-                    if not ingredient:
-                        ingredient = Ingredient(nom=nom, unite=unite)
-                        db.add(ingredient)
-                        db.flush()
-                        db.refresh(ingredient)
-
-                    ingredient_id = ingredient.id
+                if not ingredient_id:
+                    st.error("❌ Erreur création ingrédient")
+                    return
 
                 # Ajouter article courses avec le service
                 data = {

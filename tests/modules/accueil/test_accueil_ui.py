@@ -166,9 +166,10 @@ class TestAccueilUI:
         afficher_inventaire_summary()
         assert True
 
+    @patch("src.ui.components.alertes.st")
     @patch("src.services.inventaire.obtenir_service_inventaire")
     @patch("src.modules.accueil.dashboard.st")
-    def test_render_inventaire_summary_with_data(self, mock_st, mock_inv) -> None:
+    def test_render_inventaire_summary_with_data(self, mock_st, mock_inv, mock_alertes_st) -> None:
         """Test resume inventaire avec donnees."""
         from src.modules.accueil import afficher_inventaire_summary
 

@@ -43,17 +43,18 @@ class TestTimelineHelpers:
 class TestChargerEventsPeriode:
     """Tests pour charger_events_periode."""
 
-    @patch("src.modules.planning.timeline_ui.obtenir_contexte_db")
-    def test_charger_events_vide(self, mock_db):
+    @patch("src.modules.planning.timeline_ui._get_service")
+    def test_charger_events_vide(self, mock_get_service):
         """charger_events_periode retourne liste vide si pas d'events."""
         from src.modules.planning.timeline_ui import charger_events_periode
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.all.return_value = []
-        mock_db.return_value.__enter__.return_value = mock_session
+        mock_service = MagicMock()
+        mock_service.charger_events_periode.return_value = []
+        mock_get_service.return_value = mock_service
 
         result = charger_events_periode(date.today(), date.today())
         assert isinstance(result, list)
+        assert len(result) == 0
 
 
 class TestCreerTimeline:

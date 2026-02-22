@@ -87,7 +87,16 @@ def setup_mock_st(
     checkbox_values: dict | None = None,
     button_clicked: str | None = None,
 ) -> MagicMock:
-    """Configure un mock complet de Streamlit."""
+    """Configure un mock complet de Streamlit.
+
+    Les clés de widgets utilisent le namespace ``recettes_liste__`` pour
+    correspondre au ``KeyNamespace("recettes_liste")`` du module de production.
+    Les paramètres ``checkbox_values`` et ``button_clicked`` acceptent les
+    noms courts (ex: ``robot_cookeo``, ``detail_1``) et sont préfixés
+    automatiquement.
+    """
+    _PREFIX = "recettes_liste__"
+
     default_data = {"recettes_page": 0, "recettes_page_size": page_size}
     if session_data:
         default_data.update(session_data)
@@ -127,11 +136,11 @@ def setup_mock_st(
 
     def selectbox_side_effect(*args, **kwargs):
         key = kwargs.get("key", "")
-        if key == "select_page_size":
+        if key == f"{_PREFIX}page_size":
             return page_size
-        if key == "filter_type_repas":
+        if key == f"{_PREFIX}filter_type_repas":
             return type_repas
-        if key == "filter_difficulte":
+        if key == f"{_PREFIX}filter_difficulte":
             return difficulte
         return "Tous"
 
@@ -141,15 +150,17 @@ def setup_mock_st(
 
     def slider_side_effect(*args, **kwargs):
         key = kwargs.get("key", "")
-        if key == "filter_score_bio":
+        if key == f"{_PREFIX}filter_score_bio":
             return min_score_bio
-        if key == "filter_score_local":
+        if key == f"{_PREFIX}filter_score_local":
             return min_score_local
         return 0
 
     mock_st.slider.side_effect = slider_side_effect
 
-    checkbox_data = checkbox_values or {}
+    # Prefix checkbox keys: {"robot_cookeo": True} → {"recettes_liste__robot_cookeo": True}
+    raw_checkbox = checkbox_values or {}
+    checkbox_data = {f"{_PREFIX}{k}": v for k, v in raw_checkbox.items()}
 
     def checkbox_side_effect(*args, **kwargs):
         key = kwargs.get("key", "")
@@ -157,11 +168,19 @@ def setup_mock_st(
 
     mock_st.checkbox.side_effect = checkbox_side_effect
 
+    # Prefix button_clicked: "detail_1" → "recettes_liste__detail_1"
+    # Handle legacy "btn_del_oui_1" → "recettes_liste__del_oui_1" mapping
+    prefixed_button = None
+    if button_clicked:
+        # Strip legacy "btn_" prefix if present (e.g. "btn_del_oui_1" → "del_oui_1")
+        clean = button_clicked.removeprefix("btn_")
+        prefixed_button = f"{_PREFIX}{clean}"
+
     def button_side_effect(*args, **kwargs):
         key = kwargs.get("key", "")
-        if button_clicked and key == button_clicked:
+        if prefixed_button and key == prefixed_button:
             return True
-        if args and button_clicked == args[0]:
+        if args and prefixed_button == args[0]:
             return True
         return False
 

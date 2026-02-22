@@ -7,7 +7,6 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
 from src.services.cuisine.courses import obtenir_service_courses
 
 
@@ -134,37 +133,8 @@ def afficher_outils():
                     st.write(f"✅ Fichier contient {len(df_import)} articles")
 
                     if st.button("✅ Confirmer import"):
-                        from src.core.models import Ingredient
-
-                        db = next(obtenir_contexte_db())
                         service = obtenir_service_courses()
-
-                        count = 0
-                        for _, row in df_import.iterrows():
-                            ingredient = (
-                                db.query(Ingredient)
-                                .filter(Ingredient.nom == row["Article"])
-                                .first()
-                            )
-
-                            if not ingredient:
-                                ingredient = Ingredient(
-                                    nom=row["Article"], unite=row.get("Unité", "pièce")
-                                )
-                                db.add(ingredient)
-                                db.commit()
-
-                            service.create(
-                                {
-                                    "ingredient_id": ingredient.id,
-                                    "quantite_necessaire": float(row["Quantité"]),
-                                    "priorite": row.get("Priorité", "moyenne"),
-                                    "rayon_magasin": row.get("Rayon", "Autre"),
-                                    "notes": row.get("Notes"),
-                                }
-                            )
-                            count += 1
-
+                        count = service.importer_articles_csv(df_import.to_dict("records"))
                         st.success(f"✅ {count} articles importés!")
                         st.session_state.courses_refresh += 1
                         st.rerun()

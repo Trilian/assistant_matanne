@@ -8,7 +8,6 @@ import time
 import pandas as pd
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
 from src.services.cuisine.courses import obtenir_service_courses
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.services.inventaire import obtenir_service_inventaire
@@ -55,40 +54,9 @@ def afficher_suggestions_ia():
 
                         if st.button("✅ Ajouter toutes les suggestions"):
                             try:
-                                from src.core.models import Ingredient
-
-                                db = next(obtenir_contexte_db())
-                                count = 0
-
-                                for suggestion in suggestions:
-                                    # Trouver ou créer ingrédient
-                                    ingredient = (
-                                        db.query(Ingredient)
-                                        .filter(Ingredient.nom == suggestion.nom)
-                                        .first()
-                                    )
-
-                                    if not ingredient:
-                                        ingredient = Ingredient(
-                                            nom=suggestion.nom, unite=suggestion.unite
-                                        )
-                                        db.add(ingredient)
-                                        db.commit()
-
-                                    # Ajouter à la liste
-                                    data = {
-                                        "ingredient_id": ingredient.id,
-                                        "quantite_necessaire": suggestion.quantite,
-                                        "priorite": suggestion.priorite,
-                                        "rayon_magasin": suggestion.rayon,
-                                        "suggere_par_ia": True,
-                                    }
-                                    service.create(data)
-                                    count += 1
-
+                                count = service.ajouter_suggestions_en_masse(suggestions)
                                 st.success(f"✅ {count} articles ajoutés!")
                                 st.session_state.courses_refresh += 1
-                                # Pas de rerun pour rester sur cet onglet
                                 time.sleep(0.5)
                             except Exception as e:
                                 st.error(f"❌ Erreur sauvegarde: {str(e)}")
@@ -135,9 +103,6 @@ def afficher_suggestions_ia():
                                 key="btn_add_missing_ingredients",
                             ):
                                 try:
-                                    from src.core.db import obtenir_contexte_db
-                                    from src.core.models import Ingredient
-
                                     # Récupérer ingrédients de la recette
                                     ingredients_recette = (
                                         recette.ingredients if recette.ingredients else []
@@ -146,61 +111,43 @@ def afficher_suggestions_ia():
                                     if not ingredients_recette:
                                         st.warning("Aucun ingrédient dans cette recette")
                                     else:
-                                        count_added = 0
-
-                                        with obtenir_contexte_db() as db:
-                                            for ing_obj in ingredients_recette:
-                                                # Récupérer ingrédient
-                                                ing_nom = (
-                                                    ing_obj.ingredient.nom
-                                                    if hasattr(ing_obj, "ingredient")
-                                                    else ing_obj.nom
-                                                )
-                                                ing_quantite = (
-                                                    ing_obj.quantite
-                                                    if hasattr(ing_obj, "quantite")
-                                                    else 1
-                                                )
-                                                ing_unite = (
-                                                    ing_obj.ingredient.unite
-                                                    if hasattr(ing_obj, "ingredient")
-                                                    and hasattr(ing_obj.ingredient, "unite")
-                                                    else "pièce"
-                                                )
-
-                                                if not ing_nom:
-                                                    continue
-
-                                                ingredient = (
-                                                    db.query(Ingredient)
-                                                    .filter(Ingredient.nom == ing_nom)
-                                                    .first()
+                                        # Préparer les données d'ingrédients
+                                        ingredients_data = []
+                                        for ing_obj in ingredients_recette:
+                                            ing_nom = (
+                                                ing_obj.ingredient.nom
+                                                if hasattr(ing_obj, "ingredient")
+                                                else ing_obj.nom
+                                            )
+                                            ing_quantite = (
+                                                ing_obj.quantite
+                                                if hasattr(ing_obj, "quantite")
+                                                else 1
+                                            )
+                                            ing_unite = (
+                                                ing_obj.ingredient.unite
+                                                if hasattr(ing_obj, "ingredient")
+                                                and hasattr(ing_obj.ingredient, "unite")
+                                                else "pièce"
+                                            )
+                                            if ing_nom:
+                                                ingredients_data.append(
+                                                    {
+                                                        "nom": ing_nom,
+                                                        "quantite": ing_quantite,
+                                                        "unite": ing_unite,
+                                                    }
                                                 )
 
-                                                if not ingredient:
-                                                    ingredient = Ingredient(
-                                                        nom=ing_nom, unite=ing_unite
-                                                    )
-                                                    db.add(ingredient)
-                                                    db.flush()
-                                                    db.refresh(ingredient)
-
-                                                # Ajouter à la liste courses
-                                                data = {
-                                                    "ingredient_id": ingredient.id,
-                                                    "quantite_necessaire": ing_quantite,
-                                                    "priorite": "moyenne",
-                                                    "rayon_magasin": "Autre",
-                                                    "notes": f"Pour {recette.nom}",
-                                                }
-                                                service.create(data)
-                                                count_added += 1
+                                        count_added = service.ajouter_ingredients_recette(
+                                            ingredients_data=ingredients_data,
+                                            recette_nom=recette.nom,
+                                        )
 
                                         st.success(
                                             f"✅ {count_added} ingrédient(s) ajouté(s) à la liste!"
                                         )
                                         st.session_state.courses_refresh += 1
-                                        # Pas de rerun pour rester sur cet onglet
                                         time.sleep(0.5)
                                 except Exception as e:
                                     st.error(f"❌ Erreur: {str(e)}")

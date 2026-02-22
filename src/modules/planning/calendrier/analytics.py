@@ -38,10 +38,13 @@ JOURS_NOMS_COURTS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
 # ═══════════════════════════════════════════════════════════
 
 
-def afficher_graphique_charge_semaine(jours: dict) -> None:
-    """Graphique en barres de la charge familiale par jour."""
-    jours_list = list(jours.values())
-    charges = [j.charge_score for j in jours_list]
+def afficher_graphique_charge_semaine(jours: list) -> None:
+    """Graphique en barres de la charge familiale par jour.
+
+    Args:
+        jours: Liste de JourCalendrier (7 éléments).
+    """
+    charges = [j.charge_score for j in jours]
 
     fig = go.Figure(
         data=[
@@ -174,19 +177,26 @@ def afficher_suggestions(stats: dict) -> None:
 # ═══════════════════════════════════════════════════════════
 
 
-def afficher_observations(jours: dict) -> None:
-    """Affiche les observations sur la semaine."""
-    jours_list = list(jours.values())
+def afficher_observations(jours: list) -> None:
+    """Affiche les observations sur la semaine.
+
+    Args:
+        jours: Liste de JourCalendrier (7 éléments).
+    """
+    if not jours:
+        st.info("Aucune donnée pour analyser.")
+        return
+
     jours_noms = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 
-    jour_max = max(jours_list, key=lambda j: j.charge_score)
-    idx_max = jours_list.index(jour_max)
+    jour_max = max(jours, key=lambda j: j.charge_score)
+    idx_max = jours.index(jour_max)
     st.error(
         f"❌ Jour le plus chargé: **{jours_noms[idx_max].capitalize()}** ({jour_max.charge_score}/100)"
     )
 
-    jour_min = min(jours_list, key=lambda j: j.charge_score)
-    idx_min = jours_list.index(jour_min)
+    jour_min = min(jours, key=lambda j: j.charge_score)
+    idx_min = jours.index(jour_min)
     st.success(
         f"🚀 Jour le plus calme: **{jours_noms[idx_min].capitalize()}** ({jour_min.charge_score}/100)"
     )
@@ -253,12 +263,15 @@ def afficher_formulaire_optimisation_ia(week_start: date) -> None:
 # ═══════════════════════════════════════════════════════════
 
 
-def afficher_reequilibrage(jours: dict) -> None:
-    """Propose le rééquilibrage des jours surchargés."""
-    jours_list = list(jours.values())
+def afficher_reequilibrage(jours: list) -> None:
+    """Propose le rééquilibrage des jours surchargés.
+
+    Args:
+        jours: Liste de JourCalendrier (7 éléments).
+    """
     jours_noms = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
-    jours_charges = [(i, j) for i, j in enumerate(jours_list) if j.charge_score >= 75]
+    jours_charges = [(i, j) for i, j in enumerate(jours) if j.charge_score >= 75]
 
     if not jours_charges:
         st.success("✅ Semaine bien équilibrée — Aucun rééquilibrage nécessaire")
@@ -270,11 +283,13 @@ def afficher_reequilibrage(jours: dict) -> None:
         jour_nom = jours_noms[idx]
 
         with st.expander(f"❌ {jour_nom} — Surcharge ({jour_charge.charge_score}/100)"):
-            st.write(f"Activités: {len(jour_charge.activites)} | Repas: {len(jour_charge.repas)}")
+            nb_act = len(jour_charge.activites)
+            nb_evt = jour_charge.nb_evenements
+            st.write(f"Activités: {nb_act} | Événements: {nb_evt}")
 
             if st.button("💡 Proposer répartition", key=f"reequilibrer_{idx}"):
-                jour_min = min(jours_list, key=lambda j: j.charge_score)
-                idx_min = jours_list.index(jour_min)
+                jour_min = min(jours, key=lambda j: j.charge_score)
+                idx_min = jours.index(jour_min)
                 st.info(f"💡 Suggestion: Déplacer 1-2 activités vers {jours_noms[idx_min]}")
 
 

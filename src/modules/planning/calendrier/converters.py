@@ -100,7 +100,7 @@ def convertir_activite_en_evenement(activite: Any) -> EvenementCalendrier | None
         # Determiner si c'est un RDV medical
         type_evt = TypeEvenement.ACTIVITE
         if hasattr(activite, "type_activite"):
-            if activite.type_activite in ("medical", "medical", "sante", "rdv_medical"):
+            if activite.type_activite in ("medical", "sante", "rdv_medical"):
                 type_evt = TypeEvenement.RDV_MEDICAL
 
         return EvenementCalendrier(
@@ -129,7 +129,7 @@ def convertir_event_calendrier_en_evenement(event: Any) -> EvenementCalendrier |
         # Determiner le type
         type_evt = TypeEvenement.EVENEMENT
         if hasattr(event, "type_event"):
-            if event.type_event in ("medical", "medical", "sante"):
+            if event.type_event in ("medical", "sante"):
                 type_evt = TypeEvenement.RDV_MEDICAL
             elif event.type_event in ("courses", "shopping"):
                 type_evt = TypeEvenement.COURSES

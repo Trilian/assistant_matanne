@@ -219,6 +219,41 @@ class JourCalendrier:
     def a_repas_planifies(self) -> bool:
         return self.repas_midi is not None or self.repas_soir is not None
 
+    @property
+    def charge_score(self) -> int:
+        """Score de charge du jour (0-100) basé sur le nombre et type d'événements.
+
+        Pondération:
+        - Repas: 5 pts chacun (routine quotidienne)
+        - RDV médical: 20 pts (stressant/contraignant)
+        - Batch cooking: 15 pts (effort conséquent)
+        - Activité: 10 pts
+        - Courses: 10 pts
+        - Tâches ménage: 5 pts chacune
+        - Autres: 5 pts
+        """
+        score = 0
+        for evt in self.evenements:
+            if evt.type in (
+                TypeEvenement.REPAS_MIDI,
+                TypeEvenement.REPAS_SOIR,
+                TypeEvenement.GOUTER,
+            ):
+                score += 5
+            elif evt.type == TypeEvenement.RDV_MEDICAL:
+                score += 20
+            elif evt.type == TypeEvenement.BATCH_COOKING:
+                score += 15
+            elif evt.type in (TypeEvenement.ACTIVITE, TypeEvenement.COURSES):
+                score += 10
+            elif evt.type in (TypeEvenement.MENAGE, TypeEvenement.ENTRETIEN, TypeEvenement.JARDIN):
+                score += 5
+            elif evt.type == TypeEvenement.RDV_AUTRE:
+                score += 10
+            else:
+                score += 5
+        return min(score, 100)
+
 
 @dataclass
 class SemaineCalendrier:
@@ -259,16 +294,28 @@ class SemaineCalendrier:
 
     @property
     def stats(self) -> dict:
-        """Statistiques agrégées de la semaine."""
+        """Statistiques agrégées de la semaine (calculées dynamiquement)."""
+        activites_jules = sum(1 for jour in self.jours for evt in jour.evenements if evt.pour_jules)
+        budget_total = sum(evt.budget or 0 for jour in self.jours for evt in jour.evenements)
+        charges = [jour.charge_score for jour in self.jours] if self.jours else [0]
+        charge_moyenne = sum(charges) / len(charges) if charges else 0
+
+        if charge_moyenne >= 70:
+            charge_globale = "intense"
+        elif charge_moyenne >= 40:
+            charge_globale = "normal"
+        else:
+            charge_globale = "faible"
+
         return {
             "repas": self.nb_repas_planifies,
             "activites": self.nb_activites,
             "events": sum(len(jour.evenements) for jour in self.jours),
             "projets": 0,
-            "activites_jules": 0,
-            "budget": 0,
-            "charge_moyenne": 50,
-            "charge_globale": "normal",
+            "activites_jules": activites_jules,
+            "budget": budget_total,
+            "charge_moyenne": int(charge_moyenne),
+            "charge_globale": charge_globale,
         }
 
 

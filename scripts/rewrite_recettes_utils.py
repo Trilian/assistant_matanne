@@ -1,4 +1,8 @@
-"""
+"""Rewrite recettes/utils.py - keep only pure functions, remove DB duplicates."""
+
+import os
+
+new_content = '''"""
 Logique metier du module Recettes (sans UI Streamlit).
 Fonctions pures testables independamment de Streamlit.
 
@@ -8,6 +12,7 @@ Utiliser: from src.services.cuisine.recettes import obtenir_service_recettes
 """
 
 from typing import Any
+
 
 # ===================================================================
 # LOGIQUE CALCULS & STATISTIQUES (PURE - SANS DB)
@@ -78,9 +83,10 @@ def formater_quantite(quantite: float | int | str) -> str:
     return str(quantite)
 
 
-__all__ = [
-    "formater_quantite",
-    "valider_recette",
-    "calculer_cout_recette",
-    "calculer_calories_portion",
-]
+__all__ = ["formater_quantite", "valider_recette", "calculer_cout_recette", "calculer_calories_portion"]
+'''
+
+filepath = os.path.join("src", "modules", "cuisine", "recettes", "utils.py")
+with open(filepath, "w", encoding="utf-8") as f:
+    f.write(new_content)
+print(f"Rewrote {filepath} - {len(new_content)} bytes")

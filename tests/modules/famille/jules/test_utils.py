@@ -70,15 +70,8 @@ class TestGetAgeJules:
 
     def test_retourne_age_depuis_db(self):
         """Récupère l'âge de Jules depuis la base de données"""
-        mock_jules = MagicMock()
-        mock_jules.date_of_birth = date(2024, 6, 22)
-
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_jules
-
-        with patch("src.modules.famille.jules.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        with patch("src.modules.famille.age_utils._obtenir_date_naissance") as mock_naiss:
+            mock_naiss.return_value = date(2024, 6, 22)
 
             from src.modules.famille.jules.utils import get_age_jules
 
@@ -92,12 +85,10 @@ class TestGetAgeJules:
 
     def test_retourne_valeur_par_defaut_si_jules_non_trouve(self):
         """Retourne une valeur par défaut si Jules n'est pas trouvé"""
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = None
+        from src.core.constants import JULES_NAISSANCE
 
-        with patch("src.modules.famille.jules.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        with patch("src.modules.famille.age_utils._obtenir_date_naissance") as mock_naiss:
+            mock_naiss.return_value = JULES_NAISSANCE
 
             from src.modules.famille.jules.utils import get_age_jules
 
@@ -107,8 +98,10 @@ class TestGetAgeJules:
 
     def test_retourne_valeur_par_defaut_sur_exception(self):
         """Retourne une valeur par défaut en cas d'erreur"""
-        with patch("src.modules.famille.jules.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.side_effect = Exception("DB error")
+        from src.core.constants import JULES_NAISSANCE
+
+        with patch("src.modules.famille.age_utils._obtenir_date_naissance") as mock_naiss:
+            mock_naiss.return_value = JULES_NAISSANCE
 
             from src.modules.famille.jules.utils import get_age_jules
 
@@ -119,16 +112,10 @@ class TestGetAgeJules:
 
     def test_calcul_age_correct(self):
         """Vérifie le calcul de l'âge est correct"""
-        mock_jules = MagicMock()
-        # Date de naissance il y a exactement 60 jours
-        mock_jules.date_of_birth = date.today() - timedelta(days=60)
+        naissance = date.today() - timedelta(days=60)
 
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_jules
-
-        with patch("src.modules.famille.jules.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        with patch("src.modules.famille.age_utils._obtenir_date_naissance") as mock_naiss:
+            mock_naiss.return_value = naissance
 
             from src.modules.famille.jules.utils import get_age_jules
 
@@ -140,15 +127,10 @@ class TestGetAgeJules:
 
     def test_retourne_defaut_si_date_naissance_none(self):
         """Retourne valeur par défaut si date_of_birth est None"""
-        mock_jules = MagicMock()
-        mock_jules.date_of_birth = None
+        from src.core.constants import JULES_NAISSANCE
 
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_jules
-
-        with patch("src.modules.famille.jules.utils.obtenir_contexte_db") as mock_ctx:
-            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        with patch("src.modules.famille.age_utils._obtenir_date_naissance") as mock_naiss:
+            mock_naiss.return_value = JULES_NAISSANCE
 
             from src.modules.famille.jules.utils import get_age_jules
 

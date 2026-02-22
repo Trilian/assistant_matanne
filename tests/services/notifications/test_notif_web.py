@@ -247,6 +247,9 @@ class TestDoitEnvoyer:
 
     def test_doit_envoyer_type_actif(self, service, preferences):
         """Doit envoyer si type activé."""
+        # Désactiver heures silencieuses pour éviter la dépendance à l'heure
+        preferences.heures_silencieuses_debut = None
+        preferences.heures_silencieuses_fin = None
         service._preferences["user123"] = preferences
 
         result = service.doit_envoyer("user123", TypeNotification.STOCK_BAS)

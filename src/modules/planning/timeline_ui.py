@@ -13,8 +13,6 @@ import streamlit as st
 
 from src.core.constants import JOURS_SEMAINE
 from src.core.date_utils import obtenir_debut_semaine
-from src.core.db import obtenir_contexte_db
-from src.core.models import CalendarEvent, FamilyActivity, Repas
 from src.ui import etat_vide
 from src.ui.tokens import Couleur
 
@@ -28,90 +26,30 @@ COULEURS_TYPES = {
     "autre": Couleur.TEXT_SECONDARY,
 }
 
+# Accesseur lazy pour le service (singleton)
+_service = None
+
+
+def _get_service():
+    global _service
+    if _service is None:
+        from src.services.famille.calendrier_planning import (
+            obtenir_service_calendrier_planning,
+        )
+
+        _service = obtenir_service_calendrier_planning()
+    return _service
+
 
 def charger_events_periode(date_debut: date, date_fin: date) -> list[dict]:
-    """
-    Charge tous les événements pour une période donnée.
+    """Charge tous les événements pour une période donnée.
+
+    Délègue au ServiceCalendrierPlanning.
 
     Returns:
         Liste de dicts avec {titre, date_debut, date_fin, type, couleur}
     """
-    events = []
-    debut_dt = datetime.combine(date_debut, datetime.min.time())
-    fin_dt = datetime.combine(date_fin, datetime.max.time())
-
-    with obtenir_contexte_db() as db:
-        # CalendarEvent
-        calendar_events = (
-            db.query(CalendarEvent)
-            .filter(
-                CalendarEvent.date_debut >= debut_dt,
-                CalendarEvent.date_debut <= fin_dt,
-            )
-            .all()
-        )
-
-        for e in calendar_events:
-            events.append(
-                {
-                    "titre": e.titre,
-                    "date_debut": e.date_debut,
-                    "date_fin": e.date_fin or e.date_debut + timedelta(hours=1),
-                    "type": e.type_event or "autre",
-                    "couleur": e.couleur or COULEURS_TYPES.get(e.type_event, "#757575"),
-                    "lieu": e.lieu,
-                }
-            )
-
-        # FamilyActivity
-        activities = (
-            db.query(FamilyActivity)
-            .filter(
-                FamilyActivity.date_prevue >= date_debut,
-                FamilyActivity.date_prevue <= date_fin,
-            )
-            .all()
-        )
-
-        for a in activities:
-            date_debut_dt = datetime.combine(a.date_prevue, datetime.min.time().replace(hour=10))
-            events.append(
-                {
-                    "titre": a.titre,
-                    "date_debut": date_debut_dt,
-                    "date_fin": date_debut_dt + timedelta(hours=2),
-                    "type": "activité",
-                    "couleur": COULEURS_TYPES["activité"],
-                    "lieu": a.lieu,
-                }
-            )
-
-        # Repas
-        repas = (
-            db.query(Repas)
-            .filter(
-                Repas.date_repas >= date_debut,
-                Repas.date_repas <= date_fin,
-            )
-            .all()
-        )
-
-        for r in repas:
-            heures = {"petit_déjeuner": 8, "déjeuner": 12, "goûter": 16, "dîner": 19}
-            heure = heures.get(r.type_repas, 12)
-            date_debut_dt = datetime.combine(r.date_repas, datetime.min.time().replace(hour=heure))
-            events.append(
-                {
-                    "titre": f"{r.type_repas.replace('_', ' ').title()}: {r.recette.nom if r.recette else 'Non défini'}",
-                    "date_debut": date_debut_dt,
-                    "date_fin": date_debut_dt + timedelta(minutes=45),
-                    "type": "repas",
-                    "couleur": COULEURS_TYPES["repas"],
-                    "lieu": None,
-                }
-            )
-
-    return events
+    return _get_service().charger_events_periode(date_debut, date_fin)
 
 
 def creer_timeline_jour(events: list[dict], jour: date) -> go.Figure:

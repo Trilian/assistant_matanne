@@ -114,14 +114,16 @@ class TestRenderDashboard:
 
         mock_st.warning.assert_called_once()
 
-    def test_affiche_subheader(self, mock_st, mock_weekly_chart):
+    @patch("src.modules.famille.suivi_perso.tableau_bord.charger_css")
+    def test_affiche_subheader(self, mock_css, mock_st, mock_weekly_chart):
         """Vérifie l'affichage du titre"""
         from src.modules.famille.suivi_perso.tableau_bord import afficher_dashboard
 
         afficher_dashboard({"user": UserMock()})
 
-        mock_st.subheader.assert_called()
-        assert "Dashboard" in mock_st.subheader.call_args[0][0]
+        # Le titre est affiché via st.markdown("##### 📊 Dashboard")
+        markdown_calls = [str(c) for c in mock_st.markdown.call_args_list]
+        assert any("Dashboard" in c for c in markdown_calls)
 
     def test_affiche_4_metriques(self, mock_st, mock_weekly_chart):
         """Vérifie les 4 colonnes de métriques"""

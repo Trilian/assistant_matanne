@@ -65,25 +65,12 @@ def _sauvegarder_planning_db(planning_data: dict, date_debut: date) -> bool:
 
 
 def _charger_historique_plannings() -> list[dict]:
-    """Charge l'historique des plannings depuis la base de données."""
+    """Charge l'historique des plannings via ServicePlanning."""
     try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import Planning
+        from src.services.cuisine.planning import obtenir_service_planning
 
-        with obtenir_contexte_db() as db:
-            plannings = db.query(Planning).order_by(Planning.semaine_debut.desc()).limit(20).all()
-            return [
-                {
-                    "id": p.id,
-                    "nom": p.nom,
-                    "debut": p.semaine_debut,
-                    "fin": p.semaine_fin,
-                    "actif": p.actif,
-                    "genere_par_ia": p.genere_par_ia,
-                    "nb_repas": len(p.repas) if hasattr(p, "repas") else 0,
-                }
-                for p in plannings
-            ]
+        service = obtenir_service_planning()
+        return service.get_historique_plannings(limit=20)
     except Exception as e:
         import logging
 

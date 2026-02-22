@@ -108,6 +108,200 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
     # Alias pour compatibilite
     get_liste_courses = obtenir_liste_courses
 
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
+    def obtenir_ou_creer_ingredient(
+        self,
+        nom: str,
+        unite: str = "pièce",
+        db: Session | None = None,
+    ) -> int:
+        """Trouve ou crée un ingrédient par nom.
+
+        Args:
+            nom: Nom de l'ingrédient
+            unite: Unité par défaut si création
+            db: Session DB (injectée par @avec_session_db)
+
+        Returns:
+            ID de l'ingrédient (existant ou créé)
+        """
+        from src.core.models import Ingredient
+
+        ingredient = db.query(Ingredient).filter(Ingredient.nom == nom).first()
+        if not ingredient:
+            ingredient = Ingredient(nom=nom, unite=unite)
+            db.add(ingredient)
+            db.flush()
+            db.refresh(ingredient)
+            logger.debug(f"Ingredient créé: {nom}")
+        return ingredient.id
+
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
+    def obtenir_historique_achats(
+        self,
+        date_debut: Any = None,
+        date_fin: Any = None,
+        db: Session | None = None,
+    ) -> list[dict[str, Any]]:
+        """Récupère l'historique des articles achetés dans une période.
+
+        Args:
+            date_debut: Date de début (datetime ou date)
+            date_fin: Date de fin (datetime ou date)
+            db: Session DB (injectée par @avec_session_db)
+
+        Returns:
+            Liste de dicts avec données articles achetés
+        """
+        from datetime import datetime
+
+        query = (
+            db.query(ArticleCourses)
+            .options(joinedload(ArticleCourses.ingredient))
+            .filter(ArticleCourses.achete.is_(True))
+        )
+
+        if date_debut:
+            if hasattr(date_debut, "hour"):
+                dt_debut = date_debut
+            else:
+                dt_debut = datetime.combine(date_debut, datetime.min.time())
+            query = query.filter(ArticleCourses.achete_le >= dt_debut)
+
+        if date_fin:
+            if hasattr(date_fin, "hour"):
+                dt_fin = date_fin
+            else:
+                dt_fin = datetime.combine(date_fin, datetime.max.time())
+            query = query.filter(ArticleCourses.achete_le <= dt_fin)
+
+        articles = query.all()
+
+        return [
+            {
+                "id": a.id,
+                "ingredient_nom": a.ingredient.nom if a.ingredient else "N/A",
+                "quantite_necessaire": a.quantite_necessaire,
+                "unite": a.ingredient.unite if a.ingredient else "",
+                "priorite": a.priorite,
+                "rayon_magasin": a.rayon_magasin,
+                "achete_le": a.achete_le,
+                "suggere_par_ia": a.suggere_par_ia,
+            }
+            for a in articles
+        ]
+
+    # Alias
+    get_historique_achats = obtenir_historique_achats
+
+    @avec_gestion_erreurs(default_return=0)
+    def ajouter_suggestions_en_masse(
+        self,
+        suggestions: list,
+    ) -> int:
+        """Ajoute des suggestions IA à la liste de courses.
+
+        Pour chaque suggestion, trouve ou crée l'ingrédient puis crée l'article.
+
+        Args:
+            suggestions: Liste de SuggestionCourses
+
+        Returns:
+            Nombre d'articles ajoutés
+        """
+        count = 0
+        for suggestion in suggestions:
+            ingredient_id = self.obtenir_ou_creer_ingredient(
+                nom=suggestion.nom,
+                unite=suggestion.unite,
+            )
+            if ingredient_id:
+                data = {
+                    "ingredient_id": ingredient_id,
+                    "quantite_necessaire": suggestion.quantite,
+                    "priorite": suggestion.priorite,
+                    "rayon_magasin": suggestion.rayon,
+                    "suggere_par_ia": True,
+                }
+                self.create(data)
+                count += 1
+        return count
+
+    @avec_gestion_erreurs(default_return=0)
+    def ajouter_ingredients_recette(
+        self,
+        ingredients_data: list[dict],
+        recette_nom: str = "",
+    ) -> int:
+        """Ajoute les ingrédients d'une recette à la liste de courses.
+
+        Args:
+            ingredients_data: Liste de dicts avec nom, quantite, unite
+            recette_nom: Nom de la recette pour les notes
+
+        Returns:
+            Nombre d'articles ajoutés
+        """
+        count = 0
+        for ing in ingredients_data:
+            nom = ing.get("nom", "")
+            if not nom:
+                continue
+
+            ingredient_id = self.obtenir_ou_creer_ingredient(
+                nom=nom,
+                unite=ing.get("unite", "pièce"),
+            )
+            if ingredient_id:
+                data = {
+                    "ingredient_id": ingredient_id,
+                    "quantite_necessaire": ing.get("quantite", 1),
+                    "priorite": "moyenne",
+                    "rayon_magasin": "Autre",
+                    "notes": f"Pour {recette_nom}" if recette_nom else None,
+                }
+                self.create(data)
+                count += 1
+        return count
+
+    @avec_gestion_erreurs(default_return=0)
+    def importer_articles_csv(
+        self,
+        articles: list[dict],
+    ) -> int:
+        """Importe des articles depuis un CSV parsé.
+
+        Args:
+            articles: Liste de dicts avec Article, Quantité, Unité, Priorité, Rayon, Notes
+
+        Returns:
+            Nombre d'articles importés
+        """
+        count = 0
+        for row in articles:
+            nom = row.get("Article", "")
+            if not nom:
+                continue
+
+            ingredient_id = self.obtenir_ou_creer_ingredient(
+                nom=nom,
+                unite=row.get("Unité", "pièce"),
+            )
+            if ingredient_id:
+                self.create(
+                    {
+                        "ingredient_id": ingredient_id,
+                        "quantite_necessaire": float(row.get("Quantité", 1)),
+                        "priorite": row.get("Priorité", "moyenne"),
+                        "rayon_magasin": row.get("Rayon", "Autre"),
+                        "notes": row.get("Notes"),
+                    }
+                )
+                count += 1
+        return count
+
     # ═══════════════════════════════════════════════════════════
     # SECTION 2: SUGGESTIONS IA
     # ═══════════════════════════════════════════════════════════
