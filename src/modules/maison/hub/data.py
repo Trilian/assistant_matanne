@@ -1,9 +1,9 @@
 """
 Hub Maison - Fonctions de données.
 
-⚠️ Agrégation des données depuis les services et la base de données.
-Les tâches et alertes sont désormais issues des services (jardin, entretien)
-au lieu de données mock.
+Agrégation des données depuis les services et la base de données.
+Les tâches et alertes sont issues des services (jardin, entretien).
+DB access délégué à HubDataService.
 """
 
 import logging
@@ -11,10 +11,8 @@ from datetime import date, datetime
 
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
-from src.core.models import ObjetMaison, PieceMaison
-from src.core.models.temps_entretien import SessionTravail, ZoneJardin
 from src.core.session_keys import SK
+from src.services.maison import get_hub_data_service
 
 logger = logging.getLogger(__name__)
 
@@ -36,22 +34,9 @@ def obtenir_stats_globales() -> dict:
     }
 
     try:
-        with obtenir_contexte_db() as db:
-            stats["zones_jardin"] = db.query(ZoneJardin).count()
-            stats["pieces"] = db.query(PieceMaison).count()
-            stats["objets_a_changer"] = (
-                db.query(ObjetMaison)
-                .filter(ObjetMaison.statut.in_(["a_changer", "a_reparer"]))
-                .count()
-            )
-
-            debut_mois = date.today().replace(day=1)
-            sessions = (
-                db.query(SessionTravail)
-                .filter(SessionTravail.debut >= datetime.combine(debut_mois, datetime.min.time()))
-                .all()
-            )
-            stats["temps_mois_heures"] = sum(s.duree_minutes or 0 for s in sessions) / 60
+        service = get_hub_data_service()
+        db_stats = service.obtenir_stats_db()
+        stats.update(db_stats)
 
         # Calculer autonomie via le service jardin
         try:
@@ -206,26 +191,19 @@ def obtenir_alertes() -> list[dict]:
     except Exception as e:
         logger.debug(f"Erreur alertes entretien hub: {e}")
 
-    # ─── Alertes objets à changer (DB) ───
+    # ─── Alertes objets à changer (via service) ───
     try:
-        with obtenir_contexte_db() as db:
-            objets_urgents = (
-                db.query(ObjetMaison)
-                .filter(
-                    ObjetMaison.statut == "a_changer",
-                    ObjetMaison.priorite_remplacement == "urgente",
-                )
-                .count()
+        service = get_hub_data_service()
+        objets_urgents = service.compter_objets_urgents()
+        if objets_urgents > 0:
+            alertes.append(
+                {
+                    "type": "warning",
+                    "icon": "🔧",
+                    "titre": f"{objets_urgents} objet(s) à remplacer",
+                    "description": "Priorité urgente - voir détails",
+                }
             )
-            if objets_urgents > 0:
-                alertes.append(
-                    {
-                        "type": "warning",
-                        "icon": "🔧",
-                        "titre": f"{objets_urgents} objet(s) à remplacer",
-                        "description": "Priorité urgente - voir détails",
-                    }
-                )
     except Exception as e:
         logger.debug(f"Erreur alertes objets hub: {e}")
 

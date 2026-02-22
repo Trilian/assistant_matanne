@@ -193,6 +193,42 @@ class ServiceSuiviPerso:
             return []
 
     @avec_session_db
+    def sauvegarder_objectifs(
+        self,
+        user_id: int,
+        objectif_pas: int,
+        objectif_calories: int,
+        objectif_minutes: int,
+        db: Session | None = None,
+    ) -> bool:
+        """Sauvegarde les objectifs d'un utilisateur.
+
+        Args:
+            user_id: ID du profil utilisateur.
+            objectif_pas: Objectif de pas quotidien.
+            objectif_calories: Objectif de calories actives.
+            objectif_minutes: Objectif de minutes actives.
+            db: Session DB (injectée automatiquement).
+
+        Returns:
+            True si sauvegardé avec succès.
+        """
+        assert db is not None
+        try:
+            user = db.query(UserProfile).filter_by(id=user_id).first()
+            if user:
+                user.objectif_pas_quotidien = objectif_pas
+                user.objectif_calories_brulees = objectif_calories
+                user.objectif_minutes_actives = objectif_minutes
+                db.commit()
+                logger.info("Objectifs mis à jour pour user_id=%d", user_id)
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Erreur sauvegarde objectifs: {e}")
+            return False
+
+    @avec_session_db
     def ajouter_food_log(
         self,
         username: str,

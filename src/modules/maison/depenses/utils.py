@@ -12,7 +12,6 @@ from typing import List, Optional
 
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
 from src.core.models import HouseExpense
 from src.core.models.finances import ExpenseCategory
 from src.services.famille.budget import (
@@ -20,6 +19,7 @@ from src.services.famille.budget import (
     FactureMaison,
     get_budget_service,
 )
+from src.services.maison import get_depenses_crud_service
 
 # Labels des categories de depenses
 CATEGORY_LABELS = {
@@ -65,8 +65,8 @@ __all__ = [
     "Optional",
     "List",
     "calendar",
-    # Database
-    "obtenir_contexte_db",
+    # Service
+    "get_depenses_crud_service",
     "HouseExpense",
     "ExpenseCategory",
     # Budget service

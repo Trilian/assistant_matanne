@@ -8,6 +8,8 @@ from src.ui import etat_vide
 
 logger = logging.getLogger(__name__)
 
+from src.services.famille.achats import obtenir_service_achats_famille
+
 from .utils import (
     CATEGORIES,
     PRIORITES,
@@ -18,7 +20,6 @@ from .utils import (
     get_purchases_by_groupe,
     get_stats,
     mark_as_bought,
-    obtenir_contexte_db,
     st,
 )
 
@@ -48,30 +49,21 @@ def afficher_dashboard():
     st.markdown("**🔴 À acheter en priorite:**")
 
     try:
-        with obtenir_contexte_db() as db:
-            urgents = (
-                db.query(FamilyPurchase)
-                .filter(
-                    FamilyPurchase.achete == False, FamilyPurchase.priorite.in_(["urgent", "haute"])
-                )
-                .order_by(FamilyPurchase.priorite)
-                .limit(5)
-                .all()
-            )
+        urgents = obtenir_service_achats_famille().get_urgents(limit=5)
 
-            if urgents:
-                for p in urgents:
-                    cat_info = CATEGORIES.get(p.categorie, {"emoji": "📦"})
-                    prio_info = PRIORITES.get(p.priorite, {"emoji": "⚪"})
+        if urgents:
+            for p in urgents:
+                cat_info = CATEGORIES.get(p.categorie, {"emoji": "📦"})
+                prio_info = PRIORITES.get(p.priorite, {"emoji": "⚪"})
 
-                    col1, col2 = st.columns([4, 1])
-                    with col1:
-                        st.write(f"{prio_info['emoji']} {cat_info['emoji']} **{p.nom}**")
-                    with col2:
-                        if p.prix_estime:
-                            st.write(f"~{p.prix_estime:.0f}€")
-            else:
-                st.success("✅ Rien d'urgent!")
+                col1, col2 = st.columns([4, 1])
+                with col1:
+                    st.write(f"{prio_info['emoji']} {cat_info['emoji']} **{p.nom}**")
+                with col2:
+                    if p.prix_estime:
+                        st.write(f"~{p.prix_estime:.0f}€")
+        else:
+            st.success("✅ Rien d'urgent!")
     except Exception as e:
         logger.debug(f"Erreur ignorée: {e}")
         etat_vide("Aucun achat urgent", "💳")
@@ -193,23 +185,20 @@ def afficher_add_form():
                 st.error("Nom requis")
             else:
                 try:
-                    with obtenir_contexte_db() as db:
-                        purchase = FamilyPurchase(
-                            nom=nom,
-                            categorie=categorie,
-                            priorite=priorite,
-                            prix_estime=prix if prix > 0 else None,
-                            taille=taille or None,
-                            magasin=magasin or None,
-                            url=url or None,
-                            description=description or None,
-                            age_recommande_mois=age_recommande,
-                            suggere_par="manuel",
-                        )
-                        db.add(purchase)
-                        db.commit()
-                        st.success(f"✅ {nom} ajoute!")
-                        st.rerun()
+                    obtenir_service_achats_famille().ajouter_achat(
+                        nom=nom,
+                        categorie=categorie,
+                        priorite=priorite,
+                        prix_estime=prix if prix > 0 else None,
+                        taille=taille or None,
+                        magasin=magasin or None,
+                        url=url or None,
+                        description=description or None,
+                        age_recommande_mois=age_recommande,
+                        suggere_par="manuel",
+                    )
+                    st.success(f"✅ {nom} ajoute!")
+                    st.rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")
 

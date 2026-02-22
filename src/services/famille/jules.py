@@ -121,6 +121,29 @@ class ServiceJules:
 
         return {cat: count for cat, count in result}
 
+    # ═══════════════════════════════════════════════════════════
+    # ÂGE / DATE DE NAISSANCE
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_session_db
+    def get_date_naissance_jules(self, db: Session | None = None) -> date_type | None:
+        """Récupère la date de naissance de Jules depuis la BD.
+
+        Args:
+            db: Session DB (injectée automatiquement).
+
+        Returns:
+            Date de naissance ou None si non trouvée.
+        """
+        assert db is not None
+        try:
+            jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
+            if jules and jules.date_of_birth:
+                return jules.date_of_birth
+        except Exception:
+            logger.debug("Erreur récupération date naissance Jules")
+        return None
+
 
 # ═══════════════════════════════════════════════════════════
 # FACTORY

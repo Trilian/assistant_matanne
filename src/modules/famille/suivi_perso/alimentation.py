@@ -3,13 +3,8 @@ Module Suivi Perso - Log alimentation
 """
 
 from .utils import (
-    FoodLog,
-    UserProfile,
     date,
-    datetime,
     get_food_logs_today,
-    get_or_create_user,
-    obtenir_contexte_db,
     st,
 )
 
@@ -81,26 +76,17 @@ def afficher_food_form(username: str):
                 st.error("Description requise")
             else:
                 try:
-                    with obtenir_contexte_db() as db:
-                        user = db.query(UserProfile).filter_by(username=username).first()
-                        if not user:
-                            user = get_or_create_user(
-                                username, "Anne" if username == "anne" else "Mathieu", db=db
-                            )
+                    from src.services.famille.suivi_perso import obtenir_service_suivi_perso
 
-                        log = FoodLog(
-                            user_id=user.id,
-                            date=date.today(),
-                            heure=datetime.now(),
-                            repas=repas[0],
-                            description=description,
-                            calories_estimees=calories if calories > 0 else None,
-                            qualite=qualite,
-                            notes=notes or None,
-                        )
-                        db.add(log)
-                        db.commit()
-                        st.success("✅ Repas enregistre!")
-                        st.rerun()
+                    obtenir_service_suivi_perso().ajouter_food_log(
+                        username=username,
+                        repas=repas[0],
+                        description=description,
+                        calories=calories if calories > 0 else None,
+                        qualite=qualite,
+                        notes=notes or None,
+                    )
+                    st.success("✅ Repas enregistre!")
+                    st.rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")

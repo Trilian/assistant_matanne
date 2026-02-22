@@ -13,8 +13,8 @@ from typing import Optional
 
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
 from src.core.models import FamilyPurchase
+from src.services.famille.achats import obtenir_service_achats_famille
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,6 @@ __all__ = [
     "date",
     "Optional",
     # Database
-    "obtenir_contexte_db",
     "FamilyPurchase",
     # Constants
     "CATEGORIES",
@@ -59,8 +58,7 @@ __all__ = [
 def get_all_purchases(achete: bool = False) -> list:
     """Recupère tous les achats"""
     try:
-        with obtenir_contexte_db() as db:
-            return db.query(FamilyPurchase).filter_by(achete=achete).all()
+        return obtenir_service_achats_famille().lister_achats(achete=achete)
     except Exception as e:
         logger.debug(f"Erreur ignorée: {e}")
         return []
@@ -69,13 +67,7 @@ def get_all_purchases(achete: bool = False) -> list:
 def get_purchases_by_category(categorie: str, achete: bool = False) -> list:
     """Recupère les achats par categorie"""
     try:
-        with obtenir_contexte_db() as db:
-            return (
-                db.query(FamilyPurchase)
-                .filter(FamilyPurchase.categorie == categorie, FamilyPurchase.achete == achete)
-                .order_by(FamilyPurchase.priorite)
-                .all()
-            )
+        return obtenir_service_achats_famille().lister_par_categorie(categorie, achete=achete)
     except Exception as e:
         logger.debug(f"Erreur ignorée: {e}")
         return []
@@ -85,13 +77,7 @@ def get_purchases_by_groupe(groupe: str, achete: bool = False) -> list:
     """Recupère les achats par groupe (jules, nous, maison)"""
     categories = [k for k, v in CATEGORIES.items() if v["groupe"] == groupe]
     try:
-        with obtenir_contexte_db() as db:
-            return (
-                db.query(FamilyPurchase)
-                .filter(FamilyPurchase.categorie.in_(categories), FamilyPurchase.achete == achete)
-                .order_by(FamilyPurchase.priorite)
-                .all()
-            )
+        return obtenir_service_achats_famille().lister_par_groupe(categories, achete=achete)
     except Exception as e:
         logger.debug(f"Erreur ignorée: {e}")
         return []
@@ -100,21 +86,7 @@ def get_purchases_by_groupe(groupe: str, achete: bool = False) -> list:
 def get_stats() -> dict:
     """Calcule les statistiques des achats"""
     try:
-        with obtenir_contexte_db() as db:
-            en_attente = db.query(FamilyPurchase).filter_by(achete=False).all()
-            achetes = db.query(FamilyPurchase).filter_by(achete=True).all()
-
-            total_estime = sum(p.prix_estime or 0 for p in en_attente)
-            total_depense = sum(p.prix_reel or p.prix_estime or 0 for p in achetes)
-            urgents = len([p for p in en_attente if p.priorite in ["urgent", "haute"]])
-
-            return {
-                "en_attente": len(en_attente),
-                "achetes": len(achetes),
-                "total_estime": total_estime,
-                "total_depense": total_depense,
-                "urgents": urgents,
-            }
+        return obtenir_service_achats_famille().get_stats()
     except Exception as e:
         logger.debug(f"Erreur ignorée: {e}")
         return {
@@ -129,14 +101,7 @@ def get_stats() -> dict:
 def mark_as_bought(purchase_id: int, prix_reel: float = None):
     """Marque un achat comme effectue"""
     try:
-        with obtenir_contexte_db() as db:
-            purchase = db.get(FamilyPurchase, purchase_id)
-            if purchase:
-                purchase.achete = True
-                purchase.date_achat = date.today()
-                if prix_reel:
-                    purchase.prix_reel = prix_reel
-                db.commit()
+        obtenir_service_achats_famille().marquer_achete(purchase_id, prix_reel=prix_reel)
     except Exception as e:
         logger.debug(f"Erreur ignorée: {e}")
 
@@ -144,10 +109,6 @@ def mark_as_bought(purchase_id: int, prix_reel: float = None):
 def delete_purchase(purchase_id: int):
     """Supprime un achat"""
     try:
-        with obtenir_contexte_db() as db:
-            purchase = db.get(FamilyPurchase, purchase_id)
-            if purchase:
-                db.delete(purchase)
-                db.commit()
+        obtenir_service_achats_famille().supprimer_achat(purchase_id)
     except Exception as e:
         logger.debug(f"Erreur ignorée: {e}")

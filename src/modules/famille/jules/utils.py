@@ -15,9 +15,9 @@ from typing import Optional
 import streamlit as st
 
 from src.core.ai import ClientIA
-from src.core.db import obtenir_contexte_db
 from src.core.models import ChildProfile, FamilyPurchase, Milestone
 from src.services.core.base import BaseAIService
+from src.services.famille.achats import obtenir_service_achats_famille
 
 logger = logging.getLogger(__name__)
 
@@ -148,7 +148,6 @@ __all__ = [
     "timedelta",
     "Optional",
     # Database
-    "obtenir_contexte_db",
     "ChildProfile",
     "Milestone",
     "FamilyPurchase",
@@ -188,18 +187,8 @@ def get_taille_vetements(age_mois: int) -> dict:
 def get_achats_jules_en_attente() -> list:
     """Recupère les achats Jules en attente"""
     try:
-        with obtenir_contexte_db() as db:
-            return (
-                db.query(FamilyPurchase)
-                .filter(
-                    FamilyPurchase.achete == False,
-                    FamilyPurchase.categorie.in_(
-                        ["jules_vetements", "jules_jouets", "jules_equipement"]
-                    ),
-                )
-                .order_by(FamilyPurchase.priorite)
-                .all()
-            )
+        categories = ["jules_vetements", "jules_jouets", "jules_equipement"]
+        return obtenir_service_achats_famille().lister_par_groupe(categories, achete=False)
     except Exception as e:
         logger.debug(f"Erreur ignorée: {e}")
         return []

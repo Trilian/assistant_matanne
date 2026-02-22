@@ -1,0 +1,65 @@
+"""
+Service Accueil Data.
+
+Centralise les accès base de données pour le module accueil/dashboard.
+"""
+
+import logging
+from datetime import date
+
+from sqlalchemy.orm import Session
+
+from src.core.decorators import avec_gestion_erreurs, avec_session_db
+from src.core.models import MaintenanceTask
+
+logger = logging.getLogger(__name__)
+
+
+class AccueilDataService:
+    """Service de données pour le dashboard accueil."""
+
+    _instance: "AccueilDataService | None" = None
+
+    @avec_session_db
+    @avec_gestion_erreurs(default_return=[])
+    def get_taches_en_retard(self, limit: int = 10, db: Session | None = None) -> list[dict]:
+        """Récupère les tâches ménage en retard.
+
+        Returns:
+            Liste de dicts avec nom, prochaine_fois, jours_retard
+        """
+        taches = (
+            db.query(MaintenanceTask)
+            .filter(
+                MaintenanceTask.prochaine_fois < date.today(),
+                MaintenanceTask.fait.is_(False),
+            )
+            .limit(limit)
+            .all()
+        )
+
+        return [
+            {
+                "nom": t.nom,
+                "prochaine_fois": t.prochaine_fois,
+                "jours_retard": (date.today() - t.prochaine_fois).days,
+            }
+            for t in taches
+        ]
+
+
+# ═══════════════════════════════════════════════════════════
+# FACTORY
+# ═══════════════════════════════════════════════════════════
+
+
+def get_accueil_data_service() -> AccueilDataService:
+    """Factory singleton pour le service accueil data."""
+    if AccueilDataService._instance is None:
+        AccueilDataService._instance = AccueilDataService()
+    return AccueilDataService._instance
+
+
+def obtenir_service_accueil_data() -> AccueilDataService:
+    """Factory française pour le service accueil data."""
+    return get_accueil_data_service()

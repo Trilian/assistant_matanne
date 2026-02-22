@@ -4,7 +4,7 @@ Module Suivi Perso - Paramètres Garmin et objectifs
 
 from src.core.session_keys import SK
 
-from .utils import UserProfile, get_garmin_service, obtenir_contexte_db, st
+from .utils import get_garmin_service, st
 
 
 def afficher_garmin_settings(data: dict):
@@ -132,13 +132,15 @@ def afficher_objectifs(data: dict):
 
     if st.button("💾 Sauvegarder objectifs"):
         try:
-            with obtenir_contexte_db() as db:
-                u = db.query(UserProfile).filter_by(id=user.id).first()
-                u.objectif_pas_quotidien = new_pas
-                u.objectif_calories_brulees = new_cal
-                u.objectif_minutes_actives = new_min
-                db.commit()
-                st.success("✅ Objectifs mis à jour!")
-                st.rerun()
+            from src.services.famille.suivi_perso import obtenir_service_suivi_perso
+
+            obtenir_service_suivi_perso().sauvegarder_objectifs(
+                user_id=user.id,
+                objectif_pas=new_pas,
+                objectif_calories=new_cal,
+                objectif_minutes=new_min,
+            )
+            st.success("✅ Objectifs mis à jour!")
+            st.rerun()
         except Exception as e:
             st.error(f"Erreur: {e}")

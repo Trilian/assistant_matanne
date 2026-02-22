@@ -4,6 +4,7 @@ Module Jules - Composants UI
 
 from src.core.async_utils import executer_async
 from src.core.session_keys import SK
+from src.services.famille.achats import obtenir_service_achats_famille
 
 from .ai_service import JulesAIService
 from .utils import (
@@ -14,7 +15,6 @@ from .utils import (
     get_activites_pour_age,
     get_age_jules,
     get_taille_vetements,
-    obtenir_contexte_db,
     st,
 )
 
@@ -140,46 +140,38 @@ def afficher_shopping():
 def afficher_achats_categorie(categorie: str):
     """Affiche les achats d'une categorie"""
     try:
-        with obtenir_contexte_db() as db:
-            achats = (
-                db.query(FamilyPurchase)
-                .filter(FamilyPurchase.categorie == categorie, FamilyPurchase.achete == False)
-                .order_by(FamilyPurchase.priorite)
-                .all()
-            )
+        achats = obtenir_service_achats_famille().lister_par_categorie(categorie, achete=False)
 
-            if not achats:
-                st.caption("Aucun article en attente")
-                return
+        if not achats:
+            st.caption("Aucun article en attente")
+            return
 
-            for achat in achats:
-                with st.container(border=True):
-                    col1, col2, col3 = st.columns([3, 1, 1])
+        for achat in achats:
+            with st.container(border=True):
+                col1, col2, col3 = st.columns([3, 1, 1])
 
-                    with col1:
-                        prio_emoji = {
-                            "urgent": "🔴",
-                            "haute": "🟠",
-                            "moyenne": "🟡",
-                            "basse": "🟢",
-                        }.get(achat.priorite, "⚪")
-                        st.markdown(f"**{prio_emoji} {achat.nom}**")
-                        if achat.taille:
-                            st.caption(f"Taille: {achat.taille}")
-                        if achat.description:
-                            st.caption(achat.description)
+                with col1:
+                    prio_emoji = {
+                        "urgent": "🔴",
+                        "haute": "🟠",
+                        "moyenne": "🟡",
+                        "basse": "🟢",
+                    }.get(achat.priorite, "⚪")
+                    st.markdown(f"**{prio_emoji} {achat.nom}**")
+                    if achat.taille:
+                        st.caption(f"Taille: {achat.taille}")
+                    if achat.description:
+                        st.caption(achat.description)
 
-                    with col2:
-                        if achat.prix_estime:
-                            st.write(f"~{achat.prix_estime:.0f}€")
+                with col2:
+                    if achat.prix_estime:
+                        st.write(f"~{achat.prix_estime:.0f}€")
 
-                    with col3:
-                        if st.button("✅", key=f"buy_{achat.id}"):
-                            achat.achete = True
-                            achat.date_achat = date.today()
-                            db.commit()
-                            st.success("Achete!")
-                            st.rerun()
+                with col3:
+                    if st.button("✅", key=f"buy_{achat.id}"):
+                        obtenir_service_achats_famille().marquer_achete(achat.id)
+                        st.success("Achete!")
+                        st.rerun()
     except Exception as e:
         st.error(f"Erreur: {e}")
 
@@ -218,21 +210,18 @@ def afficher_form_ajout_achat():
                 st.error("Nom requis")
             else:
                 try:
-                    with obtenir_contexte_db() as db:
-                        achat = FamilyPurchase(
-                            nom=nom,
-                            categorie=categorie[0],
-                            priorite=priorite,
-                            prix_estime=prix if prix > 0 else None,
-                            taille=taille or None,
-                            url=url or None,
-                            description=description or None,
-                            suggere_par="manuel",
-                        )
-                        db.add(achat)
-                        db.commit()
-                        st.success(f"✅ {nom} ajoute!")
-                        st.rerun()
+                    obtenir_service_achats_famille().ajouter_achat(
+                        nom=nom,
+                        categorie=categorie[0],
+                        priorite=priorite,
+                        prix_estime=prix if prix > 0 else None,
+                        taille=taille or None,
+                        url=url or None,
+                        description=description or None,
+                        suggere_par="manuel",
+                    )
+                    st.success(f"✅ {nom} ajoute!")
+                    st.rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")
 

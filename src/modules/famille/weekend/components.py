@@ -4,6 +4,7 @@ Module Sorties Weekend - Composants UI
 
 from src.core.async_utils import executer_async
 from src.core.session_keys import SK
+from src.services.famille.weekend import obtenir_service_weekend
 from src.ui import etat_vide
 
 from .ai_service import WeekendAIService
@@ -18,7 +19,6 @@ from .utils import (
     get_next_weekend,
     get_weekend_activities,
     mark_activity_done,
-    obtenir_contexte_db,
     st,
 )
 
@@ -218,26 +218,21 @@ def afficher_add_activity():
                 st.error("Titre requis")
             else:
                 try:
-                    with obtenir_contexte_db() as db:
-                        activity = WeekendActivity(
-                            titre=titre,
-                            type_activite=type_activite,
-                            date_prevue=date_prevue,
-                            heure_debut=heure.strftime("%H:%M") if heure else None,
-                            duree_estimee_h=duree,
-                            lieu=lieu or None,
-                            cout_estime=cout if cout > 0 else None,
-                            meteo_requise=meteo or None,
-                            description=description or None,
-                            adapte_jules=adapte_jules,
-                            statut="planifie",
-                            participants=["Anne", "Mathieu", "Jules"],
-                        )
-                        db.add(activity)
-                        db.commit()
-                        st.success(f"✅ {titre} ajoute!")
-                        st.session_state.pop(SK.WEEKEND_ADD_DATE, None)
-                        st.rerun()
+                    obtenir_service_weekend().ajouter_activite(
+                        titre=titre,
+                        type_activite=type_activite,
+                        date_prevue=date_prevue,
+                        heure=heure.strftime("%H:%M") if heure else None,
+                        duree=duree,
+                        lieu=lieu or None,
+                        cout_estime=cout if cout > 0 else None,
+                        meteo_requise=meteo or None,
+                        description=description or None,
+                        adapte_jules=adapte_jules,
+                    )
+                    st.success(f"\u2705 {titre} ajoute!")
+                    st.session_state.pop(SK.WEEKEND_ADD_DATE, None)
+                    st.rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")
 
@@ -247,45 +242,42 @@ def afficher_noter_sortie():
     st.subheader("⭐ Noter une sortie")
 
     try:
-        with obtenir_contexte_db() as db:
-            # Activites terminees non notees
-            activities = (
-                db.query(WeekendActivity)
-                .filter(WeekendActivity.statut == "termine", WeekendActivity.note_lieu.is_(None))
-                .all()
-            )
+        service = obtenir_service_weekend()
+        activities = service.get_activites_non_notees()
 
-            if not activities:
-                etat_vide("Aucune sortie à noter", "⭐", "Les sorties terminées apparaîtront ici")
-                return
+        if not activities:
+            etat_vide("Aucune sortie à noter", "⭐", "Les sorties terminées apparaîtront ici")
+            return
 
-            for act in activities:
-                type_info = TYPES_ACTIVITES.get(act.type_activite, TYPES_ACTIVITES["autre"])
+        for act in activities:
+            type_info = TYPES_ACTIVITES.get(act.type_activite, TYPES_ACTIVITES["autre"])
 
-                with st.container(border=True):
-                    st.markdown(f"**{type_info['emoji']} {act.titre}**")
-                    st.caption(f"📅 {act.date_prevue.strftime('%d/%m/%Y')}")
+            with st.container(border=True):
+                st.markdown(f"**{type_info['emoji']} {act.titre}**")
+                st.caption(f"📅 {act.date_prevue.strftime('%d/%m/%Y')}")
 
-                    col1, col2 = st.columns(2)
+                col1, col2 = st.columns(2)
 
-                    with col1:
-                        note = st.slider("Note", 1, 5, 3, key=f"note_{act.id}")
-                        a_refaire = st.checkbox("À refaire ?", key=f"refaire_{act.id}")
+                with col1:
+                    note = st.slider("Note", 1, 5, 3, key=f"note_{act.id}")
+                    a_refaire = st.checkbox("À refaire ?", key=f"refaire_{act.id}")
 
-                    with col2:
-                        cout_reel = st.number_input(
-                            "Coût reel (€)", min_value=0.0, key=f"cout_{act.id}"
-                        )
-                        commentaire = st.text_input("Commentaire", key=f"comm_{act.id}")
+                with col2:
+                    cout_reel = st.number_input(
+                        "Coût reel (€)", min_value=0.0, key=f"cout_{act.id}"
+                    )
+                    commentaire = st.text_input("Commentaire", key=f"comm_{act.id}")
 
-                    if st.button("💾 Sauvegarder", key=f"save_{act.id}"):
-                        act.note_lieu = note
-                        act.a_refaire = a_refaire
-                        act.cout_reel = cout_reel if cout_reel > 0 else None
-                        act.commentaire = commentaire or None
-                        db.commit()
-                        st.success("✅ Note!")
-                        st.rerun()
+                if st.button("💾 Sauvegarder", key=f"save_{act.id}"):
+                    service.noter_sortie(
+                        activity_id=act.id,
+                        note=note,
+                        a_refaire=a_refaire,
+                        cout_reel=cout_reel if cout_reel > 0 else None,
+                        commentaire=commentaire or None,
+                    )
+                    st.success("✅ Note!")
+                    st.rerun()
 
     except Exception as e:
         st.error(f"Erreur: {e}")

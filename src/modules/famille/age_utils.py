@@ -53,13 +53,11 @@ def calculer_age_jules() -> dict:
 def _obtenir_date_naissance() -> date:
     """Interroge la BD pour la date de naissance, fallback JULES_NAISSANCE."""
     try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import ChildProfile
+        from src.services.famille.jules import obtenir_service_jules
 
-        with obtenir_contexte_db() as db:
-            jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
-            if jules and jules.date_of_birth:
-                return jules.date_of_birth
+        result = obtenir_service_jules().get_date_naissance_jules()
+        if result:
+            return result
     except Exception:
         logger.debug("BD indisponible pour l'âge de Jules, utilisation du fallback")
 

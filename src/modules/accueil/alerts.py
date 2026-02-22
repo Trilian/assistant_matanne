@@ -65,43 +65,33 @@ def afficher_critical_alerts():
 
     # Tâches menage en retard
     try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import MaintenanceTask
+        from src.services.accueil_data_service import get_accueil_data_service
 
-        with obtenir_contexte_db() as db:
-            taches_retard = (
-                db.query(MaintenanceTask)
-                .filter(
-                    MaintenanceTask.prochaine_fois < date.today(),
-                    MaintenanceTask.fait.is_(False),
-                )
-                .limit(10)
-                .all()
+        taches_retard = get_accueil_data_service().get_taches_en_retard(limit=10)
+
+        if taches_retard:
+            alerts.append(
+                {
+                    "type": "warning",
+                    "icon": "🧹",
+                    "title": f"{len(taches_retard)} tâche(s) menage en retard!",
+                    "action": "Voir Maison",
+                    "module": "maison.entretien",
+                }
             )
 
-            if taches_retard:
+            # Detail des tâches critiques
+            for t in taches_retard[:3]:
+                jours_retard = t["jours_retard"]
                 alerts.append(
                     {
-                        "type": "warning",
-                        "icon": "🧹",
-                        "title": f"{len(taches_retard)} tâche(s) menage en retard!",
-                        "action": "Voir Maison",
+                        "type": "error" if jours_retard > 7 else "warning",
+                        "icon": "⚠️",
+                        "title": f"{t['nom']} ({jours_retard}j de retard)",
+                        "action": "Marquer fait",
                         "module": "maison.entretien",
                     }
                 )
-
-                # Detail des tâches critiques
-                for t in taches_retard[:3]:
-                    jours_retard = (date.today() - t.prochaine_fois).days
-                    alerts.append(
-                        {
-                            "type": "error" if jours_retard > 7 else "warning",
-                            "icon": "⚠️",
-                            "title": f"{t.nom} ({jours_retard}j de retard)",
-                            "action": "Marquer fait",
-                            "module": "maison.entretien",
-                        }
-                    )
     except Exception:
         pass  # Table pas encore creee
 

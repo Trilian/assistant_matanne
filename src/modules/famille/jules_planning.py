@@ -14,8 +14,6 @@ from datetime import date
 import streamlit as st
 
 from src.core.constants import JOURS_SEMAINE
-from src.core.db import obtenir_contexte_db
-from src.core.models import ChildProfile
 from src.core.session_keys import SK
 
 # ═══════════════════════════════════════════════════════════

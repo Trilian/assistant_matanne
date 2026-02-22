@@ -15,9 +15,9 @@ from typing import Optional
 import streamlit as st
 
 from src.core.ai import ClientIA
-from src.core.db import obtenir_contexte_db
 from src.core.models import ChildProfile, WeekendActivity
 from src.services.core.base import BaseAIService
+from src.services.famille.weekend import obtenir_service_weekend
 from src.ui import etat_vide
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,6 @@ __all__ = [
     "timedelta",
     "Optional",
     # Database
-    "obtenir_contexte_db",
     "WeekendActivity",
     "ChildProfile",
     # AI
@@ -82,18 +81,7 @@ def get_next_weekend() -> tuple[date, date]:
 def get_weekend_activities(saturday: date, sunday: date) -> dict:
     """Recupère les activites du weekend"""
     try:
-        with obtenir_contexte_db() as db:
-            activities = (
-                db.query(WeekendActivity)
-                .filter(WeekendActivity.date_prevue.in_([saturday, sunday]))
-                .order_by(WeekendActivity.heure_debut)
-                .all()
-            )
-
-            return {
-                "saturday": [a for a in activities if a.date_prevue == saturday],
-                "sunday": [a for a in activities if a.date_prevue == sunday],
-            }
+        return obtenir_service_weekend().lister_activites_weekend(saturday, sunday)
     except Exception as e:
         logger.debug(f"Erreur ignorée: {e}")
         return {"saturday": [], "sunday": []}
@@ -102,17 +90,7 @@ def get_weekend_activities(saturday: date, sunday: date) -> dict:
 def get_budget_weekend(saturday: date, sunday: date) -> dict:
     """Calcule le budget du weekend"""
     try:
-        with obtenir_contexte_db() as db:
-            activities = (
-                db.query(WeekendActivity)
-                .filter(WeekendActivity.date_prevue.in_([saturday, sunday]))
-                .all()
-            )
-
-            estime = sum(a.cout_estime or 0 for a in activities)
-            reel = sum(a.cout_reel or 0 for a in activities if a.statut == "termine")
-
-            return {"estime": estime, "reel": reel}
+        return obtenir_service_weekend().get_budget_weekend(saturday, sunday)
     except Exception as e:
         logger.debug(f"Erreur ignorée: {e}")
         return {"estime": 0, "reel": 0}
@@ -121,13 +99,7 @@ def get_budget_weekend(saturday: date, sunday: date) -> dict:
 def get_lieux_testes() -> list:
     """Recupère les lieux dejà testes"""
     try:
-        with obtenir_contexte_db() as db:
-            return (
-                db.query(WeekendActivity)
-                .filter(WeekendActivity.statut == "termine", WeekendActivity.note_lieu.isnot(None))
-                .order_by(WeekendActivity.note_lieu.desc())
-                .all()
-            )
+        return obtenir_service_weekend().get_lieux_testes()
     except Exception as e:
         logger.debug(f"Erreur ignorée: {e}")
         return []
@@ -143,10 +115,6 @@ def get_age_jules_mois() -> int:
 def mark_activity_done(activity_id: int):
     """Marque une activite comme terminee"""
     try:
-        with obtenir_contexte_db() as db:
-            act = db.get(WeekendActivity, activity_id)
-            if act:
-                act.statut = "termine"
-                db.commit()
+        obtenir_service_weekend().marquer_termine(activity_id)
     except Exception as e:
         logger.debug(f"Erreur ignorée: {e}")
