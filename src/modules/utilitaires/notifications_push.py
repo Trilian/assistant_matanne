@@ -22,6 +22,7 @@ from src.services.core.notifications import (
     NotificationPush,
     obtenir_service_ntfy,
 )
+from src.ui.fragments import auto_refresh, ui_fragment
 
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES
@@ -65,6 +66,7 @@ def sauvegarder_config(config: ConfigurationNtfy):
 # ═══════════════════════════════════════════════════════════
 
 
+@ui_fragment
 def afficher_configuration():
     """Interface de configuration des notifications."""
     st.subheader("⚙️ Configuration")
@@ -113,6 +115,7 @@ def afficher_configuration():
             st.success("✅ Configuration sauvegardée!")
 
 
+@ui_fragment
 def afficher_abonnement():
     """Interface pour s'abonner aux notifications."""
     st.subheader("📷 S'abonner aux notifications")
@@ -184,6 +187,7 @@ def _simuler_notification(titre: str, message: str, priorite: int = 3, tags: lis
     return notif_id
 
 
+@ui_fragment
 def afficher_test():
     """Interface de test des notifications."""
     st.subheader("🧪 Tester les notifications")
@@ -314,8 +318,9 @@ def afficher_test():
                 st.caption(f"🕐 {notif['timestamp'][:19]} | ID: {notif['id']}")
 
 
+@auto_refresh(seconds=120)
 def afficher_taches_retard():
-    """Affiche les tâches en retard et permet d'envoyer des alertes."""
+    """Affiche les tâches en retard et permet d'envoyer des alertes (auto-refresh 120s)."""
     st.subheader("⏰ Tâches en retard")
 
     config = charger_config()
@@ -389,6 +394,7 @@ def afficher_taches_retard():
             st.markdown(f"• {tache.titre}")
 
 
+@ui_fragment
 def afficher_aide():
     """Affiche l'aide sur ntfy.sh."""
     st.subheader("❓ Aide")

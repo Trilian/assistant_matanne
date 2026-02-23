@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.errors_base import ErreurValidation
 from src.core.models import ArticleInventaire
+from src.services.core.events.bus import obtenir_bus
 
 from .types import SuggestionCourses
 
@@ -108,6 +109,18 @@ class InventaireOperationsMixin:
         logger.info(f"✅ Article '{ingredient_nom}' ajouté à l'inventaire")
         self.invalidate_cache()
 
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "stock.modifie",
+            {
+                "article_id": article.id,
+                "ingredient": ingredient.nom,
+                "quantite": quantite,
+                "raison": "ajout",
+            },
+            source="inventaire",
+        )
+
         return {
             "id": article.id,
             "ingredient_nom": ingredient.nom,
@@ -187,6 +200,13 @@ class InventaireOperationsMixin:
         logger.info(f"✅ Article #{article_id} mis à jour")
         self.invalidate_cache()
 
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "stock.modifie",
+            {"article_id": article_id, "quantite": quantite, "raison": "modification"},
+            source="inventaire",
+        )
+
         return True
 
     @avec_gestion_erreurs(default_return=False)
@@ -212,6 +232,13 @@ class InventaireOperationsMixin:
 
         logger.info(f"✅ Article #{article_id} supprimé")
         self.invalidate_cache()
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "stock.modifie",
+            {"article_id": article_id, "raison": "suppression"},
+            source="inventaire",
+        )
 
         return True
 

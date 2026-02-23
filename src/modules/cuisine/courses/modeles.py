@@ -8,12 +8,14 @@ import streamlit as st
 
 from src.services.cuisine.courses import obtenir_service_courses
 from src.ui.components.atoms import etat_vide
+from src.ui.fragments import ui_fragment
 
 from .utils import get_current_user_id
 
 logger = logging.getLogger(__name__)
 
 
+@ui_fragment
 def afficher_modeles():
     """Gestion des modèles de listes récurrentes (Phase 2: Persistance BD)"""
     st.subheader("📄 Modèles de listes - Phase 2")

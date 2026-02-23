@@ -7,12 +7,14 @@ import logging
 import streamlit as st
 
 from src.services.cuisine.recettes import obtenir_service_recettes
+from src.ui.fragments import ui_fragment
 
 from .utils import formater_quantite
 
 logger = logging.getLogger(__name__)
 
 
+@ui_fragment
 def afficher_generer_ia():
     """Interface pour générer des recettes avec l'IA"""
     st.subheader("⏰ Générer des recettes avec l'IA")

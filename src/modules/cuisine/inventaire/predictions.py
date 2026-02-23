@@ -10,8 +10,10 @@ from src.core.session_keys import SK
 from src.services.cuisine.suggestions import obtenir_service_predictions
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 
+@ui_fragment
 def afficher_predictions():
     """Affiche les prédictions et recommandations ML"""
     st.subheader("🔮 Prévisions et Recommandations")

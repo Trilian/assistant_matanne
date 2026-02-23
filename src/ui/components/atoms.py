@@ -45,6 +45,35 @@ _BADGE_STYLES: dict[str, str] = {
 }
 
 
+def badge_html(
+    texte: str,
+    variante: Variante | None = None,
+    couleur: str | None = None,
+) -> str:
+    """Génère le HTML d'un badge coloré (fonction pure, testable).
+
+    Args:
+        texte: Texte du badge
+        variante: Variante sémantique
+        couleur: Couleur brute (hex) — déprécié, préférer ``variante``
+
+    Returns:
+        Chaîne HTML du badge.
+    """
+    safe_text = echapper_html(texte)
+
+    if couleur and variante is None:
+        return (
+            f'<span role="status" aria-label="{safe_text}" style="display: inline-flex; background: {couleur}; color: white; '
+            f"padding: {Espacement.XS} 0.75rem; border-radius: {Rayon.PILL}; "
+            f'font-size: {Typographie.BODY_SM}; font-weight: 600;">{safe_text}</span>'
+        )
+    else:
+        variant_name = variante.value if variante else "success"
+        style = _BADGE_STYLES.get(variant_name, _BADGE_STYLES["success"])
+        return f'<span role="status" aria-label="{safe_text}" style="{style}">{safe_text}</span>'
+
+
 @composant_ui("atoms", exemple='badge("Actif", variante=Variante.SUCCESS)', tags=["badge", "label"])
 def badge(
     texte: str,
@@ -63,23 +92,7 @@ def badge(
         badge("Actif", variante=Variante.SUCCESS)
         badge("Urgent", variante=Variante.DANGER)
     """
-    safe_text = echapper_html(texte)
-
-    if couleur and variante is None:
-        # Rétrocompatibilité : couleur brute → inline style
-        st.markdown(
-            f'<span role="status" aria-label="{safe_text}" style="display: inline-flex; background: {couleur}; color: white; '
-            f"padding: {Espacement.XS} 0.75rem; border-radius: {Rayon.PILL}; "
-            f'font-size: {Typographie.BODY_SM}; font-weight: 600;">{safe_text}</span>',
-            unsafe_allow_html=True,
-        )
-    else:
-        variant_name = variante.value if variante else "success"
-        style = _BADGE_STYLES.get(variant_name, _BADGE_STYLES["success"])
-        st.markdown(
-            f'<span role="status" aria-label="{safe_text}" style="{style}">{safe_text}</span>',
-            unsafe_allow_html=True,
-        )
+    st.markdown(badge_html(texte, variante, couleur), unsafe_allow_html=True)
 
 
 @composant_ui("atoms", exemple='etat_vide("Aucune recette", "🍽️")', tags=["empty", "placeholder"])
@@ -215,6 +228,42 @@ def separateur(texte: str | None = None):
         st.markdown("---")
 
 
+def boite_info_html(
+    titre: str,
+    contenu: str,
+    icone: str = "ℹ️",
+    variante: Variante = Variante.INFO,
+) -> str:
+    """Génère le HTML d'une boîte d'information (fonction pure, testable).
+
+    Args:
+        titre: Titre de la boîte
+        contenu: Contenu textuel
+        icone: Icône emoji
+        variante: Variante visuelle
+
+    Returns:
+        Chaîne HTML de la boîte info.
+    """
+    bg, text_color, border_color = obtenir_couleurs_variante(variante)
+    safe_titre = echapper_html(f"{icone} {titre}")
+    safe_contenu = echapper_html(contenu)
+
+    style = (
+        f"background: {bg}; border-left: 4px solid {border_color}; "
+        f"padding: {Espacement.MD}; border-radius: {Rayon.SM}; "
+        f"margin: {Espacement.MD} 0;"
+    )
+
+    return (
+        f'<div style="{style}" role="note" aria-label="{echapper_html(titre)}: {safe_contenu}">'
+        f'<div style="font-weight: 600; color: {text_color}; margin-bottom: {Espacement.SM};">'
+        f"{safe_titre}</div>"
+        f'<div style="color: {text_color};">{safe_contenu}</div>'
+        f"</div>"
+    )
+
+
 @composant_ui(
     "atoms",
     exemple='boite_info("Astuce", "Ctrl+S pour sauvegarder", "💡")',
@@ -265,6 +314,37 @@ def boite_info(
     )
 
 
+def boule_loto_html(numero: int, is_chance: bool = False, taille: int = 50) -> str:
+    """Génère le HTML d'une boule de loto (fonction pure, testable).
+
+    Args:
+        numero: Numéro à afficher
+        is_chance: True pour style numéro chance (rose)
+        taille: Taille en pixels
+
+    Returns:
+        Chaîne HTML de la boule.
+    """
+    gradient = (
+        f"linear-gradient(135deg, {Couleur.LOTO_CHANCE_START} 0%, {Couleur.LOTO_CHANCE_END} 100%)"
+        if is_chance
+        else f"linear-gradient(135deg, {Couleur.LOTO_NORMAL_START} 0%, {Couleur.LOTO_NORMAL_END} 100%)"
+    )
+    font_size = int(taille * 0.4)
+
+    style = (
+        f"background: {gradient}; color: white; border-radius: 50%; "
+        f"width: {taille}px; height: {taille}px; display: flex; "
+        f"align-items: center; justify-content: center; margin: auto;"
+    )
+
+    return (
+        f'<div style="{style}" role="img" aria-label="Boule numéro {numero}">'
+        f'<span style="font-size: {font_size}px; font-weight: bold;">{numero}</span>'
+        f"</div>"
+    )
+
+
 @composant_ui(
     "atoms",
     exemple="boule_loto(7)",
@@ -285,9 +365,9 @@ def boule_loto(numero: int, is_chance: bool = False, taille: int = 50) -> None:
         boule_loto(42, taille=60)  # Plus grande
     """
     gradient = (
-        "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+        f"linear-gradient(135deg, {Couleur.LOTO_CHANCE_START} 0%, {Couleur.LOTO_CHANCE_END} 100%)"
         if is_chance
-        else "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+        else f"linear-gradient(135deg, {Couleur.LOTO_NORMAL_START} 0%, {Couleur.LOTO_NORMAL_END} 100%)"
     )
     font_size = int(taille * 0.4)
 

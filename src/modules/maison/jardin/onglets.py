@@ -7,6 +7,7 @@ import streamlit as st
 
 from src.core.session_keys import SK
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 from .data import charger_catalogue_plantes
 from .logic import (
@@ -48,6 +49,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+@ui_fragment
 def onglet_taches(mes_plantes: list[dict], meteo: dict):
     """Onglet des tâches automatiques."""
     st.subheader("🎯 Tâches du jour")
@@ -90,6 +92,7 @@ def onglet_taches(mes_plantes: list[dict], meteo: dict):
             )
 
 
+@ui_fragment
 def onglet_mes_plantes(mes_plantes: list[dict]):
     """Onglet de gestion des plantes."""
     st.subheader("🌿 Mes Plantations")
@@ -222,6 +225,7 @@ def onglet_mes_plantes(mes_plantes: list[dict]):
                         st.rerun()
 
 
+@ui_fragment
 def onglet_autonomie(mes_plantes: list[dict], recoltes: list[dict]):
     """Onglet objectif autonomie gamifié avec badges."""
     st.subheader("🎯 Objectif Autonomie Alimentaire")
@@ -269,6 +273,7 @@ def onglet_autonomie(mes_plantes: list[dict], recoltes: list[dict]):
             )
 
 
+@ui_fragment
 def onglet_recoltes(mes_plantes: list[dict], recoltes: list[dict]):
     """Onglet enregistrement des récoltes."""
     st.subheader("🥕 Mes Récoltes")
@@ -337,6 +342,7 @@ def onglet_recoltes(mes_plantes: list[dict], recoltes: list[dict]):
             )
 
 
+@ui_fragment
 def onglet_plan(mes_plantes: list[dict] | None = None):
     """Onglet plan du jardin — vue 2D interactive basée sur les données réelles."""
     st.subheader("🗺️ Plan du Jardin")
@@ -400,6 +406,7 @@ def onglet_plan(mes_plantes: list[dict] | None = None):
         st.info("🌱 Ajoutez vos plantes dans l'onglet 'Mes Plantes' pour peupler le plan.")
 
 
+@ui_fragment
 def onglet_graphiques(mes_plantes: list[dict], recoltes: list[dict]):
     """Onglet graphiques Plotly avec visualisations interactives."""
     st.subheader("📈 Graphiques & Analyses")
@@ -530,6 +537,7 @@ def onglet_graphiques(mes_plantes: list[dict], recoltes: list[dict]):
             st.success("✨ Aucune activité prévue dans les 6 prochains mois.")
 
 
+@ui_fragment
 def onglet_export(mes_plantes: list[dict], recoltes: list[dict]):
     """Onglet export CSV des données jardin."""
     st.subheader("📥 Export des données")

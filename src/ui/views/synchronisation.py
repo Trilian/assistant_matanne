@@ -9,6 +9,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from src.services.integrations.web.synchronisation import get_realtime_sync_service
+from src.ui.tokens import Couleur
 from src.ui.utils import echapper_html
 
 
@@ -35,7 +36,7 @@ def afficher_indicateur_presence():
                         width: 40px;
                         height: 40px;
                         border-radius: 50%;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        background: linear-gradient(135deg, {Couleur.PUSH_GRADIENT_START} 0%, {Couleur.PUSH_GRADIENT_END} 100%);
                         display: inline-flex;
                         align-items: center;
                         justify-content: center;

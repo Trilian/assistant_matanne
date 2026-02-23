@@ -33,6 +33,7 @@ from src.core.models import (
 )
 from src.core.validation import EtapeInput, IngredientInput, RecetteInput
 from src.services.core.base import BaseAIService, BaseService, RecipeAIMixin
+from src.services.core.events.bus import obtenir_bus
 from src.services.core.middleware import service_method
 
 from .recettes_ia_generation import RecettesIAGenerationMixin
@@ -208,6 +209,13 @@ class ServiceRecettes(
         # Invalider cache
         Cache.invalider(pattern="recettes")
 
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "recette.creee",
+            {"recette_id": recette.id, "nom": recette.nom, "type_repas": recette.type_repas},
+            source="recettes",
+        )
+
         logger.info(f"✅ Recette créée : {recette.nom} (ID: {recette.id})")
         return recette
 
@@ -288,6 +296,14 @@ class ServiceRecettes(
 
         db.commit()
         Cache.invalider(pattern="recettes")
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "recette.importee",
+            {"recette_id": recette.id, "nom": recette.nom, "source": "import"},
+            source="recettes",
+        )
+
         logger.info(f"✅ Recette importée : {recette.nom} (ID: {recette.id})")
         return recette
 

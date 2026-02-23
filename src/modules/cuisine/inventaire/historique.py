@@ -8,8 +8,10 @@ import streamlit as st
 
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 
+@ui_fragment
 def afficher_historique():
     """Affiche l'historique des modifications de l'inventaire"""
     service = obtenir_service_inventaire()

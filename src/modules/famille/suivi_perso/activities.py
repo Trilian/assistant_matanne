@@ -3,10 +3,12 @@ Module Suivi Perso - Activités sportives
 """
 
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 from .utils import st
 
 
+@ui_fragment
 def afficher_activities(data: dict):
     """Affiche les activités sportives"""
     st.subheader("🏃 Activités récentes")

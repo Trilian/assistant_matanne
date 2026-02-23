@@ -8,8 +8,10 @@ import pandas as pd
 import streamlit as st
 
 from src.services.cuisine.courses import obtenir_service_courses
+from src.ui.fragments import ui_fragment
 
 
+@ui_fragment
 def afficher_outils():
     """Outils utilitaires - Phase 2: Code-barres, partage, UX améliorée"""
     st.subheader("🔧 Outils")

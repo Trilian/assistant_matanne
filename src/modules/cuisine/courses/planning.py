@@ -7,8 +7,10 @@ import streamlit as st
 from src.core.session_keys import SK
 from src.core.state import naviguer
 from src.services.cuisine.courses import obtenir_service_courses_intelligentes
+from src.ui.fragments import ui_fragment
 
 
+@ui_fragment
 def afficher_courses_depuis_planning():
     """Génère la liste de courses depuis le planning repas actif."""
     st.subheader("🍽️ Courses depuis le Planning")

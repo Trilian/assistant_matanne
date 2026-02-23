@@ -267,6 +267,8 @@ class RouteurOptimise:
         # PARAMÈTRES & NOTIFICATIONS
         "parametres": {"path": "src.modules.parametres"},
         "notifications_push": {"path": "src.modules.utilitaires.notifications_push"},
+        # DEV TOOLS
+        "design_system": {"path": "src.modules.design_system"},
     }
 
     @staticmethod

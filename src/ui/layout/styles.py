@@ -1,7 +1,11 @@
 """
 Styles CSS pour l'application.
 
-Utilise les Design Tokens pour garantir la cohérence visuelle.
+Utilise les **Tokens Sémantiques** (``Sem``) pour garantir la cohérence
+visuelle et le support automatique du dark mode. Les anciennes variables
+CSS (``--primary``, ``--accent``…) sont conservées comme **alias** vers
+``--sem-*`` pour rétrocompatibilité.
+
 Enregistre le CSS dans le :class:`CSSManager` au lieu d'injecter
 directement via ``st.markdown``.
 """
@@ -18,32 +22,38 @@ from src.ui.tokens import (
 
 
 def injecter_css():
-    """Enregistre les styles CSS globaux dans le CSSManager."""
+    """Enregistre les styles CSS globaux dans le CSSManager.
+
+    Les variables CSS legacy (``--primary``, ``--accent``…) sont bridgées
+    vers les tokens sémantiques ``--sem-*`` pour que le dark mode cascade
+    automatiquement sans modifier chaque composant individuellement.
+    """
     CSSManager.register(
         "global-styles",
         f"""
 :root {{
+    /* ── Bridge legacy vars → semantic tokens ──────────── */
     --primary: {Couleur.PRIMARY};
     --secondary: {Couleur.SECONDARY};
-    --accent: {Couleur.ACCENT};
-    --text-primary: {Couleur.TEXT_PRIMARY};
-    --text-secondary: {Couleur.TEXT_SECONDARY};
-    --bg-surface: {Couleur.BG_SURFACE};
-    --bg-subtle: {Couleur.BG_SUBTLE};
-    --border: {Couleur.BORDER};
-    --success: {Couleur.SUCCESS};
-    --warning: {Couleur.WARNING};
-    --danger: {Couleur.DANGER};
-    --info: {Couleur.INFO};
+    --accent: var(--sem-interactive, {Couleur.ACCENT});
+    --text-primary: var(--sem-on-surface, {Couleur.TEXT_PRIMARY});
+    --text-secondary: var(--sem-on-surface-secondary, {Couleur.TEXT_SECONDARY});
+    --bg-surface: var(--sem-surface, {Couleur.BG_SURFACE});
+    --bg-subtle: var(--sem-surface-alt, {Couleur.BG_SUBTLE});
+    --border: var(--sem-border, {Couleur.BORDER});
+    --success: var(--sem-success, {Couleur.SUCCESS});
+    --warning: var(--sem-warning, {Couleur.WARNING});
+    --danger: var(--sem-danger, {Couleur.DANGER});
+    --info: var(--sem-info, {Couleur.INFO});
 }}
 
-/* Focus visible — accessibilit\u00e9 */
+/* Focus visible — accessibilité */
 *:focus-visible {{
     outline: 2px solid var(--sem-interactive, {Couleur.ACCENT});
     outline-offset: 2px;
 }}
 
-/* Reduced motion — accessibilit\u00e9 */
+/* Reduced motion — accessibilité */
 @media (prefers-reduced-motion: reduce) {{
     *, *::before, *::after {{
         animation-duration: 0.01ms !important;
@@ -55,15 +65,15 @@ def injecter_css():
 
 .main-header {{
     padding: {Espacement.MD} 0;
-    border-bottom: 2px solid var(--accent);
+    border-bottom: 2px solid var(--sem-interactive, {Couleur.ACCENT});
     margin-bottom: {Espacement.XL};
 }}
 
 .metric-card {{
-    background: var(--bg-surface);
+    background: var(--sem-surface, {Couleur.BG_SURFACE});
     padding: {Espacement.LG};
     border-radius: {Rayon.LG};
-    box-shadow: {Ombre.SM};
+    box-shadow: var(--sem-shadow-sm, {Ombre.SM});
     transition: transform {Transition.NORMAL};
 }}
 
@@ -74,7 +84,7 @@ def injecter_css():
 /* Cartes de navigation */
 .nav-card {{
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    color: white;
+    color: var(--sem-on-interactive, white);
     padding: {Espacement.LG};
     border-radius: {Rayon.LG};
     text-align: center;
@@ -84,7 +94,7 @@ def injecter_css():
 
 .nav-card:hover {{
     transform: translateY(-4px);
-    box-shadow: {Ombre.LG};
+    box-shadow: var(--sem-shadow-lg, {Ombre.LG});
 }}
 
 /* Badges */
@@ -97,18 +107,18 @@ def injecter_css():
 }}
 
 .badge-success {{
-    background: {Couleur.BG_SUCCESS};
-    color: {Couleur.BADGE_SUCCESS_TEXT};
+    background: var(--sem-success-subtle, {Couleur.BG_SUCCESS});
+    color: var(--sem-on-success, {Couleur.BADGE_SUCCESS_TEXT});
 }}
 
 .badge-warning {{
-    background: {Couleur.BG_WARNING};
-    color: {Couleur.BADGE_WARNING_TEXT};
+    background: var(--sem-warning-subtle, {Couleur.BG_WARNING});
+    color: var(--sem-on-warning, {Couleur.BADGE_WARNING_TEXT});
 }}
 
 .badge-danger {{
-    background: {Couleur.BG_DANGER};
-    color: {Couleur.BADGE_DANGER_TEXT};
+    background: var(--sem-danger-subtle, {Couleur.BG_DANGER});
+    color: var(--sem-on-danger, {Couleur.BADGE_DANGER_TEXT});
 }}
 
 /* Masquer éléments Streamlit par défaut */

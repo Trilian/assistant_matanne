@@ -26,6 +26,7 @@ from src.services.jeux import (
 )
 from src.ui import etat_vide
 from src.ui.engine import charger_css
+from src.ui.fragments import ui_fragment
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ NOMS_MARCHES = {
 # ═══════════════════════════════════════════════════════════
 
 
+@ui_fragment
 def afficher_series_paris():
     """Affiche le tableau des séries pour les paris sportifs."""
     # Injecter CSS pour tailles réduites
@@ -303,6 +305,7 @@ def _afficher_scheduler_status():
 # ═══════════════════════════════════════════════════════════
 
 
+@ui_fragment
 def afficher_metriques_series():
     """Affiche des métriques rapides pour le dashboard."""
     try:

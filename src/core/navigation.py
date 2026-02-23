@@ -178,6 +178,7 @@ def construire_pages() -> dict[str, list[st.Page]]:
     # ── Paramètres ──
     pages["⚙️ Configuration"] = [
         _creer_page("parametres", "src.modules.parametres", "Paramètres", "⚙️"),
+        _creer_page("design_system", "src.modules.design_system", "Design System", "🎨"),
     ]
 
     return pages

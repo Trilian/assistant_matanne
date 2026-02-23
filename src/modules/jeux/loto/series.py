@@ -29,6 +29,7 @@ from src.services.jeux import (
     get_sync_service,
 )
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
+@ui_fragment
 def afficher_series_loto():
     """Affiche le tableau des numéros en retard pour le Loto."""
     st.header("📈 Numéros en Retard")
@@ -271,6 +273,7 @@ def _synchroniser_loto():
 # ═══════════════════════════════════════════════════════════
 
 
+@ui_fragment
 def afficher_metriques_loto():
     """Affiche des métriques rapides pour le dashboard."""
     try:

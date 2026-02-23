@@ -30,6 +30,7 @@ from src.core.models import (
     StatutSessionEnum,
 )
 from src.services.core.base import BaseAIService, BaseService
+from src.services.core.events.bus import obtenir_bus
 
 from .batch_cooking_ia import BatchCookingIAMixin
 from .batch_cooking_stats import BatchCookingStatsMixin
@@ -227,6 +228,13 @@ class ServiceBatchCooking(
         # Invalider cache
         Cache.invalider(pattern="batch_session")
 
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "batch_cooking.session_creee",
+            {"session_id": session.id, "nb_recettes": len(recettes_ids)},
+            source="batch_cooking",
+        )
+
         logger.info(f"✅ Session batch cooking créée: {session.id}")
         return session
 
@@ -301,6 +309,17 @@ class ServiceBatchCooking(
 
         # Invalider cache
         Cache.invalider(pattern="batch_session")
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "batch_cooking.termine",
+            {
+                "session_id": session_id,
+                "nb_recettes": session.nb_recettes_completees or 0,
+                "duree_minutes": session.duree_reelle or 0,
+            },
+            source="batch_cooking",
+        )
 
         logger.info(f"✅ Session batch cooking terminée: {session_id}")
         return session

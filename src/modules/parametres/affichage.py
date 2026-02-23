@@ -1,17 +1,30 @@
 """
 Paramètres - Configuration Affichage
-Mode tablette et personnalisation de l'interface
+Mode tablette, thème clair/sombre et personnalisation de l'interface
 """
 
 import streamlit as st
 
+from src.ui.fragments import ui_fragment
 
+
+@ui_fragment
 def afficher_display_config():
-    """Configuration de l'affichage et mode tablette."""
+    """Configuration de l'affichage, thème et mode tablette."""
 
     st.markdown("### 🖥️ Configuration Affichage")
-    st.caption("Personnalise l'interface selon ton appareil")
+    st.caption("Personnalise l'interface selon ton appareil et tes préférences")
 
+    # ── Section 1: Thème (Dark mode) ──
+    try:
+        from src.ui.theme import afficher_selecteur_theme
+
+        afficher_selecteur_theme()
+        st.markdown("---")
+    except ImportError:
+        st.warning("Module thème non disponible")
+
+    # ── Section 2: Mode tablette ──
     try:
         from src.ui.tablet import (
             ModeTablette,

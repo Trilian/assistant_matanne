@@ -7,6 +7,7 @@ import streamlit as st
 
 from src.core.session_keys import SK
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 from .data import charger_catalogue_entretien
 from .logic import generer_taches_entretien
@@ -15,6 +16,7 @@ from .ui import afficher_piece_card, afficher_stats_rapides, afficher_tache_entr
 logger = logging.getLogger(__name__)
 
 
+@ui_fragment
 def onglet_taches(mes_objets: list[dict], historique: list[dict]):
     """Onglet des tâches automatiques."""
     st.subheader("🎯 Tâches d'entretien")
@@ -92,6 +94,7 @@ def onglet_taches(mes_objets: list[dict], historique: list[dict]):
                 st.rerun()
 
 
+@ui_fragment
 def onglet_inventaire(mes_objets: list[dict]):
     """Onglet de gestion de l'inventaire."""
     st.subheader("📦 Mon Inventaire")
@@ -260,6 +263,7 @@ def onglet_inventaire(mes_objets: list[dict]):
                             st.rerun()
 
 
+@ui_fragment
 def onglet_pieces(mes_objets: list[dict], historique: list[dict]):
     """Onglet vue par pièces."""
     st.subheader("🏠 Vue par pièces")

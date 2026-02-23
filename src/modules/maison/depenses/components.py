@@ -8,6 +8,8 @@ Ré-exporte les fonctions depuis les sous-modules:
   - export.py: Export CSV/Excel
 """
 
+from src.ui.fragments import ui_fragment
+
 from .cards import afficher_depense_card, afficher_formulaire
 from .charts import (
     afficher_comparaison_mois,
@@ -20,6 +22,7 @@ from .previsions import afficher_previsions_ia
 from .utils import CATEGORY_LABELS, MOIS_FR, date, st
 
 
+@ui_fragment
 def afficher_stats_dashboard():
     """Affiche le dashboard de stats"""
     stats = get_stats_globales()
@@ -43,6 +46,7 @@ def afficher_stats_dashboard():
         st.metric("Categories", stats["nb_categories"])
 
 
+@ui_fragment
 def afficher_onglet_mois():
     """Onglet depenses du mois"""
     today = date.today()
@@ -71,12 +75,14 @@ def afficher_onglet_mois():
         afficher_depense_card(depense)
 
 
+@ui_fragment
 def afficher_onglet_ajouter():
     """Onglet ajout"""
     st.subheader("➕ Ajouter une depense")
     afficher_formulaire(None)
 
 
+@ui_fragment
 def afficher_onglet_analyse():
     """Onglet analyse et graphiques enrichie avec Plotly, export et prévisions IA."""
 

@@ -10,12 +10,14 @@ import streamlit as st
 
 from src.services.cuisine.courses import obtenir_service_courses
 from src.ui.components.atoms import etat_vide
+from src.ui.fragments import ui_fragment
 
 from .utils import PRIORITY_EMOJIS
 
 logger = logging.getLogger(__name__)
 
 
+@ui_fragment
 def afficher_historique():
     """Historique des listes de courses"""
     service = obtenir_service_courses()

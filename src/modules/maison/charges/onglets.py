@@ -8,6 +8,7 @@ import streamlit as st
 
 from src.core.session_keys import SK
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
 
 _keys = KeyNamespace("charges")
@@ -29,6 +30,7 @@ from .ui import (
 )
 
 
+@ui_fragment
 def onglet_dashboard(factures: list[dict]):
     """Onglet tableau de bord gamifié."""
     st.subheader("📊 Vue d'ensemble")
@@ -80,6 +82,7 @@ def onglet_dashboard(factures: list[dict]):
     afficher_badges_collection(badges_obtenus, stats)
 
 
+@ui_fragment
 def onglet_factures(factures: list[dict]):
     """Onglet gestion des factures."""
     st.subheader("📄 Mes Factures")
@@ -228,6 +231,7 @@ def onglet_factures(factures: list[dict]):
                     st.rerun()
 
 
+@ui_fragment
 def onglet_analyse(factures: list[dict]):
     """Onglet analyse détaillée avec graphiques."""
     st.subheader("📈 Analyse détaillée")
@@ -327,6 +331,7 @@ def onglet_analyse(factures: list[dict]):
             st.info("📊 Votre consommation est dans la moyenne nationale.")
 
 
+@ui_fragment
 def onglet_simulation(factures: list[dict]):
     """Onglet simulation d'économies avec IA."""
     st.subheader("💰 Simulation d'économies")
@@ -432,6 +437,7 @@ def onglet_simulation(factures: list[dict]):
         st.info("👆 Sélectionnez des actions pour voir les économies potentielles")
 
 
+@ui_fragment
 def onglet_conseils():
     """Onglet conseils d'économies détaillés."""
     st.subheader("💡 Conseils d'économies")

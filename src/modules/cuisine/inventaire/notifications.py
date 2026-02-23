@@ -8,6 +8,7 @@ import streamlit as st
 from src.services.core.notifications import obtenir_service_notifications_inventaire
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 # Alias pour rétrocompatibilité
 obtenir_service_notifications = obtenir_service_notifications_inventaire
@@ -74,6 +75,7 @@ def afficher_notifications_widget():
             st.caption(f"... et {len(moyennes) - 3} autres")
 
 
+@ui_fragment
 def afficher_notifications():
     """Gestion et affichage des notifications d'alerte"""
     st.subheader("🔔 Notifications et Alertes")

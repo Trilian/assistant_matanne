@@ -7,7 +7,17 @@ Composants UI réutilisables organisés par thème
 from .alertes import alerte_stock
 
 # Atoms
-from .atoms import badge, boite_info, boule_loto, carte_metrique, etat_vide, separateur
+from .atoms import (
+    badge,
+    badge_html,
+    boite_info,
+    boite_info_html,
+    boule_loto,
+    boule_loto_html,
+    carte_metrique,
+    etat_vide,
+    separateur,
+)
 
 # Charts (graphiques Plotly)
 from .charts import (

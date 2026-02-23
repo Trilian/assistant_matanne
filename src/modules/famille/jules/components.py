@@ -5,6 +5,7 @@ Module Jules - Composants UI
 from src.core.async_utils import executer_async
 from src.core.session_keys import SK
 from src.services.famille.achats import obtenir_service_achats_famille
+from src.ui.fragments import ui_fragment
 
 from .ai_service import JulesAIService
 from .utils import (
@@ -19,6 +20,7 @@ from .utils import (
 )
 
 
+@ui_fragment
 def afficher_dashboard():
     """Affiche le dashboard Jules"""
     age = get_age_jules()
@@ -47,6 +49,7 @@ def afficher_dashboard():
             st.write(f"{emoji} {achat.nom} ({achat.categorie.replace('jules_', '')})")
 
 
+@ui_fragment
 def afficher_activites():
     """Affiche les activites du jour"""
     age = get_age_jules()
@@ -97,6 +100,7 @@ def afficher_activites():
             st.rerun()
 
 
+@ui_fragment
 def afficher_shopping():
     """Affiche le shopping Jules"""
     age = get_age_jules()
@@ -222,6 +226,7 @@ def afficher_form_ajout_achat():
                     st.error(f"Erreur: {e}")
 
 
+@ui_fragment
 def afficher_conseils():
     """Affiche les conseils developpement"""
     age = get_age_jules()

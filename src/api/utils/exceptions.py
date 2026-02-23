@@ -36,7 +36,10 @@ def gerer_exception_api(func: F) -> F:
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"Erreur API dans {func.__name__}: {e}")
-            raise HTTPException(status_code=500, detail=str(e)) from e
+            logger.error(f"Erreur API dans {func.__name__}: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=500,
+                detail="Une erreur interne est survenue. Veuillez réessayer.",
+            ) from e
 
     return wrapper  # type: ignore

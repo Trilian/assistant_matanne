@@ -10,8 +10,10 @@ from pathlib import Path
 import streamlit as st
 
 from src.services.core.backup.service import obtenir_service_backup
+from src.ui.fragments import ui_fragment
 
 
+@ui_fragment
 def afficher_sauvegarde():
     """Affiche l'interface de gestion des backups dans Streamlit."""
     st.subheader("💾 Sauvegarde & Restauration")

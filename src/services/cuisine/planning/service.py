@@ -19,6 +19,7 @@ from src.core.date_utils.helpers import get_weekday_names
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import Planning, Repas
 from src.services.core.base import BaseAIService, BaseService, PlanningAIMixin
+from src.services.core.events.bus import obtenir_bus
 
 from .nutrition import determine_protein_type
 from .planning_ia_mixin import PlanningIAGenerationMixin
@@ -244,6 +245,13 @@ class ServicePlanning(
 
         db.commit()
         db.refresh(planning)
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "planning.cree",
+            {"planning_id": planning.id, "semaine_debut": str(semaine_debut)},
+            source="planning",
+        )
 
         logger.info(f"✅ Created custom planning for {semaine_debut}")
         return planning

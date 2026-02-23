@@ -6,12 +6,14 @@ Affiche les articles en alerte avec actions rapides.
 import streamlit as st
 
 from src.services.inventaire import obtenir_service_inventaire
+from src.ui.fragments import auto_refresh
 
 from .utils import _prepare_alert_dataframe
 
 
+@auto_refresh(seconds=120)
 def afficher_alertes():
-    """Affiche les articles en alerte avec actions rapides"""
+    """Affiche les articles en alerte avec actions rapides (auto-refresh 120s)"""
     service = obtenir_service_inventaire()
 
     if service is None:

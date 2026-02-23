@@ -7,8 +7,10 @@ import streamlit as st
 
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 
+@ui_fragment
 def afficher_photos():
     """Gestion des photos pour les articles de l'inventaire"""
     st.subheader("📷 Gestion des photos")

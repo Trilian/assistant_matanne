@@ -103,6 +103,31 @@ class EvenementBatchCookingTermine:
 
 
 # ═══════════════════════════════════════════════════════════
+# ÉVÉNEMENTS ENTRETIEN / MAISON
+# ═══════════════════════════════════════════════════════════
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementEntretienRoutineCreee:
+    """Émis quand une routine d'entretien est créée."""
+
+    TYPE: str = "entretien.routine_creee"
+
+    nom: str = ""
+    categorie: str = ""
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementEntretienSemaineOptimisee:
+    """Émis quand la semaine d'entretien est optimisée."""
+
+    TYPE: str = "entretien.semaine_optimisee"
+
+    nb_taches: int = 0
+    nb_jours: int = 0
+
+
+# ═══════════════════════════════════════════════════════════
 # ÉVÉNEMENTS SYSTÈME
 # ═══════════════════════════════════════════════════════════
 
@@ -132,6 +157,8 @@ REGISTRE_EVENEMENTS: dict[str, type] = {
     "stock.modifie": EvenementStockModifie,
     "courses.generees": EvenementCoursesGenerees,
     "batch_cooking.termine": EvenementBatchCookingTermine,
+    "entretien.routine_creee": EvenementEntretienRoutineCreee,
+    "entretien.semaine_optimisee": EvenementEntretienSemaineOptimisee,
     "service.error": EvenementErreurService,
 }
 
@@ -143,6 +170,8 @@ __all__ = [
     "EvenementStockModifie",
     "EvenementCoursesGenerees",
     "EvenementBatchCookingTermine",
+    "EvenementEntretienRoutineCreee",
+    "EvenementEntretienSemaineOptimisee",
     "EvenementErreurService",
     # Registry
     "REGISTRE_EVENEMENTS",

@@ -167,143 +167,151 @@ def app():
 
     # ─── Onglet Scanner ───
     with onglet_scan:
-        st.markdown("### 📤 Charger une facture")
-        st.markdown(
-            "Prenez en photo votre facture **EDF**, **Engie**, **Veolia** ou autre "
-            "et l'IA extraira automatiquement les données."
-        )
+        with error_boundary("scan_factures_scan"):
+            st.markdown("### 📤 Charger une facture")
+            st.markdown(
+                "Prenez en photo votre facture **EDF**, **Engie**, **Veolia** ou autre "
+                "et l'IA extraira automatiquement les données."
+            )
 
-        fichier = st.file_uploader(
-            "Charger une image de facture",
-            type=["png", "jpg", "jpeg", "webp"],
-            help="Formats acceptés: PNG, JPG, JPEG, WebP",
-        )
+            fichier = st.file_uploader(
+                "Charger une image de facture",
+                type=["png", "jpg", "jpeg", "webp"],
+                help="Formats acceptés: PNG, JPG, JPEG, WebP",
+            )
 
-        if fichier is not None:
-            # Afficher l'image
-            col_img, col_action = st.columns([2, 1])
-            with col_img:
-                st.image(fichier, caption="Facture chargée", use_container_width=True)
+            if fichier is not None:
+                # Afficher l'image
+                col_img, col_action = st.columns([2, 1])
+                with col_img:
+                    st.image(fichier, caption="Facture chargée", use_container_width=True)
 
-            with col_action:
-                st.markdown("**Informations fichier**")
-                st.caption(f"📁 {fichier.name}")
-                st.caption(f"📐 {fichier.size / 1024:.1f} Ko")
+                with col_action:
+                    st.markdown("**Informations fichier**")
+                    st.caption(f"📁 {fichier.name}")
+                    st.caption(f"📐 {fichier.size / 1024:.1f} Ko")
 
-                if st.button("🔍 Extraire les données", type="primary", use_container_width=True):
-                    with st.spinner("🤖 Analyse IA en cours..."):
-                        try:
-                            # Encoder en base64
-                            image_bytes = fichier.getvalue()
-                            image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+                    if st.button(
+                        "🔍 Extraire les données", type="primary", use_container_width=True
+                    ):
+                        with st.spinner("🤖 Analyse IA en cours..."):
+                            try:
+                                # Encoder en base64
+                                image_bytes = fichier.getvalue()
+                                image_b64 = base64.b64encode(image_bytes).decode("utf-8")
 
-                            # Appeler le service OCR
-                            from src.services.integrations.facture import (
-                                get_facture_ocr_service,
-                            )
-
-                            service = get_facture_ocr_service()
-                            resultat = service.extraire_donnees_facture_sync(image_b64)
-
-                            if resultat.succes and resultat.donnees:
-                                st.success("✅ Extraction réussie !")
-
-                                # Sauvegarder dans l'historique
-                                st.session_state[SK.HISTORIQUE_FACTURES].append(
-                                    {
-                                        "donnees": resultat.donnees,
-                                        "date_scan": date.today().isoformat(),
-                                        "fichier": fichier.name,
-                                    }
+                                # Appeler le service OCR
+                                from src.services.integrations.facture import (
+                                    get_facture_ocr_service,
                                 )
 
-                                # Afficher le résultat
-                                st.markdown("---")
-                                _afficher_resultat(resultat.donnees)
+                                service = get_facture_ocr_service()
+                                resultat = service.extraire_donnees_facture_sync(image_b64)
 
-                                # Bouton pour sauvegarder dans les charges
-                                st.markdown("---")
-                                if st.button(
-                                    "💾 Ajouter aux charges",
-                                    help="Enregistrer cette facture dans le suivi des charges",
-                                ):
-                                    try:
-                                        from src.ui.keys import KeyNamespace
+                                if resultat.succes and resultat.donnees:
+                                    st.success("✅ Extraction réussie !")
 
-                                        _charges_keys = KeyNamespace("charges")
-                                        charges_key = _charges_keys("factures")
-
-                                        if charges_key not in st.session_state:
-                                            st.session_state[charges_key] = []
-
-                                        donnees = resultat.donnees
-                                        nouvelle_facture = {
-                                            "type": donnees.get("type_energie", "electricite"),
-                                            "montant": float(donnees.get("montant", 0)),
-                                            "consommation": float(donnees.get("consommation", 0)),
-                                            "date": donnees.get("date", date.today().isoformat()),
-                                            "fournisseur": donnees.get("fournisseur"),
-                                            "date_ajout": date.today().isoformat(),
-                                            "source": "scan_facture",
+                                    # Sauvegarder dans l'historique
+                                    st.session_state[SK.HISTORIQUE_FACTURES].append(
+                                        {
+                                            "donnees": resultat.donnees,
+                                            "date_scan": date.today().isoformat(),
+                                            "fichier": fichier.name,
                                         }
+                                    )
 
-                                        st.session_state[charges_key].append(nouvelle_facture)
-                                        st.success(
-                                            "✅ Facture ajoutée au module Charges ! "
-                                            "Allez dans Maison → Charges pour la consulter."
-                                        )
-                                    except Exception as e:
-                                        logger.error(f"Erreur ajout aux charges: {e}")
-                                        st.error("❌ Erreur lors de l'ajout aux charges")
-                            else:
-                                st.error(f"❌ Échec: {resultat.message}")
-                                if resultat.texte_brut:
-                                    with st.expander("📝 Réponse brute IA"):
-                                        st.code(resultat.texte_brut)
+                                    # Afficher le résultat
+                                    st.markdown("---")
+                                    _afficher_resultat(resultat.donnees)
 
-                        except Exception as e:
-                            st.error(f"❌ Erreur: {e}")
-                            logger.error(f"Erreur scan facture: {e}")
+                                    # Bouton pour sauvegarder dans les charges
+                                    st.markdown("---")
+                                    if st.button(
+                                        "💾 Ajouter aux charges",
+                                        help="Enregistrer cette facture dans le suivi des charges",
+                                    ):
+                                        try:
+                                            from src.ui.keys import KeyNamespace
 
-        else:
-            # Guide d'utilisation
-            st.markdown("---")
-            st.markdown("#### 💡 Conseils pour un bon scan")
-            col1, col2 = st.columns(2)
-            with col1:
-                st.markdown(
-                    """
+                                            _charges_keys = KeyNamespace("charges")
+                                            charges_key = _charges_keys("factures")
+
+                                            if charges_key not in st.session_state:
+                                                st.session_state[charges_key] = []
+
+                                            donnees = resultat.donnees
+                                            nouvelle_facture = {
+                                                "type": donnees.get("type_energie", "electricite"),
+                                                "montant": float(donnees.get("montant", 0)),
+                                                "consommation": float(
+                                                    donnees.get("consommation", 0)
+                                                ),
+                                                "date": donnees.get(
+                                                    "date", date.today().isoformat()
+                                                ),
+                                                "fournisseur": donnees.get("fournisseur"),
+                                                "date_ajout": date.today().isoformat(),
+                                                "source": "scan_facture",
+                                            }
+
+                                            st.session_state[charges_key].append(nouvelle_facture)
+                                            st.success(
+                                                "✅ Facture ajoutée au module Charges ! "
+                                                "Allez dans Maison → Charges pour la consulter."
+                                            )
+                                        except Exception as e:
+                                            logger.error(f"Erreur ajout aux charges: {e}")
+                                            st.error("❌ Erreur lors de l'ajout aux charges")
+                                else:
+                                    st.error(f"❌ Échec: {resultat.message}")
+                                    if resultat.texte_brut:
+                                        with st.expander("📝 Réponse brute IA"):
+                                            st.code(resultat.texte_brut)
+
+                            except Exception as e:
+                                st.error(f"❌ Erreur: {e}")
+                                logger.error(f"Erreur scan facture: {e}")
+
+            else:
+                # Guide d'utilisation
+                st.markdown("---")
+                st.markdown("#### 💡 Conseils pour un bon scan")
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown(
+                        """
                     **✅ À faire:**
                     - Photo bien éclairée
                     - Facture à plat, entière
                     - Texte lisible et net
                     """
-                )
-            with col2:
-                st.markdown(
-                    """
+                    )
+                with col2:
+                    st.markdown(
+                        """
                     **❌ À éviter:**
                     - Photo floue ou sombre
                     - Facture pliée ou coupée
                     - Reflets sur le papier
                     """
-                )
+                    )
 
-            st.info(
-                "🏷️ **Fournisseurs supportés:** EDF, Engie, TotalEnergies, Veolia, "
-                "Eau de Paris, Suez et la plupart des fournisseurs français."
-            )
+                st.info(
+                    "🏷️ **Fournisseurs supportés:** EDF, Engie, TotalEnergies, Veolia, "
+                    "Eau de Paris, Suez et la plupart des fournisseurs français."
+                )
 
     # ─── Onglet Historique ───
     with onglet_historique:
-        st.markdown("### 📋 Historique des scans")
-        historique = st.session_state.get(SK.HISTORIQUE_FACTURES, [])
+        with error_boundary("scan_factures_historique"):
+            st.markdown("### 📋 Historique des scans")
+            historique = st.session_state.get(SK.HISTORIQUE_FACTURES, [])
 
-        if historique:
-            st.caption(f"{len(historique)} facture(s) scannée(s)")
+            if historique:
+                st.caption(f"{len(historique)} facture(s) scannée(s)")
 
-            if st.button("🗑️ Effacer l'historique"):
-                st.session_state[SK.HISTORIQUE_FACTURES] = []
-                st.rerun()
+                if st.button("🗑️ Effacer l'historique"):
+                    st.session_state[SK.HISTORIQUE_FACTURES] = []
+                    st.rerun()
 
-        _afficher_historique()
+            _afficher_historique()

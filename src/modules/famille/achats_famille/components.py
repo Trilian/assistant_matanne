@@ -5,6 +5,7 @@ Module Achats Famille - Composants UI
 import logging
 
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ from .utils import (
 )
 
 
+@ui_fragment
 def afficher_dashboard():
     """Affiche le dashboard des achats"""
     stats = get_stats()
@@ -69,6 +71,7 @@ def afficher_dashboard():
         etat_vide("Aucun achat urgent", "💳")
 
 
+@ui_fragment
 def afficher_liste_groupe(groupe: str, titre: str):
     """Affiche la liste d'achats d'un groupe"""
     st.subheader(titre)
@@ -130,6 +133,7 @@ def afficher_achat_card(achat: FamilyPurchase):
                 st.rerun()
 
 
+@ui_fragment
 def afficher_add_form():
     """Formulaire d'ajout d'achat"""
     st.subheader("➕ Ajouter un article")
@@ -203,6 +207,7 @@ def afficher_add_form():
                     st.error(f"Erreur: {e}")
 
 
+@ui_fragment
 def afficher_historique():
     """Affiche l'historique des achats"""
     st.subheader("📜 Historique des achats")
@@ -243,6 +248,7 @@ def afficher_historique():
                     st.caption(achat.date_achat.strftime("%d/%m/%Y"))
 
 
+@ui_fragment
 def afficher_par_magasin():
     """Vue par magasin pour les courses"""
     st.subheader("🏪 Par magasin")

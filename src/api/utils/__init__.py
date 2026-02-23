@@ -23,6 +23,7 @@ from .metrics import (
     record_request,
     reset_metrics,
 )
+from .security_headers import SecurityHeadersMiddleware
 
 __all__ = [
     # CRUD
@@ -44,4 +45,6 @@ __all__ = [
     "add_cache_headers",
     "check_etag_match",
     "ETagMiddleware",
+    # Security
+    "SecurityHeadersMiddleware",
 ]

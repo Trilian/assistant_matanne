@@ -3,10 +3,12 @@ Dashboard de performance des paris.
 """
 
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 from .utils import calculer_performance_paris, charger_paris_utilisateur, pd, st
 
 
+@ui_fragment
 def afficher_dashboard_performance():
     """Affiche le tableau de bord de performance des paris"""
     paris = charger_paris_utilisateur()

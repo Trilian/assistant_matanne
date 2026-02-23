@@ -3,10 +3,12 @@ Module Suivi Perso - Paramètres Garmin et objectifs
 """
 
 from src.core.session_keys import SK
+from src.ui.fragments import ui_fragment
 
 from .utils import get_garmin_service, st
 
 
+@ui_fragment
 def afficher_garmin_settings(data: dict):
     """Affiche les paramètres Garmin"""
     st.subheader("⌚ Garmin Connect")
@@ -93,6 +95,7 @@ def afficher_garmin_settings(data: dict):
                 """)
 
 
+@ui_fragment
 def afficher_objectifs(data: dict):
     """Affiche et permet de modifier les objectifs"""
     st.subheader("🎯 Objectifs")

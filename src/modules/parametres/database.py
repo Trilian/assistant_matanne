@@ -11,6 +11,7 @@ from src.core.db import verifier_sante as health_check
 from src.core.session_keys import SK
 from src.ui import etat_vide
 from src.ui.feedback import afficher_erreur, afficher_succes, spinner_intelligent
+from src.ui.fragments import ui_fragment
 
 
 @st.dialog("🧹 Confirmer Optimisation")
@@ -36,6 +37,7 @@ def _dialog_vacuum():
             st.rerun()
 
 
+@ui_fragment
 def afficher_database_config():
     """Configuration base de donnees"""
 

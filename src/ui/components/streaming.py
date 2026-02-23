@@ -32,6 +32,8 @@ from typing import Any
 
 import streamlit as st
 
+from src.ui.registry import composant_ui
+
 logger = logging.getLogger(__name__)
 
 
@@ -174,6 +176,11 @@ class StreamingContainer:
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui(
+    "streaming",
+    exemple='streaming_response(generator=my_gen, label="Suggestions")',
+    tags=("ia", "streaming", "progressif"),
+)
 def streaming_response(
     generator: Iterator[str] | Generator[str, None, None],
     label: str = "Génération en cours...",
@@ -209,6 +216,11 @@ def streaming_response(
     return container.text
 
 
+@composant_ui(
+    "streaming",
+    exemple='with streaming_section("Réponse IA"): st.write("contenu")',
+    tags=("ia", "section"),
+)
 @contextmanager
 def streaming_section(
     title: str,

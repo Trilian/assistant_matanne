@@ -13,6 +13,7 @@ from src.core.ai import obtenir_client_ia
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import ArticleCourses
 from src.services.core.base import BaseAIService, BaseService
+from src.services.core.events.bus import obtenir_bus
 
 from .types import SuggestionCourses
 
@@ -227,6 +228,15 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
                 }
                 self.create(data)
                 count += 1
+
+        # Émettre événement domaine
+        if count > 0:
+            obtenir_bus().emettre(
+                "courses.ingredients_ajoutes",
+                {"recette": recette_nom, "nb_articles": count},
+                source="courses",
+            )
+
         return count
 
     @avec_gestion_erreurs(default_return=0)

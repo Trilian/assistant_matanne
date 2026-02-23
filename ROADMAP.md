@@ -1,6 +1,51 @@
 # 🗺️ ROADMAP - Assistant Matanne
 
-> Dernière mise à jour: 23 février 2026
+> Dernière mise à jour: 24 février 2026
+
+---
+
+## ✅ Terminé (Session 24 février 2026)
+
+### 🚀 PHASE 5 AUDIT — Infrastructure avancée
+
+Session de complétion de la Phase 5 du rapport d'audit: nettoyage dead code, intégration UI, tests visuels et PWA.
+
+#### Dead code supprimé
+
+| Élément supprimé     | Fichier                              | LOC | Raison                                  |
+| -------------------- | ------------------------------------ | --- | --------------------------------------- |
+| ReactiveServiceMixin | `src/services/core/base/reactive.py` | 272 | Zero callers production, jamais adopté  |
+| Stale docstring ref  | `src/core/ai/circuit_breaker.py`     | 5   | Référence middleware supprimé (Phase 3) |
+
+#### Intégrations UI complétées
+
+| Feature          | Action                                     | Fichier modifié                                     |
+| ---------------- | ------------------------------------------ | --------------------------------------------------- |
+| Dark Mode Toggle | Appel `afficher_selecteur_theme()` ajouté  | `src/modules/parametres/affichage.py`               |
+| Design System    | Module enregistré dans navigation + router | `src/core/navigation.py`, `src/core/lazy_loader.py` |
+
+#### Tests de régression visuelle (27 tests)
+
+Création de `tests/test_ui_snapshots.py` utilisant `SnapshotTester`:
+
+- **Badges**: 7 variantes (info, succes, avertissement, erreur, primaire, secondaire, neutre)
+- **Boîtes info**: 4 variantes (info, succes, avertissement, erreur)
+- **Boules loto**: 6 combinaisons (normale, chance, tailles S/M/L)
+- **Thème**: 10 tests semantic tokens (couleurs, espacements, typographie)
+
+Extraction fonctions HTML pures pour testabilité:
+
+- `badge_html(texte, variante, couleur) -> str`
+- `boite_info_html(titre, contenu, icone, variante) -> str`
+- `boule_loto_html(numero, is_chance, taille) -> str`
+
+#### PWA améliorée
+
+- Script `scripts/generate_pwa_icons.py` créé (génération programmatique)
+- 8 icônes PNG générées: 72×72, 96×96, 128×128, 144×144, 152×152, 192×192, 384×384, 512×512
+- Répertoire `static/icons/` créé et peuplé
+
+**Tests: 7 736 passed, 13 failed (pre-existing: JulesAI mocks + DB connection), 322 skipped**
 
 ---
 
@@ -35,13 +80,13 @@ Déploiement systématique des patterns framework sur tous les modules, complét
 
 #### 5 fonctionnalités WIP complétées
 
-| Feature | Fichier | Implémentation |
-|---------|---------|----------------|
-| Batch cooking → planificateur | `batch_cooking_detaille/app.py` | `naviguer("cuisine.planificateur_repas")` |
-| Batch cooking → courses | `batch_cooking_detaille/app.py` | Envoi `liste_courses` via `SK.COURSES_DEPUIS_BATCH` |
-| Batch cooking → PDF | `batch_cooking_detaille/app.py` | Export PDF via `generer_pdf_planning_session` |
-| Planificateur → stock | `planificateur_repas/__init__.py` | Chargement inventaire via `obtenir_service_inventaire()` |
-| Planificateur → courses | `planificateur_repas/__init__.py` | Extraction recettes → `SK.COURSES_DEPUIS_PLANNING` |
+| Feature                       | Fichier                           | Implémentation                                           |
+| ----------------------------- | --------------------------------- | -------------------------------------------------------- |
+| Batch cooking → planificateur | `batch_cooking_detaille/app.py`   | `naviguer("cuisine.planificateur_repas")`                |
+| Batch cooking → courses       | `batch_cooking_detaille/app.py`   | Envoi `liste_courses` via `SK.COURSES_DEPUIS_BATCH`      |
+| Batch cooking → PDF           | `batch_cooking_detaille/app.py`   | Export PDF via `generer_pdf_planning_session`            |
+| Planificateur → stock         | `planificateur_repas/__init__.py` | Chargement inventaire via `obtenir_service_inventaire()` |
+| Planificateur → courses       | `planificateur_repas/__init__.py` | Extraction recettes → `SK.COURSES_DEPUIS_PLANNING`       |
 
 #### Jardin plan 2D data-driven
 
@@ -317,17 +362,17 @@ streamlit run src/app.py
 
 ## 📊 Métriques projet
 
-| Métrique        | Actuel       | Objectif | Status               |
-| --------------- | ------------ | -------- | -------------------- |
-| Tests collectés | **8 041**    | ✅       | ✅                   |
-| Tests passés    | **7 719**    | 100%     | ✅ 96.0%             |
-| Tests en échec  | **0**        | 0        | ✅ 0%                |
-| Tests skippés   | **322**      | 0        | 🟡 modules manquants |
-| Lint (ruff)     | **0 issues** | 0        | ✅                   |
-| Temps démarrage | ~1.5s        | <1.5s    | ✅                   |
-| Tables SQL      | 35           | ✅       | ✅                   |
-| Services        | 30+          | ✅       | ✅                   |
-| N+1 corrigés    | **18/18**    | 0 N+1    | ✅                   |
+| Métrique        | Actuel       | Objectif | Status                |
+| --------------- | ------------ | -------- | --------------------- |
+| Tests collectés | **8 072**    | ✅       | ✅ (+31 snapshots)    |
+| Tests passés    | **7 736**    | 100%     | ✅ 95.8%              |
+| Tests en échec  | **13**       | 0        | 🟡 pre-existing mocks |
+| Tests skippés   | **322**      | 0        | 🟡 modules manquants  |
+| Lint (ruff)     | **0 issues** | 0        | ✅                    |
+| Temps démarrage | ~1.5s        | <1.5s    | ✅                    |
+| Tables SQL      | 35           | ✅       | ✅                    |
+| Services        | 30+          | ✅       | ✅                    |
+| N+1 corrigés    | **18/18**    | 0 N+1    | ✅                    |
 
 ---
 

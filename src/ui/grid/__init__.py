@@ -5,7 +5,7 @@ Abstraction au-dessus de st.columns avec API fluent,
 support responsive intégré et design tokens.
 
 Usage:
-    from src.ui.layouts import Row, Grid, Stack, Gap
+    from src.ui.grid import Row, Grid, Stack, Gap
 
     # Row simple (2 colonnes égales)
     with Row(2) as r:

@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 from .constants import CHANCE_MAX, CHANCE_MIN, NUMERO_MAX, NUMERO_MIN
 from .frequences import analyser_patterns_tirages, calculer_frequences_numeros
@@ -22,6 +23,7 @@ from .sync import sync_tirages_loto
 from .utils import charger_tirages
 
 
+@ui_fragment
 def afficher_simulation():
     """Interface de simulation de stratégies"""
 
@@ -115,6 +117,7 @@ def afficher_simulation():
         st.plotly_chart(fig, width="stretch", key="loto_roi_chart")
 
 
+@ui_fragment
 def afficher_gestion_tirages():
     """Interface pour gérer les tirages"""
 

@@ -11,6 +11,7 @@ import streamlit as st
 
 from src.core.state import obtenir_etat
 from src.ui.feedback import afficher_succes
+from src.ui.fragments import ui_fragment
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,7 @@ def _sauvegarder_config_db(config: dict) -> bool:
         return False
 
 
+@ui_fragment
 def afficher_foyer_config():
     """Configuration du foyer"""
 

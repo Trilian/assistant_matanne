@@ -12,6 +12,7 @@ from src.services.jeux import (
     NotificationJeuxService,
     get_notification_jeux_service,
 )
+from src.ui.tokens import Couleur
 from src.ui.utils import echapper_html
 
 
@@ -24,7 +25,7 @@ def afficher_badge_notifications_jeux(service: NotificationJeuxService | None = 
     if non_lues > 0:
         st.markdown(
             f"""
-            <span style="background-color: #FF4B4B; color: white;
+            <span style="background-color: {Couleur.NOTIFICATIONS_BADGE}; color: white;
                          padding: 2px 8px; border-radius: 10px;
                          font-size: 12px; font-weight: bold;">
                 {echapper_html(str(non_lues))}

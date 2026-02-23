@@ -9,8 +9,10 @@ from src.core.ai.cache import CacheIA as SemanticCache
 from src.core.config import obtenir_parametres as get_settings
 from src.core.state import obtenir_etat
 from src.ui.feedback import afficher_succes
+from src.ui.fragments import ui_fragment
 
 
+@ui_fragment
 def afficher_ia_config():
     """Configuration IA"""
 

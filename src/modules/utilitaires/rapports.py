@@ -16,6 +16,7 @@ import streamlit as st
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.modules._framework import error_boundary
+from src.ui.fragments import ui_fragment
 
 # ═══════════════════════════════════════════════════════════
 # INITIALISATION
@@ -69,6 +70,7 @@ def app():
 # ═══════════════════════════════════════════════════════════
 
 
+@ui_fragment
 def afficher_rapport_stocks():
     """Rapport hebdo stocks"""
 
@@ -208,6 +210,7 @@ def afficher_rapport_stocks():
 # ═══════════════════════════════════════════════════════════
 
 
+@ui_fragment
 def afficher_rapport_budget():
     """Rapport budget/depenses"""
 
@@ -344,6 +347,7 @@ def afficher_rapport_budget():
 # ═══════════════════════════════════════════════════════════
 
 
+@ui_fragment
 def afficher_analyse_gaspillage():
     """Analyse gaspillage"""
 
@@ -477,6 +481,7 @@ def afficher_analyse_gaspillage():
 # ═══════════════════════════════════════════════════════════
 
 
+@ui_fragment
 def afficher_historique():
     """Historique rapports generes"""
 

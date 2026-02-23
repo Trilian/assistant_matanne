@@ -9,10 +9,12 @@ import streamlit as st
 
 from src.core.errors_base import ErreurValidation
 from src.services.cuisine.recettes import obtenir_service_recettes
+from src.ui.fragments import ui_fragment
 
 logger = logging.getLogger(__name__)
 
 
+@ui_fragment
 def afficher_ajouter_manuel():
     """Formulaire pour ajouter une recette manuellement"""
     st.subheader("➕ Ajouter une recette manuellement")

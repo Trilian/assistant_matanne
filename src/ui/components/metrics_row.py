@@ -21,6 +21,7 @@ from typing import Any, Callable
 import streamlit as st
 
 from src.ui.engine import StyleSheet
+from src.ui.registry import composant_ui
 from src.ui.tokens import Couleur
 from src.ui.tokens_semantic import Sem
 from src.ui.utils import echapper_html
@@ -61,6 +62,11 @@ class MetricConfig:
         return self.label
 
 
+@composant_ui(
+    "metrics",
+    exemple='afficher_metriques_row([MetricConfig("Total", 42, delta=5)])',
+    tags=("métrique", "row"),
+)
 def afficher_metriques_row(
     metriques: list[MetricConfig | dict],
     columns: int | None = None,
@@ -105,6 +111,11 @@ def afficher_metriques_row(
                 )
 
 
+@composant_ui(
+    "metrics",
+    exemple='afficher_stats_cards([{"title": "Articles", "value": 42}])',
+    tags=("statistique", "carte"),
+)
 def afficher_stats_cards(
     stats: list[dict],
     columns: int = 4,
@@ -161,9 +172,14 @@ def afficher_stats_cards(
             )
 
 
+@composant_ui(
+    "metrics",
+    exemple='afficher_kpi_banner([{"label": "Ventes", "value": "12K€", "trend": "up"}])',
+    tags=("kpi", "bannière"),
+)
 def afficher_kpi_banner(
     kpis: list[dict],
-    background_color: str = "#f8f9fa",
+    background_color: str = Sem.SURFACE_ALT,
 ) -> None:
     """Bannière de KPIs horizontale.
 
@@ -231,6 +247,11 @@ def afficher_kpi_banner(
     )
 
 
+@composant_ui(
+    "metrics",
+    exemple='afficher_progress_metrics([{"label": "Ventes", "current": 75, "target": 100}])',
+    tags=("progression", "barre"),
+)
 def afficher_progress_metrics(
     metrics: list[dict],
     columns: int = 2,

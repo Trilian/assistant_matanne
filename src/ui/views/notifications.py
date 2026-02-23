@@ -14,6 +14,7 @@ from src.services.core.notifications.types import (
     VAPID_PUBLIC_KEY,
     PreferencesNotification,
 )
+from src.ui.tokens import Couleur
 
 
 def afficher_demande_permission_push():
@@ -26,7 +27,7 @@ def afficher_demande_permission_push():
 
     html = f"""
     <div id="push-permission-container" style="
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, {Couleur.PUSH_GRADIENT_START} 0%, {Couleur.PUSH_GRADIENT_END} 100%);
         padding: 16px 20px;
         border-radius: 12px;
         color: white;
@@ -42,7 +43,7 @@ def afficher_demande_permission_push():
             </div>
             <button onclick="requestPushPermission()" style="
                 background: white;
-                color: #667eea;
+                color: {Couleur.PUSH_GRADIENT_START};
                 border: none;
                 padding: 8px 16px;
                 border-radius: 6px;

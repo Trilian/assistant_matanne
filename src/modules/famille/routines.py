@@ -17,6 +17,7 @@ from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.modules._framework import error_boundary
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 if TYPE_CHECKING:
     from src.services.famille.routines import ServiceRoutines
@@ -100,6 +101,7 @@ def app() -> None:
 # ===================================
 
 
+@ui_fragment
 def _afficher_tab_routines(svc: ServiceRoutines) -> None:
     """TAB 1: Liste des routines actives."""
     st.subheader("Routines actives")
@@ -208,6 +210,7 @@ def _formulaire_ajout_tache(svc: ServiceRoutines, routine_id: int) -> None:
                 st.rerun()
 
 
+@ui_fragment
 def _afficher_tab_rappels_ia(
     svc: ServiceRoutines, agent: Any, executer_async: Callable[..., Any]
 ) -> None:
@@ -288,6 +291,7 @@ def _afficher_tab_rappels_ia(
                 st.rerun()
 
 
+@ui_fragment
 def _afficher_tab_creer(svc: ServiceRoutines) -> None:
     """TAB 3: Formulaire de création de routine."""
     st.subheader("➕ Creer une nouvelle routine")
@@ -341,6 +345,7 @@ def _afficher_tab_creer(svc: ServiceRoutines) -> None:
                 st.rerun()
 
 
+@ui_fragment
 def _afficher_tab_suivi(svc: ServiceRoutines) -> None:
     """TAB 4: Suivi & statistiques."""
     st.subheader("📊 Suivi des routines")

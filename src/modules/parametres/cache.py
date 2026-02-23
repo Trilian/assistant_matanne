@@ -8,8 +8,10 @@ import streamlit as st
 from src.core.ai.cache import CacheIA as SemanticCache
 from src.core.caching import Cache
 from src.ui.feedback import afficher_succes
+from src.ui.fragments import ui_fragment
 
 
+@ui_fragment
 def afficher_cache_config():
     """Configuration cache"""
 

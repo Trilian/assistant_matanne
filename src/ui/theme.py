@@ -21,6 +21,7 @@ from enum import StrEnum
 import streamlit as st
 
 from src.ui.tokens import Couleur, Espacement, Rayon
+from src.ui.tokens_semantic import _DARK_MAPPING, _LIGHT_MAPPING
 
 
 class ModeTheme(StrEnum):
@@ -59,42 +60,45 @@ class Theme:
 
     # ── Propriétés dérivées ────────────────────────────────
 
+    def _sem(self, key: str) -> str:
+        """Retourne la valeur d'un token sémantique selon le mode."""
+        mapping = _DARK_MAPPING if self.mode == ModeTheme.SOMBRE else _LIGHT_MAPPING
+        return mapping.get(key, "")
+
     @property
     def bg_primary(self) -> str:
         """Couleur de fond principale."""
-        return Couleur.BG_SURFACE if self.mode == ModeTheme.CLAIR else "#1a1a2e"
+        return self._sem("--sem-surface")
 
     @property
     def bg_secondary(self) -> str:
         """Couleur de fond secondaire."""
-        return Couleur.BG_SUBTLE if self.mode == ModeTheme.CLAIR else "#16213e"
+        return self._sem("--sem-surface-alt")
 
     @property
     def bg_card(self) -> str:
         """Couleur de fond des cartes."""
-        return Couleur.BG_SURFACE if self.mode == ModeTheme.CLAIR else "#1e2a3a"
+        return self._sem("--sem-surface-elevated")
 
     @property
     def text_primary(self) -> str:
         """Couleur de texte principal."""
-        return Couleur.TEXT_PRIMARY if self.mode == ModeTheme.CLAIR else "#e0e0e0"
+        return self._sem("--sem-on-surface")
 
     @property
     def text_secondary(self) -> str:
         """Couleur de texte secondaire."""
-        return Couleur.TEXT_SECONDARY if self.mode == ModeTheme.CLAIR else "#a0a0b0"
+        return self._sem("--sem-on-surface-secondary")
 
     @property
     def border_color(self) -> str:
         """Couleur des bordures."""
-        return Couleur.BORDER if self.mode == ModeTheme.CLAIR else "#2a3a4a"
+        return self._sem("--sem-border")
 
     @property
     def shadow(self) -> str:
         """Ombre par défaut."""
-        if self.mode == ModeTheme.CLAIR:
-            return "0 2px 4px rgba(0,0,0,0.04)"
-        return "0 2px 8px rgba(0,0,0,0.3)"
+        return self._sem("--sem-shadow-sm")
 
     @property
     def espacement_base(self) -> str:

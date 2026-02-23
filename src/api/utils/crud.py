@@ -5,6 +5,7 @@ Fournit des helpers pour les opérations courantes dans les routes.
 """
 
 import asyncio
+import logging
 from collections.abc import Callable, Generator
 from contextlib import asynccontextmanager, contextmanager
 from typing import Any, TypeVar
@@ -12,6 +13,8 @@ from typing import Any, TypeVar
 from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
 R = TypeVar("R")
@@ -77,7 +80,11 @@ def executer_avec_session() -> Generator[Session, None, None]:
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        logger.error(f"Erreur session DB: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="Une erreur interne est survenue. Veuillez réessayer.",
+        ) from e
 
 
 # ═══════════════════════════════════════════════════════════
@@ -116,7 +123,11 @@ async def executer_async(func: Callable[..., R], *args: Any, **kwargs: Any) -> R
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        logger.error(f"Erreur async: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="Une erreur interne est survenue. Veuillez réessayer.",
+        ) from e
 
 
 async def query_async(query_func: Callable[[Session], R]) -> R:

@@ -10,6 +10,7 @@ import streamlit as st
 from src.core.session_keys import SK
 from src.services.cuisine.courses import obtenir_service_courses
 from src.services.inventaire import obtenir_service_inventaire
+from src.ui.fragments import ui_fragment
 
 from .utils import PRIORITY_EMOJIS, RAYONS_DEFAULT
 
@@ -21,6 +22,7 @@ from .liste_utils import (
 )
 
 
+@ui_fragment
 def afficher_liste_active():
     """Gestion interactive de la liste active"""
     service = obtenir_service_courses()

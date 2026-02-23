@@ -73,6 +73,22 @@ def _invalider_cache_courses(event: EvenementDomaine) -> None:
         logger.warning("Échec invalidation cache courses: %s", e)
 
 
+def _invalider_cache_entretien(event: EvenementDomaine) -> None:
+    """Invalide le cache entretien quand les routines changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="entretien")
+        logger.debug(
+            "Cache entretien invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache entretien: %s", e)
+
+
 # ═══════════════════════════════════════════════════════════
 # MÉTRIQUES
 # ═══════════════════════════════════════════════════════════
@@ -163,6 +179,8 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("stock.*", _invalider_cache_stock, priority=100)
     compteur += 1
     bus.souscrire("courses.*", _invalider_cache_courses, priority=100)
+    compteur += 1
+    bus.souscrire("entretien.*", _invalider_cache_entretien, priority=100)
     compteur += 1
 
     # ── Métriques (priorité moyenne) ──

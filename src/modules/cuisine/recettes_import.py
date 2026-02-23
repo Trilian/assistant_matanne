@@ -8,8 +8,10 @@ import streamlit as st
 from src.services.cuisine.recettes import get_recipe_import_service, obtenir_service_recettes
 from src.services.cuisine.recettes.importer import RecipeImporter
 from src.services.cuisine.recettes.parsers import ImportedRecipe
+from src.ui.fragments import ui_fragment
 
 
+@ui_fragment
 def afficher_importer():
     """Interface pour importer une recette"""
     st.subheader("📥 Importer une recette")

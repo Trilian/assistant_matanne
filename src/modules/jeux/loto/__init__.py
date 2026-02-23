@@ -72,33 +72,40 @@ def app():
 
     # TAB 1: STATISTIQUES
     with tabs[0]:
-        afficher_dernier_tirage(tirages)
-        st.divider()
-        afficher_statistiques_frequences(tirages)
+        with error_boundary("loto_statistiques"):
+            afficher_dernier_tirage(tirages)
+            st.divider()
+            afficher_statistiques_frequences(tirages)
 
     # TAB 2: TENDANCES (Loi des séries)
     with tabs[1]:
-        afficher_series_loto()
+        with error_boundary("loto_tendances"):
+            afficher_series_loto()
 
     # TAB 3: GÉNÉRATION
     with tabs[2]:
-        afficher_generateur_grilles(tirages)
+        with error_boundary("loto_generateur"):
+            afficher_generateur_grilles(tirages)
 
     # TAB 4: MES GRILLES
     with tabs[3]:
-        afficher_mes_grilles()
+        with error_boundary("loto_mes_grilles"):
+            afficher_mes_grilles()
 
     # TAB 5: SIMULATION
     with tabs[4]:
-        afficher_simulation()
+        with error_boundary("loto_simulation"):
+            afficher_simulation()
 
     # TAB 6: MATHÉMATIQUES
     with tabs[5]:
-        afficher_esperance()
+        with error_boundary("loto_maths"):
+            afficher_esperance()
 
     # TAB 7: GESTION TIRAGES
     with tabs[6]:
-        afficher_gestion_tirages()
+        with error_boundary("loto_tirages"):
+            afficher_gestion_tirages()
 
 
 # Alias

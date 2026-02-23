@@ -7,8 +7,10 @@ import pandas as pd
 import streamlit as st
 
 from src.services.inventaire import obtenir_service_inventaire
+from src.ui.fragments import ui_fragment
 
 
+@ui_fragment
 def afficher_tools():
     """Outils utilitaires pour l'inventaire"""
     st.subheader("🔧 Outils d'administration")

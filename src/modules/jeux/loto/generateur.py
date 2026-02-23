@@ -5,6 +5,7 @@ Module Loto - Génération et gestion des grilles
 import streamlit as st
 
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 from .constants import CHANCE_MAX, CHANCE_MIN, NUMERO_MAX, NUMERO_MIN
 from .crud import enregistrer_grille
@@ -18,6 +19,7 @@ from .generation import (
 from .utils import charger_grilles_utilisateur
 
 
+@ui_fragment
 def afficher_generateur_grilles(tirages: list):
     """Interface de génération de grilles"""
 
@@ -109,6 +111,7 @@ def afficher_generateur_grilles(tirages: list):
                     st.rerun()
 
 
+@ui_fragment
 def afficher_mes_grilles():
     """Affiche les grilles de l'utilisateur"""
     grilles = charger_grilles_utilisateur()

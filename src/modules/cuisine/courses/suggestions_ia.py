@@ -12,10 +12,12 @@ from src.services.cuisine.courses import obtenir_service_courses
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui.components.atoms import etat_vide
+from src.ui.fragments import ui_fragment
 
 logger = logging.getLogger(__name__)
 
 
+@ui_fragment
 def afficher_suggestions_ia():
     """Suggestions IA depuis inventaire & recettes"""
     service = obtenir_service_courses()

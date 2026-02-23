@@ -103,7 +103,7 @@ async def subscribe_push(
             },
         }
 
-        user_id = current_user["user_id"]
+        user_id = current_user["id"]
         subscription = service.sauvegarder_abonnement(user_id, subscription_info)
 
         logger.info(f"✅ Abonnement push enregistré pour {user_id}")
@@ -116,10 +116,10 @@ async def subscribe_push(
         )
 
     except Exception as e:
-        logger.error(f"Erreur lors de l'enregistrement push: {e}")
+        logger.error(f"Erreur lors de l'enregistrement push: {e}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=f"Erreur lors de l'enregistrement: {str(e)}",
+            detail="Erreur lors de l'enregistrement de l'abonnement push.",
         )
 
 
@@ -140,7 +140,7 @@ async def unsubscribe_push(
         from src.services.core.notifications.notif_web import get_push_notification_service
 
         service = get_push_notification_service()
-        user_id = current_user["user_id"]
+        user_id = current_user["id"]
 
         service.supprimer_abonnement(user_id, request.endpoint)
 
@@ -154,10 +154,10 @@ async def unsubscribe_push(
         )
 
     except Exception as e:
-        logger.error(f"Erreur lors de la suppression push: {e}")
+        logger.error(f"Erreur lors de la suppression push: {e}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=f"Erreur lors de la suppression: {str(e)}",
+            detail="Erreur lors de la suppression de l'abonnement push.",
         )
 
 
@@ -177,7 +177,7 @@ async def get_push_status(
         from src.services.core.notifications.notif_web import get_push_notification_service
 
         service = get_push_notification_service()
-        user_id = current_user["user_id"]
+        user_id = current_user["id"]
 
         subscriptions = service.obtenir_abonnements_utilisateur(user_id)
         preferences = service.obtenir_preferences(user_id)
@@ -189,8 +189,8 @@ async def get_push_status(
         )
 
     except Exception as e:
-        logger.error(f"Erreur lors de la récupération du statut push: {e}")
+        logger.error(f"Erreur lors de la récupération du statut push: {e}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=f"Erreur: {str(e)}",
+            detail="Erreur lors de la récupération du statut des notifications.",
         )

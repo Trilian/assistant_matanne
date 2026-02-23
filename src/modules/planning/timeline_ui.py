@@ -13,6 +13,7 @@ import streamlit as st
 
 from src.core.constants import JOURS_SEMAINE
 from src.core.date_utils import obtenir_debut_semaine
+from src.modules._framework import error_boundary
 from src.ui import etat_vide
 from src.ui.tokens import Couleur
 
@@ -230,111 +231,112 @@ def app():
     st.title("📊 Vue Timeline")
     st.caption("Visualisation chronologique de vos événements")
 
-    # Sélection de la période
-    col1, col2 = st.columns([1, 2])
+    with error_boundary("timeline_ui"):
+        # Sélection de la période
+        col1, col2 = st.columns([1, 2])
 
-    with col1:
-        vue_mode = st.radio(
-            "Mode de vue",
-            ["📅 Jour", "📆 Semaine"],
-            horizontal=True,
-        )
+        with col1:
+            vue_mode = st.radio(
+                "Mode de vue",
+                ["📅 Jour", "📆 Semaine"],
+                horizontal=True,
+            )
 
-    with col2:
-        date_ref = st.date_input("Date de référence", value=date.today())
+        with col2:
+            date_ref = st.date_input("Date de référence", value=date.today())
 
-    st.divider()
+        st.divider()
 
-    # Légende
-    afficher_legende()
+        # Légende
+        afficher_legende()
 
-    st.divider()
+        st.divider()
 
-    # Charger les événements
-    if vue_mode == "📅 Jour":
-        # Vue journalière
-        events = charger_events_periode(date_ref, date_ref)
-        fig = creer_timeline_jour(events, date_ref)
-        st.plotly_chart(fig, use_container_width=True)
-
-        # Stats du jour
-        if events:
-            events_jour = [e for e in events if e["date_debut"].date() == date_ref]
-            with st.expander("📊 Statistiques du jour", expanded=False):
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.metric("Événements", len(events_jour))
-                with col2:
-                    types = set(e["type"] for e in events_jour)
-                    st.metric("Types", len(types))
-                with col3:
-                    duree_totale = sum(
-                        (e["date_fin"] - e["date_debut"]).seconds / 3600 for e in events_jour
-                    )
-                    st.metric("Durée totale", f"{duree_totale:.1f}h")
-
-    else:
-        # Vue semaine
-        lundi = obtenir_debut_semaine(date_ref)
-        dimanche = lundi + timedelta(days=6)
-
-        events = charger_events_periode(lundi, dimanche)
-        fig = creer_timeline_semaine(events, lundi)
-        st.plotly_chart(fig, use_container_width=True)
-
-        # Stats de la semaine
-        if events:
-            events_semaine = [e for e in events if lundi <= e["date_debut"].date() <= dimanche]
-            with st.expander("📊 Statistiques de la semaine", expanded=False):
-                col1, col2, col3, col4 = st.columns(4)
-                with col1:
-                    st.metric("Total événements", len(events_semaine))
-                with col2:
-                    # Jour le plus chargé
-                    from collections import Counter
-
-                    jours = Counter(e["date_debut"].weekday() for e in events_semaine)
-                    if jours:
-                        jour_max = max(jours, key=jours.get)
-                        st.metric("Jour chargé", JOURS_SEMAINE[jour_max][:3])
-                with col3:
-                    types = Counter(e["type"] for e in events_semaine)
-                    if types:
-                        type_max = max(types, key=types.get)
-                        st.metric("Type dominant", type_max.title())
-                with col4:
-                    duree_totale = sum(
-                        (e["date_fin"] - e["date_debut"]).seconds / 3600 for e in events_semaine
-                    )
-                    st.metric("Durée totale", f"{duree_totale:.0f}h")
-
-    # Liste détaillée
-    st.divider()
-    with st.expander("📋 Liste détaillée", expanded=False):
+        # Charger les événements
         if vue_mode == "📅 Jour":
-            events_afficher = [e for e in events if e["date_debut"].date() == date_ref]
+            # Vue journalière
+            events = charger_events_periode(date_ref, date_ref)
+            fig = creer_timeline_jour(events, date_ref)
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Stats du jour
+            if events:
+                events_jour = [e for e in events if e["date_debut"].date() == date_ref]
+                with st.expander("📊 Statistiques du jour", expanded=False):
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.metric("Événements", len(events_jour))
+                    with col2:
+                        types = set(e["type"] for e in events_jour)
+                        st.metric("Types", len(types))
+                    with col3:
+                        duree_totale = sum(
+                            (e["date_fin"] - e["date_debut"]).seconds / 3600 for e in events_jour
+                        )
+                        st.metric("Durée totale", f"{duree_totale:.1f}h")
+
         else:
+            # Vue semaine
             lundi = obtenir_debut_semaine(date_ref)
             dimanche = lundi + timedelta(days=6)
-            events_afficher = [e for e in events if lundi <= e["date_debut"].date() <= dimanche]
 
-        if not events_afficher:
-            etat_vide("Aucun événement", "📅")
-        else:
-            events_afficher.sort(key=lambda e: e["date_debut"])
-            for event in events_afficher:
-                jour = JOURS_SEMAINE[event["date_debut"].weekday()][:3]
-                heure = event["date_debut"].strftime("%H:%M")
-                lieu = f" • 📍 {event['lieu']}" if event.get("lieu") else ""
-                couleur = event.get("couleur", "#757575")
+            events = charger_events_periode(lundi, dimanche)
+            fig = creer_timeline_semaine(events, lundi)
+            st.plotly_chart(fig, use_container_width=True)
 
-                st.markdown(
-                    f'<div style="padding:8px;margin:4px 0;background:#f8f9fa;'
-                    f'border-left:4px solid {couleur};border-radius:4px;">'
-                    f"<strong>{jour} {heure}</strong> - {event['titre']}"
-                    f'<span style="color:#666;">{lieu}</span></div>',
-                    unsafe_allow_html=True,
-                )
+            # Stats de la semaine
+            if events:
+                events_semaine = [e for e in events if lundi <= e["date_debut"].date() <= dimanche]
+                with st.expander("📊 Statistiques de la semaine", expanded=False):
+                    col1, col2, col3, col4 = st.columns(4)
+                    with col1:
+                        st.metric("Total événements", len(events_semaine))
+                    with col2:
+                        # Jour le plus chargé
+                        from collections import Counter
+
+                        jours = Counter(e["date_debut"].weekday() for e in events_semaine)
+                        if jours:
+                            jour_max = max(jours, key=jours.get)
+                            st.metric("Jour chargé", JOURS_SEMAINE[jour_max][:3])
+                    with col3:
+                        types = Counter(e["type"] for e in events_semaine)
+                        if types:
+                            type_max = max(types, key=types.get)
+                            st.metric("Type dominant", type_max.title())
+                    with col4:
+                        duree_totale = sum(
+                            (e["date_fin"] - e["date_debut"]).seconds / 3600 for e in events_semaine
+                        )
+                        st.metric("Durée totale", f"{duree_totale:.0f}h")
+
+        # Liste détaillée
+        st.divider()
+        with st.expander("📋 Liste détaillée", expanded=False):
+            if vue_mode == "📅 Jour":
+                events_afficher = [e for e in events if e["date_debut"].date() == date_ref]
+            else:
+                lundi = obtenir_debut_semaine(date_ref)
+                dimanche = lundi + timedelta(days=6)
+                events_afficher = [e for e in events if lundi <= e["date_debut"].date() <= dimanche]
+
+            if not events_afficher:
+                etat_vide("Aucun événement", "📅")
+            else:
+                events_afficher.sort(key=lambda e: e["date_debut"])
+                for event in events_afficher:
+                    jour = JOURS_SEMAINE[event["date_debut"].weekday()][:3]
+                    heure = event["date_debut"].strftime("%H:%M")
+                    lieu = f" • 📍 {event['lieu']}" if event.get("lieu") else ""
+                    couleur = event.get("couleur", "#757575")
+
+                    st.markdown(
+                        f'<div style="padding:8px;margin:4px 0;background:#f8f9fa;'
+                        f'border-left:4px solid {couleur};border-radius:4px;">'
+                        f"<strong>{jour} {heure}</strong> - {event['titre']}"
+                        f'<span style="color:#666;">{lieu}</span></div>',
+                        unsafe_allow_html=True,
+                    )
 
 
 __all__ = ["app"]

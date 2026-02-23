@@ -16,6 +16,7 @@ import logging
 import streamlit as st
 
 from src.core.ai import obtenir_client_ia
+from src.modules._framework import error_boundary
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
 from src.ui.keys import KeyNamespace
@@ -116,61 +117,62 @@ def app():
     st.title("💬 Chat IA — Assistant Matanne")
     st.caption("Pose tes questions sur les recettes, le planning, Jules, ou la maison !")
 
-    # Initialiser l'historique
-    if _SK_MESSAGES not in st.session_state:
-        st.session_state[_SK_MESSAGES] = []
-
-    messages: list[dict] = st.session_state[_SK_MESSAGES]
-
-    # Suggestions rapides (si conversation vide)
-    if not messages:
-        st.markdown("##### 💡 Suggestions")
-        cols = st.columns(len(_SUGGESTIONS_RAPIDES))
-        for i, suggestion in enumerate(_SUGGESTIONS_RAPIDES):
-            with cols[i]:
-                if st.button(
-                    suggestion[:25] + "..." if len(suggestion) > 25 else suggestion,
-                    key=_keys("suggest", str(i)),
-                    use_container_width=True,
-                    help=suggestion,
-                ):
-                    messages.append({"role": "user", "content": suggestion})
-                    st.rerun()
-
-    # Afficher l'historique
-    for msg in messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
-
-    # Input utilisateur
-    if prompt := st.chat_input("Pose ta question à Matanne..."):
-        # Ajouter le message utilisateur
-        messages.append({"role": "user", "content": prompt})
-
-        with st.chat_message("user"):
-            st.markdown(prompt)
-
-        # Générer la réponse en streaming
-        with st.chat_message("assistant"):
-            try:
-                service = obtenir_chat_ia_service()
-                response = st.write_stream(service.streamer_reponse(messages))
-
-                # Sauvegarder la réponse
-                messages.append({"role": "assistant", "content": response})
-
-            except Exception as e:
-                error_msg = f"Désolé, je n'ai pas pu répondre. Erreur: {e}"
-                st.error(error_msg)
-                messages.append({"role": "assistant", "content": error_msg})
-                logger.error(f"Chat IA erreur: {e}")
-
-    # Actions en bas
-    st.markdown("---")
-    col1, col2 = st.columns([1, 4])
-    with col1:
-        if st.button("🗑️ Effacer", key=_keys("clear"), use_container_width=True):
+    with error_boundary("chat_ia"):
+        # Initialiser l'historique
+        if _SK_MESSAGES not in st.session_state:
             st.session_state[_SK_MESSAGES] = []
-            st.rerun()
+
+        messages: list[dict] = st.session_state[_SK_MESSAGES]
+
+        # Suggestions rapides (si conversation vide)
+        if not messages:
+            st.markdown("##### 💡 Suggestions")
+            cols = st.columns(len(_SUGGESTIONS_RAPIDES))
+            for i, suggestion in enumerate(_SUGGESTIONS_RAPIDES):
+                with cols[i]:
+                    if st.button(
+                        suggestion[:25] + "..." if len(suggestion) > 25 else suggestion,
+                        key=_keys("suggest", str(i)),
+                        use_container_width=True,
+                        help=suggestion,
+                    ):
+                        messages.append({"role": "user", "content": suggestion})
+                        st.rerun()
+
+        # Afficher l'historique
+        for msg in messages:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+
+        # Input utilisateur
+        if prompt := st.chat_input("Pose ta question à Matanne..."):
+            # Ajouter le message utilisateur
+            messages.append({"role": "user", "content": prompt})
+
+            with st.chat_message("user"):
+                st.markdown(prompt)
+
+            # Générer la réponse en streaming
+            with st.chat_message("assistant"):
+                try:
+                    service = obtenir_chat_ia_service()
+                    response = st.write_stream(service.streamer_reponse(messages))
+
+                    # Sauvegarder la réponse
+                    messages.append({"role": "assistant", "content": response})
+
+                except Exception as e:
+                    error_msg = f"Désolé, je n'ai pas pu répondre. Erreur: {e}"
+                    st.error(error_msg)
+                    messages.append({"role": "assistant", "content": error_msg})
+                    logger.error(f"Chat IA erreur: {e}")
+
+        # Actions en bas
+        st.markdown("---")
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            if st.button("🗑️ Effacer", key=_keys("clear"), use_container_width=True):
+                st.session_state[_SK_MESSAGES] = []
+                st.rerun()
     with col2:
         st.caption(f"💬 {len(messages)} message(s) dans la conversation")

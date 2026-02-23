@@ -9,6 +9,7 @@ import streamlit as st
 
 from src.core.session_keys import SK
 from src.services.integrations import BarcodeService
+from src.ui.fragments import ui_fragment
 
 from .detection import BarcodeScanner, detect_barcodes
 
@@ -135,6 +136,7 @@ def _process_scanned_code(service: BarcodeService, code_input: str):
         st.error(f"❌ Erreur: {e}")
 
 
+@ui_fragment
 def afficher_scanner():
     """Scanner codes-barres avec 3 modes: vidéo streaming, photo, manuel."""
 

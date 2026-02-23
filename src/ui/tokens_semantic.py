@@ -91,11 +91,11 @@ _LIGHT_MAPPING: dict[str, str] = {
     "--sem-surface-overlay": "rgba(0, 0, 0, 0.5)",
     # Texte
     "--sem-on-surface": "#212529",
-    "--sem-on-surface-secondary": "#6c757d",
-    "--sem-on-surface-muted": "#9e9e9e",
+    "--sem-on-surface-secondary": "#495057",
+    "--sem-on-surface-muted": "#6c757d",
     # Interactif
-    "--sem-interactive": "#4CAF50",
-    "--sem-interactive-hover": "#388E3C",
+    "--sem-interactive": "#2E7D32",
+    "--sem-interactive-hover": "#1B5E20",
     "--sem-on-interactive": "#ffffff",
     # Success
     "--sem-success": "#4CAF50",
@@ -114,8 +114,8 @@ _LIGHT_MAPPING: dict[str, str] = {
     "--sem-info-subtle": "#e7f3ff",
     "--sem-on-info": "#0c5460",
     # Bordures
-    "--sem-border": "#e2e8e5",
-    "--sem-border-subtle": "#e0e0e0",
+    "--sem-border": "#ced4da",
+    "--sem-border-subtle": "#dee2e6",
     # Ombres
     "--sem-shadow-sm": "0 2px 4px rgba(0,0,0,0.04)",
     "--sem-shadow-md": "0 4px 12px rgba(0,0,0,0.08)",
@@ -134,8 +134,8 @@ _DARK_MAPPING: dict[str, str] = {
     "--sem-surface-overlay": "rgba(0, 0, 0, 0.7)",
     # Texte
     "--sem-on-surface": "#e0e0e0",
-    "--sem-on-surface-secondary": "#a0a0b0",
-    "--sem-on-surface-muted": "#707080",
+    "--sem-on-surface-secondary": "#b0b0c0",
+    "--sem-on-surface-muted": "#8888a0",
     # Interactif
     "--sem-interactive": "#66BB6A",
     "--sem-interactive-hover": "#81C784",
@@ -157,8 +157,8 @@ _DARK_MAPPING: dict[str, str] = {
     "--sem-info-subtle": "#1b2a3a",
     "--sem-on-info": "#90caf9",
     # Bordures
-    "--sem-border": "#2a3a4a",
-    "--sem-border-subtle": "#1e2e3e",
+    "--sem-border": "#3a4a5c",
+    "--sem-border-subtle": "#2a3a4e",
     # Ombres
     "--sem-shadow-sm": "0 2px 4px rgba(0,0,0,0.2)",
     "--sem-shadow-md": "0 4px 12px rgba(0,0,0,0.3)",

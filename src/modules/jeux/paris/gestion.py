@@ -4,6 +4,7 @@ Interface de gestion des equipes et matchs.
 
 from src.services.jeux import get_paris_crud_service
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 from .crud import ajouter_equipe, ajouter_match, enregistrer_resultat_match, supprimer_match
 from .utils import (
@@ -15,6 +16,7 @@ from .utils import (
 )
 
 
+@ui_fragment
 def afficher_gestion_donnees():
     """Interface pour gerer les equipes et matchs"""
 

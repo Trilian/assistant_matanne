@@ -2,10 +2,10 @@
 Module Sorties Weekend - Composants UI
 """
 
-from src.core.async_utils import executer_async
 from src.core.session_keys import SK
 from src.services.famille.weekend import obtenir_service_weekend
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 from .ai_service import WeekendAIService
 from .utils import (
@@ -23,6 +23,7 @@ from .utils import (
 )
 
 
+@ui_fragment
 def afficher_planning():
     """Affiche le planning du weekend"""
     saturday, sunday = get_next_weekend()
@@ -85,6 +86,7 @@ def afficher_day_activities(day: date, activities: list):
                         st.caption("✅ Fait")
 
 
+@ui_fragment
 def afficher_suggestions():
     """Affiche les suggestions IA"""
     st.subheader("💡 Suggestions IA")
@@ -104,24 +106,23 @@ def afficher_suggestions():
     st.caption(f"👶 Jules: {age_jules} mois")
 
     if st.button("🤖 Generer des idees", type="primary"):
-        with st.spinner("Reflexion en cours..."):
-            try:
-                service = WeekendAIService()
-                result = executer_async(
-                    service.suggerer_activites(
-                        meteo=meteo, age_enfant_mois=age_jules, budget=budget, region=region
-                    )
+        try:
+            service = WeekendAIService()
+            st.write_stream(
+                service.stream_suggestions(
+                    meteo=meteo, age_enfant_mois=age_jules, budget=budget, region=region
                 )
-                st.markdown(result)
+            )
 
-                # Bouton pour ajouter
-                st.markdown("---")
-                st.info("💡 Pour ajouter une suggestion au planning, utilisez l'onglet 'Ajouter'")
+            # Bouton pour ajouter
+            st.markdown("---")
+            st.info("💡 Pour ajouter une suggestion au planning, utilisez l'onglet 'Ajouter'")
 
-            except Exception as e:
-                st.error(f"Erreur IA: {e}")
+        except Exception as e:
+            st.error(f"Erreur IA: {e}")
 
 
+@ui_fragment
 def afficher_lieux_testes():
     """Affiche les lieux dejà testes"""
     st.subheader("🗺️ Lieux testes")
@@ -163,6 +164,7 @@ def afficher_lieux_testes():
                 st.caption(lieu.date_prevue.strftime("%d/%m/%Y"))
 
 
+@ui_fragment
 def afficher_add_activity():
     """Formulaire d'ajout d'activite"""
     st.subheader("➕ Ajouter une activite")
@@ -237,6 +239,7 @@ def afficher_add_activity():
                     st.error(f"Erreur: {e}")
 
 
+@ui_fragment
 def afficher_noter_sortie():
     """Permet de noter une sortie terminee"""
     st.subheader("⭐ Noter une sortie")

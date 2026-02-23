@@ -9,6 +9,7 @@ import streamlit as st
 
 from src.core.errors_base import ErreurNonTrouve, ErreurValidation
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
+@ui_fragment
 def afficher_ajout_rapide():
     """Ajouter rapidement un article avec code-barres"""
 
@@ -125,6 +127,7 @@ def afficher_ajout_rapide():
 # ═══════════════════════════════════════════════════════════
 
 
+@ui_fragment
 def afficher_verifier_stock():
     """Vérifier stock par code-barres"""
 
@@ -213,6 +216,7 @@ def afficher_verifier_stock():
 # ═══════════════════════════════════════════════════════════
 
 
+@ui_fragment
 def afficher_gestion_barcodes():
     """Gestion des codes-barres"""
 
@@ -293,6 +297,7 @@ def afficher_gestion_barcodes():
 # ═══════════════════════════════════════════════════════════
 
 
+@ui_fragment
 def afficher_import_export():
     """Import/Export codes-barres"""
 

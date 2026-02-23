@@ -21,6 +21,8 @@ from typing import Any, Callable
 
 import streamlit as st
 
+from src.ui.registry import composant_ui
+
 
 @dataclass
 class FilterConfig:
@@ -47,6 +49,11 @@ class FilterConfig:
     all_label: str = "Tous"
 
 
+@composant_ui(
+    "filters",
+    exemple='afficher_barre_filtres([FilterConfig("cat", "Catégorie", ["A", "B"])])',
+    tags=("filtre", "recherche"),
+)
 def afficher_barre_filtres(
     configs: list[FilterConfig],
     prefix: str = "",
@@ -130,6 +137,7 @@ def afficher_barre_filtres(
     return result
 
 
+@composant_ui("filters", exemple='afficher_recherche("Rechercher...")', tags=("recherche",))
 def afficher_recherche(
     placeholder: str = "Rechercher...",
     key: str = "search",
@@ -155,6 +163,11 @@ def afficher_recherche(
     )
 
 
+@composant_ui(
+    "filters",
+    exemple='afficher_filtres_rapides("statut", {"Tous": None, "Actif": True})',
+    tags=("filtre", "bouton"),
+)
 def afficher_filtres_rapides(
     options: list[str],
     key: str = "quick_filter",

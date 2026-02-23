@@ -2,6 +2,8 @@
 Module Suivi Perso - Log alimentation
 """
 
+from src.ui.fragments import ui_fragment
+
 from .utils import (
     date,
     get_food_logs_today,
@@ -9,6 +11,7 @@ from .utils import (
 )
 
 
+@ui_fragment
 def afficher_food_log(username: str):
     """Affiche et permet d'ajouter des logs alimentation"""
     st.subheader("🥗 Alimentation")

@@ -290,14 +290,15 @@ class TestRenderActivites:
     def test_activites_show_ai_suggestions(
         self, mock_activites, mock_age, mock_st, mock_ai_service
     ):
-        """Test affichage suggestions IA - Lines 82-98"""
+        """Test affichage suggestions IA via streaming - Lines 82-98"""
         setup_mock_st(mock_st, {"jules_show_ai_activities": True})
         mock_age.return_value = {"mois": 19, "semaines": 82}
         mock_activites.return_value = []
 
-        # Mock AI service
+        # Mock AI service avec streaming
         mock_service_instance = MagicMock()
-        mock_service_instance.suggerer_activites = AsyncMock(return_value="Suggestion IA test")
+        mock_stream = MagicMock()
+        mock_service_instance.stream_activites = MagicMock(return_value=mock_stream)
         mock_ai_service.return_value = mock_service_instance
 
         # Bouton Fermer = False
@@ -309,7 +310,7 @@ class TestRenderActivites:
 
         mock_st.markdown.assert_any_call("---")
         mock_st.markdown.assert_any_call("**🤖 Suggestions IA:**")
-        mock_st.markdown.assert_any_call("Suggestion IA test")
+        mock_st.write_stream.assert_called_once_with(mock_stream)
 
     @patch("src.modules.famille.jules.components.JulesAIService")
     @patch("src.modules.famille.jules.components.st")

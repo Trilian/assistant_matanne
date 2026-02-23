@@ -9,10 +9,12 @@ import streamlit as st
 
 from src.core.session_keys import SK
 from src.services.inventaire import obtenir_service_inventaire
+from src.ui.fragments import ui_fragment
 
 logger = logging.getLogger(__name__)
 
 
+@ui_fragment
 def afficher_suggestions_ia():
     """Affiche les suggestions IA pour les courses"""
     service = obtenir_service_inventaire()

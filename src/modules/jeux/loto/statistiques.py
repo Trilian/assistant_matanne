@@ -7,12 +7,14 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 
 from .calculs import calculer_esperance_mathematique
 from .constants import GAINS_PAR_RANG, NUMERO_MAX, NUMERO_MIN
 from .frequences import calculer_frequences_numeros, identifier_numeros_chauds_froids
 
 
+@ui_fragment
 def afficher_dernier_tirage(tirages: list):
     """Affiche le dernier tirage avec style"""
     if not tirages:
@@ -45,6 +47,7 @@ def afficher_dernier_tirage(tirages: list):
                 st.metric("💰 Jackpot", f"{dernier['jackpot_euros']:,}€")
 
 
+@ui_fragment
 def afficher_statistiques_frequences(tirages: list):
     """Affiche les statistiques de fréquence"""
     if not tirages:
@@ -127,6 +130,7 @@ def afficher_statistiques_frequences(tirages: list):
     )
 
 
+@ui_fragment
 def afficher_esperance():
     """Affiche l'espérance mathématique du Loto"""
 

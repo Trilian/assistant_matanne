@@ -25,12 +25,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "run_sync": (".async_utils", "run_sync"),
     "is_async_method": (".async_utils", "is_async_method"),
     "get_sync_name": (".async_utils", "get_sync_name"),
-    # ─── Reactive Services ───
-    "ReactiveServiceMixin": (".reactive", "ReactiveServiceMixin"),
-    "reactive_cache": (".reactive", "reactive_cache"),
-    "emit_mutation": (".reactive", "emit_mutation"),
-    "get_reactive_dependencies": (".reactive", "get_reactive_dependencies"),
-    "DEFAULT_INVALIDATION_MAP": (".reactive", "DEFAULT_INVALIDATION_MAP"),
     # ─── AI Service ───
     "BaseAIService": (".ai_service", "BaseAIService"),
     "create_base_ai_service": (".ai_service", "create_base_ai_service"),

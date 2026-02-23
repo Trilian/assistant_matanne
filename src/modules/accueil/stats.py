@@ -5,7 +5,7 @@ Visualisations de données pour le tableau de bord principal
 
 import streamlit as st
 
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import auto_refresh, ui_fragment
 from src.ui.keys import KeyNamespace
 
 _keys = KeyNamespace("accueil")
@@ -47,9 +47,9 @@ def afficher_graphiques_enrichis():
             st.info("Pas de planning cette semaine")
 
 
-@ui_fragment
+@auto_refresh(seconds=60)
 def afficher_global_stats():
-    """Stats globales de l'application"""
+    """Stats globales de l'application (auto-refresh 60s)"""
     from src.services.cuisine.courses import obtenir_service_courses
     from src.services.cuisine.planning import obtenir_service_planning
     from src.services.cuisine.recettes import obtenir_service_recettes

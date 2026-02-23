@@ -7,8 +7,10 @@ import streamlit as st
 
 from src.ui import etat_vide
 from src.ui.feedback import afficher_erreur, afficher_succes, spinner_intelligent
+from src.ui.fragments import ui_fragment
 
 
+@ui_fragment
 def afficher_budget_config():
     """Configuration du budget."""
 

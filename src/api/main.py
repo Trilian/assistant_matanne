@@ -8,7 +8,7 @@ import logging
 import os
 from datetime import datetime
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -133,6 +133,30 @@ from src.api.utils import MetricsMiddleware
 
 app.add_middleware(MetricsMiddleware)
 
+# Middleware de sécurité HTTP (CSP, HSTS, X-Content-Type-Options, etc.)
+from src.api.utils import SecurityHeadersMiddleware
+
+app.add_middleware(SecurityHeadersMiddleware)
+
+
+# ═══════════════════════════════════════════════════════════
+# GESTIONNAIRE D'EXCEPTIONS GLOBAL
+# ═══════════════════════════════════════════════════════════
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Gestionnaire global qui empêche les fuites d'erreurs internes."""
+    from fastapi.responses import JSONResponse
+
+    logger.error(
+        f"Exception non gérée sur {request.method} {request.url.path}: {exc}", exc_info=True
+    )
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Une erreur interne est survenue. Veuillez réessayer."},
+    )
+
 
 # ═══════════════════════════════════════════════════════════
 # SCHÉMAS COMMUNS
@@ -247,7 +271,8 @@ async def health_check():
         latency = (time.perf_counter() - start) * 1000
         services["database"] = ServiceStatus(status="ok", latency_ms=round(latency, 2))
     except Exception as e:
-        services["database"] = ServiceStatus(status="error", details=str(e)[:100])
+        logger.error(f"Health check DB error: {e}")
+        services["database"] = ServiceStatus(status="error", details="Connexion impossible")
 
     # Check Cache
     try:
@@ -259,7 +284,8 @@ async def health_check():
         latency = (time.perf_counter() - start) * 1000
         services["cache"] = ServiceStatus(status="ok", latency_ms=round(latency, 2))
     except Exception as e:
-        services["cache"] = ServiceStatus(status="error", details=str(e)[:100])
+        logger.error(f"Health check cache error: {e}")
+        services["cache"] = ServiceStatus(status="error", details="Cache indisponible")
 
     # Check AI (optionnel - ne bloque pas si non configuré)
     try:
@@ -270,7 +296,8 @@ async def health_check():
         else:
             services["ai"] = ServiceStatus(status="warning", details="No API key configured")
     except Exception as e:
-        services["ai"] = ServiceStatus(status="error", details=str(e)[:100])
+        logger.error(f"Health check AI error: {e}")
+        services["ai"] = ServiceStatus(status="error", details="Service IA indisponible")
 
     # Déterminer le statut global
     statuses = [s.status for s in services.values()]

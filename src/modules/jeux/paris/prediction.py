@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.services.jeux import predire_over_under, predire_resultat_match
+from src.ui.fragments import ui_fragment
 
 from .analyseur import generer_analyse_complete
 from .crud import enregistrer_pari
@@ -13,6 +14,7 @@ from .forme import calculer_forme_equipe
 from .utils import charger_matchs_recents
 
 
+@ui_fragment
 def afficher_prediction_match(match: dict):
     """Affiche la carte de prédiction intelligente pour un match"""
 

@@ -82,6 +82,12 @@ class Couleur(StrEnum):
     DELTA_POSITIVE = "#4CAF50"
     DELTA_NEGATIVE = "#FF5722"
 
+    # ── Gradients domaine-spécifiques ─────────────────────
+    LOTO_CHANCE_START = "#f093fb"
+    LOTO_CHANCE_END = "#f5576c"
+    LOTO_NORMAL_START = "#667eea"
+    LOTO_NORMAL_END = "#764ba2"
+
 
 class Espacement(StrEnum):
     """Échelle d'espacement (en rem)."""

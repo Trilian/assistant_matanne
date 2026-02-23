@@ -18,6 +18,7 @@ from src.core.ai import ClientIA, obtenir_client_ia
 from src.core.decorators import avec_session_db
 from src.core.models import Routine, RoutineTask
 from src.services.core.base import BaseAIService
+from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
 
 from .entretien_gamification_mixin import EntretienGamificationMixin
@@ -146,6 +147,13 @@ Format JSON:
                 frequence_recommandee="hebdo",
                 duree_totale_estimee_min=60,
             )
+        finally:
+            # Émettre événement domaine (succès ou fallback)
+            obtenir_bus().emettre(
+                "entretien.routine_creee",
+                {"nom": nom, "categorie": categorie},
+                source="entretien",
+            )
 
     async def suggerer_taches(self, nom_routine: str, contexte: str = "") -> str:
         """Suggère des tâches pour une routine existante.
@@ -209,11 +217,20 @@ Format JSON: {{"Lundi": [...], "Mardi": [...], ...}}"""
             )
             import json
 
-            return json.loads(response)
+            result = json.loads(response)
         except Exception as e:
             logger.warning(f"Optimisation semaine échouée: {e}")
             # Répartition simple par défaut
-            return self._repartition_simple(taches)
+            result = self._repartition_simple(taches)
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "entretien.semaine_optimisee",
+            {"nb_taches": len(taches), "nb_jours": len(result)},
+            source="entretien",
+        )
+
+        return result
 
     async def conseil_efficacite(self) -> str:
         """Donne des astuces pour un ménage plus efficace.

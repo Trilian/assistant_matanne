@@ -29,7 +29,10 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+from src.ui.fragments import ui_fragment
 
+
+@ui_fragment
 def onglet_historique(historique: list[dict]):
     """Onglet historique des entretiens."""
     st.subheader("📜 Historique")
@@ -87,6 +90,7 @@ def onglet_historique(historique: list[dict]):
         afficher_timeline_item(h, catalogue)
 
 
+@ui_fragment
 def onglet_stats(mes_objets: list[dict], historique: list[dict]):
     """Onglet statistiques détaillées avec gamification."""
     st.subheader("📊 Statistiques & Badges")
@@ -164,6 +168,7 @@ def onglet_stats(mes_objets: list[dict], historique: list[dict]):
             )
 
 
+@ui_fragment
 def onglet_graphiques(mes_objets: list[dict], historique: list[dict]):
     """Onglet graphiques Plotly avec visualisations interactives."""
     st.subheader("📈 Graphiques & Analyses")

@@ -7,11 +7,6 @@ décorateur ``@avec_circuit_breaker``.
 
 .. note::
 
-    Le module ``src.core.middleware.builtin`` contient un
-    ``CircuitBreakerMiddleware`` distinct, conçu pour le pipeline middleware.
-    Les deux implémentations ciblent des couches architecturales différentes
-    et ne sont pas interchangeables.
-
     Pour les politiques de résilience composables (retry, timeout, bulkhead,
     fallback), voir ``src.core.resilience.policies``.
 
@@ -170,6 +165,45 @@ class CircuitBreaker:
                 "delai_reset": self.delai_reset,
             }
 
+    async def appeler_async(
+        self, fn: Callable[..., Any], fallback: Callable[[], T] | None = None
+    ) -> T:
+        """
+        Exécute une coroutine à travers le circuit breaker.
+
+        Args:
+            fn: Coroutine function à appeler (sera awaitée)
+            fallback: Fonction de repli si le circuit est ouvert
+
+        Returns:
+            Résultat de fn ou du fallback
+
+        Raises:
+            ErreurServiceExterne: Si le circuit est ouvert et pas de fallback
+        """
+        etat = self.etat
+
+        if etat == EtatCircuit.OUVERT:
+            logger.warning(f"⚡ Circuit '{self.nom}' OUVERT — appel bloqué")
+            if fallback:
+                return fallback()
+            raise ErreurServiceExterne(
+                f"Circuit '{self.nom}' ouvert (service indisponible)",
+                message_utilisateur="Service temporairement indisponible, veuillez réessayer",
+            )
+
+        try:
+            result = await fn()
+            self._enregistrer_succes()
+            return result
+
+        except Exception as e:
+            self._enregistrer_echec()
+            if fallback and self.etat == EtatCircuit.OUVERT:
+                logger.info(f"🔄 Circuit '{self.nom}' — utilisation du fallback")
+                return fallback()
+            raise
+
     def reset(self):
         """Reset manuel du circuit breaker."""
         with self._lock:
@@ -240,7 +274,7 @@ def avec_circuit_breaker(
 
             @wraps(func)
             async def async_wrapper(*args, **kwargs):
-                return cb.appeler(
+                return await cb.appeler_async(
                     fn=lambda: func(*args, **kwargs),
                     fallback=fallback,
                 )

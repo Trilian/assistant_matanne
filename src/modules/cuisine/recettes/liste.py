@@ -10,11 +10,13 @@ import streamlit as st
 
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.ui import etat_vide
+from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
 
 _keys = KeyNamespace("recettes_liste")
 
 
+@ui_fragment
 def afficher_liste():
     """Affiche la liste des recettes avec pagination"""
     service = obtenir_service_recettes()
