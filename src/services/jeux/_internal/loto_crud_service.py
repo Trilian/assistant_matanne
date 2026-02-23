@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.models import GrilleLoto, StatistiquesLoto, TirageLoto
+from src.services.core.base import BaseService
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -39,8 +40,15 @@ COUT_GRILLE = Decimal("2.20")
 # ═══════════════════════════════════════════════════════════
 
 
-class LotoCrudService:
-    """Service CRUD pour les tirages et grilles Loto."""
+class LotoCrudService(BaseService[GrilleLoto]):
+    """Service CRUD pour les tirages et grilles Loto.
+
+    Hérite de BaseService[GrilleLoto] pour le CRUD générique sur les grilles.
+    Les méthodes spécialisées gèrent les tirages et la synchronisation.
+    """
+
+    def __init__(self):
+        super().__init__(model=GrilleLoto, cache_ttl=120)
 
     # ── Lecture ──────────────────────────────────────────
 

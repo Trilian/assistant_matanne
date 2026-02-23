@@ -166,7 +166,7 @@ class TestExecuterAvecSession:
                 raise ValueError("Erreur inattendue")
 
         assert exc_info.value.status_code == 500
-        assert "Erreur inattendue" in exc_info.value.detail
+        assert "erreur interne" in exc_info.value.detail.lower()
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -216,7 +216,7 @@ class TestGererExceptionApi:
             await ma_route()
 
         assert exc_info.value.status_code == 500
-        assert "Boom" in exc_info.value.detail
+        assert "erreur interne" in exc_info.value.detail.lower()
 
     @pytest.mark.asyncio
     async def test_preserve_arguments(self):

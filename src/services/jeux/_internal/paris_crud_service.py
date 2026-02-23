@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.models import Equipe, Match, PariSportif
+from src.services.core.base import BaseService
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -32,8 +33,15 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
-class ParisCrudService:
-    """Service CRUD pour les paris sportifs, équipes et matchs."""
+class ParisCrudService(BaseService[PariSportif]):
+    """Service CRUD pour les paris sportifs, équipes et matchs.
+
+    Hérite de BaseService[PariSportif] pour le CRUD générique sur les paris.
+    Les méthodes spécialisées gèrent les relations Match/Equipe/PariSportif.
+    """
+
+    def __init__(self):
+        super().__init__(model=PariSportif, cache_ttl=60)
 
     # ── Lecture ──────────────────────────────────────────
 
