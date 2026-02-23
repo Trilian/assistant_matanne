@@ -12,7 +12,7 @@ import logging
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from src.core.ai import AnalyseurIA, ClientIA, RateLimitIA, obtenir_client_ia
 from src.core.ai.cache import CacheIA
@@ -69,9 +69,14 @@ class ServiceSuggestions:
         profil = ProfilCulinaire()
         date_limite = datetime.now() - timedelta(days=jours_historique)
 
-        # Analyser l'historique des recettes
+        # Analyser l'historique des recettes (eager load recette + ingredients)
         historique = (
             session.query(HistoriqueRecette)
+            .options(
+                selectinload(HistoriqueRecette.recette)
+                .selectinload(Recette.ingredients)
+                .selectinload(RecetteIngredient.ingredient)
+            )
             .filter(HistoriqueRecette.date_cuisson >= date_limite)
             .all()
         )
@@ -88,7 +93,7 @@ class ServiceSuggestions:
         recettes_consultees = defaultdict(int)
 
         for h in historique:
-            recette = session.query(Recette).filter_by(id=h.recette_id).first()
+            recette = h.recette
             if not recette:
                 continue
 
@@ -107,10 +112,9 @@ class ServiceSuggestions:
                 portions_list.append(recette.portions)
 
             # Compter les ingrédients
-            if hasattr(recette, "ingredients"):
-                for ri in recette.ingredients:
-                    if ri.ingredient:
-                        ingredients_count[ri.ingredient.nom] += 1
+            for ri in recette.ingredients:
+                if ri.ingredient:
+                    ingredients_count[ri.ingredient.nom] += 1
 
         # Construire le profil
         profil.categories_preferees = [cat for cat, _ in categories_count.most_common(5)]

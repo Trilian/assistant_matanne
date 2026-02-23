@@ -18,7 +18,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.models import Equipe, Match, PariSportif
@@ -95,7 +95,14 @@ class ParisCrudService:
         if championnat:
             query = query.filter(Match.championnat == championnat)
 
-        matchs = query.order_by(Match.date_match).all()
+        matchs = (
+            query.options(
+                joinedload(Match.equipe_domicile),
+                joinedload(Match.equipe_exterieur),
+            )
+            .order_by(Match.date_match)
+            .all()
+        )
 
         return [
             {
@@ -194,7 +201,12 @@ class ParisCrudService:
         Returns:
             Liste de dicts match avec noms d'équipes
         """
-        matchs = db.query(Match).filter(Match.date_match <= date.today(), Match.joue == False).all()
+        matchs = (
+            db.query(Match)
+            .options(joinedload(Match.equipe_domicile), joinedload(Match.equipe_exterieur))
+            .filter(Match.date_match <= date.today(), Match.joue == False)
+            .all()
+        )
         return [
             {
                 "id": m.id,
@@ -219,7 +231,11 @@ class ParisCrudService:
         Returns:
             Liste de dicts match
         """
-        query = db.query(Match).order_by(Match.date_match.desc())
+        query = (
+            db.query(Match)
+            .options(joinedload(Match.equipe_domicile), joinedload(Match.equipe_exterieur))
+            .order_by(Match.date_match.desc())
+        )
         if championnat:
             query = query.filter(Match.championnat == championnat)
         matchs = query.limit(limite).all()
@@ -254,6 +270,7 @@ class ParisCrudService:
 
         matchs = (
             db.query(Match)
+            .options(joinedload(Match.equipe_domicile), joinedload(Match.equipe_exterieur))
             .filter(
                 Match.date_match >= debut,
                 Match.date_match <= fin,
@@ -324,6 +341,7 @@ class ParisCrudService:
         """
         matches = (
             db.query(Match)
+            .options(joinedload(Match.equipe_domicile), joinedload(Match.equipe_exterieur))
             .filter(
                 (Match.equipe_domicile.has(nom=nom_equipe))
                 | (Match.equipe_exterieur.has(nom=nom_equipe))
@@ -620,7 +638,10 @@ class ParisCrudService:
             Nombre de matchs mis à jour
         """
         matchs_a_maj = (
-            db.query(Match).filter(Match.joue == False, Match.date_match < date.today()).all()
+            db.query(Match)
+            .options(joinedload(Match.equipe_domicile), joinedload(Match.equipe_exterieur))
+            .filter(Match.joue == False, Match.date_match < date.today())
+            .all()
         )
 
         if not matchs_a_maj:

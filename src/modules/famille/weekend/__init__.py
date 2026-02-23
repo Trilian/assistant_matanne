@@ -9,6 +9,9 @@ Fonctionnalités:
 """
 
 # Import des fonctions pour exposer l'API publique
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
+
 from .ai_service import WeekendAIService
 from .components import (
     afficher_add_activity,
@@ -29,6 +32,7 @@ from .utils import (
 )
 
 
+@profiler_rerun("weekend")
 def app():
     """Point d'entrée du module Weekend"""
     st.title("🎉 Sorties Weekend")
@@ -40,19 +44,24 @@ def app():
     tabs = st.tabs(["📅 Planning", "💡 Suggestions IA", "🗺️ Lieux testés", "➕ Ajouter", "⭐ Noter"])
 
     with tabs[0]:
-        afficher_planning()
+        with error_boundary(titre="Erreur planning weekend"):
+            afficher_planning()
 
     with tabs[1]:
-        afficher_suggestions()
+        with error_boundary(titre="Erreur suggestions weekend"):
+            afficher_suggestions()
 
     with tabs[2]:
-        afficher_lieux_testes()
+        with error_boundary(titre="Erreur lieux testés"):
+            afficher_lieux_testes()
 
     with tabs[3]:
-        afficher_add_activity()
+        with error_boundary(titre="Erreur ajout activité"):
+            afficher_add_activity()
 
     with tabs[4]:
-        afficher_noter_sortie()
+        with error_boundary(titre="Erreur notation"):
+            afficher_noter_sortie()
 
 
 __all__ = [

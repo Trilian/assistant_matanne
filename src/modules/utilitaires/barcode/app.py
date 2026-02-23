@@ -4,6 +4,9 @@ Point d'entrée module scanner barcode.
 
 from __future__ import annotations
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
+
 # ═══════════════════════════════════════════════════════════
 # INITIALISATION
 # ═══════════════════════════════════════════════════════════
@@ -23,6 +26,7 @@ def get_barcode_service() -> BarcodeService:
 # ═══════════════════════════════════════════════════════════
 
 
+@profiler_rerun("barcode")
 def app():
     """Point d'entree module scanner barcode"""
 
@@ -49,19 +53,24 @@ def app():
     )
 
     with tab1:
-        afficher_scanner()
+        with error_boundary(titre="Erreur scanner"):
+            afficher_scanner()
 
     with tab2:
-        afficher_ajout_rapide()
+        with error_boundary(titre="Erreur ajout rapide"):
+            afficher_ajout_rapide()
 
     with tab3:
-        afficher_verifier_stock()
+        with error_boundary(titre="Erreur vérifier stock"):
+            afficher_verifier_stock()
 
     with tab4:
-        afficher_gestion_barcodes()
+        with error_boundary(titre="Erreur gestion barcodes"):
+            afficher_gestion_barcodes()
 
     with tab5:
-        afficher_import_export()
+        with error_boundary(titre="Erreur import/export"):
+            afficher_import_export()
 
 
 # ═══════════════════════════════════════════════════════════

@@ -267,7 +267,7 @@ class TestExportIcal:
         """Test export d'un calendrier vide."""
         with patch("src.services.famille.calendrier.service.obtenir_contexte_db") as mock_db:
             mock_session = MagicMock()
-            mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = []
+            mock_session.query.return_value.options.return_value.join.return_value.filter.return_value.all.return_value = []
             mock_session.query.return_value.filter.return_value.all.return_value = []
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_db.return_value.__exit__ = MagicMock(return_value=False)
@@ -290,7 +290,7 @@ class TestExportIcal:
 
         with patch("src.services.famille.calendrier.service.obtenir_contexte_db") as mock_db:
             mock_session = MagicMock()
-            mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = [
+            mock_session.query.return_value.options.return_value.join.return_value.filter.return_value.all.return_value = [
                 mock_repas
             ]
             mock_session.query.return_value.filter.return_value.all.return_value = []
@@ -344,7 +344,7 @@ class TestExportIcal:
         """Test export avec plage de dates."""
         with patch("src.services.famille.calendrier.service.obtenir_contexte_db") as mock_db:
             mock_session = MagicMock()
-            mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = []
+            mock_session.query.return_value.options.return_value.join.return_value.filter.return_value.all.return_value = []
             mock_session.query.return_value.filter.return_value.all.return_value = []
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
             mock_db.return_value.__exit__ = MagicMock(return_value=False)
@@ -370,7 +370,7 @@ class TestExportIcal:
 
         with patch("src.services.famille.calendrier.service.obtenir_contexte_db") as mock_db:
             mock_session = MagicMock()
-            mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = []
+            mock_session.query.return_value.options.return_value.join.return_value.filter.return_value.all.return_value = []
             # First call returns activities (empty), second returns calendar events
             mock_session.query.return_value.filter.return_value.all.side_effect = [[], [mock_event]]
             mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
@@ -399,7 +399,7 @@ class TestExportIcal:
 
             with patch("src.services.famille.calendrier.service.obtenir_contexte_db") as mock_db:
                 mock_session = MagicMock()
-                mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = [
+                mock_session.query.return_value.options.return_value.join.return_value.filter.return_value.all.return_value = [
                     mock_repas
                 ]
                 mock_session.query.return_value.filter.return_value.all.return_value = []
@@ -681,7 +681,7 @@ class TestGoogleImportExport:
             "src.services.famille.calendrier.google_calendar.obtenir_contexte_db"
         ) as mock_db:
             mock_session = MagicMock()
-            mock_session.query.return_value.join.return_value.filter.return_value.all.return_value = [
+            mock_session.query.return_value.options.return_value.join.return_value.filter.return_value.all.return_value = [
                 mock_repas
             ]
             mock_session.query.return_value.filter.return_value.all.return_value = [mock_activity]

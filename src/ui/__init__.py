@@ -89,6 +89,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "carte_item": (".components", "carte_item"),
     # ── Components – Dynamic ───────────────────────────
     "Modale": (".components", "Modale"),
+    "confirm_dialog": (".components", "confirm_dialog"),
     # ── Components – Charts ────────────────────────────
     "graphique_repartition_repas": (".components", "graphique_repartition_repas"),
     "graphique_inventaire_categories": (".components", "graphique_inventaire_categories"),

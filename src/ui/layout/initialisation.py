@@ -44,13 +44,10 @@ def initialiser_app() -> bool:
         except Exception as e:
             logger.warning(f"⚠️ Client IA indispo: {e}")
 
-    # Validation cohérence menu / registry
-    from src.core.lazy_loader import RouteurOptimise, valider_coherence_menu
-    from src.ui.layout.sidebar import MODULES_MENU
-
-    manquantes = valider_coherence_menu(MODULES_MENU, RouteurOptimise.MODULE_REGISTRY)
-    if manquantes:
-        logger.error(f"❌ Clés menu sans registry: {manquantes}")
+    # Validation cohérence navigation
+    # Note: avec st.navigation(), la cohérence est assurée par construction
+    # dans src.core.navigation.construire_pages()
+    logger.info("✅ Navigation st.navigation() active")
 
     # ── Pipeline CSS unifié ──────────────────────────────
     # Chaque source enregistre son CSS dans le CSSManager,

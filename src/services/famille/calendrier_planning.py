@@ -16,7 +16,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session, joinedload
 
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import (
     CalendarEvent,
     FamilyActivity,
@@ -42,6 +42,8 @@ class ServiceCalendrierPlanning:
     # CHARGEMENT DONNÉES SEMAINE (ex data.py)
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return={})
+    @avec_cache(ttl=300)
     @avec_session_db
     def charger_donnees_semaine(
         self, date_debut: date, *, db: Session | None = None
@@ -56,7 +58,8 @@ class ServiceCalendrierPlanning:
             Dict avec clés: repas, sessions_batch, activites, events,
             courses_planifiees, taches_menage.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         from src.core.date_utils import obtenir_debut_semaine
 
@@ -147,6 +150,8 @@ class ServiceCalendrierPlanning:
     # CHARGEMENT TIMELINE (ex timeline_ui.py)
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def charger_events_periode(
         self, date_debut: date, date_fin: date, *, db: Session | None = None
@@ -161,7 +166,8 @@ class ServiceCalendrierPlanning:
         Returns:
             Liste de dicts avec {titre, date_debut, date_fin, type, couleur, lieu}.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         events: list[dict] = []
         debut_dt = datetime.combine(date_debut, datetime.min.time())
@@ -253,6 +259,7 @@ class ServiceCalendrierPlanning:
     # CRÉATION D'ÉVÉNEMENTS (ex components.py)
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def creer_activite(
         self,
@@ -277,7 +284,8 @@ class ServiceCalendrierPlanning:
         Returns:
             L'activité créée.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         activite = FamilyActivity(
             titre=titre,
@@ -293,6 +301,7 @@ class ServiceCalendrierPlanning:
         db.refresh(activite)
         return activite
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def creer_event_calendrier(
         self,
@@ -329,7 +338,8 @@ class ServiceCalendrierPlanning:
         Returns:
             L'événement calendrier créé.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         event = CalendarEvent(
             titre=titre,

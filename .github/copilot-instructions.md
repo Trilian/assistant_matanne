@@ -95,19 +95,14 @@ streamlit run --logger.level=debug src/app.py
 python manage.py run
 ```
 
-### Base de données et migrations
+### Base de données
 
 ```bash
-# Crée un fichier SQL numéroté dans sql/migrations/
-python manage.py create_migration
-# Vous demande un message, génère: sql/migrations/NNN_description.sql
+# Initialisation complète du schéma (94 tables, RLS, triggers, vues)
+# Exécuter sql/INIT_COMPLET.sql dans Supabase SQL Editor ou psql
 
-# Applique les migrations SQL en attente
-python manage.py migrate
-# Exécute les fichiers SQL non encore appliqués, vérifie les checksums SHA-256
-
-# Vérifie les migrations appliquées
-python -c "from src.core.db import GestionnaireMigrations; print(GestionnaireMigrations.obtenir_migrations_appliquees())"
+# Vérifier la connexion
+python -c "from src.core.db import obtenir_moteur; obtenir_moteur().connect()"
 ```
 
 ### Tests
@@ -329,9 +324,8 @@ Importer via: `from src.core.config import obtenir_parametres()`
 1. Ajouter la classe dans le fichier approprié sous [src/core/models/](src/core/models/) en héritant de `Base`
 2. Suivre les modèles ORM SQLAlchemy 2.0 avec indices de type `mapped_column` et `Mapped`
 3. Utiliser la convention de nommage pour les contraintes (déjà configurée dans models.py)
-4. Créer la migration: `python manage.py create_migration` (génère un fichier SQL numéroté)
-5. Écrire le DDL SQL dans le fichier généré sous `sql/migrations/`
-6. Appliquer: `python manage.py migrate`
+4. Ajouter le CREATE TABLE dans `sql/INIT_COMPLET.sql` (section appropriée)
+5. Ajouter RLS et triggers dans les sections correspondantes
 
 ### Intégration IA
 

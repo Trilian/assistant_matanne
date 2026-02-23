@@ -15,6 +15,9 @@ Fonctionnalités:
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
+
 from .crud import ajouter_tirage, enregistrer_grille
 from .generateur import afficher_generateur_grilles, afficher_mes_grilles
 from .series import afficher_series_loto
@@ -30,6 +33,7 @@ from .sync import sync_tirages_loto
 from .utils import charger_grilles_utilisateur, charger_tirages
 
 
+@profiler_rerun("loto")
 def app():
     """Point d'entrée du module Loto"""
 

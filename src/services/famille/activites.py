@@ -11,7 +11,7 @@ from datetime import date as date_type
 
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import FamilyActivity
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
@@ -29,6 +29,7 @@ class ServiceActivites:
     # CRUD
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def ajouter_activite(
         self,
@@ -58,7 +59,8 @@ class ServiceActivites:
         Returns:
             L'activité créée.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         activity = FamilyActivity(
             titre=titre,
             type_activite=type_activite,
@@ -80,6 +82,7 @@ class ServiceActivites:
         )
         return activity
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def marquer_terminee(
         self,
@@ -99,7 +102,8 @@ class ServiceActivites:
         Returns:
             True si l'activité a été trouvée et mise à jour.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         activity = db.get(FamilyActivity, activity_id)
         if activity:
             activity.statut = "termine"
@@ -113,6 +117,8 @@ class ServiceActivites:
             return True
         return False
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def lister_activites(
         self,
@@ -130,7 +136,8 @@ class ServiceActivites:
         Returns:
             Liste des activités correspondantes.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         query = db.query(FamilyActivity)
         if statut:
             query = query.filter(FamilyActivity.statut == statut)
@@ -138,6 +145,7 @@ class ServiceActivites:
             query = query.filter(FamilyActivity.type_activite == type_activite)
         return query.order_by(FamilyActivity.date_prevue.desc()).all()
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def supprimer_activite(self, activity_id: int, db: Session | None = None) -> bool:
         """Supprime une activité.
@@ -149,7 +157,8 @@ class ServiceActivites:
         Returns:
             True si supprimée.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         deleted = db.query(FamilyActivity).filter(FamilyActivity.id == activity_id).delete()
         db.commit()
         if deleted > 0:

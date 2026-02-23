@@ -6,6 +6,9 @@ IA-first: Tâches auto-générées selon équipements et calendrier.
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
+
 from .logic import (
     BADGES_ENTRETIEN,
     calculer_score_proprete,
@@ -28,6 +31,7 @@ from .styles import injecter_css_entretien
 __all__ = ["app"]
 
 
+@profiler_rerun("entretien")
 def app():
     """Point d'entrée du module Entretien avec gamification."""
     injecter_css_entretien()
@@ -88,22 +92,29 @@ def app():
     )
 
     with tab1:
-        onglet_taches(mes_objets, historique)
+        with error_boundary(titre="Erreur tâches entretien"):
+            onglet_taches(mes_objets, historique)
 
     with tab2:
-        onglet_inventaire(mes_objets)
+        with error_boundary(titre="Erreur inventaire entretien"):
+            onglet_inventaire(mes_objets)
 
     with tab3:
-        onglet_pieces(mes_objets, historique)
+        with error_boundary(titre="Erreur pièces"):
+            onglet_pieces(mes_objets, historique)
 
     with tab4:
-        onglet_historique(historique)
+        with error_boundary(titre="Erreur historique entretien"):
+            onglet_historique(historique)
 
     with tab5:
-        onglet_stats(mes_objets, historique)
+        with error_boundary(titre="Erreur stats entretien"):
+            onglet_stats(mes_objets, historique)
 
     with tab6:
-        onglet_graphiques(mes_objets, historique)
+        with error_boundary(titre="Erreur graphiques entretien"):
+            onglet_graphiques(mes_objets, historique)
 
     with tab7:
-        onglet_export(mes_objets, historique)
+        with error_boundary(titre="Erreur export entretien"):
+            onglet_export(mes_objets, historique)

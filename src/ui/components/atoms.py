@@ -68,7 +68,7 @@ def badge(
     if couleur and variante is None:
         # Rétrocompatibilité : couleur brute → inline style
         st.markdown(
-            f'<span style="display: inline-flex; background: {couleur}; color: white; '
+            f'<span role="status" aria-label="{safe_text}" style="display: inline-flex; background: {couleur}; color: white; '
             f"padding: {Espacement.XS} 0.75rem; border-radius: {Rayon.PILL}; "
             f'font-size: {Typographie.BODY_SM}; font-weight: 600;">{safe_text}</span>',
             unsafe_allow_html=True,
@@ -77,7 +77,7 @@ def badge(
         variant_name = variante.value if variante else "success"
         style = _BADGE_STYLES.get(variant_name, _BADGE_STYLES["success"])
         st.markdown(
-            f'<span style="{style}">{safe_text}</span>',
+            f'<span role="status" aria-label="{safe_text}" style="{style}">{safe_text}</span>',
             unsafe_allow_html=True,
         )
 
@@ -119,8 +119,8 @@ def etat_vide(message: str, icone: str = "📭", sous_texte: str | None = None):
 
     StyleSheet.inject()
     st.markdown(
-        f'<div class="{container_cls}">'
-        f'<div style="font-size: {Typographie.DISPLAY};">{safe_icone}</div>'
+        f'<div class="{container_cls}" role="status" aria-label="{safe_message}">'
+        f'<div style="font-size: {Typographie.DISPLAY};" aria-hidden="true">{safe_icone}</div>'
         f'<div style="font-size: {Typographie.H3}; font-weight: 500; margin-top: {Espacement.MD};">'
         f"{safe_message}</div>"
         f"{sous_texte_html}"
@@ -181,7 +181,7 @@ def carte_metrique(
 
     StyleSheet.inject()
     st.markdown(
-        f'<div class="{card_cls}">'
+        f'<div class="{card_cls}" role="group" aria-label="{safe_label}: {safe_valeur}">'
         f'<div style="font-size: {Typographie.BODY_SM}; font-weight: 500; '
         f'color: {Couleur.TEXT_SECONDARY};">{safe_label}</div>'
         f'<div style="font-size: {Typographie.H2}; font-weight: bold; '
@@ -256,7 +256,7 @@ def boite_info(
 
     StyleSheet.inject()
     st.markdown(
-        f'<div class="{container_cls}">'
+        f'<div class="{container_cls}" role="note" aria-label="{echapper_html(titre)}: {safe_contenu}">'
         f'<div style="font-weight: 600; color: {text_color}; margin-bottom: {Espacement.SM};">'
         f"{safe_titre}</div>"
         f'<div style="color: {text_color};">{safe_contenu}</div>'
@@ -307,7 +307,7 @@ def boule_loto(numero: int, is_chance: bool = False, taille: int = 50) -> None:
 
     StyleSheet.inject()
     st.markdown(
-        f'<div class="{circle_cls}">'
+        f'<div class="{circle_cls}" role="img" aria-label="Boule numéro {numero}">'
         f'<span style="font-size: {font_size}px; font-weight: bold;">{numero}</span>'
         f"</div>",
         unsafe_allow_html=True,

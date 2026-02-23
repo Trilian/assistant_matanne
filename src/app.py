@@ -65,15 +65,13 @@ if not _rapport.succes:
 # ═══════════════════════════════════════════════════════════
 
 from src.core import GestionnaireEtat, obtenir_etat, obtenir_parametres
-from src.core.lazy_loader import RouteurOptimise
+from src.core.navigation import initialiser_navigation
 
 # Layout modulaire
 from src.ui.layout import (
     afficher_footer,
     afficher_header,
-    afficher_sidebar,
     initialiser_app,
-    injecter_css,
 )
 from src.ui.views.pwa import injecter_meta_pwa
 
@@ -96,8 +94,7 @@ st.set_page_config(
     },
 )
 
-# Injecter CSS
-injecter_css()
+# CSS est injecté via initialiser_app() (pipeline CSS unifié)
 
 # Injecter les meta tags PWA (manifest, service worker, icons)
 injecter_meta_pwa()
@@ -105,6 +102,13 @@ injecter_meta_pwa()
 # Initialiser
 if not initialiser_app():
     st.stop()
+
+# ═══════════════════════════════════════════════════════════
+# NAVIGATION — st.navigation() + st.Page()
+# Deep-linking natif, sidebar automatique
+# ═══════════════════════════════════════════════════════════
+
+page = initialiser_navigation()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -118,12 +122,8 @@ def main() -> None:
         # Header
         afficher_header()
 
-        # Sidebar
-        afficher_sidebar()
-
-        # Router vers module actif
-        etat = obtenir_etat()
-        RouteurOptimise.charger_module(etat.module_actuel)
+        # Exécuter la page sélectionnée par st.navigation()
+        page.run()
 
         # Footer
         afficher_footer()

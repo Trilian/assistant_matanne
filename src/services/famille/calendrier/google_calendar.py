@@ -15,6 +15,8 @@ from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
 from uuid import UUID
 
+from sqlalchemy.orm import joinedload
+
 from src.core.db import obtenir_contexte_db
 from src.core.models import (
     CalendarEvent,
@@ -304,6 +306,7 @@ class GoogleCalendarMixin:
 
             repas_list = (
                 db.query(Repas)
+                .options(joinedload(Repas.recette))
                 .join(Planning)
                 .filter(
                     Repas.date_repas >= start,

@@ -24,16 +24,19 @@ class TestFootballDataServiceFactory:
 
     def test_get_football_data_service(self):
         """Test création service via factory."""
-        with patch("src.services.jeux._internal.football_data._football_data_instance", None):
-            service = get_football_data_service()
-            assert isinstance(service, FootballDataService)
+        # Reset le singleton du registre pour recréer le service
+        from src.services.core.registry import obtenir_registre
+
+        obtenir_registre().reinitialiser("football_data")
+        service = get_football_data_service()
+        assert isinstance(service, FootballDataService)
 
     def test_get_football_data_service_with_api_key(self):
         """Test création service avec clé API."""
-        with patch("src.services.jeux._internal.football_data._football_data_instance", None):
-            service = get_football_data_service("test_api_key")
-            assert isinstance(service, FootballDataService)
-            assert service.api_key == "test_api_key"
+        # Appel avec argument bypass le singleton registre
+        service = get_football_data_service("test_api_key")
+        assert isinstance(service, FootballDataService)
+        assert service.api_key == "test_api_key"
 
 
 class TestFootballDataServiceConstantes:

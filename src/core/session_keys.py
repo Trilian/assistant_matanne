@@ -78,6 +78,11 @@ class _SessionKeys:
     BATCH_DATA = "batch_data"
     BATCH_DATE = "batch_date"
     BATCH_HEURE = "batch_heure"
+    COURSES_DEPUIS_BATCH = "courses_depuis_batch"
+
+    # ─── Cuisine / Planificateur → Courses ────────────
+    COURSES_DEPUIS_PLANNING = "courses_depuis_planning"
+    PLANNING_STOCK_CONTEXT = "planning_stock_context"
 
     # ─── Famille / Hub ────────────────────────────────
     FAMILLE_PAGE = "famille_page"

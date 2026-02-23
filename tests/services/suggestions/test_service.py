@@ -203,17 +203,17 @@ class TestServiceSuggestions:
 
     def test_analyser_profil_culinaire_favorites(self, service, mock_session):
         """Test détection favoris (3+ préparations)."""
-        mock_historique = [
-            MagicMock(date_cuisson=date.today(), recette_id=1),
-            MagicMock(date_cuisson=date.today(), recette_id=1),
-            MagicMock(date_cuisson=date.today(), recette_id=1),  # 3 fois
-        ]
-        mock_session.query.return_value.filter.return_value.all.return_value = mock_historique
-
         mock_recette = MagicMock(
             id=1, categorie=None, difficulte=None, temps_preparation=None, portions=None
         )
         mock_recette.ingredients = []
+        mock_historique = [
+            MagicMock(date_cuisson=date.today(), recette_id=1, recette=mock_recette),
+            MagicMock(date_cuisson=date.today(), recette_id=1, recette=mock_recette),
+            MagicMock(date_cuisson=date.today(), recette_id=1, recette=mock_recette),  # 3 fois
+        ]
+        mock_session.query.return_value.options.return_value.filter.return_value.all.return_value = mock_historique
+
         mock_session.query.return_value.filter_by.return_value.first.return_value = mock_recette
         mock_session.query.return_value.filter_by.return_value.order_by.return_value.first.return_value = mock_historique[
             0

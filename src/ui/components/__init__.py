@@ -25,7 +25,7 @@ from .data import (
 )
 
 # Dynamic
-from .dynamic import Modale
+from .dynamic import Modale, confirm_dialog
 
 # Filters (nouveau - composants de filtrage réutilisables)
 from .filters import (
@@ -114,6 +114,7 @@ __all__ = [
     "carte_item",
     # Dynamic
     "Modale",
+    "confirm_dialog",
     # Metrics
     "carte_metrique_avancee",
     "widget_jules_apercu",

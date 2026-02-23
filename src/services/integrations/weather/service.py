@@ -17,7 +17,7 @@ from uuid import UUID
 import httpx
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_resilience, avec_session_db
 from src.core.models import (
     AlerteMeteo as AlerteMeteoModel,
 )
@@ -85,6 +85,7 @@ class ServiceMeteo(MeteoJardinMixin):
         self.latitude = latitude
         self.longitude = longitude
 
+    @avec_resilience(retry=2, timeout_s=15, fallback=False)
     def set_location_from_city(self, city: str):
         """
         Met à jour la localisation à partir d'un nom de ville.
@@ -116,6 +117,7 @@ class ServiceMeteo(MeteoJardinMixin):
     # RÉCUPÉRATION MÉTÉO
     # ═══════════════════════════════════════════════════════════
 
+    @avec_resilience(retry=2, timeout_s=30, fallback=None)
     @avec_gestion_erreurs(default_return=None)
     @avec_cache(ttl=3600)  # Cache 1h
     def get_previsions(self, nb_jours: int = 7) -> list[MeteoJour] | None:

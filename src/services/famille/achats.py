@@ -13,7 +13,7 @@ from typing import TypedDict
 
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import FamilyPurchase
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
@@ -42,6 +42,8 @@ class ServiceAchatsFamille:
     # LECTURE
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def lister_achats(
         self, achete: bool = False, db: Session | None = None
@@ -55,9 +57,12 @@ class ServiceAchatsFamille:
         Returns:
             Liste des achats correspondants.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         return db.query(FamilyPurchase).filter(FamilyPurchase.achete == achete).all()
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def lister_par_categorie(
         self, categorie: str, achete: bool = False, db: Session | None = None
@@ -72,7 +77,8 @@ class ServiceAchatsFamille:
         Returns:
             Liste des achats de la catégorie, triés par priorité.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         return (
             db.query(FamilyPurchase)
             .filter(
@@ -83,6 +89,8 @@ class ServiceAchatsFamille:
             .all()
         )
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def lister_par_groupe(
         self, categories: list[str], achete: bool = False, db: Session | None = None
@@ -100,7 +108,8 @@ class ServiceAchatsFamille:
         Returns:
             Liste des achats du groupe, triés par priorité.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         return (
             db.query(FamilyPurchase)
             .filter(
@@ -111,6 +120,8 @@ class ServiceAchatsFamille:
             .all()
         )
 
+    @avec_gestion_erreurs(default_return={})
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_stats(self, db: Session | None = None) -> AchatsStatsDict:
         """Calcule les statistiques des achats.
@@ -126,7 +137,8 @@ class ServiceAchatsFamille:
             - total_depense: Somme des prix réels (achetés)
             - urgents: Nombre d'achats urgents ou haute priorité
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         en_attente = db.query(FamilyPurchase).filter(FamilyPurchase.achete == False).all()  # noqa: E712
         achetes = db.query(FamilyPurchase).filter(FamilyPurchase.achete == True).all()  # noqa: E712
 
@@ -142,6 +154,8 @@ class ServiceAchatsFamille:
             "urgents": urgents,
         }
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_urgents(self, limit: int = 5, db: Session | None = None) -> list[FamilyPurchase]:
         """Récupère les achats urgents pour le tableau de bord.
@@ -153,7 +167,8 @@ class ServiceAchatsFamille:
         Returns:
             Liste des achats urgents/haute priorité, triés par priorité.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         return (
             db.query(FamilyPurchase)
             .filter(
@@ -169,6 +184,7 @@ class ServiceAchatsFamille:
     # ÉCRITURE
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def ajouter_achat(
         self,
@@ -202,7 +218,8 @@ class ServiceAchatsFamille:
         Returns:
             L'achat créé.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         achat = FamilyPurchase(
             nom=nom,
             categorie=categorie,
@@ -229,6 +246,7 @@ class ServiceAchatsFamille:
 
         return achat
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def marquer_achete(
         self,
@@ -246,7 +264,8 @@ class ServiceAchatsFamille:
         Returns:
             True si l'achat a été trouvé et mis à jour, False sinon.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         achat = db.get(FamilyPurchase, purchase_id)
         if achat:
             achat.achete = True
@@ -272,6 +291,7 @@ class ServiceAchatsFamille:
         logger.warning("Achat non trouvé pour marquer comme acheté: id=%d", purchase_id)
         return False
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def supprimer_achat(self, purchase_id: int, db: Session | None = None) -> bool:
         """Supprime un achat.
@@ -283,7 +303,8 @@ class ServiceAchatsFamille:
         Returns:
             True si supprimé, False si non trouvé.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         achat = db.get(FamilyPurchase, purchase_id)
         if achat:
             nom = achat.nom

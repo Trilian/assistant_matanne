@@ -131,9 +131,9 @@ def _verifier_cache() -> SanteComposant:
     """Vérifie la santé du cache multi-niveaux."""
     start = time.perf_counter()
     try:
-        from src.core.caching import CacheMultiNiveau
+        from src.core.caching import obtenir_cache
 
-        cache = CacheMultiNiveau()
+        cache = obtenir_cache()
         stats = cache.obtenir_statistiques()
         duree = (time.perf_counter() - start) * 1000
 

@@ -11,7 +11,9 @@ from datetime import date
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.modules._framework import error_boundary
 from src.ui import etat_vide
 
 logger = logging.getLogger(__name__)
@@ -150,6 +152,7 @@ def _afficher_historique():
 # ═══════════════════════════════════════════════════════════
 
 
+@profiler_rerun("scan_factures")
 def app():
     """Point d'entrée module scan factures."""
     st.title("🧾 Scan de Factures")
@@ -224,10 +227,34 @@ def app():
                                     "💾 Ajouter aux charges",
                                     help="Enregistrer cette facture dans le suivi des charges",
                                 ):
-                                    st.info(
-                                        "💡 Intégration avec le module Charges à venir. "
-                                        "Les données sont sauvegardées dans l'historique."
-                                    )
+                                    try:
+                                        from src.ui.keys import KeyNamespace
+
+                                        _charges_keys = KeyNamespace("charges")
+                                        charges_key = _charges_keys("factures")
+
+                                        if charges_key not in st.session_state:
+                                            st.session_state[charges_key] = []
+
+                                        donnees = resultat.donnees
+                                        nouvelle_facture = {
+                                            "type": donnees.get("type_energie", "electricite"),
+                                            "montant": float(donnees.get("montant", 0)),
+                                            "consommation": float(donnees.get("consommation", 0)),
+                                            "date": donnees.get("date", date.today().isoformat()),
+                                            "fournisseur": donnees.get("fournisseur"),
+                                            "date_ajout": date.today().isoformat(),
+                                            "source": "scan_facture",
+                                        }
+
+                                        st.session_state[charges_key].append(nouvelle_facture)
+                                        st.success(
+                                            "✅ Facture ajoutée au module Charges ! "
+                                            "Allez dans Maison → Charges pour la consulter."
+                                        )
+                                    except Exception as e:
+                                        logger.error(f"Erreur ajout aux charges: {e}")
+                                        st.error("❌ Erreur lors de l'ajout aux charges")
                             else:
                                 st.error(f"❌ Échec: {resultat.message}")
                                 if resultat.texte_brut:

@@ -5,8 +5,9 @@ Module pour l'import de recettes
 import streamlit as st
 
 # Logique metier pure
-from src.services.cuisine.recettes import obtenir_service_recettes
+from src.services.cuisine.recettes import get_recipe_import_service, obtenir_service_recettes
 from src.services.cuisine.recettes.importer import RecipeImporter
+from src.services.cuisine.recettes.parsers import ImportedRecipe
 
 
 def afficher_importer():
@@ -29,8 +30,19 @@ def afficher_importer():
         _afficher_import_text()
 
 
+def _imported_recipe_to_dict(recipe: ImportedRecipe) -> dict:
+    """Convertit ImportedRecipe (Pydantic) en dict pour l'aperçu UI."""
+    data = recipe.model_dump()
+    # Convertir les ingrédients structurés en chaînes lisibles
+    data["ingredients"] = [
+        f"{ing.quantite:.0f} {ing.unite} {ing.nom}".strip() if ing.quantite else ing.nom
+        for ing in recipe.ingredients
+    ]
+    return data
+
+
 def _afficher_import_url():
-    """Import depuis une URL"""
+    """Import depuis une URL via RecipeImportService."""
     st.markdown("### 🌐 Importer depuis une URL")
     st.info("Entrez l'URL d'un site contenant une recette (recipetin, marmiton, cuisineaz, etc.)")
 
@@ -47,15 +59,17 @@ def _afficher_import_url():
 
         with st.spinner("⏳ Extraction du titre, image, ingredients, etapes, temps..."):
             try:
-                recipe_data = RecipeImporter.from_url(url)
+                service = get_recipe_import_service()
+                result = service.import_from_url(url)
 
-                if recipe_data:
-                    # Stocker les donnees dans session_state pour persistence
+                if result and result.success and result.recipe:
+                    recipe_data = _imported_recipe_to_dict(result.recipe)
                     st.session_state.extracted_recipe = recipe_data
                     st.success("✅ Recette extraite!")
-                    st.rerun()  # Rafraîchir pour afficher le formulaire
+                    st.rerun()
                 else:
-                    st.error("❌ Impossible d'extraire la recette. Verifiez l'URL.")
+                    msg = result.message if result else "Erreur inconnue"
+                    st.error(f"❌ {msg}")
 
             except Exception as e:
                 st.error(f"❌ Erreur: {str(e)}")

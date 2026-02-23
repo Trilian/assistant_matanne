@@ -20,6 +20,9 @@ from datetime import date
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
+
 # Import Google Calendar UI
 from src.ui.integrations import afficher_config_google_calendar
 
@@ -51,6 +54,7 @@ from .data import charger_donnees_semaine
 from .utils import construire_semaine_calendrier, get_debut_semaine
 
 
+@profiler_rerun("calendrier")
 def app():
     """Point d'entrée du module Calendrier Familial Unifié."""
 

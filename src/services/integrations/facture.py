@@ -253,18 +253,12 @@ def extraire_montant(texte: str, pattern: str) -> float | None:
 # ═══════════════════════════════════════════════════════════
 
 
-_facture_ocr_instance: FactureOCRService | None = None
+@service_factory("facture_ocr", tags={"integrations", "ia", "ocr"})
+def get_facture_ocr_service() -> FactureOCRService:
+    """Factory singleton pour le service OCR."""
+    return FactureOCRService()
 
 
 def obtenir_service_ocr_facture() -> FactureOCRService:
-    """Factory singleton pour le service OCR."""
-    global _facture_ocr_instance
-    if _facture_ocr_instance is None:
-        _facture_ocr_instance = FactureOCRService()
-    return _facture_ocr_instance
-
-
-@service_factory("facture_ocr", tags={"integrations", "ia", "ocr"})
-def get_facture_ocr_service() -> FactureOCRService:
-    """Factory pour le service OCR (alias anglais)."""
-    return obtenir_service_ocr_facture()
+    """Alias français pour le service OCR."""
+    return get_facture_ocr_service()

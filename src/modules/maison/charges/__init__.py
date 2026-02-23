@@ -6,6 +6,10 @@ Sous-module pour le suivi des dépenses énergétiques et charges fixes.
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
+from src.ui.keys import KeyNamespace
+
 from .onglets import (
     onglet_analyse,
     onglet_conseils,
@@ -18,19 +22,22 @@ from .ui import afficher_header
 
 __all__ = ["app"]
 
+_keys = KeyNamespace("charges")
 
+
+@profiler_rerun("charges")
 def app():
     """Point d'entrée du module Charges gamifié."""
     injecter_css_charges()
 
     # Initialiser les données en session
-    if "factures_charges" not in st.session_state:
-        st.session_state.factures_charges = []
+    if _keys("factures") not in st.session_state:
+        st.session_state[_keys("factures")] = []
 
-    if "badges_vus" not in st.session_state:
-        st.session_state.badges_vus = []
+    if _keys("badges_vus") not in st.session_state:
+        st.session_state[_keys("badges_vus")] = []
 
-    factures = st.session_state.factures_charges
+    factures = st.session_state[_keys("factures")]
 
     # Header
     afficher_header()
@@ -41,16 +48,21 @@ def app():
     )
 
     with tab1:
-        onglet_dashboard(factures)
+        with error_boundary(titre="Erreur dashboard charges"):
+            onglet_dashboard(factures)
 
     with tab2:
-        onglet_factures(factures)
+        with error_boundary(titre="Erreur factures"):
+            onglet_factures(factures)
 
     with tab3:
-        onglet_analyse(factures)
+        with error_boundary(titre="Erreur analyse charges"):
+            onglet_analyse(factures)
 
     with tab4:
-        onglet_simulation(factures)
+        with error_boundary(titre="Erreur simulation"):
+            onglet_simulation(factures)
 
     with tab5:
-        onglet_conseils()
+        with error_boundary(titre="Erreur conseils"):
+            onglet_conseils()

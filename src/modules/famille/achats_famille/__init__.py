@@ -9,6 +9,9 @@ Categories:
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
+
 from .components import (
     afficher_achat_card,
     afficher_add_form,
@@ -29,6 +32,7 @@ from .utils import (
 )
 
 
+@profiler_rerun("achats_famille")
 def app():
     """Point d'entrée du module Achats Famille"""
     st.title("🛍️ Achats Famille")
@@ -49,22 +53,28 @@ def app():
     )
 
     with tabs[0]:
-        afficher_dashboard()
+        with error_boundary(titre="Erreur dashboard achats"):
+            afficher_dashboard()
 
     with tabs[1]:
-        afficher_liste_groupe("jules", "👶 Achats pour Jules")
+        with error_boundary(titre="Erreur achats Jules"):
+            afficher_liste_groupe("jules", "👶 Achats pour Jules")
 
     with tabs[2]:
-        afficher_liste_groupe("nous", "👨‍👩‍👦 Achats pour nous")
+        with error_boundary(titre="Erreur achats nous"):
+            afficher_liste_groupe("nous", "👨‍👩‍👦 Achats pour nous")
 
     with tabs[3]:
-        afficher_par_magasin()
+        with error_boundary(titre="Erreur par magasin"):
+            afficher_par_magasin()
 
     with tabs[4]:
-        afficher_add_form()
+        with error_boundary(titre="Erreur ajout achat"):
+            afficher_add_form()
 
     with tabs[5]:
-        afficher_historique()
+        with error_boundary(titre="Erreur historique achats"):
+            afficher_historique()
 
 
 __all__ = [

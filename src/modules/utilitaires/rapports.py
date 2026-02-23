@@ -13,7 +13,9 @@ import pandas as pd
 import streamlit as st
 
 # Logique metier pure
+from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.modules._framework import error_boundary
 
 # ═══════════════════════════════════════════════════════════
 # INITIALISATION
@@ -34,6 +36,7 @@ def get_rapports_service():
 # ═══════════════════════════════════════════════════════════
 
 
+@profiler_rerun("rapports")
 def app():
     """Point d'entree module rapports PDF"""
 
@@ -45,16 +48,20 @@ def app():
     tab1, tab2, tab3, tab4 = st.tabs(["📦 Stocks", "💡 Budget", "🎯 Gaspillage", "🗑️ Historique"])
 
     with tab1:
-        afficher_rapport_stocks()
+        with error_boundary(titre="Erreur rapport stocks"):
+            afficher_rapport_stocks()
 
     with tab2:
-        afficher_rapport_budget()
+        with error_boundary(titre="Erreur rapport budget"):
+            afficher_rapport_budget()
 
     with tab3:
-        afficher_analyse_gaspillage()
+        with error_boundary(titre="Erreur analyse gaspillage"):
+            afficher_analyse_gaspillage()
 
     with tab4:
-        afficher_historique()
+        with error_boundary(titre="Erreur historique"):
+            afficher_historique()
 
 
 # ═══════════════════════════════════════════════════════════

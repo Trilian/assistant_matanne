@@ -13,7 +13,9 @@ from typing import TYPE_CHECKING, Any, Callable
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.modules._framework import error_boundary
 from src.ui import etat_vide
 
 if TYPE_CHECKING:
@@ -32,6 +34,7 @@ def _get_service() -> ServiceRoutines:
 # ===================================
 
 
+@profiler_rerun("routines")
 def app() -> None:
     """Module Routines avec IA integree."""
     from src.core.async_utils import executer_async

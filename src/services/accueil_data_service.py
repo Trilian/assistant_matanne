@@ -19,10 +19,8 @@ logger = logging.getLogger(__name__)
 class AccueilDataService:
     """Service de données pour le dashboard accueil."""
 
-    _instance: "AccueilDataService | None" = None
-
-    @avec_session_db
     @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
     def get_taches_en_retard(self, limit: int = 10, db: Session | None = None) -> list[dict]:
         """Récupère les tâches ménage en retard.
 
@@ -57,9 +55,7 @@ class AccueilDataService:
 @service_factory("accueil_data", tags={"accueil", "data"})
 def get_accueil_data_service() -> AccueilDataService:
     """Factory singleton pour le service accueil data."""
-    if AccueilDataService._instance is None:
-        AccueilDataService._instance = AccueilDataService()
-    return AccueilDataService._instance
+    return AccueilDataService()
 
 
 def obtenir_service_accueil_data() -> AccueilDataService:

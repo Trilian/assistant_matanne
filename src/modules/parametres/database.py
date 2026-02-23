@@ -10,8 +10,30 @@ from src.core.db import obtenir_infos_db as get_db_info
 from src.core.db import verifier_sante as health_check
 from src.core.session_keys import SK
 from src.ui import etat_vide
-from src.ui.components import Modale as Modal
 from src.ui.feedback import afficher_erreur, afficher_succes, spinner_intelligent
+
+
+@st.dialog("🧹 Confirmer Optimisation")
+def _dialog_vacuum():
+    """Dialog natif pour confirmer l'optimisation VACUUM."""
+    st.warning("⚠️ Cela peut prendre plusieurs minutes.")
+    st.markdown(
+        "L'optimisation **VACUUM** libère l'espace inutilisé et met à jour les statistiques."
+    )
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("✅ Optimiser", type="primary", use_container_width=True, key="dlg_vacuum_ok"):
+            with spinner_intelligent("Optimisation en cours...", secondes_estimees=10):
+                try:
+                    vacuum_database()
+                    afficher_succes("✅ Optimisation terminée !")
+                except Exception as e:
+                    afficher_erreur(f"❌ Erreur: {str(e)}")
+            st.rerun()
+    with col2:
+        if st.button("❌ Annuler", use_container_width=True, key="dlg_vacuum_cancel"):
+            st.rerun()
 
 
 def afficher_database_config():
@@ -128,23 +150,7 @@ def afficher_database_config():
 
     with col7:
         if st.button("🧹 Optimiser (VACUUM)", key="btn_optimize_db", use_container_width=True):
-            modal = Modal("vacuum_db")
-
-            if not modal.is_showing():
-                modal.show()
-            else:
-                st.warning("Cela peut prendre plusieurs minutes. Continuer ?")
-
-                if modal.confirm("✅ Optimiser"):
-                    with spinner_intelligent("Optimisation en cours...", secondes_estimees=10):
-                        try:
-                            vacuum_database()
-                            afficher_succes("✅ Optimisation terminée !")
-                            modal.close()
-                        except Exception as e:
-                            afficher_erreur(f"❌ Erreur: {str(e)}")
-
-                modal.cancel("❌ Annuler")
+            _dialog_vacuum()
 
     with col8:
         if st.button("💾 Backup", key="btn_backup_db", use_container_width=True):

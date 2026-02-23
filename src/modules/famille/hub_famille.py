@@ -30,7 +30,18 @@ logger = logging.getLogger(__name__)
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.modules._framework import error_boundary
 from src.modules.famille.age_utils import get_age_jules
+from src.ui.keys import KeyNamespace
+
+_keys = KeyNamespace("famille")
+
+
+def _naviguer_famille(page: str) -> None:
+    """Navigation interne standardisée du hub famille."""
+    st.session_state[SK.FAMILLE_PAGE] = page
+    st.rerun()
+
 
 # ═══════════════════════════════════════════════════════════
 # LAZY SERVICE ACCESSORS
@@ -141,8 +152,7 @@ def afficher_card_jules():
     age = calculer_age_jules()
 
     if st.button("👶 **Jules**", key="card_jules", use_container_width=True, type="primary"):
-        st.session_state[SK.FAMILLE_PAGE] = "jules"
-        st.rerun()
+        _naviguer_famille("jules")
 
     st.caption(f"🎂 {age['texte']} • 🎨 Activites adaptees")
 
@@ -154,8 +164,7 @@ def afficher_card_weekend():
     if st.button(
         "🎉 **Ce Weekend**", key="card_weekend", use_container_width=True, type="secondary"
     ):
-        st.session_state[SK.FAMILLE_PAGE] = "weekend"
-        st.rerun()
+        _naviguer_famille("weekend")
 
     if count > 0:
         st.caption(f"📅 {count} activite(s) planifiee(s)")
@@ -176,9 +185,8 @@ def afficher_card_user(username: str, display_name: str, emoji: str):
         use_container_width=True,
         type=btn_type,
     ):
-        st.session_state[SK.FAMILLE_PAGE] = "suivi"
         st.session_state[SK.SUIVI_USER] = username
-        st.rerun()
+        _naviguer_famille("suivi")
 
     status_parts = []
     if streak > 0:
@@ -199,8 +207,7 @@ def afficher_card_achats():
     if st.button(
         "🛍️ **Achats Famille**", key="card_achats", use_container_width=True, type="secondary"
     ):
-        st.session_state[SK.FAMILLE_PAGE] = "achats"
-        st.rerun()
+        _naviguer_famille("achats")
 
     if urgent > 0:
         st.caption(f"⚠️ {urgent} urgent(s) • 📋 {pending} en attente")
@@ -232,37 +239,39 @@ def app():
     page = st.session_state.get(SK.FAMILLE_PAGE, "hub")
 
     if page == "hub":
-        afficher_hub()
+        with error_boundary(titre="Erreur hub famille"):
+            afficher_hub()
     elif page == "jules":
         from src.modules.famille.jules import app as jules_app
 
         if st.button("⬅️ Retour au Hub"):
-            st.session_state[SK.FAMILLE_PAGE] = "hub"
-            st.rerun()
-        jules_app()
+            _naviguer_famille("hub")
+        with error_boundary(titre="Erreur module Jules"):
+            jules_app()
     elif page == "weekend":
         from src.modules.famille.weekend import app as weekend_app
 
         if st.button("⬅️ Retour au Hub"):
-            st.session_state[SK.FAMILLE_PAGE] = "hub"
-            st.rerun()
-        weekend_app()
+            _naviguer_famille("hub")
+        with error_boundary(titre="Erreur module Weekend"):
+            weekend_app()
     elif page == "suivi":
         from src.modules.famille.suivi_perso import app as suivi_app
 
         if st.button("⬅️ Retour au Hub"):
-            st.session_state[SK.FAMILLE_PAGE] = "hub"
-            st.rerun()
-        suivi_app()
+            _naviguer_famille("hub")
+        with error_boundary(titre="Erreur module Suivi"):
+            suivi_app()
     elif page == "achats":
         from src.modules.famille.achats_famille import app as achats_app
 
         if st.button("⬅️ Retour au Hub"):
-            st.session_state[SK.FAMILLE_PAGE] = "hub"
-            st.rerun()
-        achats_app()
+            _naviguer_famille("hub")
+        with error_boundary(titre="Erreur module Achats"):
+            achats_app()
     else:
-        afficher_hub()
+        with error_boundary(titre="Erreur hub famille"):
+            afficher_hub()
 
 
 def afficher_hub():
@@ -345,8 +354,7 @@ def _afficher_day_activities(day: date):
         else:
             st.caption("Rien de prévu")
             if st.button("💡 Suggérer", key=f"suggest_{day}"):
-                st.session_state[SK.FAMILLE_PAGE] = "weekend"
-                st.rerun()
+                _naviguer_famille("weekend")
     except Exception as e:
         logger.debug("Erreur activités jour: %s", e)
         st.caption("Rien de prévu")

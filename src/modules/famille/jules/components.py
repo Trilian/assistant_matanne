@@ -80,19 +80,17 @@ def afficher_activites():
                 if st.button("✅ Fait", key=f"act_done_{i}"):
                     st.success("Super ! 🎉")
 
-    # Suggestions IA
+    # Suggestions IA (streaming)
     if st.session_state.get(SK.JULES_SHOW_AI_ACTIVITIES):
         st.markdown("---")
         st.markdown("**🤖 Suggestions IA:**")
 
-        with st.spinner("Generation en cours..."):
-            try:
-                service = JulesAIService()
-                meteo = "interieur" if filtre_lieu != "Exterieur" else "exterieur"
-                result = executer_async(service.suggerer_activites(age["mois"], meteo))
-                st.markdown(result)
-            except Exception as e:
-                st.error(f"Erreur IA: {e}")
+        try:
+            service = JulesAIService()
+            meteo = "interieur" if filtre_lieu != "Exterieur" else "exterieur"
+            st.write_stream(service.stream_activites(age["mois"], meteo))
+        except Exception as e:
+            st.error(f"Erreur IA: {e}")
 
         if st.button("Fermer"):
             st.session_state[SK.JULES_SHOW_AI_ACTIVITIES] = False
@@ -120,15 +118,13 @@ def afficher_shopping():
     with tabs[1]:
         afficher_achats_categorie("jules_jouets")
 
-        # Suggestions IA jouets
+        # Suggestions IA jouets (streaming)
         if st.button("🤖 Suggerer des jouets"):
-            with st.spinner("Generation..."):
-                try:
-                    service = JulesAIService()
-                    result = executer_async(service.suggerer_jouets(age["mois"]))
-                    st.markdown(result)
-                except Exception as e:
-                    st.error(f"Erreur: {e}")
+            try:
+                service = JulesAIService()
+                st.write_stream(service.stream_jouets(age["mois"]))
+            except Exception as e:
+                st.error(f"Erreur: {e}")
 
     with tabs[2]:
         afficher_achats_categorie("jules_equipement")
@@ -252,10 +248,8 @@ def afficher_conseils():
         info = CATEGORIES_CONSEILS[theme]
         st.markdown(f"### {info['emoji']} {info['titre']}")
 
-        with st.spinner("Generation du conseil..."):
-            try:
-                service = JulesAIService()
-                result = executer_async(service.conseil_developpement(age["mois"], theme))
-                st.markdown(result)
-            except Exception as e:
-                st.error(f"Erreur: {e}")
+        try:
+            service = JulesAIService()
+            st.write_stream(service.stream_conseil(age["mois"], theme))
+        except Exception as e:
+            st.error(f"Erreur: {e}")

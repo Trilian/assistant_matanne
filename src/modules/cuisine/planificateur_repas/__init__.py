@@ -13,7 +13,9 @@ from datetime import date, timedelta
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.modules._framework import avec_gestion_erreurs_ui, error_boundary
 from src.ui import etat_vide
 
 from .components import (
@@ -78,6 +80,7 @@ def _charger_historique_plannings() -> list[dict]:
     return []
 
 
+@profiler_rerun("planificateur_repas")
 def app():
     """Point d'entrée du module Planificateur de Repas."""
 
@@ -164,7 +167,23 @@ def app():
 
         with col_gen2:
             if st.button("📦 Utiliser mon stock", use_container_width=True):
-                st.info("🚧 Fonctionnalité en développement")
+                try:
+                    from src.services.inventaire import obtenir_service_inventaire
+
+                    service_inv = obtenir_service_inventaire()
+                    stock = service_inv.lister_produits() if service_inv else []
+                    if stock:
+                        noms_stock = [p.nom for p in stock[:20]]
+                        st.session_state[SK.PLANNING_STOCK_CONTEXT] = noms_stock
+                        st.success(f"✅ {len(noms_stock)} produits chargés depuis votre stock")
+                        st.caption("Cliquez sur 'Générer une semaine' pour les intégrer")
+                    else:
+                        st.info("📦 Stock vide. Ajoutez des produits dans l'inventaire.")
+                except Exception as e:
+                    import logging
+
+                    logging.getLogger(__name__).error(f"Erreur chargement stock: {e}")
+                    st.warning("⚠️ Impossible de charger le stock")
 
         with col_gen3:
             if st.button("🔄 Reset", use_container_width=True):
@@ -214,7 +233,29 @@ def app():
 
             with col_val2:
                 if st.button("🛒 Générer courses", use_container_width=True):
-                    st.info("🚧 Génération de la liste de courses...")
+                    try:
+                        # Extraire les noms de recettes du planning
+                        recettes_noms = []
+                        for jour, repas in st.session_state.planning_data.items():
+                            for type_repas in ["midi", "soir", "gouter"]:
+                                r = repas.get(type_repas)
+                                if r and isinstance(r, dict) and r.get("nom"):
+                                    recettes_noms.append(r["nom"])
+
+                        if recettes_noms:
+                            # Stocker dans session_state pour le module courses
+                            st.session_state[SK.COURSES_DEPUIS_PLANNING] = recettes_noms
+                            st.success(
+                                f"✅ Liste de courses générée ({len(recettes_noms)} recettes)"
+                            )
+                            st.caption("🛒 Allez dans le module Courses pour gérer la liste")
+                        else:
+                            st.warning("⚠️ Aucune recette trouvée dans le planning")
+                    except Exception as e:
+                        import logging
+
+                        logging.getLogger(__name__).error(f"Erreur génération courses: {e}")
+                        st.error("❌ Erreur lors de la génération")
 
             with col_val3:
                 # Export PDF du planning
@@ -244,7 +285,8 @@ def app():
     # ═══════════════════════════════════════════════════════
 
     with tab_preferences:
-        afficher_configuration_preferences()
+        with error_boundary(titre="Erreur préférences"):
+            afficher_configuration_preferences()
 
     # ═══════════════════════════════════════════════════════
     # TAB: HISTORIQUE

@@ -14,7 +14,9 @@ from datetime import date
 import streamlit as st
 
 from src.core.async_utils import executer_async
+from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.modules._framework import error_boundary
 from src.services.core.notifications import (
     ConfigurationNtfy,
     NotificationPush,
@@ -398,6 +400,7 @@ def afficher_aide():
 # ═══════════════════════════════════════════════════════════
 
 
+@profiler_rerun("notifications")
 def app():
     """Point d'entrée du module notifications push."""
     st.title("🔔 Notifications Push")
@@ -407,19 +410,24 @@ def app():
     tabs = st.tabs(["📷 S'abonner", "⚙️ Configuration", "⏰ Tâches", "🧪 Test", "❓ Aide"])
 
     with tabs[0]:
-        afficher_abonnement()
+        with error_boundary(titre="Erreur abonnement"):
+            afficher_abonnement()
 
     with tabs[1]:
-        afficher_configuration()
+        with error_boundary(titre="Erreur configuration"):
+            afficher_configuration()
 
     with tabs[2]:
-        afficher_taches_retard()
+        with error_boundary(titre="Erreur tâches"):
+            afficher_taches_retard()
 
     with tabs[3]:
-        afficher_test()
+        with error_boundary(titre="Erreur test"):
+            afficher_test()
 
     with tabs[4]:
-        afficher_aide()
+        with error_boundary(titre="Erreur aide"):
+            afficher_aide()
 
 
 if __name__ == "__main__":

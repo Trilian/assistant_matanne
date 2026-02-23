@@ -14,7 +14,7 @@ from typing import Any, TypedDict
 from sqlalchemy.orm import Session
 
 from src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUT
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import FoodLog, GarminActivity, GarminDailySummary, UserProfile
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
@@ -52,6 +52,8 @@ class ServiceSuiviPerso:
     # USER DATA
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return={})
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_user_data(self, username: str, db: Session | None = None) -> UserDataDict:
         """Récupère les données complètes d'un utilisateur (7 derniers jours).
@@ -73,7 +75,8 @@ class ServiceSuiviPerso:
             - objectif_pas: Objectif quotidien de pas
             - objectif_calories: Objectif calories brûlées
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         from src.services.integrations.garmin import get_or_create_user
 
@@ -164,6 +167,8 @@ class ServiceSuiviPerso:
     # FOOD LOGS
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_food_logs_today(self, username: str, db: Session | None = None) -> list[FoodLog]:
         """Récupère les logs alimentation du jour.
@@ -175,7 +180,8 @@ class ServiceSuiviPerso:
         Returns:
             Liste des FoodLog du jour, triée par heure.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         try:
             user = db.query(UserProfile).filter_by(username=username).first()
@@ -192,6 +198,7 @@ class ServiceSuiviPerso:
             logger.debug(f"Erreur récupération food logs: {e}")
             return []
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def sauvegarder_objectifs(
         self,
@@ -213,7 +220,8 @@ class ServiceSuiviPerso:
         Returns:
             True si sauvegardé avec succès.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         try:
             user = db.query(UserProfile).filter_by(id=user_id).first()
             if user:
@@ -228,6 +236,7 @@ class ServiceSuiviPerso:
             logger.error(f"Erreur sauvegarde objectifs: {e}")
             return False
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def ajouter_food_log(
         self,
@@ -256,7 +265,8 @@ class ServiceSuiviPerso:
         Raises:
             ValueError: Si l'utilisateur n'existe pas et ne peut être créé.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         from src.services.integrations.garmin import get_or_create_user
 

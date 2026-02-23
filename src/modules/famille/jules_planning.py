@@ -14,7 +14,9 @@ from datetime import date
 import streamlit as st
 
 from src.core.constants import JOURS_SEMAINE
+from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.modules._framework import error_boundary
 
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES - ACTIVITÉS PAR CATÉGORIE
@@ -367,6 +369,7 @@ def afficher_stats_semaine():
 # ═══════════════════════════════════════════════════════════
 
 
+@profiler_rerun("jules_planning")
 def app():
     """Point d'entree du module Planning Jules."""
     init_tracking()
@@ -380,16 +383,20 @@ def app():
     tabs = st.tabs(["🌟 Aujourd'hui", "📅 Semaine", "📊 Bilan", "📚 Catalogue"])
 
     with tabs[0]:
-        afficher_vue_aujourd_hui()
+        with error_boundary(titre="Erreur vue aujourd'hui"):
+            afficher_vue_aujourd_hui()
 
     with tabs[1]:
-        afficher_vue_semaine()
+        with error_boundary(titre="Erreur vue semaine"):
+            afficher_vue_semaine()
 
     with tabs[2]:
-        afficher_stats_semaine()
+        with error_boundary(titre="Erreur bilan"):
+            afficher_stats_semaine()
 
     with tabs[3]:
-        afficher_categories()
+        with error_boundary(titre="Erreur catalogue"):
+            afficher_categories()
 
 
 if __name__ == "__main__":

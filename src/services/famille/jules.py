@@ -14,7 +14,7 @@ from typing import Any
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import ChildProfile, Milestone
 from src.services.core.registry import service_factory
 
@@ -32,6 +32,7 @@ class ServiceJules:
     # PROFIL
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def get_or_create_jules(self, db: Session | None = None) -> int:
         """Récupère ou crée le profil Jules, retourne son ID.
@@ -45,7 +46,8 @@ class ServiceJules:
         Raises:
             RuntimeError: Si la création échoue.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         child = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
 
@@ -67,6 +69,8 @@ class ServiceJules:
     # MILESTONES (JALONS)
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return={})
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_milestones_by_category(self, child_id: int, db: Session | None = None) -> dict:
         """Récupère les jalons groupés par catégorie.
@@ -78,7 +82,8 @@ class ServiceJules:
         Returns:
             Dict {catégorie: [liste de jalons]}.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         milestones = db.query(Milestone).filter_by(child_id=child_id).all()
 
@@ -99,6 +104,8 @@ class ServiceJules:
 
         return result
 
+    @avec_gestion_erreurs(default_return={})
+    @avec_cache(ttl=300)
     @avec_session_db
     def count_milestones_by_category(self, child_id: int, db: Session | None = None) -> dict:
         """Compte les jalons par catégorie.
@@ -110,7 +117,8 @@ class ServiceJules:
         Returns:
             Dict {catégorie: nombre}.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         result = (
             db.query(Milestone.categorie, func.count(Milestone.id).label("count"))
@@ -125,6 +133,8 @@ class ServiceJules:
     # ÂGE / DATE DE NAISSANCE
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=None)
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_date_naissance_jules(self, db: Session | None = None) -> date_type | None:
         """Récupère la date de naissance de Jules depuis la BD.
@@ -135,7 +145,8 @@ class ServiceJules:
         Returns:
             Date de naissance ou None si non trouvée.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         try:
             jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
             if jules and jules.date_of_birth:

@@ -55,6 +55,7 @@ from .planning import (
 from .recettes import (
     RecetteBase,
     RecetteCreate,
+    RecettePatch,
     RecetteResponse,
 )
 
@@ -77,6 +78,7 @@ __all__ = [
     # Recettes
     "RecetteBase",
     "RecetteCreate",
+    "RecettePatch",
     "RecetteResponse",
     # Inventaire
     "InventaireItemBase",

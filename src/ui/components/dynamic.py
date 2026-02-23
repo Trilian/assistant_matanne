@@ -1,36 +1,83 @@
 """
 UI Components - Dynamic
 
-Composant Modale **DÉPRÉCIÉ** — migrer vers DialogBuilder.
+Composant Modale **DÉPRÉCIÉ** — migré vers @st.dialog natif.
 
-Migration recommandée::
+Usage moderne::
 
-    # Ancien code (déprécié)
-    from src.ui import Modale
-    modal = Modale("delete")
-    if modal.is_showing():
-        if modal.confirm():
-            delete()
-            modal.close()
+    # Créer un dialog personnalisé (recommandé)
+    @st.dialog("Confirmer suppression")
+    def dialog_supprimer(item_id: int):
+        st.warning("Êtes-vous sûr ?")
+        if st.button("Supprimer", type="primary"):
+            delete(item_id)
+            st.rerun()
+        if st.button("Annuler"):
+            st.rerun()
 
-    # Nouveau code
-    from src.ui import confirm_dialog, ouvrir_dialog
-    if st.button("Supprimer"):
-        ouvrir_dialog("delete")
-    if confirm_dialog("delete", titre="Confirmer ?", on_confirm=delete):
-        st.success("Supprimé")
+    # Appeler le dialog
+    if st.button("🗑️ Supprimer"):
+        dialog_supprimer(item_id=42)
+
+    # Ou utiliser le helper confirm_dialog()
+    if st.button("🗑️ Supprimer"):
+        confirm_dialog("Confirmer", "Supprimer cet élément ?", on_confirm=lambda: delete(42))
 
 Voir docs/MIGRATION_UI_V2.md pour le guide complet.
 """
 
 import warnings
+from collections.abc import Callable
 
 import streamlit as st
+
+# ═══════════════════════════════════════════════════════════
+# HELPER DIALOG MODERNE — @st.dialog
+# ═══════════════════════════════════════════════════════════
+
+
+def confirm_dialog(
+    titre: str = "Confirmer",
+    message: str = "Êtes-vous sûr ?",
+    *,
+    on_confirm: Callable[[], None] | None = None,
+    confirm_label: str = "✅ Confirmer",
+    cancel_label: str = "❌ Annuler",
+):
+    """Ouvre un @st.dialog de confirmation.
+
+    Args:
+        titre: Titre du dialog
+        message: Message affiché
+        on_confirm: Callback exécuté si l'utilisateur confirme
+        confirm_label: Texte du bouton confirmer
+        cancel_label: Texte du bouton annuler
+    """
+
+    @st.dialog(titre)
+    def _dlg():
+        st.warning(message)
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button(confirm_label, type="primary", use_container_width=True):
+                if on_confirm:
+                    on_confirm()
+                st.rerun()
+        with col2:
+            if st.button(cancel_label, use_container_width=True):
+                st.rerun()
+
+    _dlg()
+
+
+# ═══════════════════════════════════════════════════════════
+# MODALE LEGACY — DÉPRÉCIÉ
+# ═══════════════════════════════════════════════════════════
 
 
 class Modale:
     """
-    **DÉPRÉCIÉ** — Utiliser DialogBuilder ou confirm_dialog à la place.
+    **DÉPRÉCIÉ** — Utiliser @st.dialog ou confirm_dialog() à la place.
 
     Cette classe reste fonctionnelle mais émet un DeprecationWarning.
     Voir docs/MIGRATION_UI_V2.md pour migrer.
@@ -48,7 +95,7 @@ class Modale:
 
     def __init__(self, key: str):
         warnings.warn(
-            "Modale est déprécié. Utiliser DialogBuilder ou confirm_dialog. "
+            "Modale est déprécié. Utiliser @st.dialog ou confirm_dialog(). "
             "Voir docs/MIGRATION_UI_V2.md",
             DeprecationWarning,
             stacklevel=2,
@@ -86,4 +133,4 @@ class Modale:
     annuler = cancel
 
 
-__all__ = ["Modale"]
+__all__ = ["Modale", "confirm_dialog"]

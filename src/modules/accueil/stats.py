@@ -5,11 +5,13 @@ Visualisations de données pour le tableau de bord principal
 
 import streamlit as st
 
+from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
 
 _keys = KeyNamespace("accueil")
 
 
+@ui_fragment
 def afficher_graphiques_enrichis():
     """Affiche les graphiques Plotly enrichis."""
     from src.services.cuisine.planning import obtenir_service_planning
@@ -45,6 +47,7 @@ def afficher_graphiques_enrichis():
             st.info("Pas de planning cette semaine")
 
 
+@ui_fragment
 def afficher_global_stats():
     """Stats globales de l'application"""
     from src.services.cuisine.courses import obtenir_service_courses

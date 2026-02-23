@@ -5,17 +5,23 @@ Endpoints:
 - POST /api/v1/auth/login: Authentification email/mot de passe via Supabase
 - POST /api/v1/auth/refresh: Rafraîchissement du token API
 - GET  /api/v1/auth/me: Informations de l'utilisateur connecté
+
+Sécurité:
+- Rate limiting sur /login (5 tentatives/minute par IP)
+- Tokens JWT signés avec clé sécurisée
 """
 
 from __future__ import annotations
 
 import logging
+import time
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from src.api.auth import TokenResponse, creer_token_acces
 from src.api.dependencies import get_current_user
+from src.api.rate_limiting import _stockage
 from src.api.schemas import LoginRequest, UserInfoResponse
 
 logger = logging.getLogger(__name__)
@@ -32,12 +38,40 @@ router = APIRouter(
     summary="Connexion utilisateur",
     description="Authentifie via Supabase et retourne un token JWT API.",
 )
-async def login(request: LoginRequest):
+async def login(request: LoginRequest, raw_request: Request):
     """
     Authentifie un utilisateur via Supabase Auth.
 
+    Protégé par un rate limiting strict: 5 tentatives/minute par IP
+    pour prévenir les attaques par force brute.
+
     Retourne un token JWT API signé si les identifiants sont valides.
     """
+    # Rate limiting anti brute-force (5 tentatives/minute par IP)
+    forwarded = raw_request.headers.get("X-Forwarded-For")
+    ip = (
+        forwarded.split(",")[0].strip()
+        if forwarded
+        else (raw_request.client.host if raw_request.client else "unknown")
+    )
+    cle_login = f"login_attempt:ip:{ip}"
+
+    if _stockage.est_bloque(cle_login):
+        raise HTTPException(
+            status_code=429,
+            detail="Trop de tentatives de connexion. Réessayez dans 5 minutes.",
+            headers={"Retry-After": "300"},
+        )
+
+    compte = _stockage.incrementer(cle_login, fenetre_secondes=60)
+    if compte > 5:
+        _stockage.bloquer(cle_login, duree_secondes=300)
+        logger.warning(f"Brute force détecté sur /login depuis {ip}")
+        raise HTTPException(
+            status_code=429,
+            detail="Trop de tentatives de connexion. Réessayez dans 5 minutes.",
+            headers={"Retry-After": "300"},
+        )
     try:
         # Import lazy pour éviter la dépendance directe à Supabase
         # au chargement du module

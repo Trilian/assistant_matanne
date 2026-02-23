@@ -16,7 +16,7 @@ from typing import Any, TypedDict
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import (
     FamilyActivity,
     FamilyBudget,
@@ -69,6 +69,8 @@ class ServiceSante:
         except Exception:
             return 0.0
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_objectives_actifs(self, db: Session | None = None) -> list[dict[str, Any]]:
         """Récupère tous les objectifs en cours avec progression.
@@ -79,7 +81,8 @@ class ServiceSante:
         Returns:
             Liste de dicts avec id, titre, catégorie, progression, etc.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         objectives = db.query(HealthObjective).filter_by(statut="en_cours").all()
 
@@ -106,6 +109,8 @@ class ServiceSante:
     # ROUTINES SANTÉ
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_routines_actives(self, db: Session | None = None) -> list[dict[str, Any]]:
         """Récupère les routines de santé actives.
@@ -116,7 +121,8 @@ class ServiceSante:
         Returns:
             Liste de dicts décrivant chaque routine active.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         routines = db.query(HealthRoutine).filter_by(actif=True).all()
 
@@ -137,6 +143,8 @@ class ServiceSante:
     # STATISTIQUES
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return={})
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_stats_sante_semaine(self, db: Session | None = None) -> StatsSanteDict:
         """Calcule les stats de santé pour cette semaine.
@@ -147,7 +155,8 @@ class ServiceSante:
         Returns:
             StatsSanteDict avec nb_seances, total_minutes, etc.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         debut_semaine = date_type.today() - timedelta(days=date_type.today().weekday())
 
@@ -173,6 +182,8 @@ class ServiceSante:
     # BUDGET FAMILLE
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return={})
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_budget_par_period(
         self, period: str = "month", db: Session | None = None
@@ -186,7 +197,8 @@ class ServiceSante:
         Returns:
             Dict {catégorie: montant, 'TOTAL': total}.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         if period == "day":
             debut = date_type.today()
@@ -221,6 +233,8 @@ class ServiceSante:
         result["TOTAL"] = total
         return result
 
+    @avec_gestion_erreurs(default_return=0.0)
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_budget_mois_dernier(self, db: Session | None = None) -> float:
         """Récupère le budget total du mois dernier.
@@ -231,7 +245,8 @@ class ServiceSante:
         Returns:
             Montant total en euros.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         aujourd_hui = date_type.today()
 
@@ -256,6 +271,8 @@ class ServiceSante:
     # ACTIVITÉS - STATS RAPIDES
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_activites_semaine(self, db: Session | None = None) -> list[dict[str, Any]]:
         """Récupère les activités familiales de cette semaine.
@@ -266,7 +283,8 @@ class ServiceSante:
         Returns:
             Liste de dicts décrivant chaque activité.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         debut_semaine = date_type.today() - timedelta(days=date_type.today().weekday())
         fin_semaine = debut_semaine + timedelta(days=6)
@@ -298,6 +316,8 @@ class ServiceSante:
             for act in activities
         ]
 
+    @avec_gestion_erreurs(default_return=0.0)
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_budget_activites_mois(self, db: Session | None = None) -> float:
         """Récupère les dépenses en activités ce mois.
@@ -308,7 +328,8 @@ class ServiceSante:
         Returns:
             Montant total en euros.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
 
         debut_mois = date_type(date_type.today().year, date_type.today().month, 1)
         if date_type.today().month == 12:

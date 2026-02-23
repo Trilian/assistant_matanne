@@ -58,8 +58,8 @@ def indicateur_chargement(message: str = "Chargement..."):
     """
     safe_msg = echapper_html(message)
     st.markdown(
-        f'<div style="text-align: center; padding: {Espacement.XL};">'
-        f'<div style="font-size: {Typographie.ICON_MD};">\u23f3</div>'
+        f'<div role="status" aria-label="{safe_msg}" style="text-align: center; padding: {Espacement.XL};">'
+        f'<div style="font-size: {Typographie.ICON_MD};" aria-hidden="true">\u23f3</div>'
         f'<div style="color: {Couleur.TEXT_SECONDARY}; margin-top: {Espacement.SM};">'
         f"{safe_msg}</div>"
         f"</div>",
@@ -79,7 +79,8 @@ def chargeur_squelette(lignes: int = 3):
     """
     for _ in range(lignes):
         st.markdown(
-            f'<div style="background: linear-gradient(90deg, {Couleur.BG_HOVER} 25%, '
+            f'<div role="progressbar" aria-label="Chargement en cours" '
+            f'style="background: linear-gradient(90deg, {Couleur.BG_HOVER} 25%, '
             f"{Couleur.BORDER_LIGHT} 50%, {Couleur.BG_HOVER} 75%); "
             f"height: 20px; margin: {Espacement.SM} 0; border-radius: {Rayon.SM}; "
             f'background-size: 200% 100%; animation: shimmer 1.5s infinite;"></div>',

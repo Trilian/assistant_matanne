@@ -7,11 +7,13 @@ from datetime import date
 
 import streamlit as st
 
+from src.ui.fragments import auto_refresh
 from src.ui.keys import KeyNamespace
 
 _keys = KeyNamespace("accueil")
 
 
+@auto_refresh(seconds=30)
 def afficher_critical_alerts():
     """Affiche les alertes importantes"""
     from src.core.state import GestionnaireEtat

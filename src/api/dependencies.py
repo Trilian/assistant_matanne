@@ -42,7 +42,9 @@ async def get_current_user(
         Dict avec id, email, role de l'utilisateur
     """
     if not credentials:
-        if os.getenv("ENVIRONMENT", "development") == "development":
+        env = os.getenv("ENVIRONMENT", "development").lower()
+        if env not in ("production", "prod"):
+            logger.debug("Mode développement: utilisateur dev auto-authentifié")
             return {"id": "dev", "email": "dev@local", "role": "admin"}
         raise HTTPException(status_code=401, detail="Token requis")
 

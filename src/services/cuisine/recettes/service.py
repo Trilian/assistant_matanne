@@ -33,6 +33,7 @@ from src.core.models import (
 )
 from src.core.validation import EtapeInput, IngredientInput, RecetteInput
 from src.services.core.base import BaseAIService, BaseService, RecipeAIMixin
+from src.services.core.middleware import service_method
 
 from .recettes_ia_generation import RecettesIAGenerationMixin
 from .types import (
@@ -118,7 +119,7 @@ class ServiceRecettes(
             logger.error(f"Erreur récupération recette {recette_id}: {e}")
             return None
 
-    @avec_session_db
+    @service_method(cache=True, cache_ttl=1800, session=True, fallback=[])
     def get_by_type(self, type_repas: str, db: Session) -> list[Recette]:
         """Récupère les recettes d'un type donné."""
         try:

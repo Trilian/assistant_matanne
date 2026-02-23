@@ -14,6 +14,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
 from src.modules.famille.utils import (
     clear_famille_cache,
     get_activites_semaine,
@@ -42,7 +44,10 @@ SUGGESTIONS_ACTIVITES = {
     "sortie": ["Restaurant enfant-friendly", "Cinema familial", "Zoo"],
 }
 
+_TYPES_ACTIVITES = ["parc", "musee", "eau", "jeu_maison", "sport", "sortie"]
 
+
+@profiler_rerun("activites")
 def app() -> None:
     """Interface principale du module Activites."""
     svc = _get_service()
@@ -94,10 +99,18 @@ def app() -> None:
         with col2:
             st.subheader("➕ Ajouter Activite")
 
+            # Récupérer pré-remplissage depuis suggestion
+            prefill_titre = st.session_state.pop("activite_prefill_titre", "")
+            prefill_type = st.session_state.pop("activite_prefill_type", "parc")
+
             with st.form("form_activite"):
-                titre = st.text_input("Nom")
+                titre = st.text_input("Nom", value=prefill_titre)
                 type_act = st.selectbox(
-                    "Type", ["parc", "musee", "eau", "jeu_maison", "sport", "sortie"]
+                    "Type",
+                    _TYPES_ACTIVITES,
+                    index=_TYPES_ACTIVITES.index(prefill_type)
+                    if prefill_type in _TYPES_ACTIVITES
+                    else 0,
                 )
                 date_act = st.date_input("Date")
                 duree = st.number_input("Duree (h)", 0.5, 8.0, 2.0)
@@ -151,7 +164,10 @@ def app() -> None:
                     if st.button(
                         suggestion, key=f"suggest_{type_key}_{suggestion}", use_container_width=True
                     ):
-                        pass
+                        st.session_state["activite_prefill_titre"] = suggestion
+                        st.session_state["activite_prefill_type"] = type_key
+                        st.toast(f"✏️ '{suggestion}' pré-rempli dans le formulaire")
+                        st.rerun()
 
         col4, col5, col6 = st.columns(3)
         cols2 = [col4, col5, col6]
@@ -178,7 +194,10 @@ def app() -> None:
                     if st.button(
                         suggestion, key=f"suggest_{type_key}_{suggestion}", use_container_width=True
                     ):
-                        pass
+                        st.session_state["activite_prefill_titre"] = suggestion
+                        st.session_state["activite_prefill_type"] = type_key
+                        st.toast(f"✏️ '{suggestion}' pré-rempli dans le formulaire")
+                        st.rerun()
 
     # ═══════════════════════════════════════════════════════════
     # TAB 3: BUDGET

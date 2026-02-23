@@ -11,9 +11,9 @@ import logging
 from datetime import datetime
 from typing import Any, TypedDict
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import ChildProfile, Routine, RoutineTask
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
@@ -55,6 +55,8 @@ class ServiceRoutines:
     # LECTURE
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def lister_routines(
         self, actives_uniquement: bool = True, db: Session | None = None
@@ -68,8 +70,9 @@ class ServiceRoutines:
         Returns:
             Liste de RoutineDict contenant les données de chaque routine.
         """
-        assert db is not None
-        query = db.query(Routine)
+        if db is None:
+            raise ValueError("Session DB requise")
+        query = db.query(Routine).options(selectinload(Routine.tasks))
         if actives_uniquement:
             query = query.filter(Routine.is_active)
 
@@ -95,6 +98,8 @@ class ServiceRoutines:
             )
         return result
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def lister_taches(self, routine_id: int, db: Session | None = None) -> list[TacheDict]:
         """Liste les tâches d'une routine.
@@ -106,7 +111,8 @@ class ServiceRoutines:
         Returns:
             Liste de TacheDict contenant les tâches.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         tasks = (
             db.query(RoutineTask)
             .filter(RoutineTask.routine_id == routine_id)
@@ -124,6 +130,8 @@ class ServiceRoutines:
             for t in tasks
         ]
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def lister_personnes(self, db: Session | None = None) -> list[str]:
         """Liste les personnes disponibles (Famille + enfants).
@@ -131,7 +139,8 @@ class ServiceRoutines:
         Returns:
             Liste de noms (toujours commençant par 'Famille').
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         children = db.query(ChildProfile).all()
         return ["Famille"] + [c.name for c in children]
 
@@ -139,6 +148,7 @@ class ServiceRoutines:
     # ÉCRITURE
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def creer_routine(
         self,
@@ -160,7 +170,8 @@ class ServiceRoutines:
         Returns:
             L'ID de la routine créée.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         child_id = None
         if pour_qui != "Famille":
             child = db.query(ChildProfile).filter(ChildProfile.name == pour_qui).first()
@@ -183,6 +194,7 @@ class ServiceRoutines:
         )
         return routine.id
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def ajouter_tache(
         self,
@@ -202,7 +214,8 @@ class ServiceRoutines:
         Returns:
             L'ID de la tâche créée.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         task = RoutineTask(
             routine_id=routine_id,
             task_name=nom,
@@ -218,6 +231,7 @@ class ServiceRoutines:
         )
         return task.id
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def marquer_complete(self, task_id: int, db: Session | None = None) -> bool:
         """Marque une tâche comme terminée.
@@ -229,7 +243,8 @@ class ServiceRoutines:
         Returns:
             True si la tâche a été trouvée et marquée.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         task = db.query(RoutineTask).filter(RoutineTask.id == task_id).first()
         if task:
             task.status = "termine"
@@ -241,6 +256,7 @@ class ServiceRoutines:
             return True
         return False
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def reinitialiser_taches_jour(self, db: Session | None = None) -> int:
         """Réinitialise toutes les tâches terminées à 'à faire'.
@@ -248,7 +264,8 @@ class ServiceRoutines:
         Returns:
             Nombre de tâches réinitialisées.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         tasks = db.query(RoutineTask).filter(RoutineTask.status == "termine").all()
         for task in tasks:
             task.status = "à faire"
@@ -257,6 +274,7 @@ class ServiceRoutines:
         logger.info("Réinitialisation: %d tâches", len(tasks))
         return len(tasks)
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def supprimer_routine(self, routine_id: int, db: Session | None = None) -> bool:
         """Supprime une routine et ses tâches.
@@ -268,7 +286,8 @@ class ServiceRoutines:
         Returns:
             True si la routine existait et a été supprimée.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         deleted = db.query(Routine).filter(Routine.id == routine_id).delete()
         db.commit()
         if deleted > 0:
@@ -277,6 +296,7 @@ class ServiceRoutines:
             )
         return deleted > 0
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def desactiver_routine(self, routine_id: int, db: Session | None = None) -> bool:
         """Désactive une routine sans la supprimer.
@@ -288,7 +308,8 @@ class ServiceRoutines:
         Returns:
             True si la routine a été trouvée et désactivée.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         routine = db.query(Routine).get(routine_id)
         if routine:
             routine.is_active = False
@@ -303,6 +324,8 @@ class ServiceRoutines:
     # LOGIQUE MÉTIER
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_taches_en_retard(self, db: Session | None = None) -> list[dict[str, Any]]:
         """Détecte les tâches planifiées non terminées dont l'heure est passée.
@@ -310,7 +333,8 @@ class ServiceRoutines:
         Returns:
             Liste de dictionnaires décrivant chaque tâche en retard.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         taches_retard = []
         now = datetime.now().time()
 
@@ -342,6 +366,8 @@ class ServiceRoutines:
 
         return taches_retard
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_taches_ia_data(self, db: Session | None = None) -> list[dict[str, Any]]:
         """Récupère les tâches actives pour l'analyse IA.
@@ -349,7 +375,8 @@ class ServiceRoutines:
         Returns:
             Liste de dicts avec nom routine, heure et nom tâche.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         tasks = (
             db.query(RoutineTask, Routine)
             .join(Routine, RoutineTask.routine_id == Routine.id)
@@ -365,6 +392,8 @@ class ServiceRoutines:
             for task, routine in tasks
         ]
 
+    @avec_gestion_erreurs(default_return=0)
+    @avec_cache(ttl=300)
     @avec_session_db
     def compter_completees_aujourdhui(self, db: Session | None = None) -> int:
         """Compte les tâches complétées aujourd'hui.
@@ -372,7 +401,8 @@ class ServiceRoutines:
         Returns:
             Nombre de tâches terminées depuis minuit.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         return (
             db.query(RoutineTask)
             .filter(RoutineTask.completed_at >= datetime.now().replace(hour=0, minute=0))

@@ -5,7 +5,9 @@ from datetime import date, time, timedelta
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.modules._framework import avec_gestion_erreurs_ui, error_boundary
 from src.modules.cuisine.batch_cooking_utils import estimer_heure_fin, formater_duree
 from src.ui import etat_vide
 
@@ -25,6 +27,7 @@ from .generation import generer_batch_ia
 logger = logging.getLogger(__name__)
 
 
+@profiler_rerun("batch_cooking")
 def app():
     """Point d'entrée du module Batch Cooking Détaillé."""
 
@@ -106,7 +109,9 @@ def app():
         else:
             st.warning("⚠️ Aucun planning de repas trouvé.")
             if st.button("📅 Aller au planificateur de repas"):
-                st.info("🚧 Navigation vers le planificateur...")
+                from src.core.state import naviguer
+
+                naviguer("cuisine.planificateur_repas")
 
         st.divider()
 
@@ -220,11 +225,38 @@ def app():
 
         with col_act1:
             if st.button("🖨️ Imprimer les instructions", use_container_width=True):
-                st.info("🚧 Export PDF en développement")
+                try:
+                    from src.modules.cuisine.planificateur_repas import generer_pdf_planning_session
+
+                    pdf_buf = generer_pdf_planning_session(
+                        planning_data=batch_data,
+                        date_debut=st.session_state.get("batch_date"),
+                        conseils="",
+                        suggestions_bio=[],
+                    )
+                    if pdf_buf:
+                        st.download_button(
+                            label="📥 Télécharger PDF",
+                            data=pdf_buf,
+                            file_name="batch_cooking.pdf",
+                            mime="application/pdf",
+                            use_container_width=True,
+                        )
+                    else:
+                        st.warning("⚠️ Génération PDF impossible")
+                except Exception as e:
+                    logger.error(f"Erreur export PDF batch: {e}")
+                    st.error("❌ Erreur lors de l'export PDF")
 
         with col_act2:
             if st.button("🛒 Envoyer aux courses", use_container_width=True):
-                st.info("🚧 Intégration liste de courses...")
+                liste = batch_data.get("liste_courses", {})
+                if liste:
+                    # Stocker la liste de courses dans session_state pour le module courses
+                    st.session_state[SK.COURSES_DEPUIS_BATCH] = liste
+                    st.success("✅ Liste envoyée ! Allez dans Courses pour la retrouver.")
+                else:
+                    st.warning("⚠️ Aucune liste de courses à envoyer")
 
         with col_act3:
             if st.button("💾 Sauvegarder session", use_container_width=True):

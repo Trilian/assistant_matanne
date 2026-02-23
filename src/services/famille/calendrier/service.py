@@ -14,7 +14,7 @@ from datetime import date, datetime, timedelta
 from uuid import UUID, uuid4
 
 import httpx
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from src.core.db import obtenir_contexte_db
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
@@ -121,6 +121,7 @@ class CalendarSyncService(GoogleCalendarMixin):
             if include_meals:
                 repas_list = (
                     db.query(Repas)
+                    .options(joinedload(Repas.recette))
                     .join(Planning)
                     .filter(
                         Repas.date_repas >= start,

@@ -115,17 +115,18 @@ class TestAjouterActivite:
         mock_db = MagicMock()
         mock_db.add.side_effect = Exception("DB Error")
 
-        with pytest.raises(Exception, match="DB Error"):
-            svc.ajouter_activite(
-                titre="Test",
-                type_activite="parc",
-                date_prevue=date.today(),
-                duree=1.0,
-                lieu="",
-                participants=[],
-                cout_estime=0.0,
-                db=mock_db,
-            )
+        # @avec_gestion_erreurs catches exceptions and returns default_return=None
+        result = svc.ajouter_activite(
+            titre="Test",
+            type_activite="parc",
+            date_prevue=date.today(),
+            duree=1.0,
+            lieu="",
+            participants=[],
+            cout_estime=0.0,
+            db=mock_db,
+        )
+        assert result is None
 
 
 @pytest.mark.unit
@@ -239,8 +240,9 @@ class TestMarquerTermineeException:
         mock_db = MagicMock()
         mock_db.get.side_effect = Exception("DB error")
 
-        with pytest.raises(Exception, match="DB error"):
-            svc.marquer_terminee(activity_id=1, cout_reel=10.0, db=mock_db)
+        # @avec_gestion_erreurs catches exceptions and returns default_return=None
+        result = svc.marquer_terminee(activity_id=1, cout_reel=10.0, db=mock_db)
+        assert result is None
 
 
 @pytest.mark.unit

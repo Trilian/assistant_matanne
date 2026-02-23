@@ -26,6 +26,7 @@ Implémente le pattern Circuit Breaker pour:
 - HALF_OPEN: Test de reprise (1 appel à la fois)
 """
 
+import asyncio
 import logging
 import threading
 import time
@@ -234,6 +235,17 @@ def avec_circuit_breaker(
 
     def decorator(func):
         cb = obtenir_circuit(nom, seuil_echecs, delai_reset)
+
+        if asyncio.iscoroutinefunction(func):
+
+            @wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                return cb.appeler(
+                    fn=lambda: func(*args, **kwargs),
+                    fallback=fallback,
+                )
+
+            return async_wrapper
 
         @wraps(func)
         def wrapper(*args, **kwargs):

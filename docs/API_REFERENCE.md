@@ -129,7 +129,22 @@ Créer une nouvelle recette.
 
 #### `PUT /api/v1/recettes/{id}`
 
-Mettre à jour une recette existante.
+Mettre à jour une recette existante (remplacement complet).
+
+#### `PATCH /api/v1/recettes/{id}`
+
+Mise à jour partielle d'une recette. Seuls les champs fournis sont modifiés.
+
+**Corps de requête (exemple):**
+
+```json
+{
+  "nom": "Nouveau nom",
+  "temps_cuisson": 60
+}
+```
+
+**Note:** Tous les champs sont optionnels. Utilisez `PUT` pour un remplacement complet.
 
 #### `DELETE /api/v1/recettes/{id}`
 

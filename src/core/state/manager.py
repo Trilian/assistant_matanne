@@ -43,7 +43,10 @@ class GestionnaireEtat:
     @staticmethod
     def naviguer_vers(module: str):
         """
-        Navigue vers un module
+        Navigue vers un module.
+
+        Met à jour l'état interne, puis appelle st.switch_page()
+        si le système de navigation st.navigation() est actif.
 
         Args:
             module: Nom du module (ex: "cuisine.recettes")
@@ -60,6 +63,19 @@ class GestionnaireEtat:
 
         etat.module_actuel = module
         logger.info(f"Navigation: {module}")
+
+        # Si st.navigation() est initialisé, utiliser switch_page
+        try:
+            from src.core.navigation import obtenir_page
+
+            page = obtenir_page(module)
+            if page is not None:
+                import streamlit as st
+
+                st.switch_page(page)
+        except (ImportError, Exception):
+            # Fallback: pas de navigation native (tests, etc.)
+            pass
 
     @staticmethod
     def revenir():

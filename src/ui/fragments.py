@@ -46,7 +46,15 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 def _has_fragment() -> bool:
     """Vérifie support st.fragment (Streamlit 1.33+)."""
-    return hasattr(st, "fragment")
+    if not hasattr(st, "fragment"):
+        return False
+    # st.fragment ne fonctionne pas sans ScriptRunContext (tests, CLI)
+    try:
+        from streamlit.runtime.scriptrunner import get_script_run_ctx
+
+        return get_script_run_ctx() is not None
+    except ImportError:
+        return False
 
 
 def _has_run_every() -> bool:
@@ -88,7 +96,7 @@ def ui_fragment(func: F) -> F:
                     return func(*args, **kwargs)
 
                 return _frag()
-            except (TypeError, AttributeError) as e:
+            except Exception as e:
                 logger.debug(f"ui_fragment fallback: {e}")
 
         return func(*args, **kwargs)
@@ -131,7 +139,7 @@ def auto_refresh(seconds: int = 30) -> Callable[[F], F]:
                         return func(*args, **kwargs)
 
                     return _auto()
-                except TypeError as e:
+                except Exception as e:
                     logger.debug(f"auto_refresh fallback: {e}")
 
             return func(*args, **kwargs)

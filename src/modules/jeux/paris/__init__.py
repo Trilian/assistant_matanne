@@ -11,6 +11,9 @@ Fonctionnalités:
 import pandas as pd
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
+
 from .crud import (
     ajouter_equipe,
     ajouter_match,
@@ -43,6 +46,7 @@ from .utils import (
 )
 
 
+@profiler_rerun("paris")
 def app():
     """Point d'entrée du module Paris Sportifs"""
 

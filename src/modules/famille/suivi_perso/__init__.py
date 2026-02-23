@@ -10,6 +10,9 @@ Fonctionnalités:
 - Sync Garmin
 """
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
+
 from .activities import afficher_activities
 from .alimentation import afficher_food_form, afficher_food_log
 from .settings import afficher_garmin_settings, afficher_objectifs
@@ -19,6 +22,7 @@ from .tableau_bord import afficher_dashboard, afficher_user_switch, afficher_wee
 from .utils import get_current_user, get_food_logs_today, get_user_data, set_current_user, st
 
 
+@profiler_rerun("suivi_perso")
 def app():
     """Point d'entrée du module Suivi Perso"""
     st.title("💪 Mon Suivi")
@@ -39,19 +43,24 @@ def app():
     tabs = st.tabs(["📊 Dashboard", "🏃 Activités", "🥗 Alimentation", "🎯 Objectifs", "⌚ Garmin"])
 
     with tabs[0]:
-        afficher_dashboard(data)
+        with error_boundary(titre="Erreur dashboard suivi"):
+            afficher_dashboard(data)
 
     with tabs[1]:
-        afficher_activities(data)
+        with error_boundary(titre="Erreur activités suivi"):
+            afficher_activities(data)
 
     with tabs[2]:
-        afficher_food_log(username)
+        with error_boundary(titre="Erreur alimentation"):
+            afficher_food_log(username)
 
     with tabs[3]:
-        afficher_objectifs(data)
+        with error_boundary(titre="Erreur objectifs"):
+            afficher_objectifs(data)
 
     with tabs[4]:
-        afficher_garmin_settings(data)
+        with error_boundary(titre="Erreur Garmin"):
+            afficher_garmin_settings(data)
 
 
 __all__ = [

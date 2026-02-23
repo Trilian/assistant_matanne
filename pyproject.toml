@@ -28,6 +28,10 @@ PyJWT = "^2.8.0"
 pyzbar = {version = "^0.1.9", optional = true}
 opencv-python-headless = {version = "^4.9.0", optional = true}
 streamlit-webrtc = {version = "^0.47.0", optional = true}
+# Drag & drop
+streamlit-sortables = "^0.3.0"
+# Redis (production rate limiting & cache)
+redis = {version = "^5.0.0", optional = true}
 # PDF generation
 reportlab = "^4.0.0"
 # Scheduler

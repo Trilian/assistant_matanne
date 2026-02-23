@@ -5,18 +5,21 @@ Point d'entrée avec navigation par onglets
 
 import streamlit as st
 
-from src.modules.parametres.about import afficher_about
-from src.modules.parametres.affichage import afficher_display_config
-from src.modules.parametres.budget import afficher_budget_config
-from src.modules.parametres.cache import afficher_cache_config
-from src.modules.parametres.database import afficher_database_config
-from src.modules.parametres.foyer import afficher_foyer_config
-from src.modules.parametres.ia import afficher_ia_config
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
 
 
+@profiler_rerun("parametres")
 def app():
     """Point d'entree module paramètres"""
 
+    from src.modules.parametres.about import afficher_about
+    from src.modules.parametres.affichage import afficher_display_config
+    from src.modules.parametres.budget import afficher_budget_config
+    from src.modules.parametres.cache import afficher_cache_config
+    from src.modules.parametres.database import afficher_database_config
+    from src.modules.parametres.foyer import afficher_foyer_config
+    from src.modules.parametres.ia import afficher_ia_config
     from src.ui.views.sauvegarde import afficher_sauvegarde
 
     st.title("⚙️ Paramètres")
@@ -36,21 +39,29 @@ def app():
     )
 
     with tabs[0]:
-        afficher_foyer_config()
+        with error_boundary(titre="Erreur config foyer"):
+            afficher_foyer_config()
     with tabs[1]:
-        afficher_ia_config()
+        with error_boundary(titre="Erreur config IA"):
+            afficher_ia_config()
     with tabs[2]:
-        afficher_database_config()
+        with error_boundary(titre="Erreur config BD"):
+            afficher_database_config()
     with tabs[3]:
-        afficher_cache_config()
+        with error_boundary(titre="Erreur config cache"):
+            afficher_cache_config()
     with tabs[4]:
-        afficher_sauvegarde()
+        with error_boundary(titre="Erreur sauvegarde"):
+            afficher_sauvegarde()
     with tabs[5]:
-        afficher_display_config()
+        with error_boundary(titre="Erreur config affichage"):
+            afficher_display_config()
     with tabs[6]:
-        afficher_budget_config()
+        with error_boundary(titre="Erreur config budget"):
+            afficher_budget_config()
     with tabs[7]:
-        afficher_about()
+        with error_boundary(titre="Erreur à propos"):
+            afficher_about()
 
 
 __all__ = [
@@ -63,3 +74,27 @@ __all__ = [
     "afficher_foyer_config",
     "afficher_ia_config",
 ]
+
+# ═══════════════════════════════════════════════════════════
+# LAZY LOADING pour imports directs (tests, etc.)
+# ═══════════════════════════════════════════════════════════
+
+_LAZY_IMPORTS: dict[str, str] = {
+    "afficher_about": "about",
+    "afficher_budget_config": "budget",
+    "afficher_cache_config": "cache",
+    "afficher_database_config": "database",
+    "afficher_display_config": "affichage",
+    "afficher_foyer_config": "foyer",
+    "afficher_ia_config": "ia",
+}
+
+
+def __getattr__(name: str):
+    """Lazy loading des fonctions de configuration."""
+    if name in _LAZY_IMPORTS:
+        from importlib import import_module
+
+        mod = import_module(f"src.modules.parametres.{_LAZY_IMPORTS[name]}")
+        return getattr(mod, name)
+    raise AttributeError(f"module 'src.modules.parametres' has no attribute '{name}'")

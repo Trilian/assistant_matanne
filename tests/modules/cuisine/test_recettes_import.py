@@ -120,31 +120,48 @@ class TestRenderImportUrl:
         _afficher_import_url()
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.recettes_import.RecipeImporter")
+    @patch("src.modules.cuisine.recettes_import.get_recipe_import_service")
     @patch("src.modules.cuisine.recettes_import.st")
-    def test_render_import_url_extract_success(self, mock_st, mock_importer):
+    def test_render_import_url_extract_success(self, mock_st, mock_factory):
         """Test extraction reussie depuis URL"""
         from src.modules.cuisine.recettes_import import _afficher_import_url
 
         setup_mock_st(mock_st, {"extracted_recipe": None})
         mock_st.button.return_value = True
         mock_st.text_input.return_value = "https://example.com/recette"
-        mock_importer.from_url.return_value = {"nom": "Test Recette"}
+
+        # Mock le service et son résultat
+        mock_service = MagicMock()
+        mock_result = MagicMock()
+        mock_result.success = True
+        mock_result.recipe = MagicMock()
+        mock_result.recipe.model_dump.return_value = {"nom": "Test Recette"}
+        mock_result.recipe.ingredients = []
+        mock_service.import_from_url.return_value = mock_result
+        mock_factory.return_value = mock_service
 
         _afficher_import_url()
-        mock_importer.from_url.assert_called_once()
+        mock_service.import_from_url.assert_called_once_with("https://example.com/recette")
         mock_st.success.assert_called()
 
-    @patch("src.modules.cuisine.recettes_import.RecipeImporter")
+    @patch("src.modules.cuisine.recettes_import.get_recipe_import_service")
     @patch("src.modules.cuisine.recettes_import.st")
-    def test_render_import_url_extract_failure(self, mock_st, mock_importer):
+    def test_render_import_url_extract_failure(self, mock_st, mock_factory):
         """Test extraction echouee depuis URL"""
         from src.modules.cuisine.recettes_import import _afficher_import_url
 
         setup_mock_st(mock_st, {"extracted_recipe": None})
         mock_st.button.return_value = True
         mock_st.text_input.return_value = "https://example.com/recette"
-        mock_importer.from_url.return_value = None
+
+        # Mock le service retournant un échec
+        mock_service = MagicMock()
+        mock_result = MagicMock()
+        mock_result.success = False
+        mock_result.recipe = None
+        mock_result.message = "Extraction impossible"
+        mock_service.import_from_url.return_value = mock_result
+        mock_factory.return_value = mock_service
 
         _afficher_import_url()
         mock_st.error.assert_called()

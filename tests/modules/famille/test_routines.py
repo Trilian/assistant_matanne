@@ -68,6 +68,7 @@ def mock_db_session(mock_routine, mock_routine_task, mock_child_profile):
     mock_query.delete.return_value = 1
     mock_query.count.return_value = 5
     mock_query.join.return_value = mock_query
+    mock_query.options.return_value = mock_query
 
     session.query.return_value = mock_query
     session.add = MagicMock()
@@ -87,6 +88,7 @@ def service():
         patch("src.services.famille.routines.Routine") as mock_routine_cls,
         patch("src.services.famille.routines.RoutineTask") as mock_task_cls,
         patch("src.services.famille.routines.ChildProfile") as mock_child_cls,
+        patch("src.services.famille.routines.selectinload", return_value=MagicMock()),
         patch("src.services.famille.routines.obtenir_bus"),
     ):
         from src.services.famille.routines import ServiceRoutines

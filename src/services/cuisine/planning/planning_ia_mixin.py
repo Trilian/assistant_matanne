@@ -16,14 +16,12 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from src.core.caching import Cache
+from src.core.date_utils.helpers import get_weekday_names
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import Planning, Repas
 
+from .nutrition import determine_protein_type
 from .types import JourPlanning, ParametresEquilibre
-from .utils import (
-    determine_protein_type,
-    get_weekday_names,
-)
 
 logger = logging.getLogger(__name__)
 

@@ -157,12 +157,13 @@ class TestGetAuthorizationUrl:
     """Tests pour get_authorization_url."""
 
     def test_cles_non_configurees(self):
-        """Erreur si clés non configurées."""
+        """Retourne fallback si clés non configurées (via @avec_resilience)."""
         config = GarminConfig(consumer_key="", consumer_secret="")
         service = ServiceGarmin(config=config)
 
-        with pytest.raises(ValueError, match="Clés Garmin non configurées"):
-            service.get_authorization_url()
+        # @avec_resilience catches ValueError and returns fallback=(None, None)
+        result = service.get_authorization_url()
+        assert result == (None, None)
 
     @patch("src.services.integrations.garmin.service.OAuth1Session")
     def test_generation_url(self, mock_oauth_class, mock_config):
@@ -204,15 +205,16 @@ class TestGetAuthorizationUrl:
 
     @patch("src.services.integrations.garmin.service.OAuth1Session")
     def test_erreur_fetch_token(self, mock_oauth_class, mock_config):
-        """Exception si fetch_request_token échoue."""
+        """Retourne fallback si fetch_request_token échoue (via @avec_resilience)."""
         mock_oauth = Mock()
         mock_oauth.fetch_request_token.side_effect = Exception("Network error")
         mock_oauth_class.return_value = mock_oauth
 
         service = ServiceGarmin(config=mock_config)
 
-        with pytest.raises(Exception, match="Network error"):
-            service.get_authorization_url()
+        # @avec_resilience catches Exception and returns fallback=(None, None)
+        result = service.get_authorization_url()
+        assert result == (None, None)
 
 
 class TestCompleteAuthorization:
@@ -741,15 +743,16 @@ class TestAuthenticationErrors:
 
     @patch("src.services.integrations.garmin.service.OAuth1Session")
     def test_oauth_token_error(self, mock_oauth_class, mock_config):
-        """Gère les erreurs de récupération de token."""
+        """Gère les erreurs de récupération de token via @avec_resilience."""
         mock_oauth = Mock()
         mock_oauth.fetch_request_token.side_effect = Exception("Invalid consumer key")
         mock_oauth_class.return_value = mock_oauth
 
         service = ServiceGarmin(config=mock_config)
 
-        with pytest.raises(Exception, match="Invalid consumer key"):
-            service.get_authorization_url()
+        # @avec_resilience catches Exception and returns fallback=(None, None)
+        result = service.get_authorization_url()
+        assert result == (None, None)
 
     @patch("src.services.integrations.garmin.service.OAuth1Session")
     @patch("src.core.db.obtenir_contexte_db")

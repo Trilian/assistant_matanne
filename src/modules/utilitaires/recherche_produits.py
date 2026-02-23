@@ -9,7 +9,9 @@ import logging
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.modules._framework import error_boundary
 from src.ui import etat_vide
 
 logger = logging.getLogger(__name__)
@@ -147,6 +149,7 @@ def _afficher_resultats_recherche(resultats: list):
 # ═══════════════════════════════════════════════════════════
 
 
+@profiler_rerun("recherche_produits")
 def app():
     """Point d'entrée module recherche produits."""
     st.title("🔍 Recherche Produits")

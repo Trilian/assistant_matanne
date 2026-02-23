@@ -8,7 +8,7 @@ Regroupe les méthodes d'intégration IA :
 
 import logging
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.errors_base import ErreurValidation
@@ -55,7 +55,12 @@ class BatchCookingIAMixin:
         - Les conseils pour cuisiner avec un enfant présent
         """
         # Récupérer les recettes
-        recettes = db.query(Recette).filter(Recette.id.in_(recettes_ids)).all()
+        recettes = (
+            db.query(Recette)
+            .options(selectinload(Recette.etapes))
+            .filter(Recette.id.in_(recettes_ids))
+            .all()
+        )
         if not recettes:
             raise ErreurValidation("Aucune recette trouvée")
 

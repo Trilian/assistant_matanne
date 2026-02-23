@@ -30,6 +30,12 @@ from .limiter import (
 # Middleware
 from .middleware import MiddlewareLimitationDebit
 
+# Stockage Redis (production)
+from .redis_storage import (
+    StockageRedis,
+    obtenir_stockage_optimal,
+)
+
 # Stockage
 from .storage import (
     StockageLimitationDebit,
@@ -51,6 +57,8 @@ __all__ = [
     # Storage
     "StockageLimitationDebit",
     "_stockage",
+    "StockageRedis",
+    "obtenir_stockage_optimal",
     # Limiter
     "LimiteurDebit",
     "limiteur_debit",

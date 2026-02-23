@@ -14,14 +14,23 @@ logger = logging.getLogger(__name__)
 
 
 class LimiteurDebit:
-    """Limiteur de débit principal. Supporte plusieurs fenêtres de temps."""
+    """Limiteur de débit principal. Supporte plusieurs fenêtres de temps.
+
+    Utilise automatiquement Redis si ``REDIS_URL`` est configuré,
+    sinon fallback sur le stockage in-memory.
+    """
 
     def __init__(
         self,
         stockage: StockageLimitationDebit | None = None,
         config: ConfigLimitationDebit | None = None,
     ):
-        self.stockage = stockage or _stockage
+        if stockage is not None:
+            self.stockage = stockage
+        else:
+            from .redis_storage import obtenir_stockage_optimal
+
+            self.stockage = obtenir_stockage_optimal()
         self.config = config or config_limitation_debit
 
     def _generer_cle(

@@ -12,7 +12,7 @@ Features:
 import logging
 from datetime import date, timedelta
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from src.core.ai import ClientIA, obtenir_client_ia
 from src.core.decorators import avec_session_db
@@ -359,7 +359,12 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
     def _query_taches_jour(self, db: Session, jour_semaine: int) -> list[RoutineTask]:
         """Query interne pour tâches du jour."""
         # Récupérer routines actives du jour
-        routines = db.query(Routine).filter(Routine.actif.is_(True)).all()
+        routines = (
+            db.query(Routine)
+            .options(selectinload(Routine.tasks))
+            .filter(Routine.actif.is_(True))
+            .all()
+        )
         taches = []
         for routine in routines:
             taches.extend(routine.tasks)

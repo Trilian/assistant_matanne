@@ -13,6 +13,7 @@ from datetime import date
 import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
 from src.ui.tokens_semantic import Sem
 
@@ -190,6 +191,7 @@ def app():
 # ═══════════════════════════════════════════════════════════
 
 
+@ui_fragment
 def afficher_quick_actions():
     """Raccourcis d'actions rapides"""
     from src.core.state import GestionnaireEtat

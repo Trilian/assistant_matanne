@@ -20,7 +20,7 @@ from decimal import Decimal
 from sqlalchemy import extract
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_cache, avec_session_db
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import BudgetMensuelDB, FamilyBudget
 
 from .budget_alertes import BudgetAlertesMixin
@@ -68,6 +68,7 @@ class BudgetService(BudgetAnalysesMixin, BudgetAlertesMixin):
     # GESTION DES DÉPENSES
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def ajouter_depense(self, depense: Depense, db: Session = None) -> Depense:
         """
@@ -104,6 +105,7 @@ class BudgetService(BudgetAnalysesMixin, BudgetAlertesMixin):
 
         return depense
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def modifier_depense(self, depense_id: int, updates: dict, db: Session = None) -> bool:
         """Modifie une dépense existante."""
@@ -119,6 +121,7 @@ class BudgetService(BudgetAnalysesMixin, BudgetAlertesMixin):
         db.commit()
         return True
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def supprimer_depense(self, depense_id: int, db: Session = None) -> bool:
         """Supprime une dépense."""
@@ -131,6 +134,7 @@ class BudgetService(BudgetAnalysesMixin, BudgetAlertesMixin):
         db.commit()
         return True
 
+    @avec_gestion_erreurs(default_return=[])
     @avec_cache(ttl=300)
     @avec_session_db
     def get_depenses_mois(
@@ -179,6 +183,7 @@ class BudgetService(BudgetAnalysesMixin, BudgetAlertesMixin):
     # GESTION DES BUDGETS (PERSISTÉ EN DB)
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def definir_budget(
         self,
@@ -235,6 +240,8 @@ class BudgetService(BudgetAnalysesMixin, BudgetAlertesMixin):
         db.commit()
         logger.info(f"✅ Budget défini: {categorie.value} = {montant}€ ({mois}/{annee})")
 
+    @avec_gestion_erreurs(default_return=0.0)
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_budget(
         self,
@@ -265,6 +272,8 @@ class BudgetService(BudgetAnalysesMixin, BudgetAlertesMixin):
 
         return self.BUDGETS_DEFAUT.get(categorie, 0)
 
+    @avec_gestion_erreurs(default_return={})
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_tous_budgets(
         self,
@@ -298,6 +307,7 @@ class BudgetService(BudgetAnalysesMixin, BudgetAlertesMixin):
 
         return result
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def definir_budgets_batch(
         self,

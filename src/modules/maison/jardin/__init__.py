@@ -12,6 +12,9 @@ Structure:
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
+
 from .data import obtenir_meteo_jardin
 from .logic import (
     BADGES_JARDIN,
@@ -34,6 +37,7 @@ from .styles import injecter_css_jardin
 __all__ = ["app"]
 
 
+@profiler_rerun("jardin")
 def app():
     """Point d'entrée du module Jardin avec gamification."""
     injecter_css_jardin()
@@ -90,22 +94,29 @@ def app():
     )
 
     with tab1:
-        onglet_taches(mes_plantes, meteo)
+        with error_boundary(titre="Erreur tâches jardin"):
+            onglet_taches(mes_plantes, meteo)
 
     with tab2:
-        onglet_mes_plantes(mes_plantes)
+        with error_boundary(titre="Erreur mes plantes"):
+            onglet_mes_plantes(mes_plantes)
 
     with tab3:
-        onglet_recoltes(mes_plantes, recoltes)
+        with error_boundary(titre="Erreur récoltes"):
+            onglet_recoltes(mes_plantes, recoltes)
 
     with tab4:
-        onglet_autonomie(mes_plantes, recoltes)
+        with error_boundary(titre="Erreur autonomie"):
+            onglet_autonomie(mes_plantes, recoltes)
 
     with tab5:
-        onglet_plan()
+        with error_boundary(titre="Erreur plan jardin"):
+            onglet_plan(mes_plantes)
 
     with tab6:
-        onglet_graphiques(mes_plantes, recoltes)
+        with error_boundary(titre="Erreur graphiques jardin"):
+            onglet_graphiques(mes_plantes, recoltes)
 
     with tab7:
-        onglet_export(mes_plantes, recoltes)
+        with error_boundary(titre="Erreur export jardin"):
+            onglet_export(mes_plantes, recoltes)

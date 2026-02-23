@@ -12,6 +12,9 @@ Fonctionnalités complètes:
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
+
 from .historique import afficher_historique
 
 # Imports des sous-modules
@@ -32,6 +35,7 @@ from .suggestions_ia import afficher_suggestions_ia
 from .utils import PRIORITY_EMOJIS, RAYONS_DEFAULT
 
 
+@profiler_rerun("courses")
 def app():
     """Point d'entrée module courses"""
     st.title("🛒 Courses")
@@ -58,22 +62,28 @@ def app():
     )
 
     with tab_liste:
-        afficher_liste_active()
+        with error_boundary(titre="Erreur liste active"):
+            afficher_liste_active()
 
     with tab_planning:
-        afficher_courses_depuis_planning()
+        with error_boundary(titre="Erreur planning courses"):
+            afficher_courses_depuis_planning()
 
     with tab_suggestions:
-        afficher_suggestions_ia()
+        with error_boundary(titre="Erreur suggestions IA"):
+            afficher_suggestions_ia()
 
     with tab_historique:
-        afficher_historique()
+        with error_boundary(titre="Erreur historique"):
+            afficher_historique()
 
     with tab_modeles:
-        afficher_modeles()
+        with error_boundary(titre="Erreur modèles"):
+            afficher_modeles()
 
     with tab_outils:
-        afficher_outils()
+        with error_boundary(titre="Erreur outils"):
+            afficher_outils()
 
 
 __all__ = [

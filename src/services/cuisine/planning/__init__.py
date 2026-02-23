@@ -57,28 +57,33 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # ─── Service Templates (templates.py) ───
     "ServiceTemplates": (".templates", "ServiceTemplates"),
     "obtenir_service_templates": (".templates", "obtenir_service_templates"),
-    # ─── Utilitaires (utils.py) ───
-    "get_weekday_names": (".utils", "get_weekday_names"),
-    "get_weekday_name": (".utils", "get_weekday_name"),
-    "get_weekday_index": (".utils", "get_weekday_index"),
-    "calculate_week_dates": (".utils", "calculate_week_dates"),
-    "get_week_range": (".utils", "get_week_range"),
-    "get_monday_of_week": (".utils", "get_monday_of_week"),
-    "format_week_label": (".utils", "format_week_label"),
-    "determine_protein_type": (".utils", "determine_protein_type"),
-    "get_default_protein_schedule": (".utils", "get_default_protein_schedule"),
-    "calculate_week_balance": (".utils", "calculate_week_balance"),
-    "is_balanced_week": (".utils", "is_balanced_week"),
-    "format_meal_for_display": (".utils", "format_meal_for_display"),
-    "format_planning_summary": (".utils", "format_planning_summary"),
-    "group_meals_by_type": (".utils", "group_meals_by_type"),
-    "aggregate_ingredients": (".utils", "aggregate_ingredients"),
-    "sort_ingredients_by_rayon": (".utils", "sort_ingredients_by_rayon"),
-    "get_rayon_order": (".utils", "get_rayon_order"),
-    "validate_planning_dates": (".utils", "validate_planning_dates"),
-    "validate_meal_selection": (".utils", "validate_meal_selection"),
-    "build_planning_prompt_context": (".utils", "build_planning_prompt_context"),
-    "parse_ai_planning_response": (".utils", "parse_ai_planning_response"),
+    # ─── Utilitaires dates (src.core.date_utils) ───
+    "get_weekday_names": ("src.core.date_utils.helpers", "get_weekday_names"),
+    "get_weekday_name": ("src.core.date_utils.helpers", "get_weekday_name"),
+    "get_weekday_index": ("src.core.date_utils.helpers", "get_weekday_index"),
+    "calculate_week_dates": ("src.core.date_utils.semaines", "obtenir_jours_semaine"),
+    "get_week_range": ("src.core.date_utils.semaines", "obtenir_bornes_semaine"),
+    "get_monday_of_week": ("src.core.date_utils.semaines", "obtenir_debut_semaine"),
+    "format_week_label": ("src.core.date_utils.formatage", "format_week_label"),
+    # ─── Nutrition ───
+    "determine_protein_type": (".nutrition", "determine_protein_type"),
+    "get_default_protein_schedule": (".nutrition", "get_default_protein_schedule"),
+    "calculate_week_balance": (".nutrition", "calculate_week_balance"),
+    "is_balanced_week": (".nutrition", "is_balanced_week"),
+    # ─── Formatters ───
+    "format_meal_for_display": (".formatters", "format_meal_for_display"),
+    "format_planning_summary": (".formatters", "format_planning_summary"),
+    "group_meals_by_type": (".formatters", "group_meals_by_type"),
+    # ─── Agrégation ───
+    "aggregate_ingredients": (".agregation", "aggregate_ingredients"),
+    "sort_ingredients_by_rayon": (".agregation", "sort_ingredients_by_rayon"),
+    "get_rayon_order": (".agregation", "get_rayon_order"),
+    # ─── Validation ───
+    "validate_planning_dates": (".validators", "validate_planning_dates"),
+    "validate_meal_selection": (".validators", "validate_meal_selection"),
+    # ─── Prompts IA ───
+    "build_planning_prompt_context": (".prompts", "build_planning_prompt_context"),
+    "parse_ai_planning_response": (".prompts", "parse_ai_planning_response"),
 }
 
 

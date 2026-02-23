@@ -39,14 +39,51 @@ DUREE_TOKEN_HEURES = 24
 _API_SECRET_KEY_DEFAULT = "dev-secret-key-change-in-production"
 
 
+def _est_production() -> bool:
+    """Vérifie si l'application tourne en production."""
+    return os.getenv("ENVIRONMENT", "development").lower() in ("production", "prod")
+
+
 def _obtenir_api_secret() -> str:
-    """Retourne la clé secrète API depuis les variables d'environnement."""
-    return os.getenv("API_SECRET_KEY", _API_SECRET_KEY_DEFAULT)
+    """Retourne la clé secrète API depuis les variables d'environnement.
+
+    Raises:
+        RuntimeError: Si la clé par défaut est utilisée en production.
+    """
+    # Utilise le default si non défini OU si vide
+    secret = os.getenv("API_SECRET_KEY") or _API_SECRET_KEY_DEFAULT
+
+    if _est_production() and secret == _API_SECRET_KEY_DEFAULT:
+        raise RuntimeError(
+            "ERREUR CRITIQUE: API_SECRET_KEY doit être configuré en production. "
+            "Ne jamais utiliser la clé par défaut. "
+            "Générez une clé: python -c 'import secrets; print(secrets.token_urlsafe(64))'"
+        )
+
+    if secret == _API_SECRET_KEY_DEFAULT:
+        logger.warning(
+            "API_SECRET_KEY utilise la valeur par défaut. "
+            "Configurez une clé sécurisée pour la production."
+        )
+
+    return secret
 
 
 def _obtenir_supabase_jwt_secret() -> str | None:
-    """Retourne le secret JWT Supabase si configuré."""
-    return os.getenv("SUPABASE_JWT_SECRET")
+    """Retourne le secret JWT Supabase si configuré.
+
+    En production, loggue un avertissement si non configuré
+    (les tokens Supabase seront décodés sans vérification de signature).
+    """
+    secret = os.getenv("SUPABASE_JWT_SECRET")
+
+    if not secret and _est_production():
+        logger.warning(
+            "AVERTISSEMENT SÉCURITÉ: SUPABASE_JWT_SECRET non configuré en production. "
+            "Les tokens Supabase seront décodés SANS vérification de signature."
+        )
+
+    return secret
 
 
 # ═══════════════════════════════════════════════════════════

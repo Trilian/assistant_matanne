@@ -18,6 +18,14 @@ from .utils import (
     get_semaine_suivante,
 )
 
+# Drag & drop (graceful fallback si pas installé)
+try:
+    from streamlit_sortables import sort_items
+
+    HAS_SORTABLES = True
+except ImportError:
+    HAS_SORTABLES = False
+
 # Accesseur lazy pour le service (singleton)
 _service = None
 
@@ -136,6 +144,36 @@ def afficher_jour_calendrier(jour: JourCalendrier):
         # Autres événements
         for evt in jour.autres_evenements:
             st.caption(f"{evt.emoji} {evt.titre}")
+
+
+def afficher_jour_sortable(jour: JourCalendrier):
+    """Affiche les événements d'un jour avec réordonnancement drag & drop.
+
+    Utilise streamlit-sortables pour permettre le réordonnancement
+    visuel des activités et événements. Fallback sur l'affichage
+    classique si le package n'est pas installé.
+    """
+    if not HAS_SORTABLES or not (jour.activites or jour.autres_evenements):
+        # Fallback classique
+        afficher_jour_calendrier(jour)
+        return
+
+    # Construire les labels pour les événements triables
+    items = []
+    for act in jour.activites:
+        emoji = "👶" if act.pour_jules else "🎨"
+        items.append(f"{emoji} {act.titre} {act.heure_str}")
+
+    for evt in jour.autres_evenements:
+        items.append(f"{evt.emoji} {evt.titre}")
+
+    if items:
+        st.caption("↕️ Glissez pour réorganiser")
+        sorted_items = sort_items(items, key=f"sort_{jour.date_jour}")
+
+        # Afficher dans le nouvel ordre
+        for item in sorted_items:
+            st.markdown(f"• {item}")
 
 
 def afficher_vue_semaine_grille(semaine: SemaineCalendrier):
@@ -263,37 +301,41 @@ def afficher_actions_rapides(semaine: SemaineCalendrier):
 
     with col4:
         if st.button("🖨️ Imprimer", use_container_width=True):
-            st.session_state.show_print_modal = True
+            _dialog_impression(semaine)
+
+
+@st.dialog("🖨️ Imprimer le planning")
+def _dialog_impression(semaine: SemaineCalendrier):
+    """Dialog natif pour l'impression du planning."""
+    texte = generer_texte_semaine_pour_impression(semaine)
+
+    st.text_area(
+        "Aperçu (copier-coller pour imprimer)",
+        value=texte,
+        height=400,
+    )
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.download_button(
+            "📥 Télécharger .txt",
+            data=texte,
+            file_name=f"planning_{semaine.date_debut.strftime('%Y%m%d')}.txt",
+            mime="text/plain",
+        )
+    with col2:
+        if st.button("Fermer", use_container_width=True):
+            st.rerun()
 
 
 def afficher_modal_impression(semaine: SemaineCalendrier):
-    """Affiche le modal d'impression."""
+    """Affiche le modal d'impression.
 
+    DÉPRÉCIÉ — Utiliser _dialog_impression() via le bouton Imprimer.
+    Conservé pour compatibilité arrière.
+    """
     if st.session_state.get(SK.SHOW_PRINT_MODAL):
-        with st.container():
-            st.subheader("🖨️ Imprimer le planning")
-
-            texte = generer_texte_semaine_pour_impression(semaine)
-
-            st.text_area(
-                "Aperçu (copier-coller pour imprimer)",
-                value=texte,
-                height=400,
-            )
-
-            col1, col2 = st.columns(2)
-            with col1:
-                st.download_button(
-                    "📥 Télécharger .txt",
-                    data=texte,
-                    file_name=f"planning_{semaine.date_debut.strftime('%Y%m%d')}.txt",
-                    mime="text/plain",
-                )
-
-            with col2:
-                if st.button("Fermer"):
-                    st.session_state.show_print_modal = False
-                    st.rerun()
+        _dialog_impression(semaine)
 
 
 def afficher_formulaire_ajout_event():

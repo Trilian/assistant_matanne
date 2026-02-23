@@ -93,7 +93,7 @@ def carte_metrique_avancee(
 
     StyleSheet.inject()
     st.markdown(
-        f'<div class="{container_cls}">'
+        f'<div class="{container_cls}" role="group" aria-label="{safe_titre}: {safe_valeur}">'
         f'<div class="{inner_cls}">'
         f"<div>"
         f'<p style="color: {Couleur.TEXT_SECONDARY}; margin: 0 0 0.3rem 0; font-size: 0.9rem;">'
@@ -102,7 +102,7 @@ def carte_metrique_avancee(
         f"{delta_html}"
         f"{sous_titre_html}"
         f"</div>"
-        f'<span style="font-size: {Typographie.ICON_LG};">{safe_icone}</span>'
+        f'<span style="font-size: {Typographie.ICON_LG};" aria-hidden="true">{safe_icone}</span>'
         f"</div>"
         f"</div>",
         unsafe_allow_html=True,
@@ -142,8 +142,8 @@ def widget_jules_apercu(date_naissance: date | None = None):
 
     StyleSheet.inject()
     st.markdown(
-        f'<div class="{container_cls}">'
-        f'<span style="font-size: {Typographie.ICON_XL};">👶</span>'
+        f'<div class="{container_cls}" role="group" aria-label="Jules, {age_mois} mois">'
+        f'<span style="font-size: {Typographie.ICON_XL};" aria-hidden="true">👶</span>'
         f'<h3 style="font-size: {Typographie.H3}; font-weight: bold; '
         f'margin-top: {Espacement.SM};">Jules</h3>'
         f'<p style="font-weight: 500; color: {Couleur.JULES_PRIMARY};">'
@@ -187,8 +187,8 @@ def widget_meteo_jour(donnees_meteo: dict | None = None):
 
     StyleSheet.inject()
     st.markdown(
-        f'<div class="{container_cls}">'
-        f'<span style="font-size: {Typographie.ICON_MD};">{icone_meteo}</span>'
+        f'<div class="{container_cls}" role="group" aria-label="Météo: {safe_temp}°C">'
+        f'<span style="font-size: {Typographie.ICON_MD};" aria-hidden="true">{icone_meteo}</span>'
         f'<p style="margin: 0.3rem 0; font-size: {Typographie.H3}; font-weight: 600;">'
         f"{safe_temp}°C</p>"
         f'<small style="font-size: {Typographie.CAPTION}; color: {Couleur.TEXT_SECONDARY};">'

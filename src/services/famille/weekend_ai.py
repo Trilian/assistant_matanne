@@ -4,8 +4,9 @@ Service IA pour suggestions sorties weekend.
 Déplacé depuis src/modules/famille/weekend/ai_service.py vers la couche services.
 """
 
-from src.core.ai import ClientIA
+from src.core.ai import obtenir_client_ia
 from src.services.core.base import BaseAIService
+from src.services.core.registry import service_factory
 
 
 class WeekendAIService(BaseAIService):
@@ -13,7 +14,10 @@ class WeekendAIService(BaseAIService):
 
     def __init__(self):
         super().__init__(
-            client=ClientIA(), cache_prefix="weekend", default_ttl=3600, service_name="weekend_ai"
+            client=obtenir_client_ia(),
+            cache_prefix="weekend",
+            default_ttl=3600,
+            service_name="weekend_ai",
         )
 
     async def suggerer_activites(
@@ -68,3 +72,9 @@ Privilégie les activités:
             system_prompt="Tu es guide touristique spécialisé familles avec jeunes enfants.",
             max_tokens=500,
         )
+
+
+@service_factory("weekend_ai", tags={"famille", "ia", "weekend"})
+def obtenir_weekend_ai_service() -> WeekendAIService:
+    """Factory singleton pour WeekendAIService."""
+    return WeekendAIService()

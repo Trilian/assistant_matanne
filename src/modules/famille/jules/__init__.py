@@ -9,6 +9,9 @@ Fonctionnalités:
 """
 
 # Import des fonctions pour exposer l'API publique
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
+
 from .ai_service import JulesAIService
 from .components import (
     afficher_achats_categorie,
@@ -27,6 +30,7 @@ from .utils import (
 )
 
 
+@profiler_rerun("jules")
 def app():
     """Point d'entrée du module Jules"""
     st.title("👶 Jules")
@@ -38,16 +42,20 @@ def app():
     tabs = st.tabs(["📊 Dashboard", "🎨 Activités", "🛒 Shopping", "💡 Conseils"])
 
     with tabs[0]:
-        afficher_dashboard()
+        with error_boundary(titre="Erreur dashboard Jules"):
+            afficher_dashboard()
 
     with tabs[1]:
-        afficher_activites()
+        with error_boundary(titre="Erreur activités Jules"):
+            afficher_activites()
 
     with tabs[2]:
-        afficher_shopping()
+        with error_boundary(titre="Erreur shopping Jules"):
+            afficher_shopping()
 
     with tabs[3]:
-        afficher_conseils()
+        with error_boundary(titre="Erreur conseils Jules"):
+            afficher_conseils()
 
 
 __all__ = [

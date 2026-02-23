@@ -15,7 +15,7 @@ from typing import TypedDict
 
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import WeekendActivity
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
@@ -69,6 +69,8 @@ class ServiceWeekend:
     # LECTURE
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return={})
+    @avec_cache(ttl=300)
     @avec_session_db
     def lister_activites_weekend(
         self, saturday: date_type, sunday: date_type, db: Session | None = None
@@ -84,7 +86,8 @@ class ServiceWeekend:
             Dictionnaire avec clés 'saturday' et 'sunday' contenant
             les listes d'activités triées par heure de début.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         activities = (
             db.query(WeekendActivity)
             .filter(WeekendActivity.date_prevue.in_([saturday, sunday]))
@@ -97,6 +100,8 @@ class ServiceWeekend:
             "sunday": [a for a in activities if a.date_prevue == sunday],
         }
 
+    @avec_gestion_erreurs(default_return={})
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_budget_weekend(
         self, saturday: date_type, sunday: date_type, db: Session | None = None
@@ -112,7 +117,8 @@ class ServiceWeekend:
             BudgetWeekendDict avec 'estime' (budget total prévu) et
             'reel' (dépenses des activités terminées).
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         activities = (
             db.query(WeekendActivity)
             .filter(WeekendActivity.date_prevue.in_([saturday, sunday]))
@@ -124,6 +130,8 @@ class ServiceWeekend:
 
         return {"estime": estime, "reel": reel}
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_lieux_testes(self, db: Session | None = None) -> list[WeekendActivity]:
         """Récupère les lieux déjà testés avec notes.
@@ -135,7 +143,8 @@ class ServiceWeekend:
             Liste des activités terminées et notées,
             triées par note décroissante.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         return (
             db.query(WeekendActivity)
             .filter(
@@ -146,6 +155,8 @@ class ServiceWeekend:
             .all()
         )
 
+    @avec_gestion_erreurs(default_return=[])
+    @avec_cache(ttl=300)
     @avec_session_db
     def get_activites_non_notees(self, db: Session | None = None) -> list[WeekendActivity]:
         """Récupère les activités terminées non notées.
@@ -156,7 +167,8 @@ class ServiceWeekend:
         Returns:
             Liste des activités terminées sans note.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         return (
             db.query(WeekendActivity)
             .filter(
@@ -170,6 +182,7 @@ class ServiceWeekend:
     # ÉCRITURE
     # ═══════════════════════════════════════════════════════════
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def ajouter_activite(
         self,
@@ -205,7 +218,8 @@ class ServiceWeekend:
         Returns:
             L'activité créée.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         if participants is None:
             participants = ["Anne", "Mathieu", "Jules"]
 
@@ -236,6 +250,7 @@ class ServiceWeekend:
 
         return activity
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def marquer_termine(self, activity_id: int, db: Session | None = None) -> bool:
         """Marque une activité comme terminée.
@@ -247,7 +262,8 @@ class ServiceWeekend:
         Returns:
             True si l'activité a été trouvée et mise à jour.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         activity = db.get(WeekendActivity, activity_id)
         if activity:
             activity.statut = "termine"
@@ -264,6 +280,7 @@ class ServiceWeekend:
             return True
         return False
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def noter_sortie(
         self,
@@ -287,7 +304,8 @@ class ServiceWeekend:
         Returns:
             True si l'activité a été trouvée et notée.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         activity = db.get(WeekendActivity, activity_id)
         if activity:
             activity.note_lieu = note
@@ -307,6 +325,7 @@ class ServiceWeekend:
             return True
         return False
 
+    @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def supprimer_activite(self, activity_id: int, db: Session | None = None) -> bool:
         """Supprime une activité weekend.
@@ -318,7 +337,8 @@ class ServiceWeekend:
         Returns:
             True si supprimée.
         """
-        assert db is not None
+        if db is None:
+            raise ValueError("Session DB requise")
         deleted = db.query(WeekendActivity).filter(WeekendActivity.id == activity_id).delete()
         db.commit()
         if deleted > 0:

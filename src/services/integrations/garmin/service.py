@@ -21,7 +21,7 @@ from requests_oauthlib import OAuth1Session
 from sqlalchemy.orm import Session
 
 from src.core.config import obtenir_parametres
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_resilience, avec_session_db
 from src.core.models import (
     GarminActivity,
     GarminDailySummary,
@@ -74,6 +74,7 @@ class ServiceGarmin:
     # OAUTH 1.0a FLOW
     # ───────────────────────────────────────────────────────
 
+    @avec_resilience(retry=2, timeout_s=30, fallback=(None, None))
     def get_authorization_url(self, callback_url: str = "oob") -> tuple[str, dict]:
         """
         Étape 1: Obtenir l'URL d'autorisation.
@@ -250,6 +251,7 @@ class ServiceGarmin:
         logger.info(f"Sync Garmin terminée pour {user_id}: {results}")
         return results
 
+    @avec_resilience(retry=2, timeout_s=30, fallback=[])
     def _fetch_activities(
         self, session: OAuth1Session, start_date: date, end_date: date
     ) -> list[dict]:
@@ -273,6 +275,7 @@ class ServiceGarmin:
             logger.error(f"Erreur API Garmin activities: {e}")
             return []
 
+    @avec_resilience(retry=2, timeout_s=30, fallback=[])
     def _fetch_daily_summaries(
         self, session: OAuth1Session, start_date: date, end_date: date
     ) -> list[dict]:

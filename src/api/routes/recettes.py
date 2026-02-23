@@ -10,7 +10,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
-from src.api.schemas import MessageResponse, RecetteCreate, RecetteResponse
+from src.api.schemas import MessageResponse, RecetteCreate, RecettePatch, RecetteResponse
 from src.api.utils import construire_reponse_paginee, executer_async, executer_avec_session
 
 router = APIRouter(prefix="/api/v1/recettes", tags=["Recettes"])
@@ -229,6 +229,67 @@ async def update_recette(
             return RecetteResponse.model_validate(db_recette)
 
     return await executer_async(_update)
+
+
+@router.patch("/{recette_id}", response_model=RecetteResponse)
+async def patch_recette(
+    recette_id: int, patch: RecettePatch, user: dict[str, Any] = Depends(require_auth)
+):
+    """Mise à jour partielle d'une recette.
+
+    Seuls les champs fournis dans le body sont modifiés.
+    Les champs absents ou ``null`` restent inchangés.
+
+    Args:
+        recette_id: ID de la recette à modifier
+        patch: Champs à mettre à jour (tous optionnels)
+
+    Returns:
+        La recette mise à jour
+
+    Raises:
+        401: Non authentifié
+        404: Recette non trouvée
+        422: Données invalides
+
+    Example:
+        ```
+        PATCH /api/v1/recettes/42
+        Authorization: Bearer <token>
+
+        Body: {"nom": "Poulet rôti aux herbes", "temps_cuisson": 75}
+
+        Response:
+        {"id": 42, "nom": "Poulet rôti aux herbes", "temps_cuisson": 75, ...}
+        ```
+    """
+    from src.core.models import Recette
+
+    def _patch():
+        with executer_avec_session() as session:
+            db_recette = session.query(Recette).filter(Recette.id == recette_id).first()
+
+            if not db_recette:
+                raise HTTPException(status_code=404, detail="Recette non trouvée")
+
+            # Seuls les champs explicitement fournis sont mis à jour
+            donnees = patch.model_dump(exclude_unset=True)
+            if not donnees:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Aucun champ à mettre à jour fourni",
+                )
+
+            for key, value in donnees.items():
+                if hasattr(db_recette, key):
+                    setattr(db_recette, key, value)
+
+            session.commit()
+            session.refresh(db_recette)
+
+            return RecetteResponse.model_validate(db_recette)
+
+    return await executer_async(_patch)
 
 
 @router.delete("/{recette_id}", response_model=MessageResponse)

@@ -57,9 +57,9 @@ def avec_cache(
 
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
-            from src.core.caching import CacheMultiNiveau
+            from src.core.caching import obtenir_cache
 
-            cache = CacheMultiNiveau()
+            cache = obtenir_cache()
 
             # Générer clé de cache
             if key_func is not None:

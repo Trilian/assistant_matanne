@@ -322,29 +322,11 @@ class FootballDataService:
 # FACTORY (SINGLETON)
 # ═══════════════════════════════════════════════════════════
 
-_football_data_instance: FootballDataService | None = None
-
-
-def obtenir_service_donnees_football(api_key: str | None = None) -> FootballDataService:
-    """
-    Factory singleton pour le service Football-Data.
-
-    Args:
-        api_key: Clé API optionnelle (utilisée seulement à la première création)
-
-    Returns:
-        Instance FootballDataService
-    """
-    global _football_data_instance
-    if _football_data_instance is None:
-        _football_data_instance = FootballDataService(api_key)
-    return _football_data_instance
-
 
 @service_factory("football_data", tags={"jeux", "data", "football"})
 def get_football_data_service(api_key: str | None = None) -> FootballDataService:
     """
-    Factory pour créer une instance du service (alias anglais).
+    Factory singleton pour le service Football-Data.
 
     Args:
         api_key: Clé API optionnelle
@@ -352,7 +334,12 @@ def get_football_data_service(api_key: str | None = None) -> FootballDataService
     Returns:
         Instance FootballDataService
     """
-    return obtenir_service_donnees_football(api_key)
+    return FootballDataService(api_key)
+
+
+def obtenir_service_donnees_football(api_key: str | None = None) -> FootballDataService:
+    """Alias français pour le service Football-Data."""
+    return get_football_data_service(api_key)
 
 
 # ═══════════════════════════════════════════════════════════

@@ -10,7 +10,9 @@ Fonctionnalités avancées:
 Utilise le service Budget unifié (src/services/budget.py).
 """
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.modules._framework import error_boundary
 
 from .components import (
     afficher_comparaison_mois,
@@ -40,6 +42,7 @@ from .crud import (
 from .utils import CATEGORY_LABELS, st
 
 
+@profiler_rerun("depenses")
 def app():
     """Point d'entrée module Dépenses"""
     st.title("💰 Dépenses Maison")
@@ -68,13 +71,16 @@ def app():
     tab1, tab2, tab3 = st.tabs(["📅 Ce mois", "➕ Ajouter", "📊 Analyse"])
 
     with tab1:
-        afficher_onglet_mois()
+        with error_boundary(titre="Erreur ce mois"):
+            afficher_onglet_mois()
 
     with tab2:
-        afficher_onglet_ajouter()
+        with error_boundary(titre="Erreur ajout dépense"):
+            afficher_onglet_ajouter()
 
     with tab3:
-        afficher_onglet_analyse()
+        with error_boundary(titre="Erreur analyse dépenses"):
+            afficher_onglet_analyse()
 
 
 __all__ = [

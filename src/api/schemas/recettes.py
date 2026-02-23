@@ -29,6 +29,30 @@ class RecetteCreate(RecetteBase):
     tags: list[str] = Field(default_factory=list)
 
 
+class RecettePatch(BaseModel):
+    """Schéma pour mise à jour partielle (PATCH) d'une recette.
+
+    Tous les champs sont optionnels. Seuls les champs fournis
+    seront modifiés, les autres restent inchangés.
+
+    Example:
+        ```json
+        {"nom": "Nouveau nom", "temps_cuisson": 45}
+        ```
+    """
+
+    nom: str | None = None
+    description: str | None = None
+    temps_preparation: int | None = Field(None, description="Minutes", ge=0)
+    temps_cuisson: int | None = Field(None, description="Minutes", ge=0)
+    portions: int | None = Field(None, ge=1)
+    difficulte: str | None = None
+    categorie: str | None = None
+    ingredients: list[dict] | None = None
+    instructions: list[str] | None = None
+    tags: list[str] | None = None
+
+
 class RecetteResponse(RecetteBase, IdentifiedResponse):
     """Schéma de réponse pour une recette."""
 

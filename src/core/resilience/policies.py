@@ -246,15 +246,6 @@ class PolicyComposee(Policy[T]):
 
         return wrapped_fn()
 
-
-def _make_policy_wrapper(p: Policy[Any], f: Callable[[], Any]) -> Callable[[], Any]:
-    """Crée un wrapper qui applique une policy sur une fonction."""
-
-    def wrapper() -> Any:
-        return p.executer(f)
-
-    return wrapper
-
     def __add__(self, other: Policy[T]) -> PolicyComposee[T]:
         if isinstance(other, PolicyComposee):
             return PolicyComposee(self.policies + other.policies)
@@ -263,6 +254,15 @@ def _make_policy_wrapper(p: Policy[Any], f: Callable[[], Any]) -> Callable[[], A
     def __repr__(self) -> str:
         noms = [p.__class__.__name__ for p in self.policies]
         return f"PolicyComposee({noms})"
+
+
+def _make_policy_wrapper(p: Policy[Any], f: Callable[[], Any]) -> Callable[[], Any]:
+    """Crée un wrapper qui applique une policy sur une fonction."""
+
+    def wrapper() -> Any:
+        return p.executer(f)
+
+    return wrapper
 
 
 # ═══════════════════════════════════════════════════════════

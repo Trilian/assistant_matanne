@@ -8,6 +8,9 @@ import streamlit as st
 
 from src.core.session_keys import SK
 from src.ui import etat_vide
+from src.ui.keys import KeyNamespace
+
+_keys = KeyNamespace("charges")
 
 from .constantes import CONSEILS_ECONOMIES, ENERGIES
 from .logic import (
@@ -102,10 +105,10 @@ def onglet_factures(factures: list[dict]):
 
     # Bouton ajouter
     if st.button("➕ Ajouter une facture", type="primary", use_container_width=True):
-        st.session_state.charges_mode_ajout = True
+        st.session_state[_keys("mode_ajout")] = True
 
     # Mode ajout
-    if st.session_state.get(SK.CHARGES_MODE_AJOUT):
+    if st.session_state.get(_keys("mode_ajout")):
         st.markdown("### Nouvelle facture")
 
         with st.form("form_facture"):
@@ -150,14 +153,14 @@ def onglet_factures(factures: list[dict]):
                     "date_ajout": date.today().isoformat(),
                 }
                 factures.append(nouvelle_facture)
-                st.session_state.factures_charges = factures
-                st.session_state.charges_mode_ajout = False
+                st.session_state[_keys("factures")] = factures
+                st.session_state[_keys("mode_ajout")] = False
                 st.success("✅ Facture enregistrée ! Vérifiez votre éco-score.")
                 st.balloons()
                 st.rerun()
 
             if cancelled:
-                st.session_state.charges_mode_ajout = False
+                st.session_state[_keys("mode_ajout")] = False
                 st.rerun()
 
     else:
@@ -220,7 +223,7 @@ def onglet_factures(factures: list[dict]):
                     # Trouver l'index dans la liste originale
                     idx = factures.index(facture)
                     factures.pop(idx)
-                    st.session_state.factures_charges = factures
+                    st.session_state[_keys("factures")] = factures
                     st.success("Facture supprimée")
                     st.rerun()
 
