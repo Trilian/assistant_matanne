@@ -18,6 +18,7 @@ import streamlit as st
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
+from src.ui.state.url import tabs_with_url
 
 from .crud import ajouter_tirage, enregistrer_grille
 from .generateur import afficher_generateur_grilles, afficher_mes_grilles
@@ -61,18 +62,18 @@ def app():
     # Charger données
     tirages = charger_tirages(limite=200)
 
-    # Tabs principaux
-    tabs = st.tabs(
-        [
-            "📊 Statistiques",
-            "📈 Tendances",
-            "🎲 Générer Grille",
-            "🎫 Mes Grilles",
-            "🔬 Simulation",
-            "📊 Maths",
-            "⚙️ Tirages",
-        ]
-    )
+    # Tabs principaux avec deep linking URL
+    TAB_LABELS = [
+        "📊 Statistiques",
+        "📈 Tendances",
+        "🎲 Générer Grille",
+        "🎟️ Mes Grilles",
+        "🔬 Simulation",
+        "📊 Maths",
+        "⚙️ Tirages",
+    ]
+    tab_index = tabs_with_url(TAB_LABELS, param="tab")
+    tabs = st.tabs(TAB_LABELS)
 
     # TAB 1: STATISTIQUES
     with tabs[0]:

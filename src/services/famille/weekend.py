@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import WeekendActivity
+from src.services.core.base import BaseService
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
 
@@ -30,12 +31,16 @@ class BudgetWeekendDict(TypedDict):
     reel: float
 
 
-class ServiceWeekend:
+class ServiceWeekend(BaseService[WeekendActivity]):
     """Service de gestion des activités weekend.
 
-    Encapsule toutes les opérations CRUD et la logique métier
+    Hérite de BaseService[WeekendActivity] pour le CRUD générique.
+    Encapsule les opérations spécialisées et la logique métier
     liée aux sorties du weekend.
     """
+
+    def __init__(self):
+        super().__init__(model=WeekendActivity, cache_ttl=300)
 
     # ═══════════════════════════════════════════════════════════
     # UTILITAIRES

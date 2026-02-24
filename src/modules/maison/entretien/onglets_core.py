@@ -10,6 +10,7 @@ from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
 
 from .data import charger_catalogue_entretien
+from .db_access import ajouter_objet_entretien, marquer_tache_faite, supprimer_objet_entretien
 from .logic import generer_taches_entretien
 from .ui import afficher_piece_card, afficher_stats_rapides, afficher_tache_entretien
 
@@ -88,8 +89,13 @@ def onglet_taches(mes_objets: list[dict], historique: list[dict]):
                     "tache_nom": tache.get("tache_nom"),
                     "date": date.today().isoformat(),
                 }
+                # Persister en DB
+                marquer_tache_faite(
+                    tache.get("objet_id", ""), tache.get("tache_nom", "")
+                )
                 historique.append(nouvelle_entree)
                 st.session_state.historique_entretien = historique
+                st.session_state._entretien_reload = True
                 st.toast(f"✅ {tache['tache_nom']} accompli !")
                 st.rerun()
 
@@ -160,9 +166,12 @@ def onglet_inventaire(mes_objets: list[dict]):
                     "marque": marque or None,
                     "date_ajout": date.today().isoformat(),
                 }
+                # Persister en DB
+                ajouter_objet_entretien(nouvel_objet)
                 mes_objets.append(nouvel_objet)
                 st.session_state.mes_objets_entretien = mes_objets
                 st.session_state.entretien_mode_ajout = False
+                st.session_state._entretien_reload = True
                 st.success(f"✅ {obj_options[objet_sel]} ajouté !")
                 st.rerun()
 
@@ -256,10 +265,15 @@ def onglet_inventaire(mes_objets: list[dict]):
 
                     with col2:
                         if st.button("🗑️", key=f"del_obj_{piece}_{i}", help="Supprimer"):
+                            # Supprimer en DB si l'objet a un db_id
+                            db_id = obj.get("db_id")
+                            if db_id:
+                                supprimer_objet_entretien(db_id)
                             # Trouver et supprimer l'objet
                             idx = mes_objets.index(obj)
                             mes_objets.pop(idx)
                             st.session_state.mes_objets_entretien = mes_objets
+                            st.session_state._entretien_reload = True
                             st.rerun()
 
 

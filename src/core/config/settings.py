@@ -309,6 +309,9 @@ class Parametres(BaseSettings):
     CACHE_MAX_SIZE: int = CACHE_MAX_SIZE
     """Taille maximale du cache."""
 
+    REDIS_URL: str = ""
+    """URL Redis pour cache distribué (ex: redis://localhost:6379/0). Vide = désactivé."""
+
     # ═══════════════════════════════════════════════════════════
     # LOGGING
     # ═══════════════════════════════════════════════════════════

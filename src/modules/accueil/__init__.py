@@ -14,6 +14,7 @@ from src.modules.accueil.dashboard import (
     afficher_quick_actions,
     app,
 )
+from src.modules.accueil.resume_hebdo import afficher_resume_hebdomadaire
 
 __all__ = [
     "app",
@@ -25,4 +26,5 @@ __all__ = [
     "afficher_inventaire_summary",
     "afficher_courses_summary",
     "afficher_planning_summary",
+    "afficher_resume_hebdomadaire",
 ]

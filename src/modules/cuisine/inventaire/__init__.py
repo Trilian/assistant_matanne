@@ -128,19 +128,50 @@ def appliquer_filtres_stock(inventaire: list, filtres: dict) -> list:
 
 
 def afficher_tableau_stock(inventaire: list) -> None:
-    """Affiche le tableau de stock."""
+    """Affiche le tableau de stock avec option d'édition inline."""
     if inventaire:
-        df = _prepare_inventory_dataframe(inventaire)
-        st.dataframe(
-            df,
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "Statut": st.column_config.TextColumn(width="small"),
-                "Quantité": st.column_config.NumberColumn(width="small"),
-                "Jours": st.column_config.NumberColumn(width="small"),
-            },
+        # Choix du mode d'affichage
+        mode = st.radio(
+            "Mode d'affichage",
+            ["📊 Lecture seule", "✏️ Édition inline"],
+            horizontal=True,
+            key=_keys("stock_display_mode"),
         )
+
+        if mode == "✏️ Édition inline":
+            from src.ui.components.data_editors import editeur_inventaire
+
+            service = obtenir_service_inventaire()
+
+            def _sauvegarder_inventaire(edited_df):
+                """Callback de sauvegarde pour l'éditeur inventaire."""
+                if service is None:
+                    st.error("❌ Service indisponible")
+                    return
+                try:
+                    for _, row in edited_df.iterrows():
+                        service.modifier_article(
+                            article_id=int(row["id"]),
+                            quantite=float(row["Quantité"]),
+                            emplacement=row.get("Emplacement"),
+                        )
+                except Exception as e:
+                    logger.error(f"Erreur sauvegarde inventaire: {e}")
+                    st.error(f"❌ Erreur: {e}")
+
+            editeur_inventaire(inventaire, on_save=_sauvegarder_inventaire)
+        else:
+            df = _prepare_inventory_dataframe(inventaire)
+            st.dataframe(
+                df,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Statut": st.column_config.TextColumn(width="small"),
+                    "Quantité": st.column_config.NumberColumn(width="small"),
+                    "Jours": st.column_config.NumberColumn(width="small"),
+                },
+            )
     else:
         etat_vide(
             "Aucun article ne correspond aux filtres",

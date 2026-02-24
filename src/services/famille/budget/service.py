@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import BudgetMensuelDB, FamilyBudget
+from src.services.core.base import BaseService
 
 from .budget_alertes import BudgetAlertesMixin
 from .budget_analyses import BudgetAnalysesMixin
@@ -34,9 +35,11 @@ from .schemas import (
 logger = logging.getLogger(__name__)
 
 
-class BudgetService(BudgetAnalysesMixin, BudgetAlertesMixin):
+class BudgetService(BaseService[FamilyBudget], BudgetAnalysesMixin, BudgetAlertesMixin):
     """
     Service de gestion du budget familial.
+
+    Hérite de BaseService[FamilyBudget] pour le CRUD générique.
 
     Fonctionnalités:
     - CRUD dépenses
@@ -62,6 +65,7 @@ class BudgetService(BudgetAnalysesMixin, BudgetAlertesMixin):
 
     def __init__(self):
         """Initialise le service."""
+        super().__init__(model=FamilyBudget, cache_ttl=300)
         self._depenses_cache: dict[str, list[Depense]] = {}
 
     # ═══════════════════════════════════════════════════════════

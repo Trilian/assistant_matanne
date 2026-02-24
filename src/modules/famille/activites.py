@@ -23,10 +23,15 @@ from src.modules.famille.utils import (
     get_budget_par_period,
 )
 from src.ui import etat_vide
+from src.ui.fragments import cached_fragment
+from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 
 if TYPE_CHECKING:
     from src.services.famille.activites import ServiceActivites
+
+# Session keys scopées
+_keys = KeyNamespace("activites")
 
 
 def _get_service() -> ServiceActivites:
@@ -48,6 +53,66 @@ SUGGESTIONS_ACTIVITES = {
 _TYPES_ACTIVITES = ["parc", "musee", "eau", "jeu_maison", "sport", "sortie"]
 
 
+@cached_fragment(ttl=300)
+def _graphique_budget_timeline(data: list[dict]) -> go.Figure:
+    """Graphique timeline des dépenses (cache 5 min)."""
+    df = pd.DataFrame(data)
+    df["date"] = pd.to_datetime(df["date"])
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=df["date"],
+            y=df["cout_estime"],
+            mode="lines+markers",
+            name="Coût estimé",
+            line_color="blue",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=df["date"],
+            y=df["cout_reel"],
+            mode="lines+markers",
+            name="Coût réel",
+            line_color="red",
+        )
+    )
+    fig.update_layout(
+        title="Dépenses par Date",
+        xaxis_title="Date",
+        yaxis_title="Montant (€)",
+        height=400,
+        hovermode="x unified",
+    )
+    return fig
+
+
+@cached_fragment(ttl=300)
+def _graphique_budget_par_type(data: list[dict]) -> go.Figure:
+    """Graphique budget par type d'activité (cache 5 min)."""
+    df = pd.DataFrame(data)
+    type_budget = df.groupby("type")["cout_estime"].sum().reset_index()
+    type_budget.columns = ["Type", "Budget"]
+
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=type_budget["Type"],
+                y=type_budget["Budget"],
+                marker_color="lightblue",
+            )
+        ]
+    )
+    fig.update_layout(
+        title="Budget par Type d'Activité",
+        xaxis_title="Type",
+        yaxis_title="Budget (€)",
+        height=400,
+    )
+    return fig
+
+
 @profiler_rerun("activites")
 def app() -> None:
     """Interface principale du module Activites."""
@@ -64,6 +129,7 @@ def app() -> None:
     # TAB 1: PLANNING SEMAINE
     # ═══════════════════════════════════════════════════════════
     with tabs[0]:
+      with error_boundary(titre="Erreur planning semaine"):
         st.header("📱 Planning de la Semaine")
 
         col1, col2 = st.columns([2, 1])
@@ -137,6 +203,7 @@ def app() -> None:
     # TAB 2: IDÉES ACTIVITÉS
     # ═══════════════════════════════════════════════════════════
     with tabs[1]:
+      with error_boundary(titre="Erreur idées activités"):
         st.header("💡 Idées d'Activités")
 
         st.subheader("Suggestions par type")
@@ -207,6 +274,7 @@ def app() -> None:
     # TAB 3: BUDGET
     # ═══════════════════════════════════════════════════════════
     with tabs[2]:
+      with error_boundary(titre="Erreur budget activités"):
         st.header("💡 Budget Activites")
 
         # Stats
@@ -250,58 +318,12 @@ def app() -> None:
                         )
 
                 if data:
-                    df = pd.DataFrame(data)
-                    df["date"] = pd.to_datetime(df["date"])
-
-                    # Graphique 1: Timeline
-                    fig1 = go.Figure()
-                    fig1.add_trace(
-                        go.Scatter(
-                            x=df["date"],
-                            y=df["cout_estime"],
-                            mode="lines+markers",
-                            name="Coût estime",
-                            line_color="blue",
-                        )
-                    )
-                    fig1.add_trace(
-                        go.Scatter(
-                            x=df["date"],
-                            y=df["cout_reel"],
-                            mode="lines+markers",
-                            name="Coût reel",
-                            line_color="red",
-                        )
-                    )
-
-                    fig1.update_layout(
-                        title="Depenses par Date",
-                        xaxis_title="Date",
-                        yaxis_title="Montant (€)",
-                        height=400,
-                        hovermode="x unified",
-                    )
+                    # Graphique 1: Timeline (cached)
+                    fig1 = _graphique_budget_timeline(data)
                     st.plotly_chart(fig1, width="stretch", key="activities_budget_timeline")
 
-                    # Graphique 2: Par type d'activite
-                    type_budget = df.groupby("type")["cout_estime"].sum().reset_index()
-                    type_budget.columns = ["Type", "Budget"]
-
-                    fig2 = go.Figure(
-                        data=[
-                            go.Bar(
-                                x=type_budget["Type"],
-                                y=type_budget["Budget"],
-                                marker_color="lightblue",
-                            )
-                        ]
-                    )
-                    fig2.update_layout(
-                        title="Budget par Type d'Activite",
-                        xaxis_title="Type",
-                        yaxis_title="Budget (€)",
-                        height=400,
-                    )
+                    # Graphique 2: Par type d'activité (cached)
+                    fig2 = _graphique_budget_par_type(data)
                     st.plotly_chart(fig2, width="stretch", key="activities_budget_by_type")
                 else:
                     etat_vide("Aucune activité sur 30 jours", "📊")

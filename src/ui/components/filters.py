@@ -209,6 +209,7 @@ def afficher_filtres_rapides(
     return selected
 
 
+@composant_ui("filters", exemple='appliquer_filtres(data, {"categorie": "Fruits"})', tags=("filter", "data", "pure"))
 def appliquer_filtres(
     data: list[dict],
     filtres: dict[str, Any],
@@ -251,6 +252,7 @@ def appliquer_filtres(
     return result
 
 
+@composant_ui("filters", exemple='appliquer_recherche(data, "tomate", ["nom"])', tags=("search", "filter", "pure"))
 def appliquer_recherche(
     data: list[dict],
     terme: str,

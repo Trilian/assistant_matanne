@@ -163,6 +163,8 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "OpenFoodFactsCache": (".user_preferences", "OpenFoodFactsCache"),
     "RecipeFeedback": (".user_preferences", "RecipeFeedback"),
     "UserPreference": (".user_preferences", "UserPreference"),
+    # État persistant
+    "PersistentStateDB": (".persistent_state", "PersistentStateDB"),
     # Utilisateurs et Garmin
     "FamilyPurchase": (".users", "FamilyPurchase"),
     "FoodLog": (".users", "FoodLog"),

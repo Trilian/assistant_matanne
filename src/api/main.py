@@ -8,11 +8,12 @@ import logging
 import os
 from datetime import datetime
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from src.api.rate_limiting import MiddlewareLimitationDebit
+from src.api.dependencies import require_role
 from src.api.routes import (
     courses_router,
     inventaire_router,
@@ -324,7 +325,7 @@ async def health_check():
 
 
 @app.get("/metrics", tags=["Santé"])
-async def get_api_metrics():
+async def get_api_metrics(user: dict = Depends(require_role("admin"))):
     """Retourne les métriques de l'API (latence, requêtes, rate limiting)."""
     from src.api.utils import get_metrics
 

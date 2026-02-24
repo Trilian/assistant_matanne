@@ -19,6 +19,7 @@ from src.ui.utils import echapper_html
 logger = logging.getLogger(__name__)
 
 
+@composant_ui("system", exemple='indicateur_sante_systeme()', tags=("health", "monitoring", "pure"))
 @st.cache_data(ttl=30, show_spinner=False)
 def indicateur_sante_systeme() -> dict:
     """

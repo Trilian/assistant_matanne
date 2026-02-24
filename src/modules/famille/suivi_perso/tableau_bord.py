@@ -4,7 +4,7 @@ Module Suivi Perso - Dashboard et graphiques
 
 from src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUT
 from src.ui.engine import charger_css
-from src.ui.fragments import auto_refresh, ui_fragment
+from src.ui.fragments import auto_refresh, cached_fragment, ui_fragment
 
 from .utils import date, get_current_user, go, set_current_user, st, timedelta
 
@@ -79,8 +79,9 @@ def afficher_dashboard(data: dict):
     )
 
 
+@cached_fragment(ttl=300)
 def afficher_weekly_chart(summaries: list, objectif: int):
-    """Affiche le graphique des 7 derniers jours"""
+    """Affiche le graphique des 7 derniers jours (cache 5 min)."""
     if not summaries:
         st.info("Pas de données Garmin. Connectez votre montre pour voir vos stats.")
         return

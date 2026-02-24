@@ -22,6 +22,7 @@ import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.keys import KeyNamespace
 
 # Import Google Calendar UI
 from src.ui.integrations import afficher_config_google_calendar
@@ -53,6 +54,9 @@ from .components import (
 # Import des fonctions pour exposer l'API publique
 from .data import charger_donnees_semaine
 from .utils import construire_semaine_calendrier, get_debut_semaine
+
+# Session keys scopées
+_keys = KeyNamespace("calendrier")
 
 
 @profiler_rerun("calendrier")

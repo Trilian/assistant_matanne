@@ -14,9 +14,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session, selectinload
 
-from src.core.ai import AnalyseurIA, ClientIA, RateLimitIA, obtenir_client_ia
-from src.core.ai.cache import CacheIA
-from src.core.caching import obtenir_cache
+from src.core.ai import AnalyseurIA, obtenir_client_ia
 from src.core.decorators import avec_session_db
 from src.core.errors_base import ErreurLimiteDebit
 from src.core.models import (
@@ -25,15 +23,23 @@ from src.core.models import (
     Recette,
     RecetteIngredient,
 )
+from src.services.core.base import BaseAIService
 
 from .types import ContexteSuggestion, ProfilCulinaire, SuggestionRecette
 
 logger = logging.getLogger(__name__)
 
 
-class ServiceSuggestions:
+class ServiceSuggestions(BaseAIService):
     """
     Service de suggestions intelligentes basées sur l'historique.
+
+    Hérite de BaseAIService pour bénéficier automatiquement de:
+    - Rate limiting avec retry intelligent
+    - Cache sémantique automatique
+    - Circuit breaker (protection service externe)
+    - Parsing JSON robuste
+    - Gestion d'erreurs unifiée
 
     Analyse l'historique pour:
     - Détecter les préférences
@@ -42,11 +48,15 @@ class ServiceSuggestions:
     - Proposer des découvertes
     """
 
-    def __init__(self):
-        self.client_ia = obtenir_client_ia()
-        self.analyseur = AnalyseurIA()
-        self.cache = obtenir_cache()
-        self.service_name = "suggestions"
+    def __init__(self, client=None):
+        if client is None:
+            client = obtenir_client_ia()
+        super().__init__(
+            client=client,
+            cache_prefix="suggestions",
+            default_temperature=0.7,
+            service_name="suggestions",
+        )
 
     # ═══════════════════════════════════════════════════════════
     # ANALYSE DU PROFIL
@@ -496,25 +506,18 @@ Réponds avec 3 suggestions au format JSON:
 """
 
         try:
-            # ✅ Rate limiting — empêche l'épuisement du quota Mistral
-            autorise, msg = RateLimitIA.peut_appeler()
-            if not autorise:
-                logger.warning(f"⏳ Rate limit suggestions: {msg}")
+            # ✅ Rate limiting, cache & circuit breaker automatiques via BaseAIService
+            reponse = self.call_with_cache_sync(
+                prompt=prompt,
+                system_prompt="Tu es un chef cuisinier créatif qui fait des suggestions personnalisées.",
+                temperature=0.7,
+                category="suggestions_ia",
+            )
+
+            if not reponse:
                 return []
 
-            reponse = self.client_ia.generer(
-                prompt=prompt,
-                system="Tu es un chef cuisinier créatif qui fait des suggestions personnalisées.",
-                temperature=0.7,
-            )
-
-            # ✅ Enregistrer l'appel dans le rate limiter
-            RateLimitIA.enregistrer_appel(
-                service=self.service_name,
-                tokens_utilises=len(reponse) if reponse else 0,
-            )
-
-            suggestions = self.analyseur.extraire_json(reponse)
+            suggestions = AnalyseurIA().extraire_json(reponse)
 
             if isinstance(suggestions, list):
                 return suggestions

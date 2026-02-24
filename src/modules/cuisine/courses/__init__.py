@@ -14,6 +14,7 @@ import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 
 from .historique import afficher_historique
@@ -35,6 +36,9 @@ from .realtime import (
 from .suggestions_ia import afficher_suggestions_ia
 from .utils import PRIORITY_EMOJIS, RAYONS_DEFAULT
 
+# Session keys scopées
+_keys = KeyNamespace("courses")
+
 
 @profiler_rerun("courses")
 def app():
@@ -49,6 +53,14 @@ def app():
         st.session_state.new_article_mode = False
     # Initialiser la synchronisation temps réel
     _init_realtime_sync()
+
+    # Afficher le panneau collaboratif dans la sidebar
+    try:
+        from src.ui.views.synchronisation import afficher_panneau_collaboratif
+
+        afficher_panneau_collaboratif()
+    except Exception:
+        pass  # Sync non configurée, mode solo
 
     # Tabs principales avec deep linking URL
     TAB_LABELS = [

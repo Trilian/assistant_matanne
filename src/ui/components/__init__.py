@@ -25,6 +25,14 @@ from .charts import (
     graphique_repartition_repas,
 )
 
+# Charts Drill-down (graphiques interactifs avec on_select)
+from .plotly_drilldown import (
+    graphique_activites_heatmap,
+    graphique_budget_drilldown,
+    graphique_inventaire_drilldown,
+    graphique_recettes_drilldown,
+)
+
 # Chat contextuel (assistant IA intégré par module)
 from .chat_contextuel import ChatContextuelService, afficher_chat_contextuel
 
@@ -35,6 +43,14 @@ from .data import (
     ligne_metriques,
     pagination,
     tableau_donnees,
+)
+
+# Data Editors (édition inline via st.data_editor)
+from .data_editors import (
+    editeur_budget,
+    editeur_budgets_mensuels,
+    editeur_courses,
+    editeur_inventaire,
 )
 
 # Dynamic
@@ -102,6 +118,11 @@ __all__ = [
     # Charts
     "graphique_repartition_repas",
     "graphique_inventaire_categories",
+    # Charts Drill-down
+    "graphique_budget_drilldown",
+    "graphique_recettes_drilldown",
+    "graphique_activites_heatmap",
+    "graphique_inventaire_drilldown",
     # Filters (nouveau)
     "FilterConfig",
     "afficher_barre_filtres",
@@ -122,6 +143,11 @@ __all__ = [
     "boutons_export",
     "tableau_donnees",
     "barre_progression",
+    # Data Editors
+    "editeur_inventaire",
+    "editeur_courses",
+    "editeur_budget",
+    "editeur_budgets_mensuels",
     # Layouts
     "disposition_grille",
     "carte_item",

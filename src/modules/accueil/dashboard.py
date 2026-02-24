@@ -6,8 +6,10 @@ Structure:
   - alerts.py: Alertes critiques (stock bas, péremption, ménage)
   - stats.py: Statistiques globales et graphiques Plotly
   - summaries.py: Cartes résumé par module (cuisine, inventaire, courses, planning)
+  - resume_hebdo.py: Résumé hebdomadaire IA
 """
 
+import logging
 from datetime import date
 
 import streamlit as st
@@ -17,6 +19,8 @@ from src.modules._framework import error_boundary
 from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
 from src.ui.tokens_semantic import Sem
+
+logger = logging.getLogger(__name__)
 
 from .alerts import afficher_critical_alerts
 from .stats import afficher_global_stats, afficher_graphiques_enrichis
@@ -88,6 +92,20 @@ def app():
         if WIDGETS_DISPONIBLES:
             afficher_graphiques_enrichis()
             st.markdown("---")
+
+        # ═══════════════════════════════════════════════════════════
+        # RÉSUMÉ HEBDOMADAIRE IA
+        # ═══════════════════════════════════════════════════════════
+
+        try:
+            from src.modules.accueil.resume_hebdo import afficher_resume_hebdomadaire
+
+            afficher_resume_hebdomadaire()
+            st.markdown("---")
+        except ImportError:
+            pass
+        except Exception as e:
+            logger.debug(f"Résumé hebdo indisponible: {e}")
 
         # ═══════════════════════════════════════════════════════════
         # TIMELINE ÉVÉNEMENTS À VENIR

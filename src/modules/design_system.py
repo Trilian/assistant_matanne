@@ -4,16 +4,26 @@ Design System — Page de documentation interactive des composants UI.
 Similaire à Storybook: catalogue auto-généré depuis le registry,
 aperçu en direct des composants, palette de couleurs, et tokens.
 
-Point d'entrée: ``app()``
+Point d'entrée: ``app()`` — généré via ``@module_app`` sur ``DesignSystemModule``.
+
+Premier module piloté avec ``BaseModule`` (Phase 4 Audit, item 16).
 """
 
 from __future__ import annotations
 
+from typing import Callable
+
 import streamlit as st
 
 from src.core.monitoring import profiler_rerun
+from src.modules._framework import BaseModule, module_app
+from src.ui.keys import KeyNamespace
 from src.ui.registry import ComponentMeta, obtenir_catalogue, rechercher_composants
+from src.ui.state.url import tabs_with_url
 from src.ui.tokens import Couleur, Espacement, Ombre, Rayon, Typographie
+
+# Session keys scopées
+_keys = KeyNamespace("design_system")
 
 
 def _afficher_palette() -> None:
@@ -201,19 +211,26 @@ def _afficher_composant_card(meta: ComponentMeta) -> None:
             st.code(meta.exemple, language="python")
 
 
-@profiler_rerun("design_system")
-def app() -> None:
-    """Point d'entrée du module Design System."""
-    st.title("🎨 Design System Matanne")
-    st.caption("Documentation interactive auto-générée des composants UI")
+class DesignSystemModule(BaseModule[None]):
+    """Module Design System — piloté avec BaseModule (Phase 4 Audit)."""
 
-    tab1, tab2, tab3 = st.tabs(["🎨 Palette", "📏 Tokens", "🧩 Composants"])
+    titre = "Design System Matanne"
+    icone = "🎨"
+    description = "Documentation interactive auto-générée des composants UI"
+    show_refresh_button = False
 
-    with tab1:
-        _afficher_palette()
+    def get_service_factory(self) -> Callable[[], None] | None:
+        return None  # Pas de service nécessaire
 
-    with tab2:
-        _afficher_tokens()
+    @profiler_rerun("design_system")
+    def render(self) -> None:
+        """Rendu principal du Design System."""
+        self.render_tabs({
+            "🎨 Palette": _afficher_palette,
+            "📏 Tokens": _afficher_tokens,
+            "🧩 Composants": _afficher_catalogue,
+        })
 
-    with tab3:
-        _afficher_catalogue()
+
+# Point d'entrée standard généré par module_app
+app = module_app(DesignSystemModule)

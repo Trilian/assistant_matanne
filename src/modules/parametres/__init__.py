@@ -1,68 +1,53 @@
 """
 Module Paramètres - Configuration Application
-Point d'entrée avec navigation par onglets
+Navigation par onglets via BaseModule (Phase 4 Audit, item 16).
 """
 
-import streamlit as st
+from __future__ import annotations
+
+from typing import Callable
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
-from src.modules._framework import error_boundary
-from src.ui.state.url import tabs_with_url
+from src.modules._framework import BaseModule, module_app
 
 
-@profiler_rerun("parametres")
-def app():
-    """Point d'entree module paramètres"""
+class ParametresModule(BaseModule[None]):
+    """Module Paramètres — piloté avec BaseModule (Phase 4 Audit)."""
 
-    from src.modules.parametres.about import afficher_about
-    from src.modules.parametres.affichage import afficher_display_config
-    from src.modules.parametres.budget import afficher_budget_config
-    from src.modules.parametres.cache import afficher_cache_config
-    from src.modules.parametres.database import afficher_database_config
-    from src.modules.parametres.foyer import afficher_foyer_config
-    from src.modules.parametres.ia import afficher_ia_config
-    from src.ui.views.sauvegarde import afficher_sauvegarde
+    titre = "Paramètres"
+    icone = "⚙️"
+    description = ""
+    show_refresh_button = False
 
-    st.title("⚙️ Paramètres")
+    def get_service_factory(self) -> Callable[[], None] | None:
+        return None
 
-    # Navigation par onglets avec deep linking
-    TAB_LABELS = [
-        "👨‍👩‍👧‍👦 Foyer",
-        "🤖 IA",
-        "🗄️ BD",
-        "💾 Cache",
-        "💿 Sauvegarde",
-        "🖥️ Affichage",
-        "💰 Budget",
-        "ℹ️ À Propos",
-    ]
-    tabs_with_url(TAB_LABELS, param="tab")
-    tabs = st.tabs(TAB_LABELS)
+    @profiler_rerun("parametres")
+    def render(self) -> None:
+        """Rendu principal avec onglets gérés par render_tabs."""
+        from src.modules.parametres.about import afficher_about
+        from src.modules.parametres.affichage import afficher_display_config
+        from src.modules.parametres.budget import afficher_budget_config
+        from src.modules.parametres.cache import afficher_cache_config
+        from src.modules.parametres.database import afficher_database_config
+        from src.modules.parametres.foyer import afficher_foyer_config
+        from src.modules.parametres.ia import afficher_ia_config
+        from src.ui.views.sauvegarde import afficher_sauvegarde
 
-    with tabs[0]:
-        with error_boundary(titre="Erreur config foyer"):
-            afficher_foyer_config()
-    with tabs[1]:
-        with error_boundary(titre="Erreur config IA"):
-            afficher_ia_config()
-    with tabs[2]:
-        with error_boundary(titre="Erreur config BD"):
-            afficher_database_config()
-    with tabs[3]:
-        with error_boundary(titre="Erreur config cache"):
-            afficher_cache_config()
-    with tabs[4]:
-        with error_boundary(titre="Erreur sauvegarde"):
-            afficher_sauvegarde()
-    with tabs[5]:
-        with error_boundary(titre="Erreur config affichage"):
-            afficher_display_config()
-    with tabs[6]:
-        with error_boundary(titre="Erreur config budget"):
-            afficher_budget_config()
-    with tabs[7]:
-        with error_boundary(titre="Erreur à propos"):
-            afficher_about()
+        self.render_tabs({
+            "👨‍👩‍👧‍👦 Foyer": afficher_foyer_config,
+            "🤖 IA": afficher_ia_config,
+            "🗄️ BD": afficher_database_config,
+            "💾 Cache": afficher_cache_config,
+            "💿 Sauvegarde": afficher_sauvegarde,
+            "🖥️ Affichage": afficher_display_config,
+            "💰 Budget": afficher_budget_config,
+            "ℹ️ À Propos": afficher_about,
+        })
+
+
+# Point d'entrée standard généré par module_app
+app = module_app(ParametresModule)
 
 
 __all__ = [

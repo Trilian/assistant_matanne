@@ -58,7 +58,7 @@ def app():
     st.title("⚽ Paris Sportifs - Prédictions IA")
     st.caption("Suivi des championnats européens avec prédictions intelligentes")
 
-    with error_boundary("paris_principal"):
+    with error_boundary("paris_predictions"):
         # Tabs principaux avec deep linking URL
         TAB_LABELS = [
             "🎯 Prédictions",
@@ -70,8 +70,9 @@ def app():
         tab_index = tabs_with_url(TAB_LABELS, param="tab")
         tabs = st.tabs(TAB_LABELS)
 
-        # TAB 1: PRÉDICTIONS
-        with tabs[0]:
+    # TAB 1: PRÉDICTIONS
+    with tabs[0]:
+      with error_boundary("paris_predictions_tab"):
             st.header("Matchs à venir")
 
             with st.expander("ℹ️ Comment ça marche"):
@@ -195,16 +196,19 @@ def app():
                     """)
 
         # TAB 2: SÉRIES (LOI DES SÉRIES)
-        with tabs[1]:
+    with tabs[1]:
+      with error_boundary("paris_series_tab"):
             afficher_series_paris()
 
         # TAB 3: PERFORMANCE
-        with tabs[2]:
+    with tabs[2]:
+      with error_boundary("paris_performance_tab"):
             st.header("📊 Performance de mes paris")
             afficher_dashboard_performance()
 
         # TAB 4: CLASSEMENTS
-        with tabs[3]:
+    with tabs[3]:
+      with error_boundary("paris_classements_tab"):
             st.header("🏆 Classements")
 
             champ_classe = st.selectbox(
@@ -246,7 +250,8 @@ def app():
                 st.info(f"Aucune équipe enregistrée pour {champ_classe}")
 
         # TAB 5: GESTION
-        with tabs[4]:
+    with tabs[4]:
+      with error_boundary("paris_gestion_tab"):
             st.header("⚙️ Gestion des données")
             afficher_gestion_donnees()
 

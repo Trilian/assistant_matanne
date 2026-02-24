@@ -6,6 +6,49 @@
 
 ## ✅ Terminé (Session 24 février 2026)
 
+### ⚪ PHASE 5 AUDIT — Modules manquants (Semaine 11-14)
+
+Session d'implémentation de la Phase 5 du rapport d'audit (Modules manquants & finalisation).
+
+#### Bilan des 5 items Phase 5
+
+| Item                         | Status | Notes                                                                              |
+| ---------------------------- | ------ | ---------------------------------------------------------------------------------- |
+| Modules maison/ manquants    | ✅     | 4 modules créés: projets (UI+registry), eco_tips, energie, meubles                 |
+| Coverage fichiers 0%         | ✅     | 45 tests créés: loto/generation (29), batch_cooking/generation (6), pwa/generation (10) |
+| Lazy load images recettes    | ✅     | `loading="lazy"` + `decoding="async"` + `alt` sur `<img>` dans liste.py            |
+| Activer Redis en production  | ✅     | REDIS_URL dans Parametres, fallback config, `redis` dans requirements, docs/REDIS_SETUP.md |
+| Mode collaboratif courses    | ✅     | Panneau collaboratif intégré, résolution de conflits UI, afficher_panneau_collaboratif() |
+
+#### Fichiers créés
+
+| Fichier                                              | LOC | Description                                                |
+| ---------------------------------------------------- | --- | ---------------------------------------------------------- |
+| `src/modules/maison/projets/__init__.py`             | 65  | Module UI projets — tabs, error_boundary, profiler_rerun   |
+| `src/modules/maison/projets/onglets.py`              | 340 | 4 onglets: liste, création, timeline, ROI + CRUD helpers   |
+| `src/modules/maison/projets/styles.py`               | 50  | CSS projets (badges, cartes, ROI)                          |
+| `src/modules/maison/eco_tips/__init__.py`             | 230 | Module éco-tips — base de données de tips, éco-score, IA   |
+| `src/modules/maison/energie/__init__.py`              | 240 | Module énergie — saisie, dashboard, tendances, objectifs   |
+| `src/modules/maison/meubles/__init__.py`              | 270 | Module meubles — inventaire, souhaits, valeur assurance    |
+| `tests/modules/jeux/loto/test_generation.py`         | 165 | 29 tests pour les 4 stratégies de grilles Loto             |
+| `tests/modules/cuisine/batch_cooking_detaille/test_generation.py` | 130 | 6 tests batch cooking IA avec mocks                  |
+| `tests/services/web/test_pwa_generation.py`          | 100 | 10 tests PWA (manifest, SW, offline, icons)                |
+| `docs/REDIS_SETUP.md`                                | 85  | Guide activation Redis en production                       |
+
+#### Fichiers modifiés
+
+| Fichier                                              | Action   | Description                                              |
+| ---------------------------------------------------- | -------- | -------------------------------------------------------- |
+| `src/core/lazy_loader.py`                            | Modifié  | +4 entrées MODULE_REGISTRY (projets, eco_tips, energie, meubles) |
+| `src/modules/cuisine/recettes/liste.py`              | Modifié  | `loading="lazy" decoding="async" alt=` sur `<img>`       |
+| `src/core/config/settings.py`                        | Modifié  | Ajout `REDIS_URL: str = ""`                              |
+| `src/core/caching/redis.py`                          | Modifié  | Fallback REDIS_URL depuis Parametres si env var absente  |
+| `requirements.txt`                                   | Modifié  | Ajout `redis>=5.0.0`                                    |
+| `src/ui/views/synchronisation.py`                    | Modifié  | +afficher_resolution_conflits, +afficher_panneau_collaboratif |
+| `src/modules/cuisine/courses/__init__.py`            | Modifié  | Intégration afficher_panneau_collaboratif() dans app()   |
+
+---
+
 ### 🧪 PHASE 10 AUDIT — Tests & Scalabilité
 
 Session d'implémentation de la Phase 10 du rapport d'audit (Tests & Scalabilité).

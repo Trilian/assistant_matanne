@@ -258,6 +258,10 @@ class RouteurOptimise:
         "maison.entretien": {"path": "src.modules.maison.entretien"},
         "maison.depenses": {"path": "src.modules.maison.depenses"},
         "maison.charges": {"path": "src.modules.maison.charges"},
+        "maison.projets": {"path": "src.modules.maison.projets"},
+        "maison.eco_tips": {"path": "src.modules.maison.eco_tips"},
+        "maison.energie": {"path": "src.modules.maison.energie"},
+        "maison.meubles": {"path": "src.modules.maison.meubles"},
         # DOMAINE JEUX
         "jeux.paris": {"path": "src.modules.jeux.paris"},
         "jeux.loto": {"path": "src.modules.jeux.loto"},

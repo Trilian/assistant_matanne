@@ -31,11 +31,14 @@ from collections.abc import Callable
 
 import streamlit as st
 
+from src.ui.registry import composant_ui
+
 # ═══════════════════════════════════════════════════════════
 # HELPER DIALOG MODERNE — @st.dialog
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui("forms", exemple='confirm_dialog("Confirmer", "Supprimer ?", on_confirm=lambda: delete())', tags=("dialog", "confirm", "modal"))
 def confirm_dialog(
     titre: str = "Confirmer",
     message: str = "Êtes-vous sûr ?",

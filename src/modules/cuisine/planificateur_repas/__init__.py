@@ -17,6 +17,7 @@ from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.modules._framework import avec_gestion_erreurs_ui, error_boundary
 from src.ui import etat_vide
+from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 
 from .components import (
@@ -30,6 +31,9 @@ from .generation import generer_semaine_ia
 
 # Import des fonctions pour exposer l'API publique
 from .pdf import generer_pdf_planning_session
+
+# Session keys scopées
+_keys = KeyNamespace("planificateur_repas")
 from .preferences import (
     ajouter_feedback,
     charger_feedbacks,

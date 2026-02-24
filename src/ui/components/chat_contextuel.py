@@ -24,6 +24,7 @@ from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
 from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
+from src.ui.registry import composant_ui
 
 logger = logging.getLogger(__name__)
 
@@ -189,6 +190,7 @@ Réponds de manière utile et concise."""
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui("data", exemple='afficher_chat_contextuel("recettes")', tags=("chat", "ia", "contextuel"))
 @ui_fragment
 def afficher_chat_contextuel(
     contexte: str = "recettes",

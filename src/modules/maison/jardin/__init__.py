@@ -14,6 +14,7 @@ import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 
 from .data import obtenir_meteo_jardin
@@ -34,6 +35,9 @@ from .onglets import (
     onglet_taches,
 )
 from .styles import injecter_css_jardin
+
+# Session keys scopées
+_keys = KeyNamespace("jardin")
 
 __all__ = ["app"]
 

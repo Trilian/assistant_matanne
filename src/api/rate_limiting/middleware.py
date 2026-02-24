@@ -36,11 +36,12 @@ class MiddlewareLimitationDebit(BaseHTTPMiddleware):
 
         if auth_header.startswith("Bearer "):
             try:
-                import jwt
+                from src.api.auth import valider_token
 
                 token = auth_header.split(" ")[1]
-                payload = jwt.decode(token, options={"verify_signature": False})
-                id_utilisateur = payload.get("sub")
+                utilisateur = valider_token(token)
+                if utilisateur:
+                    id_utilisateur = utilisateur.id
             except Exception:
                 pass
 

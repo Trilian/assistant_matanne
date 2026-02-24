@@ -240,6 +240,7 @@ def streaming_section(
         yield
 
 
+@composant_ui("streaming", exemple='streaming_placeholder("gen_1")', tags=("streaming", "placeholder"))
 def streaming_placeholder(key: str | None = None) -> tuple:
     """
     Crée un placeholder pour streaming manuel.
@@ -266,6 +267,7 @@ def streaming_placeholder(key: str | None = None) -> tuple:
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui("streaming", exemple='safe_write_stream(my_generator)', tags=("streaming", "write", "compat"))
 def safe_write_stream(generator: Iterator[str] | Generator[str, None, None]) -> str:
     """
     Wrapper compatible pour st.write_stream().

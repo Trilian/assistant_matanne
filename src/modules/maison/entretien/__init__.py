@@ -8,6 +8,7 @@ import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 
 from .logic import (
@@ -27,9 +28,25 @@ from .onglets import (
     onglet_stats,
     onglet_taches,
 )
+from .db_access import charger_historique_entretien, charger_objets_entretien
 from .styles import injecter_css_entretien
 
+# Session keys scopées
+_keys = KeyNamespace("entretien")
+
 __all__ = ["app"]
+
+
+def _charger_donnees_entretien():
+    """Charge les données entretien depuis la DB, avec fallback session_state."""
+    if "mes_objets_entretien" not in st.session_state or st.session_state.get(
+        "_entretien_reload", True
+    ):
+        st.session_state.mes_objets_entretien = charger_objets_entretien()
+        st.session_state.historique_entretien = charger_historique_entretien()
+        st.session_state._entretien_reload = False
+
+    return st.session_state.mes_objets_entretien, st.session_state.historique_entretien
 
 
 @profiler_rerun("entretien")
@@ -37,15 +54,8 @@ def app():
     """Point d'entrée du module Entretien avec gamification."""
     injecter_css_entretien()
 
-    # Initialiser les données en session
-    if "mes_objets_entretien" not in st.session_state:
-        st.session_state.mes_objets_entretien = []
-
-    if "historique_entretien" not in st.session_state:
-        st.session_state.historique_entretien = []
-
-    mes_objets = st.session_state.mes_objets_entretien
-    historique = st.session_state.historique_entretien
+    # Charger depuis la DB (avec cache session_state)
+    mes_objets, historique = _charger_donnees_entretien()
 
     # Score et stats gamifiés
     score = calculer_score_proprete(mes_objets, historique)

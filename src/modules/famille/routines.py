@@ -18,9 +18,14 @@ from src.core.session_keys import SK
 from src.modules._framework import error_boundary
 from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
+from src.ui.keys import KeyNamespace
+from src.ui.state.url import tabs_with_url
 
 if TYPE_CHECKING:
     from src.services.famille.routines import ServiceRoutines
+
+# Session keys scopées
+_keys = KeyNamespace("routines")
 
 
 def _get_service() -> ServiceRoutines:
@@ -79,21 +84,25 @@ def app() -> None:
     # TABS PRINCIPAUX
     # ===================================
 
-    tab1, tab2, tab3, tab4 = st.tabs(
-        ["🎯 Mes Routines", "🤖 Rappels IA", "➕ Créer Routine", "📊 Suivi"]
-    )
+    TAB_LABELS = ["🎯 Mes Routines", "🤖 Rappels IA", "➕ Créer Routine", "📊 Suivi"]
+    tab_index = tabs_with_url(TAB_LABELS, param="tab")
+    tab1, tab2, tab3, tab4 = st.tabs(TAB_LABELS)
 
     with tab1:
-        _afficher_tab_routines(svc)
+        with error_boundary(titre="Erreur routines actives"):
+            _afficher_tab_routines(svc)
 
     with tab2:
-        _afficher_tab_rappels_ia(svc, agent, executer_async)
+        with error_boundary(titre="Erreur rappels IA"):
+            _afficher_tab_rappels_ia(svc, agent, executer_async)
 
     with tab3:
-        _afficher_tab_creer(svc)
+        with error_boundary(titre="Erreur création routine"):
+            _afficher_tab_creer(svc)
 
     with tab4:
-        _afficher_tab_suivi(svc)
+        with error_boundary(titre="Erreur suivi routines"):
+            _afficher_tab_suivi(svc)
 
 
 # ===================================

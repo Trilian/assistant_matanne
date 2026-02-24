@@ -195,7 +195,7 @@ def afficher_liste():
                 if recette.url_image:
                     try:
                         st.markdown(
-                            f'<div style="height: 100px; width: 100%; overflow: hidden; border-radius: 6px; margin-bottom: 6px; background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%); display: flex; align-items: center; justify-content: center;"><img src="{recette.url_image}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;" /></div>',
+                            f'<div style="height: 100px; width: 100%; overflow: hidden; border-radius: 6px; margin-bottom: 6px; background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%); display: flex; align-items: center; justify-content: center;"><img src="{recette.url_image}" loading="lazy" decoding="async" alt="{recette.nom}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;" /></div>',
                             unsafe_allow_html=True,
                         )
                     except Exception:

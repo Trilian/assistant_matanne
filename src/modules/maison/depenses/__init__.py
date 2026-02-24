@@ -13,6 +13,8 @@ Utilise le service Budget unifié (src/services/budget.py).
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.modules._framework import error_boundary
+from src.ui.keys import KeyNamespace
+from src.ui.state.url import tabs_with_url
 
 from .components import (
     afficher_comparaison_mois,
@@ -41,6 +43,9 @@ from .crud import (
 )
 from .utils import CATEGORY_LABELS, st
 
+# Session keys scopées
+_keys = KeyNamespace("depenses")
+
 
 @profiler_rerun("depenses")
 def app():
@@ -67,8 +72,10 @@ def app():
 
     st.divider()
 
-    # Onglets enrichis
-    tab1, tab2, tab3 = st.tabs(["📅 Ce mois", "➕ Ajouter", "📊 Analyse"])
+    # Onglets enrichis avec deep linking URL
+    TAB_LABELS = ["📅 Ce mois", "➕ Ajouter", "📊 Analyse"]
+    tab_index = tabs_with_url(TAB_LABELS, param="tab")
+    tab1, tab2, tab3 = st.tabs(TAB_LABELS)
 
     with tab1:
         with error_boundary(titre="Erreur ce mois"):

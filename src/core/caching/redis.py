@@ -37,6 +37,14 @@ def is_redis_available() -> bool:
     """
     redis_url = os.getenv("REDIS_URL", "")
     if not redis_url:
+        # Fallback: charger depuis les settings Pydantic
+        try:
+            from src.core.config import obtenir_parametres
+
+            redis_url = obtenir_parametres().REDIS_URL
+        except Exception:
+            pass
+    if not redis_url:
         return False
 
     try:

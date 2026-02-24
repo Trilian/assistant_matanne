@@ -10,6 +10,8 @@ from src.core.session_keys import SK
 from src.modules._framework import avec_gestion_erreurs_ui, error_boundary
 from src.modules.cuisine.batch_cooking_utils import estimer_heure_fin, formater_duree
 from src.ui import etat_vide
+from src.ui.keys import KeyNamespace
+from src.ui.state.url import tabs_with_url
 
 from .components import (
     afficher_etape_batch,
@@ -25,6 +27,9 @@ from .constants import TYPES_SESSION
 from .generation import generer_batch_ia
 
 logger = logging.getLogger(__name__)
+
+# Session keys scopées
+_keys = KeyNamespace("batch_cooking")
 
 
 @profiler_rerun("batch_cooking")
@@ -44,10 +49,10 @@ def app():
     # Récupérer le planning (depuis le planificateur de repas)
     planning_data = st.session_state.get(SK.PLANNING_DATA, {})
 
-    # Tabs
-    tab_preparer, tab_session, tab_finitions = st.tabs(
-        ["📋 Préparer", "👩‍🍳 Session Batch", "🍽️ Finitions Jour J"]
-    )
+    # Tabs avec deep linking URL
+    TAB_LABELS = ["📋 Préparer", "👩‍🍳 Session Batch", "🍽️ Finitions Jour J"]
+    tab_index = tabs_with_url(TAB_LABELS, param="tab")
+    tab_preparer, tab_session, tab_finitions = st.tabs(TAB_LABELS)
 
     # ═══════════════════════════════════════════════════════
     # TAB: PRÉPARER

@@ -11,6 +11,8 @@ import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.keys import KeyNamespace
+from src.ui.state.url import tabs_with_url
 
 from .components import (
     afficher_achat_card,
@@ -31,6 +33,9 @@ from .utils import (
     mark_as_bought,
 )
 
+# Session keys scopées
+_keys = KeyNamespace("achats_famille")
+
 
 @profiler_rerun("achats_famille")
 def app():
@@ -40,17 +45,17 @@ def app():
     stats = get_stats()
     st.caption(f"📋 {stats['en_attente']} en attente • 💰 ~{stats['total_estime']:.0f}€")
 
-    # Tabs
-    tabs = st.tabs(
-        [
-            "📊 Dashboard",
-            "👶 Jules",
-            "👨‍👩‍👦 Nous",
-            "🏪 Par magasin",
-            "➕ Ajouter",
-            "📜 Historique",
-        ]
-    )
+    # Tabs avec deep linking URL
+    TAB_LABELS = [
+        "📊 Dashboard",
+        "👶 Jules",
+        "👨‍👩‍👦 Nous",
+        "🏪 Par magasin",
+        "➕ Ajouter",
+        "📜 Historique",
+    ]
+    tab_index = tabs_with_url(TAB_LABELS, param="tab")
+    tabs = st.tabs(TAB_LABELS)
 
     with tabs[0]:
         with error_boundary(titre="Erreur dashboard achats"):

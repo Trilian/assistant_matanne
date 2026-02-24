@@ -68,6 +68,7 @@ _BADGE_STYLES: dict[str, str] = {
 }
 
 
+@composant_ui("atoms", exemple='badge_html("Actif", variante=Variante.SUCCESS)', tags=("badge", "html", "pure"))
 def badge_html(
     texte: str,
     variante: Variante | None = None,
@@ -251,6 +252,7 @@ def separateur(texte: str | None = None):
         st.markdown("---")
 
 
+@composant_ui("atoms", exemple='boite_info_html("Astuce", "Ctrl+S", "💡")', tags=("info", "callout", "html", "pure"))
 def boite_info_html(
     titre: str,
     contenu: str,
@@ -337,6 +339,7 @@ def boite_info(
     )
 
 
+@composant_ui("atoms", exemple='boule_loto_html(7)', tags=("loto", "html", "pure"))
 def boule_loto_html(numero: int, is_chance: bool = False, taille: int = 50) -> str:
     """Génère le HTML d'une boule de loto (fonction pure, testable).
 

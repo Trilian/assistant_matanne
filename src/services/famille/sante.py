@@ -24,6 +24,7 @@ from src.core.models import (
     HealthObjective,
     HealthRoutine,
 )
+from src.services.core.base import BaseService
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -39,13 +40,17 @@ class StatsSanteDict(TypedDict):
     moral_moyen: float
 
 
-class ServiceSante:
+class ServiceSante(BaseService[HealthEntry]):
     """Service de gestion de la santé familiale.
 
+    Hérite de BaseService[HealthEntry] pour le CRUD générique.
     Centralise l'accès DB pour les objectifs, routines et
     statistiques de santé, éliminant les requêtes directes
     depuis la couche modules.
     """
+
+    def __init__(self):
+        super().__init__(model=HealthEntry, cache_ttl=300)
 
     # ═══════════════════════════════════════════════════════════
     # OBJECTIFS
