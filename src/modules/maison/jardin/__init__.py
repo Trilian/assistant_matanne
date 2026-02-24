@@ -18,6 +18,7 @@ from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 
 from .data import obtenir_meteo_jardin
+from .db_access import charger_plantes_jardin, charger_recoltes_jardin
 from .logic import (
     BADGES_JARDIN,
     calculer_autonomie,
@@ -42,20 +43,23 @@ _keys = KeyNamespace("jardin")
 __all__ = ["app"]
 
 
+def _charger_donnees_jardin():
+    """Charge les données jardin depuis la DB, avec fallback session_state."""
+    if "mes_plantes_jardin" not in st.session_state or st.session_state.get("_jardin_reload", True):
+        st.session_state.mes_plantes_jardin = charger_plantes_jardin()
+        st.session_state.recoltes_jardin = charger_recoltes_jardin()
+        st.session_state._jardin_reload = False
+
+    return st.session_state.mes_plantes_jardin, st.session_state.recoltes_jardin
+
+
 @profiler_rerun("jardin")
 def app():
     """Point d'entrée du module Jardin avec gamification."""
     injecter_css_jardin()
 
-    # Initialiser les données en session
-    if "mes_plantes_jardin" not in st.session_state:
-        st.session_state.mes_plantes_jardin = []
-
-    if "recoltes_jardin" not in st.session_state:
-        st.session_state.recoltes_jardin = []
-
-    mes_plantes = st.session_state.mes_plantes_jardin
-    recoltes = st.session_state.recoltes_jardin
+    # Charger depuis la DB (avec cache session_state)
+    mes_plantes, recoltes = _charger_donnees_jardin()
 
     # Météo et stats
     meteo = obtenir_meteo_jardin()

@@ -12,6 +12,12 @@ from src.core.session_keys import SK
 from src.ui.fragments import ui_fragment
 
 from .data import charger_catalogue_plantes
+from .db_access import (
+    ajouter_plante_jardin,
+    ajouter_recolte_jardin,
+    mettre_a_jour_plante_jardin,
+    supprimer_plante_jardin,
+)
 from .ui import afficher_calendrier_plante, afficher_compagnons
 
 logger = logging.getLogger(__name__)
@@ -90,10 +96,13 @@ def onglet_mes_plantes(mes_plantes: list[dict]):
                         "plante_en_terre": en_terre,
                         "date_ajout": date.today().isoformat(),
                     }
+                    # Persister en DB
+                    ajouter_plante_jardin(nouvelle_plante)
                     mes_plantes.append(nouvelle_plante)
                     st.session_state.mes_plantes_jardin = mes_plantes
                     st.session_state.jardin_mode_ajout = False
                     st.session_state.jardin_plante_selectionnee = None
+                    st.session_state._jardin_reload = True
                     st.success(f"✅ {plante_data.get('nom')} ajouté au jardin !")
                     st.rerun()
 
@@ -135,18 +144,30 @@ def onglet_mes_plantes(mes_plantes: list[dict]):
                     if not ma_plante.get("semis_fait"):
                         if st.button("🌱 Semis fait", key=f"semis_{i}"):
                             mes_plantes[i]["semis_fait"] = True
+                            db_id = ma_plante.get("db_id")
+                            if db_id:
+                                mettre_a_jour_plante_jardin(db_id, {"semis_fait": True})
                             st.session_state.mes_plantes_jardin = mes_plantes
+                            st.session_state._jardin_reload = True
                             st.rerun()
 
                     elif not ma_plante.get("plante_en_terre"):
                         if st.button("🏡 Planté", key=f"plante_{i}"):
                             mes_plantes[i]["plante_en_terre"] = True
+                            db_id = ma_plante.get("db_id")
+                            if db_id:
+                                mettre_a_jour_plante_jardin(db_id, {"plante_en_terre": True})
                             st.session_state.mes_plantes_jardin = mes_plantes
+                            st.session_state._jardin_reload = True
                             st.rerun()
 
                     if st.button("🗑️", key=f"del_{i}", help="Supprimer"):
+                        db_id = ma_plante.get("db_id")
+                        if db_id:
+                            supprimer_plante_jardin(db_id)
                         mes_plantes.pop(i)
                         st.session_state.mes_plantes_jardin = mes_plantes
+                        st.session_state._jardin_reload = True
                         st.rerun()
 
 
@@ -190,8 +211,11 @@ def onglet_recoltes(mes_plantes: list[dict], recoltes: list[dict]):
                         "date": date_recolte.isoformat(),
                         "notes": notes,
                     }
+                    # Persister en DB
+                    ajouter_recolte_jardin(nouvelle_recolte)
                     recoltes.append(nouvelle_recolte)
                     st.session_state.recoltes_jardin = recoltes
+                    st.session_state._jardin_reload = True
                     st.success(f"✅ Récolte de {quantite}kg enregistrée !")
                     st.rerun()
 

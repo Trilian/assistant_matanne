@@ -11,6 +11,7 @@ from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 
+from .db_access import charger_factures
 from .onglets import (
     onglet_analyse,
     onglet_conseils,
@@ -26,19 +27,25 @@ __all__ = ["app"]
 _keys = KeyNamespace("charges")
 
 
+def _charger_donnees_charges():
+    """Charge les factures depuis la DB, avec fallback session_state."""
+    if _keys("factures") not in st.session_state or st.session_state.get("_charges_reload", True):
+        st.session_state[_keys("factures")] = charger_factures()
+        st.session_state._charges_reload = False
+
+    return st.session_state[_keys("factures")]
+
+
 @profiler_rerun("charges")
 def app():
     """Point d'entrée du module Charges gamifié."""
     injecter_css_charges()
 
-    # Initialiser les données en session
-    if _keys("factures") not in st.session_state:
-        st.session_state[_keys("factures")] = []
+    # Charger depuis la DB (avec cache session_state)
+    factures = _charger_donnees_charges()
 
     if _keys("badges_vus") not in st.session_state:
         st.session_state[_keys("badges_vus")] = []
-
-    factures = st.session_state[_keys("factures")]
 
     # Header
     afficher_header()

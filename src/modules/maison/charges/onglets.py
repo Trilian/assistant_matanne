@@ -11,6 +11,8 @@ from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
 
+from .db_access import ajouter_facture, supprimer_facture
+
 _keys = KeyNamespace("charges")
 
 from .constantes import CONSEILS_ECONOMIES, ENERGIES
@@ -155,9 +157,12 @@ def onglet_factures(factures: list[dict]):
                     "fournisseur": fournisseur or None,
                     "date_ajout": date.today().isoformat(),
                 }
+                # Persister en DB
+                ajouter_facture(nouvelle_facture)
                 factures.append(nouvelle_facture)
                 st.session_state[_keys("factures")] = factures
                 st.session_state[_keys("mode_ajout")] = False
+                st.session_state._charges_reload = True
                 st.success("✅ Facture enregistrée ! Vérifiez votre éco-score.")
                 st.balloons()
                 st.rerun()
@@ -223,10 +228,15 @@ def onglet_factures(factures: list[dict]):
 
             with col2:
                 if st.button("🗑️", key=f"del_fact_{i}", help="Supprimer cette facture"):
+                    # Supprimer en DB si la facture a un db_id
+                    db_id = facture.get("db_id")
+                    if db_id:
+                        supprimer_facture(db_id)
                     # Trouver l'index dans la liste originale
                     idx = factures.index(facture)
                     factures.pop(idx)
                     st.session_state[_keys("factures")] = factures
+                    st.session_state._charges_reload = True
                     st.success("Facture supprimée")
                     st.rerun()
 

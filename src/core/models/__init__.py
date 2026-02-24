@@ -39,6 +39,12 @@ from .base import (
     metadata,
     utc_now,
 )
+from .mixins import (
+    CreatedAtMixin,
+    CreeLeMixin,
+    TimestampFullMixin,
+    TimestampMixin,
+)
 
 # ═══════════════════════════════════════════════════════════
 # LAZY: Mapping symbole → (sous-module, nom_dans_module)

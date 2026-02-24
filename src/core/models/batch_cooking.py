@@ -28,7 +28,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base, utc_now
+from .base import Base
+from .mixins import TimestampMixin
 
 # ═══════════════════════════════════════════════════════════
 # ÉNUMÉRATIONS
@@ -80,7 +81,7 @@ class LocalisationStockageEnum(enum.StrEnum):
 # ═══════════════════════════════════════════════════════════
 
 
-class ConfigBatchCooking(Base):
+class ConfigBatchCooking(TimestampMixin, Base):
     """Configuration utilisateur pour le batch cooking.
 
     Attributes:
@@ -119,10 +120,6 @@ class ConfigBatchCooking(Base):
     objectif_portions_semaine: Mapped[int] = mapped_column(Integer, default=20)
     notes: Mapped[str | None] = mapped_column(Text)
 
-    # Timestamps
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     __table_args__ = (
         CheckConstraint("duree_max_session > 0", name="ck_config_batch_duree_positive"),
         CheckConstraint("objectif_portions_semaine > 0", name="ck_config_batch_objectif_positif"),
@@ -137,7 +134,7 @@ class ConfigBatchCooking(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class SessionBatchCooking(Base):
+class SessionBatchCooking(TimestampMixin, Base):
     """Session de batch cooking planifiée ou en cours.
 
     Attributes:
@@ -196,10 +193,6 @@ class SessionBatchCooking(Base):
     # Métriques
     nb_portions_preparees: Mapped[int] = mapped_column(Integer, default=0)
     nb_recettes_completees: Mapped[int] = mapped_column(Integer, default=0)
-
-    # Timestamps
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     etapes: Mapped[list["EtapeBatchCooking"]] = relationship(
@@ -340,7 +333,7 @@ class EtapeBatchCooking(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class PreparationBatch(Base):
+class PreparationBatch(TimestampMixin, Base):
     """Préparation issue d'une session batch cooking.
 
     Suit les plats préparés avec leur localisation et péremption.
@@ -401,10 +394,6 @@ class PreparationBatch(Base):
 
     # Statut
     consomme: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
-
-    # Timestamps
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     session: Mapped[Optional["SessionBatchCooking"]] = relationship(back_populates="preparations")

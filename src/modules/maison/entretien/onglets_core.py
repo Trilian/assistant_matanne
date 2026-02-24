@@ -90,9 +90,7 @@ def onglet_taches(mes_objets: list[dict], historique: list[dict]):
                     "date": date.today().isoformat(),
                 }
                 # Persister en DB
-                marquer_tache_faite(
-                    tache.get("objet_id", ""), tache.get("tache_nom", "")
-                )
+                marquer_tache_faite(tache.get("objet_id", ""), tache.get("tache_nom", ""))
                 historique.append(nouvelle_entree)
                 st.session_state.historique_entretien = historique
                 st.session_state._entretien_reload = True
@@ -205,18 +203,19 @@ def onglet_inventaire(mes_objets: list[dict]):
                             # Trouver la catégorie de l'objet
                             for cat_id, cat_data in catalogue.get("categories", {}).items():
                                 if obj_id in cat_data.get("objets", {}):
-                                    mes_objets.append(
-                                        {
-                                            "objet_id": obj_id,
-                                            "categorie_id": cat_id,
-                                            "piece": piece_data.get("nom", piece_id),
-                                            "piece_id": piece_id,
-                                            "date_ajout": date.today().isoformat(),
-                                        }
-                                    )
+                                    nouvel_objet = {
+                                        "objet_id": obj_id,
+                                        "categorie_id": cat_id,
+                                        "piece": piece_data.get("nom", piece_id),
+                                        "piece_id": piece_id,
+                                        "date_ajout": date.today().isoformat(),
+                                    }
+                                    ajouter_objet_entretien(nouvel_objet)
+                                    mes_objets.append(nouvel_objet)
                                     break
 
                         st.session_state.mes_objets_entretien = mes_objets
+                        st.session_state._entretien_reload = True
                         st.success(
                             f"✅ {len(objets_courants)} équipements ajoutés pour {piece_data.get('nom')} !"
                         )
@@ -322,6 +321,8 @@ def onglet_pieces(mes_objets: list[dict], historique: list[dict]):
             for i, tache in enumerate(taches_piece):
                 done = afficher_tache_entretien(tache, f"piece_{i}")
                 if done:
+                    # Persister en DB
+                    marquer_tache_faite(tache.get("objet_id", ""), tache.get("tache_nom", ""))
                     historique.append(
                         {
                             "objet_id": tache.get("objet_id"),
@@ -330,6 +331,7 @@ def onglet_pieces(mes_objets: list[dict], historique: list[dict]):
                         }
                     )
                     st.session_state.historique_entretien = historique
+                    st.session_state._entretien_reload = True
                     st.toast(f"✅ {tache['tache_nom']} accompli !")
                     st.rerun()
         else:

@@ -1,10 +1,225 @@
 # 🗺️ ROADMAP - Assistant Matanne
 
-> Dernière mise à jour: 24 février 2026
+> Dernière mise à jour: 25 février 2026
+
+---
+
+## ✅ Terminé (Session 25 février 2026)
+
+### 🟢 PHASE 4 AUDIT — Nettoyage & documentation (Semaine 9-10)
+
+Session d'implémentation de la Phase 4 du rapport d'audit (items 16-20).
+
+#### Bilan des 5 items Phase 4
+
+| Item | Status | Notes |
+| ---- | ------ | ----- |
+| 16. BaseModule adoption pilote | ✅ | Migré `design_system.py` et `parametres/__init__.py` vers `BaseModule[T]` avec `render_tabs()` |
+| 17. @composant_ui manquants | ✅ | 12+ décorateurs ajoutés dans atoms.py, charts.py, chat_contextuel.py, dynamic.py, filters.py, streaming.py, system.py |
+| 18. Split fichiers >500 LOC | ✅ | `paris_crud_service.py` (707→75 LOC facade + 3 mixins), `jardin/onglets.py` (628→22 LOC facade + 3 sous-modules) |
+| 19. Documenter docs/ui/ | ✅ | 3 fichiers créés : GUIDE_COMPOSANTS.md, PATTERNS.md, CONVENTIONS.md |
+| 20. TimestampMixin | ✅ | 4 mixins créés (`CreeLeMixin`, `TimestampMixin`, `CreatedAtMixin`, `TimestampFullMixin`), pilotés sur sante.py, batch_cooking.py, habitat.py |
+
+#### Fichiers créés
+
+| Fichier | LOC | Description |
+| ------- | --- | ----------- |
+| `src/core/models/mixins.py` | 80 | 4 mixins de timestamps (FR + EN) |
+| `src/services/jeux/_internal/paris_queries.py` | ~300 | `ParisQueryMixin` — 9 méthodes charger_* |
+| `src/services/jeux/_internal/paris_mutations.py` | ~140 | `ParisMutationMixin` — 5 méthodes d'écriture |
+| `src/services/jeux/_internal/paris_sync.py` | ~200 | `ParisSyncMixin` — 3 méthodes de synchronisation |
+| `src/modules/maison/jardin/onglets_culture.py` | ~260 | onglet_mes_plantes, onglet_recoltes, onglet_plan |
+| `src/modules/maison/jardin/onglets_stats.py` | ~200 | onglet_taches, onglet_autonomie, onglet_graphiques |
+| `src/modules/maison/jardin/onglets_export.py` | ~110 | _export_data_panel, onglet_export |
+| `src/ui/docs/GUIDE_COMPOSANTS.md` | ~280 | Guide complet composants, imports, exemples |
+| `src/ui/docs/PATTERNS.md` | ~200 | 7 patterns (fragment, error_boundary, lazy, modale, etc.) |
+| `src/ui/docs/CONVENTIONS.md` | ~180 | Nommage, structure, décorateurs, thèmes, a11y, tests |
+
+#### Fichiers modifiés
+
+| Fichier | Action | Description |
+| ------- | ------ | ----------- |
+| `src/modules/design_system.py` | Refactoré | Migré vers `DesignSystemModule(BaseModule[None])` |
+| `src/modules/parametres/__init__.py` | Refactoré | Migré vers `ParametresModule(BaseModule[None])` |
+| `src/ui/components/atoms.py` | +3 @composant_ui | badge_html, boite_info_html, boule_loto_html |
+| `src/ui/components/charts.py` | +2 @composant_ui | graphique_repartition_repas, graphique_inventaire_categories |
+| `src/ui/components/chat_contextuel.py` | +1 @composant_ui | afficher_chat_contextuel |
+| `src/ui/components/dynamic.py` | +1 @composant_ui | confirm_dialog |
+| `src/ui/components/filters.py` | +2 @composant_ui | appliquer_filtres, appliquer_recherche |
+| `src/ui/components/streaming.py` | +2 @composant_ui | streaming_placeholder, safe_write_stream |
+| `src/ui/components/system.py` | +1 @composant_ui | indicateur_sante_systeme |
+| `src/services/jeux/_internal/paris_crud_service.py` | Refactoré | Facade ~75 LOC (hérite des 3 mixins) |
+| `src/modules/maison/jardin/onglets.py` | Refactoré | Facade ~22 LOC (re-exports depuis 3 sous-modules) |
+| `src/core/models/__init__.py` | +import | Export des 4 mixins de timestamps |
+| `src/core/models/sante.py` | Refactoré | 3 classes → CreeLeMixin héritage |
+| `src/core/models/batch_cooking.py` | Refactoré | 3 classes → TimestampMixin héritage |
+| `src/core/models/habitat.py` | Refactoré | 4 classes → TimestampFullMixin/CreatedAtMixin héritage |
 
 ---
 
 ## ✅ Terminé (Session 24 février 2026)
+
+### �️ PHASE 1 AUDIT — Corrections critiques
+
+Session d'implémentation de la Phase 1 du rapport d'audit (Corrections critiques).
+
+#### Bilan des 5 items Phase 1
+
+| Item                        | Status | Notes                                                                           |
+| --------------------------- | ------ | ------------------------------------------------------------------------------- |
+| Persister maison/ en DB     | ✅     | entretien, jardin, charges: db_access.py + chargement DB + mutations persistées |
+| ServiceSuggestions → BaseAI | ✅     | Héritage BaseAIService, call_with_cache_sync(), rate limiting automatique       |
+| JWT rate limiting flaw      | ✅     | Remplacé verify_signature=False par valider_token() (signature vérifiée)        |
+| Protéger /metrics           | ✅     | require_role("admin") ajouté, non-admin → 403                                   |
+| Tests API suggestions       | ✅     | 47 tests créés: endpoints, validation, sécurité JWT, /metrics protection        |
+
+#### Fichiers créés
+
+| Fichier                                     | LOC | Description                                           |
+| ------------------------------------------- | --- | ----------------------------------------------------- |
+| `src/modules/maison/entretien/db_access.py` | 130 | CRUD MaintenanceTask: charger, ajouter, marquer, sup  |
+| `src/modules/maison/jardin/db_access.py`    | 175 | CRUD GardenItem/Log: charger plantes, récoltes, CRUD  |
+| `src/modules/maison/charges/db_access.py`   | 100 | CRUD HouseExpense: charger/ajouter/supprimer factures |
+| `tests/api/test_routes_suggestions.py`      | 450 | 47 tests (4 classes): endpoints, params, sécurité     |
+
+#### Fichiers modifiés
+
+| Fichier                                        | Action  | Description                                  |
+| ---------------------------------------------- | ------- | -------------------------------------------- |
+| `src/modules/maison/entretien/__init__.py`     | Modifié | \_charger_donnees_entretien() depuis DB      |
+| `src/modules/maison/entretien/onglets_core.py` | Modifié | 6 mutations persistées via db_access         |
+| `src/modules/maison/jardin/__init__.py`        | Modifié | \_charger_donnees_jardin() depuis DB         |
+| `src/modules/maison/jardin/onglets_culture.py` | Modifié | 6 mutations persistées via db_access         |
+| `src/modules/maison/charges/__init__.py`       | Modifié | \_charger_donnees_charges() depuis DB        |
+| `src/modules/maison/charges/onglets.py`        | Modifié | 2 mutations persistées (ajout, suppression)  |
+| `src/services/cuisine/suggestions/service.py`  | Modifié | Hérite BaseAIService, call_with_cache_sync() |
+| `src/api/rate_limiting/middleware.py`          | Modifié | verify_signature=False → valider_token()     |
+| `src/api/main.py`                              | Modifié | /metrics + Depends(require_role("admin"))    |
+
+#### Détails techniques
+
+**Persistence maison/ en DB**:
+
+```python
+# Chaque module maison/ charge depuis DB au démarrage
+def _charger_donnees_entretien():
+    if st.session_state.get("_entretien_reload", True):
+        st.session_state.mes_objets_entretien = charger_objets_entretien()
+        st.session_state._entretien_reload = False
+```
+
+**ServiceSuggestions → BaseAIService**:
+
+```python
+class ServiceSuggestions(BaseAIService):
+    def __init__(self, client: ClientIA | None = None, ...):
+        super().__init__(client=client, cache_prefix="suggestions", ...)
+
+    def suggerer_avec_ia(self, contexte: str, ...):
+        return self.call_with_cache_sync(prompt, ...)  # Rate limiting auto
+```
+
+**JWT Security Fix**:
+
+```python
+# AVANT (vulnérable):
+payload = jwt.decode(token, options={"verify_signature": False})
+
+# APRÈS (sécurisé):
+from src.api.auth import valider_token
+payload = valider_token(token)  # Vérifie signature API_SECRET ou Supabase
+```
+
+**Tests: 47 passed (test_routes_suggestions.py)**
+
+---
+
+### �🟡 PHASE 2 AUDIT — Homogénéisation des patterns (Semaine 3-4)
+
+Session d'implémentation de la Phase 2 du rapport d'audit (Homogénéisation des patterns).
+
+#### Bilan des 5 items Phase 2
+
+| Item                             | Status | Notes                                                                                                                                                            |
+| -------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| KeyNamespace 50% → 100%          | ✅     | Ajouté dans courses, planificateur_repas, entretien, jardin, calendrier, parametres, design_system, achats_famille, depenses, batch_cooking, activites, routines |
+| tabs_with_url 65% → 100%         | ✅     | Ajouté dans loto, achats_famille, depenses, batch_cooking, design_system, routines                                                                               |
+| error_boundary manquants         | ✅     | Per-tab dans activites, routines, design_system, paris (5 tabs individuels)                                                                                      |
+| BaseService Weekend/Sante/Budget | ✅     | ServiceWeekend(BaseService[WeekendActivity]), ServiceSante(BaseService[HealthEntry]), BudgetService(BaseService[FamilyBudget])                                   |
+| @cached_fragment cuisine/famille | ✅     | 2 graphiques Plotly activites extraits + cached, weekly_chart suivi_perso                                                                                        |
+
+#### Fichiers créés/modifiés
+
+| Fichier                                               | Action  | Description                                                                     |
+| ----------------------------------------------------- | ------- | ------------------------------------------------------------------------------- |
+| `src/modules/cuisine/courses/__init__.py`             | Modifié | +KeyNamespace("courses")                                                        |
+| `src/modules/cuisine/planificateur_repas/__init__.py` | Modifié | +KeyNamespace("planificateur_repas")                                            |
+| `src/modules/cuisine/batch_cooking_detaille/app.py`   | Modifié | +KeyNamespace, +tabs_with_url                                                   |
+| `src/modules/maison/entretien/__init__.py`            | Modifié | +KeyNamespace("entretien")                                                      |
+| `src/modules/maison/jardin/__init__.py`               | Modifié | +KeyNamespace("jardin")                                                         |
+| `src/modules/maison/depenses/__init__.py`             | Modifié | +KeyNamespace, +tabs_with_url                                                   |
+| `src/modules/planning/calendrier/__init__.py`         | Modifié | +KeyNamespace("calendrier")                                                     |
+| `src/modules/parametres/__init__.py`                  | Modifié | +KeyNamespace("parametres")                                                     |
+| `src/modules/design_system.py`                        | Modifié | +KeyNamespace, +tabs_with_url, +error_boundary per tab                          |
+| `src/modules/jeux/loto/__init__.py`                   | Modifié | +tabs_with_url deep linking                                                     |
+| `src/modules/jeux/paris/__init__.py`                  | Modifié | error_boundary per tab (5 onglets individuels)                                  |
+| `src/modules/famille/achats_famille/__init__.py`      | Modifié | +KeyNamespace, +tabs_with_url                                                   |
+| `src/modules/famille/activites.py`                    | Modifié | +KeyNamespace, +error_boundary per tab, +@cached_fragment (2 graphiques Plotly) |
+| `src/modules/famille/routines.py`                     | Modifié | +KeyNamespace, +tabs_with_url, +error_boundary per tab                          |
+| `src/modules/famille/suivi_perso/tableau_bord.py`     | Modifié | +@cached_fragment sur afficher_weekly_chart                                     |
+| `src/services/famille/weekend.py`                     | Modifié | ServiceWeekend → BaseService[WeekendActivity]                                   |
+| `src/services/famille/sante.py`                       | Modifié | ServiceSante → BaseService[HealthEntry]                                         |
+| `src/services/famille/budget/service.py`              | Modifié | BudgetService → BaseService[FamilyBudget]                                       |
+
+#### Détails techniques
+
+**KeyNamespace 100%**:
+
+```python
+# Chaque module a maintenant un namespace scopé pour éviter les collisions
+from src.ui.keys import KeyNamespace
+_keys = KeyNamespace("module_name")
+```
+
+**tabs_with_url 100%**:
+
+```python
+# Deep linking URL pour tous les modules avec onglets
+TAB_LABELS = ["📊 Tab1", "📈 Tab2", ...]
+tab_index = tabs_with_url(TAB_LABELS, param="tab")
+tabs = st.tabs(TAB_LABELS)
+```
+
+**error_boundary per tab**:
+
+```python
+# Isolation des erreurs par onglet — un onglet en erreur ne plante pas les autres
+with tabs[0]:
+    with error_boundary(titre="Erreur onglet 1"):
+        contenu_onglet_1()
+```
+
+**BaseService[T] migration**:
+
+```python
+# CRUD uniforme hérité via BaseService — create/get_all/update/delete automatiques
+class ServiceWeekend(BaseService[WeekendActivity]):
+    def __init__(self):
+        super().__init__(model=WeekendActivity, cache_ttl=300)
+```
+
+**@cached_fragment pour Plotly**:
+
+```python
+# Graphiques mis en cache 5 min + isolés en fragment
+@cached_fragment(ttl=300)
+def _graphique_budget_timeline(data: list[dict]) -> go.Figure:
+    ...
+```
+
+**Tests: 2024 passed, 4 skipped, 1 pre-existing failure (non lié)**
+
+---
 
 ### ⚪ PHASE 5 AUDIT — Modules manquants (Semaine 11-14)
 
@@ -12,40 +227,40 @@ Session d'implémentation de la Phase 5 du rapport d'audit (Modules manquants & 
 
 #### Bilan des 5 items Phase 5
 
-| Item                         | Status | Notes                                                                              |
-| ---------------------------- | ------ | ---------------------------------------------------------------------------------- |
-| Modules maison/ manquants    | ✅     | 4 modules créés: projets (UI+registry), eco_tips, energie, meubles                 |
-| Coverage fichiers 0%         | ✅     | 45 tests créés: loto/generation (29), batch_cooking/generation (6), pwa/generation (10) |
-| Lazy load images recettes    | ✅     | `loading="lazy"` + `decoding="async"` + `alt` sur `<img>` dans liste.py            |
-| Activer Redis en production  | ✅     | REDIS_URL dans Parametres, fallback config, `redis` dans requirements, docs/REDIS_SETUP.md |
-| Mode collaboratif courses    | ✅     | Panneau collaboratif intégré, résolution de conflits UI, afficher_panneau_collaboratif() |
+| Item                        | Status | Notes                                                                                      |
+| --------------------------- | ------ | ------------------------------------------------------------------------------------------ |
+| Modules maison/ manquants   | ✅     | 4 modules créés: projets (UI+registry), eco_tips, energie, meubles                         |
+| Coverage fichiers 0%        | ✅     | 45 tests créés: loto/generation (29), batch_cooking/generation (6), pwa/generation (10)    |
+| Lazy load images recettes   | ✅     | `loading="lazy"` + `decoding="async"` + `alt` sur `<img>` dans liste.py                    |
+| Activer Redis en production | ✅     | REDIS_URL dans Parametres, fallback config, `redis` dans requirements, docs/REDIS_SETUP.md |
+| Mode collaboratif courses   | ✅     | Panneau collaboratif intégré, résolution de conflits UI, afficher_panneau_collaboratif()   |
 
 #### Fichiers créés
 
-| Fichier                                              | LOC | Description                                                |
-| ---------------------------------------------------- | --- | ---------------------------------------------------------- |
-| `src/modules/maison/projets/__init__.py`             | 65  | Module UI projets — tabs, error_boundary, profiler_rerun   |
-| `src/modules/maison/projets/onglets.py`              | 340 | 4 onglets: liste, création, timeline, ROI + CRUD helpers   |
-| `src/modules/maison/projets/styles.py`               | 50  | CSS projets (badges, cartes, ROI)                          |
-| `src/modules/maison/eco_tips/__init__.py`             | 230 | Module éco-tips — base de données de tips, éco-score, IA   |
-| `src/modules/maison/energie/__init__.py`              | 240 | Module énergie — saisie, dashboard, tendances, objectifs   |
-| `src/modules/maison/meubles/__init__.py`              | 270 | Module meubles — inventaire, souhaits, valeur assurance    |
-| `tests/modules/jeux/loto/test_generation.py`         | 165 | 29 tests pour les 4 stratégies de grilles Loto             |
-| `tests/modules/cuisine/batch_cooking_detaille/test_generation.py` | 130 | 6 tests batch cooking IA avec mocks                  |
-| `tests/services/web/test_pwa_generation.py`          | 100 | 10 tests PWA (manifest, SW, offline, icons)                |
-| `docs/REDIS_SETUP.md`                                | 85  | Guide activation Redis en production                       |
+| Fichier                                                           | LOC | Description                                              |
+| ----------------------------------------------------------------- | --- | -------------------------------------------------------- |
+| `src/modules/maison/projets/__init__.py`                          | 65  | Module UI projets — tabs, error_boundary, profiler_rerun |
+| `src/modules/maison/projets/onglets.py`                           | 340 | 4 onglets: liste, création, timeline, ROI + CRUD helpers |
+| `src/modules/maison/projets/styles.py`                            | 50  | CSS projets (badges, cartes, ROI)                        |
+| `src/modules/maison/eco_tips/__init__.py`                         | 230 | Module éco-tips — base de données de tips, éco-score, IA |
+| `src/modules/maison/energie/__init__.py`                          | 240 | Module énergie — saisie, dashboard, tendances, objectifs |
+| `src/modules/maison/meubles/__init__.py`                          | 270 | Module meubles — inventaire, souhaits, valeur assurance  |
+| `tests/modules/jeux/loto/test_generation.py`                      | 165 | 29 tests pour les 4 stratégies de grilles Loto           |
+| `tests/modules/cuisine/batch_cooking_detaille/test_generation.py` | 130 | 6 tests batch cooking IA avec mocks                      |
+| `tests/services/web/test_pwa_generation.py`                       | 100 | 10 tests PWA (manifest, SW, offline, icons)              |
+| `docs/REDIS_SETUP.md`                                             | 85  | Guide activation Redis en production                     |
 
 #### Fichiers modifiés
 
-| Fichier                                              | Action   | Description                                              |
-| ---------------------------------------------------- | -------- | -------------------------------------------------------- |
-| `src/core/lazy_loader.py`                            | Modifié  | +4 entrées MODULE_REGISTRY (projets, eco_tips, energie, meubles) |
-| `src/modules/cuisine/recettes/liste.py`              | Modifié  | `loading="lazy" decoding="async" alt=` sur `<img>`       |
-| `src/core/config/settings.py`                        | Modifié  | Ajout `REDIS_URL: str = ""`                              |
-| `src/core/caching/redis.py`                          | Modifié  | Fallback REDIS_URL depuis Parametres si env var absente  |
-| `requirements.txt`                                   | Modifié  | Ajout `redis>=5.0.0`                                    |
-| `src/ui/views/synchronisation.py`                    | Modifié  | +afficher_resolution_conflits, +afficher_panneau_collaboratif |
-| `src/modules/cuisine/courses/__init__.py`            | Modifié  | Intégration afficher_panneau_collaboratif() dans app()   |
+| Fichier                                   | Action  | Description                                                      |
+| ----------------------------------------- | ------- | ---------------------------------------------------------------- |
+| `src/core/lazy_loader.py`                 | Modifié | +4 entrées MODULE_REGISTRY (projets, eco_tips, energie, meubles) |
+| `src/modules/cuisine/recettes/liste.py`   | Modifié | `loading="lazy" decoding="async" alt=` sur `<img>`               |
+| `src/core/config/settings.py`             | Modifié | Ajout `REDIS_URL: str = ""`                                      |
+| `src/core/caching/redis.py`               | Modifié | Fallback REDIS_URL depuis Parametres si env var absente          |
+| `requirements.txt`                        | Modifié | Ajout `redis>=5.0.0`                                             |
+| `src/ui/views/synchronisation.py`         | Modifié | +afficher_resolution_conflits, +afficher_panneau_collaboratif    |
+| `src/modules/cuisine/courses/__init__.py` | Modifié | Intégration afficher_panneau_collaboratif() dans app()           |
 
 ---
 

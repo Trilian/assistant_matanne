@@ -8,14 +8,13 @@ Contient :
 - EcoAction : Actions écologiques avec économies
 """
 
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
 from enum import StrEnum
 
 from sqlalchemy import (
     Boolean,
     Date,
-    DateTime,
     Integer,
     Numeric,
     String,
@@ -23,7 +22,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from .base import Base, utc_now
+from .base import Base
+from .mixins import CreatedAtMixin, TimestampFullMixin
 
 # ═══════════════════════════════════════════════════════════
 # ENUMS
@@ -87,7 +87,7 @@ class RoomType(StrEnum):
 # ═══════════════════════════════════════════════════════════
 
 
-class Furniture(Base):
+class Furniture(TimestampFullMixin, Base):
     """Meuble dans la wishlist.
 
     Pour gérer les achats progressifs de meubles avec budget.
@@ -131,10 +131,6 @@ class Furniture(Base):
     # Notes
     notes: Mapped[str | None] = mapped_column(Text)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     def __repr__(self) -> str:
         return f"<Furniture(id={self.id}, nom='{self.nom}', piece='{self.piece}')>"
 
@@ -144,7 +140,7 @@ class Furniture(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class HouseStock(Base):
+class HouseStock(TimestampFullMixin, Base):
     """Stock de consommables maison (ampoules, piles, produits ménagers).
 
     Pour ne plus être à court et éviter les doublons avec courses.
@@ -173,10 +169,6 @@ class HouseStock(Base):
     # Notes
     notes: Mapped[str | None] = mapped_column(Text)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     def __repr__(self) -> str:
         return f"<HouseStock(id={self.id}, nom='{self.nom}', qte={self.quantite})>"
 
@@ -186,7 +178,7 @@ class HouseStock(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class MaintenanceTask(Base):
+class MaintenanceTask(TimestampFullMixin, Base):
     """Tâche d'entretien planifiée (ménage, maintenance, rangement).
 
     Pour gérer le bordel : vitres, tri caisses, garage, médicaments...
@@ -228,10 +220,6 @@ class MaintenanceTask(Base):
     # Notes
     notes: Mapped[str | None] = mapped_column(Text)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     def __repr__(self) -> str:
         return f"<MaintenanceTask(id={self.id}, nom='{self.nom}', fait={self.fait})>"
 
@@ -241,7 +229,7 @@ class MaintenanceTask(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class EcoAction(Base):
+class EcoAction(CreatedAtMixin, Base):
     """Action écologique avec suivi des économies.
 
     Pour tracker le passage au lavable, économies d'énergie, etc.
@@ -277,9 +265,6 @@ class EcoAction(Base):
 
     # Notes
     notes: Mapped[str | None] = mapped_column(Text)
-
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     def __repr__(self) -> str:
         return f"<EcoAction(id={self.id}, nom='{self.nom}', type='{self.type_action}')>"

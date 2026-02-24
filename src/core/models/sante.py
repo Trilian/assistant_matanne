@@ -7,14 +7,13 @@ Contient :
 - HealthEntry : Entrées quotidiennes de suivi
 """
 
-from datetime import date, datetime
+from datetime import date
 from typing import Optional
 
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
     Date,
-    DateTime,
     Float,
     ForeignKey,
     Integer,
@@ -24,14 +23,15 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base, utc_now
+from .base import Base
+from .mixins import CreeLeMixin
 
 # ═══════════════════════════════════════════════════════════
 # ROUTINES SANTÉ
 # ═══════════════════════════════════════════════════════════
 
 
-class HealthRoutine(Base):
+class HealthRoutine(CreeLeMixin, Base):
     """Routine de santé ou sport.
 
     Attributes:
@@ -59,7 +59,6 @@ class HealthRoutine(Base):
     calories_brulees_estimees: Mapped[int | None] = mapped_column(Integer)
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     entries: Mapped[list["HealthEntry"]] = relationship(
@@ -72,7 +71,7 @@ class HealthRoutine(Base):
         return f"<HealthRoutine(id={self.id}, nom='{self.nom}', type='{self.type_routine}')>"
 
 
-class HealthObjective(Base):
+class HealthObjective(CreeLeMixin, Base):
     """Objectifs de santé et bien-être.
 
     Attributes:
@@ -102,7 +101,6 @@ class HealthObjective(Base):
     priorite: Mapped[str] = mapped_column(String(50), nullable=False, default="moyenne")
     statut: Mapped[str] = mapped_column(String(50), nullable=False, default="en_cours", index=True)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         CheckConstraint("valeur_cible > 0", name="ck_objective_valeur_positive"),
@@ -113,7 +111,7 @@ class HealthObjective(Base):
         return f"<HealthObjective(id={self.id}, titre='{self.titre}', statut='{self.statut}')>"
 
 
-class HealthEntry(Base):
+class HealthEntry(CreeLeMixin, Base):
     """Entrée quotidienne de suivi santé.
 
     Attributes:
@@ -144,7 +142,6 @@ class HealthEntry(Base):
     note_moral: Mapped[int | None] = mapped_column(Integer)
     ressenti: Mapped[str | None] = mapped_column(Text)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     routine: Mapped[Optional["HealthRoutine"]] = relationship(back_populates="entries")
