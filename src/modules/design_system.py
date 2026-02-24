@@ -197,12 +197,12 @@ def _afficher_composant_card(meta: ComponentMeta) -> None:
     st.markdown(
         f'<div style="border-left:3px solid #4CAF50;padding:0.75rem;'
         f'margin:0.5rem 0;background:#f8f9fa;border-radius:0 8px 8px 0;">'
-        f'<strong><code>{meta.nom}</code></strong>'
+        f"<strong><code>{meta.nom}</code></strong>"
         f'<span style="color:#999;font-size:0.85rem;margin-left:0.5rem;">'
-        f'{meta.signature}</span><br>'
+        f"{meta.signature}</span><br>"
         f'<span style="color:#666;">{meta.description[:120] if meta.description else "—"}</span>'
-        f'{" " + tags_html if tags_html else ""}'
-        f'</div>',
+        f"{' ' + tags_html if tags_html else ''}"
+        f"</div>",
         unsafe_allow_html=True,
     )
 
@@ -225,11 +225,13 @@ class DesignSystemModule(BaseModule[None]):
     @profiler_rerun("design_system")
     def render(self) -> None:
         """Rendu principal du Design System."""
-        self.render_tabs({
-            "🎨 Palette": _afficher_palette,
-            "📏 Tokens": _afficher_tokens,
-            "🧩 Composants": _afficher_catalogue,
-        })
+        self.render_tabs(
+            {
+                "🎨 Palette": _afficher_palette,
+                "📏 Tokens": _afficher_tokens,
+                "🧩 Composants": _afficher_catalogue,
+            }
+        )
 
 
 # Point d'entrée standard généré par module_app

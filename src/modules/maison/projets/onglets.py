@@ -293,9 +293,7 @@ def onglet_timeline(keys: KeyNamespace):
                 if total_days > 0:
                     time_pct = min(100, max(0, int((elapsed / total_days) * 100)))
                     remaining = max(0, (projet.date_fin_prevue - today).days)
-                    st.caption(
-                        f"⏱️ {time_pct}% du temps écoulé — " f"{remaining} jour(s) restant(s)"
-                    )
+                    st.caption(f"⏱️ {time_pct}% du temps écoulé — {remaining} jour(s) restant(s)")
                     if time_pct > 80 and projet.tasks:
                         taches_restantes = total - termines
                         if taches_restantes > 0:
@@ -357,7 +355,7 @@ def onglet_roi(keys: KeyNamespace):
                 with col_r1:
                     st.markdown(
                         '<div class="roi-card">'
-                        f'<h3>{roi.get("economies_annuelles", 0)}€/an</h3>'
+                        f"<h3>{roi.get('economies_annuelles', 0)}€/an</h3>"
                         "<p>Économies estimées</p></div>",
                         unsafe_allow_html=True,
                     )
@@ -365,14 +363,14 @@ def onglet_roi(keys: KeyNamespace):
                     retour = roi.get("retour_annees")
                     st.markdown(
                         '<div class="roi-card">'
-                        f'<h3>{retour or "N/A"} ans</h3>'
+                        f"<h3>{retour or 'N/A'} ans</h3>"
                         "<p>Retour sur investissement</p></div>",
                         unsafe_allow_html=True,
                     )
                 with col_r3:
                     aides = roi.get("aides_estimees", 0)
                     st.markdown(
-                        '<div class="roi-card">' f"<h3>{aides}€</h3>" "<p>Aides estimées</p></div>",
+                        f'<div class="roi-card"><h3>{aides}€</h3><p>Aides estimées</p></div>',
                         unsafe_allow_html=True,
                     )
 

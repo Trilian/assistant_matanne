@@ -109,9 +109,7 @@ class AppTestAssertions:
     def assert_no_exception(at):
         """Vérifie qu'aucune exception n'a été levée pendant le run."""
         if at.exception:
-            raise AssertionError(
-                f"Exception durant le rendu Streamlit:\n{at.exception}"
-            )
+            raise AssertionError(f"Exception durant le rendu Streamlit:\n{at.exception}")
 
     @staticmethod
     def assert_has_title(at, expected_text: str):
@@ -154,9 +152,7 @@ class AppTestAssertions:
         """Vérifie qu'un bouton avec ce label existe."""
         buttons = at.button
         labels = [b.label for b in buttons]
-        assert any(
-            label in lbl for lbl in labels
-        ), f"Bouton '{label}' non trouvé dans: {labels}"
+        assert any(label in lbl for lbl in labels), f"Bouton '{label}' non trouvé dans: {labels}"
 
     @staticmethod
     def assert_has_tabs(at, count: int | None = None):

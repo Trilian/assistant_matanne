@@ -128,16 +128,14 @@ def afficher_database_config():
                     if v in appliquees:
                         date_app = appliquees[v].get("applied_at", "")
                         date_str = f" ({date_app:%Y-%m-%d})" if date_app else ""
-                        st.markdown(f"✅ **v{v}** - {m['name']} " f"(`{m['fichier']}`){date_str}")
+                        st.markdown(f"✅ **v{v}** - {m['name']} (`{m['fichier']}`){date_str}")
                     else:
-                        st.markdown(
-                            f"⏳ **v{v}** - {m['name']} " f"(`{m['fichier']}`) — en attente"
-                        )
+                        st.markdown(f"⏳ **v{v}** - {m['name']} (`{m['fichier']}`) — en attente")
 
                 # Vérifier les checksums modifiés
                 modifiees = GestionnaireMigrations.verifier_checksums()
                 if modifiees:
-                    st.warning(f"⚠️ {len(modifiees)} migration(s) modifiée(s) " f"après application")
+                    st.warning(f"⚠️ {len(modifiees)} migration(s) modifiée(s) après application")
             else:
                 etat_vide("Aucun fichier SQL dans sql/migrations/", "🗄️")
 

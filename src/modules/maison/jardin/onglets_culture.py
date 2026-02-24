@@ -285,7 +285,7 @@ def onglet_plan(mes_plantes: list[dict] | None = None):
     for i, zone in enumerate(zones_defaut):
         with cols[i % 3]:
             status = "🟢" if zone["active"] else "⬜"
-            st.markdown(f"**{zone['emoji']} {zone['nom']}** {status}  \n" f"*{zone['type']}*")
+            st.markdown(f"**{zone['emoji']} {zone['nom']}** {status}  \n*{zone['type']}*")
             plantes_zone = zone.get("plantes", [])
             if plantes_zone:
                 for p in plantes_zone[:5]:

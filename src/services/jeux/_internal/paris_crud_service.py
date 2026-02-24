@@ -32,7 +32,9 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
-class ParisCrudService(ParisQueryMixin, ParisMutationMixin, ParisSyncMixin, BaseService[PariSportif]):
+class ParisCrudService(
+    ParisQueryMixin, ParisMutationMixin, ParisSyncMixin, BaseService[PariSportif]
+):
     """Service CRUD pour les paris sportifs, équipes et matchs.
 
     Façade composée des 3 mixins:
@@ -66,4 +68,3 @@ def get_paris_crud_service() -> ParisCrudService:
 def obtenir_service_paris_crud() -> ParisCrudService:
     """Alias français pour get_paris_crud_service."""
     return get_paris_crud_service()
-

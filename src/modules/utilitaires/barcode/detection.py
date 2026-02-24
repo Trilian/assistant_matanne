@@ -168,8 +168,7 @@ class BarcodeScanner:
             from streamlit_webrtc import RTCConfiguration, VideoProcessorBase, webrtc_streamer
         except ImportError:
             st.error(
-                "📦 Packages requis non installés.\n\n"
-                "Exécutez: `pip install streamlit-webrtc av`"
+                "📦 Packages requis non installés.\n\nExécutez: `pip install streamlit-webrtc av`"
             )
             self._afficher_fallback_input(key)
             return

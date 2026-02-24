@@ -81,9 +81,7 @@ class TestAccueilAppTest:
         assertions.assert_no_exception(at)
         # Vérifie le contenu markdown de bienvenue
         markdown_texts = [m.value for m in at.markdown]
-        assert any("Bienvenue" in m for m in markdown_texts), (
-            "Message de bienvenue non trouvé"
-        )
+        assert any("Bienvenue" in m for m in markdown_texts), "Message de bienvenue non trouvé"
 
     def test_accueil_displays_stats(self, assertions):
         """Le dashboard affiche les statistiques globales."""
@@ -201,12 +199,8 @@ class TestInventaireAppTest:
         self.mock_inventaire = MagicMock()
         self.mock_inventaire.get_inventaire_complet.return_value = []
         self.mock_inventaire.get_stats.return_value = {"total": 0}
-        self.mock_inventaire.get_emplacements.return_value = [
-            "Frigo", "Placard", "Congélateur"
-        ]
-        self.mock_inventaire.get_categories.return_value = [
-            "Légumes", "Fruits", "Viandes"
-        ]
+        self.mock_inventaire.get_emplacements.return_value = ["Frigo", "Placard", "Congélateur"]
+        self.mock_inventaire.get_categories.return_value = ["Légumes", "Fruits", "Viandes"]
 
         self.patches = [
             patch(

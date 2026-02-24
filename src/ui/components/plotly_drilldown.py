@@ -355,7 +355,7 @@ def graphique_activites_heatmap(
                 for act in activites_jour:
                     duree = act.get("duree_minutes", 0)
                     st.markdown(
-                        f"- **{act.get('nom', 'Activité')}** " f"({duree} min)"
+                        f"- **{act.get('nom', 'Activité')}** ({duree} min)"
                         if duree
                         else f"- **{act.get('nom', 'Activité')}**"
                     )

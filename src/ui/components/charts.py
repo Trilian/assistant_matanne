@@ -17,7 +17,11 @@ from src.ui.tokens import Couleur
 logger = logging.getLogger(__name__)
 
 
-@composant_ui("charts", exemple='graphique_repartition_repas([{"type_repas": "déjeuner"}])', tags=("chart", "plotly", "repas", "pie"))
+@composant_ui(
+    "charts",
+    exemple='graphique_repartition_repas([{"type_repas": "déjeuner"}])',
+    tags=("chart", "plotly", "repas", "pie"),
+)
 @st.cache_data(ttl=300)
 def graphique_repartition_repas(planning_data: list[dict]) -> go.Figure | None:
     """
@@ -83,7 +87,11 @@ def graphique_repartition_repas(planning_data: list[dict]) -> go.Figure | None:
     return fig
 
 
-@composant_ui("charts", exemple='graphique_inventaire_categories([{"categorie": "Fruits"}])', tags=("chart", "plotly", "inventaire", "bar"))
+@composant_ui(
+    "charts",
+    exemple='graphique_inventaire_categories([{"categorie": "Fruits"}])',
+    tags=("chart", "plotly", "inventaire", "bar"),
+)
 @st.cache_data(ttl=300)
 def graphique_inventaire_categories(inventaire: list[dict]) -> go.Figure | None:
     """

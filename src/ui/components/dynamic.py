@@ -38,7 +38,11 @@ from src.ui.registry import composant_ui
 # ═══════════════════════════════════════════════════════════
 
 
-@composant_ui("forms", exemple='confirm_dialog("Confirmer", "Supprimer ?", on_confirm=lambda: delete())', tags=("dialog", "confirm", "modal"))
+@composant_ui(
+    "forms",
+    exemple='confirm_dialog("Confirmer", "Supprimer ?", on_confirm=lambda: delete())',
+    tags=("dialog", "confirm", "modal"),
+)
 def confirm_dialog(
     titre: str = "Confirmer",
     message: str = "Êtes-vous sûr ?",

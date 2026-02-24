@@ -189,8 +189,7 @@ class TimerCuisine:
 
         if label:
             st.markdown(
-                f'<p style="text-align:center;'
-                f'color:var(--sem-on-surface-muted, #888)">{label}</p>',
+                f'<p style="text-align:center;color:var(--sem-on-surface-muted, #888)">{label}</p>',
                 unsafe_allow_html=True,
             )
 

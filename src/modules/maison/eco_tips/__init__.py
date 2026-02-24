@@ -602,7 +602,7 @@ def _onglet_tips():
                 with col2:
                     st.markdown(
                         f'<span style="color: {impact_color}; font-weight: 600; font-size: 0.8rem;">'
-                        f'{tip["impact"]}</span>',
+                        f"{tip['impact']}</span>",
                         unsafe_allow_html=True,
                     )
                 with col3:

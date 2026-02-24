@@ -190,7 +190,9 @@ Réponds de manière utile et concise."""
 # ═══════════════════════════════════════════════════════════
 
 
-@composant_ui("data", exemple='afficher_chat_contextuel("recettes")', tags=("chat", "ia", "contextuel"))
+@composant_ui(
+    "data", exemple='afficher_chat_contextuel("recettes")', tags=("chat", "ia", "contextuel")
+)
 @ui_fragment
 def afficher_chat_contextuel(
     contexte: str = "recettes",

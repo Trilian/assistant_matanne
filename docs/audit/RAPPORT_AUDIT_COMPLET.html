@@ -330,11 +330,11 @@
   <table>
     <thead><tr><th>Sous-package</th><th>Fichiers</th><th>LOC</th><th>Score</th></tr></thead>
     <tbody>
-      <tr><td>Root (main, auth, deps, limiters)</td><td>6</td><td>~600</td><td><span class="badge badge-green">8.5</span></td></tr>
-      <tr><td>rate_limiting/</td><td>4</td><td>~450</td><td><span class="badge badge-green">8.0</span></td></tr>
-      <tr><td>routes/ (16 endpoints)</td><td>16</td><td>~1 500</td><td><span class="badge badge-orange">7.5</span></td></tr>
-      <tr><td>schemas/ (Pydantic v2)</td><td>5</td><td>~550</td><td><span class="badge badge-green">8.5</span></td></tr>
-      <tr><td>utils/ (middleware, security)</td><td>5</td><td>~508</td><td><span class="badge badge-green">8.5</span></td></tr>
+      <tr><td>Root (main, auth, deps, limiters)</td><td>4</td><td>764</td><td><span class="badge badge-green">8.5</span></td></tr>
+      <tr><td>rate_limiting/</td><td>8</td><td>650</td><td><span class="badge badge-green">8.0</span></td></tr>
+      <tr><td>routes/ (8 endpoints)</td><td>8</td><td>1 959</td><td><span class="badge badge-orange">7.5</span></td></tr>
+      <tr><td>schemas/ (Pydantic v2)</td><td>8</td><td>449</td><td><span class="badge badge-green">8.5</span></td></tr>
+      <tr><td>utils/ (middleware, security)</td><td>6</td><td>643</td><td><span class="badge badge-green">8.5</span></td></tr>
     </tbody>
   </table>
 
@@ -446,32 +446,32 @@
   <table>
     <thead><tr><th>Module</th><th>Fichiers</th><th>LOC</th><th>Score</th><th>Commentaire clé</th></tr></thead>
     <tbody>
-      <tr><td><strong>_framework/</strong></td><td>7</td><td>1 200</td><td><span class="badge badge-green">9.0</span></td><td>BaseModule[T], error_boundary, @profiler_rerun, tabs_with_url</td></tr>
-      <tr><td><strong>accueil/</strong></td><td>5</td><td>1 100</td><td><span class="badge badge-green">9.0</span></td><td>✅ Dashboard fonctionnel, tous patterns adoptés</td></tr>
-      <tr><td><strong>cuisine/recettes/</strong></td><td>15</td><td>2 500</td><td><span class="badge badge-green">8.0</span></td><td>Import URL/PDF, IA suggestions, tous patterns</td></tr>
-      <tr><td><strong>cuisine/inventaire/</strong></td><td>15</td><td>2 000</td><td><span class="badge badge-green">8.5</span></td><td>✅ Lazy loading optimisé, tous patterns adoptés</td></tr>
-      <tr><td><strong>cuisine/courses/</strong></td><td>8</td><td>1 200</td><td><span class="badge badge-green">8.5</span></td><td>✅ Panel collaboratif vérifié, tous patterns adoptés</td></tr>
-      <tr><td><strong>cuisine/planificateur/</strong></td><td>5</td><td>800</td><td><span class="badge badge-green">8.0</span></td><td>✅ 3/3 onglets avec error_boundary <span class="badge badge-green">FIXÉ Sprint 1</span></td></tr>
-      <tr><td><strong>cuisine/batch_cooking/</strong></td><td>6</td><td>1 000</td><td><span class="badge badge-green">8.0</span></td><td>✅ 3/3 onglets avec error_boundary <span class="badge badge-green">FIXÉ Sprint 1</span></td></tr>
-      <tr><td><strong>famille/hub</strong></td><td>3</td><td>500</td><td><span class="badge badge-green">8.0</span></td><td>Hub central famille clean</td></tr>
-      <tr><td><strong>famille/activites/</strong></td><td>4</td><td>700</td><td><span class="badge badge-green">9.0</span></td><td>Exemplaire : tous patterns, @cached_fragment</td></tr>
-      <tr><td><strong>famille/routines/</strong></td><td>4</td><td>600</td><td><span class="badge badge-green">8.0</span></td><td>Logique pure testable dans routines_utils.py</td></tr>
-      <tr><td><strong>famille/jules/</strong></td><td>4</td><td>550</td><td><span class="badge badge-green">9.0</span></td><td>✅ KeyNamespace déployé, tous patterns adoptés</td></tr>
-      <tr><td><strong>famille/jules_planning</strong></td><td>1</td><td>404</td><td><span class="badge badge-green">9.0</span></td><td>✅ KeyNamespace + tabs_with_url déployés, tous patterns adoptés</td></tr>
-      <tr><td><strong>famille/suivi_perso/</strong></td><td>5</td><td>800</td><td><span class="badge badge-green">9.0</span></td><td>✅ Tableau de bord avec @cached_fragment, KeyNamespace déployé</td></tr>
-      <tr><td><strong>famille/weekend/</strong></td><td>4</td><td>600</td><td><span class="badge badge-green">9.0</span></td><td>✅ KeyNamespace déployé, tous patterns adoptés</td></tr>
-      <tr><td><strong>famille/achats/</strong></td><td>3</td><td>450</td><td><span class="badge badge-green">8.0</span></td><td>Clean, tous patterns de base</td></tr>
-      <tr><td><strong>maison/jardin/</strong></td><td>10</td><td>1 099</td><td><span class="badge badge-green">9.5</span></td><td>🏆 Exemplaire. Tous patterns, db_access, split vérifiée</td></tr>
-      <tr><td><strong>maison/entretien/</strong></td><td>10</td><td>1 070</td><td><span class="badge badge-green">9.5</span></td><td>🏆 Exemplaire. Tous patterns, db_access, @cached_fragment</td></tr>
-      <tr><td><strong>maison/charges/</strong></td><td>7</td><td>847</td><td><span class="badge badge-green">9.0</span></td><td>✅ db_access présent, @cached_fragment déployé, tous patterns adoptés</td></tr>
-      <tr><td><strong>maison/depenses/</strong></td><td>8</td><td>680</td><td><span class="badge badge-green">9.0</span></td><td>✅ @cached_fragment + db_access déployés, tous patterns adoptés</td></tr>
-      <tr><td><strong>maison/projets,eco,ener,meub</strong></td><td>10</td><td>~1 800</td><td><span class="badge badge-green">8.0</span></td><td>✅ Sprint 4 : 6 modules réécrits, 4 utils créés, 438/445 tests pass (98.4%)</td></tr>
-      <tr><td><strong>jeux/loto/</strong></td><td>13</td><td>1 506</td><td><span class="badge badge-green">8.5</span></td><td>7 tabs avec error_boundary, @cached_fragment</td></tr>
-      <tr><td><strong>jeux/paris/</strong></td><td>12</td><td>1 738</td><td><span class="badge badge-green">8.5</span></td><td>✅ Indentation corrigée, tous patterns adoptés</td></tr>
-      <tr><td><strong>planning/calendrier/</strong></td><td>9</td><td>1 398</td><td><span class="badge badge-green">9.0</span></td><td>✅ error_boundary per-tab déployé, tous patterns adoptés</td></tr>
-      <tr><td><strong>parametres/</strong></td><td>9</td><td>981</td><td><span class="badge badge-green">9.0</span></td><td>✅ Pilot BaseModule[T] vérifié et exemplaire</td></tr>
-      <tr><td><strong>design_system</strong></td><td>1</td><td>196</td><td><span class="badge badge-green">9.0</span></td><td>✅ Pilot BaseModule[T] vérifié</td></tr>
-      <tr><td><strong>utilitaires/</strong></td><td>13</td><td>2 637</td><td><span class="badge badge-green">8.5</span></td><td>✅ KeyNamespace + tabs_with_url déployés, tous patterns adoptés</td></tr>
+      <tr><td><strong>_framework/</strong></td><td>6</td><td>1 333</td><td><span class="badge badge-green">9.0</span></td><td>BaseModule[T], error_boundary, @profiler_rerun, tabs_with_url</td></tr>
+      <tr><td><strong>accueil/</strong></td><td>7</td><td>1 012</td><td><span class="badge badge-green">9.0</span></td><td>✅ Dashboard fonctionnel, tous patterns adoptés</td></tr>
+      <tr><td><strong>cuisine/recettes/</strong></td><td>9</td><td>1 979</td><td><span class="badge badge-green">8.0</span></td><td>Import URL/PDF, IA suggestions, tous patterns</td></tr>
+      <tr><td><strong>cuisine/inventaire/</strong></td><td>19</td><td>2 718</td><td><span class="badge badge-green">8.5</span></td><td>✅ Lazy loading optimisé, tous patterns adoptés</td></tr>
+      <tr><td><strong>cuisine/courses/</strong></td><td>10</td><td>2 216</td><td><span class="badge badge-green">8.5</span></td><td>✅ Panel collaboratif vérifié, tous patterns adoptés</td></tr>
+      <tr><td><strong>cuisine/planificateur/</strong></td><td>6</td><td>1 643</td><td><span class="badge badge-green">8.0</span></td><td>✅ 3/3 onglets avec error_boundary <span class="badge badge-green">FIXÉ Sprint 1</span></td></tr>
+      <tr><td><strong>cuisine/batch_cooking/</strong></td><td>6</td><td>1 406</td><td><span class="badge badge-green">8.0</span></td><td>✅ 3/3 onglets avec error_boundary <span class="badge badge-green">FIXÉ Sprint 1</span></td></tr>
+      <tr><td><strong>famille/hub</strong></td><td>3</td><td>676</td><td><span class="badge badge-green">8.0</span></td><td>Hub central famille clean</td></tr>
+      <tr><td><strong>famille/activites/</strong></td><td>2</td><td>746</td><td><span class="badge badge-green">9.0</span></td><td>Exemplaire : tous patterns, @cached_fragment</td></tr>
+      <tr><td><strong>famille/routines/</strong></td><td>2</td><td>847</td><td><span class="badge badge-green">8.0</span></td><td>Logique pure testable dans routines_utils.py</td></tr>
+      <tr><td><strong>famille/jules/</strong></td><td>4</td><td>545</td><td><span class="badge badge-green">9.0</span></td><td>✅ KeyNamespace déployé, tous patterns adoptés</td></tr>
+      <tr><td><strong>famille/jules_planning</strong></td><td>1</td><td>406</td><td><span class="badge badge-green">9.0</span></td><td>✅ KeyNamespace + tabs_with_url déployés, tous patterns adoptés</td></tr>
+      <tr><td><strong>famille/suivi_perso/</strong></td><td>6</td><td>593</td><td><span class="badge badge-green">9.0</span></td><td>✅ Tableau de bord avec @cached_fragment, KeyNamespace déployé</td></tr>
+      <tr><td><strong>famille/weekend/</strong></td><td>4</td><td>512</td><td><span class="badge badge-green">9.0</span></td><td>✅ KeyNamespace déployé, tous patterns adoptés</td></tr>
+      <tr><td><strong>famille/achats/</strong></td><td>3</td><td>508</td><td><span class="badge badge-green">8.0</span></td><td>Clean, tous patterns de base</td></tr>
+      <tr><td><strong>maison/jardin/</strong></td><td>10</td><td>1 730</td><td><span class="badge badge-green">9.5</span></td><td>🏆 Exemplaire. Tous patterns, db_access, split vérifiée</td></tr>
+      <tr><td><strong>maison/entretien/</strong></td><td>10</td><td>1 723</td><td><span class="badge badge-green">9.5</span></td><td>🏆 Exemplaire. Tous patterns, db_access, @cached_fragment</td></tr>
+      <tr><td><strong>maison/charges/</strong></td><td>7</td><td>1 360</td><td><span class="badge badge-green">9.0</span></td><td>✅ db_access présent, @cached_fragment déployé, tous patterns adoptés</td></tr>
+      <tr><td><strong>maison/depenses/</strong></td><td>8</td><td>1 018</td><td><span class="badge badge-green">9.0</span></td><td>✅ @cached_fragment + db_access déployés, tous patterns adoptés</td></tr>
+      <tr><td><strong>maison/projets,eco,ener,meub</strong></td><td>8</td><td>2 862</td><td><span class="badge badge-green">8.0</span></td><td>✅ Sprint 4 : 6 modules réécrits, 4 utils créés, 438/445 tests pass (98.4%)</td></tr>
+      <tr><td><strong>jeux/loto/</strong></td><td>13</td><td>1 919</td><td><span class="badge badge-green">8.5</span></td><td>7 tabs avec error_boundary, @cached_fragment</td></tr>
+      <tr><td><strong>jeux/paris/</strong></td><td>12</td><td>2 379</td><td><span class="badge badge-green">8.5</span></td><td>✅ Indentation corrigée, tous patterns adoptés</td></tr>
+      <tr><td><strong>planning/calendrier/</strong></td><td>12</td><td>2 717</td><td><span class="badge badge-green">9.0</span></td><td>✅ error_boundary per-tab déployé, tous patterns adoptés</td></tr>
+      <tr><td><strong>parametres/</strong></td><td>9</td><td>1 285</td><td><span class="badge badge-green">9.0</span></td><td>✅ Pilot BaseModule[T] vérifié et exemplaire</td></tr>
+      <tr><td><strong>design_system</strong></td><td>1</td><td>236</td><td><span class="badge badge-green">9.0</span></td><td>✅ Pilot BaseModule[T] vérifié</td></tr>
+      <tr><td><strong>utilitaires/</strong></td><td>13</td><td>3 624</td><td><span class="badge badge-green">8.5</span></td><td>✅ KeyNamespace + tabs_with_url déployés, tous patterns adoptés</td></tr>
     </tbody>
   </table>
 
@@ -626,7 +626,7 @@
   <!-- ===== SOUS-PACKAGES COMPLETS ===== -->
   <h3>Sous-packages — Analyse exhaustive</h3>
 
-  <h4>core/ — Infrastructure (6 sous-packages, 48 fichiers, ~6 568 LOC)</h4>
+  <h4>core/ — Infrastructure (6 sous-packages, 49 fichiers, ~10 859 LOC)</h4>
   <table>
     <thead><tr><th>Sous-package</th><th>Fichiers</th><th>LOC</th><th>Score</th><th>@service_factory</th><th>Héritage</th><th>Events</th><th>Commentaire</th></tr></thead>
     <tbody>
@@ -640,7 +640,7 @@
     </tbody>
   </table>
 
-  <h4>cuisine/ — Domaine cuisine (5 sous-packages, 50 fichiers, ~9 541 LOC)</h4>
+  <h4>cuisine/ — Domaine cuisine (5 sous-packages, 51 fichiers, ~11 793 LOC)</h4>
   <table>
     <thead><tr><th>Sous-package</th><th>Fichiers</th><th>LOC</th><th>Score</th><th>@service_factory</th><th>Héritage</th><th>Events</th><th>Commentaire</th></tr></thead>
     <tbody>
@@ -652,7 +652,7 @@
     </tbody>
   </table>
 
-  <h4>famille/ — Domaine vie familiale (23 fichiers incl. budget/ + calendrier/, ~5 248 LOC)</h4>
+  <h4>famille/ — Domaine vie familiale (23 fichiers incl. budget/ + calendrier/, ~6 388 LOC)</h4>
   <table>
     <thead><tr><th>Sous-package</th><th>Fichiers</th><th>LOC</th><th>Score</th><th>@service_factory</th><th>Héritage</th><th>Events</th><th>Commentaire</th></tr></thead>
     <tbody>
@@ -662,7 +662,7 @@
     </tbody>
   </table>
 
-  <h4>integrations/ — APIs externes (30 fichiers, ~5 862 LOC)</h4>
+  <h4>integrations/ — APIs externes (30 fichiers, ~7 163 LOC)</h4>
   <table>
     <thead><tr><th>Sous-package</th><th>Fichiers</th><th>LOC</th><th>Score</th><th>@service_factory</th><th>Héritage</th><th>@avec_resilience</th><th>Commentaire</th></tr></thead>
     <tbody>
@@ -676,11 +676,11 @@
     </tbody>
   </table>
 
-  <h4>jeux/ — Paris sportifs et loto (18 fichiers dans _internal/, ~5 169 LOC)</h4>
+  <h4>jeux/ — Paris sportifs et loto (18 fichiers dans _internal/, ~6 293 LOC)</h4>
   <table>
     <thead><tr><th>Sous-package</th><th>Fichiers</th><th>LOC</th><th>Score</th><th>@service_factory</th><th>Héritage</th><th>Commentaire</th></tr></thead>
     <tbody>
-      <tr><td><strong>jeux/_internal/</strong></td><td>17</td><td>5 169</td><td><span class="badge badge-green">8.0</span></td><td>×10</td><td>BaseService ×2 + BaseAIService ×1</td><td>@avec_cache ×10, @avec_resilience ×2. ⚠️ 6/10 factories ont un <code>_instance</code> redondant. football_data.py (501) = god object. <code>__init__.py</code> = 1 ligne.</td></tr>
+      <tr><td><strong>jeux/_internal/</strong></td><td>18</td><td>6 293</td><td><span class="badge badge-green">8.0</span></td><td>×10</td><td>BaseService ×2 + BaseAIService ×1</td><td>@avec_cache ×10, @avec_resilience ×2. ⚠️ 6/10 factories ont un <code>_instance</code> redondant. football_data.py (501) = god object. <code>__init__.py</code> = 1 ligne.</td></tr>
     </tbody>
   </table>
 
@@ -688,10 +688,10 @@
   <table>
     <thead><tr><th>Sous-package</th><th>Fichiers</th><th>LOC</th><th>Score</th><th>@service_factory</th><th>Héritage</th><th>Events</th><th>Commentaire</th></tr></thead>
     <tbody>
-      <tr><td><strong>inventaire/</strong></td><td>7</td><td>1 135</td><td><span class="badge badge-green">8.5</span></td><td>×1 (<code>"inventaire"</code>)</td><td>BaseService + BaseAIService + 4 Mixins (dual)</td><td>×3</td><td>@avec_cache ×2. IO/operations/stats/stock bien découpés en modules</td></tr>
-      <tr><td><strong>maison/</strong></td><td>13</td><td>2 859</td><td><span class="badge badge-green">8.0</span></td><td>×5 (<code>"jardin"</code>, <code>"projets"</code>, <code>"hub_data"</code>, <code>"entretien"</code>, <code>"depenses_crud"</code>)</td><td>BaseService ×1 + BaseAIService ×3</td><td>×2</td><td>@avec_cache ×8. Gamification mixins (entretien + jardin). ⚠️ hub_data: <code>_instance</code> redondant</td></tr>
-      <tr><td><strong>rapports/</strong></td><td>7</td><td>1 684</td><td><span class="badge badge-orange">7.5</span></td><td>×2 (<code>"export_pdf"</code>, <code>"rapports_pdf"</code>)</td><td>—</td><td>—</td><td>@avec_cache ×3. Export, génération, budget, gaspillage, planning PDF. Pas de BaseService.</td></tr>
-      <tr><td><strong>accueil_data_service.py</strong></td><td>1</td><td>47</td><td><span class="badge badge-green">8.0</span></td><td>×1 (<code>"accueil_data"</code>)</td><td>—</td><td>—</td><td>Agrégateur léger pour le dashboard. ✅ Utilisé par accueil/alerts.py (pas orphelin)</td></tr>
+      <tr><td><strong>inventaire/</strong></td><td>7</td><td>1 407</td><td><span class="badge badge-green">8.5</span></td><td>×1 (<code>"inventaire"</code>)</td><td>BaseService + BaseAIService + 4 Mixins (dual)</td><td>×3</td><td>@avec_cache ×2. IO/operations/stats/stock bien découpés en modules</td></tr>
+      <tr><td><strong>maison/</strong></td><td>13</td><td>3 475</td><td><span class="badge badge-green">8.0</span></td><td>×5 (<code>"jardin"</code>, <code>"projets"</code>, <code>"hub_data"</code>, <code>"entretien"</code>, <code>"depenses_crud"</code>)</td><td>BaseService ×1 + BaseAIService ×3</td><td>×2</td><td>@avec_cache ×8. Gamification mixins (entretien + jardin). ⚠️ hub_data: <code>_instance</code> redondant</td></tr>
+      <tr><td><strong>rapports/</strong></td><td>7</td><td>1 980</td><td><span class="badge badge-orange">7.5</span></td><td>×2 (<code>"export_pdf"</code>, <code>"rapports_pdf"</code>)</td><td>—</td><td>—</td><td>@avec_cache ×3. Export, génération, budget, gaspillage, planning PDF. Pas de BaseService.</td></tr>
+      <tr><td><strong>accueil_data_service.py</strong></td><td>1</td><td>63</td><td><span class="badge badge-green">8.0</span></td><td>×1 (<code>"accueil_data"</code>)</td><td>—</td><td>—</td><td>Agrégateur léger pour le dashboard. ✅ Utilisé par accueil/alerts.py (pas orphelin)</td></tr>
     </tbody>
   </table>
 
@@ -702,9 +702,9 @@
     <tbody>
       <tr><td>ServiceSuggestions migré vers BaseAIService</td><td><span class="badge badge-green">VÉRIFIÉ</span></td><td>Hérite de BaseAIService dans cuisine/suggestions/service.py, utilise <code>call_with_list_parsing_sync</code></td></tr>
       <tr><td>Weekend/Santé/Budget migré vers BaseService</td><td><span class="badge badge-green">VÉRIFIÉ</span></td><td><code>ServiceWeekend(BaseService[ActiviteWeekend])</code>, <code>ServiceSante(BaseService[EntreeSante])</code>, <code>BudgetService(BaseService[BudgetFamille])</code></td></tr>
-      <tr><td>@service_factory sur tous les services</td><td><span class="badge badge-green">VÉRIFIÉ</span></td><td>55 enregistrements trouvés (objectif 51). Seuls <code>IOService</code> et <code>ServicePlanningUnifie</code> sans factory (utilitaires internes — acceptable)</td></tr>
-      <tr><td>Event bus intégré</td><td><span class="badge badge-green">VÉRIFIÉ</span></td><td>27 émissions <code>obtenir_bus().emettre()</code> dans 11 fichiers. Top domaines: famille (14), cuisine (6), inventaire (3), maison (2). 20 types d'événements définis (+6 Sprint 8 : famille, routines, weekend, achats, food_log, planning)</td></tr>
-      <tr><td>Cache efficace (@avec_cache)</td><td><span class="badge badge-green">DÉPASSÉ</span></td><td>86 usages dans 30 fichiers (objectif 50+). TTL adaptatif de 5min à 24h</td></tr>
+      <tr><td>@service_factory sur tous les services</td><td><span class="badge badge-green">VÉRIFIÉ</span></td><td>58 enregistrements trouvés (objectif 51). Seuls <code>IOService</code> et <code>ServicePlanningUnifie</code> sans factory (utilitaires internes — acceptable)</td></tr>
+      <tr><td>Event bus intégré</td><td><span class="badge badge-green">VÉRIFIÉ</span></td><td>28 émissions <code>obtenir_bus().emettre()</code> dans 13 fichiers. Top domaines: famille (14), cuisine (6), inventaire (3), maison (2). 20 types d'événements définis (+6 Sprint 8 : famille, routines, weekend, achats, food_log, planning)</td></tr>
+      <tr><td>Cache efficace (@avec_cache)</td><td><span class="badge badge-green">DÉPASSÉ</span></td><td>114 usages dans 43 fichiers (objectif 50+). TTL adaptatif de 5min à 24h</td></tr>
     </tbody>
   </table>
 
@@ -839,18 +839,18 @@
     </div>
     <div class="score-card">
       <div class="label">LOC Total</div>
-      <div class="score score-good">40 255</div>
-      <div class="detail">Moyenne: 201 LOC/fichier</div>
+      <div class="score score-good">49 453</div>
+      <div class="detail">Moyenne: 247 LOC/fichier</div>
     </div>
     <div class="score-card">
       <div class="label">@service_factory</div>
-      <div class="score score-excellent">55</div>
-      <div class="detail">Objectif 51 → +8%</div>
+      <div class="score score-excellent">58</div>
+      <div class="detail">Objectif 51 → +14%</div>
     </div>
     <div class="score-card">
       <div class="label">@avec_cache</div>
-      <div class="score score-excellent">86</div>
-      <div class="detail">30 fichiers, TTL adaptatif</div>
+      <div class="score score-excellent">114</div>
+      <div class="detail">43 fichiers, TTL adaptatif</div>
     </div>
     <div class="score-card">
       <div class="label">@avec_resilience</div>

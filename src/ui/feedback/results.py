@@ -66,9 +66,7 @@ def afficher_resultat(
         if afficher_details and hasattr(error, "code"):
             with st.expander("Détails techniques", expanded=False):
                 st.code(
-                    f"Code: {error.code.value}\n"
-                    f"Message: {error.message}\n"
-                    f"Source: {error.source}"
+                    f"Code: {error.code.value}\nMessage: {error.message}\nSource: {error.source}"
                 )
     else:
         st.error(f"❌ {erreur_msg or str(error)}")

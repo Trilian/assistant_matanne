@@ -137,7 +137,7 @@ class _WidgetKeyRegistry:
                 if existing_ns != namespace:
                     self._collisions.append((key, existing_ns, namespace))
                     logger.warning(
-                        "Collision clé widget '%s': " "namespace '%s' vs '%s'",
+                        "Collision clé widget '%s': namespace '%s' vs '%s'",
                         key,
                         existing_ns,
                         namespace,
@@ -188,11 +188,7 @@ class _WidgetKeyRegistry:
         return [k for k, ns in self._keys.items() if ns == namespace]
 
     def __repr__(self) -> str:
-        return (
-            f"_WidgetKeyRegistry("
-            f"keys={len(self._keys)}, "
-            f"collisions={len(self._collisions)})"
-        )
+        return f"_WidgetKeyRegistry(keys={len(self._keys)}, collisions={len(self._collisions)})"
 
 
 # ═══════════════════════════════════════════════════════════

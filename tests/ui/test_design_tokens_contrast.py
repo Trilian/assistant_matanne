@@ -77,7 +77,7 @@ class TestContrasteThemeClair:
             pytest.skip(f"Couleur non-hex ignorée: fg={fg}, bg={bg}")
 
         ratio = A11y.ratio_contraste(fg, bg)
-        assert ratio >= 4.5, f"[CLAIR] {description}: ratio {ratio:.2f} < 4.5 " f"({fg} sur {bg})"
+        assert ratio >= 4.5, f"[CLAIR] {description}: ratio {ratio:.2f} < 4.5 ({fg} sur {bg})"
 
     @pytest.mark.parametrize(
         "description, fg_key, bg_key",
@@ -93,7 +93,7 @@ class TestContrasteThemeClair:
             pytest.skip(f"Couleur non-hex ignorée: fg={fg}, bg={bg}")
 
         ratio = A11y.ratio_contraste(fg, bg)
-        assert ratio >= 3.0, f"[CLAIR] {description}: ratio {ratio:.2f} < 3.0 " f"({fg} sur {bg})"
+        assert ratio >= 3.0, f"[CLAIR] {description}: ratio {ratio:.2f} < 3.0 ({fg} sur {bg})"
 
     @pytest.mark.parametrize(
         "description, fg_key, bg_key",
@@ -109,7 +109,7 @@ class TestContrasteThemeClair:
             pytest.skip(f"Couleur non-hex ignorée: fg={fg}, bg={bg}")
 
         ratio = A11y.ratio_contraste(fg, bg)
-        assert ratio >= 1.3, f"[CLAIR] {description}: ratio {ratio:.2f} < 1.3 " f"({fg} sur {bg})"
+        assert ratio >= 1.3, f"[CLAIR] {description}: ratio {ratio:.2f} < 1.3 ({fg} sur {bg})"
 
 
 # ── Thème SOMBRE ──────────────────────────────────────────
@@ -132,7 +132,7 @@ class TestContrasteThemeSombre:
             pytest.skip(f"Couleur non-hex ignorée: fg={fg}, bg={bg}")
 
         ratio = A11y.ratio_contraste(fg, bg)
-        assert ratio >= 4.5, f"[SOMBRE] {description}: ratio {ratio:.2f} < 4.5 " f"({fg} sur {bg})"
+        assert ratio >= 4.5, f"[SOMBRE] {description}: ratio {ratio:.2f} < 4.5 ({fg} sur {bg})"
 
     @pytest.mark.parametrize(
         "description, fg_key, bg_key",
@@ -148,7 +148,7 @@ class TestContrasteThemeSombre:
             pytest.skip(f"Couleur non-hex ignorée: fg={fg}, bg={bg}")
 
         ratio = A11y.ratio_contraste(fg, bg)
-        assert ratio >= 3.0, f"[SOMBRE] {description}: ratio {ratio:.2f} < 3.0 " f"({fg} sur {bg})"
+        assert ratio >= 3.0, f"[SOMBRE] {description}: ratio {ratio:.2f} < 3.0 ({fg} sur {bg})"
 
     @pytest.mark.parametrize(
         "description, fg_key, bg_key",
@@ -164,7 +164,7 @@ class TestContrasteThemeSombre:
             pytest.skip(f"Couleur non-hex ignorée: fg={fg}, bg={bg}")
 
         ratio = A11y.ratio_contraste(fg, bg)
-        assert ratio >= 1.3, f"[SOMBRE] {description}: ratio {ratio:.2f} < 1.3 " f"({fg} sur {bg})"
+        assert ratio >= 1.3, f"[SOMBRE] {description}: ratio {ratio:.2f} < 1.3 ({fg} sur {bg})"
 
 
 # ── Tests utilitaires A11y ────────────────────────────────

@@ -214,9 +214,7 @@ class A11y:
         """
         from src.ui.utils import echapper_html
 
-        return (
-            f'<{tag} role="{role}" aria-label="{echapper_html(label)}">' f"{html_content}</{tag}>"
-        )
+        return f'<{tag} role="{role}" aria-label="{echapper_html(label)}">{html_content}</{tag}>'
 
     # ── Contraste WCAG ────────────────────────────────────
 

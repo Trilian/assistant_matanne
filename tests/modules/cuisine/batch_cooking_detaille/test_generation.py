@@ -37,7 +37,13 @@ class TestGenererBatchIA:
                 }
             ],
             "moments_jules": [],
-            "liste_courses": {"fruits_legumes": [], "viandes": [], "cremerie": [], "epicerie": [], "surgeles": []},
+            "liste_courses": {
+                "fruits_legumes": [],
+                "viandes": [],
+                "cremerie": [],
+                "epicerie": [],
+                "surgeles": [],
+            },
         }
 
         client_instance = MagicMock()

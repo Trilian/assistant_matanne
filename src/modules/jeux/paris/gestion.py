@@ -78,9 +78,7 @@ def afficher_gestion_donnees():
             if matchs_passes:
                 for m in matchs_passes:
                     with st.container(border=True):
-                        st.write(
-                            f"**{m['dom_nom']} vs " f"{m['ext_nom']}** " f"({m['date_match']})"
-                        )
+                        st.write(f"**{m['dom_nom']} vs {m['ext_nom']}** ({m['date_match']})")
 
                         col1, col2, col3 = st.columns([1, 1, 1])
                         with col1:

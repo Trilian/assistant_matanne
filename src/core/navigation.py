@@ -51,7 +51,9 @@ def _charger_et_executer(module_path: str, module_key: str) -> None:
             module = importlib.import_module(module_path)
             _module_cache[module_path] = module
             _load_times[module_path] = time.time() - start
-            logger.info(f"📦 Module chargé: {module_path} ({_load_times[module_path]*1000:.0f}ms)")
+            logger.info(
+                f"📦 Module chargé: {module_path} ({_load_times[module_path] * 1000:.0f}ms)"
+            )
         except Exception as e:
             logger.exception(f"❌ Erreur chargement {module_path}")
             st.error(f"❌ Erreur chargement module: {e}")

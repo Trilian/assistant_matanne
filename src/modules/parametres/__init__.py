@@ -34,16 +34,18 @@ class ParametresModule(BaseModule[None]):
         from src.modules.parametres.ia import afficher_ia_config
         from src.ui.views.sauvegarde import afficher_sauvegarde
 
-        self.render_tabs({
-            "👨‍👩‍👧‍👦 Foyer": afficher_foyer_config,
-            "🤖 IA": afficher_ia_config,
-            "🗄️ BD": afficher_database_config,
-            "💾 Cache": afficher_cache_config,
-            "💿 Sauvegarde": afficher_sauvegarde,
-            "🖥️ Affichage": afficher_display_config,
-            "💰 Budget": afficher_budget_config,
-            "ℹ️ À Propos": afficher_about,
-        })
+        self.render_tabs(
+            {
+                "👨‍👩‍👧‍👦 Foyer": afficher_foyer_config,
+                "🤖 IA": afficher_ia_config,
+                "🗄️ BD": afficher_database_config,
+                "💾 Cache": afficher_cache_config,
+                "💿 Sauvegarde": afficher_sauvegarde,
+                "🖥️ Affichage": afficher_display_config,
+                "💰 Budget": afficher_budget_config,
+                "ℹ️ À Propos": afficher_about,
+            }
+        )
 
 
 # Point d'entrée standard généré par module_app

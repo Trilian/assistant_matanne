@@ -406,7 +406,7 @@ CSSEngine.register_keyframes(
 )
 CSSEngine.register_keyframes(
     "scaleIn",
-    "from { opacity: 0; transform: scale(0.9); } " "to { opacity: 1; transform: scale(1); }",
+    "from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); }",
 )
 CSSEngine.register_keyframes("pulse", "0%, 100% { opacity: 1; } 50% { opacity: 0.6; }")
 CSSEngine.register_keyframes(

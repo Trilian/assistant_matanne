@@ -72,7 +72,7 @@ def app():
 
     # TAB 1: PRÉDICTIONS
     with tabs[0]:
-      with error_boundary("paris_predictions_tab"):
+        with error_boundary("paris_predictions_tab"):
             st.header("Matchs à venir")
 
             with st.expander("ℹ️ Comment ça marche"):
@@ -197,18 +197,18 @@ def app():
 
         # TAB 2: SÉRIES (LOI DES SÉRIES)
     with tabs[1]:
-      with error_boundary("paris_series_tab"):
+        with error_boundary("paris_series_tab"):
             afficher_series_paris()
 
         # TAB 3: PERFORMANCE
     with tabs[2]:
-      with error_boundary("paris_performance_tab"):
+        with error_boundary("paris_performance_tab"):
             st.header("📊 Performance de mes paris")
             afficher_dashboard_performance()
 
         # TAB 4: CLASSEMENTS
     with tabs[3]:
-      with error_boundary("paris_classements_tab"):
+        with error_boundary("paris_classements_tab"):
             st.header("🏆 Classements")
 
             champ_classe = st.selectbox(
@@ -251,7 +251,7 @@ def app():
 
         # TAB 5: GESTION
     with tabs[4]:
-      with error_boundary("paris_gestion_tab"):
+        with error_boundary("paris_gestion_tab"):
             st.header("⚙️ Gestion des données")
             afficher_gestion_donnees()
 

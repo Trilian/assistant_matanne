@@ -151,7 +151,7 @@ class BusEvenements:
             # Trier par priorité décroissante
             self._souscriptions[type_evenement].sort(key=lambda s: s.priority, reverse=True)
             logger.debug(
-                f"📡 Souscription: {sub.handler_name} → {type_evenement}" f" (priorité: {priority})"
+                f"📡 Souscription: {sub.handler_name} → {type_evenement} (priorité: {priority})"
             )
 
     def desouscrire(
@@ -233,7 +233,7 @@ class BusEvenements:
             except Exception as e:
                 nb_erreurs += 1
                 logger.error(
-                    f"❌ Erreur handler {sub.handler_name} " f"pour {type_evenement}: {e}",
+                    f"❌ Erreur handler {sub.handler_name} pour {type_evenement}: {e}",
                     exc_info=True,
                 )
 

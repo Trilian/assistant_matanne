@@ -93,12 +93,9 @@ def afficher_resolution_conflits():
     if sync.state.conflict_count == 0:
         return
 
-    with st.expander(
-        f"⚠️ {sync.state.conflict_count} conflit(s) détecté(s)", expanded=True
-    ):
+    with st.expander(f"⚠️ {sync.state.conflict_count} conflit(s) détecté(s)", expanded=True):
         st.markdown(
-            "Des modifications simultanées ont été détectées. "
-            "Choisissez la version à conserver."
+            "Des modifications simultanées ont été détectées. Choisissez la version à conserver."
         )
 
         pending = sync.state.pending_events

@@ -92,9 +92,7 @@ def afficher_resume_hebdomadaire():
                 "💰 Budget",
                 f"{resume.budget.total_depenses:.0f}€",
                 delta=resume.budget.tendance,
-                delta_color=(
-                    "inverse" if resume.budget.tendance == "hausse" else "normal"
-                ),
+                delta_color=("inverse" if resume.budget.tendance == "hausse" else "normal"),
             )
 
         with col3:
@@ -126,9 +124,7 @@ def afficher_resume_hebdomadaire():
 
         # ── Horodatage ──
         if resume.genere_le:
-            st.caption(
-                f"⏰ Généré le {resume.genere_le.strftime('%d/%m/%Y à %H:%M')}"
-            )
+            st.caption(f"⏰ Généré le {resume.genere_le.strftime('%d/%m/%Y à %H:%M')}")
 
 
 def _afficher_score(score: int):
@@ -153,7 +149,7 @@ def _afficher_score(score: int):
 
     st.markdown(
         f'<div style="text-align:center; padding:10px; margin:10px 0; '
-        f'background: linear-gradient(90deg, {couleur}33 0%, {couleur}11 100%); '
+        f"background: linear-gradient(90deg, {couleur}33 0%, {couleur}11 100%); "
         f'border-radius: 8px; border-left: 4px solid {couleur};">'
         f'<span style="font-size:2rem;">{emoji}</span> '
         f'<strong style="font-size:1.3rem;">{score}/100</strong> '

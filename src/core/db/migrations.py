@@ -291,8 +291,7 @@ class GestionnaireMigrations:
             if modifiees:
                 for m in modifiees:
                     logger.warning(
-                        f"⚠️ Migration v{m['version']} ({m['fichier']}) "
-                        f"modifiée après application !"
+                        f"⚠️ Migration v{m['version']} ({m['fichier']}) modifiée après application !"
                     )
             return
 

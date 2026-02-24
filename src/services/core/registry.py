@@ -113,7 +113,7 @@ class ServiceRegistry:
         """
         with self._global_lock:
             if nom in self._entries and self._entries[nom].instance is not None:
-                logger.warning(f"⚠️ Service '{nom}' déjà instancié, " f"ré-enregistrement ignoré")
+                logger.warning(f"⚠️ Service '{nom}' déjà instancié, ré-enregistrement ignoré")
                 return
 
             factory_name = getattr(factory, "__name__", type(factory).__name__)
@@ -147,7 +147,7 @@ class ServiceRegistry:
                 created_at=datetime.now(),
                 tags=tags or set(),
             )
-            logger.debug(f"📦 Instance enregistrée: {nom} " f"({type(instance).__name__})")
+            logger.debug(f"📦 Instance enregistrée: {nom} ({type(instance).__name__})")
 
     # Alias anglais
     register = enregistrer
@@ -201,9 +201,7 @@ class ServiceRegistry:
                     entry.created_at = datetime.now()
                     duration_ms = (time.perf_counter() - start) * 1000
                     logger.info(
-                        f"📦 Service créé: {nom} "
-                        f"({entry.factory.__name__}) — "
-                        f"{duration_ms:.1f}ms"
+                        f"📦 Service créé: {nom} ({entry.factory.__name__}) — {duration_ms:.1f}ms"
                     )
                 except Exception as e:
                     logger.error(
@@ -230,8 +228,7 @@ class ServiceRegistry:
         instance = self.obtenir(nom)
         if not isinstance(instance, type_attendu):
             raise TypeError(
-                f"Service '{nom}' est {type(instance).__name__}, "
-                f"attendu {type_attendu.__name__}"
+                f"Service '{nom}' est {type(instance).__name__}, attendu {type_attendu.__name__}"
             )
         return instance
 
