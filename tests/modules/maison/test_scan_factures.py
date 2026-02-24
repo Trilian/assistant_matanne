@@ -45,7 +45,7 @@ class TestImports:
         assert isinstance(MOIS_FR, list)
         assert len(MOIS_FR) == 13  # Index 0 vide + 12 mois
         assert MOIS_FR[1] == "Janvier"
-        assert MOIS_FR[12] == "Decembre"
+        assert MOIS_FR[12] == "Décembre"
 
     def test_fournisseurs_structure(self):
         """Test structure des fournisseurs connus."""

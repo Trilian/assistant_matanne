@@ -56,27 +56,27 @@ DROP TABLE IF EXISTS jeux_matchs CASCADE;
 DROP TABLE IF EXISTS jeux_grilles_loto CASCADE;
 DROP TABLE IF EXISTS jeux_alertes CASCADE;
 DROP TABLE IF EXISTS repas CASCADE;
-DROP TABLE IF EXISTS template_items CASCADE;
+DROP TABLE IF EXISTS elements_templates CASCADE;
 DROP TABLE IF EXISTS liste_courses CASCADE;
 DROP TABLE IF EXISTS articles_modeles CASCADE;
 DROP TABLE IF EXISTS recette_ingredients CASCADE;
 DROP TABLE IF EXISTS etapes_recette CASCADE;
 DROP TABLE IF EXISTS versions_recette CASCADE;
 DROP TABLE IF EXISTS historique_recettes CASCADE;
-DROP TABLE IF EXISTS batch_meals CASCADE;
-DROP TABLE IF EXISTS recipe_feedbacks CASCADE;
+DROP TABLE IF EXISTS repas_batch CASCADE;
+DROP TABLE IF EXISTS retours_recettes CASCADE;
 DROP TABLE IF EXISTS historique_inventaire CASCADE;
 DROP TABLE IF EXISTS inventaire CASCADE;
-DROP TABLE IF EXISTS wellbeing_entries CASCADE;
-DROP TABLE IF EXISTS milestones CASCADE;
-DROP TABLE IF EXISTS health_entries CASCADE;
-DROP TABLE IF EXISTS project_tasks CASCADE;
-DROP TABLE IF EXISTS routine_tasks CASCADE;
-DROP TABLE IF EXISTS garden_logs CASCADE;
+DROP TABLE IF EXISTS entrees_bien_etre CASCADE;
+DROP TABLE IF EXISTS jalons CASCADE;
+DROP TABLE IF EXISTS entrees_sante CASCADE;
+DROP TABLE IF EXISTS taches_projets CASCADE;
+DROP TABLE IF EXISTS taches_routines CASCADE;
+DROP TABLE IF EXISTS journaux_jardin CASCADE;
 DROP TABLE IF EXISTS garmin_tokens CASCADE;
-DROP TABLE IF EXISTS garmin_activities CASCADE;
-DROP TABLE IF EXISTS garmin_daily_summaries CASCADE;
-DROP TABLE IF EXISTS food_logs CASCADE;
+DROP TABLE IF EXISTS activites_garmin CASCADE;
+DROP TABLE IF EXISTS resumes_quotidiens_garmin CASCADE;
+DROP TABLE IF EXISTS journaux_alimentaires CASCADE;
 DROP TABLE IF EXISTS evenements_calendrier CASCADE;
 DROP TABLE IF EXISTS depenses_home CASCADE;
 DROP TABLE IF EXISTS comparatifs CASCADE;
@@ -87,14 +87,14 @@ DROP TABLE IF EXISTS taches_home CASCADE;
 -- Tables autonomes
 DROP TABLE IF EXISTS ingredients CASCADE;
 DROP TABLE IF EXISTS recettes CASCADE;
-DROP TABLE IF EXISTS user_profiles CASCADE;
+DROP TABLE IF EXISTS profils_utilisateurs CASCADE;
 DROP TABLE IF EXISTS plannings CASCADE;
-DROP TABLE IF EXISTS child_profiles CASCADE;
-DROP TABLE IF EXISTS health_routines CASCADE;
-DROP TABLE IF EXISTS health_objectives CASCADE;
-DROP TABLE IF EXISTS projects CASCADE;
+DROP TABLE IF EXISTS profils_enfants CASCADE;
+DROP TABLE IF EXISTS routines_sante CASCADE;
+DROP TABLE IF EXISTS objectifs_sante CASCADE;
+DROP TABLE IF EXISTS projets CASCADE;
 DROP TABLE IF EXISTS routines CASCADE;
-DROP TABLE IF EXISTS garden_items CASCADE;
+DROP TABLE IF EXISTS elements_jardin CASCADE;
 DROP TABLE IF EXISTS listes_courses CASCADE;
 DROP TABLE IF EXISTS modeles_courses CASCADE;
 DROP TABLE IF EXISTS templates_semaine CASCADE;
@@ -105,29 +105,29 @@ DROP TABLE IF EXISTS jeux_stats_loto CASCADE;
 DROP TABLE IF EXISTS jeux_historique CASCADE;
 DROP TABLE IF EXISTS jeux_series CASCADE;
 DROP TABLE IF EXISTS jeux_configuration CASCADE;
-DROP TABLE IF EXISTS weekend_activities CASCADE;
-DROP TABLE IF EXISTS family_purchases CASCADE;
-DROP TABLE IF EXISTS family_activities CASCADE;
-DROP TABLE IF EXISTS family_budgets CASCADE;
-DROP TABLE IF EXISTS shopping_items_famille CASCADE;
-DROP TABLE IF EXISTS calendar_events CASCADE;
-DROP TABLE IF EXISTS furniture CASCADE;
-DROP TABLE IF EXISTS house_expenses CASCADE;
-DROP TABLE IF EXISTS eco_actions CASCADE;
-DROP TABLE IF EXISTS maintenance_tasks CASCADE;
-DROP TABLE IF EXISTS house_stocks CASCADE;
-DROP TABLE IF EXISTS user_preferences CASCADE;
+DROP TABLE IF EXISTS activites_weekend CASCADE;
+DROP TABLE IF EXISTS achats_famille CASCADE;
+DROP TABLE IF EXISTS activites_famille CASCADE;
+DROP TABLE IF EXISTS budgets_famille CASCADE;
+DROP TABLE IF EXISTS articles_achats_famille CASCADE;
+DROP TABLE IF EXISTS evenements_planning CASCADE;
+DROP TABLE IF EXISTS meubles CASCADE;
+DROP TABLE IF EXISTS depenses_maison CASCADE;
+DROP TABLE IF EXISTS actions_ecologiques CASCADE;
+DROP TABLE IF EXISTS taches_entretien CASCADE;
+DROP TABLE IF EXISTS stocks_maison CASCADE;
+DROP TABLE IF EXISTS preferences_utilisateurs CASCADE;
 DROP TABLE IF EXISTS openfoodfacts_cache CASCADE;
 DROP TABLE IF EXISTS depenses CASCADE;
 DROP TABLE IF EXISTS budgets_mensuels CASCADE;
 DROP TABLE IF EXISTS alertes_meteo CASCADE;
 DROP TABLE IF EXISTS config_meteo CASCADE;
-DROP TABLE IF EXISTS backups CASCADE;
-DROP TABLE IF EXISTS action_history CASCADE;
+DROP TABLE IF EXISTS sauvegardes CASCADE;
+DROP TABLE IF EXISTS historique_actions CASCADE;
 DROP TABLE IF EXISTS calendriers_externes CASCADE;
-DROP TABLE IF EXISTS push_subscriptions CASCADE;
-DROP TABLE IF EXISTS notification_preferences CASCADE;
-DROP TABLE IF EXISTS external_calendar_configs CASCADE;
+DROP TABLE IF EXISTS abonnements_push CASCADE;
+DROP TABLE IF EXISTS preferences_notifications CASCADE;
+DROP TABLE IF EXISTS configs_calendriers_externes CASCADE;
 
 -- Tables migration 020 (maison hub)
 DROP TABLE IF EXISTS preferences_home CASCADE;
@@ -200,7 +200,7 @@ CREATE INDEX ix_ingredients_saison ON ingredients(saison);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.02 USER_PROFILES
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE user_profiles (
+CREATE TABLE profils_utilisateurs (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     email VARCHAR(200),
@@ -303,7 +303,7 @@ CREATE INDEX ix_modeles_courses_actif ON modeles_courses(actif);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.07 CHILD_PROFILES
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE child_profiles (
+CREATE TABLE profils_enfants (
     id SERIAL PRIMARY KEY,
     prenom VARCHAR(100) NOT NULL,
     date_naissance DATE NOT NULL,
@@ -315,7 +315,7 @@ CREATE TABLE child_profiles (
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.08 HEALTH_ROUTINES
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE health_routines (
+CREATE TABLE routines_sante (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -327,13 +327,13 @@ CREATE TABLE health_routines (
     actif BOOLEAN NOT NULL DEFAULT TRUE,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_health_routines_type ON health_routines(type_routine);
-CREATE INDEX ix_health_routines_actif ON health_routines(actif);
+CREATE INDEX ix_health_routines_type ON routines_sante(type_routine);
+CREATE INDEX ix_health_routines_actif ON routines_sante(actif);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.09 HEALTH_OBJECTIVES
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE health_objectives (
+CREATE TABLE objectifs_sante (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(200) NOT NULL,
     description TEXT,
@@ -350,13 +350,13 @@ CREATE TABLE health_objectives (
     CONSTRAINT ck_objective_valeur_positive CHECK (valeur_cible > 0),
     CONSTRAINT ck_objective_dates CHECK (date_debut <= date_cible)
 );
-CREATE INDEX ix_health_objectives_categorie ON health_objectives(categorie);
-CREATE INDEX ix_health_objectives_statut ON health_objectives(statut);
+CREATE INDEX ix_health_objectives_categorie ON objectifs_sante(categorie);
+CREATE INDEX ix_health_objectives_statut ON objectifs_sante(statut);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.10 PROJECTS
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE projects (
+CREATE TABLE projets (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -369,8 +369,8 @@ CREATE TABLE projects (
     categorie VARCHAR(100),
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_projects_statut ON projects(statut);
-CREATE INDEX ix_projects_categorie ON projects(categorie);
+CREATE INDEX ix_projects_statut ON projets(statut);
+CREATE INDEX ix_projects_categorie ON projets(categorie);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.11 ROUTINES
@@ -391,7 +391,7 @@ CREATE INDEX ix_routines_actif ON routines(actif);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.12 GARDEN_ITEMS
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE garden_items (
+CREATE TABLE elements_jardin (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     type_plante VARCHAR(100) NOT NULL,
@@ -403,8 +403,8 @@ CREATE TABLE garden_items (
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_garden_items_type ON garden_items(type_plante);
-CREATE INDEX ix_garden_items_statut ON garden_items(statut);
+CREATE INDEX ix_garden_items_type ON elements_jardin(type_plante);
+CREATE INDEX ix_garden_items_statut ON elements_jardin(statut);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.13 TEMPLATES_SEMAINE
@@ -542,7 +542,7 @@ CREATE TABLE jeux_configuration (
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.21 WEEKEND_ACTIVITIES
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE weekend_activities (
+CREATE TABLE activites_weekend (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(200) NOT NULL,
     description TEXT,
@@ -570,14 +570,14 @@ CREATE TABLE weekend_activities (
         note_lieu IS NULL OR (note_lieu >= 1 AND note_lieu <= 5)
     )
 );
-CREATE INDEX ix_weekend_activities_type ON weekend_activities(type_activite);
-CREATE INDEX ix_weekend_activities_date ON weekend_activities(date_prevue);
-CREATE INDEX ix_weekend_activities_statut ON weekend_activities(statut);
+CREATE INDEX ix_weekend_activities_type ON activites_weekend(type_activite);
+CREATE INDEX ix_weekend_activities_date ON activites_weekend(date_prevue);
+CREATE INDEX ix_weekend_activities_statut ON activites_weekend(statut);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.22 FAMILY_PURCHASES
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE family_purchases (
+CREATE TABLE achats_famille (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -597,14 +597,14 @@ CREATE TABLE family_purchases (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_family_purchases_categorie ON family_purchases(categorie);
-CREATE INDEX ix_family_purchases_priorite ON family_purchases(priorite);
-CREATE INDEX ix_family_purchases_achete ON family_purchases(achete);
+CREATE INDEX ix_family_purchases_categorie ON achats_famille(categorie);
+CREATE INDEX ix_family_purchases_priorite ON achats_famille(priorite);
+CREATE INDEX ix_family_purchases_achete ON achats_famille(achete);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.23 FAMILY_ACTIVITIES
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE family_activities (
+CREATE TABLE activites_famille (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(200) NOT NULL,
     description TEXT,
@@ -622,14 +622,14 @@ CREATE TABLE family_activities (
     CONSTRAINT ck_activite_duree_positive CHECK (duree_heures IS NULL OR duree_heures > 0),
     CONSTRAINT ck_activite_age_positif CHECK (age_minimal_recommande IS NULL OR age_minimal_recommande >= 0)
 );
-CREATE INDEX ix_family_activities_type ON family_activities(type_activite);
-CREATE INDEX ix_family_activities_date ON family_activities(date_prevue);
-CREATE INDEX ix_family_activities_statut ON family_activities(statut);
+CREATE INDEX ix_family_activities_type ON activites_famille(type_activite);
+CREATE INDEX ix_family_activities_date ON activites_famille(date_prevue);
+CREATE INDEX ix_family_activities_statut ON activites_famille(statut);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.24 FAMILY_BUDGETS
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE family_budgets (
+CREATE TABLE budgets_famille (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
     categorie VARCHAR(100) NOT NULL,
@@ -642,13 +642,13 @@ CREATE TABLE family_budgets (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT ck_budget_montant_positive CHECK (montant > 0)
 );
-CREATE INDEX ix_family_budgets_date ON family_budgets(date);
-CREATE INDEX ix_family_budgets_categorie ON family_budgets(categorie);
+CREATE INDEX ix_family_budgets_date ON budgets_famille(date);
+CREATE INDEX ix_family_budgets_categorie ON budgets_famille(categorie);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.25 SHOPPING_ITEMS_FAMILLE
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE shopping_items_famille (
+CREATE TABLE articles_achats_famille (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(200) NOT NULL,
     categorie VARCHAR(50) NOT NULL,
@@ -659,16 +659,16 @@ CREATE TABLE shopping_items_famille (
     date_ajout TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     date_achat TIMESTAMP WITH TIME ZONE
 );
-CREATE INDEX ix_shopping_items_titre ON shopping_items_famille(titre);
-CREATE INDEX ix_shopping_items_categorie ON shopping_items_famille(categorie);
-CREATE INDEX ix_shopping_items_liste ON shopping_items_famille(liste);
-CREATE INDEX ix_shopping_items_actif ON shopping_items_famille(actif);
-CREATE INDEX ix_shopping_items_date ON shopping_items_famille(date_ajout);
+CREATE INDEX ix_shopping_items_titre ON articles_achats_famille(titre);
+CREATE INDEX ix_shopping_items_categorie ON articles_achats_famille(categorie);
+CREATE INDEX ix_shopping_items_liste ON articles_achats_famille(liste);
+CREATE INDEX ix_shopping_items_actif ON articles_achats_famille(actif);
+CREATE INDEX ix_shopping_items_date ON articles_achats_famille(date_ajout);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.26 CALENDAR_EVENTS
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE calendar_events (
+CREATE TABLE evenements_planning (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(200) NOT NULL,
     description TEXT,
@@ -681,15 +681,15 @@ CREATE TABLE calendar_events (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT ck_event_rappel_positif CHECK (rappel_avant_minutes IS NULL OR rappel_avant_minutes >= 0)
 );
-CREATE INDEX ix_calendar_events_date_debut ON calendar_events(date_debut);
-CREATE INDEX ix_calendar_events_type ON calendar_events(type_event);
-CREATE INDEX idx_date_type ON calendar_events(date_debut, type_event);
-CREATE INDEX idx_date_range ON calendar_events(date_debut, date_fin);
+CREATE INDEX ix_calendar_events_date_debut ON evenements_planning(date_debut);
+CREATE INDEX ix_calendar_events_type ON evenements_planning(type_event);
+CREATE INDEX idx_date_type ON evenements_planning(date_debut, type_event);
+CREATE INDEX idx_date_range ON evenements_planning(date_debut, date_fin);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.27 FURNITURE
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE furniture (
+CREATE TABLE meubles (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -712,14 +712,14 @@ CREATE TABLE furniture (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_furniture_piece ON furniture(piece);
-CREATE INDEX ix_furniture_statut ON furniture(statut);
-CREATE INDEX ix_furniture_priorite ON furniture(priorite);
+CREATE INDEX ix_furniture_piece ON meubles(piece);
+CREATE INDEX ix_furniture_statut ON meubles(statut);
+CREATE INDEX ix_furniture_priorite ON meubles(priorite);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.28 HOUSE_EXPENSES
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE house_expenses (
+CREATE TABLE depenses_maison (
     id SERIAL PRIMARY KEY,
     categorie VARCHAR(50) NOT NULL,
     mois INTEGER NOT NULL,
@@ -735,13 +735,13 @@ CREATE TABLE house_expenses (
     CONSTRAINT ck_house_montant_positif CHECK (montant >= 0),
     CONSTRAINT ck_house_consommation_positive CHECK (consommation IS NULL OR consommation >= 0)
 );
-CREATE INDEX ix_house_expenses_categorie ON house_expenses(categorie);
-CREATE INDEX ix_house_expenses_annee ON house_expenses(annee);
+CREATE INDEX ix_house_expenses_categorie ON depenses_maison(categorie);
+CREATE INDEX ix_house_expenses_annee ON depenses_maison(annee);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.29 ECO_ACTIONS
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE eco_actions (
+CREATE TABLE actions_ecologiques (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -756,12 +756,12 @@ CREATE TABLE eco_actions (
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_eco_actions_type ON eco_actions(type_action);
+CREATE INDEX ix_eco_actions_type ON actions_ecologiques(type_action);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.30 MAINTENANCE_TASKS
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE maintenance_tasks (
+CREATE TABLE taches_entretien (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -779,14 +779,14 @@ CREATE TABLE maintenance_tasks (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_maintenance_tasks_categorie ON maintenance_tasks(categorie);
-CREATE INDEX ix_maintenance_tasks_prochaine ON maintenance_tasks(prochaine_fois);
-CREATE INDEX ix_maintenance_tasks_fait ON maintenance_tasks(fait);
+CREATE INDEX ix_maintenance_tasks_categorie ON taches_entretien(categorie);
+CREATE INDEX ix_maintenance_tasks_prochaine ON taches_entretien(prochaine_fois);
+CREATE INDEX ix_maintenance_tasks_fait ON taches_entretien(fait);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.31 HOUSE_STOCKS
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE house_stocks (
+CREATE TABLE stocks_maison (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     categorie VARCHAR(100) NOT NULL,
@@ -799,12 +799,12 @@ CREATE TABLE house_stocks (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_house_stocks_categorie ON house_stocks(categorie);
+CREATE INDEX ix_house_stocks_categorie ON stocks_maison(categorie);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.32 USER_PREFERENCES
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE user_preferences (
+CREATE TABLE preferences_utilisateurs (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(100) NOT NULL,
     nb_adultes INTEGER NOT NULL DEFAULT 2,
@@ -822,8 +822,8 @@ CREATE TABLE user_preferences (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE UNIQUE INDEX uq_user_preferences_user_id ON user_preferences(user_id);
-CREATE INDEX ix_user_preferences_user_id ON user_preferences(user_id);
+CREATE UNIQUE INDEX uq_user_preferences_user_id ON preferences_utilisateurs(user_id);
+CREATE INDEX ix_user_preferences_user_id ON preferences_utilisateurs(user_id);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.33 OPENFOODFACTS_CACHE
@@ -933,7 +933,7 @@ CREATE UNIQUE INDEX uq_config_meteo_user ON config_meteo(user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.38 BACKUPS
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE backups (
+CREATE TABLE sauvegardes (
     id BIGSERIAL PRIMARY KEY,
     filename VARCHAR(255) NOT NULL,
     tables_included JSONB DEFAULT '[]',
@@ -945,13 +945,13 @@ CREATE TABLE backups (
     user_id UUID,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_backups_user ON backups(user_id);
-CREATE INDEX ix_backups_created ON backups(created_at);
+CREATE INDEX ix_backups_user ON sauvegardes(user_id);
+CREATE INDEX ix_backups_created ON sauvegardes(created_at);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.39 ACTION_HISTORY
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE action_history (
+CREATE TABLE historique_actions (
     id BIGSERIAL PRIMARY KEY,
     user_id VARCHAR(255) NOT NULL,
     user_name VARCHAR(255) NOT NULL,
@@ -967,10 +967,10 @@ CREATE TABLE action_history (
     user_agent VARCHAR(500),
     created_at TIMESTAMP DEFAULT NOW()
 );
-CREATE INDEX idx_action_history_user_id ON action_history(user_id);
-CREATE INDEX idx_action_history_action_type ON action_history(action_type);
-CREATE INDEX idx_action_history_created_at ON action_history(created_at DESC);
-CREATE INDEX idx_action_history_entity ON action_history(entity_type, entity_id);
+CREATE INDEX idx_action_history_user_id ON historique_actions(user_id);
+CREATE INDEX idx_action_history_action_type ON historique_actions(action_type);
+CREATE INDEX idx_action_history_created_at ON historique_actions(created_at DESC);
+CREATE INDEX idx_action_history_entity ON historique_actions(entity_type, entity_id);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.40 CALENDRIERS_EXTERNES
@@ -995,7 +995,7 @@ CREATE INDEX ix_calendriers_externes_user ON calendriers_externes(user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.41 PUSH_SUBSCRIPTIONS
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE push_subscriptions (
+CREATE TABLE abonnements_push (
     id BIGSERIAL PRIMARY KEY,
     endpoint TEXT NOT NULL,
     p256dh_key TEXT NOT NULL,
@@ -1005,13 +1005,13 @@ CREATE TABLE push_subscriptions (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     last_used TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE UNIQUE INDEX uq_push_subscriptions_endpoint ON push_subscriptions(endpoint);
-CREATE INDEX ix_push_subscriptions_user ON push_subscriptions(user_id);
+CREATE UNIQUE INDEX uq_push_subscriptions_endpoint ON abonnements_push(endpoint);
+CREATE INDEX ix_push_subscriptions_user ON abonnements_push(user_id);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.42 NOTIFICATION_PREFERENCES
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE notification_preferences (
+CREATE TABLE preferences_notifications (
     id BIGSERIAL PRIMARY KEY,
     courses_rappel BOOLEAN NOT NULL DEFAULT TRUE,
     repas_suggestion BOOLEAN NOT NULL DEFAULT TRUE,
@@ -1024,12 +1024,12 @@ CREATE TABLE notification_preferences (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE UNIQUE INDEX uq_notification_prefs_user ON notification_preferences(user_id);
+CREATE UNIQUE INDEX uq_notification_prefs_user ON preferences_notifications(user_id);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.43 EXTERNAL_CALENDAR_CONFIGS
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE external_calendar_configs (
+CREATE TABLE configs_calendriers_externes (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(100) NOT NULL,
     provider VARCHAR(20) NOT NULL DEFAULT 'google',
@@ -1047,8 +1047,8 @@ CREATE TABLE external_calendar_configs (
         provider IN ('google', 'apple', 'outlook', 'ical_url')
     )
 );
-CREATE INDEX ix_external_cal_user ON external_calendar_configs(user_id);
-CREATE UNIQUE INDEX uq_user_calendar ON external_calendar_configs(user_id, provider, name);
+CREATE INDEX ix_external_cal_user ON configs_calendriers_externes(user_id);
+CREATE UNIQUE INDEX uq_user_calendar ON configs_calendriers_externes(user_id, provider, name);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.44 PLANS_JARDIN
@@ -1089,7 +1089,7 @@ CREATE INDEX idx_pieces_maison_type ON pieces_maison(type_piece);
 -- ============================================================================
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.01 GARMIN_TOKENS (→ user_profiles)
+-- 4.01 GARMIN_TOKENS (→ profils_utilisateurs)
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE garmin_tokens (
     id SERIAL PRIMARY KEY,
@@ -1102,14 +1102,14 @@ CREATE TABLE garmin_tokens (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_garmin_tokens_user FOREIGN KEY (user_id)
-        REFERENCES user_profiles(id) ON DELETE CASCADE
+        REFERENCES profils_utilisateurs(id) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX uq_garmin_tokens_user_id ON garmin_tokens(user_id);
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.02 GARMIN_ACTIVITIES (→ user_profiles)
+-- 4.02 GARMIN_ACTIVITIES (→ profils_utilisateurs)
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE garmin_activities (
+CREATE TABLE activites_garmin (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     garmin_activity_id VARCHAR(100) NOT NULL,
@@ -1128,18 +1128,18 @@ CREATE TABLE garmin_activities (
     raw_data JSONB,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_garmin_activities_user FOREIGN KEY (user_id)
-        REFERENCES user_profiles(id) ON DELETE CASCADE,
+        REFERENCES profils_utilisateurs(id) ON DELETE CASCADE,
     CONSTRAINT ck_garmin_duree_positive CHECK (duree_secondes > 0)
 );
-CREATE UNIQUE INDEX uq_garmin_activity_id ON garmin_activities(garmin_activity_id);
-CREATE INDEX ix_garmin_activities_user ON garmin_activities(user_id);
-CREATE INDEX ix_garmin_activities_type ON garmin_activities(type_activite);
-CREATE INDEX ix_garmin_activities_date ON garmin_activities(date_debut);
+CREATE UNIQUE INDEX uq_garmin_activity_id ON activites_garmin(garmin_activity_id);
+CREATE INDEX ix_garmin_activities_user ON activites_garmin(user_id);
+CREATE INDEX ix_garmin_activities_type ON activites_garmin(type_activite);
+CREATE INDEX ix_garmin_activities_date ON activites_garmin(date_debut);
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.03 GARMIN_DAILY_SUMMARIES (→ user_profiles)
+-- 4.03 GARMIN_DAILY_SUMMARIES (→ profils_utilisateurs)
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE garmin_daily_summaries (
+CREATE TABLE resumes_quotidiens_garmin (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     date DATE NOT NULL,
@@ -1162,16 +1162,16 @@ CREATE TABLE garmin_daily_summaries (
     raw_data JSONB,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_garmin_daily_user FOREIGN KEY (user_id)
-        REFERENCES user_profiles(id) ON DELETE CASCADE
+        REFERENCES profils_utilisateurs(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_garmin_daily_user ON garmin_daily_summaries(user_id);
-CREATE INDEX ix_garmin_daily_date ON garmin_daily_summaries(date);
-CREATE UNIQUE INDEX uq_garmin_daily_user_date ON garmin_daily_summaries(user_id, date);
+CREATE INDEX ix_garmin_daily_user ON resumes_quotidiens_garmin(user_id);
+CREATE INDEX ix_garmin_daily_date ON resumes_quotidiens_garmin(date);
+CREATE UNIQUE INDEX uq_garmin_daily_user_date ON resumes_quotidiens_garmin(user_id, date);
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.04 FOOD_LOGS (→ user_profiles)
+-- 4.04 FOOD_LOGS (→ profils_utilisateurs)
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE food_logs (
+CREATE TABLE journaux_alimentaires (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -1186,13 +1186,13 @@ CREATE TABLE food_logs (
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_food_logs_user FOREIGN KEY (user_id)
-        REFERENCES user_profiles(id) ON DELETE CASCADE,
+        REFERENCES profils_utilisateurs(id) ON DELETE CASCADE,
     CONSTRAINT ck_food_qualite_range CHECK (
         qualite IS NULL OR (qualite >= 1 AND qualite <= 5)
     )
 );
-CREATE INDEX ix_food_logs_user ON food_logs(user_id);
-CREATE INDEX ix_food_logs_date ON food_logs(date);
+CREATE INDEX ix_food_logs_user ON journaux_alimentaires(user_id);
+CREATE INDEX ix_food_logs_date ON journaux_alimentaires(date);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.05 RECETTE_INGREDIENTS (→ recettes, ingredients)
@@ -1269,7 +1269,7 @@ CREATE INDEX ix_historique_recettes_date ON historique_recettes(date_cuisson);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.09 BATCH_MEALS (→ recettes)
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE batch_meals (
+CREATE TABLE repas_batch (
     id SERIAL PRIMARY KEY,
     recette_id INTEGER,
     nom VARCHAR(200) NOT NULL,
@@ -1285,14 +1285,14 @@ CREATE TABLE batch_meals (
     CONSTRAINT fk_batch_meals_recette FOREIGN KEY (recette_id)
         REFERENCES recettes(id) ON DELETE SET NULL
 );
-CREATE INDEX ix_batch_meals_recette ON batch_meals(recette_id);
-CREATE INDEX ix_batch_meals_date_prep ON batch_meals(date_preparation);
-CREATE INDEX ix_batch_meals_date_peremption ON batch_meals(date_peremption);
+CREATE INDEX ix_batch_meals_recette ON repas_batch(recette_id);
+CREATE INDEX ix_batch_meals_date_prep ON repas_batch(date_preparation);
+CREATE INDEX ix_batch_meals_date_peremption ON repas_batch(date_peremption);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.10 RECIPE_FEEDBACKS (→ recettes)
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE recipe_feedbacks (
+CREATE TABLE retours_recettes (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(100) NOT NULL,
     recette_id INTEGER NOT NULL,
@@ -1304,9 +1304,9 @@ CREATE TABLE recipe_feedbacks (
         REFERENCES recettes(id) ON DELETE CASCADE,
     CONSTRAINT ck_feedback_type CHECK (feedback IN ('like', 'dislike', 'neutral'))
 );
-CREATE INDEX ix_recipe_feedbacks_user ON recipe_feedbacks(user_id);
-CREATE INDEX ix_recipe_feedbacks_recette ON recipe_feedbacks(recette_id);
-CREATE UNIQUE INDEX uq_user_recipe_feedback ON recipe_feedbacks(user_id, recette_id);
+CREATE INDEX ix_recipe_feedbacks_user ON retours_recettes(user_id);
+CREATE INDEX ix_recipe_feedbacks_recette ON retours_recettes(recette_id);
+CREATE UNIQUE INDEX uq_user_recipe_feedback ON retours_recettes(user_id, recette_id);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.11 INVENTAIRE (→ ingredients)
@@ -1451,7 +1451,7 @@ CREATE INDEX ix_repas_type ON repas(type_repas);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.16 TEMPLATE_ITEMS (→ templates_semaine)
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE template_items (
+CREATE TABLE elements_templates (
     id SERIAL PRIMARY KEY,
     template_id INTEGER NOT NULL,
     jour_semaine INTEGER NOT NULL,
@@ -1465,12 +1465,12 @@ CREATE TABLE template_items (
         REFERENCES templates_semaine(id) ON DELETE CASCADE,
     CONSTRAINT ck_template_jour_valide CHECK (jour_semaine >= 0 AND jour_semaine <= 6)
 );
-CREATE INDEX idx_template_jour ON template_items(template_id, jour_semaine);
+CREATE INDEX idx_template_jour ON elements_templates(template_id, jour_semaine);
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.17 WELLBEING_ENTRIES (→ child_profiles)
+-- 4.17 WELLBEING_ENTRIES (→ profils_enfants)
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE wellbeing_entries (
+CREATE TABLE entrees_bien_etre (
     id SERIAL PRIMARY KEY,
     child_id INTEGER,
     username VARCHAR(200),
@@ -1481,16 +1481,16 @@ CREATE TABLE wellbeing_entries (
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_wellbeing_child FOREIGN KEY (child_id)
-        REFERENCES child_profiles(id) ON DELETE CASCADE
+        REFERENCES profils_enfants(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_wellbeing_child ON wellbeing_entries(child_id);
-CREATE INDEX ix_wellbeing_username ON wellbeing_entries(username);
-CREATE INDEX ix_wellbeing_date ON wellbeing_entries(date);
+CREATE INDEX ix_wellbeing_child ON entrees_bien_etre(child_id);
+CREATE INDEX ix_wellbeing_username ON entrees_bien_etre(username);
+CREATE INDEX ix_wellbeing_date ON entrees_bien_etre(date);
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.18 MILESTONES (→ child_profiles)
+-- 4.18 MILESTONES (→ profils_enfants)
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE milestones (
+CREATE TABLE jalons (
     id SERIAL PRIMARY KEY,
     child_id INTEGER NOT NULL,
     titre VARCHAR(200) NOT NULL,
@@ -1501,16 +1501,16 @@ CREATE TABLE milestones (
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_milestones_child FOREIGN KEY (child_id)
-        REFERENCES child_profiles(id) ON DELETE CASCADE
+        REFERENCES profils_enfants(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_milestones_child ON milestones(child_id);
-CREATE INDEX ix_milestones_categorie ON milestones(categorie);
-CREATE INDEX ix_milestones_date ON milestones(date_atteint);
+CREATE INDEX ix_milestones_child ON jalons(child_id);
+CREATE INDEX ix_milestones_categorie ON jalons(categorie);
+CREATE INDEX ix_milestones_date ON jalons(date_atteint);
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.19 HEALTH_ENTRIES (→ health_routines)
+-- 4.19 HEALTH_ENTRIES (→ routines_sante)
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE health_entries (
+CREATE TABLE entrees_sante (
     id SERIAL PRIMARY KEY,
     routine_id INTEGER,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -1524,7 +1524,7 @@ CREATE TABLE health_entries (
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_health_entries_routine FOREIGN KEY (routine_id)
-        REFERENCES health_routines(id) ON DELETE CASCADE,
+        REFERENCES routines_sante(id) ON DELETE CASCADE,
     CONSTRAINT ck_entry_duree_positive CHECK (duree_minutes > 0),
     CONSTRAINT ck_entry_energie CHECK (
         note_energie IS NULL OR (note_energie >= 1 AND note_energie <= 10)
@@ -1533,13 +1533,13 @@ CREATE TABLE health_entries (
         note_moral IS NULL OR (note_moral >= 1 AND note_moral <= 10)
     )
 );
-CREATE INDEX ix_health_entries_routine ON health_entries(routine_id);
-CREATE INDEX ix_health_entries_date ON health_entries(date);
+CREATE INDEX ix_health_entries_routine ON entrees_sante(routine_id);
+CREATE INDEX ix_health_entries_date ON entrees_sante(date);
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.20 PROJECT_TASKS (→ projects)
+-- 4.20 PROJECT_TASKS (→ projets)
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE project_tasks (
+CREATE TABLE taches_projets (
     id SERIAL PRIMARY KEY,
     project_id INTEGER NOT NULL,
     nom VARCHAR(200) NOT NULL,
@@ -1550,15 +1550,15 @@ CREATE TABLE project_tasks (
     assigne_a VARCHAR(200),
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_project_tasks_project FOREIGN KEY (project_id)
-        REFERENCES projects(id) ON DELETE CASCADE
+        REFERENCES projets(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_project_tasks_project ON project_tasks(project_id);
-CREATE INDEX ix_project_tasks_statut ON project_tasks(statut);
+CREATE INDEX ix_project_tasks_project ON taches_projets(project_id);
+CREATE INDEX ix_project_tasks_statut ON taches_projets(statut);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.21 ROUTINE_TASKS (→ routines)
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE routine_tasks (
+CREATE TABLE taches_routines (
     id SERIAL PRIMARY KEY,
     routine_id INTEGER NOT NULL,
     nom VARCHAR(200) NOT NULL,
@@ -1571,12 +1571,12 @@ CREATE TABLE routine_tasks (
     CONSTRAINT fk_routine_tasks_routine FOREIGN KEY (routine_id)
         REFERENCES routines(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_routine_tasks_routine ON routine_tasks(routine_id);
+CREATE INDEX ix_routine_tasks_routine ON taches_routines(routine_id);
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.22 GARDEN_LOGS (→ garden_items)
+-- 4.22 GARDEN_LOGS (→ elements_jardin)
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE garden_logs (
+CREATE TABLE journaux_jardin (
     id SERIAL PRIMARY KEY,
     garden_item_id INTEGER,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -1584,10 +1584,10 @@ CREATE TABLE garden_logs (
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_garden_logs_item FOREIGN KEY (garden_item_id)
-        REFERENCES garden_items(id) ON DELETE CASCADE
+        REFERENCES elements_jardin(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_garden_logs_item ON garden_logs(garden_item_id);
-CREATE INDEX ix_garden_logs_date ON garden_logs(date);
+CREATE INDEX ix_garden_logs_item ON journaux_jardin(garden_item_id);
+CREATE INDEX ix_garden_logs_date ON journaux_jardin(date);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.23 JEUX_MATCHS (→ jeux_equipes)
@@ -2266,8 +2266,8 @@ CREATE TABLE budgets_home (
 DO $$
 DECLARE t TEXT;
     tables_modifie_le TEXT[] := ARRAY[
-        'user_profiles', 'garmin_tokens', 'recettes', 'weekend_activities',
-        'family_purchases', 'jeux_equipes', 'jeux_matchs', 'config_batch_cooking',
+        'profils_utilisateurs', 'garmin_tokens', 'recettes', 'activites_weekend',
+        'achats_famille', 'jeux_equipes', 'jeux_matchs', 'config_batch_cooking',
         'sessions_batch_cooking', 'preparations_batch', 'plannings',
         'modeles_courses', 'templates_semaine'
     ];
@@ -2287,10 +2287,10 @@ END $$;
 DO $$
 DECLARE t TEXT;
     tables_updated_at TEXT[] := ARRAY[
-        'listes_courses', 'furniture', 'maintenance_tasks', 'house_stocks',
-        'user_preferences', 'depenses', 'budgets_mensuels', 'config_meteo',
-        'calendriers_externes', 'notification_preferences',
-        'external_calendar_configs', 'evenements_calendrier',
+        'listes_courses', 'meubles', 'taches_entretien', 'stocks_maison',
+        'preferences_utilisateurs', 'depenses', 'budgets_mensuels', 'config_meteo',
+        'calendriers_externes', 'preferences_notifications',
+        'configs_calendriers_externes', 'evenements_calendrier',
         'plans_jardin', 'zones_jardin', 'plantes_jardin',
         'pieces_maison', 'objets_maison',
         'preferences_home', 'taches_home', 'objectifs_autonomie',
@@ -2439,34 +2439,34 @@ DO $$
 DECLARE t TEXT;
     all_tables TEXT[] := ARRAY[
         -- Système
-        'schema_migrations', 'action_history', 'backups',
-        'push_subscriptions', 'notification_preferences',
+        'schema_migrations', 'historique_actions', 'sauvegardes',
+        'abonnements_push', 'preferences_notifications',
         -- Cuisine
         'ingredients', 'recettes', 'recette_ingredients', 'etapes_recette',
-        'versions_recette', 'historique_recettes', 'recipe_feedbacks',
+        'versions_recette', 'historique_recettes', 'retours_recettes',
         -- Batch Cooking
-        'batch_meals', 'config_batch_cooking', 'sessions_batch_cooking',
+        'repas_batch', 'config_batch_cooking', 'sessions_batch_cooking',
         'etapes_batch_cooking', 'preparations_batch',
         -- Inventaire & Courses
         'inventaire', 'historique_inventaire', 'listes_courses', 'liste_courses',
-        'modeles_courses', 'articles_modeles', 'shopping_items_famille',
+        'modeles_courses', 'articles_modeles', 'articles_achats_famille',
         -- Planning & Calendrier
-        'plannings', 'repas', 'calendar_events', 'templates_semaine', 'template_items',
-        'calendriers_externes', 'evenements_calendrier', 'external_calendar_configs',
+        'plannings', 'repas', 'evenements_planning', 'templates_semaine', 'elements_templates',
+        'calendriers_externes', 'evenements_calendrier', 'configs_calendriers_externes',
         -- Famille
-        'child_profiles', 'wellbeing_entries', 'milestones',
-        'family_activities', 'family_budgets', 'family_purchases',
-        'weekend_activities',
+        'profils_enfants', 'entrees_bien_etre', 'jalons',
+        'activites_famille', 'budgets_famille', 'achats_famille',
+        'activites_weekend',
         -- Santé & Fitness
-        'user_profiles', 'health_routines', 'health_objectives', 'health_entries',
-        'food_logs', 'garmin_tokens', 'garmin_activities', 'garmin_daily_summaries',
+        'profils_utilisateurs', 'routines_sante', 'objectifs_sante', 'entrees_sante',
+        'journaux_alimentaires', 'garmin_tokens', 'activites_garmin', 'resumes_quotidiens_garmin',
         -- Finances
-        'depenses', 'budgets_mensuels', 'house_expenses',
+        'depenses', 'budgets_mensuels', 'depenses_maison',
         -- Habitat
-        'furniture', 'house_stocks', 'maintenance_tasks', 'eco_actions',
+        'meubles', 'stocks_maison', 'taches_entretien', 'actions_ecologiques',
         -- Maison
-        'projects', 'project_tasks', 'routines', 'routine_tasks',
-        'garden_items', 'garden_logs',
+        'projets', 'taches_projets', 'routines', 'taches_routines',
+        'elements_jardin', 'journaux_jardin',
         -- Jeux
         'jeux_equipes', 'jeux_matchs', 'jeux_paris_sportifs',
         'jeux_tirages_loto', 'jeux_grilles_loto', 'jeux_stats_loto',
@@ -2478,7 +2478,7 @@ DECLARE t TEXT;
         'pieces_maison', 'objets_maison', 'sessions_travail',
         'versions_pieces', 'couts_travaux', 'logs_statut_objets',
         -- Préférences
-        'user_preferences', 'openfoodfacts_cache',
+        'preferences_utilisateurs', 'openfoodfacts_cache',
         -- Hub Maison (migration 020)
         'preferences_home', 'taches_home', 'stats_home',
         'plantes_catalogue', 'recoltes', 'objectifs_autonomie',

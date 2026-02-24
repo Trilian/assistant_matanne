@@ -128,6 +128,77 @@ class EvenementEntretienSemaineOptimisee:
 
 
 # ═══════════════════════════════════════════════════════════
+# ÉVÉNEMENTS FAMILLE
+# ═══════════════════════════════════════════════════════════
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementActiviteFamille:
+    """Émis quand une activité famille est créée/modifiée."""
+
+    TYPE: str = "activites.modifiee"
+
+    activite_id: int = 0
+    nom: str = ""
+    action: str = ""  # "creee", "modifiee", "supprimee"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementRoutineModifiee:
+    """Émis quand une routine famille est créée/modifiée."""
+
+    TYPE: str = "routines.modifiee"
+
+    routine_id: int = 0
+    nom: str = ""
+    action: str = ""  # "creee", "modifiee", "supprimee", "tache_ajoutee"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementWeekendModifie:
+    """Émis quand une activité weekend est créée/modifiée."""
+
+    TYPE: str = "weekend.modifie"
+
+    activite_id: int = 0
+    nom: str = ""
+    action: str = ""  # "creee", "modifiee", "supprimee"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementAchatFamille:
+    """Émis quand un achat famille est ajouté/modifié."""
+
+    TYPE: str = "achats.modifie"
+
+    achat_id: int = 0
+    nom: str = ""
+    action: str = ""  # "ajoute", "modifie", "supprime"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementJournalAlimentaire:
+    """Émis quand une entrée journal alimentaire est ajoutée."""
+
+    TYPE: str = "food_log.ajoute"
+
+    entree_id: int = 0
+    utilisateur_id: int = 0
+    action: str = ""  # "ajoute", "supprime"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementPlanningModifie:
+    """Émis quand le planning est modifié."""
+
+    TYPE: str = "planning.modifie"
+
+    planning_id: int = 0
+    semaine: str = ""
+    action: str = ""  # "cree", "modifie", "supprime"
+
+
+# ═══════════════════════════════════════════════════════════
 # ÉVÉNEMENTS SYSTÈME
 # ═══════════════════════════════════════════════════════════
 
@@ -159,6 +230,12 @@ REGISTRE_EVENEMENTS: dict[str, type] = {
     "batch_cooking.termine": EvenementBatchCookingTermine,
     "entretien.routine_creee": EvenementEntretienRoutineCreee,
     "entretien.semaine_optimisee": EvenementEntretienSemaineOptimisee,
+    "activites.modifiee": EvenementActiviteFamille,
+    "routines.modifiee": EvenementRoutineModifiee,
+    "weekend.modifie": EvenementWeekendModifie,
+    "achats.modifie": EvenementAchatFamille,
+    "food_log.ajoute": EvenementJournalAlimentaire,
+    "planning.modifie": EvenementPlanningModifie,
     "service.error": EvenementErreurService,
 }
 
@@ -172,6 +249,12 @@ __all__ = [
     "EvenementBatchCookingTermine",
     "EvenementEntretienRoutineCreee",
     "EvenementEntretienSemaineOptimisee",
+    "EvenementActiviteFamille",
+    "EvenementRoutineModifiee",
+    "EvenementWeekendModifie",
+    "EvenementAchatFamille",
+    "EvenementJournalAlimentaire",
+    "EvenementPlanningModifie",
     "EvenementErreurService",
     # Registry
     "REGISTRE_EVENEMENTS",

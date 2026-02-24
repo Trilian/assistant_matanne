@@ -1,14 +1,17 @@
 """
 Cache - Façade statique rétro-compatible sur CacheMultiNiveau.
 
+.. deprecated:: 2.0.0
+   Cette façade est conservée pour rétro-compatibilité uniquement.
+   Pour du code neuf, utiliser ``@avec_cache`` (décorateur) ou
+   ``CacheMultiNiveau()`` directement via ``obtenir_cache()``.
+
 Ce module maintient l'API historique ``Cache.obtenir()``, ``Cache.definir()``,
 etc. mais délègue désormais tout au ``CacheMultiNiveau`` (L1/L2/L3).
-
-Pour du code neuf, préférer ``@avec_cache`` ou ``CacheMultiNiveau()`` directement.
 """
 
 import logging
-import sys
+import warnings
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -30,10 +33,26 @@ class Cache:
     """
     Cache simplifié via API statique.
 
+    .. deprecated:: 2.0.0
+       Utiliser ``@avec_cache`` ou ``CacheMultiNiveau`` pour du code neuf.
+
     Délègue tout au :class:`CacheMultiNiveau` (L1 mémoire → L2 session
     → L3 fichier).  Conserve la même interface publique pour les
     consommateurs existants.
     """
+
+    _deprecation_warned: bool = False
+
+    @classmethod
+    def _warn_deprecated(cls) -> None:
+        """Émet un avertissement de dépréciation une seule fois."""
+        if not cls._deprecation_warned:
+            warnings.warn(
+                "Cache est déprécié. Utiliser @avec_cache ou CacheMultiNiveau à la place.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+            cls._deprecation_warned = True
 
     # Clés conservées pour compatibilité (lecture seule dans les tests/UI)
     CLE_DONNEES = "cache_donnees"
@@ -48,6 +67,9 @@ class Cache:
         """
         Récupère une valeur du cache.
 
+        .. deprecated:: 2.0.0
+           Utiliser ``@avec_cache`` ou ``CacheMultiNiveau.get()``.
+
         Args:
             cle: Clé de cache
             ttl: Durée de vie en secondes (ignoré – le TTL est celui du set)
@@ -56,6 +78,7 @@ class Cache:
         Returns:
             Valeur ou sentinelle si expiré/absent
         """
+        Cache._warn_deprecated()
         result = _cache().get(cle)
         return result if result is not None else sentinelle
 
@@ -71,12 +94,16 @@ class Cache:
         """
         Sauvegarde une valeur dans le cache.
 
+        .. deprecated:: 2.0.0
+           Utiliser ``@avec_cache`` ou ``CacheMultiNiveau.set()``.
+
         Args:
             cle: Clé de cache
             valeur: Valeur à cacher
             ttl: Durée de vie en secondes
             dependencies: Tags pour invalidations groupées
         """
+        Cache._warn_deprecated()
         _cache().set(cle, valeur, ttl=ttl, tags=dependencies)
 
     # ── Invalidation ─────────────────────────────────────────

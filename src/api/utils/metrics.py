@@ -8,7 +8,7 @@ import logging
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
@@ -36,7 +36,7 @@ class MetricsStore:
     ai_tokens_used: int = 0
 
     # Timestamp de démarrage
-    start_time: datetime = field(default_factory=datetime.now)
+    start_time: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 # Instance globale
@@ -83,7 +83,7 @@ def record_ai_request(tokens_used: int = 0):
 
 def get_metrics() -> dict[str, Any]:
     """Retourne toutes les métriques."""
-    uptime = (datetime.now() - _metrics.start_time).total_seconds()
+    uptime = (datetime.now(UTC) - _metrics.start_time).total_seconds()
 
     # Calcul des percentiles de latence
     latency_stats = {}

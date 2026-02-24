@@ -263,7 +263,7 @@ Triple couche de protection :
 | Types de repas | ✅ `TypeRepasValidator` avec whitelist |
 | Pagination | ✅ `ge=1, le=100/200` sur page_size |
 | Query params | ✅ `Query()` avec validators FastAPI |
-| Email/password login | ⚠️ `LoginRequest` ne valide pas le format email |
+| Email/password login | ✅ `LoginRequest` valide le format email via `EmailStr` (Pydantic v2) |
 
 ### 4.4 Error Messages — ✅ SÉCURISÉ
 
@@ -331,26 +331,22 @@ raise HTTPException(
 
 **Statut: Pas de fuite d'information.** ✅
 
-### 5.3 ETagMiddleware — ⚠️ INCOMPLÈTE (design accepté)
+### 5.3 ETagMiddleware — ✅ CORRIGÉ (implémentation complète)
 
-Le `ETagMiddleware` dans `utils/cache.py` est **fonctionnel mais limité** :
-- Ajoute `Cache-Control` avec `max-age` si configuré
-- **Ne génère PAS d'ETags automatiquement** sur les réponses (commentaire dans le code: "l'implémentation complète nécessiterait de bufferiser la réponse")
-- Les fonctions helpers `generate_etag()`, `add_cache_headers()`, `check_etag_match()` sont disponibles pour usage manuel dans les routes
+Le `ETagMiddleware` dans `utils/cache.py` est **entièrement fonctionnel** :
+- Bufferise le body pour calculer l'ETag (hash MD5)
+- Génère des ETags weak (`W/"<hash>"`) automatiquement sur toutes les réponses JSON 200
+- Retourne **304 Not Modified** si `If-None-Match` correspond
+- Ajoute `Cache-Control` avec `max-age` configurable
+- Les fonctions helpers `generate_etag()`, `add_cache_headers()`, `check_etag_match()` sont disponibles pour usage manuel
 
-**Impact**: Le middleware est un shell — il n'apporte pas de cache conditionnel 304 automatique. Les routes n'utilisent pas non plus les helpers manuellement.
+**Statut: Middleware complet avec support 304.** ✅
 
-**Statut: Middleware décoratif, pas de 304 support réel.** ⚠️
+### 5.4 OpenAPI securitySchemes — ✅ CORRIGÉ
 
-### 5.4 OpenAPI securitySchemes — ❌ MANQUANT
+`HTTPBearer` est déclaré dans `dependencies.py` avec `auto_error=False` et `description="Token JWT Bearer. Obtenu via POST /api/v1/auth/login"`. Le bouton "Authorize" dans Swagger UI est désormais fonctionnel.
 
-Aucune définition `securitySchemes` dans l'OpenAPI spec. `HTTPBearer` est déclaré dans `dependencies.py` avec `auto_error=False`, mais FastAPI ne génère pas automatiquement le bouton "Authorize" dans Swagger UI car:
-- `auto_error=False` empêche le schéma de sécurité d'apparaître dans la spec
-- Pas de `swagger_ui_init_oauth` ni `openapi_extra` configuré
-
-**Impact**: Le bouton 🔒 "Authorize" dans Swagger UI est absent ou inopérant. Les utilisateurs doivent ajouter manuellement le header `Authorization` pour tester les endpoints protégés.
-
-**Statut: UX de documentation dégradée.** ❌
+**Statut: UX de documentation corrigée.** ✅
 
 ---
 
@@ -433,14 +429,14 @@ Navigation via `st.navigation()` + `st.Page()` (Streamlit native multi-page). Le
 | Critère | Score | Détail |
 |---------|-------|--------|
 | Architecture | 9/10 | Package modulaire propre (routes/schemas/utils/rate_limiting) |
-| Sécurité | 8.5/10 | JWT solide, rate limiting complet, headers OWASP, CORS strict |
-| Schemas/Validation | 8/10 | Mixins réutilisables, Pydantic v2, RecettePatch PATCH propre |
+| Sécurité | 9/10 | JWT solide, rate limiting complet, headers OWASP, CORS strict, OpenAPI securitySchemes |
+| Schemas/Validation | 8.5/10 | Mixins réutilisables, Pydantic v2, RecettePatch PATCH propre, EmailStr validation |
 | Error Handling | 9/10 | Triple couche, aucune fuite d'info, messages génériques |
 | Documentation | 8.5/10 | Docstrings enrichies, examples JSON dans tous les endpoints |
 | Rate Limiting | 9/10 | Multi-fenêtre, Redis/memory, abuse detection, bypass tests |
-| Code Quality | 8/10 | Cohérent, DRY (helpers crud.py), bonne séparation |
+| Code Quality | 8/10 | Cohérent, DRY (helpers crud.py), bonne séparation, timezone UTC cohérent |
 | Tests | N/A | Pas audité ici |
-| **Points faibles** | | ETagMiddleware shell, pas de securitySchemes OpenAPI, `LoginRequest` sans validation email |
+| **Points faibles** | | Rate limiter in-memory pas thread-safe multi-worker |
 
 ### `src/app.py` — Score Global: **9.0/10**
 
@@ -470,42 +466,32 @@ Navigation via `st.navigation()` + `st.Page()` (Streamlit native multi-page). Le
 | Schema mixins | Validation inline | Package `schemas/` avec mixins | **RESTRUCTURÉ** |
 | CSS injection (app.py) | Multiple `st.markdown` | CSSManager pipeline single-call | **OPTIMISÉ** |
 | Navigation (app.py) | `RouteurOptimise` custom | `st.navigation()` natif | **MIGRÉ** |
-| ETagMiddleware | Incomplet | Toujours incomplet (shell) | **INCHANGÉ** ⚠️ |
-| OpenAPI securitySchemes | Absent | Toujours absent | **INCHANGÉ** ❌ |
+| ETagMiddleware | Incomplet | Implémentation complète avec body buffering + 304 | **CORRIGÉ** ✅ |
+| OpenAPI securitySchemes | Absent | `HTTPBearer(description=...)` ajouté | **CORRIGÉ** ✅ |
+| LoginRequest email | `str` sans validation | `EmailStr` (Pydantic v2) + `email-validator` | **CORRIGÉ** ✅ |
+| Timezone _START_TIME | `datetime.now()` naïf | `datetime.now(UTC)` partout (main.py + metrics.py) | **CORRIGÉ** ✅ |
+| /metrics auth | Non protégé | `Depends(require_role("admin"))` | **CORRIGÉ** ✅ |
 
 ---
 
 ## 9. Recommandations Prioritaires
 
-### Haute priorité
+### ~~Haute priorité~~ ✅ TOUTES CORRIGÉES
 
-1. **Ajouter OpenAPI securitySchemes** — Le bouton "Authorize" dans Swagger est non-fonctionnel:
-   ```python
-   # Dans dependencies.py
-   security = HTTPBearer(auto_error=False, description="Token JWT Bearer")
-   # OU dans main.py:
-   app = FastAPI(
-       ...,
-       swagger_ui_init_oauth={},
-   )
-   ```
+1. ~~**Ajouter OpenAPI securitySchemes**~~ ✅ **CORRIGÉ** — `HTTPBearer(description="Token JWT Bearer. Obtenu via POST /api/v1/auth/login")` ajouté dans `dependencies.py`.
 
-2. **Valider le format email dans `LoginRequest`**:
-   ```python
-   from pydantic import EmailStr
-   email: EmailStr  # Au lieu de str
-   ```
+2. ~~**Valider le format email dans `LoginRequest`**~~ ✅ **CORRIGÉ** — `email: EmailStr` + dépendance `email-validator` ajoutée dans `pyproject.toml`.
 
 ### Moyenne priorité
 
-3. **Implémenter ETagMiddleware complètement** ou le supprimer — le code actuel est un placeholder qui n'ajoute aucune fonctionnalité cache 304.
+3. ~~**Implémenter ETagMiddleware complètement**~~ ✅ **CORRIGÉ** — Implémentation complète avec body buffering, génération ETag MD5 et support 304 Not Modified.
 
 4. **Activer `valider_config=True`** dans `app.py` — la validation config désactivée est un risque en production.
 
-5. **Ajouter `/metrics` derrière auth** — actuellement accessible sans authentification, expose des informations opérationnelles.
+5. ~~**Ajouter `/metrics` derrière auth**~~ ✅ **CORRIGÉ** — Protégé par `Depends(require_role("admin"))`.
 
-### Basse priorité
+### ~~Basse priorité~~ ✅ CORRIGÉES
 
-6. **HealthResponse timezone** — `_START_TIME = datetime.now()` sans timezone vs `datetime.now(UTC)` utilisé dans auth.py. Inconsistance mineure.
+6. ~~**HealthResponse timezone**~~ ✅ **CORRIGÉ** — `datetime.now(UTC)` utilisé partout (main.py et metrics.py).
 
 7. **Documentation README.md** — La section endpoints est incomplète (manque push, PATCH recettes, courses nested routes).

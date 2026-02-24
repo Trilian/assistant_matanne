@@ -430,6 +430,7 @@ class TestProprietesConfig:
             "DB_PASSWORD": "test_pass",
             "DB_NAME": "test_db",
             "DB_PORT": "5432",
+            "DATABASE_URL": "",  # Clear pour forcer construction depuis composants
         }
         with patch.dict(os.environ, env_vars, clear=False):
             with patch("src.core.config.settings._read_st_secret", return_value=None):

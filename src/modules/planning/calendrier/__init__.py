@@ -22,10 +22,10 @@ import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
-from src.ui.keys import KeyNamespace
 
 # Import Google Calendar UI
 from src.ui.integrations import afficher_config_google_calendar
+from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 
 from .analytics import (

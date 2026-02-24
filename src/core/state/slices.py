@@ -168,174 +168,55 @@ class EtatApp:
 
     def __repr__(self) -> str:
         return (
-            f"EtatApp(module={self.module_actuel!r}, "
+            f"EtatApp(module={self.navigation.module_actuel!r}, "
             f"user={self.nom_utilisateur!r}, "
             f"debug={self.mode_debug})"
         )
 
-    # ── Propriétés de rétro-compatibilité (délèguent aux slices) ──
+    # ── Rétro-compatibilité dynamique (délègue aux slices) ──
+    # Mapping attribut → (nom_slice, nom_attribut)
+    _DELEGATION: dict[str, tuple[str, str]] = {
+        # Navigation
+        "module_actuel": ("navigation", "module_actuel"),
+        "module_precedent": ("navigation", "module_precedent"),
+        "historique_navigation": ("navigation", "historique_navigation"),
+        # Cuisine
+        "id_recette_visualisation": ("cuisine", "id_recette_visualisation"),
+        "id_recette_edition": ("cuisine", "id_recette_edition"),
+        "id_recette_adaptation_bebe": ("cuisine", "id_recette_adaptation_bebe"),
+        "id_article_visualisation": ("cuisine", "id_article_visualisation"),
+        "id_article_edition": ("cuisine", "id_article_edition"),
+        "id_planning_visualisation": ("cuisine", "id_planning_visualisation"),
+        "semaine_actuelle": ("cuisine", "semaine_actuelle"),
+        "id_planning_ajout_repas": ("cuisine", "id_planning_ajout_repas"),
+        "jour_ajout_repas": ("cuisine", "jour_ajout_repas"),
+        "date_ajout_repas": ("cuisine", "date_ajout_repas"),
+        "id_repas_edition": ("cuisine", "id_repas_edition"),
+        # UI
+        "afficher_formulaire_ajout": ("ui", "afficher_formulaire_ajout"),
+        "afficher_generation_ia": ("ui", "afficher_generation_ia"),
+        "afficher_confirmation_suppression": ("ui", "afficher_confirmation_suppression"),
+        "afficher_notifications": ("ui", "afficher_notifications"),
+        "afficher_formulaire_ajout_repas": ("ui", "afficher_formulaire_ajout_repas"),
+        "onglet_actif": ("ui", "onglet_actif"),
+    }
 
-    @property
-    def module_actuel(self) -> str:
-        return self.navigation.module_actuel
+    def __getattr__(self, name: str) -> Any:
+        """Délègue dynamiquement les attributs de rétro-compatibilité aux slices."""
+        delegation = EtatApp._DELEGATION
+        if name in delegation:
+            slice_name, attr_name = delegation[name]
+            return getattr(object.__getattribute__(self, slice_name), attr_name)
+        raise AttributeError(f"'{type(self).__name__}' n'a pas d'attribut '{name}'")
 
-    @module_actuel.setter
-    def module_actuel(self, value: str) -> None:
-        self.navigation.module_actuel = value
-
-    @property
-    def module_precedent(self) -> str | None:
-        return self.navigation.module_precedent
-
-    @module_precedent.setter
-    def module_precedent(self, value: str | None) -> None:
-        self.navigation.module_precedent = value
-
-    @property
-    def historique_navigation(self) -> list[str]:
-        return self.navigation.historique_navigation
-
-    @historique_navigation.setter
-    def historique_navigation(self, value: list[str]) -> None:
-        self.navigation.historique_navigation = value
-
-    # Cuisine slice properties
-    @property
-    def id_recette_visualisation(self) -> int | None:
-        return self.cuisine.id_recette_visualisation
-
-    @id_recette_visualisation.setter
-    def id_recette_visualisation(self, value: int | None) -> None:
-        self.cuisine.id_recette_visualisation = value
-
-    @property
-    def id_recette_edition(self) -> int | None:
-        return self.cuisine.id_recette_edition
-
-    @id_recette_edition.setter
-    def id_recette_edition(self, value: int | None) -> None:
-        self.cuisine.id_recette_edition = value
-
-    @property
-    def id_recette_adaptation_bebe(self) -> int | None:
-        return self.cuisine.id_recette_adaptation_bebe
-
-    @id_recette_adaptation_bebe.setter
-    def id_recette_adaptation_bebe(self, value: int | None) -> None:
-        self.cuisine.id_recette_adaptation_bebe = value
-
-    @property
-    def id_article_visualisation(self) -> int | None:
-        return self.cuisine.id_article_visualisation
-
-    @id_article_visualisation.setter
-    def id_article_visualisation(self, value: int | None) -> None:
-        self.cuisine.id_article_visualisation = value
-
-    @property
-    def id_article_edition(self) -> int | None:
-        return self.cuisine.id_article_edition
-
-    @id_article_edition.setter
-    def id_article_edition(self, value: int | None) -> None:
-        self.cuisine.id_article_edition = value
-
-    @property
-    def id_planning_visualisation(self) -> int | None:
-        return self.cuisine.id_planning_visualisation
-
-    @id_planning_visualisation.setter
-    def id_planning_visualisation(self, value: int | None) -> None:
-        self.cuisine.id_planning_visualisation = value
-
-    @property
-    def semaine_actuelle(self) -> Any | None:
-        return self.cuisine.semaine_actuelle
-
-    @semaine_actuelle.setter
-    def semaine_actuelle(self, value: Any | None) -> None:
-        self.cuisine.semaine_actuelle = value
-
-    @property
-    def id_planning_ajout_repas(self) -> int | None:
-        return self.cuisine.id_planning_ajout_repas
-
-    @id_planning_ajout_repas.setter
-    def id_planning_ajout_repas(self, value: int | None) -> None:
-        self.cuisine.id_planning_ajout_repas = value
-
-    @property
-    def jour_ajout_repas(self) -> int | None:
-        return self.cuisine.jour_ajout_repas
-
-    @jour_ajout_repas.setter
-    def jour_ajout_repas(self, value: int | None) -> None:
-        self.cuisine.jour_ajout_repas = value
-
-    @property
-    def date_ajout_repas(self) -> Any | None:
-        return self.cuisine.date_ajout_repas
-
-    @date_ajout_repas.setter
-    def date_ajout_repas(self, value: Any | None) -> None:
-        self.cuisine.date_ajout_repas = value
-
-    @property
-    def id_repas_edition(self) -> int | None:
-        return self.cuisine.id_repas_edition
-
-    @id_repas_edition.setter
-    def id_repas_edition(self, value: int | None) -> None:
-        self.cuisine.id_repas_edition = value
-
-    # UI slice properties
-    @property
-    def afficher_formulaire_ajout(self) -> bool:
-        return self.ui.afficher_formulaire_ajout
-
-    @afficher_formulaire_ajout.setter
-    def afficher_formulaire_ajout(self, value: bool) -> None:
-        self.ui.afficher_formulaire_ajout = value
-
-    @property
-    def afficher_generation_ia(self) -> bool:
-        return self.ui.afficher_generation_ia
-
-    @afficher_generation_ia.setter
-    def afficher_generation_ia(self, value: bool) -> None:
-        self.ui.afficher_generation_ia = value
-
-    @property
-    def afficher_confirmation_suppression(self) -> bool:
-        return self.ui.afficher_confirmation_suppression
-
-    @afficher_confirmation_suppression.setter
-    def afficher_confirmation_suppression(self, value: bool) -> None:
-        self.ui.afficher_confirmation_suppression = value
-
-    @property
-    def afficher_notifications(self) -> bool:
-        return self.ui.afficher_notifications
-
-    @afficher_notifications.setter
-    def afficher_notifications(self, value: bool) -> None:
-        self.ui.afficher_notifications = value
-
-    @property
-    def afficher_formulaire_ajout_repas(self) -> bool:
-        return self.ui.afficher_formulaire_ajout_repas
-
-    @afficher_formulaire_ajout_repas.setter
-    def afficher_formulaire_ajout_repas(self, value: bool) -> None:
-        self.ui.afficher_formulaire_ajout_repas = value
-
-    @property
-    def onglet_actif(self) -> str | None:
-        return self.ui.onglet_actif
-
-    @onglet_actif.setter
-    def onglet_actif(self, value: str | None) -> None:
-        self.ui.onglet_actif = value
+    def __setattr__(self, name: str, value: Any) -> None:
+        """Délègue dynamiquement les affectations de rétro-compatibilité aux slices."""
+        delegation = EtatApp._DELEGATION
+        if name in delegation:
+            slice_name, attr_name = delegation[name]
+            setattr(object.__getattribute__(self, slice_name), attr_name, value)
+            return
+        object.__setattr__(self, name, value)
 
 
 __all__ = [

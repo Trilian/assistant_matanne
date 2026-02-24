@@ -7,7 +7,8 @@ from datetime import datetime
 
 import streamlit as st
 
-from src.ui.tokens import Couleur, Espacement, Rayon, Typographie
+from src.ui.tokens import Espacement, Rayon, Typographie
+from src.ui.tokens_semantic import Sem
 from src.ui.utils import echapper_html
 
 
@@ -60,7 +61,7 @@ def indicateur_chargement(message: str = "Chargement..."):
     st.markdown(
         f'<div role="status" aria-label="{safe_msg}" style="text-align: center; padding: {Espacement.XL};">'
         f'<div style="font-size: {Typographie.ICON_MD};" aria-hidden="true">\u23f3</div>'
-        f'<div style="color: {Couleur.TEXT_SECONDARY}; margin-top: {Espacement.SM};">'
+        f'<div style="color: {Sem.ON_SURFACE_SECONDARY}; margin-top: {Espacement.SM};">'
         f"{safe_msg}</div>"
         f"</div>",
         unsafe_allow_html=True,
@@ -80,8 +81,8 @@ def chargeur_squelette(lignes: int = 3):
     for _ in range(lignes):
         st.markdown(
             f'<div role="progressbar" aria-label="Chargement en cours" '
-            f'style="background: linear-gradient(90deg, {Couleur.BG_HOVER} 25%, '
-            f"{Couleur.BORDER_LIGHT} 50%, {Couleur.BG_HOVER} 75%); "
+            f'style="background: linear-gradient(90deg, {Sem.SURFACE_ALT} 25%, '
+            f"{Sem.BORDER_SUBTLE} 50%, {Sem.SURFACE_ALT} 75%); "
             f"height: 20px; margin: {Espacement.SM} 0; border-radius: {Rayon.SM}; "
             f'background-size: 200% 100%; animation: shimmer 1.5s infinite;"></div>',
             unsafe_allow_html=True,

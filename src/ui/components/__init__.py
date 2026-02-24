@@ -25,14 +25,6 @@ from .charts import (
     graphique_repartition_repas,
 )
 
-# Charts Drill-down (graphiques interactifs avec on_select)
-from .plotly_drilldown import (
-    graphique_activites_heatmap,
-    graphique_budget_drilldown,
-    graphique_inventaire_drilldown,
-    graphique_recettes_drilldown,
-)
-
 # Chat contextuel (assistant IA intégré par module)
 from .chat_contextuel import ChatContextuelService, afficher_chat_contextuel
 
@@ -92,6 +84,14 @@ from .metrics_row import (
     afficher_metriques_row,
     afficher_progress_metrics,
     afficher_stats_cards,
+)
+
+# Charts Drill-down (graphiques interactifs avec on_select)
+from .plotly_drilldown import (
+    graphique_activites_heatmap,
+    graphique_budget_drilldown,
+    graphique_inventaire_drilldown,
+    graphique_recettes_drilldown,
 )
 
 # Streaming (réponses IA progressives)

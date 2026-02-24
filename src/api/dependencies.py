@@ -21,7 +21,10 @@ logger = logging.getLogger(__name__)
 # SÉCURITÉ
 # ═══════════════════════════════════════════════════════════
 
-security = HTTPBearer(auto_error=False)
+security = HTTPBearer(
+    auto_error=False,
+    description="Token JWT Bearer. Obtenu via POST /api/v1/auth/login",
+)
 
 
 # ═══════════════════════════════════════════════════════════

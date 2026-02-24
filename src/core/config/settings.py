@@ -3,14 +3,19 @@ Settings - Configuration Pydantic centralisée.
 
 Classe Parametres avec auto-détection des sources:
 1. st.secrets (Streamlit Cloud)
-2. Variables d'environnement
+2. Variables d'environnement (via pydantic-settings)
 3. Valeurs par défaut
+
+Toutes les valeurs passent par la validation Pydantic. Les secrets
+Streamlit sont résolus une seule fois au démarrage via
+``@model_validator(mode='after')``.
 """
 
-import logging
-import os
+from __future__ import annotations
 
-from pydantic import Field
+import logging
+
+from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from ..constants import (
@@ -34,9 +39,12 @@ class Parametres(BaseSettings):
     """
     Configuration centralisée avec auto-détection.
 
+    Toutes les valeurs passent par la validation Pydantic. Les secrets
+    Streamlit sont résolus une seule fois au démarrage (``@model_validator``).
+
     Ordre de priorité pour chaque paramètre :
-    1. st.secrets (Streamlit Cloud)
-    2. Variables d'environnement
+    1. Variables d'environnement (via pydantic-settings)
+    2. st.secrets (résolu au démarrage par ``_resoudre_secrets``)
     3. Valeur par défaut
     """
 
@@ -58,17 +66,37 @@ class Parametres(BaseSettings):
 
     # ═══════════════════════════════════════════════════════════
     # BASE DE DONNÉES (Supabase PostgreSQL)
+    # Composants individuels chargés par pydantic-settings depuis env.
     # ═══════════════════════════════════════════════════════════
+
+    DB_HOST: str | None = None
+    """Hôte de la base de données (ex: xxx.supabase.co)."""
+
+    DB_USER: str | None = None
+    """Utilisateur de la base de données."""
+
+    DB_PASSWORD: str | None = None
+    """Mot de passe de la base de données."""
+
+    DB_NAME: str | None = None
+    """Nom de la base de données."""
+
+    DB_PORT: str = "5432"
+    """Port de la base de données."""
+
+    db_url: str | None = Field(
+        None,
+        validation_alias=AliasChoices("DATABASE_URL", "db_url"),
+    )
+    """URL complète de la base de données (résolue depuis env, st.secrets ou composants)."""
 
     @property
     def DATABASE_URL(self) -> str:
         """
-        Construction URL base de données avec fallbacks.
+        URL de connexion PostgreSQL validée par Pydantic.
 
-        Ordre de priorité:
-        1. st.secrets["db"]
-        2. Variables d'environnement individuelles
-        3. Variable DATABASE_URL complète
+        La résolution depuis les env vars et st.secrets est effectuée
+        une seule fois au démarrage via ``_resoudre_secrets``.
 
         Returns:
             URL de connexion PostgreSQL
@@ -76,36 +104,8 @@ class Parametres(BaseSettings):
         Raises:
             ValueError: Si aucune configuration trouvée
         """
-        # 1. Secrets Streamlit (prioritaire en production)
-        db = _read_st_secret("db")
-        if db:
-            try:
-                return (
-                    f"postgresql://{db['user']}:{db['password']}"
-                    f"@{db['host']}:{db['port']}/{db['name']}"
-                    f"?sslmode=require"
-                )
-            except Exception:
-                logger.debug("st.secrets['db'] présente mais format inattendu")
-
-        # 2. Variables d'environnement individuelles
-        hote = os.getenv("DB_HOST")
-        utilisateur = os.getenv("DB_USER")
-        mot_de_passe = os.getenv("DB_PASSWORD")
-        nom = os.getenv("DB_NAME")
-        port = os.getenv("DB_PORT", "5432")
-
-        if all([hote, utilisateur, mot_de_passe, nom]):
-            return f"postgresql://{utilisateur}:{mot_de_passe}@{hote}:{port}/{nom}?sslmode=require"
-
-        # 3. DATABASE_URL complète
-        db_url = os.getenv("DATABASE_URL")
-        if db_url:
-            if "sslmode" not in db_url and "supabase" in db_url:
-                db_url += "?sslmode=require"
-            return db_url
-
-        # 4. Échec - guide utilisateur
+        if self.db_url:
+            return self.db_url
         raise ValueError(
             "[ERROR] Configuration DB manquante!\n\n"
             "Configure l'une de ces options:\n"
@@ -123,18 +123,31 @@ class Parametres(BaseSettings):
         )
 
     # ═══════════════════════════════════════════════════════════
-    # IA (Mistral)
+    # IA (Mistral) — chargé par pydantic-settings depuis env.
     # ═══════════════════════════════════════════════════════════
+
+    mistral_key: str | None = Field(
+        None,
+        validation_alias=AliasChoices("MISTRAL_API_KEY", "mistral_key"),
+    )
+    """Clé API Mistral résolue (depuis env ou st.secrets)."""
+
+    streamlit_secrets_mistral_key: str | None = Field(
+        None,
+        validation_alias=AliasChoices(
+            "STREAMLIT_SECRETS_MISTRAL_API_KEY",
+            "streamlit_secrets_mistral_key",
+        ),
+    )
+    """Edge case: clé Mistral via variable STREAMLIT_SECRETS_MISTRAL_API_KEY."""
 
     @property
     def MISTRAL_API_KEY(self) -> str:
         """
-        Clé API Mistral avec fallbacks optimisés pour Streamlit Cloud.
+        Clé API Mistral validée par Pydantic.
 
-        Ordre de priorité:
-        1. MISTRAL_API_KEY env var (dev local depuis .env.local)
-        2. st.secrets["mistral"]["api_key"] (Streamlit Cloud)
-        3. Vérifier si elle est dans STREAMLIT_SECRETS_MISTRAL_API_KEY (Edge case)
+        La résolution depuis les env vars et st.secrets est effectuée
+        une seule fois au démarrage via ``_resoudre_secrets``.
 
         Returns:
             Clé API Mistral
@@ -142,25 +155,11 @@ class Parametres(BaseSettings):
         Raises:
             ValueError: Si clé introuvable
         """
-        # 1. Variable d'environnement directe (PREMIÈRE PRIORITÉ - dev local)
-        cle = os.getenv("MISTRAL_API_KEY")
-        if cle and cle.strip() and cle != "sk-test-dummy-key-replace-with-real-key":
-            return cle
-
-        # 2. Vérifier si c'est un edge case en Streamlit Cloud
-        cle = os.getenv("STREAMLIT_SECRETS_MISTRAL_API_KEY")
-        if cle and cle.strip():
-            return cle
-
-        # 3. Secrets Streamlit - Essayer plusieurs chemins (Streamlit Cloud)
-        api_key = charger_secrets_streamlit()
-        if api_key and api_key.strip() and api_key != "sk-test-dummy-key-replace-with-real-key":
-            return api_key
-
-        # Erreur: aucune clé trouvée
+        dummy = "sk-test-dummy-key-replace-with-real-key"
+        if self.mistral_key and self.mistral_key != dummy:
+            return self.mistral_key
         is_cloud = _is_streamlit_cloud()
         env_info = "Streamlit Cloud" if is_cloud else "Dev Local"
-
         raise ValueError(
             f"[ERROR] Clé API Mistral manquante ({env_info})!\n\n"
             "Configure l'une de ces options:\n"
@@ -171,20 +170,8 @@ class Parametres(BaseSettings):
             "   api_key = 'sk-xxx' ou autre format"
         )
 
-    @property
-    def MISTRAL_MODEL(self) -> str:
-        """
-        Modèle Mistral à utiliser.
-
-        Returns:
-            Nom du modèle
-        """
-        try:
-            import streamlit as st
-
-            return st.secrets.get("mistral", {}).get("model", "mistral-small-latest")
-        except Exception:
-            return os.getenv("MISTRAL_MODEL", "mistral-small-latest")
+    MISTRAL_MODEL: str = "mistral-small-latest"
+    """Modèle Mistral à utiliser."""
 
     MISTRAL_TIMEOUT: int = 60
     """Timeout API Mistral en secondes."""
@@ -193,98 +180,17 @@ class Parametres(BaseSettings):
     """URL de base API Mistral."""
 
     # ═══════════════════════════════════════════════════════════
-    # APIS EXTERNES - FOOTBALL
+    # APIS EXTERNES — chargées par pydantic-settings depuis env.
     # ═══════════════════════════════════════════════════════════
 
-    @property
-    def FOOTBALL_DATA_API_KEY(self) -> str | None:
-        """
-        Clé API Football-Data.org avec fallbacks.
+    FOOTBALL_DATA_API_KEY: str | None = None
+    """Clé API Football-Data.org (optionnelle)."""
 
-        Returns:
-            Clé API ou None si non configurée
-        """
-        # 1. Variable d'environnement directe
-        cle = os.getenv("FOOTBALL_DATA_API_KEY")
-        if cle and cle.strip():
-            return cle
+    GOOGLE_CLIENT_ID: str = ""
+    """Client ID OAuth2 Google Calendar."""
 
-        # 2. Secrets Streamlit - format plat
-        try:
-            import streamlit as st
-
-            cle = st.secrets.get("FOOTBALL_DATA_API_KEY")
-            if cle and cle.strip():
-                return cle
-        except Exception:
-            pass
-
-        # 3. Secrets Streamlit - format structuré
-        try:
-            import streamlit as st
-
-            cle = st.secrets.get("football_data", {}).get("api_key")
-            if cle and cle.strip():
-                return cle
-        except Exception:
-            pass
-
-        # 4. Pas de clé - c'est OK, c'est optionnel
-        return None
-
-    # ═══════════════════════════════════════════════════════════
-    # GOOGLE CALENDAR
-    # ═══════════════════════════════════════════════════════════
-
-    @property
-    def GOOGLE_CLIENT_ID(self) -> str:
-        """
-        Client ID OAuth2 Google Calendar.
-
-        Returns:
-            Client ID ou chaîne vide si non configuré
-        """
-        # 1. Variable d'environnement directe
-        cle = os.getenv("GOOGLE_CLIENT_ID")
-        if cle and cle.strip():
-            return cle
-
-        # 2. Secrets Streamlit
-        try:
-            import streamlit as st
-
-            cle = st.secrets.get("google", {}).get("client_id")
-            if cle and cle.strip():
-                return cle
-        except Exception:
-            pass
-
-        return ""
-
-    @property
-    def GOOGLE_CLIENT_SECRET(self) -> str:
-        """
-        Client Secret OAuth2 Google Calendar.
-
-        Returns:
-            Client Secret ou chaîne vide si non configuré
-        """
-        # 1. Variable d'environnement directe
-        cle = os.getenv("GOOGLE_CLIENT_SECRET")
-        if cle and cle.strip():
-            return cle
-
-        # 2. Secrets Streamlit
-        try:
-            import streamlit as st
-
-            cle = st.secrets.get("google", {}).get("client_secret")
-            if cle and cle.strip():
-                return cle
-        except Exception:
-            pass
-
-        return ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    """Client Secret OAuth2 Google Calendar."""
 
     # ═══════════════════════════════════════════════════════════
     # RATE LIMITING
@@ -318,6 +224,111 @@ class Parametres(BaseSettings):
 
     LOG_LEVEL: str = LOG_LEVEL_PRODUCTION
     """Niveau de log."""
+
+    # ═══════════════════════════════════════════════════════════
+    # RÉSOLUTION DES SECRETS (st.secrets en fallback des env vars)
+    # ═══════════════════════════════════════════════════════════
+
+    @model_validator(mode="after")
+    def _resoudre_secrets(self) -> Parametres:
+        """Complète les valeurs depuis st.secrets en fallback des env vars.
+
+        Appelé une seule fois au démarrage. Les valeurs sont ensuite
+        stockées dans les champs Pydantic validés.
+        """
+        self._resoudre_database_url()
+        self._resoudre_mistral()
+        self._resoudre_apis_externes()
+        return self
+
+    def _resoudre_database_url(self) -> None:
+        """Résout DATABASE_URL avec la même priorité que l'original.
+
+        Ordre de priorité:
+        1. st.secrets["db"] (prioritaire en production)
+        2. DATABASE_URL env var (déjà chargé dans db_url par pydantic-settings)
+        3. Composants individuels DB_HOST/DB_USER/... (pydantic-settings)
+        """
+        # 1. st.secrets (prioritaire en production) — toujours vérifier
+        db = _read_st_secret("db")
+        if db:
+            try:
+                self.db_url = (
+                    f"postgresql://{db['user']}:{db['password']}"
+                    f"@{db['host']}:{db['port']}/{db['name']}"
+                    f"?sslmode=require"
+                )
+                return
+            except Exception:
+                logger.debug("st.secrets['db'] présente mais format inattendu")
+
+        # 2. DATABASE_URL env var (déjà dans db_url via pydantic-settings)
+        if self.db_url:
+            if "sslmode" not in self.db_url and "supabase" in self.db_url:
+                self.db_url += "?sslmode=require"
+            return
+
+        # 3. Composants individuels (chargés par pydantic-settings)
+        if all([self.DB_HOST, self.DB_USER, self.DB_PASSWORD, self.DB_NAME]):
+            self.db_url = (
+                f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}"
+                f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+                f"?sslmode=require"
+            )
+
+    def _resoudre_mistral(self) -> None:
+        """Résout MISTRAL_API_KEY et MISTRAL_MODEL depuis st.secrets si absent."""
+        dummy = "sk-test-dummy-key-replace-with-real-key"
+
+        if not self.mistral_key or self.mistral_key == dummy:
+            # Edge case: variable STREAMLIT_SECRETS_MISTRAL_API_KEY
+            if self.streamlit_secrets_mistral_key:
+                self.mistral_key = self.streamlit_secrets_mistral_key
+            else:
+                # Fallback st.secrets
+                api_key = charger_secrets_streamlit()
+                if api_key and api_key.strip() and api_key != dummy:
+                    self.mistral_key = api_key
+
+        # MISTRAL_MODEL depuis st.secrets (si non overridé par env)
+        if not self.MISTRAL_MODEL or self.MISTRAL_MODEL == "mistral-small-latest":
+            mistral_sec = _read_st_secret("mistral")
+            if mistral_sec and hasattr(mistral_sec, "get"):
+                model = mistral_sec.get("model")
+                if model:
+                    self.MISTRAL_MODEL = model
+            # Restaurer le défaut si vide
+            if not self.MISTRAL_MODEL:
+                self.MISTRAL_MODEL = "mistral-small-latest"
+
+    def _resoudre_apis_externes(self) -> None:
+        """Résout les clés API optionnelles depuis st.secrets si absentes."""
+        # FOOTBALL_DATA_API_KEY
+        if not self.FOOTBALL_DATA_API_KEY:
+            try:
+                import streamlit as st
+
+                cle = st.secrets.get("FOOTBALL_DATA_API_KEY")
+                if cle and cle.strip():
+                    self.FOOTBALL_DATA_API_KEY = cle
+                else:
+                    cle = st.secrets.get("football_data", {}).get("api_key")
+                    if cle and cle.strip():
+                        self.FOOTBALL_DATA_API_KEY = cle
+            except Exception:
+                pass
+
+        # GOOGLE Calendar
+        google = _read_st_secret("google")
+        if google and hasattr(google, "get"):
+            if not self.GOOGLE_CLIENT_ID:
+                cid = google.get("client_id")
+                if cid and cid.strip():
+                    self.GOOGLE_CLIENT_ID = cid
+            if not self.GOOGLE_CLIENT_SECRET:
+                csec = google.get("client_secret")
+                if csec and csec.strip():
+                    self.GOOGLE_CLIENT_SECRET = csec
 
     # ═══════════════════════════════════════════════════════════
     # MÉTHODES HELPERS
@@ -362,19 +373,11 @@ class Parametres(BaseSettings):
 
     def _verifier_db_configuree(self) -> bool:
         """Vérifie si la base de données est configurée."""
-        try:
-            _ = self.DATABASE_URL
-            return True
-        except Exception:
-            return False
+        return bool(self.db_url)
 
     def _verifier_mistral_configure(self) -> bool:
         """Vérifie si Mistral est configuré."""
-        try:
-            _ = self.MISTRAL_API_KEY
-            return True
-        except Exception:
-            return False
+        return bool(self.mistral_key)
 
     # Configuration Pydantic v2
     model_config = SettingsConfigDict(

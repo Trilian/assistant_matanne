@@ -41,7 +41,7 @@ CATEGORIES_AVEC_CONSO = {"gaz", "electricite", "eau"}
 MOIS_FR = [
     "",
     "Janvier",
-    "Fevrier",
+    "Février",
     "Mars",
     "Avril",
     "Mai",
@@ -51,7 +51,7 @@ MOIS_FR = [
     "Septembre",
     "Octobre",
     "Novembre",
-    "Decembre",
+    "Décembre",
 ]
 
 

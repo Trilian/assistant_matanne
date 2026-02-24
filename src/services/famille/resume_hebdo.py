@@ -186,9 +186,9 @@ Format du résumé en Markdown:
                 planning = service_planning.get_planning()
                 if planning and planning.repas:
                     repas_semaine = [
-                        r for r in planning.repas
-                        if hasattr(r, "date") and r.date
-                        and date_debut <= r.date <= date_fin
+                        r
+                        for r in planning.repas
+                        if hasattr(r, "date") and r.date and date_debut <= r.date <= date_fin
                     ]
                     stats_planning = {
                         "nb_planifies": len(planning.repas),
@@ -434,44 +434,50 @@ Génère un résumé chaleureux et motivant en Markdown. Inclus 3 recommandation
         lines = [
             f"## 📊 Bilan de la Semaine ({resume.date_debut} → {resume.date_fin})",
             "",
-            f"### 🍽️ Repas",
+            "### 🍽️ Repas",
             f"- {resume.repas.nb_repas_planifies} repas planifiés, "
             f"{resume.repas.nb_repas_realises} réalisés "
             f"({resume.repas.taux_realisation:.0f}%)",
         ]
 
         if resume.repas.recettes_populaires:
-            lines.append(
-                f"- Recettes: {', '.join(resume.repas.recettes_populaires)}"
-            )
+            lines.append(f"- Recettes: {', '.join(resume.repas.recettes_populaires)}")
 
-        lines.extend([
-            "",
-            f"### 💰 Budget",
-            f"- Total dépensé: **{resume.budget.total_depenses:.2f} €**",
-        ])
+        lines.extend(
+            [
+                "",
+                "### 💰 Budget",
+                f"- Total dépensé: **{resume.budget.total_depenses:.2f} €**",
+            ]
+        )
 
         if resume.budget.top_categories:
             for cat in resume.budget.top_categories[:3]:
                 lines.append(f"  - {cat['categorie']}: {cat['montant']:.0f} €")
 
-        lines.extend([
-            "",
-            f"### 🎯 Activités",
-            f"- {resume.activites.nb_activites} activité(s) cette semaine",
-        ])
+        lines.extend(
+            [
+                "",
+                "### 🎯 Activités",
+                f"- {resume.activites.nb_activites} activité(s) cette semaine",
+            ]
+        )
 
-        lines.extend([
-            "",
-            f"### ✅ Tâches Maison",
-            f"- {resume.taches.nb_taches_realisees} tâche(s) réalisée(s)",
-            f"- {resume.taches.nb_taches_en_retard} tâche(s) en retard",
-        ])
+        lines.extend(
+            [
+                "",
+                "### ✅ Tâches Maison",
+                f"- {resume.taches.nb_taches_realisees} tâche(s) réalisée(s)",
+                f"- {resume.taches.nb_taches_en_retard} tâche(s) en retard",
+            ]
+        )
 
-        lines.extend([
-            "",
-            f"### 🎯 Score de la semaine: **{resume.score_semaine}/100**",
-        ])
+        lines.extend(
+            [
+                "",
+                f"### 🎯 Score de la semaine: **{resume.score_semaine}/100**",
+            ]
+        )
 
         return "\n".join(lines)
 

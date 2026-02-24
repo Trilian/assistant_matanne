@@ -6,6 +6,7 @@ et la base de données (modèles SQLAlchemy ElementJardin/JournalJardin).
 """
 
 import logging
+import re
 from datetime import date
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
@@ -81,8 +82,6 @@ def charger_recoltes_jardin(session=None) -> list[dict]:
         if log.notes:
             try:
                 # Tenter d'extraire un nombre des notes
-                import re
-
                 match = re.search(r"([\d.]+)\s*kg", log.notes)
                 if match:
                     quantite_kg = float(match.group(1))

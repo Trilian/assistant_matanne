@@ -3,8 +3,14 @@ Sanitizer - Nettoyage et sanitization des entrées utilisateur.
 
 Protège contre:
 - XSS (Cross-Site Scripting)
-- Injections SQL
+- Injections SQL (couche défense en profondeur)
 - Caractères dangereux
+
+.. warning::
+   La détection d'injection SQL est une couche supplémentaire de
+   **défense en profondeur**. Elle ne remplace PAS les requêtes
+   paramétrées (ORM SQLAlchemy). Les patterns détectent les vecteurs
+   d'attaque courants mais ne sont pas exhaustifs.
 """
 
 __all__ = ["NettoyeurEntrees"]
@@ -37,13 +43,40 @@ class NettoyeurEntrees:
     """Patterns de détection XSS."""
 
     PATTERNS_SQL = [
+        # Tautologies classiques: ' OR '1, " AND "1
         r"('\s*(OR|AND)\s*'?\d)",
         r'("\s*(OR|AND)\s*"?\d)',
+        # DDL destructeur: ; DROP TABLE, ; DELETE FROM, ; TRUNCATE
         r"(;\s*DROP\s+TABLE)",
         r"(;\s*DELETE\s+FROM)",
-        r"(UNION\s+SELECT)",
+        r"(;\s*TRUNCATE\s+TABLE)",
+        # UNION-based injection
+        r"(UNION\s+(ALL\s+)?SELECT)",
+        # Stacked queries: ; INSERT, ; UPDATE, ; ALTER
+        r"(;\s*INSERT\s+INTO)",
+        r"(;\s*UPDATE\s+\w+\s+SET)",
+        r"(;\s*ALTER\s+TABLE)",
+        # Comment-based evasion: -- , /*, #
+        r"(--\s)",
+        r"(/\*)",
+        # Fonctions d'extraction: SLEEP(), BENCHMARK(), LOAD_FILE()
+        r"(SLEEP\s*\()",
+        r"(BENCHMARK\s*\()",
+        r"(LOAD_FILE\s*\()",
+        # Boolean-based: OR 1=1, AND 1=1
+        r"(\b(OR|AND)\s+\d+\s*=\s*\d+)",
+        # Hex-encoded payloads: 0x...
+        r"(0x[0-9a-fA-F]{8,})",
     ]
-    """Patterns de détection injection SQL."""
+    """
+    Patterns de détection injection SQL.
+
+    .. note::
+       Couche défense en profondeur **uniquement**. Les requêtes
+       paramétrées (SQLAlchemy ORM) restent la protection principale.
+       Ces patterns détectent les vecteurs courants mais ne remplacent
+       pas l'utilisation de ``bindparam`` / ``Mapped[]``.
+    """
 
     # Mode par défaut : "log" pour compatibilité, "strict" pour bloquer.
     # Configurable via env SANITIZER_SQL_MODE ou à l'appel.

@@ -14,7 +14,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-
 # ═══════════════════════════════════════════════════════════
 # DONNÉES DE TEST
 # ═══════════════════════════════════════════════════════════
@@ -432,12 +431,16 @@ class TestJWTRateLimitingSecurity:
             import base64
             import json
 
-            header = base64.urlsafe_b64encode(
-                json.dumps({"alg": "none", "typ": "JWT"}).encode()
-            ).decode().rstrip("=")
-            payload = base64.urlsafe_b64encode(
-                json.dumps({"sub": "forged-user-id"}).encode()
-            ).decode().rstrip("=")
+            header = (
+                base64.urlsafe_b64encode(json.dumps({"alg": "none", "typ": "JWT"}).encode())
+                .decode()
+                .rstrip("=")
+            )
+            payload = (
+                base64.urlsafe_b64encode(json.dumps({"sub": "forged-user-id"}).encode())
+                .decode()
+                .rstrip("=")
+            )
             forged_token = f"{header}.{payload}."
 
             # Vérifier que le token API (signé) rejette bien le token forgé
@@ -517,9 +520,7 @@ class TestParameterCombinations:
             (3, 2),
         ],
     )
-    def test_planning_valid_combinations(
-        self, client, mock_planning_service, jours, personnes
-    ):
+    def test_planning_valid_combinations(self, client, mock_planning_service, jours, personnes):
         """Le planning accepte les combinaisons valides."""
         with patch(
             "src.services.cuisine.planning.obtenir_service_planning",

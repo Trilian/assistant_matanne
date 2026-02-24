@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 MOIS_FR = [
     "",
     "Janvier",
-    "Fevrier",
+    "Février",
     "Mars",
     "Avril",
     "Mai",
@@ -33,7 +33,7 @@ MOIS_FR = [
     "Septembre",
     "Octobre",
     "Novembre",
-    "Decembre",
+    "Décembre",
 ]
 
 # Catégories avec suivi consommation (kWh, m³)

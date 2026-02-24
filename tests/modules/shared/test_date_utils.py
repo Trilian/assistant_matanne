@@ -174,9 +174,9 @@ class TestFormaterMoisFr:
         assert formater_mois_fr(d) == "Janvier"
 
     def test_decembre(self):
-        """Retourne 'Decembre' pour décembre."""
+        """Retourne 'Décembre' pour décembre."""
         d = date(2024, 12, 15)
-        assert formater_mois_fr(d) == "Decembre"
+        assert formater_mois_fr(d) == "Décembre"
 
     def test_format_court(self):
         """Format court (Jan, Fév, etc.)."""

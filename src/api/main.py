@@ -6,14 +6,14 @@ Point d'entrée principal de l'API avec les middlewares et routers.
 
 import logging
 import os
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from src.api.rate_limiting import MiddlewareLimitationDebit
 from src.api.dependencies import require_role
+from src.api.rate_limiting import MiddlewareLimitationDebit
 from src.api.routes import (
     courses_router,
     inventaire_router,
@@ -203,7 +203,7 @@ class HealthResponse(BaseModel):
 
 
 # Heure de démarrage pour calculer l'uptime
-_START_TIME = datetime.now()
+_START_TIME = datetime.now(UTC)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -313,12 +313,12 @@ async def health_check():
     else:
         overall = "degraded"
 
-    uptime = (datetime.now() - _START_TIME).total_seconds()
+    uptime = (datetime.now(UTC) - _START_TIME).total_seconds()
 
     return HealthResponse(
         status=overall,
         version="1.0.0",
-        timestamp=datetime.now(),
+        timestamp=datetime.now(UTC),
         services=services,
         uptime_seconds=round(uptime, 1),
     )

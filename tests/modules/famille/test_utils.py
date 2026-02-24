@@ -114,7 +114,7 @@ class TestFormatDateFr:
 
         mois = [
             "Janvier",
-            "Fevrier",
+            "Février",
             "Mars",
             "Avril",
             "Mai",
@@ -124,7 +124,7 @@ class TestFormatDateFr:
             "Septembre",
             "Octobre",
             "Novembre",
-            "Decembre",
+            "Décembre",
         ]
 
         for i, mois_attendu in enumerate(mois, 1):

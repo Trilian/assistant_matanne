@@ -2,13 +2,13 @@
 Schémas Pydantic pour l'authentification.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 class LoginRequest(BaseModel):
     """Requête de connexion."""
 
-    email: str = Field(..., description="Adresse email de l'utilisateur")
+    email: EmailStr = Field(..., description="Adresse email de l'utilisateur")
     password: str = Field(..., description="Mot de passe")
 
 

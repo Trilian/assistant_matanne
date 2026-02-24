@@ -18,6 +18,7 @@ import streamlit as st
 from src.ui.engine import StyleSheet
 from src.ui.registry import composant_ui
 from src.ui.tokens import Couleur, Espacement, Rayon, Typographie, gradient_subtil
+from src.ui.tokens_semantic import Sem
 from src.ui.utils import echapper_html
 
 logger = logging.getLogger(__name__)
@@ -72,7 +73,7 @@ def carte_metrique_avancee(
     # Delta optionnel
     delta_html = ""
     if delta:
-        delta_color = Couleur.DELTA_POSITIVE if delta_positif else Couleur.DELTA_NEGATIVE
+        delta_color = Sem.SUCCESS if delta_positif else Sem.DANGER
         delta_arrow = "↑" if delta_positif else "↓"
         delta_html = (
             f'<span style="color: {delta_color}; font-size: 0.9rem;">'
@@ -83,7 +84,7 @@ def carte_metrique_avancee(
     sous_titre_html = ""
     if sous_titre:
         sous_titre_html = (
-            f'<p style="font-size: {Typographie.CAPTION}; color: {Couleur.TEXT_SECONDARY}; '
+            f'<p style="font-size: {Typographie.CAPTION}; color: {Sem.ON_SURFACE_SECONDARY}; '
             f'margin: 0.2rem 0 0 0;">{echapper_html(sous_titre)}</p>'
         )
 
@@ -96,9 +97,9 @@ def carte_metrique_avancee(
         f'<div class="{container_cls}" role="group" aria-label="{safe_titre}: {safe_valeur}">'
         f'<div class="{inner_cls}">'
         f"<div>"
-        f'<p style="color: {Couleur.TEXT_SECONDARY}; margin: 0 0 0.3rem 0; font-size: 0.9rem;">'
+        f'<p style="color: {Sem.ON_SURFACE_SECONDARY}; margin: 0 0 0.3rem 0; font-size: 0.9rem;">'
         f"{safe_titre}</p>"
-        f'<h2 style="margin: 0; color: {Couleur.TEXT_PRIMARY};">{safe_valeur}</h2>'
+        f'<h2 style="margin: 0; color: {Sem.ON_SURFACE};">{safe_valeur}</h2>'
         f"{delta_html}"
         f"{sous_titre_html}"
         f"</div>"
@@ -191,7 +192,7 @@ def widget_meteo_jour(donnees_meteo: dict | None = None):
         f'<span style="font-size: {Typographie.ICON_MD};" aria-hidden="true">{icone_meteo}</span>'
         f'<p style="margin: 0.3rem 0; font-size: {Typographie.H3}; font-weight: 600;">'
         f"{safe_temp}°C</p>"
-        f'<small style="font-size: {Typographie.CAPTION}; color: {Couleur.TEXT_SECONDARY};">'
+        f'<small style="font-size: {Typographie.CAPTION}; color: {Sem.ON_SURFACE_SECONDARY};">'
         f"{safe_conseil}</small>"
         f"</div>",
         unsafe_allow_html=True,

@@ -6,7 +6,7 @@ et la base de données (modèles SQLAlchemy TacheEntretien/StockMaison).
 """
 
 import logging
-from datetime import date, datetime
+from datetime import date
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.models import TacheEntretien
