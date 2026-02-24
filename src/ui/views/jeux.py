@@ -13,6 +13,7 @@ from src.services.jeux import (
     get_notification_jeux_service,
 )
 from src.ui.tokens import Couleur
+from src.ui.tokens_semantic import Sem
 from src.ui.utils import echapper_html
 
 
@@ -25,7 +26,7 @@ def afficher_badge_notifications_jeux(service: NotificationJeuxService | None = 
     if non_lues > 0:
         st.markdown(
             f"""
-            <span style="background-color: {Couleur.NOTIFICATIONS_BADGE}; color: white;
+            <span style="background-color: {Couleur.NOTIFICATIONS_BADGE}; color: {Sem.ON_INTERACTIVE};
                          padding: 2px 8px; border-radius: 10px;
                          font-size: 12px; font-weight: bold;">
                 {echapper_html(str(non_lues))}

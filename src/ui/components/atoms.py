@@ -87,7 +87,7 @@ def badge_html(
 
     if couleur and variante is None:
         return (
-            f'<span role="status" aria-label="{safe_text}" style="display: inline-flex; background: {couleur}; color: white; '
+            f'<span role="status" aria-label="{safe_text}" style="display: inline-flex; background: {couleur}; color: {Sem.ON_INTERACTIVE}; '
             f"padding: {Espacement.XS} 0.75rem; border-radius: {Rayon.PILL}; "
             f'font-size: {Typographie.BODY_SM}; font-weight: 600;">{safe_text}</span>'
         )

@@ -1,14 +1,21 @@
 """
 Orchestrator - Cache multi-niveaux unifié.
 
-Combine L1 (mémoire), L2 (session) et L3 (fichier)
+Combine L1 (mémoire), L2 (session), L3 (fichier) et Redis optionnel
 pour une performance optimale avec persistance.
 
-Stratégie de lecture: L1 → L2 → L3 → miss
-Stratégie d'écriture: L1 + L2 (L3 optionnel si persistent=True)
+Architecture:
+- L1: Mémoire locale (dict) - Ultra rapide, volatile
+- L2: Session Streamlit - Persistant par session
+- L3: Fichier local - Persistant entre sessions
+- Redis (optionnel): Cache distribué multi-instances
+
+Stratégie de lecture: L1 → Redis → L2 → L3 → miss
+Stratégie d'écriture: L1 + Redis + L2 (L3 optionnel si persistent=True)
 """
 
 import logging
+import os
 import threading
 from collections.abc import Callable
 from typing import Any, ParamSpec, TypeVar
@@ -30,8 +37,8 @@ class CacheMultiNiveau:
     """
     Cache multi-niveaux unifié.
 
-    Combine L1 (mémoire), L2 (session) et L3 (fichier)
-    pour une performance optimale avec persistance.
+    Combine L1 (mémoire), L2 (session), L3 (fichier) et Redis optionnel
+    pour une performance optimale avec persistance distribuée.
 
     Utiliser ``obtenir_cache()`` pour obtenir l'instance singleton.
     """
@@ -42,15 +49,41 @@ class CacheMultiNiveau:
         l2_enabled: bool = True,
         l3_enabled: bool = True,
         l3_cache_dir: str = ".cache",
+        redis_enabled: bool | None = None,
     ):
+        """
+        Initialise le cache multi-niveaux.
+
+        Args:
+            l1_max_entries: Nombre max d'entrées en mémoire
+            l2_enabled: Activer le cache session
+            l3_enabled: Activer le cache fichier
+            l3_cache_dir: Répertoire pour le cache fichier
+            redis_enabled: Activer Redis (None = auto-detect via REDIS_URL)
+        """
         self.l1 = CacheMemoireN1(max_entries=l1_max_entries)
         self.l2 = CacheSessionN2() if l2_enabled else None
         self.l3 = CacheFichierN3(cache_dir=l3_cache_dir) if l3_enabled else None
         self.stats = StatistiquesCache()
 
-        logger.info(
-            f"CacheMultiNiveau initialisé (L1={l1_max_entries}, L2={l2_enabled}, L3={l3_enabled})"
+        # Redis: auto-detect si None, sinon utiliser le paramètre
+        self.redis = None
+        redis_url = os.getenv("REDIS_URL", "")
+        if redis_enabled is True or (redis_enabled is None and redis_url):
+            try:
+                from .redis import CacheRedis
+
+                redis_cache = CacheRedis()
+                if redis_cache.is_available:
+                    self.redis = redis_cache
+                    logger.info("CacheMultiNiveau: Redis activé")
+            except ImportError:
+                logger.debug("Package redis non installé - Redis désactivé")
+
+        layers = (
+            f"L1={l1_max_entries}, L2={l2_enabled}, L3={l3_enabled}, Redis={self.redis is not None}"
         )
+        logger.info(f"CacheMultiNiveau initialisé ({layers})")
 
     def get(
         self,
@@ -64,33 +97,46 @@ class CacheMultiNiveau:
         Args:
             key: Clé de cache
             default: Valeur par défaut si non trouvé
-            promote: Promouvoir aux niveaux supérieurs si trouvé en L2/L3
+            promote: Promouvoir aux niveaux supérieurs si trouvé en niveaux inférieurs
 
         Returns:
             Valeur ou default
         """
-        # Essayer L1
+        # Essayer L1 (mémoire locale)
         entry = self.l1.get(key)
         if entry is not None:
             self.stats.l1_hits += 1
             return entry.value
 
-        # Essayer L2
+        # Essayer Redis (cache distribué)
+        if self.redis:
+            entry = self.redis.get(key)
+            if entry is not None:
+                self.stats.redis_hits += 1
+                if promote:
+                    self.l1.set(key, entry)
+                return entry.value
+
+        # Essayer L2 (session)
         if self.l2:
             entry = self.l2.get(key)
             if entry is not None:
                 self.stats.l2_hits += 1
                 if promote:
                     self.l1.set(key, entry)
+                    if self.redis:
+                        self.redis.set(key, entry)
                 return entry.value
 
-        # Essayer L3
+        # Essayer L3 (fichier)
         if self.l3:
             entry = self.l3.get(key)
             if entry is not None:
                 self.stats.l3_hits += 1
                 if promote:
                     self.l1.set(key, entry)
+                    if self.redis:
+                        self.redis.set(key, entry)
                     if self.l2:
                         self.l2.set(key, entry)
                 return entry.value
@@ -122,14 +168,18 @@ class CacheMultiNiveau:
             tags=tags or [],
         )
 
-        # Toujours écrire en L1
+        # Toujours écrire en L1 (mémoire locale)
         self.l1.set(key, entry)
 
-        # Écrire en L2 si disponible
+        # Écrire en Redis si disponible (cache distribué)
+        if self.redis:
+            self.redis.set(key, entry)
+
+        # Écrire en L2 si disponible (session)
         if self.l2:
             self.l2.set(key, entry)
 
-        # Écrire en L3 si persistant demandé
+        # Écrire en L3 si persistant demandé (fichier)
         if persistent and self.l3:
             self.l3.set(key, entry)
 
@@ -153,6 +203,8 @@ class CacheMultiNiveau:
         total = 0
 
         total += self.l1.invalidate(pattern=pattern, tags=tags)
+        if self.redis and pattern:
+            total += self.redis.invalidate_pattern(pattern)
         if self.l2:
             total += self.l2.invalidate(pattern=pattern, tags=tags)
         if self.l3:
@@ -168,10 +220,12 @@ class CacheMultiNiveau:
         Vide le cache.
 
         Args:
-            levels: "l1", "l2", "l3", "l1l2", ou "all"
+            levels: "l1", "l2", "l3", "redis", ou "all"
         """
         if "l1" in levels or levels == "all":
             self.l1.clear()
+        if ("redis" in levels or levels == "all") and self.redis:
+            self.redis.clear()
         if ("l2" in levels or levels == "all") and self.l2:
             self.l2.clear()
         if ("l3" in levels or levels == "all") and self.l3:
@@ -181,12 +235,15 @@ class CacheMultiNiveau:
 
     def obtenir_statistiques(self) -> dict:
         """Retourne les statistiques complètes."""
-        return {
+        stats = {
             **self.stats.to_dict(),
             "l1": self.l1.obtenir_statistiques(),
             "l2_size": self.l2.size if self.l2 else 0,
             "l3_size": self.l3.size if self.l3 else 0,
         }
+        if self.redis:
+            stats["redis"] = self.redis.get_stats()
+        return stats
 
     def obtenir_ou_calculer(
         self,

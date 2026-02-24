@@ -16,6 +16,7 @@ from src.core.date_utils import obtenir_debut_semaine
 from src.core.monitoring import profiler_rerun
 from src.modules._framework import error_boundary
 from src.ui import etat_vide
+from src.ui.fragments import cached_fragment
 from src.ui.tokens import Couleur
 
 # Couleurs par type d'événement
@@ -54,6 +55,7 @@ def charger_events_periode(date_debut: date, date_fin: date) -> list[dict]:
     return _get_service().charger_events_periode(date_debut, date_fin)
 
 
+@cached_fragment(ttl=300)  # Cache 5 min (graphiques Plotly lourds)
 def creer_timeline_jour(events: list[dict], jour: date) -> go.Figure:
     """
     Crée un graphique timeline pour une journée.
@@ -136,6 +138,7 @@ def creer_timeline_jour(events: list[dict], jour: date) -> go.Figure:
     return fig
 
 
+@cached_fragment(ttl=300)  # Cache 5 min (graphiques Plotly lourds)
 def creer_timeline_semaine(events: list[dict], date_lundi: date) -> go.Figure:
     """
     Crée un graphique timeline Gantt pour une semaine entière.

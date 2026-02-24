@@ -7,6 +7,7 @@ import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.state.url import tabs_with_url
 
 
 @profiler_rerun("parametres")
@@ -24,19 +25,19 @@ def app():
 
     st.title("⚙️ Paramètres")
 
-    # Navigation par onglets
-    tabs = st.tabs(
-        [
-            "👨‍👩‍👧‍👦 Foyer",
-            "🤖 IA",
-            "🗄️ BD",
-            "💾 Cache",
-            "� Sauvegarde",
-            "🖥️ Affichage",
-            "💰 Budget",
-            "ℹ️ À Propos",
-        ]
-    )
+    # Navigation par onglets avec deep linking
+    TAB_LABELS = [
+        "👨‍👩‍👧‍👦 Foyer",
+        "🤖 IA",
+        "🗄️ BD",
+        "💾 Cache",
+        "💿 Sauvegarde",
+        "🖥️ Affichage",
+        "💰 Budget",
+        "ℹ️ À Propos",
+    ]
+    tabs_with_url(TAB_LABELS, param="tab")
+    tabs = st.tabs(TAB_LABELS)
 
     with tabs[0]:
         with error_boundary(titre="Erreur config foyer"):

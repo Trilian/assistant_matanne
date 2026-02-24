@@ -1,6 +1,8 @@
 """
 Service Activités Famille - Logique métier pour les activités familiales.
 
+Hérite de BaseService[FamilyActivity] pour CRUD générique + méthodes spécialisées.
+
 Opérations:
 - CRUD activités (planification, marquage terminé)
 - Statistiques et budget
@@ -13,17 +15,22 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import FamilyActivity
+from src.services.core.base import BaseService
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
 
-class ServiceActivites:
+class ServiceActivites(BaseService[FamilyActivity]):
     """Service de gestion des activités familiales.
 
-    Sépare la logique métier (CRUD, stats) de la couche UI.
+    Hérite de BaseService[FamilyActivity] pour le CRUD générique.
+    Les méthodes spécialisées gèrent la logique métier spécifique.
     """
+
+    def __init__(self):
+        super().__init__(model=FamilyActivity, cache_ttl=300)
 
     # ═══════════════════════════════════════════════════════════
     # CRUD

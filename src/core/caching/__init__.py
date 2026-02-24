@@ -1,13 +1,14 @@
 """
 Caching - Module de cache multi-niveaux.
 
-Architecture à 3 niveaux:
+Architecture à 3 niveaux + option Redis:
 - L1: Mémoire (dict Python) - Ultra rapide, volatile
 - L2: Session Streamlit - Persistant pendant la session
 - L3: Fichier local (pickle) - Persistant entre sessions
+- Redis (optionnel): Cache distribué pour multi-instances
 
 Ce module fournit:
-- Classes de cache par niveau (L1, L2, L3)
+- Classes de cache par niveau (L1, L2, L3, Redis)
 - Orchestrateur multi-niveaux unifié
 - Décorateur unifié @avec_cache dans src.core.decorators
 """
@@ -23,6 +24,14 @@ from .orchestrator import (
 )
 from .session import CacheSessionN2
 
+# Optional Redis import (requires redis package)
+try:
+    from .redis import CacheRedis, is_redis_available, obtenir_cache_redis
+except ImportError:
+    CacheRedis = None  # type: ignore
+    is_redis_available = lambda: False  # noqa: E731
+    obtenir_cache_redis = lambda: None  # noqa: E731
+
 __all__ = [
     # Types
     "EntreeCache",
@@ -33,6 +42,10 @@ __all__ = [
     "CacheMemoireN1",
     "CacheSessionN2",
     "CacheFichierN3",
+    # Redis (optionnel)
+    "CacheRedis",
+    "is_redis_available",
+    "obtenir_cache_redis",
     # Orchestrateur (usage recommandé)
     "CacheMultiNiveau",
     "obtenir_cache",

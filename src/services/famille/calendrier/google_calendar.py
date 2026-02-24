@@ -18,6 +18,7 @@ from uuid import UUID
 from sqlalchemy.orm import joinedload
 
 from src.core.db import obtenir_contexte_db
+from src.core.decorators import avec_resilience
 from src.core.models import (
     CalendarEvent,
     CalendrierExterne,
@@ -153,6 +154,9 @@ class GoogleCalendarMixin:
     # GOOGLE CALENDAR — SYNCHRONISATION
     # ═══════════════════════════════════════════════════════════
 
+    @avec_resilience(
+        retry=2, timeout_s=60, fallback=SyncResult(success=False, message="Erreur réseau")
+    )
     def sync_google_calendar(self, config: ExternalCalendarConfig) -> SyncResult:
         """
         Synchronise avec Google Calendar (import + export bidirectionnel).
@@ -467,6 +471,9 @@ class GoogleCalendarMixin:
             logger.debug("Recherche événement échouée: %s", e)
             return None
 
+    @avec_resilience(
+        retry=2, timeout_s=60, fallback=SyncResult(success=False, message="Erreur réseau export")
+    )
     def export_planning_to_google(
         self,
         user_id: str,

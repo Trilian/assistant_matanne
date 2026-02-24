@@ -1,6 +1,8 @@
 """
 Service Routines - Logique métier pour les routines familiales.
 
+Hérite de BaseService[Routine] pour CRUD générique + méthodes spécialisées.
+
 Opérations:
 - CRUD routines et tâches
 - Complétion et réinitialisation
@@ -15,6 +17,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import ChildProfile, Routine, RoutineTask
+from src.services.core.base import BaseService
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
 
@@ -44,12 +47,15 @@ class TacheDict(TypedDict):
     completed_at: datetime | None
 
 
-class ServiceRoutines:
+class ServiceRoutines(BaseService[Routine]):
     """Service de gestion des routines quotidiennes.
 
-    Encapsule toutes les opérations CRUD et la logique métier
-    liée aux routines et à leurs tâches.
+    Hérite de BaseService[Routine] pour le CRUD générique.
+    Les méthodes spécialisées gèrent la logique métier (tâches, complétion).
     """
+
+    def __init__(self):
+        super().__init__(model=Routine, cache_ttl=300)
 
     # ═══════════════════════════════════════════════════════════
     # LECTURE

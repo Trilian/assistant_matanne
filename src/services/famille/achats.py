@@ -1,6 +1,8 @@
 """
 Service Achats Famille - Logique métier pour les achats familiaux.
 
+Hérite de BaseService[FamilyPurchase] pour CRUD générique + méthodes spécialisées.
+
 Opérations:
 - CRUD achats (lister, ajouter, marquer achété, supprimer)
 - Filtrage par catégorie et groupe
@@ -15,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import FamilyPurchase
+from src.services.core.base import BaseService
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
 
@@ -31,12 +34,16 @@ class AchatsStatsDict(TypedDict):
     urgents: int
 
 
-class ServiceAchatsFamille:
+class ServiceAchatsFamille(BaseService[FamilyPurchase]):
     """Service de gestion des achats familiaux.
 
-    Sépare la logique métier (CRUD, stats) de la couche UI.
+    Hérite de BaseService[FamilyPurchase] pour le CRUD générique.
+    Les méthodes spécialisées gèrent la logique métier spécifique.
     Les constantes CATEGORIES et PRIORITES restent dans le module UI.
     """
+
+    def __init__(self):
+        super().__init__(model=FamilyPurchase, cache_ttl=300)
 
     # ═══════════════════════════════════════════════════════════
     # LECTURE

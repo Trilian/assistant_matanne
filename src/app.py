@@ -122,8 +122,17 @@ def main() -> None:
         # Header
         afficher_header()
 
+        # Point d'ancrage pour le skip-link (A11y)
+        st.markdown(
+            '<main id="main-content" role="main" aria-label="Contenu principal">',
+            unsafe_allow_html=True,
+        )
+
         # Exécuter la page sélectionnée par st.navigation()
         page.run()
+
+        # Fermer le landmark main
+        st.markdown("</main>", unsafe_allow_html=True)
 
         # Footer
         afficher_footer()

@@ -1,6 +1,8 @@
 """
 Service CRUD Dépenses Maison.
 
+Hérite de BaseService[HouseExpense] pour CRUD générique.
+
 Centralise tous les accès base de données pour les dépenses maison
 (gaz, eau, électricité, loyer, crèche, etc.).
 """
@@ -13,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import HouseExpense
+from src.services.core.base import BaseService
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -38,10 +41,16 @@ MOIS_FR = [
 CATEGORIES_AVEC_CONSO = {"gaz", "electricite", "eau"}
 
 
-class DepensesCrudService:
-    """Service CRUD pour les dépenses maison."""
+class DepensesCrudService(BaseService[HouseExpense]):
+    """Service CRUD pour les dépenses maison.
+
+    Hérite de BaseService[HouseExpense] pour le CRUD générique.
+    """
 
     _instance: Optional["DepensesCrudService"] = None
+
+    def __init__(self):
+        super().__init__(model=HouseExpense, cache_ttl=600)
 
     @avec_cache(ttl=600)
     @avec_session_db

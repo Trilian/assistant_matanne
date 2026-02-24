@@ -100,6 +100,10 @@ Les endpoints sont protégés par une limitation de débit:
     license_info={
         "name": "MIT",
     },
+    swagger_ui_parameters={
+        "persistAuthorization": True,
+        "displayRequestDuration": True,
+    },
 )
 
 # CORS sécurisé

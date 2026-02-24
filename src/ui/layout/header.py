@@ -34,9 +34,6 @@ def afficher_header():
             unsafe_allow_html=True,
         )
 
-    # Point d'ancrage pour le skip-link
-    st.markdown('<div id="main-content"></div>', unsafe_allow_html=True)
-
     with col2:
         if etat.agent_ia:
             badge("🤖 IA Active", variante=Variante.SUCCESS)

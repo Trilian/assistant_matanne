@@ -39,13 +39,14 @@ class StatistiquesCache:
     l1_hits: int = 0
     l2_hits: int = 0
     l3_hits: int = 0
+    redis_hits: int = 0
     misses: int = 0
     writes: int = 0
     evictions: int = 0
 
     @property
     def total_hits(self) -> int:
-        return self.l1_hits + self.l2_hits + self.l3_hits
+        return self.l1_hits + self.l2_hits + self.l3_hits + self.redis_hits
 
     @property
     def hit_rate(self) -> float:
@@ -57,6 +58,7 @@ class StatistiquesCache:
             "l1_hits": self.l1_hits,
             "l2_hits": self.l2_hits,
             "l3_hits": self.l3_hits,
+            "redis_hits": self.redis_hits,
             "total_hits": self.total_hits,
             "misses": self.misses,
             "writes": self.writes,

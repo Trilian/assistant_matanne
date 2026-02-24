@@ -6,56 +6,123 @@
 
 ## ✅ Terminé (Session 24 février 2026)
 
-### � PHASE 6 AUDIT — Innovations Streamlit (Semaines 9-14)
+### 🧪 PHASE 10 AUDIT — Tests & Scalabilité
+
+Session d'implémentation de la Phase 10 du rapport d'audit (Tests & Scalabilité).
+
+#### Bilan des 5 items Phase 10
+
+| Item                       | Status | Notes                                                                    |
+| -------------------------- | ------ | ------------------------------------------------------------------------ |
+| Circuit breaker async fix  | ✅     | `appeler()` détecte et await les coroutines automatiquement              |
+| ETagMiddleware 304 complet | ✅     | Buffer body, MD5 ETag, If-None-Match → 304 Not Modified                  |
+| BaseService[T] étendu      | ✅     | 4 services famille/maison migrés (activites, achats, routines, depenses) |
+| Redis cache distribué      | ✅     | `CacheRedis` + orchestrateur multi-niveaux avec auto-detect REDIS_URL    |
+| Cache stats avec Redis     | ✅     | `StatistiquesCache.redis_hits` + `obtenir_statistiques()` inclut Redis   |
+
+#### Fichiers créés/modifiés
+
+| Fichier                                        | Action   | Description                                             |
+| ---------------------------------------------- | -------- | ------------------------------------------------------- |
+| `src/core/caching/redis.py`                    | **Créé** | CacheRedis, is_redis_available(), obtenir_cache_redis() |
+| `src/core/caching/orchestrator.py`             | Modifié  | Support Redis auto-detect, L1→Redis→L2→L3 stratégie     |
+| `src/core/caching/base.py`                     | Modifié  | Ajout redis_hits dans StatistiquesCache                 |
+| `src/core/caching/__init__.py`                 | Modifié  | Export CacheRedis (optionnel si redis installé)         |
+| `src/core/ai/circuit_breaker.py`               | Modifié  | `appeler()` gère coroutines via inspect.iscoroutine     |
+| `src/api/utils/cache.py`                       | Modifié  | ETagMiddleware complet avec 304 Not Modified            |
+| `src/services/famille/activites.py`            | Modifié  | ServiceActivites(BaseService[FamilyActivity])           |
+| `src/services/famille/achats.py`               | Modifié  | ServiceAchatsFamille(BaseService[FamilyPurchase])       |
+| `src/services/famille/routines.py`             | Modifié  | ServiceRoutines(BaseService[Routine])                   |
+| `src/services/maison/depenses_crud_service.py` | Modifié  | DepensesCrudService(BaseService[HouseExpense])          |
+
+#### Détails techniques
+
+**Circuit Breaker Async Fix**:
+
+```python
+# appeler() détecte maintenant les coroutines et les await
+result = fn()
+if inspect.iscoroutine(result):
+    result = asyncio.run(result)  # ou executor si loop existant
+```
+
+**ETagMiddleware 304 Complet**:
+
+- Buffer body via `body_iterator`
+- Calcul MD5 pour ETag weak `W/"hash"`
+- Check `If-None-Match` header
+- Retourne 304 sans body si match
+
+**Redis Cache Layer**:
+
+```python
+# Auto-detection via REDIS_URL
+from src.core.caching import CacheRedis, is_redis_available
+
+if is_redis_available():
+    cache = obtenir_cache()  # Utilise automatiquement Redis
+```
+
+**Tests: API, Cache, Resilience passent (273+ tests API)**
+
+---
+
+### 🎨 PHASE 6 AUDIT — Innovations Streamlit (Semaines 9-14)
 
 Session d'implémentation des nouvelles fonctionnalités Streamlit et patterns avancés du rapport d'audit.
 
 #### Bilan des 6 items Phase 6
 
-| Item                      | Status | Notes                                                                        |
-| ------------------------- | ------ | ---------------------------------------------------------------------------- |
-| st.write_stream()         | ✅     | Déjà implémenté — jules_ai.py, weekend_ai.py, chat_contextuel.py             |
-| @st.dialog migration      | ✅     | Modale deprecated → confirm_dialog(), @st.dialog natif disponible            |
-| @auto_refresh dashboards  | ✅     | 4 modules: alertes (30s), stats (60s), hub alertes (60s), stats_mois (120s)  |
-| Deep linking URL tabs     | ✅     | tabs_with_url() → inventaire, planificateur_repas, paris + existants         |
-| Chat IA contextuel        | ✅     | Prompts famille/planning/weekend + intégration hub_famille, weekend, calendrier |
-| Specification pattern     | ✅     | 489 LOC — Spec, AndSpec, OrSpec, NotSpec, SpecBuilder + 49 tests             |
+| Item                     | Status | Notes                                                                           |
+| ------------------------ | ------ | ------------------------------------------------------------------------------- |
+| st.write_stream()        | ✅     | Déjà implémenté — jules_ai.py, weekend_ai.py, chat_contextuel.py                |
+| @st.dialog migration     | ✅     | Modale deprecated → confirm_dialog(), @st.dialog natif disponible               |
+| @auto_refresh dashboards | ✅     | 4 modules: alertes (30s), stats (60s), hub alertes (60s), stats_mois (120s)     |
+| Deep linking URL tabs    | ✅     | tabs_with_url() → inventaire, planificateur_repas, paris + existants            |
+| Chat IA contextuel       | ✅     | Prompts famille/planning/weekend + intégration hub_famille, weekend, calendrier |
+| Specification pattern    | ✅     | 489 LOC — Spec, AndSpec, OrSpec, NotSpec, SpecBuilder + 49 tests                |
 
 #### Nouveaux fichiers créés
 
-| Fichier                            | LOC | Description                                              |
-| ---------------------------------- | --- | -------------------------------------------------------- |
-| `src/core/specifications.py`       | 489 | Pattern Specification composable pour filtres dynamiques |
-| `tests/core/test_specifications.py`| 200 | 49 tests unitaires couvrant toutes les specs             |
+| Fichier                             | LOC | Description                                              |
+| ----------------------------------- | --- | -------------------------------------------------------- |
+| `src/core/specifications.py`        | 489 | Pattern Specification composable pour filtres dynamiques |
+| `tests/core/test_specifications.py` | 200 | 49 tests unitaires couvrant toutes les specs             |
 
 #### Détails techniques
 
 **st.write_stream()** (déjà implémenté):
+
 - `src/services/famille/jules_ai.py` — streaming suggestions Jules
-- `src/services/famille/weekend_ai.py` — streaming idées weekend  
+- `src/services/famille/weekend_ai.py` — streaming idées weekend
 - `src/ui/components/chat_contextuel.py` — chat avec streaming IA
 
 **@st.dialog migration** (complété):
+
 - Classe `Modale` dans `src/ui/components/modals/modal.py` marquée deprecated
 - Fonction `confirm_dialog()` disponible comme alternative
 - Pattern natif `@st.dialog` prêt à l'emploi
 
 **@auto_refresh dashboards** (déjà implémenté):
+
 - `src/modules/accueil/alertes.py` — `@st.fragment(run_every=30)`
-- `src/modules/accueil/stats.py` — `@st.fragment(run_every=60)`  
+- `src/modules/accueil/stats.py` — `@st.fragment(run_every=60)`
 - `src/modules/accueil/hub.py` alertes — `@st.fragment(run_every=60)`
 - `src/modules/accueil/stats_mois.py` — `@st.fragment(run_every=120)`
 
 **Deep linking URL tabs** (étendu):
+
 - Ajouté: `inventaire/__init__.py`, `planificateur_repas/__init__.py`, `paris/__init__.py`
 - Existants: jules, recettes, courses, weekend, calendrier
 - Pattern: `tabs_with_url(TAB_LABELS, param="tab")`
 
 **Chat IA contextuel** (étendu):
+
 - 3 nouveaux prompts: famille, planning, weekend dans `_PROMPTS_CONTEXTUELS`
 - Intégrations: `hub_famille.py` (expander), `weekend/__init__.py` (onglet), `calendrier/__init__.py`
 
 **Specification pattern** (nouveau):
+
 ```python
 # API fluent pour composition de filtres
 spec = (SpecBuilder()
@@ -144,17 +211,17 @@ Session de finalisation des recommandations du rapport d'audit UI concernant l'a
 
 #### Adoption `@cached_fragment` et `@lazy`
 
-| Fichier                                            | Décorateur                                 | Raison                              |
-| -------------------------------------------------- | ------------------------------------------ | ----------------------------------- |
-| `src/modules/parametres/about.py`                  | `@cached_fragment(ttl=3600)`               | Contenu statique (1h cache)         |
-| `src/modules/accueil/stats.py`                     | `@cached_fragment(ttl=300)`                | Graphiques lourds (5 min cache)     |
-| `src/modules/jeux/loto/statistiques.py`            | `@cached_fragment(ttl=300)`                | Stats fréquences (5 min)            |
-| `src/modules/jeux/loto/statistiques.py`            | `@cached_fragment(ttl=3600)`               | Espérance math (1h - constants)     |
-| `src/modules/maison/entretien/onglets_analytics.py`| `@cached_fragment(ttl=300)`                | Graphiques Plotly (5 min)           |
-| `src/modules/maison/jardin/onglets.py`             | `@cached_fragment(ttl=300)`                | Graphiques jardin (5 min)           |
-| `src/modules/parametres/ia.py`                     | `@lazy(condition=..., show_skeleton=True)` | Détails cache IA conditionnels      |
-| `src/modules/utilitaires/notifications_push.py`    | `@lazy(condition=..., show_skeleton=True)` | Aide ntfy.sh conditionnelle         |
-| `src/modules/maison/jardin/onglets.py`             | `@lazy(condition=..., show_skeleton=True)` | Export CSV conditionnel             |
+| Fichier                                             | Décorateur                                 | Raison                          |
+| --------------------------------------------------- | ------------------------------------------ | ------------------------------- |
+| `src/modules/parametres/about.py`                   | `@cached_fragment(ttl=3600)`               | Contenu statique (1h cache)     |
+| `src/modules/accueil/stats.py`                      | `@cached_fragment(ttl=300)`                | Graphiques lourds (5 min cache) |
+| `src/modules/jeux/loto/statistiques.py`             | `@cached_fragment(ttl=300)`                | Stats fréquences (5 min)        |
+| `src/modules/jeux/loto/statistiques.py`             | `@cached_fragment(ttl=3600)`               | Espérance math (1h - constants) |
+| `src/modules/maison/entretien/onglets_analytics.py` | `@cached_fragment(ttl=300)`                | Graphiques Plotly (5 min)       |
+| `src/modules/maison/jardin/onglets.py`              | `@cached_fragment(ttl=300)`                | Graphiques jardin (5 min)       |
+| `src/modules/parametres/ia.py`                      | `@lazy(condition=..., show_skeleton=True)` | Détails cache IA conditionnels  |
+| `src/modules/utilitaires/notifications_push.py`     | `@lazy(condition=..., show_skeleton=True)` | Aide ntfy.sh conditionnelle     |
+| `src/modules/maison/jardin/onglets.py`              | `@lazy(condition=..., show_skeleton=True)` | Export CSV conditionnel         |
 
 #### Tests de régression
 

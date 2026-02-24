@@ -22,6 +22,7 @@ Implémente le pattern Circuit Breaker pour:
 """
 
 import asyncio
+import inspect
 import logging
 import threading
 import time
@@ -96,8 +97,11 @@ class CircuitBreaker:
         """
         Exécute une fonction à travers le circuit breaker.
 
+        Gère automatiquement les coroutines : si ``fn()`` retourne une coroutine,
+        elle sera exécutée via ``asyncio.run()`` ou un event loop existant.
+
         Args:
-            fn: Fonction à appeler
+            fn: Fonction à appeler (sync ou async)
             fallback: Fonction de repli si le circuit est ouvert
 
         Returns:
@@ -119,6 +123,25 @@ class CircuitBreaker:
 
         try:
             result = fn()
+            # Gérer les coroutines retournées par des fonctions async
+            if inspect.iscoroutine(result):
+                try:
+                    loop = asyncio.get_running_loop()
+                except RuntimeError:
+                    loop = None
+
+                if loop and loop.is_running():
+                    # Event loop déjà en cours - créer une tâche
+                    # Note: cas rare, préférer appeler_async() dans ce contexte
+                    import concurrent.futures
+
+                    with concurrent.futures.ThreadPoolExecutor() as executor:
+                        future = executor.submit(asyncio.run, result)
+                        result = future.result()
+                else:
+                    # Pas d'event loop - utiliser asyncio.run()
+                    result = asyncio.run(result)
+
             self._enregistrer_succes()
             return result
 

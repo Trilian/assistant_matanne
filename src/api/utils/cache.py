@@ -91,33 +91,72 @@ def check_etag_match(request: Request, current_etag: str) -> bool:
 
 class ETagMiddleware(BaseHTTPMiddleware):
     """
-    Middleware pour ajouter automatiquement les ETags.
+    Middleware pour ajouter automatiquement les ETags et support 304 Not Modified.
+
+    Features:
+    - Génère des ETags weak (W/) basés sur le hash MD5 du body
+    - Retourne 304 Not Modified si If-None-Match correspond
+    - Ajoute Cache-Control headers configurables
 
     Usage:
-        app.add_middleware(ETagMiddleware)
+        app.add_middleware(ETagMiddleware, cache_seconds=60)
 
     Note:
-        Ce middleware ne génère des ETags que pour les réponses JSON.
-        Les ETags sont "weak" (W/) car basés sur le contenu.
+        Ce middleware buffurise le body pour calculer l'ETag.
+        À utiliser uniquement pour des réponses de taille raisonnable.
     """
 
-    def __init__(self, app: ASGIApp, cache_seconds: int = 0):
+    def __init__(self, app: ASGIApp, cache_seconds: int = 60):
         super().__init__(app)
         self.cache_seconds = cache_seconds
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        # Ne traiter que les GET
+        if request.method != "GET":
+            return await call_next(request)
+
+        # Capturer le If-None-Match du client
+        client_etag = request.headers.get("If-None-Match")
+
+        # Exécuter la requête
         response = await call_next(request)
 
-        # Uniquement pour les GET avec réponses JSON réussies
-        if (
-            request.method == "GET"
-            and response.status_code == 200
-            and response.headers.get("content-type", "").startswith("application/json")
+        # Ne traiter que les réponses JSON 200
+        if response.status_code != 200 or not response.headers.get("content-type", "").startswith(
+            "application/json"
         ):
-            # Note: Pour un middleware complet, il faudrait accéder au body
-            # Ici, on montre le pattern - l'implémentation complète nécessiterait
-            # de buffuriser la réponse
-            if self.cache_seconds > 0:
-                response.headers["Cache-Control"] = f"private, max-age={self.cache_seconds}"
+            return response
 
-        return response
+        # Buffuriser le body pour calculer l'ETag
+        body_parts: list[bytes] = []
+        async for chunk in response.body_iterator:
+            body_parts.append(chunk)
+        body = b"".join(body_parts)
+
+        # Générer l'ETag à partir du body
+        hash_value = hashlib.md5(body).hexdigest()[:16]
+        etag = f'W/"{hash_value}"'
+
+        # Vérifier If-None-Match - retourner 304 si correspondance
+        if client_etag:
+            client_etags = [e.strip() for e in client_etag.split(",")]
+            if etag in client_etags or "*" in client_etags:
+                return Response(
+                    status_code=304,
+                    headers={
+                        "ETag": etag,
+                        "Cache-Control": f"private, max-age={self.cache_seconds}",
+                    },
+                )
+
+        # Créer une nouvelle réponse avec le body buffurisé et les headers
+        return Response(
+            content=body,
+            status_code=response.status_code,
+            headers={
+                **dict(response.headers),
+                "ETag": etag,
+                "Cache-Control": f"private, max-age={self.cache_seconds}",
+            },
+            media_type=response.media_type,
+        )

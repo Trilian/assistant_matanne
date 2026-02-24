@@ -16,6 +16,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.ui.components.atoms import etat_vide
+from src.ui.fragments import cached_fragment
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ JOURS_NOMS_COURTS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
 # ═══════════════════════════════════════════════════════════
 
 
+@cached_fragment(ttl=300)  # Cache 5 min (graphiques Plotly lourds)
 def afficher_graphique_charge_semaine(jours: list) -> None:
     """Graphique en barres de la charge familiale par jour.
 
@@ -78,6 +80,7 @@ def afficher_graphique_charge_semaine(jours: list) -> None:
     st.plotly_chart(fig, use_container_width=True, key="analytics_charge_daily")
 
 
+@cached_fragment(ttl=300)  # Cache 5 min (graphiques Plotly lourds)
 def afficher_graphique_repartition(stats: dict) -> None:
     """Graphique camembert de répartition des événements."""
     labels = ["Repas", "Activités", "Projets", "Événements"]
