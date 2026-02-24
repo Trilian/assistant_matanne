@@ -25,6 +25,9 @@ from .charts import (
     graphique_repartition_repas,
 )
 
+# Chat contextuel (assistant IA intégré par module)
+from .chat_contextuel import ChatContextuelService, afficher_chat_contextuel
+
 # Data
 from .data import (
     barre_progression,
@@ -145,4 +148,7 @@ __all__ = [
     "streaming_section",
     "streaming_placeholder",
     "safe_write_stream",
+    # Chat contextuel
+    "afficher_chat_contextuel",
+    "ChatContextuelService",
 ]

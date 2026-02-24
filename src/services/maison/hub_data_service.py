@@ -10,7 +10,7 @@ from datetime import date, datetime
 
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_gestion_erreurs, avec_session_db
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import ObjetMaison, PieceMaison
 from src.core.models.temps_entretien import SessionTravail, ZoneJardin
 from src.services.core.registry import service_factory
@@ -23,6 +23,7 @@ class HubDataService:
 
     _instance: "HubDataService | None" = None
 
+    @avec_cache(ttl=300)
     @avec_session_db
     @avec_gestion_erreurs(default_return={})
     def obtenir_stats_db(self, db: Session | None = None) -> dict:
@@ -51,6 +52,7 @@ class HubDataService:
 
         return stats
 
+    @avec_cache(ttl=300)
     @avec_session_db
     @avec_gestion_erreurs(default_return=0)
     def compter_objets_urgents(self, db: Session | None = None) -> int:

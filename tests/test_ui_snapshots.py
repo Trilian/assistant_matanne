@@ -20,6 +20,7 @@ from src.ui.testing.visual_regression import (
     normalize_html,
 )
 from src.ui.tokens import Couleur, Variante
+from src.ui.tokens_semantic import Sem
 
 # ═══════════════════════════════════════════════════════════
 # BADGE — 6 variantes + couleur brute
@@ -39,49 +40,50 @@ class TestBadgeSnapshots:
         html = badge_html("Actif", variante=Variante.SUCCESS)
         self.tester.assert_matches(html, {"variant": "success"}, test_name="success")
 
-        assert_html_contains(html, "Actif", 'role="status"', Couleur.BG_SUCCESS)
+        # Vérifie les tokens sémantiques (migration Phase 5)
+        assert_html_contains(html, "Actif", 'role="status"', Sem.SUCCESS_SUBTLE)
 
     def test_badge_warning(self):
         """Badge variante WARNING."""
         html = badge_html("En attente", variante=Variante.WARNING)
         self.tester.assert_matches(html, {"variant": "warning"}, test_name="warning")
 
-        assert_html_contains(html, "En attente", Couleur.BG_WARNING)
+        assert_html_contains(html, "En attente", Sem.WARNING_SUBTLE)
 
     def test_badge_danger(self):
         """Badge variante DANGER."""
         html = badge_html("Expiré", variante=Variante.DANGER)
         self.tester.assert_matches(html, {"variant": "danger"}, test_name="danger")
 
-        assert_html_contains(html, "Expiré", Couleur.BG_DANGER)
+        assert_html_contains(html, "Expiré", Sem.DANGER_SUBTLE)
 
     def test_badge_info(self):
         """Badge variante INFO."""
         html = badge_html("Nouveau", variante=Variante.INFO)
         self.tester.assert_matches(html, {"variant": "info"}, test_name="info")
 
-        assert_html_contains(html, "Nouveau", Couleur.BG_INFO)
+        assert_html_contains(html, "Nouveau", Sem.INFO_SUBTLE)
 
     def test_badge_neutral(self):
         """Badge variante NEUTRAL."""
         html = badge_html("Brouillon", variante=Variante.NEUTRAL)
         self.tester.assert_matches(html, {"variant": "neutral"}, test_name="neutral")
 
-        assert_html_contains(html, "Brouillon", Couleur.BG_HOVER)
+        assert_html_contains(html, "Brouillon", Sem.SURFACE_ALT)
 
     def test_badge_accent(self):
         """Badge variante ACCENT."""
         html = badge_html("Premium", variante=Variante.ACCENT)
         self.tester.assert_matches(html, {"variant": "accent"}, test_name="accent")
 
-        assert_html_contains(html, "Premium", Couleur.ACCENT, "color: white")
+        assert_html_contains(html, "Premium", Sem.INTERACTIVE, Sem.ON_INTERACTIVE)
 
     def test_badge_default_no_variant(self):
         """Badge sans variante → SUCCESS par défaut."""
         html = badge_html("Test")
         self.tester.assert_matches(html, {"variant": "default"}, test_name="default")
 
-        assert_html_contains(html, "Test", Couleur.BG_SUCCESS)
+        assert_html_contains(html, "Test", Sem.SUCCESS_SUBTLE)
 
     def test_badge_custom_color(self):
         """Badge avec couleur brute (rétrocompatibilité)."""

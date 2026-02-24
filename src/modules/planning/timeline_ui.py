@@ -13,6 +13,7 @@ import streamlit as st
 
 from src.core.constants import JOURS_SEMAINE
 from src.core.date_utils import obtenir_debut_semaine
+from src.core.monitoring import profiler_rerun
 from src.modules._framework import error_boundary
 from src.ui import etat_vide
 from src.ui.tokens import Couleur
@@ -226,6 +227,7 @@ def afficher_legende():
             )
 
 
+@profiler_rerun("timeline_ui")
 def app():
     """Point d'entrée du module timeline."""
     st.title("📊 Vue Timeline")

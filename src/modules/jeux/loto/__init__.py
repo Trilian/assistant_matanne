@@ -17,6 +17,7 @@ import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.keys import KeyNamespace
 
 from .crud import ajouter_tirage, enregistrer_grille
 from .generateur import afficher_generateur_grilles, afficher_mes_grilles
@@ -31,6 +32,9 @@ from .statistiques import (
 # Import des fonctions pour exposer l'API publique
 from .sync import sync_tirages_loto
 from .utils import charger_grilles_utilisateur, charger_tirages
+
+# Session keys scopées
+_keys = KeyNamespace("loto")
 
 
 @profiler_rerun("loto")

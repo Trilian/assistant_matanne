@@ -14,7 +14,7 @@ from datetime import date
 import httpx
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_gestion_erreurs, avec_session_db
+from src.core.decorators import avec_gestion_erreurs, avec_resilience, avec_session_db
 from src.core.models import ArticleCourses, MaintenanceTask
 from src.services.core.base import sync_wrapper
 from src.services.core.notifications.types import (
@@ -34,6 +34,7 @@ class ServiceNtfy:
         self.config = config or ConfigurationNtfy()
         self.client = httpx.AsyncClient(timeout=10.0)
 
+    @avec_resilience(retry=2, timeout_s=15, fallback=None)
     async def envoyer(self, notification: NotificationNtfy) -> ResultatEnvoiNtfy:
         """
         Envoie une notification push via ntfy.sh.

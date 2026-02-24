@@ -22,7 +22,7 @@ from src.services.core.notifications import (
     NotificationPush,
     obtenir_service_ntfy,
 )
-from src.ui.fragments import auto_refresh, ui_fragment
+from src.ui.fragments import auto_refresh, lazy, ui_fragment
 
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES
@@ -394,11 +394,22 @@ def afficher_taches_retard():
             st.markdown(f"• {tache.titre}")
 
 
+@lazy(condition=lambda: st.session_state.get("show_notif_help", False), show_skeleton=True)
+def _afficher_aide_contenu():
+    """Contenu de l'aide sur ntfy.sh (chargé conditionnellement)."""
+    st.markdown(HELP_NTFY)
+
+
 @ui_fragment
 def afficher_aide():
     """Affiche l'aide sur ntfy.sh."""
     st.subheader("❓ Aide")
-    st.markdown(HELP_NTFY)
+    st.checkbox(
+        "📖 Afficher la documentation détaillée",
+        key="show_notif_help",
+        help="Charge la documentation complète de ntfy.sh",
+    )
+    _afficher_aide_contenu()
 
 
 # ═══════════════════════════════════════════════════════════

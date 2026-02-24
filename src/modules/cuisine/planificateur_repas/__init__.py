@@ -17,6 +17,7 @@ from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.modules._framework import avec_gestion_erreurs_ui, error_boundary
 from src.ui import etat_vide
+from src.ui.state.url import tabs_with_url
 
 from .components import (
     afficher_apprentissage_ia,
@@ -99,10 +100,10 @@ def app():
             days_until_wednesday = 7
         st.session_state.planning_date_debut = today + timedelta(days=days_until_wednesday)
 
-    # Tabs
-    tab_planifier, tab_preferences, tab_historique = st.tabs(
-        ["📅 Planifier", "⚙️ Préférences", "📋 Historique"]
-    )
+    # Tabs avec deep linking URL
+    TAB_LABELS = ["📅 Planifier", "⚙️ Préférences", "📋 Historique"]
+    tab_index = tabs_with_url(TAB_LABELS, param="tab")
+    tab_planifier, tab_preferences, tab_historique = st.tabs(TAB_LABELS)
 
     # ═══════════════════════════════════════════════════════
     # TAB: PLANIFIER

@@ -50,6 +50,14 @@ from .rerun_profiler import (
     profiler_rerun,
     reset_profiler,
 )
+from .sentry import (
+    ajouter_breadcrumb,
+    capturer_exception,
+    capturer_message,
+    definir_utilisateur,
+    est_sentry_actif,
+    initialiser_sentry,
+)
 
 __all__ = [
     "CollecteurMetriques",
@@ -72,4 +80,11 @@ __all__ = [
     "obtenir_stats_rerun",
     "profiler_rerun",
     "reset_profiler",
+    # Sentry
+    "ajouter_breadcrumb",
+    "capturer_exception",
+    "capturer_message",
+    "definir_utilisateur",
+    "est_sentry_actif",
+    "initialiser_sentry",
 ]

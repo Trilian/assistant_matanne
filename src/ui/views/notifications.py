@@ -14,7 +14,61 @@ from src.services.core.notifications.types import (
     VAPID_PUBLIC_KEY,
     PreferencesNotification,
 )
-from src.ui.tokens import Couleur
+from src.ui.tokens_semantic import Sem
+
+# ── CSS pour notifications (tokens sémantiques) ────────────
+_NOTIFICATION_CSS = """
+<style>
+.push-permission-container {
+    background: linear-gradient(135deg, var(--sem-info, #667eea) 0%, var(--sem-interactive, #764ba2) 100%);
+    padding: 16px 20px;
+    border-radius: 12px;
+    color: var(--sem-on-interactive, white);
+    display: none;
+}
+.push-permission-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.push-permission-icon {
+    font-size: 24px;
+}
+.push-permission-content {
+    flex: 1;
+}
+.push-permission-title {
+    font-weight: 600;
+}
+.push-permission-subtitle {
+    font-size: 13px;
+    opacity: 0.9;
+}
+.push-btn-primary {
+    background: var(--sem-surface, white);
+    color: var(--sem-info, #667eea);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.push-btn-primary:hover {
+    background: var(--sem-surface-alt, #f0f0f0);
+}
+.push-btn-secondary {
+    background: transparent;
+    color: var(--sem-on-interactive, white);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.push-btn-secondary:hover {
+    background: rgba(255,255,255,0.1);
+}
+</style>
+"""
 
 
 def afficher_demande_permission_push():
@@ -25,39 +79,18 @@ def afficher_demande_permission_push():
 
     safe_vapid_key = json.dumps(VAPID_PUBLIC_KEY)[1:-1]  # Strip quotes, JS-safe
 
-    html = f"""
-    <div id="push-permission-container" style="
-        background: linear-gradient(135deg, {Couleur.PUSH_GRADIENT_START} 0%, {Couleur.PUSH_GRADIENT_END} 100%);
-        padding: 16px 20px;
-        border-radius: 12px;
-        color: white;
-        display: none;
-    ">
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 24px;">🔔</span>
-            <div style="flex: 1;">
-                <div style="font-weight: 600;">Activer les notifications</div>
-                <div style="font-size: 13px; opacity: 0.9;">
+    html = f"""{_NOTIFICATION_CSS}
+    <div id="push-permission-container" class="push-permission-container">
+        <div class="push-permission-row">
+            <span class="push-permission-icon">🔔</span>
+            <div class="push-permission-content">
+                <div class="push-permission-title">Activer les notifications</div>
+                <div class="push-permission-subtitle">
                     Recevez des alertes pour les péremptions et rappels
                 </div>
             </div>
-            <button onclick="requestPushPermission()" style="
-                background: white;
-                color: {Couleur.PUSH_GRADIENT_START};
-                border: none;
-                padding: 8px 16px;
-                border-radius: 6px;
-                font-weight: 600;
-                cursor: pointer;
-            ">Activer</button>
-            <button onclick="dismissPushPrompt()" style="
-                background: transparent;
-                color: white;
-                border: 1px solid rgba(255,255,255,0.3);
-                padding: 8px 12px;
-                border-radius: 6px;
-                cursor: pointer;
-            ">Plus tard</button>
+            <button onclick="requestPushPermission()" class="push-btn-primary">Activer</button>
+            <button onclick="dismissPushPrompt()" class="push-btn-secondary">Plus tard</button>
         </div>
     </div>
 

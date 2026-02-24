@@ -11,6 +11,8 @@ from urllib.parse import quote
 
 import requests
 
+from src.core.decorators import avec_resilience
+
 logger = logging.getLogger(__name__)
 
 
@@ -63,6 +65,7 @@ else:
     )
 
 
+@avec_resilience(retry=2, timeout_s=60, fallback=None)
 def generer_image_recette(
     nom_recette: str, description: str = "", ingredients_list: list = None, type_plat: str = ""
 ) -> str | None:

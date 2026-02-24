@@ -133,40 +133,37 @@ def afficher_liste():
         limit=200,
     )
 
-    # Filtre par nom (case-insensitive, partial match)
+    # Appliquer filtres en mémoire (remplace Specification pattern)
     if nom_filter and nom_filter.strip():
-        nom_lower = nom_filter.strip().lower()
-        recettes = [r for r in recettes if nom_lower in r.nom.lower()]
+        search_term = nom_filter.strip().lower()
+        recettes = [r for r in recettes if search_term in r.nom.lower()]
 
-    # Appliquer les filtres avancés
+    # Filtres avancés: scores
     if min_score_bio > 0:
-        recettes = [r for r in recettes if (r.score_bio or 0) >= min_score_bio]
+        recettes = [r for r in recettes if getattr(r, "score_bio", 0) or 0 >= min_score_bio]
     if min_score_local > 0:
-        recettes = [r for r in recettes if (r.score_local or 0) >= min_score_local]
+        recettes = [r for r in recettes if getattr(r, "score_local", 0) or 0 >= min_score_local]
 
     # Filtres robots
-    if any(robots_selected.values()):
-
-        def has_robot(recette):
-            if robots_selected.get("cookeo") and not recette.compatible_cookeo:
-                return False
-            if robots_selected.get("monsieur_cuisine") and not recette.compatible_monsieur_cuisine:
-                return False
-            if robots_selected.get("airfryer") and not recette.compatible_airfryer:
-                return False
-            if robots_selected.get("multicooker") and not recette.compatible_multicooker:
-                return False
-            return True
-
-        recettes = [r for r in recettes if has_robot(r)]
+    robot_mapping = {
+        "cookeo": "Cookeo",
+        "monsieur_cuisine": "Monsieur Cuisine",
+        "airfryer": "Airfryer",
+        "multicooker": "Multicooker",
+    }
+    for key, robot_name in robot_mapping.items():
+        if robots_selected.get(key):
+            recettes = [
+                r for r in recettes if robot_name in (getattr(r, "robots_compatibles", None) or [])
+            ]
 
     # Filtres tags
     if est_rapide:
-        recettes = [r for r in recettes if r.est_rapide]
+        recettes = [r for r in recettes if getattr(r, "est_rapide", False)]
     if est_equilibre:
-        recettes = [r for r in recettes if r.est_equilibre]
+        recettes = [r for r in recettes if getattr(r, "est_equilibre", False)]
     if congelable:
-        recettes = [r for r in recettes if r.congelable]
+        recettes = [r for r in recettes if getattr(r, "congelable", False)]
 
     if not recettes:
         etat_vide(

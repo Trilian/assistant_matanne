@@ -15,7 +15,7 @@ from decimal import Decimal
 from sqlalchemy.orm import Session
 
 from src.core.ai import ClientIA, obtenir_client_ia
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import Project
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
@@ -402,6 +402,7 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
     # CRUD HELPERS
     # ─────────────────────────────────────────────────────────
 
+    @avec_cache(ttl=300)
     @avec_session_db
     def obtenir_projets(
         self, db: Session | None = None, statut: str | None = None
@@ -428,6 +429,7 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
             query = query.filter(Project.statut == statut)
         return query.order_by(Project.priorite.desc()).all()
 
+    @avec_cache(ttl=300)
     @avec_session_db
     def obtenir_projets_urgents(self, db: Session | None = None) -> list[Project]:
         """Récupère les projets urgents/prioritaires.

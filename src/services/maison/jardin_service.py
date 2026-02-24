@@ -17,7 +17,7 @@ from datetime import date, timedelta
 from sqlalchemy.orm import Session
 
 from src.core.ai import ClientIA, obtenir_client_ia
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import GardenItem
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
@@ -390,6 +390,7 @@ Réponds en JSON:
         """Alias anglais pour obtenir_saison_actuelle (rétrocompatibilité)."""
         return JardinService.obtenir_saison_actuelle()
 
+    @avec_cache(ttl=300)
     @avec_session_db
     def obtenir_plantes(self, db: Session | None = None) -> list[GardenItem]:
         """Récupère toutes les plantes du jardin.
@@ -406,6 +407,7 @@ Réponds en JSON:
         """Alias anglais pour obtenir_plantes (rétrocompatibilité)."""
         return self.obtenir_plantes(db)
 
+    @avec_cache(ttl=300)
     @avec_session_db
     def obtenir_plantes_a_arroser(self, db: Session | None = None) -> list[GardenItem]:
         """Récupère les plantes nécessitant arrosage.

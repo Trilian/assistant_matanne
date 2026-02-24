@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.ui import etat_vide
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import cached_fragment, ui_fragment
 
 from .calculs import calculer_esperance_mathematique
 from .constants import GAINS_PAR_RANG, NUMERO_MAX, NUMERO_MIN
@@ -47,7 +47,7 @@ def afficher_dernier_tirage(tirages: list):
                 st.metric("💰 Jackpot", f"{dernier['jackpot_euros']:,}€")
 
 
-@ui_fragment
+@cached_fragment(ttl=300)  # Cache 5 min (calculs lourds sur historique)
 def afficher_statistiques_frequences(tirages: list):
     """Affiche les statistiques de fréquence"""
     if not tirages:
@@ -130,7 +130,7 @@ def afficher_statistiques_frequences(tirages: list):
     )
 
 
-@ui_fragment
+@cached_fragment(ttl=3600)  # Cache 1h (calculs mathématiques constants)
 def afficher_esperance():
     """Affiche l'espérance mathématique du Loto"""
 

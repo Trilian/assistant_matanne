@@ -110,6 +110,18 @@ def demarrer_application(
         except Exception as e:
             logger.warning(f"⚠ Validation skippée (module non disponible): {e}")
 
+    # ─── Étape 1b: Initialisation Sentry (error tracking) ───
+    logger.info("🔍 Initialisation Sentry...")
+    try:
+        from src.core.monitoring.sentry import initialiser_sentry
+
+        if initialiser_sentry():
+            rapport.composants_enregistres.append("Sentry")
+        else:
+            logger.debug("Sentry désactivé (SENTRY_DSN non configuré)")
+    except Exception as e:
+        logger.debug(f"Sentry non disponible: {e}")
+
     # ─── Étape 2: Enregistrement des event subscribers ───
     logger.info("📡 Enregistrement des event subscribers...")
     try:

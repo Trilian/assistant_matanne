@@ -13,6 +13,7 @@ from datetime import date, timedelta
 import streamlit as st
 
 from src.core.date_utils import obtenir_debut_semaine
+from src.core.monitoring import profiler_rerun
 from src.modules._framework import error_boundary
 from src.services.cuisine.planning.templates import (
     JOURS_SEMAINE,
@@ -22,6 +23,7 @@ from src.ui import etat_vide
 from src.ui.feedback import afficher_erreur, afficher_succes
 
 
+@profiler_rerun("templates_ui")
 def app():
     """Point d'entrée du module templates."""
     st.title("📋 Templates de semaine")

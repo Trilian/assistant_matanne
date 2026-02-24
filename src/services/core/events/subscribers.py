@@ -89,6 +89,118 @@ def _invalider_cache_entretien(event: EvenementDomaine) -> None:
         logger.warning("Échec invalidation cache entretien: %s", e)
 
 
+def _invalider_cache_planning(event: EvenementDomaine) -> None:
+    """Invalide le cache planning quand les plannings changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="planning")
+        logger.debug(
+            "Cache planning invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache planning: %s", e)
+
+
+def _invalider_cache_batch_cooking(event: EvenementDomaine) -> None:
+    """Invalide le cache batch cooking quand les sessions changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="batch_cooking")
+        logger.debug(
+            "Cache batch_cooking invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache batch_cooking: %s", e)
+
+
+def _invalider_cache_activites(event: EvenementDomaine) -> None:
+    """Invalide le cache activités quand les activités changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="activites")
+        logger.debug(
+            "Cache activités invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache activités: %s", e)
+
+
+def _invalider_cache_routines(event: EvenementDomaine) -> None:
+    """Invalide le cache routines quand les routines changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="routines")
+        logger.debug(
+            "Cache routines invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache routines: %s", e)
+
+
+def _invalider_cache_weekend(event: EvenementDomaine) -> None:
+    """Invalide le cache weekend quand les plannings weekend changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="weekend")
+        logger.debug(
+            "Cache weekend invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache weekend: %s", e)
+
+
+def _invalider_cache_achats(event: EvenementDomaine) -> None:
+    """Invalide le cache achats quand les achats changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="achats")
+        logger.debug(
+            "Cache achats invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache achats: %s", e)
+
+
+def _invalider_cache_food_log(event: EvenementDomaine) -> None:
+    """Invalide le cache food_log quand les entrées alimentaires changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="food_log")
+        logger.debug(
+            "Cache food_log invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache food_log: %s", e)
+
+
 # ═══════════════════════════════════════════════════════════
 # MÉTRIQUES
 # ═══════════════════════════════════════════════════════════
@@ -181,6 +293,20 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("courses.*", _invalider_cache_courses, priority=100)
     compteur += 1
     bus.souscrire("entretien.*", _invalider_cache_entretien, priority=100)
+    compteur += 1
+    bus.souscrire("planning.*", _invalider_cache_planning, priority=100)
+    compteur += 1
+    bus.souscrire("batch_cooking.*", _invalider_cache_batch_cooking, priority=100)
+    compteur += 1
+    bus.souscrire("activites.*", _invalider_cache_activites, priority=100)
+    compteur += 1
+    bus.souscrire("routines.*", _invalider_cache_routines, priority=100)
+    compteur += 1
+    bus.souscrire("weekend.*", _invalider_cache_weekend, priority=100)
+    compteur += 1
+    bus.souscrire("achats.*", _invalider_cache_achats, priority=100)
+    compteur += 1
+    bus.souscrire("food_log.*", _invalider_cache_food_log, priority=100)
     compteur += 1
 
     # ── Métriques (priorité moyenne) ──

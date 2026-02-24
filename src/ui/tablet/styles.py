@@ -33,6 +33,9 @@ CSS_TABLETTE = """
     --tablet-spacing: 1.5rem;
     --tablet-border-radius: 12px;
     --tablet-touch-target: 48px;
+    /* Couleurs kitchen timer/step — adaptables dark mode */
+    --kitchen-accent: var(--sem-danger, #FF6B6B);
+    --kitchen-accent-dark: var(--sem-danger, #ee5a5a);
 }
 
 /* Appliquer le mode tablette */
@@ -181,7 +184,7 @@ CSS_TABLETTE = """
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #FF6B6B, #ee5a5a);
+    background: linear-gradient(135deg, var(--kitchen-accent), var(--kitchen-accent-dark));
     color: var(--sem-on-interactive, white);
     font-size: 1.8rem;
     font-weight: 700;
@@ -225,7 +228,7 @@ CSS_TABLETTE = """
     position: fixed;
     top: 20px;
     right: 20px;
-    background: linear-gradient(135deg, #FF6B6B, #ee5a5a);
+    background: linear-gradient(135deg, var(--kitchen-accent), var(--kitchen-accent-dark));
     color: var(--sem-on-interactive, white);
     padding: 16px 24px;
     border-radius: 50px;

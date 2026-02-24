@@ -12,6 +12,7 @@ Fonctionnalités:
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.state.url import tabs_with_url
 
 from .activities import afficher_activities
 from .alimentation import afficher_food_form, afficher_food_log
@@ -39,8 +40,10 @@ def app():
     # Charger les données
     data = get_user_data(username)
 
-    # Tabs
-    tabs = st.tabs(["📊 Dashboard", "🏃 Activités", "🥗 Alimentation", "🎯 Objectifs", "⌚ Garmin"])
+    # Tabs avec deep linking URL
+    TAB_LABELS = ["📊 Dashboard", "🏃 Activités", "🥗 Alimentation", "🎯 Objectifs", "⌚ Garmin"]
+    tab_index = tabs_with_url(TAB_LABELS, param="tab")
+    tabs = st.tabs(TAB_LABELS)
 
     with tabs[0]:
         with error_boundary(titre="Erreur dashboard suivi"):

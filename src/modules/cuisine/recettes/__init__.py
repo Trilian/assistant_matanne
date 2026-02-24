@@ -14,6 +14,7 @@ import streamlit as st
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
+from src.ui.state.url import tabs_with_url
 
 # Re-export public API (lazy-imported dans app())
 from .utils import formater_quantite
@@ -60,10 +61,10 @@ def app():
         st.error("❌ Recette non trouvée")
         st.session_state[_keys("detail_id")] = None
 
-    # Sous-tabs avec persistence d'état
-    tab_liste, tab_ajout, tab_import, tab_ia = st.tabs(
-        ["📋 Liste", "➕ Ajouter Manuel", "📥 Importer", "⏰ Générer IA"]
-    )
+    # Sous-tabs avec deep linking URL et persistence d'état
+    TAB_LABELS = ["📋 Liste", "➕ Ajouter Manuel", "📥 Importer", "⏰ Générer IA", "💬 Assistant"]
+    tab_index = tabs_with_url(TAB_LABELS, param="tab")
+    tab_liste, tab_ajout, tab_import, tab_ia, tab_chat = st.tabs(TAB_LABELS)
 
     with tab_liste:
         with error_boundary(titre="Erreur liste recettes"):
@@ -80,6 +81,13 @@ def app():
     with tab_ia:
         with error_boundary(titre="Erreur génération IA"):
             afficher_generer_ia()
+
+    with tab_chat:
+        with error_boundary(titre="Erreur assistant cuisine"):
+            from src.ui.components import afficher_chat_contextuel
+
+            st.caption("Posez vos questions cuisine à l'assistant IA")
+            afficher_chat_contextuel("recettes")
 
 
 __all__ = [

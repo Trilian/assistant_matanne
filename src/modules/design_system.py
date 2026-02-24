@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import streamlit as st
 
+from src.core.monitoring import profiler_rerun
 from src.ui.registry import ComponentMeta, obtenir_catalogue, rechercher_composants
 from src.ui.tokens import Couleur, Espacement, Ombre, Rayon, Typographie
 
@@ -200,6 +201,7 @@ def _afficher_composant_card(meta: ComponentMeta) -> None:
             st.code(meta.exemple, language="python")
 
 
+@profiler_rerun("design_system")
 def app() -> None:
     """Point d'entrée du module Design System."""
     st.title("🎨 Design System Matanne")

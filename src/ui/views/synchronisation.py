@@ -6,10 +6,9 @@ pour respecter la séparation UI/Services.
 """
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 from src.services.integrations.web.synchronisation import get_realtime_sync_service
-from src.ui.tokens import Couleur
+from src.ui.tokens_semantic import Sem
 from src.ui.utils import echapper_html
 
 
@@ -31,19 +30,19 @@ def afficher_indicateur_presence():
             initials = "".join([w[0].upper() for w in user.user_name.split()[:2]])
             st.markdown(
                 f"""
-                <div style="text-align: center;">
+                <div style="text-align: center;" role="listitem" aria-label="{echapper_html(user.user_name)} connecté">
                     <div style="
                         width: 40px;
                         height: 40px;
                         border-radius: 50%;
-                        background: linear-gradient(135deg, {Couleur.PUSH_GRADIENT_START} 0%, {Couleur.PUSH_GRADIENT_END} 100%);
+                        background: linear-gradient(135deg, {Sem.INFO} 0%, {Sem.INTERACTIVE} 100%);
                         display: inline-flex;
                         align-items: center;
                         justify-content: center;
-                        color: white;
+                        color: {Sem.ON_INTERACTIVE};
                         font-weight: bold;
                         font-size: 14px;
-                    ">{echapper_html(initials)}</div>
+                    " aria-hidden="true">{echapper_html(initials)}</div>
                     <div style="font-size: 11px; margin-top: 4px;">{echapper_html(user.user_name)}</div>
                 </div>
                 """,

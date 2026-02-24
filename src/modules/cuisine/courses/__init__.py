@@ -14,6 +14,7 @@ import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.state.url import tabs_with_url
 
 from .historique import afficher_historique
 
@@ -49,16 +50,18 @@ def app():
     # Initialiser la synchronisation temps réel
     _init_realtime_sync()
 
-    # Tabs principales
+    # Tabs principales avec deep linking URL
+    TAB_LABELS = [
+        "📋 Liste Active",
+        "🍽️ Depuis Planning",
+        "⏰ Suggestions IA",
+        "📋 Historique",
+        "📄 Modèles",
+        "🔧 Outils",
+    ]
+    tab_index = tabs_with_url(TAB_LABELS, param="tab")
     tab_liste, tab_planning, tab_suggestions, tab_historique, tab_modeles, tab_outils = st.tabs(
-        [
-            "📋 Liste Active",
-            "🍽️ Depuis Planning",
-            "⏰ Suggestions IA",
-            "📋 Historique",
-            "📄 Modèles",
-            "🔧 Outils",
-        ]
+        TAB_LABELS
     )
 
     with tab_liste:

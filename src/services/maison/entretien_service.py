@@ -15,7 +15,7 @@ from datetime import date, timedelta
 from sqlalchemy.orm import Session, selectinload
 
 from src.core.ai import ClientIA, obtenir_client_ia
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import Routine, RoutineTask
 from src.services.core.base import BaseAIService
 from src.services.core.events.bus import obtenir_bus
@@ -340,6 +340,7 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
     # CRUD HELPERS
     # ─────────────────────────────────────────────────────────
 
+    @avec_cache(ttl=300)
     @avec_session_db
     def obtenir_routines(self, db: Session | None = None) -> list[Routine]:
         """Récupère toutes les routines actives.
@@ -356,6 +357,7 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
         """Alias anglais pour obtenir_routines (rétrocompatibilité)."""
         return self.obtenir_routines(db)
 
+    @avec_cache(ttl=300)
     @avec_session_db
     def obtenir_taches_du_jour(self, db: Session | None = None) -> list[RoutineTask]:
         """Récupère les tâches à faire aujourd'hui.

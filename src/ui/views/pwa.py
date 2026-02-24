@@ -7,7 +7,7 @@ pour respecter la séparation UI/Services.
 
 import streamlit.components.v1 as components
 
-from src.ui.tokens import Couleur
+from src.ui.tokens_semantic import Sem
 
 
 def injecter_meta_pwa():
@@ -20,7 +20,7 @@ def injecter_meta_pwa():
     <head>
         <!-- PWA Meta Tags -->
         <link rel="manifest" href="/static/manifest.json">
-        <meta name="theme-color" content="{Couleur.PUSH_GRADIENT_START}">
+        <meta name="theme-color" content="{Sem.INTERACTIVE}">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="Matanne">
@@ -76,10 +76,10 @@ def injecter_meta_pwa():
 def afficher_invite_installation_pwa():
     """Affiche un bouton d'installation PWA si disponible."""
     install_script = f"""
-    <div id="pwa-install-container" style="display: none;">
+    <div id="pwa-install-container" style="display: none;" role="region" aria-label="Installation application">
         <button id="pwa-install-btn" onclick="installPWA()" style="
-            background: linear-gradient(135deg, {Couleur.PUSH_GRADIENT_START} 0%, {Couleur.PUSH_GRADIENT_END} 100%);
-            color: white;
+            background: linear-gradient(135deg, {Sem.INFO} 0%, {Sem.INTERACTIVE} 100%);
+            color: {Sem.ON_INTERACTIVE};
             border: none;
             padding: 12px 24px;
             border-radius: 8px;
@@ -89,7 +89,7 @@ def afficher_invite_installation_pwa():
             display: flex;
             align-items: center;
             gap: 8px;
-        ">
+        " aria-label="Installer l'application Matanne">
             📲 Installer l'application
         </button>
     </div>

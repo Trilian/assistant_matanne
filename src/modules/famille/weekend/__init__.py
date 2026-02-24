@@ -11,6 +11,7 @@ Fonctionnalités:
 # Import des fonctions pour exposer l'API publique
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.state.url import tabs_with_url
 
 from .ai_service import WeekendAIService
 from .components import (
@@ -40,8 +41,17 @@ def app():
     saturday, sunday = get_next_weekend()
     st.caption(f"📅 {saturday.strftime('%d/%m')} - {sunday.strftime('%d/%m')}")
 
-    # Tabs
-    tabs = st.tabs(["📅 Planning", "💡 Suggestions IA", "🗺️ Lieux testés", "➕ Ajouter", "⭐ Noter"])
+    # Tabs avec deep linking URL
+    TAB_LABELS = [
+        "📅 Planning",
+        "💡 Suggestions IA",
+        "🗺️ Lieux testés",
+        "➕ Ajouter",
+        "⭐ Noter",
+        "💬 Assistant",
+    ]
+    tab_index = tabs_with_url(TAB_LABELS, param="tab")
+    tabs = st.tabs(TAB_LABELS)
 
     with tabs[0]:
         with error_boundary(titre="Erreur planning weekend"):
@@ -62,6 +72,13 @@ def app():
     with tabs[4]:
         with error_boundary(titre="Erreur notation"):
             afficher_noter_sortie()
+
+    with tabs[5]:
+        with error_boundary(titre="Erreur assistant weekend"):
+            from src.ui.components import afficher_chat_contextuel
+
+            st.caption("Posez vos questions sorties à l'assistant IA")
+            afficher_chat_contextuel("weekend")
 
 
 __all__ = [

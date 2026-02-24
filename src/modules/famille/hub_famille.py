@@ -311,6 +311,13 @@ def afficher_hub():
 
     afficher_weekend_preview()
 
+    # Chat IA contextuel famille
+    st.markdown("---")
+    with st.expander("💬 Assistant Famille", expanded=False):
+        from src.ui.components import afficher_chat_contextuel
+
+        afficher_chat_contextuel("famille")
+
 
 def afficher_weekend_preview():
     """Aperçu rapide du weekend"""

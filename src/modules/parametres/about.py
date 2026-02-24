@@ -7,10 +7,10 @@ import streamlit as st
 
 from src.core.config import obtenir_parametres as get_settings
 from src.core.state import GestionnaireEtat
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import cached_fragment
 
 
-@ui_fragment
+@cached_fragment(ttl=3600)  # Cache 1h (contenu statique)
 def afficher_about():
     """Informations sur l'application"""
 

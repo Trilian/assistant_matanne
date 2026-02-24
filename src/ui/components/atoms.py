@@ -24,7 +24,30 @@ from src.ui.tokens import (
     Variante,
     obtenir_couleurs_variante,
 )
+from src.ui.tokens_semantic import Sem
 from src.ui.utils import echapper_html
+
+
+# ── Helper pour tokens sémantiques variantes ──────────────
+def _obtenir_sem_variante(variante: Variante) -> tuple[str, str, str]:
+    """Retourne (background, text, border) en tokens sémantiques.
+
+    Args:
+        variante: Variante sémantique.
+
+    Returns:
+        Tuple (couleur_fond, couleur_texte, couleur_bordure) avec Sem tokens.
+    """
+    _MAP: dict[Variante, tuple[str, str, str]] = {
+        Variante.SUCCESS: (Sem.SUCCESS_SUBTLE, Sem.ON_SUCCESS, Sem.SUCCESS),
+        Variante.WARNING: (Sem.WARNING_SUBTLE, Sem.ON_WARNING, Sem.WARNING),
+        Variante.DANGER: (Sem.DANGER_SUBTLE, Sem.ON_DANGER, Sem.DANGER),
+        Variante.INFO: (Sem.INFO_SUBTLE, Sem.ON_INFO, Sem.INFO),
+        Variante.NEUTRAL: (Sem.SURFACE_ALT, Sem.ON_SURFACE_SECONDARY, Sem.BORDER),
+        Variante.ACCENT: (Sem.INTERACTIVE, Sem.ON_INTERACTIVE, Sem.INTERACTIVE),
+    }
+    return _MAP.get(variante, _MAP[Variante.NEUTRAL])
+
 
 # ── Styles de badges pré-définis par variante ─────────────
 _BADGE_BASE = (
@@ -36,12 +59,12 @@ _BADGE_BASE = (
 )
 
 _BADGE_STYLES: dict[str, str] = {
-    "success": f"{_BADGE_BASE} background: {Couleur.BG_SUCCESS}; color: {Couleur.BADGE_SUCCESS_TEXT}; border: 1px solid {Couleur.SUCCESS};",
-    "warning": f"{_BADGE_BASE} background: {Couleur.BG_WARNING}; color: {Couleur.BADGE_WARNING_TEXT}; border: 1px solid {Couleur.WARNING};",
-    "danger": f"{_BADGE_BASE} background: {Couleur.BG_DANGER}; color: {Couleur.BADGE_DANGER_TEXT}; border: 1px solid {Couleur.DANGER};",
-    "info": f"{_BADGE_BASE} background: {Couleur.BG_INFO}; color: {Couleur.INFO}; border: 1px solid {Couleur.INFO};",
-    "neutral": f"{_BADGE_BASE} background: {Couleur.BG_HOVER}; color: {Couleur.TEXT_PRIMARY}; border: 1px solid {Couleur.BORDER_LIGHT};",
-    "accent": f"{_BADGE_BASE} background: {Couleur.ACCENT}; color: white; border: 1px solid {Couleur.ACCENT};",
+    "success": f"{_BADGE_BASE} background: {Sem.SUCCESS_SUBTLE}; color: {Sem.ON_SUCCESS}; border: 1px solid {Sem.SUCCESS};",
+    "warning": f"{_BADGE_BASE} background: {Sem.WARNING_SUBTLE}; color: {Sem.ON_WARNING}; border: 1px solid {Sem.WARNING};",
+    "danger": f"{_BADGE_BASE} background: {Sem.DANGER_SUBTLE}; color: {Sem.ON_DANGER}; border: 1px solid {Sem.DANGER};",
+    "info": f"{_BADGE_BASE} background: {Sem.INFO_SUBTLE}; color: {Sem.ON_INFO}; border: 1px solid {Sem.INFO};",
+    "neutral": f"{_BADGE_BASE} background: {Sem.SURFACE_ALT}; color: {Sem.ON_SURFACE}; border: 1px solid {Sem.BORDER_SUBTLE};",
+    "accent": f"{_BADGE_BASE} background: {Sem.INTERACTIVE}; color: {Sem.ON_INTERACTIVE}; border: 1px solid {Sem.INTERACTIVE};",
 }
 
 
@@ -114,7 +137,7 @@ def etat_vide(message: str, icone: str = "📭", sous_texte: str | None = None):
             "flex-direction": "column",
             "align-items": "center",
             "padding": Espacement.XXL,
-            "color": Couleur.TEXT_SECONDARY,
+            "color": Sem.ON_SURFACE_SECONDARY,
             "text-align": "center",
         }
     )
@@ -147,7 +170,7 @@ def carte_metrique(
     label: str,
     valeur: str,
     delta: str | None = None,
-    couleur: str = Couleur.BG_SURFACE,
+    couleur: str = Sem.SURFACE,
 ):
     """
     Carte métrique simple.
@@ -181,11 +204,11 @@ def carte_metrique(
     if delta:
         delta_str = str(delta).strip()
         if delta_str.startswith("-") or delta_str.startswith("↓"):
-            delta_couleur = Couleur.DELTA_NEGATIVE
+            delta_couleur = Sem.DANGER
         elif delta_str in ("0", "+0"):
-            delta_couleur = Couleur.TEXT_SECONDARY
+            delta_couleur = Sem.ON_SURFACE_MUTED
         else:
-            delta_couleur = Couleur.DELTA_POSITIVE
+            delta_couleur = Sem.SUCCESS
         safe_delta = echapper_html(delta)
         delta_html = (
             f'<div style="font-size: {Typographie.BODY_SM}; color: {delta_couleur}; '
@@ -196,7 +219,7 @@ def carte_metrique(
     st.markdown(
         f'<div class="{card_cls}" role="group" aria-label="{safe_label}: {safe_valeur}">'
         f'<div style="font-size: {Typographie.BODY_SM}; font-weight: 500; '
-        f'color: {Couleur.TEXT_SECONDARY};">{safe_label}</div>'
+        f'color: {Sem.ON_SURFACE_SECONDARY};">{safe_label}</div>'
         f'<div style="font-size: {Typographie.H2}; font-weight: bold; '
         f'margin-top: {Espacement.SM};">{safe_valeur}</div>'
         f"{delta_html}"
@@ -217,10 +240,10 @@ def separateur(texte: str | None = None):
         st.markdown(
             f'<div style="text-align: center; margin: {Espacement.LG} 0;">'
             f'<span style="padding: 0 {Espacement.MD}; '
-            f"background: var(--sem-surface, {Couleur.BG_SURFACE}); "
+            f"background: {Sem.SURFACE}; "
             f'position: relative; top: -0.75rem;">{echapper_html(texte)}</span>'
             f'<hr style="margin-top: -{Espacement.LG}; '
-            f'border: 1px solid {Couleur.BORDER_LIGHT};">'
+            f'border: 1px solid {Sem.BORDER_SUBTLE};">'
             f"</div>",
             unsafe_allow_html=True,
         )
@@ -245,7 +268,7 @@ def boite_info_html(
     Returns:
         Chaîne HTML de la boîte info.
     """
-    bg, text_color, border_color = obtenir_couleurs_variante(variante)
+    bg, text_color, border_color = _obtenir_sem_variante(variante)
     safe_titre = echapper_html(f"{icone} {titre}")
     safe_contenu = echapper_html(contenu)
 
@@ -288,7 +311,7 @@ def boite_info(
         boite_info("Astuce", "Utilisez Ctrl+S pour sauvegarder", "💡")
         boite_info("Attention", "Stock faible", "⚠️", variante=Variante.WARNING)
     """
-    bg, text_color, border_color = obtenir_couleurs_variante(variante)
+    bg, text_color, border_color = _obtenir_sem_variante(variante)
 
     container_cls = StyleSheet.create_class(
         {

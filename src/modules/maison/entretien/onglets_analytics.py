@@ -29,7 +29,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import cached_fragment, ui_fragment
 
 
 @ui_fragment
@@ -168,7 +168,7 @@ def onglet_stats(mes_objets: list[dict], historique: list[dict]):
             )
 
 
-@ui_fragment
+@cached_fragment(ttl=300)  # Cache 5 min (graphiques Plotly lourds)
 def onglet_graphiques(mes_objets: list[dict], historique: list[dict]):
     """Onglet graphiques Plotly avec visualisations interactives."""
     st.subheader("📈 Graphiques & Analyses")

@@ -16,6 +16,7 @@ import logging
 import streamlit as st
 
 from src.core.ai import obtenir_client_ia
+from src.core.monitoring import profiler_rerun
 from src.modules._framework import error_boundary
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
@@ -111,6 +112,7 @@ def obtenir_chat_ia_service() -> ChatIAService:
 _SK_MESSAGES = "chat_ia_messages"
 
 
+@profiler_rerun("chat_ia")
 def app():
     """Point d'entrée module Chat IA."""
 

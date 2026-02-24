@@ -1,0 +1,74 @@
+name: Deploy to Streamlit Cloud
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # Pre-check: ensure tests pass before deployment
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest ruff
+
+      - name: Lint with ruff
+        run: ruff check src/ --output-format=github
+
+      - name: Run critical tests
+        run: |
+          pytest tests/ -v --tb=short -m "unit" -x --ignore=tests/integration/
+        env:
+          PYTHONDONTWRITEBYTECODE: 1
+
+  deploy:
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Streamlit configuration
+        run: |
+          echo "✅ Validating .streamlit/config.toml exists..."
+          test -f .streamlit/config.toml && echo "Config found" || echo "Warning: No config.toml"
+
+          echo "✅ Validating src/app.py exists..."
+          test -f src/app.py && echo "Entry point found" || exit 1
+
+      - name: Create deployment marker
+        run: |
+          echo "Deployment triggered at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> .deploy-timestamp
+          echo "Commit: ${{ github.sha }}" >> .deploy-timestamp
+
+      # Streamlit Cloud auto-deploys from GitHub repo
+      # This step just confirms successful pipeline completion
+      - name: Deployment ready
+        run: |
+          echo "🚀 Code validated and ready for Streamlit Cloud auto-deploy"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Author: ${{ github.actor }}"
+
+  notify-failure:
+    needs: [quality-gate, deploy]
+    runs-on: ubuntu-latest
+    if: failure()
+
+    steps:
+      - name: Report failure
+        run: |
+          echo "❌ Deployment pipeline failed"
+          echo "Check the workflow logs for details"

@@ -379,8 +379,9 @@ class TestRenderStatsSemaine:
 class TestRenderActionsRapides:
     """Tests pour la fonction afficher_actions_rapides."""
 
+    @patch("src.modules.planning.calendrier.components._dialog_impression")
     @patch("src.modules.planning.calendrier.components.st")
-    def test_render_actions_basic(self, mock_st: MagicMock) -> None:
+    def test_render_actions_basic(self, mock_st: MagicMock, mock_dialog: MagicMock) -> None:
         """Test du rendu basique des actions rapides."""
         from src.modules.planning.calendrier.components import afficher_actions_rapides
 
@@ -403,17 +404,16 @@ class TestRenderModalImpression:
         afficher_modal_impression(semaine)
         assert True
 
-    @patch("src.modules.planning.calendrier.components.generer_texte_semaine_pour_impression")
+    @patch("src.modules.planning.calendrier.components._dialog_impression")
     @patch("src.modules.planning.calendrier.components.st")
-    def test_render_modal_open(self, mock_st: MagicMock, mock_gen: MagicMock) -> None:
+    def test_render_modal_open(self, mock_st: MagicMock, mock_dialog: MagicMock) -> None:
         """Test du modal ouvert."""
         from src.modules.planning.calendrier.components import afficher_modal_impression
 
         setup_mock_st(mock_st, {"show_print_modal": True})
-        mock_gen.return_value = "Planning texte"
         semaine = create_mock_semaine()
         afficher_modal_impression(semaine)
-        mock_st.subheader.assert_called()
+        mock_dialog.assert_called_once_with(semaine)
 
 
 class TestRenderFormulaireAjoutEvent:

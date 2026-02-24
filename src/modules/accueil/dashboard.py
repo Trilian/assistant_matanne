@@ -13,6 +13,7 @@ from datetime import date
 import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
 from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
 from src.ui.tokens_semantic import Sem
@@ -36,154 +37,154 @@ _keys = KeyNamespace("accueil")
 @profiler_rerun("accueil")
 def app():
     """Point d'entree module accueil"""
-
     from src.core.state import obtenir_etat
     from src.ui import etat_vide
 
-    # Dashboard widgets enrichis
-    try:
-        from src.ui.components import (
-            afficher_sante_systeme,
-            widget_jules_apercu,
+    with error_boundary("accueil_dashboard"):
+        # Dashboard widgets enrichis
+        try:
+            from src.ui.components import (
+                afficher_sante_systeme,
+                widget_jules_apercu,
+            )
+
+            WIDGETS_DISPONIBLES = True
+        except ImportError:
+            WIDGETS_DISPONIBLES = False
+
+        # Header
+        state = obtenir_etat()
+
+        st.markdown(
+            f"<h1 style='text-align: center;'>🤖 Bienvenue {state.nom_utilisateur} !</h1>",
+            unsafe_allow_html=True,
         )
 
-        WIDGETS_DISPONIBLES = True
-    except ImportError:
-        WIDGETS_DISPONIBLES = False
+        st.markdown(
+            f"<p style='text-align: center; color: {Sem.ON_SURFACE_SECONDARY}; font-size: 1.1rem;'>"
+            "Ton assistant familial intelligent"
+            "</p>",
+            unsafe_allow_html=True,
+        )
 
-    # Header
-    state = obtenir_etat()
-
-    st.markdown(
-        f"<h1 style='text-align: center;'>🤖 Bienvenue {state.nom_utilisateur} !</h1>",
-        unsafe_allow_html=True,
-    )
-
-    st.markdown(
-        f"<p style='text-align: center; color: {Sem.ON_SURFACE_SECONDARY}; font-size: 1.1rem;'>"
-        "Ton assistant familial intelligent"
-        "</p>",
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("---")
-
-    # Alertes critiques en haut
-    afficher_critical_alerts()
-
-    st.markdown("---")
-
-    # Stats globales
-    afficher_global_stats()
-
-    st.markdown("---")
-
-    # Raccourcis rapides
-    afficher_quick_actions()
-
-    st.markdown("---")
-
-    # Graphiques enrichis (si widgets disponibles)
-    if WIDGETS_DISPONIBLES:
-        afficher_graphiques_enrichis()
         st.markdown("---")
 
-    # ═══════════════════════════════════════════════════════════
-    # TIMELINE ÉVÉNEMENTS À VENIR
-    # ═══════════════════════════════════════════════════════════
+        # Alertes critiques en haut
+        afficher_critical_alerts()
 
-    st.subheader("📅 Prochains événements")
+        st.markdown("---")
 
-    try:
-        from datetime import timedelta
+        # Stats globales
+        afficher_global_stats()
 
-        from src.modules.planning.timeline_ui import charger_events_periode
+        st.markdown("---")
 
-        # Charger les événements des 7 prochains jours
-        aujourd_hui = date.today()
-        events = charger_events_periode(aujourd_hui, aujourd_hui + timedelta(days=7))
+        # Raccourcis rapides
+        afficher_quick_actions()
 
-        if events:
-            # Afficher les 5 prochains
-            events_tries = sorted(events, key=lambda e: e["date_debut"])[:5]
+        st.markdown("---")
 
-            for event in events_tries:
-                jour = event["date_debut"].strftime("%a %d/%m")
-                heure = event["date_debut"].strftime("%H:%M")
-                couleur = event.get("couleur", "#757575")
-                lieu = f" • 📍 {event['lieu']}" if event.get("lieu") else ""
+        # Graphiques enrichis (si widgets disponibles)
+        if WIDGETS_DISPONIBLES:
+            afficher_graphiques_enrichis()
+            st.markdown("---")
 
-                st.markdown(
-                    f'<div style="padding:8px;margin:4px 0;background:{Sem.SURFACE_ALT};'
-                    f'border-left:4px solid {couleur};border-radius:4px;">'
-                    f"<strong>{jour} {heure}</strong> - {event['titre']}"
-                    f'<span style="color:{Sem.ON_SURFACE_SECONDARY};">{lieu}</span></div>',
-                    unsafe_allow_html=True,
-                )
+        # ═══════════════════════════════════════════════════════════
+        # TIMELINE ÉVÉNEMENTS À VENIR
+        # ═══════════════════════════════════════════════════════════
 
-            # Lien vers le calendrier complet
-            if len(events) > 5:
-                st.caption(f"... et {len(events) - 5} autres événements cette semaine")
-        else:
-            etat_vide("Aucun événement prévu cette semaine", "📅")
+        st.subheader("📅 Prochains événements")
 
-    except ImportError:
-        st.caption("Module timeline non disponible")
-    except Exception as e:
-        st.warning(f"Erreur chargement événements: {e}")
-
-    # Section rappels (si disponible)
-    try:
-        from src.services.cuisine.planning.rappels import verifier_et_envoyer_rappels
-
-        rappels_info = verifier_et_envoyer_rappels()
-
-        if rappels_info["prochains"]:
-            with st.expander(
-                f"🔔 {len(rappels_info['prochains'])} rappel(s) à venir", expanded=False
-            ):
-                for rappel in rappels_info["prochains"]:
-                    st.markdown(
-                        f"- **{rappel['titre']}** - {rappel['date_debut'].strftime('%H:%M')}"
-                    )
-    except ImportError:
-        pass
-    except Exception:
-        pass
-
-    st.markdown("---")
-
-    # Vue par module
-    col1, col2 = st.columns(2)
-
-    with col1:
-        afficher_cuisine_summary()
-        st.markdown("")
-        afficher_planning_summary()
-
-    with col2:
-        afficher_inventaire_summary()
-        st.markdown("")
-        afficher_courses_summary()
-
-    # Footer avec sante système
-    st.markdown("---")
-    if WIDGETS_DISPONIBLES:
-        col_footer1, col_footer2 = st.columns([3, 1])
-        with col_footer1:
-            afficher_sante_systeme()
-        with col_footer2:
-            widget_jules_apercu()
-
-    # Section activité récente
-    st.markdown("---")
-    with st.expander("📝 Activité récente", expanded=False):
         try:
-            from src.ui.views.historique import afficher_timeline_activite
+            from datetime import timedelta
 
-            afficher_timeline_activite(limit=5)
+            from src.modules.planning.timeline_ui import charger_events_periode
+
+            # Charger les événements des 7 prochains jours
+            aujourd_hui = date.today()
+            events = charger_events_periode(aujourd_hui, aujourd_hui + timedelta(days=7))
+
+            if events:
+                # Afficher les 5 prochains
+                events_tries = sorted(events, key=lambda e: e["date_debut"])[:5]
+
+                for event in events_tries:
+                    jour = event["date_debut"].strftime("%a %d/%m")
+                    heure = event["date_debut"].strftime("%H:%M")
+                    couleur = event.get("couleur", "#757575")
+                    lieu = f" • 📍 {event['lieu']}" if event.get("lieu") else ""
+
+                    st.markdown(
+                        f'<div style="padding:8px;margin:4px 0;background:{Sem.SURFACE_ALT};'
+                        f'border-left:4px solid {couleur};border-radius:4px;">'
+                        f"<strong>{jour} {heure}</strong> - {event['titre']}"
+                        f'<span style="color:{Sem.ON_SURFACE_SECONDARY};">{lieu}</span></div>',
+                        unsafe_allow_html=True,
+                    )
+
+                # Lien vers le calendrier complet
+                if len(events) > 5:
+                    st.caption(f"... et {len(events) - 5} autres événements cette semaine")
+            else:
+                etat_vide("Aucun événement prévu cette semaine", "📅")
+
+        except ImportError:
+            st.caption("Module timeline non disponible")
         except Exception as e:
-            st.caption(f"Timeline indisponible: {e}")
+            st.warning(f"Erreur chargement événements: {e}")
+
+        # Section rappels (si disponible)
+        try:
+            from src.services.cuisine.planning.rappels import verifier_et_envoyer_rappels
+
+            rappels_info = verifier_et_envoyer_rappels()
+
+            if rappels_info["prochains"]:
+                with st.expander(
+                    f"🔔 {len(rappels_info['prochains'])} rappel(s) à venir", expanded=False
+                ):
+                    for rappel in rappels_info["prochains"]:
+                        st.markdown(
+                            f"- **{rappel['titre']}** - {rappel['date_debut'].strftime('%H:%M')}"
+                        )
+        except ImportError:
+            pass
+        except Exception:
+            pass
+
+        st.markdown("---")
+
+        # Vue par module
+        col1, col2 = st.columns(2)
+
+        with col1:
+            afficher_cuisine_summary()
+            st.markdown("")
+            afficher_planning_summary()
+
+        with col2:
+            afficher_inventaire_summary()
+            st.markdown("")
+            afficher_courses_summary()
+
+        # Footer avec sante système
+        st.markdown("---")
+        if WIDGETS_DISPONIBLES:
+            col_footer1, col_footer2 = st.columns([3, 1])
+            with col_footer1:
+                afficher_sante_systeme()
+            with col_footer2:
+                widget_jules_apercu()
+
+        # Section activité récente
+        st.markdown("---")
+        with st.expander("📝 Activité récente", expanded=False):
+            try:
+                from src.ui.views.historique import afficher_timeline_activite
+
+                afficher_timeline_activite(limit=5)
+            except Exception as e:
+                st.caption(f"Timeline indisponible: {e}")
 
 
 # ═══════════════════════════════════════════════════════════

@@ -21,7 +21,7 @@ from reportlab.lib.units import cm, inch
 from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_cache, avec_session_db
 from src.core.errors_base import ErreurValidation
 from src.core.models import ArticleInventaire
 from src.services.rapports.planning_pdf import PlanningReportMixin
@@ -62,6 +62,7 @@ class ServiceRapportsPDF(
     # RAPPORT STOCKS
     # ═══════════════════════════════════════════════════════════
 
+    @avec_cache(ttl=300)
     @avec_session_db
     def generer_donnees_rapport_stocks(
         self, periode_jours: int = 7, session: Session = None

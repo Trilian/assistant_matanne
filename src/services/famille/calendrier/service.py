@@ -17,7 +17,7 @@ import httpx
 from sqlalchemy.orm import Session, joinedload
 
 from src.core.db import obtenir_contexte_db
-from src.core.decorators import avec_gestion_erreurs, avec_session_db
+from src.core.decorators import avec_gestion_erreurs, avec_resilience, avec_session_db
 from src.core.models import (
     CalendarEvent,
     CalendrierExterne,
@@ -231,6 +231,7 @@ class CalendarSyncService(GoogleCalendarMixin):
     # IMPORT DEPUIS CALENDRIER EXTERNE
     # ═══════════════════════════════════════════════════════════
 
+    @avec_resilience(retry=2, timeout_s=30, fallback=None)
     @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
     def import_from_ical_url(
         self,

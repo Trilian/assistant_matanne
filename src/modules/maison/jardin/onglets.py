@@ -7,7 +7,7 @@ import streamlit as st
 
 from src.core.session_keys import SK
 from src.ui import etat_vide
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import cached_fragment, lazy, ui_fragment
 
 from .data import charger_catalogue_plantes
 from .logic import (
@@ -406,7 +406,7 @@ def onglet_plan(mes_plantes: list[dict] | None = None):
         st.info("🌱 Ajoutez vos plantes dans l'onglet 'Mes Plantes' pour peupler le plan.")
 
 
-@ui_fragment
+@cached_fragment(ttl=300)  # Cache 5 min (graphiques Plotly lourds)
 def onglet_graphiques(mes_plantes: list[dict], recoltes: list[dict]):
     """Onglet graphiques Plotly avec visualisations interactives."""
     st.subheader("📈 Graphiques & Analyses")
@@ -537,15 +537,9 @@ def onglet_graphiques(mes_plantes: list[dict], recoltes: list[dict]):
             st.success("✨ Aucune activité prévue dans les 6 prochains mois.")
 
 
-@ui_fragment
-def onglet_export(mes_plantes: list[dict], recoltes: list[dict]):
-    """Onglet export CSV des données jardin."""
-    st.subheader("📥 Export des données")
-
-    if not HAS_PANDAS:
-        st.warning("📦 Pandas non installé. `pip install pandas` pour l'export.")
-        return
-
+@lazy(condition=lambda: st.session_state.get("jardin_export_ready", False), show_skeleton=True)
+def _export_data_panel(mes_plantes: list[dict], recoltes: list[dict]):
+    """Panneau export CSV (chargé conditionnellement)."""
     col1, col2 = st.columns(2)
 
     with col1:
@@ -577,53 +571,57 @@ def onglet_export(mes_plantes: list[dict], recoltes: list[dict]):
 
             csv = df_plantes.to_csv(index=False).encode("utf-8")
             st.download_button(
-                label="📥 Télécharger CSV",
+                label="📥 Télécharger Plantations CSV",
                 data=csv,
-                file_name=f"jardin_plantations_{date.today().isoformat()}.csv",
+                file_name="jardin_plantations.csv",
                 mime="text/csv",
-                type="primary",
-            )
-
-            st.metric("Total plantes", len(mes_plantes))
-            st.metric(
-                "Surface totale", f"{sum(p.get('surface_m2', 0) for p in mes_plantes):.1f} m²"
             )
 
     with col2:
-        st.markdown("### 🥕 Historique Récoltes")
+        st.markdown("### 🍅 Mes Récoltes")
 
         if not recoltes:
-            etat_vide("Aucune récolte à exporter", "🥕")
+            etat_vide("Aucune récolte à exporter", "🍅")
         else:
             catalogue = charger_catalogue_plantes()
 
             df_recoltes = pd.DataFrame(
                 [
                     {
-                        "Date": r.get("date", ""),
                         "Plante": catalogue.get("plantes", {})
                         .get(r.get("plante_id"), {})
                         .get("nom", r.get("plante_id")),
                         "Quantité (kg)": r.get("quantite_kg", 0),
+                        "Date": r.get("date", ""),
                         "Notes": r.get("notes", ""),
                     }
                     for r in recoltes
                 ]
             )
-            df_recoltes = df_recoltes.sort_values("Date", ascending=False)
 
             st.dataframe(df_recoltes, use_container_width=True, height=250)
 
             csv = df_recoltes.to_csv(index=False).encode("utf-8")
             st.download_button(
-                label="📥 Télécharger CSV",
+                label="📥 Télécharger Récoltes CSV",
                 data=csv,
-                file_name=f"jardin_recoltes_{date.today().isoformat()}.csv",
+                file_name="jardin_recoltes.csv",
                 mime="text/csv",
-                key="download_recoltes",
             )
 
-            st.metric("Total récoltes", len(recoltes))
-            st.metric(
-                "Production totale", f"{sum(r.get('quantite_kg', 0) for r in recoltes):.1f} kg"
-            )
+
+@ui_fragment
+def onglet_export(mes_plantes: list[dict], recoltes: list[dict]):
+    """Onglet export CSV des données jardin."""
+    st.subheader("📥 Export des données")
+
+    if not HAS_PANDAS:
+        st.warning("📦 Pandas non installé. `pip install pandas` pour l'export.")
+        return
+
+    st.checkbox(
+        "📂 Préparer les données pour l'export",
+        key="jardin_export_ready",
+        help="Charge les tableaux de données pour téléchargement",
+    )
+    _export_data_panel(mes_plantes, recoltes)

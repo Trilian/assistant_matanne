@@ -5,13 +5,13 @@ Visualisations de données pour le tableau de bord principal
 
 import streamlit as st
 
-from src.ui.fragments import auto_refresh, ui_fragment
+from src.ui.fragments import auto_refresh, cached_fragment
 from src.ui.keys import KeyNamespace
 
 _keys = KeyNamespace("accueil")
 
 
-@ui_fragment
+@cached_fragment(ttl=300)  # Cache 5 min pour graphiques lourds
 def afficher_graphiques_enrichis():
     """Affiche les graphiques Plotly enrichis."""
     from src.services.cuisine.planning import obtenir_service_planning

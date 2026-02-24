@@ -4,7 +4,7 @@ Module Suivi Perso - Dashboard et graphiques
 
 from src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUT
 from src.ui.engine import charger_css
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import auto_refresh, ui_fragment
 
 from .utils import date, get_current_user, go, set_current_user, st, timedelta
 
@@ -28,9 +28,10 @@ def afficher_user_switch():
             st.rerun()
 
 
+@auto_refresh(seconds=90)
 @ui_fragment
 def afficher_dashboard(data: dict):
-    """Affiche le dashboard principal"""
+    """Affiche le dashboard principal (auto-refresh 90s)"""
     user = data.get("user")
     if not user:
         st.warning("Utilisateur non trouvé")

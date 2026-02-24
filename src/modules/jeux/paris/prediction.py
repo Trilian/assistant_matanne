@@ -7,11 +7,15 @@ import streamlit as st
 
 from src.services.jeux import predire_over_under, predire_resultat_match
 from src.ui.fragments import ui_fragment
+from src.ui.keys import KeyNamespace
 
 from .analyseur import generer_analyse_complete
 from .crud import enregistrer_pari
 from .forme import calculer_forme_equipe
 from .utils import charger_matchs_recents
+
+# Session keys scopées pour ce module
+_keys = KeyNamespace("paris_prediction")
 
 
 @ui_fragment
@@ -260,10 +264,10 @@ def afficher_prediction_match(match: dict):
 
         with col_btn4:
             if st.button("📊 Analyse complète", key=f"analyse_{match['id']}"):
-                st.session_state[f"show_details_{match['id']}"] = True
+                st.session_state[_keys.key(f"show_details_{match['id']}")] = True
 
         # Détails complets si demandé
-        if st.session_state.get(f"show_details_{match['id']}", False):
+        if st.session_state.get(_keys.key(f"show_details_{match['id']}"), False):
             with st.expander("📊 Analyse détaillée complète", expanded=True):
                 col_d1, col_d2 = st.columns(2)
 

@@ -11,7 +11,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_gestion_erreurs, avec_session_db
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import HouseExpense
 from src.services.core.registry import service_factory
 
@@ -43,6 +43,7 @@ class DepensesCrudService:
 
     _instance: Optional["DepensesCrudService"] = None
 
+    @avec_cache(ttl=600)
     @avec_session_db
     @avec_gestion_erreurs(default_return=[])
     def get_depenses_mois(self, mois: int, annee: int, db: Session | None = None) -> list:
@@ -54,6 +55,7 @@ class DepensesCrudService:
             .all()
         )
 
+    @avec_cache(ttl=600)
     @avec_session_db
     @avec_gestion_erreurs(default_return=[])
     def get_depenses_annee(self, annee: int, db: Session | None = None) -> list:
@@ -65,6 +67,7 @@ class DepensesCrudService:
             .all()
         )
 
+    @avec_cache(ttl=300)
     @avec_session_db
     @avec_gestion_erreurs(default_return=None)
     def get_depense_by_id(self, depense_id: int, db: Session | None = None):

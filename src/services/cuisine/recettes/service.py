@@ -34,7 +34,6 @@ from src.core.models import (
 from src.core.validation import EtapeInput, IngredientInput, RecetteInput
 from src.services.core.base import BaseAIService, BaseService, RecipeAIMixin
 from src.services.core.events.bus import obtenir_bus
-from src.services.core.middleware import service_method
 
 from .recettes_ia_generation import RecettesIAGenerationMixin
 from .types import (
@@ -120,14 +119,12 @@ class ServiceRecettes(
             logger.error(f"Erreur récupération recette {recette_id}: {e}")
             return None
 
-    @service_method(cache=True, cache_ttl=1800, session=True, fallback=[])
-    def get_by_type(self, type_repas: str, db: Session) -> list[Recette]:
+    @avec_cache(ttl=1800)
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
+    def get_by_type(self, type_repas: str, db: Session = None) -> list[Recette]:
         """Récupère les recettes d'un type donné."""
-        try:
-            return db.query(Recette).filter(Recette.type_repas == type_repas).all()
-        except Exception as e:
-            logger.error(f"Erreur récupération recettes par type {type_repas}: {e}")
-            return []
+        return db.query(Recette).filter(Recette.type_repas == type_repas).all()
 
     @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
     @avec_session_db

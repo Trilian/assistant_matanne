@@ -20,6 +20,7 @@ from src.modules._framework import (
 )
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui.keys import KeyNamespace
+from src.ui.state.url import tabs_with_url
 
 _keys = KeyNamespace("inventaire")
 from src.ui import etat_vide
@@ -303,7 +304,19 @@ def app():
     # Header
     afficher_header()
 
-    # Tabs principales avec error_boundary par onglet
+    # Tabs principales avec error_boundary par onglet et deep linking URL
+    TAB_LABELS = [
+        "📊 Stock",
+        "⚠️ Alertes",
+        "🏷️ Catégories",
+        "🛒 Suggestions IA",
+        "📋 Historique",
+        "📷 Photos",
+        "🔔 Notifications",
+        "🔮 Prévisions",
+        "🔧 Outils",
+    ]
+    tab_index = tabs_with_url(TAB_LABELS, param="tab")
     (
         tab_stock,
         tab_alertes,
@@ -314,19 +327,7 @@ def app():
         tab_notifications,
         tab_predictions,
         tab_tools,
-    ) = st.tabs(
-        [
-            "📊 Stock",
-            "⚠️ Alertes",
-            "🏷️ Catégories",
-            "🛒 Suggestions IA",
-            "📋 Historique",
-            "📷 Photos",
-            "🔔 Notifications",
-            "🔮 Prévisions",
-            "🔧 Outils",
-        ]
-    )
+    ) = st.tabs(TAB_LABELS)
 
     with tab_stock:
         with error_boundary(titre="Erreur dans l'onglet Stock"):

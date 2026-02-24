@@ -23,6 +23,7 @@ from src.modules.famille.utils import (
     get_budget_par_period,
 )
 from src.ui import etat_vide
+from src.ui.state.url import tabs_with_url
 
 if TYPE_CHECKING:
     from src.services.famille.activites import ServiceActivites
@@ -54,7 +55,10 @@ def app() -> None:
 
     st.title("🎨 Activites Familiales")
 
-    tabs = st.tabs(["📱 Planning Semaine", "👶 Idees Activites", "💡 Budget"])
+    # Tabs avec deep linking URL
+    TAB_LABELS = ["📱 Planning Semaine", "👶 Idees Activites", "💡 Budget"]
+    tab_index = tabs_with_url(TAB_LABELS, param="tab")
+    tabs = st.tabs(TAB_LABELS)
 
     # ═══════════════════════════════════════════════════════════
     # TAB 1: PLANNING SEMAINE

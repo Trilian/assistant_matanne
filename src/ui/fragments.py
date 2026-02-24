@@ -303,11 +303,14 @@ def cached_fragment(ttl: int = 300) -> Callable[[F], F]:
 
 
 def _render_skeleton() -> None:
-    """Rend un skeleton loader simple."""
+    """Rend un skeleton loader simple avec support dark mode."""
     st.markdown(
         """
         <div style="
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background: linear-gradient(90deg,
+                var(--sem-surface-alt, #f0f0f0) 25%,
+                var(--sem-border-subtle, #e0e0e0) 50%,
+                var(--sem-surface-alt, #f0f0f0) 75%);
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
             height: 100px;

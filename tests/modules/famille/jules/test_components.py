@@ -322,9 +322,9 @@ class TestRenderActivites:
         mock_age.return_value = {"mois": 19, "semaines": 82}
         mock_activites.return_value = []
 
-        # Mock AI service avec erreur
+        # Mock AI service avec erreur streaming
         mock_service_instance = MagicMock()
-        mock_service_instance.suggerer_activites = AsyncMock(side_effect=Exception("Erreur API"))
+        mock_service_instance.stream_activites = MagicMock(side_effect=Exception("Erreur API"))
         mock_ai_service.return_value = mock_service_instance
 
         from src.modules.famille.jules.components import afficher_activites
@@ -346,9 +346,10 @@ class TestRenderActivites:
         mock_age.return_value = {"mois": 19, "semaines": 82}
         mock_activites.return_value = []
 
-        # Mock AI service
+        # Mock AI service avec streaming
         mock_service_instance = MagicMock()
-        mock_service_instance.suggerer_activites = AsyncMock(return_value="Test")
+        mock_stream = MagicMock()
+        mock_service_instance.stream_activites = MagicMock(return_value=mock_stream)
         mock_ai_service.return_value = mock_service_instance
 
         # Simuler click sur Fermer (2e bouton apres IA)
@@ -402,18 +403,17 @@ class TestRenderShopping:
         # Simuler click sur le bouton suggerer jouets
         mock_st.button.return_value = True
 
-        # Mock AI service
+        # Mock AI service avec streaming
         mock_service_instance = MagicMock()
-        mock_service_instance.suggerer_jouets = AsyncMock(
-            return_value="Jouets suggeres: Lego, Puzzle"
-        )
+        mock_stream = MagicMock()
+        mock_service_instance.stream_jouets = MagicMock(return_value=mock_stream)
         mock_ai_service.return_value = mock_service_instance
 
         from src.modules.famille.jules.components import afficher_shopping
 
         afficher_shopping()
 
-        mock_st.markdown.assert_any_call("Jouets suggeres: Lego, Puzzle")
+        mock_st.write_stream.assert_called_once_with(mock_stream)
 
     @patch("src.modules.famille.jules.components.JulesAIService")
     @patch("src.modules.famille.jules.components.afficher_form_ajout_achat")
@@ -431,9 +431,9 @@ class TestRenderShopping:
 
         mock_st.button.return_value = True
 
-        # Mock AI avec erreur
+        # Mock AI avec erreur streaming
         mock_service_instance = MagicMock()
-        mock_service_instance.suggerer_jouets = AsyncMock(side_effect=Exception("Erreur API"))
+        mock_service_instance.stream_jouets = MagicMock(side_effect=Exception("Erreur API"))
         mock_ai_service.return_value = mock_service_instance
 
         from src.modules.famille.jules.components import afficher_shopping
@@ -728,9 +728,10 @@ class TestRenderConseils:
         mock_age.return_value = {"mois": 19, "semaines": 82}
         mock_st.button.return_value = False
 
-        # Mock AI service
+        # Mock AI service avec streaming
         mock_service_instance = MagicMock()
-        mock_service_instance.conseil_developpement = AsyncMock(return_value="Conseil IA genere")
+        mock_stream = MagicMock()
+        mock_service_instance.stream_conseil = MagicMock(return_value=mock_stream)
         mock_ai_service.return_value = mock_service_instance
 
         from src.modules.famille.jules.components import afficher_conseils
@@ -739,7 +740,7 @@ class TestRenderConseils:
 
         mock_st.markdown.assert_any_call("---")
         mock_st.markdown.assert_any_call("### 🏃 Motricite")
-        mock_st.markdown.assert_any_call("Conseil IA genere")
+        mock_st.write_stream.assert_called_once_with(mock_stream)
 
     @patch("src.modules.famille.jules.components.JulesAIService")
     @patch(
@@ -754,9 +755,9 @@ class TestRenderConseils:
         mock_age.return_value = {"mois": 19, "semaines": 82}
         mock_st.button.return_value = False
 
-        # Mock AI avec erreur
+        # Mock AI avec erreur streaming
         mock_service_instance = MagicMock()
-        mock_service_instance.conseil_developpement = AsyncMock(side_effect=Exception("Erreur API"))
+        mock_service_instance.stream_conseil = MagicMock(side_effect=Exception("Erreur API"))
         mock_ai_service.return_value = mock_service_instance
 
         from src.modules.famille.jules.components import afficher_conseils

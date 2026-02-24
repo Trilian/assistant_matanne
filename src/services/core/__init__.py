@@ -1,4 +1,4 @@
-"""Package core - Services fondamentaux (auth, backup, notifications, middleware, events, registry).
+"""Package core - Services fondamentaux (auth, backup, notifications, events, registry).
 
 Imports paresseux pour éviter les imports circulaires.
 Importez directement depuis les sous-packages:
@@ -6,7 +6,6 @@ Importez directement depuis les sous-packages:
     from src.services.core.base import BaseService, BaseAIService
     from src.services.core.base import CRUDProtocol, AIServiceProtocol  # Protocols PEP 544
     from src.services.core.base import Result, Success, Failure, success, failure  # Result[T]
-    from src.services.core.middleware import ServicePipeline, service_method  # Middleware
     from src.services.core.events import obtenir_bus, EvenementDomaine  # Event Bus
     from src.services.core.registry import registre, obtenir_registre  # Service Registry
     from src.services.core.backup import obtenir_service_backup
@@ -18,7 +17,6 @@ __all__ = [
     "base",
     "backup",
     "events",
-    "middleware",
     "notifications",
     "registry",
     "utilisateur",
@@ -56,16 +54,6 @@ def __getattr__(name: str):
         from src.services.core.base import result as result_mod
 
         return getattr(result_mod, name)
-
-    # Middleware
-    if name == "ServicePipeline":
-        from src.services.core.middleware import ServicePipeline
-
-        return ServicePipeline
-    if name == "service_method":
-        from src.services.core.middleware import service_method
-
-        return service_method
 
     # Event Bus
     if name == "obtenir_bus":

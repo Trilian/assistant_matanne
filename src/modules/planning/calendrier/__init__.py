@@ -25,6 +25,7 @@ from src.modules._framework import error_boundary
 
 # Import Google Calendar UI
 from src.ui.integrations import afficher_config_google_calendar
+from src.ui.state.url import tabs_with_url
 
 from .analytics import (
     afficher_actions_prioritaires,
@@ -61,136 +62,145 @@ def app():
     st.title("📅 Calendrier Familial")
     st.caption("Vue unifiée de toute votre semaine: repas, batch, courses, activités, ménage, RDV")
 
-    # Navigation
-    afficher_navigation_semaine()
-
-    st.divider()
-
-    # Init state
-    if "cal_semaine_debut" not in st.session_state:
-        st.session_state.cal_semaine_debut = get_debut_semaine(date.today())
-
-    # Charger les données
-    with st.spinner("Chargement..."):
-        donnees = charger_donnees_semaine(st.session_state.cal_semaine_debut)
-
-        semaine = construire_semaine_calendrier(
-            date_debut=st.session_state.cal_semaine_debut,
-            repas=donnees["repas"],
-            sessions_batch=donnees["sessions_batch"],
-            activites=donnees["activites"],
-            events=donnees["events"],
-            courses_planifiees=donnees["courses_planifiees"],
-            taches_menage=donnees["taches_menage"],  # Intégration ménage
-        )
-
-    # Onglets principaux
-    tab_calendrier, tab_analyse, tab_ia, tab_google = st.tabs(
-        ["📅 Calendrier", "📊 Analyse", "🤖 IA", "🔗 Google"]
-    )
-
-    # ═══════════════════════════════════════════════════════════
-    # ONGLET CALENDRIER
-    # ═══════════════════════════════════════════════════════════
-    with tab_calendrier:
-        # Stats en haut
-        afficher_stats_semaine(semaine)
+    with error_boundary("calendrier_principal"):
+        # Navigation
+        afficher_navigation_semaine()
 
         st.divider()
 
-        # Actions rapides
-        afficher_actions_rapides(semaine)
+        # Init state
+        if "cal_semaine_debut" not in st.session_state:
+            st.session_state.cal_semaine_debut = get_debut_semaine(date.today())
 
-        st.divider()
+        # Charger les données
+        with st.spinner("Chargement..."):
+            donnees = charger_donnees_semaine(st.session_state.cal_semaine_debut)
 
-        # Mode d'affichage
-        mode = st.radio(
-            "Vue",
-            ["📋 Liste détaillée", "📊 Grille"],
-            horizontal=True,
-            label_visibility="collapsed",
-        )
+            semaine = construire_semaine_calendrier(
+                date_debut=st.session_state.cal_semaine_debut,
+                repas=donnees["repas"],
+                sessions_batch=donnees["sessions_batch"],
+                activites=donnees["activites"],
+                events=donnees["events"],
+                courses_planifiees=donnees["courses_planifiees"],
+                taches_menage=donnees["taches_menage"],  # Intégration ménage
+            )
 
-        # Affichage principal
-        if mode == "📋 Liste détaillée":
-            afficher_vue_semaine_liste(semaine)
-        else:
-            afficher_vue_semaine_grille(semaine)
+        # Onglets principaux avec deep linking URL
+        TAB_LABELS = ["📅 Calendrier", "📊 Analyse", "🤖 IA", "🔗 Google"]
+        tab_index = tabs_with_url(TAB_LABELS, param="tab")
+        tab_calendrier, tab_analyse, tab_ia, tab_google = st.tabs(TAB_LABELS)
 
-        # Modals
-        afficher_modal_impression(semaine)
-        afficher_formulaire_ajout_event()
+        # ═══════════════════════════════════════════════════════════
+        # ONGLET CALENDRIER
+        # ═══════════════════════════════════════════════════════════
+        with tab_calendrier:
+            # Stats en haut
+            afficher_stats_semaine(semaine)
 
-        # Légende
-        afficher_legende()
+            st.divider()
 
-    # ═══════════════════════════════════════════════════════════
-    # ONGLET ANALYSE
-    # ═══════════════════════════════════════════════════════════
-    with tab_analyse:
-        st.subheader("📊 Analyse de la semaine")
+            # Actions rapides
+            afficher_actions_rapides(semaine)
 
-        # Calculer les stats pour l'analyse
-        stats = {
-            "total_repas": semaine.stats.get("repas", 0),
-            "total_activites": semaine.stats.get("activites", 0),
-            "total_events": semaine.stats.get("events", 0),
-            "total_projets": semaine.stats.get("projets", 0),
-            "activites_jules": semaine.stats.get("activites_jules", 0),
-            "budget_total": semaine.stats.get("budget", 0),
-            "charge_moyenne": semaine.stats.get("charge_moyenne", 50),
-        }
-        charge_globale = semaine.stats.get("charge_globale", "normal")
+            st.divider()
 
-        # Métriques détaillées
-        afficher_metriques_detaillees(stats, charge_globale)
+            # Mode d'affichage
+            mode = st.radio(
+                "Vue",
+                ["📋 Liste détaillée", "📊 Grille"],
+                horizontal=True,
+                label_visibility="collapsed",
+            )
 
-        st.divider()
+            # Affichage principal
+            if mode == "📋 Liste détaillée":
+                afficher_vue_semaine_liste(semaine)
+            else:
+                afficher_vue_semaine_grille(semaine)
 
-        # Graphiques côte à côte
-        col1, col2 = st.columns(2)
+            # Modals
+            afficher_modal_impression(semaine)
+            afficher_formulaire_ajout_event()
 
-        with col1:
-            afficher_graphique_charge_semaine(semaine.jours)
+            # Légende
+            afficher_legende()
 
-        with col2:
-            afficher_graphique_repartition(stats)
+        # ═══════════════════════════════════════════════════════════
+        # ONGLET ANALYSE
+        # ═══════════════════════════════════════════════════════════
+        with tab_analyse:
+            st.subheader("📊 Analyse de la semaine")
 
-        st.divider()
+            # Calculer les stats pour l'analyse
+            stats = {
+                "total_repas": semaine.stats.get("repas", 0),
+                "total_activites": semaine.stats.get("activites", 0),
+                "total_events": semaine.stats.get("events", 0),
+                "total_projets": semaine.stats.get("projets", 0),
+                "activites_jules": semaine.stats.get("activites_jules", 0),
+                "budget_total": semaine.stats.get("budget", 0),
+                "charge_moyenne": semaine.stats.get("charge_moyenne", 50),
+            }
+            charge_globale = semaine.stats.get("charge_globale", "normal")
 
-        # Observations et suggestions
-        col_obs, col_sug = st.columns(2)
+            # Métriques détaillées
+            afficher_metriques_detaillees(stats, charge_globale)
 
-        with col_obs:
-            st.markdown("#### 🔍 Observations")
-            afficher_observations(semaine.jours)
+            st.divider()
 
-        with col_sug:
-            st.markdown("#### 💡 Suggestions")
-            afficher_suggestions(stats)
+            # Graphiques côte à côte
+            col1, col2 = st.columns(2)
 
-    # ═══════════════════════════════════════════════════════════
-    # ONGLET IA
-    # ═══════════════════════════════════════════════════════════
-    with tab_ia:
-        st.subheader("🤖 Optimisation Intelligente")
+            with col1:
+                afficher_graphique_charge_semaine(semaine.jours)
 
-        # Formulaire d'optimisation IA
-        afficher_formulaire_optimisation_ia(st.session_state.cal_semaine_debut)
+            with col2:
+                afficher_graphique_repartition(stats)
 
-        st.divider()
+            st.divider()
 
-        # Rééquilibrage
-        st.markdown("#### 🔄 Rééquilibrage des jours chargés")
-        afficher_reequilibrage(semaine.jours)
+            # Observations et suggestions
+            col_obs, col_sug = st.columns(2)
 
-    # ═══════════════════════════════════════════════════════════
-    # ONGLET GOOGLE CALENDAR
-    # ═══════════════════════════════════════════════════════════
-    with tab_google:
-        st.subheader("🔗 Synchronisation Google Calendar")
-        st.caption("Connectez votre Google Calendar pour synchroniser vos événements")
-        afficher_config_google_calendar()
+            with col_obs:
+                st.markdown("#### 🔍 Observations")
+                afficher_observations(semaine.jours)
+
+            with col_sug:
+                st.markdown("#### 💡 Suggestions")
+                afficher_suggestions(stats)
+
+        # ═══════════════════════════════════════════════════════════
+        # ONGLET IA
+        # ═══════════════════════════════════════════════════════════
+        with tab_ia:
+            st.subheader("🤖 Optimisation Intelligente")
+
+            # Formulaire d'optimisation IA
+            afficher_formulaire_optimisation_ia(st.session_state.cal_semaine_debut)
+
+            st.divider()
+
+            # Rééquilibrage
+            st.markdown("#### 🔄 Rééquilibrage des jours chargés")
+            afficher_reequilibrage(semaine.jours)
+
+            st.divider()
+
+            # Chat IA contextuel planning
+            st.markdown("#### 💬 Assistant Planning")
+            from src.ui.components import afficher_chat_contextuel
+
+            afficher_chat_contextuel("planning")
+
+        # ═══════════════════════════════════════════════════════════
+        # ONGLET GOOGLE CALENDAR
+        # ═══════════════════════════════════════════════════════════
+        with tab_google:
+            st.subheader("🔗 Synchronisation Google Calendar")
+            st.caption("Connectez votre Google Calendar pour synchroniser vos événements")
+            afficher_config_google_calendar()
 
 
 __all__ = [

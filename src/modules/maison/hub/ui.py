@@ -7,6 +7,7 @@ from datetime import date
 import streamlit as st
 
 from src.core.state import GestionnaireEtat
+from src.ui.fragments import auto_refresh
 
 
 def afficher_header():
@@ -98,8 +99,9 @@ def afficher_taches(taches: list[dict], charge: dict):
     st.markdown("</div>", unsafe_allow_html=True)
 
 
+@auto_refresh(seconds=60)
 def afficher_alertes(alertes: list[dict]):
-    """Affiche les alertes actives."""
+    """Affiche les alertes actives (auto-refresh 60s)."""
     if not alertes:
         return
 
@@ -192,8 +194,9 @@ def afficher_modules(stats: dict):
         )
 
 
+@auto_refresh(seconds=120)
 def afficher_stats_mois(stats: dict):
-    """Affiche les mini stats du mois."""
+    """Affiche les mini stats du mois (auto-refresh 120s)."""
     heures = stats.get("temps_mois_heures", 0)
 
     st.markdown(

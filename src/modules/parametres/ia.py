@@ -9,7 +9,15 @@ from src.core.ai.cache import CacheIA as SemanticCache
 from src.core.config import obtenir_parametres as get_settings
 from src.core.state import obtenir_etat
 from src.ui.feedback import afficher_succes
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import lazy, ui_fragment
+
+
+@lazy(condition=lambda: st.session_state.get("show_ia_details", False), show_skeleton=True)
+def _afficher_cache_details():
+    """Détails du cache IA - chargé conditionnellement."""
+    cache_stats = SemanticCache.obtenir_statistiques()
+    st.markdown("##### 📈 Statistiques Détaillées")
+    st.json(cache_stats)
 
 
 @ui_fragment
@@ -105,6 +113,11 @@ def afficher_ia_config():
             afficher_succes("Cache IA vidé !")
 
     with col11:
-        if st.button("📊 Détails Cache", key="btn_cache_details", use_container_width=True):
-            with st.expander("📈 Statistiques Détaillées", expanded=True):
-                st.json(cache_stats)
+        st.checkbox(
+            "📊 Afficher détails",
+            key="show_ia_details",
+            help="Active le chargement des statistiques détaillées du cache IA",
+        )
+
+    # Détails chargés conditionnellement via @lazy
+    _afficher_cache_details()

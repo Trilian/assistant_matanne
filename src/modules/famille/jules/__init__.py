@@ -11,6 +11,7 @@ Fonctionnalités:
 # Import des fonctions pour exposer l'API publique
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.state.url import tabs_with_url
 
 from .ai_service import JulesAIService
 from .components import (
@@ -38,8 +39,10 @@ def app():
     age = get_age_jules()
     st.caption(f"🎂 {age['mois']} mois • Né le {age['date_naissance'].strftime('%d/%m/%Y')}")
 
-    # Tabs principaux
-    tabs = st.tabs(["📊 Dashboard", "🎨 Activités", "🛒 Shopping", "💡 Conseils"])
+    # Tabs avec deep linking URL
+    TAB_LABELS = ["📊 Dashboard", "🎨 Activités", "🛒 Shopping", "💡 Conseils", "💬 Assistant"]
+    tab_index = tabs_with_url(TAB_LABELS, param="tab")
+    tabs = st.tabs(TAB_LABELS)
 
     with tabs[0]:
         with error_boundary(titre="Erreur dashboard Jules"):
@@ -56,6 +59,13 @@ def app():
     with tabs[3]:
         with error_boundary(titre="Erreur conseils Jules"):
             afficher_conseils()
+
+    with tabs[4]:
+        with error_boundary(titre="Erreur assistant Jules"):
+            from src.ui.components import afficher_chat_contextuel
+
+            st.caption("Posez vos questions sur Jules à l'assistant IA")
+            afficher_chat_contextuel("jules", context_extra={"age_mois": age["mois"]})
 
 
 __all__ = [

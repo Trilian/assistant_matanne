@@ -17,7 +17,7 @@ from reportlab.lib.units import cm, inch
 from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import ArticleInventaire
 from src.services.rapports.types import AnalyseGaspillage
 
@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 class GaspillageReportMixin:
     """Mixin fournissant les méthodes d'analyse gaspillage PDF."""
 
+    @avec_cache(ttl=300)
     @avec_session_db
     def generer_analyse_gaspillage(
         self, periode_jours: int = 30, session: Session = None
