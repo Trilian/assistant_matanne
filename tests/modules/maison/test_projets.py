@@ -420,6 +420,7 @@ class TestAppExtended:
         self, mock_st, mock_stats, mock_charger, mock_urgents, mock_go
     ) -> None:
         import pandas as pd
+
         from src.modules.maison.projets import app
 
         setup_mock_st(mock_st)
@@ -442,6 +443,7 @@ class TestAppExtended:
         self, mock_st, mock_stats, mock_charger, mock_urgents, mock_go
     ) -> None:
         import pandas as pd
+
         from src.modules.maison.projets import app
 
         setup_mock_st(mock_st)
@@ -466,6 +468,7 @@ class TestAppExtended:
         self, mock_st, mock_stats, mock_charger, mock_urgents, mock_go
     ) -> None:
         import pandas as pd
+
         from src.modules.maison.projets import app
 
         setup_mock_st(mock_st)
@@ -494,6 +497,7 @@ class TestAppExtended:
         self, mock_st, mock_stats, mock_charger, mock_urgents, mock_go, mock_db
     ) -> None:
         import pandas as pd
+
         from src.modules.maison.projets import app
 
         setup_mock_st(mock_st)
@@ -580,6 +584,7 @@ class TestAppButtonInteractions:
         self, mock_st, mock_stats, mock_charger, mock_urgents, mock_go, mock_db_ctx, mock_done
     ) -> None:
         import pandas as pd
+
         from src.modules.maison.projets import app
 
         setup_mock_st(mock_st)
@@ -629,6 +634,7 @@ class TestAppButtonInteractions:
         self, mock_st, mock_stats, mock_charger, mock_urgents, mock_go, mock_ajouter, mock_creer
     ) -> None:
         import pandas as pd
+
         from src.modules.maison.projets import app
 
         setup_mock_st(mock_st)
@@ -663,6 +669,7 @@ class TestAppButtonInteractions:
         self, mock_st, mock_stats, mock_charger, mock_urgents, mock_go, mock_db_ctx
     ) -> None:
         import pandas as pd
+
         from src.modules.maison.projets import app
 
         setup_mock_st(mock_st)
@@ -706,6 +713,7 @@ class TestAppButtonInteractions:
         self, mock_st, mock_stats, mock_charger, mock_urgents, mock_go, mock_db_ctx
     ) -> None:
         import pandas as pd
+
         from src.modules.maison.projets import app
 
         setup_mock_st(mock_st)
@@ -749,6 +757,7 @@ class TestAppButtonInteractions:
         self, mock_st, mock_stats, mock_charger, mock_urgents, mock_go, mock_db_ctx, mock_task_done
     ) -> None:
         import pandas as pd
+
         from src.modules.maison.projets import app
 
         setup_mock_st(mock_st)
@@ -808,6 +817,7 @@ class TestAppButtonInteractions:
         self, mock_st, mock_stats, mock_charger, mock_urgents, mock_go, mock_creer
     ) -> None:
         import pandas as pd
+
         from src.modules.maison.projets import app
 
         setup_mock_st(mock_st)
@@ -960,6 +970,7 @@ class TestCreerGraphiqueProgression:
 
     def test_creates_plotly_figure(self) -> None:
         import pandas as pd
+
         from src.modules.maison.projets import creer_graphique_progression
 
         df = pd.DataFrame({"projet": ["Projet A", "Projet B"], "progression": [50, 75]})
@@ -971,6 +982,7 @@ class TestCreerGraphiqueProgression:
 
     def test_empty_dataframe_works(self) -> None:
         import pandas as pd
+
         from src.modules.maison.projets import creer_graphique_progression
 
         df = pd.DataFrame({"projet": [], "progression": []})
@@ -981,6 +993,7 @@ class TestCreerGraphiqueProgression:
 
     def test_figure_has_correct_title(self) -> None:
         import pandas as pd
+
         from src.modules.maison.projets import creer_graphique_progression
 
         df = pd.DataFrame({"projet": ["Test"], "progression": [100]})
