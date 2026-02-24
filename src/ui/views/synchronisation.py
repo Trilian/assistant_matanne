@@ -82,20 +82,8 @@ def afficher_statut_synchronisation():
         st.info("📴 Mode hors ligne")
 
 
-def afficher_invite_installation_pwa():
-    """Affiche un bouton d'installation PWA si disponible.
-
-    .. deprecated::
-        Importez depuis ``src.ui.views.pwa`` directement.
-    """
-    from src.ui.views.pwa import afficher_invite_installation_pwa as _impl
-
-    _impl()
-
-
 __all__ = [
     "afficher_indicateur_presence",
     "afficher_indicateur_frappe",
     "afficher_statut_synchronisation",
-    "afficher_invite_installation_pwa",
 ]

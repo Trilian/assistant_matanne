@@ -158,7 +158,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "afficher_indicateur_presence": (".views", "afficher_indicateur_presence"),
     "afficher_indicateur_frappe": (".views", "afficher_indicateur_frappe"),
     "afficher_statut_synchronisation": (".views", "afficher_statut_synchronisation"),
-    "afficher_invite_installation_pwa": (".views", "afficher_invite_installation_pwa"),
     "injecter_meta_pwa": (".views", "injecter_meta_pwa"),
     "afficher_badge_notifications_jeux": (".views", "afficher_badge_notifications_jeux"),
     "afficher_notification_jeux": (".views", "afficher_notification_jeux"),

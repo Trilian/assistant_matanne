@@ -1,6 +1,11 @@
 """
 Spans — Traces d'exécution pour le suivi des opérations.
 
+.. deprecated:: Phase 9
+    Ce module n'est actuellement utilisé par aucun service en production.
+    Considérez l'utiliser ou le supprimer dans une phase future.
+    Les fonctionnalités sont testées mais non intégrées.
+
 Pattern OpenTelemetry-inspired pour tracer les opérations
 à travers les services.
 
