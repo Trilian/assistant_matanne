@@ -146,10 +146,10 @@
   <h1>📋 Rapport d'Audit Complet</h1>
   <div class="subtitle">Assistant Matanne — Analyse Exhaustive v5</div>
   <div class="meta">
-    Généré le <strong id="date-gen">2026-02-25</strong> &bull;
+    Généré le <strong id="date-gen">2026-02-26</strong> &bull;
     Comparaison vs <strong>Roadmap v5</strong> &bull;
-    Codebase: <strong>~99K LOC</strong> &bull; <strong>579 fichiers</strong> &bull; <strong>8 440 tests</strong>
-    <br><span style="color:var(--green); font-size:0.85rem;">Mis à jour après Sprint 8 — 24/02/2026 | Matrice d'adoption 100% verte</span>
+    Codebase: <strong>~126K LOC</strong> &bull; <strong>595 fichiers</strong> &bull; <strong>~8 100 tests</strong>
+    <br><span style="color:var(--green); font-size:0.85rem;">Mis à jour après Sprint 8 — 26/02/2026 | Matrice d'adoption 100% verte</span>
   </div>
 </div>
 
@@ -580,7 +580,7 @@
   </table>
 
   <!-- ===== HÉRITAGE BaseService[T] DÉTAILLÉ ===== -->
-  <h4>Héritage BaseService[T] — 16 classes</h4>
+  <h4>Héritage BaseService[T] — 17 classes</h4>
   <table>
     <thead><tr><th>Classe</th><th>Fichier</th><th>Type</th></tr></thead>
     <tbody>
@@ -604,7 +604,7 @@
   </table>
 
   <!-- ===== HÉRITAGE BaseAIService DÉTAILLÉ ===== -->
-  <h4>Héritage BaseAIService — 15 classes</h4>
+  <h4>Héritage BaseAIService — 20 classes</h4>
   <table>
     <thead><tr><th>Classe</th><th>Fichier</th><th>Type</th></tr></thead>
     <tbody>
@@ -987,7 +987,7 @@
   <table>
     <thead><tr><th>Affirmation</th><th>Statut</th><th>Preuve</th></tr></thead>
     <tbody>
-      <tr><td>TimestampMixin (4 mixins créés)</td><td><span class="badge badge-green">✅ DÉPLOYÉ</span></td><td>mixins.py existe (4 mixins). 19/19 fichiers l'utilisent (100%).</td></tr>
+      <tr><td>TimestampMixin (4 mixins créés)</td><td><span class="badge badge-green">✅ DÉPLOYÉ</span></td><td>mixins.py existe (4 mixins). 22/22 fichiers l'utilisent (100%).</td></tr>
       <tr><td>BaseModule pilot (design_system + parametres)</td><td><span class="badge badge-green">✅ DÉPLOYÉ 100%</span></td><td>Tous les modules adoptent BaseModule[T].</td></tr>
       <tr><td>Split jardin/onglets.py (628→22 LOC)</td><td><span class="badge badge-green">✅ VÉRIFIÉ</span></td><td>onglets.py = 20 LOC facade → 3 sous-modules (258+213+89)</td></tr>
     </tbody>
@@ -1009,7 +1009,7 @@
     <tbody>
       <tr><td>ETag 304 complet</td><td><span class="badge badge-green">✅ VÉRIFIÉ</span></td><td>Middleware ETag dans api/utils/</td></tr>
       <tr><td>Security headers OWASP</td><td><span class="badge badge-green">✅ VÉRIFIÉ</span></td><td>CSP, X-Frame-Options, X-Content-Type-Options, HSTS</td></tr>
-      <tr><td>@profiler_rerun sur ~28 modules</td><td><span class="badge badge-green">✅ DÉPASSÉ</span></td><td>36 fonctions app() décorées (100% couverture)</td></tr>
+      <tr><td>@profiler_rerun sur ~28 modules</td><td><span class="badge badge-green">✅ DÉPASSÉ</span></td><td>33 fonctions app() décorées (100% couverture)</td></tr>
     </tbody>
   </table>
 
@@ -1072,7 +1072,7 @@
       <tr>
         <td><strong>BaseService[T]</strong></td>
         <td>services/core/base/</td>
-        <td><span class="badge badge-green">16/16 (100%)</span></td>
+        <td><span class="badge badge-green">17/17 (100%)</span></td>
         <td>— (consommateur)</td>
         <td>✅ Oui</td>
         <td>Maintenir. CRUD unifié indispensable.</td>

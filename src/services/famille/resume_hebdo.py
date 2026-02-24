@@ -411,10 +411,10 @@ Format du résumé en Markdown:
 
 Données de la semaine:
 - Repas: {resume.repas.nb_repas_planifies} planifiés, {resume.repas.nb_repas_realises} réalisés ({resume.repas.taux_realisation:.0f}%)
-  Recettes: {', '.join(resume.repas.recettes_populaires) if resume.repas.recettes_populaires else 'Aucune'}
+  Recettes: {", ".join(resume.repas.recettes_populaires) if resume.repas.recettes_populaires else "Aucune"}
 - Budget: {resume.budget.total_depenses:.2f}€ dépensés
-  Top catégories: {', '.join(f"{c['categorie']}: {c['montant']:.0f}€" for c in resume.budget.top_categories)}
-- Activités: {resume.activites.nb_activites} activités ({', '.join(resume.activites.activites_realisees) if resume.activites.activites_realisees else 'Aucune'})
+  Top catégories: {", ".join(f"{c['categorie']}: {c['montant']:.0f}€" for c in resume.budget.top_categories)}
+- Activités: {resume.activites.nb_activites} activités ({", ".join(resume.activites.activites_realisees) if resume.activites.activites_realisees else "Aucune"})
 - Tâches: {resume.taches.nb_taches_realisees} réalisées, {resume.taches.nb_taches_en_retard} en retard
 - Score global: {resume.score_semaine}/100"""
         result = self.call_with_cache_sync(
