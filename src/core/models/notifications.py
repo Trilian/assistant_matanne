@@ -2,8 +2,8 @@
 Modèles SQLAlchemy pour les notifications push.
 
 Contient :
-- PushSubscription : Abonnements notifications push
-- NotificationPreference : Préférences de notification par utilisateur
+- AbonnementPush : Abonnements notifications push
+- PreferenceNotification : Préférences de notification par utilisateur
 """
 
 from datetime import datetime, time
@@ -21,13 +21,14 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base, utc_now
+from .mixins import CreatedAtMixin, TimestampFullMixin
 
 # ═══════════════════════════════════════════════════════════
 # TABLE ABONNEMENTS PUSH
 # ═══════════════════════════════════════════════════════════
 
 
-class PushSubscription(Base):
+class AbonnementPush(CreatedAtMixin, Base):
     """Abonnement push notification.
 
     Table SQL: push_subscriptions
@@ -40,7 +41,7 @@ class PushSubscription(Base):
         device_info: Informations sur l'appareil
     """
 
-    __tablename__ = "push_subscriptions"
+    __tablename__ = "abonnements_push"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     endpoint: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
@@ -51,12 +52,11 @@ class PushSubscription(Base):
     # Supabase user
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), index=True)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    # Timestamps (last_used reste manuel — nom non-standard)
     last_used: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     def __repr__(self) -> str:
-        return f"<PushSubscription(id={self.id}, user_id={self.user_id})>"
+        return f"<AbonnementPush(id={self.id}, user_id={self.user_id})>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -64,7 +64,7 @@ class PushSubscription(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class NotificationPreference(Base):
+class PreferenceNotification(TimestampFullMixin, Base):
     """Préférences de notification par utilisateur.
 
     Table SQL: notification_preferences
@@ -79,7 +79,7 @@ class NotificationPreference(Base):
         quiet_hours_end: Fin des heures silencieuses
     """
 
-    __tablename__ = "notification_preferences"
+    __tablename__ = "preferences_notifications"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
 
@@ -97,9 +97,5 @@ class NotificationPreference(Base):
     # Supabase user (unique)
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), unique=True)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     def __repr__(self) -> str:
-        return f"<NotificationPreference(id={self.id}, user_id={self.user_id})>"
+        return f"<PreferenceNotification(id={self.id}, user_id={self.user_id})>"

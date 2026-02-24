@@ -2,12 +2,12 @@
 Modèles pour la famille et le bien-être.
 
 Contient :
-- ChildProfile : Profil d'enfant (Jules)
-- WellbeingEntry : Entrée de bien-être
-- Milestone : Jalon de développement
-- FamilyActivity : Activité familiale
-- FamilyBudget : Dépenses familiales
-- ShoppingItem : Article shopping familial
+- ProfilEnfant : Profil d'enfant (Jules)
+- EntreeBienEtre : Entrée de bien-être
+- Jalon : Jalon de développement
+- ActiviteFamille : Activité familiale
+- BudgetFamille : Dépenses familiales
+- ArticleAchat : Article shopping familial
 """
 
 from datetime import date, datetime
@@ -28,13 +28,14 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, utc_now
+from .mixins import CreeLeMixin
 
 # ═══════════════════════════════════════════════════════════
 # PROFIL ENFANT
 # ═══════════════════════════════════════════════════════════
 
 
-class ChildProfile(Base):
+class ProfilEnfant(CreeLeMixin, Base):
     """Profil d'un enfant suivi.
 
     Attributes:
@@ -45,7 +46,7 @@ class ChildProfile(Base):
         actif: Si le profil est actif
     """
 
-    __tablename__ = "child_profiles"
+    __tablename__ = "profils_enfants"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -53,21 +54,20 @@ class ChildProfile(Base):
     gender: Mapped[str | None] = mapped_column(String(20))
     notes: Mapped[str | None] = mapped_column(Text)
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
-    wellbeing_entries: Mapped[list["WellbeingEntry"]] = relationship(
+    wellbeing_entries: Mapped[list["EntreeBienEtre"]] = relationship(
         back_populates="child", cascade="all, delete-orphan"
     )
-    milestones: Mapped[list["Milestone"]] = relationship(
+    milestones: Mapped[list["Jalon"]] = relationship(
         back_populates="child", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:
-        return f"<ChildProfile(name='{self.name}', id={self.id})>"
+        return f"<ProfilEnfant(name='{self.name}', id={self.id})>"
 
 
-class WellbeingEntry(Base):
+class EntreeBienEtre(CreeLeMixin, Base):
     """Entrée de bien-être familial.
 
     Attributes:
@@ -80,11 +80,11 @@ class WellbeingEntry(Base):
         notes: Notes
     """
 
-    __tablename__ = "wellbeing_entries"
+    __tablename__ = "entrees_bien_etre"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     child_id: Mapped[int | None] = mapped_column(
-        ForeignKey("child_profiles.id", ondelete="CASCADE"), index=True
+        ForeignKey("profils_enfants.id", ondelete="CASCADE"), index=True
     )
     username: Mapped[str | None] = mapped_column(String(200), index=True)
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True, default=date.today)
@@ -92,13 +92,12 @@ class WellbeingEntry(Base):
     sleep_hours: Mapped[float | None] = mapped_column(Float)
     activity: Mapped[str | None] = mapped_column(String(200))
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
-    child: Mapped[Optional["ChildProfile"]] = relationship(back_populates="wellbeing_entries")
+    child: Mapped[Optional["ProfilEnfant"]] = relationship(back_populates="wellbeing_entries")
 
     def __repr__(self) -> str:
-        return f"<WellbeingEntry(id={self.id}, date={self.date}, mood='{self.mood}')>"
+        return f"<EntreeBienEtre(id={self.id}, date={self.date}, mood='{self.mood}')>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -106,7 +105,7 @@ class WellbeingEntry(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class Milestone(Base):
+class Jalon(CreeLeMixin, Base):
     """Jalons et apprentissages de l'enfant.
 
     Attributes:
@@ -119,11 +118,11 @@ class Milestone(Base):
         notes: Notes
     """
 
-    __tablename__ = "milestones"
+    __tablename__ = "jalons"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     child_id: Mapped[int] = mapped_column(
-        ForeignKey("child_profiles.id", ondelete="CASCADE"), nullable=False, index=True
+        ForeignKey("profils_enfants.id", ondelete="CASCADE"), nullable=False, index=True
     )
     titre: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
@@ -131,13 +130,12 @@ class Milestone(Base):
     date_atteint: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     photo_url: Mapped[str | None] = mapped_column(String(500))
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
-    child: Mapped["ChildProfile"] = relationship(back_populates="milestones")
+    child: Mapped["ProfilEnfant"] = relationship(back_populates="milestones")
 
     def __repr__(self) -> str:
-        return f"<Milestone(id={self.id}, titre='{self.titre}', date={self.date_atteint})>"
+        return f"<Jalon(id={self.id}, titre='{self.titre}', date={self.date_atteint})>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -145,7 +143,7 @@ class Milestone(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class FamilyActivity(Base):
+class ActiviteFamille(CreeLeMixin, Base):
     """Activités et sorties familiales.
 
     Attributes:
@@ -162,7 +160,7 @@ class FamilyActivity(Base):
         statut: Statut (planifié, terminé, annulé)
     """
 
-    __tablename__ = "family_activities"
+    __tablename__ = "activites_famille"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     titre: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -177,7 +175,6 @@ class FamilyActivity(Base):
     cout_reel: Mapped[float | None] = mapped_column(Float)
     statut: Mapped[str] = mapped_column(String(50), nullable=False, default="planifié", index=True)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         CheckConstraint("duree_heures > 0", name="ck_activite_duree_positive"),
@@ -185,7 +182,7 @@ class FamilyActivity(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<FamilyActivity(id={self.id}, titre='{self.titre}', date={self.date_prevue})>"
+        return f"<ActiviteFamille(id={self.id}, titre='{self.titre}', date={self.date_prevue})>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -193,7 +190,7 @@ class FamilyActivity(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class FamilyBudget(Base):
+class BudgetFamille(CreeLeMixin, Base):
     """Dépenses familiales par catégorie.
 
     Attributes:
@@ -207,7 +204,7 @@ class FamilyBudget(Base):
         notes: Notes
     """
 
-    __tablename__ = "family_budgets"
+    __tablename__ = "budgets_famille"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True, default=date.today)
@@ -220,12 +217,13 @@ class FamilyBudget(Base):
         String(50)
     )  # mensuel, hebdomadaire, etc.
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (CheckConstraint("montant > 0", name="ck_budget_montant_positive"),)
 
     def __repr__(self) -> str:
-        return f"<FamilyBudget(id={self.id}, categorie='{self.categorie}', montant={self.montant})>"
+        return (
+            f"<BudgetFamille(id={self.id}, categorie='{self.categorie}', montant={self.montant})>"
+        )
 
 
 # ═══════════════════════════════════════════════════════════
@@ -233,7 +231,7 @@ class FamilyBudget(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class ShoppingItem(Base):
+class ArticleAchat(Base):
     """Article dans une liste de shopping familial.
 
     Attributes:
@@ -247,7 +245,7 @@ class ShoppingItem(Base):
         date_achat: Date d'achat
     """
 
-    __tablename__ = "shopping_items_famille"
+    __tablename__ = "articles_achats_famille"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     titre: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
@@ -262,4 +260,4 @@ class ShoppingItem(Base):
     date_achat: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     def __repr__(self) -> str:
-        return f"<ShoppingItem(titre={self.titre}, categorie={self.categorie}, actif={self.actif})>"
+        return f"<ArticleAchat(titre={self.titre}, categorie={self.categorie}, actif={self.actif})>"

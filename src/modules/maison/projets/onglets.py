@@ -12,7 +12,7 @@ from datetime import date, timedelta
 import streamlit as st
 
 from src.core.decorators import avec_session_db
-from src.core.models import Project, ProjectTask
+from src.core.models import Project, TacheProjet
 from src.ui.keys import KeyNamespace
 
 logger = logging.getLogger(__name__)
@@ -81,7 +81,9 @@ def onglet_liste(keys: KeyNamespace):
         projets = [p for p in projets if p.priorite == filtre_priorite]
 
     if not projets:
-        st.info("Aucun projet trouvé. Créez votre premier projet dans l'onglet '➕ Nouveau Projet'.")
+        st.info(
+            "Aucun projet trouvé. Créez votre premier projet dans l'onglet '➕ Nouveau Projet'."
+        )
         return
 
     st.markdown(f"**{len(projets)} projet(s)**")
@@ -170,9 +172,7 @@ def onglet_creation(keys: KeyNamespace):
                 key=keys("date_fin"),
             )
 
-        estimation_ia = st.checkbox(
-            "🤖 Estimation IA (budget, matériaux, tâches)", value=True
-        )
+        estimation_ia = st.checkbox("🤖 Estimation IA (budget, matériaux, tâches)", value=True)
         submitted = st.form_submit_button("🏗️ Créer le projet", use_container_width=True)
 
     if submitted and nom:
@@ -205,9 +205,7 @@ def _afficher_estimation_ia(nom: str, description: str, categorie: str):
 
     with st.spinner("🤖 Estimation IA en cours..."):
         try:
-            estimation = asyncio.run(
-                service.estimer_projet(nom, description, categorie)
-            )
+            estimation = asyncio.run(service.estimer_projet(nom, description, categorie))
 
             st.divider()
             st.subheader("📊 Estimation IA")
@@ -296,8 +294,7 @@ def onglet_timeline(keys: KeyNamespace):
                     time_pct = min(100, max(0, int((elapsed / total_days) * 100)))
                     remaining = max(0, (projet.date_fin_prevue - today).days)
                     st.caption(
-                        f"⏱️ {time_pct}% du temps écoulé — "
-                        f"{remaining} jour(s) restant(s)"
+                        f"⏱️ {time_pct}% du temps écoulé — " f"{remaining} jour(s) restant(s)"
                     )
                     if time_pct > 80 and projet.tasks:
                         taches_restantes = total - termines
@@ -352,9 +349,7 @@ def onglet_roi(keys: KeyNamespace):
 
         with st.spinner("🤖 Calcul ROI en cours..."):
             try:
-                roi = asyncio.run(
-                    service.calculer_roi(type_renovation, Decimal(str(cout)))
-                )
+                roi = asyncio.run(service.calculer_roi(type_renovation, Decimal(str(cout))))
 
                 st.divider()
 
@@ -377,9 +372,7 @@ def onglet_roi(keys: KeyNamespace):
                 with col_r3:
                     aides = roi.get("aides_estimees", 0)
                     st.markdown(
-                        '<div class="roi-card">'
-                        f"<h3>{aides}€</h3>"
-                        "<p>Aides estimées</p></div>",
+                        '<div class="roi-card">' f"<h3>{aides}€</h3>" "<p>Aides estimées</p></div>",
                         unsafe_allow_html=True,
                     )
 

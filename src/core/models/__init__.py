@@ -9,11 +9,11 @@ Usage recommandé par domaine (imports explicites):
     # Recettes
     from src.core.models.recettes import Recette, Ingredient, EtapeRecette
     # Planning
-    from src.core.models.planning import Planning, Repas, CalendarEvent
+    from src.core.models.planning import Planning, Repas, EvenementPlanning
     # Famille
-    from src.core.models.famille import ChildProfile, Milestone
+    from src.core.models.famille import ProfilEnfant, Jalon
     # Santé
-    from src.core.models.sante import HealthRoutine, HealthEntry
+    from src.core.models.sante import RoutineSante, EntreeSante
     # Courses
     from src.core.models.courses import ArticleCourses, ListeCourses
 
@@ -60,38 +60,38 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "StatutSessionEnum": (".batch_cooking", "StatutSessionEnum"),
     "TypeRobotEnum": (".batch_cooking", "TypeRobotEnum"),
     # Calendrier externe
-    "CalendarProvider": (".calendrier", "CalendarProvider"),
+    "FournisseurCalendrier": (".calendrier", "FournisseurCalendrier"),
     "CalendrierExterne": (".calendrier", "CalendrierExterne"),
     "EvenementCalendrier": (".calendrier", "EvenementCalendrier"),
-    "SyncDirection": (".calendrier", "SyncDirection"),
+    "DirectionSync": (".calendrier", "DirectionSync"),
     # Courses
     "ArticleCourses": (".courses", "ArticleCourses"),
     "ArticleModele": (".courses", "ArticleModele"),
     "ListeCourses": (".courses", "ListeCourses"),
     "ModeleCourses": (".courses", "ModeleCourses"),
     # Famille
-    "ChildProfile": (".famille", "ChildProfile"),
-    "FamilyActivity": (".famille", "FamilyActivity"),
-    "FamilyBudget": (".famille", "FamilyBudget"),
-    "Milestone": (".famille", "Milestone"),
-    "ShoppingItem": (".famille", "ShoppingItem"),
-    "WellbeingEntry": (".famille", "WellbeingEntry"),
+    "ProfilEnfant": (".famille", "ProfilEnfant"),
+    "ActiviteFamille": (".famille", "ActiviteFamille"),
+    "BudgetFamille": (".famille", "BudgetFamille"),
+    "Jalon": (".famille", "Jalon"),
+    "ArticleAchat": (".famille", "ArticleAchat"),
+    "EntreeBienEtre": (".famille", "EntreeBienEtre"),
     # Finances
     "BudgetMensuelDB": (".finances", "BudgetMensuelDB"),
     "CategorieDepenseDB": (".finances", "CategorieDepenseDB"),
     "Depense": (".finances", "Depense"),
-    "ExpenseCategory": (".finances", "ExpenseCategory"),
-    "HouseExpense": (".finances", "HouseExpense"),
-    "RecurrenceType": (".finances", "RecurrenceType"),
+    "CategorieDepense": (".finances", "CategorieDepense"),
+    "DepenseMaison": (".finances", "DepenseMaison"),
+    "TypeRecurrence": (".finances", "TypeRecurrence"),
     # Habitat
-    "EcoAction": (".habitat", "EcoAction"),
-    "EcoActionType": (".habitat", "EcoActionType"),
-    "Furniture": (".habitat", "Furniture"),
-    "FurniturePriority": (".habitat", "FurniturePriority"),
-    "FurnitureStatus": (".habitat", "FurnitureStatus"),
-    "HouseStock": (".habitat", "HouseStock"),
-    "MaintenanceTask": (".habitat", "MaintenanceTask"),
-    "RoomType": (".habitat", "RoomType"),
+    "ActionEcologique": (".habitat", "ActionEcologique"),
+    "TypeActionEcologique": (".habitat", "TypeActionEcologique"),
+    "Meuble": (".habitat", "Meuble"),
+    "PrioriteMeuble": (".habitat", "PrioriteMeuble"),
+    "StatutMeuble": (".habitat", "StatutMeuble"),
+    "StockMaison": (".habitat", "StockMaison"),
+    "TacheEntretien": (".habitat", "TacheEntretien"),
+    "TypePiece": (".habitat", "TypePiece"),
     # Inventaire
     "ArticleInventaire": (".inventaire", "ArticleInventaire"),
     "HistoriqueInventaire": (".inventaire", "HistoriqueInventaire"),
@@ -118,23 +118,23 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TypeMarcheParisEnum": (".jeux", "TypeMarcheParisEnum"),
     "TypePariEnum": (".jeux", "TypePariEnum"),
     # Maison
-    "GardenItem": (".maison", "GardenItem"),
-    "GardenLog": (".maison", "GardenLog"),
+    "ElementJardin": (".maison", "ElementJardin"),
+    "JournalJardin": (".maison", "JournalJardin"),
     "Project": (".maison", "Project"),
-    "ProjectTask": (".maison", "ProjectTask"),
+    "TacheProjet": (".maison", "TacheProjet"),
     "Routine": (".maison", "Routine"),
-    "RoutineTask": (".maison", "RoutineTask"),
+    "TacheRoutine": (".maison", "TacheRoutine"),
     # Notifications
-    "NotificationPreference": (".notifications", "NotificationPreference"),
-    "PushSubscription": (".notifications", "PushSubscription"),
+    "PreferenceNotification": (".notifications", "PreferenceNotification"),
+    "AbonnementPush": (".notifications", "AbonnementPush"),
     # Planning
-    "CalendarEvent": (".planning", "CalendarEvent"),
+    "EvenementPlanning": (".planning", "EvenementPlanning"),
     "Planning": (".planning", "Planning"),
     "Repas": (".planning", "Repas"),
-    "TemplateItem": (".planning", "TemplateItem"),
+    "ElementTemplate": (".planning", "ElementTemplate"),
     "TemplateSemaine": (".planning", "TemplateSemaine"),
     # Recettes
-    "BatchMeal": (".recettes", "BatchMeal"),
+    "RepasBatch": (".recettes", "RepasBatch"),
     "EtapeRecette": (".recettes", "EtapeRecette"),
     "HistoriqueRecette": (".recettes", "HistoriqueRecette"),
     "Ingredient": (".recettes", "Ingredient"),
@@ -142,11 +142,11 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "RecetteIngredient": (".recettes", "RecetteIngredient"),
     "VersionRecette": (".recettes", "VersionRecette"),
     # Santé
-    "HealthEntry": (".sante", "HealthEntry"),
-    "HealthObjective": (".sante", "HealthObjective"),
-    "HealthRoutine": (".sante", "HealthRoutine"),
+    "EntreeSante": (".sante", "EntreeSante"),
+    "ObjectifSante": (".sante", "ObjectifSante"),
+    "RoutineSante": (".sante", "RoutineSante"),
     # Système
-    "ActionHistory": (".systeme", "ActionHistory"),
+    "HistoriqueAction": (".systeme", "HistoriqueAction"),
     "Backup": (".systeme", "Backup"),
     # Temps d'entretien et jardin
     "ActionPlante": (".temps_entretien", "ActionPlante"),
@@ -164,24 +164,24 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "VersionPiece": (".temps_entretien", "VersionPiece"),
     "ZoneJardin": (".temps_entretien", "ZoneJardin"),
     # Préférences utilisateur
-    "ExternalCalendarConfig": (".user_preferences", "ExternalCalendarConfig"),
-    "FeedbackType": (".user_preferences", "FeedbackType"),
+    "ConfigCalendrierExterne": (".user_preferences", "ConfigCalendrierExterne"),
+    "TypeRetour": (".user_preferences", "TypeRetour"),
     "OpenFoodFactsCache": (".user_preferences", "OpenFoodFactsCache"),
-    "RecipeFeedback": (".user_preferences", "RecipeFeedback"),
-    "UserPreference": (".user_preferences", "UserPreference"),
+    "RetourRecette": (".user_preferences", "RetourRecette"),
+    "PreferenceUtilisateur": (".user_preferences", "PreferenceUtilisateur"),
     # État persistant
-    "PersistentStateDB": (".persistent_state", "PersistentStateDB"),
+    "EtatPersistantDB": (".persistent_state", "EtatPersistantDB"),
     # Utilisateurs et Garmin
-    "FamilyPurchase": (".users", "FamilyPurchase"),
-    "FoodLog": (".users", "FoodLog"),
-    "GarminActivity": (".users", "GarminActivity"),
+    "AchatFamille": (".users", "AchatFamille"),
+    "JournalAlimentaire": (".users", "JournalAlimentaire"),
+    "ActiviteGarmin": (".users", "ActiviteGarmin"),
     "GarminActivityType": (".users", "GarminActivityType"),
-    "GarminDailySummary": (".users", "GarminDailySummary"),
+    "ResumeQuotidienGarmin": (".users", "ResumeQuotidienGarmin"),
     "GarminToken": (".users", "GarminToken"),
-    "PurchaseCategory": (".users", "PurchaseCategory"),
-    "PurchasePriority": (".users", "PurchasePriority"),
-    "UserProfile": (".users", "UserProfile"),
-    "WeekendActivity": (".users", "WeekendActivity"),
+    "CategorieAchat": (".users", "CategorieAchat"),
+    "PrioriteAchat": (".users", "PrioriteAchat"),
+    "ProfilUtilisateur": (".users", "ProfilUtilisateur"),
+    "ActiviteWeekend": (".users", "ActiviteWeekend"),
 }
 
 # Export explicite de tous les symboles

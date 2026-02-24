@@ -7,10 +7,13 @@ import logging
 import streamlit as st
 
 from src.services.core.utilisateur import get_user_preference_service
+from src.ui.keys import KeyNamespace
 
 from .utils import FeedbackRecette, PreferencesUtilisateur
 
 logger = logging.getLogger(__name__)
+
+_keys = KeyNamespace("planificateur_prefs")
 
 
 def charger_preferences() -> PreferencesUtilisateur:
@@ -21,14 +24,14 @@ def charger_preferences() -> PreferencesUtilisateur:
     pendant la même session Streamlit.
     """
     # Cache en session pour éviter requêtes DB répétées
-    if "user_preferences" in st.session_state:
-        return st.session_state.user_preferences
+    if _keys("preferences") in st.session_state:
+        return st.session_state[_keys("preferences")]
 
     # Charger depuis DB
     try:
         service = get_user_preference_service()
         prefs = service.charger_preferences()
-        st.session_state.user_preferences = prefs
+        st.session_state[_keys("preferences")] = prefs
         logger.info("✅ Préférences chargées depuis DB")
         return prefs
     except Exception as e:
@@ -50,7 +53,7 @@ def charger_preferences() -> PreferencesUtilisateur:
             robots=["monsieur_cuisine", "cookeo", "four"],
             magasins_preferes=["Carrefour Drive", "Bio Coop", "Grand Frais", "Thiriet"],
         )
-        st.session_state.user_preferences = prefs
+        st.session_state[_keys("preferences")] = prefs
         return prefs
 
 
@@ -70,14 +73,14 @@ def sauvegarder_preferences(prefs: PreferencesUtilisateur) -> bool:
 
         if success:
             # Mettre à jour le cache session
-            st.session_state.user_preferences = prefs
+            st.session_state[_keys("preferences")] = prefs
             logger.info("✅ Préférences sauvegardées en DB")
 
         return success
     except Exception as e:
         logger.error(f"❌ Erreur sauvegarde préférences: {e}")
         # Fallback: sauvegarder en session seulement
-        st.session_state.user_preferences = prefs
+        st.session_state[_keys("preferences")] = prefs
         return False
 
 
@@ -88,18 +91,18 @@ def charger_feedbacks() -> list[FeedbackRecette]:
     Utilise un cache session pour les performances.
     """
     # Cache en session
-    if "recipe_feedbacks" in st.session_state:
-        return st.session_state.recipe_feedbacks
+    if _keys("feedbacks") in st.session_state:
+        return st.session_state[_keys("feedbacks")]
 
     try:
         service = get_user_preference_service()
         feedbacks = service.charger_feedbacks()
-        st.session_state.recipe_feedbacks = feedbacks
+        st.session_state[_keys("feedbacks")] = feedbacks
         logger.debug(f"Chargé {len(feedbacks)} feedbacks depuis DB")
         return feedbacks
     except Exception as e:
         logger.error(f"❌ Erreur chargement feedbacks: {e}")
-        st.session_state.recipe_feedbacks = []
+        st.session_state[_keys("feedbacks")] = []
         return []
 
 
@@ -128,14 +131,14 @@ def ajouter_feedback(recette_id: int, recette_nom: str, feedback: str, contexte:
                 contexte=contexte,
             )
 
-            if "recipe_feedbacks" not in st.session_state:
-                st.session_state.recipe_feedbacks = []
+            if _keys("feedbacks") not in st.session_state:
+                st.session_state[_keys("feedbacks")] = []
 
             # Remplacer si feedback existant
-            st.session_state.recipe_feedbacks = [
-                f for f in st.session_state.recipe_feedbacks if f.recette_id != recette_id
+            st.session_state[_keys("feedbacks")] = [
+                f for f in st.session_state[_keys("feedbacks")] if f.recette_id != recette_id
             ]
-            st.session_state.recipe_feedbacks.append(fb)
+            st.session_state[_keys("feedbacks")].append(fb)
 
             logger.info(f"✅ Feedback ajouté: {recette_nom} → {feedback}")
 
@@ -148,9 +151,9 @@ def ajouter_feedback(recette_id: int, recette_nom: str, feedback: str, contexte:
             feedback=feedback,
             contexte=contexte,
         )
-        if "recipe_feedbacks" not in st.session_state:
-            st.session_state.recipe_feedbacks = []
-        st.session_state.recipe_feedbacks = [
-            f for f in st.session_state.recipe_feedbacks if f.recette_id != recette_id
+        if _keys("feedbacks") not in st.session_state:
+            st.session_state[_keys("feedbacks")] = []
+        st.session_state[_keys("feedbacks")] = [
+            f for f in st.session_state[_keys("feedbacks")] if f.recette_id != recette_id
         ]
-        st.session_state.recipe_feedbacks.append(fb)
+        st.session_state[_keys("feedbacks")].append(fb)

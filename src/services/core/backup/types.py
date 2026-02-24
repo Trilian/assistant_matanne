@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 class BackupConfig(BaseModel):
     """Configuration du service de backup."""
 
-    backup_dir: str = "backups"
+    backup_dir: str = "sauvegardes"
     max_backups: int = 10  # Nombre max de backups à conserver
     compress: bool = True
     include_timestamps: bool = True

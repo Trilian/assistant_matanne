@@ -12,7 +12,6 @@ import pytest
 from src.core import lazy_loader
 from src.core.lazy_loader import (
     ChargeurModuleDiffere,
-    RouteurOptimise,
     afficher_stats_chargement_differe,
     lazy_import,
 )
@@ -38,7 +37,7 @@ def nettoyer_cache():
 @pytest.mark.unit
 def test_import_lazy_loader():
     """Vérifie que le module lazy_loader s'importe sans erreur."""
-    assert hasattr(lazy_loader, "RouteurOptimise")
+    assert hasattr(lazy_loader, "ChargeurModuleDiffere")
     assert hasattr(lazy_loader, "ChargeurModuleDiffere")
     assert hasattr(lazy_loader, "lazy_import")
     assert hasattr(lazy_loader, "afficher_stats_chargement_differe")
@@ -238,46 +237,12 @@ class TestLazyImportDecorator:
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 
-@pytest.mark.unit
+@pytest.mark.skip(reason="RouteurOptimise removed — routing via navigation.py")
 class TestRouteurOptimise:
-    """Tests du routeur optimisé"""
+    """Tests du routeur optimisé — DEPRECATED (removed in Sprint 3)."""
 
-    def test_class_exists(self):
-        """Test que la classe existe"""
-        assert RouteurOptimise is not None
-
-    def test_has_module_registry(self):
-        """Test que le registre de modules existe"""
-        assert hasattr(RouteurOptimise, "MODULE_REGISTRY")
-        assert isinstance(RouteurOptimise.MODULE_REGISTRY, dict)
-
-    def test_module_registry_contient_accueil(self):
-        """Test que le module accueil est enregistré"""
-        assert "accueil" in RouteurOptimise.MODULE_REGISTRY
-
-    def test_module_registry_structure(self):
-        """Test la structure des entrées du registry"""
-        for name, config in RouteurOptimise.MODULE_REGISTRY.items():
-            assert "path" in config, f"Module {name} manque 'path'"
-            # Le champ 'type' était optionnel et a été supprimé du registry
-            # Vérifie juste que 'path' pointe vers un chemin de module valide
-            assert config["path"].startswith("src."), f"Module {name} path invalide"
-
-    @patch("streamlit.error")
-    @patch("streamlit.spinner")
-    def test_charger_module_inexistant(self, mock_spinner, mock_error):
-        """Test chargement d'un module non enregistré"""
-        mock_spinner.return_value.__enter__ = Mock(return_value=None)
-        mock_spinner.return_value.__exit__ = Mock(return_value=False)
-
-        RouteurOptimise.charger_module("module_qui_existe_pas")
-
-        mock_error.assert_called_once()
-
-    def test_class_instantiable(self):
-        """Test que la classe est instanciable"""
-        router = RouteurOptimise()
-        assert router is not None
+    def test_placeholder(self):
+        pass
 
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -420,63 +385,12 @@ class TestChargeurModuleDiffereAdvanced:
         assert "cached_modules" in stats
 
 
-@pytest.mark.unit
+@pytest.mark.skip(reason="RouteurOptimise removed — routing via navigation.py")
 class TestRouteurOptimiseAdvanced:
-    """Tests avancés pour RouteurOptimise."""
+    """Tests avancés pour RouteurOptimise — DEPRECATED (removed in Sprint 3)."""
 
-    def test_module_registry_contains_cuisine(self):
-        """Test que les modules cuisine sont enregistrés."""
-        registry = RouteurOptimise.MODULE_REGISTRY
-
-        cuisine_modules = [k for k in registry.keys() if k.startswith("cuisine")]
-        assert len(cuisine_modules) > 0
-
-    def test_module_registry_contains_famille(self):
-        """Test que les modules famille sont enregistrés."""
-        registry = RouteurOptimise.MODULE_REGISTRY
-
-        famille_modules = [k for k in registry.keys() if k.startswith("famille")]
-        assert len(famille_modules) > 0
-
-    def test_module_registry_contains_maison(self):
-        """Test que les modules maison sont enregistrés."""
-        registry = RouteurOptimise.MODULE_REGISTRY
-
-        maison_modules = [k for k in registry.keys() if k.startswith("maison")]
-        assert len(maison_modules) > 0
-
-    @patch("streamlit.error")
-    @patch("streamlit.spinner")
-    @patch("streamlit.warning")
-    @patch("streamlit.info")
-    def test_charger_module_not_implemented(
-        self, mock_info, mock_warning, mock_spinner, mock_error
-    ):
-        """Test chargement d'un module pas encore implémenté."""
-        mock_spinner.return_value.__enter__ = Mock(return_value=None)
-        mock_spinner.return_value.__exit__ = Mock(return_value=False)
-
-        # Add a fake module to registry
-        RouteurOptimise.MODULE_REGISTRY["fake_module"] = {
-            "path": "src.modules.fake.not_exists_xyz",
-            "type": "simple",
-        }
-
-        try:
-            RouteurOptimise.charger_module("fake_module")
-            # Should show warning for non-implemented module
-        finally:
-            # Cleanup
-            del RouteurOptimise.MODULE_REGISTRY["fake_module"]
-
-    @patch("streamlit.spinner")
-    def test_precharger_common_modules(self, mock_spinner):
-        """Test le préchargement des modules communs."""
-        mock_spinner.return_value.__enter__ = Mock(return_value=None)
-        mock_spinner.return_value.__exit__ = Mock(return_value=False)
-
-        # Should not raise
-        RouteurOptimise.precharger_common_modules()
+    def test_placeholder(self):
+        pass
 
 
 @pytest.mark.unit

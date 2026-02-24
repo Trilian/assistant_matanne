@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.ui import etat_vide
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import cached_fragment, ui_fragment
 
 from .constants import CHANCE_MAX, CHANCE_MIN, NUMERO_MAX, NUMERO_MIN
 from .frequences import analyser_patterns_tirages, calculer_frequences_numeros
@@ -92,29 +92,34 @@ def afficher_simulation():
         st.dataframe(df_res, hide_index=True, width="stretch")
 
         # Graphique comparatif
-        fig = go.Figure(
-            data=[
-                go.Bar(
-                    x=list(resultats.keys()),
-                    y=[r["roi"] for r in resultats.values()],
-                    marker_color=[
-                        "#4CAF50" if r["roi"] > 0 else "#f44336" for r in resultats.values()
-                    ],
-                    text=[f"{r['roi']:+.1f}%" for r in resultats.values()],
-                    textposition="auto",
-                )
-            ]
-        )
-
-        fig.update_layout(
-            title="Comparaison des ROI par stratégie",
-            xaxis_title="Stratégie",
-            yaxis_title="ROI (%)",
-            height=300,
-        )
-        fig.add_hline(y=0, line_dash="dash", line_color="gray")
-
+        strategies_noms = tuple(resultats.keys())
+        rois = tuple(r["roi"] for r in resultats.values())
+        fig = _build_roi_chart(strategies_noms, rois)
         st.plotly_chart(fig, width="stretch", key="loto_roi_chart")
+
+
+@cached_fragment(ttl=300)
+def _build_roi_chart(strategies: tuple, rois: tuple):
+    """Construit le bar chart comparatif ROI (caché 5 min)."""
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=list(strategies),
+                y=list(rois),
+                marker_color=["#4CAF50" if r > 0 else "#f44336" for r in rois],
+                text=[f"{r:+.1f}%" for r in rois],
+                textposition="auto",
+            )
+        ]
+    )
+    fig.update_layout(
+        title="Comparaison des ROI par stratégie",
+        xaxis_title="Stratégie",
+        yaxis_title="ROI (%)",
+        height=300,
+    )
+    fig.add_hline(y=0, line_dash="dash", line_color="gray")
+    return fig
 
 
 @ui_fragment

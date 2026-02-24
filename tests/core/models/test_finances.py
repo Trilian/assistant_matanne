@@ -2,7 +2,7 @@
 Tests unitaires pour finances.py
 
 Module: src.core.models.finances
-Contient: Depense, BudgetMensuelDB, HouseExpense
+Contient: Depense, BudgetMensuelDB, DepenseMaison
 """
 
 from datetime import date
@@ -10,11 +10,11 @@ from decimal import Decimal
 
 from src.core.models.finances import (
     BudgetMensuelDB,
+    CategorieDepense,
     CategorieDepenseDB,
     Depense,
-    ExpenseCategory,
-    HouseExpense,
-    RecurrenceType,
+    DepenseMaison,
+    TypeRecurrence,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -56,27 +56,27 @@ class TestCategorieDepenseDB:
 
 
 class TestRecurrenceType:
-    """Tests pour l'énumération RecurrenceType."""
+    """Tests pour l'énumération TypeRecurrence."""
 
     def test_valeurs_disponibles(self):
         """Vérifie les types de récurrence."""
-        assert RecurrenceType.PONCTUEL.value == "ponctuel"
-        assert RecurrenceType.HEBDOMADAIRE.value == "hebdomadaire"
-        assert RecurrenceType.MENSUEL.value == "mensuel"
-        assert RecurrenceType.TRIMESTRIEL.value == "trimestriel"
-        assert RecurrenceType.ANNUEL.value == "annuel"
+        assert TypeRecurrence.PONCTUEL.value == "ponctuel"
+        assert TypeRecurrence.HEBDOMADAIRE.value == "hebdomadaire"
+        assert TypeRecurrence.MENSUEL.value == "mensuel"
+        assert TypeRecurrence.TRIMESTRIEL.value == "trimestriel"
+        assert TypeRecurrence.ANNUEL.value == "annuel"
 
 
 class TestExpenseCategory:
-    """Tests pour l'énumération ExpenseCategory."""
+    """Tests pour l'énumération CategorieDepense."""
 
     def test_categories_maison(self):
         """Vérifie les catégories de dépenses maison."""
-        assert ExpenseCategory.GAZ.value == "gaz"
-        assert ExpenseCategory.ELECTRICITE.value == "electricite"
-        assert ExpenseCategory.EAU.value == "eau"
-        assert ExpenseCategory.INTERNET.value == "internet"
-        assert ExpenseCategory.LOYER.value == "loyer"
+        assert CategorieDepense.GAZ.value == "gaz"
+        assert CategorieDepense.ELECTRICITE.value == "electricite"
+        assert CategorieDepense.EAU.value == "eau"
+        assert CategorieDepense.INTERNET.value == "internet"
+        assert CategorieDepense.LOYER.value == "loyer"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -178,15 +178,15 @@ class TestBudgetMensuelDB:
 
 
 class TestHouseExpense:
-    """Tests pour le modèle HouseExpense."""
+    """Tests pour le modèle DepenseMaison."""
 
     def test_tablename(self):
         """Vérifie le nom de la table."""
-        assert HouseExpense.__tablename__ == "house_expenses"
+        assert DepenseMaison.__tablename__ == "depenses_maison"
 
     def test_creation_instance(self):
         """Test de création d'une dépense maison."""
-        expense = HouseExpense(
+        expense = DepenseMaison(
             categorie="electricite",
             mois=2,
             annee=2026,
@@ -203,7 +203,7 @@ class TestHouseExpense:
 
     def test_fournisseur(self):
         """Test des champs fournisseur."""
-        expense = HouseExpense(
+        expense = DepenseMaison(
             categorie="gaz",
             mois=1,
             annee=2026,
@@ -216,8 +216,8 @@ class TestHouseExpense:
 
     def test_repr(self):
         """Test de la représentation string."""
-        expense = HouseExpense(id=1, categorie="eau", montant=Decimal("45.00"))
+        expense = DepenseMaison(id=1, categorie="eau", montant=Decimal("45.00"))
         result = repr(expense)
-        assert "HouseExpense" in result
+        assert "DepenseMaison" in result
         assert "eau" in result
         assert "45" in result

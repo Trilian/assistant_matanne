@@ -23,7 +23,7 @@ from typing import Any
 # Ré-exports pour rétrocompatibilité
 from .auth_permissions import ROLE_PERMISSIONS, PermissionsMixin
 from .auth_profile import ProfileMixin
-from .auth_schemas import AuthResult, Permission, Role, UserProfile
+from .auth_schemas import AuthResult, Permission, ProfilUtilisateur, Role
 from .auth_session import SessionMixin
 from .auth_token import TokenValidationMixin
 
@@ -142,7 +142,7 @@ class AuthService(PermissionsMixin, SessionMixin, TokenValidationMixin, ProfileM
 
             if response.user:
                 # Créer le profil
-                user = UserProfile(
+                user = ProfilUtilisateur(
                     id=response.user.id,
                     email=email,
                     nom=nom,
@@ -219,7 +219,7 @@ class AuthService(PermissionsMixin, SessionMixin, TokenValidationMixin, ProfileM
                 prenom = nom_parts[0].capitalize()
                 nom = nom_parts[1].capitalize() if len(nom_parts) > 1 else "Test"
 
-                user = UserProfile(
+                user = ProfilUtilisateur(
                     id=email.replace("@", "_").replace(".", "_"),
                     email=email,
                     nom=nom,
@@ -256,7 +256,7 @@ class AuthService(PermissionsMixin, SessionMixin, TokenValidationMixin, ProfileM
                 # Construire le profil
                 metadata = response.user.user_metadata or {}
 
-                user = UserProfile(
+                user = ProfilUtilisateur(
                     id=response.user.id,
                     email=response.user.email,
                     nom=metadata.get("nom", ""),
@@ -372,7 +372,7 @@ __all__ = [
     "AuthService",
     "obtenir_service_authentification",
     "get_auth_service",
-    "UserProfile",
+    "ProfilUtilisateur",
     "AuthResult",
     "Role",
     "Permission",

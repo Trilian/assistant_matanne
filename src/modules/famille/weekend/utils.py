@@ -15,7 +15,7 @@ from typing import Optional
 import streamlit as st
 
 from src.core.ai import ClientIA
-from src.core.models import ChildProfile, WeekendActivity
+from src.core.models import ActiviteWeekend, ProfilEnfant
 from src.services.core.base import BaseAIService
 from src.services.famille.weekend import obtenir_service_weekend
 from src.ui import etat_vide
@@ -45,8 +45,8 @@ __all__ = [
     "timedelta",
     "Optional",
     # Database
-    "WeekendActivity",
-    "ChildProfile",
+    "ActiviteWeekend",
+    "ProfilEnfant",
     # AI
     "BaseAIService",
     "ClientIA",

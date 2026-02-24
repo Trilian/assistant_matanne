@@ -1,7 +1,7 @@
 """
 Service Activités Famille - Logique métier pour les activités familiales.
 
-Hérite de BaseService[FamilyActivity] pour CRUD générique + méthodes spécialisées.
+Hérite de BaseService[ActiviteFamille] pour CRUD générique + méthodes spécialisées.
 
 Opérations:
 - CRUD activités (planification, marquage terminé)
@@ -14,7 +14,7 @@ from datetime import date as date_type
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.models import FamilyActivity
+from src.core.models import ActiviteFamille
 from src.services.core.base import BaseService
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
@@ -22,15 +22,15 @@ from src.services.core.registry import service_factory
 logger = logging.getLogger(__name__)
 
 
-class ServiceActivites(BaseService[FamilyActivity]):
+class ServiceActivites(BaseService[ActiviteFamille]):
     """Service de gestion des activités familiales.
 
-    Hérite de BaseService[FamilyActivity] pour le CRUD générique.
+    Hérite de BaseService[ActiviteFamille] pour le CRUD générique.
     Les méthodes spécialisées gèrent la logique métier spécifique.
     """
 
     def __init__(self):
-        super().__init__(model=FamilyActivity, cache_ttl=300)
+        super().__init__(model=ActiviteFamille, cache_ttl=300)
 
     # ═══════════════════════════════════════════════════════════
     # CRUD
@@ -49,7 +49,7 @@ class ServiceActivites(BaseService[FamilyActivity]):
         cout_estime: float,
         notes: str = "",
         db: Session | None = None,
-    ) -> FamilyActivity:
+    ) -> ActiviteFamille:
         """Ajoute une nouvelle activité familiale.
 
         Args:
@@ -68,7 +68,7 @@ class ServiceActivites(BaseService[FamilyActivity]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        activity = FamilyActivity(
+        activity = ActiviteFamille(
             titre=titre,
             type_activite=type_activite,
             date_prevue=date_prevue,
@@ -111,7 +111,7 @@ class ServiceActivites(BaseService[FamilyActivity]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        activity = db.get(FamilyActivity, activity_id)
+        activity = db.get(ActiviteFamille, activity_id)
         if activity:
             activity.statut = "termine"
             if cout_reel is not None:
@@ -132,7 +132,7 @@ class ServiceActivites(BaseService[FamilyActivity]):
         statut: str | None = None,
         type_activite: str | None = None,
         db: Session | None = None,
-    ) -> list[FamilyActivity]:
+    ) -> list[ActiviteFamille]:
         """Liste les activités avec filtres optionnels.
 
         Args:
@@ -145,12 +145,12 @@ class ServiceActivites(BaseService[FamilyActivity]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        query = db.query(FamilyActivity)
+        query = db.query(ActiviteFamille)
         if statut:
-            query = query.filter(FamilyActivity.statut == statut)
+            query = query.filter(ActiviteFamille.statut == statut)
         if type_activite:
-            query = query.filter(FamilyActivity.type_activite == type_activite)
-        return query.order_by(FamilyActivity.date_prevue.desc()).all()
+            query = query.filter(ActiviteFamille.type_activite == type_activite)
+        return query.order_by(ActiviteFamille.date_prevue.desc()).all()
 
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
@@ -166,7 +166,7 @@ class ServiceActivites(BaseService[FamilyActivity]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        deleted = db.query(FamilyActivity).filter(FamilyActivity.id == activity_id).delete()
+        deleted = db.query(ActiviteFamille).filter(ActiviteFamille.id == activity_id).delete()
         db.commit()
         if deleted > 0:
             obtenir_bus().emettre(

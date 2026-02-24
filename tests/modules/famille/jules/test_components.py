@@ -56,7 +56,7 @@ def create_mock_achat(
     description: str = None,
     achete: bool = False,
 ):
-    """Cree un mock d'achat FamilyPurchase"""
+    """Cree un mock d'achat AchatFamille"""
     mock = MagicMock()
     mock.id = id_
     mock.nom = nom

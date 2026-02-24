@@ -13,10 +13,10 @@ class TestUserPreferences:
     """Tests pour le module user_preferences."""
 
     class TestFeedbackType:
-        """Tests pour la classe FeedbackType."""
+        """Tests pour la classe TypeRetour."""
 
         def test_feedbacktype_creation(self):
-            """Test de création de FeedbackType."""
+            """Test de création de TypeRetour."""
             # TODO: Implémenter
             pass
 
@@ -26,10 +26,10 @@ class TestUserPreferences:
             pass
 
     class TestCalendarProvider:
-        """Tests pour la classe CalendarProvider."""
+        """Tests pour la classe FournisseurCalendrier."""
 
         def test_calendarprovider_creation(self):
-            """Test de création de CalendarProvider."""
+            """Test de création de FournisseurCalendrier."""
             # TODO: Implémenter
             pass
 
@@ -39,10 +39,10 @@ class TestUserPreferences:
             pass
 
     class TestUserPreference:
-        """Tests pour la classe UserPreference."""
+        """Tests pour la classe PreferenceUtilisateur."""
 
         def test_userpreference_creation(self):
-            """Test de création de UserPreference."""
+            """Test de création de PreferenceUtilisateur."""
             # TODO: Implémenter
             pass
 
@@ -52,10 +52,10 @@ class TestUserPreferences:
             pass
 
     class TestRecipeFeedback:
-        """Tests pour la classe RecipeFeedback."""
+        """Tests pour la classe RetourRecette."""
 
         def test_recipefeedback_creation(self):
-            """Test de création de RecipeFeedback."""
+            """Test de création de RetourRecette."""
             # TODO: Implémenter
             pass
 

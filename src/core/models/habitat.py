@@ -2,10 +2,10 @@
 Modèles SQLAlchemy pour l'habitat et l'équipement maison.
 
 Contient :
-- Furniture : Wishlist meubles par pièce
-- HouseStock : Stock consommables maison (ampoules, piles, produits)
-- MaintenanceTask : Tâches entretien planifiées
-- EcoAction : Actions écologiques avec économies
+- Meuble : Wishlist meubles par pièce
+- StockMaison : Stock consommables maison (ampoules, piles, produits)
+- TacheEntretien : Tâches entretien planifiées
+- ActionEcologique : Actions écologiques avec économies
 """
 
 from datetime import date
@@ -30,7 +30,7 @@ from .mixins import CreatedAtMixin, TimestampFullMixin
 # ═══════════════════════════════════════════════════════════
 
 
-class FurnitureStatus(StrEnum):
+class StatutMeuble(StrEnum):
     """Statut d'un meuble dans la wishlist."""
 
     SOUHAITE = "souhaite"  # On le veut
@@ -41,7 +41,7 @@ class FurnitureStatus(StrEnum):
     ANNULE = "annule"  # Annulé
 
 
-class FurniturePriority(StrEnum):
+class PrioriteMeuble(StrEnum):
     """Priorité d'achat."""
 
     URGENT = "urgent"  # Besoin immédiat
@@ -51,7 +51,7 @@ class FurniturePriority(StrEnum):
     PLUS_TARD = "plus_tard"  # Un jour...
 
 
-class EcoActionType(StrEnum):
+class TypeActionEcologique(StrEnum):
     """Type d'action écologique."""
 
     LAVABLE = "lavable"  # Passage au lavable (essuie-tout, serviettes)
@@ -62,7 +62,7 @@ class EcoActionType(StrEnum):
     AUTRE = "autre"
 
 
-class RoomType(StrEnum):
+class TypePiece(StrEnum):
     """Pièces de la maison."""
 
     SALON = "salon"
@@ -87,20 +87,20 @@ class RoomType(StrEnum):
 # ═══════════════════════════════════════════════════════════
 
 
-class Furniture(TimestampFullMixin, Base):
+class Meuble(TimestampFullMixin, Base):
     """Meuble dans la wishlist.
 
     Pour gérer les achats progressifs de meubles avec budget.
     """
 
-    __tablename__ = "furniture"
+    __tablename__ = "meubles"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
     # Infos meuble
     nom: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
-    piece: Mapped[str] = mapped_column(String(50), nullable=False, index=True)  # RoomType
+    piece: Mapped[str] = mapped_column(String(50), nullable=False, index=True)  # TypePiece
     categorie: Mapped[str | None] = mapped_column(
         String(100)
     )  # Rangement, Assise, Table, Lit, etc.
@@ -132,7 +132,7 @@ class Furniture(TimestampFullMixin, Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     def __repr__(self) -> str:
-        return f"<Furniture(id={self.id}, nom='{self.nom}', piece='{self.piece}')>"
+        return f"<Meuble(id={self.id}, nom='{self.nom}', piece='{self.piece}')>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -140,13 +140,13 @@ class Furniture(TimestampFullMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class HouseStock(TimestampFullMixin, Base):
+class StockMaison(TimestampFullMixin, Base):
     """Stock de consommables maison (ampoules, piles, produits ménagers).
 
     Pour ne plus être à court et éviter les doublons avec courses.
     """
 
-    __tablename__ = "house_stocks"
+    __tablename__ = "stocks_maison"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
@@ -170,7 +170,7 @@ class HouseStock(TimestampFullMixin, Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     def __repr__(self) -> str:
-        return f"<HouseStock(id={self.id}, nom='{self.nom}', qte={self.quantite})>"
+        return f"<StockMaison(id={self.id}, nom='{self.nom}', qte={self.quantite})>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -178,14 +178,14 @@ class HouseStock(TimestampFullMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class MaintenanceTask(TimestampFullMixin, Base):
+class TacheEntretien(TimestampFullMixin, Base):
     """Tâche d'entretien planifiée (ménage, maintenance, rangement).
 
     Pour gérer le bordel : vitres, tri caisses, garage, médicaments...
     Intégration possible avec le planning général.
     """
 
-    __tablename__ = "maintenance_tasks"
+    __tablename__ = "taches_entretien"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
@@ -195,7 +195,7 @@ class MaintenanceTask(TimestampFullMixin, Base):
     categorie: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     # Categories: menage, rangement, maintenance, reparation, tri, vitres, garage, securite, entretien
 
-    piece: Mapped[str | None] = mapped_column(String(50))  # RoomType
+    piece: Mapped[str | None] = mapped_column(String(50))  # TypePiece
 
     # Fréquence (jours) - NULL = ponctuel
     frequence_jours: Mapped[int | None] = mapped_column(Integer)
@@ -221,7 +221,7 @@ class MaintenanceTask(TimestampFullMixin, Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     def __repr__(self) -> str:
-        return f"<MaintenanceTask(id={self.id}, nom='{self.nom}', fait={self.fait})>"
+        return f"<TacheEntretien(id={self.id}, nom='{self.nom}', fait={self.fait})>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -229,13 +229,13 @@ class MaintenanceTask(TimestampFullMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class EcoAction(CreatedAtMixin, Base):
+class ActionEcologique(CreatedAtMixin, Base):
     """Action écologique avec suivi des économies.
 
     Pour tracker le passage au lavable, économies d'énergie, etc.
     """
 
-    __tablename__ = "eco_actions"
+    __tablename__ = "actions_ecologiques"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
@@ -267,4 +267,4 @@ class EcoAction(CreatedAtMixin, Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     def __repr__(self) -> str:
-        return f"<EcoAction(id={self.id}, nom='{self.nom}', type='{self.type_action}')>"
+        return f"<ActionEcologique(id={self.id}, nom='{self.nom}', type='{self.type_action}')>"

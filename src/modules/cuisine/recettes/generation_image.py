@@ -5,6 +5,9 @@ Génération d'images pour les recettes.
 import streamlit as st
 
 from src.services.cuisine.recettes import obtenir_service_recettes
+from src.ui.keys import KeyNamespace
+
+_keys = KeyNamespace("recettes_image")
 
 
 def afficher_generer_image(recette):
@@ -57,7 +60,7 @@ def afficher_generer_image(recette):
                 status_placeholder.empty()
                 st.success(f"✅ Image générée pour: **{recette.nom}**")
                 # Stocker dans session state
-                st.session_state[f"generated_image_{recette.id}"] = url_image
+                st.session_state[_keys("generated", recette.id)] = url_image
 
                 # Afficher l'image en grande avec ratio maintenu
                 st.image(url_image, caption=f"🍽️ {recette.nom}", use_column_width=True)
@@ -76,8 +79,8 @@ def afficher_generer_image(recette):
                 st.code(traceback.format_exc(), language="python")
 
     # Afficher l'image si elle existe en session state
-    if f"generated_image_{recette.id}" in st.session_state:
-        url_image = st.session_state[f"generated_image_{recette.id}"]
+    if _keys("generated", recette.id) in st.session_state:
+        url_image = st.session_state[_keys("generated", recette.id)]
         st.image(url_image, caption=f"🍽️ {recette.nom}", use_column_width=True)
 
         # Proposer de sauvegarder

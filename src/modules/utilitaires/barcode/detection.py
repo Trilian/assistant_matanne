@@ -13,6 +13,10 @@ from datetime import datetime
 
 import streamlit as st
 
+from src.ui.keys import KeyNamespace
+
+_keys = KeyNamespace("barcode")
+
 logger = logging.getLogger(__name__)
 
 
@@ -181,8 +185,8 @@ class BarcodeScanner:
         )
 
         # État du scan
-        if f"{key}_detected" not in st.session_state:
-            st.session_state[f"{key}_detected"] = []
+        if _keys("detected", key) not in st.session_state:
+            st.session_state[_keys("detected", key)] = []
 
         scanner_instance = self
 
@@ -199,7 +203,7 @@ class BarcodeScanner:
                     for code in codes:
                         if scanner_instance._should_report_scan(code["data"]):
                             # Stocker le résultat
-                            st.session_state[f"{key}_detected"].append(
+                            st.session_state[_keys("detected", key)].append(
                                 {
                                     "type": code["type"],
                                     "data": code["data"],
@@ -255,7 +259,7 @@ class BarcodeScanner:
         )
 
         # Afficher les codes détectés
-        detected = st.session_state.get(f"{key}_detected", [])
+        detected = st.session_state.get(_keys("detected", key), [])
 
         if detected:
             st.success(f"✅ {len(detected)} code(s) détecté(s)")
@@ -272,7 +276,7 @@ class BarcodeScanner:
 
             # Bouton pour effacer
             if st.button("🗑️ Effacer historique", key=f"{key}_clear"):
-                st.session_state[f"{key}_detected"] = []
+                st.session_state[_keys("detected", key)] = []
                 st.rerun()
 
             # Liste des codes

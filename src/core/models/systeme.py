@@ -3,7 +3,7 @@ Modèles SQLAlchemy pour le système et les sauvegardes.
 
 Contient :
 - Backup : Historique des sauvegardes
-- ActionHistory : Historique des actions utilisateur (audit)
+- HistoriqueAction : Historique des actions utilisateur (audit)
 """
 
 from datetime import datetime
@@ -13,6 +13,7 @@ from sqlalchemy import (
     BigInteger,
     Boolean,
     DateTime,
+    Index,
     String,
     Text,
 )
@@ -20,14 +21,15 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from .base import Base, utc_now
+from .base import Base
+from .mixins import CreatedAtMixin
 
 # ═══════════════════════════════════════════════════════════
 # TABLE BACKUPS
 # ═══════════════════════════════════════════════════════════
 
 
-class Backup(Base):
+class Backup(CreatedAtMixin, Base):
     """Historique des sauvegardes.
 
     Table SQL: backups
@@ -43,7 +45,7 @@ class Backup(Base):
         version: Version du format de backup
     """
 
-    __tablename__ = "backups"
+    __tablename__ = "sauvegardes"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -57,8 +59,7 @@ class Backup(Base):
     # Supabase user
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), index=True)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
+    __table_args__ = (Index("ix_backups_created_at", "created_at"),)
 
     def __repr__(self) -> str:
         return f"<Backup(id={self.id}, filename='{self.filename}', size={self.size_bytes})>"
@@ -69,7 +70,7 @@ class Backup(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class ActionHistory(Base):
+class HistoriqueAction(CreatedAtMixin, Base):
     """Historique des actions utilisateur pour audit.
 
     Table SQL: action_history
@@ -90,7 +91,7 @@ class ActionHistory(Base):
         user_agent: User agent du navigateur
     """
 
-    __tablename__ = "action_history"
+    __tablename__ = "historique_actions"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
@@ -106,10 +107,7 @@ class ActionHistory(Base):
     ip_address: Mapped[str | None] = mapped_column(String(45))
     user_agent: Mapped[str | None] = mapped_column(String(500))
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
+    __table_args__ = (Index("ix_action_history_created_at", "created_at"),)
 
     def __repr__(self) -> str:
-        return (
-            f"<ActionHistory(id={self.id}, user='{self.user_name}', action='{self.action_type}')>"
-        )
+        return f"<HistoriqueAction(id={self.id}, user='{self.user_name}', action='{self.action_type}')>"

@@ -4,9 +4,6 @@ Tests pour src/modules/maison/utils.py
 Tests des fonctions utilitaires pour les modules Projets, Jardin et Entretien.
 """
 
-import pytest
-
-pytestmark = pytest.mark.skip(reason="Module src.modules.maison.utils non encore implémenté")
 from datetime import date, timedelta
 from unittest.mock import MagicMock, patch
 
@@ -433,17 +430,17 @@ class TestChargerPlantes:
     def test_charge_plantes_actives(self, mock_db, mock_plante_a_arroser, mock_garden_log):
         """Test chargement des plantes actives"""
         mock_session = MagicMock()
-        # Query pour GardenItem
+        # Query pour ElementJardin
         mock_query_items = MagicMock()
         mock_query_items.filter_by.return_value.all.return_value = [mock_plante_a_arroser]
-        # Query pour GardenLog (arrosage)
+        # Query pour JournalJardin (arrosage)
         mock_query_logs = MagicMock()
         mock_query_logs.filter_by.return_value.order_by.return_value.limit.return_value.all.return_value = [
             mock_garden_log
         ]
 
         def query_side_effect(model):
-            if model.__name__ == "GardenItem":
+            if model.__name__ == "ElementJardin":
                 return mock_query_items
             return mock_query_logs
 
@@ -470,7 +467,7 @@ class TestChargerPlantes:
         mock_query_logs.filter_by.return_value.order_by.return_value.limit.return_value.all.return_value = []
 
         def query_side_effect(model):
-            if model.__name__ == "GardenItem":
+            if model.__name__ == "ElementJardin":
                 return mock_query_items
             return mock_query_logs
 
@@ -734,7 +731,7 @@ class TestChargerRoutines:
         # Query pour Routine
         mock_query_routines = MagicMock()
         mock_query_routines.filter_by.return_value.all.return_value = [mock_routine_active]
-        # Query pour RoutineTask count
+        # Query pour TacheRoutine count
         mock_query_tasks = MagicMock()
         mock_query_tasks.filter.return_value.count.return_value = 1
 

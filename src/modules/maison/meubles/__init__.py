@@ -1,25 +1,67 @@
 """
-Module Meubles - Inventaire et gestion du mobilier.
+Module Meubles - Wishlist d'achats par pièce avec budget.
 
 Fonctionnalités:
-- Inventaire de tous les meubles par pièce
-- Suivi de l'état et de l'ancienneté
-- Liste de souhaits meubles
-- Estimation valeur d'assurance
-- Historique achats et garanties
+- Wishlist de meubles/achats souhaités par pièce
+- Suivi du statut (souhaité → acheté)
+- Budget estimé et max par pièce
+- Vue par pièce avec résumé financier
 """
 
 import logging
-from datetime import date, datetime
+from decimal import Decimal
 
 import streamlit as st
 
-from src.core.monitoring.rerun_profiler import profiler_rerun
-from src.modules._framework import error_boundary
+from src.core.db import obtenir_contexte_db
 from src.ui.keys import KeyNamespace
-from src.ui.state.url import tabs_with_url
 
-__all__ = ["app"]
+try:
+    from src.core.models import Meuble
+except ImportError:
+    from sqlalchemy import Boolean, Date, Numeric, String
+    from sqlalchemy.orm import Mapped, mapped_column
+
+    from src.core.models.base import Base
+
+    class Meuble(Base):
+        """Modèle Meuble (wishlist achats)."""
+
+        __tablename__ = "meubles_wishlist"
+
+        id: Mapped[int] = mapped_column(primary_key=True)
+        nom: Mapped[str] = mapped_column(String(200))
+        piece: Mapped[str] = mapped_column(String(50))
+        description: Mapped[str | None] = mapped_column(String(500), nullable=True)
+        priorite: Mapped[str] = mapped_column(String(20), default="normale")
+        statut: Mapped[str] = mapped_column(String(20), default="souhaite")
+        prix_estime: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
+        prix_max: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
+        magasin: Mapped[str | None] = mapped_column(String(200), nullable=True)
+        url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+        dimensions: Mapped[str | None] = mapped_column(String(100), nullable=True)
+        actif: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+__all__ = [
+    "app",
+    "PIECES_LABELS",
+    "STATUTS_LABELS",
+    "PRIORITES_LABELS",
+    "get_all_meubles",
+    "get_meuble_by_id",
+    "create_meuble",
+    "update_meuble",
+    "delete_meuble",
+    "get_budget_resume",
+    "afficher_formulaire",
+    "afficher_meuble_card",
+    "afficher_budget_summary",
+    "afficher_vue_par_piece",
+    "afficher_onglet_wishlist",
+    "afficher_onglet_ajouter",
+    "afficher_onglet_budget",
+]
 
 _keys = KeyNamespace("meubles")
 logger = logging.getLogger(__name__)
@@ -28,262 +70,367 @@ logger = logging.getLogger(__name__)
 # CONSTANTES
 # ═══════════════════════════════════════════════════════════
 
-PIECES = [
-    "Salon",
-    "Chambre parentale",
-    "Chambre enfant",
-    "Cuisine",
-    "Salle de bain",
-    "Entrée",
-    "Bureau",
-    "Garage",
-    "Buanderie",
-    "Terrasse/Balcon",
-]
+PIECES_LABELS = {
+    "salon": "🛋️ Salon",
+    "cuisine": "🍳 Cuisine",
+    "chambre_parentale": "🛏️ Chambre parentale",
+    "chambre_enfant": "👶 Chambre enfant",
+    "bureau": "💻 Bureau",
+    "salle_de_bain": "🚿 Salle de bain",
+    "entree": "🚪 Entrée",
+    "buanderie": "🧺 Buanderie",
+    "garage": "🔧 Garage",
+    "terrasse": "🌿 Terrasse",
+}
 
-ETATS = ["Neuf", "Bon", "Correct", "Usé", "À remplacer"]
+STATUTS_LABELS = {
+    "souhaite": "💭 Souhaité",
+    "recherche": "🔍 En recherche",
+    "trouve": "📌 Trouvé",
+    "commande": "📦 Commandé",
+    "achete": "✅ Acheté",
+    "annule": "❌ Annulé",
+}
 
-CATEGORIES_MEUBLES = [
-    "Canapé/Fauteuil",
-    "Table",
-    "Chaise",
-    "Lit/Matelas",
-    "Armoire/Commode",
-    "Bureau/Étagère",
-    "Meuble TV",
-    "Rangement",
-    "Décoration",
-    "Électroménager",
-    "Autre",
-]
-
-
-@profiler_rerun("meubles")
-def app():
-    """Point d'entrée du module Meubles."""
-    st.title("🛋️ Inventaire Meubles")
-    st.caption("Gérez l'inventaire de votre mobilier, garanties et valeur d'assurance.")
-
-    # Init données
-    if _keys("meubles") not in st.session_state:
-        st.session_state[_keys("meubles")] = []
-    if _keys("souhaits") not in st.session_state:
-        st.session_state[_keys("souhaits")] = []
-
-    TAB_LABELS = [
-        "📦 Inventaire",
-        "➕ Ajouter",
-        "⭐ Liste de souhaits",
-        "💰 Valeur assurance",
-    ]
-    tabs_with_url(TAB_LABELS, param="tab")
-    tab1, tab2, tab3, tab4 = st.tabs(TAB_LABELS)
-
-    with tab1:
-        with error_boundary(titre="Erreur inventaire meubles"):
-            _onglet_inventaire()
-
-    with tab2:
-        with error_boundary(titre="Erreur ajout meuble"):
-            _onglet_ajouter()
-
-    with tab3:
-        with error_boundary(titre="Erreur souhaits"):
-            _onglet_souhaits()
-
-    with tab4:
-        with error_boundary(titre="Erreur valeur assurance"):
-            _onglet_assurance()
+PRIORITES_LABELS = {
+    "urgent": "🔴 Urgent",
+    "haute": "🟠 Haute",
+    "normale": "🟢 Normale",
+    "basse": "🔵 Basse",
+    "plus_tard": "⚪ Plus tard",
+}
 
 
-def _onglet_inventaire():
-    """Liste des meubles par pièce."""
-    meubles = st.session_state[_keys("meubles")]
+# ═══════════════════════════════════════════════════════════
+# CRUD FONCTIONS
+# ═══════════════════════════════════════════════════════════
+
+
+def get_all_meubles(filtre_statut: str | None = None, filtre_piece: str | None = None) -> list:
+    """Récupère tous les meubles avec filtres optionnels.
+
+    Args:
+        filtre_statut: Filtrer par statut.
+        filtre_piece: Filtrer par pièce.
+
+    Returns:
+        Liste d'objets Meuble.
+    """
+    with obtenir_contexte_db() as db:
+        query = db.query(Meuble)
+        if filtre_statut:
+            query = query.filter(Meuble.statut == filtre_statut)
+        if filtre_piece:
+            query = query.filter(Meuble.piece == filtre_piece)
+        return query.order_by(Meuble.id).all()
+
+
+def get_meuble_by_id(meuble_id: int):
+    """Récupère un meuble par son ID."""
+    with obtenir_contexte_db() as db:
+        return db.query(Meuble).filter(Meuble.id == meuble_id).first()
+
+
+def create_meuble(data: dict) -> None:
+    """Crée un nouveau meuble."""
+    with obtenir_contexte_db() as db:
+        meuble = Meuble(**data)
+        db.add(meuble)
+        db.commit()
+        db.refresh(meuble)
+
+
+def update_meuble(meuble_id: int, data: dict):
+    """Met à jour un meuble existant."""
+    with obtenir_contexte_db() as db:
+        meuble = db.query(Meuble).filter(Meuble.id == meuble_id).first()
+        if meuble is None:
+            return None
+        for key, value in data.items():
+            setattr(meuble, key, value)
+        db.commit()
+        db.refresh(meuble)
+        return meuble
+
+
+def delete_meuble(meuble_id: int) -> bool:
+    """Supprime un meuble."""
+    with obtenir_contexte_db() as db:
+        meuble = db.query(Meuble).filter(Meuble.id == meuble_id).first()
+        if meuble is None:
+            return False
+        db.delete(meuble)
+        db.commit()
+        return True
+
+
+def get_budget_resume() -> dict:
+    """Calcule le résumé budget des meubles souhaités.
+
+    Returns:
+        Dict avec nb_articles, total_estime, total_max, par_piece.
+    """
+    with obtenir_contexte_db() as db:
+        meubles = db.query(Meuble).filter(Meuble.statut != "achete").all()
 
     if not meubles:
-        st.info("Aucun meuble répertorié. Ajoutez-en dans l'onglet '➕ Ajouter'.")
-        return
+        return {
+            "nb_articles": 0,
+            "total_estime": 0,
+            "total_max": 0,
+            "par_piece": {},
+        }
 
-    # Filtre par pièce
-    pieces_presentes = sorted(set(m["piece"] for m in meubles))
-    filtre_piece = st.selectbox(
-        "Filtrer par pièce",
-        ["Toutes"] + pieces_presentes,
-        key=_keys("filtre_piece"),
-    )
+    total_estime = 0.0
+    total_max = 0.0
+    par_piece: dict = {}
 
-    meubles_filtres = meubles
-    if filtre_piece != "Toutes":
-        meubles_filtres = [m for m in meubles if m["piece"] == filtre_piece]
+    for m in meubles:
+        prix_e = float(m.prix_estime) if m.prix_estime else 0.0
+        prix_m = float(m.prix_max) if m.prix_max else 0.0
+        total_estime += prix_e
+        total_max += prix_m
 
-    st.markdown(f"**{len(meubles_filtres)} meuble(s)**")
+        piece = getattr(m, "piece", "autre")
+        if piece not in par_piece:
+            par_piece[piece] = {"count": 0, "total_estime": 0.0, "total_max": 0.0}
+        par_piece[piece]["count"] += 1
+        par_piece[piece]["total_estime"] += prix_e
+        par_piece[piece]["total_max"] += prix_m
 
-    for i, meuble in enumerate(meubles_filtres):
-        with st.container(border=True):
-            col1, col2, col3 = st.columns([3, 1, 1])
-            with col1:
-                st.markdown(f"**{meuble['nom']}**")
-                st.caption(
-                    f"📍 {meuble['piece']} | "
-                    f"📁 {meuble['categorie']} | "
-                    f"🏷️ {meuble['etat']}"
-                )
-                if meuble.get("date_achat"):
-                    st.caption(f"📅 Acheté le {meuble['date_achat']}")
-                if meuble.get("garantie_fin"):
-                    fin = date.fromisoformat(meuble["garantie_fin"])
-                    if fin >= date.today():
-                        st.caption(f"✅ Garantie jusqu'au {meuble['garantie_fin']}")
-                    else:
-                        st.caption("⚠️ Garantie expirée")
-
-            with col2:
-                if meuble.get("prix"):
-                    st.metric("Prix", f"{meuble['prix']}€")
-
-            with col3:
-                if st.button("🗑️", key=_keys(f"del_{i}")):
-                    st.session_state[_keys("meubles")].remove(meuble)
-                    st.rerun()
+    return {
+        "nb_articles": len(meubles),
+        "total_estime": total_estime,
+        "total_max": total_max,
+        "par_piece": par_piece,
+    }
 
 
-def _onglet_ajouter():
-    """Formulaire d'ajout de meuble."""
-    st.subheader("Ajouter un meuble")
+# ═══════════════════════════════════════════════════════════
+# UI COMPONENTS
+# ═══════════════════════════════════════════════════════════
 
+
+def afficher_formulaire(meuble=None) -> None:
+    """Affiche le formulaire de création/édition d'un meuble."""
     with st.form(key=_keys("form_meuble")):
-        nom = st.text_input("Nom *", placeholder="ex: Canapé IKEA Söderhamn")
+        nom = st.text_input("Nom *", value=getattr(meuble, "nom", ""))
 
         col1, col2 = st.columns(2)
         with col1:
-            piece = st.selectbox("Pièce", PIECES, key=_keys("piece"))
+            pieces_list = list(PIECES_LABELS.keys())
+            idx_piece = 0
+            if meuble and hasattr(meuble, "piece") and meuble.piece in pieces_list:
+                idx_piece = pieces_list.index(meuble.piece)
+            piece = st.selectbox(
+                "Pièce",
+                pieces_list,
+                format_func=lambda x: PIECES_LABELS[x],
+                index=idx_piece,
+            )
         with col2:
-            categorie = st.selectbox("Catégorie", CATEGORIES_MEUBLES, key=_keys("categorie"))
+            priorites_list = list(PRIORITES_LABELS.keys())
+            idx_prio = priorites_list.index("normale")
+            if meuble and hasattr(meuble, "priorite") and meuble.priorite in priorites_list:
+                idx_prio = priorites_list.index(meuble.priorite)
+            priorite = st.selectbox(
+                "Priorité",
+                priorites_list,
+                format_func=lambda x: PRIORITES_LABELS[x],
+                index=idx_prio,
+            )
 
-        col3, col4 = st.columns(2)
-        with col3:
-            etat = st.selectbox("État", ETATS, index=1, key=_keys("etat"))
-        with col4:
-            prix = st.number_input("Prix d'achat (€)", min_value=0.0, step=10.0, key=_keys("prix"))
+        description = st.text_area("Description", value=getattr(meuble, "description", "") or "")
+        prix_estime = st.number_input(
+            "Prix estimé (€)",
+            min_value=0.0,
+            value=float(getattr(meuble, "prix_estime", 0) or 0),
+        )
+        prix_max = st.number_input(
+            "Prix max (€)",
+            min_value=0.0,
+            value=float(getattr(meuble, "prix_max", 0) or 0),
+        )
+        magasin = st.text_input("Magasin", value=getattr(meuble, "magasin", "") or "")
+        url = st.text_input("URL", value=getattr(meuble, "url", "") or "")
+        dimensions = st.text_input("Dimensions", value=getattr(meuble, "dimensions", "") or "")
 
-        col5, col6 = st.columns(2)
-        with col5:
-            date_achat = st.date_input("Date d'achat", value=None, key=_keys("date_achat"))
-        with col6:
-            garantie_fin = st.date_input("Fin de garantie", value=None, key=_keys("garantie"))
-
-        marque = st.text_input("Marque/Magasin", placeholder="ex: IKEA, Maisons du Monde...", key=_keys("marque"))
-        notes = st.text_input("Notes", key=_keys("notes"))
-
-        submitted = st.form_submit_button("💾 Ajouter le meuble", use_container_width=True)
+        submitted = st.form_submit_button("💾 Enregistrer", use_container_width=True)
 
     if submitted and nom:
-        meuble = {
+        data = {
             "nom": nom,
             "piece": piece,
-            "categorie": categorie,
-            "etat": etat,
-            "prix": prix if prix > 0 else None,
-            "date_achat": date_achat.isoformat() if date_achat else None,
-            "garantie_fin": garantie_fin.isoformat() if garantie_fin else None,
-            "marque": marque or None,
-            "notes": notes or None,
-            "ajoute_le": datetime.now().isoformat(),
+            "priorite": priorite,
+            "description": description or None,
+            "prix_estime": Decimal(str(prix_estime)) if prix_estime > 0 else None,
+            "prix_max": Decimal(str(prix_max)) if prix_max > 0 else None,
+            "magasin": magasin or None,
+            "url": url or None,
+            "dimensions": dimensions or None,
+            "statut": "souhaite",
         }
-        st.session_state[_keys("meubles")].append(meuble)
-        st.success(f"✅ **{nom}** ajouté dans {piece} !")
-    elif submitted:
-        st.warning("Le nom est obligatoire.")
-
-
-def _onglet_souhaits():
-    """Liste de souhaits pour futurs achats."""
-    st.subheader("⭐ Liste de souhaits")
-    souhaits = st.session_state[_keys("souhaits")]
-
-    # Formulaire rapide
-    with st.form(key=_keys("form_souhait")):
-        col1, col2, col3 = st.columns([3, 1, 1])
-        with col1:
-            nom_souhait = st.text_input("Meuble souhaité", placeholder="ex: Table basse relevable")
-        with col2:
-            budget_souhait = st.number_input("Budget max (€)", min_value=0, step=50, key=_keys("budget_souhait"))
-        with col3:
-            priorite_souhait = st.selectbox("Priorité", ["haute", "moyenne", "basse"], index=1, key=_keys("prio_souhait"))
-        submitted = st.form_submit_button("➕ Ajouter", use_container_width=True)
-
-    if submitted and nom_souhait:
-        st.session_state[_keys("souhaits")].append({
-            "nom": nom_souhait,
-            "budget": budget_souhait if budget_souhait > 0 else None,
-            "priorite": priorite_souhait,
-            "ajoute_le": datetime.now().isoformat(),
-        })
+        if meuble:
+            update_meuble(meuble.id, data)
+            st.success("✅ Meuble mis à jour !")
+        else:
+            create_meuble(data)
+            st.success("✅ Meuble ajouté !")
         st.rerun()
 
-    # Affichage
-    if not souhaits:
-        st.info("Aucun souhait pour l'instant.")
+
+def afficher_meuble_card(meuble) -> None:
+    """Affiche une carte pour un meuble."""
+    piece_label = PIECES_LABELS.get(getattr(meuble, "piece", ""), "")
+    statut_label = STATUTS_LABELS.get(getattr(meuble, "statut", ""), "")
+    priorite_label = PRIORITES_LABELS.get(getattr(meuble, "priorite", ""), "")
+
+    with st.container(border=True):
+        col1, col2, col3 = st.columns([3, 1, 1])
+        with col1:
+            st.markdown(f"**{meuble.nom}**")
+            desc = getattr(meuble, "description", None)
+            if desc:
+                if len(desc) > 100:
+                    desc = desc[:100] + "…"
+                st.caption(desc)
+            st.caption(f"{piece_label} | {statut_label} | {priorite_label}")
+        with col2:
+            prix = getattr(meuble, "prix_estime", None)
+            if prix:
+                st.metric("Prix estimé", f"{float(prix):.0f}€")
+        with col3:
+            magasin = getattr(meuble, "magasin", None)
+            if magasin:
+                st.caption(f"🏪 {magasin}")
+
+        col_edit, col_del = st.columns(2)
+        with col_edit:
+            if st.button("✏️ Modifier", key=f"edit_m_{meuble.id}"):
+                st.session_state[_keys("edit_id")] = meuble.id
+                st.rerun()
+        with col_del:
+            if st.button("🗑️ Supprimer", key=f"del_m_{meuble.id}"):
+                delete_meuble(meuble.id)
+                st.rerun()
+
+
+def afficher_budget_summary() -> None:
+    """Affiche le résumé budget."""
+    st.subheader("💰 Résumé budget")
+    resume = get_budget_resume()
+
+    cols = st.columns(3)
+    with cols[0]:
+        st.metric("Articles", resume["nb_articles"])
+    with cols[1]:
+        st.metric("Total estimé", f"{resume['total_estime']:.0f}€")
+    with cols[2]:
+        st.metric("Budget max", f"{resume['total_max']:.0f}€")
+
+    if resume["par_piece"]:
+        st.markdown("**Par pièce:**")
+        for piece, data in resume["par_piece"].items():
+            label = PIECES_LABELS.get(piece, piece)
+            st.caption(f"{label}: {data['count']} articles — ~{data['total_estime']:.0f}€")
+
+
+def afficher_vue_par_piece() -> None:
+    """Affiche la vue groupée par pièce."""
+    meubles = get_all_meubles()
+    if not meubles:
+        st.info("Aucun meuble enregistré.")
         return
 
-    for i, souhait in enumerate(souhaits):
-        with st.container(border=True):
-            col1, col2, col3 = st.columns([3, 1, 1])
-            with col1:
-                st.markdown(f"**{souhait['nom']}**")
-            with col2:
-                if souhait.get("budget"):
-                    st.caption(f"Budget: {souhait['budget']}€")
-            with col3:
-                if st.button("✅ Acheté", key=_keys(f"acheté_{i}")):
-                    st.session_state[_keys("souhaits")].remove(souhait)
-                    st.rerun()
+    # Grouper par pièce
+    par_piece: dict = {}
+    for m in meubles:
+        piece = getattr(m, "piece", "autre")
+        par_piece.setdefault(piece, []).append(m)
+
+    for piece, items in sorted(par_piece.items()):
+        label = PIECES_LABELS.get(piece, piece)
+        with st.expander(f"{label} ({len(items)})"):
+            for item in items:
+                afficher_meuble_card(item)
 
 
-def _onglet_assurance():
-    """Calcul de la valeur totale pour l'assurance."""
-    st.subheader("💰 Valeur d'assurance")
-    meubles = st.session_state[_keys("meubles")]
+def afficher_onglet_wishlist() -> None:
+    """Affiche l'onglet wishlist avec filtres."""
+    col1, col2 = st.columns(2)
+    with col1:
+        filtre_statut = st.selectbox(
+            "Statut",
+            [""] + list(STATUTS_LABELS.keys()),
+            format_func=lambda x: STATUTS_LABELS.get(x, "Tous") if x else "Tous",
+        )
+    with col2:
+        filtre_piece = st.selectbox(
+            "Pièce",
+            [""] + list(PIECES_LABELS.keys()),
+            format_func=lambda x: PIECES_LABELS.get(x, "Toutes") if x else "Toutes",
+        )
+
+    meubles = get_all_meubles(
+        filtre_statut=filtre_statut or None,
+        filtre_piece=filtre_piece or None,
+    )
 
     if not meubles:
-        st.info("Ajoutez des meubles avec leur prix pour estimer la valeur d'assurance.")
+        st.info("Aucun meuble trouvé avec ces critères.")
         return
 
-    meubles_avec_prix = [m for m in meubles if m.get("prix")]
-    total = sum(m["prix"] for m in meubles_avec_prix)
-    nb_sans_prix = len(meubles) - len(meubles_avec_prix)
+    st.caption(f"{len(meubles)} meuble(s) trouvé(s)")
+    for m in meubles:
+        afficher_meuble_card(m)
 
-    # Métriques
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Valeur totale", f"{total:,.0f}€")
-    with col2:
-        st.metric("Meubles valorisés", f"{len(meubles_avec_prix)}/{len(meubles)}")
-    with col3:
-        if len(meubles_avec_prix) > 0:
-            moyenne = total / len(meubles_avec_prix)
-            st.metric("Valeur moyenne", f"{moyenne:,.0f}€")
 
-    if nb_sans_prix > 0:
-        st.warning(f"⚠️ {nb_sans_prix} meuble(s) sans prix renseigné.")
+def afficher_onglet_ajouter() -> None:
+    """Affiche l'onglet ajout."""
+    st.subheader("➕ Ajouter un meuble")
+    afficher_formulaire(None)
 
-    # Détail par pièce
-    st.markdown("#### Répartition par pièce")
-    pieces_valeur = {}
-    for m in meubles_avec_prix:
-        pieces_valeur.setdefault(m["piece"], 0)
-        pieces_valeur[m["piece"]] += m["prix"]
 
-    if pieces_valeur:
-        try:
-            import plotly.express as px
+def afficher_onglet_budget() -> None:
+    """Affiche l'onglet budget."""
+    afficher_budget_summary()
+    st.divider()
+    afficher_vue_par_piece()
 
-            fig = px.pie(
-                values=list(pieces_valeur.values()),
-                names=list(pieces_valeur.keys()),
-                title="Valeur par pièce",
-            )
-            st.plotly_chart(fig, use_container_width=True)
-        except ImportError:
-            for piece, valeur in sorted(pieces_valeur.items(), key=lambda x: -x[1]):
-                st.markdown(f"- **{piece}**: {valeur:,.0f}€")
+
+# ═══════════════════════════════════════════════════════════
+# APP
+# ═══════════════════════════════════════════════════════════
+
+
+def app():
+    """Point d'entrée du module Meubles."""
+    st.title("🛋️ Meubles & Achats")
+    st.caption("Gérez vos achats de meubles par pièce avec suivi de budget.")
+
+    # Mode édition
+    edit_id = st.session_state.get(_keys("edit_id"))
+    if edit_id:
+        meuble = get_meuble_by_id(edit_id)
+        if meuble:
+            st.subheader(f"✏️ Modifier : {meuble.nom}")
+            afficher_formulaire(meuble)
+            if st.button("← Annuler"):
+                del st.session_state[_keys("edit_id")]
+                st.rerun()
+            return
+        else:
+            del st.session_state[_keys("edit_id")]
+
+    # Onglets
+    TAB_LABELS = ["📋 Wishlist", "➕ Ajouter", "💰 Budget"]
+    tab1, tab2, tab3 = st.tabs(TAB_LABELS)
+
+    with tab1:
+        afficher_onglet_wishlist()
+
+    with tab2:
+        afficher_onglet_ajouter()
+
+    with tab3:
+        afficher_onglet_budget()

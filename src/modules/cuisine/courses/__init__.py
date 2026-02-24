@@ -47,10 +47,10 @@ def app():
     st.caption("Gestion de votre liste de courses")
 
     # Initialiser session state
-    if "courses_refresh" not in st.session_state:
-        st.session_state.courses_refresh = 0
-    if "new_article_mode" not in st.session_state:
-        st.session_state.new_article_mode = False
+    if _keys("refresh") not in st.session_state:
+        st.session_state[_keys("refresh")] = 0
+    if _keys("new_article_mode") not in st.session_state:
+        st.session_state[_keys("new_article_mode")] = False
     # Initialiser la synchronisation temps réel
     _init_realtime_sync()
 

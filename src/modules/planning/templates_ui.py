@@ -21,6 +21,7 @@ from src.services.cuisine.planning.templates import (
 )
 from src.ui import etat_vide
 from src.ui.feedback import afficher_erreur, afficher_succes
+from src.ui.state.url import tabs_with_url
 
 
 @profiler_rerun("templates_ui")
@@ -33,13 +34,13 @@ def app():
         service = obtenir_service_templates()
 
         # Onglets principaux
-        tab_liste, tab_creer, tab_appliquer = st.tabs(
-            [
-                "📑 Mes templates",
-                "➕ Créer",
-                "📅 Appliquer",
-            ]
-        )
+        TAB_LABELS = [
+            "📑 Mes templates",
+            "➕ Créer",
+            "📅 Appliquer",
+        ]
+        tabs_with_url(TAB_LABELS, param="tab")
+        tab_liste, tab_creer, tab_appliquer = st.tabs(TAB_LABELS)
 
         # ═══════════════════════════════════════════════════════════
         # TAB: LISTE DES TEMPLATES

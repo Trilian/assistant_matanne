@@ -573,7 +573,7 @@ class TestSauvegarderAbonnementSupabase:
 
         service._sauvegarder_abonnement_supabase(sub)
 
-        mock_client.table.assert_called_with("push_subscriptions")
+        mock_client.table.assert_called_with("abonnements_push")
 
     def test_sauvegarder_exception_captee(self, service, subscription_info):
         """Exception capturée lors de la sauvegarde."""
@@ -616,7 +616,7 @@ class TestSupprimerAbonnementSupabase:
 
         service._supprimer_abonnement_supabase("user123", "https://example.com")
 
-        mock_client.table.assert_called_with("push_subscriptions")
+        mock_client.table.assert_called_with("abonnements_push")
 
     def test_supprimer_exception_captee(self, service):
         """Exception capturée lors de la suppression."""
@@ -706,7 +706,7 @@ class TestSauvegarderPreferencesSupabase:
 
         service._sauvegarder_preferences_supabase(preferences)
 
-        mock_client.table.assert_called_with("notification_preferences")
+        mock_client.table.assert_called_with("preferences_notifications")
 
     def test_sauvegarder_prefs_exception_captee(self, service, preferences):
         """Exception capturée lors de la sauvegarde préfs."""

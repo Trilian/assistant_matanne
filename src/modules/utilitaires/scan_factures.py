@@ -15,6 +15,7 @@ from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.modules._framework import error_boundary
 from src.ui import etat_vide
+from src.ui.state.url import tabs_with_url
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +164,9 @@ def app():
         st.session_state[SK.HISTORIQUE_FACTURES] = []
 
     # Onglets
-    onglet_scan, onglet_historique = st.tabs(["📷 Scanner", "📋 Historique"])
+    TAB_LABELS = ["📷 Scanner", "📋 Historique"]
+    tabs_with_url(TAB_LABELS, param="tab")
+    onglet_scan, onglet_historique = st.tabs(TAB_LABELS)
 
     # ─── Onglet Scanner ───
     with onglet_scan:

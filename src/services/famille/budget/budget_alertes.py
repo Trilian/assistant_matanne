@@ -11,7 +11,7 @@ from datetime import date as date_type
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_session_db
-from src.core.models import FamilyBudget
+from src.core.models import BudgetFamille
 
 from .schemas import (
     CategorieDepense,
@@ -76,7 +76,7 @@ class BudgetAlertesMixin:
     def ajouter_facture_maison(self, facture: FactureMaison, db: Session = None) -> FactureMaison:
         """
         Ajoute une facture maison avec suivi consommation.
-        Utilise la table house_expenses si disponible, sinon FamilyBudget.
+        Utilise la table house_expenses si disponible, sinon BudgetFamille.
 
         Args:
             facture: Facture à ajouter
@@ -87,9 +87,9 @@ class BudgetAlertesMixin:
         """
         try:
             # Essayer d'utiliser house_expenses (table dédiée factures)
-            from src.core.models import HouseExpense
+            from src.core.models import DepenseMaison
 
-            entry = HouseExpense(
+            entry = DepenseMaison(
                 categorie=facture.categorie.value,
                 montant=facture.montant,
                 consommation=facture.consommation,
@@ -109,12 +109,12 @@ class BudgetAlertesMixin:
             return facture
 
         except Exception as e:
-            logger.warning(f"Table house_expenses indisponible, fallback vers FamilyBudget: {e}")
+            logger.warning(f"Table house_expenses indisponible, fallback vers BudgetFamille: {e}")
 
-            # Fallback: utiliser FamilyBudget
+            # Fallback: utiliser BudgetFamille
             date_facture = facture.date_facture or date_type(facture.annee, facture.mois, 1)
 
-            entry = FamilyBudget(
+            entry = BudgetFamille(
                 date=date_facture,
                 montant=facture.montant,
                 categorie=facture.categorie.value,
@@ -148,16 +148,16 @@ class BudgetAlertesMixin:
             Liste des factures
         """
         try:
-            from src.core.models import HouseExpense
+            from src.core.models import DepenseMaison
 
-            query = db.query(HouseExpense)
+            query = db.query(DepenseMaison)
 
             if categorie:
-                query = query.filter(HouseExpense.categorie == categorie.value)
+                query = query.filter(DepenseMaison.categorie == categorie.value)
             if annee:
-                query = query.filter(HouseExpense.annee == annee)
+                query = query.filter(DepenseMaison.annee == annee)
 
-            entries = query.order_by(HouseExpense.annee.desc(), HouseExpense.mois.desc()).all()
+            entries = query.order_by(DepenseMaison.annee.desc(), DepenseMaison.mois.desc()).all()
 
             return [
                 FactureMaison(

@@ -13,13 +13,14 @@ import streamlit as st
 
 from src.ui.engine import StyleSheet
 from src.ui.registry import composant_ui
-from src.ui.tokens import Couleur, Espacement, Rayon, Typographie
+from src.ui.tokens import Espacement, Rayon, Typographie
+from src.ui.tokens_semantic import Sem
 from src.ui.utils import echapper_html
 
 logger = logging.getLogger(__name__)
 
 
-@composant_ui("system", exemple='indicateur_sante_systeme()', tags=("health", "monitoring", "pure"))
+@composant_ui("system", exemple="indicateur_sante_systeme()", tags=("health", "monitoring", "pure"))
 @st.cache_data(ttl=30, show_spinner=False)
 def indicateur_sante_systeme() -> dict:
     """
@@ -133,7 +134,7 @@ def afficher_timeline_systeme(activites: list[dict], max_items: int = 5):
                 "align-items": "center",
                 "padding": Espacement.SM,
                 "margin": "0.3rem 0",
-                "background": Couleur.BG_SUBTLE,
+                "background": Sem.SURFACE_ALT,
                 "border-radius": Rayon.MD,
             }
         )
@@ -148,7 +149,7 @@ def afficher_timeline_systeme(activites: list[dict], max_items: int = 5):
             f'<span style="margin-right: 0.8rem; font-size: {Typographie.ICON_SM};">{safe_icone}</span>'
             f"<div>"
             f'<span style="font-weight: 500;">{safe_action}</span><br>'
-            f'<small style="font-size: 0.75rem; color: {Couleur.TEXT_SECONDARY};">{safe_date}</small>'
+            f'<small style="font-size: 0.75rem; color: {Sem.ON_SURFACE_SECONDARY};">{safe_date}</small>'
             f"</div>"
             f"</div>",
             unsafe_allow_html=True,

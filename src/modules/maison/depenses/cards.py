@@ -10,10 +10,10 @@ from src.ui.keys import KeyNamespace
 _keys = KeyNamespace("depenses")
 
 from .crud import create_depense, delete_depense, update_depense
-from .utils import CATEGORY_LABELS, MOIS_FR, Decimal, HouseExpense, Optional, date, st
+from .utils import CATEGORY_LABELS, MOIS_FR, Decimal, DepenseMaison, Optional, date, st
 
 
-def afficher_depense_card(depense: HouseExpense):
+def afficher_depense_card(depense: DepenseMaison):
     """Affiche une card de depense"""
     with st.container(border=True):
         col1, col2, col3 = st.columns([2, 1, 1])
@@ -50,7 +50,7 @@ def afficher_depense_card(depense: HouseExpense):
                     st.rerun()
 
 
-def afficher_formulaire(depense: Optional[HouseExpense] = None):
+def afficher_formulaire(depense: Optional[DepenseMaison] = None):
     """Formulaire d'ajout/edition"""
     is_edit = depense is not None
     prefix = "edit" if is_edit else "new"

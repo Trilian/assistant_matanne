@@ -10,9 +10,12 @@ from src.core.config import obtenir_parametres as get_settings
 from src.core.state import obtenir_etat
 from src.ui.feedback import afficher_succes
 from src.ui.fragments import lazy, ui_fragment
+from src.ui.keys import KeyNamespace
+
+_keys = KeyNamespace("param_ia")
 
 
-@lazy(condition=lambda: st.session_state.get("show_ia_details", False), show_skeleton=True)
+@lazy(condition=lambda: st.session_state.get(_keys("details"), False), show_skeleton=True)
 def _afficher_cache_details():
     """Détails du cache IA - chargé conditionnellement."""
     cache_stats = SemanticCache.obtenir_statistiques()
@@ -58,8 +61,8 @@ def afficher_ia_config():
     # Utilisation actuelle
     _state = obtenir_etat()
 
-    if "rate_limit" in st.session_state:
-        rate_info = st.session_state.rate_limit
+    if _keys("rate_limit") in st.session_state:
+        rate_info = st.session_state[_keys("rate_limit")]
 
         st.markdown("**Utilisation Actuelle:**")
 
@@ -115,7 +118,7 @@ def afficher_ia_config():
     with col11:
         st.checkbox(
             "📊 Afficher détails",
-            key="show_ia_details",
+            key=_keys("details"),
             help="Active le chargement des statistiques détaillées du cache IA",
         )
 

@@ -2,20 +2,20 @@
 Tests unitaires pour habitat.py
 
 Module: src.core.models.habitat
-Contient: Furniture, HouseStock, MaintenanceTask, EcoAction
+Contient: Meuble, StockMaison, TacheEntretien, ActionEcologique
 """
 
 from decimal import Decimal
 
 from src.core.models.habitat import (
-    EcoAction,
-    EcoActionType,
-    Furniture,
-    FurniturePriority,
-    FurnitureStatus,
-    HouseStock,
-    MaintenanceTask,
-    RoomType,
+    ActionEcologique,
+    Meuble,
+    PrioriteMeuble,
+    StatutMeuble,
+    StockMaison,
+    TacheEntretien,
+    TypeActionEcologique,
+    TypePiece,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -24,52 +24,52 @@ from src.core.models.habitat import (
 
 
 class TestFurnitureStatus:
-    """Tests pour l'énumération FurnitureStatus."""
+    """Tests pour l'énumération StatutMeuble."""
 
     def test_valeurs_disponibles(self):
         """Vérifie les statuts disponibles."""
-        assert FurnitureStatus.SOUHAITE.value == "souhaite"
-        assert FurnitureStatus.RECHERCHE.value == "recherche"
-        assert FurnitureStatus.TROUVE.value == "trouve"
-        assert FurnitureStatus.COMMANDE.value == "commande"
-        assert FurnitureStatus.ACHETE.value == "achete"
-        assert FurnitureStatus.ANNULE.value == "annule"
+        assert StatutMeuble.SOUHAITE.value == "souhaite"
+        assert StatutMeuble.RECHERCHE.value == "recherche"
+        assert StatutMeuble.TROUVE.value == "trouve"
+        assert StatutMeuble.COMMANDE.value == "commande"
+        assert StatutMeuble.ACHETE.value == "achete"
+        assert StatutMeuble.ANNULE.value == "annule"
 
 
 class TestFurniturePriority:
-    """Tests pour l'énumération FurniturePriority."""
+    """Tests pour l'énumération PrioriteMeuble."""
 
     def test_valeurs_disponibles(self):
         """Vérifie les priorités disponibles."""
-        assert FurniturePriority.URGENT.value == "urgent"
-        assert FurniturePriority.HAUTE.value == "haute"
-        assert FurniturePriority.NORMALE.value == "normale"
-        assert FurniturePriority.BASSE.value == "basse"
-        assert FurniturePriority.PLUS_TARD.value == "plus_tard"
+        assert PrioriteMeuble.URGENT.value == "urgent"
+        assert PrioriteMeuble.HAUTE.value == "haute"
+        assert PrioriteMeuble.NORMALE.value == "normale"
+        assert PrioriteMeuble.BASSE.value == "basse"
+        assert PrioriteMeuble.PLUS_TARD.value == "plus_tard"
 
 
 class TestEcoActionType:
-    """Tests pour l'énumération EcoActionType."""
+    """Tests pour l'énumération TypeActionEcologique."""
 
     def test_valeurs_disponibles(self):
         """Vérifie les types d'actions écologiques."""
-        assert EcoActionType.LAVABLE.value == "lavable"
-        assert EcoActionType.ENERGIE.value == "energie"
-        assert EcoActionType.EAU.value == "eau"
-        assert EcoActionType.DECHETS.value == "dechets"
-        assert EcoActionType.ALIMENTATION.value == "alimentation"
+        assert TypeActionEcologique.LAVABLE.value == "lavable"
+        assert TypeActionEcologique.ENERGIE.value == "energie"
+        assert TypeActionEcologique.EAU.value == "eau"
+        assert TypeActionEcologique.DECHETS.value == "dechets"
+        assert TypeActionEcologique.ALIMENTATION.value == "alimentation"
 
 
 class TestRoomType:
-    """Tests pour l'énumération RoomType."""
+    """Tests pour l'énumération TypePiece."""
 
     def test_pieces_principales(self):
         """Vérifie les pièces principales."""
-        assert RoomType.SALON.value == "salon"
-        assert RoomType.CUISINE.value == "cuisine"
-        assert RoomType.CHAMBRE_PARENTALE.value == "chambre_parentale"
-        assert RoomType.CHAMBRE_JULES.value == "chambre_jules"
-        assert RoomType.GARAGE.value == "garage"
+        assert TypePiece.SALON.value == "salon"
+        assert TypePiece.CUISINE.value == "cuisine"
+        assert TypePiece.CHAMBRE_PARENTALE.value == "chambre_parentale"
+        assert TypePiece.CHAMBRE_JULES.value == "chambre_jules"
+        assert TypePiece.GARAGE.value == "garage"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -78,15 +78,15 @@ class TestRoomType:
 
 
 class TestFurniture:
-    """Tests pour le modèle Furniture."""
+    """Tests pour le modèle Meuble."""
 
     def test_tablename(self):
         """Vérifie le nom de la table."""
-        assert Furniture.__tablename__ == "furniture"
+        assert Meuble.__tablename__ == "meubles"
 
     def test_creation_instance(self):
         """Test de création d'un meuble."""
-        meuble = Furniture(
+        meuble = Meuble(
             nom="Canapé d'angle",
             piece="salon",
             prix_estime=Decimal("1200.00"),
@@ -101,13 +101,13 @@ class TestFurniture:
 
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
-        colonnes = Furniture.__table__.columns
+        colonnes = Meuble.__table__.columns
         assert colonnes["statut"].default is not None
         assert colonnes["priorite"].default is not None
 
     def test_dimensions(self):
         """Test des dimensions optionnelles."""
-        meuble = Furniture(
+        meuble = Meuble(
             nom="Armoire",
             piece="chambre_parentale",
             largeur_cm=120,
@@ -120,7 +120,7 @@ class TestFurniture:
 
     def test_infos_achat(self):
         """Test des informations d'achat."""
-        meuble = Furniture(
+        meuble = Meuble(
             nom="Billy",
             piece="bureau",
             magasin="IKEA",
@@ -133,23 +133,23 @@ class TestFurniture:
 
     def test_repr(self):
         """Test de la représentation string."""
-        meuble = Furniture(id=1, nom="Chaise", piece="cuisine")
+        meuble = Meuble(id=1, nom="Chaise", piece="cuisine")
         result = repr(meuble)
-        assert "Furniture" in result
+        assert "Meuble" in result
         assert "Chaise" in result
         assert "cuisine" in result
 
 
 class TestHouseStock:
-    """Tests pour le modèle HouseStock."""
+    """Tests pour le modèle StockMaison."""
 
     def test_tablename(self):
         """Vérifie le nom de la table."""
-        assert HouseStock.__tablename__ == "house_stocks"
+        assert StockMaison.__tablename__ == "stocks_maison"
 
     def test_creation_instance(self):
         """Test de création d'un stock."""
-        stock = HouseStock(
+        stock = StockMaison(
             nom="Ampoules LED E27",
             categorie="electricite",
             quantite=5,
@@ -164,30 +164,30 @@ class TestHouseStock:
 
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
-        colonnes = HouseStock.__table__.columns
+        colonnes = StockMaison.__table__.columns
         assert colonnes["quantite"].default is not None
         assert colonnes["unite"].default is not None
         assert colonnes["seuil_alerte"].default is not None
 
     def test_repr(self):
         """Test de la représentation string."""
-        stock = HouseStock(id=1, nom="Piles AA", quantite=10)
+        stock = StockMaison(id=1, nom="Piles AA", quantite=10)
         result = repr(stock)
-        assert "HouseStock" in result
+        assert "StockMaison" in result
         assert "Piles AA" in result
         assert "10" in result
 
 
 class TestMaintenanceTask:
-    """Tests pour le modèle MaintenanceTask."""
+    """Tests pour le modèle TacheEntretien."""
 
     def test_tablename(self):
         """Vérifie le nom de la table."""
-        assert MaintenanceTask.__tablename__ == "maintenance_tasks"
+        assert TacheEntretien.__tablename__ == "taches_entretien"
 
     def test_creation_instance(self):
         """Test de création d'une tâche."""
-        tache = MaintenanceTask(
+        tache = TacheEntretien(
             nom="Nettoyer les vitres",
             categorie="menage",
             piece="salon",
@@ -203,14 +203,14 @@ class TestMaintenanceTask:
 
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
-        colonnes = MaintenanceTask.__table__.columns
+        colonnes = TacheEntretien.__table__.columns
         assert colonnes["duree_minutes"].default is not None
         assert colonnes["priorite"].default is not None
         assert colonnes["fait"].default is not None
 
     def test_tache_ponctuelle(self):
         """Test d'une tâche ponctuelle (sans fréquence)."""
-        tache = MaintenanceTask(
+        tache = TacheEntretien(
             nom="Tri garage",
             categorie="rangement",
             frequence_jours=None,
@@ -219,22 +219,22 @@ class TestMaintenanceTask:
 
     def test_repr(self):
         """Test de la représentation string."""
-        tache = MaintenanceTask(id=1, nom="Tri médicaments", fait=False)
+        tache = TacheEntretien(id=1, nom="Tri médicaments", fait=False)
         result = repr(tache)
-        assert "MaintenanceTask" in result
+        assert "TacheEntretien" in result
         assert "Tri médicaments" in result
 
 
 class TestEcoAction:
-    """Tests pour le modèle EcoAction."""
+    """Tests pour le modèle ActionEcologique."""
 
     def test_tablename(self):
         """Vérifie le nom de la table."""
-        assert EcoAction.__tablename__ == "eco_actions"
+        assert ActionEcologique.__tablename__ == "actions_ecologiques"
 
     def test_creation_instance(self):
         """Test de création d'une action éco."""
-        action = EcoAction(
+        action = ActionEcologique(
             nom="Essuie-tout lavable",
             type_action="lavable",
             ancien_produit="Sopalin jetable",
@@ -250,12 +250,12 @@ class TestEcoAction:
 
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
-        colonnes = EcoAction.__table__.columns
+        colonnes = ActionEcologique.__table__.columns
         assert colonnes["actif"].default is not None
 
     def test_cout_nouveau_initial(self):
         """Test du champ cout_nouveau_initial."""
-        action = EcoAction(
+        action = ActionEcologique(
             nom="Test",
             type_action="energie",
             cout_nouveau_initial=Decimal("50.00"),
@@ -267,8 +267,8 @@ class TestEcoAction:
 
     def test_repr(self):
         """Test de la représentation string."""
-        action = EcoAction(id=1, nom="LED", type_action="energie")
+        action = ActionEcologique(id=1, nom="LED", type_action="energie")
         result = repr(action)
-        assert "EcoAction" in result
+        assert "ActionEcologique" in result
         assert "LED" in result
         assert "energie" in result

@@ -13,7 +13,7 @@ from enum import Enum, StrEnum
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
-from src.core.models import CalendarEvent
+from src.core.models import EvenementPlanning
 
 
 class TypeRecurrence(StrEnum):
@@ -45,7 +45,7 @@ JOURS_SEMAINE_INDEX = [
 ]
 
 
-def format_recurrence(event: CalendarEvent) -> str:
+def format_recurrence(event: EvenementPlanning) -> str:
     """Formate la récurrence pour affichage."""
     if not event.recurrence_type or event.recurrence_type == TypeRecurrence.AUCUNE.value:
         return ""
@@ -83,7 +83,7 @@ class ServiceRecurrence:
 
     def generer_occurrences(
         self,
-        event: CalendarEvent,
+        event: EvenementPlanning,
         date_debut: date,
         date_fin: date,
     ) -> list[dict]:
@@ -213,23 +213,23 @@ class ServiceRecurrence:
 
         # Événements simples dans la période
         events_simples = (
-            db.query(CalendarEvent)
+            db.query(EvenementPlanning)
             .filter(
-                CalendarEvent.date_debut >= debut_dt,
-                CalendarEvent.date_debut <= fin_dt,
-                (CalendarEvent.recurrence_type.is_(None))
-                | (CalendarEvent.recurrence_type == "none"),
+                EvenementPlanning.date_debut >= debut_dt,
+                EvenementPlanning.date_debut <= fin_dt,
+                (EvenementPlanning.recurrence_type.is_(None))
+                | (EvenementPlanning.recurrence_type == "none"),
             )
             .all()
         )
 
         # Événements récurrents (dont la date de début est avant la fin de période)
         events_recurrents = (
-            db.query(CalendarEvent)
+            db.query(EvenementPlanning)
             .filter(
-                CalendarEvent.date_debut <= fin_dt,
-                CalendarEvent.recurrence_type.isnot(None),
-                CalendarEvent.recurrence_type != "none",
+                EvenementPlanning.date_debut <= fin_dt,
+                EvenementPlanning.recurrence_type.isnot(None),
+                EvenementPlanning.recurrence_type != "none",
             )
             .all()
         )

@@ -1,7 +1,7 @@
 """
 Service Achats Famille - Logique métier pour les achats familiaux.
 
-Hérite de BaseService[FamilyPurchase] pour CRUD générique + méthodes spécialisées.
+Hérite de BaseService[AchatFamille] pour CRUD générique + méthodes spécialisées.
 
 Opérations:
 - CRUD achats (lister, ajouter, marquer achété, supprimer)
@@ -16,7 +16,7 @@ from typing import TypedDict
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.models import FamilyPurchase
+from src.core.models import AchatFamille
 from src.services.core.base import BaseService
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
@@ -34,16 +34,16 @@ class AchatsStatsDict(TypedDict):
     urgents: int
 
 
-class ServiceAchatsFamille(BaseService[FamilyPurchase]):
+class ServiceAchatsFamille(BaseService[AchatFamille]):
     """Service de gestion des achats familiaux.
 
-    Hérite de BaseService[FamilyPurchase] pour le CRUD générique.
+    Hérite de BaseService[AchatFamille] pour le CRUD générique.
     Les méthodes spécialisées gèrent la logique métier spécifique.
     Les constantes CATEGORIES et PRIORITES restent dans le module UI.
     """
 
     def __init__(self):
-        super().__init__(model=FamilyPurchase, cache_ttl=300)
+        super().__init__(model=AchatFamille, cache_ttl=300)
 
     # ═══════════════════════════════════════════════════════════
     # LECTURE
@@ -52,9 +52,7 @@ class ServiceAchatsFamille(BaseService[FamilyPurchase]):
     @avec_gestion_erreurs(default_return=[])
     @avec_cache(ttl=300)
     @avec_session_db
-    def lister_achats(
-        self, achete: bool = False, db: Session | None = None
-    ) -> list[FamilyPurchase]:
+    def lister_achats(self, achete: bool = False, db: Session | None = None) -> list[AchatFamille]:
         """Liste tous les achats.
 
         Args:
@@ -66,14 +64,14 @@ class ServiceAchatsFamille(BaseService[FamilyPurchase]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        return db.query(FamilyPurchase).filter(FamilyPurchase.achete == achete).all()
+        return db.query(AchatFamille).filter(AchatFamille.achete == achete).all()
 
     @avec_gestion_erreurs(default_return=[])
     @avec_cache(ttl=300)
     @avec_session_db
     def lister_par_categorie(
         self, categorie: str, achete: bool = False, db: Session | None = None
-    ) -> list[FamilyPurchase]:
+    ) -> list[AchatFamille]:
         """Liste les achats par catégorie.
 
         Args:
@@ -87,12 +85,12 @@ class ServiceAchatsFamille(BaseService[FamilyPurchase]):
         if db is None:
             raise ValueError("Session DB requise")
         return (
-            db.query(FamilyPurchase)
+            db.query(AchatFamille)
             .filter(
-                FamilyPurchase.categorie == categorie,
-                FamilyPurchase.achete == achete,
+                AchatFamille.categorie == categorie,
+                AchatFamille.achete == achete,
             )
-            .order_by(FamilyPurchase.priorite)
+            .order_by(AchatFamille.priorite)
             .all()
         )
 
@@ -101,7 +99,7 @@ class ServiceAchatsFamille(BaseService[FamilyPurchase]):
     @avec_session_db
     def lister_par_groupe(
         self, categories: list[str], achete: bool = False, db: Session | None = None
-    ) -> list[FamilyPurchase]:
+    ) -> list[AchatFamille]:
         """Liste les achats par groupe (plusieurs catégories).
 
         Le mapping groupe → catégories se fait dans le module UI via CATEGORIES.
@@ -118,12 +116,12 @@ class ServiceAchatsFamille(BaseService[FamilyPurchase]):
         if db is None:
             raise ValueError("Session DB requise")
         return (
-            db.query(FamilyPurchase)
+            db.query(AchatFamille)
             .filter(
-                FamilyPurchase.categorie.in_(categories),
-                FamilyPurchase.achete == achete,
+                AchatFamille.categorie.in_(categories),
+                AchatFamille.achete == achete,
             )
-            .order_by(FamilyPurchase.priorite)
+            .order_by(AchatFamille.priorite)
             .all()
         )
 
@@ -146,8 +144,8 @@ class ServiceAchatsFamille(BaseService[FamilyPurchase]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        en_attente = db.query(FamilyPurchase).filter(FamilyPurchase.achete == False).all()  # noqa: E712
-        achetes = db.query(FamilyPurchase).filter(FamilyPurchase.achete == True).all()  # noqa: E712
+        en_attente = db.query(AchatFamille).filter(AchatFamille.achete == False).all()  # noqa: E712
+        achetes = db.query(AchatFamille).filter(AchatFamille.achete == True).all()  # noqa: E712
 
         total_estime = sum(p.prix_estime or 0 for p in en_attente)
         total_depense = sum(p.prix_reel or p.prix_estime or 0 for p in achetes)
@@ -164,7 +162,7 @@ class ServiceAchatsFamille(BaseService[FamilyPurchase]):
     @avec_gestion_erreurs(default_return=[])
     @avec_cache(ttl=300)
     @avec_session_db
-    def get_urgents(self, limit: int = 5, db: Session | None = None) -> list[FamilyPurchase]:
+    def get_urgents(self, limit: int = 5, db: Session | None = None) -> list[AchatFamille]:
         """Récupère les achats urgents pour le tableau de bord.
 
         Args:
@@ -177,12 +175,12 @@ class ServiceAchatsFamille(BaseService[FamilyPurchase]):
         if db is None:
             raise ValueError("Session DB requise")
         return (
-            db.query(FamilyPurchase)
+            db.query(AchatFamille)
             .filter(
-                FamilyPurchase.achete == False,  # noqa: E712
-                FamilyPurchase.priorite.in_(("urgent", "haute")),
+                AchatFamille.achete == False,  # noqa: E712
+                AchatFamille.priorite.in_(("urgent", "haute")),
             )
-            .order_by(FamilyPurchase.priorite)
+            .order_by(AchatFamille.priorite)
             .limit(limit)
             .all()
         )
@@ -206,7 +204,7 @@ class ServiceAchatsFamille(BaseService[FamilyPurchase]):
         age_recommande_mois: int | None = None,
         suggere_par: str | None = None,
         db: Session | None = None,
-    ) -> FamilyPurchase:
+    ) -> AchatFamille:
         """Ajoute un nouvel achat à la liste.
 
         Args:
@@ -227,7 +225,7 @@ class ServiceAchatsFamille(BaseService[FamilyPurchase]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        achat = FamilyPurchase(
+        achat = AchatFamille(
             nom=nom,
             categorie=categorie,
             priorite=priorite,
@@ -273,7 +271,7 @@ class ServiceAchatsFamille(BaseService[FamilyPurchase]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        achat = db.get(FamilyPurchase, purchase_id)
+        achat = db.get(AchatFamille, purchase_id)
         if achat:
             achat.achete = True
             achat.date_achat = date_type.today()
@@ -312,7 +310,7 @@ class ServiceAchatsFamille(BaseService[FamilyPurchase]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        achat = db.get(FamilyPurchase, purchase_id)
+        achat = db.get(AchatFamille, purchase_id)
         if achat:
             nom = achat.nom
             db.delete(achat)

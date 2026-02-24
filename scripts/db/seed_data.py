@@ -13,25 +13,25 @@ from datetime import date, timedelta
 
 from src.core.db import obtenir_contexte_db
 from src.core.models import (
-    BatchMeal,
-    CalendarEvent,
-    ChildProfile,
-    GardenItem,
-    GardenLog,
+    ElementJardin,
+    EntreeBienEtre,
+    EvenementPlanning,
     Ingredient,
     InventoryItem,
+    JournalJardin,
     Notification,
+    ProfilEnfant,
+    ProfilUtilisateur,
     Project,
-    ProjectTask,
     Recette,
     RecetteIngredient,
+    RepasBatch,
     Routine,
-    RoutineTask,
     ShoppingList,
+    TacheProjet,
+    TacheRoutine,
     User,
-    UserProfile,
     WeatherLog,
-    WellbeingEntry,
 )
 
 
@@ -41,24 +41,24 @@ def clear_database():
 
     with obtenir_contexte_db() as db:
         # Supprimer dans l'ordre inverse des dÃ©pendances
-        db.query(GardenLog).delete()
-        db.query(GardenItem).delete()
-        db.query(ProjectTask).delete()
+        db.query(JournalJardin).delete()
+        db.query(ElementJardin).delete()
+        db.query(TacheProjet).delete()
         db.query(Project).delete()
-        db.query(RoutineTask).delete()
+        db.query(TacheRoutine).delete()
         db.query(Routine).delete()
-        db.query(WellbeingEntry).delete()
-        db.query(ChildProfile).delete()
+        db.query(EntreeBienEtre).delete()
+        db.query(ProfilEnfant).delete()
         db.query(ShoppingList).delete()
-        db.query(BatchMeal).delete()
+        db.query(RepasBatch).delete()
         db.query(RecetteIngredient).delete()
         db.query(InventoryItem).delete()
         db.query(Recette).delete()
         db.query(Ingredient).delete()
-        db.query(CalendarEvent).delete()
+        db.query(EvenementPlanning).delete()
         db.query(WeatherLog).delete()
         db.query(Notification).delete()
-        db.query(UserProfile).delete()
+        db.query(ProfilUtilisateur).delete()
         db.query(User).delete()
 
         db.commit()
@@ -81,7 +81,7 @@ def seed_users():
         db.flush()
 
         # Profils
-        profil_anne = UserProfile(
+        profil_anne = ProfilUtilisateur(
             user_id=anne.id,
             profile_name="Anne (Maman)",
             role="parent",
@@ -89,7 +89,7 @@ def seed_users():
             is_active=True,
         )
 
-        profil_mathieu = UserProfile(
+        profil_mathieu = ProfilUtilisateur(
             user_id=anne.id,
             profile_name="Mathieu (Papa)",
             role="parent",
@@ -328,7 +328,7 @@ def seed_batch_meals():
         recettes = db.query(Recette).all()
 
         for i, recette in enumerate(recettes[:7]):  # 7 jours
-            batch = BatchMeal(
+            batch = RepasBatch(
                 recette_id=recette.id,
                 scheduled_date=today + timedelta(days=i),
                 portions=4,
@@ -348,7 +348,7 @@ def seed_child_and_family():
 
     with obtenir_contexte_db() as db:
         # Jules
-        jules = ChildProfile(
+        jules = ProfilEnfant(
             name="Jules", birth_date=date(2024, 6, 22), notes="Notre petit bout de chou â¤ï¸"
         )
         db.add(jules)
@@ -356,7 +356,7 @@ def seed_child_and_family():
 
         # EntrÃ©es bien-Ãªtre
         for i in range(7):
-            entry = WellbeingEntry(
+            entry = EntreeBienEtre(
                 child_id=jules.id,
                 date=date.today() - timedelta(days=i),
                 mood=["ðŸ˜Š BIEN", "ðŸ˜ MOYEN", "ðŸ˜Š BIEN"][i % 3],
@@ -387,7 +387,7 @@ def seed_child_and_family():
         ]
 
         for nom, heure, statut in taches:
-            task = RoutineTask(
+            task = TacheRoutine(
                 routine_id=routine.id, task_name=nom, scheduled_time=heure, status=statut
             )
             db.add(task)
@@ -418,25 +418,25 @@ def seed_projects():
 
         db.add_all(
             [
-                ProjectTask(
+                TacheProjet(
                     project_id=p1.id,
                     task_name="PrÃ©parer le sol",
                     status="TERMINE",
                     due_date=date(2025, 4, 15),
                 ),
-                ProjectTask(
+                TacheProjet(
                     project_id=p1.id,
                     task_name="Acheter graines",
                     status="TERMINE",
                     due_date=date(2025, 5, 1),
                 ),
-                ProjectTask(
+                TacheProjet(
                     project_id=p1.id,
                     task_name="Planter lÃ©gumes",
                     status="EN_COURS",
                     due_date=date(2025, 5, 15),
                 ),
-                ProjectTask(
+                TacheProjet(
                     project_id=p1.id,
                     task_name="Installer arrosage",
                     status="A_FAIRE",
@@ -461,8 +461,8 @@ def seed_projects():
 
         db.add_all(
             [
-                ProjectTask(project_id=p2.id, task_name="Choisir couleurs", status="A_FAIRE"),
-                ProjectTask(project_id=p2.id, task_name="Acheter peinture", status="A_FAIRE"),
+                TacheProjet(project_id=p2.id, task_name="Choisir couleurs", status="A_FAIRE"),
+                TacheProjet(project_id=p2.id, task_name="Acheter peinture", status="A_FAIRE"),
             ]
         )
 
@@ -484,7 +484,7 @@ def seed_garden():
         ]
 
         for nom, cat, plant, harvest, qty, water_freq in plantes:
-            item = GardenItem(
+            item = ElementJardin(
                 name=nom,
                 category=cat,
                 planting_date=plant,
@@ -497,7 +497,7 @@ def seed_garden():
             db.flush()
 
             # Ajouter un log
-            log = GardenLog(
+            log = JournalJardin(
                 item_id=item.id,
                 action="Arrosage",
                 date=date.today() - timedelta(days=1),

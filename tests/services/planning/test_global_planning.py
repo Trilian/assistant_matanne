@@ -60,10 +60,10 @@ class TestServicePlanningUnifieMethods:
         assert result is None or isinstance(result, SemaineCompleSchema)
 
     def test_service_has_model_calendar_event(self, service):
-        """Vérifie que le modèle est CalendarEvent."""
-        from src.core.models import CalendarEvent
+        """Vérifie que le modèle est EvenementPlanning."""
+        from src.core.models import EvenementPlanning
 
-        assert service.model == CalendarEvent
+        assert service.model == EvenementPlanning
 
 
 class TestSemaineCompleSchema:

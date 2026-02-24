@@ -9,12 +9,12 @@ from datetime import date, timedelta
 import pytest
 
 from src.core.models.recettes import (
-    BatchMeal,
     EtapeRecette,
     HistoriqueRecette,
     Ingredient,
     Recette,
     RecetteIngredient,
+    RepasBatch,
     VersionRecette,
 )
 
@@ -386,15 +386,15 @@ class TestHistoriqueRecette:
 
 @pytest.mark.unit
 class TestBatchMeal:
-    """Tests pour la classe BatchMeal."""
+    """Tests pour la classe RepasBatch."""
 
     def test_batchmeal_tablename(self):
         """Test du nom de table."""
-        assert BatchMeal.__tablename__ == "batch_meals"
+        assert RepasBatch.__tablename__ == "repas_batch"
 
     def test_batchmeal_creation(self):
         """Test de création."""
-        batch = BatchMeal(
+        batch = RepasBatch(
             id=1,
             nom="Bolognaise",
             portions_creees=8,
@@ -411,7 +411,7 @@ class TestBatchMeal:
 
     def test_batchmeal_repr(self):
         """Test de la représentation string."""
-        batch = BatchMeal(
+        batch = RepasBatch(
             id=1,
             nom="Ratatouille",
             portions_creees=4,
@@ -421,6 +421,6 @@ class TestBatchMeal:
         )
 
         repr_str = repr(batch)
-        assert "BatchMeal" in repr_str
+        assert "RepasBatch" in repr_str
         assert "Ratatouille" in repr_str
         assert "2" in repr_str  # portions_restantes

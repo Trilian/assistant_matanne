@@ -13,10 +13,10 @@ class TestSante:
     """Tests pour le module sante."""
 
     class TestHealthRoutine:
-        """Tests pour la classe HealthRoutine."""
+        """Tests pour la classe RoutineSante."""
 
         def test_healthroutine_creation(self):
-            """Test de création de HealthRoutine."""
+            """Test de création de RoutineSante."""
             # TODO: Implémenter
             pass
 
@@ -26,10 +26,10 @@ class TestSante:
             pass
 
     class TestHealthObjective:
-        """Tests pour la classe HealthObjective."""
+        """Tests pour la classe ObjectifSante."""
 
         def test_healthobjective_creation(self):
-            """Test de création de HealthObjective."""
+            """Test de création de ObjectifSante."""
             # TODO: Implémenter
             pass
 
@@ -39,10 +39,10 @@ class TestSante:
             pass
 
     class TestHealthEntry:
-        """Tests pour la classe HealthEntry."""
+        """Tests pour la classe EntreeSante."""
 
         def test_healthentry_creation(self):
-            """Test de création de HealthEntry."""
+            """Test de création de EntreeSante."""
             # TODO: Implémenter
             pass
 

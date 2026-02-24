@@ -31,7 +31,7 @@ class BackupExportMixin:
     # UPLOAD SUPABASE STORAGE
     # ═══════════════════════════════════════════════════════════
 
-    def upload_to_supabase(self, file_path: str, bucket: str = "backups") -> bool:
+    def upload_to_supabase(self, file_path: str, bucket: str = "sauvegardes") -> bool:
         """
         Upload un backup vers Supabase Storage.
 
@@ -78,7 +78,7 @@ class BackupExportMixin:
             logger.error(f"Erreur upload Supabase: {e}")
             return False
 
-    def download_from_supabase(self, filename: str, bucket: str = "backups") -> str | None:
+    def download_from_supabase(self, filename: str, bucket: str = "sauvegardes") -> str | None:
         """
         Télécharge un backup depuis Supabase Storage.
 

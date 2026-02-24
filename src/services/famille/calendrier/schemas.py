@@ -11,7 +11,7 @@ from uuid import uuid4
 from pydantic import BaseModel, Field
 
 
-class CalendarProvider(StrEnum):
+class FournisseurCalendrier(StrEnum):
     """Fournisseurs de calendrier supportés."""
 
     GOOGLE = "google"
@@ -20,7 +20,7 @@ class CalendarProvider(StrEnum):
     ICAL_URL = "ical_url"  # URL iCal générique
 
 
-class SyncDirection(StrEnum):
+class DirectionSync(StrEnum):
     """Direction de synchronisation."""
 
     IMPORT_ONLY = "import"  # Du calendrier externe vers l'app
@@ -28,12 +28,12 @@ class SyncDirection(StrEnum):
     BIDIRECTIONAL = "both"  # Dans les deux sens
 
 
-class ExternalCalendarConfig(BaseModel):
+class ConfigCalendrierExterne(BaseModel):
     """Configuration d'un calendrier externe."""
 
     id: str = Field(default_factory=lambda: str(uuid4())[:12])
     user_id: str
-    provider: CalendarProvider
+    provider: FournisseurCalendrier
     name: str = "Mon calendrier"
 
     # Configuration selon le provider
@@ -46,7 +46,7 @@ class ExternalCalendarConfig(BaseModel):
     token_expiry: datetime | None = None
 
     # Options de sync
-    sync_direction: SyncDirection = SyncDirection.BIDIRECTIONAL
+    sync_direction: DirectionSync = DirectionSync.BIDIRECTIONAL
     sync_meals: bool = True
     sync_activities: bool = True
     sync_events: bool = True

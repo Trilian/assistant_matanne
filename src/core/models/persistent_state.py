@@ -16,10 +16,11 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from .base import Base, utc_now
+from .base import Base
+from .mixins import TimestampFullMixin
 
 
-class PersistentStateDB(Base):
+class EtatPersistantDB(TimestampFullMixin, Base):
     """
     Stockage persistant d'état applicatif.
 
@@ -34,7 +35,7 @@ class PersistentStateDB(Base):
         updated_at: Date de dernière modification
     """
 
-    __tablename__ = "persistent_states"
+    __tablename__ = "etats_persistants"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
@@ -45,17 +46,11 @@ class PersistentStateDB(Base):
     # Données
     data: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     # Contraintes
-    __table_args__ = (
-        UniqueConstraint("namespace", "user_id", name="uq_pstate_namespace_user"),
-    )
+    __table_args__ = (UniqueConstraint("namespace", "user_id", name="uq_pstate_namespace_user"),)
 
     def __repr__(self) -> str:
-        return f"<PersistentStateDB(namespace='{self.namespace}', user='{self.user_id}')>"
+        return f"<EtatPersistantDB(namespace='{self.namespace}', user='{self.user_id}')>"
 
 
-__all__ = ["PersistentStateDB"]
+__all__ = ["EtatPersistantDB"]

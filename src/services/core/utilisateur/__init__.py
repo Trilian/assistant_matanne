@@ -9,7 +9,7 @@ Regroupe:
 Usage:
     from src.services.core.utilisateur import (
         # Auth
-        AuthService, get_auth_service, UserProfile, AuthResult, Role, Permission,
+        AuthService, get_auth_service, ProfilUtilisateur, AuthResult, Role, Permission,
         afficher_login_form, afficher_user_menu, afficher_profile_settings,
         require_authenticated, require_role,
         # Historique
@@ -28,8 +28,8 @@ from .authentification import (
     AuthResult,
     AuthService,
     Permission,
+    ProfilUtilisateur,
     Role,
-    UserProfile,
     get_auth_service,
     obtenir_service_authentification,
 )
@@ -61,7 +61,7 @@ __all__ = [
     "AuthService",
     "get_auth_service",
     "obtenir_service_authentification",
-    "UserProfile",
+    "ProfilUtilisateur",
     "AuthResult",
     "Role",
     "Permission",

@@ -6,6 +6,8 @@ from datetime import date
 
 import streamlit as st
 
+from src.ui.keys import KeyNamespace
+
 from .preferences import (
     ajouter_feedback,
     charger_feedbacks,
@@ -13,6 +15,8 @@ from .preferences import (
     sauvegarder_preferences,
 )
 from .utils import PROTEINES, ROBOTS_CUISINE, TEMPS_CATEGORIES, PreferencesUtilisateur
+
+_keys = KeyNamespace("planificateur_ui")
 
 
 def afficher_configuration_preferences():
@@ -198,7 +202,7 @@ def afficher_carte_recette_suggestion(
 
             # Changer
             if st.button("🔄", key=f"{key_prefix}_change", help="Autre suggestion"):
-                st.session_state[f"show_alternatives_{key_prefix}"] = True
+                st.session_state[_keys("alternatives", key_prefix)] = True
                 st.rerun()
 
 
@@ -219,7 +223,7 @@ def afficher_jour_planning(
         else:
             st.info("Pas encore planifié")
             if st.button("➕ Ajouter midi", key=f"{key_prefix}_add_midi"):
-                st.session_state[f"add_repas_{key_prefix}_midi"] = True
+                st.session_state[_keys("add_midi", key_prefix)] = True
 
         st.divider()
 
@@ -231,7 +235,7 @@ def afficher_jour_planning(
         else:
             st.info("Pas encore planifié")
             if st.button("➕ Ajouter soir", key=f"{key_prefix}_add_soir"):
-                st.session_state[f"add_repas_{key_prefix}_soir"] = True
+                st.session_state[_keys("add_soir", key_prefix)] = True
 
         # Goûter (optionnel)
         gouter = repas_jour.get("gouter")

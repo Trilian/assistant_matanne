@@ -31,7 +31,6 @@ __all__ = [
     "ErreurConfiguration",
     "exiger_champs",
     "valider_type",
-    "valider_plage",
     "exiger_positif",
     "exiger_existence",
     "exiger_plage",

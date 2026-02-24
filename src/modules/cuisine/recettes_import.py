@@ -9,6 +9,10 @@ from src.services.cuisine.recettes import get_recipe_import_service, obtenir_ser
 from src.services.cuisine.recettes.importer import RecipeImporter
 from src.services.cuisine.recettes.parsers import ImportedRecipe
 from src.ui.fragments import ui_fragment
+from src.ui.keys import KeyNamespace
+from src.ui.state.url import tabs_with_url
+
+_keys = KeyNamespace("recettes_import")
 
 
 @ui_fragment
@@ -18,9 +22,9 @@ def afficher_importer():
     st.write("Importez une recette depuis un site web, un PDF ou du texte")
 
     # Onglets pour differents types d'import
-    import_tab1, import_tab2, import_tab3 = st.tabs(
-        ["🌐 URL/Site Web", "📄 Fichier PDF", "📝 Texte"]
-    )
+    TAB_LABELS = ["🌐 URL/Site Web", "📄 Fichier PDF", "📝 Texte"]
+    tabs_with_url(TAB_LABELS, param="tab")
+    import_tab1, import_tab2, import_tab3 = st.tabs(TAB_LABELS)
 
     with import_tab1:
         _afficher_import_url()
@@ -49,8 +53,8 @@ def _afficher_import_url():
     st.info("Entrez l'URL d'un site contenant une recette (recipetin, marmiton, cuisineaz, etc.)")
 
     # État pour stocker les donnees extraites
-    if "extracted_recipe" not in st.session_state:
-        st.session_state.extracted_recipe = None
+    if _keys("extracted_recipe") not in st.session_state:
+        st.session_state[_keys("extracted_recipe")] = None
 
     url = st.text_input("URL du site", placeholder="https://www.marmiton.org/recettes/...")
 
@@ -66,7 +70,7 @@ def _afficher_import_url():
 
                 if result and result.success and result.recipe:
                     recipe_data = _imported_recipe_to_dict(result.recipe)
-                    st.session_state.extracted_recipe = recipe_data
+                    st.session_state[_keys("extracted_recipe")] = recipe_data
                     st.success("✅ Recette extraite!")
                     st.rerun()
                 else:
@@ -77,8 +81,8 @@ def _afficher_import_url():
                 st.error(f"❌ Erreur: {str(e)}")
 
     # Si une recette a ete extraite, afficher le formulaire d'edition
-    if st.session_state.extracted_recipe:
-        _show_import_preview(st.session_state.extracted_recipe)
+    if st.session_state[_keys("extracted_recipe")]:
+        _show_import_preview(st.session_state[_keys("extracted_recipe")])
 
 
 def _afficher_import_pdf():
@@ -157,22 +161,22 @@ Ingredients:
 def _show_import_preview(recipe_data: dict):
     """Affiche l'aperçu et permet de modifier avant import"""
     # Initialiser l'etat de dernière recette importee
-    if "last_imported_recipe_name" not in st.session_state:
-        st.session_state.last_imported_recipe_name = None
+    if _keys("last_imported") not in st.session_state:
+        st.session_state[_keys("last_imported")] = None
 
     # Si une recette vient d'être importee, afficher un message de succès persistant
-    if st.session_state.last_imported_recipe_name:
+    if st.session_state[_keys("last_imported")]:
         col_success, col_action = st.columns([2, 1])
         with col_success:
             st.success(
-                f"✅ Recette '{st.session_state.last_imported_recipe_name}' importee avec succès!"
+                f"✅ Recette '{st.session_state[_keys('last_imported')]}' importee avec succès!"
             )
         with col_action:
             if st.button("✨ Voir la recette", use_container_width=True):
                 st.rerun()
         st.divider()
         # Reinitialiser le message après l'affichage
-        st.session_state.last_imported_recipe_name = None
+        st.session_state[_keys("last_imported")] = None
 
     st.markdown("### 📋 Aperçu et modification")
 
@@ -381,9 +385,9 @@ def _save_imported_recipe(
 
             if recette:
                 # Stocker le succès dans session_state pour affichage persistant
-                st.session_state.last_imported_recipe_name = nom
+                st.session_state[_keys("last_imported")] = nom
                 # Effacer les donnees extraites
-                st.session_state.extracted_recipe = None
+                st.session_state[_keys("extracted_recipe")] = None
 
                 st.success(f"✅ Recette '{nom}' importee avec succès!")
                 logger.info(f"✅ Recette '{nom}' importee avec succès")

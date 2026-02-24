@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 from .auth_schemas import Permission, Role
 
 if TYPE_CHECKING:
-    from .auth_schemas import UserProfile
+    from .auth_schemas import ProfilUtilisateur
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +100,7 @@ def a_role_minimum(role_utilisateur: Role, role_requis: Role) -> bool:
 class PermissionsMixin:
     """Mixin ajoutant les méthodes de vérification des permissions à AuthService.
 
-    Attend que la classe hôte implémente ``get_current_user() -> UserProfile | None``.
+    Attend que la classe hôte implémente ``get_current_user() -> ProfilUtilisateur | None``.
     """
 
     def require_permission(self, permission: Permission) -> bool:
@@ -112,7 +112,7 @@ class PermissionsMixin:
         Returns:
             True si autorisé.
         """
-        user: UserProfile | None = self.get_current_user()  # type: ignore[attr-defined]
+        user: ProfilUtilisateur | None = self.get_current_user()  # type: ignore[attr-defined]
 
         if not user:
             return False
@@ -125,7 +125,7 @@ class PermissionsMixin:
         Returns:
             Liste des permissions, vide si non connecté.
         """
-        user: UserProfile | None = self.get_current_user()  # type: ignore[attr-defined]
+        user: ProfilUtilisateur | None = self.get_current_user()  # type: ignore[attr-defined]
 
         if not user:
             return []
@@ -141,7 +141,7 @@ class PermissionsMixin:
         Returns:
             True si le rôle est suffisant.
         """
-        user: UserProfile | None = self.get_current_user()  # type: ignore[attr-defined]
+        user: ProfilUtilisateur | None = self.get_current_user()  # type: ignore[attr-defined]
 
         if not user:
             return False

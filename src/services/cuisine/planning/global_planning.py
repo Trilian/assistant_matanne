@@ -9,10 +9,10 @@ Service Planning Unifié - Centre de Coordination Familiale
 
 Service complet pour le planning familial fusionnant :
 - Planning repas (Planning + Repas)
-- Activités famille (FamilyActivity)
-- Événements calendrier (CalendarEvent)
-- Projets domestiques (Project + ProjectTask)
-- Routines quotidiennes (Routine + RoutineTask)
+- Activités famille (ActiviteFamille)
+- Événements calendrier (EvenementPlanning)
+- Projets domestiques (Project + TacheProjet)
+- Routines quotidiennes (Routine + TacheRoutine)
 """
 
 import logging
@@ -24,13 +24,13 @@ from src.core.ai import obtenir_client_ia
 from src.core.caching import Cache
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import (
-    CalendarEvent,
-    FamilyActivity,
+    ActiviteFamille,
+    EvenementPlanning,
     Project,
     Recette,
     Repas,
     Routine,
-    RoutineTask,
+    TacheRoutine,
 )
 from src.services.core.base import BaseAIService, BaseService, PlanningAIMixin
 
@@ -44,12 +44,12 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
-class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningAIMixin):
+class ServicePlanningUnifie(BaseService[EvenementPlanning], BaseAIService, PlanningAIMixin):
     """
     Service unifié pour le planning familial.
 
     ✅ Héritage multiple :
-    - BaseService → CRUD optimisé pour CalendarEvent
+    - BaseService → CRUD optimisé pour EvenementPlanning
     - BaseAIService → IA avec rate limiting auto
     - PlanningAIMixin → Contextes métier planning
 
@@ -64,7 +64,7 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
 
     def __init__(self):
         # Initialisation CRUD
-        BaseService.__init__(self, CalendarEvent, cache_ttl=1800)
+        BaseService.__init__(self, EvenementPlanning, cache_ttl=1800)
 
         # Initialisation IA (rate limiting + cache auto)
         BaseAIService.__init__(
@@ -208,11 +208,11 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         activites_dict = {}
 
         activites = (
-            db.query(FamilyActivity)
+            db.query(ActiviteFamille)
             .filter(
-                FamilyActivity.date_prevue
+                ActiviteFamille.date_prevue
                 >= datetime.combine(date_debut, datetime.min.time()).date(),
-                FamilyActivity.date_prevue
+                ActiviteFamille.date_prevue
                 <= datetime.combine(date_fin, datetime.max.time()).date(),
             )
             .all()
@@ -229,7 +229,7 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
                     "titre": act.titre,
                     "type": act.type_activite,
                     "debut": act.date_prevue,
-                    "fin": act.date_prevue,  # FamilyActivity n'a pas de date_fin séparée
+                    "fin": act.date_prevue,  # ActiviteFamille n'a pas de date_fin séparée
                     "lieu": act.lieu,
                     "budget": act.cout_estime or 0,
                     "duree": act.duree_heures or 0,
@@ -276,8 +276,8 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         routines_dict = {}
 
         routines = (
-            db.query(RoutineTask, Routine)
-            .join(Routine, RoutineTask.routine_id == Routine.id)
+            db.query(TacheRoutine, Routine)
+            .join(Routine, TacheRoutine.routine_id == Routine.id)
             .filter(Routine.actif == True)
             .all()
         )
@@ -306,10 +306,10 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         events_dict = {}
 
         events = (
-            db.query(CalendarEvent)
+            db.query(EvenementPlanning)
             .filter(
-                CalendarEvent.date_debut >= datetime.combine(date_debut, datetime.min.time()),
-                CalendarEvent.date_debut <= datetime.combine(date_fin, datetime.max.time()),
+                EvenementPlanning.date_debut >= datetime.combine(date_debut, datetime.min.time()),
+                EvenementPlanning.date_debut <= datetime.combine(date_fin, datetime.max.time()),
             )
             .all()
         )
@@ -545,10 +545,10 @@ class ServicePlanningUnifie(BaseService[CalendarEvent], BaseAIService, PlanningA
         lieu: str | None = None,
         couleur: str | None = None,
         db: Session | None = None,
-    ) -> CalendarEvent | None:
+    ) -> EvenementPlanning | None:
         """Crée un événement calendrier"""
         try:
-            event = CalendarEvent(
+            event = EvenementPlanning(
                 titre=titre,
                 date_debut=date_debut,
                 date_fin=date_fin,

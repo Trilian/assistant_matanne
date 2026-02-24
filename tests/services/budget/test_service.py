@@ -517,13 +517,13 @@ class TestAjouterFactureMaison:
             fournisseur="Engie",
         )
 
-        # Le fallback vers FamilyBudget sera utilisé dans la plupart des cas
+        # Le fallback vers BudgetFamille sera utilisé dans la plupart des cas
         try:
             result = service.ajouter_facture_maison(facture)
             assert result is not None
             assert result.montant == 90.0
         except Exception:
-            # La méthode gère les erreurs (HouseExpense peut ne pas exister)
+            # La méthode gère les erreurs (DepenseMaison peut ne pas exister)
             pass
 
 
@@ -536,7 +536,7 @@ class TestGetFacturesMaison:
 
         service = BudgetService()
 
-        with patch("src.core.models.HouseExpense") as mock_he:
+        with patch("src.core.models.DepenseMaison") as mock_he:
             mock_session.query.return_value.order_by.return_value.all.return_value = []
 
             result = service.get_factures_maison(db=mock_session)
@@ -551,7 +551,7 @@ class TestGetFacturesMaison:
 
         service = BudgetService()
 
-        with patch("src.core.models.HouseExpense"):
+        with patch("src.core.models.DepenseMaison"):
             result = service.get_factures_maison(
                 categorie=CategorieDepense.ELECTRICITE, db=mock_session
             )

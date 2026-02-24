@@ -39,7 +39,7 @@ class PushSubscriptionKeys(BaseModel):
 class PushSubscriptionRequest(BaseModel):
     """Demande d'enregistrement d'abonnement push.
 
-    Structure standard du PushSubscription JavaScript.
+    Structure standard du AbonnementPush JavaScript.
     """
 
     endpoint: str = Field(..., description="URL de l'endpoint push")
@@ -87,7 +87,7 @@ async def subscribe_push(
     """
     Enregistre un abonnement push pour l'utilisateur authentifié.
 
-    Le frontend doit envoyer l'objet PushSubscription.toJSON() obtenu
+    Le frontend doit envoyer l'objet AbonnementPush.toJSON() obtenu
     après navigator.serviceWorker.pushManager.subscribe().
     """
     try:

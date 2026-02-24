@@ -17,6 +17,7 @@ from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.modules._framework import error_boundary
 from src.ui.fragments import ui_fragment
+from src.ui.state.url import tabs_with_url
 
 # ═══════════════════════════════════════════════════════════
 # INITIALISATION
@@ -46,7 +47,9 @@ def app():
     st.markdown("---")
 
     # Onglets
-    tab1, tab2, tab3, tab4 = st.tabs(["📦 Stocks", "💡 Budget", "🎯 Gaspillage", "🗑️ Historique"])
+    TAB_LABELS = ["📦 Stocks", "💡 Budget", "🎯 Gaspillage", "🗑️ Historique"]
+    tabs_with_url(TAB_LABELS, param="tab")
+    tab1, tab2, tab3, tab4 = st.tabs(TAB_LABELS)
 
     with tab1:
         with error_boundary(titre="Erreur rapport stocks"):

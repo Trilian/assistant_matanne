@@ -15,7 +15,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.models import ChildProfile, Milestone
+from src.core.models import Jalon, ProfilEnfant
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -49,10 +49,10 @@ class ServiceJules:
         if db is None:
             raise ValueError("Session DB requise")
 
-        child = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
+        child = db.query(ProfilEnfant).filter_by(name="Jules", actif=True).first()
 
         if not child:
-            child = ChildProfile(
+            child = ProfilEnfant(
                 name="Jules",
                 date_of_birth=date_type(2024, 6, 22),
                 gender="M",
@@ -85,7 +85,7 @@ class ServiceJules:
         if db is None:
             raise ValueError("Session DB requise")
 
-        milestones = db.query(Milestone).filter_by(child_id=child_id).all()
+        milestones = db.query(Jalon).filter_by(child_id=child_id).all()
 
         result: dict[str, list[dict[str, Any]]] = {}
         for milestone in milestones:
@@ -121,9 +121,9 @@ class ServiceJules:
             raise ValueError("Session DB requise")
 
         result = (
-            db.query(Milestone.categorie, func.count(Milestone.id).label("count"))
+            db.query(Jalon.categorie, func.count(Jalon.id).label("count"))
             .filter_by(child_id=child_id)
-            .group_by(Milestone.categorie)
+            .group_by(Jalon.categorie)
             .all()
         )
 
@@ -148,7 +148,7 @@ class ServiceJules:
         if db is None:
             raise ValueError("Session DB requise")
         try:
-            jules = db.query(ChildProfile).filter_by(name="Jules", actif=True).first()
+            jules = db.query(ProfilEnfant).filter_by(name="Jules", actif=True).first()
             if jules and jules.date_of_birth:
                 return jules.date_of_birth
         except Exception:

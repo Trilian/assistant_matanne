@@ -9,6 +9,9 @@ from src.core.ai.cache import CacheIA as SemanticCache
 from src.core.caching import Cache
 from src.ui.feedback import afficher_succes
 from src.ui.fragments import ui_fragment
+from src.ui.keys import KeyNamespace
+
+_keys = KeyNamespace("param_cache")
 
 
 @ui_fragment
@@ -21,8 +24,8 @@ def afficher_cache_config():
     # Cache applicatif
     st.markdown("#### 📦 Cache Applicatif")
 
-    if "cache_data" in st.session_state:
-        cache_size = len(st.session_state.cache_data)
+    if _keys("data") in st.session_state:
+        cache_size = len(st.session_state[_keys("data")])
 
         col1, col2 = st.columns(2)
 
@@ -30,8 +33,8 @@ def afficher_cache_config():
             st.metric("Entrees", cache_size)
 
         with col2:
-            if "cache_stats" in st.session_state:
-                stats = st.session_state.cache_stats
+            if _keys("stats") in st.session_state:
+                stats = st.session_state[_keys("stats")]
                 total = stats.get("hits", 0) + stats.get("misses", 0)
                 hit_rate = (stats.get("hits", 0) / total * 100) if total > 0 else 0
 

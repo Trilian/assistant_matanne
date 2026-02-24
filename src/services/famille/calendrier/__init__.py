@@ -4,7 +4,7 @@ Package de synchronisation des calendriers externes.
 Exports:
 - CalendarSyncService: Service principal
 - get_calendar_sync_service: Factory
-- Schémas: CalendarProvider, SyncDirection, ExternalCalendarConfig, etc.
+- Schémas: FournisseurCalendrier, DirectionSync, ConfigCalendrierExterne, etc.
 - ICalGenerator: Génération/parsing iCal
 
 NOTE: afficher_calendar_sync_ui déplacé vers src/modules/planning/calendar_sync_ui.py
@@ -14,9 +14,9 @@ from .generateur import ICalGenerator
 from .google_calendar import GoogleCalendarMixin
 from .schemas import (
     CalendarEventExternal,
-    CalendarProvider,
-    ExternalCalendarConfig,
-    SyncDirection,
+    ConfigCalendrierExterne,
+    DirectionSync,
+    FournisseurCalendrier,
     SyncResult,
 )
 from .service import (
@@ -27,9 +27,9 @@ from .service import (
 
 __all__ = [
     # Schémas
-    "CalendarProvider",
-    "SyncDirection",
-    "ExternalCalendarConfig",
+    "FournisseurCalendrier",
+    "DirectionSync",
+    "ConfigCalendrierExterne",
     "CalendarEventExternal",
     "SyncResult",
     # Générateur iCal

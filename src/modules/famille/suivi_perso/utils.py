@@ -21,12 +21,12 @@ logger = logging.getLogger(__name__)
 
 from src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUT
 from src.core.models import (
-    FoodLog,
-    GarminActivity,
-    GarminDailySummary,
+    ActiviteGarmin,
     GarminToken,
-    HealthRoutine,
-    UserProfile,
+    JournalAlimentaire,
+    ProfilUtilisateur,
+    ResumeQuotidienGarmin,
+    RoutineSante,
 )
 from src.core.session_keys import SK
 from src.services.famille.suivi_perso import obtenir_service_suivi_perso
@@ -46,12 +46,12 @@ __all__ = [
     "px",
     # Database
     # Models
-    "UserProfile",
+    "ProfilUtilisateur",
     "GarminToken",
-    "GarminActivity",
-    "GarminDailySummary",
-    "FoodLog",
-    "HealthRoutine",
+    "ActiviteGarmin",
+    "ResumeQuotidienGarmin",
+    "JournalAlimentaire",
+    "RoutineSante",
     # Services
     "ServiceGarmin",
     "get_garmin_service",

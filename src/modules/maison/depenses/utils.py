@@ -12,10 +12,9 @@ from typing import List, Optional
 
 import streamlit as st
 
-from src.core.models import HouseExpense
-from src.core.models.finances import ExpenseCategory
+from src.core.models import DepenseMaison
+from src.core.models.finances import CategorieDepense
 from src.services.famille.budget import (
-    CategorieDepense,
     FactureMaison,
     get_budget_service,
 )
@@ -67,8 +66,8 @@ __all__ = [
     "calendar",
     # Service
     "get_depenses_crud_service",
-    "HouseExpense",
-    "ExpenseCategory",
+    "DepenseMaison",
+    "CategorieDepense",
     # Budget service
     "get_budget_service",
     "FactureMaison",

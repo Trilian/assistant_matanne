@@ -469,10 +469,10 @@ class TestConversionHelpers:
         service = UserPreferenceService()
         result = service._dataclass_to_db(preferences_dataclass)
 
-        # Vérifie que c'est un objet UserPreference
-        from src.core.models import UserPreference
+        # Vérifie que c'est un objet PreferenceUtilisateur
+        from src.core.models import PreferenceUtilisateur
 
-        assert isinstance(result, UserPreference)
+        assert isinstance(result, PreferenceUtilisateur)
         assert result.user_id == service.user_id
         assert result.nb_adultes == preferences_dataclass.nb_adultes
         assert result.jules_present == preferences_dataclass.jules_present

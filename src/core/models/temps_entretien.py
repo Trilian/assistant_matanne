@@ -26,6 +26,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, utc_now
+from .mixins import CreatedAtMixin, TimestampFullMixin
 
 # ═══════════════════════════════════════════════════════════
 # ENUMS
@@ -107,7 +108,7 @@ class PrioriteRemplacement(StrEnum):
 # ═══════════════════════════════════════════════════════════
 
 
-class SessionTravail(Base):
+class SessionTravail(CreatedAtMixin, Base):
     """Session de travail avec chronomètre.
 
     Permet de tracker le temps passé sur chaque activité
@@ -146,9 +147,6 @@ class SessionTravail(Base):
     difficulte: Mapped[int | None] = mapped_column(Integer)
     satisfaction: Mapped[int | None] = mapped_column(Integer)
 
-    # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-
     __table_args__ = (
         CheckConstraint(
             "difficulte IS NULL OR (difficulte >= 1 AND difficulte <= 5)", name="ck_difficulte_1_5"
@@ -169,7 +167,7 @@ class SessionTravail(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class VersionPiece(Base):
+class VersionPiece(CreatedAtMixin, Base):
     """Historique des versions/modifications d'une pièce.
 
     Permet de garder un historique des réorganisations,
@@ -209,7 +207,6 @@ class VersionPiece(Base):
     photo_apres_url: Mapped[str | None] = mapped_column(String(500))
 
     # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     cree_par: Mapped[str | None] = mapped_column(String(100))
 
     # Relations
@@ -221,7 +218,7 @@ class VersionPiece(Base):
         return f"<VersionPiece(piece={self.piece_id}, v{self.version}, titre='{self.titre}')>"
 
 
-class CoutTravaux(Base):
+class CoutTravaux(CreatedAtMixin, Base):
     """Détail des coûts pour une version de pièce.
 
     Permet de détailler les coûts entre main d'œuvre
@@ -254,9 +251,6 @@ class CoutTravaux(Base):
     fournisseur: Mapped[str | None] = mapped_column(String(200))
     facture_ref: Mapped[str | None] = mapped_column(String(100))
     date_paiement: Mapped[date | None] = mapped_column(Date)
-
-    # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     version: Mapped["VersionPiece"] = relationship(back_populates="couts")
@@ -323,7 +317,7 @@ class LogStatutObjet(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class PieceMaison(Base):
+class PieceMaison(TimestampFullMixin, Base):
     """Pièce de la maison avec ses caractéristiques.
 
     Attributes:
@@ -344,10 +338,6 @@ class PieceMaison(Base):
     type_piece: Mapped[str | None] = mapped_column(String(50), index=True)
     description: Mapped[str | None] = mapped_column(Text)
 
-    # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     # Relations
     objets: Mapped[list["ObjetMaison"]] = relationship(
         back_populates="piece", cascade="all, delete-orphan"
@@ -357,7 +347,7 @@ class PieceMaison(Base):
         return f"<PieceMaison(id={self.id}, nom='{self.nom}', etage={self.etage})>"
 
 
-class ObjetMaison(Base):
+class ObjetMaison(TimestampFullMixin, Base):
     """Objet/équipement dans une pièce.
 
     Attributes:
@@ -401,10 +391,6 @@ class ObjetMaison(Base):
     modele: Mapped[str | None] = mapped_column(String(100))
     notes: Mapped[str | None] = mapped_column(Text)
 
-    # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     # Relations
     piece: Mapped["PieceMaison"] = relationship(back_populates="objets")
 
@@ -417,7 +403,7 @@ class ObjetMaison(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class ZoneJardin(Base):
+class ZoneJardin(TimestampFullMixin, Base):
     """Zone du jardin (potager, pelouse, massif, etc.).
 
     Attributes:
@@ -465,10 +451,6 @@ class ZoneJardin(Base):
         JSON, default=list
     )  # ["avant:url", "apres:url"]
 
-    # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     # Relations
     plantes: Mapped[list["PlanteJardin"]] = relationship(
         back_populates="zone", cascade="all, delete-orphan"
@@ -478,7 +460,7 @@ class ZoneJardin(Base):
         return f"<ZoneJardin(id={self.id}, nom='{self.nom}', type='{self.type_zone}', etat={self.etat_note}/5)>"
 
 
-class PlanteJardin(Base):
+class PlanteJardin(TimestampFullMixin, Base):
     """Plante dans une zone du jardin.
 
     Attributes:
@@ -521,10 +503,6 @@ class PlanteJardin(Base):
     arrosage: Mapped[str | None] = mapped_column(String(50))  # quotidien, hebdo, etc.
     notes: Mapped[str | None] = mapped_column(Text)
 
-    # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     # Relations
     zone: Mapped["ZoneJardin"] = relationship(back_populates="plantes")
     actions: Mapped[list["ActionPlante"]] = relationship(
@@ -540,7 +518,7 @@ class PlanteJardin(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class PlanJardin(Base):
+class PlanJardin(TimestampFullMixin, Base):
     """Plan 2D du jardin avec ses dimensions.
 
     Attributes:
@@ -559,10 +537,6 @@ class PlanJardin(Base):
     hauteur: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
 
-    # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     # Relations
     zones: Mapped[list["ZoneJardin"]] = relationship(
         foreign_keys="ZoneJardin.plan_id",
@@ -578,7 +552,7 @@ class PlanJardin(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class ActionPlante(Base):
+class ActionPlante(CreatedAtMixin, Base):
     """Historique des actions effectuées sur une plante.
 
     Attributes:
@@ -603,9 +577,6 @@ class ActionPlante(Base):
     date_action: Mapped[date] = mapped_column(Date, nullable=False, default=date.today)
     quantite: Mapped[Decimal | None] = mapped_column(Numeric(8, 2))
     notes: Mapped[str | None] = mapped_column(Text)
-
-    # Métadonnées
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     plante: Mapped["PlanteJardin"] = relationship(back_populates="actions")

@@ -2,14 +2,14 @@
 Tests unitaires pour notifications.py
 
 Module: src.core.models.notifications
-Contient: PushSubscription, NotificationPreference
+Contient: AbonnementPush, PreferenceNotification
 """
 
 from datetime import time
 
 from src.core.models.notifications import (
-    NotificationPreference,
-    PushSubscription,
+    AbonnementPush,
+    PreferenceNotification,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -18,15 +18,15 @@ from src.core.models.notifications import (
 
 
 class TestPushSubscription:
-    """Tests pour le modèle PushSubscription."""
+    """Tests pour le modèle AbonnementPush."""
 
     def test_tablename(self):
         """Vérifie le nom de la table."""
-        assert PushSubscription.__tablename__ == "push_subscriptions"
+        assert AbonnementPush.__tablename__ == "abonnements_push"
 
     def test_creation_instance(self):
         """Test de création d'une subscription."""
-        sub = PushSubscription(
+        sub = AbonnementPush(
             endpoint="https://push.example.com/abc123",
             p256dh_key="key123",
             auth_key="auth456",
@@ -37,21 +37,21 @@ class TestPushSubscription:
 
     def test_repr(self):
         """Test de la représentation string."""
-        sub = PushSubscription(id=1, endpoint="https://test", p256dh_key="k", auth_key="a")
+        sub = AbonnementPush(id=1, endpoint="https://test", p256dh_key="k", auth_key="a")
         result = repr(sub)
-        assert "PushSubscription" in result
+        assert "AbonnementPush" in result
 
 
 class TestNotificationPreference:
-    """Tests pour le modèle NotificationPreference."""
+    """Tests pour le modèle PreferenceNotification."""
 
     def test_tablename(self):
         """Vérifie le nom de la table."""
-        assert NotificationPreference.__tablename__ == "notification_preferences"
+        assert PreferenceNotification.__tablename__ == "preferences_notifications"
 
     def test_creation_instance(self):
         """Test de création des préférences."""
-        pref = NotificationPreference(
+        pref = PreferenceNotification(
             courses_rappel=True,
             repas_suggestion=False,
             stock_alerte=True,
@@ -62,7 +62,7 @@ class TestNotificationPreference:
 
     def test_colonnes_avec_defauts(self):
         """Vérifie que les colonnes ont des valeurs par défaut."""
-        colonnes = NotificationPreference.__table__.columns
+        colonnes = PreferenceNotification.__table__.columns
         # Toutes les notifications activées par défaut
         assert colonnes["courses_rappel"].default is not None
         assert colonnes["repas_suggestion"].default is not None
@@ -75,7 +75,7 @@ class TestNotificationPreference:
 
     def test_heures_silencieuses_personnalisees(self):
         """Test des heures silencieuses personnalisées."""
-        pref = NotificationPreference(
+        pref = PreferenceNotification(
             quiet_hours_start=time(23, 0),
             quiet_hours_end=time(6, 30),
         )
@@ -84,6 +84,6 @@ class TestNotificationPreference:
 
     def test_repr(self):
         """Test de la représentation string."""
-        pref = NotificationPreference(id=1)
+        pref = PreferenceNotification(id=1)
         result = repr(pref)
-        assert "NotificationPreference" in result
+        assert "PreferenceNotification" in result

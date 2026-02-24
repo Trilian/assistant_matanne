@@ -11,7 +11,7 @@ from .ai_service import WeekendAIService
 from .utils import (
     METEO_OPTIONS,
     TYPES_ACTIVITES,
-    WeekendActivity,
+    ActiviteWeekend,
     date,
     get_age_jules_mois,
     get_budget_weekend,

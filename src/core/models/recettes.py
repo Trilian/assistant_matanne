@@ -8,7 +8,7 @@ Contient :
 - EtapeRecette : Étapes de préparation ordonnées
 - VersionRecette : Variantes (bébé, batch cooking)
 - HistoriqueRecette : Historique d'utilisation
-- BatchMeal : Plats préparés en batch cooking
+- RepasBatch : Plats préparés en batch cooking
 """
 
 from datetime import date, datetime
@@ -21,6 +21,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -28,11 +29,12 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base, utc_now
+from .base import Base
+from .mixins import CreeLeMixin, TimestampMixin
 
 if TYPE_CHECKING:
     from .inventaire import ArticleInventaire
-    from .user_preferences import RecipeFeedback
+    from .user_preferences import RetourRecette
 
 
 # ═══════════════════════════════════════════════════════════
@@ -40,7 +42,7 @@ if TYPE_CHECKING:
 # ═══════════════════════════════════════════════════════════
 
 
-class Ingredient(Base):
+class Ingredient(CreeLeMixin, Base):
     """Ingrédient de base utilisé partout (recettes, inventaire, courses).
 
     Attributes:
@@ -57,7 +59,6 @@ class Ingredient(Base):
     nom: Mapped[str] = mapped_column(String(200), nullable=False, unique=True, index=True)
     categorie: Mapped[str | None] = mapped_column(String(100), index=True)
     unite: Mapped[str] = mapped_column(String(50), nullable=False, default="pcs")
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     recette_ingredients: Mapped[list["RecetteIngredient"]] = relationship(
@@ -76,7 +77,7 @@ class Ingredient(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class Recette(Base):
+class Recette(TimestampMixin, Base):
     """Recette de cuisine avec ingrédients et étapes.
 
     Attributes:
@@ -172,10 +173,6 @@ class Recette(Base):
     # Media
     url_image: Mapped[str | None] = mapped_column(String(500))
 
-    # Timestamps
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
-    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     # Relations
     ingredients: Mapped[list["RecetteIngredient"]] = relationship(
         back_populates="recette", cascade="all, delete-orphan"
@@ -190,12 +187,13 @@ class Recette(Base):
         back_populates="recette", cascade="all, delete-orphan"
     )
     # Feedbacks utilisateurs pour apprentissage IA
-    feedbacks: Mapped[list["RecipeFeedback"]] = relationship(
+    feedbacks: Mapped[list["RetourRecette"]] = relationship(
         back_populates="recette", cascade="all, delete-orphan"
     )
 
     # Contraintes
     __table_args__ = (
+        Index("ix_recettes_cree_le", "cree_le"),
         CheckConstraint("temps_preparation >= 0", name="ck_temps_prep_positif"),
         CheckConstraint("temps_cuisson >= 0", name="ck_temps_cuisson_positif"),
         CheckConstraint("portions > 0 AND portions <= 20", name="ck_portions_valides"),
@@ -309,7 +307,7 @@ class EtapeRecette(Base):
         return f"<EtapeRecette(recette={self.recette_id}, ordre={self.ordre})>"
 
 
-class VersionRecette(Base):
+class VersionRecette(CreeLeMixin, Base):
     """Version adaptée d'une recette (bébé, batch cooking).
 
     Attributes:
@@ -341,8 +339,6 @@ class VersionRecette(Base):
     etapes_paralleles_batch: Mapped[list[str] | None] = mapped_column(JSONB)
     temps_optimise_batch: Mapped[int | None] = mapped_column(Integer)
 
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-
     # Relations
     recette_base: Mapped["Recette"] = relationship(back_populates="versions")
 
@@ -350,7 +346,7 @@ class VersionRecette(Base):
         return f"<VersionRecette(recette={self.recette_base_id}, type='{self.type_version}')>"
 
 
-class HistoriqueRecette(Base):
+class HistoriqueRecette(CreeLeMixin, Base):
     """Historique d'utilisation d'une recette.
 
     Attributes:
@@ -371,7 +367,6 @@ class HistoriqueRecette(Base):
     portions_cuisinees: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     note: Mapped[int | None] = mapped_column(Integer)
     avis: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     recette: Mapped["Recette"] = relationship(back_populates="historique")
@@ -392,7 +387,7 @@ class HistoriqueRecette(Base):
         return f"<HistoriqueRecette(recette={self.recette_id}, date={self.date_cuisson}, note={self.note})>"
 
 
-class BatchMeal(Base):
+class RepasBatch(CreeLeMixin, Base):
     """Recette préparée en batch cooking.
 
     Attributes:
@@ -407,7 +402,7 @@ class BatchMeal(Base):
         localisation: Où est stocké le plat (congélateur, frigo)
     """
 
-    __tablename__ = "batch_meals"
+    __tablename__ = "repas_batch"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     recette_id: Mapped[int | None] = mapped_column(
@@ -422,7 +417,6 @@ class BatchMeal(Base):
     container_type: Mapped[str | None] = mapped_column(String(100))
     localisation: Mapped[str | None] = mapped_column(String(200))
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     def __repr__(self) -> str:
-        return f"<BatchMeal(id={self.id}, nom='{self.nom}', portions={self.portions_restantes})>"
+        return f"<RepasBatch(id={self.id}, nom='{self.nom}', portions={self.portions_restantes})>"

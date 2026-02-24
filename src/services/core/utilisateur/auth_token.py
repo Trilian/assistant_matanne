@@ -15,7 +15,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from .auth_schemas import Role, UserProfile
+from .auth_schemas import ProfilUtilisateur, Role
 
 if TYPE_CHECKING:
     pass
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class TokenValidationMixin:
     """Mixin fournissant la validation et le décodage de tokens JWT."""
 
-    def validate_token(self, token: str) -> UserProfile | None:
+    def validate_token(self, token: str) -> ProfilUtilisateur | None:
         """
         Valide un token JWT Supabase et retourne l'utilisateur.
 
@@ -34,7 +34,7 @@ class TokenValidationMixin:
             token: Token JWT Bearer
 
         Returns:
-            UserProfile si valide, None sinon
+            ProfilUtilisateur si valide, None sinon
         """
         if not self.is_configured:
             logger.warning("Auth non configuré pour validation JWT")
@@ -48,7 +48,7 @@ class TokenValidationMixin:
             if response and response.user:
                 metadata = response.user.user_metadata or {}
 
-                return UserProfile(
+                return ProfilUtilisateur(
                     id=response.user.id,
                     email=response.user.email or "",
                     nom=metadata.get("nom", ""),

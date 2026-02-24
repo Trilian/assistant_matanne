@@ -4,7 +4,7 @@ Modèles SQLAlchemy pour les finances et le budget.
 Contient :
 - Depense : Suivi des dépenses familiales
 - BudgetMensuelDB : Budget mensuel par catégorie
-- HouseExpense : Dépenses récurrentes maison (gaz, eau, électricité)
+- DepenseMaison : Dépenses récurrentes maison (gaz, eau, électricité)
 """
 
 from datetime import date, datetime
@@ -29,6 +29,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base, utc_now
+from .mixins import CreatedAtMixin, TimestampFullMixin
 
 # ═══════════════════════════════════════════════════════════
 # ENUMS
@@ -53,7 +54,7 @@ class CategorieDepenseDB(StrEnum):
     AUTRE = "autre"
 
 
-class RecurrenceType(StrEnum):
+class TypeRecurrence(StrEnum):
     """Types de récurrence."""
 
     PONCTUEL = "ponctuel"
@@ -63,7 +64,7 @@ class RecurrenceType(StrEnum):
     ANNUEL = "annuel"
 
 
-class ExpenseCategory(StrEnum):
+class CategorieDepense(StrEnum):
     """Catégorie de dépense maison."""
 
     GAZ = "gaz"
@@ -86,7 +87,7 @@ class ExpenseCategory(StrEnum):
 # ═══════════════════════════════════════════════════════════
 
 
-class Depense(Base):
+class Depense(TimestampFullMixin, Base):
     """Dépense familiale.
 
     Table SQL: depenses
@@ -143,7 +144,7 @@ class Depense(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class BudgetMensuelDB(Base):
+class BudgetMensuelDB(TimestampFullMixin, Base):
     """Budget mensuel par utilisateur.
 
     Table SQL: budgets_mensuels
@@ -167,10 +168,6 @@ class BudgetMensuelDB(Base):
     # Supabase user
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), index=True)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     __table_args__ = (
         UniqueConstraint("mois", "user_id", name="uq_budget_mois_user"),
         CheckConstraint("budget_total >= 0", name="ck_budget_total_positif"),
@@ -185,13 +182,13 @@ class BudgetMensuelDB(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class HouseExpense(Base):
+class DepenseMaison(CreatedAtMixin, Base):
     """Dépense récurrente ou ponctuelle de la maison.
 
     Pour suivre gaz, eau, électricité, loyer, crèche, etc.
     """
 
-    __tablename__ = "house_expenses"
+    __tablename__ = "depenses_maison"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
@@ -214,9 +211,6 @@ class HouseExpense(Base):
     # Notes
     notes: Mapped[str | None] = mapped_column(Text)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-
     __table_args__ = (
         CheckConstraint("mois >= 1 AND mois <= 12", name="ck_house_mois_valide"),
         CheckConstraint("montant >= 0", name="ck_house_montant_positif"),
@@ -227,4 +221,4 @@ class HouseExpense(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<HouseExpense(id={self.id}, cat='{self.categorie}', montant={self.montant})>"
+        return f"<DepenseMaison(id={self.id}, cat='{self.categorie}', montant={self.montant})>"

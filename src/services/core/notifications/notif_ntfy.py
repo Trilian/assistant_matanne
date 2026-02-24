@@ -3,7 +3,7 @@ Service de notifications push via ntfy.sh.
 
 Fonctionnalités:
 - Envoi notifications push gratuites via ntfy.sh
-- Alertes tâches en retard (MaintenanceTask)
+- Alertes tâches en retard (TacheEntretien)
 - Rappels quotidiens configurables
 - Support multi-appareils (abonnement topic)
 """
@@ -15,7 +15,7 @@ import httpx
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_gestion_erreurs, avec_resilience, avec_session_db
-from src.core.models import ArticleCourses, MaintenanceTask
+from src.core.models import ArticleCourses, TacheEntretien
 from src.services.core.base import sync_wrapper
 from src.services.core.notifications.types import (
     NTFY_BASE_URL,
@@ -92,14 +92,14 @@ class ServiceNtfy:
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
-    def obtenir_taches_en_retard(self, db: Session = None) -> list[MaintenanceTask]:
+    def obtenir_taches_en_retard(self, db: Session = None) -> list[TacheEntretien]:
         """Récupère les tâches ménage/jardin en retard."""
         today = date.today()
 
         taches = (
-            db.query(MaintenanceTask)
-            .filter(MaintenanceTask.prochaine_fois < today, MaintenanceTask.fait == False)
-            .order_by(MaintenanceTask.prochaine_fois)
+            db.query(TacheEntretien)
+            .filter(TacheEntretien.prochaine_fois < today, TacheEntretien.fait == False)
+            .order_by(TacheEntretien.prochaine_fois)
             .all()
         )
 
@@ -107,13 +107,13 @@ class ServiceNtfy:
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
-    def obtenir_taches_du_jour(self, db: Session = None) -> list[MaintenanceTask]:
+    def obtenir_taches_du_jour(self, db: Session = None) -> list[TacheEntretien]:
         """Récupère les tâches prévues pour aujourd'hui."""
         today = date.today()
 
         taches = (
-            db.query(MaintenanceTask)
-            .filter(MaintenanceTask.prochaine_fois == today, MaintenanceTask.fait == False)
+            db.query(TacheEntretien)
+            .filter(TacheEntretien.prochaine_fois == today, TacheEntretien.fait == False)
             .all()
         )
 
@@ -132,7 +132,7 @@ class ServiceNtfy:
 
         return articles
 
-    async def envoyer_alerte_tache_retard(self, tache: MaintenanceTask) -> ResultatEnvoiNtfy:
+    async def envoyer_alerte_tache_retard(self, tache: TacheEntretien) -> ResultatEnvoiNtfy:
         """Envoie une alerte pour une tâche en retard."""
         jours_retard = (date.today() - tache.prochaine_fois).days
 

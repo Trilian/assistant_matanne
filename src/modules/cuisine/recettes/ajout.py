@@ -10,8 +10,11 @@ import streamlit as st
 from src.core.errors_base import ErreurValidation
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.ui.fragments import ui_fragment
+from src.ui.keys import KeyNamespace
 
 logger = logging.getLogger(__name__)
+
+_keys = KeyNamespace("recettes_ajout")
 
 
 @ui_fragment
@@ -20,10 +23,10 @@ def afficher_ajouter_manuel():
     st.subheader("➕ Ajouter une recette manuellement")
 
     # Initialiser session_state si nécessaire
-    if "form_num_ingredients" not in st.session_state:
-        st.session_state.form_num_ingredients = 3
-    if "form_num_etapes" not in st.session_state:
-        st.session_state.form_num_etapes = 3
+    if _keys("num_ingredients") not in st.session_state:
+        st.session_state[_keys("num_ingredients")] = 3
+    if _keys("num_etapes") not in st.session_state:
+        st.session_state[_keys("num_etapes")] = 3
 
     # Infos basiques (sans form pour réactivité)
     col1, col2 = st.columns(2)
@@ -79,10 +82,10 @@ def afficher_ajouter_manuel():
             "Nombre d'ingrédients",
             min_value=1,
             max_value=20,
-            value=st.session_state.form_num_ingredients,
+            value=st.session_state[_keys("num_ingredients")],
             key="form_num_ing_selector",
         )
-        st.session_state.form_num_ingredients = num_ingredients
+        st.session_state[_keys("num_ingredients")] = num_ingredients
 
     ingredients = []
     for i in range(int(num_ingredients)):
@@ -105,10 +108,10 @@ def afficher_ajouter_manuel():
             "Nombre d'étapes",
             min_value=1,
             max_value=15,
-            value=st.session_state.form_num_etapes,
+            value=st.session_state[_keys("num_etapes")],
             key="form_num_etapes_selector",
         )
-        st.session_state.form_num_etapes = num_etapes
+        st.session_state[_keys("num_etapes")] = num_etapes
 
     etapes = []
     for i in range(int(num_etapes)):
@@ -169,8 +172,8 @@ def afficher_ajouter_manuel():
                     recette = service.create_complete(data)
 
                     # Réinitialiser le formulaire
-                    st.session_state.form_num_ingredients = 3
-                    st.session_state.form_num_etapes = 3
+                    st.session_state[_keys("num_ingredients")] = 3
+                    st.session_state[_keys("num_etapes")] = 3
                     for key in list(st.session_state.keys()):
                         if key.startswith("form_"):
                             del st.session_state[key]

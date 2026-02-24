@@ -9,7 +9,8 @@ import streamlit as st
 
 from src.ui.engine import StyleSheet
 from src.ui.registry import composant_ui
-from src.ui.tokens import Couleur, Espacement, Rayon
+from src.ui.tokens import Espacement, Rayon
+from src.ui.tokens_semantic import Sem
 from src.ui.utils import echapper_html
 
 
@@ -89,7 +90,7 @@ def carte_item(
             actions=[("Voir", lambda: view()), ("Éditer", lambda: edit())]
         )
     """
-    border_color = couleur_statut or Couleur.BORDER
+    border_color = couleur_statut or Sem.BORDER
 
     with st.container(border=True):
         if url_image:
@@ -107,7 +108,7 @@ def carte_item(
                     st.markdown(f"### {titre}")
                 with col_status:
                     st.markdown(
-                        f'<div style="text-align: right; color: {couleur_statut or Couleur.TEXT_SECONDARY}; '
+                        f'<div style="text-align: right; color: {couleur_statut or Sem.ON_SURFACE_SECONDARY}; '
                         f'font-weight: 600;">{echapper_html(statut)}</div>',
                         unsafe_allow_html=True,
                     )
@@ -120,7 +121,7 @@ def carte_item(
             if tags:
                 tag_cls = StyleSheet.create_class(
                     {
-                        "background": Couleur.BG_INFO,
+                        "background": Sem.INFO_SUBTLE,
                         "padding": f"{Espacement.XS} {Espacement.SM}",
                         "border-radius": Rayon.PILL,
                         "font-size": "0.875rem",

@@ -13,6 +13,7 @@ try:
 except ImportError:
     PLOTLY_AVAILABLE = False
 
+from src.ui.fragments import cached_fragment
 from src.ui.keys import KeyNamespace
 
 _keys = KeyNamespace("depenses")
@@ -65,41 +66,72 @@ def afficher_graphique_evolution():
         df = pd.DataFrame(data)
 
         if PLOTLY_AVAILABLE:
-            # Graphique Plotly interactif
-            fig = px.bar(
-                df,
-                x="Mois",
-                y="Montant",
-                title=f"Évolution {'totale' if categorie == 'total' else CATEGORY_LABELS.get(categorie, categorie)}",
-                text="Montant",
-                color_discrete_sequence=["#8e44ad"],
-            )
-
-            fig.update_traces(texttemplate="%{text:.0f}€", textposition="outside")
-
-            fig.update_layout(
-                xaxis_title="",
-                yaxis_title="Montant (€)",
-                showlegend=False,
-                plot_bgcolor="rgba(0,0,0,0)",
-                paper_bgcolor="rgba(0,0,0,0)",
-                font=dict(family="system-ui", size=12),
-                margin=dict(t=50, b=50, l=50, r=20),
-            )
-
+            titre = f"Évolution {'totale' if categorie == 'total' else CATEGORY_LABELS.get(categorie, categorie)}"
+            fig = _build_evolution_bar(tuple(df["Mois"]), tuple(df["Montant"]), titre)
             st.plotly_chart(fig, use_container_width=True)
 
             # Graphique tendance (ligne)
             if len(df) >= 3:
-                fig_line = px.line(df, x="Mois", y="Montant", title="Tendance", markers=True)
-                fig_line.update_traces(line_color="#27ae60")
-                fig_line.update_layout(
-                    showlegend=False, plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)"
-                )
+                fig_line = _build_evolution_line(tuple(df["Mois"]), tuple(df["Montant"]))
                 st.plotly_chart(fig_line, use_container_width=True)
         else:
             # Fallback: graphique Streamlit natif
             st.bar_chart(df.set_index("Mois")["Montant"])
+
+
+@cached_fragment(ttl=300)
+def _build_evolution_bar(mois: tuple, montants: tuple, titre: str):
+    """Construit le bar chart d'évolution (caché 5 min)."""
+    df = pd.DataFrame({"Mois": list(mois), "Montant": list(montants)})
+    fig = px.bar(
+        df,
+        x="Mois",
+        y="Montant",
+        title=titre,
+        text="Montant",
+        color_discrete_sequence=["#8e44ad"],
+    )
+    fig.update_traces(texttemplate="%{text:.0f}€", textposition="outside")
+    fig.update_layout(
+        xaxis_title="",
+        yaxis_title="Montant (€)",
+        showlegend=False,
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="system-ui", size=12),
+        margin=dict(t=50, b=50, l=50, r=20),
+    )
+    return fig
+
+
+@cached_fragment(ttl=300)
+def _build_evolution_line(mois: tuple, montants: tuple):
+    """Construit le line chart de tendance (caché 5 min)."""
+    df = pd.DataFrame({"Mois": list(mois), "Montant": list(montants)})
+    fig = px.line(df, x="Mois", y="Montant", title="Tendance", markers=True)
+    fig.update_traces(line_color="#27ae60")
+    fig.update_layout(showlegend=False, plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
+    return fig
+
+
+@cached_fragment(ttl=300)
+def _build_repartition_pie(categories: tuple, montants: tuple, titre: str):
+    """Construit le pie chart de répartition (caché 5 min)."""
+    df = pd.DataFrame({"Catégorie": list(categories), "Montant": list(montants)})
+    fig = px.pie(
+        df,
+        values="Montant",
+        names="Catégorie",
+        title=titre,
+        color_discrete_sequence=px.colors.qualitative.Set3,
+    )
+    fig.update_traces(
+        textposition="inside",
+        textinfo="percent+label",
+        hovertemplate="<b>%{label}</b><br>%{value:.0f}€<br>%{percent}",
+    )
+    fig.update_layout(showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.3))
+    return fig
 
 
 def afficher_graphique_repartition():
@@ -141,22 +173,11 @@ def afficher_graphique_repartition():
     df = pd.DataFrame([{"Catégorie": k, "Montant": v} for k, v in par_cat.items()])
 
     if PLOTLY_AVAILABLE and not df.empty:
-        fig = px.pie(
-            df,
-            values="Montant",
-            names="Catégorie",
-            title=f"Répartition {MOIS_FR[mois]} {annee}",
-            color_discrete_sequence=px.colors.qualitative.Set3,
+        fig = _build_repartition_pie(
+            tuple(df["Catégorie"]),
+            tuple(df["Montant"]),
+            f"Répartition {MOIS_FR[mois]} {annee}",
         )
-
-        fig.update_traces(
-            textposition="inside",
-            textinfo="percent+label",
-            hovertemplate="<b>%{label}</b><br>%{value:.0f}€<br>%{percent}",
-        )
-
-        fig.update_layout(showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.3))
-
         st.plotly_chart(fig, use_container_width=True)
     else:
         # Fallback simple

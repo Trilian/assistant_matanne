@@ -13,10 +13,10 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
 from src.core.models import (
-    NotificationPreference as NotificationPreferenceModel,
+    AbonnementPush as PushSubscriptionModel,
 )
 from src.core.models import (
-    PushSubscription as PushSubscriptionModel,
+    PreferenceNotification as NotificationPreferenceModel,
 )
 from src.services.core.notifications.types import (
     AbonnementPush,
@@ -75,7 +75,7 @@ class NotificationPersistenceMixin:
                 "is_active": subscription.is_active,
             }
 
-            client.table("push_subscriptions").upsert(data, on_conflict="endpoint").execute()
+            client.table("abonnements_push").upsert(data, on_conflict="endpoint").execute()
 
             logger.debug(f"Abonnement sauvegardé pour {subscription.user_id}")
         except Exception as e:
@@ -88,7 +88,7 @@ class NotificationPersistenceMixin:
             return
 
         try:
-            client.table("push_subscriptions").delete().match(
+            client.table("abonnements_push").delete().match(
                 {"user_id": user_id, "endpoint": endpoint}
             ).execute()
 
@@ -104,7 +104,7 @@ class NotificationPersistenceMixin:
 
         try:
             response = (
-                client.table("push_subscriptions")
+                client.table("abonnements_push")
                 .select("*")
                 .eq("user_id", user_id)
                 .eq("is_active", True)
@@ -155,7 +155,7 @@ class NotificationPersistenceMixin:
                 "digest_mode": preferences.mode_digest,
             }
 
-            client.table("notification_preferences").upsert(data, on_conflict="user_id").execute()
+            client.table("preferences_notifications").upsert(data, on_conflict="user_id").execute()
 
             logger.debug(f"Préférences sauvegardées pour {preferences.user_id}")
         except Exception as e:

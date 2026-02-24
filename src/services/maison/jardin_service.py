@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from src.core.ai import ClientIA, obtenir_client_ia
 from src.core.decorators import avec_cache, avec_session_db
-from src.core.models import GardenItem
+from src.core.models import ElementJardin
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
 
@@ -392,7 +392,7 @@ Réponds en JSON:
 
     @avec_cache(ttl=300)
     @avec_session_db
-    def obtenir_plantes(self, db: Session | None = None) -> list[GardenItem]:
+    def obtenir_plantes(self, db: Session | None = None) -> list[ElementJardin]:
         """Récupère toutes les plantes du jardin.
 
         Args:
@@ -401,15 +401,15 @@ Réponds en JSON:
         Returns:
             Liste des plantes
         """
-        return db.query(GardenItem).all()
+        return db.query(ElementJardin).all()
 
-    def get_plantes(self, db: Session | None = None) -> list[GardenItem]:
+    def get_plantes(self, db: Session | None = None) -> list[ElementJardin]:
         """Alias anglais pour obtenir_plantes (rétrocompatibilité)."""
         return self.obtenir_plantes(db)
 
     @avec_cache(ttl=300)
     @avec_session_db
-    def obtenir_plantes_a_arroser(self, db: Session | None = None) -> list[GardenItem]:
+    def obtenir_plantes_a_arroser(self, db: Session | None = None) -> list[ElementJardin]:
         """Récupère les plantes nécessitant arrosage.
 
         Args:
@@ -420,16 +420,19 @@ Réponds en JSON:
         """
         return self._query_plantes_arrosage(db)
 
-    def get_plantes_a_arroser(self, db: Session | None = None) -> list[GardenItem]:
+    def get_plantes_a_arroser(self, db: Session | None = None) -> list[ElementJardin]:
         """Alias anglais pour obtenir_plantes_a_arroser (rétrocompatibilité)."""
         return self.obtenir_plantes_a_arroser(db)
 
-    def _query_plantes_arrosage(self, db: Session) -> list[GardenItem]:
+    def _query_plantes_arrosage(self, db: Session) -> list[ElementJardin]:
         """Query interne pour plantes à arroser."""
         seuil = date.today() - timedelta(days=3)
         return (
-            db.query(GardenItem)
-            .filter((GardenItem.dernier_arrosage < seuil) | (GardenItem.dernier_arrosage.is_(None)))
+            db.query(ElementJardin)
+            .filter(
+                (ElementJardin.dernier_arrosage < seuil)
+                | (ElementJardin.dernier_arrosage.is_(None))
+            )
             .all()
         )
 

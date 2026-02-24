@@ -138,9 +138,9 @@ class TestRouting:
     def test_module_registry_exists(self):
         """Teste que le registre de modules existe"""
         try:
-            from src.core.lazy_loader import RouteurOptimise
+            from src.core.lazy_loader import ChargeurModuleDiffere
 
-            assert hasattr(RouteurOptimise, "MODULE_REGISTRY")
+            assert hasattr(ChargeurModuleDiffere, "_cache")
         except ImportError:
             # Optionnel selon l'architecture
             pass
@@ -249,9 +249,9 @@ class TestPerformance:
     def test_lazy_loading_optimization(self):
         """Teste que le lazy loading est disponible"""
         try:
-            from src.core.lazy_loader import RouteurOptimise
+            from src.core.lazy_loader import ChargeurModuleDiffere
 
-            assert RouteurOptimise is not None
+            assert ChargeurModuleDiffere is not None
         except ImportError:
             # Optionnel
             pass

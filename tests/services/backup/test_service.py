@@ -25,7 +25,7 @@ from src.services.core.backup.types import (
 @pytest.fixture
 def temp_backup_dir(tmp_path):
     """Crée un répertoire temporaire pour les backups."""
-    backup_dir = tmp_path / "backups"
+    backup_dir = tmp_path / "sauvegardes"
     backup_dir.mkdir()
     return backup_dir
 

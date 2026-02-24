@@ -1,7 +1,7 @@
 """
 Service CRUD Dépenses Maison.
 
-Hérite de BaseService[HouseExpense] pour CRUD générique.
+Hérite de BaseService[DepenseMaison] pour CRUD générique.
 
 Centralise tous les accès base de données pour les dépenses maison
 (gaz, eau, électricité, loyer, crèche, etc.).
@@ -9,12 +9,11 @@ Centralise tous les accès base de données pour les dépenses maison
 
 import logging
 from datetime import date
-from typing import Optional
 
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.models import HouseExpense
+from src.core.models import DepenseMaison
 from src.services.core.base import BaseService
 from src.services.core.registry import service_factory
 
@@ -41,16 +40,14 @@ MOIS_FR = [
 CATEGORIES_AVEC_CONSO = {"gaz", "electricite", "eau"}
 
 
-class DepensesCrudService(BaseService[HouseExpense]):
+class DepensesCrudService(BaseService[DepenseMaison]):
     """Service CRUD pour les dépenses maison.
 
-    Hérite de BaseService[HouseExpense] pour le CRUD générique.
+    Hérite de BaseService[DepenseMaison] pour le CRUD générique.
     """
 
-    _instance: Optional["DepensesCrudService"] = None
-
     def __init__(self):
-        super().__init__(model=HouseExpense, cache_ttl=600)
+        super().__init__(model=DepenseMaison, cache_ttl=600)
 
     @avec_cache(ttl=600)
     @avec_session_db
@@ -58,9 +55,9 @@ class DepensesCrudService(BaseService[HouseExpense]):
     def get_depenses_mois(self, mois: int, annee: int, db: Session | None = None) -> list:
         """Récupère les dépenses d'un mois."""
         return (
-            db.query(HouseExpense)
-            .filter(HouseExpense.mois == mois, HouseExpense.annee == annee)
-            .order_by(HouseExpense.categorie)
+            db.query(DepenseMaison)
+            .filter(DepenseMaison.mois == mois, DepenseMaison.annee == annee)
+            .order_by(DepenseMaison.categorie)
             .all()
         )
 
@@ -70,9 +67,9 @@ class DepensesCrudService(BaseService[HouseExpense]):
     def get_depenses_annee(self, annee: int, db: Session | None = None) -> list:
         """Récupère toutes les dépenses d'une année."""
         return (
-            db.query(HouseExpense)
-            .filter(HouseExpense.annee == annee)
-            .order_by(HouseExpense.mois, HouseExpense.categorie)
+            db.query(DepenseMaison)
+            .filter(DepenseMaison.annee == annee)
+            .order_by(DepenseMaison.mois, DepenseMaison.categorie)
             .all()
         )
 
@@ -81,7 +78,7 @@ class DepensesCrudService(BaseService[HouseExpense]):
     @avec_gestion_erreurs(default_return=None)
     def get_depense_by_id(self, depense_id: int, db: Session | None = None):
         """Récupère une dépense par ID."""
-        return db.query(HouseExpense).filter(HouseExpense.id == depense_id).first()
+        return db.query(DepenseMaison).filter(DepenseMaison.id == depense_id).first()
 
     @avec_session_db
     def create_depense(self, data: dict, db: Session | None = None):
@@ -114,7 +111,7 @@ class DepensesCrudService(BaseService[HouseExpense]):
             except Exception as e:
                 logger.warning(f"Erreur service budget: {e}")
 
-        depense = HouseExpense(**data)
+        depense = DepenseMaison(**data)
         db.add(depense)
         db.commit()
         db.refresh(depense)
@@ -123,7 +120,7 @@ class DepensesCrudService(BaseService[HouseExpense]):
     @avec_session_db
     def update_depense(self, depense_id: int, data: dict, db: Session | None = None):
         """Met à jour une dépense."""
-        depense = db.query(HouseExpense).filter(HouseExpense.id == depense_id).first()
+        depense = db.query(DepenseMaison).filter(DepenseMaison.id == depense_id).first()
         if depense:
             for key, value in data.items():
                 setattr(depense, key, value)
@@ -134,7 +131,7 @@ class DepensesCrudService(BaseService[HouseExpense]):
     @avec_session_db
     def delete_depense(self, depense_id: int, db: Session | None = None) -> bool:
         """Supprime une dépense."""
-        depense = db.query(HouseExpense).filter(HouseExpense.id == depense_id).first()
+        depense = db.query(DepenseMaison).filter(DepenseMaison.id == depense_id).first()
         if depense:
             db.delete(depense)
             db.commit()
@@ -203,11 +200,11 @@ class DepensesCrudService(BaseService[HouseExpense]):
                 annee -= 1
 
             depense = (
-                db.query(HouseExpense)
+                db.query(DepenseMaison)
                 .filter(
-                    HouseExpense.categorie == categorie,
-                    HouseExpense.mois == mois,
-                    HouseExpense.annee == annee,
+                    DepenseMaison.categorie == categorie,
+                    DepenseMaison.mois == mois,
+                    DepenseMaison.annee == annee,
                 )
                 .first()
             )
@@ -235,9 +232,7 @@ class DepensesCrudService(BaseService[HouseExpense]):
 @service_factory("depenses_crud", tags={"maison", "crud", "depenses"})
 def get_depenses_crud_service() -> DepensesCrudService:
     """Factory singleton pour le service CRUD dépenses."""
-    if DepensesCrudService._instance is None:
-        DepensesCrudService._instance = DepensesCrudService()
-    return DepensesCrudService._instance
+    return DepensesCrudService()
 
 
 def obtenir_service_depenses_crud() -> DepensesCrudService:

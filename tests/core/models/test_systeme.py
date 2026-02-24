@@ -17,7 +17,7 @@ class TestBackup:
 
     def test_tablename(self):
         """Vérifie le nom de la table."""
-        assert Backup.__tablename__ == "backups"
+        assert Backup.__tablename__ == "sauvegardes"
 
     def test_creation_instance(self):
         """Test de création d'un backup."""

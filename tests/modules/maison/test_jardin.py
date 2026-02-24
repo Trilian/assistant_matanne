@@ -4,11 +4,6 @@ Tests pour src/modules/maison/jardin.py
 Tests complets pour le module Jardin (gestion jardin avec IA).
 """
 
-import pytest
-
-pytestmark = pytest.mark.skip(
-    reason="Fonctions jardin (ajouter_plante, etc.) non encore implémentées dans le module"
-)
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest

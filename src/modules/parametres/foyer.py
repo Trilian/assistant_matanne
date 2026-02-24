@@ -1,7 +1,7 @@
 """
 Paramètres - Configuration Foyer
 Gestion des informations du foyer familial.
-Persistée en base de données via le modèle UserPreference.
+Persistée en base de données via le modèle PreferenceUtilisateur.
 """
 
 import logging
@@ -12,20 +12,23 @@ import streamlit as st
 from src.core.state import obtenir_etat
 from src.ui.feedback import afficher_succes
 from src.ui.fragments import ui_fragment
+from src.ui.keys import KeyNamespace
 
 logger = logging.getLogger(__name__)
 
+_keys = KeyNamespace("foyer")
+
 
 def _charger_config_db() -> dict | None:
-    """Charge la config foyer depuis la DB (UserPreference)."""
+    """Charge la config foyer depuis la DB (PreferenceUtilisateur)."""
     try:
         from src.core.db import obtenir_db_securise
-        from src.core.models.user_preferences import UserPreference
+        from src.core.models.user_preferences import PreferenceUtilisateur
 
         with obtenir_db_securise() as db:
             if db is None:
                 return None
-            pref = db.query(UserPreference).first()
+            pref = db.query(PreferenceUtilisateur).first()
             if pref is None:
                 return None
             return {
@@ -43,18 +46,18 @@ def _charger_config_db() -> dict | None:
 
 
 def _sauvegarder_config_db(config: dict) -> bool:
-    """Persiste la config foyer en DB via UserPreference."""
+    """Persiste la config foyer en DB via PreferenceUtilisateur."""
     try:
         from src.core.db import obtenir_db_securise
-        from src.core.models.user_preferences import UserPreference
+        from src.core.models.user_preferences import PreferenceUtilisateur
 
         with obtenir_db_securise() as db:
             if db is None:
                 return False
 
-            pref = db.query(UserPreference).first()
+            pref = db.query(PreferenceUtilisateur).first()
             if pref is None:
-                pref = UserPreference(
+                pref = PreferenceUtilisateur(
                     user_id=config.get("nom_utilisateur", "default"),
                 )
                 db.add(pref)
@@ -88,14 +91,14 @@ def afficher_foyer_config():
     state = obtenir_etat()
 
     # Recuperer config: DB → session_state → defaults
-    if "foyer_config" not in st.session_state:
+    if _keys("config") not in st.session_state:
         db_config = _charger_config_db()
         if db_config:
-            st.session_state["foyer_config"] = db_config
+            st.session_state[_keys("config")] = db_config
             logger.debug("Config foyer chargée depuis la DB")
 
     config = st.session_state.get(
-        "foyer_config",
+        _keys("config"),
         {
             "nom_utilisateur": state.nom_utilisateur,
             "nb_adultes": 2,
@@ -172,7 +175,7 @@ def afficher_foyer_config():
                 "updated_at": datetime.now().isoformat(),
             }
 
-            st.session_state.foyer_config = new_config
+            st.session_state[_keys("config")] = new_config
 
             # Mettre à jour state
             state.nom_utilisateur = nom_utilisateur

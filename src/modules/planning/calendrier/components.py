@@ -7,6 +7,7 @@ from datetime import date, datetime, time, timedelta
 import streamlit as st
 
 from src.core.session_keys import SK
+from src.ui.keys import KeyNamespace
 
 from .utils import (
     JourCalendrier,
@@ -26,6 +27,8 @@ try:
 except ImportError:
     HAS_SORTABLES = False
 
+_keys = KeyNamespace("calendrier")
+
 # Accesseur lazy pour le service (singleton)
 _service = None
 
@@ -43,20 +46,20 @@ def _get_service():
 
 def afficher_navigation_semaine():
     """Affiche la navigation entre semaines."""
-    if "cal_semaine_debut" not in st.session_state:
-        st.session_state.cal_semaine_debut = get_debut_semaine(date.today())
+    if _keys("semaine_debut") not in st.session_state:
+        st.session_state[_keys("semaine_debut")] = get_debut_semaine(date.today())
 
     col1, col2, col3, col4 = st.columns([1, 2, 1, 1])
 
     with col1:
         if st.button("◀ Précédente", use_container_width=True):
-            st.session_state.cal_semaine_debut = get_semaine_precedente(
-                st.session_state.cal_semaine_debut
+            st.session_state[_keys("semaine_debut")] = get_semaine_precedente(
+                st.session_state[_keys("semaine_debut")]
             )
             st.rerun()
 
     with col2:
-        semaine_debut = st.session_state.cal_semaine_debut
+        semaine_debut = st.session_state[_keys("semaine_debut")]
         semaine_fin = semaine_debut + timedelta(days=6)
         st.markdown(
             f"<h3 style='text-align: center; margin: 0;'>"
@@ -67,14 +70,14 @@ def afficher_navigation_semaine():
 
     with col3:
         if st.button("Suivante ▶", use_container_width=True):
-            st.session_state.cal_semaine_debut = get_semaine_suivante(
-                st.session_state.cal_semaine_debut
+            st.session_state[_keys("semaine_debut")] = get_semaine_suivante(
+                st.session_state[_keys("semaine_debut")]
             )
             st.rerun()
 
     with col4:
         if st.button("📅 Aujourd'hui", use_container_width=True):
-            st.session_state.cal_semaine_debut = get_debut_semaine(date.today())
+            st.session_state[_keys("semaine_debut")] = get_debut_semaine(date.today())
             st.rerun()
 
 
@@ -91,7 +94,7 @@ def afficher_jour_calendrier(jour: JourCalendrier):
 
         with col_actions:
             if st.button("➕", key=f"add_{jour.date_jour}", help="Ajouter"):
-                st.session_state.ajouter_event_date = jour.date_jour
+                st.session_state[_keys("event_date")] = jour.date_jour
 
         # Grille des repas
         col_midi, col_soir = st.columns(2)
@@ -341,8 +344,8 @@ def afficher_modal_impression(semaine: SemaineCalendrier):
 def afficher_formulaire_ajout_event():
     """Affiche le formulaire d'ajout d'événement."""
 
-    if "ajouter_event_date" in st.session_state:
-        date_selectionnee = st.session_state.ajouter_event_date
+    if _keys("event_date") in st.session_state:
+        date_selectionnee = st.session_state[_keys("event_date")]
 
         with st.container():
             st.subheader(f"➕ Ajouter un événement - {date_selectionnee.strftime('%d/%m/%Y')}")
@@ -443,7 +446,7 @@ def afficher_formulaire_ajout_event():
 
                 with col_cancel:
                     if st.form_submit_button("❌ Annuler"):
-                        del st.session_state.ajouter_event_date
+                        del st.session_state[_keys("event_date")]
                         st.rerun()
 
                 if submitted and titre:
@@ -475,7 +478,7 @@ def afficher_formulaire_ajout_event():
                             )
 
                         st.success(f"✅ {titre} ajouté!")
-                        del st.session_state.ajouter_event_date
+                        del st.session_state[_keys("event_date")]
                         st.rerun()
 
                     except Exception as e:

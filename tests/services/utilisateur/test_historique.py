@@ -740,7 +740,7 @@ class TestPrivateMethods:
             description="Test",
         )
 
-        # La méthode _save_to_database importe ActionHistory localement
+        # La méthode _save_to_database importe HistoriqueAction localement
         # Si le modèle n'existe pas, elle logue l'erreur sans lever d'exception
         # On vérifie simplement que la méthode s'exécute sans crash
         service._save_to_database(entry)

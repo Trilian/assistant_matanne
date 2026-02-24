@@ -16,7 +16,7 @@ from typing import TypedDict
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.models import WeekendActivity
+from src.core.models import ActiviteWeekend
 from src.services.core.base import BaseService
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
@@ -31,16 +31,16 @@ class BudgetWeekendDict(TypedDict):
     reel: float
 
 
-class ServiceWeekend(BaseService[WeekendActivity]):
+class ServiceWeekend(BaseService[ActiviteWeekend]):
     """Service de gestion des activités weekend.
 
-    Hérite de BaseService[WeekendActivity] pour le CRUD générique.
+    Hérite de BaseService[ActiviteWeekend] pour le CRUD générique.
     Encapsule les opérations spécialisées et la logique métier
     liée aux sorties du weekend.
     """
 
     def __init__(self):
-        super().__init__(model=WeekendActivity, cache_ttl=300)
+        super().__init__(model=ActiviteWeekend, cache_ttl=300)
 
     # ═══════════════════════════════════════════════════════════
     # UTILITAIRES
@@ -79,7 +79,7 @@ class ServiceWeekend(BaseService[WeekendActivity]):
     @avec_session_db
     def lister_activites_weekend(
         self, saturday: date_type, sunday: date_type, db: Session | None = None
-    ) -> dict[str, list[WeekendActivity]]:
+    ) -> dict[str, list[ActiviteWeekend]]:
         """Récupère les activités du weekend par jour.
 
         Args:
@@ -94,9 +94,9 @@ class ServiceWeekend(BaseService[WeekendActivity]):
         if db is None:
             raise ValueError("Session DB requise")
         activities = (
-            db.query(WeekendActivity)
-            .filter(WeekendActivity.date_prevue.in_([saturday, sunday]))
-            .order_by(WeekendActivity.heure_debut)
+            db.query(ActiviteWeekend)
+            .filter(ActiviteWeekend.date_prevue.in_([saturday, sunday]))
+            .order_by(ActiviteWeekend.heure_debut)
             .all()
         )
 
@@ -125,8 +125,8 @@ class ServiceWeekend(BaseService[WeekendActivity]):
         if db is None:
             raise ValueError("Session DB requise")
         activities = (
-            db.query(WeekendActivity)
-            .filter(WeekendActivity.date_prevue.in_([saturday, sunday]))
+            db.query(ActiviteWeekend)
+            .filter(ActiviteWeekend.date_prevue.in_([saturday, sunday]))
             .all()
         )
 
@@ -138,7 +138,7 @@ class ServiceWeekend(BaseService[WeekendActivity]):
     @avec_gestion_erreurs(default_return=[])
     @avec_cache(ttl=300)
     @avec_session_db
-    def get_lieux_testes(self, db: Session | None = None) -> list[WeekendActivity]:
+    def get_lieux_testes(self, db: Session | None = None) -> list[ActiviteWeekend]:
         """Récupère les lieux déjà testés avec notes.
 
         Args:
@@ -151,19 +151,19 @@ class ServiceWeekend(BaseService[WeekendActivity]):
         if db is None:
             raise ValueError("Session DB requise")
         return (
-            db.query(WeekendActivity)
+            db.query(ActiviteWeekend)
             .filter(
-                WeekendActivity.statut == "termine",
-                WeekendActivity.note_lieu.isnot(None),
+                ActiviteWeekend.statut == "termine",
+                ActiviteWeekend.note_lieu.isnot(None),
             )
-            .order_by(WeekendActivity.note_lieu.desc())
+            .order_by(ActiviteWeekend.note_lieu.desc())
             .all()
         )
 
     @avec_gestion_erreurs(default_return=[])
     @avec_cache(ttl=300)
     @avec_session_db
-    def get_activites_non_notees(self, db: Session | None = None) -> list[WeekendActivity]:
+    def get_activites_non_notees(self, db: Session | None = None) -> list[ActiviteWeekend]:
         """Récupère les activités terminées non notées.
 
         Args:
@@ -175,10 +175,10 @@ class ServiceWeekend(BaseService[WeekendActivity]):
         if db is None:
             raise ValueError("Session DB requise")
         return (
-            db.query(WeekendActivity)
+            db.query(ActiviteWeekend)
             .filter(
-                WeekendActivity.statut == "termine",
-                WeekendActivity.note_lieu.is_(None),
+                ActiviteWeekend.statut == "termine",
+                ActiviteWeekend.note_lieu.is_(None),
             )
             .all()
         )
@@ -203,7 +203,7 @@ class ServiceWeekend(BaseService[WeekendActivity]):
         adapte_jules: bool = True,
         participants: list[str] | None = None,
         db: Session | None = None,
-    ) -> WeekendActivity:
+    ) -> ActiviteWeekend:
         """Ajoute une nouvelle activité weekend.
 
         Args:
@@ -228,7 +228,7 @@ class ServiceWeekend(BaseService[WeekendActivity]):
         if participants is None:
             participants = ["Anne", "Mathieu", "Jules"]
 
-        activity = WeekendActivity(
+        activity = ActiviteWeekend(
             titre=titre,
             type_activite=type_activite,
             date_prevue=date_prevue,
@@ -269,7 +269,7 @@ class ServiceWeekend(BaseService[WeekendActivity]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        activity = db.get(WeekendActivity, activity_id)
+        activity = db.get(ActiviteWeekend, activity_id)
         if activity:
             activity.statut = "termine"
             db.commit()
@@ -311,7 +311,7 @@ class ServiceWeekend(BaseService[WeekendActivity]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        activity = db.get(WeekendActivity, activity_id)
+        activity = db.get(ActiviteWeekend, activity_id)
         if activity:
             activity.note_lieu = note
             activity.a_refaire = a_refaire
@@ -344,7 +344,7 @@ class ServiceWeekend(BaseService[WeekendActivity]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        deleted = db.query(WeekendActivity).filter(WeekendActivity.id == activity_id).delete()
+        deleted = db.query(ActiviteWeekend).filter(ActiviteWeekend.id == activity_id).delete()
         db.commit()
         if deleted > 0:
             logger.info("Activité weekend supprimée: id=%d", activity_id)

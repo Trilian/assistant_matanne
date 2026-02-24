@@ -86,8 +86,8 @@ def service():
     """
     with (
         patch("src.services.famille.routines.Routine") as mock_routine_cls,
-        patch("src.services.famille.routines.RoutineTask") as mock_task_cls,
-        patch("src.services.famille.routines.ChildProfile") as mock_child_cls,
+        patch("src.services.famille.routines.TacheRoutine") as mock_task_cls,
+        patch("src.services.famille.routines.ProfilEnfant") as mock_child_cls,
         patch("src.services.famille.routines.selectinload", return_value=MagicMock()),
         patch("src.services.famille.routines.obtenir_bus"),
     ):

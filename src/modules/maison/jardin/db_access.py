@@ -2,14 +2,14 @@
 Accès base de données pour le module Jardin.
 
 Fait le pont entre l'UI (listes de dicts en session_state)
-et la base de données (modèles SQLAlchemy GardenItem/GardenLog).
+et la base de données (modèles SQLAlchemy ElementJardin/JournalJardin).
 """
 
 import logging
 from datetime import date
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
-from src.core.models import GardenItem, GardenLog
+from src.core.models import ElementJardin, JournalJardin
 
 logger = logging.getLogger(__name__)
 
@@ -24,12 +24,12 @@ logger = logging.getLogger(__name__)
 def charger_plantes_jardin(session=None) -> list[dict]:
     """Charge les plantes du jardin depuis la DB.
 
-    Convertit les GardenItem en dicts compatibles avec l'UI existante.
+    Convertit les ElementJardin en dicts compatibles avec l'UI existante.
     """
     items = (
-        session.query(GardenItem)
-        .filter(GardenItem.statut == "actif")
-        .order_by(GardenItem.cree_le.desc())
+        session.query(ElementJardin)
+        .filter(ElementJardin.statut == "actif")
+        .order_by(ElementJardin.cree_le.desc())
         .all()
     )
 
@@ -60,12 +60,12 @@ def charger_plantes_jardin(session=None) -> list[dict]:
 def charger_recoltes_jardin(session=None) -> list[dict]:
     """Charge l'historique des récoltes depuis la DB.
 
-    Convertit les GardenLog (action='récolte') en dicts compatibles.
+    Convertit les JournalJardin (action='récolte') en dicts compatibles.
     """
     logs = (
-        session.query(GardenLog)
-        .filter(GardenLog.action == "récolte")
-        .order_by(GardenLog.date.desc())
+        session.query(JournalJardin)
+        .filter(JournalJardin.action == "récolte")
+        .order_by(JournalJardin.date.desc())
         .all()
     )
 
@@ -119,7 +119,7 @@ def ajouter_plante_jardin(plante: dict, session=None) -> dict | None:
     Returns:
         Dict mis à jour avec db_id
     """
-    item = GardenItem(
+    item = ElementJardin(
         nom=plante.get("plante_id", "Inconnue"),
         type=plante.get("categorie", "légume"),
         location=plante.get("zone"),
@@ -148,7 +148,7 @@ def mettre_a_jour_plante_jardin(db_id: int, updates: dict, session=None) -> bool
     Returns:
         True si succès
     """
-    item = session.query(GardenItem).filter(GardenItem.id == db_id).first()
+    item = session.query(ElementJardin).filter(ElementJardin.id == db_id).first()
     if not item:
         return False
 
@@ -174,7 +174,7 @@ def supprimer_plante_jardin(db_id: int, session=None) -> bool:
     Returns:
         True si succès
     """
-    item = session.query(GardenItem).filter(GardenItem.id == db_id).first()
+    item = session.query(ElementJardin).filter(ElementJardin.id == db_id).first()
     if item:
         session.delete(item)
         session.commit()
@@ -199,10 +199,10 @@ def ajouter_recolte_jardin(recolte: dict, session=None) -> dict | None:
     plante_id = recolte.get("plante_id", "")
     if plante_id:
         item = (
-            session.query(GardenItem)
+            session.query(ElementJardin)
             .filter(
-                GardenItem.nom == plante_id,
-                GardenItem.statut == "actif",
+                ElementJardin.nom == plante_id,
+                ElementJardin.statut == "actif",
             )
             .first()
         )
@@ -214,7 +214,7 @@ def ajouter_recolte_jardin(recolte: dict, session=None) -> dict | None:
     if recolte.get("notes"):
         notes_str += f" - {recolte['notes']}"
 
-    log = GardenLog(
+    log = JournalJardin(
         garden_item_id=garden_item_id,
         date=date.fromisoformat(recolte.get("date", date.today().isoformat())),
         action="récolte",

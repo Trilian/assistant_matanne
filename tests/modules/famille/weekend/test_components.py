@@ -579,7 +579,7 @@ class TestRenderLieuxTestesFilter:
 class TestRenderAddActivitySubmit:
     """Tests for form submission in afficher_add_activity (lines 217-239)"""
 
-    @patch("src.modules.famille.weekend.components.WeekendActivity")
+    @patch("src.modules.famille.weekend.components.ActiviteWeekend")
     @patch("src.modules.famille.weekend.components.obtenir_service_weekend")
     @patch("src.modules.famille.weekend.components.get_next_weekend")
     @patch("src.modules.famille.weekend.components.st")
@@ -610,7 +610,7 @@ class TestRenderAddActivitySubmit:
 
         mock_st.rerun.assert_called()
 
-    @patch("src.modules.famille.weekend.components.WeekendActivity")
+    @patch("src.modules.famille.weekend.components.ActiviteWeekend")
     @patch("src.modules.famille.weekend.components.obtenir_service_weekend")
     @patch("src.modules.famille.weekend.components.get_next_weekend")
     @patch("src.modules.famille.weekend.components.st")

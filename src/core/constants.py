@@ -119,7 +119,7 @@ JOURS_SEMAINE_LOWER: list[str] = [
 
 MOIS_FRANCAIS: list[str] = [
     "Janvier",
-    "Fevrier",
+    "Février",
     "Mars",
     "Avril",
     "Mai",
@@ -129,7 +129,7 @@ MOIS_FRANCAIS: list[str] = [
     "Septembre",
     "Octobre",
     "Novembre",
-    "Decembre",
+    "Décembre",
 ]
 """Noms des mois en français."""
 

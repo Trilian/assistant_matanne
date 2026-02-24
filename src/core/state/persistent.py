@@ -8,12 +8,12 @@ Usage:
     from src.core.state.persistent import PersistentState, persistent_state
 
     # Décorateur pour synchronisation automatique
-    @persistent_state(model=UserPreference, key="foyer_config", sync_interval=30)
+    @persistent_state(model=PreferenceUtilisateur, key="foyer_config", sync_interval=30)
     def obtenir_config_foyer():
         return {"nb_adultes": 2, "jules_present": True}
 
     # Classe pour gestion manuelle
-    pstate = PersistentState("user_preferences", user_id="anne")
+    pstate = PersistentState("preferences_utilisateurs", user_id="anne")
     pstate.set("theme", "dark")
     pstate.commit()  # Sauvegarde en DB
 
@@ -85,7 +85,7 @@ class PersistentState:
     """
 
     _PREFIX = "pstate_"
-    _instances: dict[str, "PersistentState"] = {}
+    _instances: dict[str, PersistentState] = {}
     _lock = threading.Lock()
 
     def __init__(
@@ -121,7 +121,7 @@ class PersistentState:
         cls,
         namespace: str,
         **kwargs: Any,
-    ) -> "PersistentState":
+    ) -> PersistentState:
         """Obtient ou crée une instance singleton par namespace."""
         key = f"{namespace}_{kwargs.get('user_id', 'default')}"
 
@@ -152,11 +152,11 @@ class PersistentState:
         """Charge l'état depuis la base de données."""
         try:
             from src.core.db import obtenir_contexte_db
-            from src.core.models import PersistentStateDB
+            from src.core.models import EtatPersistantDB
 
             with obtenir_contexte_db() as db:
                 entry = (
-                    db.query(PersistentStateDB)
+                    db.query(EtatPersistantDB)
                     .filter_by(namespace=self.namespace, user_id=self.user_id)
                     .first()
                 )
@@ -164,7 +164,7 @@ class PersistentState:
                     return entry.data or {}
         except ImportError:
             # Modèle pas encore créé — fallback silencieux
-            logger.debug("PersistentStateDB non disponible")
+            logger.debug("EtatPersistantDB non disponible")
         except Exception as e:
             logger.warning(f"Erreur lecture DB: {e}")
 
@@ -282,11 +282,11 @@ class PersistentState:
         """Sauvegarde l'état en base de données."""
         try:
             from src.core.db import obtenir_contexte_db
-            from src.core.models import PersistentStateDB
+            from src.core.models import EtatPersistantDB
 
             with obtenir_contexte_db() as db:
                 entry = (
-                    db.query(PersistentStateDB)
+                    db.query(EtatPersistantDB)
                     .filter_by(namespace=self.namespace, user_id=self.user_id)
                     .first()
                 )
@@ -295,7 +295,7 @@ class PersistentState:
                     entry.data = data
                     entry.updated_at = datetime.now()
                 else:
-                    entry = PersistentStateDB(
+                    entry = EtatPersistantDB(
                         namespace=self.namespace,
                         user_id=self.user_id,
                         data=data,
@@ -306,7 +306,7 @@ class PersistentState:
                 return True
 
         except ImportError:
-            logger.debug("PersistentStateDB non disponible — sauvegarde différée")
+            logger.debug("EtatPersistantDB non disponible — sauvegarde différée")
             return True  # Pas d'erreur, juste pas de DB
         except Exception as e:
             logger.error(f"Erreur sauvegarde DB: {e}")

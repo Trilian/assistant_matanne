@@ -2,8 +2,8 @@
 Service Préférences Utilisateur - Persistance DB
 
 Gère:
-- UserPreference: Préférences familiales persistantes
-- RecipeFeedback: Feedbacks 👍/👎 pour apprentissage IA
+- PreferenceUtilisateur: Préférences familiales persistantes
+- RetourRecette: Feedbacks 👍/👎 pour apprentissage IA
 
 Remplace st.session_state par persistance PostgreSQL.
 """
@@ -15,7 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
-from src.core.models import RecipeFeedback, UserPreference
+from src.core.models import PreferenceUtilisateur, RetourRecette
 from src.modules.cuisine.schemas import (
     FeedbackRecette,
     PreferencesUtilisateur,
@@ -41,7 +41,7 @@ class UserPreferenceService:
         Returns:
             PreferencesUtilisateur avec valeurs DB ou défauts
         """
-        stmt = select(UserPreference).where(UserPreference.user_id == self.user_id)
+        stmt = select(PreferenceUtilisateur).where(PreferenceUtilisateur.user_id == self.user_id)
         db_pref = db.execute(stmt).scalar_one_or_none()
 
         if db_pref:
@@ -68,7 +68,9 @@ class UserPreferenceService:
             True si succès
         """
         try:
-            stmt = select(UserPreference).where(UserPreference.user_id == self.user_id)
+            stmt = select(PreferenceUtilisateur).where(
+                PreferenceUtilisateur.user_id == self.user_id
+            )
             db_pref = db.execute(stmt).scalar_one_or_none()
 
             if db_pref:
@@ -98,9 +100,9 @@ class UserPreferenceService:
             Liste de FeedbackRecette
         """
         stmt = (
-            select(RecipeFeedback)
-            .where(RecipeFeedback.user_id == self.user_id)
-            .order_by(RecipeFeedback.created_at.desc())
+            select(RetourRecette)
+            .where(RetourRecette.user_id == self.user_id)
+            .order_by(RetourRecette.created_at.desc())
         )
 
         db_feedbacks = db.execute(stmt).scalars().all()
@@ -144,8 +146,8 @@ class UserPreferenceService:
         """
         try:
             # Vérifier si feedback existe déjà
-            stmt = select(RecipeFeedback).where(
-                RecipeFeedback.user_id == self.user_id, RecipeFeedback.recette_id == recette_id
+            stmt = select(RetourRecette).where(
+                RetourRecette.user_id == self.user_id, RetourRecette.recette_id == recette_id
             )
             existing = db.execute(stmt).scalar_one_or_none()
 
@@ -157,7 +159,7 @@ class UserPreferenceService:
                 logger.debug(f"Feedback mis à jour: {recette_nom} → {feedback}")
             else:
                 # Insert
-                new_fb = RecipeFeedback(
+                new_fb = RetourRecette(
                     user_id=self.user_id,
                     recette_id=recette_id,
                     feedback=feedback,
@@ -179,8 +181,8 @@ class UserPreferenceService:
     def supprimer_feedback(self, recette_id: int, db: Session | None = None) -> bool:
         """Supprime un feedback."""
         try:
-            stmt = select(RecipeFeedback).where(
-                RecipeFeedback.user_id == self.user_id, RecipeFeedback.recette_id == recette_id
+            stmt = select(RetourRecette).where(
+                RetourRecette.user_id == self.user_id, RetourRecette.recette_id == recette_id
             )
             fb = db.execute(stmt).scalar_one_or_none()
 
@@ -204,7 +206,7 @@ class UserPreferenceService:
         Returns:
             Dict avec likes, dislikes, neutrals counts
         """
-        stmt = select(RecipeFeedback).where(RecipeFeedback.user_id == self.user_id)
+        stmt = select(RetourRecette).where(RetourRecette.user_id == self.user_id)
         feedbacks = db.execute(stmt).scalars().all()
 
         stats = {"like": 0, "dislike": 0, "neutral": 0, "total": 0}
@@ -237,8 +239,8 @@ class UserPreferenceService:
             magasins_preferes=["Carrefour Drive", "Bio Coop", "Grand Frais", "Thiriet"],
         )
 
-    def _db_to_dataclass(self, db_pref: UserPreference) -> PreferencesUtilisateur:
-        """Convertit UserPreference (DB) → PreferencesUtilisateur (dataclass)."""
+    def _db_to_dataclass(self, db_pref: PreferenceUtilisateur) -> PreferencesUtilisateur:
+        """Convertit PreferenceUtilisateur (DB) → PreferencesUtilisateur (dataclass)."""
         return PreferencesUtilisateur(
             nb_adultes=db_pref.nb_adultes,
             jules_present=db_pref.jules_present,
@@ -254,9 +256,9 @@ class UserPreferenceService:
             magasins_preferes=db_pref.magasins_preferes or [],
         )
 
-    def _dataclass_to_db(self, prefs: PreferencesUtilisateur) -> UserPreference:
-        """Convertit PreferencesUtilisateur (dataclass) → UserPreference (DB)."""
-        return UserPreference(
+    def _dataclass_to_db(self, prefs: PreferencesUtilisateur) -> PreferenceUtilisateur:
+        """Convertit PreferencesUtilisateur (dataclass) → PreferenceUtilisateur (DB)."""
+        return PreferenceUtilisateur(
             user_id=self.user_id,
             nb_adultes=prefs.nb_adultes,
             jules_present=prefs.jules_present,
@@ -272,7 +274,9 @@ class UserPreferenceService:
             magasins_preferes=prefs.magasins_preferes,
         )
 
-    def _update_db_from_dataclass(self, db_pref: UserPreference, prefs: PreferencesUtilisateur):
+    def _update_db_from_dataclass(
+        self, db_pref: PreferenceUtilisateur, prefs: PreferencesUtilisateur
+    ):
         """Met à jour les champs DB depuis le dataclass."""
         db_pref.nb_adultes = prefs.nb_adultes
         db_pref.jules_present = prefs.jules_present

@@ -15,7 +15,7 @@ from typing import Optional
 import streamlit as st
 
 from src.core.ai import ClientIA
-from src.core.models import ChildProfile, FamilyPurchase, Milestone
+from src.core.models import AchatFamille, Jalon, ProfilEnfant
 from src.services.core.base import BaseAIService
 from src.services.famille.achats import obtenir_service_achats_famille
 
@@ -148,9 +148,9 @@ __all__ = [
     "timedelta",
     "Optional",
     # Database
-    "ChildProfile",
-    "Milestone",
-    "FamilyPurchase",
+    "ProfilEnfant",
+    "Jalon",
+    "AchatFamille",
     # AI
     "BaseAIService",
     "ClientIA",

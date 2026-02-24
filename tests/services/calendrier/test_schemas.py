@@ -8,48 +8,48 @@ from datetime import datetime
 
 from src.services.famille.calendrier.schemas import (
     CalendarEventExternal,
-    CalendarProvider,
-    ExternalCalendarConfig,
-    SyncDirection,
+    ConfigCalendrierExterne,
+    DirectionSync,
+    FournisseurCalendrier,
     SyncResult,
 )
 
 
 class TestCalendarProvider:
-    """Tests pour l'enum CalendarProvider."""
+    """Tests pour l'enum FournisseurCalendrier."""
 
     def test_providers_disponibles(self):
         """Vérifie les fournisseurs supportés."""
-        assert CalendarProvider.GOOGLE == "google"
-        assert CalendarProvider.APPLE == "apple"
-        assert CalendarProvider.OUTLOOK == "outlook"
-        assert CalendarProvider.ICAL_URL == "ical_url"
+        assert FournisseurCalendrier.GOOGLE == "google"
+        assert FournisseurCalendrier.APPLE == "apple"
+        assert FournisseurCalendrier.OUTLOOK == "outlook"
+        assert FournisseurCalendrier.ICAL_URL == "ical_url"
 
     def test_provider_depuis_valeur(self):
         """Création depuis une valeur string."""
-        provider = CalendarProvider("google")
-        assert provider == CalendarProvider.GOOGLE
+        provider = FournisseurCalendrier("google")
+        assert provider == FournisseurCalendrier.GOOGLE
 
 
 class TestSyncDirection:
-    """Tests pour l'enum SyncDirection."""
+    """Tests pour l'enum DirectionSync."""
 
     def test_directions_disponibles(self):
         """Vérifie les directions de sync."""
-        assert SyncDirection.IMPORT_ONLY == "import"
-        assert SyncDirection.EXPORT_ONLY == "export"
-        assert SyncDirection.BIDIRECTIONAL == "both"
+        assert DirectionSync.IMPORT_ONLY == "import"
+        assert DirectionSync.EXPORT_ONLY == "export"
+        assert DirectionSync.BIDIRECTIONAL == "both"
 
 
 class TestExternalCalendarConfig:
-    """Tests pour ExternalCalendarConfig."""
+    """Tests pour ConfigCalendrierExterne."""
 
     def test_creation_minimale(self):
         """Création avec les champs requis uniquement."""
-        config = ExternalCalendarConfig(user_id="user123", provider=CalendarProvider.GOOGLE)
+        config = ConfigCalendrierExterne(user_id="user123", provider=FournisseurCalendrier.GOOGLE)
 
         assert config.user_id == "user123"
-        assert config.provider == CalendarProvider.GOOGLE
+        assert config.provider == FournisseurCalendrier.GOOGLE
         assert config.name == "Mon calendrier"
         assert config.is_active is True
         assert len(config.id) == 12
@@ -57,12 +57,12 @@ class TestExternalCalendarConfig:
     def test_creation_complete(self):
         """Création avec tous les champs."""
         now = datetime.now()
-        config = ExternalCalendarConfig(
+        config = ConfigCalendrierExterne(
             user_id="user456",
-            provider=CalendarProvider.OUTLOOK,
+            provider=FournisseurCalendrier.OUTLOOK,
             name="Calendrier travail",
             calendar_id="cal_abc123",
-            sync_direction=SyncDirection.EXPORT_ONLY,
+            sync_direction=DirectionSync.EXPORT_ONLY,
             sync_meals=True,
             sync_activities=False,
             sync_events=True,
@@ -72,15 +72,15 @@ class TestExternalCalendarConfig:
 
         assert config.name == "Calendrier travail"
         assert config.calendar_id == "cal_abc123"
-        assert config.sync_direction == SyncDirection.EXPORT_ONLY
+        assert config.sync_direction == DirectionSync.EXPORT_ONLY
         assert config.sync_activities is False
         assert config.last_sync == now
 
     def test_config_ical_url(self):
         """Configuration pour un calendrier iCal URL."""
-        config = ExternalCalendarConfig(
+        config = ConfigCalendrierExterne(
             user_id="user789",
-            provider=CalendarProvider.ICAL_URL,
+            provider=FournisseurCalendrier.ICAL_URL,
             name="Vacances scolaires",
             ical_url="https://example.com/calendar.ics",
         )
@@ -90,7 +90,7 @@ class TestExternalCalendarConfig:
 
     def test_valeurs_defaut_oauth(self):
         """Les tokens OAuth sont vides par défaut."""
-        config = ExternalCalendarConfig(user_id="test", provider=CalendarProvider.GOOGLE)
+        config = ConfigCalendrierExterne(user_id="test", provider=FournisseurCalendrier.GOOGLE)
 
         assert config.access_token == ""
         assert config.refresh_token == ""
@@ -98,8 +98,8 @@ class TestExternalCalendarConfig:
 
     def test_id_unique_genere(self):
         """Chaque config a un ID unique."""
-        config1 = ExternalCalendarConfig(user_id="u1", provider=CalendarProvider.GOOGLE)
-        config2 = ExternalCalendarConfig(user_id="u2", provider=CalendarProvider.GOOGLE)
+        config1 = ConfigCalendrierExterne(user_id="u1", provider=FournisseurCalendrier.GOOGLE)
+        config2 = ConfigCalendrierExterne(user_id="u2", provider=FournisseurCalendrier.GOOGLE)
 
         assert config1.id != config2.id
 

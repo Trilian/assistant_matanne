@@ -4,7 +4,7 @@ Modèles pour le planning et le calendrier.
 Contient :
 - Planning : Planning hebdomadaire de repas
 - Repas : Repas planifié
-- CalendarEvent : Événement du calendrier
+- EvenementPlanning : Événement du calendrier
 """
 
 from datetime import date, datetime
@@ -23,7 +23,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base, utc_now
+from .base import Base
+from .mixins import CreeLeMixin, TimestampMixin
 
 if TYPE_CHECKING:
     from .recettes import Recette
@@ -34,7 +35,7 @@ if TYPE_CHECKING:
 # ═══════════════════════════════════════════════════════════
 
 
-class Planning(Base):
+class Planning(CreeLeMixin, Base):
     """Planning hebdomadaire de repas.
 
     Attributes:
@@ -55,7 +56,6 @@ class Planning(Base):
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     genere_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     repas: Mapped[list["Repas"]] = relationship(
@@ -114,7 +114,7 @@ class Repas(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class CalendarEvent(Base):
+class EvenementPlanning(CreeLeMixin, Base):
     """Événement du calendrier familial.
 
     Attributes:
@@ -133,7 +133,7 @@ class CalendarEvent(Base):
         parent_event_id: ID de l'événement parent (pour les occurrences)
     """
 
-    __tablename__ = "calendar_events"
+    __tablename__ = "evenements_planning"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     titre: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -156,9 +156,9 @@ class CalendarEvent(Base):
         String(20)
     )  # Pour weekly: "0,1,4" = lun,mar,ven
     recurrence_fin: Mapped[date | None] = mapped_column(Date)  # Date de fin de la récurrence
-    parent_event_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("calendar_events.id"))
-
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    parent_event_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("evenements_planning.id")
+    )
 
     __table_args__ = (
         Index("idx_date_type", "date_debut", "type_event"),
@@ -170,7 +170,7 @@ class CalendarEvent(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<CalendarEvent(id={self.id}, titre='{self.titre}', date={self.date_debut})>"
+        return f"<EvenementPlanning(id={self.id}, titre='{self.titre}', date={self.date_debut})>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -178,7 +178,7 @@ class CalendarEvent(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class TemplateSemaine(Base):
+class TemplateSemaine(TimestampMixin, Base):
     """Modèle de semaine type réutilisable.
 
     Permet de sauvegarder une organisation de semaine
@@ -196,22 +196,20 @@ class TemplateSemaine(Base):
     nom: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     description: Mapped[str | None] = mapped_column(Text)
     actif: Mapped[bool] = mapped_column(Boolean, default=True)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
-    items: Mapped[list["TemplateItem"]] = relationship(
-        "TemplateItem",
+    items: Mapped[list["ElementTemplate"]] = relationship(
+        "ElementTemplate",
         back_populates="template",
         cascade="all, delete-orphan",
-        order_by="TemplateItem.jour_semaine, TemplateItem.heure_debut",
+        order_by="ElementTemplate.jour_semaine, ElementTemplate.heure_debut",
     )
 
     def __repr__(self) -> str:
         return f"<TemplateSemaine(id={self.id}, nom='{self.nom}')>"
 
 
-class TemplateItem(Base):
+class ElementTemplate(Base):
     """Élément d'un template de semaine.
 
     Représente un événement type dans le template,
@@ -228,7 +226,7 @@ class TemplateItem(Base):
         couleur: Couleur d'affichage
     """
 
-    __tablename__ = "template_items"
+    __tablename__ = "elements_templates"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     template_id: Mapped[int] = mapped_column(ForeignKey("templates_semaine.id"), nullable=False)
@@ -252,4 +250,4 @@ class TemplateItem(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<TemplateItem(jour={self.jour_semaine}, heure={self.heure_debut}, titre='{self.titre}')>"
+        return f"<ElementTemplate(jour={self.jour_semaine}, heure={self.heure_debut}, titre='{self.titre}')>"

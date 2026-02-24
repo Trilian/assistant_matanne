@@ -26,10 +26,10 @@ class TestUsers:
             pass
 
     class TestPurchaseCategory:
-        """Tests pour la classe PurchaseCategory."""
+        """Tests pour la classe CategorieAchat."""
 
         def test_purchasecategory_creation(self):
-            """Test de création de PurchaseCategory."""
+            """Test de création de CategorieAchat."""
             # TODO: Implémenter
             pass
 
@@ -39,10 +39,10 @@ class TestUsers:
             pass
 
     class TestPurchasePriority:
-        """Tests pour la classe PurchasePriority."""
+        """Tests pour la classe PrioriteAchat."""
 
         def test_purchasepriority_creation(self):
-            """Test de création de PurchasePriority."""
+            """Test de création de PrioriteAchat."""
             # TODO: Implémenter
             pass
 
@@ -52,10 +52,10 @@ class TestUsers:
             pass
 
     class TestUserProfile:
-        """Tests pour la classe UserProfile."""
+        """Tests pour la classe ProfilUtilisateur."""
 
         def test_userprofile_creation(self):
-            """Test de création de UserProfile."""
+            """Test de création de ProfilUtilisateur."""
             # TODO: Implémenter
             pass
 

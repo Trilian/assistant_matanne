@@ -23,10 +23,10 @@ from sqlalchemy.orm import Session
 from src.core.config import obtenir_parametres
 from src.core.decorators import avec_resilience, avec_session_db
 from src.core.models import (
-    GarminActivity,
-    GarminDailySummary,
+    ActiviteGarmin,
     GarminToken,
-    UserProfile,
+    ProfilUtilisateur,
+    ResumeQuotidienGarmin,
 )
 from src.services.core.registry import service_factory
 
@@ -127,7 +127,7 @@ class ServiceGarmin:
         Étape 2: Finaliser l'autorisation avec le verifier.
 
         Args:
-            user_id: ID de l'utilisateur (UserProfile)
+            user_id: ID de l'utilisateur (ProfilUtilisateur)
             oauth_verifier: Code verifier fourni par Garmin après autorisation
             request_token: Token de requête (si non stocké en mémoire)
             db: Session DB (injectée)
@@ -155,7 +155,7 @@ class ServiceGarmin:
             access_token_secret = oauth_tokens.get("oauth_token_secret")
 
             # Stocker les tokens en DB
-            user = db.get(UserProfile, user_id)
+            user = db.get(ProfilUtilisateur, user_id)
             if not user:
                 raise ValueError(f"Utilisateur {user_id} non trouvé")
 
@@ -209,7 +209,7 @@ class ServiceGarmin:
         Returns:
             Dict avec les stats de sync {activities_synced, summaries_synced}
         """
-        user = db.get(UserProfile, user_id)
+        user = db.get(ProfilUtilisateur, user_id)
         if not user or not user.garmin_token:
             raise ValueError(f"Utilisateur {user_id} non trouvé ou Garmin non connecté")
 
@@ -299,12 +299,12 @@ class ServiceGarmin:
             logger.error(f"Erreur API Garmin dailies: {e}")
             return []
 
-    def _save_activity(self, db: Session, user_id: int, data: dict) -> GarminActivity:
+    def _save_activity(self, db: Session, user_id: int, data: dict) -> ActiviteGarmin:
         """Sauvegarde une activité en DB"""
         garmin_id = str(data.get("activityId") or data.get("summaryId"))
 
         # Vérifier si existe déjà
-        existing = db.query(GarminActivity).filter_by(garmin_activity_id=garmin_id).first()
+        existing = db.query(ActiviteGarmin).filter_by(garmin_activity_id=garmin_id).first()
         if existing:
             return existing
 
@@ -318,7 +318,7 @@ class ServiceGarmin:
         else:
             date_debut = datetime.utcnow()
 
-        activity = GarminActivity(
+        activity = ActiviteGarmin(
             user_id=user_id,
             garmin_activity_id=garmin_id,
             type_activite=activity_type,
@@ -338,7 +338,7 @@ class ServiceGarmin:
         db.add(activity)
         return activity
 
-    def _save_daily_summary(self, db: Session, user_id: int, data: dict) -> GarminDailySummary:
+    def _save_daily_summary(self, db: Session, user_id: int, data: dict) -> ResumeQuotidienGarmin:
         """Sauvegarde un résumé quotidien en DB"""
         # Extraire la date
         calendar_date = data.get("calendarDate")
@@ -350,14 +350,14 @@ class ServiceGarmin:
 
         # Vérifier si existe déjà
         existing = (
-            db.query(GarminDailySummary).filter_by(user_id=user_id, date=summary_date).first()
+            db.query(ResumeQuotidienGarmin).filter_by(user_id=user_id, date=summary_date).first()
         )
 
         if existing:
             # Mettre à jour
             summary = existing
         else:
-            summary = GarminDailySummary(user_id=user_id, date=summary_date)
+            summary = ResumeQuotidienGarmin(user_id=user_id, date=summary_date)
             db.add(summary)
 
         # Remplir les données
@@ -384,7 +384,7 @@ class ServiceGarmin:
     @avec_session_db
     def disconnect_user(self, user_id: int, db: Session = None) -> bool:
         """Déconnecte Garmin pour un utilisateur"""
-        user = db.get(UserProfile, user_id)
+        user = db.get(ProfilUtilisateur, user_id)
         if not user:
             return False
 
@@ -405,7 +405,7 @@ class ServiceGarmin:
         Returns:
             Dict avec stats: total_pas, total_calories, total_activities, streak, etc.
         """
-        user = db.get(UserProfile, user_id)
+        user = db.get(ProfilUtilisateur, user_id)
         if not user:
             return {}
 
@@ -414,22 +414,22 @@ class ServiceGarmin:
 
         # Résumés quotidiens
         summaries = (
-            db.query(GarminDailySummary)
+            db.query(ResumeQuotidienGarmin)
             .filter(
-                GarminDailySummary.user_id == user_id,
-                GarminDailySummary.date >= start_date,
-                GarminDailySummary.date <= end_date,
+                ResumeQuotidienGarmin.user_id == user_id,
+                ResumeQuotidienGarmin.date >= start_date,
+                ResumeQuotidienGarmin.date <= end_date,
             )
             .all()
         )
 
         # Activités
         activities = (
-            db.query(GarminActivity)
+            db.query(ActiviteGarmin)
             .filter(
-                GarminActivity.user_id == user_id,
-                GarminActivity.date_debut >= datetime.combine(start_date, datetime.min.time()),
-                GarminActivity.date_debut <= datetime.combine(end_date, datetime.max.time()),
+                ActiviteGarmin.user_id == user_id,
+                ActiviteGarmin.date_debut >= datetime.combine(start_date, datetime.min.time()),
+                ActiviteGarmin.date_debut <= datetime.combine(end_date, datetime.max.time()),
             )
             .all()
         )
@@ -461,7 +461,7 @@ class ServiceGarmin:
 
     def _calculate_streak(self, user_id: int, db: Session) -> int:
         """Calcule le nombre de jours consécutifs avec objectif atteint"""
-        user = db.get(UserProfile, user_id)
+        user = db.get(ProfilUtilisateur, user_id)
         if not user:
             return 0
 
@@ -472,13 +472,13 @@ class ServiceGarmin:
         start_date = end_date - timedelta(days=60)
 
         summaries = (
-            db.query(GarminDailySummary)
+            db.query(ResumeQuotidienGarmin)
             .filter(
-                GarminDailySummary.user_id == user_id,
-                GarminDailySummary.date >= start_date,
-                GarminDailySummary.date <= end_date,
+                ResumeQuotidienGarmin.user_id == user_id,
+                ResumeQuotidienGarmin.date >= start_date,
+                ResumeQuotidienGarmin.date <= end_date,
             )
-            .order_by(GarminDailySummary.date.desc())
+            .order_by(ResumeQuotidienGarmin.date.desc())
             .all()
         )
 
@@ -520,12 +520,12 @@ def get_garmin_service() -> ServiceGarmin:
 
 
 @avec_session_db
-def get_or_create_user(username: str, display_name: str, db: Session = None) -> UserProfile:
+def get_or_create_user(username: str, display_name: str, db: Session = None) -> ProfilUtilisateur:
     """Récupère ou crée un profil utilisateur"""
-    user = db.query(UserProfile).filter_by(username=username).first()
+    user = db.query(ProfilUtilisateur).filter_by(username=username).first()
 
     if not user:
-        user = UserProfile(
+        user = ProfilUtilisateur(
             username=username,
             display_name=display_name,
             avatar_emoji="👩" if username == "anne" else "💨",
@@ -538,7 +538,7 @@ def get_or_create_user(username: str, display_name: str, db: Session = None) -> 
 
 
 @avec_session_db
-def init_family_users(db: Session = None) -> tuple[UserProfile, UserProfile]:
+def init_family_users(db: Session = None) -> tuple[ProfilUtilisateur, ProfilUtilisateur]:
     """Initialise les profils Anne et Mathieu"""
     anne = get_or_create_user("anne", "Anne", db=db)
     mathieu = get_or_create_user("mathieu", "Mathieu", db=db)
@@ -546,12 +546,12 @@ def init_family_users(db: Session = None) -> tuple[UserProfile, UserProfile]:
 
 
 @avec_session_db
-def get_user_by_username(username: str, db: Session = None) -> UserProfile | None:
+def get_user_by_username(username: str, db: Session = None) -> ProfilUtilisateur | None:
     """Récupère un utilisateur par son username"""
-    return db.query(UserProfile).filter_by(username=username).first()
+    return db.query(ProfilUtilisateur).filter_by(username=username).first()
 
 
 @avec_session_db
-def list_all_users(db: Session = None) -> list[UserProfile]:
+def list_all_users(db: Session = None) -> list[ProfilUtilisateur]:
     """Liste tous les utilisateurs"""
-    return db.query(UserProfile).all()
+    return db.query(ProfilUtilisateur).all()

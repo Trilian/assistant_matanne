@@ -13,7 +13,7 @@ from typing import Optional
 
 import streamlit as st
 
-from src.core.models import FamilyPurchase
+from src.core.models import AchatFamille
 from src.services.famille.achats import obtenir_service_achats_famille
 
 logger = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ __all__ = [
     "date",
     "Optional",
     # Database
-    "FamilyPurchase",
+    "AchatFamille",
     # Constants
     "CATEGORIES",
     "PRIORITES",

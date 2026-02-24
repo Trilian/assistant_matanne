@@ -92,7 +92,7 @@ def convertir_session_batch_en_evenement(session: Any) -> EvenementCalendrier | 
 
 
 def convertir_activite_en_evenement(activite: Any) -> EvenementCalendrier | None:
-    """Convertit une FamilyActivity en EvenementCalendrier."""
+    """Convertit une ActiviteFamille en EvenementCalendrier."""
     if not activite:
         return None
 
@@ -121,7 +121,7 @@ def convertir_activite_en_evenement(activite: Any) -> EvenementCalendrier | None
 
 
 def convertir_event_calendrier_en_evenement(event: Any) -> EvenementCalendrier | None:
-    """Convertit un CalendarEvent en EvenementCalendrier."""
+    """Convertit un EvenementPlanning en EvenementCalendrier."""
     if not event:
         return None
 
@@ -162,10 +162,10 @@ def convertir_event_calendrier_en_evenement(event: Any) -> EvenementCalendrier |
 
 def convertir_tache_menage_en_evenement(tache: Any) -> EvenementCalendrier | None:
     """
-    Convertit une MaintenanceTask (tâche menage/entretien) en EvenementCalendrier.
+    Convertit une TacheEntretien (tâche menage/entretien) en EvenementCalendrier.
 
     Args:
-        tache: Objet MaintenanceTask SQLAlchemy
+        tache: Objet TacheEntretien SQLAlchemy
 
     Returns:
         EvenementCalendrier ou None si erreur

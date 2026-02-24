@@ -32,11 +32,11 @@ class TestCalendrierModuleExports:
     def test_exports_schemas(self):
         """Export des schémas."""
         from src.services.famille.calendrier import (
-            CalendarProvider,
-            ExternalCalendarConfig,
-            SyncDirection,
+            ConfigCalendrierExterne,
+            DirectionSync,
+            FournisseurCalendrier,
         )
 
-        assert CalendarProvider is not None
-        assert SyncDirection is not None
-        assert ExternalCalendarConfig is not None
+        assert FournisseurCalendrier is not None
+        assert DirectionSync is not None
+        assert ConfigCalendrierExterne is not None

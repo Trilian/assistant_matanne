@@ -22,6 +22,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, utc_now
+from .mixins import CreeLeMixin, TimestampMixin
 
 # ═══════════════════════════════════════════════════════════════════
 # ENUMS
@@ -72,7 +73,7 @@ class ChampionnatEnum(enum.StrEnum):
 # ═══════════════════════════════════════════════════════════════════
 
 
-class Equipe(Base):
+class Equipe(TimestampMixin, Base):
     """Équipe de football"""
 
     __tablename__ = "jeux_equipes"
@@ -91,10 +92,6 @@ class Equipe(Base):
     defaites: Mapped[int] = mapped_column(Integer, default=0)
     buts_marques: Mapped[int] = mapped_column(Integer, default=0)
     buts_encaisses: Mapped[int] = mapped_column(Integer, default=0)
-
-    # Méta
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     matchs_domicile: Mapped[list["Match"]] = relationship(
@@ -147,7 +144,7 @@ class Equipe(Base):
         return self.victoires * 3 + self.nuls
 
 
-class Match(Base):
+class Match(TimestampMixin, Base):
     """Match de football"""
 
     __tablename__ = "jeux_matchs"
@@ -187,10 +184,6 @@ class Match(Base):
     prediction_confiance: Mapped[float | None] = mapped_column(Float, nullable=True)  # 0-100%
     prediction_raison: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    # Méta
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     # Relations (lazy="joined" pour éviter N+1 sur equipe.nom)
     equipe_domicile: Mapped["Equipe"] = relationship(
         "Equipe",
@@ -212,7 +205,7 @@ class Match(Base):
         return f"<Match {self.date_match}: DOM vs EXT>"
 
 
-class PariSportif(Base):
+class PariSportif(CreeLeMixin, Base):
     """Pari sportif enregistré (réel ou virtuel)"""
 
     __tablename__ = "jeux_paris_sportifs"
@@ -237,9 +230,6 @@ class PariSportif(Base):
     confiance_prediction: Mapped[float | None] = mapped_column(Float, nullable=True)  # Score IA
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    # Méta
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-
     # Relations
     match: Mapped["Match"] = relationship("Match", back_populates="paris")
 
@@ -252,7 +242,7 @@ class PariSportif(Base):
 # ═══════════════════════════════════════════════════════════════════
 
 
-class TirageLoto(Base):
+class TirageLoto(CreeLeMixin, Base):
     """Historique des tirages du Loto"""
 
     __tablename__ = "jeux_tirages_loto"
@@ -271,9 +261,6 @@ class TirageLoto(Base):
     # Infos jackpot
     jackpot_euros: Mapped[int | None] = mapped_column(Integer, nullable=True)
     gagnants_rang1: Mapped[int | None] = mapped_column(Integer, nullable=True)
-
-    # Méta
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     def __repr__(self) -> str:
         return f"<Tirage {self.date_tirage}: {self.numeros_str}>"
@@ -369,7 +356,7 @@ class StatistiquesLoto(Base):
 # ═══════════════════════════════════════════════════════════════════
 
 
-class HistoriqueJeux(Base):
+class HistoriqueJeux(CreeLeMixin, Base):
     """Historique global pour tracker la performance"""
 
     __tablename__ = "jeux_historique"
@@ -388,9 +375,6 @@ class HistoriqueJeux(Base):
     # Performance IA
     predictions_correctes: Mapped[int] = mapped_column(Integer, default=0)
     predictions_totales: Mapped[int] = mapped_column(Integer, default=0)
-
-    # Méta
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     @property
     def roi(self) -> float:
@@ -457,7 +441,7 @@ class TypeMarcheParisEnum(enum.StrEnum):
 # ═══════════════════════════════════════════════════════════════════
 
 
-class SerieJeux(Base):
+class SerieJeux(CreeLeMixin, Base):
     """
     Tracking des séries pour la loi des séries.
 
@@ -488,9 +472,6 @@ class SerieJeux(Base):
     derniere_occurrence: Mapped[date | None] = mapped_column(Date, nullable=True)
     derniere_mise_a_jour: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
-    # Méta
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-
     def __repr__(self) -> str:
         return f"<Serie {self.type_jeu}/{self.championnat or 'global'}/{self.marche}: {self.serie_actuelle}>"
 
@@ -505,7 +486,7 @@ class SerieJeux(Base):
         return self.frequence * 100
 
 
-class AlerteJeux(Base):
+class AlerteJeux(CreeLeMixin, Base):
     """
     Alertes d'opportunités basées sur la loi des séries.
 
@@ -539,9 +520,6 @@ class AlerteJeux(Base):
     resultat_correct: Mapped[bool | None] = mapped_column(
         Boolean, nullable=True
     )  # True si la série s'est brisée
-
-    # Méta
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     serie: Mapped["SerieJeux"] = relationship("SerieJeux")

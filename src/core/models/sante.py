@@ -2,9 +2,9 @@
 Modèles pour la santé et le bien-être.
 
 Contient :
-- HealthRoutine : Routine de santé/sport
-- HealthObjective : Objectifs de santé
-- HealthEntry : Entrées quotidiennes de suivi
+- RoutineSante : Routine de santé/sport
+- ObjectifSante : Objectifs de santé
+- EntreeSante : Entrées quotidiennes de suivi
 """
 
 from datetime import date
@@ -31,7 +31,7 @@ from .mixins import CreeLeMixin
 # ═══════════════════════════════════════════════════════════
 
 
-class HealthRoutine(CreeLeMixin, Base):
+class RoutineSante(CreeLeMixin, Base):
     """Routine de santé ou sport.
 
     Attributes:
@@ -46,7 +46,7 @@ class HealthRoutine(CreeLeMixin, Base):
         actif: Si la routine est active
     """
 
-    __tablename__ = "health_routines"
+    __tablename__ = "routines_sante"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     nom: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -61,17 +61,17 @@ class HealthRoutine(CreeLeMixin, Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     # Relations
-    entries: Mapped[list["HealthEntry"]] = relationship(
+    entries: Mapped[list["EntreeSante"]] = relationship(
         back_populates="routine", cascade="all, delete-orphan"
     )
 
     __table_args__ = (CheckConstraint("duree_minutes > 0", name="ck_routine_duree_positive"),)
 
     def __repr__(self) -> str:
-        return f"<HealthRoutine(id={self.id}, nom='{self.nom}', type='{self.type_routine}')>"
+        return f"<RoutineSante(id={self.id}, nom='{self.nom}', type='{self.type_routine}')>"
 
 
-class HealthObjective(CreeLeMixin, Base):
+class ObjectifSante(CreeLeMixin, Base):
     """Objectifs de santé et bien-être.
 
     Attributes:
@@ -87,7 +87,7 @@ class HealthObjective(CreeLeMixin, Base):
         statut: Statut (en_cours, atteint, abandonné)
     """
 
-    __tablename__ = "health_objectives"
+    __tablename__ = "objectifs_sante"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     titre: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -108,10 +108,10 @@ class HealthObjective(CreeLeMixin, Base):
     )
 
     def __repr__(self) -> str:
-        return f"<HealthObjective(id={self.id}, titre='{self.titre}', statut='{self.statut}')>"
+        return f"<ObjectifSante(id={self.id}, titre='{self.titre}', statut='{self.statut}')>"
 
 
-class HealthEntry(CreeLeMixin, Base):
+class EntreeSante(CreeLeMixin, Base):
     """Entrée quotidienne de suivi santé.
 
     Attributes:
@@ -127,11 +127,11 @@ class HealthEntry(CreeLeMixin, Base):
         notes: Notes supplémentaires
     """
 
-    __tablename__ = "health_entries"
+    __tablename__ = "entrees_sante"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     routine_id: Mapped[int | None] = mapped_column(
-        ForeignKey("health_routines.id", ondelete="CASCADE"), index=True
+        ForeignKey("routines_sante.id", ondelete="CASCADE"), index=True
     )
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True, default=date.today)
     type_activite: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -144,7 +144,7 @@ class HealthEntry(CreeLeMixin, Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     # Relations
-    routine: Mapped[Optional["HealthRoutine"]] = relationship(back_populates="entries")
+    routine: Mapped[Optional["RoutineSante"]] = relationship(back_populates="entries")
 
     __table_args__ = (
         CheckConstraint("duree_minutes > 0", name="ck_entry_duree_positive"),
@@ -153,4 +153,4 @@ class HealthEntry(CreeLeMixin, Base):
     )
 
     def __repr__(self) -> str:
-        return f"<HealthEntry(id={self.id}, date={self.date}, type='{self.type_activite}')>"
+        return f"<EntreeSante(id={self.id}, date={self.date}, type='{self.type_activite}')>"

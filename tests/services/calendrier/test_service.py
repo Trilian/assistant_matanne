@@ -13,9 +13,9 @@ import pytest
 
 from src.services.famille.calendrier.schemas import (
     CalendarEventExternal,
-    CalendarProvider,
-    ExternalCalendarConfig,
-    SyncDirection,
+    ConfigCalendrierExterne,
+    DirectionSync,
+    FournisseurCalendrier,
 )
 from src.services.famille.calendrier.service import (
     CalendarSyncService,
@@ -42,28 +42,28 @@ def mock_http_client():
 @pytest.fixture
 def google_config():
     """Configuration Google Calendar de test."""
-    return ExternalCalendarConfig(
+    return ConfigCalendrierExterne(
         id="google123",
         user_id="user-001",
-        provider=CalendarProvider.GOOGLE,
+        provider=FournisseurCalendrier.GOOGLE,
         name="Test Google Calendar",
         access_token="fake_access_token",
         refresh_token="fake_refresh_token",
         token_expiry=datetime.now() + timedelta(hours=1),
-        sync_direction=SyncDirection.BIDIRECTIONAL,
+        sync_direction=DirectionSync.BIDIRECTIONAL,
     )
 
 
 @pytest.fixture
 def ical_config():
     """Configuration iCal URL de test."""
-    return ExternalCalendarConfig(
+    return ConfigCalendrierExterne(
         id="ical456",
         user_id="user-001",
-        provider=CalendarProvider.ICAL_URL,
+        provider=FournisseurCalendrier.ICAL_URL,
         name="Test iCal",
         ical_url="https://example.com/calendar.ics",
-        sync_direction=SyncDirection.IMPORT_ONLY,
+        sync_direction=DirectionSync.IMPORT_ONLY,
     )
 
 
@@ -154,10 +154,10 @@ class TestConfigurationCalendriers:
             service.add_calendar(ical_config)
 
             # Autre utilisateur
-            other_config = ExternalCalendarConfig(
+            other_config = ConfigCalendrierExterne(
                 id="other789",
                 user_id="user-002",
-                provider=CalendarProvider.APPLE,
+                provider=FournisseurCalendrier.APPLE,
                 name="Autre utilisateur",
             )
             service.add_calendar(other_config)
@@ -185,7 +185,9 @@ class TestImportIcal:
         service.http_client.get = MagicMock(return_value=mock_response)
 
         with patch("src.services.famille.calendrier.service.obtenir_contexte_db") as mock_db:
-            with patch("src.services.famille.calendrier.service.CalendarEvent") as mock_cal_event:
+            with patch(
+                "src.services.famille.calendrier.service.EvenementPlanning"
+            ) as mock_cal_event:
                 mock_session = MagicMock()
                 mock_session.query.return_value.filter.return_value.first.return_value = None
                 mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
@@ -238,7 +240,9 @@ class TestImportIcal:
         service.http_client.get = MagicMock(return_value=mock_response)
 
         with patch("src.services.famille.calendrier.service.obtenir_contexte_db") as mock_db:
-            with patch("src.services.famille.calendrier.service.CalendarEvent") as mock_cal_event:
+            with patch(
+                "src.services.famille.calendrier.service.EvenementPlanning"
+            ) as mock_cal_event:
                 existing_event = MagicMock()
                 mock_session = MagicMock()
                 mock_session.query.return_value.filter.return_value.first.return_value = (
@@ -321,9 +325,9 @@ class TestExportIcal:
             # Activities query returns our mock, calendar events returns empty
             def query_side_effect(model):
                 q = MagicMock()
-                from src.core.models import FamilyActivity
+                from src.core.models import ActiviteFamille
 
-                if model == FamilyActivity:
+                if model == ActiviteFamille:
                     q.filter.return_value.all.return_value = [mock_activity]
                 else:
                     q.filter.return_value.all.return_value = []
@@ -472,7 +476,7 @@ class TestGoogleCalendar:
 
                 assert result is not None
                 assert result.access_token == "new_access_token"
-                assert result.provider == CalendarProvider.GOOGLE
+                assert result.provider == FournisseurCalendrier.GOOGLE
 
     def test_handle_google_callback_no_credentials(self, service):
         """Test callback sans credentials configurés."""
@@ -509,7 +513,7 @@ class TestGoogleCalendar:
 
     def test_sync_google_calendar_import(self, service, google_config):
         """Test sync Google - import."""
-        google_config.sync_direction = SyncDirection.IMPORT_ONLY
+        google_config.sync_direction = DirectionSync.IMPORT_ONLY
 
         mock_response = MagicMock()
         mock_response.json.return_value = {
@@ -534,7 +538,7 @@ class TestGoogleCalendar:
 
     def test_sync_google_calendar_export(self, service, google_config):
         """Test sync Google - export."""
-        google_config.sync_direction = SyncDirection.EXPORT_ONLY
+        google_config.sync_direction = DirectionSync.EXPORT_ONLY
 
         with patch.object(service, "_export_to_google", return_value=5):
             with patch.object(service, "_save_config_to_db"):
@@ -545,7 +549,7 @@ class TestGoogleCalendar:
 
     def test_sync_google_calendar_bidirectional(self, service, google_config):
         """Test sync Google bidirectionnelle."""
-        google_config.sync_direction = SyncDirection.BIDIRECTIONAL
+        google_config.sync_direction = DirectionSync.BIDIRECTIONAL
 
         mock_response = MagicMock()
         mock_response.json.return_value = {"items": []}
@@ -564,7 +568,7 @@ class TestGoogleCalendar:
     def test_sync_google_calendar_token_expired(self, service, google_config):
         """Test sync avec token expiré - rafraîchissement."""
         google_config.token_expiry = datetime.now() - timedelta(hours=1)
-        google_config.sync_direction = SyncDirection.IMPORT_ONLY
+        google_config.sync_direction = DirectionSync.IMPORT_ONLY
 
         mock_response = MagicMock()
         mock_response.json.return_value = {"items": []}
@@ -580,7 +584,7 @@ class TestGoogleCalendar:
 
     def test_sync_google_calendar_error(self, service, google_config):
         """Test sync avec erreur."""
-        google_config.sync_direction = SyncDirection.IMPORT_ONLY
+        google_config.sync_direction = DirectionSync.IMPORT_ONLY
 
         service.http_client.get = MagicMock(side_effect=Exception("Network error"))
 
@@ -882,7 +886,7 @@ class TestDatabasePersistence:
             "src.services.famille.calendrier.google_calendar.obtenir_contexte_db"
         ) as mock_db:
             with patch(
-                "src.services.famille.calendrier.google_calendar.CalendarEvent"
+                "src.services.famille.calendrier.google_calendar.EvenementPlanning"
             ) as mock_cal_event:
                 mock_session = MagicMock()
                 mock_session.query.return_value.filter.return_value.first.return_value = None
@@ -912,7 +916,7 @@ class TestDatabasePersistence:
             "src.services.famille.calendrier.google_calendar.obtenir_contexte_db"
         ) as mock_db:
             with patch(
-                "src.services.famille.calendrier.google_calendar.CalendarEvent"
+                "src.services.famille.calendrier.google_calendar.EvenementPlanning"
             ) as mock_cal_event:
                 mock_session = MagicMock()
                 mock_session.query.return_value.filter.return_value.first.return_value = existing
@@ -939,7 +943,7 @@ class TestDatabasePersistence:
             "src.services.famille.calendrier.google_calendar.obtenir_contexte_db"
         ) as mock_db:
             with patch(
-                "src.services.famille.calendrier.google_calendar.CalendarEvent"
+                "src.services.famille.calendrier.google_calendar.EvenementPlanning"
             ) as mock_cal_event:
                 mock_session = MagicMock()
                 mock_session.query.return_value.filter.return_value.first.side_effect = Exception(

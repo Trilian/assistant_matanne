@@ -3,11 +3,11 @@ Modèles pour la maison (projets, routines, jardin).
 
 Contient :
 - Project : Projet domestique
-- ProjectTask : Tâche de projet
+- TacheProjet : Tâche de projet
 - Routine : Routine quotidienne
-- RoutineTask : Tâche de routine
-- GardenItem : Élément du jardin
-- GardenLog : Journal d'entretien du jardin
+- TacheRoutine : Tâche de routine
+- ElementJardin : Élément du jardin
+- JournalJardin : Journal d'entretien du jardin
 """
 
 from datetime import date, datetime
@@ -24,14 +24,15 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base, utc_now
+from .base import Base
+from .mixins import CreeLeMixin
 
 # ═══════════════════════════════════════════════════════════
 # PROJETS DOMESTIQUES
 # ═══════════════════════════════════════════════════════════
 
 
-class Project(Base):
+class Project(CreeLeMixin, Base):
     """Projet domestique.
 
     Attributes:
@@ -44,7 +45,7 @@ class Project(Base):
         date_fin_reelle: Date de fin réelle
     """
 
-    __tablename__ = "projects"
+    __tablename__ = "projets"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     nom: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -54,10 +55,9 @@ class Project(Base):
     date_debut: Mapped[date | None] = mapped_column(Date)
     date_fin_prevue: Mapped[date | None] = mapped_column(Date)
     date_fin_reelle: Mapped[date | None] = mapped_column(Date)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
-    tasks: Mapped[list["ProjectTask"]] = relationship(
+    tasks: Mapped[list["TacheProjet"]] = relationship(
         back_populates="project", cascade="all, delete-orphan"
     )
 
@@ -65,7 +65,7 @@ class Project(Base):
         return f"<Project(id={self.id}, nom='{self.nom}', statut='{self.statut}')>"
 
 
-class ProjectTask(Base):
+class TacheProjet(CreeLeMixin, Base):
     """Tâche d'un projet.
 
     Attributes:
@@ -78,11 +78,11 @@ class ProjectTask(Base):
         assigne_a: Personne assignée
     """
 
-    __tablename__ = "project_tasks"
+    __tablename__ = "taches_projets"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     project_id: Mapped[int] = mapped_column(
-        ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True
+        ForeignKey("projets.id", ondelete="CASCADE"), nullable=False, index=True
     )
     nom: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
@@ -90,13 +90,12 @@ class ProjectTask(Base):
     priorite: Mapped[str] = mapped_column(String(50), nullable=False, default="moyenne")
     date_echeance: Mapped[date | None] = mapped_column(Date)
     assigne_a: Mapped[str | None] = mapped_column(String(200))
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     project: Mapped["Project"] = relationship(back_populates="tasks")
 
     def __repr__(self) -> str:
-        return f"<ProjectTask(id={self.id}, project={self.project_id}, statut='{self.statut}')>"
+        return f"<TacheProjet(id={self.id}, project={self.project_id}, statut='{self.statut}')>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -104,7 +103,7 @@ class ProjectTask(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class Routine(Base):
+class Routine(CreeLeMixin, Base):
     """Routine ou habitude quotidienne.
 
     Attributes:
@@ -123,10 +122,9 @@ class Routine(Base):
     categorie: Mapped[str | None] = mapped_column(String(100), index=True)
     frequence: Mapped[str] = mapped_column(String(50), nullable=False, default="quotidien")
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
-    tasks: Mapped[list["RoutineTask"]] = relationship(
+    tasks: Mapped[list["TacheRoutine"]] = relationship(
         back_populates="routine", cascade="all, delete-orphan"
     )
 
@@ -134,7 +132,7 @@ class Routine(Base):
         return f"<Routine(id={self.id}, nom='{self.nom}')>"
 
 
-class RoutineTask(Base):
+class TacheRoutine(CreeLeMixin, Base):
     """Tâche d'une routine.
 
     Attributes:
@@ -147,7 +145,7 @@ class RoutineTask(Base):
         notes: Notes
     """
 
-    __tablename__ = "routine_tasks"
+    __tablename__ = "taches_routines"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     routine_id: Mapped[int] = mapped_column(
@@ -159,13 +157,12 @@ class RoutineTask(Base):
     heure_prevue: Mapped[str | None] = mapped_column(String(5))  # Format: HH:MM
     fait_le: Mapped[date | None] = mapped_column(Date)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
     routine: Mapped["Routine"] = relationship(back_populates="tasks")
 
     def __repr__(self) -> str:
-        return f"<RoutineTask(id={self.id}, routine={self.routine_id}, nom='{self.nom}')>"
+        return f"<TacheRoutine(id={self.id}, routine={self.routine_id}, nom='{self.nom}')>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -173,7 +170,7 @@ class RoutineTask(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class GardenItem(Base):
+class ElementJardin(CreeLeMixin, Base):
     """Élément du jardin (plante, légume, fleur, etc.).
 
     Attributes:
@@ -186,7 +183,7 @@ class GardenItem(Base):
         notes: Notes
     """
 
-    __tablename__ = "garden_items"
+    __tablename__ = "elements_jardin"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     nom: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -196,18 +193,17 @@ class GardenItem(Base):
     date_plantation: Mapped[date | None] = mapped_column(Date)
     date_recolte_prevue: Mapped[date | None] = mapped_column(Date)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
-    logs: Mapped[list["GardenLog"]] = relationship(
+    logs: Mapped[list["JournalJardin"]] = relationship(
         back_populates="garden_item", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:
-        return f"<GardenItem(id={self.id}, nom='{self.nom}', type='{self.type}')>"
+        return f"<ElementJardin(id={self.id}, nom='{self.nom}', type='{self.type}')>"
 
 
-class GardenLog(Base):
+class JournalJardin(CreeLeMixin, Base):
     """Journal d'entretien du jardin.
 
     Attributes:
@@ -217,19 +213,18 @@ class GardenLog(Base):
         notes: Notes
     """
 
-    __tablename__ = "garden_logs"
+    __tablename__ = "journaux_jardin"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     garden_item_id: Mapped[int | None] = mapped_column(
-        ForeignKey("garden_items.id", ondelete="CASCADE"), index=True
+        ForeignKey("elements_jardin.id", ondelete="CASCADE"), index=True
     )
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True, default=date.today)
     action: Mapped[str] = mapped_column(String(200), nullable=False)
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
-    garden_item: Mapped[Optional["GardenItem"]] = relationship(back_populates="logs")
+    garden_item: Mapped[Optional["ElementJardin"]] = relationship(back_populates="logs")
 
     def __repr__(self) -> str:
-        return f"<GardenLog(id={self.id}, action='{self.action}', date={self.date})>"
+        return f"<JournalJardin(id={self.id}, action='{self.action}', date={self.date})>"

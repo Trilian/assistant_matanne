@@ -8,9 +8,9 @@ Dépendances attendues sur ``self``
 -----------------------------------
 - ``self._storage``    : ``MutableMapping[str, Any]`` — magasin de session
 - ``self._client``     : client Supabase (peut être ``None``)
-- ``self.USER_KEY``    : clé de stockage du ``UserProfile``
+- ``self.USER_KEY``    : clé de stockage du ``ProfilUtilisateur``
 - ``self.is_configured``: propriété indiquant si le client est actif
-- ``self.get_current_user()`` : méthode retournant le ``UserProfile`` courant
+- ``self.get_current_user()`` : méthode retournant le ``ProfilUtilisateur`` courant
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from .auth_schemas import AuthResult, Role, UserProfile
+from .auth_schemas import AuthResult, ProfilUtilisateur, Role
 
 if TYPE_CHECKING:
     pass
@@ -80,7 +80,7 @@ class ProfileMixin:
                 # Mettre à jour le profil local
                 metadata = response.user.user_metadata or {}
 
-                updated_user = UserProfile(
+                updated_user = ProfilUtilisateur(
                     id=response.user.id,
                     email=response.user.email or user.email,
                     nom=metadata.get("nom", user.nom),

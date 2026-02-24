@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from src.core.ai import ClientIA, obtenir_client_ia
 from src.core.decorators import avec_cache, avec_session_db
-from src.core.models import Routine, RoutineTask
+from src.core.models import Routine, TacheRoutine
 from src.services.core.base import BaseAIService
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
@@ -359,7 +359,7 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
 
     @avec_cache(ttl=300)
     @avec_session_db
-    def obtenir_taches_du_jour(self, db: Session | None = None) -> list[RoutineTask]:
+    def obtenir_taches_du_jour(self, db: Session | None = None) -> list[TacheRoutine]:
         """Récupère les tâches à faire aujourd'hui.
 
         Args:
@@ -371,11 +371,11 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
         jour_semaine = date.today().weekday()
         return self._query_taches_jour(db, jour_semaine)
 
-    def get_taches_du_jour(self, db: Session | None = None) -> list[RoutineTask]:
+    def get_taches_du_jour(self, db: Session | None = None) -> list[TacheRoutine]:
         """Alias anglais pour obtenir_taches_du_jour (rétrocompatibilité)."""
         return self.obtenir_taches_du_jour(db)
 
-    def _query_taches_jour(self, db: Session, jour_semaine: int) -> list[RoutineTask]:
+    def _query_taches_jour(self, db: Session, jour_semaine: int) -> list[TacheRoutine]:
         """Query interne pour tâches du jour."""
         # Récupérer routines actives du jour
         routines = (

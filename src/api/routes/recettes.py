@@ -64,7 +64,9 @@ async def list_recettes(
                 query = query.filter(Recette.categorie == categorie)
 
             if search:
-                query = query.filter(Recette.nom.ilike(f"%{search}%"))
+                # Échapper les caractères spéciaux SQL wildcard pour éviter l'injection
+                safe_search = search.replace("%", "\\%").replace("_", "\\_")
+                query = query.filter(Recette.nom.ilike(f"%{safe_search}%"))
 
             total = query.count()
             items = (

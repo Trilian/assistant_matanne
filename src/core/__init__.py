@@ -119,7 +119,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "valider_type": (".errors_base", "valider_type"),
     # Lazy Loader
     "ChargeurModuleDiffere": (".lazy_loader", "ChargeurModuleDiffere"),
-    "RouteurOptimise": (".lazy_loader", "RouteurOptimise"),
     "afficher_stats_chargement_differe": (".lazy_loader", "afficher_stats_chargement_differe"),
     # Logging
     "GestionnaireLog": (".logging", "GestionnaireLog"),

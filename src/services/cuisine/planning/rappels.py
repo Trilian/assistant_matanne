@@ -16,7 +16,7 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
-from src.core.models import CalendarEvent
+from src.core.models import EvenementPlanning
 from src.services.core.notifications import (
     NotificationPush,
     TypeNotification,
@@ -77,12 +77,12 @@ class ServiceRappels:
         now = datetime.now()
         rappels: list[dict[str, Any]] = []
 
-        # Événements CalendarEvent avec rappel
+        # Événements EvenementPlanning avec rappel
         events = (
-            db.query(CalendarEvent)
+            db.query(EvenementPlanning)
             .filter(
-                CalendarEvent.rappel_avant_minutes.isnot(None),
-                CalendarEvent.date_debut > now,
+                EvenementPlanning.rappel_avant_minutes.isnot(None),
+                EvenementPlanning.date_debut > now,
             )
             .all()
         )
@@ -108,7 +108,7 @@ class ServiceRappels:
                 )
 
         # Activités famille avec rappel (si elles avaient ce champ)
-        # Note: FamilyActivity n'a pas encore rappel_avant_minutes
+        # Note: ActiviteFamille n'a pas encore rappel_avant_minutes
 
         # Trier par moment du rappel
         rappels.sort(key=lambda r: r["rappel_at"])

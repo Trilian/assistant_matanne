@@ -18,11 +18,11 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import (
-    FamilyActivity,
-    FamilyBudget,
-    HealthEntry,
-    HealthObjective,
-    HealthRoutine,
+    ActiviteFamille,
+    BudgetFamille,
+    EntreeSante,
+    ObjectifSante,
+    RoutineSante,
 )
 from src.services.core.base import BaseService
 from src.services.core.registry import service_factory
@@ -40,24 +40,24 @@ class StatsSanteDict(TypedDict):
     moral_moyen: float
 
 
-class ServiceSante(BaseService[HealthEntry]):
+class ServiceSante(BaseService[EntreeSante]):
     """Service de gestion de la santé familiale.
 
-    Hérite de BaseService[HealthEntry] pour le CRUD générique.
+    Hérite de BaseService[EntreeSante] pour le CRUD générique.
     Centralise l'accès DB pour les objectifs, routines et
     statistiques de santé, éliminant les requêtes directes
     depuis la couche modules.
     """
 
     def __init__(self):
-        super().__init__(model=HealthEntry, cache_ttl=300)
+        super().__init__(model=EntreeSante, cache_ttl=300)
 
     # ═══════════════════════════════════════════════════════════
     # OBJECTIFS
     # ═══════════════════════════════════════════════════════════
 
     @staticmethod
-    def calculer_progression_objectif(objective: HealthObjective) -> float:
+    def calculer_progression_objectif(objective: ObjectifSante) -> float:
         """Calcule le % de progression d'un objectif santé.
 
         Args:
@@ -89,7 +89,7 @@ class ServiceSante(BaseService[HealthEntry]):
         if db is None:
             raise ValueError("Session DB requise")
 
-        objectives = db.query(HealthObjective).filter_by(statut="en_cours").all()
+        objectives = db.query(ObjectifSante).filter_by(statut="en_cours").all()
 
         result = []
         for obj in objectives:
@@ -129,7 +129,7 @@ class ServiceSante(BaseService[HealthEntry]):
         if db is None:
             raise ValueError("Session DB requise")
 
-        routines = db.query(HealthRoutine).filter_by(actif=True).all()
+        routines = db.query(RoutineSante).filter_by(actif=True).all()
 
         return [
             {
@@ -165,7 +165,7 @@ class ServiceSante(BaseService[HealthEntry]):
 
         debut_semaine = date_type.today() - timedelta(days=date_type.today().weekday())
 
-        entries = db.query(HealthEntry).filter(HealthEntry.date >= debut_semaine).all()
+        entries = db.query(EntreeSante).filter(EntreeSante.date >= debut_semaine).all()
 
         nb_avec_energie = len([e for e in entries if e.note_energie])
         nb_avec_moral = len([e for e in entries if e.note_moral])
@@ -221,8 +221,8 @@ class ServiceSante(BaseService[HealthEntry]):
                 )
 
         budgets = (
-            db.query(FamilyBudget)
-            .filter(and_(FamilyBudget.date >= debut, FamilyBudget.date <= fin))
+            db.query(BudgetFamille)
+            .filter(and_(BudgetFamille.date >= debut, BudgetFamille.date <= fin))
             .all()
         )
 
@@ -264,8 +264,8 @@ class ServiceSante(BaseService[HealthEntry]):
         mois_prochain = date_type(mois_prochain.year, mois_prochain.month, 1)
 
         total = (
-            db.query(func.sum(FamilyBudget.montant))
-            .filter(and_(FamilyBudget.date >= mois_dernier, FamilyBudget.date < mois_prochain))
+            db.query(func.sum(BudgetFamille.montant))
+            .filter(and_(BudgetFamille.date >= mois_dernier, BudgetFamille.date < mois_prochain))
             .scalar()
             or 0
         )
@@ -295,15 +295,15 @@ class ServiceSante(BaseService[HealthEntry]):
         fin_semaine = debut_semaine + timedelta(days=6)
 
         activities = (
-            db.query(FamilyActivity)
+            db.query(ActiviteFamille)
             .filter(
                 and_(
-                    FamilyActivity.date_prevue >= debut_semaine,
-                    FamilyActivity.date_prevue <= fin_semaine,
-                    FamilyActivity.statut != "annule",
+                    ActiviteFamille.date_prevue >= debut_semaine,
+                    ActiviteFamille.date_prevue <= fin_semaine,
+                    ActiviteFamille.statut != "annule",
                 )
             )
-            .order_by(FamilyActivity.date_prevue)
+            .order_by(ActiviteFamille.date_prevue)
             .all()
         )
 
@@ -345,12 +345,12 @@ class ServiceSante(BaseService[HealthEntry]):
             ) - timedelta(days=1)
 
         total = (
-            db.query(func.sum(FamilyActivity.cout_reel))
+            db.query(func.sum(ActiviteFamille.cout_reel))
             .filter(
                 and_(
-                    FamilyActivity.date_prevue >= debut_mois,
-                    FamilyActivity.date_prevue <= fin_mois,
-                    FamilyActivity.cout_reel > 0,
+                    ActiviteFamille.date_prevue >= debut_mois,
+                    ActiviteFamille.date_prevue <= fin_mois,
+                    ActiviteFamille.cout_reel > 0,
                 )
             )
             .scalar()

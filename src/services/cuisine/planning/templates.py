@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from src.core.constants import JOURS_SEMAINE
 from src.core.decorators import avec_session_db
-from src.core.models import CalendarEvent, TemplateItem, TemplateSemaine
+from src.core.models import ElementTemplate, EvenementPlanning, TemplateSemaine
 
 
 class ServiceTemplates:
@@ -70,7 +70,7 @@ class ServiceTemplates:
 
         if items:
             for item_data in items:
-                item = TemplateItem(
+                item = ElementTemplate(
                     template_id=template.id,
                     jour_semaine=item_data.get("jour_semaine", 0),
                     heure_debut=item_data.get("heure_debut", "09:00"),
@@ -99,9 +99,9 @@ class ServiceTemplates:
         couleur: str | None = None,
         *,
         db: Session,
-    ) -> TemplateItem:
+    ) -> ElementTemplate:
         """Ajoute un item à un template."""
-        item = TemplateItem(
+        item = ElementTemplate(
             template_id=template_id,
             jour_semaine=jour_semaine,
             heure_debut=heure_debut,
@@ -119,7 +119,7 @@ class ServiceTemplates:
     @avec_session_db
     def supprimer_item(self, item_id: int, *, db: Session) -> bool:
         """Supprime un item d'un template."""
-        item = db.query(TemplateItem).filter_by(id=item_id).first()
+        item = db.query(ElementTemplate).filter_by(id=item_id).first()
         if item:
             db.delete(item)
             db.commit()
@@ -143,7 +143,7 @@ class ServiceTemplates:
         date_lundi: date,
         *,
         db: Session,
-    ) -> list[CalendarEvent]:
+    ) -> list[EvenementPlanning]:
         """
         Applique un template à une semaine donnée.
 
@@ -177,7 +177,7 @@ class ServiceTemplates:
                 )
 
             # Créer l'événement
-            event = CalendarEvent(
+            event = EvenementPlanning(
                 titre=item.titre,
                 date_debut=date_debut,
                 date_fin=date_fin,
@@ -218,10 +218,10 @@ class ServiceTemplates:
 
         # Récupérer les événements de la semaine
         events = (
-            db.query(CalendarEvent)
+            db.query(EvenementPlanning)
             .filter(
-                CalendarEvent.date_debut >= date_debut_dt,
-                CalendarEvent.date_debut <= date_fin_dt,
+                EvenementPlanning.date_debut >= date_debut_dt,
+                EvenementPlanning.date_debut <= date_fin_dt,
             )
             .all()
         )
@@ -240,7 +240,7 @@ class ServiceTemplates:
             heure_debut = event.date_debut.strftime("%H:%M")
             heure_fin = event.date_fin.strftime("%H:%M") if event.date_fin else None
 
-            item = TemplateItem(
+            item = ElementTemplate(
                 template_id=template.id,
                 jour_semaine=jour_semaine,
                 heure_debut=heure_debut,
@@ -256,9 +256,9 @@ class ServiceTemplates:
         db.refresh(template)
         return template
 
-    def get_items_par_jour(self, template: TemplateSemaine) -> dict[int, list[TemplateItem]]:
+    def get_items_par_jour(self, template: TemplateSemaine) -> dict[int, list[ElementTemplate]]:
         """Organise les items d'un template par jour de la semaine."""
-        par_jour: dict[int, list[TemplateItem]] = {i: [] for i in range(7)}
+        par_jour: dict[int, list[ElementTemplate]] = {i: [] for i in range(7)}
         for item in template.items:
             par_jour[item.jour_semaine].append(item)
         return par_jour

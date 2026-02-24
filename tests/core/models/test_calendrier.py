@@ -8,10 +8,10 @@ Contient: CalendrierExterne, EvenementCalendrier
 from datetime import datetime
 
 from src.core.models.calendrier import (
-    CalendarProvider,
     CalendrierExterne,
+    DirectionSync,
     EvenementCalendrier,
-    SyncDirection,
+    FournisseurCalendrier,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -20,24 +20,24 @@ from src.core.models.calendrier import (
 
 
 class TestCalendarProvider:
-    """Tests pour l'énumération CalendarProvider."""
+    """Tests pour l'énumération FournisseurCalendrier."""
 
     def test_valeurs_disponibles(self):
         """Vérifie que tous les providers existent."""
-        assert CalendarProvider.GOOGLE.value == "google"
-        assert CalendarProvider.APPLE.value == "apple"
-        assert CalendarProvider.OUTLOOK.value == "outlook"
-        assert CalendarProvider.ICAL_URL.value == "ical_url"
+        assert FournisseurCalendrier.GOOGLE.value == "google"
+        assert FournisseurCalendrier.APPLE.value == "apple"
+        assert FournisseurCalendrier.OUTLOOK.value == "outlook"
+        assert FournisseurCalendrier.ICAL_URL.value == "ical_url"
 
 
 class TestSyncDirection:
-    """Tests pour l'énumération SyncDirection."""
+    """Tests pour l'énumération DirectionSync."""
 
     def test_valeurs_disponibles(self):
         """Vérifie les directions de sync."""
-        assert SyncDirection.IMPORT.value == "import"
-        assert SyncDirection.EXPORT.value == "export"
-        assert SyncDirection.BIDIRECTIONAL.value == "bidirectional"
+        assert DirectionSync.IMPORT.value == "import"
+        assert DirectionSync.EXPORT.value == "export"
+        assert DirectionSync.BIDIRECTIONAL.value == "bidirectional"
 
 
 # ═══════════════════════════════════════════════════════════

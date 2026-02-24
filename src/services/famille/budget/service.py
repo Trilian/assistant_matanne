@@ -21,7 +21,7 @@ from sqlalchemy import extract
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.models import BudgetMensuelDB, FamilyBudget
+from src.core.models import BudgetFamille, BudgetMensuelDB
 from src.services.core.base import BaseService
 
 from .budget_alertes import BudgetAlertesMixin
@@ -35,11 +35,11 @@ from .schemas import (
 logger = logging.getLogger(__name__)
 
 
-class BudgetService(BaseService[FamilyBudget], BudgetAnalysesMixin, BudgetAlertesMixin):
+class BudgetService(BaseService[BudgetFamille], BudgetAnalysesMixin, BudgetAlertesMixin):
     """
     Service de gestion du budget familial.
 
-    Hérite de BaseService[FamilyBudget] pour le CRUD générique.
+    Hérite de BaseService[BudgetFamille] pour le CRUD générique.
 
     Fonctionnalités:
     - CRUD dépenses
@@ -65,7 +65,7 @@ class BudgetService(BaseService[FamilyBudget], BudgetAnalysesMixin, BudgetAlerte
 
     def __init__(self):
         """Initialise le service."""
-        super().__init__(model=FamilyBudget, cache_ttl=300)
+        super().__init__(model=BudgetFamille, cache_ttl=300)
         self._depenses_cache: dict[str, list[Depense]] = {}
 
     # ═══════════════════════════════════════════════════════════
@@ -85,8 +85,8 @@ class BudgetService(BaseService[FamilyBudget], BudgetAnalysesMixin, BudgetAlerte
         Returns:
             Dépense créée avec ID
         """
-        # Créer l'entrée FamilyBudget
-        budget_entry = FamilyBudget(
+        # Créer l'entrée BudgetFamille
+        budget_entry = BudgetFamille(
             date=depense.date,
             montant=depense.montant,
             categorie=depense.categorie.value,
@@ -113,7 +113,7 @@ class BudgetService(BaseService[FamilyBudget], BudgetAnalysesMixin, BudgetAlerte
     @avec_session_db
     def modifier_depense(self, depense_id: int, updates: dict, db: Session = None) -> bool:
         """Modifie une dépense existante."""
-        entry = db.query(FamilyBudget).filter(FamilyBudget.id == depense_id).first()
+        entry = db.query(BudgetFamille).filter(BudgetFamille.id == depense_id).first()
 
         if not entry:
             return False
@@ -129,7 +129,7 @@ class BudgetService(BaseService[FamilyBudget], BudgetAnalysesMixin, BudgetAlerte
     @avec_session_db
     def supprimer_depense(self, depense_id: int, db: Session = None) -> bool:
         """Supprime une dépense."""
-        entry = db.query(FamilyBudget).filter(FamilyBudget.id == depense_id).first()
+        entry = db.query(BudgetFamille).filter(BudgetFamille.id == depense_id).first()
 
         if not entry:
             return False
@@ -160,15 +160,15 @@ class BudgetService(BaseService[FamilyBudget], BudgetAnalysesMixin, BudgetAlerte
         Returns:
             Liste des dépenses
         """
-        query = db.query(FamilyBudget).filter(
-            extract("month", FamilyBudget.date) == mois,
-            extract("year", FamilyBudget.date) == annee,
+        query = db.query(BudgetFamille).filter(
+            extract("month", BudgetFamille.date) == mois,
+            extract("year", BudgetFamille.date) == annee,
         )
 
         if categorie:
-            query = query.filter(FamilyBudget.categorie == categorie.value)
+            query = query.filter(BudgetFamille.categorie == categorie.value)
 
-        entries = query.order_by(FamilyBudget.date.desc()).all()
+        entries = query.order_by(BudgetFamille.date.desc()).all()
 
         return [
             Depense(

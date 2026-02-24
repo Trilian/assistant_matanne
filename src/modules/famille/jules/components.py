@@ -10,7 +10,7 @@ from src.ui.fragments import ui_fragment
 from .ai_service import JulesAIService
 from .utils import (
     CATEGORIES_CONSEILS,
-    FamilyPurchase,
+    AchatFamille,
     date,
     get_achats_jules_en_attente,
     get_activites_pour_age,

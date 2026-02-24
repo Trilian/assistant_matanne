@@ -4,7 +4,7 @@ Cible: Couverture >80%
 
 Tests pour:
 - AuthService: signup, login, logout, reset_password
-- UserProfile: permissions, display_name
+- ProfilUtilisateur: permissions, display_name
 - Session management
 - JWT validation
 - Profile updates
@@ -23,8 +23,8 @@ from src.services.core.utilisateur.authentification import (
     AuthResult,
     AuthService,
     Permission,
+    ProfilUtilisateur,
     Role,
-    UserProfile,
     get_auth_service,
 )
 from src.ui.views.authentification import (
@@ -104,11 +104,11 @@ class TestRolePermissions:
 
 @pytest.mark.unit
 class TestUserProfile:
-    """Tests pour UserProfile."""
+    """Tests pour ProfilUtilisateur."""
 
     def test_default_values(self):
         """Vérifie les valeurs par défaut."""
-        profile = UserProfile()
+        profile = ProfilUtilisateur()
         assert profile.id == ""
         assert profile.email == ""
         assert profile.role == Role.MEMBRE
@@ -117,14 +117,14 @@ class TestUserProfile:
 
     def test_has_permission_admin(self):
         """Admin a toutes les permissions."""
-        profile = UserProfile(role=Role.ADMIN)
+        profile = ProfilUtilisateur(role=Role.ADMIN)
         assert profile.has_permission(Permission.ADMIN_ALL)
         assert profile.has_permission(Permission.MANAGE_USERS)
         assert profile.has_permission(Permission.READ_RECIPES)
 
     def test_has_permission_membre(self):
         """Membre a les permissions de base."""
-        profile = UserProfile(role=Role.MEMBRE)
+        profile = ProfilUtilisateur(role=Role.MEMBRE)
         assert profile.has_permission(Permission.READ_RECIPES)
         assert profile.has_permission(Permission.WRITE_RECIPES)
         assert not profile.has_permission(Permission.ADMIN_ALL)
@@ -132,23 +132,23 @@ class TestUserProfile:
 
     def test_has_permission_invite(self):
         """Invité a les permissions de lecture."""
-        profile = UserProfile(role=Role.INVITE)
+        profile = ProfilUtilisateur(role=Role.INVITE)
         assert profile.has_permission(Permission.READ_RECIPES)
         assert not profile.has_permission(Permission.WRITE_RECIPES)
 
     def test_display_name_with_names(self):
         """Display name avec prénom et nom."""
-        profile = UserProfile(prenom="Anne", nom="Matanne")
+        profile = ProfilUtilisateur(prenom="Anne", nom="Matanne")
         assert profile.display_name == "Anne Matanne"
 
     def test_display_name_from_email(self):
         """Display name depuis email."""
-        profile = UserProfile(email="anne@matanne.fr")
+        profile = ProfilUtilisateur(email="anne@matanne.fr")
         assert profile.display_name == "anne"
 
     def test_display_name_default(self):
         """Display name par défaut."""
-        profile = UserProfile()
+        profile = ProfilUtilisateur()
         assert profile.display_name == "Utilisateur"
 
 
@@ -171,7 +171,7 @@ class TestAuthResult:
 
     def test_success_result(self):
         """Résultat de succès."""
-        user = UserProfile(email="test@test.fr")
+        user = ProfilUtilisateur(email="test@test.fr")
         result = AuthResult(success=True, user=user, message="OK")
         assert result.success is True
         assert result.user == user
@@ -528,7 +528,7 @@ class TestAuthServiceSession:
 
     def test_get_current_user_exists(self):
         """Récupère l'utilisateur connecté."""
-        user = UserProfile(email="test@test.fr")
+        user = ProfilUtilisateur(email="test@test.fr")
         storage = {AuthService.USER_KEY: user}
 
         service = AuthService(storage=storage)
@@ -551,7 +551,7 @@ class TestAuthServiceSession:
 
     def test_is_authenticated_true(self):
         """Utilisateur authentifié."""
-        storage = {AuthService.USER_KEY: UserProfile()}
+        storage = {AuthService.USER_KEY: ProfilUtilisateur()}
 
         service = AuthService(storage=storage)
         service._client = None
@@ -569,7 +569,7 @@ class TestAuthServiceSession:
 
     def test_require_permission_with_user(self):
         """Vérifie permission avec utilisateur."""
-        user = UserProfile(role=Role.ADMIN)
+        user = ProfilUtilisateur(role=Role.ADMIN)
         storage = {AuthService.USER_KEY: user}
 
         service = AuthService(storage=storage)
@@ -594,7 +594,7 @@ class TestAuthServiceSession:
         service._client = None
 
         session = Mock()
-        user = UserProfile(email="test@test.fr")
+        user = ProfilUtilisateur(email="test@test.fr")
 
         service._save_session(session, user)
 
@@ -752,7 +752,7 @@ class TestAuthServiceUpdateProfile:
 
     def test_update_profile_no_changes(self):
         """Update profile sans modifications."""
-        user = UserProfile(email="test@test.fr")
+        user = ProfilUtilisateur(email="test@test.fr")
         storage = {AuthService.USER_KEY: user}
 
         mock_client = Mock()
@@ -766,7 +766,7 @@ class TestAuthServiceUpdateProfile:
 
     def test_update_profile_success(self):
         """Update profile avec succès."""
-        user = UserProfile(email="test@test.fr", nom="Old", prenom="Name")
+        user = ProfilUtilisateur(email="test@test.fr", nom="Old", prenom="Name")
         storage = {AuthService.USER_KEY: user}
 
         mock_client = Mock()
@@ -787,7 +787,7 @@ class TestAuthServiceUpdateProfile:
 
     def test_update_profile_no_response(self):
         """Update profile sans réponse."""
-        user = UserProfile(email="test@test.fr")
+        user = ProfilUtilisateur(email="test@test.fr")
         storage = {AuthService.USER_KEY: user}
 
         mock_client = Mock()
@@ -802,7 +802,7 @@ class TestAuthServiceUpdateProfile:
 
     def test_update_profile_error(self):
         """Update profile avec erreur."""
-        user = UserProfile(email="test@test.fr")
+        user = ProfilUtilisateur(email="test@test.fr")
         storage = {AuthService.USER_KEY: user}
 
         mock_client = Mock()
@@ -992,7 +992,7 @@ class TestDecorators:
     def test_require_role_insufficient_role(self, mock_st, mock_get_auth):
         """Décorateur role avec rôle insuffisant."""
         mock_auth = Mock()
-        user = UserProfile(role=Role.INVITE)
+        user = ProfilUtilisateur(role=Role.INVITE)
         mock_auth.get_current_user.return_value = user
         mock_get_auth.return_value = mock_auth
 
@@ -1009,7 +1009,7 @@ class TestDecorators:
     def test_require_role_sufficient_role(self, mock_st, mock_get_auth):
         """Décorateur role avec rôle suffisant."""
         mock_auth = Mock()
-        user = UserProfile(role=Role.ADMIN)
+        user = ProfilUtilisateur(role=Role.ADMIN)
         mock_auth.get_current_user.return_value = user
         mock_get_auth.return_value = mock_auth
 
@@ -1099,7 +1099,7 @@ class TestRequireAuth:
 
     def test_require_auth_authenticated(self):
         """require_auth avec utilisateur connecté."""
-        user = UserProfile(email="test@test.fr")
+        user = ProfilUtilisateur(email="test@test.fr")
         storage = {AuthService.USER_KEY: user}
 
         service = AuthService(storage=storage)
@@ -1181,7 +1181,7 @@ class TestUpdateProfileExtended:
 
     def test_update_profile_with_avatar(self):
         """Update profile avec avatar_url."""
-        user = UserProfile(email="test@test.fr", nom="Test", avatar_url=None)
+        user = ProfilUtilisateur(email="test@test.fr", nom="Test", avatar_url=None)
         storage = {AuthService.USER_KEY: user}
 
         mock_client = Mock()
@@ -1207,7 +1207,7 @@ class TestUpdateProfileExtended:
 
     def test_update_profile_with_preferences(self):
         """Update profile avec preferences."""
-        user = UserProfile(email="test@test.fr", nom="Test")
+        user = ProfilUtilisateur(email="test@test.fr", nom="Test")
         storage = {AuthService.USER_KEY: user}
 
         mock_client = Mock()
@@ -1354,7 +1354,7 @@ class TestAdditionalCoverage:
     def test_auth_service_init_with_session_state(self):
         """AuthService init avec st.session_state préexistant."""
         storage = {
-            AuthService.USER_KEY: UserProfile(email="test@test.fr"),
+            AuthService.USER_KEY: ProfilUtilisateur(email="test@test.fr"),
             AuthService.SESSION_KEY: {"token": "abc"},
         }
 
@@ -1495,7 +1495,7 @@ class TestUpdateProfileNoChange:
 
     def test_update_profile_no_changes(self):
         """update_profile sans aucune modification."""
-        user = UserProfile(email="test@test.fr", nom="Doe", prenom="John")
+        user = ProfilUtilisateur(email="test@test.fr", nom="Doe", prenom="John")
         storage = {AuthService.USER_KEY: user}
 
         mock_client = Mock()

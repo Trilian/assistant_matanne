@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.state.url import tabs_with_url
 
 # ═══════════════════════════════════════════════════════════
 # INITIALISATION
@@ -48,9 +49,15 @@ def app():
     st.markdown("---")
 
     # Onglets
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(
-        ["📷 Scanner", "➕ Ajout rapide", "✅ Vérifier stock", "📊 Gestion", "📥 Import/Export"]
-    )
+    TAB_LABELS = [
+        "📷 Scanner",
+        "➕ Ajout rapide",
+        "✅ Vérifier stock",
+        "📊 Gestion",
+        "📥 Import/Export",
+    ]
+    tabs_with_url(TAB_LABELS, param="tab")
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(TAB_LABELS)
 
     with tab1:
         with error_boundary(titre="Erreur scanner"):

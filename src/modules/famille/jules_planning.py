@@ -17,6 +17,7 @@ from src.core.constants import JOURS_SEMAINE
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.modules._framework import error_boundary
+from src.ui.state.url import tabs_with_url
 
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES - ACTIVITÉS PAR CATÉGORIE
@@ -380,7 +381,9 @@ def app():
     st.caption(f"🎂 {age} mois • Planning d'eveil hebdomadaire")
 
     # Tabs principaux
-    tabs = st.tabs(["🌟 Aujourd'hui", "📅 Semaine", "📊 Bilan", "📚 Catalogue"])
+    TAB_LABELS = ["🌟 Aujourd'hui", "📅 Semaine", "📊 Bilan", "📚 Catalogue"]
+    tabs_with_url(TAB_LABELS, param="tab")
+    tabs = st.tabs(TAB_LABELS)
 
     with tabs[0]:
         with error_boundary(titre="Erreur vue aujourd'hui"):

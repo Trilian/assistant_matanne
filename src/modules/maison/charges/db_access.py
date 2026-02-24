@@ -2,7 +2,7 @@
 Accès base de données pour le module Charges.
 
 Fait le pont entre l'UI (listes de dicts en session_state)
-et la base de données (modèle SQLAlchemy HouseExpense).
+et la base de données (modèle SQLAlchemy DepenseMaison).
 """
 
 import logging
@@ -10,7 +10,7 @@ from datetime import date
 from decimal import Decimal
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
-from src.core.models import HouseExpense
+from src.core.models import DepenseMaison
 
 logger = logging.getLogger(__name__)
 
@@ -38,11 +38,11 @@ UNITES_PAR_TYPE = {
 def charger_factures(session=None) -> list[dict]:
     """Charge toutes les factures depuis la DB.
 
-    Convertit les HouseExpense en dicts compatibles avec l'UI existante.
+    Convertit les DepenseMaison en dicts compatibles avec l'UI existante.
     """
     expenses = (
-        session.query(HouseExpense)
-        .order_by(HouseExpense.annee.desc(), HouseExpense.mois.desc())
+        session.query(DepenseMaison)
+        .order_by(DepenseMaison.annee.desc(), DepenseMaison.mois.desc())
         .all()
     )
 
@@ -95,7 +95,7 @@ def ajouter_facture(facture: dict, session=None) -> dict | None:
     type_energie = facture.get("type", "autre")
     unite = UNITES_PAR_TYPE.get(type_energie)
 
-    expense = HouseExpense(
+    expense = DepenseMaison(
         categorie=type_energie,
         mois=mois,
         annee=annee,
@@ -124,7 +124,7 @@ def supprimer_facture(db_id: int, session=None) -> bool:
     Returns:
         True si succès
     """
-    expense = session.query(HouseExpense).filter(HouseExpense.id == db_id).first()
+    expense = session.query(DepenseMaison).filter(DepenseMaison.id == db_id).first()
     if expense:
         session.delete(expense)
         session.commit()

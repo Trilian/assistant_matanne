@@ -1,131 +1,220 @@
 """
-Sous-module Jardin - Gestion intelligente du potager.
+Sous-module Jardin - Gestion intelligente du potager et du jardin.
 
-Structure:
-- styles.py: CSS du module
-- data.py: Chargement catalogue plantes
-- taches.py: Génération automatique des tâches
-- autonomie.py: Calculs d'autonomie alimentaire
-- ui.py: Composants UI réutilisables
-- onglets.py: Onglets de l'interface
+Fonctionnalités:
+- Gestion des plantes (ajout, arrosage, suivi)
+- Conseils IA saisonniers
+- Suivi des récoltes
+- Statistiques et alertes
 """
 
+import logging
+
+import pandas as pd
 import streamlit as st
 
-from src.core.monitoring.rerun_profiler import profiler_rerun
-from src.modules._framework import error_boundary
+from src.core.ai import ClientIA
+from src.core.db import obtenir_contexte_db
+from src.modules.maison.utils import (
+    charger_plantes,
+    get_plantes_a_arroser,
+    get_recoltes_proches,
+    get_saison,
+    get_stats_jardin,
+)
 from src.ui.keys import KeyNamespace
-from src.ui.state.url import tabs_with_url
 
-from .data import obtenir_meteo_jardin
-from .db_access import charger_plantes_jardin, charger_recoltes_jardin
-from .logic import (
-    BADGES_JARDIN,
-    calculer_autonomie,
-    calculer_stats_jardin,
-    calculer_streak_jardin,
-    obtenir_badges_jardin,
-)
-from .onglets import (
-    onglet_autonomie,
-    onglet_export,
-    onglet_graphiques,
-    onglet_mes_plantes,
-    onglet_plan,
-    onglet_recoltes,
-    onglet_taches,
-)
-from .styles import injecter_css_jardin
+__all__ = [
+    "app",
+    "JardinService",
+    "get_jardin_service",
+    "ajouter_plante",
+    "arroser_plante",
+    "ajouter_log",
+    "get_saison",
+    "get_plantes_a_arroser",
+    "get_recoltes_proches",
+    "get_stats_jardin",
+    "charger_plantes",
+    "ClientIA",
+]
 
-# Session keys scopées
 _keys = KeyNamespace("jardin")
-
-__all__ = ["app"]
-
-
-def _charger_donnees_jardin():
-    """Charge les données jardin depuis la DB, avec fallback session_state."""
-    if "mes_plantes_jardin" not in st.session_state or st.session_state.get("_jardin_reload", True):
-        st.session_state.mes_plantes_jardin = charger_plantes_jardin()
-        st.session_state.recoltes_jardin = charger_recoltes_jardin()
-        st.session_state._jardin_reload = False
-
-    return st.session_state.mes_plantes_jardin, st.session_state.recoltes_jardin
+logger = logging.getLogger(__name__)
 
 
-@profiler_rerun("jardin")
-def app():
-    """Point d'entrée du module Jardin avec gamification."""
-    injecter_css_jardin()
+# ═══════════════════════════════════════════════════════════
+# SERVICE IA
+# ═══════════════════════════════════════════════════════════
 
-    # Charger depuis la DB (avec cache session_state)
-    mes_plantes, recoltes = _charger_donnees_jardin()
 
-    # Météo et stats
-    meteo = obtenir_meteo_jardin()
-    autonomie = calculer_autonomie(mes_plantes, recoltes)
-    stats = calculer_stats_jardin(mes_plantes, recoltes)
-    badges_obtenus = obtenir_badges_jardin(stats)
-    streak = calculer_streak_jardin(recoltes)
+class JardinService:
+    """Service IA pour le jardin."""
 
-    # Header gamifié
-    col_h1, col_h2, col_h3 = st.columns([3, 1, 1])
-    with col_h1:
-        st.markdown(
-            f"""
-        <div class="jardin-header">
-            <h1>🌱 Mon Potager Intelligent</h1>
-            <div class="meteo-badge">
-                <span style="font-size: 1.8rem">☀️</span>
-                <span><strong>{meteo.get("temperature", 20)}°C</strong></span>
-                {f'<span class="streak-badge">🔥 {streak}j</span>' if streak > 2 else ""}
-            </div>
-        </div>
-        """,
-            unsafe_allow_html=True,
+    service_name: str = "jardin"
+    cache_prefix: str = "jardin"
+
+    def __init__(self, client=None):
+        if client is None:
+            try:
+                self.client = ClientIA()
+            except Exception:
+                self.client = None
+        else:
+            self.client = client
+
+    async def call_with_cache(self, prompt: str, **kwargs) -> str:
+        """Appel IA avec cache."""
+        if self.client is None:
+            return ""
+        return await self.client.generer(prompt=prompt, **kwargs)
+
+    async def generer_conseils_saison(self, saison: str) -> str:
+        """Génère des conseils pour la saison."""
+        prompt = f"Donne des conseils de jardinage pour la saison {saison}. Liste numérotée."
+        return await self.call_with_cache(prompt=prompt)
+
+    async def suggerer_plantes_saison(self, saison: str, climat: str = "tempere") -> str:
+        """Suggère des plantes pour la saison et le climat."""
+        prompt = (
+            f"Suggère des plantes à cultiver en {saison} pour un climat {climat}. "
+            "Liste numérotée avec conseils."
         )
-    with col_h2:
-        st.metric("🏅 Badges", f"{len(badges_obtenus)}/{len(BADGES_JARDIN)}")
-    with col_h3:
-        st.metric("🎯 Autonomie", f"{autonomie['pourcentage_prevu']}%")
+        return await self.call_with_cache(prompt=prompt)
 
-    # Onglets enrichis avec deep linking
-    TAB_LABELS = [
-        "🎯 Tâches",
-        "🌿 Mes Plantes",
-        "🥕 Récoltes",
-        "🏅 Autonomie",
-        "🗺️ Plan",
-        "📈 Graphiques",
-        "📥 Export",
-    ]
-    tabs_with_url(TAB_LABELS, param="tab")
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(TAB_LABELS)
+    async def conseil_arrosage(self, plante: str, saison: str) -> str:
+        """Donne des conseils d'arrosage pour une plante."""
+        prompt = f"Conseils d'arrosage pour {plante} en {saison}."
+        return await self.call_with_cache(prompt=prompt)
+
+
+_service_instance: JardinService | None = None
+
+
+def get_jardin_service() -> JardinService:
+    """Factory pour le service jardin (singleton)."""
+    global _service_instance
+    if _service_instance is None:
+        _service_instance = JardinService()
+    return _service_instance
+
+
+# ═══════════════════════════════════════════════════════════
+# FONCTIONS METIER
+# ═══════════════════════════════════════════════════════════
+
+
+def ajouter_plante(nom: str, type_plante: str, **kwargs) -> bool:
+    """Ajoute une plante au jardin."""
+    try:
+        from src.core.models.maison import ElementJardin
+
+        with obtenir_contexte_db() as db:
+            plante = ElementJardin(nom=nom, type_plante=type_plante, **kwargs)
+            db.add(plante)
+            db.commit()
+            return True
+    except Exception as e:
+        logger.error(f"Erreur ajout plante: {e}")
+        st.error(f"Erreur: {e}")
+        return False
+
+
+def arroser_plante(plante_id: int) -> bool:
+    """Enregistre un arrosage pour une plante."""
+    try:
+        from src.core.models.maison import JournalJardin
+
+        with obtenir_contexte_db() as db:
+            log = JournalJardin(garden_item_id=plante_id, action="arrosage")
+            db.add(log)
+            db.commit()
+            return True
+    except Exception as e:
+        logger.error(f"Erreur arrosage: {e}")
+        st.error(f"Erreur: {e}")
+        return False
+
+
+def ajouter_log(plante_id: int, action: str, notes: str = "") -> bool:
+    """Ajoute un log d'activité pour une plante."""
+    try:
+        from src.core.models.maison import JournalJardin
+
+        with obtenir_contexte_db() as db:
+            log = JournalJardin(
+                garden_item_id=plante_id,
+                action=action,
+                notes=notes,
+            )
+            db.add(log)
+            db.commit()
+            return True
+    except Exception as e:
+        logger.error(f"Erreur log jardin: {e}")
+        st.error(f"Erreur: {e}")
+        return False
+
+
+# ═══════════════════════════════════════════════════════════
+# APP
+# ═══════════════════════════════════════════════════════════
+
+
+def app():
+    """Point d'entrée du module Jardin."""
+    st.title("🌱 Mon Jardin")
+    st.caption("Gérez vos plantes, arrosages et récoltes.")
+
+    # Alertes plantes à arroser
+    plantes_arrosage = get_plantes_a_arroser()
+    for p in plantes_arrosage:
+        st.warning(f"💧 {p.get('nom', 'Plante')} a besoin d'eau !")
+
+    # Stats
+    stats = get_stats_jardin()
+    saison = get_saison()
+    cols = st.columns(4)
+    with cols[0]:
+        st.metric("🌿 Plantes", stats.get("total_plantes", 0))
+    with cols[1]:
+        st.metric("💧 À arroser", stats.get("a_arroser", 0))
+    with cols[2]:
+        st.metric("🥕 Récoltes", stats.get("recoltes_proches", 0))
+    with cols[3]:
+        st.metric("📅 Saison", saison)
+
+    st.divider()
+
+    # Onglets
+    TAB_LABELS = ["🌿 Mes plantes", "➕ Ajouter", "📊 Stats"]
+    tab1, tab2, tab3 = st.tabs(TAB_LABELS)
 
     with tab1:
-        with error_boundary(titre="Erreur tâches jardin"):
-            onglet_taches(mes_plantes, meteo)
+        df = charger_plantes()
+        if hasattr(df, "empty") and df.empty:
+            st.info("Aucune plante enregistrée.")
+        else:
+            for _, row in df.iterrows():
+                with st.container(border=True):
+                    st.markdown(f"**{row.get('nom', '')}**")
+                    st.caption(row.get("type_plante", ""))
 
     with tab2:
-        with error_boundary(titre="Erreur mes plantes"):
-            onglet_mes_plantes(mes_plantes)
+        st.subheader("➕ Ajouter une plante")
+        with st.form(key=_keys("form_plante")):
+            nom = st.text_input("Nom de la plante")
+            type_p = st.selectbox("Type", ["legume", "fruit", "herbe", "fleur"])
+            submitted = st.form_submit_button("Ajouter")
+        if submitted and nom:
+            ajouter_plante(nom, type_p)
+            st.success(f"✅ {nom} ajoutée !")
+            st.rerun()
 
     with tab3:
-        with error_boundary(titre="Erreur récoltes"):
-            onglet_recoltes(mes_plantes, recoltes)
-
-    with tab4:
-        with error_boundary(titre="Erreur autonomie"):
-            onglet_autonomie(mes_plantes, recoltes)
-
-    with tab5:
-        with error_boundary(titre="Erreur plan jardin"):
-            onglet_plan(mes_plantes)
-
-    with tab6:
-        with error_boundary(titre="Erreur graphiques jardin"):
-            onglet_graphiques(mes_plantes, recoltes)
-
-    with tab7:
-        with error_boundary(titre="Erreur export jardin"):
-            onglet_export(mes_plantes, recoltes)
+        st.subheader("📊 Statistiques")
+        recoltes = get_recoltes_proches()
+        if recoltes:
+            st.markdown(f"**{len(recoltes)} récolte(s) à venir**")
+        else:
+            st.info("Aucune récolte prochaine.")

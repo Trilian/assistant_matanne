@@ -4,9 +4,6 @@ Tests pour src/modules/maison/meubles.py
 Module Meubles - Wishlist d'achats par pièce avec budget.
 """
 
-import pytest
-
-pytestmark = pytest.mark.skip(reason="Module src.modules.maison.meubles non encore implémenté")
 from contextlib import contextmanager
 from decimal import Decimal
 from unittest.mock import MagicMock, patch

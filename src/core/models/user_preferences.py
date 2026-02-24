@@ -2,10 +2,10 @@
 Modèles pour les préférences utilisateur et l'apprentissage IA.
 
 Contient :
-- UserPreference : Préférences alimentaires persistantes
-- RecipeFeedback : Feedbacks 👍/👎 pour apprentissage
+- PreferenceUtilisateur : Préférences alimentaires persistantes
+- RetourRecette : Feedbacks 👍/👎 pour apprentissage
 - OpenFoodFactsCache : Cache des produits scannés
-- ExternalCalendarConfig : Configuration calendriers externes
+- ConfigCalendrierExterne : Configuration calendriers externes
 """
 
 import enum
@@ -26,6 +26,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, utc_now
+from .mixins import CreatedAtMixin, TimestampFullMixin
 
 if TYPE_CHECKING:
     from .recettes import Recette
@@ -36,7 +37,7 @@ if TYPE_CHECKING:
 # ═══════════════════════════════════════════════════════════
 
 
-class FeedbackType(enum.StrEnum):
+class TypeRetour(enum.StrEnum):
     """Types de feedback pour les recettes."""
 
     LIKE = "like"
@@ -44,15 +45,15 @@ class FeedbackType(enum.StrEnum):
     NEUTRAL = "neutral"
 
 
-# CalendarProvider est défini dans calendrier.py (source unique)
-from .calendrier import CalendarProvider  # noqa: F401
+# FournisseurCalendrier est défini dans calendrier.py (source unique)
+from .calendrier import FournisseurCalendrier  # noqa: F401
 
 # ═══════════════════════════════════════════════════════════
 # PRÉFÉRENCES UTILISATEUR
 # ═══════════════════════════════════════════════════════════
 
 
-class UserPreference(Base):
+class PreferenceUtilisateur(TimestampFullMixin, Base):
     """Préférences alimentaires et familiales de l'utilisateur.
 
     Stockage persistant pour l'apprentissage IA des goûts.
@@ -73,7 +74,7 @@ class UserPreference(Base):
         magasins_preferes: Liste JSON des magasins préférés
     """
 
-    __tablename__ = "user_preferences"
+    __tablename__ = "preferences_utilisateurs"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[str] = mapped_column(String(100), nullable=False, unique=True, index=True)
@@ -100,12 +101,8 @@ class UserPreference(Base):
     robots: Mapped[list[str]] = mapped_column(JSONB, default=list)
     magasins_preferes: Mapped[list[str]] = mapped_column(JSONB, default=list)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     def __repr__(self) -> str:
-        return f"<UserPreference(user_id='{self.user_id}', adultes={self.nb_adultes})>"
+        return f"<PreferenceUtilisateur(user_id='{self.user_id}', adultes={self.nb_adultes})>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -113,7 +110,7 @@ class UserPreference(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class RecipeFeedback(Base):
+class RetourRecette(CreatedAtMixin, Base):
     """Feedback utilisateur sur une recette (👍/👎).
 
     Permet l'apprentissage IA des goûts pour améliorer les suggestions.
@@ -126,7 +123,7 @@ class RecipeFeedback(Base):
         notes: Notes additionnelles
     """
 
-    __tablename__ = "recipe_feedbacks"
+    __tablename__ = "retours_recettes"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
@@ -135,12 +132,10 @@ class RecipeFeedback(Base):
     )
 
     feedback: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=FeedbackType.NEUTRAL.value
+        String(20), nullable=False, default=TypeRetour.NEUTRAL.value
     )
     contexte: Mapped[str | None] = mapped_column(String(200))
     notes: Mapped[str | None] = mapped_column(Text)
-
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Contraintes
     __table_args__ = (
@@ -152,7 +147,7 @@ class RecipeFeedback(Base):
     recette: Mapped["Recette"] = relationship(back_populates="feedbacks")
 
     def __repr__(self) -> str:
-        return f"<RecipeFeedback(user='{self.user_id}', recette={self.recette_id}, feedback='{self.feedback}')>"
+        return f"<RetourRecette(user='{self.user_id}', recette={self.recette_id}, feedback='{self.feedback}')>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -160,7 +155,7 @@ class RecipeFeedback(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class OpenFoodFactsCache(Base):
+class OpenFoodFactsCache(CreatedAtMixin, Base):
     """Cache persistant des produits OpenFoodFacts.
 
     Évite les appels API répétitifs pour les produits déjà scannés.
@@ -196,9 +191,8 @@ class OpenFoodFactsCache(Base):
     allergenes: Mapped[dict[str, Any] | None] = mapped_column(JSONB, default=list)
     image_url: Mapped[str | None] = mapped_column(String(500))
 
-    # Timestamps
+    # Timestamps (last_updated reste manuel — nom non-standard)
     last_updated: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     def __repr__(self) -> str:
         return f"<OpenFoodFactsCache(code='{self.code_barres}', nom='{self.nom}')>"
@@ -209,7 +203,7 @@ class OpenFoodFactsCache(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class ExternalCalendarConfig(Base):
+class ConfigCalendrierExterne(TimestampFullMixin, Base):
     """Configuration d'un calendrier externe (Google, Apple, etc.).
 
     Stocke les tokens OAuth et paramètres de synchronisation.
@@ -226,13 +220,13 @@ class ExternalCalendarConfig(Base):
         last_sync: Dernière synchronisation
     """
 
-    __tablename__ = "external_calendar_configs"
+    __tablename__ = "configs_calendriers_externes"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
 
     provider: Mapped[str] = mapped_column(
-        String(20), nullable=False, default=CalendarProvider.GOOGLE.value
+        String(20), nullable=False, default=FournisseurCalendrier.GOOGLE.value
     )
     name: Mapped[str] = mapped_column(String(200), nullable=False, default="Mon Calendrier")
 
@@ -250,8 +244,6 @@ class ExternalCalendarConfig(Base):
 
     # Timestamps
     last_sync: Mapped[datetime | None] = mapped_column(DateTime)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Contraintes
     __table_args__ = (
@@ -262,4 +254,4 @@ class ExternalCalendarConfig(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<ExternalCalendarConfig(user='{self.user_id}', provider='{self.provider}')>"
+        return f"<ConfigCalendrierExterne(user='{self.user_id}', provider='{self.provider}')>"

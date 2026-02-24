@@ -15,7 +15,12 @@ from sqlalchemy.orm import Session
 
 from src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUT
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.models import FoodLog, GarminActivity, GarminDailySummary, UserProfile
+from src.core.models import (
+    ActiviteGarmin,
+    JournalAlimentaire,
+    ProfilUtilisateur,
+    ResumeQuotidienGarmin,
+)
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
 
@@ -28,9 +33,9 @@ class UserDataDict(TypedDict, total=False):
     total=False car la structure peut être vide en cas d'erreur.
     """
 
-    user: Any  # UserProfile
-    summaries: list[Any]  # list[GarminDailySummary]
-    activities: list[Any]  # list[GarminActivity]
+    user: Any  # ProfilUtilisateur
+    summaries: list[Any]  # list[ResumeQuotidienGarmin]
+    activities: list[Any]  # list[ActiviteGarmin]
     total_pas: int
     total_calories: int
     total_minutes: int
@@ -64,9 +69,9 @@ class ServiceSuiviPerso:
 
         Returns:
             UserDataDict contenant:
-            - user: UserProfile
-            - summaries: Liste GarminDailySummary (7 jours)
-            - activities: Liste GarminActivity (7 jours)
+            - user: ProfilUtilisateur
+            - summaries: Liste ResumeQuotidienGarmin (7 jours)
+            - activities: Liste ActiviteGarmin (7 jours)
             - total_pas: Total des pas
             - total_calories: Total calories actives
             - total_minutes: Total minutes actives
@@ -81,7 +86,7 @@ class ServiceSuiviPerso:
         from src.services.integrations.garmin import get_or_create_user
 
         try:
-            user = db.query(UserProfile).filter_by(username=username).first()
+            user = db.query(ProfilUtilisateur).filter_by(username=username).first()
 
             if not user:
                 # Créer l'utilisateur si inexistant
@@ -93,19 +98,19 @@ class ServiceSuiviPerso:
             start_date = end_date - timedelta(days=7)
 
             summaries = (
-                db.query(GarminDailySummary)
+                db.query(ResumeQuotidienGarmin)
                 .filter(
-                    GarminDailySummary.user_id == user.id,
-                    GarminDailySummary.date >= start_date,
+                    ResumeQuotidienGarmin.user_id == user.id,
+                    ResumeQuotidienGarmin.date >= start_date,
                 )
                 .all()
             )
 
             activities = (
-                db.query(GarminActivity)
+                db.query(ActiviteGarmin)
                 .filter(
-                    GarminActivity.user_id == user.id,
-                    GarminActivity.date_debut >= datetime.combine(start_date, datetime.min.time()),
+                    ActiviteGarmin.user_id == user.id,
+                    ActiviteGarmin.date_debut >= datetime.combine(start_date, datetime.min.time()),
                 )
                 .all()
             )
@@ -134,7 +139,7 @@ class ServiceSuiviPerso:
             logger.error(f"Erreur chargement données utilisateur {username}: {e}")
             return {}
 
-    def _calculate_streak(self, user: UserProfile, summaries: list) -> int:
+    def _calculate_streak(self, user: ProfilUtilisateur, summaries: list) -> int:
         """Calcule le streak actuel (jours consécutifs objectif atteint).
 
         Args:
@@ -170,7 +175,9 @@ class ServiceSuiviPerso:
     @avec_gestion_erreurs(default_return=[])
     @avec_cache(ttl=300)
     @avec_session_db
-    def get_food_logs_today(self, username: str, db: Session | None = None) -> list[FoodLog]:
+    def get_food_logs_today(
+        self, username: str, db: Session | None = None
+    ) -> list[JournalAlimentaire]:
         """Récupère les logs alimentation du jour.
 
         Args:
@@ -178,20 +185,23 @@ class ServiceSuiviPerso:
             db: Session DB (injectée automatiquement).
 
         Returns:
-            Liste des FoodLog du jour, triée par heure.
+            Liste des JournalAlimentaire du jour, triée par heure.
         """
         if db is None:
             raise ValueError("Session DB requise")
 
         try:
-            user = db.query(UserProfile).filter_by(username=username).first()
+            user = db.query(ProfilUtilisateur).filter_by(username=username).first()
             if not user:
                 return []
 
             return (
-                db.query(FoodLog)
-                .filter(FoodLog.user_id == user.id, FoodLog.date == date_type.today())
-                .order_by(FoodLog.heure)
+                db.query(JournalAlimentaire)
+                .filter(
+                    JournalAlimentaire.user_id == user.id,
+                    JournalAlimentaire.date == date_type.today(),
+                )
+                .order_by(JournalAlimentaire.heure)
                 .all()
             )
         except Exception as e:
@@ -223,7 +233,7 @@ class ServiceSuiviPerso:
         if db is None:
             raise ValueError("Session DB requise")
         try:
-            user = db.query(UserProfile).filter_by(id=user_id).first()
+            user = db.query(ProfilUtilisateur).filter_by(id=user_id).first()
             if user:
                 user.objectif_pas_quotidien = objectif_pas
                 user.objectif_calories_brulees = objectif_calories
@@ -247,7 +257,7 @@ class ServiceSuiviPerso:
         qualite: int = 3,
         notes: str | None = None,
         db: Session | None = None,
-    ) -> FoodLog:
+    ) -> JournalAlimentaire:
         """Ajoute un log alimentation.
 
         Args:
@@ -260,7 +270,7 @@ class ServiceSuiviPerso:
             db: Session DB (injectée automatiquement).
 
         Returns:
-            FoodLog créé.
+            JournalAlimentaire créé.
 
         Raises:
             ValueError: Si l'utilisateur n'existe pas et ne peut être créé.
@@ -270,12 +280,12 @@ class ServiceSuiviPerso:
 
         from src.services.integrations.garmin import get_or_create_user
 
-        user = db.query(UserProfile).filter_by(username=username).first()
+        user = db.query(ProfilUtilisateur).filter_by(username=username).first()
         if not user:
             display_name = "Anne" if username == "anne" else "Mathieu"
             user = get_or_create_user(username, display_name, db=db)
 
-        log = FoodLog(
+        log = JournalAlimentaire(
             user_id=user.id,
             date=date_type.today(),
             heure=datetime.now(),
@@ -289,7 +299,7 @@ class ServiceSuiviPerso:
         db.commit()
         db.refresh(log)
 
-        logger.info(f"FoodLog ajouté pour {username}: {repas}")
+        logger.info(f"JournalAlimentaire ajouté pour {username}: {repas}")
 
         # Emit event after successful commit
         obtenir_bus().emettre(

@@ -23,7 +23,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from .base import Base, utc_now
+from .base import Base
+from .mixins import CreatedAtMixin, TimestampFullMixin
 
 # ═══════════════════════════════════════════════════════════
 # ENUMS
@@ -54,7 +55,7 @@ class TypeAlerteMeteo(StrEnum):
 # ═══════════════════════════════════════════════════════════
 
 
-class AlerteMeteo(Base):
+class AlerteMeteo(CreatedAtMixin, Base):
     """Alerte météo pour le jardin.
 
     Table SQL: alertes_meteo
@@ -88,9 +89,6 @@ class AlerteMeteo(Base):
     # Supabase user
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), index=True)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-
     def __repr__(self) -> str:
         return f"<AlerteMeteo(id={self.id}, type='{self.type_alerte}', niveau='{self.niveau}')>"
 
@@ -100,7 +98,7 @@ class AlerteMeteo(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class ConfigMeteo(Base):
+class ConfigMeteo(TimestampFullMixin, Base):
     """Configuration météo par utilisateur.
 
     Table SQL: config_meteo
@@ -128,10 +126,6 @@ class ConfigMeteo(Base):
 
     # Supabase user (unique)
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), unique=True)
-
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     def __repr__(self) -> str:
         return f"<ConfigMeteo(id={self.id}, ville='{self.ville}')>"

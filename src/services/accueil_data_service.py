@@ -10,7 +10,7 @@ from datetime import date
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
-from src.core.models import MaintenanceTask
+from src.core.models import TacheEntretien
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -28,10 +28,10 @@ class AccueilDataService:
             Liste de dicts avec nom, prochaine_fois, jours_retard
         """
         taches = (
-            db.query(MaintenanceTask)
+            db.query(TacheEntretien)
             .filter(
-                MaintenanceTask.prochaine_fois < date.today(),
-                MaintenanceTask.fait.is_(False),
+                TacheEntretien.prochaine_fois < date.today(),
+                TacheEntretien.fait.is_(False),
             )
             .limit(limit)
             .all()

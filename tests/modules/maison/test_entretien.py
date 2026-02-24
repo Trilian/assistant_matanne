@@ -4,11 +4,6 @@ Tests pour src/modules/maison/entretien.py
 Tests complets pour le module Entretien (routines ménage).
 """
 
-import pytest
-
-pytestmark = pytest.mark.skip(
-    reason="Fonctions entretien (creer_routine, etc.) non encore implémentées dans le module"
-)
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest

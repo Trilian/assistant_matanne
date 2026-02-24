@@ -21,7 +21,7 @@ class TestBackupConfig:
         """Test création avec valeurs par défaut."""
         config = BackupConfig()
 
-        assert config.backup_dir == "backups"
+        assert config.backup_dir == "sauvegardes"
         assert config.max_backups == 10
         assert config.compress is True
         assert config.include_timestamps is True

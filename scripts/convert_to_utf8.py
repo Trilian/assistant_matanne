@@ -71,7 +71,7 @@ def find_python_files(root_dir: str = ".") -> list[str]:
         files.extend(glob.glob(pattern, recursive=True))
 
     # Exclure les dossiers de cache et virtualenv
-    excluded = {"__pycache__", ".venv", "venv", ".git", "node_modules", "backups"}
+    excluded = {"__pycache__", ".venv", "venv", ".git", "node_modules", "sauvegardes"}
     return [f for f in files if not any(excl in f.replace("\\", "/") for excl in excluded)]
 
 

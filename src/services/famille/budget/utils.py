@@ -23,10 +23,10 @@ from src.services.famille.budget import (
 
 def db_entry_to_depense(entry: Any) -> Depense:
     """
-    Convertit une entrée FamilyBudget de la DB en objet Depense.
+    Convertit une entrée BudgetFamille de la DB en objet Depense.
 
     Args:
-        entry: Objet SQLAlchemy FamilyBudget
+        entry: Objet SQLAlchemy BudgetFamille
 
     Returns:
         Objet Depense Pydantic

@@ -26,10 +26,10 @@ class TestMaison:
             pass
 
     class TestProjectTask:
-        """Tests pour la classe ProjectTask."""
+        """Tests pour la classe TacheProjet."""
 
         def test_projecttask_creation(self):
-            """Test de création de ProjectTask."""
+            """Test de création de TacheProjet."""
             # TODO: Implémenter
             pass
 
@@ -52,10 +52,10 @@ class TestMaison:
             pass
 
     class TestRoutineTask:
-        """Tests pour la classe RoutineTask."""
+        """Tests pour la classe TacheRoutine."""
 
         def test_routinetask_creation(self):
-            """Test de création de RoutineTask."""
+            """Test de création de TacheRoutine."""
             # TODO: Implémenter
             pass
 
@@ -65,10 +65,10 @@ class TestMaison:
             pass
 
     class TestGardenItem:
-        """Tests pour la classe GardenItem."""
+        """Tests pour la classe ElementJardin."""
 
         def test_gardenitem_creation(self):
-            """Test de création de GardenItem."""
+            """Test de création de ElementJardin."""
             # TODO: Implémenter
             pass
 

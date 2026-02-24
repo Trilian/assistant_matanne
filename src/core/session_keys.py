@@ -52,8 +52,8 @@ class _SessionKeys:
     PLANNING_DATE_DEBUT = "planning_date_debut"
     PLANNING_CONSEILS = "planning_conseils"
     PLANNING_SUGGESTIONS_BIO = "planning_suggestions_bio"
-    USER_PREFERENCES = "user_preferences"
-    RECIPE_FEEDBACKS = "recipe_feedbacks"
+    USER_PREFERENCES = "preferences_utilisateurs"
+    RECIPE_FEEDBACKS = "retours_recettes"
 
     # ─── Cuisine / Courses ────────────────────────────
     COURSES_REFRESH = "courses_refresh"

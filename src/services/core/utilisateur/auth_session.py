@@ -9,7 +9,7 @@ Dépendances attendues sur ``self``
 - ``self._storage``  : ``MutableMapping[str, Any]`` — magasin de session
 - ``self._client``   : client Supabase (peut être ``None``)
 - ``self.SESSION_KEY``: clé de stockage de la session Supabase
-- ``self.USER_KEY``  : clé de stockage du ``UserProfile``
+- ``self.USER_KEY``  : clé de stockage du ``ProfilUtilisateur``
 - ``self.is_configured``: propriété indiquant si le client est actif
 """
 
@@ -19,7 +19,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from .auth_schemas import UserProfile
+    from .auth_schemas import ProfilUtilisateur
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class SessionMixin:
     # Sauvegarde / nettoyage
     # -----------------------------------------------------------
 
-    def _save_session(self, session: Any, user: UserProfile) -> None:
+    def _save_session(self, session: Any, user: ProfilUtilisateur) -> None:
         """Sauvegarde la session et le profil utilisateur dans le stockage."""
         self._storage[self.SESSION_KEY] = session
         self._storage[self.USER_KEY] = user
@@ -47,7 +47,7 @@ class SessionMixin:
     # Lecture / vérification
     # -----------------------------------------------------------
 
-    def get_current_user(self) -> UserProfile | None:
+    def get_current_user(self) -> ProfilUtilisateur | None:
         """Retourne l'utilisateur actuellement connecté."""
         return self._storage.get(self.USER_KEY)
 
@@ -55,7 +55,7 @@ class SessionMixin:
         """Vérifie si un utilisateur est connecté."""
         return self.get_current_user() is not None
 
-    def require_auth(self) -> UserProfile | None:
+    def require_auth(self) -> ProfilUtilisateur | None:
         """
         Exige une authentification.
 

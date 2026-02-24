@@ -25,14 +25,15 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base, utc_now
+from .base import Base
+from .mixins import TimestampFullMixin
 
 # ═══════════════════════════════════════════════════════════
 # ENUMS
 # ═══════════════════════════════════════════════════════════
 
 
-class CalendarProvider(StrEnum):
+class FournisseurCalendrier(StrEnum):
     """Fournisseurs de calendrier."""
 
     GOOGLE = "google"
@@ -41,7 +42,7 @@ class CalendarProvider(StrEnum):
     ICAL_URL = "ical_url"
 
 
-class SyncDirection(StrEnum):
+class DirectionSync(StrEnum):
     """Direction de synchronisation calendrier."""
 
     IMPORT = "import"
@@ -54,7 +55,7 @@ class SyncDirection(StrEnum):
 # ═══════════════════════════════════════════════════════════
 
 
-class CalendrierExterne(Base):
+class CalendrierExterne(TimestampFullMixin, Base):
     """Calendrier externe synchronisé.
 
     Table SQL: calendriers_externes
@@ -86,10 +87,6 @@ class CalendrierExterne(Base):
     # Supabase user
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), index=True)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     # Relations
     evenements: Mapped[list["EvenementCalendrier"]] = relationship(
         back_populates="calendrier_source", cascade="all, delete-orphan"
@@ -104,7 +101,7 @@ class CalendrierExterne(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class EvenementCalendrier(Base):
+class EvenementCalendrier(TimestampFullMixin, Base):
     """Événement de calendrier synchronisé.
 
     Table SQL: evenements_calendrier
@@ -142,10 +139,6 @@ class EvenementCalendrier(Base):
 
     # Supabase user
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), index=True)
-
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     __table_args__ = (UniqueConstraint("uid", "user_id", name="uq_event_uid_user"),)
 

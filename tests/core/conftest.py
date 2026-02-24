@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session, sessionmaker
 # CHARGEMENT ANTICIPÉ DE TOUS LES MODÈLES
 # ═════════════════════════════════════════════════════════════════════
 # Nécessaire AVANT toute importation de modèle individuel pour que
-# SQLAlchemy puisse résoudre les chaînes de relationship (ex: "RecipeFeedback").
+# SQLAlchemy puisse résoudre les chaînes de relationship (ex: "RetourRecette").
 try:
     from src.core.models import charger_tous_modeles
 

@@ -1,131 +1,220 @@
 """
-Module Entretien - Sous-module de gestion de l'entretien maison.
+Module Entretien - Gestion des routines d'entretien de la maison.
 
-IA-first: Tâches auto-générées selon équipements et calendrier.
+Fonctionnalités:
+- Routines d'entretien avec tâches récurrentes
+- Suivi des tâches quotidiennes
+- Conseils IA pour optimisation
+- Statistiques et alertes
 """
 
+import logging
+
+import pandas as pd
 import streamlit as st
 
-from src.core.monitoring.rerun_profiler import profiler_rerun
-from src.modules._framework import error_boundary
+from src.core.ai import ClientIA
+from src.core.db import obtenir_contexte_db
+from src.core.models.maison import Routine, TacheRoutine
+from src.modules.maison.utils import (
+    charger_routines,
+    get_stats_entretien,
+    get_taches_today,
+)
 from src.ui.keys import KeyNamespace
-from src.ui.state.url import tabs_with_url
 
-from .logic import (
-    BADGES_ENTRETIEN,
-    calculer_score_proprete,
-    calculer_stats_globales,
-    calculer_streak,
-    generer_taches_entretien,
-    obtenir_badges_obtenus,
-)
-from .onglets import (
-    onglet_export,
-    onglet_graphiques,
-    onglet_historique,
-    onglet_inventaire,
-    onglet_pieces,
-    onglet_stats,
-    onglet_taches,
-)
-from .db_access import charger_historique_entretien, charger_objets_entretien
-from .styles import injecter_css_entretien
+__all__ = [
+    "app",
+    "EntretienService",
+    "get_entretien_service",
+    "creer_routine",
+    "ajouter_tache_routine",
+    "marquer_tache_faite",
+    "desactiver_routine",
+    "get_stats_entretien",
+    "charger_routines",
+    "get_taches_today",
+    "ClientIA",
+]
 
-# Session keys scopées
 _keys = KeyNamespace("entretien")
-
-__all__ = ["app"]
-
-
-def _charger_donnees_entretien():
-    """Charge les données entretien depuis la DB, avec fallback session_state."""
-    if "mes_objets_entretien" not in st.session_state or st.session_state.get(
-        "_entretien_reload", True
-    ):
-        st.session_state.mes_objets_entretien = charger_objets_entretien()
-        st.session_state.historique_entretien = charger_historique_entretien()
-        st.session_state._entretien_reload = False
-
-    return st.session_state.mes_objets_entretien, st.session_state.historique_entretien
+logger = logging.getLogger(__name__)
 
 
-@profiler_rerun("entretien")
-def app():
-    """Point d'entrée du module Entretien avec gamification."""
-    injecter_css_entretien()
+# ═══════════════════════════════════════════════════════════
+# SERVICE IA
+# ═══════════════════════════════════════════════════════════
 
-    # Charger depuis la DB (avec cache session_state)
-    mes_objets, historique = _charger_donnees_entretien()
 
-    # Score et stats gamifiés
-    score = calculer_score_proprete(mes_objets, historique)
-    streak = calculer_streak(historique)
-    stats = calculer_stats_globales(mes_objets, historique)
-    badges_obtenus = obtenir_badges_obtenus(stats)
+class EntretienService:
+    """Service IA pour l'entretien de la maison."""
 
-    # Header gamifié
-    col_h1, col_h2, col_h3 = st.columns([3, 1, 1])
-    with col_h1:
-        st.markdown(
-            f"""
-        <div class="entretien-header">
-            <h1>🏠 Entretien Maison</h1>
-            <div class="score-badge">
-                <span style="font-size: 1.25rem">✨</span>
-                <span>Score: <strong>{score["score"]}/100</strong> • {score["niveau"]}</span>
-                {f'<span class="streak-mini">🔥 {streak}j</span>' if streak > 2 else ""}
-            </div>
-        </div>
-        """,
-            unsafe_allow_html=True,
-        )
-    with col_h2:
-        st.metric("🏅 Badges", f"{len(badges_obtenus)}/{len(BADGES_ENTRETIEN)}")
-    with col_h3:
-        taches = generer_taches_entretien(mes_objets, historique)
-        urgentes = len([t for t in taches if t.get("priorite") == "urgente"])
-        if urgentes > 0:
-            st.metric("⚠️ Urgentes", urgentes, delta=f"-{urgentes}", delta_color="inverse")
+    service_name: str = "entretien"
+    cache_prefix: str = "entretien"
+
+    def __init__(self, client=None):
+        if client is None:
+            try:
+                self.client = ClientIA()
+            except Exception:
+                self.client = None
         else:
-            st.metric("✅ Urgentes", 0, delta="OK", delta_color="normal")
+            self.client = client
 
-    # Onglets enrichis avec deep linking
-    TAB_LABELS = [
-        "🎯 Tâches",
-        "📦 Inventaire",
-        "🏠 Par pièce",
-        "📜 Historique",
-        "🏅 Stats & Badges",
-        "📈 Graphiques",
-        "📥 Export",
-    ]
-    tabs_with_url(TAB_LABELS, param="tab")
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(TAB_LABELS)
+    async def call_with_cache(self, prompt: str, **kwargs) -> str:
+        """Appel IA avec cache."""
+        if self.client is None:
+            return ""
+        return await self.client.generer(prompt=prompt, **kwargs)
+
+    async def creer_routine(self, nom: str, description: str = "") -> str:
+        """Crée des suggestions de routine."""
+        prompt = f"Crée une routine d'entretien '{nom}' pour: {description}. Liste les tâches."
+        return await self.call_with_cache(prompt=prompt)
+
+    async def optimiser_semaine(self, routines: str) -> str:
+        """Optimise le planning de la semaine."""
+        prompt = f"Optimise ce planning d'entretien hebdomadaire: {routines}. Répartis par jour."
+        return await self.call_with_cache(prompt=prompt)
+
+    async def conseil_temps_estime(self, tache: str) -> str:
+        """Estime le temps pour une tâche."""
+        prompt = f"Estime le temps nécessaire pour la tâche d'entretien: {tache}."
+        return await self.call_with_cache(prompt=prompt)
+
+    async def conseil_efficacite(self, tache: str = "") -> str:
+        """Donne des astuces d'efficacité."""
+        prompt = f"Donne des astuces pour réaliser efficacement: {tache}."
+        return await self.call_with_cache(prompt=prompt)
+
+
+_service_instance: EntretienService | None = None
+
+
+def get_entretien_service() -> EntretienService:
+    """Factory pour le service entretien (singleton)."""
+    global _service_instance
+    if _service_instance is None:
+        _service_instance = EntretienService()
+    return _service_instance
+
+
+# ═══════════════════════════════════════════════════════════
+# FONCTIONS METIER
+# ═══════════════════════════════════════════════════════════
+
+
+def creer_routine(nom: str, frequence: str = "quotidien", **kwargs) -> bool:
+    """Crée une nouvelle routine d'entretien."""
+    try:
+        with obtenir_contexte_db() as db:
+            routine = Routine(nom=nom, frequence=frequence, **kwargs)
+            db.add(routine)
+            db.commit()
+            return True
+    except Exception as e:
+        logger.error(f"Erreur création routine: {e}")
+        st.error(f"Erreur: {e}")
+        return False
+
+
+def ajouter_tache_routine(routine_id: int, nom: str, **kwargs) -> bool:
+    """Ajoute une tâche à une routine."""
+    try:
+        with obtenir_contexte_db() as db:
+            tache = TacheRoutine(routine_id=routine_id, nom=nom, **kwargs)
+            db.add(tache)
+            db.commit()
+            return True
+    except Exception as e:
+        logger.error(f"Erreur ajout tâche: {e}")
+        st.error(f"Erreur: {e}")
+        return False
+
+
+def marquer_tache_faite(tache_id: int) -> bool:
+    """Marque une tâche de routine comme faite."""
+    try:
+        with obtenir_contexte_db() as db:
+            tache = db.query(TacheRoutine).get(tache_id)
+            if tache is None:
+                return False
+            tache.fait = True
+            db.commit()
+            return True
+    except Exception as e:
+        logger.error(f"Erreur marquage tâche: {e}")
+        st.error(f"Erreur: {e}")
+        return False
+
+
+def desactiver_routine(routine_id: int) -> bool:
+    """Désactive une routine."""
+    try:
+        with obtenir_contexte_db() as db:
+            routine = db.query(Routine).get(routine_id)
+            if routine is None:
+                return False
+            routine.actif = False
+            db.commit()
+            return True
+    except Exception as e:
+        logger.error(f"Erreur désactivation routine: {e}")
+        st.error(f"Erreur: {e}")
+        return False
+
+
+# ═══════════════════════════════════════════════════════════
+# APP
+# ═══════════════════════════════════════════════════════════
+
+
+def app():
+    """Point d'entrée du module Entretien."""
+    st.title("🧹 Entretien Maison")
+    st.caption("Gérez vos routines d'entretien et tâches ménagères.")
+
+    # Stats
+    stats = get_stats_entretien()
+    cols = st.columns(3)
+    with cols[0]:
+        st.metric("Routines", stats.get("total_routines", 0))
+    with cols[1]:
+        st.metric("Aujourd'hui", stats.get("taches_today", 0))
+    with cols[2]:
+        st.metric("Accompli", f"{stats.get('taux_completion', 0)}%")
+
+    st.divider()
+
+    # Onglets
+    TAB_LABELS = ["📋 Routines", "📅 Aujourd'hui", "➕ Nouvelle"]
+    tab1, tab2, tab3 = st.tabs(TAB_LABELS)
 
     with tab1:
-        with error_boundary(titre="Erreur tâches entretien"):
-            onglet_taches(mes_objets, historique)
+        df = charger_routines()
+        if hasattr(df, "empty") and df.empty:
+            st.info("Aucune routine. Créez-en une !")
+        else:
+            for _, row in df.iterrows():
+                with st.container(border=True):
+                    st.markdown(f"**{row.get('nom', '')}**")
+                    st.caption(row.get("frequence", ""))
 
     with tab2:
-        with error_boundary(titre="Erreur inventaire entretien"):
-            onglet_inventaire(mes_objets)
+        taches = get_taches_today()
+        if not taches:
+            st.info("Rien de prévu aujourd'hui !")
+        else:
+            for t in taches:
+                st.checkbox(t.get("nom", ""), key=f"tache_{t.get('id', 0)}")
 
     with tab3:
-        with error_boundary(titre="Erreur pièces"):
-            onglet_pieces(mes_objets, historique)
-
-    with tab4:
-        with error_boundary(titre="Erreur historique entretien"):
-            onglet_historique(historique)
-
-    with tab5:
-        with error_boundary(titre="Erreur stats entretien"):
-            onglet_stats(mes_objets, historique)
-
-    with tab6:
-        with error_boundary(titre="Erreur graphiques entretien"):
-            onglet_graphiques(mes_objets, historique)
-
-    with tab7:
-        with error_boundary(titre="Erreur export entretien"):
-            onglet_export(mes_objets, historique)
+        st.subheader("➕ Nouvelle routine")
+        with st.form(key=_keys("form_routine")):
+            nom = st.text_input("Nom de la routine")
+            freq = st.selectbox("Fréquence", ["quotidien", "hebdomadaire", "mensuel"])
+            submitted = st.form_submit_button("Créer")
+        if submitted and nom:
+            creer_routine(nom, freq)
+            st.success(f"✅ Routine '{nom}' créée !")
+            st.rerun()

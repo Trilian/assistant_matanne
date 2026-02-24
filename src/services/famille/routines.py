@@ -16,7 +16,7 @@ from typing import Any, TypedDict
 from sqlalchemy.orm import Session, selectinload
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.models import ChildProfile, Routine, RoutineTask
+from src.core.models import ProfilEnfant, Routine, TacheRoutine
 from src.services.core.base import BaseService
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
@@ -87,7 +87,7 @@ class ServiceRoutines(BaseService[Routine]):
         for r in routines:
             child_name = "Famille"
             if r.child_id:
-                child = db.query(ChildProfile).get(r.child_id)
+                child = db.query(ProfilEnfant).get(r.child_id)
                 if child:
                     child_name = child.name
             result.append(
@@ -120,9 +120,9 @@ class ServiceRoutines(BaseService[Routine]):
         if db is None:
             raise ValueError("Session DB requise")
         tasks = (
-            db.query(RoutineTask)
-            .filter(RoutineTask.routine_id == routine_id)
-            .order_by(RoutineTask.scheduled_time)
+            db.query(TacheRoutine)
+            .filter(TacheRoutine.routine_id == routine_id)
+            .order_by(TacheRoutine.scheduled_time)
             .all()
         )
         return [
@@ -147,7 +147,7 @@ class ServiceRoutines(BaseService[Routine]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        children = db.query(ChildProfile).all()
+        children = db.query(ProfilEnfant).all()
         return ["Famille"] + [c.name for c in children]
 
     # ═══════════════════════════════════════════════════════════
@@ -180,7 +180,7 @@ class ServiceRoutines(BaseService[Routine]):
             raise ValueError("Session DB requise")
         child_id = None
         if pour_qui != "Famille":
-            child = db.query(ChildProfile).filter(ChildProfile.name == pour_qui).first()
+            child = db.query(ProfilEnfant).filter(ProfilEnfant.name == pour_qui).first()
             if child:
                 child_id = child.id
 
@@ -222,7 +222,7 @@ class ServiceRoutines(BaseService[Routine]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        task = RoutineTask(
+        task = TacheRoutine(
             routine_id=routine_id,
             task_name=nom,
             scheduled_time=heure,
@@ -251,7 +251,7 @@ class ServiceRoutines(BaseService[Routine]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        task = db.query(RoutineTask).filter(RoutineTask.id == task_id).first()
+        task = db.query(TacheRoutine).filter(TacheRoutine.id == task_id).first()
         if task:
             task.status = "termine"
             task.completed_at = datetime.now()
@@ -272,7 +272,7 @@ class ServiceRoutines(BaseService[Routine]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        tasks = db.query(RoutineTask).filter(RoutineTask.status == "termine").all()
+        tasks = db.query(TacheRoutine).filter(TacheRoutine.status == "termine").all()
         for task in tasks:
             task.status = "à faire"
             task.completed_at = None
@@ -345,11 +345,11 @@ class ServiceRoutines(BaseService[Routine]):
         now = datetime.now().time()
 
         tasks = (
-            db.query(RoutineTask, Routine)
-            .join(Routine, RoutineTask.routine_id == Routine.id)
+            db.query(TacheRoutine, Routine)
+            .join(Routine, TacheRoutine.routine_id == Routine.id)
             .filter(
-                RoutineTask.status == "à faire",
-                RoutineTask.scheduled_time.isnot(None),
+                TacheRoutine.status == "à faire",
+                TacheRoutine.scheduled_time.isnot(None),
                 Routine.is_active,
             )
             .all()
@@ -384,9 +384,9 @@ class ServiceRoutines(BaseService[Routine]):
         if db is None:
             raise ValueError("Session DB requise")
         tasks = (
-            db.query(RoutineTask, Routine)
-            .join(Routine, RoutineTask.routine_id == Routine.id)
-            .filter(RoutineTask.status == "à faire", Routine.is_active == True)  # noqa: E712
+            db.query(TacheRoutine, Routine)
+            .join(Routine, TacheRoutine.routine_id == Routine.id)
+            .filter(TacheRoutine.status == "à faire", Routine.is_active == True)  # noqa: E712
             .all()
         )
         return [
@@ -410,8 +410,8 @@ class ServiceRoutines(BaseService[Routine]):
         if db is None:
             raise ValueError("Session DB requise")
         return (
-            db.query(RoutineTask)
-            .filter(RoutineTask.completed_at >= datetime.now().replace(hour=0, minute=0))
+            db.query(TacheRoutine)
+            .filter(TacheRoutine.completed_at >= datetime.now().replace(hour=0, minute=0))
             .count()
         )
 

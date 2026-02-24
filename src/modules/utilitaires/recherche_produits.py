@@ -13,6 +13,7 @@ from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.modules._framework import error_boundary
 from src.ui import etat_vide
+from src.ui.state.url import tabs_with_url
 
 logger = logging.getLogger(__name__)
 
@@ -156,123 +157,127 @@ def app():
     st.caption("Informations nutritionnelles via OpenFoodFacts")
 
     # Onglets
-    onglet_barcode, onglet_recherche, onglet_favoris = st.tabs(
-        ["🔢 Code-barres", "🔍 Recherche", "⭐ Favoris"]
-    )
+    TAB_LABELS = ["🔢 Code-barres", "🔍 Recherche", "⭐ Favoris"]
+    tabs_with_url(TAB_LABELS, param="tab")
+    onglet_barcode, onglet_recherche, onglet_favoris = st.tabs(TAB_LABELS)
 
     # ─── Onglet Code-barres ───
     with onglet_barcode:
-        st.markdown("### 🔢 Recherche par code-barres")
-        st.markdown(
-            "Entrez le code-barres (EAN-13) d'un produit alimentaire "
-            "pour obtenir ses informations nutritionnelles."
-        )
+        with error_boundary(titre="Erreur recherche code-barres"):
+            st.markdown("### 🔢 Recherche par code-barres")
+            st.markdown(
+                "Entrez le code-barres (EAN-13) d'un produit alimentaire "
+                "pour obtenir ses informations nutritionnelles."
+            )
 
-        code = st.text_input(
-            "Code-barres",
-            placeholder="Ex: 3017620422003 (Nutella)",
-            max_chars=14,
-        )
+            code = st.text_input(
+                "Code-barres",
+                placeholder="Ex: 3017620422003 (Nutella)",
+                max_chars=14,
+            )
 
-        if st.button("🔍 Rechercher", key="btn_barcode", type="primary"):
-            if not code or len(code) < 8:
-                st.warning("Veuillez entrer un code-barres valide (8-14 chiffres)")
-            else:
-                with st.spinner("🔍 Recherche en cours..."):
-                    try:
-                        from src.services.integrations.produit import (
-                            get_openfoodfacts_service,
-                        )
-
-                        service = get_openfoodfacts_service()
-                        produit = service.rechercher_produit(code.strip())
-
-                        if produit:
-                            _afficher_produit(produit)
-
-                            # Sauvegarder dans favoris
-                            if st.button("⭐ Ajouter aux favoris"):
-                                if SK.PRODUITS_FAVORIS not in st.session_state:
-                                    st.session_state[SK.PRODUITS_FAVORIS] = []
-                                st.session_state[SK.PRODUITS_FAVORIS].append(
-                                    {
-                                        "code": produit.code_barres,
-                                        "nom": produit.nom,
-                                        "marque": produit.marque,
-                                        "nutriscore": (
-                                            produit.nutrition.nutriscore
-                                            if produit.nutrition
-                                            else None
-                                        ),
-                                    }
-                                )
-                                st.success("⭐ Ajouté aux favoris !")
-                        else:
-                            st.warning(
-                                f"Produit non trouvé pour le code {code}. "
-                                "Vérifiez le code ou essayez la recherche par nom."
+            if st.button("🔍 Rechercher", key="btn_barcode", type="primary"):
+                if not code or len(code) < 8:
+                    st.warning("Veuillez entrer un code-barres valide (8-14 chiffres)")
+                else:
+                    with st.spinner("🔍 Recherche en cours..."):
+                        try:
+                            from src.services.integrations.produit import (
+                                get_openfoodfacts_service,
                             )
-                    except Exception as e:
-                        st.error(f"❌ Erreur: {e}")
-                        logger.error(f"Erreur recherche produit: {e}")
+
+                            service = get_openfoodfacts_service()
+                            produit = service.rechercher_produit(code.strip())
+
+                            if produit:
+                                _afficher_produit(produit)
+
+                                # Sauvegarder dans favoris
+                                if st.button("⭐ Ajouter aux favoris"):
+                                    if SK.PRODUITS_FAVORIS not in st.session_state:
+                                        st.session_state[SK.PRODUITS_FAVORIS] = []
+                                    st.session_state[SK.PRODUITS_FAVORIS].append(
+                                        {
+                                            "code": produit.code_barres,
+                                            "nom": produit.nom,
+                                            "marque": produit.marque,
+                                            "nutriscore": (
+                                                produit.nutrition.nutriscore
+                                                if produit.nutrition
+                                                else None
+                                            ),
+                                        }
+                                    )
+                                    st.success("⭐ Ajouté aux favoris !")
+                            else:
+                                st.warning(
+                                    f"Produit non trouvé pour le code {code}. "
+                                    "Vérifiez le code ou essayez la recherche par nom."
+                                )
+                        except Exception as e:
+                            st.error(f"❌ Erreur: {e}")
+                            logger.error(f"Erreur recherche produit: {e}")
 
     # ─── Onglet Recherche par nom ───
     with onglet_recherche:
-        st.markdown("### 🔍 Recherche par nom")
+        with error_boundary(titre="Erreur recherche produit"):
+            st.markdown("### 🔍 Recherche par nom")
 
-        terme = st.text_input(
-            "Nom du produit",
-            placeholder="Ex: yaourt nature, pâtes complètes...",
-        )
+            terme = st.text_input(
+                "Nom du produit",
+                placeholder="Ex: yaourt nature, pâtes complètes...",
+            )
 
-        col_limite, col_btn = st.columns([1, 2])
-        with col_limite:
-            limite = st.selectbox("Résultats max", [5, 10, 20], index=1)
+            col_limite, col_btn = st.columns([1, 2])
+            with col_limite:
+                limite = st.selectbox("Résultats max", [5, 10, 20], index=1)
 
-        if st.button("🔍 Rechercher", key="btn_nom", type="primary"):
-            if not terme or len(terme) < 2:
-                st.warning("Entrez au moins 2 caractères")
-            else:
-                with st.spinner(f"🔍 Recherche de '{terme}'..."):
-                    try:
-                        from src.services.integrations.produit import (
-                            get_openfoodfacts_service,
-                        )
+            if st.button("🔍 Rechercher", key="btn_nom", type="primary"):
+                if not terme or len(terme) < 2:
+                    st.warning("Entrez au moins 2 caractères")
+                else:
+                    with st.spinner(f"🔍 Recherche de '{terme}'..."):
+                        try:
+                            from src.services.integrations.produit import (
+                                get_openfoodfacts_service,
+                            )
 
-                        service = get_openfoodfacts_service()
-                        resultats = service.rechercher_par_nom(terme.strip(), limite=limite)
-                        _afficher_resultats_recherche(resultats)
-                    except Exception as e:
-                        st.error(f"❌ Erreur: {e}")
-                        logger.error(f"Erreur recherche par nom: {e}")
+                            service = get_openfoodfacts_service()
+                            resultats = service.rechercher_par_nom(terme.strip(), limite=limite)
+                            _afficher_resultats_recherche(resultats)
+                        except Exception as e:
+                            st.error(f"❌ Erreur: {e}")
+                            logger.error(f"Erreur recherche par nom: {e}")
 
     # ─── Onglet Favoris ───
     with onglet_favoris:
-        st.markdown("### ⭐ Produits favoris")
-        favoris = st.session_state.get(SK.PRODUITS_FAVORIS, [])
+        with error_boundary(titre="Erreur favoris produits"):
+            st.markdown("### ⭐ Produits favoris")
+            favoris = st.session_state.get(SK.PRODUITS_FAVORIS, [])
 
-        if not favoris:
-            st.info(
-                "Aucun produit favori. Recherchez un produit puis cliquez " "sur ⭐ pour l'ajouter."
-            )
-        else:
-            st.caption(f"{len(favoris)} produit(s) en favoris")
+            if not favoris:
+                st.info(
+                    "Aucun produit favori. Recherchez un produit puis cliquez "
+                    "sur ⭐ pour l'ajouter."
+                )
+            else:
+                st.caption(f"{len(favoris)} produit(s) en favoris")
 
-            for i, fav in enumerate(favoris):
-                col_info, col_action = st.columns([4, 1])
-                with col_info:
-                    ns = fav.get("nutriscore", "")
-                    ns_display = f" | Nutri-Score {ns.upper()}" if ns else ""
-                    marque = fav.get("marque", "")
-                    marque_display = f" ({marque})" if marque else ""
-                    st.markdown(f"**{fav['nom']}**{marque_display}{ns_display}")
-                    st.caption(f"Code: {fav['code']}")
+                for i, fav in enumerate(favoris):
+                    col_info, col_action = st.columns([4, 1])
+                    with col_info:
+                        ns = fav.get("nutriscore", "")
+                        ns_display = f" | Nutri-Score {ns.upper()}" if ns else ""
+                        marque = fav.get("marque", "")
+                        marque_display = f" ({marque})" if marque else ""
+                        st.markdown(f"**{fav['nom']}**{marque_display}{ns_display}")
+                        st.caption(f"Code: {fav['code']}")
 
-                with col_action:
-                    if st.button("🗑️", key=f"del_fav_{i}"):
-                        st.session_state[SK.PRODUITS_FAVORIS].pop(i)
-                        st.rerun()
+                    with col_action:
+                        if st.button("🗑️", key=f"del_fav_{i}"):
+                            st.session_state[SK.PRODUITS_FAVORIS].pop(i)
+                            st.rerun()
 
-            if st.button("🗑️ Effacer tous les favoris"):
-                st.session_state[SK.PRODUITS_FAVORIS] = []
-                st.rerun()
+                if st.button("🗑️ Effacer tous les favoris"):
+                    st.session_state[SK.PRODUITS_FAVORIS] = []
+                    st.rerun()

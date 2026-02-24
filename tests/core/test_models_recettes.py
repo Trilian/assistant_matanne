@@ -16,12 +16,12 @@ import pytest
 from sqlalchemy.orm import Session
 
 from src.core.models.recettes import (
-    BatchMeal,
     EtapeRecette,
     HistoriqueRecette,
     Ingredient,
     Recette,
     RecetteIngredient,
+    RepasBatch,
     VersionRecette,
 )
 
@@ -438,7 +438,7 @@ class TestBatchMeal:
 
     def test_batch_meal_creation(self, db: Session):
         """Test création d'un batch meal."""
-        batch = BatchMeal(
+        batch = RepasBatch(
             nom="Repas Batch Dimanche",
             description="Préparation du dimanche",
             portions_creees=12,
@@ -460,7 +460,7 @@ class TestBatchMeal:
         db.add_all([recette1, recette2])
         db.commit()
 
-        batch = BatchMeal(
+        batch = RepasBatch(
             nom="Batch Multi-Recettes",
             portions_creees=16,
             portions_restantes=16,
@@ -968,11 +968,11 @@ class TestVersionRecetteAdvanced:
 
 @pytest.mark.unit
 class TestBatchMealAdvanced:
-    """Tests avancés pour BatchMeal."""
+    """Tests avancés pour RepasBatch."""
 
     def test_batch_meal_portions_update(self, db: Session):
         """Test mise à jour des portions restantes."""
-        batch = BatchMeal(
+        batch = RepasBatch(
             nom="Batch Test",
             portions_creees=10,
             portions_restantes=10,
@@ -990,7 +990,7 @@ class TestBatchMealAdvanced:
 
     def test_batch_meal_lieu_stockage(self, db: Session):
         """Test localisation de stockage."""
-        batch = BatchMeal(
+        batch = RepasBatch(
             nom="Batch Congelé",
             portions_creees=8,
             portions_restantes=8,

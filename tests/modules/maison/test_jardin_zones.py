@@ -4,9 +4,6 @@ Tests pour src/modules/maison/jardin_zones.py
 Tests complets pour le module Dashboard Zones Jardin (Vue 2600m² avec photos avant/après).
 """
 
-import pytest
-
-pytestmark = pytest.mark.skip(reason="Module src.modules.maison.jardin_zones non encore implémenté")
 from datetime import date
 from unittest.mock import MagicMock, patch
 

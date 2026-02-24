@@ -212,38 +212,38 @@ class ActionHistoryService:
 
         try:
             from src.core.db import obtenir_contexte_db
-            from src.core.models import ActionHistory
+            from src.core.models import HistoriqueAction
 
             with obtenir_contexte_db() as session:
-                query = session.query(ActionHistory)
+                query = session.query(HistoriqueAction)
 
                 if filters.user_id:
-                    query = query.filter(ActionHistory.user_id == filters.user_id)
+                    query = query.filter(HistoriqueAction.user_id == filters.user_id)
 
                 if filters.action_types:
                     query = query.filter(
-                        ActionHistory.action_type.in_([a.value for a in filters.action_types])
+                        HistoriqueAction.action_type.in_([a.value for a in filters.action_types])
                     )
 
                 if filters.entity_type:
-                    query = query.filter(ActionHistory.entity_type == filters.entity_type)
+                    query = query.filter(HistoriqueAction.entity_type == filters.entity_type)
 
                 if filters.entity_id:
-                    query = query.filter(ActionHistory.entity_id == filters.entity_id)
+                    query = query.filter(HistoriqueAction.entity_id == filters.entity_id)
 
                 if filters.date_from:
-                    query = query.filter(ActionHistory.created_at >= filters.date_from)
+                    query = query.filter(HistoriqueAction.created_at >= filters.date_from)
 
                 if filters.date_to:
-                    query = query.filter(ActionHistory.created_at <= filters.date_to)
+                    query = query.filter(HistoriqueAction.created_at <= filters.date_to)
 
                 if filters.search_text:
                     query = query.filter(
-                        ActionHistory.description.ilike(f"%{filters.search_text}%")
+                        HistoriqueAction.description.ilike(f"%{filters.search_text}%")
                     )
 
                 entries = (
-                    query.order_by(ActionHistory.created_at.desc())
+                    query.order_by(HistoriqueAction.created_at.desc())
                     .offset(filters.offset)
                     .limit(filters.limit)
                     .all()
@@ -290,7 +290,7 @@ class ActionHistoryService:
             from sqlalchemy import func
 
             from src.core.db import obtenir_contexte_db
-            from src.core.models import ActionHistory
+            from src.core.models import HistoriqueAction
 
             with obtenir_contexte_db() as session:
                 now = datetime.now()
@@ -298,20 +298,20 @@ class ActionHistoryService:
                 today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
                 # Total actions
-                total = session.query(func.count(ActionHistory.id)).scalar() or 0
+                total = session.query(func.count(HistoriqueAction.id)).scalar() or 0
 
                 # Actions aujourd'hui
                 today_count = (
-                    session.query(func.count(ActionHistory.id))
-                    .filter(ActionHistory.created_at >= today_start)
+                    session.query(func.count(HistoriqueAction.id))
+                    .filter(HistoriqueAction.created_at >= today_start)
                     .scalar()
                     or 0
                 )
 
                 # Actions cette semaine
                 week_count = (
-                    session.query(func.count(ActionHistory.id))
-                    .filter(ActionHistory.created_at >= week_ago)
+                    session.query(func.count(HistoriqueAction.id))
+                    .filter(HistoriqueAction.created_at >= week_ago)
                     .scalar()
                     or 0
                 )
@@ -319,11 +319,11 @@ class ActionHistoryService:
                 # Utilisateurs les plus actifs
                 top_users = (
                     session.query(
-                        ActionHistory.user_name, func.count(ActionHistory.id).label("count")
+                        HistoriqueAction.user_name, func.count(HistoriqueAction.id).label("count")
                     )
-                    .filter(ActionHistory.created_at >= week_ago)
-                    .group_by(ActionHistory.user_name)
-                    .order_by(func.count(ActionHistory.id).desc())
+                    .filter(HistoriqueAction.created_at >= week_ago)
+                    .group_by(HistoriqueAction.user_name)
+                    .order_by(func.count(HistoriqueAction.id).desc())
                     .limit(5)
                     .all()
                 )
@@ -331,11 +331,11 @@ class ActionHistoryService:
                 # Actions les plus fréquentes
                 top_actions = (
                     session.query(
-                        ActionHistory.action_type, func.count(ActionHistory.id).label("count")
+                        HistoriqueAction.action_type, func.count(HistoriqueAction.id).label("count")
                     )
-                    .filter(ActionHistory.created_at >= week_ago)
-                    .group_by(ActionHistory.action_type)
-                    .order_by(func.count(ActionHistory.id).desc())
+                    .filter(HistoriqueAction.created_at >= week_ago)
+                    .group_by(HistoriqueAction.action_type)
+                    .order_by(func.count(HistoriqueAction.id).desc())
                     .limit(5)
                     .all()
                 )
@@ -398,12 +398,14 @@ class ActionHistoryService:
             True si l'annulation a réussi
         """
         from src.core.db import obtenir_contexte_db
-        from src.core.models import ActionHistory
+        from src.core.models import HistoriqueAction
 
         try:
             with obtenir_contexte_db() as session:
                 # Récupérer l'action en DB
-                action = session.query(ActionHistory).filter(ActionHistory.id == action_id).first()
+                action = (
+                    session.query(HistoriqueAction).filter(HistoriqueAction.id == action_id).first()
+                )
 
                 if not action:
                     logger.warning(f"Action {action_id} non trouvée")
@@ -422,7 +424,7 @@ class ActionHistoryService:
 
                 if restored:
                     # Logger l'action d'annulation
-                    undo_entry = ActionHistory(
+                    undo_entry = HistoriqueAction(
                         user_id=action.user_id,
                         user_name=action.user_name,
                         action_type="system.undo",
@@ -526,10 +528,10 @@ class ActionHistoryService:
         """Sauvegarde l'entrée en base de données."""
         try:
             from src.core.db import obtenir_contexte_db
-            from src.core.models import ActionHistory
+            from src.core.models import HistoriqueAction
 
             with obtenir_contexte_db() as session:
-                db_entry = ActionHistory(
+                db_entry = HistoriqueAction(
                     user_id=entry.user_id,
                     user_name=entry.user_name,
                     action_type=entry.action_type.value,

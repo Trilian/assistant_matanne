@@ -3,7 +3,7 @@ Enums et schémas Pydantic pour l'authentification.
 
 Définit:
 - Role, Permission: Enums pour les rôles et permissions utilisateur
-- UserProfile: Modèle Pydantic du profil utilisateur
+- ProfilUtilisateur: Modèle Pydantic du profil utilisateur
 - AuthResult: Résultat d'une opération d'authentification
 """
 
@@ -44,7 +44,7 @@ class Permission(StrEnum):
 # -----------------------------------------------------------
 
 
-class UserProfile(BaseModel):
+class ProfilUtilisateur(BaseModel):
     """Profil utilisateur."""
 
     id: str = ""
@@ -75,7 +75,7 @@ class AuthResult(BaseModel):
     """Résultat d'une opération d'authentification."""
 
     success: bool = False
-    user: UserProfile | None = None
+    user: ProfilUtilisateur | None = None
     message: str = ""
     error_code: str | None = None
 
@@ -84,5 +84,5 @@ __all__ = [
     "AuthResult",
     "Permission",
     "Role",
-    "UserProfile",
+    "ProfilUtilisateur",
 ]

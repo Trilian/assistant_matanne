@@ -2,12 +2,12 @@
 Modèles pour les utilisateurs et intégrations externes (Garmin).
 
 Contient :
-- UserProfile : Profil utilisateur (Anne, Mathieu)
+- ProfilUtilisateur : Profil utilisateur (Anne, Mathieu)
 - GarminToken : Tokens OAuth Garmin
-- GarminActivity : Activités synchronisées depuis Garmin
-- GarminDailySummary : Résumé quotidien Garmin
-- WeekendActivity : Activités weekend planifiées
-- FamilyPurchase : Achats famille (wishlist)
+- ActiviteGarmin : Activités synchronisées depuis Garmin
+- ResumeQuotidienGarmin : Résumé quotidien Garmin
+- ActiviteWeekend : Activités weekend planifiées
+- AchatFamille : Achats famille (wishlist)
 """
 
 from datetime import date, datetime
@@ -30,6 +30,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, utc_now
+from .mixins import CreeLeMixin, TimestampMixin
 
 # ═══════════════════════════════════════════════════════════
 # ENUMS
@@ -50,7 +51,7 @@ class GarminActivityType(StrEnum):
     OTHER = "other"
 
 
-class PurchaseCategory(StrEnum):
+class CategorieAchat(StrEnum):
     """Catégories d'achats famille"""
 
     JULES_VETEMENTS = "jules_vetements"
@@ -62,7 +63,7 @@ class PurchaseCategory(StrEnum):
     MAISON = "maison"
 
 
-class PurchasePriority(StrEnum):
+class PrioriteAchat(StrEnum):
     """Priorité d'achat"""
 
     URGENT = "urgent"
@@ -77,7 +78,7 @@ class PurchasePriority(StrEnum):
 # ═══════════════════════════════════════════════════════════
 
 
-class UserProfile(Base):
+class ProfilUtilisateur(TimestampMixin, Base):
     """Profil utilisateur (Anne ou Mathieu).
 
     Attributes:
@@ -94,7 +95,7 @@ class UserProfile(Base):
         garmin_connected: Si Garmin est connecté
     """
 
-    __tablename__ = "user_profiles"
+    __tablename__ = "profils_utilisateurs"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False, index=True)
@@ -116,33 +117,31 @@ class UserProfile(Base):
     # Garmin
     garmin_connected: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    # Timestamps
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     # Relations
     garmin_token: Mapped[Optional["GarminToken"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", uselist=False
     )
-    garmin_activities: Mapped[list["GarminActivity"]] = relationship(
+    garmin_activities: Mapped[list["ActiviteGarmin"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
-    daily_summaries: Mapped[list["GarminDailySummary"]] = relationship(
+    daily_summaries: Mapped[list["ResumeQuotidienGarmin"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
-    food_logs: Mapped[list["FoodLog"]] = relationship(
+    food_logs: Mapped[list["JournalAlimentaire"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:
-        return f"<UserProfile(username='{self.username}', display_name='{self.display_name}')>"
+        return (
+            f"<ProfilUtilisateur(username='{self.username}', display_name='{self.display_name}')>"
+        )
 
     @property
     def streak_jours(self) -> int:
         """Calcule le streak actuel de jours actifs consécutifs.
 
         Compte le nombre de jours consécutifs (en remontant depuis aujourd'hui)
-        où l'utilisateur a au moins un FoodLog enregistré.
+        où l'utilisateur a au moins un JournalAlimentaire enregistré.
         """
         if not self.food_logs:
             return 0
@@ -173,7 +172,7 @@ class UserProfile(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class GarminToken(Base):
+class GarminToken(TimestampMixin, Base):
     """Tokens OAuth Garmin pour synchronisation.
 
     Garmin utilise OAuth 1.0a, donc on stocke:
@@ -185,7 +184,7 @@ class GarminToken(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("user_profiles.id", ondelete="CASCADE"), unique=True, nullable=False
+        ForeignKey("profils_utilisateurs.id", ondelete="CASCADE"), unique=True, nullable=False
     )
 
     # OAuth 1.0a tokens
@@ -197,11 +196,8 @@ class GarminToken(Base):
     derniere_sync: Mapped[datetime | None] = mapped_column(DateTime)
     sync_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     # Relations
-    user: Mapped["UserProfile"] = relationship(back_populates="garmin_token")
+    user: Mapped["ProfilUtilisateur"] = relationship(back_populates="garmin_token")
 
     def __repr__(self) -> str:
         return f"<GarminToken(user_id={self.user_id}, sync_active={self.sync_active})>"
@@ -212,7 +208,7 @@ class GarminToken(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class GarminActivity(Base):
+class ActiviteGarmin(CreeLeMixin, Base):
     """Activité sportive synchronisée depuis Garmin.
 
     Attributes:
@@ -229,11 +225,11 @@ class GarminActivity(Base):
         elevation_gain: Dénivelé positif (m)
     """
 
-    __tablename__ = "garmin_activities"
+    __tablename__ = "activites_garmin"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("user_profiles.id", ondelete="CASCADE"), nullable=False, index=True
+        ForeignKey("profils_utilisateurs.id", ondelete="CASCADE"), nullable=False, index=True
     )
     garmin_activity_id: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
 
@@ -261,13 +257,13 @@ class GarminActivity(Base):
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Relations
-    user: Mapped["UserProfile"] = relationship(back_populates="garmin_activities")
+    user: Mapped["ProfilUtilisateur"] = relationship(back_populates="garmin_activities")
 
     __table_args__ = (CheckConstraint("duree_secondes > 0", name="ck_garmin_duree_positive"),)
 
     def __repr__(self) -> str:
         return (
-            f"<GarminActivity(id={self.id}, type='{self.type_activite}', date={self.date_debut})>"
+            f"<ActiviteGarmin(id={self.id}, type='{self.type_activite}', date={self.date_debut})>"
         )
 
     @property
@@ -291,7 +287,7 @@ class GarminActivity(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class GarminDailySummary(Base):
+class ResumeQuotidienGarmin(CreeLeMixin, Base):
     """Résumé quotidien des données Garmin.
 
     Données de Daily Summary API:
@@ -303,11 +299,11 @@ class GarminDailySummary(Base):
     - Sommeil
     """
 
-    __tablename__ = "garmin_daily_summaries"
+    __tablename__ = "resumes_quotidiens_garmin"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("user_profiles.id", ondelete="CASCADE"), nullable=False, index=True
+        ForeignKey("profils_utilisateurs.id", ondelete="CASCADE"), nullable=False, index=True
     )
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
 
@@ -338,15 +334,13 @@ class GarminDailySummary(Base):
     # Données brutes
     raw_data: Mapped[dict | None] = mapped_column(JSONB)
 
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-
     # Relations
-    user: Mapped["UserProfile"] = relationship(back_populates="daily_summaries")
+    user: Mapped["ProfilUtilisateur"] = relationship(back_populates="daily_summaries")
 
     __table_args__ = (UniqueConstraint("user_id", "date", name="uq_garmin_daily_user_date"),)
 
     def __repr__(self) -> str:
-        return f"<GarminDailySummary(user_id={self.user_id}, date={self.date}, pas={self.pas})>"
+        return f"<ResumeQuotidienGarmin(user_id={self.user_id}, date={self.date}, pas={self.pas})>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -354,7 +348,7 @@ class GarminDailySummary(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class FoodLog(Base):
+class JournalAlimentaire(CreeLeMixin, Base):
     """Log d'alimentation quotidien.
 
     Attributes:
@@ -367,11 +361,11 @@ class FoodLog(Base):
         qualite: Note qualité (1-5)
     """
 
-    __tablename__ = "food_logs"
+    __tablename__ = "journaux_alimentaires"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("user_profiles.id", ondelete="CASCADE"), nullable=False, index=True
+        ForeignKey("profils_utilisateurs.id", ondelete="CASCADE"), nullable=False, index=True
     )
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True, default=date.today)
     heure: Mapped[datetime | None] = mapped_column(DateTime)
@@ -392,10 +386,8 @@ class FoodLog(Base):
     qualite: Mapped[int | None] = mapped_column(Integer)  # 1-5 étoiles
     notes: Mapped[str | None] = mapped_column(Text)
 
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-
     # Relations
-    user: Mapped["UserProfile"] = relationship(back_populates="food_logs")
+    user: Mapped["ProfilUtilisateur"] = relationship(back_populates="food_logs")
 
     __table_args__ = (
         CheckConstraint(
@@ -405,7 +397,9 @@ class FoodLog(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<FoodLog(user_id={self.user_id}, date={self.date}, repas='{self.repas}')>"
+        return (
+            f"<JournalAlimentaire(user_id={self.user_id}, date={self.date}, repas='{self.repas}')>"
+        )
 
 
 # ═══════════════════════════════════════════════════════════
@@ -413,7 +407,7 @@ class FoodLog(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class WeekendActivity(Base):
+class ActiviteWeekend(TimestampMixin, Base):
     """Activité weekend planifiée.
 
     Attributes:
@@ -432,7 +426,7 @@ class WeekendActivity(Base):
         commentaire: Commentaire après visite
     """
 
-    __tablename__ = "weekend_activities"
+    __tablename__ = "activites_weekend"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
@@ -474,9 +468,6 @@ class WeekendActivity(Base):
     # Participants
     participants: Mapped[list[str] | None] = mapped_column(JSONB)  # ["Anne", "Mathieu", "Jules"]
 
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
-
     __table_args__ = (
         CheckConstraint(
             "note_lieu IS NULL OR (note_lieu >= 1 AND note_lieu <= 5)",
@@ -485,7 +476,7 @@ class WeekendActivity(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<WeekendActivity(id={self.id}, titre='{self.titre}', date={self.date_prevue})>"
+        return f"<ActiviteWeekend(id={self.id}, titre='{self.titre}', date={self.date_prevue})>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -493,7 +484,7 @@ class WeekendActivity(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class FamilyPurchase(Base):
+class AchatFamille(TimestampMixin, Base):
     """Article à acheter pour la famille (wishlist).
 
     Attributes:
@@ -509,7 +500,7 @@ class FamilyPurchase(Base):
         prix_reel: Prix réel
     """
 
-    __tablename__ = "family_purchases"
+    __tablename__ = "achats_famille"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
@@ -542,11 +533,9 @@ class FamilyPurchase(Base):
     suggere_par: Mapped[str | None] = mapped_column(String(50))  # anne, mathieu, ia
 
     notes: Mapped[str | None] = mapped_column(Text)
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     def __repr__(self) -> str:
-        return f"<FamilyPurchase(id={self.id}, nom='{self.nom}', categorie='{self.categorie}')>"
+        return f"<AchatFamille(id={self.id}, nom='{self.nom}', categorie='{self.categorie}')>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -556,14 +545,14 @@ class FamilyPurchase(Base):
 __all__ = [
     # Enums
     "GarminActivityType",
-    "PurchaseCategory",
-    "PurchasePriority",
+    "CategorieAchat",
+    "PrioriteAchat",
     # Models
-    "UserProfile",
+    "ProfilUtilisateur",
     "GarminToken",
-    "GarminActivity",
-    "GarminDailySummary",
-    "FoodLog",
-    "WeekendActivity",
-    "FamilyPurchase",
+    "ActiviteGarmin",
+    "ResumeQuotidienGarmin",
+    "JournalAlimentaire",
+    "ActiviteWeekend",
+    "AchatFamille",
 ]

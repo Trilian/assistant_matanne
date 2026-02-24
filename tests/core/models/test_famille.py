@@ -13,10 +13,10 @@ class TestFamille:
     """Tests pour le module famille."""
 
     class TestChildProfile:
-        """Tests pour la classe ChildProfile."""
+        """Tests pour la classe ProfilEnfant."""
 
         def test_childprofile_creation(self):
-            """Test de création de ChildProfile."""
+            """Test de création de ProfilEnfant."""
             # TODO: Implémenter
             pass
 
@@ -26,10 +26,10 @@ class TestFamille:
             pass
 
     class TestWellbeingEntry:
-        """Tests pour la classe WellbeingEntry."""
+        """Tests pour la classe EntreeBienEtre."""
 
         def test_wellbeingentry_creation(self):
-            """Test de création de WellbeingEntry."""
+            """Test de création de EntreeBienEtre."""
             # TODO: Implémenter
             pass
 
@@ -39,10 +39,10 @@ class TestFamille:
             pass
 
     class TestMilestone:
-        """Tests pour la classe Milestone."""
+        """Tests pour la classe Jalon."""
 
         def test_milestone_creation(self):
-            """Test de création de Milestone."""
+            """Test de création de Jalon."""
             # TODO: Implémenter
             pass
 
@@ -52,10 +52,10 @@ class TestFamille:
             pass
 
     class TestFamilyActivity:
-        """Tests pour la classe FamilyActivity."""
+        """Tests pour la classe ActiviteFamille."""
 
         def test_familyactivity_creation(self):
-            """Test de création de FamilyActivity."""
+            """Test de création de ActiviteFamille."""
             # TODO: Implémenter
             pass
 
@@ -65,10 +65,10 @@ class TestFamille:
             pass
 
     class TestFamilyBudget:
-        """Tests pour la classe FamilyBudget."""
+        """Tests pour la classe BudgetFamille."""
 
         def test_familybudget_creation(self):
-            """Test de création de FamilyBudget."""
+            """Test de création de BudgetFamille."""
             # TODO: Implémenter
             pass
 

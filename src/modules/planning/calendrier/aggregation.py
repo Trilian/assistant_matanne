@@ -119,8 +119,8 @@ def agreger_evenements_jour(
         date_jour: Date du jour
         repas: Liste des objets Repas SQLAlchemy
         sessions_batch: Liste des SessionBatchCooking
-        activites: Liste des FamilyActivity
-        events: Liste des CalendarEvent
+        activites: Liste des ActiviteFamille
+        events: Liste des EvenementPlanning
         courses_planifiees: Liste de dicts {magasin, heure}
         taches_menage: Liste d'EvenementCalendrier dejà convertis pour ce jour
 
@@ -196,7 +196,7 @@ def construire_semaine_calendrier(
         date_debut: Date de debut (sera alignee sur le lundi)
         repas, sessions_batch, activites, events: Donnees brutes
         courses_planifiees: Liste de {date, magasin, heure}
-        taches_menage: Liste des MaintenanceTask à integrer
+        taches_menage: Liste des TacheEntretien à integrer
 
     Returns:
         SemaineCalendrier avec les 7 jours

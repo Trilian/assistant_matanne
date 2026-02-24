@@ -2,13 +2,11 @@
 Tests for projets.py module - Project management with AI integration
 """
 
-import pytest
-
-pytestmark = pytest.mark.skip(reason="Module src.modules.maison.projets non encore implémenté")
-
 from datetime import date
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 class SessionStateMock(dict):
@@ -153,9 +151,9 @@ class TestCreerProjet:
 
 @pytest.mark.unit
 class TestAjouterTache:
-    """Test task addition - mocking ProjectTask model due to field name mismatch in code"""
+    """Test task addition - mocking TacheProjet model due to field name mismatch in code"""
 
-    @patch("src.modules.maison.projets.ProjectTask")
+    @patch("src.modules.maison.projets.TacheProjet")
     @patch("src.modules.maison.projets.clear_maison_cache")
     @patch("src.modules.maison.projets.st")
     def test_ajouter_tache_success(self, mock_st, mock_clear, mock_task_cls) -> None:
@@ -176,7 +174,7 @@ class TestAjouterTache:
         mock_clear.assert_called_once()
         assert result is True
 
-    @patch("src.modules.maison.projets.ProjectTask")
+    @patch("src.modules.maison.projets.TacheProjet")
     @patch("src.modules.maison.projets.clear_maison_cache")
     @patch("src.modules.maison.projets.st")
     def test_ajouter_tache_with_priority(self, mock_st, mock_clear, mock_task_cls) -> None:
@@ -368,7 +366,7 @@ class TestErrorHandling:
         assert result is None
         mock_st.error.assert_called()
 
-    @patch("src.modules.maison.projets.ProjectTask")
+    @patch("src.modules.maison.projets.TacheProjet")
     @patch("src.modules.maison.projets.clear_maison_cache")
     @patch("src.modules.maison.projets.st")
     def test_ajouter_tache_exception(self, mock_st, mock_clear, mock_task_cls) -> None:

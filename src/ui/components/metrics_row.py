@@ -22,7 +22,6 @@ import streamlit as st
 
 from src.ui.engine import StyleSheet
 from src.ui.registry import composant_ui
-from src.ui.tokens import Couleur
 from src.ui.tokens_semantic import Sem
 from src.ui.utils import echapper_html
 
@@ -142,7 +141,7 @@ def afficher_stats_cards(
 
     for i, stat in enumerate(stats):
         with cols[i % columns]:
-            color = stat.get("color", Couleur.SUCCESS)
+            color = stat.get("color", Sem.SUCCESS)
             icon = stat.get("icon", "")
             title = f"{icon} {stat.get('title', '')}" if icon else stat.get("title", "")
 
@@ -200,9 +199,9 @@ def afficher_kpi_banner(
 
     trend_icons = {"up": "📈", "down": "📉", "neutral": "➡️"}
     trend_colors = {
-        "up": Couleur.SUCCESS,
-        "down": Couleur.DANGER,
-        "neutral": Couleur.TEXT_SECONDARY,
+        "up": Sem.SUCCESS,
+        "down": Sem.DANGER,
+        "neutral": Sem.ON_SURFACE_SECONDARY,
     }
 
     # Classe dédupliquée pour chaque item KPI
@@ -219,7 +218,7 @@ def afficher_kpi_banner(
     for kpi in kpis:
         trend = kpi.get("trend", "neutral")
         icon = trend_icons.get(trend, "")
-        color = trend_colors.get(trend, Couleur.TEXT_SECONDARY)
+        color = trend_colors.get(trend, Sem.ON_SURFACE_SECONDARY)
 
         safe_label = echapper_html(str(kpi.get("label", "")))
         safe_value = echapper_html(f"{kpi.get('value', '')} {icon}")
@@ -283,13 +282,7 @@ def afficher_progress_metrics(
             progress = min(current / target, 1.0) if target > 0 else 0
             percent = int(progress * 100)
 
-            color = (
-                Couleur.SUCCESS
-                if percent >= 80
-                else Couleur.WARNING
-                if percent >= 50
-                else Couleur.DANGER
-            )
+            color = Sem.SUCCESS if percent >= 80 else Sem.WARNING if percent >= 50 else Sem.DANGER
 
             st.markdown(f"**{label}**")
             st.progress(progress)

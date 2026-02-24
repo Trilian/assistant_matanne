@@ -26,11 +26,11 @@ def afficher_liste():
         return
 
     # Initialiser pagination
-    if "recettes_page" not in st.session_state:
-        st.session_state.recettes_page = 0
+    if _keys("page") not in st.session_state:
+        st.session_state[_keys("page")] = 0
 
-    if "recettes_page_size" not in st.session_state:
-        st.session_state.recettes_page_size = 9
+    if _keys("page_size_val") not in st.session_state:
+        st.session_state[_keys("page_size_val")] = 9
 
     # Contrôles de pagination en haut
     col_size1, col_size2, col_size3 = st.columns([2, 1.5, 2])
@@ -40,15 +40,15 @@ def afficher_liste():
         page_size = st.selectbox(
             "Recettes/page",
             [6, 9, 12, 15],
-            index=[6, 9, 12, 15].index(st.session_state.recettes_page_size),
+            index=[6, 9, 12, 15].index(st.session_state[_keys("page_size_val")]),
             key=_keys("page_size"),
             label_visibility="collapsed",
         )
-        st.session_state.recettes_page_size = page_size
+        st.session_state[_keys("page_size_val")] = page_size
     with col_size3:
         st.write("")  # Espacement
 
-    PAGE_SIZE = st.session_state.recettes_page_size
+    PAGE_SIZE = st.session_state[_keys("page_size_val")]
 
     # Filtres
     col1, col2, col3, col4 = st.columns(4)
@@ -175,14 +175,14 @@ def afficher_liste():
 
     # Pagination
     total_pages = (len(recettes) + PAGE_SIZE - 1) // PAGE_SIZE
-    st.session_state.recettes_page = min(st.session_state.recettes_page, total_pages - 1)
+    st.session_state[_keys("page")] = min(st.session_state[_keys("page")], total_pages - 1)
 
-    start_idx = st.session_state.recettes_page * PAGE_SIZE
+    start_idx = st.session_state[_keys("page")] * PAGE_SIZE
     end_idx = start_idx + PAGE_SIZE
     page_recettes = recettes[start_idx:end_idx]
 
     st.success(
-        f"✅ {len(recettes)} recette(s) trouvée(s) | Page {st.session_state.recettes_page + 1}/{total_pages}"
+        f"✅ {len(recettes)} recette(s) trouvée(s) | Page {st.session_state[_keys('page')] + 1}/{total_pages}"
     )
 
     # Afficher en grid avec badges
@@ -356,18 +356,18 @@ def afficher_liste():
     col1, col2, col3, col4, col5 = st.columns(5)
 
     with col1:
-        if st.session_state.recettes_page > 0:
+        if st.session_state[_keys("page")] > 0:
             if st.button("⬅️ Précédent"):
-                st.session_state.recettes_page -= 1
+                st.session_state[_keys("page")] -= 1
                 st.rerun()
 
     with col3:
-        st.write(f"Page {st.session_state.recettes_page + 1}/{total_pages}")
+        st.write(f"Page {st.session_state[_keys('page')] + 1}/{total_pages}")
 
     with col5:
-        if st.session_state.recettes_page < total_pages - 1:
-            if st.button("Suivant ➡️"):
-                st.session_state.recettes_page += 1
+        if st.session_state[_keys("page")] < total_pages - 1:
+            if st.button("Suivant ➡️"):
+                st.session_state[_keys("page")] += 1
                 st.rerun()
 
 

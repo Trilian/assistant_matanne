@@ -18,8 +18,8 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import (
-    CalendarEvent,
-    FamilyActivity,
+    ActiviteFamille,
+    EvenementPlanning,
     Planning,
     Recette,
     Repas,
@@ -111,21 +111,21 @@ class ServiceCalendrierPlanning:
 
             # Activités famille
             donnees["activites"] = (
-                db.query(FamilyActivity)
+                db.query(ActiviteFamille)
                 .filter(
-                    FamilyActivity.date_prevue >= lundi,
-                    FamilyActivity.date_prevue <= dimanche,
+                    ActiviteFamille.date_prevue >= lundi,
+                    ActiviteFamille.date_prevue <= dimanche,
                 )
                 .all()
             )
 
             # Tâches ménage intégrées au planning
             try:
-                from src.core.models import MaintenanceTask
+                from src.core.models import TacheEntretien
 
                 donnees["taches_menage"] = (
-                    db.query(MaintenanceTask)
-                    .filter(MaintenanceTask.integrer_planning == True)  # noqa: E712
+                    db.query(TacheEntretien)
+                    .filter(TacheEntretien.integrer_planning == True)  # noqa: E712
                     .all()
                 )
             except Exception as e:
@@ -133,10 +133,10 @@ class ServiceCalendrierPlanning:
 
             # Événements calendrier
             donnees["events"] = (
-                db.query(CalendarEvent)
+                db.query(EvenementPlanning)
                 .filter(
-                    CalendarEvent.date_debut >= datetime.combine(lundi, time.min),
-                    CalendarEvent.date_debut <= datetime.combine(dimanche, time.max),
+                    EvenementPlanning.date_debut >= datetime.combine(lundi, time.min),
+                    EvenementPlanning.date_debut <= datetime.combine(dimanche, time.max),
                 )
                 .all()
             )
@@ -174,12 +174,12 @@ class ServiceCalendrierPlanning:
         fin_dt = datetime.combine(date_fin, datetime.max.time())
 
         try:
-            # CalendarEvent
+            # EvenementPlanning
             calendar_events = (
-                db.query(CalendarEvent)
+                db.query(EvenementPlanning)
                 .filter(
-                    CalendarEvent.date_debut >= debut_dt,
-                    CalendarEvent.date_debut <= fin_dt,
+                    EvenementPlanning.date_debut >= debut_dt,
+                    EvenementPlanning.date_debut <= fin_dt,
                 )
                 .all()
             )
@@ -196,12 +196,12 @@ class ServiceCalendrierPlanning:
                     }
                 )
 
-            # FamilyActivity
+            # ActiviteFamille
             activities = (
-                db.query(FamilyActivity)
+                db.query(ActiviteFamille)
                 .filter(
-                    FamilyActivity.date_prevue >= date_debut,
-                    FamilyActivity.date_prevue <= date_fin,
+                    ActiviteFamille.date_prevue >= date_debut,
+                    ActiviteFamille.date_prevue <= date_fin,
                 )
                 .all()
             )
@@ -270,7 +270,7 @@ class ServiceCalendrierPlanning:
         notes: str | None = None,
         *,
         db: Session | None = None,
-    ) -> FamilyActivity:
+    ) -> ActiviteFamille:
         """Crée une activité famille dans le calendrier.
 
         Args:
@@ -287,7 +287,7 @@ class ServiceCalendrierPlanning:
         if db is None:
             raise ValueError("Session DB requise")
 
-        activite = FamilyActivity(
+        activite = ActiviteFamille(
             titre=titre,
             date_prevue=date_prevue,
             heure_debut=heure_debut,
@@ -318,7 +318,7 @@ class ServiceCalendrierPlanning:
         recurrence_fin: date | None = None,
         *,
         db: Session | None = None,
-    ) -> CalendarEvent:
+    ) -> EvenementPlanning:
         """Crée un événement calendrier.
 
         Args:
@@ -341,7 +341,7 @@ class ServiceCalendrierPlanning:
         if db is None:
             raise ValueError("Session DB requise")
 
-        event = CalendarEvent(
+        event = EvenementPlanning(
             titre=titre,
             date_debut=datetime.combine(date_event, heure or time(10, 0)),
             type_event=type_event,

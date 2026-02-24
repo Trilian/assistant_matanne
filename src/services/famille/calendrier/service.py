@@ -19,10 +19,10 @@ from sqlalchemy.orm import Session, joinedload
 from src.core.db import obtenir_contexte_db
 from src.core.decorators import avec_gestion_erreurs, avec_resilience, avec_session_db
 from src.core.models import (
-    CalendarEvent,
+    ActiviteFamille,
     CalendrierExterne,
     EvenementCalendrier,
-    FamilyActivity,
+    EvenementPlanning,
     Planning,
     Repas,
 )
@@ -31,9 +31,9 @@ from .generateur import ICalGenerator
 from .google_calendar import GoogleCalendarMixin
 from .schemas import (
     CalendarEventExternal,
-    CalendarProvider,
-    ExternalCalendarConfig,
-    SyncDirection,
+    ConfigCalendrierExterne,
+    DirectionSync,
+    FournisseurCalendrier,
     SyncResult,
 )
 
@@ -53,14 +53,14 @@ class CalendarSyncService(GoogleCalendarMixin):
 
     def __init__(self):
         """Initialise le service."""
-        self._configs: dict[str, ExternalCalendarConfig] = {}
+        self._configs: dict[str, ConfigCalendrierExterne] = {}
         self.http_client = httpx.Client(timeout=30.0)
 
     # ═══════════════════════════════════════════════════════════
     # CONFIGURATION
     # ═══════════════════════════════════════════════════════════
 
-    def add_calendar(self, config: ExternalCalendarConfig) -> str:
+    def add_calendar(self, config: ConfigCalendrierExterne) -> str:
         """
         Ajoute un calendrier externe à synchroniser.
 
@@ -81,7 +81,7 @@ class CalendarSyncService(GoogleCalendarMixin):
             del self._configs[calendar_id]
         self._remove_config_from_db(calendar_id)
 
-    def get_user_calendars(self, user_id: str) -> list[ExternalCalendarConfig]:
+    def get_user_calendars(self, user_id: str) -> list[ConfigCalendrierExterne]:
         """Récupère les calendriers d'un utilisateur."""
         return [c for c in self._configs.values() if c.user_id == user_id]
 
@@ -165,11 +165,11 @@ class CalendarSyncService(GoogleCalendarMixin):
             # Activités familiales
             if include_activities:
                 activities = (
-                    db.query(FamilyActivity)
+                    db.query(ActiviteFamille)
                     .filter(
-                        FamilyActivity.date_prevue >= start,
-                        FamilyActivity.date_prevue <= end,
-                        FamilyActivity.statut != "annulé",
+                        ActiviteFamille.date_prevue >= start,
+                        ActiviteFamille.date_prevue <= end,
+                        ActiviteFamille.statut != "annulé",
                     )
                     .all()
                 )
@@ -196,10 +196,10 @@ class CalendarSyncService(GoogleCalendarMixin):
 
             # Événements du calendrier interne
             calendar_events = (
-                db.query(CalendarEvent)
+                db.query(EvenementPlanning)
                 .filter(
-                    CalendarEvent.date_debut >= start,
-                    CalendarEvent.date_debut <= end,
+                    EvenementPlanning.date_debut >= start,
+                    EvenementPlanning.date_debut <= end,
                 )
                 .all()
             )
@@ -276,8 +276,8 @@ class CalendarSyncService(GoogleCalendarMixin):
         with obtenir_contexte_db() as db:
             for event in events:
                 try:
-                    # Créer un CalendarEvent dans la base
-                    cal_event = CalendarEvent(
+                    # Créer un EvenementPlanning dans la base
+                    cal_event = EvenementPlanning(
                         titre=event.title,
                         description=event.description,
                         date_debut=event.start_time.date(),
@@ -288,8 +288,8 @@ class CalendarSyncService(GoogleCalendarMixin):
 
                     # Vérifier si existe déjà (par external_id)
                     existing = (
-                        db.query(CalendarEvent)
-                        .filter(CalendarEvent.external_id == event.external_id)
+                        db.query(EvenementPlanning)
+                        .filter(EvenementPlanning.external_id == event.external_id)
                         .first()
                     )
 

@@ -14,7 +14,7 @@ from src.services.famille.achats import obtenir_service_achats_famille
 from .utils import (
     CATEGORIES,
     PRIORITES,
-    FamilyPurchase,
+    AchatFamille,
     date,
     delete_purchase,
     get_all_purchases,
@@ -95,7 +95,7 @@ def afficher_liste_groupe(groupe: str, titre: str):
             afficher_achat_card(achat)
 
 
-def afficher_achat_card(achat: FamilyPurchase):
+def afficher_achat_card(achat: AchatFamille):
     """Affiche une card d'achat"""
     cat_info = CATEGORIES.get(achat.categorie, {"emoji": "📦", "label": "Autre"})
 

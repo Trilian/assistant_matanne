@@ -20,18 +20,18 @@ from sqlalchemy.orm import joinedload
 from src.core.db import obtenir_contexte_db
 from src.core.decorators import avec_resilience
 from src.core.models import (
-    CalendarEvent,
+    ActiviteFamille,
     CalendrierExterne,
-    FamilyActivity,
+    EvenementPlanning,
     Planning,
     Repas,
 )
 
 from .schemas import (
     CalendarEventExternal,
-    CalendarProvider,
-    ExternalCalendarConfig,
-    SyncDirection,
+    ConfigCalendrierExterne,
+    DirectionSync,
+    FournisseurCalendrier,
     SyncResult,
 )
 
@@ -49,7 +49,7 @@ class GoogleCalendarMixin:
 
     Attend d'être mixé dans une classe possédant:
     - self.http_client: httpx.Client
-    - self._configs: dict[str, ExternalCalendarConfig]
+    - self._configs: dict[str, ConfigCalendrierExterne]
     - self.add_calendar(config) -> str
     """
 
@@ -96,7 +96,7 @@ class GoogleCalendarMixin:
         user_id: str,
         code: str,
         redirect_uri: str,
-    ) -> ExternalCalendarConfig | None:
+    ) -> ConfigCalendrierExterne | None:
         """
         Gère le callback OAuth2 Google.
 
@@ -134,9 +134,9 @@ class GoogleCalendarMixin:
             tokens = response.json()
 
             # Créer la configuration
-            config = ExternalCalendarConfig(
+            config = ConfigCalendrierExterne(
                 user_id=user_id,
-                provider=CalendarProvider.GOOGLE,
+                provider=FournisseurCalendrier.GOOGLE,
                 name="Google Calendar",
                 access_token=tokens["access_token"],
                 refresh_token=tokens.get("refresh_token", ""),
@@ -157,7 +157,7 @@ class GoogleCalendarMixin:
     @avec_resilience(
         retry=2, timeout_s=60, fallback=SyncResult(success=False, message="Erreur réseau")
     )
-    def sync_google_calendar(self, config: ExternalCalendarConfig) -> SyncResult:
+    def sync_google_calendar(self, config: ConfigCalendrierExterne) -> SyncResult:
         """
         Synchronise avec Google Calendar (import + export bidirectionnel).
 
@@ -167,7 +167,7 @@ class GoogleCalendarMixin:
         Returns:
             Résultat de la synchronisation
         """
-        if config.provider != CalendarProvider.GOOGLE:
+        if config.provider != FournisseurCalendrier.GOOGLE:
             return SyncResult(success=False, message="Pas un calendrier Google")
 
         # Vérifier/rafraîchir le token
@@ -184,13 +184,13 @@ class GoogleCalendarMixin:
             # ════════════════════════════════════════════════
             # 1. IMPORT: Google → App (si autorisé)
             # ════════════════════════════════════════════════
-            if config.sync_direction in [SyncDirection.IMPORT_ONLY, SyncDirection.BIDIRECTIONAL]:
+            if config.sync_direction in [DirectionSync.IMPORT_ONLY, DirectionSync.BIDIRECTIONAL]:
                 events_imported = self._import_from_google(config, headers)
 
             # ════════════════════════════════════════════════
             # 2. EXPORT: App → Google (si autorisé)
             # ════════════════════════════════════════════════
-            if config.sync_direction in [SyncDirection.EXPORT_ONLY, SyncDirection.BIDIRECTIONAL]:
+            if config.sync_direction in [DirectionSync.EXPORT_ONLY, DirectionSync.BIDIRECTIONAL]:
                 events_exported = self._export_to_google(config, headers)
 
             config.last_sync = datetime.now()
@@ -214,7 +214,7 @@ class GoogleCalendarMixin:
     # GOOGLE CALENDAR — IMPORT
     # ═══════════════════════════════════════════════════════════
 
-    def _import_from_google(self, config: ExternalCalendarConfig, headers: dict) -> int:
+    def _import_from_google(self, config: ConfigCalendrierExterne, headers: dict) -> int:
         """Importe les événements depuis Google Calendar."""
         time_min = datetime.now().isoformat() + "Z"
         time_max = (datetime.now() + timedelta(days=30)).isoformat() + "Z"
@@ -265,8 +265,8 @@ class GoogleCalendarMixin:
             for event in events:
                 try:
                     existing = (
-                        db.query(CalendarEvent)
-                        .filter(CalendarEvent.external_id == event.external_id)
+                        db.query(EvenementPlanning)
+                        .filter(EvenementPlanning.external_id == event.external_id)
                         .first()
                     )
 
@@ -274,7 +274,7 @@ class GoogleCalendarMixin:
                         existing.titre = event.title
                         existing.description = event.description
                     else:
-                        cal_event = CalendarEvent(
+                        cal_event = EvenementPlanning(
                             titre=event.title,
                             description=event.description,
                             date_debut=event.start_time.date(),
@@ -295,7 +295,7 @@ class GoogleCalendarMixin:
     # GOOGLE CALENDAR — EXPORT
     # ═══════════════════════════════════════════════════════════
 
-    def _export_to_google(self, config: ExternalCalendarConfig, headers: dict) -> int:
+    def _export_to_google(self, config: ConfigCalendrierExterne, headers: dict) -> int:
         """
         Exporte les repas et activités vers Google Calendar.
 
@@ -329,11 +329,11 @@ class GoogleCalendarMixin:
 
             # Récupérer les activités
             activities = (
-                db.query(FamilyActivity)
+                db.query(ActiviteFamille)
                 .filter(
-                    FamilyActivity.date_prevue >= start,
-                    FamilyActivity.date_prevue <= end,
-                    FamilyActivity.statut != "annulé",
+                    ActiviteFamille.date_prevue >= start,
+                    ActiviteFamille.date_prevue <= end,
+                    ActiviteFamille.statut != "annulé",
                 )
                 .all()
             )
@@ -350,7 +350,7 @@ class GoogleCalendarMixin:
         return exported_count
 
     def _export_meal_to_google(
-        self, repas: Repas, config: ExternalCalendarConfig, headers: dict, db: Session
+        self, repas: Repas, config: ConfigCalendrierExterne, headers: dict, db: Session
     ) -> str | None:
         """Exporte un repas vers Google Calendar."""
         # Déterminer l'heure selon le type de repas
@@ -411,7 +411,7 @@ class GoogleCalendarMixin:
         return response.json().get("id")
 
     def _export_activity_to_google(
-        self, activity: FamilyActivity, config: ExternalCalendarConfig, headers: dict, db: Session
+        self, activity: ActiviteFamille, config: ConfigCalendrierExterne, headers: dict, db: Session
     ) -> str | None:
         """Exporte une activité vers Google Calendar."""
         start_time = datetime.combine(activity.date_prevue, datetime.min.time().replace(hour=10))
@@ -477,7 +477,7 @@ class GoogleCalendarMixin:
     def export_planning_to_google(
         self,
         user_id: str,
-        config: ExternalCalendarConfig,
+        config: ConfigCalendrierExterne,
         start_date: date | None = None,
         end_date: date | None = None,
     ) -> SyncResult:
@@ -493,7 +493,7 @@ class GoogleCalendarMixin:
         Returns:
             Résultat de l'export
         """
-        if config.provider != CalendarProvider.GOOGLE:
+        if config.provider != FournisseurCalendrier.GOOGLE:
             return SyncResult(success=False, message="Pas un calendrier Google")
 
         # Vérifier/rafraîchir le token
@@ -517,7 +517,7 @@ class GoogleCalendarMixin:
     # GOOGLE CALENDAR — TOKENS & PERSISTANCE
     # ═══════════════════════════════════════════════════════════
 
-    def _refresh_google_token(self, config: ExternalCalendarConfig):
+    def _refresh_google_token(self, config: ConfigCalendrierExterne):
         """Rafraîchit le token Google."""
         from src.core.config import obtenir_parametres
 
@@ -543,7 +543,7 @@ class GoogleCalendarMixin:
         except Exception as e:
             logger.error(f"Erreur refresh token Google: {e}")
 
-    def _save_config_to_db(self, config: ExternalCalendarConfig):
+    def _save_config_to_db(self, config: ConfigCalendrierExterne):
         """Sauvegarde la configuration en base."""
         with obtenir_contexte_db() as db:
             # Chercher config existante

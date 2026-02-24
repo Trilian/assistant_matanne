@@ -24,6 +24,7 @@ import pandas as pd
 import streamlit as st
 
 from src.ui.keys import KeyNamespace
+from src.ui.registry import composant_ui
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,11 @@ _keys = KeyNamespace("data_editor")
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui(
+    "data-editor",
+    exemple="editeur_inventaire(articles, on_save=save_fn)",
+    tags=("inventaire", "data_editor", "inline"),
+)
 def editeur_inventaire(
     inventaire: list[dict[str, Any]],
     *,
@@ -180,6 +186,11 @@ def editeur_inventaire(
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui(
+    "data-editor",
+    exemple="editeur_courses(articles, on_save=save_fn)",
+    tags=("courses", "data_editor", "inline"),
+)
 def editeur_courses(
     articles: list[dict[str, Any]],
     *,
@@ -309,6 +320,11 @@ def editeur_courses(
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui(
+    "data-editor",
+    exemple='editeur_budget(depenses, categories=["Alimentation"])',
+    tags=("budget", "data_editor", "inline"),
+)
 def editeur_budget(
     depenses: list[dict[str, Any]],
     *,
@@ -353,11 +369,7 @@ def editeur_budget(
         [
             {
                 "id": dep.get("id", idx),
-                "Date": (
-                    pd.to_datetime(dep["date"]).date()
-                    if dep.get("date")
-                    else date.today()
-                ),
+                "Date": (pd.to_datetime(dep["date"]).date() if dep.get("date") else date.today()),
                 "Montant (€)": float(dep.get("montant", 0)),
                 "Catégorie": dep.get("categorie", "Autre"),
                 "Description": dep.get("description", ""),
@@ -449,6 +461,11 @@ def editeur_budget(
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui(
+    "data-editor",
+    exemple='editeur_budgets_mensuels({"Alimentation": 500})',
+    tags=("budget", "mensuel", "data_editor"),
+)
 def editeur_budgets_mensuels(
     budgets: dict[str, float],
     *,

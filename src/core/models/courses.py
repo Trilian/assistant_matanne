@@ -16,6 +16,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -24,6 +25,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, utc_now
+from .mixins import CreeLeMixin, TimestampMixin
 
 if TYPE_CHECKING:
     from .recettes import Ingredient
@@ -63,7 +65,7 @@ class ListeCourses(Base):
         return f"<ListeCourses(id={self.id}, nom='{self.nom}')>"
 
 
-class ArticleCourses(Base):
+class ArticleCourses(CreeLeMixin, Base):
     """Article dans la liste de courses.
 
     Attributes:
@@ -92,7 +94,6 @@ class ArticleCourses(Base):
     suggere_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # Timestamps
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
     achete_le: Mapped[datetime | None] = mapped_column(DateTime)
 
     # Organisation
@@ -105,6 +106,7 @@ class ArticleCourses(Base):
     ingredient: Mapped["Ingredient"] = relationship("Ingredient", foreign_keys=[ingredient_id])
 
     __table_args__ = (
+        Index("ix_liste_courses_cree_le", "cree_le"),
         CheckConstraint("quantite_necessaire > 0", name="ck_quantite_courses_positive"),
     )
 
@@ -117,7 +119,7 @@ class ArticleCourses(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class ModeleCourses(Base):
+class ModeleCourses(TimestampMixin, Base):
     """Template persistant pour listes de courses réutilisables.
 
     Attributes:
@@ -138,8 +140,6 @@ class ModeleCourses(Base):
     utilisateur_id: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
 
     # Métadonnées
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
     # Données articles (JSON)
@@ -154,7 +154,7 @@ class ModeleCourses(Base):
         return f"<ModeleCourses(nom={self.nom}, articles={len(self.articles)})>"
 
 
-class ArticleModele(Base):
+class ArticleModele(CreeLeMixin, Base):
     """Article d'un modèle de courses.
 
     Attributes:
@@ -188,9 +188,6 @@ class ArticleModele(Base):
 
     # Tri
     ordre: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-
-    # Métadonnées
-    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     __table_args__ = (
         CheckConstraint("quantite > 0", name="ck_article_modele_quantite_positive"),

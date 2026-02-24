@@ -43,9 +43,21 @@ class MetricsStore:
 _metrics = MetricsStore()
 
 
+# Limite maximale d'échantillons de latence par endpoint (borne mémoire)
+MAX_LATENCY_SAMPLES = 1000
+
+# Limite maximale d'endpoints uniques trackés (prévention memory exhaustion)
+MAX_TRACKED_ENDPOINTS = 500
+
+
 def record_request(endpoint: str, method: str, status_code: int, latency_ms: float):
     """Enregistre une requête dans les métriques."""
     key = f"{method}:{endpoint}"
+
+    # Borner le nombre d'endpoints trackés pour éviter l'exhaustion mémoire
+    if key not in _metrics.requests_total and len(_metrics.requests_total) >= MAX_TRACKED_ENDPOINTS:
+        return
+
     _metrics.requests_total[key] += 1
 
     if 200 <= status_code < 400:
@@ -53,8 +65,8 @@ def record_request(endpoint: str, method: str, status_code: int, latency_ms: flo
     else:
         _metrics.requests_errors[key] += 1
 
-    # Limite à 1000 échantillons par endpoint
-    if len(_metrics.latency_samples[key]) < 1000:
+    # Limite à MAX_LATENCY_SAMPLES échantillons par endpoint
+    if len(_metrics.latency_samples[key]) < MAX_LATENCY_SAMPLES:
         _metrics.latency_samples[key].append(latency_ms)
 
 

@@ -30,6 +30,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.ui.keys import KeyNamespace
+from src.ui.registry import composant_ui
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,11 @@ _keys = KeyNamespace("drilldown")
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui(
+    "charts",
+    exemple="graphique_budget_drilldown(depenses)",
+    tags=("plotly", "drilldown", "budget"),
+)
 def graphique_budget_drilldown(
     depenses: list[dict[str, Any]],
     *,
@@ -111,10 +117,7 @@ def graphique_budget_drilldown(
         st.markdown(f"### 📋 Détails — {categorie_selectionnee}")
 
         # Filtrer les dépenses de cette catégorie
-        depenses_cat = [
-            d for d in depenses
-            if d.get("categorie") == categorie_selectionnee
-        ]
+        depenses_cat = [d for d in depenses if d.get("categorie") == categorie_selectionnee]
 
         if depenses_cat:
             for dep in sorted(
@@ -139,6 +142,11 @@ def graphique_budget_drilldown(
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui(
+    "charts",
+    exemple="graphique_recettes_drilldown(recettes_freq)",
+    tags=("plotly", "drilldown", "recettes"),
+)
 def graphique_recettes_drilldown(
     recettes_freq: list[dict[str, Any]],
     *,
@@ -162,9 +170,7 @@ def graphique_recettes_drilldown(
         return None
 
     # Top 15 recettes
-    top_recettes = sorted(
-        recettes_freq, key=lambda r: r.get("count", 0), reverse=True
-    )[:15]
+    top_recettes = sorted(recettes_freq, key=lambda r: r.get("count", 0), reverse=True)[:15]
 
     noms = [r.get("nom", "?") for r in top_recettes]
     counts = [r.get("count", 0) for r in top_recettes]
@@ -235,6 +241,11 @@ def graphique_recettes_drilldown(
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui(
+    "charts",
+    exemple="graphique_activites_heatmap(activites)",
+    tags=("plotly", "drilldown", "heatmap"),
+)
 def graphique_activites_heatmap(
     activites: list[dict[str, Any]],
     *,
@@ -268,6 +279,7 @@ def graphique_activites_heatmap(
         d = act.get("date")
         if isinstance(d, str):
             from datetime import datetime as dt
+
             try:
                 d = dt.strptime(d, "%Y-%m-%d").date()
             except ValueError:
@@ -328,11 +340,7 @@ def graphique_activites_heatmap(
         # Trouver la date correspondante
         try:
             jour_idx = jours_names.index(x_idx) if isinstance(x_idx, str) else int(x_idx)
-            sem_label_idx = (
-                semaines_labels.index(y_idx)
-                if isinstance(y_idx, str)
-                else int(y_idx)
-            )
+            sem_label_idx = semaines_labels.index(y_idx) if isinstance(y_idx, str) else int(y_idx)
             date_select = dates_map.get((sem_label_idx, jour_idx))
         except (ValueError, IndexError):
             date_select = None
@@ -341,18 +349,15 @@ def graphique_activites_heatmap(
             st.markdown(f"### 📅 {date_select.strftime('%A %d %B %Y')}")
 
             # Filtrer les activités du jour
-            activites_jour = [
-                a for a in activites
-                if _extraire_date(a.get("date")) == date_select
-            ]
+            activites_jour = [a for a in activites if _extraire_date(a.get("date")) == date_select]
 
             if activites_jour:
                 for act in activites_jour:
                     duree = act.get("duree_minutes", 0)
                     st.markdown(
-                        f"- **{act.get('nom', 'Activité')}** "
-                        f"({duree} min)" if duree else
-                        f"- **{act.get('nom', 'Activité')}**"
+                        f"- **{act.get('nom', 'Activité')}** " f"({duree} min)"
+                        if duree
+                        else f"- **{act.get('nom', 'Activité')}**"
                     )
             else:
                 st.info("Aucune activité ce jour")
@@ -367,6 +372,11 @@ def graphique_activites_heatmap(
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui(
+    "charts",
+    exemple="graphique_inventaire_drilldown(inventaire)",
+    tags=("plotly", "drilldown", "inventaire"),
+)
 def graphique_inventaire_drilldown(
     inventaire: list[dict[str, Any]],
     *,
@@ -463,6 +473,7 @@ def _extraire_date(val: Any) -> date | None:
         return val
     if isinstance(val, str):
         from datetime import datetime as dt
+
         try:
             return dt.strptime(val, "%Y-%m-%d").date()
         except ValueError:

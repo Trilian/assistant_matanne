@@ -39,10 +39,10 @@ class TestPlanning:
             pass
 
     class TestCalendarEvent:
-        """Tests pour la classe CalendarEvent."""
+        """Tests pour la classe EvenementPlanning."""
 
         def test_calendarevent_creation(self):
-            """Test de création de CalendarEvent."""
+            """Test de création de EvenementPlanning."""
             # TODO: Implémenter
             pass
 
