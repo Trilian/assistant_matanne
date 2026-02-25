@@ -1,10 +1,15 @@
 """
 Backward compatibility — imports from split modules.
 
-Le service a été divisé en 3 modules:
-- notif_web_core.py: Classe principale ServiceWebPush
-- notif_web_persistence.py: Mixin persistance Supabase/SQLAlchemy
-- notif_web_templates.py: Templates de notifications prédéfinies
+.. deprecated::
+    Importer directement depuis les modules spécifiques :
+    - notif_web_core.py: ServiceWebPush, obtenir_service_webpush
+    - notif_web_persistence.py: NotificationPersistenceMixin
+    - notif_web_templates.py: NotificationTemplatesMixin
+    Ou depuis le package: src.services.core.notifications
+
+Ce fichier ne contient que des ré-exports et sera fusionné dans
+le __init__.py du package à terme.
 """
 
 from src.services.core.notifications.notif_web_core import (  # noqa: F401

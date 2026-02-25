@@ -8,6 +8,7 @@ from datetime import datetime
 import streamlit as st
 
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.services.integrations import BarcodeService
 from src.ui.fragments import ui_fragment
 
@@ -280,7 +281,7 @@ def afficher_scanner():
             else:
                 st.warning("⚠️ Code non reconnu - doit être ajoute dans le système")
                 if st.button("➕ Ajouter ce code", key="btn_add_new_barcode"):
-                    st.rerun()
+                    rerun()
 
         except Exception as e:
             st.error(f"❌ Erreur: {str(e)}")

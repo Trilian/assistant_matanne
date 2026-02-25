@@ -38,6 +38,114 @@ _keys = KeyNamespace("drilldown")
 
 
 # ═══════════════════════════════════════════════════════════
+# CACHED FIGURE BUILDERS
+# ═══════════════════════════════════════════════════════════
+
+
+@st.cache_data(ttl=300)
+def _build_budget_figure(categories: tuple[str, ...], montants: tuple[float, ...]) -> go.Figure:
+    """Construit le graphique budget (caché)."""
+    couleurs = px.colors.qualitative.Set2[: len(categories)]
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=list(categories),
+                y=list(montants),
+                marker_color=couleurs,
+                text=[f"{m:.0f}€" for m in montants],
+                textposition="outside",
+                hovertemplate="<b>%{x}</b><br>Montant: %{y:.2f}€<extra></extra>",
+            )
+        ]
+    )
+    fig.update_layout(
+        title="💰 Dépenses par Catégorie (cliquez pour détails)",
+        xaxis_title="Catégorie",
+        yaxis_title="Montant (€)",
+        height=400,
+        showlegend=False,
+        clickmode="event+select",
+    )
+    return fig
+
+
+@st.cache_data(ttl=300)
+def _build_recettes_figure(noms: tuple[str, ...], counts: tuple[int, ...]) -> go.Figure:
+    """Construit le graphique fréquence recettes (caché)."""
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                y=list(noms),
+                x=list(counts),
+                orientation="h",
+                marker_color=px.colors.sequential.Tealgrn[: len(noms)],
+                text=list(counts),
+                textposition="auto",
+                hovertemplate="<b>%{y}</b><br>Préparée %{x} fois<extra></extra>",
+            )
+        ]
+    )
+    fig.update_layout(
+        title="🍽️ Fréquence des Recettes (cliquez pour détails)",
+        xaxis_title="Nombre de préparations",
+        height=max(300, len(noms) * 30),
+        showlegend=False,
+        clickmode="event+select",
+        yaxis=dict(autorange="reversed"),
+    )
+    return fig
+
+
+@st.cache_data(ttl=300)
+def _build_heatmap_figure(
+    z_data: tuple[tuple[int, ...], ...],
+    jours_names: tuple[str, ...],
+    semaines_labels: tuple[str, ...],
+    nb_semaines: int,
+) -> go.Figure:
+    """Construit le heatmap activités (caché)."""
+    fig = go.Figure(
+        data=go.Heatmap(
+            z=[list(row) for row in z_data],
+            x=list(jours_names),
+            y=list(semaines_labels),
+            colorscale="Greens",
+            hovertemplate="<b>%{y} %{x}</b><br>%{z} activité(s)<extra></extra>",
+            showscale=True,
+            colorbar=dict(title="Activités"),
+        )
+    )
+    fig.update_layout(
+        title="🗓️ Activités par jour (cliquez pour détails)",
+        height=max(200, nb_semaines * 50 + 100),
+        clickmode="event+select",
+    )
+    return fig
+
+
+@st.cache_data(ttl=300)
+def _build_inventaire_figure(categories: tuple[str, ...], counts: tuple[int, ...]) -> go.Figure:
+    """Construit le graphique inventaire pie (caché)."""
+    fig = go.Figure(
+        data=[
+            go.Pie(
+                labels=list(categories),
+                values=list(counts),
+                hole=0.4,
+                textinfo="label+value",
+                hovertemplate="<b>%{label}</b><br>%{value} articles<extra></extra>",
+            )
+        ]
+    )
+    fig.update_layout(
+        title="📦 Stock par Catégorie (cliquez pour détails)",
+        height=400,
+        clickmode="event+select",
+    )
+    return fig
+
+
+# ═══════════════════════════════════════════════════════════
 # BUDGET DRILL-DOWN
 # ═══════════════════════════════════════════════════════════
 
@@ -76,30 +184,7 @@ def graphique_budget_drilldown(
     categories = list(par_categorie.keys())
     montants = list(par_categorie.values())
 
-    # Couleurs par catégorie
-    couleurs = px.colors.qualitative.Set2[: len(categories)]
-
-    fig = go.Figure(
-        data=[
-            go.Bar(
-                x=categories,
-                y=montants,
-                marker_color=couleurs,
-                text=[f"{m:.0f}€" for m in montants],
-                textposition="outside",
-                hovertemplate="<b>%{x}</b><br>Montant: %{y:.2f}€<extra></extra>",
-            )
-        ]
-    )
-
-    fig.update_layout(
-        title="💰 Dépenses par Catégorie (cliquez pour détails)",
-        xaxis_title="Catégorie",
-        yaxis_title="Montant (€)",
-        height=400,
-        showlegend=False,
-        clickmode="event+select",
-    )
+    fig = _build_budget_figure(tuple(categories), tuple(montants))
 
     # Afficher avec on_select
     event = st.plotly_chart(
@@ -175,28 +260,7 @@ def graphique_recettes_drilldown(
     noms = [r.get("nom", "?") for r in top_recettes]
     counts = [r.get("count", 0) for r in top_recettes]
 
-    fig = go.Figure(
-        data=[
-            go.Bar(
-                y=noms,
-                x=counts,
-                orientation="h",
-                marker_color=px.colors.sequential.Tealgrn[: len(noms)],
-                text=counts,
-                textposition="auto",
-                hovertemplate="<b>%{y}</b><br>Préparée %{x} fois<extra></extra>",
-            )
-        ]
-    )
-
-    fig.update_layout(
-        title="🍽️ Fréquence des Recettes (cliquez pour détails)",
-        xaxis_title="Nombre de préparations",
-        height=max(300, len(noms) * 30),
-        showlegend=False,
-        clickmode="event+select",
-        yaxis=dict(autorange="reversed"),
-    )
+    fig = _build_recettes_figure(tuple(noms), tuple(counts))
 
     event = st.plotly_chart(
         fig,
@@ -304,22 +368,11 @@ def graphique_activites_heatmap(
             dates_map[(sem_idx, jour_idx)] = d
         z_data.append(row)
 
-    fig = go.Figure(
-        data=go.Heatmap(
-            z=z_data,
-            x=jours_names,
-            y=semaines_labels,
-            colorscale="Greens",
-            hovertemplate="<b>%{y} %{x}</b><br>%{z} activité(s)<extra></extra>",
-            showscale=True,
-            colorbar=dict(title="Activités"),
-        )
-    )
-
-    fig.update_layout(
-        title="🗓️ Activités par jour (cliquez pour détails)",
-        height=max(200, nb_semaines * 50 + 100),
-        clickmode="event+select",
+    fig = _build_heatmap_figure(
+        tuple(tuple(row) for row in z_data),
+        tuple(jours_names),
+        tuple(semaines_labels),
+        nb_semaines,
     )
 
     event = st.plotly_chart(
@@ -404,23 +457,7 @@ def graphique_inventaire_drilldown(
     categories = list(par_categorie.keys())
     counts = [len(articles) for articles in par_categorie.values()]
 
-    fig = go.Figure(
-        data=[
-            go.Pie(
-                labels=categories,
-                values=counts,
-                hole=0.4,
-                textinfo="label+value",
-                hovertemplate="<b>%{label}</b><br>%{value} articles<extra></extra>",
-            )
-        ]
-    )
-
-    fig.update_layout(
-        title="📦 Stock par Catégorie (cliquez pour détails)",
-        height=400,
-        clickmode="event+select",
-    )
+    fig = _build_inventaire_figure(tuple(categories), tuple(counts))
 
     event = st.plotly_chart(
         fig,

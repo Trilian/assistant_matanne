@@ -15,6 +15,7 @@ import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
@@ -76,7 +77,7 @@ def app() -> None:
                 if st.button("✅ Fait", key=f"late_{tache['id']}", use_container_width=True):
                     svc.marquer_complete(tache["id"])
                     st.success("Termine !")
-                    st.rerun()
+                    rerun()
 
     st.markdown("---")
 
@@ -118,12 +119,12 @@ def _afficher_tab_routines(svc: ServiceRoutines) -> None:
     col_a1, col_a2 = st.columns([2, 1])
     with col_a1:
         if st.button("🔄 Rafraîchir", use_container_width=True):
-            st.rerun()
+            rerun()
     with col_a2:
         if st.button("🔄 Reinitialiser jour", use_container_width=True):
             nb = svc.reinitialiser_taches_jour()
             st.success(f"Tâches reinitialisees ({nb})")
-            st.rerun()
+            rerun()
 
     routines_list = svc.lister_routines(actives_uniquement=True)
 
@@ -161,7 +162,7 @@ def _afficher_tab_routines(svc: ServiceRoutines) -> None:
                 ):
                     svc.desactiver_routine(routine["id"])
                     st.success("Routine desactivee")
-                    st.rerun()
+                    rerun()
             with col_act2:
                 if st.button(
                     "🗑️ Supprimer",
@@ -171,7 +172,7 @@ def _afficher_tab_routines(svc: ServiceRoutines) -> None:
                 ):
                     svc.supprimer_routine(routine["id"])
                     st.success("Routine supprimee")
-                    st.rerun()
+                    rerun()
 
 
 def _afficher_tache(svc: ServiceRoutines, tache: dict[str, Any], routine_id: int) -> None:
@@ -187,7 +188,7 @@ def _afficher_tache(svc: ServiceRoutines, tache: dict[str, Any], routine_id: int
             if st.button("✅ Termine", key=f"done_{tache['id']}", use_container_width=True):
                 svc.marquer_complete(tache["id"])
                 st.success("Tâche terminee !")
-                st.rerun()
+                rerun()
         else:
             st.caption(
                 f"Fait à {tache['completed_at'].strftime('%H:%M')}" if tache["completed_at"] else ""
@@ -212,11 +213,11 @@ def _formulaire_ajout_tache(svc: ServiceRoutines, routine_id: int) -> None:
                     svc.ajouter_tache(routine_id, new_task_name, time_str)
                     st.success("Tâche ajoutee")
                     del st.session_state[SK.ADDING_TASK_TO]
-                    st.rerun()
+                    rerun()
         with col_f2:
             if st.form_submit_button("❌ Annuler"):
                 del st.session_state[SK.ADDING_TASK_TO]
-                st.rerun()
+                rerun()
 
 
 @ui_fragment
@@ -297,7 +298,7 @@ def _afficher_tab_rappels_ia(
                 for tache in sugg["taches"]:
                     svc.ajouter_tache(routine_id, tache)
                 st.success(f"✅ Routine '{sugg['nom']}' creee !")
-                st.rerun()
+                rerun()
 
 
 @ui_fragment
@@ -351,7 +352,7 @@ def _afficher_tab_creer(svc: ServiceRoutines) -> None:
                     svc.ajouter_tache(routine_id, tache["nom"], tache["heure"])
                 st.success(f"✅ Routine '{nom}' creee avec {len(taches)} tâches !")
                 st.balloons()
-                st.rerun()
+                rerun()
 
 
 @ui_fragment

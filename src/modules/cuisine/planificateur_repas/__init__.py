@@ -169,7 +169,7 @@ def app():
                             )
 
                             st.success("✅ Semaine générée!")
-                            st.rerun()
+                            rerun()
                         else:
                             st.error("❌ Impossible de générer la semaine")
 
@@ -196,7 +196,7 @@ def app():
             with col_gen3:
                 if st.button("🔄 Reset", use_container_width=True):
                     st.session_state[SK.PLANNING_DATA] = {}
-                    st.rerun()
+                    rerun()
 
             st.divider()
 

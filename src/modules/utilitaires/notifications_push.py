@@ -16,6 +16,7 @@ import streamlit as st
 from src.core.async_utils import executer_async
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.services.core.notifications import (
     ConfigurationNtfy,
@@ -312,7 +313,7 @@ def afficher_test():
         with col2:
             if st.button("🗑️ Effacer", key="clear_demo_history"):
                 st.session_state[SK.NOTIF_DEMO_HISTORY] = []
-                st.rerun()
+                rerun()
 
         for notif in reversed(st.session_state[SK.NOTIF_DEMO_HISTORY][-5:]):
             priorite_emoji = {1: "⬜", 2: "🟦", 3: "🟩", 4: "🟧", 5: "🟥"}[notif["priorite"]]

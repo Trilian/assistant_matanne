@@ -6,6 +6,14 @@ Fonctions pour:
 - Obtenir l'engine de façon sécurisée
 
 Découplé de Streamlit — le cache est géré par le conteneur IoC.
+
+Note (Audit §10.4):
+    ``st.connection("supabase")`` et ``@st.cache_resource`` sont des
+    alternatives Streamlit-natives. Le choix actuel (singleton + threading.Lock)
+    garantit la testabilité hors-Streamlit et la compatibilité avec le scheduler
+    APScheduler et les tests unitaires SQLite en mémoire.
+    Migration vers ``st.connection`` à envisager si le projet se restreint
+    à Streamlit Cloud avec connection pooling intégré.
 """
 
 import logging

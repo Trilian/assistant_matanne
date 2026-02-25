@@ -83,7 +83,7 @@ def onglet_taches(mes_plantes: list[dict], meteo: dict):
             )
 
 
-@ui_fragment
+@cached_fragment(ttl=300)
 def onglet_autonomie(mes_plantes: list[dict], recoltes: list[dict]):
     """Onglet objectif autonomie gamifié avec badges."""
     st.subheader("🎯 Objectif Autonomie Alimentaire")

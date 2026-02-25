@@ -26,6 +26,8 @@ from datetime import date, timedelta
 
 import streamlit as st
 
+from src.core.state import rerun
+
 logger = logging.getLogger(__name__)
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
@@ -40,7 +42,7 @@ _keys = KeyNamespace("famille")
 def _naviguer_famille(page: str) -> None:
     """Navigation interne standardisée du hub famille."""
     st.session_state[SK.FAMILLE_PAGE] = page
-    st.rerun()
+    rerun()
 
 
 # ═══════════════════════════════════════════════════════════

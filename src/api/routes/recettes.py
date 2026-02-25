@@ -36,6 +36,7 @@ async def lister_recettes(
         None, description="Filtrer par catégorie (plat, dessert, entrée...)"
     ),
     search: str | None = Query(None, description="Recherche dans le nom de la recette"),
+    user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
     Liste les recettes avec pagination et filtres.
@@ -92,7 +93,7 @@ async def lister_recettes(
 
 @router.get("/{recette_id}", response_model=RecetteResponse)
 @gerer_exception_api
-async def obtenir_recette(recette_id: int):
+async def obtenir_recette(recette_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
     Récupère une recette par son ID.
 
@@ -199,14 +200,14 @@ async def creer_recette(recette: RecetteCreate, user: dict[str, Any] = Depends(r
 async def modifier_recette(
     recette_id: int, recette: RecetteCreate, user: dict[str, Any] = Depends(require_auth)
 ):
-    """Met à jour une recette.
+    """Met à jour une recette complètement (remplacement total).
 
-    Modifie les champs fournis d'une recette existante.
-    Seuls les champs présents dans le body sont mis à jour.
+    Remplace tous les champs de la recette par les valeurs fournies.
+    Pour une mise à jour partielle, utiliser PATCH.
 
     Args:
         recette_id: ID de la recette à modifier
-        recette: Champs à mettre à jour
+        recette: Tous les champs de la recette (remplacement complet)
 
     Returns:
         La recette mise à jour
@@ -236,7 +237,11 @@ async def modifier_recette(
             if not db_recette:
                 raise HTTPException(status_code=404, detail="Recette non trouvée")
 
-            for key, value in recette.model_dump(exclude_unset=True).items():
+            # PUT = remplacement complet (A9: ne pas utiliser exclude_unset)
+            # Exclure les champs relationnels gérés séparément
+            for key, value in recette.model_dump(
+                exclude={"ingredients", "instructions", "tags"}
+            ).items():
                 if hasattr(db_recette, key):
                     setattr(db_recette, key, value)
 

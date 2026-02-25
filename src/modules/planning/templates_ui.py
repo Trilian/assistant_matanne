@@ -14,6 +14,7 @@ import streamlit as st
 
 from src.core.date_utils import obtenir_debut_semaine
 from src.core.monitoring import profiler_rerun
+from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.services.cuisine.planning.templates import (
     JOURS_SEMAINE,
@@ -77,7 +78,7 @@ def app():
                             if st.button("🗑️ Supprimer", key=f"del_{template.id}"):
                                 if service.supprimer_template(template.id):
                                     afficher_succes("Template supprimé")
-                                    st.rerun()
+                                    rerun()
                                 else:
                                     afficher_erreur("Erreur lors de la suppression")
 
@@ -149,7 +150,7 @@ def app():
                                 afficher_succes(
                                     f"Template '{nom}' créé avec {len(items_data)} événements"
                                 )
-                                st.rerun()
+                                rerun()
                             except Exception as e:
                                 afficher_erreur(f"Erreur: {e}")
 
@@ -188,7 +189,7 @@ def app():
                                 f"Template '{nom_template}' créé avec "
                                 f"{len(template.items)} événements"
                             )
-                            st.rerun()
+                            rerun()
                         else:
                             afficher_erreur("Aucun événement trouvé dans cette semaine")
 

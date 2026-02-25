@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 # Navigation helper
 def go(page: str) -> None:
     """Navigation helper."""
-    from src.core.state import naviguer
+    from src.core.state import naviguer, rerun
 
     naviguer(page)
 
@@ -361,12 +361,12 @@ def _onglet_projets():
                         if st.button("✓ Terminer", key=f"task_done_{t.id}"):
                             with obtenir_contexte_db() as db2:
                                 marquer_tache_done(t.id, db2)
-                            st.rerun()
+                            rerun()
 
             # Bouton terminer le projet
             if st.button("✅ Terminer le projet", key=f"done_{row['id']}"):
                 marquer_projet_done(row["id"])
-                st.rerun()
+                rerun()
 
 
 def _onglet_nouveau():
@@ -389,7 +389,7 @@ def _onglet_nouveau():
         )
         if pid:
             st.success(f"✅ Projet créé (ID: {pid})")
-            st.rerun()
+            rerun()
 
 
 def _onglet_graphique():
@@ -429,4 +429,4 @@ def _onglet_templates():
                     st.success(
                         f"✅ Projet '{tpl['nom']}' créé avec {len(tpl.get('taches', []))} tâches"
                     )
-                    st.rerun()
+                    rerun()

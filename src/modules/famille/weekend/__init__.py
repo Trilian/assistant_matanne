@@ -16,7 +16,8 @@ from src.ui.state.url import tabs_with_url
 
 _keys = KeyNamespace("weekend")
 
-from .ai_service import WeekendAIService
+from src.services.famille.weekend_ai import WeekendAIService
+
 from .components import (
     afficher_add_activity,
     afficher_day_activities,

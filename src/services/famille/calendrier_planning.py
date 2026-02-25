@@ -36,6 +36,9 @@ class ServiceCalendrierPlanning:
     Centralise l'accès DB pour le module planning/calendrier,
     remplaçant les requêtes directes dans data.py, components.py
     et timeline_ui.py.
+
+    Note (S12): Service read-heavy standalone sans BaseService[T] — acceptable
+    car il ne fait que de la lecture/écriture spécifique au domaine planning.
     """
 
     # ═══════════════════════════════════════════════════════════
@@ -371,4 +374,10 @@ def _creer_service_calendrier_planning() -> ServiceCalendrierPlanning:
 
 def obtenir_service_calendrier_planning() -> ServiceCalendrierPlanning:
     """Factory pour obtenir le service calendrier planning (singleton)."""
+    return _creer_service_calendrier_planning()
+
+
+# Alias anglais
+def get_calendrier_planning_service() -> ServiceCalendrierPlanning:
+    """English alias for obtenir_service_calendrier_planning."""
     return _creer_service_calendrier_planning()

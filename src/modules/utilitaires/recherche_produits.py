@@ -11,6 +11,7 @@ import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.ui import etat_vide
 from src.ui.keys import KeyNamespace
@@ -279,8 +280,8 @@ def app():
                     with col_action:
                         if st.button("🗑️", key=f"del_fav_{i}"):
                             st.session_state[SK.PRODUITS_FAVORIS].pop(i)
-                            st.rerun()
+                            rerun()
 
                 if st.button("🗑️ Effacer tous les favoris"):
                     st.session_state[SK.PRODUITS_FAVORIS] = []
-                    st.rerun()
+                    rerun()

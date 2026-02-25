@@ -22,6 +22,8 @@ def calculer_statistiques_inventaire(articles: list[dict]) -> dict:
             "articles_alerte": 0,
             "emplacements_uniques": 0,
             "categories_uniques": 0,
+            "pct_ok": 0.0,
+            "pct_alerte": 0.0,
         }
 
     alertes = calculer_alertes(articles)

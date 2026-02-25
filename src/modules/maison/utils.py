@@ -13,6 +13,7 @@ import streamlit as st
 from src.core.db import obtenir_contexte_db
 from src.core.decorators import avec_cache
 from src.core.models import ElementJardin, JournalJardin, Projet, Routine, TacheRoutine
+from src.core.state import rerun
 
 logger = logging.getLogger(__name__)
 
@@ -402,4 +403,4 @@ def get_stats_entretien() -> dict:
 def clear_maison_cache() -> None:
     """Nettoie le cache Streamlit et relance l'application."""
     st.cache_data.clear()
-    st.rerun()
+    rerun()

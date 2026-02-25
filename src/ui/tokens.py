@@ -179,19 +179,34 @@ class Variante(StrEnum):
 def obtenir_couleurs_variante(variante: Variante) -> tuple[str, str, str]:
     """Retourne (background, text, border) pour une variante donnée.
 
+    .. deprecated::
+        Utiliser ``_obtenir_sem_variante()`` de ``atoms.py`` ou les tokens
+        sémantiques ``Sem.*`` directement.  Cette fonction délègue désormais
+        aux tokens sémantiques pour un rendu cohérent en dark mode.
+
     Args:
         variante: Variante sémantique.
 
     Returns:
-        Tuple (couleur_fond, couleur_texte, couleur_bordure).
+        Tuple (couleur_fond, couleur_texte, couleur_bordure) — tokens sémantiques.
     """
+    import warnings
+
+    warnings.warn(
+        "obtenir_couleurs_variante() utilise des tokens bruts. "
+        "Préférer les tokens sémantiques (Sem.*) via _obtenir_sem_variante().",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    from src.ui.tokens_semantic import Sem
+
     _MAP: dict[Variante, tuple[str, str, str]] = {
-        Variante.SUCCESS: (Couleur.BG_SUCCESS, Couleur.BADGE_SUCCESS_TEXT, Couleur.SUCCESS),
-        Variante.WARNING: (Couleur.BG_WARNING, Couleur.BADGE_WARNING_TEXT, Couleur.WARNING),
-        Variante.DANGER: (Couleur.BG_DANGER, Couleur.BADGE_DANGER_TEXT, Couleur.DANGER),
-        Variante.INFO: (Couleur.BG_INFO, Couleur.INFO, Couleur.BORDER_INFO),
-        Variante.NEUTRAL: (Couleur.BG_SUBTLE, Couleur.TEXT_SECONDARY, Couleur.BORDER),
-        Variante.ACCENT: (Couleur.ACCENT, "#ffffff", Couleur.ACCENT),
+        Variante.SUCCESS: (Sem.SUCCESS_SUBTLE, Sem.ON_SUCCESS, Sem.SUCCESS),
+        Variante.WARNING: (Sem.WARNING_SUBTLE, Sem.ON_WARNING, Sem.WARNING),
+        Variante.DANGER: (Sem.DANGER_SUBTLE, Sem.ON_DANGER, Sem.DANGER),
+        Variante.INFO: (Sem.INFO_SUBTLE, Sem.ON_INFO, Sem.INFO),
+        Variante.NEUTRAL: (Sem.SURFACE_ALT, Sem.ON_SURFACE_SECONDARY, Sem.BORDER),
+        Variante.ACCENT: (Sem.INTERACTIVE, Sem.ON_INTERACTIVE, Sem.INTERACTIVE),
     }
     return _MAP.get(variante, _MAP[Variante.NEUTRAL])
 

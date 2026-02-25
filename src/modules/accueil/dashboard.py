@@ -41,7 +41,7 @@ _keys = KeyNamespace("accueil")
 @profiler_rerun("accueil")
 def app():
     """Point d'entree module accueil"""
-    from src.core.state import obtenir_etat
+    from src.core.state import obtenir_etat, rerun
     from src.ui import etat_vide
 
     with error_boundary("accueil_dashboard"):
@@ -242,7 +242,7 @@ def app():
 @ui_fragment
 def afficher_quick_actions():
     """Raccourcis d'actions rapides"""
-    from src.core.state import GestionnaireEtat
+    from src.core.state import GestionnaireEtat, rerun
 
     st.markdown("### ⚡ Actions Rapides")
 
@@ -253,19 +253,19 @@ def afficher_quick_actions():
             "➕ Ajouter Recette", key=_keys("quick_add_recette"), width="stretch", type="primary"
         ):
             GestionnaireEtat.naviguer_vers("cuisine.recettes")
-            st.rerun()
+            rerun()
 
     with col2:
         if st.button("📅 Voir Courses", key=_keys("quick_view_courses"), width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.courses")
-            st.rerun()
+            rerun()
 
     with col3:
         if st.button("📦 Gerer Inventaire", key=_keys("quick_view_inventaire"), width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.inventaire")
-            st.rerun()
+            rerun()
 
     with col4:
         if st.button("🧹 Planning Semaine", key=_keys("quick_view_planning"), width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
-            st.rerun()
+            rerun()

@@ -12,65 +12,94 @@ from src.ui.tokens_semantic import Sem
 
 def injecter_meta_pwa():
     """
-    Injecte les meta tags PWA dans la page Streamlit.
+    Injecte les meta tags PWA dans le <head> du document.
 
-    Doit être appelé au début de l'application.
+    Utilise JavaScript pour ajouter les éléments au vrai <head>
+    au lieu de les rendre dans un iframe (U4).
     """
-    pwa_meta = f"""
-    <head>
-        <!-- PWA Meta Tags -->
-        <link rel="manifest" href="/static/manifest.json">
-        <meta name="theme-color" content="{Sem.INTERACTIVE}">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="Matanne">
-
-        <!-- iOS Icons -->
-        <link rel="apple-touch-icon" href="/static/icons/icon-152x152.png">
-        <link rel="apple-touch-icon" sizes="180x180" href="/static/icons/icon-192x192.png">
-
-        <!-- Splash Screens iOS -->
-        <link rel="apple-touch-startup-image" href="/static/splash/splash.png">
-    </head>
-
+    pwa_script = f"""
     <script>
-        // Enregistrer le Service Worker
-        if ('serviceWorker' in navigator) {{
-            window.addEventListener('load', () => {{
-                navigator.serviceWorker.register('/static/sw.js')
-                    .then((registration) => {{
-                        console.log('SW registered:', registration.scope);
-                    }})
-                    .catch((error) => {{
-                        console.log('SW registration failed:', error);
-                    }});
-            }});
-        }}
+        (function() {{
+            // Éviter les injections multiples
+            if (document.querySelector('link[rel="manifest"]')) return;
 
-        // Demander la permission pour les notifications
-        async function requestNotificationPermission() {{
-            if ('Notification' in window && Notification.permission === 'default') {{
-                const permission = await Notification.requestPermission();
-                console.log('Notification permission:', permission);
+            var parent = window.parent.document.head || document.head;
+
+            // Manifest
+            var manifest = document.createElement('link');
+            manifest.rel = 'manifest';
+            manifest.href = '/static/manifest.json';
+            parent.appendChild(manifest);
+
+            // Theme color
+            var themeColor = document.createElement('meta');
+            themeColor.name = 'theme-color';
+            themeColor.content = '{Sem.INTERACTIVE}';
+            parent.appendChild(themeColor);
+
+            // Apple meta tags
+            var awac = document.createElement('meta');
+            awac.name = 'apple-mobile-web-app-capable';
+            awac.content = 'yes';
+            parent.appendChild(awac);
+
+            var awabs = document.createElement('meta');
+            awabs.name = 'apple-mobile-web-app-status-bar-style';
+            awabs.content = 'black-translucent';
+            parent.appendChild(awabs);
+
+            var awat = document.createElement('meta');
+            awat.name = 'apple-mobile-web-app-title';
+            awat.content = 'Matanne';
+            parent.appendChild(awat);
+
+            // Apple touch icons
+            var icon152 = document.createElement('link');
+            icon152.rel = 'apple-touch-icon';
+            icon152.href = '/static/icons/icon-152x152.png';
+            parent.appendChild(icon152);
+
+            var icon192 = document.createElement('link');
+            icon192.rel = 'apple-touch-icon';
+            icon192.sizes = '180x180';
+            icon192.href = '/static/icons/icon-192x192.png';
+            parent.appendChild(icon192);
+
+            // Splash screen
+            var splash = document.createElement('link');
+            splash.rel = 'apple-touch-startup-image';
+            splash.href = '/static/splash/splash.png';
+            parent.appendChild(splash);
+
+            // Service Worker
+            if ('serviceWorker' in navigator) {{
+                window.addEventListener('load', function() {{
+                    navigator.serviceWorker.register('/static/sw.js')
+                        .then(function(reg) {{ console.log('SW registered:', reg.scope); }})
+                        .catch(function(err) {{ console.log('SW registration failed:', err); }});
+                }});
             }}
-        }}
 
-        // Détecter si installé en PWA
-        window.addEventListener('appinstalled', () => {{
-            console.log('PWA installed');
-        }});
+            // Notification permission
+            if ('Notification' in window && Notification.permission === 'default') {{
+                Notification.requestPermission();
+            }}
 
-        // Proposer l'installation
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {{
-            e.preventDefault();
-            deferredPrompt = e;
-            // Afficher un bouton d'installation custom si besoin
-        }});
+            // PWA install events
+            window.addEventListener('appinstalled', function() {{
+                console.log('PWA installed');
+            }});
+
+            var deferredPrompt;
+            window.addEventListener('beforeinstallprompt', function(e) {{
+                e.preventDefault();
+                deferredPrompt = e;
+            }});
+        }})();
     </script>
     """
 
-    components.html(pwa_meta, height=0)
+    components.html(pwa_script, height=0)
 
 
 def afficher_invite_installation_pwa():

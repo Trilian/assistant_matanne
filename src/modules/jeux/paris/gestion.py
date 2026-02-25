@@ -2,6 +2,7 @@
 Interface de gestion des equipes et matchs.
 """
 
+from src.core.state import rerun
 from src.services.jeux import get_paris_crud_service
 from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
@@ -88,7 +89,7 @@ def afficher_gestion_donnees():
                         with col3:
                             if st.button("Valider", key=f"val_{m['id']}"):
                                 enregistrer_resultat_match(m["id"], score_d, score_e)
-                                st.rerun()
+                                rerun()
             else:
                 etat_vide("Aucun match en attente de résultat", "⚽")
         except Exception as e:
@@ -121,7 +122,7 @@ def afficher_gestion_donnees():
                         if st.button("🗑️", key=f"del_{m['id']}", help="Supprimer ce match"):
                             if supprimer_match(m["id"]):
                                 st.success("Match supprime!")
-                                st.rerun()
+                                rerun()
                             else:
                                 st.error("Erreur lors de la suppression")
                     st.divider()

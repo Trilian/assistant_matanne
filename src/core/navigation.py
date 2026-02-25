@@ -16,50 +16,32 @@ Compatibilité:
 
 from __future__ import annotations
 
-import importlib
 import logging
-import time
-from typing import Any
 
 import streamlit as st
 
+from src.core.lazy_loader import ChargeurModuleDiffere
+
 logger = logging.getLogger(__name__)
-
-
-# ═══════════════════════════════════════════════════════════
-# CACHE DES MODULES CHARGÉS
-# ═══════════════════════════════════════════════════════════
-
-_module_cache: dict[str, Any] = {}
-_load_times: dict[str, float] = {}
 
 
 def _charger_et_executer(module_path: str, module_key: str) -> None:
     """Charge un module et exécute sa fonction app().
 
     Utilisé comme callable pour st.Page().
+    Délègue le cache au ChargeurModuleDiffere (source unique).
     """
     from src.core.state import GestionnaireEtat
 
     # Mettre à jour l'état pour garder la cohérence
     GestionnaireEtat.naviguer_vers(module_key)
 
-    start = time.time()
-
-    if module_path not in _module_cache:
-        try:
-            module = importlib.import_module(module_path)
-            _module_cache[module_path] = module
-            _load_times[module_path] = time.time() - start
-            logger.info(
-                f"📦 Module chargé: {module_path} ({_load_times[module_path] * 1000:.0f}ms)"
-            )
-        except Exception as e:
-            logger.exception(f"❌ Erreur chargement {module_path}")
-            st.error(f"❌ Erreur chargement module: {e}")
-            return
-    else:
-        module = _module_cache[module_path]
+    try:
+        module = ChargeurModuleDiffere.charger(module_path)
+    except Exception as e:
+        logger.exception(f"❌ Erreur chargement {module_path}")
+        st.error(f"❌ Erreur chargement module: {e}")
+        return
 
     # Exécuter le point d'entrée du module
     if hasattr(module, "app"):
@@ -229,10 +211,5 @@ def obtenir_page(module_key: str) -> st.Page | None:
 
 
 def obtenir_stats() -> dict:
-    """Statistiques de chargement des modules."""
-    return {
-        "cached_modules": len(_module_cache),
-        "total_load_time": sum(_load_times.values()),
-        "average_load_time": (sum(_load_times.values()) / len(_load_times) if _load_times else 0),
-        "load_times": _load_times,
-    }
+    """Statistiques de chargement des modules (délègue à ChargeurModuleDiffere)."""
+    return ChargeurModuleDiffere.obtenir_statistiques()

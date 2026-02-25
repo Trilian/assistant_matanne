@@ -7,6 +7,7 @@ from decimal import Decimal
 import streamlit as st
 
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
@@ -165,11 +166,11 @@ def onglet_factures(factures: list[dict]):
                 st.session_state._charges_reload = True
                 st.success("✅ Facture enregistrée ! Vérifiez votre éco-score.")
                 st.balloons()
-                st.rerun()
+                rerun()
 
             if cancelled:
                 st.session_state[_keys("mode_ajout")] = False
-                st.rerun()
+                rerun()
 
     else:
         # Liste des factures
@@ -238,7 +239,7 @@ def onglet_factures(factures: list[dict]):
                     st.session_state[_keys("factures")] = factures
                     st.session_state._charges_reload = True
                     st.success("Facture supprimée")
-                    st.rerun()
+                    rerun()
 
 
 @ui_fragment

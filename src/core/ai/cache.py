@@ -18,6 +18,7 @@ import logging
 from typing import Any
 
 from ..constants import CACHE_TTL_IA
+from ..state import rerun
 
 logger = logging.getLogger(__name__)
 
@@ -249,10 +250,10 @@ def afficher_statistiques_cache_ia():
             if st.button("🧹 Nettoyer", key="cache_ia_nettoyer", use_container_width=True):
                 CacheIA.nettoyer_expires()
                 st.success("Nettoyage effectué!")
-                st.rerun()
+                rerun()
 
         with col4:
             if st.button("🗑️ Vider", key="cache_ia_vider", use_container_width=True):
                 CacheIA.invalider_tout()
                 st.success("Cache IA vidé!")
-                st.rerun()
+                rerun()

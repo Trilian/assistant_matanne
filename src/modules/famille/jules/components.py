@@ -4,10 +4,11 @@ Module Jules - Composants UI
 
 from src.core.async_utils import executer_async
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.services.famille.achats import obtenir_service_achats_famille
+from src.services.famille.jules_ai import JulesAIService
 from src.ui.fragments import ui_fragment
 
-from .ai_service import JulesAIService
 from .utils import (
     CATEGORIES_CONSEILS,
     AchatFamille,
@@ -97,7 +98,7 @@ def afficher_activites():
 
         if st.button("Fermer"):
             st.session_state[SK.JULES_SHOW_AI_ACTIVITIES] = False
-            st.rerun()
+            rerun()
 
 
 @ui_fragment
@@ -171,7 +172,7 @@ def afficher_achats_categorie(categorie: str):
                     if st.button("✅", key=f"buy_{achat.id}"):
                         obtenir_service_achats_famille().marquer_achete(achat.id)
                         st.success("Achete!")
-                        st.rerun()
+                        rerun()
     except Exception as e:
         st.error(f"Erreur: {e}")
 
@@ -221,7 +222,7 @@ def afficher_form_ajout_achat():
                         suggere_par="manuel",
                     )
                     st.success(f"✅ {nom} ajoute!")
-                    st.rerun()
+                    rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")
 

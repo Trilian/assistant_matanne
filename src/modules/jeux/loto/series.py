@@ -18,6 +18,7 @@ from typing import Any
 import pandas as pd
 import streamlit as st
 
+from src.core.state import rerun
 from src.services.jeux import (
     NB_NUMEROS_CHANCE,
     NB_NUMEROS_PRINCIPAUX,
@@ -261,7 +262,7 @@ def _synchroniser_loto():
                 f"✅ {result.get('numeros_maj', 0)} numéros analysés, "
                 f"{result.get('alertes_creees', 0)} alertes"
             )
-        st.rerun()
+        rerun()
 
     except Exception as e:
         logger.error(f"Erreur sync loto: {e}")

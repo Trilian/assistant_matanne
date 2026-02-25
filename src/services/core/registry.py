@@ -509,20 +509,30 @@ def service_factory(
     La factory originale est enregistrée et sera appelée une seule fois
     lors du premier accès.
 
+    **Comportement avec arguments (S8):**
+    Si la factory décorée est appelée avec des arguments explicites,
+    le singleton registre est bypassé et une nouvelle instance est créée.
+    C'est un design voulu pour permettre la configuration custom
+    (ex: client IA spécifique, config de test), mais attention : l'instance
+    retournée n'est PAS celle du registre et ne sera pas réutilisée.
+
     Args:
         nom: Nom unique du service dans le registre
         tags: Tags de catégorisation (optionnel)
 
     Usage:
-        @service_factory("recettes", tags={"cuisine", "ia"})
-        def _creer_service_recettes() -> ServiceRecettes:
-            return ServiceRecettes()
+        @service_factory("mon_service", tags={"domaine", "ia"})
+        def _creer_mon_service() -> MonService:
+            return MonService()
 
-        # Accès via la factory décorée
-        service = _creer_service_recettes()  # singleton thread-safe
+        # Accès singleton (via registre)
+        service = _creer_mon_service()
+
+        # Bypass singleton (nouvelle instance dédiée)
+        service_custom = _creer_mon_service(client=custom_client)
 
         # Ou via le registre directement
-        service = registre.obtenir("recettes")
+        service = registre.obtenir("mon_service")
     """
 
     def decorator(func: Callable) -> Callable:

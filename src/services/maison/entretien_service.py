@@ -64,6 +64,12 @@ FREQUENCES = {
 class EntretienService(EntretienGamificationMixin, BaseAIService):
     """Service IA pour la gestion des routines ménage.
 
+    Hérite de BaseAIService pour les appels IA. Les opérations CRUD DB
+    sont gérées via @avec_session_db plutôt que BaseService[Routine] car :
+    - Les méthodes CRUD sont spécifiques au domaine (pas de CRUD générique)
+    - BaseAIService et BaseService[T] ont des constructeurs incompatibles
+    - Le pattern @avec_session_db est cohérent avec le reste du service
+
     Fonctionnalités:
     - Création routines avec suggestions IA
     - Optimisation répartition hebdomadaire

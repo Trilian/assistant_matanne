@@ -9,6 +9,7 @@ from pathlib import Path
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.services.core.backup.service import obtenir_service_backup
 from src.ui.fragments import ui_fragment
 
@@ -62,7 +63,7 @@ def afficher_sauvegarde():
                         if st.button("🗑️ Supprimer", key=f"delete_{backup.id}"):
                             if service.supprimer_sauvegarde(backup.id):
                                 st.success("Backup supprimé")
-                                st.rerun()
+                                rerun()
 
     # Section restauration
     st.markdown("---")

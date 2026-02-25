@@ -12,6 +12,7 @@ import pandas as pd
 import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
@@ -105,7 +106,7 @@ def app():
                                 st.success(f"✅ {count} matchs mis à jour!")
                             else:
                                 st.info("✅ Tous les matchs sont à jour")
-                            st.rerun()
+                            rerun()
                     except Exception as e:
                         logger.error(f"❌ Erreur refresh: {e}", exc_info=True)
                         st.error(f"❌ Erreur: {e}")
@@ -130,7 +131,7 @@ def app():
                                 for champ, count in resultats.items():
                                     if count > 0:
                                         st.caption(f"  • {champ}: {count} équipes")
-                            st.rerun()
+                            rerun()
                     except Exception as e:
                         logger.error(f"❌ Erreur sync: {e}", exc_info=True)
                         st.error(f"❌ Erreur: {e}")
@@ -155,7 +156,7 @@ def app():
                                 for champ, count in resultats.items():
                                     if count > 0:
                                         st.caption(f"  • {champ}: {count} matchs")
-                            st.rerun()
+                            rerun()
                     except Exception as e:
                         logger.error(f"❌ Erreur sync matchs: {e}", exc_info=True)
                         st.error(f"❌ Erreur: {e}")

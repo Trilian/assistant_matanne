@@ -75,12 +75,25 @@ class TestHealthEndpoints:
             assert service_info["status"] in ["ok", "warning", "error"]
 
     def test_metrics_endpoint(self, client):
-        """L'endpoint metrics retourne des données."""
-        response = client.get("/metrics")
+        """L'endpoint metrics retourne des données (nécessite admin)."""
+        from src.api.dependencies import get_current_user
+        from src.api.main import app
 
-        assert response.status_code == 200
-        data = response.json()
-        assert isinstance(data, dict)
+        # Override pour fournir un admin
+        app.dependency_overrides[get_current_user] = lambda: {
+            "id": "admin-test",
+            "email": "admin@test.com",
+            "role": "admin",
+        }
+        try:
+            admin_client = TestClient(app, raise_server_exceptions=False)
+            response = admin_client.get("/metrics")
+
+            assert response.status_code == 200
+            data = response.json()
+            assert isinstance(data, dict)
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
 
 
 # ═══════════════════════════════════════════════════════════

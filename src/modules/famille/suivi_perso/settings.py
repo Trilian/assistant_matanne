@@ -3,6 +3,7 @@ Module Suivi Perso - Paramètres Garmin et objectifs
 """
 
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.ui.fragments import ui_fragment
 
 from .utils import get_garmin_service, st
@@ -37,7 +38,7 @@ def afficher_garmin_settings(data: dict):
                         st.success(
                             f"✅ {result['activities_synced']} activites, {result['summaries_synced']} jours sync"
                         )
-                        st.rerun()
+                        rerun()
                     except Exception as e:
                         st.error(f"Erreur sync: {e}")
 
@@ -47,7 +48,7 @@ def afficher_garmin_settings(data: dict):
                     service = get_garmin_service()
                     service.disconnect_user(user.id)
                     st.success("Garmin deconnecte")
-                    st.rerun()
+                    rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")
 
@@ -78,7 +79,7 @@ def afficher_garmin_settings(data: dict):
                         try:
                             service.complete_authorization(user.id, verifier, request_token)
                             st.success("✅ Garmin connecte!")
-                            st.rerun()
+                            rerun()
                         except Exception as e:
                             st.error(f"Erreur: {e}")
                     else:
@@ -144,6 +145,6 @@ def afficher_objectifs(data: dict):
                 objectif_minutes=new_min,
             )
             st.success("✅ Objectifs mis à jour!")
-            st.rerun()
+            rerun()
         except Exception as e:
             st.error(f"Erreur: {e}")

@@ -32,30 +32,40 @@ security = HTTPBearer(
 # ═══════════════════════════════════════════════════════════
 
 
-def _est_environnement_production() -> bool:
-    """
-    Vérifie si l'environnement est la production.
+# Environnements explicitement autorisés pour le mode dev (liste blanche stricte)
+_ENVIRONNEMENTS_DEV_AUTORISES = frozenset({"development", "dev", "local", "test", "testing"})
 
-    Vérifie plusieurs indicateurs pour éviter un bypass accidentel
-    de l'authentification en production.
-    """
-    env = os.getenv("ENVIRONMENT", "development").lower().strip()
 
-    # Liste noire stricte des valeurs de production
-    if env in ("production", "prod", "prd", "live"):
+def _est_environnement_dev() -> bool:
+    """
+    Vérifie si l'environnement est EXPLICITEMENT un environnement de développement.
+
+    Utilise une liste blanche stricte : seuls les environnements explicitement
+    reconnus comme dev/test autorisent l'auto-auth. Tout environnement non reconnu
+    est traité comme production par sécurité (A1: fix bypass dev auto-auth).
+    """
+    env = os.getenv("ENVIRONMENT", "").lower().strip()
+
+    # Si pas défini du tout, refuser l'auto-auth par sécurité
+    if not env:
+        logger.warning(
+            "ENVIRONMENT non défini. Auto-auth désactivée par sécurité. "
+            "Définissez ENVIRONMENT='development' explicitement pour le mode dev."
+        )
+        return False
+
+    # Liste blanche stricte des environnements de dev
+    if env in _ENVIRONNEMENTS_DEV_AUTORISES:
         return True
 
     # Indicateurs supplémentaires de production
     # (présence de secrets réels, etc.)
     api_secret = os.getenv("API_SECRET_KEY", "")
     if api_secret and api_secret != "dev-secret-key-change-in-production":
-        # Si une vraie clé API est configurée, on considère que c'est la prod
-        if env not in ("development", "dev", "local", "test", "testing"):
-            logger.warning(
-                f"ENVIRONMENT='{env}' non reconnu avec API_SECRET_KEY configurée. "
-                "Traité comme production par sécurité."
-            )
-            return True
+        logger.warning(
+            f"ENVIRONMENT='{env}' non reconnu avec API_SECRET_KEY configurée. "
+            "Auto-auth désactivée par sécurité."
+        )
 
     return False
 
@@ -73,9 +83,9 @@ async def get_current_user(
         Dict avec id, email, role de l'utilisateur
     """
     if not credentials:
-        if not _est_environnement_production():
-            logger.debug("Mode développement: utilisateur dev auto-authentifié")
-            return {"id": "dev", "email": "dev@local", "role": "admin"}
+        if _est_environnement_dev():
+            logger.debug("Mode développement: utilisateur dev auto-authentifié (rôle membre)")
+            return {"id": "dev", "email": "dev@local", "role": "membre"}
         raise HTTPException(status_code=401, detail="Token requis")
 
     try:

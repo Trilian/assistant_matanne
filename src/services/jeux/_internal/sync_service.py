@@ -363,9 +363,10 @@ class SyncService:
 # ═══════════════════════════════════════════════════════════
 
 
-def obtenir_service_sync_jeux() -> SyncService:
+@service_factory("sync", tags={"jeux", "sync"})
+def get_sync_service() -> SyncService:
     """
-    Factory pour créer une instance du service (convention française).
+    Factory singleton pour SyncService.
 
     Returns:
         Instance SyncService
@@ -373,12 +374,11 @@ def obtenir_service_sync_jeux() -> SyncService:
     return SyncService()
 
 
-@service_factory("sync", tags={"jeux", "sync"})
-def get_sync_service() -> SyncService:
+def obtenir_service_sync_jeux() -> SyncService:
     """
-    Factory pour créer une instance du service (alias anglais).
+    Alias français pour get_sync_service (singleton via registre).
 
     Returns:
         Instance SyncService
     """
-    return obtenir_service_sync_jeux()
+    return get_sync_service()

@@ -16,9 +16,11 @@ from typing import Any
 
 import streamlit as st
 
+from src.core.state import naviguer
 from src.ui.fragments import auto_refresh
 from src.ui.keys import KeyNamespace
 from src.ui.registry import composant_ui
+from src.ui.tokens_semantic import Sem
 
 logger = logging.getLogger(__name__)
 
@@ -145,11 +147,11 @@ def _collecter_alertes() -> list[dict[str, Any]]:
 # ═══════════════════════════════════════════════════════════
 
 _COULEURS_PRIORITE = {
-    "critique": "#d32f2f",
-    "haute": "#f57c00",
-    "moyenne": "#fbc02d",
-    "normale": "#1976d2",
-    "basse": "#757575",
+    "critique": Sem.DANGER,
+    "haute": Sem.WARNING,
+    "moyenne": Sem.WARNING_SUBTLE,
+    "normale": Sem.INFO,
+    "basse": Sem.ON_SURFACE_MUTED,
 }
 
 
@@ -177,11 +179,16 @@ def widget_notifications_live(max_alertes: int = 5) -> None:
     non_lues = [a for a in alertes if not a.get("lue", False)]
     nb_non_lues = len(non_lues)
 
-    # Badge avec nombre
+    # Badge avec nombre et aria-label pour l'accessibilité
     label = f"🔔 {nb_non_lues} alerte{'s' if nb_non_lues != 1 else ''}"
 
     with st.popover(label, use_container_width=False):
-        st.markdown("**🔔 Alertes en temps réel**")
+        st.markdown(
+            f'<span aria-label="{nb_non_lues} notification{"s" if nb_non_lues != 1 else ""}'
+            f' non lue{"s" if nb_non_lues != 1 else ""}" role="status">'
+            f"**🔔 Alertes en temps réel**</span>",
+            unsafe_allow_html=True,
+        )
         st.caption(f"Dernière vérification: {datetime.now().strftime('%H:%M:%S')}")
 
         # Limiter le nombre affiché
@@ -192,14 +199,14 @@ def widget_notifications_live(max_alertes: int = 5) -> None:
             return
 
         for alerte in alertes_affichees:
-            couleur = _COULEURS_PRIORITE.get(alerte["priorite"], "#757575")
+            couleur = _COULEURS_PRIORITE.get(alerte["priorite"], Sem.ON_SURFACE_MUTED)
 
             st.markdown(
                 f'<div style="padding:6px 10px;margin:4px 0;'
                 f"border-left:3px solid {couleur};"
-                f'border-radius:4px;background:var(--st-surface-alt,#fafafa);">'
+                f'border-radius:4px;background:{Sem.SURFACE_ALT};">'
                 f"<strong>{alerte['icone']} {alerte['titre']}</strong><br>"
-                f'<span style="font-size:0.85rem;color:var(--st-on-surface-secondary,#666);">'
+                f'<span style="font-size:0.85rem;color:{Sem.ON_SURFACE_SECONDARY};">'
                 f"{alerte['message']}</span></div>",
                 unsafe_allow_html=True,
             )
@@ -209,10 +216,7 @@ def widget_notifications_live(max_alertes: int = 5) -> None:
 
         # Bouton pour voir toutes les notifications
         if st.button("📋 Voir tout", key=_keys("voir_tout"), use_container_width=True):
-            from src.core.state import GestionnaireEtat
-
-            GestionnaireEtat.naviguer_vers("notifications_push")
-            st.rerun()
+            naviguer("notifications_push")
 
 
 __all__ = ["widget_notifications_live"]

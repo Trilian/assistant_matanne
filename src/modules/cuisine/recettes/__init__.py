@@ -12,6 +12,7 @@ Fonctionnalités:
 import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
@@ -52,7 +53,7 @@ def app():
                 with col_retour:
                     if st.button("⬅️", help="Retour à la liste", use_container_width=True):
                         st.session_state[_keys("detail_id")] = None
-                        st.rerun()
+                        rerun()
                 with col_titre:
                     st.write(f"**{recette.nom}**")
                 st.divider()

@@ -13,6 +13,7 @@ from datetime import datetime
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.ui.keys import KeyNamespace
 
 _keys = KeyNamespace("barcode")
@@ -276,7 +277,7 @@ class BarcodeScanner:
             # Bouton pour effacer
             if st.button("🗑️ Effacer historique", key=f"{key}_clear"):
                 st.session_state[_keys("detected", key)] = []
-                st.rerun()
+                rerun()
 
             # Liste des codes
             with st.expander("📋 Historique des scans"):

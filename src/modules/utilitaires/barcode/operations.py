@@ -8,6 +8,7 @@ from datetime import datetime
 import streamlit as st
 
 from src.core.exceptions import ErreurNonTrouve, ErreurValidation
+from src.core.state import rerun
 from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
 
@@ -281,7 +282,7 @@ def afficher_gestion_barcodes():
                         try:
                             service.mettre_a_jour_barcode(article_id[0], nouveau_code)
                             st.success("✅ Code-barres mis à jour")
-                            st.rerun()
+                            rerun()
                         except Exception as e:
                             st.error(f"❌ Erreur: {str(e)}")
 

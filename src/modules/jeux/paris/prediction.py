@@ -5,6 +5,7 @@ Affichage des predictions pour les matchs.
 import plotly.graph_objects as go
 import streamlit as st
 
+from src.core.state import rerun
 from src.services.jeux import predire_over_under, predire_resultat_match
 from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
@@ -244,14 +245,14 @@ def afficher_prediction_match(match: dict):
             ):
                 enregistrer_pari(match["id"], "1", cote_d, est_virtuel=True)
                 st.success("✅ Pari enregistré!")
-                st.rerun()
+                rerun()
 
         with col_btn2:
             cote_n = match.get("cote_nul") or 3.5
             if st.button(f"⚖️ Match Nul ({cote_n:.2f})", key=f"bet_nul_{match['id']}"):
                 enregistrer_pari(match["id"], "N", cote_n, est_virtuel=True)
                 st.success("✅ Pari enregistré!")
-                st.rerun()
+                rerun()
 
         with col_btn3:
             cote_e = match.get("cote_ext") or 3.0
@@ -260,7 +261,7 @@ def afficher_prediction_match(match: dict):
             ):
                 enregistrer_pari(match["id"], "2", cote_e, est_virtuel=True)
                 st.success("✅ Pari enregistré!")
-                st.rerun()
+                rerun()
 
         with col_btn4:
             if st.button("📊 Analyse complète", key=f"analyse_{match['id']}"):

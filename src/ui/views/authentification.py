@@ -8,6 +8,7 @@ pour respecter la séparation UI/Services.
 import streamlit as st
 
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.services.core.utilisateur.authentification import (
     Role,
     get_auth_service,
@@ -44,7 +45,7 @@ def afficher_formulaire_connexion(rediriger_apres_succes: bool = True):
                 if result.success:
                     st.success(result.message)
                     if rediriger_apres_succes:
-                        st.rerun()
+                        rerun()
                 else:
                     st.error(result.message)
 
@@ -99,7 +100,7 @@ def afficher_menu_utilisateur():
 
             if st.button("🚪 Déconnexion", use_container_width=True, key="logout_btn"):
                 auth.logout()
-                st.rerun()
+                rerun()
     else:
         with st.sidebar:
             st.markdown("---")
@@ -146,7 +147,7 @@ def afficher_parametres_profil():
 
             if result.success:
                 st.success(f"✅ {result.message}")
-                st.rerun()
+                rerun()
             else:
                 st.error(f"❌ {result.message}")
 

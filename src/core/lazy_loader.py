@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     import streamlit as st
 
 from src.core.session_keys import SK
+from src.core.state import rerun
 
 logger = logging.getLogger(__name__)
 
@@ -176,4 +177,4 @@ def afficher_stats_chargement_differe():
         if st.button("🗑️ Vider Cache Lazy"):
             ChargeurModuleDiffere.vider_cache()
             st.success("Cache vidé !")
-            st.rerun()
+            rerun()

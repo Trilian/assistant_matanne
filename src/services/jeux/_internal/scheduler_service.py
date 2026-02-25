@@ -391,36 +391,8 @@ class SchedulerService:
 
 
 # ═══════════════════════════════════════════════════════════
-# SINGLETON POUR STREAMLIT
+# FACTORY — Singleton via @service_factory (thread-safe)
 # ═══════════════════════════════════════════════════════════
-
-_scheduler_instance: SchedulerService | None = None
-_scheduler_lock = threading.Lock()
-
-
-def obtenir_service_planificateur_jeux(
-    sync_service: SyncService | None = None,
-    api_key_football: str | None = None,
-) -> SchedulerService:
-    """
-    Factory singleton pour le scheduler (convention française, recommandé pour Streamlit).
-
-    Args:
-        sync_service: Service de synchronisation
-        api_key_football: Clé API Football-Data
-
-    Returns:
-        Instance unique du SchedulerService
-    """
-    global _scheduler_instance
-
-    with _scheduler_lock:
-        if _scheduler_instance is None:
-            _scheduler_instance = SchedulerService(
-                sync_service=sync_service,
-                api_key_football=api_key_football,
-            )
-        return _scheduler_instance
 
 
 @service_factory("scheduler", tags={"jeux", "scheduler"})
@@ -429,7 +401,10 @@ def get_scheduler_service(
     api_key_football: str | None = None,
 ) -> SchedulerService:
     """
-    Factory singleton pour le scheduler (alias anglais).
+    Factory singleton pour le scheduler.
+
+    Sans arguments: singleton via registre (thread-safe).
+    Avec arguments: bypass singleton (instance dédiée).
 
     Args:
         sync_service: Service de synchronisation
@@ -438,25 +413,34 @@ def get_scheduler_service(
     Returns:
         Instance unique du SchedulerService
     """
-    return obtenir_service_planificateur_jeux(
+    return SchedulerService(
         sync_service=sync_service,
         api_key_football=api_key_football,
     )
 
 
+def obtenir_service_planificateur_jeux(
+    sync_service: SyncService | None = None,
+    api_key_football: str | None = None,
+) -> SchedulerService:
+    """Alias français pour get_scheduler_service (singleton via registre)."""
+    if sync_service is not None or api_key_football is not None:
+        return get_scheduler_service(
+            sync_service=sync_service,
+            api_key_football=api_key_football,
+        )
+    return get_scheduler_service()
+
+
 def reset_scheduler_service() -> None:
     """Remet le singleton à zéro (utile pour tests)."""
-    global _scheduler_instance
+    from src.services.core.registry import obtenir_registre
 
-    with _scheduler_lock:
-        if _scheduler_instance is not None:
-            _scheduler_instance.arreter()
-            _scheduler_instance = None
-
-    # Aussi réinitialiser l'entrée du registre
-    try:
-        from src.services.core.registry import obtenir_registre
-
-        obtenir_registre().reinitialiser("scheduler")
-    except Exception:
-        pass
+    reg = obtenir_registre()
+    if reg.est_instancie("scheduler"):
+        try:
+            service = reg.obtenir("scheduler")
+            service.arreter()
+        except Exception:
+            pass
+    reg.reinitialiser("scheduler")

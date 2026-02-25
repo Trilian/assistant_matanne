@@ -9,6 +9,7 @@ from datetime import date
 import streamlit as st
 
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.ui.fragments import ui_fragment
 
 from .data import charger_catalogue_plantes
@@ -104,12 +105,12 @@ def onglet_mes_plantes(mes_plantes: list[dict]):
                     st.session_state.jardin_plante_selectionnee = None
                     st.session_state._jardin_reload = True
                     st.success(f"✅ {plante_data.get('nom')} ajouté au jardin !")
-                    st.rerun()
+                    rerun()
 
         if st.button("❌ Annuler"):
             st.session_state.jardin_mode_ajout = False
             st.session_state.jardin_plante_selectionnee = None
-            st.rerun()
+            rerun()
 
     else:
         # Afficher mes plantes
@@ -149,7 +150,7 @@ def onglet_mes_plantes(mes_plantes: list[dict]):
                                 mettre_a_jour_plante_jardin(db_id, {"semis_fait": True})
                             st.session_state.mes_plantes_jardin = mes_plantes
                             st.session_state._jardin_reload = True
-                            st.rerun()
+                            rerun()
 
                     elif not ma_plante.get("plante_en_terre"):
                         if st.button("🏡 Planté", key=f"plante_{i}"):
@@ -159,7 +160,7 @@ def onglet_mes_plantes(mes_plantes: list[dict]):
                                 mettre_a_jour_plante_jardin(db_id, {"plante_en_terre": True})
                             st.session_state.mes_plantes_jardin = mes_plantes
                             st.session_state._jardin_reload = True
-                            st.rerun()
+                            rerun()
 
                     if st.button("🗑️", key=f"del_{i}", help="Supprimer"):
                         db_id = ma_plante.get("db_id")
@@ -168,7 +169,7 @@ def onglet_mes_plantes(mes_plantes: list[dict]):
                         mes_plantes.pop(i)
                         st.session_state.mes_plantes_jardin = mes_plantes
                         st.session_state._jardin_reload = True
-                        st.rerun()
+                        rerun()
 
 
 @ui_fragment
@@ -217,7 +218,7 @@ def onglet_recoltes(mes_plantes: list[dict], recoltes: list[dict]):
                     st.session_state.recoltes_jardin = recoltes
                     st.session_state._jardin_reload = True
                     st.success(f"✅ Récolte de {quantite}kg enregistrée !")
-                    st.rerun()
+                    rerun()
 
     # Historique
     if recoltes:

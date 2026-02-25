@@ -7,6 +7,7 @@ import time
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.ui import etat_vide
 
@@ -33,7 +34,13 @@ def afficher_detail_recette(recette):
     # Image si disponible
     if recette.url_image:
         try:
-            st.image(recette.url_image, caption=recette.nom, width=400)
+            st.markdown(
+                f'<img src="{recette.url_image}" loading="lazy" decoding="async" '
+                f'alt="{recette.nom}" style="max-width: 400px; width: 100%; '
+                f'height: auto; border-radius: 8px; object-fit: cover;" />',
+                unsafe_allow_html=True,
+            )
+            st.caption(recette.nom)
         except Exception:
             st.caption("🖼️ Image indisponible")
     else:
@@ -186,7 +193,7 @@ def afficher_detail_recette(recette):
                             recette.id, portions, note if note > 0 else None, avis if avis else None
                         ):
                             st.success("✅ Cuisson enregistrée!")
-                            st.rerun()
+                            rerun()
                         else:
                             st.error("❌ Erreur lors de l'enregistrement")
 
@@ -343,7 +350,7 @@ def afficher_detail_recette(recette):
                             version = service.generer_version_bebe(recette.id)
                             if version:
                                 st.success("✅ Version bébé créée!")
-                                st.rerun()
+                                rerun()
                             else:
                                 st.error("❌ Erreur lors de la génération (version=None)")
                         except Exception as e:
@@ -356,7 +363,7 @@ def afficher_detail_recette(recette):
                             version = service.generer_version_batch_cooking(recette.id)
                             if version:
                                 st.success("✅ Version batch cooking créée!")
-                                st.rerun()
+                                rerun()
                             else:
                                 st.error("❌ Erreur lors de la génération")
                         except Exception as e:
@@ -393,7 +400,7 @@ def afficher_detail_recette(recette):
                                         )
                                         if version:
                                             st.success(f"✅ Version {robot_name} créée!")
-                                            st.rerun()
+                                            rerun()
                                         else:
                                             st.error("❌ Erreur lors de la génération")
                                     except Exception as e:
@@ -407,7 +414,7 @@ def afficher_detail_recette(recette):
 
     with action_cols[0]:
         if st.button("✏️ Modifier", use_container_width=True, key="btn_modifier_recette"):
-            st.rerun()
+            rerun()
 
     with action_cols[1]:
         if st.button("📋 Dupliquer", width="stretch", key="btn_dupliquer_recette"):
@@ -434,7 +441,7 @@ def afficher_detail_recette(recette):
                         }
                         service.create(recette_dict)
                         st.success("✅ Recette dupliquée!")
-                        st.rerun()
+                        rerun()
                 except Exception as e:
                     st.error(f"❌ Erreur: {str(e)}")
 
@@ -453,14 +460,14 @@ def afficher_detail_recette(recette):
                                     st.success("✅ Recette supprimée!")
                                     st.session_state.detail_recette_id = None
                                     time.sleep(1)
-                                    st.rerun()
+                                    rerun()
                                 else:
                                     st.error("❌ Impossible de supprimer la recette")
                         except Exception as e:
                             st.error(f"❌ Erreur lors de la suppression: {str(e)}")
             with col_non:
                 if st.button("❌ Annuler", use_container_width=True, key="btn_annuler_suppression"):
-                    st.rerun()
+                    rerun()
 
 
 __all__ = ["afficher_detail_recette"]

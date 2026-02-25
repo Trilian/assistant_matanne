@@ -5,7 +5,7 @@ from datetime import date
 import streamlit as st
 
 from src.ui import etat_vide
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import cached_fragment, ui_fragment
 
 from .logic import generer_planning_previsionnel
 
@@ -18,7 +18,7 @@ except ImportError:
     HAS_PANDAS = False
 
 
-@ui_fragment
+@cached_fragment(ttl=300)
 def onglet_export(mes_objets: list[dict], historique: list[dict]):
     """Onglet export CSV de l'historique et de l'inventaire."""
     st.subheader("📥 Export des données")

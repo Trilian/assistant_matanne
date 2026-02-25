@@ -425,21 +425,15 @@ def afficher_liste_notifications(
 # ═══════════════════════════════════════════════════════════
 
 
-_notification_service_instance: NotificationJeuxService | None = None
+@service_factory("notification_jeux", tags={"jeux", "notification"})
+def get_notification_jeux_service() -> NotificationJeuxService:
+    """Factory singleton pour le service de notifications."""
+    return NotificationJeuxService()
 
 
 def obtenir_service_notifications_jeux() -> NotificationJeuxService:
-    """Factory pour obtenir le service de notifications (singleton, convention française)."""
-    global _notification_service_instance
-    if _notification_service_instance is None:
-        _notification_service_instance = NotificationJeuxService()
-    return _notification_service_instance
-
-
-@service_factory("notification_jeux", tags={"jeux", "notification"})
-def get_notification_jeux_service() -> NotificationJeuxService:
-    """Factory pour obtenir le service de notifications (alias anglais)."""
-    return obtenir_service_notifications_jeux()
+    """Alias français pour get_notification_jeux_service (singleton via registre)."""
+    return get_notification_jeux_service()
 
 
 # ═══════════════════════════════════════════════════════════

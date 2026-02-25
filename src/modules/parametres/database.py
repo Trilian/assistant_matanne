@@ -10,6 +10,7 @@ from src.core.db import obtenir_infos_db as get_db_info
 from src.core.db import verifier_sante as health_check
 from src.core.monitoring.health import StatutSante, verifier_sante_globale
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.ui import etat_vide
 from src.ui.feedback import afficher_erreur, afficher_succes, spinner_intelligent
 from src.ui.fragments import ui_fragment
@@ -32,10 +33,10 @@ def _dialog_vacuum():
                     afficher_succes("✅ Optimisation terminée !")
                 except Exception as e:
                     afficher_erreur(f"❌ Erreur: {str(e)}")
-            st.rerun()
+            rerun()
     with col2:
         if st.button("❌ Annuler", use_container_width=True, key="dlg_vacuum_cancel"):
-            st.rerun()
+            rerun()
 
 
 @ui_fragment
@@ -134,7 +135,7 @@ def afficher_database_config():
                 try:
                     GestionnaireMigrations.executer_migrations()
                     afficher_succes("✅ Migrations exécutées !")
-                    st.rerun()
+                    rerun()
                 except Exception as e:
                     afficher_erreur(f"❌ Erreur: {str(e)}")
 

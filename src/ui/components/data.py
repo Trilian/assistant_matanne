@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.ui.registry import composant_ui
 
 if TYPE_CHECKING:
@@ -46,7 +47,7 @@ def pagination(
     with col1:
         if st.button("⬅️ Préc", key=f"{key}_prev"):
             st.session_state[f"{key}_page"] = max(1, st.session_state[f"{key}_page"] - 1)
-            st.rerun()
+            rerun()
 
     with col2:
         page = st.selectbox(
@@ -63,7 +64,7 @@ def pagination(
     with col3:
         if st.button("Suiv ➡️", key=f"{key}_next"):
             st.session_state[f"{key}_page"] = min(total_pages, st.session_state[f"{key}_page"] + 1)
-            st.rerun()
+            rerun()
 
     current_page = st.session_state[f"{key}_page"]
     st.caption(f"Page {current_page}/{total_pages} • {total_items} élément(s)")

@@ -14,6 +14,7 @@ import logging
 import pandas as pd
 import streamlit as st
 
+from src.core.state import rerun
 from src.services.jeux import (
     APSCHEDULER_AVAILABLE,
     COMPETITIONS,
@@ -26,7 +27,7 @@ from src.services.jeux import (
 )
 from src.ui import etat_vide
 from src.ui.engine import charger_css
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import cached_fragment, ui_fragment
 
 logger = logging.getLogger(__name__)
 
@@ -250,7 +251,7 @@ def _synchroniser_donnees(competition: str):
                 f"✅ {result.get('marches_maj', 0)} marchés, "
                 f"{result.get('alertes_creees', 0)} alertes"
             )
-        st.rerun()
+        rerun()
 
     except Exception as e:
         logger.error(f"Erreur sync: {e}")
@@ -278,7 +279,7 @@ def _afficher_scheduler_status():
                 scheduler.arreter()
             else:
                 scheduler.demarrer(competitions=["FL1"], inclure_loto=True)
-            st.rerun()
+            rerun()
 
     with col2:
         st.markdown("**Prochaines exécutions:**")
@@ -305,7 +306,7 @@ def _afficher_scheduler_status():
 # ═══════════════════════════════════════════════════════════
 
 
-@ui_fragment
+@cached_fragment(ttl=300)
 def afficher_metriques_series():
     """Affiche des métriques rapides pour le dashboard."""
     try:

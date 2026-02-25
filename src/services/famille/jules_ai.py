@@ -10,7 +10,11 @@ from src.services.core.registry import service_factory
 
 
 class JulesAIService(BaseAIService):
-    """Service IA pour suggestions Jules"""
+    """Service IA pour suggestions Jules.
+
+    Note (S12): Hérite de BaseAIService uniquement. Les données DB sont
+    gérées côté module, ce service est purement IA/read-heavy.
+    """
 
     def __init__(self):
         super().__init__(
@@ -156,3 +160,9 @@ Jouets sûrs, éducatifs et adaptés à cet âge."""
 def obtenir_jules_ai_service() -> JulesAIService:
     """Factory singleton pour JulesAIService."""
     return JulesAIService()
+
+
+# Alias anglais
+def get_jules_ai_service() -> JulesAIService:
+    """English alias for obtenir_jules_ai_service."""
+    return obtenir_jules_ai_service()

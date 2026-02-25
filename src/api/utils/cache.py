@@ -18,6 +18,8 @@ def generate_etag(data: Any) -> str:
     """
     Génère un ETag à partir des données.
 
+    Utilise SHA-256 tronqué (A3: remplacement de MD5 déprécié).
+
     Args:
         data: Données à hasher (dict, list, ou sérialisable JSON)
 
@@ -29,7 +31,7 @@ def generate_etag(data: Any) -> str:
     else:
         content = str(data)
 
-    hash_value = hashlib.md5(content.encode()).hexdigest()[:16]
+    hash_value = hashlib.sha256(content.encode()).hexdigest()[:16]
     return f'W/"{hash_value}"'
 
 
@@ -94,7 +96,7 @@ class ETagMiddleware(BaseHTTPMiddleware):
     Middleware pour ajouter automatiquement les ETags et support 304 Not Modified.
 
     Features:
-    - Génère des ETags weak (W/) basés sur le hash MD5 du body
+    - Génère des ETags weak (W/) basés sur le hash SHA-256 tronqué du body
     - Retourne 304 Not Modified si If-None-Match correspond
     - Ajoute Cache-Control headers configurables
 
@@ -133,8 +135,8 @@ class ETagMiddleware(BaseHTTPMiddleware):
             body_parts.append(chunk)
         body = b"".join(body_parts)
 
-        # Générer l'ETag à partir du body
-        hash_value = hashlib.md5(body).hexdigest()[:16]
+        # Générer l'ETag à partir du body (SHA-256 tronqué, A3)
+        hash_value = hashlib.sha256(body).hexdigest()[:16]
         etag = f'W/"{hash_value}"'
 
         # Vérifier If-None-Match - retourner 304 si correspondance

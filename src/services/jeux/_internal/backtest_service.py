@@ -517,21 +517,15 @@ class BacktestService:
 # ═══════════════════════════════════════════════════════════
 
 
-_backtest_service_instance: BacktestService | None = None
+@service_factory("backtest", tags={"jeux", "ia", "backtest"})
+def get_backtest_service() -> BacktestService:
+    """Factory singleton pour le service de backtesting."""
+    return BacktestService()
 
 
 def obtenir_service_backtest() -> BacktestService:
-    """Factory pour obtenir le service de backtesting (singleton, convention française)."""
-    global _backtest_service_instance
-    if _backtest_service_instance is None:
-        _backtest_service_instance = BacktestService()
-    return _backtest_service_instance
-
-
-@service_factory("backtest", tags={"jeux", "ia", "backtest"})
-def get_backtest_service() -> BacktestService:
-    """Factory pour obtenir le service de backtesting (alias anglais)."""
-    return obtenir_service_backtest()
+    """Alias français pour get_backtest_service (singleton via registre)."""
+    return get_backtest_service()
 
 
 # ═══════════════════════════════════════════════════════════

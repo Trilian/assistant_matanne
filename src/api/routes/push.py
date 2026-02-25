@@ -11,9 +11,9 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
-from src.api.dependencies import get_current_user
+from src.api.dependencies import require_auth
 from src.api.schemas.push import (
     PushStatusResponse,
     PushSubscriptionRequest,
@@ -44,7 +44,7 @@ router = APIRouter(
 @gerer_exception_api
 async def souscrire_push(
     request: PushSubscriptionRequest,
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_auth),
 ):
     """
     Enregistre un abonnement push pour l'utilisateur authentifié.
@@ -52,37 +52,29 @@ async def souscrire_push(
     Le frontend doit envoyer l'objet AbonnementPush.toJSON() obtenu
     après navigator.serviceWorker.pushManager.subscribe().
     """
-    try:
-        from src.services.core.notifications.notif_web import get_push_notification_service
+    from src.services.core.notifications.notif_web import get_push_notification_service
 
-        service = get_push_notification_service()
+    service = get_push_notification_service()
 
-        subscription_info = {
-            "endpoint": request.endpoint,
-            "keys": {
-                "p256dh": request.keys.p256dh,
-                "auth": request.keys.auth,
-            },
-        }
+    subscription_info = {
+        "endpoint": request.endpoint,
+        "keys": {
+            "p256dh": request.keys.p256dh,
+            "auth": request.keys.auth,
+        },
+    }
 
-        user_id = current_user["id"]
-        subscription = service.sauvegarder_abonnement(user_id, subscription_info)
+    user_id = current_user["id"]
+    subscription = service.sauvegarder_abonnement(user_id, subscription_info)
 
-        logger.info(f"✅ Abonnement push enregistré pour {user_id}")
+    logger.info(f"✅ Abonnement push enregistré pour {user_id}")
 
-        return PushSubscriptionResponse(
-            success=True,
-            message="Abonnement push enregistré avec succès",
-            user_id=user_id,
-            endpoint=subscription.endpoint,
-        )
-
-    except Exception as e:
-        logger.error(f"Erreur lors de l'enregistrement push: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail="Erreur lors de l'enregistrement de l'abonnement push.",
-        )
+    return PushSubscriptionResponse(
+        success=True,
+        message="Abonnement push enregistré avec succès",
+        user_id=user_id,
+        endpoint=subscription.endpoint,
+    )
 
 
 @router.delete(
@@ -94,34 +86,26 @@ async def souscrire_push(
 @gerer_exception_api
 async def desabonner_push(
     request: PushUnsubscribeRequest,
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_auth),
 ):
     """
     Supprime un abonnement push pour l'utilisateur authentifié.
     """
-    try:
-        from src.services.core.notifications.notif_web import get_push_notification_service
+    from src.services.core.notifications.notif_web import get_push_notification_service
 
-        service = get_push_notification_service()
-        user_id = current_user["id"]
+    service = get_push_notification_service()
+    user_id = current_user["id"]
 
-        service.supprimer_abonnement(user_id, request.endpoint)
+    service.supprimer_abonnement(user_id, request.endpoint)
 
-        logger.info(f"Abonnement push supprimé pour {user_id}")
+    logger.info(f"Abonnement push supprimé pour {user_id}")
 
-        return PushSubscriptionResponse(
-            success=True,
-            message="Abonnement push supprimé",
-            user_id=user_id,
-            endpoint=request.endpoint,
-        )
-
-    except Exception as e:
-        logger.error(f"Erreur lors de la suppression push: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail="Erreur lors de la suppression de l'abonnement push.",
-        )
+    return PushSubscriptionResponse(
+        success=True,
+        message="Abonnement push supprimé",
+        user_id=user_id,
+        endpoint=request.endpoint,
+    )
 
 
 @router.get(
@@ -132,29 +116,21 @@ async def desabonner_push(
 )
 @gerer_exception_api
 async def obtenir_statut_push(
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(require_auth),
 ):
     """
     Retourne le statut des notifications push pour l'utilisateur authentifié.
     """
-    try:
-        from src.services.core.notifications.notif_web import get_push_notification_service
+    from src.services.core.notifications.notif_web import get_push_notification_service
 
-        service = get_push_notification_service()
-        user_id = current_user["id"]
+    service = get_push_notification_service()
+    user_id = current_user["id"]
 
-        subscriptions = service.obtenir_abonnements_utilisateur(user_id)
-        preferences = service.obtenir_preferences(user_id)
+    subscriptions = service.obtenir_abonnements_utilisateur(user_id)
+    preferences = service.obtenir_preferences(user_id)
 
-        return PushStatusResponse(
-            has_subscriptions=len(subscriptions) > 0,
-            subscription_count=len(subscriptions),
-            notifications_enabled=preferences.global_enabled if preferences else True,
-        )
-
-    except Exception as e:
-        logger.error(f"Erreur lors de la récupération du statut push: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail="Erreur lors de la récupération du statut des notifications.",
-        )
+    return PushStatusResponse(
+        has_subscriptions=len(subscriptions) > 0,
+        subscription_count=len(subscriptions),
+        notifications_enabled=preferences.global_enabled if preferences else True,
+    )

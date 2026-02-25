@@ -6,7 +6,7 @@ from datetime import date
 
 import streamlit as st
 
-from src.core.state import GestionnaireEtat
+from src.core.state import GestionnaireEtat, rerun
 from src.ui.fragments import auto_refresh
 
 
@@ -134,7 +134,7 @@ def afficher_modules(stats: dict):
             "🌳\n\n**Jardin**\n\n" + "Potager", use_container_width=True, key="btn_jardin"
         ):
             GestionnaireEtat.naviguer_vers("maison.jardin")
-            st.rerun()
+            rerun()
 
         st.markdown(
             """
@@ -150,7 +150,7 @@ def afficher_modules(stats: dict):
             "🏡\n\n**Entretien**\n\n" + "Équipements", use_container_width=True, key="btn_entretien"
         ):
             GestionnaireEtat.naviguer_vers("maison.entretien")
-            st.rerun()
+            rerun()
 
         st.markdown(
             """
@@ -166,7 +166,7 @@ def afficher_modules(stats: dict):
             "💡\n\n**Charges**\n\nÉnergie & contrats", use_container_width=True, key="btn_charges"
         ):
             GestionnaireEtat.naviguer_vers("maison.charges")
-            st.rerun()
+            rerun()
 
         st.markdown(
             """
@@ -182,7 +182,7 @@ def afficher_modules(stats: dict):
             "💰\n\n**Dépenses**\n\nBudget maison", use_container_width=True, key="btn_depenses"
         ):
             GestionnaireEtat.naviguer_vers("maison.depenses")
-            st.rerun()
+            rerun()
 
         st.markdown(
             """

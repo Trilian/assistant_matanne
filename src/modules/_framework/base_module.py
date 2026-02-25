@@ -25,9 +25,39 @@ from typing import Any, Callable, Generic, TypeVar
 import streamlit as st
 
 from src.modules._framework.error_boundary import error_boundary
-from src.modules._framework.state_manager import ModuleState
 
 logger = logging.getLogger(__name__)
+
+
+class ModuleState:
+    """Gestionnaire d'état préfixé pour modules Streamlit (léger).
+
+    Chaque module reçoit un namespace dédié dans ``st.session_state``
+    pour éviter les collisions de clés.
+    """
+
+    def __init__(self, module_name: str, defaults: dict[str, Any] | None = None):
+        self._prefix = f"mod_{module_name}_"
+        for key, value in (defaults or {}).items():
+            full_key = self._prefix + key
+            if full_key not in st.session_state:
+                st.session_state[full_key] = value
+
+    def get(self, key: str, default: Any = None) -> Any:
+        return st.session_state.get(self._prefix + key, default)
+
+    def set(self, key: str, value: Any) -> None:
+        st.session_state[self._prefix + key] = value
+
+    def __getitem__(self, key: str) -> Any:
+        return st.session_state[self._prefix + key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        st.session_state[self._prefix + key] = value
+
+    def __contains__(self, key: str) -> bool:
+        return (self._prefix + key) in st.session_state
+
 
 T = TypeVar("T")  # Type du service principal
 

@@ -512,15 +512,15 @@ class PredictionServiceJeux:
 # ═══════════════════════════════════════════════════════════
 
 
-def obtenir_service_predictions_jeux() -> PredictionServiceJeux:
-    """Factory pour créer une instance du service de prédiction (convention française)."""
+@service_factory("prediction", tags={"jeux", "ia", "prediction"})
+def get_prediction_service() -> PredictionServiceJeux:
+    """Factory singleton pour le service de prédiction."""
     return PredictionServiceJeux()
 
 
-@service_factory("prediction", tags={"jeux", "ia", "prediction"})
-def get_prediction_service() -> PredictionServiceJeux:
-    """Factory pour créer une instance du service de prédiction (alias anglais)."""
-    return obtenir_service_predictions_jeux()
+def obtenir_service_predictions_jeux() -> PredictionServiceJeux:
+    """Alias français pour get_prediction_service (singleton via registre)."""
+    return get_prediction_service()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -532,17 +532,8 @@ PredictionService = PredictionServiceJeux
 
 
 # ═══════════════════════════════════════════════════════════
-# FONCTIONS DE COMPATIBILITÉ
+# FONCTIONS DE COMPATIBILITÉ — délèguent au singleton registre
 # ═══════════════════════════════════════════════════════════
-
-_service: PredictionServiceJeux | None = None
-
-
-def _get_service() -> PredictionServiceJeux:
-    global _service
-    if _service is None:
-        _service = PredictionServiceJeux()
-    return _service
 
 
 def predire_resultat_match(
@@ -553,7 +544,7 @@ def predire_resultat_match(
     facteurs_supplementaires: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Fonction de compatibilité avec l'ancienne API."""
-    service = _get_service()
+    service = get_prediction_service()
     result = service.predire_resultat_match(
         forme_domicile, forme_exterieur, h2h, cotes, facteurs_supplementaires
     )
@@ -566,7 +557,7 @@ def predire_over_under(
     seuil: float = 2.5,
 ) -> dict[str, Any]:
     """Fonction de compatibilité avec l'ancienne API."""
-    service = _get_service()
+    service = get_prediction_service()
     result = service.predire_over_under(forme_domicile, forme_exterieur, seuil)
     return result.model_dump()
 
@@ -577,7 +568,7 @@ def generer_conseils_avances(
     cotes: dict[str, float] | None = None,
 ) -> list[dict[str, str]]:
     """Fonction de compatibilité avec l'ancienne API."""
-    service = _get_service()
+    service = get_prediction_service()
     results = service.generer_conseils_avances(forme_dom, forme_ext, cotes)
     return [r.model_dump() for r in results]
 
@@ -589,5 +580,5 @@ def generer_conseil_pari(
     proba_nul: float = 0.25,
 ) -> str:
     """Fonction de compatibilité avec l'ancienne API."""
-    service = _get_service()
+    service = get_prediction_service()
     return service._generer_conseil_pari(prediction, confiance, cotes)

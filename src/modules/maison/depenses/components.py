@@ -8,7 +8,7 @@ Ré-exporte les fonctions depuis les sous-modules:
   - export.py: Export CSV/Excel
 """
 
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import cached_fragment, ui_fragment
 
 from .cards import afficher_depense_card, afficher_formulaire
 from .charts import (
@@ -22,7 +22,7 @@ from .previsions import afficher_previsions_ia
 from .utils import CATEGORY_LABELS, MOIS_FR, date, st
 
 
-@ui_fragment
+@cached_fragment(ttl=300)
 def afficher_stats_dashboard():
     """Affiche le dashboard de stats"""
     stats = get_stats_globales()

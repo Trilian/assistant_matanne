@@ -27,6 +27,7 @@ from src.core.models import (
     Repas,
 )
 from src.services.core.events import obtenir_bus
+from src.services.core.registry import service_factory
 
 from .generateur import ICalGenerator
 from .google_calendar import GoogleCalendarMixin
@@ -44,6 +45,9 @@ logger = logging.getLogger(__name__)
 class CalendarSyncService(GoogleCalendarMixin):
     """
     Service de synchronisation avec les calendriers externes.
+
+    Note (S12): Service d'intégration standalone sans BaseService[T] — acceptable
+    car il gère la sync bidirectionnelle, pas du CRUD standard.
 
     Supporte:
     - Google Calendar (OAuth2)
@@ -526,9 +530,6 @@ class CalendarSyncService(GoogleCalendarMixin):
 # ═══════════════════════════════════════════════════════════
 # FACTORY
 # ═══════════════════════════════════════════════════════════
-
-
-from src.services.core.registry import service_factory
 
 
 @service_factory("calendrier", tags={"famille", "integration"})

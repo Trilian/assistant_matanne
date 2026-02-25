@@ -111,10 +111,9 @@ def carte_metrique_avancee(
 
     if lien_module:
         if st.button(f"Voir {titre}", key=f"link_{lien_module}", use_container_width=True):
-            from src.core.state import GestionnaireEtat
+            from src.core.state import naviguer
 
-            GestionnaireEtat.naviguer_vers(lien_module)
-            st.rerun()
+            naviguer(lien_module)
 
 
 @composant_ui("metrics", exemple="widget_jules_apercu()", tags=["jules", "famille", "dashboard"])

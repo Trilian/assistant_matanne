@@ -15,6 +15,7 @@ from datetime import date, datetime, timedelta
 
 import streamlit as st
 
+from src.core.state import naviguer
 from src.ui.keys import KeyNamespace
 from src.ui.registry import composant_ui
 from src.ui.tokens_semantic import Sem
@@ -301,10 +302,7 @@ def widget_jules_aujourdhui(afficher_export: bool = True) -> None:
             "Aucune donnée enregistrée pour aujourd'hui. Commencez à tracer la journée de Jules!"
         )
         if st.button("➕ Ajouter une activité", key=_keys("ajouter")):
-            from src.core.state import GestionnaireEtat
-
-            GestionnaireEtat.naviguer_vers("famille.jules")
-            st.rerun()
+            naviguer("famille.jules")
         return
 
     # Timeline des activités
@@ -325,7 +323,7 @@ def widget_jules_aujourdhui(afficher_export: bool = True) -> None:
 
             st.markdown(
                 f"""<div style="padding: 8px; margin: 4px 0; background: {Sem.SURFACE_ALT};
-                border-radius: 8px; border-left: 4px solid {Sem.PRIMARY};">
+                border-radius: 8px; border-left: 4px solid {Sem.INTERACTIVE};">
                     <strong>{heure}</strong> {icone} {a['titre']}{humeur_badge}
                     {f"<br><small style='color: {Sem.ON_SURFACE_SECONDARY};'>{a['notes']}</small>" if a.get('notes') else ""}
                 </div>""",
@@ -422,10 +420,7 @@ def carte_resume_jules() -> None:
     )
 
     if st.button("📝 Voir le détail", key=_keys("voir_detail")):
-        from src.core.state import GestionnaireEtat
-
-        GestionnaireEtat.naviguer_vers("famille.jules")
-        st.rerun()
+        naviguer("famille.jules")
 
 
 __all__ = [

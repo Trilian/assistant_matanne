@@ -494,9 +494,10 @@ class SeriesService:
 # ═══════════════════════════════════════════════════════════════════
 
 
-def obtenir_service_series() -> SeriesService:
+@service_factory("series", tags={"jeux", "crud", "series"})
+def get_series_service() -> SeriesService:
     """
-    Factory pour obtenir une instance de SeriesService (convention française).
+    Factory singleton pour SeriesService.
 
     Returns:
         Instance de SeriesService
@@ -504,12 +505,11 @@ def obtenir_service_series() -> SeriesService:
     return SeriesService()
 
 
-@service_factory("series", tags={"jeux", "crud", "series"})
-def get_series_service() -> SeriesService:
+def obtenir_service_series() -> SeriesService:
     """
-    Factory pour obtenir une instance de SeriesService (alias anglais).
+    Alias français pour get_series_service (singleton via registre).
 
     Returns:
         Instance de SeriesService
     """
-    return obtenir_service_series()
+    return get_series_service()

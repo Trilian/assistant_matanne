@@ -19,9 +19,11 @@ logger = logging.getLogger(__name__)
 
 
 class HubDataService:
-    """Service de données pour le hub maison."""
+    """Service de données pour le hub maison.
 
-    _instance: "HubDataService | None" = None
+    Note (S12): Service read-heavy standalone sans BaseService[T] — acceptable
+    car il ne fait que de la lecture agrégée, pas de CRUD standard.
+    """
 
     @avec_cache(ttl=300)
     @avec_session_db
@@ -75,11 +77,9 @@ class HubDataService:
 @service_factory("hub_data", tags={"maison", "data"})
 def get_hub_data_service() -> HubDataService:
     """Factory singleton pour le service hub data."""
-    if HubDataService._instance is None:
-        HubDataService._instance = HubDataService()
-    return HubDataService._instance
+    return HubDataService()
 
 
 def obtenir_service_hub_data() -> HubDataService:
-    """Factory française pour le service hub data."""
+    """Alias français pour get_hub_data_service."""
     return get_hub_data_service()

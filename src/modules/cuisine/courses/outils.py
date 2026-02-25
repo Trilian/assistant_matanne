@@ -7,6 +7,7 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 
+from src.core.state import rerun
 from src.services.cuisine.courses import obtenir_service_courses
 from src.ui.fragments import ui_fragment
 
@@ -139,7 +140,7 @@ def afficher_outils():
                         count = service.importer_articles_csv(df_import.to_dict("records"))
                         st.success(f"✅ {count} articles importés!")
                         st.session_state.courses_refresh += 1
-                        st.rerun()
+                        rerun()
                 except Exception as e:
                     st.error(f"❌ Erreur import: {str(e)}")
 

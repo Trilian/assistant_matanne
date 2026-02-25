@@ -20,6 +20,7 @@ from enum import StrEnum
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.ui.tokens import Couleur, Espacement, Rayon
 from src.ui.tokens_semantic import _DARK_MAPPING, _LIGHT_MAPPING
 
@@ -61,8 +62,19 @@ class Theme:
     # ── Propriétés dérivées ────────────────────────────────
 
     def _sem(self, key: str) -> str:
-        """Retourne la valeur d'un token sémantique selon le mode."""
-        mapping = _DARK_MAPPING if self.mode == ModeTheme.SOMBRE else _LIGHT_MAPPING
+        """Retourne la valeur d'un token sémantique selon le mode.
+
+        En mode AUTO, utilise le mode clair comme défaut côté serveur.
+        La détection prefers-color-scheme est gérée côté CSS/JS
+        par ``injecter_tokens_semantiques()`` dans tokens_semantic.py
+        qui injecte un @media (prefers-color-scheme: dark) override.
+        """
+        if self.mode == ModeTheme.SOMBRE:
+            mapping = _DARK_MAPPING
+        else:
+            # AUTO et CLAIR → clair par défaut côté Python
+            # Le CSS @media query override gère le dark en AUTO
+            mapping = _LIGHT_MAPPING
         return mapping.get(key, "")
 
     @property
@@ -136,9 +148,7 @@ class Theme:
         """Génère le CSS complet incluant variables et overrides."""
         css = self.generer_css_variables()
 
-        if self.mode == ModeTheme.SOMBRE:
-            css += """
-/* Mode sombre — overrides */
+        dark_overrides = """
 .stApp {
     background-color: var(--theme-bg-primary) !important;
     color: var(--theme-text-primary) !important;
@@ -160,6 +170,36 @@ class Theme:
     background-color: var(--theme-bg-card) !important;
     border-color: var(--theme-border) !important;
 }
+"""
+
+        if self.mode == ModeTheme.SOMBRE:
+            css += f"""
+/* Mode sombre — overrides */
+{dark_overrides}
+"""
+        elif self.mode == ModeTheme.AUTO:
+            # En mode AUTO, calculer les valeurs dark pour le media query
+            dark_theme = Theme(
+                mode=ModeTheme.SOMBRE,
+                accent=self.accent,
+                rayon_bordure=self.rayon_bordure,
+                densite=self.densite,
+                police_personnalisee=self.police_personnalisee,
+            )
+            css += f"""
+/* Mode AUTO — prefers-color-scheme detection */
+@media (prefers-color-scheme: dark) {{
+    :root {{
+        --theme-bg-primary: {dark_theme.bg_primary};
+        --theme-bg-secondary: {dark_theme.bg_secondary};
+        --theme-bg-card: {dark_theme.bg_card};
+        --theme-text-primary: {dark_theme.text_primary};
+        --theme-text-secondary: {dark_theme.text_secondary};
+        --theme-border: {dark_theme.border_color};
+        --theme-shadow: {dark_theme.shadow};
+    }}
+{dark_overrides}
+}}
 """
 
         if self.densite == DensiteAffichage.COMPACT:
@@ -304,7 +344,7 @@ def afficher_selecteur_theme() -> None:
             accent=nouveau_accent,
             densite=nouvelle_densite,
         )
-        st.rerun()
+        rerun()
 
 
 __all__ = [

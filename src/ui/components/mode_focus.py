@@ -17,6 +17,7 @@ import logging
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.ui.keys import KeyNamespace
 from src.ui.registry import composant_ui
 from src.ui.state.url import get_url_param, set_url_param
@@ -130,7 +131,7 @@ def mode_focus_toggle(position: str = "top-right") -> None:
         type="secondary" if not actif else "primary",
     ):
         toggle_mode_focus()
-        st.rerun()
+        rerun()
 
 
 @composant_ui("focus", tags=("ui", "fab", "focus"))
@@ -141,45 +142,33 @@ def mode_focus_fab() -> None:
     """
     actif = is_mode_focus()
     icone = "↩️" if actif else "🧘"
+    label_a11y = "Quitter le mode focus" if actif else "Activer le mode focus"
 
-    # CSS pour le FAB
+    # CSS pour positionner le bouton FAB via Streamlit button styling
     st.markdown(
         """
         <style>
-        .focus-fab {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--st-color-primary);
-            color: white;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .focus-fab:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        /* Style FAB sur le dernier bouton du container focus */
+        [data-testid="stHorizontalBlock"]:has(button[kind="secondary"]) > div:last-child button {
+            border-radius: 50% !important;
+            min-width: 48px;
+            min-height: 48px;
         }
         </style>
         """,
         unsafe_allow_html=True,
     )
 
-    # Utiliser st.button invisible + HTML visible
+    # Un seul contrôle interactif pour l'accessibilité
     col_spacer, col_fab = st.columns([9, 1])
     with col_fab:
-        if st.button(icone, key=_keys("fab"), help="Mode focus"):
+        if st.button(
+            icone,
+            key=_keys("fab"),
+            help=label_a11y,
+        ):
             toggle_mode_focus()
-            st.rerun()
+            rerun()
 
 
 @composant_ui("focus", tags=("css", "layout", "focus"))
@@ -259,7 +248,7 @@ def focus_exit_button() -> None:
             use_container_width=True,
         ):
             desactiver_mode_focus()
-            st.rerun()
+            rerun()
 
 
 __all__ = [

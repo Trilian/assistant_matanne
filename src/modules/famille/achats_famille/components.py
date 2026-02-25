@@ -4,6 +4,7 @@ Module Achats Famille - Composants UI
 
 import logging
 
+from src.core.state import rerun
 from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
 
@@ -126,11 +127,11 @@ def afficher_achat_card(achat: AchatFamille):
         with col3:
             if st.button("✅", key=f"buy_{achat.id}", help="Marquer achete"):
                 mark_as_bought(achat.id)
-                st.rerun()
+                rerun()
 
             if st.button("🗑️", key=f"del_{achat.id}", help="Supprimer"):
                 delete_purchase(achat.id)
-                st.rerun()
+                rerun()
 
 
 @ui_fragment
@@ -202,7 +203,7 @@ def afficher_add_form():
                         suggere_par="manuel",
                     )
                     st.success(f"✅ {nom} ajoute!")
-                    st.rerun()
+                    rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")
 
@@ -283,7 +284,7 @@ def afficher_par_magasin():
                 with col2:
                     if st.checkbox("", key=f"check_{achat.id}"):
                         mark_as_bought(achat.id)
-                        st.rerun()
+                        rerun()
 
     # Sans magasin
     if sans_magasin:

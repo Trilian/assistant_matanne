@@ -8,6 +8,7 @@ import time
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
@@ -323,7 +324,7 @@ def afficher_liste():
                     "👁️ Voir détails", use_container_width=True, key=_keys("detail", recette.id)
                 ):
                     st.session_state.detail_recette_id = recette.id
-                    st.rerun()
+                    rerun()
 
                 # Bouton supprimer avec popover confirmation
                 with st.popover("🗑️ Supprimer", width="stretch"):
@@ -340,7 +341,7 @@ def afficher_liste():
                                             st.success("✅ Recette supprimée!")
                                             st.session_state.detail_recette_id = None
                                             time.sleep(1)
-                                            st.rerun()
+                                            rerun()
                                         else:
                                             st.error("❌ Impossible de supprimer la recette")
                                 except Exception as e:
@@ -349,7 +350,7 @@ def afficher_liste():
                         if st.button(
                             "❌ Annuler", width="stretch", key=_keys("del_non", recette.id)
                         ):
-                            st.rerun()
+                            rerun()
 
     # Pagination controls
     st.divider()
@@ -359,7 +360,7 @@ def afficher_liste():
         if st.session_state[_keys("page")] > 0:
             if st.button("⬅️ Précédent"):
                 st.session_state[_keys("page")] -= 1
-                st.rerun()
+                rerun()
 
     with col3:
         st.write(f"Page {st.session_state[_keys('page')] + 1}/{total_pages}")
@@ -368,7 +369,7 @@ def afficher_liste():
         if st.session_state[_keys("page")] < total_pages - 1:
             if st.button("Suivant ➡️"):
                 st.session_state[_keys("page")] += 1
-                st.rerun()
+                rerun()
 
 
 __all__ = ["afficher_liste"]

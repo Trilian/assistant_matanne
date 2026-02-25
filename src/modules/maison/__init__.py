@@ -11,9 +11,14 @@ Sous-modules disponibles:
 __all__ = [
     "charges",
     "depenses",
+    "eco_tips",
+    "energie",
     "entretien",
     "hub",
     "jardin",
+    "jardin_zones",
+    "meubles",
+    "projets",
 ]
 
 

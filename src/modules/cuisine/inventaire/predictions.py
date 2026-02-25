@@ -7,6 +7,7 @@ import pandas as pd
 import streamlit as st
 
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.services.cuisine.suggestions import obtenir_service_predictions
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui import etat_vide
@@ -47,7 +48,7 @@ def afficher_predictions():
             ):
                 st.session_state.predictions_generated = True
                 st.session_state.predictions_data = None
-                st.rerun()
+                rerun()
 
         with col2:
             # Période de prédiction

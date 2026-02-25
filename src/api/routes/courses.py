@@ -26,6 +26,7 @@ async def lister_courses(
     page: int = Query(1, ge=1, description="Numéro de page (1-indexé)"),
     page_size: int = Query(20, ge=1, le=100, description="Nombre d'éléments par page"),
     active_only: bool = Query(True, description="Afficher uniquement les listes non archivées"),
+    user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
     Liste les listes de courses avec pagination.
@@ -61,7 +62,7 @@ async def lister_courses(
             query = session.query(ListeCourses)
 
             if active_only:
-                query = query.filter(ListeCourses.archivee == False)
+                query = query.filter(ListeCourses.archivee.is_(False))
 
             total = query.count()
 
@@ -200,7 +201,7 @@ async def ajouter_article(
 
 @router.get("/{liste_id}", response_model=ListeCoursesResponse)
 @gerer_exception_api
-async def obtenir_liste(liste_id: int):
+async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
     Récupère une liste de courses avec ses articles détaillés.
 

@@ -5,6 +5,8 @@ from datetime import date, datetime, timedelta
 
 import streamlit as st
 
+from src.ui.fragments import cached_fragment
+
 from .data import charger_catalogue_entretien
 from .logic import (
     calculer_score_proprete,
@@ -29,10 +31,8 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-from src.ui.fragments import cached_fragment, ui_fragment
 
-
-@ui_fragment
+@cached_fragment(ttl=300)
 def onglet_historique(historique: list[dict]):
     """Onglet historique des entretiens."""
     st.subheader("📜 Historique")
@@ -90,7 +90,7 @@ def onglet_historique(historique: list[dict]):
         afficher_timeline_item(h, catalogue)
 
 
-@ui_fragment
+@cached_fragment(ttl=300)
 def onglet_stats(mes_objets: list[dict], historique: list[dict]):
     """Onglet statistiques détaillées avec gamification."""
     st.subheader("📊 Statistiques & Badges")

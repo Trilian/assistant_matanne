@@ -115,7 +115,7 @@ def app():
             else:
                 st.warning("⚠️ Aucun planning de repas trouvé.")
                 if st.button("📅 Aller au planificateur de repas"):
-                    from src.core.state import naviguer
+                    from src.core.state import naviguer, rerun
 
                     naviguer("cuisine.planificateur_repas")
 
@@ -136,7 +136,7 @@ def app():
                         if result:
                             st.session_state.batch_data = result
                             st.success("✅ Instructions générées!")
-                            st.rerun()
+                            rerun()
                         else:
                             st.error("❌ Impossible de générer les instructions")
 

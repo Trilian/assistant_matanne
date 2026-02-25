@@ -13,6 +13,7 @@ import streamlit as st
 
 from src.core.decorators import avec_session_db
 from src.core.models import Projet, TacheProjet
+from src.core.state import rerun
 from src.ui.keys import KeyNamespace
 
 logger = logging.getLogger(__name__)
@@ -126,11 +127,11 @@ def _afficher_projet_card(projet: Projet, keys: KeyNamespace, icon: str = "🏗�
             if projet.statut == "en_cours":
                 if st.button("✅ Terminer", key=keys(f"terminer_{projet.id}")):
                     _terminer_projet(projet.id)
-                    st.rerun()
+                    rerun()
 
             if st.button("🗑️ Supprimer", key=keys(f"supprimer_{projet.id}")):
                 _supprimer_projet(projet.id)
-                st.rerun()
+                rerun()
 
         # Tâches du projet
         if projet.tasks:

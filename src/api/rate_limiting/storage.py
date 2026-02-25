@@ -4,8 +4,14 @@ Stockage des compteurs de limitation de débit.
 Implémentation en mémoire (pour développement).
 Pour la production, utiliser Redis.
 
-Thread-safety: toutes les opérations sont protégées par un ``threading.Lock``
-pour éviter les race conditions en multi-worker (uvicorn --workers N).
+ATTENTION (A11): Ce stockage in-memory fonctionne correctement uniquement en mode
+single-worker. Avec Uvicorn multi-workers (--workers N), chaque worker possède son
+propre compteur en mémoire, ce qui rend les limites N fois plus permissives.
+Pour une limitation de débit fiable en multi-workers, configurer REDIS_URL dans
+l'environnement afin d'utiliser StockageRedis (redis_storage.py).
+
+Thread-safety: les opérations sont protégées par un ``threading.Lock``
+pour gérer les accès concurrents au sein d'un même worker (threads).
 """
 
 import threading

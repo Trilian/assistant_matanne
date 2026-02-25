@@ -23,6 +23,7 @@ from src.services.core.notifications.types import (
     NotificationNtfy,
     ResultatEnvoiNtfy,
 )
+from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
@@ -266,8 +267,13 @@ class PlanificateurNtfy:
 # ═══════════════════════════════════════════════════════════
 
 
+@service_factory("ntfy", tags={"notification"})
 def obtenir_service_ntfy(config: ConfigurationNtfy | None = None) -> ServiceNtfy:
-    """Factory pour le service de notifications ntfy."""
+    """Factory singleton pour le service de notifications ntfy.
+
+    Sans argument: singleton via registre.
+    Avec config: bypass singleton (instance dédiée).
+    """
     return ServiceNtfy(config)
 
 
@@ -276,8 +282,9 @@ def get_ntfy_service(config: ConfigurationNtfy | None = None) -> ServiceNtfy:
     return obtenir_service_ntfy(config)
 
 
+@service_factory("planificateur_ntfy", tags={"notification", "scheduler"})
 def obtenir_planificateur_ntfy() -> PlanificateurNtfy:
-    """Factory pour le planificateur de notifications ntfy."""
+    """Factory singleton pour le planificateur de notifications ntfy."""
     service = obtenir_service_ntfy()
     return PlanificateurNtfy(service)
 

@@ -28,6 +28,7 @@ from collections.abc import Callable
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.ui.registry import composant_ui
 
 # ═══════════════════════════════════════════════════════════
@@ -66,10 +67,10 @@ def confirm_dialog(
             if st.button(confirm_label, type="primary", use_container_width=True):
                 if on_confirm:
                     on_confirm()
-                st.rerun()
+                rerun()
         with col2:
             if st.button(cancel_label, use_container_width=True):
-                st.rerun()
+                rerun()
 
     _dlg()
 

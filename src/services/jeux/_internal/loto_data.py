@@ -394,9 +394,10 @@ class LotoDataService:
 # ═══════════════════════════════════════════════════════════
 
 
-def obtenir_service_donnees_loto() -> LotoDataService:
+@service_factory("loto_data", tags={"jeux", "data", "loto"})
+def get_loto_data_service() -> LotoDataService:
     """
-    Factory pour créer une instance du service (convention française).
+    Factory singleton pour le service (singleton via registre).
 
     Returns:
         Instance LotoDataService
@@ -404,12 +405,11 @@ def obtenir_service_donnees_loto() -> LotoDataService:
     return LotoDataService()
 
 
-@service_factory("loto_data", tags={"jeux", "data", "loto"})
-def get_loto_data_service() -> LotoDataService:
+def obtenir_service_donnees_loto() -> LotoDataService:
     """
-    Factory pour créer une instance du service (alias anglais).
+    Alias français pour get_loto_data_service (singleton via registre).
 
     Returns:
         Instance LotoDataService
     """
-    return obtenir_service_donnees_loto()
+    return get_loto_data_service()

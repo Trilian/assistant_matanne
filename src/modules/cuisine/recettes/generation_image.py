@@ -4,6 +4,7 @@ Génération d'images pour les recettes.
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.ui.keys import KeyNamespace
 
@@ -63,7 +64,13 @@ def afficher_generer_image(recette):
                 st.session_state[_keys("generated", recette.id)] = url_image
 
                 # Afficher l'image en grande avec ratio maintenu
-                st.image(url_image, caption=f"🍽️ {recette.nom}", use_column_width=True)
+                st.markdown(
+                    f'<img src="{url_image}" loading="lazy" decoding="async" '
+                    f'alt="🍽️ {recette.nom}" style="width: 100%; height: auto; '
+                    f'border-radius: 8px; object-fit: cover;" />',
+                    unsafe_allow_html=True,
+                )
+                st.caption(f"🍽️ {recette.nom}")
             else:
                 status_placeholder.empty()
                 st.error("❌ Impossible de générer l'image - aucune source ne retourne d'image")
@@ -81,7 +88,13 @@ def afficher_generer_image(recette):
     # Afficher l'image si elle existe en session state
     if _keys("generated", recette.id) in st.session_state:
         url_image = st.session_state[_keys("generated", recette.id)]
-        st.image(url_image, caption=f"🍽️ {recette.nom}", use_column_width=True)
+        st.markdown(
+            f'<img src="{url_image}" loading="lazy" decoding="async" '
+            f'alt="🍽️ {recette.nom}" style="width: 100%; height: auto; '
+            f'border-radius: 8px; object-fit: cover;" />',
+            unsafe_allow_html=True,
+        )
+        st.caption(f"🍽️ {recette.nom}")
 
         # Proposer de sauvegarder
         if st.button(
@@ -93,7 +106,7 @@ def afficher_generer_image(recette):
                     recette.url_image = url_image
                     service.update(recette.id, {"url_image": url_image})
                     st.success("✅ Image sauvegardée dans la recette!")
-                    st.rerun()
+                    rerun()
                 except Exception as e:
                     st.error(f"❌ Erreur sauvegarde: {str(e)}")
 

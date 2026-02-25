@@ -17,6 +17,7 @@ import streamlit as st
 
 from src.core.ai import obtenir_client_ia
 from src.core.monitoring import profiler_rerun
+from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
@@ -139,7 +140,7 @@ def app():
                         help=suggestion,
                     ):
                         messages.append({"role": "user", "content": suggestion})
-                        st.rerun()
+                        rerun()
 
         # Afficher l'historique
         for msg in messages:
@@ -175,6 +176,6 @@ def app():
         with col1:
             if st.button("🗑️ Effacer", key=_keys("clear"), use_container_width=True):
                 st.session_state[_SK_MESSAGES] = []
-                st.rerun()
+                rerun()
     with col2:
         st.caption(f"💬 {len(messages)} message(s) dans la conversation")

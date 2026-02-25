@@ -362,8 +362,9 @@ class TestRenderNoterSortie:
 class TestRenderDayActivitiesAddButton:
     """Tests for add button in afficher_day_activities (lines 54-56)"""
 
+    @patch("src.modules.famille.weekend.components.rerun")
     @patch("src.modules.famille.weekend.components.st")
-    def test_render_day_activities_add_button_click(self, mock_st) -> None:
+    def test_render_day_activities_add_button_click(self, mock_st, mock_rerun) -> None:
         from src.modules.famille.weekend.components import afficher_day_activities
 
         setup_mock_st(mock_st)
@@ -373,20 +374,23 @@ class TestRenderDayActivitiesAddButton:
         afficher_day_activities(test_date, [])
 
         assert mock_st.session_state["weekend_add_date"] == test_date
-        mock_st.rerun.assert_called()
+        mock_rerun.assert_called()
 
 
 @pytest.mark.unit
 class TestRenderDayActivitiesDoneButton:
     """Tests for done button in afficher_day_activities (lines 76-82)"""
 
+    @patch("src.modules.famille.weekend.components.rerun")
     @patch("src.modules.famille.weekend.components.mark_activity_done")
     @patch(
         "src.modules.famille.weekend.components.TYPES_ACTIVITES",
         {"parc": {"emoji": "🌳", "label": "Parc"}, "autre": {"emoji": "📌", "label": "Autre"}},
     )
     @patch("src.modules.famille.weekend.components.st")
-    def test_render_day_activities_done_button_click(self, mock_st, mock_mark_done) -> None:
+    def test_render_day_activities_done_button_click(
+        self, mock_st, mock_mark_done, mock_rerun
+    ) -> None:
         from src.modules.famille.weekend.components import afficher_day_activities
 
         setup_mock_st(mock_st)
@@ -404,7 +408,7 @@ class TestRenderDayActivitiesDoneButton:
         afficher_day_activities(date(2026, 2, 21), [mock_activity])
 
         mock_mark_done.assert_called_with(42)
-        mock_st.rerun.assert_called()
+        mock_rerun.assert_called()
 
     @patch(
         "src.modules.famille.weekend.components.TYPES_ACTIVITES",
@@ -579,12 +583,13 @@ class TestRenderLieuxTestesFilter:
 class TestRenderAddActivitySubmit:
     """Tests for form submission in afficher_add_activity (lines 217-239)"""
 
+    @patch("src.modules.famille.weekend.components.rerun")
     @patch("src.modules.famille.weekend.components.ActiviteWeekend")
     @patch("src.modules.famille.weekend.components.obtenir_service_weekend")
     @patch("src.modules.famille.weekend.components.get_next_weekend")
     @patch("src.modules.famille.weekend.components.st")
     def test_render_add_activity_submit_valid(
-        self, mock_st, mock_weekend, mock_svc_factory, mock_activity_class
+        self, mock_st, mock_weekend, mock_svc_factory, mock_activity_class, mock_rerun
     ) -> None:
         from src.modules.famille.weekend.components import afficher_add_activity
 
@@ -606,9 +611,7 @@ class TestRenderAddActivitySubmit:
 
         mock_service.ajouter_activite.assert_called()
         mock_st.success.assert_called()
-        mock_st.rerun.assert_called()
-
-        mock_st.rerun.assert_called()
+        mock_rerun.assert_called()
 
     @patch("src.modules.famille.weekend.components.ActiviteWeekend")
     @patch("src.modules.famille.weekend.components.obtenir_service_weekend")

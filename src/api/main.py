@@ -299,7 +299,13 @@ async def health_check():
 
 @app.get("/metrics", tags=["Santé"])
 async def get_api_metrics(user: dict = Depends(require_role("admin"))):
-    """Retourne les métriques de l'API (latence, requêtes, rate limiting)."""
+    """Retourne les métriques de l'API (latence, requêtes, rate limiting).
+
+    Nécessite le rôle admin.
+
+    Returns:
+        Dict structuré avec uptime, requests, latency, rate_limiting et ai.
+    """
     from src.api.utils import get_metrics
 
     return get_metrics()

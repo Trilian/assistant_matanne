@@ -10,6 +10,7 @@ import streamlit as st
 
 from src.core.db import obtenir_contexte_db  # Re-export pour tests
 from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
@@ -57,7 +58,7 @@ def app():
                 afficher_formulaire(action)
                 if st.button("← Annuler"):
                     del st.session_state[_keys("edit_id")]
-                    st.rerun()
+                    rerun()
                 return
             else:
                 # Action non trouvée — continuer normalement

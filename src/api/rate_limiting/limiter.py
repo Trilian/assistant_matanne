@@ -1,7 +1,6 @@
-"""
-Limiteur de débit principal.
-"""
+"""Limiteur de débit principal."""
 
+import ipaddress
 import logging
 from typing import Any
 
@@ -33,6 +32,26 @@ class LimiteurDebit:
             self.stockage = obtenir_stockage_optimal()
         self.config = config or config_limitation_debit
 
+    def _extraire_ip_client(self, request: Request) -> str:
+        """Extrait l'IP du client avec validation du format (A7).
+
+        Valide que l'IP extraite de X-Forwarded-For est bien une adresse IP
+        valide pour éviter les injections dans les clés de rate limiting.
+        """
+        forwarded = request.headers.get("X-Forwarded-For")
+        if forwarded:
+            ip_candidate = forwarded.split(",")[0].strip()
+            try:
+                # Valider que c'est une IP valide (IPv4 ou IPv6)
+                ipaddress.ip_address(ip_candidate)
+                return ip_candidate
+            except ValueError:
+                logger.warning(
+                    f"X-Forwarded-For contient une IP invalide: '{ip_candidate}'. "
+                    "Utilisation de l'IP directe."
+                )
+        return request.client.host if request.client else "unknown"
+
     def _generer_cle(
         self,
         request: Request,
@@ -44,11 +63,7 @@ class LimiteurDebit:
         if identifiant:
             parties.append(f"user:{identifiant}")
         else:
-            forwarded = request.headers.get("X-Forwarded-For")
-            if forwarded:
-                ip = forwarded.split(",")[0].strip()
-            else:
-                ip = request.client.host if request.client else "unknown"
+            ip = self._extraire_ip_client(request)
             parties.append(f"ip:{ip}")
         if endpoint:
             parties.append(f"endpoint:{endpoint}")

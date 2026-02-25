@@ -190,15 +190,49 @@ def injecter_tokens_semantiques() -> None:
     if theme.mode == ModeTheme.SOMBRE:
         css = _generer_css_tokens(_DARK_MAPPING)
     elif theme.mode == ModeTheme.AUTO:
-        # Utilise prefers-color-scheme pour auto-détection
+        # Utilise prefers-color-scheme pour auto-détection avec fallback JS
         css_light = _generer_css_tokens(_LIGHT_MAPPING)
-        css_dark = _generer_css_tokens(_DARK_MAPPING)
+        css_dark_props = "\n    ".join(f"{k}: {v};" for k, v in _DARK_MAPPING.items())
         css = f"""
 {css_light}
 @media (prefers-color-scheme: dark) {{
-    {_generer_css_tokens(_DARK_MAPPING)}
+    :root {{
+        {css_dark_props}
+    }}
 }}
 """
+        # Fallback JS pour détecter prefers-color-scheme dans les contextes
+        # iframe (Streamlit Cloud) où le media query peut ne pas cascader.
+        from src.ui.engine import CSSManager
+
+        dark_css_js = css_dark_props.replace("\n", "\\n").replace('"', '\\"')
+        js_detect = f"""
+<script>
+(function() {{
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {{
+        var style = document.createElement('style');
+        style.textContent = ':root {{ {dark_css_js} }}';
+        document.head.appendChild(style);
+    }}
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {{
+        var existing = document.getElementById('sem-dark-override');
+        if (e.matches) {{
+            if (!existing) {{
+                var s = document.createElement('style');
+                s.id = 'sem-dark-override';
+                s.textContent = ':root {{ {dark_css_js} }}';
+                document.head.appendChild(s);
+            }}
+        }} else if (existing) {{
+            existing.remove();
+        }}
+    }});
+}})();
+</script>
+"""
+        import streamlit.components.v1 as components
+
+        components.html(js_detect, height=0)
     else:
         css = _generer_css_tokens(_LIGHT_MAPPING)
 

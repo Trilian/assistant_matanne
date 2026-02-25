@@ -68,6 +68,7 @@ token.json
 # Fichiers temporaires de test
 test_*.txt
 test_*.xml
+pytest_collect.txt
 _test_*.txt
 _test_*.py
 _run_*.py

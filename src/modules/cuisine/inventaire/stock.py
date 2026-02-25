@@ -8,6 +8,7 @@ import logging
 import streamlit as st
 
 from src.core.exceptions import ErreurValidation
+from src.core.state import rerun
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui import etat_vide
 
@@ -62,7 +63,7 @@ def afficher_add_article_form():
                             st.success(f"✅ Article '{ingredient_nom}' ajouté avec succès!")
                             st.session_state.show_form = False
                             st.session_state.refresh_counter += 1
-                            st.rerun()
+                            rerun()
                         else:
                             st.error("❌ Impossible d'ajouter l'article")
 
@@ -75,7 +76,7 @@ def afficher_add_article_form():
         with col2:
             if st.button("❌ Annuler", width="stretch"):
                 st.session_state.show_form = False
-                st.rerun()
+                rerun()
 
     except Exception as e:
         st.error(f"❌ Erreur: {str(e)}")
@@ -184,12 +185,12 @@ def afficher_stock():
         with col_btn1:
             if st.button("➕ Ajouter un article", width="stretch"):
                 st.session_state.show_form = True
-                st.rerun()
+                rerun()
 
         with col_btn2:
             if st.button("🔄 Rafraîchir", width="stretch"):
                 st.session_state.refresh_counter += 1
-                st.rerun()
+                rerun()
 
         with col_btn3:
             if st.button("📥 Importer CSV", width="stretch"):

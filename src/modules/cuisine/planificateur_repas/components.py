@@ -110,7 +110,7 @@ def afficher_configuration_preferences():
             )
             sauvegarder_preferences(new_prefs)
             st.success("✅ Préférences sauvegardées!")
-            st.rerun()
+            rerun()
 
 
 def afficher_apprentissage_ia():
@@ -203,7 +203,7 @@ def afficher_carte_recette_suggestion(
             # Changer
             if st.button("🔄", key=f"{key_prefix}_change", help="Autre suggestion"):
                 st.session_state[_keys("alternatives", key_prefix)] = True
-                st.rerun()
+                rerun()
 
 
 def afficher_jour_planning(

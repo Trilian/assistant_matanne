@@ -12,6 +12,7 @@ Utilise le service Budget unifié (src/services/budget.py).
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
@@ -62,7 +63,7 @@ def app():
             st.subheader(f"✏️ Modifier: {CATEGORY_LABELS.get(depense.categorie, depense.categorie)}")
             if st.button("❌ Annuler"):
                 del st.session_state[SK.EDIT_DEPENSE_ID]
-                st.rerun()
+                rerun()
             afficher_formulaire(depense)
             del st.session_state[SK.EDIT_DEPENSE_ID]
             return

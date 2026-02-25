@@ -15,6 +15,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.modules.famille.utils import (
     clear_famille_cache,
@@ -195,7 +196,7 @@ def app() -> None:
                                 )
                                 st.success(f"✅ Activite '{titre}' creee!")
                                 clear_famille_cache()
-                                st.rerun()
+                                rerun()
                             except Exception as e:
                                 st.error(f"❌ Erreur ajout activite: {e}")
 
@@ -240,7 +241,7 @@ def app() -> None:
                             st.session_state[_keys("prefill_titre")] = suggestion
                             st.session_state[_keys("prefill_type")] = type_key
                             st.toast(f"✏️ '{suggestion}' pré-rempli dans le formulaire")
-                            st.rerun()
+                            rerun()
 
             col4, col5, col6 = st.columns(3)
             cols2 = [col4, col5, col6]
@@ -272,7 +273,7 @@ def app() -> None:
                             st.session_state[_keys("prefill_titre")] = suggestion
                             st.session_state[_keys("prefill_type")] = type_key
                             st.toast(f"✏️ '{suggestion}' pré-rempli dans le formulaire")
-                            st.rerun()
+                            rerun()
 
     # ═══════════════════════════════════════════════════════════
     # TAB 3: BUDGET

@@ -16,7 +16,7 @@ _keys = KeyNamespace("accueil")
 
 def afficher_cuisine_summary():
     """Resume module Cuisine"""
-    from src.core.state import GestionnaireEtat
+    from src.core.state import GestionnaireEtat, rerun
     from src.services.cuisine.recettes import obtenir_service_recettes
 
     with st.container():
@@ -48,7 +48,7 @@ def afficher_cuisine_summary():
 
         if st.button("👶 Voir les recettes", key=_keys("nav_recettes"), width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.recettes")
-            st.rerun()
+            rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -91,11 +91,11 @@ def afficher_inventaire_summary():
                 a for a in inventaire if a.get("statut") in ["critique", "peremption_proche"]
             ]
 
-            alerte_stock(articles_alert[:3], cle="home_inventory_alert")  # Max 3
+            alerte_stock(articles_alert[:3])  # Max 3
 
         if st.button("📦 Gerer l'inventaire", key=_keys("nav_inventaire"), width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.inventaire")
-            st.rerun()
+            rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -145,7 +145,7 @@ def afficher_courses_summary():
 
         if st.button("📅 Voir la liste", key=_keys("nav_courses"), width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.courses")
-            st.rerun()
+            rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -199,6 +199,6 @@ def afficher_planning_summary():
 
         if st.button("🧹 Voir le planning", key=_keys("nav_planning"), width="stretch"):
             GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
-            st.rerun()
+            rerun()
 
         st.markdown("</div>", unsafe_allow_html=True)

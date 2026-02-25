@@ -372,9 +372,21 @@ class TestMetricsProtection:
 
     def test_metrics_returns_data_for_admin(self, client):
         """Un admin peut accéder aux métriques."""
-        # En mode dev, get_current_user retourne role=admin par défaut
-        response = client.get("/metrics")
-        assert response.status_code == 200
+        from src.api.dependencies import get_current_user
+        from src.api.main import app
+
+        # Override pour fournir un admin
+        app.dependency_overrides[get_current_user] = lambda: {
+            "id": "admin-test",
+            "email": "admin@test.com",
+            "role": "admin",
+        }
+        try:
+            admin_client = TestClient(app)
+            response = admin_client.get("/metrics")
+            assert response.status_code == 200
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
 
     def test_metrics_requires_auth_in_production(self):
         """En production, /metrics exige un token valide."""

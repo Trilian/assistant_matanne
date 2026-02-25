@@ -519,7 +519,6 @@ class TestRenderVueEnsemble:
 class TestRenderDetailZone:
     """Tests pour la fonction afficher_detail_zone."""
 
-    @pytest.mark.skip(reason="Mock context manager complexe à configurer")
     @patch("src.modules.maison.jardin_zones.st")
     def test_render_detail_zone_basique(self, mock_st):
         """Test rendu détail zone basique."""
@@ -554,7 +553,6 @@ class TestRenderDetailZone:
         mock_st.markdown.assert_called()
         mock_st.progress.assert_called()
 
-    @pytest.mark.skip(reason="Mock context manager complexe à configurer")
     @patch("src.modules.maison.jardin_zones.st")
     def test_render_detail_zone_avec_photos(self, mock_st):
         """Test rendu détail zone avec photos avant/après."""

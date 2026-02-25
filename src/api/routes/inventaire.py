@@ -36,6 +36,7 @@ async def lister_inventaire(
     peremption_proche: bool = Query(
         False, description="Afficher uniquement les articles expirant sous 7 jours"
     ),
+    user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
     Liste les articles d'inventaire avec pagination et filtres avancés.
@@ -191,9 +192,9 @@ async def creer_article_inventaire(
     return await executer_async(_create)
 
 
-@router.get("/barcode/{code}")
+@router.get("/barcode/{code}", response_model=InventaireItemResponse)
 @gerer_exception_api
-async def obtenir_par_code_barres(code: str):
+async def obtenir_par_code_barres(code: str, user: dict[str, Any] = Depends(require_auth)):
     """
     Récupère un article par son code-barres.
 
@@ -245,7 +246,7 @@ async def obtenir_par_code_barres(code: str):
 
 @router.get("/{item_id}", response_model=InventaireItemResponse)
 @gerer_exception_api
-async def obtenir_article_inventaire(item_id: int):
+async def obtenir_article_inventaire(item_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
     Récupère un article d'inventaire par son ID.
 

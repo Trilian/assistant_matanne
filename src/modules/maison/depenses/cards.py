@@ -5,6 +5,7 @@ Affichage d'une dépense individuelle et formulaire d'ajout/édition.
 """
 
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.ui.keys import KeyNamespace
 
 _keys = KeyNamespace("depenses")
@@ -43,11 +44,11 @@ def afficher_depense_card(depense: DepenseMaison):
             with col_edit:
                 if st.button("✏️", key=_keys("edit", depense.id), help="Modifier"):
                     st.session_state[SK.EDIT_DEPENSE_ID] = depense.id
-                    st.rerun()
+                    rerun()
             with col_del:
                 if st.button("🗑️", key=_keys("del", depense.id), help="Supprimer"):
                     delete_depense(depense.id)
-                    st.rerun()
+                    rerun()
 
 
 def afficher_formulaire(depense: Optional[DepenseMaison] = None):
@@ -140,4 +141,4 @@ def afficher_formulaire(depense: Optional[DepenseMaison] = None):
                 create_depense(data)
                 st.success("✅ Depense ajoutee!")
 
-            st.rerun()
+            rerun()

@@ -16,6 +16,7 @@ import streamlit as st
 from src.core.constants import JOURS_SEMAINE
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
@@ -219,7 +220,7 @@ def afficher_activite_card(jour: int, activite: dict, index: int, key_prefix: st
             else:
                 if st.button("Fait ✓", key=f"act_{key_prefix}_{jour}_{index}", type="secondary"):
                     marquer_fait(jour, activite["nom"])
-                    st.rerun()
+                    rerun()
 
 
 def afficher_jour(jour_idx: int, nom_jour: str, activites: list[dict], est_aujourd_hui: bool):

@@ -2,6 +2,7 @@
 Module Suivi Perso - Log alimentation
 """
 
+from src.core.state import rerun
 from src.ui.fragments import ui_fragment
 
 from .utils import (
@@ -90,6 +91,6 @@ def afficher_food_form(username: str):
                         notes=notes or None,
                     )
                     st.success("✅ Repas enregistre!")
-                    st.rerun()
+                    rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")

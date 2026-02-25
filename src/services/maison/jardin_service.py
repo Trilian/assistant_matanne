@@ -60,6 +60,12 @@ SEUIL_SECHERESSE_JOURS = 7  # Jours sans pluie
 class JardinService(JardinGamificationMixin, BaseAIService):
     """Service IA pour la gestion intelligente du jardin.
 
+    Hérite de BaseAIService pour les appels IA. Les opérations CRUD DB
+    sont gérées via @avec_session_db plutôt que BaseService[ZoneJardin] car :
+    - Les méthodes CRUD sont spécifiques au domaine (pas de CRUD générique)
+    - BaseAIService et BaseService[T] ont des constructeurs incompatibles
+    - Le pattern @avec_session_db est cohérent avec le reste du service
+
     Fonctionnalités:
     - Conseils saisonniers automatiques
     - Adaptation à la météo locale

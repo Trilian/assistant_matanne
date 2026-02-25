@@ -5,6 +5,7 @@ Affiche et gère les notifications d'alerte.
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.services.core.notifications import obtenir_service_notifications_inventaire
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui import etat_vide
@@ -30,13 +31,13 @@ def afficher_notifications_widget():
 
     with col2:
         if st.button("🔄 Actualiser", key="refresh_notifs", width="stretch"):
-            st.rerun()
+            rerun()
 
     with col3:
         if st.button("⏰ Tout lire", key="mark_all_read", width="stretch"):
             for notif in notifs:
                 service_notifs.marquer_lue(notif.id)
-            st.rerun()
+            rerun()
 
     # Affiche les notifications groupées par priorité
     st.divider()
@@ -54,7 +55,7 @@ def afficher_notifications_widget():
                 with col2:
                     if st.button("✓", key=f"mark_read_{notif.id}", help="Marquer comme lu"):
                         service_notifs.marquer_lue(notif.id)
-                        st.rerun()
+                        rerun()
 
     # Moyennes
     moyennes = [n for n in notifs if n.priorite == "moyenne"]
@@ -69,7 +70,7 @@ def afficher_notifications_widget():
                 with col2:
                     if st.button("✓", key=f"mark_read_{notif.id}", help="Marquer comme lu"):
                         service_notifs.marquer_lue(notif.id)
-                        st.rerun()
+                        rerun()
 
         if len(moyennes) > 3:
             st.caption(f"... et {len(moyennes) - 3} autres")
@@ -107,7 +108,7 @@ def afficher_notifications():
             if st.button("⏰ Tout marquer comme lu", width="stretch"):
                 service_notifs.effacer_toutes_lues()
                 st.toast("⏰ Notifications marquées comme lues")
-                st.rerun()
+                rerun()
 
         st.divider()
 
@@ -144,7 +145,7 @@ def afficher_notifications():
                                     width="stretch",
                                 ):
                                     service_notifs.marquer_lue(notif.id)
-                                    st.rerun()
+                                    rerun()
                             with col_b:
                                 if st.button(
                                     "🗑️",
@@ -153,7 +154,7 @@ def afficher_notifications():
                                     width="stretch",
                                 ):
                                     service_notifs.supprimer_notification(notif.id)
-                                    st.rerun()
+                                    rerun()
 
             # Affiche les moyennes
             if moyennes:
@@ -177,7 +178,7 @@ def afficher_notifications():
                                     width="stretch",
                                 ):
                                     service_notifs.marquer_lue(notif.id)
-                                    st.rerun()
+                                    rerun()
                             with col_b:
                                 if st.button(
                                     "🗑️",
@@ -186,7 +187,7 @@ def afficher_notifications():
                                     width="stretch",
                                 ):
                                     service_notifs.supprimer_notification(notif.id)
-                                    st.rerun()
+                                    rerun()
 
             # Affiche les basses
             if basses:
@@ -210,7 +211,7 @@ def afficher_notifications():
                                     width="stretch",
                                 ):
                                     service_notifs.marquer_lue(notif.id)
-                                    st.rerun()
+                                    rerun()
                             with col_b:
                                 if st.button(
                                     "🗑️",
@@ -219,7 +220,7 @@ def afficher_notifications():
                                     width="stretch",
                                 ):
                                     service_notifs.supprimer_notification(notif.id)
-                                    st.rerun()
+                                    rerun()
 
                 if len(basses) > 5:
                     st.caption(f"... et {len(basses) - 5} autres informations")

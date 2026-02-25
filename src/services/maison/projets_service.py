@@ -62,6 +62,12 @@ MAGASINS_BRICOLAGE = [
 class ProjetsService(BaseAIService):
     """Service IA pour la gestion intelligente des projets maison.
 
+    Hérite de BaseAIService pour les appels IA. Les opérations CRUD DB
+    sont gérées via @avec_session_db plutôt que BaseService[ProjetMaison] car :
+    - Les méthodes CRUD sont spécifiques au domaine (pas de CRUD générique)
+    - BaseAIService et BaseService[T] ont des constructeurs incompatibles
+    - Le pattern @avec_session_db est cohérent avec le reste du service
+
     Fonctionnalités:
     - Analyse projet et estimation complète
     - Génération liste matériaux avec prix

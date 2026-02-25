@@ -20,6 +20,8 @@ from typing import Any
 
 import streamlit as st
 
+from src.core.state import rerun
+
 logger = logging.getLogger(__name__)
 
 
@@ -152,7 +154,7 @@ class TimerCuisine:
                 with cols[i % 4]:
                     if st.button(label, key=f"timer_preset_{secondes}"):
                         self.demarrer(secondes, label)
-                        st.rerun()
+                        rerun()
 
         with col_custom:
             st.markdown("**Personnalisé**")
@@ -165,7 +167,7 @@ class TimerCuisine:
             )
             if st.button("▶️ Démarrer", key="timer_start_custom"):
                 self.demarrer(int(minutes) * 60, f"{int(minutes)} min")
-                st.rerun()
+                rerun()
 
     def _afficher_en_cours(self) -> None:
         """Affiche le timer en cours avec progression."""
@@ -199,7 +201,7 @@ class TimerCuisine:
         # Bouton d'arrêt
         if st.button("⏹️ Arrêter", key="timer_stop"):
             self.arreter()
-            st.rerun()
+            rerun()
 
     def _afficher_termine(self) -> None:
         """Affiche l'alerte de fin de timer."""
@@ -211,7 +213,7 @@ class TimerCuisine:
 
         if st.button("🔄 Nouveau timer", key="timer_reset"):
             self.arreter()
-            st.rerun()
+            rerun()
 
     def _afficher_badge(self) -> None:
         """Affiche un badge compact pour le timer actif."""

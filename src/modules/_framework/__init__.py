@@ -1,43 +1,27 @@
 """
-Module Framework - Architecture moderne pour modules Streamlit.
+Module Framework - Architecture pour modules Streamlit.
 
-Ce package fournit une architecture robuste et réutilisable pour les modules:
+Ce package fournit des utilitaires réutilisables pour les modules:
 - Error Boundary: Gestion d'erreurs unifiée avec fallback UI
-- BaseModule: Classe de base avec lifecycle et injection de dépendances
+- BaseModule: Classe de base avec lifecycle et tabs (gelé, 2 modules)
+- ModuleState: État préfixé pour éviter collisions (gelé, 3 modules)
 - Fragments: Composants auto-refresh avec isolation
-- State Manager: Gestion centralisée du session_state via ModuleState
+
+Note architecturale (Audit §9.3):
+    BaseModule et ModuleState sont **gelés** — utilisés uniquement par
+    ParametresModule, DesignSystemModule, et inventaire.
+    Le pattern ``def app()`` direct est préféré pour les nouveaux modules.
 
 Usage:
-    from src.modules._framework import (
-        BaseModule,
-        module_app,
-        error_boundary,
-        ModuleState,
-        init_module_state,
-    )
+    from src.modules._framework import error_boundary, safe_call
 
-    @module_app
-    class MonModule(BaseModule[MonService]):
-        titre = "Mon Module"
-        icone = "📦"
-
-        def get_service_factory(self):
-            return obtenir_mon_service
-
-        def render(self):
-            state = ModuleState("mon_module")
-            data = self.service.get_data()
-            self._render_data(data)
-
-Architecture:
-- Error Boundaries pour UX gracieuse
-- ModuleState pour état local avec préfixes
-- Fragments pour refresh partiel
-- Convention over Configuration
+    # Pour les rares modules complexes:
+    from src.modules._framework import BaseModule, ModuleState, module_app
 """
 
 from src.modules._framework.base_module import (
     BaseModule,
+    ModuleState,
     create_simple_module,
     module_app,
 )
@@ -56,13 +40,6 @@ from src.modules._framework.fragments import (
     lazy_fragment,
     with_loading_state,
 )
-from src.modules._framework.state_manager import (
-    ModuleState,
-    clear_all_module_states,
-    get_all_module_states,
-    init_module_state,
-    reset_module_state,
-)
 
 __all__ = [
     # Error Boundary
@@ -71,16 +48,12 @@ __all__ = [
     "avec_gestion_erreurs_ui",
     "safe_call",
     "try_render",
-    # State Manager
-    "ModuleState",
-    "init_module_state",
-    "reset_module_state",
-    "get_all_module_states",
-    "clear_all_module_states",
     # Base Module
     "BaseModule",
     "module_app",
     "create_simple_module",
+    # State Manager (gelé - utilisé uniquement par BaseModule et inventaire)
+    "ModuleState",
     # Fragments
     "auto_refresh_fragment",
     "isolated_fragment",

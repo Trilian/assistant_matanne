@@ -1,5 +1,5 @@
 """
-Tests pour src/modules/famille/weekend/ai_service.py
+Tests pour src/services/famille/weekend_ai.py
 
 Tests complets pour le service IA Weekend.
 """
@@ -14,7 +14,7 @@ class TestWeekendAIService:
 
     def test_import(self):
         """Test import du service."""
-        from src.modules.famille.weekend.ai_service import WeekendAIService
+        from src.services.famille.weekend_ai import WeekendAIService
 
         assert WeekendAIService is not None
 
@@ -23,7 +23,7 @@ class TestWeekendAIService:
         """Test de création de WeekendAIService."""
         mock_factory.return_value = MagicMock()
 
-        from src.modules.famille.weekend.ai_service import WeekendAIService
+        from src.services.famille.weekend_ai import WeekendAIService
 
         service = WeekendAIService()
 
@@ -36,7 +36,7 @@ class TestWeekendAIService:
         """Test des attributs du service."""
         mock_factory.return_value = MagicMock()
 
-        from src.modules.famille.weekend.ai_service import WeekendAIService
+        from src.services.famille.weekend_ai import WeekendAIService
 
         service = WeekendAIService()
 
@@ -49,7 +49,7 @@ class TestWeekendAIService:
         """Test suggestion d'activités weekend."""
         mock_factory.return_value = MagicMock()
 
-        from src.modules.famille.weekend.ai_service import WeekendAIService
+        from src.services.famille.weekend_ai import WeekendAIService
 
         service = WeekendAIService()
         service.call_with_cache = AsyncMock(return_value="Activité suggérée")
@@ -70,7 +70,7 @@ class TestWeekendAIService:
         """Test suggestion avec paramètres par défaut."""
         mock_factory.return_value = MagicMock()
 
-        from src.modules.famille.weekend.ai_service import WeekendAIService
+        from src.services.famille.weekend_ai import WeekendAIService
 
         service = WeekendAIService()
         service.call_with_cache = AsyncMock(return_value="Suggestions")
@@ -88,7 +88,7 @@ class TestWeekendAIService:
         """Test détails d'un lieu."""
         mock_factory.return_value = MagicMock()
 
-        from src.modules.famille.weekend.ai_service import WeekendAIService
+        from src.services.famille.weekend_ai import WeekendAIService
 
         service = WeekendAIService()
         service.call_with_cache = AsyncMock(return_value="Détails du lieu")
@@ -107,7 +107,7 @@ class TestWeekendAIService:
         """Test détails d'un lieu de type différent."""
         mock_factory.return_value = MagicMock()
 
-        from src.modules.famille.weekend.ai_service import WeekendAIService
+        from src.services.famille.weekend_ai import WeekendAIService
 
         service = WeekendAIService()
         service.call_with_cache = AsyncMock(return_value="Info musée")

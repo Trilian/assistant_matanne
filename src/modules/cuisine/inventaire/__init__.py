@@ -13,11 +13,11 @@ import streamlit as st
 
 from src.core.exceptions import ErreurValidation
 from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.core.state import rerun
 from src.modules._framework import (
-    ModuleState,
     error_boundary,
-    init_module_state,
 )
+from src.modules._framework.base_module import ModuleState
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
@@ -189,12 +189,12 @@ def afficher_actions_stock(state: ModuleState) -> None:
             "➕ Ajouter un article", use_container_width=True, key=_keys("btn_add_article")
         ):
             state.set("show_form", True)
-            st.rerun()
+            rerun()
 
     with col_btn2:
         if st.button("🔄 Rafraîchir", use_container_width=True, key=_keys("btn_refresh")):
             state.increment("refresh_counter")
-            st.rerun()
+            rerun()
 
     with col_btn3:
         st.button("📥 Importer CSV", use_container_width=True, key=_keys("btn_import"))
@@ -255,14 +255,14 @@ def afficher_formulaire_ajout(state: ModuleState) -> None:
                         st.success(f"✅ Article '{ingredient_nom}' ajouté avec succès!")
                         state.set("show_form", False)
                         state.increment("refresh_counter")
-                        st.rerun()
+                        rerun()
                     else:
                         st.error("❌ Impossible d'ajouter l'article")
 
     with col2:
         if st.button("❌ Annuler", use_container_width=True, key=_keys("btn_cancel_add")):
             state.set("show_form", False)
-            st.rerun()
+            rerun()
 
 
 def afficher_stock_complet() -> None:
@@ -282,7 +282,7 @@ def afficher_stock_complet() -> None:
     except Exception as e:
         st.error(f"❌ Erreur: {e}")
         if st.button("🔄 Réessayer", key=_keys("retry_stock")):
-            st.rerun()
+            rerun()
         return
 
     # Inventaire vide

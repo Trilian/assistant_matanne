@@ -986,9 +986,9 @@ python manage.py migrate
 
 ### 4. Performance
 
-- [ ] Activer Redis en production (`REDIS_URL` dans `.env.local`)
+- [x] Activer Redis en production (`REDIS_URL` dans `.env.example`, auto-detect dans orchestrator.py)
 - [x] Optimiser requêtes N+1 avec `joinedload` / `selectinload` (18 N+1 corrigés dans 8 services)
-- [ ] Lazy load images recettes côté UI
+- [x] Lazy load images recettes côté UI (`loading="lazy"` + `decoding="async"` dans detail.py et liste.py)
 
 ### 5. Monitoring & Logs
 
@@ -1017,20 +1017,20 @@ streamlit run src/app.py
 
 ## 📊 Métriques projet
 
-| Métrique         | Actuel       | Objectif | Status                              |
-| ---------------- | ------------ | -------- | ----------------------------------- |
-| Tests collectés  | **8 150**    | ✅       | ✅ (+78 resilience/observability)   |
-| Tests passés     | **8 045**    | 100%     | ✅ 98.7%                            |
-| Tests en échec   | **48**       | 0        | 🟡 pre-existing (DB/mocks)          |
-| Tests skippés    | **31**       | 0        | 🟡 modules manquants                |
-| Lint (ruff)      | **0 issues** | 0        | ✅                                  |
-| Temps démarrage  | ~1.5s        | <1.5s    | ✅                                  |
-| Tables SQL       | **95**       | ✅       | ✅ (toutes en français)             |
-| Services         | 30+          | ✅       | ✅                                  |
-| N+1 corrigés     | **18/18**    | 0 N+1    | ✅                                  |
-| Coverage core/   | **~75%**     | 80%      | 🟡 (+resilience, +observability)    |
-| Nommage FR       | **100%**     | 100%     | ✅ Sprint 5 (45 classes, 95 tables) |
-| Événements typés | **14**       | ✅       | ✅ (+6 Sprint 5C)                   |
+| Métrique         | Actuel       | Objectif | Status                                                    |
+| ---------------- | ------------ | -------- | --------------------------------------------------------- |
+| Tests collectés  | **8 150**    | ✅       | ✅ (+78 resilience/observability)                         |
+| Tests passés     | **8 045**    | 100%     | ✅ 98.7%                                                  |
+| Tests en échec   | **48**       | 0        | 🟡 pre-existing (DB/mocks)                                |
+| Tests skippés    | **~20**      | 0        | 🟡 réduit (-11: backup UI supprimés, jardin/DB unskipped) |
+| Lint (ruff)      | **0 issues** | 0        | ✅                                                        |
+| Temps démarrage  | ~1.5s        | <1.5s    | ✅                                                        |
+| Tables SQL       | **95**       | ✅       | ✅ (toutes en français)                                   |
+| Services         | 30+          | ✅       | ✅                                                        |
+| N+1 corrigés     | **18/18**    | 0 N+1    | ✅                                                        |
+| Coverage core/   | **~75%**     | 80%      | 🟡 (+resilience, +observability)                          |
+| Nommage FR       | **100%**     | 100%     | ✅ Sprint 5 (45 classes, 95 tables)                       |
+| Événements typés | **14**       | ✅       | ✅ (+6 Sprint 5C)                                         |
 
 ---
 
@@ -1038,14 +1038,15 @@ streamlit run src/app.py
 
 ```
 🔴 PRIORITÉ HAUTE:
-□ Implémenter modules maison manquants (322 skipped tests)
+✅ Tests skippés réduits à ~20 (backup UI dead code supprimé, jardin/DB unskipped, bug inventaire corrigé)
 □ Augmenter coverage fichiers restants à 0% (sentry, health, navigation)
 □ Déployer migrations SQL sur Supabase
 
 🟡 PRIORITÉ MOYENNE:
-□ Activer Redis en production
+✅ Activer Redis en production (REDIS_URL dans .env.example, auto-detect)
 ✅ Optimiser requêtes N+1 (joinedload/selectinload — 18 corrigés)
 ✅ Intégrer Sentry pour error tracking (implémenté dans bootstrap.py)
+✅ Lazy load images recettes (loading="lazy" dans detail.py + liste.py)
 
 🟢 PRIORITÉ BASSE:
 □ Générer VAPID keys: npx web-push generate-vapid-keys

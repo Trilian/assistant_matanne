@@ -27,6 +27,7 @@ async def obtenir_planning_semaine(
     date_debut: datetime | None = Query(
         None, description="Date de début de semaine (ISO 8601). Défaut: lundi courant"
     ),
+    user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
     Récupère le planning de repas de la semaine.

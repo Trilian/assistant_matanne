@@ -5,7 +5,7 @@ Génération de courses depuis le planning repas.
 import streamlit as st
 
 from src.core.session_keys import SK
-from src.core.state import naviguer
+from src.core.state import naviguer, rerun
 from src.services.cuisine.courses import obtenir_service_courses_intelligentes
 from src.ui.fragments import ui_fragment
 
@@ -50,7 +50,7 @@ def afficher_courses_depuis_planning():
             with st.spinner("Analyse du planning en cours..."):
                 resultat = service.generer_liste_courses()
                 st.session_state[SK.COURSES_PLANNING_RESULTAT] = resultat
-                st.rerun()
+                rerun()
 
     st.divider()
 
@@ -146,12 +146,12 @@ def afficher_courses_depuis_planning():
                             # Reset
                             del st.session_state[SK.COURSES_PLANNING_RESULTAT]
                             st.session_state.courses_refresh += 1
-                            st.rerun()
+                            rerun()
 
             with col2:
                 if st.button("🔄 Régénérer", use_container_width=True):
                     del st.session_state[SK.COURSES_PLANNING_RESULTAT]
-                    st.rerun()
+                    rerun()
     else:
         # Instructions
         st.markdown("""

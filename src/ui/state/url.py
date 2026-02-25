@@ -39,6 +39,8 @@ from typing import Any, Callable, TypeVar
 
 import streamlit as st
 
+from src.core.state import rerun
+
 logger = logging.getLogger(__name__)
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -468,7 +470,7 @@ def pagination_with_url(
         if current_page > 1:
             if st.button("â† Précédent", key=f"{param}_prev", use_container_width=True):
                 set_url_param(param, current_page - 1)
-                st.rerun()
+                rerun()
         else:
             st.button("â† Précédent", key=f"{param}_prev", disabled=True, use_container_width=True)
 
@@ -484,7 +486,7 @@ def pagination_with_url(
         if current_page < total_pages:
             if st.button("Suivant â†’", key=f"{param}_next", use_container_width=True):
                 set_url_param(param, current_page + 1)
-                st.rerun()
+                rerun()
         else:
             st.button("Suivant â†’", key=f"{param}_next", disabled=True, use_container_width=True)
 

@@ -32,6 +32,8 @@ from .schemas import (
     ArticleCoursesInput,
     # Inventaire
     ArticleInventaireInput,
+    # Maison
+    DepenseMaisonInput,
     # Famille
     EntreeJournalInput,
     # Recettes
@@ -82,6 +84,8 @@ __all__ = [
     "IngredientStockInput",
     # Schemas Pydantic - Courses
     "ArticleCoursesInput",
+    # Schemas Pydantic - Maison
+    "DepenseMaisonInput",
     # Schemas Pydantic - Planning
     "RepasInput",
     # Schemas Pydantic - Famille

@@ -36,7 +36,28 @@ DUREE_TOKEN_HEURES = 24
 
 # Clé secrète pour signer/vérifier les tokens API
 # En production, DOIT être configurée via variable d'environnement
-_API_SECRET_KEY_DEFAULT = "dev-secret-key-change-in-production"
+# A2: Clé par défaut aléatoire par processus — empêche toute
+#     prédictibilité même en dev/staging.
+import secrets as _secrets
+
+_API_SECRET_KEY_DEFAULT = _secrets.token_urlsafe(64)
+
+# Vérification au chargement du module (A2: alerte précoce)
+_secret_at_import = os.getenv("API_SECRET_KEY")
+if not _secret_at_import:
+    _env = os.getenv("ENVIRONMENT", "").lower().strip()
+    if _env in ("production", "prod", "staging", "preview"):
+        logger.critical(
+            "SÉCURITÉ CRITIQUE: API_SECRET_KEY non configuré "
+            f"en environnement '{_env}'. Générez une clé sécurisée: "
+            "python -c 'import secrets; print(secrets.token_urlsafe(64))'"
+        )
+    else:
+        logger.info(
+            "API_SECRET_KEY non configuré — clé aléatoire générée pour cette session. "
+            "Configurez API_SECRET_KEY pour la production."
+        )
+del _secret_at_import
 
 
 def _est_production() -> bool:
@@ -50,20 +71,13 @@ def _obtenir_api_secret() -> str:
     Raises:
         RuntimeError: Si la clé par défaut est utilisée en production.
     """
-    # Utilise le default si non défini OU si vide
+    # Utilise le fallback aléatoire si non défini OU si vide
     secret = os.getenv("API_SECRET_KEY") or _API_SECRET_KEY_DEFAULT
 
-    if _est_production() and secret == _API_SECRET_KEY_DEFAULT:
+    if _est_production() and not os.getenv("API_SECRET_KEY"):
         raise RuntimeError(
             "ERREUR CRITIQUE: API_SECRET_KEY doit être configuré en production. "
-            "Ne jamais utiliser la clé par défaut. "
             "Générez une clé: python -c 'import secrets; print(secrets.token_urlsafe(64))'"
-        )
-
-    if secret == _API_SECRET_KEY_DEFAULT:
-        logger.warning(
-            "API_SECRET_KEY utilise la valeur par défaut. "
-            "Configurez une clé sécurisée pour la production."
         )
 
     return secret

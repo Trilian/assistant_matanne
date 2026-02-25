@@ -8,6 +8,7 @@ import logging
 import streamlit as st
 
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui.fragments import ui_fragment
 
@@ -38,7 +39,7 @@ def afficher_suggestions_ia():
                 st.warning("⚠️ Aucune suggestion générée. Vérifiez votre inventaire.")
             else:
                 st.session_state.suggestions_data = suggestions
-                st.rerun()
+                rerun()
 
         except Exception as e:
             st.error(f"❌ Erreur: {str(e)}")

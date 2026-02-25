@@ -28,6 +28,8 @@ __all__ = [
     "exiger_existence",
     "exiger_plage",
     "exiger_longueur",
+    # Alias rétrocompatibles
+    "valider_plage",
 ]
 
 from typing import Any
@@ -375,3 +377,31 @@ def exiger_longueur(
             f"{nom_champ} trop long: {longueur} > {maximum}",
             message_utilisateur=f"{nom_champ} doit faire au maximum {maximum} caractères",
         )
+
+
+# ═══════════════════════════════════════════════════════════
+# ALIAS RÉTROCOMPATIBLES
+# ═══════════════════════════════════════════════════════════
+
+
+def valider_plage(
+    valeur: float,
+    min_val: float | None = None,
+    max_val: float | None = None,
+    nom_param: str = "valeur",
+) -> None:
+    """
+    Alias rétrocompatible pour exiger_plage.
+
+    Deprecated: Utiliser exiger_plage à la place.
+
+    Args:
+        valeur: Valeur à vérifier
+        min_val: Valeur minimale (alias de minimum)
+        max_val: Valeur maximale (alias de maximum)
+        nom_param: Nom du paramètre (alias de nom_champ)
+
+    Raises:
+        ErreurValidation: Si la valeur est hors plage
+    """
+    exiger_plage(valeur, minimum=min_val, maximum=max_val, nom_champ=nom_param)

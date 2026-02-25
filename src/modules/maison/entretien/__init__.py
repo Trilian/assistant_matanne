@@ -16,6 +16,7 @@ import streamlit as st
 from src.core.db import obtenir_contexte_db
 from src.core.models.maison import Routine, TacheRoutine
 from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.modules.maison.utils import (
     charger_routines,
@@ -164,4 +165,4 @@ def app():
             if submitted and nom:
                 creer_routine(nom, freq)
                 st.success(f"✅ Routine '{nom}' créée !")
-                st.rerun()
+                rerun()

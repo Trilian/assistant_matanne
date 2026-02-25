@@ -430,6 +430,7 @@ class ZoneJardin(TimestampMixin, Base):
     plan_id: Mapped[int | None] = mapped_column(
         ForeignKey("plans_jardin.id", ondelete="SET NULL"), index=True
     )
+    plan: Mapped["PlanJardin | None"] = relationship(back_populates="zones")
 
     nom: Mapped[str] = mapped_column(String(100), nullable=False)
     type_zone: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
@@ -540,7 +541,7 @@ class PlanJardin(TimestampMixin, Base):
     # Relations
     zones: Mapped[list["ZoneJardin"]] = relationship(
         foreign_keys="ZoneJardin.plan_id",
-        backref="plan",
+        back_populates="plan",
     )
 
     def __repr__(self) -> str:

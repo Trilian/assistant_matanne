@@ -8,6 +8,7 @@ from datetime import datetime
 import streamlit as st
 
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.services.cuisine.courses import obtenir_service_courses
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui.fragments import ui_fragment
@@ -57,7 +58,7 @@ def afficher_liste_active():
             st.info("✅ Liste vide! Ajoutez des articles ou générez des suggestions IA.")
             if st.button("⏰ Générer suggestions IA"):
                 st.session_state.new_article_mode = False
-                st.rerun()
+                rerun()
             return
 
         # Filtres
@@ -106,7 +107,7 @@ def afficher_liste_active():
         with col1:
             if st.button("➕ Ajouter article", use_container_width=True):
                 st.session_state.new_article_mode = True
-                st.rerun()
+                rerun()
         with col2:
             if st.button("📄 Imprimer liste", use_container_width=True):
                 afficher_print_view(liste_filtree)
@@ -115,7 +116,7 @@ def afficher_liste_active():
                 if service.get_liste_courses(achetes=True):
                     st.warning("⚠️ Suppression des articles achetés...")
                     st.session_state.courses_refresh += 1
-                    st.rerun()
+                    rerun()
 
         # Formulaire ajout article
         if st.session_state.new_article_mode:
@@ -147,7 +148,7 @@ def afficher_rayon_articles(service, rayon: str, articles: list):
                     service.update(article["id"], {"achete": True, "achete_le": datetime.now()})
                     st.success(f"✅ {article.get('ingredient_nom')} marqué acheté!")
                     st.session_state.courses_refresh += 1
-                    st.rerun()
+                    rerun()
                 except Exception as e:
                     st.error(f"❌ Erreur: {str(e)}")
 
@@ -159,7 +160,7 @@ def afficher_rayon_articles(service, rayon: str, articles: list):
                 use_container_width=True,
             ):
                 st.session_state.edit_article_id = article["id"]
-                st.rerun()
+                rerun()
 
         with col4:
             if st.button(
@@ -172,7 +173,7 @@ def afficher_rayon_articles(service, rayon: str, articles: list):
                     service.delete(article["id"])
                     st.success(f"✅ {article.get('ingredient_nom')} supprimé!")
                     st.session_state.courses_refresh += 1
-                    st.rerun()
+                    rerun()
                 except Exception as e:
                     st.error(f"❌ Erreur: {str(e)}")
 
@@ -231,14 +232,14 @@ def afficher_rayon_articles(service, rayon: str, articles: list):
                             st.success("✅ Article mis à jour!")
                             st.session_state.edit_article_id = None
                             st.session_state.courses_refresh += 1
-                            st.rerun()
+                            rerun()
                         except Exception as e:
                             st.error(f"❌ Erreur: {str(e)}")
 
                 with col2:
                     if st.form_submit_button("❌ Annuler", key=f"article_cancel_{article['id']}"):
                         st.session_state.edit_article_id = None
-                        st.rerun()
+                        rerun()
 
 
 def afficher_ajouter_article():
@@ -295,7 +296,7 @@ def afficher_ajouter_article():
                 st.success(f"✅ {nom} ajouté à la liste!")
                 st.session_state.new_article_mode = False
                 st.session_state.courses_refresh += 1
-                st.rerun()
+                rerun()
             except Exception as e:
                 st.error(f"❌ Erreur: {str(e)}")
                 logger.error(f"Erreur ajout article: {e}")

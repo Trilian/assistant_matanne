@@ -23,6 +23,7 @@ from typing import Any
 import pandas as pd
 import streamlit as st
 
+from src.core.state import rerun
 from src.ui.keys import KeyNamespace
 from src.ui.registry import composant_ui
 
@@ -176,7 +177,7 @@ def editeur_inventaire(
                 use_container_width=True,
                 key=_keys(f"cancel_inventaire{key_suffix}"),
             ):
-                st.rerun()
+                rerun()
 
     return None
 
@@ -451,7 +452,7 @@ def editeur_budget(
                     use_container_width=True,
                     key=_keys(f"cancel_budget{key_suffix}"),
                 ):
-                    st.rerun()
+                    rerun()
 
     return None
 

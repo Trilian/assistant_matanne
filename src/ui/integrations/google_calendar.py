@@ -14,6 +14,7 @@ import streamlit as st
 
 from src.core.config import obtenir_parametres
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.services.famille.calendrier import (
     get_calendar_sync_service,
 )
@@ -122,7 +123,7 @@ def afficher_config_google_calendar():
         with col3:
             if st.button("🔌 Déconnecter", use_container_width=True):
                 st.session_state.google_calendar_config = None
-                st.rerun()
+                rerun()
 
     else:
         # Non connecté
@@ -163,7 +164,7 @@ def afficher_config_google_calendar():
                         if config:
                             st.session_state.google_calendar_config = config
                             st.success("✅ Google Calendar connecté!")
-                            st.rerun()
+                            rerun()
                         else:
                             st.error("❌ Échec de la connexion")
 

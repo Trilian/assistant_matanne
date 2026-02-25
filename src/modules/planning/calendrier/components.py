@@ -56,7 +56,7 @@ def afficher_navigation_semaine():
             st.session_state[_keys("semaine_debut")] = get_semaine_precedente(
                 st.session_state[_keys("semaine_debut")]
             )
-            st.rerun()
+            rerun()
 
     with col2:
         semaine_debut = st.session_state[_keys("semaine_debut")]
@@ -73,12 +73,12 @@ def afficher_navigation_semaine():
             st.session_state[_keys("semaine_debut")] = get_semaine_suivante(
                 st.session_state[_keys("semaine_debut")]
             )
-            st.rerun()
+            rerun()
 
     with col4:
         if st.button("📅 Aujourd'hui", use_container_width=True):
             st.session_state[_keys("semaine_debut")] = get_debut_semaine(date.today())
-            st.rerun()
+            rerun()
 
 
 def afficher_jour_calendrier(jour: JourCalendrier):
@@ -283,24 +283,24 @@ def afficher_actions_rapides(semaine: SemaineCalendrier):
     with col1:
         if st.button("🍽️ Planifier repas", use_container_width=True, type="primary"):
             # Naviguer vers le planificateur
-            from src.core.state import GestionnaireEtat
+            from src.core.state import GestionnaireEtat, rerun
 
             GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
-            st.rerun()
+            rerun()
 
     with col2:
         if st.button("🍳 Nouveau batch", use_container_width=True):
             from src.core.state import GestionnaireEtat
 
             GestionnaireEtat.naviguer_vers("cuisine.batch_cooking")
-            st.rerun()
+            rerun()
 
     with col3:
         if st.button("🛒 Mes courses", use_container_width=True):
             from src.core.state import GestionnaireEtat
 
             GestionnaireEtat.naviguer_vers("cuisine.courses")
-            st.rerun()
+            rerun()
 
     with col4:
         if st.button("🖨️ Imprimer", use_container_width=True):
@@ -328,7 +328,7 @@ def _dialog_impression(semaine: SemaineCalendrier):
         )
     with col2:
         if st.button("Fermer", use_container_width=True):
-            st.rerun()
+            rerun()
 
 
 def afficher_modal_impression(semaine: SemaineCalendrier):
@@ -447,7 +447,7 @@ def afficher_formulaire_ajout_event():
                 with col_cancel:
                     if st.form_submit_button("❌ Annuler"):
                         del st.session_state[_keys("event_date")]
-                        st.rerun()
+                        rerun()
 
                 if submitted and titre:
                     # Créer l'événement via le service
@@ -479,7 +479,7 @@ def afficher_formulaire_ajout_event():
 
                         st.success(f"✅ {titre} ajouté!")
                         del st.session_state[_keys("event_date")]
-                        st.rerun()
+                        rerun()
 
                     except Exception as e:
                         st.error(f"❌ Erreur: {str(e)}")

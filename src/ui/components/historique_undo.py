@@ -16,6 +16,7 @@ from datetime import datetime
 
 import streamlit as st
 
+from src.core.state import naviguer, rerun
 from src.ui.keys import KeyNamespace
 from src.ui.registry import composant_ui
 from src.ui.tokens_semantic import Sem
@@ -82,7 +83,7 @@ def afficher_bouton_undo(max_actions: int = 5) -> None:
                         if st.button("↩️", key=_keys(f"undo_{action.id}"), help="Annuler"):
                             if service.undo_action(action.id):
                                 st.success("Action annulée!")
-                                st.rerun()
+                                rerun()
                             else:
                                 st.error("Impossible d'annuler")
                     else:
@@ -92,10 +93,7 @@ def afficher_bouton_undo(max_actions: int = 5) -> None:
 
             # Lien vers historique complet
             if st.button("📜 Voir tout l'historique", key=_keys("voir_tout")):
-                from src.core.state import GestionnaireEtat
-
-                GestionnaireEtat.naviguer_vers("parametres")
-                st.rerun()
+                naviguer("parametres")
 
     except Exception as e:
         logger.debug(f"Historique undo non disponible: {e}")
@@ -209,7 +207,7 @@ def afficher_historique_actions(
                         if st.button("↩️", key=_keys(f"timeline_undo_{action.id}")):
                             if service.undo_action(action.id):
                                 st.success("Annulé!")
-                                st.rerun()
+                                rerun()
 
             st.divider()
 

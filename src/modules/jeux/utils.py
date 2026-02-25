@@ -11,6 +11,7 @@ import streamlit as st
 
 from src.core.caching import Cache
 from src.core.decorators import avec_cache
+from src.core.state import rerun
 
 logger = logging.getLogger(__name__)
 
@@ -207,7 +208,7 @@ def bouton_actualiser_api(cle: str):
 
     Usage:
         if bouton_actualiser_api("matchs_ligue1"):
-            st.rerun()
+            rerun()
     """
     if st.button("🔄 Actualiser depuis API"):
         Cache.invalider(pattern="charger_")

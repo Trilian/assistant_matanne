@@ -734,13 +734,16 @@ class TestContextManagersAvanced:
 class TestObtenirInfosDBAvance:
     """Tests avancés pour obtenir_infos_db."""
 
-    @pytest.mark.skip(reason="Requiert refactoring des mocks DB complexes")
     def test_obtenir_infos_db_success(self):
         """Test obtenir_infos_db avec succès."""
         mock_engine = MagicMock()
         mock_conn = MagicMock()
-        mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
-        mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
+
+        # Configurer le context manager connect() correctement
+        mock_ctx = MagicMock()
+        mock_ctx.__enter__ = MagicMock(return_value=mock_conn)
+        mock_ctx.__exit__ = MagicMock(return_value=False)
+        mock_engine.connect.return_value = mock_ctx
 
         # Mock le résultat de la requête
         mock_result = MagicMock()
@@ -754,13 +757,15 @@ class TestObtenirInfosDBAvance:
                 mock_params.return_value = MagicMock(
                     DATABASE_URL="postgresql://user:pass@host.example.com:5432/db"
                 )
-                with patch("src.core.db.utils.st.cache_data", lambda **kw: lambda f: f):
-                    with patch.object(
-                        GestionnaireMigrations, "obtenir_version_courante", return_value=5
-                    ):
-                        result = obtenir_infos_db()
+                with patch.object(
+                    GestionnaireMigrations, "obtenir_version_courante", return_value=5
+                ):
+                    result = obtenir_infos_db()
 
-                        assert result["statut"] == "connected"
+                    assert result["statut"] == "connected"
+                    assert result["version"] == "PostgreSQL 14.0"
+                    assert result["base_donnees"] == "testdb"
+                    assert result["hote"] == "host.example.com"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -801,13 +806,16 @@ class TestVerifierSanteAvance:
 class TestVerifierConnexionAvance:
     """Tests avancés pour verifier_connexion."""
 
-    @pytest.mark.skip(reason="Requiert refactoring des mocks DB complexes")
     def test_verifier_connexion_success(self):
         """Test vérification connexion avec succès."""
         mock_engine = MagicMock()
         mock_conn = MagicMock()
-        mock_engine.connect.return_value.__enter__ = MagicMock(return_value=mock_conn)
-        mock_engine.connect.return_value.__exit__ = MagicMock(return_value=False)
+
+        # Configurer le context manager connect() correctement
+        mock_ctx = MagicMock()
+        mock_ctx.__enter__ = MagicMock(return_value=mock_conn)
+        mock_ctx.__exit__ = MagicMock(return_value=False)
+        mock_engine.connect.return_value = mock_ctx
 
         with patch("src.core.db.utils.obtenir_moteur_securise", return_value=mock_engine):
             result = verifier_connexion()

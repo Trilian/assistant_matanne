@@ -47,6 +47,17 @@ def est_mode_debug() -> bool:
     return etat.mode_debug
 
 
+def rerun():
+    """Raccourci pour forcer un rafraîchissement UI.
+
+    Centralise les appels ``st.rerun()`` via l'abstraction
+    ``obtenir_rerun_callback`` pour découpler du framework.
+    """
+    from src.core.storage import obtenir_rerun_callback
+
+    obtenir_rerun_callback()()
+
+
 def nettoyer_etats_ui():
     """Raccourci pour nettoyer états UI"""
     GestionnaireEtat.nettoyer_etats_ui()
@@ -55,6 +66,7 @@ def nettoyer_etats_ui():
 __all__ = [
     "obtenir_etat",
     "naviguer",
+    "rerun",
     "revenir",
     "obtenir_fil_ariane",
     "est_mode_debug",

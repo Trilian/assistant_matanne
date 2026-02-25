@@ -10,6 +10,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+from src.core.state import rerun
 from src.ui import etat_vide
 from src.ui.fragments import cached_fragment, ui_fragment
 
@@ -143,7 +144,7 @@ def afficher_gestion_tirages():
                         st.success(f"✅ {count} nouveau(x) tirage(s) ajouté(s)!")
                     else:
                         st.info("✅ Tous les tirages sont à jour")
-                    st.rerun()
+                    rerun()
             except Exception as e:
                 logger.error(f"❌ Erreur sync loto: {e}", exc_info=True)
                 st.error(f"❌ Erreur: {e}")
@@ -181,7 +182,7 @@ def afficher_gestion_tirages():
     else:
         if st.button("💾 Enregistrer le tirage", type="primary"):
             ajouter_tirage(date_tirage, numeros, chance, jackpot)
-            st.rerun()
+            rerun()
 
     st.divider()
 

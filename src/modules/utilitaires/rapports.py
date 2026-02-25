@@ -16,7 +16,7 @@ import streamlit as st
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.modules._framework import error_boundary
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import cached_fragment, ui_fragment
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 
@@ -76,7 +76,7 @@ def app():
 # ═══════════════════════════════════════════════════════════
 
 
-@ui_fragment
+@cached_fragment(ttl=600)
 def afficher_rapport_stocks():
     """Rapport hebdo stocks"""
 
@@ -216,7 +216,7 @@ def afficher_rapport_stocks():
 # ═══════════════════════════════════════════════════════════
 
 
-@ui_fragment
+@cached_fragment(ttl=600)
 def afficher_rapport_budget():
     """Rapport budget/depenses"""
 
@@ -353,7 +353,7 @@ def afficher_rapport_budget():
 # ═══════════════════════════════════════════════════════════
 
 
-@ui_fragment
+@cached_fragment(ttl=600)
 def afficher_analyse_gaspillage():
     """Analyse gaspillage"""
 

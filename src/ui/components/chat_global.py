@@ -14,6 +14,7 @@ import logging
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.ui.keys import KeyNamespace
 from src.ui.registry import composant_ui
 
@@ -215,7 +216,7 @@ def _afficher_contenu_chat(
     with col_actions:
         if st.button("🗑️", key=_keys("clear"), help="Effacer la conversation"):
             st.session_state.chat_global_messages = []
-            st.rerun()
+            rerun()
 
     # Suggestions rapides si conversation vide
     if not messages:
@@ -269,7 +270,7 @@ def _afficher_suggestions_rapides(contexte: str) -> None:
                 st.session_state.chat_global_messages.append(
                     {"role": "user", "content": suggestion}
                 )
-                st.rerun()
+                rerun()
 
 
 __all__ = ["afficher_chat_global"]

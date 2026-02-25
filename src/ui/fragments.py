@@ -39,6 +39,8 @@ from typing import Any, Callable, TypeVar
 
 import streamlit as st
 
+from src.core.state import rerun
+
 logger = logging.getLogger(__name__)
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -391,7 +393,7 @@ class FragmentGroup:
         """Force le refresh de tous les fragments du groupe."""
         current = st.session_state.get(self._version_key, 0)
         st.session_state[self._version_key] = current + 1
-        st.rerun()
+        rerun()
 
     def render_all(self) -> None:
         """Rend tous les fragments enregistrés dans l'ordre."""

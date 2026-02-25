@@ -17,7 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 class AccueilDataService:
-    """Service de données pour le dashboard accueil."""
+    """Service de données pour le dashboard accueil.
+
+    Note (S12): Service read-heavy standalone sans BaseService[T] — acceptable
+    car il ne fait que de la lecture agrégée, pas de CRUD standard.
+    """
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db

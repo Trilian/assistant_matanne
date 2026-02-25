@@ -66,6 +66,13 @@ from .recettes import (
     RecetteResponse,
 )
 
+# Suggestions IA
+from .suggestions import (
+    SuggestionRecetteItem,
+    SuggestionsPlanningResponse,
+    SuggestionsRecettesResponse,
+)
+
 __all__ = [
     # Base
     "NomValidatorMixin",
@@ -106,4 +113,8 @@ __all__ = [
     "PushUnsubscribeRequest",
     "PushSubscriptionResponse",
     "PushStatusResponse",
+    # Suggestions IA
+    "SuggestionRecetteItem",
+    "SuggestionsRecettesResponse",
+    "SuggestionsPlanningResponse",
 ]

@@ -5,6 +5,7 @@ from datetime import time
 import streamlit as st
 
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.modules.cuisine.batch_cooking_utils import ROBOTS_INFO
 from src.ui import etat_vide
 
@@ -26,7 +27,7 @@ def afficher_selecteur_session():
             type="primary" if st.session_state.get(SK.BATCH_TYPE) == "dimanche" else "secondary",
         ):
             st.session_state.batch_type = "dimanche"
-            st.rerun()
+            rerun()
 
     with col2:
         if st.button(
@@ -36,7 +37,7 @@ def afficher_selecteur_session():
             type="primary" if st.session_state.get(SK.BATCH_TYPE) == "mercredi" else "secondary",
         ):
             st.session_state.batch_type = "mercredi"
-            st.rerun()
+            rerun()
 
 
 def afficher_planning_semaine_preview(planning_data: dict):

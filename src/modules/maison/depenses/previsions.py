@@ -13,10 +13,13 @@ try:
 except ImportError:
     PLOTLY_AVAILABLE = False
 
+from src.ui.fragments import cached_fragment
+
 from .crud import get_depenses_mois
 from .utils import MOIS_FR, date, st
 
 
+@cached_fragment(ttl=300)
 def afficher_previsions_ia():
     """Affiche les prévisions IA pour les prochains mois."""
     st.subheader("🤖 Prévisions IA")

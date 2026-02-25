@@ -3,6 +3,7 @@ Module Suivi Perso - Dashboard et graphiques
 """
 
 from src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUT
+from src.core.state import rerun
 from src.ui.engine import charger_css
 from src.ui.fragments import auto_refresh, cached_fragment, ui_fragment
 
@@ -19,13 +20,13 @@ def afficher_user_switch():
         btn_type = "primary" if current == "anne" else "secondary"
         if st.button("👩 Anne", key="switch_anne", use_container_width=True, type=btn_type):
             set_current_user("anne")
-            st.rerun()
+            rerun()
 
     with col2:
         btn_type = "primary" if current == "mathieu" else "secondary"
         if st.button("💨 Mathieu", key="switch_mathieu", use_container_width=True, type=btn_type):
             set_current_user("mathieu")
-            st.rerun()
+            rerun()
 
 
 @auto_refresh(seconds=90)

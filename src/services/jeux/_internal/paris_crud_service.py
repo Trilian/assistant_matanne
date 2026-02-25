@@ -53,16 +53,11 @@ class ParisCrudService(
 # FACTORY
 # ═══════════════════════════════════════════════════════════
 
-_instance: ParisCrudService | None = None
-
 
 @service_factory("paris_crud", tags={"jeux", "crud", "paris"})
 def get_paris_crud_service() -> ParisCrudService:
-    """Factory pour ParisCrudService (singleton)."""
-    global _instance
-    if _instance is None:
-        _instance = ParisCrudService()
-    return _instance
+    """Factory singleton pour ParisCrudService."""
+    return ParisCrudService()
 
 
 def obtenir_service_paris_crud() -> ParisCrudService:

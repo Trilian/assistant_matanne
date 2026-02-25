@@ -20,6 +20,7 @@ from typing import Any
 import streamlit as st
 
 from src.core.ai import obtenir_client_ia
+from src.core.state import rerun
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
 from src.ui.fragments import ui_fragment
@@ -224,7 +225,7 @@ def afficher_chat_contextuel(
     with col2:
         if st.button("🗑️", key=_keys("clear", contexte), help="Effacer"):
             st.session_state[sk_messages] = []
-            st.rerun()
+            rerun()
 
     # Suggestions rapides (si conversation vide)
     if not messages:
@@ -238,7 +239,7 @@ def afficher_chat_contextuel(
                     use_container_width=True,
                 ):
                     messages.append({"role": "user", "content": suggestion})
-                    st.rerun()
+                    rerun()
 
     # Conteneur scrollable pour les messages
     with st.container(height=hauteur_max if messages else 100):

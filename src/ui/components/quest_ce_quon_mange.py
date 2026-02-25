@@ -15,6 +15,7 @@ from datetime import date, datetime
 
 import streamlit as st
 
+from src.core.state import naviguer, rerun
 from src.ui.keys import KeyNamespace
 from src.ui.registry import composant_ui
 from src.ui.tokens_semantic import Sem
@@ -233,23 +234,17 @@ def widget_quest_ce_quon_mange(compact: bool = False) -> None:
             col1, col2, col3 = st.columns(3)
             with col1:
                 if st.button("📋 Voir la recette", key=_keys("voir_recette")):
-                    from src.core.state import GestionnaireEtat
-
                     st.session_state["recette_selectionnee"] = repas["recette_id"]
-                    GestionnaireEtat.naviguer_vers("cuisine.recettes")
-                    st.rerun()
+                    naviguer("cuisine.recettes")
             with col2:
                 if st.button("🔄 Autre idée", key=_keys("autre_idee")):
                     # Forcer suggestion IA
                     st.session_state[_keys("force_ia")] = True
-                    st.rerun()
+                    rerun()
             with col3:
                 if st.button("🛒 Ingrédients", key=_keys("ingredients")):
                     st.session_state["ingredients_a_verifier"] = repas.get("ingredients", "")
-                    from src.core.state import GestionnaireEtat
-
-                    GestionnaireEtat.naviguer_vers("cuisine.courses")
-                    st.rerun()
+                    naviguer("cuisine.courses")
     else:
         # Pas de planning - Proposer suggestion IA ou bouton
         st.markdown(
@@ -275,10 +270,7 @@ def widget_quest_ce_quon_mange(compact: bool = False) -> None:
                             st.info("Pas d'idée pour l'instant. Consulte tes recettes favorites!")
             with col2:
                 if st.button("📅 Planifier", key=_keys("planifier")):
-                    from src.core.state import GestionnaireEtat
-
-                    GestionnaireEtat.naviguer_vers("cuisine.planificateur_repas")
-                    st.rerun()
+                    naviguer("cuisine.planificateur_repas")
 
 
 @composant_ui("repas", tags=("ui", "widget", "compact"))
@@ -292,10 +284,7 @@ def widget_qcom_compact() -> None:
         )
     else:
         if st.button("🍽️ Qu'est-ce qu'on mange ?", key=_keys("compact_btn")):
-            from src.core.state import GestionnaireEtat
-
-            GestionnaireEtat.naviguer_vers("cuisine.planificateur_repas")
-            st.rerun()
+            naviguer("cuisine.planificateur_repas")
 
 
 __all__ = [

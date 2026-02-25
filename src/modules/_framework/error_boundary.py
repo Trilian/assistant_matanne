@@ -38,6 +38,8 @@ from typing import Any, Callable, TypeVar
 
 import streamlit as st
 
+from src.core.state import rerun
+
 logger = logging.getLogger(__name__)
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -110,7 +112,7 @@ def _render_error_ui(ctx: ErrorBoundaryContext) -> None:
         col1, col2 = st.columns([1, 3])
         with col1:
             if st.button("🔄 Réessayer", key=ctx.retry_key, type="primary"):
-                st.rerun()
+                rerun()
         with col2:
             st.caption("Si le problème persiste, contactez le support.")
 

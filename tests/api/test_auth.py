@@ -379,7 +379,9 @@ class TestConfiguration:
             assert _obtenir_api_secret() == "my-secret"
 
     def test_api_secret_defaut(self):
-        """Sans variable d'environnement, utilise la valeur par défaut."""
+        """Sans variable d'environnement, utilise une clé aléatoire générée."""
         with patch.dict("os.environ", {}, clear=True):
             secret = _obtenir_api_secret()
-            assert secret == "dev-secret-key-change-in-production"
+            # A2: la clé par défaut est maintenant aléatoire (64 bytes base64)
+            assert len(secret) >= 40
+            assert secret != "dev-secret-key-change-in-production"

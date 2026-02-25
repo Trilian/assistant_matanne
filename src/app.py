@@ -68,6 +68,7 @@ if not _rapport.succes:
 from src.core import GestionnaireEtat, obtenir_etat, obtenir_parametres
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.navigation import initialiser_navigation
+from src.core.state import rerun
 
 # Layout modulaire
 from src.ui.layout import (
@@ -126,23 +127,39 @@ page = initialiser_navigation()
 
 
 def _afficher_widgets_globaux() -> None:
-    """Injecte les widgets flottants persistants (chat IA, notifications, gamification)."""
-    try:
-        col_chat, col_notif, col_gamif = st.columns([1, 1, 1])
-        with col_chat:
+    """Injecte les widgets flottants persistants (chat IA, notifications, gamification).
+
+    Chaque widget est isolé dans son propre try/except pour que
+    l'échec de l'un ne masque pas les autres (U3).
+    """
+    col_chat, col_notif, col_gamif = st.columns([1, 1, 1])
+    with col_chat:
+        try:
             from src.ui.components.chat_global import afficher_chat_global
 
             afficher_chat_global()
-        with col_notif:
+        except ImportError:
+            logger.debug("Widget chat global non disponible (module absent)")
+        except Exception as e:
+            logger.warning(f"Widget chat global en erreur: {e}", exc_info=True)
+    with col_notif:
+        try:
             from src.ui.components.notifications_live import widget_notifications_live
 
             widget_notifications_live()
-        with col_gamif:
+        except ImportError:
+            logger.debug("Widget notifications non disponible (module absent)")
+        except Exception as e:
+            logger.warning(f"Widget notifications en erreur: {e}", exc_info=True)
+    with col_gamif:
+        try:
             from src.ui.components.gamification_widget import afficher_gamification_sidebar
 
             afficher_gamification_sidebar()
-    except Exception as e:
-        logger.debug(f"Widgets globaux indisponibles: {e}")
+        except ImportError:
+            logger.debug("Widget gamification non disponible (module absent)")
+        except Exception as e:
+            logger.warning(f"Widget gamification en erreur: {e}", exc_info=True)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -208,7 +225,7 @@ def main() -> None:
 
         if st.button("🔄 Redémarrer"):
             GestionnaireEtat.reset_complet()
-            st.rerun()
+            rerun()
 
 
 # ═══════════════════════════════════════════════════════════

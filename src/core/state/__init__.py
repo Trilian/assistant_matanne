@@ -53,6 +53,7 @@ from .shortcuts import (
     nettoyer_etats_ui,
     obtenir_etat,
     obtenir_fil_ariane,
+    rerun,
     revenir,
 )
 
@@ -70,6 +71,7 @@ __all__ = [
     # Raccourcis
     "obtenir_etat",
     "naviguer",
+    "rerun",
     "revenir",
     "obtenir_fil_ariane",
     "est_mode_debug",

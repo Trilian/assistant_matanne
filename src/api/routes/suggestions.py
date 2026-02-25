@@ -9,8 +9,9 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from src.api.dependencies import get_current_user
+from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia
+from src.api.schemas import SuggestionsPlanningResponse, SuggestionsRecettesResponse
 from src.api.utils import gerer_exception_api
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ router = APIRouter(prefix="/api/v1/suggestions", tags=["IA"])
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/recettes")
+@router.get("/recettes", response_model=SuggestionsRecettesResponse)
 @gerer_exception_api
 async def suggest_recettes(
     contexte: str = Query(
@@ -31,7 +32,7 @@ async def suggest_recettes(
         description="Contexte pour les suggestions (ex: 'rapide', 'végétarien', 'batch cooking')",
     ),
     nombre: int = Query(3, ge=1, le=10, description="Nombre de suggestions à retourner (1-10)"),
-    user: dict = Depends(get_current_user),
+    user: dict = Depends(require_auth),
     _rate_check: dict = Depends(verifier_limite_debit_ia),
 ):
     """
@@ -84,12 +85,12 @@ async def suggest_recettes(
     }
 
 
-@router.get("/planning")
+@router.get("/planning", response_model=SuggestionsPlanningResponse)
 @gerer_exception_api
 async def suggest_planning(
     jours: int = Query(7, ge=1, le=14, description="Nombre de jours à planifier (1-14)"),
     personnes: int = Query(4, ge=1, le=20, description="Nombre de personnes à table"),
-    user: dict = Depends(get_current_user),
+    user: dict = Depends(require_auth),
     _rate_check: dict = Depends(verifier_limite_debit_ia),
 ):
     """

@@ -433,16 +433,11 @@ class LotoCrudService(BaseService[GrilleLoto]):
 # FACTORY
 # ═══════════════════════════════════════════════════════════
 
-_instance: LotoCrudService | None = None
-
 
 @service_factory("loto_crud", tags={"jeux", "crud", "loto"})
 def get_loto_crud_service() -> LotoCrudService:
-    """Factory pour LotoCrudService (singleton)."""
-    global _instance
-    if _instance is None:
-        _instance = LotoCrudService()
-    return _instance
+    """Factory singleton pour LotoCrudService."""
+    return LotoCrudService()
 
 
 def obtenir_service_loto_crud() -> LotoCrudService:

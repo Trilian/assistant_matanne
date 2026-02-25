@@ -15,6 +15,7 @@ import streamlit as st
 
 from src.core.db import obtenir_contexte_db
 from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.modules.maison.utils import (
     charger_plantes,
@@ -158,7 +159,7 @@ def app():
             if submitted and nom:
                 ajouter_plante(nom, type_p)
                 st.success(f"✅ {nom} ajoutée !")
-                st.rerun()
+                rerun()
 
         with tab3:
             st.subheader("📊 Statistiques")

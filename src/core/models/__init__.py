@@ -215,6 +215,7 @@ _MODEL_MODULES = (
     ".jeux",
     ".maison",
     ".notifications",
+    ".persistent_state",
     ".planning",
     ".recettes",
     ".sante",

@@ -108,7 +108,7 @@ def afficher_generateur_grilles(tirages: list):
                         source=grille_generee.get("source", "ia"),
                         est_virtuelle=True,
                     )
-                    st.rerun()
+                    rerun()
 
 
 @ui_fragment

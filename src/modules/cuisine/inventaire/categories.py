@@ -6,12 +6,12 @@ Affiche les articles groupés par catégorie.
 import streamlit as st
 
 from src.services.inventaire import obtenir_service_inventaire
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import cached_fragment
 
 from .utils import _prepare_inventory_dataframe
 
 
-@ui_fragment
+@cached_fragment(ttl=300)
 def afficher_categories():
     """Gestion des catégories d'ingrédients"""
     service = obtenir_service_inventaire()

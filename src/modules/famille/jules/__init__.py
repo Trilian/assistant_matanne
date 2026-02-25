@@ -16,7 +16,8 @@ from src.ui.state.url import tabs_with_url
 
 _keys = KeyNamespace("jules")
 
-from .ai_service import JulesAIService
+from src.services.famille.jules_ai import JulesAIService
+
 from .components import (
     afficher_achats_categorie,
     afficher_activites,

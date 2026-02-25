@@ -6,6 +6,7 @@ from decimal import Decimal
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.ui.keys import KeyNamespace
 
 from .constants import PIECES_LABELS, PRIORITES_LABELS, STATUTS_LABELS
@@ -85,7 +86,7 @@ def afficher_formulaire(meuble=None) -> None:
         else:
             create_meuble(data)
             st.success("✅ Meuble ajouté !")
-        st.rerun()
+        rerun()
 
 
 def afficher_meuble_card(meuble) -> None:
@@ -117,11 +118,11 @@ def afficher_meuble_card(meuble) -> None:
         with col_edit:
             if st.button("✏️ Modifier", key=f"edit_m_{meuble.id}"):
                 st.session_state[_keys("edit_id")] = meuble.id
-                st.rerun()
+                rerun()
         with col_del:
             if st.button("🗑️ Supprimer", key=f"del_m_{meuble.id}"):
                 delete_meuble(meuble.id)
-                st.rerun()
+                rerun()
 
 
 def afficher_budget_summary() -> None:

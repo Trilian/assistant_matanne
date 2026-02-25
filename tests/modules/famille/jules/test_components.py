@@ -335,11 +335,14 @@ class TestRenderActivites:
         error_calls = [c for c in mock_st.error.call_args_list]
         assert len(error_calls) > 0
 
+    @patch("src.modules.famille.jules.components.rerun")
     @patch("src.modules.famille.jules.components.JulesAIService")
     @patch("src.modules.famille.jules.components.st")
     @patch("src.modules.famille.jules.components.get_age_jules")
     @patch("src.modules.famille.jules.components.get_activites_pour_age")
-    def test_activites_fermer_button(self, mock_activites, mock_age, mock_st, mock_ai_service):
+    def test_activites_fermer_button(
+        self, mock_activites, mock_age, mock_st, mock_ai_service, mock_rerun
+    ):
         """Test bouton Fermer suggestions IA"""
         session_data = {"jules_show_ai_activities": True}
         setup_mock_st(mock_st, session_data)
@@ -360,7 +363,7 @@ class TestRenderActivites:
         afficher_activites()
 
         assert mock_st.session_state.get("jules_show_ai_activities") == False
-        mock_st.rerun.assert_called_once()
+        mock_rerun.assert_called_once()
 
 
 class TestRenderShopping:
@@ -484,9 +487,10 @@ class TestRenderAchatsCategorie:
         markdown_calls = [str(c) for c in mock_st.markdown.call_args_list]
         assert any("Pantalon" in str(c) for c in markdown_calls)
 
+    @patch("src.modules.famille.jules.components.rerun")
     @patch("src.modules.famille.jules.components.obtenir_service_achats_famille")
     @patch("src.modules.famille.jules.components.st")
-    def test_achats_categorie_buy_button(self, mock_st, mock_factory):
+    def test_achats_categorie_buy_button(self, mock_st, mock_factory, mock_rerun):
         """Test bouton acheter - Lines 179-185"""
         setup_mock_st(mock_st)
 
@@ -506,7 +510,7 @@ class TestRenderAchatsCategorie:
         # Verifie que le service marque l'achat comme achete
         mock_service.marquer_achete.assert_called_once_with(achat.id)
         mock_st.success.assert_called_with("Achete!")
-        mock_st.rerun.assert_called_once()
+        mock_rerun.assert_called_once()
 
     @patch("src.modules.famille.jules.components.obtenir_service_achats_famille")
     @patch("src.modules.famille.jules.components.st")
@@ -602,9 +606,10 @@ class TestRenderFormAjoutAchat:
 
         mock_st.error.assert_called_with("Nom requis")
 
+    @patch("src.modules.famille.jules.components.rerun")
     @patch("src.modules.famille.jules.components.obtenir_service_achats_famille")
     @patch("src.modules.famille.jules.components.st")
-    def test_form_submit_success(self, mock_st, mock_factory):
+    def test_form_submit_success(self, mock_st, mock_factory, mock_rerun):
         """Test soumission reussie - Lines 221-238"""
         setup_mock_st(mock_st)
         mock_st.form_submit_button.return_value = True
@@ -624,7 +629,7 @@ class TestRenderFormAjoutAchat:
 
         mock_service.ajouter_achat.assert_called_once()
         mock_st.success.assert_called()
-        mock_st.rerun.assert_called_once()
+        mock_rerun.assert_called_once()
 
     @patch("src.modules.famille.jules.components.obtenir_service_achats_famille")
     @patch("src.modules.famille.jules.components.st")

@@ -7,6 +7,7 @@ pour respecter la séparation UI/Services.
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.services.integrations.web.synchronisation import get_realtime_sync_service
 from src.ui.tokens_semantic import Sem
 from src.ui.utils import echapper_html
@@ -119,7 +120,7 @@ def afficher_resolution_conflits():
                         key=f"resolve_remote_{i}",
                     ):
                         sync.resolve_conflict(event, keep="remote")
-                        st.rerun()
+                        rerun()
 
                 with col3:
                     if st.button(
@@ -127,12 +128,12 @@ def afficher_resolution_conflits():
                         key=f"resolve_local_{i}",
                     ):
                         sync.resolve_conflict(event, keep="local")
-                        st.rerun()
+                        rerun()
 
         if st.button("🔄 Tout accepter (distant)", key="resolve_all"):
             for event in conflicting:
                 sync.resolve_conflict(event, keep="remote")
-            st.rerun()
+            rerun()
 
 
 def afficher_panneau_collaboratif():

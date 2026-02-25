@@ -16,6 +16,7 @@ import streamlit as st
 from src.core.db import obtenir_contexte_db
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.fragments import cached_fragment
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 
@@ -227,6 +228,7 @@ def afficher_carte_zone(zone: dict) -> None:
             st.caption(f"📸 {len(photos)} photo(s)")
 
 
+@cached_fragment(ttl=300)
 def afficher_vue_ensemble() -> None:
     """Affiche la vue d'ensemble des zones."""
     zones = charger_zones()

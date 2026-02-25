@@ -5,11 +5,13 @@ Graphiques Plotly pour le module Énergie.
 from datetime import date
 
 import plotly.graph_objects as go
+import streamlit as st
 
 from .constants import ENERGIES
 from .data import charger_historique_energie, get_stats_energie
 
 
+@st.cache_data(ttl=300)
 def graphique_evolution(type_energie: str, afficher_conso: bool = True) -> go.Figure:
     """Crée un graphique d'évolution des consommations.
 
@@ -62,6 +64,7 @@ def graphique_evolution(type_energie: str, afficher_conso: bool = True) -> go.Fi
     return fig
 
 
+@st.cache_data(ttl=300)
 def graphique_comparaison_annees(type_energie: str) -> go.Figure:
     """Crée un graphique de comparaison N vs N-1.
 
@@ -106,6 +109,7 @@ def graphique_comparaison_annees(type_energie: str) -> go.Figure:
     return fig
 
 
+@st.cache_data(ttl=300)
 def graphique_repartition() -> go.Figure:
     """Crée un graphique de répartition des coûts par type d'énergie.
 

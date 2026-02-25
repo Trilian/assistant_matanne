@@ -16,7 +16,7 @@ _keys = KeyNamespace("accueil")
 @auto_refresh(seconds=30)
 def afficher_critical_alerts():
     """Affiche les alertes importantes"""
-    from src.core.state import GestionnaireEtat
+    from src.core.state import GestionnaireEtat, rerun
     from src.services.cuisine.planning import obtenir_service_planning
     from src.services.inventaire import obtenir_service_inventaire
 
@@ -119,4 +119,4 @@ def afficher_critical_alerts():
             with col2:
                 if st.button(alert["action"], key=_keys("alert", alert["module"]), width="stretch"):
                     GestionnaireEtat.naviguer_vers(alert["module"])
-                    st.rerun()
+                    rerun()

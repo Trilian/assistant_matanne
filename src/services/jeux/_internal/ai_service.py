@@ -490,21 +490,15 @@ Génère un résumé court (3-4 phrases) avec:
 # ═══════════════════════════════════════════════════════════
 
 
-_jeux_ai_service_instance: JeuxAIService | None = None
+@service_factory("jeux_ai", tags={"jeux", "ia"})
+def get_jeux_ai_service() -> JeuxAIService:
+    """Factory singleton pour le service IA Jeux."""
+    return JeuxAIService()
 
 
 def obtenir_service_ia_jeux() -> JeuxAIService:
-    """Factory pour obtenir le service IA Jeux (singleton, convention française)."""
-    global _jeux_ai_service_instance
-    if _jeux_ai_service_instance is None:
-        _jeux_ai_service_instance = JeuxAIService()
-    return _jeux_ai_service_instance
-
-
-@service_factory("jeux_ai", tags={"jeux", "ia"})
-def get_jeux_ai_service() -> JeuxAIService:
-    """Factory pour obtenir le service IA Jeux (alias anglais)."""
-    return obtenir_service_ia_jeux()
+    """Alias français pour get_jeux_ai_service (singleton via registre)."""
+    return get_jeux_ai_service()
 
 
 # ═══════════════════════════════════════════════════════════

@@ -48,6 +48,10 @@ class UserDataDict(TypedDict, total=False):
 class ServiceSuiviPerso:
     """Service de suivi santé personnel (alimentation, stats).
 
+    Note (S12): Service read-heavy standalone sans BaseService[T] — acceptable
+    car il ne fait que de la lecture/écriture spécifique au domaine via
+    @avec_session_db, pas de CRUD générique standard.
+
     Encapsule toutes les opérations liées au suivi personnel:
     - Données utilisateur agrégées (stats Garmin, streak)
     - Logs alimentation (CRUD)

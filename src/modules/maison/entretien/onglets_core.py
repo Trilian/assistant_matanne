@@ -6,6 +6,7 @@ from datetime import date
 import streamlit as st
 
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
 
@@ -95,7 +96,7 @@ def onglet_taches(mes_objets: list[dict], historique: list[dict]):
                 st.session_state.historique_entretien = historique
                 st.session_state._entretien_reload = True
                 st.toast(f"✅ {tache['tache_nom']} accompli !")
-                st.rerun()
+                rerun()
 
 
 @ui_fragment
@@ -171,11 +172,11 @@ def onglet_inventaire(mes_objets: list[dict]):
                 st.session_state.entretien_mode_ajout = False
                 st.session_state._entretien_reload = True
                 st.success(f"✅ {obj_options[objet_sel]} ajouté !")
-                st.rerun()
+                rerun()
 
         if st.button("❌ Annuler"):
             st.session_state.entretien_mode_ajout = False
-            st.rerun()
+            rerun()
 
     else:
         # Afficher l'inventaire existant
@@ -219,7 +220,7 @@ def onglet_inventaire(mes_objets: list[dict]):
                         st.success(
                             f"✅ {len(objets_courants)} équipements ajoutés pour {piece_data.get('nom')} !"
                         )
-                        st.rerun()
+                        rerun()
             return
 
         # Grouper par pièce
@@ -273,7 +274,7 @@ def onglet_inventaire(mes_objets: list[dict]):
                             mes_objets.pop(idx)
                             st.session_state.mes_objets_entretien = mes_objets
                             st.session_state._entretien_reload = True
-                            st.rerun()
+                            rerun()
 
 
 @ui_fragment
@@ -333,10 +334,10 @@ def onglet_pieces(mes_objets: list[dict], historique: list[dict]):
                     st.session_state.historique_entretien = historique
                     st.session_state._entretien_reload = True
                     st.toast(f"✅ {tache['tache_nom']} accompli !")
-                    st.rerun()
+                    rerun()
         else:
             st.success(f"✨ Tout est à jour dans {piece} !")
 
         if st.button("← Retour"):
             del st.session_state.piece_selectionnee
-            st.rerun()
+            rerun()

@@ -9,7 +9,7 @@ from datetime import datetime
 
 import streamlit as st
 
-from src.core.state import obtenir_etat
+from src.core.state import obtenir_etat, rerun
 from src.core.state.persistent import PersistentState, persistent_state
 from src.ui.feedback import afficher_succes
 from src.ui.fragments import ui_fragment
@@ -133,7 +133,7 @@ def afficher_foyer_config():
             else:
                 afficher_succes("✅ Configuration sauvegardée (session uniquement)")
 
-            st.rerun()
+            rerun()
 
     # Afficher config actuelle + statut sync
     with st.expander("📋 Configuration actuelle"):

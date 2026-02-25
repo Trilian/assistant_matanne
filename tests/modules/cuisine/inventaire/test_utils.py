@@ -614,17 +614,11 @@ class TestFormaterInventaireRapport:
         assert "ALERTES CRITIQUES" in rapport
 
     def test_rapport_liste_vide(self):
-        """Rapport pour liste vide - le code source ne gère pas ce cas."""
-        # Note: Le code source a un bug - formater_inventaire_rapport ne gère pas
-        # correctement une liste vide (KeyError: 'pct_ok')
-        # Ce test vérifie que la fonction existe et documente ce comportement
-        try:
-            rapport = formater_inventaire_rapport([])
-            # Si ça passe, vérifier le contenu
-            assert "RAPPORT" in rapport.upper() or len(rapport) > 0
-        except KeyError:
-            # Le code source ne gère pas les listes vides - c'est un bug connu
-            pytest.skip("Bug connu: formater_inventaire_rapport ne gère pas les listes vides")
+        """Rapport pour liste vide."""
+        rapport = formater_inventaire_rapport([])
+        # Doit retourner un rapport valide même pour une liste vide
+        assert "RAPPORT" in rapport.upper()
+        assert "Total articles: 0" in rapport
 
 
 # ═══════════════════════════════════════════════════════════

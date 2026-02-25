@@ -7,6 +7,7 @@ from decimal import Decimal
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.ui.keys import KeyNamespace
 
 from .constants import ECO_TIPS_DATA, IDEES_ACTIONS, IMPACT_COLORS, TYPE_LABELS
@@ -56,11 +57,11 @@ def afficher_action_card(action) -> None:
         with cols2[0]:
             if st.button("✏️ Modifier", key=f"edit_{action.id}"):
                 st.session_state[_keys("edit_id")] = action.id
-                st.rerun()
+                rerun()
         with cols2[1]:
             if st.button("🗑️ Supprimer", key=f"del_{action.id}"):
                 delete_action(action.id)
-                st.rerun()
+                rerun()
 
 
 def afficher_formulaire(action=None) -> None:
@@ -109,7 +110,7 @@ def afficher_formulaire(action=None) -> None:
         else:
             create_action(data)
             st.success("✅ Action créée !")
-        st.rerun()
+        rerun()
 
 
 def afficher_idees() -> None:
@@ -137,7 +138,7 @@ def afficher_idees() -> None:
                                 "actif": True,
                             }
                         )
-                        st.rerun()
+                        rerun()
                 else:
                     st.success("✅ Déjà adoptée")
 

@@ -4,6 +4,8 @@ Module pour l'import de recettes
 
 import streamlit as st
 
+from src.core.state import rerun
+
 # Logique metier pure
 from src.services.cuisine.recettes import get_recipe_import_service, obtenir_service_recettes
 from src.services.cuisine.recettes.importer import RecipeImporter
@@ -72,7 +74,7 @@ def _afficher_import_url():
                     recipe_data = _imported_recipe_to_dict(result.recipe)
                     st.session_state[_keys("extracted_recipe")] = recipe_data
                     st.success("✅ Recette extraite!")
-                    st.rerun()
+                    rerun()
                 else:
                     msg = result.message if result else "Erreur inconnue"
                     st.error(f"❌ {msg}")
@@ -173,7 +175,7 @@ def _show_import_preview(recipe_data: dict):
             )
         with col_action:
             if st.button("✨ Voir la recette", use_container_width=True):
-                st.rerun()
+                rerun()
         st.divider()
         # Reinitialiser le message après l'affichage
         st.session_state[_keys("last_imported")] = None

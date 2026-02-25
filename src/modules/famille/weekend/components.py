@@ -3,11 +3,12 @@ Module Sorties Weekend - Composants UI
 """
 
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.services.famille.weekend import obtenir_service_weekend
+from src.services.famille.weekend_ai import WeekendAIService
 from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
 
-from .ai_service import WeekendAIService
 from .utils import (
     METEO_OPTIONS,
     TYPES_ACTIVITES,
@@ -57,7 +58,7 @@ def afficher_day_activities(day: date, activities: list):
         st.caption("Rien de prevu")
         if st.button("➕ Ajouter", key=f"add_{day}"):
             st.session_state[SK.WEEKEND_ADD_DATE] = day
-            st.rerun()
+            rerun()
         return
 
     for act in activities:
@@ -78,7 +79,7 @@ def afficher_day_activities(day: date, activities: list):
                 if act.statut == "planifie":
                     if st.button("✅", key=f"done_{act.id}", help="Marquer fait"):
                         mark_activity_done(act.id)
-                        st.rerun()
+                        rerun()
                 elif act.statut == "termine":
                     if act.note_lieu:
                         st.write("⭐" * act.note_lieu)
@@ -234,7 +235,7 @@ def afficher_add_activity():
                     )
                     st.success(f"\u2705 {titre} ajoute!")
                     st.session_state.pop(SK.WEEKEND_ADD_DATE, None)
-                    st.rerun()
+                    rerun()
                 except Exception as e:
                     st.error(f"Erreur: {e}")
 
@@ -280,7 +281,7 @@ def afficher_noter_sortie():
                         commentaire=commentaire or None,
                     )
                     st.success("✅ Note!")
-                    st.rerun()
+                    rerun()
 
     except Exception as e:
         st.error(f"Erreur: {e}")

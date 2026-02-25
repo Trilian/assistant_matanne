@@ -15,6 +15,7 @@ from datetime import date, datetime, timedelta
 import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
 
@@ -295,15 +296,15 @@ def app() -> None:
         with col_prev:
             if st.button("◀️ Semaine préc.", key=_keys("prev")):
                 st.session_state[offset_key] -= 1
-                st.rerun()
+                rerun()
         with col_next:
             if st.button("Semaine suiv. ▶️", key=_keys("next")):
                 st.session_state[offset_key] += 1
-                st.rerun()
+                rerun()
         with col_today:
             if st.button("📍 Aujourd'hui", key=_keys("today")):
                 st.session_state[offset_key] = 0
-                st.rerun()
+                rerun()
 
         lundi, dimanche = _plage_semaine(st.session_state[offset_key])
 
