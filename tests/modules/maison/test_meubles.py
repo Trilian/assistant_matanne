@@ -339,7 +339,7 @@ class TestMeublesCrud:
 class TestMeublesUI:
     """Tests des fonctions d'affichage UI"""
 
-    @patch("src.modules.maison.meubles.st")
+    @patch("src.modules.maison.meubles.ui.st")
     @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_render_formulaire_nouveau(self, mock_ctx, mock_st):
         """Test formulaire d'ajout nouveau meuble"""
@@ -355,7 +355,7 @@ class TestMeublesUI:
         mock_st.form.assert_called_once()
         mock_st.text_input.assert_called()
 
-    @patch("src.modules.maison.meubles.st")
+    @patch("src.modules.maison.meubles.ui.st")
     @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_render_formulaire_edition(self, mock_ctx, mock_st, mock_meuble):
         """Test formulaire d'édition meuble existant"""
@@ -370,7 +370,7 @@ class TestMeublesUI:
 
         mock_st.form.assert_called_once()
 
-    @patch("src.modules.maison.meubles.st")
+    @patch("src.modules.maison.meubles.ui.st")
     def test_render_meuble_card(self, mock_st, mock_meuble):
         """Test affichage card meuble"""
         from src.modules.maison.meubles import afficher_meuble_card
@@ -394,7 +394,7 @@ class TestMeublesUI:
         mock_st.container.assert_called_once()
         mock_st.markdown.assert_called()
 
-    @patch("src.modules.maison.meubles.st")
+    @patch("src.modules.maison.meubles.ui.st")
     def test_render_meuble_card_description_longue(self, mock_st, mock_meuble):
         """Test card avec description longue (tronquée)"""
         from src.modules.maison.meubles import afficher_meuble_card
@@ -418,8 +418,8 @@ class TestMeublesUI:
 
         mock_st.container.assert_called()
 
-    @patch("src.modules.maison.meubles.get_budget_resume")
-    @patch("src.modules.maison.meubles.st")
+    @patch("src.modules.maison.meubles.ui.get_budget_resume")
+    @patch("src.modules.maison.meubles.ui.st")
     def test_render_budget_summary(self, mock_st, mock_budget):
         """Test affichage résumé budget"""
         from src.modules.maison.meubles import afficher_budget_summary
@@ -437,8 +437,8 @@ class TestMeublesUI:
         mock_st.subheader.assert_called()
         mock_st.metric.assert_called()
 
-    @patch("src.modules.maison.meubles.get_all_meubles")
-    @patch("src.modules.maison.meubles.st")
+    @patch("src.modules.maison.meubles.ui.get_all_meubles")
+    @patch("src.modules.maison.meubles.ui.st")
     def test_render_vue_par_piece_vide(self, mock_st, mock_get_all):
         """Test vue par pièce sans meubles"""
         from src.modules.maison.meubles import afficher_vue_par_piece
@@ -449,9 +449,9 @@ class TestMeublesUI:
 
         mock_st.info.assert_called_once()
 
-    @patch("src.modules.maison.meubles.afficher_meuble_card")
-    @patch("src.modules.maison.meubles.get_all_meubles")
-    @patch("src.modules.maison.meubles.st")
+    @patch("src.modules.maison.meubles.ui.afficher_meuble_card")
+    @patch("src.modules.maison.meubles.ui.get_all_meubles")
+    @patch("src.modules.maison.meubles.ui.st")
     def test_render_vue_par_piece_avec_meubles(
         self, mock_st, mock_get_all, mock_render_card, mock_meuble
     ):
@@ -475,9 +475,9 @@ class TestMeublesUI:
 class TestMeublesOnglets:
     """Tests des onglets"""
 
-    @patch("src.modules.maison.meubles.afficher_meuble_card")
-    @patch("src.modules.maison.meubles.get_all_meubles")
-    @patch("src.modules.maison.meubles.st")
+    @patch("src.modules.maison.meubles.ui.afficher_meuble_card")
+    @patch("src.modules.maison.meubles.ui.get_all_meubles")
+    @patch("src.modules.maison.meubles.ui.st")
     def test_render_onglet_wishlist_vide(self, mock_st, mock_get_all, mock_render_card):
         """Test onglet wishlist vide"""
         from src.modules.maison.meubles import afficher_onglet_wishlist
@@ -490,9 +490,9 @@ class TestMeublesOnglets:
 
         mock_st.info.assert_called()
 
-    @patch("src.modules.maison.meubles.afficher_meuble_card")
-    @patch("src.modules.maison.meubles.get_all_meubles")
-    @patch("src.modules.maison.meubles.st")
+    @patch("src.modules.maison.meubles.ui.afficher_meuble_card")
+    @patch("src.modules.maison.meubles.ui.get_all_meubles")
+    @patch("src.modules.maison.meubles.ui.st")
     def test_render_onglet_wishlist_avec_filtres(
         self, mock_st, mock_get_all, mock_render_card, mock_meuble
     ):
@@ -508,8 +508,8 @@ class TestMeublesOnglets:
         mock_st.caption.assert_called()
         mock_render_card.assert_called_once_with(mock_meuble)
 
-    @patch("src.modules.maison.meubles.afficher_formulaire")
-    @patch("src.modules.maison.meubles.st")
+    @patch("src.modules.maison.meubles.ui.afficher_formulaire")
+    @patch("src.modules.maison.meubles.ui.st")
     def test_render_onglet_ajouter(self, mock_st, mock_render_form):
         """Test onglet ajout"""
         from src.modules.maison.meubles import afficher_onglet_ajouter
@@ -519,9 +519,9 @@ class TestMeublesOnglets:
         mock_st.subheader.assert_called_once()
         mock_render_form.assert_called_once_with(None)
 
-    @patch("src.modules.maison.meubles.afficher_vue_par_piece")
-    @patch("src.modules.maison.meubles.afficher_budget_summary")
-    @patch("src.modules.maison.meubles.st")
+    @patch("src.modules.maison.meubles.ui.afficher_vue_par_piece")
+    @patch("src.modules.maison.meubles.ui.afficher_budget_summary")
+    @patch("src.modules.maison.meubles.ui.st")
     def test_render_onglet_budget(self, mock_st, mock_summary, mock_vue):
         """Test onglet budget"""
         from src.modules.maison.meubles import afficher_onglet_budget

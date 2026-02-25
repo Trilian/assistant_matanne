@@ -135,7 +135,7 @@ class TestGetStatsEnergie:
         assert callable(get_stats_energie)
 
     @patch("src.modules.maison.energie.st")
-    @patch("src.modules.maison.energie.charger_historique_energie")
+    @patch("src.modules.maison.energie.data.charger_historique_energie")
     def test_stats_energie_avec_donnees(self, mock_charger, mock_st):
         """Test calcul stats avec données."""
         # Mock historique avec données
@@ -165,7 +165,7 @@ class TestGetStatsEnergie:
         assert result["conso_totale"] == 600.0  # 50 * 12
 
     @patch("src.modules.maison.energie.st")
-    @patch("src.modules.maison.energie.charger_historique_energie")
+    @patch("src.modules.maison.energie.data.charger_historique_energie")
     def test_stats_energie_sans_donnees(self, mock_charger, mock_st):
         """Test calcul stats sans données."""
         mock_charger.return_value = [
@@ -269,7 +269,7 @@ class TestGraphiques:
         assert callable(graphique_repartition)
 
     @patch("src.modules.maison.energie.st")
-    @patch("src.modules.maison.energie.get_stats_energie")
+    @patch("src.modules.maison.energie.ui.get_stats_energie")
     def test_graphique_repartition_creation(self, mock_stats, mock_st):
         """Test création du graphique de répartition."""
         mock_stats.return_value = {
@@ -306,8 +306,8 @@ class TestUIComponents:
 
         assert callable(afficher_metric_energie)
 
-    @patch("src.modules.maison.energie.st")
-    @patch("src.modules.maison.energie.get_stats_energie")
+    @patch("src.modules.maison.energie.ui.st")
+    @patch("src.modules.maison.energie.ui.get_stats_energie")
     def test_render_metric_energie_execution(self, mock_stats, mock_st):
         """Test exécution afficher_metric_energie."""
         mock_stats.return_value = {
@@ -347,9 +347,9 @@ class TestUIComponents:
 
         assert callable(afficher_dashboard_global)
 
-    @patch("src.modules.maison.energie.st")
-    @patch("src.modules.maison.energie.get_stats_energie")
-    @patch("src.modules.maison.energie.afficher_metric_energie")
+    @patch("src.modules.maison.energie.ui.st")
+    @patch("src.modules.maison.energie.ui.get_stats_energie")
+    @patch("src.modules.maison.energie.ui.afficher_metric_energie")
     def test_render_dashboard_global_execution(self, mock_render, mock_stats, mock_st):
         """Test exécution afficher_dashboard_global."""
         mock_stats.return_value = {
@@ -383,10 +383,10 @@ class TestUIComponents:
 
         assert callable(afficher_detail_energie)
 
-    @patch("src.modules.maison.energie.st")
-    @patch("src.modules.maison.energie.get_stats_energie")
-    @patch("src.modules.maison.energie.graphique_evolution")
-    @patch("src.modules.maison.energie.graphique_comparaison_annees")
+    @patch("src.modules.maison.energie.ui.st")
+    @patch("src.modules.maison.energie.ui.get_stats_energie")
+    @patch("src.modules.maison.energie.ui.graphique_evolution")
+    @patch("src.modules.maison.energie.ui.graphique_comparaison_annees")
     def test_render_detail_energie_execution(self, mock_comp, mock_evol, mock_stats, mock_st):
         """Test exécution afficher_detail_energie."""
         mock_stats.return_value = {
@@ -428,8 +428,8 @@ class TestUIComponents:
 
         assert callable(afficher_alertes)
 
-    @patch("src.modules.maison.energie.st")
-    @patch("src.modules.maison.energie.get_stats_energie")
+    @patch("src.modules.maison.energie.ui.st")
+    @patch("src.modules.maison.energie.ui.get_stats_energie")
     def test_render_alertes_sans_alerte(self, mock_stats, mock_st):
         """Test afficher_alertes sans alerte."""
         mock_stats.return_value = {
@@ -450,8 +450,8 @@ class TestUIComponents:
 
         mock_st.success.assert_called()
 
-    @patch("src.modules.maison.energie.st")
-    @patch("src.modules.maison.energie.get_stats_energie")
+    @patch("src.modules.maison.energie.ui.st")
+    @patch("src.modules.maison.energie.ui.get_stats_energie")
     def test_render_alertes_avec_alerte_warning(self, mock_stats, mock_st):
         """Test afficher_alertes avec alerte warning (dépassement 120%)."""
         mock_stats.return_value = {
@@ -472,8 +472,8 @@ class TestUIComponents:
 
         mock_st.warning.assert_called()
 
-    @patch("src.modules.maison.energie.st")
-    @patch("src.modules.maison.energie.get_stats_energie")
+    @patch("src.modules.maison.energie.ui.st")
+    @patch("src.modules.maison.energie.ui.get_stats_energie")
     def test_render_alertes_avec_alerte_error(self, mock_stats, mock_st):
         """Test afficher_alertes avec alerte error (forte hausse conso)."""
         mock_stats.return_value = {

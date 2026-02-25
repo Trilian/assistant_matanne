@@ -315,7 +315,7 @@ class TestCrudFunctions:
 class TestCalculateStats:
     """Tests pour la fonction calculate_stats."""
 
-    @patch("src.modules.maison.eco_tips.get_all_actions")
+    @patch("src.modules.maison.eco_tips.stats.get_all_actions")
     def test_calculate_stats_empty(self, mock_get_actions):
         """Test calculate_stats sans actions."""
         mock_get_actions.return_value = []
@@ -331,7 +331,7 @@ class TestCalculateStats:
         assert stats["roi_mois"] == 0
         assert stats["economies_totales"] == 0
 
-    @patch("src.modules.maison.eco_tips.get_all_actions")
+    @patch("src.modules.maison.eco_tips.stats.get_all_actions")
     def test_calculate_stats_with_actions(self, mock_get_actions):
         """Test calculate_stats avec des actions."""
         mock_action = MagicMock()
@@ -351,7 +351,7 @@ class TestCalculateStats:
         assert stats["cout_nouveau_initial"] == 50.0
         assert stats["roi_mois"] == 5.0  # 50 / 10 = 5 mois
 
-    @patch("src.modules.maison.eco_tips.get_all_actions")
+    @patch("src.modules.maison.eco_tips.stats.get_all_actions")
     def test_calculate_stats_with_none_values(self, mock_get_actions):
         """Test calculate_stats avec valeurs None."""
         mock_action = MagicMock()
@@ -378,8 +378,8 @@ class TestCalculateStats:
 class TestUIComponents:
     """Tests pour les composants UI."""
 
-    @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.calculate_stats")
+    @patch("src.modules.maison.eco_tips.ui.st")
+    @patch("src.modules.maison.eco_tips.ui.calculate_stats")
     def test_render_stats_dashboard(self, mock_stats, mock_st):
         """Test afficher_stats_dashboard s'exécute sans erreur."""
         mock_stats.return_value = {
@@ -405,8 +405,8 @@ class TestUIComponents:
         mock_st.subheader.assert_called_once()
         mock_st.columns.assert_called_once()
 
-    @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.update_action")
+    @patch("src.modules.maison.eco_tips.ui.st")
+    @patch("src.modules.maison.eco_tips.ui.update_action")
     def test_render_action_card(self, mock_update, mock_st):
         """Test afficher_action_card s'exécute sans erreur."""
         mock_action = MagicMock()
@@ -445,8 +445,8 @@ class TestUIComponents:
 
         mock_st.container.assert_called()
 
-    @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.get_all_actions")
+    @patch("src.modules.maison.eco_tips.ui.st")
+    @patch("src.modules.maison.eco_tips.ui.get_all_actions")
     def test_render_idees(self, mock_get_actions, mock_st):
         """Test afficher_idees s'exécute sans erreur."""
         mock_get_actions.return_value = []
@@ -593,9 +593,9 @@ class TestApp:
 class TestOnglets:
     """Tests pour les fonctions de rendu des onglets."""
 
-    @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.get_all_actions")
-    @patch("src.modules.maison.eco_tips.afficher_action_card")
+    @patch("src.modules.maison.eco_tips.ui.st")
+    @patch("src.modules.maison.eco_tips.ui.get_all_actions")
+    @patch("src.modules.maison.eco_tips.ui.afficher_action_card")
     def test_render_onglet_mes_actions_empty(self, mock_render_card, mock_get_actions, mock_st):
         """Test onglet mes actions sans données."""
         mock_get_actions.return_value = []
@@ -607,9 +607,9 @@ class TestOnglets:
         mock_st.info.assert_called_once()
         mock_render_card.assert_not_called()
 
-    @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.get_all_actions")
-    @patch("src.modules.maison.eco_tips.afficher_action_card")
+    @patch("src.modules.maison.eco_tips.ui.st")
+    @patch("src.modules.maison.eco_tips.ui.get_all_actions")
+    @patch("src.modules.maison.eco_tips.ui.afficher_action_card")
     def test_render_onglet_mes_actions_with_data(self, mock_render_card, mock_get_actions, mock_st):
         """Test onglet mes actions avec données."""
         mock_action = MagicMock()
@@ -624,9 +624,9 @@ class TestOnglets:
         mock_st.radio.assert_called_once()
         mock_render_card.assert_called_once_with(mock_action)
 
-    @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.get_all_actions")
-    @patch("src.modules.maison.eco_tips.afficher_action_card")
+    @patch("src.modules.maison.eco_tips.ui.st")
+    @patch("src.modules.maison.eco_tips.ui.get_all_actions")
+    @patch("src.modules.maison.eco_tips.ui.afficher_action_card")
     def test_render_onglet_mes_actions_filter_actives(
         self, mock_render_card, mock_get_actions, mock_st
     ):
@@ -646,8 +646,8 @@ class TestOnglets:
         # Seule l'action active devrait être rendue
         mock_render_card.assert_called_once_with(mock_action_active)
 
-    @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.afficher_formulaire")
+    @patch("src.modules.maison.eco_tips.ui.st")
+    @patch("src.modules.maison.eco_tips.ui.afficher_formulaire")
     def test_render_onglet_ajouter(self, mock_render_form, mock_st):
         """Test onglet ajouter."""
         from src.modules.maison.eco_tips import afficher_onglet_ajouter
