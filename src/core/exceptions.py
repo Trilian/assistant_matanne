@@ -8,16 +8,9 @@ Ce module centralise UNIQUEMENT :
 
 [!] IMPORTANT: Ne doit JAMAIS importer streamlit ou éléments UI
 
-USAGE:
-- Services, modules backend → importer depuis exceptions
-- Modules UI Streamlit → importer depuis errors (hérite + helpers UI)
-
 Exemples:
-    # Backend/services (pas d'UI)
+    # Backend/services
     from src.core.exceptions import ErreurValidation, ErreurNonTrouve
-
-    # Modules Streamlit avec affichage d'erreurs
-    from src.core.errors import afficher_erreur, ErreurValidation
 """
 
 __all__ = [
@@ -267,37 +260,6 @@ def valider_type(
             },
             message_utilisateur=f"Type invalide pour {nom_param}",
         )
-
-
-def valider_plage(
-    valeur: int | float,
-    min_val: int | float | None = None,
-    max_val: int | float | None = None,
-    nom_param: str = "valeur",
-) -> None:
-    """
-    Vérifie qu'une valeur est dans une plage.
-
-    .. deprecated::
-        Utiliser :func:`exiger_plage` à la place.
-
-    Args:
-        valeur: Valeur à vérifier
-        min_val: Valeur minimale (incluse)
-        max_val: Valeur maximale (incluse)
-        nom_param: Nom du paramètre
-
-    Raises:
-        ErreurValidation: Si hors plage
-    """
-    import warnings
-
-    warnings.warn(
-        "valider_plage() est déprécié, utiliser exiger_plage() à la place",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    exiger_plage(valeur, minimum=min_val, maximum=max_val, nom_champ=nom_param)
 
 
 def exiger_positif(valeur: float, nom_champ: str) -> None:

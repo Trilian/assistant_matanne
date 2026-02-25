@@ -39,16 +39,6 @@ def __getattr__(name: str):
 
         return IOService
 
-    # Protocols (PEP 544)
-    if name == "CRUDProtocol":
-        from src.services.core.base.protocols import CRUDProtocol
-
-        return CRUDProtocol
-    if name == "AIServiceProtocol":
-        from src.services.core.base.protocols import AIServiceProtocol
-
-        return AIServiceProtocol
-
     # Result[T, E]
     if name in ("Result", "Success", "Failure", "success", "failure", "ErrorCode", "ErrorInfo"):
         from src.services.core.base import result as result_mod

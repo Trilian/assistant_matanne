@@ -21,7 +21,10 @@ from src.services.cuisine.planning.templates import (
 )
 from src.ui import etat_vide
 from src.ui.feedback import afficher_erreur, afficher_succes
+from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
+
+_keys = KeyNamespace("templates")
 
 
 @profiler_rerun("templates_ui")

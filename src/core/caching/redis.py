@@ -7,8 +7,8 @@ multi-processus/multi-containers.
 Usage:
     Se configure via ``REDIS_URL`` dans les variables d'environnement.
 
-    >>> from src.core.caching.redis import CacheRedis, is_redis_available
-    >>> if is_redis_available():
+    >>> from src.core.caching.redis import CacheRedis, est_redis_disponible
+    >>> if est_redis_disponible():
     ...     cache = CacheRedis()
     ...     cache.set("key", EntreeCache("value", 300))
 """
@@ -22,13 +22,13 @@ from .base import EntreeCache
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["CacheRedis", "is_redis_available", "obtenir_cache_redis"]
+__all__ = ["CacheRedis", "est_redis_disponible", "is_redis_available", "obtenir_cache_redis"]
 
 # Singleton instance
 _redis_cache_instance: "CacheRedis | None" = None
 
 
-def is_redis_available() -> bool:
+def est_redis_disponible() -> bool:
     """
     Vérifie si Redis est disponible.
 
@@ -56,6 +56,10 @@ def is_redis_available() -> bool:
     except Exception as e:
         logger.warning(f"Redis non disponible: {e}")
         return False
+
+
+# Alias rétrocompatibilité
+is_redis_available = est_redis_disponible
 
 
 class CacheRedis:

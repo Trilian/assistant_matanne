@@ -17,7 +17,10 @@ from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.modules._framework import error_boundary
 from src.ui.fragments import ui_fragment
+from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
+
+_keys = KeyNamespace("rapports")
 
 # ═══════════════════════════════════════════════════════════
 # INITIALISATION

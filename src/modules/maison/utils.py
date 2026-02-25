@@ -12,7 +12,7 @@ import streamlit as st
 
 from src.core.db import obtenir_contexte_db
 from src.core.decorators import avec_cache
-from src.core.models import ElementJardin, JournalJardin, Project, Routine, TacheRoutine
+from src.core.models import ElementJardin, JournalJardin, Projet, Routine, TacheRoutine
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ def charger_projets(statut: str | None = None) -> pd.DataFrame:
     """
     try:
         with obtenir_contexte_db() as session:
-            query = session.query(Project)
+            query = session.query(Projet)
             if statut:
                 projets = query.filter_by(statut=statut).all()
             else:
@@ -82,7 +82,7 @@ def get_projets_urgents() -> list[dict]:
     alertes: list[dict] = []
     try:
         with obtenir_contexte_db() as session:
-            projets = session.query(Project).filter_by(statut="en_cours").all()
+            projets = session.query(Projet).filter_by(statut="en_cours").all()
 
             for p in projets:
                 # Détection priorité haute/urgente
@@ -121,12 +121,12 @@ def get_stats_projets() -> dict:
     """
     try:
         with obtenir_contexte_db() as session:
-            total = session.query(Project).count()
-            en_cours = session.query(Project).filter_by(statut="en_cours").count()
-            termines = session.query(Project).filter_by(statut="termine").count()
+            total = session.query(Projet).count()
+            en_cours = session.query(Projet).filter_by(statut="en_cours").count()
+            termines = session.query(Projet).filter_by(statut="termine").count()
 
             # Calcul progression moyenne
-            projets = session.query(Project).all()
+            projets = session.query(Projet).all()
             if projets:
                 progressions = []
                 for p in projets:

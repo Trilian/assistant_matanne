@@ -16,6 +16,7 @@ from datetime import date, datetime
 import streamlit as st
 
 from src.ui.keys import KeyNamespace
+from src.ui.registry import composant_ui
 from src.ui.tokens_semantic import Sem
 
 logger = logging.getLogger(__name__)
@@ -168,6 +169,7 @@ def _construire_contexte_suggestion() -> str:
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui("repas", tags=("ui", "widget", "accueil"))
 def widget_quest_ce_quon_mange(compact: bool = False) -> None:
     """
     Widget "Qu'est-ce qu'on mange ?" pour l'accueil.
@@ -279,6 +281,7 @@ def widget_quest_ce_quon_mange(compact: bool = False) -> None:
                     st.rerun()
 
 
+@composant_ui("repas", tags=("ui", "widget", "compact"))
 def widget_qcom_compact() -> None:
     """Version compacte du widget pour la sidebar ou les petits espaces."""
     repas = obtenir_repas_du_jour()

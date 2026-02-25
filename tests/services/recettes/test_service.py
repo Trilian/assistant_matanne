@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 from sqlalchemy.orm import Session
 
-from src.core.errors import ErreurNonTrouve, ErreurValidation
+from src.core.exceptions import ErreurNonTrouve, ErreurValidation
 from src.core.models import (
     EtapeRecette,
     HistoriqueRecette,

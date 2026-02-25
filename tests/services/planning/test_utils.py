@@ -8,10 +8,10 @@ Ces tests ne nécessitent pas de base de données.
 from datetime import date, datetime
 
 from src.core.date_utils import (
-    format_week_label,
-    get_weekday_index,
-    get_weekday_name,
-    get_weekday_names,
+    formater_label_semaine,
+    obtenir_index_jour_semaine,
+    obtenir_nom_jour_semaine,
+    obtenir_noms_jours_semaine,
 )
 from src.core.date_utils import (
     obtenir_bornes_semaine as get_week_range,
@@ -28,92 +28,92 @@ from src.services.cuisine.planning.nutrition import (
 )
 
 
-class TestWeekdayNames:
-    """Tests pour les fonctions de noms de jours."""
+class TestObtenirNomsJoursSemaine:
+    """Tests pour obtenir_noms_jours_semaine."""
 
-    def test_get_weekday_names_returns_list(self):
-        """Vérifie que get_weekday_names retourne une liste."""
-        result = get_weekday_names()
+    def test_obtenir_noms_jours_semaine_returns_list(self):
+        """Vérifie que obtenir_noms_jours_semaine retourne une liste."""
+        result = obtenir_noms_jours_semaine()
         assert isinstance(result, list)
 
-    def test_get_weekday_names_has_7_days(self):
-        """Vérifie que la liste contient 7 jours."""
-        result = get_weekday_names()
+    def test_obtenir_noms_jours_semaine_has_7_days(self):
+        """Érifie que la liste contient 7 jours."""
+        result = obtenir_noms_jours_semaine()
         assert len(result) == 7
 
-    def test_get_weekday_names_starts_with_lundi(self):
+    def test_obtenir_noms_jours_semaine_starts_with_lundi(self):
         """Vérifie que la semaine commence par Lundi."""
-        result = get_weekday_names()
+        result = obtenir_noms_jours_semaine()
         assert result[0] == "Lundi"
 
-    def test_get_weekday_names_ends_with_dimanche(self):
+    def test_obtenir_noms_jours_semaine_ends_with_dimanche(self):
         """Vérifie que la semaine finit par Dimanche."""
-        result = get_weekday_names()
+        result = obtenir_noms_jours_semaine()
         assert result[6] == "Dimanche"
 
-    def test_get_weekday_names_returns_copy(self):
+    def test_obtenir_noms_jours_semaine_returns_copy(self):
         """Vérifie que la liste est une copie (pas de mutation)."""
-        result1 = get_weekday_names()
-        result2 = get_weekday_names()
+        result1 = obtenir_noms_jours_semaine()
+        result2 = obtenir_noms_jours_semaine()
         result1[0] = "Modified"
         assert result2[0] == "Lundi"
 
 
-class TestGetWeekdayName:
-    """Tests pour get_weekday_name."""
+class TestObtenirNomJourSemaine:
+    """Tests pour obtenir_nom_jour_semaine."""
 
-    def test_get_weekday_name_lundi(self):
+    def test_obtenir_nom_jour_semaine_lundi(self):
         """Vérifie l'index 0 = Lundi."""
-        assert get_weekday_name(0) == "Lundi"
+        assert obtenir_nom_jour_semaine(0) == "Lundi"
 
-    def test_get_weekday_name_dimanche(self):
+    def test_obtenir_nom_jour_semaine_dimanche(self):
         """Vérifie l'index 6 = Dimanche."""
-        assert get_weekday_name(6) == "Dimanche"
+        assert obtenir_nom_jour_semaine(6) == "Dimanche"
 
-    def test_get_weekday_name_mercredi(self):
+    def test_obtenir_nom_jour_semaine_mercredi(self):
         """Vérifie l'index 2 = Mercredi."""
-        assert get_weekday_name(2) == "Mercredi"
+        assert obtenir_nom_jour_semaine(2) == "Mercredi"
 
-    def test_get_weekday_name_vendredi(self):
+    def test_obtenir_nom_jour_semaine_vendredi(self):
         """Vérifie l'index 4 = Vendredi."""
-        assert get_weekday_name(4) == "Vendredi"
+        assert obtenir_nom_jour_semaine(4) == "Vendredi"
 
-    def test_get_weekday_name_invalid_negative(self):
+    def test_obtenir_nom_jour_semaine_invalid_negative(self):
         """Vérifie qu'un index négatif retourne une chaîne vide."""
-        assert get_weekday_name(-1) == ""
+        assert obtenir_nom_jour_semaine(-1) == ""
 
-    def test_get_weekday_name_invalid_high(self):
+    def test_obtenir_nom_jour_semaine_invalid_high(self):
         """Vérifie qu'un index > 6 retourne une chaîne vide."""
-        assert get_weekday_name(7) == ""
-        assert get_weekday_name(100) == ""
+        assert obtenir_nom_jour_semaine(7) == ""
+        assert obtenir_nom_jour_semaine(100) == ""
 
 
-class TestGetWeekdayIndex:
-    """Tests pour get_weekday_index."""
+class TestObtenirIndexJourSemaine:
+    """Tests pour obtenir_index_jour_semaine."""
 
-    def test_get_weekday_index_lundi(self):
+    def test_obtenir_index_jour_semaine_lundi(self):
         """Vérifie Lundi = 0."""
-        assert get_weekday_index("Lundi") == 0
+        assert obtenir_index_jour_semaine("Lundi") == 0
 
-    def test_get_weekday_index_dimanche(self):
+    def test_obtenir_index_jour_semaine_dimanche(self):
         """Vérifie Dimanche = 6."""
-        assert get_weekday_index("Dimanche") == 6
+        assert obtenir_index_jour_semaine("Dimanche") == 6
 
-    def test_get_weekday_index_case_insensitive(self):
+    def test_obtenir_index_jour_semaine_case_insensitive(self):
         """Vérifie que la recherche est insensible à la casse."""
-        assert get_weekday_index("lundi") == 0
-        assert get_weekday_index("LUNDI") == 0
-        assert get_weekday_index("LuNdI") == 0
+        assert obtenir_index_jour_semaine("lundi") == 0
+        assert obtenir_index_jour_semaine("LUNDI") == 0
+        assert obtenir_index_jour_semaine("LuNdI") == 0
 
-    def test_get_weekday_index_vendredi(self):
+    def test_obtenir_index_jour_semaine_vendredi(self):
         """Vérifie vendredi = 4."""
-        assert get_weekday_index("vendredi") == 4
+        assert obtenir_index_jour_semaine("vendredi") == 4
 
-    def test_get_weekday_index_invalid(self):
+    def test_obtenir_index_jour_semaine_invalid(self):
         """Vérifie qu'un nom invalide retourne -1."""
-        assert get_weekday_index("invalid") == -1
-        assert get_weekday_index("Monday") == -1
-        assert get_weekday_index("") == -1
+        assert obtenir_index_jour_semaine("invalid") == -1
+        assert obtenir_index_jour_semaine("Monday") == -1
+        assert obtenir_index_jour_semaine("") == -1
 
 
 class TestCalculateWeekDates:
@@ -204,18 +204,18 @@ class TestGetMondayOfWeek:
         assert get_monday_of_week(friday) == date(2024, 1, 15)
 
 
-class TestFormatWeekLabel:
-    """Tests pour format_week_label."""
+class TestFormaterLabelSemaine:
+    """Tests pour formater_label_semaine."""
 
-    def test_format_week_label_basic(self):
+    def test_formater_label_semaine_basic(self):
         """Vérifie le format de base."""
-        result = format_week_label(date(2024, 1, 15))
+        result = formater_label_semaine(date(2024, 1, 15))
         assert "15/01/2024" in result
         assert "Semaine du" in result
 
-    def test_format_week_label_with_end(self):
+    def test_formater_label_semaine_with_end(self):
         """Vérifie avec date de fin explicite."""
-        result = format_week_label(date(2024, 1, 15), date(2024, 1, 21))
+        result = formater_label_semaine(date(2024, 1, 15), date(2024, 1, 21))
         assert "15/01/2024" in result
 
 

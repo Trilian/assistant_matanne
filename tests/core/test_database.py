@@ -27,7 +27,7 @@ from src.core.db import (
     verifier_connexion,
     verifier_sante,
 )
-from src.core.errors import ErreurBaseDeDonnees
+from src.core.exceptions import ErreurBaseDeDonnees
 
 # ═══════════════════════════════════════════════════════════
 # SECTION 1: TESTS ENGINE

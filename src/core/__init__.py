@@ -34,7 +34,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "ClientIA": (".ai", "ClientIA"),
     "EtatCircuit": (".ai", "EtatCircuit"),
     "RateLimitIA": (".ai", "RateLimitIA"),
-    "avec_circuit_breaker": (".ai", "avec_circuit_breaker"),
     "obtenir_circuit": (".ai", "obtenir_circuit"),
     "obtenir_client_ia": (".ai", "obtenir_client_ia"),
     # Cache
@@ -93,9 +92,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "avec_resilience": (".decorators", "avec_resilience"),
     "avec_session_db": (".decorators", "avec_session_db"),
     "avec_validation": (".decorators", "avec_validation"),
-    # Errors (UI)
-    "GestionnaireErreurs": (".errors", "GestionnaireErreurs"),
-    "afficher_erreur_streamlit": (".errors", "afficher_erreur_streamlit"),
     # Exceptions (pures)
     "ErreurBaseDeDonnees": (".exceptions", "ErreurBaseDeDonnees"),
     "ErreurConfiguration": (".exceptions", "ErreurConfiguration"),
@@ -110,7 +106,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "exiger_longueur": (".exceptions", "exiger_longueur"),
     "exiger_plage": (".exceptions", "exiger_plage"),
     "exiger_positif": (".exceptions", "exiger_positif"),
-    "valider_plage": (".exceptions", "valider_plage"),
     "valider_type": (".exceptions", "valider_type"),
     # Lazy Loader
     "ChargeurModuleDiffere": (".lazy_loader", "ChargeurModuleDiffere"),

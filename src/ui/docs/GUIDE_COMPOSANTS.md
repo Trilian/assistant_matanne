@@ -23,7 +23,7 @@ src/ui/
 │   ├── atoms.py         # Badge, état vide, carte métrique, boîte info
 │   ├── charts.py        # Graphiques Plotly (répartition repas, inventaire)
 │   ├── data.py          # Pagination, tableaux, export CSV
-│   ├── dynamic.py       # Modale de confirmation
+│   ├── dynamic.py       # Dialog de confirmation (@st.dialog)
 │   ├── filters.py       # Filtres et recherche
 │   ├── forms.py         # Champs de formulaire
 │   ├── layouts.py       # Grilles, cartes
@@ -32,7 +32,7 @@ src/ui/
 │   └── system.py        # Santé système, timeline
 ├── feedback/            # Retour utilisateur
 │   ├── spinners.py      # Indicateurs de chargement
-│   ├── progress.py      # Barres de progression
+│   ├── progress_v2.py   # Barres de progression
 │   └── toasts.py        # Notifications temporaires
 ├── layout/              # Mise en page application
 │   ├── header.py        # En-tête avec navigation
@@ -61,7 +61,7 @@ from src.ui import (
     etat_vide,
     afficher_succes,
     afficher_erreur,
-    Modale,
+    confirm_dialog,
     Variante,
 )
 ```
@@ -112,20 +112,19 @@ from src.ui import boite_info, Variante
 boite_info("Astuce", "Utilisez le batch cooking le dimanche", "💡", variante=Variante.INFO)
 ```
 
-### Modale de confirmation
+### Dialog de confirmation
 
-Dialogue modal pour actions destructives.
+Dialog modal pour actions destructives utilisant `@st.dialog` natif.
 
 ```python
-from src.ui import Modale
+from src.ui import confirm_dialog
 
-modal = Modale("supprimer_recette")
-if modal.est_affichee():
-    st.warning("Supprimer cette recette ?")
-    if modal.confirmer():
-        supprimer_recette(recette_id)
-        modal.fermer()
-    modal.annuler()
+if st.button("🗑️ Supprimer"):
+    confirm_dialog(
+        "Supprimer cette recette ?",
+        "Cette action est irréversible.",
+        on_confirm=lambda: supprimer_recette(recette_id),
+    )
 ```
 
 ### Graphiques
@@ -193,7 +192,7 @@ def details_avances(data: dict):
 Encapsule un bloc UI avec gestion d'erreurs gracieuse.
 
 ```python
-from src.ui import error_boundary
+from src.modules._framework import error_boundary
 
 with error_boundary("chargement_recettes"):
     afficher_liste_recettes(recettes)
@@ -259,7 +258,7 @@ from src.ui import A11y
 assert A11y.est_conforme_aa("#212529", "#ffffff")
 
 # Attributs ARIA
-A11y.aria(role="navigation", label="Menu principal")
+A11y.attrs(role="navigation", label="Menu principal")
 ```
 
 ### Thème sombre

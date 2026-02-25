@@ -20,6 +20,8 @@ from urllib.parse import quote
 
 import requests
 
+from src.core.decorators import avec_resilience
+
 from .prompts import _construire_prompt_detaille
 
 logger = logging.getLogger(__name__)
@@ -30,6 +32,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
+@avec_resilience(retry=2, timeout_s=15, fallback=None)
 def _rechercher_image_pexels(
     nom_recette: str, search_query: str = "", api_key: str | None = None
 ) -> str | None:
@@ -72,6 +75,7 @@ def _rechercher_image_pexels(
     return None
 
 
+@avec_resilience(retry=2, timeout_s=15, fallback=None)
 def _rechercher_image_pixabay(
     nom_recette: str, search_query: str = "", api_key: str | None = None
 ) -> str | None:
@@ -115,6 +119,7 @@ def _rechercher_image_pixabay(
     return None
 
 
+@avec_resilience(retry=2, timeout_s=15, fallback=None)
 def _rechercher_image_unsplash(
     nom_recette: str, search_query: str = "", api_key: str | None = None
 ) -> str | None:
@@ -204,6 +209,7 @@ def _rechercher_image_unsplash(
 # ═══════════════════════════════════════════════════════════
 
 
+@avec_resilience(retry=1, timeout_s=90, fallback=None)
 def _generer_via_leonardo(
     nom_recette: str, description: str, ingredients_list: list = None, type_plat: str = ""
 ) -> str | None:
@@ -252,6 +258,7 @@ def _generer_via_leonardo(
     return None
 
 
+@avec_resilience(retry=1, timeout_s=10, fallback=None)
 def _generer_via_pollinations(
     nom_recette: str, description: str, ingredients_list: list = None, type_plat: str = ""
 ) -> str | None:
@@ -279,6 +286,7 @@ def _generer_via_pollinations(
     return None
 
 
+@avec_resilience(retry=1, timeout_s=45, fallback=None)
 def _generer_via_huggingface(
     nom_recette: str, description: str, ingredients_list: list = None, type_plat: str = ""
 ) -> str | None:
@@ -310,6 +318,7 @@ def _generer_via_huggingface(
     return None
 
 
+@avec_resilience(retry=1, timeout_s=90, fallback=None)
 def _generer_via_replicate(
     nom_recette: str, description: str, ingredients_list: list = None, type_plat: str = ""
 ) -> str | None:

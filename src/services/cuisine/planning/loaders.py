@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 from src.core.models import (
     ActiviteFamille,
     EvenementPlanning,
-    Project,
+    Projet,
     Recette,
     Repas,
     Routine,
@@ -114,11 +114,11 @@ class PlanningLoadersMixin:
         projets_dict = {}
 
         projets = (
-            db.query(Project)
+            db.query(Projet)
             .filter(
-                Project.statut.in_(["à_faire", "en_cours"]),
-                (Project.date_fin_prevue == None)
-                | (Project.date_fin_prevue.between(date_debut, date_fin)),
+                Projet.statut.in_(["à_faire", "en_cours"]),
+                (Projet.date_fin_prevue == None)
+                | (Projet.date_fin_prevue.between(date_debut, date_fin)),
             )
             .all()
         )

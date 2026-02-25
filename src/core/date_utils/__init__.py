@@ -11,6 +11,7 @@ from .formatage import (
     format_week_label,
     formater_date_fr,
     formater_jour_fr,
+    formater_label_semaine,
     formater_mois_fr,
     formater_temps,
 )
@@ -20,6 +21,9 @@ from .helpers import (
     get_weekday_index,
     get_weekday_name,
     get_weekday_names,
+    obtenir_index_jour_semaine,
+    obtenir_nom_jour_semaine,
+    obtenir_noms_jours_semaine,
 )
 from .periodes import (
     ajouter_jours_ouvres,
@@ -54,13 +58,17 @@ __all__ = [
     # Helpers
     "est_weekend",
     "est_aujourd_hui",
-    "get_weekday_names",
-    "get_weekday_name",
-    "get_weekday_index",
+    "get_weekday_names",  # Alias rétrocompatibilité
+    "get_weekday_name",  # Alias rétrocompatibilité
+    "get_weekday_index",  # Alias rétrocompatibilité
+    "obtenir_noms_jours_semaine",
+    "obtenir_nom_jour_semaine",
+    "obtenir_index_jour_semaine",
     # Formatage
     "formater_date_fr",
     "formater_jour_fr",
     "formater_mois_fr",
-    "format_week_label",
+    "formater_label_semaine",
+    "format_week_label",  # Alias rétrocompatibilité
     "formater_temps",
 ]

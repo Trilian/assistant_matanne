@@ -16,6 +16,7 @@ from datetime import date, datetime, timedelta
 import streamlit as st
 
 from src.ui.keys import KeyNamespace
+from src.ui.registry import composant_ui
 from src.ui.tokens_semantic import Sem
 
 logger = logging.getLogger(__name__)
@@ -270,6 +271,7 @@ def _get_activite_icone(type_activite: str | None) -> str:
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui("jules", tags=("ui", "widget", "enfant"))
 def widget_jules_aujourdhui(afficher_export: bool = True) -> None:
     """
     Widget complet "Ce que Jules a fait aujourd'hui".
@@ -370,6 +372,7 @@ def widget_jules_aujourdhui(afficher_export: bool = True) -> None:
             )
 
 
+@composant_ui("jules", tags=("ui", "widget", "compact"))
 def widget_jules_resume_compact() -> None:
     """Version compacte du résumé Jules pour sidebar ou accueil."""
     activites = obtenir_activites_jules_aujourdhui()
@@ -385,6 +388,7 @@ def widget_jules_resume_compact() -> None:
         st.caption("👶 Pas d'activité Jules enregistrée")
 
 
+@composant_ui("jules", tags=("ui", "carte", "dashboard"))
 def carte_resume_jules() -> None:
     """Carte résumé pour le dashboard accueil."""
     activites = obtenir_activites_jules_aujourdhui()

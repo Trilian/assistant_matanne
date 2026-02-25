@@ -17,6 +17,7 @@ from src.core.db import obtenir_contexte_db
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
+from src.ui.state.url import tabs_with_url
 
 __all__ = [
     "app",
@@ -331,6 +332,7 @@ def app():
 
         # Onglets
         TAB_LABELS = ["🗺️ Vue d'ensemble", "📋 Détail", "💡 Conseils"]
+        tab_index = tabs_with_url(TAB_LABELS, param="tab")
         tab1, tab2, tab3 = st.tabs(TAB_LABELS)
 
         with tab1:

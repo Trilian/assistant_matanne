@@ -22,6 +22,9 @@ import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.keys import KeyNamespace
+
+_keys = KeyNamespace("maison_hub")
 
 from .data import calculer_charge, obtenir_alertes, obtenir_stats_globales, obtenir_taches_jour
 from .styles import injecter_css_hub

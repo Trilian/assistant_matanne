@@ -11,13 +11,6 @@ from pydantic import BaseModel, Field
 T = TypeVar("T")
 
 
-class PaginationParams(BaseModel):
-    """Paramètres de pagination standard."""
-
-    page: int = Field(1, ge=1, description="Numéro de page")
-    page_size: int = Field(20, ge=1, le=100, description="Taille de page")
-
-
 class ReponsePaginee(BaseModel, Generic[T]):
     """Réponse paginée générique."""
 
@@ -34,11 +27,3 @@ class MessageResponse(BaseModel):
     message: str
     id: int | None = None
     details: dict[str, Any] | None = None
-
-
-class ErreurResponse(BaseModel):
-    """Réponse d'erreur standard."""
-
-    detail: str
-    code: str | None = None
-    errors: list[dict[str, Any]] | None = None

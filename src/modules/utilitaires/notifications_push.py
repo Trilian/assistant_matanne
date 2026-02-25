@@ -23,7 +23,10 @@ from src.services.core.notifications import (
     obtenir_service_ntfy,
 )
 from src.ui.fragments import auto_refresh, lazy, ui_fragment
+from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
+
+_keys = KeyNamespace("notifications_push")
 
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES

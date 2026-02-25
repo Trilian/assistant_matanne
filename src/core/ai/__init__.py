@@ -7,7 +7,6 @@ from .cache import CacheIA
 from .circuit_breaker import (
     CircuitBreaker,
     EtatCircuit,
-    avec_circuit_breaker,
     obtenir_circuit,
 )
 from .client import ClientIA, obtenir_client_ia
@@ -22,7 +21,6 @@ __all__ = [
     "CacheIA",
     "CircuitBreaker",
     "EtatCircuit",
-    "avec_circuit_breaker",
     "obtenir_circuit",
     "RateLimitIA",
 ]

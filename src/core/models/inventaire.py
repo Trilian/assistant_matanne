@@ -82,6 +82,25 @@ class ArticleInventaire(Base):
         CheckConstraint("quantite_min >= 0", name="ck_seuil_positif"),
     )
 
+    # ── Propriétés proxy (résolues depuis la relation Ingredient) ──
+
+    @property
+    def nom(self) -> str | None:
+        """Nom de l'ingrédient (proxy via la relation)."""
+        return self.ingredient.nom if self.ingredient else None
+
+    @property
+    def unite(self) -> str | None:
+        """Unité de l'ingrédient (proxy via la relation)."""
+        return self.ingredient.unite if self.ingredient else None
+
+    @property
+    def categorie(self) -> str | None:
+        """Catégorie de l'ingrédient (proxy via la relation)."""
+        return self.ingredient.categorie if self.ingredient else None
+
+    # ── Indicateurs de stock ──
+
     @property
     def est_stock_bas(self) -> bool:
         """Stock sous le seuil minimum."""

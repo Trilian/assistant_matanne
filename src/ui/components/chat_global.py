@@ -15,6 +15,7 @@ import logging
 import streamlit as st
 
 from src.ui.keys import KeyNamespace
+from src.ui.registry import composant_ui
 
 logger = logging.getLogger(__name__)
 
@@ -178,6 +179,7 @@ _SUGGESTIONS_PAR_CONTEXTE: dict[str, list[str]] = {
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui("chat", tags=("ia", "global", "chat"))
 def afficher_chat_global() -> None:
     """Affiche le chat IA global flottant en bas de page.
 

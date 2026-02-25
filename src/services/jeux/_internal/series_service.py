@@ -56,14 +56,9 @@ class SeriesService:
     Fournit les méthodes partagées pour Paris et Loto.
     """
 
-    def __init__(self, session: Session | None = None):
-        """
-        Initialise le service.
-
-        Args:
-            session: Session SQLAlchemy optionnelle (sinon créée à la demande)
-        """
-        self._session = session
+    def __init__(self):
+        """Initialise le service."""
+        pass
 
     # ─────────────────────────────────────────────────────────────────
     # CALCULS DE BASE
@@ -499,28 +494,22 @@ class SeriesService:
 # ═══════════════════════════════════════════════════════════════════
 
 
-def obtenir_service_series(session: Session | None = None) -> SeriesService:
+def obtenir_service_series() -> SeriesService:
     """
     Factory pour obtenir une instance de SeriesService (convention française).
 
-    Args:
-        session: Session SQLAlchemy optionnelle
-
     Returns:
         Instance de SeriesService
     """
-    return SeriesService(session)
+    return SeriesService()
 
 
 @service_factory("series", tags={"jeux", "crud", "series"})
-def get_series_service(session: Session | None = None) -> SeriesService:
+def get_series_service() -> SeriesService:
     """
     Factory pour obtenir une instance de SeriesService (alias anglais).
-
-    Args:
-        session: Session SQLAlchemy optionnelle
 
     Returns:
         Instance de SeriesService
     """
-    return obtenir_service_series(session)
+    return obtenir_service_series()

@@ -14,7 +14,14 @@ from datetime import date, datetime, timedelta
 
 import streamlit as st
 
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
+from src.ui.keys import KeyNamespace
+
 logger = logging.getLogger(__name__)
+
+# Session keys scopées
+_keys = KeyNamespace("cockpit_familial")
 
 # ═══════════════════════════════════════════════════════════
 # HELPERS
@@ -271,66 +278,69 @@ def _afficher_resume(repas: dict, evenements: dict, activites: dict, taches: dic
 # ═══════════════════════════════════════════════════════════
 
 
+@profiler_rerun("cockpit_familial")
 def app() -> None:
     """Point d'entrée du cockpit familial."""
-    st.title("🎯 Cockpit Familial")
-    st.caption("Vue unifiée de votre semaine — repas, événements, activités, tâches")
 
-    # ── Navigation semaine ──
-    offset_key = "cockpit_offset_semaine"
-    if offset_key not in st.session_state:
-        st.session_state[offset_key] = 0
+    with error_boundary("cockpit_familial"):
+        st.title("🎯 Cockpit Familial")
+        st.caption("Vue unifiée de votre semaine — repas, événements, activités, tâches")
 
-    col_prev, col_label, col_next, col_today = st.columns([1, 4, 1, 1])
-    with col_prev:
-        if st.button("◀️ Semaine préc.", key="cockpit_prev"):
-            st.session_state[offset_key] -= 1
-            st.rerun()
-    with col_next:
-        if st.button("Semaine suiv. ▶️", key="cockpit_next"):
-            st.session_state[offset_key] += 1
-            st.rerun()
-    with col_today:
-        if st.button("📍 Aujourd'hui", key="cockpit_today"):
+        # ── Navigation semaine ──
+        offset_key = _keys("offset_semaine")
+        if offset_key not in st.session_state:
             st.session_state[offset_key] = 0
-            st.rerun()
 
-    lundi, dimanche = _plage_semaine(st.session_state[offset_key])
+        col_prev, col_label, col_next, col_today = st.columns([1, 4, 1, 1])
+        with col_prev:
+            if st.button("◀️ Semaine préc.", key=_keys("prev")):
+                st.session_state[offset_key] -= 1
+                st.rerun()
+        with col_next:
+            if st.button("Semaine suiv. ▶️", key=_keys("next")):
+                st.session_state[offset_key] += 1
+                st.rerun()
+        with col_today:
+            if st.button("📍 Aujourd'hui", key=_keys("today")):
+                st.session_state[offset_key] = 0
+                st.rerun()
 
-    with col_label:
-        st.subheader(f"Semaine du {lundi.strftime('%d/%m')} au {dimanche.strftime('%d/%m/%Y')}")
+        lundi, dimanche = _plage_semaine(st.session_state[offset_key])
 
-    st.markdown("---")
+        with col_label:
+            st.subheader(f"Semaine du {lundi.strftime('%d/%m')} au {dimanche.strftime('%d/%m/%Y')}")
 
-    # ── Charger les données ──
-    repas = _charger_repas(lundi, dimanche)
-    evenements = _charger_evenements(lundi, dimanche)
-    activites = _charger_activites(lundi, dimanche)
-    taches = _charger_taches(lundi, dimanche)
+        st.markdown("---")
 
-    # ── Résumé ──
-    _afficher_resume(repas, evenements, activites, taches)
+        # ── Charger les données ──
+        repas = _charger_repas(lundi, dimanche)
+        evenements = _charger_evenements(lundi, dimanche)
+        activites = _charger_activites(lundi, dimanche)
+        taches = _charger_taches(lundi, dimanche)
 
-    st.markdown("---")
+        # ── Résumé ──
+        _afficher_resume(repas, evenements, activites, taches)
 
-    # ── Grille 7 jours ──
-    cols = st.columns(7)
-    for i in range(7):
-        jour = lundi + timedelta(days=i)
-        with cols[i]:
-            _afficher_jour(
-                jour,
-                repas.get(jour, []),
-                evenements.get(jour, []),
-                activites.get(jour, []),
-                taches.get(jour, []),
+        st.markdown("---")
+
+        # ── Grille 7 jours ──
+        cols = st.columns(7)
+        for i in range(7):
+            jour = lundi + timedelta(days=i)
+            with cols[i]:
+                _afficher_jour(
+                    jour,
+                    repas.get(jour, []),
+                    evenements.get(jour, []),
+                    activites.get(jour, []),
+                    taches.get(jour, []),
+                )
+
+        # ── Légende ──
+        with st.expander("ℹ️ Légende"):
+            st.markdown(
+                "- 🍽️ Repas planifié · ✅ Repas préparé\n"
+                "- 📍 RDV · ⚽ Activité · 🎉 Fête · 📌 Autre\n"
+                "- 👨‍👩‍👦 Activité famille\n"
+                "- 🔴 Tâche haute priorité · 🟡 Moyenne · ⚪ Normale"
             )
-
-    # ── Légende ──
-    with st.expander("ℹ️ Légende"):
-        st.markdown(
-            "- 🍽️ Repas planifié · ✅ Repas préparé\n"
-            "- 📍 RDV · ⚽ Activité · 🎉 Fête · 📌 Autre\n"
-            "- 👨‍👩‍👦 Activité famille\n"
-            "- 🔴 Tâche haute priorité · 🟡 Moyenne · ⚪ Normale"
-        )

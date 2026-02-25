@@ -2,8 +2,6 @@
 Schémas Pydantic pour les recettes.
 """
 
-from datetime import datetime
-
 from pydantic import BaseModel, Field
 
 from .base import IdentifiedResponse, NomValidatorMixin

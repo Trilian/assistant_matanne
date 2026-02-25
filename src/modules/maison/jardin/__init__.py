@@ -13,7 +13,6 @@ import logging
 import pandas as pd
 import streamlit as st
 
-from src.core.ai import ClientIA
 from src.core.db import obtenir_contexte_db
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
@@ -25,11 +24,10 @@ from src.modules.maison.utils import (
     get_stats_jardin,
 )
 from src.ui.keys import KeyNamespace
+from src.ui.state.url import tabs_with_url
 
 __all__ = [
     "app",
-    "JardinService",
-    "get_jardin_service",
     "ajouter_plante",
     "arroser_plante",
     "ajouter_log",
@@ -38,67 +36,13 @@ __all__ = [
     "get_recoltes_proches",
     "get_stats_jardin",
     "charger_plantes",
-    "ClientIA",
 ]
 
 _keys = KeyNamespace("jardin")
 logger = logging.getLogger(__name__)
 
-
-# ═══════════════════════════════════════════════════════════
-# SERVICE IA
-# ═══════════════════════════════════════════════════════════
-
-
-class JardinService:
-    """Service IA pour le jardin."""
-
-    service_name: str = "jardin"
-    cache_prefix: str = "jardin"
-
-    def __init__(self, client=None):
-        if client is None:
-            try:
-                self.client = ClientIA()
-            except Exception:
-                self.client = None
-        else:
-            self.client = client
-
-    async def call_with_cache(self, prompt: str, **kwargs) -> str:
-        """Appel IA avec cache."""
-        if self.client is None:
-            return ""
-        return await self.client.generer(prompt=prompt, **kwargs)
-
-    async def generer_conseils_saison(self, saison: str) -> str:
-        """Génère des conseils pour la saison."""
-        prompt = f"Donne des conseils de jardinage pour la saison {saison}. Liste numérotée."
-        return await self.call_with_cache(prompt=prompt)
-
-    async def suggerer_plantes_saison(self, saison: str, climat: str = "tempere") -> str:
-        """Suggère des plantes pour la saison et le climat."""
-        prompt = (
-            f"Suggère des plantes à cultiver en {saison} pour un climat {climat}. "
-            "Liste numérotée avec conseils."
-        )
-        return await self.call_with_cache(prompt=prompt)
-
-    async def conseil_arrosage(self, plante: str, saison: str) -> str:
-        """Donne des conseils d'arrosage pour une plante."""
-        prompt = f"Conseils d'arrosage pour {plante} en {saison}."
-        return await self.call_with_cache(prompt=prompt)
-
-
-_service_instance: JardinService | None = None
-
-
-def get_jardin_service() -> JardinService:
-    """Factory pour le service jardin (singleton)."""
-    global _service_instance
-    if _service_instance is None:
-        _service_instance = JardinService()
-    return _service_instance
+# NOTE: Pour l'accès au service IA jardin, utilisez:
+# from src.services.maison import get_jardin_service
 
 
 # ═══════════════════════════════════════════════════════════
@@ -192,6 +136,7 @@ def app():
 
         # Onglets
         TAB_LABELS = ["🌿 Mes plantes", "➕ Ajouter", "📊 Stats"]
+        tab_index = tabs_with_url(TAB_LABELS, param="tab")
         tab1, tab2, tab3 = st.tabs(TAB_LABELS)
 
         with tab1:

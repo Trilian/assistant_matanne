@@ -26,6 +26,7 @@ from src.core.models import (
     Planning,
     Repas,
 )
+from src.services.core.events import obtenir_bus
 
 from .generateur import ICalGenerator
 from .google_calendar import GoogleCalendarMixin
@@ -73,6 +74,14 @@ class CalendarSyncService(GoogleCalendarMixin):
         self._configs[config.id] = config
         self._save_config_to_db(config)
         logger.info(f"Calendrier ajouté: {config.name} ({config.provider.value})")
+
+        # Émettre événement calendrier ajouté
+        obtenir_bus().emettre(
+            "calendrier.externe_ajoute",
+            {"calendar_id": config.id, "name": config.name, "provider": config.provider.value},
+            source="CalendarSyncService",
+        )
+
         return config.id
 
     def remove_calendar(self, calendar_id: str):
@@ -80,6 +89,13 @@ class CalendarSyncService(GoogleCalendarMixin):
         if calendar_id in self._configs:
             del self._configs[calendar_id]
         self._remove_config_from_db(calendar_id)
+
+        # Émettre événement calendrier supprimé
+        obtenir_bus().emettre(
+            "calendrier.externe_supprime",
+            {"calendar_id": calendar_id},
+            source="CalendarSyncService",
+        )
 
     def get_user_calendars(self, user_id: str) -> list[ConfigCalendrierExterne]:
         """Récupère les calendriers d'un utilisateur."""
@@ -309,6 +325,19 @@ class CalendarSyncService(GoogleCalendarMixin):
 
         duration = (datetime.now() - start_time).total_seconds()
 
+        # Émettre événement import terminé
+        if imported_count > 0:
+            obtenir_bus().emettre(
+                "calendrier.events_importes",
+                {
+                    "source_url": ical_url,
+                    "calendar_name": calendar_name,
+                    "imported_count": imported_count,
+                    "error_count": len(errors),
+                },
+                source="CalendarSyncService",
+            )
+
         return SyncResult(
             success=len(errors) == 0,
             message=f"{imported_count} événements importés",
@@ -444,6 +473,14 @@ class CalendarSyncService(GoogleCalendarMixin):
         db.add(db_event)
         db.commit()
         db.refresh(db_event)
+
+        # Émettre événement créé
+        obtenir_bus().emettre(
+            "calendrier.event_cree",
+            {"event_id": db_event.id, "titre": event.title, "calendrier_id": calendrier_id},
+            source="CalendarSyncService",
+        )
+
         return db_event
 
     @avec_session_db

@@ -24,6 +24,7 @@ import streamlit as st
 
 from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
+from src.ui.registry import composant_ui
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,7 @@ _keys = KeyNamespace("gamif")
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui("gamification", tags=("ui", "sidebar", "badges"))
 @ui_fragment
 def afficher_gamification_sidebar() -> None:
     """Affiche un résumé compact de la gamification dans le sidebar/accueil."""
@@ -73,6 +75,7 @@ def afficher_gamification_sidebar() -> None:
     st.progress(min(progression, 1.0), text=f"Prochain niveau: {seuil_suivant} pts")
 
 
+@composant_ui("gamification", tags=("ui", "badges", "progression"))
 @ui_fragment
 def afficher_badges_complets() -> None:
     """Affiche la vue complète des badges avec progression."""
@@ -158,6 +161,7 @@ def afficher_badges_complets() -> None:
                     st.progress(progression / 100)
 
 
+@composant_ui("gamification", tags=("ui", "toast", "badges"))
 def toast_badge(badge_nom: str, badge_emoji: str) -> None:
     """Affiche un toast de félicitations pour un badge débloqué."""
     st.toast(f"{badge_emoji} Badge débloqué: {badge_nom} !", icon="🏅")

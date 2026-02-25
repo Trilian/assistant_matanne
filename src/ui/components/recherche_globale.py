@@ -18,6 +18,7 @@ from typing import Any
 import streamlit as st
 
 from src.ui.keys import KeyNamespace
+from src.ui.registry import composant_ui
 from src.ui.tokens_semantic import Sem
 
 logger = logging.getLogger(__name__)
@@ -290,6 +291,7 @@ def get_recherche_globale_service() -> RechercheGlobaleService:
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui("recherche", tags=("ui", "barre", "recherche"))
 def afficher_recherche_globale(placeholder: str = "Recherche ⌘K...") -> str | None:
     """
     Affiche la barre de recherche globale.
@@ -380,6 +382,7 @@ def afficher_recherche_globale(placeholder: str = "Recherche ⌘K...") -> str | 
     return terme if terme else None
 
 
+@composant_ui("recherche", tags=("ui", "popover", "recherche"))
 def afficher_recherche_globale_popover() -> None:
     """
     Affiche la recherche globale dans un popover (modal-like).
@@ -395,6 +398,7 @@ def afficher_recherche_globale_popover() -> None:
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui("recherche", tags=("js", "raccourcis", "clavier"))
 def injecter_raccourcis_clavier() -> None:
     """
     Injecte les raccourcis clavier JavaScript.

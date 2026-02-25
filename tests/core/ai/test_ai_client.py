@@ -15,7 +15,7 @@ import pytest
 from httpx import HTTPError as HttpXError
 
 from src.core.ai.client import ClientIA, obtenir_client_ia
-from src.core.errors import ErreurLimiteDebit, ErreurServiceIA
+from src.core.exceptions import ErreurLimiteDebit, ErreurServiceIA
 
 # ═══════════════════════════════════════════════════════════
 # SECTION 1: TESTS INITIALISATION & CONFIG LAZY LOADING

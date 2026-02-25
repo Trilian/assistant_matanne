@@ -1,9 +1,9 @@
 """
 UI Components - Dynamic
 
-Composant Modale **DÉPRÉCIÉ** — migré vers @st.dialog natif.
+Dialog helpers basés sur @st.dialog natif.
 
-Usage moderne::
+Usage::
 
     # Créer un dialog personnalisé (recommandé)
     @st.dialog("Confirmer suppression")
@@ -22,11 +22,8 @@ Usage moderne::
     # Ou utiliser le helper confirm_dialog()
     if st.button("🗑️ Supprimer"):
         confirm_dialog("Confirmer", "Supprimer cet élément ?", on_confirm=lambda: delete(42))
-
-Voir docs/MIGRATION_UI_V2.md pour le guide complet.
 """
 
-import warnings
 from collections.abc import Callable
 
 import streamlit as st
@@ -77,67 +74,4 @@ def confirm_dialog(
     _dlg()
 
 
-# ═══════════════════════════════════════════════════════════
-# MODALE LEGACY — DÉPRÉCIÉ
-# ═══════════════════════════════════════════════════════════
-
-
-class Modale:
-    """
-    **DÉPRÉCIÉ** — Utiliser @st.dialog ou confirm_dialog() à la place.
-
-    Cette classe reste fonctionnelle mais émet un DeprecationWarning.
-    Voir docs/MIGRATION_UI_V2.md pour migrer.
-
-    Usage legacy:
-        modal = Modale("delete_confirm")
-
-        if modal.is_showing():
-            st.warning("Confirmer suppression ?")
-            if modal.confirm():
-                delete_item()
-                modal.close()
-            modal.cancel()
-    """
-
-    def __init__(self, key: str):
-        warnings.warn(
-            "Modale est déprécié. Utiliser @st.dialog ou confirm_dialog(). "
-            "Voir docs/MIGRATION_UI_V2.md",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self.key = f"modal_{key}"
-        if self.key not in st.session_state:
-            st.session_state[self.key] = False
-
-    def show(self):
-        """Affiche modal"""
-        st.session_state[self.key] = True
-
-    def close(self):
-        """Ferme modal"""
-        st.session_state[self.key] = False
-
-    def is_showing(self) -> bool:
-        """Modal visible ?"""
-        return st.session_state.get(self.key, False)
-
-    def confirm(self, label: str = "✅ Confirmer") -> bool:
-        """Bouton confirmer"""
-        return st.button(label, key=f"{self.key}_yes", type="primary", use_container_width=True)
-
-    def cancel(self, label: str = "❌ Annuler"):
-        """Bouton annuler — ferme la modal si cliqué"""
-        if st.button(label, key=f"{self.key}_no", use_container_width=True):
-            self.close()
-
-    # Alias français
-    afficher = show
-    fermer = close
-    est_affichee = is_showing
-    confirmer = confirm
-    annuler = cancel
-
-
-__all__ = ["Modale", "confirm_dialog"]
+__all__ = ["confirm_dialog"]

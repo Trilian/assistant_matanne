@@ -15,7 +15,7 @@ from src.api.schemas import (
     MessageResponse,
     ReponsePaginee,
 )
-from src.api.utils import executer_async, executer_avec_session, gerer_exception_api, query_async
+from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
 

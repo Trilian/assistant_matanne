@@ -8,66 +8,6 @@ import pytest
 from pydantic import ValidationError
 
 # ═══════════════════════════════════════════════════════════════════════
-# TESTS PaginationParams
-# ═══════════════════════════════════════════════════════════════════════
-
-
-class TestPaginationParams:
-    """Tests pour les paramètres de pagination."""
-
-    def test_valeurs_par_defaut(self):
-        """Les valeurs par défaut sont page=1, page_size=20."""
-        from src.api.schemas import PaginationParams
-
-        params = PaginationParams()
-        assert params.page == 1
-        assert params.page_size == 20
-
-    def test_valeurs_personnalisees(self):
-        """Accepte des valeurs personnalisées."""
-        from src.api.schemas import PaginationParams
-
-        params = PaginationParams(page=3, page_size=50)
-        assert params.page == 3
-        assert params.page_size == 50
-
-    def test_page_minimum(self):
-        """Page ne peut pas être < 1."""
-        from src.api.schemas import PaginationParams
-
-        with pytest.raises(ValidationError):
-            PaginationParams(page=0)
-
-    def test_page_negative(self):
-        """Page ne peut pas être négative."""
-        from src.api.schemas import PaginationParams
-
-        with pytest.raises(ValidationError):
-            PaginationParams(page=-1)
-
-    def test_page_size_minimum(self):
-        """page_size ne peut pas être < 1."""
-        from src.api.schemas import PaginationParams
-
-        with pytest.raises(ValidationError):
-            PaginationParams(page_size=0)
-
-    def test_page_size_maximum(self):
-        """page_size ne peut pas dépasser 100."""
-        from src.api.schemas import PaginationParams
-
-        with pytest.raises(ValidationError):
-            PaginationParams(page_size=101)
-
-    def test_page_size_limite(self):
-        """page_size=100 est accepté."""
-        from src.api.schemas import PaginationParams
-
-        params = PaginationParams(page_size=100)
-        assert params.page_size == 100
-
-
-# ═══════════════════════════════════════════════════════════════════════
 # TESTS ReponsePaginee
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -190,58 +130,6 @@ class TestMessageResponse:
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# TESTS ErreurResponse
-# ═══════════════════════════════════════════════════════════════════════
-
-
-class TestErreurResponse:
-    """Tests pour les réponses d'erreur."""
-
-    def test_erreur_simple(self):
-        """Crée une erreur avec détail uniquement."""
-        from src.api.schemas import ErreurResponse
-
-        err = ErreurResponse(detail="Non trouvé")
-        assert err.detail == "Non trouvé"
-        assert err.code is None
-        assert err.errors is None
-
-    def test_erreur_avec_code(self):
-        """Crée une erreur avec code d'erreur."""
-        from src.api.schemas import ErreurResponse
-
-        err = ErreurResponse(detail="Accès refusé", code="FORBIDDEN")
-        assert err.code == "FORBIDDEN"
-
-    def test_erreur_avec_liste_erreurs(self):
-        """Crée une erreur avec sous-erreurs de validation."""
-        from src.api.schemas import ErreurResponse
-
-        err = ErreurResponse(
-            detail="Validation échouée",
-            code="VALIDATION_ERROR",
-            errors=[
-                {"field": "nom", "message": "Champ requis"},
-                {"field": "email", "message": "Format invalide"},
-            ],
-        )
-
-        assert len(err.errors) == 2
-        assert err.errors[0]["field"] == "nom"
-
-    def test_serialisation_json(self):
-        """Se sérialise correctement en JSON."""
-        from src.api.schemas import ErreurResponse
-
-        err = ErreurResponse(detail="Erreur serveur", code="INTERNAL")
-        data = err.model_dump()
-
-        assert data["detail"] == "Erreur serveur"
-        assert data["code"] == "INTERNAL"
-        assert data["errors"] is None
-
-
-# ═══════════════════════════════════════════════════════════════════════
 # TESTS D'IMPORT
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -253,21 +141,15 @@ class TestImports:
         """Le package schemas s'importe sans erreur."""
         from src.api import schemas
 
-        assert hasattr(schemas, "PaginationParams")
         assert hasattr(schemas, "ReponsePaginee")
         assert hasattr(schemas, "MessageResponse")
-        assert hasattr(schemas, "ErreurResponse")
 
     def test_import_direct(self):
         """Imports directs depuis common.py."""
         from src.api.schemas.common import (
-            ErreurResponse,
             MessageResponse,
-            PaginationParams,
             ReponsePaginee,
         )
 
-        assert PaginationParams is not None
         assert ReponsePaginee is not None
         assert MessageResponse is not None
-        assert ErreurResponse is not None

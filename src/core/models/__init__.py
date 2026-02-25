@@ -40,9 +40,7 @@ from .base import (
     utc_now,
 )
 from .mixins import (
-    CreatedAtMixin,
     CreeLeMixin,
-    TimestampFullMixin,
     TimestampMixin,
 )
 
@@ -120,7 +118,8 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # Maison
     "ElementJardin": (".maison", "ElementJardin"),
     "JournalJardin": (".maison", "JournalJardin"),
-    "Project": (".maison", "Project"),
+    "Projet": (".maison", "Projet"),
+    "Project": (".maison", "Project"),  # Alias rétrocompatibilité
     "TacheProjet": (".maison", "TacheProjet"),
     "Routine": (".maison", "Routine"),
     "TacheRoutine": (".maison", "TacheRoutine"),

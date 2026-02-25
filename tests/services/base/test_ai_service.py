@@ -232,7 +232,7 @@ class TestCallWithCache:
 
     async def test_call_with_cache_rate_limit_exceeded(self, mock_client_ia, mock_cache_miss):
         """Test rate limit dépassé."""
-        from src.core.errors import ErreurLimiteDebit
+        from src.core.exceptions import ErreurLimiteDebit
         from src.services.core.base.ai_service import BaseAIService
 
         service = BaseAIService(client=mock_client_ia, service_name="test")

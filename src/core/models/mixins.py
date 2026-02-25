@@ -2,8 +2,7 @@
 Mixins de timestamps pour les modèles SQLAlchemy.
 
 Fournit des mixins réutilisables pour les colonnes de date de création
-et de modification, en convention française (cree_le/modifie_le) et
-anglaise (created_at/updated_at).
+et de modification en convention française (cree_le/modifie_le).
 
 Usage:
     # Convention française — création seule
@@ -13,16 +12,6 @@ Usage:
 
     # Convention française — création + modification
     class MonModele(TimestampMixin, Base):
-        __tablename__ = "mon_modele"
-        ...
-
-    # Convention anglaise — création seule
-    class MonModele(CreatedAtMixin, Base):
-        __tablename__ = "mon_modele"
-        ...
-
-    # Convention anglaise — création + modification
-    class MonModele(TimestampFullMixin, Base):
         __tablename__ = "mon_modele"
         ...
 
@@ -60,11 +49,3 @@ class TimestampMixin(CreeLeMixin):
         onupdate=utc_now,
         nullable=False,
     )
-
-
-# ═══════════════════════════════════════════════════════════
-# ALIASES DÉPRÉCIÉ (anciennes conventions anglaises)
-# Utiliser CreeLeMixin / TimestampMixin à la place
-# ═══════════════════════════════════════════════════════════
-CreatedAtMixin = CreeLeMixin
-TimestampFullMixin = TimestampMixin

@@ -147,15 +147,22 @@ def construire_pages() -> dict[str, list[st.Page]]:
         _creer_page("famille.suivi_perso", "src.modules.famille.suivi_perso", "Mon Suivi", "💪"),
         _creer_page("famille.weekend", "src.modules.famille.weekend", "Weekend", "🎉"),
         _creer_page("famille.achats_famille", "src.modules.famille.achats_famille", "Achats", "🛍️"),
+        _creer_page("famille.activites", "src.modules.famille.activites", "Activités", "🎭"),
+        _creer_page("famille.routines", "src.modules.famille.routines", "Routines", "⏰"),
     ]
 
     # ── Maison ──
     pages["🏠 Maison"] = [
         _creer_page("maison.hub", "src.modules.maison.hub", "Hub Maison", "🏠"),
         _creer_page("maison.jardin", "src.modules.maison.jardin", "Jardin", "🌱"),
+        _creer_page("maison.jardin_zones", "src.modules.maison.jardin_zones", "Zones Jardin", "🌿"),
         _creer_page("maison.entretien", "src.modules.maison.entretien", "Entretien", "🏡"),
         _creer_page("maison.charges", "src.modules.maison.charges", "Charges", "💡"),
         _creer_page("maison.depenses", "src.modules.maison.depenses", "Dépenses", "💰"),
+        _creer_page("maison.eco_tips", "src.modules.maison.eco_tips", "Éco-Tips", "🌿"),
+        _creer_page("maison.energie", "src.modules.maison.energie", "Énergie", "⚡"),
+        _creer_page("maison.meubles", "src.modules.maison.meubles", "Meubles", "🪑"),
+        _creer_page("maison.projets", "src.modules.maison.projets", "Projets", "🏗️"),
     ]
 
     # ── Jeux ──

@@ -27,7 +27,7 @@ def est_aujourd_hui(date_ref: date) -> bool:
     return date_ref == date.today()
 
 
-def get_weekday_names() -> list[str]:
+def obtenir_noms_jours_semaine() -> list[str]:
     """
     Retourne la liste des noms de jours de la semaine.
 
@@ -37,7 +37,11 @@ def get_weekday_names() -> list[str]:
     return JOURS_SEMAINE.copy()
 
 
-def get_weekday_name(day_index: int) -> str:
+# Alias rétrocompatibilité
+get_weekday_names = obtenir_noms_jours_semaine
+
+
+def obtenir_nom_jour_semaine(day_index: int) -> str:
     """
     Retourne le nom du jour pour un index donné.
 
@@ -52,7 +56,11 @@ def get_weekday_name(day_index: int) -> str:
     return ""
 
 
-def get_weekday_index(day_name: str) -> int:
+# Alias rétrocompatibilité
+get_weekday_name = obtenir_nom_jour_semaine
+
+
+def obtenir_index_jour_semaine(day_name: str) -> int:
     """
     Retourne l'index d'un jour de la semaine.
 
@@ -66,3 +74,7 @@ def get_weekday_index(day_name: str) -> int:
         return JOURS_SEMAINE_LOWER.index(day_name.lower())
     except ValueError:
         return -1
+
+
+# Alias rétrocompatibilité
+get_weekday_index = obtenir_index_jour_semaine

@@ -40,13 +40,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "RECETTE_FIELD_MAPPING": (".io_service", "RECETTE_FIELD_MAPPING"),
     "INVENTAIRE_FIELD_MAPPING": (".io_service", "INVENTAIRE_FIELD_MAPPING"),
     "COURSES_FIELD_MAPPING": (".io_service", "COURSES_FIELD_MAPPING"),
-    # ─── Protocols (PEP 544) ───
-    "CRUDProtocol": (".protocols", "CRUDProtocol"),
-    "AIServiceProtocol": (".protocols", "AIServiceProtocol"),
-    "IOProtocol": (".protocols", "IOProtocol"),
-    "CacheableProtocol": (".protocols", "CacheableProtocol"),
-    "HealthCheckProtocol": (".protocols", "HealthCheckProtocol"),
-    "ObservableProtocol": (".protocols", "ObservableProtocol"),
+    # ─── Types de santé ───
     "ServiceStatus": (".protocols", "ServiceStatus"),
     "ServiceHealth": (".protocols", "ServiceHealth"),
 }

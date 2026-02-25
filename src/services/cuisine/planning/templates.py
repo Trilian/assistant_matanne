@@ -14,14 +14,15 @@ from sqlalchemy.orm import Session
 from src.core.constants import JOURS_SEMAINE
 from src.core.decorators import avec_session_db
 from src.core.models import ElementTemplate, EvenementPlanning, TemplateSemaine
+from src.services.core.events import obtenir_bus
 
 
 class ServiceTemplates:
     """Service de gestion des templates de semaine."""
 
-    def __init__(self, db: Session | None = None):
+    def __init__(self):
         """Initialise le service."""
-        self._db = db
+        pass
 
     @avec_session_db
     def lister_templates(
@@ -84,6 +85,14 @@ class ServiceTemplates:
 
         db.commit()
         db.refresh(template)
+
+        # Émettre événement template créé
+        obtenir_bus().emettre(
+            "planning.template_cree",
+            {"template_id": template.id, "nom": nom, "items_count": len(items) if items else 0},
+            source="ServiceTemplates",
+        )
+
         return template
 
     @avec_session_db
@@ -131,8 +140,16 @@ class ServiceTemplates:
         """Supprime un template (cascade sur les items)."""
         template = db.query(TemplateSemaine).filter_by(id=template_id).first()
         if template:
+            nom = template.nom
             db.delete(template)
             db.commit()
+
+            # Émettre événement template supprimé
+            obtenir_bus().emettre(
+                "planning.template_supprime",
+                {"template_id": template_id, "nom": nom},
+                source="ServiceTemplates",
+            )
             return True
         return False
 
@@ -189,6 +206,19 @@ class ServiceTemplates:
             events_crees.append(event)
 
         db.commit()
+
+        # Émettre événement template appliqué
+        obtenir_bus().emettre(
+            "planning.template_applique",
+            {
+                "template_id": template_id,
+                "template_nom": template.nom,
+                "date_lundi": date_lundi.isoformat(),
+                "events_count": len(events_crees),
+            },
+            source="ServiceTemplates",
+        )
+
         return events_crees
 
     @avec_session_db

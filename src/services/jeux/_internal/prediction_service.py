@@ -96,8 +96,13 @@ class ConseilPari(BaseModel):
 # ═══════════════════════════════════════════════════════════
 
 
-class PredictionService:
-    """Service de prédiction des résultats de matchs."""
+class PredictionServiceJeux:
+    """
+    Service de prédiction des résultats de matchs sportifs.
+
+    Renommé en PredictionServiceJeux pour éviter la confusion avec
+    cuisine.suggestions.predictions.PredictionService (ML inventaire).
+    """
 
     def __init__(self):
         """Initialise le service."""
@@ -507,28 +512,36 @@ class PredictionService:
 # ═══════════════════════════════════════════════════════════
 
 
-def obtenir_service_predictions_jeux() -> PredictionService:
+def obtenir_service_predictions_jeux() -> PredictionServiceJeux:
     """Factory pour créer une instance du service de prédiction (convention française)."""
-    return PredictionService()
+    return PredictionServiceJeux()
 
 
 @service_factory("prediction", tags={"jeux", "ia", "prediction"})
-def get_prediction_service() -> PredictionService:
+def get_prediction_service() -> PredictionServiceJeux:
     """Factory pour créer une instance du service de prédiction (alias anglais)."""
     return obtenir_service_predictions_jeux()
+
+
+# ═══════════════════════════════════════════════════════════
+# ALIAS RÉTRO-COMPATIBILITÉ
+# ═══════════════════════════════════════════════════════════
+
+# Alias pour rétro-compatibilité
+PredictionService = PredictionServiceJeux
 
 
 # ═══════════════════════════════════════════════════════════
 # FONCTIONS DE COMPATIBILITÉ
 # ═══════════════════════════════════════════════════════════
 
-_service: PredictionService | None = None
+_service: PredictionServiceJeux | None = None
 
 
-def _get_service() -> PredictionService:
+def _get_service() -> PredictionServiceJeux:
     global _service
     if _service is None:
-        _service = PredictionService()
+        _service = PredictionServiceJeux()
     return _service
 
 

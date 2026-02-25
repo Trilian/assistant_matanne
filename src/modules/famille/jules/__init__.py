@@ -11,7 +11,10 @@ Fonctionnalités:
 # Import des fonctions pour exposer l'API publique
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
+
+_keys = KeyNamespace("jules")
 
 from .ai_service import JulesAIService
 from .components import (

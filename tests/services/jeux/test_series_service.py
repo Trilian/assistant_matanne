@@ -62,13 +62,6 @@ class TestSeriesServiceFactory:
         service = get_series_service()
         assert isinstance(service, SeriesService)
 
-    def test_get_series_service_with_session(self):
-        """Test création service avec session."""
-        mock_session = MagicMock()
-        service = get_series_service(mock_session)
-        assert isinstance(service, SeriesService)
-        assert service._session == mock_session
-
 
 class TestSeriesServiceConstantes:
     """Tests des constantes."""
@@ -119,11 +112,7 @@ class TestSeriesServiceIntegration:
     def test_service_init(self):
         """Test initialisation du service."""
         service = SeriesService()
-        assert service._session is None
-
-        mock_session = MagicMock()
-        service_with_session = SeriesService(mock_session)
-        assert service_with_session._session == mock_session
+        assert isinstance(service, SeriesService)
 
 
 class TestSeriesServiceCasUtilisation:

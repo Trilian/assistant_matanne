@@ -12,7 +12,7 @@ from datetime import date, timedelta
 import streamlit as st
 
 from src.core.decorators import avec_session_db
-from src.core.models import Project, TacheProjet
+from src.core.models import Projet, TacheProjet
 from src.ui.keys import KeyNamespace
 
 logger = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ def onglet_liste(keys: KeyNamespace):
         _afficher_projet_card(projet, keys, icon)
 
 
-def _afficher_projet_card(projet: Project, keys: KeyNamespace, icon: str = "🏗️"):
+def _afficher_projet_card(projet: Projet, keys: KeyNamespace, icon: str = "🏗️"):
     """Affiche une carte de projet."""
     with st.container(border=True):
         col_info, col_actions = st.columns([3, 1])
@@ -393,10 +393,10 @@ def _creer_projet(
     date_debut: date | None,
     date_fin_prevue: date | None,
     db=None,
-) -> Project | None:
+) -> Projet | None:
     """Crée un nouveau projet en DB."""
     try:
-        projet = Project(
+        projet = Projet(
             nom=nom,
             description=description,
             statut="en_cours",
@@ -417,7 +417,7 @@ def _creer_projet(
 @avec_session_db
 def _terminer_projet(projet_id: int, db=None):
     """Marque un projet comme terminé."""
-    projet = db.query(Project).get(projet_id)
+    projet = db.query(Projet).get(projet_id)
     if projet:
         projet.statut = "termine"
         projet.date_fin_reelle = date.today()
@@ -427,7 +427,7 @@ def _terminer_projet(projet_id: int, db=None):
 @avec_session_db
 def _supprimer_projet(projet_id: int, db=None):
     """Supprime un projet."""
-    projet = db.query(Project).get(projet_id)
+    projet = db.query(Projet).get(projet_id)
     if projet:
         db.delete(projet)
         db.commit()

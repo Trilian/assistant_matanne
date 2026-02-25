@@ -24,6 +24,7 @@ from typing import Any, Callable, Generator
 import streamlit as st
 
 from src.ui.keys import KeyNamespace
+from src.ui.registry import composant_ui
 
 logger = logging.getLogger(__name__)
 
@@ -293,6 +294,7 @@ def chargement_progressif_dashboard() -> dict[str, Any]:
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui("loading", tags=("ui", "status", "chargement"))
 def status_chargement(
     items: list[tuple[str, Callable]],
     titre: str = "Chargement...",
@@ -335,6 +337,7 @@ def status_chargement(
     return resultats
 
 
+@composant_ui("loading", tags=("ui", "skeleton", "placeholder"))
 def skeleton_loading(nb_lignes: int = 3, hauteur: int = 60) -> None:
     """
     Affiche un placeholder de chargement skeleton.

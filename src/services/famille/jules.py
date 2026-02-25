@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import Jalon, ProfilEnfant
+from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -62,6 +63,13 @@ class ServiceJules:
             db.add(child)
             db.commit()
             logger.info("Profil Jules créé (id=%d)", child.id)
+
+            # Émettre événement profil créé
+            obtenir_bus().emettre(
+                "enfant.profil_cree",
+                {"child_id": child.id, "name": "Jules"},
+                source="ServiceJules",
+            )
 
         return child.id
 

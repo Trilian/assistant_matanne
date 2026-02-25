@@ -2,7 +2,7 @@
 Modèles pour la maison (projets, routines, jardin).
 
 Contient :
-- Project : Projet domestique
+- Projet : Projet domestique
 - TacheProjet : Tâche de projet
 - Routine : Routine quotidienne
 - TacheRoutine : Tâche de routine
@@ -32,7 +32,7 @@ from .mixins import CreeLeMixin
 # ═══════════════════════════════════════════════════════════
 
 
-class Project(CreeLeMixin, Base):
+class Projet(CreeLeMixin, Base):
     """Projet domestique.
 
     Attributes:
@@ -58,11 +58,15 @@ class Project(CreeLeMixin, Base):
 
     # Relations
     tasks: Mapped[list["TacheProjet"]] = relationship(
-        back_populates="project", cascade="all, delete-orphan"
+        back_populates="projet", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:
-        return f"<Project(id={self.id}, nom='{self.nom}', statut='{self.statut}')>"
+        return f"<Projet(id={self.id}, nom='{self.nom}', statut='{self.statut}')>"
+
+
+# Alias rétrocompatibilité
+Project = Projet
 
 
 class TacheProjet(CreeLeMixin, Base):
@@ -92,10 +96,10 @@ class TacheProjet(CreeLeMixin, Base):
     assigne_a: Mapped[str | None] = mapped_column(String(200))
 
     # Relations
-    project: Mapped["Project"] = relationship(back_populates="tasks")
+    projet: Mapped["Projet"] = relationship(back_populates="tasks")
 
     def __repr__(self) -> str:
-        return f"<TacheProjet(id={self.id}, project={self.project_id}, statut='{self.statut}')>"
+        return f"<TacheProjet(id={self.id}, projet={self.project_id}, statut='{self.statut}')>"
 
 
 # ═══════════════════════════════════════════════════════════

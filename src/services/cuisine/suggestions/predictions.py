@@ -46,8 +46,8 @@ class AnalysePrediction(BaseModel):
     tendance_globale: str
 
 
-class PredictionService:
-    """Service pour prédictions ML basiques"""
+class InventairePredictionService:
+    """Service pour prédictions ML de consommation d'inventaire"""
 
     def __init__(self):
         self.min_data_points = 3  # Min historique pour prédire
@@ -347,11 +347,11 @@ from src.services.core.registry import service_factory
 
 
 @service_factory("predictions", tags={"cuisine", "ia", "ml"})
-def obtenir_service_predictions() -> PredictionService:
+def obtenir_service_predictions() -> InventairePredictionService:
     """Obtient l'instance du service de prédictions (thread-safe via registre)."""
-    return PredictionService()
+    return InventairePredictionService()
 
 
-def get_predictions_service() -> PredictionService:
+def get_predictions_service() -> InventairePredictionService:
     """Factory for predictions service (English alias)."""
     return obtenir_service_predictions()

@@ -11,7 +11,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_resilience, avec_session_db
 from src.core.models import (
     AbonnementPush as PushSubscriptionModel,
 )
@@ -57,6 +57,7 @@ class NotificationPersistenceMixin:
             logger.warning(f"Supabase non disponible: {e}")
         return None
 
+    @avec_resilience(retry=2, timeout_s=10, fallback=None)
     def _sauvegarder_abonnement_supabase(self, subscription: AbonnementPush):
         """Sauvegarde un abonnement en base Supabase."""
         client = self._get_supabase_client()
@@ -81,6 +82,7 @@ class NotificationPersistenceMixin:
         except Exception as e:
             logger.error(f"Erreur sauvegarde abonnement: {e}")
 
+    @avec_resilience(retry=2, timeout_s=10, fallback=None)
     def _supprimer_abonnement_supabase(self, user_id: str, endpoint: str):
         """Supprime un abonnement de la base Supabase."""
         client = self._get_supabase_client()
@@ -96,6 +98,7 @@ class NotificationPersistenceMixin:
         except Exception as e:
             logger.error(f"Erreur suppression abonnement: {e}")
 
+    @avec_resilience(retry=2, timeout_s=10, fallback=[])
     def _charger_abonnements_supabase(self, user_id: str) -> list[AbonnementPush]:
         """Charge les abonnements depuis Supabase."""
         client = self._get_supabase_client()
@@ -133,6 +136,7 @@ class NotificationPersistenceMixin:
             logger.error(f"Erreur chargement abonnements: {e}")
             return []
 
+    @avec_resilience(retry=2, timeout_s=10, fallback=None)
     def _sauvegarder_preferences_supabase(self, preferences: PreferencesNotification):
         """Sauvegarde les préférences en base Supabase."""
         client = self._get_supabase_client()

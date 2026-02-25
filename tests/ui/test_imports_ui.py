@@ -23,7 +23,6 @@ import pytest
         # Layout
         "src.ui.layout.footer",
         "src.ui.layout.header",
-        "src.ui.layout.sidebar",
         "src.ui.layout.initialisation",
         "src.ui.layout.styles",
         # Integrations

@@ -49,7 +49,7 @@ from .data_editors import (
 )
 
 # Dynamic
-from .dynamic import Modale, confirm_dialog
+from .dynamic import confirm_dialog
 
 # Filters (nouveau - composants de filtrage réutilisables)
 from .filters import (
@@ -216,7 +216,6 @@ __all__ = [
     "disposition_grille",
     "carte_item",
     # Dynamic
-    "Modale",
     "confirm_dialog",
     # Metrics
     "carte_metrique_avancee",

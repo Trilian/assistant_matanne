@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 import os
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
@@ -72,16 +72,27 @@ def _obtenir_api_secret() -> str:
 def _obtenir_supabase_jwt_secret() -> str | None:
     """Retourne le secret JWT Supabase si configuré.
 
-    En production, loggue un avertissement si non configuré
-    (les tokens Supabase seront décodés sans vérification de signature).
+    En production, refuse les tokens non signés sauf si
+    ``ALLOW_UNSIGNED_SUPABASE_TOKENS=true`` est explicitement défini.
     """
     secret = os.getenv("SUPABASE_JWT_SECRET")
 
-    if not secret and _est_production():
-        logger.warning(
-            "AVERTISSEMENT SÉCURITÉ: SUPABASE_JWT_SECRET non configuré en production. "
-            "Les tokens Supabase seront décodés SANS vérification de signature."
-        )
+    if not secret:
+        allow_unsigned = os.getenv("ALLOW_UNSIGNED_SUPABASE_TOKENS", "").lower() == "true"
+
+        if _est_production() and not allow_unsigned:
+            logger.error(
+                "ERREUR SÉCURITÉ: SUPABASE_JWT_SECRET non configuré en production. "
+                "Les tokens Supabase seront REJETÉS. "
+                "Configurez SUPABASE_JWT_SECRET ou définissez "
+                "ALLOW_UNSIGNED_SUPABASE_TOKENS=true pour accepter le risque."
+            )
+        elif _est_production() and allow_unsigned:
+            logger.warning(
+                "AVERTISSEMENT SÉCURITÉ: Tokens Supabase acceptés SANS vérification "
+                "de signature (ALLOW_UNSIGNED_SUPABASE_TOKENS=true). "
+                "Configurez SUPABASE_JWT_SECRET dès que possible."
+            )
 
     return secret
 
@@ -197,6 +208,13 @@ def valider_token_supabase(token: str) -> UtilisateurToken | None:
 
     if supabase_secret:
         return _valider_supabase_avec_signature(token, supabase_secret)
+
+    # Sans secret configuré : refuser en production sauf opt-in explicite
+    if _est_production():
+        allow_unsigned = os.getenv("ALLOW_UNSIGNED_SUPABASE_TOKENS", "").lower() == "true"
+        if not allow_unsigned:
+            logger.warning("Token Supabase rejeté: SUPABASE_JWT_SECRET non configuré en production")
+            return None
 
     return _decoder_supabase_sans_signature(token)
 

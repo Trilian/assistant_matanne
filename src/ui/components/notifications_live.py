@@ -18,6 +18,7 @@ import streamlit as st
 
 from src.ui.fragments import auto_refresh
 from src.ui.keys import KeyNamespace
+from src.ui.registry import composant_ui
 
 logger = logging.getLogger(__name__)
 
@@ -157,6 +158,7 @@ _COULEURS_PRIORITE = {
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui("notifications", tags=("alertes", "temps-reel"))
 @auto_refresh(seconds=30)
 def widget_notifications_live(max_alertes: int = 5) -> None:
     """Widget de notifications temps réel avec auto-refresh.

@@ -88,7 +88,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "disposition_grille": (".components", "disposition_grille"),
     "carte_item": (".components", "carte_item"),
     # ── Components – Dynamic ───────────────────────────
-    "Modale": (".components", "Modale"),
     "confirm_dialog": (".components", "confirm_dialog"),
     # ── Components – Charts ────────────────────────────
     "graphique_repartition_repas": (".components", "graphique_repartition_repas"),
@@ -175,15 +174,15 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "cached_fragment": (".fragments", "cached_fragment"),
     "FragmentGroup": (".fragments", "FragmentGroup"),
     # ── Layouts (composable) ───────────────────────────
-    "Row": (".layouts", "Row"),
-    "Grid": (".layouts", "Grid"),
-    "Stack": (".layouts", "Stack"),
-    "Gap": (".layouts", "Gap"),
-    "two_columns": (".layouts", "two_columns"),
-    "three_columns": (".layouts", "three_columns"),
-    "metrics_row": (".layouts", "metrics_row"),
-    "card_grid": (".layouts", "card_grid"),
-    "sidebar_main": (".layouts", "sidebar_main"),
+    "Row": (".grid", "Row"),
+    "Grid": (".grid", "Grid"),
+    "Stack": (".grid", "Stack"),
+    "Gap": (".grid", "Gap"),
+    "two_columns": (".grid", "two_columns"),
+    "three_columns": (".grid", "three_columns"),
+    "metrics_row": (".grid", "metrics_row"),
+    "card_grid": (".grid", "card_grid"),
+    "sidebar_layout": (".grid", "sidebar_layout"),
     # ── State / URL Sync ───────────────────────────────
     "URLState": (".state", "URLState"),
     "url_state": (".state", "url_state"),

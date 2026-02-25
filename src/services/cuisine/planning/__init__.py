@@ -58,13 +58,20 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "ServiceTemplates": (".templates", "ServiceTemplates"),
     "obtenir_service_templates": (".templates", "obtenir_service_templates"),
     # ─── Utilitaires dates (src.core.date_utils) ───
-    "get_weekday_names": ("src.core.date_utils.helpers", "get_weekday_names"),
-    "get_weekday_name": ("src.core.date_utils.helpers", "get_weekday_name"),
-    "get_weekday_index": ("src.core.date_utils.helpers", "get_weekday_index"),
+    "obtenir_noms_jours_semaine": ("src.core.date_utils.helpers", "obtenir_noms_jours_semaine"),
+    "obtenir_nom_jour_semaine": ("src.core.date_utils.helpers", "obtenir_nom_jour_semaine"),
+    "obtenir_index_jour_semaine": ("src.core.date_utils.helpers", "obtenir_index_jour_semaine"),
+    "get_weekday_names": ("src.core.date_utils.helpers", "get_weekday_names"),  # Alias rétrocompat
+    "get_weekday_name": ("src.core.date_utils.helpers", "get_weekday_name"),  # Alias rétrocompat
+    "get_weekday_index": ("src.core.date_utils.helpers", "get_weekday_index"),  # Alias rétrocompat
     "calculate_week_dates": ("src.core.date_utils.semaines", "obtenir_jours_semaine"),
     "get_week_range": ("src.core.date_utils.semaines", "obtenir_bornes_semaine"),
     "get_monday_of_week": ("src.core.date_utils.semaines", "obtenir_debut_semaine"),
-    "format_week_label": ("src.core.date_utils.formatage", "format_week_label"),
+    "formater_label_semaine": ("src.core.date_utils.formatage", "formater_label_semaine"),
+    "format_week_label": (
+        "src.core.date_utils.formatage",
+        "format_week_label",
+    ),  # Alias rétrocompat
     # ─── Nutrition ───
     "determine_protein_type": (".nutrition", "determine_protein_type"),
     "get_default_protein_schedule": (".nutrition", "get_default_protein_schedule"),

@@ -56,9 +56,9 @@ def format_rappel(minutes: int | None) -> str:
 class ServiceRappels:
     """Service de gestion des rappels d'événements."""
 
-    def __init__(self, db: Session | None = None):
+    def __init__(self):
         """Initialise le service."""
-        self._db = db
+        pass
 
     @avec_session_db
     def get_rappels_imminents(

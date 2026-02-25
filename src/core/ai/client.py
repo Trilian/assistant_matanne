@@ -11,7 +11,7 @@ from typing import Any
 import httpx
 
 from ..config import obtenir_parametres
-from ..errors import ErreurLimiteDebit, ErreurServiceIA
+from ..exceptions import ErreurLimiteDebit, ErreurServiceIA
 from .cache import CacheIA
 from .rate_limit import RateLimitIA
 

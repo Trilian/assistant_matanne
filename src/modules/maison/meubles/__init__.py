@@ -14,6 +14,7 @@ from src.core.db import obtenir_contexte_db  # Re-export pour tests
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
+from src.ui.state.url import tabs_with_url
 
 # Re-exports pour compatibilité
 from .constants import PIECES_LABELS, PRIORITES_LABELS, STATUTS_LABELS
@@ -81,6 +82,7 @@ def app():
 
         # Onglets
         TAB_LABELS = ["📋 Wishlist", "➕ Ajouter", "💰 Budget"]
+        tab_index = tabs_with_url(TAB_LABELS, param="tab")
         tab1, tab2, tab3 = st.tabs(TAB_LABELS)
 
         with tab1:

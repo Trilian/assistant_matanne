@@ -17,7 +17,10 @@ from src.core.monitoring import profiler_rerun
 from src.modules._framework import error_boundary
 from src.ui import etat_vide
 from src.ui.fragments import cached_fragment
+from src.ui.keys import KeyNamespace
 from src.ui.tokens import Couleur
+
+_keys = KeyNamespace("timeline")
 
 # Couleurs par type d'événement
 COULEURS_TYPES = {

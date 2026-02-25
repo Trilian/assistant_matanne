@@ -13,7 +13,6 @@ import logging
 import pandas as pd
 import streamlit as st
 
-from src.core.ai import ClientIA
 from src.core.db import obtenir_contexte_db
 from src.core.models.maison import Routine, TacheRoutine
 from src.core.monitoring.rerun_profiler import profiler_rerun
@@ -24,11 +23,10 @@ from src.modules.maison.utils import (
     get_taches_today,
 )
 from src.ui.keys import KeyNamespace
+from src.ui.state.url import tabs_with_url
 
 __all__ = [
     "app",
-    "EntretienService",
-    "get_entretien_service",
     "creer_routine",
     "ajouter_tache_routine",
     "marquer_tache_faite",
@@ -36,69 +34,13 @@ __all__ = [
     "get_stats_entretien",
     "charger_routines",
     "get_taches_today",
-    "ClientIA",
 ]
 
 _keys = KeyNamespace("entretien")
 logger = logging.getLogger(__name__)
 
-
-# ═══════════════════════════════════════════════════════════
-# SERVICE IA
-# ═══════════════════════════════════════════════════════════
-
-
-class EntretienService:
-    """Service IA pour l'entretien de la maison."""
-
-    service_name: str = "entretien"
-    cache_prefix: str = "entretien"
-
-    def __init__(self, client=None):
-        if client is None:
-            try:
-                self.client = ClientIA()
-            except Exception:
-                self.client = None
-        else:
-            self.client = client
-
-    async def call_with_cache(self, prompt: str, **kwargs) -> str:
-        """Appel IA avec cache."""
-        if self.client is None:
-            return ""
-        return await self.client.generer(prompt=prompt, **kwargs)
-
-    async def creer_routine(self, nom: str, description: str = "") -> str:
-        """Crée des suggestions de routine."""
-        prompt = f"Crée une routine d'entretien '{nom}' pour: {description}. Liste les tâches."
-        return await self.call_with_cache(prompt=prompt)
-
-    async def optimiser_semaine(self, routines: str) -> str:
-        """Optimise le planning de la semaine."""
-        prompt = f"Optimise ce planning d'entretien hebdomadaire: {routines}. Répartis par jour."
-        return await self.call_with_cache(prompt=prompt)
-
-    async def conseil_temps_estime(self, tache: str) -> str:
-        """Estime le temps pour une tâche."""
-        prompt = f"Estime le temps nécessaire pour la tâche d'entretien: {tache}."
-        return await self.call_with_cache(prompt=prompt)
-
-    async def conseil_efficacite(self, tache: str = "") -> str:
-        """Donne des astuces d'efficacité."""
-        prompt = f"Donne des astuces pour réaliser efficacement: {tache}."
-        return await self.call_with_cache(prompt=prompt)
-
-
-_service_instance: EntretienService | None = None
-
-
-def get_entretien_service() -> EntretienService:
-    """Factory pour le service entretien (singleton)."""
-    global _service_instance
-    if _service_instance is None:
-        _service_instance = EntretienService()
-    return _service_instance
+# NOTE: Pour l'accès au service IA entretien, utilisez:
+# from src.services.maison import get_entretien_service
 
 
 # ═══════════════════════════════════════════════════════════
@@ -192,6 +134,7 @@ def app():
 
         # Onglets
         TAB_LABELS = ["📋 Routines", "📅 Aujourd'hui", "➕ Nouvelle"]
+        tab_index = tabs_with_url(TAB_LABELS, param="tab")
         tab1, tab2, tab3 = st.tabs(TAB_LABELS)
 
         with tab1:

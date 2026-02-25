@@ -11,7 +11,7 @@ Service complet pour le planning familial fusionnant :
 - Planning repas (Planning + Repas)
 - Activités famille (ActiviteFamille)
 - Événements calendrier (EvenementPlanning)
-- Projets domestiques (Project + TacheProjet)
+- Projets domestiques (Projet + TacheProjet)
 - Routines quotidiennes (Routine + TacheRoutine)
 """
 
@@ -25,6 +25,7 @@ from src.core.caching import Cache
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import EvenementPlanning
 from src.services.core.base import BaseAIService, BaseService, PlanningAIMixin
+from src.services.core.registry import service_factory
 
 from .analysis import PlanningAnalysisMixin
 from .loaders import PlanningLoadersMixin
@@ -296,6 +297,7 @@ class ServicePlanningUnifie(
 # ═══════════════════════════════════════════════════════════
 
 
+@service_factory("planning_unifie", tags={"planning", "ia", "cuisine"})
 def obtenir_service_planning_unifie() -> ServicePlanningUnifie:
     """Factory pour obtenir le service de planning unifié (repas + activités + projets)"""
     return ServicePlanningUnifie()

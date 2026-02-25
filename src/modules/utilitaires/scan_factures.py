@@ -15,7 +15,10 @@ from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.modules._framework import error_boundary
 from src.ui import etat_vide
+from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
+
+_keys = KeyNamespace("scan_factures")
 
 logger = logging.getLogger(__name__)
 

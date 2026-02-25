@@ -19,6 +19,7 @@ from src.core.decorators import avec_cache, avec_session_db
 from src.core.exceptions import ErreurNonTrouve, ErreurValidation
 from src.core.models import ArticleInventaire
 from src.services.core.base import BaseService
+from src.services.core.events import obtenir_bus
 
 logger = logging.getLogger(__name__)
 
@@ -289,6 +290,13 @@ class BarcodeService(BaseService[ArticleInventaire]):
         logger.info(f"✅ Article ajouté: {nom} (barcode: {code})")
         self.cache.invalidate()
 
+        # Émettre événement article créé
+        obtenir_bus().emettre(
+            "inventaire.article_cree",
+            {"article_id": article.id, "nom": nom, "barcode": code},
+            source="BarcodeService",
+        )
+
         return article
 
     @avec_session_db
@@ -318,6 +326,19 @@ class BarcodeService(BaseService[ArticleInventaire]):
 
         logger.info(f"📦 Stock augmenté: {article.nom} → {article.quantite}{article.unite}")
         self.cache.invalidate()
+
+        # Émettre événement stock modifié
+        obtenir_bus().emettre(
+            "inventaire.stock_modifie",
+            {
+                "article_id": article.id,
+                "nom": article.nom,
+                "ancienne_quantite": article.quantite - quantite,
+                "nouvelle_quantite": article.quantite,
+                "delta": quantite,
+            },
+            source="BarcodeService",
+        )
 
         return article
 
@@ -401,6 +422,18 @@ class BarcodeService(BaseService[ArticleInventaire]):
 
         logger.info(f"🔄 Code-barres mis à jour: {ancien_code} → {nouveau_code}")
         self.cache.invalidate()
+
+        # Émettre événement barcode modifié
+        obtenir_bus().emettre(
+            "inventaire.barcode_modifie",
+            {
+                "article_id": article.id,
+                "nom": article.nom,
+                "ancien_barcode": ancien_code,
+                "nouveau_barcode": nouveau_code,
+            },
+            source="BarcodeService",
+        )
 
         return article
 

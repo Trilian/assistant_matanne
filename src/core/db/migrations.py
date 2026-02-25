@@ -12,7 +12,7 @@ from pathlib import Path
 
 from sqlalchemy import text
 
-from ..errors import ErreurBaseDeDonnees
+from ..exceptions import ErreurBaseDeDonnees
 from .engine import obtenir_moteur
 
 logger = logging.getLogger(__name__)

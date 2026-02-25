@@ -8,16 +8,19 @@ Sous-module pour planifier, estimer et suivre les projets de la maison:
 - Calcul ROI rénovations énergétiques
 """
 
+from __future__ import annotations
+
 import asyncio
 import logging
 from datetime import date, timedelta
+from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
 from src.core.db import obtenir_contexte_db
-from src.core.models.maison import Project, TacheProjet
+from src.core.models.maison import Projet, TacheProjet
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
 from src.modules.maison.utils import (
@@ -27,11 +30,13 @@ from src.modules.maison.utils import (
     get_stats_projets,
 )
 from src.ui.keys import KeyNamespace
+from src.ui.state.url import tabs_with_url
+
+if TYPE_CHECKING:
+    from src.services.maison import ProjetsService
 
 __all__ = [
     "app",
-    "ProjetsService",
-    "get_projets_service",
     "creer_projet",
     "ajouter_tache",
     "marquer_tache_done",
@@ -54,64 +59,8 @@ def go(page: str) -> None:
     naviguer(page)
 
 
-# ═══════════════════════════════════════════════════════════
-# SERVICE IA
-# ═══════════════════════════════════════════════════════════
-
-
-class ProjetsService:
-    """Service IA pour les projets maison."""
-
-    def __init__(self, client=None):
-        if client is None:
-            try:
-                from src.core.ai import obtenir_client_ia
-
-                self.client = obtenir_client_ia()
-            except Exception:
-                self.client = None
-        else:
-            self.client = client
-
-    async def call_with_cache(self, prompt: str, **kwargs) -> str:
-        """Appel IA avec cache."""
-        if self.client is None:
-            return ""
-        return await self.client.generer(prompt=prompt, **kwargs)
-
-    async def suggerer_taches(self, nom: str, description: str) -> str:
-        """Suggère des tâches pour un projet."""
-        prompt = (
-            f"Suggère les tâches principales pour le projet '{nom}': {description}. "
-            "Liste numérotée, concise."
-        )
-        return await self.call_with_cache(prompt=prompt)
-
-    async def estimer_duree(self, nom: str, complexite: str) -> str:
-        """Estime la durée d'un projet."""
-        prompt = f"Estime la durée du projet '{nom}' de complexité '{complexite}'."
-        return await self.call_with_cache(prompt=prompt)
-
-    async def prioriser_taches(self, nom: str, taches: str) -> str:
-        """Priorise les tâches d'un projet."""
-        prompt = f"Priorise les tâches du projet '{nom}': {taches}"
-        return await self.call_with_cache(prompt=prompt)
-
-    async def conseil_blocages(self, nom: str, description: str) -> str:
-        """Conseille sur les risques possibles."""
-        prompt = f"Identifie les risques du projet '{nom}': {description}"
-        return await self.call_with_cache(prompt=prompt)
-
-
-_service_instance: ProjetsService | None = None
-
-
-def get_projets_service() -> ProjetsService:
-    """Factory pour le service de projets (singleton)."""
-    global _service_instance
-    if _service_instance is None:
-        _service_instance = ProjetsService()
-    return _service_instance
+# NOTE: Pour l'accès au service IA projets, utilisez:
+# from src.services.maison import get_projets_service
 
 
 # ═══════════════════════════════════════════════════════════
@@ -134,7 +83,7 @@ def creer_projet(
     """
 
     def _do(session):
-        projet = Project(
+        projet = Projet(
             nom=nom,
             description=description,
             priorite=priorite,
@@ -216,14 +165,14 @@ def marquer_projet_done(project_id: int, db=None) -> bool:
     try:
         if db is None:
             with obtenir_contexte_db() as db:
-                projet = db.query(Project).get(project_id)
+                projet = db.query(Projet).get(project_id)
                 if projet is None:
                     return False
                 projet.statut = "termine"
                 db.commit()
                 clear_maison_cache()
                 return True
-        projet = db.query(Project).get(project_id)
+        projet = db.query(Projet).get(project_id)
         if projet is None:
             return False
         projet.statut = "termine"
@@ -358,6 +307,7 @@ def app():
 
         # Onglets
         TAB_LABELS = ["📋 Projets", "➕ Nouveau", "📊 Graphique", "📝 Templates"]
+        tab_index = tabs_with_url(TAB_LABELS, param="tab")
         tab1, tab2, tab3, tab4 = st.tabs(TAB_LABELS)
 
         with tab1:

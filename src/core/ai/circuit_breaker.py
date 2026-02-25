@@ -2,8 +2,7 @@
 Circuit Breaker - Protection contre les défaillances de services externes.
 
 Module canonique pour le circuit breaker des services IA (client Mistral,
-BaseAIService).  Fournit un registre singleton ``obtenir_circuit()`` et le
-décorateur ``@avec_circuit_breaker``.
+BaseAIService).  Fournit un registre singleton ``obtenir_circuit()``.
 
 .. note::
 
@@ -28,14 +27,13 @@ import threading
 import time
 from collections.abc import Callable
 from enum import StrEnum
-from functools import wraps
 from typing import Any, TypeVar
 
 from ..exceptions import ErreurServiceExterne
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["CircuitBreaker", "EtatCircuit", "obtenir_circuit", "avec_circuit_breaker"]
+__all__ = ["CircuitBreaker", "EtatCircuit", "obtenir_circuit"]
 
 T = TypeVar("T")
 
@@ -267,50 +265,3 @@ def obtenir_circuit(
                 delai_reset=delai_reset,
             )
         return _circuits[nom]
-
-
-def avec_circuit_breaker(
-    nom: str = "default",
-    seuil_echecs: int = 5,
-    delai_reset: float = 60.0,
-    fallback: Callable | None = None,
-):
-    """
-    Décorateur Circuit Breaker.
-
-    Args:
-        nom: Nom du circuit
-        seuil_echecs: Seuil d'échecs
-        delai_reset: Délai de reset
-        fallback: Fonction de repli
-
-    Example:
-        >>> @avec_circuit_breaker("mistral", seuil_echecs=3, delai_reset=30)
-        >>> async def appeler_mistral(prompt: str) -> str:
-        >>>     return await client.chat(prompt)
-    """
-
-    def decorator(func):
-        cb = obtenir_circuit(nom, seuil_echecs, delai_reset)
-
-        if asyncio.iscoroutinefunction(func):
-
-            @wraps(func)
-            async def async_wrapper(*args, **kwargs):
-                return await cb.appeler_async(
-                    fn=lambda: func(*args, **kwargs),
-                    fallback=fallback,
-                )
-
-            return async_wrapper
-
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            return cb.appeler(
-                fn=lambda: func(*args, **kwargs),
-                fallback=fallback,
-            )
-
-        return wrapper
-
-    return decorator

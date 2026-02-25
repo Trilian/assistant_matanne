@@ -17,8 +17,6 @@ Mixins extraits (Phase 3):
 import logging
 from datetime import datetime
 
-from sqlalchemy.orm import Session
-
 from .historique_queries import HistoriqueQueriesMixin, HistoriqueStatsMixin, HistoriqueUndoMixin
 from .historique_types import ActionEntry, ActionFilter, ActionStats, ActionType
 
@@ -50,14 +48,9 @@ class ActionHistoryService(HistoriqueQueriesMixin, HistoriqueStatsMixin, Histori
     _recent_cache: list[ActionEntry] = []
     _cache_max_size: int = 100
 
-    def __init__(self, session: Session | None = None):
-        """
-        Initialise le service.
-
-        Args:
-            session: Session SQLAlchemy optionnelle
-        """
-        self._session = session
+    def __init__(self):
+        """Initialise le service."""
+        pass
 
     # -----------------------------------------------------------
     # ENREGISTREMENT D'ACTIONS

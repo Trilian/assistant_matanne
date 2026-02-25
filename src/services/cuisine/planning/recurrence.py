@@ -77,9 +77,9 @@ def format_recurrence(event: EvenementPlanning) -> str:
 class ServiceRecurrence:
     """Service de gestion des événements récurrents."""
 
-    def __init__(self, db: Session | None = None):
+    def __init__(self):
         """Initialise le service."""
-        self._db = db
+        pass
 
     def generer_occurrences(
         self,

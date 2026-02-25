@@ -21,7 +21,7 @@ from src.services.core.registry import service_factory
 
 from .football_data import FootballDataService, StatistiquesMarcheData
 from .loto_data import LotoDataService, StatistiqueNumeroLoto
-from .series_service import SEUIL_VALUE_ALERTE, SeriesService
+from .series_service import SEUIL_VALUE_ALERTE, get_series_service
 
 logger = logging.getLogger(__name__)
 
@@ -49,15 +49,9 @@ class SyncService:
     4. Création d'alertes si opportunités détectées
     """
 
-    def __init__(self, session: Session | None = None):
-        """
-        Initialise le service.
-
-        Args:
-            session: Session SQLAlchemy optionnelle
-        """
-        self._session = session
-        self.series_service = SeriesService(session)
+    def __init__(self):
+        """Initialise le service."""
+        self.series_service = get_series_service()
 
     # ─────────────────────────────────────────────────────────────────
     # SYNCHRONISATION PARIS SPORTIFS
@@ -369,28 +363,22 @@ class SyncService:
 # ═══════════════════════════════════════════════════════════
 
 
-def obtenir_service_sync_jeux(session: Session | None = None) -> SyncService:
+def obtenir_service_sync_jeux() -> SyncService:
     """
     Factory pour créer une instance du service (convention française).
 
-    Args:
-        session: Session SQLAlchemy optionnelle
-
     Returns:
         Instance SyncService
     """
-    return SyncService(session)
+    return SyncService()
 
 
 @service_factory("sync", tags={"jeux", "sync"})
-def get_sync_service(session: Session | None = None) -> SyncService:
+def get_sync_service() -> SyncService:
     """
     Factory pour créer une instance du service (alias anglais).
-
-    Args:
-        session: Session SQLAlchemy optionnelle
 
     Returns:
         Instance SyncService
     """
-    return obtenir_service_sync_jeux(session)
+    return obtenir_service_sync_jeux()

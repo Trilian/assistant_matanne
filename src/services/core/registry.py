@@ -86,11 +86,10 @@ class ServiceRegistry:
         cuisine_services = registry.par_tag("cuisine")
     """
 
-    # Mapping tag → Protocol pour validation automatique (PEP 544, Audit §9.3)
-    _PROTOCOL_PAR_TAG: dict[str, str] = {
-        "crud": "CRUDProtocol",
-        "ia": "AIServiceProtocol",
-    }
+    # Mapping tag → Protocol pour validation automatique (PEP 544)
+    # Note: Protocols retirés (dead code). Mapping conservé pour compatibilité
+    # si des protocols sont réintroduits à l'avenir.
+    _PROTOCOL_PAR_TAG: dict[str, str] = {}
 
     def __init__(self):
         self._entries: dict[str, _ServiceEntry] = {}
@@ -411,16 +410,9 @@ class ServiceRegistry:
         violations: dict[str, list[str]] = {}
 
         if validations is None:
-            # Validation par défaut: vérifier les Protocols communs
-            try:
-                from src.services.core.base.protocols import (
-                    CacheableProtocol,
-                    HealthCheckProtocol,
-                )
-
-                common_checks: list[type] = [HealthCheckProtocol, CacheableProtocol]
-            except ImportError:
-                return {}
+            # Validation par défaut: pas de protocols communs à vérifier
+            # (les protocols PEP 544 ont été retirés car jamais utilisés)
+            common_checks: list[type] = []
 
             # Résoudre les Protocols liés aux tags (Audit §9.3 — ADOPTER PEP 544)
             _tag_protocol_map: dict[str, type] = {}

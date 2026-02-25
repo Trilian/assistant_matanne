@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from src.core.ai import ClientIA, obtenir_client_ia
 from src.core.decorators import avec_cache, avec_session_db
-from src.core.models import Project
+from src.core.models import Projet
 from src.services.core.base import BaseAIService
 from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
@@ -431,9 +431,7 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
 
     @avec_cache(ttl=300)
     @avec_session_db
-    def obtenir_projets(
-        self, db: Session | None = None, statut: str | None = None
-    ) -> list[Project]:
+    def obtenir_projets(self, db: Session | None = None, statut: str | None = None) -> list[Projet]:
         """Récupère les projets.
 
         Args:
@@ -445,20 +443,20 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
         """
         return self._query_projets(db, statut)
 
-    def get_projets(self, db: Session | None = None, statut: str | None = None) -> list[Project]:
+    def get_projets(self, db: Session | None = None, statut: str | None = None) -> list[Projet]:
         """Alias anglais pour obtenir_projets (rétrocompatibilité)."""
         return self.obtenir_projets(db, statut)
 
-    def _query_projets(self, db: Session, statut: str | None = None) -> list[Project]:
+    def _query_projets(self, db: Session, statut: str | None = None) -> list[Projet]:
         """Query interne pour projets."""
-        query = db.query(Project)
+        query = db.query(Projet)
         if statut:
-            query = query.filter(Project.statut == statut)
-        return query.order_by(Project.priorite.desc()).all()
+            query = query.filter(Projet.statut == statut)
+        return query.order_by(Projet.priorite.desc()).all()
 
     @avec_cache(ttl=300)
     @avec_session_db
-    def obtenir_projets_urgents(self, db: Session | None = None) -> list[Project]:
+    def obtenir_projets_urgents(self, db: Session | None = None) -> list[Projet]:
         """Récupère les projets urgents/prioritaires.
 
         Args:
@@ -469,17 +467,17 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
         """
         return self._query_projets_urgents(db)
 
-    def get_projets_urgents(self, db: Session | None = None) -> list[Project]:
+    def get_projets_urgents(self, db: Session | None = None) -> list[Projet]:
         """Alias anglais pour obtenir_projets_urgents (rétrocompatibilité)."""
         return self.obtenir_projets_urgents(db)
 
-    def _query_projets_urgents(self, db: Session) -> list[Project]:
+    def _query_projets_urgents(self, db: Session) -> list[Projet]:
         """Query interne pour projets urgents."""
         return (
-            db.query(Project)
+            db.query(Projet)
             .filter(
-                Project.statut == "en_cours",
-                Project.priorite == "haute",
+                Projet.statut == "en_cours",
+                Projet.priorite == "haute",
             )
             .all()
         )

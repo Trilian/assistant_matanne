@@ -16,7 +16,7 @@ Hub de gestion familiale en production avec modules pour:
 - 💪 Suivi de la santé et du fitness
 - 📊 Tableau de bord familial avec métriques
 
-**Architecture**: Chargement différé avec ~60% d'accélération au démarrage via `ChargeurModuleDiffere` et `st.navigation()`, modèles SQLAlchemy modulaires dans `core/models/` (19 fichiers), codebase en français. Marqueur `py.typed` (PEP 561).
+**Architecture**: Chargement différé avec ~60% d'accélération au démarrage via `ChargeurModuleDiffere` et `st.navigation()`, modèles SQLAlchemy modulaires dans `core/models/` (22 fichiers), codebase en français. Marqueur `py.typed` (PEP 561).
 
 ---
 
@@ -32,13 +32,13 @@ Le core est organisé en **11 sous-packages** + fichiers utilitaires.
 - **date_utils/**: Package utilitaires de dates — `semaines.py`, `periodes.py`, `formatage.py`, `helpers.py`. Re-exports transparents via `__init__.py`.
 - **db/**: Base de données — `engine.py` (Engine SQLAlchemy, QueuePool), `session.py` (context managers), `migrations.py` (GestionnaireMigrations SQL-file), `utils.py` (health checks)
 - **decorators/**: Package décorateurs — `db.py` (`@avec_session_db`), `cache.py` (`@avec_cache`), `errors.py` (`@avec_gestion_erreurs`), `validation.py` (`@avec_validation`, `@avec_resilience`)
-- **models/**: Modèles SQLAlchemy ORM modulaires (19 fichiers organisés par domaine)
+- **models/**: Modèles SQLAlchemy ORM modulaires (22 fichiers organisés par domaine)
 - **monitoring/**: Métriques & performance — `collector.py`, `decorators.py`, `health.py`, `rerun_profiler.py`
 - **observability/**: Contexte d'observabilité — `context.py`
 - **resilience/**: Politiques de résilience composables — `policies.py`. `executer()` retourne `T` directement ou lève une exception.
 - **state/**: Package état applicatif — `manager.py` (GestionnaireEtat), `shortcuts.py` (naviguer, revenir), `slices.py` (EtatNavigation, EtatCuisine, EtatUI)
 - **validation/**: Package validation — `schemas/` (sous-package Pydantic: `recettes.py`, `inventaire.py`, `courses.py`, `planning.py`, `famille.py`, `projets.py`, `_helpers.py`), `sanitizer.py` (anti-XSS/injection), `validators.py` (helpers)
-- **Utilitaires**: `bootstrap.py` (init config + events), `constants.py`, `errors.py`, `errors_base.py`, `lazy_loader.py` (ChargeurModuleDiffere), `logging.py`, `navigation.py` (construire_pages, st.navigation), `session_keys.py` (KeyNamespace), `storage.py` (SessionStorage Protocol), `async_utils.py`, `py.typed`
+- **Utilitaires**: `bootstrap.py` (init config + events), `constants.py`, `exceptions.py` (exceptions pures sans UI), `errors.py` (ré-exports + helpers UI Streamlit), `lazy_loader.py` (ChargeurModuleDiffere), `logging.py`, `navigation.py` (construire_pages, st.navigation), `session_keys.py` (KeyNamespace), `storage.py` (SessionStorage Protocol), `async_utils.py`, `py.typed`
 
 ### Couche Services (src/services/)
 
@@ -142,7 +142,7 @@ python manage.py generate_requirements
 ### Nommage et langage
 
 - **Français partout**: Tous les noms de variables, commentaires, docstrings et noms de fonctions utilisent le français (ex: `obtenir_parametres()`, `GestionnaireMigrations`, `avec_session_db`)
-- **Structure des fichiers**: Modèles SQLAlchemy dans `src/core/models/` (19 fichiers modulaires), tous les décorateurs dans `src/core/decorators.py`, utilitaires dans `src/core/` (date_utils/, constants, errors, state)
+- **Structure des fichiers**: Modèles SQLAlchemy dans `src/core/models/` (22 fichiers modulaires), tous les décorateurs dans `src/core/decorators/`, utilitaires dans `src/core/` (date_utils/, constants, exceptions, errors, state)
 - **Nommage des modules**: Les modules sont `src/modules/{name}.py` ou `src/modules/{name}/__init__.py`
 - **Factories de services**: Toujours exporter une fonction `get_{service_name}_service()` décorée avec `@service_factory` pour le singleton via registre (ex: `get_recette_service()`)
 
@@ -160,7 +160,11 @@ python manage.py generate_requirements
 ### Modèle de gestion des erreurs
 
 ```python
-from src.core.errors import ErreurBaseDeDonnees
+# Backend/services (pas de dépendance UI)
+from src.core.exceptions import ErreurBaseDeDonnees
+
+# Modules Streamlit (avec helpers d'affichage UI)
+from src.core.errors import afficher_erreur, ErreurBaseDeDonnees
 
 try:
     result = perform_operation()
@@ -169,16 +173,16 @@ except Exception as e:
     raise ErreurBaseDeDonnees("Message convivial pour l'utilisateur")
 ```
 
-Voir [src/core/errors.py](src/core/errors.py) et [src/core/decorators.py](src/core/decorators.py#L1) pour le décorateur `@gerer_erreurs`.
+Voir [src/core/exceptions.py](src/core/exceptions.py) (exceptions pures), [src/core/errors.py](src/core/errors.py) (helpers UI) et [src/core/decorators/](src/core/decorators/) pour le décorateur `@avec_gestion_erreurs`.
 
 ### Gestion des sessions de base de données
 
 ```python
 from src.core.db import obtenir_contexte_db
-from src.core.decorators import with_db_session
+from src.core.decorators import avec_session_db
 
 # Modèle 1: Utiliser le décorateur (préféré pour les fonctions pures)
-@with_db_session
+@avec_session_db
 def create_recipe(data: dict, db: Session) -> Recette:
     recette = Recette(**data)
     db.add(recette)
@@ -200,6 +204,7 @@ Clé: Toujours utiliser `obtenir_contexte_db()` — ne jamais créer Engine/Sess
 - **Cache des réponses IA**: `CacheIA` dans `src/core/ai/cache.py` pour le cache sémantique des appels IA
 - **Invalidation manuelle**: `Cache.invalider(pattern="prefix_")` ou `cache.invalider_par_tag("tag")`
 - Exemple:
+
   ```python
   from src.core.decorators import avec_cache
 
@@ -260,14 +265,14 @@ naviguer("cuisine.recettes")  # Gère rerun automatiquement
 
 ### APIs externes
 
-- **Mistral AI**: Client à `src/core/ai/client.py`, configuré dans [config.py](src/core/config.py). Tous les appels IA passent par `BaseAIService` avec limitation de débit et cache intégrés.
+- **Mistral AI**: Client à `src/core/ai/client.py`, configuré dans [src/core/config/](src/core/config/). Tous les appels IA passent par `BaseAIService` avec limitation de débit et cache intégrés.
 - **Supabase PostgreSQL**: Connexion via `DATABASE_URL` depuis `.env.local`. Format: `postgresql://user:password@host/db`
 - **Limites de débit**: `AI_RATE_LIMIT_DAILY`, `AI_RATE_LIMIT_HOURLY` définis dans [src/core/constants.py](src/core/constants.py)
 
 ### Intégration du service IA
 
 ```python
-from src.services.base_ai_service import BaseAIService
+from src.services.core.base import BaseAIService
 from src.core.ai import ClientIA, AnalyseurIA
 
 class MonService(BaseAIService):
@@ -289,7 +294,7 @@ Clé: Tous les appels IA sont enveloppés avec limitation de débit automatique,
 ### Communication inter-modules
 
 - **Helpers partagés**: `src/modules/famille/helpers.py` et modules de logique pure (`activites_utils.py`, `routines_utils.py`) avec constantes, filtrage, statistiques, recommandations
-- **Gestion d'état**: `StateManager` dans [src/core/state.py](src/core/state.py) fournit un magasin clé-valeur global (nom de famille, préférences utilisateur)
+- **Gestion d'état**: `GestionnaireEtat` dans [src/core/state/](src/core/state/) fournit un magasin clé-valeur global (nom de famille, préférences utilisateur)
 - **Relations de base de données**: SQLAlchemy `relationship()` avec `back_populates` pour l'accès aux objets bidirectionnel entre modèles
 
 ### Sources de configuration (en cascade)
@@ -316,7 +321,7 @@ Importer via: `from src.core.config import obtenir_parametres()`
        # Logique du module ici
    ```
 3. Utiliser les composants UI chargés paresseusement depuis `src.ui`
-4. Interroger la base de données via les fonctions décorées avec `@with_db_session`
+4. Interroger la base de données via les fonctions décorées avec `@avec_session_db`
 5. Ajouter une page dans `construire_pages()` dans [src/core/navigation.py](src/core/navigation.py)
 
 ### Ajouter un modèle de base de données
@@ -373,27 +378,27 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 
 ## Référence des fichiers clés
 
-| Fichier                                                            | Objectif                                                  |
-| ------------------------------------------------------------------ | --------------------------------------------------------- |
-| [src/core/config/](src/core/config/)                               | Package configuration (Pydantic BaseSettings)             |
-| [src/core/db/](src/core/db/)                                       | Package base de données (engine, sessions, migrations)    |
-| [src/core/caching/](src/core/caching/)                             | Package cache multi-niveaux (L1/L2/L3, @avec_cache unifié)|
-| [src/core/date_utils/](src/core/date_utils/)                       | Package utilitaires dates (semaines, periodes, formatage) |
-| [src/core/validation/](src/core/validation/)                       | Package validation (schemas/ sous-package, sanitizer)     |
-| [src/core/monitoring/](src/core/monitoring/)                       | Package métriques & performance                           |
-| [src/core/ai/](src/core/ai/)                                       | Package IA (Mistral, rate limiting, cache, circuit breaker)|
-| [src/core/models/](src/core/models/)                               | Tous les modèles ORM SQLAlchemy (19 fichiers)             |
-| [src/core/decorators/](src/core/decorators/)                       | Package décorateurs (`@avec_session_db`, `@avec_cache`, etc.)|
-| [src/core/state/](src/core/state/)                                 | Package état applicatif (manager, slices, shortcuts)       |
+| Fichier                                                            | Objectif                                                      |
+| ------------------------------------------------------------------ | ------------------------------------------------------------- |
+| [src/core/config/](src/core/config/)                               | Package configuration (Pydantic BaseSettings)                 |
+| [src/core/db/](src/core/db/)                                       | Package base de données (engine, sessions, migrations)        |
+| [src/core/caching/](src/core/caching/)                             | Package cache multi-niveaux (L1/L2/L3, @avec_cache unifié)    |
+| [src/core/date_utils/](src/core/date_utils/)                       | Package utilitaires dates (semaines, periodes, formatage)     |
+| [src/core/validation/](src/core/validation/)                       | Package validation (schemas/ sous-package, sanitizer)         |
+| [src/core/monitoring/](src/core/monitoring/)                       | Package métriques & performance                               |
+| [src/core/ai/](src/core/ai/)                                       | Package IA (Mistral, rate limiting, cache, circuit breaker)   |
+| [src/core/models/](src/core/models/)                               | Tous les modèles ORM SQLAlchemy (22 fichiers)                 |
+| [src/core/decorators/](src/core/decorators/)                       | Package décorateurs (`@avec_session_db`, `@avec_cache`, etc.) |
+| [src/core/state/](src/core/state/)                                 | Package état applicatif (manager, slices, shortcuts)          |
 | [src/core/resilience/](src/core/resilience/)                       | Politiques de résilience composables (retourne T directement) |
-| [src/core/storage.py](src/core/storage.py)                         | SessionStorage Protocol (découplage Streamlit)            |
-| [src/services/core/registry.py](src/services/core/registry.py)     | Registre de services + @service_factory                    |
-| [src/services/core/events/](src/services/core/events/)             | Bus d'événements pub/sub avec wildcards                    |
-| [src/services/core/base/](src/services/core/base/)                 | BaseAIService, mixins IA, streaming, protocols             |
-| [src/app.py](src/app.py)                                           | App Streamlit principale, bootstrap, chargement différé   |
-| [src/core/navigation.py](src/core/navigation.py)                   | Routage multi-pages (construire_pages, st.navigation)     |
-| [pyproject.toml](pyproject.toml)                                   | Dépendances (Poetry), config test, règles de linting      |
-| [docs/MIGRATION_CORE_PACKAGES.md](docs/MIGRATION_CORE_PACKAGES.md) | Guide de migration des imports                            |
+| [src/core/storage.py](src/core/storage.py)                         | SessionStorage Protocol (découplage Streamlit)                |
+| [src/services/core/registry.py](src/services/core/registry.py)     | Registre de services + @service_factory                       |
+| [src/services/core/events/](src/services/core/events/)             | Bus d'événements pub/sub avec wildcards                       |
+| [src/services/core/base/](src/services/core/base/)                 | BaseAIService, mixins IA, streaming, protocols                |
+| [src/app.py](src/app.py)                                           | App Streamlit principale, bootstrap, chargement différé       |
+| [src/core/navigation.py](src/core/navigation.py)                   | Routage multi-pages (construire_pages, st.navigation)         |
+| [pyproject.toml](pyproject.toml)                                   | Dépendances (Poetry), config test, règles de linting          |
+| [docs/MIGRATION_CORE_PACKAGES.md](docs/MIGRATION_CORE_PACKAGES.md) | Guide de migration des imports                                |
 
 ---
 

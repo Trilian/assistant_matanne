@@ -16,7 +16,7 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from src.core.caching import Cache
-from src.core.date_utils.helpers import get_weekday_names
+from src.core.date_utils.helpers import obtenir_noms_jours_semaine
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import Planning, Repas
 from src.core.monitoring import chronometre
@@ -68,7 +68,7 @@ class PlanningIAGenerationMixin:
         from src.core.models import Recette
 
         # Utiliser planning.utils pour les jours de la semaine
-        jours_semaine = get_weekday_names()
+        jours_semaine = obtenir_noms_jours_semaine()
         suggestions_globales = []
 
         for idx, jour_name in enumerate(jours_semaine):

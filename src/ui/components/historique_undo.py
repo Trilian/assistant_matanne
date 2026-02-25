@@ -17,6 +17,7 @@ from datetime import datetime
 import streamlit as st
 
 from src.ui.keys import KeyNamespace
+from src.ui.registry import composant_ui
 from src.ui.tokens_semantic import Sem
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,7 @@ _keys = KeyNamespace("historique_undo")
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui("historique", tags=("ui", "undo", "actions"))
 def afficher_bouton_undo(max_actions: int = 5) -> None:
     """
     Affiche un bouton "Annuler" avec popover listant les dernières actions.
@@ -101,6 +103,7 @@ def afficher_bouton_undo(max_actions: int = 5) -> None:
         st.button("↩️ Annuler", disabled=True, help="Historique non disponible")
 
 
+@composant_ui("historique", tags=("ui", "timeline", "actions"))
 def afficher_historique_actions(
     jours: int = 7, limit: int = 50, filtrer_utilisateur: bool = False
 ) -> None:

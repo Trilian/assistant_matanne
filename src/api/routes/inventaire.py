@@ -14,6 +14,7 @@ from src.api.dependencies import require_auth
 from src.api.schemas import (
     InventaireItemCreate,
     InventaireItemResponse,
+    InventaireItemUpdate,
     MessageResponse,
     ReponsePaginee,
 )
@@ -69,15 +70,17 @@ async def lister_inventaire(
     """
     from datetime import timedelta
 
-    from src.core.models import ArticleInventaire
+    from sqlalchemy.orm import joinedload
+
+    from src.core.models import ArticleInventaire, Ingredient
 
     def _query():
         with executer_avec_session() as session:
-            query = session.query(ArticleInventaire)
+            query = session.query(ArticleInventaire).options(
+                joinedload(ArticleInventaire.ingredient)
+            )
 
             if categorie:
-                from src.core.models import Ingredient
-
                 query = query.join(Ingredient).filter(Ingredient.categorie == categorie)
 
             if emplacement:
@@ -100,19 +103,7 @@ async def lister_inventaire(
             )
 
             return {
-                "items": [
-                    {
-                        "id": i.id,
-                        "nom": i.ingredient.nom if i.ingredient else f"Article #{i.id}",
-                        "quantite": i.quantite,
-                        "unite": i.ingredient.unite if i.ingredient else None,
-                        "categorie": i.ingredient.categorie if i.ingredient else None,
-                        "date_peremption": i.date_peremption,
-                        "code_barres": i.code_barres,
-                        "created_at": i.derniere_maj,
-                    }
-                    for i in items
-                ],
+                "items": [InventaireItemResponse.model_validate(i) for i in items],
                 "total": total,
                 "page": page,
                 "page_size": page_size,
@@ -159,22 +150,41 @@ async def creer_article_inventaire(
         }
         ```
     """
-    from src.core.models import ArticleInventaire
+    from sqlalchemy.orm import joinedload
+
+    from src.core.models import ArticleInventaire, Ingredient
 
     def _create():
         with executer_avec_session() as session:
+            # Vérifier que l'ingrédient existe
+            ingredient = (
+                session.query(Ingredient).filter(Ingredient.id == item.ingredient_id).first()
+            )
+            if not ingredient:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Ingrédient #{item.ingredient_id} non trouvé",
+                )
+
             db_item = ArticleInventaire(
-                nom=item.nom,
+                ingredient_id=item.ingredient_id,
                 quantite=item.quantite,
-                unite=item.unite,
-                categorie=item.categorie,
+                quantite_min=item.quantite_min,
+                emplacement=item.emplacement,
                 date_peremption=item.date_peremption,
                 code_barres=item.code_barres,
-                emplacement=item.emplacement,
+                prix_unitaire=item.prix_unitaire,
             )
             session.add(db_item)
             session.commit()
-            session.refresh(db_item)
+
+            # Recharger avec la relation ingredient pour la réponse
+            db_item = (
+                session.query(ArticleInventaire)
+                .options(joinedload(ArticleInventaire.ingredient))
+                .filter(ArticleInventaire.id == db_item.id)
+                .one()
+            )
 
             return InventaireItemResponse.model_validate(db_item)
 
@@ -212,12 +222,15 @@ async def obtenir_par_code_barres(code: str):
         }
         ```
     """
+    from sqlalchemy.orm import joinedload
+
     from src.core.models import ArticleInventaire
 
     def _query():
         with executer_avec_session() as session:
             item = (
                 session.query(ArticleInventaire)
+                .options(joinedload(ArticleInventaire.ingredient))
                 .filter(ArticleInventaire.code_barres == code)
                 .first()
             )
@@ -261,11 +274,18 @@ async def obtenir_article_inventaire(item_id: int):
         }
         ```
     """
+    from sqlalchemy.orm import joinedload
+
     from src.core.models import ArticleInventaire
 
     def _query():
         with executer_avec_session() as session:
-            item = session.query(ArticleInventaire).filter(ArticleInventaire.id == item_id).first()
+            item = (
+                session.query(ArticleInventaire)
+                .options(joinedload(ArticleInventaire.ingredient))
+                .filter(ArticleInventaire.id == item_id)
+                .first()
+            )
 
             if not item:
                 raise HTTPException(status_code=404, detail="Article non trouvé")
@@ -278,17 +298,18 @@ async def obtenir_article_inventaire(item_id: int):
 @router.put("/{item_id}", response_model=InventaireItemResponse)
 @gerer_exception_api
 async def modifier_article_inventaire(
-    item_id: int, item: InventaireItemCreate, user: dict[str, Any] = Depends(require_auth)
+    item_id: int, item: InventaireItemUpdate, user: dict[str, Any] = Depends(require_auth)
 ):
     """
-    Met à jour un article d'inventaire.
+    Met à jour un article d'inventaire (PATCH partiel).
 
-    Permet de modifier la quantité, la date de péremption, le code-barres
-    ou l'emplacement d'un article existant.
+    Seuls les champs fournis dans le body sont modifiés.
+    Permet de modifier tous les champs : ingredient_id, quantité,
+    quantité min, emplacement, date de péremption, code-barres, prix.
 
     Args:
         item_id: ID de l'article à modifier
-        item: Nouvelles données de l'article
+        item: Champs à mettre à jour (seuls les champs présents sont appliqués)
 
     Returns:
         L'article mis à jour
@@ -302,33 +323,56 @@ async def modifier_article_inventaire(
         PUT /api/v1/inventaire/42
         Authorization: Bearer <token>
 
-        Body: {"nom": "Farine T55", "quantite": 0.5, "unite": "kg"}
+        Body: {"quantite": 0.5, "emplacement": "placard"}
 
         Response:
-        {"id": 42, "nom": "Farine T55", "quantite": 0.5, "unite": "kg", ...}
+        {"id": 42, "ingredient_id": 7, "nom": "Farine T55", "quantite": 0.5, ...}
         ```
     """
-    from src.core.models import ArticleInventaire
+    from sqlalchemy.orm import joinedload
+
+    from src.core.models import ArticleInventaire, Ingredient
 
     def _update():
         with executer_avec_session() as session:
             db_item = (
-                session.query(ArticleInventaire).filter(ArticleInventaire.id == item_id).first()
+                session.query(ArticleInventaire)
+                .options(joinedload(ArticleInventaire.ingredient))
+                .filter(ArticleInventaire.id == item_id)
+                .first()
             )
 
             if not db_item:
                 raise HTTPException(status_code=404, detail="Article non trouvé")
 
-            db_item.quantite = item.quantite
-            if item.date_peremption:
-                db_item.date_peremption = item.date_peremption
-            if item.code_barres:
-                db_item.code_barres = item.code_barres
-            if item.emplacement:
-                db_item.emplacement = item.emplacement
+            # Appliquer uniquement les champs fournis (exclude_unset)
+            update_data = item.model_dump(exclude_unset=True)
+
+            # Si ingredient_id est modifié, vérifier qu'il existe
+            if "ingredient_id" in update_data:
+                ingredient = (
+                    session.query(Ingredient)
+                    .filter(Ingredient.id == update_data["ingredient_id"])
+                    .first()
+                )
+                if not ingredient:
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"Ingrédient #{update_data['ingredient_id']} non trouvé",
+                    )
+
+            for field, value in update_data.items():
+                setattr(db_item, field, value)
 
             session.commit()
-            session.refresh(db_item)
+
+            # Recharger avec la relation ingredient pour la réponse
+            db_item = (
+                session.query(ArticleInventaire)
+                .options(joinedload(ArticleInventaire.ingredient))
+                .filter(ArticleInventaire.id == db_item.id)
+                .one()
+            )
 
             return InventaireItemResponse.model_validate(db_item)
 

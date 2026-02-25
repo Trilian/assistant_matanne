@@ -12,7 +12,10 @@ Fonctionnalités:
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
+from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
+
+_keys = KeyNamespace("suivi_perso")
 
 from .activities import afficher_activities
 from .alimentation import afficher_food_form, afficher_food_log

@@ -421,34 +421,8 @@ CSSManager = CSSEngine
 StyleSheet = CSSEngine
 
 
-# ═══════════════════════════════════════════════════════════
-# Keyframes pré-enregistrées
-# ═══════════════════════════════════════════════════════════
-
-CSSEngine.register_keyframes("fadeIn", "from { opacity: 0; } to { opacity: 1; }")
-CSSEngine.register_keyframes("fadeOut", "from { opacity: 1; } to { opacity: 0; }")
-CSSEngine.register_keyframes(
-    "slideUp",
-    "from { opacity: 0; transform: translateY(16px); } "
-    "to { opacity: 1; transform: translateY(0); }",
-)
-CSSEngine.register_keyframes(
-    "slideDown",
-    "from { opacity: 0; transform: translateY(-16px); } "
-    "to { opacity: 1; transform: translateY(0); }",
-)
-CSSEngine.register_keyframes(
-    "scaleIn",
-    "from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); }",
-)
-CSSEngine.register_keyframes("pulse", "0%, 100% { opacity: 1; } 50% { opacity: 0.6; }")
-CSSEngine.register_keyframes(
-    "shimmer",
-    "0% { background-position: -200% 0; } 100% { background-position: 200% 0; }",
-)
-CSSEngine.register_keyframes(
-    "spin", "from { transform: rotate(0deg); } to { transform: rotate(360deg); }"
-)
+# NOTE: Keyframes pré-enregistrées centralisées dans src/ui/animations.py
+# Utiliser register_keyframes() pour des keyframes ad-hoc uniquement.
 
 
 __all__ = [

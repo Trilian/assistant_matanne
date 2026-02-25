@@ -18,6 +18,7 @@ import logging
 import streamlit as st
 
 from src.ui.keys import KeyNamespace
+from src.ui.registry import composant_ui
 from src.ui.state.url import get_url_param, set_url_param
 
 logger = logging.getLogger(__name__)
@@ -91,6 +92,7 @@ def toggle_mode_focus() -> bool:
 # ═══════════════════════════════════════════════════════════
 
 
+@composant_ui("focus", tags=("ui", "toggle", "focus"))
 def mode_focus_toggle(position: str = "top-right") -> None:
     """
     Affiche le bouton toggle du mode focus.
@@ -131,6 +133,7 @@ def mode_focus_toggle(position: str = "top-right") -> None:
         st.rerun()
 
 
+@composant_ui("focus", tags=("ui", "fab", "focus"))
 def mode_focus_fab() -> None:
     """
     Bouton flottant (FAB) pour le mode focus.
@@ -179,6 +182,7 @@ def mode_focus_fab() -> None:
             st.rerun()
 
 
+@composant_ui("focus", tags=("css", "layout", "focus"))
 def injecter_css_mode_focus() -> None:
     """
     Injecte le CSS pour masquer sidebar/header en mode focus.
@@ -237,6 +241,7 @@ def injecter_css_mode_focus() -> None:
     )
 
 
+@composant_ui("focus", tags=("ui", "bouton", "focus"))
 def focus_exit_button() -> None:
     """
     Bouton de sortie du mode focus.

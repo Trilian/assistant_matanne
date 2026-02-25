@@ -4,7 +4,7 @@ Tests pour le module exceptions.py.
 Tests couverts:
 - Toutes les classes d'exceptions
 - Méthodes to_dict, __str__, __repr__
-- Fonctions de validation (exiger_champs, valider_type, valider_plage)
+- Fonctions de validation (exiger_champs, valider_type)
 """
 
 import pytest
@@ -19,7 +19,6 @@ from src.core.exceptions import (
     ErreurValidation,
     ExceptionApp,
     exiger_champs,
-    valider_plage,
     valider_type,
 )
 
@@ -367,73 +366,6 @@ class TestValiderType:
             valider_type(42, str)
 
         assert "paramètre" in str(exc_info.value)
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS FONCTION VALIDER_PLAGE
-# ═══════════════════════════════════════════════════════════
-
-
-class TestValiderPlage:
-    """Tests pour la fonction valider_plage."""
-
-    def test_value_in_range(self):
-        """Test valeur dans la plage."""
-        # Ne doit pas lever d'exception
-        valider_plage(5, min_val=1, max_val=10)
-        valider_plage(1, min_val=1, max_val=10)  # Limite basse
-        valider_plage(10, min_val=1, max_val=10)  # Limite haute
-
-    def test_below_min_raises(self):
-        """Test valeur sous le minimum."""
-        with pytest.raises(ErreurValidation) as exc_info:
-            valider_plage(0, min_val=1, max_val=10, nom_param="age")
-
-        # exiger_plage produit "trop petit: 0 < 1"
-        assert "trop petit" in str(exc_info.value) or ">= 1" in str(exc_info.value)
-
-    def test_above_max_raises(self):
-        """Test valeur au-dessus du maximum."""
-        with pytest.raises(ErreurValidation) as exc_info:
-            valider_plage(15, min_val=1, max_val=10, nom_param="age")
-
-        # exiger_plage produit "trop grand: 15 > 10"
-        assert "trop grand" in str(exc_info.value) or "<= 10" in str(exc_info.value)
-
-    def test_min_only(self):
-        """Test avec min seulement."""
-        valider_plage(100, min_val=1)  # Pas de max, OK
-
-        with pytest.raises(ErreurValidation):
-            valider_plage(0, min_val=1)
-
-    def test_max_only(self):
-        """Test avec max seulement."""
-        valider_plage(-100, max_val=10)  # Pas de min, OK
-
-        with pytest.raises(ErreurValidation):
-            valider_plage(20, max_val=10)
-
-    def test_float_values(self):
-        """Test avec valeurs float."""
-        valider_plage(5.5, min_val=1.0, max_val=10.0)
-
-        with pytest.raises(ErreurValidation):
-            valider_plage(0.5, min_val=1.0)
-
-    def test_negative_range(self):
-        """Test avec plage négative."""
-        valider_plage(-5, min_val=-10, max_val=-1)
-
-        with pytest.raises(ErreurValidation):
-            valider_plage(0, min_val=-10, max_val=-1)
-
-    def test_default_nom_param(self):
-        """Test nom paramètre par défaut."""
-        with pytest.raises(ErreurValidation) as exc_info:
-            valider_plage(100, max_val=10)
-
-        assert "valeur" in str(exc_info.value)
 
 
 # ═══════════════════════════════════════════════════════════

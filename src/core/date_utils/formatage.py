@@ -61,7 +61,7 @@ def formater_mois_fr(d: date, court: bool = False) -> str:
     return MOIS_FRANCAIS[d.month - 1]
 
 
-def format_week_label(semaine_debut: date, semaine_fin: date | None = None) -> str:
+def formater_label_semaine(semaine_debut: date, semaine_fin: date | None = None) -> str:
     """
     Formate un label pour afficher la semaine.
 
@@ -73,6 +73,10 @@ def format_week_label(semaine_debut: date, semaine_fin: date | None = None) -> s
         Label formaté "Semaine du DD/MM/YYYY"
     """
     return f"Semaine du {semaine_debut.strftime('%d/%m/%Y')}"
+
+
+# Alias rétrocompatibilité
+format_week_label = formater_label_semaine
 
 
 def formater_temps(minutes: int | float | None, avec_espace: bool = False) -> str:
