@@ -66,7 +66,7 @@ class TestChargerHistoriqueEnergie:
         assert callable(charger_historique_energie)
 
     @patch("src.modules.maison.energie.st")
-    @patch("src.modules.maison.energie.obtenir_contexte_db")
+    @patch("src.modules.maison.energie.data.obtenir_contexte_db")
     def test_charger_historique_avec_donnees(self, mock_db_context, mock_st):
         """Test chargement historique avec données."""
         # Mock du contexte DB
@@ -90,7 +90,7 @@ class TestChargerHistoriqueEnergie:
         assert len(result) == 3
 
     @patch("src.modules.maison.energie.st")
-    @patch("src.modules.maison.energie.obtenir_contexte_db")
+    @patch("src.modules.maison.energie.data.obtenir_contexte_db")
     def test_charger_historique_sans_donnees(self, mock_db_context, mock_st):
         """Test chargement historique sans données (None)."""
         mock_db = MagicMock()
@@ -110,7 +110,7 @@ class TestChargerHistoriqueEnergie:
             assert item["consommation"] is None
 
     @patch("src.modules.maison.energie.st")
-    @patch("src.modules.maison.energie.obtenir_contexte_db")
+    @patch("src.modules.maison.energie.data.obtenir_contexte_db")
     def test_charger_historique_exception(self, mock_db_context, mock_st):
         """Test gestion d'exception lors du chargement."""
         mock_db_context.side_effect = Exception("DB Error")

@@ -131,7 +131,7 @@ def mock_db_context(session):
 class TestMeublesCrud:
     """Tests des fonctions CRUD"""
 
-    @patch("src.modules.maison.meubles.obtenir_contexte_db")
+    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_get_all_meubles_sans_filtre(self, mock_ctx, mock_meuble):
         """Test récupération de tous les meubles sans filtre"""
         from src.modules.maison.meubles import get_all_meubles
@@ -146,7 +146,7 @@ class TestMeublesCrud:
         assert len(result) == 1
         assert result[0].nom == "Table basse"
 
-    @patch("src.modules.maison.meubles.obtenir_contexte_db")
+    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_get_all_meubles_avec_filtre_statut(self, mock_ctx, mock_meuble):
         """Test récupération avec filtre statut"""
         from src.modules.maison.meubles import get_all_meubles
@@ -164,7 +164,7 @@ class TestMeublesCrud:
         assert len(result) == 1
         mock_query.filter.assert_called()
 
-    @patch("src.modules.maison.meubles.obtenir_contexte_db")
+    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_get_all_meubles_avec_filtre_piece(self, mock_ctx, mock_meuble):
         """Test récupération avec filtre pièce"""
         from src.modules.maison.meubles import get_all_meubles
@@ -181,7 +181,7 @@ class TestMeublesCrud:
 
         assert len(result) == 1
 
-    @patch("src.modules.maison.meubles.obtenir_contexte_db")
+    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_get_meuble_by_id_existant(self, mock_ctx, mock_meuble):
         """Test récupération d'un meuble existant par ID"""
         from src.modules.maison.meubles import get_meuble_by_id
@@ -196,7 +196,7 @@ class TestMeublesCrud:
         assert result is not None
         assert result.id == 1
 
-    @patch("src.modules.maison.meubles.obtenir_contexte_db")
+    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_get_meuble_by_id_inexistant(self, mock_ctx):
         """Test récupération d'un meuble inexistant"""
         from src.modules.maison.meubles import get_meuble_by_id
@@ -210,7 +210,7 @@ class TestMeublesCrud:
 
         assert result is None
 
-    @patch("src.modules.maison.meubles.obtenir_contexte_db")
+    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_create_meuble(self, mock_ctx):
         """Test création d'un nouveau meuble"""
         from src.modules.maison.meubles import create_meuble
@@ -232,7 +232,7 @@ class TestMeublesCrud:
         mock_session.commit.assert_called_once()
         mock_session.refresh.assert_called_once()
 
-    @patch("src.modules.maison.meubles.obtenir_contexte_db")
+    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_update_meuble_existant(self, mock_ctx, mock_meuble):
         """Test mise à jour d'un meuble existant"""
         from src.modules.maison.meubles import update_meuble
@@ -249,7 +249,7 @@ class TestMeublesCrud:
         assert result is not None
         mock_session.commit.assert_called_once()
 
-    @patch("src.modules.maison.meubles.obtenir_contexte_db")
+    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_update_meuble_inexistant(self, mock_ctx):
         """Test mise à jour d'un meuble inexistant"""
         from src.modules.maison.meubles import update_meuble
@@ -263,7 +263,7 @@ class TestMeublesCrud:
 
         assert result is None
 
-    @patch("src.modules.maison.meubles.obtenir_contexte_db")
+    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_delete_meuble_existant(self, mock_ctx, mock_meuble):
         """Test suppression d'un meuble existant"""
         from src.modules.maison.meubles import delete_meuble
@@ -279,7 +279,7 @@ class TestMeublesCrud:
         mock_session.delete.assert_called_once_with(mock_meuble)
         mock_session.commit.assert_called_once()
 
-    @patch("src.modules.maison.meubles.obtenir_contexte_db")
+    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_delete_meuble_inexistant(self, mock_ctx):
         """Test suppression d'un meuble inexistant"""
         from src.modules.maison.meubles import delete_meuble
@@ -293,7 +293,7 @@ class TestMeublesCrud:
 
         assert result is False
 
-    @patch("src.modules.maison.meubles.obtenir_contexte_db")
+    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_get_budget_resume(self, mock_ctx, mock_meuble, mock_meuble_minimal):
         """Test calcul du résumé budget"""
         from src.modules.maison.meubles import get_budget_resume
@@ -314,7 +314,7 @@ class TestMeublesCrud:
         assert "nb_articles" in result
         assert result["nb_articles"] == 2
 
-    @patch("src.modules.maison.meubles.obtenir_contexte_db")
+    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_get_budget_resume_vide(self, mock_ctx):
         """Test résumé budget sans meubles"""
         from src.modules.maison.meubles import get_budget_resume
@@ -340,7 +340,7 @@ class TestMeublesUI:
     """Tests des fonctions d'affichage UI"""
 
     @patch("src.modules.maison.meubles.st")
-    @patch("src.modules.maison.meubles.obtenir_contexte_db")
+    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_render_formulaire_nouveau(self, mock_ctx, mock_st):
         """Test formulaire d'ajout nouveau meuble"""
         from src.modules.maison.meubles import afficher_formulaire
@@ -356,7 +356,7 @@ class TestMeublesUI:
         mock_st.text_input.assert_called()
 
     @patch("src.modules.maison.meubles.st")
-    @patch("src.modules.maison.meubles.obtenir_contexte_db")
+    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
     def test_render_formulaire_edition(self, mock_ctx, mock_st, mock_meuble):
         """Test formulaire d'édition meuble existant"""
         from src.modules.maison.meubles import afficher_formulaire
