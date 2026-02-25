@@ -534,8 +534,8 @@ class TestApp:
         mock_action.nom = "Action à éditer"
         mock_get_action.return_value = mock_action
 
-        # Mock session_state avec edit_action_id
-        mock_session = {"edit_action_id": 1}
+        # Mock session_state avec edit_id (namespace eco_tips__)
+        mock_session = {"eco_tips__edit_id": 1}
         mock_st.session_state = mock_session
         mock_st.button.return_value = False  # Pas de clic sur Annuler
 
@@ -566,8 +566,8 @@ class TestApp:
         """Test app() en mode édition avec action non trouvée."""
         mock_get_action.return_value = None
 
-        # Mock session_state avec edit_action_id
-        mock_session = {"edit_action_id": 999}
+        # Mock session_state avec edit_id (namespace eco_tips__)
+        mock_session = {"eco_tips__edit_id": 999}
         mock_st.session_state = mock_session
 
         # Mock tabs

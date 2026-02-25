@@ -5,18 +5,18 @@ Tests complets pour les fonctions du tableau de bord avec mocking Streamlit.
 """
 
 from datetime import date
+from typing import NamedTuple
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 
-class SummaryMock:
-    """Mock d'un résumé quotidien"""
+class SummaryMock(NamedTuple):
+    """Mock d'un résumé quotidien (hashable pour cache Streamlit)"""
 
-    def __init__(self, dt: date, pas: int = 0, calories_actives: int = 0):
-        self.date = dt
-        self.pas = pas
-        self.calories_actives = calories_actives
+    date: date
+    pas: int = 0
+    calories_actives: int = 0
 
 
 class UserMock:
@@ -223,7 +223,7 @@ class TestRenderWeeklyChart:
 
         from src.modules.famille.suivi_perso.tableau_bord import afficher_weekly_chart
 
-        afficher_weekly_chart(summaries, 10000)
+        afficher_weekly_chart(summaries, 10001)  # Unique objectif
 
         mock_utils["go"].Figure.assert_called_once()
 
@@ -233,7 +233,7 @@ class TestRenderWeeklyChart:
 
         from src.modules.famille.suivi_perso.tableau_bord import afficher_weekly_chart
 
-        afficher_weekly_chart(summaries, 10000)
+        afficher_weekly_chart(summaries, 10002)  # Unique objectif
 
         mock_utils["go"].Bar.assert_called()
 
@@ -243,7 +243,7 @@ class TestRenderWeeklyChart:
 
         from src.modules.famille.suivi_perso.tableau_bord import afficher_weekly_chart
 
-        afficher_weekly_chart(summaries, 10000)
+        afficher_weekly_chart(summaries, 10003)  # Unique objectif
 
         mock_utils["fig"].add_hline.assert_called()
 
@@ -253,7 +253,7 @@ class TestRenderWeeklyChart:
 
         from src.modules.famille.suivi_perso.tableau_bord import afficher_weekly_chart
 
-        afficher_weekly_chart(summaries, 10000)
+        afficher_weekly_chart(summaries, 10004)  # Unique objectif
 
         mock_utils["fig"].update_layout.assert_called()
 
@@ -263,7 +263,7 @@ class TestRenderWeeklyChart:
 
         from src.modules.famille.suivi_perso.tableau_bord import afficher_weekly_chart
 
-        afficher_weekly_chart(summaries, 10000)
+        afficher_weekly_chart(summaries, 10005)  # Unique objectif
 
         mock_utils["st"].plotly_chart.assert_called_once()
 

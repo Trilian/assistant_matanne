@@ -1,4 +1,4 @@
-# Comprehensive Analysis — `src/core/`
+﻿# Comprehensive Analysis — `src/core/`
 
 **Date**: 2025-01-XX  
 **Scope**: Every Python file in `src/core/` (70+ files, ~12,500 LOC)  
@@ -15,7 +15,7 @@ src/core/
 ├── bootstrap.py                (178)         demarrer_application() — app init
 ├── constants.py                (228)         All magic numbers & domain constants
 ├── errors.py                   (210)         UI-layer error display (Streamlit)
-├── errors_base.py              (417)         Exception hierarchy (no UI deps)
+├── exceptions.py              (417)         Exception hierarchy (no UI deps)
 ├── lazy_loader.py              (372)         RouteurOptimise + MODULE_REGISTRY (30+ modules)
 ├── logging.py                  (359)         Secret masking, colored/structured formatters
 ├── navigation.py               (223)         st.navigation() + st.Page() routing
@@ -139,8 +139,8 @@ src/core/
 | `async_utils.py` | 63 | `executer_async()` — ThreadPoolExecutor bridge for Streamlit event loop | 8/10 |
 | `bootstrap.py` | 178 | `demarrer_application()` — ordered init sequence with idempotency guard and `RapportDemarrage` | 8/10 |
 | `constants.py` | 228 | Centralized magic numbers (DB, Cache, IA, Validation, French days/months, meal types) | 9/10 |
-| `errors.py` | 210 | Re-exports from `errors_base` + Streamlit UI error display with lazy import | 7/10 |
-| `errors_base.py` | 417 | Pure exception hierarchy: `ExceptionApp` → 7 typed subclasses + 6 validation helpers | 9/10 |
+| `errors.py` | 210 | Re-exports from `exceptions` + Streamlit UI error display with lazy import | 7/10 |
+| `exceptions.py` | 417 | Pure exception hierarchy: `ExceptionApp` → 7 typed subclasses + 6 validation helpers | 9/10 |
 | `lazy_loader.py` | 372 | `RouteurOptimise` with 30+ module registry, stats, validation, menu coherence check | 8/10 |
 | `logging.py` | 359 | FiltreSecrets (regex masking), FormatteurColore (ANSI), FormatteurStructure (JSON+correlation_id) | 9/10 |
 | `navigation.py` | 223 | `st.navigation()` + `st.Page()` routing with inverse index for `st.switch_page()` | 8/10 |
@@ -150,14 +150,14 @@ src/core/
 **Subpackage Quality: 8.5/10**
 
 **Strengths**:
-- Clean separation of concerns (errors_base has zero UI deps, errors.py wraps with Streamlit display)
+- Clean separation of concerns (exceptions has zero UI deps, errors.py wraps with Streamlit display)
 - Excellent PEP 562 lazy loading prevents ~150 import-time module loads
 - `FiltreSecrets` regex masking is production-grade security
 - `SessionStorage` Protocol + DI decouples from Streamlit for testing
 - `RapportDemarrage` dataclass gives structured startup diagnostics
 
 **Issues**:
-- `errors.py` has some overlap with `errors_base.py` — the re-export layer is thin but functional
+- `errors.py` has some overlap with `exceptions.py` — the re-export layer is thin but functional
 - `navigation.py` duplicates some routing concept from `lazy_loader.py` (two routing systems co-exist: the legacy `RouteurOptimise` and the newer `st.navigation()` approach)
 - `session_keys.py` uses string constants rather than Enum, no typo protection at compile time
 
@@ -509,7 +509,7 @@ src/core/
 ### 3.2 Dependency Flow
 
 ```
-constants.py, errors_base.py         ← Zero dependencies (foundation)
+constants.py, exceptions.py         ← Zero dependencies (foundation)
      ↓
 storage.py, session_keys.py          ← Only protocols & constants
      ↓
@@ -533,7 +533,7 @@ monitoring/                          ← Depends on db, caching, ai (for health 
      ↓
 state/, navigation.py                ← Depends on storage, session_keys
      ↓
-validation/                          ← Depends on constants, errors_base
+validation/                          ← Depends on constants, exceptions
      ↓
 bootstrap.py                         ← Orchestrates all of the above
      ↓

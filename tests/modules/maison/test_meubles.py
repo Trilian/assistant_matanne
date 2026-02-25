@@ -565,7 +565,7 @@ class TestMeublesApp:
         """Test app en mode édition"""
         from src.modules.maison.meubles import app
 
-        mock_st.session_state = {"edit_meuble_id": 1}
+        mock_st.session_state = {"meubles__edit_id": 1}
         mock_get_by_id.return_value = mock_meuble
         mock_st.button.return_value = False
 
@@ -586,7 +586,7 @@ class TestMeublesApp:
         """Test app mode édition avec meuble supprimé entre-temps"""
         from src.modules.maison.meubles import app
 
-        mock_st.session_state = {"edit_meuble_id": 999}
+        mock_st.session_state = {"meubles__edit_id": 999}
         mock_get_by_id.return_value = None
         mock_st.tabs.return_value = [MagicMock(), MagicMock(), MagicMock()]
 
@@ -602,8 +602,8 @@ class TestMeublesApp:
         """Test annulation de l'édition"""
         from src.modules.maison.meubles import app
 
-        # Utiliser un vrai dict pour session_state afin que del fonctionne
-        session_state = {"edit_meuble_id": 1}
+        # Utiliser un vrai dict pour session_state afin que del fonctionne (namespace meubles__)
+        session_state = {"meubles__edit_id": 1}
         mock_st.session_state = session_state
         mock_get_by_id.return_value = mock_meuble
         mock_st.button.return_value = True  # Clic sur "Annuler"
@@ -613,8 +613,8 @@ class TestMeublesApp:
         with pytest.raises(SystemExit):
             app()
 
-        # Vérifier que edit_meuble_id a été supprimé avant le rerun
-        assert "edit_meuble_id" not in session_state
+        # Vérifier que meubles__edit_id a été supprimé avant le rerun
+        assert "meubles__edit_id" not in session_state
 
 
 # ═══════════════════════════════════════════════════════════

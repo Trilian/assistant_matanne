@@ -65,7 +65,7 @@ def avec_gestion_erreurs(
                 return func(*args, **kwargs)
 
             except Exception as e:
-                from src.core.errors_base import (
+                from src.core.exceptions import (
                     ErreurBaseDeDonnees,
                     ErreurLimiteDebit,
                     ErreurNonTrouve,
@@ -118,7 +118,7 @@ def _afficher_erreur_ui(
     except Exception:
         return
 
-    from src.core.errors_base import (
+    from src.core.exceptions import (
         ErreurBaseDeDonnees,
         ErreurLimiteDebit,
         ErreurNonTrouve,

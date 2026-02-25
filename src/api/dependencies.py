@@ -32,6 +32,34 @@ security = HTTPBearer(
 # ═══════════════════════════════════════════════════════════
 
 
+def _est_environnement_production() -> bool:
+    """
+    Vérifie si l'environnement est la production.
+
+    Vérifie plusieurs indicateurs pour éviter un bypass accidentel
+    de l'authentification en production.
+    """
+    env = os.getenv("ENVIRONMENT", "development").lower().strip()
+
+    # Liste noire stricte des valeurs de production
+    if env in ("production", "prod", "prd", "live"):
+        return True
+
+    # Indicateurs supplémentaires de production
+    # (présence de secrets réels, etc.)
+    api_secret = os.getenv("API_SECRET_KEY", "")
+    if api_secret and api_secret != "dev-secret-key-change-in-production":
+        # Si une vraie clé API est configurée, on considère que c'est la prod
+        if env not in ("development", "dev", "local", "test", "testing"):
+            logger.warning(
+                f"ENVIRONMENT='{env}' non reconnu avec API_SECRET_KEY configurée. "
+                "Traité comme production par sécurité."
+            )
+            return True
+
+    return False
+
+
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Security(security),
 ) -> dict[str, Any] | None:
@@ -45,8 +73,7 @@ async def get_current_user(
         Dict avec id, email, role de l'utilisateur
     """
     if not credentials:
-        env = os.getenv("ENVIRONMENT", "development").lower()
-        if env not in ("production", "prod"):
+        if not _est_environnement_production():
             logger.debug("Mode développement: utilisateur dev auto-authentifié")
             return {"id": "dev", "email": "dev@local", "role": "admin"}
         raise HTTPException(status_code=401, detail="Token requis")

@@ -31,7 +31,7 @@ from enum import StrEnum
 from functools import wraps
 from typing import Any, TypeVar
 
-from ..errors_base import ErreurServiceExterne
+from ..exceptions import ErreurServiceExterne
 
 logger = logging.getLogger(__name__)
 

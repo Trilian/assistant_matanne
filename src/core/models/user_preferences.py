@@ -26,7 +26,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, utc_now
-from .mixins import CreatedAtMixin, TimestampFullMixin
+from .mixins import CreeLeMixin, TimestampMixin
 
 if TYPE_CHECKING:
     from .recettes import Recette
@@ -53,7 +53,7 @@ from .calendrier import FournisseurCalendrier  # noqa: F401
 # ═══════════════════════════════════════════════════════════
 
 
-class PreferenceUtilisateur(TimestampFullMixin, Base):
+class PreferenceUtilisateur(TimestampMixin, Base):
     """Préférences alimentaires et familiales de l'utilisateur.
 
     Stockage persistant pour l'apprentissage IA des goûts.
@@ -110,7 +110,7 @@ class PreferenceUtilisateur(TimestampFullMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class RetourRecette(CreatedAtMixin, Base):
+class RetourRecette(CreeLeMixin, Base):
     """Feedback utilisateur sur une recette (👍/👎).
 
     Permet l'apprentissage IA des goûts pour améliorer les suggestions.
@@ -155,7 +155,7 @@ class RetourRecette(CreatedAtMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class OpenFoodFactsCache(CreatedAtMixin, Base):
+class OpenFoodFactsCache(CreeLeMixin, Base):
     """Cache persistant des produits OpenFoodFacts.
 
     Évite les appels API répétitifs pour les produits déjà scannés.
@@ -203,7 +203,7 @@ class OpenFoodFactsCache(CreatedAtMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class ConfigCalendrierExterne(TimestampFullMixin, Base):
+class ConfigCalendrierExterne(TimestampMixin, Base):
     """Configuration d'un calendrier externe (Google, Apple, etc.).
 
     Stocke les tokens OAuth et paramètres de synchronisation.

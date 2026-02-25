@@ -17,10 +17,10 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
-from .mixins import TimestampFullMixin
+from .mixins import TimestampMixin
 
 
-class EtatPersistantDB(TimestampFullMixin, Base):
+class EtatPersistantDB(TimestampMixin, Base):
     """
     Stockage persistant d'état applicatif.
 
@@ -31,8 +31,8 @@ class EtatPersistantDB(TimestampFullMixin, Base):
         namespace: Nom de l'espace de stockage (ex: "foyer_config")
         user_id: Identifiant utilisateur
         data: Données JSON sérialisées
-        created_at: Date de création
-        updated_at: Date de dernière modification
+        created_at: Date de création (cree_le)
+        updated_at: Date de dernière modification (modifie_le)
     """
 
     __tablename__ = "etats_persistants"

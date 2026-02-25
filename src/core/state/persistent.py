@@ -293,7 +293,7 @@ class PersistentState:
 
                 if entry:
                     entry.data = data
-                    entry.updated_at = datetime.now()
+                    entry.modifie_le = datetime.now()
                 else:
                     entry = EtatPersistantDB(
                         namespace=self.namespace,

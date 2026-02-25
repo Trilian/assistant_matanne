@@ -16,6 +16,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs
+from src.core.monitoring import chronometre
 
 from .types import RecetteSuggestion
 
@@ -46,6 +47,7 @@ class RecettesIASuggestionsMixin:
         ),
     )
     @avec_gestion_erreurs(default_return=[])
+    @chronometre("ia.recettes.generer", seuil_alerte_ms=10000)
     def generer_recettes_ia(
         self,
         type_repas: str,

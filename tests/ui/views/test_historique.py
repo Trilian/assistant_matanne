@@ -17,7 +17,7 @@ class MockAction:
         self.entity_type = kwargs.get("entity_type", "recette")
         self.description = kwargs.get("description", "Action test")
         self.user_name = kwargs.get("user_name", "User")
-        self.created_at = kwargs.get("created_at", datetime.now())
+        self.cree_le = kwargs.get("cree_le", datetime.now())
         self.details = kwargs.get("details", {"key": "value"})
 
 

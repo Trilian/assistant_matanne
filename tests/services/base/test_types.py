@@ -650,18 +650,18 @@ class TestBaseServiceHelpers:
         col2 = MagicMock()
         col2.name = "nom"
         col3 = MagicMock()
-        col3.name = "created_at"
+        col3.name = "cree_le"
 
         mock_obj.__table__.columns = [col1, col2, col3]
         mock_obj.id = 1
         mock_obj.nom = "Test"
-        mock_obj.created_at = datetime(2024, 1, 1, 12, 0, 0)
+        mock_obj.cree_le = datetime(2024, 1, 1, 12, 0, 0)
 
         result = base_service._model_to_dict(mock_obj)
 
         assert result["id"] == 1
         assert result["nom"] == "Test"
-        assert result["created_at"] == "2024-01-01T12:00:00"
+        assert result["cree_le"] == "2024-01-01T12:00:00"
 
     def test_invalider_cache(self, base_service):
         """Test _invalider_cache."""
@@ -882,7 +882,7 @@ class TestBaseServiceIntegration:
 
     def test_update_not_found(self, integration_service, integration_db):
         """Test mise à jour entité non trouvée lève ErreurNonTrouve."""
-        from src.core.errors_base import ErreurNonTrouve
+        from src.core.exceptions import ErreurNonTrouve
 
         with patch("src.core.caching.cache.Cache.invalider"):
             with pytest.raises(ErreurNonTrouve):

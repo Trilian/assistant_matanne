@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import BudgetFamille, BudgetMensuelDB
 from src.services.core.base import BaseService
+from src.services.core.events.bus import obtenir_bus
 
 from .budget_alertes import BudgetAlertesMixin
 from .budget_analyses import BudgetAnalysesMixin
@@ -104,6 +105,18 @@ class BudgetService(BaseService[BudgetFamille], BudgetAnalysesMixin, BudgetAlert
 
         logger.info(f"Dépense ajoutée: {depense.montant}€ ({depense.categorie.value})")
 
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "budget.modifie",
+            {
+                "depense_id": depense.id,
+                "categorie": depense.categorie.value,
+                "montant": float(depense.montant),
+                "action": "depense_ajoutee",
+            },
+            source="budget",
+        )
+
         # Vérifier si budget dépassé
         self._verifier_alertes_budget(depense.date.month, depense.date.year, db)
 
@@ -123,6 +136,14 @@ class BudgetService(BaseService[BudgetFamille], BudgetAnalysesMixin, BudgetAlert
                 setattr(entry, key, value)
 
         db.commit()
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "budget.modifie",
+            {"depense_id": depense_id, "action": "depense_modifiee"},
+            source="budget",
+        )
+
         return True
 
     @avec_gestion_erreurs(default_return=None)
@@ -136,6 +157,14 @@ class BudgetService(BaseService[BudgetFamille], BudgetAnalysesMixin, BudgetAlert
 
         db.delete(entry)
         db.commit()
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "budget.modifie",
+            {"depense_id": depense_id, "action": "depense_supprimee"},
+            source="budget",
+        )
+
         return True
 
     @avec_gestion_erreurs(default_return=[])
@@ -242,6 +271,18 @@ class BudgetService(BaseService[BudgetFamille], BudgetAnalysesMixin, BudgetAlert
         budget_db.budget_total = Decimal(str(sum(budgets.values())))
 
         db.commit()
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "budget.modifie",
+            {
+                "categorie": categorie.value,
+                "montant": montant,
+                "action": "budget_defini",
+            },
+            source="budget",
+        )
+
         logger.info(f"✅ Budget défini: {categorie.value} = {montant}€ ({mois}/{annee})")
 
     @avec_gestion_erreurs(default_return=0.0)

@@ -881,7 +881,7 @@ class TestUIComponents:
         mock_action.entity_type = "recette"
         mock_action.description = "Test action"
         mock_action.user_name = "Test User"
-        mock_action.created_at = datetime.now()
+        mock_action.cree_le = datetime.now()
 
         mock_service.return_value.get_recent_actions.return_value = [mock_action]
         mock_st.columns.return_value = [MagicMock(), MagicMock()]
@@ -910,7 +910,7 @@ class TestUIComponents:
 
         mock_action = Mock()
         mock_action.description = "Test action"
-        mock_action.created_at = datetime.now()
+        mock_action.cree_le = datetime.now()
         mock_action.details = {"key": "value"}
 
         mock_service.return_value.get_user_history.return_value = [mock_action]

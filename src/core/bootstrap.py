@@ -141,6 +141,20 @@ def demarrer_application(
     if enregistrer_atexit:
         atexit.register(arreter_application)
 
+    # ─── Étape 4: Validation Protocols des services (PEP 544) ───
+    try:
+        from src.services.core.registry import registre
+
+        violations = registre.valider_protocols()
+        if violations:
+            for nom, msgs in violations.items():
+                rapport.avertissements.append(f"Protocol {nom}: {', '.join(msgs)}")
+            logger.warning(f"⚠️ {len(violations)} service(s) ne respectent pas leurs Protocols")
+        else:
+            logger.debug("✅ Validation Protocols OK")
+    except Exception as e:
+        logger.debug(f"Validation Protocols ignorée: {e}")
+
     rapport.duree_totale_ms = (time.perf_counter() - debut) * 1000
     _deja_demarre = True
 

@@ -236,10 +236,8 @@ async def health_check():
     """
     Vérifie l'état de l'API et de toutes ses dépendances.
 
-    Checks effectués:
-    - **Database**: Connexion PostgreSQL via SQLAlchemy
-    - **Cache**: Système de cache multi-niveaux
-    - **AI**: Disponibilité de l'API Mistral (si configurée)
+    Utilise SanteSysteme (core/monitoring/health.py) comme source de vérité unique
+    pour les health checks (DB, cache, IA, métriques, + checks enregistrés).
 
     Returns:
         - `status`: "healthy" | "degraded" | "unhealthy"
@@ -260,58 +258,33 @@ async def health_check():
         }
         ```
     """
-    import time
+    from src.core.monitoring.health import StatutSante, verifier_sante_globale
 
+    # Utiliser SanteSysteme comme source de vérité unique
+    rapport = verifier_sante_globale(inclure_db=True)
+
+    # Convertir SanteComposant → ServiceStatus pour le schéma API
     services: dict[str, ServiceStatus] = {}
+    _statut_map = {
+        StatutSante.SAIN: "ok",
+        StatutSante.DEGRADE: "warning",
+        StatutSante.CRITIQUE: "error",
+        StatutSante.INCONNU: "unknown",
+    }
 
-    # Check Database
-    try:
-        from sqlalchemy import text
-
-        from src.core.db import obtenir_contexte_db
-
-        start = time.perf_counter()
-        with obtenir_contexte_db() as session:
-            session.execute(text("SELECT 1"))
-        latency = (time.perf_counter() - start) * 1000
-        services["database"] = ServiceStatus(status="ok", latency_ms=round(latency, 2))
-    except Exception as e:
-        logger.error(f"Health check DB error: {e}")
-        services["database"] = ServiceStatus(status="error", details="Connexion impossible")
-
-    # Check Cache
-    try:
-        from src.core.caching import obtenir_cache
-
-        start = time.perf_counter()
-        cache = obtenir_cache()
-        cache.get("_health_check_test")
-        latency = (time.perf_counter() - start) * 1000
-        services["cache"] = ServiceStatus(status="ok", latency_ms=round(latency, 2))
-    except Exception as e:
-        logger.error(f"Health check cache error: {e}")
-        services["cache"] = ServiceStatus(status="error", details="Cache indisponible")
-
-    # Check AI (optionnel - ne bloque pas si non configuré)
-    try:
-        import os
-
-        if os.getenv("MISTRAL_API_KEY"):
-            services["ai"] = ServiceStatus(status="ok", details="Mistral API configured")
-        else:
-            services["ai"] = ServiceStatus(status="warning", details="No API key configured")
-    except Exception as e:
-        logger.error(f"Health check AI error: {e}")
-        services["ai"] = ServiceStatus(status="error", details="Service IA indisponible")
+    for nom, composant in rapport.composants.items():
+        services[nom] = ServiceStatus(
+            status=_statut_map.get(composant.statut, "unknown"),
+            latency_ms=round(composant.duree_verification_ms, 2),
+            details=composant.message or None,
+        )
 
     # Déterminer le statut global
-    statuses = [s.status for s in services.values()]
-    if all(s == "ok" for s in statuses):
-        overall = "healthy"
-    elif "error" in statuses:
-        overall = "unhealthy" if statuses.count("error") > 1 else "degraded"
+    if rapport.sain:
+        has_degraded = any(c.statut == StatutSante.DEGRADE for c in rapport.composants.values())
+        overall = "degraded" if has_degraded else "healthy"
     else:
-        overall = "degraded"
+        overall = "unhealthy"
 
     uptime = (datetime.now(UTC) - _START_TIME).total_seconds()
 

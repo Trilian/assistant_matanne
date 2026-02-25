@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, joinedload
 from src.core.ai import obtenir_client_ia
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import ArticleCourses
+from src.core.monitoring import chronometre
 from src.services.core.base import BaseAIService, BaseService
 from src.services.core.events.bus import obtenir_bus
 
@@ -50,6 +51,7 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
     # SECTION 1: CRUD & LISTE COURSES
     # ═══════════════════════════════════════════════════════════
 
+    @chronometre("courses.liste_complete", seuil_alerte_ms=2000)
     @avec_cache(
         ttl=1800,
         key_func=lambda self, achetes, priorite: f"courses_{achetes}_{priorite}",

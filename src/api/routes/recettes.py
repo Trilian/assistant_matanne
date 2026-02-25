@@ -10,14 +10,26 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
-from src.api.schemas import MessageResponse, RecetteCreate, RecettePatch, RecetteResponse
-from src.api.utils import construire_reponse_paginee, executer_async, executer_avec_session
+from src.api.schemas import (
+    MessageResponse,
+    RecetteCreate,
+    RecettePatch,
+    RecetteResponse,
+    ReponsePaginee,
+)
+from src.api.utils import (
+    construire_reponse_paginee,
+    executer_async,
+    executer_avec_session,
+    gerer_exception_api,
+)
 
 router = APIRouter(prefix="/api/v1/recettes", tags=["Recettes"])
 
 
-@router.get("")
-async def list_recettes(
+@router.get("", response_model=ReponsePaginee[RecetteResponse])
+@gerer_exception_api
+async def lister_recettes(
     page: int = Query(1, ge=1, description="Numéro de page (1-indexé)"),
     page_size: int = Query(20, ge=1, le=100, description="Nombre d'éléments par page"),
     categorie: str | None = Query(
@@ -79,7 +91,8 @@ async def list_recettes(
 
 
 @router.get("/{recette_id}", response_model=RecetteResponse)
-async def get_recette(recette_id: int):
+@gerer_exception_api
+async def obtenir_recette(recette_id: int):
     """
     Récupère une recette par son ID.
 
@@ -124,7 +137,8 @@ async def get_recette(recette_id: int):
 
 
 @router.post("", response_model=RecetteResponse)
-async def create_recette(recette: RecetteCreate, user: dict[str, Any] = Depends(require_auth)):
+@gerer_exception_api
+async def creer_recette(recette: RecetteCreate, user: dict[str, Any] = Depends(require_auth)):
     """
     Crée une nouvelle recette.
 
@@ -181,7 +195,8 @@ async def create_recette(recette: RecetteCreate, user: dict[str, Any] = Depends(
 
 
 @router.put("/{recette_id}", response_model=RecetteResponse)
-async def update_recette(
+@gerer_exception_api
+async def modifier_recette(
     recette_id: int, recette: RecetteCreate, user: dict[str, Any] = Depends(require_auth)
 ):
     """Met à jour une recette.
@@ -234,7 +249,8 @@ async def update_recette(
 
 
 @router.patch("/{recette_id}", response_model=RecetteResponse)
-async def patch_recette(
+@gerer_exception_api
+async def modifier_partiellement_recette(
     recette_id: int, patch: RecettePatch, user: dict[str, Any] = Depends(require_auth)
 ):
     """Mise à jour partielle d'une recette.
@@ -295,7 +311,8 @@ async def patch_recette(
 
 
 @router.delete("/{recette_id}", response_model=MessageResponse)
-async def delete_recette(recette_id: int, user: dict[str, Any] = Depends(require_auth)):
+@gerer_exception_api
+async def supprimer_recette(recette_id: int, user: dict[str, Any] = Depends(require_auth)):
     """Supprime une recette.
 
     Args:

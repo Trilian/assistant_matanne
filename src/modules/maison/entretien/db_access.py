@@ -32,7 +32,7 @@ def charger_objets_entretien(session=None) -> list[dict]:
     tasks = (
         session.query(TacheEntretien)
         .filter(TacheEntretien.fait.is_(False))
-        .order_by(TacheEntretien.created_at.desc())
+        .order_by(TacheEntretien.cree_le.desc())
         .all()
     )
 
@@ -48,8 +48,8 @@ def charger_objets_entretien(session=None) -> list[dict]:
                 "nom_perso": task.description,
                 "date_achat": None,
                 "marque": None,
-                "date_ajout": task.created_at.date().isoformat()
-                if task.created_at
+                "date_ajout": task.cree_le.date().isoformat()
+                if task.cree_le
                 else date.today().isoformat(),
                 "frequence_jours": task.frequence_jours,
                 "duree_minutes": task.duree_minutes,
@@ -73,7 +73,7 @@ def charger_historique_entretien(session=None) -> list[dict]:
     tasks = (
         session.query(TacheEntretien)
         .filter(TacheEntretien.fait.is_(True))
-        .order_by(TacheEntretien.updated_at.desc())
+        .order_by(TacheEntretien.modifie_le.desc())
         .all()
     )
 

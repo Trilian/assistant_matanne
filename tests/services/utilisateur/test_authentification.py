@@ -1760,7 +1760,7 @@ class TestRenderFunctionsAdditional:
         mock_user.avatar_url = None
         mock_user.email = "jean@test.com"
         mock_user.role = Role.MEMBRE
-        mock_user.created_at = datetime(2024, 1, 1)
+        mock_user.cree_le = datetime(2024, 1, 1)
 
         mock_service = Mock()
         mock_service.get_current_user.return_value = mock_user
@@ -1793,7 +1793,7 @@ class TestRenderFunctionsAdditional:
         mock_user.avatar_url = None
         mock_user.email = "test@test.com"
         mock_user.role = Role.MEMBRE
-        mock_user.created_at = datetime(2024, 1, 1)
+        mock_user.cree_le = datetime(2024, 1, 1)
 
         mock_service = Mock()
         mock_service.get_current_user.return_value = mock_user

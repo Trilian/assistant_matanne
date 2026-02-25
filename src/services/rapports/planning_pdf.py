@@ -18,7 +18,7 @@ from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, 
 from sqlalchemy.orm import Session, selectinload
 
 from src.core.decorators import avec_session_db
-from src.core.errors_base import ErreurNonTrouve
+from src.core.exceptions import ErreurNonTrouve
 from src.core.models import (
     Planning,
     Recette,

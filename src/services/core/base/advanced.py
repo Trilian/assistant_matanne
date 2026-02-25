@@ -1,4 +1,9 @@
-"""Mixin: recherche avancée, bulk operations, statistiques et helpers de statut."""
+"""
+Mixin: recherche avancée, bulk operations, statistiques et helpers de statut.
+
+Documenté (Audit §9.3) — voir la docstring de ``AdvancedQueryMixin`` pour
+des exemples d'intégration dans un service héritant de ``BaseService``.
+"""
 
 from __future__ import annotations
 
@@ -15,10 +20,62 @@ logger = logging.getLogger(__name__)
 
 
 class AdvancedQueryMixin:
-    """Fournit advanced_search, bulk_create_with_merge, get_stats, count_by_status, mark_as.
+    """Mixin: recherche avancée, bulk operations, statistiques et helpers de statut.
 
-    Attend sur ``self``: model, model_name, _with_session, _apply_filters,
-    _model_to_dict, _invalider_cache, update.
+    Méthodes fournies:
+        - ``advanced_search()``: Recherche multi-critères (texte + filtres + tri + pagination)
+        - ``bulk_create_with_merge()``: Import en masse avec déduplication configurable
+        - ``get_stats()``: Statistiques groupées/filtrées sur les entités
+        - ``count_by_status()``: Raccourci pour count groupé par statut
+        - ``mark_as()``: Met à jour le statut d'une entité
+
+    Pré-requis sur ``self`` (cooperative mixin pattern):
+        - ``model``: Classe SQLAlchemy du modèle
+        - ``model_name``: Nom du modèle (pour les logs)
+        - ``_with_session(fn, db)``: Exécute ``fn`` dans une session DB
+        - ``_apply_filters(query, filters)``: Applique un dict de filtres
+        - ``_model_to_dict(entity)``: Convertit une entité en dict
+        - ``_invalider_cache()``: Invalide le cache après mutation
+        - ``update(entity_id, data, db)``: Met à jour une entité
+
+    Usage:
+        ::
+
+            from src.services.core.base import BaseService, AdvancedQueryMixin
+
+            class ServiceProjets(BaseService[Projet], AdvancedQueryMixin):
+                model = Projet
+                model_name = "projet"
+
+            service = ServiceProjets()
+
+            # Recherche multi-critères
+            resultats = service.advanced_search(
+                search_term="rénovation",
+                search_fields=["nom", "description"],
+                filters={"statut": "en_cours"},
+                sort_by="date_creation",
+                sort_desc=True,
+                limit=20,
+            )
+
+            # Import en masse avec fusion
+            created, merged = service.bulk_create_with_merge(
+                items_data=[{"nom": "P1", "budget": 500}],
+                merge_key="nom",
+                merge_strategy=lambda old, new: {**old, **new},
+            )
+
+            # Statistiques
+            stats = service.get_stats(
+                group_by_fields=["statut", "priorite"],
+                count_filters={"urgents": {"priorite": "haute"}},
+            )
+            # → {"total": 42, "by_statut": {...}, "by_priorite": {...}, "urgents": 5}
+
+    .. note::
+        Ce mixin est compatible avec tout service héritant de ``BaseService``
+        qui fournit les attributs listés dans « Pré-requis ».
     """
 
     # ════════════════════════════════════════════════════════════

@@ -201,6 +201,140 @@ def _invalider_cache_food_log(event: EvenementDomaine) -> None:
         logger.warning("Échec invalidation cache food_log: %s", e)
 
 
+def _invalider_cache_depenses(event: EvenementDomaine) -> None:
+    """Invalide le cache dépenses quand les dépenses changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="depenses")
+        nb += cache.invalidate(pattern="budget")
+        logger.debug(
+            "Cache dépenses/budget invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache dépenses: %s", e)
+
+
+def _invalider_cache_jardin(event: EvenementDomaine) -> None:
+    """Invalide le cache jardin quand les éléments changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="jardin")
+        logger.debug(
+            "Cache jardin invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache jardin: %s", e)
+
+
+def _invalider_cache_projets(event: EvenementDomaine) -> None:
+    """Invalide le cache projets quand les projets changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="projets")
+        logger.debug(
+            "Cache projets invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache projets: %s", e)
+
+
+def _invalider_cache_jeux(event: EvenementDomaine) -> None:
+    """Invalide le cache jeux quand les données sont synchronisées."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="jeux")
+        nb += cache.invalidate(pattern="paris")
+        nb += cache.invalidate(pattern="loto")
+        logger.debug(
+            "Cache jeux invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache jeux: %s", e)
+
+
+def _invalider_cache_budget(event: EvenementDomaine) -> None:
+    """Invalide le cache budget quand le budget familial change."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="budget")
+        nb += cache.invalidate(pattern="depenses")
+        logger.debug(
+            "Cache budget invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache budget: %s", e)
+
+
+def _invalider_cache_sante(event: EvenementDomaine) -> None:
+    """Invalide le cache santé quand les données de santé changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="sante")
+        logger.debug(
+            "Cache santé invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache santé: %s", e)
+
+
+def _invalider_cache_loto(event: EvenementDomaine) -> None:
+    """Invalide le cache loto quand les grilles/tirages changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="loto")
+        nb += cache.invalidate(pattern="jeux")
+        logger.debug(
+            "Cache loto invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache loto: %s", e)
+
+
+def _invalider_cache_paris(event: EvenementDomaine) -> None:
+    """Invalide le cache paris quand les paris/matchs changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="paris")
+        nb += cache.invalidate(pattern="jeux")
+        logger.debug(
+            "Cache paris invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache paris: %s", e)
+
+
 # ═══════════════════════════════════════════════════════════
 # MÉTRIQUES
 # ═══════════════════════════════════════════════════════════
@@ -307,6 +441,22 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("achats.*", _invalider_cache_achats, priority=100)
     compteur += 1
     bus.souscrire("food_log.*", _invalider_cache_food_log, priority=100)
+    compteur += 1
+    bus.souscrire("depenses.*", _invalider_cache_depenses, priority=100)
+    compteur += 1
+    bus.souscrire("jardin.*", _invalider_cache_jardin, priority=100)
+    compteur += 1
+    bus.souscrire("projets.*", _invalider_cache_projets, priority=100)
+    compteur += 1
+    bus.souscrire("jeux.*", _invalider_cache_jeux, priority=100)
+    compteur += 1
+    bus.souscrire("budget.*", _invalider_cache_budget, priority=100)
+    compteur += 1
+    bus.souscrire("sante.*", _invalider_cache_sante, priority=100)
+    compteur += 1
+    bus.souscrire("loto.*", _invalider_cache_loto, priority=100)
+    compteur += 1
+    bus.souscrire("paris.*", _invalider_cache_paris, priority=100)
     compteur += 1
 
     # ── Métriques (priorité moyenne) ──

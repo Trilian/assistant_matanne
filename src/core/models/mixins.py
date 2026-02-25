@@ -63,26 +63,8 @@ class TimestampMixin(CreeLeMixin):
 
 
 # ═══════════════════════════════════════════════════════════
-# CONVENTION ANGLAISE (created_at / updated_at)
+# ALIASES DÉPRÉCIÉ (anciennes conventions anglaises)
+# Utiliser CreeLeMixin / TimestampMixin à la place
 # ═══════════════════════════════════════════════════════════
-
-
-class CreatedAtMixin:
-    """Mixin ajoutant une colonne `created_at` (datetime UTC, auto-remplie)."""
-
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=utc_now,
-        nullable=False,
-    )
-
-
-class TimestampFullMixin(CreatedAtMixin):
-    """Mixin ajoutant `created_at` + `updated_at` (auto-update)."""
-
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=utc_now,
-        onupdate=utc_now,
-        nullable=False,
-    )
+CreatedAtMixin = CreeLeMixin
+TimestampFullMixin = TimestampMixin

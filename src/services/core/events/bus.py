@@ -21,7 +21,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Protocol
+from typing import Any, Protocol, runtime_checkable
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +60,7 @@ class EvenementDomaine:
             )
 
 
+@runtime_checkable
 class HandlerEvenement(Protocol):
     """Protocol pour les handlers d'événements."""
 

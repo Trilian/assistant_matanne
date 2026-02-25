@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from src.api.dependencies import get_current_user
+from src.api.utils import gerer_exception_api
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +81,8 @@ class PushStatusResponse(BaseModel):
     summary="Enregistrer un abonnement push",
     description="Enregistre un nouvel abonnement Web Push pour recevoir des notifications.",
 )
-async def subscribe_push(
+@gerer_exception_api
+async def souscrire_push(
     request: PushSubscriptionRequest,
     current_user: dict = Depends(get_current_user),
 ):
@@ -129,7 +131,8 @@ async def subscribe_push(
     summary="Supprimer un abonnement push",
     description="Supprime un abonnement Web Push existant.",
 )
-async def unsubscribe_push(
+@gerer_exception_api
+async def desabonner_push(
     request: PushUnsubscribeRequest,
     current_user: dict = Depends(get_current_user),
 ):
@@ -167,7 +170,8 @@ async def unsubscribe_push(
     summary="Statut des notifications push",
     description="Retourne le statut des notifications push pour l'utilisateur.",
 )
-async def get_push_status(
+@gerer_exception_api
+async def obtenir_statut_push(
     current_user: dict = Depends(get_current_user),
 ):
     """

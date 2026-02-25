@@ -17,7 +17,7 @@ from sqlalchemy.exc import DatabaseError, OperationalError
 
 from ..config import obtenir_parametres
 from ..constants import DB_CONNECTION_RETRY, DB_CONNECTION_TIMEOUT
-from ..errors_base import ErreurBaseDeDonnees
+from ..exceptions import ErreurBaseDeDonnees
 
 logger = logging.getLogger(__name__)
 

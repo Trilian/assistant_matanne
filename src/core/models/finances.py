@@ -29,7 +29,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base, utc_now
-from .mixins import CreatedAtMixin, TimestampFullMixin
+from .mixins import CreeLeMixin, TimestampMixin
 
 # ═══════════════════════════════════════════════════════════
 # ENUMS
@@ -87,7 +87,7 @@ class CategorieDepense(StrEnum):
 # ═══════════════════════════════════════════════════════════
 
 
-class Depense(TimestampFullMixin, Base):
+class Depense(TimestampMixin, Base):
     """Dépense familiale.
 
     Table SQL: depenses
@@ -144,7 +144,7 @@ class Depense(TimestampFullMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class BudgetMensuelDB(TimestampFullMixin, Base):
+class BudgetMensuelDB(TimestampMixin, Base):
     """Budget mensuel par utilisateur.
 
     Table SQL: budgets_mensuels
@@ -182,7 +182,7 @@ class BudgetMensuelDB(TimestampFullMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class DepenseMaison(CreatedAtMixin, Base):
+class DepenseMaison(CreeLeMixin, Base):
     """Dépense récurrente ou ponctuelle de la maison.
 
     Pour suivre gaz, eau, électricité, loyer, crèche, etc.

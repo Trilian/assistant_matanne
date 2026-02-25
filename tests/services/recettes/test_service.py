@@ -1023,7 +1023,7 @@ class TestCreateCompletePhase2:
 
     def test_create_complete_validation_error(self, service, db, patch_db_context):
         """Test création avec données invalides lève ErreurValidation."""
-        from src.core.errors_base import ErreurValidation
+        from src.core.exceptions import ErreurValidation
 
         data = {
             "nom": "X",  # Trop court (min 3)
@@ -1051,7 +1051,7 @@ class TestGenererVersionBebe:
 
     def test_generer_version_bebe_recette_not_found(self, service, db, patch_db_context):
         """Test génération avec recette inexistante."""
-        from src.core.errors_base import ErreurNonTrouve
+        from src.core.exceptions import ErreurNonTrouve
 
         # ID qui n'existe pas - le décorateur relève ErreurNonTrouve
         with pytest.raises(ErreurNonTrouve):
@@ -1145,7 +1145,7 @@ class TestGenererVersionBebe:
 
     def test_generer_version_bebe_ia_returns_none(self, service, db, patch_db_context):
         """Test génération quand l'IA retourne None."""
-        from src.core.errors_base import ErreurValidation
+        from src.core.exceptions import ErreurValidation
 
         # Créer recette
         recette = Recette(
@@ -1263,7 +1263,7 @@ class TestGenererVersionBatchCooking:
 
     def test_generer_version_batch_cooking_not_found(self, service, db, patch_db_context):
         """Test batch cooking avec recette inexistante."""
-        from src.core.errors_base import ErreurNonTrouve
+        from src.core.exceptions import ErreurNonTrouve
 
         with pytest.raises(ErreurNonTrouve):
             service.generer_version_batch_cooking(99999)
@@ -1493,7 +1493,7 @@ class TestGenererVersionRobot:
 
     def test_generer_version_robot_recette_not_found(self, service, db, patch_db_context):
         """Test robot avec recette inexistante."""
-        from src.core.errors_base import ErreurNonTrouve
+        from src.core.exceptions import ErreurNonTrouve
 
         with pytest.raises(ErreurNonTrouve):
             service.generer_version_robot(99999, robot_type="cookeo")

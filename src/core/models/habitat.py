@@ -23,7 +23,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
-from .mixins import CreatedAtMixin, TimestampFullMixin
+from .mixins import CreeLeMixin, TimestampMixin
 
 # ═══════════════════════════════════════════════════════════
 # ENUMS
@@ -87,7 +87,7 @@ class TypePiece(StrEnum):
 # ═══════════════════════════════════════════════════════════
 
 
-class Meuble(TimestampFullMixin, Base):
+class Meuble(TimestampMixin, Base):
     """Meuble dans la wishlist.
 
     Pour gérer les achats progressifs de meubles avec budget.
@@ -140,7 +140,7 @@ class Meuble(TimestampFullMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class StockMaison(TimestampFullMixin, Base):
+class StockMaison(TimestampMixin, Base):
     """Stock de consommables maison (ampoules, piles, produits ménagers).
 
     Pour ne plus être à court et éviter les doublons avec courses.
@@ -178,7 +178,7 @@ class StockMaison(TimestampFullMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class TacheEntretien(TimestampFullMixin, Base):
+class TacheEntretien(TimestampMixin, Base):
     """Tâche d'entretien planifiée (ménage, maintenance, rangement).
 
     Pour gérer le bordel : vitres, tri caisses, garage, médicaments...
@@ -229,7 +229,7 @@ class TacheEntretien(TimestampFullMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class ActionEcologique(CreatedAtMixin, Base):
+class ActionEcologique(CreeLeMixin, Base):
     """Action écologique avec suivi des économies.
 
     Pour tracker le passage au lavable, économies d'énergie, etc.

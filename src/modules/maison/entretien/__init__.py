@@ -16,6 +16,8 @@ import streamlit as st
 from src.core.ai import ClientIA
 from src.core.db import obtenir_contexte_db
 from src.core.models.maison import Routine, TacheRoutine
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
 from src.modules.maison.utils import (
     charger_routines,
     get_stats_entretien,
@@ -169,52 +171,54 @@ def desactiver_routine(routine_id: int) -> bool:
 # ═══════════════════════════════════════════════════════════
 
 
+@profiler_rerun("entretien")
 def app():
     """Point d'entrée du module Entretien."""
-    st.title("🧹 Entretien Maison")
-    st.caption("Gérez vos routines d'entretien et tâches ménagères.")
+    with error_boundary(titre="Erreur module Entretien"):
+        st.title("🧹 Entretien Maison")
+        st.caption("Gérez vos routines d'entretien et tâches ménagères.")
 
-    # Stats
-    stats = get_stats_entretien()
-    cols = st.columns(3)
-    with cols[0]:
-        st.metric("Routines", stats.get("total_routines", 0))
-    with cols[1]:
-        st.metric("Aujourd'hui", stats.get("taches_today", 0))
-    with cols[2]:
-        st.metric("Accompli", f"{stats.get('taux_completion', 0)}%")
+        # Stats
+        stats = get_stats_entretien()
+        cols = st.columns(3)
+        with cols[0]:
+            st.metric("Routines", stats.get("total_routines", 0))
+        with cols[1]:
+            st.metric("Aujourd'hui", stats.get("taches_today", 0))
+        with cols[2]:
+            st.metric("Accompli", f"{stats.get('taux_completion', 0)}%")
 
-    st.divider()
+        st.divider()
 
-    # Onglets
-    TAB_LABELS = ["📋 Routines", "📅 Aujourd'hui", "➕ Nouvelle"]
-    tab1, tab2, tab3 = st.tabs(TAB_LABELS)
+        # Onglets
+        TAB_LABELS = ["📋 Routines", "📅 Aujourd'hui", "➕ Nouvelle"]
+        tab1, tab2, tab3 = st.tabs(TAB_LABELS)
 
-    with tab1:
-        df = charger_routines()
-        if hasattr(df, "empty") and df.empty:
-            st.info("Aucune routine. Créez-en une !")
-        else:
-            for _, row in df.iterrows():
-                with st.container(border=True):
-                    st.markdown(f"**{row.get('nom', '')}**")
-                    st.caption(row.get("frequence", ""))
+        with tab1:
+            df = charger_routines()
+            if hasattr(df, "empty") and df.empty:
+                st.info("Aucune routine. Créez-en une !")
+            else:
+                for _, row in df.iterrows():
+                    with st.container(border=True):
+                        st.markdown(f"**{row.get('nom', '')}**")
+                        st.caption(row.get("frequence", ""))
 
-    with tab2:
-        taches = get_taches_today()
-        if not taches:
-            st.info("Rien de prévu aujourd'hui !")
-        else:
-            for t in taches:
-                st.checkbox(t.get("nom", ""), key=f"tache_{t.get('id', 0)}")
+        with tab2:
+            taches = get_taches_today()
+            if not taches:
+                st.info("Rien de prévu aujourd'hui !")
+            else:
+                for t in taches:
+                    st.checkbox(t.get("nom", ""), key=f"tache_{t.get('id', 0)}")
 
-    with tab3:
-        st.subheader("➕ Nouvelle routine")
-        with st.form(key=_keys("form_routine")):
-            nom = st.text_input("Nom de la routine")
-            freq = st.selectbox("Fréquence", ["quotidien", "hebdomadaire", "mensuel"])
-            submitted = st.form_submit_button("Créer")
-        if submitted and nom:
-            creer_routine(nom, freq)
-            st.success(f"✅ Routine '{nom}' créée !")
-            st.rerun()
+        with tab3:
+            st.subheader("➕ Nouvelle routine")
+            with st.form(key=_keys("form_routine")):
+                nom = st.text_input("Nom de la routine")
+                freq = st.selectbox("Fréquence", ["quotidien", "hebdomadaire", "mensuel"])
+                submitted = st.form_submit_button("Créer")
+            if submitted and nom:
+                creer_routine(nom, freq)
+                st.success(f"✅ Routine '{nom}' créée !")
+                st.rerun()

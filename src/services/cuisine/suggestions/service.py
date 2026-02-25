@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from src.core.ai import AnalyseurIA, obtenir_client_ia
 from src.core.decorators import avec_session_db
-from src.core.errors_base import ErreurLimiteDebit
+from src.core.exceptions import ErreurLimiteDebit
 from src.core.models import (
     ArticleInventaire,
     HistoriqueRecette,

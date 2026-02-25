@@ -126,7 +126,7 @@ class AbonnementPush(BaseModel):
     p256dh_key: str
     auth_key: str
     user_agent: str | None = None
-    created_at: datetime = Field(default_factory=datetime.now)
+    cree_le: datetime = Field(default_factory=datetime.now)
     last_used: datetime | None = None
     is_active: bool = True
 

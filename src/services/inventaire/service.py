@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session, joinedload
 from src.core.ai import obtenir_client_ia
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import ArticleInventaire
+from src.core.monitoring import chronometre
 from src.services.core.base import BaseAIService, BaseService, InventoryAIMixin
 
 from .inventaire_io import InventaireIOMixin
@@ -91,6 +92,7 @@ class ServiceInventaire(
     # REQUÊTE INVENTAIRE COMPLET
     # ═══════════════════════════════════════════════════════════
 
+    @chronometre("inventaire.chargement_complet", seuil_alerte_ms=2000)
     @avec_cache(
         ttl=1800,
         key_func=lambda self, emplacement, categorie, include_ok: (

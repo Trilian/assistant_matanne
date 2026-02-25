@@ -19,12 +19,13 @@ from typing import TYPE_CHECKING
 from sqlalchemy.orm import Session, joinedload
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.errors_base import ErreurNonTrouve, ErreurValidation
+from src.core.exceptions import ErreurNonTrouve, ErreurValidation
 from src.core.models import (
     Recette,
     RecetteIngredient,
     VersionRecette,
 )
+from src.core.monitoring import chronometre
 
 from .types import (
     VersionBatchCookingGeneree,
@@ -52,6 +53,7 @@ class RecettesIAVersionsMixin:
 
     @avec_gestion_erreurs(default_return=None)
     @avec_cache(ttl=3600, key_func=lambda self, rid: f"version_bebe_{rid}")
+    @chronometre("ia.recettes.version_bebe", seuil_alerte_ms=15000)
     @avec_session_db
     def generer_version_bebe(self, recette_id: int, db: Session) -> VersionRecette | None:
         """Génère une version bébé sécurisée de la recette avec l'IA.

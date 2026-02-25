@@ -180,7 +180,7 @@ class BackupExportMixin:
         if user_id:
             query = query.filter(BackupModel.user_id == UUID(str(user_id)))
 
-        return query.order_by(BackupModel.created_at.desc()).limit(limit).all()
+        return query.order_by(BackupModel.cree_le.desc()).limit(limit).all()
 
     @avec_session_db
     def supprimer_backup_historique(

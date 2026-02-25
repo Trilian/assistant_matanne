@@ -22,14 +22,14 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
-from .mixins import CreatedAtMixin
+from .mixins import CreeLeMixin
 
 # ═══════════════════════════════════════════════════════════
 # TABLE BACKUPS
 # ═══════════════════════════════════════════════════════════
 
 
-class Backup(CreatedAtMixin, Base):
+class Backup(CreeLeMixin, Base):
     """Historique des sauvegardes.
 
     Table SQL: backups
@@ -59,7 +59,7 @@ class Backup(CreatedAtMixin, Base):
     # Supabase user
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), index=True)
 
-    __table_args__ = (Index("ix_backups_created_at", "created_at"),)
+    __table_args__ = (Index("ix_backups_created_at", "cree_le"),)
 
     def __repr__(self) -> str:
         return f"<Backup(id={self.id}, filename='{self.filename}', size={self.size_bytes})>"
@@ -70,7 +70,7 @@ class Backup(CreatedAtMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class HistoriqueAction(CreatedAtMixin, Base):
+class HistoriqueAction(CreeLeMixin, Base):
     """Historique des actions utilisateur pour audit.
 
     Table SQL: action_history
@@ -107,7 +107,7 @@ class HistoriqueAction(CreatedAtMixin, Base):
     ip_address: Mapped[str | None] = mapped_column(String(45))
     user_agent: Mapped[str | None] = mapped_column(String(500))
 
-    __table_args__ = (Index("ix_action_history_created_at", "created_at"),)
+    __table_args__ = (Index("ix_action_history_created_at", "cree_le"),)
 
     def __repr__(self) -> str:
         return f"<HistoriqueAction(id={self.id}, user='{self.user_name}', action='{self.action_type}')>"

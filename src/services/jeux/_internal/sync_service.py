@@ -16,7 +16,7 @@ from typing import Literal
 
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_session_db
+from src.core.decorators import avec_resilience, avec_session_db
 from src.services.core.registry import service_factory
 
 from .football_data import FootballDataService, StatistiquesMarcheData
@@ -63,6 +63,7 @@ class SyncService:
     # SYNCHRONISATION PARIS SPORTIFS
     # ─────────────────────────────────────────────────────────────────
 
+    @avec_resilience(retry=2, timeout_s=60, fallback=None)
     def synchroniser_paris(
         self,
         competition: str = "FL1",
@@ -122,6 +123,22 @@ class SyncService:
                     f"{resultat['alertes_creees']} alertes"
                 )
 
+                # Émettre événement pour invalidation cache
+                try:
+                    from src.services.core.events.bus import obtenir_bus
+
+                    obtenir_bus().emettre(
+                        "jeux.sync_terminee",
+                        {
+                            "domaine": "paris",
+                            "nb_elements": resultat["marches_maj"],
+                            "nb_alertes": resultat["alertes_creees"],
+                        },
+                        source="sync_service",
+                    )
+                except Exception:  # noqa: BLE001
+                    pass
+
         except Exception as e:
             logger.error(f"Erreur sync paris {competition}: {e}")
             resultat["erreurs"].append(str(e))
@@ -174,6 +191,7 @@ class SyncService:
     # SYNCHRONISATION LOTO
     # ─────────────────────────────────────────────────────────────────
 
+    @avec_resilience(retry=2, timeout_s=60, fallback=None)
     def synchroniser_loto(
         self,
         source: str = "nouveau_loto",
@@ -241,6 +259,22 @@ class SyncService:
                     f"Sync Loto: {resultat['numeros_maj']} numéros, "
                     f"{resultat['alertes_creees']} alertes"
                 )
+
+                # Émettre événement pour invalidation cache
+                try:
+                    from src.services.core.events.bus import obtenir_bus
+
+                    obtenir_bus().emettre(
+                        "jeux.sync_terminee",
+                        {
+                            "domaine": "loto",
+                            "nb_elements": resultat["numeros_maj"],
+                            "nb_alertes": resultat["alertes_creees"],
+                        },
+                        source="sync_service",
+                    )
+                except Exception:  # noqa: BLE001
+                    pass
 
         except Exception as e:
             logger.error(f"Erreur sync loto: {e}")

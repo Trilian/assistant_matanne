@@ -26,7 +26,7 @@ def mock_routine():
     routine.frequency = "quotidien"
     routine.is_active = True
     routine.ai_suggested = False
-    routine.created_at = datetime(2025, 1, 1, 8, 0, 0)
+    routine.cree_le = datetime(2025, 1, 1, 8, 0, 0)
     routine.tasks = []
     return routine
 
@@ -91,6 +91,11 @@ def service():
         patch("src.services.famille.routines.selectinload", return_value=MagicMock()),
         patch("src.services.famille.routines.obtenir_bus"),
     ):
+        # Configure __name__ pour que BaseService puisse l'utiliser
+        mock_routine_cls.__name__ = "Routine"
+        mock_task_cls.__name__ = "TacheRoutine"
+        mock_child_cls.__name__ = "ProfilEnfant"
+
         from src.services.famille.routines import ServiceRoutines
 
         svc = ServiceRoutines()

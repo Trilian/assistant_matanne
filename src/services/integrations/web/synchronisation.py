@@ -20,6 +20,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from src.core.decorators import avec_resilience
+
 logger = logging.getLogger(__name__)
 
 
@@ -115,6 +117,7 @@ class RealtimeSyncService:
         self._callbacks: dict[SyncEventType, list[Callable]] = {}
         self._init_client()
 
+    @avec_resilience(retry=2, timeout_s=15, fallback=None)
     def _init_client(self):
         """Initialise le client Supabase Realtime."""
         try:
@@ -153,6 +156,7 @@ class RealtimeSyncService:
     # CONNEXION AU CHANNEL
     # ═══════════════════════════════════════════════════════════
 
+    @avec_resilience(retry=1, timeout_s=15, fallback=False)
     def join_list(self, liste_id: int, user_id: str, user_name: str) -> bool:
         """
         Rejoint un channel de liste de courses.

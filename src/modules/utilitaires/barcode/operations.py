@@ -7,7 +7,7 @@ from datetime import datetime
 
 import streamlit as st
 
-from src.core.errors_base import ErreurNonTrouve, ErreurValidation
+from src.core.exceptions import ErreurNonTrouve, ErreurValidation
 from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
 

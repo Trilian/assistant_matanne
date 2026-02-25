@@ -212,10 +212,15 @@ class TestConfigValidation:
         assert env_value in valid_envs
 
     def test_database_url_format_basic(self):
-        """Test que DATABASE_URL a un format de base."""
+        """Test que DATABASE_URL a un format de base si configuré."""
         params = Parametres()
-        # DATABASE_URL doit être en format URI
-        assert "://" in params.DATABASE_URL or "memory" in params.DATABASE_URL
+        # DATABASE_URL peut ne pas être configuré en test - vérifier que db_url existe d'abord
+        if params.db_url:
+            assert "://" in params.DATABASE_URL or "memory" in params.DATABASE_URL
+        else:
+            # Pas de DB configurée - on vérifie juste que la propriété existe
+            with pytest.raises(ValueError, match="Configuration DB manquante"):
+                _ = params.DATABASE_URL
 
 
 # ═══════════════════════════════════════════════════════════

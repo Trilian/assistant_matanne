@@ -28,9 +28,9 @@ def get_rapports_service():
     """Get ou creer service rapports (import différé pour performance)"""
     from src.services.rapports import ServiceRapportsPDF
 
-    if "rapports_service" not in st.session_state:
-        st.session_state.rapports_service = ServiceRapportsPDF()
-    return st.session_state.rapports_service
+    if SK.RAPPORTS_SERVICE not in st.session_state:
+        st.session_state[SK.RAPPORTS_SERVICE] = ServiceRapportsPDF()
+    return st.session_state[SK.RAPPORTS_SERVICE]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -103,11 +103,11 @@ def afficher_rapport_stocks():
 
     with col2:
         if st.button("🧹 Aperçu", key="btn_preview_stocks", use_container_width=True):
-            st.session_state.preview_stocks = True
+            st.session_state[SK.PREVIEW_STOCKS] = True
 
     with col3:
         if st.button("📥 Télécharger PDF", key="btn_download_stocks", use_container_width=True):
-            st.session_state.download_stocks = True
+            st.session_state[SK.DOWNLOAD_STOCKS] = True
 
     # Aperçu
     if st.session_state.get(SK.PREVIEW_STOCKS):
@@ -202,7 +202,7 @@ def afficher_rapport_stocks():
                 key="download_button_stocks",
             )
             st.success("✅ PDF généré - Cliquez sur le bouton pour télécharger")
-            st.session_state.download_stocks = False
+            st.session_state[SK.DOWNLOAD_STOCKS] = False
 
         except Exception as e:
             st.error(f"❌ Erreur: {str(e)}")
@@ -244,11 +244,11 @@ def afficher_rapport_budget():
 
     with col2:
         if st.button("🧹 Aperçu", key="btn_preview_budget", use_container_width=True):
-            st.session_state.preview_budget = True
+            st.session_state[SK.PREVIEW_BUDGET] = True
 
     with col3:
         if st.button("📥 Télécharger PDF", key="btn_download_budget", use_container_width=True):
-            st.session_state.download_budget = True
+            st.session_state[SK.DOWNLOAD_BUDGET] = True
 
     # Aperçu
     if st.session_state.get(SK.PREVIEW_BUDGET):
@@ -339,7 +339,7 @@ def afficher_rapport_budget():
                 key="download_button_budget",
             )
             st.success("✅ PDF généré - Cliquez sur le bouton pour télécharger")
-            st.session_state.download_budget = False
+            st.session_state[SK.DOWNLOAD_BUDGET] = False
 
         except Exception as e:
             st.error(f"❌ Erreur: {str(e)}")
@@ -381,11 +381,11 @@ def afficher_analyse_gaspillage():
 
     with col2:
         if st.button("🧹 Aperçu", key="btn_preview_gaspillage", use_container_width=True):
-            st.session_state.preview_gaspillage = True
+            st.session_state[SK.PREVIEW_GASPILLAGE] = True
 
     with col3:
         if st.button("📥 Télécharger PDF", key="btn_download_gaspillage", use_container_width=True):
-            st.session_state.download_gaspillage = True
+            st.session_state[SK.DOWNLOAD_GASPILLAGE] = True
 
     # Aperçu
     if st.session_state.get(SK.PREVIEW_GASPILLAGE):
@@ -473,7 +473,7 @@ def afficher_analyse_gaspillage():
                 key="download_button_gaspillage",
             )
             st.success("✅ PDF généré - Cliquez sur le bouton pour télécharger")
-            st.session_state.download_gaspillage = False
+            st.session_state[SK.DOWNLOAD_GASPILLAGE] = False
 
         except Exception as e:
             st.error(f"❌ Erreur: {str(e)}")

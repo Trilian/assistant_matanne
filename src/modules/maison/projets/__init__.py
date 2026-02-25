@@ -18,6 +18,8 @@ import streamlit as st
 
 from src.core.db import obtenir_contexte_db
 from src.core.models.maison import Project, TacheProjet
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
 from src.modules.maison.utils import (
     charger_projets,
     clear_maison_cache,
@@ -327,46 +329,48 @@ TEMPLATES_PROJETS = [
 # ═══════════════════════════════════════════════════════════
 
 
+@profiler_rerun("projets")
 def app():
     """Point d'entrée du module Projets Maison."""
-    st.title("🏗️ Projets Maison")
-    st.caption("Planifiez, estimez et suivez vos projets domestiques.")
+    with error_boundary(titre="Erreur module Projets"):
+        st.title("🏗️ Projets Maison")
+        st.caption("Planifiez, estimez et suivez vos projets domestiques.")
 
-    # Alertes urgentes
-    urgents = get_projets_urgents()
-    for u in urgents:
-        st.warning(f"⚠️ {u['message']}")
+        # Alertes urgentes
+        urgents = get_projets_urgents()
+        for u in urgents:
+            st.warning(f"⚠️ {u['message']}")
 
-    # Stats
-    stats = get_stats_projets()
-    cols = st.columns(4)
-    with cols[0]:
-        st.metric("Total", stats.get("total", 0))
-    with cols[1]:
-        st.metric("En cours", stats.get("en_cours", 0))
-    with cols[2]:
-        st.metric("Terminés", stats.get("termines", 0))
-    with cols[3]:
-        avg = stats.get("avg_progress", 0)
-        st.metric("Progression moy.", f"{avg}%")
+        # Stats
+        stats = get_stats_projets()
+        cols = st.columns(4)
+        with cols[0]:
+            st.metric("Total", stats.get("total", 0))
+        with cols[1]:
+            st.metric("En cours", stats.get("en_cours", 0))
+        with cols[2]:
+            st.metric("Terminés", stats.get("termines", 0))
+        with cols[3]:
+            avg = stats.get("avg_progress", 0)
+            st.metric("Progression moy.", f"{avg}%")
 
-    st.divider()
+        st.divider()
 
-    # Onglets
-    TAB_LABELS = ["📋 Projets", "➕ Nouveau", "📊 Graphique", "📝 Templates"]
-    tab1, tab2, tab3, tab4 = st.tabs(TAB_LABELS)
+        # Onglets
+        TAB_LABELS = ["📋 Projets", "➕ Nouveau", "📊 Graphique", "📝 Templates"]
+        tab1, tab2, tab3, tab4 = st.tabs(TAB_LABELS)
 
-    with tab1:
-        _onglet_projets()
+        with tab1:
+            _onglet_projets()
 
-    with tab2:
-        _onglet_nouveau()
+        with tab2:
+            _onglet_nouveau()
 
-    with tab3:
-        _onglet_graphique()
+        with tab3:
+            _onglet_graphique()
 
-    with tab4:
-        _onglet_templates()
+        with tab4:
+            _onglet_templates()
 
 
 def _onglet_projets():

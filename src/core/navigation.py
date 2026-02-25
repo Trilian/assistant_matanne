@@ -105,6 +105,12 @@ def construire_pages() -> dict[str, list[st.Page]]:
 
     # ── Planning ──
     pages["📅 Planning"] = [
+        _creer_page(
+            "planning.cockpit",
+            "src.modules.planning.cockpit_familial",
+            "Cockpit Familial",
+            "🎯",
+        ),
         _creer_page("planning.calendrier", "src.modules.planning.calendrier", "Calendrier", "📅"),
         _creer_page(
             "planning.templates_ui", "src.modules.planning.templates_ui", "Templates", "📋"

@@ -1123,7 +1123,7 @@ class TestEdgeCases:
 
         mock_backup = MagicMock()
         mock_backup.id = "20240115_143000"
-        mock_backup.created_at = datetime(2024, 1, 15, 14, 30)
+        mock_backup.cree_le = datetime(2024, 1, 15, 14, 30)
         mock_backup.file_size_bytes = 1024
         mock_backup.compressed = True
 
@@ -1210,7 +1210,7 @@ class TestEdgeCases:
 
         mock_backup = MagicMock()
         mock_backup.id = "20240115_143000"
-        mock_backup.created_at = datetime(2024, 1, 15)
+        mock_backup.cree_le = datetime(2024, 1, 15)
         mock_backup.file_size_bytes = 1024
         mock_backup.compressed = False
 
@@ -1244,7 +1244,7 @@ class TestEdgeCases:
 
         mock_backup = MagicMock()
         mock_backup.id = "20240115_143000"
-        mock_backup.created_at = datetime(2024, 1, 15)
+        mock_backup.cree_le = datetime(2024, 1, 15)
         mock_backup.file_size_bytes = 1024
         mock_backup.compressed = False
 

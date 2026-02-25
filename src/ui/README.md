@@ -16,12 +16,12 @@ src/ui/
 ├── views/          # Vues extraites des services
 ├── a11y.py         # Accessibilité (ARIA, contraste WCAG, sr-only)
 ├── animations.py   # Système d'animation centralisé (@keyframes)
-├── hooks.py        # Hooks Streamlit (use_pagination, use_recherche…)
 ├── tokens.py       # Design tokens bruts (Couleur, Espacement…)
 ├── tokens_semantic.py # Tokens sémantiques (dark mode auto)
 ├── theme.py        # Thème dynamique (clair/sombre/auto)
+├── keys.py         # KeyNamespace pour clés session_state
 ├── registry.py     # Registre @composant_ui + catalogue
-├── html_builder.py # Builder HTML fluide avec XSS + ARIA
+├── fragments.py    # @cached_fragment pour Plotly/composants lourds
 └── utils.py        # Helpers (echapper_html)
 ```
 
@@ -57,8 +57,8 @@ src/ui/
 | `tokens_semantic.py` | CSS custom properties avec mappings light/dark automatiques       |
 | `a11y.py`            | `A11y` : sr-only, ARIA attrs, landmarks, vérification contraste   |
 | `animations.py`      | `Animation` StrEnum + `injecter_animations()` + `animer()`        |
-| `hooks.py`           | `use_pagination`, `use_recherche`, `use_filtres`, `use_tri`, etc. |
-| `html_builder.py`    | Builder HTML fluide avec `.aria()`, `.focusable()`                |
+| `keys.py`            | `KeyNamespace` : générateur de clés scopé avec préfixe automatique|
+| `fragments.py`       | `@cached_fragment` pour cacher les composants Plotly/lourds       |
 
 ### `tablet/` - Mode Tablette
 
@@ -113,19 +113,16 @@ badge("Urgent", variante=Variante.DANGER)
 boite_info("Attention", "Stock faible", "⚠️", variante=Variante.WARNING)
 ```
 
-### Hooks réutilisables
+### KeyNamespace (clés session_state scopées)
 
 ```python
-from src.ui.hooks import use_pagination, use_recherche
+from src.ui.keys import KeyNamespace
 
-# Recherche + pagination composables
-filtered, show_search = use_recherche(recipes, ["nom", "categorie"])
-visible, show_pagination = use_pagination(filtered, per_page=12)
-
-show_search()
-for r in visible:
-    display_recipe(r)
-show_pagination()
+# Évite les collisions entre modules sur st.session_state
+_keys = KeyNamespace("recettes")
+if st.button("Ajouter", key=_keys("btn_ajouter")):
+    # Génère "_recettes_btn_ajouter" automatiquement
+    st.session_state[_keys("selected")] = item.id
 ```
 
 ### Tokens sémantiques (dark mode auto)
@@ -140,17 +137,15 @@ html = f'<div style="background: {Sem.SURFACE}; color: {Sem.ON_SURFACE};">...'
 ### Accessibilité
 
 ```python
-from src.ui import A11y, HtmlBuilder
+from src.ui import A11y
 
-# ARIA attributes helper
-html = (HtmlBuilder("nav")
-    .aria(role="navigation", label="Menu principal")
-    .child("a", text="Accueil")
-    .build())
-
-# Vérification contraste
+# Vérification contraste WCAG
 ratio = A11y.ratio_contraste("#212529", "#ffffff")
 assert A11y.est_conforme_aa("#212529", "#ffffff")  # True
+
+# ARIA helpers
+attrs = A11y.aria(role="navigation", label="Menu principal")
+sr_only = A11y.sr_only("Information pour lecteurs d'écran")
 ```
 
 ### Modale de confirmation

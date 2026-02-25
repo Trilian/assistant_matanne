@@ -8,6 +8,7 @@ import streamlit as st
 from src.core.db import GestionnaireMigrations, vacuum_database
 from src.core.db import obtenir_infos_db as get_db_info
 from src.core.db import verifier_sante as health_check
+from src.core.monitoring.health import StatutSante, verifier_sante_globale
 from src.core.session_keys import SK
 from src.ui import etat_vide
 from src.ui.feedback import afficher_erreur, afficher_succes, spinner_intelligent
@@ -70,23 +71,52 @@ def afficher_database_config():
     # Health Check
     st.markdown("#### 🟢 Health Check")
 
-    if st.button("🔍 Vérifier l'état", key="btn_check_db_status", use_container_width=True):
-        with spinner_intelligent("Verification en cours...", secondes_estimees=2):
-            health = health_check()
+    col_h1, col_h2 = st.columns(2)
 
-        if health.get("sain"):
-            st.success("✅ Base de données en bonne santé")
+    with col_h1:
+        if st.button("🔍 Vérifier DB", key="btn_check_db_status", use_container_width=True):
+            with spinner_intelligent("Verification en cours...", secondes_estimees=2):
+                health = health_check()
 
-            col3, col4 = st.columns(2)
+            if health.get("sain"):
+                st.success("✅ Base de données en bonne santé")
 
-            with col3:
-                st.metric("Connexions Actives", health.get("connexions_actives", 0))
+                col3, col4 = st.columns(2)
 
-            with col4:
-                db_size_mb = health.get("taille_base_octets", 0) / 1024 / 1024
-                st.metric("Taille DB", f"{db_size_mb:.2f} MB")
-        else:
-            st.error(f"❌ Problème détecté: {health.get('erreur')}")
+                with col3:
+                    st.metric("Connexions Actives", health.get("connexions_actives", 0))
+
+                with col4:
+                    db_size_mb = health.get("taille_base_octets", 0) / 1024 / 1024
+                    st.metric("Taille DB", f"{db_size_mb:.2f} MB")
+            else:
+                st.error(f"❌ Problème détecté: {health.get('erreur')}")
+
+    with col_h2:
+        if st.button(
+            "🩺 Santé Globale Système",
+            key="btn_check_system_health",
+            use_container_width=True,
+        ):
+            with spinner_intelligent("Vérification globale...", secondes_estimees=5):
+                rapport = verifier_sante_globale(inclure_db=True)
+
+            if rapport.sain:
+                st.success("✅ Tous les systèmes opérationnels")
+            else:
+                st.error("❌ Problème détecté sur un ou plusieurs composants")
+
+            for nom, comp in rapport.composants.items():
+                icone = {
+                    StatutSante.SAIN: "✅",
+                    StatutSante.DEGRADE: "⚠️",
+                    StatutSante.CRITIQUE: "❌",
+                    StatutSante.INCONNU: "❓",
+                }.get(comp.statut, "❓")
+                st.markdown(
+                    f"{icone} **{nom.capitalize()}** — {comp.message} "
+                    f"({comp.duree_verification_ms:.0f} ms)"
+                )
 
     st.markdown("---")
 

@@ -23,6 +23,7 @@ from src.api.auth import TokenResponse, creer_token_acces
 from src.api.dependencies import get_current_user
 from src.api.rate_limiting import _stockage
 from src.api.schemas import LoginRequest, UserInfoResponse
+from src.api.utils import gerer_exception_api
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,8 @@ router = APIRouter(
     summary="Connexion utilisateur",
     description="Authentifie via Supabase et retourne un token JWT API.",
 )
-async def login(request: LoginRequest, raw_request: Request):
+@gerer_exception_api
+async def connexion(request: LoginRequest, raw_request: Request):
     """
     Authentifie un utilisateur via Supabase Auth.
 
@@ -128,7 +130,8 @@ async def login(request: LoginRequest, raw_request: Request):
     summary="Rafraîchir le token",
     description="Génère un nouveau token à partir d'un token valide.",
 )
-async def refresh_token(user: dict[str, Any] = Depends(get_current_user)):
+@gerer_exception_api
+async def rafraichir_token(user: dict[str, Any] = Depends(get_current_user)):
     """
     Rafraîchit le token JWT API.
 
@@ -153,7 +156,8 @@ async def refresh_token(user: dict[str, Any] = Depends(get_current_user)):
     summary="Profil utilisateur",
     description="Retourne les informations de l'utilisateur connecté.",
 )
-async def get_me(user: dict[str, Any] = Depends(get_current_user)):
+@gerer_exception_api
+async def obtenir_profil(user: dict[str, Any] = Depends(get_current_user)):
     """Retourne les informations de l'utilisateur authentifié."""
     if not user:
         raise HTTPException(status_code=401, detail="Authentification requise")

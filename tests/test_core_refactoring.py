@@ -101,13 +101,6 @@ class TestResiliencePolicies:
         result = policy.executer(lambda: 42)
         assert result == 42
 
-    def test_factory_politique_api_externe(self):
-        """politique_api_externe crée une policy composée."""
-        from src.core.resilience import politique_api_externe
-
-        policy = politique_api_externe()
-        assert len(policy.policies) == 3  # Timeout + Retry + Bulkhead
-
 
 # ═══════════════════════════════════════════════════════════
 # TESTS OBSERVABILITY

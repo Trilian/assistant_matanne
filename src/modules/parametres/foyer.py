@@ -1,7 +1,7 @@
 """
 Paramètres - Configuration Foyer
 Gestion des informations du foyer familial.
-Persistée en base de données via le modèle PreferenceUtilisateur.
+Persistée en base de données via PersistentState (sync session_state ↔ DB).
 """
 
 import logging
@@ -10,6 +10,7 @@ from datetime import datetime
 import streamlit as st
 
 from src.core.state import obtenir_etat
+from src.core.state.persistent import PersistentState, persistent_state
 from src.ui.feedback import afficher_succes
 from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
@@ -19,65 +20,20 @@ logger = logging.getLogger(__name__)
 _keys = KeyNamespace("foyer")
 
 
-def _charger_config_db() -> dict | None:
-    """Charge la config foyer depuis la DB (PreferenceUtilisateur)."""
-    try:
-        from src.core.db import obtenir_db_securise
-        from src.core.models.user_preferences import PreferenceUtilisateur
-
-        with obtenir_db_securise() as db:
-            if db is None:
-                return None
-            pref = db.query(PreferenceUtilisateur).first()
-            if pref is None:
-                return None
-            return {
-                "nom_utilisateur": pref.user_id,
-                "nb_adultes": pref.nb_adultes,
-                "nb_enfants": 1,  # Non stocké dans le modèle actuel
-                "a_bebe": pref.jules_present,
-                "preferences_alimentaires": pref.aliments_exclus or [],
-                "allergies": ", ".join(pref.aliments_exclus) if pref.aliments_exclus else "",
-                "updated_at": pref.updated_at.isoformat() if pref.updated_at else None,
-            }
-    except Exception as e:
-        logger.debug(f"Chargement config foyer DB: {e}")
-        return None
+# ── PersistentState : sync automatique session_state ↔ DB ──
 
 
-def _sauvegarder_config_db(config: dict) -> bool:
-    """Persiste la config foyer en DB via PreferenceUtilisateur."""
-    try:
-        from src.core.db import obtenir_db_securise
-        from src.core.models.user_preferences import PreferenceUtilisateur
-
-        with obtenir_db_securise() as db:
-            if db is None:
-                return False
-
-            pref = db.query(PreferenceUtilisateur).first()
-            if pref is None:
-                pref = PreferenceUtilisateur(
-                    user_id=config.get("nom_utilisateur", "default"),
-                )
-                db.add(pref)
-
-            pref.user_id = config.get("nom_utilisateur", pref.user_id)
-            pref.nb_adultes = config.get("nb_adultes", 2)
-            pref.jules_present = config.get("a_bebe", True)
-
-            allergies_str = config.get("allergies", "")
-            prefs_alimentaires = config.get("preferences_alimentaires", [])
-            if allergies_str:
-                pref.aliments_exclus = [a.strip() for a in allergies_str.split(",") if a.strip()]
-            elif prefs_alimentaires:
-                pref.aliments_exclus = prefs_alimentaires
-
-            # Commit automatique via le context manager
-            return True
-    except Exception as e:
-        logger.warning(f"Sauvegarde config foyer DB: {e}")
-        return False
+@persistent_state(key="foyer_config", sync_interval=30, auto_commit=True)
+def _obtenir_config_foyer() -> dict:
+    """Valeurs par défaut du foyer (appelé une seule fois si DB vide)."""
+    return {
+        "nom_utilisateur": "Anne",
+        "nb_adultes": 2,
+        "nb_enfants": 1,
+        "a_bebe": True,
+        "preferences_alimentaires": [],
+        "allergies": "",
+    }
 
 
 @ui_fragment
@@ -90,24 +46,13 @@ def afficher_foyer_config():
     # État actuel
     state = obtenir_etat()
 
-    # Recuperer config: DB → session_state → defaults
-    if _keys("config") not in st.session_state:
-        db_config = _charger_config_db()
-        if db_config:
-            st.session_state[_keys("config")] = db_config
-            logger.debug("Config foyer chargée depuis la DB")
+    # PersistentState gère le cycle lecture DB → session_state → écriture DB
+    pstate: PersistentState = _obtenir_config_foyer()
+    config = pstate.get_all()
 
-    config = st.session_state.get(
-        _keys("config"),
-        {
-            "nom_utilisateur": state.nom_utilisateur,
-            "nb_adultes": 2,
-            "nb_enfants": 1,
-            "age_enfants": [2],
-            "a_bebe": True,
-            "preferences_alimentaires": [],
-        },
-    )
+    # Injecter le nom_utilisateur depuis l'état global si absent
+    if not config.get("nom_utilisateur"):
+        config["nom_utilisateur"] = state.nom_utilisateur
 
     # Formulaire
     with st.form("foyer_form"):
@@ -164,24 +109,25 @@ def afficher_foyer_config():
         )
 
         if submitted:
-            # Sauvegarder config
-            new_config = {
-                "nom_utilisateur": nom_utilisateur,
-                "nb_adultes": nb_adultes,
-                "nb_enfants": nb_enfants,
-                "a_bebe": a_bebe,
-                "preferences_alimentaires": preferences,
-                "allergies": allergies,
-                "updated_at": datetime.now().isoformat(),
-            }
+            # Mettre à jour via PersistentState (session_state + DB automatiquement)
+            pstate.update(
+                {
+                    "nom_utilisateur": nom_utilisateur,
+                    "nb_adultes": nb_adultes,
+                    "nb_enfants": nb_enfants,
+                    "a_bebe": a_bebe,
+                    "preferences_alimentaires": preferences,
+                    "allergies": allergies,
+                    "updated_at": datetime.now().isoformat(),
+                }
+            )
 
-            st.session_state[_keys("config")] = new_config
+            # Force la sauvegarde immédiate en DB
+            saved = pstate.commit()
 
-            # Mettre à jour state
+            # Mettre à jour state global
             state.nom_utilisateur = nom_utilisateur
 
-            # Persister en DB
-            saved = _sauvegarder_config_db(new_config)
             if saved:
                 afficher_succes("✅ Configuration sauvegardée en base de données !")
             else:
@@ -189,6 +135,12 @@ def afficher_foyer_config():
 
             st.rerun()
 
-    # Afficher config actuelle
+    # Afficher config actuelle + statut sync
     with st.expander("📋 Configuration actuelle"):
-        st.json(config)
+        st.json(pstate.get_all())
+        sync_status = pstate.get_sync_status()
+        if sync_status["last_sync"]:
+            st.caption(
+                f"🔄 Dernière sync: {sync_status['last_sync'].strftime('%H:%M:%S')} "
+                f"• {sync_status['sync_count']} sync(s)"
+            )

@@ -3,7 +3,7 @@ Tests pour barcode_logic.py
 Couverture cible: 80%+
 """
 
-from src.modules.utilitaires.barcode_utils import (
+from src.modules.utilitaires.barcode.logic import (
     detecter_pays_origine,
     detecter_type_code_barres,
     valider_checksum_ean13,

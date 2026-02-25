@@ -6,6 +6,14 @@ Fournit une architecture standardisée avec:
 - Gestion d'état préfixée
 - Error boundary intégré
 - Hooks de lifecycle
+
+.. admonition:: GELÉ (Audit §9.3)
+
+   Ce pattern est **gelé** : il est utilisé uniquement par ``ParametresModule``
+   et ``DesignSystemModule``. Ne pas forcer la migration des autres modules —
+   le pattern fonctionnel ``app()`` suffit pour la majorité des cas.
+   Les nouveaux modules doivent utiliser une simple fonction ``app()``
+   sauf besoin avéré de lifecycle hooks ou d'injection de service.
 """
 
 from __future__ import annotations

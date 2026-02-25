@@ -1,6 +1,14 @@
 """
 Service I/O Universel - Import/Export CSV/JSON
-Remplace inventaire_io_service.py + recette_io_service.py + base_io_service.py
+
+.. admonition:: ÉVALUÉ (Audit §9.3)
+
+   Évaluation terminée : les services de domaine (InventaireIOMixin, etc.)
+   couvrent déjà l'import/export avec validation Pydantic et logique métier
+   (recherche/création d'entités en DB). IOService reste disponible comme
+   utilitaire statique pour les exports simples (CSV/JSON sans logique DB),
+   mais **ne doit pas remplacer les mixins de domaine existants**.
+   Usage recommandé: export ad-hoc dans les rapports/modules UI.
 """
 
 import csv

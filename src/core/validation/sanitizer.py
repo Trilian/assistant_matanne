@@ -133,7 +133,7 @@ class NettoyeurEntrees:
                 extrait = valeur[:50]
                 logger.warning("[!] Tentative injection SQL détectée: %s", extrait)
                 if mode_effectif == "strict":
-                    from src.core.errors_base import ErreurValidation
+                    from src.core.exceptions import ErreurValidation
 
                     raise ErreurValidation(
                         "Entrée invalide : injection SQL détectée",

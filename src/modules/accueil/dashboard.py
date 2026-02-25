@@ -73,6 +73,21 @@ def app():
 
         st.markdown("---")
 
+        # ═══════════════════════════════════════════════════════════
+        # WIDGET "QU'EST-CE QU'ON MANGE ?" 🍽️
+        # ═══════════════════════════════════════════════════════════
+
+        try:
+            from src.ui.components import widget_quest_ce_quon_mange
+
+            widget_quest_ce_quon_mange()
+        except ImportError:
+            pass
+        except Exception as e:
+            logger.debug(f"Widget qcom indisponible: {e}")
+
+        st.markdown("---")
+
         # Alertes critiques en haut
         afficher_critical_alerts()
 
@@ -193,6 +208,20 @@ def app():
                 afficher_sante_systeme()
             with col_footer2:
                 widget_jules_apercu()
+
+        # ═══════════════════════════════════════════════════════════
+        # JULES AUJOURD'HUI — Résumé quotidien
+        # ═══════════════════════════════════════════════════════════
+
+        st.markdown("---")
+        try:
+            from src.ui.components import carte_resume_jules
+
+            carte_resume_jules()
+        except ImportError:
+            pass
+        except Exception as e:
+            logger.debug(f"Carte Jules indisponible: {e}")
 
         # Section activité récente
         st.markdown("---")

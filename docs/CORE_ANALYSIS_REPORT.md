@@ -1,4 +1,4 @@
-# Analyse Exhaustive de `src/core/` — Rapport Technique
+﻿# Analyse Exhaustive de `src/core/` — Rapport Technique
 
 **Projet** : Assistant MaTanne (Application Streamlit de gestion familiale)  
 **Scope** : 89 fichiers Python, ~14 500 lignes de code, 13 packages  
@@ -50,7 +50,7 @@ Le `core` implémente une architecture en couches bien structurée :
 | **Infrastructure** | `db/`, `caching/`, `ai/`, `config/` | Accès aux ressources externes |
 | **Cross-cutting** | `logging`, `monitoring/`, `observability/`, `resilience/`, `middleware/` | Aspects transverses |
 | **Domain Support** | `models/`, `repository`, `unit_of_work`, `specifications`, `query/` | Accès aux données typé |
-| **Validation** | `validation/`, `errors_base`, `result` | Intégrité des données |
+| **Validation** | `validation/`, `exceptions`, `result` | Intégrité des données |
 | **Composition** | `container`, `bootstrap`, `decorators`, `lazy_loader` | Assemblage DI + démarrage |
 | **UI Bridge** | `state`, `storage`, `session_keys`, `events` | Interface avec Streamlit |
 
@@ -83,7 +83,7 @@ bootstrap.demarrer_application()
 |---------|------------|---------|
 | **Typage** | ★★★★★ | `Mapped[T]` + `mapped_column()` partout (SQLAlchemy 2.0), generics TypeVar, PEP 604 unions |
 | **Documentation** | ★★★★☆ | Docstrings françaises complètes avec `Args`, `Returns`, `Examples` dans la plupart des fichiers |
-| **Séparation UI/domain** | ★★★★☆ | `errors_base.py` pur vs `errors.py` avec Streamlit ; `storage.py` Protocol ; lazy imports de `st` |
+| **Séparation UI/domain** | ★★★★☆ | `exceptions.py` pur vs `errors.py` avec Streamlit ; `storage.py` Protocol ; lazy imports de `st` |
 | **Cohérence interne** | ★★★☆☆ | Certaines dualités (voir anti-patterns) |
 | **Tests unitaires** | ★★★☆☆ | Fixtures fournies mais couverture incomplète sur les packages récents |
 
@@ -429,7 +429,7 @@ JULES_NAISSANCE = date(2024, 6, 22)  # Date de naissance d'un enfant
 - **Issue** : Dualité avec `decorators.py:@avec_gestion_erreurs` (voir §4.1.1)
 - **Point positif** : `GestionnaireErreurs` context manager est utile pour les blocs try/except sans décorateur
 
-#### `errors_base.py` (410 lignes)
+#### `exceptions.py` (410 lignes)
 - **Issue L320-340** : `valider_plage()` est marquée comme dépréciée mais toujours présente
 - **Point positif** : Hiérarchie d'exceptions propre avec `code_erreur`, `message_utilisateur`, `to_dict()`
 

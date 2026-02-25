@@ -103,7 +103,7 @@ class BaseService(PipelineMixin, AdvancedQueryMixin, Generic[T]):
 
     def update(self, entity_id: int, data: dict, db: Session | None = None) -> T | None:
         """Met à jour une entité"""
-        from src.core.errors_base import ErreurNonTrouve
+        from src.core.exceptions import ErreurNonTrouve
 
         def _execute(session: Session) -> T | None:
             entity = session.get(self.model, entity_id)

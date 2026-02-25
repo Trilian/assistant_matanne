@@ -395,7 +395,7 @@ def afficher_taches_retard():
             st.markdown(f"• {tache.titre}")
 
 
-@lazy(condition=lambda: st.session_state.get("show_notif_help", False), show_skeleton=True)
+@lazy(condition=lambda: st.session_state.get(SK.SHOW_NOTIF_HELP, False), show_skeleton=True)
 def _afficher_aide_contenu():
     """Contenu de l'aide sur ntfy.sh (chargé conditionnellement)."""
     st.markdown(HELP_NTFY)
@@ -407,7 +407,7 @@ def afficher_aide():
     st.subheader("❓ Aide")
     st.checkbox(
         "📖 Afficher la documentation détaillée",
-        key="show_notif_help",
+        key=SK.SHOW_NOTIF_HELP,
         help="Charge la documentation complète de ntfy.sh",
     )
     _afficher_aide_contenu()

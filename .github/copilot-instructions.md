@@ -16,7 +16,7 @@ Hub de gestion familiale en production avec modules pour:
 - 💪 Suivi de la santé et du fitness
 - 📊 Tableau de bord familial avec métriques
 
-**Architecture**: Chargement différé avec ~60% d'accélération au démarrage via `RouteurOptimise`, modèles SQLAlchemy modulaires dans `core/models/` (19 fichiers), codebase en français. Marqueur `py.typed` (PEP 561).
+**Architecture**: Chargement différé avec ~60% d'accélération au démarrage via `ChargeurModuleDiffere` et `st.navigation()`, modèles SQLAlchemy modulaires dans `core/models/` (19 fichiers), codebase en français. Marqueur `py.typed` (PEP 561).
 
 ---
 
@@ -38,7 +38,7 @@ Le core est organisé en **11 sous-packages** + fichiers utilitaires.
 - **resilience/**: Politiques de résilience composables — `policies.py`. `executer()` retourne `T` directement ou lève une exception.
 - **state/**: Package état applicatif — `manager.py` (GestionnaireEtat), `shortcuts.py` (naviguer, revenir), `slices.py` (EtatNavigation, EtatCuisine, EtatUI)
 - **validation/**: Package validation — `schemas/` (sous-package Pydantic: `recettes.py`, `inventaire.py`, `courses.py`, `planning.py`, `famille.py`, `projets.py`, `_helpers.py`), `sanitizer.py` (anti-XSS/injection), `validators.py` (helpers)
-- **Utilitaires**: `bootstrap.py` (init config + events), `constants.py`, `errors.py`, `errors_base.py`, `lazy_loader.py` (RouteurOptimise + MODULE_REGISTRY), `logging.py`, `session_keys.py` (KeyNamespace), `storage.py` (SessionStorage Protocol), `async_utils.py`, `py.typed`
+- **Utilitaires**: `bootstrap.py` (init config + events), `constants.py`, `errors.py`, `errors_base.py`, `lazy_loader.py` (ChargeurModuleDiffere), `logging.py`, `navigation.py` (construire_pages, st.navigation), `session_keys.py` (KeyNamespace), `storage.py` (SessionStorage Protocol), `async_utils.py`, `py.typed`
 
 ### Couche Services (src/services/)
 
@@ -154,7 +154,7 @@ python manage.py generate_requirements
       """Point d'entrée module"""
       # Logique du module ici
   ```
-- **Chargement différé**: `OptimizedRouter` appelle `module.app()` quand l'utilisateur sélectionne le module
+- **Chargement différé**: `st.navigation()` via `navigation.py` charge `module.app()` quand l'utilisateur sélectionne le module
 - Pas de renommage de fonctions (ne pas utiliser `afficher()` ou autres - s'en tenir à `app()`)
 
 ### Modèle de gestion des erreurs
@@ -214,9 +214,9 @@ Clé: Toujours utiliser `obtenir_contexte_db()` — ne jamais créer Engine/Sess
 Les modules sont chargés à la demande seulement quand ils sont sélectionnés:
 
 ```python
-# Dans app.py: géré automatiquement via OptimizedRouter
-if hasattr(module, "app"):
-    module.app()  # Point d'entrée du module chargé différemment
+# Dans app.py: géré automatiquement via st.navigation() + construire_pages()
+# Chaque module est enregistré comme st.Page() dans src/core/navigation.py
+# La fonction app() est appelée automatiquement par Streamlit
 ```
 
 Garder les imports de modules DANS la fonction `app()`, pas au niveau du module, pour préserver la performance du démarrage.
@@ -317,7 +317,7 @@ Importer via: `from src.core.config import obtenir_parametres()`
    ```
 3. Utiliser les composants UI chargés paresseusement depuis `src.ui`
 4. Interroger la base de données via les fonctions décorées avec `@with_db_session`
-5. Enregistrer dans `RouteurOptimise.MODULE_REGISTRY` dans [src/core/lazy_loader.py](src/core/lazy_loader.py)
+5. Ajouter une page dans `construire_pages()` dans [src/core/navigation.py](src/core/navigation.py)
 
 ### Ajouter un modèle de base de données
 
@@ -391,6 +391,7 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 | [src/services/core/events/](src/services/core/events/)             | Bus d'événements pub/sub avec wildcards                    |
 | [src/services/core/base/](src/services/core/base/)                 | BaseAIService, mixins IA, streaming, protocols             |
 | [src/app.py](src/app.py)                                           | App Streamlit principale, bootstrap, chargement différé   |
+| [src/core/navigation.py](src/core/navigation.py)                   | Routage multi-pages (construire_pages, st.navigation)     |
 | [pyproject.toml](pyproject.toml)                                   | Dépendances (Poetry), config test, règles de linting      |
 | [docs/MIGRATION_CORE_PACKAGES.md](docs/MIGRATION_CORE_PACKAGES.md) | Guide de migration des imports                            |
 
@@ -401,7 +402,7 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 **Module ne se charge pas?**
 
 - Vérifier que la fonction `app()` existe
-- Vérifier le chemin du chargeur paresseux dans `MODULE_REGISTRY`
+- Vérifier la page dans `construire_pages()` dans [src/core/navigation.py](src/core/navigation.py)
 
 **Connexion à la base de données échouée?**
 

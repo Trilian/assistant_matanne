@@ -89,7 +89,7 @@ class ProfileMixin:
                     avatar_url=metadata.get("avatar_url", user.avatar_url),
                     preferences=metadata.get("preferences", {}),
                     last_login=user.last_login,
-                    created_at=user.created_at,
+                    cree_le=user.cree_le,
                 )
 
                 # Mettre à jour la session

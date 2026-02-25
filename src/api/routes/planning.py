@@ -5,7 +5,7 @@ Gestion du planning de repas hebdomadaire : consultation, création,
 modification et suppression de repas planifiés.
 """
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -16,13 +16,14 @@ from src.api.schemas import (
     PlanningSemaineResponse,
     RepasCreate,
 )
-from src.api.utils import executer_async, executer_avec_session
+from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/planning", tags=["Planning"])
 
 
 @router.get("/semaine", response_model=PlanningSemaineResponse)
-async def get_planning_semaine(
+@gerer_exception_api
+async def obtenir_planning_semaine(
     date_debut: datetime | None = Query(
         None, description="Date de début de semaine (ISO 8601). Défaut: lundi courant"
     ),
@@ -59,7 +60,7 @@ async def get_planning_semaine(
     from src.core.models import Repas
 
     if not date_debut:
-        today = datetime.now()
+        today = datetime.now(UTC)
         date_debut = today - timedelta(days=today.weekday())
 
     date_fin = date_debut + timedelta(days=7)
@@ -94,7 +95,8 @@ async def get_planning_semaine(
 
 
 @router.post("/repas", response_model=MessageResponse)
-async def create_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require_auth)):
+@gerer_exception_api
+async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require_auth)):
     """
     Planifie un repas pour une date et un type donnés.
 
@@ -191,7 +193,8 @@ async def create_repas(repas: RepasCreate, user: dict[str, Any] = Depends(requir
 
 
 @router.put("/repas/{repas_id}", response_model=MessageResponse)
-async def update_repas(
+@gerer_exception_api
+async def modifier_repas(
     repas_id: int, repas: RepasCreate, user: dict[str, Any] = Depends(require_auth)
 ):
     """
@@ -251,7 +254,8 @@ async def update_repas(
 
 
 @router.delete("/repas/{repas_id}", response_model=MessageResponse)
-async def delete_repas(repas_id: int, user: dict[str, Any] = Depends(require_auth)):
+@gerer_exception_api
+async def supprimer_repas(repas_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
     Supprime un repas planifié.
 

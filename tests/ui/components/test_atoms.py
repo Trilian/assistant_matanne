@@ -21,8 +21,8 @@ class TestBadge:
         mock_markdown.assert_called_once()
         call_args = mock_markdown.call_args[0][0]
         assert "Actif" in call_args
-        # CVA badge success = BG_SUCCESS (#d4edda)
-        assert "#d4edda" in call_args
+        # CVA badge uses CSS variables for theming
+        assert "var(--sem-success" in call_args or "#d4edda" in call_args
 
     @patch("streamlit.markdown")
     def test_badge_couleur_personnalisee(self, mock_markdown):

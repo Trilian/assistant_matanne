@@ -7,7 +7,7 @@ import time
 
 import streamlit as st
 
-from src.core.errors_base import ErreurValidation
+from src.core.exceptions import ErreurValidation
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace

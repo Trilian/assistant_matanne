@@ -22,7 +22,7 @@ from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, 
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_session_db
-from src.core.errors_base import ErreurValidation
+from src.core.exceptions import ErreurValidation
 from src.core.models import ArticleInventaire
 from src.services.rapports.planning_pdf import PlanningReportMixin
 from src.services.rapports.rapports_budget import BudgetReportMixin

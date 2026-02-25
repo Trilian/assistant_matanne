@@ -51,4 +51,4 @@ class ListeCoursesResponse(BaseModel):
     nom: str
     archivee: bool = False
     created_at: datetime | None = None
-    items: list[ArticleResponse] = Field(default_factory=lambda: list[ArticleResponse]())
+    items: list[ArticleResponse] = Field(default_factory=list)

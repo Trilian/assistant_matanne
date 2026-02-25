@@ -9,12 +9,12 @@ Ce module centralise UNIQUEMENT :
 [!] IMPORTANT: Ne doit JAMAIS importer streamlit ou éléments UI
 
 USAGE:
-- Services, modules backend → importer depuis errors_base
+- Services, modules backend → importer depuis exceptions
 - Modules UI Streamlit → importer depuis errors (hérite + helpers UI)
 
 Exemples:
     # Backend/services (pas d'UI)
-    from src.core.errors_base import ErreurValidation, ErreurNonTrouve
+    from src.core.exceptions import ErreurValidation, ErreurNonTrouve
 
     # Modules Streamlit avec affichage d'erreurs
     from src.core.errors import afficher_erreur, ErreurValidation

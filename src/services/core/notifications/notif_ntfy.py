@@ -244,6 +244,7 @@ class PlanificateurNtfy:
         self.service = service
         self._running = False
 
+    @avec_resilience(retry=1, timeout_s=60, fallback=[])
     async def verifier_et_envoyer_alertes(self) -> list[ResultatEnvoiNtfy]:
         """Vérifie et envoie les alertes pour tâches en retard."""
         taches = self.service.obtenir_taches_en_retard()

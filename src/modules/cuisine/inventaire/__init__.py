@@ -11,7 +11,7 @@ import logging
 
 import streamlit as st
 
-from src.core.errors_base import ErreurValidation
+from src.core.exceptions import ErreurValidation
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import (
     ModuleState,

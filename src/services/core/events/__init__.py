@@ -28,10 +28,14 @@ from .bus import (
 from .events import (
     # Événements métier
     EvenementBatchCookingTermine,
+    EvenementBudgetModifie,
     EvenementCoursesGenerees,
     EvenementErreurService,
+    EvenementLotoModifie,
+    EvenementParisModifie,
     EvenementRecetteImportee,
     EvenementRecettePlanifiee,
+    EvenementSanteModifie,
     EvenementStockModifie,
 )
 from .subscribers import enregistrer_subscribers
@@ -48,6 +52,10 @@ __all__ = [
     "EvenementCoursesGenerees",
     "EvenementRecetteImportee",
     "EvenementBatchCookingTermine",
+    "EvenementBudgetModifie",
+    "EvenementSanteModifie",
+    "EvenementLotoModifie",
+    "EvenementParisModifie",
     "EvenementErreurService",
     # Subscribers
     "enregistrer_subscribers",

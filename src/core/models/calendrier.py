@@ -26,7 +26,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
-from .mixins import TimestampFullMixin
+from .mixins import TimestampMixin
 
 # ═══════════════════════════════════════════════════════════
 # ENUMS
@@ -55,7 +55,7 @@ class DirectionSync(StrEnum):
 # ═══════════════════════════════════════════════════════════
 
 
-class CalendrierExterne(TimestampFullMixin, Base):
+class CalendrierExterne(TimestampMixin, Base):
     """Calendrier externe synchronisé.
 
     Table SQL: calendriers_externes
@@ -101,7 +101,7 @@ class CalendrierExterne(TimestampFullMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class EvenementCalendrier(TimestampFullMixin, Base):
+class EvenementCalendrier(TimestampMixin, Base):
     """Événement de calendrier synchronisé.
 
     Table SQL: evenements_calendrier

@@ -140,8 +140,8 @@ def mock_model() -> Mock:
     """Mock ORM Model."""
     model = Mock()
     model.id = 1
-    model.created_at = None
-    model.updated_at = None
+    model.cree_le = None
+    model.modifie_le = None
     return model
 
 

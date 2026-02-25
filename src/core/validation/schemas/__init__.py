@@ -20,6 +20,7 @@ from .inventaire import (
     ArticleInventaireInput,
     IngredientStockInput,
 )
+from .maison import DepenseMaisonInput
 from .planning import RepasInput
 from .projets import ProjetInput
 from .recettes import (
@@ -50,6 +51,8 @@ __all__ = [
     "EntreeJournalInput",
     # Projets
     "ProjetInput",
+    # Maison
+    "DepenseMaisonInput",
     # Helper
     "nettoyer_texte",
 ]

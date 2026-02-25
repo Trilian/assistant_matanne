@@ -16,7 +16,7 @@ import time
 from sqlalchemy import text
 
 from ..config import obtenir_parametres
-from ..errors_base import ErreurBaseDeDonnees
+from ..exceptions import ErreurBaseDeDonnees
 from .engine import obtenir_moteur, obtenir_moteur_securise
 from .migrations import GestionnaireMigrations
 

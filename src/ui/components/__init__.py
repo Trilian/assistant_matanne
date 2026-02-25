@@ -28,6 +28,9 @@ from .charts import (
 # Chat contextuel (assistant IA intégré par module)
 from .chat_contextuel import ChatContextuelService, afficher_chat_contextuel
 
+# Chat global (assistant IA flottant persistant — Phase D.1)
+from .chat_global import afficher_chat_global
+
 # Data
 from .data import (
     barre_progression,
@@ -68,6 +71,27 @@ from .forms import (
     panneau_filtres,
 )
 
+# Gamification widget (Phase D.4)
+from .gamification_widget import (
+    afficher_badges_complets,
+    afficher_gamification_sidebar,
+    toast_badge,
+)
+
+# Historique Undo
+from .historique_undo import (
+    afficher_bouton_undo,
+    afficher_historique_actions,
+)
+
+# Jules aujourd'hui
+from .jules_aujourdhui import (
+    carte_resume_jules,
+    generer_resume_jules,
+    widget_jules_aujourdhui,
+    widget_jules_resume_compact,
+)
+
 # Layouts
 from .layouts import (
     carte_item,
@@ -86,12 +110,52 @@ from .metrics_row import (
     afficher_stats_cards,
 )
 
+# Mode Focus / Zen
+from .mode_focus import (
+    focus_exit_button,
+    injecter_css_mode_focus,
+    is_mode_focus,
+    mode_focus_fab,
+    mode_focus_toggle,
+)
+
+# Notifications live (temps réel — Phase D.2)
+from .notifications_live import widget_notifications_live
+
 # Charts Drill-down (graphiques interactifs avec on_select)
 from .plotly_drilldown import (
     graphique_activites_heatmap,
     graphique_budget_drilldown,
     graphique_inventaire_drilldown,
     graphique_recettes_drilldown,
+)
+
+# Progressive Loading
+from .progressive_loading import (
+    EtapeChargement,
+    ProgressiveLoader,
+    charger_avec_progression,
+    progressive_loader,
+    skeleton_loading,
+    status_chargement,
+)
+
+# Widget "Qu'est-ce qu'on mange ?"
+from .quest_ce_quon_mange import (
+    widget_qcom_compact,
+    widget_quest_ce_quon_mange,
+)
+
+# ═══════════════════════════════════════════════════════════
+# INNOVATIONS 10.x (Rapport d'audit)
+# ═══════════════════════════════════════════════════════════
+# Recherche globale ⌘K
+from .recherche_globale import (
+    RechercheGlobaleService,
+    afficher_recherche_globale,
+    afficher_recherche_globale_popover,
+    get_recherche_globale_service,
+    injecter_raccourcis_clavier,
 )
 
 # Streaming (réponses IA progressives)
@@ -177,4 +241,43 @@ __all__ = [
     # Chat contextuel
     "afficher_chat_contextuel",
     "ChatContextuelService",
+    # ── Innovations 10.x ──
+    # Recherche globale ⌘K
+    "afficher_recherche_globale",
+    "afficher_recherche_globale_popover",
+    "injecter_raccourcis_clavier",
+    "RechercheGlobaleService",
+    "get_recherche_globale_service",
+    # Mode Focus / Zen
+    "is_mode_focus",
+    "mode_focus_toggle",
+    "mode_focus_fab",
+    "injecter_css_mode_focus",
+    "focus_exit_button",
+    # Historique Undo
+    "afficher_bouton_undo",
+    "afficher_historique_actions",
+    # Qu'est-ce qu'on mange ?
+    "widget_quest_ce_quon_mange",
+    "widget_qcom_compact",
+    # Jules aujourd'hui
+    "widget_jules_aujourdhui",
+    "widget_jules_resume_compact",
+    "carte_resume_jules",
+    "generer_resume_jules",
+    # Progressive Loading
+    "ProgressiveLoader",
+    "progressive_loader",
+    "EtapeChargement",
+    "charger_avec_progression",
+    "skeleton_loading",
+    "status_chargement",
+    # Chat global (Phase D.1)
+    "afficher_chat_global",
+    # Notifications live (Phase D.2)
+    "widget_notifications_live",
+    # Gamification (Phase D.4)
+    "afficher_gamification_sidebar",
+    "afficher_badges_complets",
+    "toast_badge",
 ]

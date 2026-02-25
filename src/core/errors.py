@@ -2,11 +2,11 @@
 Errors - Gestion des erreurs avec intégration UI (Streamlit).
 
 Ce module :
-- Ré-exporte les exceptions pures depuis errors_base.py
+- Ré-exporte les exceptions pures depuis exceptions.py
 - Ajoute les fonctions d'affichage UI (avec import lazy de Streamlit)
 - Fournit le GestionnaireErreurs (context manager)
 
-[!] IMPORTANT: Les exceptions pures sont dans errors_base.py (sans dépendances UI)
+[!] IMPORTANT: Les exceptions pures sont dans exceptions.py (sans dépendances UI)
 Pour la gestion d'erreurs par décorateur, utiliser ``avec_gestion_erreurs``
 dans ``src.core.decorators``.
 """
@@ -18,7 +18,7 @@ from collections.abc import Callable
 from typing import Any
 
 # Ré-exporter les exceptions et helpers purs
-from .errors_base import (  # noqa: F401
+from .exceptions import (  # noqa: F401
     ErreurBaseDeDonnees,
     ErreurConfiguration,
     ErreurLimiteDebit,
@@ -133,7 +133,7 @@ def afficher_erreur_streamlit(erreur: Exception, contexte: str = "") -> None:
 
 
 __all__ = [
-    # Ré-exportées depuis errors_base
+    # Ré-exportées depuis exceptions
     "ExceptionApp",
     "ErreurValidation",
     "ErreurBaseDeDonnees",

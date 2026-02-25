@@ -11,8 +11,9 @@ import logging
 from sqlalchemy.orm import Session, selectinload
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.errors_base import ErreurValidation
+from src.core.exceptions import ErreurValidation
 from src.core.models import Recette
+from src.core.monitoring import chronometre
 
 from .constantes import ROBOTS_DISPONIBLES
 from .types import SessionBatchIA
@@ -39,6 +40,7 @@ class BatchCookingIAMixin:
         ),
     )
     @avec_gestion_erreurs(default_return=None)
+    @chronometre("ia.batch_cooking.generer_plan", seuil_alerte_ms=15000)
     @avec_session_db
     def generer_plan_ia(
         self,

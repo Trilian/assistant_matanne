@@ -16,7 +16,8 @@ from pydantic import BaseModel, ValidationError
 
 from src.core.ai import AnalyseurIA, CircuitBreaker, ClientIA, RateLimitIA, obtenir_circuit
 from src.core.ai.cache import CacheIA
-from src.core.errors_base import ErreurLimiteDebit
+from src.core.exceptions import ErreurLimiteDebit
+from src.core.observability import contexte_operation
 from src.services.core.base.ai_diagnostics import AIDiagnosticsMixin
 from src.services.core.base.ai_prompts import AIPromptsMixin
 from src.services.core.base.ai_streaming import AIStreamingMixin
@@ -151,22 +152,28 @@ class BaseAIService(
             logger.warning(f"⚡ Circuit '{self.circuit_breaker.nom}' OUVERT — appel bloqué")
             return None
 
-        # Appel IA protégé par CircuitBreaker
+        # Appel IA protégé par CircuitBreaker + contexte d'observabilité
         start_time = datetime.now()
 
-        try:
-            response = await self.client.appeler(
-                prompt=prompt,
-                prompt_systeme=system_prompt,
-                temperature=temp,
-                max_tokens=max_tokens,
-                utiliser_cache=False,  # On gère le cache nous-mêmes
-            )
-            self.circuit_breaker._enregistrer_succes()
-        except Exception as e:
-            self.circuit_breaker._enregistrer_echec()
-            logger.warning("Appel IA échoué (%s): %s", self.service_name, e)
-            raise
+        with contexte_operation(
+            f"ia.{self.service_name}.appel",
+            module="ai",
+            cache_category=cache_category,
+            temperature=temp,
+        ):
+            try:
+                response = await self.client.appeler(
+                    prompt=prompt,
+                    prompt_systeme=system_prompt,
+                    temperature=temp,
+                    max_tokens=max_tokens,
+                    utiliser_cache=False,  # On gère le cache nous-mêmes
+                )
+                self.circuit_breaker._enregistrer_succes()
+            except Exception as e:
+                self.circuit_breaker._enregistrer_echec()
+                logger.warning("Appel IA échoué (%s): %s", self.service_name, e)
+                raise
 
         duration = (datetime.now() - start_time).total_seconds()
 

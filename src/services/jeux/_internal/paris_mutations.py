@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
 from src.core.models import Equipe, Match, PariSportif
+from src.services.core.events.bus import obtenir_bus
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +47,14 @@ class ParisMutationMixin:
         )
         db.add(pari)
         db.commit()
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "paris.modifie",
+            {"element_id": pari.id, "type_element": "pari", "action": "enregistre"},
+            source="paris",
+        )
+
         return True
 
     @avec_session_db
@@ -58,6 +67,14 @@ class ParisMutationMixin:
         equipe = Equipe(nom=nom, championnat=championnat)
         db.add(equipe)
         db.commit()
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "paris.modifie",
+            {"element_id": equipe.id, "type_element": "equipe", "action": "ajoute"},
+            source="paris",
+        )
+
         return True
 
     @avec_session_db
@@ -85,6 +102,14 @@ class ParisMutationMixin:
         )
         db.add(match)
         db.commit()
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "paris.modifie",
+            {"element_id": match.id, "type_element": "match", "action": "ajoute"},
+            source="paris",
+        )
+
         return True
 
     @avec_session_db
@@ -127,6 +152,14 @@ class ParisMutationMixin:
                     pari.gain = Decimal("0")
 
         db.commit()
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "paris.modifie",
+            {"element_id": match_id, "type_element": "resultat", "action": "resultat"},
+            source="paris",
+        )
+
         return True
 
     @avec_session_db
@@ -146,5 +179,13 @@ class ParisMutationMixin:
 
         db.delete(match)
         db.commit()
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "paris.modifie",
+            {"element_id": match_id, "type_element": "match", "action": "supprime"},
+            source="paris",
+        )
+
         logger.info(f"🗑️ Match {match_id} supprimé")
         return True

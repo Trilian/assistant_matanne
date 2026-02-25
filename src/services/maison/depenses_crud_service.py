@@ -12,8 +12,9 @@ from datetime import date
 
 from sqlalchemy.orm import Session
 
-from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db, avec_validation
 from src.core.models import DepenseMaison
+from src.core.validation.schemas import DepenseMaisonInput
 from src.services.core.base import BaseService
 from src.services.core.registry import service_factory
 
@@ -80,6 +81,7 @@ class DepensesCrudService(BaseService[DepenseMaison]):
         """Récupère une dépense par ID."""
         return db.query(DepenseMaison).filter(DepenseMaison.id == depense_id).first()
 
+    @avec_validation(DepenseMaisonInput)
     @avec_session_db
     def create_depense(self, data: dict, db: Session | None = None):
         """Crée une nouvelle dépense.
@@ -115,6 +117,24 @@ class DepensesCrudService(BaseService[DepenseMaison]):
         db.add(depense)
         db.commit()
         db.refresh(depense)
+
+        # Émettre événement pour invalidation cache
+        try:
+            from src.services.core.events.bus import obtenir_bus
+
+            obtenir_bus().emettre(
+                "depenses.modifiee",
+                {
+                    "depense_id": depense.id,
+                    "categorie": data.get("categorie", ""),
+                    "montant": float(data.get("montant", 0)),
+                    "action": "creee",
+                },
+                source="depenses_crud",
+            )
+        except Exception:  # noqa: BLE001
+            pass
+
         return depense
 
     @avec_session_db
@@ -126,6 +146,24 @@ class DepensesCrudService(BaseService[DepenseMaison]):
                 setattr(depense, key, value)
             db.commit()
             db.refresh(depense)
+
+            # Émettre événement pour invalidation cache
+            try:
+                from src.services.core.events.bus import obtenir_bus
+
+                obtenir_bus().emettre(
+                    "depenses.modifiee",
+                    {
+                        "depense_id": depense_id,
+                        "categorie": data.get("categorie", ""),
+                        "montant": float(data.get("montant", 0)),
+                        "action": "modifiee",
+                    },
+                    source="depenses_crud",
+                )
+            except Exception:  # noqa: BLE001
+                pass
+
         return depense
 
     @avec_session_db
@@ -135,6 +173,19 @@ class DepensesCrudService(BaseService[DepenseMaison]):
         if depense:
             db.delete(depense)
             db.commit()
+
+            # Émettre événement pour invalidation cache
+            try:
+                from src.services.core.events.bus import obtenir_bus
+
+                obtenir_bus().emettre(
+                    "depenses.modifiee",
+                    {"depense_id": depense_id, "action": "supprimee"},
+                    source="depenses_crud",
+                )
+            except Exception:  # noqa: BLE001
+                pass
+
             return True
         return False
 

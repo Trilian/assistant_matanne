@@ -10,6 +10,10 @@ Architecture:
 - Keyframes avec support prefers-reduced-motion
 - Injection batch unique par cycle de rendu
 
+**Thread-safety**: Les registres CSS sont stockés dans st.session_state
+pour éviter les collisions cross-session en environnement multi-worker
+(Streamlit crée un process/thread par utilisateur).
+
 Usage:
     from src.ui.engine import CSSEngine, styled, css_class
 
@@ -34,7 +38,6 @@ from __future__ import annotations
 import hashlib
 import logging
 from pathlib import Path
-from typing import ClassVar
 
 import streamlit as st
 
@@ -42,6 +45,13 @@ logger = logging.getLogger(__name__)
 
 _CSS_DIR = Path(__file__).resolve().parent.parent.parent.parent / "static" / "css"
 _FILE_CACHE: dict[str, str] = {}
+
+# Session state keys pour les registres CSS (un par session utilisateur)
+_SK_BLOCKS = "_css_engine_blocks_v2"
+_SK_CLASSES = "_css_engine_classes_v2"
+_SK_KEYFRAMES = "_css_engine_keyframes_v2"
+_SK_HASH = "_css_engine_hash_v2"
+_SK_INJECTED = "_css_engine_injected_v2"
 
 
 class CSSEngine:
@@ -56,25 +66,37 @@ class CSSEngine:
     - Déduplication par hash MD5
     - Injection batch unique via st.markdown
     - Invalidation conditionnelle (changement thème/mode)
-    - Thread-safe via session_state
+    - Session-scoped (thread-safe multi-worker)
+
+    Note:
+        Les registres CSS sont stockés dans st.session_state pour éviter
+        les collisions entre sessions utilisateur en environnement multi-worker.
     """
 
     # ═══════════════════════════════════════════════════════════
-    # Registres globaux
+    # Accesseurs session-scoped (remplace ClassVar mutable)
     # ═══════════════════════════════════════════════════════════
 
-    # Blocs CSS nommés : name → css_string
-    _blocks: ClassVar[dict[str, str]] = {}
+    @classmethod
+    def _get_blocks(cls) -> dict[str, str]:
+        """Accès au registre de blocs CSS de la session courante."""
+        if _SK_BLOCKS not in st.session_state:
+            st.session_state[_SK_BLOCKS] = {}
+        return st.session_state[_SK_BLOCKS]
 
-    # Classes atomiques : class_name → css_rule
-    _classes: ClassVar[dict[str, str]] = {}
+    @classmethod
+    def _get_classes(cls) -> dict[str, str]:
+        """Accès au registre de classes atomiques de la session courante."""
+        if _SK_CLASSES not in st.session_state:
+            st.session_state[_SK_CLASSES] = {}
+        return st.session_state[_SK_CLASSES]
 
-    # Keyframes : name → @keyframes rule
-    _keyframes: ClassVar[dict[str, str]] = {}
-
-    # Session keys
-    _HASH_KEY: ClassVar[str] = "_css_engine_hash_v1"
-    _INJECTED_KEY: ClassVar[str] = "_css_engine_injected_v1"
+    @classmethod
+    def _get_keyframes(cls) -> dict[str, str]:
+        """Accès au registre de keyframes de la session courante."""
+        if _SK_KEYFRAMES not in st.session_state:
+            st.session_state[_SK_KEYFRAMES] = {}
+        return st.session_state[_SK_KEYFRAMES]
 
     # ═══════════════════════════════════════════════════════════
     # Blocs CSS nommés
@@ -88,12 +110,12 @@ class CSSEngine:
             name: Identifiant unique (ex: 'theme', 'jardin', 'tablette')
             css: Contenu CSS brut (sans balises <style>)
         """
-        cls._blocks[name] = css.strip()
+        cls._get_blocks()[name] = css.strip()
 
     @classmethod
     def unregister(cls, name: str) -> None:
         """Retire un bloc CSS du registre."""
-        cls._blocks.pop(name, None)
+        cls._get_blocks().pop(name, None)
 
     @classmethod
     def register_file(cls, filename: str) -> None:
@@ -143,9 +165,10 @@ class CSSEngine:
         class_name = f"{prefix}-{hash_val}"
 
         # Enregistrer si nouveau
-        if class_name not in cls._classes:
+        classes = cls._get_classes()
+        if class_name not in classes:
             props = "; ".join(f"{k}: {v}" for k, v in normalized.items())
-            cls._classes[class_name] = f".{class_name} {{ {props} }}"
+            classes[class_name] = f".{class_name} {{ {props} }}"
 
         return class_name
 
@@ -183,8 +206,9 @@ class CSSEngine:
         Returns:
             Nom de l'animation pour référence
         """
-        if name not in cls._keyframes:
-            cls._keyframes[name] = f"@keyframes {name} {{ {keyframes.strip()} }}"
+        kf = cls._get_keyframes()
+        if name not in kf:
+            kf[name] = f"@keyframes {name} {{ {keyframes.strip()} }}"
         return name
 
     # ═══════════════════════════════════════════════════════════
@@ -198,20 +222,24 @@ class CSSEngine:
         Utilise un hash MD5 pour éviter la réinjection si le
         contenu n'a pas changé entre deux cycles de rendu.
         """
+        blocks = cls._get_blocks()
+        classes = cls._get_classes()
+        keyframes = cls._get_keyframes()
+
         parts: list[str] = []
 
         # 1. Blocs nommés
-        for name, css in sorted(cls._blocks.items()):
+        for name, css in sorted(blocks.items()):
             parts.append(f"/* [{name}] */\n{css}")
 
         # 2. Classes atomiques
-        if cls._classes:
-            atomic_css = "\n".join(cls._classes.values())
+        if classes:
+            atomic_css = "\n".join(classes.values())
             parts.append(f"/* [atomic-classes] */\n{atomic_css}")
 
         # 3. Keyframes (avec prefers-reduced-motion)
-        if cls._keyframes:
-            kf_css = "\n".join(cls._keyframes.values())
+        if keyframes:
+            kf_css = "\n".join(keyframes.values())
             parts.append(
                 f"/* [keyframes] */\n"
                 f"@media (prefers-reduced-motion: no-preference) {{\n{kf_css}\n}}"
@@ -224,17 +252,17 @@ class CSSEngine:
         css_hash = hashlib.md5(full_css.encode()).hexdigest()
 
         # Vérifier si changement
-        if cls._HASH_KEY not in st.session_state:
-            st.session_state[cls._HASH_KEY] = ""
+        if _SK_HASH not in st.session_state:
+            st.session_state[_SK_HASH] = ""
 
-        if st.session_state[cls._HASH_KEY] != css_hash:
+        if st.session_state[_SK_HASH] != css_hash:
             st.markdown(f"<style>\n{full_css}\n</style>", unsafe_allow_html=True)
-            st.session_state[cls._HASH_KEY] = css_hash
+            st.session_state[_SK_HASH] = css_hash
             logger.debug(
                 "CSSEngine: injecté %d blocs + %d classes + %d keyframes (hash=%s)",
-                len(cls._blocks),
-                len(cls._classes),
-                len(cls._keyframes),
+                len(blocks),
+                len(classes),
+                len(keyframes),
                 css_hash[:8],
             )
 
@@ -244,28 +272,31 @@ class CSSEngine:
 
         À appeler lors d'un changement de thème ou mode.
         """
-        if cls._HASH_KEY in st.session_state:
-            st.session_state[cls._HASH_KEY] = ""
+        if _SK_HASH in st.session_state:
+            st.session_state[_SK_HASH] = ""
 
     @classmethod
     def get_stats(cls) -> dict[str, int]:
         """Statistiques du moteur CSS."""
-        blocks_size = sum(len(css) for css in cls._blocks.values())
-        classes_size = sum(len(css) for css in cls._classes.values())
+        blocks = cls._get_blocks()
+        classes = cls._get_classes()
+        keyframes = cls._get_keyframes()
+        blocks_size = sum(len(css) for css in blocks.values())
+        classes_size = sum(len(css) for css in classes.values())
         return {
-            "blocks": len(cls._blocks),
-            "classes": len(cls._classes),
-            "keyframes": len(cls._keyframes),
+            "blocks": len(blocks),
+            "classes": len(classes),
+            "keyframes": len(keyframes),
             "total_bytes": blocks_size + classes_size,
         }
 
     @classmethod
     def reset(cls) -> None:
         """Reset complet (pour tests)."""
-        cls._blocks.clear()
-        cls._classes.clear()
-        cls._keyframes.clear()
-        for key in (cls._HASH_KEY, cls._INJECTED_KEY):
+        cls._get_blocks().clear()
+        cls._get_classes().clear()
+        cls._get_keyframes().clear()
+        for key in (_SK_HASH, _SK_INJECTED):
             if key in st.session_state:
                 del st.session_state[key]
 
@@ -276,7 +307,9 @@ class CSSEngine:
     @classmethod
     def get_all_css(cls) -> str:
         """Retourne tout le CSS généré (pour debug/export)."""
-        parts = list(cls._blocks.values()) + list(cls._classes.values())
+        blocks = cls._get_blocks()
+        classes = cls._get_classes()
+        parts = list(blocks.values()) + list(classes.values())
         return "\n".join(parts)
 
     @classmethod

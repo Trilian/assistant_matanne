@@ -331,8 +331,8 @@ class TestRenderListeRobotFilters:
         setup_mock_st(mock_st, checkbox_values={"robot_cookeo": True})
         mock_service = MagicMock()
         recettes = [
-            create_mock_recette(1, compatible_cookeo=True),
-            create_mock_recette(2, compatible_cookeo=False),
+            create_mock_recette(1, robots_compatibles=["Cookeo"]),
+            create_mock_recette(2, robots_compatibles=[]),
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
@@ -347,8 +347,8 @@ class TestRenderListeRobotFilters:
         setup_mock_st(mock_st, checkbox_values={"robot_mc": True})
         mock_service = MagicMock()
         recettes = [
-            create_mock_recette(1, compatible_monsieur_cuisine=True),
-            create_mock_recette(2, compatible_monsieur_cuisine=False),
+            create_mock_recette(1, robots_compatibles=["Monsieur Cuisine"]),
+            create_mock_recette(2, robots_compatibles=[]),
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
@@ -363,8 +363,8 @@ class TestRenderListeRobotFilters:
         setup_mock_st(mock_st, checkbox_values={"robot_airfryer": True})
         mock_service = MagicMock()
         recettes = [
-            create_mock_recette(1, compatible_airfryer=True),
-            create_mock_recette(2, compatible_airfryer=False),
+            create_mock_recette(1, robots_compatibles=["Airfryer"]),
+            create_mock_recette(2, robots_compatibles=[]),
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
@@ -379,8 +379,8 @@ class TestRenderListeRobotFilters:
         setup_mock_st(mock_st, checkbox_values={"robot_multicooker": True})
         mock_service = MagicMock()
         recettes = [
-            create_mock_recette(1, compatible_multicooker=True),
-            create_mock_recette(2, compatible_multicooker=False),
+            create_mock_recette(1, robots_compatibles=["Multicooker"]),
+            create_mock_recette(2, robots_compatibles=[]),
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
@@ -707,7 +707,7 @@ class TestRenderListePagination:
 
         setup_mock_st(
             mock_st,
-            session_data={"recettes_page": 10, "recettes_page_size": 9},
+            session_data={"recettes_liste__page": 10, "recettes_liste__page_size_val": 9},
             page_size=9,
         )
         mock_service = MagicMock()
@@ -715,7 +715,7 @@ class TestRenderListePagination:
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service
         afficher_liste()
-        assert mock_st.session_state.recettes_page == 0
+        assert mock_st.session_state["recettes_liste__page"] == 0
 
 
 @pytest.mark.unit
@@ -727,32 +727,32 @@ class TestRenderListeSessionState:
     def test_init_session_state_page(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import afficher_liste
 
-        mock_st.session_state = SessionStateMock({"recettes_page_size": 9})
-        setup_mock_st(mock_st, session_data={"recettes_page_size": 9})
-        if "recettes_page" in mock_st.session_state:
-            del mock_st.session_state["recettes_page"]
+        mock_st.session_state = SessionStateMock({"recettes_liste__page_size_val": 9})
+        setup_mock_st(mock_st, session_data={"recettes_liste__page_size_val": 9})
+        if "recettes_liste__page" in mock_st.session_state:
+            del mock_st.session_state["recettes_liste__page"]
 
         mock_service = MagicMock()
         mock_service.search_advanced.return_value = []
         mock_svc_factory.return_value = mock_service
         afficher_liste()
-        assert "recettes_page" in mock_st.session_state
+        assert "recettes_liste__page" in mock_st.session_state
 
     @patch("src.modules.cuisine.recettes.liste.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.liste.st")
     def test_init_session_state_page_size(self, mock_st, mock_svc_factory) -> None:
         from src.modules.cuisine.recettes.liste import afficher_liste
 
-        mock_st.session_state = SessionStateMock({"recettes_page": 0})
-        setup_mock_st(mock_st, session_data={"recettes_page": 0})
-        if "recettes_page_size" in mock_st.session_state:
-            del mock_st.session_state["recettes_page_size"]
+        mock_st.session_state = SessionStateMock({"recettes_liste__page": 0})
+        setup_mock_st(mock_st, session_data={"recettes_liste__page": 0})
+        if "recettes_liste__page_size_val" in mock_st.session_state:
+            del mock_st.session_state["recettes_liste__page_size_val"]
 
         mock_service = MagicMock()
         mock_service.search_advanced.return_value = []
         mock_svc_factory.return_value = mock_service
         afficher_liste()
-        assert "recettes_page_size" in mock_st.session_state
+        assert "recettes_liste__page_size_val" in mock_st.session_state
 
 
 @pytest.mark.unit
@@ -884,9 +884,9 @@ class TestRenderListeEdgeCases:
         )
         mock_service = MagicMock()
         recettes = [
-            create_mock_recette(1, compatible_cookeo=True, compatible_monsieur_cuisine=True),
-            create_mock_recette(2, compatible_cookeo=True, compatible_monsieur_cuisine=False),
-            create_mock_recette(3, compatible_cookeo=False, compatible_monsieur_cuisine=True),
+            create_mock_recette(1, robots_compatibles=["Cookeo", "Monsieur Cuisine"]),
+            create_mock_recette(2, robots_compatibles=["Cookeo"]),
+            create_mock_recette(3, robots_compatibles=["Monsieur Cuisine"]),
         ]
         mock_service.search_advanced.return_value = recettes
         mock_svc_factory.return_value = mock_service

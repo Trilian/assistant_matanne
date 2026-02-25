@@ -127,6 +127,95 @@ class EvenementEntretienSemaineOptimisee:
     nb_jours: int = 0
 
 
+@dataclass(frozen=True, slots=True)
+class EvenementDepenseModifiee:
+    """Émis quand une dépense maison est créée/modifiée/supprimée."""
+
+    TYPE: str = "depenses.modifiee"
+
+    depense_id: int = 0
+    categorie: str = ""
+    montant: float = 0.0
+    action: str = ""  # "creee", "modifiee", "supprimee"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementJardinModifie:
+    """Émis quand un élément du jardin est modifié."""
+
+    TYPE: str = "jardin.modifie"
+
+    element_id: int = 0
+    nom: str = ""
+    action: str = ""  # "plante_ajoutee", "arrosage", "recolte", "supprime"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementProjetModifie:
+    """Émis quand un projet maison est créé/modifié."""
+
+    TYPE: str = "projets.modifie"
+
+    projet_id: int = 0
+    nom: str = ""
+    action: str = ""  # "cree", "modifie", "archive", "tache_ajoutee"
+
+
+# ═══════════════════════════════════════════════════════════
+# ÉVÉNEMENTS BUDGET / SANTÉ
+# ═══════════════════════════════════════════════════════════
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementBudgetModifie:
+    """Émis quand le budget familial est modifié (dépense/budget défini)."""
+
+    TYPE: str = "budget.modifie"
+
+    depense_id: int = 0
+    categorie: str = ""
+    montant: float = 0.0
+    action: str = ""  # "depense_ajoutee", "depense_modifiee", "depense_supprimee", "budget_defini"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementSanteModifie:
+    """Émis quand une entrée santé/fitness est créée/modifiée/supprimée."""
+
+    TYPE: str = "sante.modifie"
+
+    entree_id: int = 0
+    type_donnee: str = ""  # "entree", "objectif", "mesure"
+    action: str = ""  # "creee", "modifiee", "supprimee"
+
+
+# ═══════════════════════════════════════════════════════════
+# ÉVÉNEMENTS JEUX (LOTO / PARIS)
+# ═══════════════════════════════════════════════════════════
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementLotoModifie:
+    """Émis quand une grille/tirage loto est ajouté/modifié."""
+
+    TYPE: str = "loto.modifie"
+
+    element_id: int = 0
+    type_element: str = ""  # "grille", "tirage"
+    action: str = ""  # "sauvegardee", "enregistree", "ajoute"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementParisModifie:
+    """Émis quand un pari/match/équipe est ajouté/modifié."""
+
+    TYPE: str = "paris.modifie"
+
+    element_id: int = 0
+    type_element: str = ""  # "pari", "equipe", "match", "resultat"
+    action: str = ""  # "enregistre", "ajoutee", "resultat_enregistre", "supprime"
+
+
 # ═══════════════════════════════════════════════════════════
 # ÉVÉNEMENTS FAMILLE
 # ═══════════════════════════════════════════════════════════
@@ -199,6 +288,22 @@ class EvenementPlanningModifie:
 
 
 # ═══════════════════════════════════════════════════════════
+# ÉVÉNEMENTS JEUX
+# ═══════════════════════════════════════════════════════════
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementJeuxSyncTerminee:
+    """Émis quand une synchronisation jeux (paris/loto) est terminée."""
+
+    TYPE: str = "jeux.sync_terminee"
+
+    domaine: str = ""  # "paris", "loto", "tout"
+    nb_elements: int = 0
+    nb_alertes: int = 0
+
+
+# ═══════════════════════════════════════════════════════════
 # ÉVÉNEMENTS SYSTÈME
 # ═══════════════════════════════════════════════════════════
 
@@ -230,12 +335,20 @@ REGISTRE_EVENEMENTS: dict[str, type] = {
     "batch_cooking.termine": EvenementBatchCookingTermine,
     "entretien.routine_creee": EvenementEntretienRoutineCreee,
     "entretien.semaine_optimisee": EvenementEntretienSemaineOptimisee,
+    "depenses.modifiee": EvenementDepenseModifiee,
+    "jardin.modifie": EvenementJardinModifie,
+    "projets.modifie": EvenementProjetModifie,
+    "budget.modifie": EvenementBudgetModifie,
+    "sante.modifie": EvenementSanteModifie,
+    "loto.modifie": EvenementLotoModifie,
+    "paris.modifie": EvenementParisModifie,
     "activites.modifiee": EvenementActiviteFamille,
     "routines.modifiee": EvenementRoutineModifiee,
     "weekend.modifie": EvenementWeekendModifie,
     "achats.modifie": EvenementAchatFamille,
     "food_log.ajoute": EvenementJournalAlimentaire,
     "planning.modifie": EvenementPlanningModifie,
+    "jeux.sync_terminee": EvenementJeuxSyncTerminee,
     "service.error": EvenementErreurService,
 }
 
@@ -249,12 +362,20 @@ __all__ = [
     "EvenementBatchCookingTermine",
     "EvenementEntretienRoutineCreee",
     "EvenementEntretienSemaineOptimisee",
+    "EvenementDepenseModifiee",
+    "EvenementJardinModifie",
+    "EvenementProjetModifie",
+    "EvenementBudgetModifie",
+    "EvenementSanteModifie",
+    "EvenementLotoModifie",
+    "EvenementParisModifie",
     "EvenementActiviteFamille",
     "EvenementRoutineModifiee",
     "EvenementWeekendModifie",
     "EvenementAchatFamille",
     "EvenementJournalAlimentaire",
     "EvenementPlanningModifie",
+    "EvenementJeuxSyncTerminee",
     "EvenementErreurService",
     # Registry
     "REGISTRE_EVENEMENTS",

@@ -14,6 +14,8 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.core.db import obtenir_contexte_db
+from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
 
 __all__ = [
@@ -318,35 +320,37 @@ def afficher_conseils_amelioration() -> None:
 # ═══════════════════════════════════════════════════════════
 
 
+@profiler_rerun("jardin_zones")
 def app():
     """Point d'entrée du module Jardin Zones."""
-    st.title("🌳 Jardin - Dashboard Zones")
-    st.caption("Vue d'ensemble et gestion des zones de votre jardin.")
+    with error_boundary(titre="Erreur module Jardin Zones"):
+        st.title("🌳 Jardin - Dashboard Zones")
+        st.caption("Vue d'ensemble et gestion des zones de votre jardin.")
 
-    zones = charger_zones()
+        zones = charger_zones()
 
-    # Onglets
-    TAB_LABELS = ["🗺️ Vue d'ensemble", "📋 Détail", "💡 Conseils"]
-    tab1, tab2, tab3 = st.tabs(TAB_LABELS)
+        # Onglets
+        TAB_LABELS = ["🗺️ Vue d'ensemble", "📋 Détail", "💡 Conseils"]
+        tab1, tab2, tab3 = st.tabs(TAB_LABELS)
 
-    with tab1:
-        afficher_vue_ensemble()
-        if zones:
-            st.divider()
-            for z in zones:
-                afficher_carte_zone(z)
+        with tab1:
+            afficher_vue_ensemble()
+            if zones:
+                st.divider()
+                for z in zones:
+                    afficher_carte_zone(z)
 
-    with tab2:
-        if zones:
-            noms = [z.get("nom", f"Zone {i}") for i, z in enumerate(zones)]
-            selection = st.selectbox(
-                "Choisir une zone",
-                noms,
-            )
-            zone_selectionnee = next((z for z in zones if z.get("nom") == selection), zones[0])
-            afficher_detail_zone(zone_selectionnee)
-        else:
-            st.info("Aucune zone à afficher.")
+        with tab2:
+            if zones:
+                noms = [z.get("nom", f"Zone {i}") for i, z in enumerate(zones)]
+                selection = st.selectbox(
+                    "Choisir une zone",
+                    noms,
+                )
+                zone_selectionnee = next((z for z in zones if z.get("nom") == selection), zones[0])
+                afficher_detail_zone(zone_selectionnee)
+            else:
+                st.info("Aucune zone à afficher.")
 
-    with tab3:
-        afficher_conseils_amelioration()
+        with tab3:
+            afficher_conseils_amelioration()

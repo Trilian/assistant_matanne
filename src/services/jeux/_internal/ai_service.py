@@ -18,7 +18,8 @@ from typing import Any
 
 from src.core.ai import obtenir_client_ia
 from src.core.ai.client import ClientIA
-from src.core.errors_base import ErreurLimiteDebit, ErreurServiceIA
+from src.core.exceptions import ErreurLimiteDebit, ErreurServiceIA
+from src.core.monitoring import chronometre
 from src.services.core.base.ai_service import BaseAIService
 from src.services.core.base.async_utils import sync_wrapper
 from src.services.core.registry import service_factory
@@ -189,6 +190,7 @@ FORMAT DE RÉPONSE:
             logger.warning(f"Erreur IA Paris: {e}")
             return self._analyse_fallback("paris", opportunites)
 
+    @chronometre("ia.jeux.analyser_paris", seuil_alerte_ms=10000)
     def analyser_paris(
         self,
         opportunites: list[dict[str, Any]],

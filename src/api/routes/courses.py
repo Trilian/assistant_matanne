@@ -11,15 +11,18 @@ from src.api.schemas import (
     CourseItemBase,
     CourseListCreate,
     ListeCoursesResponse,
+    ListeCoursesResume,
     MessageResponse,
+    ReponsePaginee,
 )
-from src.api.utils import executer_async, executer_avec_session, query_async
+from src.api.utils import executer_async, executer_avec_session, gerer_exception_api, query_async
 
 router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
 
 
-@router.get("")
-async def list_courses(
+@router.get("", response_model=ReponsePaginee[ListeCoursesResume])
+@gerer_exception_api
+async def lister_courses(
     page: int = Query(1, ge=1, description="Numéro de page (1-indexé)"),
     page_size: int = Query(20, ge=1, le=100, description="Nombre d'éléments par page"),
     active_only: bool = Query(True, description="Afficher uniquement les listes non archivées"),
@@ -82,13 +85,15 @@ async def list_courses(
                 "total": total,
                 "page": page,
                 "page_size": page_size,
+                "pages": (total + page_size - 1) // page_size if total > 0 else 0,
             }
 
     return await executer_async(_query)
 
 
 @router.post("", response_model=MessageResponse, status_code=201)
-async def create_liste(data: CourseListCreate, user: dict[str, Any] = Depends(require_auth)):
+@gerer_exception_api
+async def creer_liste(data: CourseListCreate, user: dict[str, Any] = Depends(require_auth)):
     """
     Crée une nouvelle liste de courses.
 
@@ -130,7 +135,8 @@ async def create_liste(data: CourseListCreate, user: dict[str, Any] = Depends(re
 
 
 @router.post("/{liste_id}/items", response_model=MessageResponse, status_code=201)
-async def add_item(
+@gerer_exception_api
+async def ajouter_article(
     liste_id: int, item: CourseItemBase, user: dict[str, Any] = Depends(require_auth)
 ):
     """
@@ -193,7 +199,8 @@ async def add_item(
 
 
 @router.get("/{liste_id}", response_model=ListeCoursesResponse)
-async def get_liste(liste_id: int):
+@gerer_exception_api
+async def obtenir_liste(liste_id: int):
     """
     Récupère une liste de courses avec ses articles détaillés.
 
@@ -251,7 +258,8 @@ async def get_liste(liste_id: int):
 
 
 @router.put("/{liste_id}", response_model=MessageResponse)
-async def update_liste(
+@gerer_exception_api
+async def modifier_liste(
     liste_id: int, data: CourseListCreate, user: dict[str, Any] = Depends(require_auth)
 ):
     """
@@ -298,7 +306,8 @@ async def update_liste(
 
 
 @router.put("/{liste_id}/items/{item_id}", response_model=MessageResponse)
-async def update_item(
+@gerer_exception_api
+async def modifier_article(
     liste_id: int, item_id: int, item: CourseItemBase, user: dict[str, Any] = Depends(require_auth)
 ):
     """
@@ -354,7 +363,8 @@ async def update_item(
 
 
 @router.delete("/{liste_id}", response_model=MessageResponse)
-async def delete_liste(liste_id: int, user: dict[str, Any] = Depends(require_auth)):
+@gerer_exception_api
+async def supprimer_liste(liste_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
     Supprime une liste de courses et tous ses articles.
 
@@ -395,7 +405,10 @@ async def delete_liste(liste_id: int, user: dict[str, Any] = Depends(require_aut
 
 
 @router.delete("/{liste_id}/items/{item_id}", response_model=MessageResponse)
-async def delete_item(liste_id: int, item_id: int, user: dict[str, Any] = Depends(require_auth)):
+@gerer_exception_api
+async def supprimer_article(
+    liste_id: int, item_id: int, user: dict[str, Any] = Depends(require_auth)
+):
     """
     Supprime un article d'une liste de courses.
 

@@ -8,6 +8,7 @@ Application principale - VERSION OPTIMISÉE LAZY LOADING
 
 import os as _os
 import sys
+import time
 from pathlib import Path
 
 # ═══════════════════════════════════════════════════════════
@@ -65,6 +66,7 @@ if not _rapport.succes:
 # ═══════════════════════════════════════════════════════════
 
 from src.core import GestionnaireEtat, obtenir_etat, obtenir_parametres
+from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.navigation import initialiser_navigation
 
 # Layout modulaire
@@ -96,6 +98,13 @@ st.set_page_config(
 
 # CSS est injecté via initialiser_app() (pipeline CSS unifié)
 
+# ═══════════════════════════════════════════════════════════
+# INNOVATIONS 10.x — Raccourcis clavier, Mode Focus, etc.
+# ═══════════════════════════════════════════════════════════
+
+from src.ui.components.mode_focus import injecter_css_mode_focus, is_mode_focus
+from src.ui.components.recherche_globale import injecter_raccourcis_clavier
+
 # Injecter les meta tags PWA (manifest, service worker, icons)
 injecter_meta_pwa()
 
@@ -112,15 +121,54 @@ page = initialiser_navigation()
 
 
 # ═══════════════════════════════════════════════════════════
+# WIDGETS GLOBAUX PHASE D
+# ═══════════════════════════════════════════════════════════
+
+
+def _afficher_widgets_globaux() -> None:
+    """Injecte les widgets flottants persistants (chat IA, notifications, gamification)."""
+    try:
+        col_chat, col_notif, col_gamif = st.columns([1, 1, 1])
+        with col_chat:
+            from src.ui.components.chat_global import afficher_chat_global
+
+            afficher_chat_global()
+        with col_notif:
+            from src.ui.components.notifications_live import widget_notifications_live
+
+            widget_notifications_live()
+        with col_gamif:
+            from src.ui.components.gamification_widget import afficher_gamification_sidebar
+
+            afficher_gamification_sidebar()
+    except Exception as e:
+        logger.debug(f"Widgets globaux indisponibles: {e}")
+
+
+# ═══════════════════════════════════════════════════════════
 # MAIN
 # ═══════════════════════════════════════════════════════════
 
 
+@profiler_rerun("app")
 def main() -> None:
     """Fonction principale."""
     try:
-        # Header
-        afficher_header()
+        # Bannière maintenance si MAINTENANCE_MODE activé
+        if _os.getenv("MAINTENANCE_MODE", "").lower() in ("true", "1", "yes"):
+            st.info(
+                "🔧 **Mode maintenance actif** — Certaines fonctionnalités "
+                "peuvent être temporairement indisponibles.",
+                icon="🔧",
+            )
+
+        # Mode Focus: CSS + raccourcis
+        injecter_css_mode_focus()
+        injecter_raccourcis_clavier()
+
+        # Header (masqué en mode focus)
+        if not is_mode_focus():
+            afficher_header()
 
         # Point d'ancrage pour le skip-link (A11y)
         st.markdown(
@@ -129,13 +177,27 @@ def main() -> None:
         )
 
         # Exécuter la page sélectionnée par st.navigation()
+        _t0 = time.perf_counter()
         page.run()
+        _duree_page = time.perf_counter() - _t0
+        if _duree_page > 2.0:
+            logger.warning("⏱️ Page lente détectée : %.2fs (seuil 2s)", _duree_page)
 
         # Fermer le landmark main
         st.markdown("</main>", unsafe_allow_html=True)
 
-        # Footer
-        afficher_footer()
+        # ── Widgets globaux (Phase D) ──
+        _afficher_widgets_globaux()
+
+        # Mode focus: bouton de sortie
+        if is_mode_focus():
+            from src.ui.components.mode_focus import focus_exit_button
+
+            focus_exit_button()
+
+        # Footer (masqué en mode focus)
+        if not is_mode_focus():
+            afficher_footer()
 
     except Exception as e:
         logger.exception("❌ Erreur critique dans main()")

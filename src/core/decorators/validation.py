@@ -15,22 +15,40 @@ F = TypeVar("F", bound=Callable[..., Any])
 def avec_validation(
     validator_class: type,
     field_mapping: dict[str, str] | None = None,
+    *,
+    param_name: str = "data",
+    inject_validated: bool = True,
 ):
     """
     Décorateur pour validation Pydantic automatique.
 
+    Valide le paramètre ``param_name`` (dict) avec ``validator_class``
+    et remplace la valeur par le résultat de ``model_dump()`` si
+    ``inject_validated`` est True.
+
     Usage::
 
-        @avec_validation(RecetteInput, field_mapping={
-            "data": "recipe_data"
-        })
+        # Simple dict validation — le paramètre 'data' est validé automatiquement
+        @avec_validation(RecetteInput)
         def creer_recette(data: dict, db: Session) -> Recette:
-            validated = RecetteInput(**data)
-            # ...
+            # data est déjà validé et normalisé
+            ...
+
+        # Avec mapping de paramètre
+        @avec_validation(ArticleCoursesInput, param_name="article_data")
+        def ajouter_article(article_data: dict, db: Session):
+            ...
+
+        # Sans remplacement (validation seule, lève si invalide)
+        @avec_validation(RecetteInput, inject_validated=False)
+        def creer_recette(data: dict, db: Session):
+            ...
 
     Args:
         validator_class: Modèle Pydantic pour validation
-        field_mapping: Mapping des paramètres
+        field_mapping: Mapping des paramètres (déprécié, utiliser param_name)
+        param_name: Nom du paramètre dict à valider (défaut: "data")
+        inject_validated: Remplacer le dict par les données validées (défaut: True)
 
     Returns:
         Fonction décorée avec validation automatique
@@ -38,28 +56,50 @@ def avec_validation(
     Raises:
         ErreurValidation: Si validation échoue
     """
+    # Rétrocompatibilité: field_mapping override param_name
+    effective_param = list(field_mapping.keys())[0] if field_mapping else param_name
 
     def decorator(func: F) -> F:
+        import inspect
+
+        _sig = inspect.signature(func)
+        _params = list(_sig.parameters.keys())
+
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             from pydantic import ValidationError
 
-            from src.core.errors_base import ErreurValidation
+            from src.core.exceptions import ErreurValidation
 
             try:
-                # Chercher le paramètre à valider
-                param_key = list(field_mapping.keys())[0] if field_mapping else "data"
+                # Résoudre le paramètre: d'abord dans kwargs, puis dans args positionnels
+                data = None
+                in_kwargs = effective_param in kwargs
 
-                if param_key in kwargs:
-                    data = kwargs[param_key]
+                if in_kwargs:
+                    data = kwargs[effective_param]
+                elif effective_param in _params:
+                    idx = _params.index(effective_param)
+                    if idx < len(args):
+                        data = args[idx]
+
+                if data is not None and isinstance(data, dict):
                     validated = validator_class(**data)
-                    kwargs[param_key] = validated.model_dump()
+                    if inject_validated:
+                        validated_data = validated.model_dump()
+                        if in_kwargs:
+                            kwargs[effective_param] = validated_data
+                        elif effective_param in _params:
+                            idx = _params.index(effective_param)
+                            args = list(args)
+                            args[idx] = validated_data
+                            args = tuple(args)
 
                 return func(*args, **kwargs)
 
             except ValidationError as e:
                 raise ErreurValidation(
-                    f"Validation échouée: {e}",
+                    f"Validation échouée pour {validator_class.__name__}: {e}",
                     details={"validation_errors": e.errors()},
                     message_utilisateur="Les données fournies sont invalides",
                 ) from e

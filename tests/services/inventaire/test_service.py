@@ -826,7 +826,7 @@ class TestAjouterPhoto:
 
     def test_ajouter_photo_article_inexistant(self, service, db: Session):
         """Test ajout photo à un article inexistant."""
-        from src.core.errors_base import ErreurValidation
+        from src.core.exceptions import ErreurValidation
 
         with pytest.raises(ErreurValidation, match="introuvable"):
             service.ajouter_photo(
@@ -857,7 +857,7 @@ class TestSupprimerPhoto:
 
     def test_supprimer_photo_sans_photo(self, service, sample_article, db: Session):
         """Test suppression quand pas de photo."""
-        from src.core.errors_base import ErreurValidation
+        from src.core.exceptions import ErreurValidation
 
         # S'assurer qu'il n'y a pas de photo
         sample_article.photo_url = None

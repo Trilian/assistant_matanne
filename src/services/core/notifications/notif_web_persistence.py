@@ -71,7 +71,7 @@ class NotificationPersistenceMixin:
                 "p256dh_key": subscription.p256dh_key,
                 "auth_key": subscription.auth_key,
                 "user_agent": subscription.user_agent,
-                "created_at": subscription.created_at.isoformat(),
+                "created_at": subscription.cree_le.isoformat(),
                 "is_active": subscription.is_active,
             }
 
@@ -121,7 +121,7 @@ class NotificationPersistenceMixin:
                         p256dh_key=row["p256dh_key"],
                         auth_key=row["auth_key"],
                         user_agent=row.get("user_agent"),
-                        created_at=datetime.fromisoformat(row["created_at"])
+                        cree_le=datetime.fromisoformat(row["created_at"])
                         if row.get("created_at")
                         else datetime.now(),
                         is_active=row.get("is_active", True),

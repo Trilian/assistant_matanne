@@ -90,7 +90,8 @@ class TestBadgeSnapshots:
         html = badge_html("Custom", couleur="#ff0000")
         self.tester.assert_matches(html, {"couleur": "#ff0000"}, test_name="custom_color")
 
-        assert_html_contains(html, "Custom", "#ff0000", "color: white")
+        # Text color is now CSS variable-based
+        assert_html_contains(html, "Custom", "#ff0000")
 
     def test_badge_xss_escape(self):
         """Badge échappe les caractères dangereux."""

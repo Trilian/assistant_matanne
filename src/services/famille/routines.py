@@ -82,7 +82,7 @@ class ServiceRoutines(BaseService[Routine]):
         if actives_uniquement:
             query = query.filter(Routine.is_active)
 
-        routines = query.order_by(Routine.created_at.desc()).all()
+        routines = query.order_by(Routine.cree_le.desc()).all()
         result = []
         for r in routines:
             child_name = "Famille"

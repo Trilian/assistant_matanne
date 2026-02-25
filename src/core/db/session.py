@@ -14,7 +14,7 @@ from contextlib import contextmanager
 from sqlalchemy.exc import DatabaseError, OperationalError
 from sqlalchemy.orm import Session, sessionmaker
 
-from ..errors_base import ErreurBaseDeDonnees
+from ..exceptions import ErreurBaseDeDonnees
 from .engine import obtenir_moteur
 
 logger = logging.getLogger(__name__)
@@ -64,6 +64,9 @@ def obtenir_contexte_db() -> Generator[Session, None, None]:
     """
     Context manager avec gestion d'erreurs robuste.
 
+    Enrichit automatiquement les logs avec le correlation_id du contexte
+    d'observabilité, permettant de tracer chaque transaction DB.
+
     Yields:
         Session SQLAlchemy active
 
@@ -78,13 +81,24 @@ def obtenir_contexte_db() -> Generator[Session, None, None]:
     fabrique = obtenir_fabrique_session()
     db = fabrique()
 
+    # Récupérer le correlation_id pour tracer cette transaction
     try:
+        from ..observability import obtenir_contexte
+
+        ctx = obtenir_contexte()
+        cid = ctx.correlation_id
+    except Exception:
+        cid = "--------"
+
+    try:
+        logger.debug("[%s] Session DB ouverte", cid)
         yield db
         db.commit()
+        logger.debug("[%s] Session DB commit OK", cid)
 
     except OperationalError as e:
         db.rollback()
-        logger.error(f"[ERROR] Erreur opérationnelle DB: {e}")
+        logger.error("[%s] Erreur opérationnelle DB: %s", cid, e)
         raise ErreurBaseDeDonnees(
             f"Erreur réseau/connexion: {e}",
             message_utilisateur="Problème de connexion à la base de données",
@@ -92,14 +106,14 @@ def obtenir_contexte_db() -> Generator[Session, None, None]:
 
     except DatabaseError as e:
         db.rollback()
-        logger.error(f"[ERROR] Erreur base de données: {e}")
+        logger.error("[%s] Erreur base de données: %s", cid, e)
         raise ErreurBaseDeDonnees(
             str(e), message_utilisateur="Erreur lors de l'opération en base de données"
         ) from e
 
     except Exception as e:
         db.rollback()
-        logger.error(f"[ERROR] Erreur inattendue: {e}")
+        logger.error("[%s] Erreur inattendue: %s", cid, e)
         raise
 
     finally:

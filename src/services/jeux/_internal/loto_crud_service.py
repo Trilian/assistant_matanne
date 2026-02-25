@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.models import GrilleLoto, StatistiquesLoto, TirageLoto
 from src.services.core.base import BaseService
+from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -138,6 +139,14 @@ class LotoCrudService(BaseService[GrilleLoto]):
         )
         db.add(grille)
         db.commit()
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "loto.modifie",
+            {"element_id": grille.id, "type_element": "grille", "action": "creee"},
+            source="loto",
+        )
+
         return grille.id
 
     @avec_session_db
@@ -177,6 +186,14 @@ class LotoCrudService(BaseService[GrilleLoto]):
         )
         db.add(grille)
         db.commit()
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "loto.modifie",
+            {"element_id": grille.id, "type_element": "grille", "action": "creee"},
+            source="loto",
+        )
+
         return True
 
     @avec_session_db
@@ -217,6 +234,13 @@ class LotoCrudService(BaseService[GrilleLoto]):
         )
         db.add(tirage)
         db.commit()
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "loto.modifie",
+            {"element_id": tirage.id, "type_element": "tirage", "action": "ajoutee"},
+            source="loto",
+        )
 
         # Mettre à jour les grilles en attente
         grilles = db.query(GrilleLoto).filter(GrilleLoto.tirage_id == None).all()

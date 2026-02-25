@@ -115,16 +115,22 @@ class TestServiceSuggestions:
     @pytest.fixture
     def service(self):
         """Fixture service avec mocks."""
+        mock_client = MagicMock()
+        mock_analyseur = MagicMock()
         with (
-            patch("src.services.cuisine.suggestions.service.ClientIA") as mock_client,
-            patch("src.services.cuisine.suggestions.service.AnalyseurIA") as mock_analyseur,
-            patch("src.services.cuisine.suggestions.service.obtenir_cache") as mock_cache,
+            patch(
+                "src.services.cuisine.suggestions.service.obtenir_client_ia",
+                return_value=mock_client,
+            ),
+            patch(
+                "src.services.cuisine.suggestions.service.AnalyseurIA",
+                return_value=mock_analyseur,
+            ),
         ):
-            mock_cache.return_value = MagicMock()
             s = ServiceSuggestions()
-            s.client_ia = mock_client.return_value
-            s.analyseur = mock_analyseur.return_value
-            return s
+            s.client_ia = mock_client
+            s.analyseur = mock_analyseur
+            yield s
 
     @pytest.fixture
     def mock_session(self):
@@ -754,7 +760,11 @@ class TestServiceSuggestions:
 
     @patch.object(ServiceSuggestions, "construire_contexte")
     @patch.object(ServiceSuggestions, "analyser_profil_culinaire")
-    def test_suggerer_avec_ia_success(self, mock_profil, mock_contexte, service, mock_session):
+    @patch.object(ServiceSuggestions, "call_with_cache_sync")
+    @patch("src.services.cuisine.suggestions.service.AnalyseurIA")
+    def test_suggerer_avec_ia_success(
+        self, mock_analyseur_cls, mock_call_sync, mock_profil, mock_contexte, service, mock_session
+    ):
         """Test suggestions IA réussies."""
         mock_contexte.return_value = ContexteSuggestion(
             ingredients_disponibles=["tomate"],
@@ -762,9 +772,9 @@ class TestServiceSuggestions:
         )
         mock_profil.return_value = ProfilCulinaire(categories_preferees=["italien"])
 
-        # Mock réponse IA
-        service.client_ia.generer.return_value = '[{"nom": "Suggestion IA", "description": "Test"}]'
-        service.analyseur.extraire_json.return_value = [
+        # Mock réponse IA via call_with_cache_sync
+        mock_call_sync.return_value = '[{"nom": "Suggestion IA", "description": "Test"}]'
+        mock_analyseur_cls.return_value.extraire_json.return_value = [
             {"nom": "Suggestion IA", "description": "Test"}
         ]
 
@@ -778,13 +788,17 @@ class TestServiceSuggestions:
 
     @patch.object(ServiceSuggestions, "construire_contexte")
     @patch.object(ServiceSuggestions, "analyser_profil_culinaire")
-    def test_suggerer_avec_ia_with_context(self, mock_profil, mock_contexte, service, mock_session):
+    @patch.object(ServiceSuggestions, "call_with_cache_sync")
+    @patch("src.services.cuisine.suggestions.service.AnalyseurIA")
+    def test_suggerer_avec_ia_with_context(
+        self, mock_analyseur_cls, mock_call_sync, mock_profil, mock_contexte, service, mock_session
+    ):
         """Test suggestions IA avec contexte fourni."""
         contexte = ContexteSuggestion(type_repas="déjeuner")
         mock_profil.return_value = ProfilCulinaire()
 
-        service.client_ia.generer.return_value = "[]"
-        service.analyseur.extraire_json.return_value = []
+        mock_call_sync.return_value = "[]"
+        mock_analyseur_cls.return_value.extraire_json.return_value = []
 
         suggestions = service.suggerer_avec_ia(
             "Test",
@@ -796,12 +810,15 @@ class TestServiceSuggestions:
 
     @patch.object(ServiceSuggestions, "construire_contexte")
     @patch.object(ServiceSuggestions, "analyser_profil_culinaire")
-    def test_suggerer_avec_ia_error(self, mock_profil, mock_contexte, service, mock_session):
+    @patch.object(ServiceSuggestions, "call_with_cache_sync")
+    def test_suggerer_avec_ia_error(
+        self, mock_call_sync, mock_profil, mock_contexte, service, mock_session
+    ):
         """Test gestion erreur IA."""
         mock_contexte.return_value = ContexteSuggestion()
         mock_profil.return_value = ProfilCulinaire()
 
-        service.client_ia.generer.side_effect = Exception("Erreur IA")
+        mock_call_sync.side_effect = Exception("Erreur IA")
 
         suggestions = service.suggerer_avec_ia("Test", session=mock_session)
 
@@ -809,15 +826,17 @@ class TestServiceSuggestions:
 
     @patch.object(ServiceSuggestions, "construire_contexte")
     @patch.object(ServiceSuggestions, "analyser_profil_culinaire")
+    @patch.object(ServiceSuggestions, "call_with_cache_sync")
+    @patch("src.services.cuisine.suggestions.service.AnalyseurIA")
     def test_suggerer_avec_ia_invalid_response(
-        self, mock_profil, mock_contexte, service, mock_session
+        self, mock_analyseur_cls, mock_call_sync, mock_profil, mock_contexte, service, mock_session
     ):
         """Test réponse IA invalide."""
         mock_contexte.return_value = ContexteSuggestion()
         mock_profil.return_value = ProfilCulinaire()
 
-        service.client_ia.generer.return_value = "invalid"
-        service.analyseur.extraire_json.return_value = None  # Pas une liste
+        mock_call_sync.return_value = "invalid"
+        mock_analyseur_cls.return_value.extraire_json.return_value = None  # Pas une liste
 
         suggestions = service.suggerer_avec_ia("Test", session=mock_session)
 

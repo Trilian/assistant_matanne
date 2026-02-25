@@ -47,12 +47,12 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "composant_ui": (".registry", "composant_ui"),
     "obtenir_catalogue": (".registry", "obtenir_catalogue"),
     "rechercher_composants": (".registry", "rechercher_composants"),
-    # ── System (StyleSheet) ────────────────────────────
-    "styled": (".system", "styled"),
-    "StyleSheet": (".system", "StyleSheet"),
     # ── CSS Engine (unified) ───────────────────────────
     "CSSEngine": (".engine", "CSSEngine"),
     "CSSManager": (".engine", "CSSManager"),
+    "StyleSheet": (".engine", "StyleSheet"),
+    "styled": (".engine", "styled"),
+    "styled_with_attrs": (".engine", "styled_with_attrs"),
     "css_class": (".engine", "css_class"),
     "inject_all": (".engine", "inject_all"),
     "charger_css": (".engine", "charger_css"),

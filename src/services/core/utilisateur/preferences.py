@@ -76,7 +76,7 @@ class UserPreferenceService:
             if db_pref:
                 # Update existant
                 self._update_db_from_dataclass(db_pref, prefs)
-                db_pref.updated_at = datetime.now(UTC)
+                db_pref.modifie_le = datetime.now(UTC)
             else:
                 # Insert nouveau
                 db_pref = self._dataclass_to_db(prefs)
@@ -102,14 +102,14 @@ class UserPreferenceService:
         stmt = (
             select(RetourRecette)
             .where(RetourRecette.user_id == self.user_id)
-            .order_by(RetourRecette.created_at.desc())
+            .order_by(RetourRecette.cree_le.desc())
         )
 
         db_feedbacks = db.execute(stmt).scalars().all()
 
         feedbacks: list[FeedbackRecette] = []
         for fb in db_feedbacks:
-            date_fb: date | None = fb.created_at.date() if fb.created_at else None
+            date_fb: date | None = fb.cree_le.date() if fb.cree_le else None
             feedbacks.append(
                 FeedbackRecette(
                     recette_id=fb.recette_id,

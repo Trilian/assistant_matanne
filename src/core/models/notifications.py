@@ -21,14 +21,14 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base, utc_now
-from .mixins import CreatedAtMixin, TimestampFullMixin
+from .mixins import CreeLeMixin, TimestampMixin
 
 # ═══════════════════════════════════════════════════════════
 # TABLE ABONNEMENTS PUSH
 # ═══════════════════════════════════════════════════════════
 
 
-class AbonnementPush(CreatedAtMixin, Base):
+class AbonnementPush(CreeLeMixin, Base):
     """Abonnement push notification.
 
     Table SQL: push_subscriptions
@@ -64,7 +64,7 @@ class AbonnementPush(CreatedAtMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class PreferenceNotification(TimestampFullMixin, Base):
+class PreferenceNotification(TimestampMixin, Base):
     """Préférences de notification par utilisateur.
 
     Table SQL: notification_preferences

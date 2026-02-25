@@ -26,7 +26,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, utc_now
-from .mixins import CreatedAtMixin, TimestampFullMixin
+from .mixins import CreeLeMixin, TimestampMixin
 
 # ═══════════════════════════════════════════════════════════
 # ENUMS
@@ -108,7 +108,7 @@ class PrioriteRemplacement(StrEnum):
 # ═══════════════════════════════════════════════════════════
 
 
-class SessionTravail(CreatedAtMixin, Base):
+class SessionTravail(CreeLeMixin, Base):
     """Session de travail avec chronomètre.
 
     Permet de tracker le temps passé sur chaque activité
@@ -167,7 +167,7 @@ class SessionTravail(CreatedAtMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class VersionPiece(CreatedAtMixin, Base):
+class VersionPiece(CreeLeMixin, Base):
     """Historique des versions/modifications d'une pièce.
 
     Permet de garder un historique des réorganisations,
@@ -218,7 +218,7 @@ class VersionPiece(CreatedAtMixin, Base):
         return f"<VersionPiece(piece={self.piece_id}, v{self.version}, titre='{self.titre}')>"
 
 
-class CoutTravaux(CreatedAtMixin, Base):
+class CoutTravaux(CreeLeMixin, Base):
     """Détail des coûts pour une version de pièce.
 
     Permet de détailler les coûts entre main d'œuvre
@@ -317,7 +317,7 @@ class LogStatutObjet(Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class PieceMaison(TimestampFullMixin, Base):
+class PieceMaison(TimestampMixin, Base):
     """Pièce de la maison avec ses caractéristiques.
 
     Attributes:
@@ -347,7 +347,7 @@ class PieceMaison(TimestampFullMixin, Base):
         return f"<PieceMaison(id={self.id}, nom='{self.nom}', etage={self.etage})>"
 
 
-class ObjetMaison(TimestampFullMixin, Base):
+class ObjetMaison(TimestampMixin, Base):
     """Objet/équipement dans une pièce.
 
     Attributes:
@@ -403,7 +403,7 @@ class ObjetMaison(TimestampFullMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class ZoneJardin(TimestampFullMixin, Base):
+class ZoneJardin(TimestampMixin, Base):
     """Zone du jardin (potager, pelouse, massif, etc.).
 
     Attributes:
@@ -460,7 +460,7 @@ class ZoneJardin(TimestampFullMixin, Base):
         return f"<ZoneJardin(id={self.id}, nom='{self.nom}', type='{self.type_zone}', etat={self.etat_note}/5)>"
 
 
-class PlanteJardin(TimestampFullMixin, Base):
+class PlanteJardin(TimestampMixin, Base):
     """Plante dans une zone du jardin.
 
     Attributes:
@@ -518,7 +518,7 @@ class PlanteJardin(TimestampFullMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class PlanJardin(TimestampFullMixin, Base):
+class PlanJardin(TimestampMixin, Base):
     """Plan 2D du jardin avec ses dimensions.
 
     Attributes:
@@ -552,7 +552,7 @@ class PlanJardin(TimestampFullMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class ActionPlante(CreatedAtMixin, Base):
+class ActionPlante(CreeLeMixin, Base):
     """Historique des actions effectuées sur une plante.
 
     Attributes:

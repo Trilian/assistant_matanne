@@ -18,6 +18,7 @@ from src.core.ai import ClientIA, obtenir_client_ia
 from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import Project
 from src.services.core.base import BaseAIService
+from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
 
 from .schemas import (
@@ -397,6 +398,32 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
                 "retour_annees": None,
                 "aides_estimees": 0,
             }
+
+    # ─────────────────────────────────────────────────────────
+    # ÉMISSION D'ÉVÉNEMENTS — Appelé par les modules après CRUD
+    # ─────────────────────────────────────────────────────────
+
+    @staticmethod
+    def emettre_modification(
+        projet_id: int = 0,
+        nom: str = "",
+        action: str = "modifie",
+    ) -> None:
+        """Émet un événement projets.modifie pour déclencher l'invalidation de cache.
+
+        Doit être appelé par les modules après ajout/modification/suppression
+        d'un projet.
+
+        Args:
+            projet_id: ID du projet
+            nom: Nom du projet
+            action: "cree", "modifie", "archive", "tache_ajoutee"
+        """
+        obtenir_bus().emettre(
+            "projets.modifie",
+            {"projet_id": projet_id, "nom": nom, "action": action},
+            source="projets",
+        )
 
     # ─────────────────────────────────────────────────────────
     # CRUD HELPERS

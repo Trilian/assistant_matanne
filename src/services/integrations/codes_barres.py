@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_session_db
-from src.core.errors_base import ErreurNonTrouve, ErreurValidation
+from src.core.exceptions import ErreurNonTrouve, ErreurValidation
 from src.core.models import ArticleInventaire
 from src.services.core.base import BaseService
 

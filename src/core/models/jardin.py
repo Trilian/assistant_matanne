@@ -24,7 +24,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
-from .mixins import CreatedAtMixin, TimestampFullMixin
+from .mixins import CreeLeMixin, TimestampMixin
 
 # ═══════════════════════════════════════════════════════════
 # ENUMS
@@ -55,7 +55,7 @@ class TypeAlerteMeteo(StrEnum):
 # ═══════════════════════════════════════════════════════════
 
 
-class AlerteMeteo(CreatedAtMixin, Base):
+class AlerteMeteo(CreeLeMixin, Base):
     """Alerte météo pour le jardin.
 
     Table SQL: alertes_meteo
@@ -98,7 +98,7 @@ class AlerteMeteo(CreatedAtMixin, Base):
 # ═══════════════════════════════════════════════════════════
 
 
-class ConfigMeteo(TimestampFullMixin, Base):
+class ConfigMeteo(TimestampMixin, Base):
     """Configuration météo par utilisateur.
 
     Table SQL: config_meteo

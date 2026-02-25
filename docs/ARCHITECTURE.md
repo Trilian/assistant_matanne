@@ -1,4 +1,4 @@
-# 🏗️ Architecture Technique - Assistant Matanne
+﻿# 🏗️ Architecture Technique - Assistant Matanne
 
 > **Dernière mise à jour**: 25 Juin 2025
 
@@ -13,7 +13,7 @@
 │       │            │            │            │                   │
 │       └────────────┴─────┬──────┴────────────┘                  │
 │                          │                                       │
-│                    RouteurOptimise (lazy loading)                │
+│              st.navigation() + ChargeurModuleDiffere            │
 └──────────────────────────┼───────────────────────────────────────┘
                            │
 ┌──────────────────────────┼───────────────────────────────────────┐
@@ -79,8 +79,8 @@ src/core/
 ├── constants.py     # Constantes globales
 ├── container.py     # IoC Container — injection de dépendances typée
 ├── errors.py        # Classes d'erreurs métier (UI)
-├── errors_base.py   # Classe de base ExceptionApp + guards
-├── lazy_loader.py   # ChargeurModuleDiffere, RouteurOptimise, MODULE_REGISTRY
+├── exceptions.py   # Classe de base ExceptionApp + guards (→ sera renommé exceptions.py)
+├── lazy_loader.py   # ChargeurModuleDiffere (chargement différé des modules)
 ├── logging.py       # Configuration logging
 ├── repository.py    # Repository générique CRUD typé
 ├── session_keys.py  # Clés de session typées (KeyNamespace)
@@ -359,54 +359,22 @@ Fichiers clés: `ai_service.py`, `ai_mixins.py`, `ai_prompts.py`, `ai_streaming.
 
 Chaque service domaine exporte une fonction factory `get_{service_name}_service()`.
 
-## Lazy Loading (RouteurOptimise)
+## Lazy Loading (st.navigation + ChargeurModuleDiffere)
 
-Le registry des modules est défini dans `src/core/lazy_loader.py` → `RouteurOptimise.MODULE_REGISTRY`:
+Le routage multi-pages utilise `st.navigation()` configuré dans `src/core/navigation.py` via `construire_pages()`.
+Le chargement différé des modules est géré par `ChargeurModuleDiffere` dans `src/core/lazy_loader.py`.
 
 ```python
-# src/core/lazy_loader.py
-MODULE_REGISTRY = {
-    "accueil":                      {"path": "src.modules.accueil"},
-    "planning.calendrier":          {"path": "src.modules.planning.calendrier"},
-    "planning.templates_ui":        {"path": "src.modules.planning.templates_ui"},
-    "planning.timeline_ui":         {"path": "src.modules.planning.timeline_ui"},
-    "cuisine.recettes":             {"path": "src.modules.cuisine.recettes"},
-    "cuisine.inventaire":           {"path": "src.modules.cuisine.inventaire"},
-    "cuisine.planificateur_repas":  {"path": "src.modules.cuisine.planificateur_repas"},
-    "cuisine.batch_cooking_detaille": {"path": "src.modules.cuisine.batch_cooking_detaille"},
-    "cuisine.courses":              {"path": "src.modules.cuisine.courses"},
-    "famille.hub":                  {"path": "src.modules.famille.hub_famille"},
-    "famille.jules":                {"path": "src.modules.famille.jules"},
-    "famille.jules_planning":       {"path": "src.modules.famille.jules_planning"},
-    "famille.suivi_perso":          {"path": "src.modules.famille.suivi_perso"},
-    "famille.weekend":              {"path": "src.modules.famille.weekend"},
-    "famille.achats_famille":       {"path": "src.modules.famille.achats_famille"},
-    "famille.activites":            {"path": "src.modules.famille.activites"},
-    "famille.routines":             {"path": "src.modules.famille.routines"},
-    "maison.hub":                   {"path": "src.modules.maison.hub"},
-    "maison.jardin":                {"path": "src.modules.maison.jardin"},
-    "maison.entretien":             {"path": "src.modules.maison.entretien"},
-    "maison.depenses":              {"path": "src.modules.maison.depenses"},
-    "maison.charges":               {"path": "src.modules.maison.charges"},
-    "jeux.paris":                   {"path": "src.modules.jeux.paris"},
-    "jeux.loto":                    {"path": "src.modules.jeux.loto"},
-    "barcode":                      {"path": "src.modules.utilitaires.barcode"},
-    "rapports":                     {"path": "src.modules.utilitaires.rapports"},
-    "scan_factures":                {"path": "src.modules.utilitaires.scan_factures"},
-    "recherche_produits":           {"path": "src.modules.utilitaires.recherche_produits"},
-    "parametres":                   {"path": "src.modules.parametres"},
-    "notifications_push":           {"path": "src.modules.utilitaires.notifications_push"},
-}
-
-# Chaque module exporte app()
+# src/core/navigation.py — construire_pages() enregistre chaque module comme st.Page()
+# Chaque module exporte app() comme point d'entrée
 def app():
     """Point d'entrée module"""
     st.title("Mon Module")
 ```
 
-**Performance**: ~60% d'accélération au démarrage
+**Performance**: ~60% d'accélération au démarrage grâce au chargement différé
 
-**Bootstrap**: `src/app.py` appelle `demarrer_application()` (IoC) puis `RouteurOptimise.charger_module()`.
+**Bootstrap**: `src/app.py` appelle `demarrer_application()` (IoC) puis `st.navigation()` charge le module sélectionné.
 
 ## Modules Métier (src/modules/)
 

@@ -25,8 +25,8 @@ RECETTES_TEST = [
         "portions": 8,
         "difficulte": "moyen",
         "categorie": "Dessert",
-        "created_at": datetime(2026, 1, 1, 10, 0),
-        "updated_at": None,
+        "cree_le": datetime(2026, 1, 1, 10, 0),
+        "modifie_le": None,
     },
     {
         "id": 2,
@@ -37,8 +37,8 @@ RECETTES_TEST = [
         "portions": 4,
         "difficulte": "facile",
         "categorie": "Plat",
-        "created_at": datetime(2026, 1, 2, 12, 0),
-        "updated_at": None,
+        "cree_le": datetime(2026, 1, 2, 12, 0),
+        "modifie_le": None,
     },
     {
         "id": 3,
@@ -49,8 +49,8 @@ RECETTES_TEST = [
         "portions": 6,
         "difficulte": "facile",
         "categorie": "Entrée",
-        "created_at": datetime(2026, 1, 3, 18, 0),
-        "updated_at": None,
+        "cree_le": datetime(2026, 1, 3, 18, 0),
+        "modifie_le": None,
     },
 ]
 
@@ -281,15 +281,15 @@ class TestRoutesRecettesAvecMock:
             {
                 **RECETTE_NOUVELLE,
                 "id": 4,
-                "created_at": datetime.now(),
-                "updated_at": None,
+                "cree_le": datetime.now(),
+                "modifie_le": None,
             }
         )
 
         def fake_refresh(obj):
             obj.id = 4
-            obj.created_at = datetime.now()
-            obj.updated_at = None
+            obj.cree_le = datetime.now()
+            obj.modifie_le = None
 
         mock_session.add.return_value = None
         mock_session.commit.return_value = None

@@ -7,7 +7,7 @@ Convention : Noms en français uniquement.
 Usage recommandé (imports directs depuis les sous-modules):
     from src.core.config import obtenir_parametres
     from src.core.db import obtenir_contexte_db
-    from src.core.errors_base import ErreurValidation
+    from src.core.exceptions import ErreurValidation
 
 Usage général (lazy, via __getattr__):
     from src.core import obtenir_parametres  # charge config/ à la demande
@@ -68,10 +68,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "BulkheadPolicy": (".resilience", "BulkheadPolicy"),
     "FallbackPolicy": (".resilience", "FallbackPolicy"),
     "PolicyComposee": (".resilience", "PolicyComposee"),
-    "politique_api_externe": (".resilience", "politique_api_externe"),
-    "politique_base_de_donnees": (".resilience", "politique_base_de_donnees"),
-    "politique_cache": (".resilience", "politique_cache"),
-    "politique_ia": (".resilience", "politique_ia"),
     # Observability (Correlation ID)
     "ContexteExecution": (".observability", "ContexteExecution"),
     "obtenir_contexte": (".observability", "obtenir_contexte"),
@@ -97,26 +93,25 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "avec_resilience": (".decorators", "avec_resilience"),
     "avec_session_db": (".decorators", "avec_session_db"),
     "avec_validation": (".decorators", "avec_validation"),
-    "cache_ui": (".decorators", "cache_ui"),
     # Errors (UI)
     "GestionnaireErreurs": (".errors", "GestionnaireErreurs"),
     "afficher_erreur_streamlit": (".errors", "afficher_erreur_streamlit"),
-    # Errors Base (pures)
-    "ErreurBaseDeDonnees": (".errors_base", "ErreurBaseDeDonnees"),
-    "ErreurConfiguration": (".errors_base", "ErreurConfiguration"),
-    "ErreurLimiteDebit": (".errors_base", "ErreurLimiteDebit"),
-    "ErreurNonTrouve": (".errors_base", "ErreurNonTrouve"),
-    "ErreurServiceExterne": (".errors_base", "ErreurServiceExterne"),
-    "ErreurServiceIA": (".errors_base", "ErreurServiceIA"),
-    "ErreurValidation": (".errors_base", "ErreurValidation"),
-    "ExceptionApp": (".errors_base", "ExceptionApp"),
-    "exiger_champs": (".errors_base", "exiger_champs"),
-    "exiger_existence": (".errors_base", "exiger_existence"),
-    "exiger_longueur": (".errors_base", "exiger_longueur"),
-    "exiger_plage": (".errors_base", "exiger_plage"),
-    "exiger_positif": (".errors_base", "exiger_positif"),
-    "valider_plage": (".errors_base", "valider_plage"),
-    "valider_type": (".errors_base", "valider_type"),
+    # Exceptions (pures)
+    "ErreurBaseDeDonnees": (".exceptions", "ErreurBaseDeDonnees"),
+    "ErreurConfiguration": (".exceptions", "ErreurConfiguration"),
+    "ErreurLimiteDebit": (".exceptions", "ErreurLimiteDebit"),
+    "ErreurNonTrouve": (".exceptions", "ErreurNonTrouve"),
+    "ErreurServiceExterne": (".exceptions", "ErreurServiceExterne"),
+    "ErreurServiceIA": (".exceptions", "ErreurServiceIA"),
+    "ErreurValidation": (".exceptions", "ErreurValidation"),
+    "ExceptionApp": (".exceptions", "ExceptionApp"),
+    "exiger_champs": (".exceptions", "exiger_champs"),
+    "exiger_existence": (".exceptions", "exiger_existence"),
+    "exiger_longueur": (".exceptions", "exiger_longueur"),
+    "exiger_plage": (".exceptions", "exiger_plage"),
+    "exiger_positif": (".exceptions", "exiger_positif"),
+    "valider_plage": (".exceptions", "valider_plage"),
+    "valider_type": (".exceptions", "valider_type"),
     # Lazy Loader
     "ChargeurModuleDiffere": (".lazy_loader", "ChargeurModuleDiffere"),
     "afficher_stats_chargement_differe": (".lazy_loader", "afficher_stats_chargement_differe"),

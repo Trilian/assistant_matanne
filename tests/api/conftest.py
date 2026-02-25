@@ -411,8 +411,8 @@ def mock_database_for_api(monkeypatch):
     mock_recette.portions = 4
     mock_recette.difficulte = "moyen"
     mock_recette.categorie = "plats"
-    mock_recette.created_at = None
-    mock_recette.updated_at = None
+    mock_recette.cree_le = None
+    mock_recette.modifie_le = None
 
     # Mock query chain
     mock_query = MagicMock()

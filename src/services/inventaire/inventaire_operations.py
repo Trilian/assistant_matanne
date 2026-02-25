@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.errors_base import ErreurValidation
+from src.core.exceptions import ErreurValidation
 from src.core.models import ArticleInventaire
 from src.services.core.events.bus import obtenir_bus
 

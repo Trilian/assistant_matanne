@@ -13,7 +13,6 @@ from src.core import lazy_loader
 from src.core.lazy_loader import (
     ChargeurModuleDiffere,
     afficher_stats_chargement_differe,
-    lazy_import,
 )
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -38,8 +37,6 @@ def nettoyer_cache():
 def test_import_lazy_loader():
     """Vérifie que le module lazy_loader s'importe sans erreur."""
     assert hasattr(lazy_loader, "ChargeurModuleDiffere")
-    assert hasattr(lazy_loader, "ChargeurModuleDiffere")
-    assert hasattr(lazy_loader, "lazy_import")
     assert hasattr(lazy_loader, "afficher_stats_chargement_differe")
 
 
@@ -189,63 +186,6 @@ class TestChargeurModuleDiffereViderCache:
 
 
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-# TESTS DECORATOR LAZY_IMPORT
-# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestLazyImportDecorator:
-    """Tests du décorateur lazy_import"""
-
-    def test_lazy_import_sans_attr_name(self):
-        """Test lazy_import sans attr_name"""
-
-        @lazy_import("json")
-        def utiliser_json():
-            return True
-
-        result = utiliser_json()
-        assert result is True
-
-    def test_lazy_import_avec_attr_name(self):
-        """Test lazy_import avec attr_name injecte dans globals"""
-
-        # On utilise loads depuis json car c'est un attribut valide
-        @lazy_import("json", "loads")
-        def utiliser_json_loads():
-            # L'attribut 'loads' devrait être injecté dans globals
-            return True
-
-        result = utiliser_json_loads()
-        assert result is True
-
-    def test_lazy_import_charge_module(self):
-        """Test que lazy_import charge bien le module"""
-
-        @lazy_import("collections")
-        def get_counter():
-            import collections
-
-            return collections.Counter
-
-        result = get_counter()
-        assert result is not None
-
-
-# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-# TESTS ROUTEUR OPTIMISE
-# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-
-
-@pytest.mark.skip(reason="RouteurOptimise removed — routing via navigation.py")
-class TestRouteurOptimise:
-    """Tests du routeur optimisé — DEPRECATED (removed in Sprint 3)."""
-
-    def test_placeholder(self):
-        pass
-
-
-# ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 # TESTS AFFICHER STATS
 # ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
@@ -383,54 +323,6 @@ class TestChargeurModuleDiffereAdvanced:
 
         stats = ChargeurModuleDiffere.obtenir_statistiques()
         assert "cached_modules" in stats
-
-
-@pytest.mark.skip(reason="RouteurOptimise removed — routing via navigation.py")
-class TestRouteurOptimiseAdvanced:
-    """Tests avancés pour RouteurOptimise — DEPRECATED (removed in Sprint 3)."""
-
-    def test_placeholder(self):
-        pass
-
-
-@pytest.mark.unit
-class TestLazyImportAdvanced:
-    """Tests avancés pour le décorateur lazy_import."""
-
-    def test_lazy_import_preserves_function_name(self):
-        """Test que lazy_import préserve le nom de la fonction."""
-
-        @lazy_import("json")
-        def ma_fonction():
-            return True
-
-        assert ma_fonction.__name__ == "ma_fonction"
-
-    def test_lazy_import_with_submodule(self):
-        """Test lazy_import avec sous-module."""
-
-        @lazy_import("os.path")
-        def use_path():
-            import os.path
-
-            return os.path.exists(".")
-
-        result = use_path()
-        assert result is True
-
-    def test_lazy_import_function_called_multiple_times(self):
-        """Test que la fonction décorée peut être appelée plusieurs fois."""
-        call_count = 0
-
-        @lazy_import("json")
-        def increment():
-            nonlocal call_count
-            call_count += 1
-            return call_count
-
-        assert increment() == 1
-        assert increment() == 2
-        assert increment() == 3
 
 
 @pytest.mark.unit

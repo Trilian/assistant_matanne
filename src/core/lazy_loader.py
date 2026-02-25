@@ -8,13 +8,11 @@ Réduit temps chargement initial de 60%
 __all__ = [
     "ChargeurModuleDiffere",
     "afficher_stats_chargement_differe",
-    "lazy_import",
 ]
 
 import importlib
 import logging
 import time
-from functools import wraps
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -139,39 +137,6 @@ class ChargeurModuleDiffere:
         ChargeurModuleDiffere._cache.clear()
         ChargeurModuleDiffere._load_times.clear()
         logger.info("🗑️ Cache lazy loader vidé")
-
-
-# ═══════════════════════════════════════════════════════════
-# DECORATOR LAZY LOAD
-# ═══════════════════════════════════════════════════════════
-
-
-def lazy_import(module_path: str, attr_name: str | None = None):
-    """
-    Decorator pour import lazy
-
-    Usage:
-        @lazy_import("src.services.recettes", "recette_service")
-        def my_function():
-            # recette_service sera chargé uniquement ici
-            return recette_service.get_all()
-    """
-
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            # Charger module
-            module = ChargeurModuleDiffere.charger(module_path)
-
-            # Injecter dans globals si attr_name fourni
-            if attr_name:
-                func.__globals__[attr_name] = getattr(module, attr_name)
-
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
 
 
 # ═══════════════════════════════════════════════════════════

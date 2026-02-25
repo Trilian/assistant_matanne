@@ -56,8 +56,8 @@ def charger_factures(session=None) -> list[dict]:
                 "consommation": exp.consommation or 0.0,
                 "date": f"{exp.annee}-{exp.mois:02d}-01",
                 "fournisseur": exp.fournisseur,
-                "date_ajout": exp.created_at.date().isoformat()
-                if exp.created_at
+                "date_ajout": exp.cree_le.date().isoformat()
+                if exp.cree_le
                 else date.today().isoformat(),
             }
         )

@@ -14,7 +14,7 @@ from datetime import date, datetime
 from typing import TYPE_CHECKING, Any
 
 from src.core.decorators import avec_gestion_erreurs
-from src.core.errors_base import ErreurValidation
+from src.core.exceptions import ErreurValidation
 
 from .types import ArticleImport
 

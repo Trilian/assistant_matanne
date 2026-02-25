@@ -14,10 +14,6 @@ from src.core.resilience.policies import (
     RetryPolicy,
     TimeoutPolicy,
     _get_timeout_executor,
-    politique_api_externe,
-    politique_base_de_donnees,
-    politique_cache,
-    politique_ia,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -482,93 +478,6 @@ class TestPolicyComposee:
         assert "PolicyComposee" in repr_str
         assert "RetryPolicy" in repr_str
         assert "TimeoutPolicy" in repr_str
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS FACTORIES
-# ═══════════════════════════════════════════════════════════
-
-
-class TestFactories:
-    """Tests pour les fonctions factory."""
-
-    @pytest.mark.unit
-    def test_politique_api_externe(self):
-        """politique_api_externe() crée la bonne composition."""
-        policy = politique_api_externe()
-
-        assert isinstance(policy, PolicyComposee)
-        assert len(policy.policies) == 3
-
-        types = [type(p).__name__ for p in policy.policies]
-        assert "TimeoutPolicy" in types
-        assert "RetryPolicy" in types
-        assert "BulkheadPolicy" in types
-
-    @pytest.mark.unit
-    def test_politique_base_de_donnees(self):
-        """politique_base_de_donnees() crée la bonne composition."""
-        policy = politique_base_de_donnees()
-
-        assert isinstance(policy, PolicyComposee)
-        assert len(policy.policies) == 2
-
-        timeout = policy.policies[0]
-        retry = policy.policies[1]
-
-        assert isinstance(timeout, TimeoutPolicy)
-        assert timeout.timeout_secondes == 10.0
-        assert isinstance(retry, RetryPolicy)
-        assert retry.max_tentatives == 2
-
-    @pytest.mark.unit
-    def test_politique_cache(self):
-        """politique_cache() crée la bonne composition."""
-        policy = politique_cache()
-
-        assert isinstance(policy, PolicyComposee)
-        assert len(policy.policies) == 2
-
-        timeout = policy.policies[0]
-        fallback = policy.policies[1]
-
-        assert isinstance(timeout, TimeoutPolicy)
-        assert timeout.timeout_secondes == 1.0
-        assert isinstance(fallback, FallbackPolicy)
-        assert fallback.fallback_value is None
-
-    @pytest.mark.unit
-    def test_politique_ia(self):
-        """politique_ia() crée la bonne composition."""
-        policy = politique_ia()
-
-        assert isinstance(policy, PolicyComposee)
-        assert len(policy.policies) == 3
-
-        timeout = policy.policies[0]
-        retry = policy.policies[1]
-        bulkhead = policy.policies[2]
-
-        assert isinstance(timeout, TimeoutPolicy)
-        assert timeout.timeout_secondes == 60.0
-        assert isinstance(retry, RetryPolicy)
-        assert retry.delai_base == 2.0
-        assert retry.facteur_backoff == 3.0
-        assert isinstance(bulkhead, BulkheadPolicy)
-        assert bulkhead.max_concurrent == 3
-
-    @pytest.mark.unit
-    def test_factory_execution_fonctionnelle(self):
-        """Les policies factory peuvent exécuter des fonctions."""
-        for factory in [
-            politique_api_externe,
-            politique_base_de_donnees,
-            politique_cache,
-            politique_ia,
-        ]:
-            policy = factory()
-            result = policy.executer(lambda: "ok")
-            assert result == "ok"
 
 
 # ═══════════════════════════════════════════════════════════

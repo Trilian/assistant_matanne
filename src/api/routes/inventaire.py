@@ -5,20 +5,26 @@ Gestion du stock alimentaire : suivi des quantités, dates de péremption,
 alertes de stock bas et recherche par code-barres.
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
-from src.api.schemas import InventaireItemCreate, InventaireItemResponse, MessageResponse
-from src.api.utils import executer_async, executer_avec_session
+from src.api.schemas import (
+    InventaireItemCreate,
+    InventaireItemResponse,
+    MessageResponse,
+    ReponsePaginee,
+)
+from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/inventaire", tags=["Inventaire"])
 
 
-@router.get("")
-async def list_inventaire(
+@router.get("", response_model=ReponsePaginee[InventaireItemResponse])
+@gerer_exception_api
+async def lister_inventaire(
     page: int = Query(1, ge=1, description="Numéro de page (1-indexé)"),
     page_size: int = Query(50, ge=1, le=200, description="Nombre d'éléments par page (max 200)"),
     categorie: str | None = Query(None, description="Filtrer par catégorie d'ingrédient"),
@@ -81,7 +87,7 @@ async def list_inventaire(
                 query = query.filter(ArticleInventaire.quantite <= ArticleInventaire.quantite_min)
 
             if peremption_proche:
-                seuil = datetime.now() + timedelta(days=7)
+                seuil = datetime.now(UTC) + timedelta(days=7)
                 query = query.filter(ArticleInventaire.date_peremption <= seuil)
 
             total = query.count()
@@ -117,7 +123,8 @@ async def list_inventaire(
 
 
 @router.post("", response_model=InventaireItemResponse)
-async def create_inventaire_item(
+@gerer_exception_api
+async def creer_article_inventaire(
     item: InventaireItemCreate, user: dict[str, Any] = Depends(require_auth)
 ):
     """
@@ -175,7 +182,8 @@ async def create_inventaire_item(
 
 
 @router.get("/barcode/{code}")
-async def get_by_barcode(code: str):
+@gerer_exception_api
+async def obtenir_par_code_barres(code: str):
     """
     Récupère un article par son code-barres.
 
@@ -223,7 +231,8 @@ async def get_by_barcode(code: str):
 
 
 @router.get("/{item_id}", response_model=InventaireItemResponse)
-async def get_inventaire_item(item_id: int):
+@gerer_exception_api
+async def obtenir_article_inventaire(item_id: int):
     """
     Récupère un article d'inventaire par son ID.
 
@@ -267,7 +276,8 @@ async def get_inventaire_item(item_id: int):
 
 
 @router.put("/{item_id}", response_model=InventaireItemResponse)
-async def update_inventaire_item(
+@gerer_exception_api
+async def modifier_article_inventaire(
     item_id: int, item: InventaireItemCreate, user: dict[str, Any] = Depends(require_auth)
 ):
     """
@@ -326,7 +336,8 @@ async def update_inventaire_item(
 
 
 @router.delete("/{item_id}", response_model=MessageResponse)
-async def delete_inventaire_item(item_id: int, user: dict[str, Any] = Depends(require_auth)):
+@gerer_exception_api
+async def supprimer_article_inventaire(item_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
     Supprime un article d'inventaire.
 

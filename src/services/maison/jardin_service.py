@@ -20,6 +20,7 @@ from src.core.ai import ClientIA, obtenir_client_ia
 from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import ElementJardin
 from src.services.core.base import BaseAIService
+from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
 
 from .jardin_gamification_mixin import BADGES_JARDIN, JardinGamificationMixin
@@ -389,6 +390,32 @@ Réponds en JSON:
     def get_saison_actuelle() -> str:
         """Alias anglais pour obtenir_saison_actuelle (rétrocompatibilité)."""
         return JardinService.obtenir_saison_actuelle()
+
+    # ─────────────────────────────────────────────────────────
+    # ÉMISSION D'ÉVÉNEMENTS — Appelé par les modules après CRUD
+    # ─────────────────────────────────────────────────────────
+
+    @staticmethod
+    def emettre_modification(
+        element_id: int = 0,
+        nom: str = "",
+        action: str = "modifie",
+    ) -> None:
+        """Émet un événement jardin.modifie pour déclencher l'invalidation de cache.
+
+        Doit être appelé par les modules après ajout/modification/suppression
+        d'un élément jardin.
+
+        Args:
+            element_id: ID de l'élément
+            nom: Nom de l'élément
+            action: "plante_ajoutee", "arrosage", "recolte", "supprime"
+        """
+        obtenir_bus().emettre(
+            "jardin.modifie",
+            {"element_id": element_id, "nom": nom, "action": action},
+            source="jardin",
+        )
 
     @avec_cache(ttl=300)
     @avec_session_db

@@ -2,7 +2,7 @@
 Tests unitaires pour errors.py (src/core/errors.py).
 
 Tests couvrant:
-- Re-export des exceptions pures depuis errors_base.py
+- Re-export des exceptions pures depuis exceptions.py
 - Gestion d'affichage des erreurs Streamlit
 - Logging des erreurs
 """
@@ -30,7 +30,7 @@ from src.core.errors import (
     ErreurValidation,
     ExceptionApp,
 )
-from src.core.errors_base import (
+from src.core.exceptions import (
     exiger_champs,
     valider_plage,
     valider_type,
@@ -43,7 +43,7 @@ from src.core.errors_base import (
 
 @pytest.mark.unit
 class TestExceptionsReExports:
-    """Tests des re-exports d'exceptions depuis errors_base."""
+    """Tests des re-exports d'exceptions depuis exceptions."""
 
     def test_erreur_base_de_donnees_exists(self):
         """Test que ErreurBaseDeDonnees est importable."""

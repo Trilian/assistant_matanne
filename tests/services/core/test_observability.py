@@ -1,4 +1,4 @@
-"""Tests pour le package Observability — Métriques, spans, health checks."""
+"""Tests pour le package Observability — Métriques, health checks."""
 
 import time
 from datetime import datetime
@@ -17,12 +17,6 @@ from src.services.core.observability.metrics import (
     MetricsCollector,
     MetricType,
     ServiceMetrics,
-)
-from src.services.core.observability.spans import (
-    Span,
-    SpanContext,
-    SpanStatus,
-    SpanStore,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -165,112 +159,6 @@ class TestMetricsCollector:
         # Les stats sont dans services
         assert "stats_service_a" in all_stats["services"]
         assert "stats_service_b" in all_stats["services"]
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS SPANS
-# ═══════════════════════════════════════════════════════════
-
-
-class TestSpan:
-    """Tests de la classe Span."""
-
-    def test_span_creation(self):
-        """Création d'un span."""
-        span = Span(
-            service_name="test_service",
-            operation_name="test_operation",
-        )
-
-        assert span.operation_name == "test_operation"
-        assert span.service_name == "test_service"
-        assert span.trace_id is not None
-        assert span.span_id is not None
-
-    def test_span_context_manager(self):
-        """Span comme context manager."""
-        with Span(service_name="svc", operation_name="test") as span:
-            span.set_attribute("key", "value")
-            time.sleep(0.01)
-
-        assert span.status == SpanStatus.OK
-        assert span.duration_ms >= 10  # Au moins 10ms
-        assert span.attributes["key"] == "value"
-
-    def test_span_error(self):
-        """Span avec erreur."""
-        try:
-            with Span(service_name="svc", operation_name="failing") as span:
-                raise ValueError("Test error")
-        except ValueError:
-            pass
-
-        assert span.status == SpanStatus.ERROR
-        # L'exception est enregistrée dans les events
-        assert len(span.events) >= 1
-        exception_event = span.events[-1]
-        assert exception_event["name"] == "exception"
-        assert exception_event["attributes"]["type"] == "ValueError"
-
-    def test_span_add_event(self):
-        """Ajouter un événement au span."""
-        span = Span(service_name="svc", operation_name="test")
-        span.add_event("cache_hit", {"key": "recipe_123"})
-
-        assert len(span.events) == 1
-        assert span.events[0]["name"] == "cache_hit"
-
-
-class TestSpanContext:
-    """Tests de SpanContext avec le registre."""
-
-    def test_span_enter_sets_current(self):
-        """Span.__enter__ définit le span courant."""
-        from src.services.core.observability.spans import current_span
-
-        with Span(service_name="svc", operation_name="outer") as span:
-            current = current_span()
-            assert current is not None
-            assert current.operation_name == "outer"
-
-    def test_nested_spans_parent(self):
-        """Spans imbriqués héritent du parent."""
-        with Span(service_name="svc", operation_name="parent") as parent:
-            with Span(service_name="svc", operation_name="child") as child:
-                assert child.parent_span_id == parent.span_id
-                assert child.trace_id == parent.trace_id
-
-
-class TestSpanStore:
-    """Tests de SpanStore."""
-
-    def test_record_span(self):
-        """Enregistrer un span."""
-        store = SpanStore()
-        store.clear()
-
-        span = Span(service_name="svc", operation_name="test")
-        span.__enter__()  # Démarre le span
-        span.__exit__(None, None, None)  # Termine le span
-        store.record(span)
-
-        recent = store.get_recent()
-        assert len(recent) == 1
-
-    def test_get_by_trace(self):
-        """Récupérer par trace_id."""
-        store = SpanStore()
-        store.clear()
-
-        span = Span(service_name="svc", operation_name="test")
-        span.__enter__()
-        span.__exit__(None, None, None)
-        store.record(span)
-
-        retrieved = store.get_by_trace(span.trace_id)
-        assert len(retrieved) == 1
-        # Les spans stockés sont des dicts
-        assert retrieved[0]["span_id"] == span.span_id
 
 
 # ═══════════════════════════════════════════════════════════

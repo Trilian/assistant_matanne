@@ -7,7 +7,7 @@ import logging
 
 import streamlit as st
 
-from src.core.errors_base import ErreurValidation
+from src.core.exceptions import ErreurValidation
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui import etat_vide
 

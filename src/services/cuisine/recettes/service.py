@@ -1,29 +1,31 @@
 """
-Service Recettes Unifié (REFACTORING PHASE 2)
+Service Recettes Unifié (REFACTORING PHASE 3)
 
 ✅ Utilise @avec_session_db et @avec_cache (Phase 1)
 ✅ Validation Pydantic centralisée (RecetteInput, etc.)
 ✅ Type hints complets pour meilleur IDE support
 ✅ Services testables sans Streamlit
+✅ Mixins extraits pour réduire LOC (Phase 3)
 
 Service complet pour les recettes fusionnant :
 - recette_service.py (CRUD + recherche)
 - recette_ai_service.py (Génération IA)
 - recette_io_service.py (Import/Export)
 - recette_version_service.py (Versions bébé/batch)
+
+Mixins extraits:
+- recherche_mixin.py: Recherche avancée multi-critères
+- io_mixin.py: Import/Export CSV/JSON
 """
 
-import csv
-import json
 import logging
-from io import StringIO
 
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from src.core.ai import obtenir_client_ia
 from src.core.caching import Cache
-from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.errors_base import ErreurNonTrouve, ErreurValidation
+from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db, avec_validation
+from src.core.exceptions import ErreurValidation
 from src.core.models import (
     EtapeRecette,
     Ingredient,
@@ -31,11 +33,15 @@ from src.core.models import (
     RecetteIngredient,
     VersionRecette,
 )
-from src.core.validation import EtapeInput, IngredientInput, RecetteInput
+from src.core.monitoring import chronometre
+from src.core.validation import RecetteInput
 from src.services.core.base import BaseAIService, BaseService, RecipeAIMixin
 from src.services.core.events.bus import obtenir_bus
 
-from .recettes_ia_generation import RecettesIAGenerationMixin
+from .io_mixin import RecetteIOMixin
+from .recettes_ia_suggestions import RecettesIASuggestionsMixin
+from .recettes_ia_versions import RecettesIAVersionsMixin
+from .recherche_mixin import RecetteRechercheMixin
 from .types import (
     RecetteSuggestion,
     VersionBatchCookingGeneree,
@@ -52,7 +58,13 @@ logger = logging.getLogger(__name__)
 
 
 class ServiceRecettes(
-    BaseService[Recette], BaseAIService, RecipeAIMixin, RecettesIAGenerationMixin
+    BaseService[Recette],
+    BaseAIService,
+    RecipeAIMixin,
+    RecettesIASuggestionsMixin,
+    RecettesIAVersionsMixin,
+    RecetteRechercheMixin,
+    RecetteIOMixin,
 ):
     """
     Service complet pour les recettes.
@@ -61,6 +73,8 @@ class ServiceRecettes(
     - BaseService → CRUD optimisé
     - BaseAIService → IA avec rate limiting auto
     - RecipeAIMixin → Contextes métier recettes
+    - RecetteRechercheMixin → Recherche avancée multi-critères
+    - RecetteIOMixin → Import/Export CSV/JSON
 
     Fonctionnalités :
     - CRUD optimisé avec cache
@@ -88,6 +102,7 @@ class ServiceRecettes(
     # SECTION 1 : CRUD OPTIMISÉ
     # ═══════════════════════════════════════════════════════════
 
+    @chronometre("recettes.chargement_complet", seuil_alerte_ms=1500)
     @avec_cache(ttl=3600, key_func=lambda self, recette_id: f"recette_full_{recette_id}")
     @avec_session_db
     def get_by_id_full(self, recette_id: int, db: Session) -> Recette | None:
@@ -119,13 +134,6 @@ class ServiceRecettes(
             logger.error(f"Erreur récupération recette {recette_id}: {e}")
             return None
 
-    @avec_cache(ttl=1800)
-    @avec_gestion_erreurs(default_return=[])
-    @avec_session_db
-    def get_by_type(self, type_repas: str, db: Session = None) -> list[Recette]:
-        """Récupère les recettes d'un type donné."""
-        return db.query(Recette).filter(Recette.type_repas == type_repas).all()
-
     @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
     @avec_session_db
     def create_complete(self, data: dict, db: Session) -> Recette:
@@ -142,38 +150,18 @@ class ServiceRecettes(
         """
         from datetime import datetime
 
-        # Conversion des ingrédients en IngredientInput objects si ce sont des dicts
-        ingredients_data = data.get("ingredients") or []
-        if ingredients_data and isinstance(ingredients_data[0], dict):
-            data["ingredients"] = [
-                IngredientInput(
-                    nom=ing.get("nom", ""),
-                    quantite=ing.get("quantite", 1.0),
-                    unite=ing.get("unite", ""),
-                )
-                for ing in ingredients_data
-            ]
+        # Preprocessing: ajouter ordre aux étapes si manquant
+        for idx, etape in enumerate(data.get("etapes") or []):
+            if isinstance(etape, dict) and "ordre" not in etape and "numero" not in etape:
+                etape["ordre"] = idx + 1
 
-        # Conversion des étapes en EtapeInput objects si ce sont des dicts
-        etapes_data = data.get("etapes") or []
-        if etapes_data and isinstance(etapes_data[0], dict):
-            data["etapes"] = [
-                EtapeInput(
-                    ordre=idx + 1,
-                    description=etape.get("description", ""),
-                    duree=etape.get("duree"),
-                )
-                for idx, etape in enumerate(etapes_data)
-            ]
-
-        # Validation avec Pydantic
+        # Validation Pydantic (après preprocessing)
         try:
             validated = RecetteInput(**data)
         except Exception as e:
-            logger.error(f"Validation error: {e} - Data: {data}")
-            raise ErreurValidation(f"Données invalides: {str(e)}") from e
+            raise ErreurValidation(f"Données invalides: {e}") from e
 
-        # Créer recette
+        # Créer recette (exclure les relations)
         recette_dict = validated.model_dump(exclude={"ingredients", "etapes"})
         recette = Recette(**recette_dict)
         db.add(recette)
@@ -216,177 +204,25 @@ class ServiceRecettes(
         logger.info(f"✅ Recette créée : {recette.nom} (ID: {recette.id})")
         return recette
 
-    @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
-    @avec_session_db
-    def create_from_import(
-        self,
-        nom: str,
-        type_repas: str,
-        description: str,
-        temps_preparation: int,
-        temps_cuisson: int,
-        portions: int,
-        difficulte: str,
-        ingredients_textes: list[str],
-        etapes_textes: list[str],
-        image_path: str | None = None,
-        db: Session | None = None,
-    ) -> Recette:
-        """Crée une recette depuis un import (URL/PDF/texte).
-
-        Parse les ingrédients en format texte libre ("200 g farine")
-        et crée automatiquement les ingrédients manquants.
-
-        Args:
-            nom: Nom de la recette
-            type_repas: Type de repas
-            description: Description
-            temps_preparation: Temps préparation (minutes)
-            temps_cuisson: Temps cuisson (minutes)
-            portions: Nombre de portions
-            difficulte: Niveau de difficulté
-            ingredients_textes: Liste de textes d'ingrédients ("200 g farine")
-            etapes_textes: Liste de textes d'étapes
-            image_path: Chemin ou URL de l'image
-            db: Session DB (injectée)
-
-        Returns:
-            Recette créée
-        """
-        from datetime import datetime
-
-        recette = Recette(
-            nom=nom,
-            type_repas=type_repas,
-            description=description,
-            temps_preparation=temps_preparation,
-            temps_cuisson=temps_cuisson,
-            portions=portions,
-            difficulte=difficulte,
-            url_image=image_path,
-            updated_at=datetime.utcnow(),
-        )
-        db.add(recette)
-        db.flush()
-
-        # Parser et ajouter les ingrédients
-        for ing_text in ingredients_textes:
-            quantite, unite, nom_ing = self._parser_ingredient_texte(ing_text)
-
-            ingredient = self._find_or_create_ingredient(db, nom_ing)
-            ri = RecetteIngredient(
-                recette_id=recette.id,
-                ingredient_id=ingredient.id,
-                quantite=quantite,
-                unite=unite,
-            )
-            db.add(ri)
-
-        # Ajouter les étapes
-        for idx, etape_text in enumerate(etapes_textes, 1):
-            etape = EtapeRecette(
-                recette_id=recette.id,
-                description=etape_text,
-                ordre=idx,
-            )
-            db.add(etape)
-
-        db.commit()
-        Cache.invalider(pattern="recettes")
-
-        # Émettre événement domaine
-        obtenir_bus().emettre(
-            "recette.importee",
-            {"recette_id": recette.id, "nom": recette.nom, "source": "import"},
-            source="recettes",
-        )
-
-        logger.info(f"✅ Recette importée : {recette.nom} (ID: {recette.id})")
-        return recette
-
-    @staticmethod
-    def _parser_ingredient_texte(ing_text: str) -> tuple[float, str, str]:
-        """Parse un texte d'ingrédient en (quantité, unité, nom).
-
-        Exemples: "200 g farine" → (200.0, "g", "farine")
-                  "2 oignons" → (2.0, "g", "oignons")
-                  "sel" → (1.0, "", "sel")
-        """
-        parts = ing_text.split(maxsplit=2)
-        if len(parts) >= 3:
-            quantite_str, unite, nom_ing = parts[0], parts[1], " ".join(parts[2:])
-            try:
-                quantite = float(quantite_str.replace(",", "."))
-            except (ValueError, TypeError):
-                return 1.0, "", ing_text
-        elif len(parts) >= 2:
-            quantite_str, nom_ing = parts[0], parts[1]
-            try:
-                quantite = float(quantite_str.replace(",", "."))
-            except (ValueError, TypeError):
-                return 1.0, "", ing_text
-            unite = "g"
-        else:
-            return 1.0, "", ing_text
-        return quantite, unite, nom_ing
-
-    @avec_session_db
-    def search_advanced(
-        self,
-        term: str | None = None,
-        type_repas: str | None = None,
-        saison: str | None = None,
-        difficulte: str | None = None,
-        temps_max: int | None = None,
-        compatible_bebe: bool | None = None,
-        limit: int = 100,
-        db: Session | None = None,
-    ) -> list[Recette]:
-        """
-        Recherche avancée multi-critères.
-
-        Args:
-            term: Terme de recherche (nom/description)
-            type_repas: Type de repas (petit_déjeuner, déjeuner, dîner, goûter)
-            saison: Saison (printemps, été, automne, hiver)
-            difficulte: Niveau (facile, moyen, difficile)
-            temps_max: Temps préparation max en minutes
-            compatible_bebe: Compatible pour bébé
-            limit: Nombre de résultats max
-            db: Session DB injectée
-
-        Returns:
-            Liste des recettes trouvées
-        """
-        filters: dict = {}
-        if type_repas:
-            filters["type_repas"] = type_repas
-        if saison:
-            filters["saison"] = saison
-        if difficulte:
-            filters["difficulte"] = difficulte
-        if compatible_bebe is not None:
-            filters["compatible_bebe"] = compatible_bebe
-        if temps_max:
-            filters["temps_preparation"] = {"lte": temps_max}
-
-        search_fields = ["nom", "description"] if term else None
-
-        return self.advanced_search(
-            search_term=term,
-            search_fields=search_fields,
-            filters=filters,
-            sort_by="nom",
-            limit=limit,
-            db=db,
-        )
-
     # ═══════════════════════════════════════════════════════════
     # SECTION 2 : GÉNÉRATION IA (AVEC CACHE ET VALIDATION)
     # NOTE: Les méthodes de génération IA (generer_recettes_ia,
     # generer_variantes_recette_ia, generer_version_bebe,
     # generer_version_batch_cooking, generer_version_robot) sont
-    # fournies par RecettesIAGenerationMixin (voir recettes_ia_generation.py)
+    # fournies par RecettesIASuggestionsMixin et RecettesIAVersionsMixin
+    # ═══════════════════════════════════════════════════════════
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION 2b : RECHERCHE & FILTRAGE
+    # NOTE: Les méthodes search_advanced, get_by_type, etc. sont
+    # fournies par RecetteRechercheMixin (voir recherche_mixin.py)
+    # ═══════════════════════════════════════════════════════════
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION 2c : IMPORT/EXPORT
+    # NOTE: Les méthodes export_to_csv, export_to_json,
+    # create_from_import, _parser_ingredient_texte sont
+    # fournies par RecetteIOMixin (voir io_mixin.py)
     # ═══════════════════════════════════════════════════════════
 
     # ═══════════════════════════════════════════════════════════
@@ -528,85 +364,11 @@ class ServiceRecettes(
             return []
 
     # ═══════════════════════════════════════════════════════════
-    # SECTION 4 : IMPORT/EXPORT (REFACTORED)
+    # SECTION 4 : IMPORT/EXPORT
+    # NOTE: Les méthodes export_to_csv, export_to_json,
+    # create_from_import sont fournies par RecetteIOMixin
+    # (voir io_mixin.py)
     # ═══════════════════════════════════════════════════════════
-
-    def export_to_csv(self, recettes: list[Recette], separator: str = ",") -> str:
-        """Exporte des recettes en CSV.
-
-        Args:
-            recettes: List of Recette objects to export
-            separator: CSV separator character
-
-        Returns:
-            CSV string with recipe data
-        """
-        output = StringIO()
-        writer = csv.DictWriter(
-            output,
-            fieldnames=[
-                "nom",
-                "description",
-                "temps_preparation",
-                "temps_cuisson",
-                "portions",
-                "difficulte",
-                "type_repas",
-                "saison",
-            ],
-            delimiter=separator,
-        )
-
-        writer.writeheader()
-        for r in recettes:
-            writer.writerow(
-                {
-                    "nom": r.nom,
-                    "description": r.description or "",
-                    "temps_preparation": r.temps_preparation,
-                    "temps_cuisson": r.temps_cuisson,
-                    "portions": r.portions,
-                    "difficulte": r.difficulte,
-                    "type_repas": r.type_repas,
-                    "saison": r.saison,
-                }
-            )
-
-        logger.info(f"✅ Exported {len(recettes)} recipes to CSV")
-        return output.getvalue()
-
-    def export_to_json(self, recettes: list[Recette], indent: int = 2) -> str:
-        """Exporte des recettes en JSON.
-
-        Args:
-            recettes: List of Recette objects to export
-            indent: JSON indentation level
-
-        Returns:
-            JSON string with recipe data
-        """
-        data = []
-        for r in recettes:
-            data.append(
-                {
-                    "nom": r.nom,
-                    "description": r.description,
-                    "temps_preparation": r.temps_preparation,
-                    "temps_cuisson": r.temps_cuisson,
-                    "portions": r.portions,
-                    "difficulte": r.difficulte,
-                    "type_repas": r.type_repas,
-                    "saison": r.saison,
-                    "ingredients": [
-                        {"nom": ri.ingredient.nom, "quantite": ri.quantite, "unite": ri.unite}
-                        for ri in r.ingredients
-                    ],
-                    "etapes": [{"ordre": e.ordre, "description": e.description} for e in r.etapes],
-                }
-            )
-
-        logger.info(f"✅ Exported {len(recettes)} recipes to JSON")
-        return json.dumps(data, indent=indent, ensure_ascii=False)
 
     # ═══════════════════════════════════════════════════════════
     # SECTION 5 : HELPERS PRIVÉS (REFACTORED)

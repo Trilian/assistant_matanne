@@ -306,7 +306,7 @@ class TestAvecGestionErreurs:
 
     def test_reraises_exception_app(self):
         """Test que les exceptions métier ExceptionApp sont relancées"""
-        from src.core.errors_base import ExceptionApp
+        from src.core.exceptions import ExceptionApp
 
         @avec_gestion_erreurs(default_return="default")
         def raise_app_error():
@@ -387,7 +387,7 @@ class TestAvecValidation:
         """Test que la validation échoue avec des données invalides"""
         from pydantic import BaseModel
 
-        from src.core.errors_base import ErreurValidation
+        from src.core.exceptions import ErreurValidation
 
         class StrictInput(BaseModel):
             name: str
@@ -632,7 +632,7 @@ class TestAvecValidationAdvanced:
         """Test que ErreurValidation contient les détails de validation."""
         from pydantic import BaseModel
 
-        from src.core.errors_base import ErreurValidation
+        from src.core.exceptions import ErreurValidation
 
         class StrictModel(BaseModel):
             count: int

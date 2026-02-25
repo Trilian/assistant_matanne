@@ -4,7 +4,7 @@ Tests pour src/modules/outils/barcode_utils.py
 
 import pytest
 
-from src.modules.utilitaires.barcode_utils import (
+from src.modules.utilitaires.barcode.logic import (
     detecter_pays_origine,
     detecter_type_code_barres,
     extraire_infos_produit,

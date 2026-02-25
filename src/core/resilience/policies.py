@@ -265,69 +265,6 @@ def _make_policy_wrapper(p: Policy[Any], f: Callable[[], Any]) -> Callable[[], A
     return wrapper
 
 
-# ═══════════════════════════════════════════════════════════
-# FACTORIES POUR POLICIES COURANTES
-# ═══════════════════════════════════════════════════════════
-
-
-def politique_api_externe() -> PolicyComposee[Any]:
-    """
-    Policy optimisée pour appels API externes.
-
-    Combine: Timeout(30s) → Retry(3x, backoff) → Bulkhead(5 concurrent)
-    """
-    return PolicyComposee(
-        [
-            TimeoutPolicy(timeout_secondes=30.0),
-            RetryPolicy(max_tentatives=3, delai_base=1.0, jitter=True),
-            BulkheadPolicy(max_concurrent=5),
-        ]
-    )
-
-
-def politique_base_de_donnees() -> PolicyComposee[Any]:
-    """
-    Policy optimisée pour requêtes base de données.
-
-    Combine: Timeout(10s) → Retry(2x, délai court)
-    """
-    return PolicyComposee(
-        [
-            TimeoutPolicy(timeout_secondes=10.0),
-            RetryPolicy(max_tentatives=2, delai_base=0.5, jitter=False),
-        ]
-    )
-
-
-def politique_cache() -> PolicyComposee[Any]:
-    """
-    Policy pour accès cache (rapide, avec fallback None).
-
-    Combine: Timeout(1s) → Fallback(None)
-    """
-    return PolicyComposee(
-        [
-            TimeoutPolicy(timeout_secondes=1.0),
-            FallbackPolicy(fallback_value=None, log_erreur=False),
-        ]
-    )
-
-
-def politique_ia() -> PolicyComposee[Any]:
-    """
-    Policy pour appels IA (Mistral).
-
-    Combine: Timeout(60s) → Retry(3x, backoff long) → Bulkhead(3 concurrent)
-    """
-    return PolicyComposee(
-        [
-            TimeoutPolicy(timeout_secondes=60.0),
-            RetryPolicy(max_tentatives=3, delai_base=2.0, facteur_backoff=3.0, jitter=True),
-            BulkheadPolicy(max_concurrent=3, timeout_acquisition=30.0),
-        ]
-    )
-
-
 __all__ = [
     "Policy",
     "RetryPolicy",
@@ -335,8 +272,4 @@ __all__ = [
     "BulkheadPolicy",
     "FallbackPolicy",
     "PolicyComposee",
-    "politique_api_externe",
-    "politique_base_de_donnees",
-    "politique_cache",
-    "politique_ia",
 ]

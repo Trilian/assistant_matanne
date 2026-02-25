@@ -50,7 +50,7 @@ def afficher_sauvegarde():
         else:
             for backup in backups[:5]:  # Afficher les 5 derniers
                 with st.expander(f"📝 {backup.id}"):
-                    st.write(f"**Date:** {backup.created_at.strftime('%d/%m/%Y %H:%M')}")
+                    st.write(f"**Date:** {backup.cree_le.strftime('%d/%m/%Y %H:%M')}")
                     st.write(f"**Taille:** {backup.file_size_bytes / 1024:.1f} KB")
                     st.write(f"**Compressé:** {'Oui' if backup.compressed else 'Non'}")
 

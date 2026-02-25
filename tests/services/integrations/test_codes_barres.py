@@ -13,7 +13,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.core.errors_base import ErreurNonTrouve, ErreurValidation
+from src.core.exceptions import ErreurNonTrouve, ErreurValidation
 from src.services.integrations.codes_barres import (
     BarcodeArticle,
     BarcodeData,

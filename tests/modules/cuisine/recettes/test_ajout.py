@@ -77,7 +77,7 @@ class TestRenderAjouterManuel:
         from src.modules.cuisine.recettes.ajout import afficher_ajouter_manuel
 
         afficher_ajouter_manuel()
-        assert mock_st.session_state.form_num_ingredients == 3
+        assert mock_st.session_state["recettes_ajout__num_ingredients"] == 3
 
     @patch("src.modules.cuisine.recettes.ajout.st")
     def test_render_ajouter_manuel_submit_no_nom(self, mock_st):
@@ -209,7 +209,7 @@ class TestRenderAjouterManuel:
     @patch("src.modules.cuisine.recettes.ajout.obtenir_service_recettes")
     @patch("src.modules.cuisine.recettes.ajout.st")
     def test_render_ajouter_manuel_validation_error(self, mock_st, mock_get_service):
-        from src.core.errors_base import ErreurValidation
+        from src.core.exceptions import ErreurValidation
 
         setup_mock_st(mock_st)
         mock_st.button.return_value = True

@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.core.errors_base import ErreurNonTrouve, ErreurValidation
+from src.core.exceptions import ErreurNonTrouve, ErreurValidation
 from src.services.rapports.generation import (
     ServiceRapportsPDF,
     obtenir_service_rapports_pdf,

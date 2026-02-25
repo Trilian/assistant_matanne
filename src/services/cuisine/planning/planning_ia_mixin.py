@@ -19,6 +19,7 @@ from src.core.caching import Cache
 from src.core.date_utils.helpers import get_weekday_names
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import Planning, Repas
+from src.core.monitoring import chronometre
 
 from .nutrition import determine_protein_type
 from .types import JourPlanning, ParametresEquilibre
@@ -163,6 +164,7 @@ class PlanningIAGenerationMixin:
         ),
     )
     @avec_gestion_erreurs(default_return=None)
+    @chronometre("ia.planning.generer", seuil_alerte_ms=15000)
     @avec_session_db
     def generer_planning_ia(
         self,

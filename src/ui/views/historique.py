@@ -39,7 +39,7 @@ def afficher_timeline_activite(limit: int = 10):
 
         with col2:
             st.markdown(f"**{action.description}**")
-            st.caption(f"{action.user_name} à {action.created_at.strftime('%d/%m %H:%M')}")
+            st.caption(f"{action.user_name} à {action.cree_le.strftime('%d/%m %H:%M')}")
 
         st.markdown("---")
 
@@ -57,7 +57,7 @@ def afficher_activite_utilisateur(user_id: str):
 
     for action in actions:
         with st.expander(
-            f"{action.description} - {action.created_at.strftime('%d/%m %H:%M')}",
+            f"{action.description} - {action.cree_le.strftime('%d/%m %H:%M')}",
             expanded=False,
         ):
             st.json(action.details)

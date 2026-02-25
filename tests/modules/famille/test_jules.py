@@ -90,6 +90,7 @@ class TestJulesImports:
 class TestJulesApp:
     """Tests de la fonction app() du module Jules"""
 
+    @patch("src.modules.famille.jules.tabs_with_url", return_value=0)
     @patch("src.modules.famille.jules.st")
     @patch("src.modules.famille.jules.afficher_dashboard")
     @patch("src.modules.famille.jules.afficher_activites")
@@ -104,6 +105,7 @@ class TestJulesApp:
         mock_render_activites,
         mock_render_dashboard,
         mock_st,
+        mock_tabs_with_url,
     ):
         """Test que app() appelle st.title avec le bon titre"""
         # Setup
@@ -114,7 +116,7 @@ class TestJulesApp:
             "date_naissance": date(2024, 6, 22),
         }
 
-        mock_tabs = [MagicMock(), MagicMock(), MagicMock(), MagicMock()]
+        mock_tabs = [MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()]
         mock_st.tabs.return_value = mock_tabs
 
         # Configurer les context managers
@@ -130,6 +132,7 @@ class TestJulesApp:
         # Assert
         mock_st.title.assert_called_once_with("👶 Jules")
 
+    @patch("src.modules.famille.jules.tabs_with_url", return_value=0)
     @patch("src.modules.famille.jules.st")
     @patch("src.modules.famille.jules.afficher_dashboard")
     @patch("src.modules.famille.jules.afficher_activites")
@@ -144,6 +147,7 @@ class TestJulesApp:
         mock_render_activites,
         mock_render_dashboard,
         mock_st,
+        mock_tabs_with_url,
     ):
         """Test que app() affiche l'âge en caption"""
         # Setup
@@ -154,7 +158,7 @@ class TestJulesApp:
             "date_naissance": date(2024, 6, 22),
         }
 
-        mock_tabs = [MagicMock(), MagicMock(), MagicMock(), MagicMock()]
+        mock_tabs = [MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()]
         mock_st.tabs.return_value = mock_tabs
 
         for tab in mock_tabs:
@@ -166,12 +170,13 @@ class TestJulesApp:
         # Execute
         app()
 
-        # Assert
-        mock_st.caption.assert_called_once()
-        call_args = mock_st.caption.call_args[0][0]
-        assert "20 mois" in call_args
-        assert "22/06/2024" in call_args
+        # Assert - caption is called twice (age + assistant tab), check first call
+        assert mock_st.caption.call_count >= 1
+        first_call_args = mock_st.caption.call_args_list[0][0][0]
+        assert "20 mois" in first_call_args
+        assert "22/06/2024" in first_call_args
 
+    @patch("src.modules.famille.jules.tabs_with_url", return_value=0)
     @patch("src.modules.famille.jules.st")
     @patch("src.modules.famille.jules.afficher_dashboard")
     @patch("src.modules.famille.jules.afficher_activites")
@@ -186,8 +191,9 @@ class TestJulesApp:
         mock_render_activites,
         mock_render_dashboard,
         mock_st,
+        mock_tabs_with_url,
     ):
-        """Test que app() crée les 4 onglets"""
+        """Test que app() crée les 5 onglets"""
         # Setup
         mock_get_age_jules.return_value = {
             "mois": 20,
@@ -196,7 +202,7 @@ class TestJulesApp:
             "date_naissance": date(2024, 6, 22),
         }
 
-        mock_tabs = [MagicMock(), MagicMock(), MagicMock(), MagicMock()]
+        mock_tabs = [MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()]
         mock_st.tabs.return_value = mock_tabs
 
         for tab in mock_tabs:
@@ -211,12 +217,14 @@ class TestJulesApp:
         # Assert
         mock_st.tabs.assert_called_once()
         tabs_arg = mock_st.tabs.call_args[0][0]
-        assert len(tabs_arg) == 4
+        assert len(tabs_arg) == 5
         assert "📊 Dashboard" in tabs_arg
         assert "🎨 Activités" in tabs_arg
         assert "🛒 Shopping" in tabs_arg
         assert "💡 Conseils" in tabs_arg
+        assert "💬 Assistant" in tabs_arg
 
+    @patch("src.modules.famille.jules.tabs_with_url", return_value=0)
     @patch("src.modules.famille.jules.st")
     @patch("src.modules.famille.jules.afficher_dashboard")
     @patch("src.modules.famille.jules.afficher_activites")
@@ -231,6 +239,7 @@ class TestJulesApp:
         mock_render_activites,
         mock_render_dashboard,
         mock_st,
+        mock_tabs_with_url,
     ):
         """Test que app() appelle les fonctions de rendu"""
         # Setup
@@ -241,7 +250,7 @@ class TestJulesApp:
             "date_naissance": date(2024, 6, 22),
         }
 
-        mock_tabs = [MagicMock(), MagicMock(), MagicMock(), MagicMock()]
+        mock_tabs = [MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()]
         mock_st.tabs.return_value = mock_tabs
 
         for tab in mock_tabs:

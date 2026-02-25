@@ -18,6 +18,16 @@ from src.services.integrations import BarcodeService  # noqa: F401
 
 from .app import app, get_barcode_service
 from .detection import BarcodeScanner, detect_barcodes
+from .logic import (
+    detecter_pays_origine,
+    detecter_type_code_barres,
+    extraire_infos_produit,
+    formater_code_barres,
+    nettoyer_code_barres,
+    suggerer_categorie_produit,
+    valider_checksum_ean13,
+    valider_code_barres,
+)
 from .operations import (
     afficher_ajout_rapide,
     afficher_gestion_barcodes,
@@ -35,5 +45,13 @@ __all__ = [
     "afficher_verifier_stock",
     "app",
     "detect_barcodes",
+    "detecter_pays_origine",
+    "detecter_type_code_barres",
+    "extraire_infos_produit",
+    "formater_code_barres",
     "get_barcode_service",
+    "nettoyer_code_barres",
+    "suggerer_categorie_produit",
+    "valider_checksum_ean13",
+    "valider_code_barres",
 ]

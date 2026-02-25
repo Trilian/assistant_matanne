@@ -41,6 +41,23 @@ def afficher_header():
             badge("🤖 IA Indispo", variante=Variante.WARNING)
 
     with col3:
-        if etat.notifications_non_lues > 0:
-            if st.button(f"🔔 {etat.notifications_non_lues}"):
-                st.session_state.show_notifications = True
+        # Recherche globale popover + notifications
+        col_search, col_undo, col_notif = st.columns(3)
+        with col_search:
+            try:
+                from src.ui.components import afficher_recherche_globale_popover
+
+                afficher_recherche_globale_popover()
+            except ImportError:
+                pass
+        with col_undo:
+            try:
+                from src.ui.components import afficher_bouton_undo
+
+                afficher_bouton_undo()
+            except ImportError:
+                pass
+        with col_notif:
+            if etat.notifications_non_lues > 0:
+                if st.button(f"🔔 {etat.notifications_non_lues}"):
+                    st.session_state.show_notifications = True

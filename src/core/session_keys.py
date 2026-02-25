@@ -159,6 +159,7 @@ class _SessionKeys:
     NOTIF_CONFIG = "notif_config"
     NOTIF_DEMO_HISTORY = "notif_demo_history"
     NOTIF_MODE_DEMO = "notif_mode_demo"
+    SHOW_NOTIF_HELP = "show_notif_help"
 
     # ─── Utilitaires / Scan Factures ──────────────────
     HISTORIQUE_FACTURES = "historique_factures"

@@ -2,7 +2,7 @@
 Widgets de santé système et activité.
 
 Fournit des composants pour:
-- Indicateurs de santé (DB, cache, API)
+- Indicateurs de santé (DB, cache, IA, métriques) via SanteSysteme
 - Timeline d'activité récente
 """
 
@@ -24,62 +24,66 @@ logger = logging.getLogger(__name__)
 @st.cache_data(ttl=30, show_spinner=False)
 def indicateur_sante_systeme() -> dict:
     """
-    Calcule les indicateurs de santé du système.
+    Calcule les indicateurs de santé du système via SanteSysteme.
+
+    Utilise verifier_sante_globale() comme source de vérité unique
+    (DB, cache, IA, métriques, + checks enregistrés).
     Caché 30s pour éviter les checks répétitifs.
 
     Returns:
-        Dict avec status et détails
+        Dict avec status global et détails par composant
     """
-    status = {"global": "ok", "details": []}
-
     try:
-        # Vérifier la connexion DB
-        from src.core.db import verifier_connexion
+        from src.core.monitoring.health import StatutSante, verifier_sante_globale
 
-        if verifier_connexion():
-            status["details"].append(
-                {"nom": "Base de données", "status": "ok", "message": "Connectée"}
+        rapport = verifier_sante_globale(inclure_db=True)
+
+        _status_map = {
+            StatutSante.SAIN: "ok",
+            StatutSante.DEGRADE: "warning",
+            StatutSante.CRITIQUE: "error",
+            StatutSante.INCONNU: "warning",
+        }
+
+        # Noms lisibles pour l'UI
+        _noms_fr = {
+            "database": "Base de données",
+            "cache": "Cache",
+            "ia": "Intelligence Artificielle",
+            "metriques": "Métriques",
+        }
+
+        details = []
+        for nom, composant in rapport.composants.items():
+            details.append(
+                {
+                    "nom": _noms_fr.get(nom, nom.capitalize()),
+                    "status": _status_map.get(composant.statut, "warning"),
+                    "message": composant.message or composant.statut.name,
+                    "duree_ms": round(composant.duree_verification_ms, 1),
+                }
             )
+
+        # Statut global
+        if rapport.sain:
+            has_degraded = any(c.statut == StatutSante.DEGRADE for c in rapport.composants.values())
+            global_status = "warning" if has_degraded else "ok"
         else:
-            status["details"].append(
-                {"nom": "Base de données", "status": "error", "message": "Déconnectée"}
-            )
-            status["global"] = "error"
+            global_status = "error"
+
+        return {"global": global_status, "details": details}
+
     except Exception as e:
-        status["details"].append({"nom": "Base de données", "status": "error", "message": str(e)})
-        status["global"] = "error"
-
-    try:
-        # Vérifier le cache
-        from src.core.caching import obtenir_cache
-
-        cache = obtenir_cache()
-        cache_stats = cache.obtenir_statistiques()
-        hit_rate = float(cache_stats.get("hit_rate", "0%").replace("%", ""))
-
-        if hit_rate >= 70:
-            status["details"].append(
-                {"nom": "Cache", "status": "ok", "message": f"Hit rate: {hit_rate:.0f}%"}
-            )
-        elif hit_rate >= 40:
-            status["details"].append(
-                {"nom": "Cache", "status": "warning", "message": f"Hit rate: {hit_rate:.0f}%"}
-            )
-            if status["global"] == "ok":
-                status["global"] = "warning"
-        else:
-            status["details"].append(
-                {"nom": "Cache", "status": "warning", "message": f"Hit rate bas: {hit_rate:.0f}%"}
-            )
-    except Exception:
-        status["details"].append({"nom": "Cache", "status": "ok", "message": "Initialisé"})
-
-    return status
+        logger.warning(f"Health check indisponible: {e}")
+        return {
+            "global": "warning",
+            "details": [{"nom": "Système", "status": "warning", "message": str(e)}],
+        }
 
 
 @composant_ui("system", exemple="afficher_sante_systeme()", tags=["health", "monitoring"])
 def afficher_sante_systeme():
-    """Affiche les indicateurs de santé."""
+    """Affiche les indicateurs de santé via SanteSysteme."""
 
     status = indicateur_sante_systeme()
 
@@ -90,7 +94,8 @@ def afficher_sante_systeme():
     with st.expander(f"{global_icon} Santé Système", expanded=False):
         for detail in status["details"]:
             icon = icon_map.get(detail["status"], "⚪")
-            st.write(f"{icon} **{detail['nom']}**: {detail['message']}")
+            duree = f" ({detail['duree_ms']}ms)" if detail.get("duree_ms") else ""
+            st.write(f"{icon} **{detail['nom']}**: {detail['message']}{duree}")
 
 
 @composant_ui(

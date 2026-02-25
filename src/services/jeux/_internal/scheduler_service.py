@@ -32,6 +32,7 @@ except ImportError:
     CronTrigger = None
     IntervalTrigger = None
 
+from src.core.decorators import avec_resilience
 from src.services.core.registry import service_factory
 
 from .sync_service import SyncService, get_sync_service
@@ -238,6 +239,7 @@ class SchedulerService:
     # EXÉCUTION DES JOBS
     # ─────────────────────────────────────────────────────────────────
 
+    @avec_resilience(retry=1, timeout_s=120, fallback=None)
     def _executer_sync_paris(self, competition: str) -> dict:
         """Exécute la synchronisation Paris."""
         logger.info(f"Exécution sync Paris {competition}")
@@ -255,6 +257,7 @@ class SchedulerService:
             self._enregistrer_historique("paris", competition, {"erreur": str(e)})
             raise
 
+    @avec_resilience(retry=1, timeout_s=120, fallback=None)
     def _executer_sync_loto(self) -> dict:
         """Exécute la synchronisation Loto."""
         logger.info("Exécution sync Loto")

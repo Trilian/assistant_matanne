@@ -54,7 +54,7 @@ class ProfilUtilisateur(BaseModel):
     role: Role = Role.MEMBRE
     avatar_url: str | None = None
     preferences: dict = Field(default_factory=dict)
-    created_at: datetime | None = None
+    cree_le: datetime | None = None
     last_login: datetime | None = None
 
     def has_permission(self, permission: Permission) -> bool:

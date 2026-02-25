@@ -86,6 +86,12 @@ class ServiceRegistry:
         cuisine_services = registry.par_tag("cuisine")
     """
 
+    # Mapping tag → Protocol pour validation automatique (PEP 544, Audit §9.3)
+    _PROTOCOL_PAR_TAG: dict[str, str] = {
+        "crud": "CRUDProtocol",
+        "ia": "AIServiceProtocol",
+    }
+
     def __init__(self):
         self._entries: dict[str, _ServiceEntry] = {}
         self._global_lock = threading.Lock()
@@ -366,6 +372,107 @@ class ServiceRegistry:
 
     # Alias anglais
     reset = reinitialiser
+
+    # ───────────────────────────────────────────────────────
+    # VALIDATION PROTOCOLS (PEP 544)
+    # ───────────────────────────────────────────────────────
+
+    def valider_protocols(
+        self,
+        validations: dict[str, list[type]] | None = None,
+    ) -> dict[str, list[str]]:
+        """
+        Valide que les services instanciés respectent les Protocols attendus.
+
+        Utilise @runtime_checkable isinstance() pour vérifier la conformité
+        structurelle des services au démarrage.
+
+        Args:
+            validations: Mapping {nom_service: [Protocol1, Protocol2, ...]}.
+                         Si None, vérifie HealthCheckProtocol et CacheableProtocol
+                         sur tous les services instanciés.
+
+        Returns:
+            Dict des violations: {nom_service: ["ne satisfait pas Protocol1"]}
+            Dict vide = tous conformes.
+
+        Usage:
+            from src.services.core.base.protocols import (
+                CRUDProtocol, AIServiceProtocol, HealthCheckProtocol
+            )
+
+            violations = registre.valider_protocols({
+                "recettes": [CRUDProtocol, AIServiceProtocol],
+                "inventaire": [CRUDProtocol],
+            })
+            if violations:
+                logger.warning(f"Services non conformes: {violations}")
+        """
+        violations: dict[str, list[str]] = {}
+
+        if validations is None:
+            # Validation par défaut: vérifier les Protocols communs
+            try:
+                from src.services.core.base.protocols import (
+                    CacheableProtocol,
+                    HealthCheckProtocol,
+                )
+
+                common_checks: list[type] = [HealthCheckProtocol, CacheableProtocol]
+            except ImportError:
+                return {}
+
+            # Résoudre les Protocols liés aux tags (Audit §9.3 — ADOPTER PEP 544)
+            _tag_protocol_map: dict[str, type] = {}
+            try:
+                from src.services.core.base import protocols as _proto_mod
+
+                for tag, proto_name in self._PROTOCOL_PAR_TAG.items():
+                    proto_cls = getattr(_proto_mod, proto_name, None)
+                    if proto_cls is not None:
+                        _tag_protocol_map[tag] = proto_cls
+            except ImportError:
+                pass
+
+            for nom, entry in self._entries.items():
+                if entry.instance is None:
+                    continue
+                service_violations = []
+                for proto in common_checks:
+                    if not isinstance(entry.instance, proto):
+                        service_violations.append(f"ne satisfait pas {proto.__name__}")
+                # Vérifier les Protocols par tag
+                for tag in entry.tags:
+                    proto_cls = _tag_protocol_map.get(tag)
+                    if proto_cls is not None and not isinstance(entry.instance, proto_cls):
+                        service_violations.append(f"tag '{tag}' requiert {proto_cls.__name__}")
+                if service_violations:
+                    violations[nom] = service_violations
+        else:
+            for nom, protocols in validations.items():
+                if not self.est_enregistre(nom):
+                    violations[nom] = [f"service '{nom}' non enregistré"]
+                    continue
+                if not self.est_instancie(nom):
+                    continue  # Pas encore instancié, skip
+                service = self.obtenir(nom)
+                service_violations = []
+                for proto in protocols:
+                    if not isinstance(service, proto):
+                        service_violations.append(f"ne satisfait pas {proto.__name__}")
+                if service_violations:
+                    violations[nom] = service_violations
+
+        if violations:
+            for nom, msgs in violations.items():
+                logger.warning(f"⚠️ Service '{nom}': {', '.join(msgs)}")
+        else:
+            logger.debug("✅ Tous les services valident leurs Protocols")
+
+        return violations
+
+    # Alias anglais
+    validate_protocols = valider_protocols
 
 
 # ═══════════════════════════════════════════════════════════

@@ -58,7 +58,7 @@ def mock_user_preference():
     pref.viande_rouge_max = 2
     pref.robots = ["four", "monsieur_cuisine"]
     pref.magasins_preferes = ["Carrefour"]
-    pref.updated_at = datetime.now(UTC)
+    pref.modifie_le = datetime.now(UTC)
     return pref
 
 
@@ -71,7 +71,7 @@ def mock_recipe_feedback():
     fb.feedback = "like"
     fb.contexte = "délicieux"
     fb.notes = "Tarte aux pommes"
-    fb.created_at = datetime.now(UTC)
+    fb.cree_le = datetime.now(UTC)
     return fb
 
 
@@ -242,14 +242,14 @@ class TestChargerFeedbacks:
         assert result[0].feedback == "like"
 
     @patch("src.services.core.utilisateur.preferences.select")
-    def test_charger_feedbacks_sans_created_at(self, mock_select, mock_db_session):
+    def test_charger_feedbacks_sans_cree_le(self, mock_select, mock_db_session):
         """Charge feedback sans date création."""
         fb = Mock()
         fb.recette_id = 1
         fb.notes = "Test"
         fb.feedback = "like"
         fb.contexte = None
-        fb.created_at = None  # Pas de date
+        fb.cree_le = None  # Pas de date
 
         mock_db_session.execute.return_value.scalars.return_value.all.return_value = [fb]
 

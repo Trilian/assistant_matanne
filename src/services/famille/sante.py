@@ -25,6 +25,7 @@ from src.core.models import (
     RoutineSante,
 )
 from src.services.core.base import BaseService
+from src.services.core.events.bus import obtenir_bus
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -51,6 +52,42 @@ class ServiceSante(BaseService[EntreeSante]):
 
     def __init__(self):
         super().__init__(model=EntreeSante, cache_ttl=300)
+
+    # ═══════════════════════════════════════════════════════════
+    # CRUD OVERRIDES — Émission d'événements
+    # ═══════════════════════════════════════════════════════════
+
+    def create(self, data: dict, db: Session | None = None) -> EntreeSante:
+        """Crée une entrée santé et émet un événement."""
+        result = super().create(data, db)
+        obtenir_bus().emettre(
+            "sante.modifie",
+            {"entree_id": result.id, "type_donnee": "entree", "action": "creee"},
+            source="sante",
+        )
+        return result
+
+    def update(self, entity_id: int, data: dict, db: Session | None = None) -> EntreeSante | None:
+        """Met à jour une entrée santé et émet un événement."""
+        result = super().update(entity_id, data, db)
+        if result:
+            obtenir_bus().emettre(
+                "sante.modifie",
+                {"entree_id": entity_id, "type_donnee": "entree", "action": "modifiee"},
+                source="sante",
+            )
+        return result
+
+    def delete(self, entity_id: int, db: Session | None = None) -> bool:
+        """Supprime une entrée santé et émet un événement."""
+        result = super().delete(entity_id, db)
+        if result:
+            obtenir_bus().emettre(
+                "sante.modifie",
+                {"entree_id": entity_id, "type_donnee": "entree", "action": "supprimee"},
+                source="sante",
+            )
+        return result
 
     # ═══════════════════════════════════════════════════════════
     # OBJECTIFS

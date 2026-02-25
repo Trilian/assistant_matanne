@@ -16,6 +16,9 @@ def avec_session_db(func: F) -> F:
     - Aucune session n'est fournie en paramètre
     - Utilise obtenir_contexte_db() pour créer une nouvelle session
 
+    Intègre automatiquement un contexte d'observabilité (correlation_id)
+    pour tracer chaque opération DB dans les logs.
+
     Usage:
         @avec_session_db
         def creer_recette(data: dict, db: Session) -> Recette:
@@ -38,6 +41,7 @@ def avec_session_db(func: F) -> F:
     # Pré-calculer la signature à la décoration (pas à chaque appel)
     _sig = inspect.signature(func)
     _param_name = "session" if "session" in _sig.parameters else "db"
+    _operation_name = f"db.{func.__qualname__}"
 
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
@@ -47,11 +51,13 @@ def avec_session_db(func: F) -> F:
         ):
             return func(*args, **kwargs)
 
-        # Sinon, créer une nouvelle session
+        # Sinon, créer une nouvelle session avec contexte d'observabilité
         from src.core.db import obtenir_contexte_db
+        from src.core.observability import contexte_operation
 
-        with obtenir_contexte_db() as session:
-            kwargs[_param_name] = session
-            return func(*args, **kwargs)
+        with contexte_operation(_operation_name):
+            with obtenir_contexte_db() as session:
+                kwargs[_param_name] = session
+                return func(*args, **kwargs)
 
     return wrapper  # type: ignore

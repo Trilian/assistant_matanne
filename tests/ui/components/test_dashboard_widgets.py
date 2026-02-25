@@ -221,69 +221,111 @@ class TestIndicateurSanteSysteme:
 
         assert indicateur_sante_systeme is not None
 
-    @patch("src.core.db.verifier_connexion", return_value=True)
-    @patch("src.core.caching.obtenir_cache")
-    def test_all_ok(self, mock_cache, mock_db):
+    @patch("src.core.monitoring.health.verifier_sante_globale")
+    def test_all_ok(self, mock_sante):
         """Test avec tout OK."""
+        from src.core.monitoring.health import SanteComposant, SanteSysteme, StatutSante
         from src.ui.components import indicateur_sante_systeme
 
         indicateur_sante_systeme.clear()  # Vider le cache st.cache_data
 
-        mock_cache.return_value.obtenir_statistiques.return_value = {"hit_rate": "85%"}
+        mock_sante.return_value = SanteSysteme(
+            sain=True,
+            composants={
+                "database": SanteComposant(
+                    nom="database",
+                    statut=StatutSante.SAIN,
+                    message="Connectée",
+                    duree_verification_ms=5.0,
+                ),
+                "cache": SanteComposant(
+                    nom="cache",
+                    statut=StatutSante.SAIN,
+                    message="85% hit rate",
+                    duree_verification_ms=1.0,
+                ),
+            },
+        )
 
         result = indicateur_sante_systeme()
 
         assert result["global"] == "ok"
         assert len(result["details"]) >= 1
 
-    @patch("src.core.db.verifier_connexion", return_value=False)
-    @patch("src.core.caching.obtenir_cache")
-    def test_db_disconnected(self, mock_cache, mock_db):
+    @patch("src.core.monitoring.health.verifier_sante_globale")
+    def test_db_disconnected(self, mock_sante):
         """Test avec DB déconnectée."""
+        from src.core.monitoring.health import SanteComposant, SanteSysteme, StatutSante
         from src.ui.components import indicateur_sante_systeme
 
         indicateur_sante_systeme.clear()
 
-        mock_cache.return_value.obtenir_statistiques.return_value = {"hit_rate": "50%"}
+        mock_sante.return_value = SanteSysteme(
+            sain=False,
+            composants={
+                "database": SanteComposant(
+                    nom="database",
+                    statut=StatutSante.CRITIQUE,
+                    message="Déconnectée",
+                    duree_verification_ms=0.0,
+                ),
+            },
+        )
 
         result = indicateur_sante_systeme()
 
         assert result["global"] == "error"
 
-    @patch("src.core.db.verifier_connexion", side_effect=Exception("DB Error"))
-    @patch("src.core.caching.obtenir_cache")
-    def test_db_exception(self, mock_cache, mock_db):
-        """Test avec exception DB."""
+    @patch("src.core.monitoring.health.verifier_sante_globale")
+    def test_db_exception(self, mock_sante):
+        """Test avec exception dans le health check."""
         from src.ui.components import indicateur_sante_systeme
 
         indicateur_sante_systeme.clear()
 
-        mock_cache.return_value.obtenir_statistiques.return_value = {"hit_rate": "50%"}
+        mock_sante.side_effect = Exception("Health check failed")
 
         result = indicateur_sante_systeme()
 
-        assert result["global"] == "error"
+        # Exception caught, returns warning fallback
+        assert result["global"] == "warning"
 
-    @patch("src.core.db.verifier_connexion", return_value=True)
-    @patch("src.core.caching.obtenir_cache")
-    def test_cache_warning(self, mock_cache, mock_db):
+    @patch("src.core.monitoring.health.verifier_sante_globale")
+    def test_cache_warning(self, mock_sante):
         """Test avec cache en warning."""
+        from src.core.monitoring.health import SanteComposant, SanteSysteme, StatutSante
         from src.ui.components import indicateur_sante_systeme
 
         indicateur_sante_systeme.clear()
 
-        mock_cache.return_value.obtenir_statistiques.return_value = {"hit_rate": "50%"}
+        mock_sante.return_value = SanteSysteme(
+            sain=True,
+            composants={
+                "database": SanteComposant(
+                    nom="database", statut=StatutSante.SAIN, message="OK", duree_verification_ms=3.0
+                ),
+                "cache": SanteComposant(
+                    nom="cache",
+                    statut=StatutSante.DEGRADE,
+                    message="50% hit rate",
+                    duree_verification_ms=1.0,
+                ),
+            },
+        )
 
         result = indicateur_sante_systeme()
 
         # Le global peut être ok ou warning selon cache
         assert result["global"] in ["ok", "warning"]
 
-    @patch("src.core.db.verifier_connexion", return_value=True)
-    @patch("src.core.caching.obtenir_cache", side_effect=Exception("Cache Error"))
-    def test_cache_exception(self, mock_cache, mock_db):
-        """Test avec exception cache."""
+    @patch("src.core.monitoring.health.verifier_sante_globale")
+    def test_cache_exception(self, mock_sante):
+        """Test avec exception health check."""
         from src.ui.components import indicateur_sante_systeme
+
+        indicateur_sante_systeme.clear()
+
+        mock_sante.side_effect = Exception("Cache Error")
 
         result = indicateur_sante_systeme()
 

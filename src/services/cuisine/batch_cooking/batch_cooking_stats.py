@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.core.caching import Cache
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.errors_base import ErreurNonTrouve
+from src.core.exceptions import ErreurNonTrouve
 from src.core.models import (
     Planning,
     PreparationBatch,

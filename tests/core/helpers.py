@@ -74,8 +74,8 @@ class MockBuilder:
 
         # Common ORM fields
         model.id = Mock()
-        model.created_at = Mock()
-        model.updated_at = Mock()
+        model.cree_le = Mock()
+        model.modifie_le = Mock()
 
         # Apply custom fields
         for field_name, field_value in fields.items():

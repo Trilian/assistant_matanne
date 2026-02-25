@@ -132,7 +132,7 @@ def afficher_parametres_profil():
         st.caption(f"📧 Email: {user.email}")
         st.caption(f"🏆 Rôle: {user.role.value.title()}")
         st.caption(
-            f"📅 Membre depuis: {user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A'}"
+            f"📅 Membre depuis: {user.cree_le.strftime('%d/%m/%Y') if user.cree_le else 'N/A'}"
         )
 
         if st.form_submit_button(
