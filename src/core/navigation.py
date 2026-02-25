@@ -80,7 +80,7 @@ def _creer_page(key: str, path: str, title: str, icon: str = "") -> st.Page:
     return st.Page(
         _runner,
         title=display_title,
-        url_path=key.replace(".", "/"),
+        url_path=key.replace(".", "_"),  # Replace dots with underscores to avoid nested paths
         default=(key == "accueil"),
     )
 
