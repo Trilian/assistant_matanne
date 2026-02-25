@@ -4,6 +4,7 @@ Tests pour src/modules/cuisine/inventaire/categories.py
 Tests complets pour afficher_categories() avec mocking Streamlit.
 """
 
+import importlib
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -11,6 +12,14 @@ import pytest
 
 class TestRenderCategories:
     """Tests pour afficher_categories()"""
+
+    @pytest.fixture(autouse=True)
+    def clear_cache(self):
+        """Clear Streamlit cache before each test"""
+        import streamlit as st
+
+        st.cache_data.clear()
+        yield
 
     @pytest.fixture
     def mock_st(self):

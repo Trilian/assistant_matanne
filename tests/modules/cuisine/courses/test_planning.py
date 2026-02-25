@@ -233,9 +233,10 @@ class TestRenderCoursesDepuisPlanning:
         svc.ajouter_a_liste_courses.assert_called()
         mock_st.success.assert_called()
 
+    @patch("src.modules.cuisine.courses.planning.rerun")
     @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")
-    def test_render_regenerate(self, mock_st, mock_service):
+    def test_render_regenerate(self, mock_st, mock_service, mock_rerun):
         """Test régénération liste."""
         from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
 
@@ -279,7 +280,7 @@ class TestRenderCoursesDepuisPlanning:
         afficher_courses_depuis_planning()
 
         # Regenerate was clicked -> session_state key should be deleted (but rerun is mocked)
-        mock_st.rerun.assert_called()
+        mock_rerun.assert_called()
 
     @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")

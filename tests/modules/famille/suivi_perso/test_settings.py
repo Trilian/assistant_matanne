@@ -124,10 +124,11 @@ class TestRenderGarminSettings:
 
         mock_service.return_value.sync_user_data.assert_called_once()
 
+    @patch("src.modules.famille.suivi_perso.settings.rerun")
     @patch("src.modules.famille.suivi_perso.settings.get_garmin_service")
     @patch("src.modules.famille.suivi_perso.settings.st")
     def test_render_garmin_settings_sync_button_success_and_rerun(
-        self, mock_st, mock_service
+        self, mock_st, mock_service, mock_rerun
     ) -> None:
         """Test sync button verifies st.success and st.rerun are called on success"""
         from src.modules.famille.suivi_perso.settings import afficher_garmin_settings
@@ -146,7 +147,7 @@ class TestRenderGarminSettings:
 
         mock_service.return_value.sync_user_data.assert_called_once_with(1, days_back=7)
         mock_st.success.assert_called()
-        mock_st.rerun.assert_called()
+        mock_rerun.assert_called()
 
     @patch("src.modules.famille.suivi_perso.settings.get_garmin_service")
     @patch("src.modules.famille.suivi_perso.settings.st")
@@ -163,10 +164,11 @@ class TestRenderGarminSettings:
 
         mock_service.return_value.disconnect_user.assert_called_once_with(1)
 
+    @patch("src.modules.famille.suivi_perso.settings.rerun")
     @patch("src.modules.famille.suivi_perso.settings.get_garmin_service")
     @patch("src.modules.famille.suivi_perso.settings.st")
     def test_render_garmin_settings_disconnect_button_success_and_rerun(
-        self, mock_st, mock_service
+        self, mock_st, mock_service, mock_rerun
     ) -> None:
         """Test disconnect button verifies st.success and st.rerun are called on success"""
         from src.modules.famille.suivi_perso.settings import afficher_garmin_settings
@@ -181,7 +183,7 @@ class TestRenderGarminSettings:
 
         mock_service.return_value.disconnect_user.assert_called_once_with(1)
         mock_st.success.assert_called()
-        mock_st.rerun.assert_called()
+        mock_rerun.assert_called()
 
     @patch("src.modules.famille.suivi_perso.settings.get_garmin_service")
     @patch("src.modules.famille.suivi_perso.settings.st")
@@ -201,10 +203,11 @@ class TestRenderGarminSettings:
 
         mock_service.return_value.get_authorization_url.assert_called()
 
+    @patch("src.modules.famille.suivi_perso.settings.rerun")
     @patch("src.modules.famille.suivi_perso.settings.get_garmin_service")
     @patch("src.modules.famille.suivi_perso.settings.st")
     def test_render_garmin_settings_validate_verification_with_valid_verifier(
-        self, mock_st, mock_service
+        self, mock_st, mock_service, mock_rerun
     ) -> None:
         """Test validation with valid verifier code - lines 73-80"""
         from src.modules.famille.suivi_perso.settings import afficher_garmin_settings
@@ -231,7 +234,7 @@ class TestRenderGarminSettings:
             call for call in mock_st.success.call_args_list if "Garmin connecte" in str(call)
         ]
         assert len(success_calls) > 0
-        mock_st.rerun.assert_called()
+        mock_rerun.assert_called()
 
     @patch("src.modules.famille.suivi_perso.settings.get_garmin_service")
     @patch("src.modules.famille.suivi_perso.settings.st")
@@ -344,10 +347,11 @@ class TestRenderObjectifs:
         mock_service.sauvegarder_objectifs.assert_called_once()
         mock_st.success.assert_called()
 
+    @patch("src.modules.famille.suivi_perso.settings.rerun")
     @patch("src.services.famille.suivi_perso.obtenir_service_suivi_perso")
     @patch("src.modules.famille.suivi_perso.settings.st")
     def test_render_objectifs_save_button_success_and_rerun(
-        self, mock_st, mock_svc_factory
+        self, mock_st, mock_svc_factory, mock_rerun
     ) -> None:
         """Test save button verifies st.success and st.rerun are called on success"""
         from src.modules.famille.suivi_perso.settings import afficher_objectifs
@@ -369,7 +373,7 @@ class TestRenderObjectifs:
 
         mock_service.sauvegarder_objectifs.assert_called_once()
         mock_st.success.assert_called()
-        mock_st.rerun.assert_called()
+        mock_rerun.assert_called()
 
     @patch("src.services.famille.suivi_perso.obtenir_service_suivi_perso")
     @patch("src.modules.famille.suivi_perso.settings.st")

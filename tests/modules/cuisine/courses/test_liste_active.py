@@ -699,11 +699,12 @@ class TestRenderListeActiveAdditional:
         # Vérifier que metric a été appelé (sans stock_bas)
         mock_st.metric.assert_called()
 
+    @patch("src.modules.cuisine.courses.liste_active.rerun")
     @patch("src.modules.cuisine.courses.liste_active.obtenir_service_inventaire")
     @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
     @patch("src.modules.cuisine.courses.liste_active.st")
     def test_render_liste_empty_generate_ia_clicked(
-        self, mock_st, mock_courses_service, mock_inv_service
+        self, mock_st, mock_courses_service, mock_inv_service, mock_rerun
     ):
         """Test bouton générer suggestions IA cliqué (lignes 49-50)."""
         from src.modules.cuisine.courses.liste_active import afficher_liste_active
@@ -722,7 +723,7 @@ class TestRenderListeActiveAdditional:
 
         afficher_liste_active()
 
-        mock_st.rerun.assert_called()
+        mock_rerun.assert_called()
 
     @patch("src.modules.cuisine.courses.liste_active.obtenir_service_inventaire")
     @patch("src.modules.cuisine.courses.liste_active.obtenir_service_courses")
@@ -953,8 +954,9 @@ class TestRenderRayonArticlesAdditional:
         {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"},
     )
     @patch("src.modules.cuisine.courses.liste_active.RAYONS_DEFAULT", ["Crèmerie", "Autre"])
+    @patch("src.modules.cuisine.courses.liste_active.rerun")
     @patch("src.modules.cuisine.courses.liste_active.st")
-    def test_render_rayon_edit_form_cancel(self, mock_st):
+    def test_render_rayon_edit_form_cancel(self, mock_st, mock_rerun):
         """Test annulation formulaire édition (lignes 172-173)."""
         from src.modules.cuisine.courses.liste_active import afficher_rayon_articles
 
@@ -990,7 +992,7 @@ class TestRenderRayonArticlesAdditional:
 
         afficher_rayon_articles(mock_service, "Crèmerie", articles)
 
-        mock_st.rerun.assert_called()
+        mock_rerun.assert_called()
 
     @patch(
         "src.modules.cuisine.courses.liste_active.PRIORITY_EMOJIS",
@@ -1042,8 +1044,9 @@ class TestRenderRayonArticlesAdditional:
         {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"},
     )
     @patch("src.modules.cuisine.courses.liste_active.RAYONS_DEFAULT", ["Rayon", "Autre"])
+    @patch("src.modules.cuisine.courses.liste_active.rerun")
     @patch("src.modules.cuisine.courses.liste_active.st")
-    def test_render_rayon_articles_edit_button_clicked(self, mock_st):
+    def test_render_rayon_articles_edit_button_clicked(self, mock_st, mock_rerun):
         """Test bouton édition cliqué."""
         from src.modules.cuisine.courses.liste_active import afficher_rayon_articles
 
@@ -1082,4 +1085,4 @@ class TestRenderRayonArticlesAdditional:
 
         afficher_rayon_articles(mock_service, "Rayon", articles)
 
-        mock_st.rerun.assert_called()
+        mock_rerun.assert_called()

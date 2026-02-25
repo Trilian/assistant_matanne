@@ -52,10 +52,8 @@ ARTICLES_INVENTAIRE = [
 ]
 
 ARTICLE_NOUVEAU = {
-    "nom": "Yaourt nature",
+    "ingredient_id": 1,
     "quantite": 4.0,
-    "unite": "pots",
-    "categorie": "Produits laitiers",
     "emplacement": "Réfrigérateur",
     "code_barres": "3033490004729",
 }
@@ -125,7 +123,7 @@ class TestSchemasInventaire:
         from src.api.schemas import InventaireItemCreate
 
         item = InventaireItemCreate(
-            nom="Produit",
+            ingredient_id=1,
             quantite=1.0,
             code_barres="1234567890123",
         )
@@ -149,7 +147,8 @@ class TestRoutesInventaire:
     def test_creer_article_endpoint_existe(self, client):
         """POST /api/v1/inventaire existe."""
         response = client.post("/api/v1/inventaire", json=ARTICLE_NOUVEAU)
-        assert response.status_code in (200, 500)
+        # 200=success, 404=ingredient_id not found, 500=internal error (all indicate endpoint exists)
+        assert response.status_code in (200, 404, 500)
 
     def test_recherche_code_barres_endpoint_existe(self, client):
         """GET /api/v1/inventaire/barcode/{code} existe."""
@@ -173,8 +172,11 @@ class TestRoutesInventaireAvecMock:
         mock_context.__exit__ = MagicMock(return_value=None)
 
         mock_article = creer_mock_article(ARTICLES_INVENTAIRE[0])
+        # Disable auto MagicMock attribute generation
+        mock_article.ingredient = None
 
         mock_query = MagicMock()
+        mock_query.options.return_value = mock_query
         mock_query.filter.return_value = mock_query
         mock_query.first.return_value = mock_article
         mock_session.query.return_value = mock_query
@@ -198,6 +200,7 @@ class TestRoutesInventaireAvecMock:
         mock_context.__exit__ = MagicMock(return_value=None)
 
         mock_query = MagicMock()
+        mock_query.options.return_value = mock_query
         mock_query.filter.return_value = mock_query
         mock_query.first.return_value = None
         mock_session.query.return_value = mock_query

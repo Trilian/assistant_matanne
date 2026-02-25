@@ -282,7 +282,8 @@ class TestShowImportPreview:
         """Test affichage message succes apres import"""
         from src.modules.cuisine.recettes_import import _show_import_preview
 
-        setup_mock_st(mock_st, {"last_imported_recipe_name": "Recette importee"})
+        # La clé utilise KeyNamespace("recettes_import") donc le format est "recettes_import__last_imported"
+        setup_mock_st(mock_st, {"recettes_import__last_imported": "Recette importee"})
         recipe_data = {"nom": "Autre recette", "ingredients": [], "etapes": []}
 
         _show_import_preview(recipe_data)

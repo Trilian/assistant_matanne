@@ -40,7 +40,7 @@ class TestAuthHardening:
             assert "API_SECRET_KEY" in str(exc_info.value)
 
     def test_api_secret_development_returns_default(self):
-        """En développement sans API_SECRET_KEY, utilise le secret par défaut."""
+        """En développement sans API_SECRET_KEY, utilise une clé générée aléatoirement."""
         import importlib
 
         # Simuler développement sans API_SECRET_KEY défini
@@ -53,8 +53,9 @@ class TestAuthHardening:
 
             importlib.reload(auth)
             result = auth._obtenir_api_secret()
-            # En dev, retourne le secret par défaut sans erreur
-            assert result == "dev-secret-key-change-in-production"
+            # En dev, retourne une clé générée aléatoirement (non vide, pas d'erreur)
+            assert result is not None
+            assert len(result) > 0
 
     def test_api_secret_custom_value_in_production(self):
         """En production avec API_SECRET_KEY custom, pas d'erreur."""

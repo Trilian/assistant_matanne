@@ -36,6 +36,7 @@ from .courses import (
 
 # Inventaire
 from .inventaire import (
+    InventaireItemBase,
     InventaireItemCreate,
     InventaireItemResponse,
     InventaireItemUpdate,
@@ -93,6 +94,7 @@ __all__ = [
     "RecettePatch",
     "RecetteResponse",
     # Inventaire
+    "InventaireItemBase",
     "InventaireItemCreate",
     "InventaireItemResponse",
     "InventaireItemUpdate",

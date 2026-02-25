@@ -12,6 +12,28 @@ from pydantic import BaseModel, computed_field, field_validator
 from .base import IdentifiedResponse, QuantiteStricteValidatorMixin
 
 # ═══════════════════════════════════════════════════════════
+# BASE (compatibilité tests)
+# ═══════════════════════════════════════════════════════════
+
+
+class InventaireItemBase(BaseModel, QuantiteStricteValidatorMixin):
+    """Schéma de base pour validation standalone (tests).
+
+    Utilisé pour tester la validation sans dépendance FK.
+    """
+
+    nom: str
+    quantite: float = 1.0
+
+    @field_validator("nom")
+    @classmethod
+    def validate_nom(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Le nom ne peut pas être vide")
+        return v.strip()
+
+
+# ═══════════════════════════════════════════════════════════
 # CREATE
 # ═══════════════════════════════════════════════════════════
 

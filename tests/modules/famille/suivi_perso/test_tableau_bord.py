@@ -36,9 +36,10 @@ class TestRenderUserSwitch:
             patch("src.modules.famille.suivi_perso.tableau_bord.get_current_user") as m_get,
             patch("src.modules.famille.suivi_perso.tableau_bord.set_current_user") as m_set,
             patch("src.modules.famille.suivi_perso.tableau_bord.st") as m_st,
+            patch("src.modules.famille.suivi_perso.tableau_bord.rerun") as m_rerun,
         ):
             m_st.columns.return_value = [MagicMock(), MagicMock()]
-            yield {"get_user": m_get, "set_user": m_set, "st": m_st}
+            yield {"get_user": m_get, "set_user": m_set, "st": m_st, "rerun": m_rerun}
 
     def test_affiche_deux_colonnes(self, mock_utils):
         """Vérifie l'affichage en 2 colonnes"""
@@ -75,7 +76,8 @@ class TestRenderUserSwitch:
         afficher_user_switch()
 
         mock_utils["set_user"].assert_called_with("mathieu")
-        mock_utils["st"].rerun.assert_called()
+        # rerun est importé depuis src.core.state, pas st.rerun
+        mock_utils["rerun"].assert_called()
 
     def test_switch_vers_anne(self, mock_utils):
         """Vérifie le switch vers Anne"""

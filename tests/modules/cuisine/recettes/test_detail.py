@@ -117,7 +117,8 @@ class TestRenderDetailRecette:
         recette = create_mock_recette(with_image=True)
         afficher_detail_recette(recette)
 
-        mock_st.image.assert_called()
+        # L'image est affichée via st.markdown avec HTML <img> tag
+        mock_st.markdown.assert_called()
 
     @patch("src.modules.cuisine.recettes.detail.afficher_generer_image")
     @patch("src.modules.cuisine.recettes.detail.obtenir_service_recettes")
