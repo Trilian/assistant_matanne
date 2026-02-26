@@ -17,6 +17,7 @@ import streamlit as st
 
 from src.core.monitoring import profiler_rerun
 from src.modules._framework import BaseModule, module_app
+from src.ui.docs.component_explorer import afficher_component_explorer
 from src.ui.keys import KeyNamespace
 from src.ui.registry import ComponentMeta, obtenir_catalogue, rechercher_composants
 from src.ui.state.url import tabs_with_url
@@ -230,6 +231,7 @@ class DesignSystemModule(BaseModule[None]):
                 "🎨 Palette": _afficher_palette,
                 "📏 Tokens": _afficher_tokens,
                 "🧩 Composants": _afficher_catalogue,
+                "🎮 Playground": afficher_component_explorer,
             }
         )
 

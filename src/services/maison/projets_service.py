@@ -7,6 +7,7 @@ Features:
 - Pipeline automatique vers courses/budget
 - Alternatives économiques suggérées
 - Calcul ROI rénovations
+- Health checks et métriques (Sprint 6)
 """
 
 import logging
@@ -20,8 +21,11 @@ from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import Projet
 from src.core.monitoring import chronometre
 from src.services.core.base import BaseAIService
+from src.services.core.event_bus_mixin import EventBusMixin
 from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
+from src.services.core.service_health import ServiceHealthCheck, ServiceHealthMixin, StatutService
+from src.services.core.service_metrics import ServiceMetricsMixin
 
 from .schemas import (
     MaterielProjet,
@@ -61,7 +65,12 @@ MAGASINS_BRICOLAGE = [
 # ═══════════════════════════════════════════════════════════
 
 
-class ProjetsService(BaseAIService):
+class ProjetsService(
+    ServiceHealthMixin,
+    ServiceMetricsMixin,
+    EventBusMixin,
+    BaseAIService,
+):
     """Service IA pour la gestion intelligente des projets maison.
 
     Hérite de BaseAIService pour les appels IA. Les opérations CRUD DB
@@ -76,11 +85,18 @@ class ProjetsService(BaseAIService):
     - Suggestions alternatives économiques
     - Pipeline vers module courses
 
+    Sprint 6 additions:
+    - ServiceHealthMixin: Health checks granulaires
+    - ServiceMetricsMixin: Métriques Prometheus
+    - EventBusMixin: Émission automatique d'événements
+
     Example:
         >>> service = get_projets_service()
         >>> estimation = await service.estimer_projet("Repeindre chambre", "15m², 2 couches")
         >>> print(estimation.materiels_necessaires)
     """
+
+    _event_source = "projets"
 
     def __init__(self, client: ClientIA | None = None):
         """Initialise le service projets.
@@ -96,6 +112,39 @@ class ProjetsService(BaseAIService):
             default_ttl=3600,
             service_name="projets",
         )
+        # Sprint 6: Initialiser health checks et métriques
+        self._register_health_check()
+        self._init_metrics()
+
+    def _health_check_custom(self) -> ServiceHealthCheck:
+        """Vérifications de santé spécifiques aux projets."""
+        try:
+            # Vérifier l'accès aux données projets
+            projets_count = 0
+            projets_urgents = 0
+            try:
+                projets = self.obtenir_projets()
+                projets_count = len(projets) if projets else 0
+                urgents = self.obtenir_projets_urgents()
+                projets_urgents = len(urgents) if urgents else 0
+            except Exception:
+                pass
+
+            return ServiceHealthCheck(
+                service="projets",
+                status=StatutService.HEALTHY,
+                message=f"{projets_count} projets ({projets_urgents} urgents)",
+                details={
+                    "projets_count": projets_count,
+                    "projets_urgents": projets_urgents,
+                },
+            )
+        except Exception as e:
+            return ServiceHealthCheck(
+                service="projets",
+                status=StatutService.DEGRADED,
+                message=str(e),
+            )
 
     # ─────────────────────────────────────────────────────────
     # ESTIMATION COMPLÈTE
@@ -517,22 +566,32 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
             ID du projet créé, ou None en cas d'erreur.
         """
         try:
-            projet = Projet(
-                nom=nom,
-                description=description,
-                priorite=priorite,
-                statut="en_cours",
-            )
-            if date_fin_prevue:
-                projet.date_fin_prevue = date_fin_prevue
-            db.add(projet)
-            db.commit()
-            db.refresh(projet)
+            # Incrémenter le compteur de création (métriques)
+            self._incrementer_compteur("projets_crees")
+
+            with self._mesurer_duree("creation_projet"):
+                projet = Projet(
+                    nom=nom,
+                    description=description,
+                    priorite=priorite,
+                    statut="en_cours",
+                )
+                if date_fin_prevue:
+                    projet.date_fin_prevue = date_fin_prevue
+                db.add(projet)
+                db.commit()
+                db.refresh(projet)
+
             logger.info(f"✅ Projet '{nom}' créé (ID: {projet.id})")
+
+            # Émettre un événement (Sprint 6 - Event Bus 100%)
+            self._emettre_creation("projets", projet.id, nom)
+
             return projet.id
         except Exception as e:
             logger.error(f"Erreur création projet: {e}")
             db.rollback()
+            self._incrementer_compteur("erreurs")
             return None
 
     @avec_session_db
@@ -558,10 +617,16 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
             projet.statut = "termine"
             db.commit()
             logger.info(f"✅ Projet {project_id} terminé")
+
+            # Émettre un événement (Sprint 6 - Event Bus 100%)
+            self._emettre_modification("projets", project_id, projet.nom, "termine")
+            self._incrementer_compteur("projets_termines")
+
             return True
         except Exception as e:
             logger.error(f"Erreur marquage projet terminé: {e}")
             db.rollback()
+            self._incrementer_compteur("erreurs")
             return False
 
     @avec_session_db
@@ -645,6 +710,8 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
         try:
             from src.core.models.maison import TacheProjet
 
+            self._incrementer_compteur("taches_ajoutees")
+
             kwargs = {
                 "project_id": project_id,
                 "nom": nom,
@@ -660,10 +727,15 @@ Format JSON: {{"economies_annuelles": 200, "retour_annees": 5, "aides_estimees":
             db.add(tache)
             db.commit()
             logger.info(f"✅ Tâche '{nom}' ajoutée au projet {project_id}")
+
+            # Émettre un événement (Sprint 6 - Event Bus 100%)
+            self._emettre_modification("projets", project_id, nom, "tache_ajoutee")
+
             return True
         except Exception as e:
             logger.error(f"Erreur ajout tâche: {e}")
             db.rollback()
+            self._incrementer_compteur("erreurs")
             return False
 
     @avec_cache(ttl=300)

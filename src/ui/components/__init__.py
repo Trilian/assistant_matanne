@@ -18,6 +18,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # Alertes
     "alerte_stock": (".alertes", "alerte_stock"),
     # Atoms
+    "action_bar": (".atoms", "action_bar"),
     "badge": (".atoms", "badge"),
     "badge_html": (".atoms", "badge_html"),
     "boite_info": (".atoms", "boite_info"),
@@ -26,7 +27,12 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "boule_loto_html": (".atoms", "boule_loto_html"),
     "carte_metrique": (".atoms", "carte_metrique"),
     "etat_vide": (".atoms", "etat_vide"),
+    "loading_placeholder": (".atoms", "loading_placeholder"),
+    "progress_indicator": (".atoms", "progress_indicator"),
+    "quick_info": (".atoms", "quick_info"),
+    "section_header": (".atoms", "section_header"),
     "separateur": (".atoms", "separateur"),
+    "stat_row": (".atoms", "stat_row"),
     # Charts
     "graphique_inventaire_categories": (".charts", "graphique_inventaire_categories"),
     "graphique_repartition_repas": (".charts", "graphique_repartition_repas"),
@@ -77,6 +83,16 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # Layouts
     "carte_item": (".layouts", "carte_item"),
     "disposition_grille": (".layouts", "disposition_grille"),
+    # Lottie animations
+    "LottieAnimation": (".lottie", "LottieAnimation"),
+    "LottieConfig": (".lottie", "LottieConfig"),
+    "afficher_lottie": (".lottie", "afficher_lottie"),
+    "afficher_lottie_json": (".lottie", "afficher_lottie_json"),
+    "afficher_lottie_url": (".lottie", "afficher_lottie_url"),
+    "lottie_empty_state": (".lottie", "lottie_empty_state"),
+    "lottie_error": (".lottie", "lottie_error"),
+    "lottie_loading": (".lottie", "lottie_loading"),
+    "lottie_success": (".lottie", "lottie_success"),
     # Metrics
     "carte_metrique_avancee": (".metrics", "carte_metrique_avancee"),
     "widget_jules_apercu": (".metrics", "widget_jules_apercu"),
@@ -129,6 +145,35 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "afficher_sante_systeme": (".system", "afficher_sante_systeme"),
     "afficher_timeline_activites": (".system", "afficher_timeline_activites"),
     "indicateur_sante_systeme": (".system", "indicateur_sante_systeme"),
+    # Audio Input (v11 Innovation)
+    "AudioInputWidget": (".audio_input", "AudioInputWidget"),
+    "capture_audio": (".audio_input", "capture_audio"),
+    "commande_vocale_rapide": (".audio_input", "commande_vocale_rapide"),
+    "transcrire_audio": (".audio_input", "transcrire_audio"),
+    # Workflow Status (v11 Innovation)
+    "WorkflowStatus": (".workflow_status", "WorkflowStatus"),
+    "batch_cooking_workflow": (".workflow_status", "batch_cooking_workflow"),
+    "import_workflow": (".workflow_status", "import_workflow"),
+    "rapport_workflow": (".workflow_status", "rapport_workflow"),
+    # Barcode Scanner WebRTC (v11 Innovation)
+    "BarcodeScanner": (".barcode_scanner", "BarcodeScanner"),
+    "obtenir_info_produit": (".barcode_scanner", "obtenir_info_produit"),
+    "scanner_codes_barres": (".barcode_scanner", "scanner_codes_barres"),
+    # Editable DataFrames (v11 Innovation)
+    "DataFrameEditor": (".editable_dataframe", "DataFrameEditor"),
+    "courses_editable": (".editable_dataframe", "courses_editable"),
+    "inventaire_editable": (".editable_dataframe", "inventaire_editable"),
+    "planning_editable": (".editable_dataframe", "planning_editable"),
+    # Custom Components (v11 Innovation)
+    "drag_drop_planning": (".custom_components", "drag_drop_planning"),
+    "gantt_chart": (".custom_components", "gantt_chart"),
+    "kanban_board": (".custom_components", "kanban_board"),
+    "timeline_view": (".custom_components", "timeline_view"),
+    # Realtime Collaboration (v11 Innovation)
+    "CollaborativeEditor": (".realtime_collab", "CollaborativeEditor"),
+    "RealtimeRoom": (".realtime_collab", "RealtimeRoom"),
+    "collaborative_list": (".realtime_collab", "collaborative_list"),
+    "collaborative_text": (".realtime_collab", "collaborative_text"),
 }
 
 

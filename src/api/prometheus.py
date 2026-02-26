@@ -316,6 +316,19 @@ async def get_prometheus_metrics(
         )
     )
 
+    # ─────────────────────────────────────────────────────────
+    # MÉTRIQUES PAR SERVICE (Sprint 6)
+    # ─────────────────────────────────────────────────────────
+    try:
+        from src.services.core.service_metrics import exporter_prometheus_services
+
+        service_metrics = exporter_prometheus_services()
+        if service_metrics:
+            output_lines.append("\n# ═══════════ SERVICE METRICS ═══════════")
+            output_lines.append(service_metrics)
+    except Exception as e:
+        logger.warning(f"Erreur chargement métriques services: {e}")
+
     content = "\n".join(output_lines) + "\n"
 
     return Response(

@@ -9,6 +9,7 @@ Features:
 - Suggestions plantation par saison
 - Gamification : badges, streaks, autonomie alimentaire
 - Génération automatique des tâches jardin
+- Health checks et métriques (Sprint 6)
 """
 
 import logging
@@ -21,8 +22,11 @@ from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import ElementJardin
 from src.core.monitoring import chronometre
 from src.services.core.base import BaseAIService
+from src.services.core.event_bus_mixin import EventBusMixin
 from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
+from src.services.core.service_health import ServiceHealthCheck, ServiceHealthMixin, StatutService
+from src.services.core.service_metrics import ServiceMetricsMixin
 
 from .jardin_gamification_mixin import BADGES_JARDIN, JardinGamificationMixin
 from .schemas import (
@@ -58,7 +62,13 @@ SEUIL_SECHERESSE_JOURS = 7  # Jours sans pluie
 # ═══════════════════════════════════════════════════════════
 
 
-class JardinService(JardinGamificationMixin, BaseAIService):
+class JardinService(
+    JardinGamificationMixin,
+    ServiceHealthMixin,
+    ServiceMetricsMixin,
+    EventBusMixin,
+    BaseAIService,
+):
     """Service IA pour la gestion intelligente du jardin.
 
     Hérite de BaseAIService pour les appels IA. Les opérations CRUD DB
@@ -75,6 +85,11 @@ class JardinService(JardinGamificationMixin, BaseAIService):
     - Gamification: badges, streaks, autonomie alimentaire
     - Génération automatique des tâches
 
+    Sprint 6 additions:
+    - ServiceHealthMixin: Health checks granulaires
+    - ServiceMetricsMixin: Métriques Prometheus
+    - EventBusMixin: Émission automatique d'événements
+
     Example:
         >>> service = get_jardin_service()
         >>> conseils = await service.generer_conseils_saison("printemps")
@@ -82,6 +97,8 @@ class JardinService(JardinGamificationMixin, BaseAIService):
         >>> stats = service.calculer_stats(plantes, recoltes)
         >>> badges = service.obtenir_badges(stats)
     """
+
+    _event_source = "jardin"
 
     def __init__(self, client: ClientIA | None = None):
         """Initialise le service jardin.
@@ -97,6 +114,33 @@ class JardinService(JardinGamificationMixin, BaseAIService):
             default_ttl=3600,
             service_name="jardin",
         )
+        # Sprint 6: Initialiser health checks et métriques
+        self._register_health_check()
+        self._init_metrics()
+
+    def _health_check_custom(self) -> ServiceHealthCheck:
+        """Vérifications de santé spécifiques au jardin."""
+        try:
+            # Vérifier l'accès aux données jardin
+            plantes_count = 0
+            try:
+                plantes = self.obtenir_plantes()
+                plantes_count = len(plantes) if plantes else 0
+            except Exception:
+                pass
+
+            return ServiceHealthCheck(
+                service="jardin",
+                status=StatutService.HEALTHY,
+                message=f"{plantes_count} plantes dans le jardin",
+                details={"plantes_count": plantes_count},
+            )
+        except Exception as e:
+            return ServiceHealthCheck(
+                service="jardin",
+                status=StatutService.DEGRADED,
+                message=str(e),
+            )
 
     # ─────────────────────────────────────────────────────────
     # CONSEILS SAISONNIERS

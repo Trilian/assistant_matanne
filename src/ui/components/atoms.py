@@ -1,6 +1,7 @@
 """
 UI Components - Atoms (composants de base)
 badge, etat_vide, carte_metrique, separateur, boite_info, boule_loto
++ section_header, stat_row, action_bar, quick_info, loading_placeholder, progress_indicator
 
 Implémentés avec StyleSheet pour la déduplication CSS
 et échappement HTML manuel pour la sécurité XSS.
@@ -422,6 +423,270 @@ def boule_loto(numero: int, is_chance: bool = False, taille: int = 50) -> None:
     st.markdown(
         f'<div class="{circle_cls}" role="img" aria-label="Boule numéro {numero}">'
         f'<span style="font-size: {font_size}px; font-weight: bold;">{numero}</span>'
+        f"</div>",
+        unsafe_allow_html=True,
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# NOUVEAUX COMPOSANTS ATOMIQUES RÉUTILISABLES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+@composant_ui(
+    "atoms",
+    exemple='section_header("Statistiques", "📊", "Vue d\'ensemble")',
+    tags=["header", "section", "title"],
+)
+def section_header(
+    titre: str,
+    icone: str = "",
+    sous_titre: str | None = None,
+    niveau: int = 3,
+) -> None:
+    """
+    En-tête de section cohérent avec icône et sous-titre optionnel.
+
+    Args:
+        titre: Titre de la section
+        icone: Icône emoji (optionnel)
+        sous_titre: Texte secondaire sous le titre
+        niveau: Niveau du header (1-6, défaut: 3 = ###)
+
+    Example:
+        section_header("Statistiques", "📊")
+        section_header("Configuration", "⚙️", "Paramètres avancés", niveau=4)
+    """
+    safe_titre = echapper_html(titre)
+    safe_icone = echapper_html(icone) if icone else ""
+    prefix = "#" * max(1, min(6, niveau))
+
+    header_text = f"{safe_icone} {safe_titre}" if safe_icone else safe_titre
+    st.markdown(f"{prefix} {header_text}")
+
+    if sous_titre:
+        st.caption(echapper_html(sous_titre))
+
+
+@composant_ui(
+    "atoms",
+    exemple='stat_row([("Total", "42"), ("Actifs", "38"), ("Inactifs", "4")])',
+    tags=["metrics", "row", "stats", "kpi"],
+)
+def stat_row(
+    metriques: list[tuple[str, str, str | None]],
+    colonnes: int | None = None,
+) -> None:
+    """
+    Ligne de métriques uniformes (pattern très courant).
+
+    Args:
+        metriques: Liste de tuples (label, valeur, delta_optionnel)
+        colonnes: Nombre de colonnes (auto si None)
+
+    Example:
+        stat_row([
+            ("Recettes", "42", "+5"),
+            ("Inventaire", "128", "-3"),
+            ("Courses", "15", None),
+        ])
+    """
+    n_cols = colonnes if colonnes else len(metriques)
+    cols = st.columns(n_cols)
+
+    for i, metrique in enumerate(metriques):
+        with cols[i % n_cols]:
+            label, valeur = metrique[0], metrique[1]
+            delta = metrique[2] if len(metrique) > 2 else None
+            st.metric(label, valeur, delta=delta)
+
+
+@composant_ui(
+    "atoms",
+    exemple='action_bar([("Sauvegarder", "💾", True), ("Annuler", "❌", False)])',
+    tags=["buttons", "actions", "bar"],
+)
+def action_bar(
+    actions: list[tuple[str, str, bool]],
+    key_prefix: str = "action",
+) -> str | None:
+    """
+    Barre d'actions (boutons alignés horizontalement).
+
+    Args:
+        actions: Liste de tuples (label, icone, is_primary)
+        key_prefix: Préfixe pour les clés Streamlit
+
+    Returns:
+        Le label de l'action cliquée, ou None
+
+    Example:
+        clicked = action_bar([
+            ("Sauvegarder", "💾", True),
+            ("Annuler", "❌", False),
+            ("Supprimer", "🗑️", False),
+        ])
+        if clicked == "Sauvegarder":
+            save_data()
+    """
+    cols = st.columns(len(actions))
+    clicked = None
+
+    for i, (label, icone, is_primary) in enumerate(actions):
+        with cols[i]:
+            btn_type = "primary" if is_primary else "secondary"
+            btn_label = f"{icone} {label}" if icone else label
+            if st.button(
+                btn_label,
+                key=f"{key_prefix}_{i}_{label.lower().replace(' ', '_')}",
+                use_container_width=True,
+                type=btn_type,
+            ):
+                clicked = label
+
+    return clicked
+
+
+@composant_ui(
+    "atoms",
+    exemple='quick_info("5 articles en stock bas", "warning")',
+    tags=["info", "alert", "message"],
+)
+def quick_info(
+    message: str,
+    type_msg: str = "info",
+) -> None:
+    """
+    Message d'information rapide (simplifié).
+
+    Args:
+        message: Message à afficher
+        type_msg: Type ("info", "success", "warning", "error")
+
+    Example:
+        quick_info("Données sauvegardées", "success")
+        quick_info("5 articles en stock bas", "warning")
+    """
+    type_map = {
+        "info": st.info,
+        "success": st.success,
+        "warning": st.warning,
+        "error": st.error,
+    }
+    fn = type_map.get(type_msg, st.info)
+    fn(message)
+
+
+@composant_ui(
+    "atoms",
+    exemple='loading_placeholder("Chargement des données...")',
+    tags=["loading", "placeholder", "skeleton"],
+)
+def loading_placeholder(
+    message: str = "Chargement...",
+    show_spinner: bool = True,
+) -> None:
+    """
+    Placeholder de chargement cohérent.
+
+    Args:
+        message: Message de chargement
+        show_spinner: Afficher le spinner animé
+
+    Example:
+        loading_placeholder("Calcul des statistiques...")
+    """
+    container_cls = StyleSheet.create_class(
+        {
+            "display": "flex",
+            "flex-direction": "column",
+            "align-items": "center",
+            "padding": Espacement.XL,
+            "color": Sem.ON_SURFACE_SECONDARY,
+        }
+    )
+
+    safe_message = echapper_html(message)
+
+    spinner_html = ""
+    if show_spinner:
+        spinner_html = (
+            '<div style="width: 24px; height: 24px; border: 3px solid '
+            f"{Sem.BORDER_SUBTLE}; border-top-color: {Sem.INTERACTIVE}; "
+            "border-radius: 50%; animation: spin 1s linear infinite; "
+            f'margin-bottom: {Espacement.MD};"></div>'
+            "<style>@keyframes spin { to { transform: rotate(360deg); } }</style>"
+        )
+
+    StyleSheet.inject()
+    st.markdown(
+        f'<div class="{container_cls}" role="status" aria-label="{safe_message}">'
+        f"{spinner_html}"
+        f'<div style="font-size: {Typographie.BODY};">{safe_message}</div>'
+        f"</div>",
+        unsafe_allow_html=True,
+    )
+
+
+@composant_ui(
+    "atoms",
+    exemple='progress_indicator(75, "Progression")',
+    tags=["progress", "bar", "percentage"],
+)
+def progress_indicator(
+    pourcentage: float,
+    label: str | None = None,
+    couleur: str = Sem.SUCCESS,
+) -> None:
+    """
+    Indicateur de progression stylisé.
+
+    Args:
+        pourcentage: Valeur 0-100
+        label: Label optionnel
+        couleur: Couleur de la barre
+
+    Example:
+        progress_indicator(75, "Objectif atteint")
+        progress_indicator(30, couleur=Sem.WARNING)
+    """
+    pct = max(0, min(100, pourcentage))
+
+    bar_cls = StyleSheet.create_class(
+        {
+            "height": "8px",
+            "background": Sem.BORDER_SUBTLE,
+            "border-radius": Rayon.PILL,
+            "overflow": "hidden",
+            "margin": f"{Espacement.SM} 0",
+        }
+    )
+
+    fill_cls = StyleSheet.create_class(
+        {
+            "height": "100%",
+            "background": couleur,
+            "width": f"{pct}%",
+            "transition": "width 0.3s ease",
+        }
+    )
+
+    StyleSheet.inject()
+
+    if label:
+        st.markdown(
+            f'<div style="display: flex; justify-content: space-between; '
+            f'font-size: {Typographie.BODY_SM}; color: {Sem.ON_SURFACE_SECONDARY};">'
+            f"<span>{echapper_html(label)}</span>"
+            f"<span>{pct:.0f}%</span>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown(
+        f'<div class="{bar_cls}" role="progressbar" aria-valuenow="{pct}" '
+        f'aria-valuemin="0" aria-valuemax="100">'
+        f'<div class="{fill_cls}"></div>'
         f"</div>",
         unsafe_allow_html=True,
     )

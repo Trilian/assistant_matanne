@@ -11,6 +11,15 @@ Importez directement depuis les sous-packages:
     from src.services.core.backup import obtenir_service_backup
     from src.services.core.notifications import obtenir_service_notifications
     from src.services.core.utilisateur import get_auth_service
+
+    # Health checks & Metrics (Sprint 6)
+    from src.services.core.service_health import (
+        ServiceHealthMixin, obtenir_sante_services, initialiser_health_services
+    )
+    from src.services.core.service_metrics import (
+        ServiceMetricsMixin, obtenir_metriques_services, exporter_prometheus_services
+    )
+    from src.services.core.event_bus_mixin import EventBusMixin, emettre_apres_crud
 """
 
 __all__ = [
@@ -20,6 +29,9 @@ __all__ = [
     "notifications",
     "registry",
     "utilisateur",
+    "event_bus_mixin",
+    "service_health",
+    "service_metrics",
 ]
 
 
@@ -94,5 +106,47 @@ def __getattr__(name: str):
         from src.services.core.utilisateur import get_auth_service
 
         return get_auth_service
+
+    # Event Bus Mixin (Sprint 6)
+    if name == "EventBusMixin":
+        from src.services.core.event_bus_mixin import EventBusMixin
+
+        return EventBusMixin
+    if name == "emettre_apres_crud":
+        from src.services.core.event_bus_mixin import emettre_apres_crud
+
+        return emettre_apres_crud
+    if name == "avec_evenement":
+        from src.services.core.event_bus_mixin import avec_evenement
+
+        return avec_evenement
+
+    # Service Health (Sprint 6)
+    if name == "ServiceHealthMixin":
+        from src.services.core.service_health import ServiceHealthMixin
+
+        return ServiceHealthMixin
+    if name == "obtenir_sante_services":
+        from src.services.core.service_health import obtenir_sante_services
+
+        return obtenir_sante_services
+    if name == "initialiser_health_services":
+        from src.services.core.service_health import initialiser_health_services
+
+        return initialiser_health_services
+
+    # Service Metrics (Sprint 6)
+    if name == "ServiceMetricsMixin":
+        from src.services.core.service_metrics import ServiceMetricsMixin
+
+        return ServiceMetricsMixin
+    if name == "obtenir_metriques_services":
+        from src.services.core.service_metrics import obtenir_metriques_services
+
+        return obtenir_metriques_services
+    if name == "exporter_prometheus_services":
+        from src.services.core.service_metrics import exporter_prometheus_services
+
+        return exporter_prometheus_services
 
     raise AttributeError(f"module 'src.services.core' has no attribute '{name}'")

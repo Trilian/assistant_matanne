@@ -5,6 +5,8 @@ Hérite de BaseService[DepenseMaison] pour CRUD générique.
 
 Centralise tous les accès base de données pour les dépenses maison
 (gaz, eau, électricité, loyer, crèche, etc.).
+
+Sprint 6: Health checks et métriques intégrés.
 """
 
 import logging
@@ -17,7 +19,10 @@ from src.core.models import DepenseMaison
 from src.core.monitoring import chronometre
 from src.core.validation.schemas import DepenseMaisonInput
 from src.services.core.base import BaseService
+from src.services.core.event_bus_mixin import EventBusMixin
 from src.services.core.registry import service_factory
+from src.services.core.service_health import ServiceHealthCheck, ServiceHealthMixin, StatutService
+from src.services.core.service_metrics import ServiceMetricsMixin
 
 logger = logging.getLogger(__name__)
 
@@ -42,14 +47,54 @@ MOIS_FR = [
 CATEGORIES_AVEC_CONSO = {"gaz", "electricite", "eau"}
 
 
-class DepensesCrudService(BaseService[DepenseMaison]):
+class DepensesCrudService(
+    ServiceHealthMixin,
+    ServiceMetricsMixin,
+    EventBusMixin,
+    BaseService[DepenseMaison],
+):
     """Service CRUD pour les dépenses maison.
 
     Hérite de BaseService[DepenseMaison] pour le CRUD générique.
+
+    Sprint 6 additions:
+    - ServiceHealthMixin: Health checks granulaires
+    - ServiceMetricsMixin: Métriques Prometheus
+    - EventBusMixin: Émission automatique d'événements
     """
+
+    _event_source = "depenses"
+    service_name = "depenses"
 
     def __init__(self):
         super().__init__(model=DepenseMaison, cache_ttl=600)
+        # Sprint 6: Initialiser health checks et métriques
+        self._register_health_check()
+        self._init_metrics()
+
+    def _health_check_custom(self) -> ServiceHealthCheck:
+        """Vérifications de santé spécifiques aux dépenses."""
+        try:
+            today = date.today()
+            depenses_mois = self.get_depenses_mois(today.month, today.year)
+            count = len(depenses_mois) if depenses_mois else 0
+            total = sum(float(d.montant) for d in depenses_mois) if depenses_mois else 0
+
+            return ServiceHealthCheck(
+                service="depenses",
+                status=StatutService.HEALTHY,
+                message=f"{count} dépenses ce mois ({total:.0f}€)",
+                details={
+                    "depenses_count_mois": count,
+                    "total_mois_euros": total,
+                },
+            )
+        except Exception as e:
+            return ServiceHealthCheck(
+                service="depenses",
+                status=StatutService.DEGRADED,
+                message=str(e),
+            )
 
     @chronometre("maison.depenses.mois", seuil_alerte_ms=1500)
     @avec_cache(ttl=600)
@@ -91,6 +136,8 @@ class DepensesCrudService(BaseService[DepenseMaison]):
 
         Pour les catégories énergie (gaz/elec/eau), passe aussi par le service budget.
         """
+        self._incrementer_compteur("depenses_creees")
+
         if data.get("categorie") in CATEGORIES_AVEC_CONSO:
             try:
                 from src.services.famille.budget import (
@@ -121,22 +168,13 @@ class DepensesCrudService(BaseService[DepenseMaison]):
         db.commit()
         db.refresh(depense)
 
-        # Émettre événement pour invalidation cache
-        try:
-            from src.services.core.events.bus import obtenir_bus
-
-            obtenir_bus().emettre(
-                "depenses.modifiee",
-                {
-                    "depense_id": depense.id,
-                    "categorie": data.get("categorie", ""),
-                    "montant": float(data.get("montant", 0)),
-                    "action": "creee",
-                },
-                source="depenses_crud",
-            )
-        except Exception:  # noqa: BLE001
-            pass
+        # Émettre événement via mixin (Sprint 6 - Event Bus 100%)
+        self._emettre_creation(
+            "depenses",
+            depense.id,
+            data.get("categorie", ""),
+            montant=float(data.get("montant", 0)),
+        )
 
         return depense
 
@@ -150,22 +188,15 @@ class DepensesCrudService(BaseService[DepenseMaison]):
             db.commit()
             db.refresh(depense)
 
-            # Émettre événement pour invalidation cache
-            try:
-                from src.services.core.events.bus import obtenir_bus
-
-                obtenir_bus().emettre(
-                    "depenses.modifiee",
-                    {
-                        "depense_id": depense_id,
-                        "categorie": data.get("categorie", ""),
-                        "montant": float(data.get("montant", 0)),
-                        "action": "modifiee",
-                    },
-                    source="depenses_crud",
-                )
-            except Exception:  # noqa: BLE001
-                pass
+            # Émettre événement via mixin (Sprint 6 - Event Bus 100%)
+            self._emettre_modification(
+                "depenses",
+                depense_id,
+                data.get("categorie", ""),
+                "modifiee",
+                montant=float(data.get("montant", 0)),
+            )
+            self._incrementer_compteur("depenses_modifiees")
 
         return depense
 
@@ -177,17 +208,9 @@ class DepensesCrudService(BaseService[DepenseMaison]):
             db.delete(depense)
             db.commit()
 
-            # Émettre événement pour invalidation cache
-            try:
-                from src.services.core.events.bus import obtenir_bus
-
-                obtenir_bus().emettre(
-                    "depenses.modifiee",
-                    {"depense_id": depense_id, "action": "supprimee"},
-                    source="depenses_crud",
-                )
-            except Exception:  # noqa: BLE001
-                pass
+            # Émettre événement via mixin (Sprint 6 - Event Bus 100%)
+            self._emettre_suppression("depenses", depense_id)
+            self._incrementer_compteur("depenses_supprimees")
 
             return True
         return False

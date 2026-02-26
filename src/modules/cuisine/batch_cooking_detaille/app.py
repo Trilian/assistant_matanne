@@ -24,6 +24,7 @@ from .components import (
     afficher_timeline_session,
 )
 from .constants import TYPES_SESSION
+from .execution_live import afficher_execution_live
 from .generation import generer_batch_ia
 
 logger = logging.getLogger(__name__)
@@ -50,9 +51,9 @@ def app():
     planning_data = st.session_state.get(SK.PLANNING_DATA, {})
 
     # Tabs avec deep linking URL
-    TAB_LABELS = ["📋 Préparer", "👩‍🍳 Session Batch", "🍽️ Finitions Jour J"]
+    TAB_LABELS = ["📋 Préparer", "👩‍🍳 Session Batch", "� Exécution Live", "🍽️ Finitions Jour J"]
     tab_index = tabs_with_url(TAB_LABELS, param="tab")
-    tab_preparer, tab_session, tab_finitions = st.tabs(TAB_LABELS)
+    tab_preparer, tab_session, tab_execution, tab_finitions = st.tabs(TAB_LABELS)
 
     # ═══════════════════════════════════════════════════════
     # TAB: PRÉPARER
@@ -270,6 +271,14 @@ def app():
             with col_act3:
                 if st.button("💾 Sauvegarder session", use_container_width=True):
                     st.success("✅ Session sauvegardée!")
+
+    # ═══════════════════════════════════════════════════════
+    # TAB: EXÉCUTION LIVE (avec st.status)
+    # ═══════════════════════════════════════════════════════
+
+    with tab_execution:
+        with error_boundary(titre="Erreur exécution live"):
+            afficher_execution_live()
 
     # ═══════════════════════════════════════════════════════
     # TAB: FINITIONS JOUR J

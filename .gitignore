@@ -72,3 +72,8 @@ pytest_collect.txt
 _test_*.txt
 _test_*.py
 _run_*.py
+
+# Playwright - résultats de tests (screenshots d'échec)
+tests/test-results/
+test-results/
+playwright-report/

@@ -8,10 +8,33 @@ import streamlit as st
 from src.core.ai.cache import CacheIA as SemanticCache
 from src.core.caching import obtenir_cache
 from src.ui.feedback import afficher_succes
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import lazy, ui_fragment
 from src.ui.keys import KeyNamespace
 
 _keys = KeyNamespace("param_cache")
+
+
+@lazy(condition=lambda: st.session_state.get(_keys("show_details"), False), show_skeleton=True)
+def _afficher_cache_details():
+    """Détails du cache (chargé conditionnellement)."""
+    from src.core.caching import obtenir_cache
+
+    cache = obtenir_cache()
+    stats = cache.obtenir_statistiques() if hasattr(cache, "obtenir_statistiques") else {}
+
+    st.markdown("##### 📊 Statistiques détaillées")
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Taille mémoire", stats.get("taille_memoire", "N/A"))
+    with col2:
+        st.metric("Entrées L1", stats.get("entrees_l1", 0))
+    with col3:
+        st.metric("Entrées L2", stats.get("entrees_l2", 0))
+
+    # Détails par niveau de cache
+    with st.expander("🔍 Détails par niveau"):
+        st.json(stats)
 
 
 @ui_fragment
@@ -70,6 +93,17 @@ def afficher_cache_config():
     if st.button("🗑️ Vider Cache IA", key="btn_clear_cache_ia", use_container_width=True):
         SemanticCache.invalider_tout()
         afficher_succes("Cache IA vidé !")
+
+    st.markdown("---")
+
+    # Section détails (lazy-loaded)
+    show_details = st.checkbox(
+        "📊 Afficher statistiques détaillées",
+        key=_keys("show_details"),
+        help="Charge les statistiques avancées du cache",
+    )
+    if show_details:
+        _afficher_cache_details()
 
     st.markdown("---")
 
