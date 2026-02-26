@@ -48,6 +48,8 @@ from typing import Any, Callable
 import streamlit as st
 import streamlit.components.v1 as components
 
+from src.ui.tokens import Couleur
+
 logger = logging.getLogger(__name__)
 
 __all__ = [
@@ -69,14 +71,14 @@ DEFAULT_WS_URL = "wss://demos.yjs.dev"  # Demo server - remplacer en prod
 
 # Couleurs pour les utilisateurs
 USER_COLORS = [
-    "#667eea",  # Violet
-    "#48bb78",  # Vert
-    "#ed8936",  # Orange
-    "#f56565",  # Rouge
-    "#38b2ac",  # Teal
-    "#9f7aea",  # Purple
-    "#fc8181",  # Light red
-    "#68d391",  # Light green
+    Couleur.LOTO_NORMAL_START,
+    Couleur.COLLAB_VERT,
+    Couleur.COLLAB_ORANGE,
+    Couleur.COLLAB_ROUGE,
+    Couleur.COLLAB_TEAL,
+    Couleur.COLLAB_PURPLE,
+    Couleur.COLLAB_ROUGE_CLAIR,
+    Couleur.COLLAB_VERT_CLAIR,
 ]
 
 

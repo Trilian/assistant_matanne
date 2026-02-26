@@ -25,6 +25,7 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "auth: Tests for authentication")
     config.addinivalue_line("markers", "rate_limit: Tests for rate limiting")
     config.addinivalue_line("markers", "cache: Tests for caching")
+    config.addinivalue_line("markers", "websocket: WebSocket integration tests")
 
 
 # ═════════════════════════════════════════════════════════════════════

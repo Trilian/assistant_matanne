@@ -258,12 +258,12 @@ class TestClientIACache:
 
 @pytest.mark.unit
 class TestClientIAMetier:
-    """Tests des méthodes métier."""
+    """Tests des méthodes métier (legacy discuter() supprimé — remplacé par BaseAIService)."""
 
     @pytest.mark.asyncio
     @patch("src.core.ai.client.obtenir_parametres")
-    async def test_discuter(self, mock_params):
-        """Test la méthode discuter."""
+    async def test_discuter_removed(self, mock_params):
+        """Vérifie que discuter() legacy a été supprimé (remplacé par BaseAIService)."""
         mock_params.return_value = MagicMock(
             MISTRAL_API_KEY="test_key",
             MISTRAL_MODEL="mistral-small",
@@ -272,40 +272,7 @@ class TestClientIAMetier:
         )
 
         client = ClientIA()
-
-        with patch.object(
-            client, "appeler", new_callable=AsyncMock, return_value="Réponse conversation"
-        ) as mock_appel:
-            reponse = await client.discuter("Quel repas suggères-tu?")
-
-        assert reponse == "Réponse conversation"
-        mock_appel.assert_called_once()
-
-    @pytest.mark.asyncio
-    @patch("src.core.ai.client.obtenir_parametres")
-    async def test_discuter_avec_historique(self, mock_params):
-        """Test discuter avec historique."""
-        mock_params.return_value = MagicMock(
-            MISTRAL_API_KEY="test_key",
-            MISTRAL_MODEL="mistral-small",
-            MISTRAL_BASE_URL="https://api.mistral.ai/v1",
-            MISTRAL_TIMEOUT=30,
-        )
-
-        client = ClientIA()
-        historique = [
-            {"role": "user", "content": "Bonjour"},
-            {"role": "assistant", "content": "Bonjour!"},
-        ]
-
-        with patch.object(
-            client, "appeler", new_callable=AsyncMock, return_value="Réponse"
-        ) as mock_appel:
-            await client.discuter("Quoi de neuf?", historique=historique)
-
-        # Vérifier que le prompt contient l'historique
-        call_args = mock_appel.call_args
-        assert "Historique" in call_args.kwargs["prompt"] or "Historique" in call_args.args[0]
+        assert not hasattr(client, "discuter"), "discuter() legacy doit être supprimé"
 
 
 # ═══════════════════════════════════════════════════════════

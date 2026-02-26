@@ -50,8 +50,8 @@ def initialiser_app() -> bool:
     logger.info("✅ Navigation st.navigation() active")
 
     # ── Pipeline CSS unifié ──────────────────────────────
-    # Chaque source enregistre son CSS dans le CSSManager,
-    # puis une seule injection batch à la fin.
+    # CSS critique (first paint) → inject_all() immédiat
+    # CSS non-critique (a11y, animations) → inject_deferred() après le rendu
     from src.ui.engine import CSSManager
 
     # 0. Styles globaux (root vars, main-header, responsive, print)
@@ -72,21 +72,26 @@ def initialiser_app() -> bool:
     injecter_tokens_semantiques()
     logger.info("✅ Tokens sémantiques injectés")
 
+    # ── Injection batch critique — styles visibles au 1er paint ──
+    CSSManager.inject_all()
+    logger.info("✅ CSS critique injecté (1 appel)")
+
+    # ── CSS différé (non-critique, chargé après le 1er paint) ──
     # 3. CSS accessibilité (sr-only, focus-visible, reduced-motion)
     from src.ui.a11y import A11y
 
-    A11y.injecter_css()
-    logger.info("✅ CSS accessibilité injecté")
+    A11y.injecter_css_differe()
+    logger.info("✅ CSS accessibilité enregistré (différé)")
 
     # 4. Animations centralisées (@keyframes, micro-interactions)
-    from src.ui.animations import injecter_animations
+    from src.ui.animations import injecter_animations_differees
 
-    injecter_animations()
-    logger.info("✅ Animations injectées")
+    injecter_animations_differees()
+    logger.info("✅ Animations enregistrées (différées)")
 
-    # 5. Injection batch unique — remplace les 4+ st.markdown séparés
-    CSSManager.inject_all()
-    logger.info("✅ CSS unifié injecté (1 appel)")
+    # Injection batch différée — arrive après le rendu critique
+    CSSManager.inject_deferred()
+    logger.info("✅ CSS différé injecté")
 
     logger.info("✅ App initialisée (lazy mode)")
     return True

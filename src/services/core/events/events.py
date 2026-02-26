@@ -161,6 +161,51 @@ class EvenementProjetModifie:
     action: str = ""  # "cree", "modifie", "archive", "tache_ajoutee"
 
 
+@dataclass(frozen=True, slots=True)
+class EvenementMeubleModifie:
+    """Émis quand un meuble (wishlist) est créé/modifié/supprimé."""
+
+    TYPE: str = "meubles.modifie"
+
+    meuble_id: int = 0
+    nom: str = ""
+    action: str = ""  # "cree", "modifie", "supprime"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementEcoTipModifie:
+    """Émis quand une action écologique est créée/modifiée/supprimée."""
+
+    TYPE: str = "eco_tips.modifie"
+
+    action_id: int = 0
+    nom: str = ""
+    action: str = ""  # "cree", "modifie", "supprime"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementCoursesModifiees:
+    """Émis quand la liste de courses est modifiée (ajout, suppression, modèle)."""
+
+    TYPE: str = "courses.modifiees"
+
+    nb_articles: int = 0
+    action: str = ""  # "articles_ajoutes", "modele_cree", "modele_supprime", "recette_ajoutee"
+    source: str = ""  # "ia", "manuel", "recette", "modele"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementRecetteCreee:
+    """Émis quand une recette est créée."""
+
+    TYPE: str = "recette.creee"
+
+    recette_id: int = 0
+    nom: str = ""
+    type_repas: str = ""
+    source: str = ""  # "manual", "ia", "import"
+
+
 # ═══════════════════════════════════════════════════════════
 # ÉVÉNEMENTS BUDGET / SANTÉ
 # ═══════════════════════════════════════════════════════════
@@ -330,14 +375,18 @@ class EvenementErreurService:
 REGISTRE_EVENEMENTS: dict[str, type] = {
     "recette.planifiee": EvenementRecettePlanifiee,
     "recette.importee": EvenementRecetteImportee,
+    "recette.creee": EvenementRecetteCreee,
     "stock.modifie": EvenementStockModifie,
     "courses.generees": EvenementCoursesGenerees,
+    "courses.modifiees": EvenementCoursesModifiees,
     "batch_cooking.termine": EvenementBatchCookingTermine,
     "entretien.routine_creee": EvenementEntretienRoutineCreee,
     "entretien.semaine_optimisee": EvenementEntretienSemaineOptimisee,
     "depenses.modifiee": EvenementDepenseModifiee,
     "jardin.modifie": EvenementJardinModifie,
     "projets.modifie": EvenementProjetModifie,
+    "meubles.modifie": EvenementMeubleModifie,
+    "eco_tips.modifie": EvenementEcoTipModifie,
     "budget.modifie": EvenementBudgetModifie,
     "sante.modifie": EvenementSanteModifie,
     "loto.modifie": EvenementLotoModifie,
@@ -357,14 +406,18 @@ __all__ = [
     # Événements
     "EvenementRecettePlanifiee",
     "EvenementRecetteImportee",
+    "EvenementRecetteCreee",
     "EvenementStockModifie",
     "EvenementCoursesGenerees",
+    "EvenementCoursesModifiees",
     "EvenementBatchCookingTermine",
     "EvenementEntretienRoutineCreee",
     "EvenementEntretienSemaineOptimisee",
     "EvenementDepenseModifiee",
     "EvenementJardinModifie",
     "EvenementProjetModifie",
+    "EvenementMeubleModifie",
+    "EvenementEcoTipModifie",
     "EvenementBudgetModifie",
     "EvenementSanteModifie",
     "EvenementLotoModifie",

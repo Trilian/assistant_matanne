@@ -17,6 +17,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
 from src.api.schemas.common import MessageResponse
+from src.api.schemas.errors import REPONSES_CRUD_LECTURE, REPONSES_LISTE
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/maison", tags=["Maison"])
@@ -27,7 +28,7 @@ router = APIRouter(prefix="/api/v1/maison", tags=["Maison"])
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/projets")
+@router.get("/projets", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_projets(
     page: int = Query(1, ge=1),
@@ -84,7 +85,7 @@ async def lister_projets(
     return await executer_async(_query)
 
 
-@router.get("/projets/{projet_id}")
+@router.get("/projets/{projet_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_projet(projet_id: int, user: dict[str, Any] = Depends(require_auth)):
     """Récupère un projet avec ses tâches."""
@@ -130,7 +131,7 @@ async def obtenir_projet(projet_id: int, user: dict[str, Any] = Depends(require_
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/routines")
+@router.get("/routines", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_routines(
     categorie: str | None = Query(None, description="Filtrer par catégorie"),
@@ -169,7 +170,7 @@ async def lister_routines(
     return await executer_async(_query)
 
 
-@router.get("/routines/{routine_id}")
+@router.get("/routines/{routine_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_routine(routine_id: int, user: dict[str, Any] = Depends(require_auth)):
     """Récupère une routine avec ses tâches."""
@@ -208,7 +209,7 @@ async def obtenir_routine(routine_id: int, user: dict[str, Any] = Depends(requir
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/entretien")
+@router.get("/entretien", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_taches_entretien(
     categorie: str | None = Query(None, description="Filtrer par catégorie"),
@@ -262,7 +263,7 @@ async def lister_taches_entretien(
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/jardin")
+@router.get("/jardin", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_elements_jardin(
     type_element: str | None = Query(None, description="Filtrer par type (plante, légume, etc.)"),
@@ -305,7 +306,7 @@ async def lister_elements_jardin(
     return await executer_async(_query)
 
 
-@router.get("/jardin/{element_id}/journal")
+@router.get("/jardin/{element_id}/journal", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_journal_jardin(
     element_id: int,
@@ -344,7 +345,7 @@ async def obtenir_journal_jardin(
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/stocks")
+@router.get("/stocks", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_stocks_maison(
     categorie: str | None = Query(None, description="Filtrer par catégorie"),
@@ -390,7 +391,7 @@ async def lister_stocks_maison(
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/meubles")
+@router.get("/meubles", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_meubles(
     piece: str | None = Query(None, description="Filtrer par pièce"),

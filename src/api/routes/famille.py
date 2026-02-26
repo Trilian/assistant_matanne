@@ -17,6 +17,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from src.api.dependencies import require_auth
 from src.api.pagination import appliquer_cursor_filter, construire_reponse_cursor, decoder_cursor
 from src.api.schemas.common import MessageResponse, ReponsePaginee
+from src.api.schemas.errors import REPONSES_CRUD_LECTURE, REPONSES_LISTE
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/famille", tags=["Famille"])
@@ -27,7 +28,7 @@ router = APIRouter(prefix="/api/v1/famille", tags=["Famille"])
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/enfants")
+@router.get("/enfants", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_enfants(
     page: int = Query(1, ge=1),
@@ -79,7 +80,7 @@ async def lister_enfants(
     return await executer_async(_query)
 
 
-@router.get("/enfants/{enfant_id}")
+@router.get("/enfants/{enfant_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_enfant(enfant_id: int, user: dict[str, Any] = Depends(require_auth)):
     """Récupère un profil enfant par son ID."""
@@ -104,7 +105,7 @@ async def obtenir_enfant(enfant_id: int, user: dict[str, Any] = Depends(require_
     return await executer_async(_query)
 
 
-@router.get("/enfants/{enfant_id}/jalons")
+@router.get("/enfants/{enfant_id}/jalons", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def lister_jalons_enfant(
     enfant_id: int,
@@ -146,7 +147,7 @@ async def lister_jalons_enfant(
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/activites")
+@router.get("/activites", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_activites(
     page: int = Query(1, ge=1),
@@ -223,7 +224,7 @@ async def lister_activites(
     return await executer_async(_query)
 
 
-@router.get("/activites/{activite_id}")
+@router.get("/activites/{activite_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_activite(activite_id: int, user: dict[str, Any] = Depends(require_auth)):
     """Récupère une activité par son ID."""
@@ -261,7 +262,7 @@ async def obtenir_activite(activite_id: int, user: dict[str, Any] = Depends(requ
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/budget")
+@router.get("/budget", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_depenses(
     page: int = Query(1, ge=1),
@@ -315,7 +316,7 @@ async def lister_depenses(
     return await executer_async(_query)
 
 
-@router.get("/budget/stats")
+@router.get("/budget/stats", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def statistiques_budget(
     mois: int | None = Query(None, ge=1, le=12, description="Mois (1-12)"),
@@ -368,7 +369,7 @@ async def statistiques_budget(
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/shopping")
+@router.get("/shopping", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_shopping(
     liste: str | None = Query(None, description="Filtrer par liste (Jules, Nous, etc.)"),

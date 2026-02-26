@@ -396,6 +396,28 @@ def _logger_evenement_audit(event: EvenementDomaine) -> None:
 
 
 # ═══════════════════════════════════════════════════════════
+# WEBHOOKS SORTANTS
+# ═══════════════════════════════════════════════════════════
+
+
+def _livrer_webhooks(event: EvenementDomaine) -> None:
+    """Livre l'événement aux webhooks enregistrés (fire-and-forget).
+
+    N'échoue jamais — toute exception est capturée et loguée.
+    La livraison effective est déléguée au thread pool du WebhookService.
+    """
+    try:
+        from src.services.webhooks import get_webhook_service
+
+        service = get_webhook_service()
+        service.livrer_evenement(event.type, event.data)
+    except ImportError:
+        pass  # Module webhooks optionnel
+    except Exception as e:  # noqa: BLE001
+        logger.debug("Échec livraison webhooks pour %s: %s", event.type, e)
+
+
+# ═══════════════════════════════════════════════════════════
 # ENREGISTREMENT — Appelé au bootstrap
 # ═══════════════════════════════════════════════════════════
 
@@ -463,6 +485,10 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("*", _enregistrer_metrique_evenement, priority=50)
     compteur += 1
     bus.souscrire("service.error", _enregistrer_erreur_service, priority=50)
+    compteur += 1
+
+    # ── Webhooks sortants (basse priorité, fire-and-forget) ──
+    bus.souscrire("*", _livrer_webhooks, priority=5)
     compteur += 1
 
     # ── Audit logging (basse priorité) ──

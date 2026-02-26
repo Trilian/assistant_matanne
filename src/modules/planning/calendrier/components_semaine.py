@@ -8,7 +8,8 @@ import streamlit as st
 
 from src.core.session_keys import SK
 
-from .utils import SemaineCalendrier, generer_texte_semaine_pour_impression
+from .export import generer_texte_semaine_pour_impression
+from .types import SemaineCalendrier
 
 
 def afficher_vue_semaine_grille(semaine: SemaineCalendrier):

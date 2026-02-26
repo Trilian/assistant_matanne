@@ -3,1444 +3,1667 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rapport d'Audit Complet - Assistant Matanne v10</title>
+    <title>Rapport d'Audit Complet — Assistant Matanne v10</title>
     <style>
         :root {
-            --primary: #667eea;
-            --primary-dark: #5a67d8;
-            --success: #48bb78;
-            --warning: #ed8936;
-            --danger: #f56565;
-            --info: #4299e1;
-            --bg-dark: #1a202c;
-            --bg-card: #2d3748;
-            --text: #e2e8f0;
-            --text-muted: #a0aec0;
-            --border: #4a5568;
+            --bg: #0d1117;
+            --bg-card: #161b22;
+            --bg-card-alt: #1c2333;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-hover: #79c0ff;
+            --green: #3fb950;
+            --green-bg: rgba(63,185,80,.12);
+            --yellow: #d29922;
+            --yellow-bg: rgba(210,153,34,.12);
+            --red: #f85149;
+            --red-bg: rgba(248,81,73,.12);
+            --orange: #db6d28;
+            --purple: #bc8cff;
+            --pink: #f778ba;
+            --radius: 8px;
+            --shadow: 0 2px 8px rgba(0,0,0,.3);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg-dark);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
             color: var(--text);
             line-height: 1.6;
+            padding: 0;
         }
         .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
 
         /* Header */
-        header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        .hero {
+            background: linear-gradient(135deg, #101820 0%, #1a2332 50%, #0d1b2a 100%);
+            border-bottom: 1px solid var(--border);
             padding: 3rem 2rem;
             text-align: center;
-            margin-bottom: 2rem;
-            border-radius: 12px;
         }
-        header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
-        header p { font-size: 1.1rem; opacity: 0.9; }
+        .hero h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: .5rem;
+        }
+        .hero .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+        .hero .date { color: var(--accent); font-size: 0.9rem; margin-top: .5rem; }
 
         /* Navigation */
-        nav {
-            background: var(--bg-card);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
+        .toc {
             position: sticky;
             top: 0;
             z-index: 100;
+            background: rgba(13,17,23,.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: .75rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+            justify-content: center;
         }
-        nav ul { display: flex; flex-wrap: wrap; gap: 1rem; list-style: none; justify-content: center; }
-        nav a {
-            color: var(--text);
+        .toc a {
+            color: var(--text-muted);
             text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            transition: background 0.2s;
+            padding: .35rem .75rem;
+            border-radius: var(--radius);
+            font-size: .85rem;
+            transition: all .2s;
         }
-        nav a:hover { background: var(--primary); }
+        .toc a:hover { background: var(--bg-card); color: var(--accent); }
+
+        /* Sections */
+        section { margin-bottom: 3rem; }
+        h2 {
+            font-size: 1.8rem;
+            color: var(--accent);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: .5rem;
+            margin-bottom: 1.5rem;
+        }
+        h3 { font-size: 1.3rem; color: var(--text); margin: 1.5rem 0 .75rem; }
+        h4 { font-size: 1.1rem; color: var(--purple); margin: 1rem 0 .5rem; }
 
         /* Cards */
         .card {
             background: var(--bg-card);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
             border: 1px solid var(--border);
-        }
-        .card h2 {
-            color: var(--primary);
+            border-radius: var(--radius);
+            padding: 1.5rem;
             margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--border);
+            box-shadow: var(--shadow);
         }
-        .card h3 { color: var(--info); margin: 1rem 0 0.5rem; }
-        .card h4 { color: var(--text-muted); margin: 0.75rem 0 0.25rem; }
+        .card-alt { background: var(--bg-card-alt); }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .card-title { font-size: 1.2rem; font-weight: 600; }
+
+        /* Scores */
+        .score-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .25rem .75rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: .95rem;
+        }
+        .score-excellent { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+        .score-good { background: rgba(88,166,255,.12); color: var(--accent); border: 1px solid var(--accent); }
+        .score-average { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow); }
+        .score-poor { background: var(--red-bg); color: var(--red); border: 1px solid var(--red); }
+
+        /* Score bar */
+        .score-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: .5rem 0;
+        }
+        .score-bar {
+            flex: 1;
+            height: 10px;
+            background: var(--border);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width .5s ease;
+        }
+        .score-bar-fill.green { background: linear-gradient(90deg, #238636, #3fb950); }
+        .score-bar-fill.blue { background: linear-gradient(90deg, #1f6feb, #58a6ff); }
+        .score-bar-fill.yellow { background: linear-gradient(90deg, #9e6a03, #d29922); }
+        .score-bar-fill.red { background: linear-gradient(90deg, #da3633, #f85149); }
+        .score-label { font-size: .85rem; min-width: 45px; text-align: right; font-weight: 600; }
 
         /* Tables */
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 1rem 0;
+            font-size: .9rem;
         }
         th, td {
-            padding: 0.75rem;
+            padding: .6rem .8rem;
             text-align: left;
             border-bottom: 1px solid var(--border);
         }
-        th { background: rgba(102, 126, 234, 0.2); font-weight: 600; }
-        tr:hover { background: rgba(255,255,255,0.05); }
-
-        /* Metrics */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 1rem 0;
+        th {
+            background: var(--bg-card-alt);
+            color: var(--accent);
+            font-weight: 600;
+            position: sticky;
+            top: 48px;
         }
-        .metric {
-            background: rgba(102, 126, 234, 0.1);
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .metric-value { font-size: 2rem; font-weight: bold; color: var(--primary); }
-        .metric-label { font-size: 0.9rem; color: var(--text-muted); }
+        tr:hover { background: rgba(88,166,255,.04); }
 
-        /* Badges */
-        .badge {
+        /* Grid */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+        @media (max-width: 1024px) {
+            .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+        }
+
+        /* Tags */
+        .tag {
             display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.85rem;
+            padding: .15rem .5rem;
+            border-radius: 12px;
+            font-size: .75rem;
             font-weight: 500;
+            margin: .15rem;
         }
-        .badge-success { background: var(--success); color: white; }
-        .badge-warning { background: var(--warning); color: white; }
-        .badge-danger { background: var(--danger); color: white; }
-        .badge-info { background: var(--info); color: white; }
+        .tag-done { background: var(--green-bg); color: var(--green); }
+        .tag-partial { background: var(--yellow-bg); color: var(--yellow); }
+        .tag-todo { background: var(--red-bg); color: var(--red); }
+        .tag-new { background: rgba(188,140,255,.12); color: var(--purple); }
+        .tag-info { background: rgba(88,166,255,.12); color: var(--accent); }
 
-        /* Progress bars */
-        .progress-bar {
-            height: 8px;
-            background: var(--border);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: var(--success);
-            transition: width 0.3s;
-        }
-
-        /* Code blocks */
-        code {
-            background: rgba(0,0,0,0.3);
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            font-family: 'Fira Code', monospace;
-            font-size: 0.9em;
-        }
-        pre {
-            background: rgba(0,0,0,0.3);
-            padding: 1rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin: 1rem 0;
-        }
-        pre code { background: none; padding: 0; }
-
-        /* Lists */
-        ul, ol { margin: 0.5rem 0 0.5rem 1.5rem; }
-        li { margin: 0.25rem 0; }
-
-        /* Sections */
-        section { margin-bottom: 3rem; }
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        .section-header .icon { font-size: 1.5rem; }
-
-        /* Roadmap */
-        .roadmap-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            padding: 1rem;
+        /* Feature list */
+        .feature-list { list-style: none; padding: 0; }
+        .feature-list li {
+            padding: .5rem .75rem;
             border-left: 3px solid var(--border);
-            margin: 0.5rem 0;
+            margin-bottom: .4rem;
+            font-size: .9rem;
+            transition: border-color .2s;
         }
-        .roadmap-item.completed { border-left-color: var(--success); }
-        .roadmap-item.in-progress { border-left-color: var(--warning); }
-        .roadmap-item.planned { border-left-color: var(--info); }
+        .feature-list li:hover { border-left-color: var(--accent); }
+        .feature-list li.exists { border-left-color: var(--green); }
+        .feature-list li.exists::before { content: "✅ "; }
+        .feature-list li.partial { border-left-color: var(--yellow); }
+        .feature-list li.partial::before { content: "🟡 "; }
+        .feature-list li.missing { border-left-color: var(--red); }
+        .feature-list li.missing::before { content: "🔴 "; }
+        .feature-list li.idea { border-left-color: var(--purple); }
+        .feature-list li.idea::before { content: "💡 "; }
 
-        /* Comparison */
-        .comparison-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+        /* Roadmap timeline */
+        .timeline { position: relative; padding-left: 2rem; }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
         }
-        .comparison-before { border-left: 3px solid var(--warning); }
-        .comparison-after { border-left: 3px solid var(--success); }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.65rem;
+            top: 1.2rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--bg);
+        }
+        .timeline-item.done::before { background: var(--green); }
+        .timeline-item.current::before { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+        .timeline-item.future::before { background: var(--text-muted); }
+        .timeline-label {
+            font-size: .8rem;
+            color: var(--text-muted);
+            margin-bottom: .25rem;
+        }
 
         /* Collapsible */
-        details { margin: 0.5rem 0; }
+        details { margin: .5rem 0; }
         summary {
             cursor: pointer;
-            padding: 0.5rem;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 6px;
+            padding: .5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--accent);
             font-weight: 500;
         }
-        summary:hover { background: rgba(102, 126, 234, 0.2); }
-        details[open] summary { margin-bottom: 0.5rem; }
-
-        /* Print styles */
-        @media print {
-            body { background: white; color: black; }
-            .card { border: 1px solid #ccc; }
-            nav { display: none; }
+        summary:hover { background: var(--bg-card-alt); }
+        details[open] summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+        details > div {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 var(--radius) var(--radius);
+            background: var(--bg-card);
         }
+
+        /* Metric big number */
+        .metric {
+            text-align: center;
+            padding: 1.5rem 1rem;
+        }
+        .metric .number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .metric .label {
+            font-size: .85rem;
+            color: var(--text-muted);
+            margin-top: .25rem;
+        }
+
+        /* Comparison */
+        .compare-before { color: var(--text-muted); text-decoration: line-through; }
+        .compare-arrow { color: var(--yellow); margin: 0 .5rem; }
+        .compare-after { color: var(--green); font-weight: 600; }
+
+        /* Print */
+        @media print {
+            body { background: #fff; color: #000; }
+            .toc { display: none; }
+            .card { border: 1px solid #ccc; box-shadow: none; }
+        }
+
+        /* Smooth scrolling */
+        html { scroll-behavior: smooth; }
+
+        /* Flow diagram */
+        .flow-box {
+            display: inline-block;
+            padding: .4rem .8rem;
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: .85rem;
+            margin: .2rem;
+        }
+        .flow-arrow { color: var(--accent); font-size: 1.2rem; margin: 0 .3rem; vertical-align: middle; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🔍 Rapport d'Audit Complet</h1>
-            <p>Assistant Matanne - Version 10 | Généré le 26 février 2026</p>
-        </header>
 
-        <nav>
-            <ul>
-                <li><a href="#executive-summary">📊 Résumé</a></li>
-                <li><a href="#metrics">📈 Métriques</a></li>
-                <li><a href="#api">🌐 API</a></li>
-                <li><a href="#core">⚙️ Core</a></li>
-                <li><a href="#modules">📦 Modules</a></li>
-                <li><a href="#services">🔧 Services</a></li>
-                <li><a href="#ui">🎨 UI</a></li>
-                <li><a href="#innovations">💡 Innovations</a></li>
-                <li><a href="#roadmap">🗺️ Roadmap</a></li>
-            </ul>
-        </nav>
-
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <!-- EXECUTIVE SUMMARY -->
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <section id="executive-summary">
-            <div class="card">
-                <h2>📊 Résumé Exécutif</h2>
-
-                <h3>Vue d'ensemble du Projet</h3>
-                <p>
-                    <strong>Assistant Matanne</strong> est une application Streamlit de gestion familiale complète,
-                    en production, avec une architecture modulaire avancée. Le projet démontre une maturité
-                    exceptionnelle pour un projet Streamlit, intégrant des patterns enterprise-grade.
-                </p>
-
-                <div class="metrics-grid">
-                    <div class="metric">
-                        <div class="metric-value">137,157</div>
-                        <div class="metric-label">Lignes de Code (src/)</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value">655</div>
-                        <div class="metric-label">Fichiers Python</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value">8,045</div>
-                        <div class="metric-label">Tests Passés</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value">95</div>
-                        <div class="metric-label">Tables SQL</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value">50+</div>
-                        <div class="metric-label">Services</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value">100%</div>
-                        <div class="metric-label">Nommage FR</div>
-                    </div>
-                </div>
-
-                <h3>Score de Complétude Global</h3>
-                <table>
-                    <tr>
-                        <th>Domaine</th>
-                        <th>Score</th>
-                        <th>Progression</th>
-                        <th>Commentaire</th>
-                    </tr>
-                    <tr>
-                        <td>Architecture</td>
-                        <td><span class="badge badge-success">95%</span></td>
-                        <td><div class="progress-bar"><div class="progress-fill" style="width:95%"></div></div></td>
-                        <td>Patterns enterprise-grade implémentés</td>
-                    </tr>
-                    <tr>
-                        <td>API REST</td>
-                        <td><span class="badge badge-success">90%</span></td>
-                        <td><div class="progress-bar"><div class="progress-fill" style="width:90%"></div></div></td>
-                        <td>FastAPI avec sécurité complète</td>
-                    </tr>
-                    <tr>
-                        <td>Base de Données</td>
-                        <td><span class="badge badge-success">95%</span></td>
-                        <td><div class="progress-bar"><div class="progress-fill" style="width:95%"></div></div></td>
-                        <td>SQLAlchemy 2.0, 95 tables, RLS</td>
-                    </tr>
-                    <tr>
-                        <td>Services Métier</td>
-                        <td><span class="badge badge-success">92%</span></td>
-                        <td><div class="progress-bar"><div class="progress-fill" style="width:92%"></div></div></td>
-                        <td>50+ services avec BaseService/BaseAIService</td>
-                    </tr>
-                    <tr>
-                        <td>Intégration IA</td>
-                        <td><span class="badge badge-success">90%</span></td>
-                        <td><div class="progress-bar"><div class="progress-fill" style="width:90%"></div></div></td>
-                        <td>Mistral AI avec cache, rate limiting, circuit breaker</td>
-                    </tr>
-                    <tr>
-                        <td>UI/UX</td>
-                        <td><span class="badge badge-warning">85%</span></td>
-                        <td><div class="progress-bar"><div class="progress-fill" style="width:85%"></div></div></td>
-                        <td>Design system complet, tokens sémantiques</td>
-                    </tr>
-                    <tr>
-                        <td>Tests</td>
-                        <td><span class="badge badge-warning">78%</span></td>
-                        <td><div class="progress-bar"><div class="progress-fill" style="width:78%"></div></div></td>
-                        <td>8045 tests, coverage ~75% core</td>
-                    </tr>
-                    <tr>
-                        <td>Documentation</td>
-                        <td><span class="badge badge-warning">80%</span></td>
-                        <td><div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div></td>
-                        <td>Docs techniques complètes, guides utilisateur à améliorer</td>
-                    </tr>
-                    <tr>
-                        <td>DevOps/CI/CD</td>
-                        <td><span class="badge badge-success">90%</span></td>
-                        <td><div class="progress-bar"><div class="progress-fill" style="width:90%"></div></div></td>
-                        <td>GitHub Actions, security scans, Dependabot</td>
-                    </tr>
-                    <tr>
-                        <td>Sécurité</td>
-                        <td><span class="badge badge-success">88%</span></td>
-                        <td><div class="progress-bar"><div class="progress-fill" style="width:88%"></div></div></td>
-                        <td>JWT, RLS, headers OWASP, sanitization</td>
-                    </tr>
-                </table>
-
-                <h3>Points Forts Majeurs</h3>
-                <ul>
-                    <li>✅ <strong>Architecture Modulaire</strong>: Lazy loading avec ~60% d'accélération au démarrage</li>
-                    <li>✅ <strong>Patterns Enterprise</strong>: Service Registry, Event Bus, Circuit Breaker, Rate Limiting</li>
-                    <li>✅ <strong>IA Intégrée</strong>: Mistral AI avec cache sémantique et résilience</li>
-                    <li>✅ <strong>API REST Complète</strong>: FastAPI avec 12+ routers, WebSocket, Prometheus</li>
-                    <li>✅ <strong>Multi-niveaux de Cache</strong>: L1 mémoire → L2 session → L3 fichier → Redis</li>
-                    <li>✅ <strong>PWA Support</strong>: Service Worker, offline mode, push notifications</li>
-                    <li>✅ <strong>Observabilité</strong>: Correlation IDs, structured logging, Sentry, health checks</li>
-                </ul>
-
-                <h3>Axes d'Amélioration Principaux</h3>
-                <ul>
-                    <li>⚠️ <strong>Coverage Tests</strong>: Augmenter de 75% à 85%+ (fichiers à 0%)</li>
-                    <li>⚠️ <strong>Tests Skippés</strong>: ~20 tests à débloquer/supprimer</li>
-                    <li>⚠️ <strong>Documentation Utilisateur</strong>: Guides fonctionnels à enrichir</li>
-                    <li>⚠️ <strong>Monitoring Production</strong>: Grafana dashboards à créer</li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <!-- DETAILED METRICS -->
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <section id="metrics">
-            <div class="card">
-                <h2>📈 Métriques Détaillées</h2>
-
-                <h3>Répartition du Code par Dossier</h3>
-                <table>
-                    <tr>
-                        <th>Dossier</th>
-                        <th>Fichiers</th>
-                        <th>Lignes</th>
-                        <th>% du Total</th>
-                        <th>Rôle</th>
-                    </tr>
-                    <tr>
-                        <td><code>src/services/</code></td>
-                        <td>211</td>
-                        <td>52,319</td>
-                        <td>38.1%</td>
-                        <td>Logique métier, services IA, intégrations</td>
-                    </tr>
-                    <tr>
-                        <td><code>src/modules/</code></td>
-                        <td>226</td>
-                        <td>40,254</td>
-                        <td>29.3%</td>
-                        <td>Pages Streamlit, UI métier</td>
-                    </tr>
-                    <tr>
-                        <td><code>src/core/</code></td>
-                        <td>94</td>
-                        <td>19,145</td>
-                        <td>14.0%</td>
-                        <td>Infrastructure, config, DB, cache</td>
-                    </tr>
-                    <tr>
-                        <td><code>src/ui/</code></td>
-                        <td>78</td>
-                        <td>17,603</td>
-                        <td>12.8%</td>
-                        <td>Composants, design system, tokens</td>
-                    </tr>
-                    <tr>
-                        <td><code>src/api/</code></td>
-                        <td>44</td>
-                        <td>7,586</td>
-                        <td>5.5%</td>
-                        <td>API REST FastAPI</td>
-                    </tr>
-                    <tr>
-                        <td><code>src/app.py</code></td>
-                        <td>1</td>
-                        <td>249</td>
-                        <td>0.2%</td>
-                        <td>Point d'entrée Streamlit</td>
-                    </tr>
-                    <tr style="font-weight:bold; background: rgba(102,126,234,0.1);">
-                        <td>TOTAL</td>
-                        <td>655</td>
-                        <td>137,157</td>
-                        <td>100%</td>
-                        <td>-</td>
-                    </tr>
-                </table>
-
-                <h3>Modèles SQLAlchemy (src/core/models/)</h3>
-                <p>Le projet contient <strong>22 fichiers de modèles</strong> définissant environ <strong>100+ classes ORM</strong>:</p>
-                <div class="metrics-grid">
-                    <div class="metric">
-                        <div class="metric-value">95</div>
-                        <div class="metric-label">Tables PostgreSQL</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value">4</div>
-                        <div class="metric-label">Mixins (Timestamps)</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value">20+</div>
-                        <div class="metric-label">Enums Typés</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value">100%</div>
-                        <div class="metric-label">Nommage Français</div>
-                    </div>
-                </div>
-
-                <details>
-                    <summary>📋 Liste des fichiers modèles</summary>
-                    <pre><code>base.py         - Base SQLAlchemy, convention de nommage
-mixins.py       - CreeLeMixin, TimestampMixin, TimestampFullMixin
-users.py        - ProfilUtilisateur, ActiviteGarmin, JournalAlimentaire...
-recettes.py     - Recette, Ingredient, EtapeRecette, VersionRecette...
-planning.py     - Planning, Repas, EvenementPlanning, TemplateSemaine
-courses.py      - ListeCourses, ArticleCourses, ModeleCourses
-inventaire.py   - ArticleInventaire, HistoriqueInventaire
-calendrier.py   - CalendrierExterne, EvenementCalendrier
-famille.py      - ProfilEnfant (Jules)
-finances.py     - Depense, BudgetMensuelDB, DepenseMaison
-maison.py       - Projet, TacheProjet, Routine, ElementJardin
-habitat.py      - Meuble, StockMaison, TacheEntretien, ActionEcologique
-jardin.py       - AlerteMeteo, ConfigMeteo
-temps_entretien.py - SessionTravail, PieceMaison, ZoneJardin, PlanteJardin
-jeux.py         - Equipe, Match, PariSportif, GrilleLoto, SerieJeux
-sante.py        - RoutineSante, ObjectifSante, EntreeSante
-notifications.py - AbonnementPush, PreferenceNotification
-batch_cooking.py - Modèles batch cooking
-user_preferences.py - PreferenceUtilisateur, RetourRecette
-persistent_state.py - EtatPersistantDB
-systeme.py      - Backup, HistoriqueAction</code></pre>
-                </details>
-
-                <h3>Services (src/services/)</h3>
-                <p>Architecture de services avec patterns modernes:</p>
-                <table>
-                    <tr>
-                        <th>Pattern</th>
-                        <th>Classes</th>
-                        <th>Description</th>
-                    </tr>
-                    <tr>
-                        <td><code>BaseService[T]</code></td>
-                        <td>~20</td>
-                        <td>CRUD générique typé avec cache automatique</td>
-                    </tr>
-                    <tr>
-                        <td><code>BaseAIService</code></td>
-                        <td>~15</td>
-                        <td>Services IA avec rate limiting, circuit breaker, streaming</td>
-                    </tr>
-                    <tr>
-                        <td><code>@service_factory</code></td>
-                        <td>50+</td>
-                        <td>Singletons thread-safe via ServiceRegistry</td>
-                    </tr>
-                </table>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <!-- API ANALYSIS -->
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <section id="api">
-            <div class="card">
-                <h2>🌐 Analyse src/api/ (7,586 LOC, 44 fichiers)</h2>
-
-                <h3>Structure du Package</h3>
-                <pre><code>src/api/
-├── main.py              # App FastAPI, middlewares, health checks
-├── auth.py              # JWT, Supabase auth
-├── dependencies.py      # Dépendances d'injection
-├── pagination.py        # Pagination API
-├── prometheus.py        # Métriques Prometheus
-├── versioning.py        # Middleware versioning API
-├── websocket_courses.py # WebSocket collaboration temps réel
-├── rate_limiting/       # Rate limiting complet
-│   ├── config.py
-│   ├── dependencies.py
-│   ├── limiter.py
-│   ├── middleware.py
-│   ├── redis_storage.py
-│   └── storage.py
-├── routes/              # 12 routers REST
-│   ├── auth.py, calendriers.py, courses.py
-│   ├── famille.py, inventaire.py, jeux.py
-│   ├── maison.py, planning.py, push.py
-│   ├── recettes.py, suggestions.py
-│   └── __init__.py
-├── schemas/             # Pydantic v2 schemas
-│   ├── auth.py, base.py, common.py
-│   ├── courses.py, inventaire.py, planning.py
-│   ├── push.py, recettes.py, suggestions.py
-│   └── __init__.py
-└── utils/               # Utilitaires API
-    ├── cache.py         # ETagMiddleware
-    ├── crud.py          # Generic CRUD
-    ├── exceptions.py    # Error handling
-    ├── metrics.py       # MetricsMiddleware
-    └── security_headers.py  # Headers OWASP</code></pre>
-
-                <h3>Endpoints Disponibles</h3>
-                <table>
-                    <tr><th>Router</th><th>Préfixe</th><th>Endpoints Clés</th></tr>
-                    <tr><td>auth</td><td>/api/v1/auth</td><td>login, register, refresh, me</td></tr>
-                    <tr><td>recettes</td><td>/api/v1/recettes</td><td>CRUD, search, import</td></tr>
-                    <tr><td>inventaire</td><td>/api/v1/inventaire</td><td>CRUD, stock alerts</td></tr>
-                    <tr><td>courses</td><td>/api/v1/courses</td><td>CRUD, lists, articles</td></tr>
-                    <tr><td>planning</td><td>/api/v1/planning</td><td>CRUD, templates, events</td></tr>
-                    <tr><td>suggestions</td><td>/api/v1/suggestions</td><td>IA suggestions endpoints</td></tr>
-                    <tr><td>famille</td><td>/api/v1/famille</td><td>Jules, weekend, achats</td></tr>
-                    <tr><td>maison</td><td>/api/v1/maison</td><td>projets, jardin, entretien</td></tr>
-                    <tr><td>jeux</td><td>/api/v1/jeux</td><td>paris, loto</td></tr>
-                    <tr><td>calendriers</td><td>/api/v1/calendriers</td><td>sync, events</td></tr>
-                    <tr><td>push</td><td>/api/v1/push</td><td>subscriptions, notifications</td></tr>
-                    <tr><td>prometheus</td><td>/metrics/prometheus</td><td>Prometheus format</td></tr>
-                </table>
-
-                <h3>Sécurité Implémentée</h3>
-                <ul>
-                    <li>✅ <strong>JWT Bearer Authentication</strong>: HTTPBearer avec Supabase ou API_SECRET</li>
-                    <li>✅ <strong>Role-based Access</strong>: <code>require_role("admin")</code> pour /metrics</li>
-                    <li>✅ <strong>Rate Limiting</strong>: 60 req/min standard, 10 req/min IA</li>
-                    <li>✅ <strong>CORS Configuré</strong>: Origins autorisées (localhost + production)</li>
-                    <li>✅ <strong>Security Headers</strong>: X-Content-Type-Options, X-Frame-Options, CSP, HSTS</li>
-                    <li>✅ <strong>Error Sanitization</strong>: Messages génériques, logs détaillés internes</li>
-                    <li>✅ <strong>ETag Caching</strong>: 304 Not Modified support</li>
-                </ul>
-
-                <h3>Concepts Vérifiés ✅</h3>
-                <ul>
-                    <li>✅ Middleware pipeline (CORS → Rate Limiting → Version → ETag → Security → Metrics)</li>
-                    <li>✅ Dependency Injection (FastAPI Depends)</li>
-                    <li>✅ Pydantic v2 schemas avec validation</li>
-                    <li>✅ OpenAPI documentation complète avec tags</li>
-                    <li>✅ WebSocket pour collaboration temps réel</li>
-                    <li>✅ Global exception handler</li>
-                    <li>✅ Health checks centralisés via <code>SanteSysteme</code></li>
-                </ul>
-
-                <h3>Améliorations Suggérées</h3>
-                <table>
-                    <tr><th>Amélioration</th><th>Impact</th><th>Effort</th></tr>
-                    <tr>
-                        <td>GraphQL Gateway (optionnel)</td>
-                        <td>Requêtes flexibles côté mobile</td>
-                        <td>Moyen</td>
-                    </tr>
-                    <tr>
-                        <td>API versioning par header Accept</td>
-                        <td>Évolution sans casse</td>
-                        <td>Faible</td>
-                    </tr>
-                    <tr>
-                        <td>OpenTelemetry tracing</td>
-                        <td>Tracing distribué</td>
-                        <td>Moyen</td>
-                    </tr>
-                    <tr>
-                        <td>Auto-génération SDK clients</td>
-                        <td>TypeScript/Python clients</td>
-                        <td>Faible</td>
-                    </tr>
-                </table>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <!-- CORE ANALYSIS -->
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <section id="core">
-            <div class="card">
-                <h2>⚙️ Analyse src/core/ (19,145 LOC, 94 fichiers)</h2>
-
-                <h3>Architecture des Sous-Packages</h3>
-                <table>
-                    <tr><th>Package</th><th>Fichiers</th><th>Rôle</th><th>Patterns Utilisés</th></tr>
-                    <tr>
-                        <td><code>ai/</code></td>
-                        <td>7</td>
-                        <td>Client Mistral, cache IA, rate limiting, circuit breaker</td>
-                        <td>Circuit Breaker, Semantic Cache, Rate Limiting</td>
-                    </tr>
-                    <tr>
-                        <td><code>caching/</code></td>
-                        <td>7</td>
-                        <td>Cache multi-niveaux (L1 mem → L2 session → L3 file → Redis)</td>
-                        <td>Strategy, Decorator, Orchestrator</td>
-                    </tr>
-                    <tr>
-                        <td><code>config/</code></td>
-                        <td>4</td>
-                        <td>Configuration Pydantic BaseSettings</td>
-                        <td>Singleton, Cascade loading</td>
-                    </tr>
-                    <tr>
-                        <td><code>db/</code></td>
-                        <td>6</td>
-                        <td>SQLAlchemy engine, sessions, migrations SQL-file</td>
-                        <td>Context Manager, Connection Pool</td>
-                    </tr>
-                    <tr>
-                        <td><code>decorators/</code></td>
-                        <td>5</td>
-                        <td>@avec_session_db, @avec_cache, @avec_resilience</td>
-                        <td>Decorator, Aspect-Oriented</td>
-                    </tr>
-                    <tr>
-                        <td><code>models/</code></td>
-                        <td>22</td>
-                        <td>Modèles ORM SQLAlchemy 2.0</td>
-                        <td>ORM, Mixins, Relationships</td>
-                    </tr>
-                    <tr>
-                        <td><code>monitoring/</code></td>
-                        <td>6</td>
-                        <td>Métriques, health checks, Sentry, profiling</td>
-                        <td>Observer, Strategy</td>
-                    </tr>
-                    <tr>
-                        <td><code>observability/</code></td>
-                        <td>2</td>
-                        <td>Correlation IDs, contexte d'exécution</td>
-                        <td>Context Pattern</td>
-                    </tr>
-                    <tr>
-                        <td><code>resilience/</code></td>
-                        <td>2</td>
-                        <td>Policies composables (Retry, Timeout, Bulkhead, Fallback)</td>
-                        <td>Policy, Composition</td>
-                    </tr>
-                    <tr>
-                        <td><code>state/</code></td>
-                        <td>5</td>
-                        <td>GestionnaireEtat, navigation, slices typés</td>
-                        <td>State Machine, Flux-like</td>
-                    </tr>
-                    <tr>
-                        <td><code>validation/</code></td>
-                        <td>6</td>
-                        <td>Schemas Pydantic, sanitizer anti-XSS</td>
-                        <td>Validation, Sanitization</td>
-                    </tr>
-                    <tr>
-                        <td><code>date_utils/</code></td>
-                        <td>5</td>
-                        <td>Utilitaires dates (semaines, périodes, formatage FR)</td>
-                        <td>Helper Functions</td>
-                    </tr>
-                </table>
-
-                <h3>Fichiers Racine Clés</h3>
-                <ul>
-                    <li><code>bootstrap.py</code>: Initialisation unifiée (config, DB, events)</li>
-                    <li><code>constants.py</code>: Constantes globales (MOIS_FR, limites IA)</li>
-                    <li><code>exceptions.py</code>: Exceptions métier pures (sans UI)</li>
-                    <li><code>lazy_loader.py</code>: ChargeurModuleDiffere pour lazy loading</li>
-                    <li><code>logging.py</code>: FormatteurStructure, JSON logging</li>
-                    <li><code>navigation.py</code>: st.navigation() + st.Page() moderne</li>
-                    <li><code>session_keys.py</code>: KeyNamespace typé pour session_state</li>
-                    <li><code>storage.py</code>: SessionStorage Protocol (découplage Streamlit)</li>
-                </ul>
-
-                <h3>Concepts Vérifiés ✅</h3>
-                <ul>
-                    <li>✅ <strong>Lazy Imports (PEP 562)</strong>: <code>__getattr__</code> dans <code>__init__.py</code></li>
-                    <li>✅ <strong>Type Hints Modernes</strong>: PEP 604 (<code>X | Y</code>), <code>Mapped</code>, <code>mapped_column</code></li>
-                    <li>✅ <strong>SQLAlchemy 2.0 ORM</strong>: mapped_column, relationship, selectinload</li>
-                    <li>✅ <strong>Pydantic v2</strong>: model_validator, field_validator, BaseSettings</li>
-                    <li>✅ <strong>Context Managers</strong>: <code>obtenir_contexte_db()</code>, <code>contexte_operation()</code></li>
-                    <li>✅ <strong>Décorateurs Composables</strong>: @avec_session_db, @avec_cache, @avec_resilience</li>
-                    <li>✅ <strong>Separation of Concerns</strong>: Core sans dépendance UI</li>
-                    <li>✅ <strong>py.typed marker</strong>: PEP 561 conformance</li>
-                </ul>
-
-                <h3>Patterns Non Utilisés (Raisons Valides)</h3>
-                <ul>
-                    <li>❌ <strong>Repository Pattern</strong>: SQLAlchemy ORM suffisant pour ce projet</li>
-                    <li>❌ <strong>Unit of Work</strong>: <code>@avec_session_db</code> couvre le besoin</li>
-                    <li>❌ <strong>CQRS</strong>: Inutile pour app single-user</li>
-                    <li>❌ <strong>IoC Container</strong>: <code>@service_factory</code> + registre suffisent</li>
-                </ul>
-
-                <h3>Améliorations Suggérées</h3>
-                <table>
-                    <tr><th>Amélioration</th><th>Impact</th><th>Effort</th></tr>
-                    <tr>
-                        <td>Alembic migrations (optionnel)</td>
-                        <td>Versionning DB automatisé</td>
-                        <td>Moyen</td>
-                    </tr>
-                    <tr>
-                        <td>AsyncIO complet dans db/</td>
-                        <td>Performance I/O</td>
-                        <td>Élevé</td>
-                    </tr>
-                    <tr>
-                        <td>Coverage monitoring/ à 100%</td>
-                        <td>Qualité code</td>
-                        <td>Faible</td>
-                    </tr>
-                </table>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <!-- MODULES ANALYSIS -->
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <section id="modules">
-            <div class="card">
-                <h2>📦 Analyse src/modules/ (40,254 LOC, 226 fichiers)</h2>
-
-                <h3>Structure des Modules UI</h3>
-                <table>
-                    <tr><th>Module</th><th>Sous-modules</th><th>Description</th></tr>
-                    <tr>
-                        <td><code>accueil/</code></td>
-                        <td>alerts, dashboard, stats, summaries, resume_hebdo</td>
-                        <td>Tableau de bord, métriques familiales, alertes</td>
-                    </tr>
-                    <tr>
-                        <td><code>cuisine/</code></td>
-                        <td>recettes, planificateur_repas, courses, inventaire, batch_cooking_detaille</td>
-                        <td>Gestion recettes, planning repas, courses, stocks</td>
-                    </tr>
-                    <tr>
-                        <td><code>famille/</code></td>
-                        <td>hub, jules, suivi_perso, weekend, achats_famille, activites, routines</td>
-                        <td>Hub famille, suivi enfant, activités, routines</td>
-                    </tr>
-                    <tr>
-                        <td><code>maison/</code></td>
-                        <td>hub, jardin, entretien, charges, depenses, eco_tips, energie, meubles, projets</td>
-                        <td>Gestion maison, jardin, dépenses, projets</td>
-                    </tr>
-                    <tr>
-                        <td><code>jeux/</code></td>
-                        <td>loto, paris, scraper_loto</td>
-                        <td>Paris sportifs, tirages Loto</td>
-                    </tr>
-                    <tr>
-                        <td><code>planning/</code></td>
-                        <td>calendrier, cockpit_familial, templates_ui, timeline_ui</td>
-                        <td>Calendrier, templates, timeline</td>
-                    </tr>
-                    <tr>
-                        <td><code>parametres/</code></td>
-                        <td>about, affichage, budget, cache, database, foyer, ia</td>
-                        <td>Configuration multi-onglets</td>
-                    </tr>
-                    <tr>
-                        <td><code>utilitaires/</code></td>
-                        <td>barcode, rapports, notifications_push, scan_factures, recherche_produits</td>
-                        <td>Outils: scan codes-barres, rapports PDF, notifications</td>
-                    </tr>
-                    <tr>
-                        <td><code>_framework/</code></td>
-                        <td>error_boundary, base_module</td>
-                        <td>Patterns réutilisables</td>
-                    </tr>
-                </table>
-
-                <h3>Patterns Framework Déployés</h3>
-                <table>
-                    <tr><th>Pattern</th><th>Adoption</th><th>Détail</th></tr>
-                    <tr>
-                        <td><code>error_boundary</code></td>
-                        <td><span class="badge badge-success">100%</span></td>
-                        <td>Tous les onglets isolés avec fallback UI</td>
-                    </tr>
-                    <tr>
-                        <td><code>@profiler_rerun</code></td>
-                        <td><span class="badge badge-success">100%</span></td>
-                        <td>Toutes les fonctions app() instrumentées</td>
-                    </tr>
-                    <tr>
-                        <td><code>KeyNamespace</code></td>
-                        <td><span class="badge badge-success">100%</span></td>
-                        <td>Clés session_state scopées par module</td>
-                    </tr>
-                    <tr>
-                        <td><code>tabs_with_url</code></td>
-                        <td><span class="badge badge-success">100%</span></td>
-                        <td>Deep linking URL pour tous les onglets</td>
-                    </tr>
-                    <tr>
-                        <td><code>@cached_fragment</code></td>
-                        <td><span class="badge badge-warning">80%</span></td>
-                        <td>Graphiques Plotly mis en cache</td>
-                    </tr>
-                    <tr>
-                        <td><code>@lazy</code></td>
-                        <td><span class="badge badge-warning">60%</span></td>
-                        <td>Chargement conditionnel de sections</td>
-                    </tr>
-                </table>
-
-                <h3>Conventions Modules</h3>
-                <ul>
-                    <li>✅ <strong>Point d'Entrée</strong>: Chaque module exporte <code>app()</code></li>
-                    <li>✅ <strong>Imports Différés</strong>: Imports lourds à l'intérieur de <code>app()</code></li>
-                    <li>✅ <strong>Onglets Isolés</strong>: <code>with error_boundary()</code> par tab</li>
-                    <li>✅ <strong>Helpers Purs</strong>: <code>*_utils.py</code> pour logique testable</li>
-                    <li>✅ <strong>DB Access</strong>: <code>db_access.py</code> pour CRUD isolé</li>
-                </ul>
-
-                <h3>Concepts Vérifiés ✅</h3>
-                <ul>
-                    <li>✅ <strong>Lazy Loading</strong>: st.navigation() + ChargeurModuleDiffere</li>
-                    <li>✅ <strong>Error Boundaries</strong>: Isolation des erreurs par onglet</li>
-                    <li>✅ <strong>State Management</strong>: GestionnaireEtat + KeyNamespace</li>
-                    <li>✅ <strong>Deep Linking</strong>: URL tabs via query params</li>
-                    <li>✅ <strong>Fragments Streamlit</strong>: @st.fragment + @cached_fragment</li>
-                    <li>✅ <strong>Profiling</strong>: @profiler_rerun pour détection pages lentes</li>
-                </ul>
-
-                <h3>Améliorations Suggérées</h3>
-                <table>
-                    <tr><th>Amélioration</th><th>Modules Concernés</th><th>Impact</th></tr>
-                    <tr>
-                        <td>@cached_fragment sur tous les graphiques</td>
-                        <td>accueil, jeux, famille</td>
-                        <td>Performance</td>
-                    </tr>
-                    <tr>
-                        <td>@lazy pour sections lourdes</td>
-                        <td>parametres, rapports</td>
-                        <td>Temps de rendu</td>
-                    </tr>
-                    <tr>
-                        <td>Composants atomiques réutilisables</td>
-                        <td>Tous</td>
-                        <td>Consistance UI</td>
-                    </tr>
-                </table>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <!-- SERVICES ANALYSIS -->
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <section id="services">
-            <div class="card">
-                <h2>🔧 Analyse src/services/ (52,319 LOC, 211 fichiers)</h2>
-
-                <h3>Organisation des Services</h3>
-                <pre><code>src/services/
-├── core/                    # Infrastructure services
-│   ├── base/               # BaseService, BaseAIService, mixins
-│   │   ├── types.py        # BaseService[T]
-│   │   ├── ai_service.py   # BaseAIService
-│   │   ├── ai_mixins.py    # AI behavior mixins
-│   │   ├── ai_streaming.py # Streaming support
-│   │   ├── ai_prompts.py   # Prompt engineering
-│   │   ├── pipeline.py     # Middleware pipeline
-│   │   ├── advanced.py     # AdvancedQueryMixin
-│   │   └── protocols.py    # Service protocols
-│   ├── events/             # Event bus pub/sub
-│   │   ├── bus.py          # BusEvenements
-│   │   ├── events.py       # Domain events
-│   │   └── subscribers.py  # Event handlers
-│   ├── registry.py         # ServiceRegistry + @service_factory
-│   ├── notifications/      # Ntfy push service
-│   ├── backup/             # Backup service
-│   ├── utilisateur/        # Auth, preferences
-│   └── gamification.py     # Points, achievements
-├── cuisine/                 # Domain: cuisine
-│   ├── recettes/           # RecetteService
-│   ├── courses/            # CoursesService
-│   ├── planning/           # PlanningService
-│   ├── batch_cooking/      # BatchCookingService
-│   └── suggestions/        # ServiceSuggestions
-├── famille/                 # Domain: famille
-│   ├── jules.py, jules_ai.py
-│   ├── weekend.py, weekend_ai.py
-│   ├── budget/             # BudgetService
-│   ├── calendrier/         # CalendarSyncService
-│   └── activites.py, routines.py, sante.py, achats.py
-├── maison/                  # Domain: maison
-│   ├── jardin_service.py
-│   ├── entretien_service.py
-│   ├── projets_service.py
-│   ├── depenses_crud_service.py
-│   ├── eco_tips_crud_service.py
-│   └── meubles_crud_service.py
-├── jeux/_internal/          # Domain: jeux
-│   ├── paris_crud_service.py, loto_crud_service.py
-│   ├── ai_service.py, prediction_service.py
-│   ├── football_data.py, sync_service.py
-│   └── notification_service.py, scheduler_service.py
-├── inventaire/              # Domain: inventaire
-│   ├── service.py          # ServiceInventaire
-│   └── inventaire_*.py     # Sous-modules
-├── integrations/            # External integrations
-│   ├── garmin/             # Garmin Connect
-│   ├── weather/            # Météo
-│   ├── images/             # Image generation
-│   ├── web/                # PWA, sync
-│   ├── produit.py          # OpenFoodFacts
-│   ├── codes_barres.py     # Barcode scanner
-│   └── facture.py          # OCR invoices
-├── rapports/                # PDF reports
-│   ├── generation.py
-│   └── export.py
-└── accueil_data_service.py  # Dashboard data</code></pre>
-
-                <h3>Adoption des Patterns</h3>
-                <table>
-                    <tr><th>Pattern</th><th>Services Impliqués</th><th>Status</th></tr>
-                    <tr>
-                        <td><code>BaseService[T]</code></td>
-                        <td>~20 services (CRUD générique)</td>
-                        <td><span class="badge badge-success">Adopté</span></td>
-                    </tr>
-                    <tr>
-                        <td><code>BaseAIService</code></td>
-                        <td>JulesAI, WeekendAI, JeuxAI, Suggestions, Projets, Jardin, Entretien</td>
-                        <td><span class="badge badge-success">Adopté</span></td>
-                    </tr>
-                    <tr>
-                        <td><code>@service_factory</code></td>
-                        <td>50+ services via ServiceRegistry</td>
-                        <td><span class="badge badge-success">Adopté</span></td>
-                    </tr>
-                    <tr>
-                        <td><code>Event Bus</code></td>
-                        <td>14 événements typés, ~10 subscribers</td>
-                        <td><span class="badge badge-warning">Partiel</span></td>
-                    </tr>
-                    <tr>
-                        <td><code>Mixins</code></td>
-                        <td>AI mixins, Gamification mixins, Catalogue mixins</td>
-                        <td><span class="badge badge-success">Adopté</span></td>
-                    </tr>
-                </table>
-
-                <h3>Services IA (BaseAIService)</h3>
-                <p>Services héritant de BaseAIService avec fonctionnalités automatiques:</p>
-                <ul>
-                    <li>✅ Rate limiting automatique</li>
-                    <li>✅ Cache sémantique</li>
-                    <li>✅ Circuit breaker</li>
-                    <li>✅ Parsing JSON/Pydantic</li>
-                    <li>✅ Streaming support</li>
-                    <li>✅ API duale async/sync (ServiceMeta)</li>
-                </ul>
-
-                <h3>Événements Domaine</h3>
-                <pre><code>// src/services/core/events/events.py — 14 événements typés
-EvenementRecettePlanifiee  → Déclenche génération courses
-EvenementStockModifie      → Déclenche alertes stock
-EvenementCoursesGenerees   → Notification UI
-EvenementRecetteImportee   → Update cache
-EvenementBatchCookingTermine
-EvenementBudgetModifie
-EvenementSanteModifie
-EvenementLotoModifie
-EvenementParisModifie
-EvenementActiviteFamille   // Nouveau Sprint 5
-EvenementRoutineModifiee   // Nouveau Sprint 5
-EvenementWeekendModifie    // Nouveau Sprint 5
-EvenementAchatFamille      // Nouveau Sprint 5
-EvenementJournalAlimentaire // Nouveau Sprint 5</code></pre>
-
-                <h3>Services Sans Event Bus (À Intégrer)</h3>
-                <ul>
-                    <li>⚠️ <code>jardin_service.py</code>: Publier événements récoltes/plantations</li>
-                    <li>⚠️ <code>depenses_crud_service.py</code>: Publier modifications budget</li>
-                    <li>⚠️ <code>projets_service.py</code>: Publier changements statut projets</li>
-                </ul>
-
-                <h3>Améliorations Suggérées</h3>
-                <table>
-                    <tr><th>Amélioration</th><th>Impact</th><th>Effort</th></tr>
-                    <tr>
-                        <td>Event Bus 100% adoption</td>
-                        <td>Découplage inter-services</td>
-                        <td>Moyen</td>
-                    </tr>
-                    <tr>
-                        <td>Health checks par service</td>
-                        <td>Monitoring granulaire</td>
-                        <td>Faible</td>
-                    </tr>
-                    <tr>
-                        <td>Metrics par service (Prometheus)</td>
-                        <td>Observabilité</td>
-                        <td>Moyen</td>
-                    </tr>
-                </table>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <!-- UI ANALYSIS -->
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <section id="ui">
-            <div class="card">
-                <h2>🎨 Analyse src/ui/ (17,603 LOC, 78 fichiers)</h2>
-
-                <h3>Architecture UI</h3>
-                <pre><code>src/ui/
-├── __init__.py          # Lazy imports (PEP 562)
-├── tokens.py            # Design tokens (Couleur, Espacement, etc.)
-├── tokens_semantic.py   # Tokens sémantiques (Sem.*)
-├── theme.py             # ModeTheme, Theme, dark/light
-├── a11y.py              # Accessibilité WCAG 2.1
-├── animations.py        # Animations CSS
-├── registry.py          # @composant_ui, catalogue
-├── fragments.py         # @cached_fragment, @lazy
-├── keys.py              # KeyNamespace
-├── utils.py             # Helpers UI
-├── components/          # Composants réutilisables
-│   ├── atoms.py         # badge, boite_info, alerte_stock
-│   ├── charts.py        # Graphiques Plotly
-│   ├── forms.py         # champ_formulaire, formulaires
-│   ├── filters.py       # Barres de filtres
-│   ├── metrics.py       # Cartes métriques
-│   ├── data.py          # Pagination, tableaux
-│   ├── data_editors.py  # Éditeurs de données
-│   ├── layouts.py       # Grilles, cartes
-│   ├── dynamic.py       # confirm_dialog
-│   ├── streaming.py     # st.write_stream helpers
-│   ├── system.py        # Indicateurs système
-│   ├── chat_contextuel.py, chat_global.py
-│   ├── gamification_widget.py
-│   ├── notifications_live.py
-│   └── ... (28 fichiers)
-├── engine/              # CSS Engine unifié
-│   ├── CSSEngine.py
-│   └── CSSManager.py
-├── feedback/            # Feedback utilisateur
-│   ├── spinners.py      # smart_spinner
-│   └── messages.py      # show_success, show_error
-├── layout/              # Structure page
-│   ├── header.py
-│   ├── footer.py
-│   ├── styles.py
-│   └── initialisation.py
-├── views/               # Vues complexes
-│   ├── pwa.py           # PWA meta tags
-│   └── synchronisation.py
-├── tablet/              # Mode tablette
-├── integrations/        # Google Calendar UI
-├── grid/                # Système de grille
-├── state/               # State UI
-└── docs/                # Documentation UI
-    ├── GUIDE_COMPOSANTS.md
-    ├── PATTERNS.md
-    └── CONVENTIONS.md</code></pre>
-
-                <h3>Design System</h3>
-                <table>
-                    <tr><th>Catégorie</th><th>Tokens</th><th>Détail</th></tr>
-                    <tr>
-                        <td>Couleurs</td>
-                        <td><code>Couleur.*</code></td>
-                        <td>Palette complète (primary, success, warning, danger, etc.)</td>
-                    </tr>
-                    <tr>
-                        <td>Sémantiques</td>
-                        <td><code>Sem.*</code></td>
-                        <td>INFO, SUCCESS, WARNING, ERROR, INTERACTIVE, MUTED</td>
-                    </tr>
-                    <tr>
-                        <td>Espacements</td>
-                        <td><code>Espacement.*</code></td>
-                        <td>XS, S, M, L, XL, XXL</td>
-                    </tr>
-                    <tr>
-                        <td>Typographie</td>
-                        <td><code>Typographie.*</code></td>
-                        <td>Tailles, poids, hauteurs de ligne</td>
-                    </tr>
-                    <tr>
-                        <td>Ombres</td>
-                        <td><code>Ombre.*</code></td>
-                        <td>S, M, L, XL</td>
-                    </tr>
-                    <tr>
-                        <td>Rayons</td>
-                        <td><code>Rayon.*</code></td>
-                        <td>S, M, L, ROUND</td>
-                    </tr>
-                    <tr>
-                        <td>Animations</td>
-                        <td><code>Animation.*</code></td>
-                        <td>fade-in, slide-in, pulse</td>
-                    </tr>
-                </table>
-
-                <h3>Composants Décorés (@composant_ui)</h3>
-                <p>Composants enregistrés dans le catalogue:</p>
-                <ul>
-                    <li>✅ <code>badge_html</code>, <code>boite_info_html</code>, <code>boule_loto_html</code></li>
-                    <li>✅ <code>graphique_repartition_repas</code>, <code>graphique_inventaire_categories</code></li>
-                    <li>✅ <code>afficher_chat_contextuel</code>, <code>confirm_dialog</code></li>
-                    <li>✅ <code>appliquer_filtres</code>, <code>appliquer_recherche</code></li>
-                    <li>✅ <code>streaming_placeholder</code>, <code>safe_write_stream</code></li>
-                    <li>✅ <code>indicateur_sante_systeme</code></li>
-                </ul>
-
-                <h3>Accessibilité (src/ui/a11y.py)</h3>
-                <ul>
-                    <li>✅ WCAG 2.1 Level AA compliance</li>
-                    <li>✅ ARIA attributes (35+)</li>
-                    <li>✅ Skip-link fonctionnel</li>
-                    <li>✅ Focus management</li>
-                    <li>✅ Color contrast checks</li>
-                </ul>
-
-                <h3>Concepts Vérifiés ✅</h3>
-                <ul>
-                    <li>✅ <strong>Design Tokens</strong>: Couleurs, espacements, typographie centralisés</li>
-                    <li>✅ <strong>Tokens Sémantiques</strong>: Abstraction pour dark/light mode</li>
-                    <li>✅ <strong>Component Registry</strong>: @composant_ui pour catalogue</li>
-                    <li>✅ <strong>Lazy Imports</strong>: PEP 562 dans __init__.py</li>
-                    <li>✅ <strong>CSS Engine</strong>: Injection CSS unifiée</li>
-                    <li>✅ <strong>Accessibilité</strong>: WCAG 2.1, RGAA, ARIA</li>
-                    <li>✅ <strong>PWA Support</strong>: Meta tags, manifest, service worker</li>
-                </ul>
-
-                <h3>Améliorations Suggérées</h3>
-                <table>
-                    <tr><th>Amélioration</th><th>Impact</th><th>Effort</th></tr>
-                    <tr>
-                        <td>Storybook-like component explorer</td>
-                        <td>Documentation interactive</td>
-                        <td>Moyen</td>
-                    </tr>
-                    <tr>
-                        <td>Tests visuels automatisés (Playwright)</td>
-                        <td>Régression UI</td>
-                        <td>Moyen</td>
-                    </tr>
-                    <tr>
-                        <td>Animations Lottie</td>
-                        <td>UX améliorée</td>
-                        <td>Faible</td>
-                    </tr>
-                </table>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <!-- INNOVATIONS -->
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <section id="innovations">
-            <div class="card">
-                <h2>💡 Innovations Streamlit Suggérées</h2>
-
-                <h3>Innovations Déjà Implémentées ✅</h3>
-                <table>
-                    <tr><th>Innovation</th><th>Implémentation</th><th>Référence</th></tr>
-                    <tr>
-                        <td>st.write_stream()</td>
-                        <td>Streaming IA pour Jules, Weekend</td>
-                        <td>jules_ai.py, weekend_ai.py</td>
-                    </tr>
-                    <tr>
-                        <td>@st.fragment + run_every</td>
-                        <td>Auto-refresh tableaux de bord</td>
-                        <td>accueil/stats.py, alerts.py</td>
-                    </tr>
-                    <tr>
-                        <td>st.navigation() + st.Page()</td>
-                        <td>Navigation multi-pages native</td>
-                        <td>navigation.py</td>
-                    </tr>
-                    <tr>
-                        <td>Deep Linking URL tabs</td>
-                        <td>tabs_with_url() partout</td>
-                        <td>Tous modules</td>
-                    </tr>
-                    <tr>
-                        <td>@st.dialog</td>
-                        <td>confirm_dialog() moderne</td>
-                        <td>dynamic.py</td>
-                    </tr>
-                    <tr>
-                        <td>PWA + Service Worker</td>
-                        <td>Offline mode, push notifications</td>
-                        <td>static/sw.js</td>
-                    </tr>
-                </table>
-
-                <h3>Innovations Suggérées pour v11</h3>
-
-                <h4>🎯 Priorité Haute</h4>
-                <div class="roadmap-item planned">
-                    <strong>st.experimental_audio_input()</strong>
-                    <p>Commandes vocales pour ajout rapide (recettes, courses)</p>
-                </div>
-                <div class="roadmap-item planned">
-                    <strong>st.status() pour workflows</strong>
-                    <p>Progress indicators pour batch cooking, imports longs</p>
-                </div>
-                <div class="roadmap-item planned">
-                    <strong>st.connection() unifiée</strong>
-                    <p>Connexions DB, Redis, APIs externes centralisées</p>
-                </div>
-
-                <h4>🔄 Priorité Moyenne</h4>
-                <div class="roadmap-item planned">
-                    <strong>WebRTC pour scan codes-barres</strong>
-                    <p>Scan via webcam intégré sans app externe</p>
-                </div>
-                <div class="roadmap-item planned">
-                    <strong>st.dataframe avec édition inline</strong>
-                    <p>Édition inventaire et courses en place</p>
-                </div>
-                <div class="roadmap-item planned">
-                    <strong>Multi-modal AI (images + texte)</strong>
-                    <p>Reconnaissance photos de recettes/factures</p>
-                </div>
-
-                <h4>🌟 Innovations Architecturales</h4>
-                <div class="roadmap-item planned">
-                    <strong>Streamlit Components Custom (React)</strong>
-                    <p>Composants drag-drop pour planning, gantt charts</p>
-                </div>
-                <div class="roadmap-item planned">
-                    <strong>Micro-frontends pattern</strong>
-                    <p>Modules indépendants déployables séparément</p>
-                </div>
-                <div class="roadmap-item planned">
-                    <strong>Real-time collaboration (Yjs)</strong>
-                    <p>Édition collaborative des courses/calendrier</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <!-- ROADMAP -->
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <section id="roadmap">
-            <div class="card">
-                <h2>🗺️ Roadmap v10 → v11</h2>
-
-                <h3>Comparatif v10 Actuel vs Objectifs v11</h3>
-                <table>
-                    <tr><th>Métrique</th><th>v10 Actuel</th><th>v11 Objectif</th><th>Action</th></tr>
-                    <tr>
-                        <td>Tests passés</td>
-                        <td>8,045</td>
-                        <td>8,500+</td>
-                        <td>Couvrir fichiers à 0%</td>
-                    </tr>
-                    <tr>
-                        <td>Coverage core/</td>
-                        <td>~75%</td>
-                        <td>85%+</td>
-                        <td>Tests monitoring, health</td>
-                    </tr>
-                    <tr>
-                        <td>Tests skippés</td>
-                        <td>~20</td>
-                        <td>0</td>
-                        <td>Implémenter ou supprimer</td>
-                    </tr>
-                    <tr>
-                        <td>Event Bus adoption</td>
-                        <td>~80%</td>
-                        <td>100%</td>
-                        <td>3 services à migrer</td>
-                    </tr>
-                    <tr>
-                        <td>Documentation</td>
-                        <td>80%</td>
-                        <td>95%</td>
-                        <td>Guides utilisateur</td>
-                    </tr>
-                </table>
-
-                <h3>Sprint Recommandé</h3>
-
-                <h4>Phase 1: Tests & Coverage (1-2 semaines)</h4>
-                <div class="roadmap-item planned">
-                    <span class="badge badge-info">1.1</span>
-                    <strong>Couvrir fichiers à 0%</strong>
-                    <p>barcode.py, rapports/generation.py, plan_jardin.py</p>
-                </div>
-                <div class="roadmap-item planned">
-                    <span class="badge badge-info">1.2</span>
-                    <strong>Débloquer tests skippés</strong>
-                    <p>Implémenter modules maison/ manquants ou supprimer tests fantômes</p>
-                </div>
-
-                <h4>Phase 2: Event Bus 100% (1 semaine)</h4>
-                <div class="roadmap-item planned">
-                    <span class="badge badge-info">2.1</span>
-                    <strong>Migrer jardin_service</strong>
-                    <p>Publier EvenementRecolte, EvenementPlantation</p>
-                </div>
-                <div class="roadmap-item planned">
-                    <span class="badge badge-info">2.2</span>
-                    <strong>Migrer depenses_crud_service</strong>
-                    <p>Publier EvenementDepenseModifiee</p>
-                </div>
-                <div class="roadmap-item planned">
-                    <span class="badge badge-info">2.3</span>
-                    <strong>Migrer projets_service</strong>
-                    <p>Publier EvenementProjetModifie</p>
-                </div>
-
-                <h4>Phase 3: Innovations Streamlit (2 semaines)</h4>
-                <div class="roadmap-item planned">
-                    <span class="badge badge-info">3.1</span>
-                    <strong>st.status() pour batch cooking</strong>
-                    <p>Progress multi-étapes avec steps</p>
-                </div>
-                <div class="roadmap-item planned">
-                    <span class="badge badge-info">3.2</span>
-                    <strong>Commandes vocales (audio_input)</strong>
-                    <p>"Ajouter lait à la liste de courses"</p>
-                </div>
-                <div class="roadmap-item planned">
-                    <span class="badge badge-info">3.3</span>
-                    <strong>WebRTC barcode scanner</strong>
-                    <p>Scan codes-barres via webcam</p>
-                </div>
-
-                <h4>Phase 4: Documentation (1 semaine)</h4>
-                <div class="roadmap-item planned">
-                    <span class="badge badge-info">4.1</span>
-                    <strong>Guides utilisateur</strong>
-                    <p>Tutoriels fonctionnels par module</p>
-                </div>
-                <div class="roadmap-item planned">
-                    <span class="badge badge-info">4.2</span>
-                    <strong>Video walkthroughs</strong>
-                    <p>Démos enregistrées des fonctionnalités clés</p>
-                </div>
-
-                <h3>Métriques de Succès v11</h3>
-                <div class="metrics-grid">
-                    <div class="metric">
-                        <div class="metric-value">85%+</div>
-                        <div class="metric-label">Coverage Core</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value">0</div>
-                        <div class="metric-label">Tests Skippés</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value">100%</div>
-                        <div class="metric-label">Event Bus</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value">3</div>
-                        <div class="metric-label">Nouvelles Innovations</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <!-- ANNEXES -->
-        <!-- ═══════════════════════════════════════════════════════════ -->
-        <section id="annexes">
-            <div class="card">
-                <h2>📎 Annexes</h2>
-
-                <h3>Commandes Utiles</h3>
-                <pre><code># Lancer l'application
-streamlit run src/app.py
-
-# Tests avec couverture
-python manage.py test_coverage
-
-# Linting
-python manage.py lint
-
-# Format code
-python manage.py format_code
-
-# Générer requirements
-python manage.py generate_requirements</code></pre>
-
-                <h3>Variables d'Environnement Critiques</h3>
-                <pre><code>DATABASE_URL=postgresql://user:pass@host/db  # Obligatoire
-MISTRAL_API_KEY=your_key                      # Obligatoire
-REDIS_URL=redis://localhost:6379              # Optionnel (production)
-GOOGLE_CLIENT_ID=...                          # Optionnel (Calendar)
-GOOGLE_CLIENT_SECRET=...                      # Optionnel (Calendar)</code></pre>
-
-                <h3>Fichiers Clés</h3>
-                <ul>
-                    <li><code>src/app.py</code>: Point d'entrée Streamlit</li>
-                    <li><code>src/core/bootstrap.py</code>: Initialisation application</li>
-                    <li><code>src/core/navigation.py</code>: Routing multi-pages</li>
-                    <li><code>src/services/core/registry.py</code>: Service Registry</li>
-                    <li><code>src/services/core/base/ai_service.py</code>: BaseAIService</li>
-                    <li><code>pyproject.toml</code>: Configuration projet</li>
-                    <li><code>sql/INIT_COMPLET.sql</code>: Schéma DB complet</li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer style="text-align: center; padding: 2rem; color: var(--text-muted);">
-            <p>Rapport généré automatiquement — 26 février 2026</p>
-            <p>Assistant Matanne v10 | GitHub: <a href="https://github.com/Trilian/assistant_matanne" style="color: var(--primary);">Trilian/assistant_matanne</a></p>
-        </footer>
+<!-- ============ HERO ============ -->
+<div class="hero">
+    <h1>📊 Rapport d'Audit Complet</h1>
+    <div class="subtitle">Assistant Matanne — Application Streamlit de Gestion Familiale</div>
+    <div class="date">26 février 2026 — Comparatif ROADMAP v10</div>
+</div>
+
+<!-- ============ TOC ============ -->
+<nav class="toc">
+    <a href="#resume">📋 Résumé</a>
+    <a href="#metriques">📊 Métriques</a>
+    <a href="#notes">🎯 Notes</a>
+    <a href="#api">🔌 API</a>
+    <a href="#core">⚙️ Core</a>
+    <a href="#modules">📦 Modules</a>
+    <a href="#services">🔧 Services</a>
+    <a href="#ui">🎨 UI</a>
+    <a href="#app">🏠 App.py</a>
+    <a href="#flux">🔄 Flux de données</a>
+    <a href="#fonctionnalites">💡 Fonctionnalités</a>
+    <a href="#roadmap-compare">🗺️ Roadmap v10</a>
+    <a href="#roadmap-next">🚀 Prochaines étapes</a>
+</nav>
+
+<div class="container">
+
+<!-- ============ RÉSUMÉ EXÉCUTIF ============ -->
+<section id="resume">
+    <h2>📋 Résumé Exécutif</h2>
+    <div class="card">
+        <p>L'<strong>Assistant Matanne</strong> est une application Streamlit de gestion familiale complète, couvrant cuisine, famille, maison, jeux, planning et utilitaires. Le projet repose sur une architecture modulaire avec <strong>~440 fichiers Python</strong>, <strong>~119 000 LOC</strong>, <strong>95 tables PostgreSQL</strong>, <strong>30+ services</strong>, et une API FastAPI distincte.</p>
+        <br>
+        <p>L'analyse porte sur les dossiers <code>src/api</code>, <code>src/core</code>, <code>src/modules</code>, <code>src/services</code>, <code>src/ui</code> et le fichier <code>app.py</code>.</p>
     </div>
+
+    <!-- Global Score -->
+    <div class="card" style="text-align: center; padding: 2rem;">
+        <div style="font-size: 1rem; color: var(--text-muted); margin-bottom: .5rem;">NOTE GLOBALE DU PROJET</div>
+        <div style="font-size: 5rem; font-weight: 800; background: linear-gradient(135deg, var(--green), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">8.0 / 10</div>
+        <div style="margin-top: .5rem; font-size: 1rem; color: var(--text-muted);">Projet mature, bien structuré, prêt pour production avec quelques axes d'amélioration</div>
+    </div>
+
+    <div class="grid-4">
+        <div class="card metric">
+            <div class="number" style="color: var(--accent);">674</div>
+            <div class="label">Fichiers Python</div>
+        </div>
+        <div class="card metric">
+            <div class="number" style="color: var(--green);">~119K</div>
+            <div class="label">Lignes de code</div>
+        </div>
+        <div class="card metric">
+            <div class="number" style="color: var(--purple);">8 150</div>
+            <div class="label">Tests collectés</div>
+        </div>
+        <div class="card metric">
+            <div class="number" style="color: var(--yellow);">95</div>
+            <div class="label">Tables SQL</div>
+        </div>
+    </div>
+
+    <div class="grid-3">
+        <div class="card metric">
+            <div class="number" style="color: var(--green);">405</div>
+            <div class="label">Fichiers de test</div>
+        </div>
+        <div class="card metric">
+            <div class="number" style="color: var(--accent);">30+</div>
+            <div class="label">Services enregistrés</div>
+        </div>
+        <div class="card metric">
+            <div class="number" style="color: var(--purple);">14</div>
+            <div class="label">Événements typés</div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ MÉTRIQUES PAR DOSSIER ============ -->
+<section id="metriques">
+    <h2>📊 Métriques par Dossier</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Dossier</th>
+                <th>Fichiers .py</th>
+                <th>Lignes de code</th>
+                <th>% du projet</th>
+                <th>Sous-packages</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>src/services/</strong></td>
+                <td>215</td>
+                <td>44 201</td>
+                <td>37.2%</td>
+                <td>20 (core, cuisine, famille, integrations, inventaire, jeux, maison, rapports)</td>
+            </tr>
+            <tr>
+                <td><strong>src/modules/</strong></td>
+                <td>227</td>
+                <td>32 635</td>
+                <td>27.5%</td>
+                <td>27 (accueil, cuisine, famille, jeux, maison, parametres, planning, utilitaires)</td>
+            </tr>
+            <tr>
+                <td><strong>src/ui/</strong></td>
+                <td>90</td>
+                <td>19 646</td>
+                <td>16.5%</td>
+                <td>11 (components, docs, engine, feedback, grid, integrations, layout, state, tablet, testing, views)</td>
+            </tr>
+            <tr>
+                <td><strong>src/core/</strong></td>
+                <td>96</td>
+                <td>16 161</td>
+                <td>13.6%</td>
+                <td>11 (ai, caching, config, date_utils, db, decorators, models, monitoring, observability, resilience, state, validation)</td>
+            </tr>
+            <tr>
+                <td><strong>src/api/</strong></td>
+                <td>44</td>
+                <td>6 032</td>
+                <td>5.1%</td>
+                <td>4 (rate_limiting, routes, schemas, utils)</td>
+            </tr>
+            <tr>
+                <td><strong>src/app.py</strong></td>
+                <td>1</td>
+                <td>195</td>
+                <td>0.2%</td>
+                <td>—</td>
+            </tr>
+            <tr style="font-weight: 700; background: var(--bg-card-alt);">
+                <td><strong>TOTAL</strong></td>
+                <td><strong>674</strong></td>
+                <td><strong>118 870</strong></td>
+                <td><strong>100%</strong></td>
+                <td><strong>73</strong></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ============ NOTES PAR DOSSIER ============ -->
+<section id="notes">
+    <h2>🎯 Notes par Dossier</h2>
+
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">⚙️ src/core/</span>
+                <span class="score-badge score-excellent">8.6 / 10</span>
+            </div>
+            <div class="score-bar-container">
+                <div class="score-bar"><div class="score-bar-fill green" style="width: 86%"></div></div>
+                <span class="score-label">86%</span>
+            </div>
+            <p style="font-size: .85rem; color: var(--text-muted);">Infrastructure solide : PEP 562 lazy loading, cache multi-niveaux avec Redis, résilience composable, modèles ORM modulaires (22 fichiers), configuration Pydantic multi-source, monitoring Sentry, observabilité avec correlation_id.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">🔌 src/api/</span>
+                <span class="score-badge score-excellent">8.5 / 10</span>
+            </div>
+            <div class="score-bar-container">
+                <div class="score-bar"><div class="score-bar-fill green" style="width: 85%"></div></div>
+                <span class="score-label">85%</span>
+            </div>
+            <p style="font-size: .85rem; color: var(--text-muted);">API FastAPI complète : 11 routes, JWT authentication, rate limiting Redis, security headers OWASP, ETag caching, pagination, versioning, WebSocket pour courses collaboratif, OpenAPI Swagger.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">🔧 src/services/</span>
+                <span class="score-badge score-excellent">8.3 / 10</span>
+            </div>
+            <div class="score-bar-container">
+                <div class="score-bar"><div class="score-bar-fill green" style="width: 83%"></div></div>
+                <span class="score-label">83%</span>
+            </div>
+            <p style="font-size: .85rem; color: var(--text-muted);">Couche métier riche : BaseAIService avec rate limiting + cache, @service_factory singleton, BaseService[T] CRUD générique, event bus pub/sub, intégrations (Garmin, Google Calendar, météo, images IA, PWA).</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">🎨 src/ui/</span>
+                <span class="score-badge score-good">8.0 / 10</span>
+            </div>
+            <div class="score-bar-container">
+                <div class="score-bar"><div class="score-bar-fill blue" style="width: 80%"></div></div>
+                <span class="score-label">80%</span>
+            </div>
+            <p style="font-size: .85rem; color: var(--text-muted);">Design system complet : tokens sémantiques + dark mode, 35+ composants, accessibilité WCAG 2.1, grid responsive, animations, tablet mode, tests snapshot visuels, documentation composants.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">📦 src/modules/</span>
+                <span class="score-badge score-good">7.6 / 10</span>
+            </div>
+            <div class="score-bar-container">
+                <div class="score-bar"><div class="score-bar-fill blue" style="width: 76%"></div></div>
+                <span class="score-label">76%</span>
+            </div>
+            <p style="font-size: .85rem; color: var(--text-muted);">8 domaines métier couverts avec ~30 sous-modules. Patterns uniformisés (error_boundary, profiler, KeyNamespace, tabs_with_url). Quelques modules récents (eco_tips, energie, meubles) encore peu profonds.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">🏠 app.py</span>
+                <span class="score-badge score-good">8.0 / 10</span>
+            </div>
+            <div class="score-bar-container">
+                <div class="score-bar"><div class="score-bar-fill blue" style="width: 80%"></div></div>
+                <span class="score-label">80%</span>
+            </div>
+            <p style="font-size: .85rem; color: var(--text-muted);">Point d'entrée bien structuré : bootstrap séquentiel, chargement différé, error boundary global, injection PWA, accessibilité, mode maintenance, détection pages lentes.</p>
+        </div>
+    </div>
+
+    <h3>Résumé des notes</h3>
+    <table>
+        <thead>
+            <tr><th>Composant</th><th>Note</th><th>Forces principales</th><th>Axe d'amélioration principal</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>src/core/</td><td><span class="score-badge score-excellent">8.6</span></td><td>Architecture infra de niveau professionnel</td><td>Thread-safety des singletons</td></tr>
+            <tr><td>src/api/</td><td><span class="score-badge score-excellent">8.5</span></td><td>Sécurité + middleware complets</td><td>Inline imports à restructurer</td></tr>
+            <tr><td>src/services/</td><td><span class="score-badge score-excellent">8.3</span></td><td>Richesse fonctionnelle, patterns BaseService/BaseAI</td><td>Quelques fichiers > 500 LOC</td></tr>
+            <tr><td>src/ui/</td><td><span class="score-badge score-good">8.0</span></td><td>Design system + a11y + tokens sémantiques</td><td>Maintenance PEP 562 dicts (120+ entries)</td></tr>
+            <tr><td>src/modules/</td><td><span class="score-badge score-good">7.6</span></td><td>Couverture fonctionnelle large</td><td>Modules récents peu profonds, dashboard.py complexe</td></tr>
+            <tr><td>app.py</td><td><span class="score-badge score-good">8.0</span></td><td>Bootstrap propre, lazy loading</td><td>Widgéts globaux fragiles (try/except)</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ============ ANALYSE API ============ -->
+<section id="api">
+    <h2>🔌 Analyse détaillée — src/api/ (6 032 LOC, 44 fichiers)</h2>
+
+    <details>
+        <summary>📁 Structure du dossier</summary>
+        <div>
+            <pre style="color: var(--text-muted); font-size: .85rem;">
+src/api/
+├── __init__.py, auth.py (319 LOC), dependencies.py, main.py (372 LOC)
+├── pagination.py, prometheus.py, versioning.py, websocket_courses.py
+├── rate_limiting/ (7 fichiers: config, dependencies, limiter, middleware, redis_storage, storage, utils)
+├── routes/ (11 routes: auth, calendriers, courses, famille, inventaire, jeux, maison, planning, push, recettes, suggestions)
+├── schemas/ (10 fichiers: auth, base, common, courses, inventaire, planning, push, recettes, suggestions)
+└── utils/ (5 fichiers: cache, crud, exceptions, metrics, security_headers)
+            </pre>
+        </div>
+    </details>
+
+    <div class="grid-2">
+        <div class="card">
+            <h4>✅ Points forts</h4>
+            <ul class="feature-list">
+                <li class="exists">JWT avec vérification signature (API + Supabase fallback)</li>
+                <li class="exists">Rate limiting multi-backend (mémoire + Redis)</li>
+                <li class="exists">Security headers OWASP complets (HSTS, CSP, X-Frame)</li>
+                <li class="exists">ETag caching avec 304 Not Modified</li>
+                <li class="exists">WebSocket pour courses collaboratif temps réel</li>
+                <li class="exists">Versioning API (header-based)</li>
+                <li class="exists">OpenAPI Swagger avec persistAuthorization</li>
+                <li class="exists">Métriques Prometheus (endpoints, latence)</li>
+                <li class="exists">Pagination standardisée (offset/limit)</li>
+                <li class="exists">Global exception handler (pas de fuite d'erreurs internes)</li>
+                <li class="exists">11 groupes de routes couvrant tous les domaines</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h4>⚠️ Points d'amélioration</h4>
+            <ul class="feature-list">
+                <li class="partial">Inline imports dans main.py (middleware importés dans le body)</li>
+                <li class="partial">Pas de mécanisme de refresh/rotation de tokens JWT</li>
+                <li class="missing">Pas de rate limiting par utilisateur (seulement global/IP)</li>
+                <li class="missing">Pas de tests d'intégration end-to-end pour WebSocket</li>
+                <li class="missing">Pas de documentation OpenAPI pour les erreurs (4xx/5xx)</li>
+                <li class="missing">Pas de webhook/callback pour notifications externes</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ============ ANALYSE CORE ============ -->
+<section id="core">
+    <h2>⚙️ Analyse détaillée — src/core/ (16 161 LOC, 96 fichiers)</h2>
+
+    <details>
+        <summary>📁 Structure complète (11 sous-packages)</summary>
+        <div>
+            <pre style="color: var(--text-muted); font-size: .85rem;">
+src/core/
+├── ai/ (7 fichiers: client.py 543 LOC, cache, circuit_breaker, parser, rate_limit, router)
+├── caching/ (7 fichiers: memory L1, session L2, file L3, redis, orchestrator 278 LOC)
+├── config/ (4 fichiers: settings.py 443 LOC, loader, validator)
+├── date_utils/ (5 fichiers: semaines, periodes, formatage, helpers)
+├── db/ (8 fichiers: engine.py 201 LOC, session 126 LOC, async_session, connection, migrations)
+├── decorators/ (5 fichiers: db, cache, errors, validation)
+├── models/ (22 fichiers: base, mixins + 19 modèles domaine)
+├── monitoring/ (6 fichiers: collector, decorators, health, rerun_profiler, sentry 351 LOC)
+├── observability/ (2 fichiers: context.py avec correlation_id)
+├── resilience/ (2 fichiers: policies.py 270 LOC — Retry, Timeout, Bulkhead, Fallback, composable)
+├── state/ (5 fichiers: manager, persistent, shortcuts, slices)
+├── validation/ (8 fichiers: sanitizer, validators, schemas/ sous-package avec 7 domaines)
+├── bootstrap.py 170 LOC, constants.py 217 LOC, exceptions.py 408 LOC
+├── lazy_loader.py 168 LOC, logging.py, navigation.py 185 LOC
+├── session_keys.py 210 LOC, storage.py, async_utils.py, plugins.py
+└── py.typed (PEP 561 marker)
+            </pre>
+        </div>
+    </details>
+
+    <div class="grid-2">
+        <div class="card">
+            <h4>✅ Points forts</h4>
+            <ul class="feature-list">
+                <li class="exists">22 modèles ORM SQLAlchemy 2.0 avec mapped_column + Mapped types</li>
+                <li class="exists">Cache multi-niveaux L1→Redis→L2→L3 avec statistiques</li>
+                <li class="exists">Résilience composable (Retry + Timeout + Bulkhead + Fallback via '+')</li>
+                <li class="exists">Circuit breaker avec support async automatique</li>
+                <li class="exists">Configuration Pydantic BaseSettings multi-source (env → secrets → defaults)</li>
+                <li class="exists">Bootstrap idempotent avec rapport de démarrage structuré</li>
+                <li class="exists">Hiérarchie d'exceptions pure (sans dépendance UI)</li>
+                <li class="exists">PEP 562 lazy loading sur tous les __init__.py</li>
+                <li class="exists">Monitoring Sentry avec filtrage PII automatique</li>
+                <li class="exists">Observabilité avec correlation_id pour tracing distribué</li>
+                <li class="exists">Décorateurs unifiés (@avec_session_db, @avec_cache, @avec_resilience)</li>
+                <li class="exists">Validation Pydantic v2 + sanitizer anti-XSS/injection</li>
+                <li class="exists">4 Timestamp mixins (FR + EN) pour modèles DRY</li>
+                <li class="exists">Session DB avec context manager, commit auto, rollback on exception</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h4>⚠️ Points d'amélioration</h4>
+            <ul class="feature-list">
+                <li class="partial">Thread-safety : singletons sans lock (client IA, config, cache)</li>
+                <li class="partial">client.py 543 LOC — devrait être divisé (legacy code présent)</li>
+                <li class="partial">Mapping PEP 562 maintenu manuellement (~130 symboles models)</li>
+                <li class="partial">lazy_loader.py : pas de thread-safe pour le cache modules</li>
+                <li class="partial">navigation.py : pages hardcodées (~100 LOC), devrait être déclaratif</li>
+                <li class="missing">Pas d'auto-discovery pour les modèles (mapping manuel dans __init__.py)</li>
+                <li class="missing">Pas de migration Alembic (SQL files manuels uniquement)</li>
+                <li class="missing">Timeout executor jamais shutdown (resource leak potentiel)</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>Détail par sous-package core/</h3>
+    <table>
+        <thead><tr><th>Sous-package</th><th>Fichiers</th><th>LOC est.</th><th>Note</th><th>Verdict</th></tr></thead>
+        <tbody>
+            <tr><td>ai/</td><td>7</td><td>~1 400</td><td><span class="score-badge score-good">7.5</span></td><td>Client puissant mais monolithique. Router, cache, rate_limit bien séparés.</td></tr>
+            <tr><td>caching/</td><td>7</td><td>~1 200</td><td><span class="score-badge score-excellent">8.5</span></td><td>Architecture multi-niveaux exemplaire avec Redis auto-detect.</td></tr>
+            <tr><td>config/</td><td>4</td><td>~700</td><td><span class="score-badge score-excellent">8.5</span></td><td>Pydantic BaseSettings solide, multi-source, validation au boot.</td></tr>
+            <tr><td>date_utils/</td><td>5</td><td>~400</td><td><span class="score-badge score-excellent">9.0</span></td><td>Utilitaires propres et bien testés.</td></tr>
+            <tr><td>db/</td><td>8</td><td>~800</td><td><span class="score-badge score-excellent">9.0</span></td><td>Engine + session exemplaires. Double-checked locking. Correlation ID.</td></tr>
+            <tr><td>decorators/</td><td>5</td><td>~500</td><td><span class="score-badge score-excellent">9.5</span></td><td>Clean, bien documentés, exports via barrel.</td></tr>
+            <tr><td>models/</td><td>22</td><td>~3 500</td><td><span class="score-badge score-excellent">8.5</span></td><td>22 fichiers modulaires, mixins, naming convention. Mapping manuel à améliorer.</td></tr>
+            <tr><td>monitoring/</td><td>6</td><td>~900</td><td><span class="score-badge score-good">8.0</span></td><td>Sentry complet + rerun profiler. Prometheus basique.</td></tr>
+            <tr><td>observability/</td><td>2</td><td>~200</td><td><span class="score-badge score-excellent">9.0</span></td><td>Correlation ID propre et bien intégré.</td></tr>
+            <tr><td>resilience/</td><td>2</td><td>~300</td><td><span class="score-badge score-excellent">9.0</span></td><td>Composition élégante par opérateur +. Generics typés.</td></tr>
+            <tr><td>state/</td><td>5</td><td>~600</td><td><span class="score-badge score-good">8.0</span></td><td>Manager + slices + persistent. Navigation centralisée.</td></tr>
+            <tr><td>validation/</td><td>8</td><td>~1 200</td><td><span class="score-badge score-excellent">8.5</span></td><td>Schemas Pydantic par domaine + sanitizer anti-XSS.</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ============ ANALYSE MODULES ============ -->
+<section id="modules">
+    <h2>📦 Analyse détaillée — src/modules/ (32 635 LOC, 227 fichiers)</h2>
+
+    <details>
+        <summary>📁 Structure complète (8 domaines + framework)</summary>
+        <div>
+            <pre style="color: var(--text-muted); font-size: .85rem;">
+src/modules/
+├── _framework/ (base_module, error_boundary, fragments, state_manager)
+├── accueil/ (6 fichiers: dashboard 257 LOC, alerts, stats, summaries, resume_hebdo, utils)
+├── cuisine/ (5 sous-modules: batch_cooking_detaille, courses 11 fichiers, inventaire 19 fichiers, planificateur_repas 9 fichiers, recettes 7 fichiers)
+├── famille/ (4 sous-modules: achats_famille, jules, suivi_perso, weekend + activites, routines, hub_famille 310 LOC)
+├── jeux/ (2 sous-modules: loto 12 fichiers, paris 12 fichiers + scraper)
+├── maison/ (8 sous-modules: charges, depenses, eco_tips, energie, entretien, hub, jardin, meubles, projets)
+├── parametres/ (8 onglets: about, affichage, budget, cache, database, foyer, ia)
+├── planning/ (calendrier 12 fichiers + cockpit_familial, templates_ui, timeline_ui)
+├── utilitaires/ (barcode 6 fichiers, chat_ia, notifications_push, rapports 5 fichiers, scan_factures, recherche_produits)
+└── design_system.py
+            </pre>
+        </div>
+    </details>
+
+    <h3>Notes par module</h3>
+    <table>
+        <thead><tr><th>Module</th><th>Fichiers</th><th>LOC est.</th><th>Note</th><th>Complétude</th><th>Verdict</th></tr></thead>
+        <tbody>
+            <tr><td>🍽️ cuisine/</td><td>~55</td><td>~8 500</td><td><span class="score-badge score-excellent">8.5</span></td><td><span class="tag tag-done">95%</span></td><td>Module le plus complet : recettes, inventaire 19 fichiers, planificateur IA, batch cooking, courses collaboratif</td></tr>
+            <tr><td>👨‍👩‍👦 famille/</td><td>~25</td><td>~4 500</td><td><span class="score-badge score-good">7.8</span></td><td><span class="tag tag-done">85%</span></td><td>Hub avec navigation par cartes, Jules IA, suivi perso Garmin, weekend IA, routines. Manque calendrier partagé avancé.</td></tr>
+            <tr><td>🏠 maison/</td><td>~40</td><td>~5 500</td><td><span class="score-badge score-good">7.5</span></td><td><span class="tag tag-partial">75%</span></td><td>8 sous-modules (charges, dépenses, entretien, jardin, eco_tips, énergie, meubles, projets). Modules récents encore légers.</td></tr>
+            <tr><td>🎮 jeux/</td><td>~25</td><td>~4 000</td><td><span class="score-badge score-good">8.0</span></td><td><span class="tag tag-done">90%</span></td><td>Loto (statistiques, génération, simulation) + Paris sportifs (CRUD, analyse, prédiction). Complet et bien structuré.</td></tr>
+            <tr><td>📅 planning/</td><td>~17</td><td>~3 000</td><td><span class="score-badge score-good">7.5</span></td><td><span class="tag tag-partial">70%</span></td><td>Calendrier solide avec analytics, export. Cockpit familial et timeline encore basiques.</td></tr>
+            <tr><td>🏡 accueil/</td><td>~7</td><td>~1 200</td><td><span class="score-badge score-average">7.0</span></td><td><span class="tag tag-partial">65%</span></td><td>Dashboard avec métriques, alertes auto-refresh, résumé hebdo. Fonctions app() complexes.</td></tr>
+            <tr><td>⚙️ parametres/</td><td>~9</td><td>~1 500</td><td><span class="score-badge score-excellent">8.5</span></td><td><span class="tag tag-done">90%</span></td><td>8 onglets bien organisés (BaseModule). Foyer persisté DB. Cache, IA, affichage configurables.</td></tr>
+            <tr><td>🔧 utilitaires/</td><td>~13</td><td>~2 500</td><td><span class="score-badge score-good">7.5</span></td><td><span class="tag tag-partial">75%</span></td><td>Barcode scanner, rapports PDF, notifications push, scan factures, chat IA, recherche produits.</td></tr>
+            <tr><td>🎨 design_system</td><td>1</td><td>~200</td><td><span class="score-badge score-good">8.0</span></td><td><span class="tag tag-done">85%</span></td><td>Showcase composants, BaseModule adopté.</td></tr>
+            <tr><td>🧩 _framework/</td><td>4</td><td>~400</td><td><span class="score-badge score-excellent">8.5</span></td><td><span class="tag tag-done">90%</span></td><td>BaseModule[T], error_boundary, fragments, state_manager. Bien conçu.</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ============ ANALYSE SERVICES ============ -->
+<section id="services">
+    <h2>🔧 Analyse détaillée — src/services/ (44 201 LOC, 215 fichiers)</h2>
+
+    <details>
+        <summary>📁 Structure complète (8 domaines)</summary>
+        <div>
+            <pre style="color: var(--text-muted); font-size: .85rem;">
+src/services/
+├── core/ (registry 563 LOC, base/ 11 fichiers BaseAIService + mixins + protocols,
+│         events/ bus pub/sub, notifications/ 9 fichiers, backup/ 7 fichiers,
+│         observability/, utilisateur/ authentification + permissions + historique,
+│         gamification, service_health, service_metrics)
+├── cuisine/ (batch_cooking/ 6 fichiers, courses/ 5 fichiers, planning/ 16 fichiers,
+│            recettes/ 14 fichiers, suggestions/ 11 fichiers)
+├── famille/ (12 fichiers: jules, jules_ai, weekend, weekend_ai, activites, routines,
+│            achats, sante, suivi_perso, resume_hebdo, budget/ 6f, calendrier/ 8f)
+├── integrations/ (garmin/ 7f, images/ 4f, weather/ 9f, web/ pwa + sync,
+│                  codes_barres, facture, produit)
+├── inventaire/ (7 fichiers: service, stock, stats, operations, io, types)
+├── jeux/ (_internal/ 17 fichiers: loto_crud, paris_crud + mixins, football_data,
+│          prediction, backtest, scheduler, series, sync, ai, notification)
+├── maison/ (15 fichiers: depenses, eco_tips, entretien + gamification,
+│            jardin + 3 mixins, meubles, projets, hub_data, schemas)
+└── rapports/ (7 fichiers: generation, export, planning_pdf, budget, gaspillage)
+            </pre>
+        </div>
+    </details>
+
+    <div class="grid-2">
+        <div class="card">
+            <h4>✅ Architecture services</h4>
+            <ul class="feature-list">
+                <li class="exists">@service_factory — singleton thread-safe via registre central</li>
+                <li class="exists">BaseService[T] — CRUD générique (create/get_all/update/delete)</li>
+                <li class="exists">BaseAIService — rate limiting + cache sémantique + circuit breaker</li>
+                <li class="exists">Event bus pub/sub avec wildcards et 14 événements typés</li>
+                <li class="exists">Notifications multi-canal (ntfy, web push, in-app)</li>
+                <li class="exists">Backup/restore service avec export JSON + identity mapping</li>
+                <li class="exists">Authentification complète (JWT, rôles, permissions, sessions)</li>
+                <li class="exists">Historique utilisateur avec queries + types dédiés</li>
+                <li class="exists">Gamification (entretien, jardin)</li>
+                <li class="exists">Intégrations : Garmin OAuth, Google Calendar, météo, images IA, PWA</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h4>⚠️ Points d'amélioration</h4>
+            <ul class="feature-list">
+                <li class="partial">planning/ 16 fichiers — très fragmenté, certains fichiers petits</li>
+                <li class="partial">suggestions/ 11 fichiers — complexité élevée pour le scoring ML</li>
+                <li class="partial">Event bus adopté par ~50% des services seulement</li>
+                <li class="partial">Certains services > 500 LOC (documentés, split prévu)</li>
+                <li class="missing">Pas de service de synchronisation offline (queue-based)</li>
+                <li class="missing">Pas de service de logs/audit trail transversal</li>
+                <li class="missing">Pas de service d'analytics/métriques d'usage utilisateur</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ============ ANALYSE UI ============ -->
+<section id="ui">
+    <h2>🎨 Analyse détaillée — src/ui/ (19 646 LOC, 90 fichiers)</h2>
+
+    <details>
+        <summary>📁 Structure complète (11 sous-packages)</summary>
+        <div>
+            <pre style="color: var(--text-muted); font-size: .85rem;">
+src/ui/
+├── components/ (35+ composants: atoms, charts, chat_contextuel, chat_global, data_editors,
+│               dynamic, filters, forms, gamification, historique_undo, ia_fragment,
+│               jules_aujourdhui, lottie, metrics, notifications_live, plotly_drilldown,
+│               progressive_loading, quest_ce_quon_mange, realtime_collab, recherche_globale,
+│               streaming, system, vocal, voice_assistant, workflow_status, barcode_*, audio_input)
+├── docs/ (GUIDE_COMPOSANTS.md, PATTERNS.md, CONVENTIONS.md + component_explorer.py)
+├── engine/ (css.py — CSS Manager)
+├── feedback/ (progress_v2, results, spinners, toasts)
+├── grid/ (grid_layout, helpers, row, stack, types)
+├── integrations/ (google_calendar.py)
+├── layout/ (header, footer, styles 207 LOC, initialisation)
+├── state/ (url.py — deep linking)
+├── tablet/ (config, kitchen, styles, timer, widgets)
+├── testing/ (playwright_config, visual_regression + SnapshotTester)
+├── views/ (10 vues: authentification, historique, import_recettes, jeux, meteo, notifications, pwa, sauvegarde, synchronisation)
+├── a11y.py (accessibilité WCAG 2.1), animations.py, fragments.py, keys.py (KeyNamespace)
+├── registry.py (@composant_ui), theme.py, tokens.py, tokens_semantic.py
+└── README.md
+            </pre>
+        </div>
+    </details>
+
+    <div class="grid-2">
+        <div class="card">
+            <h4>✅ Points forts UI</h4>
+            <ul class="feature-list">
+                <li class="exists">Design tokens (Couleur, Espacement, Rayon, Ombre, Transition) + tokens sémantiques</li>
+                <li class="exists">Dark mode complet via semantic token bridge</li>
+                <li class="exists">Accessibilité WCAG 2.1 : skip-link, ARIA, focus-visible, prefers-reduced-motion</li>
+                <li class="exists">35+ composants avec @composant_ui registry</li>
+                <li class="exists">Grid responsive (3 breakpoints + fluid typography)</li>
+                <li class="exists">Tablet mode dédié (kitchen timer, widgets cuisine)</li>
+                <li class="exists">Tests snapshot visuels (27 tests SnapshotTester)</li>
+                <li class="exists">Streaming IA (safe_write_stream, streaming_placeholder)</li>
+                <li class="exists">Animations Lottie + CSS transitions</li>
+                <li class="exists">Documentation composants (3 guides)</li>
+                <li class="exists">Print stylesheet optimisé</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h4>⚠️ Points d'amélioration</h4>
+            <ul class="feature-list">
+                <li class="partial">120+ entries dans le PEP 562 mapping dict — maintenance lourde</li>
+                <li class="partial">Quelques couleurs hex hardcodées restantes (~50 identifiées)</li>
+                <li class="partial">Pas de Storybook-like interactif (component_explorer est statique)</li>
+                <li class="missing">Pas de tests E2E Playwright configurés (config présente mais pas de tests)</li>
+                <li class="missing">Pas de lazy loading pour les CSS lourds (tout injecté au boot)</li>
+                <li class="missing">Pas de skeleton loading unifié pour les modules</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ============ ANALYSE APP.PY ============ -->
+<section id="app">
+    <h2>🏠 Analyse détaillée — app.py (195 LOC)</h2>
+
+    <div class="card">
+        <h4>Rôle</h4>
+        <p>Point d'entrée principal Streamlit. Orchestre : variables d'environnement → logging → bootstrap → config page → navigation → widgets globaux → error boundary.</p>
+
+        <h4 style="margin-top: 1rem;">Architecture</h4>
+        <div style="margin: 1rem 0; text-align: center;">
+            <span class="flow-box">🔧 os.environ</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-box">📝 Logging</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-box">🚀 Bootstrap</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-box">⚙️ Config</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-box">🧭 Navigation</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-box">🎨 Widgets</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-box">▶️ Run Page</span>
+        </div>
+
+        <h4 style="margin-top: 1rem;">Points clés</h4>
+        <ul class="feature-list">
+            <li class="exists">Chargement différé via st.navigation() — ~60% accélération au démarrage</li>
+            <li class="exists">Mode maintenance toggle via session_state</li>
+            <li class="exists">Injection PWA (manifest + service worker)</li>
+            <li class="exists">Accessibilité : balises &lt;main role="main"&gt;</li>
+            <li class="exists">Détection pages lentes (&gt; seuil configurable)</li>
+            <li class="exists">Error boundary global avec bouton restart</li>
+            <li class="partial">Widgets globaux isolés par try/except (fragile mais fonctionnel)</li>
+            <li class="partial">unsafe_allow_html pour landmarks — dépend de Streamlit</li>
+        </ul>
+    </div>
+</section>
+
+<!-- ============ FLUX DE DONNÉES ============ -->
+<section id="flux">
+    <h2>🔄 Organisation et Flux de Données</h2>
+
+    <div class="card">
+        <h3>Architecture en couches</h3>
+        <div style="text-align: center; margin: 1.5rem 0;">
+            <div style="padding: .8rem; background: rgba(188,140,255,.15); border: 1px solid var(--purple); border-radius: var(--radius); margin: .5rem auto; max-width: 600px;">
+                <strong style="color: var(--purple);">🖥️ COUCHE PRÉSENTATION</strong><br>
+                <small>src/modules/ (UI Streamlit) + src/ui/ (composants réutilisables)</small>
+            </div>
+            <div style="font-size: 1.5rem; color: var(--accent);">↕️</div>
+            <div style="padding: .8rem; background: rgba(88,166,255,.15); border: 1px solid var(--accent); border-radius: var(--radius); margin: .5rem auto; max-width: 600px;">
+                <strong style="color: var(--accent);">⚙️ COUCHE MÉTIER / SERVICES</strong><br>
+                <small>src/services/ (logique, IA, intégrations) + src/core/decorators/ (transversal)</small>
+            </div>
+            <div style="font-size: 1.5rem; color: var(--accent);">↕️</div>
+            <div style="padding: .8rem; background: rgba(63,185,80,.15); border: 1px solid var(--green); border-radius: var(--radius); margin: .5rem auto; max-width: 600px;">
+                <strong style="color: var(--green);">💾 COUCHE DONNÉES</strong><br>
+                <small>src/core/models/ (ORM) + src/core/db/ (engine, sessions) + src/core/caching/</small>
+            </div>
+            <div style="font-size: 1.5rem; color: var(--accent);">↕️</div>
+            <div style="padding: .8rem; background: rgba(210,153,34,.15); border: 1px solid var(--yellow); border-radius: var(--radius); margin: .5rem auto; max-width: 600px;">
+                <strong style="color: var(--yellow);">🌐 COUCHE INFRASTRUCTURE</strong><br>
+                <small>src/core/config/ + src/core/ai/ + src/core/resilience/ + src/core/monitoring/</small>
+            </div>
+            <div style="font-size: 1.5rem; color: var(--orange);">↕️</div>
+            <div style="padding: .8rem; background: rgba(219,109,40,.15); border: 1px solid var(--orange); border-radius: var(--radius); margin: .5rem auto; max-width: 600px;">
+                <strong style="color: var(--orange);">🔌 COUCHE API EXTERNE</strong><br>
+                <small>src/api/ (FastAPI REST + WebSocket) — interface mobile/externe</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Verdict sur l'organisation</h3>
+        <div class="grid-2">
+            <div>
+                <h4 style="color: var(--green);">✅ Ce qui est bien</h4>
+                <ul class="feature-list">
+                    <li class="exists"><strong>Séparation claire</strong> : modules (UI) ≠ services (logique) ≠ core (infra)</li>
+                    <li class="exists"><strong>Dependency Injection légère</strong> via @service_factory + registre central</li>
+                    <li class="exists"><strong>Event-driven</strong> : bus d'événements pour découplage inter-modules</li>
+                    <li class="exists"><strong>Cache-aside pattern</strong> systématique (données chaudes en mémoire)</li>
+                    <li class="exists"><strong>Decorators transversaux</strong> : session DB, cache, erreurs, résilience — orthogonaux aux services</li>
+                    <li class="exists"><strong>Communication inter-modules</strong> via session_state + SessionKeys centralisées</li>
+                    <li class="exists"><strong>Flux IA centralisé</strong> : tout passe par BaseAIService → rate limiting → cache → circuit breaker</li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color: var(--yellow);">⚠️ Améliorations possibles</h4>
+                <ul class="feature-list">
+                    <li class="partial"><strong>Couplage modules-services</strong> : certains modules importent directement les services sans passer par le registre</li>
+                    <li class="partial"><strong>Session state surchargée</strong> : ~130 clés centralisées — risque de pollution namespace</li>
+                    <li class="partial"><strong>Event bus sous-utilisé</strong> : seulement ~50% des services émettent des événements</li>
+                    <li class="missing"><strong>Pas de couche DTO explicite</strong> entre modules et services (les modèles ORM circulent directement)</li>
+                    <li class="missing"><strong>Pas de command/query pattern</strong> — lectures et écritures mélangées dans les mêmes services</li>
+                </ul>
+            </div>
+        </div>
+
+        <h4 style="margin-top: 1rem;">Note flux de données : <span class="score-badge score-good">7.8 / 10</span></h4>
+        <p style="color: var(--text-muted); font-size: .9rem;">L'architecture est <strong>très adaptée pour un assistant familial Streamlit</strong>. La complexité est bien gérée par les couches. Le principal risque est la scalabilité du session_state si la famille utilise plusieurs onglets simultanément. Pour un usage mono-utilisateur/mono-famille, c'est excellent.</p>
+    </div>
+</section>
+
+<!-- ============ PROPOSITIONS FONCTIONNALITÉS ============ -->
+<section id="fonctionnalites">
+    <h2>💡 Propositions de Fonctionnalités — Liste Exhaustive</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Fonctionnalités existantes (✅), partielles (🟡), manquantes prioritaires (🔴), et idées innovantes (💡) pour chaque module.</p>
+
+    <!-- ACCUEIL -->
+    <div class="card">
+        <h3>🏡 Module Accueil</h3>
+        <div class="grid-2">
+            <div>
+                <h4>Existant</h4>
+                <ul class="feature-list">
+                    <li class="exists">Dashboard avec métriques familiales</li>
+                    <li class="exists">Alertes critiques auto-refresh (30s)</li>
+                    <li class="exists">Statistiques mensuelles (60s)</li>
+                    <li class="exists">Résumé hebdomadaire</li>
+                    <li class="exists">Raccourcis rapides (quick actions)</li>
+                </ul>
+            </div>
+            <div>
+                <h4>À ajouter</h4>
+                <ul class="feature-list">
+                    <li class="missing">Widget météo du jour avec impact sur les activités planifiées</li>
+                    <li class="missing">Résumé matinal IA personnalisé ("Bonjour ! Voici votre journée...")</li>
+                    <li class="missing">Feed d'activité familiale (timeline des actions récentes)</li>
+                    <li class="idea">Widget "Ce soir on mange..." avec suggestion rapide</li>
+                    <li class="idea">Compteur de jours depuis dernier loto/paris gagné</li>
+                    <li class="idea">Score de bien-être familial hebdomadaire (agrégé depuis suivi perso)</li>
+                    <li class="idea">Rappels contextuels ("Jules a rendez-vous demain", "Stock de lait bas")</li>
+                    <li class="idea">Mini-calendrier de la semaine intégré</li>
+                    <li class="idea">Widget économies réalisées ce mois (batch cooking, promotions)</li>
+                    <li class="idea">Photo souvenir du jour (aléatoire depuis galerie famille)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUISINE -->
+    <div class="card">
+        <h3>🍽️ Module Cuisine</h3>
+        <div class="grid-2">
+            <div>
+                <h4>Existant</h4>
+                <ul class="feature-list">
+                    <li class="exists">Recettes CRUD + génération IA + import URL/PDF</li>
+                    <li class="exists">Inventaire complet (19 fichiers, alertes, prédictions)</li>
+                    <li class="exists">Planificateur de repas avec IA</li>
+                    <li class="exists">Batch cooking détaillé avec étapes live</li>
+                    <li class="exists">Courses collaboratif temps réel (WebSocket)</li>
+                    <li class="exists">Scan codes-barres</li>
+                    <li class="exists">Génération d'images de recettes IA</li>
+                    <li class="exists">Notes et retours sur les recettes</li>
+                </ul>
+            </div>
+            <div>
+                <h4>À ajouter</h4>
+                <ul class="feature-list">
+                    <li class="missing">Compteur de calories/macros par repas et par jour</li>
+                    <li class="missing">Partage de recettes entre familles (export/import social)</li>
+                    <li class="missing">Mode "Qu'est-ce qu'on mange ?" basé sur le stock actuel</li>
+                    <li class="idea">Timer de cuisson intégré avec alertes sonores</li>
+                    <li class="idea">Historique des prix par produit (évolution tarifaire)</li>
+                    <li class="idea">Recettes adaptées au régime alimentaire (végétarien, sans gluten, etc.)</li>
+                    <li class="idea">Budget courses hebdomadaire avec objectif et suivi</li>
+                    <li class="idea">Score anti-gaspillage (recettes utilisant les produits proches expiration)</li>
+                    <li class="idea">Carnet de recettes partagé (contributions de la famille élargie)</li>
+                    <li class="idea">Suggestions de substitutions d'ingrédients manquants par IA</li>
+                    <li class="idea">Intégration drive/livraison pour les courses (API Courses U, etc.)</li>
+                    <li class="idea">Mode pas-à-pas vocal pour cuisiner (text-to-speech)</li>
+                    <li class="idea">Classification automatique des tickets de caisse (OCR)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAMILLE -->
+    <div class="card">
+        <h3>👨‍👩‍👦 Module Famille</h3>
+        <div class="grid-2">
+            <div>
+                <h4>Existant</h4>
+                <ul class="feature-list">
+                    <li class="exists">Hub familial avec navigation par cartes</li>
+                    <li class="exists">Suivi de Jules (19 mois) — activités adaptées âge, IA</li>
+                    <li class="exists">Suivi perso Anne/Mathieu — Garmin, alimentation</li>
+                    <li class="exists">Planning weekend avec suggestions IA</li>
+                    <li class="exists">Achats famille (wishlist par catégorie)</li>
+                    <li class="exists">Routines quotidiennes</li>
+                    <li class="exists">Activités planifiées avec graphiques</li>
+                    <li class="exists">Chat IA contextuel (famille, planning, weekend)</li>
+                </ul>
+            </div>
+            <div>
+                <h4>À ajouter</h4>
+                <ul class="feature-list">
+                    <li class="missing">Journal/album photo de Jules avec étapes de développement</li>
+                    <li class="missing">Carnet de santé numérique (vaccins, RDV médecin, taille/poids)</li>
+                    <li class="missing">Calendrier partagé famille (vue combinée)</li>
+                    <li class="missing">Budget familial mensuel avec catégories et objectifs</li>
+                    <li class="idea">Arbre généalogique interactif</li>
+                    <li class="idea">Anniversaires et événements familiaux avec rappels auto</li>
+                    <li class="idea">Liste de contacts famille (médecin, nounou, école, urgences)</li>
+                    <li class="idea">Suivi des premières fois de Jules (premiers mots, premiers pas...)</li>
+                    <li class="idea">Module babysitting (disponibilités, contacts, consignes)</li>
+                    <li class="idea">Tableau de récompenses/motivation enfant (stickers virtuels)</li>
+                    <li class="idea">Suivi de sommeil bébé (heures, durée, qualité)</li>
+                    <li class="idea">Comparatif développement enfant vs normes OMS</li>
+                    <li class="idea">Mode "Soirée en amoureux" — suggestions d'activités sans enfant</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- JEUX -->
+    <div class="card">
+        <h3>🎮 Module Jeux</h3>
+        <div class="grid-2">
+            <div>
+                <h4>Existant</h4>
+                <ul class="feature-list">
+                    <li class="exists">Loto : statistiques, fréquences, génération, simulation, stratégies</li>
+                    <li class="exists">Paris sportifs : CRUD, analyse, prédiction, séries, sync football-data</li>
+                    <li class="exists">Scraper résultats Loto</li>
+                    <li class="exists">Backtest des stratégies de paris</li>
+                    <li class="exists">Notifications sur résultats</li>
+                </ul>
+            </div>
+            <div>
+                <h4>À ajouter</h4>
+                <ul class="feature-list">
+                    <li class="missing">Euromillions (en plus du Loto classique)</li>
+                    <li class="missing">Bilan gains/pertes global avec graphiques temporels</li>
+                    <li class="idea">Alertes pronostics (match intéressant détecté par IA)</li>
+                    <li class="idea">Grille de mise responsable (limite mensuelle configurable)</li>
+                    <li class="idea">Comparatif ROI entre stratégies de jeu</li>
+                    <li class="idea">Social : partage de pronostics entre amis</li>
+                    <li class="idea">Suivi des cotes en temps réel (API bookmaker)</li>
+                    <li class="idea">Module poker / jeux de société (scores, classements famille)</li>
+                    <li class="idea">Jeux éducatifs pour Jules (quiz, mémory, couleurs)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAISON -->
+    <div class="card">
+        <h3>🏠 Module Maison</h3>
+        <div class="grid-2">
+            <div>
+                <h4>Existant</h4>
+                <ul class="feature-list">
+                    <li class="exists">Charges/factures avec persistance DB + scan OCR</li>
+                    <li class="exists">Dépenses CRUD avec cartes, graphiques, prévisions, export</li>
+                    <li class="exists">Entretien maison avec gamification + analytics</li>
+                    <li class="exists">Jardin complet (plantes, récoltes, plan 2D, tâches, autonomie, gamification)</li>
+                    <li class="exists">Éco-tips avec éco-score et suggestions IA</li>
+                    <li class="exists">Suivi énergie (saisie, dashboard, tendances, objectifs)</li>
+                    <li class="exists">Inventaire meubles (inventaire, souhaits, valeur assurance)</li>
+                    <li class="exists">Projets maison (liste, création, timeline, ROI)</li>
+                    <li class="exists">Hub maison centralisé</li>
+                </ul>
+            </div>
+            <div>
+                <h4>À ajouter</h4>
+                <ul class="feature-list">
+                    <li class="missing">Plan interactif de la maison (pièces cliquables)</li>
+                    <li class="missing">Historique des travaux par pièce</li>
+                    <li class="missing">Suivi des contrats (assurance, box internet, électricité, dates renouvellement)</li>
+                    <li class="idea">Estimation valeur immobilière (connecté DVF/API immobilier)</li>
+                    <li class="idea">Alertes entretien saisonnier automatiques (chaudière, ramonage...)</li>
+                    <li class="idea">Carnet d'adresses artisans (plombier, électricien, etc.)</li>
+                    <li class="idea">Comparateur fournisseurs énergie</li>
+                    <li class="idea">Suivi conso eau (compteur + objectif)</li>
+                    <li class="idea">Inventaire cave à vin / cellier</li>
+                    <li class="idea">Guide tri sélectif personnalisé par commune</li>
+                    <li class="idea">Domotique : intégration Home Assistant / API objets connectés</li>
+                    <li class="idea">Checklist déménagement / emménagement</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- PARAMETRES -->
+    <div class="card">
+        <h3>⚙️ Module Paramètres</h3>
+        <div class="grid-2">
+            <div>
+                <h4>Existant</h4>
+                <ul class="feature-list">
+                    <li class="exists">About avec infos système</li>
+                    <li class="exists">Affichage + dark mode toggle</li>
+                    <li class="exists">Budget configuration</li>
+                    <li class="exists">Cache management (stats, clear)</li>
+                    <li class="exists">Database health check</li>
+                    <li class="exists">Foyer persisté en DB (nb adultes, Jules, exclusions)</li>
+                    <li class="exists">Configuration IA (limites, cache)</li>
+                </ul>
+            </div>
+            <div>
+                <h4>À ajouter</h4>
+                <ul class="feature-list">
+                    <li class="missing">Export/import de toute la configuration (backup settings)</li>
+                    <li class="missing">Gestion des profils utilisateurs (multi-utilisateur)</li>
+                    <li class="idea">Notifications configurables par module (activer/désactiver)</li>
+                    <li class="idea">Langue de l'interface (i18n FR/EN)</li>
+                    <li class="idea">Tableau de bord admin (logs, erreurs, performances)</li>
+                    <li class="idea">Mode démo (données fictives pour présentation)</li>
+                    <li class="idea">Changelog intégré (nouveautés de chaque version)</li>
+                    <li class="idea">Gestion des raccourcis clavier personnalisés</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- PLANNING -->
+    <div class="card">
+        <h3>📅 Module Planning</h3>
+        <div class="grid-2">
+            <div>
+                <h4>Existant</h4>
+                <ul class="feature-list">
+                    <li class="exists">Calendrier avec analytics, agrégation, composants jour/semaine</li>
+                    <li class="exists">Export calendrier (Google Calendar, ICS)</li>
+                    <li class="exists">Cockpit familial</li>
+                    <li class="exists">Templates de planification</li>
+                    <li class="exists">Timeline UI</li>
+                    <li class="exists">Récurrence et rappels</li>
+                </ul>
+            </div>
+            <div>
+                <h4>À ajouter</h4>
+                <ul class="feature-list">
+                    <li class="missing">Vue mensuelle drag & drop</li>
+                    <li class="missing">Synchronisation bidirectionnelle Google Calendar en temps réel</li>
+                    <li class="missing">Partage de calendrier entre membres de la famille</li>
+                    <li class="idea">Import ICS depuis d'autres calendriers (Outlook, Apple)</li>
+                    <li class="idea">Détection automatique de conflits d'horaires</li>
+                    <li class="idea">Suggestions IA de créneaux libres pour activités</li>
+                    <li class="idea">Mode agenda imprimable (export PDF hebdo)</li>
+                    <li class="idea">Widget "Prochains événements" pour l'accueil</li>
+                    <li class="idea">Intégration Doctolib pour les rendez-vous médicaux</li>
+                    <li class="idea">Planning garde alternée (si applicable)</li>
+                    <li class="idea">Rappels intelligents (adapter heure rappel selon type événement)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- UTILITAIRES -->
+    <div class="card">
+        <h3>🔧 Module Utilitaires</h3>
+        <div class="grid-2">
+            <div>
+                <h4>Existant</h4>
+                <ul class="feature-list">
+                    <li class="exists">Barcode scanner (détection, opérations, logique)</li>
+                    <li class="exists">Rapports PDF (budget, gaspillage, historique, stocks)</li>
+                    <li class="exists">Notifications push (ntfy.sh)</li>
+                    <li class="exists">Scan factures OCR</li>
+                    <li class="exists">Recherche produits (Open Food Facts)</li>
+                    <li class="exists">Chat IA global</li>
+                </ul>
+            </div>
+            <div>
+                <h4>À ajouter</h4>
+                <ul class="feature-list">
+                    <li class="missing">Export global de données (JSON/CSV/Excel)</li>
+                    <li class="missing">Import en masse (CSV template pour recettes, dépenses...)</li>
+                    <li class="idea">Reconnaissance vocale pour ajout rapide (liste courses, notes)</li>
+                    <li class="idea">Widget notes/mémos rapides</li>
+                    <li class="idea">Convertisseur d'unités cuisine (tasses → grammes, etc.)</li>
+                    <li class="idea">QR code generator (pour partager recettes, listes)</li>
+                    <li class="idea">Minuteur/chronomètre multi-usage</li>
+                    <li class="idea">Calculatrice de portions (adapter recette au nb de personnes)</li>
+                    <li class="idea">Journal de bord / notes quotidiennes</li>
+                    <li class="idea">Widget météo local détaillé</li>
+                    <li class="idea">Gestion de mots de passe WiFi et codes d'accès maison</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ COMPARATIF ROADMAP V10 ============ -->
+<section id="roadmap-compare">
+    <h2>🗺️ Comparatif avec la ROADMAP v10</h2>
+
+    <div class="card">
+        <h3>Phases d'audit vs État actuel</h3>
+        <table>
+            <thead>
+                <tr><th>Phase</th><th>Description</th><th>Status ROADMAP</th><th>Évaluation Audit</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Phase 1</strong></td>
+                    <td>Corrections critiques (DB persist, BaseAI, JWT, /metrics, tests API)</td>
+                    <td><span class="tag tag-done">✅ Terminé</span></td>
+                    <td>Confirmé — JWT sécurisé, 47 tests API, DB persistée pour maison/</td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 2</strong></td>
+                    <td>Homogénéisation patterns (KeyNamespace, tabs_with_url, error_boundary, BaseService, cached_fragment)</td>
+                    <td><span class="tag tag-done">✅ Terminé</span></td>
+                    <td>Confirmé — 100% KeyNamespace, tabs_with_url, error_boundary per tab</td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 3</strong></td>
+                    <td>Robustesse (error_boundary 28 modules, navigation famille, features WIP, jardin data-driven)</td>
+                    <td><span class="tag tag-done">✅ Terminé</span></td>
+                    <td>Confirmé — 28 modules instrumentés, 5 WIP complétés, scan factures→charges</td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 4</strong></td>
+                    <td>Nettoyage (BaseModule pilote, @composant_ui, split >500 LOC, docs UI, TimestampMixin)</td>
+                    <td><span class="tag tag-done">✅ Terminé</span></td>
+                    <td>Confirmé — 12+ @composant_ui, 2 fichiers splittés, 3 docs, 4 mixins</td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 5</strong></td>
+                    <td>Modules manquants (projets, eco_tips, energie, meubles) + Coverage + Redis + Collab</td>
+                    <td><span class="tag tag-done">✅ Terminé</span></td>
+                    <td>Confirmé — 4 modules créés, 45 tests, Redis REDIS_URL, mode collaboratif</td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 5 suite</strong></td>
+                    <td>Dead code, design system integration, tests snapshot, PWA icons</td>
+                    <td><span class="tag tag-done">✅ Terminé</span></td>
+                    <td>Confirmé — ReactiveServiceMixin supprimé, 27 snapshot tests, 8 icônes PWA</td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 6</strong></td>
+                    <td>Innovations Streamlit (st.write_stream, @st.dialog, auto_refresh, deep linking, chat IA, Specification)</td>
+                    <td><span class="tag tag-done">✅ Terminé</span></td>
+                    <td>Confirmé — Tout implémenté. Specification supprimé ensuite (dead code → Phase nettoyage)</td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 7</strong></td>
+                    <td>Production Hardening (Sentry, PWA offline, JSON logging, CI/CD, tests coverage)</td>
+                    <td><span class="tag tag-done">✅ Terminé</span></td>
+                    <td>Confirmé — 78 tests resilience/observability, CI/CD (.github/workflows), Sentry, SW.js</td>
+                </tr>
+                <tr>
+                    <td><strong>Phase 10</strong></td>
+                    <td>Tests & Scalabilité (Circuit breaker async, ETag, BaseService étendu, Redis cache, cache stats)</td>
+                    <td><span class="tag tag-done">✅ Terminé</span></td>
+                    <td>Confirmé — 4 services migrés, CacheRedis, ETag 304, circuit breaker async</td>
+                </tr>
+                <tr>
+                    <td><strong>Sprint 5 Audit</strong></td>
+                    <td>Francisation complète (45 classes, 34 tables, 95 tables SQL, 14 événements)</td>
+                    <td><span class="tag tag-done">✅ Terminé</span></td>
+                    <td>Confirmé — 100% nommage FR, 113 fichiers modifiés, 0 ancien nom anglais</td>
+                </tr>
+                <tr>
+                    <td><strong>Nettoyage patterns</strong></td>
+                    <td>Suppression 8 patterns dead code (~6 000 LOC), 18 N+1 corrigés</td>
+                    <td><span class="tag tag-done">✅ Terminé</span></td>
+                    <td>Confirmé — Result Monad, Repository, UoW, IoC, Middleware, CQRS, Specification, UI v2 supprimés</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>Items restants de la ROADMAP v10</h3>
+        <table>
+            <thead>
+                <tr><th>Priorité</th><th>Item</th><th>Status</th><th>Recommandation audit</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="tag tag-todo">HAUTE</span></td>
+                    <td>Augmenter coverage fichiers restants à 0% (sentry, health, navigation)</td>
+                    <td>🔴 Non fait</td>
+                    <td>Recommandé — fichiers critiques sans couverture</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-todo">HAUTE</span></td>
+                    <td>Déployer migrations SQL sur Supabase</td>
+                    <td>🔴 Non fait</td>
+                    <td>Bloquant pour la mise en production</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-partial">MOYENNE</span></td>
+                    <td>322 tests skippés (modules maison non implémentés)</td>
+                    <td>🟡 Réduit à ~20</td>
+                    <td>Les modules existent maintenant — réévaluer les skips</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-partial">BASSE</span></td>
+                    <td>Reconnaissance vocale</td>
+                    <td>🟡 vocal.py + voice_assistant.py existent</td>
+                    <td>Infrastructure présente, intégration modules manquante</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-done">FAIT</span></td>
+                    <td>Mode hors-ligne (Service Worker)</td>
+                    <td>✅ static/sw.js 249 LOC</td>
+                    <td>Complet — cache recettes, IndexedDB, background sync</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-partial">BASSE</span></td>
+                    <td>Multi-famille (comptes partagés)</td>
+                    <td>🔴 Non fait</td>
+                    <td>Nécessite refonte auth — garder en backlog</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-partial">BASSE</span></td>
+                    <td>Générer VAPID keys pour push</td>
+                    <td>🔴 Non fait</td>
+                    <td>Simple — 1 commande, à documenter dans setup</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>Métriques : ROADMAP v10 vs Audit actuel</h3>
+        <table>
+            <thead><tr><th>Métrique</th><th>Avant (ROADMAP v10)</th><th>Audit actuel</th><th>Delta</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Tests collectés</td>
+                    <td><span class="compare-before">8 150</span></td>
+                    <td><span class="compare-after">8 150</span></td>
+                    <td>= (stable)</td>
+                </tr>
+                <tr>
+                    <td>Tests passés</td>
+                    <td><span class="compare-before">8 045</span></td>
+                    <td><span class="compare-after">8 045</span></td>
+                    <td>= (98.7%)</td>
+                </tr>
+                <tr>
+                    <td>Tests en échec</td>
+                    <td><span class="compare-before">48</span></td>
+                    <td><span class="compare-after">48</span></td>
+                    <td>= (pre-existing DB/mocks)</td>
+                </tr>
+                <tr>
+                    <td>Lint issues</td>
+                    <td><span class="compare-before">0</span></td>
+                    <td><span class="compare-after">0</span></td>
+                    <td>✅ Clean</td>
+                </tr>
+                <tr>
+                    <td>Tables SQL</td>
+                    <td><span class="compare-before">95</span></td>
+                    <td><span class="compare-after">95</span></td>
+                    <td>= (100% FR)</td>
+                </tr>
+                <tr>
+                    <td>Services</td>
+                    <td><span class="compare-before">30+</span></td>
+                    <td><span class="compare-after">30+</span></td>
+                    <td>= (tous @service_factory)</td>
+                </tr>
+                <tr>
+                    <td>N+1 queries</td>
+                    <td><span class="compare-before">18 identifiés</span></td>
+                    <td><span class="compare-after">18/18 corrigés</span></td>
+                    <td>✅ 0 restants</td>
+                </tr>
+                <tr>
+                    <td>Coverage core/</td>
+                    <td><span class="compare-before">~75%</span></td>
+                    <td><span class="compare-after">~75%</span></td>
+                    <td>🟡 Objectif 80% non atteint</td>
+                </tr>
+                <tr>
+                    <td>Nommage FR</td>
+                    <td><span class="compare-before">100%</span></td>
+                    <td><span class="compare-after">100%</span></td>
+                    <td>✅ Confirmé</td>
+                </tr>
+                <tr>
+                    <td>Fichiers Python</td>
+                    <td>-</td>
+                    <td><span class="compare-after">674</span></td>
+                    <td>📊 (première mesure)</td>
+                </tr>
+                <tr>
+                    <td>Lignes de code</td>
+                    <td>-</td>
+                    <td><span class="compare-after">118 870</span></td>
+                    <td>📊 (première mesure)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ============ ROADMAP NEXT ============ -->
+<section id="roadmap-next">
+    <h2>🚀 Roadmap Recommandée — Prochaines Étapes</h2>
+
+    <div class="timeline">
+        <div class="timeline-item current">
+            <div class="timeline-label">SPRINT A — Semaine 1-2 (Priorité Haute)</div>
+            <h4>🔴 Corrections et déploiement</h4>
+            <ul class="feature-list">
+                <li class="missing">Déployer migrations SQL sur Supabase production</li>
+                <li class="missing">Corriger les 48 tests en échec (DB/mocks — pre-existing)</li>
+                <li class="missing">Ajouter tests pour fichiers à 0% coverage (sentry.py, health.py, navigation.py)</li>
+                <li class="missing">Thread-safety : ajouter locks sur singletons critiques (client IA, config, cache)</li>
+                <li class="missing">Réévaluer les ~20 tests skippés restants</li>
+            </ul>
+        </div>
+
+        <div class="timeline-item future">
+            <div class="timeline-label">SPRINT B — Semaine 3-4 (Enrichissement fonctionnel)</div>
+            <h4>💡 Accueil & Dashboard enrichi</h4>
+            <ul class="feature-list">
+                <li class="idea">Résumé matinal IA personnalisé</li>
+                <li class="idea">Widget météo + impact activités</li>
+                <li class="idea">Mini-calendrier semaine intégré</li>
+                <li class="idea">Rappels contextuels multi-modules</li>
+                <li class="idea">Widget "Ce soir on mange..."</li>
+            </ul>
+        </div>
+
+        <div class="timeline-item future">
+            <div class="timeline-label">SPRINT C — Semaine 5-6 (Famille & Santé)</div>
+            <h4>💡 Module Famille enrichi</h4>
+            <ul class="feature-list">
+                <li class="idea">Carnet de santé numérique (vaccins, RDV, taille/poids Jules)</li>
+                <li class="idea">Journal photo développement Jules</li>
+                <li class="idea">Calendrier partagé famille (vue combinée)</li>
+                <li class="idea">Anniversaires et événements familiaux</li>
+                <li class="idea">Contacts importants (médecin, nounou, urgences)</li>
+            </ul>
+        </div>
+
+        <div class="timeline-item future">
+            <div class="timeline-label">SPRINT D — Semaine 7-8 (Cuisine avancée)</div>
+            <h4>💡 Nutrition & Intelligence</h4>
+            <ul class="feature-list">
+                <li class="idea">Compteur calories/macros par repas</li>
+                <li class="idea">Mode "Qu'est-ce qu'on mange ?" basé sur stock</li>
+                <li class="idea">Score anti-gaspillage</li>
+                <li class="idea">Substitutions d'ingrédients par IA</li>
+                <li class="idea">Budget courses avec objectif hebdo</li>
+            </ul>
+        </div>
+
+        <div class="timeline-item future">
+            <div class="timeline-label">SPRINT E — Semaine 9-10 (Maison & Outils)</div>
+            <h4>💡 Maison intelligente</h4>
+            <ul class="feature-list">
+                <li class="idea">Suivi contrats (assurance, box, énergie, dates renouvellement)</li>
+                <li class="idea">Plan interactif de la maison</li>
+                <li class="idea">Carnet adresses artisans</li>
+                <li class="idea">Alertes entretien saisonnier automatiques</li>
+                <li class="idea">Comparateur fournisseurs énergie</li>
+            </ul>
+        </div>
+
+        <div class="timeline-item future">
+            <div class="timeline-label">SPRINT F — Semaine 11-14 (Innovation)</div>
+            <h4>💡 Fonctionnalités avancées</h4>
+            <ul class="feature-list">
+                <li class="idea">Reconnaissance vocale pour ajout rapide</li>
+                <li class="idea">Timer cuisson avec alertes sonores</li>
+                <li class="idea">Tableau de bord admin (logs, erreurs, perf)</li>
+                <li class="idea">Mode démo avec données fictives</li>
+                <li class="idea">Internationalisation (i18n FR/EN)</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ============ ANALYSE COMPLÉTUDE PROJET ============ -->
+<section id="completude">
+    <h2>📋 Analyse de Complétude — Aspects d'un Projet Informatique</h2>
+
+    <table>
+        <thead>
+            <tr><th>Aspect</th><th>Note</th><th>Implémentation</th><th>Commentaire</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Architecture logicielle</strong></td>
+                <td><span class="score-badge score-excellent">9/10</span></td>
+                <td>Couches séparées, lazy loading, DI via registre, patterns composables</td>
+                <td>Architecture mature et bien pensée</td>
+            </tr>
+            <tr>
+                <td><strong>Modèle de données</strong></td>
+                <td><span class="score-badge score-excellent">9/10</span></td>
+                <td>95 tables, SQLAlchemy 2.0 ORM, 22 modèles modulaires, naming convention, mixins</td>
+                <td>Complet et bien normalisé</td>
+            </tr>
+            <tr>
+                <td><strong>Sécurité</strong></td>
+                <td><span class="score-badge score-excellent">8.5/10</span></td>
+                <td>JWT, security headers OWASP, sanitizer XSS, rate limiting, PII filtering, HSTS</td>
+                <td>Excellent pour un projet personnel</td>
+            </tr>
+            <tr>
+                <td><strong>Tests</strong></td>
+                <td><span class="score-badge score-good">7.5/10</span></td>
+                <td>8 150 tests, 405 fichiers, 98.7% pass rate, snapshot visuels</td>
+                <td>Bon volume mais coverage ~75% (objectif 80%)</td>
+            </tr>
+            <tr>
+                <td><strong>Performance</strong></td>
+                <td><span class="score-badge score-excellent">8.5/10</span></td>
+                <td>Lazy loading, cache multi-niveaux, Redis, N+1 corrigés, profiler rerun</td>
+                <td>Excellente optimisation startup + runtime</td>
+            </tr>
+            <tr>
+                <td><strong>Résilience</strong></td>
+                <td><span class="score-badge score-excellent">9/10</span></td>
+                <td>Circuit breaker, retry composable, timeout, bulkhead, fallback, error boundary</td>
+                <td>Resilience de niveau production</td>
+            </tr>
+            <tr>
+                <td><strong>Observabilité</strong></td>
+                <td><span class="score-badge score-good">8/10</span></td>
+                <td>Sentry, correlation_id, JSON structured logging, Prometheus, health checks</td>
+                <td>Complet mais Grafana dashboard manquant</td>
+            </tr>
+            <tr>
+                <td><strong>CI/CD</strong></td>
+                <td><span class="score-badge score-excellent">8.5/10</span></td>
+                <td>GitHub Actions (lint, test matrix, security audit, deploy), Dependabot</td>
+                <td>Pipeline mature. Manque staging environment</td>
+            </tr>
+            <tr>
+                <td><strong>Documentation</strong></td>
+                <td><span class="score-badge score-good">8/10</span></td>
+                <td>ROADMAP, ARCHITECTURE, PATTERNS, API_REFERENCE, copilot-instructions, docstrings FR</td>
+                <td>Bonne doc dev. Manque doc utilisateur</td>
+            </tr>
+            <tr>
+                <td><strong>UX/Accessibilité</strong></td>
+                <td><span class="score-badge score-good">8/10</span></td>
+                <td>WCAG 2.1, skip-link, ARIA, dark mode, responsive, tablet mode, print</td>
+                <td>Très bon. Manque tests E2E Playwright</td>
+            </tr>
+            <tr>
+                <td><strong>Configuration</strong></td>
+                <td><span class="score-badge score-excellent">9/10</span></td>
+                <td>Pydantic BaseSettings, multi-source (env, secrets, defaults), validation au boot</td>
+                <td>Exemplaire</td>
+            </tr>
+            <tr>
+                <td><strong>Qualité de code</strong></td>
+                <td><span class="score-badge score-excellent">8.5/10</span></td>
+                <td>0 lint issues (ruff), nommage FR 100%, type hints, PEP 561 py.typed</td>
+                <td>Code propre et cohérent</td>
+            </tr>
+            <tr>
+                <td><strong>Intégrations externes</strong></td>
+                <td><span class="score-badge score-good">8/10</span></td>
+                <td>Mistral AI, Supabase, Google Calendar, Garmin, football-data, Open Food Facts, météo, ntfy</td>
+                <td>Riche. Manque: Doctolib, drive courses</td>
+            </tr>
+            <tr>
+                <td><strong>PWA/Mobile</strong></td>
+                <td><span class="score-badge score-good">7.5/10</span></td>
+                <td>Service worker 249 LOC, manifest, icônes, IndexedDB, background sync</td>
+                <td>Bon. Manque tests offline et push réel</td>
+            </tr>
+            <tr>
+                <td><strong>Gestion d'état</strong></td>
+                <td><span class="score-badge score-good">7.5/10</span></td>
+                <td>SessionKeys centralisé, GestionnaireEtat, slices, state persistant DB</td>
+                <td>Bon. ~130 clés — risque de pollution</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="card" style="margin-top: 1.5rem;">
+        <h3>Synthèse de complétude</h3>
+        <div class="grid-3">
+            <div class="metric">
+                <div class="number" style="color: var(--green);">85%</div>
+                <div class="label">Infrastructure technique</div>
+            </div>
+            <div class="metric">
+                <div class="number" style="color: var(--accent);">80%</div>
+                <div class="label">Fonctionnalités métier</div>
+            </div>
+            <div class="metric">
+                <div class="number" style="color: var(--yellow);">70%</div>
+                <div class="label">Production readiness</div>
+            </div>
+        </div>
+        <p style="text-align: center; color: var(--text-muted); margin-top: 1rem;">
+            Le projet est <strong>très avancé pour un assistant familial personnel</strong>. L'infrastructure technique est de niveau professionnel.
+            Les 30% restants de "production readiness" concernent : déploiement SQL, tests en échec à corriger, monitoring Grafana, et documentation utilisateur.
+        </p>
+    </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<div style="text-align: center; padding: 3rem 0; border-top: 1px solid var(--border); margin-top: 3rem; color: var(--text-muted);">
+    <p>Rapport d'audit généré le 26 février 2026</p>
+    <p>Assistant Matanne — 674 fichiers Python · 118 870 LOC · 95 tables SQL · 8 150 tests</p>
+    <p style="margin-top: .5rem; font-size: .8rem;">Analyse complète de src/api, src/core, src/modules, src/services, src/ui et app.py</p>
+</div>
+
+</div><!-- /container -->
+
 </body>
 </html>

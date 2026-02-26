@@ -8,6 +8,7 @@ import streamlit as st
 
 from src.ui import etat_vide
 from src.ui.fragments import cached_fragment, ui_fragment
+from src.ui.tokens import Couleur
 
 from .calculs import calculer_esperance_mathematique
 from .constants import GAINS_PAR_RANG, NUMERO_MAX, NUMERO_MIN
@@ -101,11 +102,11 @@ def afficher_statistiques_frequences(tirages: list):
                 x=nums,
                 y=freqs,
                 marker_color=[
-                    "#f5576c"
+                    Couleur.LOTO_CHANCE_END
                     if n in chauds_froids.get("chauds", [])[:10]
-                    else "#667eea"
+                    else Couleur.LOTO_NORMAL_START
                     if n in chauds_froids.get("froids", [])[:10]
-                    else "#95a5a6"
+                    else Couleur.LOTO_NEUTRAL
                     for n in nums
                 ],
                 hovertemplate="Numéro %{x}<br>Fréquence: %{y}<extra></extra>",

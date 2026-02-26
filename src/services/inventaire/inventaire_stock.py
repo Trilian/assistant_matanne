@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any
 from sqlalchemy.orm import Session, joinedload
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
+from src.services.core.event_bus_mixin import emettre_evenement_simple
 
 if TYPE_CHECKING:
     from src.core.models import ArticleInventaire
@@ -156,6 +157,12 @@ class InventaireStockMixin:
 
         db.add(historique)
         db.commit()
+
+        emettre_evenement_simple(
+            "stock.modifie",
+            {"article_id": article.id, "ingredient_nom": "", "raison": type_modification},
+            source="inventaire_stock",
+        )
 
         logger.info(f"📝 Historique enregistré: {type_modification} article #{article.id}")
         return True

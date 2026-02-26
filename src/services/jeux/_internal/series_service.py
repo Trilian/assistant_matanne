@@ -26,6 +26,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
 from src.core.models import AlerteJeux, SerieJeux
+from src.services.core.event_bus_mixin import emettre_evenement_simple
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -218,6 +219,17 @@ class SeriesService:
 
         db.commit()
         db.refresh(serie)
+
+        emettre_evenement_simple(
+            "jeux.serie_modifiee",
+            {
+                "serie_id": serie.id,
+                "type_jeu": str(type_jeu),
+                "marche": marche,
+                "action": "cree_ou_maj",
+            },
+            source="series_service",
+        )
         return serie
 
     @avec_session_db
@@ -356,6 +368,12 @@ class SeriesService:
         logger.info(
             f"Alerte créée: {serie.type_jeu}/{serie.marche} "
             f"value={serie.value:.2f} série={serie.serie_actuelle}"
+        )
+
+        emettre_evenement_simple(
+            "jeux.alerte_creee",
+            {"alerte_id": alerte.id, "type_jeu": str(serie.type_jeu), "marche": serie.marche},
+            source="series_service",
         )
 
         return alerte

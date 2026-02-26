@@ -12,12 +12,10 @@ from src.ui.fragments import cached_fragment
 
 
 def get_rapports_service():
-    """Get ou creer service rapports (import différé pour performance)"""
-    from src.services.rapports import ServiceRapportsPDF
+    """Get ou creer service rapports (via registre singleton)."""
+    from src.services.rapports import obtenir_service_rapports_pdf
 
-    if SK.RAPPORTS_SERVICE not in st.session_state:
-        st.session_state[SK.RAPPORTS_SERVICE] = ServiceRapportsPDF()
-    return st.session_state[SK.RAPPORTS_SERVICE]
+    return obtenir_service_rapports_pdf()
 
 
 @cached_fragment(ttl=600)

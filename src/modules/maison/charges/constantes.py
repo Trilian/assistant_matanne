@@ -10,6 +10,8 @@ Contient toutes les constantes métier du module charges:
 
 from decimal import Decimal
 
+from src.ui.tokens import Couleur
+
 # =============================================================================
 # CONSTANTES ÉNERGIE
 # =============================================================================
@@ -17,7 +19,7 @@ from decimal import Decimal
 ENERGIES = {
     "electricite": {
         "emoji": "⚡",
-        "couleur": "#FFEB3B",
+        "couleur": Couleur.YELLOW_ALT,
         "unite": "kWh",
         "label": "Électricité",
         "prix_moyen": Decimal("0.22"),
@@ -25,7 +27,7 @@ ENERGIES = {
     },
     "gaz": {
         "emoji": "🔥",
-        "couleur": "#FF5722",
+        "couleur": Couleur.DANGER,
         "unite": "m³",
         "label": "Gaz",
         "prix_moyen": Decimal("0.11"),
@@ -33,7 +35,7 @@ ENERGIES = {
     },
     "eau": {
         "emoji": "💧",
-        "couleur": "#2196F3",
+        "couleur": Couleur.INFO,
         "unite": "m³",
         "label": "Eau",
         "prix_moyen": Decimal("4.50"),

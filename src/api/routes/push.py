@@ -14,6 +14,7 @@ import logging
 from fastapi import APIRouter, Depends
 
 from src.api.dependencies import require_auth
+from src.api.schemas.errors import REPONSES_AUTH
 from src.api.schemas.push import (
     PushStatusResponse,
     PushSubscriptionRequest,
@@ -38,6 +39,7 @@ router = APIRouter(
 @router.post(
     "/subscribe",
     response_model=PushSubscriptionResponse,
+    responses=REPONSES_AUTH,
     summary="Enregistrer un abonnement push",
     description="Enregistre un nouvel abonnement Web Push pour recevoir des notifications.",
 )
@@ -80,6 +82,7 @@ async def souscrire_push(
 @router.delete(
     "/unsubscribe",
     response_model=PushSubscriptionResponse,
+    responses=REPONSES_AUTH,
     summary="Supprimer un abonnement push",
     description="Supprime un abonnement Web Push existant.",
 )
@@ -111,6 +114,7 @@ async def desabonner_push(
 @router.get(
     "/status",
     response_model=PushStatusResponse,
+    responses=REPONSES_AUTH,
     summary="Statut des notifications push",
     description="Retourne le statut des notifications push pour l'utilisateur.",
 )

@@ -19,6 +19,7 @@ from src.modules._framework import error_boundary
 from src.ui.fragments import cached_fragment
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
+from src.ui.tokens import Couleur
 
 if TYPE_CHECKING:
     from src.services.maison.jardin_service import JardinService
@@ -67,11 +68,11 @@ EMOJI_ZONE = {
 }
 
 COULEUR_ETAT = {
-    1: "#c62828",
-    2: "#e65100",
-    3: "#f9a825",
-    4: "#2e7d32",
-    5: "#1b5e20",
+    1: Couleur.SCALE_CRITICAL,
+    2: Couleur.SCALE_BAD,
+    3: Couleur.SCALE_OK,
+    4: Couleur.SCALE_GOOD,
+    5: Couleur.SCALE_EXCELLENT,
 }
 
 LABEL_ETAT = {

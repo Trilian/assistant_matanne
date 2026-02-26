@@ -25,6 +25,7 @@ from src.core.models import (
     Repas,
     SessionBatchCooking,
 )
+from src.services.core.event_bus_mixin import emettre_evenement_simple
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -302,6 +303,12 @@ class ServiceCalendrierPlanning:
         db.add(activite)
         db.commit()
         db.refresh(activite)
+
+        emettre_evenement_simple(
+            "activites.modifiee",
+            {"activite_id": activite.id, "nom": titre, "action": "creee"},
+            source="calendrier_planning",
+        )
         return activite
 
     @avec_gestion_erreurs(default_return=None)
@@ -359,6 +366,12 @@ class ServiceCalendrierPlanning:
         db.add(event)
         db.commit()
         db.refresh(event)
+
+        emettre_evenement_simple(
+            "planning.modifie",
+            {"planning_id": event.id, "semaine": "", "action": "event_cree"},
+            source="calendrier_planning",
+        )
         return event
 
 

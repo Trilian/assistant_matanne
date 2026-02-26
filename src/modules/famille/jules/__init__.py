@@ -16,7 +16,7 @@ from src.ui.state.url import tabs_with_url
 
 _keys = KeyNamespace("jules")
 
-from src.services.famille.jules_ai import JulesAIService
+from src.services.famille.jules_ai import obtenir_jules_ai_service
 
 from .components import (
     afficher_achats_categorie,
@@ -75,8 +75,8 @@ def app():
 __all__ = [
     # Entry point
     "app",
-    # AI Service
-    "JulesAIService",
+    # AI Service (via factory)
+    "obtenir_jules_ai_service",
     # Helpers
     "get_age_jules",
     "get_activites_pour_age",

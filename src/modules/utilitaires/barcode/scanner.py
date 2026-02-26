@@ -2,15 +2,20 @@
 Scanner tab UI - modes caméra, streaming vidéo et saisie manuelle.
 """
 
+from __future__ import annotations
+
 import logging
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 import streamlit as st
 
 from src.core.session_keys import SK
 from src.core.state import rerun
-from src.services.integrations import BarcodeService
 from src.ui.fragments import ui_fragment
+
+if TYPE_CHECKING:
+    from src.services.integrations import BarcodeService
 
 from .detection import BarcodeScanner, detect_barcodes
 

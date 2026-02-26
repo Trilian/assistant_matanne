@@ -18,6 +18,7 @@ import streamlit as st
 from src.modules._framework import error_boundary
 from src.ui.fragments import cached_fragment
 from src.ui.keys import KeyNamespace
+from src.ui.tokens import Couleur
 
 logger = logging.getLogger(__name__)
 
@@ -131,19 +132,19 @@ def _afficher_score(score: int):
     """Affiche le score de la semaine avec jauge visuelle."""
     # Couleur basée sur le score
     if score >= 80:
-        couleur = "#4CAF50"  # Vert
+        couleur = Couleur.SUCCESS
         emoji = "🌟"
         label = "Excellente semaine !"
     elif score >= 60:
-        couleur = "#FF9800"  # Orange
+        couleur = Couleur.ORANGE
         emoji = "👍"
         label = "Bonne semaine"
     elif score >= 40:
-        couleur = "#FFC107"  # Jaune
+        couleur = Couleur.WARNING
         emoji = "📊"
         label = "Semaine correcte"
     else:
-        couleur = "#F44336"  # Rouge
+        couleur = Couleur.RED_500
         emoji = "💪"
         label = "Semaine à améliorer"
 

@@ -12,6 +12,7 @@ from datetime import date, time, timedelta
 from enum import StrEnum
 
 from src.core.constants import JOURS_SEMAINE, JOURS_SEMAINE_COURT
+from src.ui.tokens import Couleur
 
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES LOCALES
@@ -55,19 +56,19 @@ EMOJI_TYPE = {
 
 # Couleurs par type (pour l'affichage)
 COULEUR_TYPE = {
-    TypeEvenement.REPAS_MIDI: "#FFB74D",  # Orange clair
-    TypeEvenement.REPAS_SOIR: "#7986CB",  # Bleu/violet
-    TypeEvenement.GOUTER: "#F48FB1",  # Rose
-    TypeEvenement.BATCH_COOKING: "#81C784",  # Vert
-    TypeEvenement.COURSES: "#4DD0E1",  # Cyan
-    TypeEvenement.ACTIVITE: "#BA68C8",  # Violet
-    TypeEvenement.RDV_MEDICAL: "#E57373",  # Rouge clair
-    TypeEvenement.RDV_AUTRE: "#90A4AE",  # Gris
-    TypeEvenement.ROUTINE: "#A1887F",  # Marron
-    TypeEvenement.MENAGE: "#FFCC80",  # Orange pâle
-    TypeEvenement.JARDIN: "#A5D6A7",  # Vert pâle
-    TypeEvenement.ENTRETIEN: "#BCAAA4",  # Marron clair
-    TypeEvenement.EVENEMENT: "#64B5F6",  # Bleu
+    TypeEvenement.REPAS_MIDI: Couleur.CHART_BREAKFAST,
+    TypeEvenement.REPAS_SOIR: Couleur.CAL_REPAS_SOIR,
+    TypeEvenement.GOUTER: Couleur.CAL_GOUTER,
+    TypeEvenement.BATCH_COOKING: Couleur.CAL_BATCH,
+    TypeEvenement.COURSES: Couleur.CAL_COURSES,
+    TypeEvenement.ACTIVITE: Couleur.CAL_ACTIVITE,
+    TypeEvenement.RDV_MEDICAL: Couleur.CAL_RDV_MEDICAL,
+    TypeEvenement.RDV_AUTRE: Couleur.CAL_RDV_AUTRE,
+    TypeEvenement.ROUTINE: Couleur.CAL_ROUTINE,
+    TypeEvenement.MENAGE: Couleur.CAL_MENAGE,
+    TypeEvenement.JARDIN: Couleur.CAL_JARDIN,
+    TypeEvenement.ENTRETIEN: Couleur.CAL_ENTRETIEN,
+    TypeEvenement.EVENEMENT: Couleur.CAL_EVENEMENT,
 }
 
 

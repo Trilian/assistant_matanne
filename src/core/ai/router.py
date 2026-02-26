@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import threading
 import time
 from dataclasses import dataclass, field
 from enum import Enum
@@ -684,15 +685,18 @@ class RouteurIA:
 # ═══════════════════════════════════════════════════════════
 
 _routeur: RouteurIA | None = None
+_routeur_lock = threading.Lock()
 
 
 def obtenir_routeur_ia() -> RouteurIA:
-    """Obtient le routeur IA singleton.
+    """Obtient le routeur IA singleton (thread-safe).
 
     Returns:
         Instance RouteurIA
     """
     global _routeur
     if _routeur is None:
-        _routeur = RouteurIA()
+        with _routeur_lock:
+            if _routeur is None:
+                _routeur = RouteurIA()
     return _routeur

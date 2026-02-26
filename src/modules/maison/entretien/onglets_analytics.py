@@ -6,6 +6,7 @@ from datetime import date, datetime, timedelta
 import streamlit as st
 
 from src.ui.fragments import cached_fragment
+from src.ui.tokens import Couleur
 
 from .data import charger_catalogue_entretien
 from .logic import (
@@ -159,7 +160,7 @@ def onglet_stats(mes_objets: list[dict], historique: list[dict]):
             <div class="entretien-card">
                 <div style="font-size: 2rem; margin-bottom: 0.5rem">{cat_data.get("icon", "📦")}</div>
                 <div style="font-weight: 600">{cat_id.replace("_", " ").capitalize()}</div>
-                <div style="font-size: 0.85rem; color: #718096">
+                <div style="font-size: 0.85rem; color: {Couleur.TEXT_SLATE_500}">
                     {data["objets"]} équipements • {data["taches"]} tâches en attente
                 </div>
             </div>
@@ -212,8 +213,8 @@ def onglet_graphiques(mes_objets: list[dict], historique: list[dict]):
                     y=counts,
                     mode="lines+markers",
                     name="Tâches accomplies",
-                    line={"color": "#3498db", "width": 3},
-                    marker={"size": 10, "color": "#3498db"},
+                    line={"color": Couleur.FLAT_BLUE, "width": 3},
+                    marker={"size": 10, "color": Couleur.FLAT_BLUE},
                     fill="tozeroy",
                     fillcolor="rgba(52, 152, 219, 0.2)",
                 )
@@ -283,7 +284,7 @@ def onglet_graphiques(mes_objets: list[dict], historique: list[dict]):
                 x="Jours",
                 orientation="h",
                 color="Jours",
-                color_continuous_scale=["#e74c3c", "#f39c12", "#27ae60"],
+                color_continuous_scale=[Couleur.FLAT_RED, Couleur.FLAT_ORANGE, Couleur.FLAT_GREEN],
                 title="Prochaines tâches (jours restants)",
             )
             fig.update_layout(

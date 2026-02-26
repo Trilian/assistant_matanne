@@ -14,16 +14,20 @@ from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_d
 from src.core.models import Meuble
 from src.core.monitoring import chronometre
 from src.services.core.base import BaseService
+from src.services.core.event_bus_mixin import EventBusMixin
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
 
-class MeublesCrudService(BaseService[Meuble]):
+class MeublesCrudService(EventBusMixin, BaseService[Meuble]):
     """Service CRUD pour les meubles (wishlist achats).
 
     Hérite de BaseService[Meuble] pour le CRUD générique.
+    Utilise EventBusMixin pour émettre des événements domaine.
     """
+
+    _event_source = "meubles"
 
     def __init__(self):
         super().__init__(model=Meuble, cache_ttl=300)
@@ -86,6 +90,10 @@ class MeublesCrudService(BaseService[Meuble]):
         db.commit()
         db.refresh(meuble)
         logger.info(f"Meuble créé: {meuble.id} - {meuble.nom}")
+        self._emettre_evenement(
+            "meubles.modifie",
+            {"meuble_id": meuble.id, "nom": meuble.nom, "action": "cree"},
+        )
         return meuble
 
     @avec_session_db
@@ -108,6 +116,10 @@ class MeublesCrudService(BaseService[Meuble]):
         db.commit()
         db.refresh(meuble)
         logger.info(f"Meuble {meuble_id} mis à jour")
+        self._emettre_evenement(
+            "meubles.modifie",
+            {"meuble_id": meuble_id, "nom": meuble.nom, "action": "modifie"},
+        )
         return meuble
 
     @avec_session_db
@@ -124,9 +136,14 @@ class MeublesCrudService(BaseService[Meuble]):
         meuble = db.query(Meuble).filter(Meuble.id == meuble_id).first()
         if meuble is None:
             return False
+        nom = meuble.nom
         db.delete(meuble)
         db.commit()
         logger.info(f"Meuble {meuble_id} supprimé")
+        self._emettre_evenement(
+            "meubles.modifie",
+            {"meuble_id": meuble_id, "nom": nom, "action": "supprime"},
+        )
         return True
 
     @avec_cache(ttl=300)

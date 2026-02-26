@@ -6,6 +6,7 @@ from src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUT
 from src.core.state import rerun
 from src.ui.engine import charger_css
 from src.ui.fragments import auto_refresh, cached_fragment, ui_fragment
+from src.ui.tokens import Couleur
 
 from .utils import date, get_current_user, go, set_current_user, st, timedelta
 
@@ -104,7 +105,7 @@ def afficher_weekly_chart(summaries: list, objectif: int):
     fig = go.Figure()
 
     # Barres pour les pas
-    colors = ["#4CAF50" if p >= objectif else "#FFC107" for p in pas_values]
+    colors = [Couleur.SUCCESS if p >= objectif else Couleur.WARNING for p in pas_values]
     fig.add_trace(go.Bar(x=dates, y=pas_values, name="Pas", marker_color=colors))
 
     # Ligne objectif

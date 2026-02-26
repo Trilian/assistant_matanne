@@ -7,6 +7,7 @@ En cas d'échec, l'exception est propagée (pas de wrapper Result).
 
 from __future__ import annotations
 
+import atexit
 import logging
 import random
 import threading
@@ -107,7 +108,17 @@ def _get_timeout_executor() -> ThreadPoolExecutor:
                 _TIMEOUT_EXECUTOR = ThreadPoolExecutor(
                     max_workers=4, thread_name_prefix="timeout-policy"
                 )
+                atexit.register(_shutdown_timeout_executor)
     return _TIMEOUT_EXECUTOR
+
+
+def _shutdown_timeout_executor() -> None:
+    """Cleanup propre du ThreadPoolExecutor à la sortie du processus."""
+    global _TIMEOUT_EXECUTOR
+    if _TIMEOUT_EXECUTOR is not None:
+        logger.debug("[Resilience] Shutdown timeout executor")
+        _TIMEOUT_EXECUTOR.shutdown(wait=False)
+        _TIMEOUT_EXECUTOR = None
 
 
 @dataclass

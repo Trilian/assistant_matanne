@@ -10,14 +10,16 @@ Activites adaptees, achats suggeres, conseils developpement:
 
 import logging
 from datetime import date, timedelta
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import streamlit as st
 
-from src.core.ai import ClientIA
 from src.core.models import AchatFamille, Jalon, ProfilEnfant
-from src.services.core.base import BaseAIService
 from src.services.famille.achats import obtenir_service_achats_famille
+
+if TYPE_CHECKING:
+    from src.core.ai import ClientIA
+    from src.services.core.base import BaseAIService
 
 logger = logging.getLogger(__name__)
 

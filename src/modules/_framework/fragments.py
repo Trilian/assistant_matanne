@@ -176,23 +176,38 @@ def lazy_fragment(
 def with_loading_state(
     loading_message: str = "Chargement...",
     show_spinner: bool = True,
+    skeleton: bool = False,
 ) -> Callable[[F], F]:
     """Wrapper qui affiche un état de chargement pendant l'exécution.
 
     Args:
         loading_message: Message affiché pendant le chargement
         show_spinner: Si True, utilise st.spinner (bloquant visuel)
+        skeleton: Si True, affiche un skeleton shimmer au lieu du spinner/texte
 
     Usage:
         @with_loading_state("Chargement des données...")
         def charger_donnees_lourdes():
             return service.get_big_data()
+
+        @with_loading_state("Recettes", skeleton=True)
+        def charger_recettes():
+            return service.get_recettes()
     """
 
     def decorator(func: F) -> F:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            if show_spinner:
+            if skeleton:
+                from src.ui.components.skeleton import skeleton_pendant_chargement
+
+                placeholder = skeleton_pendant_chargement(loading_message)
+                try:
+                    result = func(*args, **kwargs)
+                    return result
+                finally:
+                    placeholder.empty()
+            elif show_spinner:
                 with st.spinner(loading_message):
                     return func(*args, **kwargs)
             else:

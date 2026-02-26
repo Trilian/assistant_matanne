@@ -44,6 +44,34 @@ def base_url():
     return "http://localhost:8501"
 
 
+@pytest.fixture(scope="session")
+def _playwright_browser():
+    """Lance une instance de navigateur Playwright pour la session de tests."""
+    if not HAS_PLAYWRIGHT:
+        pytest.skip("Playwright non installé")
+
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(headless=True)
+        yield browser
+        browser.close()
+
+
+@pytest.fixture
+def page(_playwright_browser):
+    """Fournit une page Playwright fraîche pour chaque test.
+
+    La page est fermée automatiquement à la fin du test.
+    """
+    context = _playwright_browser.new_context(
+        viewport={"width": 1280, "height": 720},
+        ignore_https_errors=True,
+    )
+    _page = context.new_page()
+    yield _page
+    _page.close()
+    context.close()
+
+
 def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
     """Skip les tests visuels si Playwright n'est pas installé."""
     if not HAS_PLAYWRIGHT:

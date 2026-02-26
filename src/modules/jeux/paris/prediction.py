@@ -9,6 +9,7 @@ from src.core.state import rerun
 from src.services.jeux import predire_over_under, predire_resultat_match
 from src.ui.fragments import cached_fragment, ui_fragment
 from src.ui.keys import KeyNamespace
+from src.ui.tokens import Couleur
 
 from .analyseur import generer_analyse_complete
 from .crud import enregistrer_pari
@@ -31,7 +32,7 @@ def _build_proba_chart(
             go.Bar(
                 x=["🏠 Dom", "⚖️ Nul", "✈️ Ext"],
                 y=[dom, nul, ext],
-                marker_color=["#4CAF50", "#FFC107", "#2196F3"],
+                marker_color=[Couleur.SUCCESS, Couleur.WARNING, Couleur.INFO],
                 text=[f"{v:.0f}%" for v in [dom, nul, ext]],
                 textposition="outside",
             )
@@ -181,7 +182,7 @@ def afficher_prediction_match(match: dict):
                             probas.get("nul", 33),
                             probas.get("exterieur", 33),
                         ],
-                        marker_color=["#4CAF50", "#FFC107", "#2196F3"],
+                        marker_color=[Couleur.SUCCESS, Couleur.WARNING, Couleur.INFO],
                         text=[
                             f"{v:.0f}%"
                             for v in [

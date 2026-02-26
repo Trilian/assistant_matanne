@@ -5,7 +5,7 @@ Module Sorties Weekend - Composants UI
 from src.core.session_keys import SK
 from src.core.state import rerun
 from src.services.famille.weekend import obtenir_service_weekend
-from src.services.famille.weekend_ai import WeekendAIService
+from src.services.famille.weekend_ai import obtenir_weekend_ai_service
 from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
 
@@ -108,7 +108,7 @@ def afficher_suggestions():
 
     if st.button("🤖 Generer des idees", type="primary"):
         try:
-            service = WeekendAIService()
+            service = obtenir_weekend_ai_service()
             st.write_stream(
                 service.stream_suggestions(
                     meteo=meteo, age_enfant_mois=age_jules, budget=budget, region=region

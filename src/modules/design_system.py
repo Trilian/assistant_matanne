@@ -17,7 +17,6 @@ import streamlit as st
 
 from src.core.monitoring import profiler_rerun
 from src.modules._framework import BaseModule, module_app
-from src.ui.docs.component_explorer import afficher_component_explorer
 from src.ui.keys import KeyNamespace
 from src.ui.registry import ComponentMeta, obtenir_catalogue, rechercher_composants
 from src.ui.state.url import tabs_with_url
@@ -68,20 +67,20 @@ def _afficher_palette() -> None:
                     "white"
                     if valeur
                     not in (
-                        "#ffffff",
-                        "#f8f9fa",
-                        "#f0f0f0",
-                        "#e7f3ff",
-                        "#d4edda",
-                        "#fff3cd",
-                        "#f8d7da",
+                        Couleur.BG_SURFACE,
+                        Couleur.BG_SUBTLE,
+                        Couleur.BG_HOVER,
+                        Couleur.BG_INFO,
+                        Couleur.BG_SUCCESS,
+                        Couleur.BG_WARNING,
+                        Couleur.BG_DANGER,
                     )
-                    else "#333"
+                    else Couleur.TEXT_PRIMARY
                 )
                 st.markdown(
                     f'<div style="background:{valeur};color:{text_color};'
                     f"padding:1rem;border-radius:8px;text-align:center;"
-                    f'border:1px solid #ddd;margin-bottom:0.5rem;">'
+                    f'border:1px solid {Couleur.BORDER_LIGHT};margin-bottom:0.5rem;">'
                     f"<strong>{nom}</strong><br>"
                     f"<small>{valeur}</small></div>",
                     unsafe_allow_html=True,
@@ -99,7 +98,7 @@ def _afficher_tokens() -> None:
         for token in Espacement:
             st.markdown(
                 f'<div style="display:flex;align-items:center;margin:0.25rem 0;">'
-                f'<div style="background:#4CAF50;height:12px;width:calc({token.value} * 10);'
+                f'<div style="background:{Couleur.SUCCESS};height:12px;width:calc({token.value} * 10);'
                 f'border-radius:2px;margin-right:0.5rem;"></div>'
                 f"<code>{token.name}: {token.value}</code></div>",
                 unsafe_allow_html=True,
@@ -110,8 +109,8 @@ def _afficher_tokens() -> None:
         for token in Rayon:
             st.markdown(
                 f'<div style="display:flex;align-items:center;margin:0.3rem 0;">'
-                f'<div style="background:#e0e0e0;width:40px;height:40px;'
-                f'border-radius:{token.value};margin-right:0.5rem;border:2px solid #999;"></div>'
+                f'<div style="background:{Couleur.BORDER_LIGHT};width:40px;height:40px;'
+                f'border-radius:{token.value};margin-right:0.5rem;border:2px solid {Couleur.TEXT_MUTED};"></div>'
                 f"<code>{token.name}: {token.value}</code></div>",
                 unsafe_allow_html=True,
             )
@@ -121,7 +120,7 @@ def _afficher_tokens() -> None:
         for token in list(Typographie)[:8]:
             st.markdown(
                 f'<div style="font-size:{token.value};margin:0.2rem 0;">'
-                f'{token.name} <small style="color:#999;">({token.value})</small></div>',
+                f'{token.name} <small style="color:{Couleur.TEXT_MUTED};">({token.value})</small></div>',
                 unsafe_allow_html=True,
             )
 
@@ -190,18 +189,18 @@ def _afficher_catalogue() -> None:
 def _afficher_composant_card(meta: ComponentMeta) -> None:
     """Affiche la carte d'un composant."""
     tags_html = " ".join(
-        f'<span style="background:#e7f3ff;padding:2px 8px;border-radius:10px;'
+        f'<span style="background:{Couleur.BG_INFO};padding:2px 8px;border-radius:10px;'
         f'font-size:0.75rem;margin-right:4px;">{tag}</span>'
         for tag in meta.tags
     )
 
     st.markdown(
-        f'<div style="border-left:3px solid #4CAF50;padding:0.75rem;'
-        f'margin:0.5rem 0;background:#f8f9fa;border-radius:0 8px 8px 0;">'
+        f'<div style="border-left:3px solid {Couleur.SUCCESS};padding:0.75rem;'
+        f'margin:0.5rem 0;background:{Couleur.BG_SUBTLE};border-radius:0 8px 8px 0;">'
         f"<strong><code>{meta.nom}</code></strong>"
-        f'<span style="color:#999;font-size:0.85rem;margin-left:0.5rem;">'
+        f'<span style="color:{Couleur.TEXT_MUTED};font-size:0.85rem;margin-left:0.5rem;">'
         f"{meta.signature}</span><br>"
-        f'<span style="color:#666;">{meta.description[:120] if meta.description else "—"}</span>'
+        f'<span style="color:{Couleur.TEXT_SECONDARY};">{meta.description[:120] if meta.description else "—"}</span>'
         f"{' ' + tags_html if tags_html else ''}"
         f"</div>",
         unsafe_allow_html=True,
@@ -231,7 +230,6 @@ class DesignSystemModule(BaseModule[None]):
                 "🎨 Palette": _afficher_palette,
                 "📏 Tokens": _afficher_tokens,
                 "🧩 Composants": _afficher_catalogue,
-                "🎮 Playground": afficher_component_explorer,
             }
         )
 

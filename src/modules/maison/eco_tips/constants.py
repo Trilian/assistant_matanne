@@ -2,6 +2,8 @@
 Constantes et données statiques pour le module Éco-Tips.
 """
 
+from src.ui.tokens import Couleur
+
 TYPE_LABELS = {
     "lavable": "🧽 Lavable/Réutilisable",
     "energie": "⚡ Énergie",
@@ -184,7 +186,7 @@ ECO_TIPS_DATA = {
 }
 
 IMPACT_COLORS = {
-    "haute": "#2e7d32",
-    "moyenne": "#e65100",
-    "basse": "#616161",
+    "haute": Couleur.SCALE_GOOD,
+    "moyenne": Couleur.SCALE_BAD,
+    "basse": Couleur.GREY_600,
 }

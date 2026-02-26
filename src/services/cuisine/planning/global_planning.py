@@ -25,6 +25,7 @@ from src.core.caching import obtenir_cache
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import EvenementPlanning
 from src.services.core.base import BaseAIService, BaseService, PlanningAIMixin
+from src.services.core.event_bus_mixin import emettre_evenement_simple
 from src.services.core.registry import service_factory
 
 from .analysis import PlanningAnalysisMixin
@@ -277,6 +278,12 @@ class ServicePlanningUnifie(
             self._invalider_cache_semaine(date_debut.date())
 
             logger.info(f"✅ Événement créé: {titre}")
+
+            emettre_evenement_simple(
+                "planning.modifie",
+                {"planning_id": event.id, "semaine": "", "action": "event_cree"},
+                source="global_planning",
+            )
             return event
         except Exception as e:
             logger.error(f"❌ Erreur création événement: {e}")

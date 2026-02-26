@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
 from src.api.pagination import appliquer_cursor_filter, construire_reponse_cursor, decoder_cursor
+from src.api.schemas.errors import REPONSES_CRUD_LECTURE, REPONSES_LISTE
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/calendriers", tags=["Calendriers"])
@@ -23,7 +24,7 @@ router = APIRouter(prefix="/api/v1/calendriers", tags=["Calendriers"])
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("")
+@router.get("", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_calendriers(
     provider: str | None = Query(
@@ -65,7 +66,7 @@ async def lister_calendriers(
     return await executer_async(_query)
 
 
-@router.get("/{calendrier_id}")
+@router.get("/{calendrier_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_calendrier(
     calendrier_id: int,
@@ -105,7 +106,7 @@ async def obtenir_calendrier(
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/evenements")
+@router.get("/evenements", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_evenements(
     page: int = Query(1, ge=1),
@@ -176,7 +177,7 @@ async def lister_evenements(
     return await executer_async(_query)
 
 
-@router.get("/evenements/{evenement_id}")
+@router.get("/evenements/{evenement_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_evenement(
     evenement_id: int,
@@ -214,7 +215,7 @@ async def obtenir_evenement(
     return await executer_async(_query)
 
 
-@router.get("/evenements/aujourd-hui")
+@router.get("/evenements/aujourd-hui", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def evenements_aujourdhui(
     user: dict[str, Any] = Depends(require_auth),
@@ -258,7 +259,7 @@ async def evenements_aujourdhui(
     return await executer_async(_query)
 
 
-@router.get("/evenements/semaine")
+@router.get("/evenements/semaine", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def evenements_semaine(
     date_debut: datetime | None = Query(None, description="Date de début (défaut: lundi courant)"),

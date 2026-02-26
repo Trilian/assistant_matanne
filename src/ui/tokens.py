@@ -82,6 +82,72 @@ class Couleur(StrEnum):
     DELTA_POSITIVE = "#4CAF50"
     DELTA_NEGATIVE = "#FF5722"
 
+    # ── Couleurs domaine (calendrier, énergie, etc.) ──────
+    ORANGE = "#FF9800"
+    PURPLE = "#9C27B0"
+    BROWN = "#795548"
+    RED_500 = "#F44336"
+    YELLOW_ENERGY = "#FFD600"
+    ORANGE_ENERGY = "#FF6D00"
+    YELLOW_ALT = "#FFEB3B"
+    BLUE_700 = "#1976D2"
+    RED_700 = "#D32F2F"
+    AMBER_800 = "#F57F17"
+    FLAT_BLUE = "#3498db"
+    FLAT_RED = "#e74c3c"
+    FLAT_ORANGE = "#f39c12"
+    FLAT_GREEN = "#27ae60"
+    LOTO_NEUTRAL = "#95a5a6"
+
+    # ── Échelle de sévérité / état ────────────────────────
+    SCALE_CRITICAL = "#c62828"
+    SCALE_BAD = "#e65100"
+    SCALE_OK = "#f9a825"
+    SCALE_GOOD = "#2e7d32"
+    SCALE_EXCELLENT = "#1b5e20"
+
+    # ── Arrière-plans domaine ─────────────────────────────
+    BG_LIGHT_GREEN = "#e8f5e9"
+    BG_LIGHT_GREEN_ALT = "#c8e6c9"
+    BG_LIGHT_ORANGE = "#fff3e0"
+    BG_LIGHT_RED = "#ffe0e0"
+    BG_LIGHT_RED_ALT = "#FFEBEE"
+    BG_LIGHT_PINK = "#FCE4EC"
+    BG_GREY_100 = "#f5f5f5"
+    BG_YELLOW_LIGHT = "#FFF9C4"
+    BG_LIGHT_BLUE = "#E3F2FD"
+
+    # ── Gris utilitaires ──────────────────────────────────
+    GREY_600 = "#616161"
+    GREY_500 = "#757575"
+    TEXT_SLATE_600 = "#4a5568"
+    TEXT_SLATE_500 = "#718096"
+    TEXT_DARK_SLATE = "#2d3748"
+
+    # ── Palette calendrier (Material 300) ─────────────────
+    CAL_REPAS_SOIR = "#7986CB"
+    CAL_GOUTER = "#F48FB1"
+    CAL_BATCH = "#81C784"
+    CAL_COURSES = "#4DD0E1"
+    CAL_ACTIVITE = "#BA68C8"
+    CAL_RDV_MEDICAL = "#E57373"
+    CAL_RDV_AUTRE = "#90A4AE"
+    CAL_ROUTINE = "#A1887F"
+    CAL_MENAGE = "#FFCC80"
+    CAL_JARDIN = "#A5D6A7"
+    CAL_ENTRETIEN = "#BCAAA4"
+    CAL_EVENEMENT = "#64B5F6"
+
+    # ── Palette collaboration / avatars ───────────────────
+    COLLAB_VERT = "#48bb78"
+    COLLAB_ORANGE = "#ed8936"
+    COLLAB_ROUGE = "#f56565"
+    COLLAB_TEAL = "#38b2ac"
+    COLLAB_PURPLE = "#9f7aea"
+    COLLAB_ROUGE_CLAIR = "#fc8181"
+    COLLAB_VERT_CLAIR = "#68d391"
+    COLLAB_BORDER = "#e2e8f0"
+
     # ── Gradients domaine-spécifiques ─────────────────────
     LOTO_CHANCE_START = "#f093fb"
     LOTO_CHANCE_END = "#f5576c"

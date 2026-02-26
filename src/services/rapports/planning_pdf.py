@@ -26,6 +26,7 @@ from src.core.models import (
     Repas,
 )
 from src.services.rapports.types import RapportPlanning
+from src.ui.tokens import Couleur
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +146,7 @@ class PlanningReportMixin:
             "PlanningTitle",
             parent=styles["Heading1"],
             fontSize=22,
-            textColor=colors.HexColor("#4CAF50"),
+            textColor=colors.HexColor(Couleur.SUCCESS),
             spaceAfter=20,
             alignment=TA_CENTER,
         )
@@ -153,7 +154,7 @@ class PlanningReportMixin:
             "PlanningSubtitle",
             parent=styles["Normal"],
             fontSize=12,
-            textColor=colors.HexColor("#666666"),
+            textColor=colors.HexColor(Couleur.TEXT_SECONDARY),
             spaceAfter=20,
             alignment=TA_CENTER,
         )
@@ -161,7 +162,7 @@ class PlanningReportMixin:
             "DayHeader",
             parent=styles["Heading2"],
             fontSize=14,
-            textColor=colors.HexColor("#1976D2"),
+            textColor=colors.HexColor(Couleur.BLUE_700),
             spaceAfter=8,
             spaceBefore=15,
         )
@@ -187,7 +188,7 @@ class PlanningReportMixin:
         stats_table.setStyle(
             TableStyle(
                 [
-                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#4CAF50")),
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.SUCCESS)),
                     ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                     ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                     ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
@@ -198,7 +199,7 @@ class PlanningReportMixin:
                         "ROWBACKGROUNDS",
                         (0, 1),
                         (-1, -1),
-                        [colors.white, colors.HexColor("#E8F5E9")],
+                        [colors.white, colors.HexColor(Couleur.BG_LIGHT_GREEN)],
                     ),
                 ]
             )
@@ -260,7 +261,7 @@ class PlanningReportMixin:
             day_table.setStyle(
                 TableStyle(
                     [
-                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2196F3")),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.INFO)),
                         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                         ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                         ("ALIGN", (2, 0), (3, -1), "CENTER"),
@@ -272,7 +273,7 @@ class PlanningReportMixin:
                             "ROWBACKGROUNDS",
                             (0, 1),
                             (-1, -1),
-                            [colors.white, colors.HexColor("#E3F2FD")],
+                            [colors.white, colors.HexColor(Couleur.BG_LIGHT_BLUE)],
                         ),
                     ]
                 )
@@ -300,7 +301,7 @@ class PlanningReportMixin:
             courses_table.setStyle(
                 TableStyle(
                     [
-                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#FF9800")),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.ORANGE)),
                         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                         ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                         ("ALIGN", (1, 0), (-1, -1), "CENTER"),
@@ -312,7 +313,7 @@ class PlanningReportMixin:
                             "ROWBACKGROUNDS",
                             (0, 1),
                             (-1, -1),
-                            [colors.white, colors.HexColor("#FFF3E0")],
+                            [colors.white, colors.HexColor(Couleur.BG_LIGHT_ORANGE)],
                         ),
                     ]
                 )

@@ -17,6 +17,13 @@ from src.api.schemas import (
     RecetteResponse,
     ReponsePaginee,
 )
+from src.api.schemas.errors import (
+    REPONSES_CRUD_CREATION,
+    REPONSES_CRUD_ECRITURE,
+    REPONSES_CRUD_LECTURE,
+    REPONSES_CRUD_SUPPRESSION,
+    REPONSES_LISTE,
+)
 from src.api.utils import (
     construire_reponse_paginee,
     executer_async,
@@ -27,7 +34,7 @@ from src.api.utils import (
 router = APIRouter(prefix="/api/v1/recettes", tags=["Recettes"])
 
 
-@router.get("", response_model=ReponsePaginee[RecetteResponse])
+@router.get("", response_model=ReponsePaginee[RecetteResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_recettes(
     page: int = Query(1, ge=1, description="Numéro de page (1-indexé)"),
@@ -91,7 +98,7 @@ async def lister_recettes(
     return await executer_async(_query)
 
 
-@router.get("/{recette_id}", response_model=RecetteResponse)
+@router.get("/{recette_id}", response_model=RecetteResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_recette(recette_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
@@ -137,7 +144,7 @@ async def obtenir_recette(recette_id: int, user: dict[str, Any] = Depends(requir
     return await executer_async(_query)
 
 
-@router.post("", response_model=RecetteResponse)
+@router.post("", response_model=RecetteResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def creer_recette(recette: RecetteCreate, user: dict[str, Any] = Depends(require_auth)):
     """
@@ -195,7 +202,7 @@ async def creer_recette(recette: RecetteCreate, user: dict[str, Any] = Depends(r
     return await executer_async(_create)
 
 
-@router.put("/{recette_id}", response_model=RecetteResponse)
+@router.put("/{recette_id}", response_model=RecetteResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_recette(
     recette_id: int, recette: RecetteCreate, user: dict[str, Any] = Depends(require_auth)
@@ -253,7 +260,7 @@ async def modifier_recette(
     return await executer_async(_update)
 
 
-@router.patch("/{recette_id}", response_model=RecetteResponse)
+@router.patch("/{recette_id}", response_model=RecetteResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_partiellement_recette(
     recette_id: int, patch: RecettePatch, user: dict[str, Any] = Depends(require_auth)
@@ -315,7 +322,7 @@ async def modifier_partiellement_recette(
     return await executer_async(_patch)
 
 
-@router.delete("/{recette_id}", response_model=MessageResponse)
+@router.delete("/{recette_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
 @gerer_exception_api
 async def supprimer_recette(recette_id: int, user: dict[str, Any] = Depends(require_auth)):
     """Supprime une recette.

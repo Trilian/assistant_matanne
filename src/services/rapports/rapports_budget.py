@@ -21,6 +21,7 @@ from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import ArticleInventaire
 from src.core.monitoring import chronometre
 from src.services.rapports.types import RapportBudget
+from src.ui.tokens import Couleur
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +120,7 @@ class BudgetReportMixin:
             "CustomTitle",
             parent=styles["Heading1"],
             fontSize=24,
-            textColor=colors.HexColor("#D32F2F"),
+            textColor=colors.HexColor(Couleur.RED_700),
             spaceAfter=30,
             alignment=TA_CENTER,
         )
@@ -127,7 +128,7 @@ class BudgetReportMixin:
             "CustomHeading",
             parent=styles["Heading2"],
             fontSize=14,
-            textColor=colors.HexColor("#1976D2"),
+            textColor=colors.HexColor(Couleur.BLUE_700),
             spaceAfter=12,
             spaceBefore=12,
         )
@@ -157,7 +158,7 @@ class BudgetReportMixin:
         summary_table.setStyle(
             TableStyle(
                 [
-                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#D32F2F")),
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.RED_700)),
                     ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                     ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                     ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
@@ -186,7 +187,7 @@ class BudgetReportMixin:
             cat_table.setStyle(
                 TableStyle(
                     [
-                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1976D2")),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.BLUE_700)),
                         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
@@ -220,7 +221,7 @@ class BudgetReportMixin:
             costly_table.setStyle(
                 TableStyle(
                     [
-                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#F57F17")),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.AMBER_800)),
                         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                         ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
@@ -231,7 +232,7 @@ class BudgetReportMixin:
                             "ROWBACKGROUNDS",
                             (0, 1),
                             (-1, -1),
-                            [colors.white, colors.HexColor("#FFF3E0")],
+                            [colors.white, colors.HexColor(Couleur.BG_LIGHT_ORANGE)],
                         ),
                     ]
                 )

@@ -20,6 +20,8 @@ from datetime import date
 
 import streamlit as st
 
+# Date utils
+from src.core.date_utils import obtenir_debut_semaine as get_debut_semaine
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
 
@@ -28,6 +30,8 @@ from src.ui.integrations import afficher_config_google_calendar
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 
+# Import des fonctions pour exposer l'API publique
+from .aggregation import construire_semaine_calendrier
 from .analytics import (
     afficher_actions_prioritaires,
     afficher_formulaire_optimisation_ia,
@@ -38,22 +42,24 @@ from .analytics import (
     afficher_reequilibrage,
     afficher_suggestions,
 )
-from .components import (
-    afficher_actions_rapides,
-    afficher_cellule_jour,
+from .components_formulaire import (
     afficher_formulaire_ajout_event,
-    afficher_jour_calendrier,
     afficher_legende,
-    afficher_modal_impression,
     afficher_navigation_semaine,
+)
+from .components_jour import (
+    afficher_cellule_jour,
+    afficher_jour_calendrier,
+)
+from .components_semaine import (
+    afficher_actions_rapides,
+    afficher_modal_impression,
     afficher_stats_semaine,
     afficher_vue_semaine_grille,
     afficher_vue_semaine_liste,
 )
-
-# Import des fonctions pour exposer l'API publique
 from .data import charger_donnees_semaine
-from .utils import construire_semaine_calendrier, get_debut_semaine
+from .types import SemaineCalendrier  # noqa: F401
 
 # Session keys scopées
 _keys = KeyNamespace("calendrier")

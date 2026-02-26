@@ -28,6 +28,7 @@ from src.services.rapports.planning_pdf import PlanningReportMixin
 from src.services.rapports.rapports_budget import BudgetReportMixin
 from src.services.rapports.rapports_gaspillage import GaspillageReportMixin
 from src.services.rapports.types import RapportStocks
+from src.ui.tokens import Couleur
 
 logger = logging.getLogger(__name__)
 
@@ -175,7 +176,7 @@ class ServiceRapportsPDF(
             "CustomTitle",
             parent=styles["Heading1"],
             fontSize=24,
-            textColor=colors.HexColor("#2E7D32"),
+            textColor=colors.HexColor(Couleur.SCALE_GOOD),
             spaceAfter=30,
             alignment=TA_CENTER,
         )
@@ -183,7 +184,7 @@ class ServiceRapportsPDF(
             "CustomHeading",
             parent=styles["Heading2"],
             fontSize=14,
-            textColor=colors.HexColor("#1976D2"),
+            textColor=colors.HexColor(Couleur.BLUE_700),
             spaceAfter=12,
             spaceBefore=12,
         )
@@ -214,7 +215,7 @@ class ServiceRapportsPDF(
         summary_table.setStyle(
             TableStyle(
                 [
-                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2E7D32")),
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.SCALE_GOOD)),
                     ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
                     ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                     ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
@@ -250,7 +251,7 @@ class ServiceRapportsPDF(
             stock_table.setStyle(
                 TableStyle(
                     [
-                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#FF9800")),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.ORANGE)),
                         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                         ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
@@ -261,7 +262,7 @@ class ServiceRapportsPDF(
                             "ROWBACKGROUNDS",
                             (0, 1),
                             (-1, -1),
-                            [colors.white, colors.HexColor("#FFF3E0")],
+                            [colors.white, colors.HexColor(Couleur.BG_LIGHT_ORANGE)],
                         ),
                     ]
                 )
@@ -289,7 +290,7 @@ class ServiceRapportsPDF(
             perimes_table.setStyle(
                 TableStyle(
                     [
-                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#D32F2F")),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.RED_700)),
                         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                         ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
@@ -300,7 +301,7 @@ class ServiceRapportsPDF(
                             "ROWBACKGROUNDS",
                             (0, 1),
                             (-1, -1),
-                            [colors.white, colors.HexColor("#FFEBEE")],
+                            [colors.white, colors.HexColor(Couleur.BG_LIGHT_RED_ALT)],
                         ),
                     ]
                 )
@@ -322,7 +323,7 @@ class ServiceRapportsPDF(
             cat_table.setStyle(
                 TableStyle(
                     [
-                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1976D2")),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.BLUE_700)),
                         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),

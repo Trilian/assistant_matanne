@@ -1,6 +1,96 @@
 # 🗺️ ROADMAP - Assistant Matanne
 
-> Dernière mise à jour: 26 février 2026
+> Dernière mise à jour: 27 février 2026
+
+---
+
+## ✅ Terminé (Session 27 février 2026)
+
+### 🔧 SPRINT 6 AUDIT — Résolution complète des 7 findings d'audit
+
+Session d'implémentation des 7 recommandations identifiées dans le rapport d'audit complet. Résolution de la fragmentation, complexité ML, adoption event bus, services >500 LOC, et création de 3 services transversaux manquants.
+
+#### Finding 1 — Fragmentation planning/ (16 fichiers, duplication facade)
+
+| Item                               | Status | Notes                                                              |
+| ---------------------------------- | ------ | ------------------------------------------------------------------ |
+| `components.py` deprecation facade | ✅     | `warnings.warn()` + re-export depuis `ServiceCalendrierPlanning`   |
+| `utils.py` deprecation facade      | ✅     | `warnings.warn()` + re-export depuis `ServiceCalendrierPlanning`   |
+| `data.py` thin facade conservé     | ✅     | Facade mince vers `ServiceCalendrierPlanning` (pas de duplication) |
+
+#### Finding 2 — Complexité ML suggestions/ (ml_predictions.py 824 LOC)
+
+| Item                         | Status | Notes                                  |
+| ---------------------------- | ------ | -------------------------------------- |
+| `ml_consommation.py` extrait | ✅     | ~180 LOC — Prédictions de consommation |
+| `ml_anomalies.py` extrait    | ✅     | ~200 LOC — Détection d'anomalies       |
+| `ml_satisfaction.py` extrait | ✅     | ~180 LOC — Score de satisfaction       |
+| `ml_schemas.py` extrait      | ✅     | ~80 LOC — Modèles Pydantic partagés    |
+| `ml_predictions.py` → facade | ✅     | Re-exports transparents, 824→~30 LOC   |
+
+#### Finding 3 — Scoring dual (scoring.py ↔ service.py)
+
+| Item                                 | Status | Notes                                                                                                                  |
+| ------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `service.py._calculer_score_recette` | ✅     | Délègue désormais à `scoring.py:calculate_recipe_score()` pour le score de base, puis ajoute les bonus contextuels ORM |
+
+#### Finding 4 — Event bus ~50% adoption
+
+| Item                                       | Status | Notes                                                        |
+| ------------------------------------------ | ------ | ------------------------------------------------------------ |
+| `meubles_crud_service.py` + EventBusMixin  | ✅     | `_event_source = "meubles"`, émission création/modification  |
+| `eco_tips_crud_service.py` + EventBusMixin | ✅     | `_event_source = "eco_tips"`, émission création/modification |
+
+#### Finding 5 — Services >500 LOC (split en facade + mixins)
+
+| Service              | Avant   | Après           | Fichiers créés                                                       |
+| -------------------- | ------- | --------------- | -------------------------------------------------------------------- |
+| `jardin_service.py`  | 833 LOC | ~120 LOC facade | `jardin_ia_mixin.py` (~300 LOC), `jardin_crud_mixin.py` (~330 LOC)   |
+| `projets_service.py` | 802 LOC | ~140 LOC facade | `projets_ia_mixin.py` (~310 LOC), `projets_crud_mixin.py` (~310 LOC) |
+
+#### Finding 6 — Service audit trail manquant
+
+| Item                         | Status | Notes                                                                                                                                                          |
+| ---------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/services/core/audit.py` | ✅     | 355 LOC — `ServiceAudit` avec wildcard bus subscription, buffer in-memory (deque), persistence DB best-effort, API query avec filtres/pagination, statistiques |
+| `@service_factory("audit")`  | ✅     | `obtenir_service_audit()`, `EntreeAudit` Pydantic model                                                                                                        |
+
+#### Finding 7 — Services transversaux manquants (offline queue + analytics)
+
+| Item                                | Status | Notes                                                                                                                                                          |
+| ----------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/services/core/file_attente.py` | ✅     | ~350 LOC — Queue offline avec retry backoff exponentiel (1s→60s, 5 retries), persistence JSON (`data/.file_attente.json`), callback importlib                  |
+| `src/services/core/analytics.py`    | ✅     | ~340 LOC — Analytics usage avec wildcard bus, Counter-based fast lookups, `suivre_page()/suivre_action()/mesurer_temps()`, `top_pages()/repartition_modules()` |
+
+#### Fichiers créés
+
+| Fichier                                               | LOC  | Description                                    |
+| ----------------------------------------------------- | ---- | ---------------------------------------------- |
+| `src/services/core/audit.py`                          | 355  | Service audit trail transversal                |
+| `src/services/core/file_attente.py`                   | ~350 | Queue offline avec retry backoff               |
+| `src/services/core/analytics.py`                      | ~340 | Analytics usage + métriques comportementales   |
+| `src/services/maison/jardin_ia_mixin.py`              | ~300 | Mixin IA jardin (conseils, diagnostics, météo) |
+| `src/services/maison/jardin_crud_mixin.py`            | ~330 | Mixin CRUD jardin (plantes, arrosage, zones)   |
+| `src/services/maison/projets_ia_mixin.py`             | ~310 | Mixin IA projets (estimation, budget, ROI)     |
+| `src/services/maison/projets_crud_mixin.py`           | ~310 | Mixin CRUD projets (CRUD, tâches, stats)       |
+| `src/services/cuisine/suggestions/ml_consommation.py` | ~180 | Prédictions de consommation                    |
+| `src/services/cuisine/suggestions/ml_anomalies.py`    | ~200 | Détection d'anomalies                          |
+| `src/services/cuisine/suggestions/ml_satisfaction.py` | ~180 | Score de satisfaction                          |
+| `src/services/cuisine/suggestions/ml_schemas.py`      | ~80  | Modèles Pydantic partagés ML                   |
+
+#### Fichiers modifiés
+
+| Fichier                                              | Action         | Description                     |
+| ---------------------------------------------------- | -------------- | ------------------------------- |
+| `src/modules/planning/calendrier/components.py`      | Deprecation    | Facade avec `warnings.warn`     |
+| `src/modules/planning/calendrier/utils.py`           | Deprecation    | Facade avec `warnings.warn`     |
+| `src/modules/planning/calendrier/data.py`            | Facade         | Thin facade vers service        |
+| `src/services/maison/meubles_crud_service.py`        | +EventBusMixin | `_event_source = "meubles"`     |
+| `src/services/maison/eco_tips_crud_service.py`       | +EventBusMixin | `_event_source = "eco_tips"`    |
+| `src/services/cuisine/suggestions/service.py`        | Refactoré      | Scoring délégué à `scoring.py`  |
+| `src/services/cuisine/suggestions/ml_predictions.py` | Refactoré      | 824→~30 LOC, facade re-exports  |
+| `src/services/maison/jardin_service.py`              | Refactoré      | 833→~120 LOC, facade + 2 mixins |
+| `src/services/maison/projets_service.py`             | Refactoré      | 802→~140 LOC, facade + 2 mixins |
 
 ---
 
@@ -70,14 +160,14 @@ Renommage systématique de **45 classes ORM** et **34 `__tablename__`** à trave
 | 6 nouveaux événements typés dans `events.py`                          | ✅     | `ActiviteFamille`, `RoutineModifiee`, `WeekendModifie`, `AchatFamille`, `JournalAlimentaire`, `PlanningModifie` |
 | `REGISTRE_EVENEMENTS` et `__all__` mis à jour                         | ✅     | 14 événements typés (était 8)                                                                                   |
 
-#### Sprint 5D — Consolidation (évalué, différé)
+#### Sprint 5D — Consolidation (évalué, résolu Sprint 6)
 
 | Item                                  | Status       | Notes                                                                     |
 | ------------------------------------- | ------------ | ------------------------------------------------------------------------- |
 | Modèles jardin dispersés (3 fichiers) | 📋 Documenté | `maison.py`, `jardin.py`, `temps_entretien.py` — trop risqué à consolider |
-| 5 fichiers services >500 LOC          | 📋 Documenté | Division identifiée, différée (stabilité prioritaire)                     |
+| 5 fichiers services >500 LOC          | ✅ Sprint 6  | jardin_service + projets_service divisés en facade + mixins               |
 | ~50 couleurs hex hardcodées           | 📋 Documenté | Migration vers tokens `Couleur`/`Sem` planifiée                           |
-| Event bus non adopté (3 services)     | 📋 Documenté | `jardin_service`, `depenses_crud_service`, `projets_service`              |
+| Event bus non adopté (3 services)     | ✅ Sprint 6  | meubles_crud + eco_tips + jardin + projets adoptent EventBusMixin         |
 
 #### Sprint 5E — Réécriture SQL INIT_COMPLET.sql
 

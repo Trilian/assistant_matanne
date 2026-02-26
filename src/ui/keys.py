@@ -84,6 +84,13 @@ class KeyNamespace:
 
         if self._register:
             widget_keys._register(key, self._prefix)
+            # Enregistrer aussi dans le registre centralisé session keys
+            try:
+                from src.core.session_keys import obtenir_registre_session_keys
+
+                obtenir_registre_session_keys().enregistrer_dynamique(self._prefix, name)
+            except ImportError:
+                pass  # Éviter erreur circulaire au bootstrap
 
         return key
 

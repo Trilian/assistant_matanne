@@ -18,12 +18,19 @@ from src.api.schemas import (
     MessageResponse,
     ReponsePaginee,
 )
+from src.api.schemas.errors import (
+    REPONSES_CRUD_CREATION,
+    REPONSES_CRUD_ECRITURE,
+    REPONSES_CRUD_LECTURE,
+    REPONSES_CRUD_SUPPRESSION,
+    REPONSES_LISTE,
+)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/inventaire", tags=["Inventaire"])
 
 
-@router.get("", response_model=ReponsePaginee[InventaireItemResponse])
+@router.get("", response_model=ReponsePaginee[InventaireItemResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_inventaire(
     page: int = Query(1, ge=1, description="Numéro de page (1-indexé)"),
@@ -114,7 +121,7 @@ async def lister_inventaire(
     return await executer_async(_query)
 
 
-@router.post("", response_model=InventaireItemResponse)
+@router.post("", response_model=InventaireItemResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def creer_article_inventaire(
     item: InventaireItemCreate, user: dict[str, Any] = Depends(require_auth)
@@ -192,7 +199,9 @@ async def creer_article_inventaire(
     return await executer_async(_create)
 
 
-@router.get("/barcode/{code}", response_model=InventaireItemResponse)
+@router.get(
+    "/barcode/{code}", response_model=InventaireItemResponse, responses=REPONSES_CRUD_LECTURE
+)
 @gerer_exception_api
 async def obtenir_par_code_barres(code: str, user: dict[str, Any] = Depends(require_auth)):
     """
@@ -244,7 +253,7 @@ async def obtenir_par_code_barres(code: str, user: dict[str, Any] = Depends(requ
     return await executer_async(_query)
 
 
-@router.get("/{item_id}", response_model=InventaireItemResponse)
+@router.get("/{item_id}", response_model=InventaireItemResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_article_inventaire(item_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
@@ -296,7 +305,7 @@ async def obtenir_article_inventaire(item_id: int, user: dict[str, Any] = Depend
     return await executer_async(_query)
 
 
-@router.put("/{item_id}", response_model=InventaireItemResponse)
+@router.put("/{item_id}", response_model=InventaireItemResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_article_inventaire(
     item_id: int, item: InventaireItemUpdate, user: dict[str, Any] = Depends(require_auth)
@@ -380,7 +389,7 @@ async def modifier_article_inventaire(
     return await executer_async(_update)
 
 
-@router.delete("/{item_id}", response_model=MessageResponse)
+@router.delete("/{item_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
 @gerer_exception_api
 async def supprimer_article_inventaire(item_id: int, user: dict[str, Any] = Depends(require_auth)):
     """

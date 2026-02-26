@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from src.core.decorators import avec_session_db
 from src.core.models import Equipe, Match
+from src.services.core.event_bus_mixin import emettre_evenement_simple
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +75,12 @@ class ParisSyncMixin:
             logger.error(f"Erreur commit equipes: {e}")
             db.rollback()
 
+        if count > 0:
+            emettre_evenement_simple(
+                "paris.modifie",
+                {"element_id": 0, "type_element": "equipe", "action": "sync", "count": count},
+                source="paris_sync",
+            )
         return count
 
     @avec_session_db
@@ -144,6 +151,12 @@ class ParisSyncMixin:
         if count > 0:
             db.commit()
 
+            emettre_evenement_simple(
+                "paris.modifie",
+                {"element_id": 0, "type_element": "match", "action": "sync", "count": count},
+                source="paris_sync",
+            )
+
         return count
 
     @avec_session_db
@@ -196,5 +209,16 @@ class ParisSyncMixin:
         if count > 0:
             db.commit()
             logger.info(f"✅ {count} matchs mis à jour avec scores")
+
+            emettre_evenement_simple(
+                "paris.modifie",
+                {
+                    "element_id": 0,
+                    "type_element": "resultat",
+                    "action": "scores_maj",
+                    "count": count,
+                },
+                source="paris_sync",
+            )
 
         return count

@@ -20,6 +20,7 @@ from src.core.date_utils.helpers import obtenir_noms_jours_semaine
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import Planning, Repas
 from src.core.monitoring import chronometre
+from src.services.core.event_bus_mixin import emettre_evenement_simple
 
 from .nutrition import determine_protein_type
 from .types import JourPlanning, ParametresEquilibre
@@ -264,6 +265,12 @@ RULES:
 
             db.commit()
             logger.info(f"✅ Created default planning for {semaine_debut} with 7 days")
+
+            emettre_evenement_simple(
+                "planning.modifie",
+                {"planning_id": planning.id, "semaine": str(semaine_debut), "action": "cree"},
+                source="planning_ia",
+            )
             return planning
 
         # Planning IA réussi
@@ -304,6 +311,12 @@ RULES:
 
         db.commit()
         db.refresh(planning)
+
+        emettre_evenement_simple(
+            "planning.modifie",
+            {"planning_id": planning.id, "semaine": str(semaine_debut), "action": "genere_ia"},
+            source="planning_ia",
+        )
 
         # Invalider cache
         obtenir_cache().invalidate(pattern="planning")

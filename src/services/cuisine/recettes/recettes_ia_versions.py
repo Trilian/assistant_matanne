@@ -26,6 +26,7 @@ from src.core.models import (
     VersionRecette,
 )
 from src.core.monitoring import chronometre
+from src.services.core.event_bus_mixin import emettre_evenement_simple
 
 from .types import (
     VersionBatchCookingGeneree,
@@ -178,6 +179,12 @@ Steps:
 
         logger.info(f"✅ Baby version created for recipe {recette_id}")
         logger.debug("[generer_version_bebe] END: Returning version %s", version.id)
+
+        emettre_evenement_simple(
+            "recette.modifie",
+            {"recette_id": recette_id, "nom": "", "action": "version_bebe_creee"},
+            source="recettes_ia_versions",
+        )
         return version
 
     @avec_session_db
@@ -310,6 +317,12 @@ Difficulty: {recette.difficulte}"""
         db.refresh(version)
 
         logger.info(f"✅ Batch cooking version created for recipe {recette_id}")
+
+        emettre_evenement_simple(
+            "recette.modifie",
+            {"recette_id": recette_id, "nom": "", "action": "version_batch_creee"},
+            source="recettes_ia_versions",
+        )
         return version
 
     @avec_session_db
@@ -507,4 +520,10 @@ Difficulty: {recette.difficulte}"""
         db.refresh(version)
 
         logger.info(f"✅ {robot_type} version created for recipe {recette_id}")
+
+        emettre_evenement_simple(
+            "recette.modifie",
+            {"recette_id": recette_id, "nom": "", "action": f"version_{robot_type}_creee"},
+            source="recettes_ia_versions",
+        )
         return version

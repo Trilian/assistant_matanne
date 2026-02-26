@@ -283,6 +283,14 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
                 }
                 self.create(data)
                 count += 1
+
+        # Émettre événement domaine
+        if count > 0:
+            obtenir_bus().emettre(
+                "courses.modifiees",
+                {"nb_articles": count, "action": "recette_ajoutee", "source": recette_nom},
+                source="courses",
+            )
         return count
 
     @avec_gestion_erreurs(default_return=0)
@@ -482,6 +490,11 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
 
         db.commit()
         logger.info(f"Modele '{nom}' cree avec {len(articles)} articles")
+        obtenir_bus().emettre(
+            "courses.modifiees",
+            {"nb_articles": len(articles), "action": "modele_cree", "source": "modele"},
+            source="courses",
+        )
         return modele.id
 
     # Alias pour compatibilite
@@ -499,6 +512,11 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
         db.delete(modele)
         db.commit()
         logger.info(f"Modele {modele_id} supprime")
+        obtenir_bus().emettre(
+            "courses.modifiees",
+            {"nb_articles": 0, "action": "modele_supprime", "source": "modele"},
+            source="courses",
+        )
         return True
 
     # Alias pour compatibilite

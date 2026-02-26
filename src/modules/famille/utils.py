@@ -97,11 +97,11 @@ def count_milestones_by_category(child_id: int) -> dict:
 def calculer_progression_objectif(objective) -> float:
     """Calcule le % de progression d'un objectif santé.
 
-    Pure logique sans accès DB — reste dans ce module.
+    Délègue au service santé via factory registry.
     """
-    from src.services.famille.sante import ServiceSante
+    from src.services.famille.sante import obtenir_service_sante
 
-    return ServiceSante.calculer_progression_objectif(objective)
+    return obtenir_service_sante().calculer_progression_objectif(objective)
 
 
 def get_objectives_actifs() -> list:

@@ -16,13 +16,11 @@ _keys = KeyNamespace("barcode")
 # ═══════════════════════════════════════════════════════════
 
 
-def get_barcode_service() -> BarcodeService:
-    """Get ou creer service barcode"""
-    from src.modules.utilitaires.barcode import BarcodeService, st
+def get_barcode_service():
+    """Get ou creer service barcode (via registre singleton)."""
+    from src.services.integrations import get_barcode_service as _factory
 
-    if "barcode_service" not in st.session_state:
-        st.session_state.barcode_service = BarcodeService()
-    return st.session_state.barcode_service
+    return _factory()
 
 
 # ═══════════════════════════════════════════════════════════

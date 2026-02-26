@@ -192,6 +192,18 @@ def injecter_animations() -> None:
     CSSManager.register("animations", _ANIMATION_CSS)
 
 
+def injecter_animations_differees() -> None:
+    """Enregistre les animations dans la file CSS différée (non-critique).
+
+    Appelé par ``initialiser_app()`` pour charger les animations après
+    le premier paint critique. Le CSS est injecté via
+    ``CSSManager.inject_deferred()``.
+    """
+    from src.ui.engine import CSSManager
+
+    CSSManager.register_deferred("animations", _ANIMATION_CSS)
+
+
 def animer(
     html: str,
     animation: Animation,
@@ -219,5 +231,6 @@ def animer(
 __all__ = [
     "Animation",
     "injecter_animations",
+    "injecter_animations_differees",
     "animer",
 ]

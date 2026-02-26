@@ -1,11 +1,15 @@
 """
 Client IA Unifié - Mistral AI
+
+Fonctionnalités core: appels API, cache, rate limiting, retry.
+Vision/OCR et streaming sont délégués aux mixins dédiés.
 """
 
 __all__ = ["ClientIA", "obtenir_client_ia"]
 
 import asyncio
 import logging
+import threading
 from typing import Any
 
 import httpx
@@ -14,11 +18,13 @@ from ..config import obtenir_parametres
 from ..exceptions import ErreurLimiteDebit, ErreurServiceIA
 from .cache import CacheIA
 from .rate_limit import RateLimitIA
+from .streaming import StreamingMixin
+from .vision import VisionMixin
 
 logger = logging.getLogger(__name__)
 
 
-class ClientIA:
+class ClientIA(VisionMixin, StreamingMixin):
     """
     Client IA unifié pour Mistral
 
@@ -27,6 +33,8 @@ class ClientIA:
     - Cache intelligent
     - Rate limiting
     - Gestion d'erreurs robuste
+    - Vision/OCR (via VisionMixin)
+    - Streaming SSE (via StreamingMixin)
     """
 
     def __init__(self):
@@ -233,222 +241,6 @@ class ClientIA:
             return contenu
 
     # ═══════════════════════════════════════════════════════════
-    # APPEL VISION (OCR)
-    # ═══════════════════════════════════════════════════════════
-
-    async def chat_with_vision(
-        self,
-        prompt: str,
-        image_base64: str,
-        max_tokens: int = 1000,
-        temperature: float = 0.3,
-    ) -> str:
-        """
-        Appel API avec image (Vision) pour OCR.
-
-        Args:
-            prompt: Instructions pour l'analyse
-            image_base64: Image encodée en base64
-            max_tokens: Tokens max pour la réponse
-            temperature: Température (recommandé: 0.3 pour OCR)
-
-        Returns:
-            Texte extrait de l'image
-        """
-        # Charger la config
-        self._ensure_config_loaded()
-
-        if not self.cle_api:
-            raise ErreurServiceIA(
-                "Clé API Mistral non configurée",
-                message_utilisateur="La clé API Mistral n'est pas configurée.",
-            )
-
-        # Modèle vision (pixtral)
-        vision_model = "pixtral-12b-2409"
-
-        messages = [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": prompt},
-                    {
-                        "type": "image_url",
-                        "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"},
-                    },
-                ],
-            }
-        ]
-
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.post(
-                f"{self.url_base}/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {self.cle_api}",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "model": vision_model,
-                    "messages": messages,
-                    "temperature": temperature,
-                    "max_tokens": max_tokens,
-                },
-            )
-
-            response.raise_for_status()
-            result = response.json()
-
-            if not result.get("choices"):
-                raise ErreurServiceIA(
-                    "Réponse vision vide", message_utilisateur="L'analyse de l'image a échoué"
-                )
-
-            content = result["choices"][0]["message"]["content"]
-            logger.info(f"[OK] Vision: {len(content)} caractères extraits")
-
-            return content
-
-    # ═══════════════════════════════════════════════════════════
-    # APPEL STREAMING — Réponse progressive
-    # ═══════════════════════════════════════════════════════════
-
-    async def appeler_streaming(
-        self,
-        prompt: str,
-        prompt_systeme: str = "",
-        temperature: float = 0.7,
-        max_tokens: int = 1000,
-    ):
-        """
-        Appel API avec streaming — retourne un async generator.
-
-        Permet d'afficher la réponse progressivement dans Streamlit.
-        Le rate limiting est vérifié au début, le cache est IGNORÉ
-        (streaming = pas de cache pour UX en temps réel).
-
-        Args:
-            prompt: Prompt utilisateur
-            prompt_systeme: Instructions système
-            temperature: Température (0-2)
-            max_tokens: Tokens max
-
-        Yields:
-            str: Chunks de texte au fur et à mesure qu'ils arrivent
-
-        Usage:
-            async for chunk in client.appeler_streaming("Génère une recette"):
-                print(chunk, end="", flush=True)
-
-        Raises:
-            ErreurServiceIA: Si erreur API
-            ErreurLimiteDebit: Si rate limit dépassé
-        """
-        # Charger la config
-        self._ensure_config_loaded()
-
-        # Vérifier rate limit
-        peut_appeler, message_erreur = RateLimitIA.peut_appeler()
-        if not peut_appeler:
-            raise ErreurLimiteDebit(message_erreur, message_utilisateur=message_erreur)
-
-        if not self.cle_api:
-            raise ErreurServiceIA(
-                "Clé API Mistral non configurée",
-                message_utilisateur="La clé API Mistral n'est pas configurée.",
-            )
-
-        messages = []
-        if prompt_systeme:
-            messages.append({"role": "system", "content": prompt_systeme})
-        messages.append({"role": "user", "content": prompt})
-
-        full_response = []
-
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            async with client.stream(
-                "POST",
-                f"{self.url_base}/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {self.cle_api}",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "model": self.modele,
-                    "messages": messages,
-                    "temperature": temperature,
-                    "max_tokens": max_tokens,
-                    "stream": True,
-                },
-            ) as response:
-                response.raise_for_status()
-
-                async for line in response.aiter_lines():
-                    if not line or not line.startswith("data: "):
-                        continue
-
-                    data = line[6:]  # Remove "data: " prefix
-
-                    if data == "[DONE]":
-                        break
-
-                    try:
-                        import json
-
-                        chunk_json = json.loads(data)
-                        choices = chunk_json.get("choices", [])
-
-                        if choices:
-                            delta = choices[0].get("delta", {})
-                            content = delta.get("content", "")
-
-                            if content:
-                                full_response.append(content)
-                                yield content
-
-                    except Exception as e:
-                        logger.debug(f"Erreur parsing chunk streaming: {e}")
-                        continue
-
-        # Enregistrer l'appel
-        total_content = "".join(full_response)
-        RateLimitIA.enregistrer_appel(service="mistral_streaming")
-        logger.info(f"[OK] Streaming terminé ({len(total_content)} caractères)")
-
-    # ═══════════════════════════════════════════════════════════
-    # MÉTHODES MÉTIER (LEGACY)
-    # ═══════════════════════════════════════════════════════════
-
-    async def discuter(
-        self, message: str, historique: list[dict] | None = None, contexte: dict | None = None
-    ) -> str:
-        """
-        Interface conversationnelle (legacy)
-
-        Maintenu pour compatibilité avec l'ancien code
-        """
-        texte_historique = ""
-        if historique:
-            texte_historique = "\n".join([f"{h['role']}: {h['content']}" for h in historique[-5:]])
-
-        texte_contexte = ""
-        if contexte:
-            import json
-
-            texte_contexte = f"\n\nContexte:\n{json.dumps(contexte, indent=2)}"
-
-        prompt_systeme = (
-            "Tu es l'assistant familial MaTanne. "
-            "Tu aides avec: Cuisine, Famille, Maison, Planning."
-            f"{texte_contexte}"
-        )
-
-        prompt = f"Historique:\n{texte_historique}\n\nUtilisateur: {message}"
-
-        return await self.appeler(
-            prompt=prompt, prompt_systeme=prompt_systeme, temperature=0.7, max_tokens=500
-        )
-
-    # ═══════════════════════════════════════════════════════════
     # HELPERS SYNCHRONES
     # ═══════════════════════════════════════════════════════════
 
@@ -525,11 +317,12 @@ class ClientIA:
 # ═══════════════════════════════════════════════════════════
 
 _client: ClientIA | None = None
+_client_lock = threading.Lock()
 
 
 def obtenir_client_ia() -> ClientIA:
     """
-    Récupère l'instance ClientIA (singleton lazy).
+    Récupère l'instance ClientIA (singleton lazy, thread-safe).
 
     Returns:
         Instance ClientIA (toujours valide — la config est chargée en lazy
@@ -537,6 +330,8 @@ def obtenir_client_ia() -> ClientIA:
     """
     global _client
     if _client is None:
-        _client = ClientIA()
-        logger.debug("[OK] ClientIA créé (config chargée en lazy)")
+        with _client_lock:
+            if _client is None:
+                _client = ClientIA()
+                logger.debug("[OK] ClientIA créé (config chargée en lazy)")
     return _client

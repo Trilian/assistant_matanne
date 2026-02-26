@@ -6,7 +6,7 @@ from src.core.async_utils import executer_async
 from src.core.session_keys import SK
 from src.core.state import rerun
 from src.services.famille.achats import obtenir_service_achats_famille
-from src.services.famille.jules_ai import JulesAIService
+from src.services.famille.jules_ai import obtenir_jules_ai_service
 from src.ui.fragments import ui_fragment
 
 from .utils import (
@@ -90,7 +90,7 @@ def afficher_activites():
         st.markdown("**🤖 Suggestions IA:**")
 
         try:
-            service = JulesAIService()
+            service = obtenir_jules_ai_service()
             meteo = "interieur" if filtre_lieu != "Exterieur" else "exterieur"
             st.write_stream(service.stream_activites(age["mois"], meteo))
         except Exception as e:
@@ -126,7 +126,7 @@ def afficher_shopping():
         # Suggestions IA jouets (streaming)
         if st.button("🤖 Suggerer des jouets"):
             try:
-                service = JulesAIService()
+                service = obtenir_jules_ai_service()
                 st.write_stream(service.stream_jouets(age["mois"]))
             except Exception as e:
                 st.error(f"Erreur: {e}")
@@ -255,7 +255,7 @@ def afficher_conseils():
         st.markdown(f"### {info['emoji']} {info['titre']}")
 
         try:
-            service = JulesAIService()
+            service = obtenir_jules_ai_service()
             st.write_stream(service.stream_conseil(age["mois"], theme))
         except Exception as e:
             st.error(f"Erreur: {e}")

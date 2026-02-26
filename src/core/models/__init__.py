@@ -2,6 +2,7 @@
 Models - Point d'entrée unifié pour tous les modèles SQLAlchemy.
 
 Architecture modulaire avec chargement paresseux (PEP 562).
+Auto-discovery des sous-modules et symboles via AST parsing.
 Seuls ``Base`` et ``metadata`` sont chargés eagerly (nécessaires
 pour la création de tables et les migrations).
 
@@ -24,8 +25,13 @@ Usage général (chargement lazy à la demande):
 
 from __future__ import annotations
 
+import ast
 import importlib
+import logging
+from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════════
 # EAGER: Base & metadata — requis pour la création de tables
@@ -45,143 +51,71 @@ from .mixins import (
 )
 
 # ═══════════════════════════════════════════════════════════
-# LAZY: Mapping symbole → (sous-module, nom_dans_module)
+# AUTO-DISCOVERY: Sous-modules et symboles via AST parsing
 # ═══════════════════════════════════════════════════════════
-_LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    # Batch Cooking
-    "ConfigBatchCooking": (".batch_cooking", "ConfigBatchCooking"),
-    "EtapeBatchCooking": (".batch_cooking", "EtapeBatchCooking"),
-    "LocalisationStockageEnum": (".batch_cooking", "LocalisationStockageEnum"),
-    "PreparationBatch": (".batch_cooking", "PreparationBatch"),
-    "SessionBatchCooking": (".batch_cooking", "SessionBatchCooking"),
-    "StatutEtapeEnum": (".batch_cooking", "StatutEtapeEnum"),
-    "StatutSessionEnum": (".batch_cooking", "StatutSessionEnum"),
-    "TypeRobotEnum": (".batch_cooking", "TypeRobotEnum"),
-    # Calendrier externe
-    "FournisseurCalendrier": (".calendrier", "FournisseurCalendrier"),
-    "CalendrierExterne": (".calendrier", "CalendrierExterne"),
-    "EvenementCalendrier": (".calendrier", "EvenementCalendrier"),
-    "DirectionSync": (".calendrier", "DirectionSync"),
-    # Courses
-    "ArticleCourses": (".courses", "ArticleCourses"),
-    "ArticleModele": (".courses", "ArticleModele"),
-    "ListeCourses": (".courses", "ListeCourses"),
-    "ModeleCourses": (".courses", "ModeleCourses"),
-    # Famille
-    "ProfilEnfant": (".famille", "ProfilEnfant"),
-    "ActiviteFamille": (".famille", "ActiviteFamille"),
-    "BudgetFamille": (".famille", "BudgetFamille"),
-    "Jalon": (".famille", "Jalon"),
-    "ArticleAchat": (".famille", "ArticleAchat"),
-    "EntreeBienEtre": (".famille", "EntreeBienEtre"),
-    # Finances
-    "BudgetMensuelDB": (".finances", "BudgetMensuelDB"),
-    "CategorieDepenseDB": (".finances", "CategorieDepenseDB"),
-    "Depense": (".finances", "Depense"),
-    "CategorieDepense": (".finances", "CategorieDepense"),
-    "DepenseMaison": (".finances", "DepenseMaison"),
-    "TypeRecurrence": (".finances", "TypeRecurrence"),
-    # Habitat
-    "ActionEcologique": (".habitat", "ActionEcologique"),
-    "TypeActionEcologique": (".habitat", "TypeActionEcologique"),
-    "Meuble": (".habitat", "Meuble"),
-    "PrioriteMeuble": (".habitat", "PrioriteMeuble"),
-    "StatutMeuble": (".habitat", "StatutMeuble"),
-    "StockMaison": (".habitat", "StockMaison"),
-    "TacheEntretien": (".habitat", "TacheEntretien"),
-    "TypePiece": (".habitat", "TypePiece"),
-    # Inventaire
-    "ArticleInventaire": (".inventaire", "ArticleInventaire"),
-    "HistoriqueInventaire": (".inventaire", "HistoriqueInventaire"),
-    # Jardin / Météo
-    "AlerteMeteo": (".jardin", "AlerteMeteo"),
-    "ConfigMeteo": (".jardin", "ConfigMeteo"),
-    "NiveauAlerte": (".jardin", "NiveauAlerte"),
-    "TypeAlerteMeteo": (".jardin", "TypeAlerteMeteo"),
-    # Jeux
-    "AlerteJeux": (".jeux", "AlerteJeux"),
-    "ChampionnatEnum": (".jeux", "ChampionnatEnum"),
-    "ConfigurationJeux": (".jeux", "ConfigurationJeux"),
-    "Equipe": (".jeux", "Equipe"),
-    "GrilleLoto": (".jeux", "GrilleLoto"),
-    "HistoriqueJeux": (".jeux", "HistoriqueJeux"),
-    "Match": (".jeux", "Match"),
-    "PariSportif": (".jeux", "PariSportif"),
-    "ResultatMatchEnum": (".jeux", "ResultatMatchEnum"),
-    "SerieJeux": (".jeux", "SerieJeux"),
-    "StatistiquesLoto": (".jeux", "StatistiquesLoto"),
-    "StatutPariEnum": (".jeux", "StatutPariEnum"),
-    "TirageLoto": (".jeux", "TirageLoto"),
-    "TypeJeuEnum": (".jeux", "TypeJeuEnum"),
-    "TypeMarcheParisEnum": (".jeux", "TypeMarcheParisEnum"),
-    "TypePariEnum": (".jeux", "TypePariEnum"),
-    # Maison
-    "ElementJardin": (".maison", "ElementJardin"),
-    "JournalJardin": (".maison", "JournalJardin"),
-    "Projet": (".maison", "Projet"),
-    "Project": (".maison", "Project"),  # Alias rétrocompatibilité
-    "TacheProjet": (".maison", "TacheProjet"),
-    "Routine": (".maison", "Routine"),
-    "TacheRoutine": (".maison", "TacheRoutine"),
-    # Notifications
-    "PreferenceNotification": (".notifications", "PreferenceNotification"),
-    "AbonnementPush": (".notifications", "AbonnementPush"),
-    # Planning
-    "EvenementPlanning": (".planning", "EvenementPlanning"),
-    "Planning": (".planning", "Planning"),
-    "Repas": (".planning", "Repas"),
-    "ElementTemplate": (".planning", "ElementTemplate"),
-    "TemplateSemaine": (".planning", "TemplateSemaine"),
-    # Recettes
-    "RepasBatch": (".recettes", "RepasBatch"),
-    "EtapeRecette": (".recettes", "EtapeRecette"),
-    "HistoriqueRecette": (".recettes", "HistoriqueRecette"),
-    "Ingredient": (".recettes", "Ingredient"),
-    "Recette": (".recettes", "Recette"),
-    "RecetteIngredient": (".recettes", "RecetteIngredient"),
-    "VersionRecette": (".recettes", "VersionRecette"),
-    # Santé
-    "EntreeSante": (".sante", "EntreeSante"),
-    "ObjectifSante": (".sante", "ObjectifSante"),
-    "RoutineSante": (".sante", "RoutineSante"),
-    # Système
-    "HistoriqueAction": (".systeme", "HistoriqueAction"),
-    "Backup": (".systeme", "Backup"),
-    # Temps d'entretien et jardin
-    "ActionPlante": (".temps_entretien", "ActionPlante"),
-    "CoutTravaux": (".temps_entretien", "CoutTravaux"),
-    "LogStatutObjet": (".temps_entretien", "LogStatutObjet"),
-    "ObjetMaison": (".temps_entretien", "ObjetMaison"),
-    "PieceMaison": (".temps_entretien", "PieceMaison"),
-    "PlanJardin": (".temps_entretien", "PlanJardin"),
-    "PlanteJardin": (".temps_entretien", "PlanteJardin"),
-    "PrioriteRemplacement": (".temps_entretien", "PrioriteRemplacement"),
-    "SessionTravail": (".temps_entretien", "SessionTravail"),
-    "StatutObjet": (".temps_entretien", "StatutObjet"),
-    "TypeActiviteEntretien": (".temps_entretien", "TypeActiviteEntretien"),
-    "TypeModificationPiece": (".temps_entretien", "TypeModificationPiece"),
-    "VersionPiece": (".temps_entretien", "VersionPiece"),
-    "ZoneJardin": (".temps_entretien", "ZoneJardin"),
-    # Préférences utilisateur
-    "ConfigCalendrierExterne": (".user_preferences", "ConfigCalendrierExterne"),
-    "TypeRetour": (".user_preferences", "TypeRetour"),
-    "OpenFoodFactsCache": (".user_preferences", "OpenFoodFactsCache"),
-    "RetourRecette": (".user_preferences", "RetourRecette"),
-    "PreferenceUtilisateur": (".user_preferences", "PreferenceUtilisateur"),
-    # État persistant
-    "EtatPersistantDB": (".persistent_state", "EtatPersistantDB"),
-    # Utilisateurs et Garmin
-    "AchatFamille": (".users", "AchatFamille"),
-    "JournalAlimentaire": (".users", "JournalAlimentaire"),
-    "ActiviteGarmin": (".users", "ActiviteGarmin"),
-    "GarminActivityType": (".users", "GarminActivityType"),
-    "ResumeQuotidienGarmin": (".users", "ResumeQuotidienGarmin"),
-    "GarminToken": (".users", "GarminToken"),
-    "CategorieAchat": (".users", "CategorieAchat"),
-    "PrioriteAchat": (".users", "PrioriteAchat"),
-    "ProfilUtilisateur": (".users", "ProfilUtilisateur"),
-    "ActiviteWeekend": (".users", "ActiviteWeekend"),
-}
+_PACKAGE_DIR = Path(__file__).parent
+_EXCLUDED_FILES = frozenset({"__init__.py", "base.py", "mixins.py"})
+
+
+def _discover_model_modules() -> tuple[str, ...]:
+    """Auto-discover model submodules from directory listing.
+
+    Scans ``src/core/models/`` for ``.py`` files (excluding base, mixins,
+    __init__ and private files) and returns relative import paths.
+    """
+    return tuple(
+        f".{f.stem}"
+        for f in sorted(_PACKAGE_DIR.glob("*.py"))
+        if f.name not in _EXCLUDED_FILES and not f.name.startswith("_")
+    )
+
+
+def _build_lazy_imports(modules: tuple[str, ...]) -> dict[str, tuple[str, str]]:
+    """Build symbol → (module, name) mapping via AST parsing.
+
+    Scans each submodule file for:
+    - Top-level class definitions (SQLAlchemy models, Enums)
+    - PascalCase module-level name assignments (aliases like ``Project = Projet``)
+
+    No imports are performed — only source files are read and parsed.
+    This keeps the package import fast (~1-2ms for 20 files).
+    """
+    mapping: dict[str, tuple[str, str]] = {}
+
+    for mod_name in modules:
+        file_name = f"{mod_name.lstrip('.')}.py"
+        file_path = _PACKAGE_DIR / file_name
+
+        if not file_path.exists():
+            continue
+
+        try:
+            source = file_path.read_text(encoding="utf-8")
+            tree = ast.parse(source, filename=str(file_path))
+        except Exception:
+            logger.warning(f"AST parsing failed for {file_path}, skipping")
+            continue
+
+        for node in ast.iter_child_nodes(tree):
+            if isinstance(node, ast.ClassDef):
+                # Class definitions (SQLAlchemy models, Enums)
+                mapping[node.name] = (mod_name, node.name)
+            elif isinstance(node, ast.Assign):
+                # Module-level assignments (aliases like Project = Projet)
+                for target in node.targets:
+                    if (
+                        isinstance(target, ast.Name)
+                        and not target.id.startswith("_")
+                        and target.id[0].isupper()  # Only PascalCase symbols
+                    ):
+                        mapping[target.id] = (mod_name, target.id)
+
+    return mapping
+
+
+# Build at import time (fast — AST parsing only, no module imports)
+_MODEL_MODULES = _discover_model_modules()
+_LAZY_IMPORTS = _build_lazy_imports(_MODEL_MODULES)
 
 # Export explicite de tous les symboles
 __all__ = [
@@ -193,37 +127,14 @@ __all__ = [
     "SaisonEnum",
     "TypeRepasEnum",
     "TypeVersionRecetteEnum",
+    # Mixins (eager)
+    "CreeLeMixin",
+    "TimestampMixin",
     # Helper
     "charger_tous_modeles",
-    # Tous les symboles lazy
+    # Tous les symboles lazy (auto-discovered)
     *_LAZY_IMPORTS.keys(),
 ]
-
-
-# ═══════════════════════════════════════════════════════════
-# SOUS-MODULES à charger pour enregistrer tous les modèles
-# ═══════════════════════════════════════════════════════════
-_MODEL_MODULES = (
-    ".batch_cooking",
-    ".calendrier",
-    ".courses",
-    ".famille",
-    ".finances",
-    ".habitat",
-    ".inventaire",
-    ".jardin",
-    ".jeux",
-    ".maison",
-    ".notifications",
-    ".persistent_state",
-    ".planning",
-    ".recettes",
-    ".sante",
-    ".systeme",
-    ".temps_entretien",
-    ".user_preferences",
-    ".users",
-)
 
 
 def charger_tous_modeles() -> None:

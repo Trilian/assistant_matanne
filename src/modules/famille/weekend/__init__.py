@@ -16,7 +16,7 @@ from src.ui.state.url import tabs_with_url
 
 _keys = KeyNamespace("weekend")
 
-from src.services.famille.weekend_ai import WeekendAIService
+from src.services.famille.weekend_ai import obtenir_weekend_ai_service
 
 from .components import (
     afficher_add_activity,
@@ -88,8 +88,8 @@ def app():
 __all__ = [
     # Entry point
     "app",
-    # AI Service
-    "WeekendAIService",
+    # AI Service (via factory)
+    "obtenir_weekend_ai_service",
     # Helpers
     "get_next_weekend",
     "get_weekend_activities",

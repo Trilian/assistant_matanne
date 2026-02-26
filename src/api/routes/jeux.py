@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
 from src.api.pagination import appliquer_cursor_filter, construire_reponse_cursor, decoder_cursor
+from src.api.schemas.errors import REPONSES_CRUD_LECTURE, REPONSES_LISTE
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/jeux", tags=["Jeux"])
@@ -25,7 +26,7 @@ router = APIRouter(prefix="/api/v1/jeux", tags=["Jeux"])
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/equipes")
+@router.get("/equipes", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_equipes(
     championnat: str | None = Query(None, description="Filtrer par championnat"),
@@ -70,7 +71,7 @@ async def lister_equipes(
     return await executer_async(_query)
 
 
-@router.get("/equipes/{equipe_id}")
+@router.get("/equipes/{equipe_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_equipe(equipe_id: int, user: dict[str, Any] = Depends(require_auth)):
     """Récupère une équipe avec sa forme récente."""
@@ -107,7 +108,7 @@ async def obtenir_equipe(equipe_id: int, user: dict[str, Any] = Depends(require_
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/matchs")
+@router.get("/matchs", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_matchs(
     page: int = Query(1, ge=1),
@@ -177,7 +178,7 @@ async def lister_matchs(
     return await executer_async(_query)
 
 
-@router.get("/matchs/{match_id}")
+@router.get("/matchs/{match_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_match(match_id: int, user: dict[str, Any] = Depends(require_auth)):
     """Récupère un match avec ses paris."""
@@ -248,7 +249,7 @@ async def obtenir_match(match_id: int, user: dict[str, Any] = Depends(require_au
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/paris")
+@router.get("/paris", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_paris(
     page: int = Query(1, ge=1),
@@ -302,7 +303,7 @@ async def lister_paris(
     return await executer_async(_query)
 
 
-@router.get("/paris/stats")
+@router.get("/paris/stats", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def statistiques_paris(
     est_virtuel: bool | None = Query(None, description="Stats paris virtuels ou réels"),
@@ -359,7 +360,7 @@ async def statistiques_paris(
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/loto/tirages")
+@router.get("/loto/tirages", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_tirages_loto(
     page: int = Query(1, ge=1),
@@ -403,7 +404,7 @@ async def lister_tirages_loto(
     return await executer_async(_query)
 
 
-@router.get("/loto/grilles")
+@router.get("/loto/grilles", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_grilles_loto(
     est_virtuelle: bool | None = Query(None, description="Grilles virtuelles ou réelles"),

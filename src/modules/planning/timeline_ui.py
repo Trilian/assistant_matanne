@@ -90,7 +90,7 @@ def creer_timeline_jour(events: list[dict], jour: date) -> go.Figure:
 
     for i, event in enumerate(events_jour):
         y_positions.append(i)
-        colors.append(event.get("couleur", "#757575"))
+        colors.append(event.get("couleur", Couleur.GREY_500))
         texts.append(event["titre"][:30])
         lieu_str = f"<br>📍 {event['lieu']}" if event.get("lieu") else ""
         hovers.append(
@@ -111,7 +111,7 @@ def creer_timeline_jour(events: list[dict], jour: date) -> go.Figure:
                 y=[event["titre"][:25]],
                 base=[debut_h],
                 orientation="h",
-                marker_color=event.get("couleur", "#757575"),
+                marker_color=event.get("couleur", Couleur.GREY_500),
                 text=f"{event['date_debut'].strftime('%H:%M')}",
                 textposition="inside",
                 hovertemplate=hovers[i] + "<extra></extra>",
@@ -177,7 +177,7 @@ def creer_timeline_semaine(events: list[dict], date_lundi: date) -> go.Figure:
                 "Finish": event["date_fin"],
                 "Type": event["type"],
                 "Jour": jour,
-                "Couleur": event.get("couleur", "#757575"),
+                "Couleur": event.get("couleur", Couleur.GREY_500),
             }
         )
 
@@ -336,13 +336,13 @@ def app():
                     jour = JOURS_SEMAINE[event["date_debut"].weekday()][:3]
                     heure = event["date_debut"].strftime("%H:%M")
                     lieu = f" • 📍 {event['lieu']}" if event.get("lieu") else ""
-                    couleur = event.get("couleur", "#757575")
+                    couleur = event.get("couleur", Couleur.GREY_500)
 
                     st.markdown(
-                        f'<div style="padding:8px;margin:4px 0;background:#f8f9fa;'
+                        f'<div style="padding:8px;margin:4px 0;background:{Couleur.BG_SUBTLE};'
                         f'border-left:4px solid {couleur};border-radius:4px;">'
                         f"<strong>{jour} {heure}</strong> - {event['titre']}"
-                        f'<span style="color:#666;">{lieu}</span></div>',
+                        f'<span style="color:{Couleur.TEXT_SECONDARY};">{lieu}</span></div>',
                         unsafe_allow_html=True,
                     )
 

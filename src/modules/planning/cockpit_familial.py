@@ -19,6 +19,7 @@ from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
+from src.ui.tokens import Couleur
 
 logger = logging.getLogger(__name__)
 
@@ -32,10 +33,10 @@ _keys = KeyNamespace("cockpit_familial")
 _JOURS_FR = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
 
 _COULEURS_TYPE_REPAS = {
-    "petit_déjeuner": "#FFF9C4",
-    "déjeuner": "#C8E6C9",
-    "goûter": "#FFECB3",
-    "dîner": "#BBDEFB",
+    "petit_déjeuner": Couleur.BG_YELLOW_LIGHT,
+    "déjeuner": Couleur.BG_LIGHT_GREEN_ALT,
+    "goûter": Couleur.BG_METEO_END,
+    "dîner": Couleur.BG_JULES_END,
 }
 
 _ICONES_TYPE_EVENT = {

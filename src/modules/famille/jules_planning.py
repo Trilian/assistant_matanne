@@ -21,6 +21,7 @@ from src.modules._framework import error_boundary
 from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
+from src.ui.tokens import Couleur
 
 _keys = KeyNamespace("jules_planning")
 
@@ -31,7 +32,7 @@ _keys = KeyNamespace("jules_planning")
 CATEGORIES_ACTIVITES = {
     "motricite": {
         "emoji": "🏃",
-        "couleur": "#4CAF50",
+        "couleur": Couleur.SUCCESS,
         "activites": [
             {"nom": "Parcours coussins", "duree": 15, "desc": "Grimper, sauter sur les coussins"},
             {"nom": "Danse sur musique", "duree": 10, "desc": "Bouger librement sur comptines"},
@@ -47,7 +48,7 @@ CATEGORIES_ACTIVITES = {
     },
     "langage": {
         "emoji": "💬",
-        "couleur": "#2196F3",
+        "couleur": Couleur.INFO,
         "activites": [
             {"nom": "Lecture interactive", "duree": 15, "desc": "Pointer et nommer les images"},
             {
@@ -63,7 +64,7 @@ CATEGORIES_ACTIVITES = {
     },
     "creativite": {
         "emoji": "🎨",
-        "couleur": "#FF9800",
+        "couleur": Couleur.ORANGE,
         "activites": [
             {"nom": "Peinture au doigt", "duree": 20, "desc": "Sur grande feuille ou carton"},
             {"nom": "Pâte à modeler", "duree": 20, "desc": "Manipuler, ecraser, rouler"},
@@ -75,7 +76,7 @@ CATEGORIES_ACTIVITES = {
     },
     "sensoriel": {
         "emoji": "✋",
-        "couleur": "#9C27B0",
+        "couleur": Couleur.PURPLE,
         "activites": [
             {"nom": "Bac sensoriel", "duree": 20, "desc": "Riz, pâtes, sable kinetic"},
             {"nom": "Jeux d'eau", "duree": 20, "desc": "Transvaser, verser, eclabousser"},
@@ -87,7 +88,7 @@ CATEGORIES_ACTIVITES = {
     },
     "exterieur": {
         "emoji": "🌳",
-        "couleur": "#795548",
+        "couleur": Couleur.BROWN,
         "activites": [
             {"nom": "Promenade nature", "duree": 30, "desc": "Observer, ramasser feuilles"},
             {"nom": "Bac à sable", "duree": 30, "desc": "Creuser, construire"},
@@ -99,7 +100,7 @@ CATEGORIES_ACTIVITES = {
     },
     "imitation": {
         "emoji": "🎭",
-        "couleur": "#E91E63",
+        "couleur": Couleur.CHART_SNACK,
         "activites": [
             {"nom": "Dînette", "duree": 20, "desc": "Preparer à manger, servir"},
             {"nom": "Poupee/doudou", "duree": 15, "desc": "Nourrir, coucher, promener"},

@@ -24,8 +24,11 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["CacheRedis", "est_redis_disponible", "is_redis_available", "obtenir_cache_redis"]
 
-# Singleton instance
+# Singleton instance (thread-safe)
+import threading as _threading
+
 _redis_cache_instance: "CacheRedis | None" = None
+_redis_cache_lock = _threading.Lock()
 
 
 def est_redis_disponible() -> bool:
@@ -269,7 +272,7 @@ class CacheRedis:
 
 def obtenir_cache_redis() -> CacheRedis | None:
     """
-    Obtient l'instance singleton du cache Redis.
+    Obtient l'instance singleton du cache Redis (thread-safe).
 
     Returns:
         CacheRedis si disponible, None sinon
@@ -277,10 +280,12 @@ def obtenir_cache_redis() -> CacheRedis | None:
     global _redis_cache_instance
 
     if _redis_cache_instance is None:
-        cache = CacheRedis()
-        if cache.is_available:
-            _redis_cache_instance = cache
-            return _redis_cache_instance
-        return None
+        with _redis_cache_lock:
+            if _redis_cache_instance is None:
+                cache = CacheRedis()
+                if cache.is_available:
+                    _redis_cache_instance = cache
+                    return _redis_cache_instance
+                return None
 
     return _redis_cache_instance

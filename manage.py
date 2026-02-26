@@ -182,6 +182,31 @@ def test_quick():
     run_cmd("python scripts/test/test_manager.py quick")
 
 
+def test_visual():
+    """Lance les tests visuels Playwright (nécessite: pip install playwright pytest-playwright && playwright install chromium)"""
+    print("[VISUAL] Tests visuels Playwright...")
+    run_cmd("pytest tests/visual/ -m visual -v")
+
+
+def test_visual_update():
+    """Met à jour les snapshots de référence Playwright"""
+    import os
+
+    print("[VISUAL] Mise à jour des snapshots...")
+    os.environ["UPDATE_SNAPSHOTS"] = "1"
+    run_cmd("pytest tests/visual/ -m visual -v")
+    os.environ.pop("UPDATE_SNAPSHOTS", None)
+    print("[OK] Snapshots mis à jour")
+
+
+def playwright_install():
+    """Installe Playwright et les navigateurs nécessaires"""
+    print("[INSTALL] Installation Playwright...")
+    run_cmd("pip install playwright pytest-playwright")
+    run_cmd("playwright install chromium")
+    print("[OK] Playwright installé")
+
+
 def test_core():
     """Tests du core uniquement"""
     print("[TEST] Tests core...")
@@ -222,6 +247,11 @@ Tests avancés:
   test-core            Tests du core uniquement
   audit-tests          Audit de couverture des tests
 
+Tests visuels (Playwright):
+  test-visual          Lance les tests de régression visuelle
+  visual-update        Met à jour les snapshots de référence
+  playwright-install   Installe Playwright + navigateurs
+
 Déploiement:
   requirements         Génère requirements.txt
 
@@ -246,6 +276,9 @@ COMMANDS = {
     "seed-demo": seed_demo,
     "test-quick": test_quick,
     "test-core": test_core,
+    "test-visual": test_visual,
+    "visual-update": test_visual_update,
+    "playwright-install": playwright_install,
     "audit-tests": audit_tests,
     "requirements": generate_requirements,
     "clean": clean,

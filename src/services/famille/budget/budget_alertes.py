@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import BudgetFamille
+from src.services.core.event_bus_mixin import emettre_evenement_simple
 
 from .schemas import (
     CategorieDepense,
@@ -105,6 +106,16 @@ class BudgetAlertesMixin:
             db.refresh(entry)
 
             facture.id = entry.id
+            emettre_evenement_simple(
+                "depenses.modifiee",
+                {
+                    "depense_id": entry.id,
+                    "categorie": facture.categorie.value,
+                    "montant": facture.montant,
+                    "action": "creee",
+                },
+                source="budget_alertes",
+            )
             logger.info(f"✅ Facture {facture.categorie.value} ajoutée: {facture.montant}€")
             return facture
 
@@ -126,6 +137,16 @@ class BudgetAlertesMixin:
             db.commit()
 
             facture.id = entry.id
+            emettre_evenement_simple(
+                "budget.modifie",
+                {
+                    "depense_id": entry.id,
+                    "categorie": facture.categorie.value,
+                    "montant": facture.montant,
+                    "action": "depense_ajoutee",
+                },
+                source="budget_alertes",
+            )
             return facture
 
     @avec_cache(ttl=300)

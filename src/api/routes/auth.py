@@ -22,6 +22,7 @@ from src.api.auth import TokenResponse, creer_token_acces
 from src.api.dependencies import get_current_user
 from src.api.rate_limiting import _stockage
 from src.api.schemas import LoginRequest, UserInfoResponse
+from src.api.schemas.errors import REPONSES_AUTH, REPONSES_AUTH_LOGIN
 from src.api.utils import gerer_exception_api
 
 logger = logging.getLogger(__name__)
@@ -35,6 +36,7 @@ router = APIRouter(
 @router.post(
     "/login",
     response_model=TokenResponse,
+    responses=REPONSES_AUTH_LOGIN,
     summary="Connexion utilisateur",
     description="Authentifie via Supabase et retourne un token JWT API.",
 )
@@ -126,6 +128,7 @@ async def connexion(request: LoginRequest, raw_request: Request):
 @router.post(
     "/refresh",
     response_model=TokenResponse,
+    responses=REPONSES_AUTH,
     summary="Rafraîchir le token",
     description="Génère un nouveau token à partir d'un token valide.",
 )
@@ -152,6 +155,7 @@ async def rafraichir_token(user: dict[str, Any] = Depends(get_current_user)):
 @router.get(
     "/me",
     response_model=UserInfoResponse,
+    responses=REPONSES_AUTH,
     summary="Profil utilisateur",
     description="Retourne les informations de l'utilisateur connecté.",
 )

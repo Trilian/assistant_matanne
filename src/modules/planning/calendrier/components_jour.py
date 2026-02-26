@@ -8,7 +8,7 @@ import streamlit as st
 
 from src.ui.keys import KeyNamespace
 
-from .utils import JourCalendrier, TypeEvenement
+from .types import JourCalendrier, TypeEvenement
 
 # Drag & drop (graceful fallback si pas installé)
 try:

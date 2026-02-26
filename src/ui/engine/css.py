@@ -52,6 +52,8 @@ _SK_CLASSES = "_css_engine_classes_v2"
 _SK_KEYFRAMES = "_css_engine_keyframes_v2"
 _SK_HASH = "_css_engine_hash_v2"
 _SK_INJECTED = "_css_engine_injected_v2"
+_SK_DEFERRED = "_css_engine_deferred_v2"
+_SK_DEFERRED_HASH = "_css_engine_deferred_hash_v2"
 
 
 class CSSEngine:
@@ -98,6 +100,13 @@ class CSSEngine:
             st.session_state[_SK_KEYFRAMES] = {}
         return st.session_state[_SK_KEYFRAMES]
 
+    @classmethod
+    def _get_deferred(cls) -> dict[str, str]:
+        """Accès au registre de blocs CSS différés (non-critiques)."""
+        if _SK_DEFERRED not in st.session_state:
+            st.session_state[_SK_DEFERRED] = {}
+        return st.session_state[_SK_DEFERRED]
+
     # ═══════════════════════════════════════════════════════════
     # Blocs CSS nommés
     # ═══════════════════════════════════════════════════════════
@@ -134,6 +143,54 @@ class CSSEngine:
 
         if filename in _FILE_CACHE:
             cls.register(f"file:{filename}", _FILE_CACHE[filename])
+
+    # ═══════════════════════════════════════════════════════════
+    # Blocs CSS différés (non-critiques, chargés après le 1er paint)
+    # ═══════════════════════════════════════════════════════════
+
+    @classmethod
+    def register_deferred(cls, name: str, css: str) -> None:
+        """Enregistre un bloc CSS non-critique pour injection différée.
+
+        Ces blocs ne sont PAS inclus dans ``inject_all()`` et doivent
+        être injectés explicitement via ``inject_deferred()``, typiquement
+        après le premier rendu de la page.
+
+        Usage typique : animations, utilitaires a11y, CSS de modules
+        non-visibles au premier paint.
+
+        Args:
+            name: Identifiant unique (ex: 'animations', 'a11y')
+            css: Contenu CSS brut
+        """
+        cls._get_deferred()[name] = css.strip()
+
+    @classmethod
+    def inject_deferred(cls) -> None:
+        """Injecte les blocs CSS différés en une seule passe.
+
+        Utilise un hash pour éviter la réinjection si le contenu
+        n'a pas changé. Appelé après le premier paint critique.
+        """
+        deferred = cls._get_deferred()
+        if not deferred:
+            return
+
+        parts = [f"/* [deferred:{name}] */\n{css}" for name, css in sorted(deferred.items())]
+        full_css = "\n\n".join(parts)
+        css_hash = hashlib.md5(full_css.encode()).hexdigest()
+
+        if _SK_DEFERRED_HASH not in st.session_state:
+            st.session_state[_SK_DEFERRED_HASH] = ""
+
+        if st.session_state[_SK_DEFERRED_HASH] != css_hash:
+            st.markdown(f"<style>\n{full_css}\n</style>", unsafe_allow_html=True)
+            st.session_state[_SK_DEFERRED_HASH] = css_hash
+            logger.debug(
+                "CSSEngine: injecté %d blocs CSS différés (hash=%s)",
+                len(deferred),
+                css_hash[:8],
+            )
 
     # ═══════════════════════════════════════════════════════════
     # Classes atomiques
@@ -287,13 +344,16 @@ class CSSEngine:
         blocks = cls._get_blocks()
         classes = cls._get_classes()
         keyframes = cls._get_keyframes()
+        deferred = cls._get_deferred()
         blocks_size = sum(len(css) for css in blocks.values())
         classes_size = sum(len(css) for css in classes.values())
+        deferred_size = sum(len(css) for css in deferred.values())
         return {
             "blocks": len(blocks),
             "classes": len(classes),
             "keyframes": len(keyframes),
-            "total_bytes": blocks_size + classes_size,
+            "deferred": len(deferred),
+            "total_bytes": blocks_size + classes_size + deferred_size,
         }
 
     @classmethod
@@ -302,7 +362,8 @@ class CSSEngine:
         cls._get_blocks().clear()
         cls._get_classes().clear()
         cls._get_keyframes().clear()
-        for key in (_SK_HASH, _SK_INJECTED):
+        cls._get_deferred().clear()
+        for key in (_SK_HASH, _SK_INJECTED, _SK_DEFERRED_HASH):
             if key in st.session_state:
                 del st.session_state[key]
 
@@ -496,6 +557,11 @@ def inject_all() -> None:
     CSSEngine.inject_all()
 
 
+def inject_deferred() -> None:
+    """Injecte le CSS différé (wrapper pour CSSEngine.inject_deferred)."""
+    CSSEngine.inject_deferred()
+
+
 def charger_css(nom_fichier: str) -> None:
     """Charge un fichier CSS depuis static/css/ (compat ancien API)."""
     CSSEngine.register_file(nom_fichier)
@@ -521,6 +587,7 @@ __all__ = [
     "css_class",
     "register_keyframes",
     "inject_all",
+    "inject_deferred",
     "charger_css",
     "CSSManager",
     "StyleSheet",

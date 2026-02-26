@@ -21,6 +21,7 @@ from .base import (
 
 # Common
 from .common import (
+    ErrorResponse,
     MessageResponse,
     ReponsePaginee,
 )
@@ -32,6 +33,27 @@ from .courses import (
     CourseListCreate,
     ListeCoursesResponse,
     ListeCoursesResume,
+)
+
+# Error responses OpenAPI
+from .errors import (
+    REPONSE_401,
+    REPONSE_403,
+    REPONSE_404,
+    REPONSE_422,
+    REPONSE_429,
+    REPONSE_500,
+    REPONSE_503,
+    REPONSES_AUTH,
+    REPONSES_AUTH_ADMIN,
+    REPONSES_AUTH_LOGIN,
+    REPONSES_CRUD_CREATION,
+    REPONSES_CRUD_ECRITURE,
+    REPONSES_CRUD_LECTURE,
+    REPONSES_CRUD_SUPPRESSION,
+    REPONSES_IA,
+    REPONSES_LISTE,
+    combiner_reponses,
 )
 
 # Inventaire
@@ -83,8 +105,27 @@ __all__ = [
     "IdentifiedResponse",
     "TypeRepasValidator",
     # Common
+    "ErrorResponse",
     "ReponsePaginee",
     "MessageResponse",
+    # Error responses
+    "REPONSE_401",
+    "REPONSE_403",
+    "REPONSE_404",
+    "REPONSE_422",
+    "REPONSE_429",
+    "REPONSE_500",
+    "REPONSE_503",
+    "REPONSES_AUTH",
+    "REPONSES_AUTH_ADMIN",
+    "REPONSES_AUTH_LOGIN",
+    "REPONSES_CRUD_CREATION",
+    "REPONSES_CRUD_ECRITURE",
+    "REPONSES_CRUD_LECTURE",
+    "REPONSES_CRUD_SUPPRESSION",
+    "REPONSES_IA",
+    "REPONSES_LISTE",
+    "combiner_reponses",
     # Auth
     "LoginRequest",
     "UserInfoResponse",

@@ -1,9 +1,10 @@
 """
-Modèles SQLAlchemy pour les notifications push.
+Modèles SQLAlchemy pour les notifications push et les webhooks.
 
 Contient :
 - AbonnementPush : Abonnements notifications push
 - PreferenceNotification : Préférences de notification par utilisateur
+- WebhookAbonnement : Webhooks sortants pour notifications externes
 """
 
 from datetime import datetime, time
@@ -13,6 +14,8 @@ from sqlalchemy import (
     BigInteger,
     Boolean,
     DateTime,
+    Integer,
+    String,
     Text,
     Time,
 )
@@ -99,3 +102,44 @@ class PreferenceNotification(TimestampMixin, Base):
 
     def __repr__(self) -> str:
         return f"<PreferenceNotification(id={self.id}, user_id={self.user_id})>"
+
+
+# ═══════════════════════════════════════════════════════════
+# TABLE WEBHOOKS SORTANTS
+# ═══════════════════════════════════════════════════════════
+
+
+class WebhookAbonnement(TimestampMixin, Base):
+    """Abonnement webhook pour notifications externes.
+
+    Permet d'envoyer des notifications HTTP POST vers des URLs externes
+    quand des événements métier se produisent (recette créée, stock modifié, etc.).
+
+    Table SQL: webhooks_abonnements
+
+    Attributes:
+        url: URL de destination du webhook (POST)
+        evenements: Patterns d'événements à écouter (ex: ["recette.*", "courses.generees"])
+        secret: Clé HMAC-SHA256 pour signer les payloads
+        actif: Webhook actif ou désactivé
+        description: Description libre
+        derniere_livraison: Date de la dernière livraison réussie
+        nb_echecs_consecutifs: Compteur d'échecs consécutifs (auto-désactivation à 5)
+    """
+
+    __tablename__ = "webhooks_abonnements"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    url: Mapped[str] = mapped_column(Text, nullable=False)
+    evenements: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    secret: Mapped[str] = mapped_column(String(128), nullable=False)
+    actif: Mapped[bool] = mapped_column(Boolean, default=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    derniere_livraison: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    nb_echecs_consecutifs: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Propriétaire du webhook
+    user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), index=True)
+
+    def __repr__(self) -> str:
+        return f"<WebhookAbonnement(id={self.id}, url={self.url}, actif={self.actif})>"

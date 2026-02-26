@@ -46,6 +46,19 @@ def __getattr__(name: str):
         from src.services.core.base import BaseAIService
 
         return BaseAIService
+
+    # CQS (Command/Query Separation)
+    if name in (
+        "QueryService",
+        "CommandService",
+        "CRUDService",
+        "QueryProtocol",
+        "CommandProtocol",
+    ):
+        from src.services.core import cqs as cqs_mod
+
+        return getattr(cqs_mod, name)
+
     if name == "IOService":
         from src.services.core.base import IOService
 

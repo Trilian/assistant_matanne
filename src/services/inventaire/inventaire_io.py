@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any
 
 from src.core.decorators import avec_gestion_erreurs
 from src.core.exceptions import ErreurValidation
+from src.services.core.event_bus_mixin import emettre_evenement_simple
 
 from .types import ArticleImport
 
@@ -76,6 +77,16 @@ class InventaireIOMixin:
                     db.add(ingredient)
                     db.commit()
                     db.refresh(ingredient)
+
+                    emettre_evenement_simple(
+                        "stock.modifie",
+                        {
+                            "article_id": ingredient.id,
+                            "ingredient_nom": ingredient.nom,
+                            "raison": "import",
+                        },
+                        source="inventaire_io",
+                    )
 
                 # Ajoute l'article à l'inventaire
                 self.ajouter_article(

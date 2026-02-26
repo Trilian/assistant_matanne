@@ -174,6 +174,20 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "RealtimeRoom": (".realtime_collab", "RealtimeRoom"),
     "collaborative_list": (".realtime_collab", "collaborative_list"),
     "collaborative_text": (".realtime_collab", "collaborative_text"),
+    # Skeleton loading
+    "afficher_skeleton_module": (".skeleton", "afficher_skeleton_module"),
+    "afficher_skeleton_tableau": (".skeleton", "afficher_skeleton_tableau"),
+    "skeleton_block": (".skeleton", "skeleton_block"),
+    "skeleton_carte": (".skeleton", "skeleton_carte"),
+    "skeleton_circle": (".skeleton", "skeleton_circle"),
+    "skeleton_pendant_chargement": (".skeleton", "skeleton_pendant_chargement"),
+    "skeleton_texte": (".skeleton", "skeleton_texte"),
+    # Widget Runner — Isolation robuste des widgets globaux
+    "WidgetConfig": (".widget_runner", "WidgetConfig"),
+    "WIDGETS_GLOBAUX": (".widget_runner", "WIDGETS_GLOBAUX"),
+    "afficher_widgets_globaux": (".widget_runner", "afficher_widgets_globaux"),
+    "executer_widget_isole": (".widget_runner", "executer_widget_isole"),
+    "obtenir_stats_widgets": (".widget_runner", "obtenir_stats_widgets"),
 }
 
 

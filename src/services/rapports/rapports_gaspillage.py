@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import ArticleInventaire
 from src.services.rapports.types import AnalyseGaspillage
+from src.ui.tokens import Couleur
 
 logger = logging.getLogger(__name__)
 
@@ -133,7 +134,7 @@ class GaspillageReportMixin:
             "CustomTitle",
             parent=styles["Heading1"],
             fontSize=24,
-            textColor=colors.HexColor("#E91E63"),
+            textColor=colors.HexColor(Couleur.CHART_SNACK),
             spaceAfter=30,
             alignment=TA_CENTER,
         )
@@ -141,7 +142,7 @@ class GaspillageReportMixin:
             "CustomHeading",
             parent=styles["Heading2"],
             fontSize=14,
-            textColor=colors.HexColor("#1976D2"),
+            textColor=colors.HexColor(Couleur.BLUE_700),
             spaceAfter=12,
             spaceBefore=12,
         )
@@ -174,13 +175,13 @@ class GaspillageReportMixin:
         summary_table.setStyle(
             TableStyle(
                 [
-                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#E91E63")),
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.CHART_SNACK)),
                     ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                     ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                     ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
                     ("FONTSIZE", (0, 0), (-1, 0), 12),
                     ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
-                    ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor("#FCE4EC")),
+                    ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor(Couleur.BG_LIGHT_PINK)),
                     ("GRID", (0, 0), (-1, -1), 1, colors.black),
                     ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
                 ]
@@ -217,7 +218,7 @@ class GaspillageReportMixin:
             detail_table.setStyle(
                 TableStyle(
                     [
-                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#C62828")),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.SCALE_CRITICAL)),
                         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                         ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
@@ -228,7 +229,7 @@ class GaspillageReportMixin:
                             "ROWBACKGROUNDS",
                             (0, 1),
                             (-1, -1),
-                            [colors.white, colors.HexColor("#FFEBEE")],
+                            [colors.white, colors.HexColor(Couleur.BG_LIGHT_RED_ALT)],
                         ),
                     ]
                 )
@@ -251,7 +252,7 @@ class GaspillageReportMixin:
             cat_table.setStyle(
                 TableStyle(
                     [
-                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#F57F17")),
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.AMBER_800)),
                         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
@@ -262,7 +263,7 @@ class GaspillageReportMixin:
                             "ROWBACKGROUNDS",
                             (0, 1),
                             (-1, -1),
-                            [colors.white, colors.HexColor("#FFF3E0")],
+                            [colors.white, colors.HexColor(Couleur.BG_LIGHT_ORANGE)],
                         ),
                     ]
                 )

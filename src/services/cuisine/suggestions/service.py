@@ -314,52 +314,68 @@ class ServiceSuggestions(BaseAIService):
         """
         Calcule le score d'une recette selon le contexte et le profil.
 
+        Délègue au scoring unifié (scoring.py) puis ajoute les bonus
+        contextuels spécifiques aux objets ORM.
+
         Returns:
             (score, raisons, tags)
         """
-        score = 50.0  # Score de base
+        from .scoring import calculate_recipe_score, generate_suggestion_reason
+
+        # Convertir l'objet ORM en dict pour le scoring unifié
+        ingredients_recette = []
+        if hasattr(recette, "ingredients"):
+            ingredients_recette = [ri.ingredient.nom for ri in recette.ingredients if ri.ingredient]
+
+        recette_dict = {
+            "id": recette.id,
+            "nom": recette.nom,
+            "categorie": recette.categorie,
+            "temps_preparation": recette.temps_preparation or 0,
+            "temps_cuisson": getattr(recette, "temps_cuisson", 0) or 0,
+            "difficulte": recette.difficulte or "moyen",
+            "ingredients": ingredients_recette,
+            "est_vegetarien": getattr(recette, "est_vegetarien", False),
+            "contient_gluten": getattr(recette, "contient_gluten", False),
+        }
+
+        contexte_dict = {
+            "ingredients_disponibles": contexte.ingredients_disponibles,
+            "ingredients_a_utiliser": contexte.ingredients_a_utiliser,
+            "temps_disponible_minutes": contexte.temps_disponible_minutes,
+            "contraintes": contexte.contraintes,
+            "saison": contexte.saison,
+        }
+
+        profil_dict = {
+            "categories_preferees": profil.categories_preferees,
+            "difficulte_moyenne": profil.difficulte_moyenne,
+            "temps_moyen_minutes": profil.temps_moyen_minutes,
+        }
+
+        historique_list = [
+            {"recette_id": rid, "date": str(date)}
+            for rid, date in profil.jours_depuis_derniere_recette.items()
+        ]
+
+        # Score unifié (0-100) via scoring.py
+        score_base = calculate_recipe_score(
+            recette_dict, contexte_dict, profil_dict, historique_list
+        )
+
+        # Bonus contextuels ORM (non disponibles dans le scoring dict-based)
         raisons = []
         tags = []
 
-        # Bonus catégorie préférée
-        if recette.categorie in profil.categories_preferees:
-            idx = profil.categories_preferees.index(recette.categorie)
-            bonus = 20 - (idx * 3)
-            score += bonus
-            raisons.append(f"Catégorie préférée: {recette.categorie}")
-            tags.append("favori")
+        # Raison générée par le scoring unifié
+        raison_base = generate_suggestion_reason(recette_dict, contexte_dict)
+        if raison_base:
+            raisons.append(raison_base)
 
-        # Bonus temps adapté
-        if recette.temps_preparation:
-            if recette.temps_preparation <= contexte.temps_disponible_minutes:
-                score += 15
-                raisons.append("Temps adapté")
-                tags.append("rapide")
-            elif recette.temps_preparation > contexte.temps_disponible_minutes + 30:
-                score -= 20  # Trop long
-
-        # Bonus utilisation ingrédients à consommer
-        ingredients_recette = []
-        if hasattr(recette, "ingredients"):
-            ingredients_recette = [
-                ri.ingredient.nom.lower() for ri in recette.ingredients if ri.ingredient
-            ]
-
-        ingredients_prioritaires_utilises = sum(
-            1
-            for ing in contexte.ingredients_a_utiliser
-            if ing.lower() in [i.lower() for i in ingredients_recette]
-        )
-        if ingredients_prioritaires_utilises > 0:
-            score += ingredients_prioritaires_utilises * 15
-            raisons.append(f"Utilise {ingredients_prioritaires_utilises} ingrédient(s) à consommer")
-            tags.append("anti-gaspi")
-
-        # Bonus ingrédients disponibles
+        # Bonus ingrédients en stock (ratio)
+        ingredients_lower = [i.lower() for i in ingredients_recette]
         ingredients_disponibles_utilises = sum(
-            1
-            for ing in contexte.ingredients_disponibles
-            if ing.lower() in [i.lower() for i in ingredients_recette]
+            1 for ing in contexte.ingredients_disponibles if ing.lower() in ingredients_lower
         )
         ratio_disponible = (
             ingredients_disponibles_utilises / len(ingredients_recette)
@@ -367,45 +383,38 @@ class ServiceSuggestions(BaseAIService):
             else 0
         )
         if ratio_disponible > 0.7:
-            score += 20
+            score_base += 10
             raisons.append("Majorité des ingrédients en stock")
             tags.append("stock-ok")
 
-        # Malus répétition récente
-        if recette.id in profil.jours_depuis_derniere_recette:
-            jours = profil.jours_depuis_derniere_recette[recette.id]
-            if jours < 7:
-                score -= 30
-                raisons.append("Préparé récemment")
-            elif jours < 14:
-                score -= 15
-
-        # Bonus découverte
+        # Tags contextuels
+        if recette.categorie in profil.categories_preferees:
+            tags.append("favori")
+        if (
+            recette.temps_preparation
+            and recette.temps_preparation <= contexte.temps_disponible_minutes
+        ):
+            tags.append("rapide")
+        if any(
+            ing.lower() in [i.lower() for i in contexte.ingredients_a_utiliser]
+            for ing in ingredients_recette
+        ):
+            tags.append("anti-gaspi")
         if recette.id not in profil.jours_depuis_derniere_recette:
-            score += 10
             tags.append("découverte")
-
-        # Bonus saison
-        saison_tags = {
-            "printemps": ["légumes verts", "asperge", "petit pois"],
-            "été": ["tomate", "courgette", "aubergine", "salade"],
-            "automne": ["champignon", "courge", "potiron"],
-            "hiver": ["chou", "poireau", "carotte", "navet"],
-        }
-        if contexte.saison in saison_tags:
-            for ing in ingredients_recette:
-                if any(s in ing.lower() for s in saison_tags[contexte.saison]):
-                    score += 10
-                    tags.append("de-saison")
-                    raisons.append("Ingrédients de saison")
-                    break
-
-        # Recette favorite
         if recette.id in profil.recettes_favorites:
-            score += 5
             tags.append("classique")
 
-        return max(0, score), raisons, list(set(tags))
+        # Bonus saison (tag)
+        from .saisons import get_current_season, is_ingredient_in_season
+
+        saison = contexte.saison or get_current_season()
+        for ing in ingredients_recette:
+            if is_ingredient_in_season(ing, saison):
+                tags.append("de-saison")
+                break
+
+        return max(0, min(100, score_base)), raisons, list(set(tags))
 
     def _trouver_ingredients_manquants(
         self, recette: Recette, ingredients_disponibles: list[str]

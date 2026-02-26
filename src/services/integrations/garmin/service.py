@@ -29,6 +29,7 @@ from src.core.models import (
     ResumeQuotidienGarmin,
 )
 from src.core.monitoring import chronometre
+from src.services.core.event_bus_mixin import emettre_evenement_simple
 from src.services.core.registry import service_factory
 
 from .types import GarminConfig
@@ -178,6 +179,11 @@ class ServiceGarmin:
             db.commit()
 
             logger.info(f"Garmin connecté pour l'utilisateur {user_id}")
+            emettre_evenement_simple(
+                "sante.modifie",
+                {"entree_id": user_id, "type_donnee": "garmin_connexion", "action": "creee"},
+                source="garmin",
+            )
             self._temp_request_token = None
             return True
 
@@ -250,6 +256,12 @@ class ServiceGarmin:
         # Mettre à jour la date de dernière sync
         user.garmin_token.derniere_sync = datetime.utcnow()
         db.commit()
+
+        emettre_evenement_simple(
+            "sante.modifie",
+            {"entree_id": user_id, "type_donnee": "garmin_sync", "action": "creee"},
+            source="garmin",
+        )
 
         logger.info(f"Sync Garmin terminée pour {user_id}: {results}")
         return results
@@ -396,6 +408,12 @@ class ServiceGarmin:
 
         user.garmin_connected = False
         db.commit()
+
+        emettre_evenement_simple(
+            "sante.modifie",
+            {"entree_id": user_id, "type_donnee": "garmin_deconnexion", "action": "supprimee"},
+            source="garmin",
+        )
 
         logger.info(f"Garmin déconnecté pour l'utilisateur {user_id}")
         return True

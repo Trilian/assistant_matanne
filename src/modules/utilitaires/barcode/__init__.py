@@ -12,9 +12,14 @@ Intègre les fonctionnalités avancées de détection:
 - Anti-doublon (scan_cooldown)
 """
 
+from typing import TYPE_CHECKING
+
 import streamlit as st  # noqa: F401 — exposed for @patch compatibility
 
-from src.services.integrations import BarcodeService  # noqa: F401
+from src.services.integrations import get_barcode_service as _get_svc  # noqa: F401
+
+if TYPE_CHECKING:
+    from src.services.integrations import BarcodeService  # noqa: F401
 
 from .app import app, get_barcode_service
 from .detection import BarcodeScanner, detect_barcodes

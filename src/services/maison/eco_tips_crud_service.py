@@ -13,16 +13,20 @@ from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_d
 from src.core.models import ActionEcologique
 from src.core.monitoring import chronometre
 from src.services.core.base import BaseService
+from src.services.core.event_bus_mixin import EventBusMixin
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
 
-class EcoTipsCrudService(BaseService[ActionEcologique]):
+class EcoTipsCrudService(EventBusMixin, BaseService[ActionEcologique]):
     """Service CRUD pour les actions écologiques.
 
     Hérite de BaseService[ActionEcologique] pour le CRUD générique.
+    Utilise EventBusMixin pour émettre des événements domaine.
     """
+
+    _event_source = "eco_tips"
 
     def __init__(self):
         super().__init__(model=ActionEcologique, cache_ttl=300)
@@ -83,6 +87,10 @@ class EcoTipsCrudService(BaseService[ActionEcologique]):
         db.commit()
         db.refresh(action)
         logger.info(f"Action écologique créée: {action.id} - {action.nom}")
+        self._emettre_evenement(
+            "eco_tips.modifie",
+            {"action_id": action.id, "nom": action.nom, "action": "cree"},
+        )
         return action
 
     @avec_session_db
@@ -107,6 +115,10 @@ class EcoTipsCrudService(BaseService[ActionEcologique]):
         db.commit()
         db.refresh(action)
         logger.info(f"Action écologique {action_id} mise à jour")
+        self._emettre_evenement(
+            "eco_tips.modifie",
+            {"action_id": action_id, "nom": action.nom, "action": "modifie"},
+        )
         return action
 
     @avec_session_db
@@ -123,9 +135,14 @@ class EcoTipsCrudService(BaseService[ActionEcologique]):
         action = db.query(ActionEcologique).filter(ActionEcologique.id == action_id).first()
         if action is None:
             return False
+        nom = action.nom
         db.delete(action)
         db.commit()
         logger.info(f"Action écologique {action_id} supprimée")
+        self._emettre_evenement(
+            "eco_tips.modifie",
+            {"action_id": action_id, "nom": nom, "action": "supprime"},
+        )
         return True
 
 

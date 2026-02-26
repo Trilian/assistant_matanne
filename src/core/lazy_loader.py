@@ -12,6 +12,7 @@ __all__ = [
 
 import importlib
 import logging
+import threading
 import time
 from typing import TYPE_CHECKING, Any
 
@@ -40,11 +41,12 @@ class ChargeurModuleDiffere:
 
     _cache: dict[str, Any] = {}
     _load_times: dict[str, float] = {}
+    _lock = threading.Lock()
 
     @staticmethod
     def charger(module_path: str, reload: bool = False) -> Any:
         """
-        Charge un module à la demande
+        Charge un module à la demande (thread-safe)
 
         Args:
             module_path: Chemin du module (ex: "src.modules.cuisine")
@@ -53,37 +55,42 @@ class ChargeurModuleDiffere:
         Returns:
             Module chargé
         """
-        # Vérifier cache
-        if module_path in ChargeurModuleDiffere._cache and not reload:
+        # Vérifier cache (read sans lock — ok car dict.get est atomique en CPython)
+        if not reload and module_path in ChargeurModuleDiffere._cache:
             logger.debug(f"Cache HIT: {module_path}")
             return ChargeurModuleDiffere._cache[module_path]
 
-        # Charger module
-        start_time = time.time()
+        # Charger module avec lock
+        with ChargeurModuleDiffere._lock:
+            # Double-check après acquisition du lock
+            if not reload and module_path in ChargeurModuleDiffere._cache:
+                return ChargeurModuleDiffere._cache[module_path]
 
-        try:
-            logger.info(f"📦 Chargement lazy: {module_path}")
+            start_time = time.time()
 
-            # Import dynamique
-            module = importlib.import_module(module_path)
+            try:
+                logger.info(f"📦 Chargement lazy: {module_path}")
 
-            # Cacher
-            ChargeurModuleDiffere._cache[module_path] = module
+                # Import dynamique
+                module = importlib.import_module(module_path)
 
-            # Métriques
-            load_time = time.time() - start_time
-            ChargeurModuleDiffere._load_times[module_path] = load_time
+                # Cacher
+                ChargeurModuleDiffere._cache[module_path] = module
 
-            logger.info(f"[OK] Module chargé en {load_time * 1000:.0f}ms: {module_path}")
+                # Métriques
+                load_time = time.time() - start_time
+                ChargeurModuleDiffere._load_times[module_path] = load_time
 
-            return module
+                logger.info(f"[OK] Module chargé en {load_time * 1000:.0f}ms: {module_path}")
 
-        except ModuleNotFoundError:
-            logger.error(f"[ERROR] Module introuvable: {module_path}")
-            raise
-        except Exception as e:
-            logger.error(f"[ERROR] Erreur chargement {module_path}: {e}")
-            raise
+                return module
+
+            except ModuleNotFoundError:
+                logger.error(f"[ERROR] Module introuvable: {module_path}")
+                raise
+            except Exception as e:
+                logger.error(f"[ERROR] Erreur chargement {module_path}: {e}")
+                raise
 
     @staticmethod
     def precharger(module_paths: list[str], background: bool = True):
@@ -118,24 +125,26 @@ class ChargeurModuleDiffere:
 
     @staticmethod
     def obtenir_statistiques() -> dict:
-        """Retourne stats lazy loading"""
-        return {
-            "cached_modules": len(ChargeurModuleDiffere._cache),
-            "total_load_time": sum(ChargeurModuleDiffere._load_times.values()),
-            "average_load_time": (
-                sum(ChargeurModuleDiffere._load_times.values())
-                / len(ChargeurModuleDiffere._load_times)
-                if ChargeurModuleDiffere._load_times
-                else 0
-            ),
-            "load_times": ChargeurModuleDiffere._load_times,
-        }
+        """Retourne stats lazy loading (thread-safe)"""
+        with ChargeurModuleDiffere._lock:
+            return {
+                "cached_modules": len(ChargeurModuleDiffere._cache),
+                "total_load_time": sum(ChargeurModuleDiffere._load_times.values()),
+                "average_load_time": (
+                    sum(ChargeurModuleDiffere._load_times.values())
+                    / len(ChargeurModuleDiffere._load_times)
+                    if ChargeurModuleDiffere._load_times
+                    else 0
+                ),
+                "load_times": dict(ChargeurModuleDiffere._load_times),
+            }
 
     @staticmethod
     def vider_cache():
-        """Vide le cache (dev mode)"""
-        ChargeurModuleDiffere._cache.clear()
-        ChargeurModuleDiffere._load_times.clear()
+        """Vide le cache (dev mode, thread-safe)"""
+        with ChargeurModuleDiffere._lock:
+            ChargeurModuleDiffere._cache.clear()
+            ChargeurModuleDiffere._load_times.clear()
         logger.info("🗑️ Cache lazy loader vidé")
 
 

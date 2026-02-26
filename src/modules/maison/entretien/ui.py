@@ -63,7 +63,7 @@ def afficher_score_gamifie(score: dict, streak: int = 0):
     <div class="score-container animate-in">
         <div class="score-ring">
             <svg width="180" height="180" viewBox="0 0 180 180">
-                <circle cx="90" cy="90" r="70" fill="none" stroke="#2d3748" stroke-width="12" opacity="0.3"/>
+                <circle cx="90" cy="90" r="70" fill="none" stroke="{Couleur.TEXT_DARK_SLATE}" stroke-width="12" opacity="0.3"/>
                 <circle
                     cx="90" cy="90" r="70"
                     fill="none"
@@ -216,7 +216,7 @@ def afficher_tache_entretien(tache: dict, key: str) -> bool:
             <div class="icon-circle {cat_class}">{tache["categorie_icon"]}</div>
             <div class="content">
                 <div class="title">{tache["tache_nom"]} {pro_html}</div>
-                <div style="font-size: 0.9rem; color: #4a5568; margin-bottom: 0.5rem;">
+                <div style="font-size: 0.9rem; color: {Couleur.TEXT_SLATE_600}; margin-bottom: 0.5rem;">
                     {tache["objet_nom"]} • {tache.get("piece", "Non assigné")}
                 </div>
                 <div class="meta">
@@ -353,7 +353,7 @@ def afficher_timeline_item(historique_entry: dict, catalogue: dict, label_date: 
     <div class="timeline-item done">
         <span>{icon}</span>
         <span><strong>{historique_entry.get("tache_nom", "Tâche")}</strong></span>
-        <span style="color: #718096">• {historique_entry.get("objet_id", "").replace("_", " ")}</span>
+        <span style="color: {Couleur.TEXT_SLATE_500}">• {historique_entry.get("objet_id", "").replace("_", " ")}</span>
     </div>
     """,
         unsafe_allow_html=True,

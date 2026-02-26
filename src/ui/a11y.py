@@ -5,6 +5,7 @@ Fournit des utilitaires pour rendre les composants UI accessibles :
 - Texte invisible pour screen readers (``sr_only``)
 - Régions ARIA live pour les notifications dynamiques
 - Rôles et attributs ARIA
+- Landmarks ARIA avec context manager (isole ``unsafe_allow_html``)
 - Vérification du ratio de contraste WCAG AA/AAA
 - CSS utilitaire d'accessibilité injecté globalement
 
@@ -17,6 +18,10 @@ Usage:
     # Zone live pour annoncer les changements dynamiques
     A11y.live_region("Sauvegarde réussie", politeness="polite")
 
+    # Landmark via context manager (fermeture garantie)
+    with A11y.landmark_region("main", "Contenu principal", html_id="main-content"):
+        page.run()
+
     # Vérifier le contraste
     ratio = A11y.ratio_contraste("#212529", "#ffffff")
     assert ratio >= 4.5  # WCAG AA
@@ -24,31 +29,17 @@ Usage:
 
 from __future__ import annotations
 
+import logging
+from contextlib import contextmanager
+from typing import Generator
+
 import streamlit as st
 
+logger = logging.getLogger(__name__)
 
-class A11y:
-    """Utilitaires d'accessibilité centralisés.
 
-    Méthodes statiques uniquement — pas d'instanciation nécessaire.
-    """
-
-    # ── CSS utilitaire ────────────────────────────────────
-
-    @staticmethod
-    def injecter_css() -> None:
-        """Enregistre le CSS utilitaire d'accessibilité dans le CSSManager.
-
-        Inclut :
-        - ``.sr-only`` : texte invisible visuellement mais lu par les screen readers
-        - ``:focus-visible`` : indicateurs de focus clairs
-        - ``@media (prefers-reduced-motion)`` : désactive les animations
-        """
-        from src.ui.engine import CSSManager
-
-        CSSManager.register(
-            "a11y",
-            """
+# ── Constante CSS a11y (partagée par injecter_css / injecter_css_differe) ──
+_A11Y_CSS = """
 /* ── Screen reader only ────────────────────────── */
 .sr-only {
     position: absolute !important;
@@ -85,7 +76,46 @@ class A11y:
 [aria-live] {
     position: relative;
 }
-""",
+"""
+
+
+class A11y:
+    """Utilitaires d'accessibilité centralisés.
+
+    Méthodes statiques uniquement — pas d'instanciation nécessaire.
+    """
+
+    # ── CSS utilitaire ────────────────────────────────────
+
+    @staticmethod
+    def injecter_css() -> None:
+        """Enregistre le CSS utilitaire d'accessibilité dans le CSSManager.
+
+        Inclut :
+        - ``.sr-only`` : texte invisible visuellement mais lu par les screen readers
+        - ``:focus-visible`` : indicateurs de focus clairs
+        - ``@media (prefers-reduced-motion)`` : désactive les animations
+        """
+        from src.ui.engine import CSSManager
+
+        CSSManager.register(
+            "a11y",
+            _A11Y_CSS,
+        )
+
+    @staticmethod
+    def injecter_css_differe() -> None:
+        """Enregistre le CSS a11y dans la file CSS différée (non-critique).
+
+        Appelé par ``initialiser_app()`` pour charger le CSS a11y après
+        le premier paint critique. Le CSS est injecté via
+        ``CSSManager.inject_deferred()``.
+        """
+        from src.ui.engine import CSSManager
+
+        CSSManager.register_deferred(
+            "a11y",
+            _A11Y_CSS,
         )
 
     # ── Screen Reader ─────────────────────────────────────
@@ -215,6 +245,96 @@ class A11y:
         from src.ui.utils import echapper_html
 
         return f'<{tag} role="{role}" aria-label="{echapper_html(label)}">{html_content}</{tag}>'
+
+    # ── Landmark safe rendering (isole unsafe_allow_html) ─
+
+    @staticmethod
+    def _safe_html(html: str) -> None:
+        """Injecte du HTML brut via st.markdown avec fallback.
+
+        Point unique de dépendance à ``unsafe_allow_html``.
+        Si Streamlit retire le support, seule cette méthode doit être adaptée.
+
+        Args:
+            html: Fragment HTML à injecter.
+        """
+        try:
+            st.markdown(html, unsafe_allow_html=True)
+        except TypeError:
+            # Fallback si Streamlit retire unsafe_allow_html dans une future version
+            logger.warning(
+                "unsafe_allow_html non supporté — HTML ignoré: %.60s…",
+                html,
+            )
+
+    @staticmethod
+    def ouvrir_landmark(
+        role: str,
+        label: str,
+        tag: str = "main",
+        html_id: str | None = None,
+    ) -> None:
+        """Ouvre un landmark ARIA via st.markdown(unsafe_allow_html=True).
+
+        Encapsule la dépendance à ``unsafe_allow_html`` dans un seul
+        point de contrôle. Si Streamlit supprime le support, seule
+        ``_safe_html`` doit être adaptée.
+
+        Args:
+            role: Rôle ARIA (``"main"``, ``"navigation"``, ``"complementary"``…).
+            label: Label accessible pour le landmark.
+            tag: Balise HTML (``"main"``, ``"nav"``, ``"aside"``, ``"header"``…).
+            html_id: Attribut ``id`` optionnel (pour skip-link).
+        """
+        from src.ui.utils import echapper_html
+
+        id_attr = f' id="{html_id}"' if html_id else ""
+        html = f'<{tag}{id_attr} role="{role}" ' f'aria-label="{echapper_html(label)}">'
+        A11y._safe_html(html)
+
+    @staticmethod
+    def fermer_landmark(tag: str = "main") -> None:
+        """Ferme un landmark ARIA précédemment ouvert.
+
+        Args:
+            tag: Balise HTML à fermer (doit correspondre à ``ouvrir_landmark``).
+        """
+        A11y._safe_html(f"</{tag}>")
+
+    @staticmethod
+    @contextmanager
+    def landmark_region(
+        role: str,
+        label: str,
+        tag: str = "main",
+        html_id: str | None = None,
+    ) -> Generator[None, None, None]:
+        """Context manager pour un landmark ARIA ouvert/fermé automatiquement.
+
+        Garantit la fermeture même si le contenu lève une exception.
+        Isole la dépendance à ``unsafe_allow_html`` de Streamlit dans
+        ``_safe_html()`` — un seul point de modification si l'API change.
+
+        Args:
+            role: Rôle ARIA du landmark.
+            label: Label accessible.
+            tag: Balise HTML englobante.
+            html_id: ID optionnel pour navigation (skip-link).
+
+        Example::
+
+            with A11y.landmark_region("main", "Contenu principal",
+                                      html_id="main-content"):
+                page.run()
+
+            with A11y.landmark_region("navigation", "Menu latéral", tag="nav"):
+                afficher_sidebar()
+        """
+        A11y.ouvrir_landmark(role, label, tag, html_id)
+        try:
+            yield
+        finally:
+            A11y.fermer_landmark(tag)
 
     # ── Contraste WCAG ────────────────────────────────────
 

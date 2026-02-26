@@ -4,15 +4,148 @@ Constantes nommées pour les clés st.session_state.
 Registre centralisé de toutes les clés de session Streamlit utilisées
 dans l'application. Élimine les chaînes magiques et prévient les collisions.
 
+Deux mécanismes coexistent:
+- **SK** (ci-dessous): Clés statiques centralisées pour l'état global/partagé.
+- **KeyNamespace** (``src/ui/keys.py``): Clés dynamiques préfixées par module
+  (ex: ``charges__mode_ajout``). Utilisées pour l'état local d'un module.
+
+Règle: Utiliser **SK** pour l'état partagé inter-modules,
+**KeyNamespace** pour l'état local d'un module.
+
 Usage:
     from src.core.session_keys import SK
     if SK.BATCH_TYPE not in st.session_state:
         st.session_state[SK.BATCH_TYPE] = "dimanche"
+
+    # Audit des clés en session
+    from src.core.session_keys import auditer_session_keys
+    rapport = auditer_session_keys()
 """
+
+from __future__ import annotations
+
+import logging
+import threading
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+
+# ═══════════════════════════════════════════════════════════
+# REGISTRE DYNAMIQUE DES CLÉS DE SESSION
+# ═══════════════════════════════════════════════════════════
+
+
+class _SessionKeyRegistry:
+    """Registre centralisé qui trace TOUTES les clés de session state.
+
+    Trace les clés statiques (SK.*) et les clés dynamiques (_keys()).
+    Permet l'audit, la détection de collisions et le nettoyage.
+    """
+
+    def __init__(self) -> None:
+        self._static_keys: dict[str, str] = {}  # key → description/source
+        self._dynamic_namespaces: dict[str, set[str]] = {}  # prefix → {key_names}
+        self._lock = threading.Lock()
+
+    def enregistrer_statique(self, key: str, source: str = "SK") -> None:
+        """Enregistre une clé statique."""
+        with self._lock:
+            self._static_keys[key] = source
+
+    def enregistrer_dynamique(self, namespace: str, key_name: str) -> None:
+        """Enregistre une clé dynamique générée par KeyNamespace."""
+        with self._lock:
+            if namespace not in self._dynamic_namespaces:
+                self._dynamic_namespaces[namespace] = set()
+            self._dynamic_namespaces[namespace].add(key_name)
+
+    def obtenir_toutes_cles(self) -> dict[str, str]:
+        """Retourne toutes les clés connues (statiques + dynamiques)."""
+        with self._lock:
+            result = dict(self._static_keys)
+            for ns, keys in self._dynamic_namespaces.items():
+                for k in keys:
+                    full_key = f"{ns}__{k}"
+                    result[full_key] = f"KeyNamespace({ns})"
+            return result
+
+    def detecter_collisions(self) -> list[tuple[str, str, str]]:
+        """Détecte les collisions entre clés statiques et dynamiques."""
+        collisions: list[tuple[str, str, str]] = []
+        with self._lock:
+            dynamic_full = {}
+            for ns, keys in self._dynamic_namespaces.items():
+                for k in keys:
+                    full_key = f"{ns}__{k}"
+                    dynamic_full[full_key] = f"KeyNamespace({ns})"
+
+            for key in self._static_keys:
+                if key in dynamic_full:
+                    collisions.append((key, self._static_keys[key], dynamic_full[key]))
+        return collisions
+
+    def rapport(self) -> str:
+        """Génère un rapport d'audit des clés de session."""
+        with self._lock:
+            nb_static = len(self._static_keys)
+            nb_dynamic_ns = len(self._dynamic_namespaces)
+            nb_dynamic_keys = sum(len(v) for v in self._dynamic_namespaces.values())
+
+        collisions = self.detecter_collisions()
+        lines = [
+            "📊 Audit Session Keys",
+            f"  Clés statiques (SK): {nb_static}",
+            f"  Namespaces dynamiques: {nb_dynamic_ns}",
+            f"  Clés dynamiques totales: {nb_dynamic_keys}",
+            f"  Total: {nb_static + nb_dynamic_keys}",
+        ]
+
+        if collisions:
+            lines.append(f"\n⚠️ {len(collisions)} collision(s):")
+            for key, src1, src2 in collisions:
+                lines.append(f"  • '{key}': {src1} ↔ {src2}")
+        else:
+            lines.append("  ✅ Aucune collision")
+
+        if self._dynamic_namespaces:
+            lines.append("\n📦 Namespaces actifs:")
+            for ns, keys in sorted(self._dynamic_namespaces.items()):
+                lines.append(f"  • {ns}: {len(keys)} clés")
+
+        return "\n".join(lines)
+
+
+# Singleton thread-safe
+_registry_lock = threading.Lock()
+_registry_instance: _SessionKeyRegistry | None = None
+
+
+def obtenir_registre_session_keys() -> _SessionKeyRegistry:
+    """Obtient l'instance singleton du registre de clés."""
+    global _registry_instance
+    if _registry_instance is None:
+        with _registry_lock:
+            if _registry_instance is None:
+                _registry_instance = _SessionKeyRegistry()
+    return _registry_instance
+
+
+def auditer_session_keys() -> str:
+    """Audit rapide des clés de session — retourne un rapport texte."""
+    return obtenir_registre_session_keys().rapport()
+
+
+# ═══════════════════════════════════════════════════════════
+# SESSION KEYS — Clés statiques globales
+# ═══════════════════════════════════════════════════════════
 
 
 class _SessionKeys:
-    """Namespace pour toutes les clés de session state."""
+    """Namespace pour les clés de session state GLOBALES/PARTAGÉES.
+
+    Pour l'état local d'un module, utiliser ``KeyNamespace`` à la place.
+    """
 
     __slots__ = ()
 
@@ -213,4 +346,28 @@ class _SessionKeys:
 # Singleton — usage: from src.core.session_keys import SK
 SK = _SessionKeys()
 
-__all__ = ["SK"]
+
+# ═══════════════════════════════════════════════════════════
+# AUTO-ENREGISTREMENT des clés statiques
+# ═══════════════════════════════════════════════════════════
+
+
+def _enregistrer_cles_statiques() -> None:
+    """Enregistre toutes les constantes de SK dans le registre global."""
+    registry = obtenir_registre_session_keys()
+    for attr in dir(SK):
+        if attr.startswith("_") or callable(getattr(SK, attr)):
+            continue
+        value = getattr(SK, attr)
+        if isinstance(value, str):
+            registry.enregistrer_statique(value, f"SK.{attr}")
+
+
+_enregistrer_cles_statiques()
+
+
+__all__ = [
+    "SK",
+    "auditer_session_keys",
+    "obtenir_registre_session_keys",
+]

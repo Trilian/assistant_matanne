@@ -11,6 +11,20 @@ from pydantic import BaseModel, Field
 T = TypeVar("T")
 
 
+class ErrorResponse(BaseModel):
+    """Réponse d'erreur standardisée.
+
+    Utilisée pour documenter les erreurs 4xx/5xx dans OpenAPI.
+
+    Example:
+        ```json
+        {"detail": "Recette non trouvée"}
+        ```
+    """
+
+    detail: str = Field(description="Message d'erreur descriptif")
+
+
 class ReponsePaginee(BaseModel, Generic[T]):
     """Réponse paginée générique."""
 

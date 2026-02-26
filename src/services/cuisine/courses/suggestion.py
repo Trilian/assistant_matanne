@@ -21,6 +21,7 @@ from src.core.models import (
     Repas,
 )
 from src.services.core.base import BaseAIService
+from src.services.core.event_bus_mixin import emettre_evenement_simple
 
 from .constantes import MAPPING_RAYONS, PRIORITES
 from .types import ArticleCourse, ListeCoursesIntelligente, SuggestionSubstitution
@@ -261,6 +262,12 @@ class ServiceCoursesIntelligentes(BaseAIService):
                 ids_crees.append(item.id)
 
         db.commit()
+
+        emettre_evenement_simple(
+            "courses.modifiees",
+            {"nb_articles": len(ids_crees), "action": "articles_ajoutes", "source": "planning"},
+            source="courses_suggestion",
+        )
         logger.info(f"{len(ids_crees)} articles ajoutes a la liste de courses")
         return ids_crees
 

@@ -100,7 +100,7 @@ class ConnectionManager:
             self._connexions[liste_id][user_id] = websocket
             self._users[liste_id][user_id] = {
                 "username": username,
-                "connected_at": datetime.now(UTC),
+                "connected_at": datetime.now(UTC).isoformat(),
             }
 
         logger.info(f"🔌 WS: {username} ({user_id}) connecté à liste #{liste_id}")

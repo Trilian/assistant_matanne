@@ -15,12 +15,19 @@ from src.api.schemas import (
     MessageResponse,
     ReponsePaginee,
 )
+from src.api.schemas.errors import (
+    REPONSES_CRUD_CREATION,
+    REPONSES_CRUD_ECRITURE,
+    REPONSES_CRUD_LECTURE,
+    REPONSES_CRUD_SUPPRESSION,
+    REPONSES_LISTE,
+)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
 
 
-@router.get("", response_model=ReponsePaginee[ListeCoursesResume])
+@router.get("", response_model=ReponsePaginee[ListeCoursesResume], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_courses(
     page: int = Query(1, ge=1, description="Numéro de page (1-indexé)"),
@@ -92,7 +99,7 @@ async def lister_courses(
     return await executer_async(_query)
 
 
-@router.post("", response_model=MessageResponse, status_code=201)
+@router.post("", response_model=MessageResponse, status_code=201, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def creer_liste(data: CourseListCreate, user: dict[str, Any] = Depends(require_auth)):
     """
@@ -135,7 +142,12 @@ async def creer_liste(data: CourseListCreate, user: dict[str, Any] = Depends(req
     return await executer_async(_create)
 
 
-@router.post("/{liste_id}/items", response_model=MessageResponse, status_code=201)
+@router.post(
+    "/{liste_id}/items",
+    response_model=MessageResponse,
+    status_code=201,
+    responses=REPONSES_CRUD_CREATION,
+)
 @gerer_exception_api
 async def ajouter_article(
     liste_id: int, item: CourseItemBase, user: dict[str, Any] = Depends(require_auth)
@@ -199,7 +211,7 @@ async def ajouter_article(
     return await executer_async(_add)
 
 
-@router.get("/{liste_id}", response_model=ListeCoursesResponse)
+@router.get("/{liste_id}", response_model=ListeCoursesResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
@@ -258,7 +270,7 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
     return await executer_async(_get)
 
 
-@router.put("/{liste_id}", response_model=MessageResponse)
+@router.put("/{liste_id}", response_model=MessageResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_liste(
     liste_id: int, data: CourseListCreate, user: dict[str, Any] = Depends(require_auth)
@@ -306,7 +318,9 @@ async def modifier_liste(
     return await executer_async(_update)
 
 
-@router.put("/{liste_id}/items/{item_id}", response_model=MessageResponse)
+@router.put(
+    "/{liste_id}/items/{item_id}", response_model=MessageResponse, responses=REPONSES_CRUD_ECRITURE
+)
 @gerer_exception_api
 async def modifier_article(
     liste_id: int, item_id: int, item: CourseItemBase, user: dict[str, Any] = Depends(require_auth)
@@ -363,7 +377,7 @@ async def modifier_article(
     return await executer_async(_update)
 
 
-@router.delete("/{liste_id}", response_model=MessageResponse)
+@router.delete("/{liste_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
 @gerer_exception_api
 async def supprimer_liste(liste_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
@@ -405,7 +419,11 @@ async def supprimer_liste(liste_id: int, user: dict[str, Any] = Depends(require_
     return await executer_async(_delete)
 
 
-@router.delete("/{liste_id}/items/{item_id}", response_model=MessageResponse)
+@router.delete(
+    "/{liste_id}/items/{item_id}",
+    response_model=MessageResponse,
+    responses=REPONSES_CRUD_SUPPRESSION,
+)
 @gerer_exception_api
 async def supprimer_article(
     liste_id: int, item_id: int, user: dict[str, Any] = Depends(require_auth)

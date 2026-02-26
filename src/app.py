@@ -4,6 +4,8 @@ Application principale - VERSION OPTIMISÉE LAZY LOADING
 ✅ -60% temps chargement initial
 ✅ Navigation instantanée
 ✅ Modules chargés à la demande
+✅ Widgets globaux isolés via WidgetRunner (configurable, métriques)
+✅ Landmarks ARIA via A11y context manager (isole unsafe_allow_html)
 """
 
 import os as _os
@@ -123,45 +125,10 @@ page = initialiser_navigation()
 
 
 # ═══════════════════════════════════════════════════════════
-# WIDGETS GLOBAUX PHASE D
+# WIDGETS GLOBAUX PHASE D — Isolation robuste via WidgetRunner
 # ═══════════════════════════════════════════════════════════
 
-
-def _afficher_widgets_globaux() -> None:
-    """Injecte les widgets flottants persistants (chat IA, notifications, gamification).
-
-    Chaque widget est isolé dans son propre try/except pour que
-    l'échec de l'un ne masque pas les autres (U3).
-    """
-    col_chat, col_notif, col_gamif = st.columns([1, 1, 1])
-    with col_chat:
-        try:
-            from src.ui.components.chat_global import afficher_chat_global
-
-            afficher_chat_global()
-        except ImportError:
-            logger.debug("Widget chat global non disponible (module absent)")
-        except Exception as e:
-            logger.warning(f"Widget chat global en erreur: {e}", exc_info=True)
-    with col_notif:
-        try:
-            from src.ui.components.notifications_live import widget_notifications_live
-
-            widget_notifications_live()
-        except ImportError:
-            logger.debug("Widget notifications non disponible (module absent)")
-        except Exception as e:
-            logger.warning(f"Widget notifications en erreur: {e}", exc_info=True)
-    with col_gamif:
-        try:
-            from src.ui.components.gamification_widget import afficher_gamification_sidebar
-
-            afficher_gamification_sidebar()
-        except ImportError:
-            logger.debug("Widget gamification non disponible (module absent)")
-        except Exception as e:
-            logger.warning(f"Widget gamification en erreur: {e}", exc_info=True)
-
+from src.ui.components.widget_runner import afficher_widgets_globaux
 
 # ═══════════════════════════════════════════════════════════
 # MAIN
@@ -188,35 +155,35 @@ def main() -> None:
         if not is_mode_focus():
             afficher_header()
 
-        # Point d'ancrage pour le skip-link (A11y)
-        st.markdown(
-            '<main id="main-content" role="main" aria-label="Contenu principal">',
-            unsafe_allow_html=True,
-        )
+        # Landmark ARIA via context manager — isole unsafe_allow_html
+        # dans A11y._safe_html() (un seul point de modification si l'API change)
+        from src.ui.a11y import A11y
 
-        # Exécuter la page sélectionnée par st.navigation()
-        # Error boundary global : capture élégante avec fallback UI (audit §10)
-        _seuil = parametres.SEUIL_PAGE_LENTE
-        with error_boundary(
-            titre="Erreur lors du chargement de la page",
-            afficher_details=obtenir_etat().mode_debug,
-            niveau="error",
+        with A11y.landmark_region(
+            role="main",
+            label="Contenu principal",
+            tag="main",
+            html_id="main-content",
         ):
-            _t0 = time.perf_counter()
-            page.run()
-            _duree_page = time.perf_counter() - _t0
-            if _duree_page > _seuil:
-                logger.warning(
-                    "⏱️ Page lente détectée : %.2fs (seuil %.1fs)",
-                    _duree_page,
-                    _seuil,
-                )
+            # Error boundary global : capture élégante avec fallback UI (audit §10)
+            _seuil = parametres.SEUIL_PAGE_LENTE
+            with error_boundary(
+                titre="Erreur lors du chargement de la page",
+                afficher_details=obtenir_etat().mode_debug,
+                niveau="error",
+            ):
+                _t0 = time.perf_counter()
+                page.run()
+                _duree_page = time.perf_counter() - _t0
+                if _duree_page > _seuil:
+                    logger.warning(
+                        "⏱️ Page lente détectée : %.2fs (seuil %.1fs)",
+                        _duree_page,
+                        _seuil,
+                    )
 
-        # Fermer le landmark main
-        st.markdown("</main>", unsafe_allow_html=True)
-
-        # ── Widgets globaux (Phase D) ──
-        _afficher_widgets_globaux()
+        # ── Widgets globaux (Phase D) — isolation robuste via WidgetRunner ──
+        afficher_widgets_globaux()
 
         # Mode focus: bouton de sortie
         if is_mode_focus():

@@ -22,6 +22,7 @@ from src.core.models import (
     PreparationBatch,
     SessionBatchCooking,
 )
+from src.services.core.event_bus_mixin import emettre_evenement_simple
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +113,12 @@ class BatchCookingStatsMixin:
         obtenir_cache().invalidate(pattern="preparations")
 
         logger.info(f"✅ Préparation créée: {preparation.id}")
+
+        emettre_evenement_simple(
+            "batch_cooking.modifie",
+            {"preparation_id": preparation.id, "nom": nom, "action": "preparation_creee"},
+            source="batch_cooking_stats",
+        )
         return preparation
 
     @avec_gestion_erreurs(default_return=None)
@@ -136,6 +143,12 @@ class BatchCookingStatsMixin:
         obtenir_cache().invalidate(pattern="preparations")
 
         logger.info(f"✅ {portions} portion(s) consommée(s): {preparation_id}")
+
+        emettre_evenement_simple(
+            "batch_cooking.modifie",
+            {"preparation_id": preparation_id, "nom": "", "action": "portions_consommees"},
+            source="batch_cooking_stats",
+        )
         return preparation
 
     # ═══════════════════════════════════════════════════════════

@@ -25,6 +25,7 @@ from src.services.rapports.types import (
     DonneesPlanningPDF,
     DonneesRecettePDF,  # Alias compat
 )
+from src.ui.tokens import Couleur
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +55,7 @@ class ServiceExportPDF:
                 fontSize=24,
                 spaceAfter=12,
                 alignment=TA_CENTER,
-                textColor=colors.HexColor("#2E7D32"),
+                textColor=colors.HexColor(Couleur.SCALE_GOOD),
             )
         )
         self.styles.add(
@@ -64,7 +65,7 @@ class ServiceExportPDF:
                 fontSize=14,
                 spaceBefore=12,
                 spaceAfter=6,
-                textColor=colors.HexColor("#1565C0"),
+                textColor=colors.HexColor(Couleur.JULES_PRIMARY),
             )
         )
         self.styles.add(
@@ -155,7 +156,7 @@ class ServiceExportPDF:
         infos_table.setStyle(
             TableStyle(
                 [
-                    ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#E8F5E9")),
+                    ("BACKGROUND", (0, 0), (0, -1), colors.HexColor(Couleur.BG_LIGHT_GREEN)),
                     ("TEXTCOLOR", (0, 0), (-1, -1), colors.black),
                     ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                     ("FONTSIZE", (0, 0), (-1, -1), 10),
@@ -313,7 +314,7 @@ class ServiceExportPDF:
         table.setStyle(
             TableStyle(
                 [
-                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1565C0")),
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.JULES_PRIMARY)),
                     ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                     ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                     ("FONTSIZE", (0, 0), (-1, 0), 12),
@@ -325,7 +326,7 @@ class ServiceExportPDF:
                         "ROWBACKGROUNDS",
                         (0, 1),
                         (-1, -1),
-                        [colors.white, colors.HexColor("#F5F5F5")],
+                        [colors.white, colors.HexColor(Couleur.BG_GREY_100)],
                     ),
                 ]
             )

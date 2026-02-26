@@ -10,9 +10,11 @@ from datetime import UTC, datetime
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from src.api.dependencies import require_role
+from src.api.prometheus import prometheus_router
 from src.api.rate_limiting import MiddlewareLimitationDebit
 from src.api.routes import (
     calendriers_router,
@@ -25,7 +27,19 @@ from src.api.routes import (
     recettes_router,
     suggestions_router,
 )
+from src.api.routes.auth import router as auth_router
+from src.api.routes.push import router as push_router
+from src.api.routes.webhooks import router as webhooks_router
+from src.api.schemas.errors import REPONSE_500, REPONSES_AUTH_ADMIN
+from src.api.utils import (
+    ETagMiddleware,
+    MetricsMiddleware,
+    SecurityHeadersMiddleware,
+    get_metrics,
+)
 from src.api.versioning import VersionMiddleware
+from src.api.websocket_courses import router as websocket_router
+from src.core.monitoring.health import StatutSante, verifier_sante_globale
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +102,10 @@ tags_metadata = [
     {
         "name": "WebSocket",
         "description": "Collaboration temps réel sur les listes de courses",
+    },
+    {
+        "name": "Webhooks",
+        "description": "Gestion des webhooks sortants pour notifications externes",
     },
 ]
 
@@ -157,18 +175,12 @@ app.add_middleware(MiddlewareLimitationDebit)
 app.add_middleware(VersionMiddleware)
 
 # Middleware ETag pour cache HTTP
-from src.api.utils import ETagMiddleware
-
 app.add_middleware(ETagMiddleware)
 
 # Middleware de métriques
-from src.api.utils import MetricsMiddleware
-
 app.add_middleware(MetricsMiddleware)
 
 # Middleware de sécurité HTTP (CSP, HSTS, X-Content-Type-Options, etc.)
-from src.api.utils import SecurityHeadersMiddleware
-
 app.add_middleware(SecurityHeadersMiddleware)
 
 
@@ -180,8 +192,6 @@ app.add_middleware(SecurityHeadersMiddleware)
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Gestionnaire global qui empêche les fuites d'erreurs internes."""
-    from fastapi.responses import JSONResponse
-
     logger.error(
         f"Exception non gérée sur {request.method} {request.url.path}: {exc}", exc_info=True
     )
@@ -259,7 +269,7 @@ async def root():
     return {"message": "API Assistant Matanne", "docs": "/docs", "version": "1.0.0"}
 
 
-@app.get("/health", response_model=HealthResponse, tags=["Santé"])
+@app.get("/health", response_model=HealthResponse, tags=["Santé"], responses=REPONSE_500)
 async def health_check():
     """
     Vérifie l'état de l'API et de toutes ses dépendances.
@@ -286,8 +296,6 @@ async def health_check():
         }
         ```
     """
-    from src.core.monitoring.health import StatutSante, verifier_sante_globale
-
     # Utiliser SanteSysteme comme source de vérité unique
     rapport = verifier_sante_globale(inclure_db=True)
 
@@ -325,7 +333,7 @@ async def health_check():
     )
 
 
-@app.get("/metrics", tags=["Santé"])
+@app.get("/metrics", tags=["Santé"], responses=REPONSES_AUTH_ADMIN)
 async def get_api_metrics(user: dict = Depends(require_role("admin"))):
     """Retourne les métriques de l'API (latence, requêtes, rate limiting).
 
@@ -334,8 +342,6 @@ async def get_api_metrics(user: dict = Depends(require_role("admin"))):
     Returns:
         Dict structuré avec uptime, requests, latency, rate_limiting et ai.
     """
-    from src.api.utils import get_metrics
-
     return get_metrics()
 
 
@@ -344,20 +350,13 @@ async def get_api_metrics(user: dict = Depends(require_role("admin"))):
 # ═══════════════════════════════════════════════════════════
 
 
-# Prometheus metrics endpoint
-from src.api.prometheus import prometheus_router
-from src.api.routes.auth import router as auth_router
-from src.api.routes.push import router as push_router
-
-# WebSocket pour collaboration temps réel
-from src.api.websocket_courses import router as websocket_router
-
 app.include_router(auth_router)
 app.include_router(recettes_router)
 app.include_router(inventaire_router)
 app.include_router(courses_router)
 app.include_router(planning_router)
 app.include_router(push_router)
+app.include_router(webhooks_router)
 app.include_router(suggestions_router)
 
 # Nouveaux routers - famille, maison, jeux, calendriers

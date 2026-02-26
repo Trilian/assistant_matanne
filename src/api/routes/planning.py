@@ -16,12 +16,18 @@ from src.api.schemas import (
     PlanningSemaineResponse,
     RepasCreate,
 )
+from src.api.schemas.errors import (
+    REPONSES_CRUD_CREATION,
+    REPONSES_CRUD_ECRITURE,
+    REPONSES_CRUD_SUPPRESSION,
+    REPONSES_LISTE,
+)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/planning", tags=["Planning"])
 
 
-@router.get("/semaine", response_model=PlanningSemaineResponse)
+@router.get("/semaine", response_model=PlanningSemaineResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def obtenir_planning_semaine(
     date_debut: datetime | None = Query(
@@ -95,7 +101,7 @@ async def obtenir_planning_semaine(
     return await executer_async(_query)
 
 
-@router.post("/repas", response_model=MessageResponse)
+@router.post("/repas", response_model=MessageResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require_auth)):
     """
@@ -193,7 +199,7 @@ async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require
     return await executer_async(_create)
 
 
-@router.put("/repas/{repas_id}", response_model=MessageResponse)
+@router.put("/repas/{repas_id}", response_model=MessageResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_repas(
     repas_id: int, repas: RepasCreate, user: dict[str, Any] = Depends(require_auth)
@@ -254,7 +260,9 @@ async def modifier_repas(
     return await executer_async(_update)
 
 
-@router.delete("/repas/{repas_id}", response_model=MessageResponse)
+@router.delete(
+    "/repas/{repas_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION
+)
 @gerer_exception_api
 async def supprimer_repas(repas_id: int, user: dict[str, Any] = Depends(require_auth)):
     """

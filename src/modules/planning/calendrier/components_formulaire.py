@@ -8,9 +8,10 @@ from datetime import date, time, timedelta
 
 import streamlit as st
 
+from src.core.date_utils import obtenir_debut_semaine as get_debut_semaine
 from src.ui.keys import KeyNamespace
 
-from .utils import get_debut_semaine, get_semaine_precedente, get_semaine_suivante
+from .aggregation import get_semaine_precedente, get_semaine_suivante
 
 _keys = KeyNamespace("calendrier")
 

@@ -400,11 +400,12 @@ class Parametres(BaseSettings):
 
 _parametres: Parametres | None = None
 _logging_configured: bool = False
+_parametres_lock = __import__("threading").Lock()
 
 
 def obtenir_parametres() -> Parametres:
     """
-    Récupère l'instance Parametres.
+    Récupère l'instance Parametres (thread-safe).
 
     Utilise un singleton avec rechargement des .env au premier appel
     du cycle Streamlit. Le logging n'est configuré qu'une seule fois.
@@ -417,20 +418,26 @@ def obtenir_parametres() -> Parametres:
     if _parametres is not None:
         return _parametres
 
-    # Charger .env files une seule fois
-    _reload_env_files()
+    with _parametres_lock:
+        if _parametres is not None:
+            return _parametres
 
-    _parametres = Parametres()
+        # Charger .env files une seule fois
+        _reload_env_files()
 
-    # Configure logging une seule fois
-    if not _logging_configured:
-        try:
-            from ..logging import configure_logging
+        instance = Parametres()
 
-            configure_logging(_parametres.LOG_LEVEL)
-            _logging_configured = True
-        except Exception:
-            pass
+        # Configure logging une seule fois
+        if not _logging_configured:
+            try:
+                from ..logging import configure_logging
+
+                configure_logging(instance.LOG_LEVEL)
+                _logging_configured = True
+            except Exception:
+                pass
+
+        _parametres = instance
 
     return _parametres
 
@@ -438,5 +445,6 @@ def obtenir_parametres() -> Parametres:
 def reinitialiser_parametres() -> Parametres:
     """Force le rechargement des paramètres (utile après changement .env)."""
     global _parametres
-    _parametres = None
+    with _parametres_lock:
+        _parametres = None
     return obtenir_parametres()

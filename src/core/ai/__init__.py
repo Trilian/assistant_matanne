@@ -13,6 +13,8 @@ from .client import ClientIA, obtenir_client_ia
 from .parser import AnalyseurIA, analyser_liste_reponse
 from .rate_limit import RateLimitIA
 from .router import Fournisseur, RouteurIA, obtenir_routeur_ia
+from .streaming import StreamingMixin
+from .vision import VisionMixin
 
 __all__ = [
     "ClientIA",
@@ -27,4 +29,6 @@ __all__ = [
     "RouteurIA",
     "Fournisseur",
     "obtenir_routeur_ia",
+    "VisionMixin",
+    "StreamingMixin",
 ]
