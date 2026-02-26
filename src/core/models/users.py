@@ -117,6 +117,14 @@ class ProfilUtilisateur(TimestampMixin, Base):
     # Garmin
     garmin_connected: Mapped[bool] = mapped_column(Boolean, default=False)
 
+    # Sécurité
+    pin_hash: Mapped[str | None] = mapped_column(String(255))
+    sections_protegees: Mapped[list | None] = mapped_column(JSONB)
+
+    # Préférences avancées
+    preferences_modules: Mapped[dict | None] = mapped_column(JSONB)
+    theme_prefere: Mapped[str] = mapped_column(String(20), default="auto")
+
     # Relations
     garmin_token: Mapped[Optional["GarminToken"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", uselist=False

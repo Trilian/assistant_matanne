@@ -7,6 +7,18 @@ Structure:
   - stats.py: Statistiques globales et graphiques Plotly
   - summaries.py: Cartes résumé par module (cuisine, inventaire, courses, planning)
   - resume_hebdo.py: Résumé hebdomadaire IA
+  - resume_matinal.py: Résumé matinal IA personnalisé
+  - widget_meteo.py: Météo du jour + impact activités
+  - widget_ce_soir.py: Widget "Ce soir on mange..."
+  - rappels_contextuels.py: Rappels contextuels enrichis
+  - mini_calendrier.py: Mini-calendrier de la semaine
+  - widget_economies.py: Économies réalisées ce mois
+  - widget_photo.py: Photo souvenir du jour
+  - widget_sante.py: Santé/fitness Garmin
+  - widget_conseil_jules.py: Conseil Jules IA du jour
+  - widget_gamification.py: Gamification / streaks
+  - widget_jardin.py: Mini-widget jardin
+  - widget_maison.py: Résumé maison / entretien
 """
 
 import logging
@@ -74,22 +86,81 @@ def app():
         st.markdown("---")
 
         # ═══════════════════════════════════════════════════════════
-        # WIDGET "QU'EST-CE QU'ON MANGE ?" 🍽️
+        # RÉSUMÉ MATINAL IA PERSONNALISÉ 🌅
         # ═══════════════════════════════════════════════════════════
 
         try:
-            from src.ui.components import widget_quest_ce_quon_mange
+            from src.modules.accueil.resume_matinal import afficher_resume_matinal
 
-            widget_quest_ce_quon_mange()
+            afficher_resume_matinal()
         except ImportError:
             pass
         except Exception as e:
-            logger.debug(f"Widget qcom indisponible: {e}")
+            logger.debug(f"Résumé matinal indisponible: {e}")
+
+        # ═══════════════════════════════════════════════════════════
+        # LIGNE 1: MÉTÉO + CE SOIR ON MANGE
+        # ═══════════════════════════════════════════════════════════
+
+        col_meteo, col_diner = st.columns(2)
+
+        with col_meteo:
+            try:
+                from src.modules.accueil.widget_meteo import afficher_widget_meteo
+
+                afficher_widget_meteo()
+            except ImportError:
+                pass
+            except Exception as e:
+                logger.debug(f"Widget météo indisponible: {e}")
+
+        with col_diner:
+            try:
+                from src.modules.accueil.widget_ce_soir import afficher_widget_ce_soir
+
+                afficher_widget_ce_soir()
+            except ImportError:
+                # Fallback vers l'ancien widget QCOM
+                try:
+                    from src.ui.components import widget_quest_ce_quon_mange
+
+                    widget_quest_ce_quon_mange()
+                except ImportError:
+                    pass
+            except Exception as e:
+                logger.debug(f"Widget dîner indisponible: {e}")
 
         st.markdown("---")
 
-        # Alertes critiques en haut
-        afficher_critical_alerts()
+        # ═══════════════════════════════════════════════════════════
+        # RAPPELS CONTEXTUELS 🔔
+        # ═══════════════════════════════════════════════════════════
+
+        try:
+            from src.modules.accueil.rappels_contextuels import afficher_rappels_contextuels
+
+            afficher_rappels_contextuels()
+        except ImportError:
+            # Fallback vers les alertes classiques
+            afficher_critical_alerts()
+        except Exception as e:
+            logger.debug(f"Rappels contextuels indisponibles: {e}")
+            afficher_critical_alerts()
+
+        st.markdown("---")
+
+        # ═══════════════════════════════════════════════════════════
+        # MINI-CALENDRIER SEMAINE 📅
+        # ═══════════════════════════════════════════════════════════
+
+        try:
+            from src.modules.accueil.mini_calendrier import afficher_mini_calendrier
+
+            afficher_mini_calendrier()
+        except ImportError:
+            pass
+        except Exception as e:
+            logger.debug(f"Mini-calendrier indisponible: {e}")
 
         st.markdown("---")
 
@@ -100,6 +171,90 @@ def app():
 
         # Raccourcis rapides
         afficher_quick_actions()
+
+        st.markdown("---")
+
+        # ═══════════════════════════════════════════════════════════
+        # LIGNE 2: ÉCONOMIES + SANTÉ/FITNESS
+        # ═══════════════════════════════════════════════════════════
+
+        col_eco, col_sante = st.columns(2)
+
+        with col_eco:
+            try:
+                from src.modules.accueil.widget_economies import afficher_widget_economies
+
+                afficher_widget_economies()
+            except ImportError:
+                pass
+            except Exception as e:
+                logger.debug(f"Widget économies indisponible: {e}")
+
+        with col_sante:
+            try:
+                from src.modules.accueil.widget_sante import afficher_widget_sante
+
+                afficher_widget_sante()
+            except ImportError:
+                pass
+            except Exception as e:
+                logger.debug(f"Widget santé indisponible: {e}")
+
+        st.markdown("---")
+
+        # ═══════════════════════════════════════════════════════════
+        # LIGNE 3: CONSEIL JULES + GAMIFICATION
+        # ═══════════════════════════════════════════════════════════
+
+        col_jules, col_gamif = st.columns(2)
+
+        with col_jules:
+            try:
+                from src.modules.accueil.widget_conseil_jules import afficher_conseil_jules
+
+                afficher_conseil_jules()
+            except ImportError:
+                pass
+            except Exception as e:
+                logger.debug(f"Conseil Jules indisponible: {e}")
+
+        with col_gamif:
+            try:
+                from src.modules.accueil.widget_gamification import afficher_widget_gamification
+
+                afficher_widget_gamification()
+            except ImportError:
+                pass
+            except Exception as e:
+                logger.debug(f"Widget gamification indisponible: {e}")
+
+        st.markdown("---")
+
+        # ═══════════════════════════════════════════════════════════
+        # LIGNE 4: JARDIN + MAISON
+        # ═══════════════════════════════════════════════════════════
+
+        col_jardin, col_maison = st.columns(2)
+
+        with col_jardin:
+            try:
+                from src.modules.accueil.widget_jardin import afficher_widget_jardin
+
+                afficher_widget_jardin()
+            except ImportError:
+                pass
+            except Exception as e:
+                logger.debug(f"Widget jardin indisponible: {e}")
+
+        with col_maison:
+            try:
+                from src.modules.accueil.widget_maison import afficher_widget_maison
+
+                afficher_widget_maison()
+            except ImportError:
+                pass
+            except Exception as e:
+                logger.debug(f"Widget maison indisponible: {e}")
 
         st.markdown("---")
 
@@ -123,82 +278,32 @@ def app():
             logger.debug(f"Résumé hebdo indisponible: {e}")
 
         # ═══════════════════════════════════════════════════════════
-        # TIMELINE ÉVÉNEMENTS À VENIR
+        # PHOTO SOUVENIR DU JOUR 📸
         # ═══════════════════════════════════════════════════════════
 
-        st.subheader("📅 Prochains événements")
+        col_photo, col_summaries = st.columns([1, 2])
 
-        try:
-            from datetime import timedelta
+        with col_photo:
+            try:
+                from src.modules.accueil.widget_photo import afficher_photo_souvenir
 
-            from src.modules.planning.timeline_ui import charger_events_periode
+                afficher_photo_souvenir()
+            except ImportError:
+                pass
+            except Exception as e:
+                logger.debug(f"Photo souvenir indisponible: {e}")
 
-            # Charger les événements des 7 prochains jours
-            aujourd_hui = date.today()
-            events = charger_events_periode(aujourd_hui, aujourd_hui + timedelta(days=7))
-
-            if events:
-                # Afficher les 5 prochains
-                events_tries = sorted(events, key=lambda e: e["date_debut"])[:5]
-
-                for event in events_tries:
-                    jour = event["date_debut"].strftime("%a %d/%m")
-                    heure = event["date_debut"].strftime("%H:%M")
-                    couleur = event.get("couleur", "#757575")
-                    lieu = f" • 📍 {event['lieu']}" if event.get("lieu") else ""
-
-                    st.markdown(
-                        f'<div style="padding:8px;margin:4px 0;background:{Sem.SURFACE_ALT};'
-                        f'border-left:4px solid {couleur};border-radius:4px;">'
-                        f"<strong>{jour} {heure}</strong> - {event['titre']}"
-                        f'<span style="color:{Sem.ON_SURFACE_SECONDARY};">{lieu}</span></div>',
-                        unsafe_allow_html=True,
-                    )
-
-                # Lien vers le calendrier complet
-                if len(events) > 5:
-                    st.caption(f"... et {len(events) - 5} autres événements cette semaine")
-            else:
-                etat_vide("Aucun événement prévu cette semaine", "📅")
-
-        except ImportError:
-            st.caption("Module timeline non disponible")
-        except Exception as e:
-            st.warning(f"Erreur chargement événements: {e}")
-
-        # Section rappels (si disponible)
-        try:
-            from src.services.cuisine.planning.rappels import verifier_et_envoyer_rappels
-
-            rappels_info = verifier_et_envoyer_rappels()
-
-            if rappels_info["prochains"]:
-                with st.expander(
-                    f"🔔 {len(rappels_info['prochains'])} rappel(s) à venir", expanded=False
-                ):
-                    for rappel in rappels_info["prochains"]:
-                        st.markdown(
-                            f"- **{rappel['titre']}** - {rappel['date_debut'].strftime('%H:%M')}"
-                        )
-        except ImportError:
-            pass
-        except Exception:
-            pass
-
-        st.markdown("---")
-
-        # Vue par module
-        col1, col2 = st.columns(2)
-
-        with col1:
-            afficher_cuisine_summary()
-            st.markdown("")
-            afficher_planning_summary()
-
-        with col2:
-            afficher_inventaire_summary()
-            st.markdown("")
-            afficher_courses_summary()
+        with col_summaries:
+            # Vue par module (compacte)
+            c1, c2 = st.columns(2)
+            with c1:
+                afficher_cuisine_summary()
+                st.markdown("")
+                afficher_planning_summary()
+            with c2:
+                afficher_inventaire_summary()
+                st.markdown("")
+                afficher_courses_summary()
 
         # Footer avec sante système
         st.markdown("---")

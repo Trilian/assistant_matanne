@@ -35,6 +35,9 @@ class TypeEvenement(StrEnum):
     JARDIN = "jardin"  # 🌱 Tâches jardin
     ENTRETIEN = "entretien"  # 🔧 Entretien maison
     EVENEMENT = "evenement"
+    FERIE = "ferie"  # 🇫🇷 Jour férié
+    CRECHE = "creche"  # 🏫 Fermeture crèche
+    PONT = "pont"  # 🌉 Jour de pont
 
 
 # Emojis par type d'evenement
@@ -52,6 +55,9 @@ EMOJI_TYPE = {
     TypeEvenement.JARDIN: "🌱",
     TypeEvenement.ENTRETIEN: "🔧",
     TypeEvenement.EVENEMENT: "📜",
+    TypeEvenement.FERIE: "🇫🇷",
+    TypeEvenement.CRECHE: "🏫",
+    TypeEvenement.PONT: "🌉",
 }
 
 # Couleurs par type (pour l'affichage)
@@ -69,6 +75,9 @@ COULEUR_TYPE = {
     TypeEvenement.JARDIN: Couleur.CAL_JARDIN,
     TypeEvenement.ENTRETIEN: Couleur.CAL_ENTRETIEN,
     TypeEvenement.EVENEMENT: Couleur.CAL_EVENEMENT,
+    TypeEvenement.FERIE: Couleur.CAL_FERIE,
+    TypeEvenement.CRECHE: Couleur.CAL_CRECHE,
+    TypeEvenement.PONT: Couleur.CAL_PONT,
 }
 
 
@@ -192,6 +201,20 @@ class JourCalendrier:
         return [evt for evt in self.evenements if evt.type == TypeEvenement.JARDIN]
 
     @property
+    def jours_speciaux(self) -> list[EvenementCalendrier]:
+        """Jours fériés, fermetures crèche et ponts du jour."""
+        return [
+            evt
+            for evt in self.evenements
+            if evt.type in (TypeEvenement.FERIE, TypeEvenement.CRECHE, TypeEvenement.PONT)
+        ]
+
+    @property
+    def est_jour_special(self) -> bool:
+        """True si le jour contient un jour férié, crèche ou pont."""
+        return len(self.jours_speciaux) > 0
+
+    @property
     def autres_evenements(self) -> list[EvenementCalendrier]:
         types_principaux = {
             TypeEvenement.REPAS_MIDI,
@@ -205,6 +228,9 @@ class JourCalendrier:
             TypeEvenement.MENAGE,
             TypeEvenement.JARDIN,
             TypeEvenement.ENTRETIEN,
+            TypeEvenement.FERIE,
+            TypeEvenement.CRECHE,
+            TypeEvenement.PONT,
         }
         return [evt for evt in self.evenements if evt.type not in types_principaux]
 

@@ -1,0 +1,128 @@
+{
+  "meta": {
+    "source": "Calendrier vaccinal français - Ministère de la Santé (DGS)",
+    "annee_reference": 2025,
+    "description": "Vaccinations obligatoires et recommandées pour les enfants de 0 à 6 ans"
+  },
+  "vaccins": [
+    {
+      "nom": "DTP (Diphtérie-Tétanos-Polio)",
+      "code": "DTP",
+      "obligatoire": true,
+      "doses": [
+        {"age_mois": 2, "type": "primo", "label": "1ère dose"},
+        {"age_mois": 4, "type": "primo", "label": "2ème dose"},
+        {"age_mois": 11, "type": "rappel", "label": "Rappel"},
+        {"age_mois": 72, "type": "rappel", "label": "Rappel 6 ans"}
+      ]
+    },
+    {
+      "nom": "Coqueluche",
+      "code": "Ca",
+      "obligatoire": true,
+      "doses": [
+        {"age_mois": 2, "type": "primo", "label": "1ère dose"},
+        {"age_mois": 4, "type": "primo", "label": "2ème dose"},
+        {"age_mois": 11, "type": "rappel", "label": "Rappel"},
+        {"age_mois": 72, "type": "rappel", "label": "Rappel 6 ans"}
+      ]
+    },
+    {
+      "nom": "Haemophilus influenzae b (Hib)",
+      "code": "Hib",
+      "obligatoire": true,
+      "doses": [
+        {"age_mois": 2, "type": "primo", "label": "1ère dose"},
+        {"age_mois": 4, "type": "primo", "label": "2ème dose"},
+        {"age_mois": 11, "type": "rappel", "label": "Rappel"}
+      ]
+    },
+    {
+      "nom": "Hépatite B",
+      "code": "HepB",
+      "obligatoire": true,
+      "doses": [
+        {"age_mois": 2, "type": "primo", "label": "1ère dose"},
+        {"age_mois": 4, "type": "primo", "label": "2ème dose"},
+        {"age_mois": 11, "type": "rappel", "label": "Rappel"}
+      ]
+    },
+    {
+      "nom": "Pneumocoque (PCV13)",
+      "code": "PCV13",
+      "obligatoire": true,
+      "doses": [
+        {"age_mois": 2, "type": "primo", "label": "1ère dose"},
+        {"age_mois": 4, "type": "primo", "label": "2ème dose"},
+        {"age_mois": 11, "type": "rappel", "label": "Rappel"}
+      ]
+    },
+    {
+      "nom": "Méningocoque C",
+      "code": "MenC",
+      "obligatoire": true,
+      "doses": [
+        {"age_mois": 5, "type": "primo", "label": "1ère dose"},
+        {"age_mois": 12, "type": "rappel", "label": "Rappel"}
+      ]
+    },
+    {
+      "nom": "Méningocoque B",
+      "code": "MenB",
+      "obligatoire": true,
+      "doses": [
+        {"age_mois": 3, "type": "primo", "label": "1ère dose"},
+        {"age_mois": 5, "type": "primo", "label": "2ème dose"},
+        {"age_mois": 12, "type": "rappel", "label": "Rappel"}
+      ]
+    },
+    {
+      "nom": "ROR (Rougeole-Oreillons-Rubéole)",
+      "code": "ROR",
+      "obligatoire": true,
+      "doses": [
+        {"age_mois": 12, "type": "primo", "label": "1ère dose"},
+        {"age_mois": 16, "type": "rappel", "label": "2ème dose"}
+      ]
+    },
+    {
+      "nom": "BCG (Tuberculose)",
+      "code": "BCG",
+      "obligatoire": false,
+      "notes": "Recommandé pour les enfants à risque (Île-de-France, Guyane, etc.)",
+      "doses": [
+        {"age_mois": 1, "type": "primo", "label": "Dose unique"}
+      ]
+    },
+    {
+      "nom": "Varicelle",
+      "code": "VAR",
+      "obligatoire": false,
+      "notes": "Recommandé pour les adolescents sans antécédent et les professionnels de santé",
+      "doses": [
+        {"age_mois": 12, "type": "primo", "label": "1ère dose (si indication)"},
+        {"age_mois": 18, "type": "rappel", "label": "2ème dose"}
+      ]
+    },
+    {
+      "nom": "Grippe saisonnière",
+      "code": "GRIPPE",
+      "obligatoire": false,
+      "notes": "Recommandé annuellement à partir de 6 mois pour les enfants à risque",
+      "doses": [
+        {"age_mois": 6, "type": "annuel", "label": "Annuel (si indication)"}
+      ]
+    },
+    {
+      "nom": "Rotavirus",
+      "code": "ROTA",
+      "obligatoire": false,
+      "notes": "Recommandé. Vaccin oral, 2 ou 3 doses selon le vaccin utilisé",
+      "doses": [
+        {"age_mois": 2, "type": "primo", "label": "1ère dose"},
+        {"age_mois": 3, "type": "primo", "label": "2ème dose"},
+        {"age_mois": 4, "type": "primo", "label": "3ème dose (si Rotateq)"}
+      ]
+    }
+  ]
+}

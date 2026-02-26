@@ -4,9 +4,16 @@ Fonctions d'export pour le Calendrier Familial Unifié.
 Export vers:
 - Texte formaté (pour impression frigo)
 - HTML (pour impression navigateur)
+- PDF (via reportlab, téléchargeable)
 """
 
+import io
+import logging
+from datetime import date
+
 from .types import SemaineCalendrier, TypeEvenement
+
+logger = logging.getLogger(__name__)
 
 
 def generer_texte_semaine_pour_impression(semaine: SemaineCalendrier) -> str:
@@ -49,6 +56,10 @@ def generer_texte_semaine_pour_impression(semaine: SemaineCalendrier) -> str:
         for rdv in jour.rdv:
             emoji = "🏥" if rdv.type == TypeEvenement.RDV_MEDICAL else "📅"
             lignes.append(f"  {emoji} {rdv.titre} {rdv.heure_str}")
+
+        # Jours spéciaux
+        for js in jour.jours_speciaux:
+            lignes.append(f"  {js.emoji} {js.titre}")
 
         if jour.est_vide:
             lignes.append("  (rien de planifie)")
@@ -125,4 +136,168 @@ def generer_html_semaine_pour_impression(semaine: SemaineCalendrier) -> str:
 __all__ = [
     "generer_texte_semaine_pour_impression",
     "generer_html_semaine_pour_impression",
+    "generer_pdf_semaine",
 ]
+
+
+# ═══════════════════════════════════════════════════════════
+# EXPORT PDF (via reportlab)
+# ═══════════════════════════════════════════════════════════
+
+
+def generer_pdf_semaine(semaine: SemaineCalendrier) -> bytes | None:
+    """Génère un PDF formaté de la semaine pour téléchargement.
+
+    Utilise reportlab pour créer un PDF avec:
+    - Titre et période
+    - Un bloc par jour avec repas, activités, RDV, jours spéciaux
+    - Statistiques en bas
+
+    Returns:
+        Contenu PDF en bytes, ou None si erreur.
+    """
+    try:
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+        from reportlab.lib.units import cm, mm
+        from reportlab.platypus import (
+            Paragraph,
+            SimpleDocTemplate,
+            Spacer,
+            Table,
+            TableStyle,
+        )
+    except ImportError:
+        logger.warning("reportlab non installé — PDF impossible")
+        return None
+
+    buffer = io.BytesIO()
+
+    # Créer le document
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=1.5 * cm,
+        leftMargin=1.5 * cm,
+        topMargin=1.5 * cm,
+        bottomMargin=1.5 * cm,
+    )
+
+    # Styles
+    styles = getSampleStyleSheet()
+    titre_style = ParagraphStyle(
+        "TitreSemaine",
+        parent=styles["Heading1"],
+        fontSize=16,
+        spaceAfter=6 * mm,
+        alignment=1,  # centré
+    )
+    jour_style = ParagraphStyle(
+        "TitreJour",
+        parent=styles["Heading2"],
+        fontSize=12,
+        spaceBefore=4 * mm,
+        spaceAfter=2 * mm,
+        textColor=colors.HexColor("#1565C0"),
+    )
+    item_style = ParagraphStyle(
+        "ItemEvent",
+        parent=styles["Normal"],
+        fontSize=9,
+        leftIndent=10 * mm,
+        spaceBefore=1 * mm,
+    )
+    special_style = ParagraphStyle(
+        "JourSpecial",
+        parent=styles["Normal"],
+        fontSize=9,
+        leftIndent=10 * mm,
+        spaceBefore=1 * mm,
+        textColor=colors.HexColor("#D32F2F"),
+    )
+    stats_style = ParagraphStyle(
+        "Stats",
+        parent=styles["Normal"],
+        fontSize=10,
+        alignment=1,
+        spaceBefore=6 * mm,
+        textColor=colors.HexColor("#757575"),
+    )
+
+    elements = []
+
+    # Titre
+    elements.append(Paragraph(f"Calendrier Familial — Semaine du {semaine.titre}", titre_style))
+
+    # Chaque jour
+    for jour in semaine.jours:
+        marqueur = " (aujourd'hui)" if jour.est_aujourdhui else ""
+        elements.append(
+            Paragraph(
+                f"{jour.jour_semaine} {jour.date_jour.strftime('%d/%m')}{marqueur}",
+                jour_style,
+            )
+        )
+
+        # Jours spéciaux en premier
+        for js in jour.jours_speciaux:
+            emoji_txt = {"ferie": "[FERIE]", "creche": "[CRECHE FERMEE]", "pont": "[PONT]"}.get(
+                js.type.value if hasattr(js.type, "value") else str(js.type), ""
+            )
+            elements.append(Paragraph(f"{emoji_txt} {js.titre}", special_style))
+
+        # Repas
+        if jour.repas_midi:
+            elements.append(Paragraph(f"Midi: {jour.repas_midi.titre}", item_style))
+        if jour.repas_soir:
+            elements.append(Paragraph(f"Soir: {jour.repas_soir.titre}", item_style))
+        if jour.gouter:
+            elements.append(Paragraph(f"Gouter: {jour.gouter.titre}", item_style))
+
+        # Batch
+        if jour.batch_cooking:
+            elements.append(Paragraph(f"BATCH COOKING {jour.batch_cooking.heure_str}", item_style))
+
+        # Courses
+        for c in jour.courses:
+            elements.append(Paragraph(f"Courses: {c.magasin} {c.heure_str}", item_style))
+
+        # Activités
+        for act in jour.activites:
+            jules = " (Jules)" if act.pour_jules else ""
+            elements.append(Paragraph(f"Activite: {act.titre} {act.heure_str}{jules}", item_style))
+
+        # RDV
+        for rdv in jour.rdv:
+            lieu = f" @ {rdv.lieu}" if rdv.lieu else ""
+            elements.append(Paragraph(f"RDV: {rdv.titre} {rdv.heure_str}{lieu}", item_style))
+
+        # Tâches ménage
+        for tache in jour.taches_menage:
+            elements.append(Paragraph(f"Menage: {tache.titre}", item_style))
+
+        if jour.est_vide and not jour.jours_speciaux:
+            elements.append(Paragraph("(rien de planifie)", item_style))
+
+        elements.append(Spacer(1, 2 * mm))
+
+    # Statistiques
+    stats = semaine.stats
+    elements.append(
+        Paragraph(
+            f"{stats.get('repas', 0)} repas | "
+            f"{semaine.nb_sessions_batch} batch | "
+            f"{stats.get('activites', 0)} activites | "
+            f"Charge moyenne: {stats.get('charge_moyenne', 0)}%",
+            stats_style,
+        )
+    )
+
+    # Générer
+    try:
+        doc.build(elements)
+        return buffer.getvalue()
+    except Exception as e:
+        logger.error(f"Erreur génération PDF: {e}")
+        return None

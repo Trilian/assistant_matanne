@@ -137,6 +137,9 @@ class Couleur(StrEnum):
     CAL_JARDIN = "#A5D6A7"
     CAL_ENTRETIEN = "#BCAAA4"
     CAL_EVENEMENT = "#64B5F6"
+    CAL_FERIE = "#EF5350"  # Rouge drapeau — jour férié
+    CAL_CRECHE = "#FFB74D"  # Orange chaud — fermeture crèche
+    CAL_PONT = "#CE93D8"  # Violet doux — jour de pont
 
     # ── Palette collaboration / avatars ───────────────────
     COLLAB_VERT = "#48bb78"

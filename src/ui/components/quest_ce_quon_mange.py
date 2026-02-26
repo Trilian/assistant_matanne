@@ -84,6 +84,59 @@ def obtenir_repas_du_jour() -> dict | None:
     return None
 
 
+def obtenir_suggestions_faisabilite() -> list[dict]:
+    """
+    Récupère les recettes faisables avec le stock actuel.
+
+    Utilise le service de faisabilité (A1) pour scorer les recettes
+    en fonction de l'inventaire courant.
+
+    Returns:
+        Liste de dicts {recette_id, nom, score, tier, manquants}
+    """
+    try:
+        from src.services.cuisine.suggestions.faisabilite import (
+            obtenir_recettes_faisables,
+        )
+
+        faisables = obtenir_recettes_faisables(limite=5)
+        return [
+            {
+                "recette_id": f.recette_id,
+                "recette_nom": f.nom_recette,
+                "score": f.score,
+                "tier": f.tier,
+                "manquants": f.ingredients_manquants,
+                "source": "faisabilite",
+            }
+            for f in faisables
+        ]
+    except Exception as e:
+        logger.debug(f"Faisabilité non disponible: {e}")
+        return []
+
+
+def obtenir_produits_urgents_widget() -> list[dict]:
+    """Récupère les produits à consommer en urgence (anti-gaspi)."""
+    try:
+        from src.services.cuisine.suggestions.anti_gaspillage import (
+            obtenir_produits_urgents,
+        )
+
+        urgents = obtenir_produits_urgents(seuil_jours=5)
+        return [
+            {
+                "nom": u.nom,
+                "jours_restants": u.jours_restants,
+                "urgence": u.urgence,
+            }
+            for u in urgents
+        ]
+    except Exception as e:
+        logger.debug(f"Anti-gaspi non disponible: {e}")
+        return []
+
+
 def suggerer_repas_ia() -> dict | None:
     """
     Génère une suggestion de repas via IA.
@@ -272,6 +325,57 @@ def widget_quest_ce_quon_mange(compact: bool = False) -> None:
                 if st.button("📅 Planifier", key=_keys("planifier")):
                     naviguer("cuisine.planificateur_repas")
 
+    # ── Section Faisabilité (recettes faisables avec le stock) ──
+    if not compact:
+        _afficher_section_faisabilite()
+        _afficher_section_anti_gaspi()
+
+
+def _afficher_section_faisabilite() -> None:
+    """Affiche les recettes faisables avec le stock actuel."""
+    faisables = obtenir_suggestions_faisabilite()
+    if not faisables:
+        return
+
+    with st.expander("🎯 Faisable avec votre stock", expanded=False):
+        for item in faisables[:5]:
+            tier_emoji = {
+                "complet": "🟢",
+                "quasi_complet": "🟡",
+                "partiel": "🟠",
+            }.get(item["tier"], "⚪")
+
+            col_nom, col_score, col_btn = st.columns([4, 2, 2])
+            with col_nom:
+                st.markdown(f"{tier_emoji} **{item['recette_nom']}**")
+            with col_score:
+                score_pct = int(item["score"] * 100)
+                st.progress(item["score"], text=f"{score_pct}%")
+            with col_btn:
+                if st.button(
+                    "🍳 Je cuisine ça !",
+                    key=_keys(f"fais_{item['recette_id']}"),
+                ):
+                    st.session_state["recette_selectionnee"] = item["recette_id"]
+                    naviguer("cuisine.recettes")
+
+            if item.get("manquants"):
+                st.caption(f"Manque: {', '.join(item['manquants'][:3])}")
+
+
+def _afficher_section_anti_gaspi() -> None:
+    """Affiche les produits à consommer en urgence."""
+    urgents = obtenir_produits_urgents_widget()
+    if not urgents:
+        return
+
+    with st.expander(f"⚠️ Anti-gaspi — {len(urgents)} produit(s) urgent(s)", expanded=False):
+        for prod in urgents[:5]:
+            urgence_emoji = "🔴" if prod["urgence"] >= 4 else "🟠" if prod["urgence"] >= 3 else "🟡"
+            jours = prod["jours_restants"]
+            texte_jours = "Aujourd'hui !" if jours <= 0 else f"{jours}j restants"
+            st.markdown(f"{urgence_emoji} **{prod['nom']}** — {texte_jours}")
+
 
 @composant_ui("repas", tags=("ui", "widget", "compact"))
 def widget_qcom_compact() -> None:
@@ -292,4 +396,6 @@ __all__ = [
     "widget_qcom_compact",
     "obtenir_repas_du_jour",
     "suggerer_repas_ia",
+    "obtenir_suggestions_faisabilite",
+    "obtenir_produits_urgents_widget",
 ]

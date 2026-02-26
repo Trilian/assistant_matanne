@@ -312,6 +312,66 @@ def afficher_stock_complet() -> None:
 
 
 # ============================================================================
+# Onglet Anti-Gaspi
+# ============================================================================
+
+
+def _afficher_anti_gaspi() -> None:
+    """Affiche l'onglet anti-gaspillage avec produits urgents et score mensuel."""
+    st.subheader("♻️ Anti-Gaspillage")
+
+    try:
+        from src.services.cuisine.suggestions.anti_gaspillage import (
+            calculer_score_mensuel,
+            obtenir_produits_urgents,
+            obtenir_recettes_antigaspi,
+        )
+
+        # Score mensuel (gamification)
+        score = calculer_score_mensuel()
+        col_badge, col_score, col_eco = st.columns(3)
+        with col_badge:
+            st.markdown(f"### {score.badge}")
+        with col_score:
+            st.metric("Score anti-gaspi", f"{score.score}/100")
+        with col_eco:
+            st.metric("Économie estimée", f"{score.economie_estimee:.0f} €")
+
+        st.divider()
+
+        # Produits urgents
+        urgents = obtenir_produits_urgents(seuil_jours=7)
+        if urgents:
+            st.markdown(f"### ⚠️ {len(urgents)} produit(s) à consommer rapidement")
+            for p in urgents:
+                urgence_emoji = "🔴" if p.urgence >= 4 else "🟠" if p.urgence >= 3 else "🟡"
+                jours = p.jours_restants
+                texte = "Aujourd'hui !" if jours <= 0 else f"{jours}j"
+                st.markdown(f"{urgence_emoji} **{p.nom}** — {texte}")
+
+            st.divider()
+
+            # Suggestions de recettes anti-gaspi
+            recettes = obtenir_recettes_antigaspi()
+            if recettes:
+                st.markdown("### 🍳 Recettes pour sauver ces produits")
+                for r in recettes[:5]:
+                    with st.expander(
+                        f"🍽️ {r.nom_recette} "
+                        f"(utilise {r.nb_ingredients_urgents} produit(s) urgent(s))"
+                    ):
+                        st.markdown(f"Score anti-gaspi: **{r.score_antigaspi}/100**")
+                        if hasattr(r, "ingredients_sauves") and r.ingredients_sauves:
+                            st.markdown("Sauve: " + ", ".join(r.ingredients_sauves))
+        else:
+            st.success("🎉 Aucun produit en urgence ! Bravo pour la gestion du stock.")
+
+    except Exception as e:
+        logger.error(f"Erreur anti-gaspi: {e}")
+        st.info("Service anti-gaspillage non disponible.")
+
+
+# ============================================================================
 # Point d'entrée principal
 # ============================================================================
 
@@ -340,6 +400,7 @@ def app():
         "📊 Stock",
         "⚠️ Alertes",
         "🏷️ Catégories",
+        "♻️ Anti-Gaspi",
         "🛒 Suggestions IA",
         "📋 Historique",
         "📷 Photos",
@@ -352,6 +413,7 @@ def app():
         tab_stock,
         tab_alertes,
         tab_categories,
+        tab_anti_gaspi,
         tab_suggestions,
         tab_historique,
         tab_photos,
@@ -371,6 +433,10 @@ def app():
     with tab_categories:
         with error_boundary(titre="Erreur dans l'onglet Catégories"):
             afficher_categories()
+
+    with tab_anti_gaspi:
+        with error_boundary(titre="Erreur dans l'onglet Anti-Gaspi"):
+            _afficher_anti_gaspi()
 
     with tab_suggestions:
         with error_boundary(titre="Erreur dans l'onglet Suggestions IA"):

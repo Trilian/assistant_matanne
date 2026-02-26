@@ -43,6 +43,9 @@ def afficher_vue_semaine_liste(semaine: SemaineCalendrier):
 
         # Construire le titre avec indicateurs
         indicateurs = []
+        if jour.est_jour_special:
+            for js in jour.jours_speciaux:
+                indicateurs.append(js.emoji)
         if jour.repas_midi or jour.repas_soir:
             indicateurs.append("🍽️")
         if jour.batch_cooking:
@@ -119,6 +122,8 @@ def _dialog_impression(semaine: SemaineCalendrier):
     """Dialog natif pour l'impression du planning."""
     from src.core.state import rerun
 
+    from .export import generer_pdf_semaine
+
     texte = generer_texte_semaine_pour_impression(semaine)
 
     st.text_area(
@@ -127,7 +132,7 @@ def _dialog_impression(semaine: SemaineCalendrier):
         height=400,
     )
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
         st.download_button(
             "📥 Télécharger .txt",
@@ -136,6 +141,17 @@ def _dialog_impression(semaine: SemaineCalendrier):
             mime="text/plain",
         )
     with col2:
+        pdf_data = generer_pdf_semaine(semaine)
+        if pdf_data:
+            st.download_button(
+                "📄 Télécharger PDF",
+                data=pdf_data,
+                file_name=f"planning_{semaine.date_debut.strftime('%Y%m%d')}.pdf",
+                mime="application/pdf",
+            )
+        else:
+            st.caption("PDF indisponible")
+    with col3:
         if st.button("Fermer", use_container_width=True):
             rerun()
 

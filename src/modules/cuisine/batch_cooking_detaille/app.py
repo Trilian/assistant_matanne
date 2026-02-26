@@ -51,9 +51,15 @@ def app():
     planning_data = st.session_state.get(SK.PLANNING_DATA, {})
 
     # Tabs avec deep linking URL
-    TAB_LABELS = ["📋 Préparer", "👩‍🍳 Session Batch", "� Exécution Live", "🍽️ Finitions Jour J"]
+    TAB_LABELS = [
+        "📋 Préparer",
+        "👩‍🍳 Session Batch",
+        "\U0001f9d1\u200d🍳 Exécution Live",
+        "🍽️ Finitions Jour J",
+        "🧊 Congélation",
+    ]
     tab_index = tabs_with_url(TAB_LABELS, param="tab")
-    tab_preparer, tab_session, tab_execution, tab_finitions = st.tabs(TAB_LABELS)
+    tab_preparer, tab_session, tab_execution, tab_finitions, tab_congelation = st.tabs(TAB_LABELS)
 
     # ═══════════════════════════════════════════════════════
     # TAB: PRÉPARER
@@ -314,3 +320,13 @@ def app():
                 for recette in recettes:
                     with st.expander(f"🍽️ {recette.get('nom', 'Recette')}", expanded=False):
                         afficher_finition_jour_j(recette)
+
+    # ═══════════════════════════════════════════════════════
+    # TAB: CONGÉLATION
+    # ═══════════════════════════════════════════════════════
+
+    with tab_congelation:
+        with error_boundary(titre="Erreur congélation"):
+            from .congelation_ui import afficher_congelation
+
+            afficher_congelation()

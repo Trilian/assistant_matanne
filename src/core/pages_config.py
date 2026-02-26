@@ -158,6 +158,72 @@ PAGES: list[SectionConfig] = [
                 "title": "Routines",
                 "icon": "⏰",
             },
+            {
+                "key": "famille.carnet_sante",
+                "path": "src.modules.famille.carnet_sante",
+                "title": "Carnet Santé",
+                "icon": "🏥",
+            },
+            {
+                "key": "famille.calendrier",
+                "path": "src.modules.famille.calendrier_famille",
+                "title": "Calendrier",
+                "icon": "📅",
+            },
+            {
+                "key": "famille.anniversaires",
+                "path": "src.modules.famille.anniversaires",
+                "title": "Anniversaires",
+                "icon": "🎂",
+            },
+            {
+                "key": "famille.contacts",
+                "path": "src.modules.famille.contacts_famille",
+                "title": "Contacts",
+                "icon": "📞",
+            },
+            {
+                "key": "famille.soiree_couple",
+                "path": "src.modules.famille.soiree_couple",
+                "title": "Soirée Couple",
+                "icon": "❤️",
+            },
+            {
+                "key": "famille.album",
+                "path": "src.modules.famille.album",
+                "title": "Album Souvenirs",
+                "icon": "📸",
+            },
+            {
+                "key": "famille.sante_globale",
+                "path": "src.modules.famille.sante_globale",
+                "title": "Santé Globale",
+                "icon": "💪",
+            },
+            {
+                "key": "famille.journal",
+                "path": "src.modules.famille.journal_familial",
+                "title": "Journal IA",
+                "icon": "📝",
+            },
+            {
+                "key": "famille.documents",
+                "path": "src.modules.famille.documents_famille",
+                "title": "Documents",
+                "icon": "📁",
+            },
+            {
+                "key": "famille.voyage",
+                "path": "src.modules.famille.voyage",
+                "title": "Mode Voyage",
+                "icon": "✈️",
+            },
+            {
+                "key": "famille.routines_pdf",
+                "path": "src.modules.famille.routines_imprimables",
+                "title": "Routines PDF",
+                "icon": "🖨️",
+            },
         ],
     },
     # ── Maison ──
@@ -242,6 +308,48 @@ PAGES: list[SectionConfig] = [
                 "title": "Loto",
                 "icon": "🎰",
             },
+            {
+                "key": "jeux.euromillions",
+                "path": "src.modules.jeux.euromillions",
+                "title": "Euromillions",
+                "icon": "⭐",
+            },
+            {
+                "key": "jeux.bilan",
+                "path": "src.modules.jeux.bilan",
+                "title": "Bilan Global",
+                "icon": "📊",
+            },
+            {
+                "key": "jeux.comparatif_roi",
+                "path": "src.modules.jeux.comparatif_roi",
+                "title": "Comparatif ROI",
+                "icon": "📈",
+            },
+            {
+                "key": "jeux.alertes",
+                "path": "src.modules.jeux.alertes",
+                "title": "Alertes Pronostics",
+                "icon": "🔔",
+            },
+            {
+                "key": "jeux.biais",
+                "path": "src.modules.jeux.biais",
+                "title": "Biais Cognitifs",
+                "icon": "🧠",
+            },
+            {
+                "key": "jeux.calendrier",
+                "path": "src.modules.jeux.calendrier",
+                "title": "Calendrier",
+                "icon": "📅",
+            },
+            {
+                "key": "jeux.educatif",
+                "path": "src.modules.jeux.educatif",
+                "title": "Module Éducatif",
+                "icon": "🎓",
+            },
         ],
     },
     # ── Outils ──
@@ -283,6 +391,138 @@ PAGES: list[SectionConfig] = [
                 "path": "src.modules.utilitaires.chat_ia",
                 "title": "Chat IA",
                 "icon": "💬",
+            },
+        ],
+    },
+    # ── Données ──
+    {
+        "name": "📦 Données",
+        "pages": [
+            {
+                "key": "export_global",
+                "path": "src.modules.utilitaires.export_global",
+                "title": "Export Global",
+                "icon": "📤",
+            },
+            {
+                "key": "import_masse",
+                "path": "src.modules.utilitaires.import_masse",
+                "title": "Import Masse",
+                "icon": "📥",
+            },
+        ],
+    },
+    # ── Outils Cuisine ──
+    {
+        "name": "🍳 Cuisine+",
+        "pages": [
+            {
+                "key": "convertisseur_unites",
+                "path": "src.modules.utilitaires.convertisseur_unites",
+                "title": "Convertisseur",
+                "icon": "⚖️",
+            },
+            {
+                "key": "calculatrice_portions",
+                "path": "src.modules.utilitaires.calculatrice_portions",
+                "title": "Portions",
+                "icon": "🔢",
+            },
+            {
+                "key": "substitutions",
+                "path": "src.modules.utilitaires.substitutions",
+                "title": "Substitutions",
+                "icon": "🔄",
+            },
+            {
+                "key": "cout_repas",
+                "path": "src.modules.utilitaires.cout_repas",
+                "title": "Coût Repas",
+                "icon": "💰",
+            },
+            {
+                "key": "saisonnalite",
+                "path": "src.modules.utilitaires.saisonnalite",
+                "title": "Saisons",
+                "icon": "🥕",
+            },
+            {
+                "key": "minuteur",
+                "path": "src.modules.utilitaires.minuteur",
+                "title": "Minuteur",
+                "icon": "⏱️",
+            },
+        ],
+    },
+    # ── Productivité ──
+    {
+        "name": "📝 Productivité",
+        "pages": [
+            {
+                "key": "notes_memos",
+                "path": "src.modules.utilitaires.notes_memos",
+                "title": "Notes",
+                "icon": "📝",
+            },
+            {
+                "key": "journal_bord",
+                "path": "src.modules.utilitaires.journal_bord",
+                "title": "Journal",
+                "icon": "📓",
+            },
+            {
+                "key": "presse_papiers",
+                "path": "src.modules.utilitaires.presse_papiers",
+                "title": "Presse-papiers",
+                "icon": "📋",
+            },
+            {
+                "key": "liens_utiles",
+                "path": "src.modules.utilitaires.liens_utiles",
+                "title": "Favoris",
+                "icon": "🔗",
+            },
+            {
+                "key": "annuaire_contacts",
+                "path": "src.modules.utilitaires.annuaire_contacts",
+                "title": "Contacts",
+                "icon": "📇",
+            },
+            {
+                "key": "compte_rebours",
+                "path": "src.modules.utilitaires.compte_rebours",
+                "title": "Compte à rebours",
+                "icon": "⏳",
+            },
+        ],
+    },
+    # ── Outils Maison ──
+    {
+        "name": "🏠 Outils Maison",
+        "pages": [
+            {
+                "key": "meteo",
+                "path": "src.modules.utilitaires.meteo",
+                "title": "Météo",
+                "icon": "🌤️",
+            },
+            {
+                "key": "suivi_energie",
+                "path": "src.modules.utilitaires.suivi_energie",
+                "title": "Énergie",
+                "icon": "⚡",
+            },
+            {
+                "key": "mots_de_passe",
+                "path": "src.modules.utilitaires.mots_de_passe",
+                "title": "Mots de passe",
+                "icon": "🔐",
+            },
+            {
+                "key": "qr_code_gen",
+                "path": "src.modules.utilitaires.qr_code_gen",
+                "title": "QR Codes",
+                "icon": "📱",
             },
         ],
     },

@@ -17,6 +17,9 @@ from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 
+# Nouveaux sous-modules
+from .budget_ui import afficher_budget_courses
+from .export_drive_ui import afficher_export_drive
 from .historique import afficher_historique
 
 # Imports des sous-modules
@@ -26,6 +29,7 @@ from .liste_active import (
     afficher_print_view,
     afficher_rayon_articles,
 )
+from .mode_rapide_ui import afficher_mode_rapide
 from .modeles import afficher_modeles
 from .outils import afficher_outils
 from .planning import afficher_courses_depuis_planning
@@ -33,6 +37,7 @@ from .realtime import (
     _init_realtime_sync,
     afficher_realtime_status,
 )
+from .scan_ticket_ui import afficher_scan_ticket
 from .suggestions_ia import afficher_suggestions_ia
 from .utils import PRIORITY_EMOJIS, RAYONS_DEFAULT
 
@@ -69,12 +74,25 @@ def app():
         "⏰ Suggestions IA",
         "📋 Historique",
         "📄 Modèles",
+        "� Budget",
+        "⚡ Mode Rapide",
+        "🧾 Scan Ticket",
+        "🚗 Export Drive",
         "🔧 Outils",
     ]
     tab_index = tabs_with_url(TAB_LABELS, param="tab")
-    tab_liste, tab_planning, tab_suggestions, tab_historique, tab_modeles, tab_outils = st.tabs(
-        TAB_LABELS
-    )
+    (
+        tab_liste,
+        tab_planning,
+        tab_suggestions,
+        tab_historique,
+        tab_modeles,
+        tab_budget,
+        tab_rapide,
+        tab_ticket,
+        tab_drive,
+        tab_outils,
+    ) = st.tabs(TAB_LABELS)
 
     with tab_liste:
         with error_boundary(titre="Erreur liste active"):
@@ -95,6 +113,22 @@ def app():
     with tab_modeles:
         with error_boundary(titre="Erreur modèles"):
             afficher_modeles()
+
+    with tab_budget:
+        with error_boundary(titre="Erreur budget"):
+            afficher_budget_courses()
+
+    with tab_rapide:
+        with error_boundary(titre="Erreur mode rapide"):
+            afficher_mode_rapide()
+
+    with tab_ticket:
+        with error_boundary(titre="Erreur scan ticket"):
+            afficher_scan_ticket()
+
+    with tab_drive:
+        with error_boundary(titre="Erreur export drive"):
+            afficher_export_drive()
 
     with tab_outils:
         with error_boundary(titre="Erreur outils"):

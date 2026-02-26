@@ -15,12 +15,14 @@ def afficher_courses_depuis_planning():
     """Génère la liste de courses depuis le planning repas actif."""
     st.subheader("🍽️ Courses depuis le Planning")
 
-    st.info("""
+    st.info(
+        """
     **Génération automatique** de la liste de courses basée sur votre planning de repas.
 
     Le système analyse les recettes planifiées, extrait les ingrédients,
     compare avec votre inventaire et génère une liste optimisée.
-    """)
+    """
+    )
 
     service = obtenir_service_courses_intelligentes()
 
@@ -154,7 +156,8 @@ def afficher_courses_depuis_planning():
                     rerun()
     else:
         # Instructions
-        st.markdown("""
+        st.markdown(
+            """
         ### Comment ça marche?
 
         1. **Analyse** - Le système parcourt toutes les recettes de votre planning
@@ -164,7 +167,8 @@ def afficher_courses_depuis_planning():
         5. **Organisation** - Tri par rayon pour faciliter vos courses
 
         Cliquez sur **"Générer la liste"** pour commencer.
-        """)
+        """
+        )
 
 
 __all__ = ["afficher_courses_depuis_planning"]

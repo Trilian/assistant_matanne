@@ -1,12 +1,13 @@
 # 📚 Documentation Index - MaTanne v2
 
-> **Dernière mise à jour**: 19 Février 2026
+> **Dernière mise à jour**: 26 Février 2026
 
 ## 🎯 Documents Essentiels
 
 | Fichier                                                          | Description                            |
 | ---------------------------------------------------------------- | -------------------------------------- |
 | **README.md**                                                    | Documentation principale du projet     |
+| **[GUIDE_UTILISATEUR.md](./GUIDE_UTILISATEUR.md)**               | **Guide utilisateur complet**          |
 | **ROADMAP.md**                                                   | Plan de développement & roadmap        |
 | **[API_REFERENCE.md](./API_REFERENCE.md)**                       | **Référence complète de l'API REST**   |
 | **[SERVICES_REFERENCE.md](./SERVICES_REFERENCE.md)**             | **Documentation des services backend** |
@@ -24,6 +25,7 @@
 ```text
 docs/
 ├── INDEX.md                          ← Vous êtes ici
+├── GUIDE_UTILISATEUR.md              ← Guide utilisateur complet
 ├── ARCHITECTURE.md                   ← Architecture technique
 ├── API_REFERENCE.md                  ← Documentation API REST
 ├── SERVICES_REFERENCE.md             ← Documentation Services
@@ -130,6 +132,7 @@ pytest tests/ --cov=src --cov-report=html
 
 | Fichier                       | Contenu                                          |
 | ----------------------------- | ------------------------------------------------ |
+| `GUIDE_UTILISATEUR.md`        | Guide utilisateur complet (tous les modules)     |
 | `ARCHITECTURE.md`             | Architecture technique (core, services, modules) |
 | `API_REFERENCE.md`            | Référence API REST FastAPI                       |
 | `SERVICES_REFERENCE.md`       | Documentation services backend                   |

@@ -1,5 +1,5 @@
 """
-Modèles SQLAlchemy pour le domaine Jeux (Paris sportifs & Loto)
+Modèles SQLAlchemy pour le domaine Jeux (Paris sportifs, Loto & Euromillions)
 """
 
 import enum
@@ -402,6 +402,7 @@ class TypeJeuEnum(enum.StrEnum):
 
     PARIS = "paris"
     LOTO = "loto"
+    EUROMILLIONS = "euromillions"
 
 
 class TypeMarcheParisEnum(enum.StrEnum):
@@ -545,3 +546,221 @@ class ConfigurationJeux(Base):
 
     def __repr__(self) -> str:
         return f"<Config {self.cle}={self.valeur}>"
+
+
+# ═══════════════════════════════════════════════════════════════════
+# MODÈLES EUROMILLIONS
+# ═══════════════════════════════════════════════════════════════════
+
+
+class TirageEuromillions(CreeLeMixin, Base):
+    """Historique des tirages Euromillions"""
+
+    __tablename__ = "jeux_tirages_euromillions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    date_tirage: Mapped[date] = mapped_column(Date, nullable=False, unique=True)
+
+    # 5 numéros principaux (1-50)
+    numero_1: Mapped[int] = mapped_column(Integer, nullable=False)
+    numero_2: Mapped[int] = mapped_column(Integer, nullable=False)
+    numero_3: Mapped[int] = mapped_column(Integer, nullable=False)
+    numero_4: Mapped[int] = mapped_column(Integer, nullable=False)
+    numero_5: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # 2 étoiles (1-12)
+    etoile_1: Mapped[int] = mapped_column(Integer, nullable=False)
+    etoile_2: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # Infos jackpot
+    jackpot_euros: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    gagnants_rang1: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    # MyMillion (code)
+    code_my_million: Mapped[str | None] = mapped_column(String(20), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<TirageEuro {self.date_tirage}: {self.numeros_str}>"
+
+    @property
+    def numeros(self) -> list[int]:
+        """Retourne la liste des 5 numéros principaux"""
+        return sorted([self.numero_1, self.numero_2, self.numero_3, self.numero_4, self.numero_5])
+
+    @property
+    def etoiles(self) -> list[int]:
+        """Retourne la liste des 2 étoiles"""
+        return sorted([self.etoile_1, self.etoile_2])
+
+    @property
+    def numeros_str(self) -> str:
+        """Format affichage: 5-12-23-34-45 ★1 ★9"""
+        nums = "-".join(map(str, self.numeros))
+        stars = " ".join(f"★{e}" for e in self.etoiles)
+        return f"{nums} {stars}"
+
+
+class GrilleEuromillions(Base):
+    """Grille Euromillions jouée (réelle ou virtuelle)"""
+
+    __tablename__ = "jeux_grilles_euromillions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    tirage_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("jeux_tirages_euromillions.id"), nullable=True
+    )
+
+    # 5 numéros choisis (1-50)
+    numero_1: Mapped[int] = mapped_column(Integer, nullable=False)
+    numero_2: Mapped[int] = mapped_column(Integer, nullable=False)
+    numero_3: Mapped[int] = mapped_column(Integer, nullable=False)
+    numero_4: Mapped[int] = mapped_column(Integer, nullable=False)
+    numero_5: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # 2 étoiles (1-12)
+    etoile_1: Mapped[int] = mapped_column(Integer, nullable=False)
+    etoile_2: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # Tracking
+    est_virtuelle: Mapped[bool] = mapped_column(Boolean, default=True)
+    source_prediction: Mapped[str] = mapped_column(String(50), default="manuel")
+    mise: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=Decimal("2.50"))
+
+    # Résultat
+    numeros_trouves: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 0-5
+    etoiles_trouvees: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 0-2
+    gain: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
+    rang: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 1-13
+
+    # Méta
+    date_creation: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # Relations
+    tirage: Mapped[Optional["TirageEuromillions"]] = relationship("TirageEuromillions")
+
+    def __repr__(self) -> str:
+        return f"<GrilleEuro {self.numeros_str}>"
+
+    @property
+    def numeros(self) -> list[int]:
+        return sorted([self.numero_1, self.numero_2, self.numero_3, self.numero_4, self.numero_5])
+
+    @property
+    def etoiles(self) -> list[int]:
+        return sorted([self.etoile_1, self.etoile_2])
+
+    @property
+    def numeros_str(self) -> str:
+        nums = "-".join(map(str, self.numeros))
+        stars = " ".join(f"★{e}" for e in self.etoiles)
+        return f"{nums} {stars}"
+
+
+class StatistiquesEuromillions(Base):
+    """Statistiques calculées sur les tirages Euromillions (cache)"""
+
+    __tablename__ = "jeux_stats_euromillions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    date_calcul: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+    frequences_numeros: Mapped[dict] = mapped_column(JSON, nullable=True)
+    frequences_etoiles: Mapped[dict] = mapped_column(JSON, nullable=True)
+
+    numeros_chauds: Mapped[dict] = mapped_column(JSON, nullable=True)
+    numeros_froids: Mapped[dict] = mapped_column(JSON, nullable=True)
+    numeros_retard: Mapped[dict] = mapped_column(JSON, nullable=True)
+    etoiles_chaudes: Mapped[dict] = mapped_column(JSON, nullable=True)
+    etoiles_froides: Mapped[dict] = mapped_column(JSON, nullable=True)
+
+    somme_moyenne: Mapped[float | None] = mapped_column(Float, nullable=True)
+    paires_frequentes: Mapped[dict] = mapped_column(JSON, nullable=True)
+    nb_tirages_analyses: Mapped[int] = mapped_column(Integer, default=0)
+
+
+# ═══════════════════════════════════════════════════════════════════
+# SUIVI DES COTES EN TEMPS RÉEL
+# ═══════════════════════════════════════════════════════════════════
+
+
+class CoteHistorique(CreeLeMixin, Base):
+    """Historique des mouvements de cotes par bookmaker"""
+
+    __tablename__ = "jeux_cotes_historique"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    match_id: Mapped[int] = mapped_column(Integer, ForeignKey("jeux_matchs.id"), nullable=False)
+
+    bookmaker: Mapped[str] = mapped_column(String(100), nullable=False)
+    marche: Mapped[str] = mapped_column(String(50), nullable=False)  # "1", "N", "2", "over_2.5"
+
+    cote: Mapped[float] = mapped_column(Float, nullable=False)
+    probabilite_implicite: Mapped[float | None] = mapped_column(Float, nullable=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+    # Relations
+    match: Mapped["Match"] = relationship("Match")
+
+    def __repr__(self) -> str:
+        return f"<Cote {self.bookmaker} {self.marche}={self.cote} @ {self.timestamp}>"
+
+
+# ═══════════════════════════════════════════════════════════════════
+# MISE RESPONSABLE
+# ═══════════════════════════════════════════════════════════════════
+
+
+class MiseResponsable(CreeLeMixin, Base):
+    """Suivi mensuel de la mise responsable"""
+
+    __tablename__ = "jeux_mise_responsable"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    mois: Mapped[date] = mapped_column(Date, nullable=False)  # Premier jour du mois
+
+    # Limites
+    limite_mensuelle: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2), nullable=False, default=Decimal("50.00")
+    )
+    mises_cumulees: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=Decimal("0.00"))
+
+    # Alertes déclenchées
+    alerte_50_pct: Mapped[bool] = mapped_column(Boolean, default=False)
+    alerte_75_pct: Mapped[bool] = mapped_column(Boolean, default=False)
+    alerte_90_pct: Mapped[bool] = mapped_column(Boolean, default=False)
+    alerte_100_pct: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # Auto-exclusion
+    auto_exclusion_jusqu_a: Mapped[date | None] = mapped_column(Date, nullable=True)
+
+    # Cooldown
+    cooldown_actif: Mapped[bool] = mapped_column(Boolean, default=False)
+    cooldown_fin: Mapped[date | None] = mapped_column(Date, nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<MiseResponsable {self.mois}: {self.mises_cumulees}/{self.limite_mensuelle}>"
+
+    @property
+    def pourcentage_utilise(self) -> float:
+        """Pourcentage de la limite utilisée"""
+        if self.limite_mensuelle == 0:
+            return 100.0
+        return float(self.mises_cumulees / self.limite_mensuelle * 100)
+
+    @property
+    def reste_disponible(self) -> Decimal:
+        """Montant restant disponible ce mois"""
+        reste = self.limite_mensuelle - self.mises_cumulees
+        return max(reste, Decimal("0.00"))
+
+    @property
+    def est_bloque(self) -> bool:
+        """Indique si les mises sont bloquées"""
+        from datetime import date as date_type
+
+        if self.auto_exclusion_jusqu_a and self.auto_exclusion_jusqu_a > date_type.today():
+            return True
+        if self.cooldown_actif and self.cooldown_fin and self.cooldown_fin > date_type.today():
+            return True
+        return self.mises_cumulees >= self.limite_mensuelle

@@ -97,6 +97,10 @@ class PreferenceNotification(TimestampMixin, Base):
     quiet_hours_start: Mapped[time | None] = mapped_column(Time, default=time(22, 0))
     quiet_hours_end: Mapped[time | None] = mapped_column(Time, default=time(7, 0))
 
+    # Configuration par module (JSONB)
+    modules_actifs: Mapped[dict | None] = mapped_column(JSONB, default=dict)
+    canal_prefere: Mapped[str] = mapped_column(String(20), default="push")
+
     # Supabase user (unique)
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), unique=True)
 

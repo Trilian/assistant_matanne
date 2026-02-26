@@ -1,4 +1,5 @@
-"""Package famille - Services calendrier, budget, routines, activités, achats, weekend, suivi perso, jules et santé.
+"""Package famille - Services calendrier, budget, routines, activités, achats, weekend, suivi perso, jules, santé,
+carnet_sante, contacts, anniversaires, evenements, voyage, documents, album, soiree_ai, journal_ia.
 
 Imports paresseux pour éviter les imports circulaires.
 Importez directement depuis les sous-packages:
@@ -12,6 +13,15 @@ Importez directement depuis les sous-packages:
     from src.services.famille.suivi_perso import obtenir_service_suivi_perso
     from src.services.famille.jules import obtenir_service_jules
     from src.services.famille.sante import obtenir_service_sante
+    from src.services.famille.carnet_sante import obtenir_service_carnet_sante
+    from src.services.famille.contacts import obtenir_service_contacts
+    from src.services.famille.anniversaires import obtenir_service_anniversaires
+    from src.services.famille.evenements import obtenir_service_evenements
+    from src.services.famille.voyage import obtenir_service_voyage
+    from src.services.famille.documents import obtenir_service_documents
+    from src.services.famille.album import obtenir_service_album
+    from src.services.famille.soiree_ai import obtenir_service_soiree_ai
+    from src.services.famille.journal_ia import obtenir_service_journal_ia
 """
 
 __all__ = [
@@ -27,6 +37,15 @@ __all__ = [
     "calendrier_planning",
     "jules_ai",
     "weekend_ai",
+    "carnet_sante",
+    "contacts",
+    "anniversaires",
+    "evenements",
+    "voyage",
+    "documents",
+    "album",
+    "soiree_ai",
+    "journal_ia",
 ]
 
 
@@ -74,4 +93,40 @@ def __getattr__(name: str):
         )
 
         return obtenir_service_calendrier_planning
+    if name in ("obtenir_service_carnet_sante", "get_carnet_sante_service"):
+        from src.services.famille.carnet_sante import obtenir_service_carnet_sante
+
+        return obtenir_service_carnet_sante
+    if name in ("obtenir_service_contacts", "get_contacts_service"):
+        from src.services.famille.contacts import obtenir_service_contacts
+
+        return obtenir_service_contacts
+    if name in ("obtenir_service_anniversaires", "get_anniversaires_service"):
+        from src.services.famille.anniversaires import obtenir_service_anniversaires
+
+        return obtenir_service_anniversaires
+    if name in ("obtenir_service_evenements", "get_evenements_service"):
+        from src.services.famille.evenements import obtenir_service_evenements
+
+        return obtenir_service_evenements
+    if name in ("obtenir_service_voyage", "get_voyage_service"):
+        from src.services.famille.voyage import obtenir_service_voyage
+
+        return obtenir_service_voyage
+    if name in ("obtenir_service_documents", "get_documents_service"):
+        from src.services.famille.documents import obtenir_service_documents
+
+        return obtenir_service_documents
+    if name in ("obtenir_service_album", "get_album_service"):
+        from src.services.famille.album import obtenir_service_album
+
+        return obtenir_service_album
+    if name in ("obtenir_service_soiree_ai", "get_soiree_ai_service"):
+        from src.services.famille.soiree_ai import obtenir_service_soiree_ai
+
+        return obtenir_service_soiree_ai
+    if name in ("obtenir_service_journal_ia", "get_journal_ia_service"):
+        from src.services.famille.journal_ia import obtenir_service_journal_ia
+
+        return obtenir_service_journal_ia
     raise AttributeError(f"module 'src.services.famille' has no attribute '{name}'")

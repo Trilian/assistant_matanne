@@ -140,13 +140,15 @@ def executer_batch_cooking_live(batch_data: dict) -> bool:
         )
 
     # Résumé final
-    st.success(f"""
+    st.success(
+        f"""
     ### 🎉 Batch Cooking Terminé!
 
     - **{etapes_terminees} étapes** complétées
     - **{len(recettes)} recettes** préparées
     - **Durée**: {minutes_totales} minutes
-    """)
+    """
+    )
 
     return True
 

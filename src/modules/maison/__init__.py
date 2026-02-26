@@ -9,16 +9,26 @@ Sous-modules disponibles:
 """
 
 __all__ = [
+    "artisans",
+    "cellier",
     "charges",
+    "checklists",
+    "contrats",
     "depenses",
+    "devis",
+    "diagnostics",
     "eco_tips",
     "energie",
     "entretien",
+    "entretien_saisonnier",
+    "garanties",
     "hub",
     "jardin",
     "jardin_zones",
     "meubles",
+    "nuisibles",
     "projets",
+    "releves",
 ]
 
 

@@ -1,0 +1,151 @@
+{
+  "meta": {
+    "description": "Templates de checklists de voyage par défaut",
+    "version": "1.0"
+  },
+  "templates": [
+    {
+      "nom": "Essentiel Bébé - Été",
+      "type_voyage": "vacances",
+      "membre": "jules",
+      "description": "Indispensables pour voyager avec un bébé/tout-petit en été",
+      "articles": [
+        {"nom": "Doudou", "categorie": "essentiel", "quantite": 1},
+        {"nom": "Tétine(s) de rechange", "categorie": "essentiel", "quantite": 2},
+        {"nom": "Couches (par jour)", "categorie": "hygiene", "quantite": 6},
+        {"nom": "Lingettes", "categorie": "hygiene", "quantite": 1},
+        {"nom": "Crème de change", "categorie": "hygiene", "quantite": 1},
+        {"nom": "Crème solaire SPF50", "categorie": "protection", "quantite": 1},
+        {"nom": "Chapeau / Bob", "categorie": "protection", "quantite": 1},
+        {"nom": "Lunettes de soleil", "categorie": "protection", "quantite": 1},
+        {"nom": "Body manches courtes", "categorie": "vetements", "quantite": 4},
+        {"nom": "Short / Bermuda", "categorie": "vetements", "quantite": 3},
+        {"nom": "T-shirt léger", "categorie": "vetements", "quantite": 4},
+        {"nom": "Pyjama léger", "categorie": "vetements", "quantite": 2},
+        {"nom": "Sandales", "categorie": "vetements", "quantite": 1},
+        {"nom": "Maillot de bain / couche piscine", "categorie": "vetements", "quantite": 2},
+        {"nom": "Turbulette légère", "categorie": "dodo", "quantite": 1},
+        {"nom": "Biberon / gobelet", "categorie": "repas", "quantite": 2},
+        {"nom": "Bavoir", "categorie": "repas", "quantite": 3},
+        {"nom": "Petits pots / gourdes", "categorie": "repas", "quantite": 5},
+        {"nom": "Jouet préféré", "categorie": "divertissement", "quantite": 2},
+        {"nom": "Livre d'images", "categorie": "divertissement", "quantite": 2},
+        {"nom": "Gigoteuse voyage", "categorie": "dodo", "quantite": 1}
+      ]
+    },
+    {
+      "nom": "Essentiel Bébé - Hiver",
+      "type_voyage": "vacances",
+      "membre": "jules",
+      "description": "Indispensables pour voyager avec un bébé/tout-petit en hiver",
+      "articles": [
+        {"nom": "Doudou", "categorie": "essentiel", "quantite": 1},
+        {"nom": "Tétine(s) de rechange", "categorie": "essentiel", "quantite": 2},
+        {"nom": "Couches (par jour)", "categorie": "hygiene", "quantite": 6},
+        {"nom": "Lingettes", "categorie": "hygiene", "quantite": 1},
+        {"nom": "Crème hydratante", "categorie": "hygiene", "quantite": 1},
+        {"nom": "Body manches longues", "categorie": "vetements", "quantite": 4},
+        {"nom": "Pantalon chaud", "categorie": "vetements", "quantite": 3},
+        {"nom": "Pull / Gilet", "categorie": "vetements", "quantite": 3},
+        {"nom": "Combinaison / Manteau", "categorie": "vetements", "quantite": 1},
+        {"nom": "Bonnet", "categorie": "vetements", "quantite": 1},
+        {"nom": "Moufles", "categorie": "vetements", "quantite": 1},
+        {"nom": "Chaussettes chaudes", "categorie": "vetements", "quantite": 4},
+        {"nom": "Chaussures chaudes", "categorie": "vetements", "quantite": 1},
+        {"nom": "Pyjama chaud", "categorie": "vetements", "quantite": 2},
+        {"nom": "Turbulette chaude", "categorie": "dodo", "quantite": 1},
+        {"nom": "Biberon / gobelet", "categorie": "repas", "quantite": 2},
+        {"nom": "Bavoir", "categorie": "repas", "quantite": 3},
+        {"nom": "Petits pots / gourdes", "categorie": "repas", "quantite": 5},
+        {"nom": "Jouet préféré", "categorie": "divertissement", "quantite": 2},
+        {"nom": "Livre d'images", "categorie": "divertissement", "quantite": 2}
+      ]
+    },
+    {
+      "nom": "Trousse de secours famille",
+      "type_voyage": null,
+      "membre": "commun",
+      "description": "Trousse médicale et premiers soins pour toute la famille",
+      "articles": [
+        {"nom": "Doliprane enfant (sirop/suppositoire)", "categorie": "medicament", "quantite": 1},
+        {"nom": "Doliprane adulte", "categorie": "medicament", "quantite": 1},
+        {"nom": "Sérum physiologique", "categorie": "medicament", "quantite": 1},
+        {"nom": "Thermomètre", "categorie": "materiel", "quantite": 1},
+        {"nom": "Pansements assortis", "categorie": "materiel", "quantite": 1},
+        {"nom": "Désinfectant (Biseptine)", "categorie": "medicament", "quantite": 1},
+        {"nom": "Crème Arnica", "categorie": "medicament", "quantite": 1},
+        {"nom": "Gel antibactérien", "categorie": "hygiene", "quantite": 1},
+        {"nom": "Anti-moustiques bébé", "categorie": "protection", "quantite": 1},
+        {"nom": "Soluté de réhydratation orale", "categorie": "medicament", "quantite": 2},
+        {"nom": "Smecta / anti-diarrhéique", "categorie": "medicament", "quantite": 1},
+        {"nom": "Carnet de santé (copie)", "categorie": "document", "quantite": 1},
+        {"nom": "Ordonnances en cours", "categorie": "document", "quantite": 1},
+        {"nom": "Carte vitale / Mutuelle", "categorie": "document", "quantite": 1}
+      ]
+    },
+    {
+      "nom": "Weekend parents",
+      "type_voyage": "weekend",
+      "membre": "commun",
+      "description": "Essentiels pour un weekend en couple ou en famille",
+      "articles": [
+        {"nom": "Papiers d'identité", "categorie": "document", "quantite": 2},
+        {"nom": "Chargeurs téléphone", "categorie": "tech", "quantite": 2},
+        {"nom": "Vêtements (2 jours)", "categorie": "vetements", "quantite": 1},
+        {"nom": "Trousse de toilette", "categorie": "hygiene", "quantite": 1},
+        {"nom": "Pyjama", "categorie": "vetements", "quantite": 1},
+        {"nom": "Maillot de bain", "categorie": "vetements", "quantite": 1},
+        {"nom": "Snacks route", "categorie": "repas", "quantite": 1},
+        {"nom": "Bouteilles d'eau", "categorie": "repas", "quantite": 2},
+        {"nom": "Appareil photo", "categorie": "tech", "quantite": 1}
+      ]
+    },
+    {
+      "nom": "Vacances longues parents",
+      "type_voyage": "vacances",
+      "membre": "commun",
+      "description": "Pour des vacances d'une semaine ou plus",
+      "articles": [
+        {"nom": "Papiers d'identité / Passeports", "categorie": "document", "quantite": 1},
+        {"nom": "Billets / Réservations (imprimés)", "categorie": "document", "quantite": 1},
+        {"nom": "Carte bancaire / Espèces", "categorie": "document", "quantite": 1},
+        {"nom": "Assurance voyage", "categorie": "document", "quantite": 1},
+        {"nom": "Chargeurs + câbles", "categorie": "tech", "quantite": 1},
+        {"nom": "Batterie externe", "categorie": "tech", "quantite": 1},
+        {"nom": "Adaptateur prise", "categorie": "tech", "quantite": 1},
+        {"nom": "T-shirts", "categorie": "vetements", "quantite": 7},
+        {"nom": "Pantalons / Shorts", "categorie": "vetements", "quantite": 4},
+        {"nom": "Sous-vêtements", "categorie": "vetements", "quantite": 7},
+        {"nom": "Chaussettes", "categorie": "vetements", "quantite": 7},
+        {"nom": "Veste / Pull", "categorie": "vetements", "quantite": 2},
+        {"nom": "Chaussures confort", "categorie": "vetements", "quantite": 1},
+        {"nom": "Tongs / Sandales", "categorie": "vetements", "quantite": 1},
+        {"nom": "Trousse de toilette complète", "categorie": "hygiene", "quantite": 1},
+        {"nom": "Crème solaire", "categorie": "protection", "quantite": 1},
+        {"nom": "Lunettes de soleil", "categorie": "protection", "quantite": 1},
+        {"nom": "Livre / Liseuse", "categorie": "divertissement", "quantite": 1},
+        {"nom": "Jeux de cartes / société", "categorie": "divertissement", "quantite": 1},
+        {"nom": "Sac à dos journée", "categorie": "accessoire", "quantite": 1}
+      ]
+    },
+    {
+      "nom": "Voyage en voiture avec bébé",
+      "type_voyage": null,
+      "membre": "commun",
+      "description": "Spécifique aux longs trajets en voiture",
+      "articles": [
+        {"nom": "Siège auto vérifié", "categorie": "securite", "quantite": 1},
+        {"nom": "Pare-soleil vitre", "categorie": "protection", "quantite": 2},
+        {"nom": "Miroir rétroviseur bébé", "categorie": "securite", "quantite": 1},
+        {"nom": "Jouets d'éveil voiture", "categorie": "divertissement", "quantite": 3},
+        {"nom": "Musique / Comptines (playlist)", "categorie": "divertissement", "quantite": 1},
+        {"nom": "Snacks / Gourdes compote", "categorie": "repas", "quantite": 5},
+        {"nom": "Eau / Biberon d'eau", "categorie": "repas", "quantite": 2},
+        {"nom": "Couches + lingettes (sac à portée)", "categorie": "hygiene", "quantite": 1},
+        {"nom": "Change complet de rechange", "categorie": "vetements", "quantite": 1},
+        {"nom": "Sac poubelle", "categorie": "hygiene", "quantite": 3},
+        {"nom": "Couverture légère", "categorie": "dodo", "quantite": 1}
+      ]
+    }
+  ]
+}

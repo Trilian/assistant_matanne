@@ -116,6 +116,21 @@ _LAZY_IMPORTS: dict[str, str] = {
     "ParisCrudService": "paris_crud_service",
     "get_paris_crud_service": "paris_crud_service",
     "obtenir_service_paris_crud": "paris_crud_service",
+    # ── Odds / Cotes ──
+    "OddsDataService": "odds_data",
+    "CoteMatch": "odds_data",
+    "MeilleureCote": "odds_data",
+    "MouvementCote": "odds_data",
+    "get_odds_data_service": "odds_data",
+    "obtenir_service_odds_data": "odds_data",
+    # ── Mise Responsable ──
+    "ResponsableGamingService": "responsable_gaming",
+    "get_responsable_gaming_service": "responsable_gaming",
+    "obtenir_service_responsable_gaming": "responsable_gaming",
+    # ── Euromillions CRUD ──
+    "EuromillionsCrudService": "euromillions_crud_service",
+    "get_euromillions_crud_service": "euromillions_crud_service",
+    "obtenir_service_euromillions_crud": "euromillions_crud_service",
 }
 
 
@@ -150,6 +165,11 @@ if TYPE_CHECKING:
         StatistiquesBacktest,
         get_backtest_service,
         obtenir_service_backtest,
+    )
+    from ._internal.euromillions_crud_service import (
+        EuromillionsCrudService,
+        get_euromillions_crud_service,
+        obtenir_service_euromillions_crud,
     )
     from ._internal.football_data import (
         COMPETITIONS,
@@ -198,6 +218,14 @@ if TYPE_CHECKING:
         get_notification_jeux_service,
         obtenir_service_notifications_jeux,
     )
+    from ._internal.odds_data import (
+        CoteMatch,
+        MeilleureCote,
+        MouvementCote,
+        OddsDataService,
+        get_odds_data_service,
+        obtenir_service_odds_data,
+    )
     from ._internal.paris_crud_service import (
         ParisCrudService,
         get_paris_crud_service,
@@ -218,6 +246,11 @@ if TYPE_CHECKING:
         obtenir_service_predictions_jeux,
         predire_over_under,
         predire_resultat_match,
+    )
+    from ._internal.responsable_gaming import (
+        ResponsableGamingService,
+        get_responsable_gaming_service,
+        obtenir_service_responsable_gaming,
     )
     from ._internal.scheduler_service import (
         APSCHEDULER_AVAILABLE,

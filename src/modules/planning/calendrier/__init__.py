@@ -42,6 +42,9 @@ from .analytics import (
     afficher_reequilibrage,
     afficher_suggestions,
 )
+from .components_conflits import (
+    afficher_alertes_conflits,
+)
 from .components_formulaire import (
     afficher_formulaire_ajout_event,
     afficher_legende,
@@ -59,7 +62,9 @@ from .components_semaine import (
     afficher_vue_semaine_liste,
 )
 from .data import charger_donnees_semaine
+from .import_ics import afficher_import_ics
 from .types import SemaineCalendrier  # noqa: F401
+from .vue_mensuelle import afficher_vue_mensuelle
 
 # Session keys scopées
 _keys = KeyNamespace("calendrier")
@@ -97,9 +102,9 @@ def app():
             )
 
         # Onglets principaux avec deep linking URL
-        TAB_LABELS = ["📅 Calendrier", "📊 Analyse", "🤖 IA", "🔗 Google"]
+        TAB_LABELS = ["📅 Calendrier", "📊 Analyse", "🤖 IA", "� Import", "🔗 Google"]
         tab_index = tabs_with_url(TAB_LABELS, param="tab")
-        tab_calendrier, tab_analyse, tab_ia, tab_google = st.tabs(TAB_LABELS)
+        tab_calendrier, tab_analyse, tab_ia, tab_import, tab_google = st.tabs(TAB_LABELS)
 
         # ═══════════════════════════════════════════════════════════
         # ONGLET CALENDRIER
@@ -107,6 +112,9 @@ def app():
         with tab_calendrier:
             # Stats en haut
             afficher_stats_semaine(semaine)
+
+            # Alertes conflits
+            afficher_alertes_conflits(st.session_state.cal_semaine_debut)
 
             st.divider()
 
@@ -118,7 +126,7 @@ def app():
             # Mode d'affichage
             mode = st.radio(
                 "Vue",
-                ["📋 Liste détaillée", "📊 Grille"],
+                ["📋 Liste détaillée", "📊 Grille", "📅 Mois"],
                 horizontal=True,
                 label_visibility="collapsed",
             )
@@ -126,8 +134,10 @@ def app():
             # Affichage principal
             if mode == "📋 Liste détaillée":
                 afficher_vue_semaine_liste(semaine)
-            else:
+            elif mode == "📊 Grille":
                 afficher_vue_semaine_grille(semaine)
+            else:
+                afficher_vue_mensuelle()
 
             # Modals
             afficher_modal_impression(semaine)
@@ -187,6 +197,11 @@ def app():
         with tab_ia:
             st.subheader("🤖 Optimisation Intelligente")
 
+            # Créneaux libres et suggestions
+            _afficher_suggestions_creneaux(semaine)
+
+            st.divider()
+
             # Formulaire d'optimisation IA
             afficher_formulaire_optimisation_ia(st.session_state.cal_semaine_debut)
 
@@ -205,12 +220,73 @@ def app():
             afficher_chat_contextuel("planning")
 
         # ═══════════════════════════════════════════════════════════
+        # ONGLET IMPORT ICS
+        # ═══════════════════════════════════════════════════════════
+        with tab_import:
+            afficher_import_ics()
+
+        # ═══════════════════════════════════════════════════════════
         # ONGLET GOOGLE CALENDAR
         # ═══════════════════════════════════════════════════════════
         with tab_google:
             st.subheader("🔗 Synchronisation Google Calendar")
             st.caption("Connectez votre Google Calendar pour synchroniser vos événements")
             afficher_config_google_calendar()
+
+
+# ═══════════════════════════════════════════════════════════
+# SUGGESTIONS IA — CRÉNEAUX LIBRES
+# ═══════════════════════════════════════════════════════════
+
+
+def _afficher_suggestions_creneaux(semaine):
+    """Affiche les créneaux libres et suggestions d'optimisation."""
+    try:
+        from src.services.planning.suggestions import obtenir_service_suggestions
+
+        service = obtenir_service_suggestions()
+
+        # Suggestions d'optimisation
+        suggestions = service.suggestions_planning(semaine.jours)
+
+        if suggestions:
+            st.markdown("#### 💡 Suggestions d'optimisation")
+            for s in suggestions[:6]:
+                if s.priorite >= 4:
+                    st.warning(f"{s.icone} **{s.titre}** — {s.description}")
+                elif s.priorite >= 3:
+                    st.info(f"{s.icone} **{s.titre}** — {s.description}")
+                else:
+                    st.caption(f"{s.icone} **{s.titre}** — {s.description}")
+
+            st.divider()
+
+        # Créneaux libres
+        creneaux = service.creneaux_libres(semaine.jours)
+
+        if creneaux:
+            st.markdown("#### 🕐 Meilleurs créneaux libres")
+            st.caption("Créneaux disponibles classés par qualité")
+
+            for c in creneaux[:8]:
+                from src.core.constants import JOURS_SEMAINE
+
+                jour_nom = JOURS_SEMAINE[c.date_jour.weekday()]
+                score_bar = (
+                    "🟢" if c.score_qualite >= 70 else "🟡" if c.score_qualite >= 50 else "🔵"
+                )
+
+                st.markdown(
+                    f"{score_bar} **{jour_nom} {c.date_jour.strftime('%d/%m')}** "
+                    f"— {c.horaire_str} ({c.duree_str})" + (f" *— {c.raison}*" if c.raison else "")
+                )
+        else:
+            st.success("✅ Semaine bien remplie — pas de grand créneau libre !")
+
+    except Exception:
+        import logging
+
+        logging.getLogger(__name__).debug("Suggestions créneaux indisponibles")
 
 
 __all__ = [

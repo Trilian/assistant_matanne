@@ -123,6 +123,15 @@ if not initialiser_app():
 
 page = initialiser_navigation()
 
+# ═══════════════════════════════════════════════════════════
+# SIDEBAR — Sélecteur de profil utilisateur
+# ═══════════════════════════════════════════════════════════
+
+with st.sidebar:
+    from src.ui.components.profile_switcher import afficher_selecteur_profil
+
+    afficher_selecteur_profil()
+
 
 # ═══════════════════════════════════════════════════════════
 # WIDGETS GLOBAUX PHASE D — Isolation robuste via WidgetRunner

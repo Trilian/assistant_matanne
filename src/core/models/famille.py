@@ -4,10 +4,12 @@ Modèles pour la famille et le bien-être.
 Contient :
 - ProfilEnfant : Profil d'enfant (Jules)
 - EntreeBienEtre : Entrée de bien-être
-- Jalon : Jalon de développement
+- Jalon : Jalon de développement (enrichi premières fois)
 - ActiviteFamille : Activité familiale
 - BudgetFamille : Dépenses familiales
 - ArticleAchat : Article shopping familial
+- AnniversaireFamille : Anniversaires et rappels
+- EvenementFamilial : Événements familiaux récurrents
 """
 
 from datetime import date, datetime
@@ -61,6 +63,15 @@ class ProfilEnfant(CreeLeMixin, Base):
     )
     milestones: Mapped[list["Jalon"]] = relationship(
         back_populates="child", cascade="all, delete-orphan"
+    )
+    vaccins: Mapped[list["Vaccin"]] = relationship(  # noqa: F821
+        back_populates="enfant", cascade="all, delete-orphan"
+    )
+    rendez_vous: Mapped[list["RendezVousMedical"]] = relationship(  # noqa: F821
+        back_populates="enfant", cascade="all, delete-orphan"
+    )
+    mesures_croissance: Mapped[list["MesureCroissance"]] = relationship(  # noqa: F821
+        back_populates="enfant", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:
@@ -130,6 +141,12 @@ class Jalon(CreeLeMixin, Base):
     date_atteint: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     photo_url: Mapped[str | None] = mapped_column(String(500))
     notes: Mapped[str | None] = mapped_column(Text)
+
+    # Enrichissement jalons (premières fois)
+    contexte_narratif: Mapped[str | None] = mapped_column(Text)  # "Il a dit papa au parc"
+    lieu: Mapped[str | None] = mapped_column(String(200))
+    emotion_parents: Mapped[str | None] = mapped_column(String(50))  # joie, fierté, émotion
+    age_mois_atteint: Mapped[int | None] = mapped_column(Integer)  # calculé automatiquement
 
     # Relations
     child: Mapped["ProfilEnfant"] = relationship(back_populates="milestones")
@@ -261,3 +278,108 @@ class ArticleAchat(Base):
 
     def __repr__(self) -> str:
         return f"<ArticleAchat(titre={self.titre}, categorie={self.categorie}, actif={self.actif})>"
+
+
+# ═══════════════════════════════════════════════════════════
+# ANNIVERSAIRES ET ÉVÉNEMENTS
+# ═══════════════════════════════════════════════════════════
+
+
+class AnniversaireFamille(CreeLeMixin, Base):
+    """Anniversaire d'un membre de la famille ou proche.
+
+    Attributes:
+        nom_personne: Nom de la personne
+        date_naissance: Date de naissance
+        relation: Relation (parent, enfant, grand_parent, oncle_tante, cousin, ami, collègue)
+        rappel_jours_avant: Jours avant pour rappel (JSONB array: [7, 1, 0])
+        idees_cadeaux: Idées de cadeaux (texte libre)
+        historique_cadeaux: Historique des cadeaux offerts (JSONB)
+        notes: Notes
+        actif: Si actif
+    """
+
+    __tablename__ = "anniversaires_famille"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nom_personne: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    date_naissance: Mapped[date] = mapped_column(Date, nullable=False)
+    relation: Mapped[str] = mapped_column(
+        String(50), nullable=False, index=True
+    )  # parent, enfant, grand_parent, oncle_tante, cousin, ami, collègue
+    rappel_jours_avant: Mapped[list[int] | None] = mapped_column(
+        JSONB, default=[7, 1, 0]
+    )  # [7, 1, 0] = J-7, J-1, Jour J
+    idees_cadeaux: Mapped[str | None] = mapped_column(Text)
+    historique_cadeaux: Mapped[list[dict] | None] = mapped_column(
+        JSONB
+    )  # [{"annee": 2025, "cadeau": "Livre", "budget": 30}]
+    notes: Mapped[str | None] = mapped_column(Text)
+    actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+
+    @property
+    def age(self) -> int:
+        """Calcule l'âge actuel de la personne."""
+        today = date.today()
+        return (
+            today.year
+            - self.date_naissance.year
+            - ((today.month, today.day) < (self.date_naissance.month, self.date_naissance.day))
+        )
+
+    @property
+    def prochain_anniversaire(self) -> date:
+        """Retourne la date du prochain anniversaire."""
+        today = date.today()
+        anniv_cette_annee = self.date_naissance.replace(year=today.year)
+        if anniv_cette_annee < today:
+            return self.date_naissance.replace(year=today.year + 1)
+        return anniv_cette_annee
+
+    @property
+    def jours_restants(self) -> int:
+        """Nombre de jours avant le prochain anniversaire."""
+        return (self.prochain_anniversaire - date.today()).days
+
+    def __repr__(self) -> str:
+        return (
+            f"<AnniversaireFamille(id={self.id}, nom='{self.nom_personne}', "
+            f"relation='{self.relation}', age={self.age})>"
+        )
+
+
+class EvenementFamilial(CreeLeMixin, Base):
+    """Événement familial récurrent ou ponctuel.
+
+    Attributes:
+        titre: Titre de l'événement
+        date_evenement: Date de l'événement
+        type_evenement: Type (anniversaire, fete, vacances, rentree, tradition)
+        recurrence: Récurrence (annuelle, mensuelle, unique)
+        rappel_jours_avant: Jours avant pour rappel
+        notes: Notes
+        participants: Liste des participants (JSONB)
+        actif: Si actif
+    """
+
+    __tablename__ = "evenements_familiaux"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    titre: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    date_evenement: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    type_evenement: Mapped[str] = mapped_column(
+        String(50), nullable=False, index=True
+    )  # anniversaire, fete, vacances, rentree, tradition
+    recurrence: Mapped[str] = mapped_column(
+        String(50), nullable=False, default="unique"
+    )  # annuelle, mensuelle, unique
+    rappel_jours_avant: Mapped[int] = mapped_column(Integer, default=7)
+    notes: Mapped[str | None] = mapped_column(Text)
+    participants: Mapped[list[str] | None] = mapped_column(JSONB)
+    actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+
+    def __repr__(self) -> str:
+        return (
+            f"<EvenementFamilial(id={self.id}, titre='{self.titre}', "
+            f"date={self.date_evenement}, type='{self.type_evenement}')>"
+        )

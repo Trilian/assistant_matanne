@@ -1,6 +1,16 @@
-"""Module Jeux - Paris sportifs et Loto avec lazy loading."""
+"""Module Jeux - Paris sportifs, Loto, Euromillions et modules transversaux."""
 
-__all__ = ["loto", "paris"]
+__all__ = [
+    "loto",
+    "paris",
+    "euromillions",
+    "bilan",
+    "comparatif_roi",
+    "alertes",
+    "biais",
+    "calendrier",
+    "educatif",
+]
 
 
 def __getattr__(name: str):

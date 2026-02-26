@@ -36,6 +36,15 @@ def afficher_jour_calendrier(jour: JourCalendrier):
             if st.button("➕", key=f"add_{jour.date_jour}", help="Ajouter"):
                 st.session_state[_keys("event_date")] = jour.date_jour
 
+        # Jours spéciaux (fériés, crèche, ponts) — affichés en bannière
+        for js in jour.jours_speciaux:
+            if js.type == TypeEvenement.FERIE:
+                st.error(f"🇫🇷 **{js.titre}** — Jour férié")
+            elif js.type == TypeEvenement.CRECHE:
+                st.warning(f"🏫 **{js.titre}**")
+            elif js.type == TypeEvenement.PONT:
+                st.info(f"🌉 **{js.titre}**")
+
         # Grille des repas
         col_midi, col_soir = st.columns(2)
 
@@ -124,6 +133,15 @@ def afficher_cellule_jour(jour: JourCalendrier):
 
     # Date
     st.markdown(f"**{jour.date_jour.strftime('%d')}**")
+
+    # Jours spéciaux en bandeau compact
+    for js in jour.jours_speciaux:
+        if js.type == TypeEvenement.FERIE:
+            st.caption(f"🇫🇷 {js.titre[:18]}")
+        elif js.type == TypeEvenement.CRECHE:
+            st.caption("🏫 Crèche fermée")
+        elif js.type == TypeEvenement.PONT:
+            st.caption("🌉 Pont")
 
     # Repas
     if jour.repas_midi:

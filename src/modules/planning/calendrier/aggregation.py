@@ -5,10 +5,12 @@ Fonctions pour:
 - Calcul des jours de la semaine
 - Navigation entre semaines
 - Génération des tâches ménage
+- Injection des jours spéciaux (fériés, crèche, ponts)
 - Agrégation des événements par jour
 - Construction d'une semaine calendrier complète
 """
 
+import logging
 from datetime import date, time, timedelta
 from typing import Any
 
@@ -22,7 +24,9 @@ from .converters import (
     convertir_tache_menage_en_evenement,
     creer_evenement_courses,
 )
-from .types import EvenementCalendrier, JourCalendrier, SemaineCalendrier
+from .types import EvenementCalendrier, JourCalendrier, SemaineCalendrier, TypeEvenement
+
+logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════════
 # FONCTIONS DE CALCUL
@@ -99,6 +103,59 @@ def generer_taches_menage_semaine(
 
 
 # ═══════════════════════════════════════════════════════════
+# JOURS SPÉCIAUX (fériés, crèche, ponts)
+# ═══════════════════════════════════════════════════════════
+
+# Mapping type jour spécial → TypeEvenement
+_TYPE_JOUR_SPECIAL = {
+    "ferie": TypeEvenement.FERIE,
+    "creche": TypeEvenement.CRECHE,
+    "pont": TypeEvenement.PONT,
+}
+
+
+def generer_jours_speciaux_semaine(
+    date_debut: date,
+) -> dict[date, list[EvenementCalendrier]]:
+    """Génère les événements jours spéciaux pour une semaine.
+
+    Interroge le ServiceJoursSpeciaux et crée des EvenementCalendrier
+    pour chaque jour spécial trouvé dans la période.
+
+    Returns:
+        Dict[date, List[EvenementCalendrier]] pour chaque jour de la semaine.
+    """
+    speciaux_par_jour: dict[date, list[EvenementCalendrier]] = {}
+
+    try:
+        from src.services.famille.jours_speciaux import obtenir_service_jours_speciaux
+
+        service = obtenir_service_jours_speciaux()
+        jours = service.jours_speciaux_semaine(date_debut)
+
+        for jour in jours:
+            type_evt = _TYPE_JOUR_SPECIAL.get(jour.type, TypeEvenement.EVENEMENT)
+            evt = EvenementCalendrier(
+                id=f"{jour.type}_{jour.date_jour.isoformat()}",
+                type=type_evt,
+                titre=jour.nom,
+                date_jour=jour.date_jour,
+                heure_debut=None,
+                heure_fin=None,
+                description=f"Jour spécial: {jour.nom}",
+            )
+
+            if jour.date_jour not in speciaux_par_jour:
+                speciaux_par_jour[jour.date_jour] = []
+            speciaux_par_jour[jour.date_jour].append(evt)
+
+    except Exception as e:
+        logger.warning(f"Impossible de charger les jours spéciaux: {e}")
+
+    return speciaux_par_jour
+
+
+# ═══════════════════════════════════════════════════════════
 # AGRÉGATION DES ÉVÉNEMENTS
 # ═══════════════════════════════════════════════════════════
 
@@ -111,6 +168,7 @@ def agreger_evenements_jour(
     events: list[Any] = None,
     courses_planifiees: list[dict] = None,
     taches_menage: list[EvenementCalendrier] = None,
+    jours_speciaux: list[EvenementCalendrier] = None,
 ) -> JourCalendrier:
     """
     Agrège tous les evenements d'un jour dans une structure unifiee.
@@ -123,11 +181,16 @@ def agreger_evenements_jour(
         events: Liste des EvenementPlanning
         courses_planifiees: Liste de dicts {magasin, heure}
         taches_menage: Liste d'EvenementCalendrier dejà convertis pour ce jour
+        jours_speciaux: Liste d'EvenementCalendrier fériés/crèche/ponts pour ce jour
 
     Returns:
         JourCalendrier avec tous les evenements
     """
     evenements = []
+
+    # Ajouter les jours spéciaux en premier (toujours visibles en haut)
+    if jours_speciaux:
+        evenements.extend(jours_speciaux)
 
     # Convertir les repas
     if repas:
@@ -210,6 +273,9 @@ def construire_semaine_calendrier(
     if taches_menage:
         taches_par_jour = generer_taches_menage_semaine(taches_menage, lundi, dimanche)
 
+    # Charger les jours spéciaux (fériés, crèche, ponts)
+    speciaux_par_jour = generer_jours_speciaux_semaine(lundi)
+
     for i in range(7):
         jour_date = lundi + timedelta(days=i)
         jour = agreger_evenements_jour(
@@ -220,6 +286,7 @@ def construire_semaine_calendrier(
             events=events,
             courses_planifiees=courses_planifiees,
             taches_menage=taches_par_jour.get(jour_date, []),
+            jours_speciaux=speciaux_par_jour.get(jour_date, []),
         )
         jours.append(jour)
 
@@ -231,6 +298,7 @@ __all__ = [
     "get_semaine_precedente",
     "get_semaine_suivante",
     "generer_taches_menage_semaine",
+    "generer_jours_speciaux_semaine",
     "agreger_evenements_jour",
     "construire_semaine_calendrier",
 ]

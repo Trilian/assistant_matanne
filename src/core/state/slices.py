@@ -90,6 +90,8 @@ class EtatApp:
         "cuisine",
         "ui",
         "nom_utilisateur",
+        "user_id",
+        "profil_charge",
         "notifications_non_lues",
         "agent_ia",
         "mode_debug",
@@ -124,6 +126,8 @@ class EtatApp:
         onglet_actif: str | None = None,
         # Top-level
         nom_utilisateur: str = "Anne",
+        user_id: int | None = None,
+        profil_charge: bool = False,
         notifications_non_lues: int = 0,
         agent_ia: ClientIA | None = None,
         mode_debug: bool = False,
@@ -161,6 +165,8 @@ class EtatApp:
             onglet_actif=onglet_actif,
         )
         self.nom_utilisateur = nom_utilisateur
+        self.user_id = user_id
+        self.profil_charge = profil_charge
         self.notifications_non_lues = notifications_non_lues
         self.agent_ia = agent_ia
         self.mode_debug = mode_debug

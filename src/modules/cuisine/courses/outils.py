@@ -33,21 +33,25 @@ def afficher_outils():
         # Simuler la structure Phase 2
         col1, col2 = st.columns(2)
         with col1:
-            st.write("""
+            st.write(
+                """
             **Fonctionnalités planifiées:**
             - 📱 Scan code-barres avec webcam
             - 🔍 Reconnaissance automatique article
             - ⚡ Saisie 10x plus rapide
             - 📊 Base de codes-barres articles
-            """)
+            """
+            )
         with col2:
-            st.write("""
+            st.write(
+                """
             **Intégration:**
             - Ajout rapide en magasin
             - Sync prix automatique
             - Recommandations marque
             - Export liste code-barres
-            """)
+            """
+            )
 
         st.divider()
         st.markdown("**Estimation:** 2-3 jours (composant scanning + base données)")
@@ -62,21 +66,25 @@ def afficher_outils():
 
         col1, col2 = st.columns(2)
         with col1:
-            st.write("""
+            st.write(
+                """
             **Fonctionnalités planifiées:**
             - 👥 Partage par email/lien
             - 📄 Sync temps réel
             - ✅ Permissions (lecture/écriture)
             - 📱 Notifications mises à jour
-            """)
+            """
+            )
         with col2:
-            st.write("""
+            st.write(
+                """
             **Avantages:**
             - Colocataires voient qui achète
             - Une seule liste partagée
             - Pas de doublons articles
             - Historique collaboratif
-            """)
+            """
+            )
 
         st.divider()
 

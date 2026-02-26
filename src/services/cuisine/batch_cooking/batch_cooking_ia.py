@@ -75,7 +75,8 @@ class BatchCookingIAMixin:
                     [f"  {e.ordre}. {e.description} ({e.duree or '?'} min)" for e in r.etapes]
                 )
 
-            recettes_context.append(f"""
+            recettes_context.append(
+                f"""
 Recette: {r.nom}
 - Temps préparation: {r.temps_preparation} min
 - Temps cuisson: {r.temps_cuisson} min
@@ -85,7 +86,8 @@ Recette: {r.nom}
 - Robots: {", ".join(r.robots_compatibles) if r.robots_compatibles else "Aucun"}
 - Étapes:
 {etapes_text}
-""")
+"""
+            )
 
         robots_text = ", ".join(
             [ROBOTS_DISPONIBLES.get(r, {}).get("nom", r) for r in robots_disponibles]

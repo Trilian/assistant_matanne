@@ -251,7 +251,7 @@ def _read_existing_lazy_imports(init_path: Path) -> dict[str, tuple[str, str]]:
                     if isinstance(node.value, ast.Dict):
                         result = {}
                         for key, val in zip(node.value.keys, node.value.values, strict=False):
-                            if isinstance(key, ast.Constant) and isinstance(val, ast.Tuple):
+                            if isinstance(key, ast.Constant) and isinstance(val, ast.Tuple):  # noqa: UP038
                                 elts = val.elts
                                 if len(elts) == 2:
                                     mod = elts[0].value if isinstance(elts[0], ast.Constant) else ""

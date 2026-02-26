@@ -26,23 +26,37 @@ class ParametresModule(BaseModule[None]):
     def render(self) -> None:
         """Rendu principal avec onglets gérés par render_tabs."""
         from src.modules.parametres.about import afficher_about
+        from src.modules.parametres.admin import afficher_admin_dashboard
         from src.modules.parametres.affichage import afficher_display_config
         from src.modules.parametres.budget import afficher_budget_config
         from src.modules.parametres.cache import afficher_cache_config
+        from src.modules.parametres.creche import afficher_creche_config
         from src.modules.parametres.database import afficher_database_config
         from src.modules.parametres.foyer import afficher_foyer_config
         from src.modules.parametres.ia import afficher_ia_config
+        from src.modules.parametres.import_export import afficher_import_export
+        from src.modules.parametres.notifications import afficher_notifications_config
+        from src.modules.parametres.profils import afficher_profils_config
+        from src.modules.parametres.quotas_ia import afficher_quotas_ia
+        from src.modules.parametres.securite import afficher_securite_config
         from src.ui.views.sauvegarde import afficher_sauvegarde
 
         self.render_tabs(
             {
                 "👨‍👩‍👧‍👦 Foyer": afficher_foyer_config,
+                "👥 Profils": afficher_profils_config,
+                "🏫 Crèche": afficher_creche_config,
+                "🔔 Notifications": afficher_notifications_config,
                 "🤖 IA": afficher_ia_config,
+                "📈 Quotas IA": afficher_quotas_ia,
                 "🗄️ BD": afficher_database_config,
                 "💾 Cache": afficher_cache_config,
                 "💿 Sauvegarde": afficher_sauvegarde,
                 "🖥️ Affichage": afficher_display_config,
                 "💰 Budget": afficher_budget_config,
+                "📊 Admin": afficher_admin_dashboard,
+                "🔒 Sécurité": afficher_securite_config,
+                "📦 Import/Export": afficher_import_export,
                 "ℹ️ À Propos": afficher_about,
             }
         )
@@ -55,12 +69,18 @@ app = module_app(ParametresModule)
 __all__ = [
     "app",
     "afficher_about",
+    "afficher_admin_dashboard",
     "afficher_budget_config",
     "afficher_cache_config",
     "afficher_database_config",
     "afficher_display_config",
     "afficher_foyer_config",
     "afficher_ia_config",
+    "afficher_import_export",
+    "afficher_notifications_config",
+    "afficher_profils_config",
+    "afficher_quotas_ia",
+    "afficher_securite_config",
 ]
 
 # ═══════════════════════════════════════════════════════════
@@ -69,12 +89,18 @@ __all__ = [
 
 _LAZY_IMPORTS: dict[str, str] = {
     "afficher_about": "about",
+    "afficher_admin_dashboard": "admin",
     "afficher_budget_config": "budget",
     "afficher_cache_config": "cache",
     "afficher_database_config": "database",
     "afficher_display_config": "affichage",
     "afficher_foyer_config": "foyer",
     "afficher_ia_config": "ia",
+    "afficher_import_export": "import_export",
+    "afficher_notifications_config": "notifications",
+    "afficher_profils_config": "profils",
+    "afficher_quotas_ia": "quotas_ia",
+    "afficher_securite_config": "securite",
 }
 
 
