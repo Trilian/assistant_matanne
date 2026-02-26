@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.exceptions import ErreurValidation
 from src.core.models import ArticleInventaire
-from src.services.core.events.bus import obtenir_bus
+from src.services.core.events import obtenir_bus
 
 from .types import SuggestionCourses
 

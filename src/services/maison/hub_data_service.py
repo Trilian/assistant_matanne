@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import ObjetMaison, PieceMaison
 from src.core.models.temps_entretien import SessionTravail, ZoneJardin
+from src.core.monitoring import chronometre
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -25,6 +26,7 @@ class HubDataService:
     car il ne fait que de la lecture agrégée, pas de CRUD standard.
     """
 
+    @chronometre("maison.hub.stats_db", seuil_alerte_ms=2000)
     @avec_cache(ttl=300)
     @avec_session_db
     @avec_gestion_erreurs(default_return={})

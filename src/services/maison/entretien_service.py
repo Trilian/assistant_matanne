@@ -17,8 +17,9 @@ from sqlalchemy.orm import Session, selectinload
 from src.core.ai import ClientIA, obtenir_client_ia
 from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import Routine, TacheRoutine
+from src.core.monitoring import chronometre
 from src.services.core.base import BaseAIService
-from src.services.core.events.bus import obtenir_bus
+from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
 
 from .entretien_gamification_mixin import EntretienGamificationMixin
@@ -31,6 +32,8 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES
 # ═══════════════════════════════════════════════════════════
+
+JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
 CATEGORIES_ENTRETIEN = [
     "menage",
@@ -346,6 +349,7 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
     # CRUD HELPERS
     # ─────────────────────────────────────────────────────────
 
+    @chronometre(nom="entretien.obtenir_routines", seuil_alerte_ms=1500)
     @avec_cache(ttl=300)
     @avec_session_db
     def obtenir_routines(self, db: Session | None = None) -> list[Routine]:
@@ -363,6 +367,7 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
         """Alias anglais pour obtenir_routines (rétrocompatibilité)."""
         return self.obtenir_routines(db)
 
+    @chronometre(nom="entretien.taches_du_jour", seuil_alerte_ms=1500)
     @avec_cache(ttl=300)
     @avec_session_db
     def obtenir_taches_du_jour(self, db: Session | None = None) -> list[TacheRoutine]:
@@ -394,6 +399,35 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
         for routine in routines:
             taches.extend(routine.tasks)
         return taches
+
+    @chronometre(nom="entretien.stats", seuil_alerte_ms=2000)
+    @avec_cache(ttl=300)
+    @avec_session_db
+    def obtenir_stats_entretien(self, db: Session | None = None) -> dict:
+        """Calcule les statistiques d'entretien.
+
+        Args:
+            db: Session DB (injectée automatiquement par @avec_session_db)
+
+        Returns:
+            Dict avec routines_actives, total_taches, taches_today, completion_today.
+        """
+        routines_actives = db.query(Routine).filter(Routine.actif.is_(True)).count()
+        total_taches = db.query(TacheRoutine).count()
+        taches_today = db.query(TacheRoutine).filter(TacheRoutine.fait_le == date.today()).count()
+
+        completion = (taches_today / total_taches * 100) if total_taches > 0 else 0
+
+        return {
+            "routines_actives": routines_actives,
+            "total_taches": total_taches,
+            "taches_today": taches_today,
+            "completion_today": completion,
+        }
+
+    def get_stats_entretien(self, db: Session | None = None) -> dict:
+        """Alias anglais pour obtenir_stats_entretien (rétrocompatibilité)."""
+        return self.obtenir_stats_entretien(db)
 
     # ─────────────────────────────────────────────────────────
     # HELPERS PRIVÉS
@@ -435,6 +469,122 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
         """Arrondit à la période standard la plus proche."""
         periodes_std = [1, 2, 7, 14, 30, 90, 365]
         return min(periodes_std, key=lambda x: abs(x - jours))
+
+    # ─────────────────────────────────────────────────────────
+    # CRUD ROUTINES (non-IA)
+    # ─────────────────────────────────────────────────────────
+
+    @avec_session_db
+    def creer_routine(
+        self,
+        nom: str,
+        frequence: str = "quotidien",
+        db: Session | None = None,
+        **kwargs,
+    ) -> Routine | None:
+        """Crée une nouvelle routine d'entretien.
+
+        Args:
+            nom: Nom de la routine
+            frequence: Fréquence (quotidien, hebdo, mensuel, etc.)
+            db: Session DB (injectée par @avec_session_db)
+            **kwargs: Champs additionnels (description, categorie, etc.)
+
+        Returns:
+            La Routine créée, ou None en cas d'erreur.
+        """
+        try:
+            routine = Routine(nom=nom, frequence=frequence, **kwargs)
+            db.add(routine)
+            db.commit()
+            db.refresh(routine)
+            logger.info(f"✅ Routine créée: {nom}")
+            return routine
+        except Exception as e:
+            logger.error(f"Erreur création routine: {e}")
+            db.rollback()
+            return None
+
+    @avec_session_db
+    def ajouter_tache_routine(
+        self,
+        routine_id: int,
+        nom: str,
+        db: Session | None = None,
+        **kwargs,
+    ) -> TacheRoutine | None:
+        """Ajoute une tâche à une routine.
+
+        Args:
+            routine_id: ID de la routine parente
+            nom: Nom de la tâche
+            db: Session DB (injectée par @avec_session_db)
+            **kwargs: Champs additionnels (duree_min, ordre, etc.)
+
+        Returns:
+            La TacheRoutine créée, ou None en cas d'erreur.
+        """
+        try:
+            tache = TacheRoutine(routine_id=routine_id, nom=nom, **kwargs)
+            db.add(tache)
+            db.commit()
+            db.refresh(tache)
+            logger.info(f"✅ Tâche ajoutée à routine {routine_id}: {nom}")
+            return tache
+        except Exception as e:
+            logger.error(f"Erreur ajout tâche: {e}")
+            db.rollback()
+            return None
+
+    @avec_session_db
+    def marquer_tache_faite(self, tache_id: int, db: Session | None = None) -> bool:
+        """Marque une tâche de routine comme faite.
+
+        Args:
+            tache_id: ID de la tâche
+            db: Session DB (injectée par @avec_session_db)
+
+        Returns:
+            True si la tâche a été mise à jour.
+        """
+        try:
+            tache = db.get(TacheRoutine, tache_id)
+            if tache is None:
+                logger.warning(f"Tâche {tache_id} non trouvée")
+                return False
+            tache.fait = True
+            db.commit()
+            logger.info(f"✅ Tâche {tache_id} marquée comme faite")
+            return True
+        except Exception as e:
+            logger.error(f"Erreur marquage tâche: {e}")
+            db.rollback()
+            return False
+
+    @avec_session_db
+    def desactiver_routine(self, routine_id: int, db: Session | None = None) -> bool:
+        """Désactive une routine.
+
+        Args:
+            routine_id: ID de la routine
+            db: Session DB (injectée par @avec_session_db)
+
+        Returns:
+            True si la routine a été désactivée.
+        """
+        try:
+            routine = db.get(Routine, routine_id)
+            if routine is None:
+                logger.warning(f"Routine {routine_id} non trouvée")
+                return False
+            routine.actif = False
+            db.commit()
+            logger.info(f"✅ Routine {routine_id} désactivée")
+            return True
+        except Exception as e:
+            logger.error(f"Erreur désactivation routine: {e}")
+            db.rollback()
+            return False
 
 
 # ═══════════════════════════════════════════════════════════

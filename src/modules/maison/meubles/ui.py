@@ -7,6 +7,7 @@ from decimal import Decimal
 import streamlit as st
 
 from src.core.state import rerun
+from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
 
 from .constants import PIECES_LABELS, PRIORITES_LABELS, STATUTS_LABELS
@@ -165,6 +166,7 @@ def afficher_vue_par_piece() -> None:
                 afficher_meuble_card(item)
 
 
+@ui_fragment
 def afficher_onglet_wishlist() -> None:
     """Affiche l'onglet wishlist avec filtres."""
     col1, col2 = st.columns(2)
@@ -195,12 +197,14 @@ def afficher_onglet_wishlist() -> None:
         afficher_meuble_card(m)
 
 
+@ui_fragment
 def afficher_onglet_ajouter() -> None:
     """Affiche l'onglet ajout."""
     st.subheader("➕ Ajouter un meuble")
     afficher_formulaire(None)
 
 
+@ui_fragment
 def afficher_onglet_budget() -> None:
     """Affiche l'onglet budget."""
     afficher_budget_summary()

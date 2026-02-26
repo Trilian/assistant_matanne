@@ -171,15 +171,12 @@ def mock_routine_task_non_faite():
 class TestChargerProjets:
     """Tests pour charger_projets"""
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_charge_tous_projets(self, mock_db, mock_projet_en_cours):
+    @patch("src.modules.maison.utils._get_projets_service")
+    def test_charge_tous_projets(self, mock_get_service, mock_projet_en_cours):
         """Test chargement de tous les projets sans filtre"""
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.all.return_value = [mock_projet_en_cours]
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_projets.return_value = [mock_projet_en_cours]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import charger_projets
 
@@ -190,16 +187,14 @@ class TestChargerProjets:
         assert len(result) == 1
         assert result.iloc[0]["nom"] == "Renovation cuisine"
         assert result.iloc[0]["progress"] == 50.0  # 1/2 tasks done
+        mock_service.obtenir_projets.assert_called_once_with(statut=None)
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_charge_projets_avec_filtre_statut(self, mock_db, mock_projet_en_cours):
+    @patch("src.modules.maison.utils._get_projets_service")
+    def test_charge_projets_avec_filtre_statut(self, mock_get_service, mock_projet_en_cours):
         """Test chargement des projets filtrés par statut"""
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter_by.return_value.all.return_value = [mock_projet_en_cours]
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_projets.return_value = [mock_projet_en_cours]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import charger_projets
 
@@ -207,10 +202,10 @@ class TestChargerProjets:
         result = charger_projets.__wrapped__(statut="en_cours")
 
         assert len(result) == 1
-        mock_query.filter_by.assert_called_with(statut="en_cours")
+        mock_service.obtenir_projets.assert_called_once_with(statut="en_cours")
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_projet_sans_date_fin(self, mock_db):
+    @patch("src.modules.maison.utils._get_projets_service")
+    def test_projet_sans_date_fin(self, mock_get_service):
         """Test projet sans date de fin prévue"""
         projet = MagicMock()
         projet.id = 1
@@ -221,12 +216,9 @@ class TestChargerProjets:
         projet.date_fin_prevue = None
         projet.tasks = []
 
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.all.return_value = [projet]
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_projets.return_value = [projet]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import charger_projets
 
@@ -236,15 +228,12 @@ class TestChargerProjets:
         assert result.iloc[0]["jours_restants"] is None
         assert result.iloc[0]["progress"] == 0
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_projets_liste_vide(self, mock_db):
+    @patch("src.modules.maison.utils._get_projets_service")
+    def test_projets_liste_vide(self, mock_get_service):
         """Test quand aucun projet n'existe"""
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.all.return_value = []
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_projets.return_value = []
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import charger_projets
 
@@ -263,15 +252,12 @@ class TestChargerProjets:
 class TestGetProjetsUrgents:
     """Tests pour get_projets_urgents"""
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_detecte_projet_priorite_haute(self, mock_db, mock_projet_en_cours):
+    @patch("src.modules.maison.utils._get_projets_service")
+    def test_detecte_projet_priorite_haute(self, mock_get_service, mock_projet_en_cours):
         """Test détection des projets à priorité haute"""
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter_by.return_value.all.return_value = [mock_projet_en_cours]
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_projets.return_value = [mock_projet_en_cours]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import get_projets_urgents
 
@@ -281,16 +267,14 @@ class TestGetProjetsUrgents:
         assert len(result) >= 1
         priorite_alert = [r for r in result if r["type"] == "PRIORITE"]
         assert len(priorite_alert) == 1
+        mock_service.obtenir_projets.assert_called_once_with(statut="en_cours")
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_detecte_projet_en_retard(self, mock_db, mock_projet_en_retard):
+    @patch("src.modules.maison.utils._get_projets_service")
+    def test_detecte_projet_en_retard(self, mock_get_service, mock_projet_en_retard):
         """Test détection des projets en retard"""
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter_by.return_value.all.return_value = [mock_projet_en_retard]
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_projets.return_value = [mock_projet_en_retard]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import get_projets_urgents
 
@@ -301,8 +285,8 @@ class TestGetProjetsUrgents:
         assert len(retard_alerts) == 1
         assert "5 jour(s)" in retard_alerts[0]["message"]
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_projet_priorite_urgente(self, mock_db):
+    @patch("src.modules.maison.utils._get_projets_service")
+    def test_projet_priorite_urgente(self, mock_get_service):
         """Test détection projet avec priorité urgente"""
         projet = MagicMock()
         projet.id = 1
@@ -311,12 +295,9 @@ class TestGetProjetsUrgents:
         projet.priorite = "urgente"
         projet.date_fin_prevue = date.today() + timedelta(days=1)
 
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter_by.return_value.all.return_value = [projet]
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_projets.return_value = [projet]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import get_projets_urgents
 
@@ -326,8 +307,8 @@ class TestGetProjetsUrgents:
         priorite_alerts = [r for r in result if r["type"] == "PRIORITE"]
         assert len(priorite_alerts) == 1
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_aucun_projet_urgent(self, mock_db):
+    @patch("src.modules.maison.utils._get_projets_service")
+    def test_aucun_projet_urgent(self, mock_get_service):
         """Test quand aucun projet n'est urgent"""
         projet = MagicMock()
         projet.id = 1
@@ -336,12 +317,9 @@ class TestGetProjetsUrgents:
         projet.priorite = "normale"
         projet.date_fin_prevue = date.today() + timedelta(days=30)
 
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter_by.return_value.all.return_value = [projet]
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_projets.return_value = [projet]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import get_projets_urgents
 
@@ -359,17 +337,19 @@ class TestGetProjetsUrgents:
 class TestGetStatsProjets:
     """Tests pour get_stats_projets"""
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_calcule_stats_projets(self, mock_db, mock_projet_en_cours, mock_projet_termine):
+    @patch("src.modules.maison.utils._get_projets_service")
+    def test_calcule_stats_projets(
+        self, mock_get_service, mock_projet_en_cours, mock_projet_termine
+    ):
         """Test calcul des statistiques de projets"""
-        mock_session = MagicMock()
-        mock_session.query.return_value.count.side_effect = [3, 2, 1]  # total, en_cours, termines
-        mock_session.query.return_value.all.return_value = [
-            mock_projet_en_cours,
-            mock_projet_termine,
-        ]
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_stats_projets.return_value = {
+            "total": 3,
+            "en_cours": 2,
+            "termines": 1,
+            "avg_progress": 50.0,
+        }
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import get_stats_projets
 
@@ -380,18 +360,19 @@ class TestGetStatsProjets:
         assert "en_cours" in result
         assert "termines" in result
         assert "avg_progress" in result
+        mock_service.obtenir_stats_projets.assert_called_once()
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_stats_projets_sans_taches(self, mock_db):
+    @patch("src.modules.maison.utils._get_projets_service")
+    def test_stats_projets_sans_taches(self, mock_get_service):
         """Test statistiques avec projets sans tâches"""
-        projet = MagicMock()
-        projet.tasks = []
-
-        mock_session = MagicMock()
-        mock_session.query.return_value.count.return_value = 1
-        mock_session.query.return_value.all.return_value = [projet]
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_stats_projets.return_value = {
+            "total": 1,
+            "en_cours": 1,
+            "termines": 0,
+            "avg_progress": 0,
+        }
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import get_stats_projets
 
@@ -400,14 +381,17 @@ class TestGetStatsProjets:
 
         assert result["avg_progress"] == 0
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_stats_aucun_projet(self, mock_db):
+    @patch("src.modules.maison.utils._get_projets_service")
+    def test_stats_aucun_projet(self, mock_get_service):
         """Test statistiques quand aucun projet n'existe"""
-        mock_session = MagicMock()
-        mock_session.query.return_value.count.return_value = 0
-        mock_session.query.return_value.all.return_value = []
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_stats_projets.return_value = {
+            "total": 0,
+            "en_cours": 0,
+            "termines": 0,
+            "avg_progress": 0,
+        }
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import get_stats_projets
 
@@ -426,27 +410,15 @@ class TestGetStatsProjets:
 class TestChargerPlantes:
     """Tests pour charger_plantes"""
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_charge_plantes_actives(self, mock_db, mock_plante_a_arroser, mock_garden_log):
+    @patch("src.modules.maison.utils._get_jardin_service")
+    def test_charge_plantes_actives(self, mock_get_service, mock_plante_a_arroser, mock_garden_log):
         """Test chargement des plantes actives"""
-        mock_session = MagicMock()
-        # Query pour ElementJardin
-        mock_query_items = MagicMock()
-        mock_query_items.filter_by.return_value.all.return_value = [mock_plante_a_arroser]
-        # Query pour JournalJardin (arrosage)
-        mock_query_logs = MagicMock()
-        mock_query_logs.filter_by.return_value.order_by.return_value.limit.return_value.all.return_value = [
-            mock_garden_log
-        ]
+        # Add dernier_arrosage attribute (3 days ago)
+        mock_plante_a_arroser.dernier_arrosage = date.today() - timedelta(days=3)
 
-        def query_side_effect(model):
-            if model.__name__ == "ElementJardin":
-                return mock_query_items
-            return mock_query_logs
-
-        mock_session.query.side_effect = query_side_effect
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_plantes.return_value = [mock_plante_a_arroser]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import charger_plantes
 
@@ -456,24 +428,17 @@ class TestChargerPlantes:
         assert isinstance(result, pd.DataFrame)
         assert len(result) == 1
         assert result.iloc[0]["nom"] == "Tomates cerises"
+        mock_service.obtenir_plantes.assert_called_once()
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_plante_jamais_arrosee(self, mock_db, mock_plante_a_arroser):
+    @patch("src.modules.maison.utils._get_jardin_service")
+    def test_plante_jamais_arrosee(self, mock_get_service, mock_plante_a_arroser):
         """Test plante qui n'a jamais été arrosée"""
-        mock_session = MagicMock()
-        mock_query_items = MagicMock()
-        mock_query_items.filter_by.return_value.all.return_value = [mock_plante_a_arroser]
-        mock_query_logs = MagicMock()
-        mock_query_logs.filter_by.return_value.order_by.return_value.limit.return_value.all.return_value = []
+        # Plant never watered
+        mock_plante_a_arroser.dernier_arrosage = None
 
-        def query_side_effect(model):
-            if model.__name__ == "ElementJardin":
-                return mock_query_items
-            return mock_query_logs
-
-        mock_session.query.side_effect = query_side_effect
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_plantes.return_value = [mock_plante_a_arroser]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import charger_plantes
 
@@ -483,15 +448,12 @@ class TestChargerPlantes:
         assert result.iloc[0]["a_arroser"] == True
         assert result.iloc[0]["jours_depuis_arrosage"] is None
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_aucune_plante(self, mock_db):
+    @patch("src.modules.maison.utils._get_jardin_service")
+    def test_aucune_plante(self, mock_get_service):
         """Test quand le jardin est vide"""
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter_by.return_value.all.return_value = []
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_plantes.return_value = []
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import charger_plantes
 
@@ -614,19 +576,17 @@ class TestGetRecoltesProches:
 class TestGetStatsJardin:
     """Tests pour get_stats_jardin"""
 
-    @patch("src.modules.maison.utils.get_recoltes_proches")
-    @patch("src.modules.maison.utils.get_plantes_a_arroser")
-    @patch("src.modules.maison.utils.charger_plantes")
-    def test_calcule_stats_jardin(self, mock_charger, mock_arroser, mock_recoltes):
+    @patch("src.modules.maison.utils._get_jardin_service")
+    def test_calcule_stats_jardin(self, mock_get_service):
         """Test calcul des statistiques du jardin"""
-        mock_charger.return_value = pd.DataFrame(
-            [
-                {"id": 1, "nom": "Tomate", "type": "Légume"},
-                {"id": 2, "nom": "Basilic", "type": "Aromate"},
-            ]
-        )
-        mock_arroser.return_value = [{"id": 1, "nom": "Tomate"}]
-        mock_recoltes.return_value = []
+        mock_service = MagicMock()
+        mock_service.obtenir_stats_jardin.return_value = {
+            "total_plantes": 2,
+            "a_arroser": 1,
+            "recoltes_proches": 0,
+            "categories": 2,
+        }
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import get_stats_jardin
 
@@ -636,15 +596,19 @@ class TestGetStatsJardin:
         assert result["total_plantes"] == 2
         assert result["a_arroser"] == 1
         assert result["categories"] == 2
+        mock_service.obtenir_stats_jardin.assert_called_once()
 
-    @patch("src.modules.maison.utils.get_recoltes_proches")
-    @patch("src.modules.maison.utils.get_plantes_a_arroser")
-    @patch("src.modules.maison.utils.charger_plantes")
-    def test_stats_jardin_vide(self, mock_charger, mock_arroser, mock_recoltes):
+    @patch("src.modules.maison.utils._get_jardin_service")
+    def test_stats_jardin_vide(self, mock_get_service):
         """Test statistiques quand le jardin est vide"""
-        mock_charger.return_value = pd.DataFrame()
-        mock_arroser.return_value = []
-        mock_recoltes.return_value = []
+        mock_service = MagicMock()
+        mock_service.obtenir_stats_jardin.return_value = {
+            "total_plantes": 0,
+            "a_arroser": 0,
+            "recoltes_proches": 0,
+            "categories": 0,
+        }
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import get_stats_jardin
 
@@ -724,25 +688,12 @@ class TestGetSaison:
 class TestChargerRoutines:
     """Tests pour charger_routines"""
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_charge_routines_actives(self, mock_db, mock_routine_active):
+    @patch("src.modules.maison.utils._get_entretien_service")
+    def test_charge_routines_actives(self, mock_get_service, mock_routine_active):
         """Test chargement des routines actives"""
-        mock_session = MagicMock()
-        # Query pour Routine
-        mock_query_routines = MagicMock()
-        mock_query_routines.filter_by.return_value.all.return_value = [mock_routine_active]
-        # Query pour TacheRoutine count
-        mock_query_tasks = MagicMock()
-        mock_query_tasks.filter.return_value.count.return_value = 1
-
-        def query_side_effect(model):
-            if model.__name__ == "Routine":
-                return mock_query_routines
-            return mock_query_tasks
-
-        mock_session.query.side_effect = query_side_effect
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_routines.return_value = [mock_routine_active]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import charger_routines
 
@@ -752,16 +703,14 @@ class TestChargerRoutines:
         assert isinstance(result, pd.DataFrame)
         assert len(result) == 1
         assert result.iloc[0]["nom"] == "Ménage hebdomadaire"
+        mock_service.obtenir_routines.assert_called_once()
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_routines_vides(self, mock_db):
+    @patch("src.modules.maison.utils._get_entretien_service")
+    def test_routines_vides(self, mock_get_service):
         """Test quand aucune routine n'existe"""
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter_by.return_value.all.return_value = []
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_routines.return_value = []
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import charger_routines
 
@@ -780,15 +729,12 @@ class TestChargerRoutines:
 class TestGetTachesToday:
     """Tests pour get_taches_today"""
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_retourne_taches_non_faites(self, mock_db, mock_routine_task_non_faite):
+    @patch("src.modules.maison.utils._get_entretien_service")
+    def test_retourne_taches_non_faites(self, mock_get_service, mock_routine_task_non_faite):
         """Test retourne les tâches non faites aujourd'hui"""
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter.return_value.all.return_value = [mock_routine_task_non_faite]
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_taches_du_jour.return_value = [mock_routine_task_non_faite]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import get_taches_today
 
@@ -797,16 +743,14 @@ class TestGetTachesToday:
 
         assert len(result) == 1
         assert result[0]["nom"] == "Laver sols"
+        mock_service.obtenir_taches_du_jour.assert_called_once()
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_aucune_tache_a_faire(self, mock_db):
+    @patch("src.modules.maison.utils._get_entretien_service")
+    def test_aucune_tache_a_faire(self, mock_get_service):
         """Test quand toutes les tâches sont faites"""
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter.return_value.all.return_value = []
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_taches_du_jour.return_value = []
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import get_taches_today
 
@@ -824,17 +768,17 @@ class TestGetTachesToday:
 class TestGetStatsEntretien:
     """Tests pour get_stats_entretien"""
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_calcule_stats_entretien(self, mock_db):
+    @patch("src.modules.maison.utils._get_entretien_service")
+    def test_calcule_stats_entretien(self, mock_get_service):
         """Test calcul des statistiques d'entretien"""
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        # Simule les counts: routines actives, total tâches, tâches aujourd'hui
-        mock_query.filter_by.return_value.count.side_effect = [5, 3]  # actives, today
-        mock_query.count.return_value = 20  # total tâches
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_stats_entretien.return_value = {
+            "routines_actives": 5,
+            "total_taches": 20,
+            "taches_today": 3,
+            "completion_today": 15.0,
+        }
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import get_stats_entretien
 
@@ -845,17 +789,19 @@ class TestGetStatsEntretien:
         assert "total_taches" in result
         assert "taches_today" in result
         assert "completion_today" in result
+        mock_service.obtenir_stats_entretien.assert_called_once()
 
-    @patch("src.modules.maison.utils.obtenir_contexte_db")
-    def test_stats_sans_taches(self, mock_db):
+    @patch("src.modules.maison.utils._get_entretien_service")
+    def test_stats_sans_taches(self, mock_get_service):
         """Test statistiques quand aucune tâche n'existe"""
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter_by.return_value.count.return_value = 0
-        mock_query.count.return_value = 0
-        mock_session.query.return_value = mock_query
-        mock_db.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_db.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.obtenir_stats_entretien.return_value = {
+            "routines_actives": 0,
+            "total_taches": 0,
+            "taches_today": 0,
+            "completion_today": 0,
+        }
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.utils import get_stats_entretien
 
@@ -874,8 +820,9 @@ class TestGetStatsEntretien:
 class TestClearMaisonCache:
     """Tests pour clear_maison_cache"""
 
+    @patch("src.modules.maison.utils.rerun")
     @patch("src.modules.maison.utils.st")
-    def test_nettoie_cache_et_rerun(self, mock_st):
+    def test_nettoie_cache_et_rerun(self, mock_st, mock_rerun):
         """Test que la fonction nettoie le cache et relance l'app"""
         mock_st.cache_data = MagicMock()
 
@@ -884,4 +831,4 @@ class TestClearMaisonCache:
         clear_maison_cache()
 
         mock_st.cache_data.clear.assert_called_once()
-        mock_st.rerun.assert_called_once()
+        mock_rerun.assert_called_once()

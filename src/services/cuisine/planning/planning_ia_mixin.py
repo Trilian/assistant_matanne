@@ -15,7 +15,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from src.core.caching import Cache
+from src.core.caching import obtenir_cache
 from src.core.date_utils.helpers import obtenir_noms_jours_semaine
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import Planning, Repas
@@ -306,7 +306,7 @@ RULES:
         db.refresh(planning)
 
         # Invalider cache
-        Cache.invalider(pattern="planning")
+        obtenir_cache().invalidate(pattern="planning")
 
         logger.info(f"✅ Generated AI planning for week starting {semaine_debut}")
         return planning

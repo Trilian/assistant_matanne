@@ -18,16 +18,16 @@ class TestJardinService:
 
     def test_import(self):
         """Test import du service."""
-        from src.modules.maison.jardin import JardinService
+        from src.services.maison import JardinService
 
         assert JardinService is not None
 
-    @patch("src.modules.maison.jardin.ClientIA")
+    @patch("src.services.maison.jardin_service.ClientIA")
     def test_creation(self, mock_client_class):
         """Test de création de JardinService."""
         mock_client_class.return_value = MagicMock()
 
-        from src.modules.maison.jardin import JardinService
+        from src.services.maison import JardinService
 
         service = JardinService()
 
@@ -35,24 +35,24 @@ class TestJardinService:
         assert service.service_name == "jardin"
         assert service.cache_prefix == "jardin"
 
-    @patch("src.modules.maison.jardin.ClientIA")
+    @patch("src.services.maison.jardin_service.ClientIA")
     def test_creation_with_custom_client(self, mock_client_class):
         """Test création avec client personnalisé."""
         custom_client = MagicMock()
 
-        from src.modules.maison.jardin import JardinService
+        from src.services.maison import JardinService
 
         service = JardinService(client=custom_client)
 
         assert service.client == custom_client
 
     @pytest.mark.asyncio
-    @patch("src.modules.maison.jardin.ClientIA")
+    @patch("src.services.maison.jardin_service.ClientIA")
     async def test_generer_conseils_saison(self, mock_client_class):
         """Test génération conseils saisonniers via IA."""
         mock_client_class.return_value = MagicMock()
 
-        from src.modules.maison.jardin import JardinService
+        from src.services.maison import JardinService
 
         service = JardinService()
         service.call_with_cache = AsyncMock(return_value="- Conseil 1\n- Conseil 2\n- Conseil 3")
@@ -63,12 +63,12 @@ class TestJardinService:
         service.call_with_cache.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("src.modules.maison.jardin.ClientIA")
+    @patch("src.services.maison.jardin_service.ClientIA")
     async def test_suggerer_plantes_saison(self, mock_client_class):
         """Test suggestion plantes par saison."""
         mock_client_class.return_value = MagicMock()
 
-        from src.modules.maison.jardin import JardinService
+        from src.services.maison import JardinService
 
         service = JardinService()
         service.call_with_cache = AsyncMock(
@@ -81,12 +81,12 @@ class TestJardinService:
         service.call_with_cache.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("src.modules.maison.jardin.ClientIA")
+    @patch("src.services.maison.jardin_service.ClientIA")
     async def test_suggerer_plantes_climat_default(self, mock_client_class):
         """Test suggestion plantes avec climat par défaut."""
         mock_client_class.return_value = MagicMock()
 
-        from src.modules.maison.jardin import JardinService
+        from src.services.maison import JardinService
 
         service = JardinService()
         service.call_with_cache = AsyncMock(return_value="- Plante 1")
@@ -96,12 +96,12 @@ class TestJardinService:
         assert result == "- Plante 1"
 
     @pytest.mark.asyncio
-    @patch("src.modules.maison.jardin.ClientIA")
+    @patch("src.services.maison.jardin_service.ClientIA")
     async def test_conseil_arrosage(self, mock_client_class):
         """Test conseil d'arrosage pour une plante."""
         mock_client_class.return_value = MagicMock()
 
-        from src.modules.maison.jardin import JardinService
+        from src.services.maison import JardinService
 
         service = JardinService()
         service.call_with_cache = AsyncMock(return_value="Arroser 2 fois/semaine, 0.5L, le matin")
@@ -120,24 +120,24 @@ class TestJardinService:
 class TestFactory:
     """Tests pour les fonctions factory."""
 
-    @patch("src.modules.maison.jardin.ClientIA")
+    @patch("src.services.maison.jardin_service.ClientIA")
     def test_get_jardin_service(self, mock_client_class):
         """Test de la fonction get_jardin_service."""
         mock_client_class.return_value = MagicMock()
 
-        from src.modules.maison.jardin import get_jardin_service
+        from src.services.maison import get_jardin_service
 
         service = get_jardin_service()
 
         assert service is not None
         assert service.service_name == "jardin"
 
-    @patch("src.modules.maison.jardin.ClientIA")
+    @patch("src.services.maison.jardin_service.ClientIA")
     def test_get_jardin_service_callable(self, mock_client_class):
         """Test que get_jardin_service est callable."""
         mock_client_class.return_value = MagicMock()
 
-        from src.modules.maison.jardin import get_jardin_service
+        from src.services.maison import get_jardin_service
 
         assert callable(get_jardin_service)
 
@@ -181,16 +181,14 @@ class TestApp:
     """Tests pour la fonction app (UI)."""
 
     @patch("src.modules.maison.jardin.st")
-    @patch("src.modules.maison.jardin.get_jardin_service")
     @patch("src.modules.maison.jardin.get_saison")
-    def test_app_import(self, mock_saison, mock_service, mock_st):
+    def test_app_import(self, mock_saison, mock_st):
         """Test import de la fonction app."""
         from src.modules.maison.jardin import app
 
         assert callable(app)
 
     @patch("src.modules.maison.jardin.st")
-    @patch("src.modules.maison.jardin.get_jardin_service")
     @patch("src.modules.maison.jardin.get_saison")
     @patch("src.modules.maison.jardin.get_plantes_a_arroser")
     @patch("src.modules.maison.jardin.get_recoltes_proches")
@@ -203,7 +201,6 @@ class TestApp:
         mock_recoltes,
         mock_arroser,
         mock_saison,
-        mock_service,
         mock_st,
     ):
         """Test que app() s'exécute sans erreur."""
@@ -220,7 +217,6 @@ class TestApp:
             "categories": 4,
         }
         mock_charger.return_value = pd.DataFrame()
-        mock_service.return_value = MagicMock()
 
         # Mock st.columns pour retourner des contextes
         mock_cols = [MagicMock() for _ in range(4)]
@@ -247,7 +243,6 @@ class TestApp:
         mock_st.title.assert_called_once()
 
     @patch("src.modules.maison.jardin.st")
-    @patch("src.modules.maison.jardin.get_jardin_service")
     @patch("src.modules.maison.jardin.get_saison")
     @patch("src.modules.maison.jardin.get_plantes_a_arroser")
     @patch("src.modules.maison.jardin.get_recoltes_proches")
@@ -260,7 +255,6 @@ class TestApp:
         mock_recoltes,
         mock_arroser,
         mock_saison,
-        mock_service,
         mock_st,
     ):
         """Test que app() affiche les alertes d'arrosage."""
@@ -280,7 +274,6 @@ class TestApp:
             "categories": 4,
         }
         mock_charger.return_value = pd.DataFrame()
-        mock_service.return_value = MagicMock()
 
         # Mock st.columns
         mock_cols = [MagicMock() for _ in range(4)]

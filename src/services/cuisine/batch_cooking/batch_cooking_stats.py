@@ -14,7 +14,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session, joinedload
 
-from src.core.caching import Cache
+from src.core.caching import obtenir_cache
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.exceptions import ErreurNonTrouve
 from src.core.models import (
@@ -109,7 +109,7 @@ class BatchCookingStatsMixin:
         db.refresh(preparation)
 
         # Invalider cache
-        Cache.invalider(pattern="preparations")
+        obtenir_cache().invalidate(pattern="preparations")
 
         logger.info(f"✅ Préparation créée: {preparation.id}")
         return preparation
@@ -133,7 +133,7 @@ class BatchCookingStatsMixin:
         db.refresh(preparation)
 
         # Invalider cache
-        Cache.invalider(pattern="preparations")
+        obtenir_cache().invalidate(pattern="preparations")
 
         logger.info(f"✅ {portions} portion(s) consommée(s): {preparation_id}")
         return preparation

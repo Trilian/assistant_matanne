@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
 from src.core.models import Equipe, Match, PariSportif
-from src.services.core.events.bus import obtenir_bus
+from src.services.core.events import obtenir_bus
 
 logger = logging.getLogger(__name__)
 

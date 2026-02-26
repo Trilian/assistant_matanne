@@ -71,6 +71,7 @@ from src.core.navigation import initialiser_navigation
 from src.core.state import rerun
 
 # Layout modulaire
+from src.modules._framework.error_boundary import error_boundary
 from src.ui.layout import (
     afficher_footer,
     afficher_header,
@@ -194,11 +195,22 @@ def main() -> None:
         )
 
         # Exécuter la page sélectionnée par st.navigation()
-        _t0 = time.perf_counter()
-        page.run()
-        _duree_page = time.perf_counter() - _t0
-        if _duree_page > 2.0:
-            logger.warning("⏱️ Page lente détectée : %.2fs (seuil 2s)", _duree_page)
+        # Error boundary global : capture élégante avec fallback UI (audit §10)
+        _seuil = parametres.SEUIL_PAGE_LENTE
+        with error_boundary(
+            titre="Erreur lors du chargement de la page",
+            afficher_details=obtenir_etat().mode_debug,
+            niveau="error",
+        ):
+            _t0 = time.perf_counter()
+            page.run()
+            _duree_page = time.perf_counter() - _t0
+            if _duree_page > _seuil:
+                logger.warning(
+                    "⏱️ Page lente détectée : %.2fs (seuil %.1fs)",
+                    _duree_page,
+                    _seuil,
+                )
 
         # Fermer le landmark main
         st.markdown("</main>", unsafe_allow_html=True)

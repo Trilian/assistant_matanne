@@ -18,6 +18,7 @@ from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.core.state import rerun
 from src.modules._framework import error_boundary
+from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 
@@ -244,6 +245,7 @@ def afficher_jour(jour_idx: int, nom_jour: str, activites: list[dict], est_aujou
             afficher_activite_card(jour_idx, act, i)
 
 
+@ui_fragment
 def afficher_vue_semaine():
     """Affiche la vue semaine complète."""
     st.subheader("📅 Planning de la semaine")
@@ -268,6 +270,7 @@ def afficher_vue_semaine():
             )
 
 
+@ui_fragment
 def afficher_vue_aujourd_hui():
     """Affiche les activites du jour."""
     st.subheader("🌟 Aujourd'hui")
@@ -301,6 +304,7 @@ def afficher_vue_aujourd_hui():
         afficher_activite_card(jour_actuel, act, i, key_prefix="today")
 
 
+@ui_fragment
 def afficher_categories():
     """Affiche toutes les categories d'activites."""
     st.subheader("📚 Toutes les activites par categorie")
@@ -319,6 +323,7 @@ def afficher_categories():
                     st.caption(f"⏱️ {act['duree']} min • {act['desc']}")
 
 
+@ui_fragment
 def afficher_stats_semaine():
     """Affiche les stats de la semaine."""
     planning = get_planning_semaine()

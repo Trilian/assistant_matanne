@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import BudgetFamille, BudgetMensuelDB
 from src.services.core.base import BaseService
-from src.services.core.events.bus import obtenir_bus
+from src.services.core.events import obtenir_bus
 
 from .budget_alertes import BudgetAlertesMixin
 from .budget_analyses import BudgetAnalysesMixin

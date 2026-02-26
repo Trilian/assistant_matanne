@@ -155,6 +155,7 @@ def _build_inventaire_figure(categories: tuple[str, ...], counts: tuple[int, ...
     exemple="graphique_budget_drilldown(depenses)",
     tags=("plotly", "drilldown", "budget"),
 )
+@st.fragment
 def graphique_budget_drilldown(
     depenses: list[dict[str, Any]],
     *,
@@ -232,6 +233,7 @@ def graphique_budget_drilldown(
     exemple="graphique_recettes_drilldown(recettes_freq)",
     tags=("plotly", "drilldown", "recettes"),
 )
+@st.fragment
 def graphique_recettes_drilldown(
     recettes_freq: list[dict[str, Any]],
     *,
@@ -310,6 +312,7 @@ def graphique_recettes_drilldown(
     exemple="graphique_activites_heatmap(activites)",
     tags=("plotly", "drilldown", "heatmap"),
 )
+@st.fragment
 def graphique_activites_heatmap(
     activites: list[dict[str, Any]],
     *,
@@ -430,6 +433,7 @@ def graphique_activites_heatmap(
     exemple="graphique_inventaire_drilldown(inventaire)",
     tags=("plotly", "drilldown", "inventaire"),
 )
+@st.fragment
 def graphique_inventaire_drilldown(
     inventaire: list[dict[str, Any]],
     *,

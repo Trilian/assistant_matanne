@@ -8,10 +8,13 @@ import streamlit as st
 
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.ui.fragments import ui_fragment
+from src.ui.keys import KeyNamespace
 
 from .utils import formater_quantite
 
 logger = logging.getLogger(__name__)
+
+_keys = KeyNamespace("recettes_ia")
 
 
 @ui_fragment
@@ -29,7 +32,7 @@ def afficher_generer_ia():
         "Mode de génération",
         ["Personnalisé", "Recherche spécifique"],
         horizontal=True,
-        key="recettes_mode_generation",
+        key=_keys("mode_generation"),
     )
 
     if mode_gen == "Recherche spécifique":
@@ -218,7 +221,7 @@ def _afficher_suggestion_card(
         st.divider()
         col_btn_add, col_btn_space = st.columns([2, 1])
         with col_btn_add:
-            button_key = f"add_variant_{idx}" if is_variant else f"add_suggestion_{idx}"
+            button_key = _keys("add_variant", idx) if is_variant else _keys("add_suggestion", idx)
             if st.button(
                 "✅ Ajouter à mes recettes",
                 key=button_key,

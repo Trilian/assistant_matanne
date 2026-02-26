@@ -532,3 +532,330 @@ def text_input_with_url(
     value = st.text_input(label, value=url_value, **widget_kwargs)
 
     return value
+
+
+# ═══════════════════════════════════════════════════════════
+# DEEP LINK STATE — Multi-niveaux page → onglet → filtre → item
+# Innovation 1.3 du rapport d'audit
+# ═══════════════════════════════════════════════════════════
+
+
+class DeepLinkState:
+    """Système de deep linking multi-niveaux complet.
+
+    Permet de bookmarker/partager un état complet:
+        /app?tab=recettes&filter=dessert&item=42&view=details
+
+    Niveaux supportés:
+    1. page   — Géré par st.navigation (url_path)
+    2. tab    — Onglet actif dans la page
+    3. filter — Filtres appliqués (catégorie, recherche, date)
+    4. item   — Élément sélectionné (ID recette, activité, etc.)
+    5. view   — Vue active (liste, détails, édition)
+
+    Usage:
+        deep = DeepLinkState("cuisine")
+
+        # Restaurer l'état depuis l'URL
+        tab = deep.tab("planificateur")  # ?cuisine_tab=...
+        filtre = deep.filter("categorie", "tous")  # ?cuisine_f_categorie=...
+        item_id = deep.item()  # ?cuisine_item=...
+        vue = deep.view("liste")  # ?cuisine_view=...
+
+        # Construire un lien partageable
+        link = deep.build_link(tab="recettes", filter={"cat": "dessert"}, item=42)
+
+        # Naviguer vers un état complet
+        deep.navigate(tab="batch", filter={"semaine": "2025-08"})
+
+        # Effacer tous les filtres
+        deep.clear_filters()
+    """
+
+    def __init__(self, namespace: str):
+        """
+        Args:
+            namespace: Préfixe du module (ex: "cuisine", "famille", "maison")
+        """
+        self.namespace = namespace
+        self._url = URLState(namespace)
+
+    # ─── Niveau 2: Onglet ───
+
+    def tab(self, default: str = "") -> str:
+        """Récupère l'onglet actif depuis l'URL.
+
+        Args:
+            default: Onglet par défaut
+
+        Returns:
+            Nom de l'onglet actif
+        """
+        return self._url.get("tab", default) or default
+
+    def set_tab(self, tab_name: str) -> None:
+        """Change l'onglet actif et met à jour l'URL.
+
+        Args:
+            tab_name: Nom de l'onglet
+        """
+        self._url.set("tab", tab_name)
+
+    # ─── Niveau 3: Filtres ───
+
+    def filter(self, key: str, default: Any = None) -> Any:
+        """Récupère un filtre depuis l'URL.
+
+        Args:
+            key: Clé du filtre (ex: "categorie", "recherche", "date_debut")
+            default: Valeur par défaut
+
+        Returns:
+            Valeur du filtre
+        """
+        return self._url.get(f"f_{key}", default)
+
+    def set_filter(self, key: str, value: Any) -> None:
+        """Définit un filtre et met à jour l'URL.
+
+        Args:
+            key: Clé du filtre
+            value: Valeur du filtre
+        """
+        if value is None or value == "" or value == []:
+            self._url.clear(f"f_{key}")
+        else:
+            self._url.set(f"f_{key}", value)
+
+    def get_filters(self) -> dict[str, Any]:
+        """Récupère tous les filtres actifs.
+
+        Returns:
+            Dict des filtres {key: value}
+        """
+        all_params = self._url.get_all()
+        return {
+            k[2:]: v  # Enlever le préfixe "f_"
+            for k, v in all_params.items()
+            if k.startswith("f_")
+        }
+
+    def clear_filters(self) -> None:
+        """Supprime tous les filtres de l'URL."""
+        all_params = self._url.get_all()
+        for key in all_params:
+            if key.startswith("f_"):
+                self._url.clear(key)
+
+    # ─── Niveau 4: Item sélectionné ───
+
+    def item(self, default: Any = None) -> Any:
+        """Récupère l'item sélectionné depuis l'URL.
+
+        Args:
+            default: Valeur par défaut
+
+        Returns:
+            ID ou identifiant de l'item sélectionné
+        """
+        value = self._url.get("item", default)
+        # Tenter conversion en int pour les IDs numériques
+        if isinstance(value, str):
+            try:
+                return int(value)
+            except ValueError:
+                return value
+        return value
+
+    def set_item(self, item_id: Any) -> None:
+        """Sélectionne un item et met à jour l'URL.
+
+        Args:
+            item_id: ID de l'item (None pour désélectionner)
+        """
+        if item_id is None:
+            self._url.clear("item")
+        else:
+            self._url.set("item", item_id)
+
+    # ─── Niveau 5: Vue ───
+
+    def view(self, default: str = "liste") -> str:
+        """Récupère la vue active depuis l'URL.
+
+        Args:
+            default: Vue par défaut ("liste", "details", "edition", "grille")
+
+        Returns:
+            Nom de la vue active
+        """
+        return self._url.get("view", default) or default
+
+    def set_view(self, view_name: str) -> None:
+        """Change la vue active.
+
+        Args:
+            view_name: Nom de la vue
+        """
+        self._url.set("view", view_name)
+
+    # ─── Navigation complète ───
+
+    def navigate(
+        self,
+        tab: str | None = None,
+        filter: dict[str, Any] | None = None,
+        item: Any = None,
+        view: str | None = None,
+        clear_previous: bool = False,
+    ) -> None:
+        """Navigue vers un état complet d'un coup.
+
+        Args:
+            tab: Onglet cible
+            filter: Filtres à appliquer
+            item: Item à sélectionner
+            view: Vue à activer
+            clear_previous: Effacer l'état précédent avant
+
+        Usage:
+            deep.navigate(
+                tab="recettes",
+                filter={"categorie": "dessert", "recherche": "tarte"},
+                item=42,
+                view="details",
+            )
+        """
+        if clear_previous:
+            self._url.clear_all()
+
+        if tab is not None:
+            self.set_tab(tab)
+        if filter:
+            for k, v in filter.items():
+                self.set_filter(k, v)
+        if item is not None:
+            self.set_item(item)
+        if view is not None:
+            self.set_view(view)
+
+    def build_link(
+        self,
+        tab: str | None = None,
+        filter: dict[str, Any] | None = None,
+        item: Any = None,
+        view: str | None = None,
+    ) -> str:
+        """Construit un lien partageable avec l'état spécifié.
+
+        Returns:
+            Fragment de query string (ex: "?cuisine_tab=recettes&cuisine_item=42")
+        """
+        params: dict[str, str] = {}
+
+        if tab is not None:
+            params[f"{self.namespace}_tab"] = str(tab)
+        if filter:
+            for k, v in filter.items():
+                val = json.dumps(v) if isinstance(v, dict | list) else str(v)
+                params[f"{self.namespace}_f_{k}"] = val
+        if item is not None:
+            params[f"{self.namespace}_item"] = str(item)
+        if view is not None:
+            params[f"{self.namespace}_view"] = str(view)
+
+        if not params:
+            return ""
+
+        from urllib.parse import urlencode
+
+        return "?" + urlencode(params)
+
+    def get_state_snapshot(self) -> dict[str, Any]:
+        """Capture complète de l'état deep link actuel.
+
+        Returns:
+            Dict avec tab, filters, item, view
+        """
+        return {
+            "tab": self.tab(),
+            "filters": self.get_filters(),
+            "item": self.item(),
+            "view": self.view(),
+        }
+
+    def restore_from_snapshot(self, snapshot: dict[str, Any]) -> None:
+        """Restaure un état depuis un snapshot.
+
+        Args:
+            snapshot: Dict capturé par get_state_snapshot()
+        """
+        self.navigate(
+            tab=snapshot.get("tab"),
+            filter=snapshot.get("filters"),
+            item=snapshot.get("item"),
+            view=snapshot.get("view"),
+            clear_previous=True,
+        )
+
+    # ─── Widget helpers ───
+
+    def tabs_synced(self, labels: list[str], default: int = 0) -> int:
+        """Tabs synchronisés avec le deep link.
+
+        Args:
+            labels: Labels des onglets
+            default: Index par défaut
+
+        Returns:
+            Index de l'onglet sélectionné (0-based)
+        """
+        current_tab = self.tab()
+
+        if current_tab and current_tab in labels:
+            return labels.index(current_tab)
+
+        return default
+
+    def selectbox_synced(
+        self,
+        label: str,
+        options: list[Any],
+        filter_key: str,
+        default: Any = None,
+        **kwargs: Any,
+    ) -> Any:
+        """Selectbox synchronisé avec le deep link filtre.
+
+        Args:
+            label: Label du selectbox
+            options: Options disponibles
+            filter_key: Clé du filtre à synchroniser
+            default: Valeur par défaut
+            **kwargs: Args supplémentaires pour st.selectbox
+        """
+        return selectbox_with_url(
+            label=label,
+            options=options,
+            param=f"{self.namespace}_f_{filter_key}",
+            default=default,
+            **kwargs,
+        )
+
+    def search_synced(
+        self,
+        label: str = "🔍 Recherche",
+        filter_key: str = "recherche",
+        **kwargs: Any,
+    ) -> str:
+        """Champ de recherche synchronisé avec le deep link.
+
+        Args:
+            label: Label du champ
+            filter_key: Clé du filtre recherche
+        """
+        return text_input_with_url(
+            label=label,
+            param=f"{self.namespace}_f_{filter_key}",
+            **kwargs,
+        )

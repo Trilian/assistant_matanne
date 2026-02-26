@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import Jalon, ProfilEnfant
+from src.core.monitoring import chronometre
 from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
 
@@ -33,6 +34,7 @@ class ServiceJules:
     # PROFIL
     # ═══════════════════════════════════════════════════════════
 
+    @chronometre(nom="jules.get_or_create", seuil_alerte_ms=2000)
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def get_or_create_jules(self, db: Session | None = None) -> int:
@@ -77,6 +79,7 @@ class ServiceJules:
     # MILESTONES (JALONS)
     # ═══════════════════════════════════════════════════════════
 
+    @chronometre(nom="jules.milestones_by_category", seuil_alerte_ms=1500)
     @avec_gestion_erreurs(default_return={})
     @avec_cache(ttl=300)
     @avec_session_db
@@ -112,6 +115,7 @@ class ServiceJules:
 
         return result
 
+    @chronometre(nom="jules.count_milestones", seuil_alerte_ms=1000)
     @avec_gestion_erreurs(default_return={})
     @avec_cache(ttl=300)
     @avec_session_db

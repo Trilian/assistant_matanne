@@ -17,8 +17,9 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import ActiviteWeekend
+from src.core.monitoring import chronometre
 from src.services.core.base import BaseService
-from src.services.core.events.bus import obtenir_bus
+from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -74,6 +75,7 @@ class ServiceWeekend(BaseService[ActiviteWeekend]):
     # LECTURE
     # ═══════════════════════════════════════════════════════════
 
+    @chronometre("famille.weekend.lister", seuil_alerte_ms=1500)
     @avec_gestion_erreurs(default_return={})
     @avec_cache(ttl=300)
     @avec_session_db

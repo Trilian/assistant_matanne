@@ -2,7 +2,7 @@
 
 from datetime import date
 
-from src.core.constants import (
+from ..constants import (
     JOURS_SEMAINE,
     JOURS_SEMAINE_COURT,
     MOIS_FRANCAIS,

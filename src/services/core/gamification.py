@@ -20,6 +20,10 @@ Usage:
 
     # Vérifier les badges débloqués
     badges = service.obtenir_badges()
+
+Note:
+    Ce service utilise l'abstraction ``SessionStorage`` de ``src.core.storage``
+    pour permettre l'injection de dépendance et les tests sans Streamlit.
 """
 
 import logging
@@ -27,8 +31,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
-import streamlit as st
-
+from src.core.storage import obtenir_storage
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -276,7 +279,7 @@ class ServiceGamification:
     """Service de gamification multi-modules.
 
     Gère les points, badges, streaks et niveaux pour tous les modules.
-    Stocke les données en session_state pour persistance intra-session.
+    Utilise l'abstraction SessionStorage pour la persistance intra-session.
     """
 
     _SK_STATS = "gamification_stats"
@@ -284,15 +287,16 @@ class ServiceGamification:
 
     def __init__(self) -> None:
         """Initialise le service de gamification."""
-        if self._SK_STATS not in st.session_state:
-            st.session_state[self._SK_STATS] = StatsGamification()
-        if self._SK_HISTORIQUE not in st.session_state:
-            st.session_state[self._SK_HISTORIQUE] = []
+        storage = obtenir_storage()
+        if not storage.contains(self._SK_STATS):
+            storage.set(self._SK_STATS, StatsGamification())
+        if not storage.contains(self._SK_HISTORIQUE):
+            storage.set(self._SK_HISTORIQUE, [])
 
     @property
     def stats(self) -> StatsGamification:
         """Accès aux stats courantes."""
-        return st.session_state[self._SK_STATS]
+        return obtenir_storage().get(self._SK_STATS)
 
     def enregistrer_action(self, action: str, **kwargs: Any) -> dict[str, Any]:
         """Enregistre une action et met à jour les stats.
@@ -328,7 +332,9 @@ class ServiceGamification:
         stats.derniere_activite = datetime.now()
 
         # Historique
-        st.session_state[self._SK_HISTORIQUE].append(
+        storage = obtenir_storage()
+        historique = storage.get(self._SK_HISTORIQUE, [])
+        historique.append(
             {
                 "action": action,
                 "points": points,
@@ -336,6 +342,7 @@ class ServiceGamification:
                 **kwargs,
             }
         )
+        storage.set(self._SK_HISTORIQUE, historique)
 
         # Vérifier les nouveaux badges
         nouveaux_badges = self._verifier_nouveaux_badges(stats)
@@ -404,7 +411,7 @@ class ServiceGamification:
 
     def obtenir_historique(self, limit: int = 20) -> list[dict[str, Any]]:
         """Retourne l'historique des actions récentes."""
-        historique: list[dict[str, Any]] = st.session_state.get(self._SK_HISTORIQUE, [])
+        historique: list[dict[str, Any]] = obtenir_storage().get(self._SK_HISTORIQUE, [])
         return list(reversed(historique[-limit:]))
 
 

@@ -1,901 +1,1245 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rapport d'Audit Complet v8 — Assistant Matanne</title>
-<style>
-  :root {
-    --bg: #0d1117; --surface: #161b22; --surface2: #1c2333;
-    --border: #30363d; --border-accent: #58a6ff;
-    --text: #e6edf3; --text-muted: #8b949e; --text-link: #58a6ff;
-    --green: #3fb950; --green-bg: rgba(63,185,80,0.1);
-    --yellow: #d29922; --yellow-bg: rgba(210,153,34,0.1);
-    --red: #f85149; --red-bg: rgba(248,81,73,0.1);
-    --blue: #58a6ff; --blue-bg: rgba(88,166,255,0.1);
-    --purple: #bc8cff; --purple-bg: rgba(188,140,255,0.1);
-    --orange: #f0883e; --orange-bg: rgba(240,136,62,0.1);
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
-  .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
-  h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; background: linear-gradient(135deg, var(--blue), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  h2 { font-size: 1.6rem; font-weight: 600; margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); color: var(--text); }
-  h3 { font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem; color: var(--text); }
-  h4 { font-size: 1.05rem; font-weight: 600; margin: 1rem 0 0.5rem; color: var(--text-muted); }
-  p { margin-bottom: 0.75rem; }
-  a { color: var(--text-link); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  code { background: var(--surface2); padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.88em; font-family: 'Consolas', 'Fira Code', monospace; color: var(--orange); }
-  pre { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; }
-  pre code { background: none; padding: 0; color: var(--text); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport d'Audit Complet — Assistant Matanne v9</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface-2: #1c2333;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-2: #1f6feb;
+            --green: #3fb950;
+            --green-bg: rgba(63,185,80,0.1);
+            --yellow: #d29922;
+            --yellow-bg: rgba(210,153,34,0.1);
+            --red: #f85149;
+            --red-bg: rgba(248,81,73,0.1);
+            --purple: #bc8cff;
+            --purple-bg: rgba(188,140,255,0.1);
+            --orange: #d18616;
+            --orange-bg: rgba(209,134,22,0.1);
+            --cyan: #39d2c0;
+            --cyan-bg: rgba(57,210,192,0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 0;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
 
-  /* Header */
-  .header { text-align: center; padding: 3rem 2rem; background: var(--surface); border-radius: 16px; border: 1px solid var(--border); margin-bottom: 2rem; }
-  .header .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem; }
-  .header .date { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; }
-  .header .badges { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.25rem; flex-wrap: wrap; }
-  .badge { padding: 0.3em 0.8em; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
-  .badge-blue { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(88,166,255,0.3); }
-  .badge-green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
-  .badge-yellow { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(210,153,34,0.3); }
-  .badge-red { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
-  .badge-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(188,140,255,0.3); }
+        /* Header */
+        .hero {
+            background: linear-gradient(135deg, #1a1f3a 0%, #0d1117 50%, #0a1628 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .hero .subtitle { color: var(--text-muted); font-size: 1.15rem; }
+        .hero .date { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.75rem; }
+        .hero .badge-row { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; }
+        .badge {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.3rem 0.75rem; border-radius: 2rem;
+            font-size: 0.8rem; font-weight: 600;
+        }
+        .badge-green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+        .badge-yellow { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(210,153,34,0.3); }
+        .badge-red { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+        .badge-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(188,140,255,0.3); }
+        .badge-cyan { background: var(--cyan-bg); color: var(--cyan); border: 1px solid rgba(57,210,192,0.3); }
+        .badge-orange { background: var(--orange-bg); color: var(--orange); border: 1px solid rgba(209,134,22,0.3); }
 
-  /* Dashboard cards */
-  .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
-  .card-value { font-size: 2rem; font-weight: 700; }
-  .card-label { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem; }
-  .card-delta { font-size: 0.8rem; margin-top: 0.25rem; }
-  .card-delta.up { color: var(--green); }
-  .card-delta.down { color: var(--red); }
+        /* Navigation */
+        .toc {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+        }
+        .toc h2 { color: var(--accent); font-size: 1.3rem; margin-bottom: 1rem; }
+        .toc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.5rem; }
+        .toc a {
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            display: block;
+            transition: background 0.2s;
+        }
+        .toc a:hover { background: var(--surface-2); color: var(--accent); }
+        .toc a .num { color: var(--text-muted); font-size: 0.85rem; margin-right: 0.5rem; }
 
-  /* Tables */
-  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
-  th { background: var(--surface2); color: var(--text-muted); text-align: left; padding: 0.6rem 0.8rem; font-weight: 600; border-bottom: 2px solid var(--border); white-space: nowrap; }
-  td { padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
-  tr:hover td { background: rgba(88,166,255,0.04); }
+        /* Sections */
+        section { margin: 2.5rem 0; }
+        h2 {
+            font-size: 1.6rem;
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent-2);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        h3 {
+            font-size: 1.25rem;
+            color: var(--purple);
+            margin: 1.5rem 0 0.75rem;
+        }
+        h4 {
+            font-size: 1.05rem;
+            color: var(--cyan);
+            margin: 1.2rem 0 0.5rem;
+        }
+        p { margin: 0.5rem 0; }
 
-  /* Severity badges */
-  .sev { display: inline-block; padding: 0.15em 0.5em; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
-  .sev-crit { background: var(--red-bg); color: var(--red); }
-  .sev-high { background: var(--orange-bg); color: var(--orange); }
-  .sev-med { background: var(--yellow-bg); color: var(--yellow); }
-  .sev-low { background: var(--blue-bg); color: var(--blue); }
-  .sev-info { background: var(--surface2); color: var(--text-muted); }
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-card .label { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; }
 
-  /* Status dots */
-  .status { display: inline-flex; align-items: center; gap: 0.4em; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-  .dot-green { background: var(--green); }
-  .dot-yellow { background: var(--yellow); }
-  .dot-red { background: var(--red); }
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        th {
+            background: var(--surface-2);
+            color: var(--accent);
+            text-align: left;
+            padding: 0.65rem 0.75rem;
+            border-bottom: 2px solid var(--border);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        td {
+            padding: 0.55rem 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        tr:hover td { background: rgba(88,166,255,0.04); }
+        code {
+            background: var(--surface-2);
+            color: var(--cyan);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
 
-  /* Progress bar */
-  .progress-bar { background: var(--surface2); border-radius: 8px; height: 8px; overflow: hidden; margin: 0.25rem 0; }
-  .progress-fill { height: 100%; border-radius: 8px; transition: width 0.3s; }
-  .progress-fill.green { background: var(--green); }
-  .progress-fill.yellow { background: var(--yellow); }
-  .progress-fill.red { background: var(--red); }
-  .progress-fill.blue { background: var(--blue); }
+        /* Progress bars */
+        .progress-container { margin: 0.5rem 0; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.25rem; }
+        .progress-bar {
+            height: 8px;
+            background: var(--surface-2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        .fill-green { background: linear-gradient(90deg, #238636, var(--green)); }
+        .fill-yellow { background: linear-gradient(90deg, #9e6a03, var(--yellow)); }
+        .fill-red { background: linear-gradient(90deg, #da3633, var(--red)); }
+        .fill-purple { background: linear-gradient(90deg, #8957e5, var(--purple)); }
+        .fill-cyan { background: linear-gradient(90deg, #1b7c83, var(--cyan)); }
+        .fill-accent { background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
 
-  /* Sections */
-  .section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
-  .section-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-  .section-icon { font-size: 1.4rem; }
+        /* Scores */
+        .score-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .score-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        .score-item .name { font-weight: 600; margin-bottom: 0.5rem; }
+        .score-stars { color: var(--yellow); font-size: 1.1rem; letter-spacing: 2px; }
+        .score-note { color: var(--text-muted); font-size: 0.8rem; margin-top: 0.3rem; }
 
-  /* Collapsible */
-  details { border: 1px solid var(--border); border-radius: 8px; margin: 0.5rem 0; }
-  details > summary { padding: 0.75rem 1rem; cursor: pointer; font-weight: 600; background: var(--surface); border-radius: 8px; list-style: none; }
-  details > summary::before { content: "▶ "; font-size: 0.75em; color: var(--text-muted); }
-  details[open] > summary::before { content: "▼ "; }
-  details > summary:hover { background: var(--surface2); }
-  details > .content { padding: 1rem; }
+        /* Alert boxes */
+        .alert {
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 0.75rem 0;
+            border-left: 4px solid;
+        }
+        .alert-info { background: rgba(88,166,255,0.08); border-color: var(--accent); }
+        .alert-success { background: var(--green-bg); border-color: var(--green); }
+        .alert-warning { background: var(--yellow-bg); border-color: var(--yellow); }
+        .alert-danger { background: var(--red-bg); border-color: var(--red); }
+        .alert-title { font-weight: 600; margin-bottom: 0.25rem; }
 
-  /* Issue list */
-  .issue-item { display: grid; grid-template-columns: 80px 1fr; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
-  .issue-item:last-child { border-bottom: none; }
+        /* Lists */
+        ul, ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+        li { margin: 0.3rem 0; }
 
-  /* TOC */
-  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
-  .toc ul { list-style: none; padding-left: 1.25rem; }
-  .toc > ul { padding-left: 0; }
-  .toc li { margin: 0.3rem 0; }
-  .toc a { color: var(--text-muted); font-size: 0.92rem; }
-  .toc a:hover { color: var(--blue); }
+        /* Accordions */
+        details {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 0.75rem 0;
+        }
+        summary {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        summary:hover { background: var(--surface-2); border-radius: 8px; }
+        details[open] summary { border-bottom: 1px solid var(--border); border-radius: 8px 8px 0 0; }
+        details > div, details > table, details > ul, details > p { padding: 0 1rem 1rem; }
 
-  /* Roadmap comparison */
-  .roadmap-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0; }
-  .rm-check { color: var(--green); font-weight: bold; }
-  .rm-partial { color: var(--yellow); font-weight: bold; }
-  .rm-missing { color: var(--red); font-weight: bold; }
+        /* Print */
+        @media print {
+            body { background: #fff; color: #000; }
+            .hero { background: #f0f4f8; }
+            .hero h1 { -webkit-text-fill-color: #0366d6; }
+            .card, .stat-card, .score-item, details { border-color: #d1d5da; background: #f6f8fa; }
+            th { background: #f6f8fa; color: #24292e; }
+            td { color: #24292e; }
+            code { background: #f6f8fa; color: #0550ae; }
+        }
 
-  /* Grid utility */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+        .roadmap-item {
+            display: flex; gap: 1rem; padding: 0.75rem 1rem;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; margin: 0.5rem 0; align-items: flex-start;
+        }
+        .roadmap-item .phase {
+            padding: 0.2rem 0.6rem; border-radius: 1rem;
+            font-size: 0.75rem; font-weight: 700; white-space: nowrap;
+        }
+        .phase-imm { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+        .phase-short { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(210,153,34,0.3); }
+        .phase-mid { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(188,140,255,0.3); }
+        .phase-long { background: var(--cyan-bg); color: var(--cyan); border: 1px solid rgba(57,210,192,0.3); }
+        .phase-innov { background: var(--orange-bg); color: var(--orange); border: 1px solid rgba(209,134,22,0.3); }
 
-  /* Score ring */
-  .score-ring { text-align: center; padding: 1rem; }
-  .score-value { font-size: 3rem; font-weight: 700; }
-  .score-label { color: var(--text-muted); font-size: 0.9rem; }
-
-  /* Nav */
-  nav.sticky { position: sticky; top: 0; background: var(--bg); z-index: 100; padding: 0.5rem 0; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
-  nav.sticky a { color: var(--text-muted); margin-right: 1rem; font-size: 0.85rem; font-weight: 500; }
-  nav.sticky a:hover { color: var(--blue); }
-
-  /* Print */
-  @media print {
-    body { background: white; color: black; }
-    .section, .card, details, .toc { border-color: #ddd; }
-    th { background: #f0f0f0; }
-    .badge, .sev { border: 1px solid #ccc; }
-  }
-</style>
+        .compare-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center; margin: 0.5rem 0; }
+        .compare-row .arrow { color: var(--green); font-size: 1.5rem; }
+    </style>
 </head>
 <body>
+
+<!-- ═══════════════════════════════════════════ HERO ═══════════════════════════════════════════ -->
+<div class="hero">
+    <h1>🏠 Rapport d'Audit Complet</h1>
+    <div class="subtitle">Assistant Matanne — Analyse exhaustive du codebase</div>
+    <div class="date">📅 25 février 2026 — Post ROADMAP v9 (Sprint 5 Francisation)</div>
+    <div class="badge-row">
+        <span class="badge badge-green">✅ 8 045 tests passés</span>
+        <span class="badge badge-yellow">⚠ 48 tests échoués</span>
+        <span class="badge badge-purple">📦 ~110 000 LOC Python</span>
+        <span class="badge badge-cyan">🏗️ 95 tables SQL</span>
+        <span class="badge badge-orange">🤖 16 services IA</span>
+        <span class="badge badge-green">🇫🇷 100% Français</span>
+    </div>
+</div>
+
 <div class="container">
 
-<!-- ======================== HEADER ======================== -->
-<div class="header">
-  <h1>📊 Rapport d'Audit Complet v8</h1>
-  <div class="subtitle">Assistant Matanne — Hub de Gestion Familiale</div>
-  <div class="date">Généré le 27 février 2026 — Comparaison vs ROADMAP v8</div>
-  <div class="badges">
-    <span class="badge badge-blue">Streamlit + SQLAlchemy 2.0</span>
-    <span class="badge badge-purple">Mistral AI × 16 services</span>
-    <span class="badge badge-green">8 150 tests</span>
-    <span class="badge badge-yellow">95 tables SQL</span>
-    <span class="badge badge-blue">FastAPI 35 endpoints</span>
-  </div>
-</div>
-
-<!-- ======================== DASHBOARD ======================== -->
-<div class="dashboard">
-  <div class="card">
-    <div class="card-value" style="color:var(--blue)">607</div>
-    <div class="card-label">Fichiers Python</div>
-    <div class="card-delta up">src/ complet</div>
-  </div>
-  <div class="card">
-    <div class="card-value" style="color:var(--purple)">104 229</div>
-    <div class="card-label">Lignes de code (LOC)</div>
-    <div class="card-delta">Core 14k · API 3.6k · Modules 33k · Services 41k · UI 13k</div>
-  </div>
-  <div class="card">
-    <div class="card-value" style="color:var(--green)">84</div>
-    <div class="card-label">Modèles ORM</div>
-    <div class="card-delta">+ 33 StrEnum · 2 Mixins</div>
-  </div>
-  <div class="card">
-    <div class="card-value" style="color:var(--orange)">57</div>
-    <div class="card-label">Service Factories</div>
-    <div class="card-delta up">@service_factory singletons</div>
-  </div>
-  <div class="card">
-    <div class="card-value" style="color:var(--yellow)">38</div>
-    <div class="card-label">Pages Navigation</div>
-    <div class="card-delta up">100% pattern adoption</div>
-  </div>
-  <div class="card">
-    <div class="card-value" style="color:var(--green)">8 150</div>
-    <div class="card-label">Tests collectés</div>
-    <div class="card-delta">8 045 passed · 48 failed · 31 skipped</div>
-  </div>
-</div>
-
-<!-- ======================== TABLE OF CONTENTS ======================== -->
-<div class="toc">
-  <h3>📑 Table des matières</h3>
-  <ul>
-    <li><a href="#exec">1. Synthèse Exécutive</a></li>
-    <li><a href="#scores">2. Scores Qualité par Domaine</a></li>
-    <li><a href="#core">3. Analyse src/core/ (92 fichiers, 14 111 LOC)</a></li>
-    <li><a href="#api">4. Analyse src/api/ (35 fichiers, 3 628 LOC)</a></li>
-    <li><a href="#modules">5. Analyse src/modules/ (215 fichiers, 32 752 LOC)</a></li>
-    <li><a href="#services">6. Analyse src/services/ (209 fichiers, 41 170 LOC)</a></li>
-    <li><a href="#ui">7. Analyse src/ui/ + app.py (71 fichiers, 12 676 LOC)</a></li>
-    <li><a href="#roadmap">8. Comparaison ROADMAP v8</a></li>
-    <li><a href="#issues">9. Registre Global des Issues (55 items)</a></li>
-    <li><a href="#innovations">10. Propositions d'Améliorations Streamlit Innovantes</a></li>
-    <li><a href="#actions">11. Plan d'Actions Recommandé</a></li>
-  </ul>
-</div>
-
-<!-- ======================== 1. SYNTHÈSE ======================== -->
-<h2 id="exec">1. Synthèse Exécutive</h2>
-<div class="section">
-  <p>L'<strong>Assistant Matanne</strong> est un hub de gestion familiale mature en production avec une architecture en couches bien définie : <code>core → services → modules → ui</code>. Le projet a considérablement évolué depuis les phases initiales et atteint aujourd'hui un niveau de sophistication remarquable.</p>
-
-  <h3>Points forts majeurs</h3>
-  <ul style="margin:0.75rem 0 0.75rem 1.5rem">
-    <li><strong>Architecture cohérente</strong> : Modèle en couches avec séparation stricte des responsabilités, lazy loading PEP 562, et patterns factory singleton</li>
-    <li><strong>Patterns framework à 100%</strong> : Les 38 pages de navigation adoptent toutes <code>app()</code>, <code>error_boundary</code>, <code>@profiler_rerun</code>, et <code>KeyNamespace</code></li>
-    <li><strong>IA omniprésente</strong> : 16 services héritent de <code>BaseAIService</code> avec rate limiting, cache sémantique et circuit breaker intégrés</li>
-    <li><strong>Design system mature</strong> : 8 classes de tokens, 30 tokens sémantiques, dark mode complet, 3 breakpoints responsifs, a11y WCAG 2.1</li>
-    <li><strong>API REST robuste</strong> : 35 endpoints FastAPI avec JWT dual (API + Supabase), rate limiting multi-fenêtre, security headers OWASP, ETag caching</li>
-    <li><strong>Événements typés</strong> : 22 types d'événements avec bus pub/sub synchrone et wildcards</li>
-    <li><strong>Tests solides</strong> : 8 150 tests collectés avec ratio test/source de 1.11× sur l'API</li>
-  </ul>
-
-  <h3>Points d'attention</h3>
-  <ul style="margin:0.75rem 0 0.75rem 1.5rem">
-    <li><span class="sev sev-high">HIGH</span> Faille sécurité API : bypass auto-auth dev donne accès admin si <code>ENVIRONMENT</code> mal configuré</li>
-    <li><span class="sev sev-high">HIGH</span> Bug UI : <code>Sem.PRIMARY</code> référencé mais inexistant → <code>AttributeError</code> runtime</li>
-    <li><span class="sev sev-med">MEDIUM</span> <code>naviguer()</code> jamais utilisé dans les modules (45 appels raw <code>st.rerun()</code>)</li>
-    <li><span class="sev sev-med">MEDIUM</span> 8 singletons legacy redondants (module-level <code>_instance</code> + <code>@service_factory</code>)</li>
-    <li><span class="sev sev-med">MEDIUM</span> Dead code estimé : ~1 800 LOC (orphelins + stubs + framework inutilisé)</li>
-    <li><span class="sev sev-low">LOW</span> <code>@cached_fragment</code> adopté sur seulement 5/38 modules (13%)</li>
-  </ul>
-</div>
-
-<!-- ======================== 2. SCORES ======================== -->
-<h2 id="scores">2. Scores Qualité par Domaine</h2>
-<div class="dashboard" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-
-  <div class="card">
-    <div class="score-ring"><div class="score-value" style="color:var(--green)">A</div></div>
-    <div class="score-label" style="text-align:center"><strong>src/core/</strong></div>
-    <div style="padding:0.5rem">
-      <div>Architecture <div class="progress-bar"><div class="progress-fill green" style="width:95%"></div></div></div>
-      <div>SQLAlchemy 2.0 <div class="progress-bar"><div class="progress-fill green" style="width:99%"></div></div></div>
-      <div>Conventions FR <div class="progress-bar"><div class="progress-fill green" style="width:100%"></div></div></div>
-      <div>Exports complets <div class="progress-bar"><div class="progress-fill green" style="width:92%"></div></div></div>
+<!-- ═══════════════════════════════════════ TABLE DES MATIÈRES ═══════════════════════════════════════ -->
+<nav class="toc">
+    <h2>📑 Table des matières</h2>
+    <div class="toc-grid">
+        <a href="#vue-ensemble"><span class="num">1.</span> Vue d'ensemble du projet</a>
+        <a href="#metriques"><span class="num">2.</span> Métriques globales</a>
+        <a href="#completude"><span class="num">3.</span> Score de complétude</a>
+        <a href="#audit-app"><span class="num">4.</span> Audit app.py</a>
+        <a href="#audit-core"><span class="num">5.</span> Audit src/core/</a>
+        <a href="#audit-api"><span class="num">6.</span> Audit src/api/</a>
+        <a href="#audit-services"><span class="num">7.</span> Audit src/services/</a>
+        <a href="#audit-modules"><span class="num">8.</span> Audit src/modules/</a>
+        <a href="#audit-ui"><span class="num">9.</span> Audit src/ui/</a>
+        <a href="#concepts"><span class="num">10.</span> Vérification des concepts</a>
+        <a href="#innovations"><span class="num">11.</span> Améliorations innovantes</a>
+        <a href="#comparatif-v9"><span class="num">12.</span> Comparatif ROADMAP v9</a>
+        <a href="#roadmap-audit"><span class="num">13.</span> Roadmap recommandée</a>
     </div>
-  </div>
+</nav>
 
-  <div class="card">
-    <div class="score-ring"><div class="score-value" style="color:var(--green)">A-</div></div>
-    <div class="score-label" style="text-align:center"><strong>src/api/</strong></div>
-    <div style="padding:0.5rem">
-      <div>Sécurité <div class="progress-bar"><div class="progress-fill yellow" style="width:72%"></div></div></div>
-      <div>OpenAPI <div class="progress-bar"><div class="progress-fill green" style="width:86%"></div></div></div>
-      <div>Tests <div class="progress-bar"><div class="progress-fill green" style="width:95%"></div></div></div>
-      <div>Rate Limiting <div class="progress-bar"><div class="progress-fill green" style="width:98%"></div></div></div>
+<!-- ═══════════════════════════════════════ 1. VUE D'ENSEMBLE ═══════════════════════════════════════ -->
+<section id="vue-ensemble">
+<h2>1. Vue d'ensemble du projet</h2>
+
+<div class="card">
+<p><strong>Assistant Matanne</strong> est un hub de gestion familiale complet construit avec <strong>Streamlit</strong> + <strong>SQLAlchemy 2.0</strong> + <strong>FastAPI</strong> + <strong>Mistral AI</strong>. Le projet couvre la cuisine, la famille, la maison, les jeux, le planning et des utilitaires avancés.</p>
+</div>
+
+<h3>Architecture en couches</h3>
+<table>
+<tr><th>Couche</th><th>Dossier</th><th>Fichiers</th><th>LOC</th><th>Rôle</th></tr>
+<tr><td>🎯 Point d'entrée</td><td><code>src/app.py</code></td><td>1</td><td>238</td><td>Bootstrap, navigation, layout global</td></tr>
+<tr><td>🧱 Infrastructure</td><td><code>src/core/</code></td><td>78</td><td>~11 400</td><td>AI, Cache, Config, DB, Models, State, Validation</td></tr>
+<tr><td>🔌 API REST</td><td><code>src/api/</code></td><td>36</td><td>~3 544</td><td>FastAPI 32 endpoints, JWT, Rate limiting</td></tr>
+<tr><td>⚙️ Services</td><td><code>src/services/</code></td><td>209</td><td>~41 233</td><td>Logique métier, 63 factories, 16 services IA</td></tr>
+<tr><td>📱 Modules UI</td><td><code>src/modules/</code></td><td>213</td><td>~40 206</td><td>37 pages Streamlit, 8 domaines métier</td></tr>
+<tr><td>🎨 Composants UI</td><td><code>src/ui/</code></td><td>74</td><td>~13 127</td><td>Design system, tokens, composants, a11y</td></tr>
+<tr><td><strong>TOTAL</strong></td><td></td><td><strong>611</strong></td><td><strong>~109 748</strong></td><td></td></tr>
+</table>
+</section>
+
+<!-- ═══════════════════════════════════════ 2. MÉTRIQUES GLOBALES ═══════════════════════════════════════ -->
+<section id="metriques">
+<h2>2. Métriques globales</h2>
+
+<div class="card-grid">
+    <div class="stat-card"><div class="value">109 748</div><div class="label">Lignes de code Python</div></div>
+    <div class="stat-card"><div class="value">611</div><div class="label">Fichiers Python</div></div>
+    <div class="stat-card"><div class="value">95</div><div class="label">Tables SQL</div></div>
+    <div class="stat-card"><div class="value">~86</div><div class="label">Modèles ORM</div></div>
+    <div class="stat-card"><div class="value">63</div><div class="label">Service Factories</div></div>
+    <div class="stat-card"><div class="value">37</div><div class="label">Pages Streamlit</div></div>
+    <div class="stat-card"><div class="value">32</div><div class="label">Endpoints API REST</div></div>
+    <div class="stat-card"><div class="value">16</div><div class="label">Services IA (Mistral)</div></div>
+    <div class="stat-card"><div class="value">14</div><div class="label">Événements typés</div></div>
+    <div class="stat-card"><div class="value">15</div><div class="label">Émetteurs Event Bus</div></div>
+    <div class="stat-card"><div class="value">8 045</div><div class="label">Tests passés</div></div>
+    <div class="stat-card"><div class="value">5</div><div class="label">Décorateurs cross-cutting</div></div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════ 3. SCORE DE COMPLÉTUDE ═══════════════════════════════════════ -->
+<section id="completude">
+<h2>3. Score de complétude par aspect</h2>
+
+<div class="score-grid">
+    <div class="score-item">
+        <div class="name">🏗️ Architecture</div>
+        <div class="score-stars">★★★★★</div>
+        <div class="progress-container"><div class="progress-bar"><div class="progress-fill fill-green" style="width:95%"></div></div></div>
+        <div class="score-note">95% — Architecture en couches exemplaire, lazy loading, DI via protocols</div>
     </div>
-  </div>
-
-  <div class="card">
-    <div class="score-ring"><div class="score-value" style="color:var(--green)">A</div></div>
-    <div class="score-label" style="text-align:center"><strong>src/modules/</strong></div>
-    <div style="padding:0.5rem">
-      <div>Core 4 patterns <div class="progress-bar"><div class="progress-fill green" style="width:100%"></div></div></div>
-      <div>Lazy loading <div class="progress-bar"><div class="progress-fill green" style="width:90%"></div></div></div>
-      <div>@cached_fragment <div class="progress-bar"><div class="progress-fill red" style="width:13%"></div></div></div>
-      <div>Dead code <div class="progress-bar"><div class="progress-fill yellow" style="width:70%"></div></div></div>
+    <div class="score-item">
+        <div class="name">🗃️ Base de données</div>
+        <div class="score-stars">★★★★★</div>
+        <div class="progress-container"><div class="progress-bar"><div class="progress-fill fill-green" style="width:93%"></div></div></div>
+        <div class="score-note">93% — 95 tables, RLS, triggers, migrations SQL-file, SQLAlchemy 2.0</div>
     </div>
-  </div>
-
-  <div class="card">
-    <div class="score-ring"><div class="score-value" style="color:var(--green)">A-</div></div>
-    <div class="score-label" style="text-align:center"><strong>src/services/</strong></div>
-    <div style="padding:0.5rem">
-      <div>@service_factory <div class="progress-bar"><div class="progress-fill green" style="width:98%"></div></div></div>
-      <div>BaseService/AI <div class="progress-bar"><div class="progress-fill green" style="width:85%"></div></div></div>
-      <div>Events typés <div class="progress-bar"><div class="progress-fill green" style="width:100%"></div></div></div>
-      <div>Legacy cleanup <div class="progress-bar"><div class="progress-fill yellow" style="width:65%"></div></div></div>
+    <div class="score-item">
+        <div class="name">🤖 Intelligence Artificielle</div>
+        <div class="score-stars">★★★★★</div>
+        <div class="progress-container"><div class="progress-bar"><div class="progress-fill fill-green" style="width:96%"></div></div></div>
+        <div class="score-note">96% — 16 services IA, rate limiting, cache sémantique, circuit breaker, streaming</div>
     </div>
-  </div>
-
-  <div class="card">
-    <div class="score-ring"><div class="score-value" style="color:var(--green)">A</div></div>
-    <div class="score-label" style="text-align:center"><strong>src/ui/ + app.py</strong></div>
-    <div style="padding:0.5rem">
-      <div>Design System <div class="progress-bar"><div class="progress-fill green" style="width:95%"></div></div></div>
-      <div>Accessibilité <div class="progress-bar"><div class="progress-fill green" style="width:88%"></div></div></div>
-      <div>Dark Mode <div class="progress-bar"><div class="progress-fill green" style="width:100%"></div></div></div>
-      <div>Performance <div class="progress-bar"><div class="progress-fill green" style="width:82%"></div></div></div>
+    <div class="score-item">
+        <div class="name">🔐 Sécurité</div>
+        <div class="score-stars">★★★★☆</div>
+        <div class="progress-container"><div class="progress-bar"><div class="progress-fill fill-green" style="width:88%"></div></div></div>
+        <div class="score-note">88% — JWT, RLS, OWASP headers, sanitizer XSS/SQL, Sentry PII filtering</div>
     </div>
-  </div>
+    <div class="score-item">
+        <div class="name">🧪 Tests</div>
+        <div class="score-stars">★★★★☆</div>
+        <div class="progress-container"><div class="progress-bar"><div class="progress-fill fill-yellow" style="width:82%"></div></div></div>
+        <div class="score-note">82% — 8 150 tests, coverage ~75% core, 48 failures pré-existants</div>
+    </div>
+    <div class="score-item">
+        <div class="name">⚡ Performance</div>
+        <div class="score-stars">★★★★★</div>
+        <div class="progress-container"><div class="progress-bar"><div class="progress-fill fill-green" style="width:92%"></div></div></div>
+        <div class="score-note">92% — Cache multi-niveaux, Redis, lazy loading, N+1 corrigés, PEP 562</div>
+    </div>
+    <div class="score-item">
+        <div class="name">🎨 UI / Design System</div>
+        <div class="score-stars">★★★★★</div>
+        <div class="progress-container"><div class="progress-bar"><div class="progress-fill fill-green" style="width:91%"></div></div></div>
+        <div class="score-note">91% — Tokens sémantiques, dark mode, a11y WCAG, tablet mode, PWA</div>
+    </div>
+    <div class="score-item">
+        <div class="name">🔌 API REST</div>
+        <div class="score-stars">★★★★☆</div>
+        <div class="progress-container"><div class="progress-bar"><div class="progress-fill fill-yellow" style="width:85%"></div></div></div>
+        <div class="score-note">85% — 32 endpoints, rate limiting, ETag, Swagger, tests API</div>
+    </div>
+    <div class="score-item">
+        <div class="name">📊 Monitoring</div>
+        <div class="score-stars">★★★★☆</div>
+        <div class="progress-container"><div class="progress-bar"><div class="progress-fill fill-yellow" style="width:80%"></div></div></div>
+        <div class="score-note">80% — Sentry, rerun profiler, @chronometre, health probes, JSON logs</div>
+    </div>
+    <div class="score-item">
+        <div class="name">📖 Documentation</div>
+        <div class="score-stars">★★★★☆</div>
+        <div class="progress-container"><div class="progress-bar"><div class="progress-fill fill-yellow" style="width:83%"></div></div></div>
+        <div class="score-note">83% — Copilot instructions, docs/, docstrings, API README</div>
+    </div>
+    <div class="score-item">
+        <div class="name">🚀 DevOps / CI/CD</div>
+        <div class="score-stars">★★★★☆</div>
+        <div class="progress-container"><div class="progress-bar"><div class="progress-fill fill-yellow" style="width:78%"></div></div></div>
+        <div class="score-note">78% — GitHub Actions (test + deploy), bandit, pip-audit, Dependabot</div>
+    </div>
+    <div class="score-item">
+        <div class="name">♿ Accessibilité</div>
+        <div class="score-stars">★★★★★</div>
+        <div class="progress-container"><div class="progress-bar"><div class="progress-fill fill-green" style="width:90%"></div></div></div>
+        <div class="score-note">90% — WCAG 2.1, skip-link, ARIA landmarks, contraste, focus-visible</div>
+    </div>
 </div>
 
-<!-- ======================== 3. CORE ======================== -->
-<h2 id="core">3. Analyse détaillée — src/core/</h2>
-<div class="section">
-  <div class="section-title"><span class="section-icon">🏗️</span> Core Framework — 92 fichiers, 14 111 LOC</div>
+<div class="card" style="text-align:center; margin-top: 1.5rem;">
+    <div style="font-size:1.3rem; font-weight:700; color: var(--green);">Score global de complétude : 88/100</div>
+    <div style="color: var(--text-muted); margin-top: 0.25rem;">Projet mature, production-ready avec des axes d'amélioration ciblés</div>
+</div>
+</section>
 
-  <h3>3.1 Vue d'ensemble des sub-packages (12)</h3>
-  <table>
-    <tr><th>Sub-package</th><th>Fichiers</th><th>LOC</th><th>Rôle</th><th>Santé</th></tr>
-    <tr><td><code>models/</code></td><td>21</td><td>4 746</td><td>84 modèles ORM, 33 StrEnum, 2 Mixins</td><td><span class="dot dot-green"></span> Excellent</td></tr>
-    <tr><td><code>ai/</code></td><td>5</td><td>1 246</td><td>Client Mistral, parser, cache sémantique, rate limit, circuit breaker</td><td><span class="dot dot-green"></span> Bon</td></tr>
-    <tr><td><code>monitoring/</code></td><td>5</td><td>1 061</td><td>Métriques, health probes, Sentry, rerun profiler</td><td><span class="dot dot-green"></span> Bon</td></tr>
-    <tr><td><code>caching/</code></td><td>7</td><td>1 017</td><td>Cache multi-niveaux L1→L2→L3→Redis</td><td><span class="dot dot-green"></span> Excellent</td></tr>
-    <tr><td><code>validation/</code></td><td>10</td><td>985</td><td>Sanitizer XSS, 11 schémas Pydantic</td><td><span class="dot dot-yellow"></span> 1 export manquant</td></tr>
-    <tr><td><code>state/</code></td><td>4</td><td>832</td><td>GestionnaireEtat, PersistentState, slices</td><td><span class="dot dot-green"></span> Complet</td></tr>
-    <tr><td><code>config/</code></td><td>3</td><td>684</td><td>Pydantic BaseSettings, .env loader</td><td><span class="dot dot-green"></span> Bon</td></tr>
-    <tr><td><code>db/</code></td><td>4</td><td>650</td><td>Engine SQLAlchemy, sessions, migrations SQL</td><td><span class="dot dot-green"></span> Bon</td></tr>
-    <tr><td><code>decorators/</code></td><td>4</td><td>453</td><td>6 décorateurs : db, cache, erreurs, validation, résilience</td><td><span class="dot dot-green"></span> Complet</td></tr>
-    <tr><td><code>date_utils/</code></td><td>4</td><td>273</td><td>Semaines, périodes, formatage</td><td><span class="dot dot-green"></span> Propre</td></tr>
-    <tr><td><code>resilience/</code></td><td>1</td><td>207</td><td>Retry, timeout, bulkhead, fallback composables</td><td><span class="dot dot-green"></span> Bon</td></tr>
-    <tr><td><code>observability/</code></td><td>1</td><td>197</td><td>Correlation ID, contexte d'exécution</td><td><span class="dot dot-green"></span> Bon</td></tr>
-  </table>
+<!-- ═══════════════════════════════════════ 4. AUDIT APP.PY ═══════════════════════════════════════ -->
+<section id="audit-app">
+<h2>4. Audit src/app.py (238 LOC)</h2>
 
-  <h3>3.2 Modèles ORM — 84 classes, 18 fichiers domaine</h3>
-  <table>
-    <tr><th>Fichier</th><th>Modèles</th><th>LOC</th><th>Tables</th></tr>
-    <tr><td><code>temps_entretien.py</code></td><td>10</td><td>442</td><td>sessions_travail, versions_pieces, couts_travaux, pieces_maison, objets_maison, zones_jardin, plantes_jardin, plans_jardin, actions_plantes, logs_statut_objets</td></tr>
-    <tr><td><code>users.py</code></td><td>7</td><td>433</td><td>profils_utilisateurs, garmin_tokens, activites_garmin, resumes_quotidiens_garmin, journaux_alimentaires, activites_weekend, achats_famille</td></tr>
-    <tr><td><code>jeux.py</code></td><td>10</td><td>415</td><td>jeux_equipes, jeux_matchs, jeux_paris_sportifs, jeux_tirages_loto, jeux_grilles_loto, jeux_stats_loto, jeux_historique, jeux_series, jeux_alertes, jeux_configuration</td></tr>
-    <tr><td><code>recettes.py</code></td><td>7</td><td>340</td><td>recettes, ingredients, recette_ingredients, etapes_recette, versions_recette, historique_recettes, repas_batch</td></tr>
-    <tr><td><code>batch_cooking.py</code></td><td>4</td><td>337</td><td>config_batch_cooking, sessions_batch_cooking, etapes_batch_cooking, preparations_batch</td></tr>
-    <tr><td><code>planning.py</code></td><td>5</td><td>202</td><td>plannings, repas, evenements_planning, templates_semaine, elements_templates</td></tr>
-    <tr><td><code>famille.py</code></td><td>6</td><td>208</td><td>profils_enfants, entrees_bien_etre, jalons, activites_famille, budgets_famille, articles_achats_famille</td></tr>
-    <tr><td><code>user_preferences.py</code></td><td>4</td><td>192</td><td>preferences_utilisateurs, retours_recettes, openfoodfacts_cache, configs_calendriers_externes</td></tr>
-    <tr><td><code>habitat.py</code></td><td>4</td><td>194</td><td>meubles, stocks_maison, taches_entretien, actions_ecologiques</td></tr>
-    <tr><td><code>maison.py</code></td><td>6</td><td>181</td><td>projets, taches_projets, routines, taches_routines, elements_jardin, journaux_jardin</td></tr>
-    <tr><td><code>finances.py</code></td><td>3</td><td>172</td><td>depenses, budgets_mensuels, depenses_maison</td></tr>
-    <tr><td><code>courses.py</code></td><td>4</td><td>158</td><td>listes_courses, liste_courses, modeles_courses, articles_modeles</td></tr>
-    <tr><td><code>inventaire.py</code></td><td>2</td><td>131</td><td>inventaire, historique_inventaire</td></tr>
-    <tr><td><code>sante.py</code></td><td>3</td><td>128</td><td>routines_sante, objectifs_sante, entrees_sante</td></tr>
-    <tr><td><code>calendrier.py</code></td><td>2</td><td>116</td><td>calendriers_externes, evenements_calendrier</td></tr>
-    <tr><td><code>jardin.py</code></td><td>2</td><td>99</td><td>alertes_meteo, config_meteo</td></tr>
-    <tr><td><code>systeme.py</code></td><td>2</td><td>89</td><td>sauvegardes, historique_actions</td></tr>
-    <tr><td><code>notifications.py</code></td><td>2</td><td>75</td><td>abonnements_push, preferences_notifications</td></tr>
-    <tr><td><code>persistent_state.py</code></td><td>1</td><td>40</td><td>etats_persistants</td></tr>
-  </table>
+<div class="card">
+<h3>Séquence de Bootstrap</h3>
+<table>
+<tr><th>Étape</th><th>Action</th><th>Détail</th></tr>
+<tr><td>1. Env</td><td><code>dotenv.load_dotenv()</code></td><td>Cascade <code>.env.local</code> &gt; <code>.env</code></td></tr>
+<tr><td>2. Path</td><td><code>sys.path</code></td><td>Ajoute la racine projet</td></tr>
+<tr><td>3. Logs</td><td><code>GestionnaireLog.initialiser()</code></td><td>Niveau INFO</td></tr>
+<tr><td>4. Bootstrap</td><td><code>demarrer_application()</code></td><td>Config, DB, monitoring, Sentry, events</td></tr>
+<tr><td>5. Imports</td><td>Lazy imports minimaux</td><td>State, monitoring, navigation, layout, PWA</td></tr>
+<tr><td>6. Page config</td><td><code>st.set_page_config()</code></td><td>Wide layout, sidebar expanded</td></tr>
+<tr><td>7. UI init</td><td><code>initialiser_app()</code></td><td>CSS pipeline (5 étapes), DB check, IA client</td></tr>
+<tr><td>8. Navigation</td><td><code>initialiser_navigation()</code></td><td>37 pages via <code>st.navigation()</code></td></tr>
+</table>
 
-  <h4>Conformité SQLAlchemy 2.0</h4>
-  <table>
-    <tr><th>Pattern</th><th>Occurrences</th><th>Status</th></tr>
-    <tr><td><code>Mapped[]</code></td><td>965</td><td><span class="status"><span class="dot dot-green"></span> Adopté</span></td></tr>
-    <tr><td><code>mapped_column()</code></td><td>914</td><td><span class="status"><span class="dot dot-green"></span> Adopté</span></td></tr>
-    <tr><td><code>relationship()</code></td><td>71</td><td><span class="status"><span class="dot dot-green"></span> Bon</span></td></tr>
-    <tr><td><code>back_populates</code></td><td>64</td><td><span class="status"><span class="dot dot-green"></span> Standard</span></td></tr>
-    <tr><td><code>backref=</code> (legacy)</td><td>1</td><td><span class="status"><span class="dot dot-yellow"></span> temps_entretien.py</span></td></tr>
-    <tr><td><code>TimestampMixin</code></td><td>28 modèles</td><td><span class="status"><span class="dot dot-green"></span> Bon coverage</span></td></tr>
-  </table>
+<h3>Points forts ✅</h3>
+<ul>
+    <li><strong>Lazy imports partout</strong> — Les widgets globaux importent dans les fonctions, pas au top-level</li>
+    <li><strong>Isolation des widgets</strong> — Chat IA, notifications, gamification isolés dans try/except individuels</li>
+    <li><strong>Accessibilité</strong> — Skip-link, <code>&lt;main role="main"&gt;</code>, landmarks ARIA</li>
+    <li><strong>Performance monitoring</strong> — <code>@profiler_rerun("app")</code> + alerte si page &gt; 2s</li>
+    <li><strong>Mode maintenance</strong> — Variable d'environnement pour bannière</li>
+    <li><strong>Mode focus</strong> — CSS + raccourcis clavier + bouton sortie</li>
+</ul>
 
-  <h3>3.3 Issues Core (5 items)</h3>
-  <table>
-    <tr><th>#</th><th>Sévérité</th><th>Localisation</th><th>Description</th></tr>
-    <tr><td>C1</td><td><span class="sev sev-high">HIGH</span></td><td><code>models/__init__.py</code></td><td><code>.persistent_state</code> manquant dans <code>_MODEL_MODULES</code> — <code>charger_tous_modeles()</code> ignore <code>EtatPersistantDB</code>, la table <code>etats_persistants</code> ne sera pas créée</td></tr>
-    <tr><td>C2</td><td><span class="sev sev-med">MEDIUM</span></td><td><code>validation/__init__.py</code></td><td><code>DepenseMaisonInput</code> non ré-exporté — <code>from src.core.validation import DepenseMaisonInput</code> échoue</td></tr>
-    <tr><td>C3</td><td><span class="sev sev-med">MEDIUM</span></td><td><code>temps_entretien.py</code></td><td>Dernier <code>backref="plan"</code> legacy au lieu de <code>back_populates</code></td></tr>
-    <tr><td>C4</td><td><span class="sev sev-low">LOW</span></td><td><code>navigation.py</code> vs <code>lazy_loader.py</code></td><td>Logic de cache dopée dupliquée. <code>ChargeurModuleDiffere</code> potentiellement inutilisé en production</td></tr>
-    <tr><td>C5</td><td><span class="sev sev-info">INFO</span></td><td><code>__pycache__/errors.cpython-311.pyc</code></td><td>Bytecode obsolète pour <code>errors.py</code> supprimé — à nettoyer</td></tr>
-  </table>
+<h3>Améliorations suggérées 🔧</h3>
+<ul>
+    <li>Ajouter un <code>error_boundary</code> global autour de <code>page.run()</code> plutôt que try/except brut</li>
+    <li>Le seuil de 2s pour les pages lentes pourrait être configurable via <code>Parametres</code></li>
+    <li>Considérer <code>st.cache_resource</code> pour le bootstrap lourd (DB connection pool)</li>
+</ul>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════ 5. AUDIT CORE ═══════════════════════════════════════ -->
+<section id="audit-core">
+<h2>5. Audit src/core/ (~11 400 LOC, 78 fichiers)</h2>
+
+<div class="alert alert-success">
+    <div class="alert-title">✅ Excellent — Architecture de référence</div>
+    Zero imports depuis services/modules/ui. 12 sous-packages cohérents. Design patterns avancés (Circuit Breaker, Policy Chain, PEP 562 lazy loading).
 </div>
 
-<!-- ======================== 4. API ======================== -->
-<h2 id="api">4. Analyse détaillée — src/api/</h2>
-<div class="section">
-  <div class="section-title"><span class="section-icon">🔌</span> API REST FastAPI — 35 fichiers, 3 628 LOC source + 4 028 LOC tests</div>
+<details>
+<summary>📁 ai/ — Intégration Mistral AI (1 271 LOC, 5 fichiers)</summary>
+<div>
+<table>
+<tr><th>Fichier</th><th>LOC</th><th>Rôle</th><th>Score</th></tr>
+<tr><td><code>client.py</code></td><td>438</td><td>ClientIA — httpx async, chat/streaming/vision, retry</td><td>★★★★★</td></tr>
+<tr><td><code>parser.py</code></td><td>246</td><td>AnalyseurIA — 5 stratégies parsing JSON + Pydantic</td><td>★★★★★</td></tr>
+<tr><td><code>cache.py</code></td><td>203</td><td>CacheIA — cache sémantique pour prompts IA</td><td>★★★★★</td></tr>
+<tr><td><code>rate_limit.py</code></td><td>143</td><td>RateLimitIA — quotas daily/hourly via SessionStorage</td><td>★★★★☆</td></tr>
+<tr><td><code>circuit_breaker.py</code></td><td>217</td><td>CircuitBreaker — CLOSED→OPEN→HALF_OPEN sync+async</td><td>★★★★☆</td></tr>
+</table>
+<p><strong>⚠ Issue</strong> : CircuitBreaker n'a pas de lock sur les transitions d'état — risque de race condition en multi-thread.</p>
+</div>
+</details>
 
-  <h3>4.1 Endpoints (35 total)</h3>
-  <table>
-    <tr><th>Groupe</th><th>Endpoints</th><th>Auth</th><th>Response Models</th></tr>
-    <tr><td>Auth</td><td>3 (login, refresh, me)</td><td>✅ Partiel (login public)</td><td>✅ 3/3</td></tr>
-    <tr><td>Recettes</td><td>6 (CRUD + PATCH)</td><td>✅ Write auth</td><td>✅ 6/6</td></tr>
-    <tr><td>Inventaire</td><td>6 (CRUD + barcode)</td><td>✅ Write auth</td><td>⚠️ 5/6 (barcode manque)</td></tr>
-    <tr><td>Courses</td><td>9 (listes + items)</td><td>✅ Write auth</td><td>✅ 9/9</td></tr>
-    <tr><td>Planning</td><td>4 (semaine + repas)</td><td>✅ Write auth</td><td>✅ 4/4</td></tr>
-    <tr><td>Push</td><td>3 (sub/unsub/status)</td><td>✅ Soft auth</td><td>✅ 3/3</td></tr>
-    <tr><td>Suggestions IA</td><td>2 (recettes, planning)</td><td>✅ + IA rate limit</td><td>⚠️ 0/2 (réponses ad-hoc)</td></tr>
-    <tr><td>System</td><td>2 (health, metrics)</td><td>Admin (metrics)</td><td>⚠️ 1/2</td></tr>
-  </table>
+<details>
+<summary>📁 caching/ — Cache multi-niveaux (1 067 LOC, 7 fichiers)</summary>
+<div>
+<table>
+<tr><th>Fichier</th><th>LOC</th><th>Rôle</th><th>Score</th></tr>
+<tr><td><code>orchestrator.py</code></td><td>260</td><td>CacheMultiNiveau L1→Redis→L2→L3, write-through, tags</td><td>★★★★★</td></tr>
+<tr><td><code>redis.py</code></td><td>226</td><td>CacheRedis — optionnel, dégradation gracieuse</td><td>★★★★★</td></tr>
+<tr><td><code>memory.py</code></td><td>83</td><td>L1 OrderedDict LRU, thread-safe</td><td>★★★★★</td></tr>
+<tr><td><code>session.py</code></td><td>93</td><td>L2 session_state, TTL-aware</td><td>★★★★☆</td></tr>
+<tr><td><code>file.py</code></td><td>138</td><td>L3 fichiers JSON, TTL + cleanup</td><td>★★★★☆</td></tr>
+<tr><td><code>cache.py</code></td><td>163</td><td>⚠ DEPRECATED — facade statique à supprimer</td><td>★★☆☆☆</td></tr>
+</table>
+<p><strong>💡 Suggestion</strong> : Supprimer <code>cache.py</code> deprecated et migrer les derniers callers vers <code>CacheMultiNiveau</code>.</p>
+</div>
+</details>
 
-  <h3>4.2 Middleware Stack</h3>
-  <table>
-    <tr><th>#</th><th>Middleware</th><th>Description</th></tr>
-    <tr><td>1</td><td><code>SecurityHeadersMiddleware</code></td><td>OWASP headers (CSP, HSTS, X-Frame-Options, X-XSS-Protection)</td></tr>
-    <tr><td>2</td><td><code>MetricsMiddleware</code></td><td>Latence / compteurs (ASGI natif, p50/p95/p99)</td></tr>
-    <tr><td>3</td><td><code>ETagMiddleware</code></td><td>ETag automatique + 304 Not Modified</td></tr>
-    <tr><td>4</td><td><code>MiddlewareLimitationDebit</code></td><td>Rate limiting multi-fenêtre (min/hour/day), Redis ou in-memory</td></tr>
-    <tr><td>5</td><td><code>CORSMiddleware</code></td><td>Origines localhost + Streamlit Cloud</td></tr>
-  </table>
+<details>
+<summary>📁 config/ — Configuration Pydantic (699 LOC, 4 fichiers)</summary>
+<div>
+<table>
+<tr><th>Fichier</th><th>LOC</th><th>Rôle</th><th>Score</th></tr>
+<tr><td><code>settings.py</code></td><td>347</td><td>Parametres(BaseSettings) — toute la config centralisée</td><td>★★★★★</td></tr>
+<tr><td><code>validator.py</code></td><td>223</td><td>ValidateurConfiguration — API fluent de validation</td><td>★★★★★</td></tr>
+<tr><td><code>loader.py</code></td><td>114</td><td>Cascade .env.local → .env → st.secrets</td><td>★★★★★</td></tr>
+</table>
+<p>✅ Exemplaire — Pydantic v2 BaseSettings, cascade de config, validation explicite.</p>
+</div>
+</details>
 
-  <h3>4.3 Tests API — 294 tests, 4 028 LOC</h3>
-  <p>Ratio test/source : <strong>1.11×</strong> (excellent). Couverture complète des routes, auth, rate limiting, schemas, e2e.</p>
+<details>
+<summary>📁 models/ — Modèles ORM (4 720 LOC, 22 fichiers)</summary>
+<div>
+<table>
+<tr><th>Fichier</th><th>LOC</th><th>Modèles</th><th>Tables</th></tr>
+<tr><td><code>jeux.py</code></td><td>415</td><td>PariSportif, Match, GrilleLoto +7</td><td>10</td></tr>
+<tr><td><code>temps_entretien.py</code></td><td>443</td><td>PieceMaison, ObjetMaison +6</td><td>8</td></tr>
+<tr><td><code>users.py</code></td><td>433</td><td>ProfilUtilisateur +8</td><td>9</td></tr>
+<tr><td><code>recettes.py</code></td><td>340</td><td>Recette, Ingredient +5</td><td>7</td></tr>
+<tr><td><code>batch_cooking.py</code></td><td>337</td><td>SessionBatchCooking +3</td><td>4</td></tr>
+<tr><td colspan="2"><em>+ 17 autres fichiers</em></td><td><strong>~86 classes</strong></td><td><strong>~86 tables</strong></td></tr>
+</table>
+<p>✅ Tous en SQLAlchemy 2.0 <code>Mapped[]</code>, <code>__init__.py</code> PEP 562 lazy-loads ~120 symboles.</p>
+<p><strong>⚠ Issue</strong> : Modèles jardin dispersés sur 3 fichiers (<code>maison.py</code>, <code>jardin.py</code>, <code>temps_entretien.py</code>) — documenté dans ROADMAP, différé.</p>
+</div>
+</details>
 
-  <h3>4.4 Issues API (11 items)</h3>
-  <table>
-    <tr><th>#</th><th>Sévérité</th><th>Type</th><th>Description</th></tr>
-    <tr><td>A1</td><td><span class="sev sev-high">HIGH</span></td><td>Sécurité</td><td><span class="badge badge-green">✅ RÉSOLU</span> Dev auto-auth bypass — whitelist stricte + défaut-deny + rôle membre</td></tr>
-    <tr><td>A2</td><td><span class="sev sev-med">MEDIUM</span></td><td>Sécurité</td><td><span class="badge badge-green">✅ RÉSOLU</span> Secret JWT — clé aléatoire par processus, RuntimeError en prod si non configuré</td></tr>
-    <tr><td>A3</td><td><span class="sev sev-med">MEDIUM</span></td><td>Sécurité</td><td><span class="badge badge-green">✅ RÉSOLU</span> SHA-256 tronqué pour ETag (docstring corrigée)</td></tr>
-    <tr><td>A4</td><td><span class="sev sev-med">MEDIUM</span></td><td>Sécurité</td><td><span class="badge badge-green">✅ RÉSOLU</span> Tous les GET reads utilisent <code>Depends(require_auth)</code></td></tr>
-    <tr><td>A5</td><td><span class="sev sev-med">MEDIUM</span></td><td>Bug</td><td><span class="badge badge-green">✅ RÉSOLU</span> Tous les endpoints ont <code>response_model</code></td></tr>
-    <tr><td>A6</td><td><span class="sev sev-med">MEDIUM</span></td><td>Design</td><td><span class="badge badge-green">✅ RÉSOLU</span> Push routes utilisent <code>require_auth</code></td></tr>
-    <tr><td>A7</td><td><span class="sev sev-low">LOW</span></td><td>Sécurité</td><td>IP extraction <code>X-Forwarded-For</code> sans validation de proxy trusted</td></tr>
-    <tr><td>A8</td><td><span class="sev sev-low">LOW</span></td><td>Bug</td><td><code>ListeCourses.archivee == False</code> → SAWarning (utiliser <code>is_(False)</code>)</td></tr>
-    <tr><td>A9</td><td><span class="sev sev-low">LOW</span></td><td>Bug</td><td>PUT recettes utilise <code>exclude_unset=True</code> — sémantique PATCH, pas PUT</td></tr>
-    <tr><td>A10</td><td><span class="sev sev-low">LOW</span></td><td>Design</td><td>Double error handling : <code>@gerer_exception_api</code> + <code>try/except</code> internes</td></tr>
-    <tr><td>A11</td><td><span class="sev sev-info">INFO</span></td><td>Design</td><td>Rate limiting in-memory ne fonctionne pas avec multi-workers Uvicorn</td></tr>
-  </table>
+<details>
+<summary>📁 decorators/ — Décorateurs transversaux (469 LOC, 5 fichiers)</summary>
+<div>
+<table>
+<tr><th>Décorateur</th><th>Fichier</th><th>LOC</th><th>Usage</th></tr>
+<tr><td><code>@avec_cache(ttl)</code></td><td>cache.py</td><td>105</td><td>10+ services</td></tr>
+<tr><td><code>@avec_session_db</code></td><td>db.py</td><td>48</td><td>20+ fichiers</td></tr>
+<tr><td><code>@avec_gestion_erreurs</code></td><td>errors.py</td><td>134</td><td>50+ méthodes</td></tr>
+<tr><td><code>@avec_validation(schema)</code></td><td>validation.py</td><td>166</td><td>Validation Pydantic auto</td></tr>
+<tr><td><code>@avec_resilience(retry, timeout)</code></td><td>validation.py</td><td>—</td><td>9 services API externes</td></tr>
+</table>
+</div>
+</details>
+
+<details>
+<summary>📁 Autres sous-packages</summary>
+<div>
+<table>
+<tr><th>Package</th><th>LOC</th><th>Score</th><th>Notes</th></tr>
+<tr><td><code>db/</code></td><td>698</td><td>★★★★★</td><td>Engine singleton, context managers, migrations SQL-file</td></tr>
+<tr><td><code>date_utils/</code></td><td>343</td><td>★★★★★</td><td>Fonctions pures, locale française, zéro dépendance circulaire</td></tr>
+<tr><td><code>monitoring/</code></td><td>1 161</td><td>★★★★☆</td><td>Sentry, rerun profiler, health probes, @chronometre</td></tr>
+<tr><td><code>state/</code></td><td>911</td><td>★★★★★</td><td>Slices typées, persistent state DB↔session, naviguer()</td></tr>
+<tr><td><code>validation/</code></td><td>919</td><td>★★★★★</td><td>12 schemas Pydantic, sanitizer XSS/SQL, messages FR</td></tr>
+<tr><td><code>resilience/</code></td><td>241</td><td>★★★★★</td><td>5 policies composables (retry, timeout, bulkhead, fallback)</td></tr>
+<tr><td><code>observability/</code></td><td>226</td><td>★★★★★</td><td>contextvars correlation IDs, propagation automatique</td></tr>
+</table>
+</div>
+</details>
+
+<h3>Problèmes identifiés dans core/</h3>
+<div class="alert alert-warning">
+    <div class="alert-title">⚠ Risques de priorité moyenne</div>
+    <ul>
+        <li><code>caching/cache.py</code> (163 LOC) est DEPRECATED — dead code à supprimer</li>
+        <li><code>CircuitBreaker</code> : pas de threading.Lock sur les transitions d'état</li>
+        <li>Import <code>lazy_loader.py → state.rerun</code> pourrait devenir circulaire si state/ importe des modules</li>
+        <li>~10% des imports sont absoluts au lieu de relatifs (inconsistance de style)</li>
+        <li><code>copilot-instructions.md</code> référence <code>src/core/errors.py</code> qui n'existe plus</li>
+    </ul>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════ 6. AUDIT API ═══════════════════════════════════════ -->
+<section id="audit-api">
+<h2>6. Audit src/api/ (~3 544 LOC, 36 fichiers)</h2>
+
+<div class="alert alert-success">
+    <div class="alert-title">✅ API REST complète et bien sécurisée</div>
+    32 endpoints, JWT dual (API + Supabase), rate limiting 3 tiers, ETag 304, OWASP headers.
 </div>
 
-<!-- ======================== 5. MODULES ======================== -->
-<h2 id="modules">5. Analyse détaillée — src/modules/</h2>
-<div class="section">
-  <div class="section-title"><span class="section-icon">📦</span> Modules Métier — 215 fichiers, 32 752 LOC</div>
+<details>
+<summary>🔗 32 Endpoints (7 routers)</summary>
+<div>
+<table>
+<tr><th>Router</th><th>Endpoints</th><th>Méthodes</th><th>Auth</th></tr>
+<tr><td><code>auth</code></td><td>/login, /refresh, /me</td><td>POST, POST, GET</td><td>Public + Protected</td></tr>
+<tr><td><code>recettes</code></td><td>CRUD complet + patch</td><td>GET, POST, PUT, PATCH, DELETE</td><td>Protected</td></tr>
+<tr><td><code>inventaire</code></td><td>CRUD + barcode lookup</td><td>GET, POST, PUT, DELETE</td><td>Protected</td></tr>
+<tr><td><code>courses</code></td><td>Listes + items (nested)</td><td>GET, POST, PUT, DELETE</td><td>Protected</td></tr>
+<tr><td><code>planning</code></td><td>Semaine + repas CRUD</td><td>GET, POST, PUT, DELETE</td><td>Protected</td></tr>
+<tr><td><code>suggestions</code></td><td>Recettes IA, Planning IA</td><td>GET, GET</td><td>Protected + Rate-limited</td></tr>
+<tr><td><code>push</code></td><td>Subscribe, Unsubscribe, Status</td><td>POST, DELETE, GET</td><td>Protected</td></tr>
+</table>
+</div>
+</details>
 
-  <h3>5.1 Répartition par domaine</h3>
-  <table>
-    <tr><th>Domaine</th><th>Fichiers</th><th>LOC</th><th>%</th><th>Pages nav</th></tr>
-    <tr><td>🍳 <strong>cuisine</strong></td><td>51</td><td>8 133</td><td>24.8%</td><td>5 (recettes, planificateur, batch, courses, inventaire)</td></tr>
-    <tr><td>🏠 <strong>maison</strong></td><td>60</td><td>8 389</td><td>25.6%</td><td>10 (hub, jardin, jardin_zones, entretien, charges, depenses, eco_tips, energie, meubles, projets)</td></tr>
-    <tr><td>🎲 <strong>jeux</strong></td><td>28</td><td>3 970</td><td>12.1%</td><td>2 (paris, loto)</td></tr>
-    <tr><td>👨‍👩‍👦 <strong>famille</strong></td><td>26</td><td>3 829</td><td>11.7%</td><td>8 (hub, jules, jules_planning, suivi_perso, weekend, achats, activites, routines)</td></tr>
-    <tr><td>🛠️ <strong>utilitaires</strong></td><td>13</td><td>2 888</td><td>8.8%</td><td>6 (barcode, scan_factures, recherche_produits, rapports, notifications, chat_ia)</td></tr>
-    <tr><td>📅 <strong>planning</strong></td><td>13</td><td>2 498</td><td>7.6%</td><td>4 (cockpit, calendrier, templates, timeline)</td></tr>
-    <tr><td>⚙️ <strong>parametres</strong></td><td>9</td><td>971</td><td>3.0%</td><td>1 (multi-onglets)</td></tr>
-    <tr><td>🏠 <strong>accueil</strong></td><td>7</td><td>804</td><td>2.5%</td><td>1 (dashboard)</td></tr>
-    <tr><td>🧩 <strong>_framework</strong></td><td>6</td><td>1 050</td><td>3.2%</td><td>0 (infra)</td></tr>
-    <tr><td>🎨 <strong>design_system</strong></td><td>2</td><td>220</td><td>0.7%</td><td>1</td></tr>
-  </table>
+<details>
+<summary>🛡️ Pile de middlewares</summary>
+<div>
+<ol>
+    <li><strong>SecurityHeadersMiddleware</strong> — OWASP (CSP, HSTS, X-Frame-Options, Permissions-Policy)</li>
+    <li><strong>MetricsMiddleware</strong> — Latence, statut par endpoint, compteurs</li>
+    <li><strong>ETagMiddleware</strong> — Auto ETag + 304 Not Modified pour GET</li>
+    <li><strong>MiddlewareLimitationDebit</strong> — Fenêtre glissante 3 tiers (minute/heure/jour)</li>
+    <li><strong>CORSMiddleware</strong> — Origins configurables (dev + prod)</li>
+</ol>
+</div>
+</details>
 
-  <h3>5.2 Adoption des Patterns — Matrice Complète</h3>
-  <table>
-    <tr><th>Pattern</th><th>Adoption</th><th>Status</th></tr>
-    <tr><td><code>def app()</code> entry point</td><td>38/38</td><td><span class="badge badge-green">100%</span></td></tr>
-    <tr><td><code>with error_boundary()</code></td><td>38/38</td><td><span class="badge badge-green">100%</span></td></tr>
-    <tr><td><code>@profiler_rerun("module")</code></td><td>38/38</td><td><span class="badge badge-green">100%</span></td></tr>
-    <tr><td><code>KeyNamespace("module")</code></td><td>38/38</td><td><span class="badge badge-green">100%</span></td></tr>
-    <tr><td><code>@cached_fragment(ttl=...)</code></td><td>5/38</td><td><span class="badge badge-yellow">13%</span></td></tr>
-    <tr><td><code>@lazy(condition=...)</code></td><td>2/38</td><td><span class="badge badge-red">5%</span></td></tr>
-    <tr><td><code>@auto_refresh(seconds=...)</code></td><td>3 fichiers</td><td><span class="badge badge-yellow">Nickel pour real-time</span></td></tr>
-    <tr><td><code>naviguer()</code></td><td>0/38</td><td><span class="badge badge-red">0% ⚠️ 45 raw st.rerun()</span></td></tr>
-    <tr><td><code>BaseModule</code></td><td>2/38</td><td><span class="badge badge-yellow">parametres + design_system</span></td></tr>
-    <tr><td><code>ModuleState</code></td><td>0/38</td><td><span class="badge badge-red">Dead code framework</span></td></tr>
-  </table>
+<h3>Problèmes identifiés</h3>
+<div class="alert alert-warning">
+    <div class="alert-title">⚠ Points d'attention</div>
+    <ul>
+        <li>Pas de <strong>versioning explicite</strong> dans les URL (les routes sont <code>/api/v1/</code> mais pas de mécanisme de version v2)</li>
+        <li>Pas d'endpoint <strong>WebSocket</strong> pour le temps réel (collaboration courses)</li>
+        <li>Le <strong>/metrics</strong> admin-only gagnerait à exposer un format <strong>Prometheus</strong></li>
+        <li>Pas de <strong>pagination cursor-based</strong> (offset only) — problème de performance sur grandes collections</li>
+        <li>Manque endpoints pour : <strong>famille</strong>, <strong>maison</strong>, <strong>jeux</strong>, <strong>calendrier</strong></li>
+    </ul>
+</div>
+</section>
 
-  <h3>5.3 Issues Modules (16 items)</h3>
-  <table>
-    <tr><th>#</th><th>Sévérité</th><th>Description</th></tr>
-    <tr><td>M1</td><td><span class="sev sev-med">MEDIUM</span></td><td><code>naviguer()</code> jamais utilisé — 45 appels raw <code>st.rerun()</code> dans 16 fichiers. Bypass la gestion d'état et le deep-linking</td></tr>
-    <tr><td>M2</td><td><span class="sev sev-med">MEDIUM</span></td><td><code>ModuleState</code> dans <code>_framework/state_manager.py</code> (136 LOC) — 0 adopteurs, dead code framework</td></tr>
-    <tr><td>M3</td><td><span class="sev sev-low">LOW</span></td><td>Orphelin : <code>cuisine/recettes_import.py</code> (327 LOC) — UI import recettes non atteignable</td></tr>
-    <tr><td>M4</td><td><span class="sev sev-low">LOW</span></td><td>Orphelin : <code>jeux/scraper_loto.py</code> (314 LOC) — scraper non référencé</td></tr>
-    <tr><td>M5</td><td><span class="sev sev-low">LOW</span></td><td>Orphelin : <code>_framework/example_module.py</code> (173 LOC) — template documentation</td></tr>
-    <tr><td>M6</td><td><span class="sev sev-low">LOW</span></td><td>Dead : <code>cuisine/schemas.py</code> (65 LOC) — 0 imports</td></tr>
-    <tr><td>M7</td><td><span class="sev sev-low">LOW</span></td><td>Dead : <code>maison/entretien_utils.py</code> (160 LOC) — 0 imports</td></tr>
-    <tr><td>M8</td><td><span class="sev sev-low">LOW</span></td><td>Dead : <code>famille/age_utils.py</code> (59 LOC) — 0 imports</td></tr>
-    <tr><td>M9</td><td><span class="sev sev-low">LOW</span></td><td>Stubs vides : <code>famille/jules/ai_service.py</code> et <code>weekend/ai_service.py</code> (2 LOC chacun)</td></tr>
-    <tr><td>M10</td><td><span class="sev sev-low">LOW</span></td><td>Artefacts test dans source : <code>maison/meubles/tests.log</code> et <code>test_maison_split.txt</code></td></tr>
-    <tr><td>M11</td><td><span class="sev sev-low">LOW</span></td><td><code>maison/__init__.py.__all__</code> incomplet — manque eco_tips, energie, meubles, projets, jardin_zones</td></tr>
-    <tr><td>M12</td><td><span class="sev sev-info">INFO</span></td><td><code>@cached_fragment</code> utilisé par seulement 5/38 modules — potentiel d'optimisation sur cuisine, jeux, maison</td></tr>
-    <tr><td>M13</td><td><span class="sev sev-info">INFO</span></td><td><code>@lazy</code> utilisé par seulement 2/38 modules — potentiel sur panneaux conditionnels</td></tr>
-    <tr><td>M14</td><td><span class="sev sev-info">INFO</span></td><td><code>BaseModule</code> ignoré par 36/38 modules — questionner son utilité ou le supprimer</td></tr>
-    <tr><td>M15</td><td><span class="sev sev-info">INFO</span></td><td>3 modules avec accès DB direct (<code>obtenir_contexte_db()</code>) au lieu de services : maison/utils, jardin_zones, cockpit_familial</td></tr>
-    <tr><td>M16</td><td><span class="sev sev-info">INFO</span></td><td><code>planning/cockpit_familial.py</code> utilise 4× <code>obtenir_contexte_db()</code> directement — devrait passer par un service</td></tr>
-  </table>
+<!-- ═══════════════════════════════════════ 7. AUDIT SERVICES ═══════════════════════════════════════ -->
+<section id="audit-services">
+<h2>7. Audit src/services/ (~41 233 LOC, 209 fichiers)</h2>
+
+<div class="alert alert-success">
+    <div class="alert-title">✅ Couche métier dense et bien structurée</div>
+    63 factories singleton, 16 services BaseAIService, 12 BaseService[T], 15 émetteurs event bus, 9 services avec @avec_resilience.
 </div>
 
-<!-- ======================== 6. SERVICES ======================== -->
-<h2 id="services">6. Analyse détaillée — src/services/</h2>
-<div class="section">
-  <div class="section-title"><span class="section-icon">⚙️</span> Couche Services — 209 fichiers, 41 170 LOC</div>
+<details>
+<summary>📊 Répartition par domaine</summary>
+<div>
+<table>
+<tr><th>Package</th><th>LOC</th><th>Fichiers</th><th>Factories</th><th>Rôle</th></tr>
+<tr><td><code>core/</code></td><td>9 444</td><td>38</td><td>9</td><td>Infrastructure (base, registry, events, backup, notifications, observability, utilisateur)</td></tr>
+<tr><td><code>cuisine/</code></td><td>7 527</td><td>34</td><td>10</td><td>Recettes, planning, courses, suggestions, batch cooking</td></tr>
+<tr><td><code>famille/</code></td><td>5 160</td><td>22</td><td>14</td><td>Achats, activités, routines, weekend, jules, budget, calendrier, santé</td></tr>
+<tr><td><code>integrations/</code></td><td>5 019</td><td>20</td><td>7</td><td>Garmin, météo, barcode, images, facture OCR, PWA</td></tr>
+<tr><td><code>jeux/</code></td><td>4 564</td><td>19</td><td>11</td><td>Paris sportifs, loto, football data, prédictions</td></tr>
+<tr><td><code>maison/</code></td><td>2 960</td><td>13</td><td>5</td><td>Entretien, jardin, dépenses, projets, hub</td></tr>
+<tr><td><code>rapports/</code></td><td>1 684</td><td>6</td><td>2</td><td>PDF, export, gaspillage, budget</td></tr>
+<tr><td><code>inventaire/</code></td><td>1 137</td><td>7</td><td>1</td><td>Inventaire avec IA + opérations mixins</td></tr>
+</table>
+</div>
+</details>
 
-  <h3>6.1 Répartition</h3>
-  <table>
-    <tr><th>Répertoire</th><th>Fichiers</th><th>LOC</th><th>Services</th></tr>
-    <tr><td><code>cuisine/</code></td><td>53</td><td>9 656</td><td>12 (ServiceRecettes, ServicePlanning, ServiceCourses, ServiceBatchCooking, ServiceSuggestions...)</td></tr>
-    <tr><td><code>core/</code></td><td>50</td><td>8 994</td><td>8 (ServiceBackup, AuthService, ServiceGamification, ServiceWebPush, EventBus...)</td></tr>
-    <tr><td><code>integrations/</code></td><td>32</td><td>5 977</td><td>7 (BarcodeService, FactureOCR, Garmin, Météo, PWA, Sync...)</td></tr>
-    <tr><td><code>famille/</code></td><td>26</td><td>5 422</td><td>13 (ServiceRoutines, ServiceSanté, BudgetService, CalendarSync, JulesAI, WeekendAI...)</td></tr>
-    <tr><td><code>jeux/</code></td><td>19</td><td>5 283</td><td>11 (LotoCrud, ParisCrud, FootballData, Prediction, Series, Scheduler...)</td></tr>
-    <tr><td><code>maison/</code></td><td>13</td><td>2 945</td><td>5 (EntretienService, JardinService, ProjetsService, DepensesCrud, HubData)</td></tr>
-    <tr><td><code>rapports/</code></td><td>7</td><td>1 684</td><td>2 (ServiceRapportsPDF, ServiceExportPDF)</td></tr>
-    <tr><td><code>inventaire/</code></td><td>7</td><td>1 137</td><td>1 (ServiceInventaire)</td></tr>
-  </table>
+<details>
+<summary>🔌 Matrice d'adoption des patterns</summary>
+<div>
+<table>
+<tr><th>Service</th><th>BaseService[T]</th><th>BaseAIService</th><th>@service_factory</th><th>Event Bus</th><th>@avec_cache</th><th>@avec_resilience</th></tr>
+<tr><td>ServiceRecettes</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>—</td></tr>
+<tr><td>ServiceCourses</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>—</td></tr>
+<tr><td>ServiceInventaire</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>—</td></tr>
+<tr><td>ServiceSuggestions</td><td>—</td><td>✅</td><td>✅</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>ServicePlanning</td><td>—</td><td>✅</td><td>✅</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>ServiceAchatsFamille</td><td>✅</td><td>—</td><td>✅</td><td>✅</td><td>—</td><td>—</td></tr>
+<tr><td>ServiceRoutines</td><td>✅</td><td>—</td><td>✅</td><td>✅</td><td>—</td><td>—</td></tr>
+<tr><td>ServiceSante</td><td>✅</td><td>—</td><td>✅</td><td>✅</td><td>—</td><td>—</td></tr>
+<tr><td>ServiceWeekend</td><td>✅</td><td>—</td><td>✅</td><td>✅</td><td>—</td><td>—</td></tr>
+<tr><td>BudgetService</td><td>✅</td><td>—</td><td>✅</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>EntretienService</td><td>—</td><td>✅</td><td>✅</td><td>✅</td><td>—</td><td>—</td></tr>
+<tr><td>JardinService</td><td>—</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>—</td></tr>
+<tr><td>ProjetsService</td><td>—</td><td>✅</td><td>✅</td><td>✅</td><td>—</td><td>—</td></tr>
+<tr><td>DepensesCrudService</td><td>✅</td><td>—</td><td>✅</td><td>✅</td><td>—</td><td>—</td></tr>
+<tr><td>MeteoService</td><td>—</td><td>—</td><td>✅</td><td>—</td><td>—</td><td>✅</td></tr>
+<tr><td>GarminService</td><td>—</td><td>—</td><td>✅</td><td>—</td><td>—</td><td>❌ manquant</td></tr>
+</table>
+</div>
+</details>
 
-  <h3>6.2 Métriques clés</h3>
-  <div class="dashboard" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
-    <div class="card"><div class="card-value" style="color:var(--purple)">57</div><div class="card-label">@service_factory</div></div>
-    <div class="card"><div class="card-value" style="color:var(--blue)">~55</div><div class="card-label">Classes service</div></div>
-    <div class="card"><div class="card-value" style="color:var(--orange)">16</div><div class="card-label">BaseAIService</div></div>
-    <div class="card"><div class="card-value" style="color:var(--green)">11</div><div class="card-label">BaseService[T]</div></div>
-    <div class="card"><div class="card-value" style="color:var(--yellow)">22</div><div class="card-label">Événements typés</div></div>
-    <div class="card"><div class="card-value" style="color:var(--text-muted)">~25</div><div class="card-label">Mixins</div></div>
-  </div>
-
-  <h3>6.3 Services IA (16 héritant de BaseAIService)</h3>
-  <table>
-    <tr><th>Service</th><th>Domaine</th><th>Usage IA</th></tr>
-    <tr><td><code>ServiceRecettes</code></td><td>Cuisine</td><td>Suggestions, versions bébé/batch/robot</td></tr>
-    <tr><td><code>RecipeImportService</code></td><td>Cuisine</td><td>Import URL avec parsing IA (Marmiton, CuisineAZ)</td></tr>
-    <tr><td><code>ServicePlanning</code></td><td>Cuisine</td><td>Génération planning repas hebdomadaire</td></tr>
-    <tr><td><code>ServiceCourses</code></td><td>Cuisine</td><td>Optimisation listes de courses</td></tr>
-    <tr><td><code>ServiceCoursesIntelligentes</code></td><td>Cuisine</td><td>Suggestions smart shopping</td></tr>
-    <tr><td><code>ServiceBatchCooking</code></td><td>Cuisine</td><td>Optimisation batch cooking</td></tr>
-    <tr><td><code>ServiceSuggestions</code></td><td>Cuisine</td><td>Suggestions intelligentes + historique</td></tr>
-    <tr><td><code>ServiceInventaire</code></td><td>Inventaire</td><td>Analyse IA inventaire</td></tr>
-    <tr><td><code>EntretienService</code></td><td>Maison</td><td>Planification entretien IA</td></tr>
-    <tr><td><code>JardinService</code></td><td>Maison</td><td>Conseils jardinage IA</td></tr>
-    <tr><td><code>ProjetsService</code></td><td>Maison</td><td>Estimation projets IA</td></tr>
-    <tr><td><code>JulesAIService</code></td><td>Famille</td><td>Développement enfant IA</td></tr>
-    <tr><td><code>WeekendAIService</code></td><td>Famille</td><td>Suggestions activités weekend</td></tr>
-    <tr><td><code>ServiceResumeHebdo</code></td><td>Famille</td><td>Résumé hebdo familial IA</td></tr>
-    <tr><td><code>FactureOCRService</code></td><td>Intégrations</td><td>OCR factures IA</td></tr>
-    <tr><td><code>JeuxAIService</code></td><td>Jeux</td><td>Analyse paris sportifs IA</td></tr>
-  </table>
-
-  <h3>6.4 Issues Services (12 items)</h3>
-  <table>
-    <tr><th>#</th><th>Sévérité</th><th>Description</th></tr>
-    <tr><td>S1</td><td><span class="sev sev-med">MEDIUM</span></td><td><code>ServiceNtfy</code> : factory <code>obtenir_service_ntfy()</code> sans <code>@service_factory</code> — crée une nouvelle instance à chaque appel</td></tr>
-    <tr><td>S2</td><td><span class="sev sev-med">MEDIUM</span></td><td>8 singletons legacy redondants (<code>_instance: X | None</code> + <code>@service_factory</code>) dans jeux/_internal/</td></tr>
-    <tr><td>S3</td><td><span class="sev sev-med">MEDIUM</span></td><td>3 services maison (Entretien, Jardin, Projets) utilisent <code>BaseAIService</code> mais pas <code>BaseService[T]</code> malgré CRUD DB</td></tr>
-    <tr><td>S4</td><td><span class="sev sev-low">LOW</span></td><td><code>images/generator.py</code> (193 LOC) — fonctions module-level sans classe service ni factory</td></tr>
-    <tr><td>S5</td><td><span class="sev sev-low">LOW</span></td><td><code>notif_web.py</code> (25 LOC) — quasi vide, ré-exports uniquement → candidat suppression/merge</td></tr>
-    <tr><td>S6</td><td><span class="sev sev-low">LOW</span></td><td>Aliases FR manquants pour certaines factories : <code>obtenir_service_calendrier_planning()</code> sans <code>get_*</code> English</td></tr>
-    <tr><td>S7</td><td><span class="sev sev-low">LOW</span></td><td>6 services avec DB access sans <code>BaseService[T]</code> : Jules, SuiviPerso, CalendrierPlanning, CalendarSync, HubData, AccueilData</td></tr>
-    <tr><td>S8</td><td><span class="sev sev-info">INFO</span></td><td><code>@service_factory</code> avec args bypass le singleton (design voulu mais potentiel bug subtil)</td></tr>
-    <tr><td>S9</td><td><span class="sev sev-info">INFO</span></td><td><code>HubDataService._instance</code> class-var est dead code — <code>@service_factory</code> fait le singleton</td></tr>
-    <tr><td>S10</td><td><span class="sev sev-info">INFO</span></td><td>Nom de registre docstring example "recettes" identique au service réel (confusion potentielle)</td></tr>
-    <tr><td>S11</td><td><span class="sev sev-info">INFO</span></td><td><code>PlanificateurNtfy</code> pas enregistré du tout — instancié ad-hoc</td></tr>
-    <tr><td>S12</td><td><span class="sev sev-info">INFO</span></td><td>Services standalone sans <code>BaseService</code> — acceptable pour des data-services read-heavy (Jules, SuiviPerso)</td></tr>
-  </table>
+<h3>Problèmes identifiés</h3>
+<div class="alert alert-danger">
+    <div class="alert-title">🔴 Issues critiques</div>
+    <ul>
+        <li><strong><code>core/gamification.py</code></strong> — importe <code>streamlit as st</code> directement dans la couche service (viole le découplage UI)</li>
+        <li><strong>Double héritage fragile</strong> — 3 services utilisent <code>BaseService[T] + BaseAIService</code> en double-init manuelle sans MRO coopératif</li>
+    </ul>
 </div>
 
-<!-- ======================== 7. UI ======================== -->
-<h2 id="ui">7. Analyse détaillée — src/ui/ + app.py</h2>
-<div class="section">
-  <div class="section-title"><span class="section-icon">🎨</span> Couche UI — 71 fichiers, 12 676 LOC</div>
+<div class="alert alert-warning">
+    <div class="alert-title">⚠ Issues moyennes</div>
+    <ul>
+        <li><strong>Event bus imports inconsistants</strong> — certains en module-level, d'autres inline dans les fonctions</li>
+        <li><strong><code>football_compat.py</code></strong> duplique <code>football_helpers.py</code> (459 LOC de duplication)</li>
+        <li><strong>Garmin + Google Calendar</strong> — pas de <code>@avec_resilience</code> sur les appels HTTP externes</li>
+        <li><strong><code>@chronometre</code></strong> — seulement 8 usages sur 90+ services (instrumentation insuffisante)</li>
+        <li><strong>Schemas/types dispersés</strong> — certains dans <code>types.py</code>, d'autres inline dans les services</li>
+    </ul>
+</div>
+</section>
 
-  <h3>7.1 Architecture UI</h3>
-  <table>
-    <tr><th>Sub-package</th><th>Fichiers</th><th>LOC</th><th>Rôle</th></tr>
-    <tr><td><code>components/</code></td><td>25</td><td>~6 600</td><td>Widgets réutilisables (atoms, charts, forms, filters, streaming, chat)</td></tr>
-    <tr><td><code>engine/</code></td><td>2</td><td>472</td><td>CSSManager avec hash-dedup et injection batch</td></tr>
-    <tr><td><code>feedback/</code></td><td>5</td><td>870</td><td>Spinners, toasts, progress bars, résultats</td></tr>
-    <tr><td><code>grid/</code></td><td>1</td><td>512</td><td>Layout grille responsive (Stack, Grid, Row)</td></tr>
-    <tr><td><code>tablet/</code></td><td>5</td><td>997</td><td>Mode cuisine tablette (timer, recettes cuisine)</td></tr>
-    <tr><td><code>views/</code></td><td>10</td><td>1 133</td><td>Vues spécialisées (auth, météo, PWA, notifications, sync)</td></tr>
-    <tr><td><code>state/</code></td><td>2</td><td>445</td><td>URL state management, deep linking</td></tr>
-    <tr><td><code>layout/</code></td><td>4</td><td>404</td><td>Header, footer, styles globaux, initialisation</td></tr>
-    <tr><td><code>integrations/</code></td><td>2</td><td>232</td><td>Google Calendar UI</td></tr>
-    <tr><td><code>testing/</code></td><td>2</td><td>313</td><td>Visual regression (snap testing)</td></tr>
-    <tr><td>Root files</td><td>9</td><td>2 080</td><td>tokens, theme, a11y, animations, fragments, registry, keys</td></tr>
-  </table>
+<!-- ═══════════════════════════════════════ 8. AUDIT MODULES ═══════════════════════════════════════ -->
+<section id="audit-modules">
+<h2>8. Audit src/modules/ (~40 206 LOC, 213 fichiers)</h2>
 
-  <h3>7.2 Design System</h3>
-  <div class="grid-2">
+<div class="alert alert-success">
+    <div class="alert-title">✅ 37 pages avec app() — Couverture fonctionnelle large</div>
+    8 domaines métier, patterns framework largement adoptés, lazy loading efficace.
+</div>
+
+<details>
+<summary>📊 Vue par domaine</summary>
+<div>
+<table>
+<tr><th>Domaine</th><th>Pages</th><th>LOC total</th><th>Fichiers</th></tr>
+<tr><td>🍽️ Cuisine</td><td>6</td><td>~9 500</td><td>40+</td></tr>
+<tr><td>👨‍👩‍👦 Famille</td><td>8</td><td>~5 800</td><td>22</td></tr>
+<tr><td>🏠 Maison</td><td>10</td><td>~9 200</td><td>55</td></tr>
+<tr><td>🎮 Jeux</td><td>2+</td><td>~4 500</td><td>25</td></tr>
+<tr><td>📅 Planning</td><td>4</td><td>~3 000</td><td>15</td></tr>
+<tr><td>⚙️ Paramètres</td><td>1</td><td>~1 300</td><td>9</td></tr>
+<tr><td>🧰 Utilitaires</td><td>6</td><td>~3 400</td><td>17</td></tr>
+<tr><td>🏠 Accueil</td><td>1</td><td>~1 000</td><td>7</td></tr>
+</table>
+</div>
+</details>
+
+<details>
+<summary>📐 Adoption des patterns par module</summary>
+<div>
+<table>
+<tr><th>Pattern</th><th>Adoption</th><th>Détail</th></tr>
+<tr><td><code>@profiler_rerun</code></td><td><span class="badge badge-green">100%</span></td><td>Tous les 37 app() sont instrumentés</td></tr>
+<tr><td><code>KeyNamespace</code></td><td><span class="badge badge-yellow">~75%</span></td><td>Manquant dans 6 modules cuisine (courses, inventaire, recettes, planificateur, batch_cooking) + design_system</td></tr>
+<tr><td><code>tabs_with_url</code></td><td><span class="badge badge-green">~90%</span></td><td>Absent uniquement dans accueil, hub_famille, cockpit_familial, timeline</td></tr>
+<tr><td><code>error_boundary</code></td><td><span class="badge badge-yellow">~70%</span></td><td>Manquant dans accueil, cuisine/*, famille/hub, routines, weekend, suivi_perso, parametres</td></tr>
+<tr><td><code>@cached_fragment</code></td><td><span class="badge badge-yellow">~45%</span></td><td>33 usages sur 20 fichiers — de nombreux modules avec graphiques Plotly n'en ont pas</td></tr>
+<tr><td><code>@lazy</code></td><td><span class="badge badge-red">~8%</span></td><td>3 usages seulement (ia, jardin/export, notifications_push)</td></tr>
+</table>
+</div>
+</details>
+
+<h3>Fichiers &gt; 500 LOC (à diviser)</h3>
+<table>
+<tr><th>Fichier</th><th>LOC</th><th>Action recommandée</th></tr>
+<tr><td><code>cuisine/courses/utils.py</code></td><td>627</td><td>Séparer en utils_formatage.py + utils_operations.py</td></tr>
+<tr><td><code>cuisine/planificateur_repas/utils.py</code></td><td>604</td><td>Extraire helpers, calculs, formatage</td></tr>
+<tr><td><code>cuisine/batch_cooking_utils.py</code></td><td>598</td><td>Diviser par responsabilité (étapes, temps, portions)</td></tr>
+<tr><td><code>utilitaires/rapports.py</code></td><td>560</td><td>Séparer UI rapport de la logique (contient app())</td></tr>
+<tr><td><code>planning/calendrier/components.py</code></td><td>503</td><td>Extraire composants individuels (jour, semaine, mois)</td></tr>
+</table>
+
+<h3>Problèmes identifiés</h3>
+<div class="alert alert-danger">
+    <div class="alert-title">🔴 Accès DB direct dans les modules UI</div>
+    <ul>
+        <li><strong>maison/utils.py</strong> — 7× <code>obtenir_contexte_db</code> directement dans le code UI</li>
+        <li><strong>planning/cockpit_familial.py</strong> — 4× queries directes (Repas, EvenementPlanning, ActiviteFamille, TacheEntretien)</li>
+        <li><strong>maison/meubles/crud.py</strong> — 6× context managers directs (pas de couche service)</li>
+        <li><strong>maison/eco_tips/crud.py</strong> — 5× accès directs</li>
+        <li><strong>maison/jardin/, entretien/, projets/</strong> — db_access.py coexiste avec les services → duplication possible</li>
+    </ul>
+</div>
+
+<div class="alert alert-warning">
+    <div class="alert-title">⚠ Fichiers parasites</div>
+    <ul>
+        <li><code>maison/meubles/test_maison_split.txt</code> (20 lignes) — fichier de test oublié</li>
+        <li><code>maison/meubles/tests.log</code> (0 lignes) — log vide à supprimer</li>
+    </ul>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════ 9. AUDIT UI ═══════════════════════════════════════ -->
+<section id="audit-ui">
+<h2>9. Audit src/ui/ (~13 127 LOC, 74 fichiers)</h2>
+
+<div class="alert alert-success">
+    <div class="alert-title">✅ Design System mature avec architecture 4 couches</div>
+    Tokens primitifs → Sémantiques → Thème → CSS Engine. Dark mode, a11y WCAG 2.1, PWA, mode tablette.
+</div>
+
+<details>
+<summary>🎨 Architecture Design System</summary>
+<div>
+<table>
+<tr><th>Couche</th><th>Fichier</th><th>LOC</th><th>Rôle</th></tr>
+<tr><td>1. Tokens primitifs</td><td><code>tokens.py</code></td><td>201</td><td>StrEnums: Couleur, Espacement, Rayon, Typographie, Ombre...</td></tr>
+<tr><td>2. Tokens sémantiques</td><td><code>tokens_semantic.py</code></td><td>210</td><td>CSS custom props <code>--sem-*</code> avec mappings light/dark</td></tr>
+<tr><td>3. Thème</td><td><code>theme.py</code></td><td>294</td><td>Theme dataclass, modes clair/sombre/auto, densité, accent</td></tr>
+<tr><td>4. CSS Engine</td><td><code>engine/css.py</code></td><td>340</td><td>CSSEngine — dedup MD5, batch injection, keyframes</td></tr>
+<tr><td>5. CSS Pipeline</td><td><code>layout/initialisation.py</code></td><td>66</td><td>5 étapes séquentielles → 1 seul st.markdown</td></tr>
+</table>
+</div>
+</details>
+
+<details>
+<summary>📦 Composants (5 584 LOC, 25 fichiers)</summary>
+<div>
+<table>
+<tr><th>Catégorie</th><th>Composants clés</th><th>LOC</th></tr>
+<tr><td>Atoms</td><td>badge, etat_vide, carte_metrique, boite_info, boule_loto</td><td>364</td></tr>
+<tr><td>Data</td><td>pagination, tableau_donnees, data_editors (st.data_editor)</td><td>642</td></tr>
+<tr><td>Charts</td><td>plotly_drilldown (budget, inventaire, recettes, heatmap)</td><td>564</td></tr>
+<tr><td>AI</td><td>chat_contextuel, chat_global, streaming, quest_ce_quon_mange</td><td>841</td></tr>
+<tr><td>Navigation</td><td>recherche_globale (⌘K), mode_focus, progressive_loading</td><td>878</td></tr>
+<tr><td>Metrics</td><td>carte_metrique_avancee, jules_apercu, meteo_jour, KPI banners</td><td>755</td></tr>
+<tr><td>System</td><td>historique_undo, notifications_live, gamification_widget</td><td>535</td></tr>
+</table>
+</div>
+</details>
+
+<details>
+<summary>🧩 Sous-packages spécialisés</summary>
+<div>
+<table>
+<tr><th>Package</th><th>LOC</th><th>Rôle</th><th>Score</th></tr>
+<tr><td><code>fragments.py</code></td><td>343</td><td>@ui_fragment, @auto_refresh, @lazy, @cached_fragment, @with_loading</td><td>★★★★★</td></tr>
+<tr><td><code>a11y.py</code></td><td>227</td><td>WCAG 2.1, ARIA attrs, skip-link, contraste, sr-only</td><td>★★★★★</td></tr>
+<tr><td><code>state/url.py</code></td><td>411</td><td>Deep linking URL, URLState, tabs_with_url</td><td>★★★★★</td></tr>
+<tr><td><code>tablet/</code></td><td>871</td><td>Mode cuisine tablette, timer, touch targets</td><td>★★★★☆</td></tr>
+<tr><td><code>views/</code></td><td>1 143</td><td>Auth, historique, météo, PWA, sync, notifications</td><td>★★★★☆</td></tr>
+<tr><td><code>grid/</code></td><td>409</td><td>Row, Grid, Stack, Gap, layout helpers</td><td>★★★★☆</td></tr>
+<tr><td><code>feedback/</code></td><td>686</td><td>Spinners, toasts, progress v2, results</td><td>★★★★★</td></tr>
+<tr><td><code>testing/</code></td><td>248</td><td>SnapshotTester, visual regression</td><td>★★★★☆</td></tr>
+</table>
+</div>
+</details>
+
+<h3>Problèmes identifiés</h3>
+<div class="alert alert-warning">
+    <div class="alert-title">⚠ Points d'attention UI</div>
+    <ul>
+        <li><strong>Imports eager dans views/ et feedback/</strong> — alors que components/ et __init__ utilisent PEP 562 lazy loading</li>
+        <li><strong><code>grid/__init__.py</code></strong> monolithique (409 LOC) — tout le système de layout dans un seul fichier</li>
+        <li><strong><code>header.py</code></strong> importe <code>atoms.badge</code> en module-level — contourne le lazy loading des composants</li>
+        <li><strong>Pas de purge CSS</strong> — les classes atomiques s'accumulent en session_state sans garbage collection</li>
+        <li><strong><code>obtenir_couleurs_variante()</code></strong> deprecated mais encore exporté dans l'API publique</li>
+    </ul>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════ 10. VÉRIFICATION DES CONCEPTS ═══════════════════════════════════════ -->
+<section id="concepts">
+<h2>10. Vérification de l'adoption des concepts</h2>
+
+<p>Objectif : vérifier que tous les concepts architecturaux sont <strong>effectivement utilisés</strong> dans les services et modules.</p>
+
+<h3>10.1 Concepts bien adoptés ✅</h3>
+<table>
+<tr><th>Concept</th><th>Défini dans</th><th>Utilisation</th><th>Verdict</th></tr>
+<tr><td><code>@service_factory</code></td><td>core/registry.py</td><td>63 factories enregistrées, utilisées dans tous les modules</td><td><span class="badge badge-green">✅ 100%</span></td></tr>
+<tr><td><code>BaseAIService</code></td><td>services/core/base/ai_service.py</td><td>16 services héritent, rate limiting + cache auto</td><td><span class="badge badge-green">✅ 100%</span></td></tr>
+<tr><td><code>BaseService[T]</code></td><td>services/core/base/types.py</td><td>12 services CRUD avec héritage générique</td><td><span class="badge badge-green">✅ 100%</span></td></tr>
+<tr><td><code>@avec_session_db</code></td><td>core/decorators/db.py</td><td>20+ fichiers, injection automatique de Session</td><td><span class="badge badge-green">✅ 100%</span></td></tr>
+<tr><td><code>@avec_gestion_erreurs</code></td><td>core/decorators/errors.py</td><td>50+ méthodes avec gestion UI automatique</td><td><span class="badge badge-green">✅ 95%</span></td></tr>
+<tr><td><code>Event Bus</code></td><td>services/core/events/bus.py</td><td>15 services émettent, subscribers actifs</td><td><span class="badge badge-green">✅ 90%</span></td></tr>
+<tr><td><code>@profiler_rerun</code></td><td>core/monitoring/rerun_profiler.py</td><td>37/37 fonctions app() instrumentées</td><td><span class="badge badge-green">✅ 100%</span></td></tr>
+<tr><td><code>tabs_with_url</code></td><td>ui/state/url.py</td><td>~90% des modules avec onglets</td><td><span class="badge badge-green">✅ 90%</span></td></tr>
+<tr><td>Tokens sémantiques <code>Sem.*</code></td><td>ui/tokens_semantic.py</td><td>Migré dans views/ et composants</td><td><span class="badge badge-green">✅ 85%</span></td></tr>
+<tr><td><code>PEP 562 lazy loading</code></td><td>core/__init__.py, ui/__init__.py</td><td>~130 symboles lazy dans core + ui</td><td><span class="badge badge-green">✅ 100%</span></td></tr>
+<tr><td><code>obtenir_contexte_db()</code></td><td>core/db/session.py</td><td>Standard unique pour les sessions DB</td><td><span class="badge badge-green">✅ 95%</span></td></tr>
+</table>
+
+<h3>10.2 Concepts sous-utilisés ⚠</h3>
+<table>
+<tr><th>Concept</th><th>Défini dans</th><th>Adoption actuelle</th><th>Recommandation</th></tr>
+<tr><td><code>KeyNamespace</code></td><td>ui/keys.py</td><td>~75% des modules</td><td>Étendre aux 6 modules cuisine + design_system manquants</td></tr>
+<tr><td><code>error_boundary</code></td><td>modules/_framework/error_boundary.py</td><td>~70% des modules</td><td>Ajouter dans accueil, tous les cuisine/, famille/hub+routines+weekend, parametres</td></tr>
+<tr><td><code>@cached_fragment</code></td><td>ui/fragments.py</td><td>~45% (33 usages)</td><td>Ajouter sur tous les graphiques Plotly + tableaux de données lourds</td></tr>
+<tr><td><code>@lazy</code></td><td>ui/fragments.py</td><td>~8% (3 usages)</td><td>Utiliser pour les onglets secondaires de tous les modules à onglets</td></tr>
+<tr><td><code>@avec_resilience</code></td><td>core/decorators/validation.py</td><td>9 services seulement</td><td>Manquant sur Garmin et Google Calendar (appels HTTP sans protection)</td></tr>
+<tr><td><code>@chronometre</code></td><td>core/monitoring/decorators.py</td><td>8 usages sur 90+ services</td><td>Instrumenter les hot paths de tous les services principaux</td></tr>
+<tr><td><code>@avec_cache</code></td><td>core/decorators/cache.py</td><td>10+ services</td><td>Ajouter sur les lectures fréquentes (budget, routines, achats, health)</td></tr>
+<tr><td><code>@composant_ui</code></td><td>ui/registry.py</td><td>12+ composants</td><td>Étendre à tous les composants publics pour le catalogue auto-généré</td></tr>
+</table>
+
+<h3>10.3 Concepts correctement abandonnés ❌→✅</h3>
+<table>
+<tr><th>Concept supprimé</th><th>LOC supprimées</th><th>Raison</th><th>Remplacement</th></tr>
+<tr><td>Result Monad</td><td>~600</td><td>Zero callers production</td><td>Exceptions typées + @avec_gestion_erreurs</td></tr>
+<tr><td>Repository Pattern</td><td>~200</td><td>SQLAlchemy ORM suffit</td><td>@avec_session_db direct</td></tr>
+<tr><td>Unit of Work</td><td>~300</td><td>Context managers suffisent</td><td>obtenir_contexte_db()</td></tr>
+<tr><td>IoC Container</td><td>~400</td><td>Trop complexe pour Streamlit</td><td>@service_factory + registre</td></tr>
+<tr><td>CQRS</td><td>~500</td><td>App single-user inutile</td><td>CRUD direct via BaseService[T]</td></tr>
+<tr><td>Middleware Pipeline</td><td>~400</td><td>FastAPI a son propre système</td><td>@avec_resilience composable</td></tr>
+<tr><td>Specification Pattern</td><td>489</td><td>Jamais utilisé après création</td><td>Filtres Streamlit natifs + SQL WHERE</td></tr>
+</table>
+</section>
+
+<!-- ═══════════════════════════════════════ 11. AMÉLIORATIONS INNOVANTES ═══════════════════════════════════════ -->
+<section id="innovations">
+<h2>11. Améliorations innovantes pour Streamlit</h2>
+
+<h3>🚀 Innovations de niveau 1 — Impact immédiat</h3>
+
+<div class="card">
+<h4>1.1 st.fragment + streaming IA combo</h4>
+<p>Combiner <code>@st.fragment</code> avec <code>st.write_stream()</code> pour des réponses IA qui ne déclenchent pas de rerun global. Chaque widget IA (chat, suggestions, Jules) peut streamer dans son propre fragment isolé.</p>
+<pre><code>@st.fragment
+def widget_ia_isole():
+    if prompt := st.chat_input("Demander à l'IA..."):
+        with st.chat_message("assistant"):
+            st.write_stream(service.generer_stream(prompt))
+</code></pre>
+</div>
+
+<div class="card">
+<h4>1.2 st.connection pour Supabase</h4>
+<p>Migrer de <code>obtenir_moteur()</code> vers <code>st.connection("supabase")</code> pour bénéficier du connection pooling natif Streamlit, du retry automatique, et de l'intégration <code>secrets.toml</code>.</p>
+</div>
+
+<div class="card">
+<h4>1.3 Multi-page state avec st.query_params harmonisé</h4>
+<p>Étendre <code>tabs_with_url</code> à un système complet de <strong>deep linking multi-niveaux</strong> : page → onglet → filtre → item sélectionné. Permettrait de bookmarker/partager un état complet.</p>
+</div>
+
+<h3>🧪 Innovations de niveau 2 — Moyen terme</h3>
+
+<div class="card">
+<h4>2.1 Composants Custom Streamlit (st.components.v1)</h4>
+<p>Créer des composants JavaScript natifs pour les widgets lourds :</p>
+<ul>
+    <li><strong>Drag & Drop Planning</strong> — Glisser-déposer les repas sur un calendrier interactif</li>
+    <li><strong>Barcode Scanner WebRTC</strong> — Scanner directement depuis la caméra sans bibliothèque externe</li>
+    <li><strong>Plan Jardin 2D Canvas</strong> — Éditeur drag & drop avec zones et plantes</li>
+</ul>
+</div>
+
+<div class="card">
+<h4>2.2 Système de plugins modulaire</h4>
+<p>Architecture "plugin" où les modules sont auto-découverts :</p>
+<pre><code># Chaque module expose un manifest
+MODULE_MANIFEST = {
+    "nom": "Jardin",
+    "version": "2.1",
+    "dependances": ["maison.hub", "integrations.meteo"],
+    "configuration": {"afficher_plan_2d": True},
+    "pages": [("jardin", "🌱 Jardin", app)],
+}
+</code></pre>
+</div>
+
+<div class="card">
+<h4>2.3 Pipeline IA multi-modèle</h4>
+<p>Supporter plusieurs LLM (Mistral, Ollama local, GPT-4 fallback) avec routage intelligent basé sur la complexité de la requête et le budget token. Un modèle rapide/pas cher pour le chat, un modèle puissant pour l'analyse de recettes.</p>
+</div>
+
+<div class="card">
+<h4>2.4 Dashboards interactifs avec Plotly + st.fragment drill-down</h4>
+<p>Chaque graphique Plotly enveloppé dans <code>@st.fragment</code> pour permettre des interactions (click sur barre → filtre → sous-graphique) sans rerun global. Le composant <code>plotly_drilldown.py</code> existant pourrait être étendu avec cette approche.</p>
+</div>
+
+<h3>🔮 Innovations de niveau 3 — Long terme</h3>
+
+<div class="card">
+<h4>3.1 Mode offline complet avec IndexedDB</h4>
+<p>Synchronisation bidirectionnelle : <code>sw.js</code> (existant) sauvegarde les mutations offline dans IndexedDB, puis sync avec Supabase quand la connexion revient. Particulièrement utile pour les listes de courses en magasin.</p>
+</div>
+
+<div class="card">
+<h4>3.2 Assistant vocal Streamlit</h4>
+<p>Intégrer <code>webkitSpeechRecognition</code> via un composant custom pour ajouter des items aux courses/inventaire par la voix. Combiné avec Mistral pour la compréhension : "Ajoute 3 tomates cerises à la liste".</p>
+</div>
+
+<div class="card">
+<h4>3.3 Analytics prédictifs avec ML local</h4>
+<p>Pour les modules qui ont suffisamment d'historique (dépenses, courses, recettes), entraîner un modèle scikit-learn local :</p>
+<ul>
+    <li>Prédiction des courses de la semaine basée sur l'historique (existant <code>predictions.py</code>, mais extensible)</li>
+    <li>Détection d'anomalies de dépenses</li>
+    <li>Score de satisfaction repas basé sur les retours famille</li>
+</ul>
+</div>
+
+<div class="card">
+<h4>3.4 Multi-famille (multi-tenant)</h4>
+<p>Partager l'instance entre plusieurs familles avec isolation RLS PostgreSQL + sélecteur de famille dans le sidebar. Les tables ont déjà <code>utilisateur_id</code>, il faudrait un <code>famille_id</code> global.</p>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════ 12. COMPARATIF v9 ═══════════════════════════════════════ -->
+<section id="comparatif-v9">
+<h2>12. Comparatif avec ROADMAP v9</h2>
+
+<h3>12.1 Ce qui est terminé dans v9 ✅</h3>
+<table>
+<tr><th>Phase</th><th>Items</th><th>Status</th><th>Impact</th></tr>
+<tr><td>Phase 1 — Corrections critiques</td><td>5/5</td><td><span class="badge badge-green">✅ 100%</span></td><td>Persistence maison/, JWT sécurisé, tests API</td></tr>
+<tr><td>Phase 2 — Homogénéisation</td><td>5/5</td><td><span class="badge badge-green">✅ 100%</span></td><td>KeyNamespace 100%, tabs_with_url 100%, BaseService[T] étendu</td></tr>
+<tr><td>Phase 3 — Robustesse modules</td><td>9/9</td><td><span class="badge badge-green">✅ 100%</span></td><td>error_boundary 28 modules, 5 features WIP complétées, config foyer DB</td></tr>
+<tr><td>Phase 4 — Nettoyage</td><td>5/5</td><td><span class="badge badge-green">✅ 100%</span></td><td>BaseModule pilote, @composant_ui, split >500 LOC, docs ui/, TimestampMixin</td></tr>
+<tr><td>Phase 5 — Modules manquants</td><td>5/5 + extras</td><td><span class="badge badge-green">✅ 100%</span></td><td>4 modules maison créés, dead code supprimé, Redis prod, PWA, collaboratif courses</td></tr>
+<tr><td>Phase 6 — Innovations</td><td>6/6</td><td><span class="badge badge-green">✅ 100%</span></td><td>st.write_stream, @st.dialog, @auto_refresh, deep linking, chat IA, Specification</td></tr>
+<tr><td>Phase 7 — Production</td><td>7/7</td><td><span class="badge badge-green">✅ 100%</span></td><td>Sentry, PWA SW, JSON logs, CI/CD, tests coverage 78+</td></tr>
+<tr><td>Phase 10 — Scalabilité</td><td>5/5</td><td><span class="badge badge-green">✅ 100%</span></td><td>Circuit breaker async, ETag 304, Redis cache, BaseService étendu</td></tr>
+<tr><td>Sprint 5 — Francisation</td><td>5/5</td><td><span class="badge badge-green">✅ 100%</span></td><td>45 classes + 95 tables renommées, 14 événements typés</td></tr>
+<tr><td>Rationalisation patterns</td><td>8 supprimés</td><td><span class="badge badge-green">✅ 100%</span></td><td>~6 000 LOC dead code éliminées, 18 N+1 corrigés</td></tr>
+</table>
+
+<h3>12.2 Ce qui reste à faire 🔴🟡🟢</h3>
+<table>
+<tr><th>Item</th><th>Priorité</th><th>Status v9</th><th>Status audit</th></tr>
+<tr><td>Tests skippés (322→~20)</td><td>🔴</td><td>Réduit</td><td><span class="badge badge-yellow">~20 restants</span></td></tr>
+<tr><td>Coverage fichiers 0% restants</td><td>🔴</td><td>Documenté</td><td><span class="badge badge-yellow">barcode, rapports/generation, plan_jardin</span></td></tr>
+<tr><td>Déployer SQL sur Supabase</td><td>🔴</td><td>Non fait</td><td><span class="badge badge-red">⬛ En attente</span></td></tr>
+<tr><td>48 tests en échec</td><td>🟡</td><td>pre-existing</td><td><span class="badge badge-yellow">DB mocks, JulesAI</span></td></tr>
+<tr><td>VAPID keys generation</td><td>🟢</td><td>Non fait</td><td><span class="badge badge-red">⬛ En attente</span></td></tr>
+<tr><td>Reconnaissance vocale</td><td>🟢</td><td>Non fait</td><td><span class="badge badge-red">⬛ Planifié</span></td></tr>
+</table>
+
+<h3>12.3 Nouvelles découvertes hors ROADMAP v9</h3>
+<table>
+<tr><th>Découverte</th><th>Sévérité</th><th>Détail</th></tr>
+<tr><td>Gamification importe Streamlit dans services</td><td>🔴 Haute</td><td><code>core/gamification.py</code> utilise <code>st.session_state</code> directement</td></tr>
+<tr><td>DB direct dans modules UI</td><td>🔴 Haute</td><td>~30 appels <code>obtenir_contexte_db</code> dans src/modules/ au lieu de passer par des services</td></tr>
+<tr><td>Double héritage BaseService + BaseAIService fragile</td><td>🟡 Moyenne</td><td>3 services avec init manuelle dual — MRO non coopératif</td></tr>
+<tr><td>football_compat.py duplication</td><td>🟡 Moyenne</td><td>459 LOC quasi-identiques avec football_helpers.py</td></tr>
+<tr><td>Garmin + Google Calendar sans @avec_resilience</td><td>🟡 Moyenne</td><td>Appels HTTP externes non protégés</td></tr>
+<tr><td>@cached_fragment sous-utilisé</td><td>🟡 Moyenne</td><td>De nombreux graphiques Plotly lourds sans cache fragment</td></tr>
+<tr><td>KeyNamespace manquant dans cuisine/</td><td>🟡 Moyenne</td><td>6 modules du domaine cuisine sans namespace scopé</td></tr>
+<tr><td>error_boundary manquant dans ~30% des modules</td><td>🟡 Moyenne</td><td>accueil, cuisine/*, famille/*, parametres</td></tr>
+<tr><td>Cache deprecated non supprimé</td><td>🟢 Basse</td><td><code>caching/cache.py</code> 163 LOC de dead code</td></tr>
+<tr><td>Fichiers parasites dans modules</td><td>🟢 Basse</td><td>test_maison_split.txt, tests.log dans meubles/</td></tr>
+</table>
+</section>
+
+<!-- ═══════════════════════════════════════ 13. ROADMAP RECOMMANDÉE ═══════════════════════════════════════ -->
+<section id="roadmap-audit">
+<h2>13. Roadmap recommandée post-audit</h2>
+
+<h3>🔴 Sprint Immédiat (1-2 jours)</h3>
+
+<div class="roadmap-item">
+    <span class="phase phase-imm">IMMÉDIAT</span>
     <div>
-      <h4>Tokens (8 StrEnum, ~100 valeurs)</h4>
-      <ul style="margin-left:1.25rem">
-        <li><code>Couleur</code> : 40+ couleurs</li>
-        <li><code>Espacement</code> : 6 tailles (xs→3xl)</li>
-        <li><code>Rayon</code> : 7 rayons</li>
-        <li><code>Typographie</code> : 13 tailles</li>
-        <li><code>Ombre</code> : 5 niveaux</li>
-        <li><code>Transition</code> : 4 vitesses</li>
-        <li><code>ZIndex</code> : 6 couches</li>
-        <li><code>Variante</code> : 6 variantes sémantiques</li>
-      </ul>
+        <strong>1. Découpler Gamification de Streamlit</strong><br>
+        <code>services/core/gamification.py</code> — Remplacer <code>st.session_state</code> par <code>SessionStorage</code> Protocol (pattern déjà existant dans le projet).
     </div>
+</div>
+
+<div class="roadmap-item">
+    <span class="phase phase-imm">IMMÉDIAT</span>
     <div>
-      <h4>Tokens Sémantiques (30 CSS custom properties)</h4>
-      <ul style="margin-left:1.25rem">
-        <li>Surfaces : 4 (<code>--sem-surface-*</code>)</li>
-        <li>Texte : 3 (<code>--sem-text-*</code>)</li>
-        <li>Interactif : 3 (<code>--sem-interactive-*</code>)</li>
-        <li>Feedback : 12 (success/warning/danger/info × 3)</li>
-        <li>Bordures : 2</li>
-        <li>Ombres : 3</li>
-        <li>Espacement : 3</li>
-      </ul>
+        <strong>2. Supprimer fichiers parasites</strong><br>
+        <code>maison/meubles/test_maison_split.txt</code>, <code>maison/meubles/tests.log</code>.<br>
+        Supprimer <code>caching/cache.py</code> deprecated (163 LOC) après migration des derniers callers.
     </div>
-  </div>
-
-  <h3>7.3 Accessibilité (a11y)</h3>
-  <table>
-    <tr><th>Feature</th><th>Status</th><th>Détail</th></tr>
-    <tr><td>Module a11y dédié</td><td><span class="badge badge-green">✅</span></td><td>286 LOC — WCAG 2.1 / RGAA</td></tr>
-    <tr><td>Skip-link</td><td><span class="badge badge-green">✅</span></td><td>header.py → <code>#main-content</code></td></tr>
-    <tr><td>ARIA attributes</td><td><span class="badge badge-green">✅</span></td><td>35+ attributs dans components/</td></tr>
-    <tr><td>Contraste vérification</td><td><span class="badge badge-green">✅</span></td><td><code>ratio_contraste()</code>, vérification AA/AAA</td></tr>
-    <tr><td>Screen reader support</td><td><span class="badge badge-green">✅</span></td><td><code>sr_only()</code>, <code>live_region()</code></td></tr>
-    <tr><td>Focus managements</td><td><span class="badge badge-green">✅</span></td><td><code>:focus-visible</code> global</td></tr>
-    <tr><td>Reduced motion</td><td><span class="badge badge-green">✅</span></td><td><code>prefers-reduced-motion: reduce</code></td></tr>
-    <tr><td>Print styles</td><td><span class="badge badge-green">✅</span></td><td><code>@media print</code> avec masquage sidebar/toolbar</td></tr>
-  </table>
-
-  <h3>7.4 app.py (221 LOC)</h3>
-  <table>
-    <tr><th>Section</th><th>Lignes</th><th>Description</th></tr>
-    <tr><td>Env loading</td><td>16-38</td><td><code>.env.local</code> → <code>.env</code> fallback, debug gating</td></tr>
-    <tr><td>Path setup</td><td>42-50</td><td><code>sys.path</code> insertion, logging init</td></tr>
-    <tr><td>Bootstrap</td><td>55-59</td><td><code>demarrer_application()</code> — lazy, non-blocking</td></tr>
-    <tr><td>Page config</td><td>84-95</td><td><code>st.set_page_config(layout="wide")</code></td></tr>
-    <tr><td>Init pipeline</td><td>105-108</td><td>PWA meta tags, CSS pipeline, theme, a11y</td></tr>
-    <tr><td>Navigation</td><td>114-173</td><td><code>initialiser_navigation()</code> → <code>page.run()</code></td></tr>
-    <tr><td>Global widgets</td><td>121-140</td><td>Chat global, notifications live, gamification sidebar</td></tr>
-  </table>
-
-  <h3>7.5 Issues UI (12 items)</h3>
-  <table>
-    <tr><th>#</th><th>Sévérité</th><th>Description</th></tr>
-    <tr><td>U1</td><td><span class="sev sev-high">HIGH</span></td><td><code>Sem.PRIMARY</code> référencé dans <code>jules_aujourdhui.py</code> mais n'existe PAS dans l'enum <code>Sem</code> → <code>AttributeError</code> au runtime</td></tr>
-    <tr><td>U2</td><td><span class="sev sev-med">MEDIUM</span></td><td><code>notifications_live.py</code> utilise des couleurs hex hardcodées au lieu de tokens sémantiques — cassé en dark mode</td></tr>
-    <tr><td>U3</td><td><span class="sev sev-med">MEDIUM</span></td><td><code>_afficher_widgets_globaux()</code> — un seul <code>try/except</code> pour 3 widgets. Un échec masque les 2 autres</td></tr>
-    <tr><td>U4</td><td><span class="sev sev-med">MEDIUM</span></td><td><code>pwa.py</code> injecte <code>&lt;head&gt;</code> tags via <code>components.html()</code> — HTML invalide (déjà dans <code>&lt;body&gt;</code>)</td></tr>
-    <tr><td>U5</td><td><span class="sev sev-med">MEDIUM</span></td><td>Missing <code>@st.cache_data</code> sur 4 fonctions Plotly drilldown (399 LOC) — graphiques lourds non cachés</td></tr>
-    <tr><td>U6</td><td><span class="sev sev-med">MEDIUM</span></td><td><code>recherche_globale.py</code> — 4 requêtes DB séquentielles sur chaque frappe clavier</td></tr>
-    <tr><td>U7</td><td><span class="sev sev-low">LOW</span></td><td><code>ModeTheme.AUTO</code> sans détection <code>prefers-color-scheme</code> — toujours mode clair par défaut</td></tr>
-    <tr><td>U8</td><td><span class="sev sev-low">LOW</span></td><td>Dual mapping couleurs : <code>obtenir_couleurs_variante()</code> (tokens bruts) vs <code>_obtenir_sem_variante()</code> (tokens sémantiques)</td></tr>
-    <tr><td>U9</td><td><span class="sev sev-low">LOW</span></td><td><code>alerte_stock</code> — paramètre <code>cle</code> déprécié mais accepté silencieusement</td></tr>
-    <tr><td>U10</td><td><span class="sev sev-low">LOW</span></td><td><code>mode_focus_fab</code> FAB — screen readers voient 2 contrôles (HTML + st.button)</td></tr>
-    <tr><td>U11</td><td><span class="sev sev-low">LOW</span></td><td><code>notifications_live.py</code> popover badge sans <code>aria-label</code> pour le compteur</td></tr>
-    <tr><td>U12</td><td><span class="sev sev-info">INFO</span></td><td><code>components/__init__.py</code> importation eager de tous les 25 modules — bypass lazy loading si import direct</td></tr>
-  </table>
 </div>
 
-<!-- ======================== 8. ROADMAP ======================== -->
-<h2 id="roadmap">8. Comparaison avec ROADMAP v8</h2>
-<div class="section">
-  <div class="section-title"><span class="section-icon">🗺️</span> Conformité ROADMAP — 7 Phases + Sprint 5 + Rationalisation</div>
-
-  <h3>8.1 Phases terminées</h3>
-  <table>
-    <tr><th>Phase</th><th>Titre</th><th>Items</th><th>Status Vérifié</th></tr>
-    <tr><td>Sprint 5</td><td>Francisation complète</td><td>5 sous-sprints (A→E)</td><td><span class="badge badge-green">✅ Confirmé</span> — 100% noms FR, 45 classes renommées, 95 tables FR</td></tr>
-    <tr><td>Phase 1</td><td>Persistence & patterns</td><td>BaseAI, JWT, /metrics, tests</td><td><span class="badge badge-green">✅ Confirmé</span> — Toutes les features observées dans le code</td></tr>
-    <tr><td>Phase 2</td><td>Performance & UX</td><td>KeyNamespace, tabs_with_url, error_boundary, cached_fragment</td><td><span class="badge badge-green">✅ Confirmé</span> — Framework patterns à 100%</td></tr>
-    <tr><td>Phase 3</td><td>Robustesse modules</td><td>28 modules with error_boundary, WIP completées, inter-module</td><td><span class="badge badge-green">✅ Confirmé</span> — 38/38 modules avec tous les patterns core</td></tr>
-    <tr><td>Phase 4</td><td>Architecture audit</td><td>BaseModule, @composant_ui, TimestampMixin</td><td><span class="badge badge-green">✅ Confirmé</span> — Implémentés (BaseModule utilisé par 2 modules)</td></tr>
-    <tr><td>Phase 5</td><td>Infrastructure avancée</td><td>Dark mode, tokens sémantiques, PWA, dead code, tests visuels</td><td><span class="badge badge-green">✅ Confirmé</span> — Dark mode complet, 30 tokens Sem, PWA 249 LOC, 27 snapshot tests</td></tr>
-    <tr><td>Phase 6</td><td>Production Hardening</td><td>Sanitization, ETag, OpenAPI, Security Headers, CI/CD, A11y</td><td><span class="badge badge-green">✅ Confirmé</span> — Tous les middleware et headers observés</td></tr>
-    <tr><td>Phase 7</td><td>Production Hardening suite</td><td>Sentry, Service Worker, JSON logging, CI/CD pipeline</td><td><span class="badge badge-green">✅ Confirmé</span> — sentry.py 274 LOC, sw.js 249 LOC, FormatteurStructure, workflows GH</td></tr>
-    <tr><td>Rationalisation</td><td>8 patterns dead code supprimés</td><td>~6 000+ LOC (Result, Repository, Specification, UoW, IoC, Middleware, CQRS, UI v2)</td><td><span class="badge badge-green">✅ Confirmé</span> — Aucun de ces patterns trouvé dans le codebase</td></tr>
-  </table>
-
-  <h3>8.2 Items "À faire" de la ROADMAP — Évaluation</h3>
-
-  <h4>🔴 Priorité Haute</h4>
-  <div class="roadmap-item"><span class="rm-partial">⚠</span> <strong>322 tests skippés (modules maison non implémentés)</strong> — <em>Réduit à 31 skipped selon métriques. Progrès majeur mais pas zéro.</em></div>
-  <div class="roadmap-item"><span class="rm-partial">⚠</span> <strong>Coverage fichiers à 0%</strong> — <em>barcode.py (288 stmts), generation.py (248 stmts), plan_jardin.py (240 stmts), rapports.py (200 stmts) restent probablement à 0%</em></div>
-  <div class="roadmap-item"><span class="rm-missing">✗</span> <strong>Déployer SQL sur Supabase</strong> — <em>Non vérifiable depuis l'audit code</em></div>
-
-  <h4>🟡 Priorité Moyenne</h4>
-  <div class="roadmap-item"><span class="rm-missing">✗</span> <strong>Activer Redis en production</strong> — <em>Code prêt (CacheRedis, redis_storage.py) mais REDIS_URL optionnel</em></div>
-  <div class="roadmap-item"><span class="rm-check">✅</span> <strong>Optimiser requêtes N+1</strong> — <em>18/18 corrigés, confirmé dans le code (joinedload/selectinload)</em></div>
-  <div class="roadmap-item"><span class="rm-missing">✗</span> <strong>Lazy load images recettes</strong> — <em>Non observé dans recettes/detail.py ou liste.py</em></div>
-
-  <h4>🟢 Priorité Basse</h4>
-  <div class="roadmap-item"><span class="rm-missing">✗</span> <strong>Reconnaissance vocale</strong> — <em>Non implémentée</em></div>
-  <div class="roadmap-item"><span class="rm-check">✅</span> <strong>Mode hors-ligne (Service Worker)</strong> — <em>Implémenté (sw.js 249 LOC, IndexedDB, Background Sync)</em></div>
-  <div class="roadmap-item"><span class="rm-missing">✗</span> <strong>Multi-famille (comptes partagés)</strong> — <em>Non implémenté</em></div>
-
-  <h3>8.3 Métriques ROADMAP vs Réalité</h3>
-  <table>
-    <tr><th>Métrique</th><th>ROADMAP</th><th>Audit v8</th><th>Delta</th></tr>
-    <tr><td>Tests collectés</td><td>8 150</td><td>8 150</td><td><span class="badge badge-green">✅ Match</span></td></tr>
-    <tr><td>Tests passés</td><td>8 045</td><td>8 045</td><td><span class="badge badge-green">✅ Match</span></td></tr>
-    <tr><td>Tests échec</td><td>48</td><td>48</td><td><span class="badge badge-green">✅ Pre-existing (DB/mocks)</span></td></tr>
-    <tr><td>Tests skippés</td><td>31</td><td>31</td><td><span class="badge badge-green">✅ Match (vs 322 initiaux)</span></td></tr>
-    <tr><td>Lint (ruff)</td><td>0 issues</td><td>0</td><td><span class="badge badge-green">✅</span></td></tr>
-    <tr><td>Tables SQL</td><td>95</td><td>95</td><td><span class="badge badge-green">✅</span></td></tr>
-    <tr><td>Services</td><td>30+</td><td>57 factories</td><td><span class="badge badge-green">✅ Dépasse</span></td></tr>
-    <tr><td>N+1 corrigés</td><td>18/18</td><td>18/18</td><td><span class="badge badge-green">✅</span></td></tr>
-    <tr><td>Coverage core/</td><td>~75%</td><td>~75%</td><td><span class="badge badge-green">✅ Objectif 80% pas atteint</span></td></tr>
-    <tr><td>Nommage FR</td><td>100%</td><td>100%</td><td><span class="badge badge-green">✅</span></td></tr>
-    <tr><td>Événements typés</td><td>14</td><td>22</td><td><span class="badge badge-green">✅ +8 depuis Sprint 5</span></td></tr>
-  </table>
-</div>
-
-<!-- ======================== 9. ISSUES REGISTRY ======================== -->
-<h2 id="issues">9. Registre Global des Issues (55 items)</h2>
-<div class="section">
-
-  <h3>9.1 Par sévérité</h3>
-  <div class="dashboard" style="grid-template-columns: repeat(4, 1fr);">
-    <div class="card" style="border-left: 3px solid var(--green);">
-      <div class="card-value" style="color:var(--green)">3 ✅</div><div class="card-label">HIGH (résolu)</div>
+<div class="roadmap-item">
+    <span class="phase phase-imm">IMMÉDIAT</span>
+    <div>
+        <strong>3. Ajouter @avec_resilience manquants</strong><br>
+        <code>integrations/garmin/service.py</code> et <code>famille/calendrier/google_*.py</code> — appels HTTP externes non protégés.
     </div>
-    <div class="card" style="border-left: 3px solid var(--green);">
-      <div class="card-value" style="color:var(--green)">17 ✅</div><div class="card-label">MEDIUM (résolu)</div>
+</div>
+
+<h3>🟡 Sprint Court terme (1 semaine)</h3>
+
+<div class="roadmap-item">
+    <span class="phase phase-short">1 SEM</span>
+    <div>
+        <strong>4. Compléter KeyNamespace + error_boundary</strong><br>
+        Étendre KeyNamespace aux 6 modules cuisine + design_system.<br>
+        Ajouter error_boundary dans accueil, cuisine/*, famille/hub+routines+weekend, parametres.
     </div>
-    <div class="card" style="border-left: 3px solid var(--blue);">
-      <div class="card-value" style="color:var(--blue)">18</div><div class="card-label">LOW</div>
+</div>
+
+<div class="roadmap-item">
+    <span class="phase phase-short">1 SEM</span>
+    <div>
+        <strong>5. Migrer les accès DB directs dans modules/</strong><br>
+        Créer ou utiliser des services pour les ~30 appels <code>obtenir_contexte_db</code> dans src/modules/ (notamment maison/utils.py, cockpit_familial.py, meubles/crud.py, eco_tips/crud.py).
     </div>
-    <div class="card" style="border-left: 3px solid var(--text-muted);">
-      <div class="card-value" style="color:var(--text-muted)">17</div><div class="card-label">INFO</div>
+</div>
+
+<div class="roadmap-item">
+    <span class="phase phase-short">1 SEM</span>
+    <div>
+        <strong>6. Étendre @cached_fragment et @lazy</strong><br>
+        Ajouter @cached_fragment sur les ~15 graphiques Plotly lourds identifiés.<br>
+        Utiliser @lazy pour les onglets secondaires dans les modules à onglets.
     </div>
-  </div>
-
-  <h3>9.2 Issues HIGH (correction prioritaire)</h3>
-  <table>
-    <tr><th>ID</th><th>Domaine</th><th>Description</th><th>Impact</th></tr>
-    <tr><td><span class="sev sev-high">A1</span></td><td>API</td><td><span class="badge badge-green">✅ RÉSOLU</span> Dev auto-auth bypass — whitelist + défaut-deny + rôle membre</td><td>Corrigé</td></tr>
-    <tr><td><span class="sev sev-high">U1</span></td><td>UI</td><td><span class="badge badge-green">✅ RÉSOLU</span> <code>Sem.PRIMARY</code> remplacé par <code>Sem.INTERACTIVE</code></td><td>Corrigé</td></tr>
-    <tr><td><span class="sev sev-high">C1</span></td><td>Core</td><td><span class="badge badge-green">✅ RÉSOLU</span> <code>.persistent_state</code> présent dans <code>_MODEL_MODULES</code></td><td>Corrigé</td></tr>
-  </table>
-
-  <h3>9.3 Issues MEDIUM (à planifier)</h3>
-  <table>
-    <tr><th>ID</th><th>Domaine</th><th>Description</th></tr>
-    <tr><td>A2</td><td>API</td><td><span class="badge badge-green">✅ RÉSOLU</span> Secret JWT — clé aléatoire par processus</td></tr>
-    <tr><td>A3</td><td>API</td><td><span class="badge badge-green">✅ RÉSOLU</span> SHA-256 pour ETag (docstring corrigée)</td></tr>
-    <tr><td>A4</td><td>API</td><td><span class="badge badge-green">✅ RÉSOLU</span> GET reads protégés par require_auth</td></tr>
-    <tr><td>A5</td><td>API</td><td><span class="badge badge-green">✅ RÉSOLU</span> Tous les endpoints ont response_model</td></tr>
-    <tr><td>A6</td><td>API</td><td><span class="badge badge-green">✅ RÉSOLU</span> Push routes avec require_auth</td></tr>
-    <tr><td>C2</td><td>Core</td><td><span class="badge badge-green">✅ RÉSOLU</span> DepenseMaisonInput ré-exporté</td></tr>
-    <tr><td>C3</td><td>Core</td><td><span class="badge badge-green">✅ RÉSOLU</span> back_populates partout</td></tr>
-    <tr><td>M1</td><td>Modules</td><td><span class="badge badge-green">✅ RÉSOLU</span> st.rerun() remplacé par rerun() centralisé</td></tr>
-    <tr><td>M2</td><td>Modules</td><td>ModuleState gelé — utilisé par BaseModule + inventaire (136 LOC)</td></tr>
-    <tr><td>S1</td><td>Services</td><td><span class="badge badge-green">✅ RÉSOLU</span> ServiceNtfy avec @service_factory</td></tr>
-    <tr><td>S2</td><td>Services</td><td><span class="badge badge-green">✅ RÉSOLU</span> Singletons legacy nettoyés</td></tr>
-    <tr><td>S3</td><td>Services</td><td>Entretien/Jardin AI-centric via BaseAIService (par design)</td></tr>
-    <tr><td>U2</td><td>UI</td><td><span class="badge badge-green">✅ RÉSOLU</span> Couleur fallback → Sem.ON_SURFACE_MUTED</td></tr>
-    <tr><td>U3</td><td>UI</td><td><span class="badge badge-green">✅ RÉSOLU</span> Widgets isolés avec ImportError + warning logging</td></tr>
-    <tr><td>U4</td><td>UI</td><td><span class="badge badge-green">✅ RÉSOLU</span> PWA meta tags injectés dans document.head via JS</td></tr>
-    <tr><td>U5</td><td>UI</td><td><span class="badge badge-green">✅ RÉSOLU</span> @st.cache_data sur Plotly builders</td></tr>
-    <tr><td>U6</td><td>UI</td><td><span class="badge badge-green">✅ RÉSOLU</span> @avec_cache(ttl=10) + session DB unique</td></tr>
-  </table>
 </div>
 
-<!-- ======================== 10. INNOVATIONS ======================== -->
-<h2 id="innovations">10. Propositions d'Améliorations Streamlit Innovantes</h2>
-<div class="section">
-  <div class="section-title"><span class="section-icon">💡</span> Optimisations et concepts avancés</div>
-
-  <h3>10.1 Performance — Quick Wins</h3>
-  <table>
-    <tr><th>Proposition</th><th>Impact</th><th>Effort</th><th>Détail</th></tr>
-    <tr>
-      <td><strong>@st.cache_data sur Plotly drilldown</strong></td>
-      <td><span class="badge badge-green">Haut</span></td>
-      <td><span class="badge badge-green">5 min</span></td>
-      <td>Ajouter <code>@st.cache_data(ttl=300)</code> sur les 4 fonctions <code>graphique_*_drilldown</code> (399 LOC). Évite la regénération Plotly sur chaque rerun.</td>
-    </tr>
-    <tr>
-      <td><strong>Recherche globale avec debounce</strong></td>
-      <td><span class="badge badge-green">Haut</span></td>
-      <td><span class="badge badge-yellow">30 min</span></td>
-      <td>Remplacer les 4 requêtes DB séquentielles par un service unifié avec <code>@avec_cache(ttl=10)</code> et regrouper en une seule requête avec <code>UNION ALL</code>.</td>
-    </tr>
-    <tr>
-      <td><strong>Extension @cached_fragment</strong></td>
-      <td><span class="badge badge-yellow">Moyen</span></td>
-      <td><span class="badge badge-yellow">1h</span></td>
-      <td>Déployer <code>@cached_fragment(ttl=300)</code> sur les modules lourds : statistiques loto, graphiques jeux/paris, onglets analytics maison. Cible : 15→38 modules.</td>
-    </tr>
-    <tr>
-      <td><strong>Lazy images recettes</strong></td>
-      <td><span class="badge badge-yellow">Moyen</span></td>
-      <td><span class="badge badge-yellow">45 min</span></td>
-      <td>Ajouter <code>loading="lazy"</code> sur les images recettes dans <code>detail.py</code> et <code>liste.py</code>. Utiliser <code>IntersectionObserver</code> via <code>components.html()</code>.</td>
-    </tr>
-  </table>
-
-  <h3>10.2 Architecture — Améliorations structurelles</h3>
-  <table>
-    <tr><th>Proposition</th><th>Impact</th><th>Effort</th><th>Détail</th></tr>
-    <tr>
-      <td><strong>Migration st.rerun() → naviguer()</strong></td>
-      <td><span class="badge badge-green">Haut</span></td>
-      <td><span class="badge badge-yellow">2h</span></td>
-      <td>Remplacer les 45 appels raw <code>st.rerun()</code> dans 16 fichiers par <code>naviguer()</code> de <code>src.core.state</code>. Unifie la gestion d'état et prépare le deep-linking.</td>
-    </tr>
-    <tr>
-      <td><strong>Nettoyage singletons legacy</strong></td>
-      <td><span class="badge badge-yellow">Moyen</span></td>
-      <td><span class="badge badge-green">30 min</span></td>
-      <td>Supprimer les 8 variables <code>_instance: X | None = None</code> redondantes dans jeux/_internal/ — <code>@service_factory</code> fait déjà le job.</td>
-    </tr>
-    <tr>
-      <td><strong>Décision BaseModule</strong></td>
-      <td><span class="badge badge-yellow">Moyen</span></td>
-      <td><span class="badge badge-green">15 min</span></td>
-      <td>Seulement 2/38 modules utilisent <code>BaseModule</code> et 0/38 <code>ModuleState</code>. Supprimer ou migrer progressivement. Le pattern <code>def app()</code> direct fonctionne bien.</td>
-    </tr>
-    <tr>
-      <td><strong>ModeTheme.AUTO avec prefers-color-scheme</strong></td>
-      <td><span class="badge badge-yellow">Moyen</span></td>
-      <td><span class="badge badge-yellow">45 min</span></td>
-      <td>Implémenter la détection de <code>prefers-color-scheme</code> via JavaScript bridge dans <code>components.html()</code> pour que <code>ModeTheme.AUTO</code> fonctionne réellement.</td>
-    </tr>
-  </table>
-
-  <h3>10.3 Qualité Code — Nettoyage</h3>
-  <table>
-    <tr><th>Proposition</th><th>LOC récupérés</th><th>Effort</th><th>Détail</th></tr>
-    <tr>
-      <td><strong>Supprimer dead code modules</strong></td>
-      <td>~1 100 LOC</td>
-      <td><span class="badge badge-green">15 min</span></td>
-      <td>Supprimer : <code>recettes_import.py</code> (327), <code>scraper_loto.py</code> (314), <code>example_module.py</code> (173), <code>schemas.py</code> (65), <code>entretien_utils.py</code> (160), <code>age_utils.py</code> (59), stubs AI 2×(2)</td>
-    </tr>
-    <tr>
-      <td><strong>Supprimer ModuleState</strong></td>
-      <td>136 LOC</td>
-      <td><span class="badge badge-green">5 min</span></td>
-      <td>0 adopteurs. Le GestionnaireEtat de core/state/ suffit.</td>
-    </tr>
-    <tr>
-      <td><strong>Nettoyer artefacts</strong></td>
-      <td>N/A</td>
-      <td><span class="badge badge-green">2 min</span></td>
-      <td>Supprimer <code>tests.log</code>, <code>test_maison_split.txt</code>, <code>__pycache__/errors.cpython-311.pyc</code></td>
-    </tr>
-    <tr>
-      <td><strong>Compléter __all__ maison</strong></td>
-      <td>N/A</td>
-      <td><span class="badge badge-green">2 min</span></td>
-      <td>Ajouter eco_tips, energie, meubles, projets, jardin_zones dans <code>maison/__init__.py.__all__</code></td>
-    </tr>
-  </table>
-
-  <h3>10.4 Concepts Streamlit avancés à explorer</h3>
-  <table>
-    <tr><th>Concept</th><th>Pertinence</th><th>Détail</th></tr>
-    <tr>
-      <td><strong>st.connection (Supabase)</strong></td>
-      <td><span class="badge badge-green">Haute</span></td>
-      <td>Remplacer l'engine SQLAlchemy par <code>st.connection("supabase")</code> pour bénéficier du connection pooling Streamlit natif et du caching intégré. Compatible avec l'architecture actuelle.</td>
-    </tr>
-    <tr>
-      <td><strong>st.experimental_user</strong></td>
-      <td><span class="badge badge-yellow">Moyenne</span></td>
-      <td>Pour le multi-utilisateur, utiliser l'info utilisateur Streamlit Cloud intégrée au lieu du système JWT custom dans l'app Streamlit. Garder JWT pour l'API.</td>
-    </tr>
-    <tr>
-      <td><strong>Custom components (bidirectional)</strong></td>
-      <td><span class="badge badge-yellow">Moyenne</span></td>
-      <td>Le timer tablette cuisine et le mode focus FAB gagneraient à être de vrais composants Streamlit custom (React/TypeScript) au lieu de HTML inline via <code>components.html()</code>.</td>
-    </tr>
-    <tr>
-      <td><strong>st.cache_resource pour services</strong></td>
-      <td><span class="badge badge-green">Haute</span></td>
-      <td>Les services singleton (<code>@service_factory</code>) qui maintiennent des connexions (DB, API) pourraient être wrappés avec <code>@st.cache_resource</code> pour une meilleure lifecycle management.</td>
-    </tr>
-  </table>
+<div class="roadmap-item">
+    <span class="phase phase-short">1 SEM</span>
+    <div>
+        <strong>7. Diviser les 5 fichiers &gt;500 LOC restants</strong><br>
+        courses/utils.py (627), planificateur_repas/utils.py (604), batch_cooking_utils.py (598), rapports.py (560), calendrier/components.py (503).
+    </div>
 </div>
 
-<!-- ======================== 11. PLAN D'ACTIONS ======================== -->
-<h2 id="actions">11. Plan d'Actions Recommandé</h2>
-<div class="section">
-  <div class="section-title"><span class="section-icon">📋</span> Roadmap d'améliorations prioritisée</div>
+<h3>🟣 Sprint Moyen terme (2-3 semaines)</h3>
 
-  <h3>🔴 Sprint Immédiat (< 1 jour) — <span class="badge badge-green">✅ TERMINÉ</span></h3>
-  <table>
-    <tr><th>#</th><th>Action</th><th>Issues</th><th>Statut</th></tr>
-    <tr><td>1</td><td>Sécuriser API dev bypass : whitelist stricte + défaut-deny + rôle membre</td><td>A1</td><td><span class="badge badge-green">✅ FAIT</span></td></tr>
-    <tr><td>2</td><td>Fixer <code>Sem.PRIMARY</code> → <code>Sem.INTERACTIVE</code> dans jules_aujourdhui.py</td><td>U1</td><td><span class="badge badge-green">✅ FAIT</span></td></tr>
-    <tr><td>3</td><td>Ajouter <code>.persistent_state</code> à <code>_MODEL_MODULES</code></td><td>C1</td><td><span class="badge badge-green">✅ FAIT</span></td></tr>
-    <tr><td>4</td><td>Séparer les 3 try/except widgets globaux dans app.py</td><td>U3</td><td><span class="badge badge-green">✅ FAIT</span></td></tr>
-    <tr><td>5</td><td>Ajouter <code>response_model</code> aux endpoints API</td><td>A5</td><td><span class="badge badge-green">✅ FAIT</span></td></tr>
-    <tr><td>6</td><td>Ré-exporter <code>DepenseMaisonInput</code> dans validation/__init__.py</td><td>C2</td><td><span class="badge badge-green">✅ FAIT</span></td></tr>
-  </table>
-
-  <h3>🟡 Sprint Court (1-3 jours) — <span class="badge badge-green">✅ TERMINÉ</span></h3>
-  <table>
-    <tr><th>#</th><th>Action</th><th>Issues</th><th>Statut</th></tr>
-    <tr><td>7</td><td>Migrer <code>st.rerun()</code> → <code>rerun()</code> centralisé</td><td>M1</td><td><span class="badge badge-green">✅ FAIT</span></td></tr>
-    <tr><td>8</td><td>Ajouter <code>@st.cache_data</code> sur Plotly drilldown</td><td>U5</td><td><span class="badge badge-green">✅ FAIT</span></td></tr>
-    <tr><td>9</td><td>Couleurs notifications_live.py → tokens sémantiques</td><td>U2</td><td><span class="badge badge-green">✅ FAIT</span></td></tr>
-    <tr><td>10</td><td>Singletons legacy nettoyés</td><td>S2</td><td><span class="badge badge-green">✅ FAIT</span></td></tr>
-    <tr><td>11</td><td>Ajouter <code>@service_factory</code> sur ServiceNtfy</td><td>S1</td><td><span class="badge badge-green">✅ FAIT</span></td></tr>
-    <tr><td>12</td><td>ModuleState gelé (utilisé par BaseModule + inventaire)</td><td>M2</td><td><span class="badge badge-yellow">GELÉ</span></td></tr>
-    <tr><td>13</td><td>Recherche globale: <code>@avec_cache(ttl=10)</code> + session DB unique</td><td>U6</td><td><span class="badge badge-green">✅ FAIT</span></td></tr>
-  </table>
-
-  <h3>🟢 Sprint Moyen (1-2 semaines)</h3>
-  <table>
-    <tr><th>#</th><th>Action</th><th>Issues</th><th>Effort</th></tr>
-    <tr><td>14</td><td>Déployer <code>@cached_fragment</code> sur 15→38 modules</td><td>M12</td><td>2h</td></tr>
-    <tr><td>15</td><td>Migrer 3 services maison vers <code>BaseService[T]</code> + <code>BaseAIService</code></td><td>S3</td><td>3h</td></tr>
-    <tr><td>16</td><td>Implémenter <code>ModeTheme.AUTO</code> avec <code>prefers-color-scheme</code></td><td>U7</td><td>45 min</td></tr>
-    <tr><td>17</td><td>Augmenter coverage core/ 75% → 80%</td><td>ROADMAP</td><td>1 jour</td></tr>
-    <tr><td>18</td><td>Couvrir fichiers à 0% (barcode, generation, plan_jardin, rapports)</td><td>ROADMAP</td><td>2 jours</td></tr>
-    <tr><td>19</td><td>Activer Redis en production</td><td>ROADMAP</td><td>30 min config</td></tr>
-    <tr><td>20</td><td>Implémenter lazy images recettes</td><td>ROADMAP</td><td>45 min</td></tr>
-  </table>
+<div class="roadmap-item">
+    <span class="phase phase-mid">2-3 SEM</span>
+    <div>
+        <strong>8. Résoudre les 48 tests en échec</strong><br>
+        Analyser et corriger les tests pré-existants (DB mocks, JulesAI mocks). Objectif : 0 failure.
+    </div>
 </div>
 
-<!-- ======================== FOOTER ======================== -->
-<div style="text-align:center; padding:3rem 2rem 2rem; color:var(--text-muted);">
-  <div style="font-size:0.85rem">
-    <strong>Assistant Matanne</strong> — Rapport d'Audit Complet v8<br>
-    Généré automatiquement par GitHub Copilot<br>
-    607 fichiers Python · 104 229 LOC · 84 modèles ORM · 57 services factory · 38 pages navigation · 8 150 tests<br>
-    <span style="color:var(--green)">Score global : A- (très bon)</span>
-  </div>
+<div class="roadmap-item">
+    <span class="phase phase-mid">2-3 SEM</span>
+    <div>
+        <strong>9. Coverage des fichiers à 0%</strong><br>
+        Créer des tests pour : barcode.py (288 stmts), rapports/generation.py (248), plan_jardin.py (240), rapports.py (200).
+    </div>
 </div>
 
-</div><!-- container -->
+<div class="roadmap-item">
+    <span class="phase phase-mid">2-3 SEM</span>
+    <div>
+        <strong>10. Consolider football_compat.py / football_helpers.py</strong><br>
+        Supprimer la duplication de 459 LOC. Garder un seul fichier avec @avec_cache.
+    </div>
+</div>
+
+<div class="roadmap-item">
+    <span class="phase phase-mid">2-3 SEM</span>
+    <div>
+        <strong>11. Étendre l'API REST</strong><br>
+        Ajouter les endpoints manquants : famille, maison, jeux, calendrier. Implémenter la pagination cursor-based pour les grandes collections.
+    </div>
+</div>
+
+<div class="roadmap-item">
+    <span class="phase phase-mid">2-3 SEM</span>
+    <div>
+        <strong>12. Instrumenter @chronometre</strong><br>
+        Étendre de 8 à 30+ usages sur les hot paths critiques de chaque service principal.
+    </div>
+</div>
+
+<h3>🔵 Sprint Long terme (1-2 mois)</h3>
+
+<div class="roadmap-item">
+    <span class="phase phase-long">1-2 MOIS</span>
+    <div>
+        <strong>13. Composants Custom Streamlit</strong><br>
+        Drag & Drop Planning, Barcode Scanner WebRTC, Plan Jardin Canvas.
+    </div>
+</div>
+
+<div class="roadmap-item">
+    <span class="phase phase-long">1-2 MOIS</span>
+    <div>
+        <strong>14. Pipeline IA multi-modèle</strong><br>
+        Routage intelligent Mistral/Ollama/GPT-4, budget token dynamique.
+    </div>
+</div>
+
+<div class="roadmap-item">
+    <span class="phase phase-long">1-2 MOIS</span>
+    <div>
+        <strong>15. Mode offline complet</strong><br>
+        Synchronisation bidirectionnelle IndexedDB ↔ Supabase, mutations offline.
+    </div>
+</div>
+
+<div class="roadmap-item">
+    <span class="phase phase-long">1-2 MOIS</span>
+    <div>
+        <strong>16. Assistant vocal</strong><br>
+        webkitSpeechRecognition + Mistral NLU pour ajout rapide courses/inventaire par la voix.
+    </div>
+</div>
+
+<h3>🟠 Innovation continue</h3>
+
+<div class="roadmap-item">
+    <span class="phase phase-innov">INNOV</span>
+    <div>
+        <strong>17. Analytics prédictifs ML local</strong><br>
+        Scikit-learn pour prédiction courses hebdomadaires, détection anomalies dépenses, scoring satisfaction repas.
+    </div>
+</div>
+
+<div class="roadmap-item">
+    <span class="phase phase-innov">INNOV</span>
+    <div>
+        <strong>18. Multi-famille (multi-tenant)</strong><br>
+        Isolation RLS par famille_id, sélecteur dans le sidebar, partage de listes entre familles.
+    </div>
+</div>
+
+<div class="roadmap-item">
+    <span class="phase phase-innov">INNOV</span>
+    <div>
+        <strong>19. Format Prometheus pour /metrics</strong><br>
+        Exposer les métriques en format Prometheus pour intégration Grafana dashboards.
+    </div>
+</div>
+
+<div class="roadmap-item">
+    <span class="phase phase-innov">INNOV</span>
+    <div>
+        <strong>20. WebSocket temps réel</strong><br>
+        Ajouter un endpoint WebSocket dans l'API pour la collaboration temps réel (courses, planning familial partagé).
+    </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════ CONCLUSION ═══════════════════════════════════════ -->
+<section>
+<h2>Conclusion</h2>
+
+<div class="card" style="border-left: 4px solid var(--green);">
+    <h3 style="color: var(--green); margin-top:0;">Bilan global : Projet mature de haute qualité</h3>
+    <p>
+        <strong>Assistant Matanne</strong> est un projet <strong>exemplaire</strong> pour une application Streamlit en production :
+    </p>
+    <ul>
+        <li>✅ Architecture en couches propre avec zéro import inversé dans core/</li>
+        <li>✅ ~110 000 LOC bien organisées en 611 fichiers Python</li>
+        <li>✅ 63 factories singleton, 16 services IA, 12 services CRUD génériques</li>
+        <li>✅ Design system 4 couches avec dark mode, a11y WCAG 2.1, et PWA</li>
+        <li>✅ API REST 32 endpoints avec sécurité multi-couches (JWT, rate limiting, OWASP)</li>
+        <li>✅ 8 045 tests passés, CI/CD GitHub Actions, Sentry monitoring</li>
+        <li>✅ 100% nommage français cohérent (Sprint 5 francisation)</li>
+    </ul>
+    <p>
+        Les <strong>axes d'amélioration prioritaires</strong> sont : compléter l'adoption des patterns framework dans les modules restants (~30%),
+        migrer les accès DB directs dans les modules UI vers des services, et étendre @cached_fragment/@lazy pour optimiser les performances UI.
+    </p>
+</div>
+
+<div class="card" style="text-align: center; margin-top: 1.5rem;">
+    <div style="color: var(--text-muted); font-size: 0.9rem;">
+        Rapport généré le 25 février 2026 — Post ROADMAP v9 (Sprint 5 Francisation)<br>
+        Analyse basée sur l'état complet du codebase à la date du rapport.
+    </div>
+</div>
+</section>
+
+</div><!-- .container -->
+
 </body>
 </html>

@@ -19,8 +19,9 @@ from sqlalchemy.orm import Session
 from src.core.ai import ClientIA, obtenir_client_ia
 from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import ElementJardin
+from src.core.monitoring import chronometre
 from src.services.core.base import BaseAIService
-from src.services.core.events.bus import obtenir_bus
+from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
 
 from .jardin_gamification_mixin import BADGES_JARDIN, JardinGamificationMixin
@@ -423,6 +424,8 @@ Réponds en JSON:
             source="jardin",
         )
 
+    @chronometre(nom="jardin.obtenir_plantes", seuil_alerte_ms=1500)
+    @chronometre("maison.jardin.plantes", seuil_alerte_ms=1500)
     @avec_cache(ttl=300)
     @avec_session_db
     def obtenir_plantes(self, db: Session | None = None) -> list[ElementJardin]:
@@ -440,6 +443,7 @@ Réponds en JSON:
         """Alias anglais pour obtenir_plantes (rétrocompatibilité)."""
         return self.obtenir_plantes(db)
 
+    @chronometre(nom="jardin.plantes_a_arroser", seuil_alerte_ms=1500)
     @avec_cache(ttl=300)
     @avec_session_db
     def obtenir_plantes_a_arroser(self, db: Session | None = None) -> list[ElementJardin]:
@@ -468,6 +472,297 @@ Réponds en JSON:
             )
             .all()
         )
+
+    @avec_cache(ttl=300)
+    @avec_session_db
+    def obtenir_recoltes_proches(self, db: Session | None = None) -> list[ElementJardin]:
+        """Récupère les plantes à récolter dans les 7 prochains jours.
+
+        Args:
+            db: Session DB (injectée automatiquement par @avec_session_db)
+
+        Returns:
+            Liste des plantes à récolter bientôt.
+        """
+        today = date.today()
+        dans_7_jours = today + timedelta(days=7)
+        return (
+            db.query(ElementJardin)
+            .filter(
+                ElementJardin.date_recolte_prevue.isnot(None),
+                ElementJardin.date_recolte_prevue >= today,
+                ElementJardin.date_recolte_prevue <= dans_7_jours,
+            )
+            .all()
+        )
+
+    def get_recoltes_proches(self, db: Session | None = None) -> list[ElementJardin]:
+        """Alias anglais pour obtenir_recoltes_proches (rétrocompatibilité)."""
+        return self.obtenir_recoltes_proches(db)
+
+    @avec_cache(ttl=300)
+    @avec_session_db
+    def obtenir_stats_jardin(self, db: Session | None = None) -> dict:
+        """Calcule les statistiques du jardin.
+
+        Args:
+            db: Session DB (injectée automatiquement par @avec_session_db)
+
+        Returns:
+            Dict avec total_plantes, a_arroser, recoltes_proches, categories.
+        """
+        total = db.query(ElementJardin).filter(ElementJardin.statut == "actif").count()
+        plantes_arroser = len(self._query_plantes_arrosage(db))
+
+        # Récoltes proches
+        today = date.today()
+        dans_7_jours = today + timedelta(days=7)
+        recoltes_proches = (
+            db.query(ElementJardin)
+            .filter(
+                ElementJardin.date_recolte_prevue.isnot(None),
+                ElementJardin.date_recolte_prevue >= today,
+                ElementJardin.date_recolte_prevue <= dans_7_jours,
+            )
+            .count()
+        )
+
+        # Catégories distinctes
+        from sqlalchemy import func
+
+        categories = (
+            db.query(func.count(func.distinct(ElementJardin.type)))
+            .filter(ElementJardin.statut == "actif")
+            .scalar()
+            or 0
+        )
+
+        return {
+            "total_plantes": total,
+            "a_arroser": plantes_arroser,
+            "recoltes_proches": recoltes_proches,
+            "categories": categories,
+        }
+
+    def get_stats_jardin(self, db: Session | None = None) -> dict:
+        """Alias anglais pour obtenir_stats_jardin (rétrocompatibilité)."""
+        return self.obtenir_stats_jardin(db)
+
+    # ─────────────────────────────────────────────────────────
+    # CRUD PLANTES (non-IA)
+    # ─────────────────────────────────────────────────────────
+
+    @avec_session_db
+    def ajouter_plante(
+        self,
+        nom: str,
+        type_plante: str,
+        db: Session | None = None,
+        **kwargs,
+    ) -> ElementJardin | None:
+        """Ajoute une plante au jardin.
+
+        Args:
+            nom: Nom de la plante
+            type_plante: Type (legume, fruit, fleur, etc.)
+            db: Session DB (injectée par @avec_session_db)
+            **kwargs: Champs additionnels (zone_id, date_plantation, etc.)
+
+        Returns:
+            ElementJardin créé, ou None en cas d'erreur.
+        """
+        try:
+            plante = ElementJardin(nom=nom, type_plante=type_plante, **kwargs)
+            db.add(plante)
+            db.commit()
+            db.refresh(plante)
+            logger.info(f"✅ Plante ajoutée: {nom}")
+            return plante
+        except Exception as e:
+            logger.error(f"Erreur ajout plante: {e}")
+            db.rollback()
+            return None
+
+    @avec_session_db
+    def arroser_plante(self, plante_id: int, db: Session | None = None) -> bool:
+        """Enregistre un arrosage pour une plante.
+
+        Args:
+            plante_id: ID de la plante
+            db: Session DB (injectée par @avec_session_db)
+
+        Returns:
+            True si l'arrosage a été enregistré.
+        """
+        try:
+            from src.core.models.maison import JournalJardin
+
+            log = JournalJardin(garden_item_id=plante_id, action="arrosage")
+            db.add(log)
+            db.commit()
+            logger.info(f"✅ Arrosage enregistré pour plante {plante_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Erreur arrosage: {e}")
+            db.rollback()
+            return False
+
+    @avec_session_db
+    def ajouter_log_jardin(
+        self,
+        plante_id: int,
+        action: str,
+        notes: str = "",
+        db: Session | None = None,
+    ) -> bool:
+        """Ajoute un log d'activité pour une plante.
+
+        Args:
+            plante_id: ID de la plante
+            action: Type d'action (arrosage, taille, recolte, etc.)
+            notes: Notes additionnelles
+            db: Session DB (injectée par @avec_session_db)
+
+        Returns:
+            True si le log a été enregistré.
+        """
+        try:
+            from src.core.models.maison import JournalJardin
+
+            log = JournalJardin(
+                garden_item_id=plante_id,
+                action=action,
+                notes=notes,
+            )
+            db.add(log)
+            db.commit()
+            logger.info(f"✅ Log jardin ajouté: {action} pour plante {plante_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Erreur log jardin: {e}")
+            db.rollback()
+            return False
+
+    # ─────────────────────────────────────────────────────────
+    # CRUD ZONES JARDIN
+    # ─────────────────────────────────────────────────────────
+
+    @avec_session_db
+    def charger_zones(self, db: Session | None = None) -> list[dict]:
+        """Charge toutes les zones du jardin depuis la DB.
+
+        Args:
+            db: Session DB (injectée par @avec_session_db)
+
+        Returns:
+            Liste de dicts avec: id, nom, type_zone, etat_note, superficie,
+            commentaire, photos.
+        """
+        try:
+            from src.core.models.temps_entretien import ZoneJardin
+
+            zones = db.query(ZoneJardin).all()
+            result = []
+            for z in zones:
+                result.append(
+                    {
+                        "id": z.id,
+                        "nom": z.nom,
+                        "type_zone": getattr(z, "type_zone", "autre"),
+                        "etat_note": getattr(z, "etat_note", None) or 3,
+                        "surface_m2": getattr(z, "surface_m2", None)
+                        or getattr(z, "superficie", None)
+                        or 0,
+                        "etat_description": getattr(z, "etat_description", None)
+                        or getattr(z, "commentaire", None)
+                        or "",
+                        "objectif": getattr(z, "objectif", None) or "",
+                        "prochaine_action": getattr(z, "prochaine_action", None) or "",
+                        "date_prochaine_action": getattr(z, "date_prochaine_action", None),
+                        "photos_url": getattr(z, "photos_url", None)
+                        or getattr(z, "photos", None)
+                        or [],
+                        "budget_estime": getattr(z, "budget_estime", None) or 0,
+                    }
+                )
+            return result
+        except Exception as e:
+            logger.error(f"Erreur chargement zones: {e}")
+            return []
+
+    @avec_session_db
+    def mettre_a_jour_zone(
+        self,
+        zone_id: int,
+        updates: dict,
+        db: Session | None = None,
+    ) -> bool:
+        """Met à jour une zone du jardin.
+
+        Args:
+            zone_id: ID de la zone.
+            updates: Dict des champs à mettre à jour.
+            db: Session DB (injectée par @avec_session_db)
+
+        Returns:
+            True si la mise à jour a réussi.
+        """
+        try:
+            from src.core.models.temps_entretien import ZoneJardin
+
+            zone = db.query(ZoneJardin).filter_by(id=zone_id).first()
+            if zone is None:
+                logger.warning(f"Zone {zone_id} non trouvée")
+                return False
+            for key, value in updates.items():
+                setattr(zone, key, value)
+            db.commit()
+            logger.info(f"✅ Zone {zone_id} mise à jour")
+            return True
+        except Exception as e:
+            logger.error(f"Erreur mise à jour zone: {e}")
+            db.rollback()
+            return False
+
+    @avec_session_db
+    def ajouter_photo_zone(
+        self,
+        zone_id: int,
+        url: str,
+        est_avant: bool = True,
+        db: Session | None = None,
+    ) -> bool:
+        """Ajoute une photo à une zone.
+
+        Args:
+            zone_id: ID de la zone.
+            url: URL de la photo.
+            est_avant: True pour photo 'avant', False pour 'après'.
+            db: Session DB (injectée par @avec_session_db)
+
+        Returns:
+            True si l'ajout a réussi.
+        """
+        try:
+            from src.core.models.temps_entretien import ZoneJardin
+
+            prefix = "avant:" if est_avant else "apres:"
+            photo_entry = f"{prefix}{url}"
+
+            zone = db.query(ZoneJardin).filter_by(id=zone_id).first()
+            if zone is None:
+                logger.warning(f"Zone {zone_id} non trouvée")
+                return False
+            photos = zone.photos_url if zone.photos_url is not None else []
+            photos.append(photo_entry)
+            zone.photos_url = photos
+            db.commit()
+            logger.info(f"✅ Photo ajoutée à zone {zone_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Erreur ajout photo: {e}")
+            db.rollback()
+            return False
 
 
 # ═══════════════════════════════════════════════════════════

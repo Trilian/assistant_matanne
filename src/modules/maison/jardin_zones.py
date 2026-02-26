@@ -9,16 +9,19 @@ Fonctionnalités:
 """
 
 import logging
+from typing import TYPE_CHECKING
 
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
 from src.ui.fragments import cached_fragment
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
+
+if TYPE_CHECKING:
+    from src.services.maison.jardin_service import JardinService
 
 __all__ = [
     "app",
@@ -36,6 +39,18 @@ __all__ = [
 
 _keys = KeyNamespace("jardin_zones")
 logger = logging.getLogger(__name__)
+
+
+# ═══════════════════════════════════════════════════════════
+# SERVICE LOADER
+# ═══════════════════════════════════════════════════════════
+
+
+def _get_service() -> "JardinService":
+    """Charge paresseusement le service jardin."""
+    from src.services.maison.jardin_service import get_jardin_service
+
+    return get_jardin_service()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -81,38 +96,7 @@ def charger_zones() -> list:
         Liste de dicts avec: id, nom, type_zone, etat_note, superficie,
         commentaire, photos.
     """
-    try:
-        with obtenir_contexte_db() as db:
-            from src.core.models.temps_entretien import ZoneJardin
-
-            zones = db.query(ZoneJardin).all()
-            result = []
-            for z in zones:
-                result.append(
-                    {
-                        "id": z.id,
-                        "nom": z.nom,
-                        "type_zone": getattr(z, "type_zone", "autre"),
-                        "etat_note": getattr(z, "etat_note", None) or 3,
-                        "surface_m2": getattr(z, "surface_m2", None)
-                        or getattr(z, "superficie", None)
-                        or 0,
-                        "etat_description": getattr(z, "etat_description", None)
-                        or getattr(z, "commentaire", None)
-                        or "",
-                        "objectif": getattr(z, "objectif", None) or "",
-                        "prochaine_action": getattr(z, "prochaine_action", None) or "",
-                        "date_prochaine_action": getattr(z, "date_prochaine_action", None),
-                        "photos_url": getattr(z, "photos_url", None)
-                        or getattr(z, "photos", None)
-                        or [],
-                        "budget_estime": getattr(z, "budget_estime", None) or 0,
-                    }
-                )
-            return result
-    except Exception as e:
-        logger.error(f"Erreur chargement zones: {e}")
-        return []
+    return _get_service().charger_zones()
 
 
 def mettre_a_jour_zone(zone_id: int, updates: dict, db=None) -> bool:
@@ -121,36 +105,15 @@ def mettre_a_jour_zone(zone_id: int, updates: dict, db=None) -> bool:
     Args:
         zone_id: ID de la zone.
         updates: Dict des champs à mettre à jour.
-        db: Session DB optionnelle.
+        db: Session DB optionnelle (ignorée, conservée pour rétrocompatibilité).
 
     Returns:
         True si la mise à jour a réussi.
     """
-    try:
-        from src.core.models.temps_entretien import ZoneJardin
-
-        if db is None:
-            with obtenir_contexte_db() as db:
-                zone = db.query(ZoneJardin).filter_by(id=zone_id).first()
-                if zone is None:
-                    return False
-                for key, value in updates.items():
-                    setattr(zone, key, value)
-                db.commit()
-                charger_zones.clear()
-                return True
-
-        zone = db.query(ZoneJardin).filter_by(id=zone_id).first()
-        if zone is None:
-            return False
-        for key, value in updates.items():
-            setattr(zone, key, value)
-        db.commit()
+    result = _get_service().mettre_a_jour_zone(zone_id, updates)
+    if result:
         charger_zones.clear()
-        return True
-    except Exception as e:
-        logger.error(f"Erreur mise à jour zone: {e}")
-        return False
+    return result
 
 
 def ajouter_photo_zone(zone_id: int, url: str, est_avant: bool = True, db=None) -> bool:
@@ -160,41 +123,15 @@ def ajouter_photo_zone(zone_id: int, url: str, est_avant: bool = True, db=None) 
         zone_id: ID de la zone.
         url: URL de la photo.
         est_avant: True pour photo 'avant', False pour 'après'.
-        db: Session DB optionnelle.
+        db: Session DB optionnelle (ignorée, conservée pour rétrocompatibilité).
 
     Returns:
         True si l'ajout a réussi.
     """
-    try:
-        from src.core.models.temps_entretien import ZoneJardin
-
-        prefix = "avant:" if est_avant else "apres:"
-        photo_entry = f"{prefix}{url}"
-
-        if db is None:
-            with obtenir_contexte_db() as db:
-                zone = db.query(ZoneJardin).filter_by(id=zone_id).first()
-                if zone is None:
-                    return False
-                photos = zone.photos_url if zone.photos_url is not None else []
-                photos.append(photo_entry)
-                zone.photos_url = photos
-                db.commit()
-                charger_zones.clear()
-                return True
-
-        zone = db.query(ZoneJardin).filter_by(id=zone_id).first()
-        if zone is None:
-            return False
-        photos = zone.photos_url if zone.photos_url is not None else []
-        photos.append(photo_entry)
-        zone.photos_url = photos
-        db.commit()
+    result = _get_service().ajouter_photo_zone(zone_id, url, est_avant)
+    if result:
         charger_zones.clear()
-        return True
-    except Exception as e:
-        logger.error(f"Erreur ajout photo: {e}")
-        return False
+    return result
 
 
 # ═══════════════════════════════════════════════════════════

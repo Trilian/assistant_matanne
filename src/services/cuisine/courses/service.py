@@ -14,7 +14,7 @@ from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_d
 from src.core.models import ArticleCourses
 from src.core.monitoring import chronometre
 from src.services.core.base import BaseAIService, BaseService
-from src.services.core.events.bus import obtenir_bus
+from src.services.core.events import obtenir_bus
 
 from .types import SuggestionCourses
 
@@ -34,12 +34,19 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
     - Liste de courses avec filtres
     - Suggestions IA basees sur inventaire
     - Gestion priorites et rayons magasin
+
+    Note:
+        Utilise MRO cooperatif via super().__init__() pour éviter
+        les appels manuels fragiles aux __init__ des classes parentes.
     """
 
     def __init__(self):
-        BaseService.__init__(self, ArticleCourses, cache_ttl=1800)
-        BaseAIService.__init__(
-            self,
+        # MRO coopératif: un seul super() avec tous les paramètres
+        super().__init__(
+            # BaseService parameters
+            model=ArticleCourses,
+            cache_ttl=1800,
+            # BaseAIService parameters
             client=obtenir_client_ia(),
             cache_prefix="courses",
             default_ttl=1800,

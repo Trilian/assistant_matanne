@@ -27,7 +27,7 @@ Hub de gestion familiale en production avec modules pour:
 Le core est organisé en **11 sous-packages** + fichiers utilitaires.
 
 - **ai/**: `ClientIA` (client Mistral), `AnalyseurIA` (parsing JSON/Pydantic), `CacheIA` (cache sémantique), `RateLimitIA` (rate limiting), `CircuitBreaker` (résilience API)
-- **caching/**: Cache multi-niveaux — `base.py` (types), `cache.py` (Cache), `memory.py` (L1), `session.py` (L2), `file.py` (L3), `orchestrator.py` (CacheMultiNiveau). Décorateur unifié `@avec_cache`
+- **caching/**: Cache multi-niveaux — `base.py` (types), `memory.py` (L1), `session.py` (L2), `file.py` (L3), `orchestrator.py` (CacheMultiNiveau, obtenir_cache). Décorateur unifié `@avec_cache`
 - **config/**: Pydantic `BaseSettings` — `settings.py` (Parametres, obtenir_parametres), `loader.py` (chargement .env, secrets Streamlit), `validator.py` (ValidateurConfiguration)
 - **date_utils/**: Package utilitaires de dates — `semaines.py`, `periodes.py`, `formatage.py`, `helpers.py`. Re-exports transparents via `__init__.py`.
 - **db/**: Base de données — `engine.py` (Engine SQLAlchemy, QueuePool), `session.py` (context managers), `migrations.py` (GestionnaireMigrations SQL-file), `utils.py` (health checks)
@@ -38,7 +38,7 @@ Le core est organisé en **11 sous-packages** + fichiers utilitaires.
 - **resilience/**: Politiques de résilience composables — `policies.py`. `executer()` retourne `T` directement ou lève une exception.
 - **state/**: Package état applicatif — `manager.py` (GestionnaireEtat), `shortcuts.py` (naviguer, revenir), `slices.py` (EtatNavigation, EtatCuisine, EtatUI)
 - **validation/**: Package validation — `schemas/` (sous-package Pydantic: `recettes.py`, `inventaire.py`, `courses.py`, `planning.py`, `famille.py`, `projets.py`, `_helpers.py`), `sanitizer.py` (anti-XSS/injection), `validators.py` (helpers)
-- **Utilitaires**: `bootstrap.py` (init config + events), `constants.py`, `exceptions.py` (exceptions pures sans UI), `errors.py` (ré-exports + helpers UI Streamlit), `lazy_loader.py` (ChargeurModuleDiffere), `logging.py`, `navigation.py` (construire_pages, st.navigation), `session_keys.py` (KeyNamespace), `storage.py` (SessionStorage Protocol), `async_utils.py`, `py.typed`
+- **Utilitaires**: `bootstrap.py` (init config + events), `constants.py`, `exceptions.py` (exceptions pures sans UI), `lazy_loader.py` (ChargeurModuleDiffere), `logging.py`, `navigation.py` (construire_pages, st.navigation), `session_keys.py` (KeyNamespace), `storage.py` (SessionStorage Protocol), `async_utils.py`, `py.typed`
 
 ### Couche Services (src/services/)
 
@@ -164,7 +164,8 @@ python manage.py generate_requirements
 from src.core.exceptions import ErreurBaseDeDonnees
 
 # Modules Streamlit (avec helpers d'affichage UI)
-from src.core.errors import afficher_erreur, ErreurBaseDeDonnees
+from src.ui.feedback import afficher_erreur
+from src.core.exceptions import ErreurBaseDeDonnees
 
 try:
     result = perform_operation()
@@ -173,7 +174,7 @@ except Exception as e:
     raise ErreurBaseDeDonnees("Message convivial pour l'utilisateur")
 ```
 
-Voir [src/core/exceptions.py](src/core/exceptions.py) (exceptions pures), [src/core/errors.py](src/core/errors.py) (helpers UI) et [src/core/decorators/](src/core/decorators/) pour le décorateur `@avec_gestion_erreurs`.
+Voir [src/core/exceptions.py](src/core/exceptions.py) (exceptions pures), [src/ui/feedback/](src/ui/feedback/) (helpers UI afficher_erreur/succes) et [src/core/decorators/](src/core/decorators/) pour le décorateur `@avec_gestion_erreurs`.
 
 ### Gestion des sessions de base de données
 

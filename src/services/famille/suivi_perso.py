@@ -21,7 +21,8 @@ from src.core.models import (
     ProfilUtilisateur,
     ResumeQuotidienGarmin,
 )
-from src.services.core.events.bus import obtenir_bus
+from src.core.monitoring import chronometre
+from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -61,6 +62,7 @@ class ServiceSuiviPerso:
     # USER DATA
     # ═══════════════════════════════════════════════════════════
 
+    @chronometre("famille.suivi_perso.user_data", seuil_alerte_ms=2000)
     @avec_gestion_erreurs(default_return={})
     @avec_cache(ttl=300)
     @avec_session_db

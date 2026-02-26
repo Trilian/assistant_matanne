@@ -23,7 +23,7 @@ import logging
 from sqlalchemy.orm import Session
 
 from src.core.ai import obtenir_client_ia
-from src.core.caching import Cache
+from src.core.caching import obtenir_cache
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db, avec_validation
 from src.core.exceptions import ErreurValidation
 from src.core.models import (
@@ -36,7 +36,7 @@ from src.core.models import (
 from src.core.monitoring import chronometre
 from src.core.validation import RecetteInput
 from src.services.core.base import BaseAIService, BaseService, RecipeAIMixin
-from src.services.core.events.bus import obtenir_bus
+from src.services.core.events import obtenir_bus
 
 from .io_mixin import RecetteIOMixin
 from .recettes_ia_suggestions import RecettesIASuggestionsMixin
@@ -85,12 +85,12 @@ class ServiceRecettes(
     """
 
     def __init__(self):
-        # Initialisation CRUD
-        BaseService.__init__(self, Recette, cache_ttl=3600)
-
-        # Initialisation IA (rate limiting + cache auto)
-        BaseAIService.__init__(
-            self,
+        # MRO coopératif: tous les arguments passés via kwargs
+        super().__init__(
+            # Arguments pour BaseService
+            model=Recette,
+            cache_ttl=3600,
+            # Arguments pour BaseAIService
             client=obtenir_client_ia(),
             cache_prefix="recettes",
             default_ttl=3600,
@@ -192,7 +192,7 @@ class ServiceRecettes(
         db.refresh(recette)
 
         # Invalider cache
-        Cache.invalider(pattern="recettes")
+        obtenir_cache().invalidate(pattern="recettes")
 
         # Émettre événement domaine
         obtenir_bus().emettre(

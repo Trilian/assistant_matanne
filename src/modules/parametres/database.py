@@ -13,7 +13,31 @@ from src.core.session_keys import SK
 from src.core.state import rerun
 from src.ui import etat_vide
 from src.ui.feedback import afficher_erreur, afficher_succes, spinner_intelligent
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import lazy, ui_fragment
+
+
+@lazy(condition=lambda: st.session_state.get(SK.SHOW_MIGRATIONS_HISTORY, False), show_skeleton=True)
+def _afficher_historique_migrations():
+    """Historique des migrations SQL (chargé à la demande)."""
+    with st.expander("📜 Historique des Migrations", expanded=True):
+        appliquees = GestionnaireMigrations.obtenir_migrations_appliquees()
+        disponibles = GestionnaireMigrations.obtenir_migrations_disponibles()
+
+        if disponibles:
+            for m in disponibles:
+                v = m["version"]
+                if v in appliquees:
+                    date_app = appliquees[v].get("applied_at", "")
+                    date_str = f" ({date_app:%Y-%m-%d})" if date_app else ""
+                    st.markdown(f"✅ **v{v}** - {m['name']} (`{m['fichier']}`){date_str}")
+                else:
+                    st.markdown(f"⏳ **v{v}** - {m['name']} (`{m['fichier']}`) — en attente")
+
+            modifiees = GestionnaireMigrations.verifier_checksums()
+            if modifiees:
+                st.warning(f"⚠️ {len(modifiees)} migration(s) modifiée(s) après application")
+        else:
+            etat_vide("Aucun fichier SQL dans sql/migrations/", "🗄️")
 
 
 @st.dialog("🧹 Confirmer Optimisation")
@@ -148,27 +172,7 @@ def afficher_database_config():
             )
 
     # Afficher l'historique si demandé
-    if st.session_state.get(SK.SHOW_MIGRATIONS_HISTORY, False):
-        with st.expander("📜 Historique des Migrations", expanded=True):
-            appliquees = GestionnaireMigrations.obtenir_migrations_appliquees()
-            disponibles = GestionnaireMigrations.obtenir_migrations_disponibles()
-
-            if disponibles:
-                for m in disponibles:
-                    v = m["version"]
-                    if v in appliquees:
-                        date_app = appliquees[v].get("applied_at", "")
-                        date_str = f" ({date_app:%Y-%m-%d})" if date_app else ""
-                        st.markdown(f"✅ **v{v}** - {m['name']} (`{m['fichier']}`){date_str}")
-                    else:
-                        st.markdown(f"⏳ **v{v}** - {m['name']} (`{m['fichier']}`) — en attente")
-
-                # Vérifier les checksums modifiés
-                modifiees = GestionnaireMigrations.verifier_checksums()
-                if modifiees:
-                    st.warning(f"⚠️ {len(modifiees)} migration(s) modifiée(s) après application")
-            else:
-                etat_vide("Aucun fichier SQL dans sql/migrations/", "🗄️")
+    _afficher_historique_migrations()
 
     st.markdown("---")
 

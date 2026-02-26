@@ -19,7 +19,6 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
 from src.core.models.maison import Projet, TacheProjet
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
@@ -29,6 +28,7 @@ from src.modules.maison.utils import (
     get_projets_urgents,
     get_stats_projets,
 )
+from src.ui.fragments import cached_fragment, ui_fragment
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 
@@ -49,6 +49,18 @@ __all__ = [
 
 _keys = KeyNamespace("projets")
 logger = logging.getLogger(__name__)
+
+
+# ═══════════════════════════════════════════════════════════
+# SERVICE LOADER
+# ═══════════════════════════════════════════════════════════
+
+
+def _get_service() -> ProjetsService:
+    """Charge paresseusement le service projets."""
+    from src.services.maison import get_projets_service
+
+    return get_projets_service()
 
 
 # Navigation helper
@@ -78,30 +90,27 @@ def creer_projet(
 ) -> int | None:
     """Crée un nouveau projet.
 
+    Args:
+        nom: Nom du projet.
+        description: Description du projet.
+        categorie: Catégorie (conservée pour rétrocompatibilité, non utilisée).
+        priorite: Priorité (basse, moyenne, haute, urgente).
+        db: Session DB (ignorée, conservée pour rétrocompatibilité).
+        date_fin: Date d'échéance optionnelle.
+
     Returns:
         ID du projet créé, ou None en cas d'erreur.
     """
-
-    def _do(session):
-        projet = Projet(
+    try:
+        project_id = _get_service().creer_projet(
             nom=nom,
             description=description,
             priorite=priorite,
-            statut="en_cours",
+            date_fin_prevue=date_fin,
         )
-        if date_fin:
-            projet.date_fin_prevue = date_fin
-        session.add(projet)
-        session.commit()
-        session.refresh(projet)
-        clear_maison_cache()
-        return projet.id
-
-    try:
-        if db is None:
-            with obtenir_contexte_db() as session:
-                return _do(session)
-        return _do(db)
+        if project_id:
+            clear_maison_cache()
+        return project_id
     except Exception as e:
         logger.error(f"Erreur création projet: {e}")
         st.error(f"Erreur lors de la création du projet: {e}")
@@ -118,42 +127,49 @@ def ajouter_tache(
 ) -> bool:
     """Ajoute une tâche à un projet.
 
+    Args:
+        project_id: ID du projet.
+        nom: Nom de la tâche.
+        description: Description optionnelle.
+        priorite: Priorité optionnelle.
+        date_echeance: Date d'échéance optionnelle.
+        db: Session DB (ignorée, conservée pour rétrocompatibilité).
+
     Returns:
         True si la tâche a été ajoutée.
     """
     try:
-        kwargs = {
-            "project_id": project_id,
-            "nom": nom,
-            "statut": "a_faire",
-        }
-        if description:
-            kwargs["description"] = description
-        if priorite:
-            kwargs["priorite"] = priorite
-        if date_echeance:
-            kwargs["date_echeance"] = date_echeance
-        tache = TacheProjet(**kwargs)
-        db.add(tache)
-        db.commit()
-        clear_maison_cache()
-        return True
+        result = _get_service().ajouter_tache(
+            project_id=project_id,
+            nom=nom,
+            description=description,
+            priorite=priorite,
+            date_echeance=date_echeance,
+        )
+        if result:
+            clear_maison_cache()
+        return result
     except Exception as e:
         logger.error(f"Erreur ajout tâche: {e}")
         st.error(f"Erreur lors de l'ajout de la tâche: {e}")
         return False
 
 
-def marquer_tache_done(task_id: int, db) -> bool:
-    """Marque une tâche comme terminée."""
+def marquer_tache_done(task_id: int, db=None) -> bool:
+    """Marque une tâche comme terminée.
+
+    Args:
+        task_id: ID de la tâche.
+        db: Session DB (ignorée, conservée pour rétrocompatibilité).
+
+    Returns:
+        True si la tâche a été marquée terminée.
+    """
     try:
-        tache = db.query(TacheProjet).get(task_id)
-        if tache is None:
-            return False
-        tache.statut = "termine"
-        db.commit()
-        clear_maison_cache()
-        return True
+        result = _get_service().marquer_tache_terminee(task_id)
+        if result:
+            clear_maison_cache()
+        return result
     except Exception as e:
         logger.error(f"Erreur marquage tâche: {e}")
         st.error(f"Erreur: {e}")
@@ -161,24 +177,20 @@ def marquer_tache_done(task_id: int, db) -> bool:
 
 
 def marquer_projet_done(project_id: int, db=None) -> bool:
-    """Marque un projet comme terminé."""
+    """Marque un projet comme terminé.
+
+    Args:
+        project_id: ID du projet.
+        db: Session DB (ignorée, conservée pour rétrocompatibilité).
+
+    Returns:
+        True si le projet a été marqué terminé.
+    """
     try:
-        if db is None:
-            with obtenir_contexte_db() as db:
-                projet = db.query(Projet).get(project_id)
-                if projet is None:
-                    return False
-                projet.statut = "termine"
-                db.commit()
-                clear_maison_cache()
-                return True
-        projet = db.query(Projet).get(project_id)
-        if projet is None:
-            return False
-        projet.statut = "termine"
-        db.commit()
-        clear_maison_cache()
-        return True
+        result = _get_service().marquer_projet_termine(project_id)
+        if result:
+            clear_maison_cache()
+        return result
     except Exception as e:
         logger.error(f"Erreur marquage projet: {e}")
         st.error(f"Erreur: {e}")
@@ -231,6 +243,7 @@ def run_ia_analyser_risques(service: ProjetsService, description: str) -> tuple[
 # ═══════════════════════════════════════════════════════════
 
 
+@cached_fragment(ttl=300)
 def creer_graphique_progression(df: pd.DataFrame):
     """Crée un graphique de progression des projets.
 
@@ -323,6 +336,7 @@ def app():
             _onglet_templates()
 
 
+@ui_fragment
 def _onglet_projets():
     """Affiche la liste des projets."""
     df = charger_projets()
@@ -348,9 +362,8 @@ def _onglet_projets():
 
             st.progress(min(row.get("progress", 0) / 100, 1.0))
 
-            # Tâches
-            with obtenir_contexte_db() as db:
-                taches = db.query(TacheProjet).filter_by(project_id=row["id"]).all()
+            # Tâches (chargées via service)
+            taches = _get_service().charger_taches_projet(row["id"])
 
             if taches:
                 for t in taches:
@@ -359,8 +372,7 @@ def _onglet_projets():
                     st.caption(f"{icone} {t.nom}{echeance}")
                     if t.statut != "termine":
                         if st.button("✓ Terminer", key=f"task_done_{t.id}"):
-                            with obtenir_contexte_db() as db2:
-                                marquer_tache_done(t.id, db2)
+                            marquer_tache_done(t.id)
                             rerun()
 
             # Bouton terminer le projet
@@ -369,6 +381,7 @@ def _onglet_projets():
                 rerun()
 
 
+@ui_fragment
 def _onglet_nouveau():
     """Formulaire de création de projet."""
     st.subheader("➕ Nouveau projet")
@@ -392,6 +405,7 @@ def _onglet_nouveau():
             rerun()
 
 
+@ui_fragment
 def _onglet_graphique():
     """Graphique de progression."""
     df = charger_projets()
@@ -409,6 +423,7 @@ def _onglet_graphique():
     st.plotly_chart(fig, use_container_width=True)
 
 
+@ui_fragment
 def _onglet_templates():
     """Templates de projets."""
     st.subheader("📝 Templates de projets")

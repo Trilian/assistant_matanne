@@ -37,9 +37,15 @@ class BaseService(PipelineMixin, AdvancedQueryMixin, Generic[T]):
     - Pipeline middleware optionnel (``PipelineMixin``)
 
     ⚠️ ATTENTION : Ce fichier ne doit JAMAIS importer depuis src.ui
+
+    Note:
+        Utilise le MRO coopératif avec **kwargs pour permettre
+        l'héritage multiple avec BaseAIService.
     """
 
-    def __init__(self, model: type[T], cache_ttl: int = 60):
+    def __init__(self, model: type[T], cache_ttl: int = 60, **kwargs: Any):
+        # MRO coopératif: passer les kwargs restants aux classes parentes
+        super().__init__(**kwargs)
         self.model = model
         self.model_name = model.__name__
         self.cache_ttl = cache_ttl
@@ -64,17 +70,17 @@ class BaseService(PipelineMixin, AdvancedQueryMixin, Generic[T]):
 
     def get_by_id(self, entity_id: int, db: Session | None = None) -> T | None:
         """Récupère par ID avec cache"""
-        from src.core.caching import Cache
+        from src.core.caching import obtenir_cache
 
         def _execute(session: Session) -> T | None:
             cache_key = f"{self.model_name.lower()}_{entity_id}"
-            cached = Cache.obtenir(cache_key, ttl=self.cache_ttl)
+            cached = obtenir_cache().get(cache_key)
             if cached:
                 return cached
 
             entity = session.get(self.model, entity_id)
             if entity:
-                Cache.definir(cache_key, entity, ttl=self.cache_ttl)
+                obtenir_cache().set(cache_key, entity, ttl=self.cache_ttl)
             return entity
 
         return self._with_session(_execute, db)
@@ -207,9 +213,9 @@ class BaseService(PipelineMixin, AdvancedQueryMixin, Generic[T]):
 
     def _invalider_cache(self):
         """Invalide le cache associé à ce modèle."""
-        from src.core.caching import Cache
+        from src.core.caching import obtenir_cache
 
-        Cache.invalider(pattern=self.model_name.lower())
+        obtenir_cache().invalidate(pattern=self.model_name.lower())
 
 
 __all__ = ["BaseService", "T"]

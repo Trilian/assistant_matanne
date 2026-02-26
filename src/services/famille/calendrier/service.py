@@ -26,6 +26,7 @@ from src.core.models import (
     Planning,
     Repas,
 )
+from src.core.monitoring import chronometre
 from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
 
@@ -109,6 +110,7 @@ class CalendarSyncService(GoogleCalendarMixin):
     # EXPORT VERS CALENDRIER EXTERNE
     # ═══════════════════════════════════════════════════════════
 
+    @chronometre(nom="calendrier.export_ical", seuil_alerte_ms=5000)
     @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
     def export_to_ical(
         self,
@@ -251,6 +253,7 @@ class CalendarSyncService(GoogleCalendarMixin):
     # IMPORT DEPUIS CALENDRIER EXTERNE
     # ═══════════════════════════════════════════════════════════
 
+    @chronometre(nom="calendrier.import_ical", seuil_alerte_ms=10000)
     @avec_resilience(retry=2, timeout_s=30, fallback=None)
     @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
     def import_from_ical_url(

@@ -13,7 +13,6 @@ import logging
 import pandas as pd
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.state import rerun
 from src.modules._framework import error_boundary
@@ -42,65 +41,41 @@ __all__ = [
 _keys = KeyNamespace("jardin")
 logger = logging.getLogger(__name__)
 
-# NOTE: Pour l'accès au service IA jardin, utilisez:
-# from src.services.maison import get_jardin_service
+
+# ═══════════════════════════════════════════════════════════
+# SERVICE LAZY LOADER
+# ═══════════════════════════════════════════════════════════
+
+
+def _get_service():
+    """Retourne le service singleton JardinService."""
+    from src.services.maison import get_jardin_service
+
+    return get_jardin_service()
 
 
 # ═══════════════════════════════════════════════════════════
-# FONCTIONS METIER
+# FONCTIONS METIER (délèguent au service)
 # ═══════════════════════════════════════════════════════════
 
 
 def ajouter_plante(nom: str, type_plante: str, **kwargs) -> bool:
     """Ajoute une plante au jardin."""
-    try:
-        from src.core.models.maison import ElementJardin
-
-        with obtenir_contexte_db() as db:
-            plante = ElementJardin(nom=nom, type_plante=type_plante, **kwargs)
-            db.add(plante)
-            db.commit()
-            return True
-    except Exception as e:
-        logger.error(f"Erreur ajout plante: {e}")
-        st.error(f"Erreur: {e}")
+    result = _get_service().ajouter_plante(nom, type_plante, **kwargs)
+    if result is None:
+        st.error("Erreur lors de l'ajout de la plante")
         return False
+    return True
 
 
 def arroser_plante(plante_id: int) -> bool:
     """Enregistre un arrosage pour une plante."""
-    try:
-        from src.core.models.maison import JournalJardin
-
-        with obtenir_contexte_db() as db:
-            log = JournalJardin(garden_item_id=plante_id, action="arrosage")
-            db.add(log)
-            db.commit()
-            return True
-    except Exception as e:
-        logger.error(f"Erreur arrosage: {e}")
-        st.error(f"Erreur: {e}")
-        return False
+    return _get_service().arroser_plante(plante_id)
 
 
 def ajouter_log(plante_id: int, action: str, notes: str = "") -> bool:
     """Ajoute un log d'activité pour une plante."""
-    try:
-        from src.core.models.maison import JournalJardin
-
-        with obtenir_contexte_db() as db:
-            log = JournalJardin(
-                garden_item_id=plante_id,
-                action=action,
-                notes=notes,
-            )
-            db.add(log)
-            db.commit()
-            return True
-    except Exception as e:
-        logger.error(f"Erreur log jardin: {e}")
-        st.error(f"Erreur: {e}")
-        return False
+    return _get_service().ajouter_log_jardin(plante_id, action, notes)
 
 
 # ═══════════════════════════════════════════════════════════

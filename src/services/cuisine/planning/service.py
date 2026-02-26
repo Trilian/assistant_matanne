@@ -14,12 +14,11 @@ from typing import Any
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from src.core.ai import obtenir_client_ia
-from src.core.caching import Cache
 from src.core.date_utils.helpers import get_weekday_names
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import Planning, Repas
 from src.services.core.base import BaseAIService, BaseService, PlanningAIMixin
-from src.services.core.events.bus import obtenir_bus
+from src.services.core.events import obtenir_bus
 
 from .nutrition import determine_protein_type
 from .planning_ia_mixin import PlanningIAGenerationMixin
@@ -51,9 +50,12 @@ class ServicePlanning(
     """
 
     def __init__(self):
-        BaseService.__init__(self, Planning, cache_ttl=1800)
-        BaseAIService.__init__(
-            self,
+        # MRO coopératif: tous les arguments passés via kwargs
+        super().__init__(
+            # Arguments pour BaseService
+            model=Planning,
+            cache_ttl=1800,
+            # Arguments pour BaseAIService
             client=obtenir_client_ia(),
             cache_prefix="planning",
             default_ttl=1800,

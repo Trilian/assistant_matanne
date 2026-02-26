@@ -131,93 +131,89 @@ def mock_db_context(session):
 class TestMeublesCrud:
     """Tests des fonctions CRUD"""
 
-    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
-    def test_get_all_meubles_sans_filtre(self, mock_ctx, mock_meuble):
+    @patch("src.modules.maison.meubles.crud._get_service")
+    def test_get_all_meubles_sans_filtre(self, mock_get_service, mock_meuble):
         """Test récupération de tous les meubles sans filtre"""
         from src.modules.maison.meubles import get_all_meubles
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.order_by.return_value.all.return_value = [mock_meuble]
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.get_all_meubles.return_value = [mock_meuble]
+        mock_get_service.return_value = mock_service
 
         result = get_all_meubles()
 
         assert len(result) == 1
         assert result[0].nom == "Table basse"
+        mock_service.get_all_meubles.assert_called_once_with(filtre_statut=None, filtre_piece=None)
 
-    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
-    def test_get_all_meubles_avec_filtre_statut(self, mock_ctx, mock_meuble):
+    @patch("src.modules.maison.meubles.crud._get_service")
+    def test_get_all_meubles_avec_filtre_statut(self, mock_get_service, mock_meuble):
         """Test récupération avec filtre statut"""
         from src.modules.maison.meubles import get_all_meubles
 
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_session.query.return_value = mock_query
-        mock_query.filter.return_value = mock_query
-        mock_query.order_by.return_value.all.return_value = [mock_meuble]
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.get_all_meubles.return_value = [mock_meuble]
+        mock_get_service.return_value = mock_service
 
         result = get_all_meubles(filtre_statut="souhaite")
 
         assert len(result) == 1
-        mock_query.filter.assert_called()
+        mock_service.get_all_meubles.assert_called_once_with(
+            filtre_statut="souhaite", filtre_piece=None
+        )
 
-    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
-    def test_get_all_meubles_avec_filtre_piece(self, mock_ctx, mock_meuble):
+    @patch("src.modules.maison.meubles.crud._get_service")
+    def test_get_all_meubles_avec_filtre_piece(self, mock_get_service, mock_meuble):
         """Test récupération avec filtre pièce"""
         from src.modules.maison.meubles import get_all_meubles
 
-        mock_session = MagicMock()
-        mock_query = MagicMock()
-        mock_session.query.return_value = mock_query
-        mock_query.filter.return_value = mock_query
-        mock_query.order_by.return_value.all.return_value = [mock_meuble]
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.get_all_meubles.return_value = [mock_meuble]
+        mock_get_service.return_value = mock_service
 
         result = get_all_meubles(filtre_piece="salon")
 
         assert len(result) == 1
+        mock_service.get_all_meubles.assert_called_once_with(
+            filtre_statut=None, filtre_piece="salon"
+        )
 
-    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
-    def test_get_meuble_by_id_existant(self, mock_ctx, mock_meuble):
+    @patch("src.modules.maison.meubles.crud._get_service")
+    def test_get_meuble_by_id_existant(self, mock_get_service, mock_meuble):
         """Test récupération d'un meuble existant par ID"""
         from src.modules.maison.meubles import get_meuble_by_id
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.first.return_value = mock_meuble
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.get_meuble_by_id.return_value = mock_meuble
+        mock_get_service.return_value = mock_service
 
         result = get_meuble_by_id(1)
 
         assert result is not None
         assert result.id == 1
+        mock_service.get_meuble_by_id.assert_called_once_with(1)
 
-    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
-    def test_get_meuble_by_id_inexistant(self, mock_ctx):
+    @patch("src.modules.maison.meubles.crud._get_service")
+    def test_get_meuble_by_id_inexistant(self, mock_get_service):
         """Test récupération d'un meuble inexistant"""
         from src.modules.maison.meubles import get_meuble_by_id
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.first.return_value = None
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.get_meuble_by_id.return_value = None
+        mock_get_service.return_value = mock_service
 
         result = get_meuble_by_id(999)
 
         assert result is None
+        mock_service.get_meuble_by_id.assert_called_once_with(999)
 
-    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
-    def test_create_meuble(self, mock_ctx):
+    @patch("src.modules.maison.meubles.crud._get_service")
+    def test_create_meuble(self, mock_get_service):
         """Test création d'un nouveau meuble"""
         from src.modules.maison.meubles import create_meuble
 
-        mock_session = MagicMock()
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_get_service.return_value = mock_service
 
         data = {
             "nom": "Nouvelle étagère",
@@ -228,83 +224,79 @@ class TestMeublesCrud:
 
         create_meuble(data)
 
-        mock_session.add.assert_called_once()
-        mock_session.commit.assert_called_once()
-        mock_session.refresh.assert_called_once()
+        mock_service.create_meuble.assert_called_once_with(data)
 
-    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
-    def test_update_meuble_existant(self, mock_ctx, mock_meuble):
+    @patch("src.modules.maison.meubles.crud._get_service")
+    def test_update_meuble_existant(self, mock_get_service, mock_meuble):
         """Test mise à jour d'un meuble existant"""
         from src.modules.maison.meubles import update_meuble
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.first.return_value = mock_meuble
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.update_meuble.return_value = mock_meuble
+        mock_get_service.return_value = mock_service
 
         data = {"nom": "Table basse modifiée", "statut": "achete"}
 
         result = update_meuble(1, data)
 
         assert result is not None
-        mock_session.commit.assert_called_once()
+        mock_service.update_meuble.assert_called_once_with(1, data)
 
-    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
-    def test_update_meuble_inexistant(self, mock_ctx):
+    @patch("src.modules.maison.meubles.crud._get_service")
+    def test_update_meuble_inexistant(self, mock_get_service):
         """Test mise à jour d'un meuble inexistant"""
         from src.modules.maison.meubles import update_meuble
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.first.return_value = None
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.update_meuble.return_value = None
+        mock_get_service.return_value = mock_service
 
         result = update_meuble(999, {"nom": "Test"})
 
         assert result is None
+        mock_service.update_meuble.assert_called_once_with(999, {"nom": "Test"})
 
-    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
-    def test_delete_meuble_existant(self, mock_ctx, mock_meuble):
+    @patch("src.modules.maison.meubles.crud._get_service")
+    def test_delete_meuble_existant(self, mock_get_service, mock_meuble):
         """Test suppression d'un meuble existant"""
         from src.modules.maison.meubles import delete_meuble
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.first.return_value = mock_meuble
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.delete_meuble.return_value = True
+        mock_get_service.return_value = mock_service
 
         result = delete_meuble(1)
 
         assert result is True
-        mock_session.delete.assert_called_once_with(mock_meuble)
-        mock_session.commit.assert_called_once()
+        mock_service.delete_meuble.assert_called_once_with(1)
 
-    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
-    def test_delete_meuble_inexistant(self, mock_ctx):
+    @patch("src.modules.maison.meubles.crud._get_service")
+    def test_delete_meuble_inexistant(self, mock_get_service):
         """Test suppression d'un meuble inexistant"""
         from src.modules.maison.meubles import delete_meuble
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.first.return_value = None
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.delete_meuble.return_value = False
+        mock_get_service.return_value = mock_service
 
         result = delete_meuble(999)
 
         assert result is False
+        mock_service.delete_meuble.assert_called_once_with(999)
 
-    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
-    def test_get_budget_resume(self, mock_ctx, mock_meuble, mock_meuble_minimal):
+    @patch("src.modules.maison.meubles.crud._get_service")
+    def test_get_budget_resume(self, mock_get_service, mock_meuble, mock_meuble_minimal):
         """Test calcul du résumé budget"""
         from src.modules.maison.meubles import get_budget_resume
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.all.return_value = [
-            mock_meuble,
-            mock_meuble_minimal,
-        ]
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.get_budget_resume.return_value = {
+            "par_piece": {"salon": {"count": 1, "total_estime": 150, "total_max": 200}},
+            "total_estime": 150,
+            "total_max": 200,
+            "nb_articles": 2,
+        }
+        mock_get_service.return_value = mock_service
 
         result = get_budget_resume()
 
@@ -313,22 +305,28 @@ class TestMeublesCrud:
         assert "total_max" in result
         assert "nb_articles" in result
         assert result["nb_articles"] == 2
+        mock_service.get_budget_resume.assert_called_once()
 
-    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
-    def test_get_budget_resume_vide(self, mock_ctx):
+    @patch("src.modules.maison.meubles.crud._get_service")
+    def test_get_budget_resume_vide(self, mock_get_service):
         """Test résumé budget sans meubles"""
         from src.modules.maison.meubles import get_budget_resume
 
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.all.return_value = []
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.get_budget_resume.return_value = {
+            "par_piece": {},
+            "total_estime": 0,
+            "total_max": 0,
+            "nb_articles": 0,
+        }
+        mock_get_service.return_value = mock_service
 
         result = get_budget_resume()
 
         assert result["nb_articles"] == 0
         assert result["total_estime"] == 0
         assert result["total_max"] == 0
+        mock_service.get_budget_resume.assert_called_once()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -340,8 +338,7 @@ class TestMeublesUI:
     """Tests des fonctions d'affichage UI"""
 
     @patch("src.modules.maison.meubles.ui.st")
-    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
-    def test_render_formulaire_nouveau(self, mock_ctx, mock_st):
+    def test_render_formulaire_nouveau(self, mock_st):
         """Test formulaire d'ajout nouveau meuble"""
         from src.modules.maison.meubles import afficher_formulaire
 
@@ -356,8 +353,7 @@ class TestMeublesUI:
         mock_st.text_input.assert_called()
 
     @patch("src.modules.maison.meubles.ui.st")
-    @patch("src.modules.maison.meubles.crud.obtenir_contexte_db")
-    def test_render_formulaire_edition(self, mock_ctx, mock_st, mock_meuble):
+    def test_render_formulaire_edition(self, mock_st, mock_meuble):
         """Test formulaire d'édition meuble existant"""
         from src.modules.maison.meubles import afficher_formulaire
 

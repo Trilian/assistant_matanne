@@ -12,6 +12,7 @@ from .circuit_breaker import (
 from .client import ClientIA, obtenir_client_ia
 from .parser import AnalyseurIA, analyser_liste_reponse
 from .rate_limit import RateLimitIA
+from .router import Fournisseur, RouteurIA, obtenir_routeur_ia
 
 __all__ = [
     "ClientIA",
@@ -23,4 +24,7 @@ __all__ = [
     "EtatCircuit",
     "obtenir_circuit",
     "RateLimitIA",
+    "RouteurIA",
+    "Fournisseur",
+    "obtenir_routeur_ia",
 ]

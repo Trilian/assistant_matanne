@@ -155,11 +155,11 @@ class GestionnaireEtat:
     @staticmethod
     def reset_complet():
         """Reset complet: state + cache app + cache lazy loader."""
-        from src.core.caching import Cache
+        from src.core.caching import obtenir_cache
         from src.core.lazy_loader import ChargeurModuleDiffere
 
         GestionnaireEtat.reinitialiser()
-        Cache.vider()
+        obtenir_cache().clear()
         ChargeurModuleDiffere.vider_cache()
         logger.info("🔄 Reset complet effectué")
 

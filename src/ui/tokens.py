@@ -253,7 +253,7 @@ __all__ = [
     "Transition",
     "ZIndex",
     "Variante",
-    "obtenir_couleurs_variante",
+    # obtenir_couleurs_variante retiré de l'API publique (deprecated)
     "gradient",
     "gradient_subtil",
 ]

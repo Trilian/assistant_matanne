@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import ArticleInventaire
+from src.core.monitoring import chronometre
 from src.services.rapports.types import RapportBudget
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,7 @@ logger = logging.getLogger(__name__)
 class BudgetReportMixin:
     """Mixin fournissant les méthodes de rapport budget/dépenses PDF."""
 
+    @chronometre("rapports.budget.donnees", seuil_alerte_ms=2000)
     @avec_cache(ttl=300)
     @avec_session_db
     def generer_donnees_rapport_budget(

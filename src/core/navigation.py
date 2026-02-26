@@ -20,7 +20,7 @@ import logging
 
 import streamlit as st
 
-from src.core.lazy_loader import ChargeurModuleDiffere
+from .lazy_loader import ChargeurModuleDiffere
 
 logger = logging.getLogger(__name__)
 

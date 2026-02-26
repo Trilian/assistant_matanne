@@ -84,12 +84,7 @@ class CircuitBreaker:
     def etat(self) -> EtatCircuit:
         """État actuel du circuit."""
         with self._lock:
-            if self._etat == EtatCircuit.OUVERT:
-                # Vérifier si le délai de reset est passé
-                if time.time() - self._derniere_ouverture >= self.delai_reset:
-                    self._etat = EtatCircuit.SEMI_OUVERT
-                    logger.info(f"🔄 Circuit '{self.nom}' → SEMI_OUVERT (test de reprise)")
-            return self._etat
+            return self._verifier_etat_interne()
 
     def appeler(self, fn: Callable[[], T], fallback: Callable[[], T] | None = None) -> T:
         """
@@ -97,6 +92,9 @@ class CircuitBreaker:
 
         Gère automatiquement les coroutines : si ``fn()`` retourne une coroutine,
         elle sera exécutée via ``asyncio.run()`` ou un event loop existant.
+
+        Thread-safe : en état SEMI_OUVERT, un seul appel de test est autorisé
+        à la fois ; les appels concurrents reçoivent le fallback ou une erreur.
 
         Args:
             fn: Fonction à appeler (sync ou async)
@@ -108,16 +106,27 @@ class CircuitBreaker:
         Raises:
             ErreurServiceExterne: Si le circuit est ouvert et pas de fallback
         """
-        etat = self.etat
+        # Vérifier l'état sous verrou pour éviter les TOCTOU
+        with self._lock:
+            etat = self._verifier_etat_interne()
 
-        if etat == EtatCircuit.OUVERT:
-            logger.warning(f"⚡ Circuit '{self.nom}' OUVERT — appel bloqué")
-            if fallback:
-                return fallback()
-            raise ErreurServiceExterne(
-                f"Circuit '{self.nom}' ouvert (service indisponible)",
-                message_utilisateur="Service temporairement indisponible, veuillez réessayer",
-            )
+            if etat == EtatCircuit.OUVERT:
+                logger.warning(f"⚡ Circuit '{self.nom}' OUVERT — appel bloqué")
+                if fallback:
+                    return fallback()
+                raise ErreurServiceExterne(
+                    f"Circuit '{self.nom}' ouvert (service indisponible)",
+                    message_utilisateur="Service temporairement indisponible, veuillez réessayer",
+                )
+
+            if etat == EtatCircuit.SEMI_OUVERT:
+                # En semi-ouvert, empêcher les appels concurrents :
+                # on passe temporairement en OUVERT pour bloquer les autres threads
+                # pendant que ce thread teste la reprise.
+                self._etat = EtatCircuit.OUVERT
+                est_appel_test = True
+            else:
+                est_appel_test = False
 
         try:
             result = fn()
@@ -144,28 +153,41 @@ class CircuitBreaker:
             return result
 
         except Exception as e:
-            self._enregistrer_echec()
+            self._enregistrer_echec(est_appel_test=est_appel_test)
             if fallback and self.etat == EtatCircuit.OUVERT:
                 logger.info(f"🔄 Circuit '{self.nom}' — utilisation du fallback")
                 return fallback()
             raise
+
+    def _verifier_etat_interne(self) -> EtatCircuit:
+        """Vérifie et met à jour l'état interne (appelé sous self._lock)."""
+        if self._etat == EtatCircuit.OUVERT:
+            if time.time() - self._derniere_ouverture >= self.delai_reset:
+                self._etat = EtatCircuit.SEMI_OUVERT
+                logger.info(f"🔄 Circuit '{self.nom}' → SEMI_OUVERT (test de reprise)")
+        return self._etat
 
     def _enregistrer_succes(self):
         """Enregistre un appel réussi."""
         with self._lock:
             self._succes_total += 1
             self._echecs_consecutifs = 0
-            if self._etat == EtatCircuit.SEMI_OUVERT:
+            if self._etat in (EtatCircuit.SEMI_OUVERT, EtatCircuit.OUVERT):
                 self._etat = EtatCircuit.FERME
                 logger.info(f"✅ Circuit '{self.nom}' → FERMÉ (reprise confirmée)")
 
-    def _enregistrer_echec(self):
+    def _enregistrer_echec(self, *, est_appel_test: bool = False):
         """Enregistre un échec."""
         with self._lock:
             self._echecs_total += 1
             self._echecs_consecutifs += 1
 
-            if self._echecs_consecutifs >= self.seuil_echecs:
+            if est_appel_test:
+                # L'appel de test en semi-ouvert a échoué → rester ouvert
+                self._etat = EtatCircuit.OUVERT
+                self._derniere_ouverture = time.time()
+                logger.warning(f"🔴 Circuit '{self.nom}' — test de reprise échoué, reste OUVERT")
+            elif self._echecs_consecutifs >= self.seuil_echecs:
                 self._etat = EtatCircuit.OUVERT
                 self._derniere_ouverture = time.time()
                 logger.error(
@@ -192,6 +214,8 @@ class CircuitBreaker:
         """
         Exécute une coroutine à travers le circuit breaker.
 
+        Thread-safe : même logique que ``appeler()`` pour le SEMI_OUVERT.
+
         Args:
             fn: Coroutine function à appeler (sera awaitée)
             fallback: Fonction de repli si le circuit est ouvert
@@ -202,16 +226,23 @@ class CircuitBreaker:
         Raises:
             ErreurServiceExterne: Si le circuit est ouvert et pas de fallback
         """
-        etat = self.etat
+        with self._lock:
+            etat = self._verifier_etat_interne()
 
-        if etat == EtatCircuit.OUVERT:
-            logger.warning(f"⚡ Circuit '{self.nom}' OUVERT — appel bloqué")
-            if fallback:
-                return fallback()
-            raise ErreurServiceExterne(
-                f"Circuit '{self.nom}' ouvert (service indisponible)",
-                message_utilisateur="Service temporairement indisponible, veuillez réessayer",
-            )
+            if etat == EtatCircuit.OUVERT:
+                logger.warning(f"⚡ Circuit '{self.nom}' OUVERT — appel bloqué")
+                if fallback:
+                    return fallback()
+                raise ErreurServiceExterne(
+                    f"Circuit '{self.nom}' ouvert (service indisponible)",
+                    message_utilisateur="Service temporairement indisponible, veuillez réessayer",
+                )
+
+            if etat == EtatCircuit.SEMI_OUVERT:
+                self._etat = EtatCircuit.OUVERT
+                est_appel_test = True
+            else:
+                est_appel_test = False
 
         try:
             result = await fn()
@@ -219,7 +250,7 @@ class CircuitBreaker:
             return result
 
         except Exception as e:
-            self._enregistrer_echec()
+            self._enregistrer_echec(est_appel_test=est_appel_test)
             if fallback and self.etat == EtatCircuit.OUVERT:
                 logger.info(f"🔄 Circuit '{self.nom}' — utilisation du fallback")
                 return fallback()

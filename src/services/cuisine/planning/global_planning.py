@@ -21,7 +21,7 @@ from datetime import date, datetime, timedelta
 from sqlalchemy.orm import Session
 
 from src.core.ai import obtenir_client_ia
-from src.core.caching import Cache
+from src.core.caching import obtenir_cache
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import EvenementPlanning
 from src.services.core.base import BaseAIService, BaseService, PlanningAIMixin
@@ -287,8 +287,8 @@ class ServicePlanningUnifie(
         """Invalide cache pour la semaine contenant date_jour"""
         # Trouver début semaine (lundi)
         debut_semaine = date_jour - timedelta(days=date_jour.weekday())
-        Cache.invalider(pattern=f"semaine_complete_{debut_semaine.isoformat()}")
-        Cache.invalider(pattern=f"semaine_ia_{debut_semaine.isoformat()}")
+        obtenir_cache().invalidate(pattern=f"semaine_complete_{debut_semaine.isoformat()}")
+        obtenir_cache().invalidate(pattern=f"semaine_ia_{debut_semaine.isoformat()}")
         logger.debug(f"🔄 Cache semaine invalidé: {debut_semaine}")
 
 

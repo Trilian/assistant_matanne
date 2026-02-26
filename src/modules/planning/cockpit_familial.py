@@ -14,6 +14,7 @@ from datetime import date, datetime, timedelta
 
 import streamlit as st
 
+from src.core.decorators import avec_session_db
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.state import rerun
 from src.modules._framework import error_boundary
@@ -62,131 +63,127 @@ def _plage_semaine(offset: int = 0) -> tuple[date, date]:
 # ═══════════════════════════════════════════════════════════
 
 
-def _charger_repas(lundi: date, dimanche: date) -> dict[date, list]:
+@avec_session_db
+def _charger_repas(lundi: date, dimanche: date, session=None) -> dict[date, list]:
     """Charge les repas de la semaine groupés par date."""
     try:
-        from src.core.db import obtenir_contexte_db
         from src.core.models.planning import Repas
 
-        with obtenir_contexte_db() as session:
-            repas_list = (
-                session.query(Repas)
-                .filter(Repas.date_repas >= lundi, Repas.date_repas <= dimanche)
-                .order_by(Repas.date_repas, Repas.type_repas)
-                .all()
-            )
-            # Grouper par date
-            par_date: dict[date, list] = {}
-            for r in repas_list:
-                info = {
-                    "type": r.type_repas,
-                    "recette": r.recette.nom if r.recette else None,
-                    "prepare": r.prepare,
-                    "notes": r.notes,
-                }
-                par_date.setdefault(r.date_repas, []).append(info)
-            return par_date
+        repas_list = (
+            session.query(Repas)
+            .filter(Repas.date_repas >= lundi, Repas.date_repas <= dimanche)
+            .order_by(Repas.date_repas, Repas.type_repas)
+            .all()
+        )
+        # Grouper par date
+        par_date: dict[date, list] = {}
+        for r in repas_list:
+            info = {
+                "type": r.type_repas,
+                "recette": r.recette.nom if r.recette else None,
+                "prepare": r.prepare,
+                "notes": r.notes,
+            }
+            par_date.setdefault(r.date_repas, []).append(info)
+        return par_date
     except Exception as e:
         logger.debug(f"Chargement repas échoué: {e}")
         return {}
 
 
-def _charger_evenements(lundi: date, dimanche: date) -> dict[date, list]:
+@avec_session_db
+def _charger_evenements(lundi: date, dimanche: date, session=None) -> dict[date, list]:
     """Charge les événements du calendrier de la semaine."""
     try:
-        from src.core.db import obtenir_contexte_db
         from src.core.models.planning import EvenementPlanning
 
         lundi_dt = datetime.combine(lundi, datetime.min.time())
         dimanche_dt = datetime.combine(dimanche, datetime.max.time())
 
-        with obtenir_contexte_db() as session:
-            events = (
-                session.query(EvenementPlanning)
-                .filter(
-                    EvenementPlanning.date_debut >= lundi_dt,
-                    EvenementPlanning.date_debut <= dimanche_dt,
-                )
-                .order_by(EvenementPlanning.date_debut)
-                .all()
+        events = (
+            session.query(EvenementPlanning)
+            .filter(
+                EvenementPlanning.date_debut >= lundi_dt,
+                EvenementPlanning.date_debut <= dimanche_dt,
             )
-            par_date: dict[date, list] = {}
-            for ev in events:
-                info = {
-                    "titre": ev.titre,
-                    "type": ev.type_event,
-                    "heure": ev.date_debut.strftime("%H:%M") if ev.date_debut else "",
-                    "lieu": ev.lieu,
-                }
-                jour = ev.date_debut.date()
-                par_date.setdefault(jour, []).append(info)
-            return par_date
+            .order_by(EvenementPlanning.date_debut)
+            .all()
+        )
+        par_date: dict[date, list] = {}
+        for ev in events:
+            info = {
+                "titre": ev.titre,
+                "type": ev.type_event,
+                "heure": ev.date_debut.strftime("%H:%M") if ev.date_debut else "",
+                "lieu": ev.lieu,
+            }
+            jour = ev.date_debut.date()
+            par_date.setdefault(jour, []).append(info)
+        return par_date
     except Exception as e:
         logger.debug(f"Chargement événements échoué: {e}")
         return {}
 
 
-def _charger_activites(lundi: date, dimanche: date) -> dict[date, list]:
+@avec_session_db
+def _charger_activites(lundi: date, dimanche: date, session=None) -> dict[date, list]:
     """Charge les activités familiales prévues."""
     try:
-        from src.core.db import obtenir_contexte_db
         from src.core.models.famille import ActiviteFamille
 
-        with obtenir_contexte_db() as session:
-            activites = (
-                session.query(ActiviteFamille)
-                .filter(
-                    ActiviteFamille.date_prevue >= lundi,
-                    ActiviteFamille.date_prevue <= dimanche,
-                    ActiviteFamille.statut != "annulé",
-                )
-                .order_by(ActiviteFamille.date_prevue)
-                .all()
+        activites = (
+            session.query(ActiviteFamille)
+            .filter(
+                ActiviteFamille.date_prevue >= lundi,
+                ActiviteFamille.date_prevue <= dimanche,
+                ActiviteFamille.statut != "annulé",
             )
-            par_date: dict[date, list] = {}
-            for act in activites:
-                info = {
-                    "titre": act.titre,
-                    "type": act.type_activite,
-                    "lieu": act.lieu,
-                    "duree": act.duree_heures,
-                    "statut": act.statut,
-                }
-                par_date.setdefault(act.date_prevue, []).append(info)
-            return par_date
+            .order_by(ActiviteFamille.date_prevue)
+            .all()
+        )
+        par_date: dict[date, list] = {}
+        for act in activites:
+            info = {
+                "titre": act.titre,
+                "type": act.type_activite,
+                "lieu": act.lieu,
+                "duree": act.duree_heures,
+                "statut": act.statut,
+            }
+            par_date.setdefault(act.date_prevue, []).append(info)
+        return par_date
     except Exception as e:
         logger.debug(f"Chargement activités échoué: {e}")
         return {}
 
 
-def _charger_taches(lundi: date, dimanche: date) -> dict[date, list]:
+@avec_session_db
+def _charger_taches(lundi: date, dimanche: date, session=None) -> dict[date, list]:
     """Charge les tâches d'entretien planifiées sur la semaine."""
     try:
-        from src.core.db import obtenir_contexte_db
         from src.core.models.habitat import TacheEntretien
 
-        with obtenir_contexte_db() as session:
-            taches = (
-                session.query(TacheEntretien)
-                .filter(
-                    TacheEntretien.prochaine_fois >= lundi,
-                    TacheEntretien.prochaine_fois <= dimanche,
-                    TacheEntretien.fait.is_(False),
-                )
-                .order_by(TacheEntretien.prochaine_fois, TacheEntretien.priorite)
-                .all()
+        taches = (
+            session.query(TacheEntretien)
+            .filter(
+                TacheEntretien.prochaine_fois >= lundi,
+                TacheEntretien.prochaine_fois <= dimanche,
+                TacheEntretien.fait.is_(False),
             )
-            par_date: dict[date, list] = {}
-            for t in taches:
-                info = {
-                    "nom": t.nom,
-                    "categorie": t.categorie,
-                    "duree": t.duree_minutes,
-                    "priorite": t.priorite,
-                    "responsable": t.responsable,
-                }
-                par_date.setdefault(t.prochaine_fois, []).append(info)  # type: ignore[arg-type]
-            return par_date
+            .order_by(TacheEntretien.prochaine_fois, TacheEntretien.priorite)
+            .all()
+        )
+        par_date: dict[date, list] = {}
+        for t in taches:
+            info = {
+                "nom": t.nom,
+                "categorie": t.categorie,
+                "duree": t.duree_minutes,
+                "priorite": t.priorite,
+                "responsable": t.responsable,
+            }
+            par_date.setdefault(t.prochaine_fois, []).append(info)  # type: ignore[arg-type]
+        return par_date
     except Exception as e:
         logger.debug(f"Chargement tâches échoué: {e}")
         return {}

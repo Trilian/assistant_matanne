@@ -28,6 +28,7 @@ from src.core.models import (
     ProfilUtilisateur,
     ResumeQuotidienGarmin,
 )
+from src.core.monitoring import chronometre
 from src.services.core.registry import service_factory
 
 from .types import GarminConfig
@@ -115,6 +116,7 @@ class ServiceGarmin:
             logger.error(f"Erreur lors de l'obtention du request token: {e}")
             raise
 
+    @avec_resilience(retry=2, timeout_s=30, fallback=False)
     @avec_session_db
     def complete_authorization(
         self,
@@ -196,6 +198,7 @@ class ServiceGarmin:
     # SYNCHRONISATION
     # ───────────────────────────────────────────────────────
 
+    @chronometre(nom="garmin.sync_user_data", seuil_alerte_ms=15000)
     @avec_session_db
     def sync_user_data(self, user_id: int, days_back: int = 7, db: Session = None) -> dict:
         """
@@ -397,6 +400,7 @@ class ServiceGarmin:
         logger.info(f"Garmin déconnecté pour l'utilisateur {user_id}")
         return True
 
+    @chronometre(nom="garmin.get_user_stats", seuil_alerte_ms=3000)
     @avec_session_db
     def get_user_stats(self, user_id: int, days: int = 7, db: Session = None) -> dict:
         """

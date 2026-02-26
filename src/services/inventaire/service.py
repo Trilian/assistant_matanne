@@ -78,9 +78,12 @@ class ServiceInventaire(
     """
 
     def __init__(self):
-        BaseService.__init__(self, ArticleInventaire, cache_ttl=1800)
-        BaseAIService.__init__(
-            self,
+        # MRO coopératif: tous les arguments passés via kwargs
+        super().__init__(
+            # Arguments pour BaseService
+            model=ArticleInventaire,
+            cache_ttl=1800,
+            # Arguments pour BaseAIService
             client=obtenir_client_ia(),
             cache_prefix="inventaire",
             default_ttl=1800,

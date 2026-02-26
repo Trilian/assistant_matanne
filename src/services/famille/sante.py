@@ -25,7 +25,7 @@ from src.core.models import (
     RoutineSante,
 )
 from src.services.core.base import BaseService
-from src.services.core.events.bus import obtenir_bus
+from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)

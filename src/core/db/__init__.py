@@ -24,6 +24,17 @@ from .utils import (
     verifier_sante,
 )
 
+# st.connection Supabase (lazy import pour éviter dépendance Streamlit en tests)
+try:
+    from .connection import (
+        SupabaseConnection,
+        obtenir_connexion_supabase,
+        obtenir_session_supabase,
+        requete_sql,
+    )
+except ImportError:
+    pass
+
 __all__ = [
     # Engine
     "obtenir_moteur",
@@ -41,4 +52,9 @@ __all__ = [
     "creer_toutes_tables",
     "verifier_sante",
     "vacuum_database",
+    # st.connection Supabase
+    "SupabaseConnection",
+    "obtenir_connexion_supabase",
+    "obtenir_session_supabase",
+    "requete_sql",
 ]

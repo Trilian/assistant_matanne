@@ -425,13 +425,14 @@ def register_default_checks() -> None:
     def check_cache() -> HealthCheck:
         """Vérifie le système de cache."""
         try:
-            from src.core.caching import Cache
+            from src.core.caching import obtenir_cache
 
             # Tester un write/read
             test_key = "_health_check_test"
-            Cache.definir(test_key, "ok", ttl=10)
-            value = Cache.obtenir(test_key)
-            Cache.supprimer(test_key)
+            _cache = obtenir_cache()
+            _cache.set(test_key, "ok", ttl=10)
+            value = _cache.get(test_key)
+            _cache.invalidate(pattern=test_key)
 
             if value == "ok":
                 return HealthCheck.healthy("cache", "Cache operational")

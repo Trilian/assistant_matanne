@@ -19,7 +19,7 @@ from typing import Any
 from sqlalchemy.orm import Session, joinedload
 
 from src.core.ai import obtenir_client_ia
-from src.core.caching import Cache
+from src.core.caching import obtenir_cache
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.exceptions import ErreurNonTrouve, ErreurValidation
 from src.core.models import (
@@ -30,7 +30,7 @@ from src.core.models import (
     StatutSessionEnum,
 )
 from src.services.core.base import BaseAIService, BaseService
-from src.services.core.events.bus import obtenir_bus
+from src.services.core.events import obtenir_bus
 
 from .batch_cooking_ia import BatchCookingIAMixin
 from .batch_cooking_stats import BatchCookingStatsMixin
@@ -126,7 +126,7 @@ class ServiceBatchCooking(
         db.refresh(config)
 
         # Invalider cache
-        Cache.invalider(pattern="batch_config")
+        obtenir_cache().invalidate(pattern="batch_config")
 
         logger.info("✅ Configuration batch cooking mise à jour")
         return config
@@ -226,7 +226,7 @@ class ServiceBatchCooking(
         db.refresh(session)
 
         # Invalider cache
-        Cache.invalider(pattern="batch_session")
+        obtenir_cache().invalidate(pattern="batch_session")
 
         # Émettre événement domaine
         obtenir_bus().emettre(
@@ -258,7 +258,7 @@ class ServiceBatchCooking(
         db.refresh(session)
 
         # Invalider cache
-        Cache.invalider(pattern="batch_session")
+        obtenir_cache().invalidate(pattern="batch_session")
 
         logger.info(f"✅ Session batch cooking démarrée: {session_id}")
         return session
@@ -308,7 +308,7 @@ class ServiceBatchCooking(
         db.refresh(session)
 
         # Invalider cache
-        Cache.invalider(pattern="batch_session")
+        obtenir_cache().invalidate(pattern="batch_session")
 
         # Émettre événement domaine
         obtenir_bus().emettre(

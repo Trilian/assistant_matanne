@@ -27,7 +27,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "Transition": (".tokens", "Transition"),
     "ZIndex": (".tokens", "ZIndex"),
     "Variante": (".tokens", "Variante"),
-    "obtenir_couleurs_variante": (".tokens", "obtenir_couleurs_variante"),
     # ── Semantic Tokens ────────────────────────────────
     "Sem": (".tokens_semantic", "Sem"),
     "injecter_tokens_semantiques": (".tokens_semantic", "injecter_tokens_semantiques"),

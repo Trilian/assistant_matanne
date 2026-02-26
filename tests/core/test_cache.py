@@ -1,5 +1,5 @@
 """
-Tests pour src/core/cache.py - Système de cache (façade sur CacheMultiNiveau).
+Tests pour le système de cache multi-niveaux (CacheMultiNiveau).
 """
 
 import time
@@ -25,253 +25,257 @@ def _reset_cache_singleton():
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS CACHE CLASS (façade statique → CacheMultiNiveau)
+# TESTS CACHE MULTINIVEAU (via obtenir_cache())
 # ═══════════════════════════════════════════════════════════
 
 
-class TestCacheBase:
-    """Tests de base pour la classe Cache."""
+class TestCacheMultiNiveau:
+    """Tests pour CacheMultiNiveau (remplace l'ancienne façade Cache)."""
 
     def test_initialise_creates_structures(self):
         """Test initialisation — le singleton CacheMultiNiveau se crée."""
-        from src.core.caching.cache import Cache, _cache
+        from src.core.caching.orchestrator import obtenir_cache
 
-        # L'accès au cache crée le singleton
-        c = _cache()
+        c = obtenir_cache()
         assert c is not None
         assert c.l1 is not None
 
-        # L'API statique fonctionne sans exception
-        stats = Cache.obtenir_statistiques()
+        stats = c.obtenir_statistiques()
         assert isinstance(stats, dict)
 
     def test_initialise_only_once(self):
         """Test le singleton ne se recrée pas — les données persistent."""
-        from src.core.caching.cache import Cache
+        from src.core.caching.orchestrator import obtenir_cache
 
-        Cache.definir("test", "valeur")
+        cache = obtenir_cache()
+        cache.set("test", "valeur")
 
         # Deuxième accès au cache — la valeur doit être toujours là
-        result = Cache.obtenir("test")
+        result = obtenir_cache().get("test")
         assert result == "valeur"
 
 
 class TestCacheObtenir:
-    """Tests pour Cache.obtenir()."""
+    """Tests pour CacheMultiNiveau.get()."""
 
-    def test_obtenir_returns_sentinelle_if_missing(self):
-        """Test obtenir retourne sentinelle si clé absente."""
-        from src.core.caching.cache import Cache
+    def test_obtenir_returns_default_if_missing(self):
+        """Test get retourne default si clé absente."""
+        from src.core.caching.orchestrator import obtenir_cache
 
-        result = Cache.obtenir("inexistant", sentinelle="default")
+        result = obtenir_cache().get("inexistant", default="default")
         assert result == "default"
 
     def test_obtenir_returns_value_if_present_and_fresh(self):
-        """Test obtenir retourne valeur si présente et fraîche."""
-        from src.core.caching.cache import Cache
+        """Test get retourne valeur si présente et fraîche."""
+        from src.core.caching.orchestrator import obtenir_cache
 
-        Cache.definir("ma_cle", "ma_valeur", ttl=300)
-        result = Cache.obtenir("ma_cle", ttl=300)
+        cache = obtenir_cache()
+        cache.set("ma_cle", "ma_valeur", ttl=300)
+        result = cache.get("ma_cle")
         assert result == "ma_valeur"
 
-    def test_obtenir_returns_sentinelle_if_expired(self):
-        """Test obtenir retourne sentinelle si expiré."""
-        from src.core.caching.cache import Cache, _cache
+    def test_obtenir_returns_default_if_expired(self):
+        """Test get retourne default si expiré."""
+        from src.core.caching.orchestrator import obtenir_cache
 
-        Cache.definir("ma_cle", "ma_valeur", ttl=300)
+        cache = obtenir_cache()
+        cache.set("ma_cle", "ma_valeur", ttl=300)
 
         # Simuler expiration en modifiant created_at dans L1
-        entry = _cache().l1._cache["ma_cle"]
+        entry = cache.l1._cache["ma_cle"]
         entry.created_at = time.time() - 400
 
-        result = Cache.obtenir("ma_cle", sentinelle="expiré")
-        assert result == "expiré"
+        result = cache.get("ma_cle")
+        assert result is None
 
     def test_obtenir_increments_miss_counter(self):
-        """Test obtenir incrémente compteur miss."""
-        from src.core.caching.cache import Cache
+        """Test get incrémente compteur miss."""
+        from src.core.caching.orchestrator import obtenir_cache
 
-        stats_before = Cache.obtenir_statistiques()
+        cache = obtenir_cache()
+        stats_before = cache.obtenir_statistiques()
         initial_misses = stats_before["misses"]
 
-        Cache.obtenir("inexistant")
+        cache.get("inexistant")
 
-        stats_after = Cache.obtenir_statistiques()
+        stats_after = cache.obtenir_statistiques()
         assert stats_after["misses"] == initial_misses + 1
 
     def test_obtenir_increments_hit_counter(self):
-        """Test obtenir incrémente compteur hit."""
-        from src.core.caching.cache import Cache
+        """Test get incrémente compteur hit."""
+        from src.core.caching.orchestrator import obtenir_cache
 
-        Cache.definir("ma_cle", "ma_valeur")
+        cache = obtenir_cache()
+        cache.set("ma_cle", "ma_valeur")
 
-        stats_before = Cache.obtenir_statistiques()
-        initial_hits = stats_before["hits"]
+        stats_before = cache.obtenir_statistiques()
+        initial_hits = stats_before["total_hits"]
 
-        Cache.obtenir("ma_cle")
+        cache.get("ma_cle")
 
-        stats_after = Cache.obtenir_statistiques()
-        assert stats_after["hits"] == initial_hits + 1
+        stats_after = cache.obtenir_statistiques()
+        assert stats_after["total_hits"] == initial_hits + 1
 
 
 class TestCacheDefinir:
-    """Tests pour Cache.definir()."""
+    """Tests pour CacheMultiNiveau.set()."""
 
     def test_definir_stores_value(self):
-        """Test definir stocke la valeur."""
-        from src.core.caching.cache import Cache
+        """Test set stocke la valeur."""
+        from src.core.caching.orchestrator import obtenir_cache
 
-        Cache.definir("test_cle", {"data": "valeur"})
+        cache = obtenir_cache()
+        cache.set("test_cle", {"data": "valeur"})
 
-        result = Cache.obtenir("test_cle")
+        result = cache.get("test_cle")
         assert result == {"data": "valeur"}
 
     def test_definir_stores_timestamp(self):
-        """Test definir stocke le timestamp (created_at dans EntreeCache)."""
-        from src.core.caching.cache import Cache, _cache
+        """Test set stocke le timestamp (created_at dans EntreeCache)."""
+        from src.core.caching.orchestrator import obtenir_cache
 
+        cache = obtenir_cache()
         avant = time.time()
-        Cache.definir("test_cle", "valeur")
+        cache.set("test_cle", "valeur")
         apres = time.time()
 
-        entry = _cache().l1._cache["test_cle"]
+        entry = cache.l1._cache["test_cle"]
         assert avant <= entry.created_at <= apres
 
-    def test_definir_with_dependencies(self):
-        """Test definir avec dépendances (tags)."""
-        from src.core.caching.cache import Cache, _cache
+    def test_definir_with_tags(self):
+        """Test set avec tags."""
+        from src.core.caching.orchestrator import obtenir_cache
 
-        Cache.definir("recette_1", "data", dependencies=["recettes", "recette_1"])
+        cache = obtenir_cache()
+        cache.set("recette_1", "data", tags=["recettes", "recette_1"])
 
-        entry = _cache().l1._cache["recette_1"]
+        entry = cache.l1._cache["recette_1"]
         assert "recettes" in entry.tags
         assert "recette_1" in entry.tags
 
 
 class TestCacheInvalider:
-    """Tests pour Cache.invalider()."""
+    """Tests pour CacheMultiNiveau.invalidate()."""
 
     def test_invalider_by_pattern(self):
         """Test invalidation par pattern."""
-        from src.core.caching.cache import Cache
+        from src.core.caching.orchestrator import obtenir_cache
 
-        Cache.definir("recettes_liste", "data1")
-        Cache.definir("recettes_detail_1", "data2")
-        Cache.definir("courses_liste", "data3")
+        cache = obtenir_cache()
+        cache.set("recettes_liste", "data1")
+        cache.set("recettes_detail_1", "data2")
+        cache.set("courses_liste", "data3")
 
-        Cache.invalider(pattern="recettes")
+        cache.invalidate(pattern="recettes")
 
-        assert Cache.obtenir("recettes_liste") is None
-        assert Cache.obtenir("recettes_detail_1") is None
-        assert Cache.obtenir("courses_liste") == "data3"
+        assert cache.get("recettes_liste") is None
+        assert cache.get("recettes_detail_1") is None
+        assert cache.get("courses_liste") == "data3"
 
-    def test_invalider_by_dependencies(self):
-        """Test invalidation par dépendances (tags)."""
-        from src.core.caching.cache import Cache
+    def test_invalider_by_tags(self):
+        """Test invalidation par tags."""
+        from src.core.caching.orchestrator import obtenir_cache
 
-        Cache.definir("recette_1", "data1", dependencies=["tag_recette"])
-        Cache.definir("recette_2", "data2", dependencies=["tag_recette"])
-        Cache.definir("autre", "data3")
+        cache = obtenir_cache()
+        cache.set("recette_1", "data1", tags=["tag_recette"])
+        cache.set("recette_2", "data2", tags=["tag_recette"])
+        cache.set("autre", "data3")
 
-        Cache.invalider(dependencies=["tag_recette"])
+        cache.invalidate(tags=["tag_recette"])
 
-        assert Cache.obtenir("recette_1") is None
-        assert Cache.obtenir("recette_2") is None
-        assert Cache.obtenir("autre") == "data3"
+        assert cache.get("recette_1") is None
+        assert cache.get("recette_2") is None
+        assert cache.get("autre") == "data3"
 
     def test_invalider_increments_counter(self):
         """Test invalidation met à jour les statistiques (evictions)."""
-        from src.core.caching.cache import Cache
+        from src.core.caching.orchestrator import obtenir_cache
 
-        Cache.definir("test", "valeur")
+        cache = obtenir_cache()
+        cache.set("test", "valeur")
 
-        stats_before = Cache.obtenir_statistiques()
-        initial_invalidations = stats_before["invalidations"]
+        stats_before = cache.obtenir_statistiques()
+        initial_evictions = stats_before["evictions"]
 
-        Cache.invalider(pattern="test")
+        cache.invalidate(pattern="test")
 
-        stats_after = Cache.obtenir_statistiques()
-        assert stats_after["invalidations"] > initial_invalidations
+        stats_after = cache.obtenir_statistiques()
+        assert stats_after["evictions"] > initial_evictions
 
 
 class TestCacheVider:
-    """Tests pour Cache.vider() et clear()."""
+    """Tests pour CacheMultiNiveau.clear()."""
 
     def test_vider_removes_all_data(self):
-        """Test vider supprime toutes les données."""
-        from src.core.caching.cache import Cache
+        """Test clear supprime toutes les données."""
+        from src.core.caching.orchestrator import obtenir_cache
 
-        Cache.definir("cle1", "val1")
-        Cache.definir("cle2", "val2")
+        cache = obtenir_cache()
+        cache.set("cle1", "val1")
+        cache.set("cle2", "val2")
 
-        Cache.vider()
+        cache.clear()
 
-        assert Cache.obtenir("cle1") is None
-        assert Cache.obtenir("cle2") is None
-
-    def test_clear_alias_works(self):
-        """Test alias clear fonctionne."""
-        from src.core.caching.cache import Cache
-
-        Cache.definir("cle", "val")
-
-        Cache.clear()
-
-        assert Cache.obtenir("cle") is None
+        assert cache.get("cle1") is None
+        assert cache.get("cle2") is None
 
 
 class TestCacheStatistiques:
-    """Tests pour Cache.obtenir_statistiques()."""
+    """Tests pour CacheMultiNiveau.obtenir_statistiques()."""
 
     def test_obtenir_statistiques_returns_dict(self):
         """Test statistiques retourne dict."""
-        from src.core.caching.cache import Cache
+        from src.core.caching.orchestrator import obtenir_cache
 
-        stats = Cache.obtenir_statistiques()
+        stats = obtenir_cache().obtenir_statistiques()
 
         assert isinstance(stats, dict)
-        assert "hits" in stats
+        assert "total_hits" in stats
         assert "misses" in stats
-        assert "entrees" in stats
-        assert "taux_hit" in stats
+        assert "l1" in stats
+        assert "hit_rate" in stats
 
     def test_taux_hit_calculation(self):
         """Test calcul taux de hit."""
-        from src.core.caching.cache import Cache
+        from src.core.caching.orchestrator import obtenir_cache
 
-        Cache.definir("cle", "val")
+        cache = obtenir_cache()
+        cache.set("cle", "val")
 
         # 2 hits
-        Cache.obtenir("cle")
-        Cache.obtenir("cle")
+        cache.get("cle")
+        cache.get("cle")
 
         # 1 miss
-        Cache.obtenir("inexistant")
+        cache.get("inexistant")
 
-        stats = Cache.obtenir_statistiques()
+        stats = cache.obtenir_statistiques()
 
-        # 2 hits sur 3 requêtes = 66.67%
-        assert stats["taux_hit"] == pytest.approx(66.67, rel=0.01)
+        # hit_rate is formatted as string like "66.7%"
+        assert "hit_rate" in stats
+        rate = float(stats["hit_rate"].rstrip("%"))
+        assert rate == pytest.approx(66.7, abs=1.0)
 
 
 class TestCacheNettoyerExpires:
-    """Tests pour Cache.nettoyer_expires()."""
+    """Tests pour nettoyage des entrées expirées."""
 
     def test_nettoyer_removes_old_entries(self):
         """Test nettoyer supprime entrées anciennes."""
-        from src.core.caching.cache import Cache, _cache
+        from src.core.caching.orchestrator import obtenir_cache
 
-        Cache.definir("recente", "val1", ttl=7200)
-        Cache.definir("ancienne", "val2", ttl=300)
+        cache = obtenir_cache()
+        cache.set("recente", "val1", ttl=7200)
+        cache.set("ancienne", "val2", ttl=300)
 
         # Simuler entrée ancienne en modifiant created_at dans L1
-        entry = _cache().l1._cache["ancienne"]
+        entry = cache.l1._cache["ancienne"]
         entry.created_at = time.time() - 7200  # 2h dans le passé
 
-        Cache.nettoyer_expires(age_max_secondes=3600)
+        cache.l1.cleanup_expired()
 
-        assert Cache.obtenir("recente") == "val1"
-        assert Cache.obtenir("ancienne") is None
+        assert cache.get("recente") == "val1"
+        assert cache.get("ancienne") is None
 
 
 # ═══════════════════════════════════════════════════════════

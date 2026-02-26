@@ -924,9 +924,9 @@ class TestCreateCompletePhase2:
             "ingredients": [{"nom": "pâtes", "quantite": 200, "unite": "g"}],
             "etapes": [{"description": "Cuire les pâtes al dente"}],
         }
-        from src.core.caching.cache import Cache
+        from src.core.caching import obtenir_cache
 
-        with patch.object(Cache, "invalider"):
+        with patch.object(type(obtenir_cache()), "invalidate"):
             result = service.create_complete(data)
 
         assert result is not None
@@ -950,9 +950,9 @@ class TestCreateCompletePhase2:
             ],
             "etapes": [{"description": "Battre les oeufs et cuire à feu doux"}],
         }
-        from src.core.caching.cache import Cache
+        from src.core.caching import obtenir_cache
 
-        with patch.object(Cache, "invalider"):
+        with patch.object(type(obtenir_cache()), "invalidate"):
             result = service.create_complete(data)
 
         assert result is not None
@@ -977,9 +977,9 @@ class TestCreateCompletePhase2:
                 {"description": "Assaisonner et servir frais"},
             ],
         }
-        from src.core.caching.cache import Cache
+        from src.core.caching import obtenir_cache
 
-        with patch.object(Cache, "invalider"):
+        with patch.object(type(obtenir_cache()), "invalidate"):
             result = service.create_complete(data)
 
         assert result is not None
@@ -1010,9 +1010,9 @@ class TestCreateCompletePhase2:
                 {"description": "Ajouter les légumes et mijoter"},
             ],
         }
-        from src.core.caching.cache import Cache
+        from src.core.caching import obtenir_cache
 
-        with patch.object(Cache, "invalider"):
+        with patch.object(type(obtenir_cache()), "invalidate"):
             result = service.create_complete(data)
 
         assert result is not None

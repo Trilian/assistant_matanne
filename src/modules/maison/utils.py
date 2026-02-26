@@ -2,6 +2,7 @@
 Utilitaires partagés pour les modules Maison.
 
 Fonctions de chargement, filtrage et statistiques pour Projets, Jardin et Entretien.
+Délègue toutes les opérations DB aux services correspondants.
 """
 
 import logging
@@ -10,12 +11,37 @@ from datetime import date
 import pandas as pd
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
 from src.core.decorators import avec_cache
-from src.core.models import ElementJardin, JournalJardin, Projet, Routine, TacheRoutine
 from src.core.state import rerun
 
 logger = logging.getLogger(__name__)
+
+
+# ═══════════════════════════════════════════════════════════
+# SERVICE LAZY LOADERS
+# ═══════════════════════════════════════════════════════════
+
+
+def _get_projets_service():
+    """Retourne le service singleton ProjetsService."""
+    from src.services.maison import get_projets_service
+
+    return get_projets_service()
+
+
+def _get_jardin_service():
+    """Retourne le service singleton JardinService."""
+    from src.services.maison import get_jardin_service
+
+    return get_jardin_service()
+
+
+def _get_entretien_service():
+    """Retourne le service singleton EntretienService."""
+    from src.services.maison import get_entretien_service
+
+    return get_entretien_service()
+
 
 # ═══════════════════════════════════════════════════════════
 # PROJETS
@@ -33,41 +59,37 @@ def charger_projets(statut: str | None = None) -> pd.DataFrame:
         DataFrame avec colonnes: nom, progress, jours_restants, etc.
     """
     try:
-        with obtenir_contexte_db() as session:
-            query = session.query(Projet)
-            if statut:
-                projets = query.filter_by(statut=statut).all()
-            else:
-                projets = query.all()
+        service = _get_projets_service()
+        projets = service.obtenir_projets(statut=statut)
 
-            if not projets:
-                return pd.DataFrame()
+        if not projets:
+            return pd.DataFrame()
 
-            data = []
-            for p in projets:
-                tasks = p.tasks if p.tasks else []
-                total = len(tasks)
-                done = len([t for t in tasks if t.statut == "termine"])
-                progress = (done / total * 100) if total > 0 else 0
+        data = []
+        for p in projets:
+            tasks = p.tasks if p.tasks else []
+            total = len(tasks)
+            done = len([t for t in tasks if t.statut == "termine"])
+            progress = (done / total * 100) if total > 0 else 0
 
-                jours_restants = None
-                if p.date_fin_prevue:
-                    jours_restants = (p.date_fin_prevue - date.today()).days
+            jours_restants = None
+            if p.date_fin_prevue:
+                jours_restants = (p.date_fin_prevue - date.today()).days
 
-                data.append(
-                    {
-                        "id": p.id,
-                        "nom": p.nom,
-                        "description": p.description,
-                        "statut": p.statut,
-                        "priorite": p.priorite,
-                        "progress": progress,
-                        "jours_restants": jours_restants,
-                        "taches_count": total,
-                    }
-                )
+            data.append(
+                {
+                    "id": p.id,
+                    "nom": p.nom,
+                    "description": p.description,
+                    "statut": p.statut,
+                    "priorite": p.priorite,
+                    "progress": progress,
+                    "jours_restants": jours_restants,
+                    "taches_count": total,
+                }
+            )
 
-            return pd.DataFrame(data)
+        return pd.DataFrame(data)
     except Exception as e:
         logger.error(f"Erreur chargement projets: {e}")
         return pd.DataFrame()
@@ -82,30 +104,30 @@ def get_projets_urgents() -> list[dict]:
     """
     alertes: list[dict] = []
     try:
-        with obtenir_contexte_db() as session:
-            projets = session.query(Projet).filter_by(statut="en_cours").all()
+        service = _get_projets_service()
+        projets = service.obtenir_projets(statut="en_cours")
 
-            for p in projets:
-                # Détection priorité haute/urgente
-                if p.priorite in ("haute", "urgente"):
-                    alertes.append(
-                        {
-                            "type": "PRIORITE",
-                            "message": f"Projet '{p.nom}' en priorité {p.priorite}",
-                            "projet": p.nom,
-                        }
-                    )
+        for p in projets:
+            # Détection priorité haute/urgente
+            if p.priorite in ("haute", "urgente"):
+                alertes.append(
+                    {
+                        "type": "PRIORITE",
+                        "message": f"Projet '{p.nom}' en priorité {p.priorite}",
+                        "projet": p.nom,
+                    }
+                )
 
-                # Détection retard
-                if p.date_fin_prevue and p.date_fin_prevue < date.today():
-                    jours = (date.today() - p.date_fin_prevue).days
-                    alertes.append(
-                        {
-                            "type": "RETARD",
-                            "message": f"Projet '{p.nom}' en retard de {jours} jour(s)",
-                            "projet": p.nom,
-                        }
-                    )
+            # Détection retard
+            if p.date_fin_prevue and p.date_fin_prevue < date.today():
+                jours = (date.today() - p.date_fin_prevue).days
+                alertes.append(
+                    {
+                        "type": "RETARD",
+                        "message": f"Projet '{p.nom}' en retard de {jours} jour(s)",
+                        "projet": p.nom,
+                    }
+                )
 
     except Exception as e:
         logger.error(f"Erreur détection projets urgents: {e}")
@@ -121,30 +143,8 @@ def get_stats_projets() -> dict:
         Dict avec total, en_cours, termines, avg_progress.
     """
     try:
-        with obtenir_contexte_db() as session:
-            total = session.query(Projet).count()
-            en_cours = session.query(Projet).filter_by(statut="en_cours").count()
-            termines = session.query(Projet).filter_by(statut="termine").count()
-
-            # Calcul progression moyenne
-            projets = session.query(Projet).all()
-            if projets:
-                progressions = []
-                for p in projets:
-                    tasks = p.tasks if p.tasks else []
-                    t_total = len(tasks)
-                    t_done = len([t for t in tasks if t.statut == "termine"])
-                    progressions.append((t_done / t_total * 100) if t_total > 0 else 0)
-                avg_progress = sum(progressions) / len(progressions) if progressions else 0
-            else:
-                avg_progress = 0
-
-            return {
-                "total": total,
-                "en_cours": en_cours,
-                "termines": termines,
-                "avg_progress": avg_progress,
-            }
+        service = _get_projets_service()
+        return service.obtenir_stats_projets()
     except Exception as e:
         logger.error(f"Erreur calcul stats projets: {e}")
         return {"total": 0, "en_cours": 0, "termines": 0, "avg_progress": 0}
@@ -165,42 +165,37 @@ def charger_plantes() -> pd.DataFrame:
         DataFrame avec colonnes: nom, a_arroser, jours_depuis_arrosage, recolte, etc.
     """
     try:
-        with obtenir_contexte_db() as session:
-            plantes = session.query(ElementJardin).filter_by(statut="actif").all()
+        service = _get_jardin_service()
+        plantes = service.obtenir_plantes()
 
-            if not plantes:
-                return pd.DataFrame()
+        if not plantes:
+            return pd.DataFrame()
 
-            data = []
-            for plante in plantes:
-                # Dernier arrosage
-                logs = (
-                    session.query(JournalJardin)
-                    .filter_by(garden_item_id=plante.id)
-                    .order_by(JournalJardin.date.desc())
-                    .limit(1)
-                    .all()
-                )
+        data = []
+        for plante in plantes:
+            if plante.statut != "actif":
+                continue
 
-                jours_depuis = None
-                a_arroser = True
-                if logs:
-                    jours_depuis = (date.today() - logs[0].date).days
-                    a_arroser = jours_depuis >= SEUIL_ARROSAGE_JOURS
+            # Déterminer si arrosage nécessaire
+            jours_depuis = None
+            a_arroser = True
+            if plante.dernier_arrosage:
+                jours_depuis = (date.today() - plante.dernier_arrosage).days
+                a_arroser = jours_depuis >= SEUIL_ARROSAGE_JOURS
 
-                data.append(
-                    {
-                        "id": plante.id,
-                        "nom": plante.nom,
-                        "type": plante.type,
-                        "location": plante.location,
-                        "a_arroser": a_arroser,
-                        "jours_depuis_arrosage": jours_depuis,
-                        "recolte": plante.date_recolte_prevue,
-                    }
-                )
+            data.append(
+                {
+                    "id": plante.id,
+                    "nom": plante.nom,
+                    "type": plante.type,
+                    "location": plante.location,
+                    "a_arroser": a_arroser,
+                    "jours_depuis_arrosage": jours_depuis,
+                    "recolte": plante.date_recolte_prevue,
+                }
+            )
 
-            return pd.DataFrame(data)
+        return pd.DataFrame(data)
     except Exception as e:
         logger.error(f"Erreur chargement plantes: {e}")
         return pd.DataFrame()
@@ -252,19 +247,17 @@ def get_stats_jardin() -> dict:
     Returns:
         Dict avec total_plantes, a_arroser, categories, etc.
     """
-    df = charger_plantes()
-    plantes_arroser = get_plantes_a_arroser()
-    recoltes = get_recoltes_proches()
-
-    total = len(df) if not df.empty else 0
-    categories = df["type"].nunique() if not df.empty and "type" in df.columns else 0
-
-    return {
-        "total_plantes": total,
-        "a_arroser": len(plantes_arroser),
-        "recoltes_proches": len(recoltes),
-        "categories": categories,
-    }
+    try:
+        service = _get_jardin_service()
+        return service.obtenir_stats_jardin()
+    except Exception as e:
+        logger.error(f"Erreur calcul stats jardin: {e}")
+        return {
+            "total_plantes": 0,
+            "a_arroser": 0,
+            "recoltes_proches": 0,
+            "categories": 0,
+        }
 
 
 def get_saison() -> str:
@@ -297,35 +290,29 @@ def charger_routines() -> pd.DataFrame:
         DataFrame des routines actives.
     """
     try:
-        with obtenir_contexte_db() as session:
-            routines = session.query(Routine).filter_by(actif=True).all()
+        service = _get_entretien_service()
+        routines = service.obtenir_routines()
 
-            if not routines:
-                return pd.DataFrame()
+        if not routines:
+            return pd.DataFrame()
 
-            data = []
-            for r in routines:
-                taches_faites = (
-                    session.query(TacheRoutine)
-                    .filter(
-                        TacheRoutine.routine_id == r.id,
-                        TacheRoutine.fait_le == date.today(),
-                    )
-                    .count()
-                )
+        data = []
+        for r in routines:
+            # Compter les tâches faites aujourd'hui
+            taches_faites = sum(1 for t in (r.tasks or []) if t.fait_le == date.today())
 
-                data.append(
-                    {
-                        "id": r.id,
-                        "nom": r.nom,
-                        "categorie": r.categorie,
-                        "frequence": r.frequence,
-                        "total_taches": len(r.tasks) if r.tasks else 0,
-                        "taches_faites": taches_faites,
-                    }
-                )
+            data.append(
+                {
+                    "id": r.id,
+                    "nom": r.nom,
+                    "categorie": r.categorie,
+                    "frequence": r.frequence,
+                    "total_taches": len(r.tasks) if r.tasks else 0,
+                    "taches_faites": taches_faites,
+                }
+            )
 
-            return pd.DataFrame(data)
+        return pd.DataFrame(data)
     except Exception as e:
         logger.error(f"Erreur chargement routines: {e}")
         return pd.DataFrame()
@@ -339,26 +326,20 @@ def get_taches_today() -> list[dict]:
         Liste de dicts des tâches à faire aujourd'hui.
     """
     try:
-        with obtenir_contexte_db() as session:
-            taches = (
-                session.query(TacheRoutine)
-                .filter(
-                    (TacheRoutine.fait_le == None)  # noqa: E711
-                    | (TacheRoutine.fait_le < date.today())
-                )
-                .all()
-            )
+        service = _get_entretien_service()
+        taches = service.obtenir_taches_du_jour()
 
-            return [
-                {
-                    "id": t.id,
-                    "nom": t.nom,
-                    "routine_id": t.routine_id,
-                    "heure_prevue": t.heure_prevue,
-                    "description": t.description,
-                }
-                for t in taches
-            ]
+        return [
+            {
+                "id": t.id,
+                "nom": t.nom,
+                "routine_id": t.routine_id,
+                "heure_prevue": t.heure_prevue,
+                "description": t.description,
+            }
+            for t in taches
+            if t.fait_le is None or t.fait_le < date.today()
+        ]
     except Exception as e:
         logger.error(f"Erreur chargement tâches du jour: {e}")
         return []
@@ -372,19 +353,8 @@ def get_stats_entretien() -> dict:
         Dict avec routines_actives, total_taches, taches_today, completion_today.
     """
     try:
-        with obtenir_contexte_db() as session:
-            routines_actives = session.query(Routine).filter_by(actif=True).count()
-            total_taches = session.query(TacheRoutine).count()
-            taches_today = session.query(TacheRoutine).filter_by(fait_le=date.today()).count()
-
-            completion = (taches_today / total_taches * 100) if total_taches > 0 else 0
-
-            return {
-                "routines_actives": routines_actives,
-                "total_taches": total_taches,
-                "taches_today": taches_today,
-                "completion_today": completion,
-            }
+        service = _get_entretien_service()
+        return service.obtenir_stats_entretien()
     except Exception as e:
         logger.error(f"Erreur calcul stats entretien: {e}")
         return {

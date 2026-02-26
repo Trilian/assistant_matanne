@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db, avec_validation
 from src.core.models import DepenseMaison
+from src.core.monitoring import chronometre
 from src.core.validation.schemas import DepenseMaisonInput
 from src.services.core.base import BaseService
 from src.services.core.registry import service_factory
@@ -50,6 +51,7 @@ class DepensesCrudService(BaseService[DepenseMaison]):
     def __init__(self):
         super().__init__(model=DepenseMaison, cache_ttl=600)
 
+    @chronometre("maison.depenses.mois", seuil_alerte_ms=1500)
     @avec_cache(ttl=600)
     @avec_session_db
     @avec_gestion_erreurs(default_return=[])
@@ -62,6 +64,7 @@ class DepensesCrudService(BaseService[DepenseMaison]):
             .all()
         )
 
+    @chronometre("maison.depenses.annee", seuil_alerte_ms=2000)
     @avec_cache(ttl=600)
     @avec_session_db
     @avec_gestion_erreurs(default_return=[])
@@ -273,6 +276,64 @@ class DepensesCrudService(BaseService[DepenseMaison]):
             )
 
         return list(reversed(result))
+
+    @avec_session_db
+    @avec_gestion_erreurs(default_return=[])
+    def charger_historique_energie(
+        self, type_energie: str, nb_mois: int = 12, db: Session | None = None
+    ) -> list[dict]:
+        """Charge l'historique de consommation énergétique depuis la DB.
+
+        Args:
+            type_energie: Type d'énergie (electricite, gaz, eau).
+            nb_mois: Nombre de mois d'historique.
+            db: Session DB (injectée par @avec_session_db)
+
+        Returns:
+            Liste de dicts avec mois, annee, label, montant, consommation.
+        """
+        today = date.today()
+        result = []
+
+        for i in range(nb_mois):
+            # Calculer le mois cible (en remontant depuis aujourd'hui)
+            mois_offset = nb_mois - 1 - i
+            mois = today.month - mois_offset
+            annee = today.year
+            while mois <= 0:
+                mois += 12
+                annee -= 1
+
+            label = MOIS_FR[mois] if 1 <= mois <= 12 else f"M{mois}"
+
+            # Requête DB pour ce mois
+            depense = (
+                db.query(DepenseMaison)
+                .filter(
+                    DepenseMaison.categorie == type_energie,
+                    DepenseMaison.mois == mois,
+                    DepenseMaison.annee == annee,
+                )
+                .first()
+            )
+
+            montant = None
+            consommation = None
+            if depense:
+                montant = depense.montant
+                consommation = getattr(depense, "consommation", None)
+
+            result.append(
+                {
+                    "mois": mois,
+                    "annee": annee,
+                    "label": label,
+                    "montant": montant,
+                    "consommation": consommation,
+                }
+            )
+
+        return result
 
 
 # ═══════════════════════════════════════════════════════════

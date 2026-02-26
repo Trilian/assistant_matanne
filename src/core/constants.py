@@ -165,8 +165,13 @@ TYPES_PROTEINES: dict[str, list[str]] = {
 }
 """Types de protéines avec mots-clés associés."""
 
-# ═══════════════════════════════════════════════════════════
-# LOGGING
+# ═══════════════════════════════════════════════════════════# PERFORMANCE / MONITORING
+# ═════════════════════════════════════════════════════════════
+
+SEUIL_PAGE_LENTE: float = 2.0
+"""Seuil en secondes au-delà duquel une page est considérée lente (défaut: 2s)."""
+
+# ═════════════════════════════════════════════════════════════# LOGGING
 # ═══════════════════════════════════════════════════════════
 
 LOG_LEVEL_PRODUCTION = "INFO"
@@ -218,6 +223,8 @@ __all__ = [
     "MOIS_FRANCAIS_COURT",
     "TYPES_REPAS_KEYS",
     "TYPES_PROTEINES",
+    # Performance / Monitoring
+    "SEUIL_PAGE_LENTE",
     # Logging
     "LOG_LEVEL_PRODUCTION",
     # Famille

@@ -15,8 +15,9 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import ActiviteFamille
+from src.core.monitoring import chronometre
 from src.services.core.base import BaseService
-from src.services.core.events.bus import obtenir_bus
+from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ class ServiceActivites(BaseService[ActiviteFamille]):
     # CRUD
     # ═══════════════════════════════════════════════════════════
 
+    @chronometre(nom="activites.ajouter", seuil_alerte_ms=2000)
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def ajouter_activite(
@@ -124,6 +126,7 @@ class ServiceActivites(BaseService[ActiviteFamille]):
             return True
         return False
 
+    @chronometre(nom="activites.lister", seuil_alerte_ms=1500)
     @avec_gestion_erreurs(default_return=[])
     @avec_cache(ttl=300)
     @avec_session_db
@@ -152,6 +155,7 @@ class ServiceActivites(BaseService[ActiviteFamille]):
             query = query.filter(ActiviteFamille.type_activite == type_activite)
         return query.order_by(ActiviteFamille.date_prevue.desc()).all()
 
+    @chronometre(nom="activites.supprimer", seuil_alerte_ms=2000)
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def supprimer_activite(self, activity_id: int, db: Session | None = None) -> bool:

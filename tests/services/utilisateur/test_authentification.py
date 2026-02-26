@@ -1579,9 +1579,10 @@ class TestRenderFunctions:
 class TestRenderFunctionsAdditional:
     """Tests supplémentaires pour les fonctions render (couverture branches)."""
 
+    @patch("src.ui.views.authentification.rerun")
     @patch("src.ui.views.authentification.st")
     @patch("src.ui.views.authentification.get_auth_service")
-    def test_render_login_form_login_success(self, mock_get_auth, mock_st):
+    def test_render_login_form_login_success(self, mock_get_auth, mock_st, mock_rerun):
         """Test login réussi avec rerun."""
         from src.ui.views.authentification import (
             afficher_formulaire_connexion as afficher_login_form,
@@ -1610,7 +1611,7 @@ class TestRenderFunctionsAdditional:
         afficher_login_form(rediriger_apres_succes=True)
 
         mock_st.success.assert_called()
-        mock_st.rerun.assert_called()
+        mock_rerun.assert_called()
 
     @patch("src.ui.views.authentification.st")
     @patch("src.ui.views.authentification.get_auth_service")
@@ -1696,9 +1697,10 @@ class TestRenderFunctionsAdditional:
 
         mock_st.markdown.assert_called()
 
+    @patch("src.ui.views.authentification.rerun")
     @patch("src.ui.views.authentification.st")
     @patch("src.ui.views.authentification.get_auth_service")
-    def test_render_user_menu_logout_clicked(self, mock_get_auth, mock_st):
+    def test_render_user_menu_logout_clicked(self, mock_get_auth, mock_st, mock_rerun):
         """Test bouton déconnexion cliqué."""
         from unittest.mock import MagicMock
 
@@ -1720,7 +1722,7 @@ class TestRenderFunctionsAdditional:
         afficher_user_menu()
 
         mock_service.logout.assert_called_once()
-        mock_st.rerun.assert_called()
+        mock_rerun.assert_called()
 
     @patch("src.ui.views.authentification.st")
     @patch("src.ui.views.authentification.get_auth_service")

@@ -433,9 +433,10 @@ class TestRenderCardJules:
         mock_st.button.assert_called_once()
         mock_st.caption.assert_called_once()
 
+    @patch("src.modules.famille.hub_famille.rerun")
     @patch("src.modules.famille.hub_famille.st")
     @patch("src.modules.famille.hub_famille.calculer_age_jules")
-    def test_render_card_jules_clic_navigation(self, mock_age, mock_st):
+    def test_render_card_jules_clic_navigation(self, mock_age, mock_st, mock_rerun):
         """Test navigation au clic sur la card Jules."""
         from src.modules.famille.hub_famille import afficher_card_jules
 
@@ -446,7 +447,7 @@ class TestRenderCardJules:
         afficher_card_jules()
 
         assert mock_st.session_state.get("famille_page") == "jules"
-        mock_st.rerun.assert_called_once()
+        mock_rerun.assert_called_once()
 
 
 @pytest.mark.unit
@@ -504,10 +505,11 @@ class TestRenderCardUser:
         mock_st.button.assert_called_once()
         mock_st.caption.assert_called_once()
 
+    @patch("src.modules.famille.hub_famille.rerun")
     @patch("src.modules.famille.hub_famille.st")
     @patch("src.modules.famille.hub_famille.get_user_streak")
     @patch("src.modules.famille.hub_famille.get_user_garmin_connected")
-    def test_render_card_user_clic_navigation(self, mock_garmin, mock_streak, mock_st):
+    def test_render_card_user_clic_navigation(self, mock_garmin, mock_streak, mock_st, mock_rerun):
         """Test navigation au clic sur card utilisateur."""
         from src.modules.famille.hub_famille import afficher_card_user
 
@@ -520,7 +522,7 @@ class TestRenderCardUser:
 
         assert mock_st.session_state.get("famille_page") == "suivi"
         assert mock_st.session_state.get("suivi_user") == "mathieu"
-        mock_st.rerun.assert_called_once()
+        mock_rerun.assert_called_once()
 
 
 @pytest.mark.unit

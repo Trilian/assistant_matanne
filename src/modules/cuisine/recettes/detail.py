@@ -10,9 +10,12 @@ import streamlit as st
 from src.core.state import rerun
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.ui import etat_vide
+from src.ui.keys import KeyNamespace
 
 from .generation_image import afficher_generer_image
 from .utils import formater_quantite
+
+_keys = KeyNamespace("recettes_detail")
 
 
 def afficher_detail_recette(recette):
@@ -391,7 +394,7 @@ def afficher_detail_recette(recette):
                             if st.button(
                                 f"{icon} {robot_name}",
                                 use_container_width=True,
-                                key=f"gen_robot_{robot_key}",
+                                key=_keys("gen_robot", robot_key),
                             ):
                                 with st.spinner(f"🤖 L'IA adapte pour {robot_name}..."):
                                     try:
@@ -413,11 +416,11 @@ def afficher_detail_recette(recette):
     action_cols = st.columns(3)
 
     with action_cols[0]:
-        if st.button("✏️ Modifier", use_container_width=True, key="btn_modifier_recette"):
+        if st.button("✏️ Modifier", use_container_width=True, key=_keys("modifier")):
             rerun()
 
     with action_cols[1]:
-        if st.button("📋 Dupliquer", width="stretch", key="btn_dupliquer_recette"):
+        if st.button("📋 Dupliquer", width="stretch", key=_keys("dupliquer")):
             if service:
                 try:
                     with st.spinner("Duplication en cours..."):
@@ -451,7 +454,7 @@ def afficher_detail_recette(recette):
             col_oui, col_non = st.columns(2)
             with col_oui:
                 if st.button(
-                    "✅ Oui, supprimer", use_container_width=True, key="btn_confirmer_suppression"
+                    "✅ Oui, supprimer", use_container_width=True, key=_keys("confirmer_suppr")
                 ):
                     if service:
                         try:
@@ -466,7 +469,7 @@ def afficher_detail_recette(recette):
                         except Exception as e:
                             st.error(f"❌ Erreur lors de la suppression: {str(e)}")
             with col_non:
-                if st.button("❌ Annuler", use_container_width=True, key="btn_annuler_suppression"):
+                if st.button("❌ Annuler", use_container_width=True, key=_keys("annuler_suppr")):
                     rerun()
 
 

@@ -48,48 +48,42 @@ class TestImports:
             assert "description" in idee
 
     @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_import_get_all_actions(self, mock_db, mock_st):
+    def test_import_get_all_actions(self, mock_st):
         """Test import fonction get_all_actions."""
         from src.modules.maison.eco_tips import get_all_actions
 
         assert callable(get_all_actions)
 
     @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_import_get_action_by_id(self, mock_db, mock_st):
+    def test_import_get_action_by_id(self, mock_st):
         """Test import fonction get_action_by_id."""
         from src.modules.maison.eco_tips import get_action_by_id
 
         assert callable(get_action_by_id)
 
     @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_import_create_action(self, mock_db, mock_st):
+    def test_import_create_action(self, mock_st):
         """Test import fonction create_action."""
         from src.modules.maison.eco_tips import create_action
 
         assert callable(create_action)
 
     @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_import_update_action(self, mock_db, mock_st):
+    def test_import_update_action(self, mock_st):
         """Test import fonction update_action."""
         from src.modules.maison.eco_tips import update_action
 
         assert callable(update_action)
 
     @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_import_delete_action(self, mock_db, mock_st):
+    def test_import_delete_action(self, mock_st):
         """Test import fonction delete_action."""
         from src.modules.maison.eco_tips import delete_action
 
         assert callable(delete_action)
 
     @patch("src.modules.maison.eco_tips.st")
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_import_calculate_stats(self, mock_db, mock_st):
+    def test_import_calculate_stats(self, mock_st):
         """Test import fonction calculate_stats."""
         from src.modules.maison.eco_tips import calculate_stats
 
@@ -151,53 +145,49 @@ class TestImports:
 
 
 class TestCrudFunctions:
-    """Tests pour les fonctions CRUD avec mocks de base de données."""
+    """Tests pour les fonctions CRUD avec mocks de service."""
 
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_get_all_actions_empty(self, mock_db_context):
+    @patch("src.modules.maison.eco_tips.crud._get_service")
+    def test_get_all_actions_empty(self, mock_get_service):
         """Test get_all_actions avec aucune action."""
-        mock_db = MagicMock()
-        mock_query = MagicMock()
-        mock_query.order_by.return_value.all.return_value = []
-        mock_db.query.return_value = mock_query
-        mock_db_context.return_value.__enter__.return_value = mock_db
+        mock_service = MagicMock()
+        mock_service.get_all_actions.return_value = []
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.eco_tips import get_all_actions
 
         result = get_all_actions()
 
         assert result == []
-        mock_db.query.assert_called_once()
+        mock_service.get_all_actions.assert_called_once_with(actif_only=False)
 
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_get_all_actions_with_filter(self, mock_db_context):
+    @patch("src.modules.maison.eco_tips.crud._get_service")
+    def test_get_all_actions_with_filter(self, mock_get_service):
         """Test get_all_actions avec filtre actif_only."""
         mock_action = MagicMock()
         mock_action.actif = True
 
-        mock_db = MagicMock()
-        mock_query = MagicMock()
-        mock_query.filter.return_value.order_by.return_value.all.return_value = [mock_action]
-        mock_db.query.return_value = mock_query
-        mock_db_context.return_value.__enter__.return_value = mock_db
+        mock_service = MagicMock()
+        mock_service.get_all_actions.return_value = [mock_action]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.eco_tips import get_all_actions
 
         result = get_all_actions(actif_only=True)
 
         assert len(result) == 1
-        mock_query.filter.assert_called_once()
+        mock_service.get_all_actions.assert_called_once_with(actif_only=True)
 
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_get_action_by_id_found(self, mock_db_context):
+    @patch("src.modules.maison.eco_tips.crud._get_service")
+    def test_get_action_by_id_found(self, mock_get_service):
         """Test get_action_by_id avec action trouvée."""
         mock_action = MagicMock()
         mock_action.id = 1
         mock_action.nom = "Test Action"
 
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.first.return_value = mock_action
-        mock_db_context.return_value.__enter__.return_value = mock_db
+        mock_service = MagicMock()
+        mock_service.get_action_by_id.return_value = mock_action
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.eco_tips import get_action_by_id
 
@@ -206,12 +196,12 @@ class TestCrudFunctions:
         assert result is not None
         assert result.id == 1
 
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_get_action_by_id_not_found(self, mock_db_context):
+    @patch("src.modules.maison.eco_tips.crud._get_service")
+    def test_get_action_by_id_not_found(self, mock_get_service):
         """Test get_action_by_id avec action non trouvée."""
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.first.return_value = None
-        mock_db_context.return_value.__enter__.return_value = mock_db
+        mock_service = MagicMock()
+        mock_service.get_action_by_id.return_value = None
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.eco_tips import get_action_by_id
 
@@ -219,11 +209,11 @@ class TestCrudFunctions:
 
         assert result is None
 
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_create_action(self, mock_db_context):
+    @patch("src.modules.maison.eco_tips.crud._get_service")
+    def test_create_action(self, mock_get_service):
         """Test create_action crée une nouvelle action."""
-        mock_db = MagicMock()
-        mock_db_context.return_value.__enter__.return_value = mock_db
+        mock_service = MagicMock()
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.eco_tips import create_action
 
@@ -237,74 +227,65 @@ class TestCrudFunctions:
 
         create_action(data)
 
-        mock_db.add.assert_called_once()
-        mock_db.commit.assert_called_once()
-        mock_db.refresh.assert_called_once()
+        mock_service.create_action.assert_called_once_with(data)
 
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_update_action_found(self, mock_db_context):
+    @patch("src.modules.maison.eco_tips.crud._get_service")
+    def test_update_action_found(self, mock_get_service):
         """Test update_action met à jour une action existante."""
         mock_action = MagicMock()
         mock_action.id = 1
-        mock_action.nom = "Old Name"
+        mock_action.nom = "New Name"
 
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.first.return_value = mock_action
-        mock_db_context.return_value.__enter__.return_value = mock_db
+        mock_service = MagicMock()
+        mock_service.update_action.return_value = mock_action
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.eco_tips import update_action
 
         result = update_action(1, {"nom": "New Name"})
 
         assert result is not None
-        mock_db.commit.assert_called_once()
-        mock_db.refresh.assert_called_once()
+        mock_service.update_action.assert_called_once_with(1, {"nom": "New Name"})
 
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_update_action_not_found(self, mock_db_context):
+    @patch("src.modules.maison.eco_tips.crud._get_service")
+    def test_update_action_not_found(self, mock_get_service):
         """Test update_action avec action non trouvée."""
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.first.return_value = None
-        mock_db_context.return_value.__enter__.return_value = mock_db
+        mock_service = MagicMock()
+        mock_service.update_action.return_value = None
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.eco_tips import update_action
 
         result = update_action(999, {"nom": "New Name"})
 
         assert result is None
-        mock_db.commit.assert_not_called()
 
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_delete_action_found(self, mock_db_context):
+    @patch("src.modules.maison.eco_tips.crud._get_service")
+    def test_delete_action_found(self, mock_get_service):
         """Test delete_action supprime une action existante."""
-        mock_action = MagicMock()
-        mock_action.id = 1
-
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.first.return_value = mock_action
-        mock_db_context.return_value.__enter__.return_value = mock_db
+        mock_service = MagicMock()
+        mock_service.delete_action.return_value = True
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.eco_tips import delete_action
 
         result = delete_action(1)
 
         assert result is True
-        mock_db.delete.assert_called_once_with(mock_action)
-        mock_db.commit.assert_called_once()
+        mock_service.delete_action.assert_called_once_with(1)
 
-    @patch("src.modules.maison.eco_tips.crud.obtenir_contexte_db")
-    def test_delete_action_not_found(self, mock_db_context):
+    @patch("src.modules.maison.eco_tips.crud._get_service")
+    def test_delete_action_not_found(self, mock_get_service):
         """Test delete_action avec action non trouvée."""
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter.return_value.first.return_value = None
-        mock_db_context.return_value.__enter__.return_value = mock_db
+        mock_service = MagicMock()
+        mock_service.delete_action.return_value = False
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.eco_tips import delete_action
 
         result = delete_action(999)
 
         assert result is False
-        mock_db.delete.assert_not_called()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

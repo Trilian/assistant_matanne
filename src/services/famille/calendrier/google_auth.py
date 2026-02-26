@@ -13,6 +13,8 @@ import logging
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
+from src.core.decorators import avec_resilience
+
 from .schemas import ConfigCalendrierExterne, FournisseurCalendrier
 
 if TYPE_CHECKING:
@@ -66,6 +68,7 @@ class GoogleAuthMixin:
 
         return auth_url
 
+    @avec_resilience(retry=2, timeout_s=30, fallback=None)
     def handle_google_callback(
         self,
         user_id: str,

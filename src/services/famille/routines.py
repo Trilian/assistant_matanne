@@ -17,8 +17,9 @@ from sqlalchemy.orm import Session, selectinload
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import ProfilEnfant, Routine, TacheRoutine
+from src.core.monitoring import chronometre
 from src.services.core.base import BaseService
-from src.services.core.events.bus import obtenir_bus
+from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -61,6 +62,8 @@ class ServiceRoutines(BaseService[Routine]):
     # LECTURE
     # ═══════════════════════════════════════════════════════════
 
+    @chronometre(nom="routines.lister", seuil_alerte_ms=2000)
+    @chronometre("famille.routines.lister", seuil_alerte_ms=1500)
     @avec_gestion_erreurs(default_return=[])
     @avec_cache(ttl=300)
     @avec_session_db
@@ -104,6 +107,7 @@ class ServiceRoutines(BaseService[Routine]):
             )
         return result
 
+    @chronometre(nom="routines.lister_taches", seuil_alerte_ms=1500)
     @avec_gestion_erreurs(default_return=[])
     @avec_cache(ttl=300)
     @avec_session_db
@@ -237,6 +241,7 @@ class ServiceRoutines(BaseService[Routine]):
         )
         return task.id
 
+    @chronometre(nom="routines.marquer_complete", seuil_alerte_ms=2000)
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def marquer_complete(self, task_id: int, db: Session | None = None) -> bool:
@@ -330,6 +335,7 @@ class ServiceRoutines(BaseService[Routine]):
     # LOGIQUE MÉTIER
     # ═══════════════════════════════════════════════════════════
 
+    @chronometre(nom="routines.taches_en_retard", seuil_alerte_ms=2000)
     @avec_gestion_erreurs(default_return=[])
     @avec_cache(ttl=300)
     @avec_session_db

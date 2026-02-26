@@ -2,17 +2,20 @@
 Header de l'application.
 """
 
+from __future__ import annotations
+
 import streamlit as st
 
 from src.core.config import obtenir_parametres
 from src.core.state import obtenir_etat
-from src.ui.components.atoms import badge
 from src.ui.tokens import Couleur, Variante
 from src.ui.utils import echapper_html
 
 
 def afficher_header():
     """Affiche le header avec badges d'état et skip-link d'accessibilité."""
+    from src.ui.components.atoms import badge
+
     parametres = obtenir_parametres()
     etat = obtenir_etat()
 

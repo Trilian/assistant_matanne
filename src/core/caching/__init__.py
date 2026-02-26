@@ -14,7 +14,6 @@ Ce module fournit:
 """
 
 from .base import EntreeCache, StatistiquesCache
-from .cache import Cache
 from .file import CacheFichierN3
 from .memory import CacheMemoireN1
 from .orchestrator import (
@@ -37,8 +36,6 @@ __all__ = [
     # Types
     "EntreeCache",
     "StatistiquesCache",
-    # Cache session simple (usage legacy)
-    "Cache",
     # Caches par niveau
     "CacheMemoireN1",
     "CacheSessionN2",

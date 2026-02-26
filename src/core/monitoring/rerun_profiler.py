@@ -32,7 +32,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Any, Callable, TypeVar
 
-from src.core.monitoring.collector import MetriqueType, enregistrer_metrique
+from .collector import MetriqueType, enregistrer_metrique
 
 logger = logging.getLogger(__name__)
 

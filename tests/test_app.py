@@ -98,14 +98,14 @@ class TestStateManagement:
 
     @patch("streamlit.session_state", {})
     def test_cache_functionality(self):
-        """Teste la fonctionnalité de cache"""
-        from src.core.caching.cache import Cache
+        """Teste la fonctionnalité du cache multi-niveaux"""
+        from src.core.caching import CacheMultiNiveau
 
-        # Test que la classe Cache existe et peut être instanciée
-        assert Cache is not None
-        assert hasattr(Cache, "clear")
-        assert hasattr(Cache, "obtenir")
-        assert hasattr(Cache, "definir")
+        # Test que la classe CacheMultiNiveau existe
+        assert CacheMultiNiveau is not None
+        assert hasattr(CacheMultiNiveau, "get")
+        assert hasattr(CacheMultiNiveau, "set")
+        assert hasattr(CacheMultiNiveau, "clear")
 
 
 class TestStreamlitIntegration:

@@ -1,22 +1,20 @@
 """
 Fonctions CRUD pour les actions écologiques.
+
+Délègue toutes les opérations au service EcoTipsCrudService.
+Ce fichier est conservé pour compatibilité des imports existants.
 """
 
 import logging
 
-from src.core.db import obtenir_contexte_db
-
 logger = logging.getLogger(__name__)
 
 
-def _get_action_model():
-    """Retourne le modèle ActionEcologique (import différé)."""
-    try:
-        from src.core.models import ActionEcologique
+def _get_service():
+    """Retourne le service singleton EcoTipsCrudService."""
+    from src.services.maison.eco_tips_crud_service import get_eco_tips_crud_service
 
-        return ActionEcologique
-    except ImportError:
-        return type("ActionEcologique", (), {"__tablename__": "actions_ecologiques"})
+    return get_eco_tips_crud_service()
 
 
 def get_all_actions(actif_only: bool = False) -> list:
@@ -28,13 +26,7 @@ def get_all_actions(actif_only: bool = False) -> list:
     Returns:
         Liste d'objets ActionEcologique.
     """
-    ActionEcologique = _get_action_model()
-
-    with obtenir_contexte_db() as db:
-        query = db.query(ActionEcologique)
-        if actif_only:
-            query = query.filter(ActionEcologique.actif == True)  # noqa: E712
-        return query.order_by(ActionEcologique.id).all()
+    return _get_service().get_all_actions(actif_only=actif_only)
 
 
 def get_action_by_id(action_id: int):
@@ -46,10 +38,7 @@ def get_action_by_id(action_id: int):
     Returns:
         Objet ActionEcologique ou None.
     """
-    ActionEcologique = _get_action_model()
-
-    with obtenir_contexte_db() as db:
-        return db.query(ActionEcologique).filter(ActionEcologique.id == action_id).first()
+    return _get_service().get_action_by_id(action_id)
 
 
 def create_action(data: dict) -> None:
@@ -58,13 +47,7 @@ def create_action(data: dict) -> None:
     Args:
         data: Dict avec les champs de l'action.
     """
-    ActionEcologique = _get_action_model()
-
-    with obtenir_contexte_db() as db:
-        action = ActionEcologique(**data)
-        db.add(action)
-        db.commit()
-        db.refresh(action)
+    _get_service().create_action(data)
 
 
 def update_action(action_id: int, data: dict):
@@ -77,17 +60,7 @@ def update_action(action_id: int, data: dict):
     Returns:
         Objet ActionEcologique mis à jour ou None si non trouvé.
     """
-    ActionEcologique = _get_action_model()
-
-    with obtenir_contexte_db() as db:
-        action = db.query(ActionEcologique).filter(ActionEcologique.id == action_id).first()
-        if action is None:
-            return None
-        for key, value in data.items():
-            setattr(action, key, value)
-        db.commit()
-        db.refresh(action)
-        return action
+    return _get_service().update_action(action_id, data)
 
 
 def delete_action(action_id: int) -> bool:
@@ -99,12 +72,4 @@ def delete_action(action_id: int) -> bool:
     Returns:
         True si supprimée, False si non trouvée.
     """
-    ActionEcologique = _get_action_model()
-
-    with obtenir_contexte_db() as db:
-        action = db.query(ActionEcologique).filter(ActionEcologique.id == action_id).first()
-        if action is None:
-            return False
-        db.delete(action)
-        db.commit()
-        return True
+    return _get_service().delete_action(action_id)

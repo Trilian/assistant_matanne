@@ -35,7 +35,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, TypeVar
 
-from src.core.storage import obtenir_storage
+from ..storage import obtenir_storage
 
 logger = logging.getLogger(__name__)
 

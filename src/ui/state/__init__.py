@@ -6,6 +6,7 @@ Modules:
 """
 
 from src.ui.state.url import (
+    DeepLinkState,
     URLState,
     clear_url_param,
     get_url_param,
@@ -14,12 +15,14 @@ from src.ui.state.url import (
     set_url_param,
     sync_to_url,
     tabs_with_url,
+    text_input_with_url,
     url_state,
 )
 
 __all__ = [
     # Classes
     "URLState",
+    "DeepLinkState",
     # Décorateurs
     "url_state",
     # Helpers
@@ -31,4 +34,5 @@ __all__ = [
     "tabs_with_url",
     "selectbox_with_url",
     "pagination_with_url",
+    "text_input_with_url",
 ]

@@ -106,13 +106,12 @@ class TestChargerZones:
     """Tests pour la fonction charger_zones."""
 
     @patch("src.modules.maison.jardin_zones.st")
-    @patch("src.modules.maison.jardin_zones.obtenir_contexte_db")
-    def test_charger_zones_vide(self, mock_ctx, mock_st):
+    @patch("src.modules.maison.jardin_zones._get_service")
+    def test_charger_zones_vide(self, mock_get_service, mock_st):
         """Test chargement zones quand base vide."""
-        mock_db = MagicMock()
-        mock_db.query.return_value.all.return_value = []
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.charger_zones.return_value = []
+        mock_get_service.return_value = mock_service
 
         # Clear cache avant test
         from src.modules.maison.jardin_zones import charger_zones
@@ -124,26 +123,26 @@ class TestChargerZones:
         assert result == []
 
     @patch("src.modules.maison.jardin_zones.st")
-    @patch("src.modules.maison.jardin_zones.obtenir_contexte_db")
-    def test_charger_zones_avec_donnees(self, mock_ctx, mock_st):
+    @patch("src.modules.maison.jardin_zones._get_service")
+    def test_charger_zones_avec_donnees(self, mock_get_service, mock_st):
         """Test chargement zones avec données."""
-        mock_zone = MagicMock()
-        mock_zone.id = 1
-        mock_zone.nom = "Pelouse Principale"
-        mock_zone.type_zone = "pelouse"
-        mock_zone.surface_m2 = 1000
-        mock_zone.etat_note = 4
-        mock_zone.etat_description = "Bon état"
-        mock_zone.objectif = "Entretien régulier"
-        mock_zone.prochaine_action = "Tonte"
-        mock_zone.date_prochaine_action = date(2026, 3, 1)
-        mock_zone.photos_url = ["avant:url1"]
-        mock_zone.budget_estime = 100.0
-
-        mock_db = MagicMock()
-        mock_db.query.return_value.all.return_value = [mock_zone]
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.charger_zones.return_value = [
+            {
+                "id": 1,
+                "nom": "Pelouse Principale",
+                "type_zone": "pelouse",
+                "surface_m2": 1000,
+                "etat_note": 4,
+                "etat_description": "Bon état",
+                "objectif": "Entretien régulier",
+                "prochaine_action": "Tonte",
+                "date_prochaine_action": date(2026, 3, 1),
+                "photos_url": ["avant:url1"],
+                "budget_estime": 100.0,
+            }
+        ]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.jardin_zones import charger_zones
 
@@ -159,26 +158,27 @@ class TestChargerZones:
         assert result[0]["etat_note"] == 4
 
     @patch("src.modules.maison.jardin_zones.st")
-    @patch("src.modules.maison.jardin_zones.obtenir_contexte_db")
-    def test_charger_zones_valeurs_par_defaut(self, mock_ctx, mock_st):
-        """Test chargement zones avec valeurs None."""
-        mock_zone = MagicMock()
-        mock_zone.id = 2
-        mock_zone.nom = "Zone Test"
-        mock_zone.type_zone = "autre"
-        mock_zone.surface_m2 = None
-        mock_zone.etat_note = None
-        mock_zone.etat_description = None
-        mock_zone.objectif = None
-        mock_zone.prochaine_action = None
-        mock_zone.date_prochaine_action = None
-        mock_zone.photos_url = None
-        mock_zone.budget_estime = None
-
-        mock_db = MagicMock()
-        mock_db.query.return_value.all.return_value = [mock_zone]
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+    @patch("src.modules.maison.jardin_zones._get_service")
+    def test_charger_zones_valeurs_par_defaut(self, mock_get_service, mock_st):
+        """Test chargement zones avec valeurs None (service normalise les valeurs)."""
+        mock_service = MagicMock()
+        # Le service normalise les valeurs None automatiquement
+        mock_service.charger_zones.return_value = [
+            {
+                "id": 2,
+                "nom": "Zone Test",
+                "type_zone": "autre",
+                "surface_m2": 0,
+                "etat_note": 3,
+                "etat_description": "",
+                "objectif": "",
+                "prochaine_action": "",
+                "date_prochaine_action": None,
+                "photos_url": [],
+                "budget_estime": 0,
+            }
+        ]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.jardin_zones import charger_zones
 
@@ -195,11 +195,12 @@ class TestChargerZones:
         assert result[0]["budget_estime"] == 0
 
     @patch("src.modules.maison.jardin_zones.st")
-    @patch("src.modules.maison.jardin_zones.obtenir_contexte_db")
-    def test_charger_zones_erreur(self, mock_ctx, mock_st):
+    @patch("src.modules.maison.jardin_zones._get_service")
+    def test_charger_zones_erreur(self, mock_get_service, mock_st):
         """Test gestion erreur lors du chargement."""
-        mock_ctx.return_value.__enter__ = MagicMock(side_effect=Exception("DB Error"))
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.charger_zones.return_value = []  # Service retourne [] en cas d'erreur
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.jardin_zones import charger_zones
 
@@ -219,44 +220,48 @@ class TestMettreAJourZone:
     """Tests pour la fonction mettre_a_jour_zone."""
 
     @patch("src.modules.maison.jardin_zones.charger_zones")
-    def test_mettre_a_jour_zone_succes(self, mock_charger):
+    @patch("src.modules.maison.jardin_zones._get_service")
+    def test_mettre_a_jour_zone_succes(self, mock_get_service, mock_charger):
         """Test mise à jour réussie."""
-        mock_zone = MagicMock()
-        mock_zone.etat_note = 3
-
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_zone
+        mock_service = MagicMock()
+        mock_service.mettre_a_jour_zone.return_value = True
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.jardin_zones import mettre_a_jour_zone
 
-        result = mettre_a_jour_zone(1, {"etat_note": 5}, db=mock_db)
+        result = mettre_a_jour_zone(1, {"etat_note": 5})
 
         assert result is True
-        assert mock_zone.etat_note == 5
-        mock_db.commit.assert_called_once()
+        mock_service.mettre_a_jour_zone.assert_called_once_with(1, {"etat_note": 5})
         mock_charger.clear.assert_called()
 
     @patch("src.modules.maison.jardin_zones.charger_zones")
-    def test_mettre_a_jour_zone_non_trouvee(self, mock_charger):
+    @patch("src.modules.maison.jardin_zones._get_service")
+    def test_mettre_a_jour_zone_non_trouvee(self, mock_get_service, mock_charger):
         """Test mise à jour zone inexistante."""
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = None
+        mock_service = MagicMock()
+        mock_service.mettre_a_jour_zone.return_value = False
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.jardin_zones import mettre_a_jour_zone
 
-        result = mettre_a_jour_zone(999, {"etat_note": 5}, db=mock_db)
+        result = mettre_a_jour_zone(999, {"etat_note": 5})
 
         assert result is False
 
     @patch("src.modules.maison.jardin_zones.charger_zones")
-    def test_mettre_a_jour_zone_erreur(self, mock_charger):
+    @patch("src.modules.maison.jardin_zones._get_service")
+    def test_mettre_a_jour_zone_erreur(self, mock_get_service, mock_charger):
         """Test gestion erreur lors mise à jour."""
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.side_effect = Exception("DB Error")
+        mock_service = MagicMock()
+        mock_service.mettre_a_jour_zone.return_value = (
+            False  # Service retourne False en cas d'erreur
+        )
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.jardin_zones import mettre_a_jour_zone
 
-        result = mettre_a_jour_zone(1, {"etat_note": 5}, db=mock_db)
+        result = mettre_a_jour_zone(1, {"etat_note": 5})
 
         assert result is False
 
@@ -270,81 +275,82 @@ class TestAjouterPhotoZone:
     """Tests pour la fonction ajouter_photo_zone."""
 
     @patch("src.modules.maison.jardin_zones.charger_zones")
-    def test_ajouter_photo_avant_succes(self, mock_charger):
+    @patch("src.modules.maison.jardin_zones._get_service")
+    def test_ajouter_photo_avant_succes(self, mock_get_service, mock_charger):
         """Test ajout photo avant."""
-        mock_zone = MagicMock()
-        mock_zone.photos_url = []
-
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_zone
+        mock_service = MagicMock()
+        mock_service.ajouter_photo_zone.return_value = True
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.jardin_zones import ajouter_photo_zone
 
-        result = ajouter_photo_zone(1, "http://example.com/photo.jpg", est_avant=True, db=mock_db)
+        result = ajouter_photo_zone(1, "http://example.com/photo.jpg", est_avant=True)
 
         assert result is True
-        assert mock_zone.photos_url == ["avant:http://example.com/photo.jpg"]
-        mock_db.commit.assert_called_once()
+        mock_service.ajouter_photo_zone.assert_called_once_with(
+            1, "http://example.com/photo.jpg", True
+        )
+        mock_charger.clear.assert_called()
 
     @patch("src.modules.maison.jardin_zones.charger_zones")
-    def test_ajouter_photo_apres_succes(self, mock_charger):
+    @patch("src.modules.maison.jardin_zones._get_service")
+    def test_ajouter_photo_apres_succes(self, mock_get_service, mock_charger):
         """Test ajout photo après."""
-        mock_zone = MagicMock()
-        mock_zone.photos_url = []
-
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_zone
+        mock_service = MagicMock()
+        mock_service.ajouter_photo_zone.return_value = True
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.jardin_zones import ajouter_photo_zone
 
-        result = ajouter_photo_zone(1, "http://example.com/photo.jpg", est_avant=False, db=mock_db)
+        result = ajouter_photo_zone(1, "http://example.com/photo.jpg", est_avant=False)
 
         assert result is True
-        assert mock_zone.photos_url == ["apres:http://example.com/photo.jpg"]
+        mock_service.ajouter_photo_zone.assert_called_once_with(
+            1, "http://example.com/photo.jpg", False
+        )
 
     @patch("src.modules.maison.jardin_zones.charger_zones")
-    def test_ajouter_photo_a_liste_existante(self, mock_charger):
+    @patch("src.modules.maison.jardin_zones._get_service")
+    def test_ajouter_photo_a_liste_existante(self, mock_get_service, mock_charger):
         """Test ajout photo à liste existante."""
-        mock_zone = MagicMock()
-        mock_zone.photos_url = ["avant:url1"]
-
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_zone
+        mock_service = MagicMock()
+        mock_service.ajouter_photo_zone.return_value = True
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.jardin_zones import ajouter_photo_zone
 
-        result = ajouter_photo_zone(1, "url2", est_avant=True, db=mock_db)
+        result = ajouter_photo_zone(1, "url2", est_avant=True)
 
         assert result is True
-        assert "avant:url2" in mock_zone.photos_url
+        mock_service.ajouter_photo_zone.assert_called_once_with(1, "url2", True)
 
     @patch("src.modules.maison.jardin_zones.charger_zones")
-    def test_ajouter_photo_zone_non_trouvee(self, mock_charger):
+    @patch("src.modules.maison.jardin_zones._get_service")
+    def test_ajouter_photo_zone_non_trouvee(self, mock_get_service, mock_charger):
         """Test ajout photo zone inexistante."""
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = None
+        mock_service = MagicMock()
+        mock_service.ajouter_photo_zone.return_value = False
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.jardin_zones import ajouter_photo_zone
 
-        result = ajouter_photo_zone(999, "url", db=mock_db)
+        result = ajouter_photo_zone(999, "url")
 
         assert result is False
 
     @patch("src.modules.maison.jardin_zones.charger_zones")
-    def test_ajouter_photo_photos_None(self, mock_charger):
-        """Test ajout photo quand photos_url est None."""
-        mock_zone = MagicMock()
-        mock_zone.photos_url = None
-
-        mock_db = MagicMock()
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mock_zone
+    @patch("src.modules.maison.jardin_zones._get_service")
+    def test_ajouter_photo_photos_None(self, mock_get_service, mock_charger):
+        """Test ajout photo quand photos_url est None (service gère en interne)."""
+        mock_service = MagicMock()
+        mock_service.ajouter_photo_zone.return_value = True
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.jardin_zones import ajouter_photo_zone
 
-        result = ajouter_photo_zone(1, "url", est_avant=True, db=mock_db)
+        result = ajouter_photo_zone(1, "url", est_avant=True)
 
         assert result is True
-        assert mock_zone.photos_url == ["avant:url"]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -773,26 +779,26 @@ class TestJardinZonesIntegration:
     """Tests d'intégration légers."""
 
     @patch("src.modules.maison.jardin_zones.st")
-    @patch("src.modules.maison.jardin_zones.obtenir_contexte_db")
-    def test_workflow_complet_lecture(self, mock_ctx, mock_st):
+    @patch("src.modules.maison.jardin_zones._get_service")
+    def test_workflow_complet_lecture(self, mock_get_service, mock_st):
         """Test workflow lecture zones."""
-        mock_zone = MagicMock()
-        mock_zone.id = 1
-        mock_zone.nom = "Test"
-        mock_zone.type_zone = "pelouse"
-        mock_zone.surface_m2 = 100
-        mock_zone.etat_note = 3
-        mock_zone.etat_description = ""
-        mock_zone.objectif = ""
-        mock_zone.prochaine_action = ""
-        mock_zone.date_prochaine_action = None
-        mock_zone.photos_url = []
-        mock_zone.budget_estime = None
-
-        mock_db = MagicMock()
-        mock_db.query.return_value.all.return_value = [mock_zone]
-        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
-        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        mock_service = MagicMock()
+        mock_service.charger_zones.return_value = [
+            {
+                "id": 1,
+                "nom": "Test",
+                "type_zone": "pelouse",
+                "surface_m2": 100,
+                "etat_note": 3,
+                "etat_description": "",
+                "objectif": "",
+                "prochaine_action": "",
+                "date_prochaine_action": None,
+                "photos_url": [],
+                "budget_estime": 0,
+            }
+        ]
+        mock_get_service.return_value = mock_service
 
         from src.modules.maison.jardin_zones import charger_zones
 

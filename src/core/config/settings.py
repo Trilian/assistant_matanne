@@ -24,6 +24,7 @@ from ..constants import (
     CACHE_MAX_SIZE,
     CACHE_TTL_RECETTES,
     LOG_LEVEL_PRODUCTION,
+    SEUIL_PAGE_LENTE,
 )
 from .loader import (
     _is_streamlit_cloud,
@@ -225,8 +226,13 @@ class Parametres(BaseSettings):
     LOG_LEVEL: str = LOG_LEVEL_PRODUCTION
     """Niveau de log."""
 
-    # ═══════════════════════════════════════════════════════════
-    # RÉSOLUTION DES SECRETS (st.secrets en fallback des env vars)
+    # ═══════════════════════════════════════════════════════════    # PERFORMANCE / MONITORING
+    # ═════════════════════════════════════════════════════════════
+
+    SEUIL_PAGE_LENTE: float = SEUIL_PAGE_LENTE
+    """Seuil en secondes au-delà duquel une page est considérée lente (défaut: 2.0s)."""
+
+    # ═════════════════════════════════════════════════════════════    # RÉSOLUTION DES SECRETS (st.secrets en fallback des env vars)
     # ═══════════════════════════════════════════════════════════
 
     @model_validator(mode="after")

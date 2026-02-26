@@ -22,7 +22,6 @@ from src.ui.tokens import (
     Rayon,
     Typographie,
     Variante,
-    obtenir_couleurs_variante,
 )
 from src.ui.tokens_semantic import Sem
 from src.ui.utils import echapper_html

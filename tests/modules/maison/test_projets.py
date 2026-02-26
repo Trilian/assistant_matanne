@@ -43,12 +43,12 @@ def setup_mock_st(mock_st: MagicMock, session_data: dict | None = None) -> None:
 
 class TestImports:
     def test_import_projets_service(self) -> None:
-        from src.modules.maison.projets import ProjetsService
+        from src.services.maison import ProjetsService
 
         assert ProjetsService is not None
 
     def test_import_get_projets_service(self) -> None:
-        from src.modules.maison.projets import get_projets_service
+        from src.services.maison import get_projets_service
 
         assert callable(get_projets_service)
 
@@ -80,18 +80,18 @@ class TestImports:
 
 @pytest.mark.unit
 class TestProjetsService:
-    @patch("src.modules.maison.projets.st")
-    def test_service_creation_with_custom_client(self, mock_st) -> None:
-        from src.modules.maison.projets import ProjetsService
+    @patch("src.services.maison.projets_service.ClientIA")
+    def test_service_creation_with_custom_client(self, mock_client) -> None:
+        from src.services.maison import ProjetsService
 
-        mock_client = MagicMock()
-        service = ProjetsService(client=mock_client)
+        mock_client_obj = MagicMock()
+        service = ProjetsService(client=mock_client_obj)
         assert service is not None
-        assert service.client == mock_client
+        assert service.client == mock_client_obj
 
-    @patch("src.modules.maison.projets.st")
-    def test_service_creation_default_client(self, mock_st) -> None:
-        from src.modules.maison.projets import ProjetsService
+    @patch("src.services.maison.projets_service.ClientIA")
+    def test_service_creation_default_client(self, mock_client) -> None:
+        from src.services.maison import ProjetsService
 
         service = ProjetsService()
         assert service is not None
@@ -99,9 +99,9 @@ class TestProjetsService:
 
 @pytest.mark.unit
 class TestGetProjetsService:
-    @patch("src.modules.maison.projets.st")
-    def test_get_projets_service_returns_service(self, mock_st) -> None:
-        from src.modules.maison.projets import ProjetsService, get_projets_service
+    @patch("src.services.maison.projets_service.ClientIA")
+    def test_get_projets_service_returns_service(self, mock_client) -> None:
+        from src.services.maison import ProjetsService, get_projets_service
 
         service = get_projets_service()
         assert isinstance(service, ProjetsService)
@@ -110,32 +110,34 @@ class TestGetProjetsService:
 @pytest.mark.unit
 class TestCreerProjet:
     @patch("src.modules.maison.projets.clear_maison_cache")
+    @patch("src.modules.maison.projets._get_service")
     @patch("src.modules.maison.projets.st")
-    def test_creer_projet_success(self, mock_st, mock_clear) -> None:
+    def test_creer_projet_success(self, mock_st, mock_get_service, mock_clear) -> None:
         from src.modules.maison.projets import creer_projet
 
-        mock_db = MagicMock()
-        mock_db.refresh.side_effect = lambda p: setattr(p, "id", 42)
+        mock_service = MagicMock()
+        mock_service.creer_projet.return_value = 42
+        mock_get_service.return_value = mock_service
 
         result = creer_projet(
             nom="Renovation Cuisine",
             description="Refaire la cuisine",
             categorie="renovation",
             priorite="haute",
-            db=mock_db,
         )
-        mock_db.add.assert_called_once()
-        mock_db.commit.assert_called_once()
+        mock_service.creer_projet.assert_called_once()
         mock_clear.assert_called_once()
         assert result == 42
 
     @patch("src.modules.maison.projets.clear_maison_cache")
+    @patch("src.modules.maison.projets._get_service")
     @patch("src.modules.maison.projets.st")
-    def test_creer_projet_with_date(self, mock_st, mock_clear) -> None:
+    def test_creer_projet_with_date(self, mock_st, mock_get_service, mock_clear) -> None:
         from src.modules.maison.projets import creer_projet
 
-        mock_db = MagicMock()
-        mock_db.refresh.side_effect = lambda p: setattr(p, "id", 10)
+        mock_service = MagicMock()
+        mock_service.creer_projet.return_value = 10
+        mock_get_service.return_value = mock_service
 
         result = creer_projet(
             nom="Test",
@@ -143,114 +145,112 @@ class TestCreerProjet:
             categorie="entretien",
             priorite="moyenne",
             date_fin=date(2025, 12, 31),
-            db=mock_db,
         )
-        mock_db.add.assert_called_once()
+        mock_service.creer_projet.assert_called_once()
         assert result == 10
 
 
 @pytest.mark.unit
 class TestAjouterTache:
-    """Test task addition - mocking TacheProjet model due to field name mismatch in code"""
+    """Test task addition via service"""
 
-    @patch("src.modules.maison.projets.TacheProjet")
     @patch("src.modules.maison.projets.clear_maison_cache")
+    @patch("src.modules.maison.projets._get_service")
     @patch("src.modules.maison.projets.st")
-    def test_ajouter_tache_success(self, mock_st, mock_clear, mock_task_cls) -> None:
+    def test_ajouter_tache_success(self, mock_st, mock_get_service, mock_clear) -> None:
         from src.modules.maison.projets import ajouter_tache
 
-        mock_db = MagicMock()
-        mock_task_cls.return_value = MagicMock()
+        mock_service = MagicMock()
+        mock_service.ajouter_tache.return_value = True
+        mock_get_service.return_value = mock_service
 
         result = ajouter_tache(
             project_id=1,
             nom="Acheter materiel",
             description="Aller chez Leroy Merlin",
-            db=mock_db,
         )
-        mock_task_cls.assert_called_once()
-        mock_db.add.assert_called_once()
-        mock_db.commit.assert_called_once()
+        mock_service.ajouter_tache.assert_called_once()
         mock_clear.assert_called_once()
         assert result is True
 
-    @patch("src.modules.maison.projets.TacheProjet")
     @patch("src.modules.maison.projets.clear_maison_cache")
+    @patch("src.modules.maison.projets._get_service")
     @patch("src.modules.maison.projets.st")
-    def test_ajouter_tache_with_priority(self, mock_st, mock_clear, mock_task_cls) -> None:
+    def test_ajouter_tache_with_priority(self, mock_st, mock_get_service, mock_clear) -> None:
         from src.modules.maison.projets import ajouter_tache
 
-        mock_db = MagicMock()
-        mock_task_cls.return_value = MagicMock()
+        mock_service = MagicMock()
+        mock_service.ajouter_tache.return_value = True
+        mock_get_service.return_value = mock_service
 
         result = ajouter_tache(
             project_id=5,
             nom="Tache urgente",
             priorite="haute",
             date_echeance=date(2025, 6, 15),
-            db=mock_db,
         )
-        mock_task_cls.assert_called_once()
-        mock_db.add.assert_called_once()
+        mock_service.ajouter_tache.assert_called_once()
         assert result is True
 
 
 @pytest.mark.unit
 class TestMarquerTacheDone:
     @patch("src.modules.maison.projets.clear_maison_cache")
+    @patch("src.modules.maison.projets._get_service")
     @patch("src.modules.maison.projets.st")
-    def test_marquer_tache_done_exists(self, mock_st, mock_clear) -> None:
+    def test_marquer_tache_done_exists(self, mock_st, mock_get_service, mock_clear) -> None:
         from src.modules.maison.projets import marquer_tache_done
 
-        mock_db = MagicMock()
-        mock_tache = MagicMock()
-        mock_tache.statut = "a_faire"
-        mock_db.query.return_value.get.return_value = mock_tache
+        mock_service = MagicMock()
+        mock_service.marquer_tache_terminee.return_value = True
+        mock_get_service.return_value = mock_service
 
-        result = marquer_tache_done(task_id=1, db=mock_db)
+        result = marquer_tache_done(task_id=1)
         assert result is True
-        assert mock_tache.statut == "termine"
-        mock_db.commit.assert_called_once()
+        mock_service.marquer_tache_terminee.assert_called_once_with(1)
         mock_clear.assert_called_once()
 
     @patch("src.modules.maison.projets.clear_maison_cache")
+    @patch("src.modules.maison.projets._get_service")
     @patch("src.modules.maison.projets.st")
-    def test_marquer_tache_done_not_exists(self, mock_st, mock_clear) -> None:
+    def test_marquer_tache_done_not_exists(self, mock_st, mock_get_service, mock_clear) -> None:
         from src.modules.maison.projets import marquer_tache_done
 
-        mock_db = MagicMock()
-        mock_db.query.return_value.get.return_value = None
+        mock_service = MagicMock()
+        mock_service.marquer_tache_terminee.return_value = False
+        mock_get_service.return_value = mock_service
 
-        result = marquer_tache_done(task_id=999, db=mock_db)
+        result = marquer_tache_done(task_id=999)
         assert result is False
 
 
 @pytest.mark.unit
 class TestMarquerProjetDone:
     @patch("src.modules.maison.projets.clear_maison_cache")
+    @patch("src.modules.maison.projets._get_service")
     @patch("src.modules.maison.projets.st")
-    def test_marquer_projet_done_exists(self, mock_st, mock_clear) -> None:
+    def test_marquer_projet_done_exists(self, mock_st, mock_get_service, mock_clear) -> None:
         from src.modules.maison.projets import marquer_projet_done
 
-        mock_db = MagicMock()
-        mock_projet = MagicMock()
-        mock_projet.statut = "en_cours"
-        mock_db.query.return_value.get.return_value = mock_projet
+        mock_service = MagicMock()
+        mock_service.marquer_projet_termine.return_value = True
+        mock_get_service.return_value = mock_service
 
-        result = marquer_projet_done(project_id=1, db=mock_db)
+        result = marquer_projet_done(project_id=1)
         assert result is True
-        assert mock_projet.statut == "termine"
-        mock_db.commit.assert_called_once()
+        mock_service.marquer_projet_termine.assert_called_once_with(1)
 
     @patch("src.modules.maison.projets.clear_maison_cache")
+    @patch("src.modules.maison.projets._get_service")
     @patch("src.modules.maison.projets.st")
-    def test_marquer_projet_done_not_exists(self, mock_st, mock_clear) -> None:
+    def test_marquer_projet_done_not_exists(self, mock_st, mock_get_service, mock_clear) -> None:
         from src.modules.maison.projets import marquer_projet_done
 
-        mock_db = MagicMock()
-        mock_db.query.return_value.get.return_value = None
+        mock_service = MagicMock()
+        mock_service.marquer_projet_termine.return_value = False
+        mock_get_service.return_value = mock_service
 
-        result = marquer_projet_done(project_id=999, db=mock_db)
+        result = marquer_projet_done(project_id=999)
         assert result is False
 
 
@@ -300,9 +300,9 @@ class TestProjetsServiceAsync:
     """Tests for async IA methods in ProjetsService"""
 
     @pytest.mark.asyncio
-    @patch("src.modules.maison.projets.st")
-    async def test_suggerer_taches(self, mock_st) -> None:
-        from src.modules.maison.projets import ProjetsService
+    @patch("src.services.maison.projets_service.ClientIA")
+    async def test_suggerer_taches(self, mock_client_cls) -> None:
+        from src.services.maison import ProjetsService
 
         mock_client = MagicMock()
         service = ProjetsService(client=mock_client)
@@ -312,9 +312,9 @@ class TestProjetsServiceAsync:
         assert result == "1. Tache A"
 
     @pytest.mark.asyncio
-    @patch("src.modules.maison.projets.st")
-    async def test_estimer_duree(self, mock_st) -> None:
-        from src.modules.maison.projets import ProjetsService
+    @patch("src.services.maison.projets_service.ClientIA")
+    async def test_estimer_duree(self, mock_client_cls) -> None:
+        from src.services.maison import ProjetsService
 
         mock_client = MagicMock()
         service = ProjetsService(client=mock_client)
@@ -324,9 +324,9 @@ class TestProjetsServiceAsync:
         assert result == "3-5 jours"
 
     @pytest.mark.asyncio
-    @patch("src.modules.maison.projets.st")
-    async def test_prioriser_taches(self, mock_st) -> None:
-        from src.modules.maison.projets import ProjetsService
+    @patch("src.services.maison.projets_service.ClientIA")
+    async def test_prioriser_taches(self, mock_client_cls) -> None:
+        from src.services.maison import ProjetsService
 
         mock_client = MagicMock()
         service = ProjetsService(client=mock_client)
@@ -336,9 +336,9 @@ class TestProjetsServiceAsync:
         assert result == "1. Prep"
 
     @pytest.mark.asyncio
-    @patch("src.modules.maison.projets.st")
-    async def test_conseil_blocages(self, mock_st) -> None:
-        from src.modules.maison.projets import ProjetsService
+    @patch("src.services.maison.projets_service.ClientIA")
+    async def test_conseil_blocages(self, mock_client_cls) -> None:
+        from src.services.maison import ProjetsService
 
         mock_client = MagicMock()
         service = ProjetsService(client=mock_client)
@@ -352,55 +352,55 @@ class TestProjetsServiceAsync:
 class TestErrorHandling:
     """Tests for error handling in decorated functions"""
 
-    @patch("src.modules.maison.projets.clear_maison_cache")
+    @patch("src.modules.maison.projets._get_service")
     @patch("src.modules.maison.projets.st")
-    def test_creer_projet_exception(self, mock_st, mock_clear) -> None:
+    def test_creer_projet_exception(self, mock_st, mock_get_service) -> None:
         from src.modules.maison.projets import creer_projet
 
-        mock_db = MagicMock()
-        mock_db.add.side_effect = Exception("DB Error")
+        mock_service = MagicMock()
+        mock_service.creer_projet.side_effect = Exception("DB Error")
+        mock_get_service.return_value = mock_service
 
-        result = creer_projet(
-            nom="Test", description="Desc", categorie="cat", priorite="haute", db=mock_db
-        )
+        result = creer_projet(nom="Test", description="Desc", categorie="cat", priorite="haute")
         assert result is None
         mock_st.error.assert_called()
 
-    @patch("src.modules.maison.projets.TacheProjet")
-    @patch("src.modules.maison.projets.clear_maison_cache")
+    @patch("src.modules.maison.projets._get_service")
     @patch("src.modules.maison.projets.st")
-    def test_ajouter_tache_exception(self, mock_st, mock_clear, mock_task_cls) -> None:
+    def test_ajouter_tache_exception(self, mock_st, mock_get_service) -> None:
         from src.modules.maison.projets import ajouter_tache
 
-        mock_db = MagicMock()
-        mock_db.add.side_effect = Exception("DB Error")
-        mock_task_cls.return_value = MagicMock()
+        mock_service = MagicMock()
+        mock_service.ajouter_tache.side_effect = Exception("DB Error")
+        mock_get_service.return_value = mock_service
 
-        result = ajouter_tache(project_id=1, nom="Tache", db=mock_db)
+        result = ajouter_tache(project_id=1, nom="Tache")
         assert result is False
         mock_st.error.assert_called()
 
-    @patch("src.modules.maison.projets.clear_maison_cache")
+    @patch("src.modules.maison.projets._get_service")
     @patch("src.modules.maison.projets.st")
-    def test_marquer_tache_done_exception(self, mock_st, mock_clear) -> None:
+    def test_marquer_tache_done_exception(self, mock_st, mock_get_service) -> None:
         from src.modules.maison.projets import marquer_tache_done
 
-        mock_db = MagicMock()
-        mock_db.query.side_effect = Exception("DB Error")
+        mock_service = MagicMock()
+        mock_service.marquer_tache_terminee.side_effect = Exception("DB Error")
+        mock_get_service.return_value = mock_service
 
-        result = marquer_tache_done(task_id=1, db=mock_db)
+        result = marquer_tache_done(task_id=1)
         assert result is False
         mock_st.error.assert_called()
 
-    @patch("src.modules.maison.projets.clear_maison_cache")
+    @patch("src.modules.maison.projets._get_service")
     @patch("src.modules.maison.projets.st")
-    def test_marquer_projet_done_exception(self, mock_st, mock_clear) -> None:
+    def test_marquer_projet_done_exception(self, mock_st, mock_get_service) -> None:
         from src.modules.maison.projets import marquer_projet_done
 
-        mock_db = MagicMock()
-        mock_db.query.side_effect = Exception("DB Error")
+        mock_service = MagicMock()
+        mock_service.marquer_projet_termine.side_effect = Exception("DB Error")
+        mock_get_service.return_value = mock_service
 
-        result = marquer_projet_done(project_id=1, db=mock_db)
+        result = marquer_projet_done(project_id=1)
         assert result is False
         mock_st.error.assert_called()
 

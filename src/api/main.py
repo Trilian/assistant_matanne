@@ -15,12 +15,17 @@ from pydantic import BaseModel
 from src.api.dependencies import require_role
 from src.api.rate_limiting import MiddlewareLimitationDebit
 from src.api.routes import (
+    calendriers_router,
     courses_router,
+    famille_router,
     inventaire_router,
+    jeux_router,
+    maison_router,
     planning_router,
     recettes_router,
     suggestions_router,
 )
+from src.api.versioning import VersionMiddleware
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +68,26 @@ tags_metadata = [
     {
         "name": "IA",
         "description": "Suggestions intelligentes via Mistral AI",
+    },
+    {
+        "name": "Famille",
+        "description": "Suivi enfant, activités, budget et shopping familial",
+    },
+    {
+        "name": "Maison",
+        "description": "Projets, routines, entretien, jardin et stocks maison",
+    },
+    {
+        "name": "Jeux",
+        "description": "Paris sportifs et tirages Loto",
+    },
+    {
+        "name": "Calendriers",
+        "description": "Synchronisation calendriers externes et événements",
+    },
+    {
+        "name": "WebSocket",
+        "description": "Collaboration temps réel sur les listes de courses",
     },
 ]
 
@@ -127,6 +152,9 @@ app.add_middleware(
 )
 
 app.add_middleware(MiddlewareLimitationDebit)
+
+# Middleware API Versioning
+app.add_middleware(VersionMiddleware)
 
 # Middleware ETag pour cache HTTP
 from src.api.utils import ETagMiddleware
@@ -301,7 +329,7 @@ async def health_check():
 async def get_api_metrics(user: dict = Depends(require_role("admin"))):
     """Retourne les métriques de l'API (latence, requêtes, rate limiting).
 
-    Nécessite le rôle admin.
+    Nécessite le rôle admin. Pour le format Prometheus, voir /metrics/prometheus.
 
     Returns:
         Dict structuré avec uptime, requests, latency, rate_limiting et ai.
@@ -316,8 +344,13 @@ async def get_api_metrics(user: dict = Depends(require_role("admin"))):
 # ═══════════════════════════════════════════════════════════
 
 
+# Prometheus metrics endpoint
+from src.api.prometheus import prometheus_router
 from src.api.routes.auth import router as auth_router
 from src.api.routes.push import router as push_router
+
+# WebSocket pour collaboration temps réel
+from src.api.websocket_courses import router as websocket_router
 
 app.include_router(auth_router)
 app.include_router(recettes_router)
@@ -326,3 +359,13 @@ app.include_router(courses_router)
 app.include_router(planning_router)
 app.include_router(push_router)
 app.include_router(suggestions_router)
+
+# Nouveaux routers - famille, maison, jeux, calendriers
+app.include_router(famille_router)
+app.include_router(maison_router)
+app.include_router(jeux_router)
+app.include_router(calendriers_router)
+
+# Prometheus et WebSocket
+app.include_router(prometheus_router)
+app.include_router(websocket_router)

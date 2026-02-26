@@ -221,7 +221,13 @@ class CSSEngine:
 
         Utilise un hash MD5 pour éviter la réinjection si le
         contenu n'a pas changé entre deux cycles de rendu.
+
+        Effectue une purge automatique si le nombre de classes
+        atomiques dépasse le seuil (500 par défaut).
         """
+        # Purge automatique pour éviter l'accumulation sans borne
+        cls.purge_stale()
+
         blocks = cls._get_blocks()
         classes = cls._get_classes()
         keyframes = cls._get_keyframes()
@@ -299,6 +305,89 @@ class CSSEngine:
         for key in (_SK_HASH, _SK_INJECTED):
             if key in st.session_state:
                 del st.session_state[key]
+
+    # ═══════════════════════════════════════════════════════════
+    # Purge / Garbage Collection
+    # ═══════════════════════════════════════════════════════════
+
+    @classmethod
+    def purge_classes(cls, keep_prefixes: tuple[str, ...] = ()) -> int:
+        """Purge les classes atomiques accumulées en session_state.
+
+        Les classes atomiques générées par ``css_class()`` / ``styled()``
+        s'accumulent au fil des reruns sans être nettoyées.  Cette méthode
+        supprime celles qui ne correspondent pas aux préfixes conservés.
+
+        Args:
+            keep_prefixes: Tuple de préfixes de classes à conserver
+                (ex: ``("css-",)`` pour ne garder que les classes standard).
+                Si vide, **toutes** les classes atomiques sont purgées.
+
+        Returns:
+            Nombre de classes supprimées.
+
+        Usage:
+            # En début de session ou périodiquement
+            CSSEngine.purge_classes()
+
+            # Conserver uniquement certains préfixes
+            CSSEngine.purge_classes(keep_prefixes=("badge-", "layout-"))
+        """
+        classes = cls._get_classes()
+        if not classes:
+            return 0
+
+        if not keep_prefixes:
+            count = len(classes)
+            classes.clear()
+        else:
+            to_remove = [
+                name
+                for name in classes
+                if not any(name.startswith(prefix) for prefix in keep_prefixes)
+            ]
+            for name in to_remove:
+                del classes[name]
+            count = len(to_remove)
+
+        if count > 0:
+            # Invalider le hash pour forcer la réinjection
+            cls.invalidate()
+            logger.debug("CSSEngine: purgé %d classes atomiques", count)
+
+        return count
+
+    @classmethod
+    def purge_stale(cls, max_classes: int = 500) -> int:
+        """Purge automatique si le nombre de classes dépasse un seuil.
+
+        Appelée automatiquement par ``inject_all()`` pour éviter
+        l'accumulation sans borne.  Supprime les classes les plus
+        anciennes (FIFO — insertion order des dicts Python 3.7+).
+
+        Args:
+            max_classes: Seuil maximal de classes atomiques.
+
+        Returns:
+            Nombre de classes supprimées (0 si sous le seuil).
+        """
+        classes = cls._get_classes()
+        overflow = len(classes) - max_classes
+        if overflow <= 0:
+            return 0
+
+        # Supprimer les plus anciennes (début du dict ordonné)
+        keys_to_remove = list(classes.keys())[:overflow]
+        for key in keys_to_remove:
+            del classes[key]
+
+        cls.invalidate()
+        logger.debug(
+            "CSSEngine: purge automatique de %d classes (seuil=%d)",
+            overflow,
+            max_classes,
+        )
+        return overflow
 
     # ═══════════════════════════════════════════════════════════
     # Méthodes de compat StyleSheet

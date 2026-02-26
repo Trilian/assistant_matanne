@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 
 from src.core.db import obtenir_contexte_db
+from src.core.decorators import avec_resilience
 from src.core.models import CalendrierExterne
 
 from .schemas import ConfigCalendrierExterne
@@ -31,6 +32,7 @@ class GoogleTokensMixin:
     - self.http_client: httpx.Client
     """
 
+    @avec_resilience(retry=2, timeout_s=30, fallback=None)
     def _refresh_google_token(self, config: ConfigCalendrierExterne):
         """Rafraîchit le token Google."""
         from src.core.config import obtenir_parametres

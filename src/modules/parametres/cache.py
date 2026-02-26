@@ -6,7 +6,7 @@ Gestion du cache applicatif et cache IA
 import streamlit as st
 
 from src.core.ai.cache import CacheIA as SemanticCache
-from src.core.caching import Cache
+from src.core.caching import obtenir_cache
 from src.ui.feedback import afficher_succes
 from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
@@ -43,7 +43,7 @@ def afficher_cache_config():
             if st.button(
                 "🗑️ Vider Cache Applicatif", key="btn_clear_cache_app", use_container_width=True
             ):
-                Cache.clear()
+                obtenir_cache().clear()
                 afficher_succes("Cache applicatif vidé !")
 
     else:
@@ -82,6 +82,6 @@ def afficher_cache_config():
         type="primary",
         use_container_width=True,
     ):
-        Cache.clear()
+        obtenir_cache().clear()
         SemanticCache.invalider_tout()
         afficher_succes("✅ Tous les caches vidés !")

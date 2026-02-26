@@ -115,14 +115,15 @@ class TestDepensesApp:
         """Vérifie l'annulation du mode édition"""
         mock_st.session_state = SessionStateMock({"edit_depense_id": 1})
         mock_st.button.return_value = True
-        # st.rerun() should stop execution, simulate with exception
-        mock_st.rerun.side_effect = SystemExit()
 
         with (
             patch("src.modules.maison.depenses.get_depense_by_id") as mock_get,
             patch("src.modules.maison.depenses.CATEGORY_LABELS", {"gaz": "Gaz"}),
+            patch("src.modules.maison.depenses.rerun") as mock_rerun,
         ):
             mock_get.return_value = MagicMock(categorie="gaz")
+            # rerun() should stop execution, simulate with exception
+            mock_rerun.side_effect = SystemExit()
 
             from src.modules.maison.depenses import app
 
@@ -130,7 +131,7 @@ class TestDepensesApp:
                 app()
 
             mock_st.button.assert_called()
-            mock_st.rerun.assert_called()
+            mock_rerun.assert_called()
 
     def test_app_mode_edition_depense_introuvable(self, mock_st, mock_components):
         """Vérifie le comportement si dépense non trouvée"""

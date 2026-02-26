@@ -608,10 +608,13 @@ class TestRenderAchatCard:
 
         mock_st.container.assert_called_once_with(border=True)
 
+    @patch("src.modules.famille.achats_famille.components.rerun")
     @patch("src.modules.famille.achats_famille.components.st")
     @patch("src.modules.famille.achats_famille.components.mark_as_bought")
     @patch("src.modules.famille.achats_famille.components.delete_purchase")
-    def test_bouton_acheter_appelle_mark_as_bought(self, mock_delete, mock_mark, mock_st):
+    def test_bouton_acheter_appelle_mark_as_bought(
+        self, mock_delete, mock_mark, mock_st, mock_rerun
+    ):
         """Le bouton ✅ appelle mark_as_bought"""
         mock_achat = MagicMock(
             id=42,
@@ -639,7 +642,7 @@ class TestRenderAchatCard:
         afficher_achat_card(mock_achat)
 
         mock_mark.assert_called_once_with(42)
-        mock_st.rerun.assert_called()
+        mock_rerun.assert_called()
 
 
 class TestRenderAddForm:

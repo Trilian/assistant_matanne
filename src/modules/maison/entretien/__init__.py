@@ -13,8 +13,6 @@ import logging
 import pandas as pd
 import streamlit as st
 
-from src.core.db import obtenir_contexte_db
-from src.core.models.maison import Routine, TacheRoutine
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.state import rerun
 from src.modules._framework import error_boundary
@@ -40,73 +38,50 @@ __all__ = [
 _keys = KeyNamespace("entretien")
 logger = logging.getLogger(__name__)
 
-# NOTE: Pour l'accès au service IA entretien, utilisez:
-# from src.services.maison import get_entretien_service
+
+# ═══════════════════════════════════════════════════════════
+# SERVICE LAZY LOADER
+# ═══════════════════════════════════════════════════════════
+
+
+def _get_service():
+    """Retourne le service singleton EntretienService."""
+    from src.services.maison import get_entretien_service
+
+    return get_entretien_service()
 
 
 # ═══════════════════════════════════════════════════════════
-# FONCTIONS METIER
+# FONCTIONS METIER (délèguent au service)
 # ═══════════════════════════════════════════════════════════
 
 
 def creer_routine(nom: str, frequence: str = "quotidien", **kwargs) -> bool:
     """Crée une nouvelle routine d'entretien."""
-    try:
-        with obtenir_contexte_db() as db:
-            routine = Routine(nom=nom, frequence=frequence, **kwargs)
-            db.add(routine)
-            db.commit()
-            return True
-    except Exception as e:
-        logger.error(f"Erreur création routine: {e}")
-        st.error(f"Erreur: {e}")
+    result = _get_service().creer_routine(nom, frequence, **kwargs)
+    if result is None:
+        st.error("Erreur lors de la création de la routine")
         return False
+    return True
 
 
 def ajouter_tache_routine(routine_id: int, nom: str, **kwargs) -> bool:
     """Ajoute une tâche à une routine."""
-    try:
-        with obtenir_contexte_db() as db:
-            tache = TacheRoutine(routine_id=routine_id, nom=nom, **kwargs)
-            db.add(tache)
-            db.commit()
-            return True
-    except Exception as e:
-        logger.error(f"Erreur ajout tâche: {e}")
-        st.error(f"Erreur: {e}")
+    result = _get_service().ajouter_tache_routine(routine_id, nom, **kwargs)
+    if result is None:
+        st.error("Erreur lors de l'ajout de la tâche")
         return False
+    return True
 
 
 def marquer_tache_faite(tache_id: int) -> bool:
     """Marque une tâche de routine comme faite."""
-    try:
-        with obtenir_contexte_db() as db:
-            tache = db.query(TacheRoutine).get(tache_id)
-            if tache is None:
-                return False
-            tache.fait = True
-            db.commit()
-            return True
-    except Exception as e:
-        logger.error(f"Erreur marquage tâche: {e}")
-        st.error(f"Erreur: {e}")
-        return False
+    return _get_service().marquer_tache_faite(tache_id)
 
 
 def desactiver_routine(routine_id: int) -> bool:
     """Désactive une routine."""
-    try:
-        with obtenir_contexte_db() as db:
-            routine = db.query(Routine).get(routine_id)
-            if routine is None:
-                return False
-            routine.actif = False
-            db.commit()
-            return True
-    except Exception as e:
-        logger.error(f"Erreur désactivation routine: {e}")
-        st.error(f"Erreur: {e}")
-        return False
+    return _get_service().desactiver_routine(routine_id)
 
 
 # ═══════════════════════════════════════════════════════════

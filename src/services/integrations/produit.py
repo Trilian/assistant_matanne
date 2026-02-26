@@ -11,7 +11,7 @@ from datetime import datetime
 
 import httpx
 
-from src.core.caching import Cache
+from src.core.caching import obtenir_cache
 from src.core.decorators import avec_gestion_erreurs, avec_resilience
 
 logger = logging.getLogger(__name__)
@@ -108,7 +108,7 @@ class OpenFoodFactsService:
     """
 
     def __init__(self):
-        self.cache = Cache
+        self.cache = obtenir_cache()
         self.timeout = 10.0
         self.user_agent = "AssistantMatanne/1.0 (contact@example.com)"
 
@@ -125,7 +125,7 @@ class OpenFoodFactsService:
         """
         # Vérifier le cache
         cache_key = f"off_product_{code_barres}"
-        cached = self.cache.obtenir(cache_key)
+        cached = self.cache.get(cache_key)
         if cached:
             logger.debug(f"Cache hit pour {code_barres}")
             return cached
@@ -151,7 +151,7 @@ class OpenFoodFactsService:
 
                 # Mettre en cache
                 if result:
-                    self.cache.definir(cache_key, result, ttl=CACHE_TTL)
+                    self.cache.set(cache_key, result, ttl=CACHE_TTL)
 
                 return result
 

@@ -9,7 +9,7 @@ from typing import Any
 
 import streamlit as st
 
-from src.core.caching import Cache
+from src.core.caching import obtenir_cache
 from src.core.decorators import avec_cache
 from src.core.state import rerun
 
@@ -211,7 +211,7 @@ def bouton_actualiser_api(cle: str):
             rerun()
     """
     if st.button("🔄 Actualiser depuis API"):
-        Cache.invalider(pattern="charger_")
+        obtenir_cache().invalidate(pattern="charger_")
         st.session_state[f"{cle}_updated"] = True
         return True
     return False

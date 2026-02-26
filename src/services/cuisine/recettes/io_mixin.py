@@ -15,10 +15,10 @@ from io import StringIO
 
 from sqlalchemy.orm import Session
 
-from src.core.caching import Cache
+from src.core.caching import obtenir_cache
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.models import EtapeRecette, Ingredient, Recette, RecetteIngredient
-from src.services.core.events.bus import obtenir_bus
+from src.services.core.events import obtenir_bus
 
 logger = logging.getLogger(__name__)
 
@@ -191,7 +191,7 @@ class RecetteIOImportMixin:
             db.add(etape)
 
         db.commit()
-        Cache.invalider(pattern="recettes")
+        obtenir_cache().invalidate(pattern="recettes")
 
         # Émettre événement domaine
         obtenir_bus().emettre(

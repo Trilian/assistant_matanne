@@ -11,6 +11,7 @@ chaque fichier à taille raisonnable tout en conservant la même API publique.
 
 import logging
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, ValidationError
 
@@ -59,24 +60,28 @@ class BaseAIService(
 
     def __init__(
         self,
-        client: ClientIA,
+        client: ClientIA | None = None,
         cache_prefix: str = "ai",
         default_ttl: int = 3600,
         default_temperature: float = 0.7,
         service_name: str = "unknown",
         circuit_breaker: CircuitBreaker | None = None,
+        **kwargs: Any,
     ):
         """
         Initialise le service IA
 
         Args:
-            client: Client IA (ClientIA)
+            client: Client IA (ClientIA). Si None, sera obtenu via obtenir_client_ia()
             cache_prefix: Préfixe pour clés cache
             default_ttl: TTL cache par défaut (secondes)
             default_temperature: Température par défaut
             service_name: Nom du service (pour analytics)
             circuit_breaker: Circuit breaker (auto-créé si None)
+            **kwargs: Arguments pour le MRO coopératif (héritage multiple)
         """
+        # MRO coopératif: passer les kwargs restants aux classes parentes
+        super().__init__(**kwargs)
         self.client = client
         self.cache_prefix = cache_prefix
         self.default_ttl = default_ttl

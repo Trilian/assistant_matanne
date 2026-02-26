@@ -7,7 +7,7 @@ import streamlit as st
 
 from src.core.state import rerun
 from src.services.jeux import predire_over_under, predire_resultat_match
-from src.ui.fragments import ui_fragment
+from src.ui.fragments import cached_fragment, ui_fragment
 from src.ui.keys import KeyNamespace
 
 from .analyseur import generer_analyse_complete
@@ -17,6 +17,34 @@ from .utils import charger_matchs_recents
 
 # Session keys scopées pour ce module
 _keys = KeyNamespace("paris_prediction")
+
+
+@cached_fragment(ttl=300)
+def _build_proba_chart(
+    dom: float,
+    nul: float,
+    ext: float,
+) -> go.Figure:
+    """Construit le bar chart des probabilités (caché 5 min)."""
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=["🏠 Dom", "⚖️ Nul", "✈️ Ext"],
+                y=[dom, nul, ext],
+                marker_color=["#4CAF50", "#FFC107", "#2196F3"],
+                text=[f"{v:.0f}%" for v in [dom, nul, ext]],
+                textposition="outside",
+            )
+        ]
+    )
+    fig.update_layout(
+        title="📊 Probabilités estimées",
+        height=220,
+        margin=dict(l=20, r=20, t=40, b=20),
+        showlegend=False,
+        yaxis=dict(range=[0, 100]),
+    )
+    return fig
 
 
 @ui_fragment

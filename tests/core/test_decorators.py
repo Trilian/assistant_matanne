@@ -14,7 +14,6 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from src.core.caching.cache import Cache
 from src.core.decorators import (
     avec_cache,
     avec_gestion_erreurs,

@@ -43,6 +43,14 @@ _SERVICES = {
     "HubDataService": "hub_data_service",
     "get_hub_data_service": "hub_data_service",
     "obtenir_service_hub_data": "hub_data_service",
+    # NEW: Meubles CRUD service
+    "MeublesCrudService": "meubles_crud_service",
+    "get_meubles_crud_service": "meubles_crud_service",
+    "obtenir_service_meubles_crud": "meubles_crud_service",
+    # NEW: Eco Tips CRUD service
+    "EcoTipsCrudService": "eco_tips_crud_service",
+    "get_eco_tips_crud_service": "eco_tips_crud_service",
+    "obtenir_service_eco_tips_crud": "eco_tips_crud_service",
 }
 
 _SCHEMAS = {
@@ -81,12 +89,22 @@ def __dir__():
 
 # Type hints pour IDE sans charger les modules
 if TYPE_CHECKING:
+    from .eco_tips_crud_service import (
+        EcoTipsCrudService,
+        get_eco_tips_crud_service,
+        obtenir_service_eco_tips_crud,
+    )
     from .entretien_service import (
         EntretienService,
         get_entretien_service,
         obtenir_service_entretien,
     )
     from .jardin_service import JardinService, get_jardin_service, obtenir_service_jardin
+    from .meubles_crud_service import (
+        MeublesCrudService,
+        get_meubles_crud_service,
+        obtenir_service_meubles_crud,
+    )
     from .projets_service import ProjetsService, get_projets_service, obtenir_service_projets
     from .schemas import (
         AlerteMaison,
@@ -133,4 +151,12 @@ __all__ = [
     "HubDataService",
     "get_hub_data_service",
     "obtenir_service_hub_data",
+    # NEW: Meubles CRUD service
+    "MeublesCrudService",
+    "get_meubles_crud_service",
+    "obtenir_service_meubles_crud",
+    # NEW: Eco Tips CRUD service
+    "EcoTipsCrudService",
+    "get_eco_tips_crud_service",
+    "obtenir_service_eco_tips_crud",
 ]
