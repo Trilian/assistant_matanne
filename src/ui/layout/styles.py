@@ -122,12 +122,32 @@ def injecter_css():
 }}
 
 /* Boutons — éviter que les labels se replient sur plusieurs lignes */
-.stButton > button {{
+/* Sélecteurs multiples pour couvrir variantes DOM Streamlit */
+.stButton > button,
+.stButton button,
+.stButton > div > button,
+.stForm button,
+button.stButton {{
     white-space: nowrap !important;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-height: 36px;
-    padding: 8px 12px;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.4rem !important;
+    min-height: 36px !important;
+    padding: 8px 12px !important;
+}}
+
+/* Autoriser le wrap sur écrans très petits mais garder un minimum propre */
+@media (max-width: 380px) {{
+    .stButton > button,
+    .stButton button,
+    .stButton > div > button,
+    .stForm button {{
+        white-space: normal !important;
+        padding: 6px 8px !important;
+    }}
 }}
 
 /* Masquer éléments Streamlit par défaut */

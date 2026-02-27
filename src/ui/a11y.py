@@ -58,19 +58,25 @@ _A11Y_CSS = """
     position: absolute;
     top: -40px;
     left: 0;
-    /* Utiliser une couleur sobre et contrastée pour un rendu plus professionnel */
-    background: var(--sem-on-surface, #212529);
-    color: var(--sem-surface, #ffffff);
-    padding: 8px 16px;
+    /* Apparence discrète par défaut (ton neutre) */
+    background: var(--sem-surface-alt, #f8f9fa);
+    color: var(--sem-on-surface, #212529);
+    border: 1px solid var(--sem-border, #ced4da);
+    padding: 6px 12px;
     z-index: 10000;
-    font-weight: 600;
+    font-weight: 500;
     text-decoration: none;
-    border-radius: 0 0 8px 0;
-    transition: top 0.2s ease;
+    border-radius: 4px;
+    transition: top 0.18s ease, background 0.12s ease, color 0.12s ease;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
 .skip-link:focus {
-    top: 0;
+    top: 8px;
+    /* Mettre en évidence au focus avec la couleur interactive (accessible) */
+    background: var(--sem-interactive, #2E7D32);
+    color: var(--sem-on-interactive, #ffffff);
+    border-color: transparent;
 }
 
 /* ── ARIA live regions ─────────────────────────── */
