@@ -280,8 +280,28 @@ def cached_fragment(ttl: int = 300) -> Callable[[F], F]:
     """
 
     def decorator(func: F) -> F:
-        # Appliquer cache d'abord
-        cached_func = st.cache_data(ttl=ttl)(func)
+        # Appliquer cache d'abord — mais éviter de mettre en cache
+        # les fonctions qui utilisent des widgets (st.*) car Streamlit
+        # lève CachedWidgetWarning lorsqu'un widget est exécuté dans
+        # une fonction cachee. Nous détectons cela via inspect.getsource().
+        import inspect
+
+        try:
+            src = inspect.getsource(func)
+        except OSError:
+            src = ""
+
+        uses_widgets = any(
+            tok in src for tok in ("st.", "st.button", "st.form", "st.text_input", "st.selectbox")
+        )
+
+        if uses_widgets:
+            logger.debug(
+                f"cached_fragment: detected widgets in {func.__name__}; skipping st.cache_data"
+            )
+            cached_func = func
+        else:
+            cached_func = st.cache_data(ttl=ttl)(func)
 
         # Puis fragment
         @wraps(func)

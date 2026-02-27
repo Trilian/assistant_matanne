@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-02-27",
+  "recettes": {
+    "legend": "Métadonnées liées aux recettes (tags, catégories, difficultés)",
+    "last_updated": "2026-02-27"
+  },
+  "accueil_dashboard": {
+    "legend": "Légendes et libellés utilisés par le dashboard d'accueil",
+    "last_updated": "2026-02-27"
+  },
+  "notes": "Fichier centralisé pour stocker légendes et dates de mise à jour. Modifier selon besoin."
+}

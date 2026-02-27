@@ -53,6 +53,30 @@ def injecter_css():
     outline-offset: 2px;
 }}
 
+/* Lien "Aller au contenu principal" — style bouton arrondi, discret hors focus */
+.skip-link {{
+    position: absolute;
+    left: 1rem;
+    top: 0.75rem;
+    background: rgba(0,0,0,0.04);
+    color: var(--text-primary);
+    padding: 6px 10px;
+    border-radius: {Rayon.XS};
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    font-size: 0.95rem;
+    text-decoration: none;
+    transform: translateY(-120%);
+    transition: transform {Transition.SHORT}, background {Transition.SHORT};
+    z-index: 9999;
+}}
+
+.skip-link:focus, .skip-link:active {{
+    transform: translateY(0);
+    background: var(--sem-interactive, {Couleur.ACCENT});
+    color: var(--sem-on-interactive, #fff);
+    outline: none;
+}}
+
 /* Reduced motion — accessibilité */
 @media (prefers-reduced-motion: reduce) {{
     *, *::before, *::after {{
@@ -135,8 +159,13 @@ button.stButton {{
     align-items: center !important;
     justify-content: center !important;
     gap: 0.4rem !important;
-    min-height: 36px !important;
-    padding: 8px 12px !important;
+    min-height: 40px !important;
+    padding: 10px 14px !important;
+    border-radius: 10px !important;
+    min-width: 96px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    box-shadow: 0 1px 3px rgba(16,24,40,0.06) !important;
 }}
 
 /* Autoriser le wrap sur écrans très petits mais garder un minimum propre */
@@ -147,6 +176,9 @@ button.stButton {{
     .stForm button {{
         white-space: normal !important;
         padding: 6px 8px !important;
+        min-width: unset !important;
+        font-size: 0.9rem !important;
+        border-radius: 8px !important;
     }}
 }}
 
