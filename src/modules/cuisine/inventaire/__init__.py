@@ -380,17 +380,14 @@ def _afficher_anti_gaspi() -> None:
 def app():
     """Point d'entrée du module inventaire (version migrée)."""
 
-    # Initialisation de l'état avec préfixes
-    init_module_state(
-        "inventaire",
-        {
-            "show_form": False,
-            "refresh_counter": 0,
-            "active_tab": 0,
-        },
-    )
+    # Initialisation de l'état avec préfixes (ModuleState gère les defaults)
+    defaults = {
+        "show_form": False,
+        "refresh_counter": 0,
+        "active_tab": 0,
+    }
 
-    state = ModuleState("inventaire")
+    state = ModuleState("inventaire", defaults=defaults)
 
     # Header
     afficher_header()

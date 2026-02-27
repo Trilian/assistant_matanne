@@ -252,7 +252,7 @@ class UserPreferenceService:
             magasins_preferes=["Carrefour Drive", "Bio Coop", "Grand Frais", "Thiriet"],
         )
 
-    def _db_to_dataclass(self, db_pref: PreferenceUtilisateur) -> PreferencesUtilisateur:
+    def _db_to_dataclass(self, db_pref: "PreferenceUtilisateur") -> PreferencesUtilisateur:
         """Convertit PreferenceUtilisateur (DB) → PreferencesUtilisateur (dataclass)."""
         return PreferencesUtilisateur(
             nb_adultes=db_pref.nb_adultes,
@@ -269,7 +269,7 @@ class UserPreferenceService:
             magasins_preferes=db_pref.magasins_preferes or [],
         )
 
-    def _dataclass_to_db(self, prefs: PreferencesUtilisateur) -> PreferenceUtilisateur:
+    def _dataclass_to_db(self, prefs: PreferencesUtilisateur) -> "PreferenceUtilisateur":
         """Convertit PreferencesUtilisateur (dataclass) → PreferenceUtilisateur (DB)."""
         from src.core.models import PreferenceUtilisateur
 
@@ -290,7 +290,7 @@ class UserPreferenceService:
         )
 
     def _update_db_from_dataclass(
-        self, db_pref: PreferenceUtilisateur, prefs: PreferencesUtilisateur
+        self, db_pref: "PreferenceUtilisateur", prefs: PreferencesUtilisateur
     ):
         """Met à jour les champs DB depuis le dataclass."""
         db_pref.nb_adultes = prefs.nb_adultes

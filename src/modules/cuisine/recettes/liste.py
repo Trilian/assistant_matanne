@@ -42,7 +42,7 @@ def afficher_liste():
             "Recettes/page",
             [6, 9, 12, 15],
             index=[6, 9, 12, 15].index(st.session_state[_keys("page_size_val")]),
-            key=_keys("page_size"),
+            key=_keys("page_size_sel"),
             label_visibility="collapsed",
         )
         st.session_state[_keys("page_size_val")] = page_size

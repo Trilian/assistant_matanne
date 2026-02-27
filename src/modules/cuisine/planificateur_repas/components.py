@@ -163,7 +163,7 @@ def afficher_carte_recette_suggestion(
             # Tags
             tags = []
             if suggestion.get("temps_minutes"):
-                tags.append(f"â±ï¸ {suggestion['temps_minutes']} min")
+                tags.append(f"⏱️ {suggestion['temps_minutes']} min")
             if suggestion.get("proteine"):
                 prot_info = PROTEINES.get(suggestion["proteine"], {})
                 tags.append(
@@ -221,7 +221,7 @@ def afficher_jour_planning(
         if midi:
             afficher_carte_recette_suggestion(midi, jour, "midi", f"{key_prefix}_midi")
         else:
-            st.info("Pas encore planifié")
+            st.info("Aucun")
             if st.button("➕ Ajouter midi", key=f"{key_prefix}_add_midi"):
                 st.session_state[_keys("add_midi", key_prefix)] = True
 
@@ -233,7 +233,7 @@ def afficher_jour_planning(
         if soir:
             afficher_carte_recette_suggestion(soir, jour, "soir", f"{key_prefix}_soir")
         else:
-            st.info("Pas encore planifié")
+            st.info("Aucun")
             if st.button("➕ Ajouter soir", key=f"{key_prefix}_add_soir"):
                 st.session_state[_keys("add_soir", key_prefix)] = True
 
@@ -269,7 +269,24 @@ def afficher_resume_equilibre(planning_data: dict):
 
     prefs = charger_preferences()
 
+    # Calcul des repas planifiés
+    total_slots = 0
+    planned = 0
+    for jour, repas in planning_data.items():
+        for tr in ["midi", "soir"]:
+            total_slots += 1
+            if repas.get(tr):
+                planned += 1
+
     st.markdown("##### 📊 Équilibre de la semaine")
+
+    # Afficher résumé des repas planifiés
+    col_top1, col_top2 = st.columns([1, 3])
+    with col_top1:
+        st.metric("🍽️ Repas planifiés", f"{planned}/{total_slots}")
+    with col_top2:
+        if planned == 0:
+            st.info("0 repas planifiés — Le planificateur IA peut compléter !")
 
     col1, col2, col3, col4 = st.columns(4)
 

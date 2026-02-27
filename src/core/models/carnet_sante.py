@@ -67,8 +67,9 @@ class Vaccin(CreeLeMixin, Base):
     fait: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
 
     # Relations
-    enfant: Mapped[Optional["ProfilEnfant"]] = relationship(  # noqa: F821
-        back_populates="vaccins"
+    # Use fully-qualified target name to avoid mapper init ordering issues
+    enfant: Mapped[Optional["src.core.models.famille.ProfilEnfant"]] = relationship(  # noqa: F821
+        "src.core.models.famille.ProfilEnfant", back_populates="vaccins"
     )
 
     def __repr__(self) -> str:
@@ -117,8 +118,8 @@ class RendezVousMedical(CreeLeMixin, Base):
     statut: Mapped[str] = mapped_column(String(50), nullable=False, default="planifié", index=True)
 
     # Relations
-    enfant: Mapped[Optional["ProfilEnfant"]] = relationship(  # noqa: F821
-        back_populates="rendez_vous"
+    enfant: Mapped[Optional["src.core.models.famille.ProfilEnfant"]] = relationship(  # noqa: F821
+        "src.core.models.famille.ProfilEnfant", back_populates="rendez_vous"
     )
 
     def __repr__(self) -> str:
@@ -162,8 +163,8 @@ class MesureCroissance(CreeLeMixin, Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     # Relations
-    enfant: Mapped["ProfilEnfant"] = relationship(  # noqa: F821
-        back_populates="mesures_croissance"
+    enfant: Mapped["src.core.models.famille.ProfilEnfant"] = relationship(  # noqa: F821
+        "src.core.models.famille.ProfilEnfant", back_populates="mesures_croissance"
     )
 
     __table_args__ = (

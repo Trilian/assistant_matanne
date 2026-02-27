@@ -152,6 +152,23 @@ class BaseService(PipelineMixin, AdvancedQueryMixin, Generic[T]):
         return self._with_session(_execute, db)
 
     # ════════════════════════════════════════════════════════════
+    # Backwards compatibility / English aliases
+    # Some UI code and older services call English method names like
+    # `list_all` or `list`. Provide small aliases to avoid AttributeError
+    # when migrating the codebase.
+    def list_all(self, *args, **kwargs) -> list[T]:
+        """Alias backward-compat: calls `get_all`."""
+        return self.get_all(*args, **kwargs)
+
+    def list(self, *args, **kwargs) -> list[T]:
+        """Short alias for `get_all`."""
+        return self.get_all(*args, **kwargs)
+
+    def get(self, entity_id: int, db: Session | None = None) -> T | None:
+        """Alias for `get_by_id` used in some callers."""
+        return self.get_by_id(entity_id, db=db)
+
+    # ════════════════════════════════════════════════════════════
     # HELPERS PRIVÉS
     # ════════════════════════════════════════════════════════════
 

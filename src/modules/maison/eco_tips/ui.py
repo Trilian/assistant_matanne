@@ -55,11 +55,11 @@ def afficher_action_card(action) -> None:
 
         cols2 = st.columns(2)
         with cols2[0]:
-            if st.button("✏️ Modifier", key=f"edit_{action.id}"):
+            if st.button("✏️ Modifier", key=f"edit_{action.id}", use_container_width=True):
                 st.session_state[_keys("edit_id")] = action.id
                 rerun()
         with cols2[1]:
-            if st.button("🗑️ Supprimer", key=f"del_{action.id}"):
+            if st.button("🗑️ Supprimer", key=f"del_{action.id}", use_container_width=True):
                 delete_action(action.id)
                 rerun()
 
@@ -127,7 +127,7 @@ def afficher_idees() -> None:
                 st.caption(idee["description"])
                 st.caption(f"💰 ~{idee['economie_estimee']:.0f}€/mois")
                 if idee["nom"] not in noms_existants:
-                    if st.button("➕ Adopter", key=f"adopt_{i}"):
+                    if st.button("➕ Adopter", key=f"adopt_{i}", use_container_width=True):
                         create_action(
                             {
                                 "nom": idee["nom"],
@@ -140,7 +140,12 @@ def afficher_idees() -> None:
                         )
                         rerun()
                 else:
-                    st.success("✅ Déjà adoptée")
+                    st.markdown(
+                        '<div style="display:inline-block; width:100%; padding:0.5rem; '
+                        "background:#e9f7ef; border-radius:6px; text-align:center; "
+                        'font-weight:600;">✅ Déjà adoptée</div>',
+                        unsafe_allow_html=True,
+                    )
 
 
 def afficher_onglet_mes_actions() -> None:

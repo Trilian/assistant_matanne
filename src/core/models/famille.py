@@ -64,14 +64,21 @@ class ProfilEnfant(CreeLeMixin, Base):
     milestones: Mapped[list["Jalon"]] = relationship(
         back_populates="child", cascade="all, delete-orphan"
     )
-    vaccins: Mapped[list["Vaccin"]] = relationship(  # noqa: F821
-        back_populates="enfant", cascade="all, delete-orphan"
+    # Use fully-qualified target names for relationships defined in other modules
+    vaccins: Mapped[list["src.core.models.carnet_sante.Vaccin"]] = relationship(  # noqa: F821
+        "src.core.models.carnet_sante.Vaccin", back_populates="enfant", cascade="all, delete-orphan"
     )
-    rendez_vous: Mapped[list["RendezVousMedical"]] = relationship(  # noqa: F821
-        back_populates="enfant", cascade="all, delete-orphan"
+    rendez_vous: Mapped[list["src.core.models.carnet_sante.RendezVousMedical"]] = relationship(  # noqa: F821
+        "src.core.models.carnet_sante.RendezVousMedical",
+        back_populates="enfant",
+        cascade="all, delete-orphan",
     )
-    mesures_croissance: Mapped[list["MesureCroissance"]] = relationship(  # noqa: F821
-        back_populates="enfant", cascade="all, delete-orphan"
+    mesures_croissance: Mapped[list["src.core.models.carnet_sante.MesureCroissance"]] = (
+        relationship(  # noqa: F821
+            "src.core.models.carnet_sante.MesureCroissance",
+            back_populates="enfant",
+            cascade="all, delete-orphan",
+        )
     )
 
     def __repr__(self) -> str:

@@ -130,20 +130,26 @@ def afficher_budget_summary() -> None:
     """Affiche le résumé budget."""
     st.subheader("💰 Résumé budget")
     resume = get_budget_resume()
+    # Défensive: le service peut retourner {} en cas d'erreur (decorateur renvoie default_return)
+    if not resume or not isinstance(resume, dict):
+        resume = {}
 
     cols = st.columns(3)
     with cols[0]:
-        st.metric("Articles", resume["nb_articles"])
+        st.metric("Articles", resume.get("nb_articles", 0))
     with cols[1]:
-        st.metric("Total estimé", f"{resume['total_estime']:.0f}€")
+        st.metric("Total estimé", f"{resume.get('total_estime', 0):.0f}€")
     with cols[2]:
-        st.metric("Budget max", f"{resume['total_max']:.0f}€")
+        st.metric("Budget max", f"{resume.get('total_max', 0):.0f}€")
 
-    if resume["par_piece"]:
+    par_piece = resume.get("par_piece") or {}
+    if par_piece:
         st.markdown("**Par pièce:**")
-        for piece, data in resume["par_piece"].items():
+        for piece, data in par_piece.items():
             label = PIECES_LABELS.get(piece, piece)
-            st.caption(f"{label}: {data['count']} articles — ~{data['total_estime']:.0f}€")
+            st.caption(
+                f"{label}: {data.get('count', 0)} articles — ~{data.get('total_estime', 0):.0f}€"
+            )
 
 
 def afficher_vue_par_piece() -> None:

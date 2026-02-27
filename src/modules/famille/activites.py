@@ -150,7 +150,10 @@ def app() -> None:
                                 col_date, col_info = st.columns([1, 3])
 
                                 with col_date:
-                                    jour = act["date"].strftime("%a")
+                                    from src.core.constants import JOURS_SEMAINE
+
+                                    jour_idx = act["date"].weekday()
+                                    jour = JOURS_SEMAINE[jour_idx]
                                     jour_num = act["date"].strftime("%d")
                                     st.write(f"**{jour}**")
                                     st.write(f"*{jour_num}*")

@@ -137,6 +137,21 @@ def demarrer_application(
         rapport.avertissements.append(f"Event subscribers: {e}")
         logger.warning(f"⚠ Échec enregistrement subscribers: {e}")
 
+    # ─── Étape 2b: Charger tous les modèles SQLAlchemy (préventif)
+    # Certains modules utilisent des relationships entre fichiers modèles
+    # qui nécessitent le chargement complet des modules pour que
+    # SQLAlchemy résolve correctement les targets de relationship.
+    try:
+        from src.core.models import charger_tous_modeles
+
+        charger_tous_modeles()
+        rapport.composants_enregistres.append("ModelsLoaded")
+        logger.debug("✅ Tous les modèles SQLAlchemy ont été chargés")
+    except Exception as e:
+        # Non bloquant: continuer mais avertir
+        rapport.avertissements.append(f"charger_tous_modeles: {e}")
+        logger.warning(f"⚠ Impossible de charger tous les modèles: {e}")
+
     # ─── Étape 3: Enregistrement atexit ───
     if enregistrer_atexit:
         atexit.register(arreter_application)
