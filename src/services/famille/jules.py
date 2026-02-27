@@ -60,6 +60,9 @@ class ServiceJules:
                 date_of_birth=date_type(2024, 6, 22),
                 gender="M",
                 notes="Notre petit Jules ❤️",
+                # Defaults for clothing sizes / shoe size (per-child)
+                taille_vetements={},
+                pointure=None,
                 actif=True,
             )
             db.add(child)

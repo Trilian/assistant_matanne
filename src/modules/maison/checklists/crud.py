@@ -24,7 +24,15 @@ def create_checklist(data: dict):
 
 
 def create_from_template(template_key: str, nom: str = "", date_depart=None):
-    return _get_service().create_from_template(template_key, nom, date_depart)
+    # Ensure we pass the correct argument order to the service: (nom, type_voyage,...)
+    from src.modules.maison.checklists.constants import TYPES_VOYAGE_LABELS
+
+    if not nom:
+        nom = TYPES_VOYAGE_LABELS.get(template_key, template_key)
+
+    return _get_service().create_from_template(
+        nom=nom, type_voyage=template_key, date_depart=date_depart
+    )
 
 
 def delete_checklist(checklist_id: int):

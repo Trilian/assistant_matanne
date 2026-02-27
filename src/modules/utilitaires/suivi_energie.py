@@ -99,17 +99,24 @@ def _onglet_saisie(service):
 
         if st.form_submit_button("💾 Enregistrer", use_container_width=True):
             if consommation > 0:
-                service.creer(
-                    type_energie=type_energie,
-                    mois=mois,
-                    annee=annee,
-                    consommation=consommation,
-                    unite=unite,
-                    montant=montant if montant > 0 else None,
-                    notes=notes or None,
-                )
-                st.success("Relevé enregistré !")
-                st.rerun()
+                try:
+                    service.creer(
+                        type_energie=type_energie,
+                        mois=mois,
+                        annee=annee,
+                        consommation=consommation,
+                        unite=unite,
+                        montant=montant if montant > 0 else None,
+                        notes=notes or None,
+                    )
+                    st.success("Relevé enregistré !")
+                    st.rerun()
+                except Exception as e:
+                    logger.exception("Erreur en créant le relevé énergie")
+                    st.error(
+                        "Erreur lors de l'enregistrement du relevé. Voir le détail ci-dessous."
+                    )
+                    st.exception(e)
             else:
                 st.warning("La consommation doit être supérieure à 0.")
 
@@ -117,7 +124,14 @@ def _onglet_saisie(service):
     st.divider()
     st.subheader("📋 Derniers relevés")
 
-    releves = service.lister()
+    try:
+        releves = service.lister()
+    except Exception as e:
+        logger.exception("Erreur chargement des relevés énergie")
+        st.error("Impossible de charger les relevés énergie. Voir le détail ci-dessous.")
+        st.exception(e)
+        releves = []
+
     if releves:
         for r in releves[:20]:
             info = PRIX_UNITAIRES.get(r.type_energie, {})
@@ -152,7 +166,13 @@ def _onglet_graphiques(service):
         key=_keys("graph_cat"),
     )
 
-    releves = service.lister(type_energie=type_energie)
+    try:
+        releves = service.lister(type_energie=type_energie)
+    except Exception as e:
+        logger.exception("Erreur chargement des relevés pour graphiques énergie")
+        st.error("Impossible de charger les relevés pour le graphique. Voir le détail ci-dessous.")
+        st.exception(e)
+        releves = []
 
     if not releves or len(releves) < 2:
         st.info("Pas assez de données pour afficher un graphique (minimum 2 relevés).")
@@ -203,7 +223,14 @@ def _onglet_couts(service):
     st.divider()
 
     for cat, info in PRIX_UNITAIRES.items():
-        releves = service.lister(type_energie=cat)
+        try:
+            releves = service.lister(type_energie=cat)
+        except Exception as e:
+            logger.exception("Erreur chargement des relevés pour coûts énergie")
+            st.error(f"Impossible de charger les relevés pour {cat}. Voir le détail ci-dessous.")
+            st.exception(e)
+            continue
+
         releves = releves[:12]  # Limiter aux 12 derniers
         if not releves:
             continue

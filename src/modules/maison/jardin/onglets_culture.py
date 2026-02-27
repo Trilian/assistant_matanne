@@ -246,63 +246,7 @@ def onglet_recoltes(mes_plantes: list[dict], recoltes: list[dict]):
 
 @ui_fragment
 def onglet_plan(mes_plantes: list[dict] | None = None):
-    """Onglet plan du jardin — vue 2D interactive basée sur les données réelles."""
-    st.subheader("🗺️ Plan du Jardin")
+    """Onglet plan du jardin — redirige vers le plan interactif 2D/3D."""
+    from .onglets_plan import onglet_plan_interactif
 
-    # Zones de culture par défaut
-    zones_defaut = [
-        {"nom": "Zone A", "emoji": "🥬", "type": "Légumes feuilles", "active": True},
-        {"nom": "Zone B", "emoji": "🍅", "type": "Tomates & cucurbitacées", "active": True},
-        {"nom": "Zone C", "emoji": "📦", "type": "À planter", "active": False},
-        {"nom": "Zone D", "emoji": "🥕", "type": "Légumes racines", "active": True},
-        {"nom": "Zone E", "emoji": "🌿", "type": "Aromatiques", "active": True},
-        {"nom": "Zone F", "emoji": "🌸", "type": "Fleurs mellifères", "active": False},
-    ]
-
-    # Enrichir les zones avec les plantes réelles de l'utilisateur
-    if mes_plantes:
-        plantes_par_type: dict[str, list[str]] = {}
-        for p in mes_plantes:
-            cat = p.get("categorie", "autre")
-            nom = p.get("nom", "?")
-            plantes_par_type.setdefault(cat, []).append(nom)
-
-        # Mapper les catégories aux zones
-        mapping_zones = {
-            "légume-feuille": 0,
-            "légume-fruit": 1,
-            "légume-racine": 3,
-            "aromatique": 4,
-            "fleur": 5,
-        }
-        for cat, noms in plantes_par_type.items():
-            idx = mapping_zones.get(cat)
-            if idx is not None and idx < len(zones_defaut):
-                zones_defaut[idx]["active"] = True
-                zones_defaut[idx]["plantes"] = noms
-
-    # Afficher le plan en grille Streamlit
-    cols = st.columns(3)
-    for i, zone in enumerate(zones_defaut):
-        with cols[i % 3]:
-            status = "🟢" if zone["active"] else "⬜"
-            st.markdown(f"**{zone['emoji']} {zone['nom']}** {status}  \n*{zone['type']}*")
-            plantes_zone = zone.get("plantes", [])
-            if plantes_zone:
-                for p in plantes_zone[:5]:
-                    st.caption(f"  🌱 {p}")
-                if len(plantes_zone) > 5:
-                    st.caption(f"  ... +{len(plantes_zone) - 5} autres")
-            elif zone["active"]:
-                st.caption("  (aucune plante enregistrée)")
-
-    # Stat résumé
-    if mes_plantes:
-        st.markdown("---")
-        nb_actives = sum(1 for z in zones_defaut if z["active"])
-        st.caption(
-            f"📊 {nb_actives}/{len(zones_defaut)} zones actives • "
-            f"{len(mes_plantes)} plante(s) au total"
-        )
-    else:
-        st.info("🌱 Ajoutez vos plantes dans l'onglet 'Mes Plantes' pour peupler le plan.")
+    onglet_plan_interactif()

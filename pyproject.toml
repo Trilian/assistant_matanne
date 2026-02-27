@@ -99,3 +99,8 @@ reportGeneralTypeIssues = "error"
 reportPrivateUsage = "warning"
 reportOptionalMemberAccess = "warning"
 reportOptionalSubscript = "warning"
+
+[tool.poetry.scripts]
+# Helper scripts for local development (convenience only)
+check-db = "python scripts/check_db.py"
+run-checks = "powershell -File scripts/run_checks.ps1"

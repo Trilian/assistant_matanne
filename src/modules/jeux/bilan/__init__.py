@@ -261,6 +261,49 @@ def app():
     st.title("📊 Bilan Global — Jeux")
     st.caption("Vue consolidée de vos performances Paris + Loto + Euromillions")
 
+    # ── Outils d'analyse ──
+    _c1, _c2, _c3, _c4, _c5 = st.columns(5)
+    with _c1:
+        if st.button("📈 ROI", key="bil_nav_roi", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("jeux.comparatif_roi")
+            from src.core.state import rerun
+
+            rerun()
+    with _c2:
+        if st.button("🔔 Alertes", key="bil_nav_alt", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("jeux.alertes")
+            from src.core.state import rerun
+
+            rerun()
+    with _c3:
+        if st.button("🧠 Biais", key="bil_nav_biais", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("jeux.biais")
+            from src.core.state import rerun
+
+            rerun()
+    with _c4:
+        if st.button("📅 Calendrier", key="bil_nav_cal", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("jeux.calendrier")
+            from src.core.state import rerun
+
+            rerun()
+    with _c5:
+        if st.button("🎓 Éducatif", key="bil_nav_edu", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("jeux.educatif")
+            from src.core.state import rerun
+
+            rerun()
+
     TAB_LABELS = [
         "📈 Vue globale",
         "📊 Détail mensuel",

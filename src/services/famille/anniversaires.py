@@ -142,6 +142,15 @@ class ServiceAnniversaires(BaseService[AnniversaireFamille]):
 
         return sorted(prochains, key=lambda a: a["jours_restants"])
 
+    # Compatibility aliases expected by older UI code
+    def lister_prochains(self, *, limite: int = 90, db: Session | None = None):
+        """Alias historique for `obtenir_prochains` (old callers expect `lister_prochains`)."""
+        return self.obtenir_prochains(jours=limite, db=db)
+
+    def lister_anniversaires(self, *, db: Session | None = None):
+        """Alias for `obtenir_anniversaires` to support older callers."""
+        return self.obtenir_anniversaires(db=db)
+
     # ═══════════════════════════════════════════════════════════
     # CADEAUX
     # ═══════════════════════════════════════════════════════════

@@ -42,11 +42,11 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # ─── Service Planning Unifié (global_planning.py) ───
     "ServicePlanningUnifie": (".global_planning", "ServicePlanningUnifie"),
     "obtenir_service_planning_unifie": (".global_planning", "obtenir_service_planning_unifie"),
-    # ─── Service Rappels (rappels.py) ───
+    # ─── Service Rappels (delegated to central planning) ───
     "OPTIONS_RAPPEL": (".rappels", "OPTIONS_RAPPEL"),
-    "ServiceRappels": (".rappels", "ServiceRappels"),
+    "ServiceRappels": ("src.services.planning.rappels", "ServiceRappels"),
     "format_rappel": (".rappels", "format_rappel"),
-    "obtenir_service_rappels": (".rappels", "obtenir_service_rappels"),
+    "obtenir_service_rappels": ("src.services.planning.rappels", "obtenir_service_rappels"),
     # ─── Service Récurrence (recurrence.py) ───
     "JOURS_SEMAINE_RECURRENCE": (".recurrence", "JOURS_SEMAINE_INDEX"),
     "OPTIONS_RECURRENCE": (".recurrence", "OPTIONS_RECURRENCE"),

@@ -338,8 +338,17 @@ class PieceMaison(TimestampMixin, Base):
     type_piece: Mapped[str | None] = mapped_column(String(50), index=True)
     description: Mapped[str | None] = mapped_column(Text)
 
+    # Colonnes de position pour le plan 2D/3D
+    position_x: Mapped[int] = mapped_column(Integer, default=0)
+    position_y: Mapped[int] = mapped_column(Integer, default=0)
+    largeur_px: Mapped[int] = mapped_column(Integer, default=100)
+    hauteur_px: Mapped[int] = mapped_column(Integer, default=80)
+
     # Relations
     objets: Mapped[list["ObjetMaison"]] = relationship(
+        back_populates="piece", cascade="all, delete-orphan"
+    )
+    versions: Mapped[list["VersionPiece"]] = relationship(
         back_populates="piece", cascade="all, delete-orphan"
     )
 
@@ -440,6 +449,13 @@ class ZoneJardin(TimestampMixin, Base):
     arrosage_auto: Mapped[bool] = mapped_column(default=False)
 
     description: Mapped[str | None] = mapped_column(Text)
+
+    # Colonnes de position pour le plan 2D/3D
+    position_x: Mapped[int] = mapped_column(Integer, default=0)
+    position_y: Mapped[int] = mapped_column(Integer, default=0)
+    largeur_px: Mapped[int] = mapped_column(Integer, default=100)
+    hauteur_px: Mapped[int] = mapped_column(Integer, default=100)
+    couleur: Mapped[str | None] = mapped_column(String(20))
 
     # État et suivi (champs migrés de GardenZone)
     etat_note: Mapped[int] = mapped_column(Integer, default=3)  # 1=catastrophe, 5=parfait

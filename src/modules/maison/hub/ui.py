@@ -127,7 +127,7 @@ def afficher_modules(stats: dict):
     """Affiche la navigation vers les modules."""
     st.markdown("#### 📂 Modules")
 
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
 
     with col1:
         if st.button(
@@ -188,6 +188,22 @@ def afficher_modules(stats: dict):
             """
             <div style="text-align: center; margin-top: -0.5rem;">
                 <span class="module-highlight highlight-success">Voir budget</span>
+            </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+    with col5:
+        if st.button(
+            "🏘️\n\n**Plan**\n\nVisualisation", use_container_width=True, key="btn_plan_maison"
+        ):
+            GestionnaireEtat.naviguer_vers("maison.visualisation")
+            rerun()
+
+        st.markdown(
+            """
+            <div style="text-align: center; margin-top: -0.5rem;">
+                <span class="module-highlight highlight-info">2D / 3D</span>
             </div>
         """,
             unsafe_allow_html=True,

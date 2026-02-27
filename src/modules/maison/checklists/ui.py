@@ -82,6 +82,47 @@ def afficher_checklist_detail(checklist) -> None:
         )
         rerun()
 
+    # Export PDF / imprimer
+    st.divider()
+    try:
+        from io import BytesIO
+
+        from reportlab.lib.pagesizes import A4
+        from reportlab.pdfgen import canvas
+
+        def _generate_pdf_bytes(checklist) -> bytes:
+            buf = BytesIO()
+            c = canvas.Canvas(buf, pagesize=A4)
+            width, height = A4
+            y = height - 50
+            c.setFont("Helvetica-Bold", 14)
+            c.drawString(50, y, f"Checklist: {getattr(checklist, 'nom', 'Checklist')}")
+            y -= 30
+            c.setFont("Helvetica", 11)
+            items = getattr(checklist, "items", [])
+            for item in items:
+                if y < 80:
+                    c.showPage()
+                    y = height - 50
+                tick = "[x] " if getattr(item, "fait", False) else "[ ] "
+                text = f"{tick}{item.libelle}"
+                c.drawString(60, y, text[:120])
+                y -= 16
+            c.save()
+            buf.seek(0)
+            return buf.read()
+
+        pdf_bytes = _generate_pdf_bytes(checklist)
+        st.download_button(
+            label="📄 Exporter en PDF",
+            data=pdf_bytes,
+            file_name=f"{getattr(checklist, 'nom', 'checklist')}.pdf",
+            mime="application/pdf",
+        )
+    except Exception:
+        # reportlab may be missing; show a fallback
+        st.warning("Export PDF non disponible (dépendance manquante)")
+
 
 def afficher_formulaire_checklist() -> None:
     """Formulaire de création d'une checklist vide."""
@@ -152,6 +193,7 @@ def afficher_onglet_checklists() -> None:
 @ui_fragment
 def afficher_onglet_templates() -> None:
     """Créer une checklist depuis un template prédéfini."""
+    from src.modules.maison.checklists.constants import TYPES_VOYAGE_LABELS
     from src.services.maison.checklists_crud_service import TEMPLATES_CHECKLIST
 
     st.markdown("Choisissez un template pour démarrer rapidement :")
@@ -159,11 +201,22 @@ def afficher_onglet_templates() -> None:
         with st.container(border=True):
             col1, col2 = st.columns([3, 1])
             with col1:
-                st.markdown(f"**{template['nom']}**")
-                nb_items = sum(len(items) for items in template["items"].values())
+                # Support two template formats:
+                # - legacy: list[items]
+                # - new: {"nom": str, "items": {categorie: [items]}}
+                if isinstance(template, list):
+                    label = TYPES_VOYAGE_LABELS.get(key, key)
+                    nb_items = len(template)
+                else:
+                    label = template.get("nom") or TYPES_VOYAGE_LABELS.get(key, key)
+                    items_map = template.get("items", {})
+                    nb_items = sum(len(items) for items in items_map.values())
+
+                st.markdown(f"**{label}**")
                 st.caption(f"{nb_items} items prédéfinis")
             with col2:
                 if st.button("Utiliser", key=_keys(f"tpl_{key}")):
+                    # Pass a sensible default name; the service wrapper will derive one if empty
                     create_from_template(key)
-                    st.success(f"✅ Checklist '{template['nom']}' créée !")
+                    st.success(f"✅ Checklist '{label}' créée !")
                     rerun()

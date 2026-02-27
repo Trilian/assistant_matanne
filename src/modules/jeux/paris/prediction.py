@@ -269,28 +269,51 @@ def afficher_prediction_match(match: dict):
 
         with col_btn1:
             cote_d = match.get("cote_dom") or 2.0
-            if st.button(
-                f"🏠 {match['dom_nom'][:10]}... ({cote_d:.2f})", key=f"bet_dom_{match['id']}"
-            ):
-                enregistrer_pari(match["id"], "1", cote_d, est_virtuel=True)
-                st.success("✅ Pari enregistré!")
-                rerun()
+            if not match.get("id"):
+                st.button(
+                    f"🏠 {match.get('dom_nom','?')[:10]}... ({cote_d:.2f})", key="bet_dom_missing"
+                )
+                st.caption("Impossible d'enregistrer: match sans identifiant")
+            else:
+                if st.button(
+                    f"🏠 {match['dom_nom'][:10]}... ({cote_d:.2f})", key=f"bet_dom_{match['id']}"
+                ):
+                    ok = enregistrer_pari(match["id"], "1", cote_d, est_virtuel=True)
+                    if ok:
+                        st.success("✅ Pari enregistré!")
+                        rerun()
+                    else:
+                        st.error("❌ Échec enregistrement du pari. Voir logs.")
 
         with col_btn2:
             cote_n = match.get("cote_nul") or 3.5
-            if st.button(f"⚖️ Match Nul ({cote_n:.2f})", key=f"bet_nul_{match['id']}"):
-                enregistrer_pari(match["id"], "N", cote_n, est_virtuel=True)
-                st.success("✅ Pari enregistré!")
-                rerun()
+            if not match.get("id"):
+                st.button(f"⚖️ Match Nul ({cote_n:.2f})", key="bet_nul_missing")
+            else:
+                if st.button(f"⚖️ Match Nul ({cote_n:.2f})", key=f"bet_nul_{match['id']}"):
+                    ok = enregistrer_pari(match["id"], "N", cote_n, est_virtuel=True)
+                    if ok:
+                        st.success("✅ Pari enregistré!")
+                        rerun()
+                    else:
+                        st.error("❌ Échec enregistrement du pari. Voir logs.")
 
         with col_btn3:
             cote_e = match.get("cote_ext") or 3.0
-            if st.button(
-                f"✈️ {match['ext_nom'][:10]}... ({cote_e:.2f})", key=f"bet_ext_{match['id']}"
-            ):
-                enregistrer_pari(match["id"], "2", cote_e, est_virtuel=True)
-                st.success("✅ Pari enregistré!")
-                rerun()
+            if not match.get("id"):
+                st.button(
+                    f"✈️ {match.get('ext_nom','?')[:10]}... ({cote_e:.2f})", key="bet_ext_missing"
+                )
+            else:
+                if st.button(
+                    f"✈️ {match['ext_nom'][:10]}... ({cote_e:.2f})", key=f"bet_ext_{match['id']}"
+                ):
+                    ok = enregistrer_pari(match["id"], "2", cote_e, est_virtuel=True)
+                    if ok:
+                        st.success("✅ Pari enregistré!")
+                        rerun()
+                    else:
+                        st.error("❌ Échec enregistrement du pari. Voir logs.")
 
         with col_btn4:
             if st.button("📊 Analyse complète", key=f"analyse_{match['id']}"):

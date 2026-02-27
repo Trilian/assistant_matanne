@@ -216,6 +216,55 @@ class JardinCrudMixin:
             return None
 
     @avec_session_db
+    def ajouter_zone(
+        self,
+        nom: str,
+        type_zone: str = "autre",
+        superficie_m2: float | None = None,
+        description: str | None = None,
+        db: Session | None = None,
+        **kwargs,
+    ) -> dict | None:
+        """Crée une nouvelle zone jardin et retourne un dict minimal.
+
+        Args:
+            nom: Nom de la zone
+            type_zone: Type (pelouse, potager, arbres, ...)
+            superficie_m2: Surface en m²
+            description: Description libre
+        Returns:
+            Dictionnaire représentant la zone créée ou None en cas d'erreur.
+        """
+        try:
+            from src.core.models.temps_entretien import ZoneJardin
+
+            zone = ZoneJardin(
+                nom=nom,
+                type_zone=type_zone,
+                superficie_m2=superficie_m2,
+                description=description,
+                etat_note=3,
+            )
+            db.add(zone)
+            db.commit()
+            db.refresh(zone)
+            logger.info(f"✅ Zone créée: {zone.nom} (id={zone.id})")
+            # return a minimal dict compatible with loader
+            return {
+                "id": zone.id,
+                "nom": zone.nom,
+                "type_zone": zone.type_zone,
+                "etat_note": zone.etat_note,
+                "surface_m2": float(zone.superficie_m2) if zone.superficie_m2 is not None else 0,
+                "etat_description": zone.etat_description or "",
+                "photos_url": zone.photos_url or [],
+            }
+        except Exception as e:
+            logger.error(f"Erreur création zone: {e}")
+            db.rollback()
+            return None
+
+    @avec_session_db
     def arroser_plante(self, plante_id: int, db: Session | None = None) -> bool:
         """Enregistre un arrosage pour une plante.
 

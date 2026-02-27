@@ -285,6 +285,27 @@ def app() -> None:
         st.title("🎯 Cockpit Familial")
         st.caption("Vue unifiée de votre semaine — repas, événements, activités, tâches")
 
+        # ── Accès rapide aux outils planning ──
+        _c1, _c2, _c3 = st.columns(3)
+        with _c1:
+            if st.button("📅 Calendrier", key=_keys("nav_cal"), use_container_width=True):
+                from src.core.state import GestionnaireEtat
+
+                GestionnaireEtat.naviguer_vers("planning.calendrier")
+                rerun()
+        with _c2:
+            if st.button("📋 Templates", key=_keys("nav_tpl"), use_container_width=True):
+                from src.core.state import GestionnaireEtat
+
+                GestionnaireEtat.naviguer_vers("planning.templates_ui")
+                rerun()
+        with _c3:
+            if st.button("📊 Timeline", key=_keys("nav_tl"), use_container_width=True):
+                from src.core.state import GestionnaireEtat
+
+                GestionnaireEtat.naviguer_vers("planning.timeline_ui")
+                rerun()
+
         # ── Navigation semaine ──
         offset_key = _keys("offset_semaine")
         if offset_key not in st.session_state:

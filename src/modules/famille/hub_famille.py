@@ -55,8 +55,37 @@ _keys = KeyNamespace("famille")
 
 
 def _naviguer_famille(page: str) -> None:
-    """Navigation interne standardisée du hub famille."""
-    st.session_state[SK.FAMILLE_PAGE] = page
+    """Navigation vers une sous-page famille via st.switch_page.
+
+    Utilise le routage natif Streamlit (pages cachées de la sidebar)
+    au lieu du dispatch session_state interne.
+    """
+    from src.core.state import GestionnaireEtat
+
+    # Mapping ancien nom interne → clé pages_config
+    _KEYS: dict[str, str] = {
+        "hub": "famille.hub",
+        "jules": "famille.jules",
+        "jules_planning": "famille.jules_planning",
+        "weekend": "famille.weekend",
+        "suivi": "famille.suivi_perso",
+        "achats": "famille.achats_famille",
+        "activites": "famille.activites",
+        "routines": "famille.routines",
+        "carnet_sante": "famille.carnet_sante",
+        "calendrier": "famille.calendrier",
+        "anniversaires": "famille.anniversaires",
+        "contacts": "famille.contacts",
+        "soiree": "famille.soiree_couple",
+        "album": "famille.album",
+        "sante_globale": "famille.sante_globale",
+        "journal": "famille.journal",
+        "documents": "famille.documents",
+        "voyage": "famille.voyage",
+        "routines_pdf": "famille.routines_pdf",
+    }
+    module_key = _KEYS.get(page, f"famille.{page}")
+    GestionnaireEtat.naviguer_vers(module_key)
     rerun()
 
 
@@ -445,7 +474,14 @@ def afficher_card_soiree():
 
 @profiler_rerun("famille")
 def app():
-    """Point d'entrée du Hub Famille."""
+    """Point d'entrée du Hub Famille.
+
+    Affiche directement le dashboard avec cartes de navigation.
+    Les sous-pages famille sont désormais des pages Streamlit cachées
+    (hidden=True dans pages_config) — le dispatch session_state
+    n'est plus nécessaire. Le bouton « Retour » est géré
+    automatiquement par navigation.py.
+    """
     st.title("👨‍👩‍👧 Hub Famille")
 
     # Initialiser les utilisateurs si nécessaire
@@ -456,120 +492,8 @@ def app():
     except Exception as e:
         logger.debug("Init utilisateurs: %s", e)
 
-    # Gerer la navigation
-    page = st.session_state.get(SK.FAMILLE_PAGE, "hub")
-
-    if page == "hub":
-        with error_boundary(titre="Erreur hub famille"):
-            afficher_hub()
-    elif page == "jules":
-        from src.modules.famille.jules import app as jules_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Jules"):
-            jules_app()
-    elif page == "weekend":
-        from src.modules.famille.weekend import app as weekend_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Weekend"):
-            weekend_app()
-    elif page == "suivi":
-        from src.modules.famille.suivi_perso import app as suivi_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Suivi"):
-            suivi_app()
-    elif page == "achats":
-        from src.modules.famille.achats_famille import app as achats_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Achats"):
-            achats_app()
-    elif page == "carnet_sante":
-        from src.modules.famille.carnet_sante import app as carnet_sante_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Carnet de Santé"):
-            carnet_sante_app()
-    elif page == "calendrier":
-        from src.modules.famille.calendrier_famille import app as calendrier_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Calendrier"):
-            calendrier_app()
-    elif page == "anniversaires":
-        from src.modules.famille.anniversaires import app as anniversaires_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Anniversaires"):
-            anniversaires_app()
-    elif page == "contacts":
-        from src.modules.famille.contacts_famille import app as contacts_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Contacts"):
-            contacts_app()
-    elif page == "soiree":
-        from src.modules.famille.soiree_couple import app as soiree_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Soirée Couple"):
-            soiree_app()
-    elif page == "album":
-        from src.modules.famille.album import app as album_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Album"):
-            album_app()
-    elif page == "sante_globale":
-        from src.modules.famille.sante_globale import app as sante_globale_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Santé Globale"):
-            sante_globale_app()
-    elif page == "journal":
-        from src.modules.famille.journal_familial import app as journal_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Journal Familial"):
-            journal_app()
-    elif page == "documents":
-        from src.modules.famille.documents_famille import app as documents_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Documents"):
-            documents_app()
-    elif page == "voyage":
-        from src.modules.famille.voyage import app as voyage_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Voyage"):
-            voyage_app()
-    elif page == "routines_pdf":
-        from src.modules.famille.routines_imprimables import app as routines_pdf_app
-
-        if st.button("⬅️ Retour au Hub"):
-            _naviguer_famille("hub")
-        with error_boundary(titre="Erreur module Routines PDF"):
-            routines_pdf_app()
-    else:
-        with error_boundary(titre="Erreur hub famille"):
-            afficher_hub()
+    with error_boundary(titre="Erreur hub famille"):
+        afficher_hub()
 
 
 def afficher_hub():

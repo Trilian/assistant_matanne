@@ -57,6 +57,11 @@ class ProfilEnfant(CreeLeMixin, Base):
     notes: Mapped[str | None] = mapped_column(Text)
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
+    # Taille de vêtements (JSON, ex: {"haut": "18 mois", "bas": "18-24 mois"})
+    taille_vetements: Mapped[dict | None] = mapped_column(JSONB, default=dict, nullable=True)
+    # Pointure (chaussures)
+    pointure: Mapped[str | None] = mapped_column(String(50), nullable=True, index=False)
+
     # Relations
     wellbeing_entries: Mapped[list["EntreeBienEtre"]] = relationship(
         back_populates="child", cascade="all, delete-orphan"
@@ -309,7 +314,19 @@ class AnniversaireFamille(CreeLeMixin, Base):
     __tablename__ = "anniversaires_famille"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    nom_personne: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    # Stored in DB as column `nom` (historical schema); keep attribute name
+    # `nom_personne` for clarity in code and compatibility with validations.
+    nom_personne: Mapped[str] = mapped_column(String(200), nullable=False, index=True, name="nom")
+
+    # Backwards-compatible alias attribute `nom` used throughout older code.
+    @property
+    def nom(self) -> str:
+        return self.nom_personne
+
+    @nom.setter
+    def nom(self, value: str) -> None:
+        self.nom_personne = value
+
     date_naissance: Mapped[date] = mapped_column(Date, nullable=False)
     relation: Mapped[str] = mapped_column(
         String(50), nullable=False, index=True

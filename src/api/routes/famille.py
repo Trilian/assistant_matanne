@@ -68,6 +68,8 @@ async def lister_enfants(
                         "gender": e.gender,
                         "notes": e.notes,
                         "actif": e.actif,
+                        "taille_vetements": e.taille_vetements or {},
+                        "pointure": e.pointure,
                     }
                     for e in items
                 ],
@@ -100,6 +102,8 @@ async def obtenir_enfant(enfant_id: int, user: dict[str, Any] = Depends(require_
                 "notes": enfant.notes,
                 "actif": enfant.actif,
                 "cree_le": enfant.cree_le.isoformat() if enfant.cree_le else None,
+                "taille_vetements": enfant.taille_vetements or {},
+                "pointure": enfant.pointure,
             }
 
     return await executer_async(_query)

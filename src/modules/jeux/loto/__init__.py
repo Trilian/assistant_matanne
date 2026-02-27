@@ -45,6 +45,25 @@ def app():
     st.title("🎰 Loto - Analyse & Simulation")
     st.caption("Analysez les statistiques et testez vos stratégies (virtuellement)")
 
+    # ── Accès rapide ──
+    _c1, _c2 = st.columns(2)
+    with _c1:
+        if st.button("⭐ Euromillions", key="loto_nav_euro", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("jeux.euromillions")
+            from src.core.state import rerun as _rerun
+
+            _rerun()
+    with _c2:
+        if st.button("📊 Bilan Global", key="loto_nav_bilan", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("jeux.bilan")
+            from src.core.state import rerun as _rerun
+
+            _rerun()
+
     # Avertissement
     with st.expander("⚠️ Avertissement important", expanded=False):
         st.markdown("""

@@ -38,6 +38,33 @@ def app():
     st.title("🍽️ Mes Recettes")
     st.caption("Gestion complète de votre base de recettes")
 
+    # ── Outils cuisine ──
+    _c1, _c2, _c3, _c4 = st.columns(4)
+    with _c1:
+        if st.button("⚖️ Convertisseur", key="rec_nav_conv", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("convertisseur_unites")
+            rerun()
+    with _c2:
+        if st.button("🔢 Portions", key="rec_nav_port", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("calculatrice_portions")
+            rerun()
+    with _c3:
+        if st.button("🔄 Substitutions", key="rec_nav_sub", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("substitutions")
+            rerun()
+    with _c4:
+        if st.button("🥕 Saisons", key="rec_nav_sais", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("saisonnalite")
+            rerun()
+
     # Gérer l'état de la vue détails
     if _keys("detail_id") not in st.session_state:
         st.session_state[_keys("detail_id")] = None

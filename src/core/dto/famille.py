@@ -23,6 +23,8 @@ class ProfilEnfantDTO(IdentifiedDTO):
     gender: str | None = None
     notes: str | None = None
     actif: bool = True
+    taille_vetements: dict[str, str] = Field(default_factory=dict)
+    pointure: str | None = None
 
     @property
     def age_mois(self) -> int | None:

@@ -53,113 +53,65 @@ def format_rappel(minutes: int | None) -> str:
 # ═══════════════════════════════════════════════════════════
 
 
-class ServiceRappels:
-    """Service de gestion des rappels d'événements."""
+# Delegate to the central planning reminders service for logic and retrieval.
+from src.services.planning.rappels import (
+    obtenir_service_rappels as _obtenir_service_rappels_planning,
+)
 
-    def __init__(self):
-        """Initialise le service."""
-        pass
 
-    @avec_session_db
-    def get_rappels_imminents(
-        self, window_minutes: int = 60, *, db: Session
-    ) -> list[dict[str, Any]]:
-        """
-        Récupère les événements dont le rappel doit être envoyé.
+@avec_session_db
+def get_rappels_imminents(
+    window_minutes: int = 60, *, db: Session | None = None
+) -> list[dict[str, Any]]:
+    """Wrapper returning reminders in the original dict format by delegating
+    to the canonical planning reminders service.
+    """
+    service = _obtenir_service_rappels_planning()
+    # central service expects hours
+    heures = max(1, int((window_minutes + 59) // 60))
+    rappels = service.rappels_a_venir(heures=heures)
 
-        Args:
-            window_minutes: Fenêtre de temps en minutes (par défaut 60)
-            db: Session SQLAlchemy
-
-        Returns:
-            Liste de dicts avec les événements à rappeler
-        """
-        now = datetime.now()
-        rappels: list[dict[str, Any]] = []
-
-        # Événements EvenementPlanning avec rappel
-        events = (
-            db.query(EvenementPlanning)
-            .filter(
-                EvenementPlanning.rappel_avant_minutes.isnot(None),
-                EvenementPlanning.date_debut > now,
-            )
-            .all()
+    result: list[dict[str, Any]] = []
+    for r in rappels:
+        result.append(
+            {
+                "type": getattr(r, "evenement_type", "evenement"),
+                "id": None,
+                "titre": getattr(r, "evenement_titre", ""),
+                "date_debut": getattr(r, "date_evenement", None),
+                "lieu": None,
+                "rappel_minutes": None,
+                "rappel_at": getattr(r, "date_rappel", None),
+            }
         )
 
-        for event in events:
-            # Calculer quand le rappel doit être envoyé
-            if event.rappel_avant_minutes is None:
-                continue
-            rappel_at = event.date_debut - timedelta(minutes=event.rappel_avant_minutes)
+    # sort by rappel_at
+    result.sort(key=lambda x: x.get("rappel_at") or datetime.max)
+    return result
 
-            # Si le moment du rappel est dans la fenêtre
-            if now <= rappel_at <= now + timedelta(minutes=window_minutes):
-                rappels.append(
-                    {
-                        "type": "calendar_event",
-                        "id": event.id,
-                        "titre": event.titre,
-                        "date_debut": event.date_debut,
-                        "lieu": event.lieu,
-                        "rappel_minutes": event.rappel_avant_minutes,
-                        "rappel_at": rappel_at,
-                    }
-                )
 
-        # Activités famille avec rappel (si elles avaient ce champ)
-        # Note: ActiviteFamille n'a pas encore rappel_avant_minutes
+def envoyer_rappels_en_attente(user_id: str = "default") -> int:
+    """Send pending reminders using the central reminders service and webpush."""
+    service = _obtenir_service_rappels_planning()
+    prochains = service.rappels_a_venir(heures=1)
+    service_push = obtenir_service_webpush()
 
-        # Trier par moment du rappel
-        rappels.sort(key=lambda r: r["rappel_at"])
+    envois = 0
+    for r in prochains:
+        try:
+            notification = NotificationPush(
+                title=f"🔔 Rappel: {r.evenement_titre}",
+                body=r.message,
+                notification_type=TypeNotification.RAPPEL_ACTIVITE,
+                data={"type": r.evenement_type},
+            )
+            service_push.envoyer_notification(user_id, notification)
+            envois += 1
+            logger.info("✅ Rappel envoyé: %s", r.evenement_titre)
+        except Exception as e:
+            logger.error("❌ Erreur envoi rappel %s: %s", r.evenement_titre, e)
 
-        return rappels
-
-    def envoyer_rappels_en_attente(self, user_id: str = "default") -> int:
-        """
-        Envoie les notifications pour les rappels imminents.
-
-        Args:
-            user_id: ID de l'utilisateur destinataire
-
-        Returns:
-            Nombre de rappels envoyés
-        """
-        rappels = self.get_rappels_imminents(window_minutes=15)
-        service_push = obtenir_service_webpush()
-
-        envois = 0
-        for rappel in rappels:
-            try:
-                # Formater le délai
-                minutes = rappel["rappel_minutes"]
-                if minutes >= 60:
-                    delai_str = (
-                        f"{minutes // 60}h"
-                        if minutes % 60 == 0
-                        else f"{minutes // 60}h{minutes % 60}"
-                    )
-                else:
-                    delai_str = f"{minutes} min"
-
-                # Créer la notification
-                notification = NotificationPush(
-                    title=f"🔔 Rappel: {rappel['titre']}",
-                    body=f"Dans {delai_str}"
-                    + (f" • {rappel['lieu']}" if rappel.get("lieu") else ""),
-                    notification_type=TypeNotification.RAPPEL_ACTIVITE,
-                    data={"event_id": rappel["id"], "type": rappel["type"]},
-                )
-
-                # Envoyer
-                service_push.envoyer_notification(user_id, notification)
-                envois += 1
-                logger.info(f"✅ Rappel envoyé: {rappel['titre']}")
-
-            except Exception as e:
-                logger.error(f"❌ Erreur envoi rappel {rappel['titre']}: {e}")
-
-        return envois
+    return envois
 
 
 # ═══════════════════════════════════════════════════════════
@@ -168,15 +120,21 @@ class ServiceRappels:
 
 from src.services.core.registry import service_factory
 
+# Reuse central planning reminders service to avoid duplicate factories.
+
 
 @service_factory("rappels", tags={"cuisine", "planning", "notifications"})
-def obtenir_service_rappels() -> ServiceRappels:
-    """Retourne l'instance du service de rappels (thread-safe via registre)."""
-    return ServiceRappels()
+def obtenir_service_rappels() -> Any:
+    """Return the central planning reminders service (alias).
+
+    This ensures all modules importing `obtenir_service_rappels` get the same
+    singleton instance instead of creating duplicates.
+    """
+    return _obtenir_service_rappels_planning()
 
 
-def get_reminders_service() -> ServiceRappels:
-    """Factory for reminders service (English alias)."""
+def get_reminders_service() -> Any:
+    """English alias returning the unified reminders service."""
     return obtenir_service_rappels()
 
 

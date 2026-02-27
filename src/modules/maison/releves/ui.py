@@ -175,6 +175,30 @@ def afficher_formulaire_releve():
 
         notes = st.text_area("Notes", key=_keys("new_notes"))
 
+        # Champs optionnels supplémentaires
+        col3, col4, col5 = st.columns([1, 2, 2])
+        with col3:
+            etat_note = st.slider("État (note)", 1, 5, 3, key=_keys("new_etat_note"))
+        with col4:
+            objectif = st.text_input("Objectif (optionnel)", key=_keys("new_objectif"))
+        with col5:
+            programmer = st.checkbox("Programmer une action", key=_keys("new_enable_next"))
+            if programmer:
+                date_prochaine_action = st.date_input(
+                    "Date prochaine action",
+                    value=date.today(),
+                    key=_keys("new_date_next"),
+                )
+            else:
+                date_prochaine_action = None
+
+        photos = st.file_uploader(
+            "Photos (optionnel)",
+            accept_multiple_files=True,
+            type=["png", "jpg", "jpeg", "pdf"],
+            key=_keys("new_photos"),
+        )
+
         submitted = st.form_submit_button("➕ Ajouter le relevé")
 
         if submitted:
@@ -182,12 +206,18 @@ def afficher_formulaire_releve():
                 st.error("La valeur d'index est obligatoire.")
                 return
 
+            photos_list = [f.name for f in photos] if photos else None
+
             data = {
                 "type_compteur": type_compteur,
                 "valeur_index": valeur_index,
                 "date_releve": date_releve,
                 "cout": cout or None,
                 "notes": notes or None,
+                "etat_note": int(etat_note),
+                "objectif": objectif or None,
+                "date_prochaine_action": date_prochaine_action,
+                "photos": photos_list,
             }
             create_releve(data)
             st.success("Relevé ajouté !")

@@ -15,6 +15,7 @@ import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.modules._framework import avec_gestion_erreurs_ui, error_boundary
 from src.ui import etat_vide
 from src.ui.keys import KeyNamespace
@@ -91,6 +92,33 @@ def app():
 
     st.title("🍽️ Planifier mes repas")
     st.caption("Générateur intelligent de menus équilibrés avec adaptation pour Jules")
+
+    # ── Accès rapide ──
+    _c1, _c2, _c3, _c4 = st.columns(4)
+    with _c1:
+        if st.button("📋 Recettes", key="plan_nav_rec", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("cuisine.recettes")
+            rerun()
+    with _c2:
+        if st.button("🛒 Courses", key="plan_nav_crs", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("cuisine.courses")
+            rerun()
+    with _c3:
+        if st.button("🥫 Inventaire", key="plan_nav_inv", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("cuisine.inventaire")
+            rerun()
+    with _c4:
+        if st.button("🍳 Batch Cooking", key="plan_nav_bc", use_container_width=True):
+            from src.core.state import GestionnaireEtat
+
+            GestionnaireEtat.naviguer_vers("cuisine.batch_cooking_detaille")
+            rerun()
 
     # Initialiser la session
     if SK.PLANNING_DATA not in st.session_state:

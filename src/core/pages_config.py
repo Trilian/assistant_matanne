@@ -6,6 +6,11 @@ Chaque section contient une liste de pages avec:
 - path: Chemin d'import Python du module
 - title: Titre affiché dans la navigation
 - icon: Emoji affiché devant le titre
+- hidden: (optionnel) True → page routable mais cachée de la sidebar
+- parent: (optionnel) Clé du hub parent pour le bouton retour automatique
+
+Pages hidden : accessibles via URL directe et st.switch_page() depuis les hubs.
+Le masquage est purement CSS (injection dans navigation.py).
 
 Pour ajouter une page: ajouter une entrée dans la section appropriée.
 Pour ajouter une section: ajouter un nouveau dict dans PAGES.
@@ -13,16 +18,25 @@ Pour ajouter une section: ajouter un nouveau dict dans PAGES.
 
 from __future__ import annotations
 
-from typing import TypedDict
+from typing import Required, TypedDict
 
 
-class PageConfig(TypedDict):
-    """Configuration d'une page de navigation."""
+class PageConfig(TypedDict, total=False):
+    """Configuration d'une page de navigation.
 
-    key: str
-    path: str
-    title: str
+    ``hidden`` masque la page de la sidebar tout en la gardant routable
+    (URL directe + ``st.switch_page`` depuis les hubs).
+
+    ``parent`` détermine le hub cible du bouton « ⬅️ Retour » automatique
+    ajouté par ``navigation.py`` sur les pages cachées.
+    """
+
+    key: Required[str]
+    path: Required[str]
+    title: Required[str]
     icon: str
+    hidden: bool
+    parent: str
 
 
 class SectionConfig(TypedDict):
@@ -32,516 +46,428 @@ class SectionConfig(TypedDict):
     pages: list[PageConfig]
 
 
+# ─────────────────────────────────────────────────────────
+# Raccourcis pour lisibilité de la déclaration
+# ─────────────────────────────────────────────────────────
+
+
+def _h(key: str, path: str, title: str, icon: str, parent: str) -> PageConfig:
+    """Crée une PageConfig cachée (hidden) avec parent."""
+    return {
+        "key": key,
+        "path": path,
+        "title": title,
+        "icon": icon,
+        "hidden": True,
+        "parent": parent,
+    }
+
+
+def _v(key: str, path: str, title: str, icon: str) -> PageConfig:
+    """Crée une PageConfig visible (raccourci lisibilité)."""
+    return {"key": key, "path": path, "title": title, "icon": icon}
+
+
+# ═════════════════════════════════════════════════════════════
+# LISTE DÉCLARATIVE DES PAGES
+# ═════════════════════════════════════════════════════════════
+#
+# Visibles dans la sidebar : ~15 pages (hubs + accès fréquents)
+# Cachées (accessibles par bouton / URL) : ~59 pages
+# Total inchangé : 74 pages — zéro fonctionnalité perdue
+# ═════════════════════════════════════════════════════════════
+
 PAGES: list[SectionConfig] = [
-    # ── Accueil ──
+    # ── Accueil ──────────────────────────────────────────────
     {
         "name": "",
         "pages": [
-            {"key": "accueil", "path": "src.modules.accueil", "title": "Accueil", "icon": "🏠"},
+            _v("accueil", "src.modules.accueil", "Accueil", "🏠"),
         ],
     },
-    # ── Planning ──
+    # ── Planning ─────────────────────────────────────────────
     {
         "name": "📅 Planning",
         "pages": [
-            {
-                "key": "planning.cockpit",
-                "path": "src.modules.planning.cockpit_familial",
-                "title": "Cockpit Familial",
-                "icon": "🎯",
-            },
-            {
-                "key": "planning.calendrier",
-                "path": "src.modules.planning.calendrier",
-                "title": "Calendrier",
-                "icon": "📅",
-            },
-            {
-                "key": "planning.templates_ui",
-                "path": "src.modules.planning.templates_ui",
-                "title": "Templates",
-                "icon": "📋",
-            },
-            {
-                "key": "planning.timeline_ui",
-                "path": "src.modules.planning.timeline_ui",
-                "title": "Timeline",
-                "icon": "📊",
-            },
+            _v(
+                "planning.cockpit",
+                "src.modules.planning.cockpit_familial",
+                "Cockpit Familial",
+                "🎯",
+            ),
+            _h(
+                "planning.calendrier",
+                "src.modules.planning.calendrier",
+                "Calendrier",
+                "📅",
+                "planning.cockpit",
+            ),
+            _h(
+                "planning.templates_ui",
+                "src.modules.planning.templates_ui",
+                "Templates",
+                "📋",
+                "planning.cockpit",
+            ),
+            _h(
+                "planning.timeline_ui",
+                "src.modules.planning.timeline_ui",
+                "Timeline",
+                "📊",
+                "planning.cockpit",
+            ),
         ],
     },
-    # ── Cuisine ──
+    # ── Cuisine ──────────────────────────────────────────────
     {
         "name": "🍳 Cuisine",
         "pages": [
-            {
-                "key": "cuisine.planificateur_repas",
-                "path": "src.modules.cuisine.planificateur_repas",
-                "title": "Planifier Repas",
-                "icon": "🍽️",
-            },
-            {
-                "key": "cuisine.batch_cooking_detaille",
-                "path": "src.modules.cuisine.batch_cooking_detaille",
-                "title": "Batch Cooking",
-                "icon": "🍳",
-            },
-            {
-                "key": "cuisine.courses",
-                "path": "src.modules.cuisine.courses",
-                "title": "Courses",
-                "icon": "🛒",
-            },
-            {
-                "key": "cuisine.recettes",
-                "path": "src.modules.cuisine.recettes",
-                "title": "Recettes",
-                "icon": "📋",
-            },
-            {
-                "key": "cuisine.inventaire",
-                "path": "src.modules.cuisine.inventaire",
-                "title": "Inventaire",
-                "icon": "🥫",
-            },
+            _v(
+                "cuisine.planificateur_repas",
+                "src.modules.cuisine.planificateur_repas",
+                "Planifier Repas",
+                "🍽️",
+            ),
+            _v("cuisine.recettes", "src.modules.cuisine.recettes", "Recettes", "📋"),
+            _h(
+                "cuisine.batch_cooking_detaille",
+                "src.modules.cuisine.batch_cooking_detaille",
+                "Batch Cooking",
+                "🍳",
+                "cuisine.planificateur_repas",
+            ),
+            _h(
+                "cuisine.courses",
+                "src.modules.cuisine.courses",
+                "Courses",
+                "🛒",
+                "cuisine.planificateur_repas",
+            ),
+            _h(
+                "cuisine.inventaire",
+                "src.modules.cuisine.inventaire",
+                "Inventaire",
+                "🥫",
+                "cuisine.planificateur_repas",
+            ),
+            # Outils cuisine (ex-section « Cuisine+ »)
+            _h(
+                "convertisseur_unites",
+                "src.modules.utilitaires.convertisseur_unites",
+                "Convertisseur",
+                "⚖️",
+                "cuisine.recettes",
+            ),
+            _h(
+                "calculatrice_portions",
+                "src.modules.utilitaires.calculatrice_portions",
+                "Portions",
+                "🔢",
+                "cuisine.recettes",
+            ),
+            _h(
+                "substitutions",
+                "src.modules.utilitaires.substitutions",
+                "Substitutions",
+                "🔄",
+                "cuisine.recettes",
+            ),
+            _h(
+                "cout_repas",
+                "src.modules.utilitaires.cout_repas",
+                "Coût Repas",
+                "💰",
+                "cuisine.planificateur_repas",
+            ),
+            _h(
+                "saisonnalite",
+                "src.modules.utilitaires.saisonnalite",
+                "Saisons",
+                "🥕",
+                "cuisine.recettes",
+            ),
+            _h(
+                "minuteur",
+                "src.modules.utilitaires.minuteur",
+                "Minuteur",
+                "⏱️",
+                "cuisine.planificateur_repas",
+            ),
         ],
     },
-    # ── Famille ──
+    # ── Famille ──────────────────────────────────────────────
     {
         "name": "👨\u200d👩\u200d👧\u200d👦 Famille",
         "pages": [
-            {
-                "key": "famille.hub",
-                "path": "src.modules.famille.hub_famille",
-                "title": "Hub Famille",
-                "icon": "🏠",
-            },
-            {
-                "key": "famille.jules",
-                "path": "src.modules.famille.jules",
-                "title": "Jules",
-                "icon": "👶",
-            },
-            {
-                "key": "famille.jules_planning",
-                "path": "src.modules.famille.jules_planning",
-                "title": "Planning Jules",
-                "icon": "📅",
-            },
-            {
-                "key": "famille.suivi_perso",
-                "path": "src.modules.famille.suivi_perso",
-                "title": "Mon Suivi",
-                "icon": "💪",
-            },
-            {
-                "key": "famille.weekend",
-                "path": "src.modules.famille.weekend",
-                "title": "Weekend",
-                "icon": "🎉",
-            },
-            {
-                "key": "famille.achats_famille",
-                "path": "src.modules.famille.achats_famille",
-                "title": "Achats",
-                "icon": "🛍️",
-            },
-            {
-                "key": "famille.activites",
-                "path": "src.modules.famille.activites",
-                "title": "Activités",
-                "icon": "🎭",
-            },
-            {
-                "key": "famille.routines",
-                "path": "src.modules.famille.routines",
-                "title": "Routines",
-                "icon": "⏰",
-            },
-            {
-                "key": "famille.carnet_sante",
-                "path": "src.modules.famille.carnet_sante",
-                "title": "Carnet Santé",
-                "icon": "🏥",
-            },
-            {
-                "key": "famille.calendrier",
-                "path": "src.modules.famille.calendrier_famille",
-                "title": "Calendrier",
-                "icon": "📅",
-            },
-            {
-                "key": "famille.anniversaires",
-                "path": "src.modules.famille.anniversaires",
-                "title": "Anniversaires",
-                "icon": "🎂",
-            },
-            {
-                "key": "famille.contacts",
-                "path": "src.modules.famille.contacts_famille",
-                "title": "Contacts",
-                "icon": "📞",
-            },
-            {
-                "key": "famille.soiree_couple",
-                "path": "src.modules.famille.soiree_couple",
-                "title": "Soirée Couple",
-                "icon": "❤️",
-            },
-            {
-                "key": "famille.album",
-                "path": "src.modules.famille.album",
-                "title": "Album Souvenirs",
-                "icon": "📸",
-            },
-            {
-                "key": "famille.sante_globale",
-                "path": "src.modules.famille.sante_globale",
-                "title": "Santé Globale",
-                "icon": "💪",
-            },
-            {
-                "key": "famille.journal",
-                "path": "src.modules.famille.journal_familial",
-                "title": "Journal IA",
-                "icon": "📝",
-            },
-            {
-                "key": "famille.documents",
-                "path": "src.modules.famille.documents_famille",
-                "title": "Documents",
-                "icon": "📁",
-            },
-            {
-                "key": "famille.voyage",
-                "path": "src.modules.famille.voyage",
-                "title": "Mode Voyage",
-                "icon": "✈️",
-            },
-            {
-                "key": "famille.routines_pdf",
-                "path": "src.modules.famille.routines_imprimables",
-                "title": "Routines PDF",
-                "icon": "🖨️",
-            },
+            _v("famille.hub", "src.modules.famille.hub_famille", "Hub Famille", "🏠"),
+            _h("famille.jules", "src.modules.famille.jules", "Jules", "👶", "famille.hub"),
+            _h(
+                "famille.jules_planning",
+                "src.modules.famille.jules_planning",
+                "Planning Jules",
+                "📅",
+                "famille.hub",
+            ),
+            _h(
+                "famille.suivi_perso",
+                "src.modules.famille.suivi_perso",
+                "Mon Suivi",
+                "💪",
+                "famille.hub",
+            ),
+            _h("famille.weekend", "src.modules.famille.weekend", "Weekend", "🎉", "famille.hub"),
+            _h(
+                "famille.achats_famille",
+                "src.modules.famille.achats_famille",
+                "Achats",
+                "🛍️",
+                "famille.hub",
+            ),
+            _h(
+                "famille.activites",
+                "src.modules.famille.activites",
+                "Activités",
+                "🎭",
+                "famille.hub",
+            ),
+            _h("famille.routines", "src.modules.famille.routines", "Routines", "⏰", "famille.hub"),
+            _h(
+                "famille.carnet_sante",
+                "src.modules.famille.carnet_sante",
+                "Carnet Santé",
+                "🏥",
+                "famille.hub",
+            ),
+            _h(
+                "famille.calendrier",
+                "src.modules.famille.calendrier_famille",
+                "Calendrier",
+                "📅",
+                "famille.hub",
+            ),
+            _h(
+                "famille.anniversaires",
+                "src.modules.famille.anniversaires",
+                "Anniversaires",
+                "🎂",
+                "famille.hub",
+            ),
+            _h(
+                "famille.contacts",
+                "src.modules.famille.contacts_famille",
+                "Contacts",
+                "📞",
+                "famille.hub",
+            ),
+            _h(
+                "famille.soiree_couple",
+                "src.modules.famille.soiree_couple",
+                "Soirée Couple",
+                "❤️",
+                "famille.hub",
+            ),
+            _h(
+                "famille.album", "src.modules.famille.album", "Album Souvenirs", "📸", "famille.hub"
+            ),
+            _h(
+                "famille.sante_globale",
+                "src.modules.famille.sante_globale",
+                "Santé Globale",
+                "💪",
+                "famille.hub",
+            ),
+            _h(
+                "famille.journal",
+                "src.modules.famille.journal_familial",
+                "Journal IA",
+                "📝",
+                "famille.hub",
+            ),
+            _h(
+                "famille.documents",
+                "src.modules.famille.documents_famille",
+                "Documents",
+                "📁",
+                "famille.hub",
+            ),
+            _h("famille.voyage", "src.modules.famille.voyage", "Mode Voyage", "✈️", "famille.hub"),
+            _h(
+                "famille.routines_pdf",
+                "src.modules.famille.routines_imprimables",
+                "Routines PDF",
+                "🖨️",
+                "famille.hub",
+            ),
         ],
     },
-    # ── Maison ──
+    # ── Maison ───────────────────────────────────────────────
     {
         "name": "🏠 Maison",
         "pages": [
-            {
-                "key": "maison.hub",
-                "path": "src.modules.maison.hub",
-                "title": "Hub Maison",
-                "icon": "🏠",
-            },
-            {
-                "key": "maison.jardin",
-                "path": "src.modules.maison.jardin",
-                "title": "Jardin",
-                "icon": "🌱",
-            },
-            {
-                "key": "maison.jardin_zones",
-                "path": "src.modules.maison.jardin_zones",
-                "title": "Zones Jardin",
-                "icon": "🌿",
-            },
-            {
-                "key": "maison.entretien",
-                "path": "src.modules.maison.entretien",
-                "title": "Entretien",
-                "icon": "🏡",
-            },
-            {
-                "key": "maison.charges",
-                "path": "src.modules.maison.charges",
-                "title": "Charges",
-                "icon": "💡",
-            },
-            {
-                "key": "maison.depenses",
-                "path": "src.modules.maison.depenses",
-                "title": "Dépenses",
-                "icon": "💰",
-            },
-            {
-                "key": "maison.eco_tips",
-                "path": "src.modules.maison.eco_tips",
-                "title": "Éco-Tips",
-                "icon": "🌿",
-            },
-            {
-                "key": "maison.energie",
-                "path": "src.modules.maison.energie",
-                "title": "Énergie",
-                "icon": "⚡",
-            },
-            {
-                "key": "maison.meubles",
-                "path": "src.modules.maison.meubles",
-                "title": "Meubles",
-                "icon": "🪑",
-            },
-            {
-                "key": "maison.projets",
-                "path": "src.modules.maison.projets",
-                "title": "Projets",
-                "icon": "🏗️",
-            },
+            _v("maison.hub", "src.modules.maison.hub", "Hub Maison", "🏠"),
+            _h("maison.jardin", "src.modules.maison.jardin", "Jardin", "🌱", "maison.hub"),
+            _h(
+                "maison.jardin_zones",
+                "src.modules.maison.jardin_zones",
+                "Zones Jardin",
+                "🌿",
+                "maison.hub",
+            ),
+            _h("maison.entretien", "src.modules.maison.entretien", "Entretien", "🏡", "maison.hub"),
+            _h("maison.charges", "src.modules.maison.charges", "Charges", "💡", "maison.hub"),
+            _h("maison.depenses", "src.modules.maison.depenses", "Dépenses", "💰", "maison.hub"),
+            _h("maison.eco_tips", "src.modules.maison.eco_tips", "Éco-Tips", "🌿", "maison.hub"),
+            _h("maison.energie", "src.modules.maison.energie", "Énergie", "⚡", "maison.hub"),
+            _h("maison.meubles", "src.modules.maison.meubles", "Meubles", "🪑", "maison.hub"),
+            _h("maison.projets", "src.modules.maison.projets", "Projets", "🏗️", "maison.hub"),
+            _h(
+                "maison.visualisation",
+                "src.modules.maison.visualisation",
+                "Plan Maison",
+                "🏘️",
+                "maison.hub",
+            ),
+            # Ex-section « Outils Maison »
+            _h("meteo", "src.modules.utilitaires.meteo", "Météo", "🌤️", "maison.hub"),
+            _h(
+                "suivi_energie",
+                "src.modules.utilitaires.suivi_energie",
+                "Suivi Énergie",
+                "⚡",
+                "maison.hub",
+            ),
         ],
     },
-    # ── Jeux ──
+    # ── Jeux ─────────────────────────────────────────────────
     {
         "name": "🎲 Jeux",
         "pages": [
-            {
-                "key": "jeux.paris",
-                "path": "src.modules.jeux.paris",
-                "title": "Paris Sportifs",
-                "icon": "⚽",
-            },
-            {
-                "key": "jeux.loto",
-                "path": "src.modules.jeux.loto",
-                "title": "Loto",
-                "icon": "🎰",
-            },
-            {
-                "key": "jeux.euromillions",
-                "path": "src.modules.jeux.euromillions",
-                "title": "Euromillions",
-                "icon": "⭐",
-            },
-            {
-                "key": "jeux.bilan",
-                "path": "src.modules.jeux.bilan",
-                "title": "Bilan Global",
-                "icon": "📊",
-            },
-            {
-                "key": "jeux.comparatif_roi",
-                "path": "src.modules.jeux.comparatif_roi",
-                "title": "Comparatif ROI",
-                "icon": "📈",
-            },
-            {
-                "key": "jeux.alertes",
-                "path": "src.modules.jeux.alertes",
-                "title": "Alertes Pronostics",
-                "icon": "🔔",
-            },
-            {
-                "key": "jeux.biais",
-                "path": "src.modules.jeux.biais",
-                "title": "Biais Cognitifs",
-                "icon": "🧠",
-            },
-            {
-                "key": "jeux.calendrier",
-                "path": "src.modules.jeux.calendrier",
-                "title": "Calendrier",
-                "icon": "📅",
-            },
-            {
-                "key": "jeux.educatif",
-                "path": "src.modules.jeux.educatif",
-                "title": "Module Éducatif",
-                "icon": "🎓",
-            },
+            _v("jeux.paris", "src.modules.jeux.paris", "Paris Sportifs", "⚽"),
+            _v("jeux.loto", "src.modules.jeux.loto", "Loto", "🎰"),
+            _v("jeux.bilan", "src.modules.jeux.bilan", "Bilan Global", "📊"),
+            _h(
+                "jeux.euromillions",
+                "src.modules.jeux.euromillions",
+                "Euromillions",
+                "⭐",
+                "jeux.loto",
+            ),
+            _h(
+                "jeux.comparatif_roi",
+                "src.modules.jeux.comparatif_roi",
+                "Comparatif ROI",
+                "📈",
+                "jeux.bilan",
+            ),
+            _h(
+                "jeux.alertes", "src.modules.jeux.alertes", "Alertes Pronostics", "🔔", "jeux.bilan"
+            ),
+            _h("jeux.biais", "src.modules.jeux.biais", "Biais Cognitifs", "🧠", "jeux.bilan"),
+            _h("jeux.calendrier", "src.modules.jeux.calendrier", "Calendrier", "📅", "jeux.bilan"),
+            _h("jeux.educatif", "src.modules.jeux.educatif", "Module Éducatif", "🎓", "jeux.bilan"),
         ],
     },
-    # ── Outils ──
+    # ── Outils (fusion des 5 anciennes sections) ─────────────
     {
         "name": "🔧 Outils",
         "pages": [
-            {
-                "key": "barcode",
-                "path": "src.modules.utilitaires.barcode",
-                "title": "Code-barres",
-                "icon": "📱",
-            },
-            {
-                "key": "scan_factures",
-                "path": "src.modules.utilitaires.scan_factures",
-                "title": "Scan Factures",
-                "icon": "🧾",
-            },
-            {
-                "key": "recherche_produits",
-                "path": "src.modules.utilitaires.recherche_produits",
-                "title": "Produits",
-                "icon": "🔍",
-            },
-            {
-                "key": "rapports",
-                "path": "src.modules.utilitaires.rapports",
-                "title": "Rapports",
-                "icon": "📊",
-            },
-            {
-                "key": "notifications_push",
-                "path": "src.modules.utilitaires.notifications_push",
-                "title": "Notifications",
-                "icon": "🔔",
-            },
-            {
-                "key": "chat_ia",
-                "path": "src.modules.utilitaires.chat_ia",
-                "title": "Chat IA",
-                "icon": "💬",
-            },
+            _v("chat_ia", "src.modules.utilitaires.chat_ia", "Chat IA", "💬"),
+            _v("outils.hub", "src.modules.utilitaires.boite_outils", "Boîte à outils", "🧰"),
+            # Scan & Recherche
+            _h("barcode", "src.modules.utilitaires.barcode", "Code-barres", "📱", "outils.hub"),
+            _h(
+                "scan_factures",
+                "src.modules.utilitaires.scan_factures",
+                "Scan Factures",
+                "🧾",
+                "outils.hub",
+            ),
+            _h(
+                "recherche_produits",
+                "src.modules.utilitaires.recherche_produits",
+                "Produits",
+                "🔍",
+                "outils.hub",
+            ),
+            _h("rapports", "src.modules.utilitaires.rapports", "Rapports", "📊", "outils.hub"),
+            _h(
+                "notifications_push",
+                "src.modules.utilitaires.notifications_push",
+                "Notifications",
+                "🔔",
+                "outils.hub",
+            ),
+            # Données (ex-section « Données »)
+            _h(
+                "export_global",
+                "src.modules.utilitaires.export_global",
+                "Export Global",
+                "📤",
+                "outils.hub",
+            ),
+            _h(
+                "import_masse",
+                "src.modules.utilitaires.import_masse",
+                "Import Masse",
+                "📥",
+                "outils.hub",
+            ),
+            # Productivité (ex-section « Productivité »)
+            _h("notes_memos", "src.modules.utilitaires.notes_memos", "Notes", "📝", "outils.hub"),
+            _h(
+                "journal_bord",
+                "src.modules.utilitaires.journal_bord",
+                "Journal",
+                "📓",
+                "outils.hub",
+            ),
+            _h(
+                "presse_papiers",
+                "src.modules.utilitaires.presse_papiers",
+                "Presse-papiers",
+                "📋",
+                "outils.hub",
+            ),
+            _h(
+                "liens_utiles",
+                "src.modules.utilitaires.liens_utiles",
+                "Favoris",
+                "🔗",
+                "outils.hub",
+            ),
+            _h(
+                "annuaire_contacts",
+                "src.modules.utilitaires.annuaire_contacts",
+                "Contacts",
+                "📇",
+                "outils.hub",
+            ),
+            _h(
+                "compte_rebours",
+                "src.modules.utilitaires.compte_rebours",
+                "Compte à rebours",
+                "⏳",
+                "outils.hub",
+            ),
+            # Sécurité
+            _h(
+                "mots_de_passe",
+                "src.modules.utilitaires.mots_de_passe",
+                "Mots de passe",
+                "🔐",
+                "outils.hub",
+            ),
+            _h(
+                "qr_code_gen", "src.modules.utilitaires.qr_code_gen", "QR Codes", "📱", "outils.hub"
+            ),
         ],
     },
-    # ── Données ──
-    {
-        "name": "📦 Données",
-        "pages": [
-            {
-                "key": "export_global",
-                "path": "src.modules.utilitaires.export_global",
-                "title": "Export Global",
-                "icon": "📤",
-            },
-            {
-                "key": "import_masse",
-                "path": "src.modules.utilitaires.import_masse",
-                "title": "Import Masse",
-                "icon": "📥",
-            },
-        ],
-    },
-    # ── Outils Cuisine ──
-    {
-        "name": "🍳 Cuisine+",
-        "pages": [
-            {
-                "key": "convertisseur_unites",
-                "path": "src.modules.utilitaires.convertisseur_unites",
-                "title": "Convertisseur",
-                "icon": "⚖️",
-            },
-            {
-                "key": "calculatrice_portions",
-                "path": "src.modules.utilitaires.calculatrice_portions",
-                "title": "Portions",
-                "icon": "🔢",
-            },
-            {
-                "key": "substitutions",
-                "path": "src.modules.utilitaires.substitutions",
-                "title": "Substitutions",
-                "icon": "🔄",
-            },
-            {
-                "key": "cout_repas",
-                "path": "src.modules.utilitaires.cout_repas",
-                "title": "Coût Repas",
-                "icon": "💰",
-            },
-            {
-                "key": "saisonnalite",
-                "path": "src.modules.utilitaires.saisonnalite",
-                "title": "Saisons",
-                "icon": "🥕",
-            },
-            {
-                "key": "minuteur",
-                "path": "src.modules.utilitaires.minuteur",
-                "title": "Minuteur",
-                "icon": "⏱️",
-            },
-        ],
-    },
-    # ── Productivité ──
-    {
-        "name": "📝 Productivité",
-        "pages": [
-            {
-                "key": "notes_memos",
-                "path": "src.modules.utilitaires.notes_memos",
-                "title": "Notes",
-                "icon": "📝",
-            },
-            {
-                "key": "journal_bord",
-                "path": "src.modules.utilitaires.journal_bord",
-                "title": "Journal",
-                "icon": "📓",
-            },
-            {
-                "key": "presse_papiers",
-                "path": "src.modules.utilitaires.presse_papiers",
-                "title": "Presse-papiers",
-                "icon": "📋",
-            },
-            {
-                "key": "liens_utiles",
-                "path": "src.modules.utilitaires.liens_utiles",
-                "title": "Favoris",
-                "icon": "🔗",
-            },
-            {
-                "key": "annuaire_contacts",
-                "path": "src.modules.utilitaires.annuaire_contacts",
-                "title": "Contacts",
-                "icon": "📇",
-            },
-            {
-                "key": "compte_rebours",
-                "path": "src.modules.utilitaires.compte_rebours",
-                "title": "Compte à rebours",
-                "icon": "⏳",
-            },
-        ],
-    },
-    # ── Outils Maison ──
-    {
-        "name": "🏠 Outils Maison",
-        "pages": [
-            {
-                "key": "meteo",
-                "path": "src.modules.utilitaires.meteo",
-                "title": "Météo",
-                "icon": "🌤️",
-            },
-            {
-                "key": "suivi_energie",
-                "path": "src.modules.utilitaires.suivi_energie",
-                "title": "Énergie",
-                "icon": "⚡",
-            },
-            {
-                "key": "mots_de_passe",
-                "path": "src.modules.utilitaires.mots_de_passe",
-                "title": "Mots de passe",
-                "icon": "🔐",
-            },
-            {
-                "key": "qr_code_gen",
-                "path": "src.modules.utilitaires.qr_code_gen",
-                "title": "QR Codes",
-                "icon": "📱",
-            },
-        ],
-    },
-    # ── Configuration ──
+    # ── Configuration ────────────────────────────────────────
     {
         "name": "⚙️ Configuration",
         "pages": [
-            {
-                "key": "parametres",
-                "path": "src.modules.parametres",
-                "title": "Paramètres",
-                "icon": "⚙️",
-            },
-            {
-                "key": "design_system",
-                "path": "src.modules.design_system",
-                "title": "Design System",
-                "icon": "🎨",
-            },
+            _v("parametres", "src.modules.parametres", "Paramètres", "⚙️"),
+            _h("design_system", "src.modules.design_system", "Design System", "🎨", "parametres"),
         ],
     },
 ]

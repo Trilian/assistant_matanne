@@ -184,6 +184,21 @@ class ServiceEvenements(BaseService[EvenementFamilial]):
             .all()
         )
 
+    # Compatibility aliases used by older UI code
+    def lister_par_semaine(self, *, date_ref: date_type | None = None, db: Session | None = None):
+        """Alias historique pour `obtenir_evenements_semaine`"""
+        return self.obtenir_evenements_semaine(date_ref=date_ref, db=db)
+
+    def lister_par_mois(
+        self, *, annee: int | None = None, mois: int | None = None, db: Session | None = None
+    ):
+        """Alias historique pour `obtenir_evenements_mois`"""
+        return self.obtenir_evenements_mois(annee=annee, mois=mois, db=db)
+
+    def lister_par_type(self, type_evenement: str, *, db: Session | None = None):
+        """Alias historique pour `obtenir_par_type`"""
+        return self.obtenir_par_type(type_evenement, db=db)
+
 
 # ═══════════════════════════════════════════════════════════
 # FACTORY

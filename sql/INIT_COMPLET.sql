@@ -4074,3 +4074,95 @@ COMMIT;
 --   anon         : Pas d'accès (PostgREST avec clé anonyme bloqué)
 --
 -- ============================================================================
+-- ============================================================================
+-- MIGRATIONS NON-DESTRUCTIVES AJOUTÉES: 2026-02-27
+-- Ces blocs sont idempotents (IF NOT EXISTS / DO $$ checks)
+-- Ajoutés automatiquement par l'agent pour synchroniser le schéma
+-- ============================================================================
+-- 1) Rename columns and add child profile fields
+BEGIN;
+-- Rename ingredients.unite_mesure -> unite (if exists)
+DO $$ BEGIN IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'ingredients'
+        AND column_name = 'unite_mesure'
+) THEN
+ALTER TABLE ingredients
+    RENAME COLUMN unite_mesure TO unite;
+END IF;
+END $$;
+-- Rename taches_entretien.created_at -> cree_le and updated_at -> modifie_le
+DO $$ BEGIN IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'taches_entretien'
+        AND column_name = 'created_at'
+) THEN
+ALTER TABLE taches_entretien
+    RENAME COLUMN created_at TO cree_le;
+END IF;
+IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'taches_entretien'
+        AND column_name = 'updated_at'
+) THEN
+ALTER TABLE taches_entretien
+    RENAME COLUMN updated_at TO modifie_le;
+END IF;
+END $$;
+-- Add new columns to profils_enfants: taille_vetements (jsonb) and pointure (varchar)
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'profils_enfants'
+        AND column_name = 'taille_vetements'
+) THEN
+ALTER TABLE profils_enfants
+ADD COLUMN taille_vetements jsonb DEFAULT '{}'::jsonb;
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'profils_enfants'
+        AND column_name = 'pointure'
+) THEN
+ALTER TABLE profils_enfants
+ADD COLUMN pointure varchar(50);
+END IF;
+END $$;
+COMMIT;
+-- 2) Add sous_categorie to contacts_famille
+BEGIN;
+ALTER TABLE IF EXISTS contacts_famille
+ADD COLUMN IF NOT EXISTS sous_categorie varchar(100);
+COMMIT;
+-- 3) Add date_debut and date_fin to albums_famille
+BEGIN;
+ALTER TABLE IF EXISTS albums_famille
+ADD COLUMN IF NOT EXISTS date_debut date;
+ALTER TABLE IF EXISTS albums_famille
+ADD COLUMN IF NOT EXISTS date_fin date;
+COMMIT;
+-- 4) Add titre to documents_famille and backfill from fichier_nom if present
+BEGIN;
+ALTER TABLE IF EXISTS documents_famille
+ADD COLUMN IF NOT EXISTS titre varchar(200);
+DO $$ BEGIN IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'documents_famille'
+        AND column_name = 'fichier_nom'
+) THEN EXECUTE 'UPDATE documents_famille SET titre = fichier_nom WHERE titre IS NULL AND fichier_nom IS NOT NULL';
+END IF;
+END $$;
+COMMIT;
+-- 5) Add budget_reel to voyages
+BEGIN;
+ALTER TABLE IF EXISTS voyages
+ADD COLUMN IF NOT EXISTS budget_reel double precision;
+COMMIT;
+-- ============================================================================
+-- FIN DES MIGRATIONS AJOUTÉES LE 2026-02-27
+-- ============================================================================

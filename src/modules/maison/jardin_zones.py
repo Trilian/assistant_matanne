@@ -54,6 +54,19 @@ def _get_service() -> "JardinService":
     return get_jardin_service()
 
 
+def creer_zone(nom: str, type_zone: str = "autre", superficie: float | None = None) -> bool:
+    """Wrapper UI: crée une zone via le service et invalide le cache."""
+    try:
+        res = _get_service().ajouter_zone(nom=nom, type_zone=type_zone, superficie_m2=superficie)
+        if res:
+            charger_zones.clear()
+            return True
+        return False
+    except Exception as e:
+        logger.error(f"Erreur creer_zone UI: {e}")
+        return False
+
+
 # ═══════════════════════════════════════════════════════════
 # CONSTANTES
 # ═══════════════════════════════════════════════════════════
@@ -277,6 +290,32 @@ def app():
 
         with tab1:
             afficher_vue_ensemble()
+            st.divider()
+
+            # Formulaire rapide pour ajouter une zone
+            with st.expander("➕ Ajouter une zone", expanded=False):
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    nom_zone = st.text_input("Nom de la zone", key=_keys("new_zone_nom"))
+                    type_zone = st.selectbox(
+                        "Type de zone",
+                        list(EMOJI_ZONE.keys()),
+                        format_func=lambda k: f"{EMOJI_ZONE.get(k, '')} {k.capitalize()}",
+                        key=_keys("new_zone_type"),
+                    )
+                with col2:
+                    superficie = st.number_input(
+                        "Surface (m²)", min_value=0.0, value=0.0, key=_keys("new_zone_surface")
+                    )
+                if st.button("Créer la zone", key=_keys("create_zone")):
+                    if nom_zone:
+                        ok = creer_zone(nom_zone, type_zone, superficie or None)
+                        if ok:
+                            st.success("Zone créée")
+                            st.experimental_rerun()
+                        else:
+                            st.error("Échec création zone")
+
             if zones:
                 st.divider()
                 for z in zones:

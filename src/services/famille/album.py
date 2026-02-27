@@ -169,6 +169,25 @@ class ServiceAlbum(BaseService[AlbumFamille]):
             .all()
         )
 
+    @avec_cache(ttl=300)
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
+    def lister_souvenirs_timeline(
+        self, *, annee: int | None = None, limite: int = 50, db: Session | None = None
+    ) -> list[SouvenirFamille]:
+        """Compatibilité: ancienne API attend `lister_souvenirs_timeline(annee=...)`.
+
+        Si `annee` fourni, filtre par année de `date_souvenir`, sinon retourne
+        les derniers souvenirs (ordre descendant) limité à `limite`.
+        """
+        if db is None:
+            return []
+        query = db.query(SouvenirFamille)
+        if annee is not None:
+            # filter by year using SQL extract
+            query = query.filter(func.extract("year", SouvenirFamille.date_souvenir) == annee)
+        return query.order_by(SouvenirFamille.date_souvenir.desc()).limit(limite).all()
+
     # ═══════════════════════════════════════════════════════════
     # STATISTIQUES
     # ═══════════════════════════════════════════════════════════
