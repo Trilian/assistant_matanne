@@ -61,7 +61,7 @@ def injecter_css():
     background: rgba(0,0,0,0.04);
     color: var(--text-primary);
     padding: 6px 10px;
-    border-radius: {Rayon.XS};
+    border-radius: {Rayon.SM};
     box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     font-size: 0.95rem;
     text-decoration: none;
