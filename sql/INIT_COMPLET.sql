@@ -212,9 +212,9 @@ CREATE TABLE ingredients (
     allergene BOOLEAN NOT NULL DEFAULT FALSE,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE UNIQUE INDEX uq_ingredients_nom ON ingredients(nom);
-CREATE INDEX ix_ingredients_categorie ON ingredients(categorie);
-CREATE INDEX ix_ingredients_saison ON ingredients(saison);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_ingredients_nom ON ingredients(nom);
+CREATE INDEX IF NOT EXISTS ix_ingredients_categorie ON ingredients(categorie);
+CREATE INDEX IF NOT EXISTS ix_ingredients_saison ON ingredients(saison);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.02 USER_PROFILES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -245,7 +245,7 @@ CREATE TABLE profils_utilisateurs (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE UNIQUE INDEX uq_profils_username ON profils_utilisateurs(username);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_profils_username ON profils_utilisateurs(username);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.03 RECETTES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -275,11 +275,11 @@ CREATE TABLE recettes (
     CONSTRAINT ck_temps_cuisson_positif CHECK (temps_cuisson >= 0),
     CONSTRAINT ck_portions_positive CHECK (portions > 0)
 );
-CREATE INDEX ix_recettes_categorie ON recettes(categorie);
-CREATE INDEX ix_recettes_type_repas ON recettes(type_repas);
-CREATE INDEX ix_recettes_saison ON recettes(saison);
-CREATE INDEX ix_recettes_batch_cooking ON recettes(batch_cooking);
-CREATE INDEX ix_recettes_adaptee_bebe ON recettes(adaptee_bebe);
+CREATE INDEX IF NOT EXISTS ix_recettes_categorie ON recettes(categorie);
+CREATE INDEX IF NOT EXISTS ix_recettes_type_repas ON recettes(type_repas);
+CREATE INDEX IF NOT EXISTS ix_recettes_saison ON recettes(saison);
+CREATE INDEX IF NOT EXISTS ix_recettes_batch_cooking ON recettes(batch_cooking);
+CREATE INDEX IF NOT EXISTS ix_recettes_adaptee_bebe ON recettes(adaptee_bebe);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.04 PLANNINGS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -293,7 +293,7 @@ CREATE TABLE plannings (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_plannings_semaine ON plannings(semaine_du);
+CREATE INDEX IF NOT EXISTS ix_plannings_semaine ON plannings(semaine_du);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.05 LISTES_COURSES (en-tête)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -309,8 +309,8 @@ CREATE TABLE listes_courses (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_listes_courses_semaine ON listes_courses(semaine_du);
-CREATE INDEX ix_listes_courses_statut ON listes_courses(statut);
+CREATE INDEX IF NOT EXISTS ix_listes_courses_semaine ON listes_courses(semaine_du);
+CREATE INDEX IF NOT EXISTS ix_listes_courses_statut ON listes_courses(statut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.06 MODELES_COURSES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -324,9 +324,9 @@ CREATE TABLE modeles_courses (
     actif BOOLEAN NOT NULL DEFAULT TRUE,
     articles_data JSONB
 );
-CREATE INDEX ix_modeles_courses_nom ON modeles_courses(nom);
-CREATE INDEX ix_modeles_courses_utilisateur_id ON modeles_courses(utilisateur_id);
-CREATE INDEX ix_modeles_courses_actif ON modeles_courses(actif);
+CREATE INDEX IF NOT EXISTS ix_modeles_courses_nom ON modeles_courses(nom);
+CREATE INDEX IF NOT EXISTS ix_modeles_courses_utilisateur_id ON modeles_courses(utilisateur_id);
+CREATE INDEX IF NOT EXISTS ix_modeles_courses_actif ON modeles_courses(actif);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.07 CHILD_PROFILES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -353,8 +353,8 @@ CREATE TABLE routines_sante (
     actif BOOLEAN NOT NULL DEFAULT TRUE,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_health_routines_type ON routines_sante(type_routine);
-CREATE INDEX ix_health_routines_actif ON routines_sante(actif);
+CREATE INDEX IF NOT EXISTS ix_health_routines_type ON routines_sante(type_routine);
+CREATE INDEX IF NOT EXISTS ix_health_routines_actif ON routines_sante(actif);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.09 HEALTH_OBJECTIVES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -375,8 +375,8 @@ CREATE TABLE objectifs_sante (
     CONSTRAINT ck_objective_valeur_positive CHECK (valeur_cible > 0),
     CONSTRAINT ck_objective_dates CHECK (date_debut <= date_cible)
 );
-CREATE INDEX ix_health_objectives_categorie ON objectifs_sante(categorie);
-CREATE INDEX ix_health_objectives_statut ON objectifs_sante(statut);
+CREATE INDEX IF NOT EXISTS ix_health_objectives_categorie ON objectifs_sante(categorie);
+CREATE INDEX IF NOT EXISTS ix_health_objectives_statut ON objectifs_sante(statut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.10 PROJECTS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -393,8 +393,8 @@ CREATE TABLE projets (
     categorie VARCHAR(100),
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_projects_statut ON projets(statut);
-CREATE INDEX ix_projects_categorie ON projets(categorie);
+CREATE INDEX IF NOT EXISTS ix_projects_statut ON projets(statut);
+CREATE INDEX IF NOT EXISTS ix_projects_categorie ON projets(categorie);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.11 ROUTINES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -408,8 +408,8 @@ CREATE TABLE routines (
     actif BOOLEAN NOT NULL DEFAULT TRUE,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_routines_type ON routines(type_routine);
-CREATE INDEX ix_routines_actif ON routines(actif);
+CREATE INDEX IF NOT EXISTS ix_routines_type ON routines(type_routine);
+CREATE INDEX IF NOT EXISTS ix_routines_actif ON routines(actif);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.12 GARDEN_ITEMS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -425,8 +425,8 @@ CREATE TABLE elements_jardin (
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_garden_items_type ON elements_jardin(type_plante);
-CREATE INDEX ix_garden_items_statut ON elements_jardin(statut);
+CREATE INDEX IF NOT EXISTS ix_garden_items_type ON elements_jardin(type_plante);
+CREATE INDEX IF NOT EXISTS ix_garden_items_statut ON elements_jardin(statut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.13 TEMPLATES_SEMAINE
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -491,7 +491,7 @@ CREATE TABLE jeux_tirages_loto (
     gagnants_rang1 INTEGER,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE UNIQUE INDEX uq_tirages_loto_date ON jeux_tirages_loto(date_tirage);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_tirages_loto_date ON jeux_tirages_loto(date_tirage);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.17 JEUX_STATS_LOTO
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -539,9 +539,9 @@ CREATE TABLE jeux_series (
     derniere_mise_a_jour TIMESTAMP,
     cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX ix_jeux_series_type_jeu_championnat ON jeux_series(type_jeu, championnat);
-CREATE INDEX ix_jeux_series_type_jeu_marche ON jeux_series(type_jeu, marche);
-CREATE INDEX ix_jeux_series_value ON jeux_series((frequence * serie_actuelle) DESC);
+CREATE INDEX IF NOT EXISTS ix_jeux_series_type_jeu_championnat ON jeux_series(type_jeu, championnat);
+CREATE INDEX IF NOT EXISTS ix_jeux_series_type_jeu_marche ON jeux_series(type_jeu, marche);
+CREATE INDEX IF NOT EXISTS ix_jeux_series_value ON jeux_series((frequence * serie_actuelle) DESC);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.20 JEUX_CONFIGURATION
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -587,9 +587,9 @@ CREATE TABLE activites_weekend (
         )
     )
 );
-CREATE INDEX ix_weekend_activities_type ON activites_weekend(type_activite);
-CREATE INDEX ix_weekend_activities_date ON activites_weekend(date_prevue);
-CREATE INDEX ix_weekend_activities_statut ON activites_weekend(statut);
+CREATE INDEX IF NOT EXISTS ix_weekend_activities_type ON activites_weekend(type_activite);
+CREATE INDEX IF NOT EXISTS ix_weekend_activities_date ON activites_weekend(date_prevue);
+CREATE INDEX IF NOT EXISTS ix_weekend_activities_statut ON activites_weekend(statut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.22 FAMILY_PURCHASES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -613,9 +613,9 @@ CREATE TABLE achats_famille (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_family_purchases_categorie ON achats_famille(categorie);
-CREATE INDEX ix_family_purchases_priorite ON achats_famille(priorite);
-CREATE INDEX ix_family_purchases_achete ON achats_famille(achete);
+CREATE INDEX IF NOT EXISTS ix_family_purchases_categorie ON achats_famille(categorie);
+CREATE INDEX IF NOT EXISTS ix_family_purchases_priorite ON achats_famille(priorite);
+CREATE INDEX IF NOT EXISTS ix_family_purchases_achete ON achats_famille(achete);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.23 FAMILY_ACTIVITIES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -643,9 +643,9 @@ CREATE TABLE activites_famille (
         OR age_minimal_recommande >= 0
     )
 );
-CREATE INDEX ix_family_activities_type ON activites_famille(type_activite);
-CREATE INDEX ix_family_activities_date ON activites_famille(date_prevue);
-CREATE INDEX ix_family_activities_statut ON activites_famille(statut);
+CREATE INDEX IF NOT EXISTS ix_family_activities_type ON activites_famille(type_activite);
+CREATE INDEX IF NOT EXISTS ix_family_activities_date ON activites_famille(date_prevue);
+CREATE INDEX IF NOT EXISTS ix_family_activities_statut ON activites_famille(statut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.24 FAMILY_BUDGETS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -662,8 +662,8 @@ CREATE TABLE budgets_famille (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT ck_budget_montant_positive CHECK (montant > 0)
 );
-CREATE INDEX ix_family_budgets_date ON budgets_famille(date);
-CREATE INDEX ix_family_budgets_categorie ON budgets_famille(categorie);
+CREATE INDEX IF NOT EXISTS ix_family_budgets_date ON budgets_famille(date);
+CREATE INDEX IF NOT EXISTS ix_family_budgets_categorie ON budgets_famille(categorie);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.25 SHOPPING_ITEMS_FAMILLE
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -678,11 +678,11 @@ CREATE TABLE articles_achats_famille (
     date_ajout TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     date_achat TIMESTAMP WITH TIME ZONE
 );
-CREATE INDEX ix_shopping_items_titre ON articles_achats_famille(titre);
-CREATE INDEX ix_shopping_items_categorie ON articles_achats_famille(categorie);
-CREATE INDEX ix_shopping_items_liste ON articles_achats_famille(liste);
-CREATE INDEX ix_shopping_items_actif ON articles_achats_famille(actif);
-CREATE INDEX ix_shopping_items_date ON articles_achats_famille(date_ajout);
+CREATE INDEX IF NOT EXISTS ix_shopping_items_titre ON articles_achats_famille(titre);
+CREATE INDEX IF NOT EXISTS ix_shopping_items_categorie ON articles_achats_famille(categorie);
+CREATE INDEX IF NOT EXISTS ix_shopping_items_liste ON articles_achats_famille(liste);
+CREATE INDEX IF NOT EXISTS ix_shopping_items_actif ON articles_achats_famille(actif);
+CREATE INDEX IF NOT EXISTS ix_shopping_items_date ON articles_achats_famille(date_ajout);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.26 CALENDAR_EVENTS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -702,10 +702,10 @@ CREATE TABLE evenements_planning (
         OR rappel_avant_minutes >= 0
     )
 );
-CREATE INDEX ix_calendar_events_date_debut ON evenements_planning(date_debut);
-CREATE INDEX ix_calendar_events_type ON evenements_planning(type_event);
-CREATE INDEX idx_date_type ON evenements_planning(date_debut, type_event);
-CREATE INDEX idx_date_range ON evenements_planning(date_debut, date_fin);
+CREATE INDEX IF NOT EXISTS ix_calendar_events_date_debut ON evenements_planning(date_debut);
+CREATE INDEX IF NOT EXISTS ix_calendar_events_type ON evenements_planning(type_event);
+CREATE INDEX IF NOT EXISTS idx_date_type ON evenements_planning(date_debut, type_event);
+CREATE INDEX IF NOT EXISTS idx_date_range ON evenements_planning(date_debut, date_fin);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.27 FURNITURE
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -732,9 +732,9 @@ CREATE TABLE meubles (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_furniture_piece ON meubles(piece);
-CREATE INDEX ix_furniture_statut ON meubles(statut);
-CREATE INDEX ix_furniture_priorite ON meubles(priorite);
+CREATE INDEX IF NOT EXISTS ix_furniture_piece ON meubles(piece);
+CREATE INDEX IF NOT EXISTS ix_furniture_statut ON meubles(statut);
+CREATE INDEX IF NOT EXISTS ix_furniture_priorite ON meubles(priorite);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.28 HOUSE_EXPENSES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -760,8 +760,8 @@ CREATE TABLE depenses_maison (
         OR consommation >= 0
     )
 );
-CREATE INDEX ix_house_expenses_categorie ON depenses_maison(categorie);
-CREATE INDEX ix_house_expenses_annee ON depenses_maison(annee);
+CREATE INDEX IF NOT EXISTS ix_house_expenses_categorie ON depenses_maison(categorie);
+CREATE INDEX IF NOT EXISTS ix_house_expenses_annee ON depenses_maison(annee);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.29 ECO_ACTIONS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -780,7 +780,7 @@ CREATE TABLE actions_ecologiques (
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_eco_actions_type ON actions_ecologiques(type_action);
+CREATE INDEX IF NOT EXISTS ix_eco_actions_type ON actions_ecologiques(type_action);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.30 MAINTENANCE_TASKS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -802,9 +802,9 @@ CREATE TABLE taches_entretien (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_maintenance_tasks_categorie ON taches_entretien(categorie);
-CREATE INDEX ix_maintenance_tasks_prochaine ON taches_entretien(prochaine_fois);
-CREATE INDEX ix_maintenance_tasks_fait ON taches_entretien(fait);
+CREATE INDEX IF NOT EXISTS ix_maintenance_tasks_categorie ON taches_entretien(categorie);
+CREATE INDEX IF NOT EXISTS ix_maintenance_tasks_prochaine ON taches_entretien(prochaine_fois);
+CREATE INDEX IF NOT EXISTS ix_maintenance_tasks_fait ON taches_entretien(fait);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.31 HOUSE_STOCKS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -821,7 +821,7 @@ CREATE TABLE stocks_maison (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_house_stocks_categorie ON stocks_maison(categorie);
+CREATE INDEX IF NOT EXISTS ix_house_stocks_categorie ON stocks_maison(categorie);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.32 USER_PREFERENCES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -843,8 +843,8 @@ CREATE TABLE preferences_utilisateurs (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE UNIQUE INDEX uq_user_preferences_user_id ON preferences_utilisateurs(user_id);
-CREATE INDEX ix_user_preferences_user_id ON preferences_utilisateurs(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_user_preferences_user_id ON preferences_utilisateurs(user_id);
+CREATE INDEX IF NOT EXISTS ix_user_preferences_user_id ON preferences_utilisateurs(user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.33 OPENFOODFACTS_CACHE
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -863,8 +863,8 @@ CREATE TABLE openfoodfacts_cache (
     last_updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE UNIQUE INDEX uq_openfoodfacts_code ON openfoodfacts_cache(code_barres);
-CREATE INDEX ix_openfoodfacts_code ON openfoodfacts_cache(code_barres);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_openfoodfacts_code ON openfoodfacts_cache(code_barres);
+CREATE INDEX IF NOT EXISTS ix_openfoodfacts_code ON openfoodfacts_cache(code_barres);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.34 DEPENSES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -898,9 +898,9 @@ CREATE TABLE depenses (
         )
     )
 );
-CREATE INDEX ix_depenses_categorie ON depenses(categorie);
-CREATE INDEX ix_depenses_date ON depenses(date);
-CREATE INDEX ix_depenses_user_id ON depenses(user_id);
+CREATE INDEX IF NOT EXISTS ix_depenses_categorie ON depenses(categorie);
+CREATE INDEX IF NOT EXISTS ix_depenses_date ON depenses(date);
+CREATE INDEX IF NOT EXISTS ix_depenses_user_id ON depenses(user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.35 BUDGETS_MENSUELS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -915,9 +915,9 @@ CREATE TABLE budgets_mensuels (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT ck_budget_total_positif CHECK (budget_total >= 0)
 );
-CREATE INDEX ix_budgets_mensuels_mois ON budgets_mensuels(mois);
-CREATE INDEX ix_budgets_mensuels_user ON budgets_mensuels(user_id);
-CREATE UNIQUE INDEX uq_budget_mois_user ON budgets_mensuels(mois, user_id);
+CREATE INDEX IF NOT EXISTS ix_budgets_mensuels_mois ON budgets_mensuels(mois);
+CREATE INDEX IF NOT EXISTS ix_budgets_mensuels_user ON budgets_mensuels(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_budget_mois_user ON budgets_mensuels(mois, user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.36 ALERTES_METEO
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -935,9 +935,9 @@ CREATE TABLE alertes_meteo (
     user_id UUID,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_alertes_meteo_type ON alertes_meteo(type_alerte);
-CREATE INDEX ix_alertes_meteo_date ON alertes_meteo(date_debut);
-CREATE INDEX ix_alertes_meteo_user ON alertes_meteo(user_id);
+CREATE INDEX IF NOT EXISTS ix_alertes_meteo_type ON alertes_meteo(type_alerte);
+CREATE INDEX IF NOT EXISTS ix_alertes_meteo_date ON alertes_meteo(date_debut);
+CREATE INDEX IF NOT EXISTS ix_alertes_meteo_user ON alertes_meteo(user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.37 CONFIG_METEO
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -954,7 +954,7 @@ CREATE TABLE config_meteo (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE UNIQUE INDEX uq_config_meteo_user ON config_meteo(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_config_meteo_user ON config_meteo(user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.38 BACKUPS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -970,8 +970,8 @@ CREATE TABLE sauvegardes (
     user_id UUID,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_backups_user ON sauvegardes(user_id);
-CREATE INDEX ix_backups_created ON sauvegardes(created_at);
+CREATE INDEX IF NOT EXISTS ix_backups_user ON sauvegardes(user_id);
+CREATE INDEX IF NOT EXISTS ix_backups_created ON sauvegardes(created_at);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.39 ACTION_HISTORY
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -991,10 +991,10 @@ CREATE TABLE historique_actions (
     user_agent VARCHAR(500),
     created_at TIMESTAMP DEFAULT NOW()
 );
-CREATE INDEX idx_action_history_user_id ON historique_actions(user_id);
-CREATE INDEX idx_action_history_action_type ON historique_actions(action_type);
-CREATE INDEX idx_action_history_created_at ON historique_actions(created_at DESC);
-CREATE INDEX idx_action_history_entity ON historique_actions(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_action_history_user_id ON historique_actions(user_id);
+CREATE INDEX IF NOT EXISTS idx_action_history_action_type ON historique_actions(action_type);
+CREATE INDEX IF NOT EXISTS idx_action_history_created_at ON historique_actions(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_action_history_entity ON historique_actions(entity_type, entity_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.40 CALENDRIERS_EXTERNES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1012,8 +1012,8 @@ CREATE TABLE calendriers_externes (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_calendriers_externes_provider ON calendriers_externes(provider);
-CREATE INDEX ix_calendriers_externes_user ON calendriers_externes(user_id);
+CREATE INDEX IF NOT EXISTS ix_calendriers_externes_provider ON calendriers_externes(provider);
+CREATE INDEX IF NOT EXISTS ix_calendriers_externes_user ON calendriers_externes(user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.41 PUSH_SUBSCRIPTIONS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1027,8 +1027,8 @@ CREATE TABLE abonnements_push (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     last_used TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE UNIQUE INDEX uq_push_subscriptions_endpoint ON abonnements_push(endpoint);
-CREATE INDEX ix_push_subscriptions_user ON abonnements_push(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_push_subscriptions_endpoint ON abonnements_push(endpoint);
+CREATE INDEX IF NOT EXISTS ix_push_subscriptions_user ON abonnements_push(user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.42 NOTIFICATION_PREFERENCES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1047,7 +1047,7 @@ CREATE TABLE preferences_notifications (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE UNIQUE INDEX uq_notification_prefs_user ON preferences_notifications(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_notification_prefs_user ON preferences_notifications(user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.43 EXTERNAL_CALENDAR_CONFIGS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1069,8 +1069,8 @@ CREATE TABLE configs_calendriers_externes (
         provider IN ('google', 'apple', 'outlook', 'ical_url')
     )
 );
-CREATE INDEX ix_external_cal_user ON configs_calendriers_externes(user_id);
-CREATE UNIQUE INDEX uq_user_calendar ON configs_calendriers_externes(user_id, provider, name);
+CREATE INDEX IF NOT EXISTS ix_external_cal_user ON configs_calendriers_externes(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_user_calendar ON configs_calendriers_externes(user_id, provider, name);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.44 PLANS_JARDIN
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1083,7 +1083,7 @@ CREATE TABLE plans_jardin (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX idx_plans_jardin_nom ON plans_jardin(nom);
+CREATE INDEX IF NOT EXISTS idx_plans_jardin_nom ON plans_jardin(nom);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.45 PIECES_MAISON
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1101,7 +1101,7 @@ CREATE TABLE pieces_maison (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
-CREATE INDEX idx_pieces_maison_type ON pieces_maison(type_piece);
+CREATE INDEX IF NOT EXISTS idx_pieces_maison_type ON pieces_maison(type_piece);
 -- ============================================================================
 -- PARTIE 4 : TABLES AVEC DÉPENDANCES FK
 -- ============================================================================
@@ -1120,7 +1120,7 @@ CREATE TABLE garmin_tokens (
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_garmin_tokens_user FOREIGN KEY (user_id) REFERENCES profils_utilisateurs(id) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX uq_garmin_tokens_user_id ON garmin_tokens(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_garmin_tokens_user_id ON garmin_tokens(user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.02 GARMIN_ACTIVITIES (→ profils_utilisateurs)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1145,10 +1145,10 @@ CREATE TABLE activites_garmin (
     CONSTRAINT fk_garmin_activities_user FOREIGN KEY (user_id) REFERENCES profils_utilisateurs(id) ON DELETE CASCADE,
     CONSTRAINT ck_garmin_duree_positive CHECK (duree_secondes > 0)
 );
-CREATE UNIQUE INDEX uq_garmin_activity_id ON activites_garmin(garmin_activity_id);
-CREATE INDEX ix_garmin_activities_user ON activites_garmin(user_id);
-CREATE INDEX ix_garmin_activities_type ON activites_garmin(type_activite);
-CREATE INDEX ix_garmin_activities_date ON activites_garmin(date_debut);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_garmin_activity_id ON activites_garmin(garmin_activity_id);
+CREATE INDEX IF NOT EXISTS ix_garmin_activities_user ON activites_garmin(user_id);
+CREATE INDEX IF NOT EXISTS ix_garmin_activities_type ON activites_garmin(type_activite);
+CREATE INDEX IF NOT EXISTS ix_garmin_activities_date ON activites_garmin(date_debut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.03 GARMIN_DAILY_SUMMARIES (→ profils_utilisateurs)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1176,9 +1176,9 @@ CREATE TABLE resumes_quotidiens_garmin (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_garmin_daily_user FOREIGN KEY (user_id) REFERENCES profils_utilisateurs(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_garmin_daily_user ON resumes_quotidiens_garmin(user_id);
-CREATE INDEX ix_garmin_daily_date ON resumes_quotidiens_garmin(date);
-CREATE UNIQUE INDEX uq_garmin_daily_user_date ON resumes_quotidiens_garmin(user_id, date);
+CREATE INDEX IF NOT EXISTS ix_garmin_daily_user ON resumes_quotidiens_garmin(user_id);
+CREATE INDEX IF NOT EXISTS ix_garmin_daily_date ON resumes_quotidiens_garmin(date);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_garmin_daily_user_date ON resumes_quotidiens_garmin(user_id, date);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.04 FOOD_LOGS (→ profils_utilisateurs)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1205,8 +1205,8 @@ CREATE TABLE journaux_alimentaires (
         )
     )
 );
-CREATE INDEX ix_food_logs_user ON journaux_alimentaires(user_id);
-CREATE INDEX ix_food_logs_date ON journaux_alimentaires(date);
+CREATE INDEX IF NOT EXISTS ix_food_logs_user ON journaux_alimentaires(user_id);
+CREATE INDEX IF NOT EXISTS ix_food_logs_date ON journaux_alimentaires(date);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.05 RECETTE_INGREDIENTS (→ recettes, ingredients)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1221,8 +1221,8 @@ CREATE TABLE recette_ingredients (
     CONSTRAINT fk_recette_ing_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE,
     CONSTRAINT ck_quantite_positive CHECK (quantite > 0)
 );
-CREATE INDEX ix_recette_ingredients_recette ON recette_ingredients(recette_id);
-CREATE INDEX ix_recette_ingredients_ingredient ON recette_ingredients(ingredient_id);
+CREATE INDEX IF NOT EXISTS ix_recette_ingredients_recette ON recette_ingredients(recette_id);
+CREATE INDEX IF NOT EXISTS ix_recette_ingredients_ingredient ON recette_ingredients(ingredient_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.06 ETAPES_RECETTE (→ recettes)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1235,7 +1235,7 @@ CREATE TABLE etapes_recette (
     CONSTRAINT fk_etapes_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE CASCADE,
     CONSTRAINT ck_ordre_positif CHECK (ordre > 0)
 );
-CREATE INDEX ix_etapes_recette_recette ON etapes_recette(recette_id);
+CREATE INDEX IF NOT EXISTS ix_etapes_recette_recette ON etapes_recette(recette_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.07 VERSIONS_RECETTE (→ recettes)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1251,8 +1251,8 @@ CREATE TABLE versions_recette (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_versions_recette FOREIGN KEY (recette_base_id) REFERENCES recettes(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_versions_recette_base ON versions_recette(recette_base_id);
-CREATE INDEX ix_versions_recette_type ON versions_recette(type_version);
+CREATE INDEX IF NOT EXISTS ix_versions_recette_base ON versions_recette(recette_base_id);
+CREATE INDEX IF NOT EXISTS ix_versions_recette_type ON versions_recette(type_version);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.08 HISTORIQUE_RECETTES (→ recettes)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1274,8 +1274,8 @@ CREATE TABLE historique_recettes (
     ),
     CONSTRAINT ck_portions_cuisinees_positive CHECK (portions_cuisinees > 0)
 );
-CREATE INDEX ix_historique_recettes_recette ON historique_recettes(recette_id);
-CREATE INDEX ix_historique_recettes_date ON historique_recettes(date_cuisson);
+CREATE INDEX IF NOT EXISTS ix_historique_recettes_recette ON historique_recettes(recette_id);
+CREATE INDEX IF NOT EXISTS ix_historique_recettes_date ON historique_recettes(date_cuisson);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.09 BATCH_MEALS (→ recettes)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1295,9 +1295,9 @@ CREATE TABLE repas_batch (
     CONSTRAINT fk_batch_meals_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE
     SET NULL
 );
-CREATE INDEX ix_batch_meals_recette ON repas_batch(recette_id);
-CREATE INDEX ix_batch_meals_date_prep ON repas_batch(date_preparation);
-CREATE INDEX ix_batch_meals_date_peremption ON repas_batch(date_peremption);
+CREATE INDEX IF NOT EXISTS ix_batch_meals_recette ON repas_batch(recette_id);
+CREATE INDEX IF NOT EXISTS ix_batch_meals_date_prep ON repas_batch(date_preparation);
+CREATE INDEX IF NOT EXISTS ix_batch_meals_date_peremption ON repas_batch(date_peremption);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.10 RECIPE_FEEDBACKS (→ recettes)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1312,9 +1312,9 @@ CREATE TABLE retours_recettes (
     CONSTRAINT fk_recipe_feedbacks_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE CASCADE,
     CONSTRAINT ck_feedback_type CHECK (feedback IN ('like', 'dislike', 'neutral'))
 );
-CREATE INDEX ix_recipe_feedbacks_user ON retours_recettes(user_id);
-CREATE INDEX ix_recipe_feedbacks_recette ON retours_recettes(recette_id);
-CREATE UNIQUE INDEX uq_user_recipe_feedback ON retours_recettes(user_id, recette_id);
+CREATE INDEX IF NOT EXISTS ix_recipe_feedbacks_user ON retours_recettes(user_id);
+CREATE INDEX IF NOT EXISTS ix_recipe_feedbacks_recette ON retours_recettes(recette_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_user_recipe_feedback ON retours_recettes(user_id, recette_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.11 INVENTAIRE (→ ingredients)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1335,13 +1335,13 @@ CREATE TABLE inventaire (
     CONSTRAINT ck_quantite_inventaire_positive CHECK (quantite >= 0),
     CONSTRAINT ck_seuil_positif CHECK (quantite_min >= 0)
 );
-CREATE UNIQUE INDEX uq_inventaire_ingredient ON inventaire(ingredient_id);
-CREATE INDEX ix_inventaire_ingredient ON inventaire(ingredient_id);
-CREATE INDEX ix_inventaire_emplacement ON inventaire(emplacement);
-CREATE INDEX ix_inventaire_peremption ON inventaire(date_peremption);
-CREATE INDEX ix_inventaire_derniere_maj ON inventaire(derniere_maj);
-CREATE UNIQUE INDEX uq_code_barres ON inventaire(code_barres);
-CREATE INDEX ix_inventaire_code_barres ON inventaire(code_barres);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_inventaire_ingredient ON inventaire(ingredient_id);
+CREATE INDEX IF NOT EXISTS ix_inventaire_ingredient ON inventaire(ingredient_id);
+CREATE INDEX IF NOT EXISTS ix_inventaire_emplacement ON inventaire(emplacement);
+CREATE INDEX IF NOT EXISTS ix_inventaire_peremption ON inventaire(date_peremption);
+CREATE INDEX IF NOT EXISTS ix_inventaire_derniere_maj ON inventaire(derniere_maj);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_code_barres ON inventaire(code_barres);
+CREATE INDEX IF NOT EXISTS ix_inventaire_code_barres ON inventaire(code_barres);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.12 HISTORIQUE_INVENTAIRE (→ inventaire, ingredients)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1364,10 +1364,10 @@ CREATE TABLE historique_inventaire (
     CONSTRAINT fk_hist_inv_article FOREIGN KEY (article_id) REFERENCES inventaire(id) ON DELETE CASCADE,
     CONSTRAINT fk_hist_inv_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_historique_inventaire_article ON historique_inventaire(article_id);
-CREATE INDEX ix_historique_inventaire_ingredient ON historique_inventaire(ingredient_id);
-CREATE INDEX ix_historique_inventaire_type ON historique_inventaire(type_modification);
-CREATE INDEX ix_historique_inventaire_date ON historique_inventaire(date_modification);
+CREATE INDEX IF NOT EXISTS ix_historique_inventaire_article ON historique_inventaire(article_id);
+CREATE INDEX IF NOT EXISTS ix_historique_inventaire_ingredient ON historique_inventaire(ingredient_id);
+CREATE INDEX IF NOT EXISTS ix_historique_inventaire_type ON historique_inventaire(type_modification);
+CREATE INDEX IF NOT EXISTS ix_historique_inventaire_date ON historique_inventaire(date_modification);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.13 LISTE_COURSES (articles) (→ listes_courses, ingredients)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1388,13 +1388,13 @@ CREATE TABLE liste_courses (
     CONSTRAINT fk_liste_courses_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE,
     CONSTRAINT ck_quantite_courses_positive CHECK (quantite_necessaire > 0)
 );
-CREATE INDEX ix_liste_courses_liste ON liste_courses(liste_id);
-CREATE INDEX ix_liste_courses_ingredient ON liste_courses(ingredient_id);
-CREATE INDEX ix_liste_courses_priorite ON liste_courses(priorite);
-CREATE INDEX ix_liste_courses_achete ON liste_courses(achete);
-CREATE INDEX ix_liste_courses_cree_le ON liste_courses(cree_le);
-CREATE INDEX ix_liste_courses_rayon ON liste_courses(rayon_magasin);
-CREATE INDEX ix_liste_courses_magasin ON liste_courses(magasin_cible);
+CREATE INDEX IF NOT EXISTS ix_liste_courses_liste ON liste_courses(liste_id);
+CREATE INDEX IF NOT EXISTS ix_liste_courses_ingredient ON liste_courses(ingredient_id);
+CREATE INDEX IF NOT EXISTS ix_liste_courses_priorite ON liste_courses(priorite);
+CREATE INDEX IF NOT EXISTS ix_liste_courses_achete ON liste_courses(achete);
+CREATE INDEX IF NOT EXISTS ix_liste_courses_cree_le ON liste_courses(cree_le);
+CREATE INDEX IF NOT EXISTS ix_liste_courses_rayon ON liste_courses(rayon_magasin);
+CREATE INDEX IF NOT EXISTS ix_liste_courses_magasin ON liste_courses(magasin_cible);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.14 ARTICLES_MODELES (→ modeles_courses, ingredients)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1418,8 +1418,8 @@ CREATE TABLE articles_modeles (
             priorite IN ('haute', 'moyenne', 'basse')
         )
 );
-CREATE INDEX ix_articles_modeles_modele ON articles_modeles(modele_id);
-CREATE INDEX ix_articles_modeles_ingredient ON articles_modeles(ingredient_id);
+CREATE INDEX IF NOT EXISTS ix_articles_modeles_modele ON articles_modeles(modele_id);
+CREATE INDEX IF NOT EXISTS ix_articles_modeles_ingredient ON articles_modeles(ingredient_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.15 REPAS (→ plannings, recettes)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1443,10 +1443,10 @@ CREATE TABLE repas (
             )
         )
 );
-CREATE INDEX ix_repas_planning ON repas(planning_id);
-CREATE INDEX ix_repas_recette ON repas(recette_id);
-CREATE INDEX ix_repas_date ON repas(date_repas);
-CREATE INDEX ix_repas_type ON repas(type_repas);
+CREATE INDEX IF NOT EXISTS ix_repas_planning ON repas(planning_id);
+CREATE INDEX IF NOT EXISTS ix_repas_recette ON repas(recette_id);
+CREATE INDEX IF NOT EXISTS ix_repas_date ON repas(date_repas);
+CREATE INDEX IF NOT EXISTS ix_repas_type ON repas(type_repas);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.16 TEMPLATE_ITEMS (→ templates_semaine)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1466,7 +1466,7 @@ CREATE TABLE elements_templates (
         AND jour_semaine <= 6
     )
 );
-CREATE INDEX idx_template_jour ON elements_templates(template_id, jour_semaine);
+CREATE INDEX IF NOT EXISTS idx_template_jour ON elements_templates(template_id, jour_semaine);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.17 WELLBEING_ENTRIES (→ profils_enfants)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1482,9 +1482,9 @@ CREATE TABLE entrees_bien_etre (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_wellbeing_child FOREIGN KEY (child_id) REFERENCES profils_enfants(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_wellbeing_child ON entrees_bien_etre(child_id);
-CREATE INDEX ix_wellbeing_username ON entrees_bien_etre(username);
-CREATE INDEX ix_wellbeing_date ON entrees_bien_etre(date);
+CREATE INDEX IF NOT EXISTS ix_wellbeing_child ON entrees_bien_etre(child_id);
+CREATE INDEX IF NOT EXISTS ix_wellbeing_username ON entrees_bien_etre(username);
+CREATE INDEX IF NOT EXISTS ix_wellbeing_date ON entrees_bien_etre(date);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.18 MILESTONES (→ profils_enfants)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1504,9 +1504,9 @@ CREATE TABLE jalons (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_milestones_child FOREIGN KEY (child_id) REFERENCES profils_enfants(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_milestones_child ON jalons(child_id);
-CREATE INDEX ix_milestones_categorie ON jalons(categorie);
-CREATE INDEX ix_milestones_date ON jalons(date_atteint);
+CREATE INDEX IF NOT EXISTS ix_milestones_child ON jalons(child_id);
+CREATE INDEX IF NOT EXISTS ix_milestones_categorie ON jalons(categorie);
+CREATE INDEX IF NOT EXISTS ix_milestones_date ON jalons(date_atteint);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.19 HEALTH_ENTRIES (→ routines_sante)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1540,8 +1540,8 @@ CREATE TABLE entrees_sante (
         )
     )
 );
-CREATE INDEX ix_health_entries_routine ON entrees_sante(routine_id);
-CREATE INDEX ix_health_entries_date ON entrees_sante(date);
+CREATE INDEX IF NOT EXISTS ix_health_entries_routine ON entrees_sante(routine_id);
+CREATE INDEX IF NOT EXISTS ix_health_entries_date ON entrees_sante(date);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.20 PROJECT_TASKS (→ projets)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1557,8 +1557,8 @@ CREATE TABLE taches_projets (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_project_tasks_project FOREIGN KEY (project_id) REFERENCES projets(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_project_tasks_project ON taches_projets(project_id);
-CREATE INDEX ix_project_tasks_statut ON taches_projets(statut);
+CREATE INDEX IF NOT EXISTS ix_project_tasks_project ON taches_projets(project_id);
+CREATE INDEX IF NOT EXISTS ix_project_tasks_statut ON taches_projets(statut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.21 ROUTINE_TASKS (→ routines)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1574,7 +1574,7 @@ CREATE TABLE taches_routines (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_routine_tasks_routine FOREIGN KEY (routine_id) REFERENCES routines(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_routine_tasks_routine ON taches_routines(routine_id);
+CREATE INDEX IF NOT EXISTS ix_routine_tasks_routine ON taches_routines(routine_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.22 GARDEN_LOGS (→ elements_jardin)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1587,8 +1587,8 @@ CREATE TABLE journaux_jardin (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_garden_logs_item FOREIGN KEY (garden_item_id) REFERENCES elements_jardin(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_garden_logs_item ON journaux_jardin(garden_item_id);
-CREATE INDEX ix_garden_logs_date ON journaux_jardin(date);
+CREATE INDEX IF NOT EXISTS ix_garden_logs_item ON journaux_jardin(garden_item_id);
+CREATE INDEX IF NOT EXISTS ix_garden_logs_date ON journaux_jardin(date);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.23 JEUX_MATCHS (→ jeux_equipes)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1679,9 +1679,9 @@ CREATE TABLE jeux_alertes (
     cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_jeux_alertes_serie FOREIGN KEY (serie_id) REFERENCES jeux_series(id) ON DELETE CASCADE
 );
-CREATE INDEX ix_jeux_alertes_notifie ON jeux_alertes(notifie)
+CREATE INDEX IF NOT EXISTS ix_jeux_alertes_notifie ON jeux_alertes(notifie)
 WHERE notifie = FALSE;
-CREATE INDEX ix_jeux_alertes_resultat ON jeux_alertes(resultat_verifie, resultat_correct);
+CREATE INDEX IF NOT EXISTS ix_jeux_alertes_resultat ON jeux_alertes(resultat_verifie, resultat_correct);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.27 SESSIONS_BATCH_COOKING (→ plannings)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1715,10 +1715,10 @@ CREATE TABLE sessions_batch_cooking (
         CONSTRAINT ck_session_portions_positive CHECK (nb_portions_preparees >= 0),
         CONSTRAINT ck_session_recettes_positive CHECK (nb_recettes_completees >= 0)
 );
-CREATE INDEX ix_sessions_batch_date ON sessions_batch_cooking(date_session);
-CREATE INDEX ix_sessions_batch_statut ON sessions_batch_cooking(statut);
-CREATE INDEX ix_sessions_batch_planning ON sessions_batch_cooking(planning_id);
-CREATE INDEX idx_session_date_statut ON sessions_batch_cooking(date_session, statut);
+CREATE INDEX IF NOT EXISTS ix_sessions_batch_date ON sessions_batch_cooking(date_session);
+CREATE INDEX IF NOT EXISTS ix_sessions_batch_statut ON sessions_batch_cooking(statut);
+CREATE INDEX IF NOT EXISTS ix_sessions_batch_planning ON sessions_batch_cooking(planning_id);
+CREATE INDEX IF NOT EXISTS idx_session_date_statut ON sessions_batch_cooking(date_session, statut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.28 ETAPES_BATCH_COOKING (→ sessions_batch_cooking, recettes)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1751,9 +1751,9 @@ CREATE TABLE etapes_batch_cooking (
             OR duree_reelle > 0
         )
 );
-CREATE INDEX ix_etapes_batch_session ON etapes_batch_cooking(session_id);
-CREATE INDEX ix_etapes_batch_recette ON etapes_batch_cooking(recette_id);
-CREATE INDEX idx_etape_session_ordre ON etapes_batch_cooking(session_id, ordre);
+CREATE INDEX IF NOT EXISTS ix_etapes_batch_session ON etapes_batch_cooking(session_id);
+CREATE INDEX IF NOT EXISTS ix_etapes_batch_recette ON etapes_batch_cooking(recette_id);
+CREATE INDEX IF NOT EXISTS idx_etape_session_ordre ON etapes_batch_cooking(session_id, ordre);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.29 PREPARATIONS_BATCH (→ sessions_batch_cooking, recettes)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1783,14 +1783,14 @@ CREATE TABLE preparations_batch (
         CONSTRAINT ck_prep_portions_initiales_positive CHECK (portions_initiales > 0),
         CONSTRAINT ck_prep_portions_restantes_positive CHECK (portions_restantes >= 0)
 );
-CREATE INDEX ix_prep_batch_session ON preparations_batch(session_id);
-CREATE INDEX ix_prep_batch_recette ON preparations_batch(recette_id);
-CREATE INDEX ix_prep_batch_date ON preparations_batch(date_preparation);
-CREATE INDEX ix_prep_batch_peremption ON preparations_batch(date_peremption);
-CREATE INDEX ix_prep_batch_localisation ON preparations_batch(localisation);
-CREATE INDEX ix_prep_batch_consomme ON preparations_batch(consomme);
-CREATE INDEX idx_prep_localisation_peremption ON preparations_batch(localisation, date_peremption);
-CREATE INDEX idx_prep_consomme_peremption ON preparations_batch(consomme, date_peremption);
+CREATE INDEX IF NOT EXISTS ix_prep_batch_session ON preparations_batch(session_id);
+CREATE INDEX IF NOT EXISTS ix_prep_batch_recette ON preparations_batch(recette_id);
+CREATE INDEX IF NOT EXISTS ix_prep_batch_date ON preparations_batch(date_preparation);
+CREATE INDEX IF NOT EXISTS ix_prep_batch_peremption ON preparations_batch(date_peremption);
+CREATE INDEX IF NOT EXISTS ix_prep_batch_localisation ON preparations_batch(localisation);
+CREATE INDEX IF NOT EXISTS ix_prep_batch_consomme ON preparations_batch(consomme);
+CREATE INDEX IF NOT EXISTS idx_prep_localisation_peremption ON preparations_batch(localisation, date_peremption);
+CREATE INDEX IF NOT EXISTS idx_prep_consomme_peremption ON preparations_batch(consomme, date_peremption);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.30 EVENEMENTS_CALENDRIER (→ calendriers_externes)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1812,9 +1812,9 @@ CREATE TABLE evenements_calendrier (
     CONSTRAINT fk_evenements_calendrier_source FOREIGN KEY (source_calendrier_id) REFERENCES calendriers_externes(id) ON DELETE
     SET NULL
 );
-CREATE INDEX ix_evenements_calendrier_date ON evenements_calendrier(date_debut);
-CREATE INDEX ix_evenements_calendrier_user ON evenements_calendrier(user_id);
-CREATE UNIQUE INDEX uq_event_uid_user ON evenements_calendrier(uid, user_id);
+CREATE INDEX IF NOT EXISTS ix_evenements_calendrier_date ON evenements_calendrier(date_debut);
+CREATE INDEX IF NOT EXISTS ix_evenements_calendrier_user ON evenements_calendrier(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_event_uid_user ON evenements_calendrier(uid, user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.31 ZONES_JARDIN (→ plans_jardin)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1839,8 +1839,8 @@ CREATE TABLE zones_jardin (
     CONSTRAINT fk_zones_jardin_plan_id FOREIGN KEY (plan_id) REFERENCES plans_jardin(id) ON DELETE
     SET NULL
 );
-CREATE INDEX idx_zones_jardin_type ON zones_jardin(type_zone);
-CREATE INDEX idx_zones_jardin_plan_id ON zones_jardin(plan_id);
+CREATE INDEX IF NOT EXISTS idx_zones_jardin_type ON zones_jardin(type_zone);
+CREATE INDEX IF NOT EXISTS idx_zones_jardin_plan_id ON zones_jardin(plan_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.32 PLANTES_JARDIN (→ zones_jardin)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1861,7 +1861,7 @@ CREATE TABLE plantes_jardin (
     updated_at TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_plantes_jardin_zone FOREIGN KEY (zone_id) REFERENCES zones_jardin(id) ON DELETE CASCADE
 );
-CREATE INDEX idx_plantes_jardin_zone ON plantes_jardin(zone_id);
+CREATE INDEX IF NOT EXISTS idx_plantes_jardin_zone ON plantes_jardin(zone_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.33 ACTIONS_PLANTES (→ plantes_jardin)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1875,9 +1875,9 @@ CREATE TABLE actions_plantes (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_actions_plantes_plante_id FOREIGN KEY (plante_id) REFERENCES plantes_jardin(id) ON DELETE CASCADE
 );
-CREATE INDEX idx_actions_plantes_plante_id ON actions_plantes(plante_id);
-CREATE INDEX idx_actions_plantes_type_action ON actions_plantes(type_action);
-CREATE INDEX idx_actions_plantes_date_action ON actions_plantes(date_action);
+CREATE INDEX IF NOT EXISTS idx_actions_plantes_plante_id ON actions_plantes(plante_id);
+CREATE INDEX IF NOT EXISTS idx_actions_plantes_type_action ON actions_plantes(type_action);
+CREATE INDEX IF NOT EXISTS idx_actions_plantes_date_action ON actions_plantes(date_action);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.34 OBJETS_MAISON (→ pieces_maison)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1898,9 +1898,9 @@ CREATE TABLE objets_maison (
     updated_at TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_objets_maison_piece FOREIGN KEY (piece_id) REFERENCES pieces_maison(id) ON DELETE CASCADE
 );
-CREATE INDEX idx_objets_maison_piece ON objets_maison(piece_id);
-CREATE INDEX idx_objets_maison_categorie ON objets_maison(categorie);
-CREATE INDEX idx_objets_maison_statut ON objets_maison(statut);
+CREATE INDEX IF NOT EXISTS idx_objets_maison_piece ON objets_maison(piece_id);
+CREATE INDEX IF NOT EXISTS idx_objets_maison_categorie ON objets_maison(categorie);
+CREATE INDEX IF NOT EXISTS idx_objets_maison_statut ON objets_maison(statut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.35 SESSIONS_TRAVAIL
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1936,10 +1936,10 @@ CREATE TABLE sessions_travail (
         )
     )
 );
-CREATE INDEX idx_sessions_travail_type ON sessions_travail(type_activite);
-CREATE INDEX idx_sessions_travail_zone ON sessions_travail(zone_jardin_id);
-CREATE INDEX idx_sessions_travail_piece ON sessions_travail(piece_id);
-CREATE INDEX idx_sessions_travail_type_debut ON sessions_travail(type_activite, debut);
+CREATE INDEX IF NOT EXISTS idx_sessions_travail_type ON sessions_travail(type_activite);
+CREATE INDEX IF NOT EXISTS idx_sessions_travail_zone ON sessions_travail(zone_jardin_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_travail_piece ON sessions_travail(piece_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_travail_type_debut ON sessions_travail(type_activite, debut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.36 VERSIONS_PIECES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1957,8 +1957,8 @@ CREATE TABLE versions_pieces (
     created_at TIMESTAMP DEFAULT NOW(),
     cree_par VARCHAR(100)
 );
-CREATE INDEX idx_versions_pieces_piece ON versions_pieces(piece_id);
-CREATE INDEX idx_versions_pieces_piece_version ON versions_pieces(piece_id, version);
+CREATE INDEX IF NOT EXISTS idx_versions_pieces_piece ON versions_pieces(piece_id);
+CREATE INDEX IF NOT EXISTS idx_versions_pieces_piece_version ON versions_pieces(piece_id, version);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.37 COUTS_TRAVAUX (→ versions_pieces)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1975,7 +1975,7 @@ CREATE TABLE couts_travaux (
     CONSTRAINT fk_couts_travaux_version FOREIGN KEY (version_id) REFERENCES versions_pieces(id) ON DELETE CASCADE,
     CONSTRAINT ck_cout_montant_positif CHECK (montant >= 0)
 );
-CREATE INDEX idx_couts_travaux_version ON couts_travaux(version_id);
+CREATE INDEX IF NOT EXISTS idx_couts_travaux_version ON couts_travaux(version_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.38 LOGS_STATUT_OBJETS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1992,7 +1992,7 @@ CREATE TABLE logs_statut_objets (
     date_changement TIMESTAMP DEFAULT NOW(),
     change_par VARCHAR(100)
 );
-CREATE INDEX idx_logs_statut_objet ON logs_statut_objets(objet_id);
+CREATE INDEX IF NOT EXISTS idx_logs_statut_objet ON logs_statut_objets(objet_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX VACCINS (→ profils_enfants) — Carnet de santé numérique
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2011,8 +2011,8 @@ CREATE TABLE vaccins (
     CONSTRAINT fk_vaccins_child FOREIGN KEY (child_id) REFERENCES profils_enfants(id) ON DELETE CASCADE,
     CONSTRAINT ck_vaccins_dose_positive CHECK (dose_numero > 0)
 );
-CREATE INDEX ix_vaccins_child ON vaccins(child_id);
-CREATE INDEX ix_vaccins_rappel ON vaccins(rappel_prevu);
+CREATE INDEX IF NOT EXISTS ix_vaccins_child ON vaccins(child_id);
+CREATE INDEX IF NOT EXISTS ix_vaccins_rappel ON vaccins(rappel_prevu);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX RENDEZ_VOUS_MEDICAUX — Suivi médical famille
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2032,9 +2032,9 @@ CREATE TABLE rendez_vous_medicaux (
     CONSTRAINT fk_rdv_child FOREIGN KEY (child_id) REFERENCES profils_enfants(id) ON DELETE
     SET NULL
 );
-CREATE INDEX ix_rdv_child ON rendez_vous_medicaux(child_id);
-CREATE INDEX ix_rdv_date ON rendez_vous_medicaux(date_rdv);
-CREATE INDEX ix_rdv_membre ON rendez_vous_medicaux(membre_famille);
+CREATE INDEX IF NOT EXISTS ix_rdv_child ON rendez_vous_medicaux(child_id);
+CREATE INDEX IF NOT EXISTS ix_rdv_date ON rendez_vous_medicaux(date_rdv);
+CREATE INDEX IF NOT EXISTS ix_rdv_membre ON rendez_vous_medicaux(membre_famille);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX MESURES_CROISSANCE (→ profils_enfants) — Courbes OMS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2059,8 +2059,8 @@ CREATE TABLE mesures_croissance (
         OR taille_cm > 0
     )
 );
-CREATE INDEX ix_croissance_child ON mesures_croissance(child_id);
-CREATE INDEX ix_croissance_date ON mesures_croissance(date_mesure);
+CREATE INDEX IF NOT EXISTS ix_croissance_child ON mesures_croissance(child_id);
+CREATE INDEX IF NOT EXISTS ix_croissance_date ON mesures_croissance(date_mesure);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX NORMES_OMS — Référentiel percentiles
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2079,7 +2079,7 @@ CREATE TABLE normes_oms (
         type_mesure IN ('poids', 'taille', 'perimetre_cranien')
     )
 );
-CREATE UNIQUE INDEX uq_normes_oms ON normes_oms(sexe, type_mesure, age_mois);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_normes_oms ON normes_oms(sexe, type_mesure, age_mois);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX CONTACTS_FAMILLE — Répertoire familial
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2107,8 +2107,8 @@ CREATE TABLE contacts_famille (
         )
     )
 );
-CREATE INDEX ix_contacts_categorie ON contacts_famille(categorie);
-CREATE INDEX ix_contacts_urgence ON contacts_famille(est_urgence)
+CREATE INDEX IF NOT EXISTS ix_contacts_categorie ON contacts_famille(categorie);
+CREATE INDEX IF NOT EXISTS ix_contacts_urgence ON contacts_famille(est_urgence)
 WHERE est_urgence = TRUE;
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX ANNIVERSAIRES_FAMILLE — Dates importantes et rappels
@@ -2124,7 +2124,7 @@ CREATE TABLE anniversaires_famille (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_anniversaires_date ON anniversaires_famille(date_naissance);
+CREATE INDEX IF NOT EXISTS ix_anniversaires_date ON anniversaires_famille(date_naissance);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX EVENEMENTS_FAMILIAUX — Calendrier partagé
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2157,8 +2157,8 @@ CREATE TABLE evenements_familiaux (
         OR date_fin >= date_debut
     )
 );
-CREATE INDEX ix_evenements_date_debut ON evenements_familiaux(date_debut);
-CREATE INDEX ix_evenements_type ON evenements_familiaux(type_evenement);
+CREATE INDEX IF NOT EXISTS ix_evenements_date_debut ON evenements_familiaux(date_debut);
+CREATE INDEX IF NOT EXISTS ix_evenements_type ON evenements_familiaux(type_evenement);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX VOYAGES — Mode voyage famille
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2181,8 +2181,8 @@ CREATE TABLE voyages (
         statut IN ('planifie', 'en_cours', 'termine', 'annule')
     )
 );
-CREATE INDEX ix_voyages_depart ON voyages(date_depart);
-CREATE INDEX ix_voyages_statut ON voyages(statut);
+CREATE INDEX IF NOT EXISTS ix_voyages_depart ON voyages(date_depart);
+CREATE INDEX IF NOT EXISTS ix_voyages_statut ON voyages(statut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX TEMPLATES_CHECKLIST — Templates de checklists réutilisables
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2195,7 +2195,7 @@ CREATE TABLE templates_checklist (
     est_defaut BOOLEAN NOT NULL DEFAULT FALSE,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_templates_type ON templates_checklist(type_voyage);
+CREATE INDEX IF NOT EXISTS ix_templates_type ON templates_checklist(type_voyage);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX CHECKLISTS_VOYAGE (→ voyages, templates_checklist)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2211,7 +2211,7 @@ CREATE TABLE checklists_voyage (
     CONSTRAINT fk_checklist_template FOREIGN KEY (template_id) REFERENCES templates_checklist(id) ON DELETE
     SET NULL
 );
-CREATE INDEX ix_checklists_voyage ON checklists_voyage(voyage_id);
+CREATE INDEX IF NOT EXISTS ix_checklists_voyage ON checklists_voyage(voyage_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX DOCUMENTS_FAMILLE — Coffre-fort numérique
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2237,10 +2237,10 @@ CREATE TABLE documents_famille (
         )
     )
 );
-CREATE INDEX ix_documents_type ON documents_famille(type_document);
-CREATE INDEX ix_documents_expiration ON documents_famille(date_expiration)
+CREATE INDEX IF NOT EXISTS ix_documents_type ON documents_famille(type_document);
+CREATE INDEX IF NOT EXISTS ix_documents_expiration ON documents_famille(date_expiration)
 WHERE date_expiration IS NOT NULL;
-CREATE INDEX ix_documents_membre ON documents_famille(membre_famille);
+CREATE INDEX IF NOT EXISTS ix_documents_membre ON documents_famille(membre_famille);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX ALBUMS_FAMILLE — Albums souvenirs
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2253,7 +2253,7 @@ CREATE TABLE albums_famille (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_albums_type ON albums_famille(type_album);
+CREATE INDEX IF NOT EXISTS ix_albums_type ON albums_famille(type_album);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX SOUVENIRS_FAMILLE (→ albums_famille, jalons)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2273,9 +2273,9 @@ CREATE TABLE souvenirs_famille (
         CONSTRAINT fk_souvenir_jalon FOREIGN KEY (jalon_id) REFERENCES jalons(id) ON DELETE
     SET NULL
 );
-CREATE INDEX ix_souvenirs_album ON souvenirs_famille(album_id);
-CREATE INDEX ix_souvenirs_jalon ON souvenirs_famille(jalon_id);
-CREATE INDEX ix_souvenirs_date ON souvenirs_famille(date_souvenir);
+CREATE INDEX IF NOT EXISTS ix_souvenirs_album ON souvenirs_famille(album_id);
+CREATE INDEX IF NOT EXISTS ix_souvenirs_jalon ON souvenirs_famille(jalon_id);
+CREATE INDEX IF NOT EXISTS ix_souvenirs_date ON souvenirs_famille(date_souvenir);
 -- ============================================================================
 -- PARTIE 5 : TABLES HUB MAISON (sans modèles ORM — migration 020)
 -- ============================================================================
@@ -2338,10 +2338,10 @@ CREATE TABLE taches_home (
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-CREATE INDEX idx_taches_home_domaine ON taches_home(domaine);
-CREATE INDEX idx_taches_home_statut ON taches_home(statut);
-CREATE INDEX idx_taches_home_date_due ON taches_home(date_due);
-CREATE INDEX idx_taches_home_source ON taches_home(source, source_id);
+CREATE INDEX IF NOT EXISTS idx_taches_home_domaine ON taches_home(domaine);
+CREATE INDEX IF NOT EXISTS idx_taches_home_statut ON taches_home(statut);
+CREATE INDEX IF NOT EXISTS idx_taches_home_date_due ON taches_home(date_due);
+CREATE INDEX IF NOT EXISTS idx_taches_home_source ON taches_home(source, source_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.03 STATS_HOME
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2366,7 +2366,7 @@ CREATE TABLE stats_home (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(date, domaine)
 );
-CREATE INDEX idx_stats_home_date ON stats_home(date);
+CREATE INDEX IF NOT EXISTS idx_stats_home_date ON stats_home(date);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.04 PLANTES_CATALOGUE
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2396,7 +2396,7 @@ CREATE TABLE plantes_catalogue (
     besoin_famille_4_kg_an DECIMAL(6, 2),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-CREATE INDEX idx_plantes_catalogue_famille ON plantes_catalogue(famille);
+CREATE INDEX IF NOT EXISTS idx_plantes_catalogue_famille ON plantes_catalogue(famille);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.05 RECOLTES (→ plantes_jardin, zones_jardin)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2416,8 +2416,8 @@ CREATE TABLE recoltes (
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-CREATE INDEX idx_recoltes_date ON recoltes(date_recolte);
-CREATE INDEX idx_recoltes_legume ON recoltes(legume);
+CREATE INDEX IF NOT EXISTS idx_recoltes_date ON recoltes(date_recolte);
+CREATE INDEX IF NOT EXISTS idx_recoltes_legume ON recoltes(legume);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.06 OBJECTIFS_AUTONOMIE
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2475,8 +2475,8 @@ CREATE TABLE contrats (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-CREATE INDEX idx_contrats_type ON contrats(type_contrat);
-CREATE INDEX idx_contrats_actif ON contrats(actif);
+CREATE INDEX IF NOT EXISTS idx_contrats_type ON contrats(type_contrat);
+CREATE INDEX IF NOT EXISTS idx_contrats_actif ON contrats(actif);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.08 FACTURES (→ contrats)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2497,9 +2497,9 @@ CREATE TABLE factures (
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-CREATE INDEX idx_factures_contrat ON factures(contrat_id);
-CREATE INDEX idx_factures_date ON factures(date_facture);
-CREATE INDEX idx_factures_payee ON factures(payee);
+CREATE INDEX IF NOT EXISTS idx_factures_contrat ON factures(contrat_id);
+CREATE INDEX IF NOT EXISTS idx_factures_date ON factures(date_facture);
+CREATE INDEX IF NOT EXISTS idx_factures_payee ON factures(payee);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.09 COMPARATIFS (→ contrats)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2548,8 +2548,8 @@ CREATE TABLE depenses_home (
     SET NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-CREATE INDEX idx_depenses_home_date ON depenses_home(date_depense);
-CREATE INDEX idx_depenses_home_categorie ON depenses_home(categorie);
+CREATE INDEX IF NOT EXISTS idx_depenses_home_date ON depenses_home(date_depense);
+CREATE INDEX IF NOT EXISTS idx_depenses_home_categorie ON depenses_home(categorie);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.11 BUDGETS_HOME
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2600,7 +2600,7 @@ CREATE TABLE jeux_tirages_euromillions (
     cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE (date_tirage)
 );
-CREATE INDEX idx_tirages_euromillions_date ON jeux_tirages_euromillions(date_tirage DESC);
+CREATE INDEX IF NOT EXISTS idx_tirages_euromillions_date ON jeux_tirages_euromillions(date_tirage DESC);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5B.02 JEUX_GRILLES_EUROMILLIONS (→ jeux_tirages_euromillions)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2617,8 +2617,8 @@ CREATE TABLE jeux_grilles_euromillions (
         est_virtuelle BOOLEAN DEFAULT TRUE,
         cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-CREATE INDEX idx_grilles_euromillions_tirage ON jeux_grilles_euromillions(tirage_id);
-CREATE INDEX idx_grilles_euromillions_date ON jeux_grilles_euromillions(cree_le DESC);
+CREATE INDEX IF NOT EXISTS idx_grilles_euromillions_tirage ON jeux_grilles_euromillions(tirage_id);
+CREATE INDEX IF NOT EXISTS idx_grilles_euromillions_date ON jeux_grilles_euromillions(cree_le DESC);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5B.03 JEUX_STATS_EUROMILLIONS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2649,9 +2649,9 @@ CREATE TABLE jeux_cotes_historique (
     donnees_json JSONB,
     timestamp_cote TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-CREATE INDEX idx_cotes_hist_match ON jeux_cotes_historique(match_id);
-CREATE INDEX idx_cotes_hist_timestamp ON jeux_cotes_historique(timestamp_cote DESC);
-CREATE INDEX idx_cotes_hist_bookmaker ON jeux_cotes_historique(bookmaker);
+CREATE INDEX IF NOT EXISTS idx_cotes_hist_match ON jeux_cotes_historique(match_id);
+CREATE INDEX IF NOT EXISTS idx_cotes_hist_timestamp ON jeux_cotes_historique(timestamp_cote DESC);
+CREATE INDEX IF NOT EXISTS idx_cotes_hist_bookmaker ON jeux_cotes_historique(bookmaker);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5B.05 JEUX_MISE_RESPONSABLE
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2674,7 +2674,7 @@ CREATE TABLE jeux_mise_responsable (
     modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE (mois)
 );
-CREATE INDEX idx_mise_responsable_mois ON jeux_mise_responsable(mois DESC);
+CREATE INDEX IF NOT EXISTS idx_mise_responsable_mois ON jeux_mise_responsable(mois DESC);
 -- ============================================================================
 -- PARTIE 5C : TABLES MAISON EXTENSIONS (contrats, artisans, garanties, etc.)
 -- ============================================================================
@@ -2708,9 +2708,9 @@ CREATE TABLE contrats_maison (
     cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_contrats_maison_type ON contrats_maison(type_contrat);
-CREATE INDEX ix_contrats_maison_statut ON contrats_maison(statut);
-CREATE INDEX ix_contrats_maison_renouvellement ON contrats_maison(date_renouvellement);
+CREATE INDEX IF NOT EXISTS ix_contrats_maison_type ON contrats_maison(type_contrat);
+CREATE INDEX IF NOT EXISTS ix_contrats_maison_statut ON contrats_maison(statut);
+CREATE INDEX IF NOT EXISTS ix_contrats_maison_renouvellement ON contrats_maison(date_renouvellement);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.02 ARTISANS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2735,7 +2735,7 @@ CREATE TABLE artisans (
     cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_artisans_metier ON artisans(metier);
+CREATE INDEX IF NOT EXISTS ix_artisans_metier ON artisans(metier);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.03 INTERVENTIONS_ARTISANS (→ artisans)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2754,7 +2754,7 @@ CREATE TABLE interventions_artisans (
     cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_interventions_artisans_artisan ON interventions_artisans(artisan_id);
+CREATE INDEX IF NOT EXISTS ix_interventions_artisans_artisan ON interventions_artisans(artisan_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.04 GARANTIES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2781,9 +2781,9 @@ CREATE TABLE garanties (
     cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_garanties_piece ON garanties(piece);
-CREATE INDEX ix_garanties_fin ON garanties(date_fin_garantie);
-CREATE INDEX ix_garanties_statut ON garanties(statut);
+CREATE INDEX IF NOT EXISTS ix_garanties_piece ON garanties(piece);
+CREATE INDEX IF NOT EXISTS ix_garanties_fin ON garanties(date_fin_garantie);
+CREATE INDEX IF NOT EXISTS ix_garanties_statut ON garanties(statut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.05 INCIDENTS_SAV (→ garanties, artisans)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2803,8 +2803,8 @@ CREATE TABLE incidents_sav (
     cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_incidents_sav_garantie ON incidents_sav(garantie_id);
-CREATE INDEX ix_incidents_sav_statut ON incidents_sav(statut);
+CREATE INDEX IF NOT EXISTS ix_incidents_sav_garantie ON incidents_sav(garantie_id);
+CREATE INDEX IF NOT EXISTS ix_incidents_sav_statut ON incidents_sav(statut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.06 ARTICLES_CELLIER
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2827,9 +2827,9 @@ CREATE TABLE articles_cellier (
     cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_articles_cellier_categorie ON articles_cellier(categorie);
-CREATE INDEX ix_articles_cellier_code_barres ON articles_cellier(code_barres);
-CREATE INDEX ix_articles_cellier_dlc ON articles_cellier(dlc);
+CREATE INDEX IF NOT EXISTS ix_articles_cellier_categorie ON articles_cellier(categorie);
+CREATE INDEX IF NOT EXISTS ix_articles_cellier_code_barres ON articles_cellier(code_barres);
+CREATE INDEX IF NOT EXISTS ix_articles_cellier_dlc ON articles_cellier(dlc);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.07 DIAGNOSTICS_MAISON
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2856,8 +2856,8 @@ CREATE TABLE diagnostics_maison (
     cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_diagnostics_type ON diagnostics_maison(type_diagnostic);
-CREATE INDEX ix_diagnostics_validite ON diagnostics_maison(date_validite);
+CREATE INDEX IF NOT EXISTS ix_diagnostics_type ON diagnostics_maison(type_diagnostic);
+CREATE INDEX IF NOT EXISTS ix_diagnostics_validite ON diagnostics_maison(date_validite);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.08 ESTIMATIONS_IMMOBILIERES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2899,7 +2899,7 @@ CREATE TABLE checklists_vacances (
     cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_checklists_type_voyage ON checklists_vacances(type_voyage);
+CREATE INDEX IF NOT EXISTS ix_checklists_type_voyage ON checklists_vacances(type_voyage);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.10 ITEMS_CHECKLIST (→ checklists_vacances)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2916,7 +2916,7 @@ CREATE TABLE items_checklist (
     cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_items_checklist_checklist ON items_checklist(checklist_id);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_checklist ON items_checklist(checklist_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.11 TRAITEMENTS_NUISIBLES (→ artisans)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2941,8 +2941,8 @@ CREATE TABLE traitements_nuisibles (
     cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_traitements_type ON traitements_nuisibles(type_nuisible);
-CREATE INDEX ix_traitements_prochain ON traitements_nuisibles(date_prochain_traitement);
+CREATE INDEX IF NOT EXISTS ix_traitements_type ON traitements_nuisibles(type_nuisible);
+CREATE INDEX IF NOT EXISTS ix_traitements_prochain ON traitements_nuisibles(date_prochain_traitement);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.12 DEVIS_COMPARATIFS (→ projets, artisans)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2969,9 +2969,9 @@ CREATE TABLE devis_comparatifs (
     cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_devis_projet ON devis_comparatifs(projet_id);
-CREATE INDEX ix_devis_artisan ON devis_comparatifs(artisan_id);
-CREATE INDEX ix_devis_statut ON devis_comparatifs(statut);
+CREATE INDEX IF NOT EXISTS ix_devis_projet ON devis_comparatifs(projet_id);
+CREATE INDEX IF NOT EXISTS ix_devis_artisan ON devis_comparatifs(artisan_id);
+CREATE INDEX IF NOT EXISTS ix_devis_statut ON devis_comparatifs(statut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.13 LIGNES_DEVIS (→ devis_comparatifs)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2986,7 +2986,7 @@ CREATE TABLE lignes_devis (
     type_ligne VARCHAR(30) DEFAULT 'fourniture',
     cree_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_lignes_devis_devis ON lignes_devis(devis_id);
+CREATE INDEX IF NOT EXISTS ix_lignes_devis_devis ON lignes_devis(devis_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.14 ENTRETIENS_SAISONNIERS (→ artisans)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -3013,9 +3013,9 @@ CREATE TABLE entretiens_saisonniers (
     cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_entretiens_saisonniers_categorie ON entretiens_saisonniers(categorie);
-CREATE INDEX ix_entretiens_saisonniers_saison ON entretiens_saisonniers(saison);
-CREATE INDEX ix_entretiens_saisonniers_prochaine ON entretiens_saisonniers(date_prochaine);
+CREATE INDEX IF NOT EXISTS ix_entretiens_saisonniers_categorie ON entretiens_saisonniers(categorie);
+CREATE INDEX IF NOT EXISTS ix_entretiens_saisonniers_saison ON entretiens_saisonniers(saison);
+CREATE INDEX IF NOT EXISTS ix_entretiens_saisonniers_prochaine ON entretiens_saisonniers(date_prochaine);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.15 RELEVES_COMPTEURS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -3036,8 +3036,8 @@ CREATE TABLE releves_compteurs (
     notes TEXT,
     cree_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE INDEX ix_releves_type ON releves_compteurs(type_compteur);
-CREATE INDEX ix_releves_date ON releves_compteurs(date_releve);
+CREATE INDEX IF NOT EXISTS ix_releves_type ON releves_compteurs(type_compteur);
+CREATE INDEX IF NOT EXISTS ix_releves_date ON releves_compteurs(date_releve);
 -- ============================================================================
 -- PARTIE 5D : TABLES UTILITAIRES (notes, journal, contacts, liens, etc.)
 -- ============================================================================
@@ -3056,10 +3056,10 @@ CREATE TABLE notes_memos (
     cree_le TIMESTAMPTZ DEFAULT NOW(),
     modifie_le TIMESTAMPTZ DEFAULT NOW()
 );
-CREATE INDEX idx_notes_memos_categorie ON notes_memos(categorie);
-CREATE INDEX idx_notes_memos_epingle ON notes_memos(epingle)
+CREATE INDEX IF NOT EXISTS idx_notes_memos_categorie ON notes_memos(categorie);
+CREATE INDEX IF NOT EXISTS idx_notes_memos_epingle ON notes_memos(epingle)
 WHERE epingle = TRUE;
-CREATE INDEX idx_notes_memos_archive ON notes_memos(archive);
+CREATE INDEX IF NOT EXISTS idx_notes_memos_archive ON notes_memos(archive);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5D.02 JOURNAL_BORD
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -3076,7 +3076,7 @@ CREATE TABLE journal_bord (
     cree_le TIMESTAMPTZ DEFAULT NOW(),
     modifie_le TIMESTAMPTZ DEFAULT NOW()
 );
-CREATE INDEX idx_journal_date ON journal_bord(date_entree DESC);
+CREATE INDEX IF NOT EXISTS idx_journal_date ON journal_bord(date_entree DESC);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5D.03 CONTACTS_UTILES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -3092,8 +3092,8 @@ CREATE TABLE contacts_utiles (
     cree_le TIMESTAMPTZ DEFAULT NOW(),
     modifie_le TIMESTAMPTZ DEFAULT NOW()
 );
-CREATE INDEX idx_contacts_utiles_categorie ON contacts_utiles(categorie);
-CREATE INDEX idx_contacts_utiles_nom ON contacts_utiles(nom);
+CREATE INDEX IF NOT EXISTS idx_contacts_utiles_categorie ON contacts_utiles(categorie);
+CREATE INDEX IF NOT EXISTS idx_contacts_utiles_nom ON contacts_utiles(nom);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5D.04 LIENS_FAVORIS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -3107,7 +3107,7 @@ CREATE TABLE liens_favoris (
     cree_le TIMESTAMPTZ DEFAULT NOW(),
     modifie_le TIMESTAMPTZ DEFAULT NOW()
 );
-CREATE INDEX idx_liens_categorie ON liens_favoris(categorie);
+CREATE INDEX IF NOT EXISTS idx_liens_categorie ON liens_favoris(categorie);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5D.05 MOTS_DE_PASSE_MAISON
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -3121,7 +3121,7 @@ CREATE TABLE mots_de_passe_maison (
     cree_le TIMESTAMPTZ DEFAULT NOW(),
     modifie_le TIMESTAMPTZ DEFAULT NOW()
 );
-CREATE INDEX idx_mdp_categorie ON mots_de_passe_maison(categorie);
+CREATE INDEX IF NOT EXISTS idx_mdp_categorie ON mots_de_passe_maison(categorie);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5D.06 PRESSE_PAPIER_ENTREES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -3131,7 +3131,7 @@ CREATE TABLE presse_papier_entrees (
     auteur VARCHAR(100),
     cree_le TIMESTAMPTZ DEFAULT NOW()
 );
-CREATE INDEX idx_pp_cree_le ON presse_papier_entrees(cree_le DESC);
+CREATE INDEX IF NOT EXISTS idx_pp_cree_le ON presse_papier_entrees(cree_le DESC);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5D.07 RELEVES_ENERGIE
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -3145,8 +3145,8 @@ CREATE TABLE releves_energie (
     cree_le TIMESTAMPTZ DEFAULT NOW(),
     modifie_le TIMESTAMPTZ DEFAULT NOW()
 );
-CREATE INDEX idx_energie_categorie ON releves_energie(categorie);
-CREATE INDEX idx_energie_date ON releves_energie(date_releve DESC);
+CREATE INDEX IF NOT EXISTS idx_energie_categorie ON releves_energie(categorie);
+CREATE INDEX IF NOT EXISTS idx_energie_date ON releves_energie(date_releve DESC);
 -- ============================================================================
 -- PARTIE 6 : TRIGGERS (modifie_le / updated_at)
 -- ============================================================================
@@ -3592,72 +3592,451 @@ VALUES ('Tomate', 40.00, 8.00),
     ('Oignon', 10.00, 2.00),
     ('Ail', 3.00, 1.00),
     ('Fraise', 10.00, 4.00) ON CONFLICT (legume) DO NOTHING;
-
 -- Mise responsable par défaut (mois courant)
 INSERT INTO jeux_mise_responsable (mois, limite_mensuelle)
-VALUES (DATE_TRUNC('month', CURRENT_DATE)::DATE, 50.00)
-ON CONFLICT (mois) DO NOTHING;
-
+VALUES (DATE_TRUNC('month', CURRENT_DATE)::DATE, 50.00) ON CONFLICT (mois) DO NOTHING;
 -- Entretiens saisonniers prédéfinis
-INSERT INTO entretiens_saisonniers (nom, description, categorie, saison, mois_recommande, mois_rappel, frequence, professionnel_requis, obligatoire, cout_estime, duree_minutes) VALUES
--- AUTOMNE
-('Entretien chaudière', 'Visite annuelle obligatoire de la chaudière gaz/fioul', 'chauffage', 'automne', 9, 8, 'annuel', TRUE, TRUE, 150.00, 60),
-('Ramonage cheminée', 'Ramonage obligatoire des conduits de fumée (1 à 2 fois/an)', 'chauffage', 'automne', 10, 9, 'annuel', TRUE, TRUE, 80.00, 45),
-('Purge des radiateurs', 'Purger les radiateurs avant mise en route du chauffage', 'chauffage', 'automne', 10, 9, 'annuel', FALSE, FALSE, 0.00, 30),
-('Nettoyage gouttières', 'Retirer les feuilles mortes des gouttières', 'toiture', 'automne', 11, 10, 'semestriel', FALSE, FALSE, 0.00, 60),
-('Vérification toiture', 'Contrôle visuel tuiles/ardoises, étanchéité', 'toiture', 'automne', 10, 9, 'annuel', FALSE, FALSE, 0.00, 30),
-('Isolation fenêtres', 'Vérifier joints fenêtres, calfeutrage si nécessaire', 'isolation', 'automne', 10, 9, 'annuel', FALSE, FALSE, 20.00, 60),
-('Rentrer plantes fragiles', 'Mettre à l''abri les plantes gélives', 'jardin', 'automne', 10, 9, 'annuel', FALSE, FALSE, 0.00, 30),
-('Préparer la tondeuse (hivernage)', 'Vidanger, nettoyer, ranger la tondeuse pour l''hiver', 'jardin', 'automne', 11, 10, 'annuel', FALSE, FALSE, 0.00, 45),
--- HIVER
-('Vérification détecteurs fumée', 'Tester les détecteurs, changer les piles si besoin', 'securite', 'hiver', 1, 12, 'semestriel', FALSE, TRUE, 10.00, 15),
-('Contrôle VMC', 'Nettoyage bouches VMC et vérification fonctionnement', 'ventilation', 'hiver', 1, 12, 'annuel', FALSE, FALSE, 0.00, 30),
-('Couper eau extérieure', 'Fermer les robinets extérieurs et purger pour éviter le gel', 'plomberie', 'hiver', 12, 11, 'annuel', FALSE, FALSE, 0.00, 15),
-('Vérifier isolation combles', 'Contrôle visuel isolation toiture/combles', 'isolation', 'hiver', 1, 12, 'annuel', FALSE, FALSE, 0.00, 30),
--- PRINTEMPS
-('Entretien climatisation', 'Nettoyage filtres et vérification avant été', 'climatisation', 'printemps', 4, 3, 'annuel', FALSE, FALSE, 0.00, 30),
-('Nettoyage terrasse', 'Nettoyage haute pression terrasse, dalles, mobilier', 'exterieur', 'printemps', 4, 3, 'annuel', FALSE, FALSE, 0.00, 120),
-('Révision tondeuse', 'Remise en service tondeuse, affûtage lame, huile', 'jardin', 'printemps', 3, 2, 'annuel', FALSE, FALSE, 15.00, 30),
-('Vernissage/traitement bois extérieur', 'Traitement mobilier jardin, clôtures, portail bois', 'exterieur', 'printemps', 4, 3, 'annuel', FALSE, FALSE, 50.00, 180),
-('Vérification étanchéité toiture', 'Post-hiver: contrôle fuites après gel/neige', 'toiture', 'printemps', 3, 2, 'annuel', FALSE, FALSE, 0.00, 30),
-('Nettoyage gouttières (printemps)', 'Second nettoyage annuel des gouttières', 'toiture', 'printemps', 4, 3, 'semestriel', FALSE, FALSE, 0.00, 60),
-('Traitement anti-mousse toiture', 'Application produit anti-mousse sur tuiles', 'toiture', 'printemps', 4, 3, 'annuel', FALSE, FALSE, 40.00, 120),
-('Remettre eau extérieure', 'Réouvrir robinets extérieurs après risque gel', 'plomberie', 'printemps', 3, 2, 'annuel', FALSE, FALSE, 0.00, 10),
--- ÉTÉ
-('Entretien portail automatique', 'Graissage, vérification cellules, télécommandes', 'exterieur', 'ete', 6, 5, 'annuel', FALSE, FALSE, 0.00, 30),
-('Contrôle extincteurs', 'Vérification pression, date péremption', 'securite', 'ete', 6, 5, 'annuel', FALSE, FALSE, 0.00, 15),
-('Traitement bois charpente', 'Traitement préventif anti-insectes xylophages', 'toiture', 'ete', 7, 6, 'annuel', TRUE, FALSE, 200.00, 240),
-('Vérification tableau électrique', 'Contrôle visuel disjoncteurs, test différentiel', 'electricite', 'ete', 6, 5, 'annuel', FALSE, FALSE, 0.00, 20),
-('Nettoyage chauffe-eau', 'Vidange partielle et détartrage', 'plomberie', 'ete', 7, 6, 'annuel', FALSE, FALSE, 0.00, 45),
--- TOUTE L'ANNÉE
-('Relevé compteurs eau', 'Relevé index compteurs pour suivi consommation', 'plomberie', 'toute_annee', NULL, NULL, 'trimestriel', FALSE, FALSE, 0.00, 5),
-('Test alarme', 'Tester le système d''alarme et changer piles détecteurs', 'securite', 'toute_annee', NULL, NULL, 'trimestriel', FALSE, FALSE, 0.00, 15),
-('Contrôle pression chaudière', 'Vérifier entre 1 et 1.5 bar', 'chauffage', 'toute_annee', NULL, NULL, 'trimestriel', FALSE, FALSE, 0.00, 5),
-('Nettoyage filtres aspirateur', 'Nettoyer/remplacer les filtres', 'menage', 'toute_annee', NULL, NULL, 'trimestriel', FALSE, FALSE, 10.00, 15),
-('Vérification joints salle de bain', 'Contrôle moisissures, étanchéité joints silicone', 'plomberie', 'toute_annee', NULL, NULL, 'semestriel', FALSE, FALSE, 15.00, 20)
-ON CONFLICT DO NOTHING;
-
+INSERT INTO entretiens_saisonniers (
+        nom,
+        description,
+        categorie,
+        saison,
+        mois_recommande,
+        mois_rappel,
+        frequence,
+        professionnel_requis,
+        obligatoire,
+        cout_estime,
+        duree_minutes
+    )
+VALUES -- AUTOMNE
+    (
+        'Entretien chaudière',
+        'Visite annuelle obligatoire de la chaudière gaz/fioul',
+        'chauffage',
+        'automne',
+        9,
+        8,
+        'annuel',
+        TRUE,
+        TRUE,
+        150.00,
+        60
+    ),
+    (
+        'Ramonage cheminée',
+        'Ramonage obligatoire des conduits de fumée (1 à 2 fois/an)',
+        'chauffage',
+        'automne',
+        10,
+        9,
+        'annuel',
+        TRUE,
+        TRUE,
+        80.00,
+        45
+    ),
+    (
+        'Purge des radiateurs',
+        'Purger les radiateurs avant mise en route du chauffage',
+        'chauffage',
+        'automne',
+        10,
+        9,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        30
+    ),
+    (
+        'Nettoyage gouttières',
+        'Retirer les feuilles mortes des gouttières',
+        'toiture',
+        'automne',
+        11,
+        10,
+        'semestriel',
+        FALSE,
+        FALSE,
+        0.00,
+        60
+    ),
+    (
+        'Vérification toiture',
+        'Contrôle visuel tuiles/ardoises, étanchéité',
+        'toiture',
+        'automne',
+        10,
+        9,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        30
+    ),
+    (
+        'Isolation fenêtres',
+        'Vérifier joints fenêtres, calfeutrage si nécessaire',
+        'isolation',
+        'automne',
+        10,
+        9,
+        'annuel',
+        FALSE,
+        FALSE,
+        20.00,
+        60
+    ),
+    (
+        'Rentrer plantes fragiles',
+        'Mettre à l''abri les plantes gélives',
+        'jardin',
+        'automne',
+        10,
+        9,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        30
+    ),
+    (
+        'Préparer la tondeuse (hivernage)',
+        'Vidanger, nettoyer, ranger la tondeuse pour l''hiver',
+        'jardin',
+        'automne',
+        11,
+        10,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        45
+    ),
+    -- HIVER
+    (
+        'Vérification détecteurs fumée',
+        'Tester les détecteurs, changer les piles si besoin',
+        'securite',
+        'hiver',
+        1,
+        12,
+        'semestriel',
+        FALSE,
+        TRUE,
+        10.00,
+        15
+    ),
+    (
+        'Contrôle VMC',
+        'Nettoyage bouches VMC et vérification fonctionnement',
+        'ventilation',
+        'hiver',
+        1,
+        12,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        30
+    ),
+    (
+        'Couper eau extérieure',
+        'Fermer les robinets extérieurs et purger pour éviter le gel',
+        'plomberie',
+        'hiver',
+        12,
+        11,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        15
+    ),
+    (
+        'Vérifier isolation combles',
+        'Contrôle visuel isolation toiture/combles',
+        'isolation',
+        'hiver',
+        1,
+        12,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        30
+    ),
+    -- PRINTEMPS
+    (
+        'Entretien climatisation',
+        'Nettoyage filtres et vérification avant été',
+        'climatisation',
+        'printemps',
+        4,
+        3,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        30
+    ),
+    (
+        'Nettoyage terrasse',
+        'Nettoyage haute pression terrasse, dalles, mobilier',
+        'exterieur',
+        'printemps',
+        4,
+        3,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        120
+    ),
+    (
+        'Révision tondeuse',
+        'Remise en service tondeuse, affûtage lame, huile',
+        'jardin',
+        'printemps',
+        3,
+        2,
+        'annuel',
+        FALSE,
+        FALSE,
+        15.00,
+        30
+    ),
+    (
+        'Vernissage/traitement bois extérieur',
+        'Traitement mobilier jardin, clôtures, portail bois',
+        'exterieur',
+        'printemps',
+        4,
+        3,
+        'annuel',
+        FALSE,
+        FALSE,
+        50.00,
+        180
+    ),
+    (
+        'Vérification étanchéité toiture',
+        'Post-hiver: contrôle fuites après gel/neige',
+        'toiture',
+        'printemps',
+        3,
+        2,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        30
+    ),
+    (
+        'Nettoyage gouttières (printemps)',
+        'Second nettoyage annuel des gouttières',
+        'toiture',
+        'printemps',
+        4,
+        3,
+        'semestriel',
+        FALSE,
+        FALSE,
+        0.00,
+        60
+    ),
+    (
+        'Traitement anti-mousse toiture',
+        'Application produit anti-mousse sur tuiles',
+        'toiture',
+        'printemps',
+        4,
+        3,
+        'annuel',
+        FALSE,
+        FALSE,
+        40.00,
+        120
+    ),
+    (
+        'Remettre eau extérieure',
+        'Réouvrir robinets extérieurs après risque gel',
+        'plomberie',
+        'printemps',
+        3,
+        2,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        10
+    ),
+    -- ÉTÉ
+    (
+        'Entretien portail automatique',
+        'Graissage, vérification cellules, télécommandes',
+        'exterieur',
+        'ete',
+        6,
+        5,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        30
+    ),
+    (
+        'Contrôle extincteurs',
+        'Vérification pression, date péremption',
+        'securite',
+        'ete',
+        6,
+        5,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        15
+    ),
+    (
+        'Traitement bois charpente',
+        'Traitement préventif anti-insectes xylophages',
+        'toiture',
+        'ete',
+        7,
+        6,
+        'annuel',
+        TRUE,
+        FALSE,
+        200.00,
+        240
+    ),
+    (
+        'Vérification tableau électrique',
+        'Contrôle visuel disjoncteurs, test différentiel',
+        'electricite',
+        'ete',
+        6,
+        5,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        20
+    ),
+    (
+        'Nettoyage chauffe-eau',
+        'Vidange partielle et détartrage',
+        'plomberie',
+        'ete',
+        7,
+        6,
+        'annuel',
+        FALSE,
+        FALSE,
+        0.00,
+        45
+    ),
+    -- TOUTE L'ANNÉE
+    (
+        'Relevé compteurs eau',
+        'Relevé index compteurs pour suivi consommation',
+        'plomberie',
+        'toute_annee',
+        NULL,
+        NULL,
+        'trimestriel',
+        FALSE,
+        FALSE,
+        0.00,
+        5
+    ),
+    (
+        'Test alarme',
+        'Tester le système d''alarme et changer piles détecteurs',
+        'securite',
+        'toute_annee',
+        NULL,
+        NULL,
+        'trimestriel',
+        FALSE,
+        FALSE,
+        0.00,
+        15
+    ),
+    (
+        'Contrôle pression chaudière',
+        'Vérifier entre 1 et 1.5 bar',
+        'chauffage',
+        'toute_annee',
+        NULL,
+        NULL,
+        'trimestriel',
+        FALSE,
+        FALSE,
+        0.00,
+        5
+    ),
+    (
+        'Nettoyage filtres aspirateur',
+        'Nettoyer/remplacer les filtres',
+        'menage',
+        'toute_annee',
+        NULL,
+        NULL,
+        'trimestriel',
+        FALSE,
+        FALSE,
+        10.00,
+        15
+    ),
+    (
+        'Vérification joints salle de bain',
+        'Contrôle moisissures, étanchéité joints silicone',
+        'plomberie',
+        'toute_annee',
+        NULL,
+        NULL,
+        'semestriel',
+        FALSE,
+        FALSE,
+        15.00,
+        20
+    ) ON CONFLICT DO NOTHING;
 -- Préférences de notification par défaut
 INSERT INTO preferences_notifications (
-    courses_rappel, repas_suggestion, stock_alerte,
-    meteo_alerte, budget_alerte,
-    quiet_hours_start, quiet_hours_end,
-    modules_actifs, canal_prefere,
-    created_at, updated_at
-) VALUES (
-    TRUE, TRUE, TRUE,
-    TRUE, TRUE,
-    '22:00', '07:00',
-    '{
+        courses_rappel,
+        repas_suggestion,
+        stock_alerte,
+        meteo_alerte,
+        budget_alerte,
+        quiet_hours_start,
+        quiet_hours_end,
+        modules_actifs,
+        canal_prefere,
+        created_at,
+        updated_at
+    )
+VALUES (
+        TRUE,
+        TRUE,
+        TRUE,
+        TRUE,
+        TRUE,
+        '22:00',
+        '07:00',
+        '{
         "cuisine": {"suggestions_repas": true, "stock_bas": true, "batch_cooking": false},
         "famille": {"routines_jules": true, "activites_weekend": true, "achats_planifier": false},
         "maison": {"entretien_programme": true, "charges_payer": true, "jardin_arrosage": false},
         "planning": {"rappels_evenements": true, "taches_retard": true},
         "budget": {"depassement_seuil": true, "resume_mensuel": false}
     }'::jsonb,
-    'push',
-    NOW(), NOW()
-) ON CONFLICT DO NOTHING;
+        'push',
+        NOW(),
+        NOW()
+    ) ON CONFLICT DO NOTHING;
 -- Grants Supabase
 GRANT SELECT,
     INSERT,

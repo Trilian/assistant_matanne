@@ -3,6 +3,8 @@ Dashboard - Statistiques et graphiques
 Visualisations de données pour le tableau de bord principal
 """
 
+import logging
+
 import streamlit as st
 
 from src.ui.fragments import auto_refresh, cached_fragment
@@ -58,9 +60,28 @@ def afficher_global_stats():
     st.markdown("### 📊 Vue d'Ensemble")
 
     # Charger stats
-    stats_recettes = obtenir_service_recettes().get_stats()
-    stats_inventaire = obtenir_service_inventaire().get_stats()
-    stats_courses = obtenir_service_courses().get_stats()
+    logger = logging.getLogger(__name__)
+
+    try:
+        stats_recettes = obtenir_service_recettes().get_stats()
+    except Exception as e:
+        logger.exception("Erreur lors du chargement des stats recettes")
+        st.warning("Impossible de charger les statistiques de recettes (voir logs).")
+        stats_recettes = {"total": 0}
+
+    try:
+        stats_inventaire = obtenir_service_inventaire().get_stats()
+    except Exception as e:
+        logger.exception("Erreur lors du chargement des stats inventaire")
+        st.warning("Impossible de charger les statistiques d'inventaire (voir logs).")
+        stats_inventaire = {"total": 0}
+
+    try:
+        stats_courses = obtenir_service_courses().get_stats()
+    except Exception as e:
+        logger.exception("Erreur lors du chargement des stats courses")
+        st.warning("Impossible de charger les statistiques des courses (voir logs).")
+        stats_courses = {"total": 0}
 
     inventaire = obtenir_service_inventaire().get_inventaire_complet()
 

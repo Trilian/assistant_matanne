@@ -53,6 +53,10 @@ def afficher_gamification_sidebar() -> None:
         logger.debug(f"Gamification indisponible: {e}")
         return
 
+    if stats is None:
+        logger.debug("Gamification: stats is None, skipping sidebar display")
+        return
+
     niveau = stats.niveau
     titre = TITRES_NIVEAUX.get(niveau, "Explorateur")
     points = stats.points_total
@@ -87,6 +91,10 @@ def afficher_badges_complets() -> None:
         stats = service.obtenir_stats()
     except Exception as e:
         st.warning(f"Service gamification indisponible: {e}")
+        return
+
+    if stats is None:
+        st.warning("Statistiques de gamification indisponibles.")
         return
 
     st.subheader("🏅 Badges & Progression")

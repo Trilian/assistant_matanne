@@ -54,12 +54,13 @@ _A11Y_CSS = """
 }
 
 /* ── Skip to content link ──────────────────────── */
-.skip-link {
+    .skip-link {
     position: absolute;
     top: -40px;
     left: 0;
-    background: var(--sem-interactive, #4CAF50);
-    color: var(--sem-on-interactive, #fff);
+    /* Utiliser une couleur sobre et contrastée pour un rendu plus professionnel */
+    background: var(--sem-on-surface, #212529);
+    color: var(--sem-surface, #ffffff);
     padding: 8px 16px;
     z-index: 10000;
     font-weight: 600;

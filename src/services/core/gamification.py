@@ -296,7 +296,14 @@ class ServiceGamification:
     @property
     def stats(self) -> StatsGamification:
         """Accès aux stats courantes."""
-        return obtenir_storage().get(self._SK_STATS)
+        value = obtenir_storage().get(self._SK_STATS)
+        if value is None:
+            # Défense supplémentaire: si le storage retourne None, initialise
+            # un nouvel objet StatsGamification et persiste-le pour éviter
+            # les retours None dans les callers UI.
+            value = StatsGamification()
+            obtenir_storage().set(self._SK_STATS, value)
+        return value
 
     def enregistrer_action(self, action: str, **kwargs: Any) -> dict[str, Any]:
         """Enregistre une action et met à jour les stats.

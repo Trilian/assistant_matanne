@@ -121,6 +121,15 @@ def injecter_css():
     color: var(--sem-on-danger, {Couleur.BADGE_DANGER_TEXT});
 }}
 
+/* Boutons — éviter que les labels se replient sur plusieurs lignes */
+.stButton > button {{
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 36px;
+    padding: 8px 12px;
+}}
+
 /* Masquer éléments Streamlit par défaut */
 #MainMenu {{visibility: hidden;}}
 footer {{visibility: hidden;}}

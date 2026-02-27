@@ -15,7 +15,6 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
-from src.core.models import PreferenceUtilisateur, RetourRecette
 from src.modules.cuisine.schemas import (
     FeedbackRecette,
     PreferencesUtilisateur,
@@ -41,6 +40,8 @@ class UserPreferenceService:
         Returns:
             PreferencesUtilisateur avec valeurs DB ou défauts
         """
+        from src.core.models import PreferenceUtilisateur
+
         stmt = select(PreferenceUtilisateur).where(PreferenceUtilisateur.user_id == self.user_id)
         db_pref = db.execute(stmt).scalar_one_or_none()
 
@@ -68,6 +69,8 @@ class UserPreferenceService:
             True si succès
         """
         try:
+            from src.core.models import PreferenceUtilisateur
+
             stmt = select(PreferenceUtilisateur).where(
                 PreferenceUtilisateur.user_id == self.user_id
             )
@@ -99,6 +102,8 @@ class UserPreferenceService:
         Returns:
             Liste de FeedbackRecette
         """
+        from src.core.models import RetourRecette
+
         stmt = (
             select(RetourRecette)
             .where(RetourRecette.user_id == self.user_id)
@@ -146,6 +151,8 @@ class UserPreferenceService:
         """
         try:
             # Vérifier si feedback existe déjà
+            from src.core.models import RetourRecette
+
             stmt = select(RetourRecette).where(
                 RetourRecette.user_id == self.user_id, RetourRecette.recette_id == recette_id
             )
@@ -159,6 +166,8 @@ class UserPreferenceService:
                 logger.debug(f"Feedback mis à jour: {recette_nom} → {feedback}")
             else:
                 # Insert
+                from src.core.models import RetourRecette
+
                 new_fb = RetourRecette(
                     user_id=self.user_id,
                     recette_id=recette_id,
@@ -181,6 +190,8 @@ class UserPreferenceService:
     def supprimer_feedback(self, recette_id: int, db: Session | None = None) -> bool:
         """Supprime un feedback."""
         try:
+            from src.core.models import RetourRecette
+
             stmt = select(RetourRecette).where(
                 RetourRecette.user_id == self.user_id, RetourRecette.recette_id == recette_id
             )
@@ -206,6 +217,8 @@ class UserPreferenceService:
         Returns:
             Dict avec likes, dislikes, neutrals counts
         """
+        from src.core.models import RetourRecette
+
         stmt = select(RetourRecette).where(RetourRecette.user_id == self.user_id)
         feedbacks = db.execute(stmt).scalars().all()
 
@@ -258,6 +271,8 @@ class UserPreferenceService:
 
     def _dataclass_to_db(self, prefs: PreferencesUtilisateur) -> PreferenceUtilisateur:
         """Convertit PreferencesUtilisateur (dataclass) → PreferenceUtilisateur (DB)."""
+        from src.core.models import PreferenceUtilisateur
+
         return PreferenceUtilisateur(
             user_id=self.user_id,
             nb_adultes=prefs.nb_adultes,
