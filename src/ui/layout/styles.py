@@ -66,7 +66,7 @@ def injecter_css():
     font-size: 0.95rem;
     text-decoration: none;
     transform: translateY(-120%);
-    transition: transform {Transition.SHORT}, background {Transition.SHORT};
+    transition: transform {Transition.FAST}, background {Transition.FAST};
     z-index: 9999;
 }}
 
