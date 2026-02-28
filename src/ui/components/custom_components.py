@@ -888,9 +888,9 @@ def kanban_board(
             due_html = card.get("due", "")
 
             cards_html += f"""
-            <div class="kanban-card {priority_class}" draggable="true" data-id="{card.get('id', '')}">
-                <div class="card-title">{card.get('title', 'Sans titre')}</div>
-                <div class="card-description">{card.get('description', '')}</div>
+            <div class="kanban-card {priority_class}" draggable="true" data-id="{card.get("id", "")}">
+                <div class="card-title">{card.get("title", "Sans titre")}</div>
+                <div class="card-description">{card.get("description", "")}</div>
                 <div class="card-meta">
                     {tag_html}
                     <span>{due_html}</span>

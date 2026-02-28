@@ -64,7 +64,7 @@ def _naviguer_famille(page: str) -> None:
 
     # Mapping ancien nom interne → clé pages_config
     _KEYS: dict[str, str] = {
-        "hub": "famille.hub",
+        "hub": "famille",
         "jules": "famille.jules",
         "jules_planning": "famille.jules_planning",
         "weekend": "famille.weekend",

@@ -395,7 +395,7 @@ class RouteurIA:
         candidats.sort(key=score_candidat)
         choix = candidats[0]
         logger.debug(
-            f"Routage → {choix.nom.value} (complexité: {complexite}, " f"modèle: {choix.modele})"
+            f"Routage → {choix.nom.value} (complexité: {complexite}, modèle: {choix.modele})"
         )
         return choix
 

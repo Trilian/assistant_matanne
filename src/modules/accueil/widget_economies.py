@@ -200,7 +200,7 @@ def afficher_widget_economies():
             couleur_delta = Couleur.SUCCESS if delta > 0 else Couleur.RED_500
             st.markdown(
                 f'<p style="text-align:center;color:{couleur_delta};font-weight:600;">'
-                f'{"↑" if delta > 0 else "↓"} {delta_str} vs mois précédent</p>'
+                f"{'↑' if delta > 0 else '↓'} {delta_str} vs mois précédent</p>"
                 f"</div>",
                 unsafe_allow_html=True,
             )

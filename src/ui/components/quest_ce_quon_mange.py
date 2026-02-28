@@ -271,11 +271,11 @@ def widget_quest_ce_quon_mange(compact: bool = False) -> None:
             f"""
             <div class="qcom-container">
                 <div class="qcom-titre">🍽️ Qu'est-ce qu'on mange ?</div>
-                <div class="qcom-reponse">{repas['recette_nom']}</div>
+                <div class="qcom-reponse">{repas["recette_nom"]}</div>
                 <div class="qcom-details">
-                    {repas.get('type_repas', 'Repas')} •
-                    {repas.get('temps_total', '?')} min •
-                    {repas.get('nb_personnes', '?')} pers.
+                    {repas.get("type_repas", "Repas")} •
+                    {repas.get("temps_total", "?")} min •
+                    {repas.get("nb_personnes", "?")} pers.
                 </div>
             </div>
             """,

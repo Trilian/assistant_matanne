@@ -82,7 +82,7 @@ def afficher_vue_mensuelle():
             "Décembre",
         ]
         st.markdown(
-            f"<h3 style='text-align:center;margin:0;'>" f"📅 {noms_mois[mois]} {annee}</h3>",
+            f"<h3 style='text-align:center;margin:0;'>📅 {noms_mois[mois]} {annee}</h3>",
             unsafe_allow_html=True,
         )
 
@@ -285,7 +285,7 @@ def _afficher_cellule_mois(
     # Badge nombre
     badge = ""
     if nb > 0:
-        badge = f'<span style="font-size:0.6rem;color:#888;">' f"{nb}</span>"
+        badge = f'<span style="font-size:0.6rem;color:#888;">{nb}</span>'
 
     # Jours spéciaux icône
     special_icon = ""

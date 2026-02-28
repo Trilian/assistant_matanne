@@ -349,6 +349,5 @@ class ReleveEnergie(TimestampMixin, Base):
 
     def __repr__(self) -> str:
         return (
-            f"<ReleveEnergie(id={self.id}, type='{self.type_energie}', "
-            f"{self.mois}/{self.annee})>"
+            f"<ReleveEnergie(id={self.id}, type='{self.type_energie}', {self.mois}/{self.annee})>"
         )

@@ -153,6 +153,4 @@ def afficher_vue_3d(pieces: list[dict]):
     st.plotly_chart(fig, use_container_width=True, key="plan_3d_chart")
 
     # Aide
-    st.caption(
-        "🖱️ Clic + glisser pour tourner · " "Molette pour zoomer · " "Shift+clic pour déplacer"
-    )
+    st.caption("🖱️ Clic + glisser pour tourner · Molette pour zoomer · Shift+clic pour déplacer")

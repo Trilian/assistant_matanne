@@ -9,6 +9,7 @@ import time
 import streamlit as st
 
 from src.core.state import rerun
+from src.core.session_keys import SK
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
@@ -30,8 +31,9 @@ def afficher_liste():
     if _keys("page") not in st.session_state:
         st.session_state[_keys("page")] = 0
 
-    if _keys("page_size_val") not in st.session_state:
-        st.session_state[_keys("page_size_val")] = 9
+    key_page_size = _keys("page_size_val")
+    if key_page_size not in st.session_state:
+        st.session_state[key_page_size] = 9
 
     # Contrôles de pagination en haut
     col_size1, col_size2, col_size3 = st.columns([2, 1.5, 2])
@@ -41,15 +43,14 @@ def afficher_liste():
         page_size = st.selectbox(
             "Recettes/page",
             [6, 9, 12, 15],
-            index=[6, 9, 12, 15].index(st.session_state[_keys("page_size_val")]),
-            key=_keys("page_size_val"),
+            index=[6, 9, 12, 15].index(st.session_state[key_page_size]),
+            key=key_page_size,
             label_visibility="collapsed",
         )
-        st.session_state[_keys("page_size_val")] = page_size
     with col_size3:
         st.write("")  # Espacement
 
-    PAGE_SIZE = st.session_state[_keys("page_size_val")]
+    PAGE_SIZE = st.session_state[key_page_size]
 
     # Filtres
     col1, col2, col3, col4 = st.columns(4)
@@ -324,6 +325,8 @@ def afficher_liste():
                     "👁️ Voir détails", use_container_width=True, key=_keys("detail", recette.id)
                 ):
                     st.session_state[_keys("detail_id")] = recette.id
+                    # Mirror to global session key for cross-module compatibility
+                    st.session_state[SK.DETAIL_RECETTE_ID] = recette.id
                     rerun()
 
                 # Bouton supprimer avec popover confirmation
@@ -337,9 +340,10 @@ def afficher_liste():
                             if service:
                                 try:
                                     with st.spinner("Suppression en cours..."):
-                                        if service.delete(recette.id):
+                                            if service.delete(recette.id):
                                             st.success("✅ Recette supprimée!")
                                             st.session_state[_keys("detail_id")] = None
+                                            st.session_state[SK.DETAIL_RECETTE_ID] = None
                                             time.sleep(1)
                                             rerun()
                                         else:

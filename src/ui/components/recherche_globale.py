@@ -96,7 +96,7 @@ class RechercheGlobaleService:
     _TYPE_CONFIG: dict[str, dict[str, str]] = {
         "recette": {"action": "cuisine.recettes", "icone": ""},
         "inventaire": {"action": "cuisine.inventaire", "icone": ""},
-        "activite": {"action": "famille.hub", "icone": "🎨"},
+        "activite": {"action": "famille", "icone": "🎨"},
         "planning": {"action": "cuisine.planificateur_repas", "icone": ""},
     }
 

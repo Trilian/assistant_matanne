@@ -74,7 +74,7 @@ Humeur générale: {humeur_famille}
         nb_jalons: int,
     ) -> str:
         """Génère une rétrospective du mois."""
-        resumes_txt = "\n\n".join(f"Semaine {i+1}:\n{r}" for i, r in enumerate(resumes_semaines))
+        resumes_txt = "\n\n".join(f"Semaine {i + 1}:\n{r}" for i, r in enumerate(resumes_semaines))
 
         prompt = f"""Écris la rétrospective du mois de {mois} pour notre famille:
 

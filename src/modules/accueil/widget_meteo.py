@@ -115,8 +115,7 @@ def _evaluer_impact_meteo(meteo, evenements: list[dict]) -> list[dict]:
         impacts.append(
             {
                 "icone": "☀️",
-                "message": f"UV très élevé (index {meteo.uv_index}) — "
-                "crème solaire indispensable",
+                "message": f"UV très élevé (index {meteo.uv_index}) — crème solaire indispensable",
                 "niveau": "warning",
             }
         )

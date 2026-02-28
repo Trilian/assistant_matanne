@@ -154,7 +154,7 @@ class DetecteurAnomaliesDepenses:
 
             logger.info(
                 f"Détecteur anomalies entraîné: {len(X)} samples, "
-                f"{n_anomalies} anomalies ({n_anomalies/len(X)*100:.1f}%)"
+                f"{n_anomalies} anomalies ({n_anomalies / len(X) * 100:.1f}%)"
             )
 
             return {

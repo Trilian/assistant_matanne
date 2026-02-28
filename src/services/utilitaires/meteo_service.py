@@ -215,8 +215,7 @@ class MeteoService:
         for prev in previsions[1:3]:
             if prev.precip_proba > 70:
                 suggestions.append(
-                    f"🌧️ Forte probabilité de pluie {prev.date} — "
-                    "prévoir les courses aujourd'hui."
+                    f"🌧️ Forte probabilité de pluie {prev.date} — prévoir les courses aujourd'hui."
                 )
                 break
 

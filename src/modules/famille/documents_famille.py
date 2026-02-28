@@ -254,11 +254,11 @@ def _onglet_alertes():
                 jours = d.jours_avant_expiration
                 if jours <= 30:
                     st.warning(
-                        f"{emoji} **{d.nom}** — Expire dans {jours}j " f"• {d.membre_famille or ''}"
+                        f"{emoji} **{d.nom}** — Expire dans {jours}j • {d.membre_famille or ''}"
                     )
                 else:
                     st.info(
-                        f"{emoji} **{d.nom}** — Expire dans {jours}j " f"• {d.membre_famille or ''}"
+                        f"{emoji} **{d.nom}** — Expire dans {jours}j • {d.membre_famille or ''}"
                     )
 
         st.markdown("---")

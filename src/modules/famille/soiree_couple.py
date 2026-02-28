@@ -129,7 +129,7 @@ def _onglet_suggestions():
             for i, s in enumerate(suggestions):
                 with st.container(border=True):
                     if isinstance(s, dict):
-                        st.markdown(f"**{s.get('titre', f'Suggestion {i+1}')}**")
+                        st.markdown(f"**{s.get('titre', f'Suggestion {i + 1}')}**")
                         st.write(s.get("description", ""))
                         col1, col2 = st.columns(2)
                         with col1:

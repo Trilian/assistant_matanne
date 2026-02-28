@@ -284,8 +284,7 @@ class ServiceConflits:
                                 type=TypeConflit.JOUR_FERIE,
                                 niveau=NiveauConflit.AVERTISSEMENT,
                                 message=(
-                                    f"'{evt['titre']}' planifié un jour férié "
-                                    f"({jour_special.nom})"
+                                    f"'{evt['titre']}' planifié un jour férié ({jour_special.nom})"
                                 ),
                                 date_jour=date_jour,
                                 evenement_1=evt,

@@ -169,7 +169,7 @@ def afficher_widget_ce_soir():
                 )
             else:
                 st.error(
-                    f"❌ Plusieurs ingrédients manquants : " f"{', '.join(check['manquants'][:4])}"
+                    f"❌ Plusieurs ingrédients manquants : {', '.join(check['manquants'][:4])}"
                 )
 
         # Actions

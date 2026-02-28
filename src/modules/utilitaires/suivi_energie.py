@@ -57,7 +57,9 @@ def _onglet_saisie(service):
             type_energie = st.selectbox(
                 "Type",
                 options=[c.value for c in CategorieEnergie],
-                format_func=lambda x: f"{PRIX_UNITAIRES.get(x, {}).get('emoji', '')} {x.capitalize()}",
+                format_func=lambda x: (
+                    f"{PRIX_UNITAIRES.get(x, {}).get('emoji', '')} {x.capitalize()}"
+                ),
                 key=_keys("new_cat"),
             )
         with col2:
@@ -142,7 +144,7 @@ def _onglet_saisie(service):
                 col1, col2, col3 = st.columns([2, 2, 1])
                 with col1:
                     st.markdown(
-                        f"{emoji} **{r.type_energie.capitalize()}** — " f"{r.mois:02d}/{r.annee}"
+                        f"{emoji} **{r.type_energie.capitalize()}** — {r.mois:02d}/{r.annee}"
                     )
                 with col2:
                     conso = float(r.consommation) if r.consommation else 0
@@ -206,7 +208,7 @@ def _onglet_couts(service):
     st.subheader("💰 Estimation des coûts")
 
     st.info(
-        "💡 Les prix unitaires sont des moyennes France 2024-2025. " "Ajustez selon votre contrat."
+        "💡 Les prix unitaires sont des moyennes France 2024-2025. Ajustez selon votre contrat."
     )
 
     with st.expander("⚙️ Personnaliser les prix unitaires"):

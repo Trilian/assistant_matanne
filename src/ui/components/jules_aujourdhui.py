@@ -324,8 +324,8 @@ def widget_jules_aujourdhui(afficher_export: bool = True) -> None:
             st.markdown(
                 f"""<div style="padding: 8px; margin: 4px 0; background: {Sem.SURFACE_ALT};
                 border-radius: 8px; border-left: 4px solid {Sem.INTERACTIVE};">
-                    <strong>{heure}</strong> {icone} {a['titre']}{humeur_badge}
-                    {f"<br><small style='color: {Sem.ON_SURFACE_SECONDARY};'>{a['notes']}</small>" if a.get('notes') else ""}
+                    <strong>{heure}</strong> {icone} {a["titre"]}{humeur_badge}
+                    {f"<br><small style='color: {Sem.ON_SURFACE_SECONDARY};'>{a['notes']}</small>" if a.get("notes") else ""}
                 </div>""",
                 unsafe_allow_html=True,
             )

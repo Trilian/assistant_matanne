@@ -291,7 +291,7 @@ def format_lazy_imports_dict(
     for mod in sorted(by_module.keys()):
         # Commentaire de section
         mod_label = mod.lstrip(".").replace(".", "/").replace("_", " ").title()
-        lines.append(f'    # ── {mod_label} {"─" * max(1, 45 - len(mod_label))}')
+        lines.append(f"    # ── {mod_label} {'─' * max(1, 45 - len(mod_label))}")
         for name, attr in sorted(by_module[mod]):
             if name == attr:
                 lines.append(f'    "{name}": ("{mod}", "{attr}"),')

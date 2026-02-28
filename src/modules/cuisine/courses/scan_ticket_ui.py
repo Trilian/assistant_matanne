@@ -103,7 +103,7 @@ def _afficher_resultat_ticket(ticket) -> None:
         return
 
     st.success(
-        f"✅ {len(ticket.lignes)} article(s) détecté(s) — " f"Total: {ticket.total_calcule:.2f} €"
+        f"✅ {len(ticket.lignes)} article(s) détecté(s) — Total: {ticket.total_calcule:.2f} €"
     )
 
     if hasattr(ticket, "confiance_ocr") and ticket.confiance_ocr:

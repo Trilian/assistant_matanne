@@ -299,9 +299,7 @@ class A11y:
         # When an html_id is provided, add tabindex="-1" so the element can
         # receive programmatic focus (used by skip-links for accessibility).
         tabindex_attr = ' tabindex="-1"' if html_id else ""
-        html = (
-            f'<{tag}{id_attr}{tabindex_attr} role="{role}" ' f'aria-label="{echapper_html(label)}">'
-        )
+        html = f'<{tag}{id_attr}{tabindex_attr} role="{role}" aria-label="{echapper_html(label)}">'
         A11y._safe_html(html)
 
     @staticmethod

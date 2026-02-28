@@ -786,7 +786,7 @@ def presence_indicator(
             width: 28px;
             height: 28px;
             border-radius: 50%;
-            background: {user['color']};
+            background: {user["color"]};
             display: flex;
             align-items: center;
             justify-content: center;
@@ -794,8 +794,8 @@ def presence_indicator(
             font-size: 12px;
             font-weight: 500;
             border: 2px solid white;
-        " title="{user['name']} (vous)">
-            {user['name'][0].upper()}
+        " title="{user["name"]} (vous)">
+            {user["name"][0].upper()}
         </div>
         <span style="color: #a0aec0; font-size: 11px;">En ligne</span>
     </div>

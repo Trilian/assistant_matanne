@@ -88,7 +88,7 @@ def capture_audio(
     except AttributeError:
         # Fallback pour versions antérieures
         st.warning(
-            "⚠️ st.audio_input() nécessite Streamlit ≥ 1.33. " "Utilisez le bouton vocal classique."
+            "⚠️ st.audio_input() nécessite Streamlit ≥ 1.33. Utilisez le bouton vocal classique."
         )
         return None
 

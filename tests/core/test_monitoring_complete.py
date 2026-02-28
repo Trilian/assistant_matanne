@@ -743,9 +743,9 @@ class TestSentryInitialisation:
             # Importer le module mocké
             with patch(
                 "builtins.__import__",
-                side_effect=lambda name, *args: mock_sdk
-                if name == "sentry_sdk"
-                else __import__(name, *args),
+                side_effect=lambda name, *args: (
+                    mock_sdk if name == "sentry_sdk" else __import__(name, *args)
+                ),
             ):
                 # On ne peut pas facilement mocker les imports dans une fonction
                 # Testons au moins que la fonction ne crash pas

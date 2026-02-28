@@ -170,7 +170,7 @@ class ServiceFileAttente:
         self._persister()
 
         logger.info(
-            f"File d'attente: ajout #{op.id} '{operation}' " f"(file: {len(self._file)} éléments)"
+            f"File d'attente: ajout #{op.id} '{operation}' (file: {len(self._file)} éléments)"
         )
         return op
 
@@ -403,8 +403,7 @@ class ServiceFileAttente:
 
                 if self._file:
                     logger.info(
-                        f"File d'attente: {len(self._file)} opérations "
-                        f"restaurées depuis le fichier"
+                        f"File d'attente: {len(self._file)} opérations restaurées depuis le fichier"
                     )
         except Exception as e:
             logger.debug(f"Chargement file d'attente échoué: {e}")

@@ -228,17 +228,17 @@ def generer_etiquettes_html(articles: list[ArticleCongele]) -> str:
             f"""
         <div class="etiquette {cls}">
             <h3>🧊 {art.nom}</h3>
-            <p>📅 Congelé: {art.date_congelation.strftime('%d/%m/%Y')}</p>
-            <p>⏰ Limite: {art.date_limite.strftime('%d/%m/%Y')}</p>
+            <p>📅 Congelé: {art.date_congelation.strftime("%d/%m/%Y")}</p>
+            <p>⏰ Limite: {art.date_limite.strftime("%d/%m/%Y")}</p>
             <p>🍽️ {art.portions} portion(s) — {art.categorie}</p>
-            {f'<p>📝 {art.notes}</p>' if art.notes else ''}
+            {f"<p>📝 {art.notes}</p>" if art.notes else ""}
         </div>"""
         )
 
     return f"""
     {style}
     <div class="etiquette-grid">
-        {''.join(etiquettes)}
+        {"".join(etiquettes)}
     </div>
     """
 

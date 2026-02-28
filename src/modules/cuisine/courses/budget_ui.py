@@ -99,7 +99,7 @@ def _afficher_tendance() -> None:
         "stable": "➡️",
     }.get(tendance.tendance, "")
 
-    st.markdown(f"**Tendance {tendance_emoji}** — " f"Moyenne: {tendance.moyenne:.0f} €/sem")
+    st.markdown(f"**Tendance {tendance_emoji}** — Moyenne: {tendance.moyenne:.0f} €/sem")
 
     st.bar_chart(df.set_index("Semaine"))
 

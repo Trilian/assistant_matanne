@@ -61,9 +61,7 @@ BIAIS_CATALOGUE = {
             "Surestimer ses compétences de pronostiqueur."
         ),
         "detection": "Ratio mises gagnantes rapportées vs réelles très différent",
-        "conseil": (
-            "Tenez un journal objectif de TOUS vos paris, " "même ceux qui vous déplaisent."
-        ),
+        "conseil": ("Tenez un journal objectif de TOUS vos paris, même ceux qui vous déplaisent."),
     },
     "sunk_cost": {
         "nom": "⚓ Coût irrécupérable (Sunk Cost)",
@@ -97,8 +95,7 @@ BIAIS_CATALOGUE = {
         ),
         "detection": "Paris répétés sur les mêmes cotes/équipes",
         "conseil": (
-            "Analysez chaque situation indépendamment. "
-            "Ne vous fixez pas sur une cote 'habituelle'."
+            "Analysez chaque situation indépendamment. Ne vous fixez pas sur une cote 'habituelle'."
         ),
     },
 }

@@ -55,7 +55,7 @@ class AlbumFamille(TimestampMixin, Base):
         return len(self.souvenirs) if self.souvenirs else 0
 
     def __repr__(self) -> str:
-        return f"<AlbumFamille(id={self.id}, titre='{self.titre}', " f"type='{self.type_album}')>"
+        return f"<AlbumFamille(id={self.id}, titre='{self.titre}', type='{self.type_album}')>"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -104,6 +104,4 @@ class SouvenirFamille(TimestampMixin, Base):
     jalon: Mapped["Jalon | None"] = relationship()  # noqa: F821
 
     def __repr__(self) -> str:
-        return (
-            f"<SouvenirFamille(id={self.id}, titre='{self.titre}', " f"date={self.date_souvenir})>"
-        )
+        return f"<SouvenirFamille(id={self.id}, titre='{self.titre}', date={self.date_souvenir})>"

@@ -271,7 +271,7 @@ def afficher_prediction_match(match: dict):
             cote_d = match.get("cote_dom") or 2.0
             if not match.get("id"):
                 st.button(
-                    f"🏠 {match.get('dom_nom','?')[:10]}... ({cote_d:.2f})", key="bet_dom_missing"
+                    f"🏠 {match.get('dom_nom', '?')[:10]}... ({cote_d:.2f})", key="bet_dom_missing"
                 )
                 st.caption("Impossible d'enregistrer: match sans identifiant")
             else:
@@ -302,7 +302,7 @@ def afficher_prediction_match(match: dict):
             cote_e = match.get("cote_ext") or 3.0
             if not match.get("id"):
                 st.button(
-                    f"✈️ {match.get('ext_nom','?')[:10]}... ({cote_e:.2f})", key="bet_ext_missing"
+                    f"✈️ {match.get('ext_nom', '?')[:10]}... ({cote_e:.2f})", key="bet_ext_missing"
                 )
             else:
                 if st.button(

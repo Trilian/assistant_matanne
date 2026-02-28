@@ -60,13 +60,11 @@ def _afficher_import_fichier():
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.markdown("**🩺 Doctolib**\n\n" "Mes RDV → Exporter (.ics)\n\n" "*Gratuit, export natif*")
+        st.markdown("**🩺 Doctolib**\n\nMes RDV → Exporter (.ics)\n\n*Gratuit, export natif*")
     with col2:
-        st.markdown("**📅 Google Calendar**\n\n" "Paramètres → Exporter\n\n" "*Télécharge un .ics*")
+        st.markdown("**📅 Google Calendar**\n\nParamètres → Exporter\n\n*Télécharge un .ics*")
     with col3:
-        st.markdown(
-            "**📧 Outlook**\n\n" "Calendrier → Partager → Exporter\n\n" "*Format .ics standard*"
-        )
+        st.markdown("**📧 Outlook**\n\nCalendrier → Partager → Exporter\n\n*Format .ics standard*")
 
     st.divider()
 

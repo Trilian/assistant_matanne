@@ -24,9 +24,7 @@ def afficher_plan_2d(
         ID de la pièce sélectionnée (clic), ou None.
     """
     if not pieces:
-        st.info(
-            "🏠 Aucune pièce à afficher. " "Les pièces par défaut seront créées au rechargement."
-        )
+        st.info("🏠 Aucune pièce à afficher. Les pièces par défaut seront créées au rechargement.")
         return None
 
     # Mode édition
@@ -143,7 +141,7 @@ def afficher_plan_2d(
                 st.markdown(
                     f'<div style="background:{style["fill"]};border:2px solid {style["border"]};'
                     f'padding:4px 8px;border-radius:6px;text-align:center;font-size:0.85em">'
-                    f'{style["label"]}</div>',
+                    f"{style['label']}</div>",
                     unsafe_allow_html=True,
                 )
 
@@ -164,9 +162,7 @@ def afficher_plan_2d(
             idx = points[0].get("point_index")
             if idx is not None and idx < len(pieces):
                 piece_sel_id = pieces[idx]["id"]
-                st.info(
-                    f"🏠 Pièce sélectionnée : **{pieces[idx]['nom']}** " "— voir onglet Détails"
-                )
+                st.info(f"🏠 Pièce sélectionnée : **{pieces[idx]['nom']}** — voir onglet Détails")
 
     # Mode édition : formulaire de position
     if mode_edit:
