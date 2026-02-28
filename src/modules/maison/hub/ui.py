@@ -1,10 +1,12 @@
 """
-Hub Maison - Composants UI.
+Maison - Composants UI.
 """
 
+import urllib.parse
 from datetime import date
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 from src.core.state import GestionnaireEtat, rerun
 from src.ui.fragments import auto_refresh
@@ -124,90 +126,79 @@ def afficher_alertes(alertes: list[dict]):
 
 
 def afficher_modules(stats: dict):
-    """Affiche la navigation vers les modules."""
+    """Affiche la navigation vers les modules via composant HTML/JS."""
     st.markdown("#### 📂 Modules")
 
-    col1, col2, col3, col4, col5 = st.columns(5)
+    modules = [
+        {"key": "maison.jardin", "icon": "🌳", "title": "Jardin", "subtitle": "Potager"},
+        {"key": "maison.entretien", "icon": "🏡", "title": "Entretien", "subtitle": "Équipements"},
+        {
+            "key": "maison.charges",
+            "icon": "💡",
+            "title": "Charges",
+            "subtitle": "Énergie & contrats",
+        },
+        {"key": "maison.depenses", "icon": "💰", "title": "Dépenses", "subtitle": "Budget maison"},
+        {"key": "maison.visualisation", "icon": "🏘️", "title": "Plan", "subtitle": "Visualisation"},
+    ]
 
-    with col1:
-        if st.button(
-            "🌳\n\n**Jardin**\n\n" + "Potager", use_container_width=True, key="btn_jardin"
-        ):
-            GestionnaireEtat.naviguer_vers("maison.jardin")
-            rerun()
-
-        st.markdown(
-            """
-            <div style="text-align: center; margin-top: -0.5rem;">
-                <span class="module-highlight highlight-success">Tâches auto</span>
-            </div>
-        """,
-            unsafe_allow_html=True,
+    html = """
+    <style>
+    .modules-grid{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+    .tile{flex:1 1 140px;min-width:120px;max-width:220px;padding:12px;border-radius:8px;background:#ffffff;border:1px solid rgba(0,0,0,0.06);text-align:center;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.04);transition:transform .12s ease,box-shadow .12s ease}
+    .tile .icon{font-size:26px;display:block;margin-bottom:6px}
+    .tile .title{font-weight:600}
+    .tile .subtitle{font-size:12px;color:#6b7280;margin-top:4px}
+    .tile:hover{transform:translateY(-4px);box-shadow:0 8px 18px rgba(0,0,0,0.08)}
+    </style>
+    <div class="modules-grid">
+    """
+    for m in modules:
+        key_q = urllib.parse.quote(m["key"], safe="")
+        html += (
+            f'<a class="tile" href="?navigate={key_q}" title="{m["title"]} - {m["subtitle"]}">'
+            + f'<span class="icon">{m["icon"]}</span>'
+            + f'<span class="title">{m["title"]}</span>'
+            + f'<div class="subtitle">{m["subtitle"]}</div>'
+            + "</a>"
         )
 
+    html += "</div>"
+
+    # Height augmenté pour éviter coupe sur petits écrans
+    components.html(html, height=220, scrolling=False)
+
+
+def afficher_modules_fallback(stats: dict):
+    """Fallback Streamlit si le composant HTML/JS ne s'affiche pas."""
+    st.markdown("#### 📂 Modules (Fallback)")
+    col1, col2, col3, col4, col5 = st.columns(5)
+    with col1:
+        if st.button("🌳 Jardin — Potager", key="btn_jardin_fb", use_container_width=True):
+            GestionnaireEtat.naviguer_vers("maison.jardin")
+            rerun()
     with col2:
         if st.button(
-            "🏡\n\n**Entretien**\n\n" + "Équipements", use_container_width=True, key="btn_entretien"
+            "🏡 Entretien — Équipements", key="btn_entretien_fb", use_container_width=True
         ):
             GestionnaireEtat.naviguer_vers("maison.entretien")
             rerun()
-
-        st.markdown(
-            """
-            <div style="text-align: center; margin-top: -0.5rem;">
-                <span class="module-highlight highlight-info">Score maison</span>
-            </div>
-        """,
-            unsafe_allow_html=True,
-        )
-
     with col3:
         if st.button(
-            "💡\n\n**Charges**\n\nÉnergie & contrats", use_container_width=True, key="btn_charges"
+            "💡 Charges — Énergie & contrats", key="btn_charges_fb", use_container_width=True
         ):
             GestionnaireEtat.naviguer_vers("maison.charges")
             rerun()
-
-        st.markdown(
-            """
-            <div style="text-align: center; margin-top: -0.5rem;">
-                <span class="module-highlight highlight-info">Suivi factures</span>
-            </div>
-        """,
-            unsafe_allow_html=True,
-        )
-
     with col4:
         if st.button(
-            "💰\n\n**Dépenses**\n\nBudget maison", use_container_width=True, key="btn_depenses"
+            "💰 Dépenses — Budget maison", key="btn_depenses_fb", use_container_width=True
         ):
             GestionnaireEtat.naviguer_vers("maison.depenses")
             rerun()
-
-        st.markdown(
-            """
-            <div style="text-align: center; margin-top: -0.5rem;">
-                <span class="module-highlight highlight-success">Voir budget</span>
-            </div>
-        """,
-            unsafe_allow_html=True,
-        )
-
     with col5:
-        if st.button(
-            "🏘️\n\n**Plan**\n\nVisualisation", use_container_width=True, key="btn_plan_maison"
-        ):
+        if st.button("🏘️ Plan — Visualisation", key="btn_plan_fb", use_container_width=True):
             GestionnaireEtat.naviguer_vers("maison.visualisation")
             rerun()
-
-        st.markdown(
-            """
-            <div style="text-align: center; margin-top: -0.5rem;">
-                <span class="module-highlight highlight-info">2D / 3D</span>
-            </div>
-        """,
-            unsafe_allow_html=True,
-        )
 
 
 @auto_refresh(seconds=120)

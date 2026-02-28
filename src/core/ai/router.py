@@ -33,7 +33,7 @@ import logging
 import threading
 import time
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any, AsyncGenerator
 
 import httpx
@@ -53,7 +53,7 @@ __all__ = [
 # ═══════════════════════════════════════════════════════════
 
 
-class Fournisseur(str, Enum):
+class Fournisseur(StrEnum):
     """Fournisseurs IA disponibles."""
 
     MISTRAL = "mistral"

@@ -24,6 +24,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_cache, avec_session_db
 from src.core.exceptions import ErreurValidation
 from src.core.models import ArticleInventaire
+from src.services.maison.checklists_crud_service import obtenir_service_checklists_crud
 from src.services.rapports.planning_pdf import PlanningReportMixin
 from src.services.rapports.rapports_budget import BudgetReportMixin
 from src.services.rapports.rapports_gaspillage import GaspillageReportMixin
@@ -384,6 +385,88 @@ class ServiceRapportsPDF(
         else:
             raise ErreurValidation(f"Type de rapport inconnu: {type_rapport}")
 
+        return pdf, filename
+
+    # ═══════════════════════════════════════════════════════════
+    # CHECKLISTS VACANCES (PDF)
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_session_db
+    def generer_pdf_checklist(self, checklist_id: int, session: Session | None = None) -> BytesIO:
+        """
+        Génère un PDF pour une checklist de vacances.
+
+        Args:
+            checklist_id: id de la checklist
+            session: Session SQLAlchemy (optionnel)
+
+        Returns:
+            BytesIO contenant le PDF
+        """
+        service_checklists = obtenir_service_checklists_crud()
+        checklist = service_checklists.get_checklist_by_id(checklist_id)
+        if checklist is None:
+            raise ErreurValidation(f"Checklist introuvable: {checklist_id}")
+
+        items = service_checklists.get_items(checklist_id)
+
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            rightMargin=2 * cm,
+            leftMargin=2 * cm,
+            topMargin=2 * cm,
+            bottomMargin=2 * cm,
+        )
+
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            "ChecklistTitle",
+            parent=styles["Heading1"],
+            fontSize=20,
+            alignment=TA_CENTER,
+        )
+        normal = styles["Normal"]
+
+        elements = []
+        elements.append(Paragraph(f"✅ Checklist: {checklist.nom}", title_style))
+        elements.append(Spacer(1, 0.2 * inch))
+
+        # Table header
+        table_data = [["#", "Catégorie", "Item", "Fait"]]
+        for i, it in enumerate(items, start=1):
+            fait = "✔️" if getattr(it, "fait", False) else ""
+            table_data.append(
+                [str(i), getattr(it, "categorie", ""), getattr(it, "libelle", ""), fait]
+            )
+
+        table = Table(table_data, colWidths=[0.6 * inch, 1.8 * inch, 3.6 * inch, 0.6 * inch])
+        table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.BLUE_700)),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                    ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("FONTSIZE", (0, 0), (-1, -1), 10),
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ]
+            )
+        )
+
+        elements.append(table)
+        doc.build(elements)
+        buffer.seek(0)
+        return buffer
+
+    def telecharger_checklist_pdf(self, checklist_id: int) -> tuple[BytesIO, str]:
+        """Prépare le PDF de la checklist pour téléchargement."""
+        from datetime import datetime
+
+        now = datetime.now()
+        pdf = self.generer_pdf_checklist(checklist_id)
+        filename = f"checklist_{checklist_id}_{now.strftime('%Y%m%d_%H%M%S')}.pdf"
         return pdf, filename
 
     # NOTE: Les méthodes de rapport planning (generer_donnees_rapport_planning,

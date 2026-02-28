@@ -183,11 +183,13 @@ def _show_import_preview(recipe_data: dict):
     st.markdown("### 📋 Aperçu et modification")
 
     # Formulaire d'edition
-    with st.form("form_import_recette"):
+    with st.form(_keys("form_import_recette")):
         # Infos de base
         col1, col2 = st.columns(2)
         with col1:
-            nom = st.text_input("Nom de la recette *", value=recipe_data.get("nom", ""))
+            nom = st.text_input(
+                "Nom de la recette *", value=recipe_data.get("nom", ""), key=_keys("nom")
+            )
         with col2:
             # Detecter automatiquement le type de repas à partir du nom
             default_type = "dîner"  # Defaut le plus courant
@@ -213,7 +215,9 @@ def _show_import_preview(recipe_data: dict):
             options = ["petit_dejeuner", "dejeuner", "dîner", "goûter", "aperitif", "dessert"]
             default_idx = options.index(default_type) if default_type in options else 2
 
-            type_repas = st.selectbox("Type de repas *", options, index=default_idx)
+            type_repas = st.selectbox(
+                "Type de repas *", options, index=default_idx, key=_keys("type_repas")
+            )
 
         description = st.text_area(
             "Description", value=recipe_data.get("description", ""), height=100
@@ -227,11 +231,14 @@ def _show_import_preview(recipe_data: dict):
             "URL de l'image extraite",
             value=extracted_image_url,
             help="URL automatiquement extraite du site, vous pouvez la modifier",
+            key=_keys("image_url_input"),
         )
 
         st.markdown("**Ou telecharger une image:**")
         uploaded_image = st.file_uploader(
-            "Choisissez une image", type=["jpg", "jpeg", "png", "webp"], key="import_image_uploader"
+            "Choisissez une image",
+            type=["jpg", "jpeg", "png", "webp"],
+            key=_keys("import_image_uploader"),
         )
 
         # Temps et portions
@@ -242,6 +249,7 @@ def _show_import_preview(recipe_data: dict):
                 min_value=0,
                 max_value=300,
                 value=recipe_data.get("temps_preparation", 15),
+                key=_keys("temps_prep"),
             )
         with col2:
             temps_cuisson = st.number_input(
@@ -249,13 +257,20 @@ def _show_import_preview(recipe_data: dict):
                 min_value=0,
                 max_value=300,
                 value=recipe_data.get("temps_cuisson", 20),
+                key=_keys("temps_cuisson"),
             )
         with col3:
             portions = st.number_input(
-                "Portions", min_value=1, max_value=20, value=recipe_data.get("portions", 4)
+                "Portions",
+                min_value=1,
+                max_value=20,
+                value=recipe_data.get("portions", 4),
+                key=_keys("portions"),
             )
 
-        difficulte = st.selectbox("Difficulte", ["facile", "moyen", "difficile"], index=0)
+        difficulte = st.selectbox(
+            "Difficulte", ["facile", "moyen", "difficile"], index=0, key=_keys("difficulte")
+        )
 
         # Ingredients
         st.markdown("#### 🛍 Ingredients")
@@ -264,12 +279,12 @@ def _show_import_preview(recipe_data: dict):
         # Afficher et permettre l'edition
         edited_ingredients = []
         for idx, ing in enumerate(ingredients):
-            ing_text = st.text_input(f"Ingredient {idx + 1}", value=ing, key=f"ing_{idx}")
+            ing_text = st.text_input(f"Ingredient {idx + 1}", value=ing, key=_keys("ing", idx))
             if ing_text:
                 edited_ingredients.append(ing_text)
 
         # Ajouter un ingredient vierge pour en ajouter plus
-        new_ing = st.text_input("Nouvel ingredient (optionnel)", key="new_ing")
+        new_ing = st.text_input("Nouvel ingredient (optionnel)", key=_keys("new_ing"))
         if new_ing:
             edited_ingredients.append(new_ing)
 
@@ -282,13 +297,13 @@ def _show_import_preview(recipe_data: dict):
             # Enlever le numero si present
             etape_text = etape.lstrip("0123456789.").strip()
             etape_input = st.text_area(
-                f"Étape {idx + 1}", value=etape_text, height=60, key=f"step_{idx}"
+                f"Étape {idx + 1}", value=etape_text, height=60, key=_keys("step", idx)
             )
             if etape_input:
                 edited_etapes.append(etape_input)
 
         # Ajouter une etape vierge
-        new_step = st.text_area("Nouvelle etape (optionnel)", height=60, key="new_step")
+        new_step = st.text_area("Nouvelle etape (optionnel)", height=60, key=_keys("new_step"))
         if new_step:
             edited_etapes.append(new_step)
 

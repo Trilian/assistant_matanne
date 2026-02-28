@@ -12,6 +12,7 @@ import streamlit as st
 from src.core.state import rerun
 from src.services.core.backup.service import obtenir_service_backup
 from src.ui.fragments import ui_fragment
+from src.ui.keys import KeyNamespace
 
 
 @ui_fragment
@@ -20,13 +21,14 @@ def afficher_sauvegarde():
     st.subheader("💾 Sauvegarde & Restauration")
 
     service = obtenir_service_backup()
+    keys = KeyNamespace("sauvegarde")
 
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("### Créer un backup")
 
-        compress = st.checkbox("Compresser (gzip)", value=True, key="backup_compress")
+        compress = st.checkbox("Compresser (gzip)", value=True, key=keys("compress"))
 
         if st.button("📥 Créer un backup maintenant", use_container_width=True, type="primary"):
             with st.spinner("Création du backup..."):
@@ -57,10 +59,10 @@ def afficher_sauvegarde():
 
                     col_a, col_b = st.columns(2)
                     with col_a:
-                        if st.button("🔄 Restaurer", key=f"restore_{backup.id}"):
+                        if st.button("🔄 Restaurer", key=keys("restore", backup.id)):
                             st.warning("⚠️ Cette action va écraser les données actuelles!")
                     with col_b:
-                        if st.button("🗑️ Supprimer", key=f"delete_{backup.id}"):
+                        if st.button("🗑️ Supprimer", key=keys("delete", backup.id)):
                             if service.supprimer_sauvegarde(backup.id):
                                 st.success("Backup supprimé")
                                 rerun()
@@ -70,14 +72,14 @@ def afficher_sauvegarde():
     st.markdown("### Restaurer depuis un fichier")
 
     uploaded_file = st.file_uploader(
-        "Choisir un fichier de backup", type=["json", "gz"], key="backup_upload"
+        "Choisir un fichier de backup", type=["json", "gz"], key=keys("upload")
     )
 
     if uploaded_file:
         clear_existing = st.checkbox(
             "Supprimer les données existantes avant restauration",
             value=False,
-            key="clear_before_restore",
+            key=keys("clear_before_restore"),
         )
 
         if st.button("🔄 Restaurer ce backup", type="secondary"):

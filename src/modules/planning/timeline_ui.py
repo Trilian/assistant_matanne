@@ -236,7 +236,7 @@ def afficher_legende():
 @profiler_rerun("timeline_ui")
 def app():
     """Point d'entrée du module timeline."""
-    st.title("📊 Vue Timeline")
+    st.title("Planning familial — Timeline")
     st.caption("Visualisation chronologique de vos événements")
 
     with error_boundary("timeline_ui"):

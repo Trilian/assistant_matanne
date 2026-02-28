@@ -15,8 +15,6 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
-from src.core.models.notifications import PreferenceNotification
-from src.core.models.users import ProfilUtilisateur
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -114,12 +112,16 @@ class ProfilService:
     @avec_session_db
     def obtenir_profils(*, db: Session | None = None) -> list[ProfilUtilisateur]:
         """Retourne tous les profils utilisateurs."""
+        from src.core.models.users import ProfilUtilisateur
+
         return list(db.query(ProfilUtilisateur).order_by(ProfilUtilisateur.id).all())
 
     @staticmethod
     @avec_session_db
     def obtenir_profil(username: str, *, db: Session | None = None) -> ProfilUtilisateur | None:
         """Retourne un profil par username."""
+        from src.core.models.users import ProfilUtilisateur
+
         return db.query(ProfilUtilisateur).filter_by(username=username).first()
 
     @staticmethod
@@ -128,6 +130,8 @@ class ProfilService:
         user_id: int, *, db: Session | None = None
     ) -> ProfilUtilisateur | None:
         """Retourne un profil par ID."""
+        from src.core.models.users import ProfilUtilisateur
+
         return db.query(ProfilUtilisateur).filter_by(id=user_id).first()
 
     @staticmethod
@@ -136,6 +140,8 @@ class ProfilService:
         username: str, data: dict[str, Any], *, db: Session | None = None
     ) -> ProfilUtilisateur | None:
         """Met à jour un profil existant."""
+        from src.core.models.users import ProfilUtilisateur
+
         profil = db.query(ProfilUtilisateur).filter_by(username=username).first()
         if not profil:
             logger.warning("Profil introuvable: %s", username)
@@ -190,6 +196,8 @@ class ProfilService:
     @avec_session_db
     def definir_pin(username: str, pin: str, *, db: Session | None = None) -> bool:
         """Définit un PIN pour un profil."""
+        from src.core.models.users import ProfilUtilisateur
+
         profil = db.query(ProfilUtilisateur).filter_by(username=username).first()
         if not profil:
             return False
@@ -202,6 +210,8 @@ class ProfilService:
     @avec_session_db
     def supprimer_pin(username: str, *, db: Session | None = None) -> bool:
         """Supprime le PIN d'un profil."""
+        from src.core.models.users import ProfilUtilisateur
+
         profil = db.query(ProfilUtilisateur).filter_by(username=username).first()
         if not profil:
             return False
@@ -215,6 +225,8 @@ class ProfilService:
     @avec_session_db
     def verifier_pin(username: str, pin: str, *, db: Session | None = None) -> bool:
         """Vérifie un PIN."""
+        from src.core.models.users import ProfilUtilisateur
+
         profil = db.query(ProfilUtilisateur).filter_by(username=username).first()
         if not profil or not profil.pin_hash:
             return False
@@ -226,6 +238,8 @@ class ProfilService:
         username: str, sections: list[str], *, db: Session | None = None
     ) -> bool:
         """Définit les sections protégées par PIN."""
+        from src.core.models.users import ProfilUtilisateur
+
         profil = db.query(ProfilUtilisateur).filter_by(username=username).first()
         if not profil:
             return False
@@ -239,6 +253,9 @@ class ProfilService:
     @avec_session_db
     def exporter_configuration(username: str, *, db: Session | None = None) -> dict[str, Any]:
         """Exporte la configuration complète d'un profil en JSON."""
+        from src.core.models.notifications import PreferenceNotification
+        from src.core.models.users import ProfilUtilisateur
+
         profil = db.query(ProfilUtilisateur).filter_by(username=username).first()
         if not profil:
             return {}

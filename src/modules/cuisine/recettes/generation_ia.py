@@ -44,12 +44,13 @@ def afficher_generer_ia():
 def _afficher_recherche_specifique(service):
     """Mode recherche de variantes d'une recette spécifique"""
     st.info("🔍 Générez plusieurs variantes d'une recette spécifique")
-    with st.form("form_recette_specifique", border=True):
+    with st.form(_keys("form_recette_specifique"), border=True):
         recette_recherche = st.text_input(
             "Nom de la recette recherchée *",
             placeholder="Exemple: pâtes bolognaises, tarte tatin, pizza...",
+            key=_keys("recette_recherche"),
         )
-        nb_variantes = st.slider("Nombre de variantes", 1, 5, 3)
+        nb_variantes = st.slider("Nombre de variantes", 1, 5, 3, key=_keys("nb_variantes"))
         submitted_spec = st.form_submit_button(
             "🔍 Chercher des variantes", use_container_width=True
         )
@@ -82,30 +83,40 @@ def _afficher_recherche_specifique(service):
 def _afficher_mode_personnalise(service):
     """Mode génération personnalisée"""
     st.info("💡 Laissez l'IA générer des recettes personnalisées basées sur vos préférences")
-    with st.form("form_recette_ia", border=True):
+    with st.form(_keys("form_recette_ia"), border=True):
         col1, col2 = st.columns(2)
         with col1:
             type_repas = st.selectbox(
                 "Type de repas *",
                 ["petit_déjeuner", "déjeuner", "dîner", "goûter", "apéritif", "dessert"],
+                key=_keys("type_repas"),
             )
         with col2:
             saison = st.selectbox(
-                "Saison *", ["printemps", "été", "automne", "hiver", "toute_année"]
+                "Saison *",
+                ["printemps", "été", "automne", "hiver", "toute_année"],
+                key=_keys("saison"),
             )
 
         col1, col2 = st.columns(2)
         with col1:
-            difficulte = st.selectbox("Niveau de difficulté", ["facile", "moyen", "difficile"])
+            difficulte = st.selectbox(
+                "Niveau de difficulté", ["facile", "moyen", "difficile"], key=_keys("difficulte")
+            )
         with col2:
             nb_recettes = st.number_input(
-                "Nombre de suggestions", min_value=1, max_value=10, value=3
+                "Nombre de suggestions",
+                min_value=1,
+                max_value=10,
+                value=3,
+                key=_keys("nb_recettes"),
             )
 
         ingredients_str = st.text_area(
             "Ingrédients disponibles (optionnel)",
             placeholder="Séparez les ingrédients par des virgules\nEx: tomate, oignon, ail, riz",
             height=80,
+            key=_keys("ingredients_str"),
         )
 
         submitted = st.form_submit_button("🤖 Générer avec l'IA", use_container_width=True)

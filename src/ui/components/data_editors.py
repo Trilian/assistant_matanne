@@ -157,13 +157,13 @@ def editeur_inventaire(
 
     # Détecter les modifications
     if edited_df is not None and not df.equals(edited_df):
-        col_save, col_cancel = st.columns([1, 4])
+        col_save, col_cancel = st.columns([4, 1])
 
         with col_save:
             if st.button(
                 "💾 Sauvegarder",
                 type="primary",
-                use_container_width=True,
+                use_container_width=False,
                 key=_keys(f"save_inventaire{key_suffix}"),
             ):
                 if on_save:
@@ -174,7 +174,7 @@ def editeur_inventaire(
         with col_cancel:
             if st.button(
                 "↩️ Annuler",
-                use_container_width=True,
+                use_container_width=False,
                 key=_keys(f"cancel_inventaire{key_suffix}"),
             ):
                 rerun()

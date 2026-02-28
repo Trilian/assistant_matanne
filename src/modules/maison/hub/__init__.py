@@ -1,7 +1,7 @@
 """
-🏠 Hub Maison - Dashboard Intelligent
+🏠 Maison - Dashboard Intelligent
 
-Hub central avec :
+Maison central avec :
 - Briefing IA quotidien
 - Tâches prioritaires (respect charge mentale)
 - Stats visuelles
@@ -26,6 +26,8 @@ from src.ui.keys import KeyNamespace
 
 _keys = KeyNamespace("maison_hub")
 
+from src.core.state import GestionnaireEtat, rerun
+
 from .data import calculer_charge, obtenir_alertes, obtenir_stats_globales, obtenir_taches_jour
 from .styles import injecter_css_hub
 from .ui import (
@@ -39,8 +41,19 @@ from .ui import (
 
 @profiler_rerun("maison_hub")
 def app():
-    """Point d'entrée du hub maison."""
-    with error_boundary(titre="Erreur hub maison"):
+    """Point d'entrée du module Maison."""
+    with error_boundary(titre="Erreur Maison"):
+        # Navigation depuis le composant HTML (ex: ?navigate=maison.jardin)
+        params = st.experimental_get_query_params()
+        if "navigate" in params:
+            target = params["navigate"][0]
+            try:
+                GestionnaireEtat.naviguer_vers(target)
+            finally:
+                # Efface le param pour éviter boucle et force rerun
+                st.experimental_set_query_params()
+                rerun()
+
         injecter_css_hub()
 
         # Données

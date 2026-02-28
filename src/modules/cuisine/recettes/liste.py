@@ -42,7 +42,7 @@ def afficher_liste():
             "Recettes/page",
             [6, 9, 12, 15],
             index=[6, 9, 12, 15].index(st.session_state[_keys("page_size_val")]),
-            key=_keys("page_size_sel"),
+            key=_keys("page_size_val"),
             label_visibility="collapsed",
         )
         st.session_state[_keys("page_size_val")] = page_size
@@ -323,7 +323,7 @@ def afficher_liste():
                 if st.button(
                     "👁️ Voir détails", use_container_width=True, key=_keys("detail", recette.id)
                 ):
-                    st.session_state.detail_recette_id = recette.id
+                    st.session_state[_keys("detail_id")] = recette.id
                     rerun()
 
                 # Bouton supprimer avec popover confirmation
@@ -339,7 +339,7 @@ def afficher_liste():
                                     with st.spinner("Suppression en cours..."):
                                         if service.delete(recette.id):
                                             st.success("✅ Recette supprimée!")
-                                            st.session_state.detail_recette_id = None
+                                            st.session_state[_keys("detail_id")] = None
                                             time.sleep(1)
                                             rerun()
                                         else:
@@ -358,7 +358,7 @@ def afficher_liste():
 
     with col1:
         if st.session_state[_keys("page")] > 0:
-            if st.button("⬅️ Précédent"):
+            if st.button("⬅️ Précédent", key=_keys("prev")):
                 st.session_state[_keys("page")] -= 1
                 rerun()
 
@@ -367,7 +367,7 @@ def afficher_liste():
 
     with col5:
         if st.session_state[_keys("page")] < total_pages - 1:
-            if st.button("Suivant ➡️"):
+            if st.button("Suivant ➡️", key=_keys("next")):
                 st.session_state[_keys("page")] += 1
                 rerun()
 

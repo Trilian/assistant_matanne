@@ -205,7 +205,6 @@ def _afficher_jour(
     """Affiche le contenu d'un jour dans une colonne."""
     est_aujourdhui = jour == date.today()
     style_border = "border: 2px solid var(--st-primary, #1976d2);" if est_aujourdhui else ""
-    label_aujourdhui = " · **Auj.**" if est_aujourdhui else ""
 
     st.markdown(
         f"<div style='min-height:60px;padding:6px;border-radius:8px;"
@@ -213,7 +212,10 @@ def _afficher_jour(
         unsafe_allow_html=True,
     )
 
-    st.markdown(f"**{_JOURS_FR[jour.weekday()]} {jour.day}**{label_aujourdhui}")
+    st.markdown(f"**{_JOURS_FR[jour.weekday()]} {jour.day}**")
+
+    if est_aujourdhui:
+        st.caption("Aujourd'hui")
 
     # Repas
     if repas:
@@ -282,7 +284,7 @@ def app() -> None:
     """Point d'entrée du cockpit familial."""
 
     with error_boundary("cockpit_familial"):
-        st.title("🎯 Cockpit Familial")
+        st.title("Planning familial")
         st.caption("Vue unifiée de votre semaine — repas, événements, activités, tâches")
 
         # ── Accès rapide aux outils planning ──
@@ -311,24 +313,31 @@ def app() -> None:
         if offset_key not in st.session_state:
             st.session_state[offset_key] = 0
 
-        col_prev, col_label, col_next, col_today = st.columns([1, 4, 1, 1])
+        col_prev, col_label, col_next = st.columns([1, 4, 1])
         with col_prev:
-            if st.button("◀️ Semaine préc.", key=_keys("prev")):
+            if st.button("◀ Semaine", key=_keys("prev")):
                 st.session_state[offset_key] -= 1
                 rerun()
         with col_next:
-            if st.button("Semaine suiv. ▶️", key=_keys("next")):
+            if st.button("Semaine ▶", key=_keys("next")):
                 st.session_state[offset_key] += 1
-                rerun()
-        with col_today:
-            if st.button("📍 Aujourd'hui", key=_keys("today")):
-                st.session_state[offset_key] = 0
                 rerun()
 
         lundi, dimanche = _plage_semaine(st.session_state[offset_key])
 
         with col_label:
-            st.subheader(f"Semaine du {lundi.strftime('%d/%m')} au {dimanche.strftime('%d/%m/%Y')}")
+            week_label = f"Semaine du {lundi.strftime('%d/%m')} au {dimanche.strftime('%d/%m/%Y')}"
+            st.markdown(
+                f"<h3 class='planning--no-wrap' style='text-align:center;margin:0.25rem 0;'>{week_label}</h3>",
+                unsafe_allow_html=True,
+            )
+
+        # Second row: centered Today button
+        c1, c2, c3 = st.columns([1, 2, 1])
+        with c2:
+            if st.button("📍 Aujourd'hui", key=_keys("today")):
+                st.session_state[offset_key] = 0
+                rerun()
 
         st.markdown("---")
 

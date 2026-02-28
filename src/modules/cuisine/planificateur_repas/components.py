@@ -6,6 +6,7 @@ from datetime import date
 
 import streamlit as st
 
+from src.core.state import rerun
 from src.ui.keys import KeyNamespace
 
 from .preferences import (
@@ -26,17 +27,21 @@ def afficher_configuration_preferences():
 
     st.subheader("⚙️ Mes Préférences Alimentaires")
 
-    with st.form("form_preferences"):
+    with st.form(_keys("form_preferences")):
         # Famille
         st.markdown("##### 👨‍👩‍👦 Ma famille")
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            nb_adultes = st.number_input("Adultes", 1, 6, prefs.nb_adultes)
+            nb_adultes = st.number_input("Adultes", 1, 6, prefs.nb_adultes, key=_keys("nb_adultes"))
         with col2:
-            jules_present = st.checkbox("Jules mange avec nous", value=prefs.jules_present)
+            jules_present = st.checkbox(
+                "Jules mange avec nous", value=prefs.jules_present, key=_keys("jules_present")
+            )
         with col3:
-            jules_age = st.number_input("Âge Jules (mois)", 6, 36, prefs.jules_age_mois)
+            jules_age = st.number_input(
+                "Âge Jules (mois)", 6, 36, prefs.jules_age_mois, key=_keys("jules_age")
+            )
 
         st.markdown("##### ⏱️ Temps de cuisine")
         col1, col2 = st.columns(2)
@@ -47,6 +52,7 @@ def afficher_configuration_preferences():
                 options=list(TEMPS_CATEGORIES.keys()),
                 format_func=lambda x: TEMPS_CATEGORIES[x]["label"],
                 index=list(TEMPS_CATEGORIES.keys()).index(prefs.temps_semaine),
+                key=_keys("temps_semaine"),
             )
         with col2:
             temps_weekend = st.selectbox(
@@ -54,6 +60,7 @@ def afficher_configuration_preferences():
                 options=list(TEMPS_CATEGORIES.keys()),
                 format_func=lambda x: TEMPS_CATEGORIES[x]["label"],
                 index=list(TEMPS_CATEGORIES.keys()).index(prefs.temps_weekend),
+                key=_keys("temps_weekend"),
             )
 
         st.markdown("##### 🚫 Aliments à éviter")
@@ -61,6 +68,7 @@ def afficher_configuration_preferences():
             "Séparés par des virgules",
             value=", ".join(prefs.aliments_exclus),
             placeholder="Ex: fruits de mer, abats, coriandre",
+            key=_keys("aliments_exclus"),
         )
 
         st.markdown("##### ❤️ Vos basiques adorés")
@@ -68,17 +76,28 @@ def afficher_configuration_preferences():
             "Séparés par des virgules",
             value=", ".join(prefs.aliments_favoris),
             placeholder="Ex: pâtes, poulet, gratins",
+            key=_keys("aliments_favoris"),
         )
 
-        st.markdown("##### ⚖️ Équilibre souhaité par semaine")
+        st.markdown("##### ⚖️ Équilibre souhaité par semaine")
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            poisson = st.number_input("🐟 Poisson", 0, 7, prefs.poisson_par_semaine)
+            poisson = st.number_input(
+                "🐟 Poisson", 0, 7, prefs.poisson_par_semaine, key=_keys("poisson_par_semaine")
+            )
         with col2:
-            vege = st.number_input("🥬 Végétarien", 0, 7, prefs.vegetarien_par_semaine)
+            vege = st.number_input(
+                "🥬 Végétarien",
+                0,
+                7,
+                prefs.vegetarien_par_semaine,
+                key=_keys("vegetarien_par_semaine"),
+            )
         with col3:
-            viande_rouge = st.number_input("🥩 Viande rouge max", 0, 7, prefs.viande_rouge_max)
+            viande_rouge = st.number_input(
+                "🥩 Viande rouge max", 0, 7, prefs.viande_rouge_max, key=_keys("viande_rouge_max")
+            )
 
         st.markdown("##### 🤖 Mes robots cuisine")
         robots_selected = []
@@ -88,7 +107,7 @@ def afficher_configuration_preferences():
                 if st.checkbox(
                     f"{robot_info['emoji']} {robot_info['label']}",
                     value=robot_id in prefs.robots,
-                    key=f"robot_pref_{robot_id}",
+                    key=_keys("robot_pref", robot_id),
                 ):
                     robots_selected.append(robot_id)
 

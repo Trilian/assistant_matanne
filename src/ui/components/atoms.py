@@ -539,7 +539,7 @@ def action_bar(
             if st.button(
                 btn_label,
                 key=f"{key_prefix}_{i}_{label.lower().replace(' ', '_')}",
-                use_container_width=True,
+                use_container_width=False,
                 type=btn_type,
             ):
                 clicked = label

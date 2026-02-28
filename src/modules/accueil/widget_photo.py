@@ -160,6 +160,39 @@ def afficher_photo_souvenir():
 
     st.markdown("### 📸 Souvenir du jour")
 
+    # Upload simple
+    uploaded = st.file_uploader("Ajouter une photo", type=["jpg", "jpeg", "png", "webp", "gif"])
+    if uploaded:
+        PHOTOS_DIR.mkdir(parents=True, exist_ok=True)
+        dest = PHOTOS_DIR / uploaded.name
+        # avoid overwrite
+        if dest.exists():
+            base = dest.stem
+            ext = dest.suffix
+            i = 1
+            while (PHOTOS_DIR / f"{base}_{i}{ext}").exists():
+                i += 1
+            dest = PHOTOS_DIR / f"{base}_{i}{ext}"
+        with open(dest, "wb") as f:
+            f.write(uploaded.getbuffer())
+        # update metadata minimal entry
+        meta = _charger_metadata()
+        meta.setdefault(dest.name, {})
+        _initialiser_dossier()
+        try:
+            # write full metadata file preserving header keys
+            if METADATA_FILE.exists():
+                with open(METADATA_FILE, encoding="utf-8") as fh:
+                    raw = json.load(fh)
+            else:
+                raw = {}
+            raw[dest.name] = meta.get(dest.name, {})
+            with open(METADATA_FILE, "w", encoding="utf-8") as fh:
+                json.dump(raw, fh, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+        st.success("Photo ajoutée !")
+
     if photo:
         # Afficher la photo
         try:

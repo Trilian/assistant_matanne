@@ -15,6 +15,7 @@ from datetime import date, datetime, timedelta
 
 import streamlit as st
 
+from src.core.date_utils.formatage import formater_date_fr
 from src.ui.fragments import cached_fragment
 from src.ui.keys import KeyNamespace
 from src.ui.tokens import Couleur, Rayon
@@ -170,9 +171,8 @@ def _generer_resume_local(donnees: dict) -> str:
     except Exception:
         nom = ""
 
-    jour_semaine = aujourdhui.strftime("%A").capitalize()
-    jour_mois = aujourdhui.strftime("%d %B")
-    parts.append(f"**{salut} {nom} !** Nous sommes {jour_semaine} {jour_mois}.")
+    date_str = formater_date_fr(aujourdhui, avec_annee=False)
+    parts.append(f"**{salut} {nom} !** Nous sommes {date_str}.")
 
     # Météo
     if donnees.get("meteo"):
@@ -266,7 +266,7 @@ def _generer_resume_ia(donnees: dict) -> str | None:
         except Exception:
             nom = "la famille"
 
-        jour = donnees["date"].strftime("%A %d %B")
+        jour = formater_date_fr(donnees["date"], avec_annee=False)
         contexte = "\n".join(f"- {p}" for p in contexte_parts)
 
         prompt = f"""Génère un court résumé matinal chaleureux et personnalisé pour {nom}.

@@ -57,10 +57,10 @@ Session d'implémentation des 7 recommandations identifiées dans le rapport d'a
 
 #### Finding 7 — Services transversaux manquants (offline queue + analytics)
 
-| Item                                | Status | Notes                                                                                                                                                          |
-| ----------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/services/core/file_attente.py` | ✅     | ~350 LOC — Queue offline avec retry backoff exponentiel (1s→60s, 5 retries), persistence JSON (`data/.file_attente.json`), callback importlib                  |
-| `src/services/core/analytics.py`    | ✅     | ~340 LOC — Analytics usage avec wildcard bus, Counter-based fast lookups, `suivre_page()/suivre_action()/mesurer_temps()`, `top_pages()/repartition_modules()` |
+| Item                                | Status      | Notes                                                                                                                                                                 |
+| ----------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/services/core/file_attente.py` | Not started | ~350 LOC — Queue offline prévue avec retry backoff exponentiel (1s→60s, 5 retries), persistence JSON (`data/.file_attente.json`), callback importlib                  |
+| `src/services/core/analytics.py`    | Not started | ~340 LOC — Analytics usage prévue avec wildcard bus, Counter-based fast lookups, `suivre_page()/suivre_action()/mesurer_temps()`, `top_pages()/repartition_modules()` |
 
 #### Fichiers créés
 

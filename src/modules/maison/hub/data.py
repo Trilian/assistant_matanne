@@ -1,5 +1,5 @@
 """
-Hub Maison - Fonctions de données.
+Maison - Fonctions de données.
 
 Agrégation des données depuis les services et la base de données.
 Les tâches et alertes sont issues des services (jardin, entretien).

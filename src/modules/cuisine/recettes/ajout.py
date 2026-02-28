@@ -31,12 +31,12 @@ def afficher_ajouter_manuel():
     # Infos basiques (sans form pour réactivité)
     col1, col2 = st.columns(2)
     with col1:
-        nom = st.text_input("Nom de la recette *", max_chars=200, key="form_nom")
+        nom = st.text_input("Nom de la recette *", max_chars=200, key=_keys("nom"))
     with col2:
         type_repas = st.selectbox(
             "Type de repas *",
             ["petit_déjeuner", "déjeuner", "dîner", "goûter", "apéritif", "dessert"],
-            key="form_type_repas",
+            key=_keys("type_repas"),
         )
 
     # Upload d'image
@@ -45,33 +45,33 @@ def afficher_ajouter_manuel():
         image_file = st.file_uploader(
             "📷 Photo de la recette (optionnel)",
             type=["jpg", "jpeg", "png"],
-            key="form_image_upload",
+            key=_keys("image_upload"),
         )
 
-    description = st.text_area("Description", height=100, key="form_description")
+    description = st.text_area("Description", height=100, key=_keys("description"))
 
     col1, col2, col3 = st.columns(3)
     with col1:
         temps_prep = st.number_input(
-            "Temps préparation (min)", min_value=0, max_value=300, value=15, key="form_temps_prep"
+            "Temps préparation (min)", min_value=0, max_value=300, value=15, key=_keys("temps_prep")
         )
     with col2:
         temps_cuisson = st.number_input(
-            "Temps cuisson (min)", min_value=0, max_value=300, value=20, key="form_temps_cuisson"
+            "Temps cuisson (min)", min_value=0, max_value=300, value=20, key=_keys("temps_cuisson")
         )
     with col3:
         portions = st.number_input(
-            "Portions", min_value=1, max_value=20, value=4, key="form_portions"
+            "Portions", min_value=1, max_value=20, value=4, key=_keys("portions")
         )
 
     col1, col2 = st.columns(2)
     with col1:
         difficulte = st.selectbox(
-            "Difficulté", ["facile", "moyen", "difficile"], key="form_difficulte"
+            "Difficulté", ["facile", "moyen", "difficile"], key=_keys("difficulte")
         )
     with col2:
         saison = st.selectbox(
-            "Saison", ["toute_année", "printemps", "été", "automne", "hiver"], key="form_saison"
+            "Saison", ["toute_année", "printemps", "été", "automne", "hiver"], key=_keys("saison")
         )
 
     # Ingrédients
@@ -83,7 +83,7 @@ def afficher_ajouter_manuel():
             min_value=1,
             max_value=20,
             value=st.session_state[_keys("num_ingredients")],
-            key="form_num_ing_selector",
+            key=_keys("num_ing_selector"),
         )
         st.session_state[_keys("num_ingredients")] = num_ingredients
 
@@ -91,11 +91,11 @@ def afficher_ajouter_manuel():
     for i in range(int(num_ingredients)):
         col1, col2, col3 = st.columns([2, 1, 1])
         with col1:
-            ing_nom = st.text_input(f"Ingrédient {i + 1}", key=f"form_ing_nom_{i}")
+            ing_nom = st.text_input(f"Ingrédient {i + 1}", key=_keys("ing_nom", i))
         with col2:
-            ing_qty = st.number_input("Qté", value=1.0, key=f"form_ing_qty_{i}", step=0.25)
+            ing_qty = st.number_input("Qté", value=1.0, key=_keys("ing_qty", i), step=0.25)
         with col3:
-            ing_unit = st.text_input("Unité", value="g", key=f"form_ing_unit_{i}", max_chars=20)
+            ing_unit = st.text_input("Unité", value="g", key=_keys("ing_unit", i), max_chars=20)
 
         if ing_nom:
             ingredients.append({"nom": ing_nom, "quantite": ing_qty, "unite": ing_unit})
@@ -109,13 +109,13 @@ def afficher_ajouter_manuel():
             min_value=1,
             max_value=15,
             value=st.session_state[_keys("num_etapes")],
-            key="form_num_etapes_selector",
+            key=_keys("num_etapes_selector"),
         )
         st.session_state[_keys("num_etapes")] = num_etapes
 
     etapes = []
     for i in range(int(num_etapes)):
-        etape_desc = st.text_area(f"Étape {i + 1}", height=80, key=f"form_etape_{i}")
+        etape_desc = st.text_area(f"Étape {i + 1}", height=80, key=_keys("etape", i))
         if etape_desc:
             etapes.append({"description": etape_desc, "duree": None})
 
@@ -174,8 +174,9 @@ def afficher_ajouter_manuel():
                     # Réinitialiser le formulaire
                     st.session_state[_keys("num_ingredients")] = 3
                     st.session_state[_keys("num_etapes")] = 3
+                    prefix = _keys.prefix + "__"
                     for key in list(st.session_state.keys()):
-                        if key.startswith("form_"):
+                        if key.startswith(prefix):
                             del st.session_state[key]
 
                     st.success(f"✅ Recette '{recette.nom}' créée avec succès!")

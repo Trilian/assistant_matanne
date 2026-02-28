@@ -83,6 +83,102 @@ PAGES: list[SectionConfig] = [
         "name": "",
         "pages": [
             _v("accueil", "src.modules.accueil", "Accueil", "🏠"),
+            _v("boite_outils", "src.modules.utilitaires.boite_outils", "Boîte à outils", "🧰"),
+            _h(
+                "chat_ia",
+                "src.modules.utilitaires.chat_ia",
+                "Chat IA",
+                "💬",
+                "boite_outils",
+            ),
+            # Hidden utility pages (registered here to keep sidebar uncluttered)
+            _h("barcode", "src.modules.utilitaires.barcode", "Code-barres", "📱", "boite_outils"),
+            _h(
+                "scan_factures",
+                "src.modules.utilitaires.scan_factures",
+                "Scan Factures",
+                "🧾",
+                "boite_outils",
+            ),
+            _h(
+                "recherche_produits",
+                "src.modules.utilitaires.recherche_produits",
+                "Produits",
+                "🔍",
+                "boite_outils",
+            ),
+            _h("rapports", "src.modules.utilitaires.rapports", "Rapports", "📊", "boite_outils"),
+            _h(
+                "notifications_push",
+                "src.modules.utilitaires.notifications_push",
+                "Notifications",
+                "🔔",
+                "boite_outils",
+            ),
+            _h(
+                "export_global",
+                "src.modules.utilitaires.export_global",
+                "Export Global",
+                "📤",
+                "boite_outils",
+            ),
+            _h(
+                "import_masse",
+                "src.modules.utilitaires.import_masse",
+                "Import Masse",
+                "📥",
+                "boite_outils",
+            ),
+            _h("notes_memos", "src.modules.utilitaires.notes_memos", "Notes", "📝", "boite_outils"),
+            _h(
+                "journal_bord",
+                "src.modules.utilitaires.journal_bord",
+                "Journal",
+                "📓",
+                "boite_outils",
+            ),
+            _h(
+                "presse_papiers",
+                "src.modules.utilitaires.presse_papiers",
+                "Presse-papiers",
+                "📋",
+                "boite_outils",
+            ),
+            _h(
+                "liens_utiles",
+                "src.modules.utilitaires.liens_utiles",
+                "Favoris",
+                "🔗",
+                "boite_outils",
+            ),
+            _h(
+                "annuaire_contacts",
+                "src.modules.utilitaires.annuaire_contacts",
+                "Contacts",
+                "📇",
+                "boite_outils",
+            ),
+            _h(
+                "compte_rebours",
+                "src.modules.utilitaires.compte_rebours",
+                "Compte à rebours",
+                "⏳",
+                "boite_outils",
+            ),
+            _h(
+                "mots_de_passe",
+                "src.modules.utilitaires.mots_de_passe",
+                "Mots de passe",
+                "🔐",
+                "boite_outils",
+            ),
+            _h(
+                "qr_code_gen",
+                "src.modules.utilitaires.qr_code_gen",
+                "QR Codes",
+                "📱",
+                "boite_outils",
+            ),
         ],
     },
     # ── Planning ─────────────────────────────────────────────
@@ -92,7 +188,7 @@ PAGES: list[SectionConfig] = [
             _v(
                 "planning.cockpit",
                 "src.modules.planning.cockpit_familial",
-                "Cockpit Familial",
+                "Planning familial",
                 "🎯",
             ),
             _h(
@@ -304,7 +400,7 @@ PAGES: list[SectionConfig] = [
     {
         "name": "🏠 Maison",
         "pages": [
-            _v("maison.hub", "src.modules.maison.hub", "Hub Maison", "🏠"),
+            _v("maison.hub", "src.modules.maison.hub", "Maison", "🏠"),
             _h("maison.jardin", "src.modules.maison.jardin", "Jardin", "🌱", "maison.hub"),
             _h(
                 "maison.jardin_zones",
@@ -367,101 +463,7 @@ PAGES: list[SectionConfig] = [
             _h("jeux.educatif", "src.modules.jeux.educatif", "Module Éducatif", "🎓", "jeux.bilan"),
         ],
     },
-    # ── Outils (fusion des 5 anciennes sections) ─────────────
-    {
-        "name": "🔧 Outils",
-        "pages": [
-            _v("chat_ia", "src.modules.utilitaires.chat_ia", "Chat IA", "💬"),
-            _v("outils.hub", "src.modules.utilitaires.boite_outils", "Boîte à outils", "🧰"),
-            # Scan & Recherche
-            _h("barcode", "src.modules.utilitaires.barcode", "Code-barres", "📱", "outils.hub"),
-            _h(
-                "scan_factures",
-                "src.modules.utilitaires.scan_factures",
-                "Scan Factures",
-                "🧾",
-                "outils.hub",
-            ),
-            _h(
-                "recherche_produits",
-                "src.modules.utilitaires.recherche_produits",
-                "Produits",
-                "🔍",
-                "outils.hub",
-            ),
-            _h("rapports", "src.modules.utilitaires.rapports", "Rapports", "📊", "outils.hub"),
-            _h(
-                "notifications_push",
-                "src.modules.utilitaires.notifications_push",
-                "Notifications",
-                "🔔",
-                "outils.hub",
-            ),
-            # Données (ex-section « Données »)
-            _h(
-                "export_global",
-                "src.modules.utilitaires.export_global",
-                "Export Global",
-                "📤",
-                "outils.hub",
-            ),
-            _h(
-                "import_masse",
-                "src.modules.utilitaires.import_masse",
-                "Import Masse",
-                "📥",
-                "outils.hub",
-            ),
-            # Productivité (ex-section « Productivité »)
-            _h("notes_memos", "src.modules.utilitaires.notes_memos", "Notes", "📝", "outils.hub"),
-            _h(
-                "journal_bord",
-                "src.modules.utilitaires.journal_bord",
-                "Journal",
-                "📓",
-                "outils.hub",
-            ),
-            _h(
-                "presse_papiers",
-                "src.modules.utilitaires.presse_papiers",
-                "Presse-papiers",
-                "📋",
-                "outils.hub",
-            ),
-            _h(
-                "liens_utiles",
-                "src.modules.utilitaires.liens_utiles",
-                "Favoris",
-                "🔗",
-                "outils.hub",
-            ),
-            _h(
-                "annuaire_contacts",
-                "src.modules.utilitaires.annuaire_contacts",
-                "Contacts",
-                "📇",
-                "outils.hub",
-            ),
-            _h(
-                "compte_rebours",
-                "src.modules.utilitaires.compte_rebours",
-                "Compte à rebours",
-                "⏳",
-                "outils.hub",
-            ),
-            # Sécurité
-            _h(
-                "mots_de_passe",
-                "src.modules.utilitaires.mots_de_passe",
-                "Mots de passe",
-                "🔐",
-                "outils.hub",
-            ),
-            _h(
-                "qr_code_gen", "src.modules.utilitaires.qr_code_gen", "QR Codes", "📱", "outils.hub"
-            ),
-        ],
-    },
+    # NOTE: 'Outils' section removed — `Boîte à outils` moved to root sidebar.
     # ── Configuration ────────────────────────────────────────
     {
         "name": "⚙️ Configuration",

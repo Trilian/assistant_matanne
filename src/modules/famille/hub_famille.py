@@ -583,6 +583,7 @@ def afficher_hub():
     st.subheader("🎯 Ce Weekend")
 
     afficher_weekend_preview()
+    afficher_vacances_preview()
 
     # Chat IA contextuel famille
     st.markdown("---")
@@ -638,3 +639,107 @@ def _afficher_day_activities(day: date):
     except Exception as e:
         logger.debug("Erreur activités jour: %s", e)
         st.caption("Rien de prévu")
+
+
+def afficher_vacances_preview():
+    """Aperçu / alerte pour prochaines vacances / fermetures crèche.
+    Propose de créer une checklist depuis template et de la télécharger (PDF + CSV).
+    """
+    try:
+        from src.core.config import obtenir_parametres
+        from src.core.state.persistent import PersistentState
+        from src.services.famille.jours_speciaux import obtenir_service_jours_speciaux
+        from src.services.maison.checklists_crud_service import obtenir_service_checklists_crud
+        from src.services.rapports.generation import ServiceRapportsPDF
+    except Exception as e:
+        logger.debug("Imports vacances preview: %s", e)
+        return
+
+    svc_js = obtenir_service_jours_speciaux()
+    prochains = svc_js.prochains_jours_speciaux(5)
+    # Filtrer fériés ou fermetures crèche
+    candidats = [j for j in prochains if j.type in ("ferie", "creche")]
+    if not candidats:
+        return
+
+    prochain = candidats[0]
+    today = date.today()
+    jours_restants = (prochain.date_jour - today).days
+
+    # Seuil d'alerte configurable (priorité: PersistentState 'param_alerts' puis Parametres)
+    try:
+        default_seuil = obtenir_parametres().VACANCES_ALERT_DAYS
+        pstate = PersistentState.get_instance("param_alerts")
+        seuil = pstate.get("vacances_alert_days", default_seuil)
+    except Exception:
+        try:
+            seuil = obtenir_parametres().VACANCES_ALERT_DAYS
+        except Exception:
+            seuil = 14
+
+    if jours_restants <= int(seuil):
+        st.markdown("---")
+        st.subheader("🏖️ Vacances & Fermetures à venir")
+        st.info(
+            f"Prochain: **{prochain.nom}** le {prochain.date_jour.strftime('%d/%m')} (dans {jours_restants}j)"
+        )
+
+        with st.expander("Préparer la checklist de vacances", expanded=False):
+            chk_svc = obtenir_service_checklists_crud()
+            templates = chk_svc.get_templates_disponibles()
+            options = [t["type_voyage"] for t in templates] if templates else ["vacances_ete"]
+            tpl_index = 0 if "vacances_ete" in options else 0
+            template_sel = st.selectbox(
+                "Choisir un template", options, index=tpl_index, key="vac_tpl"
+            )
+
+            if st.button("Créer checklist vacances", key="create_chk_vac"):
+                checklist = chk_svc.create_from_template(
+                    nom=f"Checklist {prochain.nom}",
+                    type_voyage=template_sel,
+                    date_depart=prochain.date_jour,
+                )
+                st.success(f"Checklist créée (id={checklist.id})")
+
+                # Télécharger CSV
+                try:
+                    import csv
+                    import io
+
+                    items = chk_svc.get_items(checklist.id)
+                    sio = io.StringIO()
+                    writer = csv.writer(sio)
+                    writer.writerow(["libelle", "categorie", "quand", "fait"])
+                    for it in items:
+                        writer.writerow(
+                            [
+                                getattr(it, "libelle", ""),
+                                getattr(it, "categorie", ""),
+                                getattr(it, "quand", ""),
+                                getattr(it, "fait", False),
+                            ]
+                        )
+
+                    st.download_button(
+                        "Télécharger CSV",
+                        data=sio.getvalue(),
+                        file_name=f"checklist_{checklist.id}.csv",
+                        mime="text/csv",
+                    )
+                except Exception as e:
+                    logger.debug("Erreur export CSV checklist: %s", e)
+                    st.warning("Impossible de préparer le CSV.")
+
+                # Télécharger PDF via ServiceRapportsPDF
+                try:
+                    rapports = ServiceRapportsPDF()
+                    pdf_buf, fname = rapports.telecharger_checklist_pdf(checklist.id)
+                    st.download_button(
+                        "Télécharger PDF",
+                        data=pdf_buf.getvalue(),
+                        file_name=fname,
+                        mime="application/pdf",
+                    )
+                except Exception as e:
+                    logger.debug("Erreur génération PDF checklist: %s", e)
+                    st.warning("Impossible de générer le PDF (dépendances manquantes ?).")

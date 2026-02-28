@@ -131,7 +131,7 @@ class GestionnaireEtat:
             "famille.suivi_perso": "Mon Suivi",
             "famille.activites": "Activités",
             "famille.shopping": "Shopping",
-            "maison.hub": "Hub Maison",
+            "maison.hub": "Maison",
             "maison.jardin": "Jardin",
             "maison.entretien": "Entretien",
             "maison.depenses": "Dépenses",

@@ -1945,7 +1945,7 @@ CREATE INDEX IF NOT EXISTS idx_sessions_travail_type_debut ON sessions_travail(t
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE versions_pieces (
     id SERIAL PRIMARY KEY,
-    piece_id INTEGER NOT NULL,
+    piece_id INTEGER NOT NULL REFERENCES pieces_maison(id) ON DELETE CASCADE,
     version INTEGER NOT NULL,
     type_modification VARCHAR(50) NOT NULL,
     titre VARCHAR(200) NOT NULL,
@@ -2277,7 +2277,7 @@ CREATE INDEX IF NOT EXISTS ix_souvenirs_album ON souvenirs_famille(album_id);
 CREATE INDEX IF NOT EXISTS ix_souvenirs_jalon ON souvenirs_famille(jalon_id);
 CREATE INDEX IF NOT EXISTS ix_souvenirs_date ON souvenirs_famille(date_souvenir);
 -- ============================================================================
--- PARTIE 5 : TABLES HUB MAISON (sans modèles ORM — migration 020)
+-- PARTIE 5 : TABLES MAISON (sans modèles ORM — migration 020)
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.01 PREFERENCES_HOME
@@ -3429,7 +3429,7 @@ all_tables TEXT [] := ARRAY [
         'versions_pieces', 'couts_travaux', 'logs_statut_objets',
         -- Préférences
         'preferences_utilisateurs', 'openfoodfacts_cache',
-        -- Hub Maison (migration 020)
+        -- Maison (migration 020)
         'preferences_home', 'taches_home', 'stats_home',
         'plantes_catalogue', 'recoltes', 'objectifs_autonomie',
         'contrats', 'factures', 'comparatifs', 'depenses_home', 'budgets_home',

@@ -31,7 +31,7 @@ _keys = KeyNamespace("templates")
 @profiler_rerun("templates_ui")
 def app():
     """Point d'entrée du module templates."""
-    st.title("📋 Templates de semaine")
+    st.title("Planning familial — Templates")
     st.caption("Créez des semaines types et appliquez-les facilement")
 
     with error_boundary("templates_ui"):
@@ -171,8 +171,7 @@ def app():
 
                 lundi = obtenir_debut_semaine(date_ref)
                 st.info(
-                    f"📅 Semaine du {lundi.strftime('%d/%m/%Y')} au "
-                    f"{(lundi + timedelta(days=6)).strftime('%d/%m/%Y')}"
+                    f"📅 Semaine du {lundi.strftime('%d/%m/%Y')}\u00a0au\u00a0{(lundi + timedelta(days=6)).strftime('%d/%m/%Y')}"
                 )
 
                 if st.button("📥 Créer depuis cette semaine", use_container_width=True):
@@ -217,8 +216,7 @@ def app():
 
                 lundi_cible = obtenir_debut_semaine(date_cible)
                 st.info(
-                    f"📅 Les événements seront créés du {lundi_cible.strftime('%d/%m/%Y')} "
-                    f"au {(lundi_cible + timedelta(days=6)).strftime('%d/%m/%Y')}"
+                    f"📅 Les événements seront créés du {lundi_cible.strftime('%d/%m/%Y')}\u00a0au\u00a0{(lundi_cible + timedelta(days=6)).strftime('%d/%m/%Y')}"
                 )
 
                 # Prévisualiser le template sélectionné

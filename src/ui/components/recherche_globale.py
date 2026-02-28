@@ -12,7 +12,7 @@ Usage:
 
 import logging
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 import streamlit as st
@@ -32,7 +32,7 @@ _keys = KeyNamespace("recherche_globale")
 # ═══════════════════════════════════════════════════════════
 
 
-class TypeResultat(str, Enum):
+class TypeResultat(StrEnum):
     """Types de résultats de recherche."""
 
     RECETTE = "recette"

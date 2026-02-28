@@ -249,7 +249,7 @@ def filtres_rapides(filtres: dict[str, list[str]], prefixe_cle: str = "filter") 
         for idx, option in enumerate(options):
             with cols[idx]:
                 if st.button(
-                    option, key=f"{prefixe_cle}_{label}_{option}", use_container_width=True
+                    option, key=f"{prefixe_cle}_{label}_{option}", use_container_width=False
                 ):
                     results[label] = option
 

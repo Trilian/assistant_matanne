@@ -270,17 +270,18 @@ def afficher_rappels_contextuels():
         col_content, col_action = st.columns([5, 1])
 
         with col_content:
-            detail_html = (
-                f' <span style="color: {Sem.ON_SURFACE_SECONDARY}; font-size: 0.85rem;">'
-                f"— {rappel['detail']}</span>"
-                if rappel.get("detail")
+            detail_html = f"— {rappel['detail']}" if rappel.get("detail") else ""
+            small_detail = (
+                f'<div><span style="color: {Sem.ON_SURFACE_SECONDARY}; font-size: 0.85rem; display:block; margin-top:4px;">{detail_html}</span></div>'
+                if detail_html
                 else ""
             )
             st.markdown(
                 f'<div style="padding: 6px 10px; margin: 3px 0; '
                 f"background: {Sem.SURFACE_ALT}; border-radius: 6px; "
-                f'border-left: 3px solid {_couleur};">'
-                f"{rappel['icone']} **{rappel['titre']}**{detail_html}"
+                f"border-left: 3px solid {_couleur};"
+                > f'<div style="white-space:nowrap;">{rappel["icone"]} <strong>{rappel["titre"]}</strong></div>'
+                f"{small_detail}"
                 f"</div>",
                 unsafe_allow_html=True,
             )

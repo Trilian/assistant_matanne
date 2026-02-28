@@ -12,8 +12,8 @@ from datetime import time
 import streamlit as st
 
 from src.core.decorators import avec_session_db
-from src.core.models.notifications import PreferenceNotification
 from src.core.state import obtenir_etat
+from src.core.state.persistent import PersistentState, persistent_state
 from src.ui.feedback import afficher_erreur, afficher_succes
 from src.ui.fragments import ui_fragment
 from src.ui.keys import KeyNamespace
@@ -70,6 +70,8 @@ def _charger_preferences(*, db=None) -> PreferenceNotification | None:
     """Charge les préférences de notification depuis la DB."""
     from sqlalchemy.orm import Session
 
+    from src.core.models.notifications import PreferenceNotification
+
     db: Session
     return db.query(PreferenceNotification).first()
 
@@ -78,6 +80,8 @@ def _charger_preferences(*, db=None) -> PreferenceNotification | None:
 def _sauvegarder_preferences(data: dict, *, db=None) -> bool:
     """Sauvegarde les préférences de notification."""
     from sqlalchemy.orm import Session
+
+    from src.core.models.notifications import PreferenceNotification
 
     db: Session
     pref = db.query(PreferenceNotification).first()
@@ -91,6 +95,14 @@ def _sauvegarder_preferences(data: dict, *, db=None) -> bool:
 
     db.commit()
     return True
+
+
+@persistent_state(key="param_alerts", sync_interval=60, auto_commit=True)
+def _obtenir_config_alertes() -> dict:
+    """Valeurs par défaut pour les paramètres modifiables via UI (alerte vacances...)."""
+    return {
+        "vacances_alert_days": 14,
+    }
 
 
 @ui_fragment
@@ -129,7 +141,29 @@ def afficher_notifications_config():
         )
 
     with col3:
-        st.write("")  # Spacer
+        # Seuil d'alerte pour la preview Vacances (jours)
+        pstate_alerts = _obtenir_config_alertes()
+        current_alerts = pstate_alerts.get_all()
+        default_vacances = current_alerts.get("vacances_alert_days", None)
+
+        # Fallback to global settings if not present
+        try:
+            from src.core.config import obtenir_parametres
+
+            if default_vacances is None:
+                default_vacances = obtenir_parametres().VACANCES_ALERT_DAYS
+        except Exception:
+            if default_vacances is None:
+                default_vacances = 14
+
+        vacances_alert_days = st.number_input(
+            "Seuil alert vacances (jours)",
+            min_value=1,
+            max_value=365,
+            value=int(default_vacances),
+            step=1,
+            key=_keys("vacances_alert_days"),
+        )
 
     # Heures calmes
     st.markdown("##### 🌙 Heures calmes")
@@ -226,6 +260,13 @@ def afficher_notifications_config():
         }
         try:
             _sauvegarder_preferences(data)
+            # Sauvegarder le seuil vacances dans PersistentState param_alerts
+            try:
+                pstate_alerts.update({"vacances_alert_days": int(vacances_alert_days)})
+                pstate_alerts.commit()
+            except Exception:
+                logger.debug("Impossible de sauvegarder param_alerts persistent state")
+
             afficher_succes("✅ Préférences de notification sauvegardées !")
         except Exception as e:
             logger.error("Erreur sauvegarde notifications: %s", e)

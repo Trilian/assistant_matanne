@@ -55,8 +55,13 @@ def format_rappel(minutes: int | None) -> str:
 
 # Delegate to the central planning reminders service for logic and retrieval.
 from src.services.planning.rappels import (
+    ServiceRappels as _PlanningServiceRappels,
+)
+from src.services.planning.rappels import (
     obtenir_service_rappels as _obtenir_service_rappels_planning,
 )
+
+ServiceRappels = _PlanningServiceRappels
 
 
 @avec_session_db

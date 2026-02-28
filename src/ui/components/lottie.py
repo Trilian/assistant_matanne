@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 import streamlit as st
@@ -35,7 +35,7 @@ import streamlit as st
 from src.ui.registry import composant_ui
 
 
-class LottieAnimation(str, Enum):
+class LottieAnimation(StrEnum):
     """Animations Lottie prédéfinies."""
 
     # Feedback utilisateur

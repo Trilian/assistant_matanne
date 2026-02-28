@@ -1,7 +1,7 @@
 """
-Service Hub Data Maison.
+Service Maison - Hub Data.
 
-Centralise les accès base de données pour le hub maison
+Centralise les accès base de données pour le module Maison
 (statistiques globales, alertes objets urgents).
 """
 
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class HubDataService:
-    """Service de données pour le hub maison.
+    """Service de données pour le module Maison.
 
     Note (S12): Service read-heavy standalone sans BaseService[T] — acceptable
     car il ne fait que de la lecture agrégée, pas de CRUD standard.

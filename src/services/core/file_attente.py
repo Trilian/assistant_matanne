@@ -38,7 +38,7 @@ import time
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum, auto
+from enum import Enum, StrEnum, auto
 from pathlib import Path
 from typing import Any
 
@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════════════════════
 
 
-class StatutOperation(str, Enum):
+class StatutOperation(StrEnum):
     """Statut d'une opération en file."""
 
     EN_ATTENTE = "en_attente"

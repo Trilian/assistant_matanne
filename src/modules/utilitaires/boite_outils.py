@@ -11,12 +11,24 @@ from __future__ import annotations
 import streamlit as st
 
 from src.core.state import GestionnaireEtat, rerun
+from src.ui.components.chat_global import afficher_chat_global
 
 # ═══════════════════════════════════════════════════════════
 # CATÉGORIES D'OUTILS
 # ═══════════════════════════════════════════════════════════
 
 _CATEGORIES: list[dict] = [
+    {
+        "titre": "💬 Assistant",
+        "outils": [
+            {
+                "key": "chat_ia",
+                "icon": "💬",
+                "nom": "Chat IA",
+                "desc": "Assistant IA (pop-over)",
+            }
+        ],
+    },
     {
         "titre": "🔍 Scan & Recherche",
         "outils": [
@@ -146,5 +158,10 @@ def app():
                             key=f"outil_{outil['key']}",
                             use_container_width=True,
                         ):
-                            _naviguer(outil["key"])
+                            # Ouvrir le popover du chat si c'est l'outil Chat IA,
+                            # sinon naviguer vers la page utilitaire correspondante.
+                            if outil.get("key") == "chat_ia":
+                                afficher_chat_global()
+                            else:
+                                _naviguer(outil["key"])
                         st.caption(outil["desc"])

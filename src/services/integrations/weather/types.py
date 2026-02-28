@@ -63,7 +63,7 @@ class MeteoJour(BaseModel):
     probabilite_pluie: int  # %
     vent_km_h: float
     direction_vent: str = ""
-    uv_index: int = 0
+    uv_index: float = 0.0
     lever_soleil: str = ""
     coucher_soleil: str = ""
     condition: str = ""  # ensoleillé, nuageux, pluvieux, etc.

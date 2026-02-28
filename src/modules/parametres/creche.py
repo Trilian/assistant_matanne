@@ -267,9 +267,22 @@ def afficher_creche_config():
     with st.expander("📅 Aperçu jours fériés + fermetures crèche"):
         jours = service.tous_jours_speciaux(annee)
         if jours:
-            for j in jours:
+            # Trier par date puis afficher de façon compacte et lisible
+            jours_sorted = sorted(jours, key=lambda x: x.date_jour)
+            for j in jours_sorted:
                 icone = {"ferie": "🇫🇷", "creche": "🏫", "pont": "🌉"}.get(j.type, "📅")
-                st.markdown(f"{icone} **{j.date_jour.strftime('%a %d/%m')}** — {j.nom}")
+                date_str = j.date_jour.strftime("%a %d/%m")
+                # Mise en page: petite colonne pour icône, contenu principal pour détails
+                c_icon, c_main = st.columns([0.6, 9])
+                with c_icon:
+                    st.markdown(
+                        f"<div style='font-size:22px'>{icone}</div>", unsafe_allow_html=True
+                    )
+                with c_main:
+                    st.write(f"**{date_str}** — {j.nom}")
+                    tlabel = j.type.capitalize() if hasattr(j, "type") else ""
+                    if tlabel:
+                        st.caption(tlabel)
         else:
             st.caption("Aucun jour spécial configuré.")
 

@@ -232,6 +232,13 @@ class Parametres(BaseSettings):
     SEUIL_PAGE_LENTE: float = SEUIL_PAGE_LENTE
     """Seuil en secondes au-delà duquel une page est considérée lente (défaut: 2.0s)."""
 
+    # ═══════════════════════════════════════════════════════════════════
+    # FAMILLE - ALERTES
+    # ═══════════════════════════════════════════════════════════════════
+
+    VACANCES_ALERT_DAYS: int = 14
+    """Seuil en jours pour afficher l'alerte/preview 'Vacances' dans le hub famille (défaut: 14 jours)."""
+
     # ═════════════════════════════════════════════════════════════    # RÉSOLUTION DES SECRETS (st.secrets en fallback des env vars)
     # ═══════════════════════════════════════════════════════════
 
