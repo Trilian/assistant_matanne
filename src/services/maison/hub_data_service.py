@@ -26,7 +26,7 @@ class HubDataService:
     car il ne fait que de la lecture agrégée, pas de CRUD standard.
     """
 
-    @chronometre("maison.hub.stats_db", seuil_alerte_ms=2000)
+    @chronometre("maison.stats_db", seuil_alerte_ms=2000)
     @avec_cache(ttl=300)
     @avec_session_db
     @avec_gestion_erreurs(default_return={})
