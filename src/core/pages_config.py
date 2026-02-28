@@ -95,6 +95,12 @@ PAGES: list[SectionConfig] = [
                 "Planning familial",
                 "🎯",
             ),
+            _v(
+                "planning.calendrier",
+                "src.modules.planning.calendrier",
+                "Calendrier",
+                "📅",
+            ),
             _v("boite_outils", "src.modules.utilitaires.boite_outils", "Boîte à outils", "🧰"),
             _h(
                 "chat_ia",
@@ -197,13 +203,7 @@ PAGES: list[SectionConfig] = [
     {
         "name": "📅 Planning",
         "pages": [
-            _h(
-                "planning.calendrier",
-                "src.modules.planning.calendrier",
-                "Calendrier",
-                "📅",
-                "planning.cockpit",
-            ),
+            # 'planning.calendrier' moved to root for direct sidebar access
             _h(
                 "planning.templates_ui",
                 "src.modules.planning.templates_ui",
@@ -362,9 +362,7 @@ PAGES: list[SectionConfig] = [
                 "❤️",
                 "famille",
             ),
-            _h(
-                "famille.album", "src.modules.famille.album", "Album Souvenirs", "📸", "famille"
-            ),
+            _h("famille.album", "src.modules.famille.album", "Album Souvenirs", "📸", "famille"),
             _h(
                 "famille.sante_globale",
                 "src.modules.famille.sante_globale",

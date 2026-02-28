@@ -285,15 +285,16 @@ CREATE INDEX IF NOT EXISTS ix_recettes_adaptee_bebe ON recettes(adaptee_bebe);
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE plannings (
     id SERIAL PRIMARY KEY,
-    semaine_du DATE NOT NULL,
-    semaine_au DATE NOT NULL,
-    statut VARCHAR(50) NOT NULL DEFAULT 'brouillon',
+    nom VARCHAR(200) NOT NULL,
+    semaine_debut DATE NOT NULL,
+    semaine_fin DATE NOT NULL,
+    actif BOOLEAN NOT NULL DEFAULT FALSE,
     genere_par_ia BOOLEAN NOT NULL DEFAULT FALSE,
-    prompt_ia TEXT,
+    notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS ix_plannings_semaine ON plannings(semaine_du);
+CREATE INDEX IF NOT EXISTS ix_plannings_semaine_debut ON plannings(semaine_debut);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.05 LISTES_COURSES (en-tête)
 -- ─────────────────────────────────────────────────────────────────────────────

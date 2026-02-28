@@ -381,13 +381,13 @@ def injecter_raccourcis_clavier() -> None:
         """
         <script>
         document.addEventListener('keydown', function(e) {
-            // ⌘K / Ctrl+K - Focus sur recherche
+            // ⌘K / Ctrl+K - Focus sur recherche (robuste: cherche le placeholder 'Recherche')
             if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
                 e.preventDefault();
-                const searchInput = document.querySelector('[data-testid="stTextInput"] input');
+                const inputs = Array.from(document.querySelectorAll('[data-testid="stTextInput"] input'));
+                const searchInput = inputs.find(i => i.placeholder && i.placeholder.toLowerCase().includes('recherche')) || inputs[0];
                 if (searchInput) {
-                    searchInput.focus();
-                    searchInput.select();
+                    try { searchInput.focus(); searchInput.select(); } catch (err) { /* best-effort */ }
                 }
             }
 
@@ -415,9 +415,16 @@ def injecter_raccourcis_clavier() -> None:
                 window.location.href = url.toString();
             }
 
-            // Alt+P - Planning
+            // Alt+P - Planning (robust fallback: try to click a sidebar link named 'Calendrier' or matching planning path)
             if (e.altKey && e.key === 'p') {
                 e.preventDefault();
+                // 1) try to find a sidebar anchor that includes 'planning' or 'calendrier'
+                const anchors = Array.from(document.querySelectorAll('a'));
+                const match = anchors.find(a => (a.href && a.href.toLowerCase().includes('planning')) || (a.textContent && a.textContent.toLowerCase().includes('calendrier')) );
+                if (match) {
+                    try { match.click(); return; } catch (err) { /* ignore */ }
+                }
+                // 2) fallback: try path as before
                 const url = new URL(window.location);
                 url.pathname = '/planning/calendrier';
                 window.location.href = url.toString();

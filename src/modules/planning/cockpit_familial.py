@@ -315,11 +315,11 @@ def app() -> None:
 
         col_prev, col_label, col_next = st.columns([1, 4, 1])
         with col_prev:
-            if st.button("Semaine", key=_keys("prev")):
+            if st.button("◀️", key=_keys("prev")):
                 st.session_state[offset_key] -= 1
                 rerun()
         with col_next:
-            if st.button("Semaine", key=_keys("next")):
+            if st.button("▶️", key=_keys("next")):
                 st.session_state[offset_key] += 1
                 rerun()
 
