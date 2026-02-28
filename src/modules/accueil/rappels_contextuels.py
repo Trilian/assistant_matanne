@@ -254,6 +254,10 @@ def afficher_rappels_contextuels():
     from src.core.state import GestionnaireEtat, rerun
 
     rappels = _collecter_rappels()
+    # Guard: ensure we have a list (some sources might return False/None)
+    if not isinstance(rappels, list):
+        logger.debug(f"Rappels non-list reçu: {rappels!r}")
+        return
 
     if not rappels:
         return  # Pas de rappels, pas d'affichage

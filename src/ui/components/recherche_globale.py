@@ -355,9 +355,9 @@ def afficher_recherche_globale_popover() -> None:
     Affiche la recherche globale dans un popover (modal-like).
     Idéal pour l'intégration dans le header.
     """
-    with st.popover("🔍 Recherche", use_container_width=False):
-        st.markdown("### Recherche Globale")
-        afficher_recherche_globale()
+    # Remplacer le popover par un rendu inline (sans popover)
+    st.markdown("### Recherche Globale")
+    afficher_recherche_globale()
 
 
 # ═══════════════════════════════════════════════════════════

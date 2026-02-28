@@ -180,7 +180,9 @@ def app():
                 max_chars=14,
             )
 
-            if st.button("🔍 Rechercher", key="btn_barcode", type="primary"):
+            if st.button(
+                "🔍 Rechercher", key="btn_barcode", type="primary", use_container_width=True
+            ):
                 if not code or len(code) < 8:
                     st.warning("Veuillez entrer un code-barres valide (8-14 chiffres)")
                 else:
@@ -236,22 +238,25 @@ def app():
             with col_limite:
                 limite = st.selectbox("Résultats max", [5, 10, 20], index=1)
 
-            if st.button("🔍 Rechercher", key="btn_nom", type="primary"):
-                if not terme or len(terme) < 2:
-                    st.warning("Entrez au moins 2 caractères")
-                else:
-                    with st.spinner(f"🔍 Recherche de '{terme}'..."):
-                        try:
-                            from src.services.integrations.produit import (
-                                get_openfoodfacts_service,
-                            )
+            with col_btn:
+                if st.button(
+                    "🔍 Rechercher", key="btn_nom", type="primary", use_container_width=True
+                ):
+                    if not terme or len(terme) < 2:
+                        st.warning("Entrez au moins 2 caractères")
+                    else:
+                        with st.spinner(f"🔍 Recherche de '{terme}'..."):
+                            try:
+                                from src.services.integrations.produit import (
+                                    get_openfoodfacts_service,
+                                )
 
-                            service = get_openfoodfacts_service()
-                            resultats = service.rechercher_par_nom(terme.strip(), limite=limite)
-                            _afficher_resultats_recherche(resultats)
-                        except Exception as e:
-                            st.error(f"❌ Erreur: {e}")
-                            logger.error(f"Erreur recherche par nom: {e}")
+                                service = get_openfoodfacts_service()
+                                resultats = service.rechercher_par_nom(terme.strip(), limite=limite)
+                                _afficher_resultats_recherche(resultats)
+                            except Exception as e:
+                                st.error(f"❌ Erreur: {e}")
+                                logger.error(f"Erreur recherche par nom: {e}")
 
     # ─── Onglet Favoris ───
     with onglet_favoris:

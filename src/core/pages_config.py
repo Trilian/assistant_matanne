@@ -83,6 +83,12 @@ PAGES: list[SectionConfig] = [
         "name": "",
         "pages": [
             _v("accueil", "src.modules.accueil", "Accueil", "🏠"),
+            _v(
+                "planning.cockpit",
+                "src.modules.planning.cockpit_familial",
+                "Planning familial",
+                "🎯",
+            ),
             _v("boite_outils", "src.modules.utilitaires.boite_outils", "Boîte à outils", "🧰"),
             _h(
                 "chat_ia",
@@ -185,12 +191,6 @@ PAGES: list[SectionConfig] = [
     {
         "name": "📅 Planning",
         "pages": [
-            _v(
-                "planning.cockpit",
-                "src.modules.planning.cockpit_familial",
-                "Planning familial",
-                "🎯",
-            ),
             _h(
                 "planning.calendrier",
                 "src.modules.planning.calendrier",

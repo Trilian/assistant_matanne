@@ -40,7 +40,7 @@ def afficher_navigation_semaine():
     col1, col2, col3, col4 = st.columns([1, 2, 1, 1])
 
     with col1:
-        if st.button("◀ Précédente", use_container_width=True):
+        if st.button("Semaine", use_container_width=True):
             st.session_state[_keys("semaine_debut")] = get_semaine_precedente(
                 st.session_state[_keys("semaine_debut")]
             )
@@ -57,7 +57,7 @@ def afficher_navigation_semaine():
         )
 
     with col3:
-        if st.button("Suivante ▶", use_container_width=True):
+        if st.button("Semaine", use_container_width=True):
             st.session_state[_keys("semaine_debut")] = get_semaine_suivante(
                 st.session_state[_keys("semaine_debut")]
             )

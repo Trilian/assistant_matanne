@@ -57,7 +57,7 @@ def afficher_vue_mensuelle():
     col_prev, col_titre, col_next = st.columns([1, 3, 1])
 
     with col_prev:
-        if st.button("◀️ Mois précédent", key=_keys("prev_mois"), use_container_width=True):
+        if st.button("Mois", key=_keys("prev_mois"), use_container_width=True):
             if mois == 1:
                 st.session_state.vue_mois_mois = 12
                 st.session_state.vue_mois_annee = annee - 1
@@ -87,7 +87,7 @@ def afficher_vue_mensuelle():
         )
 
     with col_next:
-        if st.button("Mois suivant ▶️", key=_keys("next_mois"), use_container_width=True):
+        if st.button("Mois", key=_keys("next_mois"), use_container_width=True):
             if mois == 12:
                 st.session_state.vue_mois_mois = 1
                 st.session_state.vue_mois_annee = annee + 1

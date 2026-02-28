@@ -73,11 +73,11 @@ def _onglet_semaine():
     semaine_offset = st.session_state.get(_keys("semaine_offset"), 0)
 
     with col_nav1:
-        if st.button("◀️ Semaine précédente", key=_keys("prev_week")):
+        if st.button("Semaine", key=_keys("prev_week")):
             st.session_state[_keys("semaine_offset")] = semaine_offset - 1
             st.rerun()
     with col_nav3:
-        if st.button("Semaine suivante ▶️", key=_keys("next_week")):
+        if st.button("Semaine", key=_keys("next_week")):
             st.session_state[_keys("semaine_offset")] = semaine_offset + 1
             st.rerun()
 
@@ -137,11 +137,11 @@ def _onglet_mois():
 
     col1, col2, col3 = st.columns([1, 3, 1])
     with col1:
-        if st.button("◀️ Mois", key=_keys("prev_month")):
+        if st.button("Mois", key=_keys("prev_month")):
             st.session_state[_keys("mois_offset")] = mois_offset - 1
             st.rerun()
     with col3:
-        if st.button("Mois ▶️", key=_keys("next_month")):
+        if st.button("Mois", key=_keys("next_month")):
             st.session_state[_keys("mois_offset")] = mois_offset + 1
             st.rerun()
 

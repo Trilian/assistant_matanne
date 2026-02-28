@@ -136,8 +136,8 @@ _REGLES_RAPPEL: dict[str, RegleRappel] = {
     "ferie": RegleRappel(
         delais=[timedelta(days=2)],
         priorite=PrioriteRappel.BASSE,
-        message_template="🇫🇷 {titre} dans {delai}",
-        icone="🇫🇷",
+        message_template="{titre} dans {delai}",
+        icone="📅",
     ),
     "pont": RegleRappel(
         delais=[timedelta(days=3)],

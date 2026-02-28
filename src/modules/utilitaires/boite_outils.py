@@ -11,7 +11,8 @@ from __future__ import annotations
 import streamlit as st
 
 from src.core.state import GestionnaireEtat, rerun
-from src.ui.components.chat_global import afficher_chat_global
+
+# Note: chat global s'ouvre via session_state flag 'chat_global_visible'
 
 # ═══════════════════════════════════════════════════════════
 # CATÉGORIES D'OUTILS
@@ -25,7 +26,7 @@ _CATEGORIES: list[dict] = [
                 "key": "chat_ia",
                 "icon": "💬",
                 "nom": "Chat IA",
-                "desc": "Assistant IA (pop-over)",
+                "desc": "Assistant IA",
             }
         ],
     },
@@ -158,10 +159,23 @@ def app():
                             key=f"outil_{outil['key']}",
                             use_container_width=True,
                         ):
-                            # Ouvrir le popover du chat si c'est l'outil Chat IA,
+                            # Ouvrir le chat global (persistant) si demandé,
                             # sinon naviguer vers la page utilitaire correspondante.
                             if outil.get("key") == "chat_ia":
-                                afficher_chat_global()
+                                st.session_state["chat_global_visible"] = True
+                                # ouvrir remet à zéro le compteur de non lus
+                                st.session_state["chat_global_unread"] = 0
+                                rerun()
                             else:
                                 _naviguer(outil["key"])
+
+                        # Badge de nouveaux messages pour l'outil Chat IA
+                        if outil.get("key") == "chat_ia":
+                            unread = st.session_state.get("chat_global_unread", 0)
+                            if unread > 0:
+                                st.markdown(
+                                    f"<div class='chat-open-badge' title='{unread} nouveau(x)'>🔴 {unread}</div>",
+                                    unsafe_allow_html=True,
+                                )
+
                         st.caption(outil["desc"])

@@ -58,10 +58,8 @@ class Ingredient(CreeLeMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     nom: Mapped[str] = mapped_column(String(200), nullable=False, unique=True, index=True)
     categorie: Mapped[str | None] = mapped_column(String(100), index=True)
-    # colonne DB actuelle: `unite_mesure` (schéma SQL); mapper expose l'attribut `unite`
-    unite: Mapped[str] = mapped_column(
-        String(50), name="unite_mesure", nullable=False, default="pcs"
-    )
+    # colonne DB actuelle: `unite` (schéma SQL); mapper expose l'attribut `unite`
+    unite: Mapped[str] = mapped_column(String(50), name="unite", nullable=False, default="pcs")
 
     # Relations
     recette_ingredients: Mapped[list["RecetteIngredient"]] = relationship(
