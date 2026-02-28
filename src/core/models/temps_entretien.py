@@ -190,7 +190,9 @@ class VersionPiece(CreeLeMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     # Pièce et version
-    piece_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    piece_id: Mapped[int] = mapped_column(
+        ForeignKey("pieces_maison.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     version: Mapped[int] = mapped_column(Integer, nullable=False)
     type_modification: Mapped[str] = mapped_column(String(50), nullable=False)
 
@@ -213,6 +215,8 @@ class VersionPiece(CreeLeMixin, Base):
     couts: Mapped[list["CoutTravaux"]] = relationship(
         back_populates="version", cascade="all, delete-orphan"
     )
+
+    piece: Mapped["PieceMaison"] = relationship(back_populates="versions", foreign_keys=[piece_id])
 
     def __repr__(self) -> str:
         return f"<VersionPiece(piece={self.piece_id}, v{self.version}, titre='{self.titre}')>"
@@ -401,7 +405,7 @@ class ObjetMaison(TimestampMixin, Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     # Relations
-    piece: Mapped["PieceMaison"] = relationship(back_populates="objets")
+    piece: Mapped["PieceMaison"] = relationship(back_populates="objets", foreign_keys=[piece_id])
 
     def __repr__(self) -> str:
         return f"<ObjetMaison(id={self.id}, nom='{self.nom}', statut='{self.statut}')>"
