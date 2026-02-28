@@ -33,7 +33,7 @@ Manifest dans un module:
         "version": "2.1",
         "icone": "🌱",
         "section": "🏠 Maison",
-        "dependances": ["maison.hub"],
+        "dependances": ["maison"],
         "configuration": {"afficher_plan_2d": True},
         "tags": ["maison", "jardin", "outdoor"],
         "pages": [("jardin", "🌱 Jardin", "app")],
