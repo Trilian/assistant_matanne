@@ -88,7 +88,7 @@ def afficher_widget_maison():
 
     st.markdown(f'<div class="{container_cls}">', unsafe_allow_html=True)
 
-    col_titre, col_score = st.columns([3, 1])
+    col_titre, col_score = st.columns([4, 1])
 
     with col_titre:
         st.markdown("### 🏠 Maison")
@@ -102,8 +102,8 @@ def afficher_widget_maison():
         )
         emoji_score = "✨" if score >= 80 else ("👍" if score >= 50 else "⚠️")
         st.markdown(
-            f'<p style="text-align:right;font-size:1.5rem;font-weight:700;'
-            f'color:{couleur_score};margin:0;">{emoji_score} {score}%</p>',
+            f'<p style="text-align:right;font-size:1.5rem;font-weight:700; '
+            f'color:{couleur_score}; white-space:nowrap; margin:0;">{emoji_score} {score}%</p>',
             unsafe_allow_html=True,
         )
 
