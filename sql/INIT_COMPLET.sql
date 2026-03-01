@@ -206,7 +206,7 @@ CREATE TABLE ingredients (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     categorie VARCHAR(100) NOT NULL DEFAULT 'Autre',
-    unite_mesure VARCHAR(50) NOT NULL DEFAULT 'pièce',
+    unite VARCHAR(50) NOT NULL DEFAULT 'pièce',
     calories_pour_100g FLOAT,
     saison VARCHAR(50),
     allergene BOOLEAN NOT NULL DEFAULT FALSE,
@@ -337,6 +337,8 @@ CREATE TABLE profils_enfants (
     date_naissance DATE NOT NULL,
     photo_url VARCHAR(500),
     notes TEXT,
+    taille_vetements JSONB DEFAULT '{}'::jsonb,
+    pointure VARCHAR(50),
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -347,7 +349,7 @@ CREATE TABLE routines_sante (
     nom VARCHAR(200) NOT NULL,
     description TEXT,
     type_routine VARCHAR(100) NOT NULL,
-    jours JSONB DEFAULT '[]',
+    jours JSONB DEFAULT '[]'::jsonb,
     heure_preferee VARCHAR(10),
     duree_minutes INTEGER NOT NULL DEFAULT 30,
     rappel BOOLEAN NOT NULL DEFAULT TRUE,
@@ -800,8 +802,8 @@ CREATE TABLE taches_entretien (
     fait BOOLEAN NOT NULL DEFAULT FALSE,
     integrer_planning BOOLEAN NOT NULL DEFAULT FALSE,
     notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_maintenance_tasks_categorie ON taches_entretien(categorie);
 CREATE INDEX IF NOT EXISTS ix_maintenance_tasks_prochaine ON taches_entretien(prochaine_fois);
@@ -1045,8 +1047,8 @@ CREATE TABLE preferences_notifications (
     modules_actifs JSONB DEFAULT '{}'::jsonb,
     canal_prefere VARCHAR(20) DEFAULT 'push',
     user_id UUID,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_notification_prefs_user ON preferences_notifications(user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2095,6 +2097,7 @@ CREATE TABLE contacts_famille (
     relation VARCHAR(100),
     notes TEXT,
     est_urgence BOOLEAN NOT NULL DEFAULT FALSE,
+    sous_categorie VARCHAR(100),
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT ck_contacts_categorie CHECK (
@@ -2175,6 +2178,7 @@ CREATE TABLE voyages (
     statut VARCHAR(30) NOT NULL DEFAULT 'planifie',
     notes TEXT,
     reservations JSONB DEFAULT '[]',
+    budget_reel FLOAT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT ck_voyage_dates CHECK (date_retour >= date_depart),
@@ -2219,6 +2223,7 @@ CREATE INDEX IF NOT EXISTS ix_checklists_voyage ON checklists_voyage(voyage_id);
 CREATE TABLE documents_famille (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(300) NOT NULL,
+    titre VARCHAR(200),
     type_document VARCHAR(50) NOT NULL,
     fichier_url VARCHAR(500),
     date_expiration DATE,
@@ -2251,6 +2256,8 @@ CREATE TABLE albums_famille (
     description TEXT,
     type_album VARCHAR(50) DEFAULT 'general',
     photo_couverture_url VARCHAR(500),
+    date_debut DATE,
+    date_fin DATE,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
@@ -4016,8 +4023,8 @@ INSERT INTO preferences_notifications (
         quiet_hours_end,
         modules_actifs,
         canal_prefere,
-        created_at,
-        updated_at
+        cree_le,
+        modifie_le
     )
 VALUES (
         TRUE,
@@ -4167,3 +4174,7 @@ COMMIT;
 -- ============================================================================
 -- FIN DES MIGRATIONS AJOUTÉES LE 2026-02-27
 -- ============================================================================
+
+CREATE TRIGGER trg_update_modifie_le_preferences_notifications
+BEFORE UPDATE ON preferences_notifications
+FOR EACH ROW EXECUTE FUNCTION update_modifie_le_column();

@@ -86,7 +86,7 @@ PAGES: list[SectionConfig] = [
             _v(
                 "cuisine.planificateur_repas",
                 "src.modules.cuisine.planificateur_repas",
-                "Planifier Repas",
+                "Cuisine & Repas",
                 "🍽️",
             ),
             # 'planning' entries removed (no root menu)
@@ -270,9 +270,9 @@ PAGES: list[SectionConfig] = [
     # available via their URL (keys unchanged).
     # ── Famille ──────────────────────────────────────────────
     {
-        "name": "👨\u200d👩\u200d👧\u200d👦 Famille",
+        "name": "",
         "pages": [
-            _v("famille", "src.modules.famille.hub_famille", "Hub Famille", "🏠"),
+            _v("famille", "src.modules.famille.hub_famille", "Famille", "👨‍👩‍👧‍👦"),
             _h("famille.jules", "src.modules.famille.jules", "Jules", "👶", "famille"),
             _h(
                 "famille.jules_planning",
@@ -373,7 +373,7 @@ PAGES: list[SectionConfig] = [
     },
     # ── Maison ───────────────────────────────────────────────
     {
-        "name": "🏠 Maison",
+        "name": "",
         "pages": [
             _v("maison", "src.modules.maison.hub", "Maison", "🏠"),
             _h("maison.jardin", "src.modules.maison.jardin", "Jardin", "🌱", "maison"),
@@ -411,7 +411,7 @@ PAGES: list[SectionConfig] = [
     },
     # ── Jeux ─────────────────────────────────────────────────
     {
-        "name": "🎲 Jeux",
+        "name": "",
         "pages": [
             _v("jeux.paris", "src.modules.jeux.paris", "Paris Sportifs", "⚽"),
             _v("jeux.loto", "src.modules.jeux.loto", "Loto", "🎰"),
@@ -441,7 +441,7 @@ PAGES: list[SectionConfig] = [
     # NOTE: 'Outils' section removed — `Boîte à outils` moved to root sidebar.
     # ── Configuration ────────────────────────────────────────
     {
-        "name": "⚙️ Configuration",
+        "name": "",
         "pages": [
             _v("parametres", "src.modules.parametres", "Paramètres", "⚙️"),
             _h("design_system", "src.modules.design_system", "Design System", "🎨", "parametres"),

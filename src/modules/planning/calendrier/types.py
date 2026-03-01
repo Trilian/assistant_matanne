@@ -35,7 +35,7 @@ class TypeEvenement(StrEnum):
     JARDIN = "jardin"  # 🌱 Tâches jardin
     ENTRETIEN = "entretien"  # 🔧 Entretien maison
     EVENEMENT = "evenement"
-    FERIE = "ferie"  # 🇫🇷 Jour férié
+    FERIE = "ferie"  # ⭐ Jour férié
     CRECHE = "creche"  # 🏫 Fermeture crèche
     PONT = "pont"  # 🌉 Jour de pont
 
@@ -55,7 +55,7 @@ EMOJI_TYPE = {
     TypeEvenement.JARDIN: "🌱",
     TypeEvenement.ENTRETIEN: "🔧",
     TypeEvenement.EVENEMENT: "📜",
-    TypeEvenement.FERIE: "🇫🇷",
+    TypeEvenement.FERIE: "⭐",
     TypeEvenement.CRECHE: "🏫",
     TypeEvenement.PONT: "🌉",
 }

@@ -161,7 +161,7 @@ def _charger_evenements_semaine() -> dict[str, list[dict]]:
         for js in jours_speciaux:
             key = js.date_jour.isoformat()
             if key in events_par_jour:
-                icone = {"ferie": "🇫🇷", "creche": "🏫", "pont": "🌉"}.get(js.type, "📅")
+                icone = {"ferie": "⭐", "creche": "🏫", "pont": "🌉"}.get(js.type, "📅")
                 events_par_jour[key].insert(
                     0,
                     {
@@ -318,7 +318,7 @@ def _afficher_prochains_jours_speciaux():
         if prochains:
             items_html = ""
             for js in prochains:
-                icone = {"ferie": "🇫🇷", "creche": "🏫", "pont": "🌉"}.get(js.type, "📅")
+                icone = {"ferie": "⭐", "creche": "🏫", "pont": "🌉"}.get(js.type, "📅")
                 delta = (js.date_jour - date.today()).days
 
                 if delta == 0:

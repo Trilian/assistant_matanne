@@ -202,18 +202,20 @@ def afficher_widget_meteo():
         st.markdown("#### 🌤️ Météo du jour")
 
         # Métriques compactes
-        m1, m2, m3, m4 = st.columns(4)
-        with m1:
-            st.metric("💧 Pluie", f"{meteo_jour.probabilite_pluie}%")
-        with m2:
-            st.metric("💨 Vent", f"{meteo_jour.vent_km_h:.0f} km/h")
-        with m3:
-            st.metric("☀️ UV", f"{meteo_jour.uv_index}")
-        with m4:
-            if meteo_jour.lever_soleil and meteo_jour.coucher_soleil:
-                st.metric(
-                    "🌅 Soleil", f"{meteo_jour.lever_soleil[:5]}-{meteo_jour.coucher_soleil[:5]}"
-                )
+        st.markdown(
+            f"""<div style="display:flex; flex-wrap:wrap; gap:10px; font-size:14px; margin-bottom:10px;">
+                <div style="background:#f1f5f9; padding:4px 8px; border-radius:6px;">💧 {meteo_jour.probabilite_pluie}%</div>
+                <div style="background:#f1f5f9; padding:4px 8px; border-radius:6px;">💨 {meteo_jour.vent_km_h:.0f} km/h</div>
+                <div style="background:#f1f5f9; padding:4px 8px; border-radius:6px;">☀️ UV {meteo_jour.uv_index}</div>
+            """
+            + (
+                f"""<div style="background:#f1f5f9; padding:4px 8px; border-radius:6px;">🌅 {meteo_jour.lever_soleil[:5]}-{meteo_jour.coucher_soleil[:5]}</div>"""
+                if meteo_jour.lever_soleil and meteo_jour.coucher_soleil
+                else ""
+            )
+            + """</div>""",
+            unsafe_allow_html=True,
+        )
 
         # Impacts sur les activités
         if impacts:

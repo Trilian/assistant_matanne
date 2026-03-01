@@ -270,7 +270,7 @@ def afficher_creche_config():
             # Trier par date puis afficher de façon compacte et lisible
             jours_sorted = sorted(jours, key=lambda x: x.date_jour)
             for j in jours_sorted:
-                icone = {"ferie": "🇫🇷", "creche": "🏫", "pont": "🌉"}.get(j.type, "📅")
+                icone = {"ferie": "⭐", "creche": "🏫", "pont": "🌉"}.get(j.type, "📅")
                 date_str = j.date_jour.strftime("%a %d/%m")
                 # Mise en page: petite colonne pour icône, contenu principal pour détails
                 c_icon, c_main = st.columns([0.6, 9])
