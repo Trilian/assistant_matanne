@@ -199,7 +199,10 @@ def afficher_widget_meteo():
         )
 
     with col_details:
-        st.markdown("#### 🌤️ Météo du jour")
+        st.markdown(
+            '<h4 style="white-space:normal;margin:0;">🌤️ Météo du jour</h4>',
+            unsafe_allow_html=True,
+        )
 
         # Métriques compactes
         st.markdown(

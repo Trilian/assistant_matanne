@@ -39,6 +39,13 @@ COULEURS_TYPES = {
 JOURS_COURTS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
 
 
+def _strip_regional_indicator_flags(text: str) -> str:
+    """Remove regional indicator symbol letters (flag emojis) from a string."""
+    if not text:
+        return text
+    return "".join(ch for ch in text if not (0x1F1E6 <= ord(ch) <= 0x1F1FF)).strip()
+
+
 # ═══════════════════════════════════════════════════════════
 # LOGIQUE MÉTIER
 # ═══════════════════════════════════════════════════════════
@@ -162,10 +169,11 @@ def _charger_evenements_semaine() -> dict[str, list[dict]]:
             key = js.date_jour.isoformat()
             if key in events_par_jour:
                 icone = {"ferie": "⭐", "creche": "🏫", "pont": "🌉"}.get(js.type, "📅")
+                clean_nom = _strip_regional_indicator_flags(js.nom)
                 events_par_jour[key].insert(
                     0,
                     {
-                        "titre": f"{icone} {js.nom}",
+                        "titre": f"{icone} {clean_nom}",
                         "type_couleur": js.type,
                     },
                 )
@@ -328,10 +336,11 @@ def _afficher_prochains_jours_speciaux():
                 else:
                     quand = f"dans {delta}j"
 
+                clean_nom = _strip_regional_indicator_flags(js.nom)
                 items_html += (
-                    f'<span style="display:inline-flex;align-items:center;margin-right:12px;'
-                    f'font-size:0.8rem;">'
-                    f'{icone} <strong style="margin:0 3px;">{js.nom}</strong> '
+                    '<span style="display:inline-flex;align-items:center;margin-right:12px;'
+                    "font-size:0.8rem;"
+                    > f'{icone} <strong style="margin:0 3px;">{clean_nom}</strong> '
                     f'<span style="color:{Sem.ON_SURFACE_SECONDARY};">({quand})</span>'
                     f"</span>"
                 )
