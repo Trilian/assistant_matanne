@@ -194,7 +194,7 @@ class Recette(TimestampMixin, Base):
 
     # Contraintes
     __table_args__ = (
-        Index("ix_recettes_cree_le", "cree_le"),
+        Index("ix_recettes_cree_le", "created_at"),
         CheckConstraint("temps_preparation >= 0", name="ck_temps_prep_positif"),
         CheckConstraint("temps_cuisson >= 0", name="ck_temps_cuisson_positif"),
         CheckConstraint("portions > 0 AND portions <= 20", name="ck_portions_valides"),

@@ -281,6 +281,7 @@ def afficher_rappels_contextuels():
                 if detail_html
                 else ""
             )
+            # build safe HTML block for the reminder
             html = (
                 f'<div style="padding: 6px 10px; margin: 3px 0; '
                 f"background: {Sem.SURFACE_ALT}; border-radius: 6px; "

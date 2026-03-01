@@ -106,7 +106,7 @@ class ArticleCourses(CreeLeMixin, Base):
     ingredient: Mapped["Ingredient"] = relationship("Ingredient", foreign_keys=[ingredient_id])
 
     __table_args__ = (
-        Index("ix_liste_courses_cree_le", "cree_le"),
+        Index("ix_liste_courses_cree_le", "created_at"),
         CheckConstraint("quantite_necessaire > 0", name="ck_quantite_courses_positive"),
     )
 

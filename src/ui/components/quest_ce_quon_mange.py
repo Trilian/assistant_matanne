@@ -323,7 +323,7 @@ def widget_quest_ce_quon_mange(compact: bool = False) -> None:
                             st.info("Pas d'idée pour l'instant. Consulte tes recettes favorites!")
             with col2:
                 if st.button("📅 Planifier", key=_keys("planifier")):
-                    naviguer("cuisine.planificateur_repas")
+                    naviguer("cuisine_repas")
 
     # ── Section Faisabilité (recettes faisables avec le stock) ──
     if not compact:
@@ -388,7 +388,7 @@ def widget_qcom_compact() -> None:
         )
     else:
         if st.button("🍽️ Qu'est-ce qu'on mange ?", key=_keys("compact_btn")):
-            naviguer("cuisine.planificateur_repas")
+            naviguer("cuisine_repas")
 
 
 __all__ = [

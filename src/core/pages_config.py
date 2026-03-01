@@ -84,7 +84,7 @@ PAGES: list[SectionConfig] = [
         "pages": [
             _v("accueil", "src.modules.accueil", "Accueil", "🏠"),
             _v(
-                "cuisine.planificateur_repas",
+                "cuisine_repas",
                 "src.modules.cuisine.planificateur_repas",
                 "Cuisine & Repas",
                 "🍽️",
@@ -94,35 +94,35 @@ PAGES: list[SectionConfig] = [
             # the Planifier Repas hub so the sidebar shows a single entry
             # "Planifier Repas" while keeping recipes/courses/inventaire
             # accessible via URL or hub buttons.
-            _v("boite_outils", "src.modules.utilitaires.boite_outils", "Boîte à outils", "🧰"),
-            # Cuisine subpages (hidden parents -> cuisine.planificateur_repas)
+            # 'boite_outils' moved later in the menu (after Jeux)
+            # Cuisine subpages (hidden parents -> cuisine_repas)
             _h(
                 "cuisine.recettes",
                 "src.modules.cuisine.recettes",
                 "Recettes",
                 "📋",
-                "cuisine.planificateur_repas",
+                "cuisine_repas",
             ),
             _h(
                 "cuisine.batch_cooking_detaille",
                 "src.modules.cuisine.batch_cooking_detaille",
                 "Batch Cooking",
                 "🍳",
-                "cuisine.planificateur_repas",
+                "cuisine_repas",
             ),
             _h(
                 "cuisine.courses",
                 "src.modules.cuisine.courses",
                 "Courses",
                 "🛒",
-                "cuisine.planificateur_repas",
+                "cuisine_repas",
             ),
             _h(
                 "cuisine.inventaire",
                 "src.modules.cuisine.inventaire",
                 "Inventaire",
                 "🥫",
-                "cuisine.planificateur_repas",
+                "cuisine_repas",
             ),
             # Utility helpers used by cuisine features
             _h(
@@ -151,7 +151,7 @@ PAGES: list[SectionConfig] = [
                 "src.modules.utilitaires.cout_repas",
                 "Coût Repas",
                 "💰",
-                "cuisine.planificateur_repas",
+                "cuisine_repas",
             ),
             _h(
                 "saisonnalite",
@@ -165,7 +165,7 @@ PAGES: list[SectionConfig] = [
                 "src.modules.utilitaires.minuteur",
                 "Minuteur",
                 "⏱️",
-                "cuisine.planificateur_repas",
+                "cuisine_repas",
             ),
             _h(
                 "chat_ia",
@@ -262,6 +262,13 @@ PAGES: list[SectionConfig] = [
                 "📱",
                 "boite_outils",
             ),
+        ],
+    },
+    # ── Planning (top-level visible page) ─────────────────────────────
+    {
+        "name": "",
+        "pages": [
+            _v("planning", "src.modules.planning.cockpit_familial", "Planning", "📅"),
         ],
     },
     # Planning and separate Cuisine sections removed — their pages are now
@@ -436,6 +443,13 @@ PAGES: list[SectionConfig] = [
             _h("jeux.biais", "src.modules.jeux.biais", "Biais Cognitifs", "🧠", "jeux.bilan"),
             _h("jeux.calendrier", "src.modules.jeux.calendrier", "Calendrier", "📅", "jeux.bilan"),
             _h("jeux.educatif", "src.modules.jeux.educatif", "Module Éducatif", "🎓", "jeux.bilan"),
+        ],
+    },
+    # ── Boîte à outils (visible after Jeux) ───────────────────────────
+    {
+        "name": "",
+        "pages": [
+            _v("boite_outils", "src.modules.utilitaires.boite_outils", "Boîte à outils", "🧰"),
         ],
     },
     # NOTE: 'Outils' section removed — `Boîte à outils` moved to root sidebar.

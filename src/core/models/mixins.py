@@ -33,7 +33,9 @@ from .base import utc_now
 class CreeLeMixin:
     """Mixin ajoutant une colonne `cree_le` (datetime UTC, auto-remplie)."""
 
+    # map the Python attribute `cree_le` to the existing DB column `created_at`
     cree_le: Mapped[datetime] = mapped_column(
+        "created_at",
         DateTime,
         default=utc_now,
         nullable=False,
@@ -43,7 +45,9 @@ class CreeLeMixin:
 class TimestampMixin(CreeLeMixin):
     """Mixin ajoutant `cree_le` + `modifie_le` (auto-update)."""
 
+    # map the Python attribute `modifie_le` to the existing DB column `updated_at`
     modifie_le: Mapped[datetime] = mapped_column(
+        "updated_at",
         DateTime,
         default=utc_now,
         onupdate=utc_now,

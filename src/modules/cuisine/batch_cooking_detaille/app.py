@@ -124,7 +124,7 @@ def app():
                 if st.button("📅 Aller au planificateur de repas"):
                     from src.core.state import naviguer, rerun
 
-                    naviguer("cuisine.planificateur_repas")
+                    naviguer("cuisine_repas")
 
             st.divider()
 

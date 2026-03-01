@@ -100,7 +100,7 @@ class RechercheGlobaleService:
         "recette": {"action": "cuisine.recettes", "icone": ""},
         "inventaire": {"action": "cuisine.inventaire", "icone": ""},
         "activite": {"action": "famille", "icone": "🎨"},
-        "planning": {"action": "cuisine.planificateur_repas", "icone": ""},
+        "planning": {"action": "cuisine_repas", "icone": ""},
     }
 
     # ── Fragments SQL par type (UNION ALL) ──────────────────
