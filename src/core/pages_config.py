@@ -89,19 +89,84 @@ PAGES: list[SectionConfig] = [
                 "Planifier Repas",
                 "🍽️",
             ),
-            _v(
-                "planning.cockpit",
-                "src.modules.planning.cockpit_familial",
-                "Planning familial",
-                "🎯",
-            ),
-            _v(
-                "planning.calendrier",
-                "src.modules.planning.calendrier",
-                "Calendrier",
-                "📅",
-            ),
+            # 'planning' entries removed (no root menu)
+            # Cuisine-related pages are registered as hidden subpages of
+            # the Planifier Repas hub so the sidebar shows a single entry
+            # "Planifier Repas" while keeping recipes/courses/inventaire
+            # accessible via URL or hub buttons.
             _v("boite_outils", "src.modules.utilitaires.boite_outils", "Boîte à outils", "🧰"),
+            # Cuisine subpages (hidden parents -> cuisine.planificateur_repas)
+            _h(
+                "cuisine.recettes",
+                "src.modules.cuisine.recettes",
+                "Recettes",
+                "📋",
+                "cuisine.planificateur_repas",
+            ),
+            _h(
+                "cuisine.batch_cooking_detaille",
+                "src.modules.cuisine.batch_cooking_detaille",
+                "Batch Cooking",
+                "🍳",
+                "cuisine.planificateur_repas",
+            ),
+            _h(
+                "cuisine.courses",
+                "src.modules.cuisine.courses",
+                "Courses",
+                "🛒",
+                "cuisine.planificateur_repas",
+            ),
+            _h(
+                "cuisine.inventaire",
+                "src.modules.cuisine.inventaire",
+                "Inventaire",
+                "🥫",
+                "cuisine.planificateur_repas",
+            ),
+            # Utility helpers used by cuisine features
+            _h(
+                "convertisseur_unites",
+                "src.modules.utilitaires.convertisseur_unites",
+                "Convertisseur",
+                "⚖️",
+                "cuisine.recettes",
+            ),
+            _h(
+                "calculatrice_portions",
+                "src.modules.utilitaires.calculatrice_portions",
+                "Portions",
+                "🔢",
+                "cuisine.recettes",
+            ),
+            _h(
+                "substitutions",
+                "src.modules.utilitaires.substitutions",
+                "Substitutions",
+                "🔄",
+                "cuisine.recettes",
+            ),
+            _h(
+                "cout_repas",
+                "src.modules.utilitaires.cout_repas",
+                "Coût Repas",
+                "💰",
+                "cuisine.planificateur_repas",
+            ),
+            _h(
+                "saisonnalite",
+                "src.modules.utilitaires.saisonnalite",
+                "Saisons",
+                "🥕",
+                "cuisine.recettes",
+            ),
+            _h(
+                "minuteur",
+                "src.modules.utilitaires.minuteur",
+                "Minuteur",
+                "⏱️",
+                "cuisine.planificateur_repas",
+            ),
             _h(
                 "chat_ia",
                 "src.modules.utilitaires.chat_ia",
@@ -199,98 +264,10 @@ PAGES: list[SectionConfig] = [
             ),
         ],
     },
-    # ── Planning ─────────────────────────────────────────────
-    {
-        "name": "📅 Planning",
-        "pages": [
-            # 'planning.calendrier' moved to root for direct sidebar access
-            _h(
-                "planning.templates_ui",
-                "src.modules.planning.templates_ui",
-                "Templates",
-                "📋",
-                "planning.cockpit",
-            ),
-            _h(
-                "planning.timeline_ui",
-                "src.modules.planning.timeline_ui",
-                "Timeline",
-                "📊",
-                "planning.cockpit",
-            ),
-        ],
-    },
-    # ── Cuisine ──────────────────────────────────────────────
-    {
-        "name": "🍳 Cuisine",
-        "pages": [
-            _v("cuisine.recettes", "src.modules.cuisine.recettes", "Recettes", "📋"),
-            _h(
-                "cuisine.batch_cooking_detaille",
-                "src.modules.cuisine.batch_cooking_detaille",
-                "Batch Cooking",
-                "🍳",
-                "cuisine.planificateur_repas",
-            ),
-            _h(
-                "cuisine.courses",
-                "src.modules.cuisine.courses",
-                "Courses",
-                "🛒",
-                "cuisine.planificateur_repas",
-            ),
-            _h(
-                "cuisine.inventaire",
-                "src.modules.cuisine.inventaire",
-                "Inventaire",
-                "🥫",
-                "cuisine.planificateur_repas",
-            ),
-            # Outils cuisine (ex-section « Cuisine+ »)
-            _h(
-                "convertisseur_unites",
-                "src.modules.utilitaires.convertisseur_unites",
-                "Convertisseur",
-                "⚖️",
-                "cuisine.recettes",
-            ),
-            _h(
-                "calculatrice_portions",
-                "src.modules.utilitaires.calculatrice_portions",
-                "Portions",
-                "🔢",
-                "cuisine.recettes",
-            ),
-            _h(
-                "substitutions",
-                "src.modules.utilitaires.substitutions",
-                "Substitutions",
-                "🔄",
-                "cuisine.recettes",
-            ),
-            _h(
-                "cout_repas",
-                "src.modules.utilitaires.cout_repas",
-                "Coût Repas",
-                "💰",
-                "cuisine.planificateur_repas",
-            ),
-            _h(
-                "saisonnalite",
-                "src.modules.utilitaires.saisonnalite",
-                "Saisons",
-                "🥕",
-                "cuisine.recettes",
-            ),
-            _h(
-                "minuteur",
-                "src.modules.utilitaires.minuteur",
-                "Minuteur",
-                "⏱️",
-                "cuisine.planificateur_repas",
-            ),
-        ],
-    },
+    # Planning and separate Cuisine sections removed — their pages are now
+    # registered under the Accueil section so that "Planifier Repas" stays
+    # the single visible entry for meal planning. Hidden subpages remain
+    # available via their URL (keys unchanged).
     # ── Famille ──────────────────────────────────────────────
     {
         "name": "👨\u200d👩\u200d👧\u200d👦 Famille",

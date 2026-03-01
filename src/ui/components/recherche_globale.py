@@ -10,6 +10,7 @@ Usage:
     afficher_recherche_globale()  # En header ou sidebar
 """
 
+import json
 import logging
 from dataclasses import dataclass
 from enum import Enum, StrEnum
@@ -18,6 +19,8 @@ from typing import Any
 import streamlit as st
 
 from src.core.decorators import avec_cache
+from src.core.pages_config import PAGES
+from src.core.state import rerun
 from src.services.core.registry import service_factory
 from src.ui.keys import KeyNamespace
 from src.ui.registry import composant_ui
@@ -359,6 +362,13 @@ def afficher_recherche_globale_popover() -> None:
     st.markdown("### Recherche Globale")
     afficher_recherche_globale()
 
+    # Bouton Annuler: efface l'input de recherche globale et force un rerun
+    if st.button("Annuler", key=_keys("cancel")):
+        k = _keys("input")
+        if k in st.session_state:
+            st.session_state[k] = ""
+        rerun()
+
 
 # ═══════════════════════════════════════════════════════════
 # RACCOURCIS CLAVIER (JS)
@@ -377,59 +387,67 @@ def injecter_raccourcis_clavier() -> None:
     - Alt+J: Navigation vers Jules
     - Escape: Ferme les modales
     """
+    # Générer dynamiquement une table page_key -> url_path à partir de la config
+    page_map: dict[str, str] = {}
+    for section in PAGES:
+        for p in section.get("pages", []):
+            key = p.get("key")
+            if key:
+                page_map[key] = "/" + key.replace(".", "_")
+
+    # Sérialiser la map en JSON sécurisé pour l'injection JS
+    try:
+        page_map_json = json.dumps(page_map).replace("</", "<\\/")
+    except Exception:
+        page_map_json = "{}"
+
     st.markdown(
-        """
+        f"""
         <script>
-        document.addEventListener('keydown', function(e) {
+        const PAGE_MAP = {page_map_json};
+        document.addEventListener('keydown', function(e) {{
             // ⌘K / Ctrl+K - Focus sur recherche (robuste: cherche le placeholder 'Recherche')
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {{
                 e.preventDefault();
                 const inputs = Array.from(document.querySelectorAll('[data-testid="stTextInput"] input'));
                 const searchInput = inputs.find(i => i.placeholder && i.placeholder.toLowerCase().includes('recherche')) || inputs[0];
-                if (searchInput) {
-                    try { searchInput.focus(); searchInput.select(); } catch (err) { /* best-effort */ }
-                }
-            }
+                if (searchInput) {{
+                    try {{ searchInput.focus(); searchInput.select(); }} catch (err) {{ /* best-effort */ }}
+                }}
+            }}
 
             // Alt+R - Recettes
-            if (e.altKey && e.key === 'r') {
+            if (e.altKey && e.key === 'r') {{
                 e.preventDefault();
-                const url = new URL(window.location);
-                url.pathname = '/cuisine/recettes';
-                window.location.href = url.toString();
-            }
+                const target = PAGE_MAP['cuisine.recettes'];
+                if (target) {{ window.location.href = window.location.origin + target; return; }}
+            }}
 
             // Alt+C - Courses
-            if (e.altKey && e.key === 'c') {
+            if (e.altKey && e.key === 'c') {{
                 e.preventDefault();
-                const url = new URL(window.location);
-                url.pathname = '/cuisine/courses';
-                window.location.href = url.toString();
-            }
+                const target = PAGE_MAP['cuisine.courses'];
+                if (target) {{ window.location.href = window.location.origin + target; return; }}
+            }}
 
             // Alt+J - Jules
-            if (e.altKey && e.key === 'j') {
+            if (e.altKey && e.key === 'j') {{
                 e.preventDefault();
-                const url = new URL(window.location);
-                url.pathname = '/famille/jules';
-                window.location.href = url.toString();
-            }
+                const target = PAGE_MAP['famille.jules'];
+                if (target) {{ window.location.href = window.location.origin + target; return; }}
+            }}
 
-            // Alt+P - Planning (robust fallback: try to click a sidebar link named 'Calendrier' or matching planning path)
-            if (e.altKey && e.key === 'p') {
+            // Alt+P - Planning (fournir fallback: tenter de cliquer un lien contenant 'calendrier')
+            if (e.altKey && e.key === 'p') {{
                 e.preventDefault();
-                // 1) try to find a sidebar anchor that includes 'planning' or 'calendrier'
+                const target = PAGE_MAP['planning.calendrier'];
+                if (target) {{ window.location.href = window.location.origin + target; return; }}
+                // Fallback: rechercher un lien affichant 'calendrier' dans la page
                 const anchors = Array.from(document.querySelectorAll('a'));
-                const match = anchors.find(a => (a.href && a.href.toLowerCase().includes('planning')) || (a.textContent && a.textContent.toLowerCase().includes('calendrier')) );
-                if (match) {
-                    try { match.click(); return; } catch (err) { /* ignore */ }
-                }
-                // 2) fallback: try path as before
-                const url = new URL(window.location);
-                url.pathname = '/planning/calendrier';
-                window.location.href = url.toString();
-            }
-        });
+                const match = anchors.find(a => (a.href && a.href.toLowerCase().includes('calendrier')) || (a.textContent && a.textContent.toLowerCase().includes('calendrier')) );
+                if (match) {{ try {{ match.click(); return; }} catch (err) {{ /* ignore */ }} }}
+            }}
+        }});
         </script>
         """,
         unsafe_allow_html=True,
