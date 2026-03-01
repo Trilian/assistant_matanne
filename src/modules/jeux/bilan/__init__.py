@@ -20,7 +20,7 @@ import streamlit as st
 from src.core.decorators import avec_session_db
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.modules._framework import error_boundary
-from src.ui.core.fragments import cached_fragment
+from src.ui.fragments import cached_fragment
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
 

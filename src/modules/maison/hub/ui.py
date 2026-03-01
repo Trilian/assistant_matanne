@@ -127,7 +127,7 @@ def afficher_alertes(alertes: list[dict]):
 
 def afficher_modules(stats: dict):
     """Affiche la navigation vers les modules via composant HTML/JS."""
-    st.markdown("#### 📂 Modules")
+    st.markdown("#### 🏠 Sections")
 
     modules = [
         {"key": "maison.jardin", "icon": "🌳", "title": "Jardin", "subtitle": "Potager"},
@@ -171,7 +171,7 @@ def afficher_modules(stats: dict):
 
 def afficher_modules_fallback(stats: dict):
     """Fallback Streamlit si le composant HTML/JS ne s'affiche pas."""
-    st.markdown("#### 📂 Modules (Fallback)")
+    st.markdown("#### 🏠 Sections (Fallback)")
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
         if st.button("🌳 Jardin — Potager", key="btn_jardin_fb", use_container_width=True):
@@ -205,24 +205,35 @@ def afficher_modules_fallback(stats: dict):
 def afficher_stats_mois(stats: dict):
     """Affiche les mini stats du mois (auto-refresh 120s)."""
     heures = stats.get("temps_mois_heures", 0)
+    zones = stats.get("zones_jardin", 0)
+    pieces = stats.get("pieces", 0)
+    autonomie = stats.get("autonomie_pourcent", None)
+
+    def pretty_num(v, fmt="{:.0f}"):
+        return fmt.format(v) if v else "—"
+
+    heures_display = pretty_num(heures, "{:.1f} h")
+    zones_display = pretty_num(zones, "{:.0f}")
+    pieces_display = pretty_num(pieces, "{:.0f}")
+    autonomie_display = (f"{autonomie} %") if autonomie else "—"
 
     st.markdown(
         f"""
         <div class="stats-mini">
             <div class="stat-item">
-                <div class="stat-value">{heures:.1f}h</div>
+                <div class="stat-value">{heures_display}</div>
                 <div class="stat-label">Ce mois</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">{stats.get("zones_jardin", 0)}</div>
+                <div class="stat-value">{zones_display}</div>
                 <div class="stat-label">Zones jardin</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">{stats.get("pieces", 0)}</div>
+                <div class="stat-value">{pieces_display}</div>
                 <div class="stat-label">Pièces</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">{stats.get("autonomie_pourcent", 0)}%</div>
+                <div class="stat-value">{autonomie_display}</div>
                 <div class="stat-label">Autonomie</div>
             </div>
         </div>
