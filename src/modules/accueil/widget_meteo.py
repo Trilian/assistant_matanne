@@ -167,63 +167,52 @@ def afficher_widget_meteo():
     evenements = _charger_evenements_aujourdhui()
     impacts = _evaluer_impact_meteo(meteo_jour, evenements)
 
-    # ── Carte météo principale ──
+    # ── Carte météo principale (full-width, sans sub-colonnes) ──
     icone = meteo_jour.icone or "🌤️"
-    condition = meteo_jour.condition or "Données en cours"
+    condition = echapper_html(meteo_jour.condition or "Données en cours")
+    t_max = f"{meteo_jour.temperature_max:.0f}"
+    t_min = f"{meteo_jour.temperature_min:.0f}"
+    pluie = f"{meteo_jour.probabilite_pluie}"
+    vent = f"{meteo_jour.vent_km_h:.0f}"
+    uv = f"{meteo_jour.uv_index}"
 
-    container_cls = StyleSheet.create_class(
-        {
-            "background": f"linear-gradient(135deg, {Couleur.BG_METEO_START}, {Couleur.BG_METEO_END})",
-            "border-radius": Rayon.XL,
-            "padding": Espacement.LG,
-            "margin-bottom": Espacement.MD,
-        }
-    )
-
-    StyleSheet.inject()
-
-    col_meteo, col_details = st.columns([1, 2])
-
-    with col_meteo:
-        safe_condition = echapper_html(condition)
-        st.markdown(
-            f'<div class="{container_cls}" style="text-align:center;">'
-            f'<span style="font-size: 3rem;">{icone}</span>'
-            f'<p style="font-size: 1.8rem; font-weight: 700; margin: 0.3rem 0;">'
-            f"{meteo_jour.temperature_max:.0f}°C</p>"
-            f'<p style="font-size: 0.9rem; color: {Sem.ON_SURFACE_SECONDARY}; margin: 0;">'
-            f"{meteo_jour.temperature_min:.0f}° / {meteo_jour.temperature_max:.0f}°</p>"
-            f'<p style="font-size: 0.85rem; margin-top: 0.3rem;">{safe_condition}</p>'
-            f"</div>",
-            unsafe_allow_html=True,
+    lever_coucher = ""
+    if meteo_jour.lever_soleil and meteo_jour.coucher_soleil:
+        lever_coucher = (
+            f'<div style="background:#f1f5f9;padding:4px 10px;border-radius:6px;'
+            f'white-space:nowrap;">🌅 {meteo_jour.lever_soleil[:5]}–{meteo_jour.coucher_soleil[:5]}</div>'
         )
 
-    with col_details:
-        st.markdown("#### 🌤️ Météo du jour")
+    StyleSheet.inject()
+    st.markdown(
+        f'<div style="background:linear-gradient(135deg,{Couleur.BG_METEO_START},{Couleur.BG_METEO_END});'
+        f'border-radius:{Rayon.XL};padding:{Espacement.LG};margin-bottom:{Espacement.MD};">'
+        f'<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">'
+        f'<span style="font-size:2.5rem;line-height:1;">{icone}</span>'
+        f"<div>"
+        f'<div style="font-size:1.9rem;font-weight:700;line-height:1;">{t_max}°C</div>'
+        f'<div style="font-size:0.85rem;color:{Sem.ON_SURFACE_SECONDARY};">{t_min}° / {t_max}° — {condition}</div>'
+        f"</div>"
+        f"</div>"
+        f'<div style="display:flex;flex-wrap:wrap;gap:8px;font-size:0.82rem;">'
+        f'<div style="background:#f1f5f9;padding:4px 10px;border-radius:6px;white-space:nowrap;">💧 Pluie {pluie}%</div>'
+        f'<div style="background:#f1f5f9;padding:4px 10px;border-radius:6px;white-space:nowrap;">💨 Vent {vent} km/h</div>'
+        f'<div style="background:#f1f5f9;padding:4px 10px;border-radius:6px;white-space:nowrap;">☀️ UV {uv}</div>'
+        f"{lever_coucher}"
+        f"</div>"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
 
-        # Métriques compactes
-        m1, m2, m3, m4 = st.columns(4)
-        with m1:
-            st.metric("💧 Pluie", f"{meteo_jour.probabilite_pluie}%")
-        with m2:
-            st.metric("💨 Vent", f"{meteo_jour.vent_km_h:.0f} km/h")
-        with m3:
-            st.metric("☀️ UV", f"{meteo_jour.uv_index}")
-        with m4:
-            if meteo_jour.lever_soleil and meteo_jour.coucher_soleil:
-                st.metric(
-                    "🌅 Soleil", f"{meteo_jour.lever_soleil[:5]}-{meteo_jour.coucher_soleil[:5]}"
-                )
-
-        # Impacts sur les activités
-        if impacts:
-            for impact in impacts:
-                if impact["niveau"] == "warning":
-                    st.warning(f"{impact['icone']} {impact['message']}")
-                elif impact["niveau"] == "success":
-                    st.success(f"{impact['icone']} {impact['message']}")
-                else:
-                    st.info(f"{impact['icone']} {impact['message']}")
+    # Impacts sur les activités (compacts)
+    if impacts:
+        for impact in impacts:
+            if impact["niveau"] == "warning":
+                st.warning(f"{impact['icone']} {impact['message']}")
+            elif impact["niveau"] == "success":
+                st.success(f"{impact['icone']} {impact['message']}")
+            else:
+                st.info(f"{impact['icone']} {impact['message']}")
 
     # Aperçu demain (compact)
     if meteo_demain:

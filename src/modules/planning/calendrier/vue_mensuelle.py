@@ -291,7 +291,7 @@ def _afficher_cellule_mois(
     special_icon = ""
     for js in jours_speciaux[:1]:
         t = js.type.value if hasattr(js.type, "value") else str(js.type)
-        icone = {"ferie": "🇫🇷", "creche": "🏫", "pont": "🌉"}.get(t, "")
+        icone = {"ferie": "⭐", "creche": "🏫", "pont": "🌉"}.get(t, "")
         if icone:
             special_icon = f'<span style="font-size:0.65rem;">{icone}</span>'
 
@@ -378,7 +378,7 @@ _COULEUR_PASTILLE_EMOJI = {
     TypeEvenement.COURSES: "🛒",
     TypeEvenement.BATCH_COOKING: "🍳",
     TypeEvenement.MENAGE: "🧹",
-    TypeEvenement.FERIE: "🇫🇷",
+    TypeEvenement.FERIE: "⭐",
     TypeEvenement.CRECHE: "🏫",
     TypeEvenement.PONT: "🌉",
 }
@@ -392,7 +392,7 @@ def _afficher_legende():
         ("🟢 Normal", "Charge < 40%"),
         ("🟡 Modéré", "Charge 40-60%"),
         ("🔴 Intense", "Charge > 60%"),
-        ("🇫🇷 Férié", "Jour férié"),
+        ("⭐ Férié", "Jour férié"),
         ("🏫 Crèche", "Crèche fermée"),
         ("🌉 Pont", "Jour de pont"),
     ]

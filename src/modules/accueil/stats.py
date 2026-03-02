@@ -57,8 +57,6 @@ def afficher_global_stats():
     from src.services.cuisine.recettes import obtenir_service_recettes
     from src.services.inventaire import obtenir_service_inventaire
 
-    st.markdown("### 📊 Vue d'Ensemble")
-
     # Charger stats
     logger = logging.getLogger(__name__)
 
@@ -109,7 +107,11 @@ def afficher_global_stats():
 
     with col4:
         # Planning semaine
-        planning = obtenir_service_planning().get_planning()
-        nb_repas = len(planning.repas) if planning else 0
+        nb_repas = 0
+        try:
+            planning = obtenir_service_planning().get_planning()
+            nb_repas = len(planning.repas) if planning else 0
+        except Exception as e:
+            logger.exception("Erreur lors du chargement des repas planifiés")
 
-        st.metric("🧹 Repas Planifies", nb_repas, help="Cette semaine")
+        st.metric("🧹 Repas Planifiés", nb_repas, help="Cette semaine")

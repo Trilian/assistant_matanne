@@ -28,11 +28,11 @@ def afficher_sauvegarde():
     with col1:
         st.markdown("### Créer un backup")
 
-        compress = st.checkbox("Compresser (gzip)", value=True, key=keys("compress"))
+        compress = st.checkbox("Compresser (gzip)", value=True, key=keys("root_compress"))
 
         if st.button("📥 Créer un backup maintenant", use_container_width=True, type="primary"):
             with st.spinner("Création du backup..."):
-                result = service.creer_sauvegarde(compress=compress)
+                result = service.create_backup(compress=compress)
 
                 if result and result.success:
                     st.success(f"✅ {result.message}")
@@ -46,7 +46,7 @@ def afficher_sauvegarde():
     with col2:
         st.markdown("### Backups disponibles")
 
-        backups = service.lister_sauvegardes()
+        backups = service.list_backups()
 
         if not backups:
             st.info("Aucun backup disponible")
@@ -63,7 +63,7 @@ def afficher_sauvegarde():
                             st.warning("⚠️ Cette action va écraser les données actuelles!")
                     with col_b:
                         if st.button("🗑️ Supprimer", key=keys("delete", backup.id)):
-                            if service.supprimer_sauvegarde(backup.id):
+                            if service.delete_backup(backup.id):
                                 st.success("Backup supprimé")
                                 rerun()
 
@@ -89,7 +89,7 @@ def afficher_sauvegarde():
                 f.write(uploaded_file.read())
 
             with st.spinner("Restauration en cours..."):
-                result = service.restaurer_sauvegarde(str(temp_path), clear_existing=clear_existing)
+                result = service.restore_backup(str(temp_path), clear_existing=clear_existing)
 
                 if result.success:
                     st.success(f"✅ {result.message}")

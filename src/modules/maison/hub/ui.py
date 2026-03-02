@@ -126,8 +126,8 @@ def afficher_alertes(alertes: list[dict]):
 
 
 def afficher_modules(stats: dict):
-    """Affiche la navigation vers les modules via composant HTML/JS."""
-    st.markdown("#### 📂 Modules")
+    """Affiche la navigation vers les modules."""
+    st.markdown("#### 🏠 Sections")
 
     modules = [
         {"key": "maison.jardin", "icon": "🌳", "title": "Jardin", "subtitle": "Potager"},
@@ -142,90 +142,43 @@ def afficher_modules(stats: dict):
         {"key": "maison.visualisation", "icon": "🏘️", "title": "Plan", "subtitle": "Visualisation"},
     ]
 
-    html = """
-    <style>
-    .modules-grid{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
-    .tile{flex:1 1 140px;min-width:120px;max-width:220px;padding:12px;border-radius:8px;background:#ffffff;border:1px solid rgba(0,0,0,0.06);text-align:center;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.04);transition:transform .12s ease,box-shadow .12s ease}
-    .tile .icon{font-size:26px;display:block;margin-bottom:6px}
-    .tile .title{font-weight:600}
-    .tile .subtitle{font-size:12px;color:#6b7280;margin-top:4px}
-    .tile:hover{transform:translateY(-4px);box-shadow:0 8px 18px rgba(0,0,0,0.08)}
-    </style>
-    <div class="modules-grid">
-    """
-    for m in modules:
-        key_q = urllib.parse.quote(m["key"], safe="")
-        html += (
-            f'<a class="tile" href="?navigate={key_q}" title="{m["title"]} - {m["subtitle"]}">'
-            + f'<span class="icon">{m["icon"]}</span>'
-            + f'<span class="title">{m["title"]}</span>'
-            + f'<div class="subtitle">{m["subtitle"]}</div>'
-            + "</a>"
-        )
+    cols = st.columns(3)
+    for i, m in enumerate(modules):
+        with cols[i % 3]:
+            with st.container(border=True):
+                st.markdown(f"**{m['icon']} {m['title']}**")
+                st.caption(m["subtitle"])
+                if st.button("Ouvrir", key=f"btn_nav_{m['key']}", use_container_width=True):
+                    from src.core.state import GestionnaireEtat, rerun
 
-    html += "</div>"
-
-    # Height augmenté pour éviter coupe sur petits écrans
-    components.html(html, height=220, scrolling=False)
+                    GestionnaireEtat.naviguer_vers(m["key"])
+                    rerun()
 
 
 def afficher_modules_fallback(stats: dict):
-    """Fallback Streamlit si le composant HTML/JS ne s'affiche pas."""
-    st.markdown("#### 📂 Modules (Fallback)")
-    col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        if st.button("🌳 Jardin — Potager", key="btn_jardin_fb", use_container_width=True):
-            GestionnaireEtat.naviguer_vers("maison.jardin")
-            rerun()
-    with col2:
-        if st.button(
-            "🏡 Entretien — Équipements", key="btn_entretien_fb", use_container_width=True
-        ):
-            GestionnaireEtat.naviguer_vers("maison.entretien")
-            rerun()
-    with col3:
-        if st.button(
-            "💡 Charges — Énergie & contrats", key="btn_charges_fb", use_container_width=True
-        ):
-            GestionnaireEtat.naviguer_vers("maison.charges")
-            rerun()
-    with col4:
-        if st.button(
-            "💰 Dépenses — Budget maison", key="btn_depenses_fb", use_container_width=True
-        ):
-            GestionnaireEtat.naviguer_vers("maison.depenses")
-            rerun()
-    with col5:
-        if st.button("🏘️ Plan — Visualisation", key="btn_plan_fb", use_container_width=True):
-            GestionnaireEtat.naviguer_vers("maison.visualisation")
-            rerun()
+    pass
 
 
 @auto_refresh(seconds=120)
 def afficher_stats_mois(stats: dict):
     """Affiche les mini stats du mois (auto-refresh 120s)."""
     heures = stats.get("temps_mois_heures", 0)
+    zones = stats.get("zones_jardin", 0)
+    pieces = stats.get("pieces", 0)
+    autonomie = stats.get("autonomie_pourcent", None)
 
-    st.markdown(
-        f"""
-        <div class="stats-mini">
-            <div class="stat-item">
-                <div class="stat-value">{heures:.1f}h</div>
-                <div class="stat-label">Ce mois</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">{stats.get("zones_jardin", 0)}</div>
-                <div class="stat-label">Zones jardin</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">{stats.get("pieces", 0)}</div>
-                <div class="stat-label">Pièces</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">{stats.get("autonomie_pourcent", 0)}%</div>
-                <div class="stat-label">Autonomie</div>
-            </div>
-        </div>
-    """,
-        unsafe_allow_html=True,
-    )
+    heures_display = f"{heures:.1f} h" if heures else "—"
+    zones_display = f"{zones:.0f}" if zones else "—"
+    pieces_display = f"{pieces:.0f}" if pieces else "—"
+    autonomie_display = f"{autonomie} %" if autonomie else "—"
+
+    st.markdown("#### 📊 Statistiques")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Ce mois", heures_display)
+    with col2:
+        st.metric("Zones jardin", zones_display)
+    with col3:
+        st.metric("Pièces", pieces_display)
+    with col4:
+        st.metric("Autonomie", autonomie_display)

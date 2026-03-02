@@ -59,7 +59,7 @@ class Backup(CreeLeMixin, Base):
     # Supabase user
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), index=True)
 
-    __table_args__ = (Index("ix_backups_created_at", "cree_le"),)
+    __table_args__ = (Index("ix_backups_created_at", "created_at"),)
 
     def __repr__(self) -> str:
         return f"<Backup(id={self.id}, filename='{self.filename}', size={self.size_bytes})>"
@@ -107,7 +107,7 @@ class HistoriqueAction(CreeLeMixin, Base):
     ip_address: Mapped[str | None] = mapped_column(String(45))
     user_agent: Mapped[str | None] = mapped_column(String(500))
 
-    __table_args__ = (Index("ix_action_history_created_at", "cree_le"),)
+    __table_args__ = (Index("ix_action_history_created_at", "created_at"),)
 
     def __repr__(self) -> str:
         return f"<HistoriqueAction(id={self.id}, user='{self.user_name}', action='{self.action_type}')>"

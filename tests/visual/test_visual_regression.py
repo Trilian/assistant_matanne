@@ -147,7 +147,7 @@ class TestPagesVisuelles:
         """Test visuel du calendrier."""
         self._test_page(
             page,
-            f"{streamlit_server}/planning_calendrier",
+            f"{streamlit_server}/famille_calendrier",
             "calendrier",
             snapshot_dir,
             output_dir,

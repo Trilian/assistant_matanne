@@ -21,7 +21,7 @@ Phase 4 Audit, item 20.
 from datetime import datetime
 
 from sqlalchemy import DateTime
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, declared_attr, mapped_column, synonym
 
 from .base import utc_now
 
@@ -31,21 +31,28 @@ from .base import utc_now
 
 
 class CreeLeMixin:
-    """Mixin ajoutant une colonne `cree_le` (datetime UTC, auto-remplie)."""
+    """Mixin ajoutant une colonne `created_at` puis un alias `cree_le`.
 
-    cree_le: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=utc_now,
-        nullable=False,
-    )
+    Si la classe fille définit déjà `created_at`, la colonne existante est
+    réutilisée et `cree_le` devient un `synonym` pointant vers elle.
+    """
+
+    @declared_attr
+    def created_at(cls) -> Mapped[datetime]:
+        return mapped_column(DateTime, default=utc_now, nullable=False)
+
+    @declared_attr
+    def cree_le(cls):
+        return synonym("created_at")
 
 
 class TimestampMixin(CreeLeMixin):
-    """Mixin ajoutant `cree_le` + `modifie_le` (auto-update)."""
+    """Mixin ajoutant `created_at/updated_at` + alias `cree_le/modifie_le`."""
 
-    modifie_le: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=utc_now,
-        onupdate=utc_now,
-        nullable=False,
-    )
+    @declared_attr
+    def updated_at(cls) -> Mapped[datetime]:
+        return mapped_column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
+
+    @declared_attr
+    def modifie_le(cls):
+        return synonym("updated_at")

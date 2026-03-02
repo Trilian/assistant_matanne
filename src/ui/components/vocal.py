@@ -267,7 +267,7 @@ def _naviguer(commande: CommandeVocale) -> tuple[bool, str]:
             "recettes": "cuisine.recettes",
             "courses": "cuisine.courses",
             "inventaire": "cuisine.inventaire",
-            "planning": "cuisine.planificateur_repas",
+            "planning": "cuisine_repas",
             "batch": "cuisine.batch_cooking",
             "accueil": "accueil",
             "paramètres": "parametres",

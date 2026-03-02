@@ -194,7 +194,7 @@ def _onglet_urgences():
 
         # Numéros nationaux
         st.markdown("---")
-        st.markdown("#### 🇫🇷 Numéros nationaux")
+        st.markdown("#### 📞 Numéros nationaux")
         col1, col2, col3 = st.columns(3)
         with col1:
             st.metric("SAMU", "15")

@@ -39,7 +39,7 @@ def afficher_jour_calendrier(jour: JourCalendrier):
         # Jours spéciaux (fériés, crèche, ponts) — affichés en bannière
         for js in jour.jours_speciaux:
             if js.type == TypeEvenement.FERIE:
-                st.error(f"🇫🇷 **{js.titre}** — Jour férié")
+                st.error(f"⭐ **{js.titre}** — Jour férié")
             elif js.type == TypeEvenement.CRECHE:
                 st.warning(f"🏫 **{js.titre}**")
             elif js.type == TypeEvenement.PONT:
@@ -137,7 +137,7 @@ def afficher_cellule_jour(jour: JourCalendrier):
     # Jours spéciaux en bandeau compact
     for js in jour.jours_speciaux:
         if js.type == TypeEvenement.FERIE:
-            st.caption(f"🇫🇷 {js.titre[:18]}")
+            st.caption(f"⭐ {js.titre[:18]}")
         elif js.type == TypeEvenement.CRECHE:
             st.caption("🏫 Crèche fermée")
         elif js.type == TypeEvenement.PONT:
