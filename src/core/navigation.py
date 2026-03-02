@@ -182,7 +182,10 @@ def construire_pages() -> dict[str, list[st.Page]]:
             _pages_index[key] = section_pages[-1]
 
         if section_pages:
-            pages[section_name] = section_pages
+            if section_name in pages:
+                pages[section_name].extend(section_pages)
+            else:
+                pages[section_name] = section_pages
 
     return pages
 

@@ -53,7 +53,7 @@ def afficher_bouton_undo(max_actions: int = 5) -> None:
         nb_annulables = len(annulables)
 
         # Bouton avec popover
-        with st.popover(f"↩️ Annuler ({nb_annulables})" if nb_annulables else "↩️ Annuler"):
+        with st.popover(f"↩️ ({nb_annulables})" if nb_annulables else "↩️", use_container_width=True):
             st.markdown("### Dernières actions")
 
             if not actions:
