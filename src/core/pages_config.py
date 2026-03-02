@@ -72,30 +72,35 @@ def _v(key: str, path: str, title: str, icon: str) -> PageConfig:
 # LISTE DÉCLARATIVE DES PAGES
 # ═════════════════════════════════════════════════════════════
 #
-# Visibles dans la sidebar : ~15 pages (hubs + accès fréquents)
-# Cachées (accessibles par bouton / URL) : ~59 pages
-# Total inchangé : 74 pages — zéro fonctionnalité perdue
+# Structure : 2 sections
+#   1. Pages visibles dans la sidebar (hubs principaux)
+#   2. Pages cachées (sous-pages accessibles via URL / boutons hub)
+#
+# Regrouper les pages visibles dans UNE SEULE section évite les
+# séparateurs visuels dans la sidebar et le bouton "View less".
 # ═════════════════════════════════════════════════════════════
 
 PAGES: list[SectionConfig] = [
-    # ── Tableau de bord + Cuisine + Planning ───────────────────
+    # ── Pages visibles — sidebar sans séparateurs ──────────────
     {
         "name": "",
         "pages": [
             _v("accueil", "src.modules.accueil", "Tableau de bord", "📊"),
-            _v(
-                "cuisine_repas",
-                "src.modules.cuisine.planificateur_repas",
-                "Cuisine & Repas",
-                "🍽️",
-            ),
-            # 'planning' entries removed (no root menu)
-            # Cuisine-related pages are registered as hidden subpages of
-            # the Planifier Repas hub so the sidebar shows a single entry
-            # "Planifier Repas" while keeping recipes/courses/inventaire
-            # accessible via URL or hub buttons.
-            # 'boite_outils' moved later in the menu (after Jeux)
-            # Cuisine subpages (hidden parents -> cuisine_repas)
+            _v("planning", "src.modules.planning.cockpit_familial", "Planning", "📅"),
+            _v("cuisine_repas", "src.modules.cuisine.planificateur_repas", "Cuisine & Repas", "🍽️"),
+            _v("famille", "src.modules.famille.hub_famille", "Famille", "👨‍👩‍👧‍👦"),
+            _v("maison", "src.modules.maison.hub", "Maison", "🏠"),
+            _v("jeux", "src.modules.jeux.hub", "Jeux", "🎮"),
+            _v("boite_outils", "src.modules.utilitaires.boite_outils", "Boîte à outils", "🧰"),
+            _v("parametres", "src.modules.parametres", "Paramètres", "⚙️"),
+        ],
+    },
+    # ── Pages cachées (routables via URL / switch_page) ────────
+    #    CSS-masquées dans la sidebar par _injecter_css_pages_cachees()
+    {
+        "name": "",
+        "pages": [
+            # Cuisine
             _h(
                 "cuisine.recettes",
                 "src.modules.cuisine.recettes",
@@ -110,13 +115,7 @@ PAGES: list[SectionConfig] = [
                 "🍳",
                 "cuisine_repas",
             ),
-            _h(
-                "cuisine.courses",
-                "src.modules.cuisine.courses",
-                "Courses",
-                "🛒",
-                "cuisine_repas",
-            ),
+            _h("cuisine.courses", "src.modules.cuisine.courses", "Courses", "🛒", "cuisine_repas"),
             _h(
                 "cuisine.inventaire",
                 "src.modules.cuisine.inventaire",
@@ -124,7 +123,7 @@ PAGES: list[SectionConfig] = [
                 "🥫",
                 "cuisine_repas",
             ),
-            # Utility helpers used by cuisine features
+            # Utilitaires cuisine
             _h(
                 "convertisseur_unites",
                 "src.modules.utilitaires.convertisseur_unites",
@@ -160,21 +159,147 @@ PAGES: list[SectionConfig] = [
                 "🥕",
                 "cuisine.recettes",
             ),
+            _h("minuteur", "src.modules.utilitaires.minuteur", "Minuteur", "⏱️", "cuisine_repas"),
+            # Famille
+            _h("famille.jules", "src.modules.famille.jules", "Jules", "👶", "famille"),
             _h(
-                "minuteur",
-                "src.modules.utilitaires.minuteur",
-                "Minuteur",
-                "⏱️",
-                "cuisine_repas",
+                "famille.jules_planning",
+                "src.modules.famille.jules_planning",
+                "Planning Jules",
+                "📅",
+                "famille",
             ),
             _h(
-                "chat_ia",
-                "src.modules.utilitaires.chat_ia",
-                "Chat IA",
-                "💬",
-                "boite_outils",
+                "famille.suivi_perso",
+                "src.modules.famille.suivi_perso",
+                "Mon Suivi",
+                "💪",
+                "famille",
             ),
-            # Hidden utility pages (registered here to keep sidebar uncluttered)
+            _h("famille.weekend", "src.modules.famille.weekend", "Weekend", "🎉", "famille"),
+            _h(
+                "famille.achats_famille",
+                "src.modules.famille.achats_famille",
+                "Achats",
+                "🛍️",
+                "famille",
+            ),
+            _h("famille.activites", "src.modules.famille.activites", "Activités", "🎭", "famille"),
+            _h("famille.routines", "src.modules.famille.routines", "Routines", "⏰", "famille"),
+            _h(
+                "famille.carnet_sante",
+                "src.modules.famille.carnet_sante",
+                "Carnet Santé",
+                "🏥",
+                "famille",
+            ),
+            _h(
+                "famille.calendrier",
+                "src.modules.famille.calendrier_famille",
+                "Calendrier",
+                "📅",
+                "famille",
+            ),
+            _h(
+                "famille.anniversaires",
+                "src.modules.famille.anniversaires",
+                "Anniversaires",
+                "🎂",
+                "famille",
+            ),
+            _h(
+                "famille.contacts",
+                "src.modules.famille.contacts_famille",
+                "Contacts",
+                "📞",
+                "famille",
+            ),
+            _h(
+                "famille.soiree_couple",
+                "src.modules.famille.soiree_couple",
+                "Soirée Couple",
+                "❤️",
+                "famille",
+            ),
+            _h("famille.album", "src.modules.famille.album", "Album Souvenirs", "📸", "famille"),
+            _h(
+                "famille.sante_globale",
+                "src.modules.famille.sante_globale",
+                "Santé Globale",
+                "💪",
+                "famille",
+            ),
+            _h(
+                "famille.journal",
+                "src.modules.famille.journal_familial",
+                "Journal IA",
+                "📝",
+                "famille",
+            ),
+            _h(
+                "famille.documents",
+                "src.modules.famille.documents_famille",
+                "Documents",
+                "📁",
+                "famille",
+            ),
+            _h("famille.voyage", "src.modules.famille.voyage", "Mode Voyage", "✈️", "famille"),
+            _h(
+                "famille.routines_pdf",
+                "src.modules.famille.routines_imprimables",
+                "Routines PDF",
+                "🖨️",
+                "famille",
+            ),
+            # Maison
+            _h("maison.jardin", "src.modules.maison.jardin", "Jardin", "🌱", "maison"),
+            _h(
+                "maison.jardin_zones",
+                "src.modules.maison.jardin_zones",
+                "Zones Jardin",
+                "🌿",
+                "maison",
+            ),
+            _h("maison.entretien", "src.modules.maison.entretien", "Entretien", "🏡", "maison"),
+            _h("maison.charges", "src.modules.maison.charges", "Charges", "💡", "maison"),
+            _h("maison.depenses", "src.modules.maison.depenses", "Dépenses", "💰", "maison"),
+            _h("maison.eco_tips", "src.modules.maison.eco_tips", "Éco-Tips", "🌿", "maison"),
+            _h("maison.energie", "src.modules.maison.energie", "Énergie", "⚡", "maison"),
+            _h("maison.meubles", "src.modules.maison.meubles", "Meubles", "🪑", "maison"),
+            _h("maison.projets", "src.modules.maison.projets", "Projets", "🏗️", "maison"),
+            _h(
+                "maison.visualisation",
+                "src.modules.maison.visualisation",
+                "Plan Maison",
+                "🏘️",
+                "maison",
+            ),
+            _h("meteo", "src.modules.utilitaires.meteo", "Météo", "🌤️", "maison"),
+            _h(
+                "suivi_energie",
+                "src.modules.utilitaires.suivi_energie",
+                "Suivi Énergie",
+                "⚡",
+                "maison",
+            ),
+            # Jeux
+            _h("jeux.paris", "src.modules.jeux.paris", "Paris Sportifs", "⚽", "jeux"),
+            _h("jeux.loto", "src.modules.jeux.loto", "Loto", "🎰", "jeux"),
+            _h("jeux.bilan", "src.modules.jeux.bilan", "Bilan Global", "📊", "jeux"),
+            _h("jeux.euromillions", "src.modules.jeux.euromillions", "Euromillions", "⭐", "jeux"),
+            _h(
+                "jeux.comparatif_roi",
+                "src.modules.jeux.comparatif_roi",
+                "Comparatif ROI",
+                "📈",
+                "jeux",
+            ),
+            _h("jeux.alertes", "src.modules.jeux.alertes", "Alertes Pronostics", "🔔", "jeux"),
+            _h("jeux.biais", "src.modules.jeux.biais", "Biais Cognitifs", "🧠", "jeux"),
+            _h("jeux.calendrier", "src.modules.jeux.calendrier", "Calendrier", "📅", "jeux"),
+            _h("jeux.educatif", "src.modules.jeux.educatif", "Module Éducatif", "🎓", "jeux"),
+            # Boîte à outils
+            _h("chat_ia", "src.modules.utilitaires.chat_ia", "Chat IA", "💬", "boite_outils"),
             _h("barcode", "src.modules.utilitaires.barcode", "Code-barres", "📱", "boite_outils"),
             _h(
                 "scan_factures",
@@ -262,185 +387,7 @@ PAGES: list[SectionConfig] = [
                 "📱",
                 "boite_outils",
             ),
-            _v("planning", "src.modules.planning.cockpit_familial", "Planning", "📅"),
-        ],
-    },
-    # ── Famille + Maison ─────────────────────────────────────
-    {
-        "name": "",
-        "pages": [
-            _v("famille", "src.modules.famille.hub_famille", "Famille", "👨‍👩‍👧‍👦"),
-            _h("famille.jules", "src.modules.famille.jules", "Jules", "👶", "famille"),
-            _h(
-                "famille.jules_planning",
-                "src.modules.famille.jules_planning",
-                "Planning Jules",
-                "📅",
-                "famille",
-            ),
-            _h(
-                "famille.suivi_perso",
-                "src.modules.famille.suivi_perso",
-                "Mon Suivi",
-                "💪",
-                "famille",
-            ),
-            _h("famille.weekend", "src.modules.famille.weekend", "Weekend", "🎉", "famille"),
-            _h(
-                "famille.achats_famille",
-                "src.modules.famille.achats_famille",
-                "Achats",
-                "🛍️",
-                "famille",
-            ),
-            _h(
-                "famille.activites",
-                "src.modules.famille.activites",
-                "Activités",
-                "🎭",
-                "famille",
-            ),
-            _h("famille.routines", "src.modules.famille.routines", "Routines", "⏰", "famille"),
-            _h(
-                "famille.carnet_sante",
-                "src.modules.famille.carnet_sante",
-                "Carnet Santé",
-                "🏥",
-                "famille",
-            ),
-            _h(
-                "famille.calendrier",
-                "src.modules.famille.calendrier_famille",
-                "Calendrier",
-                "📅",
-                "famille",
-            ),
-            _h(
-                "famille.anniversaires",
-                "src.modules.famille.anniversaires",
-                "Anniversaires",
-                "🎂",
-                "famille",
-            ),
-            _h(
-                "famille.contacts",
-                "src.modules.famille.contacts_famille",
-                "Contacts",
-                "📞",
-                "famille",
-            ),
-            _h(
-                "famille.soiree_couple",
-                "src.modules.famille.soiree_couple",
-                "Soirée Couple",
-                "❤️",
-                "famille",
-            ),
-            _h("famille.album", "src.modules.famille.album", "Album Souvenirs", "📸", "famille"),
-            _h(
-                "famille.sante_globale",
-                "src.modules.famille.sante_globale",
-                "Santé Globale",
-                "💪",
-                "famille",
-            ),
-            _h(
-                "famille.journal",
-                "src.modules.famille.journal_familial",
-                "Journal IA",
-                "📝",
-                "famille",
-            ),
-            _h(
-                "famille.documents",
-                "src.modules.famille.documents_famille",
-                "Documents",
-                "📁",
-                "famille",
-            ),
-            _h("famille.voyage", "src.modules.famille.voyage", "Mode Voyage", "✈️", "famille"),
-            _h(
-                "famille.routines_pdf",
-                "src.modules.famille.routines_imprimables",
-                "Routines PDF",
-                "🖨️",
-                "famille",
-            ),
-            _v("maison", "src.modules.maison.hub", "Maison", "🏠"),
-            _h("maison.jardin", "src.modules.maison.jardin", "Jardin", "🌱", "maison"),
-            _h(
-                "maison.jardin_zones",
-                "src.modules.maison.jardin_zones",
-                "Zones Jardin",
-                "🌿",
-                "maison",
-            ),
-            _h("maison.entretien", "src.modules.maison.entretien", "Entretien", "🏡", "maison"),
-            _h("maison.charges", "src.modules.maison.charges", "Charges", "💡", "maison"),
-            _h("maison.depenses", "src.modules.maison.depenses", "Dépenses", "💰", "maison"),
-            _h("maison.eco_tips", "src.modules.maison.eco_tips", "Éco-Tips", "🌿", "maison"),
-            _h("maison.energie", "src.modules.maison.energie", "Énergie", "⚡", "maison"),
-            _h("maison.meubles", "src.modules.maison.meubles", "Meubles", "🪑", "maison"),
-            _h("maison.projets", "src.modules.maison.projets", "Projets", "🏗️", "maison"),
-            _h(
-                "maison.visualisation",
-                "src.modules.maison.visualisation",
-                "Plan Maison",
-                "🏘️",
-                "maison",
-            ),
-            # Ex-section « Outils Maison »
-            _h("meteo", "src.modules.utilitaires.meteo", "Météo", "🌤️", "maison"),
-            _h(
-                "suivi_energie",
-                "src.modules.utilitaires.suivi_energie",
-                "Suivi Énergie",
-                "⚡",
-                "maison",
-            ),
-        ],
-    },
-    # ── Jeux ─────────────────────────────────────────────────
-    {
-        "name": "",
-        "pages": [
-            _v("jeux", "src.modules.jeux.hub", "Jeux", "🎮"),
-            _h("jeux.paris", "src.modules.jeux.paris", "Paris Sportifs", "⚽", "jeux"),
-            _h("jeux.loto", "src.modules.jeux.loto", "Loto", "🎰", "jeux"),
-            _h("jeux.bilan", "src.modules.jeux.bilan", "Bilan Global", "📊", "jeux"),
-            _h(
-                "jeux.euromillions",
-                "src.modules.jeux.euromillions",
-                "Euromillions",
-                "⭐",
-                "jeux",
-            ),
-            _h(
-                "jeux.comparatif_roi",
-                "src.modules.jeux.comparatif_roi",
-                "Comparatif ROI",
-                "📈",
-                "jeux",
-            ),
-            _h("jeux.alertes", "src.modules.jeux.alertes", "Alertes Pronostics", "🔔", "jeux"),
-            _h("jeux.biais", "src.modules.jeux.biais", "Biais Cognitifs", "🧠", "jeux"),
-            _h("jeux.calendrier", "src.modules.jeux.calendrier", "Calendrier", "📅", "jeux"),
-            _h("jeux.educatif", "src.modules.jeux.educatif", "Module Éducatif", "🎓", "jeux"),
-        ],
-    },
-    # ── Boîte à outils (visible after Jeux) ───────────────────────────
-    {
-        "name": "",
-        "pages": [
-            _v("boite_outils", "src.modules.utilitaires.boite_outils", "Boîte à outils", "🧰"),
-        ],
-    },
-    # NOTE: 'Outils' section removed — `Boîte à outils` moved to root sidebar.
-    # ── Configuration ────────────────────────────────────────
-    {
-        "name": "",
-        "pages": [
-            _v("parametres", "src.modules.parametres", "Paramètres", "⚙️"),
+            # Paramètres
             _h("design_system", "src.modules.design_system", "Design System", "🎨", "parametres"),
         ],
     },

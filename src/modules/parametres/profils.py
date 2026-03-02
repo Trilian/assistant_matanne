@@ -35,14 +35,33 @@ def afficher_profils_config():
     etat = obtenir_etat()
 
     # ── Section 1: Profil actif ──
+    # Essayer de charger depuis la DB ; fallback sur les profils en session
+    profils = None
+    db_disponible = True
     try:
         profils = ProfilService.obtenir_profils()
     except Exception as _e:
-        logger.warning(f"Impossible de charger les profils depuis la DB : {_e}")
-        st.warning("⚠️ Base de données indisponible. Les profils ne peuvent pas être chargés.")
-        return
-    if not profils:
-        st.warning("Aucun profil trouvé en base de données.")
+        logger.warning(f"Impossible de charger les profils depuis la DB : {_e}")
+        db_disponible = False
+
+    if not db_disponible or not profils:
+        # Fallback : utiliser les profils mis en cache dans la session
+        profils_session = st.session_state.get("profils_disponibles", [])
+        if not db_disponible:
+            st.info(
+                "ℹ️ La base de données est momentanément indisponible. "
+                "Les modifications de profil ne seront pas sauvegardées.",
+                icon="ℹ️",
+            )
+        if not profils_session:
+            st.warning("Aucun profil disponible.")
+            return
+        # Afficher uniquement le nom/avatar (lecture seule en mode hors-ligne)
+        st.markdown("#### Profils disponibles (lecture seule)")
+        for p in profils_session:
+            st.markdown(
+                f"- {p.get('avatar', '👤')} **{p.get('display_name', p.get('username', '?'))}**"
+            )
         return
 
     # Trouver le profil actif

@@ -31,8 +31,8 @@ class EtatPersistantDB(TimestampMixin, Base):
         namespace: Nom de l'espace de stockage (ex: "foyer_config")
         user_id: Identifiant utilisateur
         data: Données JSON sérialisées
-        created_at: Date de création (cree_le)
-        updated_at: Date de dernière modification (modifie_le)
+        cree_le: Date de création
+        modifie_le: Date de dernière modification
     """
 
     __tablename__ = "etats_persistants"

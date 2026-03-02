@@ -133,6 +133,16 @@ def _injecter_css_pages_cachees() -> None:
         batch = selecteurs[i : i + 20]
         css_parts.append(",\n".join(batch) + " { display: none !important; }")
 
+    # Masquer le bouton "View less / View more" que Streamlit affiche quand une
+    # section contient beaucoup de pages. Les items de navigation sont des <a>,
+    # seul le toggle de repli est un <button> → sûr de l'effacer ici.
+    css_parts.append(
+        '[data-testid="stSidebarNav"] button { display: none !important; }\n'
+        # Masquer aussi les li vides résiduels liés aux pages cachées
+        '[data-testid="stSidebarNav"] li:has(a[style*="display: none"]) '
+        "{ display: none !important; }"
+    )
+
     css = "\n".join(css_parts)
     st.markdown(f"<style>\n{css}\n</style>", unsafe_allow_html=True)
 

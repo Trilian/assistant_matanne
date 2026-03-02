@@ -15,7 +15,7 @@ from src.ui.keys import KeyNamespace
 from src.ui.tokens import Couleur
 from src.ui.tokens_semantic import Sem
 
-_keys = KeyNamespace("accueil")
+_keys = KeyNamespace("tableau_de_bord")
 
 
 def _card_css(border_color: str) -> str:

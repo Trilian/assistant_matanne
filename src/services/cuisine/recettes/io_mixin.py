@@ -163,7 +163,7 @@ class RecetteIOImportMixin:
             portions=portions,
             difficulte=difficulte,
             url_image=image_path,
-            updated_at=datetime.utcnow(),
+            modifie_le=datetime.utcnow(),
         )
         db.add(recette)
         db.flush()

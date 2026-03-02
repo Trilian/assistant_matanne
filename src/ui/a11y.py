@@ -54,25 +54,26 @@ _A11Y_CSS = """
 }
 
 /* ── Skip to content link ──────────────────────── */
-    .skip-link {
-    position: absolute;
-    top: -40px;
-    left: 0;
+.skip-link {
+    position: fixed;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
     /* Apparence discrète par défaut (ton neutre) */
     background: var(--sem-surface-alt, #f8f9fa);
     color: var(--sem-on-surface, #212529);
     border: 1px solid var(--sem-border, #ced4da);
-    padding: 6px 12px;
-    z-index: 10000;
+    padding: 6px 16px;
+    z-index: 99999;
     font-weight: 500;
     text-decoration: none;
     border-radius: 4px;
     transition: top 0.18s ease, background 0.12s ease, color 0.12s ease;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
 .skip-link:focus {
-    top: 8px;
+    top: 10px;
     /* Mettre en évidence au focus avec la couleur interactive (accessible) */
     background: var(--sem-interactive, #2E7D32);
     color: var(--sem-on-interactive, #ffffff);

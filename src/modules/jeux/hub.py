@@ -34,40 +34,43 @@ def app():
         c1, c2, c3 = st.columns(3)
 
         with c1:
-            st.markdown("### ⚽ Paris Sportifs")
-            st.caption("Suivi des championnats, prédictions IA et paris virtuels")
-            if st.button(
-                "Ouvrir Paris Sportifs",
-                key=_keys("goto_paris"),
-                use_container_width=True,
-                type="primary",
-            ):
-                _naviguer("jeux.paris")
-                st.rerun()
+            with st.container(border=True):
+                st.markdown("#### ⚽ Paris Sportifs")
+                st.caption("Suivi des championnats, prédictions IA et paris virtuels")
+                if st.button(
+                    "Ouvrir Paris Sportifs",
+                    key=_keys("goto_paris"),
+                    use_container_width=True,
+                    type="primary",
+                ):
+                    _naviguer("jeux.paris")
+                    st.rerun()
 
         with c2:
-            st.markdown("### 🎰 Loto")
-            st.caption("Analyse statistique, générateur de grilles et simulations")
-            if st.button(
-                "Ouvrir Loto",
-                key=_keys("goto_loto"),
-                use_container_width=True,
-                type="primary",
-            ):
-                _naviguer("jeux.loto")
-                st.rerun()
+            with st.container(border=True):
+                st.markdown("#### 🎰 Loto")
+                st.caption("Analyse statistique, générateur de grilles et simulations")
+                if st.button(
+                    "Ouvrir Loto",
+                    key=_keys("goto_loto"),
+                    use_container_width=True,
+                    type="primary",
+                ):
+                    _naviguer("jeux.loto")
+                    st.rerun()
 
         with c3:
-            st.markdown("### 📊 Bilan Global")
-            st.caption("Dashboard consolidé gains/pertes tous jeux confondus")
-            if st.button(
-                "Ouvrir Bilan",
-                key=_keys("goto_bilan"),
-                use_container_width=True,
-                type="primary",
-            ):
-                _naviguer("jeux.bilan")
-                st.rerun()
+            with st.container(border=True):
+                st.markdown("#### 📊 Bilan Global")
+                st.caption("Dashboard consolidé gains/pertes tous jeux confondus")
+                if st.button(
+                    "Ouvrir Bilan",
+                    key=_keys("goto_bilan"),
+                    use_container_width=True,
+                    type="primary",
+                ):
+                    _naviguer("jeux.bilan")
+                    st.rerun()
 
         st.divider()
 

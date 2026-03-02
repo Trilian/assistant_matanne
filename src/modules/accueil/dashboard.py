@@ -43,20 +43,20 @@ from .summaries import (
     afficher_planning_summary,
 )
 
-_keys = KeyNamespace("accueil")
+_keys = KeyNamespace("tableau_de_bord")
 
 # ═══════════════════════════════════════════════════════════
 # MODULE PRINCIPAL
 # ═══════════════════════════════════════════════════════════
 
 
-@profiler_rerun("accueil")
+@profiler_rerun("tableau_de_bord")
 def app():
-    """Point d'entree module accueil"""
+    """Point d'entree module tableau de bord"""
     from src.core.state import obtenir_etat, rerun
     from src.ui import etat_vide
 
-    with error_boundary("accueil_dashboard"):
+    with error_boundary("tableau_de_bord"):
         # Dashboard widgets enrichis
         try:
             from src.ui.components import (

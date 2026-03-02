@@ -43,6 +43,32 @@ def afficher_header():
             border-radius: 10px !important;
         }
 
+        /* ── Sidebar : titre application non tronqué ── */
+        [data-testid="stSidebarHeader"] span,
+        [data-testid="stSidebarHeader"] a {
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: unset !important;
+            font-size: 1rem !important;
+            font-weight: 700 !important;
+            line-height: 1.3 !important;
+        }
+
+        /* ── Bouton recherche globale (popover) ── */
+        [data-testid="stPopover"] > button {
+            border-radius: 20px !important;
+            border: 1px solid var(--sem-border, #ced4da) !important;
+            background: transparent !important;
+            color: var(--sem-on-surface, #212529) !important;
+            padding: 6px 12px !important;
+            font-size: 0.9rem !important;
+            transition: background 0.15s ease, border-color 0.15s ease !important;
+        }
+        [data-testid="stPopover"] > button:hover {
+            background: var(--sem-surface-alt, #f0f0f0) !important;
+            border-color: var(--sem-interactive, #2E7D32) !important;
+        }
+
         /* Petite carte pour l'assistant chat lorsqu'il est affiché inline */
         .chat-card {
             background: var(--st-color-background);
@@ -138,7 +164,7 @@ def afficher_header():
     with col1:
         st.markdown(
             f"<div class='main-header' role='banner' aria-label='En-tête application'>"
-            f"<h1 style='white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'>🤖 {echapper_html(parametres.APP_NAME)}</h1>"
+            f"<h1 style='white-space: nowrap;'>🤖 {echapper_html(parametres.APP_NAME)}</h1>"
             f"<p style='color: var(--sem-on-surface-muted, {Couleur.SECONDARY}); margin: 0;'>"
             f"Assistant familial intelligent"
             f"</p></div>",

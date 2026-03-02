@@ -1,4 +1,4 @@
--- ============================================================================
+﻿-- ============================================================================
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
 -- Version : 3.0
@@ -182,7 +182,7 @@ CREATE OR REPLACE FUNCTION update_modifie_le_column() RETURNS TRIGGER AS $$ BEGI
 RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-CREATE OR REPLACE FUNCTION update_updated_at_column() RETURNS TRIGGER AS $$ BEGIN NEW.updated_at = NOW();
+CREATE OR REPLACE FUNCTION update_modifie_le_bis_column() RETURNS TRIGGER AS $$ BEGIN NEW.modifie_le = NOW();
 RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -308,7 +308,7 @@ CREATE TABLE listes_courses (
     magasin_principal VARCHAR(200),
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_listes_courses_semaine ON listes_courses(semaine_du);
 CREATE INDEX IF NOT EXISTS ix_listes_courses_statut ON listes_courses(statut);
@@ -732,8 +732,8 @@ CREATE TABLE meubles (
     date_souhait DATE NOT NULL DEFAULT CURRENT_DATE,
     date_achat DATE,
     notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_furniture_piece ON meubles(piece);
 CREATE INDEX IF NOT EXISTS ix_furniture_statut ON meubles(statut);
@@ -752,7 +752,7 @@ CREATE TABLE depenses_maison (
     fournisseur VARCHAR(200),
     numero_contrat VARCHAR(100),
     notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT ck_house_mois_valide CHECK (
         mois >= 1
         AND mois <= 12
@@ -781,7 +781,7 @@ CREATE TABLE actions_ecologiques (
     date_debut DATE NOT NULL DEFAULT CURRENT_DATE,
     actif BOOLEAN NOT NULL DEFAULT TRUE,
     notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_eco_actions_type ON actions_ecologiques(type_action);
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -821,8 +821,8 @@ CREATE TABLE stocks_maison (
     emplacement VARCHAR(200),
     prix_unitaire NUMERIC(10, 2),
     notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_house_stocks_categorie ON stocks_maison(categorie);
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -843,8 +843,8 @@ CREATE TABLE preferences_utilisateurs (
     viande_rouge_max INTEGER NOT NULL DEFAULT 2,
     robots JSONB NOT NULL DEFAULT '[]',
     magasins_preferes JSONB NOT NULL DEFAULT '[]',
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_user_preferences_user_id ON preferences_utilisateurs(user_id);
 CREATE INDEX IF NOT EXISTS ix_user_preferences_user_id ON preferences_utilisateurs(user_id);
@@ -864,7 +864,7 @@ CREATE TABLE openfoodfacts_cache (
     allergenes JSONB DEFAULT '[]',
     image_url VARCHAR(500),
     last_updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_openfoodfacts_code ON openfoodfacts_cache(code_barres);
 CREATE INDEX IF NOT EXISTS ix_openfoodfacts_code ON openfoodfacts_cache(code_barres);
@@ -880,8 +880,8 @@ CREATE TABLE depenses (
     recurrence VARCHAR(20),
     tags JSONB DEFAULT '[]',
     user_id UUID,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT ck_depense_montant_positif CHECK (montant > 0),
     CONSTRAINT check_categorie_valide CHECK (
         categorie IN (
@@ -914,8 +914,8 @@ CREATE TABLE budgets_mensuels (
     budgets_par_categorie JSONB DEFAULT '{}',
     notes TEXT,
     user_id UUID,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT ck_budget_total_positif CHECK (budget_total >= 0)
 );
 CREATE INDEX IF NOT EXISTS ix_budgets_mensuels_mois ON budgets_mensuels(mois);
@@ -936,7 +936,7 @@ CREATE TABLE alertes_meteo (
     temperature NUMERIC(5, 2),
     lu BOOLEAN NOT NULL DEFAULT FALSE,
     user_id UUID,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_alertes_meteo_type ON alertes_meteo(type_alerte);
 CREATE INDEX IF NOT EXISTS ix_alertes_meteo_date ON alertes_meteo(date_debut);
@@ -954,8 +954,8 @@ CREATE TABLE config_meteo (
     notifications_canicule BOOLEAN NOT NULL DEFAULT TRUE,
     notifications_pluie BOOLEAN NOT NULL DEFAULT TRUE,
     user_id UUID,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_config_meteo_user ON config_meteo(user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -971,10 +971,10 @@ CREATE TABLE sauvegardes (
     storage_path VARCHAR(500),
     version VARCHAR(20) NOT NULL DEFAULT '1.0.0',
     user_id UUID,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_backups_user ON sauvegardes(user_id);
-CREATE INDEX IF NOT EXISTS ix_backups_created ON sauvegardes(created_at);
+CREATE INDEX IF NOT EXISTS ix_backups_cree_le ON sauvegardes(cree_le);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.39 ACTION_HISTORY
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -992,11 +992,11 @@ CREATE TABLE historique_actions (
     new_value JSONB,
     ip_address VARCHAR(45),
     user_agent VARCHAR(500),
-    created_at TIMESTAMP DEFAULT NOW()
+    cree_le TIMESTAMP DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_action_history_user_id ON historique_actions(user_id);
 CREATE INDEX IF NOT EXISTS idx_action_history_action_type ON historique_actions(action_type);
-CREATE INDEX IF NOT EXISTS idx_action_history_created_at ON historique_actions(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_action_history_cree_le ON historique_actions(cree_le DESC);
 CREATE INDEX IF NOT EXISTS idx_action_history_entity ON historique_actions(entity_type, entity_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.40 CALENDRIERS_EXTERNES
@@ -1012,8 +1012,8 @@ CREATE TABLE calendriers_externes (
     last_sync TIMESTAMP WITH TIME ZONE,
     sync_direction VARCHAR(20) NOT NULL DEFAULT 'bidirectional',
     user_id UUID,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_calendriers_externes_provider ON calendriers_externes(provider);
 CREATE INDEX IF NOT EXISTS ix_calendriers_externes_user ON calendriers_externes(user_id);
@@ -1027,7 +1027,7 @@ CREATE TABLE abonnements_push (
     auth_key TEXT NOT NULL,
     device_info JSONB DEFAULT '{}',
     user_id UUID,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     last_used TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_push_subscriptions_endpoint ON abonnements_push(endpoint);
@@ -1066,8 +1066,8 @@ CREATE TABLE configs_calendriers_externes (
     sync_enabled BOOLEAN NOT NULL DEFAULT TRUE,
     sync_direction VARCHAR(20) NOT NULL DEFAULT 'import',
     last_sync TIMESTAMP WITH TIME ZONE,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT ck_calendar_provider CHECK (
         provider IN ('google', 'apple', 'outlook', 'ical_url')
     )
@@ -1083,8 +1083,8 @@ CREATE TABLE plans_jardin (
     largeur NUMERIC(6, 2) NOT NULL,
     hauteur NUMERIC(6, 2) NOT NULL,
     description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modifie_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_plans_jardin_nom ON plans_jardin(nom);
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1101,8 +1101,8 @@ CREATE TABLE pieces_maison (
     position_y INTEGER DEFAULT 0,
     largeur_px INTEGER DEFAULT 100,
     hauteur_px INTEGER DEFAULT 100,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    cree_le TIMESTAMP DEFAULT NOW(),
+    modifie_le TIMESTAMP DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_pieces_maison_type ON pieces_maison(type_piece);
 -- ============================================================================
@@ -1311,7 +1311,7 @@ CREATE TABLE retours_recettes (
     feedback VARCHAR(20) NOT NULL DEFAULT 'neutral',
     contexte VARCHAR(200),
     notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_recipe_feedbacks_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE CASCADE,
     CONSTRAINT ck_feedback_type CHECK (feedback IN ('like', 'dislike', 'neutral'))
 );
@@ -1810,8 +1810,8 @@ CREATE TABLE evenements_calendrier (
     rappel_minutes INTEGER,
     source_calendrier_id BIGINT,
     user_id UUID,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_evenements_calendrier_source FOREIGN KEY (source_calendrier_id) REFERENCES calendriers_externes(id) ON DELETE
     SET NULL
 );
@@ -1837,8 +1837,8 @@ CREATE TABLE zones_jardin (
     largeur_px INTEGER DEFAULT 100,
     hauteur_px INTEGER DEFAULT 100,
     couleur VARCHAR(20) DEFAULT '#4CAF50',
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
+    cree_le TIMESTAMP DEFAULT NOW(),
+    modifie_le TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_zones_jardin_plan_id FOREIGN KEY (plan_id) REFERENCES plans_jardin(id) ON DELETE
     SET NULL
 );
@@ -1860,8 +1860,8 @@ CREATE TABLE plantes_jardin (
     notes TEXT,
     position_x NUMERIC(8, 2),
     position_y NUMERIC(8, 2),
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
+    cree_le TIMESTAMP DEFAULT NOW(),
+    modifie_le TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_plantes_jardin_zone FOREIGN KEY (zone_id) REFERENCES zones_jardin(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_plantes_jardin_zone ON plantes_jardin(zone_id);
@@ -1875,7 +1875,7 @@ CREATE TABLE actions_plantes (
     date_action DATE NOT NULL DEFAULT CURRENT_DATE,
     quantite NUMERIC(8, 2),
     notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_actions_plantes_plante_id FOREIGN KEY (plante_id) REFERENCES plantes_jardin(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_actions_plantes_plante_id ON actions_plantes(plante_id);
@@ -1897,8 +1897,8 @@ CREATE TABLE objets_maison (
     marque VARCHAR(100),
     modele VARCHAR(100),
     notes TEXT,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
+    cree_le TIMESTAMP DEFAULT NOW(),
+    modifie_le TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_objets_maison_piece FOREIGN KEY (piece_id) REFERENCES pieces_maison(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_objets_maison_piece ON objets_maison(piece_id);
@@ -1919,7 +1919,7 @@ CREATE TABLE sessions_travail (
     notes TEXT,
     difficulte INTEGER,
     satisfaction INTEGER,
-    created_at TIMESTAMP DEFAULT NOW(),
+    cree_le TIMESTAMP DEFAULT NOW(),
     CONSTRAINT ck_sessions_duree_positive CHECK (
         duree_minutes IS NULL
         OR duree_minutes >= 0
@@ -1957,7 +1957,7 @@ CREATE TABLE versions_pieces (
     cout_total NUMERIC(10, 2),
     photo_avant_url VARCHAR(500),
     photo_apres_url VARCHAR(500),
-    created_at TIMESTAMP DEFAULT NOW(),
+    cree_le TIMESTAMP DEFAULT NOW(),
     cree_par VARCHAR(100)
 );
 CREATE INDEX IF NOT EXISTS idx_versions_pieces_piece ON versions_pieces(piece_id);
@@ -1974,7 +1974,7 @@ CREATE TABLE couts_travaux (
     fournisseur VARCHAR(200),
     facture_ref VARCHAR(100),
     date_paiement DATE,
-    created_at TIMESTAMP DEFAULT NOW(),
+    cree_le TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_couts_travaux_version FOREIGN KEY (version_id) REFERENCES versions_pieces(id) ON DELETE CASCADE,
     CONSTRAINT ck_cout_montant_positif CHECK (montant >= 0)
 );
@@ -2301,8 +2301,8 @@ CREATE TABLE preferences_home (
     jours_menage JSONB DEFAULT '[6]',
     notification_matin BOOLEAN DEFAULT TRUE,
     heure_briefing INTEGER DEFAULT 7,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.02 TACHES_HOME (→ zones_jardin, pieces_maison)
@@ -2343,8 +2343,8 @@ CREATE TABLE taches_home (
     SET NULL,
         piece_id INTEGER REFERENCES pieces_maison(id) ON DELETE
     SET NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_taches_home_domaine ON taches_home(domaine);
 CREATE INDEX IF NOT EXISTS idx_taches_home_statut ON taches_home(statut);
@@ -2371,7 +2371,7 @@ CREATE TABLE stats_home (
     taches_completees INTEGER DEFAULT 0,
     taches_reportees INTEGER DEFAULT 0,
     score_jour INTEGER DEFAULT 0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(date, domaine)
 );
 CREATE INDEX IF NOT EXISTS idx_stats_home_date ON stats_home(date);
@@ -2402,7 +2402,7 @@ CREATE TABLE plantes_catalogue (
     ),
     rendement_kg_m2 DECIMAL(4, 2) DEFAULT 2.0,
     besoin_famille_4_kg_an DECIMAL(6, 2),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_plantes_catalogue_famille ON plantes_catalogue(famille);
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2422,7 +2422,7 @@ CREATE TABLE recoltes (
         destination IN ('frais', 'conserve', 'congele', 'donne', 'perdu')
     ),
     notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_recoltes_date ON recoltes(date_recolte);
 CREATE INDEX IF NOT EXISTS idx_recoltes_legume ON recoltes(legume);
@@ -2446,8 +2446,8 @@ CREATE TABLE objectifs_autonomie (
         END
     ) STORED,
     notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.07 CONTRATS
@@ -2480,8 +2480,8 @@ CREATE TABLE contrats (
     tacite_reconduction BOOLEAN DEFAULT TRUE,
     fichier_url TEXT,
     notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_contrats_type ON contrats(type_contrat);
 CREATE INDEX IF NOT EXISTS idx_contrats_actif ON contrats(actif);
@@ -2503,7 +2503,7 @@ CREATE TABLE factures (
     date_paiement DATE,
     fichier_url TEXT,
     notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_factures_contrat ON factures(contrat_id);
 CREATE INDEX IF NOT EXISTS idx_factures_date ON factures(date_facture);
@@ -2524,7 +2524,7 @@ CREATE TABLE comparatifs (
     lien_offre TEXT,
     applique BOOLEAN DEFAULT FALSE,
     date_application DATE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.10 DEPENSES_HOME (→ contrats, factures)
@@ -2554,7 +2554,7 @@ CREATE TABLE depenses_home (
     SET NULL,
         facture_id INTEGER REFERENCES factures(id) ON DELETE
     SET NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_depenses_home_date ON depenses_home(date_depense);
 CREATE INDEX IF NOT EXISTS idx_depenses_home_categorie ON depenses_home(categorie);
@@ -2567,8 +2567,8 @@ CREATE TABLE budgets_home (
     montant_mensuel DECIMAL(10, 2) NOT NULL,
     alerte_pourcent INTEGER DEFAULT 80,
     notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 -- ============================================================================
 -- PARTIE 5B : TABLES JEUX EXTENSIONS (Euromillions, Cotes, Mise Responsable)
@@ -3156,7 +3156,7 @@ CREATE TABLE releves_energie (
 CREATE INDEX IF NOT EXISTS idx_energie_categorie ON releves_energie(categorie);
 CREATE INDEX IF NOT EXISTS idx_energie_date ON releves_energie(date_releve DESC);
 -- ============================================================================
--- PARTIE 6 : TRIGGERS (modifie_le / updated_at)
+-- PARTIE 6 : TRIGGERS (modifie_le)
 -- ============================================================================
 -- Tables avec colonne modifie_le
 DO $$
@@ -3177,7 +3177,16 @@ tables_modifie_le TEXT [] := ARRAY [
         'traitements_nuisibles', 'devis_comparatifs', 'entretiens_saisonniers',
         -- Utilitaires
         'notes_memos', 'journal_bord', 'contacts_utiles', 'liens_favoris',
-        'mots_de_passe_maison', 'releves_energie'
+        'mots_de_passe_maison', 'releves_energie',
+        -- Tables anciennement updated_at (colonnes renommées modifie_le)
+        'listes_courses', 'meubles', 'taches_entretien', 'stocks_maison',
+        'preferences_utilisateurs', 'depenses', 'budgets_mensuels', 'config_meteo',
+        'calendriers_externes', 'preferences_notifications',
+        'configs_calendriers_externes', 'evenements_calendrier',
+        'plans_jardin', 'zones_jardin', 'plantes_jardin',
+        'pieces_maison', 'objets_maison',
+        'preferences_home', 'taches_home', 'objectifs_autonomie',
+        'contrats', 'budgets_home'
     ];
 BEGIN FOREACH t IN ARRAY tables_modifie_le LOOP EXECUTE format(
     'DROP TRIGGER IF EXISTS trigger_update_modifie_le ON %I',
@@ -3189,34 +3198,6 @@ EXECUTE format(
             BEFORE UPDATE ON %I
             FOR EACH ROW
             EXECUTE FUNCTION update_modifie_le_column()
-        ',
-    t
-);
-END LOOP;
-END $$;
--- Tables avec colonne updated_at
-DO $$
-DECLARE t TEXT;
-tables_updated_at TEXT [] := ARRAY [
-        'listes_courses', 'meubles', 'taches_entretien', 'stocks_maison',
-        'preferences_utilisateurs', 'depenses', 'budgets_mensuels', 'config_meteo',
-        'calendriers_externes', 'preferences_notifications',
-        'configs_calendriers_externes', 'evenements_calendrier',
-        'plans_jardin', 'zones_jardin', 'plantes_jardin',
-        'pieces_maison', 'objets_maison',
-        'preferences_home', 'taches_home', 'objectifs_autonomie',
-        'contrats', 'budgets_home'
-    ];
-BEGIN FOREACH t IN ARRAY tables_updated_at LOOP EXECUTE format(
-    'DROP TRIGGER IF EXISTS trigger_update_updated_at ON %I',
-    t
-);
-EXECUTE format(
-    '
-            CREATE TRIGGER trigger_update_updated_at
-            BEFORE UPDATE ON %I
-            FOR EACH ROW
-            EXECUTE FUNCTION update_updated_at_column()
         ',
     t
 );
@@ -3449,7 +3430,16 @@ all_tables TEXT [] := ARRAY [
         'entretiens_saisonniers', 'releves_compteurs',
         -- Utilitaires
         'notes_memos', 'journal_bord', 'contacts_utiles', 'liens_favoris',
-        'mots_de_passe_maison', 'presse_papier_entrees', 'releves_energie'
+        'mots_de_passe_maison', 'presse_papier_entrees', 'releves_energie',
+        -- Tables anciennement updated_at (colonnes renommées modifie_le)
+        'listes_courses', 'meubles', 'taches_entretien', 'stocks_maison',
+        'preferences_utilisateurs', 'depenses', 'budgets_mensuels', 'config_meteo',
+        'calendriers_externes', 'preferences_notifications',
+        'configs_calendriers_externes', 'evenements_calendrier',
+        'plans_jardin', 'zones_jardin', 'plantes_jardin',
+        'pieces_maison', 'objets_maison',
+        'preferences_home', 'taches_home', 'objectifs_autonomie',
+        'contrats', 'budgets_home'
     ];
 BEGIN FOREACH t IN ARRAY all_tables LOOP EXECUTE format(
     'ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY',
@@ -4174,7 +4164,5 @@ COMMIT;
 -- ============================================================================
 -- FIN DES MIGRATIONS AJOUTÉES LE 2026-02-27
 -- ============================================================================
-
-CREATE TRIGGER trg_update_modifie_le_preferences_notifications
-BEFORE UPDATE ON preferences_notifications
-FOR EACH ROW EXECUTE FUNCTION update_modifie_le_column();
+CREATE TRIGGER trg_update_modifie_le_preferences_notifications BEFORE
+UPDATE ON preferences_notifications FOR EACH ROW EXECUTE FUNCTION update_modifie_le_column();

@@ -29,7 +29,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base
+from .base import Base, utc_now
 from .mixins import CreeLeMixin, TimestampMixin
 
 if TYPE_CHECKING:
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
 # ═══════════════════════════════════════════════════════════
 
 
-class Ingredient(CreeLeMixin, Base):
+class Ingredient(Base):
     """Ingrédient de base utilisé partout (recettes, inventaire, courses).
 
     Attributes:
@@ -50,7 +50,7 @@ class Ingredient(CreeLeMixin, Base):
         nom: Nom de l'ingrédient (unique)
         categorie: Catégorie (fruits, légumes, viandes, etc.)
         unite: Unité par défaut (pcs, kg, L, etc.)
-        cree_le: Date de création
+        cree_le: Date de création (colonne DB: cree_le)
     """
 
     __tablename__ = "ingredients"
@@ -60,6 +60,10 @@ class Ingredient(CreeLeMixin, Base):
     categorie: Mapped[str | None] = mapped_column(String(100), index=True)
     # colonne DB actuelle: `unite` (schéma SQL); mapper expose l'attribut `unite`
     unite: Mapped[str] = mapped_column(String(50), name="unite", nullable=False, default="pcs")
+    # La table DB utilise "cree_le" comme nom de colonne réel
+    cree_le: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, nullable=False
+    )
 
     # Relations
     recette_ingredients: Mapped[list["RecetteIngredient"]] = relationship(
@@ -194,7 +198,7 @@ class Recette(TimestampMixin, Base):
 
     # Contraintes
     __table_args__ = (
-        Index("ix_recettes_cree_le", "created_at"),
+        Index("ix_recettes_cree_le", "cree_le"),
         CheckConstraint("temps_preparation >= 0", name="ck_temps_prep_positif"),
         CheckConstraint("temps_cuisson >= 0", name="ck_temps_cuisson_positif"),
         CheckConstraint("portions > 0 AND portions <= 20", name="ck_portions_valides"),

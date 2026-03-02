@@ -10,7 +10,7 @@ import streamlit as st
 from src.ui.fragments import auto_refresh, cached_fragment
 from src.ui.keys import KeyNamespace
 
-_keys = KeyNamespace("accueil")
+_keys = KeyNamespace("tableau_de_bord")
 
 
 @cached_fragment(ttl=300)  # Cache 5 min pour graphiques lourds

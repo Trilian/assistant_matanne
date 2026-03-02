@@ -51,10 +51,8 @@ class ListeCourses(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     nom: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
     archivee: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
-    cree_le: Mapped[datetime] = mapped_column("created_at", DateTime, default=utc_now, index=True)
-    modifie_le: Mapped[datetime] = mapped_column(
-        "updated_at", DateTime, default=utc_now, onupdate=utc_now
-    )
+    cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
+    modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relations
     articles: Mapped[list["ArticleCourses"]] = relationship(
@@ -106,7 +104,7 @@ class ArticleCourses(CreeLeMixin, Base):
     ingredient: Mapped["Ingredient"] = relationship("Ingredient", foreign_keys=[ingredient_id])
 
     __table_args__ = (
-        Index("ix_liste_courses_cree_le", "created_at"),
+        Index("ix_liste_courses_cree_le", "cree_le"),
         CheckConstraint("quantite_necessaire > 0", name="ck_quantite_courses_positive"),
     )
 
