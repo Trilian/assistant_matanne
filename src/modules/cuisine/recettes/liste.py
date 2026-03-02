@@ -32,8 +32,6 @@ def afficher_liste():
         st.session_state[_keys("page")] = 0
 
     key_page_size = _keys("page_size_val")
-    if key_page_size not in st.session_state:
-        st.session_state[key_page_size] = 9
 
     # Contrôles de pagination en haut
     col_size1, col_size2, col_size3 = st.columns([2, 1.5, 2])
@@ -43,14 +41,14 @@ def afficher_liste():
         page_size = st.selectbox(
             "Recettes/page",
             [6, 9, 12, 15],
-            index=[6, 9, 12, 15].index(st.session_state[key_page_size]),
+            index=1,  # défaut : 9
             key=key_page_size,
             label_visibility="collapsed",
         )
     with col_size3:
         st.write("")  # Espacement
 
-    PAGE_SIZE = st.session_state[key_page_size]
+    PAGE_SIZE = page_size
 
     # Filtres
     col1, col2, col3, col4 = st.columns(4)

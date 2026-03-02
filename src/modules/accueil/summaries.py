@@ -121,37 +121,14 @@ def afficher_inventaire_summary():
         + "</div>",
         unsafe_allow_html=True,
     )
-    col_btn, col_help = st.columns([4, 1])
-    with col_btn:
-        if st.button(
-            "Gérer l'inventaire →",
-            key=_keys("nav_inventaire"),
-            use_container_width=True,
-            help="Voir et gérer le stock",
-        ):
-            GestionnaireEtat.naviguer_vers("cuisine.inventaire")
-            rerun()
-    with col_help:
-        if st.button("?", key=_keys("quick_view_inventaire"), help="Aperçu rapide"):
-            st.session_state[_keys("show_quick_inventaire")] = not st.session_state.get(
-                _keys("show_quick_inventaire"), False
-            )
-            rerun()
-
-    # Aperçu rapide si activé
-    if st.session_state.get(_keys("show_quick_inventaire")):
-        try:
-            inventaire = obtenir_service_inventaire().get_inventaire_complet()
-            st.caption(f"**Total : {len(inventaire)} articles**")
-            urgents = [a for a in inventaire if a.get("statut") in ("critique", "sous_seuil")][:5]
-            if urgents:
-                st.caption("**⚠️ À racheter :**")
-                for a in urgents:
-                    st.caption(f"• {a.get('ingredient_nom', '?')}")
-            else:
-                st.caption("✅ Stock OK")
-        except Exception:
-            st.caption("Données indisponibles")
+    if st.button(
+        "Gérer l'inventaire →",
+        key=_keys("nav_inventaire"),
+        use_container_width=True,
+        help="Voir et gérer le stock",
+    ):
+        GestionnaireEtat.naviguer_vers("cuisine.inventaire")
+        rerun()
 
 
 def afficher_courses_summary():

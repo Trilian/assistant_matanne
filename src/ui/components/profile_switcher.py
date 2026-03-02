@@ -72,7 +72,15 @@ def afficher_selecteur_profil() -> None:
             break
 
     # Sélecteur
-    st.markdown('<div style="margin-top: 4px;">', unsafe_allow_html=True)
+    st.markdown(
+        """
+        <style>
+        [data-testid="stSidebarUserContent"] { padding-top: 0.25rem !important; }
+        </style>
+        <div style="margin-top: 2px;">
+        """,
+        unsafe_allow_html=True,
+    )
     choix = st.selectbox(
         "👤 Profil actif",
         noms_affichage,

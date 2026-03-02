@@ -125,7 +125,7 @@ class GestionnaireEtat:
             "cuisine_repas": "Planning repas",
             "cuisine.planning_semaine": "Planning",  # alias
             "cuisine.courses": "Courses",
-            "famille": "Hub Famille",
+            "famille": "Famille",
             "famille.jules": "Jules",
             "famille.jules_planning": "Planning Jules",
             "famille.sante": "Santé & Sport",

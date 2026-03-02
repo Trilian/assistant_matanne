@@ -88,7 +88,7 @@ PAGES: list[SectionConfig] = [
             _v("accueil", "src.modules.accueil", "Tableau de bord", "📊"),
             _v("planning", "src.modules.planning.cockpit_familial", "Planning", "📅"),
             _v("cuisine_repas", "src.modules.cuisine.planificateur_repas", "Cuisine & Repas", "🍽️"),
-            _v("famille", "src.modules.famille.hub_famille", "Hub Famille", "👨‍👩‍👧"),
+            _v("famille", "src.modules.famille.hub_famille", "Famille", "👨‍👩‍👧"),
             _v("maison", "src.modules.maison.hub", "Maison", "🏠"),
             _v("jeux", "src.modules.jeux.hub", "Jeux", "🎮"),
             _v("boite_outils", "src.modules.utilitaires.boite_outils", "Boîte à outils", "🧰"),
@@ -160,6 +160,28 @@ PAGES: list[SectionConfig] = [
                 "cuisine.recettes",
             ),
             _h("minuteur", "src.modules.utilitaires.minuteur", "Minuteur", "⏱️", "cuisine_repas"),
+            # Planning (sous-pages)
+            _h(
+                "planning.calendrier",
+                "src.modules.planning.calendrier",
+                "Calendrier",
+                "📅",
+                "planning",
+            ),
+            _h(
+                "planning.templates_ui",
+                "src.modules.planning.templates_ui",
+                "Templates",
+                "📋",
+                "planning",
+            ),
+            _h(
+                "planning.timeline_ui",
+                "src.modules.planning.timeline_ui",
+                "Timeline",
+                "📊",
+                "planning",
+            ),
             # Famille
             _h("famille.jules", "src.modules.famille.jules", "Jules", "👶", "famille"),
             _h(

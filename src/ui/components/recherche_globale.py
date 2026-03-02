@@ -367,7 +367,6 @@ def afficher_recherche_globale_popover() -> None:
             "✖ Effacer",
             key=_keys("cancel"),
             help="Effacer la recherche",
-            type="tertiary",
             use_container_width=True,
         ):
             k = _keys("input")

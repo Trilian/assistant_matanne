@@ -115,4 +115,4 @@ def afficher_global_stats():
         except Exception as e:
             logger.exception("Erreur lors du chargement des repas planifiés")
 
-        st.metric("🧹 Repas Planifiés", nb_repas, help="Cette semaine")
+        st.metric("🍽️ Repas / sem.", nb_repas, help="Repas planifiés cette semaine")

@@ -219,7 +219,20 @@ Format du résumé en Markdown:
             if service is None:
                 return {}
 
-            depenses = service.get_depenses_periode(date_debut, date_fin)
+            # get_depenses_mois prend mois+annee ; on couvre les 2 semaines via les 2 mois
+            mois_debut, annee_debut = date_debut.month, date_debut.year
+            mois_fin, annee_fin = date_fin.month, date_fin.year
+            depenses_raw = service.get_depenses_mois(mois=mois_debut, annee=annee_debut)
+            if mois_fin != mois_debut or annee_fin != annee_debut:
+                depenses_raw = depenses_raw + service.get_depenses_mois(
+                    mois=mois_fin, annee=annee_fin
+                )
+            # Filtrer sur la période exacte
+            depenses = [
+                d
+                for d in depenses_raw
+                if date_debut <= getattr(d, "date", date_debut).date() <= date_fin
+            ]
             if not depenses:
                 return {"total": 0, "categories": {}}
 
@@ -251,13 +264,16 @@ Format du résumé en Markdown:
             if service is None:
                 return {}
 
-            activites = service.lister_par_periode(date_debut, date_fin)
+            toutes = service.lister_activites()
+            activites = [
+                a for a in toutes if date_debut <= getattr(a, "date_prevue", date_debut) <= date_fin
+            ]
             if not activites:
                 return {"nb_activites": 0}
 
             return {
                 "nb_activites": len(activites),
-                "noms": [getattr(a, "nom", "Activité") for a in activites[:5]],
+                "noms": [getattr(a, "titre", "Activité") for a in activites[:5]],
             }
         except Exception as e:
             logger.warning(f"Erreur collecte activités: {e}")
@@ -273,7 +289,8 @@ Format du résumé en Markdown:
             if service is None:
                 return {}
 
-            taches = service.get_taches_periode(date_debut, date_fin)
+            # get_taches_du_jour retourne les tâches du jour courant (pas de filtrage par période)
+            taches = service.get_taches_du_jour()
             return {
                 "nb_realisees": len([t for t in taches if getattr(t, "fait", False)]),
                 "nb_en_retard": len([t for t in taches if getattr(t, "en_retard", False)]),

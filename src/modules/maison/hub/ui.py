@@ -9,7 +9,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from src.core.state import GestionnaireEtat, rerun
-from src.ui.fragments import auto_refresh
 
 
 def afficher_header():
@@ -159,9 +158,8 @@ def afficher_modules_fallback(stats: dict):
     pass
 
 
-@auto_refresh(seconds=120)
 def afficher_stats_mois(stats: dict):
-    """Affiche les mini stats du mois (auto-refresh 120s)."""
+    """Affiche les mini stats du mois."""
     heures = stats.get("temps_mois_heures", 0)
     zones = stats.get("zones_jardin", 0)
     pieces = stats.get("pieces", 0)

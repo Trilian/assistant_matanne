@@ -247,13 +247,13 @@ def _charger_evenements_aujourdhui() -> list[dict]:
         with obtenir_contexte_db() as session:
             activites = (
                 session.query(ActiviteFamille)
-                .filter(ActiviteFamille.date_activite == aujourdhui)
+                .filter(ActiviteFamille.date_prevue == aujourdhui)
                 .all()
             )
             for act in activites:
                 evenements.append(
                     {
-                        "titre": act.nom or act.type_activite or "Activité",
+                        "titre": act.titre or act.type_activite or "Activité",
                         "lieu": getattr(act, "lieu", "") or "",
                     }
                 )

@@ -482,7 +482,7 @@ def app():
     n'est plus nécessaire. Le bouton « Retour » est géré
     automatiquement par navigation.py.
     """
-    st.title("👨‍👩‍👧 Hub Famille")
+    st.title("👨‍👩‍👧 Famille")
 
     # Initialiser les utilisateurs si nécessaire
     try:

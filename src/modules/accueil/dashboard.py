@@ -374,7 +374,7 @@ def afficher_quick_actions():
     with col3:
         if st.button(
             "📦 Gérer Inventaire",
-            key=_keys("quick_view_inventaire"),
+            key=_keys("goto_inventaire"),
             use_container_width=True,
             help="Consulter et mettre à jour les stocks",
         ):
