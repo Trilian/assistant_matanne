@@ -302,6 +302,24 @@ class ServiceRecettes(
             return []
 
     @avec_session_db
+    def get_stats(self, db: Session | None = None) -> dict:
+        """Retourne les statistiques globales des recettes.
+
+        Returns:
+            Dict avec 'total' et métriques agrégées.
+        """
+        try:
+            total = db.query(Recette).count()
+            favoris = db.query(Recette).filter(Recette.est_favori == True).count()  # noqa: E712
+            return {
+                "total": total,
+                "favoris": favoris,
+            }
+        except Exception as e:
+            logger.error(f"Erreur get_stats recettes: {e}")
+            return {"total": 0, "favoris": 0}
+
+    @avec_session_db
     def get_stats_recette(self, recette_id: int, db: Session | None = None) -> dict:
         """Récupère les statistiques d'utilisation d'une recette.
 

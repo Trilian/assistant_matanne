@@ -175,10 +175,10 @@ def afficher_stats_mois(stats: dict):
     st.markdown("#### 📊 Statistiques")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("Ce mois", heures_display)
+        st.metric("Mois", heures_display)
     with col2:
-        st.metric("Zones jardin", zones_display)
+        st.metric("Zones", zones_display)
     with col3:
         st.metric("Pièces", pieces_display)
     with col4:
-        st.metric("Autonomie", autonomie_display)
+        st.metric("Autonomie %", autonomie_display)

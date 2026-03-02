@@ -63,22 +63,19 @@ def afficher_global_stats():
     try:
         stats_recettes = obtenir_service_recettes().get_stats()
     except Exception as e:
-        logger.exception("Erreur lors du chargement des stats recettes")
-        st.warning("Impossible de charger les statistiques de recettes (voir logs).")
+        logger.debug("Stats recettes indisponibles: %s", e)
         stats_recettes = {"total": 0}
 
     try:
         stats_inventaire = obtenir_service_inventaire().get_stats()
     except Exception as e:
-        logger.exception("Erreur lors du chargement des stats inventaire")
-        st.warning("Impossible de charger les statistiques d'inventaire (voir logs).")
+        logger.debug("Stats inventaire indisponibles: %s", e)
         stats_inventaire = {"total": 0}
 
     try:
         stats_courses = obtenir_service_courses().get_stats()
     except Exception as e:
-        logger.exception("Erreur lors du chargement des stats courses")
-        st.warning("Impossible de charger les statistiques des courses (voir logs).")
+        logger.debug("Stats courses indisponibles: %s", e)
         stats_courses = {"total": 0}
 
     try:

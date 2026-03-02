@@ -311,6 +311,13 @@ def afficher_resume_matinal():
     """Affiche le résumé matinal IA personnalisé."""
     donnees = _collecter_donnees_jour()
 
+    try:
+        from src.core.state import obtenir_etat
+
+        ia_dispo = obtenir_etat().agent_ia
+    except Exception:
+        ia_dispo = False
+
     # Container stylisé
     st.markdown(
         f'<div style="background: linear-gradient(135deg, {Couleur.BG_METEO_START}, #FFF5E1); '
@@ -321,28 +328,29 @@ def afficher_resume_matinal():
 
     col_txt, col_btn = st.columns([5, 1])
 
+    use_ia = False
     with col_btn:
-        use_ia = st.button(
-            "✨ Version IA",
-            key=_keys("btn_resume_ia"),
-            help="Générer un résumé enrichi par l'IA",
-        )
+        if ia_dispo:
+            use_ia = st.button(
+                "✨ Version IA",
+                key=_keys("btn_resume_ia"),
+                help="Générer un résumé enrichi par l'IA",
+            )
 
-    # Générer le résumé
-    if use_ia or st.session_state.get(_keys("resume_ia_active")):
-        st.session_state[_keys("resume_ia_active")] = True
-
-        with st.spinner("✨ L'IA prépare votre résumé..."):
-            resume = _generer_resume_ia(donnees)
-
-        if resume:
-            st.markdown(resume)
+    # Générer le résumé dans la colonne texte
+    with col_txt:
+        if ia_dispo and (use_ia or st.session_state.get(_keys("resume_ia_active"))):
+            st.session_state[_keys("resume_ia_active")] = True
+            with st.spinner("✨ L'IA prépare votre résumé..."):
+                resume = _generer_resume_ia(donnees)
+            if resume:
+                st.markdown(resume)
+            else:
+                # Fallback silencieux — on affiche juste la version locale
+                st.session_state[_keys("resume_ia_active")] = False
+                st.markdown(_generer_resume_local(donnees))
         else:
-            # Fallback local
             st.markdown(_generer_resume_local(donnees))
-            st.caption("💡 Résumé IA indisponible, version locale affichée")
-    else:
-        st.markdown(_generer_resume_local(donnees))
 
     st.markdown("</div>", unsafe_allow_html=True)
 

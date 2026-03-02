@@ -201,13 +201,22 @@ def afficher_widget_ce_soir():
 
         col_a, col_b = st.columns(2)
         with col_a:
-            if st.button(
-                "✨ Suggestion IA",
-                key=_keys("suggestion_ia"),
-                type="primary",
-                width="stretch",
-            ):
-                _afficher_suggestion_ia()
+            try:
+                from src.core.state import obtenir_etat
+
+                _ia_dispo = obtenir_etat().agent_ia
+            except Exception:
+                _ia_dispo = False
+            if _ia_dispo:
+                if st.button(
+                    "✨ Suggestion IA",
+                    key=_keys("suggestion_ia"),
+                    type="primary",
+                    width="stretch",
+                ):
+                    _afficher_suggestion_ia()
+            else:
+                st.caption("💡 IA non configurée")
         with col_b:
             if st.button("📅 Planifier", key=_keys("planifier"), width="stretch"):
                 from src.core.state import naviguer
@@ -251,7 +260,7 @@ def _afficher_suggestion_ia():
                 st.info("💡 Pas de suggestion disponible")
         except Exception as e:
             logger.debug(f"Suggestion IA indisponible: {e}")
-            st.info("💡 Service IA temporairement indisponible")
+            st.caption("💡 IA indisponible — vérifiez la configuration MISTRAL_API_KEY.")
 
 
 __all__ = ["afficher_widget_ce_soir"]

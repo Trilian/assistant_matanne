@@ -184,7 +184,13 @@ def afficher_conseil_jules():
     col_ia, col_nav = st.columns(2)
 
     with col_ia:
-        if st.button(
+        try:
+            from src.core.state import obtenir_etat
+
+            _ia_dispo = obtenir_etat().agent_ia
+        except Exception:
+            _ia_dispo = False
+        if _ia_dispo and st.button(
             "✨ Idées IA", key=_keys("suggestion_ia"), help="Suggestions personnalisées par l'IA"
         ):
             with st.spinner("✨ L'IA réfléchit..."):
@@ -201,7 +207,7 @@ def afficher_conseil_jules():
                     st.write_stream(stream)
                 except Exception as e:
                     logger.debug(f"IA Jules indisponible: {e}")
-                    st.info("✨ Service IA temporairement indisponible")
+                    st.caption("✨ IA indisponible — vérifiez la configuration MISTRAL_API_KEY.")
 
     with col_nav:
         if st.button("👶 Voir tout", key=_keys("nav_jules")):

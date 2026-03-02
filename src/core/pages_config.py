@@ -88,7 +88,7 @@ PAGES: list[SectionConfig] = [
             _v("accueil", "src.modules.accueil", "Tableau de bord", "📊"),
             _v("planning", "src.modules.planning.cockpit_familial", "Planning", "📅"),
             _v("cuisine_repas", "src.modules.cuisine.planificateur_repas", "Cuisine & Repas", "🍽️"),
-            _v("famille", "src.modules.famille.hub_famille", "Famille", "👨‍👩‍👧‍👦"),
+            _v("famille", "src.modules.famille.hub_famille", "Hub Famille", "👨‍👩‍👧"),
             _v("maison", "src.modules.maison.hub", "Maison", "🏠"),
             _v("jeux", "src.modules.jeux.hub", "Jeux", "🎮"),
             _v("boite_outils", "src.modules.utilitaires.boite_outils", "Boîte à outils", "🧰"),

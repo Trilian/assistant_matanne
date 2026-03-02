@@ -137,15 +137,18 @@ def _verifier_cache() -> SanteComposant:
         stats = cache.obtenir_statistiques()
         duree = (time.perf_counter() - start) * 1000
 
-        hit_rate = float(stats.get("hit_rate", 0) or 0)
+        _raw_hit = stats.get("hit_rate", 0) or 0
+        if isinstance(_raw_hit, str):
+            _raw_hit = _raw_hit.rstrip("%").strip()
+        hit_rate = float(_raw_hit)
         statut = StatutSante.SAIN
-        if hit_rate < 0.3 and stats.get("total_requetes", 0) > 100:
+        if hit_rate < 30 and stats.get("total_requetes", 0) > 100:
             statut = StatutSante.DEGRADE
 
         return SanteComposant(
             nom="cache",
             statut=statut,
-            message=f"Hit rate: {hit_rate:.1%}",
+            message=f"Hit rate: {hit_rate:.1f}%",
             details=stats,
             duree_verification_ms=duree,
         )

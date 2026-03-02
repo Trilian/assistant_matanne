@@ -19,6 +19,22 @@ def afficher_selecteur_profil() -> None:
 
     etat = obtenir_etat()
 
+    # Indicateur IA Active — visible sur toutes les pages via la sidebar
+    ia_css = (
+        "background: #e8f5e9; color: #2E7D32; border: 1px solid #a5d6a7; "
+        "border-radius: 999px; padding: 3px 10px; font-size: 0.78rem; "
+        "font-weight: 600; display: inline-block; margin-bottom: 6px;"
+    )
+    ia_indispo_css = (
+        "background: #fff8e1; color: #f57c00; border: 1px solid #ffe082; "
+        "border-radius: 999px; padding: 3px 10px; font-size: 0.78rem; "
+        "font-weight: 600; display: inline-block; margin-bottom: 6px;"
+    )
+    if etat.agent_ia:
+        st.markdown(f'<span style="{ia_css}">🤖 IA Active</span>', unsafe_allow_html=True)
+    else:
+        st.markdown(f'<span style="{ia_indispo_css}">🤖 IA Indispo</span>', unsafe_allow_html=True)
+
     # Charger les profils depuis la DB (cache en session)
     if "profils_disponibles" not in st.session_state:
         try:
@@ -56,13 +72,14 @@ def afficher_selecteur_profil() -> None:
             break
 
     # Sélecteur
-    st.markdown("---")
+    st.markdown('<div style="margin-top: 4px;">', unsafe_allow_html=True)
     choix = st.selectbox(
         "👤 Profil actif",
         noms_affichage,
         index=index_actuel,
         key="sidebar_profil_selecteur",
     )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     # Déterminer le profil sélectionné
     idx = noms_affichage.index(choix)
