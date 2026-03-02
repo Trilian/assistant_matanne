@@ -192,16 +192,28 @@ def afficher_observations(jours: list) -> None:
 
     jours_noms = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 
+    scores = [j.charge_score for j in jours]
+    score_max = max(scores)
+    score_min = min(scores)
+
+    if score_max == 0:
+        st.info("📅 Semaine vide — Aucun événement planifié")
+        return
+
+    if score_max == score_min:
+        st.info(f"↔️ Charge uniforme toute la semaine ({score_max}/100)")
+        return
+
     jour_max = max(jours, key=lambda j: j.charge_score)
     idx_max = jours.index(jour_max)
     st.error(
-        f"❌ Jour le plus chargé: **{jours_noms[idx_max].capitalize()}** ({jour_max.charge_score}/100)"
+        f"❌ Jour le plus chargé : **{jours_noms[idx_max].capitalize()}** ({jour_max.charge_score}/100)"
     )
 
     jour_min = min(jours, key=lambda j: j.charge_score)
     idx_min = jours.index(jour_min)
     st.success(
-        f"🚀 Jour le plus calme: **{jours_noms[idx_min].capitalize()}** ({jour_min.charge_score}/100)"
+        f"🚀 Jour le plus calme : **{jours_noms[idx_min].capitalize()}** ({jour_min.charge_score}/100)"
     )
 
 

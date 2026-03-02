@@ -343,9 +343,9 @@ def afficher_header():
     with col_badge:
         st.markdown('<div style="padding-top: 16px;">', unsafe_allow_html=True)
         if etat.agent_ia:
-            badge("🤖 IA ✓", variante=Variante.SUCCESS)
+            badge("IA ✓", variante=Variante.SUCCESS)
         else:
-            badge("🤖 IA ✗", variante=Variante.WARNING)
+            badge("IA ✗", variante=Variante.WARNING)
         st.markdown("</div>", unsafe_allow_html=True)
 
     with col_search:

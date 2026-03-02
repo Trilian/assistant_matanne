@@ -96,4 +96,44 @@ CREATE INDEX IF NOT EXISTS idx_recettes_est_local ON recettes (est_local);
 CREATE INDEX IF NOT EXISTS idx_recettes_compatible_cookeo ON recettes (compatible_cookeo);
 CREATE INDEX IF NOT EXISTS idx_recettes_compatible_monsieur_cuisine ON recettes (compatible_monsieur_cuisine);
 CREATE INDEX IF NOT EXISTS idx_recettes_compatible_airfryer ON recettes (compatible_airfryer);
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 6. TABLE contacts_utiles (Annuaire familial)
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS contacts_utiles (
+    id BIGSERIAL PRIMARY KEY,
+    nom VARCHAR(200) NOT NULL,
+    categorie VARCHAR(50) NOT NULL DEFAULT 'autre',
+    specialite VARCHAR(200),
+    telephone VARCHAR(20),
+    email VARCHAR(200),
+    adresse TEXT,
+    horaires VARCHAR(200),
+    notes TEXT,
+    favori BOOLEAN NOT NULL DEFAULT FALSE,
+    cree_le TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_contacts_utiles_categorie ON contacts_utiles (categorie);
+CREATE INDEX IF NOT EXISTS idx_contacts_utiles_nom ON contacts_utiles (nom);
+CREATE INDEX IF NOT EXISTS idx_contacts_utiles_favori ON contacts_utiles (favori)
+WHERE favori = TRUE;
+-- RLS contacts_utiles
+ALTER TABLE contacts_utiles ENABLE ROW LEVEL SECURITY;
+DO $do$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policy
+    WHERE polname = 'contacts_utiles_all'
+        AND polrelid = 'contacts_utiles'::regclass
+) THEN EXECUTE 'CREATE POLICY "contacts_utiles_all" ON contacts_utiles FOR ALL USING (true) WITH CHECK (true)';
+END IF;
+END $do$;
+-- Trigger modifie_le
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'trg_contacts_utiles_modifie'
+) THEN CREATE TRIGGER trg_contacts_utiles_modifie BEFORE
+UPDATE ON contacts_utiles FOR EACH ROW EXECUTE FUNCTION update_modifie_le();
+END IF;
+END $$;
 COMMIT;

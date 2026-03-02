@@ -102,7 +102,7 @@ def app():
             )
 
         # Onglets principaux avec deep linking URL
-        TAB_LABELS = ["📅 Calendrier", "📊 Analyse", "🤖 IA", "� Import", "🔗 Google"]
+        TAB_LABELS = ["📅 Calendrier", "📊 Analyse", "🤖 IA", "📥 Import", "🔗 Google"]
         tab_index = tabs_with_url(TAB_LABELS, param="tab")
         tab_calendrier, tab_analyse, tab_ia, tab_import, tab_google = st.tabs(TAB_LABELS)
 

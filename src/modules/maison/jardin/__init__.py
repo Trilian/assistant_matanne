@@ -111,9 +111,9 @@ def app():
         st.divider()
 
         # Onglets
-        TAB_LABELS = ["🌿 Mes plantes", "➕ Ajouter", "📊 Stats"]
+        TAB_LABELS = ["🌿 Mes plantes", "📍 Zones", "📊 Stats", "➕ Ajouter"]
         tab_index = tabs_with_url(TAB_LABELS, param="tab")
-        tab1, tab2, tab3 = st.tabs(TAB_LABELS)
+        tab1, tab_zones, tab3, tab2 = st.tabs(TAB_LABELS)
 
         with tab1:
             df = charger_plantes()
@@ -124,6 +124,11 @@ def app():
                     with st.container(border=True):
                         st.markdown(f"**{row.get('nom', '')}**")
                         st.caption(row.get("type_plante", ""))
+
+        with tab_zones:
+            from src.modules.maison.jardin_zones import afficher_vue_ensemble
+
+            afficher_vue_ensemble()
 
         with tab2:
             st.subheader("➕ Ajouter une plante")

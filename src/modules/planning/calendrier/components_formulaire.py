@@ -18,6 +18,31 @@ _keys = KeyNamespace("calendrier")
 # Accesseur lazy pour le service (singleton)
 _service = None
 
+MOIS_ABBREV = [
+    "jan",
+    "fév",
+    "mars",
+    "avr",
+    "mai",
+    "jun",
+    "jul",
+    "aoû",
+    "sep",
+    "oct",
+    "nov",
+    "déc",
+]
+
+
+def _label_semaine(debut: date) -> str:
+    """Retourne un label court pour une semaine, ex: '10 – 16 mars'."""
+    fin = debut + timedelta(days=6)
+    m_debut = MOIS_ABBREV[debut.month - 1]
+    m_fin = MOIS_ABBREV[fin.month - 1]
+    if debut.month == fin.month:
+        return f"{debut.day} – {fin.day} {m_fin}"
+    return f"{debut.day} {m_debut} – {fin.day} {m_fin}"
+
 
 def _get_service():
     global _service
@@ -37,17 +62,18 @@ def afficher_navigation_semaine():
     if _keys("semaine_debut") not in st.session_state:
         st.session_state[_keys("semaine_debut")] = get_debut_semaine(date.today())
 
+    semaine_debut = st.session_state[_keys("semaine_debut")]
+    prec = get_semaine_precedente(semaine_debut)
+    suiv = get_semaine_suivante(semaine_debut)
+
     col1, col2, col3, col4 = st.columns([1, 2, 1, 1])
 
     with col1:
-        if st.button("Semaine", key="btn_semaine_prec", use_container_width=True):
-            st.session_state[_keys("semaine_debut")] = get_semaine_precedente(
-                st.session_state[_keys("semaine_debut")]
-            )
+        if st.button(_label_semaine(prec), key="btn_semaine_prec", use_container_width=True):
+            st.session_state[_keys("semaine_debut")] = prec
             rerun()
 
     with col2:
-        semaine_debut = st.session_state[_keys("semaine_debut")]
         semaine_fin = semaine_debut + timedelta(days=6)
         st.markdown(
             f"<h3 style='text-align: center; margin: 0;'>"
@@ -57,10 +83,8 @@ def afficher_navigation_semaine():
         )
 
     with col3:
-        if st.button("Semaine", key="btn_semaine_suiv", use_container_width=True):
-            st.session_state[_keys("semaine_debut")] = get_semaine_suivante(
-                st.session_state[_keys("semaine_debut")]
-            )
+        if st.button(_label_semaine(suiv), key="btn_semaine_suiv", use_container_width=True):
+            st.session_state[_keys("semaine_debut")] = suiv
             rerun()
 
     with col4:

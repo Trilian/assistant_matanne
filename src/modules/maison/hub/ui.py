@@ -9,6 +9,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from src.core.state import GestionnaireEtat, rerun
+from src.ui.fragments import auto_refresh
 
 
 def afficher_header():
@@ -129,8 +130,13 @@ def afficher_modules(stats: dict):
     st.markdown("#### 🏠 Sections")
 
     modules = [
-        {"key": "maison.jardin", "icon": "🌳", "title": "Jardin", "subtitle": "Potager"},
-        {"key": "maison.entretien", "icon": "🏡", "title": "Entretien", "subtitle": "Équipements"},
+        {"key": "maison.jardin", "icon": "🌳", "title": "Jardin", "subtitle": "Plantes & Zones 📍"},
+        {
+            "key": "maison.entretien",
+            "icon": "🏡",
+            "title": "Entretien",
+            "subtitle": "Tâches & Plan 📍",
+        },
         {
             "key": "maison.charges",
             "icon": "💡",
@@ -138,7 +144,12 @@ def afficher_modules(stats: dict):
             "subtitle": "Énergie & contrats",
         },
         {"key": "maison.depenses", "icon": "💰", "title": "Dépenses", "subtitle": "Budget maison"},
-        {"key": "maison.visualisation", "icon": "🏘️", "title": "Plan", "subtitle": "Visualisation"},
+        {
+            "key": "maison.visualisation",
+            "icon": "🏘️",
+            "title": "Plan complet",
+            "subtitle": "2D/3D détaillé",
+        },
     ]
 
     cols = st.columns(3)

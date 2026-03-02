@@ -109,9 +109,9 @@ def app():
         st.divider()
 
         # Onglets
-        TAB_LABELS = ["📋 Routines", "📅 Aujourd'hui", "➕ Nouvelle"]
+        TAB_LABELS = ["📋 Routines", "📅 Aujourd'hui", "📍 Plan maison", "➕ Nouvelle"]
         tab_index = tabs_with_url(TAB_LABELS, param="tab")
-        tab1, tab2, tab3 = st.tabs(TAB_LABELS)
+        tab1, tab2, tab_plan, tab3 = st.tabs(TAB_LABELS)
 
         with tab1:
             df = charger_routines()
@@ -130,6 +130,27 @@ def app():
             else:
                 for t in taches:
                     st.checkbox(t.get("nom", ""), key=f"tache_{t.get('id', 0)}")
+
+        with tab_plan:
+            st.caption("Plan 2D de la maison — cliquez sur une pièce pour voir son entretien.")
+            try:
+                from src.modules.maison.visualisation import app as afficher_plan
+                from src.services.maison.visualisation_service import get_visualisation_service
+
+                visu_service = get_visualisation_service()
+                visu_service.initialiser_pieces_defaut()
+                pieces = visu_service.obtenir_pieces_avec_details()
+
+                from src.modules.maison.visualisation.ui_2d import afficher_plan_2d
+                from src.ui.keys import KeyNamespace as _KNS
+
+                _visu_keys = _KNS("entretien_visu")
+                afficher_plan_2d(pieces, visu_service, key_prefix=_visu_keys("plan"))
+            except Exception as _e:
+                logger.warning(f"Plan maison indisponible: {_e}")
+                st.info(
+                    "🏠 Plan non disponible. Vérifiez que les pièces sont configurées dans **Visualisation**."
+                )
 
         with tab3:
             st.subheader("➕ Nouvelle routine")
