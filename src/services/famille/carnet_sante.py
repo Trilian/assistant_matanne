@@ -374,6 +374,47 @@ class ServiceCarnetSante(BaseService[Vaccin]):
             },
         }
 
+    # Compatibility aliases for older UI code
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
+    def lister_vaccins(
+        self, child_id: int | None = None, *, db: Session | None = None
+    ) -> list[Vaccin]:
+        """Alias historique: retourne les vaccins (optionnellement filtrés par enfant)."""
+        if db is None:
+            return []
+        query = db.query(Vaccin).order_by(Vaccin.date_vaccination.desc())
+        if child_id is not None:
+            query = query.filter_by(child_id=child_id)
+        return query.all()
+
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
+    def lister_prochains_rdv(self, limite: int = 10, *, db: Session | None = None):
+        """Alias historique: retourne les prochains RDV (limit)."""
+        if db is None:
+            return []
+        return (
+            db.query(RendezVousMedical)
+            .filter(RendezVousMedical.date_rdv >= func.now())
+            .order_by(RendezVousMedical.date_rdv.asc())
+            .limit(limite)
+            .all()
+        )
+
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
+    def lister_mesures(
+        self, child_id: int | None = None, *, db: Session | None = None
+    ) -> list[MesureCroissance]:
+        """Alias historique: retourne mesures de croissance (optionnellement pour un enfant)."""
+        if db is None:
+            return []
+        query = db.query(MesureCroissance).order_by(MesureCroissance.date_mesure.desc())
+        if child_id is not None:
+            query = query.filter_by(child_id=child_id)
+        return query.all()
+
 
 # ═══════════════════════════════════════════════════════════
 # FACTORY

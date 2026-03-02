@@ -9,6 +9,7 @@ Ré-exporte les fonctions depuis les sous-modules:
 """
 
 from src.ui.fragments import cached_fragment, ui_fragment
+from src.ui.tokens_semantic import Sem
 
 from .cards import afficher_depense_card, afficher_formulaire
 from .charts import (
@@ -40,7 +41,13 @@ def afficher_stats_dashboard():
         st.metric("Mois precedent", f"{stats['total_prec']:.0f}€")
 
     with col3:
-        st.metric("Moyenne mensuelle", f"{stats['moyenne_mensuelle']:.0f}€")
+        md = (
+            f'<div style="text-align:center;min-width:0;">'
+            f'<div style="font-size:1.3rem;font-weight:700;line-height:1.2;">{stats["moyenne_mensuelle"]:.0f}€</div>'
+            f'<div style="font-size:0.72rem;color:{Sem.ON_SURFACE_SECONDARY};white-space:normal;overflow:visible;word-break:break-word;">Moyenne mensuelle</div>'
+            '</div>'
+        )
+        st.markdown(md, unsafe_allow_html=True)
 
     with col4:
         st.metric("Categories", stats["nb_categories"])

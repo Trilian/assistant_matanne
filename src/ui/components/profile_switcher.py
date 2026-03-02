@@ -23,12 +23,12 @@ def afficher_selecteur_profil() -> None:
     ia_css = (
         "background: #e8f5e9; color: #2E7D32; border: 1px solid #a5d6a7; "
         "border-radius: 999px; padding: 3px 10px; font-size: 0.78rem; "
-        "font-weight: 600; display: inline-block; margin-bottom: 6px;"
+        "font-weight: 600; display: inline-block; margin-bottom: 2px;"
     )
     ia_indispo_css = (
         "background: #fff8e1; color: #f57c00; border: 1px solid #ffe082; "
         "border-radius: 999px; padding: 3px 10px; font-size: 0.78rem; "
-        "font-weight: 600; display: inline-block; margin-bottom: 6px;"
+        "font-weight: 600; display: inline-block; margin-bottom: 2px;"
     )
     if etat.agent_ia:
         st.markdown(f'<span style="{ia_css}">🤖 IA Active</span>', unsafe_allow_html=True)

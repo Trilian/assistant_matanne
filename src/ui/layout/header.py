@@ -110,26 +110,26 @@ def afficher_header():
 
         /* ── En-têtes de section ── */
         h2 {
-            font-size: 1.4rem !important;
+            font-size: 1.35rem !important;
             font-weight: 700 !important;
-            margin-top: 1.5rem !important;
-            margin-bottom: 0.6rem !important;
+            margin-top: 1.0rem !important;
+            margin-bottom: 0.5rem !important;
             color: var(--sem-on-surface, #212529) !important;
             border-bottom: 2px solid var(--sem-interactive, #2E7D32) !important;
             padding-bottom: 6px !important;
         }
         h3 {
-            font-size: 1.15rem !important;
+            font-size: 1.12rem !important;
             font-weight: 700 !important;
-            margin-top: 1.2rem !important;
-            margin-bottom: 0.5rem !important;
+            margin-top: 0.8rem !important;
+            margin-bottom: 0.45rem !important;
             color: var(--sem-on-surface, #212529) !important;
         }
         h4 {
-            font-size: 1rem !important;
+            font-size: 0.98rem !important;
             font-weight: 600 !important;
-            margin-top: 1rem !important;
-            margin-bottom: 0.4rem !important;
+            margin-top: 0.7rem !important;
+            margin-bottom: 0.35rem !important;
             color: var(--sem-on-surface-secondary, #495057) !important;
         }
 
@@ -171,19 +171,19 @@ def afficher_header():
             border-right: 1px solid var(--sem-border-subtle, #e9ecef) !important;
         }
         [data-testid="stSidebar"] section[data-testid="stSidebarContent"] {
-            padding-top: 0.5rem !important;
+            padding-top: 0.25rem !important;
         }
         /* Réduction du gap entre le dernier nav item et le profil */
         [data-testid="stSidebar"] .stSelectbox {
-            margin-top: 2px !important;
+            margin-top: 0px !important;
         }
         /* Nav items ─ taille, poids */
         [data-testid="stSidebarNav"] a {
-            font-size: 0.9rem !important;
+            font-size: 0.88rem !important;
             font-weight: 500 !important;
-            padding: 6px 14px !important;
+            padding: 4px 12px !important;
             border-radius: 8px !important;
-            transition: background 0.15s ease !important;
+            transition: background 0.12s ease !important;
         }
         [data-testid="stSidebarNav"] a[aria-current="page"],
         [data-testid="stSidebarNav"] a:hover {

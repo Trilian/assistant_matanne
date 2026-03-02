@@ -218,10 +218,11 @@ def afficher_chat_contextuel(
 
     messages: list[dict] = st.session_state[sk_messages]
 
-    # Header compact
+    # Header compact (hidden if the global chat is visible to avoid duplicate titles)
     col1, col2 = st.columns([4, 1])
     with col1:
-        st.markdown(f"**💬 Assistant {contexte.capitalize()}**")
+        if not st.session_state.get("chat_global_visible", False):
+            st.markdown(f"**💬 Assistant {contexte.capitalize()}**")
     with col2:
         if st.button("🗑️", key=_keys("clear", contexte), help="Effacer"):
             st.session_state[sk_messages] = []

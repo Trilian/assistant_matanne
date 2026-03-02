@@ -38,7 +38,7 @@ def _metric_html(label: str, value: str, sub: str = "") -> str:
         f'<div style="flex:1;min-width:0;text-align:center;">'
         f'<div style="font-size:1.3rem;font-weight:700;line-height:1.2;">{value}</div>'
         f'<div style="font-size:0.72rem;color:{Sem.ON_SURFACE_SECONDARY};'
-        f'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{label}</div>'
+        f'white-space:normal;overflow:visible;word-break:break-word;">{label}</div>'
         f"{sub_html}"
         f"</div>"
     )
