@@ -208,7 +208,18 @@ def _generer_resume_local(donnees: dict) -> str:
 
     # Jules
     if donnees.get("jules_age_mois"):
-        parts.append(f"👶 Jules a **{donnees['jules_age_mois']} mois** aujourd'hui.")
+        import calendar
+
+        from src.core.constants import JULES_NAISSANCE
+
+        _today = date.today()
+        _dernier_jour = calendar.monthrange(_today.year, _today.month)[1]
+        _jour_pivot = min(JULES_NAISSANCE.day, _dernier_jour)
+        _est_moisiversaire = _today.day == _jour_pivot
+        if _est_moisiversaire:
+            parts.append(f"👶 Jules a **{donnees['jules_age_mois']} mois** aujourd'hui ! 🎉")
+        else:
+            parts.append(f"👶 Jules a **{donnees['jules_age_mois']} mois**.")
 
     # Stocks bas
     if donnees.get("stocks_bas"):

@@ -97,8 +97,8 @@ def afficher_bouton_undo(max_actions: int = 5) -> None:
 
     except Exception as e:
         logger.debug(f"Historique undo non disponible: {e}")
-        # Fallback: bouton désactivé
-        st.button("↩️ Annuler", disabled=True, help="Historique non disponible")
+        # Pas de bouton fallback pour ne pas polluer l'interface
+        return
 
 
 @composant_ui("historique", tags=("ui", "timeline", "actions"))

@@ -116,7 +116,11 @@ def afficher_notifications_config():
     etat = obtenir_etat()
 
     # Charger les préférences existantes
-    pref = _charger_preferences()
+    try:
+        pref = _charger_preferences()
+    except Exception as _e:
+        logger.warning(f"Impossible de charger les préférences de notification : {_e}")
+        pref = None
 
     # ── Section 1: Configuration générale ──
     st.markdown("#### ⚙️ Configuration générale")

@@ -37,7 +37,7 @@ def injecter_css():
         + f" --text-primary: var(--sem-on-surface, {Couleur.TEXT_PRIMARY});"
         + f" --text-secondary: var(--sem-on-surface-secondary, {Couleur.TEXT_SECONDARY});"
         + " }"
-        + " .skip-link { position: absolute; left: 1rem; top: 0.75rem; padding: 8px 12px; }"
+        # skip-link style est défini dans a11y.py (top: -40px par défaut, visible au focus)
     )
 
     CSSManager.register("global-styles", css)

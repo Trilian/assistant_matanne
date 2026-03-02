@@ -35,7 +35,12 @@ def afficher_profils_config():
     etat = obtenir_etat()
 
     # ── Section 1: Profil actif ──
-    profils = ProfilService.obtenir_profils()
+    try:
+        profils = ProfilService.obtenir_profils()
+    except Exception as _e:
+        logger.warning(f"Impossible de charger les profils depuis la DB : {_e}")
+        st.warning("⚠️ Base de données indisponible. Les profils ne peuvent pas être chargés.")
+        return
     if not profils:
         st.warning("Aucun profil trouvé en base de données.")
         return

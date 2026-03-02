@@ -368,8 +368,18 @@ def app() -> None:
         # ── Légende ──
         with st.expander("ℹ️ Légende"):
             st.markdown(
-                "- 🍽️ Repas planifié · ✅ Repas préparé\n"
-                "- 📍 RDV · ⚽ Activité · 🎉 Fête · 📌 Autre\n"
-                "- 👨‍👩‍👦 Activité famille\n"
-                "- 🔴 Tâche haute priorité · 🟡 Moyenne · ⚪ Normale"
+                """
+<div style='display:flex;flex-wrap:wrap;gap:6px 16px;font-size:0.82rem;line-height:1.7;'>
+<span>🍽️&nbsp;Repas planifié</span>
+<span>✅&nbsp;Repas préparé</span>
+<span>📍&nbsp;RDV</span>
+<span>⚽&nbsp;Activité</span>
+<span>🎉&nbsp;Fête</span>
+<span>📌&nbsp;Autre</span>
+<span>👨‍👩‍👦&nbsp;Activité famille</span>
+<span>🔴&nbsp;Haute priorité</span>
+<span>🟡&nbsp;Priorité moyenne</span>
+<span>⚪&nbsp;Priorité normale</span>
+</div>""",
+                unsafe_allow_html=True,
             )

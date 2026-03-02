@@ -138,7 +138,7 @@ def afficher_header():
     with col1:
         st.markdown(
             f"<div class='main-header' role='banner' aria-label='En-tête application'>"
-            f"<h1>🤖 {echapper_html(parametres.APP_NAME)}</h1>"
+            f"<h1 style='white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'>🤖 {echapper_html(parametres.APP_NAME)}</h1>"
             f"<p style='color: var(--sem-on-surface-muted, {Couleur.SECONDARY}); margin: 0;'>"
             f"Assistant familial intelligent"
             f"</p></div>",
@@ -152,23 +152,23 @@ def afficher_header():
             badge("🤖 IA Indispo", variante=Variante.WARNING)
 
     with col3:
-        # Recherche globale popover + notifications
-        col_search, col_undo, col_notif = st.columns(3)
-        with col_search:
+        # Recherche globale + undo — affichés sans sous-colonnes pour éviter les boutons trop étroits
+        btn_cols = st.columns([1, 1, 1])
+        with btn_cols[0]:
             try:
                 from src.ui.components import afficher_recherche_globale_popover
 
                 afficher_recherche_globale_popover()
             except ImportError:
                 pass
-        with col_undo:
+        with btn_cols[1]:
             try:
                 from src.ui.components import afficher_bouton_undo
 
                 afficher_bouton_undo()
             except ImportError:
                 pass
-        with col_notif:
+        with btn_cols[2]:
             if etat.notifications_non_lues > 0:
-                if st.button(f"🔔 {etat.notifications_non_lues}"):
+                if st.button(f"🔔 {etat.notifications_non_lues}", key="_header_notif"):
                     st.session_state.show_notifications = True

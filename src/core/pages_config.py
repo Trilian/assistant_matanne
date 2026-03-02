@@ -78,11 +78,11 @@ def _v(key: str, path: str, title: str, icon: str) -> PageConfig:
 # ═════════════════════════════════════════════════════════════
 
 PAGES: list[SectionConfig] = [
-    # ── Accueil ──────────────────────────────────────────────
+    # ── Tableau de bord + Cuisine + Planning ───────────────────
     {
         "name": "",
         "pages": [
-            _v("accueil", "src.modules.accueil", "Accueil", "🏠"),
+            _v("accueil", "src.modules.accueil", "Tableau de bord", "📊"),
             _v(
                 "cuisine_repas",
                 "src.modules.cuisine.planificateur_repas",
@@ -262,20 +262,10 @@ PAGES: list[SectionConfig] = [
                 "📱",
                 "boite_outils",
             ),
-        ],
-    },
-    # ── Planning (top-level visible page) ─────────────────────────────
-    {
-        "name": "",
-        "pages": [
             _v("planning", "src.modules.planning.cockpit_familial", "Planning", "📅"),
         ],
     },
-    # Planning and separate Cuisine sections removed — their pages are now
-    # registered under the Accueil section so that "Planifier Repas" stays
-    # the single visible entry for meal planning. Hidden subpages remain
-    # available via their URL (keys unchanged).
-    # ── Famille ──────────────────────────────────────────────
+    # ── Famille + Maison ─────────────────────────────────────
     {
         "name": "",
         "pages": [
@@ -376,12 +366,6 @@ PAGES: list[SectionConfig] = [
                 "🖨️",
                 "famille",
             ),
-        ],
-    },
-    # ── Maison ───────────────────────────────────────────────
-    {
-        "name": "",
-        "pages": [
             _v("maison", "src.modules.maison.hub", "Maison", "🏠"),
             _h("maison.jardin", "src.modules.maison.jardin", "Jardin", "🌱", "maison"),
             _h(
@@ -420,29 +404,28 @@ PAGES: list[SectionConfig] = [
     {
         "name": "",
         "pages": [
-            _v("jeux.paris", "src.modules.jeux.paris", "Paris Sportifs", "⚽"),
-            _v("jeux.loto", "src.modules.jeux.loto", "Loto", "🎰"),
-            _v("jeux.bilan", "src.modules.jeux.bilan", "Bilan Global", "📊"),
+            _v("jeux", "src.modules.jeux.hub", "Jeux", "🎮"),
+            _h("jeux.paris", "src.modules.jeux.paris", "Paris Sportifs", "⚽", "jeux"),
+            _h("jeux.loto", "src.modules.jeux.loto", "Loto", "🎰", "jeux"),
+            _h("jeux.bilan", "src.modules.jeux.bilan", "Bilan Global", "📊", "jeux"),
             _h(
                 "jeux.euromillions",
                 "src.modules.jeux.euromillions",
                 "Euromillions",
                 "⭐",
-                "jeux.loto",
+                "jeux",
             ),
             _h(
                 "jeux.comparatif_roi",
                 "src.modules.jeux.comparatif_roi",
                 "Comparatif ROI",
                 "📈",
-                "jeux.bilan",
+                "jeux",
             ),
-            _h(
-                "jeux.alertes", "src.modules.jeux.alertes", "Alertes Pronostics", "🔔", "jeux.bilan"
-            ),
-            _h("jeux.biais", "src.modules.jeux.biais", "Biais Cognitifs", "🧠", "jeux.bilan"),
-            _h("jeux.calendrier", "src.modules.jeux.calendrier", "Calendrier", "📅", "jeux.bilan"),
-            _h("jeux.educatif", "src.modules.jeux.educatif", "Module Éducatif", "🎓", "jeux.bilan"),
+            _h("jeux.alertes", "src.modules.jeux.alertes", "Alertes Pronostics", "🔔", "jeux"),
+            _h("jeux.biais", "src.modules.jeux.biais", "Biais Cognitifs", "🧠", "jeux"),
+            _h("jeux.calendrier", "src.modules.jeux.calendrier", "Calendrier", "📅", "jeux"),
+            _h("jeux.educatif", "src.modules.jeux.educatif", "Module Éducatif", "🎓", "jeux"),
         ],
     },
     # ── Boîte à outils (visible after Jeux) ───────────────────────────

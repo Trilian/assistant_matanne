@@ -81,7 +81,11 @@ def afficher_global_stats():
         st.warning("Impossible de charger les statistiques des courses (voir logs).")
         stats_courses = {"total": 0}
 
-    inventaire = obtenir_service_inventaire().get_inventaire_complet()
+    try:
+        inventaire = obtenir_service_inventaire().get_inventaire_complet()
+    except Exception as e:
+        logger.exception("Erreur lors du chargement de l'inventaire complet")
+        inventaire = []
 
     # Afficher metriques
     col1, col2, col3, col4 = st.columns(4)

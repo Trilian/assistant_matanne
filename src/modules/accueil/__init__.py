@@ -1,5 +1,5 @@
 """
-Module Accueil - Dashboard Central
+Module Tableau de bord - Hub central de l'application
 Vue d'ensemble de l'application avec stats, alertes, widgets enrichis et raccourcis.
 
 Sous-modules:

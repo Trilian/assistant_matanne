@@ -1,5 +1,5 @@
 """
-Dashboard Central - Interface utilisateur
+Tableau de bord Central - Interface utilisateur
 Vue d'ensemble de l'application avec stats, alertes et raccourcis
 
 Structure:
