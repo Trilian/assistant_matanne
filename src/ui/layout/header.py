@@ -328,7 +328,7 @@ def afficher_header():
     )
 
     # Flat layout: title | badge | search | undo | notifications
-    col1, col_badge, col_search, col_undo, col_notif = st.columns([5, 2, 1, 1, 1])
+    col1, col_badge, col_search, col_undo, col_notif = st.columns([4, 2, 3, 1, 1])
 
     with col1:
         st.markdown(
@@ -341,11 +341,11 @@ def afficher_header():
         )
 
     with col_badge:
-        st.markdown('<div style="padding-top: 14px;">', unsafe_allow_html=True)
+        st.markdown('<div style="padding-top: 16px;">', unsafe_allow_html=True)
         if etat.agent_ia:
-            badge("🤖 IA Active", variante=Variante.SUCCESS)
+            badge("🤖 IA ✓", variante=Variante.SUCCESS)
         else:
-            badge("🤖 IA Indispo", variante=Variante.WARNING)
+            badge("🤖 IA ✗", variante=Variante.WARNING)
         st.markdown("</div>", unsafe_allow_html=True)
 
     with col_search:

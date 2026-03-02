@@ -302,19 +302,50 @@ class ServiceRecettes(
             return []
 
     @avec_session_db
-    def get_stats(self, db: Session | None = None) -> dict:
+    def get_stats(self, db: Session | None = None, count_filters: dict | None = None) -> dict:  # noqa: E501
         """Retourne les statistiques globales des recettes.
+
+        Args:
+            count_filters: Dictionnaire optionnel de comptages supplémentaires.
+                Format: {"cle": {"colonne": valeur | {"lte": val, "gte": val}}}
 
         Returns:
             Dict avec 'total' et métriques agrégées.
         """
         try:
             total = db.query(Recette).count()
-            favoris = db.query(Recette).filter(Recette.est_favori == True).count()  # noqa: E712
-            return {
-                "total": total,
-                "favoris": favoris,
-            }
+            result: dict = {"total": total}
+
+            # Favoris (colonne optionnelle)
+            try:
+                favoris = db.query(Recette).filter(Recette.est_favori == True).count()  # noqa: E712
+                result["favoris"] = favoris
+            except Exception:
+                result["favoris"] = 0
+
+            # Comptages supplémentaires demandés par l'appelant
+            if count_filters:
+                for name, filters in count_filters.items():
+                    try:
+                        q = db.query(Recette)
+                        for col_name, val in filters.items():
+                            col = getattr(Recette, col_name, None)
+                            if col is None:
+                                raise AttributeError(f"Colonne inconnue: {col_name}")
+                            if isinstance(val, dict):
+                                if "lte" in val:
+                                    q = q.filter(col <= val["lte"])
+                                if "gte" in val:
+                                    q = q.filter(col >= val["gte"])
+                                if "eq" in val:
+                                    q = q.filter(col == val["eq"])
+                            else:
+                                q = q.filter(col == val)
+                        result[name] = q.count()
+                    except Exception:
+                        result[name] = 0
+
+            return result
         except Exception as e:
             logger.error(f"Erreur get_stats recettes: {e}")
             return {"total": 0, "favoris": 0}

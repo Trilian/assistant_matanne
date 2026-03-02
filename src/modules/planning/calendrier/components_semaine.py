@@ -95,7 +95,7 @@ def afficher_actions_rapides(semaine: SemaineCalendrier):
             # Naviguer vers le planificateur
             from src.core.state import GestionnaireEtat, rerun
 
-            GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
+            GestionnaireEtat.naviguer_vers("cuisine_repas")
             rerun()
 
     with col2:

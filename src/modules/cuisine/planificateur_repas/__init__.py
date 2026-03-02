@@ -207,9 +207,9 @@ def app():
                         from src.services.inventaire import obtenir_service_inventaire
 
                         service_inv = obtenir_service_inventaire()
-                        stock = service_inv.lister_produits() if service_inv else []
+                        stock = service_inv.get_inventaire_complet() if service_inv else []
                         if stock:
-                            noms_stock = [p.nom for p in stock[:20]]
+                            noms_stock = [p["ingredient_nom"] for p in stock[:20]]
                             st.session_state[SK.PLANNING_STOCK_CONTEXT] = noms_stock
                             st.success(f"✅ {len(noms_stock)} produits chargés depuis votre stock")
                             st.caption("Cliquez sur 'Générer une semaine' pour les intégrer")

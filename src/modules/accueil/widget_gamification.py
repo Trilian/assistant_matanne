@@ -54,7 +54,7 @@ def afficher_widget_gamification():
 
     with col1:
         points_semaine = getattr(stats, "points_semaine", 0)
-        st.metric("⭐ Points semaine", points_semaine)
+        st.metric("⭐ Points", points_semaine)
 
     with col2:
         total_badges = len(badges) if badges else 0

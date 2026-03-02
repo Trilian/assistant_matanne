@@ -30,15 +30,13 @@ def afficher_configuration_preferences():
     with st.form(_keys("form_preferences")):
         # Famille
         st.markdown("##### 👨‍👩‍👦 Ma famille")
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            nb_adultes = st.number_input("Adultes", 1, 6, prefs.nb_adultes, key=_keys("nb_adultes"))
-        with col2:
+        nb_adultes = st.number_input("Adultes", 1, 6, prefs.nb_adultes, key=_keys("nb_adultes"))
+        colj1, colj2 = st.columns(2)
+        with colj1:
             jules_present = st.checkbox(
                 "Jules mange avec nous", value=prefs.jules_present, key=_keys("jules_present")
             )
-        with col3:
+        with colj2:
             jules_age = st.number_input(
                 "Âge Jules (mois)", 6, 36, prefs.jules_age_mois, key=_keys("jules_age")
             )
@@ -192,7 +190,7 @@ def afficher_carte_recette_suggestion(
                 robot_info = ROBOTS_CUISINE.get(suggestion["robot"], {})
                 tags.append(f"{robot_info.get('emoji', '')} {robot_info.get('label', '')}")
 
-            st.caption(" â”‚ ".join(tags))
+            st.caption(" | ".join(tags))
 
             # Version Jules
             if suggestion.get("jules_adaptation"):

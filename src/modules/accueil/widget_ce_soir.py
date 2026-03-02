@@ -221,7 +221,7 @@ def afficher_widget_ce_soir():
             if st.button("📅 Planifier", key=_keys("planifier"), width="stretch"):
                 from src.core.state import naviguer
 
-                naviguer("cuisine.planning_semaine")
+                naviguer("cuisine_repas")
 
     st.markdown("</div>", unsafe_allow_html=True)
 

@@ -101,7 +101,7 @@ def _calculer_economies_mois() -> dict:
             sessions = (
                 session.query(SessionBatchCooking)
                 .filter(
-                    SessionBatchCooking.date_debut >= debut_mois,
+                    SessionBatchCooking.date_session >= debut_mois,
                     SessionBatchCooking.statut.in_(["termine", "en_cours"]),
                 )
                 .all()
@@ -126,8 +126,8 @@ def _calculer_economies_mois() -> dict:
             consommes = (
                 session.query(HistoriqueInventaire)
                 .filter(
-                    HistoriqueInventaire.date_action >= debut_mois,
-                    HistoriqueInventaire.type_action == "consomme",
+                    HistoriqueInventaire.date_modification >= debut_mois,
+                    HistoriqueInventaire.type_modification == "consomme",
                 )
                 .count()
             )

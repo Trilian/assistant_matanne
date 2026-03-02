@@ -18,13 +18,13 @@ logger = logging.getLogger(__name__)
 
 @ui_fragment
 def afficher_modeles():
-    """Gestion des modèles de listes récurrentes (Phase 2: Persistance BD)"""
-    st.subheader("📄 Modèles de listes - Phase 2")
+    """Gestion des modèles de listes récurrentes."""
+    st.subheader("📄 Modèles de listes")
 
     service = obtenir_service_courses()
 
     try:
-        # Récupérer modèles depuis BD (Phase 2)
+        # Récupérer modèles depuis BD
         modeles = service.get_modeles(utilisateur_id=get_current_user_id())
 
         tab_mes_modeles, tab_nouveau = st.tabs(["📋 Mes modèles", "➕ Nouveau"])

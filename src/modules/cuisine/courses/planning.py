@@ -34,7 +34,7 @@ def afficher_courses_depuis_planning():
         st.caption("Créez d'abord un planning de repas dans 'Cuisine → Planning Semaine'")
 
         if st.button("📅 Aller au planning", use_container_width=True):
-            naviguer("cuisine.planning_semaine")
+            naviguer("cuisine_repas")
         return
 
     # Afficher info planning

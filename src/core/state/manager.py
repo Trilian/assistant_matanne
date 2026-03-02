@@ -122,7 +122,8 @@ class GestionnaireEtat:
             "accueil": "Accueil",
             "cuisine.recettes": "Recettes",
             "cuisine.inventaire": "Inventaire",
-            "cuisine.planning_semaine": "Planning",
+            "cuisine_repas": "Planning repas",
+            "cuisine.planning_semaine": "Planning",  # alias
             "cuisine.courses": "Courses",
             "famille": "Hub Famille",
             "famille.jules": "Jules",

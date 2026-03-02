@@ -61,7 +61,7 @@ def afficher_critical_alerts():
                 "icon": "📅",
                 "title": "Aucun planning pour cette semaine",
                 "action": "Creer un planning",
-                "module": "cuisine.planning_semaine",
+                "module": "cuisine_repas",
             }
         )
 

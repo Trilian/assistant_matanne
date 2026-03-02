@@ -161,17 +161,13 @@ def afficher_conseil_jules():
 
     st.markdown(f'<div class="{container_cls}">', unsafe_allow_html=True)
 
-    col_titre, col_age = st.columns([3, 1])
-
-    with col_titre:
-        st.markdown("### 🧒 Conseil Jules du jour")
-
-    with col_age:
-        st.markdown(
-            f'<p style="text-align:right;color:{Couleur.JULES_PRIMARY};'
-            f'font-weight:600;">{age_mois} mois</p>',
-            unsafe_allow_html=True,
-        )
+    # Titre + âge en une seule ligne
+    st.markdown(
+        f"### 🧒 Conseil Jules du jour "
+        f'<span style="color:{Couleur.JULES_PRIMARY};font-weight:600;'
+        f'font-size:0.95rem;">({age_mois} mois)</span>',
+        unsafe_allow_html=True,
+    )
 
     # Conseil local (toujours disponible, rapide)
     conseil = _generer_conseil_local(age_mois)

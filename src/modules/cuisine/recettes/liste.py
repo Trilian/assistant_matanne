@@ -8,8 +8,8 @@ import time
 
 import streamlit as st
 
-from src.core.state import rerun
 from src.core.session_keys import SK
+from src.core.state import rerun
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.ui import etat_vide
 from src.ui.fragments import ui_fragment
@@ -340,7 +340,7 @@ def afficher_liste():
                             if service:
                                 try:
                                     with st.spinner("Suppression en cours..."):
-                                            if service.delete(recette.id):
+                                        if service.delete(recette.id):
                                             st.success("✅ Recette supprimée!")
                                             st.session_state[_keys("detail_id")] = None
                                             st.session_state[SK.DETAIL_RECETTE_ID] = None

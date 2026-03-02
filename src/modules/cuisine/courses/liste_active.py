@@ -43,14 +43,14 @@ def afficher_liste_active():
             st.metric("📥 À acheter", len(liste))
         with col2:
             haute = len([a for a in liste if a.get("priorite") == "haute"])
-            st.metric("🔴 Haute priorité", haute)
+            st.metric("🔴 Urgent", haute)
         with col3:
             if inventaire_service:
                 alertes = inventaire_service.get_alertes()
                 stock_bas = len(alertes.get("stock_bas", []))
                 st.metric("⚠️ Stock bas", stock_bas)
         with col4:
-            st.metric("💰 Total articles", len(service.get_liste_courses(achetes=True)))
+            st.metric("💰 Achetés", len(service.get_liste_courses(achetes=True)))
 
         st.divider()
 

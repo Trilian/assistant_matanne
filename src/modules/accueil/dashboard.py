@@ -388,5 +388,5 @@ def afficher_quick_actions():
             use_container_width=True,
             help="Planning des repas et activités de la semaine",
         ):
-            GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
+            GestionnaireEtat.naviguer_vers("cuisine_repas")
             rerun()
