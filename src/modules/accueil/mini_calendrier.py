@@ -338,9 +338,9 @@ def _afficher_prochains_jours_speciaux():
 
                 clean_nom = _strip_regional_indicator_flags(js.nom)
                 items_html += (
-                    '<span style="display:inline-flex;align-items:center;margin-right:12px;'
-                    "font-size:0.8rem;"
-                    > f'{icone} <strong style="margin:0 3px;">{clean_nom}</strong> '
+                    f'<span style="display:inline-flex;align-items:center;margin-right:12px;'
+                    f'font-size:0.8rem;">'
+                    f'{icone} <strong style="margin:0 3px;">{clean_nom}</strong> '
                     f'<span style="color:{Sem.ON_SURFACE_SECONDARY};">({quand})</span>'
                     f"</span>"
                 )

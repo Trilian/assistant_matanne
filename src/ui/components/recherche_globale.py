@@ -358,12 +358,17 @@ def afficher_recherche_globale_popover() -> None:
     Affiche la recherche globale dans un popover (modal-like).
     Idéal pour l'intégration dans le header.
     """
-    with st.popover("🔍", help="Recherche Globale (⌘K)"):
-        st.markdown("### Recherche Globale")
+    with st.popover("🔍 Recherche", help="Recherche globale dans toute l'application (Ctrl+K)"):
+        st.markdown("### 🔍 Recherche globale")
         afficher_recherche_globale()
 
-        # Bouton Annuler: efface l'input de recherche globale et force un rerun
-        if st.button("❌", key=_keys("cancel"), help="Annuler la recherche"):
+        # Bouton Annuler : efface l'input et force un rerun
+        if st.button(
+            "✖ Annuler",
+            key=_keys("cancel"),
+            help="Effacer la recherche et fermer",
+            use_container_width=True,
+        ):
             k = _keys("input")
             if k in st.session_state:
                 st.session_state[k] = ""

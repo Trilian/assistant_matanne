@@ -278,11 +278,24 @@ def app():
             logger.debug(f"Résumé hebdo indisponible: {e}")
 
         # ═══════════════════════════════════════════════════════════
-        # PHOTO SOUVENIR DU JOUR 📸
+        # MODULES — Vue synthétique 4 colonnes 📊
         # ═══════════════════════════════════════════════════════════
 
-        col_photo, col_summaries = st.columns([1, 2])
+        st.markdown("### 📊 Vue d'ensemble des modules")
+        col_rec, col_inv, col_crs, col_pln = st.columns(4)
+        with col_rec:
+            afficher_cuisine_summary()
+        with col_inv:
+            afficher_inventaire_summary()
+        with col_crs:
+            afficher_courses_summary()
+        with col_pln:
+            afficher_planning_summary()
 
+        st.markdown("---")
+
+        # Photo souvenir + Jules
+        col_photo, col_jules = st.columns([1, 1])
         with col_photo:
             try:
                 from src.modules.accueil.widget_photo import afficher_photo_souvenir
@@ -293,40 +306,17 @@ def app():
             except Exception as e:
                 logger.debug(f"Photo souvenir indisponible: {e}")
 
-        with col_summaries:
-            # Vue par module (compacte)
-            c1, c2 = st.columns(2)
-            with c1:
-                afficher_cuisine_summary()
-                st.markdown("")
-                afficher_planning_summary()
-            with c2:
-                afficher_inventaire_summary()
-                st.markdown("")
-                afficher_courses_summary()
-
-        # Footer avec sante système
-        st.markdown("---")
-        if WIDGETS_DISPONIBLES:
-            col_footer1, col_footer2 = st.columns([3, 1])
-            with col_footer1:
-                afficher_sante_systeme()
-            with col_footer2:
+        with col_jules:
+            if WIDGETS_DISPONIBLES:
                 widget_jules_apercu()
+            try:
+                from src.ui.components import carte_resume_jules
 
-        # ═══════════════════════════════════════════════════════════
-        # JULES AUJOURD'HUI — Résumé quotidien
-        # ═══════════════════════════════════════════════════════════
-
-        st.markdown("---")
-        try:
-            from src.ui.components import carte_resume_jules
-
-            carte_resume_jules()
-        except ImportError:
-            pass
-        except Exception as e:
-            logger.debug(f"Carte Jules indisponible: {e}")
+                carte_resume_jules()
+            except ImportError:
+                pass
+            except Exception as e:
+                logger.debug(f"Carte Jules indisponible: {e}")
 
         # Section activité récente
         st.markdown("---")
@@ -337,6 +327,13 @@ def app():
                 afficher_timeline_activite(limit=5)
             except Exception as e:
                 st.caption(f"Timeline indisponible: {e}")
+
+        # ═══════════════════════════════════════════════════════════
+        # SANTÉ SYSTÈME — Expander discret en pied de page
+        # ═══════════════════════════════════════════════════════════
+        if WIDGETS_DISPONIBLES:
+            st.markdown("---")
+            afficher_sante_systeme()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -355,22 +352,41 @@ def afficher_quick_actions():
 
     with col1:
         if st.button(
-            "➕ Ajouter Recette", key=_keys("quick_add_recette"), width="stretch", type="primary"
+            "➕ Ajouter Recette",
+            key=_keys("quick_add_recette"),
+            use_container_width=True,
+            type="primary",
+            help="Ajouter une nouvelle recette à la bibliothèque",
         ):
             GestionnaireEtat.naviguer_vers("cuisine.recettes")
             rerun()
 
     with col2:
-        if st.button("📅 Voir Courses", key=_keys("quick_view_courses"), width="stretch"):
+        if st.button(
+            "🛒 Voir Courses",
+            key=_keys("quick_view_courses"),
+            use_container_width=True,
+            help="Voir et modifier la liste de courses",
+        ):
             GestionnaireEtat.naviguer_vers("cuisine.courses")
             rerun()
 
     with col3:
-        if st.button("📦 Gerer Inventaire", key=_keys("quick_view_inventaire"), width="stretch"):
+        if st.button(
+            "📦 Gérer Inventaire",
+            key=_keys("quick_view_inventaire"),
+            use_container_width=True,
+            help="Consulter et mettre à jour les stocks",
+        ):
             GestionnaireEtat.naviguer_vers("cuisine.inventaire")
             rerun()
 
     with col4:
-        if st.button("🧹 Planning Semaine", key=_keys("quick_view_planning"), width="stretch"):
+        if st.button(
+            "👨‍👩‍👦 Planning Jules",
+            key=_keys("quick_view_planning"),
+            use_container_width=True,
+            help="Planning des repas et activités de la semaine",
+        ):
             GestionnaireEtat.naviguer_vers("cuisine.planning_semaine")
             rerun()

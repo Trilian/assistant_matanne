@@ -106,35 +106,47 @@ def _collecter_rappels() -> list[dict]:
     try:
         from src.core.constants import JULES_NAISSANCE
 
-        age_jours = (aujourdhui - JULES_NAISSANCE).days
-        age_mois = age_jours // 30
+        # Calcul de l'âge en mois calendaires (précis)
+        mois_age = (aujourdhui.year - JULES_NAISSANCE.year) * 12 + (
+            aujourdhui.month - JULES_NAISSANCE.month
+        )
+        if aujourdhui.day < JULES_NAISSANCE.day:
+            mois_age -= 1
+        mois_age = max(0, mois_age)
 
-        # Vérifier si un "moisiversaire" est proche (±2 jours)
-        jours_dans_mois = age_jours % 30
-        if jours_dans_mois <= 2:
+        # Vérifier si c'est exactement le jour d'anniversaire mensuel
+        # (même jour du mois que la naissance, ou dernier jour du mois si
+        #  le jour de naissance n'existe pas dans le mois courant)
+        import calendar
+
+        dernier_jour_mois = calendar.monthrange(aujourdhui.year, aujourdhui.month)[1]
+        jour_pivot = min(JULES_NAISSANCE.day, dernier_jour_mois)
+        est_moisiversaire = aujourdhui.day == jour_pivot
+
+        if est_moisiversaire:
             rappels.append(
                 {
                     "icone": "🎂",
-                    "titre": f"Jules a {age_mois} mois !",
-                    "detail": "Un nouveau mois de découvertes 🎉",
+                    "titre": f"Jules a {mois_age} mois aujourd'hui ! 🎉",
+                    "detail": "Un nouveau mois de découvertes",
                     "priorite": "moyenne",
                     "module": "famille.jules",
                 }
             )
 
-        # Jalons de développement importants
+        # Jalons de développement importants (seulement le jour exact)
         jalons_importants = {
             18: "Premiers mots combinés, autonomie croissante",
             20: "Marche assurée, vocabulaire de ~50 mots",
             21: "Début d'association de 2 mots",
             24: "Grande étape — 2 ans !",
         }
-        if age_mois in jalons_importants:
+        if est_moisiversaire and mois_age in jalons_importants:
             rappels.append(
                 {
                     "icone": "⭐",
-                    "titre": f"Jalon développement : {age_mois} mois",
-                    "detail": jalons_importants[age_mois],
+                    "titre": f"Jalon développement : {mois_age} mois",
+                    "detail": jalons_importants[mois_age],
                     "priorite": "basse",
                     "module": "famille.jules",
                 }
@@ -284,22 +296,26 @@ def afficher_rappels_contextuels():
             # build safe HTML block for the reminder
             html = (
                 f'<div style="padding: 6px 10px; margin: 3px 0; '
-                f"background: {Sem.SURFACE_ALT}; border-radius: 6px; "
-                f"border-left: 3px solid {_couleur};"
-                > f'<div style="white-space:nowrap;">{rappel["icone"]} <strong>{rappel["titre"]}</strong></div>'
+                f'background: {Sem.SURFACE_ALT}; border-radius: 6px; '
+                f'border-left: 3px solid {_couleur};">'
+                f'<div style="white-space:nowrap;">{rappel["icone"]} <strong>{rappel["titre"]}</strong></div>'
                 f"{small_detail}"
                 f"</div>"
             )
             st.markdown(html, unsafe_allow_html=True)
 
         with col_action:
-            if rappel.get("module"):
+            module = rappel.get("module")
+            if module:
+                # Libellé lisible à partir de la clé de module
+                _label_module = module.split(".")[-1].capitalize()
                 if st.button(
-                    "→",
-                    key=_keys("nav", rappel["module"], rappel["titre"][:10]),
-                    help=f"Aller à {rappel['module']}",
+                    "↗",
+                    key=_keys("nav", module, rappel["titre"][:10]),
+                    help=f"Voir dans {_label_module}",
+                    use_container_width=True,
                 ):
-                    GestionnaireEtat.naviguer_vers(rappel["module"])
+                    GestionnaireEtat.naviguer_vers(module)
                     rerun()
 
 

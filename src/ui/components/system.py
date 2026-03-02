@@ -84,18 +84,36 @@ def indicateur_sante_systeme() -> dict:
 @composant_ui("system", exemple="afficher_sante_systeme()", tags=["health", "monitoring"])
 def afficher_sante_systeme():
     """Affiche les indicateurs de santé via SanteSysteme."""
-
     status = indicateur_sante_systeme()
 
-    # Icône global
     icon_map = {"ok": "🟢", "warning": "🟡", "error": "🔴"}
+    label_map = {"ok": "Sain", "warning": "Dégradé", "error": "Critique"}
     global_icon = icon_map.get(status["global"], "⚪")
+    global_label = label_map.get(status["global"], "Inconnu")
 
-    with st.expander(f"{global_icon} Santé Système", expanded=False):
-        for detail in status["details"]:
-            icon = icon_map.get(detail["status"], "⚪")
-            duree = f" ({detail['duree_ms']}ms)" if detail.get("duree_ms") else ""
-            st.write(f"{icon} **{detail['nom']}**: {detail['message']}{duree}")
+    # Construire les lignes HTML
+    rows_html = ""
+    for detail in status["details"]:
+        icon = icon_map.get(detail["status"], "⚪")
+        duree = f"{detail['duree_ms']} ms" if detail.get("duree_ms") else ""
+        msg = echapper_html(str(detail.get("message", "")))
+        nom = echapper_html(str(detail.get("nom", "")))
+        rows_html += (
+            f'<tr style="border-bottom:1px solid {Sem.SURFACE_ALT};">'
+            f'<td style="padding:5px 8px;white-space:nowrap;">{icon} <strong>{nom}</strong></td>'
+            f'<td style="padding:5px 8px;font-size:0.85rem;color:{Sem.ON_SURFACE_SECONDARY};">{msg}</td>'
+            f'<td style="padding:5px 8px;font-size:0.8rem;color:{Sem.ON_SURFACE_SECONDARY};white-space:nowrap;text-align:right;">{duree}</td>'
+            f"</tr>"
+        )
+
+    with st.expander(
+        f"{global_icon} Santé Système — {global_label}",
+        expanded=False,
+    ):
+        st.markdown(
+            f'<table style="width:100%;border-collapse:collapse;"><tbody>{rows_html}</tbody></table>',
+            unsafe_allow_html=True,
+        )
 
 
 @composant_ui(
