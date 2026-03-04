@@ -57,7 +57,9 @@ class Ingredient(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     nom: Mapped[str] = mapped_column(String(200), nullable=False, unique=True, index=True)
-    categorie: Mapped[str | None] = mapped_column(String(100), index=True)
+    categorie: Mapped[str] = mapped_column(
+        String(100), nullable=False, default="Autre", server_default="Autre", index=True
+    )
     # colonne DB actuelle: `unite` (schéma SQL); mapper expose l'attribut `unite`
     unite: Mapped[str] = mapped_column(String(50), name="unite", nullable=False, default="pcs")
     # La table DB utilise "cree_le" comme nom de colonne réel

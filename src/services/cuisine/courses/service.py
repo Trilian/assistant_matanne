@@ -140,7 +140,7 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
 
         ingredient = db.query(Ingredient).filter(Ingredient.nom == nom).first()
         if not ingredient:
-            ingredient = Ingredient(nom=nom, unite=unite)
+            ingredient = Ingredient(nom=nom, unite=unite, categorie="Autre")
             db.add(ingredient)
             db.flush()
             db.refresh(ingredient)

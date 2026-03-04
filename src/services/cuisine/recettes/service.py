@@ -478,7 +478,7 @@ class ServiceRecettes(
         """
         ingredient = db.query(Ingredient).filter(Ingredient.nom == nom).first()
         if not ingredient:
-            ingredient = Ingredient(nom=nom, unite="pcs")
+            ingredient = Ingredient(nom=nom, unite="pcs", categorie="Autre")
             db.add(ingredient)
             db.flush()
             logger.debug(f"Created ingredient: {nom}")
