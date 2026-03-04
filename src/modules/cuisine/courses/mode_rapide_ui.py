@@ -1,8 +1,7 @@
 """
-Page Mode Rapide Magasin — Liste organisée par rayon.
+Page Mode Rapide Magasin — Liste organisée par rayon + ajout rapide.
 
-Affiche la liste de courses réorganisée par rayon de magasin
-pour un parcours optimisé. Inclut estimation du temps.
+Interface style Bring! : ajout en un tap, cochage par rayon, parcours optimisé.
 """
 
 import logging
@@ -18,12 +17,76 @@ _keys = KeyNamespace("mode_rapide")
 
 
 def afficher_mode_rapide() -> None:
-    """Affiche la liste de courses en mode rapide (par rayon)."""
+    """Affiche la liste de courses en mode rapide style Bring! (ajout + cochage par rayon)."""
     st.subheader("⚡ Mode Rapide Magasin")
-    st.caption("Votre liste organisée par rayon pour faire les courses vite !")
+    st.caption("Ajoutez et cochez vos articles directement depuis le magasin")
 
     with error_boundary(titre="Erreur mode rapide"):
+        # ── Zone d'ajout rapide (style Bring!) ──
+        _afficher_ajout_rapide()
+
+        st.divider()
+
+        # ── Liste organisée par rayon ──
         _charger_et_afficher()
+
+
+def _afficher_ajout_rapide() -> None:
+    """Zone d'ajout rapide en tête de liste — un champ, un bouton, c'est tout."""
+    from src.services.cuisine.courses import obtenir_service_courses
+
+    col_input, col_btn = st.columns([5, 1])
+    with col_input:
+        nom = st.text_input(
+            "ajout_rapide",
+            key=_keys("quick_add_nom"),
+            label_visibility="collapsed",
+            placeholder="🛒  lait, pain, tomates… (appuyez sur Entrée)",
+        )
+    with col_btn:
+        ajouter = st.button(
+            "➕ Ajouter",
+            key=_keys("quick_add_btn"),
+            use_container_width=True,
+            type="primary",
+            help="Ajouter à la liste",
+        )
+
+    if ajouter or (nom and nom != st.session_state.get(_keys("_last_added"), "")):
+        if ajouter and nom and nom.strip():
+            _ajouter_article_rapide(nom.strip())
+
+
+def _ajouter_article_rapide(nom: str) -> None:
+    """Ajoute un article à la liste via le service courses."""
+    from src.services.cuisine.courses import obtenir_service_courses
+
+    service = obtenir_service_courses()
+    if not service:
+        st.toast("❌ Service indisponible", icon="❌")
+        return
+
+    try:
+        ingredient_id = service.obtenir_ou_creer_ingredient(nom=nom, unite="pièce")
+        if ingredient_id:
+            service.create(
+                {
+                    "ingredient_id": ingredient_id,
+                    "quantite_necessaire": 1,
+                    "priorite": "moyenne",
+                    "rayon_magasin": "Autre",
+                }
+            )
+            st.toast(f"✅ {nom} ajouté !", icon="✅")
+            # Mémoriser pour éviter double-ajout, puis vider le champ
+            st.session_state[_keys("_last_added")] = nom
+            st.session_state[_keys("quick_add_nom")] = ""
+            st.rerun()
+        else:
+            st.toast("❌ Erreur création article", icon="❌")
+    except Exception as e:
+        st.toast(f"❌ Erreur: {e}", icon="❌")
+        logger.error(f"Erreur ajout rapide mode_rapide: {e}")
 
 
 def _charger_et_afficher() -> None:

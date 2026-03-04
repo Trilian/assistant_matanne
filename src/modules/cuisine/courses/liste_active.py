@@ -97,7 +97,7 @@ def afficher_liste_active():
         rayons = grouper_par_rayon(liste_filtree)
 
         for rayon in sorted(rayons.keys()):
-            with st.expander(f"🍪‘ {rayon} ({len(rayons[rayon])} articles)", expanded=True):
+            with st.expander(f"📍 {rayon} ({len(rayons[rayon])} articles)", expanded=True):
                 afficher_rayon_articles(service, rayon, rayons[rayon])
 
         st.divider()

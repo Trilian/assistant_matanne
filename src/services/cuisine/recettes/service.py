@@ -150,12 +150,43 @@ class ServiceRecettes(
         """
         from datetime import datetime
 
-        # Preprocessing: ajouter ordre aux étapes si manquant
-        for idx, etape in enumerate(data.get("etapes") or []):
-            if isinstance(etape, dict) and "ordre" not in etape and "numero" not in etape:
-                etape["ordre"] = idx + 1
+        # ── Normalisation des données d'entrée (formats variés JSON/IA/import) ──
+        data = dict(data)  # copie pour ne pas muter l'original
 
-        # Validation Pydantic (après preprocessing)
+        # Normaliser etapes : accepte strings simples OU dicts
+        etapes_raw = data.get("etapes") or []
+        etapes_normalised = []
+        for idx, etape in enumerate(etapes_raw):
+            if isinstance(etape, str):
+                etapes_normalised.append({"description": etape, "ordre": idx + 1})
+            elif isinstance(etape, dict):
+                if "ordre" not in etape and "numero" not in etape:
+                    etape = dict(etape)
+                    etape["ordre"] = idx + 1
+                etapes_normalised.append(etape)
+        data["etapes"] = etapes_normalised
+
+        # Normaliser ingrédients : convertir unite '' → None
+        ings_raw = data.get("ingredients") or []
+        ings_normalised = []
+        for ing in ings_raw:
+            if isinstance(ing, dict):
+                ing = dict(ing)
+                if ing.get("unite") == "":
+                    ing["unite"] = None
+                ings_normalised.append(ing)
+        data["ingredients"] = ings_normalised
+
+        # Normaliser temps_preparation : minimum 1 minute
+        if (data.get("temps_preparation") or 0) < 1:
+            data["temps_preparation"] = 1
+
+        # Normaliser temps_cuisson : minimum 0
+        if (data.get("temps_cuisson") or 0) < 0:
+            data["temps_cuisson"] = 0
+        # ── Fin normalisation ──
+
+        # Validation Pydantic
         try:
             validated = RecetteInput(**data)
         except Exception as e:

@@ -125,12 +125,12 @@ def app():
         st.session_state[SK.PLANNING_DATA] = {}
 
     if SK.PLANNING_DATE_DEBUT not in st.session_state:
-        # Par défaut: mercredi prochain
+        # Par défaut: lundi prochain (début de semaine naturel)
         today = date.today()
-        days_until_wednesday = (2 - today.weekday()) % 7
-        if days_until_wednesday == 0:
-            days_until_wednesday = 7
-        st.session_state[SK.PLANNING_DATE_DEBUT] = today + timedelta(days=days_until_wednesday)
+        days_until_monday = (0 - today.weekday()) % 7  # 0 = lundi
+        if days_until_monday == 0:
+            days_until_monday = 7  # Si on est lundi, aller au lundi suivant
+        st.session_state[SK.PLANNING_DATE_DEBUT] = today + timedelta(days=days_until_monday)
 
     # Tabs avec deep linking URL
     TAB_LABELS = ["📅 Planifier", "⚙️ Préférences", "📋 Historique"]
@@ -288,7 +288,16 @@ def app():
                                 st.success(
                                     f"✅ Liste de courses générée ({len(recettes_noms)} recettes)"
                                 )
-                                st.caption("🛒 Allez dans le module Courses pour gérer la liste")
+                                if st.button(
+                                    "🛒 Aller aux Courses →",
+                                    key="plan_nav_to_courses",
+                                    type="primary",
+                                    use_container_width=True,
+                                ):
+                                    from src.core.state import GestionnaireEtat
+
+                                    GestionnaireEtat.naviguer_vers("cuisine.courses")
+                                    rerun()
                             else:
                                 st.warning("⚠️ Aucune recette trouvée dans le planning")
                         except Exception as e:

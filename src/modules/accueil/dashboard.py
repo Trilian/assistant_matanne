@@ -45,6 +45,102 @@ from .summaries import (
 
 _keys = KeyNamespace("tableau_de_bord")
 
+
+# ═══════════════════════════════════════════════════════════
+# BANNIÈRE PREMIER DÉMARRAGE
+# ═══════════════════════════════════════════════════════════
+
+
+def _compter_recettes() -> int:
+    """Retourne le nombre de recettes en base — 0 si indisponible."""
+    try:
+        from src.services.cuisine.recettes import obtenir_service_recettes
+
+        service = obtenir_service_recettes()
+        if service:
+            recettes = service.get_all()
+            return len(recettes) if recettes else 0
+    except Exception:
+        pass
+    return -1  # -1 = DB indisponible
+
+
+def _afficher_banniere_demarrage(rerun) -> None:
+    """Bannière d'onboarding pour la première utilisation."""
+    nb = _compter_recettes()
+
+    # DB indisponible → ne pas afficher (pas de fausse alerte)
+    if nb == -1:
+        return
+
+    if nb == 0:
+        # Première utilisation — aucune recette
+        with st.container(border=True):
+            st.markdown("### 🚀 Bienvenue — Configurons votre assistant !")
+            st.markdown(
+                "Pour profiter de l'application dès aujourd'hui, suivez ces **3 étapes rapides** :"
+            )
+
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.markdown("**① Charger des recettes**")
+                st.caption("50+ recettes françaises prêtes à l'emploi, en un clic")
+                if st.button(
+                    "🍽️ Aller aux Recettes",
+                    key=_keys("ob_recettes"),
+                    use_container_width=True,
+                    type="primary",
+                ):
+                    from src.core.state import GestionnaireEtat
+
+                    GestionnaireEtat.naviguer_vers("cuisine.recettes")
+                    rerun()
+            with col2:
+                st.markdown("**② Générer mon menu**")
+                st.caption("L'IA propose une semaine de repas équilibrée pour toute la famille")
+                if st.button(
+                    "📅 Planifier mes repas",
+                    key=_keys("ob_planning"),
+                    use_container_width=True,
+                ):
+                    from src.core.state import GestionnaireEtat
+
+                    GestionnaireEtat.naviguer_vers("cuisine_repas")
+                    rerun()
+            with col3:
+                st.markdown("**③ Ma liste de courses**")
+                st.caption("Générée automatiquement depuis le planning, groupée par rayon")
+                if st.button(
+                    "🛒 Gérer les courses",
+                    key=_keys("ob_courses"),
+                    use_container_width=True,
+                ):
+                    from src.core.state import GestionnaireEtat
+
+                    GestionnaireEtat.naviguer_vers("cuisine.courses")
+                    rerun()
+
+            st.divider()
+            col_dismiss, _ = st.columns([1, 3])
+            with col_dismiss:
+                if st.button("✕ Fermer ce message", key=_keys("ob_dismiss")):
+                    st.session_state[_keys("onboarding_dismissed")] = True
+                    rerun()
+
+    elif nb < 10:
+        # Quelques recettes seulement — suggérer d'en charger plus
+        with st.info(
+            f"💡 Vous avez {nb} recette(s). "
+            "Allez dans **Recettes → Assistant démarrage → Charger recettes d'exemple** "
+            "pour en ajouter 50+ en un clic.",
+            icon="💡",
+        ):
+            pass
+        if st.button("✕ Ok, j'ai compris", key=_keys("ob_dismiss_few")):
+            st.session_state[_keys("onboarding_dismissed")] = True
+            rerun()
+
+
 # ═══════════════════════════════════════════════════════════
 # MODULE PRINCIPAL
 # ═══════════════════════════════════════════════════════════
@@ -84,6 +180,12 @@ def app():
         )
 
         st.markdown("---")
+
+        # ═══════════════════════════════════════════════════════════
+        # BANNIÈRE PREMIER DÉMARRAGE
+        # ═══════════════════════════════════════════════════════════
+        if not st.session_state.get(_keys("onboarding_dismissed")):
+            _afficher_banniere_demarrage(rerun)
 
         # ═══════════════════════════════════════════════════════════
         # RÉSUMÉ MATINAL IA PERSONNALISÉ 🌅

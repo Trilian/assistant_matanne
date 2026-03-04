@@ -155,7 +155,7 @@ def app():
                         else:
                             recipe_data = result.recipe.model_dump()
                             st.session_state[_keys("wizard_preview")] = recipe_data
-                            st.experimental_rerun()
+                            rerun()
                     except Exception as e:
                         st.error(f"Erreur import: {e}")
 
@@ -288,18 +288,35 @@ def app():
                         st.error("Service recettes indisponible")
                     else:
                         with open(fpath, encoding="utf-8") as fh:
-                            data = json.load(fh)
-                        count = 0
-                        for item in data:
-                            try:
-                                service.create_complete(item)
-                                count += 1
-                            except Exception:
-                                # Ignorer les erreurs d'une recette et continuer
-                                continue
-                        st.success(f"{count} recettes d'exemple importées")
-                        st.session_state[_keys("show_wizard")] = False
-                        rerun()
+                            raw = json.load(fh)
+                        # Supporte les deux formats : liste directe ou {"recettes_standard": [...]}
+                        if isinstance(raw, list):
+                            data = raw
+                        elif isinstance(raw, dict):
+                            data = raw.get("recettes_standard", [])
+                        else:
+                            data = []
+                        if not data:
+                            st.error("Aucune recette trouvée dans le fichier d'exemples")
+                        else:
+                            count = 0
+                            errors = 0
+                            with st.spinner(f"Import de {len(data)} recettes en cours..."):
+                                for item in data:
+                                    try:
+                                        service.create_complete(item)
+                                        count += 1
+                                    except Exception:
+                                        errors += 1
+                                        continue
+                            if count:
+                                st.success(f"✅ {count} recettes d'exemple importées !")
+                                if errors:
+                                    st.caption(f"({errors} ignorées)")
+                            else:
+                                st.error("Aucune recette n'a pu être importée")
+                            st.session_state[_keys("show_wizard")] = False
+                            rerun()
             except Exception as e:
                 st.error(f"Erreur chargement exemples: {e}")
 

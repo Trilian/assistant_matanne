@@ -242,7 +242,7 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
         if count > 0:
             obtenir_bus().emettre(
                 "courses.ingredients_ajoutes",
-                {"recette": recette_nom, "nb_articles": count},
+                {"nb_articles": count},
                 source="courses",
             )
 

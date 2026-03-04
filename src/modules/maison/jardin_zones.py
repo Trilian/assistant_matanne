@@ -312,7 +312,7 @@ def app():
                         ok = creer_zone(nom_zone, type_zone, superficie or None)
                         if ok:
                             st.success("Zone créée")
-                            st.experimental_rerun()
+                            st.rerun()
                         else:
                             st.error("Échec création zone")
 
