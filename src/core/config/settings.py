@@ -193,6 +193,9 @@ class Parametres(BaseSettings):
     GOOGLE_CLIENT_SECRET: str = ""
     """Client Secret OAuth2 Google Calendar."""
 
+    GOOGLE_REDIRECT_URI: str = ""
+    """URI de redirection OAuth2 Google (local: http://localhost:8501/callback/google, cloud: https://<app>.streamlit.app/callback/google)."""
+
     # ═══════════════════════════════════════════════════════════
     # RATE LIMITING
     # ═══════════════════════════════════════════════════════════
@@ -342,6 +345,10 @@ class Parametres(BaseSettings):
                 csec = google.get("client_secret")
                 if csec and csec.strip():
                     self.GOOGLE_CLIENT_SECRET = csec
+            if not self.GOOGLE_REDIRECT_URI:
+                ruri = google.get("redirect_uri")
+                if ruri and ruri.strip():
+                    self.GOOGLE_REDIRECT_URI = ruri
 
     # ═══════════════════════════════════════════════════════════
     # MÉTHODES HELPERS

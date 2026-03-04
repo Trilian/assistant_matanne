@@ -296,11 +296,15 @@ class ServiceSuggestions:
             creneaux = self.creneaux_libres(jours, duree_min=60)
             if creneaux:
                 meilleur = creneaux[0]
+                if nb_activites_jules == 0:
+                    _jules_msg = "Jules n'a aucune activité prévue cette semaine."
+                else:
+                    _jules_msg = f"Jules n'a que {nb_activites_jules} activité{'s' if nb_activites_jules > 1 else ''} prévue{'s' if nb_activites_jules > 1 else ''} cette semaine."
                 suggestions.append(
                     SuggestionPlanning(
                         titre=f"Activité Jules — {meilleur.date_jour.strftime('%A')}",
                         description=(
-                            f"Jules n'a que {nb_activites_jules} activité(s) cette semaine. "
+                            f"{_jules_msg} "
                             f"Créneau idéal: {meilleur.horaire_str} ({meilleur.raison})"
                         ),
                         priorite=3,
@@ -312,10 +316,14 @@ class ServiceSuggestions:
         # Repas manquants
         nb_repas = sum(1 for j in jours if j.repas_midi) + sum(1 for j in jours if j.repas_soir)
         if nb_repas < 10:  # Moins de ~70% planifiés
+            if nb_repas == 0:
+                _repas_msg = "Aucun repas planifié cette semaine."
+            else:
+                _repas_msg = f"Seulement {nb_repas}/14 repas planifiés."
             suggestions.append(
                 SuggestionPlanning(
                     titre="Planifier les repas manquants",
-                    description=f"Seulement {nb_repas}/14 repas planifiés. Le planificateur IA peut compléter !",
+                    description=f"{_repas_msg} Le planificateur IA peut compléter !",
                     priorite=4,
                     categories=["repas"],
                     icone="🍽️",

@@ -300,10 +300,15 @@ def afficher_resume_equilibre(planning_data: dict):
     # Afficher résumé des repas planifiés
     col_top1, col_top2 = st.columns([1, 3])
     with col_top1:
-        st.metric("🍽️ Repas planifiés", f"{planned}/{total_slots}")
+        valeur_metric = "Aucun" if planned == 0 else f"{planned}/{total_slots}"
+        st.metric("🍽️ Repas planifiés", valeur_metric)
     with col_top2:
         if planned == 0:
-            st.info("0 repas planifiés — Le planificateur IA peut compléter !")
+            st.info("Aucun repas planifié — Cliquez sur 'Générer une semaine' pour commencer !")
+        elif planned < total_slots:
+            st.info(
+                f"{total_slots - planned} repas manquants — Le planificateur IA peut compléter !"
+            )
 
     col1, col2, col3, col4 = st.columns(4)
 
