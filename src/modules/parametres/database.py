@@ -4,8 +4,9 @@ Gestion et maintenance de la base PostgreSQL/Supabase
 """
 
 import streamlit as st
+from sqlalchemy import text
 
-from src.core.db import GestionnaireMigrations, vacuum_database
+from src.core.db import GestionnaireMigrations, obtenir_moteur, vacuum_database
 from src.core.db import obtenir_infos_db as get_db_info
 from src.core.db import verifier_sante as health_check
 from src.core.monitoring.health import StatutSante, verifier_sante_globale
@@ -14,6 +15,75 @@ from src.core.state import rerun
 from src.ui import etat_vide
 from src.ui.feedback import afficher_erreur, afficher_succes, spinner_intelligent
 from src.ui.fragments import lazy, ui_fragment
+
+
+def _trouver_doublons_planning() -> list[dict]:
+    """Trouve les semaines avec plusieurs plannings actifs."""
+    engine = obtenir_moteur()
+    doublons = []
+
+    with engine.connect() as conn:
+        # Périodes avec > 1 planning actif
+        stmt = text("""
+            SELECT semaine_debut, COUNT(*) as cnt
+            FROM plannings
+            WHERE actif = TRUE
+            GROUP BY semaine_debut
+            HAVING COUNT(*) > 1
+            ORDER BY semaine_debut DESC
+        """)
+        result = conn.execute(stmt).fetchall()
+
+        for row in result:
+            doublons.append({"semaine_debut": row[0], "count": row[1]})
+
+    return doublons
+
+
+def _reparer_doublons_planning():
+    """Désactive les plannings en doublon, en gardant le plus récent par ID."""
+    engine = obtenir_moteur()
+
+    with engine.connect() as conn:
+        # Trouver les doublons
+        stmt = text("""
+            SELECT semaine_debut
+            FROM plannings
+            WHERE actif = TRUE
+            GROUP BY semaine_debut
+            HAVING COUNT(*) > 1
+        """)
+        semaines = conn.execute(stmt).fetchall()
+
+        count_fixed = 0
+
+        for (semaine_debut,) in semaines:
+            # Récupérer tous les IDs actifs pour cette semaine, triés par ID desc (le plus récent en premier)
+            ids_stmt = text("""
+                SELECT id
+                FROM plannings
+                WHERE semaine_debut = :semaine_debut AND actif = TRUE
+                ORDER BY id DESC
+            """)
+            ids = [
+                row[0]
+                for row in conn.execute(ids_stmt, {"semaine_debut": semaine_debut}).fetchall()
+            ]
+
+            if len(ids) > 1:
+                # Garder le premier (le plus récent), désactiver les autres
+                ids_to_deactivate = ids[1:]
+
+                upd_stmt = text("""
+                    UPDATE plannings
+                    SET actif = FALSE
+                    WHERE id = ANY(:ids)
+                """)
+                conn.execute(upd_stmt, {"ids": ids_to_deactivate})
+                count_fixed += len(ids_to_deactivate)
+
+        conn.commit()
+        return count_fixed
 
 
 @lazy(condition=lambda: st.session_state.get(SK.SHOW_MIGRATIONS_HISTORY, False), show_skeleton=True)
@@ -201,3 +271,32 @@ def afficher_database_config():
                         afficher_erreur(f"❌ {result.message}")
             except ImportError:
                 st.warning("Module backup non disponible")
+
+    st.markdown("---")
+
+    # Nettoyage Planning
+    st.markdown("#### 🗓️ Nettoyage Planning")
+    st.caption("Détection et suppression des plannings actifs en doublon (garde le plus récent)")
+
+    col_net_1, col_net_2 = st.columns([3, 1])
+
+    with col_net_1:
+        if st.button("🔍 Analyser les doublons", key="btn_check_duplicates"):
+            with spinner_intelligent("Analyse en cours..."):
+                st.session_state["_planning_doublons"] = _trouver_doublons_planning()
+
+    if "_planning_doublons" in st.session_state:
+        doublons = st.session_state["_planning_doublons"]
+        if not doublons:
+            st.success("✅ Aucun doublon détecté (Planning sain)")
+        else:
+            st.warning(f"⚠️ {len(doublons)} semaines ont plusieurs plannings actifs simultanés.")
+            for item in doublons:
+                st.write(f"- Semaine du {item['semaine_debut']}: {item['count']} plannings actifs")
+
+            if st.button("🧹 Réparer (Garder le plus récent)", type="primary"):
+                with spinner_intelligent("Réparation..."):
+                    count = _reparer_doublons_planning()
+                st.success(f"✅ {count} plannings obsolètes désactivés !")
+                del st.session_state["_planning_doublons"]
+                rerun()

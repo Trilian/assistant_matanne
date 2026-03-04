@@ -309,17 +309,25 @@ class ClientIA(VisionMixin, StreamingMixin):
 
                     cleaned = cleaned.strip()
 
+                # Nettoyage préventif des erreurs courantes LLM (virgules trailing)
+                cleaned = re.sub(r",\s*([}\]])", r"\1", cleaned)
+
                 return json.loads(cleaned)
 
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e:
+                logger.warning(f"Erreur JSON decode (tentative 1): {e}")
+
                 # Tentative 2: Chercher le premier objet/tableau JSON valide dans le texte brut
                 # Utile si le LLM met du texte avant/après sans bloc de code
                 try:
                     match = re.search(r"(\{.*\}|\[.*\])", cleaned, re.DOTALL)
                     if match:
                         potential_json = match.group(0)
+                        # Nettoyage préventif sur le fragment extrait aussi
+                        potential_json = re.sub(r",\s*([}\]])", r"\1", potential_json)
                         return json.loads(potential_json)
-                except Exception:
+                except Exception as e2:
+                    logger.warning(f"Erreur JSON decode (tentative 2): {e2}")
                     pass
 
                 # Retourner la réponse brute si pas du JSON valide
