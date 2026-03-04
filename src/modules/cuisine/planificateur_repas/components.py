@@ -6,6 +6,7 @@ from datetime import date
 
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.core.state import rerun
 from src.ui.keys import KeyNamespace
 
@@ -207,7 +208,7 @@ def afficher_carte_recette_suggestion(
                         recette_nom=suggestion.get("nom", ""),
                         feedback="like",
                     )
-                    st.toast("👍 Noté!")
+                    st.toast("👍 Noté! L'IA s'en souvient.")
             with col_dislike:
                 if st.button("👎", key=f"{key_prefix}_dislike", help="Je n'aime pas"):
                     ajouter_feedback(
@@ -215,12 +216,44 @@ def afficher_carte_recette_suggestion(
                         recette_nom=suggestion.get("nom", ""),
                         feedback="dislike",
                     )
-                    st.toast("👎 Noté!")
+                    st.toast("👎 Noté! Ce plat sera évité.")
 
-            # Changer
+            # Changer — génère une vraie alternative et met à jour le planning
             if st.button("🔄", key=f"{key_prefix}_change", help="Autre suggestion"):
-                st.session_state[_keys("alternatives", key_prefix)] = True
-                rerun()
+                from .generation import generer_alternative_ia
+
+                with st.spinner("🤖 Recherche..."):
+                    alt = generer_alternative_ia(suggestion, jour, type_repas)
+
+                if alt:
+                    planning = st.session_state.get(SK.PLANNING_DATA, {})
+                    if jour in planning:
+                        planning[jour][type_repas] = alt
+                        st.session_state[SK.PLANNING_DATA] = planning
+                        st.toast(f"✅ Remplacé par {alt.get('nom', 'nouvelle recette')}")
+                    rerun()
+                else:
+                    st.warning("⚠️ Aucune alternative trouvée")
+
+            # Sauvegarder dans mes recettes
+            nom_recette = suggestion.get("nom", "")
+            sauvegardees: set = st.session_state.get(SK.RECETTES_IA_SAUVEGARDEES, set())
+            if nom_recette in sauvegardees:
+                st.caption("✅ Sauvegardée")
+            else:
+                if st.button("💾", key=f"{key_prefix}_save", help="Sauvegarder dans mes recettes"):
+                    from .generation import sauvegarder_recette_ia
+
+                    with st.spinner("💾 Sauvegarde..."):
+                        recette_id = sauvegarder_recette_ia(suggestion, type_repas)
+
+                    if recette_id:
+                        sauvegardees.add(nom_recette)
+                        st.session_state[SK.RECETTES_IA_SAUVEGARDEES] = sauvegardees
+                        st.toast(f"✅ '{nom_recette}' ajoutée à vos recettes !")
+                        rerun()
+                    else:
+                        st.toast("❌ Échec de la sauvegarde", icon="❌")
 
 
 def afficher_jour_planning(

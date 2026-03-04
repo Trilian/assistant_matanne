@@ -216,6 +216,8 @@ class _SessionKeys:
     # ─── Cuisine / Planificateur → Courses ────────────
     COURSES_DEPUIS_PLANNING = "courses_depuis_planning"
     PLANNING_STOCK_CONTEXT = "planning_stock_context"
+    PLANNING_VALIDE = "planning_valide"
+    RECETTES_IA_SAUVEGARDEES = "recettes_ia_sauvegardees"  # set[str] — noms sauvegardés
 
     # ─── Famille / Hub ────────────────────────────────
     FAMILLE_PAGE = "famille_page"

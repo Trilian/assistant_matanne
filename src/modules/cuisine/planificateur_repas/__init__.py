@@ -262,19 +262,13 @@ def app():
                     if st.button(
                         "💚 Valider ce planning", type="primary", use_container_width=True
                     ):
-                        saved = _sauvegarder_planning_db(
-                            st.session_state[SK.PLANNING_DATA], date_debut
-                        )
-                        if saved:
-                            st.success("✅ Planning validé et sauvegardé !")
-                        else:
-                            st.success("✅ Planning validé!")
-                            st.caption("⚠️ Sauvegarde BD partielle (certaines recettes non liées)")
+                        _sauvegarder_planning_db(st.session_state[SK.PLANNING_DATA], date_debut)
+                        st.session_state[SK.PLANNING_VALIDE] = True
+                        st.success("✅ Planning validé !")
 
                 with col_val2:
-                    if st.button("🛒 Générer courses", use_container_width=True):
+                    if st.button("🛒 Aller aux Courses", use_container_width=True):
                         try:
-                            # Extraire les noms de recettes du planning
                             recettes_noms = []
                             for jour, repas in st.session_state[SK.PLANNING_DATA].items():
                                 for type_repas in ["midi", "soir", "gouter"]:
@@ -283,28 +277,18 @@ def app():
                                         recettes_noms.append(r["nom"])
 
                             if recettes_noms:
-                                # Stocker dans session_state pour le module courses
                                 st.session_state[SK.COURSES_DEPUIS_PLANNING] = recettes_noms
-                                st.success(
-                                    f"✅ Liste de courses générée ({len(recettes_noms)} recettes)"
-                                )
-                                if st.button(
-                                    "🛒 Aller aux Courses →",
-                                    key="plan_nav_to_courses",
-                                    type="primary",
-                                    use_container_width=True,
-                                ):
-                                    from src.core.state import GestionnaireEtat
+                                from src.core.state import GestionnaireEtat
 
-                                    GestionnaireEtat.naviguer_vers("cuisine.courses")
-                                    rerun()
+                                GestionnaireEtat.naviguer_vers("cuisine.courses")
+                                rerun()
                             else:
                                 st.warning("⚠️ Aucune recette trouvée dans le planning")
                         except Exception as e:
                             import logging
 
-                            logging.getLogger(__name__).error(f"Erreur génération courses: {e}")
-                            st.error("❌ Erreur lors de la génération")
+                            logging.getLogger(__name__).error(f"Erreur navigation courses: {e}")
+                            st.error("❌ Erreur lors de la navigation")
 
                 with col_val3:
                     # Export PDF du planning

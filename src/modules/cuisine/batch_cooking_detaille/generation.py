@@ -1,6 +1,5 @@
 """Génération IA pour le module Batch Cooking Détaillé."""
 
-import json
 import logging
 
 import streamlit as st
@@ -119,14 +118,15 @@ IMPORTANT:
 
         response = client.generer_json(
             prompt=prompt,
-            system_prompt="Tu es un expert batch cooking. Réponds UNIQUEMENT en JSON valide.",
+            system_prompt="Tu es un expert batch cooking. Réponds UNIQUEMENT en JSON valide, sans commentaire, sans markdown.",
+            max_tokens=4000,
         )
 
+        # generer_json retourne déjà un dict parsé — ne jamais re-parser
         if response and isinstance(response, dict):
             return response
 
-        if isinstance(response, str):
-            return json.loads(response)
+        st.error("❌ Réponse IA invalide ou vide (essaie de simplifier le planning)")
 
     except Exception as e:
         logger.error(f"Erreur génération batch IA: {e}")
