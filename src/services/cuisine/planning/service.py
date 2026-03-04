@@ -208,6 +208,17 @@ class ServicePlanning(
 
         semaine_fin = semaine_debut + timedelta(days=6)
 
+        # 1. Désactiver les anciens plannings pour cette semaine
+        anciens_plannings = (
+            db.query(Planning)
+            .filter(Planning.semaine_debut == semaine_debut, Planning.actif == True)
+            .all()
+        )
+        for p in anciens_plannings:
+            p.actif = False
+            logger.info(f"Planning {p.id} désactivé (remplacé par nouveau)")
+
+        # 2. Créer le nouveau planning
         planning = Planning(
             nom=f"Planning {semaine_debut.strftime('%d/%m')}",
             semaine_debut=semaine_debut,
@@ -227,7 +238,7 @@ class ServicePlanning(
             # Récupérer la recette sélectionnée
             recette_id = recettes_selection.get(jour_key)
             if not recette_id:
-                logger.warning(f"⚠️ No recipe selected for {jour_name}")
+                # logger.warning(f"⚠️ No recipe selected for {jour_name}")
                 continue
 
             recette = db.query(Recette).filter(Recette.id == recette_id).first()

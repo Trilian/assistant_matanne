@@ -16,6 +16,7 @@ from src.core.models import (
     ArticleCourses,
     ArticleInventaire,
     Ingredient,
+    ListeCourses,
     Planning,
     Recette,
     RecetteIngredient,
@@ -217,6 +218,22 @@ class ServiceCoursesIntelligentes(BaseAIService):
         """
         ids_crees: list[int] = []
 
+        # 0. Récupérer ou créer la liste de courses active
+        # On suppose qu'il y a une liste active "principale"
+        liste_active = (
+            db.query(ListeCourses)
+            .filter(ListeCourses.archivee == False)
+            .order_by(ListeCourses.cree_le.desc())
+            .first()
+        )
+
+        if not liste_active:
+            liste_active = ListeCourses(nom="Ma liste de courses")
+            db.add(liste_active)
+            db.flush()
+
+        liste_id = liste_active.id
+
         for article in articles:
             # Chercher ou creer l'ingredient
             ingredient = (
@@ -224,17 +241,24 @@ class ServiceCoursesIntelligentes(BaseAIService):
             )
 
             if not ingredient:
-                ingredient = Ingredient(
-                    nom=article.nom, categorie=article.rayon, unite=article.unite or "pcs"
-                )
-                db.add(ingredient)
-                db.flush()
+                # Vérifier contrainte d'unicité exacte avant création
+                existing_exact = db.query(Ingredient).filter(Ingredient.nom == article.nom).first()
+                if existing_exact:
+                    ingredient = existing_exact
+                else:
+                    ingredient = Ingredient(
+                        nom=article.nom, categorie=article.rayon, unite=article.unite or "pcs"
+                    )
+                    db.add(ingredient)
+                    db.flush()
 
             # Verifier si deja dans la liste de courses
             existant = (
                 db.query(ArticleCourses)
                 .filter(
-                    ArticleCourses.ingredient_id == ingredient.id, ArticleCourses.achete == False
+                    ArticleCourses.liste_id == liste_id,
+                    ArticleCourses.ingredient_id == ingredient.id,
+                    ArticleCourses.achete == False,
                 )
                 .first()
             )
@@ -244,11 +268,14 @@ class ServiceCoursesIntelligentes(BaseAIService):
                 existant.quantite_necessaire = (
                     existant.quantite_necessaire or 0
                 ) + article.a_acheter
-                existant.notes = f"{existant.notes or ''} + planning".strip()
+                notes_actuelles = existant.notes or ""
+                if "planning" not in notes_actuelles:
+                    existant.notes = f"{notes_actuelles} + planning".strip()
                 ids_crees.append(existant.id)
             else:
                 # Creer nouvel article courses
                 item = ArticleCourses(
+                    liste_id=liste_id,
                     ingredient_id=ingredient.id,
                     quantite_necessaire=article.a_acheter,
                     priorite={1: "haute", 2: "moyenne", 3: "basse"}.get(

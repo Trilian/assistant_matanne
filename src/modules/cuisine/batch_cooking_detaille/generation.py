@@ -44,17 +44,13 @@ RÉPONDS EN JSON avec cette structure EXACTE (réponse courte et stricte):
           "nom": "carottes",
           "quantite": 2,
           "unite": "pièces",
-          "poids_g": 200,
           "decoupe": "rondelles",
-          "taille_decoupe": "1cm",
-          "instruction_prep": "Éplucher et laver",
-          "tache_jules": "Laver les carottes (si applicable)"
+          "tache_jules": "Laver"
         }
       ],
       "etapes_batch": [
         {
           "titre": "Préparer les légumes",
-          "description": "Éplucher et couper...",
           "duree_minutes": 15,
           "est_passif": false,
           "jules_participation": true,
@@ -94,6 +90,12 @@ IMPORTANT:
         # generer_json retourne déjà un dict parsé — ne jamais re-parser
         if response and isinstance(response, dict):
             return response
+
+        # Debugging info if JSON fails
+        if response:
+            logger.warning(f"Réponse IA invalide (non-dict): {str(response)[:500]}...")
+        else:
+            logger.warning("Réponse IA vide (None)")
 
         st.error("❌ Réponse IA invalide ou vide (essaie de simplifier le planning)")
 

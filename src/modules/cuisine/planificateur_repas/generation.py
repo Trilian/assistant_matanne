@@ -132,14 +132,17 @@ Réponds UNIQUEMENT en JSON valide :
                                 if match:
                                     q = float(match.group(1))
                                 else:
-                                    # Cas "sel, poivre", "à votre goût" -> quantité 0, et on met l'info dans l'unité si vide
+                                    # Cas "sel, poivre", "à votre goût" -> quantité minime, et on met l'info dans l'unité si vide
                                     if not unite:
                                         unite = str(q)
-                                    q = 0.0
+                                    q = 0.01  # Minimum requis par validation (>0)
                             else:
                                 q = float(q)
                         except (ValueError, TypeError):
-                            q = 0.0
+                            q = 0.01
+
+                        if q <= 0:
+                            q = 0.01
 
                         ing["quantite"] = q
                         ing["unite"] = unite
