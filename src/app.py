@@ -53,6 +53,43 @@ from src.core.logging import GestionnaireLog, obtenir_logger
 GestionnaireLog.initialiser(niveau_log="INFO")
 logger = obtenir_logger(__name__)
 
+
+# ═══════════════════════════════════════════════════════════
+# HOTFIX: MIGRATION BASE DE DONNEES
+# ═══════════════════════════════════════════════════════════
+def _hotfix_db_migration():
+    """HOTFIX: Applique les migrations critiques en utilisant la connexion de l'app (qui fonctionne)."""
+    try:
+        from sqlalchemy import text
+
+        from src.core.db.engine import obtenir_moteur
+
+        logger.info("[HOTFIX] Tentative de migration 'archivee' via l'application...")
+        engine = obtenir_moteur()
+        with engine.connect() as conn:
+            # Vérifier si la colonne existe
+            try:
+                conn.execute(text("SELECT archivee FROM listes_courses LIMIT 1"))
+                logger.info("[HOTFIX] Colonne 'archivee' déjà présente. OK.")
+            except Exception:
+                # La colonne manque (ProgrammingError/UndefinedColumn)
+                logger.warning("[HOTFIX] Colonne 'archivee' manquante. Application du fix...")
+                conn.rollback()  # Important: annuler la transaction échouée
+                conn.execute(
+                    text(
+                        "ALTER TABLE listes_courses ADD COLUMN IF NOT EXISTS archivee BOOLEAN DEFAULT FALSE"
+                    )
+                )
+                conn.commit()
+                logger.info("[HOTFIX] Migration 'archivee' réussie !")
+    except Exception as e:
+        # Ne pas bloquer le démarrage si ça échoue, mais logger l'erreur
+        logger.error(f"[HOTFIX] Échec de la migration via app: {e}")
+
+
+# Exécuter le hotfix au démarrage
+_hotfix_db_migration()
+
 # ═══════════════════════════════════════════════════════════
 # BOOTSTRAP IoC — Initialisation unifiée (container, config, DB)
 # ═══════════════════════════════════════════════════════════
