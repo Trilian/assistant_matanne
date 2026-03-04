@@ -274,7 +274,9 @@ class RecetteIngredient(Base):
         ForeignKey("ingredients.id", ondelete="CASCADE"), nullable=False, index=True
     )
     quantite: Mapped[float] = mapped_column(Float, nullable=False)
-    unite: Mapped[str] = mapped_column(String(50), nullable=False)
+    unite: Mapped[str] = mapped_column(
+        String(50), nullable=False, default="pièce", server_default="pièce"
+    )
     optionnel: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # Relations

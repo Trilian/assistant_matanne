@@ -216,8 +216,8 @@ class ServiceRecettes(
             recette_ing = RecetteIngredient(
                 recette_id=recette.id,
                 ingredient_id=ingredient.id,
-                quantite=ing_data.quantite,
-                unite=ing_data.unite,
+                quantite=ing_data.quantite or 1.0,
+                unite=ing_data.unite or "pièce",
             )
             db.add(recette_ing)
 
