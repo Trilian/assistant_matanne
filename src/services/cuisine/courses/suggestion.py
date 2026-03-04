@@ -18,6 +18,7 @@ from src.core.models import (
     Ingredient,
     Planning,
     Recette,
+    RecetteIngredient,
     Repas,
 )
 from src.services.core.base import BaseAIService
@@ -65,6 +66,7 @@ class ServiceCoursesIntelligentes(BaseAIService):
                 selectinload(Planning.repas)
                 .selectinload(Repas.recette)
                 .selectinload(Recette.ingredients)
+                .selectinload(RecetteIngredient.ingredient)
             )
             .filter(Planning.actif == True)
             .first()

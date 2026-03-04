@@ -116,7 +116,35 @@ Réponds UNIQUEMENT en JSON valide :
                     prompt_details, system_prompt="Tu es un chef cuisinier.", max_tokens=1500
                 )
                 if details and isinstance(details, dict):
-                    ingredients = details.get("ingredients", [])
+                    ingredients_raw = details.get("ingredients", [])
+                    # Sanitization ingredients (conversion quantité en float obligatoire)
+                    ingredients = []
+                    import re
+
+                    for ing in ingredients_raw:
+                        q = ing.get("quantite", 0)
+                        unite = ing.get("unite", "")
+                        try:
+                            if isinstance(q, str):
+                                # Si c'est du texte comme "à votre goût", on met 0
+                                # Sinon on essaie d'extraire un nombre (ex: "100g")
+                                match = re.search(r"(\d+([.,]\d+)?)", q.replace(",", "."))
+                                if match:
+                                    q = float(match.group(1))
+                                else:
+                                    # Cas "sel, poivre", "à votre goût" -> quantité 0, et on met l'info dans l'unité si vide
+                                    if not unite:
+                                        unite = str(q)
+                                    q = 0.0
+                            else:
+                                q = float(q)
+                        except (ValueError, TypeError):
+                            q = 0.0
+
+                        ing["quantite"] = q
+                        ing["unite"] = unite
+                        ingredients.append(ing)
+
                     etapes_raw = details.get("etapes", [])
                     # Convertir étapes en format dict si nécessaire ou garder liste strings
                     # Le service attend souvent list[dict] ou list[str]. On va supposer list[dict] pour ingredients
