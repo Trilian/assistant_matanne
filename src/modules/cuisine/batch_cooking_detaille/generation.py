@@ -28,7 +28,7 @@ RECETTES À PRÉPARER:
 
     prompt += """
 
-RÉPONDS EN JSON avec cette structure EXACTE:
+RÉPONDS EN JSON avec cette structure EXACTE (réponse courte et stricte):
 {
   "session": {
     "duree_estimee_minutes": 120,
@@ -37,7 +37,7 @@ RÉPONDS EN JSON avec cette structure EXACTE:
   "recettes": [
     {
       "nom": "Nom recette",
-      "pour_jours": ["Lundi midi", "Mardi soir"],
+      "pour_jours": ["Lundi midi"],
       "portions": 4,
       "ingredients": [
         {
@@ -45,67 +45,36 @@ RÉPONDS EN JSON avec cette structure EXACTE:
           "quantite": 2,
           "unite": "pièces",
           "poids_g": 200,
-          "description": "taille moyenne",
           "decoupe": "rondelles",
           "taille_decoupe": "1cm",
           "instruction_prep": "Éplucher et laver",
-          "jules_peut_aider": true,
-          "tache_jules": "Laver les carottes"
+          "tache_jules": "Laver les carottes (si applicable)"
         }
       ],
       "etapes_batch": [
         {
           "titre": "Préparer les légumes",
-          "description": "Éplucher et couper tous les légumes",
+          "description": "Éplucher et couper...",
           "duree_minutes": 15,
           "est_passif": false,
-          "robot": null,
           "jules_participation": true,
-          "tache_jules": "Mettre les légumes dans le saladier"
-        },
-        {
-          "titre": "Cuisson Cookeo",
-          "description": "Cuisson sous pression des légumes",
-          "duree_minutes": 20,
-          "est_passif": true,
-          "robot": {
-            "type": "cookeo",
-            "programme": "Sous pression",
-            "duree_secondes": 1200
-          },
-          "jules_participation": false
+          "tache_jules": "Laver..."
         }
       ],
       "instructions_finition": [
-        "Sortir du frigo 15min avant",
-        "Réchauffer 5min au micro-ondes"
+        "Réchauffer..."
       ],
       "stockage": "frigo",
-      "duree_conservation_jours": 4,
-      "temps_finition_minutes": 10,
-      "version_jules": "Mixer la portion de Jules plus finement"
+      "duree_conservation_jours": 3
     }
   ],
   "moments_jules": [
-    "0-15min: Laver les légumes ensemble",
-    "30-40min: Mélanger les ingrédients"
-  ],
-  "liste_courses": {
-    "fruits_legumes": [
-      {"nom": "carottes", "quantite": 4, "unite": "pièces", "poids_g": 400}
-    ],
-    "viandes": [],
-    "cremerie": [],
-    "epicerie": [],
-    "surgeles": []
-  }
+    "0-15min: Laver les légumes"
+  ]
 }
 
 IMPORTANT:
-- Découpes possibles: rondelles, cubes, julienne, brunoise, lamelles, cisele, emince, rape
-- Monsieur Cuisine: vitesse 1-10, duree_secondes, temperature
-- Cookeo: programme (Sous pression, Dorer, Mijoter, Cuisson rapide, Cuisson douce)
-- Four: mode (Chaleur tournante, Grill), temperature, duree_secondes
+- Réponds UNIQUEMENT en JSON.
 - Quantités: TOUJOURS poids approximatif en grammes
 - Jules 19 mois: tâches TRÈS simples (laver, mélanger, verser)
 """
@@ -119,7 +88,7 @@ IMPORTANT:
         response = client.generer_json(
             prompt=prompt,
             system_prompt="Tu es un expert batch cooking. Réponds UNIQUEMENT en JSON valide, sans commentaire, sans markdown.",
-            max_tokens=4000,
+            max_tokens=3000,
         )
 
         # generer_json retourne déjà un dict parsé — ne jamais re-parser

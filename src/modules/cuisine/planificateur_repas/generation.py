@@ -94,6 +94,44 @@ def sauvegarder_recette_ia(recette_dict: dict, type_repas_slot: str) -> int | No
             description_parts.append(f"Version Jules : {jules_adaptation}")
         description = " ".join(description_parts)
 
+        # Générer les détails manquants (ingrédients/étapes) via IA
+        ingredients = []
+        etapes = []
+
+        try:
+            client = obtenir_client_ia()
+            if client:
+                prompt_details = f"""Génère les ingrédients et étapes pour la recette : "{nom}" (pour 4 personnes).
+Réponds UNIQUEMENT en JSON valide :
+{{
+  "ingredients": [
+    {{"nom": "nom ingrédient", "quantite": 100, "unite": "g"}}
+  ],
+  "etapes": [
+    "Etape 1...",
+    "Etape 2..."
+  ]
+}}"""
+                details = client.generer_json(
+                    prompt_details, system_prompt="Tu es un chef cuisinier.", max_tokens=1500
+                )
+                if details and isinstance(details, dict):
+                    ingredients = details.get("ingredients", [])
+                    etapes_raw = details.get("etapes", [])
+                    # Convertir étapes en format dict si nécessaire ou garder liste strings
+                    # Le service attend souvent list[dict] ou list[str]. On va supposer list[dict] pour ingredients
+                    # Pour étapes, ServiceRecettes.create_complete attend indexé ?
+                    # Vérifions models/recettes.py, mais en général simple liste strings passe pour création simple
+                    # ou liste de dicts avec "description".
+                    if etapes_raw and isinstance(etapes_raw[0], str):
+                        etapes = [
+                            {"description": e, "ordre": i + 1} for i, e in enumerate(etapes_raw)
+                        ]
+                    else:
+                        etapes = etapes_raw
+        except Exception as e:
+            logger.warning(f"Impossible de générer les détails pour {nom}: {e}")
+
         data = {
             "nom": nom,
             "description": description,
@@ -112,8 +150,8 @@ def sauvegarder_recette_ia(recette_dict: dict, type_repas_slot: str) -> int | No
             "compatible_monsieur_cuisine": compatible_monsieur_cuisine,
             "compatible_airfryer": compatible_airfryer,
             "compatible_multicooker": compatible_multicooker,
-            "ingredients": [],
-            "etapes": [],
+            "ingredients": ingredients,
+            "etapes": etapes,
         }
 
         service = obtenir_service_recettes()

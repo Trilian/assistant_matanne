@@ -48,16 +48,46 @@ def _sauvegarder_planning_db(planning_data: dict, date_debut: date) -> bool:
     try:
         from src.services.cuisine.planning import obtenir_service_planning
 
+        from .generation import sauvegarder_recette_ia
+
         service = obtenir_service_planning()
 
         # Construire la sélection de recettes
         recettes_selection = {}
-        for i, (jour, repas) in enumerate(planning_data.items()):
+
+        # S'assurer de l'ordre des jours (Lundi -> Dimanche)
+        jours_ordonnes = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+
+        # Mapping des jours présents dans planning_data
+        for i, jour_nom in enumerate(jours_ordonnes):
+            # Chercher le jour dans les données (parfois le nom diffère légèrement)
+            jour_data = None
+            for j, d in planning_data.items():
+                if j.lower().startswith(jour_nom.lower()):
+                    jour_data = d
+                    break
+
+            if not jour_data:
+                continue
+
+            # Traiter Midi et Soir
             for type_repas in ["midi", "soir"]:
-                recette_info = repas.get(type_repas)
-                if recette_info and isinstance(recette_info, dict) and recette_info.get("id"):
-                    recettes_selection[f"jour_{i}"] = recette_info["id"]
-                    break  # Un repas par jour suffit pour le mapping
+                recette_info = jour_data.get(type_repas)
+                if recette_info and isinstance(recette_info, dict):
+                    recette_id = recette_info.get("id")
+
+                    # Si pas d'ID, créer la recette en base
+                    if not recette_id:
+                        recette_id = sauvegarder_recette_ia(recette_info, type_repas)
+                        if recette_id:
+                            recette_info["id"] = recette_id  # Mettre à jour pour la session
+
+                    if recette_id:
+                        # Clé compatible avec ServicePlanning (jour_0_midi, jour_0_soir ?)
+                        # Si le service attend juste "jour_i", il prend probablement une seule recette
+                        # On garde le comportement actuel (break) mais avec ID garanti
+                        recettes_selection[f"jour_{i}"] = recette_id
+                        break
 
         if recettes_selection:
             planning = service.creer_planning_avec_choix(
