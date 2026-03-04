@@ -284,22 +284,47 @@ class ClientIA(VisionMixin, StreamingMixin):
             if not response:
                 return None
 
-            # Nettoyer et parser JSON
-            cleaned = response.strip()
-            if cleaned.startswith("```json"):
-                cleaned = cleaned[7:]
-            elif cleaned.startswith("```"):
-                cleaned = cleaned[3:]
-            if cleaned.endswith("```"):
-                cleaned = cleaned[:-3]
-            cleaned = cleaned.strip()
+            try:
+                # Nettoyer et parser JSON
+                import re
 
-            return json.loads(cleaned)
+                cleaned = response.strip()
 
-        except json.JSONDecodeError:
-            # Retourner la réponse brute si pas du JSON valide
-            logger.warning("Réponse non-JSON, retour brut")
-            return response  # type: ignore[possibly-undefined]
+                # Tentative 1: Extraire bloc de code JSON via regex
+                # Capture tout ce qu'il y a entre ```json et ``` ou entre ``` et ```
+                code_block_match = re.search(
+                    r"```(?:json)?\s*(.*?)\s*```", cleaned, re.DOTALL | re.IGNORECASE
+                )
+                if code_block_match:
+                    cleaned = code_block_match.group(1).strip()
+                else:
+                    # Fallback manuel si regex échoue (ex: pas de bloc de code complet)
+                    if cleaned.startswith("```json"):
+                        cleaned = cleaned[7:]
+                    elif cleaned.startswith("```"):
+                        cleaned = cleaned[3:]
+
+                    if cleaned.endswith("```"):
+                        cleaned = cleaned[:-3]
+
+                    cleaned = cleaned.strip()
+
+                return json.loads(cleaned)
+
+            except json.JSONDecodeError:
+                # Tentative 2: Chercher le premier objet/tableau JSON valide dans le texte brut
+                # Utile si le LLM met du texte avant/après sans bloc de code
+                try:
+                    match = re.search(r"(\{.*\}|\[.*\])", cleaned, re.DOTALL)
+                    if match:
+                        potential_json = match.group(0)
+                        return json.loads(potential_json)
+                except Exception:
+                    pass
+
+                # Retourner la réponse brute si pas du JSON valide
+                logger.warning(f"Réponse non-JSON, retour brut (début): {cleaned[:100]}...")
+                return response  # type: ignore[possibly-undefined]
 
         except Exception as e:
             logger.error(f"Erreur generer_json: {e}")
