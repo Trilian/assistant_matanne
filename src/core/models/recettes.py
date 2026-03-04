@@ -138,7 +138,9 @@ class Recette(TimestampMixin, Base):
     saison: Mapped[str] = mapped_column(
         String(50), nullable=False, default="toute_année", index=True
     )
-    categorie: Mapped[str | None] = mapped_column(String(100))
+    categorie: Mapped[str] = mapped_column(
+        String(100), nullable=False, default="Plat", server_default="Plat"
+    )
 
     # Flags - Tags système
     est_rapide: Mapped[bool] = mapped_column(Boolean, default=False, index=True)

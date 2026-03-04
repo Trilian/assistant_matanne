@@ -102,6 +102,9 @@ class RecetteInput(BaseModel):
     difficulte: str = Field(default="moyen", description="Niveau de difficulté")
     type_repas: str = Field(..., description="Type de repas")
     saison: str | None = Field(None, description="Saison (printemps, été, automne, hiver)")
+    categorie: str | None = Field(
+        None, max_length=100, description="Catégorie (Plat, Goûter, etc.)"
+    )
     url_image: str | None = Field(None, max_length=500, description="URL ou chemin de l'image")
     ingredients: list[IngredientInput] = Field(
         ..., min_length=MIN_INGREDIENTS, max_length=MAX_INGREDIENTS

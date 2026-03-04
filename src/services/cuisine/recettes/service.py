@@ -184,6 +184,18 @@ class ServiceRecettes(
         # Normaliser temps_cuisson : minimum 0
         if (data.get("temps_cuisson") or 0) < 0:
             data["temps_cuisson"] = 0
+
+        # Normaliser categorie : NOT NULL en DB, dériver depuis type_repas si absent
+        if not data.get("categorie"):
+            _type_to_cat = {
+                "petit_déjeuner": "Petit-déjeuner",
+                "déjeuner": "Plat",
+                "dîner": "Plat",
+                "goûter": "Goûter",
+                "apéritif": "Apéritif",
+                "dessert": "Dessert",
+            }
+            data["categorie"] = _type_to_cat.get((data.get("type_repas") or "").lower(), "Plat")
         # ── Fin normalisation ──
 
         # Validation Pydantic
