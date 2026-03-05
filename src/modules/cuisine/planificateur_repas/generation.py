@@ -115,7 +115,21 @@ def sauvegarder_recette_ia(recette_dict: dict, type_repas_slot: str) -> int | No
 
         temps = max(1, recette_dict.get("temps_minutes") or 30)
         nom = recette_dict.get("nom", "Recette IA").strip()
-        difficulte = recette_dict.get("difficulte", "moyen")
+        difficulte_raw = (recette_dict.get("difficulte") or "moyen").lower().strip()
+        _DIFFICULTE_MAP = {
+            "facile": "facile",
+            "easy": "facile",
+            "simple": "facile",
+            "moyen": "moyen",
+            "moyenne": "moyen",
+            "medium": "moyen",
+            "modéré": "moyen",
+            "moderé": "moyen",
+            "difficile": "difficile",
+            "hard": "difficile",
+            "complexe": "difficile",
+        }
+        difficulte = _DIFFICULTE_MAP.get(difficulte_raw, "moyen")
         jules_adaptation = recette_dict.get("jules_adaptation", "")
 
         description_parts = ["Recette générée par l'IA via le planificateur."]
