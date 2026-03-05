@@ -119,28 +119,48 @@ class AnalyseurIA:
 
     @staticmethod
     def _extraire_objet_json(texte: str) -> str:
-        """Extrait le premier objet JSON complet {...} ou liste [...]"""
+        """Extrait le premier objet JSON complet {...} ou liste [...]
+
+        Gère correctement les structures imbriquées et les chaînes de caractères.
+        """
         texte = AnalyseurIA._nettoyer_basique(texte)
 
         pile = []
         debut = None
+        in_string = False
+        escape = False
 
         for i, char in enumerate(texte):
+            # Gestion des chaînes de caractères
+            if in_string:
+                if escape:
+                    escape = False
+                elif char == "\\":
+                    escape = True
+                elif char == '"':
+                    in_string = False
+                continue
+
+            # Si on n'est pas dans une chaîne
+            if char == '"':
+                in_string = True
+                continue
+
             if char == "{":
                 if not pile:
                     debut = i
-                pile.append(char)
+                pile.append("{")
             elif char == "[":
                 if not pile:
                     debut = i
-                pile.append(char)
+                pile.append("[")
             elif char == "}":
-                if pile and (pile[-1] == "{"):
+                if pile and pile[-1] == "{":
                     pile.pop()
                 if not pile and debut is not None:
                     return texte[debut : i + 1]
             elif char == "]":
-                if pile and (pile[-1] == "["):
+                if pile and pile[-1] == "[":
                     pile.pop()
                 if not pile and debut is not None:
                     return texte[debut : i + 1]
@@ -149,24 +169,38 @@ class AnalyseurIA:
 
     @staticmethod
     def _reparer_intelligemment(texte: str) -> str:
-        """Répare les erreurs JSON courantes"""
+        """Répare les erreurs JSON courantes
+
+        Note: Cette méthode est heuristique et peut échouer sur des cas complexes.
+        Elle tente de fixer les erreurs les plus fréquentes sans casser le JSON valide.
+        """
         texte = AnalyseurIA._nettoyer_basique(texte)
 
-        # Échapper apostrophes dans strings
-        texte = re.sub(r'(["\'])([^"\']*?)\'([^"\']*?)\1', r"\1\2\\\'\3\1", texte)
+        # 1. Échapper apostrophes UNIQUEMENT dans les chaines simple-quotes
+        def escape_inner_quotes(match):
+            quote = match.group(1)
+            # Ne JAMAIS toucher aux chaînes entre double quotes (JSON valide)
+            if quote == '"':
+                return match.group(0)
 
-        # Supprimer virgules trailing
+            # Pour single quotes (Python/JS style), on échappe l'apostrophe interne
+            return f"{quote}{match.group(2)}\\'{match.group(3)}{quote}"
+
+        # Regex: quote, content without quotes, quote literal, content without quotes, matching quote
+        texte = re.sub(r'(["\'])([^"\']*?)\'([^"\']*?)\1', escape_inner_quotes, texte)
+
+        # 2. Supprimer virgules trailing
         texte = re.sub(r",\s*([}\]])", r"\1", texte)
 
-        # Guillemets sur clés
+        # 3. Guillemets sur clés (ex: {key: val} -> {"key": val})
         texte = re.sub(r"([{\s,])(\w+)(\s*:)", r'\1"\2"\3', texte)
 
-        # Python booleans -> JSON
+        # 4. Python booleans -> JSON
         texte = re.sub(r"\bTrue\b", "true", texte)
         texte = re.sub(r"\bFalse\b", "false", texte)
         texte = re.sub(r"\bNone\b", "null", texte)
 
-        # Apostrophes simples -> doubles
+        # 5. Convertir single quotes (clés/valeurs) en double quotes
         texte = re.sub(r"'([^']*)'(\s*[:, \]}])", r'"\1"\2', texte)
 
         return texte
