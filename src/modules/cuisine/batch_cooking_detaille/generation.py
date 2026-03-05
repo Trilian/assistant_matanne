@@ -66,7 +66,12 @@ RÉPONDS EN JSON avec cette structure EXACTE (réponse courte et stricte):
   ],
   "moments_jules": [
     "0-15min: Laver les légumes"
-  ]
+  ],
+  "liste_courses": {
+    "Fruits et légumes": ["carottes 500g", "oignons 3 pièces"],
+    "Viandes": ["poulet 600g"],
+    "Epicerie": ["huile olive", "sel"]
+  }
 }
 
 IMPORTANT:
@@ -87,9 +92,25 @@ IMPORTANT:
             max_tokens=6000,
         )
 
-        # generer_json retourne déjà un dict parsé — ne jamais re-parser
+        # generer_json retourne un dict parsé, une string brute, ou None
         if response and isinstance(response, dict):
             return response
+
+        # Fallback: si generer_json a retourné une string brute, tenter le parsing
+        if response and isinstance(response, str):
+            import json
+
+            logger.warning("generer_json batch a retourné une string, tentative parse manuelle")
+            try:
+                from src.core.ai.parser import AnalyseurIA
+
+                json_str = AnalyseurIA._extraire_objet_json(response)
+                json_str = AnalyseurIA._reparer_intelligemment(json_str)
+                parsed = json.loads(json_str)
+                if isinstance(parsed, dict):
+                    return parsed
+            except Exception:
+                pass
 
         # Debugging info if JSON fails
         if response:

@@ -34,12 +34,39 @@ def generer_semaine_ia(date_debut: date) -> dict:
         response = client.generer_json(
             prompt=prompt,
             system_prompt=_SYSTEM_PROMPT,
-            max_tokens=3000,
+            max_tokens=4096,
         )
 
-        # generer_json retourne déjà un dict parsé ou None — ne jamais re-parser
+        # generer_json retourne un dict parsé, une string brute, ou None
         if response and isinstance(response, dict):
             return response
+
+        # Fallback: si generer_json a retourné une string brute, tenter le parsing
+        if response and isinstance(response, str):
+            import json
+            import re
+
+            logger.warning("generer_json a retourné une string, tentative de parse manuelle")
+            try:
+                from src.core.ai.parser import AnalyseurIA
+
+                json_str = AnalyseurIA._extraire_objet_json(response)
+                json_str = AnalyseurIA._reparer_intelligemment(json_str)
+                parsed = json.loads(json_str)
+                if isinstance(parsed, dict):
+                    return parsed
+            except Exception:
+                # Dernier recours: regex
+                try:
+                    cleaned = re.sub(r",\s*([}\]])", r"\1", response)
+                    cleaned = re.sub(r'"\s*\n\s*"', '",\n"', cleaned)
+                    match = re.search(r"\{.*\}", cleaned, re.DOTALL)
+                    if match:
+                        parsed = json.loads(match.group(0))
+                        if isinstance(parsed, dict):
+                            return parsed
+                except Exception:
+                    pass
 
         st.error("❌ Réponse IA invalide ou vide")
 

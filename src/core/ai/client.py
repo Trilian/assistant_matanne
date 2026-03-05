@@ -99,6 +99,7 @@ class ClientIA(VisionMixin, StreamingMixin):
         max_tokens: int = 1000,
         utiliser_cache: bool = True,
         max_tentatives: int = 3,
+        response_format: dict | None = None,
     ) -> str:
         """
         Appel API avec cache et retry
@@ -144,6 +145,7 @@ class ClientIA(VisionMixin, StreamingMixin):
                     prompt_systeme=prompt_systeme,
                     temperature=temperature,
                     max_tokens=max_tokens,
+                    response_format=response_format,
                 )
 
                 # Enregistrer appel
@@ -184,7 +186,12 @@ class ClientIA(VisionMixin, StreamingMixin):
         raise ErreurServiceIA("Échec après toutes les tentatives")
 
     async def _effectuer_appel(
-        self, prompt: str, prompt_systeme: str, temperature: float, max_tokens: int
+        self,
+        prompt: str,
+        prompt_systeme: str,
+        temperature: float,
+        max_tokens: int,
+        response_format: dict | None = None,
     ) -> str:
         """Effectue l'appel API réel"""
         # S'assurer que la config est chargée
@@ -222,6 +229,7 @@ class ClientIA(VisionMixin, StreamingMixin):
                     "messages": messages,
                     "temperature": temperature,
                     "max_tokens": max_tokens,
+                    **({"response_format": response_format} if response_format else {}),
                 },
             )
 
@@ -278,6 +286,7 @@ class ClientIA(VisionMixin, StreamingMixin):
                     temperature=temperature,
                     max_tokens=max_tokens,
                     utiliser_cache=True,
+                    response_format={"type": "json_object"},
                 )
             )
 

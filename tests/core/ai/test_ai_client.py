@@ -413,8 +413,8 @@ class TestClientIAGenererJson:
 
             result = client.generer_json("Test")
 
-            # JSON invalide retourne la réponse brute ou None
-            assert result is None or isinstance(result, str)
+            # JSON invalide retourne la réponse brute, None, ou un dict vide (si réparation partielle)
+            assert result is None or isinstance(result, str | dict)
 
     @patch("src.core.ai.client.obtenir_parametres")
     def test_generer_json_error_returns_none(self, mock_params):

@@ -243,6 +243,15 @@ class AnalyseurIA:
         # 2. Supprimer virgules trailing
         texte = re.sub(r",\s*([}\]])", r"\1", texte)
 
+        # 2b. Ajouter virgules manquantes entre propriétés/éléments
+        # Ex: "value" "key" → "value", "key"  ou  } { → }, {  ou  ] [ → ], [
+        texte = re.sub(r'"\s*\n\s*"', '",\n"', texte)
+        texte = re.sub(r"}\s*\n\s*{", "},\n{", texte)
+        texte = re.sub(r'}\s*"', '},"', texte)
+        texte = re.sub(r'"\s*{', '",{', texte)
+        # Fix: "value"  "key" on same line
+        texte = re.sub(r'"\s+"(?=[a-zA-Z_])', '", "', texte)
+
         # 3. Guillemets sur clés (ex: {key: val} -> {"key": val})
         texte = re.sub(r"([{\s,])(\w+)(\s*:)", r'\1"\2"\3', texte)
 

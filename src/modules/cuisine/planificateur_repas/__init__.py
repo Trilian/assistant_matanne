@@ -83,11 +83,7 @@ def _sauvegarder_planning_db(planning_data: dict, date_debut: date) -> bool:
                             recette_info["id"] = recette_id  # Mettre à jour pour la session
 
                     if recette_id:
-                        # Clé compatible avec ServicePlanning (jour_0_midi, jour_0_soir ?)
-                        # Si le service attend juste "jour_i", il prend probablement une seule recette
-                        # On garde le comportement actuel (break) mais avec ID garanti
-                        recettes_selection[f"jour_{i}"] = recette_id
-                        break
+                        recettes_selection[f"jour_{i}_{type_repas}"] = recette_id
 
         if recettes_selection:
             planning = service.creer_planning_avec_choix(
@@ -299,21 +295,18 @@ def app():
                 with col_val2:
                     if st.button("🛒 Aller aux Courses", use_container_width=True):
                         try:
-                            recettes_noms = []
-                            for jour, repas in st.session_state[SK.PLANNING_DATA].items():
-                                for type_repas in ["midi", "soir", "gouter"]:
-                                    r = repas.get(type_repas)
-                                    if r and isinstance(r, dict) and r.get("nom"):
-                                        recettes_noms.append(r["nom"])
+                            # Auto-sauvegarder le planning en DB pour que le module courses le trouve
+                            if not st.session_state.get(SK.PLANNING_VALIDE):
+                                saved = _sauvegarder_planning_db(
+                                    st.session_state[SK.PLANNING_DATA], date_debut
+                                )
+                                if saved:
+                                    st.session_state[SK.PLANNING_VALIDE] = True
 
-                            if recettes_noms:
-                                st.session_state[SK.COURSES_DEPUIS_PLANNING] = recettes_noms
-                                from src.core.state import GestionnaireEtat
+                            from src.core.state import GestionnaireEtat
 
-                                GestionnaireEtat.naviguer_vers("cuisine.courses")
-                                rerun()
-                            else:
-                                st.warning("⚠️ Aucune recette trouvée dans le planning")
+                            GestionnaireEtat.naviguer_vers("cuisine.courses")
+                            rerun()
                         except Exception as e:
                             import logging
 

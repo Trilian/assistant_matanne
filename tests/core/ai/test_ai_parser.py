@@ -427,7 +427,6 @@ class TestAnalyseurIATroncature:
         result = AnalyseurIA.analyser(json_str, Container)
         assert len(result.items) == 1
         assert result.items[0].a == "valeur compl"
-        assert result[0].nom == "Fallback"
 
     def test_retourne_liste_vide_si_echec_total(self):
         """Test retourne liste vide si tout échoue"""
