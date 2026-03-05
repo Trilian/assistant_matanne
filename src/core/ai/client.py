@@ -258,6 +258,7 @@ class ClientIA(VisionMixin, StreamingMixin):
         system_prompt: str = "Réponds UNIQUEMENT en JSON valide.",
         temperature: float = 0.3,
         max_tokens: int = 2000,
+        utiliser_cache: bool = True,
     ) -> dict | str | None:
         """
         Génère une réponse JSON de manière synchrone.
@@ -270,6 +271,7 @@ class ClientIA(VisionMixin, StreamingMixin):
             system_prompt: Instructions système (défaut: JSON uniquement)
             temperature: Température (défaut: 0.3 pour plus de précision)
             max_tokens: Tokens max
+            utiliser_cache: Utiliser le cache (défaut: True)
 
         Returns:
             Dictionnaire parsé, string JSON brut, ou None si erreur
@@ -285,7 +287,7 @@ class ClientIA(VisionMixin, StreamingMixin):
                     prompt_systeme=system_prompt,
                     temperature=temperature,
                     max_tokens=max_tokens,
-                    utiliser_cache=True,
+                    utiliser_cache=utiliser_cache,
                     response_format={"type": "json_object"},
                 )
             )

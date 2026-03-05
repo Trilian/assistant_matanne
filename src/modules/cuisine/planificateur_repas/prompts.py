@@ -5,6 +5,7 @@ Prompts pour la generation de menus et alternatives.
 """
 
 import logging
+import random
 from datetime import date
 
 from src.core.constants import JOURS_SEMAINE
@@ -117,6 +118,9 @@ FORMAT DE RÉPONSE (JSON strict):
   "conseils_batch": "Dimanche: préparer la sauce bolognaise et la soupe. Mercredi: poulet mariné.",
   "suggestions_bio": ["Poulet fermier Bio", "Légumes Grand Frais"]
 }}
+
+IMPORTANT: Propose des recettes VARIÉES et ORIGINALES. Évite les classiques trop courants (pâtes bolo, poulet riz).
+Seed aléatoire pour la variété: {random.randint(1000, 9999)}
 """
 
     return prompt

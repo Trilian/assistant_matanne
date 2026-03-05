@@ -35,6 +35,8 @@ def generer_semaine_ia(date_debut: date) -> dict:
             prompt=prompt,
             system_prompt=_SYSTEM_PROMPT,
             max_tokens=4096,
+            temperature=0.8,
+            utiliser_cache=False,
         )
 
         # generer_json retourne un dict parsé, une string brute, ou None
@@ -189,6 +191,12 @@ Réponds UNIQUEMENT en JSON valide :
                         etapes = etapes_raw
         except Exception as e:
             logger.warning(f"Impossible de générer les détails pour {nom}: {e}")
+
+        # Fallback: si aucun ingrédient/étape n'a été généré, en créer des minimaux
+        if not ingredients:
+            ingredients = [{"nom": nom, "quantite": 1.0, "unite": "portion"}]
+        if not etapes:
+            etapes = [{"description": f"Préparer {nom} selon la recette.", "ordre": 1}]
 
         data = {
             "nom": nom,
