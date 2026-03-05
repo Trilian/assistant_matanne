@@ -309,26 +309,38 @@ class ClientIA(VisionMixin, StreamingMixin):
 
                     cleaned = cleaned.strip()
 
-                # Nettoyage préventif des erreurs courantes LLM (virgules trailing)
-                cleaned = re.sub(r",\s*([}\]])", r"\1", cleaned)
+                # Tentative 1.1: Utiliser AnalyseurIA._reparer_intelligemment si possible
+                try:
+                    from .parser import AnalyseurIA
+
+                    cleaned = AnalyseurIA._reparer_intelligemment(cleaned)
+                except ImportError:
+                    # Nettoyage préventif manuel si AnalyseurIA indisponible
+                    cleaned = re.sub(r",\s*([}\]])", r"\1", cleaned)
 
                 return json.loads(cleaned)
 
             except json.JSONDecodeError as e:
                 logger.warning(f"Erreur JSON decode (tentative 1): {e}")
 
-                # Tentative 2: Chercher le premier objet/tableau JSON valide dans le texte brut
-                # Utile si le LLM met du texte avant/après sans bloc de code
+                # Tentative 2: Chercher le premier objet/tableau JSON valide via AnalyseurIA
                 try:
-                    match = re.search(r"(\{.*\}|\[.*\])", cleaned, re.DOTALL)
-                    if match:
-                        potential_json = match.group(0)
-                        # Nettoyage préventif sur le fragment extrait aussi
-                        potential_json = re.sub(r",\s*([}\]])", r"\1", potential_json)
-                        return json.loads(potential_json)
-                except Exception as e2:
-                    logger.warning(f"Erreur JSON decode (tentative 2): {e2}")
-                    pass
+                    from .parser import AnalyseurIA
+
+                    extracted = AnalyseurIA._extraire_objet_json(cleaned)
+                    extracted = AnalyseurIA._reparer_intelligemment(extracted)
+                    return json.loads(extracted)
+                except Exception:
+                    # Fallback regex simple si AnalyseurIA échoue
+                    try:
+                        match = re.search(r"(\{.*\}|\[.*\])", cleaned, re.DOTALL)
+                        if match:
+                            potential_json = match.group(0)
+                            # Nettoyage préventif sur le fragment extrait aussi
+                            potential_json = re.sub(r",\s*([}\]])", r"\1", potential_json)
+                            return json.loads(potential_json)
+                    except Exception as e2:
+                        logger.warning(f"Erreur JSON decode (tentative 2): {e2}")
 
                 # Retourner la réponse brute si pas du JSON valide
                 logger.warning(f"Réponse non-JSON, retour brut (début): {cleaned[:100]}...")

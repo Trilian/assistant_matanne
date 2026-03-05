@@ -83,8 +83,8 @@ IMPORTANT:
 
         response = client.generer_json(
             prompt=prompt,
-            system_prompt="Tu es un expert batch cooking. Réponds UNIQUEMENT en JSON valide, sans commentaire, sans markdown.",
-            max_tokens=3000,
+            system_prompt="Tu es un expert batch cooking. Réponds UNIQUEMENT en JSON valide, sans commentaire, sans markdown. Sois concis.",
+            max_tokens=6000,
         )
 
         # generer_json retourne déjà un dict parsé — ne jamais re-parser
