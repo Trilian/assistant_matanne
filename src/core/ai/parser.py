@@ -168,6 +168,54 @@ class AnalyseurIA:
         raise ValueError("Aucun objet/liste JSON complet trouvé")
 
     @staticmethod
+    def _reparer_troncature(texte: str) -> str:
+        """Tentative de réparation d'un JSON tronqué"""
+        texte = texte.strip()
+
+        # 1. État de parsing simple
+        pile = []
+        in_string = False
+        escape = False
+
+        for char in texte:
+            if in_string:
+                if escape:
+                    escape = False
+                elif char == "\\":
+                    escape = True
+                elif char == '"':
+                    in_string = False
+            else:
+                if char == '"':
+                    in_string = True
+                elif char in "{[":
+                    pile.append(char)
+                elif char in "}]":
+                    if pile:
+                        last_open = pile[-1]
+                        if (char == "}" and last_open == "{") or (char == "]" and last_open == "["):
+                            pile.pop()
+
+        # 2. Fermer la chaîne en cours si nécessaire
+        if in_string:
+            texte += '"'
+
+        # 3. Nettoyer la fin (virgules, deux points orphelins)
+        texte = texte.rstrip()
+        if texte.endswith(","):
+            texte = texte[:-1]
+        elif texte.endswith(":"):
+            texte += " null"
+
+        # 4. Fermer les accolades/crochets restants
+        while pile:
+            ouvrant = pile.pop()
+            fermant = "}" if ouvrant == "{" else "]"
+            texte += fermant
+
+        return texte
+
+    @staticmethod
     def _reparer_intelligemment(texte: str) -> str:
         """Répare les erreurs JSON courantes
 
@@ -175,6 +223,9 @@ class AnalyseurIA:
         Elle tente de fixer les erreurs les plus fréquentes sans casser le JSON valide.
         """
         texte = AnalyseurIA._nettoyer_basique(texte)
+
+        # 0. Réparation des troncatures (récupération d'erreurs fréquentes en streaming/taille max)
+        texte = AnalyseurIA._reparer_troncature(texte)
 
         # 1. Échapper apostrophes UNIQUEMENT dans les chaines simple-quotes
         def escape_inner_quotes(match):

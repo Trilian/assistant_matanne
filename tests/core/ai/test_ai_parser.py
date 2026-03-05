@@ -348,6 +348,85 @@ class TestAnalyserListeReponse:
         result = analyser_liste_reponse(texte_invalide, PersonneTest, items_secours=items_secours)
 
         assert len(result) == 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TESTS ANALYSEUR IA - STRATÉGIE DE REPARATION DE TRONCATURE
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@pytest.mark.unit
+class TestAnalyseurIATroncature:
+    """Tests de la réparation de JSON tronqué"""
+
+    def test_reparation_liste_tronquee_fin(self):
+        """Test réparation d'une liste tronquée à la fin"""
+        # Truncated: {"items": [{"nom": "R1"}, {"nom": "R2"
+        json_str = '{"items": [{"nom": "R1"}, {"nom": "R2"'
+
+        repaired = AnalyseurIA._reparer_troncature(json_str)
+        # Should append }]}
+        assert repaired.endswith("}]}")
+
+    def test_reparation_chaine_tronquee(self):
+        """Test réparation d'une chaîne tronquée"""
+        # Truncated: {"items": [{"nom": "Recette de po
+        json_str = '{"items": [{"nom": "Recette de po'
+
+        repaired = AnalyseurIA._reparer_troncature(json_str)
+        # Should append "}]}
+        assert repaired.endswith('"}]}')
+        assert '"Recette de po"' in repaired
+
+    def test_reparation_apres_virgule(self):
+        """Test réparation après une virgule"""
+        # Truncated: {"items": [{"nom": "R1"},
+        json_str = '{"items": [{"nom": "R1"}, '
+
+        repaired = AnalyseurIA._reparer_troncature(json_str)
+        # Should remove comma and append ]}
+        assert "}," not in repaired[-5:]  # Comma should be gone
+        assert repaired.endswith("]}")
+
+    def test_reparation_apres_deux_points(self):
+        """Test réparation après deux points"""
+        # Truncated: {"items": [{"nom":
+        json_str = '{"items": [{"nom": '
+
+        repaired = AnalyseurIA._reparer_troncature(json_str)
+        # Should append null}]}
+        assert "null" in repaired
+        assert repaired.endswith("}]}")
+
+    def test_integration_analyser(self):
+        """Test intégration complète dans analyser()"""
+        # Truncated: {"items": [{"a": 1}, {"a": 2
+        json_str = '{"items": [{"a": 1}, {"a": 2'
+
+        class Item(BaseModel):
+            a: int
+
+        class Container(BaseModel):
+            items: list[Item]
+
+        result = AnalyseurIA.analyser(json_str, Container)
+        assert len(result.items) == 2
+        assert result.items[1].a == 2
+
+    def test_integration_analyser_chaine(self):
+        """Test intégration complète avec chaine tronquée"""
+        # Truncated: {"items": [{"a": "valeur compl
+        json_str = '{"items": [{"a": "valeur compl'
+
+        class Item(BaseModel):
+            a: str
+
+        class Container(BaseModel):
+            items: list[Item]
+
+        result = AnalyseurIA.analyser(json_str, Container)
+        assert len(result.items) == 1
+        assert result.items[0].a == "valeur compl"
         assert result[0].nom == "Fallback"
 
     def test_retourne_liste_vide_si_echec_total(self):
