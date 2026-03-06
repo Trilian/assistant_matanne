@@ -89,7 +89,7 @@ class ServiceCoursesIntelligentes(BaseAIService):
         }
 
     def extraire_ingredients_planning(self, planning: Planning) -> list[ArticleCourse]:
-        """Extrait tous les ingredients des recettes du planning."""
+        """Extrait tous les ingredients des recettes du planning (plat + entrée + desserts)."""
         from typing import Any
 
         # Agregateur: {nom_ingredient: {quantite, unite, recettes}}
@@ -99,22 +99,28 @@ class ServiceCoursesIntelligentes(BaseAIService):
 
         recettes_traitees: set[str] = set()
 
-        for repas in planning.repas:
-            if not repas.recette:
-                continue
-
-            recette = repas.recette
+        def _ajouter_ingredients_recette(recette) -> None:
+            """Ajoute les ingrédients d'une recette à l'agrégat."""
+            if not recette or recette.nom in recettes_traitees:
+                return
             recettes_traitees.add(recette.nom)
-
-            # Parcourir les ingredients de la recette (relation "ingredients")
             for ing_recette in recette.ingredients:
                 if not ing_recette.ingredient:
                     continue
-
                 nom = ing_recette.ingredient.nom.lower()
                 agregat[nom]["quantite"] += float(ing_recette.quantite or 1)
                 agregat[nom]["unite"] = ing_recette.unite or ""
                 agregat[nom]["recettes"].add(recette.nom)
+
+        for repas in planning.repas:
+            # Plat principal
+            _ajouter_ingredients_recette(repas.recette)
+            # Entrée (si liée à une recette)
+            _ajouter_ingredients_recette(getattr(repas, "entree_recette", None))
+            # Dessert (si lié à une recette)
+            _ajouter_ingredients_recette(getattr(repas, "dessert_recette", None))
+            # Dessert Jules (si lié à une recette)
+            _ajouter_ingredients_recette(getattr(repas, "dessert_jules_recette", None))
 
         # Construire la liste d'articles
         articles: list[ArticleCourse] = []

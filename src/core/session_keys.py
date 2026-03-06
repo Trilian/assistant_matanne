@@ -211,6 +211,11 @@ class _SessionKeys:
     BATCH_DATA = "batch_data"
     BATCH_DATE = "batch_date"
     BATCH_HEURE = "batch_heure"
+    BATCH_SELECTION = "batch_selection"
+    BATCH_NB_SESSIONS = "batch_nb_sessions"
+    BATCH_JOUR_SESSION_1 = "batch_jour_session_1"
+    BATCH_JOUR_SESSION_2 = "batch_jour_session_2"
+    BATCH_SESSION_ASSIGNMENT = "batch_session_assignment"
     COURSES_DEPUIS_BATCH = "courses_depuis_batch"
 
     # ─── Cuisine / Planificateur → Courses ────────────

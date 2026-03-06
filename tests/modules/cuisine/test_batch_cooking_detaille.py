@@ -79,7 +79,7 @@ def mock_st():
             tab_mock = MagicMock()
             tab_mock.__enter__ = MagicMock(return_value=tab_mock)
             tab_mock.__exit__ = MagicMock(return_value=False)
-            st_mock.tabs.return_value = [tab_mock, tab_mock, tab_mock]
+            st_mock.tabs.return_value = [tab_mock, tab_mock, tab_mock, tab_mock, tab_mock]
 
             # time_input returns a proper time object
             st_mock.time_input.return_value = time(9, 0)
@@ -782,10 +782,12 @@ class TestApp:
 
         mock_st.tabs.assert_called_once()
         call_args = mock_st.tabs.call_args[0][0]
-        assert len(call_args) == 3
+        assert len(call_args) == 5
         assert "parer" in call_args[0].lower()  # "Préparer" (encoding-safe)
         assert "Session" in call_args[1]
-        assert "Finitions" in call_args[2]
+        assert "cution" in call_args[2].lower()  # "Exécution Live"
+        assert "Finitions" in call_args[3]
+        assert "ongélation" in call_args[4].lower()  # "Congélation"
 
 
 # =============================================================================

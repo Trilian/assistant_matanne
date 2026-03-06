@@ -72,11 +72,17 @@ APPRENTISSAGE (base sur l'historique):
 JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
 
 ⚠️ RÈGLE OBLIGATOIRE: Pour CHAQUE jour listé, tu DOIS fournir OBLIGATOIREMENT:
-- "midi": un plat (JAMAIS null, JAMAIS absent)
-- "soir": un plat (JAMAIS null, JAMAIS absent)
+- "midi": un repas complet (JAMAIS null, JAMAIS absent)
+- "soir": un repas complet (JAMAIS null, JAMAIS absent)
 - "gouter": facultatif, pertinent pour Jules
 
-Pour chaque repas, fournis:
+Chaque repas (midi/soir) DOIT contenir:
+1. "entree": entrée simple (texte libre, ex: "Salade verte", "Soupe de légumes", ou null si pas d'entrée)
+2. "plat": objet avec nom, proteine, temps_minutes, robot, difficulte, jules_adaptation
+3. "dessert": dessert famille (texte libre, ex: "Yaourt nature", "Fruit frais", "Tarte aux pommes")
+4. "dessert_jules": dessert adapté Jules {preferences.jules_age_mois} mois (texte libre, ex: "Compote pomme-banane", "Yaourt nature", "Petit-suisse")
+
+Pour le plat, fournis:
 1. Nom du plat (simple et familial)
 2. Type de protéine principale (parmi: poulet, boeuf, porc, agneau, poisson, crevettes, oeufs, tofu, legumineuses)
 3. Temps total de préparation en minutes
@@ -92,20 +98,30 @@ FORMAT DE RÉPONSE (JSON strict):
     {{
       "jour": "Mercredi",
       "midi": {{
-        "nom": "Poulet rôti aux légumes",
-        "proteine": "poulet",
-        "temps_minutes": 45,
-        "robot": "four",
-        "difficulte": "facile",
-        "jules_adaptation": "Prélever 80g de poulet et légumes avant sel. Mixer grossièrement. Servir tiède."
+        "entree": "Salade de tomates",
+        "plat": {{
+          "nom": "Poulet rôti aux légumes",
+          "proteine": "poulet",
+          "temps_minutes": 45,
+          "robot": "four",
+          "difficulte": "facile",
+          "jules_adaptation": "Prélever 80g de poulet et légumes avant sel. Mixer grossièrement. Servir tiède."
+        }},
+        "dessert": "Yaourt aux fruits",
+        "dessert_jules": "Compote pomme-banane"
       }},
       "soir": {{
-        "nom": "Soupe de légumes maison",
-        "proteine": "legumineuses",
-        "temps_minutes": 25,
-        "robot": "poele",
-        "difficulte": "facile",
-        "jules_adaptation": "Mixer finement la portion de Jules (100g). Servir tiède."
+        "entree": null,
+        "plat": {{
+          "nom": "Soupe de légumes maison",
+          "proteine": "legumineuses",
+          "temps_minutes": 25,
+          "robot": "poele",
+          "difficulte": "facile",
+          "jules_adaptation": "Mixer finement la portion de Jules (100g). Servir tiède."
+        }},
+        "dessert": "Fruit frais",
+        "dessert_jules": "Petit-suisse nature"
       }},
       "gouter": {{
         "nom": "Compote pomme-poire maison",

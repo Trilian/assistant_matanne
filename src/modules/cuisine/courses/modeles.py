@@ -6,6 +6,7 @@ import logging
 
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.core.state import rerun
 from src.services.cuisine.courses import obtenir_service_courses
 from src.ui.components.atoms import etat_vide
@@ -67,7 +68,7 @@ def afficher_modeles():
                                         st.success(
                                             f"✅ Modèle chargé ({len(article_ids)} articles)!"
                                         )
-                                        st.session_state.courses_refresh += 1
+                                        st.session_state[SK.COURSES_REFRESH] += 1
                                         rerun()
                                 except Exception as e:
                                     import traceback

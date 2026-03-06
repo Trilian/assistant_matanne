@@ -115,7 +115,7 @@ def afficher_liste_active():
             if st.button("🗑️ Vider (achetés)", use_container_width=True):
                 if service.get_liste_courses(achetes=True):
                     st.warning("⚠️ Suppression des articles achetés...")
-                    st.session_state.courses_refresh += 1
+                    st.session_state[SK.COURSES_REFRESH] += 1
                     rerun()
 
         # Formulaire ajout article
@@ -147,7 +147,7 @@ def afficher_rayon_articles(service, rayon: str, articles: list):
                 try:
                     service.update(article["id"], {"achete": True, "achete_le": datetime.now()})
                     st.success(f"✅ {article.get('ingredient_nom')} marqué acheté!")
-                    st.session_state.courses_refresh += 1
+                    st.session_state[SK.COURSES_REFRESH] += 1
                     rerun()
                 except Exception as e:
                     st.error(f"❌ Erreur: {str(e)}")
@@ -172,7 +172,7 @@ def afficher_rayon_articles(service, rayon: str, articles: list):
                 try:
                     service.delete(article["id"])
                     st.success(f"✅ {article.get('ingredient_nom')} supprimé!")
-                    st.session_state.courses_refresh += 1
+                    st.session_state[SK.COURSES_REFRESH] += 1
                     rerun()
                 except Exception as e:
                     st.error(f"❌ Erreur: {str(e)}")
@@ -231,7 +231,7 @@ def afficher_rayon_articles(service, rayon: str, articles: list):
                             )
                             st.success("✅ Article mis à jour!")
                             st.session_state.edit_article_id = None
-                            st.session_state.courses_refresh += 1
+                            st.session_state[SK.COURSES_REFRESH] += 1
                             rerun()
                         except Exception as e:
                             st.error(f"❌ Erreur: {str(e)}")
@@ -295,7 +295,7 @@ def afficher_ajouter_article():
 
                 st.success(f"✅ {nom} ajouté à la liste!")
                 st.session_state.new_article_mode = False
-                st.session_state.courses_refresh += 1
+                st.session_state[SK.COURSES_REFRESH] += 1
                 rerun()
             except Exception as e:
                 st.error(f"❌ Erreur: {str(e)}")

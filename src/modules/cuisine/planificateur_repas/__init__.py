@@ -45,6 +45,10 @@ from .preferences import (
 
 def _sauvegarder_planning_db(planning_data: dict, date_debut: date) -> bool:
     """Sauvegarde le planning généré en base de données."""
+    import logging
+
+    _logger = logging.getLogger(__name__)
+
     try:
         from src.services.cuisine.planning import obtenir_service_planning
 
@@ -54,6 +58,8 @@ def _sauvegarder_planning_db(planning_data: dict, date_debut: date) -> bool:
 
         # Construire la sélection de recettes
         recettes_selection = {}
+        repas_extras = {}  # {slot_key: {entree, dessert, dessert_jules}}
+        echecs = []
 
         # S'assurer de l'ordre des jours (Lundi -> Dimanche)
         jours_ordonnes = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
@@ -68,33 +74,57 @@ def _sauvegarder_planning_db(planning_data: dict, date_debut: date) -> bool:
                     break
 
             if not jour_data:
+                _logger.debug(f"Jour {jour_nom} absent du planning_data")
                 continue
 
             # Traiter Midi et Soir
             for type_repas in ["midi", "soir"]:
                 recette_info = jour_data.get(type_repas)
-                if recette_info and isinstance(recette_info, dict):
-                    recette_id = recette_info.get("id")
+                if not recette_info or not isinstance(recette_info, dict):
+                    _logger.warning(f"{jour_nom} {type_repas}: données manquantes ou invalides")
+                    echecs.append(f"{jour_nom} {type_repas}")
+                    continue
 
-                    # Si pas d'ID, créer la recette en base
-                    if not recette_id:
-                        recette_id = sauvegarder_recette_ia(recette_info, type_repas)
-                        if recette_id:
-                            recette_info["id"] = recette_id  # Mettre à jour pour la session
+                recette_id = recette_info.get("id")
 
+                # Si pas d'ID, créer la recette en base
+                if not recette_id:
+                    nom_recette = recette_info.get("nom", "?")
+                    _logger.info(f"Sauvegarde recette IA: {nom_recette} ({jour_nom} {type_repas})")
+                    recette_id = sauvegarder_recette_ia(recette_info, type_repas)
                     if recette_id:
-                        recettes_selection[f"jour_{i}_{type_repas}"] = recette_id
+                        recette_info["id"] = recette_id
+                    else:
+                        _logger.error(
+                            f"Échec sauvegarde recette: {nom_recette} ({jour_nom} {type_repas})"
+                        )
+                        echecs.append(f"{jour_nom} {type_repas}: {nom_recette}")
+
+                if recette_id:
+                    slot_key = f"jour_{i}_{type_repas}"
+                    recettes_selection[slot_key] = recette_id
+                    # Capturer entrée/dessert
+                    repas_extras[slot_key] = {
+                        "entree": recette_info.get("entree"),
+                        "dessert": recette_info.get("dessert"),
+                        "dessert_jules": recette_info.get("dessert_jules"),
+                    }
+
+        _logger.info(
+            f"Planning: {len(recettes_selection)} recettes mappées, {len(echecs)} échecs: {echecs}"
+        )
 
         if recettes_selection:
             planning = service.creer_planning_avec_choix(
                 semaine_debut=date_debut,
                 recettes_selection=recettes_selection,
+                repas_extras=repas_extras,
             )
             return planning is not None
+        else:
+            _logger.error("Aucune recette n'a pu être sauvegardée")
     except Exception as e:
-        import logging
-
-        logging.getLogger(__name__).error(f"Erreur sauvegarde planning: {e}")
+        _logger.error(f"Erreur sauvegarde planning: {e}")
     return False
 
 
@@ -208,11 +238,25 @@ def app():
                             planning = {}
                             for jour_data in result["semaine"]:
                                 jour = jour_data.get("jour", "")
-                                planning[jour] = {
-                                    "midi": jour_data.get("midi"),
-                                    "soir": jour_data.get("soir"),
-                                    "gouter": jour_data.get("gouter"),
-                                }
+                                planning[jour] = {}
+                                for slot in ["midi", "soir"]:
+                                    meal = jour_data.get(slot)
+                                    if meal and isinstance(meal, dict):
+                                        # Nouveau format: {entree, plat, dessert, dessert_jules}
+                                        if "plat" in meal and isinstance(meal["plat"], dict):
+                                            planning[jour][slot] = {
+                                                **meal["plat"],
+                                                "entree": meal.get("entree"),
+                                                "dessert": meal.get("dessert"),
+                                                "dessert_jules": meal.get("dessert_jules"),
+                                            }
+                                        else:
+                                            # Ancien format: {nom, proteine, ...} directement
+                                            planning[jour][slot] = meal
+                                    else:
+                                        planning[jour][slot] = meal
+                                # Goûter (inchangé)
+                                planning[jour]["gouter"] = jour_data.get("gouter")
 
                             st.session_state[SK.PLANNING_DATA] = planning
                             st.session_state[SK.PLANNING_CONSEILS] = result.get(
@@ -288,9 +332,15 @@ def app():
                     if st.button(
                         "💚 Valider ce planning", type="primary", use_container_width=True
                     ):
-                        _sauvegarder_planning_db(st.session_state[SK.PLANNING_DATA], date_debut)
-                        st.session_state[SK.PLANNING_VALIDE] = True
-                        st.success("✅ Planning validé !")
+                        with st.spinner("Sauvegarde en cours..."):
+                            saved = _sauvegarder_planning_db(
+                                st.session_state[SK.PLANNING_DATA], date_debut
+                            )
+                        if saved:
+                            st.session_state[SK.PLANNING_VALIDE] = True
+                            st.success("✅ Planning validé !")
+                        else:
+                            st.error("❌ Erreur lors de la sauvegarde du planning")
 
                 with col_val2:
                     if st.button("🛒 Aller aux Courses", use_container_width=True):

@@ -1435,9 +1435,18 @@ CREATE TABLE repas (
     portion_ajustee INTEGER,
     prepare BOOLEAN NOT NULL DEFAULT FALSE,
     notes TEXT,
+    entree VARCHAR(200),
+    entree_recette_id INTEGER,
+    dessert VARCHAR(200),
+    dessert_recette_id INTEGER,
+    dessert_jules VARCHAR(200),
+    dessert_jules_recette_id INTEGER,
     CONSTRAINT fk_repas_planning FOREIGN KEY (planning_id) REFERENCES plannings(id) ON DELETE CASCADE,
     CONSTRAINT fk_repas_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE
     SET NULL,
+        CONSTRAINT fk_repas_entree_recette FOREIGN KEY (entree_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+        CONSTRAINT fk_repas_dessert_recette FOREIGN KEY (dessert_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+        CONSTRAINT fk_repas_dessert_jules_recette FOREIGN KEY (dessert_jules_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
         CONSTRAINT ck_repas_portions_valides CHECK (
             portion_ajustee IS NULL
             OR (

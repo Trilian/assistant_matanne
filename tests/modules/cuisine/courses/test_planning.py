@@ -79,7 +79,7 @@ class TestRenderCoursesDepuisPlanning:
 
         afficher_courses_depuis_planning()
 
-        mock_naviguer.assert_called_once_with("cuisine.planning_semaine")
+        mock_naviguer.assert_called_once_with("cuisine_repas")
 
     @patch("src.modules.cuisine.courses.planning.obtenir_service_courses_intelligentes")
     @patch("src.modules.cuisine.courses.planning.st")

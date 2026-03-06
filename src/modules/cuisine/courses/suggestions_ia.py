@@ -8,6 +8,7 @@ import time
 import pandas as pd
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.services.cuisine.courses import obtenir_service_courses
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.services.inventaire import obtenir_service_inventaire
@@ -58,7 +59,7 @@ def afficher_suggestions_ia():
                             try:
                                 count = service.ajouter_suggestions_en_masse(suggestions)
                                 st.success(f"✅ {count} articles ajoutés!")
-                                st.session_state.courses_refresh += 1
+                                st.session_state[SK.COURSES_REFRESH] += 1
                                 time.sleep(0.5)
                             except Exception as e:
                                 st.error(f"❌ Erreur sauvegarde: {str(e)}")
@@ -149,7 +150,7 @@ def afficher_suggestions_ia():
                                         st.success(
                                             f"✅ {count_added} ingrédient(s) ajouté(s) à la liste!"
                                         )
-                                        st.session_state.courses_refresh += 1
+                                        st.session_state[SK.COURSES_REFRESH] += 1
                                         time.sleep(0.5)
                                 except Exception as e:
                                     st.error(f"❌ Erreur: {str(e)}")

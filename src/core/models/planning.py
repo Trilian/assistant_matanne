@@ -71,12 +71,18 @@ class Repas(Base):
 
     Attributes:
         planning_id: ID du planning parent
-        recette_id: ID de la recette (optionnel)
+        recette_id: ID de la recette principale (plat)
         date_repas: Date du repas
         type_repas: Type (petit_déjeuner, déjeuner, dîner, goûter)
         portion_ajustee: Portions ajustées
         prepare: Si le repas a été préparé
         notes: Notes supplémentaires
+        entree: Entrée en texte libre (ex: "Salade verte")
+        entree_recette_id: FK optionnelle vers recette pour l'entrée
+        dessert: Dessert famille en texte libre (ex: "Yaourt nature")
+        dessert_recette_id: FK optionnelle vers recette pour le dessert
+        dessert_jules: Dessert Jules en texte libre (ex: "Compote pomme")
+        dessert_jules_recette_id: FK optionnelle vers recette pour le dessert Jules
     """
 
     __tablename__ = "repas"
@@ -94,9 +100,32 @@ class Repas(Base):
     prepare: Mapped[bool] = mapped_column(Boolean, default=False)
     notes: Mapped[str | None] = mapped_column(Text)
 
+    # Entrée (texte libre + FK recette optionnelle)
+    entree: Mapped[str | None] = mapped_column(String(200))
+    entree_recette_id: Mapped[int | None] = mapped_column(
+        ForeignKey("recettes.id", ondelete="SET NULL")
+    )
+
+    # Dessert famille (texte libre + FK recette optionnelle)
+    dessert: Mapped[str | None] = mapped_column(String(200))
+    dessert_recette_id: Mapped[int | None] = mapped_column(
+        ForeignKey("recettes.id", ondelete="SET NULL")
+    )
+
+    # Dessert Jules (texte libre + FK recette optionnelle)
+    dessert_jules: Mapped[str | None] = mapped_column(String(200))
+    dessert_jules_recette_id: Mapped[int | None] = mapped_column(
+        ForeignKey("recettes.id", ondelete="SET NULL")
+    )
+
     # Relations
     planning: Mapped["Planning"] = relationship(back_populates="repas")
-    recette: Mapped[Optional["Recette"]] = relationship()
+    recette: Mapped[Optional["Recette"]] = relationship(foreign_keys=[recette_id])
+    entree_recette: Mapped[Optional["Recette"]] = relationship(foreign_keys=[entree_recette_id])
+    dessert_recette: Mapped[Optional["Recette"]] = relationship(foreign_keys=[dessert_recette_id])
+    dessert_jules_recette: Mapped[Optional["Recette"]] = relationship(
+        foreign_keys=[dessert_jules_recette_id]
+    )
 
     __table_args__ = (
         CheckConstraint(

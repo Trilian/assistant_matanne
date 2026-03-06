@@ -190,6 +190,7 @@ class ServicePlanning(
         self,
         semaine_debut: date,
         recettes_selection: dict[str, int],  # {jour_index: recette_id}
+        repas_extras: dict[str, dict] | None = None,  # {slot_key: {entree, dessert, dessert_jules}}
         enfants_adaptes: list[int] | None = None,
         db: Session | None = None,
     ) -> Planning | None:
@@ -264,17 +265,29 @@ class ServicePlanning(
                         logger.warning(f"⚠️ Recipe {recette_id} not found for {jour_name} {slot}")
                         continue
 
+                    # Récupérer les extras (entrée/dessert)
+                    extras = (repas_extras or {}).get(slot_key, {})
+
                     repas = Repas(
                         planning_id=planning.id,
                         recette_id=recette.id,
                         date_repas=date_jour,
                         type_repas=type_db,
                         notes=f"{type_db.capitalize()} du {jour_name}",
+                        entree=extras.get("entree"),
+                        dessert=extras.get("dessert"),
+                        dessert_jules=extras.get("dessert_jules"),
                     )
                     db.add(repas)
 
         db.commit()
         db.refresh(planning)
+
+        nb_repas = len(planning.repas) if planning.repas else 0
+        logger.info(
+            f"✅ Created custom planning for {semaine_debut}: "
+            f"{nb_repas} repas créés (attendu: {len(recettes_selection)})"
+        )
 
         # Émettre événement domaine
         obtenir_bus().emettre(
@@ -283,7 +296,6 @@ class ServicePlanning(
             source="planning",
         )
 
-        logger.info(f"✅ Created custom planning for {semaine_debut}")
         return planning
 
     # ═══════════════════════════════════════════════════════════

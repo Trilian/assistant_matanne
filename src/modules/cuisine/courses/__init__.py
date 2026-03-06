@@ -13,6 +13,7 @@ Fonctionnalités complètes:
 import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.core.session_keys import SK
 from src.modules._framework import error_boundary
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
@@ -52,8 +53,8 @@ def app():
     st.caption("Gestion de votre liste de courses")
 
     # Initialiser session state
-    if _keys("refresh") not in st.session_state:
-        st.session_state[_keys("refresh")] = 0
+    if SK.COURSES_REFRESH not in st.session_state:
+        st.session_state[SK.COURSES_REFRESH] = 0
     if _keys("new_article_mode") not in st.session_state:
         st.session_state[_keys("new_article_mode")] = False
     # Initialiser la synchronisation temps réel

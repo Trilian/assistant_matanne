@@ -41,7 +41,7 @@ def afficher_selecteur_session():
 
 
 def afficher_planning_semaine_preview(planning_data: dict):
-    """Affiche les repas de la semaine pour lesquels on fait le batch."""
+    """Affiche les repas de la semaine avec sélection pour le batch cooking."""
 
     st.markdown("##### 📋 Repas à préparer")
 
@@ -49,25 +49,95 @@ def afficher_planning_semaine_preview(planning_data: dict):
         etat_vide("Aucun planning trouvé", "📋", "Allez d'abord dans 'Planifier mes repas'")
         return
 
-    # Afficher en tableau compact
+    # Initialiser la sélection si besoin
+    if SK.BATCH_SELECTION not in st.session_state:
+        st.session_state[SK.BATCH_SELECTION] = {}
+
+    # Récupérer les paramètres multi-sessions
+    nb_sessions = st.session_state.get(SK.BATCH_NB_SESSIONS, 1)
+
+    # Initialiser l'assignation si besoin
+    if SK.BATCH_SESSION_ASSIGNMENT not in st.session_state:
+        st.session_state[SK.BATCH_SESSION_ASSIGNMENT] = {}
+
+    selection = st.session_state[SK.BATCH_SELECTION]
+    assignment = st.session_state[SK.BATCH_SESSION_ASSIGNMENT]
+
+    # Actions globales
+    col_all1, col_all2 = st.columns(2)
+    with col_all1:
+        if st.button("✅ Tout sélectionner", key="batch_sel_all", use_container_width=True):
+            for jour, repas in planning_data.items():
+                for tr in ["midi", "soir"]:
+                    r = repas.get(tr, {})
+                    if r and isinstance(r, dict):
+                        selection[f"{jour}_{tr}"] = True
+            rerun()
+    with col_all2:
+        if st.button("❌ Tout désélectionner", key="batch_desel_all", use_container_width=True):
+            selection.clear()
+            rerun()
+
+    st.divider()
+
+    # Afficher chaque jour
     for jour, repas in planning_data.items():
         with st.container():
             st.markdown(f"**{jour}**")
-            cols = st.columns(2)
 
-            with cols[0]:
-                midi = repas.get("midi", {})
-                if midi:
-                    st.caption(f"🌞 {midi.get('nom', 'Non défini')}")
-                else:
-                    st.caption("🌞 -")
+            for type_repas, emoji in [("midi", "🌞"), ("soir", "🌙")]:
+                meal = repas.get(type_repas, {})
+                if not meal or not isinstance(meal, dict):
+                    continue
 
-            with cols[1]:
-                soir = repas.get("soir", {})
-                if soir:
-                    st.caption(f"🌙 {soir.get('nom', 'Non défini')}")
-                else:
-                    st.caption("🌙 -")
+                nom = meal.get("nom", "Non défini")
+                key = f"{jour}_{type_repas}"
+
+                # Valeur par défaut: batch sauf indication contraire
+                default_selected = selection.get(key, True)
+
+                cols = st.columns([0.5, 3, 2] if nb_sessions > 1 else [0.5, 4])
+
+                with cols[0]:
+                    checked = st.checkbox(
+                        "sel",
+                        value=default_selected,
+                        key=f"batch_check_{key}",
+                        label_visibility="collapsed",
+                    )
+                    selection[key] = checked
+
+                with cols[1]:
+                    label = f"{emoji} {nom}"
+                    if not checked:
+                        label += " — 🔥 *Jour J*"
+                    st.markdown(label)
+
+                # Assignation session (si 2 sessions)
+                if nb_sessions > 1 and checked:
+                    with cols[2]:
+                        jour_s1 = st.session_state.get(SK.BATCH_JOUR_SESSION_1, "dimanche")
+                        jour_s2 = st.session_state.get(SK.BATCH_JOUR_SESSION_2, "mercredi")
+                        options = [f"Session 1 ({jour_s1})", f"Session 2 ({jour_s2})"]
+                        default_idx = 0 if assignment.get(key, 1) == 1 else 1
+                        sess = st.selectbox(
+                            "Session",
+                            options,
+                            index=default_idx,
+                            key=f"batch_sess_{key}",
+                            label_visibility="collapsed",
+                        )
+                        assignment[key] = 1 if sess == options[0] else 2
+
+    # Résumé sélection
+    nb_selected = sum(1 for v in selection.values() if v)
+    nb_total = sum(
+        1
+        for repas in planning_data.values()
+        for tr in ["midi", "soir"]
+        if repas.get(tr) and isinstance(repas.get(tr), dict)
+    )
+    st.caption(f"**{nb_selected}/{nb_total}** repas sélectionnés pour le batch cooking")
 
 
 def afficher_ingredient_detaille(ingredient: dict, key_prefix: str):

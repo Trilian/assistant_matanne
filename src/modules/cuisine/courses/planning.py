@@ -147,7 +147,7 @@ def afficher_courses_depuis_planning():
                             st.success(f"✅ {len(ids)} articles ajoutés à votre liste de courses!")
                             # Reset
                             del st.session_state[SK.COURSES_PLANNING_RESULTAT]
-                            st.session_state.courses_refresh += 1
+                            st.session_state[SK.COURSES_REFRESH] += 1
                             rerun()
 
             with col2:

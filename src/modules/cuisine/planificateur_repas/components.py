@@ -10,6 +10,7 @@ from src.core.session_keys import SK
 from src.core.state import rerun
 from src.ui.keys import KeyNamespace
 
+from .helpers import DESSERTS_FAMILLE, DESSERTS_JULES, ENTREES_SUGGESTIONS
 from .preferences import (
     ajouter_feedback,
     charger_feedbacks,
@@ -170,13 +171,19 @@ def afficher_carte_recette_suggestion(
     type_repas: str,
     key_prefix: str,
 ):
-    """Affiche une carte de recette avec feedback."""
+    """Affiche une carte de recette avec entrée/plat/dessert et feedback."""
 
     with st.container():
+        # ── Entrée (si présente) ──
+        entree = suggestion.get("entree")
+        if entree:
+            st.caption(f"🥗 **Entrée:** {entree}")
+
+        # ── Plat principal ──
         col_info, col_actions = st.columns([4, 1])
 
         with col_info:
-            st.markdown(f"**{suggestion.get('nom', 'Recette')}**")
+            st.markdown(f"**🍽️ {suggestion.get('nom', 'Recette')}**")
 
             # Tags
             tags = []
@@ -218,8 +225,8 @@ def afficher_carte_recette_suggestion(
                     )
                     st.toast("👎 Noté! Ce plat sera évité.")
 
-            # Changer — génère une vraie alternative et met à jour le planning
-            if st.button("🔄", key=f"{key_prefix}_change", help="Autre suggestion"):
+            # Changer via IA
+            if st.button("🔄", key=f"{key_prefix}_change", help="Autre suggestion (IA)"):
                 from .generation import generer_alternative_ia
 
                 with st.spinner("🤖 Recherche..."):
@@ -228,12 +235,23 @@ def afficher_carte_recette_suggestion(
                 if alt:
                     planning = st.session_state.get(SK.PLANNING_DATA, {})
                     if jour in planning:
+                        # Conserver entrée/dessert existants si l'alternative n'en a pas
+                        old = planning[jour].get(type_repas, {})
+                        if old and isinstance(old, dict):
+                            for k in ("entree", "dessert", "dessert_jules"):
+                                if k not in alt and old.get(k):
+                                    alt[k] = old[k]
                         planning[jour][type_repas] = alt
                         st.session_state[SK.PLANNING_DATA] = planning
                         st.toast(f"✅ Remplacé par {alt.get('nom', 'nouvelle recette')}")
                     rerun()
                 else:
                     st.warning("⚠️ Aucune alternative trouvée")
+
+            # Changer manuellement (plaisir)
+            if st.button("📝", key=f"{key_prefix}_manual", help="Choisir manuellement"):
+                st.session_state[f"_manual_edit_{key_prefix}"] = True
+                rerun()
 
             # Sauvegarder dans mes recettes
             nom_recette = suggestion.get("nom", "")
@@ -254,6 +272,130 @@ def afficher_carte_recette_suggestion(
                         rerun()
                     else:
                         st.toast("❌ Échec de la sauvegarde", icon="❌")
+
+        # ── Formulaire changement manuel ──
+        if st.session_state.get(f"_manual_edit_{key_prefix}"):
+            _afficher_edition_manuelle(suggestion, jour, type_repas, key_prefix)
+
+        # ── Desserts ──
+        dessert = suggestion.get("dessert")
+        dessert_jules = suggestion.get("dessert_jules")
+
+        if dessert or dessert_jules:
+            col_d1, col_d2 = st.columns(2)
+            with col_d1:
+                if dessert:
+                    st.caption(f"🍰 **Dessert:** {dessert}")
+            with col_d2:
+                if dessert_jules:
+                    st.caption(f"👶🍰 **Jules:** {dessert_jules}")
+
+
+def _afficher_edition_manuelle(suggestion: dict, jour: str, type_repas: str, key_prefix: str):
+    """Formulaire d'édition manuelle d'un repas (sélection recette ou texte libre)."""
+
+    with st.container(border=True):
+        st.markdown("##### 📝 Changer le repas")
+
+        # Charger les recettes existantes
+        try:
+            from src.services.cuisine.recettes import obtenir_service_recettes
+
+            service = obtenir_service_recettes()
+            recettes_db = service.get_all() if service else []
+            noms_recettes = ["(Texte libre)"] + [r.nom for r in recettes_db if hasattr(r, "nom")]
+        except Exception:
+            recettes_db = []
+            noms_recettes = ["(Texte libre)"]
+
+        choix = st.selectbox(
+            "Choisir une recette",
+            noms_recettes,
+            key=f"{key_prefix}_manual_select",
+        )
+
+        if choix == "(Texte libre)":
+            nom_libre = st.text_input(
+                "Nom du plat",
+                value=suggestion.get("nom", ""),
+                key=f"{key_prefix}_manual_text",
+            )
+        else:
+            nom_libre = choix
+
+        # Édition entrée/dessert
+        col_e, col_d, col_dj = st.columns(3)
+        with col_e:
+            entree_edit = st.selectbox(
+                "🥗 Entrée",
+                ["(Aucune)", "(Texte libre)"] + ENTREES_SUGGESTIONS,
+                key=f"{key_prefix}_entree_edit",
+            )
+            if entree_edit == "(Texte libre)":
+                entree_edit = st.text_input("Entrée", key=f"{key_prefix}_entree_txt")
+            elif entree_edit == "(Aucune)":
+                entree_edit = None
+
+        with col_d:
+            dessert_edit = st.selectbox(
+                "🍰 Dessert",
+                ["(Aucun)", "(Texte libre)"] + DESSERTS_FAMILLE,
+                key=f"{key_prefix}_dessert_edit",
+            )
+            if dessert_edit == "(Texte libre)":
+                dessert_edit = st.text_input("Dessert", key=f"{key_prefix}_dessert_txt")
+            elif dessert_edit == "(Aucun)":
+                dessert_edit = None
+
+        with col_dj:
+            dessert_j_edit = st.selectbox(
+                "👶 Dessert Jules",
+                ["(Aucun)", "(Texte libre)"] + DESSERTS_JULES,
+                key=f"{key_prefix}_dessertj_edit",
+            )
+            if dessert_j_edit == "(Texte libre)":
+                dessert_j_edit = st.text_input("Dessert Jules", key=f"{key_prefix}_dessertj_txt")
+            elif dessert_j_edit == "(Aucun)":
+                dessert_j_edit = None
+
+        col_ok, col_cancel = st.columns(2)
+        with col_ok:
+            if st.button("✅ Appliquer", key=f"{key_prefix}_manual_ok", use_container_width=True):
+                planning = st.session_state.get(SK.PLANNING_DATA, {})
+                if jour in planning:
+                    if choix == "(Texte libre)":
+                        new_meal = {
+                            "nom": nom_libre,
+                            "plaisir": True,
+                            "entree": entree_edit,
+                            "dessert": dessert_edit,
+                            "dessert_jules": dessert_j_edit,
+                        }
+                    else:
+                        # Recette existante: récupérer les infos
+                        recette_obj = next(
+                            (r for r in recettes_db if hasattr(r, "nom") and r.nom == choix), None
+                        )
+                        new_meal = {
+                            "nom": choix,
+                            "id": recette_obj.id if recette_obj else None,
+                            "proteine": getattr(recette_obj, "type_proteines", None),
+                            "temps_minutes": getattr(recette_obj, "temps_preparation", 30),
+                            "entree": entree_edit,
+                            "dessert": dessert_edit,
+                            "dessert_jules": dessert_j_edit,
+                        }
+                    planning[jour][type_repas] = new_meal
+                    st.session_state[SK.PLANNING_DATA] = planning
+
+                del st.session_state[f"_manual_edit_{key_prefix}"]
+                st.toast(f"✅ Repas changé: {nom_libre}")
+                rerun()
+
+        with col_cancel:
+            if st.button("❌ Annuler", key=f"{key_prefix}_manual_cancel", use_container_width=True):
+                del st.session_state[f"_manual_edit_{key_prefix}"]
+                rerun()
 
 
 def afficher_jour_planning(

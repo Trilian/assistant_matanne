@@ -55,6 +55,59 @@ ROBOTS_CUISINE = {
     "poele": {"label": "Poêle/Casserole", "emoji": "🍳"},
 }
 
+# Desserts adaptés Jules (19 mois)
+DESSERTS_JULES = [
+    "Compote pomme",
+    "Compote pomme-banane",
+    "Compote pomme-poire",
+    "Compote poire",
+    "Compote pêche-abricot",
+    "Yaourt nature",
+    "Petit-suisse nature",
+    "Fromage blanc",
+    "Fruit frais (banane)",
+    "Fruit frais (fraise)",
+    "Fruit frais (kiwi)",
+    "Fruit frais (mangue)",
+    "Semoule au lait",
+    "Riz au lait",
+    "Biscuit bébé",
+    "Crème dessert vanille",
+]
+
+# Desserts famille
+DESSERTS_FAMILLE = [
+    "Yaourt nature",
+    "Yaourt aux fruits",
+    "Fruit frais",
+    "Salade de fruits",
+    "Compote",
+    "Fromage blanc",
+    "Crème dessert",
+    "Mousse au chocolat",
+    "Tarte aux fruits",
+    "Crumble",
+    "Clafoutis",
+    "Gâteau au yaourt",
+    "Île flottante",
+    "Panna cotta",
+    "Flan",
+]
+
+# Entrées simples
+ENTREES_SUGGESTIONS = [
+    "Salade verte",
+    "Salade de tomates",
+    "Salade de concombre",
+    "Soupe de légumes",
+    "Velouté",
+    "Carottes râpées",
+    "Crudités",
+    "Taboulé",
+    "Melon",
+    "Avocat vinaigrette",
+]
+
 
 # ═══════════════════════════════════════════════════════════
 # DATACLASSES
