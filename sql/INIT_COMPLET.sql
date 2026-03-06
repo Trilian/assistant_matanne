@@ -253,33 +253,64 @@ CREATE TABLE recettes (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
-    instructions TEXT,
+    -- Temps & Portions
     temps_preparation INTEGER NOT NULL DEFAULT 0,
     temps_cuisson INTEGER NOT NULL DEFAULT 0,
     portions INTEGER NOT NULL DEFAULT 4,
-    difficulte VARCHAR(50) NOT NULL DEFAULT 'Facile',
-    categorie VARCHAR(100) NOT NULL DEFAULT 'Plat',
-    saison VARCHAR(50),
+    difficulte VARCHAR(50) NOT NULL DEFAULT 'moyen',
+    -- Catégorisation
     type_repas VARCHAR(50) NOT NULL DEFAULT 'dîner',
-    tags JSONB DEFAULT '[]',
-    image_url VARCHAR(500),
-    source_url VARCHAR(500),
-    note_moyenne FLOAT,
-    nb_preparations INTEGER NOT NULL DEFAULT 0,
-    cout_estime FLOAT,
-    adaptee_bebe BOOLEAN NOT NULL DEFAULT FALSE,
-    batch_cooking BOOLEAN NOT NULL DEFAULT FALSE,
-    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    saison VARCHAR(50) NOT NULL DEFAULT 'toute_année',
+    categorie VARCHAR(100) NOT NULL DEFAULT 'Plat',
+    -- Flags - Tags système
+    est_rapide BOOLEAN NOT NULL DEFAULT FALSE,
+    est_equilibre BOOLEAN NOT NULL DEFAULT FALSE,
+    est_vegetarien BOOLEAN NOT NULL DEFAULT FALSE,
+    compatible_bebe BOOLEAN NOT NULL DEFAULT FALSE,
+    compatible_batch BOOLEAN NOT NULL DEFAULT FALSE,
+    congelable BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Types de protéines
+    type_proteines VARCHAR(100),
+    -- Bio & Local
+    est_bio BOOLEAN NOT NULL DEFAULT FALSE,
+    est_local BOOLEAN NOT NULL DEFAULT FALSE,
+    score_bio INTEGER NOT NULL DEFAULT 0,
+    score_local INTEGER NOT NULL DEFAULT 0,
+    -- Robots compatibles
+    compatible_cookeo BOOLEAN NOT NULL DEFAULT FALSE,
+    compatible_monsieur_cuisine BOOLEAN NOT NULL DEFAULT FALSE,
+    compatible_airfryer BOOLEAN NOT NULL DEFAULT FALSE,
+    compatible_multicooker BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Nutrition
+    calories INTEGER,
+    proteines FLOAT,
+    lipides FLOAT,
+    glucides FLOAT,
+    -- IA
+    genere_par_ia BOOLEAN NOT NULL DEFAULT FALSE,
+    score_ia FLOAT,
+    -- Media
+    url_image VARCHAR(500),
+    -- Timestamps
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT ck_temps_preparation_positif CHECK (temps_preparation >= 0),
     CONSTRAINT ck_temps_cuisson_positif CHECK (temps_cuisson >= 0),
     CONSTRAINT ck_portions_positive CHECK (portions > 0)
 );
-CREATE INDEX IF NOT EXISTS ix_recettes_categorie ON recettes(categorie);
+CREATE INDEX IF NOT EXISTS ix_recettes_nom ON recettes(nom);
 CREATE INDEX IF NOT EXISTS ix_recettes_type_repas ON recettes(type_repas);
 CREATE INDEX IF NOT EXISTS ix_recettes_saison ON recettes(saison);
-CREATE INDEX IF NOT EXISTS ix_recettes_batch_cooking ON recettes(batch_cooking);
-CREATE INDEX IF NOT EXISTS ix_recettes_adaptee_bebe ON recettes(adaptee_bebe);
+CREATE INDEX IF NOT EXISTS ix_recettes_categorie ON recettes(categorie);
+CREATE INDEX IF NOT EXISTS ix_recettes_est_rapide ON recettes(est_rapide);
+CREATE INDEX IF NOT EXISTS ix_recettes_est_vegetarien ON recettes(est_vegetarien);
+CREATE INDEX IF NOT EXISTS ix_recettes_compatible_bebe ON recettes(compatible_bebe);
+CREATE INDEX IF NOT EXISTS ix_recettes_compatible_batch ON recettes(compatible_batch);
+CREATE INDEX IF NOT EXISTS ix_recettes_est_bio ON recettes(est_bio);
+CREATE INDEX IF NOT EXISTS ix_recettes_est_local ON recettes(est_local);
+CREATE INDEX IF NOT EXISTS ix_recettes_compatible_cookeo ON recettes(compatible_cookeo);
+CREATE INDEX IF NOT EXISTS ix_recettes_compatible_monsieur_cuisine ON recettes(compatible_monsieur_cuisine);
+CREATE INDEX IF NOT EXISTS ix_recettes_compatible_airfryer ON recettes(compatible_airfryer);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.04 PLANNINGS
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -699,6 +730,12 @@ CREATE TABLE evenements_planning (
     type_event VARCHAR(50) NOT NULL DEFAULT 'autre',
     couleur VARCHAR(20),
     rappel_avant_minutes INTEGER,
+    -- Récurrence
+    recurrence_type VARCHAR(20),
+    recurrence_interval INTEGER DEFAULT 1,
+    recurrence_jours VARCHAR(20),
+    recurrence_fin DATE,
+    parent_event_id INTEGER REFERENCES evenements_planning(id),
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT ck_event_rappel_positif CHECK (
         rappel_avant_minutes IS NULL
@@ -4173,5 +4210,66 @@ COMMIT;
 -- ============================================================================
 -- FIN DES MIGRATIONS AJOUTÉES LE 2026-02-27
 -- ============================================================================
-CREATE TRIGGER trg_update_modifie_le_preferences_notifications BEFORE
-UPDATE ON preferences_notifications FOR EACH ROW EXECUTE FUNCTION update_modifie_le_column();
+
+-- ============================================================================
+-- MIGRATIONS AJOUTÉES LE 2026-03-06
+-- Synchronisation ORM ↔ SQL : recettes + evenements_planning
+-- Ces blocs sont idempotents (IF NOT EXISTS / DO $$ checks)
+-- ============================================================================
+
+-- 6) Ajouter colonnes manquantes à la table recettes (ORM sync)
+BEGIN;
+-- Flags système
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS est_rapide BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS est_equilibre BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS est_vegetarien BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS compatible_bebe BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS compatible_batch BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS congelable BOOLEAN NOT NULL DEFAULT FALSE;
+-- Types de protéines
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS type_proteines VARCHAR(100);
+-- Bio & Local
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS est_bio BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS est_local BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS score_bio INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS score_local INTEGER NOT NULL DEFAULT 0;
+-- Robots compatibles
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS compatible_cookeo BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS compatible_monsieur_cuisine BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS compatible_airfryer BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS compatible_multicooker BOOLEAN NOT NULL DEFAULT FALSE;
+-- Nutrition
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS calories INTEGER;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS proteines FLOAT;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS lipides FLOAT;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS glucides FLOAT;
+-- IA
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS genere_par_ia BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS score_ia FLOAT;
+-- Media
+ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS url_image VARCHAR(500);
+-- Index
+CREATE INDEX IF NOT EXISTS ix_recettes_nom ON recettes(nom);
+CREATE INDEX IF NOT EXISTS ix_recettes_est_rapide ON recettes(est_rapide);
+CREATE INDEX IF NOT EXISTS ix_recettes_est_vegetarien ON recettes(est_vegetarien);
+CREATE INDEX IF NOT EXISTS ix_recettes_compatible_bebe ON recettes(compatible_bebe);
+CREATE INDEX IF NOT EXISTS ix_recettes_compatible_batch ON recettes(compatible_batch);
+CREATE INDEX IF NOT EXISTS ix_recettes_est_bio ON recettes(est_bio);
+CREATE INDEX IF NOT EXISTS ix_recettes_est_local ON recettes(est_local);
+CREATE INDEX IF NOT EXISTS ix_recettes_compatible_cookeo ON recettes(compatible_cookeo);
+CREATE INDEX IF NOT EXISTS ix_recettes_compatible_monsieur_cuisine ON recettes(compatible_monsieur_cuisine);
+CREATE INDEX IF NOT EXISTS ix_recettes_compatible_airfryer ON recettes(compatible_airfryer);
+COMMIT;
+
+-- 7) Ajouter colonnes récurrence à evenements_planning (ORM sync)
+BEGIN;
+ALTER TABLE IF EXISTS evenements_planning ADD COLUMN IF NOT EXISTS recurrence_type VARCHAR(20);
+ALTER TABLE IF EXISTS evenements_planning ADD COLUMN IF NOT EXISTS recurrence_interval INTEGER DEFAULT 1;
+ALTER TABLE IF EXISTS evenements_planning ADD COLUMN IF NOT EXISTS recurrence_jours VARCHAR(20);
+ALTER TABLE IF EXISTS evenements_planning ADD COLUMN IF NOT EXISTS recurrence_fin DATE;
+ALTER TABLE IF EXISTS evenements_planning ADD COLUMN IF NOT EXISTS parent_event_id INTEGER REFERENCES evenements_planning(id);
+COMMIT;
+
+-- ============================================================================
+-- FIN DES MIGRATIONS AJOUTÉES LE 2026-03-06
+-- ============================================================================

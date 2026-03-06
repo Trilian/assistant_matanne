@@ -211,8 +211,8 @@ def app():
                 st.session_state[SK.PLANNING_DATE_DEBUT] = date_debut
 
             with col2:
-                date_fin = date_debut + timedelta(days=9)  # Mer → Ven suivant = 10 jours
-                st.markdown(f"**→** Vendredi {date_fin.strftime('%d/%m/%Y')}")
+                date_fin = date_debut + timedelta(days=6)  # Lundi → Dimanche = 7 jours
+                st.markdown(f"**→** Dimanche {date_fin.strftime('%d/%m/%Y')}")
 
             with col3:
                 st.write("")  # Spacer
