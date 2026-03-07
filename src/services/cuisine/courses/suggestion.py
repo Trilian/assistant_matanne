@@ -126,8 +126,12 @@ class ServiceCoursesIntelligentes(BaseAIService):
                 agregat[nom]["recettes"].add(recette.nom)
 
         for repas in planning.repas:
+            # Sauter les recettes réchauffées (nom commence par "Réchauffé:")
+            recette = repas.recette
+            if recette and recette.nom and recette.nom.lower().startswith("réchauffé"):
+                continue
             # Plat principal
-            _ajouter_ingredients_recette(repas.recette)
+            _ajouter_ingredients_recette(recette)
             # Entrée (si liée à une recette)
             _ajouter_ingredients_recette(getattr(repas, "entree_recette", None))
             # Dessert (si lié à une recette)

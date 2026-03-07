@@ -393,10 +393,11 @@ def app():
                                 generer_pdf_planning_session,
                             )
 
+                            # Utiliser planning_data (format jour/repas) et non batch_data
                             pdf_buf = generer_pdf_planning_session(
-                                planning_data=batch_data,
-                                date_debut=st.session_state.get("batch_date"),
-                                conseils="",
+                                planning_data=planning_data,
+                                date_debut=st.session_state.get("batch_date", date.today()),
+                                conseils=st.session_state.get(SK.PLANNING_CONSEILS, ""),
                                 suggestions_bio=[],
                             )
                             if pdf_buf:

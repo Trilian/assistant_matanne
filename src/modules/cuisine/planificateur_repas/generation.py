@@ -211,7 +211,10 @@ Réponds UNIQUEMENT en JSON valide :
 
         # Fallback: si aucun ingrédient/étape n'a été généré, en créer des minimaux
         if not ingredients:
-            ingredients = [{"nom": nom, "quantite": 1.0, "unite": "portion"}]
+            # Utiliser la protéine comme ingrédient principal plutôt que le nom de recette
+            fallback_nom = type_proteines if type_proteines else "ingrédients divers"
+            ingredients = [{"nom": fallback_nom, "quantite": 1.0, "unite": "portion"}]
+            logger.warning(f"Fallback ingrédients pour '{nom}': [{fallback_nom}]")
         if not etapes:
             etapes = [{"description": f"Préparer {nom} selon la recette.", "ordre": 1}]
 

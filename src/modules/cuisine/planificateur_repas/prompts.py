@@ -90,10 +90,12 @@ CONTRAINTES:
 - Aliments à ÉVITER absolument: {", ".join(preferences.aliments_exclus) if preferences.aliments_exclus else "aucun"}
 - Aliments favoris: {", ".join(preferences.aliments_favoris) if preferences.aliments_favoris else "variés"}
 
-ÉQUILIBRE SOUHAITÉ PAR SEMAINE:
-- Poisson: {preferences.poisson_par_semaine} fois
-- Repas végétarien: {preferences.vegetarien_par_semaine} fois
-- Viande rouge: maximum {preferences.viande_rouge_max} fois
+ÉQUILIBRE SOUHAITÉ PAR SEMAINE (RESPECTER STRICTEMENT):
+- Poisson: EXACTEMENT {preferences.poisson_par_semaine} repas dans la semaine
+- Repas végétarien/vegan: EXACTEMENT {preferences.vegetarien_par_semaine} repas dans la semaine, PAS PLUS.
+  ⚠️ ATTENTION: Ne PAS dépasser {preferences.vegetarien_par_semaine} repas végétarien(s). Tous les autres repas DOIVENT contenir une protéine animale (poulet, boeuf, porc, agneau, poisson, crevettes, oeufs).
+  Les repas avec oeufs ou poisson NE comptent PAS comme végétariens — seuls les repas avec tofu, légumineuses ou sans aucune protéine animale comptent.
+- Viande rouge: maximum {preferences.viande_rouge_max} repas
 
 APPRENTISSAGE (base sur l'historique):
 - La famille a aimé: {", ".join(recettes_aimees) if recettes_aimees else "pas encore assez de données"}
@@ -106,13 +108,19 @@ JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
 ═══════════════════════════════════════════════════
 
 🔄 RÉUTILISATION DES REPAS (RÉCHAUFFÉ):
-- Parmi les 14 repas (7 midis + 7 soirs), 3 à 4 MIDIS en semaine (lun-ven) DOIVENT être des réchauffés d'un DÎNER préparé un JOUR PRÉCÉDENT.
-- ⚠️ RÈGLE CHRONOLOGIQUE STRICTE: Un midi réchauffé ne peut référencer QUE un dîner d'un jour ANTÉRIEUR.
-  Exemples VALIDES: Mardi midi = réchauffé de Lundi soir. Jeudi midi = réchauffé de Mardi soir.
-  Exemples INVALIDES: Lundi midi = réchauffé de Dimanche soir (pas encore cuisiné!). Mardi midi = réchauffé de Mardi soir (pas logique).
-- Le premier réchauffé possible est MARDI midi (source: Lundi soir).
+- Parmi les 14 repas (7 midis + 7 soirs), 3 à 4 MIDIS en semaine (lun-ven) DOIVENT être des réchauffés d'un DÎNER préparé un jour précédent.
+- ⚠️ RÈGLE DU DÉCALAGE DE 2 JOURS: Le réchauffé doit être servi 2 jours APRÈS le dîner source (pas le lendemain).
+  Cela laisse le temps au plat de reposer au frigo et permet de ne pas manger la même chose 2 jours de suite.
+  Exemples VALIDES:
+    - Lundi soir → réchauffé Mercredi midi (2 jours après)
+    - Mardi soir → réchauffé Jeudi midi (2 jours après)
+    - Mercredi soir → réchauffé Vendredi midi (2 jours après)
+  Exemples INVALIDES:
+    - Lundi soir → Mardi midi (trop tôt, seulement 1 jour)
+    - Dimanche soir → Lundi midi (dimanche pas encore cuisiné en début de semaine)
+    - Mardi soir → Mardi midi (même jour, impossible)
+- Le premier réchauffé possible est MERCREDI midi (source: Lundi soir).
 - Le dîner source est cuisiné en double portion. Le midi réchauffé est simplement réchauffé.
-- Le midi réchauffé peut être 1-3 jours après le dîner source (pas forcément le lendemain).
 - Mettre "est_rechauffe": true et "rechauffe_de": "Lundi soir" pour ces midis.
 - Résultat: seulement ~10 repas à cuisiner au lieu de 14.
 
@@ -163,15 +171,14 @@ FORMAT DE RÉPONSE (JSON strict):
       "midi": {{
         "entree": null,
         "plat": {{
-          "nom": "Réchauffé: Gratin de courgettes",
-          "proteine": "oeufs",
-          "temps_minutes": 5,
-          "robot": "four",
+          "nom": "Pâtes au pesto et jambon",
+          "proteine": "porc",
+          "temps_minutes": 15,
+          "robot": "plaque",
           "difficulte": "facile",
           "complexite": "simple",
-          "est_rechauffe": true,
-          "rechauffe_de": "Vendredi soir",
-          "jules_adaptation": "Réchauffer la portion de Jules séparément."
+          "est_rechauffe": false,
+          "jules_adaptation": "Mixer les pâtes, couper le jambon en petits morceaux."
         }},
         "dessert": "Yaourt nature",
         "dessert_jules": "Compote pomme-banane"
@@ -204,9 +211,9 @@ FORMAT DE RÉPONSE (JSON strict):
     "proteines": ["poulet", "oeufs"]
   }},
   "repas_rechauffe_resume": [
-    {{"midi": "Mardi midi", "source": "Lundi soir", "plat": "Émincés de poulet"}},
-    {{"midi": "Jeudi midi", "source": "Mercredi soir", "plat": "Curry de légumes"}},
-    {{"midi": "Vendredi midi", "source": "Mardi soir", "plat": "Gratin de courgettes"}}
+    {{"midi": "Mercredi midi", "source": "Lundi soir", "plat": "Émincés de poulet"}},
+    {{"midi": "Jeudi midi", "source": "Mardi soir", "plat": "Gratin de courgettes"}},
+    {{"midi": "Vendredi midi", "source": "Mercredi soir", "plat": "Curry de légumes"}}
   ],
   "equilibre_respecte": true,
   "conseils_batch": "Dimanche: préparer les légumes de base (courgettes, carottes). Couper le poulet en deux lots. Cuire le riz pour 2 jours.",

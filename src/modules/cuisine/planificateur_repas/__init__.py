@@ -85,6 +85,11 @@ def _sauvegarder_planning_db(planning_data: dict, date_debut: date) -> bool:
                     echecs.append(f"{jour_nom} {type_repas}")
                     continue
 
+                # Sauter les repas réchauffés — pas de recette à créer
+                if recette_info.get("est_rechauffe"):
+                    _logger.debug(f"{jour_nom} {type_repas}: réchauffé, skip")
+                    continue
+
                 recette_id = recette_info.get("id")
 
                 # Si pas d'ID, créer la recette en base

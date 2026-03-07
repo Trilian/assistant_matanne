@@ -44,10 +44,13 @@ def executer_batch_cooking_live(batch_data: dict) -> bool:
             toutes_etapes.append(
                 {
                     "recette": nom_recette,
-                    "description": etape.get("description", ""),
+                    "description": etape.get("titre", "") or etape.get("description", ""),
                     "duree_minutes": etape.get("duree_minutes", 10),
                     "type": etape.get("type", "preparation"),
                     "robot": etape.get("robot"),
+                    "est_passif": etape.get("est_passif", False),
+                    "jules_participation": etape.get("jules_participation", False),
+                    "tache_jules": etape.get("tache_jules", ""),
                 }
             )
 
@@ -171,9 +174,32 @@ def afficher_execution_live():
         st.info("👆 Générez d'abord les instructions dans l'onglet 'Préparer'")
         return
 
+    # Détecter format multi-sessions et sélectionner les données
+    is_multi = "session_1" in batch_data or "session_2" in batch_data
+    if is_multi:
+        sessions_dispo = []
+        if batch_data.get("session_1"):
+            sessions_dispo.append(("Session 1", batch_data["session_1"]))
+        if batch_data.get("session_2"):
+            sessions_dispo.append(("Session 2", batch_data["session_2"]))
+        if not sessions_dispo:
+            st.warning("⚠️ Aucune session générée")
+            return
+        if len(sessions_dispo) > 1:
+            choix = st.radio(
+                "Choisir la session à exécuter",
+                [s[0] for s in sessions_dispo],
+                horizontal=True,
+            )
+            active_data = next(s[1] for s in sessions_dispo if s[0] == choix)
+        else:
+            active_data = sessions_dispo[0][1]
+    else:
+        active_data = batch_data
+
     # Afficher résumé avant exécution
-    recettes = batch_data.get("recettes", [])
-    session_info = batch_data.get("session", {})
+    recettes = active_data.get("recettes", [])
+    session_info = active_data.get("session", {})
     duree_estimee = session_info.get("duree_estimee_minutes", 120)
 
     col1, col2, col3 = st.columns(3)
@@ -208,7 +234,7 @@ def afficher_execution_live():
 
     # Exécution étape par étape
     if st.session_state.batch_en_cours:
-        success = executer_batch_cooking_live(batch_data)
+        success = executer_batch_cooking_live(active_data)
         if success:
             st.session_state.batch_en_cours = False
             st.session_state.batch_termine = True

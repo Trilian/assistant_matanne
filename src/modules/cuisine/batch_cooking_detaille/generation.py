@@ -23,7 +23,7 @@ RECETTES À PRÉPARER:
     for jour, repas in planning_data.items():
         for type_repas in ["midi", "soir"]:
             r = repas.get(type_repas, {})
-            if r:
+            if r and isinstance(r, dict) and not r.get("est_rechauffe"):
                 prompt += f"\n- {jour} {type_repas}: {r.get('nom', 'Recette')}"
 
     prompt += """
@@ -94,6 +94,14 @@ IMPORTANT:
 
         # generer_json retourne un dict parsé, une string brute, ou None
         if response and isinstance(response, dict):
+            # Valider la structure minimale
+            if "recettes" not in response or not isinstance(response.get("recettes"), list):
+                logger.warning(f"Réponse IA sans 'recettes' valide. Clés: {list(response.keys())}")
+                # Tenter de récupérer si la structure est imbriquée
+                if "session" in response and isinstance(response["session"], dict):
+                    inner = response["session"]
+                    if isinstance(inner.get("recettes"), list):
+                        response["recettes"] = inner["recettes"]
             return response
 
         # Fallback: si generer_json a retourné une string brute, tenter le parsing
