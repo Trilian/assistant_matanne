@@ -30,6 +30,28 @@ PROTEINES = {
     "legumineuses": {"label": "Legumineuses", "emoji": "🫘", "categorie": "vegetarien"},
 }
 
+# Légumes de base courants pour le batch cooking
+LEGUMES_BASE = [
+    "carottes", "courgettes", "poireaux", "tomates", "oignons",
+    "brocoli", "haricots verts", "épinards", "champignons", "poivrons",
+    "aubergines", "chou-fleur", "petits pois", "patate douce", "potimarron",
+    "céleri", "navets", "betteraves", "fenouil", "endives",
+]
+
+# Féculents de base courants
+FECULENTS_BASE = [
+    "riz", "pâtes", "pommes de terre", "semoule", "quinoa",
+    "lentilles", "boulgour", "blé", "gnocchi", "pain",
+    "pois chiches", "haricots blancs", "polenta", "patate douce",
+]
+
+# Protéines de base
+PROTEINES_BASE = [
+    "poulet", "boeuf haché", "porc", "saumon", "cabillaud",
+    "oeufs", "tofu", "lentilles", "crevettes", "dinde",
+    "merlu", "thon", "agneau", "jambon", "sardines",
+]
+
 # Équilibre recommande par semaine (nombre de repas)
 EQUILIBRE_DEFAUT = {
     "poisson": 2,  # 2 fois poisson

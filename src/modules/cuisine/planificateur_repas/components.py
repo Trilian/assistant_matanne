@@ -174,6 +174,13 @@ def afficher_carte_recette_suggestion(
     """Affiche une carte de recette avec entrée/plat/dessert et feedback."""
 
     with st.container():
+        # ── Badge réchauffé ──
+        if suggestion.get("est_rechauffe"):
+            rechauffe_source = suggestion.get("rechauffe_de", "")
+            st.markdown(
+                f"🔄 **Réchauffé** du {rechauffe_source} — *juste à réchauffer !*"
+            )
+
         # ── Entrée (si présente) ──
         entree = suggestion.get("entree")
         if entree:
@@ -183,11 +190,21 @@ def afficher_carte_recette_suggestion(
         col_info, col_actions = st.columns([4, 1])
 
         with col_info:
-            st.markdown(f"**🍽️ {suggestion.get('nom', 'Recette')}**")
+            # Badge complexité
+            complexite = suggestion.get("complexite", "")
+            badge_complexite = ""
+            if complexite == "simple":
+                badge_complexite = " ⚡"
+            elif complexite == "elabore":
+                badge_complexite = " 👨‍🍳"
+
+            st.markdown(f"**🍽️ {suggestion.get('nom', 'Recette')}**{badge_complexite}")
 
             # Tags
             tags = []
-            if suggestion.get("temps_minutes"):
+            if suggestion.get("est_rechauffe"):
+                tags.append("🔄 5 min")
+            elif suggestion.get("temps_minutes"):
                 tags.append(f"⏱️ {suggestion['temps_minutes']} min")
             if suggestion.get("proteine"):
                 prot_info = PROTEINES.get(suggestion["proteine"], {})
@@ -507,3 +524,36 @@ def afficher_resume_equilibre(planning_data: dict):
             delta=f"{delta:+d}" if delta else None,
             delta_color=color,
         )
+
+    # Compteurs simple/élaboré et réchauffé
+    nb_simple = 0
+    nb_elabore = 0
+    nb_rechauffe = 0
+    nb_a_cuisiner = 0
+
+    for jour, repas in planning_data.items():
+        for tr in ["midi", "soir"]:
+            meal = repas.get(tr)
+            if meal and isinstance(meal, dict):
+                if meal.get("est_rechauffe"):
+                    nb_rechauffe += 1
+                else:
+                    nb_a_cuisiner += 1
+                if meal.get("complexite") == "elabore":
+                    nb_elabore += 1
+                elif meal.get("complexite") == "simple":
+                    nb_simple += 1
+
+    if nb_rechauffe > 0 or nb_simple > 0:
+        col_r1, col_r2, col_r3 = st.columns(3)
+        with col_r1:
+            st.metric("⚡ Simples", nb_simple)
+        with col_r2:
+            st.metric("👨‍🍳 Élaborés", nb_elabore)
+        with col_r3:
+            st.metric(
+                "🔄 Réchauffés",
+                nb_rechauffe,
+                delta=f"{nb_a_cuisiner} à cuisiner",
+                delta_color="off",
+            )

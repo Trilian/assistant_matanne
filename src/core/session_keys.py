@@ -185,6 +185,9 @@ class _SessionKeys:
     PLANNING_DATE_DEBUT = "planning_date_debut"
     PLANNING_CONSEILS = "planning_conseils"
     PLANNING_SUGGESTIONS_BIO = "planning_suggestions_bio"
+    PLANNING_INGREDIENTS_COMMUNS = "planning_ingredients_communs"
+    PLANNING_RECHAUFFE_RESUME = "planning_rechauffe_resume"
+    PLANNING_BASES_CHOISIES = "planning_bases_choisies"
     USER_PREFERENCES = "preferences_utilisateurs"
     RECIPE_FEEDBACKS = "retours_recettes"
 

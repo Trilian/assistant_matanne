@@ -17,13 +17,16 @@ logger = logging.getLogger(__name__)
 _SYSTEM_PROMPT = "Tu es un assistant culinaire familial. Réponds UNIQUEMENT en JSON valide, sans commentaire, sans markdown."
 
 
-def generer_semaine_ia(date_debut: date) -> dict:
+def generer_semaine_ia(
+    date_debut: date,
+    bases_choisies: dict[str, list[str]] | None = None,
+) -> dict:
     """Génère une semaine complète avec l'IA."""
 
     prefs = charger_preferences()
     feedbacks = charger_feedbacks()
 
-    prompt = generer_prompt_semaine(prefs, feedbacks, date_debut)
+    prompt = generer_prompt_semaine(prefs, feedbacks, date_debut, bases_choisies=bases_choisies)
 
     try:
         client = obtenir_client_ia()
@@ -34,7 +37,7 @@ def generer_semaine_ia(date_debut: date) -> dict:
         response = client.generer_json(
             prompt=prompt,
             system_prompt=_SYSTEM_PROMPT,
-            max_tokens=4096,
+            max_tokens=6000,
             temperature=0.8,
             utiliser_cache=False,
         )

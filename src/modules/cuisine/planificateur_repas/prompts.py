@@ -26,6 +26,7 @@ def generer_prompt_semaine(
     feedbacks: list[FeedbackRecette],
     date_debut: date,
     jours_a_planifier: list[str] = None,
+    bases_choisies: dict[str, list[str]] | None = None,
 ) -> str:
     """
     Genère un prompt pour l'IA pour creer une semaine de repas.
@@ -35,6 +36,8 @@ def generer_prompt_semaine(
         feedbacks: Historique feedbacks pour apprentissage
         date_debut: Date de debut de la semaine
         jours_a_planifier: Liste des jours (si partiel)
+        bases_choisies: Dict optionnel {legumes: [...], feculents: [...], proteines: [...]}
+                        Si fourni, l'IA DOIT utiliser ces ingrédients comme base.
 
     Returns:
         Prompt formate pour l'IA
@@ -48,7 +51,34 @@ def generer_prompt_semaine(
     if not jours_a_planifier:
         jours_a_planifier = JOURS_SEMAINE
 
-    prompt = f"""Tu es un assistant culinaire familial expert. Génère un planning de repas COMPLET pour une famille.
+    # Construire la section ingrédients de base
+    bases = bases_choisies or {}
+    legumes_choisis = bases.get("legumes", [])
+    feculents_choisis = bases.get("feculents", [])
+    proteines_choisies = bases.get("proteines", [])
+
+    if legumes_choisis or feculents_choisis or proteines_choisies:
+        section_bases = """🥕 INGRÉDIENTS DE BASE IMPOSÉS PAR L'UTILISATEUR:
+- Tu DOIS construire les repas de la semaine autour de ces ingrédients de base choisis.
+- Utilise-les dans 3-4 repas différents minimum pour optimiser le batch cooking."""
+        if legumes_choisis:
+            section_bases += f"\n  * LÉGUMES imposés: {', '.join(legumes_choisis)}"
+        if feculents_choisis:
+            section_bases += f"\n  * FÉCULENTS imposés: {', '.join(feculents_choisis)}"
+        if proteines_choisies:
+            section_bases += f"\n  * PROTÉINES imposées: {', '.join(proteines_choisies)}"
+        section_bases += "\n- Tu peux ajouter d'autres ingrédients en complément, mais ces bases doivent être centrales."
+        section_bases += '\n- Lister TOUS les ingrédients partagés (imposés + complémentaires) dans "ingredients_communs_semaine".'
+    else:
+        section_bases = """🥕 INGRÉDIENTS EN COMMUN (BATCH COOKING):
+- Les repas de la semaine DOIVENT partager des bases communes pour simplifier les courses et la préparation batch:
+  * Choisir 2-3 LÉGUMES de base utilisés dans 3-4 repas différents (ex: carottes, courgettes, poireaux)
+  * Choisir 1-2 FÉCULENTS de base réutilisés (ex: riz, pommes de terre, pâtes)
+  * La même PROTÉINE peut servir 2 repas différents (ex: poulet rôti dimanche → émincés de poulet mardi)
+- Lister ces ingrédients partagés dans "ingredients_communs_semaine"."""
+
+    prompt = f"""Tu es un assistant culinaire familial expert en BATCH COOKING et organisation hebdomadaire.
+Génère un planning de repas COMPLET pour une famille, optimisé pour minimiser le temps de préparation.
 
 CONTEXTE FAMILLE:
 - {preferences.nb_adultes} adultes
@@ -71,54 +101,83 @@ APPRENTISSAGE (base sur l'historique):
 
 JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
 
+═══════════════════════════════════════════════════
+⚠️ RÈGLES CRITIQUES DE CONCEPTION DU MENU:
+═══════════════════════════════════════════════════
+
+🔄 RÉUTILISATION DES REPAS (RÉCHAUFFÉ):
+- Parmi les 14 repas (7 midis + 7 soirs), 3 à 4 MIDIS en semaine (lun-ven) DOIVENT être des réchauffés d'un DÎNER préparé un autre jour.
+- Le dîner source est cuisiné en double portion. Le midi réchauffé est simplement réchauffé.
+- Le midi réchauffé N'EST PAS forcément le lendemain du dîner (peut être 2-3 jours après).
+- Mettre "est_rechauffe": true et "rechauffe_de": "Mardi soir" pour ces midis.
+- Résultat: seulement ~10 repas à cuisiner au lieu de 14.
+
+{section_bases}
+
+⚡ MIX SIMPLE / ÉLABORÉ:
+- La MAJORITÉ des repas (8-10 sur 14) doivent être SIMPLES et RAPIDES (≤ 25 min, "difficulte": "facile").
+  Exemples: omelette, pâtes au pesto, steak haché-purée, croque-monsieur, wrap, salade composée, soupe, gratin simple.
+- Seulement 2-3 repas par semaine peuvent être plus ÉLABORÉS (30-60 min, "difficulte": "moyen" ou "difficile").
+  Exemples: tajine, gratin dauphinois, poulet rôti, poisson en papillote, risotto, curry maison.
+- Les repas élaborés sont idéalement placés le weekend ou les soirs où on a plus de temps.
+- Mettre "complexite": "simple" ou "complexite": "elabore" pour chaque plat.
+
+═══════════════════════════════════════════════════
+
 ⚠️ RÈGLE OBLIGATOIRE: Pour CHAQUE jour listé, tu DOIS fournir OBLIGATOIREMENT:
 - "midi": un repas complet (JAMAIS null, JAMAIS absent)
 - "soir": un repas complet (JAMAIS null, JAMAIS absent)
 - "gouter": facultatif, pertinent pour Jules
 
 Chaque repas (midi/soir) DOIT contenir:
-1. "entree": entrée simple (texte libre, ex: "Salade verte", "Soupe de légumes", ou null si pas d'entrée)
-2. "plat": objet avec nom, proteine, temps_minutes, robot, difficulte, jules_adaptation
-3. "dessert": dessert famille (texte libre, ex: "Yaourt nature", "Fruit frais", "Tarte aux pommes")
-4. "dessert_jules": dessert adapté Jules {preferences.jules_age_mois} mois (texte libre, ex: "Compote pomme-banane", "Yaourt nature", "Petit-suisse")
+1. "entree": entrée simple (texte libre ou null)
+2. "plat": objet complet (voir ci-dessous)
+3. "dessert": dessert famille (texte libre)
+4. "dessert_jules": dessert adapté Jules {preferences.jules_age_mois} mois
 
 Pour le plat, fournis:
-1. Nom du plat (simple et familial)
-2. Type de protéine principale (parmi: poulet, boeuf, porc, agneau, poisson, crevettes, oeufs, tofu, legumineuses)
-3. Temps total de préparation en minutes
-4. Instructions spécifiques pour adapter le repas à Jules ({preferences.jules_age_mois} mois):
-   - Comment adapter la texture
-   - Quelle quantité prélever avant assaisonnement
-   - Comment servir pour son âge
-   ⚠️ Pas de miel pour Jules (moins de 12 mois) et textures adaptées à l'âge
+1. "nom": Nom du plat
+2. "proteine": Type de protéine (poulet, boeuf, porc, agneau, poisson, crevettes, oeufs, tofu, legumineuses)
+3. "temps_minutes": Temps total en minutes
+4. "robot": Robot utilisé
+5. "difficulte": facile/moyen/difficile
+6. "complexite": "simple" ou "elabore"
+7. "est_rechauffe": true/false (si ce midi est un réchauffé d'un dîner)
+8. "rechauffe_de": "Jour soir" (si est_rechauffe=true, ex: "Lundi soir")
+9. "jules_adaptation": Instructions pour adapter à Jules ({preferences.jules_age_mois} mois)
 
 FORMAT DE RÉPONSE (JSON strict):
 {{
   "semaine": [
     {{
-      "jour": "Mercredi",
+      "jour": "Lundi",
       "midi": {{
-        "entree": "Salade de tomates",
+        "entree": null,
         "plat": {{
-          "nom": "Poulet rôti aux légumes",
-          "proteine": "poulet",
-          "temps_minutes": 45,
+          "nom": "Réchauffé: Gratin de courgettes",
+          "proteine": "oeufs",
+          "temps_minutes": 5,
           "robot": "four",
           "difficulte": "facile",
-          "jules_adaptation": "Prélever 80g de poulet et légumes avant sel. Mixer grossièrement. Servir tiède."
+          "complexite": "simple",
+          "est_rechauffe": true,
+          "rechauffe_de": "Dimanche soir",
+          "jules_adaptation": "Réchauffer la portion de Jules séparément."
         }},
-        "dessert": "Yaourt aux fruits",
+        "dessert": "Yaourt nature",
         "dessert_jules": "Compote pomme-banane"
       }},
       "soir": {{
-        "entree": null,
+        "entree": "Salade verte",
         "plat": {{
-          "nom": "Soupe de légumes maison",
-          "proteine": "legumineuses",
-          "temps_minutes": 25,
+          "nom": "Émincés de poulet aux courgettes et riz",
+          "proteine": "poulet",
+          "temps_minutes": 20,
           "robot": "poele",
           "difficulte": "facile",
-          "jules_adaptation": "Mixer finement la portion de Jules (100g). Servir tiède."
+          "complexite": "simple",
+          "est_rechauffe": false,
+          "jules_adaptation": "Prélever 80g avant sel. Écraser les morceaux de poulet."
         }},
         "dessert": "Fruit frais",
         "dessert_jules": "Petit-suisse nature"
@@ -130,12 +189,26 @@ FORMAT DE RÉPONSE (JSON strict):
       }}
     }}
   ],
+  "ingredients_communs_semaine": {{
+    "legumes": ["courgettes", "carottes", "poireaux"],
+    "feculents": ["riz", "pommes de terre"],
+    "proteines": ["poulet", "oeufs"]
+  }},
+  "repas_rechauffe_resume": [
+    {{"midi": "Lundi midi", "source": "Dimanche soir", "plat": "Gratin de courgettes"}},
+    {{"midi": "Mercredi midi", "source": "Mardi soir", "plat": "Curry de légumes"}},
+    {{"midi": "Vendredi midi", "source": "Jeudi soir", "plat": "Pâtes aux légumes"}}
+  ],
   "equilibre_respecte": true,
-  "conseils_batch": "Dimanche: préparer la sauce bolognaise et la soupe. Mercredi: poulet mariné.",
+  "conseils_batch": "Dimanche: préparer les légumes de base (courgettes, carottes). Couper le poulet en deux lots. Cuire le riz pour 2 jours.",
   "suggestions_bio": ["Poulet fermier Bio", "Légumes Grand Frais"]
 }}
 
-IMPORTANT: Propose des recettes VARIÉES et ORIGINALES. Évite les classiques trop courants (pâtes bolo, poulet riz).
+IMPORTANT:
+- Les repas réchauffés au midi ont "temps_minutes": 5 (juste réchauffer).
+- Privilégie des recettes familiales SIMPLES et rapides pour les soirs de semaine.
+- Les plats plus élaborés sont pour le weekend ou un soir calme.
+- RÉUTILISE les mêmes légumes/féculents dans plusieurs repas pour faciliter le batch.
 Seed aléatoire pour la variété: {random.randint(1000, 9999)}
 """
 

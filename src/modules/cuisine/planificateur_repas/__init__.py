@@ -142,6 +142,84 @@ def _charger_historique_plannings() -> list[dict]:
     return []
 
 
+def _charger_planning_actif_db() -> tuple[dict, date | None, str, list]:
+    """
+    Charge le planning actif depuis la base de données et le convertit
+    en format session_state pour restaurer l'affichage.
+
+    Returns:
+        Tuple (planning_data, date_debut, conseils, suggestions_bio)
+        planning_data vide si aucun planning actif trouvé.
+    """
+    import logging
+
+    _logger = logging.getLogger(__name__)
+
+    try:
+        from src.core.constants import JOURS_SEMAINE
+        from src.services.cuisine.planning import obtenir_service_planning
+
+        service = obtenir_service_planning()
+        planning = service.get_planning()  # Charge le planning actif
+
+        if not planning or not planning.repas:
+            return {}, None, "", []
+
+        # Convertir les repas DB en format session_state
+        planning_data = {}
+        date_debut = planning.semaine_debut
+
+        # Regrouper les repas par jour
+        repas_par_jour = {}
+        for repas in planning.repas:
+            jour_idx = (repas.date_repas - date_debut).days
+            if 0 <= jour_idx < 7:
+                jour_nom = JOURS_SEMAINE[jour_idx]
+                if jour_nom not in repas_par_jour:
+                    repas_par_jour[jour_nom] = {}
+
+                # Déterminer le slot (midi/soir)
+                slot = "midi" if repas.type_repas == "déjeuner" else "soir"
+
+                meal_data = {
+                    "nom": repas.recette.nom if repas.recette else "Repas planifié",
+                    "id": repas.recette_id,
+                    "entree": repas.entree,
+                    "dessert": repas.dessert,
+                    "dessert_jules": repas.dessert_jules,
+                    "notes": repas.notes or "",
+                }
+
+                # Enrichir avec les infos de la recette si disponible
+                if repas.recette:
+                    meal_data.update(
+                        {
+                            "proteine": repas.recette.type_proteines,
+                            "temps_minutes": repas.recette.temps_preparation
+                            or repas.recette.temps_cuisson
+                            or 30,
+                            "difficulte": repas.recette.difficulte or "moyen",
+                        }
+                    )
+
+                repas_par_jour[jour_nom][slot] = meal_data
+
+        # S'assurer que tous les jours sont présents dans l'ordre
+        for jour_nom in JOURS_SEMAINE:
+            if jour_nom in repas_par_jour:
+                planning_data[jour_nom] = repas_par_jour[jour_nom]
+
+        _logger.info(
+            f"✅ Planning actif chargé depuis DB: {len(planning_data)} jours, "
+            f"semaine du {date_debut}"
+        )
+        return planning_data, date_debut, planning.notes or "", []
+
+    except Exception as e:
+        _logger.debug(f"Erreur chargement planning actif: {e}")
+        return {}, None, "", []
+
+
 @profiler_rerun("planificateur_repas")
 def app():
     """Point d'entrée du module Planificateur de Repas."""
@@ -176,9 +254,20 @@ def app():
             GestionnaireEtat.naviguer_vers("cuisine.batch_cooking_detaille")
             rerun()
 
-    # Initialiser la session
-    if SK.PLANNING_DATA not in st.session_state:
-        st.session_state[SK.PLANNING_DATA] = {}
+    # Initialiser la session — charger le planning actif depuis la DB si la session est vide
+    if SK.PLANNING_DATA not in st.session_state or not st.session_state[SK.PLANNING_DATA]:
+        planning_db, date_db, conseils_db, bio_db = _charger_planning_actif_db()
+        if planning_db:
+            st.session_state[SK.PLANNING_DATA] = planning_db
+            st.session_state[SK.PLANNING_VALIDE] = True
+            if date_db:
+                st.session_state[SK.PLANNING_DATE_DEBUT] = date_db
+            if conseils_db:
+                st.session_state[SK.PLANNING_CONSEILS] = conseils_db
+            if bio_db:
+                st.session_state[SK.PLANNING_SUGGESTIONS_BIO] = bio_db
+        else:
+            st.session_state[SK.PLANNING_DATA] = {}
 
     if SK.PLANNING_DATE_DEBUT not in st.session_state:
         # Par défaut: lundi prochain (début de semaine naturel)
@@ -225,13 +314,83 @@ def app():
 
             st.divider()
 
+            # Choix des ingrédients de base pour la semaine
+            from .helpers import FECULENTS_BASE, LEGUMES_BASE, PROTEINES_BASE
+
+            with st.expander("🥕 Choisir mes ingrédients de base (optionnel)", expanded=False):
+                st.caption(
+                    "Sélectionnez les ingrédients autour desquels construire la semaine, "
+                    "ou laissez vide pour laisser l'IA choisir."
+                )
+
+                col_b1, col_b2, col_b3 = st.columns(3)
+
+                with col_b1:
+                    legumes_sel = st.multiselect(
+                        "🥬 Légumes de base",
+                        options=LEGUMES_BASE,
+                        default=st.session_state.get(SK.PLANNING_BASES_CHOISIES, {}).get(
+                            "legumes", []
+                        ),
+                        placeholder="Ex: carottes, courgettes...",
+                        key=_keys("bases_legumes"),
+                        max_selections=4,
+                    )
+
+                with col_b2:
+                    feculents_sel = st.multiselect(
+                        "🍚 Féculents de base",
+                        options=FECULENTS_BASE,
+                        default=st.session_state.get(SK.PLANNING_BASES_CHOISIES, {}).get(
+                            "feculents", []
+                        ),
+                        placeholder="Ex: riz, pâtes...",
+                        key=_keys("bases_feculents"),
+                        max_selections=3,
+                    )
+
+                with col_b3:
+                    proteines_sel = st.multiselect(
+                        "🥩 Protéines de base",
+                        options=PROTEINES_BASE,
+                        default=st.session_state.get(SK.PLANNING_BASES_CHOISIES, {}).get(
+                            "proteines", []
+                        ),
+                        placeholder="Ex: poulet, oeufs...",
+                        key=_keys("bases_proteines"),
+                        max_selections=4,
+                    )
+
+                # Sauvegarder les choix en session
+                bases_choisies = {}
+                if legumes_sel:
+                    bases_choisies["legumes"] = legumes_sel
+                if feculents_sel:
+                    bases_choisies["feculents"] = feculents_sel
+                if proteines_sel:
+                    bases_choisies["proteines"] = proteines_sel
+
+                st.session_state[SK.PLANNING_BASES_CHOISIES] = bases_choisies
+
+                if bases_choisies:
+                    total = sum(len(v) for v in bases_choisies.values())
+                    st.success(
+                        f"✅ {total} ingrédient(s) sélectionné(s) — "
+                        "l'IA construira les repas autour de ces bases."
+                    )
+                else:
+                    st.info("Aucune sélection → l'IA choisira automatiquement les bases.")
+
+            st.divider()
+
             # Bouton génération
+            _bases = st.session_state.get(SK.PLANNING_BASES_CHOISIES, {}) or None
             col_gen1, col_gen2, col_gen3 = st.columns([2, 2, 1])
 
             with col_gen1:
                 if st.button("🎲 Générer une semaine", type="primary", use_container_width=True):
                     with st.spinner("🤖 L'IA réfléchit à vos menus..."):
-                        result = generer_semaine_ia(date_debut)
+                        result = generer_semaine_ia(date_debut, bases_choisies=_bases)
 
                         if result and result.get("semaine"):
                             # Convertir en format interne
@@ -265,6 +424,13 @@ def app():
                             st.session_state[SK.PLANNING_SUGGESTIONS_BIO] = result.get(
                                 "suggestions_bio", []
                             )
+                            st.session_state[SK.PLANNING_INGREDIENTS_COMMUNS] = result.get(
+                                "ingredients_communs_semaine", {}
+                            )
+                            st.session_state[SK.PLANNING_RECHAUFFE_RESUME] = result.get(
+                                "repas_rechauffe_resume", []
+                            )
+                            st.session_state[SK.PLANNING_VALIDE] = False
 
                             st.success("✅ Semaine générée!")
                             rerun()
@@ -294,6 +460,9 @@ def app():
             with col_gen3:
                 if st.button("🔄 Reset", use_container_width=True):
                     st.session_state[SK.PLANNING_DATA] = {}
+                    st.session_state[SK.PLANNING_INGREDIENTS_COMMUNS] = {}
+                    st.session_state[SK.PLANNING_RECHAUFFE_RESUME] = []
+                    st.session_state[SK.PLANNING_VALIDE] = False
                     rerun()
 
             st.divider()
@@ -309,6 +478,50 @@ def app():
                 for i, (jour, repas) in enumerate(st.session_state[SK.PLANNING_DATA].items()):
                     jour_date = date_debut + timedelta(days=i)
                     afficher_jour_planning(jour, jour_date, repas, f"jour_{i}")
+
+                st.divider()
+
+                # Ingrédients communs de la semaine (batch cooking)
+                ingredients_communs = st.session_state.get(SK.PLANNING_INGREDIENTS_COMMUNS, {})
+                if ingredients_communs:
+                    st.markdown("##### 🥕 Ingrédients communs de la semaine")
+                    st.caption(
+                        "Ces ingrédients reviennent dans plusieurs repas — "
+                        "achetez-les en quantité et préparez-les en une fois !"
+                    )
+                    col_leg, col_fec, col_prot = st.columns(3)
+                    with col_leg:
+                        legumes = ingredients_communs.get("legumes", [])
+                        if legumes:
+                            st.markdown("**🥬 Légumes**")
+                            for leg in legumes:
+                                st.caption(f"• {leg}")
+                    with col_fec:
+                        feculents = ingredients_communs.get("feculents", [])
+                        if feculents:
+                            st.markdown("**🍚 Féculents**")
+                            for fec in feculents:
+                                st.caption(f"• {fec}")
+                    with col_prot:
+                        proteines = ingredients_communs.get("proteines", [])
+                        if proteines:
+                            st.markdown("**🥩 Protéines**")
+                            for prot in proteines:
+                                st.caption(f"• {prot}")
+
+                # Résumé des repas réchauffés
+                rechauffe_resume = st.session_state.get(SK.PLANNING_RECHAUFFE_RESUME, [])
+                if rechauffe_resume:
+                    st.markdown("##### 🔄 Repas réchauffés (moins de cuisine !)")
+                    st.caption(
+                        f"**{len(rechauffe_resume)} midis** sont des réchauffés de dîners "
+                        f"→ seulement **{14 - len(rechauffe_resume)} repas à cuisiner** au lieu de 14"
+                    )
+                    for r in rechauffe_resume:
+                        st.caption(
+                            f"• **{r.get('midi', '?')}**: réchauffé de "
+                            f"_{r.get('source', '?')}_ ({r.get('plat', '')})"
+                        )
 
                 st.divider()
 
