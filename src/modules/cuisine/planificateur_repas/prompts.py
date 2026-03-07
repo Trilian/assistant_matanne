@@ -60,20 +60,20 @@ def generer_prompt_semaine(
     if legumes_choisis or feculents_choisis or proteines_choisies:
         section_bases = """🥕 INGRÉDIENTS DE BASE IMPOSÉS PAR L'UTILISATEUR:
 - Tu DOIS construire les repas de la semaine autour de ces ingrédients de base choisis.
-- Utilise-les dans 3-4 repas différents minimum pour optimiser le batch cooking."""
+- Utilise chaque ingrédient imposé dans EXACTEMENT 2 repas différents (pas plus, pour garder de la variété)."""
         if legumes_choisis:
             section_bases += f"\n  * LÉGUMES imposés: {', '.join(legumes_choisis)}"
         if feculents_choisis:
             section_bases += f"\n  * FÉCULENTS imposés: {', '.join(feculents_choisis)}"
         if proteines_choisies:
             section_bases += f"\n  * PROTÉINES imposées: {', '.join(proteines_choisies)}"
-        section_bases += "\n- Tu peux ajouter d'autres ingrédients en complément, mais ces bases doivent être centrales."
+        section_bases += "\n- Tu peux ajouter d'autres ingrédients en complément. Les bases sont centrales MAIS la variété prime."
         section_bases += '\n- Lister TOUS les ingrédients partagés (imposés + complémentaires) dans "ingredients_communs_semaine".'
     else:
         section_bases = """🥕 INGRÉDIENTS EN COMMUN (BATCH COOKING):
 - Les repas de la semaine DOIVENT partager des bases communes pour simplifier les courses et la préparation batch:
-  * Choisir 2-3 LÉGUMES de base utilisés dans 3-4 repas différents (ex: carottes, courgettes, poireaux)
-  * Choisir 1-2 FÉCULENTS de base réutilisés (ex: riz, pommes de terre, pâtes)
+  * Choisir 2-3 LÉGUMES de base utilisés dans 2 repas chacun (ex: carottes, courgettes, poireaux)
+  * Choisir 1-2 FÉCULENTS de base réutilisés dans 2 repas chacun (ex: riz, pommes de terre, pâtes)
   * La même PROTÉINE peut servir 2 repas différents (ex: poulet rôti dimanche → émincés de poulet mardi)
 - Lister ces ingrédients partagés dans "ingredients_communs_semaine"."""
 
@@ -106,11 +106,20 @@ JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
 ═══════════════════════════════════════════════════
 
 🔄 RÉUTILISATION DES REPAS (RÉCHAUFFÉ):
-- Parmi les 14 repas (7 midis + 7 soirs), 3 à 4 MIDIS en semaine (lun-ven) DOIVENT être des réchauffés d'un DÎNER préparé un autre jour.
+- Parmi les 14 repas (7 midis + 7 soirs), 3 à 4 MIDIS en semaine (lun-ven) DOIVENT être des réchauffés d'un DÎNER préparé un JOUR PRÉCÉDENT.
+- ⚠️ RÈGLE CHRONOLOGIQUE STRICTE: Un midi réchauffé ne peut référencer QUE un dîner d'un jour ANTÉRIEUR.
+  Exemples VALIDES: Mardi midi = réchauffé de Lundi soir. Jeudi midi = réchauffé de Mardi soir.
+  Exemples INVALIDES: Lundi midi = réchauffé de Dimanche soir (pas encore cuisiné!). Mardi midi = réchauffé de Mardi soir (pas logique).
+- Le premier réchauffé possible est MARDI midi (source: Lundi soir).
 - Le dîner source est cuisiné en double portion. Le midi réchauffé est simplement réchauffé.
-- Le midi réchauffé N'EST PAS forcément le lendemain du dîner (peut être 2-3 jours après).
-- Mettre "est_rechauffe": true et "rechauffe_de": "Mardi soir" pour ces midis.
+- Le midi réchauffé peut être 1-3 jours après le dîner source (pas forcément le lendemain).
+- Mettre "est_rechauffe": true et "rechauffe_de": "Lundi soir" pour ces midis.
 - Résultat: seulement ~10 repas à cuisiner au lieu de 14.
+
+🚫 VARIÉTÉ OBLIGATOIRE:
+- Chaque plat cuisiné (non réchauffé) doit avoir un NOM DIFFÉRENT. JAMAIS 2 plats identiques dans la semaine.
+- Même avec des ingrédients en commun, les RECETTES doivent être différentes (ex: courgettes → gratin de courgettes ET ratatouille, pas 2 gratins).
+- Les réchauffés reprennent le même plat = c'est normal, mais la recette source ne doit apparaître QU'UNE seule fois comme dîner cuisiné.
 
 {section_bases}
 
@@ -161,7 +170,7 @@ FORMAT DE RÉPONSE (JSON strict):
           "difficulte": "facile",
           "complexite": "simple",
           "est_rechauffe": true,
-          "rechauffe_de": "Dimanche soir",
+          "rechauffe_de": "Vendredi soir",
           "jules_adaptation": "Réchauffer la portion de Jules séparément."
         }},
         "dessert": "Yaourt nature",
@@ -195,9 +204,9 @@ FORMAT DE RÉPONSE (JSON strict):
     "proteines": ["poulet", "oeufs"]
   }},
   "repas_rechauffe_resume": [
-    {{"midi": "Lundi midi", "source": "Dimanche soir", "plat": "Gratin de courgettes"}},
-    {{"midi": "Mercredi midi", "source": "Mardi soir", "plat": "Curry de légumes"}},
-    {{"midi": "Vendredi midi", "source": "Jeudi soir", "plat": "Pâtes aux légumes"}}
+    {{"midi": "Mardi midi", "source": "Lundi soir", "plat": "Émincés de poulet"}},
+    {{"midi": "Jeudi midi", "source": "Mercredi soir", "plat": "Curry de légumes"}},
+    {{"midi": "Vendredi midi", "source": "Mardi soir", "plat": "Gratin de courgettes"}}
   ],
   "equilibre_respecte": true,
   "conseils_batch": "Dimanche: préparer les légumes de base (courgettes, carottes). Couper le poulet en deux lots. Cuire le riz pour 2 jours.",

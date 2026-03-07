@@ -67,7 +67,20 @@ class ServiceCoursesIntelligentes(BaseAIService):
                 selectinload(Planning.repas)
                 .selectinload(Repas.recette)
                 .selectinload(Recette.ingredients)
-                .selectinload(RecetteIngredient.ingredient)
+                .selectinload(RecetteIngredient.ingredient),
+                # Charger aussi les recettes liées aux entrées/desserts
+                selectinload(Planning.repas)
+                .selectinload(Repas.entree_recette)
+                .selectinload(Recette.ingredients)
+                .selectinload(RecetteIngredient.ingredient),
+                selectinload(Planning.repas)
+                .selectinload(Repas.dessert_recette)
+                .selectinload(Recette.ingredients)
+                .selectinload(RecetteIngredient.ingredient),
+                selectinload(Planning.repas)
+                .selectinload(Repas.dessert_jules_recette)
+                .selectinload(Recette.ingredients)
+                .selectinload(RecetteIngredient.ingredient),
             )
             .filter(Planning.actif == True)
             .first()
