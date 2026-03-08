@@ -237,8 +237,20 @@ FORMAT DE RÉPONSE (JSON strict):
   ],
   "equilibre_respecte": true,
   "conseils_batch": "Dimanche: préparer les légumes de base (courgettes, carottes). Couper le poulet en deux lots. Cuire le riz pour 2 jours.",
-  "suggestions_bio": ["Poulet fermier Bio", "Légumes Grand Frais"]
+  "suggestions_bio": ["<5-8 suggestions VARIÉES et CONCRÈTES>"]
 }}
+
+🌿 SUGGESTIONS BIO/LOCAL (champ "suggestions_bio"):
+- Génère 5 à 8 suggestions CONCRÈTES et VARIÉES, directement liées aux recettes du planning.
+- Pour chaque ingrédient clé de la semaine, propose une alternative bio, locale, ou de meilleure qualité.
+- Format: "Ingrédient bio/local + où le trouver ou pourquoi" (ex: "Courgettes bio de saison au marché", "Oeufs plein air Label Rouge")
+- INTERDICTION de répéter "Poulet fermier Bio" et "Légumes Grand Frais" à chaque fois.
+- Varier les catégories: viandes, poissons, légumes, fruits, produits laitiers, épicerie.
+- Exemples de formats acceptés:
+  "Saumon sauvage Label Rouge plutôt que d'élevage"
+  "Carottes bio en vrac au marché (moins cher qu'en supermarché)"
+  "Yaourts nature La Fermière ou local plutôt qu'industriel"
+  "Huile d'olive extra-vierge première pression à froid"
 
 IMPORTANT:
 - Les repas réchauffés au midi ont "temps_minutes": 5 (juste réchauffer).

@@ -29,6 +29,9 @@ def afficher_liste_active():
     service = obtenir_service_courses()
     inventaire_service = obtenir_service_inventaire()
 
+    if "new_article_mode" not in st.session_state:
+        st.session_state.new_article_mode = False
+
     if service is None:
         st.error("❌ Service courses indisponible")
         return
