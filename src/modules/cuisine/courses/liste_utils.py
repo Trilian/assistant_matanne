@@ -119,7 +119,14 @@ def formater_article_label(
     quantite = article.get("quantite_necessaire", 0)
     unite = article.get("unite", "")
 
-    label = f"{priorite_emoji} {nom} ({quantite} {unite})"
+    # Nettoyer l'unité pour l'affichage
+    quantite_fmt = int(quantite) if quantite == int(quantite) else round(quantite, 1)
+    if unite and unite not in ("pcs", "piece", "pièce", ""):
+        label = f"{priorite_emoji} {nom} ({quantite_fmt} {unite})"
+    elif quantite and quantite > 0:
+        label = f"{priorite_emoji} {nom} (×{quantite_fmt})"
+    else:
+        label = f"{priorite_emoji} {nom}"
 
     if include_notes and article.get("notes"):
         label += f" | 📝 {article.get('notes')}"

@@ -37,7 +37,7 @@ def afficher_alertes():
 
         # STOCK BAS
         if alertes["stock_bas"]:
-            st.warning(f"âš  {len(alertes['stock_bas'])} articles avec stock faible")
+            st.warning(f"⚠️ {len(alertes['stock_bas'])} articles avec stock faible")
             df = _prepare_alert_dataframe(alertes["stock_bas"])
             st.dataframe(df, width="stretch", hide_index=True)
 

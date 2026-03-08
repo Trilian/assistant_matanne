@@ -37,9 +37,12 @@ class SuggestionRecettesDay(BaseModel):
 class ParametresEquilibre(BaseModel):
     """Paramètres pour l'équilibre de la semaine"""
 
-    poisson_jours: list[str] = Field(
-        default_factory=lambda: ["lundi", "jeudi"]
-    )  # Jours avec poisson
+    poisson_blanc_jours: list[str] = Field(
+        default_factory=lambda: ["lundi"]
+    )  # Jours avec poisson blanc
+    poisson_gras_jours: list[str] = Field(
+        default_factory=lambda: ["jeudi"]
+    )  # Jours avec poisson gras
     viande_rouge_jours: list[str] = Field(
         default_factory=lambda: ["mardi"]
     )  # Jours avec viande rouge
@@ -47,6 +50,11 @@ class ParametresEquilibre(BaseModel):
     pates_riz_count: int = Field(default=3, ge=1, le=5)  # Combien de fois pâtes/riz
     ingredients_exclus: list[str] = Field(default_factory=list)  # Allergies, phobies
     preferences_extras: dict = Field(default_factory=dict)  # Autres contraintes
+
+    @property
+    def poisson_jours(self) -> list[str]:
+        """Tous les jours poisson (blanc + gras) pour compatibilité."""
+        return self.poisson_blanc_jours + self.poisson_gras_jours
 
 
 # ═══════════════════════════════════════════════════════════

@@ -386,16 +386,49 @@ def app():
                 else:
                     st.info("Aucune sélection → l'IA choisira automatiquement les bases.")
 
+            # Plats imposés par l'utilisateur
+            with st.expander("🍽️ Plats souhaités cette semaine (optionnel)", expanded=False):
+                st.caption(
+                    "Indiquez les plats que vous voulez manger cette semaine (un par ligne). "
+                    "L'IA les intégrera au planning et complétera avec d'autres recettes équilibrées."
+                )
+                plats_text = st.text_area(
+                    "Mes plats souhaités",
+                    value=st.session_state.get(SK.PLANNING_RECETTES_IMPOSEES, ""),
+                    placeholder="Ex:\nGnocchi à la crème\nEnchiladas\nKnacki purée\nSaucisses flageolets",
+                    key=_keys("recettes_imposees"),
+                    height=120,
+                    label_visibility="collapsed",
+                )
+                st.session_state[SK.PLANNING_RECETTES_IMPOSEES] = plats_text
+                recettes_imposees = [
+                    line.strip() for line in plats_text.split("\n") if line.strip()
+                ]
+                if recettes_imposees:
+                    st.success(
+                        f"✅ {len(recettes_imposees)} plat(s) imposé(s) — "
+                        "l'IA les intégrera au planning."
+                    )
+
             st.divider()
 
             # Bouton génération
             _bases = st.session_state.get(SK.PLANNING_BASES_CHOISIES, {}) or None
+            _recettes_imp = [
+                line.strip()
+                for line in st.session_state.get(SK.PLANNING_RECETTES_IMPOSEES, "").split("\n")
+                if line.strip()
+            ] or None
             col_gen1, col_gen2, col_gen3 = st.columns([2, 2, 1])
 
             with col_gen1:
                 if st.button("🎲 Générer une semaine", type="primary", use_container_width=True):
                     with st.spinner("🤖 L'IA réfléchit à vos menus..."):
-                        result = generer_semaine_ia(date_debut, bases_choisies=_bases)
+                        result = generer_semaine_ia(
+                            date_debut,
+                            bases_choisies=_bases,
+                            recettes_imposees=_recettes_imp,
+                        )
 
                         if result and result.get("semaine"):
                             # Convertir en format interne

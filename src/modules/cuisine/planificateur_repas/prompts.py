@@ -27,6 +27,7 @@ def generer_prompt_semaine(
     date_debut: date,
     jours_a_planifier: list[str] = None,
     bases_choisies: dict[str, list[str]] | None = None,
+    recettes_imposees: list[str] | None = None,
 ) -> str:
     """
     Genère un prompt pour l'IA pour creer une semaine de repas.
@@ -38,6 +39,7 @@ def generer_prompt_semaine(
         jours_a_planifier: Liste des jours (si partiel)
         bases_choisies: Dict optionnel {legumes: [...], feculents: [...], proteines: [...]}
                         Si fourni, l'IA DOIT utiliser ces ingrédients comme base.
+        recettes_imposees: Liste de plats spécifiques que l'utilisateur veut cette semaine
 
     Returns:
         Prompt formate pour l'IA
@@ -77,6 +79,20 @@ def generer_prompt_semaine(
   * La même PROTÉINE peut servir 2 repas différents (ex: poulet rôti dimanche → émincés de poulet mardi)
 - Lister ces ingrédients partagés dans "ingredients_communs_semaine"."""
 
+    # Section recettes imposées par l'utilisateur
+    section_recettes_imposees = ""
+    if recettes_imposees:
+        plats = "\n".join(f"  - {plat}" for plat in recettes_imposees)
+        section_recettes_imposees = f"""
+
+🍽️ PLATS IMPOSÉS PAR L'UTILISATEUR (OBLIGATOIRE):
+- Tu DOIS inclure ces plats dans le planning de la semaine:
+{plats}
+- Intègre-les aux jours et créneaux (midi/soir) les plus adaptés.
+- Complète le reste de la semaine avec d'autres recettes pour respecter l'équilibre demandé.
+- Si un plat imposé est végétarien, il compte dans le quota végétarien.
+- Si un plat imposé contient du poisson, précise le type (blanc ou gras) dans "proteine"."""
+
     prompt = f"""Tu es un assistant culinaire familial expert en BATCH COOKING et organisation hebdomadaire.
 Génère un planning de repas COMPLET pour une famille, optimisé pour minimiser le temps de préparation.
 
@@ -91,11 +107,14 @@ CONTRAINTES:
 - Aliments favoris: {", ".join(preferences.aliments_favoris) if preferences.aliments_favoris else "variés"}
 
 ÉQUILIBRE SOUHAITÉ PAR SEMAINE (RESPECTER STRICTEMENT):
-- Poisson: EXACTEMENT {preferences.poisson_par_semaine} repas dans la semaine
-- Repas végétarien/vegan: EXACTEMENT {preferences.vegetarien_par_semaine} repas dans la semaine, PAS PLUS.
+- Poisson BLANC (cabillaud, merlu, colin, sole, bar, daurade): EXACTEMENT {preferences.poisson_blanc_par_semaine} repas
+- Poisson GRAS (saumon, sardine, thon, maquereau, truite): EXACTEMENT {preferences.poisson_gras_par_semaine} repas
+  ⚠️ Bien VARIER les types de poisson: {preferences.poisson_blanc_par_semaine} blanc + {preferences.poisson_gras_par_semaine} gras = {preferences.poisson_par_semaine} poisson(s) au total.
+- Repas végétarien/vegan: MAXIMUM {preferences.vegetarien_par_semaine} repas dans la semaine, PAS PLUS.
   ⚠️ ATTENTION: Ne PAS dépasser {preferences.vegetarien_par_semaine} repas végétarien(s). Tous les autres repas DOIVENT contenir une protéine animale (poulet, boeuf, porc, agneau, poisson, crevettes, oeufs).
   Les repas avec oeufs ou poisson NE comptent PAS comme végétariens — seuls les repas avec tofu, légumineuses ou sans aucune protéine animale comptent.
-- Viande rouge: maximum {preferences.viande_rouge_max} repas
+- Viande rouge (boeuf, agneau, veau): maximum {preferences.viande_rouge_max} repas
+- Le RESTE des repas: privilégier VOLAILLE (poulet, dinde) et un peu de porc. Pas trop de porc.
 
 APPRENTISSAGE (base sur l'historique):
 - La famille a aimé: {", ".join(recettes_aimees) if recettes_aimees else "pas encore assez de données"}
@@ -130,6 +149,7 @@ JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
 - Les réchauffés reprennent le même plat = c'est normal, mais la recette source ne doit apparaître QU'UNE seule fois comme dîner cuisiné.
 
 {section_bases}
+{section_recettes_imposees}
 
 ⚡ MIX SIMPLE / ÉLABORÉ:
 - La MAJORITÉ des repas (8-10 sur 14) doivent être SIMPLES et RAPIDES (≤ 25 min, "difficulte": "facile").
@@ -251,9 +271,10 @@ CONTRAINTES:
 - À eviter: {", ".join(preferences.aliments_exclus) if preferences.aliments_exclus else "rien"}
 
 ÉQUILIBRE ACTUEL DE LA SEMAINE:
-- Poisson dejà prevu: {contraintes_equilibre.get("poisson", 0)}/{preferences.poisson_par_semaine}
-- Vegetarien: {contraintes_equilibre.get("vegetarien", 0)}/{preferences.vegetarien_par_semaine}
-- Viande rouge: {contraintes_equilibre.get("viande_rouge", 0)}/{preferences.viande_rouge_max}
+- Poisson blanc dejà prevu: {contraintes_equilibre.get("poisson_blanc", 0)}/{preferences.poisson_blanc_par_semaine}
+- Poisson gras dejà prevu: {contraintes_equilibre.get("poisson_gras", 0)}/{preferences.poisson_gras_par_semaine}
+- Vegetarien: {contraintes_equilibre.get("vegetarien", 0)}/{preferences.vegetarien_par_semaine} max
+- Viande rouge: {contraintes_equilibre.get("viande_rouge", 0)}/{preferences.viande_rouge_max} max
 
 FORMAT JSON:
 {{

@@ -181,7 +181,7 @@ def _afficher_suggestion_card(
         col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.metric(
-                "â±ï¸ Préparation",
+                "⏱️ Préparation",
                 f"{suggestion.temps_preparation} min",
                 label_visibility="collapsed",
             )

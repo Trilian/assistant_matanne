@@ -29,8 +29,9 @@ class PreferencesUtilisateur:
     aliments_favoris: list[str] = field(default_factory=list)
 
     # Équilibre souhaité
-    poisson_par_semaine: int = 2
-    vegetarien_par_semaine: int = 1
+    poisson_blanc_par_semaine: int = 1
+    poisson_gras_par_semaine: int = 1
+    vegetarien_par_semaine: int = 2
     viande_rouge_max: int = 2
 
     # Robots disponibles
@@ -53,7 +54,8 @@ class PreferencesUtilisateur:
             "temps_weekend": self.temps_weekend,
             "aliments_exclus": self.aliments_exclus,
             "aliments_favoris": self.aliments_favoris,
-            "poisson_par_semaine": self.poisson_par_semaine,
+            "poisson_blanc_par_semaine": self.poisson_blanc_par_semaine,
+            "poisson_gras_par_semaine": self.poisson_gras_par_semaine,
             "vegetarien_par_semaine": self.vegetarien_par_semaine,
             "viande_rouge_max": self.viande_rouge_max,
             "robots": self.robots,
@@ -61,8 +63,18 @@ class PreferencesUtilisateur:
             "budget_semaine": self.budget_semaine,
         }
 
+    @property
+    def poisson_par_semaine(self) -> int:
+        """Total poisson (blanc + gras) pour compatibilité."""
+        return self.poisson_blanc_par_semaine + self.poisson_gras_par_semaine
+
     @classmethod
     def from_dict(cls, data: dict) -> "PreferencesUtilisateur":
+        # Migration: ancien champ poisson_par_semaine → split blanc/gras
+        if "poisson_par_semaine" in data and "poisson_blanc_par_semaine" not in data:
+            total = data.pop("poisson_par_semaine")
+            data["poisson_blanc_par_semaine"] = max(1, total // 2)
+            data["poisson_gras_par_semaine"] = total - data["poisson_blanc_par_semaine"]
         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
 
 

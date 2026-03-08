@@ -50,7 +50,7 @@ def afficher_liste_active():
                 stock_bas = len(alertes.get("stock_bas", []))
                 st.metric("⚠️ Stock bas", stock_bas)
         with col4:
-            st.metric("💰 Achetés", len(service.get_liste_courses(achetes=True)))
+            st.metric("✅ Achetés", len(service.get_liste_courses(achetes=True)))
 
         st.divider()
 

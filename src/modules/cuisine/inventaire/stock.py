@@ -114,7 +114,7 @@ def afficher_stock():
             color = "❌" if stock_critique > 0 else "✅"
             st.metric(f"{color} Critique", stock_critique)
         with col3:
-            color = "âš " if stock_bas > 0 else "✅"
+            color = "⚠️" if stock_bas > 0 else "✅"
             st.metric(f"{color} Faible", stock_bas)
         with col4:
             color = "⏰" if peremption > 0 else "✅"

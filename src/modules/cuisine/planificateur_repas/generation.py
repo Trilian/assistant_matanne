@@ -20,13 +20,20 @@ _SYSTEM_PROMPT = "Tu es un assistant culinaire familial. Réponds UNIQUEMENT en 
 def generer_semaine_ia(
     date_debut: date,
     bases_choisies: dict[str, list[str]] | None = None,
+    recettes_imposees: list[str] | None = None,
 ) -> dict:
     """Génère une semaine complète avec l'IA."""
 
     prefs = charger_preferences()
     feedbacks = charger_feedbacks()
 
-    prompt = generer_prompt_semaine(prefs, feedbacks, date_debut, bases_choisies=bases_choisies)
+    prompt = generer_prompt_semaine(
+        prefs,
+        feedbacks,
+        date_debut,
+        bases_choisies=bases_choisies,
+        recettes_imposees=recettes_imposees,
+    )
 
     try:
         client = obtenir_client_ia()

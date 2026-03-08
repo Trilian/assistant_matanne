@@ -30,6 +30,72 @@ from .generation import generer_batch_ia
 
 logger = logging.getLogger(__name__)
 
+
+def _get_user_robots() -> list[str]:
+    """Récupère les robots de l'utilisateur depuis les préférences."""
+    from src.modules.cuisine.planificateur_repas.preferences import charger_preferences
+
+    prefs = charger_preferences()
+    return prefs.robots if prefs.robots else ["four", "plaques"]
+
+
+def _generer_texte_batch(batch_data: dict, is_multi: bool) -> str:
+    """Génère un texte imprimable des instructions de batch cooking."""
+    lines: list[str] = ["🍳 INSTRUCTIONS BATCH COOKING", "=" * 50, ""]
+
+    sessions_to_process = []
+    if is_multi:
+        for key in ("session_1", "session_2"):
+            s = batch_data.get(key, {})
+            if s:
+                sessions_to_process.append((key, s))
+    else:
+        sessions_to_process.append(("session", batch_data))
+
+    for session_label, session_data in sessions_to_process:
+        info = session_data.get("session", {})
+        if info.get("duree_estimee_minutes"):
+            lines.append(f"⏱️ Durée estimée: {info['duree_estimee_minutes']} min")
+        for c in info.get("conseils_organisation", []):
+            lines.append(f"  💡 {c}")
+        lines.append("")
+
+        for recette in session_data.get("recettes", []):
+            lines.append(f"━━━ {recette.get('nom', '?')} ━━━")
+            lines.append(f"  Pour: {', '.join(recette.get('pour_jours', []))}")
+            lines.append(f"  Portions: {recette.get('portions', '?')}")
+            lines.append("")
+
+            lines.append("  INGRÉDIENTS:")
+            for ing in recette.get("ingredients", []):
+                q = ing.get("quantite", "")
+                d = f" ({ing.get('decoupe', '')})" if ing.get("decoupe") else ""
+                lines.append(f"    • {ing.get('nom', '?')} {q}{d}")
+            lines.append("")
+
+            lines.append("  ÉTAPES BATCH:")
+            for i, etape in enumerate(recette.get("etapes_batch", []), 1):
+                robot = f" [{etape.get('robot', '')}]" if etape.get("robot") else ""
+                dur = f" ({etape.get('duree_minutes', '?')} min)" if etape.get("duree_minutes") else ""
+                lines.append(f"    {i}. {etape.get('titre', '?')}{robot}{dur}")
+                if etape.get("detail"):
+                    lines.append(f"       → {etape['detail']}")
+                if etape.get("tache_jules"):
+                    lines.append(f"       👶 Jules: {etape['tache_jules']}")
+            lines.append("")
+
+            lines.append("  FINITIONS JOUR J:")
+            for fin in recette.get("instructions_finition", []):
+                lines.append(f"    → {fin}")
+            stockage = recette.get("stockage", "")
+            conservation = recette.get("duree_conservation_jours", "")
+            if stockage:
+                lines.append(f"  📦 Stockage: {stockage} ({conservation}j)")
+            lines.append("")
+
+    return "\n".join(lines)
+
+
 # Session keys scopées
 _keys = KeyNamespace("batch_cooking")
 
@@ -207,7 +273,8 @@ def app():
 
                         with st.spinner("🤖 L'IA génère vos instructions détaillées..."):
                             result = generer_batch_ia(
-                                filtered_data, st.session_state.batch_type, avec_jules
+                                filtered_data, st.session_state.batch_type, avec_jules,
+                                robots_user=_get_user_robots(),
                             )
 
                             if result:
@@ -231,7 +298,8 @@ def app():
 
                             with st.spinner(f"🤖 Génération session 1 ({j1})..."):
                                 result = generer_batch_ia(
-                                    filtered_s1, st.session_state.batch_type, avec_jules
+                                    filtered_s1, st.session_state.batch_type, avec_jules,
+                                    robots_user=_get_user_robots(),
                                 )
                                 if result:
                                     batch_data_all = st.session_state.get(SK.BATCH_DATA, {})
@@ -258,7 +326,8 @@ def app():
 
                             with st.spinner(f"🤖 Génération session 2 ({j2})..."):
                                 result = generer_batch_ia(
-                                    filtered_s2, st.session_state.batch_type, avec_jules
+                                    filtered_s2, st.session_state.batch_type, avec_jules,
+                                    robots_user=_get_user_robots(),
                                 )
                                 if result:
                                     batch_data_all = st.session_state.get(SK.BATCH_DATA, {})
@@ -389,30 +458,20 @@ def app():
                 with col_act1:
                     if st.button("🖨️ Imprimer les instructions", use_container_width=True):
                         try:
-                            from src.modules.cuisine.planificateur_repas import (
-                                generer_pdf_planning_session,
-                            )
-
-                            # Utiliser planning_data (format jour/repas) et non batch_data
-                            pdf_buf = generer_pdf_planning_session(
-                                planning_data=planning_data,
-                                date_debut=st.session_state.get("batch_date", date.today()),
-                                conseils=st.session_state.get(SK.PLANNING_CONSEILS, ""),
-                                suggestions_bio=[],
-                            )
-                            if pdf_buf:
+                            texte = _generer_texte_batch(batch_data, is_multi)
+                            if texte:
                                 st.download_button(
-                                    label="📥 Télécharger PDF",
-                                    data=pdf_buf,
-                                    file_name="batch_cooking.pdf",
-                                    mime="application/pdf",
+                                    label="📥 Télécharger les instructions",
+                                    data=texte.encode("utf-8"),
+                                    file_name="batch_cooking_instructions.txt",
+                                    mime="text/plain",
                                     use_container_width=True,
                                 )
                             else:
-                                st.warning("⚠️ Génération PDF impossible")
+                                st.warning("⚠️ Aucune instruction à exporter")
                         except Exception as e:
-                            logger.error(f"Erreur export PDF batch: {e}")
-                            st.error("❌ Erreur lors de l'export PDF")
+                            logger.error(f"Erreur export batch: {e}")
+                            st.error("❌ Erreur lors de l'export")
 
                 with col_act2:
                     if st.button("🛒 Envoyer aux courses", use_container_width=True):

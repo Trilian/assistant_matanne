@@ -3,11 +3,25 @@ Logique d'équilibre nutritionnel pour le planning des repas.
 
 Contient les règles et calculs pour:
 - Détermination du type de protéine par jour
-- Calcul de l'équilibre hebdomadaire
+- Calcul de l'équilibre hebdomadaire (poisson blanc/gras, vegan, viande rouge)
 - Vérification du respect des recommandations nutritionnelles
 """
 
 from src.core.constants import TYPES_PROTEINES
+
+# Mots-clés spécifiques pour la classification poisson blanc / gras
+_POISSON_BLANC = {"cabillaud", "merlu", "colin", "sole", "bar", "daurade", "lieu", "lotte"}
+_POISSON_GRAS = {"saumon", "thon", "sardine", "maquereau", "hareng", "truite", "anchois"}
+
+
+def _classifier_poisson(protein_lower: str) -> str:
+    """Classifie un poisson en blanc ou gras. Défaut: poisson_blanc."""
+    if any(mot in protein_lower for mot in _POISSON_GRAS):
+        return "poisson_gras"
+    if any(mot in protein_lower for mot in _POISSON_BLANC):
+        return "poisson_blanc"
+    # "poisson" générique ou "crevette" → poisson_blanc par défaut
+    return "poisson_blanc"
 
 
 def determine_protein_type(
@@ -21,18 +35,12 @@ def determine_protein_type(
 
     Args:
         jour_lower: Nom du jour en minuscules
-        poisson_jours: Liste des jours poisson
+        poisson_jours: Liste des jours poisson (blanc + gras confondus)
         viande_rouge_jours: Liste des jours viande rouge
         vegetarien_jours: Liste des jours végétariens
 
     Returns:
         Tuple (type_proteine, raison_emoji)
-
-    Examples:
-        >>> determine_protein_type('lundi', ['lundi'], [], [])
-        ('poisson', '🐟 Jour poisson')
-        >>> determine_protein_type('mercredi', [], [], ['mercredi'])
-        ('vegetarien', '🥬 Jour végétarien')
     """
     if jour_lower in [j.lower() for j in poisson_jours]:
         return "poisson", "🐟 Jour poisson"
@@ -50,20 +58,15 @@ def get_default_protein_schedule() -> dict[str, str]:
 
     Returns:
         Dict {jour: type_proteine}
-
-    Examples:
-        >>> schedule = get_default_protein_schedule()
-        >>> schedule['lundi']
-        'poisson'
     """
     return {
-        "lundi": "poisson",
+        "lundi": "poisson_blanc",
         "mardi": "viande_rouge",
         "mercredi": "vegetarien",
-        "jeudi": "poisson",
+        "jeudi": "poisson_gras",
         "vendredi": "volaille",
         "samedi": "volaille",
-        "dimanche": "viande_rouge",
+        "dimanche": "volaille",
     }
 
 
@@ -71,20 +74,17 @@ def calculate_week_balance(repas_list: list[dict]) -> dict:
     """
     Calcule l'équilibre nutritionnel de la semaine.
 
+    Distingue poisson_blanc et poisson_gras.
+
     Args:
         repas_list: Liste de dicts {type_proteines, ...}
 
     Returns:
         Dict avec comptage par type de protéine
-
-    Examples:
-        >>> repas = [{'type_proteines': 'poisson'}, {'type_proteines': 'volaille'}]
-        >>> balance = calculate_week_balance(repas)
-        >>> balance['poisson']
-        1
     """
     balance = {
-        "poisson": 0,
+        "poisson_blanc": 0,
+        "poisson_gras": 0,
         "viande_rouge": 0,
         "volaille": 0,
         "vegetarien": 0,
@@ -93,52 +93,84 @@ def calculate_week_balance(repas_list: list[dict]) -> dict:
 
     for repas in repas_list:
         protein = repas.get("type_proteines", "autre")
-        if protein:
-            protein_lower = protein.lower()
+        if not protein:
+            balance["autre"] += 1
+            continue
 
-            # Mapper aux catégories
-            found = False
-            for category, keywords in TYPES_PROTEINES.items():
-                if any(kw in protein_lower for kw in keywords):
-                    balance[category] += 1
-                    found = True
-                    break
+        protein_lower = protein.lower()
 
-            if not found:
-                balance["autre"] += 1
+        # Vérifier d'abord si c'est un poisson (avant les catégories génériques)
+        is_fish = False
+        for cat in ("poisson_blanc", "poisson_gras", "poisson"):
+            keywords = TYPES_PROTEINES.get(cat, [])
+            if any(kw in protein_lower for kw in keywords):
+                is_fish = True
+                break
+
+        if is_fish:
+            fish_type = _classifier_poisson(protein_lower)
+            balance[fish_type] += 1
+            continue
+
+        # Autres catégories (viande_rouge, volaille, vegetarien)
+        found = False
+        for category in ("viande_rouge", "volaille", "vegetarien"):
+            keywords = TYPES_PROTEINES.get(category, [])
+            if any(kw in protein_lower for kw in keywords):
+                balance[category] += 1
+                found = True
+                break
+
+        if not found:
+            balance["autre"] += 1
 
     return balance
 
 
-def is_balanced_week(repas_list: list[dict]) -> tuple[bool, list[str]]:
+def is_balanced_week(
+    repas_list: list[dict],
+    poisson_blanc_cible: int = 1,
+    poisson_gras_cible: int = 1,
+    vegetarien_max: int = 2,
+    viande_rouge_max: int = 2,
+) -> tuple[bool, list[str]]:
     """
     Vérifie si la semaine est équilibrée.
 
-    Critères:
-    - Au moins 2 repas poisson
-    - Maximum 2 repas viande rouge
-    - Au moins 1 repas végétarien
+    Critères paramétrables basés sur les préférences utilisateur.
 
     Args:
         repas_list: Liste de dicts avec type_proteines
+        poisson_blanc_cible: Nombre cible de repas poisson blanc
+        poisson_gras_cible: Nombre cible de repas poisson gras
+        vegetarien_max: Nombre maximum de repas végétariens
+        viande_rouge_max: Nombre maximum de repas viande rouge
 
     Returns:
         Tuple (is_balanced, list_of_issues)
-
-    Examples:
-        >>> repas = [{'type_proteines': 'poisson'}] * 3 + [{'type_proteines': 'légumes'}]
-        >>> balanced, issues = is_balanced_week(repas)
-        >>> balanced
-        True
     """
     balance = calculate_week_balance(repas_list)
     issues = []
 
-    if balance["poisson"] < 2:
-        issues.append(f"Pas assez de poisson ({balance['poisson']}/2 min)")
+    if balance["poisson_blanc"] < poisson_blanc_cible:
+        issues.append(
+            f"Pas assez de poisson blanc ({balance['poisson_blanc']}/{poisson_blanc_cible})"
+        )
 
-    if balance["viande_rouge"] > 2:
-        issues.append(f"Trop de viande rouge ({balance['viande_rouge']}/2 max)")
+    if balance["poisson_gras"] < poisson_gras_cible:
+        issues.append(
+            f"Pas assez de poisson gras ({balance['poisson_gras']}/{poisson_gras_cible})"
+        )
+
+    if balance["viande_rouge"] > viande_rouge_max:
+        issues.append(
+            f"Trop de viande rouge ({balance['viande_rouge']}/{viande_rouge_max} max)"
+        )
+
+    if balance["vegetarien"] > vegetarien_max:
+        issues.append(
+            f"Trop de repas végétariens ({balance['vegetarien']}/{vegetarien_max} max)"
+        )
 
     if balance["vegetarien"] < 1:
         issues.append("Pas de repas végétarien")

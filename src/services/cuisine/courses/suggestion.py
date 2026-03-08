@@ -139,6 +139,20 @@ class ServiceCoursesIntelligentes(BaseAIService):
             # Dessert Jules (si lié à une recette)
             _ajouter_ingredients_recette(getattr(repas, "dessert_jules_recette", None))
 
+            # Entrées/desserts texte (non liées à une recette) → article direct
+            for champ, label in [
+                ("entree", "Entrée"),
+                ("dessert", "Dessert"),
+                ("dessert_jules", "Dessert Jules"),
+            ]:
+                texte = getattr(repas, champ, None)
+                fk = getattr(repas, f"{champ}_recette_id", None) if champ != "dessert_jules" else getattr(repas, "dessert_jules_recette_id", None)
+                if texte and not fk:
+                    nom = texte.strip().lower()
+                    agregat[nom]["quantite"] += 1
+                    agregat[nom]["unite"] = ""
+                    agregat[nom]["recettes"].add(f"{label}: {texte.strip()}")
+
         # Construire la liste d'articles
         articles: list[ArticleCourse] = []
         for nom, data in agregat.items():

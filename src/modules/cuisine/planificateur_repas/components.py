@@ -80,21 +80,35 @@ def afficher_configuration_preferences():
         )
 
         st.markdown("##### ⚖️ Équilibre souhaité par semaine")
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            poisson = st.number_input(
-                "🐟 Poisson", 0, 7, prefs.poisson_par_semaine, key=_keys("poisson_par_semaine")
+            poisson_blanc = st.number_input(
+                "🐟 Poisson blanc",
+                0,
+                7,
+                prefs.poisson_blanc_par_semaine,
+                key=_keys("poisson_blanc_par_semaine"),
+                help="Cabillaud, merlu, colin, sole...",
             )
         with col2:
+            poisson_gras = st.number_input(
+                "🩽 Poisson gras",
+                0,
+                7,
+                prefs.poisson_gras_par_semaine,
+                key=_keys("poisson_gras_par_semaine"),
+                help="Saumon, sardine, thon, maquereau...",
+            )
+        with col3:
             vege = st.number_input(
-                "🥬 Végétarien",
+                "🥬 Végétarien max",
                 0,
                 7,
                 prefs.vegetarien_par_semaine,
                 key=_keys("vegetarien_par_semaine"),
             )
-        with col3:
+        with col4:
             viande_rouge = st.number_input(
                 "🥩 Viande rouge max", 0, 7, prefs.viande_rouge_max, key=_keys("viande_rouge_max")
             )
@@ -121,7 +135,8 @@ def afficher_configuration_preferences():
                 temps_weekend=temps_weekend,
                 aliments_exclus=[x.strip() for x in exclus.split(",") if x.strip()],
                 aliments_favoris=[x.strip() for x in favoris.split(",") if x.strip()],
-                poisson_par_semaine=poisson,
+                poisson_blanc_par_semaine=poisson_blanc,
+                poisson_gras_par_semaine=poisson_gras,
                 vegetarien_par_semaine=vege,
                 viande_rouge_max=viande_rouge,
                 robots=robots_selected,
@@ -171,88 +186,73 @@ def afficher_carte_recette_suggestion(
     type_repas: str,
     key_prefix: str,
 ):
-    """Affiche une carte de recette avec entrée/plat/dessert et feedback."""
+    """Affiche une carte de recette avec entrée/plat/dessert et actions."""
 
-    with st.container():
+    with st.container(border=True):
         # ── Badge réchauffé ──
         if suggestion.get("est_rechauffe"):
             rechauffe_source = suggestion.get("rechauffe_de", "")
-            st.markdown(
-                f"🔄 **Réchauffé** du {rechauffe_source} — *juste à réchauffer !*"
-            )
+            st.caption(f"🔄 **Réchauffé** du {rechauffe_source} — *juste à réchauffer !*")
+            return  # Pas d'actions pour les réchauffés
 
         # ── Entrée (si présente) ──
         entree = suggestion.get("entree")
         if entree:
-            st.caption(f"🥗 **Entrée:** {entree}")
+            st.caption(f"🥗 {entree}")
 
         # ── Plat principal ──
-        col_info, col_actions = st.columns([4, 1])
+        complexite = suggestion.get("complexite", "")
+        badge = " ⚡" if complexite == "simple" else (" 👨‍🍳" if complexite == "elabore" else "")
+        st.markdown(f"**🍽️ {suggestion.get('nom', 'Recette')}**{badge}")
 
-        with col_info:
-            # Badge complexité
-            complexite = suggestion.get("complexite", "")
-            badge_complexite = ""
-            if complexite == "simple":
-                badge_complexite = " ⚡"
-            elif complexite == "elabore":
-                badge_complexite = " 👨‍🍳"
+        # Tags inline
+        tags = []
+        if suggestion.get("temps_minutes"):
+            tags.append(f"⏱ {suggestion['temps_minutes']}m")
+        if suggestion.get("proteine"):
+            prot_info = PROTEINES.get(suggestion["proteine"], {})
+            tags.append(
+                f"{prot_info.get('emoji', '')} {prot_info.get('label', suggestion['proteine'])}"
+            )
+        if suggestion.get("robot"):
+            robot_info = ROBOTS_CUISINE.get(suggestion["robot"], {})
+            tags.append(f"{robot_info.get('emoji', '')} {robot_info.get('label', '')}")
+        if tags:
+            st.caption(" · ".join(tags))
 
-            st.markdown(f"**🍽️ {suggestion.get('nom', 'Recette')}**{badge_complexite}")
+        # ── Desserts ──
+        dessert = suggestion.get("dessert")
+        dessert_jules = suggestion.get("dessert_jules")
+        if dessert or dessert_jules:
+            parts = []
+            if dessert:
+                parts.append(f"🍰 {dessert}")
+            if dessert_jules:
+                parts.append(f"👶 {dessert_jules}")
+            st.caption(" · ".join(parts))
 
-            # Tags
-            tags = []
-            if suggestion.get("est_rechauffe"):
-                tags.append("🔄 5 min")
-            elif suggestion.get("temps_minutes"):
-                tags.append(f"⏱️ {suggestion['temps_minutes']} min")
-            if suggestion.get("proteine"):
-                prot_info = PROTEINES.get(suggestion["proteine"], {})
-                tags.append(
-                    f"{prot_info.get('emoji', '')} {prot_info.get('label', suggestion['proteine'])}"
-                )
-            if suggestion.get("robot"):
-                robot_info = ROBOTS_CUISINE.get(suggestion["robot"], {})
-                tags.append(f"{robot_info.get('emoji', '')} {robot_info.get('label', '')}")
+        # ── Actions : ligne compacte de 5 boutons ──
+        col1, col2, col3, col4, col5 = st.columns(5)
 
-            st.caption(" | ".join(tags))
+        with col1:
+            if st.button("👍", key=f"{key_prefix}_like", help="J'aime", use_container_width=True):
+                ajouter_feedback(recette_nom=suggestion.get("nom", ""), feedback="like")
+                st.toast("👍 Noté !")
 
-            # Version Jules
-            if suggestion.get("jules_adaptation"):
-                with st.expander("👶 Instructions Jules", expanded=False):
-                    st.markdown(suggestion["jules_adaptation"])
+        with col2:
+            if st.button("👎", key=f"{key_prefix}_dislike", help="Pas aimé", use_container_width=True):
+                ajouter_feedback(recette_nom=suggestion.get("nom", ""), feedback="dislike")
+                st.toast("👎 Noté !")
 
-        with col_actions:
-            # Feedback
-            col_like, col_dislike = st.columns(2)
-            with col_like:
-                if st.button("👍", key=f"{key_prefix}_like", help="J'aime"):
-                    ajouter_feedback(
-                        recette_id=hash(suggestion.get("nom", "")),
-                        recette_nom=suggestion.get("nom", ""),
-                        feedback="like",
-                    )
-                    st.toast("👍 Noté! L'IA s'en souvient.")
-            with col_dislike:
-                if st.button("👎", key=f"{key_prefix}_dislike", help="Je n'aime pas"):
-                    ajouter_feedback(
-                        recette_id=hash(suggestion.get("nom", "")),
-                        recette_nom=suggestion.get("nom", ""),
-                        feedback="dislike",
-                    )
-                    st.toast("👎 Noté! Ce plat sera évité.")
-
-            # Changer via IA
-            if st.button("🔄", key=f"{key_prefix}_change", help="Autre suggestion (IA)"):
+        with col3:
+            if st.button("🔄", key=f"{key_prefix}_change", help="Autre suggestion", use_container_width=True):
                 from .generation import generer_alternative_ia
 
-                with st.spinner("🤖 Recherche..."):
+                with st.spinner("🤖"):
                     alt = generer_alternative_ia(suggestion, jour, type_repas)
-
                 if alt:
                     planning = st.session_state.get(SK.PLANNING_DATA, {})
                     if jour in planning:
-                        # Conserver entrée/dessert existants si l'alternative n'en a pas
                         old = planning[jour].get(type_repas, {})
                         if old and isinstance(old, dict):
                             for k in ("entree", "dessert", "dessert_jules"):
@@ -260,52 +260,64 @@ def afficher_carte_recette_suggestion(
                                     alt[k] = old[k]
                         planning[jour][type_repas] = alt
                         st.session_state[SK.PLANNING_DATA] = planning
-                        st.toast(f"✅ Remplacé par {alt.get('nom', 'nouvelle recette')}")
+                        st.toast(f"✅ {alt.get('nom', 'nouvelle recette')}")
                     rerun()
                 else:
-                    st.warning("⚠️ Aucune alternative trouvée")
+                    st.warning("⚠️ Aucune alternative")
 
-            # Changer manuellement (plaisir)
-            if st.button("📝", key=f"{key_prefix}_manual", help="Choisir manuellement"):
+        with col4:
+            if st.button("📝", key=f"{key_prefix}_manual", help="Modifier", use_container_width=True):
                 st.session_state[f"_manual_edit_{key_prefix}"] = True
                 rerun()
 
-            # Sauvegarder dans mes recettes
+        with col5:
             nom_recette = suggestion.get("nom", "")
             sauvegardees: set = st.session_state.get(SK.RECETTES_IA_SAUVEGARDEES, set())
             if nom_recette in sauvegardees:
-                st.caption("✅ Sauvegardée")
+                st.button("✅", key=f"{key_prefix}_saved", disabled=True, use_container_width=True, help="Sauvegardée")
             else:
-                if st.button("💾", key=f"{key_prefix}_save", help="Sauvegarder dans mes recettes"):
+                if st.button("💾", key=f"{key_prefix}_save", help="Sauvegarder", use_container_width=True):
                     from .generation import sauvegarder_recette_ia
 
-                    with st.spinner("💾 Sauvegarde..."):
+                    with st.spinner("💾"):
                         recette_id = sauvegarder_recette_ia(suggestion, type_repas)
-
                     if recette_id:
                         sauvegardees.add(nom_recette)
                         st.session_state[SK.RECETTES_IA_SAUVEGARDEES] = sauvegardees
-                        st.toast(f"✅ '{nom_recette}' ajoutée à vos recettes !")
+                        st.toast(f"✅ '{nom_recette}' sauvegardée !")
                         rerun()
                     else:
-                        st.toast("❌ Échec de la sauvegarde", icon="❌")
+                        st.toast("❌ Échec", icon="❌")
+
+        # ── Jules ──
+        if suggestion.get("jules_adaptation"):
+            with st.expander("👶 Jules", expanded=False):
+                st.markdown(suggestion["jules_adaptation"])
+
+        # ── Détails recette ──
+        with st.expander("📋 Détails", expanded=False):
+            details = []
+            if suggestion.get("difficulte"):
+                details.append(f"**Difficulté:** {suggestion['difficulte']}")
+            if suggestion.get("temps_minutes"):
+                details.append(f"**Temps:** {suggestion['temps_minutes']} min")
+            if suggestion.get("proteine"):
+                details.append(f"**Protéine:** {suggestion['proteine']}")
+            if suggestion.get("robot"):
+                details.append(f"**Robot:** {suggestion['robot']}")
+            if details:
+                st.markdown(" · ".join(details))
+            # Ingrédients communs de la semaine (si disponibles)
+            ingredients_communs = st.session_state.get(SK.PLANNING_INGREDIENTS_COMMUNS, {})
+            if ingredients_communs:
+                st.caption("🛒 Ingrédients communs de la semaine:")
+                for cat, items in ingredients_communs.items():
+                    if items:
+                        st.caption(f"  {cat}: {', '.join(items)}")
 
         # ── Formulaire changement manuel ──
         if st.session_state.get(f"_manual_edit_{key_prefix}"):
             _afficher_edition_manuelle(suggestion, jour, type_repas, key_prefix)
-
-        # ── Desserts ──
-        dessert = suggestion.get("dessert")
-        dessert_jules = suggestion.get("dessert_jules")
-
-        if dessert or dessert_jules:
-            col_d1, col_d2 = st.columns(2)
-            with col_d1:
-                if dessert:
-                    st.caption(f"🍰 **Dessert:** {dessert}")
-            with col_d2:
-                if dessert_jules:
-                    st.caption(f"👶🍰 **Jules:** {dessert_jules}")
 
 
 def _afficher_edition_manuelle(suggestion: dict, jour: str, type_repas: str, key_prefix: str):

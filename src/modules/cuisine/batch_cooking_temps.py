@@ -19,9 +19,9 @@ logger = logging.getLogger(__name__)
 JOURS_EMOJI = {
     0: "🟡",  # Lundi
     1: "🟠",  # Mardi
-    2: "🐟£",  # Mercredi
+    2: "🟠",  # Mercredi
     3: "🟢",  # Jeudi
-    4: "âš«",  # Vendredi
+    4: "⚫",  # Vendredi
     5: "🔴",  # Samedi
     6: "🟢",  # Dimanche
 }
