@@ -678,9 +678,7 @@ class TestAjouterAListeCourses:
     ):
         """Test ajout avec ingrédient existant mais pas dans courses.
 
-        Note: Ce test vérifie le comportement quand le code essaie de créer
-        un ArticleCourses sans liste_id (erreur de contrainte).
-        Le gestionnaire d'erreurs retourne [] par défaut.
+        Le service crée une ListeCourses si aucune n'existe, puis ajoute l'article.
         """
         article = ArticleCourse(
             nom="Tomates",  # Correspond à sample_ingredient
@@ -692,20 +690,17 @@ class TestAjouterAListeCourses:
             recettes_source=["Salade"],
         )
 
-        # Le code source ne définit pas liste_id, donc l'insertion échoue
-        # À cause du décorateur @avec_gestion_erreurs(default_return=[])
         result = service_suggestions.ajouter_a_liste_courses([article])
 
-        # Le décorateur retourne [] en cas d'erreur
-        assert result == []
+        # L'article est ajouté avec succès (une ListeCourses est créée automatiquement)
+        assert len(result) == 1
 
     def test_ajouter_cree_ingredient_si_inexistant(
         self, db: Session, service_suggestions, patch_db_context
     ):
         """Test création ingrédient si non trouvé.
 
-        La création d'ingrédient fonctionne, mais ArticleCourses échoue
-        sans liste_id, donc le résultat est [].
+        Le service crée l'ingrédient et l'article dans une ListeCourses créée automatiquement.
         """
         article = ArticleCourse(
             nom="Nouvel Ingredient Unique",
@@ -719,11 +714,8 @@ class TestAjouterAListeCourses:
 
         result = service_suggestions.ajouter_a_liste_courses([article])
 
-        # Le décorateur retourne [] à cause de l'erreur de contrainte
-        assert result == []
-
-        # Mais l'ingrédient a été créé (commit partiel avant flush ArticleCourses)
-        # Note: le comportement exact dépend du rollback
+        # L'article est ajouté avec succès
+        assert len(result) == 1
 
 
 # ═══════════════════════════════════════════════════════════
