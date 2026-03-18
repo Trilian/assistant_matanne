@@ -45,7 +45,9 @@ from .preferences import (
 )
 
 
-def _sauvegarder_planning_db(planning_data: dict, date_debut: date, date_fin: date) -> bool:
+def _sauvegarder_planning_db(
+    planning_data: dict, date_debut: date, date_fin: date, genere_par_ia: bool = False
+) -> bool:
     """Sauvegarde le planning généré en base de données."""
     import logging
 
@@ -128,6 +130,7 @@ def _sauvegarder_planning_db(planning_data: dict, date_debut: date, date_fin: da
                 semaine_debut=date_debut,
                 recettes_selection=recettes_selection,
                 repas_extras=repas_extras,
+                genere_par_ia=genere_par_ia,
             )
             if planning is not None:
                 # Persister les métadonnées (suggestions bio, conseils batch) dans notes
@@ -165,10 +168,15 @@ def _charger_historique_plannings() -> list[dict]:
     return []
 
 
-def _charger_planning_actif_db() -> tuple[dict, date | None, str, list]:
+def _charger_planning_actif_db(
+    planning_id: int | None = None,
+) -> tuple[dict, date | None, str, list]:
     """
-    Charge le planning actif depuis la base de données et le convertit
-    en format session_state pour restaurer l'affichage.
+    Charge le planning actif (ou un planning spécifique) depuis la base de données
+    et le convertit en format session_state pour restaurer l'affichage.
+
+    Args:
+        planning_id: ID du planning à charger. Si None, charge le planning actif.
 
     Returns:
         Tuple (planning_data, date_debut, conseils, suggestions_bio)
@@ -183,7 +191,7 @@ def _charger_planning_actif_db() -> tuple[dict, date | None, str, list]:
         from src.services.cuisine.planning import obtenir_service_planning
 
         service = obtenir_service_planning()
-        planning = service.get_planning()  # Charge le planning actif
+        planning = service.get_planning(planning_id=planning_id)
 
         if not planning or not planning.repas:
             return {}, None, "", []
@@ -408,16 +416,22 @@ def app():
             st.session_state[SK.PLANNING_DATA] = {}
 
     if SK.PLANNING_DATE_DEBUT not in st.session_state:
-        # Par défaut: aujourd'hui
-        st.session_state[SK.PLANNING_DATE_DEBUT] = date.today()
+        # Par défaut: prochain lundi (ou aujourd'hui si on est lundi)
+        today = date.today()
+        days_until_monday = (7 - today.weekday()) % 7
+        if days_until_monday == 0:
+            # On est lundi, rester à aujourd'hui
+            st.session_state[SK.PLANNING_DATE_DEBUT] = today
+        else:
+            st.session_state[SK.PLANNING_DATE_DEBUT] = today + timedelta(days=days_until_monday)
 
     if SK.PLANNING_DATE_FIN not in st.session_state:
-        # Par défaut: dimanche de cette semaine
-        today = date.today()
-        days_until_sunday = (6 - today.weekday()) % 7
-        if days_until_sunday == 0 and today.weekday() == 6:
-            days_until_sunday = 0  # Si on est dimanche, rester à aujourd'hui
-        st.session_state[SK.PLANNING_DATE_FIN] = today + timedelta(days=days_until_sunday)
+        # Par défaut: dimanche de la semaine du planning (date_debut + 6 jours)
+        debut = st.session_state[SK.PLANNING_DATE_DEBUT]
+        days_until_sunday = (6 - debut.weekday()) % 7
+        if days_until_sunday == 0 and debut.weekday() == 6:
+            days_until_sunday = 0
+        st.session_state[SK.PLANNING_DATE_FIN] = debut + timedelta(days=days_until_sunday)
 
     # Tabs avec deep linking URL
     TAB_LABELS = ["📅 Planifier", "⚙️ Préférences", "📋 Historique"]
@@ -802,9 +816,15 @@ def app():
                     if st.button(
                         "💚 Valider ce planning", type="primary", use_container_width=True
                     ):
+                        _is_ia = (
+                            st.session_state.get(SK.PLANNING_MODE, "") != "Utiliser mes recettes"
+                        )
                         with st.spinner("Sauvegarde en cours..."):
                             saved = _sauvegarder_planning_db(
-                                st.session_state[SK.PLANNING_DATA], date_debut, date_fin
+                                st.session_state[SK.PLANNING_DATA],
+                                date_debut,
+                                date_fin,
+                                genere_par_ia=_is_ia,
                             )
                         if saved:
                             st.session_state[SK.PLANNING_VALIDE] = True
@@ -817,8 +837,15 @@ def app():
                         try:
                             # Auto-sauvegarder le planning en DB pour que le module courses le trouve
                             if not st.session_state.get(SK.PLANNING_VALIDE):
+                                _is_ia = (
+                                    st.session_state.get(SK.PLANNING_MODE, "")
+                                    != "Utiliser mes recettes"
+                                )
                                 saved = _sauvegarder_planning_db(
-                                    st.session_state[SK.PLANNING_DATA], date_debut, date_fin
+                                    st.session_state[SK.PLANNING_DATA],
+                                    date_debut,
+                                    date_fin,
+                                    genere_par_ia=_is_ia,
                                 )
                                 if saved:
                                     st.session_state[SK.PLANNING_VALIDE] = True
@@ -877,7 +904,7 @@ def app():
             if historique_plannings:
                 for plan in historique_plannings:
                     with st.container(border=True):
-                        col1, col2, col3 = st.columns([3, 1, 1])
+                        col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
                         with col1:
                             st.write(f"**📅 {plan['nom']}**")
                             st.caption(
@@ -888,6 +915,34 @@ def app():
                         with col3:
                             badge = "🤖 IA" if plan["genere_par_ia"] else "✍️ Manuel"
                             st.write(badge)
+                        with col4:
+                            if st.button(
+                                "📂 Charger",
+                                key=_keys("charger_planning", plan["id"]),
+                                use_container_width=True,
+                            ):
+                                planning_db, date_db, conseils_db, bio_db = (
+                                    _charger_planning_actif_db(planning_id=plan["id"])
+                                )
+                                if planning_db:
+                                    st.session_state[SK.PLANNING_DATA] = planning_db
+                                    st.session_state[SK.PLANNING_VALIDE] = True
+                                    if date_db:
+                                        st.session_state[SK.PLANNING_DATE_DEBUT] = date_db
+                                        days_until_sunday = (6 - date_db.weekday()) % 7
+                                        st.session_state[SK.PLANNING_DATE_FIN] = (
+                                            date_db + timedelta(days=days_until_sunday)
+                                        )
+                                    if conseils_db:
+                                        st.session_state[SK.PLANNING_CONSEILS] = conseils_db
+                                    if bio_db:
+                                        st.session_state[SK.PLANNING_SUGGESTIONS_BIO] = bio_db
+                                    st.success(
+                                        f"✅ Planning du {plan['debut'].strftime('%d/%m')} chargé !"
+                                    )
+                                    rerun()
+                                else:
+                                    st.error("❌ Impossible de charger ce planning")
             else:
                 etat_vide(
                     "Aucun planning sauvegardé", "💭", "Générez votre premier planning de repas"

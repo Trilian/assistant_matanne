@@ -192,6 +192,7 @@ class ServicePlanning(
         recettes_selection: dict[str, int],  # {jour_index: recette_id}
         repas_extras: dict[str, dict] | None = None,  # {slot_key: {entree, dessert, dessert_jules}}
         enfants_adaptes: list[int] | None = None,
+        genere_par_ia: bool = False,
         db: Session | None = None,
     ) -> Planning | None:
         """Crée un planning à partir des choix de l'utilisateur.
@@ -225,7 +226,7 @@ class ServicePlanning(
             semaine_debut=semaine_debut,
             semaine_fin=semaine_fin,
             actif=True,
-            genere_par_ia=False,
+            genere_par_ia=genere_par_ia,
         )
         db.add(planning)
         db.flush()

@@ -24,7 +24,7 @@ PROTEINES = {
     "porc": {"label": "Porc", "emoji": "🐷", "categorie": "viande"},
     "agneau": {"label": "Agneau", "emoji": "🐑", "categorie": "viande_rouge"},
     "poisson": {"label": "Poisson", "emoji": "🐟", "categorie": "poisson"},
-    "saumon": {"label": "Saumon", "emoji": "🩽", "categorie": "poisson_gras"},
+    "saumon": {"label": "Saumon", "emoji": "🐠", "categorie": "poisson_gras"},
     "cabillaud": {"label": "Cabillaud", "emoji": "🐟", "categorie": "poisson_blanc"},
     "crevettes": {"label": "Crevettes", "emoji": "🦐", "categorie": "fruits_mer"},
     "oeufs": {"label": "Oeufs", "emoji": "🥚", "categorie": "autre"},
@@ -34,24 +34,63 @@ PROTEINES = {
 
 # Légumes de base courants pour le batch cooking
 LEGUMES_BASE = [
-    "carottes", "courgettes", "poireaux", "tomates", "oignons",
-    "brocoli", "haricots verts", "épinards", "champignons", "poivrons",
-    "aubergines", "chou-fleur", "petits pois", "patate douce", "potimarron",
-    "céleri", "navets", "betteraves", "fenouil", "endives",
+    "carottes",
+    "courgettes",
+    "poireaux",
+    "tomates",
+    "oignons",
+    "brocoli",
+    "haricots verts",
+    "épinards",
+    "champignons",
+    "poivrons",
+    "aubergines",
+    "chou-fleur",
+    "petits pois",
+    "patate douce",
+    "potimarron",
+    "céleri",
+    "navets",
+    "betteraves",
+    "fenouil",
+    "endives",
 ]
 
 # Féculents de base courants
 FECULENTS_BASE = [
-    "riz", "pâtes", "pommes de terre", "semoule", "quinoa",
-    "lentilles", "boulgour", "blé", "gnocchi", "pain",
-    "pois chiches", "haricots blancs", "polenta", "patate douce",
+    "riz",
+    "pâtes",
+    "pommes de terre",
+    "semoule",
+    "quinoa",
+    "lentilles",
+    "boulgour",
+    "blé",
+    "gnocchi",
+    "pain",
+    "pois chiches",
+    "haricots blancs",
+    "polenta",
+    "patate douce",
 ]
 
 # Protéines de base
 PROTEINES_BASE = [
-    "poulet", "boeuf haché", "porc", "saumon", "cabillaud",
-    "oeufs", "tofu", "lentilles", "crevettes", "dinde",
-    "merlu", "thon", "agneau", "jambon", "sardines",
+    "poulet",
+    "boeuf haché",
+    "porc",
+    "saumon",
+    "cabillaud",
+    "oeufs",
+    "tofu",
+    "lentilles",
+    "crevettes",
+    "dinde",
+    "merlu",
+    "thon",
+    "agneau",
+    "jambon",
+    "sardines",
 ]
 
 # Équilibre recommande par semaine (nombre de repas)

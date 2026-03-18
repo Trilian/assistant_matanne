@@ -93,7 +93,7 @@ def afficher_configuration_preferences():
             )
         with col2:
             poisson_gras = st.number_input(
-                "🩽 Poisson gras",
+                "🐠 Poisson gras",
                 0,
                 7,
                 prefs.poisson_gras_par_semaine,

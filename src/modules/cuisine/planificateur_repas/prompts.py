@@ -117,6 +117,9 @@ CONTEXTE FAMILLE:
 - {preferences.nb_adultes} adultes
 - 1 bébé de {preferences.jules_age_mois} mois (Jules) qui mange avec nous
 - Robots cuisine disponibles: {", ".join(preferences.robots) if preferences.robots else "poêle, four"}
+  ⚠️ IMPORTANT: Pour CHAQUE recette, propose d'utiliser un des robots disponibles quand c'est pertinent.
+  Privilégie les robots qui optimisent le temps (Cookeo pour cuisson rapide, Monsieur Cuisine pour préparation + cuisson automatique, Airfryer pour cuisson sans huile et rapide).
+  Indique le robot le mieux adapté dans le champ "robot" de chaque plat.
 
 CONTRAINTES:
 - Temps de cuisine en semaine: {preferences.temps_semaine} ({TEMPS_CATEGORIES[preferences.temps_semaine]["label"]})

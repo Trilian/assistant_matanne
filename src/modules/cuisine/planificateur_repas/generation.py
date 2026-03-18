@@ -164,33 +164,87 @@ def sauvegarder_recette_ia(recette_dict: dict, type_repas_slot: str) -> int | No
         difficulte = _DIFFICULTE_MAP.get(difficulte_raw, "moyen")
         jules_adaptation = recette_dict.get("jules_adaptation", "")
 
-        description_parts = ["Recette générée par l'IA via le planificateur."]
-        if jules_adaptation:
-            description_parts.append(f"Version Jules : {jules_adaptation}")
-        description = " ".join(description_parts)
-
-        # Générer les détails manquants (ingrédients/étapes) via IA
+        # Générer les détails complets (description, ingrédients, étapes, temps, portions) via IA
+        description = ""
         ingredients = []
         etapes = []
+        temps_cuisson = 0
+        portions_ia = 4
+
+        robot_context = ""
+        if robot:
+            robot_label = robot.replace("_", " ").title()
+            robot_context = f"\nCette recette est préparée avec un {robot_label}. Adapte les étapes pour utiliser ce robot (temps, modes, réglages spécifiques)."
 
         try:
             client = obtenir_client_ia()
             if client:
-                prompt_details = f"""Génère les ingrédients et étapes pour la recette : "{nom}" (pour 4 personnes).
+                prompt_details = f"""Génère les détails complets pour la recette : "{nom}".
+Contexte : famille de 2 adultes + 1 bébé de 19 mois.
+Protéine principale : {proteine or "non spécifiée"}.{robot_context}
+
 Réponds UNIQUEMENT en JSON valide :
 {{
+  "description": "Description appétissante de la recette en 1-2 phrases (PAS 'Recette générée par IA')",
+  "temps_preparation": <temps de préparation en minutes (entier)>,
+  "temps_cuisson": <temps de cuisson en minutes (entier)>,
+  "portions": <nombre de portions (entier, typiquement 4)>,
   "ingredients": [
-    {{"nom": "nom ingrédient", "quantite": 100, "unite": "g"}}
+    {{"nom": "nom ingrédient", "quantite": 200, "unite": "g"}},
+    {{"nom": "autre ingrédient", "quantite": 1, "unite": "pièce"}}
   ],
   "etapes": [
-    "Etape 1...",
-    "Etape 2..."
+    "Description détaillée de l'étape 1...",
+    "Description détaillée de l'étape 2...",
+    "Description détaillée de l'étape 3..."
   ]
-}}"""
+}}
+IMPORTANT:
+- La description doit être appétissante et décrire le plat (goût, texture, accompagnement), PAS mentionner l'IA.
+- Liste TOUS les ingrédients nécessaires (minimum 4-5), avec des quantités réalistes.
+- Détaille TOUTES les étapes de préparation (minimum 3-4 étapes), claires et précises.
+- Les temps doivent être réalistes pour cette recette.
+- Les quantités en grammes, cl, pièces, cuillères à soupe, etc."""
                 details = client.generer_json(
-                    prompt_details, system_prompt="Tu es un chef cuisinier.", max_tokens=1500
+                    prompt_details,
+                    system_prompt="Tu es un chef cuisinier expert en cuisine familiale. Tu donnes des recettes détaillées et précises.",
+                    max_tokens=2000,
                 )
                 if details and isinstance(details, dict):
+                    # Extraire description IA
+                    desc_ia = details.get("description", "")
+                    if desc_ia and not any(
+                        x in desc_ia.lower() for x in ("généré", "ia", "planificateur")
+                    ):
+                        description = desc_ia
+                        if jules_adaptation:
+                            description += f" Version Jules : {jules_adaptation}"
+
+                    # Extraire temps de cuisson et portions
+                    temps_cuisson_ia = details.get("temps_cuisson")
+                    if (
+                        temps_cuisson_ia
+                        and isinstance(temps_cuisson_ia, int | float)
+                        and temps_cuisson_ia > 0
+                    ):
+                        temps_cuisson = int(temps_cuisson_ia)
+
+                    temps_prep_ia = details.get("temps_preparation")
+                    if (
+                        temps_prep_ia
+                        and isinstance(temps_prep_ia, int | float)
+                        and temps_prep_ia > 0
+                    ):
+                        temps = int(temps_prep_ia)
+
+                    portions_detail = details.get("portions")
+                    if (
+                        portions_detail
+                        and isinstance(portions_detail, int | float)
+                        and portions_detail > 0
+                    ):
+                        portions_ia = int(min(portions_detail, 20))
+
                     ingredients_raw = details.get("ingredients", [])
                     # Sanitization ingredients (conversion quantité en float obligatoire)
                     ingredients = []
@@ -238,6 +292,13 @@ Réponds UNIQUEMENT en JSON valide :
         except Exception as e:
             logger.warning(f"Impossible de générer les détails pour {nom}: {e}")
 
+        # Fallback description si l'IA n'a pas pu en générer
+        if not description:
+            description_parts = [f"Plat à base de {proteine or 'ingrédients variés'}."]
+            if jules_adaptation:
+                description_parts.append(f"Version Jules : {jules_adaptation}")
+            description = " ".join(description_parts)
+
         # Fallback: si aucun ingrédient/étape n'a été généré, en créer des minimaux
         if not ingredients:
             # Utiliser la protéine comme ingrédient principal plutôt que le nom de recette
@@ -251,8 +312,8 @@ Réponds UNIQUEMENT en JSON valide :
             "nom": nom,
             "description": description,
             "temps_preparation": temps,
-            "temps_cuisson": 0,
-            "portions": 4,
+            "temps_cuisson": temps_cuisson,
+            "portions": portions_ia,
             "difficulte": difficulte,
             "type_repas": type_repas_db,
             "categorie": "Plat",
