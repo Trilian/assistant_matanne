@@ -109,6 +109,7 @@ class ServicePlanning(
                     .selectinload(Recette.versions)
                 )
                 .filter(Planning.actif)
+                .order_by(Planning.semaine_debut.desc())
                 .first()
             )
 

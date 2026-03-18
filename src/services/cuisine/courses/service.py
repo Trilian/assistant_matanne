@@ -61,7 +61,7 @@ class ServiceCourses(BaseService[ArticleCourses], BaseAIService):
     @chronometre("courses.liste_complete", seuil_alerte_ms=2000)
     @avec_cache(
         ttl=1800,
-        key_func=lambda self, achetes, priorite: f"courses_{achetes}_{priorite}",
+        key_func=lambda self, achetes, priorite: f"articlecourses_{achetes}_{priorite}",
     )
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db

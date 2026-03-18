@@ -337,29 +337,57 @@ def afficher_carte_recette_suggestion(
 
             # Ingrédients et étapes depuis la DB (si la recette est sauvegardée)
             recette_id = suggestion.get("id")
+            _found = False
+
+            # 1. Par ID direct
             if recette_id:
                 _afficher_details_recette_inline(recette_id)
-            else:
-                # Tenter de trouver la recette en DB par nom
+                _found = True
+
+            # 2. Recherche par nom en DB (matching normalisé)
+            if not _found:
                 nom_recette = suggestion.get("nom", "")
-                _found = False
                 if nom_recette:
                     try:
                         from src.services.cuisine.recettes import obtenir_service_recettes
 
                         svc = obtenir_service_recettes()
                         if svc:
-                            matches = svc.search_advanced(term=nom_recette, limit=1)
-                            if matches and matches[0].nom.lower() == nom_recette.lower():
-                                _afficher_details_recette_inline(matches[0].id)
+                            existing = svc.find_existing_recette(nom_recette)
+                            if existing:
+                                _afficher_details_recette_inline(existing.id)
+                                # Mettre à jour l'ID dans la suggestion pour les prochains affichages
+                                suggestion["id"] = existing.id
                                 _found = True
                     except Exception:
                         pass
-                if not _found:
-                    st.caption(
-                        "Recette générée par IA — sauvegardez-la pour voir "
-                        "les ingrédients détaillés"
-                    )
+
+            # 3. Afficher les données IA disponibles dans la suggestion
+            if not _found:
+                ingredients = suggestion.get("ingredients", [])
+                etapes = suggestion.get("etapes", [])
+                if ingredients:
+                    st.markdown("**🥕 Ingrédients:**")
+                    for ing in ingredients:
+                        if isinstance(ing, dict):
+                            nom_ing = ing.get("nom", "")
+                            q = ing.get("quantite", "")
+                            u = ing.get("unite", "")
+                            if q and float(q) > 0.01:
+                                st.caption(f"• {nom_ing} — {q} {u}")
+                            else:
+                                st.caption(f"• {nom_ing}")
+                        else:
+                            st.caption(f"• {ing}")
+                if etapes:
+                    st.markdown("**👨‍🍳 Préparation:**")
+                    for idx_e, etape in enumerate(etapes, 1):
+                        if isinstance(etape, dict):
+                            st.caption(f"{idx_e}. {etape.get('description', '')}")
+                        else:
+                            st.caption(f"{idx_e}. {etape}")
+                if not ingredients and not etapes:
+                    st.caption("💡 Sauvegardez le planning pour générer les détails complets")
 
         # ── Formulaire changement manuel ──
         if st.session_state.get(f"_manual_edit_{key_prefix}"):

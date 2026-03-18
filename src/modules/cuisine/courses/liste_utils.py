@@ -121,9 +121,13 @@ def formater_article_label(
 
     # Nettoyer l'unité pour l'affichage
     quantite_fmt = int(quantite) if quantite == int(quantite) else round(quantite, 1)
-    if unite and unite not in ("pcs", "piece", "pièce", ""):
-        label = f"{priorite_emoji} {nom} ({quantite_fmt} {unite})"
-    elif quantite and quantite > 0:
+    unite_affichage = unite.strip() if unite else ""
+    unites_generiques = ("pcs", "piece", "pièce", "portion", "")
+
+    if unite_affichage and unite_affichage.lower() not in unites_generiques:
+        label = f"{priorite_emoji} {nom} ({quantite_fmt} {unite_affichage})"
+    elif quantite and quantite > 1:
+        # Pour les quantités > 1 avec unité générique, afficher ×N
         label = f"{priorite_emoji} {nom} (×{quantite_fmt})"
     else:
         label = f"{priorite_emoji} {nom}"

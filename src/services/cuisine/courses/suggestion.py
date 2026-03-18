@@ -60,7 +60,7 @@ class ServiceCoursesIntelligentes(BaseAIService):
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def obtenir_planning_actif(self, db: Session | None = None) -> Planning | None:
-        """Recupere le planning actif avec ses repas et recettes."""
+        """Recupere le planning actif le plus récent avec ses repas et recettes."""
         planning = (
             db.query(Planning)
             .options(
@@ -83,6 +83,7 @@ class ServiceCoursesIntelligentes(BaseAIService):
                 .selectinload(RecetteIngredient.ingredient),
             )
             .filter(Planning.actif == True)
+            .order_by(Planning.semaine_debut.desc())
             .first()
         )
         return planning
@@ -146,7 +147,11 @@ class ServiceCoursesIntelligentes(BaseAIService):
                 ("dessert_jules", "Dessert Jules"),
             ]:
                 texte = getattr(repas, champ, None)
-                fk = getattr(repas, f"{champ}_recette_id", None) if champ != "dessert_jules" else getattr(repas, "dessert_jules_recette_id", None)
+                fk = (
+                    getattr(repas, f"{champ}_recette_id", None)
+                    if champ != "dessert_jules"
+                    else getattr(repas, "dessert_jules_recette_id", None)
+                )
                 if texte and not fk:
                     nom = texte.strip().lower()
                     agregat[nom]["quantite"] += 1
@@ -272,22 +277,19 @@ class ServiceCoursesIntelligentes(BaseAIService):
         liste_id = liste_active.id
 
         for article in articles:
-            # Chercher ou creer l'ingredient
-            ingredient = (
-                db.query(Ingredient).filter(Ingredient.nom.ilike(f"%{article.nom}%")).first()
-            )
+            # Chercher ou creer l'ingredient (matching exact insensible à la casse)
+            ingredient = db.query(Ingredient).filter(Ingredient.nom.ilike(article.nom)).first()
 
             if not ingredient:
-                # Vérifier contrainte d'unicité exacte avant création
-                existing_exact = db.query(Ingredient).filter(Ingredient.nom == article.nom).first()
-                if existing_exact:
-                    ingredient = existing_exact
-                else:
-                    ingredient = Ingredient(
-                        nom=article.nom, categorie=article.rayon, unite=article.unite or "pcs"
-                    )
-                    db.add(ingredient)
-                    db.flush()
+                ingredient = Ingredient(
+                    nom=article.nom, categorie=article.rayon, unite=article.unite or "pcs"
+                )
+                db.add(ingredient)
+                db.flush()
+            elif article.unite and article.unite not in ("pcs", "piece", "pièce", ""):
+                # Mettre à jour l'unité de l'ingrédient si on a une unité plus précise
+                if ingredient.unite in (None, "", "pcs", "piece", "pièce"):
+                    ingredient.unite = article.unite
 
             # Verifier si deja dans la liste de courses
             existant = (
