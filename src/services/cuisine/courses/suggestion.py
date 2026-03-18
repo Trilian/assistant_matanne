@@ -67,7 +67,20 @@ class ServiceCoursesIntelligentes(BaseAIService):
                 selectinload(Planning.repas)
                 .selectinload(Repas.recette)
                 .selectinload(Recette.ingredients)
-                .selectinload(RecetteIngredient.ingredient)
+                .selectinload(RecetteIngredient.ingredient),
+                # Charger aussi les recettes liées aux entrées/desserts
+                selectinload(Planning.repas)
+                .selectinload(Repas.entree_recette)
+                .selectinload(Recette.ingredients)
+                .selectinload(RecetteIngredient.ingredient),
+                selectinload(Planning.repas)
+                .selectinload(Repas.dessert_recette)
+                .selectinload(Recette.ingredients)
+                .selectinload(RecetteIngredient.ingredient),
+                selectinload(Planning.repas)
+                .selectinload(Repas.dessert_jules_recette)
+                .selectinload(Recette.ingredients)
+                .selectinload(RecetteIngredient.ingredient),
             )
             .filter(Planning.actif == True)
             .first()
@@ -113,14 +126,32 @@ class ServiceCoursesIntelligentes(BaseAIService):
                 agregat[nom]["recettes"].add(recette.nom)
 
         for repas in planning.repas:
+            # Sauter les recettes réchauffées (nom commence par "Réchauffé:")
+            recette = repas.recette
+            if recette and recette.nom and recette.nom.lower().startswith("réchauffé"):
+                continue
             # Plat principal
-            _ajouter_ingredients_recette(repas.recette)
+            _ajouter_ingredients_recette(recette)
             # Entrée (si liée à une recette)
             _ajouter_ingredients_recette(getattr(repas, "entree_recette", None))
             # Dessert (si lié à une recette)
             _ajouter_ingredients_recette(getattr(repas, "dessert_recette", None))
             # Dessert Jules (si lié à une recette)
             _ajouter_ingredients_recette(getattr(repas, "dessert_jules_recette", None))
+
+            # Entrées/desserts texte (non liées à une recette) → article direct
+            for champ, label in [
+                ("entree", "Entrée"),
+                ("dessert", "Dessert"),
+                ("dessert_jules", "Dessert Jules"),
+            ]:
+                texte = getattr(repas, champ, None)
+                fk = getattr(repas, f"{champ}_recette_id", None) if champ != "dessert_jules" else getattr(repas, "dessert_jules_recette_id", None)
+                if texte and not fk:
+                    nom = texte.strip().lower()
+                    agregat[nom]["quantite"] += 1
+                    agregat[nom]["unite"] = ""
+                    agregat[nom]["recettes"].add(f"{label}: {texte.strip()}")
 
         # Construire la liste d'articles
         articles: list[ArticleCourse] = []

@@ -213,7 +213,7 @@ def afficher_liste():
 
                 # Titre et infos compactes - HAUTEUR FIXE
                 difficulty_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(
-                    recette.difficulte, "âš«"
+                    recette.difficulte, "⚫"
                 )
 
                 # Échapper le nom pour éviter les problèmes d'encodage
@@ -303,7 +303,7 @@ def afficher_liste():
                 info_cols = st.columns(3, gap="small")
                 with info_cols[0]:
                     st.markdown(
-                        f"<div style='text-align: center; font-size: 13px;'><div>â±ï¸</div><div style='font-weight: bold;'>{recette.temps_preparation}m</div></div>",
+                        f"<div style='text-align: center; font-size: 13px;'><div>⏱️</div><div style='font-weight: bold;'>{recette.temps_preparation}m</div></div>",
                         unsafe_allow_html=True,
                     )
                 with info_cols[1]:

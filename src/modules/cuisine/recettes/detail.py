@@ -84,7 +84,7 @@ def afficher_detail_recette(recette):
     if recette.est_equilibre:
         badges.append("💪 Équilibré")
     if recette.congelable:
-        badges.append("â„ï¸ Congélable")
+        badges.append("❄️ Congélable")
     if badges:
         st.markdown(" • ".join(badges))
 
@@ -271,7 +271,7 @@ def afficher_detail_recette(recette):
 
                         if version.temps_optimise_batch:
                             st.caption(
-                                f"â±ï¸ Temps optimisé: {version.temps_optimise_batch} minutes"
+                                f"⏱️ Temps optimisé: {version.temps_optimise_batch} minutes"
                             )
             else:
                 etat_vide(

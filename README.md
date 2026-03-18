@@ -2,7 +2,7 @@
 
 > Hub de gestion familiale intelligent propulsé par l'IA
 
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.13+-blue.svg)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-red.svg)](https://streamlit.io)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green.svg)](https://supabase.com)
 

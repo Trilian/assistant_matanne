@@ -6,7 +6,6 @@ multi-étapes du batch cooking en temps réel.
 """
 
 import logging
-import time
 from datetime import datetime, timedelta
 
 import streamlit as st
@@ -45,10 +44,13 @@ def executer_batch_cooking_live(batch_data: dict) -> bool:
             toutes_etapes.append(
                 {
                     "recette": nom_recette,
-                    "description": etape.get("description", ""),
+                    "description": etape.get("titre", "") or etape.get("description", ""),
                     "duree_minutes": etape.get("duree_minutes", 10),
                     "type": etape.get("type", "preparation"),
                     "robot": etape.get("robot"),
+                    "est_passif": etape.get("est_passif", False),
+                    "jules_participation": etape.get("jules_participation", False),
+                    "tache_jules": etape.get("tache_jules", ""),
                 }
             )
 
@@ -56,99 +58,106 @@ def executer_batch_cooking_live(batch_data: dict) -> bool:
         st.warning("⚠️ Aucune étape de batch cooking trouvée")
         return False
 
-    # Exécution avec st.status()
-    with st.status("🍳 **Batch Cooking en cours...**", expanded=True) as status:
-        heure_debut = datetime.now()
-        etapes_terminees = 0
-        total_etapes = len(toutes_etapes)
+    # Initialiser l'état de progression si nécessaire
+    if "batch_etape_courante" not in st.session_state:
+        st.session_state.batch_etape_courante = 0
+    if "batch_heure_debut" not in st.session_state:
+        st.session_state.batch_heure_debut = datetime.now()
 
-        # Phase 1: Préparation
-        status.update(label="📋 **Phase 1: Préparation**", state="running")
-        st.write("🔄 Vérification des ingrédients...")
-        time.sleep(0.5)  # Simulation
-        st.write("✅ Ingrédients prêts")
+    etape_courante = st.session_state.batch_etape_courante
+    total_etapes = len(toutes_etapes)
+    heure_debut = st.session_state.batch_heure_debut
 
-        # Afficher les conseils d'organisation
-        conseils = session_info.get("conseils_organisation", [])
-        if conseils:
-            st.write("💡 **Conseils:**")
-            for conseil in conseils[:3]:
-                st.write(f"  • {conseil}")
+    # ── Progression globale ──
+    progress_pct = int((etape_courante / total_etapes) * 100) if total_etapes else 0
+    st.progress(progress_pct / 100, text=f"Progression: {etape_courante}/{total_etapes} étapes ({progress_pct}%)")
+
+    # ── Afficher les étapes terminées (résumé compact) ──
+    if etape_courante > 0:
+        with st.expander(f"✅ {etape_courante} étape(s) terminée(s)", expanded=False):
+            for i, etape in enumerate(toutes_etapes[:etape_courante]):
+                icon = (
+                    "🔪" if etape["type"] == "preparation"
+                    else "🔥" if etape["type"] == "cuisson"
+                    else "🥣"
+                )
+                st.caption(f"{icon} ~~{etape['recette']}: {etape['description']}~~")
+
+    # ── Étape en cours ──
+    if etape_courante < total_etapes:
+        etape = toutes_etapes[etape_courante]
+        recette_nom = etape["recette"]
+        description = etape["description"]
+        duree = etape["duree_minutes"]
+        type_etape = etape["type"]
+        robot = etape.get("robot")
+
+        icon = (
+            "🔪" if type_etape == "preparation"
+            else "🔥" if type_etape == "cuisson"
+            else "🥣"
+        )
+        robot_info = f" • 🤖 {robot}" if robot else ""
+
+        st.markdown(f"### {icon} Étape {etape_courante + 1}/{total_etapes}")
+
+        with st.container(border=True):
+            st.markdown(f"**{recette_nom}**")
+            st.markdown(f"{description}")
+            st.caption(f"⏱️ Durée estimée: {duree} min{robot_info}")
+
+        # Aperçu de l'étape suivante
+        if etape_courante + 1 < total_etapes:
+            next_etape = toutes_etapes[etape_courante + 1]
+            st.caption(f"⏭️ Prochaine étape: {next_etape['recette']} — {next_etape['description']}")
 
         st.divider()
 
-        # Phase 2: Exécution des étapes
-        status.update(label="👩‍🍳 **Phase 2: Cuisson & Préparation**", state="running")
+        # Bouton pour passer à l'étape suivante
+        col_prev, col_next = st.columns([1, 2])
+        with col_prev:
+            if etape_courante > 0:
+                if st.button("⬅️ Précédent", use_container_width=True):
+                    st.session_state.batch_etape_courante -= 1
+                    st.rerun()
+        with col_next:
+            if st.button(
+                f"✅ Terminé — Passer à l'étape {etape_courante + 2}"
+                if etape_courante + 1 < total_etapes
+                else "✅ Terminer le batch cooking",
+                type="primary",
+                use_container_width=True,
+            ):
+                st.session_state.batch_etape_courante += 1
+                st.rerun()
 
-        for i, etape in enumerate(toutes_etapes, 1):
-            # Mise à jour du status
-            progress_pct = int((i / total_etapes) * 100)
-            status.update(
-                label=f"👩‍🍳 **Étape {i}/{total_etapes}** ({progress_pct}%)", state="running"
-            )
+        return False  # Pas encore terminé
 
-            # Afficher l'étape en cours
-            recette_nom = etape["recette"]
-            description = etape["description"]
-            duree = etape["duree_minutes"]
-            type_etape = etape["type"]
-            robot = etape.get("robot")
-
-            # Icône selon le type
-            icon = (
-                "🔪" if type_etape == "preparation" else "🔥" if type_etape == "cuisson" else "🥣"
-            )
-            robot_info = f" ({robot})" if robot else ""
-
-            st.write(f"{icon} **{recette_nom}**: {description}{robot_info}")
-            st.caption(f"⏱️ Durée estimée: {duree} min")
-
-            # Barre de progression pour cette étape (simulation)
-            progress_bar = st.progress(0)
-            for p in range(100):
-                time.sleep(0.02)  # Simulation de progression
-                progress_bar.progress(p + 1)
-
-            st.write(f"✅ Étape {i} terminée")
-            etapes_terminees += 1
-
-            # Pause entre les étapes
-            if i < total_etapes:
-                st.write("---")
-
-        # Phase 3: Finalisation
-        status.update(label="📦 **Phase 3: Stockage**", state="running")
-        st.write("🔄 Stockage des préparations...")
-
-        for recette in recettes:
-            stockage = recette.get("stockage", "frigo")
-            duree_conservation = recette.get("duree_conservation_jours", 3)
-            st.write(f"📦 {recette['nom']} → {stockage.upper()} ({duree_conservation}j)")
-
-        time.sleep(0.5)
-        st.write("✅ Toutes les préparations sont stockées")
-
-        # Terminé !
-        heure_fin = datetime.now()
-        duree_totale = heure_fin - heure_debut
-        minutes_totales = int(duree_totale.total_seconds() / 60)
-
-        status.update(
-            label=f"✅ **Batch Cooking Terminé!** ({etapes_terminees} étapes en {minutes_totales}min)",
-            state="complete",
-            expanded=False,
-        )
+    # ── Toutes les étapes terminées: phase stockage ──
+    st.markdown("### 📦 Stockage")
+    for recette in recettes:
+        stockage = recette.get("stockage", "frigo")
+        duree_conservation = recette.get("duree_conservation_jours", 3)
+        st.write(f"📦 {recette['nom']} → {stockage.upper()} ({duree_conservation}j)")
 
     # Résumé final
+    heure_fin = datetime.now()
+    duree_totale = heure_fin - heure_debut
+    minutes_totales = int(duree_totale.total_seconds() / 60)
+
     st.success(
         f"""
     ### 🎉 Batch Cooking Terminé!
 
-    - **{etapes_terminees} étapes** complétées
+    - **{total_etapes} étapes** complétées
     - **{len(recettes)} recettes** préparées
     - **Durée**: {minutes_totales} minutes
     """
     )
+
+    # Nettoyer l'état
+    del st.session_state["batch_etape_courante"]
+    del st.session_state["batch_heure_debut"]
 
     return True
 
@@ -165,9 +174,32 @@ def afficher_execution_live():
         st.info("👆 Générez d'abord les instructions dans l'onglet 'Préparer'")
         return
 
+    # Détecter format multi-sessions et sélectionner les données
+    is_multi = "session_1" in batch_data or "session_2" in batch_data
+    if is_multi:
+        sessions_dispo = []
+        if batch_data.get("session_1"):
+            sessions_dispo.append(("Session 1", batch_data["session_1"]))
+        if batch_data.get("session_2"):
+            sessions_dispo.append(("Session 2", batch_data["session_2"]))
+        if not sessions_dispo:
+            st.warning("⚠️ Aucune session générée")
+            return
+        if len(sessions_dispo) > 1:
+            choix = st.radio(
+                "Choisir la session à exécuter",
+                [s[0] for s in sessions_dispo],
+                horizontal=True,
+            )
+            active_data = next(s[1] for s in sessions_dispo if s[0] == choix)
+        else:
+            active_data = sessions_dispo[0][1]
+    else:
+        active_data = batch_data
+
     # Afficher résumé avant exécution
-    recettes = batch_data.get("recettes", [])
-    session_info = batch_data.get("session", {})
+    recettes = active_data.get("recettes", [])
+    session_info = active_data.get("session", {})
     duree_estimee = session_info.get("duree_estimee_minutes", 120)
 
     col1, col2, col3 = st.columns(3)
@@ -195,19 +227,24 @@ def afficher_execution_live():
     if not st.session_state.batch_en_cours and not st.session_state.batch_termine:
         if st.button("▶️ Démarrer le Batch Cooking", type="primary", use_container_width=True):
             st.session_state.batch_en_cours = True
+            # Initialiser la progression
+            st.session_state.batch_etape_courante = 0
+            st.session_state.batch_heure_debut = datetime.now()
             st.rerun()
 
-    # Exécution
+    # Exécution étape par étape
     if st.session_state.batch_en_cours:
-        success = executer_batch_cooking_live(batch_data)
-        st.session_state.batch_en_cours = False
-        st.session_state.batch_termine = success
-        st.rerun()
+        success = executer_batch_cooking_live(active_data)
+        if success:
+            st.session_state.batch_en_cours = False
+            st.session_state.batch_termine = True
 
     # Terminé
     if st.session_state.batch_termine:
         if st.button("🔄 Recommencer", use_container_width=True):
             st.session_state.batch_termine = False
+            for key in ["batch_etape_courante", "batch_heure_debut"]:
+                st.session_state.pop(key, None)
             st.rerun()
 
 

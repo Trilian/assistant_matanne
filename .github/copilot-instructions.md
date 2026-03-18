@@ -3,7 +3,7 @@
 ## Vue d'ensemble du projet
 
 **Type**: Application Streamlit de gestion familiale  
-**Langage**: Python 3.11+ avec SQLAlchemy 2.0 ORM  
+**Langage**: Python 3.13+ avec SQLAlchemy 2.0 ORM  
 **Base de données**: Supabase PostgreSQL avec migrations SQL-file  
 **Stack clé**: Streamlit, SQLAlchemy, Pydantic v2, API Mistral AI, pandas, Plotly
 

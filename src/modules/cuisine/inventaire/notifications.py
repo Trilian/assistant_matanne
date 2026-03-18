@@ -255,7 +255,7 @@ def afficher_notifications():
                 with col1:
                     st.metric("❌ Critique", len(stats["stock_critique"]))
                 with col2:
-                    st.metric("âš  Bas", len(stats["stock_bas"]))
+                    st.metric("⚠️ Bas", len(stats["stock_bas"]))
                 with col3:
                     st.metric("⏰ Péremption", len(stats["peremption_proche"]))
                 with col4:

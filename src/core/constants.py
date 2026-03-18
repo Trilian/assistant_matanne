@@ -158,12 +158,14 @@ TYPES_REPAS_KEYS: list[str] = [
 """Clés techniques pour types de repas."""
 
 TYPES_PROTEINES: dict[str, list[str]] = {
-    "poisson": ["poisson", "saumon", "thon", "cabillaud", "sardine", "crevette"],
+    "poisson_blanc": ["cabillaud", "merlu", "colin", "sole", "bar", "daurade", "lieu"],
+    "poisson_gras": ["saumon", "thon", "sardine", "maquereau", "hareng", "truite"],
+    "poisson": ["poisson", "crevette", "fruits de mer"],
     "viande_rouge": ["boeuf", "veau", "agneau", "viande rouge"],
     "volaille": ["poulet", "dinde", "canard", "volaille"],
     "vegetarien": ["légumes", "tofu", "seitan", "légumineuses"],
 }
-"""Types de protéines avec mots-clés associés."""
+"""Types de protéines avec mots-clés associés (poisson subdivisé blanc/gras)."""
 
 # ═══════════════════════════════════════════════════════════# PERFORMANCE / MONITORING
 # ═════════════════════════════════════════════════════════════

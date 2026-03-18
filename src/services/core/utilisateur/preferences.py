@@ -131,9 +131,9 @@ class UserPreferenceService:
     @avec_session_db
     def ajouter_feedback(
         self,
-        recette_id: int,
         recette_nom: str,
         feedback: str,
+        recette_id: int = 0,
         contexte: str | None = None,
         db: Session | None = None,
     ) -> bool:
@@ -141,20 +141,20 @@ class UserPreferenceService:
         Ajoute ou met à jour un feedback sur une recette.
 
         Args:
-            recette_id: ID de la recette
-            recette_nom: Nom de la recette (stocké dans notes)
+            recette_nom: Nom de la recette (clé de recherche et stockage)
             feedback: "like", "dislike", ou "neutral"
+            recette_id: ID de la recette (optionnel, 0 si inconnu)
             contexte: Contexte optionnel
 
         Returns:
             True si succès
         """
         try:
-            # Vérifier si feedback existe déjà
             from src.core.models import RetourRecette
 
+            # Chercher par nom d'abord (plus fiable que l'ID pour les recettes IA)
             stmt = select(RetourRecette).where(
-                RetourRecette.user_id == self.user_id, RetourRecette.recette_id == recette_id
+                RetourRecette.user_id == self.user_id, RetourRecette.notes == recette_nom
             )
             existing = db.execute(stmt).scalar_one_or_none()
 
@@ -162,18 +162,15 @@ class UserPreferenceService:
                 # Update
                 existing.feedback = feedback
                 existing.contexte = contexte
-                existing.notes = recette_nom
                 logger.debug(f"Feedback mis à jour: {recette_nom} → {feedback}")
             else:
                 # Insert
-                from src.core.models import RetourRecette
-
                 new_fb = RetourRecette(
                     user_id=self.user_id,
                     recette_id=recette_id,
                     feedback=feedback,
                     contexte=contexte,
-                    notes=recette_nom,  # Stocker le nom dans notes
+                    notes=recette_nom,
                 )
                 db.add(new_fb)
                 logger.debug(f"Nouveau feedback: {recette_nom} → {feedback}")

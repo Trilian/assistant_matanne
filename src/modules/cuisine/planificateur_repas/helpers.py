@@ -20,23 +20,48 @@ TYPES_REPAS = ["déjeuner", "dîner", "goûter"]
 # Categories de proteines
 PROTEINES = {
     "poulet": {"label": "Poulet", "emoji": "🐔", "categorie": "volaille"},
-    "boeuf": {"label": "Boeuf", "emoji": "\U0001f404", "categorie": "viande_rouge"},
+    "boeuf": {"label": "Boeuf", "emoji": "🐄", "categorie": "viande_rouge"},
     "porc": {"label": "Porc", "emoji": "🐷", "categorie": "viande"},
     "agneau": {"label": "Agneau", "emoji": "🐑", "categorie": "viande_rouge"},
     "poisson": {"label": "Poisson", "emoji": "🐟", "categorie": "poisson"},
+    "saumon": {"label": "Saumon", "emoji": "🩽", "categorie": "poisson_gras"},
+    "cabillaud": {"label": "Cabillaud", "emoji": "🐟", "categorie": "poisson_blanc"},
     "crevettes": {"label": "Crevettes", "emoji": "🦐", "categorie": "fruits_mer"},
-    "oeufs": {"label": "Oeufs", "emoji": "\U0001f95a", "categorie": "vegetarien"},
+    "oeufs": {"label": "Oeufs", "emoji": "🥚", "categorie": "autre"},
     "tofu": {"label": "Tofu", "emoji": "🧊", "categorie": "vegan"},
     "legumineuses": {"label": "Legumineuses", "emoji": "🫘", "categorie": "vegetarien"},
 }
 
+# Légumes de base courants pour le batch cooking
+LEGUMES_BASE = [
+    "carottes", "courgettes", "poireaux", "tomates", "oignons",
+    "brocoli", "haricots verts", "épinards", "champignons", "poivrons",
+    "aubergines", "chou-fleur", "petits pois", "patate douce", "potimarron",
+    "céleri", "navets", "betteraves", "fenouil", "endives",
+]
+
+# Féculents de base courants
+FECULENTS_BASE = [
+    "riz", "pâtes", "pommes de terre", "semoule", "quinoa",
+    "lentilles", "boulgour", "blé", "gnocchi", "pain",
+    "pois chiches", "haricots blancs", "polenta", "patate douce",
+]
+
+# Protéines de base
+PROTEINES_BASE = [
+    "poulet", "boeuf haché", "porc", "saumon", "cabillaud",
+    "oeufs", "tofu", "lentilles", "crevettes", "dinde",
+    "merlu", "thon", "agneau", "jambon", "sardines",
+]
+
 # Équilibre recommande par semaine (nombre de repas)
 EQUILIBRE_DEFAUT = {
-    "poisson": 2,  # 2 fois poisson
+    "poisson_blanc": 1,  # 1 fois poisson blanc (cabillaud, merlu, colin...)
+    "poisson_gras": 1,  # 1 fois poisson gras (saumon, sardine, thon...)
     "viande_rouge": 1,  # Max 1-2 fois viande rouge
-    "volaille": 2,  # 2-3 fois volaille
-    "vegetarien": 2,  # 2 repas vege
-    "pates_riz": 3,  # Max 3 feculents "lourds"
+    "volaille": 3,  # Volaille = protéine principale
+    "vegetarien": 2,  # 1-2 repas vegétariens/vegan
+    "pates_riz": 3,  # Max 3 féculents "lourds"
 }
 
 # Temps de preparation

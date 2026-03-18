@@ -21,7 +21,10 @@ from .calculs import (
 )
 from .helpers import (
     EQUILIBRE_DEFAUT,
+    FECULENTS_BASE,
+    LEGUMES_BASE,
     PROTEINES,
+    PROTEINES_BASE,
     ROBOTS_CUISINE,
     TEMPS_CATEGORIES,
     TYPES_REPAS,
@@ -36,8 +39,11 @@ from .prompts import generer_prompt_alternative, generer_prompt_semaine
 __all__ = [
     # Constantes
     "EQUILIBRE_DEFAUT",
+    "FECULENTS_BASE",
     "JOURS_SEMAINE",
+    "LEGUMES_BASE",
     "PROTEINES",
+    "PROTEINES_BASE",
     "ROBOTS_CUISINE",
     "TEMPS_CATEGORIES",
     "TYPES_REPAS",

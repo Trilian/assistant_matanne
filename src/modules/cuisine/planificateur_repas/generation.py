@@ -21,13 +21,22 @@ def generer_semaine_ia(
     date_debut: date,
     date_fin: date | None = None,
     jours_a_planifier: list[str] | None = None,
+    bases_choisies: dict[str, list[str]] | None = None,
+    recettes_imposees: list[str] | None = None,
 ) -> dict:
     """Génère une semaine complète avec l'IA."""
 
     prefs = charger_preferences()
     feedbacks = charger_feedbacks()
 
-    prompt = generer_prompt_semaine(prefs, feedbacks, date_debut, jours_a_planifier)
+    prompt = generer_prompt_semaine(
+        prefs,
+        feedbacks,
+        date_debut,
+        jours_a_planifier,
+        bases_choisies=bases_choisies,
+        recettes_imposees=recettes_imposees,
+    )
 
     try:
         client = obtenir_client_ia()
@@ -38,7 +47,7 @@ def generer_semaine_ia(
         response = client.generer_json(
             prompt=prompt,
             system_prompt=_SYSTEM_PROMPT,
-            max_tokens=4096,
+            max_tokens=6000,
             temperature=0.8,
             utiliser_cache=False,
         )
@@ -212,7 +221,10 @@ Réponds UNIQUEMENT en JSON valide :
 
         # Fallback: si aucun ingrédient/étape n'a été généré, en créer des minimaux
         if not ingredients:
-            ingredients = [{"nom": nom, "quantite": 1.0, "unite": "portion"}]
+            # Utiliser la protéine comme ingrédient principal plutôt que le nom de recette
+            fallback_nom = type_proteines if type_proteines else "ingrédients divers"
+            ingredients = [{"nom": fallback_nom, "quantite": 1.0, "unite": "portion"}]
+            logger.warning(f"Fallback ingrédients pour '{nom}': [{fallback_nom}]")
         if not etapes:
             etapes = [{"description": f"Préparer {nom} selon la recette.", "ordre": 1}]
 

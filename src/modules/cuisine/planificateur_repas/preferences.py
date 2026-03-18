@@ -47,8 +47,9 @@ def charger_preferences() -> PreferencesUtilisateur:
             temps_weekend="long",
             aliments_exclus=[],
             aliments_favoris=["poulet", "pâtes", "gratins", "soupes"],
-            poisson_par_semaine=2,
-            vegetarien_par_semaine=1,
+            poisson_blanc_par_semaine=1,
+            poisson_gras_par_semaine=1,
+            vegetarien_par_semaine=2,
             viande_rouge_max=2,
             robots=["monsieur_cuisine", "cookeo", "four"],
             magasins_preferes=["Carrefour Drive", "Bio Coop", "Grand Frais", "Thiriet"],
@@ -106,12 +107,11 @@ def charger_feedbacks() -> list[FeedbackRecette]:
         return []
 
 
-def ajouter_feedback(recette_id: int, recette_nom: str, feedback: str, contexte: str = None):
+def ajouter_feedback(recette_nom: str, feedback: str, contexte: str = None):
     """
     Ajoute un feedback sur une recette en DB.
 
     Args:
-        recette_id: ID de la recette
         recette_nom: Nom de la recette
         feedback: "like", "dislike", ou "neutral"
         contexte: Contexte optionnel
@@ -119,13 +119,13 @@ def ajouter_feedback(recette_id: int, recette_nom: str, feedback: str, contexte:
     try:
         service = get_user_preference_service()
         success = service.ajouter_feedback(
-            recette_id=recette_id, recette_nom=recette_nom, feedback=feedback, contexte=contexte
+            recette_nom=recette_nom, feedback=feedback, contexte=contexte
         )
 
         if success:
             # Mettre à jour le cache session
             fb = FeedbackRecette(
-                recette_id=recette_id,
+                recette_id=0,
                 recette_nom=recette_nom,
                 feedback=feedback,
                 contexte=contexte,
@@ -134,9 +134,9 @@ def ajouter_feedback(recette_id: int, recette_nom: str, feedback: str, contexte:
             if _keys("feedbacks") not in st.session_state:
                 st.session_state[_keys("feedbacks")] = []
 
-            # Remplacer si feedback existant
+            # Remplacer si feedback existant (par nom)
             st.session_state[_keys("feedbacks")] = [
-                f for f in st.session_state[_keys("feedbacks")] if f.recette_id != recette_id
+                f for f in st.session_state[_keys("feedbacks")] if f.recette_nom != recette_nom
             ]
             st.session_state[_keys("feedbacks")].append(fb)
 
@@ -146,7 +146,7 @@ def ajouter_feedback(recette_id: int, recette_nom: str, feedback: str, contexte:
         logger.error(f"❌ Erreur ajout feedback: {e}")
         # Fallback: sauvegarder en session seulement
         fb = FeedbackRecette(
-            recette_id=recette_id,
+            recette_id=0,
             recette_nom=recette_nom,
             feedback=feedback,
             contexte=contexte,
@@ -154,6 +154,6 @@ def ajouter_feedback(recette_id: int, recette_nom: str, feedback: str, contexte:
         if _keys("feedbacks") not in st.session_state:
             st.session_state[_keys("feedbacks")] = []
         st.session_state[_keys("feedbacks")] = [
-            f for f in st.session_state[_keys("feedbacks")] if f.recette_id != recette_id
+            f for f in st.session_state[_keys("feedbacks")] if f.recette_nom != recette_nom
         ]
         st.session_state[_keys("feedbacks")].append(fb)
