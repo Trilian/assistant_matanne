@@ -190,6 +190,7 @@ class _SessionKeys:
     PLANNING_RECHAUFFE_RESUME = "planning_rechauffe_resume"
     PLANNING_BASES_CHOISIES = "planning_bases_choisies"
     PLANNING_RECETTES_IMPOSEES = "planning_recettes_imposees"
+    PLANNING_MODE = "planning_mode"
     USER_PREFERENCES = "preferences_utilisateurs"
     RECIPE_FEEDBACKS = "retours_recettes"
 

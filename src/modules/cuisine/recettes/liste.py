@@ -1,10 +1,11 @@
 """
-Liste des recettes - Affichage et pagination.
+Liste des recettes - Affichage style Marmiton avec catégories et pagination.
 """
 
 import html
 import random
 import time
+from pathlib import Path
 
 import streamlit as st
 
@@ -17,10 +18,68 @@ from src.ui.keys import KeyNamespace
 
 _keys = KeyNamespace("recettes_liste")
 
+# Couleurs par catégorie pour les badges
+_CAT_COLORS = {
+    "Plat": "#4CAF50",
+    "Entrée": "#2196F3",
+    "Dessert": "#FF9800",
+    "Accompagnement": "#9C27B0",
+    "Apéritif": "#F44336",
+    "Petit-déjeuner": "#795548",
+    "Goûter": "#E91E63",
+}
+
+# Catégories pour les onglets
+_CATEGORIE_TABS = ["Tous", "Entrées", "Plats", "Desserts", "Accompagnements", "Autres"]
+_CAT_TAB_MAP = {
+    "Entrées": "Entrée",
+    "Plats": "Plat",
+    "Desserts": "Dessert",
+    "Accompagnements": "Accompagnement",
+}
+_MAIN_CATS = {"Entrée", "Plat", "Dessert", "Accompagnement"}
+
+
+def _afficher_image(recette):
+    """Affiche l'image d'une recette (locale ou URL)."""
+    if recette.url_image:
+        # Chemin local
+        if not recette.url_image.startswith("http") and Path(recette.url_image).exists():
+            st.image(recette.url_image, use_container_width=True)
+        else:
+            try:
+                nom_safe = html.escape(recette.nom, quote=True)
+                st.markdown(
+                    f'<div style="height: 160px; width: 100%; overflow: hidden; '
+                    f'border-radius: 8px 8px 0 0; margin-bottom: 6px;">'
+                    f'<img src="{recette.url_image}" loading="lazy" decoding="async" '
+                    f'alt="{nom_safe}" style="width: 100%; height: 100%; object-fit: cover;" />'
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+            except Exception:
+                _afficher_placeholder()
+    else:
+        _afficher_placeholder()
+
+
+def _afficher_placeholder():
+    """Affiche un placeholder image."""
+    food_emojis = ["🍽️", "🍳", "🥘", "🍲", "🥗", "🍜", "🥧", "🍰", "🥩", "🐟"]
+    emoji = random.choice(food_emojis)
+    st.markdown(
+        f'<div style="height: 160px; width: 100%; border-radius: 8px 8px 0 0; '
+        f"margin-bottom: 6px; "
+        f"background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); "
+        f"display: flex; align-items: center; justify-content: center; "
+        f'font-size: 50px; opacity: 0.8;">{emoji}</div>',
+        unsafe_allow_html=True,
+    )
+
 
 @ui_fragment
 def afficher_liste():
-    """Affiche la liste des recettes avec pagination"""
+    """Affiche la liste des recettes avec catégories style Marmiton et pagination."""
     service = obtenir_service_recettes()
 
     if service is None:
@@ -31,9 +90,16 @@ def afficher_liste():
     if _keys("page") not in st.session_state:
         st.session_state[_keys("page")] = 0
 
-    key_page_size = _keys("page_size_val")
+    # ── Onglets catégories ──
+    selected_cat = st.radio(
+        "Catégorie",
+        _CATEGORIE_TABS,
+        horizontal=True,
+        key=_keys("cat_tab"),
+        label_visibility="collapsed",
+    )
 
-    # Contrôles de pagination en haut
+    # ── Contrôles affichage ──
     col_size1, col_size2, col_size3 = st.columns([2, 1.5, 2])
     with col_size1:
         st.caption("👁️ Options d'affichage")
@@ -41,16 +107,16 @@ def afficher_liste():
         page_size = st.selectbox(
             "Recettes/page",
             [6, 9, 12, 15],
-            index=1,  # défaut : 9
-            key=key_page_size,
+            index=1,
+            key=_keys("page_size_val"),
             label_visibility="collapsed",
         )
     with col_size3:
-        st.write("")  # Espacement
+        st.write("")
 
     PAGE_SIZE = page_size
 
-    # Filtres
+    # ── Filtres ──
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         nom_filter = st.text_input(
@@ -122,7 +188,7 @@ def afficher_liste():
         with col_tags[2]:
             congelable = st.checkbox("❄️ Congélable", key=_keys("tag_congelable"))
 
-    # Chercher les recettes
+    # ── Recherche ──
     type_repas_filter = None if type_repas == "Tous" else type_repas
     difficulte_filter = None if difficulte == "Tous" else difficulte
 
@@ -133,16 +199,24 @@ def afficher_liste():
         limit=200,
     )
 
-    # Appliquer filtres en mémoire (remplace Specification pattern)
+    # Filtre par nom
     if nom_filter and nom_filter.strip():
         search_term = nom_filter.strip().lower()
         recettes = [r for r in recettes if search_term in r.nom.lower()]
 
+    # Filtre par catégorie (onglet)
+    if selected_cat != "Tous":
+        if selected_cat == "Autres":
+            recettes = [r for r in recettes if getattr(r, "categorie", "Plat") not in _MAIN_CATS]
+        else:
+            target_cat = _CAT_TAB_MAP.get(selected_cat, selected_cat)
+            recettes = [r for r in recettes if getattr(r, "categorie", "Plat") == target_cat]
+
     # Filtres avancés: scores
     if min_score_bio > 0:
-        recettes = [r for r in recettes if getattr(r, "score_bio", 0) or 0 >= min_score_bio]
+        recettes = [r for r in recettes if (getattr(r, "score_bio", 0) or 0) >= min_score_bio]
     if min_score_local > 0:
-        recettes = [r for r in recettes if getattr(r, "score_local", 0) or 0 >= min_score_local]
+        recettes = [r for r in recettes if (getattr(r, "score_local", 0) or 0) >= min_score_local]
 
     # Filtres robots
     robot_mapping = {
@@ -173,7 +247,7 @@ def afficher_liste():
         )
         return
 
-    # Pagination
+    # ── Pagination ──
     total_pages = (len(recettes) + PAGE_SIZE - 1) // PAGE_SIZE
     st.session_state[_keys("page")] = min(st.session_state[_keys("page")], total_pages - 1)
 
@@ -181,180 +255,115 @@ def afficher_liste():
     end_idx = start_idx + PAGE_SIZE
     page_recettes = recettes[start_idx:end_idx]
 
-    st.success(
-        f"✅ {len(recettes)} recette(s) trouvée(s) | Page {st.session_state[_keys('page')] + 1}/{total_pages}"
+    st.caption(
+        f"{len(recettes)} recette(s) · Page {st.session_state[_keys('page')] + 1}/{total_pages}"
     )
 
-    # Afficher en grid avec badges
+    # ── Grille de cartes style Marmiton ──
     cols = st.columns(3, gap="small")
     for idx, recette in enumerate(page_recettes):
         with cols[idx % 3]:
-            # Container avec flexbox minimal
             with st.container(border=True):
-                # Image avec hauteur RÉDUITE (100px) et conteneur strictement dimensionné
-                if recette.url_image:
-                    try:
-                        st.markdown(
-                            f'<div style="height: 100px; width: 100%; overflow: hidden; border-radius: 6px; margin-bottom: 6px; background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%); display: flex; align-items: center; justify-content: center;"><img src="{recette.url_image}" loading="lazy" decoding="async" alt="{recette.nom}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;" /></div>',
-                            unsafe_allow_html=True,
-                        )
-                    except Exception:
-                        st.markdown(
-                            '<div style="height: 100px; width: 100%; border-radius: 6px; margin-bottom: 6px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 40px; opacity: 0.3;">🖼️</div>',
-                            unsafe_allow_html=True,
-                        )
-                else:
-                    food_emojis = ["🍽️", "🍳", "🥘", "🍲", "🥗", "🍜"]
-                    emoji = random.choice(food_emojis)
-                    st.markdown(
-                        f'<div style="height: 100px; width: 100%; border-radius: 6px; margin-bottom: 6px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 40px; opacity: 0.3;">{emoji}</div>',
-                        unsafe_allow_html=True,
-                    )
+                # Image plus grande
+                _afficher_image(recette)
 
-                # Titre et infos compactes - HAUTEUR FIXE
-                difficulty_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(
-                    recette.difficulte, "⚫"
-                )
-
-                # Échapper le nom pour éviter les problèmes d'encodage
-                nom_echappé = html.escape(recette.nom, quote=True)
+                # Badge catégorie
+                cat = getattr(recette, "categorie", "Plat")
+                cat_color = _CAT_COLORS.get(cat, "#757575")
                 st.markdown(
-                    f"<h4 style='margin: 6px 0; line-height: 1.3; font-size: 15px; min-height: 3.9em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; word-break: break-word;'>{difficulty_emoji} {nom_echappé}</h4>",
+                    f'<span style="background: {cat_color}; color: white; padding: 2px 10px; '
+                    f'border-radius: 12px; font-size: 11px; font-weight: 500;">{cat}</span>',
                     unsafe_allow_html=True,
                 )
 
-                # Description sur hauteur fixe pour éviter décalage
-                if recette.description:
-                    # Limiter à ~250 caractères pour laisser la CSS faire le clamp sur 3 lignes
-                    desc = recette.description
-                    # Tronquer à limite mais sans couper mid-word
-                    if len(desc) > 250:
-                        truncated = desc[:250]
-                        last_space = truncated.rfind(" ")
-                        if last_space > 150:
-                            desc = truncated[:last_space] + "..."
-                        else:
-                            desc = truncated + "..."
-                    st.markdown(
-                        f"<p style='margin: 4px 0; font-size: 11px; opacity: 0.7; min-height: 3.3em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;'>{desc}</p>",
-                        unsafe_allow_html=True,
-                    )
-                else:
-                    st.markdown(
-                        "<p style='margin: 4px 0; font-size: 11px; opacity: 0; min-height: 3.3em;'>&nbsp;</p>",
-                        unsafe_allow_html=True,
-                    )
+                # Titre
+                difficulty_emoji = {"facile": "🟢", "moyen": "🟡", "difficile": "🔴"}.get(
+                    recette.difficulte, "⚫"
+                )
+                nom_safe = html.escape(recette.nom, quote=True)
+                st.markdown(
+                    f"<h4 style='margin: 6px 0 4px 0; line-height: 1.3; font-size: 15px; "
+                    f"min-height: 2.6em; overflow: hidden; display: -webkit-box; "
+                    f"-webkit-line-clamp: 2; -webkit-box-orient: vertical; "
+                    f"word-break: break-word;'>{difficulty_emoji} {nom_safe}</h4>",
+                    unsafe_allow_html=True,
+                )
 
-                # Badges et robots sur la même ligne
-                badge_definitions = {
-                    "🌱": "Bio",
-                    "🚜": "Local",
-                    "⚡": "Rapide",
-                    "💪": "Équilibré",
-                    "❄️": "Congélable",
-                }
+                # Ligne compacte: temps + difficulté + portions
+                temps = recette.temps_preparation or 0
+                st.markdown(
+                    f"<div style='font-size: 12px; opacity: 0.7; margin-bottom: 4px;'>"
+                    f"⏱️ {temps}min · {recette.difficulte} · 👥 {recette.portions} pers."
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
 
-                all_badges = []
-
+                # Badges (bio, local, rapide, etc.)
+                badges = []
                 if recette.est_bio:
-                    all_badges.append(
-                        f'<span title="{badge_definitions["🌱"]}" style="cursor: help;">🌱</span>'
-                    )
+                    badges.append("🌱")
                 if recette.est_local:
-                    all_badges.append(
-                        f'<span title="{badge_definitions["🚜"]}" style="cursor: help;">🚜</span>'
-                    )
+                    badges.append("🚜")
                 if recette.est_rapide:
-                    all_badges.append(
-                        f'<span title="{badge_definitions["⚡"]}" style="cursor: help;">⚡</span>'
-                    )
+                    badges.append("⚡")
                 if recette.est_equilibre:
-                    all_badges.append(
-                        f'<span title="{badge_definitions["💪"]}" style="cursor: help;">💪</span>'
-                    )
+                    badges.append("💪")
                 if recette.congelable:
-                    all_badges.append(
-                        f'<span title="{badge_definitions["❄️"]}" style="cursor: help;">❄️</span>'
-                    )
-
+                    badges.append("❄️")
                 if recette.robots_compatibles:
                     robots_icons = {
-                        "Cookeo": ("🤖", "Cookeo"),
-                        "Monsieur Cuisine": ("👨‍🍳", "MC"),
-                        "Airfryer": ("🌪️", "Airfryer"),
-                        "Multicooker": ("🍳", "MC"),
+                        "Cookeo": "🤖",
+                        "Monsieur Cuisine": "👨‍🍳",
+                        "Airfryer": "🌪️",
+                        "Multicooker": "🍳",
                     }
                     for robot in recette.robots_compatibles:
-                        icon, tooltip = robots_icons.get(robot, ("🤖", robot))
-                        all_badges.append(
-                            f'<span title="{tooltip}" style="cursor: help;">{icon}</span>'
-                        )
+                        badges.append(robots_icons.get(robot, "🤖"))
 
-                if all_badges:
-                    all_badges_html = " ".join(all_badges)
+                if badges:
                     st.markdown(
-                        f"<p style='margin: 2px 0; font-size: 13px;'>{all_badges_html}</p>",
-                        unsafe_allow_html=True,
-                    )
-
-                st.divider()
-
-                # Infos principales (3 colonnes compactes)
-                info_cols = st.columns(3, gap="small")
-                with info_cols[0]:
-                    st.markdown(
-                        f"<div style='text-align: center; font-size: 13px;'><div>⏱️</div><div style='font-weight: bold;'>{recette.temps_preparation}m</div></div>",
-                        unsafe_allow_html=True,
-                    )
-                with info_cols[1]:
-                    st.markdown(
-                        f"<div style='text-align: center; font-size: 13px;'><div>👥</div><div style='font-weight: bold;'>{recette.portions}</div></div>",
-                        unsafe_allow_html=True,
-                    )
-                with info_cols[2]:
-                    cal = recette.calories if recette.calories else "─"
-                    st.markdown(
-                        f"<div style='text-align: center; font-size: 13px;'><div>🔥</div><div style='font-weight: bold;'>{cal}</div></div>",
+                        f"<p style='margin: 2px 0 6px 0; font-size: 14px;'>"
+                        f"{' '.join(badges)}</p>",
                         unsafe_allow_html=True,
                     )
 
                 # Bouton voir détails
                 if st.button(
-                    "👁️ Voir détails", use_container_width=True, key=_keys("detail", recette.id)
+                    "Voir la recette",
+                    use_container_width=True,
+                    key=_keys("detail", recette.id),
+                    type="primary",
                 ):
                     st.session_state[_keys("detail_id")] = recette.id
-                    # Mirror to global session key for cross-module compatibility
                     st.session_state[SK.DETAIL_RECETTE_ID] = recette.id
                     rerun()
 
                 # Bouton supprimer avec popover confirmation
-                with st.popover("🗑️ Supprimer", width="stretch"):
-                    st.warning(f"⚠️ Êtes-vous sûr de vouloir supprimer:\n\n**{recette.nom}** ?")
+                with st.popover("🗑️", use_container_width=True):
+                    st.warning(f"Supprimer **{recette.nom}** ?")
                     col_del_oui, col_del_non = st.columns(2)
                     with col_del_oui:
                         if st.button(
-                            "✅ Oui, supprimer", width="stretch", key=_keys("del_oui", recette.id)
+                            "Oui", use_container_width=True, key=_keys("del_oui", recette.id)
                         ):
                             if service:
                                 try:
-                                    with st.spinner("Suppression en cours..."):
-                                        if service.delete(recette.id):
-                                            st.success("✅ Recette supprimée!")
-                                            st.session_state[_keys("detail_id")] = None
-                                            st.session_state[SK.DETAIL_RECETTE_ID] = None
-                                            time.sleep(1)
-                                            rerun()
-                                        else:
-                                            st.error("❌ Impossible de supprimer la recette")
+                                    if service.delete(recette.id):
+                                        st.success("Recette supprimée")
+                                        st.session_state[SK.DETAIL_RECETTE_ID] = None
+                                        time.sleep(1)
+                                        rerun()
+                                    else:
+                                        st.error("Impossible de supprimer")
                                 except Exception as e:
-                                    st.error(f"❌ Erreur lors de la suppression: {str(e)}")
+                                    st.error(f"Erreur: {e}")
                     with col_del_non:
                         if st.button(
-                            "❌ Annuler", width="stretch", key=_keys("del_non", recette.id)
+                            "Non", use_container_width=True, key=_keys("del_non", recette.id)
                         ):
                             rerun()
 
-    # Pagination controls
+    # ── Pagination controls ──
     st.divider()
     col1, col2, col3, col4, col5 = st.columns(5)
 

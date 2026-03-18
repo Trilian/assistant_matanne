@@ -4,9 +4,11 @@ Détail d'une recette - Affichage complet avec historique et versions.
 
 import random
 import time
+from pathlib import Path
 
 import streamlit as st
 
+from src.core.session_keys import SK
 from src.core.state import rerun
 from src.services.cuisine.recettes import obtenir_service_recettes
 from src.ui import etat_vide
@@ -37,12 +39,15 @@ def afficher_detail_recette(recette):
     # Image si disponible
     if recette.url_image:
         try:
-            st.markdown(
-                f'<img src="{recette.url_image}" loading="lazy" decoding="async" '
-                f'alt="{recette.nom}" style="max-width: 400px; width: 100%; '
-                f'height: auto; border-radius: 8px; object-fit: cover;" />',
-                unsafe_allow_html=True,
-            )
+            if not recette.url_image.startswith("http") and Path(recette.url_image).exists():
+                st.image(recette.url_image, width=400)
+            else:
+                st.markdown(
+                    f'<img src="{recette.url_image}" loading="lazy" decoding="async" '
+                    f'alt="{recette.nom}" style="max-width: 400px; width: 100%; '
+                    f'height: auto; border-radius: 8px; object-fit: cover;" />',
+                    unsafe_allow_html=True,
+                )
             st.caption(recette.nom)
         except Exception:
             st.caption("🖼️ Image indisponible")
@@ -72,6 +77,46 @@ def afficher_detail_recette(recette):
 
     # Section génération d'image (fusionnée en une seule)
     afficher_generer_image(recette)
+
+    # Upload ou URL d'image
+    with st.expander("📷 Changer l'image", expanded=False):
+        img_tab1, img_tab2 = st.tabs(["Upload", "URL"])
+        with img_tab1:
+            new_image = st.file_uploader(
+                "Nouvelle image",
+                type=["jpg", "jpeg", "png"],
+                key=_keys("upload_img", recette.id),
+            )
+            if new_image and st.button("Sauvegarder l'image", key=_keys("save_upload", recette.id)):
+                try:
+                    import uuid
+
+                    images_dir = Path("data/recettes_images")
+                    images_dir.mkdir(parents=True, exist_ok=True)
+                    ext = new_image.name.split(".")[-1]
+                    fname = f"recette_{uuid.uuid4().hex[:8]}.{ext}"
+                    dest = images_dir / fname
+                    with open(dest, "wb") as f:
+                        f.write(new_image.getbuffer())
+                    svc = obtenir_service_recettes()
+                    if svc:
+                        svc.update(recette.id, {"url_image": str(dest)})
+                        st.success("Image mise à jour")
+                        rerun()
+                except Exception as e:
+                    st.error(f"Erreur: {e}")
+        with img_tab2:
+            new_url = st.text_input(
+                "URL de l'image",
+                key=_keys("url_img", recette.id),
+                placeholder="https://...",
+            )
+            if new_url and st.button("Sauvegarder l'URL", key=_keys("save_url", recette.id)):
+                svc = obtenir_service_recettes()
+                if svc:
+                    svc.update(recette.id, {"url_image": new_url.strip()})
+                    st.success("Image mise à jour")
+                    rerun()
 
     # Badges et caractéristiques
     badges = []
@@ -270,9 +315,7 @@ def afficher_detail_recette(recette):
                                 st.caption(f"• {etape}")
 
                         if version.temps_optimise_batch:
-                            st.caption(
-                                f"⏱️ Temps optimisé: {version.temps_optimise_batch} minutes"
-                            )
+                            st.caption(f"⏱️ Temps optimisé: {version.temps_optimise_batch} minutes")
             else:
                 etat_vide(
                     "Aucune version adaptée générée",
@@ -461,7 +504,7 @@ def afficher_detail_recette(recette):
                             with st.spinner("Suppression en cours..."):
                                 if service.delete(recette.id):
                                     st.success("✅ Recette supprimée!")
-                                    st.session_state.detail_recette_id = None
+                                    st.session_state[SK.DETAIL_RECETTE_ID] = None
                                     time.sleep(1)
                                     rerun()
                                 else:

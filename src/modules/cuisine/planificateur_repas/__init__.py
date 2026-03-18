@@ -9,6 +9,7 @@ Interface style Jow:
 - Validation équilibre nutritionnel
 """
 
+import json
 from datetime import date, timedelta
 
 import streamlit as st
@@ -128,7 +129,21 @@ def _sauvegarder_planning_db(planning_data: dict, date_debut: date, date_fin: da
                 recettes_selection=recettes_selection,
                 repas_extras=repas_extras,
             )
-            return planning is not None
+            if planning is not None:
+                # Persister les métadonnées (suggestions bio, conseils batch) dans notes
+                try:
+                    meta = {
+                        "conseils_batch": st.session_state.get(SK.PLANNING_CONSEILS, ""),
+                        "suggestions_bio": st.session_state.get(SK.PLANNING_SUGGESTIONS_BIO, []),
+                        "ingredients_communs": st.session_state.get(
+                            SK.PLANNING_INGREDIENTS_COMMUNS, {}
+                        ),
+                    }
+                    service.update(planning.id, {"notes": json.dumps(meta, ensure_ascii=False)})
+                except Exception as e:
+                    _logger.warning(f"Impossible de sauvegarder les métadonnées du planning: {e}")
+                return True
+            return False
         else:
             _logger.error("Aucune recette n'a pu être sauvegardée")
     except Exception as e:
@@ -221,11 +236,126 @@ def _charger_planning_actif_db() -> tuple[dict, date | None, str, list]:
             f"✅ Planning actif chargé depuis DB: {len(planning_data)} jours, "
             f"semaine du {date_debut}"
         )
-        return planning_data, date_debut, planning.notes or "", []
+
+        # Décoder les métadonnées depuis le champ notes (JSON)
+        notes_raw = planning.notes or ""
+        conseils = ""
+        suggestions_bio = []
+        try:
+            notes_parsed = json.loads(notes_raw)
+            if isinstance(notes_parsed, dict):
+                conseils = notes_parsed.get("conseils_batch", "")
+                suggestions_bio = notes_parsed.get("suggestions_bio", [])
+            else:
+                conseils = notes_raw
+        except (json.JSONDecodeError, TypeError):
+            conseils = notes_raw
+
+        return planning_data, date_debut, conseils, suggestions_bio
 
     except Exception as e:
         _logger.debug(f"Erreur chargement planning actif: {e}")
         return {}, None, "", []
+
+
+def _afficher_selection_manuelle(date_debut: date, date_fin: date):
+    """Affiche la sélection manuelle de recettes pour chaque jour/slot."""
+    from src.services.cuisine.recettes import obtenir_service_recettes
+
+    service_recettes = obtenir_service_recettes()
+    if not service_recettes:
+        st.error("Service recettes indisponible")
+        return
+
+    all_recipes = service_recettes.get_all(limit=500)
+    if not all_recipes:
+        st.info("Aucune recette en base. Ajoutez des recettes d'abord.")
+        return
+
+    recipe_names = {r.nom: r for r in all_recipes}
+    recipe_options = ["(Aucun)"] + sorted(recipe_names.keys())
+
+    nb_jours = (date_fin - date_debut).days + 1
+    planning = {}
+
+    for i in range(nb_jours):
+        jour_date = date_debut + timedelta(days=i)
+        jour_nom = JOURS_SEMAINE[jour_date.weekday()]
+
+        with st.expander(f"{jour_nom} {jour_date.strftime('%d/%m')}", expanded=(i < 3)):
+            col_midi, col_soir = st.columns(2)
+            with col_midi:
+                midi_choice = st.selectbox(
+                    "Midi",
+                    recipe_options,
+                    key=_keys("manual_midi", i),
+                )
+            with col_soir:
+                soir_choice = st.selectbox(
+                    "Soir",
+                    recipe_options,
+                    key=_keys("manual_soir", i),
+                )
+
+            jour_data = {}
+            if midi_choice != "(Aucun)" and midi_choice in recipe_names:
+                r = recipe_names[midi_choice]
+                jour_data["midi"] = {
+                    "nom": r.nom,
+                    "id": r.id,
+                    "proteine": r.type_proteines,
+                    "temps_minutes": r.temps_preparation or 30,
+                    "difficulte": r.difficulte or "moyen",
+                }
+            if soir_choice != "(Aucun)" and soir_choice in recipe_names:
+                r = recipe_names[soir_choice]
+                jour_data["soir"] = {
+                    "nom": r.nom,
+                    "id": r.id,
+                    "proteine": r.type_proteines,
+                    "temps_minutes": r.temps_preparation or 30,
+                    "difficulte": r.difficulte or "moyen",
+                }
+            if jour_data:
+                planning[jour_nom] = jour_data
+
+    if st.button("Valider mon planning", type="primary", use_container_width=True):
+        if not planning:
+            st.warning("Sélectionnez au moins un repas")
+        else:
+            st.session_state[SK.PLANNING_DATA] = planning
+            st.session_state[SK.PLANNING_VALIDE] = False
+            st.success(f"✅ Planning créé avec {sum(len(v) for v in planning.values())} repas")
+            rerun()
+
+
+def _matcher_recettes_db(planning: dict):
+    """Match les noms de recettes IA contre la DB et injecte les ID."""
+    try:
+        from src.services.cuisine.recettes import obtenir_service_recettes
+
+        service = obtenir_service_recettes()
+        if not service:
+            return
+
+        all_recipes = service.get_all(limit=500)
+        name_to_id = {r.nom.lower().strip(): r.id for r in all_recipes}
+
+        matched = 0
+        for _jour, repas in planning.items():
+            for slot in ["midi", "soir"]:
+                meal = repas.get(slot)
+                if meal and isinstance(meal, dict) and not meal.get("id"):
+                    nom = (meal.get("nom") or "").lower().strip()
+                    if nom in name_to_id:
+                        meal["id"] = name_to_id[nom]
+                        matched += 1
+        if matched:
+            import logging
+
+            logging.getLogger(__name__).info(f"Mode mixte: {matched} recettes matchées avec la DB")
+    except Exception:
+        pass
 
 
 @profiler_rerun("planificateur_repas")
@@ -431,128 +561,156 @@ def app():
 
             st.divider()
 
-            # Bouton génération
-            _bases = st.session_state.get(SK.PLANNING_BASES_CHOISIES, {}) or None
-            _recettes_imp = [
-                line.strip()
-                for line in st.session_state.get(SK.PLANNING_RECETTES_IMPOSEES, "").split("\n")
-                if line.strip()
-            ] or None
-            col_gen1, col_gen2, col_gen3 = st.columns([2, 2, 1])
+            # ── Mode de planification ──
+            st.markdown("##### Mode de planification")
+            planning_mode = st.radio(
+                "Source des recettes",
+                ["Générer avec IA", "Utiliser mes recettes", "Mix des deux"],
+                horizontal=True,
+                key=_keys("planning_mode"),
+                label_visibility="collapsed",
+            )
+            st.session_state[SK.PLANNING_MODE] = planning_mode
 
-            with col_gen1:
-                if st.button("🎲 Générer une semaine", type="primary", use_container_width=True):
-                    with st.spinner("🤖 L'IA réfléchit à vos menus..."):
-                        # Calculer les jours à planifier depuis les dates choisies
-                        nb_jours_plan = (date_fin - date_debut).days + 1
-                        jours_a_planifier = [
-                            JOURS_SEMAINE[(date_debut + timedelta(days=i)).weekday()]
-                            for i in range(nb_jours_plan)
-                        ]
-                        result = generer_semaine_ia(
-                            date_debut,
-                            date_fin=date_fin,
-                            jours_a_planifier=jours_a_planifier,
-                            bases_choisies=_bases,
-                            recettes_imposees=_recettes_imp,
-                        )
+            st.divider()
 
-                        if result and result.get("semaine"):
-                            # Convertir en format interne
-                            planning = {}
-                            for jour_data in result["semaine"]:
-                                jour = jour_data.get("jour", "")
-                                planning[jour] = {}
-                                for slot in ["midi", "soir"]:
-                                    meal = jour_data.get(slot)
-                                    if meal and isinstance(meal, dict):
-                                        # Nouveau format: {entree, plat, dessert, dessert_jules}
-                                        if "plat" in meal and isinstance(meal["plat"], dict):
-                                            plat = meal["plat"]
-                                            # Filtrer les plats "réchauffé"
-                                            nom_plat = (plat.get("nom") or "").lower()
-                                            if any(
-                                                x in nom_plat
-                                                for x in (
-                                                    "réchauffé",
-                                                    "rechauffe",
-                                                    "restes de",
-                                                    "reste de",
-                                                )
-                                            ):
-                                                continue
-                                            planning[jour][slot] = {
-                                                **plat,
-                                                "entree": meal.get("entree"),
-                                                "dessert": meal.get("dessert"),
-                                                "dessert_jules": meal.get("dessert_jules"),
-                                            }
+            # ── Mode "Mes recettes" : sélection manuelle ──
+            if planning_mode == "Utiliser mes recettes":
+                _afficher_selection_manuelle(date_debut, date_fin)
+
+            # ── Mode IA ou Mix ──
+            else:
+                # Bouton génération
+                _bases = st.session_state.get(SK.PLANNING_BASES_CHOISIES, {}) or None
+                _recettes_imp = [
+                    line.strip()
+                    for line in st.session_state.get(SK.PLANNING_RECETTES_IMPOSEES, "").split("\n")
+                    if line.strip()
+                ] or None
+                col_gen1, col_gen2, col_gen3 = st.columns([2, 2, 1])
+
+                with col_gen1:
+                    if st.button(
+                        "🎲 Générer une semaine", type="primary", use_container_width=True
+                    ):
+                        with st.spinner("🤖 L'IA réfléchit à vos menus..."):
+                            # Calculer les jours à planifier depuis les dates choisies
+                            nb_jours_plan = (date_fin - date_debut).days + 1
+                            jours_a_planifier = [
+                                JOURS_SEMAINE[(date_debut + timedelta(days=i)).weekday()]
+                                for i in range(nb_jours_plan)
+                            ]
+                            result = generer_semaine_ia(
+                                date_debut,
+                                date_fin=date_fin,
+                                jours_a_planifier=jours_a_planifier,
+                                bases_choisies=_bases,
+                                recettes_imposees=_recettes_imp,
+                                mode="mixte" if planning_mode == "Mix des deux" else "ia",
+                            )
+
+                            if result and result.get("semaine"):
+                                # Convertir en format interne
+                                planning = {}
+                                for jour_data in result["semaine"]:
+                                    jour = jour_data.get("jour", "")
+                                    planning[jour] = {}
+                                    for slot in ["midi", "soir"]:
+                                        meal = jour_data.get(slot)
+                                        if meal and isinstance(meal, dict):
+                                            # Nouveau format: {entree, plat, dessert, dessert_jules}
+                                            if "plat" in meal and isinstance(meal["plat"], dict):
+                                                plat = meal["plat"]
+                                                # Filtrer les plats "réchauffé"
+                                                nom_plat = (plat.get("nom") or "").lower()
+                                                if any(
+                                                    x in nom_plat
+                                                    for x in (
+                                                        "réchauffé",
+                                                        "rechauffe",
+                                                        "restes de",
+                                                        "reste de",
+                                                    )
+                                                ):
+                                                    continue
+                                                planning[jour][slot] = {
+                                                    **plat,
+                                                    "entree": meal.get("entree"),
+                                                    "dessert": meal.get("dessert"),
+                                                    "dessert_jules": meal.get("dessert_jules"),
+                                                }
+                                            else:
+                                                # Ancien format: {nom, proteine, ...} directement
+                                                nom_plat = (meal.get("nom") or "").lower()
+                                                if any(
+                                                    x in nom_plat
+                                                    for x in (
+                                                        "réchauffé",
+                                                        "rechauffe",
+                                                        "restes de",
+                                                        "reste de",
+                                                    )
+                                                ):
+                                                    continue
+                                                planning[jour][slot] = meal
                                         else:
-                                            # Ancien format: {nom, proteine, ...} directement
-                                            nom_plat = (meal.get("nom") or "").lower()
-                                            if any(
-                                                x in nom_plat
-                                                for x in (
-                                                    "réchauffé",
-                                                    "rechauffe",
-                                                    "restes de",
-                                                    "reste de",
-                                                )
-                                            ):
-                                                continue
                                             planning[jour][slot] = meal
-                                    else:
-                                        planning[jour][slot] = meal
-                                # Goûter (inchangé)
-                                planning[jour]["gouter"] = jour_data.get("gouter")
+                                    # Goûter (inchangé)
+                                    planning[jour]["gouter"] = jour_data.get("gouter")
 
-                            st.session_state[SK.PLANNING_DATA] = planning
-                            st.session_state[SK.PLANNING_CONSEILS] = result.get(
-                                "conseils_batch", ""
-                            )
-                            st.session_state[SK.PLANNING_SUGGESTIONS_BIO] = result.get(
-                                "suggestions_bio", []
-                            )
-                            st.session_state[SK.PLANNING_INGREDIENTS_COMMUNS] = result.get(
-                                "ingredients_communs_semaine", {}
-                            )
-                            st.session_state[SK.PLANNING_RECHAUFFE_RESUME] = result.get(
-                                "repas_rechauffe_resume", []
-                            )
-                            st.session_state[SK.PLANNING_VALIDE] = False
+                                st.session_state[SK.PLANNING_DATA] = planning
+                                st.session_state[SK.PLANNING_CONSEILS] = result.get(
+                                    "conseils_batch", ""
+                                )
+                                st.session_state[SK.PLANNING_SUGGESTIONS_BIO] = result.get(
+                                    "suggestions_bio", []
+                                )
+                                st.session_state[SK.PLANNING_INGREDIENTS_COMMUNS] = result.get(
+                                    "ingredients_communs_semaine", {}
+                                )
+                                st.session_state[SK.PLANNING_RECHAUFFE_RESUME] = result.get(
+                                    "repas_rechauffe_resume", []
+                                )
+                                st.session_state[SK.PLANNING_VALIDE] = False
 
-                            st.success("✅ Semaine générée!")
-                            rerun()
-                        else:
-                            st.error("❌ Impossible de générer la semaine")
+                                # En mode mixte, matcher les noms IA contre la DB
+                                if planning_mode == "Mix des deux":
+                                    _matcher_recettes_db(planning)
 
-            with col_gen2:
-                if st.button("📦 Utiliser mon stock", use_container_width=True):
-                    try:
-                        from src.services.inventaire import obtenir_service_inventaire
+                                st.success("✅ Semaine générée!")
+                                rerun()
+                            else:
+                                st.error("❌ Impossible de générer la semaine")
 
-                        service_inv = obtenir_service_inventaire()
-                        stock = service_inv.get_inventaire_complet() if service_inv else []
-                        if stock:
-                            noms_stock = [p["ingredient_nom"] for p in stock[:20]]
-                            st.session_state[SK.PLANNING_STOCK_CONTEXT] = noms_stock
-                            st.success(f"✅ {len(noms_stock)} produits chargés depuis votre stock")
-                            st.caption("Cliquez sur 'Générer une semaine' pour les intégrer")
-                        else:
-                            st.info("📦 Stock vide. Ajoutez des produits dans l'inventaire.")
-                    except Exception as e:
-                        import logging
+                with col_gen2:
+                    if st.button("📦 Utiliser mon stock", use_container_width=True):
+                        try:
+                            from src.services.inventaire import obtenir_service_inventaire
 
-                        logging.getLogger(__name__).error(f"Erreur chargement stock: {e}")
-                        st.warning("⚠️ Impossible de charger le stock")
+                            service_inv = obtenir_service_inventaire()
+                            stock = service_inv.get_inventaire_complet() if service_inv else []
+                            if stock:
+                                noms_stock = [p["ingredient_nom"] for p in stock[:20]]
+                                st.session_state[SK.PLANNING_STOCK_CONTEXT] = noms_stock
+                                st.success(
+                                    f"✅ {len(noms_stock)} produits chargés depuis votre stock"
+                                )
+                                st.caption("Cliquez sur 'Générer une semaine' pour les intégrer")
+                            else:
+                                st.info("📦 Stock vide. Ajoutez des produits dans l'inventaire.")
+                        except Exception as e:
+                            import logging
 
-            with col_gen3:
-                if st.button("🔄 Reset", use_container_width=True):
-                    st.session_state[SK.PLANNING_DATA] = {}
-                    st.session_state[SK.PLANNING_INGREDIENTS_COMMUNS] = {}
-                    st.session_state[SK.PLANNING_RECHAUFFE_RESUME] = []
-                    st.session_state[SK.PLANNING_VALIDE] = False
-                    rerun()
+                            logging.getLogger(__name__).error(f"Erreur chargement stock: {e}")
+                            st.warning("⚠️ Impossible de charger le stock")
+
+                with col_gen3:
+                    if st.button("🔄 Reset", use_container_width=True):
+                        st.session_state[SK.PLANNING_DATA] = {}
+                        st.session_state[SK.PLANNING_INGREDIENTS_COMMUNS] = {}
+                        st.session_state[SK.PLANNING_RECHAUFFE_RESUME] = []
+                        st.session_state[SK.PLANNING_VALIDE] = False
+                        rerun()
 
             st.divider()
 

@@ -23,11 +23,29 @@ def generer_semaine_ia(
     jours_a_planifier: list[str] | None = None,
     bases_choisies: dict[str, list[str]] | None = None,
     recettes_imposees: list[str] | None = None,
+    mode: str = "ia",
 ) -> dict:
-    """Génère une semaine complète avec l'IA."""
+    """Génère une semaine complète avec l'IA.
+
+    Args:
+        mode: "ia" (génération pure IA) ou "mixte" (priorité recettes DB).
+    """
 
     prefs = charger_preferences()
     feedbacks = charger_feedbacks()
+
+    # En mode mixte, charger les noms de recettes existantes
+    recettes_existantes = None
+    if mode == "mixte":
+        try:
+            from src.services.cuisine.recettes import obtenir_service_recettes
+
+            service = obtenir_service_recettes()
+            if service:
+                all_recipes = service.get_all(limit=200)
+                recettes_existantes = [r.nom for r in all_recipes] if all_recipes else None
+        except Exception:
+            pass
 
     prompt = generer_prompt_semaine(
         prefs,
@@ -36,6 +54,7 @@ def generer_semaine_ia(
         jours_a_planifier,
         bases_choisies=bases_choisies,
         recettes_imposees=recettes_imposees,
+        recettes_existantes=recettes_existantes,
     )
 
     try:

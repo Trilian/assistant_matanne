@@ -74,6 +74,20 @@ def afficher_ajouter_manuel():
             "Saison", ["toute_année", "printemps", "été", "automne", "hiver"], key=_keys("saison")
         )
 
+    col1, col2 = st.columns(2)
+    with col1:
+        categorie = st.selectbox(
+            "Catégorie",
+            ["Plat", "Entrée", "Dessert", "Accompagnement", "Apéritif", "Petit-déjeuner", "Goûter"],
+            key=_keys("categorie"),
+        )
+    with col2:
+        url_image_input = st.text_input(
+            "URL image (optionnel)",
+            key=_keys("url_image"),
+            placeholder="https://...",
+        )
+
     # Ingrédients
     st.markdown("### Ingrédients")
     col1, col2 = st.columns([3, 1])
@@ -153,6 +167,8 @@ def afficher_ajouter_manuel():
                             f.write(image_file.getbuffer())
 
                         url_image = str(image_path)
+                    elif url_image_input and url_image_input.strip():
+                        url_image = url_image_input.strip()
 
                     data = {
                         "nom": nom,
@@ -163,6 +179,7 @@ def afficher_ajouter_manuel():
                         "portions": int(portions),
                         "difficulte": difficulte,
                         "saison": saison,
+                        "categorie": categorie,
                         "ingredients": ingredients,
                         "etapes": etapes,
                         "url_image": url_image,

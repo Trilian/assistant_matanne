@@ -102,6 +102,22 @@ class ServiceRecettes(
     # SECTION 1 : CRUD OPTIMISÉ
     # ═══════════════════════════════════════════════════════════
 
+    @avec_session_db
+    def delete_all(self, db: Session) -> int:
+        """Supprime toutes les recettes et leurs données associées."""
+        # Supprimer les données liées en cascade
+        count_etapes = db.query(EtapeRecette).delete()
+        count_ri = db.query(RecetteIngredient).delete()
+        count_versions = db.query(VersionRecette).delete()
+        count = db.query(Recette).delete()
+        db.commit()
+        self._invalider_cache()
+        logger.info(
+            f"Toutes les recettes supprimées ({count} recettes, "
+            f"{count_ri} ingrédients, {count_etapes} étapes, {count_versions} versions)"
+        )
+        return count
+
     @chronometre("recettes.chargement_complet", seuil_alerte_ms=1500)
     @avec_cache(ttl=3600, key_func=lambda self, recette_id: f"recette_full_{recette_id}")
     @avec_session_db

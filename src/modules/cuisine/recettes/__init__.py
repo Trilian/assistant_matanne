@@ -19,6 +19,7 @@ import requests
 import streamlit as st
 
 from src.core.monitoring.rerun_profiler import profiler_rerun
+from src.core.session_keys import SK
 from src.core.state import rerun
 from src.modules._framework import error_boundary
 from src.services.cuisine.recettes import get_recipe_import_service
@@ -320,21 +321,72 @@ def app():
             except Exception as e:
                 st.error(f"Erreur chargement exemples: {e}")
 
+    # ── Admin: Gestion base de recettes ──
+    with st.expander("Gestion base de recettes", expanded=False):
+        col_reset1, col_reset2 = st.columns(2)
+        with col_reset1:
+            with st.popover("Supprimer toutes les recettes", use_container_width=True):
+                st.warning("Toutes les recettes seront définitivement supprimées.")
+                if st.button(
+                    "Confirmer la suppression", key=_keys("confirm_reset_yes"), type="primary"
+                ):
+                    service = obtenir_service_recettes()
+                    if service:
+                        try:
+                            count = service.delete_all()
+                            st.success(f"{count} recettes supprimées")
+                            import time
+
+                            time.sleep(1)
+                            rerun()
+                        except Exception as e:
+                            st.error(f"Erreur: {e}")
+        with col_reset2:
+            if st.button(
+                "Recharger recettes d'exemple", key=_keys("reload_seed"), use_container_width=True
+            ):
+                try:
+                    fpath = Path("data") / "recettes_standard.json"
+                    if fpath.exists():
+                        service = obtenir_service_recettes()
+                        if service:
+                            with open(fpath, encoding="utf-8") as fh:
+                                raw = json.load(fh)
+                            data = (
+                                raw if isinstance(raw, list) else raw.get("recettes_standard", [])
+                            )
+                            count = 0
+                            for item in data:
+                                try:
+                                    service.create_complete(item)
+                                    count += 1
+                                except Exception:
+                                    continue
+                            st.success(f"{count} recettes d'exemple rechargées")
+                            import time
+
+                            time.sleep(1)
+                            rerun()
+                    else:
+                        st.error("Fichier d'exemples introuvable")
+                except Exception as e:
+                    st.error(f"Erreur: {e}")
+
     # Gérer l'état de la vue détails
-    if _keys("detail_id") not in st.session_state:
-        st.session_state[_keys("detail_id")] = None
+    if SK.DETAIL_RECETTE_ID not in st.session_state:
+        st.session_state[SK.DETAIL_RECETTE_ID] = None
 
     # Si une recette est sélectionnée, afficher son détail
-    if st.session_state[_keys("detail_id")] is not None:
+    if st.session_state[SK.DETAIL_RECETTE_ID] is not None:
         service = obtenir_service_recettes()
         if service is not None:
-            recette = service.get_by_id_full(st.session_state[_keys("detail_id")])
+            recette = service.get_by_id_full(st.session_state[SK.DETAIL_RECETTE_ID])
             if recette:
                 # Bouton retour en haut avec icône visible
                 col_retour, col_titre = st.columns([1, 10])
                 with col_retour:
                     if st.button("⬅️", help="Retour à la liste", use_container_width=True):
-                        st.session_state[_keys("detail_id")] = None
+                        st.session_state[SK.DETAIL_RECETTE_ID] = None
                         rerun()
                 with col_titre:
                     st.write(f"**{recette.nom}**")
@@ -342,7 +394,7 @@ def app():
                 afficher_detail_recette(recette)
                 return
         st.error("❌ Recette non trouvée")
-        st.session_state[_keys("detail_id")] = None
+        st.session_state[SK.DETAIL_RECETTE_ID] = None
 
     # Sous-tabs avec deep linking URL et persistence d'état
     TAB_LABELS = ["📋 Liste", "➕ Ajouter Manuel", "📥 Importer", "⏰ Générer IA", "💬 Assistant"]

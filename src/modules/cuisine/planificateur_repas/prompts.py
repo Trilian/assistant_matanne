@@ -28,6 +28,7 @@ def generer_prompt_semaine(
     jours_a_planifier: list[str] = None,
     bases_choisies: dict[str, list[str]] | None = None,
     recettes_imposees: list[str] | None = None,
+    recettes_existantes: list[str] | None = None,
 ) -> str:
     """
     Genère un prompt pour l'IA pour creer une semaine de repas.
@@ -40,6 +41,7 @@ def generer_prompt_semaine(
         bases_choisies: Dict optionnel {legumes: [...], feculents: [...], proteines: [...]}
                         Si fourni, l'IA DOIT utiliser ces ingrédients comme base.
         recettes_imposees: Liste de plats spécifiques que l'utilisateur veut cette semaine
+        recettes_existantes: Liste de noms de recettes en DB (mode mixte)
 
     Returns:
         Prompt formate pour l'IA
@@ -92,6 +94,21 @@ def generer_prompt_semaine(
 - Complète le reste de la semaine avec d'autres recettes pour respecter l'équilibre demandé.
 - Si un plat imposé est végétarien, il compte dans le quota végétarien.
 - Si un plat imposé contient du poisson, précise le type (blanc ou gras) dans "proteine"."""
+
+    # Section recettes existantes en base (mode mixte)
+    section_recettes_db = ""
+    if recettes_existantes:
+        noms_limites = recettes_existantes[:40]
+        noms_formatted = "\n".join(f"  - {nom}" for nom in noms_limites)
+        section_recettes_db = f"""
+
+RECETTES DISPONIBLES DANS LA BASE (PRIORITAIRES):
+- L'utilisateur possède {len(recettes_existantes)} recettes en base de données.
+- Tu DOIS utiliser EN PRIORITÉ ces recettes existantes pour remplir le planning.
+- Utilise au minimum 60% de recettes de cette liste.
+- Pour les recettes issues de cette liste, utilise EXACTEMENT le nom tel qu'écrit.
+- Voici les noms disponibles:
+{noms_formatted}"""
 
     prompt = f"""Tu es un assistant culinaire familial expert en BATCH COOKING et organisation hebdomadaire.
 Génère un planning de repas COMPLET pour une famille, optimisé pour minimiser le temps de préparation.
@@ -150,6 +167,7 @@ JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
 
 {section_bases}
 {section_recettes_imposees}
+{section_recettes_db}
 
 ⚡ MIX SIMPLE / ÉLABORÉ:
 - La MAJORITÉ des repas (8-10 sur 14) doivent être SIMPLES et RAPIDES (≤ 25 min, "difficulte": "facile").

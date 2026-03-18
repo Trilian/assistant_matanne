@@ -326,6 +326,27 @@ def afficher_carte_recette_suggestion(
             recette_id = suggestion.get("id")
             if recette_id:
                 _afficher_details_recette_inline(recette_id)
+            else:
+                # Tenter de trouver la recette en DB par nom
+                nom_recette = suggestion.get("nom", "")
+                _found = False
+                if nom_recette:
+                    try:
+                        from src.services.cuisine.recettes import obtenir_service_recettes
+
+                        svc = obtenir_service_recettes()
+                        if svc:
+                            matches = svc.search_advanced(term=nom_recette, limit=1)
+                            if matches and matches[0].nom.lower() == nom_recette.lower():
+                                _afficher_details_recette_inline(matches[0].id)
+                                _found = True
+                    except Exception:
+                        pass
+                if not _found:
+                    st.caption(
+                        "Recette générée par IA — sauvegardez-la pour voir "
+                        "les ingrédients détaillés"
+                    )
 
         # ── Formulaire changement manuel ──
         if st.session_state.get(f"_manual_edit_{key_prefix}"):
