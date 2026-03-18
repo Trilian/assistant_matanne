@@ -183,6 +183,7 @@ class _SessionKeys:
     # ─── Cuisine / Planificateur Repas ────────────────
     PLANNING_DATA = "planning_data"
     PLANNING_DATE_DEBUT = "planning_date_debut"
+    PLANNING_DATE_FIN = "planning_date_fin"
     PLANNING_CONSEILS = "planning_conseils"
     PLANNING_SUGGESTIONS_BIO = "planning_suggestions_bio"
     USER_PREFERENCES = "preferences_utilisateurs"

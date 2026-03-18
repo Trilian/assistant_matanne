@@ -136,6 +136,7 @@ FORMAT DE RÉPONSE (JSON strict):
 }}
 
 IMPORTANT: Propose des recettes VARIÉES et ORIGINALES. Évite les classiques trop courants (pâtes bolo, poulet riz).
+⚠️ NE JAMAIS proposer de plats "réchauffé", "restes de", "réchauffé :" ou toute variante de restes/réchauffé. Chaque plat DOIT être une recette unique et indépendante.
 Seed aléatoire pour la variété: {random.randint(1000, 9999)}
 """
 

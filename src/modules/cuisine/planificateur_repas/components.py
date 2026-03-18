@@ -200,6 +200,11 @@ def afficher_carte_recette_suggestion(
 
             st.caption(" | ".join(tags))
 
+            # Détails recette: ingrédients et étapes
+            recette_id = suggestion.get("id")
+            if recette_id:
+                _afficher_details_recette_db(recette_id, f"{key_prefix}_details")
+
             # Version Jules
             if suggestion.get("jules_adaptation"):
                 with st.expander("👶 Instructions Jules", expanded=False):
@@ -289,6 +294,45 @@ def afficher_carte_recette_suggestion(
             with col_d2:
                 if dessert_jules:
                     st.caption(f"👶🍰 **Jules:** {dessert_jules}")
+
+
+def _afficher_details_recette_db(recette_id: int, key_prefix: str):
+    """Affiche les ingrédients et étapes d'une recette sauvegardée en DB."""
+    with st.expander("📋 Ingrédients & Préparation", expanded=False):
+        try:
+            from src.services.cuisine.recettes import obtenir_service_recettes
+
+            service = obtenir_service_recettes()
+            recette = service.get_by_id_full(recette_id) if service else None
+
+            if recette:
+                # Ingrédients
+                ingredients = getattr(recette, "ingredients", [])
+                if ingredients:
+                    st.markdown("**🥕 Ingrédients:**")
+                    for ri in ingredients:
+                        ingredient = getattr(ri, "ingredient", None)
+                        nom_str = getattr(ingredient, "nom", "") if ingredient else ""
+                        quantite = getattr(ri, "quantite", 0)
+                        unite = getattr(ri, "unite", "")
+                        if quantite and quantite > 0.01:
+                            st.caption(f"• {nom_str} — {quantite:g} {unite}")
+                        else:
+                            st.caption(f"• {nom_str}")
+
+                # Étapes
+                etapes = getattr(recette, "etapes", [])
+                if etapes:
+                    st.markdown("**👨‍🍳 Préparation:**")
+                    etapes_triees = sorted(etapes, key=lambda e: getattr(e, "ordre", 0))
+                    for etape in etapes_triees:
+                        ordre = getattr(etape, "ordre", "")
+                        desc = getattr(etape, "description", "")
+                        st.caption(f"{ordre}. {desc}")
+            else:
+                st.caption("Détails non disponibles")
+        except Exception:
+            st.caption("Détails non disponibles")
 
 
 def _afficher_edition_manuelle(suggestion: dict, jour: str, type_repas: str, key_prefix: str):

@@ -13,6 +13,7 @@ from datetime import date, timedelta
 
 import streamlit as st
 
+from src.core.constants import JOURS_SEMAINE
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.core.state import rerun
@@ -43,7 +44,7 @@ from .preferences import (
 )
 
 
-def _sauvegarder_planning_db(planning_data: dict, date_debut: date) -> bool:
+def _sauvegarder_planning_db(planning_data: dict, date_debut: date, date_fin: date) -> bool:
     """Sauvegarde le planning généré en base de données."""
     import logging
 
@@ -61,12 +62,14 @@ def _sauvegarder_planning_db(planning_data: dict, date_debut: date) -> bool:
         repas_extras = {}  # {slot_key: {entree, dessert, dessert_jules}}
         echecs = []
 
-        # S'assurer de l'ordre des jours (Lundi -> Dimanche)
-        jours_ordonnes = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+        # Calculer les jours réels entre date_debut et date_fin
+        nb_jours = (date_fin - date_debut).days + 1
+        jours_dates = [date_debut + timedelta(days=i) for i in range(nb_jours)]
+        jours_noms = [JOURS_SEMAINE[d.weekday()] for d in jours_dates]
 
         # Mapping des jours présents dans planning_data
-        for i, jour_nom in enumerate(jours_ordonnes):
-            # Chercher le jour dans les données (parfois le nom diffère légèrement)
+        for i, (jour_nom, jour_date) in enumerate(zip(jours_noms, jours_dates, strict=False)):
+            # Chercher le jour dans les données
             jour_data = None
             for j, d in planning_data.items():
                 if j.lower().startswith(jour_nom.lower()):
@@ -181,12 +184,16 @@ def app():
         st.session_state[SK.PLANNING_DATA] = {}
 
     if SK.PLANNING_DATE_DEBUT not in st.session_state:
-        # Par défaut: lundi prochain (début de semaine naturel)
+        # Par défaut: aujourd'hui
+        st.session_state[SK.PLANNING_DATE_DEBUT] = date.today()
+
+    if SK.PLANNING_DATE_FIN not in st.session_state:
+        # Par défaut: dimanche de cette semaine
         today = date.today()
-        days_until_monday = (0 - today.weekday()) % 7  # 0 = lundi
-        if days_until_monday == 0:
-            days_until_monday = 7  # Si on est lundi, aller au lundi suivant
-        st.session_state[SK.PLANNING_DATE_DEBUT] = today + timedelta(days=days_until_monday)
+        days_until_sunday = (6 - today.weekday()) % 7
+        if days_until_sunday == 0 and today.weekday() == 6:
+            days_until_sunday = 0  # Si on est dimanche, rester à aujourd'hui
+        st.session_state[SK.PLANNING_DATE_FIN] = today + timedelta(days=days_until_sunday)
 
     # Tabs avec deep linking URL
     TAB_LABELS = ["📅 Planifier", "⚙️ Préférences", "📋 Historique"]
@@ -204,18 +211,30 @@ def app():
 
             with col1:
                 date_debut = st.date_input(
-                    "📅 Début de la semaine",
+                    "📅 Début",
                     value=st.session_state[SK.PLANNING_DATE_DEBUT],
                     format="DD/MM/YYYY",
                 )
                 st.session_state[SK.PLANNING_DATE_DEBUT] = date_debut
 
             with col2:
-                date_fin = date_debut + timedelta(days=6)  # Lundi → Dimanche = 7 jours
-                st.markdown(f"**→** Dimanche {date_fin.strftime('%d/%m/%Y')}")
+                date_fin = st.date_input(
+                    "📅 Fin",
+                    value=st.session_state[SK.PLANNING_DATE_FIN],
+                    min_value=date_debut,
+                    max_value=date_debut + timedelta(days=13),
+                    format="DD/MM/YYYY",
+                )
+                st.session_state[SK.PLANNING_DATE_FIN] = date_fin
 
             with col3:
-                st.write("")  # Spacer
+                nb_jours = (date_fin - date_debut).days + 1
+                jours_noms = [
+                    JOURS_SEMAINE[((date_debut + timedelta(days=i)).weekday())]
+                    for i in range(nb_jours)
+                ]
+                st.caption(f"{nb_jours} jours")
+                st.caption(f"{jours_noms[0]} → {jours_noms[-1]}")
 
             st.divider()
 
@@ -231,7 +250,13 @@ def app():
             with col_gen1:
                 if st.button("🎲 Générer une semaine", type="primary", use_container_width=True):
                     with st.spinner("🤖 L'IA réfléchit à vos menus..."):
-                        result = generer_semaine_ia(date_debut)
+                        # Calculer les jours à planifier depuis les dates choisies
+                        nb_jours_plan = (date_fin - date_debut).days + 1
+                        jours_a_planifier = [
+                            JOURS_SEMAINE[(date_debut + timedelta(days=i)).weekday()]
+                            for i in range(nb_jours_plan)
+                        ]
+                        result = generer_semaine_ia(date_debut, date_fin, jours_a_planifier)
 
                         if result and result.get("semaine"):
                             # Convertir en format interne
@@ -244,14 +269,38 @@ def app():
                                     if meal and isinstance(meal, dict):
                                         # Nouveau format: {entree, plat, dessert, dessert_jules}
                                         if "plat" in meal and isinstance(meal["plat"], dict):
+                                            plat = meal["plat"]
+                                            # Filtrer les plats "réchauffé"
+                                            nom_plat = (plat.get("nom") or "").lower()
+                                            if any(
+                                                x in nom_plat
+                                                for x in (
+                                                    "réchauffé",
+                                                    "rechauffe",
+                                                    "restes de",
+                                                    "reste de",
+                                                )
+                                            ):
+                                                continue
                                             planning[jour][slot] = {
-                                                **meal["plat"],
+                                                **plat,
                                                 "entree": meal.get("entree"),
                                                 "dessert": meal.get("dessert"),
                                                 "dessert_jules": meal.get("dessert_jules"),
                                             }
                                         else:
                                             # Ancien format: {nom, proteine, ...} directement
+                                            nom_plat = (meal.get("nom") or "").lower()
+                                            if any(
+                                                x in nom_plat
+                                                for x in (
+                                                    "réchauffé",
+                                                    "rechauffe",
+                                                    "restes de",
+                                                    "reste de",
+                                                )
+                                            ):
+                                                continue
                                             planning[jour][slot] = meal
                                     else:
                                         planning[jour][slot] = meal
@@ -305,10 +354,20 @@ def app():
 
                 st.divider()
 
-                # Afficher par jour
-                for i, (jour, repas) in enumerate(st.session_state[SK.PLANNING_DATA].items()):
+                # Afficher par jour — mapping correct jour/date
+                nb_jours_affich = (date_fin - date_debut).days + 1
+                planning_data = st.session_state[SK.PLANNING_DATA]
+                for i in range(nb_jours_affich):
                     jour_date = date_debut + timedelta(days=i)
-                    afficher_jour_planning(jour, jour_date, repas, f"jour_{i}")
+                    jour_nom = JOURS_SEMAINE[jour_date.weekday()]
+                    # Chercher le jour dans les données du planning
+                    repas = None
+                    for j, d in planning_data.items():
+                        if j.lower().startswith(jour_nom.lower()):
+                            repas = d
+                            break
+                    if repas:
+                        afficher_jour_planning(jour_nom, jour_date, repas, f"jour_{i}")
 
                 st.divider()
 
@@ -334,7 +393,7 @@ def app():
                     ):
                         with st.spinner("Sauvegarde en cours..."):
                             saved = _sauvegarder_planning_db(
-                                st.session_state[SK.PLANNING_DATA], date_debut
+                                st.session_state[SK.PLANNING_DATA], date_debut, date_fin
                             )
                         if saved:
                             st.session_state[SK.PLANNING_VALIDE] = True
@@ -348,7 +407,7 @@ def app():
                             # Auto-sauvegarder le planning en DB pour que le module courses le trouve
                             if not st.session_state.get(SK.PLANNING_VALIDE):
                                 saved = _sauvegarder_planning_db(
-                                    st.session_state[SK.PLANNING_DATA], date_debut
+                                    st.session_state[SK.PLANNING_DATA], date_debut, date_fin
                                 )
                                 if saved:
                                     st.session_state[SK.PLANNING_VALIDE] = True
