@@ -406,7 +406,8 @@ def app():
         if planning_db:
             st.session_state[SK.PLANNING_DATA] = planning_db
             st.session_state[SK.PLANNING_VALIDE] = True
-            if date_db:
+            # Ne restaurer les dates que si le planning est encore actuel (pas dans le passé)
+            if date_db and date_db >= date.today() - timedelta(days=date.today().weekday()):
                 st.session_state[SK.PLANNING_DATE_DEBUT] = date_db
             if conseils_db:
                 st.session_state[SK.PLANNING_CONSEILS] = conseils_db
