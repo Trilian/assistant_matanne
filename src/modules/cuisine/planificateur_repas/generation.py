@@ -331,6 +331,13 @@ IMPORTANT:
         }
 
         service = obtenir_service_recettes()
+
+        # Deduplication: vérifier si une recette avec ce nom existe déjà
+        existing = service.find_existing_recette(nom)
+        if existing:
+            logger.info(f"Recette existante réutilisée : '{nom}' (ID: {existing.id})")
+            return existing.id
+
         recette = service.create_complete(data)
         if recette:
             logger.info(f"✅ Recette IA sauvegardée : {nom} (ID: {recette.id})")

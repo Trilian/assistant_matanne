@@ -338,30 +338,36 @@ def _afficher_selection_manuelle(date_debut: date, date_fin: date):
 
 
 def _matcher_recettes_db(planning: dict):
-    """Match les noms de recettes IA contre la DB et injecte les ID."""
+    """Match les noms de recettes IA contre la DB et injecte les ID (matching normalisé)."""
     try:
         from src.services.cuisine.recettes import obtenir_service_recettes
+        from src.services.cuisine.recettes.utils import normaliser_nom_recette
 
         service = obtenir_service_recettes()
         if not service:
             return
 
         all_recipes = service.get_all(limit=500)
-        name_to_id = {r.nom.lower().strip(): r.id for r in all_recipes}
+        # Construire un mapping nom normalisé → id (garder le premier trouvé)
+        name_to_id = {}
+        for r in all_recipes:
+            key = normaliser_nom_recette(r.nom)
+            if key and key not in name_to_id:
+                name_to_id[key] = r.id
 
         matched = 0
         for _jour, repas in planning.items():
             for slot in ["midi", "soir"]:
                 meal = repas.get(slot)
                 if meal and isinstance(meal, dict) and not meal.get("id"):
-                    nom = (meal.get("nom") or "").lower().strip()
-                    if nom in name_to_id:
-                        meal["id"] = name_to_id[nom]
+                    nom_norm = normaliser_nom_recette(meal.get("nom", ""))
+                    if nom_norm in name_to_id:
+                        meal["id"] = name_to_id[nom_norm]
                         matched += 1
         if matched:
             import logging
 
-            logging.getLogger(__name__).info(f"Mode mixte: {matched} recettes matchées avec la DB")
+            logging.getLogger(__name__).info(f"{matched} recettes matchées avec la DB")
     except Exception:
         pass
 
@@ -688,9 +694,8 @@ def app():
                                 )
                                 st.session_state[SK.PLANNING_VALIDE] = False
 
-                                # En mode mixte, matcher les noms IA contre la DB
-                                if planning_mode == "Mix des deux":
-                                    _matcher_recettes_db(planning)
+                                # Matcher les noms IA contre les recettes existantes en DB
+                                _matcher_recettes_db(planning)
 
                                 st.success("✅ Semaine générée!")
                                 rerun()

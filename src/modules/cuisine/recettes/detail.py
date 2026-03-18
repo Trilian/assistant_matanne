@@ -210,6 +210,30 @@ def afficher_detail_recette(recette):
         for etape in sorted(recette.etapes, key=lambda e: e.ordre or 0):
             st.markdown(f"**Étape {etape.ordre}:** {etape.description}")
 
+    # Bouton régénérer si données fallback (1 ingrédient générique, 1 étape générique)
+    _is_fallback = (len(recette.ingredients) <= 1 and len(recette.etapes) <= 1) or (
+        len(recette.etapes) == 1
+        and "selon la recette" in (recette.etapes[0].description or "").lower()
+    )
+    if _is_fallback and recette.genere_par_ia:
+        st.divider()
+        st.warning("Cette recette a des données incomplètes (ingrédients/étapes génériques).")
+        if st.button(
+            "🔄 Régénérer les détails avec l'IA",
+            key=_keys("regen_details", recette.id),
+            use_container_width=True,
+        ):
+            with st.spinner("🤖 Régénération des ingrédients et étapes..."):
+                from src.modules.cuisine.planificateur_repas.components import (
+                    _regenerer_details_recette,
+                )
+
+                if _regenerer_details_recette(recette.id):
+                    st.success("✅ Détails régénérés !")
+                    rerun()
+                else:
+                    st.error("❌ Échec de la régénération")
+
     # Historique d'utilisation
     st.divider()
     st.markdown("### 📊 Historique d'utilisation")

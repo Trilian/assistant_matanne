@@ -279,6 +279,19 @@ def afficher_carte_recette_suggestion(
         with col5:
             nom_recette = suggestion.get("nom", "")
             sauvegardees: set = st.session_state.get(SK.RECETTES_IA_SAUVEGARDEES, set())
+
+            # Vérifier aussi la DB (pas juste la session)
+            if nom_recette and nom_recette not in sauvegardees:
+                try:
+                    from src.services.cuisine.recettes import obtenir_service_recettes
+
+                    _svc = obtenir_service_recettes()
+                    if _svc and _svc.find_existing_recette(nom_recette):
+                        sauvegardees.add(nom_recette)
+                        st.session_state[SK.RECETTES_IA_SAUVEGARDEES] = sauvegardees
+                except Exception:
+                    pass
+
             if nom_recette in sauvegardees:
                 st.button(
                     "✅",
@@ -353,6 +366,173 @@ def afficher_carte_recette_suggestion(
             _afficher_edition_manuelle(suggestion, jour, type_repas, key_prefix)
 
 
+def _est_recette_fallback(recette) -> bool:
+    """Détecte si une recette a des données minimales/fallback (1 ingrédient générique, 1 étape générique)."""
+    ingredients = getattr(recette, "ingredients", [])
+    etapes = getattr(recette, "etapes", [])
+
+    if len(ingredients) <= 1 and len(etapes) <= 1:
+        return True
+
+    # Vérifier si l'unique étape est un fallback "Préparer X selon la recette"
+    if len(etapes) == 1:
+        desc = getattr(etapes[0], "description", "")
+        if "selon la recette" in desc.lower():
+            return True
+
+    return False
+
+
+def _regenerer_details_recette(recette_id: int) -> bool:
+    """Régénère les détails (description, ingrédients, étapes, temps) d'une recette existante via l'IA."""
+    import logging
+    import re
+
+    _logger = logging.getLogger(__name__)
+
+    try:
+        from src.core.ai import obtenir_client_ia
+        from src.core.db.session import obtenir_contexte_db
+        from src.core.models.recettes import EtapeRecette, RecetteIngredient
+        from src.services.cuisine.recettes import obtenir_service_recettes
+
+        service = obtenir_service_recettes()
+        if not service:
+            return False
+
+        recette = service.get_by_id_full(recette_id)
+        if not recette:
+            return False
+
+        client = obtenir_client_ia()
+        if not client:
+            return False
+
+        # Contexte robot
+        robot_context = ""
+        robots = recette.robots_compatibles
+        if robots:
+            robot_context = f"\nCette recette peut être préparée avec : {', '.join(robots)}. Adapte les étapes si pertinent."
+
+        prompt = f"""Génère les détails complets pour la recette : "{recette.nom}".
+Contexte : famille de 2 adultes + 1 bébé de 19 mois.
+Protéine principale : {recette.type_proteines or "non spécifiée"}.{robot_context}
+
+Réponds UNIQUEMENT en JSON valide :
+{{
+  "description": "Description appétissante de la recette en 1-2 phrases",
+  "temps_preparation": <temps de préparation en minutes (entier)>,
+  "temps_cuisson": <temps de cuisson en minutes (entier)>,
+  "portions": <nombre de portions (entier, typiquement 4)>,
+  "ingredients": [
+    {{"nom": "nom ingrédient", "quantite": 200, "unite": "g"}},
+    {{"nom": "autre ingrédient", "quantite": 1, "unite": "pièce"}}
+  ],
+  "etapes": [
+    "Description détaillée de l'étape 1...",
+    "Description détaillée de l'étape 2...",
+    "Description détaillée de l'étape 3..."
+  ]
+}}
+IMPORTANT:
+- La description doit être appétissante et décrire le plat, PAS mentionner l'IA.
+- Liste TOUS les ingrédients nécessaires (minimum 4-5), avec des quantités réalistes.
+- Détaille TOUTES les étapes de préparation (minimum 3-4 étapes).
+- Les temps doivent être réalistes. Les quantités en grammes, cl, pièces, etc."""
+
+        details = client.generer_json(
+            prompt,
+            system_prompt="Tu es un chef cuisinier expert en cuisine familiale.",
+            max_tokens=2000,
+        )
+
+        if not details or not isinstance(details, dict):
+            return False
+
+        # Mise à jour des champs de la recette
+        update_data = {}
+
+        desc_ia = details.get("description", "")
+        if desc_ia and "ia" not in desc_ia.lower() and "planificateur" not in desc_ia.lower():
+            update_data["description"] = desc_ia
+
+        temps_prep = details.get("temps_preparation")
+        if isinstance(temps_prep, int | float) and temps_prep > 0:
+            update_data["temps_preparation"] = int(temps_prep)
+
+        temps_cuisson = details.get("temps_cuisson")
+        if isinstance(temps_cuisson, int | float) and temps_cuisson > 0:
+            update_data["temps_cuisson"] = int(temps_cuisson)
+
+        portions = details.get("portions")
+        if isinstance(portions, int | float) and portions > 0:
+            update_data["portions"] = int(min(portions, 20))
+
+        if update_data:
+            service.update(recette_id, update_data)
+
+        # Remplacer ingrédients et étapes en DB
+        ingredients_raw = details.get("ingredients", [])
+        etapes_raw = details.get("etapes", [])
+
+        if ingredients_raw and len(ingredients_raw) > 1:
+            with obtenir_contexte_db() as db:
+                # Supprimer les anciens ingrédients
+                db.query(RecetteIngredient).filter(
+                    RecetteIngredient.recette_id == recette_id
+                ).delete()
+
+                # Créer les nouveaux
+                for ing in ingredients_raw:
+                    q = ing.get("quantite", 0)
+                    unite = ing.get("unite", "pièce")
+                    try:
+                        if isinstance(q, str):
+                            match = re.search(r"(\d+([.,]\d+)?)", q.replace(",", "."))
+                            q = float(match.group(1)) if match else 0.01
+                        else:
+                            q = float(q)
+                    except (ValueError, TypeError):
+                        q = 0.01
+                    if q <= 0:
+                        q = 0.01
+
+                    ingredient = service._find_or_create_ingredient(db, ing.get("nom", "inconnu"))
+                    ri = RecetteIngredient(
+                        recette_id=recette_id,
+                        ingredient_id=ingredient.id,
+                        quantite=q,
+                        unite=unite or "pièce",
+                    )
+                    db.add(ri)
+
+                db.commit()
+
+        if etapes_raw and len(etapes_raw) > 1:
+            with obtenir_contexte_db() as db:
+                # Supprimer les anciennes étapes
+                db.query(EtapeRecette).filter(EtapeRecette.recette_id == recette_id).delete()
+
+                # Créer les nouvelles
+                for idx, etape in enumerate(etapes_raw):
+                    desc = etape if isinstance(etape, str) else etape.get("description", "")
+                    e = EtapeRecette(
+                        recette_id=recette_id,
+                        ordre=idx + 1,
+                        description=desc,
+                    )
+                    db.add(e)
+
+                db.commit()
+
+        _logger.info(f"✅ Détails régénérés pour recette {recette_id}: {recette.nom}")
+        return True
+
+    except Exception as e:
+        _logger.error(f"Erreur régénération détails recette {recette_id}: {e}")
+        return False
+
+
 def _afficher_details_recette_inline(recette_id: int):
     """Affiche les ingrédients et étapes d'une recette sauvegardée en DB (sans expander)."""
     try:
@@ -385,6 +565,20 @@ def _afficher_details_recette_inline(recette_id: int):
                     ordre = getattr(etape, "ordre", "")
                     desc = getattr(etape, "description", "")
                     st.caption(f"{ordre}. {desc}")
+
+            # Bouton régénérer si données fallback
+            if _est_recette_fallback(recette):
+                st.warning("Cette recette a des données incomplètes.")
+                if st.button(
+                    "🔄 Régénérer les détails avec l'IA",
+                    key=f"regen_{recette_id}",
+                ):
+                    with st.spinner("🤖 Régénération en cours..."):
+                        if _regenerer_details_recette(recette_id):
+                            st.success("✅ Détails régénérés !")
+                            rerun()
+                        else:
+                            st.error("❌ Échec de la régénération")
         else:
             st.caption("Détails non disponibles")
     except Exception:

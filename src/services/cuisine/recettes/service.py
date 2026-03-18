@@ -264,6 +264,37 @@ class ServiceRecettes(
         return recette
 
     # ═══════════════════════════════════════════════════════════
+    # SECTION 1b : DEDUPLICATION
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_session_db
+    def find_existing_recette(self, nom: str, db: Session | None = None) -> Recette | None:
+        """Cherche une recette existante par nom normalisé (sans accents, lowercase).
+
+        Args:
+            nom: Nom de la recette à chercher
+            db: Session DB (injectée)
+
+        Returns:
+            Recette existante ou None si non trouvée
+        """
+        from .utils import normaliser_nom_recette
+
+        nom_normalise = normaliser_nom_recette(nom)
+        if not nom_normalise:
+            return None
+
+        # Utiliser le premier mot comme filtre ilike pour restreindre les candidats
+        first_word = nom_normalise.split()[0] if nom_normalise else ""
+        candidates = db.query(Recette).filter(Recette.nom.ilike(f"%{first_word}%")).limit(50).all()
+
+        for recette in candidates:
+            if normaliser_nom_recette(recette.nom) == nom_normalise:
+                return recette
+
+        return None
+
+    # ═══════════════════════════════════════════════════════════
     # SECTION 2 : GÉNÉRATION IA (AVEC CACHE ET VALIDATION)
     # NOTE: Les méthodes de génération IA (generer_recettes_ia,
     # generer_variantes_recette_ia, generer_version_bebe,

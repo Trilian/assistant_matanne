@@ -7,6 +7,8 @@ testées unitairement sans mocking.
 
 import csv
 import json
+import re
+import unicodedata
 from io import StringIO
 
 # ═══════════════════════════════════════════════════════════
@@ -23,6 +25,35 @@ ROBOTS_COMPATIBLES = {
     "airfryer": {"nom": "Airfryer", "temps_reduction": 0.75},
     "multicooker": {"nom": "Multicooker", "temps_reduction": 0.85},
 }
+
+
+# ═══════════════════════════════════════════════════════════
+# NORMALISATION NOM RECETTE (DEDUPLICATION)
+# ═══════════════════════════════════════════════════════════
+
+
+def normaliser_nom_recette(nom: str) -> str:
+    """Normalise un nom de recette pour la comparaison de deduplication.
+
+    Applique: strip, lowercase, suppression accents (NFD), collapse espaces.
+
+    Examples:
+        >>> normaliser_nom_recette("Poulet Rôti")
+        'poulet roti'
+        >>> normaliser_nom_recette("Pâtes  Carbonara")
+        'pates carbonara'
+        >>> normaliser_nom_recette("Gratin Dauphinois ")
+        'gratin dauphinois'
+    """
+    if not nom:
+        return ""
+    s = nom.strip().lower()
+    # Suppression accents: decompose NFD puis retire les marques combinatoires
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    # Collapse espaces multiples
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
 
 
 # ═══════════════════════════════════════════════════════════
@@ -655,6 +686,8 @@ __all__ = [
     "TYPES_REPAS",
     "SAISONS",
     "ROBOTS_COMPATIBLES",
+    # Normalisation
+    "normaliser_nom_recette",
     # Export CSV
     "export_recettes_to_csv",
     "parse_csv_to_recettes",
