@@ -32,6 +32,7 @@ from .periodes import (
     plage_dates,
 )
 from .semaines import (
+    jour_debut_from_nom,
     obtenir_bornes_semaine,
     obtenir_debut_semaine,
     obtenir_fin_semaine,
@@ -50,6 +51,7 @@ __all__ = [
     "obtenir_semaine_precedente",
     "obtenir_semaine_suivante",
     "semaines_entre",
+    "jour_debut_from_nom",
     # Périodes
     "obtenir_bornes_mois",
     "obtenir_trimestre",

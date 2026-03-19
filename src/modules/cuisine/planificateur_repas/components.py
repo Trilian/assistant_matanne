@@ -801,12 +801,26 @@ def afficher_jour_planning(
 def afficher_resume_equilibre(planning_data: dict):
     """Affiche le résumé de l'équilibre nutritionnel."""
 
-    # Compter les types de protéines
+    # Compter les types de protéines (blanc/gras séparés)
     equilibre = {
-        "poisson": 0,
+        "poisson_blanc": 0,
+        "poisson_gras": 0,
         "viande_rouge": 0,
         "volaille": 0,
         "vegetarien": 0,
+    }
+
+    # Mapping des catégories PROTEINES → clés equilibre
+    _CAT_MAPPING = {
+        "poisson_blanc": "poisson_blanc",
+        "poisson_gras": "poisson_gras",
+        "poisson": "poisson_blanc",  # fallback générique
+        "fruits_mer": "poisson_blanc",
+        "viande_rouge": "viande_rouge",
+        "viande": "viande_rouge",  # porc, etc.
+        "volaille": "volaille",
+        "vegetarien": "vegetarien",
+        "vegan": "vegetarien",
     }
 
     for jour, repas in planning_data.items():
@@ -815,10 +829,9 @@ def afficher_resume_equilibre(planning_data: dict):
                 prot = repas[type_repas]["proteine"]
                 if prot in PROTEINES:
                     cat = PROTEINES[prot]["categorie"]
-                    if cat in equilibre:
-                        equilibre[cat] += 1
-                    elif cat in ("viande", "volaille"):
-                        equilibre["volaille"] += 1
+                    eq_key = _CAT_MAPPING.get(cat)
+                    if eq_key:
+                        equilibre[eq_key] += 1
 
     prefs = charger_preferences()
 
@@ -846,20 +859,24 @@ def afficher_resume_equilibre(planning_data: dict):
                 f"{total_slots - planned} repas manquants — Le planificateur IA peut compléter !"
             )
 
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
 
     with col1:
-        delta = equilibre["poisson"] - prefs.poisson_par_semaine
-        st.metric("🐟 Poisson", equilibre["poisson"], delta=f"{delta:+d}" if delta else None)
+        delta = equilibre["poisson_blanc"] - prefs.poisson_blanc_par_semaine
+        st.metric("🐟 P. blanc", equilibre["poisson_blanc"], delta=f"{delta:+d}" if delta else None)
 
     with col2:
+        delta = equilibre["poisson_gras"] - prefs.poisson_gras_par_semaine
+        st.metric("🐠 P. gras", equilibre["poisson_gras"], delta=f"{delta:+d}" if delta else None)
+
+    with col3:
         delta = equilibre["vegetarien"] - prefs.vegetarien_par_semaine
         st.metric("🥬 Végé", equilibre["vegetarien"], delta=f"{delta:+d}" if delta else None)
 
-    with col3:
+    with col4:
         st.metric("🐔 Volaille", equilibre["volaille"])
 
-    with col4:
+    with col5:
         delta = equilibre["viande_rouge"] - prefs.viande_rouge_max
         color = "inverse" if delta > 0 else "normal"
         st.metric(

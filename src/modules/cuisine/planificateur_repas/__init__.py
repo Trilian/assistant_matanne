@@ -15,6 +15,7 @@ from datetime import date, timedelta
 import streamlit as st
 
 from src.core.constants import JOURS_SEMAINE
+from src.core.date_utils import jour_debut_from_nom
 from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.core.state import rerun
@@ -423,22 +424,21 @@ def app():
             st.session_state[SK.PLANNING_DATA] = {}
 
     if SK.PLANNING_DATE_DEBUT not in st.session_state:
-        # Par défaut: prochain lundi (ou aujourd'hui si on est lundi)
+        # Par défaut: prochain jour de début de semaine selon les préférences
         today = date.today()
-        days_until_monday = (7 - today.weekday()) % 7
-        if days_until_monday == 0:
-            # On est lundi, rester à aujourd'hui
+        prefs_init = charger_preferences()
+        _jour_debut_wd = jour_debut_from_nom(prefs_init.jour_debut_semaine)
+        days_until_start = (_jour_debut_wd - today.weekday()) % 7
+        if days_until_start == 0:
+            # On est le jour de début, rester à aujourd'hui
             st.session_state[SK.PLANNING_DATE_DEBUT] = today
         else:
-            st.session_state[SK.PLANNING_DATE_DEBUT] = today + timedelta(days=days_until_monday)
+            st.session_state[SK.PLANNING_DATE_DEBUT] = today + timedelta(days=days_until_start)
 
     if SK.PLANNING_DATE_FIN not in st.session_state:
-        # Par défaut: dimanche de la semaine du planning (date_debut + 6 jours)
+        # Par défaut: 6 jours après le début (semaine complète)
         debut = st.session_state[SK.PLANNING_DATE_DEBUT]
-        days_until_sunday = (6 - debut.weekday()) % 7
-        if days_until_sunday == 0 and debut.weekday() == 6:
-            days_until_sunday = 0
-        st.session_state[SK.PLANNING_DATE_FIN] = debut + timedelta(days=days_until_sunday)
+        st.session_state[SK.PLANNING_DATE_FIN] = debut + timedelta(days=6)
 
     # Tabs avec deep linking URL
     TAB_LABELS = ["📅 Planifier", "⚙️ Préférences", "📋 Historique"]
@@ -642,18 +642,6 @@ def app():
                                             # Nouveau format: {entree, plat, dessert, dessert_jules}
                                             if "plat" in meal and isinstance(meal["plat"], dict):
                                                 plat = meal["plat"]
-                                                # Filtrer les plats "réchauffé"
-                                                nom_plat = (plat.get("nom") or "").lower()
-                                                if any(
-                                                    x in nom_plat
-                                                    for x in (
-                                                        "réchauffé",
-                                                        "rechauffe",
-                                                        "restes de",
-                                                        "reste de",
-                                                    )
-                                                ):
-                                                    continue
                                                 planning[jour][slot] = {
                                                     **plat,
                                                     "entree": meal.get("entree"),
@@ -662,17 +650,6 @@ def app():
                                                 }
                                             else:
                                                 # Ancien format: {nom, proteine, ...} directement
-                                                nom_plat = (meal.get("nom") or "").lower()
-                                                if any(
-                                                    x in nom_plat
-                                                    for x in (
-                                                        "réchauffé",
-                                                        "rechauffe",
-                                                        "restes de",
-                                                        "reste de",
-                                                    )
-                                                ):
-                                                    continue
                                                 planning[jour][slot] = meal
                                         else:
                                             planning[jour][slot] = meal
@@ -689,9 +666,28 @@ def app():
                                 st.session_state[SK.PLANNING_INGREDIENTS_COMMUNS] = result.get(
                                     "ingredients_communs_semaine", {}
                                 )
-                                st.session_state[SK.PLANNING_RECHAUFFE_RESUME] = result.get(
-                                    "repas_rechauffe_resume", []
-                                )
+
+                                # Recalculer le résumé réchauffés depuis les données réelles
+                                rechauffe_resume = []
+                                for jour_nom, repas_jour in planning.items():
+                                    for tr in ["midi", "soir"]:
+                                        slot_data = repas_jour.get(tr)
+                                        if (
+                                            slot_data
+                                            and isinstance(slot_data, dict)
+                                            and slot_data.get("est_rechauffe")
+                                        ):
+                                            rechauffe_resume.append(
+                                                {
+                                                    "midi": f"{jour_nom} {tr}",
+                                                    "source": slot_data.get(
+                                                        "rechauffe_de", "?"
+                                                    ),
+                                                    "plat": slot_data.get("nom", "?"),
+                                                }
+                                            )
+                                st.session_state[SK.PLANNING_RECHAUFFE_RESUME] = rechauffe_resume
+
                                 st.session_state[SK.PLANNING_VALIDE] = False
 
                                 # Matcher les noms IA contre les recettes existantes en DB
@@ -910,7 +906,7 @@ def app():
             if historique_plannings:
                 for plan in historique_plannings:
                     with st.container(border=True):
-                        col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
+                        col1, col2, col3, col4, col5 = st.columns([3, 1, 1, 1, 1])
                         with col1:
                             st.write(f"**📅 {plan['nom']}**")
                             st.caption(
@@ -923,9 +919,10 @@ def app():
                             st.write(badge)
                         with col4:
                             if st.button(
-                                "📂 Charger",
+                                "📂 Revoir",
                                 key=_keys("charger_planning", plan["id"]),
                                 use_container_width=True,
+                                help="Restaure ce planning comme planning actif pour le revoir ou le modifier",
                             ):
                                 planning_db, date_db, conseils_db, bio_db = (
                                     _charger_planning_actif_db(planning_id=plan["id"])
@@ -935,20 +932,55 @@ def app():
                                     st.session_state[SK.PLANNING_VALIDE] = True
                                     if date_db:
                                         st.session_state[SK.PLANNING_DATE_DEBUT] = date_db
-                                        days_until_sunday = (6 - date_db.weekday()) % 7
                                         st.session_state[SK.PLANNING_DATE_FIN] = (
-                                            date_db + timedelta(days=days_until_sunday)
+                                            date_db + timedelta(days=6)
                                         )
                                     if conseils_db:
                                         st.session_state[SK.PLANNING_CONSEILS] = conseils_db
                                     if bio_db:
                                         st.session_state[SK.PLANNING_SUGGESTIONS_BIO] = bio_db
-                                    st.success(
-                                        f"✅ Planning du {plan['debut'].strftime('%d/%m')} chargé !"
+                                    st.toast(
+                                        f"✅ Planning du {plan['debut'].strftime('%d/%m')} restauré"
                                     )
                                     rerun()
                                 else:
                                     st.error("❌ Impossible de charger ce planning")
+                        with col5:
+                            _del_key = _keys("suppr_planning", plan["id"])
+                            _confirm_key = _keys("confirm_suppr", plan["id"])
+                            if st.session_state.get(_confirm_key):
+                                if st.button(
+                                    "⚠️ Confirmer",
+                                    key=_del_key,
+                                    use_container_width=True,
+                                    type="primary",
+                                ):
+                                    try:
+                                        from src.services.cuisine.planning import (
+                                            obtenir_service_planning,
+                                        )
+
+                                        service = obtenir_service_planning()
+                                        service.delete(plan["id"])
+                                        st.session_state[_confirm_key] = False
+                                        st.toast("✅ Planning supprimé")
+                                        rerun()
+                                    except Exception as e:
+                                        import logging
+
+                                        logging.getLogger(__name__).error(
+                                            f"Erreur suppression planning: {e}"
+                                        )
+                                        st.error("❌ Erreur lors de la suppression")
+                            else:
+                                if st.button(
+                                    "🗑️",
+                                    key=_del_key,
+                                    use_container_width=True,
+                                    help="Supprimer ce planning",
+                                ):
+                                    st.session_state[_confirm_key] = True
+                                    rerun()
             else:
                 etat_vide(
                     "Aucun planning sauvegardé", "💭", "Générez votre premier planning de repas"

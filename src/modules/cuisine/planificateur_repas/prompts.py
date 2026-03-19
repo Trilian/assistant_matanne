@@ -110,6 +110,30 @@ RECETTES DISPONIBLES DANS LA BASE (PRIORITAIRES):
 - Voici les noms disponibles:
 {noms_formatted}"""
 
+    # Générer dynamiquement les exemples de réchauffés selon les jours planifiés
+    _jours = jours_a_planifier
+    _exemples_valides = []
+    _exemples_invalides = []
+    _premier_rechauffe = None
+    for idx, jour in enumerate(_jours):
+        # Un dîner du jour idx peut être réchauffé au midi du jour idx+2
+        if idx + 2 < len(_jours):
+            _exemples_valides.append(
+                f"    - {jour} soir → réchauffé {_jours[idx + 2]} midi (2 jours après)"
+            )
+            if not _premier_rechauffe:
+                _premier_rechauffe = f"{_jours[idx + 2]} midi (source: {jour} soir)"
+        # Exemple invalide: jour soir → lendemain midi
+        if idx + 1 < len(_jours) and len(_exemples_invalides) < 2:
+            _exemples_invalides.append(
+                f"    - {jour} soir → {_jours[idx + 1]} midi (trop tôt, seulement 1 jour)"
+            )
+    if not _premier_rechauffe:
+        _premier_rechauffe = "pas de réchauffé possible (semaine trop courte)"
+
+    exemples_valides_str = "\n".join(_exemples_valides[:3]) if _exemples_valides else "    - (aucun exemple possible)"
+    exemples_invalides_str = "\n".join(_exemples_invalides) if _exemples_invalides else "    - (aucun)"
+
     prompt = f"""Tu es un assistant culinaire familial expert en BATCH COOKING et organisation hebdomadaire.
 Génère un planning de repas COMPLET pour une famille, optimisé pour minimiser le temps de préparation.
 
@@ -147,21 +171,17 @@ JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
 ═══════════════════════════════════════════════════
 
 🔄 RÉUTILISATION DES REPAS (RÉCHAUFFÉ):
-- Parmi les 14 repas (7 midis + 7 soirs), 3 à 4 MIDIS en semaine (lun-ven) DOIVENT être des réchauffés d'un DÎNER préparé un jour précédent.
+- Parmi les {len(jours_a_planifier) * 2} repas ({len(jours_a_planifier)} midis + {len(jours_a_planifier)} soirs), 3 à 4 MIDIS DOIVENT être des réchauffés d'un DÎNER préparé un jour précédent.
 - ⚠️ RÈGLE DU DÉCALAGE DE 2 JOURS: Le réchauffé doit être servi 2 jours APRÈS le dîner source (pas le lendemain).
   Cela laisse le temps au plat de reposer au frigo et permet de ne pas manger la même chose 2 jours de suite.
   Exemples VALIDES:
-    - Lundi soir → réchauffé Mercredi midi (2 jours après)
-    - Mardi soir → réchauffé Jeudi midi (2 jours après)
-    - Mercredi soir → réchauffé Vendredi midi (2 jours après)
+{exemples_valides_str}
   Exemples INVALIDES:
-    - Lundi soir → Mardi midi (trop tôt, seulement 1 jour)
-    - Dimanche soir → Lundi midi (dimanche pas encore cuisiné en début de semaine)
-    - Mardi soir → Mardi midi (même jour, impossible)
-- Le premier réchauffé possible est MERCREDI midi (source: Lundi soir).
+{exemples_invalides_str}
+- Le premier réchauffé possible est {_premier_rechauffe}.
 - Le dîner source est cuisiné en double portion. Le midi réchauffé est simplement réchauffé.
-- Mettre "est_rechauffe": true et "rechauffe_de": "Lundi soir" pour ces midis.
-- Résultat: seulement ~10 repas à cuisiner au lieu de 14.
+- Mettre "est_rechauffe": true et "rechauffe_de": "{_jours[0]} soir" pour ces midis.
+- Résultat: seulement ~{len(jours_a_planifier) * 2 - 3} repas à cuisiner au lieu de {len(jours_a_planifier) * 2}.
 
 🚫 VARIÉTÉ OBLIGATOIRE:
 - Chaque plat cuisiné (non réchauffé) doit avoir un NOM DIFFÉRENT. JAMAIS 2 plats identiques dans la semaine.
@@ -203,6 +223,8 @@ Pour le plat, fournis:
 7. "est_rechauffe": true/false (si ce midi est un réchauffé d'un dîner)
 8. "rechauffe_de": "Jour soir" (si est_rechauffe=true, ex: "Lundi soir")
 9. "jules_adaptation": Instructions pour adapter à Jules ({preferences.jules_age_mois} mois)
+10. "ingredients": Liste de 4 à 8 ingrédients avec quantités réalistes
+11. "etapes": Liste de 3 à 5 étapes de préparation détaillées
 
 FORMAT DE RÉPONSE (JSON strict):
 {{
@@ -219,7 +241,19 @@ FORMAT DE RÉPONSE (JSON strict):
           "difficulte": "facile",
           "complexite": "simple",
           "est_rechauffe": false,
-          "jules_adaptation": "Mixer les pâtes, couper le jambon en petits morceaux."
+          "jules_adaptation": "Mixer les pâtes, couper le jambon en petits morceaux.",
+          "ingredients": [
+            {{"nom": "pâtes penne", "quantite": 300, "unite": "g"}},
+            {{"nom": "pesto vert", "quantite": 3, "unite": "c.s."}},
+            {{"nom": "jambon blanc", "quantite": 4, "unite": "tranches"}},
+            {{"nom": "parmesan râpé", "quantite": 30, "unite": "g"}}
+          ],
+          "etapes": [
+            "Faire cuire les pâtes dans un grand volume d'eau salée.",
+            "Couper le jambon en lanières.",
+            "Mélanger les pâtes égouttées avec le pesto et le jambon.",
+            "Servir avec le parmesan râpé."
+          ]
         }},
         "dessert": "Yaourt nature",
         "dessert_jules": "Compote pomme-banane"
@@ -234,7 +268,20 @@ FORMAT DE RÉPONSE (JSON strict):
           "difficulte": "facile",
           "complexite": "simple",
           "est_rechauffe": false,
-          "jules_adaptation": "Prélever 80g avant sel. Écraser les morceaux de poulet."
+          "jules_adaptation": "Prélever 80g avant sel. Écraser les morceaux de poulet.",
+          "ingredients": [
+            {{"nom": "blancs de poulet", "quantite": 400, "unite": "g"}},
+            {{"nom": "courgettes", "quantite": 2, "unite": "pièce"}},
+            {{"nom": "riz basmati", "quantite": 200, "unite": "g"}},
+            {{"nom": "huile d'olive", "quantite": 2, "unite": "c.s."}},
+            {{"nom": "ail", "quantite": 1, "unite": "gousse"}}
+          ],
+          "etapes": [
+            "Couper le poulet en émincés et les courgettes en rondelles.",
+            "Faire cuire le riz selon les instructions du paquet.",
+            "Faire revenir le poulet à la poêle avec l'huile d'olive et l'ail 5 min.",
+            "Ajouter les courgettes et cuire 10 min à feu moyen."
+          ]
         }},
         "dessert": "Fruit frais",
         "dessert_jules": "Petit-suisse nature"
@@ -274,7 +321,8 @@ FORMAT DE RÉPONSE (JSON strict):
   "Huile d'olive extra-vierge première pression à froid"
 
 IMPORTANT:
-- Les repas réchauffés au midi ont "temps_minutes": 5 (juste réchauffer).
+- Chaque plat DOIT inclure "ingredients" (4-8 ingrédients avec nom/quantite/unite) et "etapes" (3-5 étapes).
+- Pour les plats réchauffés (est_rechauffe: true), mettre les mêmes ingrédients/étapes que le plat source, et "temps_minutes": 5.
 - Privilégie des recettes familiales SIMPLES et rapides pour les soirs de semaine.
 - Les plats plus élaborés sont pour le weekend ou un soir calme.
 - RÉUTILISE les mêmes légumes/féculents dans plusieurs repas pour faciliter le batch.

@@ -45,6 +45,9 @@ class PreferencesUtilisateur:
     # Budget
     budget_semaine: float | None = None
 
+    # Jour de début de semaine (pour le planificateur)
+    jour_debut_semaine: str = "vendredi"  # lundi, mardi, ..., dimanche
+
     def to_dict(self) -> dict:
         return {
             "nb_adultes": self.nb_adultes,
@@ -61,6 +64,7 @@ class PreferencesUtilisateur:
             "robots": self.robots,
             "magasins_preferes": self.magasins_preferes,
             "budget_semaine": self.budget_semaine,
+            "jour_debut_semaine": self.jour_debut_semaine,
         }
 
     @property
