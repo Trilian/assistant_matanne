@@ -205,7 +205,10 @@ JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
 ⚠️ RÈGLE OBLIGATOIRE: Pour CHAQUE jour listé, tu DOIS fournir OBLIGATOIREMENT:
 - "midi": un repas complet (JAMAIS null, JAMAIS absent)
 - "soir": un repas complet (JAMAIS null, JAMAIS absent)
-- "gouter": facultatif, pertinent pour Jules
+- "gouter": goûter adapté à Jules ({preferences.jules_age_mois} mois). OBLIGATOIRE.
+  ⚠️ Le goûter est pour un BÉBÉ de {preferences.jules_age_mois} mois. Uniquement des aliments adaptés à son âge:
+  EXEMPLES ADAPTÉS: compote maison, yaourt nature, petit-suisse, madeleine maison, banane écrasée, biscuit bébé, galette de riz, pain + beurre, fromage frais.
+  INTERDIT: crudités crues (risque d'étouffement), noix entières, bonbons, gâteaux industriels, miel.
 
 Chaque repas (midi/soir) DOIT contenir:
 1. "entree": entrée simple (texte libre ou null)
@@ -287,9 +290,9 @@ FORMAT DE RÉPONSE (JSON strict):
         "dessert_jules": "Petit-suisse nature"
       }},
       "gouter": {{
-        "nom": "Compote pomme-poire maison",
-        "temps_minutes": 15,
-        "jules_adaptation": "Texture lisse parfaite pour Jules"
+        "nom": "Compote pomme-banane maison",
+        "temps_minutes": 10,
+        "jules_adaptation": "Mixer lisse, servir tiède. Parfait pour {preferences.jules_age_mois} mois."
       }}
     }}
   ],

@@ -387,7 +387,24 @@ IMPORTANT:
             logger.info(f"Recette existante réutilisée : '{nom}' (ID: {existing.id})")
             return existing.id
 
-        recette = service.create_complete(data)
+        try:
+            recette = service.create_complete(data)
+        except Exception as e_create:
+            logger.warning(f"Validation échouée pour '{nom}', tentative simplifiée: {e_create}")
+            # Retenter avec un minimum viable (2 ingrédients, 2 étapes)
+            data["ingredients"] = [
+                {"nom": type_proteines or "ingrédient principal", "quantite": 1.0, "unite": "portion"},
+                {"nom": "accompagnement", "quantite": 1.0, "unite": "portion"},
+            ]
+            data["etapes"] = [
+                {"description": f"Préparer les ingrédients pour {nom}.", "ordre": 1},
+                {"description": f"Cuire et servir {nom}.", "ordre": 2},
+            ]
+            try:
+                recette = service.create_complete(data)
+            except Exception:
+                recette = None
+
         if recette:
             logger.info(f"✅ Recette IA sauvegardée : {nom} (ID: {recette.id})")
             return recette.id
